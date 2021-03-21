@@ -19,9 +19,9 @@
 
 *Dependencies:*  
     axis2/c:  
-        https://axis.apache.org/axis2/c/core/download.cgi
+        https://axis.apache.org/axis2/c/core/download.cgi  
     icu:  
-        https://github.com/unicode-org/icu/releases/tag/release-50-2
+        https://github.com/unicode-org/icu/releases/tag/release-50-2  
     hunspell:  
         http://downloads.sourceforge.net/hunspell/hunspell-1.3.2.tar.gz
 
