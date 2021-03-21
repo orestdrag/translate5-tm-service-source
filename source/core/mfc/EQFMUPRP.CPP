@@ -66,7 +66,7 @@ int aiSegBreakStyles[] = { SID_SEG_OFF,      SEG_OFF,
                            SID_SEG_ON,       SEG_ON,
                            SID_SEG_RESET,    SEG_RESET,
                            SID_SEG_LINE,     SEG_LINE,
-                           SID_SEG_NOSEGMENTING,     SEG_NOSEGMENTING,
+                           /*SID_SEG_NOSEGMENTING,     SEG_NOSEGMENTING,*/
                            SID_PROTECT_ON,   PROTECT_ON,
                            SID_PROTECT_OFF,  PROTECT_OFF,
                            0,                0 };
@@ -1346,7 +1346,7 @@ CMUPropTagsPage::~CMUPropTagsPage()
 
 void CMUPropTagsPage::OnEditchangeTagDelimCb()
 {
-  // TODO: Code für die Behandlungsroutine der Steuerelement-Benachrichtigung hier einfügen
+  // TODO: Code fï¿½r die Behandlungsroutine der Steuerelement-Benachrichtigung hier einfï¿½gen
 
 
 }
@@ -1732,7 +1732,7 @@ BOOL CMUPropTagsPage::OnInitDialog()
   if ( m_fProtected ) Protect( TRUE );
 
   return TRUE;  // return TRUE unless you set the focus to a control
-                // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+                // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurï¿½ckgeben
 }
 
 // protect/unprotect controls of property page

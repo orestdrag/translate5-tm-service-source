@@ -35,7 +35,7 @@ Var UninstLog
 ;add end
 !include WordFunc.nsh
 !include LogicLib.nsh
-!include EnvVarUpdate.nsh
+;!include EnvVarUpdate.nsh
 !insertmacro GetDrives
 !insertmacro DriveSpace
 
@@ -560,7 +560,7 @@ ${File} "WIN\" "OpenTM2.EXE"
 ${File} "WIN\" "OpenTM2Starter.EXE"
 ${File} "WIN\" "OtmBatch.EXE"
 ${File} "WIN\" "OpenTM2Scripter.EXE"
-${File} "WIN\" "MemoryWebServiceClient.DLL"
+;${File} "WIN\" "MemoryWebServiceClient.DLL"
 ${File} "WIN\" "OtmItm.EXE"
 ${File} "WIN\" "standard.dll"
 ${File} "WIN\" "rtfedit.dll"
@@ -575,7 +575,7 @@ ${File} "WIN\" "zlib1.dll"
 ${File} "WIN\" "libeay32.dll"
 ${File} "WIN\" "libssh2.dll"
 ${File} "WIN\" "ssleay32.dll"
-${File} "WIN\" "MemoryWebServiceClient.DLL"
+;${File} "WIN\" "MemoryWebServiceClient.DLL"
 ${File} "WIN\" "OtmAutoVerUp.exe"
 ${File} "WIN\" "OpenTM2Starter.exe"
 ${File} "WIN\" "OtmGetToolInfo.exe"
@@ -606,14 +606,14 @@ ${File} "WIN\" "OtmIsOpenTM2FXP.EXE"
 ${File} "WIN\" "TM2OTMMigrator.EXE"
 ${File} "WIN\" "OpenTMSHelper.jar"
 ${File} "WIN\" "EQFXLIFF.DLL"
-${File} "WIN\" "OtmMemoryService.EXE"
-${File} "WIN\" "OtmMemoryServiceGUI.EXE"
+;${File} "WIN\" "OtmMemoryService.EXE"
+;${File} "WIN\" "OtmMemoryServiceGUI.EXE"
 IfFileExists "$INSTDIR\WIN\OtmMemoryService.conf" OMSConfExists 0
-${File} "WIN\" "OtmMemoryService.conf"
+;${File} "WIN\" "OtmMemoryService.conf"
 OMSConfExists:
 
-${File} "WIN\" "UNZIP.EXE"
-${File} "WIN\" "ZIP.EXE"
+;${File} "WIN\" "UNZIP.EXE"
+;${File} "WIN\" "ZIP.EXE"
 
 
 ${SetOutPath} "$INSTDIR\API"
@@ -625,7 +625,7 @@ ${SetOutPath} "$INSTDIR\PLUGINS"
 ${File} "PLUGINS\" "EqfDictionaryPlugin.DLL"
 ${File} "PLUGINS\" "EqfDocumentPlugin.DLL"
 ${File} "PLUGINS\" "EqfMemoryPlugin.DLL"
-${File} "PLUGINS\" "EqfSharedMemPlugin.DLL"
+;${File} "PLUGINS\" "EqfSharedMemPlugin.DLL"
 ${File} "PLUGINS\" "EqfSharedOnLanMemoryPlugin.DLL"
 ${File} "PLUGINS\" "OtmMorphICUPlugin.DLL"
 ${File} "PLUGINS\" "PluginManager.conf.sample"

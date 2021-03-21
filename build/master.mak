@@ -36,7 +36,7 @@
 !include $(_BLD)\OTMQdam.MAK
 !include $(_BLD)\EqfDictionaryPlugin.MAK
 !include $(_BLD)\EqfMemoryPlugin.MAK
-!include $(_BLD)\EqfSharedMem.MAK
+#!include $(_BLD)\EqfSharedMem.MAK
 !include $(_BLD)\EqfSharedOnLanMemoryPlugin.MAK
 !include $(_BLD)\OtmSpellHSPlugin.MAK
 !include $(_BLD)\OtmMorphICUPlugin.MAK
