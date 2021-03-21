@@ -1,4 +1,4 @@
-# This is a version of the project successfully built on Windows 7 OS. Description below specifies the prerequisites.
+### This is a version of the project successfully built on Windows 7 OS. Description below specifies the prerequisites.
 
 ** Prerequisites **
 
@@ -12,7 +12,7 @@ Windows SDK:
     SDK v7.0A
 
 Installer:
-    Nullsoft Installer: 
+    Nullsoft Installer:
         http://nsis.sourceforge.net/Download
     FindProcDLL plugin:
         https://nsis.sourceforge.io/FindProcDLL_plug-in#Links
