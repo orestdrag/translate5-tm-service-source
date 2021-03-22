@@ -21,6 +21,7 @@
 !include $(_BLD)\OtmFuzzy.MAK
 !include $(_BLD)\OtmSegmentedFile.MAK
 !include $(_BLD)\OtmMemoryFunctions.MAK
+#!include $(_BLD)\OtmMemoryService.MAK
 !include $(_BLD)\OtmUtilities.MAK
 !include $(_BLD)\OtmFolderUtils.MAK
 !include $(_BLD)\OtmListFunctions.MAK

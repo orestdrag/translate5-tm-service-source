@@ -19,7 +19,8 @@
 #include <memory>
 #include <thread>
 #include <cstdlib>
-#include <restbed>
+#include <settings.hpp>
+#include <byte.hpp>
 #include <sstream>
 #include "core\utilities\LanguageFactory.h"
 #include "OtmProposal.h"

@@ -45,4 +45,7 @@ rem settings for HUNSPELL
 SET _HUNSPELL_INCL=C:\hunspell\src
 SET HUNSPELLLIBDIR=%_DRIVE%\%_DEVDIR%\Packages\lib
 
+rem settings for RESTBED
+SET RESTBED_INCL=%_DRIVE%\%_DEVDIR%\Packages\include\restbed
+SET RESTBED_LIB_DIR=%_DRIVE%\%_DEVDIR%\Packages\lib
 

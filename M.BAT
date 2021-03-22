@@ -51,6 +51,7 @@ set _DLL=%_DLLWIN%
 set _BIN=%_BINWIN%
 set LIB=%vclib%;%_LIBWIN%
 set HUNSPELLLIB=libhunspell.lib
+set RESTBED_LIB=restbed.lib
 goto makeit
 
 
@@ -74,6 +75,7 @@ set _BIN=%_BINWINCV%
 set _DEBUGOPT=YES
 set LIB=%vclib%;%_LIBWINCV%
 set HUNSPELLLIB=libhunspelld.lib
+set RESTBED_LIB=restbedd.lib
 goto makeit
 
 

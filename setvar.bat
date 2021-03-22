@@ -70,8 +70,8 @@ set MAKEDEP=N
 set _TESTSUITE=%_DRIVE%\%_DEVDIR%\OpenTM2_TestSuite
 
 
-set INCLUDE=%_INC%;%_MRI%;%_WININC%;%vcinclude%;%_SRC%;%_AXIS2C_INCL%;%_ICU_INCL%;%_HUNSPELL_INCL%
-set LIB=%vclib%;%_LIB%;%ICULIB%;%HUNSPELLLIB%
+set INCLUDE=%_INC%;%_MRI%;%_WININC%;%vcinclude%;%_SRC%;%_AXIS2C_INCL%;%_ICU_INCL%;%_HUNSPELL_INCL%;%RESTBED_INCL%
+set LIB=%vclib%;%_LIB%;%ICULIB%;%HUNSPELLLIB%;%RESTBED_LIB_DIR%
 
 rem compiler options
 
