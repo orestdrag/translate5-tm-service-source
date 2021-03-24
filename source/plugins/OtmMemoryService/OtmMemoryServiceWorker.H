@@ -160,8 +160,8 @@ public:
   int getMem
   (
     std::string strMemory,
-    std::string strType,
-    restbed::Bytes &vMemData
+    std::string strType/*,
+    restbed::Bytes &vMemData*/
   );
 
   /*! \brief get the status of a memory
@@ -373,7 +373,7 @@ private:
   \param strError string receiving any error message text
   \returns 0 is sucessfull or a return code
   */
-  int loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData );
+  //int loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData );
 
   /*! \brief States of a memory
   */

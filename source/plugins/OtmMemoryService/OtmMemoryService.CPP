@@ -17,9 +17,9 @@
 #include <windows.h>
 #include <process.h>  
 #include <memory>
-#include <thread>
+//#include <thread>
 #include <cstdlib>
-#include <settings.hpp>
+//#include <settings.hpp>
 #include <byte.hpp>
 #include <sstream>
 #include "core\utilities\LanguageFactory.h"
@@ -34,6 +34,7 @@ using namespace restbed;
 
 const char szVersionID[] = "X-OpenTM2-Version";
 
+#if 0
 static Service service;
 static std::shared_ptr<restbed::Settings> pSettings = NULL;
 static OtmMemoryServiceWorker *pMemService = NULL;
@@ -628,3 +629,4 @@ void WriteCrashLog( char *pszLogDir )
     fclose( hfLog );
   }
 }
+#endif

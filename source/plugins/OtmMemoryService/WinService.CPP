@@ -20,7 +20,7 @@
 #include <process.h>  
 #include <stdarg.h>  
 #include <memory>
-#include <thread>
+//#include <thread>
 #include <cstdlib>
 #include <sstream>
 #include "OtmMemoryService.h"
@@ -126,7 +126,7 @@ LONG CALLBACK unhandled_handler( EXCEPTION_POINTERS* e )
   {
     fProcessingUnhandledException = TRUE;
     WriteLogEntry( "Error: Unhandled exception detected\n" );
-    WriteCrashLog( szLogFileDir );
+    //WriteCrashLog( szLogFileDir );
   }
   return EXCEPTION_CONTINUE_SEARCH;
 }
@@ -193,11 +193,13 @@ VOID WINAPI ServiceMain( DWORD argc, LPTSTR *argv )
     WriteLogEntry( "Error: OtmMemoryService: ServiceMain: SetServiceStatus returned error\n" );
   }
 
+#if 0
   // Start a thread that will perform the main task of the service
   HANDLE hThread = CreateThread( NULL, 0, ServiceWorkerThread, NULL, 0, NULL );
 
   // Wait until our worker thread exits signaling that the service needs to stop
   WaitForSingleObject( hThread, INFINITE );
+#endif
 
 
   /*
@@ -272,6 +274,7 @@ DWORD WINAPI ServiceCtrlHandler( DWORD  dwControl, DWORD  dwEventType, LPVOID lp
   return( NO_ERROR );
 }
 
+#if 0
 // Service Worker Thread
 DWORD WINAPI ServiceWorkerThread( LPVOID lpParam )
 {
@@ -306,3 +309,4 @@ DWORD WINAPI ServiceWorkerThread( LPVOID lpParam )
 
   return ERROR_SUCCESS;
 }
+#endif

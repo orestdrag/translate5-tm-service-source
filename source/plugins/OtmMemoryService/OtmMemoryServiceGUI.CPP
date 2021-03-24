@@ -17,9 +17,9 @@
 #include <windows.h>
 #include <process.h>  
 #include <memory>
-#include <thread>
+//#include <thread>
 #include <cstdlib>
-#include <restbed>
+//#include <restbed>
 #include <sstream>
 #include "core\utilities\LanguageFactory.h"
 #include "OtmProposal.h"
@@ -86,7 +86,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         hfLog = fopen( szLogFile, "a" );
         SetWindowText( hwndLogButton, "Stop logging" );
       }
-      SetLogFile( hfLog );
+      //SetLogFile( hfLog );
     }
     break;
 	case WM_DESTROY:
@@ -104,7 +104,7 @@ LONG CALLBACK unhandled_handler( EXCEPTION_POINTERS* e )
   if ( !fProcessingUnhandledException )
   {
     fProcessingUnhandledException = TRUE;
-    WriteCrashLog( szLogFileDir );
+    //WriteCrashLog( szLogFileDir );
   }
   return EXCEPTION_CONTINUE_SEARCH;
 }
@@ -159,7 +159,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 	LPSTR lpCmdLin
   // prepare web service
   char szServiceName[80];
   unsigned int uiPort = 0;
-  PrepareOtmMemoryService( szServiceName, &uiPort );
+  //PrepareOtmMemoryService( szServiceName, &uiPort );
 
 
   // show port and service name in status line
@@ -172,7 +172,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 	LPSTR lpCmdLin
   SetWindowText( hwnd, szValue );
 
   // start web service
-  StartOtmMemoryService();
+  //StartOtmMemoryService();
 
   // show our service window
 	ShowWindow(hwnd, nCmdShow);
@@ -184,7 +184,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 	LPSTR lpCmdLin
 		DispatchMessage(&Msg);
 	}
 
-  StopOtmMemoryService();
+  //StopOtmMemoryService();
 
   if ( hfLog ) fclose( hfLog );
 
