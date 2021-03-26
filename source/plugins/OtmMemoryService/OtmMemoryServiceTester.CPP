@@ -18,8 +18,8 @@
 //+----------------------------------------------------------------------------+
 //
 
-#include <windows.h>
-#include <string.h>
+#include <string>
+#include <cstring>
 #include "OtmProposal.h"
 #include "OtmMemoryServiceWorker.h"
 
@@ -45,7 +45,7 @@ int main( int argc, char *argv[], char *envp[] )
 
     if ( (*pszParm == '-') || (*pszParm == '/') )
     {
-      if ( _strnicmp( pszParm+1, "log=", 4 ) == 0 )
+      if ( strncasecmp( pszParm+1, "log=", 4 ) == 0 )
       {
         strcpy( szLogFile, pszParm+5 );
       }
@@ -110,7 +110,7 @@ int main( int argc, char *argv[], char *envp[] )
   } /* endif */
 
   // process script file
-  BOOL fInCommand = FALSE;
+  bool fInCommand = false;
   std::wstring strInParms = L"";
   std::wstring strOutParms = L"";
   while( !feof( hfScript ) )
@@ -135,46 +135,46 @@ int main( int argc, char *argv[], char *envp[] )
       {
         int iRC = 0;
         // end of parameter data reached, execute the command
-        if ( wcsicmp( szCommand, L"importMemoryFromPackage" ) == 0 )
+        if ( wcscasecmp( szCommand, L"importMemoryFromPackage" ) == 0 )
         {
           iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"deleteMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"deleteMemory" ) == 0 )
         {
           iRC = pService->deleteMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"createMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"createMemory" ) == 0 )
         {
           iRC = pService->createMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"importMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"importMemory" ) == 0 )
         {
           iRC = pService->importMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"openMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"openMemory" ) == 0 )
         {
           iRC = pService->openMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"closeMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"closeMemory" ) == 0 )
         {
           iRC = pService->closeMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"lookupInMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"lookupInMemory" ) == 0 )
         {
           iRC = pService->lookupInMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"searchMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"searchMemory" ) == 0 )
         {
           iRC = pService->searchMemory( strInParms, strOutParms );
         }
-        else if ( wcsicmp( szCommand, L"updateMemory" ) == 0 )
+        else if ( wcscasecmp( szCommand, L"updateMemory" ) == 0 )
         {
           iRC = pService->updateMemory( strInParms, strOutParms );
         }
         else
         {
           wprintf( L"Warning: unknown command \"%s\" ignored\n", szCommand );
-          fInCommand = FALSE;
+          fInCommand = false;
         } /* endif */
 
         if ( fInCommand )
@@ -185,7 +185,7 @@ int main( int argc, char *argv[], char *envp[] )
           wprintf( L"Result = %ld\n", iRC );
           wprintf( L"Output:\n" );
           wprintf( L"%s\n", strOutParms.c_str() );
-          fInCommand = FALSE;
+          fInCommand = false;
         } /* endif */
       }
       else
@@ -200,7 +200,7 @@ int main( int argc, char *argv[], char *envp[] )
       // switch to command mode
       wcscpy( szCommand, pszStart + 1 );
       strInParms.clear();
-      fInCommand = TRUE;
+      fInCommand = true;
     }
   } /* endwhile */
 
