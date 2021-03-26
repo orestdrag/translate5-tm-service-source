@@ -20,7 +20,6 @@
 
 #include <string>
 #include <cstring>
-#include "OtmProposal.h"
 #include "OtmMemoryServiceWorker.h"
 
 wchar_t szLine[8096];                // buffer for script lines
