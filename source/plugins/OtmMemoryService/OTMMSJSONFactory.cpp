@@ -3,8 +3,8 @@
 	Description: This module contains functions to wrap parameters in the JSON format and to retrieve parameters from JSON strings
 */
 
-#include <windows.h>
-#include <winbase.h>
+#include <cstdlib>
+#include <cwctype>
 #include "OTMMSJSONFactory.h"
 
 /** Initialize the static instance variable */
@@ -113,9 +113,7 @@ JSONFactory* JSONFactory::getInstance()
     int iValue
   )
   {
-    char szValue[20];
-
-    _itoa( iValue, szValue, 10 );
+    std::string szValue = std::to_string(iValue);
 
     addDelimiter( JSONString );
 
@@ -194,9 +192,7 @@ JSONFactory* JSONFactory::getInstance()
     int iValue
   )
   {
-    wchar_t szValue[20];
-
-    _itow( iValue, szValue, 10 );
+    std::wstring szValue = std::to_wstring(iValue);
 
     addDelimiterW( JSONString );
 
@@ -977,7 +973,7 @@ int JSONFactory::extractStringW
     } /* endwhile */ 
 
     // special handling for the value "null"
-    if ( wcsicmp( string.c_str(), L"null" ) == 0 )
+    if ( wcscasecmp( string.c_str(), L"null" ) == 0 )
     {
       string = L"";
     }
@@ -1044,7 +1040,7 @@ int JSONFactory::parseJSON
 
       while( !fFound && (pParm->szName[0] != 0) )
       {
-        if ( wcsicmp( name.c_str(), pParm->szName ) == 0 )
+        if ( wcscasecmp( name.c_str(), pParm->szName ) == 0 )
         {
           fFound = true;
         }
@@ -1074,7 +1070,8 @@ int JSONFactory::parseJSON
             break;
 
           case INT_PARM_TYPE:
-            *((int *)pParm->pvValue) = _wtol( value.c_str() );
+            wchar_t * pEnd;
+            *((int *)pParm->pvValue) = wcstol( value.c_str(), &pEnd, 10 );
             break;
         } /* endswitch */
       } /* endif */
