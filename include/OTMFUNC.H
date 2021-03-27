@@ -28,7 +28,7 @@
 
 // include EQFPAPI.H for segment definitions
 #ifndef _EQFPAPI_H_INCLUDED
-  #include "EQFPAPI.h"
+  #include "EQFPAPI.H"
 #endif 
 
 #ifdef __cplusplus

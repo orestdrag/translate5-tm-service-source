@@ -15,7 +15,7 @@
 #include <codecvt>
 #include <string>
 #include <vector>
-//#include "OTMFUNC.H"
+#include "OTMFUNC.H"
 
 /*! \brief constant defining the maximum number of opened memories
 */

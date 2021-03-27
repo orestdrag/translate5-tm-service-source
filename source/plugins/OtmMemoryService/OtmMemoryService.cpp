@@ -22,7 +22,7 @@
 #include <restbed/byte.hpp>
 #include <sstream>
 #include <linux/limits.h>
-//#include "core\utilities\LanguageFactory.h"
+#include "../../core/utilities/LanguageFactory.H"
 #include "OtmProposal.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
