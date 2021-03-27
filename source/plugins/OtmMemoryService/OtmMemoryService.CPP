@@ -18,15 +18,15 @@
 #include <thread>
 #include <cstdlib>
 #include <cstring>
-#include <settings.hpp>
-#include <byte.hpp>
+#include <restbed/settings.hpp>
+#include <restbed/byte.hpp>
 #include <sstream>
 #include <linux/limits.h>
-#include "core\utilities\LanguageFactory.h"
+//#include "core\utilities\LanguageFactory.h"
 #include "OtmProposal.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
-#include "eqfserno.h"
+#include "EQFSERNO.H"
 
 using namespace std;
 using namespace restbed;
@@ -498,27 +498,27 @@ void MakeDateTimeString( time_t lTime, char chDateDelim, char chDateTimeDelim, c
   char szBuffer[10];
 
   tm *pTime = localtime( &lTime );
-  ltoa( pTime->tm_year + 1900, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_year + 1900 );
   memcpy( pszDateTime, szBuffer, 4 );
   pszDateTime += 4;
   if ( chDateDelim != 0 ) *pszDateTime++ = chDateDelim;
-  ltoa( pTime->tm_mon + 100, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_mon + 100 );
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chDateDelim != 0 ) *pszDateTime++ = chDateDelim;
-  ltoa( pTime->tm_mday + 100, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_mday + 100 );
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chDateTimeDelim != 0 ) *pszDateTime++ = chDateTimeDelim;
-  ltoa( pTime->tm_hour + 100, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_hour + 100 );
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chTimeDelim != 0 ) *pszDateTime++ = chTimeDelim;
-  ltoa( pTime->tm_min + 100, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_min + 100 );
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chTimeDelim != 0 ) *pszDateTime++ = chTimeDelim;
-  ltoa( pTime->tm_sec + 100, szBuffer, 10 );
+  szBuffer = std::to_string( pTime->tm_sec + 100 );
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   *pszDateTime = 0;

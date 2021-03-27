@@ -15,7 +15,7 @@
 #include <codecvt>
 #include <string>
 #include <vector>
-#include "OTMFUNC.H"
+//#include "OTMFUNC.H"
 
 /*! \brief constant defining the maximum number of opened memories
 */
@@ -26,7 +26,7 @@
 */
 #define OTMMEMSERVICE_MEMORY_TIMEOUT 7200
 
-class __declspec(dllexport) OtmMemoryServiceWorker
+class OtmMemoryServiceWorker
 /*! \brief   This class provides translation memory related services
 
 */
@@ -227,7 +227,7 @@ private:
     \param piReturnCode pointer to a buffer for the OpenTM2 error code
     \returns OK if successful or an HTTP error code in case of failures
   */
-  int getMemoryHandle( char *pszMemory, PLONG plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode );
+  int getMemoryHandle( char *pszMemory, long *plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode );
 
   /*! \brief find a memory in our list of active memories
     \param pszMemory name of the memory
@@ -250,14 +250,14 @@ private:
     \param pszDateTime buffer receiving the converted date time
     \returns 0 
   */
-  int convertTimeToUTC( LONG lTime, char *pszDateTime );
+  int convertTimeToUTC( long lTime, char *pszDateTime );
 
   /*! \brief convert a UTC time value to a OpenTM2 long time value 
       \param pszDateTime buffer containing the UTC date and time
       \param plTime pointer to a long buffer receiving the converted time 
     \returns 0 
   */
-  int convertUTCTimeToLong( char *pszDateTime, PLONG plTime );
+  int convertUTCTimeToLong( char *pszDateTime, long *plTime );
 
   /*! \brief extract a numeric value from a string
       \param pszString string containing the numeric value
@@ -265,21 +265,21 @@ private:
       \param piResult pointer to a int value receiving the extracted value
     \returns TRUE if successful and FALSE in case of errors
   */
-  BOOL getValue( PSZ pszString, int iLen, int *piResult );
+  bool getValue( char *pszString, int iLen, int *piResult );
 
   /*! \brief convert a long time value to a date time string in the form YYYY-MM-DD HH:MM:SS
   \param lTime long time value
   \param pszDateTime buffer receiving the convererd date and time
   \returns 0
   */
-  int convertTimeToDateTimeString( LONG lTime, char *pszDateTime );
+  int convertTimeToDateTimeString( long lTime, char *pszDateTime );
 
   /*! \brief convert a date and time in the form YYYY-MM-DD HH:MM:SS to a OpenTM2 long time value
   \param pszDateTime buffer containing the TMX date and time
   \param plTime pointer to a long buffer receiving the converted time
   \returns 0
   */
-  int convertDateTimeStringToLong( char *pszDateTime, PLONG plTime );
+  int convertDateTimeStringToLong( char *pszDateTime, long *plTime );
   
   /*! \brief close a memory and remove it from the open list
       \param iIndex index of memory in the open list
