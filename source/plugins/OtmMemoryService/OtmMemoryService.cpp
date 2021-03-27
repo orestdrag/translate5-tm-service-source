@@ -20,6 +20,7 @@
 #include <cstring>
 #include <restbed/settings.hpp>
 #include <restbed/byte.hpp>
+#include <restbed/service.hpp>
 #include <sstream>
 #include <linux/limits.h>
 #include "../../core/utilities/LanguageFactory.H"
@@ -498,27 +499,27 @@ void MakeDateTimeString( time_t lTime, char chDateDelim, char chDateTimeDelim, c
   char szBuffer[10];
 
   tm *pTime = localtime( &lTime );
-  szBuffer = std::to_string( pTime->tm_year + 1900 );
+  strncpy(szBuffer, std::to_string( pTime->tm_year + 1900 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer, 4 );
   pszDateTime += 4;
   if ( chDateDelim != 0 ) *pszDateTime++ = chDateDelim;
-  szBuffer = std::to_string( pTime->tm_mon + 100 );
+  strncpy(szBuffer, std::to_string( pTime->tm_mon + 100 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chDateDelim != 0 ) *pszDateTime++ = chDateDelim;
-  szBuffer = std::to_string( pTime->tm_mday + 100 );
+  strncpy(szBuffer, std::to_string( pTime->tm_mday + 100 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chDateTimeDelim != 0 ) *pszDateTime++ = chDateTimeDelim;
-  szBuffer = std::to_string( pTime->tm_hour + 100 );
+  strncpy(szBuffer, std::to_string( pTime->tm_hour + 100 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chTimeDelim != 0 ) *pszDateTime++ = chTimeDelim;
-  szBuffer = std::to_string( pTime->tm_min + 100 );
+  strncpy(szBuffer, std::to_string( pTime->tm_min + 100 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   if ( chTimeDelim != 0 ) *pszDateTime++ = chTimeDelim;
-  szBuffer = std::to_string( pTime->tm_sec + 100 );
+  strncpy(szBuffer, std::to_string( pTime->tm_sec + 100 ).c_str(), 10);
   memcpy( pszDateTime, szBuffer + 1, 2 );
   pszDateTime += 2;
   *pszDateTime = 0;
