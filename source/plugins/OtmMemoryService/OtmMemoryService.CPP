@@ -14,14 +14,14 @@
 
 #include <time.h>
 #include <stdarg.h>
-#include <windows.h>
-#include <process.h>  
 #include <memory>
-//#include <thread>
+#include <thread>
 #include <cstdlib>
-//#include <settings.hpp>
+#include <cstring>
+#include <settings.hpp>
 #include <byte.hpp>
 #include <sstream>
+#include <linux/limits.h>
 #include "core\utilities\LanguageFactory.h"
 #include "OtmProposal.h"
 #include "OTMMSJSONFactory.h"
@@ -34,13 +34,11 @@ using namespace restbed;
 
 const char szVersionID[] = "X-OpenTM2-Version";
 
-#if 0
 static Service service;
 static std::shared_ptr<restbed::Settings> pSettings = NULL;
 static OtmMemoryServiceWorker *pMemService = NULL;
-static char szLogFile[MAX_PATH];
+static char szLogFile[PATH_MAX];
 static FILE *hfLog = NULL;
-static HWND hwndLogButton = NULL;
 
 void restoreBlanks( std::string &strInOut );
 void WriteCrashLog( char *pszLogDir );
@@ -62,7 +60,7 @@ typedef struct _TRANSACTLOG
   time_t lStartTimeStamp;
   time_t lStopTimeStamp;
   TRANSACTID Id;
-  char szMemory[MAX_PATH];
+  char szMemory[PATH_MAX];
 } TRANSACTLOG;
 
 static TRANSACTLOG *pTransActLog = NULL;
@@ -321,7 +319,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     // get configuration settings
     {
-      char szConfFileName[MAX_PATH];
+      char szConfFileName[PATH_MAX];
 
       GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
       char *pszExt = strrchr( szConfFileName, '.' );
@@ -401,7 +399,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
   }
 
   // prepare log file
-  GetModuleFileName( NULL, szLogFile, MAX_PATH );
+  GetModuleFileName( NULL, szLogFile, PATH_MAX );
   strcat( szLogFile, ".log" );
 
   return( TRUE );
@@ -614,7 +612,7 @@ void WriteTransActLog( FILE *hfLog )
 // write crash log
 void WriteCrashLog( char *pszLogDir )
 {
-  static char szLogFile[MAX_PATH];
+  static char szLogFile[PATH_MAX];
   time_t lTime = 0;
   time( &lTime );
   strcpy( szLogFile, pszLogDir );
@@ -629,4 +627,3 @@ void WriteCrashLog( char *pszLogDir )
     fclose( hfLog );
   }
 }
-#endif

@@ -19,13 +19,11 @@ typedef struct _THREADDATA
   int nCmdShow;
 } THREADDATA, *PTHREADDATA;
 
-#if 0
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort );
 BOOL StartOtmMemoryService();
 void StopOtmMemoryService();
 void SetLogFile( FILE *hfLog );
 void WriteCrashLog( char *pszLogDir );
-#endif
 
 
 

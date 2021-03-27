@@ -13,11 +13,9 @@
 //
 
 #include <time.h>
-#include <process.h>
 #include <stdarg.h>
-#include <windows.h>
-#include <wincrypt.h>
-//#include <restbed>
+#include <string>
+#include <restbed>
 #include "core\PluginManager\OtmMemory.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
@@ -25,8 +23,6 @@
 
 // import memory process
 void importMemoryProcess( void *pvData );
-
-#if 0
 
 /** Initialize the static instance variable */
 OtmMemoryServiceWorker* OtmMemoryServiceWorker::instance = 0;
@@ -225,7 +221,6 @@ int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
     int *pi = NULL;
     return( *pi );
   } /* endif */
-#endif 
 
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
