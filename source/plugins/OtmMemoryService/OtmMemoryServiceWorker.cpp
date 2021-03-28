@@ -16,10 +16,10 @@
 #include <stdarg.h>
 #include <string>
 #include <restbed>
-#include "core\PluginManager\OtmMemory.h"
+//#include "../../core/pluginmanager/OtmMemory.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
-#include <eqfmsg.h>
+#include <EQFMSG.H>
 
 // import memory process
 void importMemoryProcess( void *pvData );
@@ -141,7 +141,7 @@ int OtmMemoryServiceWorker::verifyAPISession
   if ( this->hSession != 0 ) return( 0 );
 
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  if ( this->iLastRC != 0 ) swprintf( this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
+  if ( this->iLastRC != 0 ) swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   return( this->iLastRC );
 }
 
@@ -214,13 +214,14 @@ int OtmMemoryServiceWorker::buildErrorReturn
 */
 int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
 {
-  // for debugging only: cause an exception when the special memory name "XX_CauseAnException_XX" is neing used
+  // for debugging only: cause an exception when the special memory name "XX_CauseAnException_XX" is being used
 #ifdef _DEBUG
   if ( strcmp( pszMemory, "XX_CauseAnException_XX" ) == 0 )
   {
     int *pi = NULL;
     return( *pi );
   } /* endif */
+#endif
 
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
@@ -2153,4 +2154,3 @@ void importMemoryProcess( void *pvData )
 }
 
 
-#endif
