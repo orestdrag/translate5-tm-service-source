@@ -109,7 +109,7 @@ void delete_method_handler( const shared_ptr< Session > session )
 
   TransActDone( iTransActIndex );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
 }
 
 void get_memory_method_handler( const shared_ptr< Session > session )
@@ -129,7 +129,7 @@ void get_memory_method_handler( const shared_ptr< Session > session )
 
   TransActDone( iTransActIndex );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\n", rc );
+  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\n", rc );
 }
 
 void get_method_handler(const shared_ptr< Session > session)
@@ -200,7 +200,7 @@ void postImport_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
   } );
 }
 
@@ -221,7 +221,7 @@ void post_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->createMemory( strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
   } );
 }
 
@@ -249,7 +249,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
   } );
 }
 
@@ -276,7 +276,7 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->concordanceSearch( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
   } );
 }
 
@@ -303,7 +303,7 @@ void postEntry_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->updateEntry( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%ld\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
   } );
 }
 
@@ -346,45 +346,45 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     // handler for resource URL w/o memory name
     auto resource = make_shared< Resource >();
-    sprintf( szValue, "/%s", szServiceName );
+    snprintf( szValue, 100, "/%s", szServiceName );
     resource->set_path( szValue );
     resource->set_method_handler( "GET", get_method_handler );
     resource->set_method_handler( "POST", post_method_handler );
 
     // handler for resource URL w memory name/import
     auto memImport = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}/import", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}/import", szServiceName );
     memImport->set_path( szValue );
     memImport->set_method_handler( "POST", postImport_method_handler );
 
     // handler for resource URL w memory name/fuzzysearch
     auto fuzzysearch = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}/fuzzysearch", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}/fuzzysearch", szServiceName );
     fuzzysearch->set_path( szValue );
     fuzzysearch->set_method_handler( "POST", postFuzzySearch_method_handler );
 
     // handler for resource URL w memory name/concordancesearch
     auto concordancesearch = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}/concordancesearch", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}/concordancesearch", szServiceName );
     concordancesearch->set_path( szValue );
     concordancesearch->set_method_handler( "POST", postConcordanceSearch_method_handler );
 
     // handler for resource URL w memory name/entry
     auto postEntry = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}/entry", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}/entry", szServiceName );
     postEntry->set_path( szValue );
     postEntry->set_method_handler( "POST", postEntry_method_handler );
 
     // handler for resource URL w memory name
     auto memname = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}", szServiceName );
     memname->set_path( szValue );
     memname->set_method_handler( "DELETE", delete_method_handler );
     memname->set_method_handler( "GET", get_memory_method_handler );
 
     // handler for resource URL w memory name/status
     auto getStatus = make_shared< Resource >();
-    sprintf( szValue, "/%s/{id: .+}/status", szServiceName );
+    snprintf( szValue, 100, "/%s/{id: .+}/status", szServiceName );
     getStatus->set_path( szValue );
     getStatus->set_method_handler( "GET", getStatus_method_handler );
 
@@ -543,7 +543,7 @@ void WriteTimeStamp( const char *pszPrefix, time_t lTime, FILE *hfLog )
 // write a transaction log entry to a log file
 void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
 {
-  char *pszFunction = "UNKNOWN";
+  std::string pszFunction = "UNKNOWN";
   switch ( pEntry->Id )
   {
     case UNUSED_TRANSACTID: return; break;
@@ -559,7 +559,7 @@ void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
     default: break;
   }
 
-  fprintf( hfLog, "%s(", pszFunction );
+  fprintf( hfLog, "%s(", pszFunction.c_str() );
   WriteTimeStamp( "Start=", pEntry->lStartTimeStamp, hfLog );
 
   if ( pEntry->lStopTimeStamp != 0 )
