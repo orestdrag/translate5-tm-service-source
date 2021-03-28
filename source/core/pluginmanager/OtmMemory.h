@@ -15,7 +15,7 @@ extern "C" {
 #define INCL_EQF_TP
 #define INCL_EQF_TM
 #define INCL_EQF_DAM
-#include "eqf.h"
+#include "EQF.H"
 //#include "eqftmi.h"
 //#include "eqftmm.h"
 //#include "eqfqdami.h"
