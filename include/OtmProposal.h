@@ -15,7 +15,7 @@
  *
  * 
  */
-class __declspec(dllexport) OtmProposal
+class OtmProposal
 {
 
 public:
