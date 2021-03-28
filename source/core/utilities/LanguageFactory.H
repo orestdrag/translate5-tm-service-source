@@ -12,7 +12,7 @@
 #include <vector>
 
 
-class __declspec(dllexport) LanguageFactory
+class LanguageFactory
 /*! \brief   This class provides a language name related utility factory 
 
 */
@@ -41,10 +41,10 @@ typedef struct _LANGUAGEINFO
   char szIsoCPName[40];                // ISO name of the codepage
   char szIsoID[40];                    // ISO ID for the language
   char szIcuID[40];                    // ICU/BCP47 ID for the language
-  BOOL fisPreferred;                   // TRUE = this is the preferred language if several languages use the same ISO/BCP47 ID
+  bool fisPreferred;                   // TRUE = this is the preferred language if several languages use the same ISO/BCP47 ID
   char szAddInfo[256];                 // additional language information or comments
-  BOOL isSourceLanguage;               // TRUE = language can be used as a source language    
-  BOOL isTargetLanguage;               // TRUE = language can be used as a target language    
+  bool isSourceLanguage;               // TRUE = language can be used as a source language    
+  bool isTargetLanguage;               // TRUE = language can be used as a target language    
   char szLangGroup[128];               // language group of the language (will be used as language in the memory lookup)
 } LANGUAGEINFO, *PLANGUAGEINFO;
 
@@ -53,7 +53,7 @@ typedef struct _LANGUAGEINFO
   typedef enum _LANGUAGETYPE { SOURCE_LANGUAGE_TYPE, TARGET_LANGUAGE_TYPE, ALL_LANGUAGES_TYPE } LANGUAGETYPE;
 
   /*! \brief type of callback function for listLanguages method */
-  typedef int (*PFN_LISTLANGUAGES_CALLBACK )(PVOID pvData, char *pszName, PLANGUAGEINFO pInfo  );
+  typedef int (*PFN_LISTLANGUAGES_CALLBACK )(void *pvData, char *pszName, PLANGUAGEINFO pInfo  );
 
   /*! \brief Provide a list of all available languages
   \param eType type of languages to be listed
@@ -67,7 +67,7 @@ typedef struct _LANGUAGEINFO
     LANGUAGETYPE eType,
 	  PFN_LISTLANGUAGES_CALLBACK pfnCallBack,			  
 	  void *pvData,
-	  BOOL fWithDetails
+	  bool fWithDetails
   );
 
 
@@ -163,7 +163,7 @@ unsigned long getAnsiCP
    \param pszLanguage OpenTM2 language name
    \returns true when the specified language is a valid source language
 */
-BOOL isSourceLanguage
+bool isSourceLanguage
 (
   const char *pszLanguage
 );
@@ -172,7 +172,7 @@ BOOL isSourceLanguage
    \param pszLanguage OpenTM2 language name
    \returns true when the specified language is a valid target language
 */
-BOOL isTargetLanguage
+bool isTargetLanguage
 (
   const char *pszLanguage
 );
@@ -182,10 +182,10 @@ BOOL isTargetLanguage
    \param fAdjustLangName when TRUE the language name in the buffer is replaced by the correct language name
    \returns TRUE when the specified language is valid 
 */
-BOOL isValidLanguage
+bool isValidLanguage
 (
   char *pszLanguage,
-  BOOL fAdjustLangName
+  bool fAdjustLangName
 );
 
 /* \brief Get all information available for the given language
@@ -193,7 +193,7 @@ BOOL isValidLanguage
    \param pInfo a pointer to a LANGUAGEINFO buffer
    \returns TRUE when the info for the specified language could be retrieved
 */
-BOOL getLanguageInfo
+bool getLanguageInfo
 (
   const char *pszLanguage,
   PLANGUAGEINFO pInfo

@@ -214,7 +214,7 @@ LanguageFactory* LanguageFactory::getInstance()
    \param pszLanguage OpenTM2 language name
    \returns true when the specified language is a valid source language
 */
-BOOL LanguageFactory::isSourceLanguage
+bool LanguageFactory::isSourceLanguage
 (
   const char *pszLanguage
 )
@@ -234,7 +234,7 @@ BOOL LanguageFactory::isSourceLanguage
    \param pszLanguage OpenTM2 language name
    \returns true when the specified language is a valid target language
 */
-BOOL LanguageFactory::isTargetLanguage
+bool LanguageFactory::isTargetLanguage
 (
   const char *pszLanguage
 )
@@ -262,7 +262,7 @@ int LanguageFactory::listLanguages(
   LANGUAGETYPE eType,
 	PFN_LISTLANGUAGES_CALLBACK pfnCallBack,			  
 	void *pvData,
-	BOOL fWithDetails
+	bool fWithDetails
 )
 {
   int iLanguages = 0;
@@ -271,7 +271,7 @@ int LanguageFactory::listLanguages(
   int iMax = pvLanguageList->size();
   while( i < iMax )
   {
-    BOOL fAddLanguage = FALSE;
+    bool fAddLanguage = FALSE;
     switch( eType )
     {
       case SOURCE_LANGUAGE_TYPE:
@@ -513,10 +513,10 @@ unsigned long LanguageFactory::getAnsiCP
    \param fAdjustLangName when TRUE the language name in the buffer is replaced by the correct language name
    \returns TRUE when the specified language is valid 
 */
-BOOL LanguageFactory::isValidLanguage
+bool LanguageFactory::isValidLanguage
 (
   char *pszLanguage,
-  BOOL fAdjustLangName
+  bool fAdjustLangName
 )
 {
   std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
@@ -535,7 +535,7 @@ BOOL LanguageFactory::isValidLanguage
    \param pInfo a pointer to a LANGUAGEINFO buffer
    \returns TRUE when the info for the specified language could be retrieved
 */
-BOOL LanguageFactory::getLanguageInfo
+bool LanguageFactory::getLanguageInfo
 (
   const char *pszLanguage,
   PLANGUAGEINFO pInfo
