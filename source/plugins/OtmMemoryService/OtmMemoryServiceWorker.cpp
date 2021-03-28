@@ -15,6 +15,9 @@
 #include <time.h>
 #include <stdarg.h>
 #include <string>
+#include <cstring>
+#include <strings.h>
+#include <linux/limits.h>
 #include <restbed>
 //#include "../../core/pluginmanager/OtmMemory.h"
 #include "OTMMSJSONFactory.h"
@@ -226,7 +229,7 @@ int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
   {
-    if ( stricmp( this->vMemoryList[i].szName, pszMemory ) == 0 )
+    if ( strcasecmp( this->vMemoryList[i].szName, pszMemory ) == 0 )
     {
       return( i );
     } /* endif */
@@ -541,9 +544,9 @@ int OtmMemoryServiceWorker::convertDateTimeStringToLong( char *pszDateTime, PLON
     \param piResult pointer to a int value receiving the extracted value
   \returns TRUE if successful and FALSE in case of errors
 */
-BOOL OtmMemoryServiceWorker::getValue( PSZ pszString, int iLen, int *piResult )
+bool OtmMemoryServiceWorker::getValue( char *pszString, int iLen, int *piResult )
 {
-  BOOL fOK = TRUE;
+  bool fOK = true;
   char szNumber[10];
   char *pszNumber = szNumber;
 
@@ -558,7 +561,7 @@ BOOL OtmMemoryServiceWorker::getValue( PSZ pszString, int iLen, int *piResult )
     }
     else
     {
-      fOK = FALSE;
+      fOK = false;
     } /* endif */
   } /*endwhile */
 
@@ -711,7 +714,7 @@ int OtmMemoryServiceWorker::import
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
-      if ( stricmp( name.c_str(), "tmxData" ) == 0 )
+      if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
       {
         strTmxData = value;
         break;
@@ -726,7 +729,7 @@ int OtmMemoryServiceWorker::import
   } /* endif */
 
   // setup temp file name for TMX file 
-  char szTempFile[MAX_PATH];
+  char szTempFile[PATH_MAX];
   iRC = buildTempFileName( szTempFile );
   if ( iRC != 0  )
   {
@@ -828,15 +831,15 @@ int OtmMemoryServiceWorker::createMemory
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
-      if ( stricmp( name.c_str(), "data" ) == 0 )
+      if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {
         strData = value;
       }
-      else if ( stricmp( name.c_str(), "name" ) == 0 )
+      else if ( strcasecmp( name.c_str(), "name" ) == 0 )
       {
         strName = value;
       }
-      else if ( stricmp( name.c_str(), "sourceLang" ) == 0 )
+      else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
       {
         strSourceLang = value;
       }
@@ -887,7 +890,7 @@ int OtmMemoryServiceWorker::createMemory
   else
   {
     // setup temp file name for ZIP package file 
-    char szTempFile[MAX_PATH];
+    char szTempFile[PATH_MAX];
     iRC = buildTempFileName( szTempFile );
     if ( iRC != 0 )
     {
@@ -913,7 +916,7 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( iRC != 0 )
   {
-    char szError[MAX_PATH];
+    char szError[PATH_MAX];
     unsigned short usRC = 0;
     EqfGetLastError( this->hSession, &usRC, szError, sizeof( szError ) );
     buildErrorReturn( iRC, szError, strOutputParms );
@@ -1277,15 +1280,15 @@ int OtmMemoryServiceWorker::concordanceSearch
 
   // do the search and handle the results
   LONG lOptions = 0;
-  if ( stricmp( pData->szSearchMode, "Source" ) == 0 )
+  if ( strcasecmp( pData->szSearchMode, "Source" ) == 0 )
   {
     lOptions |= SEARCH_IN_SOURCE_OPT;
   }
-  else if ( stricmp( pData->szSearchMode, "Target" ) == 0 )
+  else if ( strcasecmp( pData->szSearchMode, "Target" ) == 0 )
   {
     lOptions |= SEARCH_IN_TARGET_OPT;
   }
-  else if ( stricmp( pData->szSearchMode, "SourceAndTarget" ) == 0 )
+  else if ( strcasecmp( pData->szSearchMode, "SourceAndTarget" ) == 0 )
   {
     lOptions |= SEARCH_IN_SOURCE_OPT | SEARCH_IN_TARGET_OPT;
   } /* endif */
@@ -1425,7 +1428,7 @@ int OtmMemoryServiceWorker::list
   PSZ pszCurTM = pszBuffer;
   while ( *pszCurTM != 0 )
   {
-    wchar_t szTM[MAX_PATH];
+    wchar_t szTM[PATH_MAX];
 
     // isolate TM name and convert it to UTF16
     PSZ pszEnd = strchr( pszCurTM, ',' );
@@ -1577,7 +1580,7 @@ int OtmMemoryServiceWorker::updateEntry
     // use default
     strcpy( pProp->szMarkup, "OTMANSI" );
   }
-  else if ( stricmp( pData->szMarkup, "translate5" ) == 0 )
+  else if ( strcasecmp( pData->szMarkup, "translate5" ) == 0 )
   {
     strcpy( pProp->szMarkup, "OTMXUXLF" );
   }
@@ -1738,7 +1741,7 @@ int OtmMemoryServiceWorker::getMem
   }
 
   // get a temporary file name for the memory package file or TMX file
-  char szTempFile[MAX_PATH];
+  char szTempFile[PATH_MAX];
   iRC = buildTempFileName( szTempFile );
   if ( iRC != 0 )
   {
@@ -1857,19 +1860,19 @@ int OtmMemoryServiceWorker::getStatus
 
 MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
 {
-  if ( stricmp( pszType, "GlobalMemory" ) == 0 )
+  if ( strcasecmp( pszType, "GlobalMemory" ) == 0 )
   {
     return( GLOBMEMORY_PROPTYPE );
   }
-  else if ( stricmp( pszType, "GlobalMemoryStar" ) == 0 )
+  else if ( strcasecmp( pszType, "GlobalMemoryStar" ) == 0 )
   {
     return( GLOBMEMORYSTAR_PROPTYPE );
   }
-  else if ( stricmp( pszType, "MachineTranslation" ) == 0 )
+  else if ( strcasecmp( pszType, "MachineTranslation" ) == 0 )
   {
     return( MACHINE_PROPTYPE );
   }
-  else if ( stricmp( pszType, "Manual" ) == 0 )
+  else if ( strcasecmp( pszType, "Manual" ) == 0 )
   {
     return( MANUAL_PROPTYPE );
   } /* endif */
@@ -1904,9 +1907,9 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
   int iRC = 0;
 
   // setup temp file name for TMX file 
-  char szTempPath[MAX_PATH];
-  iRC = GetTempPath( MAX_PATH, szTempPath );
-  if ( iRC > MAX_PATH || ( iRC == 0 ) )
+  char szTempPath[PATH_MAX];
+  iRC = GetTempPath( PATH_MAX, szTempPath );
+  if ( iRC > PATH_MAX || ( iRC == 0 ) )
   {
     iRC = -1;
   }
