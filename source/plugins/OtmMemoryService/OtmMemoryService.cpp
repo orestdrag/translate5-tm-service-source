@@ -322,7 +322,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     char szServiceName[100] = "";
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
-    char szValue[100];
+    char szValue[150];
 
     // get configuration settings
     {
@@ -346,45 +346,45 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     // handler for resource URL w/o memory name
     auto resource = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s", szServiceName );
+    snprintf( szValue, 150, "/%s", szServiceName );
     resource->set_path( szValue );
     resource->set_method_handler( "GET", get_method_handler );
     resource->set_method_handler( "POST", post_method_handler );
 
     // handler for resource URL w memory name/import
     auto memImport = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}/import", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}/import", szServiceName );
     memImport->set_path( szValue );
     memImport->set_method_handler( "POST", postImport_method_handler );
 
     // handler for resource URL w memory name/fuzzysearch
     auto fuzzysearch = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}/fuzzysearch", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}/fuzzysearch", szServiceName );
     fuzzysearch->set_path( szValue );
     fuzzysearch->set_method_handler( "POST", postFuzzySearch_method_handler );
 
     // handler for resource URL w memory name/concordancesearch
     auto concordancesearch = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}/concordancesearch", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}/concordancesearch", szServiceName );
     concordancesearch->set_path( szValue );
     concordancesearch->set_method_handler( "POST", postConcordanceSearch_method_handler );
 
     // handler for resource URL w memory name/entry
     auto postEntry = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}/entry", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}/entry", szServiceName );
     postEntry->set_path( szValue );
     postEntry->set_method_handler( "POST", postEntry_method_handler );
 
     // handler for resource URL w memory name
     auto memname = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}", szServiceName );
     memname->set_path( szValue );
     memname->set_method_handler( "DELETE", delete_method_handler );
     memname->set_method_handler( "GET", get_memory_method_handler );
 
     // handler for resource URL w memory name/status
     auto getStatus = make_shared< Resource >();
-    snprintf( szValue, 100, "/%s/{id: .+}/status", szServiceName );
+    snprintf( szValue, 150, "/%s/{id: .+}/status", szServiceName );
     getStatus->set_path( szValue );
     getStatus->set_method_handler( "GET", getStatus_method_handler );
 
