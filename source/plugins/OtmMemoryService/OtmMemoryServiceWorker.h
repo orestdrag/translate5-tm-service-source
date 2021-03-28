@@ -160,8 +160,8 @@ public:
   int getMem
   (
     std::string strMemory,
-    std::string strType/*,
-    restbed::Bytes &vMemData*/
+    std::string strType,
+    restbed::Bytes &vMemData
   );
 
   /*! \brief get the status of a memory

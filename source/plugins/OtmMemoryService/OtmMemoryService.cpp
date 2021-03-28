@@ -18,13 +18,11 @@
 #include <thread>
 #include <cstdlib>
 #include <cstring>
-#include <restbed/settings.hpp>
-#include <restbed/byte.hpp>
-#include <restbed/service.hpp>
 #include <sstream>
 #include <linux/limits.h>
-#include "../../core/utilities/LanguageFactory.H"
-#include "OtmProposal.h"
+#include <restbed>
+//#include "../../core/utilities/LanguageFactory.H"
+//#include "OtmProposal.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
 #include "EQFSERNO.H"
@@ -46,6 +44,14 @@ void WriteCrashLog( char *pszLogDir );
 
 // number of entries in the transaction log
 #define NUM_OF_TRANSACTENTRIES 50
+
+#ifndef FALSE
+#define FALSE   0
+#endif
+
+#ifndef TRUE
+#define TRUE    1
+#endif
 
 //  transaction IDs
 typedef enum _TRANSACTID 

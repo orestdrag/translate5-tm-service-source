@@ -11,6 +11,11 @@
 #ifndef _OtmMemoryService_H_
 #define _OtmMemoryService_H_
 
+typedef int BOOL;
+typedef char *LPSTR;
+typedef void *HANDLE;
+typedef HANDLE HINSTANCE;
+
 typedef struct _THREADDATA
 {
   HANDLE g_ServiceStopEvent;
