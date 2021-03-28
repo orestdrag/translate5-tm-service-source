@@ -6,6 +6,12 @@
 
 #define _EQFPAPI_H_INCLUDED
 
+// Windows data types
+typedef void *HANDLE;
+typedef wchar_t WCHAR;
+typedef int BOOL;
+typedef long *PLONG;
+
 typedef HANDLE HPARSER;                // parser API handle
 typedef HANDLE HPARSSEGFILE;           // handle of a segmented file loaded into memory
 typedef HANDLE HPARSMARKUP;            // handle of loaded markup table
@@ -113,14 +119,12 @@ typedef struct _PARSTOKEN
 
 
 // terminate parser API environment
-__declspec(dllexport)
 int ParsTerminate
 (
   HPARSER hParser                      // parser API handle returned by ParsInitialize
 );
 
 // initialize parser API environment
-__declspec(dllexport)
 int ParsInitialize
 (
   HPARSER *phParser,                   // ptr to buffer for parser API handle
@@ -136,7 +140,6 @@ int ParsBuildTempName
 );
 
 // load a segmented file into memory
-__declspec(dllexport)
 int  ParsLoadSegFile
 (
   HPARSER     hParser,                 // parser API handle
@@ -146,7 +149,6 @@ int  ParsLoadSegFile
 
 
 // get number of segments in loaded segmented file
-__declspec(dllexport)
 int ParsGetSegNum
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -162,7 +164,6 @@ int  ParsGetSeg
 );
 
 // get a segment from a segmented file loaded into memory (Unicode version)
-__declspec(dllexport)
 int  ParsGetSegW
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -179,7 +180,6 @@ int  ParsUpdateSeg
 );
 
 // update a segment of a segmented file loaded into memory (Unicode version)
-__declspec(dllexport)
 int  ParsUpdateSegW
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -188,7 +188,6 @@ int  ParsUpdateSegW
 );
 
 // write a segmented file loaded into memory to an external file
-__declspec(dllexport)
 int  ParsWriteSegFile
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -196,7 +195,6 @@ int  ParsWriteSegFile
 );
 
 // free a segmented file loaded into memory
-__declspec(dllexport)
 int  ParsFreeSegFile
 (
   HPARSSEGFILE hSegFile                // handle of loaded segmented file
@@ -345,7 +343,6 @@ int ParsGetNextToken
                                        // data of the token
 );
 
-__declspec(dllexport)
 int  ParsGetSourceLine
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -355,7 +352,6 @@ int  ParsGetSourceLine
 );
 
 // get the line number for the given segment
-__declspec(dllexport)
 int  ParsGetSegmentNumber
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
