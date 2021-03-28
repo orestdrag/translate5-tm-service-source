@@ -14,11 +14,13 @@
 
 #ifndef _EQF_H_INCLUDED
   typedef long LONG;
+  typedef unsigned long ULONG;
+  typedef short SHORT;
   typedef unsigned short USHORT;
   typedef unsigned short *PUSHORT;
-  typedef char * PSZ;
-  typedef wchar_t CHAR_W;
   typedef char CHAR;
+  typedef wchar_t CHAR_W;
+  typedef char * PSZ;
   #define MAX_LANG_LENGTH           20   // length of the name of a language
   #define MAX_LONGFILESPEC         256   // max length of long file name + extension
   #define NUM_OF_FOLDER_DICS        10   // number of dictionaries per folder
@@ -391,7 +393,6 @@ typedef struct _EXTFOLPROP
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/  
-__declspec(dllexport)
 USHORT EqfCreateFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -440,7 +441,6 @@ USHORT EqfCreateFolder
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/  
-__declspec(dllexport)
 USHORT EqfCreateControlledFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -480,7 +480,6 @@ USHORT EqfCreateControlledFolder
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfChangeFolProps
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -504,7 +503,6 @@ USHORT EqfChangeFolProps
   \returns 0 if successful or an error code in case of failures
   */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfChangeFolPropsEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -533,7 +531,6 @@ USHORT EqfChangeFolPropsEx
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfCreateSubFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -569,7 +566,6 @@ USHORT EqfCreateSubFolder
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfExportFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -601,7 +597,6 @@ USHORT EqfExportFolder
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfExportFolderFP
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -636,7 +631,6 @@ USHORT EqfExportFolderFP
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfExportFolderFPas
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -680,7 +674,6 @@ USHORT EqfExportFolderFPas
 	
 **/
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCountWords
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -713,7 +706,6 @@ USHORT EqfCountWords
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportDict
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -739,7 +731,6 @@ USHORT EqfImportDict
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfExportDict
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -766,7 +757,6 @@ USHORT EqfExportDict
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportDoc
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -816,7 +806,6 @@ USHORT EqfImportDoc
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfExportDoc
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -903,7 +892,6 @@ USHORT EqfExportDoc
   \param pszPM Project manager name               
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfExportDocVal
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -950,7 +938,6 @@ USHORT EqfExportDocVal
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -990,7 +977,6 @@ USHORT EqfImportMem
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportMemEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1025,7 +1011,6 @@ USHORT EqfImportMemEx
 \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfExportMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1042,7 +1027,6 @@ USHORT EqfExportMem
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1060,7 +1044,6 @@ USHORT EqfOrganizeMem
 \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1088,7 +1071,6 @@ USHORT EqfCreateMem
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateITM
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1113,7 +1095,6 @@ USHORT EqfCreateITM
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfChangeMFlag
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1155,7 +1136,6 @@ USHORT EqfChangeMFlag
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfAnalyzeDoc
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1205,7 +1185,6 @@ USHORT EqfAnalyzeDoc
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfAnalyzeDocEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1229,7 +1208,6 @@ USHORT EqfAnalyzeDocEx
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfDeleteMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1249,7 +1227,6 @@ USHORT EqfDeleteMem
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1273,7 +1250,6 @@ USHORT EqfImportFolder
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportFolderFP
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1299,7 +1275,6 @@ USHORT EqfImportFolderFP
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportFolderAs
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1328,7 +1303,6 @@ USHORT EqfImportFolderAs
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfImportFolderAs2
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1349,7 +1323,6 @@ USHORT EqfImportFolderAs2
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfDeleteFolder
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1364,7 +1337,6 @@ USHORT EqfDeleteFolder
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfGetFolderProp
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1381,7 +1353,6 @@ USHORT EqfGetFolderProp
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfGetFolderPropEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1400,7 +1371,6 @@ USHORT EqfGetFolderPropEx
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfDeleteDoc
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1446,7 +1416,6 @@ USHORT EqfDeleteDoc
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateCountReport
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1503,7 +1472,6 @@ USHORT EqfCreateCountReport
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateCountReportEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1537,7 +1505,6 @@ USHORT EqfCreateCountReportEx
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfArchiveTM
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1555,7 +1522,6 @@ USHORT EqfArchiveTM
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateMarkup
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1568,7 +1534,6 @@ USHORT EqfCreateMarkup
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfStartSession
 (
   PHSESSION   phSession                // mand: ptr to callers Eqf session handle variable
@@ -1579,7 +1544,6 @@ USHORT EqfStartSession
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfEndSession
 (
   HSESSION    hSession                 // mand: Eqf session handle
@@ -1592,7 +1556,6 @@ USHORT EqfEndSession
     \param usBufSize size of message buffer in number of bytes
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetLastError
 (
   HSESSION    hSession,                // Eqf session handle
@@ -1607,7 +1570,6 @@ USHORT EqfGetLastError
     \param usBufSize size of message buffer in number of characters
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetLastErrorW
 (
   HSESSION    hSession,                // Eqf session handle
@@ -1642,7 +1604,6 @@ USHORT EqfGetLastErrorW
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfCreateCntReport
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1688,7 +1649,6 @@ USHORT EqfCreateCntReport
     \param pszUnused2 for future enhancements, currently unused
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfCreateCntReportEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -1719,7 +1679,6 @@ USHORT EqfCreateCntReportEx
     \param hLoadedFile pointer to buffer for handle of loaded file
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfLoadSegFile
 (
   HSESSION    hSession,                // Eqf session handle
@@ -1732,7 +1691,6 @@ USHORT EqfLoadSegFile
     \param plNumOfSegs pointer to a buffer receiving the number of segments in the loaded file
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetSegNum
 (
   HPARSSEGFILE hLoadedFile,            // handle of loaded segmented file
@@ -1743,7 +1701,6 @@ USHORT EqfGetSegNum
     \param hLoadedFile the loaded file handle returned by the EqfLoadSegFile call
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfFreeSegFile
 (
   HPARSSEGFILE hLoadedFile             // handle of loaded segmented file
@@ -1755,7 +1712,6 @@ USHORT EqfFreeSegFile
     \param pszFullDocName fully qualified name of the segmented document file
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfWriteSegFile
 (
   HPARSSEGFILE hLoadedFile,            // handle of loaded segmented file
@@ -1768,7 +1724,6 @@ USHORT EqfWriteSegFile
     \param pSeg pointer to a PARSSEGMENTW structure receiving the segment data
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetSegW
 (
   HPARSSEGFILE  hSegFile,              // handle of loaded segmented file
@@ -1782,7 +1737,6 @@ USHORT EqfGetSegW
     \param pSeg pointer to a PARSSEGMENTW structure containing the new segment data
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfUpdateSegW
 (
   HPARSSEGFILE hSegFile,               // handle of loaded segmented file
@@ -1800,7 +1754,6 @@ USHORT EqfUpdateSegW
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfBuildSegDocName
 (
   HSESSION         hSession,           // mand: non-DDE session handle
@@ -1818,7 +1771,6 @@ USHORT EqfBuildSegDocName
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfSetSysLanguage
 (
   HSESSION    hSession,                // mand: ptr to callers Eqf session handle variable
@@ -1831,7 +1783,6 @@ USHORT EqfSetSysLanguage
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfGetSysLanguage
 (
   HSESSION   hSession,                // mand: callers Eqf session handle variable
@@ -1843,7 +1794,6 @@ USHORT EqfGetSysLanguage
     \param pusProgress pointer to a buffer receiving the current progress value
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetProgress
 (
   HSESSION   hSession,                // callers Eqf session handle variable
@@ -1857,7 +1807,6 @@ USHORT EqfGetProgress
     \param plEndLine points to a buffer for the segment end line
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetSourceLine
 (
   HPARSSEGFILE hLoadedFile,           // handle of loaded segmented file
@@ -1873,7 +1822,6 @@ USHORT EqfGetSourceLine
     \param plSegNum number of segment found at given position
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetSegmentNumber
 (
   HPARSSEGFILE hLoadedFile,           // handle of loaded segmented file
@@ -1935,7 +1883,6 @@ typedef enum _EQFMATCHSTATE
            - USE_GENERIC_INLINETAG_REPL_OPT perform generic inline tag replacement
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfGetMatchLevel
 (
   HSESSION         hSession,           // non-DDE session handle
@@ -1958,7 +1905,6 @@ USHORT EqfGetMatchLevel
            - USE_GENERIC_INLINETAG_REPL_OPT perform generic inline tag replacement
     \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 SHORT EqfSimpleGetMatchLevel
 (
   HSESSION         hSession,           // non-DDE session handle
@@ -2022,7 +1968,6 @@ SHORT EqfSimpleGetMatchLevel
     \returns 0 if successful, CONTINUE_RC to indicate that the processing is not finished yet, or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/  
-__declspec(dllexport)
 USHORT EqfCleanMemory
 (
   HSESSION         hSession,           // mand: Eqf session handle
@@ -2055,7 +2000,6 @@ USHORT EqfCleanMemory
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/  
-__declspec(dllexport)
 USHORT EqfRename
 (
   HSESSION         hSession,           // mand: Eqf session handle
@@ -2086,7 +2030,6 @@ USHORT EqfRename
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfProcessNomatch
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2120,7 +2063,6 @@ USHORT EqfProcessNomatch
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfProcessNomatchEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2145,7 +2087,6 @@ USHORT EqfProcessNomatchEx
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfOpenDoc
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2164,7 +2105,6 @@ USHORT EqfOpenDoc
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfOpenDocEx
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2182,7 +2122,6 @@ USHORT EqfOpenDocEx
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfOpenDocByTrack
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2196,7 +2135,6 @@ USHORT EqfOpenDocByTrack
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfDeleteMTLog
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2227,7 +2165,6 @@ USHORT EqfDeleteMTLog
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfGetShortName
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2245,7 +2182,6 @@ USHORT EqfGetShortName
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfRemoveDocs
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2258,7 +2194,6 @@ USHORT EqfRemoveDocs
     \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfRestoreDocs
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2272,7 +2207,6 @@ USHORT EqfRestoreDocs
     \returns 0 if successful or an error code in case of failures
 */
  /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfAddCTIDList
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2292,7 +2226,6 @@ USHORT EqfAddCTIDList
 \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfExportSegs
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2309,7 +2242,6 @@ USHORT EqfExportSegs
     \returns 0 when the folder exists or an error code
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfFolderExists
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2322,7 +2254,6 @@ USHORT EqfFolderExists
     \returns 0 when the Translation Memory exists or an error code
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfMemoryExists
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2335,7 +2266,6 @@ USHORT EqfMemoryExists
     \returns 0 when the dictionary exists or an error code
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfDictionaryExists
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2348,7 +2278,6 @@ USHORT EqfDictionaryExists
     \returns 0 when the document exists or an error code
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfDocumentExists
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2370,7 +2299,6 @@ USHORT EqfDocumentExists
  	
 **/
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport) 
 unsigned short EqfCountWordsInString
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2393,7 +2321,7 @@ unsigned short EqfCountWordsInString
 	
 **/
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport) unsigned short EqfCheckSpelling
+unsigned short EqfCheckSpelling
 (
   HSESSION    hSession,                // mand: Eqf session handle
   char*       pszLanguage,             // mand: name of the language being used for the spell checking
@@ -2418,7 +2346,6 @@ __declspec(dllexport) unsigned short EqfCheckSpelling
 	
 **/
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport) 
 unsigned short EqfReduceToStemForm
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2441,7 +2368,6 @@ unsigned short EqfReduceToStemForm
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 unsigned short EqfClearMTFlag
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2474,7 +2400,6 @@ unsigned short EqfClearMTFlag
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 unsigned short EqfFilterNoMatchFile
 (
   HSESSION    hSession,               // mand: Eqf session handle   
@@ -2495,7 +2420,6 @@ unsigned short EqfFilterNoMatchFile
 	\returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/ 
-__declspec(dllexport)
 USHORT EqfDeleteDict
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2508,7 +2432,6 @@ USHORT EqfDeleteDict
     \returns version information
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfGetVersionEx
 (
   PSZ  pszVersion,                    // mand: to retrieve version information
@@ -2525,7 +2448,6 @@ USHORT EqfGetVersionEx
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfAddMatchSegID
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2549,7 +2471,6 @@ USHORT EqfAddMatchSegID
   \returns 0 if successful or an error code in case of failures
 */
 /*@ADDTOSCRIPTER*/
-__declspec(dllexport)
 USHORT EqfSearchFuzzySegments
 (
   HSESSION    hSession,                // mand: Eqf session handle
@@ -2572,7 +2493,6 @@ USHORT EqfSearchFuzzySegments
          - OVERWRITE_OPT overwrite any existing memory with the given name
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfImportMemInInternalFormat
 (
   HSESSION    hSession, 
@@ -2587,7 +2507,6 @@ USHORT EqfImportMemInInternalFormat
   \param pszMemoryPackage name of a new ZIP archive receiving the memory files
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfExportMemInInternalFormat
 (
   HSESSION    hSession, 
@@ -2603,7 +2522,6 @@ USHORT EqfExportMemInInternalFormat
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfOpenMem
 (
   HSESSION    hSession,
@@ -2618,7 +2536,6 @@ USHORT EqfOpenMem
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfCloseMem
 (
   HSESSION    hSession, 
@@ -2721,7 +2638,6 @@ typedef struct _MEMPROPOSAL
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfQueryMem
 (
   HSESSION    hSession,    
@@ -2744,7 +2660,6 @@ USHORT EqfQueryMem
      SEARCH_IN_TARGET_OPT  search in target
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfSearchMem
 (
   HSESSION    hSession,                
@@ -2763,7 +2678,6 @@ USHORT EqfSearchMem
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfUpdateMem
 (
   HSESSION    hSession,
@@ -2778,7 +2692,6 @@ USHORT EqfUpdateMem
 \param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfListMem
 (
   HSESSION    hSession,
@@ -2792,7 +2705,6 @@ USHORT EqfListMem
 \param pszOpenTM2Lang buffer for the OpenTM2 language name
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfGetOpenTM2Lang
 (
   HSESSION    hSession,
@@ -2806,7 +2718,6 @@ USHORT EqfGetOpenTM2Lang
 \param pszISOLang pointer to a buffer for the ISO language identifier
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfGetIsoLang
 (
   HSESSION    hSession,
@@ -2821,7 +2732,6 @@ USHORT EqfGetIsoLang
 \param pszMemName the memory name
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfConnectSharedMem
 (
   HSESSION    hSession,
@@ -2835,7 +2745,6 @@ USHORT EqfConnectSharedMem
 \param pszMemName the memory name
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfDisconnectSharedMem
 (
   HSESSION    hSession,
