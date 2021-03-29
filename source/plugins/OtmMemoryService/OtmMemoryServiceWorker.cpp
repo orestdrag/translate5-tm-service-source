@@ -23,6 +23,10 @@
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
 #include <EQFMSG.H>
+//#include <EQFTM.H>
+
+typedef unsigned long DWORD;
+typedef unsigned char BYTE;
 
 // import memory process
 void importMemoryProcess( void *pvData );
@@ -603,9 +607,9 @@ std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8S
 {
 	int iUTF16Len;
 	int iUTF8Len = (int)strUTF8String.length() + 1;
-	iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, 0, 0 );
+	//iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, 0, 0 );
 	std::wstring strUTF16( iUTF16Len, L'\0');
-	MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
+	//MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
 	return strUTF16;
 }
 
@@ -617,9 +621,9 @@ std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16St
 {
 	int iUTF8Len;
 	int iUTF16Len = (int)strUTF16String.length() + 1;
-	iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
+	//iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
 	std::string strUTF8( iUTF8Len, '\0');
-	WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
+	//WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
 	return strUTF8;
 }
 
@@ -633,12 +637,12 @@ void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
   int iASCIILen;
   int iUTF8Len = (int)strText.length() + 1;
   char *pszNewData = NULL;
-  iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
+  //iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
-  MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
-  iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  //MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
+  //iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iASCIILen + 1 );
-  WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
+  //WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
   strText = pszNewData;
   free( pszNewData );
 }
@@ -652,12 +656,12 @@ void OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText )
   int iUTF8Len;
   int iASCIILen = (int)strText.length() + 1;
   char *pszNewData = NULL;
-  iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
+  //iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
-  MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
-  iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  //MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
+  //iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iUTF8Len + 1);
-  WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
+  //WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
   strText = pszNewData;
   free( pszNewData );
 }
@@ -687,7 +691,8 @@ int OtmMemoryServiceWorker::import
 
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -703,7 +708,8 @@ int OtmMemoryServiceWorker::import
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
   {
-    buildErrorReturn( iRC, L"Missing or incorrect JSON data in request body", strOutputParms );
+    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
 
@@ -724,7 +730,8 @@ int OtmMemoryServiceWorker::import
   factory->parseJSONStop( parseHandle );
   if ( strTmxData.empty() )
   {
-    buildErrorReturn( iRC, L"Missing TMX data", strOutputParms );
+    wchar_t errMsg[] = L"Missing TMX data";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -733,7 +740,8 @@ int OtmMemoryServiceWorker::import
   iRC = buildTempFileName( szTempFile );
   if ( iRC != 0  )
   {
-    buildErrorReturn( -1, L"Could not create file name for temporary data", strOutputParms );
+    wchar_t errMsg[] = L"Could not create file name for temporary data";
+    buildErrorReturn( -1, errMsg, strOutputParms );
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 
@@ -773,7 +781,8 @@ int OtmMemoryServiceWorker::import
     // handle "too many open memories" condition
     if ( iIndex == -1 )
     {
-      buildErrorReturn( iRC, L"Error: too many open translation memory databases", strOutputParms );
+      wchar_t errMsg[] = L"Error: too many open translation memory databases";
+      buildErrorReturn( iRC, errMsg, strOutputParms );
       return( restbed::INTERNAL_SERVER_ERROR );
     } /* endif */
 
@@ -789,7 +798,7 @@ int OtmMemoryServiceWorker::import
   strcpy( pData->szMemory, strMemory.c_str() );
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
-  _beginthread( &importMemoryProcess, 0, (void *)pData );
+  //_beginthread( &importMemoryProcess, 0, (void *)pData );
 
   return( restbed::CREATED );
 }
@@ -820,7 +829,8 @@ int OtmMemoryServiceWorker::createMemory
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
   {
-    buildErrorReturn( iRC, L"Missing or incorrect JSON data in request body", strOutputParms );
+    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
 
@@ -860,13 +870,15 @@ int OtmMemoryServiceWorker::createMemory
   if ( strName.empty() )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing memory name input parameter", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing memory name input parameter";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( strSourceLang.empty() )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source language input parameter", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing source language input parameter";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
 
@@ -876,7 +888,7 @@ int OtmMemoryServiceWorker::createMemory
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, L"Error: Could not convert language %S to OpenTM2 language name", strSourceLang.c_str() );
+    swprintf( this->szLastError, 200, L"Error: Could not convert language %S to OpenTM2 language name", strSourceLang.c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -885,7 +897,7 @@ int OtmMemoryServiceWorker::createMemory
   convertUTF8ToASCII( strName );
   if ( strData.empty() )
   {
-    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), "", 0, szOtmSourceLang, 0 );
+    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
   }
   else
   {
@@ -894,7 +906,8 @@ int OtmMemoryServiceWorker::createMemory
     iRC = buildTempFileName( szTempFile );
     if ( iRC != 0 )
     {
-      buildErrorReturn( -1, L"Could not create file name for temporary data", strOutputParms );
+      wchar_t errMsg[] = L"Could not create file name for temporary data";
+      buildErrorReturn( -1, errMsg, strOutputParms );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
 
@@ -911,7 +924,7 @@ int OtmMemoryServiceWorker::createMemory
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
 
-    DeleteFile( szTempFile );
+    //DeleteFile( szTempFile );
   }
 
   if ( iRC != 0 )
@@ -966,17 +979,17 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"source", pProp->szSource );
   pJsonFactory->addParmToJSONW( strJSON, L"target", pProp->szTarget );
   pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"id", pData->lSegmentNum );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", pData->szSource );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"targetLang", pData->szSource );
 
   switch ( pProp->eType )
@@ -1000,16 +1013,16 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   }
   pJsonFactory->addParmToJSONW( strJSON, L"matchType", pData->szSource );
 
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"author", pData->szSource );
 
   convertTimeToUTC( pProp->lTargetTime, pData->szDocName );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );
 
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"markupTable", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"context", pProp->szContext );
@@ -1074,7 +1087,8 @@ int OtmMemoryServiceWorker::search
   convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -1097,7 +1111,8 @@ int OtmMemoryServiceWorker::search
   if ( iRC != 0 )
   {
     iRC = ERROR_INTERNALFUNCTION_FAILED;
-    buildErrorReturn( iRC, L"Error: Parsing of input parameters failed", strOutputParms );
+    wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1105,21 +1120,24 @@ int OtmMemoryServiceWorker::search
   if ( pData->szSource[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source text input parameter", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing source text input parameter";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szIsoSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source language input parameter", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing source language input parameter";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szIsoTargetLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing target language input parameter", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing target language input parameter";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1131,7 +1149,8 @@ int OtmMemoryServiceWorker::search
   if ( pData->iNumOfProposals > 20 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Too many proposals requested, the maximum value is 20", strOutputParms );
+    wchar_t errMsg[] = L"Error: Too many proposals requested, the maximum value is 20";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1165,7 +1184,7 @@ int OtmMemoryServiceWorker::search
 
   // do the lookup and handle the results
   int iNumOfProposals = pData->iNumOfProposals;
-  iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+  //iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
   if ( iRC == 0 )
   {
     std::wstring strOutputParmsW;
@@ -1222,7 +1241,8 @@ int OtmMemoryServiceWorker::concordanceSearch
   convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -1244,7 +1264,8 @@ int OtmMemoryServiceWorker::concordanceSearch
   if ( iRC != 0 )
   {
     iRC = ERROR_INTERNALFUNCTION_FAILED;
-    buildErrorReturn( iRC, L"Error: Parsing of input parameters failed", strOutputParms );
+    wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1252,14 +1273,16 @@ int OtmMemoryServiceWorker::concordanceSearch
   if ( pData->szSearchString[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing search string", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing search string";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->iNumOfProposals > 20 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Too many proposals requested, the maximum value is 20", strOutputParms );
+    wchar_t errMsg[] = L"Error: Too many proposals requested, the maximum value is 20";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1433,7 +1456,7 @@ int OtmMemoryServiceWorker::list
     // isolate TM name and convert it to UTF16
     PSZ pszEnd = strchr( pszCurTM, ',' );
     if ( pszEnd ) *pszEnd = 0;
-    MultiByteToWideChar( CP_OEMCP, 0, pszCurTM, -1, szTM, sizeof( szTM ) / sizeof( szTM[0] ) );
+    //MultiByteToWideChar( CP_OEMCP, 0, pszCurTM, -1, szTM, sizeof( szTM ) / sizeof( szTM[0] ) );
 
     // add name to response area
     pJsonFactory->addElementStartToJSONW( strOutputParmsW );
@@ -1479,7 +1502,8 @@ int OtmMemoryServiceWorker::updateEntry
 
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -1513,7 +1537,8 @@ int OtmMemoryServiceWorker::updateEntry
   if ( iRC != 0 )
   {
     iRC = ERROR_INTERNALFUNCTION_FAILED;
-    buildErrorReturn( iRC, L"Error: Parsing of input parameters failed", strOutputParms );
+    wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1521,35 +1546,40 @@ int OtmMemoryServiceWorker::updateEntry
   if ( pData->szSource[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source text", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing source text";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szTarget[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing target text", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing target text";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szIsoSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source language", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing source language";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szIsoTargetLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing target language", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing target language";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing markup table", strOutputParms );
+    wchar_t errMsg[] = L"Error: Missing markup table";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1663,7 +1693,8 @@ int OtmMemoryServiceWorker::deleteMem
   convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -1757,7 +1788,7 @@ int OtmMemoryServiceWorker::getMem
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMem failed with rc=%ld, error message is %ws\n", iRC, this->szLastError );
+      if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMem failed with rc=%d, error message is %ls\n", iRC, this->szLastError );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
   }
@@ -1768,7 +1799,7 @@ int OtmMemoryServiceWorker::getMem
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMemInInternalFormat failed with rc=%ld, error message is %ws\n", iRC, this->szLastError );
+      if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMemInInternalFormat failed with rc=%d, error message is %ls\n", iRC, this->szLastError );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
   }
@@ -1783,12 +1814,12 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     if ( hfLog ) fprintf( hfLog, "    Error: failed to load the temporary file\n" );
-    DeleteFile( szTempFile );
+    //DeleteFile( szTempFile );
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 
   // cleanup
-  DeleteFile( szTempFile );
+  //DeleteFile( szTempFile );
 
   return( restbed::OK );
 }
@@ -1817,7 +1848,8 @@ int OtmMemoryServiceWorker::getStatus
   convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    buildErrorReturn( iRC, L"Missing name of memory", strOutputParms );
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -1828,7 +1860,7 @@ int OtmMemoryServiceWorker::getStatus
   if ( iIndex != -1 )
   {
     // set status value
-    char *pszStatus = "";
+    std::string pszStatus = "";
     switch ( this->vMemoryList[iIndex].eImportStatus )
     {
       case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
@@ -1908,14 +1940,14 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
 
   // setup temp file name for TMX file 
   char szTempPath[PATH_MAX];
-  iRC = GetTempPath( PATH_MAX, szTempPath );
+  //iRC = GetTempPath( PATH_MAX, szTempPath );
   if ( iRC > PATH_MAX || ( iRC == 0 ) )
   {
     iRC = -1;
   }
   else
   {
-    iRC = GetTempFileName( szTempPath, "OTM", 0, pszTempFile );
+    //iRC = GetTempFileName( szTempPath, "OTM", 0, pszTempFile );
     if ( iRC != 0 ) iRC = 0;
   }
   return( iRC );
@@ -1933,10 +1965,10 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
   int iRC = 0;
 
   // open file
-  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HANDLE hFile = NULL;//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     strError = "open of package file "; 
     strError.append( pszFile ); 
     strError.append( " failed" );
@@ -1946,43 +1978,47 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
   // get the size of file
   DWORD dwFileSize = 0;
   DWORD dwFileSizeHigh = 0;
-  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
+  //dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
 
   // allocate byte array for file content
   BYTE *pByteArray = (BYTE *)malloc( dwFileSize );
   if ( pByteArray == NULL )
   {
-    CloseFile( &hFile );
+    //CloseFile( &hFile );
     strError = "Insufficient memory";
     return( iRC );
   }
 
   // read file into byte array
   DWORD dwBytesRead = 0;
+#if 0
   if ( !ReadFile( hFile, pByteArray, dwFileSize, &dwBytesRead, NULL ) )
   {
-    CloseFile( &hFile );
+    //CloseFile( &hFile );
     free( pByteArray );
-    iRC = GetLastError();
+    //iRC = GetLastError();
     strError = "read of package ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
+#endif
 
   // close file
-  CloseFile( &hFile );
+  //CloseFile( &hFile );
 
   // get encoded length of data
   DWORD dwEncodedLength = 0;
+#if 0
   if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, NULL, &dwEncodedLength ) )
   {
-    CloseFile( &hFile );
+    //CloseFile( &hFile );
     free( pByteArray );
-    iRC = GetLastError();
+    //iRC = GetLastError();
     strError = "encoding of binary data failed";
     return( iRC );
   }
+#endif
 
   // get area for encoded string
   char *pStringData = (char *)malloc( dwEncodedLength );
@@ -1993,15 +2029,17 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
     return( iRC );
   }
 
+#if 0
   // encode data
   if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, pStringData, &dwEncodedLength ) )
   {
     free( pByteArray );
     free( pStringData );
-    iRC = GetLastError();
+    //iRC = GetLastError();
     strError = "encoding of binary data failed";
     return( iRC );
   }
+#endif
 
   *ppStringData = pStringData;
 
@@ -2023,12 +2061,14 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   // get decoded length of data
   DWORD dwDecodedLength = 0;
+#if 0
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
     return( iRC );
   }
+#endif
 
   // get byte array for decoded data
   BYTE *pData = (BYTE *)malloc( dwDecodedLength );
@@ -2038,42 +2078,48 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     return( iRC );
   }
 
+#if 0
   // decode data
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, pData, &dwDecodedLength, NULL, NULL ) )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     free( pData );
     strError = "decoding of BASE64 data failed";
     return( iRC );
   }
+#endif
 
+#if 0
   // open output file
   HANDLE hFile = CreateFile( pszFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == INVALID_HANDLE_VALUE )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     free( pData );
     strError = "creation of output file ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
+#endif
 
   // write byte array to the file
   DWORD dwBytesWritten = 0;
+#if 0
   if ( !WriteFile( hFile, pData, dwDecodedLength, &dwBytesWritten, NULL ) )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     free( pData );
-    CloseFile( &hFile );
+    //CloseFile( &hFile );
     strError = "write to output file  ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
+#endif
 
   // close file
-  CloseFile( &hFile );
+  //CloseFile( &hFile );
 
   // cleanup
   free( pData );
@@ -2093,34 +2139,36 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   int iRC = 0;
 
   // open file
-  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HANDLE hFile = NULL;//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
-    iRC = GetLastError();
-    if ( hfLog ) fprintf( hfLog, "   Error: open of file %s failed with rc=%ld\n", pszFile, iRC );
+    //iRC = GetLastError();
+    if ( hfLog ) fprintf( hfLog, "   Error: open of file %s failed with rc=%d\n", pszFile, iRC );
     return( iRC );
   }
 
   // get the size of file
   DWORD dwFileSize = 0;
   DWORD dwFileSizeHigh = 0;
-  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
+  //dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
 
   // adjust size of Byte vector
   vFileData.resize( dwFileSize );
 
   // read file into byte vector
   DWORD dwBytesRead = 0;
+#if 0
   if ( !ReadFile( hFile, &vFileData[0], dwFileSize, &dwBytesRead, NULL ) )
   {
-    CloseFile( &hFile );
-    iRC = GetLastError();
+    //CloseFile( &hFile );
+    //iRC = GetLastError();
     if ( hfLog ) fprintf( hfLog, "   Error: reading of %ld bytes from file %s failed with rc=%ld\n", dwFileSize, pszFile, iRC );
     return( iRC );
   }
+#endif
 
   // close file
-  CloseFile( &hFile );
+  //CloseFile( &hFile );
 
   return( iRC );
 }
@@ -2150,7 +2198,7 @@ void importMemoryProcess( void *pvData )
   pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pszError );
 
   // cleanup
-  DeleteFile( pData->szInFile );
+  //DeleteFile( pData->szInFile );
   delete( pData );
 
   return;

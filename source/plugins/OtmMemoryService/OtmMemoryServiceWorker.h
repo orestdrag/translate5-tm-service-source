@@ -15,6 +15,7 @@
 #include <codecvt>
 #include <string>
 #include <vector>
+#include <restbed>
 #include "OTMFUNC.H"
 
 /*! \brief constant defining the maximum number of opened memories
@@ -373,7 +374,7 @@ private:
   \param strError string receiving any error message text
   \returns 0 is sucessfull or a return code
   */
-  //int loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData );
+  int loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData );
 
   /*! \brief States of a memory
   */
