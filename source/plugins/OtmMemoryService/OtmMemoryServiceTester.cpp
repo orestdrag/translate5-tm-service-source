@@ -110,8 +110,8 @@ int main( int argc, char *argv[], char *envp[] )
 
   // process script file
   bool fInCommand = false;
-  std::wstring strInParms = L"";
-  std::wstring strOutParms = L"";
+  std::string strInParms = "";
+  std::string strOutParms = "";
   while( !feof( hfScript ) )
   {
     memset( szLine, 0, sizeof(szLine) );
@@ -136,11 +136,11 @@ int main( int argc, char *argv[], char *envp[] )
         // end of parameter data reached, execute the command
         if ( wcscasecmp( szCommand, L"importMemoryFromPackage" ) == 0 )
         {
-          iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
+          //iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"deleteMemory" ) == 0 )
         {
-          iRC = pService->deleteMemory( strInParms, strOutParms );
+          iRC = pService->deleteMem( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"createMemory" ) == 0 )
         {
@@ -148,27 +148,27 @@ int main( int argc, char *argv[], char *envp[] )
         }
         else if ( wcscasecmp( szCommand, L"importMemory" ) == 0 )
         {
-          iRC = pService->importMemory( strInParms, strOutParms );
+          //iRC = pService->importMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"openMemory" ) == 0 )
         {
-          iRC = pService->openMemory( strInParms, strOutParms );
+          //iRC = pService->openMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"closeMemory" ) == 0 )
         {
-          iRC = pService->closeMemory( strInParms, strOutParms );
+          //iRC = pService->closeMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"lookupInMemory" ) == 0 )
         {
-          iRC = pService->lookupInMemory( strInParms, strOutParms );
+          //iRC = pService->lookupInMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"searchMemory" ) == 0 )
         {
-          iRC = pService->searchMemory( strInParms, strOutParms );
+          //iRC = pService->searchMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"updateMemory" ) == 0 )
         {
-          iRC = pService->updateMemory( strInParms, strOutParms );
+          //iRC = pService->updateMemory( strInParms, strOutParms );
         }
         else
         {
@@ -180,7 +180,7 @@ int main( int argc, char *argv[], char *envp[] )
         {
           wprintf( L"Processing command %s\n", szCommand );
           wprintf( L"Input parameter:\n" );
-          wprintf( L"%s\n", strInParms.c_str() );
+          //wprintf( L"%s\n", strInParms.c_str() );
           wprintf( L"Result = %ld\n", iRC );
           wprintf( L"Output:\n" );
           wprintf( L"%s\n", strOutParms.c_str() );
@@ -190,7 +190,7 @@ int main( int argc, char *argv[], char *envp[] )
       else
       {
         // add current line to parameter data
-        strInParms.append( pszStart );
+        //strInParms.append( pszStart );
       }
     } /* endif */
 
