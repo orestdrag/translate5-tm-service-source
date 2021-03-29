@@ -1,4 +1,4 @@
-### This branch reflects the progress of work on building working version of OtmMemoryService on Ubuntu OS. Description below specifies the details.
+### This branch reflects the progress of work of building OtmMemoryService on Ubuntu OS. Description below specifies the details.
 
 **Prerequisites**
 
