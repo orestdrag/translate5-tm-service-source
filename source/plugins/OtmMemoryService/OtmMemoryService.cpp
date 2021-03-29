@@ -21,8 +21,6 @@
 #include <sstream>
 #include <linux/limits.h>
 #include <restbed>
-//#include "../../core/utilities/LanguageFactory.H"
-//#include "OtmProposal.h"
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
 #include "EQFSERNO.H"
