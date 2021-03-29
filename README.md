@@ -13,7 +13,7 @@
 
 *Dependencies:*  
 &nbsp;&nbsp;&nbsp;&nbsp;restbed:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/corvusoft/restbed 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/corvusoft/restbed   
 &nbsp;&nbsp;&nbsp;&nbsp;Clone the repo into the Packages dir, and build it.
 
 **Build**  
