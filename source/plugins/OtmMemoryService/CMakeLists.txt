@@ -15,7 +15,7 @@ set(OPENTM2_API_DIR "../../api")
 include_directories(${RESTBED_INCLUDE_DIR} ${OPENTM2_INCLUDE_DIR})
 link_directories(${RESTBED_LIBRARIES})
 
-add_library(OpenTM2 ${OPENTM2_API_DIR}/OTMFUNC.C)
+#add_library(OpenTM2 ${OPENTM2_API_DIR}/OTMFUNC.C)
 
 add_executable(OtmMemoryService
                 OtmMemoryService.cpp
@@ -23,5 +23,5 @@ add_executable(OtmMemoryService
                 OtmMemoryServiceTester.cpp
                 OTMMSJSONFactory.cpp)
 
-target_link_libraries(OtmMemoryService librestbed.so OpenTM2)
-#target_link_libraries(OtmMemoryService librestbed.so)
+#target_link_libraries(OtmMemoryService librestbed.so OpenTM2)
+target_link_libraries(OtmMemoryService librestbed.so)
