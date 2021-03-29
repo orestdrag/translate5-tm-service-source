@@ -328,16 +328,16 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     {
       char szConfFileName[PATH_MAX];
 
-      GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
+      //GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
       char *pszExt = strrchr( szConfFileName, '.' );
       if ( pszExt != NULL )strcpy( pszExt, ".conf" );
-      GetPrivateProfileString( "Settings", "TimeOut", "3600", szValue, sizeof( szValue ), szConfFileName );
+      //GetPrivateProfileString( "Settings", "TimeOut", "3600", szValue, sizeof( szValue ), szConfFileName );
       uiTimeOut = atoi( szValue );
-      GetPrivateProfileString( "Settings", "Port", "8080", szValue, sizeof( szValue ), szConfFileName );
+      //GetPrivateProfileString( "Settings", "Port", "8080", szValue, sizeof( szValue ), szConfFileName );
       uiPort = atoi( szValue );
-      GetPrivateProfileString( "Settings", "Threads", "10", szValue, sizeof( szValue ), szConfFileName );
+      //GetPrivateProfileString( "Settings", "Threads", "10", szValue, sizeof( szValue ), szConfFileName );
       uiWorkerThreads = atoi( szValue );
-      GetPrivateProfileString( "Settings", "ServiceName", "otmmemoryservice", szServiceName, sizeof( szServiceName ), szConfFileName );
+      //GetPrivateProfileString( "Settings", "ServiceName", "otmmemoryservice", szServiceName, sizeof( szServiceName ), szConfFileName );
 
       // set caller's service name and port fields
       strcpy( pszService, szServiceName );
@@ -406,7 +406,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
   }
 
   // prepare log file
-  GetModuleFileName( NULL, szLogFile, PATH_MAX );
+  //GetModuleFileName( NULL, szLogFile, PATH_MAX );
   strcat( szLogFile, ".log" );
 
   return( TRUE );
@@ -417,7 +417,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 BOOL StartOtmMemoryService()
 {
   // start web service
-  _beginthread( ServiceThread, 0, NULL );
+  //_beginthread( ServiceThread, 0, NULL );
 
   return( TRUE );
 }
