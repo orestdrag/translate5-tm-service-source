@@ -81,7 +81,7 @@ int main( int argc, char *argv[], char *envp[] )
   }
 
   // check for unicode BOM
-  byte bBOM[2];
+  unsigned char bBOM[2];
   fread( bBOM, 2, 1, hfScript );
   if ( (bBOM[0] == 0xFF) && (bBOM[1] == 0xFE) ) 
   {
