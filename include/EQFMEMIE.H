@@ -93,7 +93,7 @@ typedef struct _MEMEXPIMPSEG
 #pragma pack( pop, segmentpacking )
 
 // callback function which is used by ExtMemImportprocess to insert segments into the memory
-typedef USHORT (APIENTRY *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
+typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
 
 //+----------------------------------------------------------------------------+
 //|                                                                            |
@@ -108,7 +108,7 @@ typedef USHORT (APIENTRY *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG 
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMEXPORTSTART
+USHORT /*__cdecl*/ EXTMEMEXPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszOutFile,         // fully qualified file name for the exported memory
@@ -122,7 +122,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMEXPORTSTART
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMEXPORTPROCESS
+USHORT /*__cdecl*/ EXTMEMEXPORTPROCESS
 ( 
   LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
   PMEMEXPIMPSEG    pSegment                 // pointer to structure containing the segment data
@@ -135,7 +135,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMEXPORTPROCESS
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMEXPORTEND
+USHORT /*__cdecl*/ EXTMEMEXPORTEND
 ( 
   LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
 );
@@ -147,7 +147,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMEXPORTEND
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTSTART
+USHORT /*__cdecl*/ EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
@@ -162,7 +162,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTSTART
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTPROCESS
+USHORT /*__cdecl*/ EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
@@ -177,7 +177,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTPROCESS
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTEND
+USHORT /*__cdecl*/ EXTMEMIMPORTEND
 ( 
   LONG             lHandle                  // Import/import handle as set by ExtMemImportStart function
 );
@@ -187,7 +187,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTEND
 //
 // Get the description of the last error (This function has to be called before calling EXTMEMIMPORTEND)
 extern "C" 
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTGETLASTERROR
+USHORT /*__cdecl*/ EXTMEMIMPORTGETLASTERROR
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PSZ              pszErrorBuffer,          // pointer to buffer for the error text
@@ -198,12 +198,12 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTGETLASTERROR
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef USHORT (__cdecl *PFN_EXTMEMEXPORTSTART)( PLONG plHandle, PSZ pszOutFile, PMEMEXPIMPINFO pMemInfo );
-typedef USHORT (__cdecl *PFN_EXTMEMEXPORTPROCESS)( LONG lHandle, PMEMEXPIMPSEG pSeg);
-typedef USHORT (__cdecl *PFN_EXTMEMEXPORTEND)( LONG lHandle );
-typedef USHORT (__cdecl *PFN_EXTMEMIMPORTSTART)( PLONG plHandle, PSZ pszInFile, PMEMEXPIMPINFO pMemInfo );
-typedef USHORT (__cdecl *PFN_EXTMEMIMPORTPROCESS)( LONG lHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLONG lProgress );
-typedef USHORT (__cdecl *PFN_EXTMEMIMPORTEND)(LONG lHandle );
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMEXPORTSTART)( PLONG plHandle, PSZ pszOutFile, PMEMEXPIMPINFO pMemInfo );
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMEXPORTPROCESS)( LONG lHandle, PMEMEXPIMPSEG pSeg);
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMEXPORTEND)( LONG lHandle );
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMIMPORTSTART)( PLONG plHandle, PSZ pszInFile, PMEMEXPIMPINFO pMemInfo );
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMIMPORTPROCESS)( LONG lHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLONG lProgress );
+typedef USHORT (/*__cdecl*/ *PFN_EXTMEMIMPORTEND)(LONG lHandle );
 #ifdef __cplusplus
 }
 #endif
@@ -212,7 +212,6 @@ typedef USHORT (__cdecl *PFN_EXTMEMIMPORTEND)(LONG lHandle );
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
 USHORT TMXTOEXP
 ( 
   PSZ              pszInMem,            // fully qualified name of input (TMX) memory
@@ -229,7 +228,6 @@ USHORT TMXTOEXP
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
 USHORT EXPTOTMX
 ( 
   PSZ              pszInMem,            // fully qualified name of input (EXP) memory
@@ -245,7 +243,6 @@ USHORT EXPTOTMX
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
 USHORT XLFTOEXP
 ( 
   PSZ              pszInMem,            // fully qualified name of input (XLIFF) memory
