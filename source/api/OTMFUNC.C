@@ -3,7 +3,6 @@
 */
 
 #include <time.h>
-#include <process.h>
 #define INCL_EQF_FOLDER                // folder functions
 #define INCL_EQF_ANALYSIS              // analysis functions
 #define INCL_EQF_DLGUTILS              // dialog utilities (for EQFTMI.H!)
@@ -11,19 +10,23 @@
 #define DLLIMPORTRESMOD              // resource module handle imported from DLL
 #include "EQF.H"
 
-#include "eqftops.h"
+//
+#include "EQFTOPS.H"
+
 #include "OTMFUNC.H"
 #include "EQFFUNCI.H"
 #include "EQFSTART.H"                  // for TwbGetCheckProfileData
 #define INCL_EQFMEM_DLGIDAS            // include dialog IDA definitions
 #include <EQFTMI.H>                    // Private header file of Translation Memory
-#include "eqfsetup.h"                  // directory names
-#include "eqfrpt.h"
-#include "eqfserno.h"
-#include "tools\common\InitPlugins.h"
-#include "core\PluginManager\PluginManager.h"    // Add for P403138
-#include "core\memory\MemoryFactory.h"
-#include "core\utilities\LanguageFactory.h"
+#include "EQFSETUP.H"                  // directory names
+#include "EQFRPT.H"
+#include "EQFSERNO.H"
+
+#include "../tools/common/InitPlugins.h"
+#include "../core/pluginmanager/PluginManager.h"    // Add for P403138
+
+#include "../core/memory/MemoryFactory.h"
+#include "../core/utilities/LanguageFactory.H"
 
 
 //#define SESSIONLOG
@@ -39,6 +42,13 @@
   #define EQFAPI_LOGFILE "EQFAPI.LOG"
 #endif
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
 
 #ifdef DEBUGAPI
   #define LOGFORCEWRITE() if ( fLog ) { fclose(hLog); hLog = fopen( szLogFile, "a" ); }
@@ -120,7 +130,8 @@
 #endif
 
 
-
+// HERE
+#if 0
 // create a new folder
 USHORT EqfCreateFolder
 (
@@ -939,7 +950,10 @@ USHORT EqfExportDocVal
   return  usRC;
 }
 
+// HERE
+#endif
 
+// OtmMemoryService
 // import a Translation Memory
 USHORT EqfImportMem
 (
@@ -998,6 +1012,9 @@ USHORT EqfImportMem
 
   return( usRC );
 } /* end of function EqfImportMem */
+
+// HERE
+#if 0
 
 USHORT EqfImportMemEx
 (
@@ -1073,7 +1090,10 @@ USHORT EqfImportMemEx
   return( usRC );
 } /* end of function EqfImportMemEx */
 
+#endif
+// HERE
 
+// OtmMemoryService
 // export a Translation Memory
 USHORT EqfExportMem
 (
@@ -1123,6 +1143,8 @@ USHORT EqfExportMem
 
   return( usRC );
 } /* end of function EqfExportMem */
+// HERE
+#if 0
 
 
 
@@ -1212,7 +1234,10 @@ USHORT EqfAddMatchSegID
 
 
 
+#endif
+// HERE
 
+// OtmMemoryService
 // create a new Translation Memory
 USHORT EqfCreateMem
 (
@@ -1255,6 +1280,9 @@ USHORT EqfCreateMem
 
   return( usRC );
 } /* end of function EqfCreateMem */
+
+// HERE
+#if 0
 
 // analyze one or more documents
 USHORT EqfAnalyzeDoc
@@ -1374,7 +1402,10 @@ USHORT EqfAnalyzeDocEx
   return( usRC );
 } /* end of function EqfAnalyzeDocEx */
 
+#endif
+// HERE
 
+// OtmMemoryService
 // delete a Translation Memory
 USHORT EqfDeleteMem
 (
@@ -1408,6 +1439,8 @@ USHORT EqfDeleteMem
 
   return( usRC );
 } /* end of function EqfDeleteMem */
+// HERE
+#if 0
 
 
 USHORT EqfImportFolder
@@ -1942,7 +1975,10 @@ USHORT EqfCreateMarkup
   return( usRC );
 } /* end of function EqfCreateMarkup */
 
+#endif
+// HERE
 
+// OtmMemoryService
 USHORT EqfStartSession
 (
   PHSESSION   phSession                // ptr to callers Eqf session handle variable
@@ -2204,6 +2240,8 @@ USHORT EqfStartSession
 
   return( usRC );
 } /* end of function EqfStartSession */
+// HERE
+#if 0
 
 
 USHORT EqfEndSession
@@ -2283,6 +2321,9 @@ USHORT EqfEndSession
   return( usRC );
 } /* end of function EqfEndSession */
 
+#endif
+// HERE
+// OtmMemoryService
 USHORT EqfGetLastError
 (
   HSESSION    hSession,                // Eqf session handle
@@ -2310,6 +2351,7 @@ USHORT EqfGetLastError
   return( usRC );
 } /* end of function EqfGetLastError */
 
+// OtmMemoryService
 USHORT EqfGetLastErrorW
 (
   HSESSION    hSession,                // Eqf session handle
@@ -2327,7 +2369,7 @@ USHORT EqfGetLastErrorW
   if ( usRC == NO_ERROR )
   {
     *pusRC = (USHORT)pData->LastMessage.sErrNumber;
-    MultiByteToWideChar( CP_OEMCP, 0, pData->LastMessage.chMsgText, -1, pszMsgBuffer, usBufSize );
+    //MultiByteToWideChar( CP_OEMCP, 0, pData->LastMessage.chMsgText, -1, pszMsgBuffer, usBufSize );
 
     pData->LastMessage.sErrNumber = 0;
     pData->LastMessage.chMsgText[0] = EOS;
@@ -2335,7 +2377,6 @@ USHORT EqfGetLastErrorW
 
   return( usRC );
 } /* end of function EqfGetLastErrorW */
-
 
 
 // FctValidateSession: check and convert a session handle to a FCTDATA pointer
@@ -2377,6 +2418,9 @@ USHORT FctValidateSession
   } /* endif */
   return( usRC );
 } /* end of function FctValidateSession */
+// HERE
+#if 0
+
 
 // FctBuildCheckSum: check and convert a session handle to a FUNCDATA pointer
 USHORT FctBuildCheckSum
@@ -3957,6 +4001,9 @@ USHORT EqfFolderExists
   return( usRC );
 } /* end of function EqfFolderExists */
 
+#endif
+//HERE
+// OtmMemoryService
 // API function checking the existence of a translation memory
 // 
 USHORT EqfMemoryExists
@@ -3997,6 +4044,8 @@ USHORT EqfMemoryExists
   return( usRC );
 } /* end of function EqfMemoryExists */
 
+// HERE
+#if 0
 
 // API function checking the existence of a dictionary
 // 
@@ -4487,6 +4536,9 @@ USHORT EqfSearchFuzzySegments
 
 }
 
+#endif
+// HERE
+// OtmMemoryService
 /*! \brief Import a memory using the internal memory files
   \param hSession the session handle returned by the EqfStartSession call
   \param pszMemory name of the memory being imported
@@ -4495,7 +4547,6 @@ USHORT EqfSearchFuzzySegments
          - OVERWRITE_OPT overwrite any existing memory with the given name
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfImportMemInInternalFormat
 (
   HSESSION    hSession, 
@@ -4535,13 +4586,13 @@ USHORT EqfImportMemInInternalFormat
 }
 
 
+// OtmMemoryService
 /*! \brief Export a memory to a ZIP package
   \param hSession the session handle returned by the EqfStartSession call
   \param pszMemory name of the memory being exported
   \param pszMemoryPackage name of a new ZIP archive receiving the memory files
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfExportMemInInternalFormat
 (
   HSESSION    hSession, 
@@ -4581,6 +4632,7 @@ USHORT EqfExportMemInInternalFormat
 }
 
 
+// OtmMemoryService
 /*! \brief Open the specified translation memory
   \param hSession the session handle returned by the EqfStartSession call
   \param pszMemory name of the memory being opened
@@ -4588,7 +4640,6 @@ USHORT EqfExportMemInInternalFormat
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfOpenMem
 (
   HSESSION    hSession,
@@ -4627,13 +4678,13 @@ USHORT EqfOpenMem
 }
 
 
+// OtmMemoryService
 /*! \brief Close the translation memory referred by the handle
   \param hSession the session handle returned by the EqfStartSession call
   \param lHandle handle of a previously opened memory
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfCloseMem
 (
   HSESSION    hSession, 
@@ -4670,6 +4721,8 @@ USHORT EqfCloseMem
   return( usRC );
 }
 
+// HERE
+#if 0
 /*! \brief Lookup a segment in the memory
   \param hSession the session handle returned by the EqfStartSession call
   \param lHandle handle of a previously opened memory
@@ -4721,6 +4774,9 @@ USHORT EqfQueryMem
 
 
 
+#endif
+// HERE
+// OtmMemoryService
 /*! \brief Search the given text string in the memory
 \param hSession the session handle returned by the EqfStartSession call
 \param lHandle handle of a previously opened memory
@@ -4733,7 +4789,6 @@ SEARCH_IN_SOURCE_OPT  search in source
 SEARCH_IN_TARGET_OPT  search in target
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfSearchMem
 (
   HSESSION    hSession,
@@ -4777,6 +4832,7 @@ USHORT EqfSearchMem
 }
 
 
+// OtmMemoryService
 /*! \brief Update a segment in the memory
   \param hSession the session handle returned by the EqfStartSession call
   \param lHandle handle of a previously opened memory
@@ -4784,7 +4840,6 @@ USHORT EqfSearchMem
   \param lOptions processing options 
   \returns 0 if successful or an error code in case of failures
 */
-__declspec(dllexport)
 USHORT EqfUpdateMem
 (
   HSESSION    hSession,
@@ -4822,13 +4877,13 @@ USHORT EqfUpdateMem
   return( usRC );
 }
 
+// OtmMemoryService
 /*! \brief List the name of all memories
 \param hSession the session handle returned by the EqfStartSession call
 \param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
 \param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfListMem
 (
   HSESSION    hSession,
@@ -4865,13 +4920,13 @@ USHORT EqfListMem
   return( usRC );
 }
 
+// OtmMemoryService
 /*! \brief Get the OpenTM2 language name for a ISO language identifier
 \param hSession the session handle returned by the EqfStartSession call
 \param pszISOLang pointer to ISO language name (e.g. en-US )
 \param pszOpenTM2Lang buffer for the OpenTM2 language name
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfGetOpenTM2Lang
 (
   HSESSION    hSession,
@@ -4921,13 +4976,13 @@ USHORT EqfGetOpenTM2Lang
   return( usRC );
 }
 
+// OtmMemoryService
 /*! \brief Get the ISO language identifier for a OpenTM2 language name
 \param hSession the session handle returned by the EqfStartSession call
 \param pszOpenTM2Lang pointer to the OpenTM2 language name
 \param pszISOLang pointer to a buffer for the ISO language identifier
 \returns 0 if successful or an error code in case of failures
 */
-__declspec( dllexport )
 USHORT EqfGetIsoLang
 (
   HSESSION    hSession,
@@ -4976,6 +5031,8 @@ USHORT EqfGetIsoLang
 
   return( usRC );
 }
+// HERE
+#if 0
 
 /*! \brief Connet to LAN based shared memory
 \param hSession the session handle returned by the EqfStartSession call
@@ -5210,3 +5267,6 @@ USHORT EqfDisconnectSharedMem
 
   return( usRC );
 }
+
+// HERE
+#endif
