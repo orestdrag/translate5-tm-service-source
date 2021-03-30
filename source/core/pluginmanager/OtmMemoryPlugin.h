@@ -13,7 +13,7 @@
 
 /*! \brief Abstract base-class for plugins handling translation memory
 */
-class __declspec(dllexport) OtmMemoryPlugin: public OtmPlugin
+class OtmMemoryPlugin: public OtmPlugin
 {
 
 public:
