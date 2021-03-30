@@ -68,10 +68,10 @@ TATAG TADummyTag [] = { { ":qfa n=%lu.", ":eqfa." },     // attribute
 extern  TATAG TADummyTag [];
 #endif
 
-__declspec(dllexport) BOOL EQFUnSeg( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT); // remove segmenting tags
-__declspec(dllexport) BOOL EQFUnSeg2( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT, PSZ); // remove segmenting tags
-__declspec(dllexport) VOID EQFNoiseFiltering(PSZ, PEXCLUSIONLIST, PTOKENENTRY);
-__declspec(dllexport) BOOL EQFUnSegRevMark
+BOOL EQFUnSeg( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT); // remove segmenting tags
+BOOL EQFUnSeg2( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT, PSZ); // remove segmenting tags
+VOID EQFNoiseFiltering(PSZ, PEXCLUSIONLIST, PTOKENENTRY);
+BOOL EQFUnSegRevMark
 (
   PSZ pSegTarget,                       // segm.target file
   PSZ pTarget,                          // target file name
@@ -82,7 +82,7 @@ __declspec(dllexport) BOOL EQFUnSegRevMark
   USHORT usTrackDocNum                  // not 0, TVT tracking document num
 );
 
-__declspec(dllexport) BOOL EQFUnSegRevMark2
+BOOL EQFUnSegRevMark2
 (
   PSZ pSegTarget,                       // segm.target file
   PSZ pTarget,                          // target file name
@@ -93,7 +93,6 @@ __declspec(dllexport) BOOL EQFUnSegRevMark2
   USHORT usTrackDocNum,                 // not 0, TVT tracking document num
   PSZ    pszConversion                  // ptr to conversion name or NULL
 );
-__declspec(dllexport)
 USHORT TACreateProtectTable
 (
   PSZ              pszSegment,         // ptr to text of segment being processed
@@ -106,7 +105,6 @@ USHORT TACreateProtectTable
   ULONG            ulCP
 );
 
-__declspec(dllexport)
 USHORT TACreateProtectTableW
 (
   PSZ_W            pszSegmentW,        // ptr to text of segment being processed
@@ -124,7 +122,6 @@ USHORT TACreateProtectTableW
 #define CREATEPROTTABLE_NOTRANSLVAR  0x04
 
 
-__declspec(dllexport)
 USHORT TACreateProtectTableWEx
 (
   PSZ_W            pszSegment,         // ptr to text of segment being processed
@@ -141,7 +138,6 @@ USHORT TACreateProtectTableWEx
 
 
 
-__declspec(dllexport)
 USHORT TAPrepProtectTable
 (
   PVOID            pVoidTable,         // ptr to tag table (PLOADEDTABLE)
@@ -152,7 +148,6 @@ USHORT TAPrepProtectTable
   PFN              *ppfnTocGoto        // ptr to TOC goto function
 );
 
-__declspec(dllexport)
 USHORT TAEndProtectTable
 (
   HMODULE          *phModule,          // address of user exit module handle
@@ -164,7 +159,6 @@ USHORT TAEndProtectTable
   PFN              *ppfnCheckSegExitW
 );
 
-__declspec(dllexport)
 USHORT TALoadEditUserExit
 (
   PVOID            pVoidTable,         // ptr to tag table (PLOADEDTABLE)
@@ -193,7 +187,6 @@ USHORT TAFreeEditUserExit
 
 #define TA_USEFOLDERSETTINGS 0x0002    // get analysis settings from folder properties
 
-__declspec(dllexport)
 BOOL TAAnalyzeFile
 (
   PSZ        pszDocument,              // document object name
@@ -210,7 +203,6 @@ BOOL TAGetTagNameByID
   PSZ           pszName                // buffer for tag name
 );
 
-__declspec(dllexport)
 BOOL TAGetTagNameByIDW
 (
   PVOID         pVoidTable,            // pointer to tag table
@@ -219,14 +211,14 @@ BOOL TAGetTagNameByIDW
 );
 
 
-__declspec(dllexport) void TAFillWSList
+void TAFillWSList
 (
 	PSZ  pszTagTableName,
 	PSZ_W  *ppWSList
 );
 
 
-__declspec(dllexport) BOOL TAAdjustWhiteSpace
+BOOL TAAdjustWhiteSpace
 (
   PSZ_W       pszSourceSeg,            // ptr to source segment data
   PSZ_W       pszTargetSeg,            // ptr to target segment
@@ -238,22 +230,22 @@ __declspec(dllexport) BOOL TAAdjustWhiteSpace
 );
 
 
-__declspec(dllexport) VOID TABuildArchTM( HWND hwnd, PSZ pSelFolderName );
-__declspec(dllexport) VOID ExportSegs( HWND hwnd, PSZ pSelFolderName );
+VOID TABuildArchTM( HWND hwnd, PSZ pSelFolderName );
+VOID ExportSegs( HWND hwnd, PSZ pSelFolderName );
 
 // free memory used for table space
-__declspec(dllexport) USHORT TAFreeTableSpace( PVOID pvTable );
-__declspec(dllexport) BOOL TATagsToUnicode( PVOID pvLoadedTable, USHORT usSize, ULONG ulCP);
+USHORT TAFreeTableSpace( PVOID pvTable );
+BOOL TATagsToUnicode( PVOID pvLoadedTable, USHORT usSize, ULONG ulCP);
 
 
 
 /**********************************************************************/
 /* Free a loaded document                                             */
 /**********************************************************************/
-__declspec(dllexport) VOID TAFreeDoc( PVOID *ppvDoc );
+VOID TAFreeDoc( PVOID *ppvDoc );
 
-__declspec(dllexport) USHORT TASegFileConvertASCII2Unicode( PSZ pInFile, PSZ pOutFile, PSZ pDocLang );
-__declspec(dllexport) USHORT TASegFileConvertUnicode2ASCII( PSZ pInFile, PSZ pOutFile, PSZ pDocLang );
+USHORT TASegFileConvertASCII2Unicode( PSZ pInFile, PSZ pOutFile, PSZ pDocLang );
+USHORT TASegFileConvertUnicode2ASCII( PSZ pInFile, PSZ pOutFile, PSZ pDocLang );
 
 
 //convert & copy contents TATag struct into unicode TATAG_W struct
