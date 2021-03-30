@@ -89,6 +89,8 @@ typedef struct _EXTFOLPROP
 // option flags used by the function call interface
 //
 
+#define NO_ERROR 0
+
 // location flags for TMs and dictionaries
 #define LOCAL_OPT         0x00000001L
 #define SHARED_OPT        0x00000002L
