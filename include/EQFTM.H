@@ -236,6 +236,7 @@
                                        // by the TMC_GET_SERVER_TM_LIST command
 #define GETPART_BUFFER_SIZE 16384      // read a 16 KB block at a time
 #define MEM_PROP_SIZE    2048          // Global size of all memory database properties
+#define	_MAX_DIR	256
 
 /**********************************************************************/
 /* indicatos for old or new TM                                        */
@@ -268,6 +269,7 @@
 #define NTM_MARKER "#@@NTM01@@#"
 
 
+typedef long long LONG64;
 
 typedef LHANDLE HTM;
 typedef CHAR  SHORT_FN  [FN_LENGTH];
@@ -1821,7 +1823,6 @@ USHORT TmGetServerFileInfo( SERVERNAME   szServer,        //Servername
                             USHORT       usMsgHandling ); // Message handling parameter
 USHORT TmGetServerFileInfoHwnd( SERVERNAME, PSZ, PFILEFINDBUF, USHORT, HWND );
 USHORT TmCompareLocalRemoteProperties( SERVERNAME, PSZ, USHORT );
-__declspec(dllexport)
 USHORT MemRcHandling( USHORT,  PSZ, HTM *, PSZ );
 USHORT MemRcHandlingHwnd( USHORT,  PSZ, HTM *, PSZ, HWND );
 
@@ -1902,9 +1903,9 @@ USHORT NTMReadWriteSegmentHwndW( HTM,      //Handle of Input TM
 
 
 
-__declspec(dllexport) BOOL fMemIsAvail( PSZ, PSZ, PSZ );      // memory is available and accessible
-__declspec(dllexport) USHORT MemFillCBNames( HWND, PSZ, PSZ );
-__declspec(dllexport) USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
+BOOL fMemIsAvail( PSZ, PSZ, PSZ );      // memory is available and accessible
+USHORT MemFillCBNames( HWND, PSZ, PSZ );
+USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 
 /**********************************************************************/
 /* TmCreate                                                           */
@@ -1914,7 +1915,7 @@ USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
 /**********************************************************************/
 /* TmOpen                                                             */
 /**********************************************************************/
-__declspec(dllexport) USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
+USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
                    //                   TM_REMOTE
                    //                   TM_LOCAL_REMOTE
         USHORT,    //(in)  message handling parameter
@@ -1925,7 +1926,6 @@ __declspec(dllexport) USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  loca
 /**********************************************************************/
 /* TmClose                                                            */
 /**********************************************************************/
-__declspec(dllexport)
 USHORT
 TmClose( HTM,        //(in) TM handle returned from open
          PSZ,        //(in) full TM name x:\eqf\mem\mem.mem
@@ -1944,7 +1944,6 @@ TmReplace( HTM,           //(in)  TM handle
            USHORT );      //(in)  message handling parameter
                           //      TRUE:  display error message
                           //      FALSE: display no error message
-__declspec(dllexport)
 USHORT
 TmReplaceW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
 
@@ -2153,7 +2152,6 @@ BOOL MTTMMergeStart
   PLISTCOMMAREA pCommArea,
   PMT_TMMERGE pTMMerge
 );
-__declspec(dllexport)
 BOOL MemCreatePath( PSZ pszString );
 
 
@@ -2188,14 +2186,12 @@ USHORT MemConvertMem( PSZ pszFullMemName );
 
 
 // do a cleanup of temporary memories
-__declspec(dllexport)
 void TMCleanupTempMem
 (
   PSZ         pszPrefix                                     // ptr to memory prefix
 );
 
 // create a temporary memory
-__declspec(dllexport)
 USHORT TMCreateTempMem
 (
   PSZ         pszPrefix,                                    // short prefix to be used for memory name (should start with a dollar sign)
@@ -2207,15 +2203,14 @@ USHORT TMCreateTempMem
 );
 
 // delete a temporary memory
-__declspec(dllexport) void TMDeleteTempMem
+void TMDeleteTempMem
 (
   PSZ         pszMemPath                                    // ptr to memory path
 );
 
-__declspec(dllexport) BOOL TMFuzzyness( PSZ, PSZ_W, PSZ_W, SHORT, PUSHORT, ULONG );
+BOOL TMFuzzyness( PSZ, PSZ_W, PSZ_W, SHORT, PUSHORT, ULONG );
 
 
-__declspec(dllexport)
 BOOL TMFuzzynessEx
 (
   PSZ pszMarkup,                       // markup table name
@@ -2227,12 +2222,11 @@ BOOL TMFuzzynessEx
   PUSHORT     pusWords                 // number of words in segment
 );
 
-__declspec(dllexport) USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
-__declspec(dllexport) USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
-__declspec(dllexport) USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
-__declspec(dllexport) USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT, USHORT);
+USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
+USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
+USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
+USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT, USHORT);
 
-__declspec(dllexport)
 USHORT NTMTokenize
 (
   PVOID    pvLangCB,                   // IN : ptr to language control block
@@ -2246,7 +2240,6 @@ USHORT NTMTokenize
    USHORT usVersion                    // version of TM
 );
 
-__declspec(dllexport)
 BOOL NTMTagSubst                     // generic inline tagging for TM
 (
   PTMX_SUBSTPROP pSubstProp,
@@ -2254,30 +2247,22 @@ BOOL NTMTagSubst                     // generic inline tagging for TM
   ULONG          ulTgtOemCP
 );
 
-__declspec(dllexport)
 BOOL NTMDocMatch( PSZ pszShort1, PSZ pszLong1, PSZ pszShort2, PSZ pszLong2 );
 
 // utility to allocate pSentence and associated memory areas
-__declspec(dllexport)
 USHORT NTMAllocSentenceStructure( PTMX_SENTENCE  *ppSentence );
 
 // utility to free pSentence and associated memory areas
-__declspec(dllexport)
 VOID NTMFreeSentenceStructure( PTMX_SENTENCE  pSentence );
 
-__declspec(dllexport)
 void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp );
 
-__declspec(dllexport)
 USHORT  MemOpenProp( HPROP *, PVOID *, PSZ, PSZ, USHORT, BOOL );
 
-__declspec(dllexport)
 USHORT  FillMemoryListBox ( PLISTCOMMAREA, WPARAM, LPARAM );
 
-__declspec(dllexport)
 VOID NTMGetHandlesFromCLB ( HTM, PVOID *, PVOID * );
 
-__declspec(dllexport)
 USHORT NTMGetMatchLevel
 (
   PEQFSEGINFO      pSegment,           // pointer to segment info
