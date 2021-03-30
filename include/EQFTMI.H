@@ -696,7 +696,7 @@ typedef struct _MEM_PROP_IDA
 }MEM_PROP_IDA, * PMEM_PROP_IDA;
 
 
-__declspec(dllexport) BOOL EqfMemPropsToHtml( HWND hwndParent, PMEM_IDA  pIDA, OtmMemory *pMem );
+BOOL EqfMemPropsToHtml( HWND hwndParent, PMEM_IDA  pIDA, OtmMemory *pMem );
 
 VOID    EQFMemImportTrojaEnd( PMEM_MERGE_IDA );
 USHORT  CloseMergeTmAndTm( PMEM_MERGE_IDA, BOOL );                   /*@1139A*/
@@ -1155,16 +1155,16 @@ USHORT
   TmtClose (PTMT_GLOBALS ptmtg,       /* Pointer to Globals structure.....*/
             PCLOSE_OUT   pCloseOut);  /* Pointer to output buffer.........*/
 
-__declspec(dllexport) INT_PTR CALLBACK MEMCREATEDLG( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) INT_PTR CALLBACK MEMLOADDLG( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) INT_PTR CALLBACK MEMEXPORTDLG( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) INT_PTR CALLBACK MEMMERGEDLG( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) INT_PTR CALLBACK MEMPROPDLG( HWND, WINMSG, WPARAM, LPARAM );
-INT_PTR CALLBACK MemCreateName( HWND, USHORT, WPARAM, LPARAM );
-INT_PTR CALLBACK UTLSERVERLISTDLG( HWND, WINMSG, WPARAM, LPARAM );
-INT_PTR CALLBACK UTLSERVERLISTNAMEDLG( HWND, WINMSG, WPARAM, LPARAM );
-INT_PTR CALLBACK MEMINCLUDEDLG( HWND, WINMSG, WPARAM, LPARAM );
-INT_PTR CALLBACK SERVWAITDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMCREATEDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMLOADDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMEXPORTDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMMERGEDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMPROPDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MemCreateName( HWND, USHORT, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ UTLSERVERLISTDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ UTLSERVERLISTNAMEDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ MEMINCLUDEDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ SERVWAITDLG( HWND, WINMSG, WPARAM, LPARAM );
 USHORT  MemCreateProcess( PMEM_IDA, PSZ, USHORT );
 VOID    MemDestroyProcess( PMEM_IDA, USHORT * );
 USHORT  MemGetAddressOfProcessIDA( PMEM_IDA, WPARAM, USHORT *, PVOID * );
@@ -1182,13 +1182,13 @@ USHORT  EQFMemExportEnd( PPROCESSCOMMAREA, HWND, LPARAM );
 VOID    EQFMemMergeStart( PPROCESSCOMMAREA, HWND );
 VOID    EQFMemMergeProcess( PPROCESSCOMMAREA, HWND );
 VOID    EQFMemMergeEnd( PPROCESSCOMMAREA, HWND, LPARAM );
-__declspec(dllexport) USHORT  EQFMemImportTrojaStart( HWND, LPARAM, HWND );
+USHORT  EQFMemImportTrojaStart( HWND, LPARAM, HWND );
 USHORT  MemInitSlider( HWND, USHORT, PSZ, USHORT, PSZ, PHWND, USHORT, USHORT);
 USHORT  ReadABGrouping( PSZ, PSZ, ABGROUP );
-__declspec(dllexport) MRESULT MemOrganizeCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT MemExportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT MemMergeCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT MemOrganizeCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT MemExportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT MemMergeCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 
 
 
@@ -1465,7 +1465,7 @@ BOOL    MemImportFileOpenDialog( PMEM_LOAD_DLG_IDA   pLoadIDA );
 
 
 /* !brief function handling the GUI mode of the memory import */
-__declspec(dllexport) BOOL MemGUIExportMemory
+BOOL MemGUIExportMemory
 ( 
   OtmMemory *pMemory, 
   PLISTCOMMAREA pCommArea,
@@ -1476,10 +1476,10 @@ __declspec(dllexport) BOOL MemGUIExportMemory
 );
 
 /* !brief function handling the GUI mode of the memory merge */
-__declspec(dllexport) BOOL MemGUIMergeMemory( OtmMemory *pMemory, PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
+BOOL MemGUIMergeMemory( OtmMemory *pMemory, PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
 
 /* !brief function handling the GUI mode of the memory import */
-__declspec(dllexport) BOOL MemGUIImportMemory( PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
+BOOL MemGUIImportMemory( PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
 
 
 #endif
