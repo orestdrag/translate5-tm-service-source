@@ -23,4 +23,4 @@ cmake ..
 make  
 
 **Status notes**  
-If OpenTM2 and Win API calls and data types are commented in OtmMemoryService files, executable can be built (obviously without OtmMemoryServiceGUI.CPP and WinService.CPP). 
+The project can be built (excluding OtmMemoryServiceGUI.CPP and WinService.CPP) when Win API calls and data types are commented.
