@@ -128,8 +128,8 @@
   // should use the new version of the function asap
   #define _CRT_NON_CONFORMING_SWPRINTFS
 
-  #include <windows.h>
-  #include <winbase.h>
+  //#include <windows.h>
+  //#include <winbase.h>
 
   /**********************************************************************/
   /* Include the special definitions for unicode                        */
@@ -138,13 +138,13 @@
     #define _EQF_UNICODE 1
 
     #ifndef _WCHAR_T_DEFINED
-      typedef unsigned short wchar_t;
+      //typedef unsigned short wchar_t;
       #define _WCHAR_T_DEFINED
     #endif
 
     #if MSC_VER < 1400
         #ifndef _WCTYPE_T_DEFINED
-          typedef wchar_t wint_t;
+          //typedef wchar_t wint_t;
           typedef wchar_t wctype_t;
           #define _WCTYPE_T_DEFINED
         #endif
@@ -158,14 +158,37 @@
     #endif
   #endif
 
-  #include "commctrl.h"          // common controls
+  //#include "commctrl.h"          // common controls
 
-  #include "eqfoswin.h"
-  #include <dos.h>
-  #include <io.h>
-  #include <share.h>
+  #include "EQFOSWIN.H"
+  //#include <dos.h>
+  //#include <io.h>
+  //#include <share.h>
   #include <fcntl.h>
   #include <assert.h>
+
+  typedef void *PVOID;
+  typedef PVOID HANDLE;
+  typedef HANDLE HMENU;
+  typedef long LONG;
+  typedef LONG HRESULT;
+  typedef LONG *PLONG;
+  typedef unsigned long long ULONG64;
+
+  typedef struct tagPOINT {
+    LONG x;
+    LONG y;
+  } POINT, *PPOINT, *NPPOINT, *LPPOINT;
+
+  typedef struct tagMSG {
+    HWND   hwnd;
+    UINT   message;
+    WPARAM wParam;
+    LPARAM lParam;
+    DWORD  time;
+    POINT  pt;
+    DWORD  lPrivate;
+  } MSG, *PMSG, *NPMSG, *LPMSG;
 
 /**********************************************************************/
 /* Include some of the basic C library functions                      */
@@ -174,15 +197,15 @@
    #include <stdio.h>
    #include <stdlib.h>
    #include <string.h>
-   #include <ctype.H>
+   #include <ctype.h>
 #endif
 
 /**********************************************************************/
 /* Include support for spinbutton and slider controls                 */
 /**********************************************************************/
 #ifndef NO_SPININCLUDE
-  #include <fclspbw.h>                 // include spinbutton stuff...
-  #include <fclsldw.h>                 // include slider stuff...
+  //#include <fclspbw.h>                 // include spinbutton stuff...
+  //#include <fclsldw.h>                 // include slider stuff...
 #endif
 
 /**********************************************************************/
@@ -230,7 +253,7 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /* Include the general ID file                                        */
 /**********************************************************************/
-#include <eqf.id>                      // Eqf PM IDs
+#include <../mri/EQF.ID>                      // Eqf PM IDs
 
 // Send a notification message to a dialog
 #define SENDNOTIFICATION( hwnd, id, notification ) \
@@ -292,9 +315,9 @@ typedef PSWP  EQF_PSWP;
   #define SHORTFROMMP1(mp)            ((SHORT)(mp))
   #define USHORT1FROMMP1(mp)          ((USHORT)(mp))
   #define USHORTFROMMP1(mp)           ((USHORT)(mp))
-  #define PVOIDFROMMP1(mp)            ((VOID FAR *)(mp))
+  #define PVOIDFROMMP1(mp)            ((VOID *)(mp))
   #define HWNDFROMMP1(mp)             ((HWND)(mp))
-  #define PVOIDFROMMP2(mp)            ((VOID FAR *)(mp))
+  #define PVOIDFROMMP2(mp)            ((VOID *)(mp))
   #define HWNDFROMMP2(mp)             ((HWND)(mp))
   #define CHAR1FROMMP2(mp)            ((UCHAR)(mp))
   #define CHAR2FROMMP2(mp)            ((UCHAR)((ULONG)mp >> 8))
@@ -630,7 +653,7 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /* Message ID file                                                    */
 /**********************************************************************/
-#include <eqfmsg.h>                    // general eqf message ids
+#include <EQFMSG.H>                    // general eqf message ids
 
 /**********************************************************************/
 /**********************************************************************/
@@ -640,6 +663,8 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /**********************************************************************/
 #ifndef NO_EQF_WMIDS
+
+#define WM_USER                         0x0400
 
 typedef enum _eqfmsgids
 {
@@ -1782,31 +1807,18 @@ typedef struct _objlst {
 } OBJLST, *POBJLST;
 
 
-__declspec(dllexport)
 HWND      EqfQueryObjectManager( VOID);
-__declspec(dllexport)
 USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
-__declspec(dllexport)
 USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport)
 USHORT    InstallHandler( PSZ name, HWND hwnd, USHORT cls);
-__declspec(dllexport)
 USHORT    RegisterObject( PSZ name, HWND hwnd, USHORT cls);
-__declspec(dllexport)
-MRESULT   APIENTRY OBJECTMANAGERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport)
+MRESULT   OBJECTMANAGERWP( HWND, WINMSG, WPARAM, LPARAM);
 HWND      EqfQueryObject( PSZ pszObj, SHORT sClass, SHORT sFlags );
-__declspec(dllexport)
 SHORT     EqfQueryObjectName( HWND hwnd, PSZ pBuffer );
-__declspec(dllexport)
 USHORT    EqfSetObjectStatus( HWND hwnd, SHORT sMask, SHORT sStatus );
-__declspec(dllexport)
 USHORT    EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer );
-__declspec(dllexport)
 MRESULT   EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
-__declspec(dllexport)
 MRESULT   EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
-__declspec(dllexport)
 USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 
 /**********************************************************************/
@@ -2183,6 +2195,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define SECOND_DISPLAY 2               // displayed on second panel
 #define THIRD_DISPLAY 3                // displayed on third panel
 
+typedef SHORT *PSHORT;
 
 // The following enum values can be used to extract data from the string
 // via the utility UtlParseX15
@@ -2561,16 +2574,16 @@ typedef struct _OPENANDPOS
 /**********************************************************************/
 /* Prototypes for handler and instance window procedures              */
 /**********************************************************************/
-__declspec(dllexport) MRESULT APIENTRY DOCUMENTHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY ANALYSISHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY PROPERTYHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY SERVICESHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY LNGUPDATEHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY FILTHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT APIENTRY DDEHANDLERWP( HWND, WINMSG, WPARAM,LPARAM);
-__declspec(dllexport) MRESULT APIENTRY GENERICHANDLERWP( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT APIENTRY GENERICLISTWP( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT APIENTRY GENERICPROCESSWP( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT DOCUMENTHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT ANALYSISHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT PROPERTYHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT SERVICESHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT LNGUPDATEHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT FILTHANDLERWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT DDEHANDLERWP( HWND, WINMSG, WPARAM,LPARAM);
+MRESULT GENERICHANDLERWP( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT GENERICLISTWP( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT GENERICPROCESSWP( HWND, WINMSG, WPARAM, LPARAM );
 
 /**********************************************************************/
 /* External referenced to the handles of preloaded icons declared in  */
@@ -2578,33 +2591,33 @@ __declspec(dllexport) MRESULT APIENTRY GENERICPROCESSWP( HWND, WINMSG, WPARAM, L
 /**********************************************************************/
 #ifdef NOEXTICONS
 #elif defined(DLLIMPORTICONS)
-__declspec(dllimport) HPOINTER hiconDICTIMP;          // dictionary import icon
-__declspec(dllimport) HPOINTER hiconDICTEXP;          // dictionary export icon
-__declspec(dllimport) HPOINTER hiconFOLIMP;           // folder import icon
-__declspec(dllimport) HPOINTER hiconFOLEXP;           // folder export icon
-__declspec(dllimport) HPOINTER hiconTWB;              // workbench icon
-__declspec(dllimport) HPOINTER hiconFLL;              // folder list icon
-__declspec(dllimport) HPOINTER hiconFOL;              // folder icon
-__declspec(dllimport) HPOINTER hiconDOC;              // document icon
-__declspec(dllimport) HPOINTER hiconANA;              // analysis icon
-__declspec(dllimport) HPOINTER hiconMEM;              // memory list icon
-__declspec(dllimport) HPOINTER hiconTAG;              // tagtable list icon
-__declspec(dllimport) HPOINTER hiconCOUNT;            // count icon
-__declspec(dllimport) HPOINTER hiconTMEMIMP;          // memory import icon
-__declspec(dllimport) HPOINTER hiconTMEMEXP;          // memory export icon
-__declspec(dllimport) HPOINTER hiconTMEMMERGE;        // memory merge icon
-__declspec(dllimport) HPOINTER hiconTMEMORG;          // memory organize icon
-__declspec(dllimport) HPOINTER hiconMARKUPIMP;        // tagtable import icon
-__declspec(dllimport) HPOINTER hiconMARKUPEXP;        // tagtable export icon
-__declspec(dllimport) HPOINTER hiconDICTORG;          // dictionary organize icon
-__declspec(dllimport) HPOINTER hiconDICTLIST;         // dicionary list icon
-__declspec(dllimport) HPOINTER hiconLIST;             // terminology list icon
-__declspec(dllimport) HPOINTER hiconEXCLLIST;         // terminology list icon
-__declspec(dllimport) HPOINTER hiconNEWLIST;          // terminology list icon
-__declspec(dllimport) HPOINTER hiconFOUNDLIST;        // terminology list icon
-__declspec(dllimport) HPOINTER hiconDICTPRINT;        // dictionary print icon
-__declspec(dllimport) HPOINTER hiconDICTDISP;         // dictionary display entry icon
-__declspec(dllimport) HPOINTER hiconTMM;              // translation memory maintenance icon
+HPOINTER hiconDICTIMP;          // dictionary import icon
+HPOINTER hiconDICTEXP;          // dictionary export icon
+HPOINTER hiconFOLIMP;           // folder import icon
+HPOINTER hiconFOLEXP;           // folder export icon
+HPOINTER hiconTWB;              // workbench icon
+HPOINTER hiconFLL;              // folder list icon
+HPOINTER hiconFOL;              // folder icon
+HPOINTER hiconDOC;              // document icon
+HPOINTER hiconANA;              // analysis icon
+HPOINTER hiconMEM;              // memory list icon
+HPOINTER hiconTAG;              // tagtable list icon
+HPOINTER hiconCOUNT;            // count icon
+HPOINTER hiconTMEMIMP;          // memory import icon
+HPOINTER hiconTMEMEXP;          // memory export icon
+HPOINTER hiconTMEMMERGE;        // memory merge icon
+HPOINTER hiconTMEMORG;          // memory organize icon
+HPOINTER hiconMARKUPIMP;        // tagtable import icon
+HPOINTER hiconMARKUPEXP;        // tagtable export icon
+HPOINTER hiconDICTORG;          // dictionary organize icon
+HPOINTER hiconDICTLIST;         // dicionary list icon
+HPOINTER hiconLIST;             // terminology list icon
+HPOINTER hiconEXCLLIST;         // terminology list icon
+HPOINTER hiconNEWLIST;          // terminology list icon
+HPOINTER hiconFOUNDLIST;        // terminology list icon
+HPOINTER hiconDICTPRINT;        // dictionary print icon
+HPOINTER hiconDICTDISP;         // dictionary display entry icon
+HPOINTER hiconTMM;              // translation memory maintenance icon
 #else
 extern HPOINTER hiconDICTIMP;          // dictionary import icon
 extern HPOINTER hiconDICTEXP;          // dictionary export icon
@@ -3902,11 +3915,8 @@ typedef struct _ERRDATA                // global data of UtlError
 /**********************************************************************/
 /* prototypes for Setter functions for MAT ULONG/USHORT               */
 /**********************************************************************/
-__declspec(dllexport)
 VOID UtlSetULong( SHORT sID, ULONG ulValue );
-__declspec(dllexport)
 VOID UtlSetString( SHORT sID, PSZ pszString );
-__declspec(dllexport)
 VOID UtlSetUShort( SHORT sID, USHORT usValue );
 
 
@@ -4209,52 +4219,35 @@ typedef ULONG HPRINT, *PHPRINT;
 /**********************************************************************/
 /* Function prototypes                                                */
 /**********************************************************************/
-__declspec(dllexport)
 USHORT  UtlOpen( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                 USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                 ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlClose( HFILE hf, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlRead( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesRead,
                 BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlReadL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                 BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlWrite( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesWritten,
                  BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlWriteL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                  BOOL fMsg );
 USHORT  UtlDupHandle( HFILE hfOld, PHFILE phfNew, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
                       PULONG pulNewOffset, BOOL fMsg );
 
-__declspec(dllexport)
 USHORT  UtlDelete( PSZ pszFName, ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlRmDir( PSZ pszDir, ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlCopy( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlMove( PSZ pszSrc, PSZ pszDst, ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlFindFirst( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
                      PFILEFINDBUF pffb, USHORT cbBuf, PUSHORT pcSearch,
                      ULONG ulReserved, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlFindNext( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
                     PUSHORT pcSearch, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlFindClose( HDIR hdir, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlQFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
                      USHORT cbInfoBuf, BOOL fMsg );
-__declspec(dllexport)
 USHORT UtlGetFileSize
 (
    HFILE    hf,                        // file handle
@@ -4272,10 +4265,8 @@ USHORT  UtlSetFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
                        USHORT cbInfoBuf, BOOL fMsg );
 USHORT  UtlQFSInfo( USHORT usDriveNo, USHORT usInfoLevel, PBYTE pInfoBuf,
                    USHORT cbInfoBuf, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlQFileMode( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserved,
                      BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlQPathInfo( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
                      USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg );
 VOID    UtlDestroyChildResources( VOID );
@@ -4286,279 +4277,172 @@ MRESULT UtlTransAccel ( HWND, WPARAM, LPARAM );
 #ifndef _CEQFPPT
 //MRESULT EXPENTRY UTLDEFDIALOGPROC( HWND, WINMSG, WPARAM, LPARAM );
 #define UTLDEFDIALOGPROC( hwnd, usMsg, mp1, mp2) WinDefDlgProc( hwnd, usMsg, mp1, mp2 )
-__declspec(dllexport)
-MRESULT EXPENTRY UTLDEFHANDLERPROC( HWND, WINMSG, WPARAM, LPARAM );
-MRESULT EXPENTRY UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT /*EXPENTRY*/ UTLDEFHANDLERPROC( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT /*EXPENTRY*/ UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
 //MRESULT EXPENTRY UTLDEFWINDOWPROC( HWND, WINMSG, WPARAM, LPARAM );
 #define UTLDEFWINDOWPROC( hwnd, usMsg, mp1, mp2) WinDefWindowProc( hwnd, usMsg, mp1, mp2 )
 #endif
-__declspec(dllexport)
 BOOL    UtlRegisterCLB( HAB );
-__declspec(dllexport)
 PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
-__declspec(dllexport)
 PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
-__declspec(dllexport)
 VOID    UtlDispatch( VOID );
-__declspec(dllexport)
 ULONG   UtlQueryULong( SHORT sID );
-__declspec(dllexport)
 VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
-__declspec(dllexport)
 VOID    UtlMenuDisableItem( SHORT sItemID );
-__declspec(dllexport)
 VOID    UtlMenuEnableItem( SHORT sItemID );
-__declspec(dllexport)
 ULONG   UtlLongToTimeString( LONG, PSZ, ULONG );
-__declspec(dllexport)
 ULONG   UtlLongToDateString( LONG, PSZ, ULONG );
-__declspec(dllexport)
 ULONG   UtlLongToTimeStringW( LONG, PSZ_W, ULONG );
-__declspec(dllexport)
 ULONG   UtlLongToDateStringW( LONG, PSZ_W, ULONG );
-__declspec(dllexport)
 BOOL    UtlLoadFile( PSZ, PVOID *, USHORT *, BOOL, BOOL );
-__declspec(dllexport)
 BOOL    UtlLoadFileL( PSZ, PVOID *, ULONG *, BOOL, BOOL );
-__declspec(dllexport)
 BOOL    UtlLoadFileHwnd( PSZ, PVOID *, ULONG *, BOOL, BOOL, HWND );
-__declspec(dllexport)
 USHORT  UtlCheckSpaceForFile( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL );
-__declspec(dllexport)
 USHORT  UtlCheckSpaceForFileEx( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL, PUSHORT );
-__declspec(dllexport)
 ULONG64 UtlQueryFreeSpace( CHAR, BOOL );
-__declspec(dllexport)
 USHORT  UtlMkMultDir( PSZ, BOOL );
-__declspec(dllexport)
 USHORT  UtlMkMultDirHwnd( PSZ, BOOL, HWND );
-__declspec(dllexport)
 BOOL    UtlPrintOpen( PHPRINT phPrint, PSZ pszListName, HWND hwndOwner );
-__declspec(dllexport)
 BOOL    UtlPrintOpenW( PHPRINT phPrint, PSZ_W pszListName, HWND hwndOwner );
-__declspec(dllexport)
 BOOL    UtlPrintClose( HPRINT hPrint );
 BOOL    UtlPrintFormFeed( HPRINT hPrint );
-__declspec(dllexport)
 BOOL    UtlPrintLineW( HPRINT hPrint, PSZ_W pszLine );
-__declspec(dllexport)
 BOOL    UtlPrintLine( HPRINT hPrint, PSZ pszLine );
-__declspec(dllexport)
 BOOL    UtlPrintSetAnsiConv( HPRINT hPrint, BOOL fAnsiConv );
-__declspec(dllexport)
 BOOL    UtlFileExist( PSZ pszFileName );
-__declspec(dllexport)
 BOOL    UtlDirExist( PSZ pszDirName );
 BOOL    UtlMoveIfNewerOrNotExist( PSZ pszSource, PSZ pszTarget );
-__declspec(dllexport)
 BOOL    UtlMoveIfNewerOrNotExistHwnd( PSZ pszSource, PSZ pszTarget, HWND hwnd );
-__declspec(dllexport)
 BOOL    UtlMoveIfNewerOrNotExistHwnd2( PSZ pszSource, PSZ pszTarget, HWND hwnd, BOOL fMsg, PUSHORT pusDosRC );
-__declspec(dllexport)
 USHORT  UtlSmartMove( PSZ pszSource, PSZ pszTarget, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlSmartMoveHwnd( PSZ pszSource, PSZ pszTarget, BOOL fMsg, HWND hwnd );
-__declspec(dllexport)
 USHORT  UtlRemoveDir( PSZ pszDir, BOOL fMsg );
-__declspec(dllexport)
 SHORT   UtlCopyListBox( HWND, HWND );
-__declspec(dllexport)
 PSZ     UtlMakeFullPath ( PSZ, PSZ, PSZ, PSZ, PSZ );
-__declspec(dllexport)
 USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
         BOOL fMsg, HWND hwndParent );
 BOOL    UtlIsEqfDrive( CHAR chDrive );
-__declspec(dllexport)
 BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
-__declspec(dllexport)
 USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-__declspec(dllexport)
 USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-__declspec(dllexport)
 PSZ     UtlGetFnameFromPath( PSZ path);
 PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
-__declspec(dllexport) VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
-__declspec(dllexport)
+VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
 PSZ     UtlParseX15( PSZ str, SHORT id);
 PSZ_W   UtlParseX15W( PSZ_W str, SHORT id);
-__declspec(dllexport)
 PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
-__declspec(dllexport)
 USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
 
 PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
 PPLUG   UtlPlugOut( PPLUG plug);
-__declspec(dllexport)
 PSZ     UtlSplitFnameFromPath( PSZ path);
-__declspec(dllexport)
 PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
-__declspec(dllexport)
 USHORT  UtlGetDriveList( BYTE *szList);
-__declspec(dllexport)
 USHORT  UtlGetLANDriveList( BYTE *szList);
 BYTE    UtlQCurDisk( void);
 BOOL    UtlChangePropHead( PSZ, CHAR, PSZ, PSZ );
-__declspec(dllexport)
 SHORT   UtlLoadFileNames( PSZ search_path, USHORT atrb, HWND hlb, USHORT flg);
-__declspec(dllexport)
 SHORT   UtlLoadFileNamesHwnd( PSZ search_path, USHORT atrb,
                               HWND hlb, USHORT flg, HWND hwnd);
 PMNUTBL UtlLoadMenuTbl( HWND hmenu);
 VOID    UtlFreeMenuTbl( PMNUTBL ptbl);
 VOID    UtlSetMenuItemsAttr( PMNUTBL ptbl);
-MRESULT APIENTRY UTLDRIVEBUTTONWP( HWND, USHORT, WPARAM, LPARAM);
-__declspec(dllexport)
+MRESULT UTLDRIVEBUTTONWP( HWND, USHORT, WPARAM, LPARAM);
 USHORT  UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
                                ULONG style1, ULONG style);
-__declspec(dllexport)
 USHORT UtlSetPosDriveButtons2( HWND, USHORT, ULONG, ULONG, ULONG, ULONG,
                                 ULONG, ULONG, ULONG, ULONG, HWND );
 
-__declspec(dllexport)
 USHORT UtlDriveButtons( HWND hwnd, PSZ plist, USHORT sid,                          // starting id
                         ULONG style1, ULONG style,
                         HWND  hwndGroupBox, HWND  hwndDummy, HWND hwndDelim );
-__declspec(dllexport)
 SHORT UtlDriveType( CHAR chDrive );
 
-__declspec(dllexport)
 VOID UtlSetHorzScrollingForLB(HWND hLB);
 
-__declspec(dllexport)
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
-__declspec(dllexport)
 BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
-__declspec(dllexport)
 BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
-__declspec(dllexport)
 BOOL   UtlInitUtils( HAB );
-__declspec(dllexport)
 BOOL   UtlRegisterEqfHelp( HAB );
-__declspec(dllexport)
 BOOL   UtlTerminateUtils( VOID );
-__declspec(dllexport)
 USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
-__declspec(dllexport)
 USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
-__declspec(dllexport)
 USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
-__declspec(dllexport)
 USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
-__declspec(dllexport)
 VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
 
-__declspec(dllexport)
 VOID   UtlInitError ( HAB, HWND, HWND, PSZ );
-__declspec(dllexport)
 VOID   UtlTerminateError ( VOID );
-__declspec(dllexport)
 USHORT UtlQueryUShort( SHORT sID );
-__declspec(dllexport)
 BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
-__declspec(dllexport)
 ULONG  UtlFDateToDateString( FDATE *, PSZ, ULONG );
-__declspec(dllexport)
 ULONG  UtlFTimeToTimeString( FTIME *, PSZ, ULONG );
-__declspec(dllexport)
 BOOL   UtlDateStringToFDate( PSZ, FDATE * );
-__declspec(dllexport)
 BOOL   UtlTimeStringToFTime( PSZ, FTIME * );
-__declspec(dllexport)
 USHORT UtlSetFileMode ( PSZ, USHORT, ULONG, BOOL );
-__declspec(dllexport)
 VOID   UtlStripBlanks ( PSZ );
-__declspec(dllexport)
 VOID   UtlStripBlanksW( PSZ_W );
-__declspec(dllexport)
 BOOL   UtlSetDrive( CHAR szNewDrive );
-__declspec(dllexport)
 USHORT  UtlBufOpen( PBUFCB *, PSZ, ULONG, ULONG, BOOL );
-__declspec(dllexport)
 USHORT  UtlBufClose( PBUFCB pBufCB, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlBufWrite( PBUFCB pBufCB, PSZ pszData, ULONG ulDataLength, BOOL fMsg );
-__declspec(dllexport)
 USHORT  UtlBufRead( PBUFCB, PSZ, ULONG, PULONG, BOOL );
 USHORT  UtlBufOpenHwnd( PBUFCB *, PSZ, ULONG, ULONG, BOOL, HWND );
 USHORT  UtlBufCloseHwnd( PBUFCB pBufCB, BOOL fMsg, HWND hwnd );
-__declspec(dllexport)
 USHORT  UtlBufWriteHwnd( PBUFCB pBufCB, PSZ pszData, ULONG ulDataLength, BOOL fMsg, HWND hwnd );
 USHORT  UtlBufReadHwnd( PBUFCB, PSZ, ULONG, PULONG, BOOL, HWND );
-__declspec(dllexport)
 USHORT  UtlBufWriteW( PBUFCB, PSZ_W, ULONG, BOOL );
 USHORT  UtlBufWriteHwndW( PBUFCB, PSZ_W, ULONG, BOOL, HWND );
-__declspec(dllexport)
 USHORT  UtlBufWriteConv( PBUFCB, PSZ_W, ULONG, BOOL, USHORT, ULONG, ULONG );
 
 VOID    UtlIncludeRemoteResources(VOID);
-__declspec(dllexport)
 VOID    UtlGetLastError( HWND, PSZ );
-__declspec(dllexport)
 USHORT  UtlGetDDEErrorCode( HWND );
-__declspec(dllexport)
 SHORT   UtlQdamMsgTxt ( SHORT );
 
-__declspec(dllexport)
 SHORT   UtlGetOperatingSystemInfo( VOID );
-__declspec(dllexport)
 VOID    UtlGetWinError( HRESULT, PSZ );
-__declspec(dllexport)
 BOOL    UtlGetPidMultipleInstances( PSZ, DWORD * );
-__declspec(dllexport)
 BOOL    UtlKillProcess( DWORD );
 BOOL    UtlProcessWalk(SHORT, PSZ, DWORD *);
 
 USHORT  UtlFindCloseHwnd( HDIR, BOOL, HWND );
-__declspec(dllexport)
 USHORT  UtlCloseHwnd( HFILE hf, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                      USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                      ULONG ulReserved, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                      BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                       BOOL fMsg, HWND hwndParent  );
-__declspec(dllexport)
 USHORT  UtlWriteWoCheckHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf,
                              PULONG pcbBytesWritten, BOOL fMsg, HWND hwndParent  );
 USHORT  UtlDupHandleHwnd( HFILE hfOld, PHFILE phfNew, BOOL fMsg,
                           HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlChgFilePtrHwnd( HFILE hf, LONG lOffset, USHORT fsMethod,
                            PULONG pulNewOffset, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlDeleteHwnd( PSZ pszFName, ULONG ulReserved, BOOL fMsg, HWND hwndParent );
 USHORT  UtlMkDirHwnd( PSZ pszDirName, ULONG usReserved, BOOL fMsg, HWND hwndParent );
 USHORT  UtlRmDirHwnd( PSZ pszDir, ULONG ulReserved, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlCopyHwnd( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved,
                      BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlCopyHwnd2( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved,
                       BOOL fMsg, PUSHORT pusRCList, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlMoveHwnd( PSZ pszSrc, PSZ pszDst, ULONG ulReserved,
                      BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlFindFirstHwnd( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
                           PFILEFINDBUF pffb, USHORT cbBuf, PUSHORT pcSearch,
                          ULONG ulReserved, BOOL fMsg, HWND hwndParent );
 USHORT  UtlFindNextHwnd( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
                          PUSHORT pcSearch, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlQFileInfoHwnd( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
                           USHORT cbInfoBuf, BOOL fMsg, HWND hwndParent );
 USHORT  UtlSetFileInfoHwnd( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
                             USHORT cbInfoBuf, BOOL fMsg, HWND hwndParent );
-__declspec(dllexport)
 USHORT  UtlQFSInfoHwnd( USHORT usDriveNo, USHORT usInfoLevel, PBYTE pInfoBuf,
                         USHORT cbInfoBuf, BOOL fMsg, HWND hwndParent );
 USHORT  UtlQFileModeHwnd( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserved,
@@ -4566,39 +4450,23 @@ USHORT  UtlQFileModeHwnd( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserve
 USHORT  UtlQPathInfoHwnd( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
                           USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg,
                           HWND hwndParent);
-__declspec(dllexport)
 USHORT  UtlSetFileModeHwnd ( PSZ, USHORT, ULONG, BOOL, HWND );
-__declspec(dllexport)
 USHORT  UtlFileLocks( HFILE, PFILELOCK, PFILELOCK, BOOL );
 USHORT  UtlFileLocksHwnd( HFILE, PFILELOCK, PFILELOCK, BOOL, HWND );
 USHORT  UtlGetLongFTime( HFILE hFile, PLONG plTime );
-__declspec(dllexport)
 PSZ     UtlUpper ( PSZ  pData );
-__declspec(dllexport)
 PSZ_W   UtlUpperW( PSZ_W  pData );
 BYTE    UtlToUpper (BYTE c);
-__declspec(dllexport)
 CHAR_W  UtlToUpperW(CHAR_W c);
-__declspec(dllexport)
 PSZ     UtlLower ( PSZ  pData );
-__declspec(dllexport)
 PSZ_W   UtlLowerW( PSZ_W  pData );
 BYTE    UtlToLower (BYTE c);
-__declspec(dllexport)
 CHAR_W  UtlToLowerW(CHAR_W c);
-__declspec(dllexport)
 BOOL UtlIsWhiteSpaceW( CHAR_W c );
-__declspec(dllexport)
-SHORT   UtlCompIgnWhiteSpace(PSZ, PSZ, USHORT);
-__declspec(dllexport)
 LONG    UtlCompIgnWhiteSpaceW(PSZ_W, PSZ_W, ULONG);
-__declspec(dllexport)
 LONG    UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen );
-__declspec(dllexport)
 LONG    UtlCompareDate( FDATE *fDateFirst, FDATE *fDateSecond );
-__declspec(dllexport)
 LONG    UtlCompareTime( FTIME *fTimeFirst, FTIME *fTimeSecond );
-__declspec(dllexport)
 USHORT UtlCompFDates
 (
   PSZ    pszFile1,                     // fully qualified path first file
@@ -4606,38 +4474,23 @@ USHORT UtlCompFDates
   PSHORT psResult,                     // address of result buffer
   BOOL   fMsg                          // error handling flag
 );
-__declspec(dllexport)
 BOOL    UtlCopyParameter ( PSZ pszTgt, PSZ pszSrc, USHORT usSize, BOOL fMsg);
-__declspec(dllexport)
 USHORT  UtlQueryCharTable( CHARTABLEID TableID, PUCHAR *ppTable );
-__declspec(dllexport)
 USHORT  UtlQueryCharTableEx( CHARTABLEID TableID, PUCHAR *ppTable, USHORT usCodePage );
-__declspec(dllexport)
 USHORT  UtlQueryCharTableLang( CHARTABLEID TableID, PUCHAR *ppTable, PSZ pszLanguage );
-__declspec(dllexport)
 VOID    UtlSortString( PSZ );
 BYTE    UtlAnsiEquivCharForDBCS1st( BYTE, ULONG ulCP );
-__declspec(dllexport)
 BOOL    UtlRegisterModelessDlg( HWND hwndDlg );
-__declspec(dllexport)
 BOOL    UtlUnregisterModelessDlg( HWND hwndDlg );
-__declspec(dllexport)
-BOOL    UtlIsDialogMsg( MSG FAR * pMsg );
-__declspec(dllexport)
+BOOL    UtlIsDialogMsg( MSG * pMsg );
 USHORT  UtlGetTask ( VOID );
-__declspec(dllexport)
 BOOL    UtlInsertCurDir ( PSZ , PSZ **, PSZ );
-__declspec(dllexport)
 BOOL isValidLanguage( PSZ pszLanguage, BOOL fAdjustLangName );
-__declspec(dllexport)
 BOOL GetLanguageGroup( PSZ pszLanguage, PSZ pszGroup );
-__declspec(dllexport)
 BOOL isSpellCheckerAvailable( PSZ pszLanguage );
-__declspec(dllexport)
 BOOL isMorphSupportAvailable( PSZ pszLanguage );
 
 
-__declspec(dllexport)
 BOOL UtlQuerySysLangFile
 (
   PSZ              pszLanguage,        // language to search in file
@@ -4653,13 +4506,10 @@ SHORT UtlFillSysLangPopUp
   PSZ              pszCurLanguage      // name of currently active language
 );
 
-__declspec(dllexport)
 PSZ UtlEditorLangSupport( PSZ pEditor, PSZ pSrcLang, PSZ pTgtLang );
 
 BOOL UtlIsDriveShared( CHAR chDrive );
-__declspec(dllexport)
 BOOL UtlMatchStrings( PSZ pszString, PSZ pszPattern, PBOOL pfMatch );
-__declspec(dllexport)
 BOOL UtlMatchStringsW( PSZ_W pszString, PSZ_W pszPattern, PBOOL pfMatch );
 USHORT UtlLoadConversionStrings(HWND hwndLB );  // handle of listbox receiving conversion strings
 // create fully qualified file name from supplied data
@@ -4677,7 +4527,6 @@ USHORT UtlMakeFileName
   \param pszDestPath fully qualified name of the destination directory
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
 
 /*! \brief add all files of a directoy to a ZIP package
@@ -4686,7 +4535,6 @@ int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
 
 /*! \brief add a list of files to a ZIP package
@@ -4694,13 +4542,11 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
 
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
 */
-__declspec(dllexport)
 void UtlDeleteAllFiles( const char *pszDirectory );
 
 // Mode defines for function UtlHandleConversionStrings
@@ -4716,7 +4562,6 @@ void UtlDeleteAllFiles( const char *pszDirectory );
 #define CONVERT_TO_UTF16 3
 #define CONVERT_TO_ASCII 4
 
-__declspec(dllexport)
 USHORT UtlHandleConversionStrings
 (
   USHORT      usMode,                  // mode of function:
@@ -4731,7 +4576,6 @@ USHORT UtlHandleConversionStrings
   PUSHORT     pusConvFlag              // ptr to buffer for conversion flag
                                        // only used in CONVCHECK_MODE
 );
-__declspec(dllexport)
 USHORT UtlQueryCharTableForDocConv
 (
   PSZ         pszDocFullName,          // full file name of segmented document
@@ -4752,20 +4596,13 @@ USHORT UtlQueryCharTableForDocConv
 #define  SERVER_MAINTAIN_LB    7  // Identifier for server lb in maintain dlg
 #define  ALL_SOURCE_LANGUAGES  8  // Identifier for source and target languages
 #define  ALL_TARGET_LANGUAGES  9  // including languages marked as disabled
-__declspec(dllexport)
 USHORT  UtlFillTableLB( HWND, USHORT );     // get languages
-__declspec(dllexport)
 ULONG GetLangOEMCP(PSZ pTargetLang);
-__declspec(dllexport)
 ULONG GetLangAnsiCP( PSZ pLanguage);
 
-__declspec(dllexport)
 USHORT SetSystemLanguage( PSZ pLanguage );
-__declspec(dllexport)
 PSZ    GetSystemLanguage( );
-__declspec(dllexport)
 USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg );
-__declspec(dllexport)
 USHORT UtlBufReset( HFILE hf, BOOL fMsg );
 USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd );
 USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd );
@@ -4800,17 +4637,11 @@ USHORT EqfDriveType(USHORT iDrive);
 #define CHKPATH_IS_DEVICE       0x00080000L // path is a device name (e.g.
                                             // CON, LPT1: ) this flag/check
                                             // is not active yet!
-__declspec(dllexport)
 BOOL UtlCheckPath( PSZ pszPath, ULONG ulInFlags, PULONG pulOutFlags );
-__declspec(dllexport)
 BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName );
-__declspec(dllexport)
 BOOL UtlCheckLongName( PSZ pszName );
-__declspec(dllexport)
 BOOL UtlKeepInTWB( PSWP pswpWin );
-__declspec(dllexport)
 USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow );
-__declspec(dllexport)
 LONG UtlTime( PLONG plTime );
 
 #ifdef UTLFFST
@@ -4819,9 +4650,7 @@ LONG UtlTime( PLONG plTime );
 
 #endif
 
-__declspec(dllexport)
 VOID UtlWait( SHORT sWaitTime );       // wait the given time
-__declspec(dllexport)
 USHORT UtlLoadWidth( HAB, HMODULE, SHORT, PUSHORT );
 
 /**********************************************************************/
@@ -4841,44 +4670,29 @@ typedef struct _LONGFILEFIND
    CHAR   achName[MAX_LONGFILESPEC];
 } LONGFILEFIND, *PLONGFILEFIND;
 
-__declspec(dllexport)
 USHORT UtlFindFirstLong( PSZ, PHDIR, USHORT, PLONGFILEFIND, BOOL );
-__declspec(dllexport)
 USHORT UtlFindNextLong( HDIR, PLONGFILEFIND, BOOL );
-__declspec(dllexport)
 USHORT UtlFindCloseLong( HDIR, BOOL );
 USHORT UtlFindFirstLongHwnd( PSZ, PHDIR, USHORT, PLONGFILEFIND, BOOL, HWND );
 USHORT UtlFindNextLongHwnd( HDIR, PLONGFILEFIND, BOOL, HWND );
 USHORT UtlFindCloseLongHwnd( HDIR, BOOL, HWND );
-__declspec(dllexport)
 SHORT  UtlLoadLongFileNames( PSZ, USHORT, HWND, USHORT );
-__declspec(dllexport)
 SHORT  UtlLoadLongFileNamesHwnd( PSZ, USHORT, HWND, USHORT, HWND );
-__declspec(dllexport)
 BOOL   UtlIsLongFileName( PSZ pszFileName );
-__declspec(dllexport)
 USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName );
-__declspec(dllexport)
 BOOL   UtlSupportsLongNames( CHAR chDrive );
-__declspec(dllexport)
 BOOL   UtlFileExistLong( PSZ pszFileName );
-__declspec(dllexport)
 USHORT UtlRenameObjectDlg( PSZ pszObjName, CLASSES ObjClass );
-__declspec(dllexport)
 BOOL   UtlPreloadIcons( void );
 BOOL   UtlFreeIcons( void );
 
 
-__declspec(dllexport)
 USHORT UtlAddUserDlg( PSZ pszObjName, CLASSES ObjClass );
 
-__declspec(dllexport)
 USHORT UtlRemoveUserDlg( PSZ pszObjName, CLASSES ObjClass );
 
-__declspec(dllexport)
 USHORT UtlListUserDlg( PSZ pszObjName, CLASSES ObjClass );
 
-__declspec(dllexport)
 BOOL UtlGetNextFileFromCommaList
 (
   PSZ  *ppszNameStart,                 // current start of file name
@@ -4886,7 +4700,6 @@ BOOL UtlGetNextFileFromCommaList
 );
 
 // convert a list of file names into a pointer array
-__declspec(dllexport)
 BOOL UtlValidateList
 (
   PSZ pStart,                          // start of list
@@ -4894,10 +4707,8 @@ BOOL UtlValidateList
   USHORT usMaxAlloc                    // max ptrs to be allocated
 );
 
-__declspec(dllexport)
 ULONG UtlFileTimeToLong(PSZ pszFileName);
 // new UTL functions for unicode enabling
-__declspec(dllexport)
 VOID UtlLoadStringW ( HAB hInst, HMODULE hmod, UINT sid, PCHAR szBuffer, PSZ_W pBufW, USHORT usBufWMax );
 
 //#define LOADSTRING( hInst, hmod, sid, buffer)
@@ -4951,33 +4762,22 @@ typedef struct _HASH
 //------------------------------------------------------------------------------
 //   Prototypes for the string pool functions
 //------------------------------------------------------------------------------
-__declspec(dllexport)
 PPOOL PoolCreate( LONG lPoolSize );
-__declspec(dllexport)
 VOID  PoolDestroy( PPOOL pPool );
-__declspec(dllexport)
 PSZ   PoolAddString( PPOOL pPool, PSZ pszString );
-__declspec(dllexport)
 PSZ_W PoolAddStringW( PPOOL pPool, PSZ_W pszString );
 VOID  PoolRemoveString( PPOOL pPool, PSZ pszString );
-__declspec(dllexport)
 PVOID PoolAddData( PPOOL pPool, LONG lDataLen, PVOID pData );
 
 //------------------------------------------------------------------------------
 //   Prototypes for the low level hash routines
 //------------------------------------------------------------------------------
-__declspec(dllexport)
 PHASH  HashCreate( USHORT, ULONG, PFN_HASHVALUE, PFN_HASHCOMP, PFN_HASHFREE, PVOID );
-__declspec(dllexport)
 BOOL   HashAdd( PHASH, PVOID );
-__declspec(dllexport)
 BOOL   HashDelete( PHASH pHash, PVOID pDelElement );
-__declspec(dllexport)
 VOID   HashDestroy( PHASH pHash );
-__declspec(dllexport)
 PVOID  HashSearch( PHASH, PVOID );
 PVOID  HashIterate( PHASH,PFN_HASHITERATE, PVOID );
-__declspec(dllexport)
 BOOL   HashReset(PHASH pHash );
 
 /**********************************************************************/
@@ -5003,22 +4803,15 @@ typedef struct _ATOMTBL
 
 typedef PVOID    EQF_ATOM;
 
-__declspec(dllexport)
-HATOMTBL APIENTRY WinCreateAtomTable( USHORT cbInitial, USHORT cBuckets );
-__declspec(dllexport)
-VOID     APIENTRY WinDestroyAtomTable( HATOMTBL hAtomTbl );
-__declspec(dllexport)
-EQF_ATOM APIENTRY WinAddAtom( HATOMTBL hAtomTbl, PSZ pszAtomName );
-__declspec(dllexport)
-EQF_ATOM APIENTRY WinFindAtom( HATOMTBL hAtomTbl, PSZ pszAtomName );
-__declspec(dllexport)
-EQF_ATOM APIENTRY WinDeleteAtom( HATOMTBL hAtomTbl, EQF_ATOM atom );
-USHORT   APIENTRY WinQueryAtomName( HATOMTBL hAtomTbl, EQF_ATOM atom, PSZ pchBuffer,
+HATOMTBL WinCreateAtomTable( USHORT cbInitial, USHORT cBuckets );
+VOID     WinDestroyAtomTable( HATOMTBL hAtomTbl );
+EQF_ATOM WinAddAtom( HATOMTBL hAtomTbl, PSZ pszAtomName );
+EQF_ATOM WinFindAtom( HATOMTBL hAtomTbl, PSZ pszAtomName );
+EQF_ATOM WinDeleteAtom( HATOMTBL hAtomTbl, EQF_ATOM atom );
+USHORT   WinQueryAtomName( HATOMTBL hAtomTbl, EQF_ATOM atom, PSZ pchBuffer,
                                    USHORT cchBufferMax );
-__declspec(dllexport)
-EQF_ATOM APIENTRY WinAddAtomW( HATOMTBL hAtomTbl, PSZ_W pszAtomNameW, ULONG ulCP );
-__declspec(dllexport)
-EQF_ATOM APIENTRY WinFindAtomW( HATOMTBL hAtomTbl, PSZ_W pszAtomNameW, ULONG ulCP );
+EQF_ATOM WinAddAtomW( HATOMTBL hAtomTbl, PSZ_W pszAtomNameW, ULONG ulCP );
+EQF_ATOM WinFindAtomW( HATOMTBL hAtomTbl, PSZ_W pszAtomNameW, ULONG ulCP );
 //USHORT   APIENTRY WinQueryAtomNameW( HATOMTBL hAtomTbl, EQF_ATOM atom, PSZ_W pchBuffer,
 //                                   USHORT cchBufferMax );
 
@@ -5129,16 +4922,14 @@ typedef struct _LISTCOMMAREA
                                        // function during WM_CREATE processing
 
   SHORT            asCurViewWidth[MAX_VIEW]; // R/W: details view list
-} LISTCOMMAREA, FAR *PLISTCOMMAREA;
+} LISTCOMMAREA, *PLISTCOMMAREA;
 
 /**********************************************************************/
 /* type definition for list instance callback function                */
 /**********************************************************************/
 typedef MRESULT (*PFN_LISTCALLBACK)( PLISTCOMMAREA, HWND,
                                                 WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
   MRESULT FolderCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
   MRESULT FolderListCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 /**********************************************************************/
 /* Defines for the layout of the process window                       */
@@ -5294,7 +5085,7 @@ typedef struct _PROCESSCOMMAREA
                                        // for the first listbox
   CHAR             szLB2Text[80];      // R/W: text to be displayed as label
                                        // for the second listbox
-} PROCESSCOMMAREA, FAR *PPROCESSCOMMAREA;
+} PROCESSCOMMAREA, *PPROCESSCOMMAREA;
 
 /**********************************************************************/
 /* type definition for process instance callback function             */
@@ -5346,7 +5137,7 @@ typedef struct _HANDLERCOMMAREA
   PVOID            pUserIDA;           // R/W: ptr to IDA of callback function
                                        // use this variable to anchor the IDA
                                        // of the callback function
-} HANDLERCOMMAREA, FAR *PHANDLERCOMMAREA;
+} HANDLERCOMMAREA, *PHANDLERCOMMAREA;
 
 
 /**********************************************************************/
@@ -5385,7 +5176,6 @@ typedef FINDNAME *PFINDNAME;
 /**********************************************************************/
 /* Prototype for create process window function                       */
 /**********************************************************************/
-__declspec(dllexport)
 BOOL CreateProcessWindow
 (
   PSZ                  pszObjName,     // ptr to object name for process window
@@ -5393,7 +5183,6 @@ BOOL CreateProcessWindow
   PVOID                pvUserData      // ptr to user data (is passed to callback
                                        // function in mp2 of WM_CREATE message)
 );
-__declspec(dllexport)
 BOOL CreateProcessWindow2
 (
   PSZ                  pszObjName,     // ptr to object name for process window
@@ -5406,7 +5195,6 @@ BOOL CreateProcessWindow2
 /**********************************************************************/
 /* Prototype for create list window function                          */
 /**********************************************************************/
-__declspec(dllexport)
 BOOL CreateListWindow
 (
   PSZ                  pszObjName,     // ptr to object name for process window
@@ -5423,7 +5211,7 @@ typedef struct _GENHANDLERIDA
   HANDLERCOMMAREA  CommArea;           // area for communication between handler
                                        // and handler callback function
   PFN_HANDLERCALLBACK pfnCallBack;     // ptr to callback function of handler
-} GENHANDLERIDA, FAR *PGENHANDLERIDA;
+} GENHANDLERIDA, *PGENHANDLERIDA;
 
 
 typedef struct _GENLISTINSTIDA
@@ -5504,19 +5292,16 @@ VOID PositionProcessControls( PGENPROCESSINSTIDA  pIda,
 /**********************************************************************/
 PVOID AccessGenListCommArea( HWND hwnd );
 
-__declspec(dllexport)
 PVOID AccessGenProcCommArea( HWND hwnd );
 
 /**********************************************************************/
 /* Prototype for popup window function                                */
 /**********************************************************************/
-__declspec(dllexport)
 void HandlePopupMenu( HWND hwnd, POINT point, SHORT sMenuID );
 
 /**********************************************************************/
 /* Prototype for activate MDI child window function                   */
 /**********************************************************************/
-__declspec(dllexport)
 BOOL ActivateMDIChild
 (
   HWND                 hwndChild       // handle of window being activated
@@ -5524,14 +5309,14 @@ BOOL ActivateMDIChild
 
 
 
-__declspec(dllexport) MRESULT FolderHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT FolderListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT DictListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT TagListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT MemListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT LngListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT WCntListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT FolderHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT FolderListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT DictListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT TagListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT MemListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT LngListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT WCntListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
+MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #ifdef _TQM
   MRESULT TQMListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #endif
@@ -6760,51 +6545,33 @@ typedef struct _PROPLIST
 /**********************************************************************/
 /* Function declarations for the EQF Property Handler                 */
 /**********************************************************************/
-__declspec(dllexport)
 HPROP   OpenProperties(   PSZ, PSZ, USHORT, PEQFINFO);
-__declspec(dllexport)
 HPROP   CreateProperties( PSZ, PSZ, USHORT, PEQFINFO);
-__declspec(dllexport)
 HPROP   CreatePropertiesEx( PSZ, PSZ, USHORT, PEQFINFO, BOOL );
-__declspec(dllexport)
 SHORT   DeleteProperties( PSZ, PSZ, PEQFINFO);
-__declspec(dllexport)
 SHORT   CloseProperties(  HPROP, USHORT, PEQFINFO);
-__declspec(dllexport)
 SHORT   GetAllProperties( HPROP, PVOID, PEQFINFO);
-__declspec(dllexport)
 SHORT   PutAllProperties( HPROP, PVOID, PEQFINFO);
-__declspec(dllexport)
 SHORT   SaveProperties( HPROP, PEQFINFO);
-__declspec(dllexport)
 PVOID   MakePropPtrFromHnd( HPROP hObject);
 PVOID   MakePropPtrFromHWnd( HWND hObject);
-__declspec(dllexport)
 BOOL    SetPropAccess( HPROP hprop, USHORT flgs);
-__declspec(dllexport)
 VOID    ResetPropAccess( HPROP hprop, USHORT flgs);
 PSZ     MakePropPath( PSZ pbuf, PSZ pd, PSZ pp, PSZ pn, PSZ pe);
 SHORT   GetPropSize( USHORT usClass);
-__declspec(dllexport)
 PPROPSYSTEM GetSystemPropPtr( VOID );
 BOOL    PropHandlerInitForBatch( void );
 BOOL    PropHandlerTerminateForBatch( void );
-__declspec(dllexport)
 HPROP   EqfQuerySystemPropHnd( void );
-__declspec(dllexport)
 USHORT  ReloadSysProp(PPROPSYSTEM);
 
 // other function prototypes
 BOOL DDEIsBatchHwnd( HWND hwndInQuestion );
 BOOL ObjHandlerInitForBatch( void );
 BOOL ObjHandlerTerminateForBatch( void );
-__declspec(dllexport)
 SHORT ObjQuerySymbol( PSZ pszSymbol );
-__declspec(dllexport)
 SHORT ObjSetSymbol( PSZ pszSymbol );
-__declspec(dllexport)
 SHORT ObjRemoveSymbol( PSZ pszSymbol );
-__declspec(dllexport)
 USHORT MemFuncCreateMem
 (
   PSZ         pszMemName,              // name of new Translation Memory
@@ -6813,7 +6580,6 @@ USHORT MemFuncCreateMem
   PSZ         pszSourceLanguage,       // Translation Memory source language
   LONG        lOptions                 // type of new Translation Memory
 );
-__declspec(dllexport)
 USHORT MarkupFuncCreateMarkup
 (
   PSZ         pszInFile,               // Input TBX file
@@ -6831,10 +6597,8 @@ typedef enum _UTLCHECKOBJTYPES
   TARGET_LANGUAGE_OBJECT,
   SOURCE_LANGUAGE_OBJECT,
 } UTLCHECKOBJTYPES;
-__declspec(dllexport)
 BOOL UtlCheckIfExist( PSZ pszName, SHORT sObjType );
 
-__declspec(dllexport)
 USHORT ObjLongToShortName
 (
   PSZ pszLongName,                     // ptr to object long name
@@ -6842,7 +6606,6 @@ USHORT ObjLongToShortName
   UTLCHECKOBJTYPES ObjType,            // type of object
   PBOOL   pfIsNew                      // ptr to caller's is-new flag
 );
-__declspec(dllexport)
 USHORT ObjShortToLongName
 (
   PSZ pszShortName,                    // ptr to object short name
@@ -6859,7 +6622,6 @@ typedef enum _OBJLONGTOSHORTSTATE
 } OBJLONGTOSHORTSTATE, * POBJLONGTOSHORTSTATE;
 
 // Object long to short name conversion with check for shared resources
-__declspec(dllexport)
 USHORT ObjLongToShortNameEx
 (
   PSZ         pszLongName,             // ptr to object long name
@@ -6870,7 +6632,6 @@ USHORT ObjLongToShortNameEx
 );
 
 // Object long to short name conversion with check for shared resources and reservation of files
-__declspec(dllexport)
 USHORT ObjLongToShortNameEx2
 (
   PSZ         pszLongName,             // ptr to object long name
@@ -6884,18 +6645,14 @@ USHORT ObjLongToShortNameEx2
 
 
 
-__declspec(dllexport)
 BOOL StartBrowser( PSZ pszUrl );       // start the standard Browser
-__declspec(dllexport)
 VOID EqfDisplayContextHelp( HWND, PHELPSUBTABLE);
 
 // OEM/ASCII to ANSI conversions -- to be removed if full Unicode support implemented
 #define ANSI_CP 1
 #define OEM_CP  2
-__declspec(dllexport)
 VOID EQFAnsiToOem  ( PSZ pIn, PSZ pOut );
 VOID EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut );
-__declspec(dllexport)
 VOID EQFOemToAnsi  ( PSZ pIn, PSZ pOut );
 VOID EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut );
 VOID EQFOemToAnsiBuff( PSZ pIn, PSZ pOut, USHORT usLen );
@@ -6903,11 +6660,8 @@ VOID EQFCPOemToAnsiBuff( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, USHOR
 VOID EQFAnsiToOemBuff( PSZ pIn, PSZ pOut, USHORT usLen );
 VOID EQFCPAnsiToOemBuff( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, USHORT usLen );
 
-__declspec(dllexport)
 ULONG  GetCodePage( USHORT usType );
-__declspec(dllexport)
 ULONG GetLangCodePage( USHORT usType, PSZ pLanguage );
-__declspec(dllexport)
 ULONG GetOrgLangCP( PSZ pLanguage, BOOL  fASCII );
 
 /**********************************************************************/
@@ -6964,76 +6718,48 @@ void LogSysInfo( VOID );
 ///                                                                         ///
 ///////////////////////////////////////////////////////////////////////////////
 
-__declspec(dllexport)
 PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource );
-__declspec(dllexport)
 PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource );
-__declspec(dllexport)
 PSZ_W UTF16strncpy(PSZ_W pusTarget, PSZ_W pusSource, LONG lLen);
-__declspec(dllexport)
 int   UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 );
 int   UTF16strncmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
 int   UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
-__declspec(dllexport)
 int   UTF16strncmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
-__declspec(dllexport)
 int   UTF16strnicmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
-__declspec(dllexport)
 int   UTF16strlenCHAR( PSZ_W pszString );
-__declspec(dllexport)
 int   UTF16strlenBYTE( PSZ_W pszString );
 int   UTF16strcspn( PSZ_W pszString1, PSZ_W pszString2 );
-__declspec(dllexport)
 PSZ_W UTF16strchr( PSZ_W pszString, CHAR_W ch );
-__declspec(dllexport)
 PSZ_W UTF16strstr( PSZ_W pszString1, PSZ_W pszString2 );
-__declspec(dllexport)
 PSZ_W UTF16strrev( PSZ_W pszString );
-__declspec(dllexport)
 PSZ   Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP );
-__declspec(dllexport)
 PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG ulCP );
-__declspec(dllexport)
 PSZ   Unicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulCP );
-__declspec(dllexport)
 PSZ_W Ansi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulCP );
-__declspec(dllexport)
 ULONG ASCII2UnicodeBuf( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
-__declspec(dllexport)
 ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
 ULONG Ansi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
-__declspec(dllexport)
 ULONG   UTF82UnicodeBuf( PSZ pszUTF8, PSZ_W pszUni, LONG Len );
-__declspec(dllexport)
 ULONG   UTF82UnicodeBufEx( PSZ pszUTF8, PSZ_W pszUni, LONG Len, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
-__declspec(dllexport)
 ULONG   Unicode2UTF8Buf( PSZ_W pszUni, PSZ pszUTF8, LONG Len );
-__declspec(dllexport)
 ULONG   Unicode2UTF8BufEx( PSZ_W pszUni, PSZ pszUTF8, LONG Len, LONG lBufLen, BOOL fMsg, PLONG plRc );
 
 // GQ: The lBufLen parameter in the following two functions specifies the
 //     actual size of the pAscii/pAnsi buffer in number of bytes
-__declspec(dllexport)
 ULONG Unicode2ASCIIBuf( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen, ULONG ulCP );
 //ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen,
 //                              ULONG ulCP,BOOL fMsg, PLONG plRc, DWORD dwFlags );
 ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG usLen, LONG lBufLen, ULONG ulCP  );
-__declspec(dllexport)
 ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
                              ULONG ulAnsiCP, BOOL fMsg, PLONG plRc );
-__declspec(dllexport)
 ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulAnsiCP,
                              BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
-__declspec(dllexport)
 PSZ   UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP );
-__declspec(dllexport)
 PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP );
-__declspec(dllexport)
 ULONG UtlConvertBuf(USHORT usType, PVOID pvInString, PVOID pvOutString, ULONG ulLen,
                     LONG lBufLen, ULONG ulASCIICP, ULONG ulAnsiCP,
                     BOOL fMsg, PLONG plRc, PLONG plBytesLeft);
 
-__declspec(dllexport)
 USHORT usConvertCRLF(
   PCHAR  pcInput,            // pointer to input character array
   USHORT usInputLen,         // length of input area
@@ -7041,21 +6767,16 @@ USHORT usConvertCRLF(
   BOOL   fMode);             // flag indicating whether CRLF or LF is desired
                              // as the output format; TRUE means only LF is
                              // used. FALSE uses CRLF as the line end code
-__declspec(dllexport)
 USHORT usConvertCRLFW(PCHAR_W pcInput,     // pointer to character input area
                       USHORT  usInputLen,  // length of input area
                       PCHAR_W pcOutput,    // pointer to output area
                       BOOL    fMode);      // conversion mode :
 
-__declspec(dllexport)
 BOOL EQFIsDBCSChar( CHAR_W c, ULONG ulCP);
 //USHORT EQFGetCPOem();
 PSZ_W UTF16strccpy( PSZ_W pszTarget, PSZ_W pszSource, CHAR_W chStop );
-__declspec(dllexport)
 int   UTF16stricmp(PSZ_W a, PSZ_W b);
-__declspec(dllexport)
 PSZ_W UTF16memset( PSZ_W pusString, CHAR_W c, USHORT usNum );
-__declspec(dllexport)
 PSZ_W UTF16memsetL( PSZ_W pusString, CHAR_W c, ULONG ulNum );
 
 ULONG UtlQueryTextW( HWND hwnd, LONG id, PSZ_W buffer, LONG usLen );
@@ -7068,7 +6789,6 @@ LONG UtlCBFindStringExact( HWND hwnd, SHORT sPos, PSZ_W pText );
 LONG UtlGetTextW( HWND hwnd, USHORT id, PSZ_W pText, LONG len );
 LONG UtlQueryItemTextW( HWND hwnd, USHORT id,  SHORT index, PSZ_W buffer, USHORT usLen );
 LONG UtlCBQueryItemTextW( HWND hwnd, SHORT index, PSZ_W buffer, USHORT usLen );
-__declspec(dllexport)
 USHORT UtlFindAndShowConversionError
 (
   PSZ    pszBuffer,
@@ -7079,28 +6799,27 @@ USHORT UtlFindAndShowConversionError
 // Generic check if instance of TM or ITM is currently running
 // If not create semaphore to disable another instance of us to try to start
 // otherwise display messagebox indicating the situation...
-__declspec(dllexport)
 BOOL UtlIsAlreadyRunning(HANDLE *phTM_Sem);
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-__declspec(dllexport) void InitTMPluginWrapper();
-__declspec(dllexport) void InitDictPluginWrapper();
-__declspec(dllexport) void InitMarkupPluginMapper();
-__declspec(dllexport) void InitDocumentPluginMapper();
+void InitTMPluginWrapper();
+void InitDictPluginWrapper();
+void InitMarkupPluginMapper();
+void InitDocumentPluginMapper();
 
-typedef EQF_BOOL (__cdecl *PFNCHECKSEGEXIT)( PSZ, PSZ, PSZ, PEQF_BOOL, EQF_BOOL);
-typedef EQF_BOOL (__cdecl *PFNCHECKSEGEXITW)( PSZ_W, PSZ_W, PSZ_W, PEQF_BOOL, EQF_BOOL);
-typedef EQF_BOOL (__cdecl *PFNCHECKSEGEXEXITW)( PSZ_W, PSZ_W, PSZ_W, PEQF_BOOL, LONG, ULONG, EQF_BOOL);
+typedef EQF_BOOL (*PFNCHECKSEGEXIT)( PSZ, PSZ, PSZ, PEQF_BOOL, EQF_BOOL);
+typedef EQF_BOOL (*PFNCHECKSEGEXITW)( PSZ_W, PSZ_W, PSZ_W, PEQF_BOOL, EQF_BOOL);
+typedef EQF_BOOL (*PFNCHECKSEGEXEXITW)( PSZ_W, PSZ_W, PSZ_W, PEQF_BOOL, LONG, ULONG, EQF_BOOL);
 
-typedef EQF_BOOL (__cdecl *PFNSHOWTRANS)( LONG, HWND );
-typedef EQF_BOOL (__cdecl *PFNTOCGOTO)( LONG, HWND );
+typedef EQF_BOOL (*PFNSHOWTRANS)( LONG, HWND );
+typedef EQF_BOOL (*PFNTOCGOTO)( LONG, HWND );
 
-typedef EQF_BOOL (__cdecl *PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
-typedef EQF_BOOL (__cdecl *PFNFORMATCONTTEXT)( PSZ_W, PSZ_W );
-typedef EQF_BOOL (__cdecl *PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHORT *, SHORT * );
+typedef EQF_BOOL (*PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
+typedef EQF_BOOL (*PFNFORMATCONTTEXT)( PSZ_W, PSZ_W );
+typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHORT *, SHORT * );
 #ifdef __cplusplus
 }
 #endif
@@ -7194,10 +6913,10 @@ typedef EQF_BOOL (__cdecl *PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULO
 /**********************************************************************/
 /* Dictionary handler functions                                       */
 /**********************************************************************/
-__declspec(dllexport) USHORT DicFillDictLB( HWND, HWND, PSZ, BOOL );
-__declspec(dllexport) VOID DictionaryImport( HWND, PSZ, BOOL, HWND );
-__declspec(dllexport) VOID DictionaryOrganize( HWND, PSZ, PVOID );
-__declspec(dllexport) BOOL DicGetCheckPassword( PSZ pszPassword, PULONG pulPassword, BOOL fCheckPassword );
+USHORT DicFillDictLB( HWND, HWND, PSZ, BOOL );
+VOID DictionaryImport( HWND, PSZ, BOOL, HWND );
+VOID DictionaryOrganize( HWND, PSZ, PVOID );
+BOOL DicGetCheckPassword( PSZ pszPassword, PULONG pulPassword, BOOL fCheckPassword );
 
 /**********************************************************************/
 /* Dictionary filter functions                                        */
@@ -7296,9 +7015,7 @@ typedef struct _EXTRAIDA
 #define MAX_REVMARK_SIZE  256          // max size of revision marks
 
 //added prototypes to avoid warnings!!
-__declspec(dllexport)
 BOOL EqfDocPropsToHtml(PSZ pszDocumentObj,HWND hwndParent);
-__declspec(dllexport)
 BOOL EqfDictPropsToHtml(PSZ pszDictionaryObj,HWND hwndParent);
 
 
@@ -7326,10 +7043,8 @@ typedef struct _DocList
   DOCPROP aDoc[1];                                // document specs, short and long name
 } DOCLIST,*PDOCLIST;
 
-__declspec(dllexport)
 BOOL  SubFolderPropsToHtml( PSZ pszObjName, HWND hwnd, BOOL fIsSubFolder );
 
-__declspec(dllexport)
 BOOL
 NTMCompareBetweenTokens
 (
@@ -7341,15 +7056,11 @@ NTMCompareBetweenTokens
     PBOOL pfStringEqual
 );
 
-__declspec(dllexport)
 ULONG EQFGETDLLVERSION( void );
-__declspec(dllexport)
 ULONG EQFGETEXEVERSION( void );
 
-__declspec(dllexport)
-int CALLBACK UtlBrowseForFolderCallbackProc(HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData);
+int /*CALLBACK*/ UtlBrowseForFolderCallbackProc(HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData);
 
-__declspec(dllexport)
 BOOL UtlIsLanguageSupported
 (
   PSZ    pszLanguage,
@@ -7358,7 +7069,7 @@ BOOL UtlIsLanguageSupported
 );
 
 // helper function for automatic subst in analysis and editor
-__declspec(dllexport) BOOL TACheckAndAdaptLFChanges
+BOOL TACheckAndAdaptLFChanges
 (
 	PSZ_W          pSegData,
 	PSZ_W          pszMatch,
@@ -7381,40 +7092,26 @@ __declspec(dllexport) BOOL TACheckAndAdaptLFChanges
   {  ReleaseMutex( hMutexSem ); CloseHandle( hMutexSem ); }  \
 }
 
-__declspec(dllexport)
 MRESULT UtlInvokeHelp();
-__declspec(dllexport)
 BOOL    UtlIsHighContrast();
 
 // function checking a given codepage value by doing a test conversion
-__declspec(dllexport)
 BOOL UtlIsValidCP( ULONG ulCP );
 
 
-__declspec(dllexport)
 USHORT UtlFuncRenameObject( USHORT usMode, PSZ pszName, PSZ pszNewName,LONG lOptions );
-__declspec(dllexport)
 USHORT UtlFuncGetShortName( USHORT ObjectType, PSZ pszLongName, PSZ pszShortName );
 
-__declspec(dllexport)
 void UtlLogStart( PSZ pszLogFilePrefix );
-__declspec(dllexport)
 void UtlLogStop();
 void UtlLogFlush();
-__declspec(dllexport)
 void UtlLogWriteString( PSZ pszFormat, PSZ pszString );
-__declspec(dllexport)
 void UtlLogWriteString2( PSZ pszFormat, PSZ pszString1, PSZ pszString2 );
-__declspec(dllexport)
 void UtlLogWrite( PSZ pszString );
 
-__declspec(dllexport)
 BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize, PSZ pszDefault );
-__declspec(dllexport)
 int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault );
-__declspec(dllexport)
 BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue );
-__declspec(dllexport)
 BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue );
 
 
@@ -7428,19 +7125,15 @@ BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue );
 typedef PSZ_W HADDDATAKEY;
 
 // Search a specific key in the additional memory data
-__declspec(dllexport)
 HADDDATAKEY MADSearchKey( PSZ_W pAddData, PSZ_W pszKey );
 
 // retrieve the data associated with a specific key
-__declspec(dllexport)
 BOOL MDAGetValueForKey( HADDDATAKEY pKey, PSZ_W pszBuffer, int iBufSize, PSZ_W pszDefault );
 
 // get the value for a specific attribute
-__declspec(dllexport)
 BOOL MADGetAttr( HADDDATAKEY pKey, PSZ_W pszAttrName, PSZ_W pszBuffer, int iBufSize, PSZ_W pszDefault );
 
 // delete a key and its associated data
-__declspec(dllexport)
 BOOL MADDeleteKey( HADDDATAKEY pKey );
 
 // Add a match segment ID to the additional data section
@@ -7450,19 +7143,14 @@ BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BO
 BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID );
 
 
-__declspec(dllexport)
 VOID    CloseFile( HFILE * );
 
-__declspec(dllexport)
 void UtlSaveLastUsedString( HWND hwndDlg, int iID, char *pszName, int iMaxNumOfStrings );
 
-__declspec(dllexport)
 void UtlLoadLastUsedStrings( HWND hwndDlg, int iID, char  *pszName );
 
-__declspec(dllexport)
 BOOL UtlAddMenuItem( const char *pszMenuName, const char *pszMenuItem, int iMenuItemID, BOOL isSubMenu );
 
-__declspec(dllexport)
 BOOL UtlDeleteMenuItem( const char *pszMenuName, int iMenuItemID );
 
 // Input/output data for the UtlColorChooser dialog
@@ -7483,7 +7171,6 @@ typedef struct _COLORCHOOSERDATA
 
 
 // let the user select the color settings for a group of items
-__declspec(dllexport)
 USHORT UtlColorChooserDlg
 (
   PCOLORCHOOSERDATA pColorChooserData  // pointer to caller's color chooser data structure
@@ -7501,7 +7188,6 @@ USHORT UtlColorChooserDlg
 *	\returns 0 if successful or an error code
 *	
 **/
-__declspec(dllexport)
 unsigned short CntFuncCountWordsInstring
 (
   char        *pszMarkup,              // name of the markup table to be used for the recognition of in-line tags
@@ -7556,12 +7242,12 @@ typedef struct _CALCREPORTBINDATA
 #define   MEMIMP_MRKUP_ACTION_RESET    2
 
 // segmented file related function prototypes
-__declspec(dllexport) VOID SegFileFreeDoc( PVOID *ppvDoc );
+//VOID SegFileFreeDoc( PVOID *ppvDoc );
 
-__declspec(dllexport) int XSLTConversion( PSZ pszXmlFile, PSZ pszHtmlFile, PSZ pszStyleSheet, BOOL fMsg, HWND hwndErrMsg );
+//int XSLTConversion( PSZ pszXmlFile, PSZ pszHtmlFile, PSZ pszStyleSheet, BOOL fMsg, HWND hwndErrMsg );
 
 #define  MAX_LIST_FILES   10000
-__declspec(dllexport) BOOL UtlListOfFiles ( PSZ **, PSZ , PSZ **);
+//BOOL UtlListOfFiles ( PSZ **, PSZ , PSZ **);
 
 #define FUZZY_THRESHOLD_0                  0.5 // Theshold for different fuzzy classes
 #define FUZZY_THRESHOLD_1                  0.7 // Theshold for different fuzzy classes
