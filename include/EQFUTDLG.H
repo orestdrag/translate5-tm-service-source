@@ -53,17 +53,12 @@ typedef struct _CONTROLSIDA
 } CONTROLSIDA, * PCONTROLSIDA;
 
 //function prototypes
-__declspec(dllexport)
 VOID UtlControlsInit( HWND, PCONTROLSIDA );
 
-__declspec(dllexport)
   MRESULT UtlDMGETDEFID( HWND, WPARAM, LPARAM, PCONTROLSIDA );
 
-__declspec(dllexport)
 MRESULT UtlWMControls(  HWND, WINMSG, SHORT, SHORT, PCONTROLSIDA );
-__declspec(dllexport)
 BOOL UtlEFValidityTest ( PCONTROLSIDA, HWND );
-__declspec(dllexport)
 SHORT UtlFillFileDir( HWND, PCONTROLSIDA, BOOL );
 BOOL UtlCheckFileName( PSZ );
 BOOL UtlCheckString( PSZ );
