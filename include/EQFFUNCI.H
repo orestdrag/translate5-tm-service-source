@@ -8,6 +8,11 @@
 // name delimiter for name lists (e.g. list of document names)
 #define NAME_DELIMITER            ','
 
+// max length of a file in an EQF dir
+#define MAX_EQF_PATH            60
+
+typedef void *PVOID;
+
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS
 {
@@ -163,7 +168,6 @@ USHORT FctBuildCheckSum
 void SetSharingFlag(ULONG ulRefreshFlag);
 
 // Function call I/F specific functions in other modules
-__declspec(dllexport)
 USHORT TAFuncAnalyzeDoc
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -189,7 +193,6 @@ USHORT TAFuncPrepAnalysis
   LONG        lOptions                 // options for analysis
 );
 
-__declspec(dllexport)
 USHORT MemFuncAddMatchSegID
 (
   PFCTDATA    pMatchSegIDData,         // function I/F session data
@@ -199,7 +202,6 @@ USHORT MemFuncAddMatchSegID
   LONG        lOptions                 // options for function
 );
 
-__declspec(dllexport)
 USHORT MemFuncImportMem
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -230,7 +232,6 @@ USHORT MemFuncImportProcess
   PFCTDATA    pData                    // function I/F session data
 );
 
-__declspec(dllexport)
 USHORT FolFuncCreateFolder
 (
   PSZ         pszFolderName,           // name of folder
@@ -246,7 +247,6 @@ USHORT FolFuncCreateFolder
   PSZ         pszReadOnlyMems          // list of readonly TMs or NULL
 );
 
-__declspec(dllexport)
 USHORT FolFuncCreateControlledFolder
 (
   PSZ         pszFolderName,           // name of folder
@@ -275,7 +275,6 @@ USHORT FolFuncCreateControlledFolder
   PSZ         pszShipmentNumber        // Shipment number
 );
 
-__declspec(dllexport)
 USHORT FolFuncChangeFolProps
 (
   PSZ         pszFolder,               // name of folder
@@ -289,14 +288,12 @@ USHORT FolFuncChangeFolProps
   PSZ         pszShipment              // shipment number or NULL
 );
 
-__declspec(dllexport)
 USHORT FolFuncGetFolProps
 (
   PSZ         pszFolderName,           // name of the folder
   PEXTFOLPROP pExtFolProps             // structure to fill in folder properties
 );
 
-__declspec(dllexport)
 USHORT FolFuncGetFolPropEx
 (
   PSZ         pszFolderName,           // mand: name of the folder to get the property value from
@@ -307,7 +304,6 @@ USHORT FolFuncGetFolPropEx
 );
 
 
-__declspec(dllexport)
 USHORT FolFuncCreateSubFolder
 (
   PSZ         pszParentFolder,         // name of parent (sub)folder
@@ -322,7 +318,6 @@ USHORT FolFuncCreateSubFolder
   PSZ         pszTranslatorMail        // Mail of translator
 );
 
-__declspec(dllexport)
 USHORT TAFuncArchTM
 (
   PFCTDATA    pData,
@@ -333,7 +328,6 @@ USHORT TAFuncArchTM
   LONG        lOptions
 );
 
-__declspec(dllexport)
 USHORT CntFuncCountWords
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -343,7 +337,6 @@ USHORT CntFuncCountWords
   PSZ         pszOutFile               // name of output file
 );
 
-__declspec(dllexport)
 USHORT FolFuncExportFolder
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -356,7 +349,6 @@ USHORT FolFuncExportFolder
   PSZ         pszMemoryExportAs        // export folder memory with this name
 );
 
-__declspec(dllexport)
 USHORT DicFuncImportDict
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -367,7 +359,6 @@ USHORT DicFuncImportDict
 );
 
 // export a dictionary
-__declspec(dllexport)
 USHORT DicFuncExportDict
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -377,7 +368,6 @@ USHORT DicFuncExportDict
 );
 
 // import a document
-__declspec(dllexport)
 USHORT DocFuncImportDoc
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -395,7 +385,6 @@ USHORT DocFuncImportDoc
 );
 
 // export a document
-__declspec(dllexport)
 USHORT DocFuncExportDoc
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -405,7 +394,6 @@ USHORT DocFuncExportDoc
   LONG        lOptions                 // options for document export
 );
 
-__declspec(dllexport)
 USHORT DocFuncExportDocVal
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -420,7 +408,6 @@ USHORT DocFuncExportDocVal
   PSZ         pszPM
 );
 
-__declspec(dllexport)
 USHORT MemFuncExportMem
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -430,7 +417,6 @@ USHORT MemFuncExportMem
 );
 
 // create a new Translation Memory
-__declspec(dllexport)
 USHORT MemFuncCreateMem
 (
   PSZ         pszMemname,              // name of new Translation Memory
@@ -442,24 +428,20 @@ USHORT MemFuncCreateMem
 );
 
 // delete a Translation Memory
-__declspec(dllexport)
 USHORT MemFuncDeleteMem
 (
   PSZ         pszMemName               // Translation Memory being deleted
 );
 
-__declspec(dllexport)
 USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory );
 
 // organize a Translation Memory
-__declspec(dllexport)
 USHORT MemFuncOrganizeMem
 (
   PFCTDATA    pData,                   // function I/F session data
   PSZ         pszMemName               // Translation Memory being deleted
 );
 
-__declspec(dllexport)
 USHORT FolFuncImportFolder
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -471,20 +453,17 @@ USHORT FolFuncImportFolder
   LONG        lOptions                 // folder import options
 );
 
-__declspec(dllexport)
 USHORT FolFuncDeleteFolder
 (
   PSZ         pszFolderName            // name of folder being deleted
 );
 
-__declspec(dllexport)
 USHORT DocFuncDeleteDoc
 (
   PSZ         pszFolderName,           // name of folder containing the documents
   PSZ         pszDocuments             // list of documents being deleted
 );
 
-__declspec(dllexport)
 USHORT MemFuncCreateITM
 (
     PSZ  pszMemName,
@@ -521,7 +500,6 @@ USHORT TAFuncPrepArchTM
   LONG        lOptions                 // options for analysis
 );
 
-__declspec(dllexport)
 USHORT MemFuncCleanMemory
 (
   PFCTDATA         pData,              // function I/F session data
@@ -531,7 +509,6 @@ USHORT MemFuncCleanMemory
   LONG             lOptions            // options for processing
 );
 
-__declspec(dllexport)
 USHORT MemFuncProcessNomatch
 (
   PFCTDATA    pFuncData,              // function I/F session data
@@ -547,13 +524,11 @@ USHORT MemFuncProcessNomatch
   LONG        lOptions                 // options for processing
 );
 
-__declspec(dllexport)
 USHORT FolFuncDeleteMTLog
 (
   PSZ         pszFolderName            // name of the folder
 );
 
-__declspec(dllexport)
 USHORT MarkupFuncCreateMarkup
 (
   PSZ         pszInFile,               // fully qualified name of input file
@@ -561,7 +536,6 @@ USHORT MarkupFuncCreateMarkup
   LONG        lOptions                 // options for Markup Table create
 );
 
-__declspec(dllexport)
 USHORT FolFuncOpenDoc
 (
   PSZ         pszFolderName,           // name of the folder
@@ -572,27 +546,23 @@ USHORT FolFuncOpenDoc
   PSZ         pszTrackID               // TVT track ID to be activated
 );
 
-__declspec(dllexport)
 USHORT FolFuncRemoveDocs
 (
   PSZ         pszFolderName,           // name of the folder
   PSZ         pszListFile              // name of list file 
 );
 
-__declspec(dllexport)
 USHORT FolFuncRestoreDocs
 (
   PSZ         pszFolderName            // name of the folder
 );
 
-__declspec(dllexport)
 USHORT FolFuncAddCTIDList
 (
   PSZ         pszFolderName,           // name of the folder
   PSZ         pszCTIDListFile          // fully qualified name of the CTID list file
 );
 
-__declspec(dllexport) 
 unsigned short MorphFuncCheckSpelling
 (
   char *pszLanguage,                   // name of the language being used for the spell checking
@@ -602,7 +572,6 @@ unsigned short MorphFuncCheckSpelling
   long  lOptions
 );
 
-__declspec(dllexport) 
 unsigned short MorphFuncReduceToStemForm
 (
   char *pszLanguage,                   // name of the language being used for the stem form reduction
@@ -613,7 +582,6 @@ unsigned short MorphFuncReduceToStemForm
 );
 
 // function removed irrelevant segments from an external memory
-__declspec(dllexport) 
 USHORT FilterNoMatchFile
 (
   PFCTDATA         pData,                   // function I/F session data
@@ -627,14 +595,12 @@ USHORT FilterNoMatchFile
 );
 
 // delete a dictionary
-__declspec(dllexport)
 USHORT DicFuncDeleteDict
 (
   PSZ         pszMemName               // Translation Memory being deleted
 );
 
 // change the machine translation flags of memory proposals
-__declspec(dllexport)
 USHORT MemFuncChangeMFlag
 (
     PSZ  pszMemName,
