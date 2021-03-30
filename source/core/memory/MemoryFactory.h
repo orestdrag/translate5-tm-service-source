@@ -10,17 +10,17 @@
 
 #include <string>
 #include <vector>
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmSharedMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
-#include "core\utilities\LogWriter.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmSharedMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
+#include "../utilities/LogWriter.h"
 extern "C"
 {
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions
 }
 
-class __declspec(dllexport) MemoryFactory
+class MemoryFactory
 /*! \brief   This class provides factory methods for OtmMemory objects 
 
 */
@@ -192,7 +192,7 @@ OtmMemory *createMemory
   char *pszSourceLanguage,
   char chDrive,
   char *pszOwner,
-  boolean bInvisible,
+  bool bInvisible,
   int *piErrorCode
 );
 
@@ -365,7 +365,7 @@ void showLastError(
   \param   strError the error string returned with
   \returns the last error string
 */
-std::string& MemoryFactory::getLastError(
+std::string& getLastError(
     OtmMemory *pMemory,
     int& iLastError,
     std::string& strError);
@@ -697,7 +697,7 @@ int removeMemoryFromList(PSZ pszName);
   USHORT APISearchMem
   (
     LONG        lHandle,                 
-    __wchar_t  *pszSearchString,
+    wchar_t     *pszSearchString,
     PSZ         pszStartPosition,
     PMEMPROPOSAL pProposal,
     LONG        lSearchTime,
@@ -735,7 +735,7 @@ private:
    \param pszPlugin plugin-name
    \returns pointer to plugin or NULL if no memory pluging with the given name is specified
 */
-OtmPlugin *MemoryFactory::getPlugin
+OtmPlugin *getPlugin
 (
   const char *pszPluginName
 );
@@ -772,7 +772,7 @@ OtmSharedMemoryPlugin *getSharedMemoryPlugin( char *pszPlugin );
 
 /* \brief Refresh internal list of memory plugins 
 */
-void MemoryFactory::refreshPluginList();
+void refreshPluginList();
 
 /*! \brief get the index into the memory object table from a memory handle
   \param lHandle handle of a previously opened memory
