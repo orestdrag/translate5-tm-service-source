@@ -346,26 +346,20 @@ typedef struct _LOADEDTABLE
  #define ERR_READFILE   -3
 #endif
 
-__declspec(dllexport)
 VOID   TAFastTokenize( PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG );
-__declspec(dllexport)
 VOID   TAFastTokenizeW( PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT );
-__declspec(dllexport)
 BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID );
 
 VOID EQFTagTokenize(PSZ, TAGTABLE *, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT);
 
 
-__declspec(dllexport)
 BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
-__declspec(dllexport)
 BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
 
 
 /**********************************************************************/
 /* Load a tag table or access a loaded tag table                      */
 /**********************************************************************/
-__declspec(dllexport)
 USHORT TALoadTagTable                  // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
@@ -373,7 +367,6 @@ USHORT TALoadTagTable                  // loads/accesses a tag table
   BOOL             fInternal,          // internal-table flag
   BOOL             fMsg                // show-error-messages flag
 );
-__declspec(dllexport)
 USHORT TALoadTagTableHwnd              // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
@@ -407,7 +400,6 @@ USHORT TALoadTagTableHwnd              // loads/accesses a tag table
 // Load query exit info function (if any)
 #define TALOADQUERYEXITINFOFUNC 0x00000080L
 
-__declspec(dllexport)
 USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
@@ -422,7 +414,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 /**********************************************************************/
 /* Free a tag table logically                                         */
 /**********************************************************************/
-__declspec(dllexport) USHORT TAFreeTagTable                  // frees a tag table
+USHORT TAFreeTagTable                  // frees a tag table
 (
   PLOADEDTABLE     pTagTable           // tag table pointer returned by TALoadTagTable
 );
@@ -431,15 +423,15 @@ __declspec(dllexport) USHORT TAFreeTagTable                  // frees a tag tabl
 /* Invalidate a loaded tag table ==> indicate that the tag table      */
 /* has to be reloaded if another user wants to access the tag table   */
 /**********************************************************************/
-__declspec(dllexport) USHORT TAInvalidateTagTable
+USHORT TAInvalidateTagTable
 (
   PSZ  pszTableName
 );
 
 // load user exit not tried yet and user exit is avialable
-__declspec(dllexport) USHORT TALoadExitIfAvailable( PLOADEDTABLE pTable );
+USHORT TALoadExitIfAvailable( PLOADEDTABLE pTable );
 // load user exit protect function if not tried yet and user exit is avialable
-__declspec(dllexport) USHORT TALoadProtectFunctionIfAvailable( PLOADEDTABLE pTable );
+USHORT TALoadProtectFunctionIfAvailable( PLOADEDTABLE pTable );
 
 
 #define MAX_FORMAT    80               // max lenght of a symbolic format name
@@ -461,7 +453,6 @@ BOOL MUDetectFormat( PSZ pszDoc, PSZ pszFormat );
 #define TAG_ITM_RELEVANT   32          // inline tag eligible as anchor
 
 
-__declspec(dllexport)
 SHORT TagInsEscapeChars( PSZ pszIn, PSZ pszOut );
 
 BOOL TALoadExternalMarkupTableList
