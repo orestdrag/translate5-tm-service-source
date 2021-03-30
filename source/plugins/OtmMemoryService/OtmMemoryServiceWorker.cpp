@@ -21,7 +21,6 @@
 #include <restbed>
 #include "OtmMemoryServiceWorker.h"
 #include "OTMMSJSONFactory.h"
-//#include <EQFMSG.H>
 
 typedef unsigned long DWORD;
 typedef unsigned char BYTE;
