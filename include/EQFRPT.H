@@ -12,10 +12,10 @@ typedef LONG HSESSION;
 
 
 
-INT_PTR CALLBACK COUNTINGPROPDLGPROC (HWND, WINMSG, WPARAM, LPARAM);
+INT_PTR /*CALLBACK*/ COUNTINGPROPDLGPROC (HWND, WINMSG, WPARAM, LPARAM);
 
 
-__declspec(dllexport) MRESULT ReportListHandlerCallBack
+MRESULT ReportListHandlerCallBack
 (
   PHANDLERCOMMAREA pCommArea,
   HWND             hwnd,
@@ -25,7 +25,7 @@ __declspec(dllexport) MRESULT ReportListHandlerCallBack
 );
 
 
-INT_PTR CALLBACK RPTPROP_GENERAL_DLGPROC
+INT_PTR /*CALLBACK*/ RPTPROP_GENERAL_DLGPROC
 (
    HWND hwndDlg,                       /* handle of dialog window             */
    WINMSG msg,
@@ -34,17 +34,7 @@ INT_PTR CALLBACK RPTPROP_GENERAL_DLGPROC
 );
 
 
-INT_PTR CALLBACK RPTPROP_PROFILE_DLGPROC
-(
-   HWND hwndDlg,                       /* handle of dialog window             */
-   WINMSG msg,
-   WPARAM mp1,
-   LPARAM mp2
-);
-
-
-
-INT_PTR CALLBACK RPTPROP_SETTINGS_DLGPROC
+INT_PTR /*CALLBACK*/ RPTPROP_PROFILE_DLGPROC
 (
    HWND hwndDlg,                       /* handle of dialog window             */
    WINMSG msg,
@@ -54,7 +44,17 @@ INT_PTR CALLBACK RPTPROP_SETTINGS_DLGPROC
 
 
 
-INT_PTR CALLBACK RPTPROP_FACTSHEET_DLGPROC
+INT_PTR /*CALLBACK*/ RPTPROP_SETTINGS_DLGPROC
+(
+   HWND hwndDlg,                       /* handle of dialog window             */
+   WINMSG msg,
+   WPARAM mp1,
+   LPARAM mp2
+);
+
+
+
+INT_PTR /*CALLBACK*/ RPTPROP_FACTSHEET_DLGPROC
 (
    HWND hwndDlg,                       /* handle of dialog window             */
    WINMSG msg,
@@ -65,7 +65,7 @@ INT_PTR CALLBACK RPTPROP_FACTSHEET_DLGPROC
 
 
 
-INT_PTR CALLBACK RPTPROP_MORE_DLGPROC
+INT_PTR /*CALLBACK*/ RPTPROP_MORE_DLGPROC
 (
    HWND hwndDlg,                       /* handle of dialog window             */
    WINMSG msg,
@@ -74,7 +74,7 @@ INT_PTR CALLBACK RPTPROP_MORE_DLGPROC
 );
 
 
-INT_PTR CALLBACK RPTPROP_SHIPM_DLGPROC
+INT_PTR /*CALLBACK*/ RPTPROP_SHIPM_DLGPROC
 (
    HWND hwndDlg,                       /* handle of dialog window             */
    WINMSG msg,
@@ -86,7 +86,6 @@ INT_PTR CALLBACK RPTPROP_SHIPM_DLGPROC
 MRESULT RptListCallBack (PLISTCOMMAREA, HWND,WINMSG,WPARAM,LPARAM);
 
 
-__declspec(dllexport)
 USHORT MemFuncCreateCntReport
 (
   HSESSION hSession,
