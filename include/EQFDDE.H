@@ -614,6 +614,7 @@ typedef struct _BATCHIMPORTPARMS
 /* function prototypes for DDE handler                                */
 /**********************************************************************/
 
+typedef HANDLE HGLOBAL;
 HGLOBAL MakeDDEDataSeg(USHORT, PSZ, PVOID, USHORT, USHORT );
 
 static BOOL EQFFunctionCmdLine (PDDECLIENT );
@@ -621,16 +622,16 @@ static BATCHCMD ValidateToken ( PSZ  *ppToken, PBATCHLIST  pBatchList );
 static BOOL CheckBatchOccurrence (PDDECLIENT, PUSHORT);
 static DDETASK ValidateTask ( PDDECLIENT pDDEClient );
 
-__declspec(dllexport) BOOL DDEDocUnLoad( PDOCIMPEXP pDocExpIda );
-__declspec(dllexport) BOOL DDEDocLoad( PDOCIMPEXP pDocImpIda );
+BOOL DDEDocUnLoad( PDOCIMPEXP pDocExpIda );
+BOOL DDEDocLoad( PDOCIMPEXP pDocImpIda );
 
-__declspec(dllexport) BOOL ResolveMultFileNames(PSZ, PSZ, PSZ *); // resolve single/multiple subst.
-__declspec(dllexport) BOOL ResolveMultFileNamesEx(PSZ, PSZ, PSZ *, BOOL ); // resolve single/multiple subst.
-__declspec(dllexport) BOOL DDEDocLoadWork ( PDOCIMPEXP,PSZ); // do the dirty work
-__declspec(dllexport) BOOL DDEDocUnLoadWork(PDOCIMPEXP, PSZ, PSZ, PSZ ); // do the dirty work
+BOOL ResolveMultFileNames(PSZ, PSZ, PSZ *); // resolve single/multiple subst.
+BOOL ResolveMultFileNamesEx(PSZ, PSZ, PSZ *, BOOL ); // resolve single/multiple subst.
+BOOL DDEDocLoadWork ( PDOCIMPEXP,PSZ); // do the dirty work
+BOOL DDEDocUnLoadWork(PDOCIMPEXP, PSZ, PSZ, PSZ ); // do the dirty work
 
 
-MRESULT APIENTRY DDEINSTWNDPROC( HWND, WINMSG, WPARAM, LPARAM );
+MRESULT /*APIENTRY*/ DDEINSTWNDPROC( HWND, WINMSG, WPARAM, LPARAM );
 
 /**********************************************************************/
 /* list of functions; one for each task which is implemented          */
