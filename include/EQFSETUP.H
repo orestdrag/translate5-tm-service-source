@@ -90,7 +90,6 @@ static BOOL             InstCheckAndAdd( PSZ *, PSZ, USHORT );
 static USHORT           ReadAndPrepareConfigSys ( VOID );
        USHORT           UpdateConfigSys ( VOID );
 
-__declspec(dllexport)
          USHORT SetupMAT( HAB hab, CHAR chPrimaryDrive, PSZ  pszSecondaryDrives, CHAR chLanDrive );
 static   USHORT CreateEditProperties( CHAR );
 static   USHORT CreateFolderListProperties( CHAR );
@@ -115,7 +114,6 @@ static USHORT   UpdateTMProp( PSZ pszFullFileName, CHAR  chDrive );
 static USHORT   UpdateSystemProp( PSZ pszFullFileName, PSZ pszFolderName );
 
        BOOL     SetupUtils( HAB, PSZ );
-__declspec(dllexport)
        BOOL     TWBInit( HAB );
        BOOL     TwbStartHandler( HAB, PSZ, PFNWP, PHWND );
        BOOL     TwbStartListHandler( PSZ, PFN_HANDLERCALLBACK, PHWND );
