@@ -6,12 +6,12 @@
 #ifndef _LOGWRITER_H_
 #define _LOGWRITER_H_
 
-#include <eqf.h>
+#include <EQF.H>
 #include "string"
 #include <stdarg.h>
 #include <stdio.h>
 
-class __declspec(dllexport) LogWriter
+class LogWriter
 {
 public:
   /*! \brief Open mode */
@@ -21,10 +21,10 @@ public:
   static const int OM_OVERWRITE = 8;
 
   /*! \brief Constructors */
-  LogWriter::LogWriter();
+  LogWriter();
 
   /*! \brief Denstructor */
-  LogWriter::~LogWriter();
+  ~LogWriter();
 
   /*! \brief Register a log file
        

@@ -36,7 +36,7 @@ class PluginManagerImpl;
 	Implementation details can be found in the PluginManagerImpl class.
 */
 
-class __declspec(dllexport) PluginManager
+class PluginManager
 {
 public:
 

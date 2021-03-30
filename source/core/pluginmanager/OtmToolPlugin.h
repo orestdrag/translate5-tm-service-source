@@ -12,7 +12,7 @@
 
 /*! \brief Abstract base-class for tools plugins 
 */
-class __declspec(dllexport) OtmToolPlugin: public OtmPlugin
+class OtmToolPlugin: public OtmPlugin
 {
 
 public:
