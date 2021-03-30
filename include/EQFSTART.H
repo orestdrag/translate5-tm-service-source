@@ -128,48 +128,38 @@ typedef struct _USERHANDLER
 /**********************************************************************/
 VOID             TwbUnSetMessageFilterHook();
 #ifdef _WINDOWS
-__declspec(dllexport)
 VOID             TwbSetMessageFilterHook( HINSTANCE, HWND );
-__declspec(dllexport)
 HWND             TwbInit( BOOL, BOOL );
 #else
 VOID             TwbSetMessageFilterHook( HAB, HWND );
-HWND             TwbInit( BOOL, BOOL, HMQ );
+//HWND             TwbInit( BOOL, BOOL, HMQ );
 #endif
 
 HWND             TwbWinInit( BOOL );
-__declspec(dllexport)
 BOOL             TwbGetCheckProfileData( PSZ, PSZ, PSZ );
 VOID             TwbFreeResources( VOID );
-__declspec(dllexport)
 VOID             EqfDisplayHelpIndex(VOID);
-__declspec(dllexport)
 VOID             EqfDisplayHelpForHelp(VOID);
 
-__declspec(dllexport)
 VOID             EqfIELookAndFeel (BOOL fIE);
-__declspec(dllexport)
-MRESULT          APIENTRY TwbMainWP( HWND, WINMSG, WPARAM, LPARAM);
+MRESULT          /*APIENTRY*/ TwbMainWP( HWND, WINMSG, WPARAM, LPARAM);
 VOID             TwbDrawBitmap( HWND hwnd, PMATBITMAP pBitmap );
 USHORT           TwbStartTutorial( PSZ );
-__declspec(dllexport)
 VOID             TwbShowLogo( LONG, HWND, PSZ, USHORT, UCHAR );
-INT_PTR CALLBACK TwbLogoDlgBox ( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/ TwbLogoDlgBox ( HWND, WINMSG, WPARAM, LPARAM );
 VOID             TwbRestart( PSZ pszHandler, PSZ pszRestartList );
 BOOL             TwbSwitchHelpTable ( PHELPSUBTABLE, PHELPSUBTABLE );
 USHORT           TwbStartBook ( VOID );
 MRESULT          TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 );
-__declspec(dllexport)
 MRESULT          TwbInitMenuMFC( HMENU hMenu, WPARAM mp1, LPARAM mp2);
 BOOL             TwbStartHandler( HAB, PSZ, PFNWP, PHWND );
 BOOL             TwbStartListHandler( PSZ, PFN_HANDLERCALLBACK, PHWND );
-__declspec(dllexport)
 MRESULT          TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 );
 BOOL             TwbCloseCheck( VOID );
 BOOL             TwbStartUserHandler( HAB hab );
 
-INT_PTR CALLBACK  UTLSERVERLISTDLG( HWND, WINMSG, WPARAM, LPARAM );
-INT_PTR CALLBACK  MEMINCLUDEDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/  UTLSERVERLISTDLG( HWND, WINMSG, WPARAM, LPARAM );
+INT_PTR /*CALLBACK*/  MEMINCLUDEDLG( HWND, WINMSG, WPARAM, LPARAM );
 
 
 #endif
