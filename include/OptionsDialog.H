@@ -24,7 +24,7 @@
   	\returns TRUW when input data is correct and FALSE when the user has to correct the data
 */
 
-typedef BOOL (APIENTRY *PFN_OPTIONSDIALOGCHECKDATA)
+typedef BOOL (/*APIENTRY*/ *PFN_OPTIONSDIALOGCHECKDATA)
 ( 
   std::vector<std::string> *pvData,
   int *piIndex,
@@ -51,7 +51,7 @@ typedef BOOL (APIENTRY *PFN_OPTIONSDIALOGCHECKDATA)
     \param lHandle handle passed to pfnCheckData callback
   	\returns TRUE when user input data is correct and FALSE when the user has to correct the data
 */
-__declspec(dllexport) BOOL UtlOptionsDlg
+BOOL UtlOptionsDlg
 (
   HWND              hwndOwner,        // owner window for this dialog box
   SHORT             sID,              // ID to be used for options dialog
