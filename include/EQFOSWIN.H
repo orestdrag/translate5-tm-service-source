@@ -57,7 +57,46 @@
 /**********************************************************************/
 /* substitute typedefs - use definitely far items                     */
 /**********************************************************************/
-#define HFILE         HANDLE
+#define VOID void
+
+typedef void *HANDLE;
+typedef HANDLE HDC;
+typedef HANDLE HBITMAP;
+typedef HANDLE HICON;
+typedef HANDLE HINSTANCE;
+typedef HINSTANCE HMODULE;
+
+typedef char *PSZ;
+
+typedef unsigned short WORD;
+typedef unsigned long DWORD;
+typedef DWORD COLORREF;
+
+typedef long LONG_PTR;
+typedef LONG_PTR LRESULT;
+typedef LONG_PTR LPARAM;
+
+typedef unsigned int UINT_PTR;
+typedef UINT_PTR WPARAM;
+
+typedef void *PVOID;
+typedef unsigned char BYTE;
+typedef BYTE *PBYTE;
+typedef int BOOL;
+typedef unsigned int UINT;
+typedef short SHORT;
+typedef unsigned short USHORT;
+typedef USHORT *PUSHORT;
+typedef long LONG;
+typedef unsigned long ULONG;
+
+#ifdef UNICODE
+ typedef WCHAR TCHAR;
+#else
+ typedef char TCHAR;
+#endif
+
+#define HFILE HANDLE
 
 /* Extract high and low order parts of 16 and 32 bit quantity */
 //#define LOBYTE(w)       LOUCHAR(w)
@@ -70,22 +109,87 @@
 
 typedef unsigned char UCHAR;    /* uch */
 typedef unsigned char BYTE;     /* b   */
-typedef void far      *LHANDLE;
+typedef void *LHANDLE;
 typedef unsigned short SHANDLE;
 
 typedef HFILE * PHFILE;
 
-typedef int   (pascal far  *PFN)();
+typedef int   (*PFN)();
 
-typedef CHAR   FAR *PCHAR;
+typedef char CHAR;
+typedef CHAR *PCHAR;
 
-typedef UCHAR  FAR *PUCHAR;
-typedef ULONG  FAR *PULONG;
+typedef UCHAR *PUCHAR;
+typedef ULONG *PULONG;
 
-
-typedef BOOL FAR *PBOOL;
-typedef HWND FAR *PHWND;
+typedef BOOL *PBOOL;
+typedef HANDLE HWND;
+typedef HWND *PHWND;
 typedef int       INT;
+
+typedef struct tagSIZE {
+  LONG cx;
+  LONG cy;
+} SIZE, *PSIZE, *LPSIZE;
+
+typedef struct _SIZE {
+  LONG cx;
+  LONG cy;
+} SIZEL, *PSIZEL, *LPSIZEL;
+
+typedef struct _POINTL {
+  LONG x;
+  LONG y;
+} POINTL, *PPOINTL;
+
+typedef struct tagRECT {
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECT, *PRECT, *NPRECT, *LPRECT;
+
+typedef struct _RECTL {
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECTL, *PRECTL, *LPRECTL;
+
+typedef struct _FILETIME {
+  DWORD dwLowDateTime;
+  DWORD dwHighDateTime;
+} FILETIME, *PFILETIME, *LPFILETIME;
+
+#define MAX_PATH 260
+
+typedef struct _WIN32_FIND_DATA { 
+  DWORD dwFileAttributes; 
+  FILETIME ftCreationTime; 
+  FILETIME ftLastAccessTime; 
+  FILETIME ftLastWriteTime; 
+  DWORD nFileSizeHigh; 
+  DWORD nFileSizeLow; 
+  DWORD dwOID; 
+  TCHAR cFileName[MAX_PATH]; 
+} WIN32_FIND_DATA,*PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;  
+
+typedef struct _WIN32_FIND_DATAA {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    dwReserved0;
+  DWORD    dwReserved1;
+  CHAR     cFileName[MAX_PATH];
+  CHAR     cAlternateFileName[14];
+  DWORD    dwFileType;
+  DWORD    dwCreatorType;
+  WORD     wFinderFlags;
+} WIN32_FIND_DATAA, *PWIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
+
 /**********************************************************************/
 /* different KEYBOard defines                                         */
 /* we will leave and use the PM defines all over                      */
@@ -109,8 +213,7 @@ typedef int       INT;
 /**********************************************************************/
 /* WinQueryWindow substitutes                                         */
 /**********************************************************************/
-__declspec(dllexport)
-HWND APIENTRY WinQueryWindow ( HWND, SHORT, BOOL );
+HWND WinQueryWindow ( HWND, SHORT, BOOL );
 
 #define  QW_OWNER                    GW_OWNER
 #define  QW_TOP                      GW_HWNDFIRST
@@ -145,10 +248,9 @@ HWND APIENTRY WinQueryWindow ( HWND, SHORT, BOOL );
  *     Loads a dynamic link module and returns a handle for the module.
  */
 // typedef USHORT    HMODULE;  /* hmod */
-typedef HMODULE FAR *PHMODULE;
+typedef HMODULE *PHMODULE;
 
-__declspec(dllexport)
-USHORT APIENTRY DosLoadModule(
+USHORT DosLoadModule(
         PSZ pszFailName,                /* object name buffer                 */
         USHORT cbFileName,              /* length of object name buffer       */
         PSZ pszModName,                 /* dynamic link module name string    */
@@ -159,24 +261,22 @@ USHORT APIENTRY DosLoadModule(
  *     dynamic link module is no longer needed by any process, the module is
  *     freed from system memory.
  */
-__declspec(dllexport)
-USHORT APIENTRY DosFreeModule(
+USHORT DosFreeModule(
         HMODULE hmod);                  /* module handle                      */
 
 /***   DosGetProcAddr - Get dynamic link procedure address
  *     Returns a far address to a desired procedure within a dynamic link
  *     module.
  */
-__declspec(dllexport)
-USHORT APIENTRY DosGetProcAddr(
+USHORT DosGetProcAddr(
         HMODULE hmod,          /* handle of module where procedure is located */
         PSZ pszProcName,       /* name of module where procedure is located   */
-        PFN FAR * ppfnProcAddr);        /* procedure address (returned)       */
+        PFN * ppfnProcAddr);        /* procedure address (returned)       */
 
 /***   DosGetModHandle - Get dynamic link module handle
  *     Returns a handle to a previously loaded dynamic link module.
  */
-USHORT APIENTRY DosGetModHandle(
+USHORT DosGetModHandle(
         PSZ pszModName,                 /* dynamic link module name           */
         PHMODULE phmod);                /* module handle (returned)           */
 
@@ -184,7 +284,7 @@ USHORT APIENTRY DosGetModHandle(
  *     Returns the fully qualified drive, path, filename, and extension
  *     associated with a referenced module handle.
  */
-USHORT APIENTRY DosGetModName(
+USHORT DosGetModName(
         HMODULE hmod,            /* module handle                             */
         USHORT cbBuf,            /* max length of buffer where name is stored */
         PCHAR pchBuf);           /* buffer (returned) where info is stored    */
@@ -193,7 +293,7 @@ USHORT APIENTRY DosGetModName(
  *     Allows a process to disable user notification (from OS/2) on hard errors
  *     and program exceptions.
  */
-USHORT APIENTRY DosError(
+USHORT DosError(
         USHORT fEnable);                /* action flag (bit field)            */
 /***   DosInsMessage - Insert variable text strings in message
  *
@@ -202,9 +302,8 @@ USHORT APIENTRY DosError(
  *     are known.
  *
  */
-__declspec(dllexport)
-USHORT APIENTRY DosInsMessage(
-        PCHAR FAR * ppchVTable,         /* table of variables to insert   */
+USHORT DosInsMessage(
+        PCHAR * ppchVTable,         /* table of variables to insert   */
         USHORT usVCount,                /* number of variables            */
         PSZ pszMsg,                     /* address of input message       */
         ULONG cbMsg,                   /* length of input message        */
@@ -213,9 +312,8 @@ USHORT APIENTRY DosInsMessage(
         ULONG  cbBuf,                   /* length of data area (returned) */
         PULONG pcbMsg);                /* length of updated messsage     */
 
-__declspec(dllexport)
-USHORT APIENTRY DosInsMessageW(
-        PCHAR_W FAR * ppchVTable,         /* table of variables to insert   */
+USHORT DosInsMessageW(
+        PCHAR_W * ppchVTable,         /* table of variables to insert   */
         USHORT usVCount,                  /* number of variables            */
         PSZ_W pszMsg,                     /* address of input message       */
         ULONG cbMsg,                     /* length of input message        */
@@ -230,9 +328,8 @@ USHORT APIENTRY DosInsMessageW(
  *     into the body of the message.
  *
  */
-__declspec(dllexport)
-USHORT APIENTRY DosGetMessage (
-  PCHAR FAR * ppchVTable ,             // table of variables to insert
+USHORT DosGetMessage (
+  PCHAR * ppchVTable ,             // table of variables to insert
   USHORT  usVCount,                    // number of variables
   PCHAR pchBuf,                        // data area (where message is returned)
   ULONG  cbBuf,                        // length of data area
@@ -245,7 +342,7 @@ USHORT APIENTRY DosGetMessage (
 /**********************************************************************/
 
 /***   DosCopy - Copy file */
-USHORT APIENTRY  DosCopy (
+USHORT DosCopy (
         PSZ pszSrc,                     /* old path name                   */
         PSZ pszDst,                     /* new path name                   */
         USHORT usOpt,                   /* operation mode                  */
@@ -257,8 +354,7 @@ USHORT APIENTRY  DosCopy (
  *
  */
 
-__declspec(dllexport)
-USHORT APIENTRY DosNewSize(
+USHORT DosNewSize(
         HFILE hf,                       /* file handle     */
         ULONG ulNewSize);               /* file's new size */
 
@@ -320,7 +416,7 @@ USHORT APIENTRY DosNewSize(
   #define HDIR_CREATE  (HANDLE)0xFFFF     /* Allocate a new, unused handle */
   typedef HANDLE HDIR;           /* hdir */
 
-typedef HDIR FAR *PHDIR;
+typedef HDIR *PHDIR;
 
   #define FILEFINDBUF   WIN32_FIND_DATA
   #define PFILEFINDBUF  LPWIN32_FIND_DATA
@@ -335,7 +431,7 @@ typedef struct _FSALLOCATE {
     ULONG  cUnitAvail;                  /* avalaible allocation units         */
     USHORT cbSector;                    /* bytes per sector                   */
 } FSALLOCATE;
-typedef FSALLOCATE FAR *PFSALLOCATE;
+typedef FSALLOCATE *PFSALLOCATE;
 
 /**********************************************************************/
 /* listbox messages .....                                             */
@@ -438,14 +534,14 @@ typedef struct _FTIME {          /* ftime */
     unsigned short minutes : 6;
     unsigned short hours   : 5;
 } FTIME;
-typedef FTIME FAR *PFTIME;
+typedef FTIME *PFTIME;
 
 typedef struct _FDATE {          /* fdate */
     unsigned short day     : 5;
     unsigned short month   : 4;
     unsigned short year    : 7;
 } FDATE;
-typedef FDATE FAR *PFDATE;
+typedef FDATE *PFDATE;
 
 typedef struct _FILESTATUS {     /* fsts  */
     FDATE  fdateCreation;               /* date of file creation   */
@@ -458,7 +554,7 @@ typedef struct _FILESTATUS {     /* fsts  */
     ULONG  cbFileAlloc;                 /* file allocated size     */
     USHORT attrFile;                    /* attributes of the file  */
 } FILESTATUS;
-typedef FILESTATUS FAR *PFILESTATUS;
+typedef FILESTATUS *PFILESTATUS;
 
 /* File info levels: All listed API's */
 #define FIL_STANDARD            1       /* Info level 1, standard file info */
@@ -483,7 +579,8 @@ typedef  struct _MESSAGEFILE
 /**********************************************************************/
 /* substitute Messagebox returns                                      */
 /**********************************************************************/
-#define MB_CANCEL     MB_OK            // windows only provides OK button
+#define MB_OK          0x00000000L
+#define MB_CANCEL      MB_OK            // windows only provides OK button
 #define MB_ENTER       MB_OK
 #define MB_ENTERCANCEL MB_OKCANCEL
 #define MB_INFORMATION MB_ICONINFORMATION
@@ -606,9 +703,8 @@ typedef  struct _MESSAGEFILE
 /* RECTL struct of PM has to be converted to windows structure        */
 /* using primitive functions...                                       */
 /**********************************************************************/
-typedef RECTL FAR  *PRECTL;
-__declspec(dllexport)
-BOOL    APIENTRY WinQueryWindowRect(HWND hwnd, PRECTL prclDest);
+typedef RECTL *PRECTL;
+BOOL    WinQueryWindowRect(HWND hwnd, PRECTL prclDest);
 
 
 /* Macros to make an MPARAM from standard types. */
@@ -659,7 +755,7 @@ BOOL    APIENTRY WinQueryWindowRect(HWND hwnd, PRECTL prclDest);
 //typedef LHANDLE   HPS;      /* hps  */
 //typedef HPS FAR *PHPS;
 
-typedef MRESULT (pascal FAR *PFNWP)(HWND, UINT, WPARAM, LPARAM);
+typedef MRESULT (*PFNWP)(HWND, UINT, WPARAM, LPARAM);
 
 /**********************************************************************/
 /* constants                                                          */
@@ -695,8 +791,8 @@ typedef MRESULT (pascal FAR *PFNWP)(HWND, UINT, WPARAM, LPARAM);
 #define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
 
 #if defined(WIN32BIT) & defined(DLLIMPORTDBCSCP)
-  __declspec(dllimport) unsigned int _dbcs_cp;
-  __declspec(dllimport) unsigned int _IsUnicodeSystem;
+    unsigned int _dbcs_cp;
+    unsigned int _IsUnicodeSystem;
 #else
   extern unsigned int _dbcs_cp;
   extern unsigned int _IsUnicodeSystem;
@@ -704,14 +800,11 @@ typedef MRESULT (pascal FAR *PFNWP)(HWND, UINT, WPARAM, LPARAM);
 BOOL IsUnicodeSystem();
 unsigned int getctype(const char *string, unsigned int n) ;
 VOID initdbcs();
-__declspec(dllexport)
 VOID InitUnicode();
 BOOL UserDefaultLangIsAPLang();
-__declspec(dllexport)
 BOOL IsAPLang(char *pszLang);
 
 VOID initdbcsLang( PSZ pTargetLang );
-__declspec(dllexport)
 BOOL IsDBCS_CP(ULONG ulCP);
 
 
@@ -772,9 +865,9 @@ typedef struct _SWP { /* swp */
     HWND    hwndInsertBehind;
     HWND    hwnd;
 } SWP;
-typedef SWP FAR *PSWP;
+typedef SWP *PSWP;
 
-typedef SIZEL FAR *PSIZEL;
+typedef SIZEL *PSIZEL;
 
 /**********************************************************************/
 /* thread IDs..                                                       */
@@ -782,7 +875,7 @@ typedef SIZEL FAR *PSIZEL;
 /*   very clever solution                                             */
 /**********************************************************************/
 typedef USHORT    TID;      /* tid  */
-typedef TID FAR *PTID;
+typedef TID *PTID;
 
 /**********************************************************************/
 /* SWP defines                                                        */
@@ -806,10 +899,8 @@ typedef TID FAR *PTID;
 #define EQF_SWP_FOCUSDEACTIVATE        0x4000
 
 #define WinIsWindow( a, b )           IsWindow( b )
-__declspec(dllexport)
-BOOL    APIENTRY WinQueryWindowPos(HWND hwnd, PSWP pSwp);
-__declspec(dllexport)
-BOOL   APIENTRY WinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x,
+BOOL    WinQueryWindowPos(HWND hwnd, PSWP pSwp);
+BOOL   WinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x,
                                 LONG y, LONG cx, LONG cy, USHORT fs);
 
 /**********************************************************************/
@@ -819,13 +910,13 @@ typedef struct _VIOFONTCELLSIZE { /* viof */
        LONG cx;
        LONG cy;
        } VIOFONTCELLSIZE;
-typedef VIOFONTCELLSIZE FAR * PVIOFONTCELLSIZE;
+typedef VIOFONTCELLSIZE * PVIOFONTCELLSIZE;
 
 typedef struct _VIOSIZECOUNT { /* vios */
        LONG maxcount;
        LONG count;
        } VIOSIZECOUNT;
-typedef VIOSIZECOUNT FAR * PVIOSIZECOUNT;
+typedef VIOSIZECOUNT * PVIOSIZECOUNT;
 
 // VIOCURSORINFO is not used any more
 // but keep it until it is sure! (RJ 03/02/12)
@@ -835,7 +926,7 @@ typedef struct _VIOCURSORINFO {
         USHORT   cx;     /* cursor width                                */
         USHORT   attr;   /* -1=hidden cursor, any other=normal cursor   */
         } VIOCURSORINFO;
-typedef VIOCURSORINFO FAR *PVIOCURSORINFO;
+typedef VIOCURSORINFO *PVIOCURSORINFO;
 //
 // sizeof(_NEWVIOCURSORINFO) = sizeof(_VIOCURSORINFO)
 // this is prereq and should not be changed! since within TBDOCUMENT
@@ -845,7 +936,7 @@ typedef struct _NEWVIOCURSORINFO {
         ULONG    cEnd;   /* cursor end line                             */
         ULONG    cx;     /* cursor width                                */
        } NEWVIOCURSORINFO;
-typedef NEWVIOCURSORINFO FAR *PNEWVIOCURSORINFO;
+typedef NEWVIOCURSORINFO *PNEWVIOCURSORINFO;
 
 /**********************************************************************/
 /* mouse messages ...                                                 */
@@ -882,10 +973,9 @@ typedef NEWVIOCURSORINFO FAR *PNEWVIOCURSORINFO;
 /**********************************************************************/
 /* draw a bitmap..                                                    */
 /**********************************************************************/
-typedef POINTL  FAR  *PPOINTL;
+typedef POINTL  *PPOINTL;
 
-__declspec(dllexport)
-BOOL  APIENTRY WinDrawBitmap(HDC hdc, HBITMAP hbm, PRECTL pwrcSrc,
+BOOL  WinDrawBitmap(HDC hdc, HBITMAP hbm, PRECTL pwrcSrc,
                              PPOINTL pptlDst, LONG clrFore, LONG clrBack,
                              USHORT fs);
 
@@ -919,7 +1009,6 @@ BOOL  APIENTRY WinDrawBitmap(HDC hdc, HBITMAP hbm, PRECTL pwrcSrc,
 
 #define CLR_BACKGROUND SYSCLR_BACKGROUND
 
-__declspec(dllexport)
 COLORREF UtlGetColorref( LONG lColor );
 
 // set the drive types defines (use same values as used under Win/NT)
@@ -943,7 +1032,6 @@ COLORREF UtlGetColorref( LONG lColor );
 /**********************************************************************/
 /* get arguments from invocation                                      */
 /**********************************************************************/
-__declspec(dllexport)
 void UtlGetArgs
 (
   HINSTANCE hInstance,                 // application instance
@@ -960,9 +1048,7 @@ void UtlGetArgs
 /**********************************************************************/
 /* Function to simulate LM_SETITEMTEXT message                        */
 /**********************************************************************/
-__declspec(dllexport)
 SHORT LBSetItemText( HWND hwnd, SHORT index, PSZ pText );
-__declspec(dllexport)
 SHORT LBSetItemTextW( HWND hwnd, SHORT index, PSZ_W pText );
 
 /**********************************************************************/
@@ -977,15 +1063,11 @@ VOID Oem850ToAnsiBuff( PSZ, PSZ, USHORT );
 
 #define SHEIGHTINCTRL    3
 
-__declspec(dllexport)
 VOID DelCtrlFont ( HWND , USHORT );              //del special font for ctrl
 VOID DelCtrlFontHwnd ( HWND );
-__declspec(dllexport)
 USHORT GetCharSet (VOID);                        // get charset (SHIFTJIS etc.)
-__declspec(dllexport)
 VOID SetCtrlFnt ( HWND , USHORT , USHORT, USHORT  );       //set special font for ctrl
 VOID SetCtrlFntHwnd ( HWND , USHORT  );
-__declspec(dllexport)
 VOID ClearIME
 (
    HWND    hwndDlg                        // handle of dialog window
@@ -998,7 +1080,7 @@ typedef struct _FILELOCK {
     LONG    lOffset;
     LONG    lRange;
 } FILELOCK;
-typedef FILELOCK  FAR  *PFILELOCK;
+typedef FILELOCK  *PFILELOCK;
 
 
 USHORT WPToEQFConv ( PUCHAR pucData, PBYTE  pwzData, USHORT usLen );
@@ -1023,7 +1105,7 @@ USHORT EQFToWPConv ( PUCHAR pucData, PBYTE  pwzData, USHORT usLen );
 /******************************************************************************/
 
 typedef SHORT HELPSUBTABLE;
-typedef SHORT far *PHELPSUBTABLE;
+typedef SHORT *PHELPSUBTABLE;
 
 /******************************************************************************/
 /* HelpTable entry structure                                                  */
@@ -1034,7 +1116,7 @@ typedef struct _HELPTABLE   {  /* ht */
   PHELPSUBTABLE   phstHelpSubTable;
   USHORT          idExtPanel;
 } HELPTABLE;
-typedef HELPTABLE FAR *PHELPTABLE;
+typedef HELPTABLE *PHELPTABLE;
 
 /**********************************************************************/
 /* Defines for system color settings                                  */
@@ -1070,25 +1152,24 @@ typedef struct _DATETIME {
     USHORT  year;                         /* current year                   */
     SHORT   timezone;                     /* minutes of time west of GMT    */
     UCHAR   weekday;                      /* current day of week            */
-} DATETIME, far *PDATETIME;
+} DATETIME, *PDATETIME;
 
 /**********************************************************************/
 /* OS/2 PM functions converted to Windows                             */
 /**********************************************************************/
-__declspec(dllexport)
-BOOL APIENTRY WinRegisterClass( HINSTANCE hInstance, PSZ pszClass,
+#if 0
+BOOL WinRegisterClass( HINSTANCE hInstance, PSZ pszClass,
                                 WNDPROC lpfnWindowProc, LONG lStyle,
                                 SHORT sExtraBytes );
-BOOL APIENTRY WinSetMultWindowPos( HINSTANCE hInstance, PSWP pSwp,
+#endif
+BOOL WinSetMultWindowPos( HINSTANCE hInstance, PSWP pSwp,
                                    USHORT usWindows );
-__declspec(dllexport)
-SHORT APIENTRY WinDrawText(HPS hps, SHORT cchText, PSZ lpchText, PRECTL prcl,
+SHORT WinDrawText(HPS hps, SHORT cchText, PSZ lpchText, PRECTL prcl,
                            LONG clrFore, LONG clrBack, USHORT rgfCmd);
-BOOL  APIENTRY WinMapDlgPoints( HWND hwndDlg, PPOINTL prgwptl, USHORT cwpt,
+BOOL  WinMapDlgPoints( HWND hwndDlg, PPOINTL prgwptl, USHORT cwpt,
                                 BOOL fCalcWindowCoords );
 
-__declspec(dllexport)
-HWND    APIENTRY WinCreateWindow(HWND hwndParent, PSZ pszClass, PSZ pszName,
+HWND    WinCreateWindow(HWND hwndParent, PSZ pszClass, PSZ pszName,
                                  ULONG flStyle, LONG x, LONG y, LONG cx,
                                  LONG cy, HWND hwndOwner,
                                  HWND hwndInsertBehind, USHORT id,
@@ -1098,13 +1179,11 @@ HWND    APIENTRY WinCreateWindow(HWND hwndParent, PSZ pszClass, PSZ pszName,
 /**********************************************************************/
 /* OS/2 DOS Functions converted to Windows                            */
 /**********************************************************************/
-__declspec(dllexport)
-USHORT APIENTRY DosGetDateTime( PDATETIME pDateTime );
+USHORT DosGetDateTime( PDATETIME pDateTime );
 
 /**********************************************************************/
 /* New functions to handle messages not supported by windows          */
 /**********************************************************************/
-__declspec(dllexport)
 SHORT GetNextSelection( HWND hwndLB, SHORT sPos );
 
 /**********************************************************************/
@@ -1117,5 +1196,4 @@ SHORT GetNextSelection( HWND hwndLB, SHORT sPos );
 /**********************************************************************/
 /* allow to fill the rectangle in the selected color                  */
 /**********************************************************************/
-__declspec(dllexport)
 void ERASERECT(HDC hdc, const RECT* pRect, LONG bg);
