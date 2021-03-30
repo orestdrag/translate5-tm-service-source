@@ -11,12 +11,12 @@
 #include "OtmPlugin.h"
 #include "OtmMemoryPlugin.h"
 #include "OtmMemory.h"
-#include "OptionsDialog.h"
+#include "OptionsDialog.H"
 
 
 /*! \brief Abstract base-class for shared memory plugins 
 */
-class __declspec(dllexport) OtmSharedMemoryPlugin: public OtmPlugin
+class OtmSharedMemoryPlugin: public OtmPlugin
 {
 
 public:
