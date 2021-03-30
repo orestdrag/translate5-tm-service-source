@@ -12180,3 +12180,5 @@
 // Text:       The document '%1' is not found.
 // HelpTitle:  OpenTM2 - Help
 // Help:       Document not found
+
+#define ERROR_NOT_ENOUGH_MEMORY                                1092
