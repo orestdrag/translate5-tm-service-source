@@ -9,7 +9,7 @@
 #define _OTMPLUGIN_H_
 
 /*! \brief Abstract base-class for OpenTM2 plugins */
-class __declspec(dllexport) OtmPlugin
+class OtmPlugin
 {
 
 public:
@@ -122,7 +122,7 @@ extern "C" {
 	The function should call PluginManager::registerPlugin() for each avaliable
 	plugin.
 */
-	__declspec(dllexport) unsigned short registerPlugins();   // add return value for P402974
+unsigned short registerPlugins();   // add return value for P402974
 }
 
 /*! Structure for plugin infomation
@@ -147,7 +147,7 @@ extern "C" {
   \param pPluginInfo points to a OTMPLUGINFO structure which receives the plugin information
 	\returns 0 if suucessful or an error code
 */
-__declspec(dllexport) unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo );
+unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo );
 
 
 }
