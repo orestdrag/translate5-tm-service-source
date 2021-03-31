@@ -51,6 +51,8 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
+#include <cwctype>
+
 // define for memory import logging (remove to disable logging)
 #ifdef _DEBUG
   #define IMPORT_LOGGING
@@ -65,22 +67,40 @@
 #define INCL_EQF_TP               // public translation processor functions
 #define INCL_EQF_FOLDER           // folder list and document list functions
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define FILE_BEGIN 0
+#define FILE_CURRENT 1
+#define FILE_END 2
+
+typedef long long INT64;
+
+#define MB_DEFBUTTON1 0x00000000L
+#define MB_DEFBUTTON2 0x00000100L
+#define MB_DEFBUTTON3 0x00000200L
+#define MB_DEFBUTTON4 0x00000300L
+
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
-#include <EQFMEM.ID>              // Translation Memory IDs
+#include "../../../mri/EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
-#include "EQFMEM.ID"              // Translation Memory IDs
-  #include "OTMFUNC.H"            // public defines for function call interface
+#include "OTMFUNC.H"              // public defines for function call interface
 #include <time.h>                 // C library for time functions
 #include "EQFHLOG.H"              // for word count category limits
 #include <EQFQDAM.H>              // Low level TM access functions
-#include "EQFFUNCI.H"           // private defines for function call interface
+#include "EQFFUNCI.H"             // private defines for function call interface
 
 
 #define MEM_START_IMPORT    USER_TASK + 1
@@ -99,7 +119,7 @@ static BOOL    NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge );
 BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID );
 BOOL MemLPExtractValue( PTOKENENTRY *ppTok, SHORT sStartID, SHORT sEndID, PSZ_W pszBuffer, int iBufSize, PBOOL pfSegmentTooLarge );
 
-USHORT APIENTRY MEMINSERTSEGMENT
+USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 ( 
   LONG lMemHandle, 
   PMEMEXPIMPSEG pSegment 
@@ -126,7 +146,7 @@ static void GetElapsedTime( LONG64 *plTime );
 
 USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG usSize, PULONG pusBytesRead );
 
-INT_PTR CALLBACK NTMTagLangDlg( HWND,         // Dialog window handle
+INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
                WINMSG,       // Message ID
                WPARAM,       // Message parameter 1
                LPARAM );     // Message parameter 2
@@ -209,6 +229,13 @@ BOOL MemGUIImportMemory
 /**********************************************/
 /* Callback function for Import ProcessWindow */
 /**********************************************/
+
+#if 0
+//WINAPI
+#define WM_CREATE                       0x0001
+#define WM_DESTROY                      0x0002
+#define WM_INITMENU                     0x0116
+
 MRESULT MemImportCallBack
 (
   PPROCESSCOMMAREA pCommArea,          // ptr to commmunication area
@@ -279,8 +306,10 @@ MRESULT MemImportCallBack
       /* Start processing by posting WM_EQF_PROCESSTASK               */
       /****************************************************************/
     case WM_EQF_INITIALIZE:
+#if 0
       WinPostMsg( hwnd, WM_EQF_PROCESSTASK,
                   MP1FROMSHORT( MEM_START_IMPORT ), 0L );
+#endif
       break;
 
     /******************************************************************/
@@ -357,6 +386,8 @@ MRESULT MemImportCallBack
   return( mResult );
 } /* end of function MemImportCallBack */
 
+#endif
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -413,8 +444,11 @@ VOID EQFMemLoadStart( PPROCESSCOMMAREA pCommArea,
    {
      // Move process-ID which is stored in usRc into the
      // mp1 and issue a message WM_EQF_MEMLOAD_PROCESS
+#if 0
+//WINAPI
      WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                  MP1FROMSHORT( MEM_IMPORT_TASK ), NULL);
+#endif
    } /* endif */
 
    // Free the dialog IDA
@@ -519,17 +553,21 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
 
            if ( pLoadData->hwndNotify && fInform )
            {
+#if 0
              WinSendMsg( pLoadData->hwndNotify, WM_EQF_UPDATESLIDER,
                          MP1FROMSHORT( pCommArea->usComplete ),
                          pLoadData->szObjName );
+#endif
            } /* endif */
          } /* endif */
          // Post the next WM_EQF_MEMLOAD_PROCESS message but check
          // first whether an other message is in the message queue
          // and if it is dispatch it.
          UtlDispatch();
+#if 0
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_IMPORT_TASK ), NULL );
+#endif
          break;
       //-------------------------------------------------------------------
       case MEM_PROCESS_END:
@@ -559,7 +597,9 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
            {
              //--- set the progress indicator to 100 percent
              pCommArea->usComplete = 100;
+#if 0
              WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+#endif
              if ( !pLoadData->hwndNotify )
              {
                UtlErrorHwnd( ERROR_MEM_LOAD_NOSEGMENTS , MB_CANCEL, 2,
@@ -585,7 +625,9 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
          {
             //--- set the progress indicator to 100 percent
             pCommArea->usComplete = 100;
+#if 0
             WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+#endif
 
             if ( pLoadData->pszList )
             {
@@ -740,19 +782,21 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
                   pLoadData->pTokenList->sTokenid = ENDOFLIST;
                   fStopProcessing = FALSE;
 
-                  LOADSTRING( NULLHANDLE, hResMod, MEM_IPTITLE, pCommArea->szBuffer );
+                  //LOADSTRING( NULLHANDLE, hResMod, MEM_IPTITLE, pCommArea->szBuffer );
                   OEMTOANSI( pLoadData->szMemName );
                   sprintf( pCommArea->szTitle, "%s %s", pCommArea->szBuffer,
                            pLoadData->szMemName );
-                  SetWindowText( hWnd, pCommArea->szTitle );
+                  //SetWindowText( hWnd, pCommArea->szTitle );
                   ANSITOOEM( pLoadData->szMemName );
-                  LOADSTRING( NULLHANDLE, hResMod, MEM_IPLINE2, pCommArea->szBuffer );
+                  //LOADSTRING( NULLHANDLE, hResMod, MEM_IPLINE2, pCommArea->szBuffer );
                   sprintf( pCommArea->szText, "%s %s", pCommArea->szBuffer,
                            pLoadData->szFilePath );
+#if 0
                   WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 0 ), NULL );
 
                   WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                               MP1FROMSHORT( MEM_IMPORT_TASK ), NULL );
+#endif
                 } /* endif */
               }
               else
@@ -760,9 +804,11 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
                 pLoadData->pszActFile = NULL; // no more files to follow
                 if ( pLoadData->hwndNotify )
                 {
+#if 0
                   WinSendMsg( pLoadData->hwndNotify, WM_EQF_UPDATESLIDER,
                               MP1FROMSHORT( 100 ),
                               pLoadData->szObjName );
+#endif
                 }
                 else
                 {
@@ -774,9 +820,11 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
             {
               if ( pLoadData->hwndNotify )
               {
+#if 0
                 WinSendMsg( pLoadData->hwndNotify, WM_EQF_UPDATESLIDER,
                             MP1FROMSHORT( 100 ),
                             pLoadData->szObjName );
+#endif
               }
               else
               {
@@ -789,8 +837,8 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
 
                 if ( fSegsLogged )
                 {
-                  pReplAddr[2] = _ltoa( pLoadData->ulSegmentCounter+pLoadData->ulResetSegmentCounter, szNumber, 10 );
-                  pReplAddr[3] = _ltoa( pLoadData->ulInvSegmentCounter, szInvNumber, 10 );
+                  pReplAddr[2] = strcpy(szNumber, std::to_string( pLoadData->ulSegmentCounter+pLoadData->ulResetSegmentCounter ).c_str());
+                  pReplAddr[3] = strcpy(szInvNumber, std::to_string( pLoadData->ulInvSegmentCounter).c_str());
                   pReplAddr[4] = pLoadData->szSegLog;
                   UtlError( MESSAGE_MEM_LOAD_COMPLETED2, MB_OK, 5,
                             &pReplAddr[0], EQF_INFO );
@@ -799,14 +847,14 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
                 {
                   if ( pLoadData->ulResetSegmentCounter ) 
                   {
-                     pReplAddr[2] = _ltoa( pLoadData->ulSegmentCounter, szNumber, 10 );
-                     pReplAddr[3] = _ltoa( pLoadData->ulInvSegmentCounter, szInvNumber, 10 );
-                     pReplAddr[4] = _ltoa( pLoadData->ulResetSegmentCounter, szResetNumber, 10 );
+                     pReplAddr[2] = strcpy(szNumber, std::to_string( pLoadData->ulSegmentCounter).c_str());
+                     pReplAddr[3] = strcpy(szInvNumber, std::to_string( pLoadData->ulInvSegmentCounter).c_str());
+                     pReplAddr[4] = strcpy(szResetNumber, std::to_string( pLoadData->ulResetSegmentCounter).c_str());
                      UtlError( MESSAGE_MEM_LOAD_COMPLETED3, MB_OK, 5,
                                &pReplAddr[0], EQF_INFO );
                   } else {
-                     pReplAddr[2] = _ltoa( pLoadData->ulSegmentCounter, szNumber, 10 );
-                     pReplAddr[3] = _ltoa( pLoadData->ulInvSegmentCounter, szInvNumber, 10 );
+                     pReplAddr[2] = strcpy(szNumber, std::to_string( pLoadData->ulSegmentCounter).c_str());
+                     pReplAddr[3] = strcpy(szInvNumber, std::to_string( pLoadData->ulInvSegmentCounter).c_str());
                      UtlError( MESSAGE_MEM_LOAD_COMPLETED, MB_OK, 4,
                                &pReplAddr[0], EQF_INFO );
                   }
@@ -819,15 +867,19 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
          // Issue message WM_EQF_MEMLOAD_END
          if ( fStopProcessing )
          {
+#if 0
             WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                        MP1FROMSHORT( MEM_END_IMPORT ), NULL );
+#endif
          } /* endif */
          break;
       //----------------------------------------------------------/*@47A*/
       case MEM_DB_CANCEL :                                        /*@47A*/
          //--- CANCEL button selected on replace confirmation message /*@47A*/
+#if 0
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_END_IMPORT ), NULL );
+#endif
          break;                                                   /*@47A*/
       //-------------------------------------------------------------------
       default:
@@ -845,8 +897,10 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
          ANSITOOEM( pLoadData->szMemName );
 
          // Issue message WM_EQF_MEMLOAD_END
+#if 0
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_END_IMPORT ), NULL );
+#endif
          break;
    } /* end switch */
 } /* end of function EQFMemLoadProcess */
@@ -975,8 +1029,10 @@ VOID EQFMemLoadEnd ( PPROCESSCOMMAREA   pCommArea,
      /*****************************************************************/
      if ( pLoadData->hwndNotify )
      {
+#if 0
        WinSendMsg( pLoadData->hwndNotify, WM_EQFN_TASKDONE,
                    TRUE, pLoadData->szObjName );
+#endif
      } /* endif */
    } /* endif */
 
@@ -1041,8 +1097,10 @@ VOID EQFMemLoadEnd ( PPROCESSCOMMAREA   pCommArea,
 
      if ( pLoadData->pDDEMemImp != NULL )
      {
+#if 0
        WinPostMsg( pLoadData->pDDEMemImp->hwndOwner, WM_EQF_DDE_ANSWER,
                    NULL, MP2FROMP(&pLoadData->pDDEMemImp->DDEReturn) );
+#endif
 
      } /* endif */
 
@@ -1062,7 +1120,8 @@ VOID EQFMemLoadEnd ( PPROCESSCOMMAREA   pCommArea,
      pCommArea->pUserIDA = NULL;
 
      // Dismiss the slider window if it had been created
-     EqfRemoveObject( TWBFORCE, hWnd );
+//WINAPI
+     //EqfRemoveObject( TWBFORCE, hWnd );
    } /* endif */
 
 
@@ -1558,7 +1617,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          *ppIda = NULL;
 
          // Dismiss the slider window if it had been created
-         EqfRemoveObject( TWBFORCE, hWnd );
+//WINAPI
+         //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
    } /* endif */
 
@@ -2296,8 +2356,10 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
          /* This is an old TM format display listbox to get           */
          /* source and target language                                */
          /*************************************************************/
+#if 0 //WINAPI
          DIALOGBOX( QUERYACTIVEWINDOW(), NTMTagLangDlg, hResMod,
                     ID_NTM_TAGLANG_DLG, pLIDA, iDlgRc );
+#endif
          if ( iDlgRc )
          {
            usRc = MEM_PROCESS_END;
@@ -2334,7 +2396,8 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
 //+----------------------------------------------------------------------------+
 //|Function flow:     _                                                        |
 //+----------------------------------------------------------------------------+
-INT_PTR CALLBACK NTMTagLangDlg
+#if 0 //WINAPI
+INT_PTR /*CALLBACK*/ NTMTagLangDlg
 (
     HWND   hDlg,    // Dialog window handle
     WINMSG usMsg,   // Message ID
@@ -2483,6 +2546,7 @@ INT_PTR CALLBACK NTMTagLangDlg
 
   return mResult;
 } /* end of function NTMTagLangDlg */
+#endif
 
 static BOOL
 NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the load IDA  area
@@ -2623,7 +2687,7 @@ NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the
        /***************************************************************/
        /* seg. Nr Ok. copy it to put structure                        */
        /***************************************************************/
-       pLIDA->pProposal->setSegmentNum( _wtol(pszStringW) );
+       pLIDA->pProposal->setSegmentNum( wcstol(pszStringW, 0, 10));
      } /* endif */
    } /* endif */
 
@@ -2673,7 +2737,7 @@ NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the
        /***************************************************************/
        /* time stamp Ok. copy it to put structure                     */
        /***************************************************************/
-       pLIDA->pProposal->setUpdateTime( _wtol(pszStringW) );
+       pLIDA->pProposal->setUpdateTime( wcstol(pszStringW, 0, 10) );
      } /* endif */
    } /* endif */
 
@@ -2820,7 +2884,7 @@ NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the
      }
      else if ( pLIDA->fCreateMatchID ) 
      {
-       swprintf( pLIDA->szSegBuffer, L"<MatchSegID ID=\"%s%lu\"/>", pLIDA->szMatchIDPrefixW, pLIDA->ulSequenceNumber );
+       //swprintf( pLIDA->szSegBuffer, "<MatchSegID ID=\"%s%lu\"/>", pLIDA->szMatchIDPrefixW, pLIDA->ulSequenceNumber );
        pLIDA->pProposal->setAddInfo( pLIDA->szSegBuffer );
      } /* endif */      
    } /* endif */      
@@ -3020,8 +3084,10 @@ USHORT MemBatchTMImport
       /****************************************************************/
       /* report end of task to DDE handler                            */
       /****************************************************************/
+#if 0
       WinPostMsg( pMemImp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                   MP2FROMP(&pMemImp->DDEReturn) );
+#endif
    } /* endif */
 
    return( pMemImp->DDEReturn.usRc );
@@ -3211,7 +3277,9 @@ USHORT MemFuncPrepImport
    if ( fOK )
    {
      pLoadIDA->fCreateMatchID = MADPrepareMatchSegIDPrefix( pszTM_ID, pszStoreID, pLoadIDA->szMatchIDPrefix );
+#if 0 //WINAPI
      if ( pLoadIDA->fCreateMatchID  ) MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
+#endif
    } /* endif */
 
    /*******************************************************************/
@@ -3594,7 +3662,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
              PSZ pszImportFile = pLIDA->szFilePath;
              usDosRc = UtlError( NO_VALID_UNICODEFORMAT, MB_YESNO, 1, &pszImportFile, EQF_WARNING );
 
-             usDosRc = (usDosRc == MBID_YES ) ? NO_ERROR : ERROR_INVALID_DATA;  
+             //usDosRc = (usDosRc == MBID_YES ) ? NO_ERROR : ERROR_INVALID_DATA;  
           } /* endif */
         } /* endif */
 
@@ -3619,6 +3687,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
           if ( ulBytesRead && !pLIDA->fEOF )
           {
              BYTE bTest = (BYTE)pConvBuffer[ulBytesRead-1];
+#if 0 //WINAPI
              if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )
              {
                  int iTry = 5;
@@ -3680,6 +3749,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
               }
               ulBytesRead = ulOutPut;
             } /* endif */
+#endif
           }
           else
           {
@@ -3739,7 +3809,7 @@ USHORT MemHandleCodePageValue
 	   if ( UTF16strnicmp( pszCodePage, L"ANSI=", 5 ) == 0)
 	   {
   		  usImpMode = SGMLFORMAT_ANSI;
-		    ulCP = _wtoi(pszCodePage + 5);
+		    ulCP = wcstol(pszCodePage + 5, 0, 10);
 
         if ( usImpMode != pLIDA->usImpMode )
 		    {
@@ -3791,7 +3861,7 @@ USHORT MemHandleCodePageValue
 	   else if ( UTF16strnicmp( pszCodePage, L"ASCII=", 6 ) == 0)
 	   {
   		 usImpMode = SGMLFORMAT_ASCII;
-		   ulCP = _wtoi(pszCodePage + 6);
+		   ulCP = wcstol(pszCodePage + 6, 0, 10);
 
  		   if( usImpMode != pLIDA->usImpMode )
 		   {
@@ -3865,7 +3935,7 @@ USHORT MemHandleCodePageValue
 //
 // call back function used by external memory import code to insert a segment into the memory
 // 
-USHORT APIENTRY MEMINSERTSEGMENT
+USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 ( 
   LONG lMemHandle, 
   PMEMEXPIMPSEG pSegment 
@@ -4062,12 +4132,16 @@ USHORT UtlFindConversionError
 
   while ( !usRC && ulLen )
   {
+#if 0 //WINAPI
     ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
+#endif
 
     // try conversion together with next byte, might be a DBCS character
     if ( !ulOutPut && ulLen )
     {
+#if 0 //WINAPI
       ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
+#endif
       if ( ulOutPut )
       {
         pszBuffer++;
@@ -4081,7 +4155,7 @@ USHORT UtlFindConversionError
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
 
-      usRC = (USHORT)GetLastError();
+      //usRC = (USHORT)GetLastError();
 
       sprintf( szCharacter, "%d (hex %2.2X)", iCh, iCh );
       sprintf( szCP, "%lu", ulCP );
