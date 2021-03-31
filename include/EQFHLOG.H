@@ -375,7 +375,7 @@ typedef struct _LONGNAMEHIST
 //|  Function to add a new record to the history log file                      |
 //|  (the function is located in EQFBFILE.C)                                   |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 USHORT EQFBWriteHistLog
 (
   PSZ      pszFolObjName,    // folder object name (e.g. "E:\\EQF\\SAMPLE1.F00")
@@ -387,7 +387,7 @@ USHORT EQFBWriteHistLog
   HWND     hwndErrMsg        // window handle to use for error messages
 );
 
-__declspec(dllexport)
+
 USHORT EQFBWriteHistLog2
 (
   PSZ      pszFolObjName,    // folder object name (e.g. "E:\\EQF\\SAMPLE1.F00")
@@ -476,7 +476,7 @@ typedef struct _DELHISTLOG
 } DELHISTLOG, *PDELHISTLOG;
 
 // function to correct size values in older records
-__declspec(dllexport) void HistLogCorrectRecSizes( PHISTLOGRECORD pRecord );
+ void HistLogCorrectRecSizes( PHISTLOGRECORD pRecord );
 
 // union covering all types of the variable part of the histlog records
 // union of variable parts of histlog record
@@ -501,5 +501,5 @@ typedef union _HISTLOGVARPART
 // the required size is: sizeof HISTLOGRECORD + max. length of long names + max. size of variable part
 #define MAXHISTLOGRECORDSIZE (sizeof(HISTLOGRECORD)+MAX_LONGFILESPEC+sizeof(HISTLOGVARPART))
 
-__declspec(dllexport) USHORT FolReadLogRecord( HFILE hFile, PHISTLOGRECORD pRecord, PBOOL pfEOF, BOOL fMsg, HWND hwnd );
-__declspec(dllexport) USHORT FolWriteLogRecord( HFILE hFile, PHISTLOGRECORD pRecord, BOOL fMsg, HWND hwnd );
+ USHORT FolReadLogRecord( HFILE hFile, PHISTLOGRECORD pRecord, PBOOL pfEOF, BOOL fMsg, HWND hwnd );
+ USHORT FolWriteLogRecord( HFILE hFile, PHISTLOGRECORD pRecord, BOOL fMsg, HWND hwnd );

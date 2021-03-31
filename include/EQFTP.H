@@ -2,7 +2,8 @@
 	Copyright (c) 1990-2017, International Business Machines Corporation and others. All rights reserved.
 */
 
-#include <richedit.h>
+//WINAPI
+//#include <richedit.h>
 /**********************************************************************/
 /* Allow usage of this include file even if AVIO/PM support has not   */
 /* included                                                           */
@@ -69,6 +70,59 @@ typedef USHORT REDRAW;
 #define REDRAW_LINE  0x01    /* Just the current line               */
 #define REDRAW_BELOW 0x02    /* Current line and all lines below it */
 #define REDRAW_ALL   0x04    /* All lines                           */
+
+typedef HANDLE HGLOBAL;
+typedef DWORD LCID;
+
+typedef struct _charformat2 {
+    UINT  cbSize;
+    DWORD  dwMask;
+    DWORD  dwEffects;
+    LONG  yHeight;
+    LONG  yOffset;
+    COLORREF  crTextColor;
+    BYTE  bCharSet;
+    BYTE  bPitchAndFamily;
+    TCHAR  szFaceName[LF_FACESIZE];
+    WORD  wWeight;
+    SHORT  sSpacing;
+    COLORREF  crBackColor;
+    LCID  lcid;
+    DWORD  dwReserved;
+    SHORT  sStyle;
+    WORD  wKerning;
+    BYTE  bUnderlineType;
+    BYTE  bAnimation;
+    BYTE  bRevAuthor;
+    BYTE  bReserved1;	
+} CHARFORMAT2;
+
+typedef struct _charformat2w {
+  UINT     cbSize;
+  DWORD    dwMask;
+  DWORD    dwEffects;
+  LONG     yHeight;
+  LONG     yOffset;
+  COLORREF crTextColor;
+  BYTE     bCharSet;
+  BYTE     bPitchAndFamily;
+  WCHAR    szFaceName[LF_FACESIZE];
+  WORD     wWeight;
+  SHORT    sSpacing;
+  COLORREF crBackColor;
+  LCID     lcid;
+  union {
+    //DWORD dwReserved;
+    DWORD dwCookie;
+  };
+  DWORD    dwReserved;
+  SHORT    sStyle;
+  WORD     wKerning;
+  BYTE     bUnderlineType;
+  BYTE     bAnimation;
+  BYTE     bRevAuthor;
+  BYTE     bUnderlineColor;
+} CHARFORMAT2W;
 
 /* 'Insert' and 'replace' mode are indicated by changing the shape  */
 /* of the cursor.  Again how these CURSOR_XXXX values actually give */
@@ -656,8 +710,8 @@ typedef struct _PEDATABUFFER
 } PEDATABUFFER, *PPEDATABUFFER;
 
 
-__declspec(dllexport) VOID WriteMTLog( PACTSEGLOGENH2 pSegLog, PSZ_W pszSegSource, PSZ pszPropSourceDoc, PSZ_W pszMetaData, PPEDATABUFFER pPEData );
-__declspec(dllexport) VOID WriteToMTLog( FILE *hMTLogFile, PACTSEGLOGENH2 pSegLog, PSZ_W pszSegSource, PSZ pszPropSourceDoc, PSZ_W pszMetaData, PPEDATABUFFER pPEData );
+ VOID WriteMTLog( PACTSEGLOGENH2 pSegLog, PSZ_W pszSegSource, PSZ pszPropSourceDoc, PSZ_W pszMetaData, PPEDATABUFFER pPEData );
+ VOID WriteToMTLog( FILE *hMTLogFile, PACTSEGLOGENH2 pSegLog, PSZ_W pszSegSource, PSZ pszPropSourceDoc, PSZ_W pszMetaData, PPEDATABUFFER pPEData );
 
 typedef struct _tbdocument
 {
@@ -910,10 +964,10 @@ typedef struct _TEXTTYPETABLE
 
 
 
-__declspec(dllexport)
+
 USHORT     EQFBFileRead( PSZ pszFileName, PTBDOCUMENT pDoc);  // EQFBFILE.C
 USHORT     EQFBFileReadEx( PSZ, PTBDOCUMENT, LONG );
-__declspec(dllexport)
+
 USHORT     EQFBFileReadExW(PSZ, PTBDOCUMENT, LONG );
 VOID EQFBParseGetCP (  PSZ  pszInFile, PULONG pulSrcOemCP, PULONG pulTgtOemCP,
                         PULONG pulSrcAnsiCP, PULONG pulTgtAnsiCP );
@@ -921,7 +975,7 @@ VOID EQFBParseGetCP (  PSZ  pszInFile, PULONG pulSrcOemCP, PULONG pulTgtOemCP,
 #define EQFBFREEDOC_NOTAGTABLEFREE  0x00000001L
 #define EQFBFREEDOC_NOPROTECTFREE   0x00000002L
 #define EQFBFREEDOC_NODOCIDAFREE    0x00000004L
-__declspec(dllexport)
+
 void EQFBFreeDoc( PTBDOCUMENT *ppDoc, ULONG ulOptions );
 
 #define FILEREAD_FPOS  0x02L
@@ -930,9 +984,9 @@ void EQFBFreeDoc( PTBDOCUMENT *ppDoc, ULONG ulOptions );
 
 VOID       EQFBXlateConv(PTBDOCUMENT, PSZ);
 
-__declspec(dllexport)
+
 USHORT     EQFBFileWrite( PSZ pszFileName, PTBDOCUMENT pDoc); // EQFBFILE.C
-__declspec(dllexport)
+
 USHORT     EQFBFileWriteEx( PSZ pszFileName, PTBDOCUMENT pDoc,
                             SHORT sLogTaskID, USHORT usCPConv );
 
@@ -940,60 +994,60 @@ USHORT     EQFBFileWriteEx( PSZ pszFileName, PTBDOCUMENT pDoc,
 #define ADDITIONALTABLE 1            // SegTable not used in standard editor
 PTBSEGMENT EQFBGetSegEx ( PTBDOCUMENT, ULONG,  USHORT );
 
-__declspec(dllexport)
+
 PTBSEGMENT EQFBGetSeg ( PTBDOCUMENT, ULONG  );                // in EQFBDOC.C
-__declspec(dllexport)
+
 PTBSEGMENT EQFBGetSegW ( PTBDOCUMENT, ULONG );               // pSeg->pDataW filled!
-__declspec(dllexport)
+
 PTBSEGMENT   EQFBGetFromBothTables(PTBDOCUMENT, PULONG, PULONG, PULONG);
 
-__declspec(dllexport)
+
 SHORT      EQFBAddSeg( PTBDOCUMENT pDoc, PTBSEGMENT pNewSeg );
-__declspec(dllexport)
+
 SHORT      EQFBAddSegW( PTBDOCUMENT pDoc, PTBSEGMENT pNewSeg );
-__declspec(dllexport)
+
 PTBSEGMENT EQFBGetVisSeg( PTBDOCUMENT pDoc, PULONG    pulSegNum);
-__declspec(dllexport)
+
 PTBSEGMENT SegFileGetVisSeg( PTBDOCUMENT pDoc, PULONG    pulSegNum);
-__declspec(dllexport)
+
 USHORT     EQFBGetReqSeg ( PTBDOCUMENT, SHORT, PULONG, PCHAR_W, PUSHORT, PUSHORT);
-__declspec(dllexport)
+
 MRESULT    EQFBDispClass( HWND, WINMSG, WPARAM, LPARAM, PTBDOCUMENT );
-__declspec(dllexport)
+
 void EQFBSetResetFrameCtrls ( PTBDOCUMENT, HWND, ULONG  );
-__declspec(dllexport)
+
 VOID EQFBInitMenu ( PTBDOCUMENT, USHORT );            // enable/disable AAB item
 
-__declspec(dllexport)
+
 VOID       EQFBGetColors ( PTEXTTYPETABLE );
-__declspec(dllexport)
+
 VOID       EQFBFuncChangeFocusLine ( SHORT );
-__declspec(dllexport)
+
 SHORT      EQFBFuncGetFocusLine();
-__declspec(dllexport)
+
 VOID       EQFBRefreshScreen ( PTBDOCUMENT );        // refresh documents
-__declspec(dllexport)
+
 VOID       EQFBVioSetNewDocSize ( PTBDOCUMENT );     // refresh doc size
 
-__declspec(dllexport)
+
    VOID    ImeMoveConvertWin ( PTBDOCUMENT, HWND, SHORT, SHORT );
-__declspec(dllexport)
+
    VOID    ImeSetFont( PTBDOCUMENT, HWND, PLOGFONT );
 
-__declspec(dllexport)
+
 BOOL EQFBFindDiffEx( PVOID, PBYTE, PBYTE, PSZ_W, PSZ_W, SHORT , PVOID * , PVOID *, ULONG);
-__declspec(dllexport)
+
 BOOL EQFBCountDiff( PVOID pvFuzzyTok, PUSHORT pusTokens, PUSHORT pusDiffs );
-__declspec(dllexport)
+
 BOOL EQFBDoEmptySegCheck( PTBDOCUMENT ); // do empty segment handling
 
-__declspec(dllexport)
+
 BOOL EQFBMousePosition ( PTBDOCUMENT, WINMSG, WPARAM, LPARAM ); // position mouse ...
 
-__declspec(dllexport)
+
 BOOL EQFBMouseOnActSeg ( PTBDOCUMENT, LONG, LONG );
-__declspec(dllexport)
-GLOBALHANDLE  EQFBFuncCopyToHGlob( PTBDOCUMENT );
+
+//GLOBALHANDLE  EQFBFuncCopyToHGlob( PTBDOCUMENT );
 VOID  InitBIDIVars( VOID );
 
 int BiDitransform
@@ -1014,37 +1068,37 @@ int BiDitransform
 #define BDTERR_DIFFERENT_CODEPAGES 3
 #define BDTERR_NOMEM 4
 
-__declspec(dllexport) SHORT EQFBWordCntPerSeg (PVOID, PTOKENENTRY, PSZ_W, SHORT, PULONG,PULONG, ULONG);
-__declspec(dllexport) SHORT EQFBCntAllSrcWords( PTBDOCUMENT pSourceDoc, PTBDOCUMENT pTargetDoc, SHORT sSourceLang, ULONG ulOemCP );
-__declspec(dllexport) SHORT EQFBHistDocSave(PSZ, PTBDOCUMENT, SHORT );
-__declspec(dllexport) SHORT EQFBHistDocSaveEx( PSZ, PTBDOCUMENT, SHORT );
-__declspec(dllexport)   VOID  EQFBShowFindChangeDlg( BOOL );   // show or hide
-__declspec(dllexport)   HWND  EQFBFindChangeDlgHwnd( VOID );   // return handle of FindChange Dlg
-__declspec(dllexport) VOID  EQFBBufRemoveTRNote( PSZ_W, PVOID, PFN, PFN, ULONG );
-__declspec(dllexport) BOOL  EQFBInit ( VOID );                                 // init editor wnd class
-__declspec(dllexport) VOID  EQFBGotoSeg( PTBDOCUMENT,ULONG,USHORT);  // position file at segment
-__declspec(dllexport) VOID EQFBSetNewCellSize ( PTBDOCUMENT, ULONG, ULONG );// set new cell size
-__declspec(dllexport) VOID  EQFBGetUserSettings ( PTBDOCUMENT );
-__declspec(dllexport)   VOID  EQFBGenProcessing( HWND, PTBDOCUMENT, USHORT );
-__declspec(dllexport) void  EQFBFuncTopDoc(PTBDOCUMENT);
+ SHORT EQFBWordCntPerSeg (PVOID, PTOKENENTRY, PSZ_W, SHORT, PULONG,PULONG, ULONG);
+ SHORT EQFBCntAllSrcWords( PTBDOCUMENT pSourceDoc, PTBDOCUMENT pTargetDoc, SHORT sSourceLang, ULONG ulOemCP );
+ SHORT EQFBHistDocSave(PSZ, PTBDOCUMENT, SHORT );
+ SHORT EQFBHistDocSaveEx( PSZ, PTBDOCUMENT, SHORT );
+   VOID  EQFBShowFindChangeDlg( BOOL );   // show or hide
+   HWND  EQFBFindChangeDlgHwnd( VOID );   // return handle of FindChange Dlg
+ VOID  EQFBBufRemoveTRNote( PSZ_W, PVOID, PFN, PFN, ULONG );
+ BOOL  EQFBInit ( VOID );                                 // init editor wnd class
+ VOID  EQFBGotoSeg( PTBDOCUMENT,ULONG,USHORT);  // position file at segment
+ VOID EQFBSetNewCellSize ( PTBDOCUMENT, ULONG, ULONG );// set new cell size
+ VOID  EQFBGetUserSettings ( PTBDOCUMENT );
+   VOID  EQFBGenProcessing( HWND, PTBDOCUMENT, USHORT );
+ void  EQFBFuncTopDoc(PTBDOCUMENT);
   MRESULT HandleEEAWMChar ( HWND, WINMSG, WPARAM, LPARAM, PTBDOCUMENT );
 
-__declspec(dllexport) VOID EQFBSoftLFInsert ( PTBDOCUMENT );
-__declspec(dllexport) VOID EQFBSoftLFRemove ( PTBDOCUMENT );
+ VOID EQFBSoftLFInsert ( PTBDOCUMENT );
+ VOID EQFBSoftLFRemove ( PTBDOCUMENT );
   BOOL EQFBBufAddSoftLF ( PTBDOCUMENT    pDoc,
                           PTBSEGMENT     pSeg,
                           PSZ_W          pData,
                           LONG           lSegStartCol,
                           PLONG          plSegEndCol,
                           PUSHORT        pusSegOffOld );
-__declspec(dllexport) USHORT EQFBAdjustCountInfo( PTBDOCUMENT pDoc, PSZ pszDocObjName );
+ USHORT EQFBAdjustCountInfo( PTBDOCUMENT pDoc, PSZ pszDocObjName );
 
 
 
-__declspec(dllexport)
+
 VOID EQFBBufRemoveSoftLF(HWND, PCHAR_W, PUSHORT, PUSHORT);
 
-__declspec(dllexport)
+
 BOOL   EQFBEnableToolbarItem( HWND  hwnd, USHORT usID );
 
 
@@ -1067,22 +1121,22 @@ typedef struct _REPLLIST
 } REPLLIST, *PREPLLIST;
 
 
-__declspec(dllexport)
+
 USHORT FuzzyLCSReplList     ( PFUZZYTOK, PFUZZYTOK, PREPLLIST *,
                               USHORT, USHORT, PUSHORT, BOOL);
 
 SHORT StrNLFCmp ( PSZ_W, PSZ_W );
 
-__declspec(dllexport)
+
 BOOL   EQFBGetHexNumber( PSZ pszNumber, PUSHORT pusValue );
-__declspec(dllexport)
+
 BOOL EQFBGetHexNumberW( PSZ_W pszNumber, PUSHORT pusValue );
 
-__declspec(dllexport)
+
 VOID   EQFBFillWriteAttrW ( PVOID, PSZ_W, PSZ_W, PSZ_W, PSZ_W, PSZ_W, PSZ_W, PSZ_W );
-__declspec(dllexport)
+
 VOID   EQFBFillWriteAttr ( PVOID, PSZ, PSZ, PSZ, PSZ, PSZ, PSZ, PSZ );
-__declspec(dllexport)
+
 VOID          EQFBResetAllFonts(PTBDOCUMENT);
 //+----------------------------------------------------------------------------+
 //|  symbolic values for colors (which are indeed the actual value for colors) |
@@ -1108,14 +1162,14 @@ typedef enum _VIOCOLORS
    MAXVIOCOLOR
 } VIOCOLORS;
 
-  __declspec(dllexport)
+  
   COLORREF * EQFBGetColorRGB ( );
-__declspec(dllexport)
+
 PUSHORT EQFBGetFontTypesInGroup ( );
-__declspec(dllexport)
+
 CHARFORMAT2 * EQFBGetFontSpecs();
 CHARFORMAT2 * EQFBGetDefFontSpecs();
-__declspec(dllexport)
+
 VOID EQFBSetCharFormat2 ( CHARFORMAT2 *, PSZ, BYTE, BYTE, LONG, SHORT,
                           COLORREF, COLORREF, SHORT, SHORT );
 
@@ -1151,7 +1205,7 @@ VOID   EQFBUpdateDispTable(PTBDOCUMENT pDoc);
 PSZ_W EQFBGetContext( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, ULONG ulSegNum );
 BOOL EQFBRelCurPos(  PTBDOCUMENT pDoc, LONG lCol, LONG  lAbsPos  );
 LONG EQFBGetAbsPos(  PTBDOCUMENT pDoc, LONG lCol  );
-__declspec(dllexport) USHORT EQFBBuildCountCheckSum
+ USHORT EQFBBuildCountCheckSum
 (
   USHORT usCountFlags,
   USHORT usSrcWords,
@@ -1160,8 +1214,8 @@ __declspec(dllexport) USHORT EQFBBuildCountCheckSum
 );
 
 BOOL EQFBIsLFProtected( PTBSEGMENT pSeg, SHORT sOffs);
-__declspec(dllexport) VOID UtlGetUTF16VisibleWhiteSpace (	PTBDOCUMENT, PUSEROPT, ULONG);
-__declspec(dllexport) SHORT EQFBIsNumLFEqual(PSZ_W pData1, PSZ_W pData2, PSHORT sNumLF1, PSHORT sNumLF2);
+ VOID UtlGetUTF16VisibleWhiteSpace (	PTBDOCUMENT, PUSEROPT, ULONG);
+ SHORT EQFBIsNumLFEqual(PSZ_W pData1, PSZ_W pData2, PSHORT sNumLF1, PSHORT sNumLF2);
 USHORT TAIteratedCreateProtectTableW( PTBDOCUMENT pDoc, PTBSEGMENT  pSeg, int iMaxIterations );
 
 // metadata (segment property) structures and functions
@@ -1180,25 +1234,25 @@ typedef struct _MD_PROPOSAL
   BYTE             bFutureUse[200];              // room for enhancements
 } MD_PROPOSAL, *PMD_PROPOSAL;
 
-__declspec(dllexport) BOOL MDGetFirstProposal( PVOID pvMetadata, PMD_PROPOSAL pProposal );
-__declspec(dllexport) BOOL MDGetNextProposal( PMD_PROPOSAL pProposal );
-__declspec(dllexport) void MDEndDialog( PTBDOCUMENT pDoc );
-__declspec(dllexport) BOOL MDStartDialog( PTBDOCUMENT pDoc );
-__declspec(dllexport) BOOL MDRefreshMetadata( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, PSZ_W pszDisplayContext  );
-__declspec(dllexport) BOOL MDGetMetadata( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, BOOL fSegModified  );
-__declspec(dllexport) BOOL MDIsWindowVisible();
-__declspec(dllexport) USHORT MDWriteMetaData( PTBDOCUMENT pDoc );
-__declspec(dllexport) USHORT MDLoadMetaData( PTBDOCUMENT pDoc );
-__declspec(dllexport) void MDShowSegPropDialog( BOOL fShow );
-__declspec(dllexport) BOOL MDDialogWasActive();
-__declspec(dllexport) BOOL MDCommentHasChanged( PTBDOCUMENT pDoc );
-__declspec(dllexport) void MDAddCommentData( PVOID *ppData, PSZ_W pszComment, PSZ_W pszStyle );
+ BOOL MDGetFirstProposal( PVOID pvMetadata, PMD_PROPOSAL pProposal );
+ BOOL MDGetNextProposal( PMD_PROPOSAL pProposal );
+ void MDEndDialog( PTBDOCUMENT pDoc );
+ BOOL MDStartDialog( PTBDOCUMENT pDoc );
+ BOOL MDRefreshMetadata( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, PSZ_W pszDisplayContext  );
+ BOOL MDGetMetadata( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, BOOL fSegModified  );
+ BOOL MDIsWindowVisible();
+ USHORT MDWriteMetaData( PTBDOCUMENT pDoc );
+ USHORT MDLoadMetaData( PTBDOCUMENT pDoc );
+ void MDShowSegPropDialog( BOOL fShow );
+ BOOL MDDialogWasActive();
+ BOOL MDCommentHasChanged( PTBDOCUMENT pDoc );
+ void MDAddCommentData( PVOID *ppData, PSZ_W pszComment, PSZ_W pszStyle );
 
 
 
 
 // Convert the binary segment meta data format to the XML based memory meta data format
-__declspec(dllexport) BOOL MDConvertToMemMetadata( PVOID pvSegMetaData, PSZ_W pszMemMetaData );
+ BOOL MDConvertToMemMetadata( PVOID pvSegMetaData, PSZ_W pszMemMetaData );
 
 // defines used in tokenlists of EQFBxxFuzzyxxx functions
 #define PROP_NOT_REPLACED   0
@@ -1212,10 +1266,10 @@ __declspec(dllexport) BOOL MDConvertToMemMetadata( PVOID pvSegMetaData, PSZ_W ps
 #define MARK_MODIFIED 'M'
 
 
-__declspec(dllexport) USHORT EQFBPrepareFuzzyProp ( PTBDOCUMENT, PSZ_W, PSZ_W, PSZ_W, SHORT , SHORT);
-__declspec(dllexport) USHORT EQFBPrepareFuzzyPropEx ( PTBDOCUMENT, PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, ULONG, ULONG);
-__declspec(dllexport) USHORT EQFBPrepareFuzzyPropEx2( PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, PVOID, PVOID, PBYTE, PBYTE, ULONG, ULONG );
-__declspec(dllexport) USHORT EQFBPrepareFuzzyPropEx3( PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, PVOID, PVOID, PBYTE, PBYTE, ULONG, ULONG, PUSHORT );
-__declspec(dllexport) BOOL EQFBFindDiff ( PTBDOCUMENT, PSZ_W, PSZ_W, SHORT , PFUZZYTOK * , PUSHORT, PUSHORT, ULONG);
-__declspec(dllexport) BOOL EQFBFindWord ( PSZ_W ,SHORT, USHORT, PUSHORT, PUSHORT, ULONG, BOOL );
+ USHORT EQFBPrepareFuzzyProp ( PTBDOCUMENT, PSZ_W, PSZ_W, PSZ_W, SHORT , SHORT);
+ USHORT EQFBPrepareFuzzyPropEx ( PTBDOCUMENT, PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, ULONG, ULONG);
+ USHORT EQFBPrepareFuzzyPropEx2( PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, PVOID, PVOID, PBYTE, PBYTE, ULONG, ULONG );
+ USHORT EQFBPrepareFuzzyPropEx3( PSZ_W, PSZ_W, PSZ_W, SHORT, SHORT, PUSHORT, PVOID, PVOID, PBYTE, PBYTE, ULONG, ULONG, PUSHORT );
+ BOOL EQFBFindDiff ( PTBDOCUMENT, PSZ_W, PSZ_W, SHORT , PFUZZYTOK * , PUSHORT, PUSHORT, ULONG);
+ BOOL EQFBFindWord ( PSZ_W ,SHORT, USHORT, PUSHORT, PUSHORT, ULONG, BOOL );
 

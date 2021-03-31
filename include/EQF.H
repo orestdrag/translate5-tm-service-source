@@ -145,7 +145,7 @@
     #if MSC_VER < 1400
         #ifndef _WCTYPE_T_DEFINED
           //typedef wchar_t wint_t;
-          typedef wchar_t wctype_t;
+          //typedef wchar_t wctype_t;
           #define _WCTYPE_T_DEFINED
         #endif
     #endif
@@ -2656,6 +2656,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define EqfSend2AllHandlers( msg, mp1, mp2) Send2AllHandlers( msg, mp1, mp2)
 #define EqfSend2AllObjects( cls, msg, mp1, mp2)                                \
                                            Send2AllObjects( cls, msg, mp1, mp2)
+#if 0 //WINAPI
 #define EqfQueryHandler( psz)        (HWND)WinSendMsg( EqfQueryObjectManager(),\
                                                 WM_EQF_QUERYHANDLER,           \
                                                 NULL, MP2FROMP(psz) )
@@ -2699,6 +2700,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
                                                 WM_EQF_QUERYHANDLERCOUNT,      \
                                                 NULL,                          \
                                                 NULL)
+#endif
 
 #define EqfQueryActiveFolderlistHwnd()  \
   EqfQueryObject( NULL, clsFOLDERLIST, OBJ_ACTIVE | OBJ_BUSY )
@@ -2715,6 +2717,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Macro interface to workbench code (EQFSTART)                       */
 /**********************************************************************/
+#if 0 //WINAPI
 #define EqfActivateInstance( hwnd, flg)                                        \
                                    (VOID)WinSendMsg( EqfQueryHandler( TWBMAIN),\
                                                 WM_EQF_ACTIVATEINSTANCE,       \
@@ -2723,6 +2726,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define EqfQueryMenuTbl()         (PVOID)WinSendMsg( EqfQueryHandler( TWBMAIN),\
                                                 WM_EQF_QUERYMENUTBL,           \
                                                 NULL, NULL)
+#endif
 #define EqfQueryTwbClient()          (HWND)EqfQueryHandler( TWBMAIN)
 #define EqfQueryTwbFrame()  (HWND)WinQueryWindow( EqfQueryTwbClient(),\
                                                 QW_PARENT, FALSE)
@@ -3377,6 +3381,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
      CPLUSPLUS SendMessage( hwnd, WM_COMMAND, MAKELONG( id, BN_CLICKED ), 0 ); \
     }
 
+#if 0
 // SETTEXTFROMRES:  do a WinSetWindowText from a resource string table string
 #define SETTEXTFROMRES( hwnd, id, buffer, hmod, sid )              \
     if ( LoadString( hmod, sid, buffer, sizeof(buffer) ) ) \
@@ -3388,6 +3393,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 // Load a string from a resource with buffer length specified
 #define LOADSTRINGLEN( hInst, hmod, sid, buffer, len )   \
     LoadString( hmod, sid, buffer, len )
+#endif
 
 /**********************************************************************/
 /* macro to 'anchor' IDA in window structure                          */
@@ -3434,7 +3440,9 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get active window                                                  */
 /**********************************************************************/
+#if 0 //WINAPI
 #define QUERYACTIVEWINDOW() GetActiveWindow()
+#endif
 
 /**********************************************************************/
 /* Get instance (anchor block under PM)                               */
@@ -3545,10 +3553,12 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* modal dialog                                                       */
 /**********************************************************************/
+#if 0 //WINAPI
   #define DIALOGBOX( hwnd, proc, hresource, id, param, rc )    \
     rc = DialogBoxParam( hresource, MAKEINTRESOURCE( id ), hwnd, proc, (LPARAM)param );
   #define DIALOGBOXW( hwnd, proc, hresource, id, param, rc )    \
     rc = DialogBoxParamW( hresource, (PSZ_W)MAKEINTRESOURCE( id ), hwnd, proc, (LPARAM)param );
+#endif
 
 /**********************************************************************/
 /* get system bitmaps                                                 */

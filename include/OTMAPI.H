@@ -12,6 +12,29 @@
 extern "C" {
 #endif
 
+typedef SHORT *PSHORT;
+typedef UINT *PUINT;
+typedef HANDLE HKL;
+
+#define LF_FACESIZE 32
+
+typedef struct tagLOGFONT { 
+    LONG lfHeight; 
+    LONG lfWidth; 
+    LONG lfEscapement; 
+    LONG lfOrientation; 
+    LONG lfWeight; 
+    BYTE lfItalic; 
+    BYTE lfUnderline; 
+    BYTE lfStrikeOut; 
+    BYTE lfCharSet; 
+    BYTE lfOutPrecision ; 
+    BYTE lfClipPrecision ; 
+    BYTE lfQuality ; 
+    BYTE lfPitchAndFamily ; 
+    TCHAR lfFaceName[LF_FACESIZE] ; 
+} LOGFONT, *PLOGFONT;
+
 /**********************************************************************/
 /* 32bit / 16bit compatibility defines (only if EQF.H has not been    */
 /* included yet)                                                      */
@@ -305,6 +328,8 @@ extern "C" {
 #define    EQF_HORZSCROLL          0x01L
 #define    EQF_VERTSCROLL          0x02L
 
+#define __cdecl 
+
 /*------------------------------------------------------------------------------
 * EQF Typedefs
 *-----------------------------------------------------------------------------*/
@@ -523,7 +548,7 @@ typedef struct _SEGINFO
 *               USHORT  slider position value ( 0 ... 100 )
 *       Output: None
 *******************************************************************************/
-__declspec(dllexport) 
+ 
 VOID __cdecl EQFSETSLIDER( HWND, USHORT );
 
 /*******************************************************************************
@@ -543,7 +568,6 @@ VOID __cdecl EQFSETSLIDER( HWND, USHORT );
 *                       dictionaries
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
 USHORT __cdecl EQFINIT (PSTEQFGEN pstEQFGeneric,
                          PSZ       *apszTranslationMemories,
                          PSZ       *apszUserDictionaries);
@@ -561,7 +585,6 @@ USHORT __cdecl EQFINIT (PSTEQFGEN pstEQFGeneric,
 *                               EQFF_NODICTWND - hide dictionary window
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
 USHORT __cdecl EQFCLEAR (USHORT fsFlags);
 
 
@@ -579,7 +602,6 @@ USHORT __cdecl EQFCLEAR (USHORT fsFlags);
 *                      EQF_CLOSE_EXIT    - services are closed and destroyed
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
 USHORT __cdecl EQFCLOSE (EQF_BOOL fShutdown);
 
 
@@ -611,12 +633,10 @@ USHORT __cdecl EQFCLOSE (EQF_BOOL fShutdown);
 *               PUSHORT...return match level (for num)
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
 USHORT __cdecl EQFGETPROP (USHORT  usNum,
                               PSZ     pszBuffer,
                               PUSHORT pusLevel);
 
-__declspec(dllexport)
 USHORT __cdecl EQFGETPROPW (USHORT  usNum,
                                PSZ_W   pszBuffer,
                                PUSHORT pusLevel);
@@ -637,7 +657,6 @@ USHORT __cdecl EQFGETPROPW (USHORT  usNum,
 *        Output: None
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
 USHORT __cdecl EQFGETSOURCE (USHORT usNum );
 
 /*******************************************************************************
@@ -658,11 +677,11 @@ USHORT __cdecl EQFGETSOURCE (USHORT usNum );
 *       Output: PSZ...pointer to buffer with output text (num)
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETDICT (USHORT usNum,
                               PSZ    pszBuffer);
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETDICTW(USHORT usNum,
                               PSZ_W  pszBuffer);
 
@@ -683,12 +702,12 @@ USHORT __cdecl EQFGETDICTW(USHORT usNum,
 *                      (not used in current version)
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFDICTLOOK (PSZ    pszSegmentBuffer,
                                PSZ    pszWord,
                                USHORT usPosition,
                                EQF_BOOL   fSource);
-__declspec(dllexport)
+
 USHORT __cdecl EQFDICTLOOKW(PSZ_W  pszSegmentBuffer,
                                PSZ_W  pszWord,
                                USHORT usPosition,
@@ -708,21 +727,21 @@ USHORT __cdecl EQFDICTLOOKW(PSZ_W  pszSegmentBuffer,
 *               USHORT...segment number of src/tgt segment
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFSAVESEG (PSZ    pszSource,
                               PSZ    pszTarget,
                               USHORT usSegNum);
-__declspec(dllexport)
+
 USHORT __cdecl EQFSAVESEGW(PSZ_W  pszSource,
                               PSZ_W  pszTarget,
                               ULONG  ulSegNum);
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFSAVESEG2W(PSZ_W  pszSource,
                                PSZ_W  pszTarget,
                                PSZ_W  pszContext,
                                ULONG  ulSegNum);
-__declspec(dllexport)
+
 USHORT __cdecl EQFSAVESEG3W(PSZ_W  pszSource,
                                PSZ_W  pszTarget,
                                PSZ_W  pszContext,
@@ -766,26 +785,26 @@ USHORT __cdecl EQFSAVESEG3W(PSZ_W  pszSource,
 *                       will be returned
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFTRANSSEG (PSZ    pszSource,
                                USHORT usSegNum,
                                EQF_BOOL   fForeground,
                                USHORT fsFlags,
                                PSHORT psExact);
-__declspec(dllexport)
+
 USHORT __cdecl EQFTRANSSEGW(PSZ_W  pszSource,
                                ULONG  ulSegNum,
                                EQF_BOOL   fForeground,
                                USHORT fsFlags,
                                PSHORT psExact);
-__declspec(dllexport)
+
 USHORT __cdecl EQFTRANSSEG2W(PSZ_W  pszSource,
                                 PSZ_W  pszContext,
                                 ULONG  ulSegNum,
                                 EQF_BOOL   fForeground,
                                 USHORT fsFlags,
                                 PSHORT psExact);
-__declspec(dllexport)
+
 USHORT __cdecl EQFTRANSSEG3W(PSZ_W  pszSource,
                                 PSZ_W  pszContext,
                                 PVOID  pvMetaData,
@@ -805,7 +824,7 @@ USHORT __cdecl EQFTRANSSEG3W(PSZ_W  pszSource,
 *       Input:  PULONG...pointer to buffer for segment number
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETSEGNUM (PULONG pulSegNum );
 
 /*******************************************************************************
@@ -820,11 +839,11 @@ USHORT __cdecl EQFGETSEGNUM (PULONG pulSegNum );
 *               USHORT...segment number of source/target segment
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFDELSEG (PSZ    pszSource,
                              PSZ    pszTarget,
                              USHORT usSegNum);
-__declspec(dllexport)
+
 USHORT __cdecl EQFDELSEGW(PSZ_W  pszSource,
                              PSZ_W  pszTarget,
                              ULONG  ulSegNum);
@@ -842,10 +861,10 @@ USHORT __cdecl EQFDELSEGW(PSZ_W  pszSource,
 *       Output: PSZ...extracted source for specified target (in buffer)
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFEXTSEG (PSZ    pszBuffer,
                              USHORT usNum);
-__declspec(dllexport)
+
 USHORT __cdecl EQFEXTSEGW(PSZ_W  pszBuffer,
                              ULONG  ulNum);
 
@@ -863,7 +882,7 @@ USHORT __cdecl EQFEXTSEGW(PSZ_W  pszBuffer,
 *       Output: PSZ...pointer to translation memory name
 *               Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETTMNAME (PSZ    pszFolder,
                                 PSZ    pszPath,
                                 PSZ    pszTMName);
@@ -881,7 +900,7 @@ USHORT __cdecl EQFGETTMNAME (PSZ    pszFolder,
 *       Output: PSTEQFGEN...pointer to shared memory or NULL if either no
 *                           access or access released
 *******************************************************************************/
-__declspec(dllexport)
+
 PSTEQFGEN __cdecl EQFSHMEM (PSTEQFGEN pstEQFGen);
 
 
@@ -895,7 +914,7 @@ PSTEQFGEN __cdecl EQFSHMEM (PSTEQFGEN pstEQFGen);
 *       Input:  none
 *       Output: BOOL...TRUE/FALSE - services are running / not running
 *******************************************************************************/
-__declspec(dllexport)
+
 EQF_BOOL __cdecl   EQFSTARTED (VOID);
 
 
@@ -910,7 +929,7 @@ EQF_BOOL __cdecl   EQFSTARTED (VOID);
 *       Input:  none
 *       Output: System Returncode
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFSYSRC (VOID);
 
 
@@ -924,7 +943,7 @@ USHORT __cdecl EQFSYSRC (VOID);
 *       Input:  none
 *       Output: Errorclass
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFERRCLASS (VOID);
 
 
@@ -939,7 +958,7 @@ USHORT __cdecl EQFERRCLASS (VOID);
 *       Input:  none
 *       Output: error ID
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFERRID (VOID);
 
 
@@ -954,9 +973,9 @@ USHORT __cdecl EQFERRID (VOID);
 *       Input:  none
 *       Output: pointer to error message
 *******************************************************************************/
-__declspec(dllexport)
+
 PSZ __cdecl    EQFERRMSG (VOID);
-__declspec(dllexport)
+
 PSZ_W __cdecl  EQFERRMSGW(VOID);
 
 
@@ -971,9 +990,9 @@ PSZ_W __cdecl  EQFERRMSGW(VOID);
 *       Input:  none
 *       Output: pointer to insert item
 *******************************************************************************/
-__declspec(dllexport)
+
 PSZ __cdecl    EQFERRINS       (VOID);
-__declspec(dllexport)
+
 PSZ_W __cdecl  EQFERRINSW      (VOID);
 
 /**********************************************************************
@@ -993,13 +1012,13 @@ PSZ_W __cdecl  EQFERRINSW      (VOID);
 *               PCHAR...pointer to dictionary buffer
 *               Returncode (see EQFRC_... values)
 ***********************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFDUMPSEG (PSZ, PSZ, USHORT, PCHAR, PCHAR );
-__declspec(dllexport)
+
 USHORT __cdecl EQFDUMPSEG2(PSZ, PSZ, USHORT, USHORT, PCHAR, PCHAR);
-__declspec(dllexport)
+
 USHORT __cdecl EQFDUMPSEGW (PSZ_W, PSZ, ULONG, PCHAR_W, PCHAR_W );
-__declspec(dllexport)
+
 USHORT __cdecl EQFDUMPSEG2W(PSZ_W, PSZ, ULONG, USHORT, PCHAR_W, PCHAR_W);
 
 
@@ -1022,7 +1041,7 @@ EQF_XSTART - start the user supplied editor
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
 EQF_BOOL __cdecl 
 EQF_XSTART(  PSZ           pEQFProgPath,   // Program directory of troja
              PSZ           pSegSource  ,   // segmented Source file:
@@ -1053,7 +1072,7 @@ EQF_XSTOP - stop the user supplied editor
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
 EQF_BOOL __cdecl 
 EQF_XSTOP( PSZ       pEQFProgPath,              // Program directory of troja                                 //
            PSTEQFGEN pstEQFGen,                 // generic editor structure                        //
@@ -1133,7 +1152,7 @@ EQF_XSTOP( PSZ       pEQFProgPath,              // Program directory of troja   
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPRESEG (
                 PSZ pTagTable,
                 PSZ   pEdit,
@@ -1142,7 +1161,7 @@ EQF_BOOL __cdecl EQFPRESEG (
                 PSZ   pTempSource,
                 PEQF_BOOL   pfNoSegment);
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPRESEG2 (
                 PSZ pTagTable,
                 PSZ   pEdit,
@@ -1153,7 +1172,7 @@ EQF_BOOL __cdecl EQFPRESEG2 (
                 HWND hSlider,
                 PEQF_BOOL   pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPRESEGEX (
                 PSZ pTagTable,
                 PSZ   pEdit,
@@ -1212,7 +1231,7 @@ EQF_BOOL __cdecl EQFPRESEGEX (
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEG (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1221,7 +1240,7 @@ EQF_BOOL __cdecl EQFPOSTSEG (
                  PSZ       pSegTarget,
                  PTATAG    pTATag);
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEG2 (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1232,7 +1251,7 @@ EQF_BOOL __cdecl EQFPOSTSEG2 (
                  HWND      hSlider,
                  PEQF_BOOL pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEGEX (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1244,7 +1263,7 @@ EQF_BOOL __cdecl EQFPOSTSEGEX (
                  PEQF_BOOL pfKill,
                  LONG      lAnalysisHandle );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEGW (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1255,7 +1274,7 @@ EQF_BOOL __cdecl EQFPOSTSEGW (
                  HWND      hSlider,
                  PEQF_BOOL pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEGWEX (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1319,7 +1338,7 @@ EQF_BOOL __cdecl EQFPOSTSEGWEX (
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTTM  (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1329,7 +1348,7 @@ EQF_BOOL __cdecl EQFPOSTTM  (
                  PTATAG    pTATag,
                  EQF_BOOL  fChange);
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTTM2 (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1343,7 +1362,7 @@ EQF_BOOL __cdecl EQFPOSTTM2 (
                  HWND      hSlider,
                  PEQF_BOOL pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTTMW (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1416,7 +1435,7 @@ EQF_BOOL __cdecl EQFPREUNSEG (
                  PTATAG    pTATag,
                  PEQF_BOOL pfNoUnseg);
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPREUNSEG2 (
                  PSZ       pTagTable,               
                  PSZ       pEdit,
@@ -1427,7 +1446,7 @@ EQF_BOOL __cdecl EQFPREUNSEG2 (
                  PEQF_BOOL pfNoUnseg,
                  PEQF_BOOL pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPREUNSEGW (
                  PSZ       pTagTable,
                  PSZ       pEdit,
@@ -1476,7 +1495,7 @@ EQF_BOOL __cdecl EQFPREUNSEGW (
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTUNSEG (
                    PSZ       pTagTable,
                    PSZ       pEdit,
@@ -1484,7 +1503,7 @@ EQF_BOOL __cdecl EQFPOSTUNSEG (
                    PSZ        pTarget,
                    PTATAG     pTATag);
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTUNSEG2 (
                    PSZ       pTagTable,
                    PSZ       pEdit,
@@ -1493,7 +1512,7 @@ EQF_BOOL __cdecl EQFPOSTUNSEG2 (
                    PTATAG     pTATag,
                    PEQF_BOOL  pfKill );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTUNSEGW (
                    PSZ       pTagTable,
                    PSZ       pEdit,
@@ -1531,7 +1550,7 @@ EQF_BOOL __cdecl EQFPOSTUNSEGW (
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCHECKSEG (
    PSZ pszPrevSrc,                     // previous source segment
    PSZ pszSrc,                         // current source segment
@@ -1541,7 +1560,7 @@ EQF_BOOL __cdecl EQFCHECKSEG (
 );
 
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCHECKSEGW (
    PSZ_W pszPrevSrc,                     // previous source segment
    PSZ_W pszSrc,                         // current source segment
@@ -1550,7 +1569,7 @@ EQF_BOOL __cdecl EQFCHECKSEGW (
    EQF_BOOL fMsg                       // message display requested
 );
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCHECKSEGEXW (
    PSZ_W pszPrevSrc,                     // previous source segment
    PSZ_W pszSrc,                         // current source segment
@@ -1594,7 +1613,7 @@ EQF_BOOL __cdecl EQFCHECKSEGEXW (
 #define CST_NO_MATCH      32
 #define CST_AUTOSUBST_MATCH  64
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCHECKSEGTYPE (
    PSZ  pTagTable,                       // name of tag table
    PSZ_W pszPrevSrc,                     // previous source segment
@@ -1627,7 +1646,7 @@ EQF_BOOL __cdecl EQFCHECKSEGTYPE (
 *
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCOUNTMOD ( PCOUNTINOUT  pCountInOut );
 
 /*******************************************************************************
@@ -1650,9 +1669,9 @@ EQF_BOOL __cdecl EQFCOUNTMOD ( PCOUNTINOUT  pCountInOut );
 *                          EQFRS_AREA_TOO_SMALL passed area too small
 *                          EQFRS_NOMORPH_DICT   no morphological dictionary
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOF ( PSZ, PCHAR, PUSHORT);
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOFW( PSZ_W, PCHAR_W, PUSHORT);
 /*******************************************************************************
 *
@@ -1667,9 +1686,9 @@ USHORT __cdecl EQFPROOFW( PSZ_W, PCHAR_W, PUSHORT);
 *               USHORT     OK - everything okay
 *                          EQFRS_NOADDENDA_DICT   no addenda dictionary
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOFADD ( PSZ );
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOFADDW( PSZ_W );
 
 /*******************************************************************************
@@ -1691,9 +1710,9 @@ USHORT __cdecl EQFPROOFADDW( PSZ_W );
 *                          EQFRS_AREA_TOO_SMALL passed area too small
 *                          EQFRS_NOMORPH_DICT   no morphological dictionary
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOFAID ( PSZ, PCHAR, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFPROOFAIDW( PSZ_W, PCHAR_W, PUSHORT );
 
 /*******************************************************************************
@@ -1709,9 +1728,9 @@ USHORT __cdecl EQFPROOFAIDW( PSZ_W, PCHAR_W, PUSHORT );
 *               USHORT     OK - everything okay
 *                          EQFRS_NOADDENDA_DICT   no addenda dictionary
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFADDABBREV ( PSZ );
-__declspec(dllexport)
+
 USHORT __cdecl EQFADDABBREVW( PSZ_W );
 /*******************************************************************************
 *
@@ -1724,9 +1743,9 @@ USHORT __cdecl EQFADDABBREVW( PSZ_W );
 *       Input:  PSZ...pointer to the term to be edited
 *       Output: Returncode (see EQFRC_... values)
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFDICTEDIT (PSZ    pszTerm );
-__declspec(dllexport)
+
 USHORT __cdecl EQFDICTEDITW(PSZ_W  pszTerm );
 
   /*******************************************************************************
@@ -1741,7 +1760,7 @@ USHORT __cdecl EQFDICTEDITW(PSZ_W  pszTerm );
   *       Return:
   *               PSTEQFGEN   pointer to generic structure
   *******************************************************************************/
-  __declspec(dllexport)
+  
 PSTEQFGEN __cdecl EQFGETSTRUCT( VOID );
 
   /*******************************************************************************
@@ -1756,7 +1775,7 @@ PSTEQFGEN __cdecl EQFGETSTRUCT( VOID );
   *       Return:
   *               PSTEQFGEN   pointer to generic structure
   *******************************************************************************/
-  __declspec(dllexport)
+  
 PSTEQFGEN __cdecl EQFCHECKSTRUCT( VOID );
 
   /*******************************************************************************
@@ -1771,7 +1790,7 @@ PSTEQFGEN __cdecl EQFCHECKSTRUCT( VOID );
   *       Return:
   *               VOID
   *******************************************************************************/
-  __declspec(dllexport)
+  
 VOID __cdecl EQFFREESTRUCT( VOID );
 
   /*******************************************************************************
@@ -1789,14 +1808,14 @@ VOID __cdecl EQFFREESTRUCT( VOID );
   *       Return:
   *               USHORT   error-code: NO_ERROR, ERR_BUFSIZE_EXCEEDED...
   *******************************************************************************/
-  __declspec(dllexport)
+  
 USHORT __cdecl EQFGETNEXTSEG( LONG, PUSHORT, PCHAR, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETNEXTSEGW( LONG, PULONG, PCHAR_W, PUSHORT );
 
-  __declspec(dllexport)
+  
 USHORT __cdecl EQFGETNEXTSEGS( LONG, PUSHORT, PCHAR, PUSHORT, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETNEXTSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
 
   /*******************************************************************************
@@ -1814,14 +1833,14 @@ USHORT __cdecl EQFGETNEXTSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
   *       Return:
   *               USHORT   error-code: NO_ERROR, ERR_BUFSIZE_EXCEEDED...
   *******************************************************************************/
-  __declspec(dllexport)
+  
 USHORT __cdecl EQFGETPREVSEG( LONG, PUSHORT, PCHAR, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETPREVSEGW( LONG, PULONG, PCHAR_W, PUSHORT );
 
-  __declspec(dllexport)
+  
 USHORT __cdecl EQFGETPREVSEGS( LONG, PUSHORT, PCHAR, PUSHORT, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETPREVSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
 
   /*******************************************************************************
@@ -1839,14 +1858,14 @@ USHORT __cdecl EQFGETPREVSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
   *       Return:
   *               USHORT   error-code: NO_ERROR, ERR_BUFSIZE_EXCEEDED...
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETCURSEG( LONG, PUSHORT, PCHAR, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETCURSEGW( LONG, PULONG, PCHAR_W, PUSHORT );      
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETCURSEGS( LONG, PUSHORT, PCHAR, PUSHORT, PUSHORT );
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETCURSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
 
   /*******************************************************************************
@@ -1865,9 +1884,9 @@ USHORT __cdecl EQFGETCURSEGSW( LONG, PULONG, PCHAR_W, PUSHORT, PUSHORT );
   *       Return:
   *               VOID
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFTEXTPANEL(HWND, PSZ *, USHORT, USHORT, PSZ, ULONG);
-__declspec(dllexport)
+
 USHORT __cdecl EQFTEXTPANELW(HWND, PSZ_W *, USHORT, USHORT, PSZ_W, ULONG);
 
   /*******************************************************************************
@@ -1887,7 +1906,7 @@ USHORT __cdecl EQFTEXTPANELW(HWND, PSZ_W *, USHORT, USHORT, PSZ_W, ULONG);
 extern "C" {
 #endif
 
-__declspec(dllexport)
+
   EQF_BOOL __cdecl EQFSHOW( LONG, HWND );
 
 #ifdef __cplusplus
@@ -1937,7 +1956,7 @@ __declspec(dllexport)
   *******************************************************************************/
 
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFCONVERTFILENAMES
 (
    PSZ      pszFolder,
@@ -1967,7 +1986,7 @@ USHORT __cdecl EQFCONVERTFILENAMES
   *       Remarks: pszSegSource and pszSegTarget have to be allocated in size
   *                of MAX_LONGPATH (260 bytes).
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCGETPATHS
 (
    PSZ      pszDocObjName,
@@ -1995,7 +2014,7 @@ USHORT __cdecl EQF_XDOCGETPATHS
   *       Remarks: The correct translation memory (databases) as well as the
   *                dictionaries are activated
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCACT
 (
    PSTEQFGEN pstEQFGen,
@@ -2021,7 +2040,7 @@ USHORT __cdecl EQF_XDOCACT
   *       Remarks: The associated translation memory (databases) as well as the
   *                dictionaries are closed if document is the active one..
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCREMOVE
 (
    PSTEQFGEN pstEQFGen,
@@ -2045,7 +2064,7 @@ USHORT __cdecl EQF_XDOCREMOVE
   *               0=OK
   *
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCADD
 (
    PSTEQFGEN pstEQFGen,
@@ -2071,7 +2090,7 @@ USHORT __cdecl EQF_XDOCADD
   *               0=OK
   *
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCNEXT
 (
    PSTEQFGEN pstEQFGen,
@@ -2097,7 +2116,7 @@ USHORT __cdecl EQF_XDOCNEXT
   *               0=OK
   *
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCNUM
 (
    PSTEQFGEN pstEQFGen,
@@ -2122,7 +2141,7 @@ USHORT __cdecl EQF_XDOCNUM
   *               TM/2 error
   *
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQF_XDOCINLIST
 (
    PSTEQFGEN pstEQFGen,
@@ -2145,7 +2164,7 @@ USHORT __cdecl EQF_XDOCINLIST
   *       Return:
   *               EQF_BOOL
   *******************************************************************************/
-__declspec(dllexport)
+
   EQF_BOOL __cdecl EQFTOCGOTO(LONG, HWND );
 
   /*******************************************************************************
@@ -2163,9 +2182,9 @@ __declspec(dllexport)
   *       Return:
   *               USHORT   error-code: NO_ERROR, ERR_BUFSIZE_EXCEEDED...
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFADDTOTOC  ( LONG, PUSHORT, PCHAR, HWND    );
-__declspec(dllexport)
+
   USHORT __cdecl EQFADDTOTOCW ( LONG, PULONG,  PCHAR_W, HWND  );
 
 
@@ -2179,7 +2198,7 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFWRITEHISTLOG
   (
      PSZ              ,    // folder object name (e.g. "E:\\EQF\\SAMPLE1.F00")
@@ -2200,7 +2219,7 @@ __declspec(dllexport)
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETSOURCELANG
   (
     PSZ      pszFolder,       //  Folder path
@@ -2222,7 +2241,7 @@ __declspec(dllexport)
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETTARGETLANG
   (
     PSZ      pszFolder,       //  Folder path
@@ -2240,7 +2259,7 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETDOCFORMAT
   (
     PSZ      pszFolder,       //  Folder path
@@ -2259,7 +2278,7 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFWORDCNTPERSEG
   (
     PSZ            pszSeg,               // ptr to Segment
@@ -2269,7 +2288,7 @@ __declspec(dllexport)
     PULONG         pulMarkUp              // result for markup
   );
 
-__declspec(dllexport)
+
  USHORT __cdecl EQFWORDCNTPERSEGW
     (
       PSZ_W          pszSeg,               // ptr to Segment
@@ -2297,7 +2316,7 @@ __declspec(dllexport)
 //+----------------------------------------------------------------------------+
 //|Returns:           USHORT     return code of called functions               |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETDOCCONV
 (
    PSZ        pszFolderPath, // folder path; e.g. "C:\EQF\SAMPLE1.F00"
@@ -2343,14 +2362,14 @@ USHORT __cdecl EQFGETDOCCONV
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl EQFBUILDSEGATTR
   (
     PSZ       pszBuffer,                 // in/out: last/new ".qff n=..."
     USHORT    usBufLen,                  // length of buffer
     PSEGINFO  pSegInfo                   // info to be put into Buffer
   );
-__declspec(dllexport)
+
   USHORT __cdecl EQFBUILDSEGATTRW
   (
     PSZ_W     pszBuffer,                 // in/out: last/new ".qff n=..."
@@ -2368,14 +2387,14 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETSEGATTR
   (
     PSZ       pszBuffer,                 // in/out: last/new ":qff n=..."
     USHORT    usBufLen,                  // length of buffer
     PSEGINFO  pSegInfo                   // info to be put into Buffer
   );
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETSEGATTRW
   (
     PSZ_W     pszBuffer,                 // in/out: last/new ":qff n=..."
@@ -2393,7 +2412,7 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFWRITEHISTDOCSAVE
   (
     PSZ       pszDocument,                 // name of document
@@ -2408,7 +2427,7 @@ __declspec(dllexport)
   *       Parameters:
   *       Return:
   *******************************************************************************/
-__declspec(dllexport)
+
   USHORT __cdecl EQFGETTYPE
   (
     PSTEQFGEN      pstEQFGen,            // ptr to nenric structure
@@ -2439,7 +2458,7 @@ __declspec(dllexport)
 #ifdef __cplusplus
 extern "C" {
 #endif
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETSEGCONTEXT
 (
   PSZ_W       pszCurSeg,               // ptr to text of current segment (UTF16)
@@ -2450,7 +2469,7 @@ USHORT __cdecl EQFGETSEGCONTEXT
   ULONG       ulSegNum                 // current segment number for usage with next/prev segment calls
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFCOMPARECONTEXT
 (
   PSZ_W       pszSegContext,           // ptr to context of active segment (UTF16)
@@ -2458,14 +2477,14 @@ USHORT __cdecl EQFCOMPARECONTEXT
   PUSHORT     pusRanking               // ptr to USHORT receiving the result
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFUPDATECONTEXT
 (
   PSZ_W       pszCurSeg,               // ptr to text of current segment (UTF16)
   PSZ_W       pszContext               // ptr to buffer for context string (UTF16)
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFFORMATCONTEXT
 (
   PSZ_W       pszContext,              // ptr to buffer with context string (UTF16)
@@ -2478,21 +2497,21 @@ USHORT __cdecl EQFFORMATCONTEXT
 
 
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFSEGFILECONVERTUNICODE2ASCII
 (
   PSZ         pszInFile,                // ptr to segmented UTF16Unicode file
   PSZ         pszOutFile                // ptr to segmented ASCII file
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFSEGFILECONVERTASCII2UNICODE
 (
   PSZ         pszInFile,                // ptr to segmented ASCII file
   PSZ         pszOutFile                // ptr to segmented UTF16 Unicode file
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFSEGFILECONVERTUNICODE2ASCIILANG
 (
   PSZ         pszInFile,                // ptr to segmented UTF16Unicode file
@@ -2500,7 +2519,7 @@ USHORT __cdecl EQFSEGFILECONVERTUNICODE2ASCIILANG
   PSZ         pszDocLang
 );
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFSEGFILECONVERTASCII2UNICODELANG
 (
   PSZ         pszInFile,                // ptr to segmented ASCII file
@@ -2513,7 +2532,7 @@ USHORT __cdecl EQFSEGFILECONVERTASCII2UNICODELANG
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
 USHORT __cdecl EQFFILECONVERSIONEX
 (
     PSZ         pszInFile,                // ptr to input file
@@ -2524,13 +2543,13 @@ USHORT __cdecl EQFFILECONVERSIONEX
 );
 
 // get the installed version of TranslationManager
-__declspec(dllexport)
+
 ULONG __cdecl EQFGETVERSION( void );
 
 // user exit entry point called by TranslationManager to query
 // user exit specific information
 // a return value of zero indicates successful completion
-__declspec(dllexport)
+
 USHORT __cdecl EQFQUERYEXITINFO
 (
   PSZ pszTagTable,                     // name of the markup table, e.g. "IBMHTM32"
@@ -2583,7 +2602,7 @@ typedef enum _EQFGETINFOID
 } EQFGETINFOID;
 
 // API to retrieve information about the document and its folder
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETINFO
 (
   LONG         lInfo,                  // info handle from EQFSHOW entry point
@@ -2602,7 +2621,7 @@ typedef enum _EQFPATHID
 } EQFPATHID;
 
 // API to build a fully qualified path name of a document contained in a TM folder
-__declspec(dllexport)
+
 USHORT __cdecl EQFBUILDDOCPATH
 (
   PCHAR        pszFolObjName,          // folder object name
@@ -2621,7 +2640,7 @@ typedef struct _EQFTAOPTIONS
 
 // API to get the active analysis options
 // this API can only be called from the user exit entry points EQFPRESEGEX and EQFPOSTSEGEX
-__declspec(dllexport)
+
 USHORT __cdecl EQFGETTAOPTIONS
 (
   HANDLE           hAnalysis,                    // analysis process handle
@@ -2630,7 +2649,7 @@ USHORT __cdecl EQFGETTAOPTIONS
 
 // API to set the analyis options
 // this API can only be called from the user exit entry points EQFPRESEGEX and EQFPOSTSEGEX
-__declspec(dllexport)
+
 USHORT __cdecl EQFSETTAOPTIONS
 (
   HANDLE           hAnalysis,                    // analysis process handle
@@ -2638,14 +2657,14 @@ USHORT __cdecl EQFSETTAOPTIONS
 );
 
 // API call to write a history log save record using the count data stored in a segmented target file
-__declspec(dllexport)
+
 USHORT __cdecl EQFWRITEHISTLOGFROMFILE
 (
   PSZ         pszSegTargetFile                   // fully qualified file name of STARGET file of document
 );
 
 // API call to write counting information using the count data stored in a segmented target file
-__declspec(dllexport)
+
 USHORT __cdecl EQFADJUSTCOUNTINFO
 (
   PSZ         pszSegTargetFile                   // fully qualified file name of STARGET file of document

@@ -169,7 +169,7 @@ SHORT EQFNTMUpdSign
 //                    for consistency reasons, the little overhead was used...
 //+----------------------------------------------------------------------------+
 
-__declspec(dllexport)
+
 SHORT EQFNTMSign
 (
    PVOID  pBTIda,                      // pointer to btree structure
@@ -319,7 +319,7 @@ EQFNTMGetNextNumber
 //+----------------------------------------------------------------------------+
 // Returncode type:   VOID
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 VOID  QDAMInit( VOID );
 
 //+----------------------------------------------------------------------------+

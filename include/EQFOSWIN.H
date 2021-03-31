@@ -404,6 +404,13 @@ USHORT DosNewSize(
 /**********************************************************************/
 /* Defines for DosFindFirst/DosFindNext                               */
 /**********************************************************************/
+        #define FILE_ATTRIBUTE_NORMAL    0x80
+        #define FILE_ATTRIBUTE_READONLY  0x1
+        #define FILE_ATTRIBUTE_HIDDEN    0x2
+        #define FILE_ATTRIBUTE_SYSTEM    0x4
+        #define FILE_ATTRIBUTE_DIRECTORY 0x10
+        #define FILE_ATTRIBUTE_ARCHIVE   0x20
+
         #define FILE_NORMAL     FILE_ATTRIBUTE_NORMAL
         #define FILE_READONLY   FILE_ATTRIBUTE_READONLY
         #define FILE_HIDDEN     FILE_ATTRIBUTE_HIDDEN
@@ -579,6 +586,14 @@ typedef  struct _MESSAGEFILE
 /**********************************************************************/
 /* substitute Messagebox returns                                      */
 /**********************************************************************/
+#define MB_OKCANCEL 0x00000001L
+#define MB_RETRYCANCEL 0x00000005L
+#define MB_YESNO 0x00000004L
+#define MB_YESNOCANCEL 0x00000003L
+#define MB_HELP 0x00004000L
+#define MB_CANCELTRYCONTINUE 0x00000006L
+#define MB_ABORTRETRYIGNORE 0x00000002L
+
 #define MB_OK          0x00000000L
 #define MB_CANCEL      MB_OK            // windows only provides OK button
 #define MB_ENTER       MB_OK
@@ -588,6 +603,14 @@ typedef  struct _MESSAGEFILE
 #define MB_WARNING     MB_ICONEXCLAMATION  /* Message box IDs */
 #define MB_ERROR       MB_ICONSTOP
 #define MB_MOVEABLE    0
+
+#define IDYES    6
+#define IDNO     7
+#define IDRETRY  4
+#define IDOK     1
+#define IDCANCEL 2
+#define IDABORT  3
+#define IDIGNORE 5
 
 #define MBID_YES      IDYES
 #define MBID_NO       IDNO
@@ -628,8 +651,11 @@ typedef  struct _MESSAGEFILE
   #define WinSetFocus(d,f)          SetFocus(f)
   #define GpiSetColor      SetTextColor
   #define GpiSetBackColor  SetBkColor
+//WINAPI
+#if 0
   #define WinPostMsg(a, b, c, d)     CPLUSPLUS   PostMessage(a, b, (WPARAM)c, (LPARAM)d)
   #define WinSendMsg(a, b, c, d)     CPLUSPLUS   SendMessage(a, b, (WPARAM)c, (LPARAM)d)
+#endif
   #define WinDefWindowProc DefWindowProc
   #define GpiQueryFontMetrics(a,b,c) GetTextMetrics(a,c);
   #define FONTMETRICS TEXTMETRIC
@@ -679,7 +705,8 @@ typedef  struct _MESSAGEFILE
     #define DID_OK       IDOK                /* Dialog IDs */
     #define DID_CANCEL   IDCANCEL
     #define DID_ERROR    0xffff        // IDABORT
-  #define WM_INITDLG     WM_INITDIALOG
+//WINAPI
+  //#define WM_INITDLG     WM_INITDIALOG
   #define FACESIZE       35
 
   #define CLR_BLACK      RGB(0,0,0)
