@@ -21,6 +21,9 @@
 #include <restbed>
 #include "OtmMemoryServiceWorker.h"
 #include "OTMMSJSONFactory.h"
+#include "OTMFUNC.H"
+#include "EQFMSG.H"
+#include "EQFTM.H"
 
 typedef unsigned long DWORD;
 typedef unsigned char BYTE;
@@ -144,7 +147,7 @@ int OtmMemoryServiceWorker::verifyAPISession
 {
   if ( this->hSession != 0 ) return( 0 );
 
-  //this->iLastRC = EqfStartSession( &(this->hSession) );
+  this->iLastRC = EqfStartSession( &(this->hSession) );
   if ( this->iLastRC != 0 ) swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   return( this->iLastRC );
 }
@@ -325,11 +328,11 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
         {
           // open the memory
           LONG lHandle = 0;
-          //*piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
+          *piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
           if ( *piErrorCode != 0 )
           {
             unsigned short usRC = 0;
-            //EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
+            EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
             return( restbed::INTERNAL_SERVER_ERROR );
           } /* endif */
           this->vMemoryList[iIndex].lHandle = lHandle;
@@ -366,11 +369,11 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
 
   // open the memory
   LONG lHandle = 0;
-  //*piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
+  *piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
   if ( *piErrorCode != 0 )
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
+    EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
     return( restbed::INTERNAL_SERVER_ERROR );
   } /* endif */
 
@@ -591,7 +594,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   this->vMemoryList[iIndex].pszError = NULL;
 
   // close the memory
-  //EqfCloseMem( this->hSession, lHandle, 0 );
+  EqfCloseMem( this->hSession, lHandle, 0 );
 
   return( 0 );
 } 
@@ -693,13 +696,11 @@ int OtmMemoryServiceWorker::import
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-/*
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
   {
     return( restbed::NOT_FOUND );
   }
-*/
 
   // extract TMX data
   std::string strTmxData;
@@ -766,7 +767,7 @@ int OtmMemoryServiceWorker::import
       this->vMemoryList[iIndex].lHandle = 0;
       this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
       this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-      //EqfCloseMem( this->hSession, lHandle, 0 );
+      EqfCloseMem( this->hSession, lHandle, 0 );
     }
   }
   else
@@ -883,7 +884,7 @@ int OtmMemoryServiceWorker::createMemory
 
   // convert the ISO source language to a OpenTM2 source language name
   char szOtmSourceLang[40];
-  //EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
+  EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -896,7 +897,7 @@ int OtmMemoryServiceWorker::createMemory
   convertUTF8ToASCII( strName );
   if ( strData.empty() )
   {
-    //iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
+    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
   }
   else
   {
@@ -921,18 +922,18 @@ int OtmMemoryServiceWorker::createMemory
       return( restbed::INTERNAL_SERVER_ERROR );
     }
 
-    //iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
+    iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
 
     //DeleteFile( szTempFile );
   }
 
-#if 0
   if ( iRC != 0 )
   {
     char szError[PATH_MAX];
     unsigned short usRC = 0;
     EqfGetLastError( this->hSession, &usRC, szError, sizeof( szError ) );
     buildErrorReturn( iRC, szError, strOutputParms );
+
     switch ( usRC )
     {
       case ERROR_MEM_NAME_INVALID:
@@ -948,7 +949,6 @@ int OtmMemoryServiceWorker::createMemory
     }
     return( iRC );
   }
-#endif
 
   factory->startJSON( strOutputParms );
 
@@ -986,10 +986,10 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", pData->szSource );
   //MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", pData->szSource );
-  //EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
+  EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
   //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", pData->szSource );
-  //EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
+  EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
   //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"targetLang", pData->szSource );
 
@@ -1178,14 +1178,14 @@ int OtmMemoryServiceWorker::search
   wcscpy( pSearchKey->szSource, pData->szSource );
   strcpy( pSearchKey->szDocName, pData->szDocName );
   pSearchKey->lSegmentNum = pData->lSegmentNum;
-  //EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pSearchKey->szSourceLanguage );
-  //EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pSearchKey->szTargetLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pSearchKey->szSourceLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pSearchKey->szTargetLanguage );
   strcpy( pSearchKey->szMarkup, pData->szMarkup );
   wcscpy( pSearchKey->szContext, pData->szContext );
 
   // do the lookup and handle the results
   int iNumOfProposals = pData->iNumOfProposals;
-  //iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+  iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
   if ( iRC == 0 )
   {
     std::wstring strOutputParmsW;
@@ -1206,7 +1206,7 @@ int OtmMemoryServiceWorker::search
   else
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
+    EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
     buildErrorReturn( usRC, pData->szError, strOutputParms );
     iRC = restbed::INTERNAL_SERVER_ERROR;
   } /* endif */
@@ -1327,7 +1327,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   do
   {
     memset( pProposal, 0, sizeof( *pProposal ) );
-    //iRC = EqfSearchMem( this->hSession, lHandle, pData->szSearchString, pData->szSearchPos, pProposal, iActualSearchTime, lOptions );
+    iRC = EqfSearchMem( this->hSession, lHandle, pData->szSearchString, pData->szSearchPos, pProposal, iActualSearchTime, lOptions );
     iActualSearchTime = pData->iSearchTime;
     if ( iRC == 0 )
     {
@@ -1364,7 +1364,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   else
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
+    EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
     buildErrorReturn( usRC, pData->szError, strOutputParms );
     iRC = restbed::INTERNAL_SERVER_ERROR;
   } /* endif */
@@ -1423,22 +1423,22 @@ int OtmMemoryServiceWorker::list
 
   // get buffer size required for the list of TMs
   LONG lBufferSize = 0;
-  //iRC = EqfListMem( this->hSession, NULL, &lBufferSize );
+  iRC = EqfListMem( this->hSession, NULL, &lBufferSize );
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     buildErrorReturn( usRC, this->szLastError, strOutputParms );
     return( restbed::INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // get the list of TMs
   PSZ pszBuffer = new( char[lBufferSize] );
-  //iRC = EqfListMem( this->hSession, pszBuffer, &lBufferSize );
+  iRC = EqfListMem( this->hSession, pszBuffer, &lBufferSize );
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     buildErrorReturn( usRC, this->szLastError, strOutputParms );
     delete pszBuffer;
     return( restbed::INTERNAL_SERVER_ERROR );
@@ -1602,8 +1602,8 @@ int OtmMemoryServiceWorker::updateEntry
   wcscpy( pProp->szTarget, pData->szTarget );
   pProp->lSegmentNum = pData->lSegmentNum;
   strcpy( pProp->szDocName, pData->szDocName );
-  //EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );
-  //EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pProp->szTargetLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pProp->szTargetLanguage );
   pProp->eType = this->getMemProposalType( pData->szType );
   strcpy( pProp->szTargetAuthor, pData->szAuthor );
   if ( pData->szMarkup[0] == 0 )
@@ -1639,11 +1639,11 @@ int OtmMemoryServiceWorker::updateEntry
   wcscpy( pProp->szAddInfo, pData->szAddInfo );
 
   // update the memory
-  //iRC = EqfUpdateMem( this->hSession, lHandle, pProp, 0 );
+  iRC = EqfUpdateMem( this->hSession, lHandle, pProp, 0 );
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
+    EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pProp;
     delete pData;
@@ -1709,7 +1709,6 @@ int OtmMemoryServiceWorker::deleteMem
     removeFromMemoryList( iIndex );
   } /* endif */
 
-#if 0
   // delete the memory
   iRC = EqfDeleteMem( this->hSession, (PSZ)strMemory.c_str() );
   if ( iRC == ERROR_MEMORY_NOTFOUND )
@@ -1723,7 +1722,6 @@ int OtmMemoryServiceWorker::deleteMem
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::INTERNAL_SERVER_ERROR );
   }
-#endif
 
   iRC = restbed::OK;
 
@@ -1767,14 +1765,12 @@ int OtmMemoryServiceWorker::getMem
     removeFromMemoryList( iIndex );
   } /* endif */
 
-/*
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
   {
     if ( hfLog ) fprintf( hfLog, "    Error: memory %s does not exist\n", strMemory.c_str() );
     return( restbed::NOT_FOUND );
   }
-*/
 
   // get a temporary file name for the memory package file or TMX file
   char szTempFile[PATH_MAX];
@@ -1788,22 +1784,22 @@ int OtmMemoryServiceWorker::getMem
   // export the memory in internal format
   if ( strType.compare( "application/xml" ) == 0 )
   {
-    //iRC = EqfExportMem( this->hSession, (PSZ)strMemory.c_str(), szTempFile, TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
+    iRC = EqfExportMem( this->hSession, (PSZ)strMemory.c_str(), szTempFile, TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
-      //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMem failed with rc=%d, error message is %ls\n", iRC, this->szLastError );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
   }
   else if ( strType.compare( "application/zip" ) == 0 )
   {
-    //iRC = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), szTempFile, 0 );
+    iRC = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), szTempFile, 0 );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
-      //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       if ( hfLog ) fprintf( hfLog, "    Error: EqfExportMemInInternalFormat failed with rc=%d, error message is %ls\n", iRC, this->szLastError );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
@@ -2185,7 +2181,6 @@ void importMemoryProcess( void *pvData )
 {
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
 
-#if 0
   // call the OpenTM2 API function
   pData->szError[0] = 0;
   int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT );
@@ -2195,7 +2190,7 @@ void importMemoryProcess( void *pvData )
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
-    //EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
+    EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
     pszError = new char[strlen( pData->szError ) + 1];
     strcpy( pszError, pData->szError );
   }
@@ -2206,7 +2201,6 @@ void importMemoryProcess( void *pvData )
   // cleanup
   //DeleteFile( pData->szInFile );
   delete( pData );
-#endif
 
   return;
 }
