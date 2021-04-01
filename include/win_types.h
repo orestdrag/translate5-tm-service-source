@@ -388,4 +388,33 @@ typedef struct _charformat2w {
   BYTE     bUnderlineColor;
 } CHARFORMAT2W;
 
+/* https://docs.microsoft.com/en-us/windows/win32/api/commdlg/ns-commdlg-openfilenamea */
+typedef struct tagOFNA {
+    DWORD         lStructSize;
+    HWND          hwndOwner;
+    HINSTANCE     hInstance;
+    LPCSTR        lpstrFilter;
+    LPSTR         lpstrCustomFilter;
+    DWORD         nMaxCustFilter;
+    DWORD         nFilterIndex;
+    LPSTR         lpstrFile;
+    DWORD         nMaxFile;
+    LPSTR         lpstrFileTitle;
+    DWORD         nMaxFileTitle;
+    LPCSTR        lpstrInitialDir;
+    LPCSTR        lpstrTitle;
+    DWORD         Flags;
+    WORD          nFileOffset;
+    WORD          nFileExtension;
+    LPCSTR        lpstrDefExt;
+    LPARAM        lCustData;
+    //LPOFNHOOKPROC lpfnHook; //WINAPI https://docs.microsoft.com/en-us/windows/win32/api/commdlg/nc-commdlg-lpofnhookproc
+    LPCSTR        lpTemplateName;
+    //LPEDITMENU    lpEditInfo;
+    LPCSTR        lpstrPrompt;
+    void          *pvReserved;
+    DWORD         dwReserved;
+    DWORD         FlagsEx;
+} OPENFILENAMEA, *LPOPENFILENAMEA;
+
 #endif
