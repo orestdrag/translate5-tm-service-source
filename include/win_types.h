@@ -257,4 +257,135 @@ typedef struct tagLOGFONT {
     TCHAR lfFaceName[LF_FACESIZE] ; 
 } LOGFONT, *PLOGFONT;
 
+typedef struct tagPOINT {
+    LONG x;
+    LONG y;
+} POINT, *PPOINT, *NPPOINT, *LPPOINT;
+
+typedef struct tagMSG {
+    HWND   hwnd;
+    UINT   message;
+    WPARAM wParam;
+    LPARAM lParam;
+    DWORD  time;
+    POINT  pt;
+    DWORD  lPrivate;
+} MSG, *PMSG, *NPMSG, *LPMSG;
+
+typedef struct tagSIZE {
+  LONG cx;
+  LONG cy;
+} SIZE, *PSIZE, *LPSIZE;
+
+typedef struct _SIZE {
+  LONG cx;
+  LONG cy;
+} SIZEL, *PSIZEL, *LPSIZEL;
+
+typedef struct _POINTL {
+  LONG x;
+  LONG y;
+} POINTL, *PPOINTL;
+
+typedef struct tagRECT {
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECT, *PRECT, *NPRECT, *LPRECT;
+
+typedef struct _RECTL {
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECTL, *PRECTL, *LPRECTL;
+
+typedef struct _FILETIME {
+  DWORD dwLowDateTime;
+  DWORD dwHighDateTime;
+} FILETIME, *PFILETIME, *LPFILETIME;
+
+#define MAX_PATH 260
+
+typedef struct _WIN32_FIND_DATA { 
+  DWORD dwFileAttributes; 
+  FILETIME ftCreationTime; 
+  FILETIME ftLastAccessTime; 
+  FILETIME ftLastWriteTime; 
+  DWORD nFileSizeHigh; 
+  DWORD nFileSizeLow; 
+  DWORD dwOID; 
+  TCHAR cFileName[MAX_PATH]; 
+} WIN32_FIND_DATA,*PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;  
+
+typedef struct _WIN32_FIND_DATAA {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    dwReserved0;
+  DWORD    dwReserved1;
+  CHAR     cFileName[MAX_PATH];
+  CHAR     cAlternateFileName[14];
+  DWORD    dwFileType;
+  DWORD    dwCreatorType;
+  WORD     wFinderFlags;
+} WIN32_FIND_DATAA, *PWIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
+
+typedef HANDLE HGLOBAL;
+typedef DWORD LCID;
+
+typedef struct _charformat2 {
+    UINT  cbSize;
+    DWORD  dwMask;
+    DWORD  dwEffects;
+    LONG  yHeight;
+    LONG  yOffset;
+    COLORREF  crTextColor;
+    BYTE  bCharSet;
+    BYTE  bPitchAndFamily;
+    TCHAR  szFaceName[LF_FACESIZE];
+    WORD  wWeight;
+    SHORT  sSpacing;
+    COLORREF  crBackColor;
+    LCID  lcid;
+    DWORD  dwReserved;
+    SHORT  sStyle;
+    WORD  wKerning;
+    BYTE  bUnderlineType;
+    BYTE  bAnimation;
+    BYTE  bRevAuthor;
+    BYTE  bReserved1;	
+} CHARFORMAT2;
+
+typedef struct _charformat2w {
+  UINT     cbSize;
+  DWORD    dwMask;
+  DWORD    dwEffects;
+  LONG     yHeight;
+  LONG     yOffset;
+  COLORREF crTextColor;
+  BYTE     bCharSet;
+  BYTE     bPitchAndFamily;
+  WCHAR    szFaceName[LF_FACESIZE];
+  WORD     wWeight;
+  SHORT    sSpacing;
+  COLORREF crBackColor;
+  LCID     lcid;
+  union {
+    //DWORD dwReserved;
+    DWORD dwCookie;
+  };
+  DWORD    dwReserved;
+  SHORT    sStyle;
+  WORD     wKerning;
+  BYTE     bUnderlineType;
+  BYTE     bAnimation;
+  BYTE     bRevAuthor;
+  BYTE     bUnderlineColor;
+} CHARFORMAT2W;
+
 #endif
