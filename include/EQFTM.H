@@ -3,8 +3,12 @@
 */
 
 #ifndef _OTMFUNC_H_INCLUDED
-  #include "OTMFUNC.H"
+    #include "OTMFUNC.H"
 #endif 
+
+#ifndef _EQF_H_INCLUDED
+    #include "EQF.H"
+#endif
 
 // ************ Translation memory flags ********************************
 #define far
@@ -268,8 +272,7 @@
 /**********************************************************************/
 #define NTM_MARKER "#@@NTM01@@#"
 
-
-typedef long long LONG64;
+#include "win_types.h"
 
 typedef LHANDLE HTM;
 typedef CHAR  SHORT_FN  [FN_LENGTH];

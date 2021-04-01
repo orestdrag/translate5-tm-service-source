@@ -57,46 +57,9 @@
 /**********************************************************************/
 /* substitute typedefs - use definitely far items                     */
 /**********************************************************************/
-#define VOID void
-
-typedef void *HANDLE;
-typedef HANDLE HDC;
-typedef HANDLE HBITMAP;
-typedef HANDLE HICON;
-typedef HANDLE HINSTANCE;
-typedef HINSTANCE HMODULE;
+#include "win_types.h"
 
 typedef char *PSZ;
-
-typedef unsigned short WORD;
-typedef unsigned long DWORD;
-typedef DWORD COLORREF;
-
-typedef long LONG_PTR;
-typedef LONG_PTR LRESULT;
-typedef LONG_PTR LPARAM;
-
-typedef unsigned int UINT_PTR;
-typedef UINT_PTR WPARAM;
-
-typedef void *PVOID;
-typedef unsigned char BYTE;
-typedef BYTE *PBYTE;
-typedef int BOOL;
-typedef unsigned int UINT;
-typedef short SHORT;
-typedef unsigned short USHORT;
-typedef USHORT *PUSHORT;
-typedef long LONG;
-typedef unsigned long ULONG;
-
-#ifdef UNICODE
- typedef WCHAR TCHAR;
-#else
- typedef char TCHAR;
-#endif
-
-#define HFILE HANDLE
 
 /* Extract high and low order parts of 16 and 32 bit quantity */
 //#define LOBYTE(w)       LOUCHAR(w)

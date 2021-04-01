@@ -28,8 +28,6 @@ typedef struct _DOCUMENTINFO
   EQF_BOOL         fTargetLangLocked;             // TRUE = target language is locked and may not be changed by user
 } DOCUMENTINFO, *PDOCUMENTINFO;
 
-typedef int INT_PTR;
-
 INT_PTR /*CALLBACK*/ FIMPODLGPROPPROC( HWND, WINMSG, WPARAM, LPARAM);
 INT_PTR /*CALLBACK*/ FEXPORTDLGPROPPROC( HWND, WINMSG, WPARAM, LPARAM);
 INT_PTR /*CALLBACK*/ FIMPODLGPROC( HWND, WINMSG, WPARAM, LPARAM);
