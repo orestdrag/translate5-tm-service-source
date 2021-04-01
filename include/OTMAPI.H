@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#include "win_types.h"
+
 /**********************************************************************/
 /* 32bit / 16bit compatibility defines (only if EQF.H has not been    */
 /* included yet)                                                      */

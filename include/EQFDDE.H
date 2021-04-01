@@ -614,7 +614,8 @@ typedef struct _BATCHIMPORTPARMS
 /* function prototypes for DDE handler                                */
 /**********************************************************************/
 
-typedef HANDLE HGLOBAL;
+#include "win_types.h"
+
 HGLOBAL MakeDDEDataSeg(USHORT, PSZ, PVOID, USHORT, USHORT );
 
 static BOOL EQFFunctionCmdLine (PDDECLIENT );

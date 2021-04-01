@@ -160,35 +160,13 @@
 
   //#include "commctrl.h"          // common controls
 
+  #include "win_types.h"
   #include "EQFOSWIN.H"
   //#include <dos.h>
   //#include <io.h>
   //#include <share.h>
   #include <fcntl.h>
   #include <assert.h>
-
-  typedef void *PVOID;
-  typedef PVOID HANDLE;
-  typedef HANDLE HMENU;
-  typedef long LONG;
-  typedef LONG HRESULT;
-  typedef LONG *PLONG;
-  typedef unsigned long long ULONG64;
-
-  typedef struct tagPOINT {
-    LONG x;
-    LONG y;
-  } POINT, *PPOINT, *NPPOINT, *LPPOINT;
-
-  typedef struct tagMSG {
-    HWND   hwnd;
-    UINT   message;
-    WPARAM wParam;
-    LPARAM lParam;
-    DWORD  time;
-    POINT  pt;
-    DWORD  lPrivate;
-  } MSG, *PMSG, *NPMSG, *LPMSG;
 
 /**********************************************************************/
 /* Include some of the basic C library functions                      */

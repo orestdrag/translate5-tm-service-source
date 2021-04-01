@@ -12,10 +12,10 @@
 #ifndef _OTMFUNC_H_INCLUDED
 #define _OTMFUNC_H_INCLUDED
 
+#include "win_types.h"
+
 #ifndef _EQF_H_INCLUDED
   typedef long LONG;
-  typedef unsigned long ULONG;
-  typedef short SHORT;
   typedef unsigned short USHORT;
   typedef unsigned short *PUSHORT;
   typedef char CHAR;

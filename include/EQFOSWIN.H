@@ -90,69 +90,6 @@ typedef HANDLE HWND;
 typedef HWND *PHWND;
 typedef int       INT;
 
-typedef struct tagSIZE {
-  LONG cx;
-  LONG cy;
-} SIZE, *PSIZE, *LPSIZE;
-
-typedef struct _SIZE {
-  LONG cx;
-  LONG cy;
-} SIZEL, *PSIZEL, *LPSIZEL;
-
-typedef struct _POINTL {
-  LONG x;
-  LONG y;
-} POINTL, *PPOINTL;
-
-typedef struct tagRECT {
-  LONG left;
-  LONG top;
-  LONG right;
-  LONG bottom;
-} RECT, *PRECT, *NPRECT, *LPRECT;
-
-typedef struct _RECTL {
-  LONG left;
-  LONG top;
-  LONG right;
-  LONG bottom;
-} RECTL, *PRECTL, *LPRECTL;
-
-typedef struct _FILETIME {
-  DWORD dwLowDateTime;
-  DWORD dwHighDateTime;
-} FILETIME, *PFILETIME, *LPFILETIME;
-
-#define MAX_PATH 260
-
-typedef struct _WIN32_FIND_DATA { 
-  DWORD dwFileAttributes; 
-  FILETIME ftCreationTime; 
-  FILETIME ftLastAccessTime; 
-  FILETIME ftLastWriteTime; 
-  DWORD nFileSizeHigh; 
-  DWORD nFileSizeLow; 
-  DWORD dwOID; 
-  TCHAR cFileName[MAX_PATH]; 
-} WIN32_FIND_DATA,*PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;  
-
-typedef struct _WIN32_FIND_DATAA {
-  DWORD    dwFileAttributes;
-  FILETIME ftCreationTime;
-  FILETIME ftLastAccessTime;
-  FILETIME ftLastWriteTime;
-  DWORD    nFileSizeHigh;
-  DWORD    nFileSizeLow;
-  DWORD    dwReserved0;
-  DWORD    dwReserved1;
-  CHAR     cFileName[MAX_PATH];
-  CHAR     cAlternateFileName[14];
-  DWORD    dwFileType;
-  DWORD    dwCreatorType;
-  WORD     wFinderFlags;
-} WIN32_FIND_DATAA, *PWIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
-
 /**********************************************************************/
 /* different KEYBOard defines                                         */
 /* we will leave and use the PM defines all over                      */

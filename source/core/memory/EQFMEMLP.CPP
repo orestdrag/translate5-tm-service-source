@@ -53,6 +53,8 @@
 
 #include <cwctype>
 
+#include "win_types.h"
+
 // define for memory import logging (remove to disable logging)
 #ifdef _DEBUG
   #define IMPORT_LOGGING
@@ -66,14 +68,6 @@
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions
 #define INCL_EQF_TP               // public translation processor functions
 #define INCL_EQF_FOLDER           // folder list and document list functions
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
 
 #define FILE_BEGIN 0
 #define FILE_CURRENT 1

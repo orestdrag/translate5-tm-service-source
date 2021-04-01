@@ -11,7 +11,7 @@
 // max length of a file in an EQF dir
 #define MAX_EQF_PATH            60
 
-typedef void *PVOID;
+#include "win_types.h"
 
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS

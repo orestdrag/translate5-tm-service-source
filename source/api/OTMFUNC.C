@@ -28,6 +28,8 @@
 #include "../core/memory/MemoryFactory.h"
 #include "../core/utilities/LanguageFactory.H"
 
+#include "win_types.h"
+
 
 //#define SESSIONLOG
 
@@ -40,14 +42,6 @@
   int iLogLevel = 0;
   #define EQFAPI_TRIGGER "EQFAPI.TRG"
   #define EQFAPI_LOGFILE "EQFAPI.LOG"
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
 #endif
 
 #ifdef DEBUGAPI

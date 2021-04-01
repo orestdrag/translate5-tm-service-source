@@ -6,11 +6,7 @@
 
 #define _EQFPAPI_H_INCLUDED
 
-// Windows data types
-typedef void *HANDLE;
-typedef wchar_t WCHAR;
-typedef int BOOL;
-typedef long *PLONG;
+#include "win_types.h"
 
 typedef HANDLE HPARSER;                // parser API handle
 typedef HANDLE HPARSSEGFILE;           // handle of a segmented file loaded into memory

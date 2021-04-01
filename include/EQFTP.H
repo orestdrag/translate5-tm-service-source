@@ -71,59 +71,6 @@ typedef USHORT REDRAW;
 #define REDRAW_BELOW 0x02    /* Current line and all lines below it */
 #define REDRAW_ALL   0x04    /* All lines                           */
 
-typedef HANDLE HGLOBAL;
-typedef DWORD LCID;
-
-typedef struct _charformat2 {
-    UINT  cbSize;
-    DWORD  dwMask;
-    DWORD  dwEffects;
-    LONG  yHeight;
-    LONG  yOffset;
-    COLORREF  crTextColor;
-    BYTE  bCharSet;
-    BYTE  bPitchAndFamily;
-    TCHAR  szFaceName[LF_FACESIZE];
-    WORD  wWeight;
-    SHORT  sSpacing;
-    COLORREF  crBackColor;
-    LCID  lcid;
-    DWORD  dwReserved;
-    SHORT  sStyle;
-    WORD  wKerning;
-    BYTE  bUnderlineType;
-    BYTE  bAnimation;
-    BYTE  bRevAuthor;
-    BYTE  bReserved1;	
-} CHARFORMAT2;
-
-typedef struct _charformat2w {
-  UINT     cbSize;
-  DWORD    dwMask;
-  DWORD    dwEffects;
-  LONG     yHeight;
-  LONG     yOffset;
-  COLORREF crTextColor;
-  BYTE     bCharSet;
-  BYTE     bPitchAndFamily;
-  WCHAR    szFaceName[LF_FACESIZE];
-  WORD     wWeight;
-  SHORT    sSpacing;
-  COLORREF crBackColor;
-  LCID     lcid;
-  union {
-    //DWORD dwReserved;
-    DWORD dwCookie;
-  };
-  DWORD    dwReserved;
-  SHORT    sStyle;
-  WORD     wKerning;
-  BYTE     bUnderlineType;
-  BYTE     bAnimation;
-  BYTE     bRevAuthor;
-  BYTE     bUnderlineColor;
-} CHARFORMAT2W;
-
 /* 'Insert' and 'replace' mode are indicated by changing the shape  */
 /* of the cursor.  Again how these CURSOR_XXXX values actually give */
 /* different shapes is handled entirely by the low level system     */
