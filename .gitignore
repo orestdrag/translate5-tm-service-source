@@ -8,3 +8,4 @@ my-config.bat
 /source/plugins/OtmMemoryService/build/
 .vscode/
 *.swp
+tags
