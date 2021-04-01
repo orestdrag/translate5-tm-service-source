@@ -19,7 +19,8 @@ include_directories(${RESTBED_INCLUDE_DIR}
 link_directories(${RESTBED_LIBRARIES})
 
 add_library(OpenTM2 ${OPENTM2_API_DIR}/OTMFUNC.C
-                    ${OPENTM2_MEM_DIR}/EQFMEMLP.CPP)
+                    ${OPENTM2_MEM_DIR}/EQFMEMLP.CPP
+                    ${OPENTM2_MEM_DIR}/EQFMEMEP.CPP)
 
 add_executable(OtmMemoryService
                OtmMemoryService.cpp
