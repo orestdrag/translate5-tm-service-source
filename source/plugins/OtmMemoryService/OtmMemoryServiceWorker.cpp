@@ -24,9 +24,7 @@
 #include "OTMFUNC.H"
 #include "EQFMSG.H"
 #include "EQFTM.H"
-
-typedef unsigned long DWORD;
-typedef unsigned char BYTE;
+#include "win_types.h"
 
 // import memory process
 void importMemoryProcess( void *pvData );

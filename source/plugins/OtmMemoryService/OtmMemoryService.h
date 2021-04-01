@@ -11,10 +11,7 @@
 #ifndef _OtmMemoryService_H_
 #define _OtmMemoryService_H_
 
-typedef int BOOL;
-typedef char *LPSTR;
-typedef void *HANDLE;
-typedef HANDLE HINSTANCE;
+#include "win_types.h"
 
 typedef struct _THREADDATA
 {

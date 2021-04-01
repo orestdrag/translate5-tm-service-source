@@ -24,6 +24,8 @@
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryServiceWorker.h"
 #include "EQFSERNO.H"
+#include "win_types.h"
+
 
 using namespace std;
 using namespace restbed;
@@ -42,14 +44,6 @@ void WriteCrashLog( char *pszLogDir );
 
 // number of entries in the transaction log
 #define NUM_OF_TRANSACTENTRIES 50
-
-#ifndef FALSE
-#define FALSE   0
-#endif
-
-#ifndef TRUE
-#define TRUE    1
-#endif
 
 //  transaction IDs
 typedef enum _TRANSACTID 
