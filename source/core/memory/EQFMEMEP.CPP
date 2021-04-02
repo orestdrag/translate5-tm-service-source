@@ -43,22 +43,22 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 //#include "MemoryUtil.h"
 
+#include "EQF.H"
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
-#include <EQFMEM.ID>              // Translation Memory IDs
+#include "../../../mri/EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
-#include "EQFMEM.ID"              // Translation Memory IDs
-#include "OTMFUNC.H"            // public defines for function call interface
+#include "OTMFUNC.H"              // public defines for function call interface
 
-  #include "EQFFUNCI.H"           // private defines for function call interface
+#include "EQFFUNCI.H"             // private defines for function call interface
 
 
 #define MEM_START_EXPORT    USER_TASK + 1
@@ -173,12 +173,15 @@ BOOL MemGUIExportMemory
     // Make the memory database IDA available to the export programs
     pExportIDA->pIDA = pIDA;
 
-    iDlgRc = MemExpSaveAsDlg( QUERYACTIVEWINDOW(), pExportIDA );
+    //WINAPI QUERYACTIVEWINDOW
+    //iDlgRc = MemExpSaveAsDlg( QUERYACTIVEWINDOW(), pExportIDA );
 
+#if 0 //WINAPI
     if ( iDlgRc || !WinIsWindow( (HAB)NULL, hwnd))  // WM_DESTROYed ?
     {
       fOK = FALSE;
     } /* endif */
+#endif
 
     // If file handle not set then set usRc to FALSE
     if ( !pExportIDA->hFile )
@@ -297,12 +300,14 @@ int MemExpSaveAsDlg( HWND hwndParent, MEM_EXPORT_IDA *pIDA )
 //     OpenFileName.lpstrDefExt        = "EXP";
     OpenFileName.lpstrDefExt        = NULL;   // no default extension, we have to set the extension depending of the format
     OpenFileName.lCustData          = 0L;
-    OpenFileName.lpfnHook           = NULL;
+//WINAPI
+    //OpenFileName.lpfnHook           = NULL;
     OpenFileName.lpTemplateName     = NULL;
 
     do
     {
-      fOK = (GetSaveFileName( &OpenFileName ) != 0 );
+//WINAPI
+      //fOK = (GetSaveFileName( &OpenFileName ) != 0 );
 
       if ( fOK )
       {
@@ -439,6 +444,8 @@ USHORT MemFuncExportProcess
 /* Callback function for Export ProcessWindow */
 /**********************************************/
 
+// WINAPI
+#if 0
 MRESULT MemExportCallBack
 (
   PPROCESSCOMMAREA pCommArea,          // ptr to commmunication area
@@ -483,10 +490,11 @@ MRESULT MemExportCallBack
       } /* endif */
       pCommArea->sSliderID        = ID_MEMEXP_SLIDER;
       pCommArea->sTextID          = ID_MEMEXP_TEXT;
-      LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
+      //LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
       sprintf( pCommArea->szTitle, "%s %s", pCommArea->szBuffer,
                pEIDA->szMemName );
-      LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
+//WINAPI
+     // LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
       sprintf( pCommArea->szText, "%s %s", pCommArea->szBuffer,
                pEIDA->ControlsIda.szPathContent );
       pCommArea->hIcon            = (HPOINTER) UtlQueryULong(QL_TMEMEXPICON); //hiconTMEMEXP;
@@ -593,7 +601,7 @@ MRESULT MemExportCallBack
   } /* endswitch */
   return( mResult );
 } /* end of function MemExportCallBack */
-
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -675,7 +683,8 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     // Dismiss the slider window if it had been created
     if ( hwndErrMsg != HWND_FUNCIF )
     {
-      EqfRemoveObject( TWBFORCE, hWnd );
+//WINAPI
+      //EqfRemoveObject( TWBFORCE, hWnd );
     } /* endif */
   }
   else if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
@@ -686,8 +695,10 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
   {
     // Move process-ID which is stored in usRc into the
     // mp1 and issue a message WM_EQF_MEMEXPORT_PROCESS
+/* //WINAPI
     WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                 MP1FROMSHORT( MEM_EXPORT_TASK ), NULL);
+*/
   } /* endif */
   return( usRC );
 } /* end of function EQFMemExportStart */
@@ -784,8 +795,11 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          UtlDispatch();
 
          //--- Post the next WM_EQF_MEMEXPORT_PROCESS
+#if 0
+//WINAPI
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_EXPORT_TASK ), NULL );
+#endif
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -803,7 +817,8 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        pCommArea->usComplete = 100;
        if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
        {
-         WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+//WINAPI
+         //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
        } /* endif */
 
        if ( pExportIDA->ulSegmentCounter == 0 )
@@ -817,7 +832,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        }
        else if ( !pExportIDA->pszNameList )
        {
-         pReplString[2] = _ltoa( pExportIDA->ulSegmentCounter, szNumber, 10 );
+         pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
          UtlErrorHwnd( MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
                    &(pReplString[0]), EQF_INFO,
                    pExportIDA->hwndErrMsg );
@@ -831,8 +846,11 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        }
        else
        {
+#if 0
+//WINAPI
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_END_EXPORT ), NULL );
+#endif
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -856,8 +874,11 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      }
      else
      {
+#if 0
+//WINAPI
        WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                    MP1FROMSHORT( MEM_END_EXPORT ), NULL );
+#endif
      } /* endif */
      break;
   } /* end switch */
@@ -993,8 +1014,10 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   /********************************************************************/
   if ( pExportIDA->pDDEMemExp != NULL )
   {
+#if 0 //WINAPI
     WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                 MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );
+#endif
   } /* endif */
 
   // continue with next TM if any
@@ -1187,13 +1210,17 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   {
     HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);    
     // GQTODO update process window title bar and outfile static
-    LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
+//WINAPI
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
     sprintf( pCommArea->szText, "%s %s", pCommArea->szBuffer, pExportIDA->ControlsIda.szPathContent );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
     sprintf( pCommArea->szTitle, "%s %s", pCommArea->szBuffer, pExportIDA->szMemName );
 
     // restart TM export
+#if 0
+//WINAPI
     WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_START_EXPORT ), 0L );
+#endif
   }
   else
   {
@@ -1214,7 +1241,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     // Dismiss the slider window if it had been created
     if ( hwndErrMsg != HWND_FUNCIF )
     {
-      EqfRemoveObject( TWBFORCE, hWnd );
+      //EqfRemoveObject( TWBFORCE, hWnd );
     } /* endif */
   }
 
@@ -1668,7 +1695,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
           case MEM_SGMLFORMAT_ANSI:
             {
               SHORT sCP = (SHORT)GetOrgLangCP( NULL, FALSE );
-              swprintf( pszWorkArea + wcslen(pszWorkArea), NTM_CODEPAGE_ANSI_VALUE, sCP );
+              swprintf( pszWorkArea + wcslen(pszWorkArea), sizeof(pszWorkArea + wcslen(pszWorkArea)) / sizeof(*(pszWorkArea + wcslen(pszWorkArea))), NTM_CODEPAGE_ANSI_VALUE, sCP );
             }
             break;
 
@@ -1681,7 +1708,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
 
             {
               SHORT sCP = (SHORT)GetOrgLangCP( NULL, TRUE );
-              swprintf( pszWorkArea + wcslen(pszWorkArea), NTM_CODEPAGE_ASCII_VALUE, sCP );
+              swprintf( pszWorkArea + wcslen(pszWorkArea), sizeof(pszWorkArea + wcslen(pszWorkArea)) / sizeof(*(pszWorkArea + wcslen(pszWorkArea))), NTM_CODEPAGE_ASCII_VALUE, sCP );
             }
             break;
         } /*endswitch */
@@ -1722,7 +1749,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
    //--- Write SegmentID
    if ( usRc == MEM_PROCESS_OK )
    {
-     swprintf( pszWorkArea, L"%010ld\r\n", pExportIDA->ulSegmentCounter );
+     swprintf( pszWorkArea, sizeof pszWorkArea / sizeof * pszWorkArea,  L"%010ld\r\n", pExportIDA->ulSegmentCounter );
      usRc = MemExportWrite( pExportIDA, pszWorkArea );
    } /* endif */
 
@@ -2227,7 +2254,8 @@ USHORT MemBatchTMExport
      pIDA->fBatch     = TRUE;
      pIDA->hwndErrMsg = pMemExp->hwndErrMsg;
      pIDA->pDDEMemExp = pMemExp;
-     pIDA->pIDA       = ACCESSWNDIDA(hwndParent, PMEM_IDA );
+//WINAPI
+     //pIDA->pIDA       = ACCESSWNDIDA(hwndParent, PMEM_IDA );
      pIDA->usEntryInDirToStop        = KEY_DIR_ENTRIES_NUM -1;
      pIDA->fAscii                    = TRUE;
 
@@ -2272,8 +2300,10 @@ USHORT MemBatchTMExport
       /****************************************************************/
       /* report end of task to DDE handler                            */
       /****************************************************************/
+#if 0 //WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postmessagea
       WinPostMsg( pMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                   MP2FROMP(&pMemExp->DDEReturn) );
+#endif
    } /* endif */
 
    return( pMemExp->DDEReturn.usRc );

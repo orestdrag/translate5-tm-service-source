@@ -2441,12 +2441,16 @@ USHORT FctBuildCheckSum
   return( NO_ERROR );
 } /* end of function FctBuildCheckSum */
 
+#endif
+//HERE
+#if 1
 
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
     HANDLE        hMapObject = NULL;
 
-    hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
+//WINAPI
+    //hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
     /*
     if(!hMapObject)
     {
@@ -2464,17 +2468,18 @@ void SetSharingFlag(ULONG ulRefreshFlag)
     }*/
     if ( hMapObject )
     {
-        ULONG *ulActFlag = (ULONG *)MapViewOfFile (hMapObject,
+        /*ULONG *ulActFlag = (ULONG *)MapViewOfFile (hMapObject,
                                   FILE_MAP_WRITE,
                                   0,
                                   0,
                                   0);
         *ulActFlag |= ulRefreshFlag;
-        UnmapViewOfFile(ulActFlag);
+        UnmapViewOfFile(ulActFlag);*/
 
     }
 }
-
+#endif
+#if 0
 
 
 USHORT EqfCreateCntReport(HSESSION hSession,

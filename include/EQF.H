@@ -3434,8 +3434,10 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define ACCESSDLGIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, DWL_USER)
 
+#if 0 // WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga
 #define ACCESSWNDIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, GWL_USERDATA /*0*/ )
+#endif
 
 #define DISMISSDLG( hwnd, value ) \
     EndDialog( hwnd, value )
@@ -6975,7 +6977,7 @@ typedef struct _EXTRAIDA
 #define SGML_FORMAT_FILTERS "SGML ANSI\0*.*\0SGML ASCII\0*.*\0SGML UTF-16\0*.*\0\0\0"
 
 // Prefix for Unicode Text Files (at least WordPad requires this prefix...)
-#define UNICODEFILEPREFIX "\xFF\xFE"
+#define UNICODEFILEPREFIX (char*)"\xFF\xFE"
 #define UTF8FILEPREFIX    "\xEF\xBB\xBF"
 
 // some defines for process handling

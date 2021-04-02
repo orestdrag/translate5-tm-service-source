@@ -69,17 +69,6 @@
 #define INCL_EQF_TP               // public translation processor functions
 #define INCL_EQF_FOLDER           // folder list and document list functions
 
-#define FILE_BEGIN 0
-#define FILE_CURRENT 1
-#define FILE_END 2
-
-typedef long long INT64;
-
-#define MB_DEFBUTTON1 0x00000000L
-#define MB_DEFBUTTON2 0x00000100L
-#define MB_DEFBUTTON3 0x00000200L
-#define MB_DEFBUTTON4 0x00000300L
-
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"

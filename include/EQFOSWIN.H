@@ -825,7 +825,7 @@ typedef TID *PTID;
 #define EQF_SWP_FOCUSACTIVATE          0x2000
 #define EQF_SWP_FOCUSDEACTIVATE        0x4000
 
-#define WinIsWindow( a, b )           IsWindow( b )
+//#define WinIsWindow( a, b )           IsWindow( b )
 BOOL    WinQueryWindowPos(HWND hwnd, PSWP pSwp);
 BOOL   WinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x,
                                 LONG y, LONG cx, LONG cy, USHORT fs);
