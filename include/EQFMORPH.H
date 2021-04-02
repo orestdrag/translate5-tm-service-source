@@ -92,6 +92,8 @@
 
 #define MORPH_LARGE_ZTERMLIST_LEN 32000L         // max block size of larger ZTERM lists
 
+#include "win_types.h"
+
 /**********************************************************************/
 /* Structure to access MORPH_FLAG_OFFSLIST type term lists            */
 /**********************************************************************/

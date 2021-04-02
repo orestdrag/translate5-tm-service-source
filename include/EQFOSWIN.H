@@ -598,7 +598,8 @@ typedef  struct _MESSAGEFILE
   #define WinDefDlgProc(a,b,c,d)         FALSE
   #define WinSetWindowText               SetWindowText
   #define WinEnableWindow                EnableWindow
-  #define WinWindowFromID                GetDlgItem
+  //#define WinWindowFromID                GetDlgItem
+//WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdlgitem
 
   #define WinMessageBox(a,b,c,d,e,f)     MessageBox(b,c,d,f)
     #define MBID_OK      IDOK

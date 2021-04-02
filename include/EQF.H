@@ -555,6 +555,7 @@ typedef PSWP  EQF_PSWP;
     } \
   }
 
+#if 0
 #define CBQUERYSELECTEDITEMTEXT( sItem, hwnd, id, szBuffer ) \
   { \
     sItem = (SHORT)SendDlgItemMessage( hwnd, id, CB_GETCURSEL, 0, 0L ); \
@@ -568,6 +569,7 @@ typedef PSWP  EQF_PSWP;
       szBuffer [0] = EOS; \
     } /* endif */ \
   }
+#endif
 
 #define CBQUERYSELECTEDITEMTEXTHWND( sItem, hwnd, szBuffer ) \
   { \
@@ -606,9 +608,9 @@ typedef PSWP  EQF_PSWP;
 #define POSTEQFCLOSE( hwnd, flag ) \
     CPLUSPLUS PostMessage( hwnd, WM_EQF_CLOSE, flag, 0L )
 
-#define WMCOMMANDID( mp1, mp2 ) LOWORD(mp1)
+//#define WMCOMMANDID( mp1, mp2 ) LOWORD(mp1)
 
-#define WMCOMMANDCMD( mp1, mp2 ) HIWORD(mp1)
+//#define WMCOMMANDCMD( mp1, mp2 ) HIWORD(mp1)
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -2731,16 +2733,20 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define  SENDMESSAGE( hwnd, msg, mp1, mp2 )       \
     SendMessageW( hwnd, msg, mp1, mp2)
 
+#if 0 //WINAPI
 // macro to get the index of the first selected item in a listbox
 #define QUERYSELECTION( hwnd, id )                              \
      (SHORT) SendDlgItemMessage( (hwnd), (id), LB_GETCURSEL, 0, 0L )
+#endif
 
 // macro to get the index of the first selected item in a listbox
 #define QUERYSELECTIONHWND( hwnd )                       \
      (SHORT) CPLUSPLUS SendMessage( (hwnd), LB_GETCURSEL, 0, 0L )
 
+#if 0 //WINAPI
 #define CBQUERYSELECTION( hwnd, id )                              \
      (SHORT) SendDlgItemMessage( (hwnd), (id), CB_GETCURSEL, 0, 0L )
+#endif
 
 // macro to get the index of the first selected item in a listbox
 #define CBQUERYSELECTIONHWND( hwnd )                       \
@@ -2753,6 +2759,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /* 2.) Windows does not send a notification in such cases - we have   */
 /*     to do it on our own...                                         */
 /**********************************************************************/
+#if 0
 #define SELECTITEM( hwnd, id, index )                                  \
   {                                                                      \
      SendDlgItemMessage( hwnd, id, LB_SETCURSEL, index, 0L );            \
@@ -2953,6 +2960,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define IDFROMDRIVE( startid, drive )                           \
    ( (SHORT) (drive - 'A') + startid )
 
+#if 0
 // macro to set the hilite state of a drive icon
 #define SETDRIVE( hwnd, id, flag )                           \
     SendDlgItemMessage( hwnd, id, WM_DRIVEBUTTON_SELECT, flag, 0L )
@@ -3041,8 +3049,11 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
      SendDlgItemMessage( hwnd, id, CB_LIMITTEXT, limit, 0L)
 #define CBSETTEXTLIMITHWND( hwnd, limit )                         \
      CPLUSPLUS SendMessage( hwnd, CB_LIMITTEXT, limit, 0L)
+#endif
+#endif //WINAPI
 
 // macro to get text from a dialog control
+#if 0 //WINAPI
 #define QUERYTEXT( hwnd, id, buffer ) \
     GetDlgItemText( hwnd, id, buffer, sizeof(buffer) )
 #define QUERYTEXTW( hwnd, id, buffer ) \
@@ -3061,6 +3072,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
     { GetDlgItemText( hwnd, id, buffer, sizeof(buffer) ); EQFAnsiToOem( buffer, buffer ); }
 #define OEMQUERYTEXTHWND( hwnd, buffer ) \
     { GetWindowText( hwnd, buffer, sizeof(buffer) ); EQFAnsiToOem( buffer, buffer ); }
+#endif
 
 // macro to convert the characterset from ANSI to OEM
 #define OEMTOANSI( buffer ) \
@@ -3089,6 +3101,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
      } \
   }
 
+#if 0
 // Post a WM_CLOSE message to close window
 #define POSTCLOSE( hwnd, flag ) \
     CPLUSPLUS PostMessage( hwnd, WM_CLOSE, flag, 0L )
@@ -3245,10 +3258,13 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
             (WPARAM)item, 0L )
 #define CBSETTOPINDEX( hwnd, usID, item )    {  }
 #define CBSETTOPINDEXHWND( hwnd, item )    { }
+#endif
 
 // macro to enable or disable a dialog control
+#if 0 //WINAPI
 #define ENABLECTRL( hwnd, id, flag ) \
      EnableWindow( GetDlgItem( hwnd, id ), flag )
+#endif
 #define ENABLECTRLHWND( hwnd, flag ) \
      EnableWindow( hwnd, flag )
 
@@ -3431,16 +3447,20 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* macro to retrieve store IDA pointer from window structure          */
 /**********************************************************************/
+#if 0 //WINAPI
 #define ACCESSDLGIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, DWL_USER)
+#endif
 
 #if 0 // WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga
 #define ACCESSWNDIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, GWL_USERDATA /*0*/ )
 #endif
 
+#if 0
 #define DISMISSDLG( hwnd, value ) \
     EndDialog( hwnd, value )
+#endif
 
 #define COMMANDID( mp1, mp2 ) \
   SHORT1FROMMP1(mp1)
@@ -3500,6 +3520,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* anchor pointer in listbox item handle                              */
 /**********************************************************************/
+#if 0 //WINAPI
 #define SETITEMHANDLE( hwnd, id, index, handle ) \
      SendDlgItemMessage( hwnd, id, LB_SETITEMDATA, index, (ULONG) handle)
 // Add for R012027 start
@@ -3529,6 +3550,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 
 #define CBGETITEMHANDLEHWND( hwnd, index, type ) \
      (type) CPLUSPLUS SendMessage( hwnd, CB_GETITEMDATA, index, 0L)
+#endif
 
 /**********************************************************************/
 /* modal dialog                                                       */

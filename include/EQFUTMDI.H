@@ -11,6 +11,8 @@
 //old:#define GWW_MDIDIALOGHICON       10
 //old:#define GWW_MDIDIALOGEXTRABYTES  12
 
+#include "win_types.h"
+
 #define MAXLEN_MENUNAME          64
 #define MAXLEN_CLASSNAME         64
 #define MAXLEN_CAPTIONTEXT       132
@@ -44,7 +46,7 @@ typedef struct tagMDIDIALOGINFO
 {
    int      dtItemCount ;
 //   FARPROC  lpDialogProc ;
-   WNDPROC  lpDialogProc ;
+   //WNDPROC  lpDialogProc ;
    HFONT    hFont ;
    HMENU    hMenu ;
    HICON    hIcon ;
@@ -76,7 +78,8 @@ BOOL NEAR CreateMDIDialogChildren( HWND, LPSTR, int, HFONT, WORD, WORD ) ;
 __declspec(dllexport)
 BOOL FAR PASCAL RegisterMDIDialog( HINSTANCE ) ;
 __declspec(dllexport)
-HWND FAR PASCAL CreateMDIDialogParam( HINSTANCE, LPCSTR, HWND, FARPROC,
+/*HWND FAR PASCAL CreateMDIDialogParam( HINSTANCE, LPCSTR, HWND, FARPROC,
                                       LPARAM, BOOL, HICON ) ;
+*/
 __declspec(dllexport)
 LRESULT FAR PASCAL MDIDialogProc( HWND, UINT, WPARAM, LPARAM ) ;

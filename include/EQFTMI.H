@@ -1193,6 +1193,7 @@ MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 
 
 // ************* Memory macro definitions *******************************
+#if 0 //WINAPI
 #define EnableOKAndCANCELButton( hDlg, flag )   \
   ENABLECTRL( hDlg, PID_PB_OK, flag );          \
   ENABLECTRL( hDlg, PID_PB_CANCEL, flag );
@@ -1219,6 +1220,7 @@ MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
      ENABLECTRL( hDlg, ID_SERVLIST_NAME_CANCEL_PB, fEnable );                                           \
      ENABLECTRL( hDlg, ID_SERVLIST_NAME_HELP_PB, fEnable );                                           \
   }
+#endif
 
 //=======================================================================
 //prototypes and definitions for TM utilities
