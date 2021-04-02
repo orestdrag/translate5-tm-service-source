@@ -21,6 +21,15 @@
 #define FALSE 0
 #endif
 
+#define FILE_BEGIN 0
+#define FILE_CURRENT 1
+#define FILE_END 2
+
+#define MB_DEFBUTTON1 0x00000000L
+#define MB_DEFBUTTON2 0x00000100L
+#define MB_DEFBUTTON3 0x00000200L
+#define MB_DEFBUTTON4 0x00000300L
+
 typedef wchar_t WCHAR;
 
 typedef char CHAR;
@@ -387,6 +396,43 @@ typedef struct _charformat2w {
   BYTE     bRevAuthor;
   BYTE     bUnderlineColor;
 } CHARFORMAT2W;
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/commdlg/ns-commdlg-openfilenamea */
+
+#define OFN_NOCHANGEDIR        0x00000008
+#define OFN_PATHMUSTEXIST      0x00000800
+#define OFN_NOTESTFILECREATE   0x00010000
+#define OFN_EXPLORER           0x00080000
+#define OFN_NODEREFERENCELINKS 0x00100000
+#define OFN_LONGNAMES          0x00200000
+#define OFN_ENABLESIZING       0x00800000
+
+
+/* http://www.jasinskionline.com/WindowsApi/ref/o/openfilename.html */
+
+typedef struct tagOFN {
+    DWORD         lStructSize;
+    HWND          hwndOwner;
+    HINSTANCE     hInstance;
+    LPCSTR        lpstrFilter;
+    LPSTR         lpstrCustomFilter;
+    DWORD         nMaxCustFilter;
+    DWORD         nFilterIndex;
+    LPSTR         lpstrFile;
+    DWORD         nMaxFile;
+    LPSTR         lpstrFileTitle;
+    DWORD         nMaxFileTitle;
+    LPCSTR        lpstrInitialDir;
+    LPCSTR        lpstrTitle;
+    DWORD         Flags;
+    WORD          nFileOffset;
+    WORD          nFileExtension;
+    LPCSTR        lpstrDefExt;
+    LPARAM        lCustData;
+    //LPOFNHOOKPROC lpfnHook;
+//WINAPI https://docs.microsoft.com/en-us/windows/win32/api/commdlg/nc-commdlg-lpofnhookproc
+    LPCSTR        lpTemplateName;
+} OPENFILENAME;
 
 /* https://docs.microsoft.com/en-us/windows/win32/api/commdlg/ns-commdlg-openfilenamea */
 typedef struct tagOFNA {
