@@ -37,22 +37,22 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #define INCL_EQF_DLGUTILS         // dialog utilities
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 #include "EQFMORPH.H"
 
 #undef _WPTMIF                         // we don't care about WP I/F
-#include "eqfhelp.id"                  // help resource IDs
-#include "eqfhlp1.h"                   // first part of help tables
-#include "eqfmsg.htb"                          // message help table
+//#include "eqfhelp.id"                  // help resource IDs
+//#include "eqfhlp1.h"                   // first part of help tables
+//#include "eqfmsg.htb"                          // message help table
 
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
-#include <EQFMEM.ID>              // Translation Memory IDs
+#include "../../../mri/EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
 #include <EQFQDAM.H>            // Low level TM access functions
 #include <OTMFUNC.H>              // function call I/F
@@ -152,6 +152,7 @@ extern HELPSUBTABLE hlpsubtblTMPropDlg[];
 //+----------------------------------------------------------------------------+
 //|Function flow:     _                                                        |
 //+----------------------------------------------------------------------------+
+#if 0 //WINAPI
 INT_PTR CALLBACK MEMCREATEDLG( HWND      hDlg,
                                WINMSG    usMessage,
                                WPARAM    mp1,
@@ -241,7 +242,7 @@ INT_PTR CALLBACK MEMCREATEDLG( HWND      hDlg,
       /*************************************************************/
 
       //--- set focus to Name entry field
-      WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ) );
+      //WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ) );
       mResult = MRFROMSHORT(DIALOGINITRETURN( TRUE ));
       break;
       // ---------------------------------------------------------------------
@@ -261,7 +262,7 @@ INT_PTR CALLBACK MEMCREATEDLG( HWND      hDlg,
       break;
 
     case WM_DESTROY:
-      pCIDA = ACCESSDLGIDA( hDlg, PTMX_CREATE_IDA );
+      //pCIDA = ACCESSDLGIDA( hDlg, PTMX_CREATE_IDA );
       if ( pCIDA ) delete( pCIDA );
       break;
 
@@ -274,6 +275,7 @@ INT_PTR CALLBACK MEMCREATEDLG( HWND      hDlg,
 
   return mResult;
 } /* end of function MEMCREATEDLG */
+#endif
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -308,7 +310,8 @@ VOID MemCreateControl( HWND hDlg, USHORT usId  )
   USHORT          usLast;      // last selected drive ID
 
   // Get address of dialog procedure data area
-  pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+  //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+  //WINAPI
 
   if (pCIDA != NULL)
   {
@@ -316,14 +319,18 @@ VOID MemCreateControl( HWND hDlg, USHORT usId  )
     usLast = ( PID_DRIVEBUTTON_A ) + pCIDA->szMemPath[0] - 'A';
 
     // Deselect  previous selected drive button
+#if 0 //WINAPI
     WinSendMsg( WinWindowFromID( hDlg, usLast ),
                 WM_DRIVEBUTTON_SELECT, 0, NULL);
+#endif
 
     // Save selected drive character
     pCIDA->szMemPath[0] = (CHAR)( usId - ( PID_DRIVEBUTTON_A ) + (USHORT)'A');
     // Select selected drive button
+#if 0 //WINAPI
     WinSendMsg( WinWindowFromID( hDlg, usId ), WM_DRIVEBUTTON_SELECT,
                 MP1FROMSHORT( TRUE ), NULL);
+#endif
   } /* endif */
 } /* end of function MemCreateControl */
 
@@ -366,7 +373,7 @@ VOID MemCreateCommand( HWND hDlg )
 
 
   //--- Get address of dialog procedure data area
-  pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+  //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
   //--- if no access to IDA stop further processing
   if ( pCIDA == NULL ) fOK = FALSE;
@@ -374,10 +381,12 @@ VOID MemCreateCommand( HWND hDlg )
   if ( fOK )
   {
     // Disable the Create and Cancel button
-    EnableOKAndCANCELButton( hDlg, FALSE );
+    //EnableOKAndCANCELButton( hDlg, FALSE );
+//WINAPI
 
     // Create memory database name with extension
-    QUERYTEXT( hDlg, DID_CD_NAME, pCIDA->szMemName );
+    //QUERYTEXT( hDlg, DID_CD_NAME, pCIDA->szMemName );
+//WINAPI
     ANSITOOEM( pCIDA->szMemName );
 
     //--- remove leading and trailing blanks
@@ -387,22 +396,24 @@ VOID MemCreateCommand( HWND hDlg )
       fOK = FALSE;
       UtlError(  ERROR_MEM_CREATE_NO_NAME, MB_CANCEL, 0,
                  NULL, EQF_ERROR );
-      WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
+      //WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
       fMemExists = FALSE;
     } /* endif */
    
     // get selected plugin
-    SHORT  sItem = CBQUERYSELECTION( hDlg, DID_CD_TYPE_CB );
+    /*SHORT  sItem = CBQUERYSELECTION( hDlg, DID_CD_TYPE_CB );
+//WINAPI
     if ( sItem != LIT_NONE )
     {
       pCIDA->pSelectedPlugin = (OtmPlugin *) CBQUERYITEMHANDLE( hDlg, DID_CD_TYPE_CB, sItem );
     }
+*/
 
     // '-' should not be included in memname, because mysql don't allow this
     if ( fOK && (pCIDA->usLocation == TM_SHARED) && strchr(pCIDA->szMemName,'-')!=NULL )
     {
       fOK = FALSE;
-      MessageBox( hDlg, "'-' isn't allowed in shared memory name,\nplease replace it with underline or other character.", "Error", MB_OK );
+      //MessageBox( hDlg, "'-' isn't allowed in shared memory name,\nplease replace it with underline or other character.", "Error", MB_OK );
       fMemExists = FALSE;
     }
 
@@ -416,7 +427,7 @@ VOID MemCreateCommand( HWND hDlg )
         OEMTOANSI( pCIDA->szMemName );
         UtlError(  ERROR_INV_LONGNAME, MB_CANCEL, 1,
                    &pReplAddr, EQF_ERROR );
-        WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
+        //WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
         fMemExists = FALSE;
       } /* endif */
     } /* endif */
@@ -431,7 +442,8 @@ VOID MemCreateCommand( HWND hDlg )
           UtlError( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pReplAddr, EQF_ERROR );
 
           // Set cursor to the incorrect field the name field
-          WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
+//WINAPI
+          //WinSetFocus( HWND_DESKTOP, WinWindowFromID( hDlg, DID_CD_NAME ));
           fMemExists = FALSE;
           fOK = FALSE;
       } /* end */         
@@ -444,8 +456,9 @@ VOID MemCreateCommand( HWND hDlg )
   {
     SHORT sSelectedItem;
 
-    CBQUERYSELECTEDITEMTEXT( sSelectedItem, hDlg, DID_CD_SOURCE, pCIDA->szSourceLang );
-    QUERYTEXT( hDlg, DID_CD_DESCRIPTION, pCIDA->szMemDesc );
+//WINAPI
+    //CBQUERYSELECTEDITEMTEXT( sSelectedItem, hDlg, DID_CD_SOURCE, pCIDA->szSourceLang );
+    //QUERYTEXT( hDlg, DID_CD_DESCRIPTION, pCIDA->szMemDesc );
     ANSITOOEM( pCIDA->szMemDesc );
 
     if ( !pCIDA->szSourceLang[0]  )
@@ -491,7 +504,7 @@ VOID MemCreateCommand( HWND hDlg )
         }
         else
         {
-          MessageBox( hDlg, "fail to create shared memory", "Error", MB_OK );
+         // MessageBox( hDlg, "fail to create shared memory", "Error", MB_OK );
           fOK = FALSE;
         } /* end */       
       }
@@ -551,7 +564,7 @@ VOID MemCreateCommand( HWND hDlg )
     // pass name of created memory to calling function if requested
     if ( pCIDA->pszParms != NULL ) strcpy( pCIDA->pszParms, pCIDA->szMemName );
 
-    DISMISSDLG( hDlg, fOK );
+    //DISMISSDLG( hDlg, fOK );
   } /* endif */
 
   //=================================================================
@@ -562,7 +575,7 @@ VOID MemCreateCommand( HWND hDlg )
   if ( !pCIDA->usCreate )
   {
     // Enable the Create and Cancel button
-    EnableOKAndCANCELButton( hDlg, TRUE );
+    //EnableOKAndCANCELButton( hDlg, TRUE );
   } /* endif */
 
 } /* end of function MemCreateCommand */
@@ -654,8 +667,9 @@ VOID HandleOtherControlMsgs( HWND   hDlg,
     case DID_CD_TYPE_CB:                
       {
         //--- Get address of dialog procedure data area
-        pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+        //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
+#if 0
         if ( sNotification == CBN_SELCHANGE )
         {
           // get plugin for selected memory type
@@ -685,6 +699,7 @@ VOID HandleOtherControlMsgs( HWND   hDlg,
             pCIDA->usLocation = TM_LOCAL;
           } /* endif */
         }
+#endif
       }/*end if*/
       break;
       //------------------------------------------------------------------
@@ -732,6 +747,7 @@ VOID SetupDriveIcons( HWND   hDlg,           //dialog handle
                       USHORT usLocation,     //drive location
                       PSZ    pszServer )     //selected server in server LB
 {
+#if 0
   PTMX_CREATE_IDA pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
   pszServer; usLocation;
@@ -743,6 +759,7 @@ VOID SetupDriveIcons( HWND   hDlg,           //dialog handle
 
   DisplayDriveIcons( hDlg, pCIDA->szDriveList );
   strcpy( pCIDA->szLastDriveList, pCIDA->szDriveList );
+#endif
 }/* end SetupDriveIcons */
 
 /*
@@ -768,8 +785,8 @@ VOID DeleteDriveIcons( HWND  hDlg, PSZ pszDriveList )
   usIndex = 0;
   while ( pszDriveList[usIndex] != EOS )
   {
-    usDrive = IDFROMDRIVE( PID_DRIVEBUTTON_A, pszDriveList[usIndex] );
-    WinDestroyWindow( WinWindowFromID( hDlg, usDrive ) );
+    //usDrive = IDFROMDRIVE( PID_DRIVEBUTTON_A, pszDriveList[usIndex] );
+    //WinDestroyWindow( WinWindowFromID( hDlg, usDrive ) );
     usIndex++;
   }/*endwhile*/
 }/* end DeleteDriveIcons */
@@ -796,22 +813,23 @@ VOID DisplayDriveIcons( HWND hDlg, PSZ pszDriveList )
   PTMX_CREATE_IDA pCIDA = NULL;             // Pointer to the create IDA
 
   //--- Get address of dialog procedure data area
-  pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+  //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
   //--- sort drivelist
   SortString( pszDriveList );
 
   // Get position of dummy control and group box
-  WinQueryWindowPos( WinWindowFromID( hDlg, DID_CD_DUMMY ), &swpDrive );
-  WinQueryWindowPos( WinWindowFromID( hDlg, DID_CD_TMLOCATION_GB ), &swpBox );
+  //WinQueryWindowPos( WinWindowFromID( hDlg, DID_CD_DUMMY ), &swpDrive );
+  //WinQueryWindowPos( WinWindowFromID( hDlg, DID_CD_TMLOCATION_GB ), &swpBox );
 
   // Display available drives as icons
   if ( *pszDriveList != EOS ) UtlCreateDriveButtons( hDlg, pszDriveList, PID_DRIVEBUTTON_A, WS_GROUP | WS_TABSTOP, WS_VISIBLE );
 
   // Hide dummy button for Windows (is hidden in OS/2)
-  ShowWindow( WinWindowFromID( hDlg, DID_CD_DUMMY ), SW_HIDE );
+  //ShowWindow( WinWindowFromID( hDlg, DID_CD_DUMMY ), SW_HIDE );
 
   // Set position of drive buttons depending on dummy button
+#if 0
   if ( *pszDriveList != EOS ) UtlSetPosDriveButtons2( hDlg,      PID_DRIVEBUTTON_A,
                                 swpDrive.x,   swpDrive.y,
                                 swpDrive.cx,  swpDrive.cy,
@@ -820,6 +838,7 @@ VOID DisplayDriveIcons( HWND hDlg, PSZ pszDriveList )
                                 6, // leave 6 pels in x direction and
                                 5, // 5 pels in y direction between buttons
                                 WinWindowFromID( hDlg, DID_CD_TXT_DRIVES ) );
+#endif
 
   //--- Select the EQF system drive as default drive if it is contained in the drive list
   if ( *pszDriveList != EOS ) 
@@ -830,7 +849,7 @@ VOID DisplayDriveIcons( HWND hDlg, PSZ pszDriveList )
     while ( pszDriveList[usIndex] != szDrive[0] ) usIndex++;
     if ( pszDriveList[usIndex] != szDrive[0] ) usIndex = 0;
     usIndex = pszDriveList[usIndex] - 'A';
-    SETCHECK_TRUE( hDlg, (PID_DRIVEBUTTON_A + usIndex) );
+    //SETCHECK_TRUE( hDlg, (PID_DRIVEBUTTON_A + usIndex) );
   }
 }/* end DisplayDriveIcons */
 
@@ -849,6 +868,7 @@ VOID ProcessWM_COMMAND( HWND   hDlg,
   USHORT         usUserPriv;                //LAN user privilege class
   mp2;
 
+#if 0
   switch ( WMCOMMANDID( mp1, mp2 ) )             //selected control
   {
     case PID_PB_HELP:
@@ -856,10 +876,10 @@ VOID ProcessWM_COMMAND( HWND   hDlg,
      break;
     // -----------------------------------------------------------------------
     case PID_PB_OK:                        //Create button selected
-      EnableOKAndCANCELButton( hDlg, FALSE );
+      //EnableOKAndCANCELButton( hDlg, FALSE );
 
       // Get address of dialog procedure data area
-      pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+      //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
       //--- Try to get the LAN userid also for local TMs. If the /*@U1A*/
       //--- user is currently logged on thes userid should be saved/*@U1A*/
@@ -868,7 +888,7 @@ VOID ProcessWM_COMMAND( HWND   hDlg,
 
       MemCreateCommand( hDlg );
 
-      EnableOKAndCANCELButton( hDlg, TRUE );
+      //EnableOKAndCANCELButton( hDlg, TRUE );
       break;
       // -----------------------------------------------------------------------
     case PID_PB_CANCEL:
@@ -903,6 +923,7 @@ VOID ProcessWM_COMMAND( HWND   hDlg,
       } /* endif */
       break;
   }/* end switch */
+#endif
   // ---------------------------------------------------------------------
 }/* end ProcessWM_COMMAND */
 
@@ -920,15 +941,15 @@ static VOID InitMemCreateDlg( HWND   hDlg )
   MemoryFactory *pFactory = MemoryFactory::getInstance();
 
   // Get address of dialog procedure data area
-  pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
+  //pCIDA = ACCESSDLGIDA(hDlg, PTMX_CREATE_IDA);
 
   // set default memory plugin
   strcpy( pCIDA->szPlugin, DEFAULT_MEMORY_PLUGIN  );
 
-  hName = WinWindowFromID( hDlg, DID_CD_NAME );
-  SETTEXTLIMITHWND( hName, (MAX_LONGFILESPEC - 1) );
+  //hName = WinWindowFromID( hDlg, DID_CD_NAME );
+  //SETTEXTLIMITHWND( hName, (MAX_LONGFILESPEC - 1) );
 
-  SETTEXTLIMIT( hDlg, DID_CD_DESCRIPTION, MAX_MEM_DESCRIPTION - 1 );
+  //SETTEXTLIMIT( hDlg, DID_CD_DESCRIPTION, MAX_MEM_DESCRIPTION - 1 );
 
   SetCtrlFnt (hDlg, GetCharSet(), DID_CD_DESCRIPTION, DID_CD_NAME );
 
@@ -940,21 +961,21 @@ static VOID InitMemCreateDlg( HWND   hDlg )
   for( int i=0; i < (int)pCIDA->vMemoryPlugins.size(); i++ )
   {
     const char *pszType = pCIDA->vMemoryPlugins[i]->getDescriptiveMemType();
-    SHORT sItem = CBINSERTITEM( hDlg, DID_CD_TYPE_CB, pszType );
-    CBSETITEMHANDLE( hDlg, DID_CD_TYPE_CB, sItem, (pCIDA->vMemoryPlugins[i]) );
-    if ( stricmp( pCIDA->szPlugin, pCIDA->vMemoryPlugins[i]->getName() ) == 0 )
+    //SHORT sItem = CBINSERTITEM( hDlg, DID_CD_TYPE_CB, pszType );
+    //CBSETITEMHANDLE( hDlg, DID_CD_TYPE_CB, sItem, (pCIDA->vMemoryPlugins[i]) );
+    if ( strcasecmp( pCIDA->szPlugin, pCIDA->vMemoryPlugins[i]->getName() ) == 0 )
     {
-      CBSELECTITEM( hDlg, DID_CD_TYPE_CB, sItem );
+      //CBSELECTITEM( hDlg, DID_CD_TYPE_CB, sItem );
     }
   }
   for( int i=0; i < (int)pCIDA->vSharedMemoryPlugins.size(); i++ )
   {
     const char *pszType = pCIDA->vSharedMemoryPlugins[i]->getDescriptiveMemType();
-    SHORT sItem = CBINSERTITEM( hDlg, DID_CD_TYPE_CB, pszType );
-    CBSETITEMHANDLE( hDlg, DID_CD_TYPE_CB, sItem, (pCIDA->vSharedMemoryPlugins[i]) );
-    if ( stricmp( pCIDA->szPlugin, pCIDA->vSharedMemoryPlugins[i]->getName() ) == 0 )
+    //SHORT sItem = CBINSERTITEM( hDlg, DID_CD_TYPE_CB, pszType );
+    //CBSETITEMHANDLE( hDlg, DID_CD_TYPE_CB, sItem, (pCIDA->vSharedMemoryPlugins[i]) );
+    if ( strcasecmp( pCIDA->szPlugin, pCIDA->vSharedMemoryPlugins[i]->getName() ) == 0 )
     {
-      CBSELECTITEM( hDlg, DID_CD_TYPE_CB, sItem );
+      //CBSELECTITEM( hDlg, DID_CD_TYPE_CB, sItem );
     }
   }
 
@@ -977,7 +998,7 @@ static VOID InitMemCreateDlg( HWND   hDlg )
     if ( pCIDA->szMemName[0] != NULC )
     {
       OEMTOANSI( pCIDA->szMemName );
-      SETTEXTHWND( hName , pCIDA->szMemName );
+      //SETTEXTHWND( hName , pCIDA->szMemName );
       ANSITOOEM( pCIDA->szMemName );
     } /* endif */
 
@@ -986,13 +1007,13 @@ static VOID InitMemCreateDlg( HWND   hDlg )
       // Fill the source language drop down list box by scanning all
       // language entries in the file SOURCE.LNG and select if
       // available the last used entry
-      MemFillTableLB( WinWindowFromID(hDlg, DID_CD_SOURCE), SOURCE_LANGUAGES, szLastUsed);
+      //MemFillTableLB( WinWindowFromID(hDlg, DID_CD_SOURCE), SOURCE_LANGUAGES, szLastUsed);
     } /* endif */
 
     if ( usRc )
     {
       //--- if a source language is provided by caller, call function to select the language in the combobox
-      if ( pCIDA->szSourceLang[0] != NULC ) CBSEARCHSELECT( sItem, hDlg, DID_CD_SOURCE, pCIDA->szSourceLang );
+      //if ( pCIDA->szSourceLang[0] != NULC ) CBSEARCHSELECT( sItem, hDlg, DID_CD_SOURCE, pCIDA->szSourceLang );
     } /* endif */
   } /* endif */
 
@@ -1011,7 +1032,7 @@ static VOID InitMemCreateDlg( HWND   hDlg )
   if ( !usRc )
   {
     DelCtrlFont (hDlg, DID_CD_DESCRIPTION);
-    DISMISSDLG( hDlg, TRUE );
+    //DISMISSDLG( hDlg, TRUE );
   } /* endif */
 }/* end InitMemCreateDlg */
 
@@ -1386,6 +1407,19 @@ int iCompare( const void *arg1, const void *arg2 )
 //} /* end of function MemBatchTMCreate */
 //
 //
+
+char* strupr(char *str)
+{
+    char *tmp = str;
+
+    while (*tmp) {
+        *tmp = toupper((unsigned char)*tmp);
+        ++tmp;
+    }
+
+    return str;
+}
+
 BOOL MemCreatePropsFromDlgData
 (
 PTMX_CREATE_IDA pCIDA,               // Pointer to create IDA
@@ -1518,6 +1552,7 @@ HWND            hwnd                 // window handle for error messages
 //+----------------------------------------------------------------------------+
 //|Returncode type:   MRESULT                                                  |
 //+----------------------------------------------------------------------------+
+#if 0
 INT_PTR CALLBACK MEMPROPDLG
 (
 HWND      hDlg,
@@ -1560,7 +1595,7 @@ LPARAM    mp2
 
         // prepare dialog controls
         SetCtrlFnt (hDlg, GetCharSet(), ID_TM_PROP_DESCR_EF, 0 );
-        SETTEXTLIMIT( hDlg, ID_TM_PROP_DESCR_EF, MAX_MEM_DESCRIPTION - 1 );
+        //SETTEXTLIMIT( hDlg, ID_TM_PROP_DESCR_EF, MAX_MEM_DESCRIPTION - 1 );
 
         // fill dialog controls
         if ( fOK )
@@ -1748,7 +1783,7 @@ LPARAM    mp2
           {
             BOOL fOK      = TRUE;
 
-            pIDA = ACCESSDLGIDA( hDlg, PMEM_PROP_IDA );
+            //pIDA = ACCESSDLGIDA( hDlg, PMEM_PROP_IDA );
 
             // get new description text
             if ( fOK )
@@ -1786,6 +1821,7 @@ LPARAM    mp2
 
   return mResult;
 } /* end of function MEMPROPDLG */
+#endif
 
 
 // create a new Translation Memory using the function I/F
@@ -1969,6 +2005,7 @@ LONG        lOptions                 // type of new Translation Memory
      pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
 
       // notify creation success
+#if 0
       HWND hwnd = FindWindow( TWBMAIN ,NULL);
       if(hwnd != NULL)
       {
@@ -1978,6 +2015,7 @@ LONG        lOptions                 // type of new Translation Memory
         cds.lpData =  szObjName;
         SendMessage(hwnd,WM_COPYDATA, MP1FROMCHAR(chToDrive),(LPARAM)(LPVOID)&cds);
       }
+#endif
   } 
 
   //--- Tm is created. Close it. 

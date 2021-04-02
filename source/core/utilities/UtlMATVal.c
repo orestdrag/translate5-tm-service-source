@@ -4,7 +4,7 @@
 //|      Copyright (C) 1990-2012, International Business Machines              |
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
-#include "eqf.h"                  // General Translation Manager include file
+#include "EQF.H"                  // General Translation Manager include file
 #include "Utility.h"
 
 //------------------------------------------------------------------------------

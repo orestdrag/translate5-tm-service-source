@@ -10,7 +10,7 @@
 
 #include <malloc.h>
 
-#include "eqf.h"                  // General Translation Manager include file
+#include "EQF.H"                  // General Translation Manager include file
 #define STATIC_OWNER
 #include "Utility.h"
 #undef STATIC_OWNER
@@ -76,7 +76,7 @@ BOOL UtlAlloc
       pTemp = UtlIntAlloc( lNewLength, usMessageNo );
       if ( pTemp )
       {
-        memcpy( pTemp, *ppStorage, min(lNewLength,lOldLength) );
+        memcpy( pTemp, *ppStorage, get_min(lNewLength,lOldLength) );
         fSuccess = (BOOL) ! UtlIntFree( *ppStorage, lOldLength );
         *ppStorage = pTemp;
       }
@@ -159,7 +159,7 @@ PVOID UtlIntAlloc
   } /* endfor */
 
   //--- get size of block actually allocated ---
-  ulAllocLength = max( ulRealLength, (ULONG)pSegTable->usMinBlockSize );
+  ulAllocLength = get_max( ulRealLength, (ULONG)pSegTable->usMinBlockSize );
 
   pStorage    = NULL;                 // no storage yet ...
   fWrapAround = FALSE;                // not all segments searched thru ...
@@ -234,7 +234,7 @@ PVOID UtlIntAlloc
            // allocate areas large enough to contain at least 128 blocks
            ULONG  ulMinSize = (ULONG)pSegTable->usMinBlockSize * 128L;
 
-           ulNewAllocLen = max( 0xFF00L, ulMinSize );
+           ulNewAllocLen = get_max( 0xFF00L, ulMinSize );
            pHlp = pSegTable->pSegment[pSegTable->sMaxSel+1].pSel =
                              (PBYTE) malloc( ulNewAllocLen );
            if ( pHlp )
@@ -481,11 +481,13 @@ USHORT UtlGetTask ( void )
   WORD   usTask;
   USHORT currTask;
 
+#if 0 //
         _asm
           {
             mov      ax, SS
             mov      usTask, ax
           }
+#endif
   for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
   {
     if ( UtiVar[currTask].usTask == usTask )

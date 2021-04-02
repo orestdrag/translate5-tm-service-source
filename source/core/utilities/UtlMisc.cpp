@@ -4,20 +4,20 @@
 //|      Copyright (C) 1990-2015, International Business Machines              |
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
-#include <shlobj.h>               // folder browse function
+//#include <shlobj.h>               // folder browse function
 #include <time.h>                 // C time related functions
 
 #define INCL_EQF_TM               // general Transl. Memory functions
-#include "eqf.h"
-#include "otmapi.h"
-#include "eqfserno.h"
-#include "eqfevent.h"
-#include "eqfsetup.h"
+#include "EQF.H"
+#include "OTMAPI.H"
+#include "EQFSERNO.H"
+#include "EQFEVENT.H"
+#include "EQFSETUP.H"
 #include "Utility.h"
-#include "eqfutmdi.h"           // MDI Utilities
-#include "eqffol.h"
-#include <eqfutils.id>            // IDs used by dialog utilities
-#include "eqfta.h"                // required for TAAdjustWhiteSpace prototype
+#include "EQFUTMDI.H"               // MDI Utilities
+#include "EQFFOL.H"
+#include "../../../mri/EQFUTILS.ID" // IDs used by dialog utilities
+#include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
 // includes for Xalan XSLT
 
@@ -42,7 +42,7 @@ static SHORT  sRegisteredDlgs = 0;			// number of registered dialogs
 static FILE   *hFFSTFile = NULL;       // UtlAlloc log file
 PEVENTTABLE pEventTable;        // ptr to event logging table
 
-static FARPROC lpfnOldButtonProc = NULL;// ptr to original button proc
+//static FARPROC lpfnOldButtonProc = NULL;// ptr to original button proc
 LONG FAR PASCAL EqfHelpButtonProc     (HWND, UINT, WPARAM, LPARAM);
 
 static HANDLE hinstWFWDriver = 0;			// instance handle for Windows network driver
@@ -81,7 +81,7 @@ HANDLE UtlGetWFWNetDriver()
 #if defined(WIN32BIT)
    // TBD : Call to WNetGetCaps has to be converted to 32bit!
 #else
-        hinst = WNetGetCaps(0xffff);
+        //hinst = WNetGetCaps(0xffff);
 #endif
         if (hinst != 0)
                 hinstWFWDriver = hinst;
@@ -93,17 +93,17 @@ HANDLE UtlGetWFWNetDriver()
 WORD FAR PASCAL UtlSetNextTarget( HANDLE hNetwork)
 {
   LPMNETSETNEXTTARGET lpMNetSetNextTarget;        // pointer to MNet function
-  WORD retval = WN_BAD_VALUE;
+  WORD retval = 0;//WN_BAD_VALUE;
 
   if (hinstWFWDriver == 0)
     hinstWFWDriver = UtlGetWFWNetDriver();
 
   if (hinstWFWDriver != 0)
   {
-    lpMNetSetNextTarget = (LPMNETSETNEXTTARGET) GetProcAddress( (HMODULE) hinstWFWDriver,
+    /*lpMNetSetNextTarget = (LPMNETSETNEXTTARGET) GetProcAddress( (HMODULE) hinstWFWDriver,
     (LPSTR) MAKEINTRESOURCE(ORD_MNETSETNEXTTARGET) );
     if (lpMNetSetNextTarget != NULL)
-      retval = (*lpMNetSetNextTarget) (hNetwork);
+      retval = (*lpMNetSetNextTarget) (hNetwork);*/
   }
 
   return (retval);
@@ -379,11 +379,13 @@ BOOL UtlMNetDetect()
 
   if (Multinet == -1)                       /* first time, so we must determine */
   {
-    nIndex = WNetGetCaps(WNNC_NET_TYPE);    /* query net version type */
+    //nIndex = WNetGetCaps(WNNC_NET_TYPE);    /* query net version type */
+#if 0
     if (nIndex & WNNC_NET_MultiNet)         // is MultiNet bit set ??
        Multinet = 1;
     else
        Multinet = 0;
+#endif
   } /* endif */
 
   if (Multinet == 1)
@@ -421,25 +423,32 @@ BOOL FAR PASCAL UtlNetworkEnumAll()
 
   if (hinstWFWDriver != 0 )
   {
+#if 0
     lpMNetNetworkEnum = (LPMNETNETWORKENUM) GetProcAddress( (HMODULE) hinstWFWDriver,
             (LPSTR) MAKEINTRESOURCE(ORD_MNETNETWORKENUM) );
+#endif
     if (lpMNetNetworkEnum != NULL)
     {
       err = (*lpMNetNetworkEnum) ( &hNetwork);
       if (hNetwork != 0)
       {
         hinstMNet[i++] = hNetwork;
+#if 0
         lpMNetGetNetInfo = (LPMNETGETNETINFO) GetProcAddress( (HMODULE) hinstWFWDriver,
-                            (LPSTR) MAKEINTRESOURCE(ORD_MNETGETNETINFO) );
+                           (LPSTR) MAKEINTRESOURCE(ORD_MNETGETNETINFO) );
+#endif
         if (lpMNetGetNetInfo != NULL)
         {
           errinfo = (*lpMNetGetNetInfo) ( hNetwork, &NetInfo, szButton, &cbButton, &hInstance);
+#if 0
           if (errinfo == WN_SUCCESS)
           {
             if (NetInfo == MNM_NET_PRIMARY)
               primary = hNetwork;
           } /* endif */
+#endif
         }
+#if 0
         while (err != WN_BAD_VALUE && i < MAX_MNETS )
         {
           err = (*lpMNetNetworkEnum) ( &hNetwork);
@@ -458,6 +467,7 @@ BOOL FAR PASCAL UtlNetworkEnumAll()
             }
           }
         } /* while err != WN_BAD_VALUE etc */
+#endif
       }
     }
 
@@ -475,7 +485,7 @@ BOOL FAR PASCAL UtlNetworkEnumAll()
   return (retval);
 }
 
-
+#if 0
 USHORT UtlGetLANUserID
 (
   PSZ    pszLANUserID,                 // LAN UserID - returned
@@ -516,6 +526,7 @@ USHORT UtlGetLANUserID
     static char szUser[80];
 
     iUserIDLen = sizeof(szUser) - 1;
+#if 0
     if ( GetUserName( szUser, &iUserIDLen ) )
     {
       strncpy( pszLANUserID, szUser, MAX_USERID - 1 );
@@ -526,6 +537,7 @@ USHORT UtlGetLANUserID
     {
       iRC = GetLastError();
     } /* endif */
+#endif
 
     if ( iRC != WN_SUCCESS )
     {
@@ -538,6 +550,7 @@ USHORT UtlGetLANUserID
   } /* endif */
   return( usRC );
 }
+#endif
 
 USHORT UtlGetLANUserIDW
 (
@@ -699,6 +712,7 @@ VOID UtlDispatch( VOID )
    HWND hwndClient =  (HWND) UtlQueryULong( QL_TWBCLIENT );
    MSG msg;                      // message queue structure
 
+#if 0
    while ( usMsg && PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
    {
      if ( msg.message == WM_QUIT)
@@ -727,6 +741,7 @@ VOID UtlDispatch( VOID )
      } /* endif */
      usMsg--;
    } /* endwhile */
+#endif
 }
 
 //+----------------------------------------------------------------------------+
@@ -756,7 +771,7 @@ BOOL UtlIsDialogMsg( MSG FAR * pMsg )
   sIndex = 0;
   while ( !fDispatched && (sIndex < sRegisteredDlgs) )
   {
-    fDispatched = IsDialogMessage( hwndDlgs[sIndex], pMsg );
+    //fDispatched = IsDialogMessage( hwndDlgs[sIndex], pMsg );
     sIndex++;
   } /* endwhile */
 
@@ -765,12 +780,12 @@ BOOL UtlIsDialogMsg( MSG FAR * pMsg )
 
 VOID UtlMenuEnableItem( SHORT sItemID )
 {
-  SETAABITEM( GetMenu((HWND)UtlQueryULong( QL_TWBFRAME )), sItemID, TRUE );
+  //SETAABITEM( GetMenu((HWND)UtlQueryULong( QL_TWBFRAME )), sItemID, TRUE );
 }
 
 VOID UtlMenuDisableItem( SHORT sItemID )
 {
-  SETAABITEM( GetMenu((HWND)UtlQueryULong( QL_TWBFRAME )), sItemID, FALSE );
+  //SETAABITEM( GetMenu((HWND)UtlQueryULong( QL_TWBFRAME )), sItemID, FALSE );
 }
 
 //+----------------------------------------------------------------------------+
@@ -801,6 +816,7 @@ VOID UtlMenuDisableItem( SHORT sItemID )
 //                      endfor
 //                    endif
 //+----------------------------------------------------------------------------+
+#if 0
 VOID UtlMenuDisableAll( HWND hwnd, SHORT sMenuID )
 {
   HWND       hwndMenu;
@@ -820,8 +836,8 @@ VOID UtlMenuDisableAll( HWND hwnd, SHORT sMenuID )
       /****************************************************************/
       /* get submenu handle and disable all submenu items ...         */
       /****************************************************************/
-      hwndMenu = (HWND)GetMenu((HWND)UtlQueryULong( QL_TWBFRAME ));
-      hwndMenu = (HWND)GetSubMenu((HMENU)hwndMenu, sMenuID);
+      //hwndMenu = (HWND)GetMenu((HWND)UtlQueryULong( QL_TWBFRAME ));
+      //hwndMenu = (HWND)GetSubMenu((HMENU)hwndMenu, sMenuID);
       /****************************************************************/
       /* check if we by chance are dealing with the system icon ...   */
       /****************************************************************/
@@ -850,6 +866,7 @@ VOID UtlMenuDisableAll( HWND hwnd, SHORT sMenuID )
       } /* endif */
   } /* endif */
 }
+#endif
 
 //+----------------------------------------------------------------------------+
 // External function
@@ -1943,7 +1960,7 @@ BOOL UtlRegisterEqfHelp( HAB hAB )
 
   GetClassInfo( NULL,"Button", &wc );
   wc.style         |= CS_GLOBALCLASS;
-  lpfnOldButtonProc = (FARPROC)wc.lpfnWndProc;  // Save old proc
+  //lpfnOldButtonProc = (FARPROC)wc.lpfnWndProc;  // Save old proc
   wc.lpszClassName = EQFHELPBUTTON;            // Change the class name
   wc.hInstance     = (HINSTANCE)  hAB;         // Change the instance so that
                                                // the class gets unregistered
@@ -2314,7 +2331,7 @@ BOOL UtlKillProcess( DWORD dwPid )
 */
 #define PROC_TABLE_ENTRIES 512
 #include <string.h>
-#include <tlhelp32.h>   // Toolhelp 32
+//#include <tlhelp32.h>   // Toolhelp 32
 
 
 BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
