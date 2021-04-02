@@ -12,6 +12,9 @@
 #define CONST const
 #define VOID void
 #define far 
+#define FAR 
+#define NEAR 
+#define PASCAL 
 
 #ifndef TRUE
 #define TRUE 1
@@ -20,15 +23,6 @@
 #ifndef FALSE
 #define FALSE 0
 #endif
-
-#define FILE_BEGIN 0
-#define FILE_CURRENT 1
-#define FILE_END 2
-
-#define MB_DEFBUTTON1 0x00000000L
-#define MB_DEFBUTTON2 0x00000100L
-#define MB_DEFBUTTON3 0x00000200L
-#define MB_DEFBUTTON4 0x00000300L
 
 typedef wchar_t WCHAR;
 
@@ -244,6 +238,8 @@ typedef UNICODE_STRING *PUNICODE_STRING;
 typedef const UNICODE_STRING *PCUNICODE_STRING;
 */
 typedef LONGLONG USN;
+
+#define __declspec(dllexport) /* __attribute__((visibility("default"))) */
 
 /* https://docs.microsoft.com/en-us/previous-versions/ms915433(v=msdn.10) */
 
@@ -462,5 +458,27 @@ typedef struct tagOFNA {
     DWORD         dwReserved;
     DWORD         FlagsEx;
 } OPENFILENAMEA, *LPOPENFILENAMEA;
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfilepointer */
+
+#define FILE_BEGIN 0
+#define FILE_CURRENT 1
+#define FILE_END 2
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox */
+
+#define MB_DEFBUTTON1 0x00000000L
+#define MB_DEFBUTTON2 0x00000100L
+#define MB_DEFBUTTON3 0x00000200L
+#define MB_DEFBUTTON4 0x00000300L
+
+/* https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles */
+
+#define WS_TABSTOP 0x00010000L
+#define WS_GROUP   0x00020000L
+#define WS_VISIBLE 0x10000000L
+
+#define get_max(a, b) (a > b) ? (a) : (b)
+#define get_min(a, b) (a > b) ? (b) : (a)
 
 #endif
