@@ -38,7 +38,7 @@ add_library(OpenTM2
 
                     ${OPENTM2_MEM_DIR}/EQFMEM00.CPP
                     #${OPENTM2_WBN_DIR}/EQFMAIN.C
-                    #${OPENTM2_UTIL_DIR}/EQFPRO00.C
+                    ${OPENTM2_UTIL_DIR}/EQFPRO00.C
                     #${OPENTM2_UTIL_DIR}/EQFUTFIL.C
                     #${OPENTM2_UTIL_DIR}/EQFUTDOS.C
                     ${OPENTM2_TLCMN_DIR}/InitPlugins.cpp #nowinapi
