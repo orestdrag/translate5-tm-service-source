@@ -9,8 +9,9 @@
 //+----------------------------------------------------------------------------+
 
 #define INCL_EQF_TM               // general Transl. Memory functions
-#include "eqf.h"                  // General .H for EQF
-#include "eqfobj00.h"             // Object manager defines
+#include "EQF.H"                  // General .H for EQF
+#include "EQFOBJ00.H"             // Object manager defines
+#include "win_types.h"
 
 static HWND hObjMan[MAX_TASK] = {NULLHANDLE};
 POBJM_IDA     pObjBatchIda = NULL;     // Points to IDA when in function call mode
@@ -70,7 +71,7 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
     USHORT        usResult;             //
-    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
     if (pIda != NULL  )                                                   /*@02A*/
     {                                                                     /*@02A*/
       usResult = SendAll( pIda->pHndlrTbl, clsANY, msg, mp1, mp2);
@@ -84,7 +85,7 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
-    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
     return( SendAll( pIda->pObjTbl, (CLASSES) cls, msg, mp1, mp2));
 }
 USHORT RegisterObject( PSZ name, HWND hwnd, USHORT cls)
@@ -92,7 +93,7 @@ USHORT RegisterObject( PSZ name, HWND hwnd, USHORT cls)
     POBJM_IDA     pIda;                // Our Ida
     EQF_ATOM      atom;
     POBJENTRY     pEntry;
-    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
     if( (atom = WinFindAtom( pIda->hAtomTbl, name)) != NULLHANDLE )
       return( ErrObjM_AlreadyReg);
 //  if( !FindObjByClass( pIda->pHndlrTbl, cls))
@@ -113,7 +114,7 @@ USHORT InstallHandler( PSZ name, HWND hwnd, USHORT cls)
     POBJM_IDA     pIda;                // Our Ida
     EQF_ATOM      atom;
     POBJENTRY     pEntry;
-    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
     if( (atom = WinFindAtom( pIda->hAtomTbl, name)) != NULLHANDLE )
       return( ErrObjM_AlreadyReg);
     if( (pEntry = MakeObjEntry( pIda->pHndlrTbl))== NULL)
@@ -140,6 +141,7 @@ MRESULT APIENTRY OBJECTMANAGERWP
     HAB           hab;                 // our Anchor Block handle
     int           i;
 
+#if 0
     switch( message) {
 /*--------------------------------------------------------------------------*/
       case WM_CREATE:
@@ -466,7 +468,8 @@ MRESULT APIENTRY OBJECTMANAGERWP
 
 /*--------------------------------------------------------------------------*/
     }
-    return( WinDefWindowProc( hwnd, message, mp1, mp2));
+#endif
+    //return( WinDefWindowProc( hwnd, message, mp1, mp2));
 }
 
 /*+--------------------------------------------------------------------------+
@@ -524,7 +527,7 @@ int RemoveObject( POBJM_IDA pIda, POBJENTRY pe, USHORT flg)
     OBJNAME szObjName;
     BOOL    fNotClosed;
 
-    fNotClosed = (BOOL)WinSendMsg( pe->hWnd, WM_EQF_TERMINATE, MP1FROMSHORT( flg ), NULL);
+    //fNotClosed = (BOOL)WinSendMsg( pe->hWnd, WM_EQF_TERMINATE, MP1FROMSHORT( flg ), NULL);
 
     if( fNotClosed && !(flg & TWBFORCE) )
     {
@@ -575,9 +578,11 @@ int RemoveHandler( POBJM_IDA pIda, POBJENTRY pe, USHORT flg)
 {
     USHORT cls, status;
     OBJNAME szObjName;
+#if 0
     if( WinSendMsg( pe->hWnd, WM_EQF_TERMINATE, MP1FROMSHORT( flg ), NULL))
       if( !(flg & TWBFORCE))
         return( 1);
+#endif
     // attention: if the workbench is closed while the called handler is
     //            processing its WM_EQF_TERMINATE message, all object tables
     //            and handler tables have been removed. So here we have to
@@ -622,9 +627,11 @@ POBJENTRY FindObjByHwnd( POBJTBL pt, HWND hwnd)
     register int i;
     POBJENTRY pe=pt->pObjEntry;
 
+#if 0
     for( i=pt->usUsed; i; --i,++pe)
       if( (hwnd == pe->hWnd) || ( hwnd == GETPARENT(pe->hWnd)) )
         return( pe);
+#endif
     return( NULL);
 }
 
@@ -736,7 +743,7 @@ USHORT SendAll( POBJTBL pt, CLASSES objClass, WINMSG message,
 //  wnd proc returns NULL if ok otherwise !NULL
     for( i=pt->usUsed,pe=pt->pObjEntry+i-1; i; --i,--pe)
       if( objClass == clsANY || pe->usClassID == objClass)
-        x = x + (USHORT)WinSendMsg( pe->hWnd, message, mp1, mp2);
+        //x = x + (USHORT)WinSendMsg( pe->hWnd, message, mp1, mp2);
     return( x);
 }
 
@@ -747,10 +754,12 @@ HWND EqfQueryObject( PSZ pszObj, SHORT sClass, SHORT sFlags )
   QueryObj.sClass = sClass;
   QueryObj.sFlags = sFlags;
   QueryObj.pBuffer = pszObj;
+#if 0
   return ( (HWND)WinSendMsg( EqfQueryObjectManager(),
                              WM_EQF_QUERYOBJECT,
                              MP1FROMSHORT( 0 ),
                              MP2FROMP( &QueryObj ) ) );
+#endif
 }
 
 SHORT EqfQueryObjectName( HWND hwnd, PSZ pBuffer )
@@ -760,10 +769,12 @@ SHORT EqfQueryObjectName( HWND hwnd, PSZ pBuffer )
   QueryObjName.hwnd    = hwnd;
   QueryObjName.pBuffer = pBuffer;
 
+#if 0
   return( (SHORT)WinSendMsg( EqfQueryObjectManager(),
                        WM_EQF_QUERYOBJECTNAME,
                        MP1FROMSHORT(0),
                        MP2FROMP(&QueryObjName)) );
+#endif
 }
 
 USHORT EqfSetObjectStatus( HWND hwnd, SHORT sMask, SHORT sStatus )
@@ -774,10 +785,12 @@ USHORT EqfSetObjectStatus( HWND hwnd, SHORT sMask, SHORT sStatus )
   SetObjStatus.sMask   = sMask;
   SetObjStatus.sStatus = sStatus;
 
+#if 0
   return ( (USHORT)WinSendMsg( EqfQueryObjectManager(),
                                WM_EQF_SETOBJECTSTATUS,
                                MP1FROMSHORT( 0 ),
                                MP2FROMP(&SetObjStatus) ) );
+#endif
 }
 
 USHORT EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer )
@@ -788,34 +801,40 @@ USHORT EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer )
   GetObjList.sCount  = sCount;
   GetObjList.pBuffer = pBuffer;
 
+#if 0
   return( (USHORT)WinSendMsg( EqfQueryObjectManager(),
                        WM_EQF_GETOBJECTLIST,
                        MP1FROMSHORT( 0 ),
                        MP2FROMP( &GetObjList )) );
+#endif
 
 }
 
 MRESULT EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
   MRESULT mResult = FALSE;
-  HWND hwnd = EqfQueryHandler( psz);
+  //HWND hwnd = EqfQueryHandler( psz);
 
+#if 0
   if ( hwnd )
   {
     mResult = WinSendMsg( hwnd, msg, mp1, mp2);
   } /* endif */
+#endif
   return( mResult );
 }
 
 MRESULT EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
   MRESULT mResult = FALSE;
+#if 0
   HWND hwnd = EqfQueryHandler( psz);
 
   if ( hwnd )
   {
     mResult = (MRESULT)WinPostMsg( hwnd, msg, mp1, mp2);
   } /* endif */
+#endif
   return( mResult );
 }
 
@@ -877,10 +896,10 @@ BOOL ObjHandlerTerminateForBatch( void )
     PFUNCIF_LOCK_TABLE pLockTable = ObjLockTable_AccessTable( hSharedMem);
     if ( pLockTable )
     {
-      ObjLockTable_Delete(pLockTable, NULL, GetCurrentProcessId() );
+      //ObjLockTable_Delete(pLockTable, NULL, GetCurrentProcessId() );
       ObjLockTable_ReleaseTable(pLockTable);
     } /* endif */
-    CloseHandle( hSharedMem );
+    //CloseHandle( hSharedMem );
     hSharedMem = NULLHANDLE;
   } /* endif */
 
@@ -907,8 +926,9 @@ SHORT ObjQuerySymbol( PSZ pszSymbol )
   }
   else
   {
-    sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
+    /*sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
                       WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );
+*/
   } /* endif */
   return( sRC );
 } /* endif ObjQuerySymbol */
@@ -924,20 +944,24 @@ SHORT ObjSetSymbol( PSZ pszSymbol )
       PFUNCIF_LOCK_TABLE pLockTable = ObjLockTable_AccessTable( hSharedMem);
       if ( pLockTable )
       {
+#if 0
         if ( ObjLockTable_Add( pLockTable, pszSymbol, GetCurrentProcessId() ) )
         {
           sRC = 1;
         } /* endif */
+#endif
         ObjLockTable_ReleaseTable(pLockTable);
       } /* endif */
     } /* endif */
   }
+#if 0
   else
   {
     WinSendMsg( EqfQueryObjectManager(), WM_EQF_SETSYMBOL,
                 MP1FROMSHORT( TRUE ),
                 MP2FROMP( pszSymbol ) );
   } /* endif */
+#endif
   return( sRC );
 } /* endif ObjSetSymbol */
 
@@ -960,11 +984,13 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
       } /* endif */
     } /* endif */
   }
+#if 0
   else
   {
    sRC = (SHORT)WinSendMsg( EqfQueryObjectManager(), WM_EQF_REMOVESYMBOL,
                             NULL, MP2FROMP( pszSymbol ) );
   } /* endif */
+#endif
   return( sRC );
 } /* endif ObjRemoveSymbol */
 
@@ -974,6 +1000,7 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
 
 HANDLE ObjLockTable_CreateOrOpenTable()
 {
+#if 0
   HANDLE hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );
   if ( !hShMem )
   {
@@ -991,21 +1018,24 @@ HANDLE ObjLockTable_CreateOrOpenTable()
     }
   }
   return( hShMem );
+#endif
 } /* end of function ObjLockTable_CreateOrOpenTable */
 
 PFUNCIF_LOCK_TABLE ObjLockTable_AccessTable( HANDLE hSharedMem )
 {
   PFUNCIF_LOCK_TABLE pTable;
 
+#if 0
   pTable = (PFUNCIF_LOCK_TABLE )MapViewOfFile( hSharedMem,
                                                FILE_MAP_WRITE,
                                                0, 0, 0);
+#endif
   return( pTable );
 } /* end of function ObjLockTable_AccessTable */
 
 void ObjLockTable_ReleaseTable( PFUNCIF_LOCK_TABLE pTable )
 {
-  UnmapViewOfFile(pTable);
+  //UnmapViewOfFile(pTable);
 } /* end of function ObjLockTable_AccessTable */
 
 BOOL ObjLockTable_SetUpdateFlag( PFUNCIF_LOCK_TABLE pLockTable )
@@ -1061,7 +1091,7 @@ PFUNCIF_LOCK_ENTRY ObjLockTable_Search
         {
           fRestart = TRUE;
         }
-        else if ( _stricmp( pEntry->szLockObj, pszObject ) == 0 )
+        else if ( strcasecmp( pEntry->szLockObj, pszObject ) == 0 )
         {
           pFound = pEntry;
         }
@@ -1188,7 +1218,7 @@ BOOL ObjLockTable_WaitWhenUpdated( PFUNCIF_LOCK_TABLE pLockTable )
   int  iNumOfRetries = 50;
   while ( pLockTable->fUpdateInProgress && !fTimeOut )
   {
-    Sleep( 20 );
+    //Sleep( 20 );
     iNumOfRetries--;
     fTimeOut = (iNumOfRetries == 0 );
   }
@@ -1334,10 +1364,12 @@ USHORT ObjLongToShortNameEx2
       else
       {
         NameType = LONGNAME;
+#if 0
         if ( IsDBCSLeadByteEx(ulCP,  *pszLongName ) && (pszLongName[1] != EOS) )
         {
           pszLongName++;                 // skip second byte of DBCS char
         }
+#endif
         pszLongName++;                   // try next character
       } /* endif */
     } /* endwhile */
@@ -1473,7 +1505,7 @@ USHORT ObjLongToShortNameEx2
     BOOL   fOK;
     HANDLE hMutexSem = NULL;
 
-    GETMUTEX(hMutexSem);
+    //GETMUTEX(hMutexSem);
 
     // if specified long name has exactly 8 alphanumeric characters
     // check if there is already an object with the given name
@@ -1529,6 +1561,7 @@ USHORT ObjLongToShortNameEx2
       ULONG ulBytesRead;
 
       // in TM_OBJECT mode only: ignore all files but files with the .MEM and .SLM extension
+#if 0
       PSZ pszExtension = strrchr( RESBUFNAME(pData->stResultBuf), DOT );
       if ( (ObjType != TM_OBJECT) || // no memory or
            (pszExtension == NULL) || // no extension found or
@@ -1536,7 +1569,7 @@ USHORT ObjLongToShortNameEx2
            (strcmp( pszExtension, ".SLM" ) == 0) )      // a lan-based memory property file
       {
         strcpy( pData->szSearchPath, pData->szFullPath );
-        strcat( pData->szSearchPath, RESBUFNAME(pData->stResultBuf) );
+        //strcat( pData->szSearchPath, RESBUFNAME(pData->stResultBuf) );
 
         fOK = UtlLoadFileL( pData->szSearchPath,// name of file to be loaded
                            &pProp,     // return pointer to loaded file
@@ -1606,13 +1639,14 @@ USHORT ObjLongToShortNameEx2
           if ( fFound )
           {
             ObjState = OBJ_EXISTS_ALREADY;
-            Utlstrccpy( pszShortName, RESBUFNAME( pData->stResultBuf ), DOT );
+            //Utlstrccpy( pszShortName, RESBUFNAME( pData->stResultBuf ), DOT );
             strcpy( pszOrgLongName, pszPropName );
           } /* endif */
 
           UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
         } /* endif */
       } /* endif */
+#endif
 
       // try next object
       if ( ObjState == OBJ_IS_NEW )
@@ -1626,7 +1660,7 @@ USHORT ObjLongToShortNameEx2
     UtlFindClose( hDir, FALSE );
 
     // release Mutex
-    RELEASEMUTEX(hMutexSem);
+    //RELEASEMUTEX(hMutexSem);
   } /* endif */
 
   // check if there is a shared resource with the given long name
@@ -1646,7 +1680,7 @@ USHORT ObjLongToShortNameEx2
       ULONG ulBytesRead;
 
       strcpy( pData->szSharedSearchPath, pData->szSharedFullPath );
-      strcat( pData->szSharedSearchPath, RESBUFNAME(pData->stResultBuf) );
+      //strcat( pData->szSharedSearchPath, RESBUFNAME(pData->stResultBuf) );
 
       fOK = UtlLoadFileL( pData->szSharedSearchPath,// name of file to be loaded
                          &pProp,     // return pointer to loaded file
@@ -1699,12 +1733,12 @@ USHORT ObjLongToShortNameEx2
 
         // compare long name of found object with given long name
         // use case-insensitive compare
-        fFound = ( _stricmp( pszOrgLongName, pszPropName ) == 0);
+        fFound = ( strcasecmp( pszOrgLongName, pszPropName ) == 0);
 
         if ( fFound )
         {
           ObjState = SHARED_OBJ_EXISTS;
-          Utlstrccpy( pszShortName, RESBUFNAME( pData->stResultBuf ), DOT );
+          //Utlstrccpy( pszShortName, RESBUFNAME( pData->stResultBuf ), DOT );
           strcpy( pszOrgLongName, pszPropName );
         } /* endif */
 
@@ -1741,7 +1775,7 @@ USHORT ObjLongToShortNameEx2
       strcpy( szCounter, "000" );        // counter start value
 
       // do not allow other process to search while we search for a new name
-      GETMUTEX(hMutexSem);
+      //GETMUTEX(hMutexSem);
 
       do
       {
@@ -1886,7 +1920,7 @@ USHORT ObjLongToShortNameEx2
        } /* endif */
 
       // release Mutex
-      RELEASEMUTEX(hMutexSem);
+      //RELEASEMUTEX(hMutexSem);
     } /* endif */
   } /* endif */
 

@@ -13,19 +13,19 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 #include "MemoryUtil.h"
 
 // EQF.H is included by otmmemory.h
-// #include <eqf.h>                  // General Translation Manager include file EQF:H 
+// #include <EQF.H>                  // General Translation Manager include file EQF:H 
 
-#include <EQFDDE.H>               // batch mode definitions
+#include <EQFDDE.H>                  // batch mode definitions
 #define INCL_EQFMEM_DLGIDAS
-#include <EQFMEM.ID>              // Translation Memory IDs
-#include "eqfcolw.id"             // column width IDs
+#include "../../../mri/EQFMEM.ID"    // Translation Memory IDs
+#include "../../../mri/EQFCOLW.ID"   // column width IDs
 
 BOOL EQFTMMaintain( PSZ );
 
@@ -33,6 +33,7 @@ BOOL EQFTMMaintain( PSZ );
 
 
 static CHAR ColHdr[10][30];       // Buffer for column header texts
+#if 0
 static CLBCOLDATA MemColTable[] =
 {
 { "",        1,                    TEXT_DATA, DT_LEFT  }, // Object
@@ -46,6 +47,7 @@ static CLBCOLDATA MemColTable[] =
 { ColHdr[8], CLB_MAX_LANG_LENGTH,  TEXT_DATA, DT_LEFT  }, // Target
 { ColHdr[9], CLB_MAX_FNAME,        TEXT_DATA, DT_LEFT  }, // Markup
 { NULL,      (CLBDATATYPE)0,       TEXT_DATA,   0      } };
+#endif
 
 static SHORT sLastUsedView[MAX_VIEW] = { MEM_NAME_IND, CLBLISTEND };
 static SHORT sDefaultView[MAX_VIEW]  = { MEM_NAME_IND, CLBLISTEND };
@@ -54,6 +56,7 @@ static SHORT sDetailsView[MAX_VIEW]  = { MEM_NAME_IND, MEM_DESCRIPTION_IND,
                                          CLBLISTEND };
 static SHORT sSortCriteria[MAX_VIEW] = { MEM_NAME_IND, CLBLISTEND };
 
+#if 0
 static CLBCTLDATA MemCLBData =
 {  sizeof(CLBCTLDATA),                 // size of control structure
    10,                                 // we have 9 data columns
@@ -69,6 +72,7 @@ static CLBCTLDATA MemCLBData =
    sNameView,                          // set view list for 'name' view option
    sSortCriteria,                      // set sort criteria list
    MemColTable };                      // set address of column definition table
+#endif
 
 
 
@@ -83,6 +87,7 @@ VOID PASCAL FAR  MemCleanUp( USHORT );
 
 USHORT MemBatchTMOrganize( HWND hwnd, PDDEMEMORG pMemOrg );
 
+#if 0
 /**********************************************************************/
 /* Handler callback function for tag table list handler               */
 /**********************************************************************/
@@ -144,7 +149,7 @@ MRESULT MemListHandlerCallBack
           }
           else
           {
-            mResult = WinSendMsg( hwnd, WM_EQF_CREATELISTWINDOW, mp1, mp2 );
+            //mResult = WinSendMsg( hwnd, WM_EQF_CREATELISTWINDOW, mp1, mp2 );
           } /* endif */
         } /* endif */
       } /* endcase WM_EQF_OPEN */
@@ -327,8 +332,10 @@ MRESULT MemListHandlerCallBack
   } /* endswitch */
   return( mResult );
 } /* end of function MemListHandlerCallBack */
+#endif
 
 
+#if 0
 /**********************************************************************/
 /* List instance callback function for memory list window             */
 /**********************************************************************/
@@ -721,6 +728,7 @@ MRESULT MemListCallBack
   } /* endswitch */
   return( mResult );
 } /* end of function MemListCallBack */
+#endif
 
 
 /*****************************************************************************/
@@ -805,7 +813,7 @@ MRESULT MemListCreate
 
       // Set the memory database window position, size, and
       // flags for the first time
-      WinQueryWindowRect( EqfQueryTwbClient(), &RectParent );
+      //WinQueryWindowRect( EqfQueryTwbClient(), &RectParent );
 
       pPropMem->Swp.x = (SHORT)((RECTL_XRIGHT(RectParent) -  RECTL_XLEFT(RectParent)) / 3 );
       pPropMem->Swp.y = (SHORT)(RECTL_YBOTTOM(RectParent) + (RECTL_YTOP(RectParent) / 10));
@@ -893,29 +901,31 @@ MRESULT MemListCreate
   /**************************************************************/
   if ( fOK  )
   {
-    LOADSTRING( NULLHANDLE, hResMod, MEM_NAME_H,  ColHdr[MEM_NAME_IND] );
+#if 0
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_NAME_H,  ColHdr[MEM_NAME_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_NAME_COLWIDTH,
                   &(MemColTable[MEM_NAME_IND].usWidth) );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_DESCRIPTION_H, ColHdr[MEM_DESCRIPTION_IND] );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_DESCRIPTION_H, ColHdr[MEM_DESCRIPTION_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_DESCRIPTION_COLWIDTH,
                   &(MemColTable[MEM_DESCRIPTION_IND].usWidth) );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_SIZE_H,  ColHdr[MEM_SIZE_IND] );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_SIZE_H,  ColHdr[MEM_SIZE_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_SIZE_COLWIDTH,
                   &(MemColTable[MEM_SIZE_IND].usWidth) );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_DRIVE_H, ColHdr[MEM_DRIVE_IND] );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_DRIVE_H, ColHdr[MEM_DRIVE_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_DRIVE_COLWIDTH,
                   &(MemColTable[MEM_DRIVE_IND].usWidth) );
     /******************************************************************/
     /* Supress server column under windows                            */
     /******************************************************************/
-    LOADSTRING( NULLHANDLE, hResMod, MEM_OWNER_H, ColHdr[MEM_OWNER_IND] );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_OWNER_H, ColHdr[MEM_OWNER_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_OWNER_COLWIDTH,
                   &(MemColTable[MEM_OWNER_IND].usWidth) );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_SOURCE_H, ColHdr[MEM_SOURCELNG_IND] );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_SOURCE_H, ColHdr[MEM_SOURCELNG_IND] );
     UtlLoadWidth( NULLHANDLE, hResMod, MEM_SOURCE_COLWIDTH,
                   &(MemColTable[MEM_SOURCELNG_IND].usWidth) );
     /* load string for N/A text (e.g. server name not available) */
-    LOADSTRING( NULLHANDLE, hResMod, MEM_FILESIZE_NA_TEXT, pIDA->szNAString );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_FILESIZE_NA_TEXT, pIDA->szNAString );
+#endif
   } /* endif */
 
   /**************************************************************/
@@ -927,23 +937,23 @@ MRESULT MemListCreate
             (pPropMem->sLastUsedViewList[0] != 0) ?
                        pPropMem->sLastUsedViewList :
                        sLastUsedView, sizeof( pCommArea->asCurView ) );
-    MemCLBData.psLastUsedViewList = pCommArea->asCurView;
+    //MemCLBData.psLastUsedViewList = pCommArea->asCurView;
 
     memcpy( pCommArea->asDetailsView,
             (pPropMem->sDetailsViewList[0] != 0) ?
                        pPropMem->sDetailsViewList :
                        sDetailsView, sizeof( pCommArea->asDetailsView ) );
-    MemCLBData.psDetailsViewList = pCommArea->asDetailsView;
+    //MemCLBData.psDetailsViewList = pCommArea->asDetailsView;
 
     memcpy( pCommArea->asSortList,
             (pPropMem->sSortList[0] != 0) ?
                        pPropMem->sSortList :
                        sSortCriteria, sizeof( pCommArea->asSortList ) );
-    MemCLBData.psSortList = pCommArea->asSortList;
+    //MemCLBData.psSortList = pCommArea->asSortList;
 
     memcpy( &pCommArea->Filter, &pPropMem->Filter,
             sizeof( pCommArea->Filter ) );
-    MemCLBData.pFilter = &pCommArea->Filter;
+    //MemCLBData.pFilter = &pCommArea->Filter;
 
 
   {
@@ -954,11 +964,11 @@ MRESULT MemListCreate
       //MemColTable[index].usWidth = pPropMem->sLastUsedViewWidth[i];
             if (pPropMem->sLastUsedViewWidth[i] > 0)
             {
-                MemColTable[index].usWidth = pPropMem->sLastUsedViewWidth[i];
+                //MemColTable[index].usWidth = pPropMem->sLastUsedViewWidth[i];
             }
             else
             {
-                pPropMem->sLastUsedViewWidth[i] = MemColTable[index].usWidth;
+                //pPropMem->sLastUsedViewWidth[i] = MemColTable[index].usWidth;
             }
     }
         memcpy( pCommArea->asCurViewWidth, (pPropMem->sLastUsedViewWidth),
@@ -973,7 +983,7 @@ MRESULT MemListCreate
   if ( fOK )
   {
     pCommArea->sListObjClass  = clsMEMORY;
-    LOADSTRING( NULLHANDLE, hResMod, MEM_TITLE, pCommArea->szTitle );
+    //LOADSTRING( NULLHANDLE, hResMod, MEM_TITLE, pCommArea->szTitle );
     pCommArea->hIcon          = (HPOINTER) UtlQueryULong(QL_MEMICON); //hiconMEM;
     pCommArea->fNoClose       = TRUE;
     pCommArea->sObjNameIndex  = MEM_OBJECT_IND;
@@ -983,7 +993,7 @@ MRESULT MemListCreate
     pCommArea->sPopupMenuID   = ID_MEM_POPUP;
     pCommArea->sGreyedPopupMenuID   = ID_MEM_POPUP;
     pCommArea->sNoSelPopupMenuID = ID_MEM_POPUP_NOSEL;
-    pCommArea->pColData       = &MemCLBData;
+    //pCommArea->pColData       = &MemCLBData;
     pCommArea->fMultipleSel   = TRUE;
     pCommArea->sMultPopupMenuID = ID_MEM_POPUP_MULTSEL;
     pCommArea->sDefaultAction = PID_FILE_MI_OPEN;
@@ -1066,7 +1076,7 @@ MRESULT MemListCommands
   BOOL          fEnabled = FALSE;           // item enabled ?
   OtmMemory     *pMemory = NULL;            // ptr to opened memory
   USHORT        usTmtRc;                    // Memory database return code
-  SHORT         sMemSelected = LIT_NONE;
+  //SHORT         sMemSelected = LIT_NONE;
   SHORT         sRC;                        // value used for symbol checking..
   PSZ           pszNameList = NULL;         // list of selected TMs (when more than one is selected)
   PSZ           pszActiveName = NULL;       // points to active name in name list
@@ -1078,9 +1088,10 @@ MRESULT MemListCommands
     // clear name field
     pIDA->szMemName[0] = NULC;
 
+#if 0
     // get number of selected TMs and build name list
     {
-      SHORT sItem = LIT_FIRST;
+      //SHORT sItem = LIT_FIRST;
       int iSelItems = SendMessage( pCommArea->hwndLB, LB_GETSELCOUNT, 0, 0 );
 
       if ( iSelItems > 1 )
@@ -1093,8 +1104,9 @@ MRESULT MemListCommands
         if ( fOK )
         {
           PSZ pszCurPos = pszNameList;
-          sItem = LIT_FIRST;
+          //sItem = LIT_FIRST;
 
+#if 0
           while ( iSelItems )
           {
             sItem = QUERYNEXTSELECTIONHWND( pCommArea->hwndLB, sItem );
@@ -1106,17 +1118,21 @@ MRESULT MemListCommands
             } /* endif */
             iSelItems--;
           } /* endwhile */
+#endif
           *pszCurPos = EOS;          // terminate list
           pszActiveName  = pszNameList;
         } /* endif */
       } /* endif */
     }
+#endif
+#if 0
     if ( pIDA->szProcessTaskWithObject[0] == NULC )
     {
       /* no object name to process specified yet, read it */
       /* get current selection */
       sMemSelected = QUERYSELECTIONHWND( pCommArea->hwndLB );
 
+#if 0
       if ((sMemSelected != LIT_NONE) && (sMemSelected != LIT_ERROR) )
       {
         /* now check if item is disabled (greyed out) */
@@ -1136,6 +1152,7 @@ MRESULT MemListCommands
         // it is allowed, that nothing is selected if we want to import
         fOK = (usMenuItem == PID_FILE_MI_IMPORT);
       } /* endif */
+#endif
     }
     else
     {
@@ -1144,6 +1161,7 @@ MRESULT MemListCommands
       // clear task object name to avoid interference with other tasks
       pIDA->szProcessTaskWithObject[0] = NULC;
     } /* endif */
+#endif
 
     if ( pIDA->szMemObjName[0] == NULC )
     {
@@ -1228,7 +1246,7 @@ MRESULT MemListCommands
 
         case PID_FILE_MI_IMPORT:
           {
-            if ( !fEnabled && ( sMemSelected != LIT_NONE) ) pIDA->szMemName[0] = EOS;  
+            //if ( !fEnabled && ( sMemSelected != LIT_NONE) ) pIDA->szMemName[0] = EOS;  
             fOK = MemGUIImportMemory( pCommArea, pIDA->szMemName, pIDA, hwnd );
           }
           break;
@@ -1260,14 +1278,14 @@ MRESULT MemListCommands
                 strcpy( pPropIDA->szMemName, pIDA->szMemName );
 
                 // call property dialog
-                DIALOGBOX( QUERYACTIVEWINDOW(), MEMPROPDLG, hResMod, ID_TM_PROP_DLG, pPropIDA, iDlgRc );
+                //DIALOGBOX( QUERYACTIVEWINDOW(), MEMPROPDLG, hResMod, ID_TM_PROP_DLG, pPropIDA, iDlgRc );
 
                 // update memory list window
                 //EqfSend2Handler( MEMORYHANDLER, 
                 //                 WM_EQFN_PROPERTIESCHANGED, 
                 //                 MP1FROMSHORT( PROP_CLASS_MEMORY ), 
                 //                 MP2FROMP( pIDA->szMemName ));
-                WinSendMsg( hwnd, WM_EQF_MEMFILL_LISTBOX, NULL, NULL );
+                //WinSendMsg( hwnd, WM_EQF_MEMFILL_LISTBOX, NULL, NULL );
 
                 UtlAlloc( (PVOID *)&pPropIDA, 0L, 0L, NOMSG );
               } /* endif */
@@ -1335,8 +1353,10 @@ MRESULT MemListCommands
 
                 if(iRC == 0)
                     EqfSend2Handler( MEMORYHANDLER, WM_EQFN_DELETED, MP1FROMSHORT( clsMEMORYDB ), MP2FROMP( pIDA->szMemObjName ));
+#if 0
                 else
                     MessageBox(hwnd, strError.c_str(),NULL,MB_OK|MB_ICONWARNING);
+#endif
               } /* endif */
 
               // prepare next TM
@@ -1424,7 +1444,7 @@ MRESULT MemListCommands
 
         default:
         {
-          MessageBox( hwnd, "This command is not implemented yet", "Warning",  MB_CANCEL );
+          //MessageBox( hwnd, "This command is not implemented yet", "Warning",  MB_CANCEL );
         }
       } /* endswitch */
 //      BOOL fIsNew = FALSE;         // new flag
@@ -1630,8 +1650,9 @@ MRESULT MemListProcessTask
         UtlMakeEQFPath( &(pCommArea->szBuffer[512]), NULC, SYSTEM_PATH, NULL );
         sprintf( pCommArea->szBuffer, "%s\\%s%s", &(pCommArea->szBuffer[512]),
                  pszString, EXT_OF_MEM );
-        sIndex = LBSEARCHSTRINGHWND( pCommArea->hwndLB, pCommArea->szBuffer );
+        //sIndex = LBSEARCHSTRINGHWND( pCommArea->hwndLB, pCommArea->szBuffer );
 
+#if 0
         // If the name was found then perform the appropriate tasks
         if ( sIndex != LIT_NONE )
         {
@@ -1707,6 +1728,7 @@ MRESULT MemListProcessTask
           *pszString = EOS;
           fOK = FALSE;
         } /* endif */
+#endif
       } /* endif */
       break;
     //-------------------------------------------------------------------------
@@ -1770,8 +1792,9 @@ MRESULT MemListProcessTask
                    pszString, EXT_OF_MEM );
 
 
-          sIndex = LBSEARCHSTRINGHWND( pCommArea->hwndLB, pCommArea->szBuffer );
+          //sIndex = LBSEARCHSTRINGHWND( pCommArea->hwndLB, pCommArea->szBuffer );
 
+#if 0
           // If the name was found then perform the appropriate tasks
           if ( sIndex != LIT_NONE )
           {
@@ -1785,6 +1808,7 @@ MRESULT MemListProcessTask
           {
             fOK = FALSE;
           } /* endif */
+#endif
         } /* endif */
 
       } /* endif */
@@ -1801,7 +1825,7 @@ MRESULT MemListProcessTask
         strcpy( pIDA->szProcessTaskWithObject, (CHAR *)PVOIDFROMMP2( mp2 ) );
 
         // Send a message to start the organize process
-        fOK = (BOOL) WinSendMsg( hwnd, WM_EQF_COMMAND, mp1, NULL );
+        //fOK = (BOOL) WinSendMsg( hwnd, WM_EQF_COMMAND, mp1, NULL );
       } /* endif */
       break;
     case WM_EQF_MT_TMMERGE:
@@ -1859,11 +1883,13 @@ int FillListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo
                pInfo->szSourceLanguage,  X15_STR,
                "n/a",                    X15_STR,
                "n/a",                    X15_STR);
+#if 0
   SHORT sItem = INSERTITEMHWND( pData->hwndLBox, pData->pszBuffer );
   if ( (sItem >= 0) && !pInfo->fEnabled )
   {
-    WinSendMsg( pData->hwndLBox, LM_EQF_SETITEMSTATE, MP1FROMSHORT( sItem ), MP2FROMSHORT( FALSE ) );
+    //WinSendMsg( pData->hwndLBox, LM_EQF_SETITEMSTATE, MP1FROMSHORT( sItem ), MP2FROMSHORT( FALSE ) );
   } /* endif */
+#endif
 
   free( (void *)pszDispName );
   free( (void *)pszDescription );
@@ -1877,7 +1903,7 @@ int FillComboBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInf
 
   if ( pInfo->fEnabled )
   {
-    CBINSERTITEMHWND( pData->hwndLBox, pszName );
+    //CBINSERTITEMHWND( pData->hwndLBox, pszName );
   } /* end */     
   return( 1 );
 }
@@ -1891,27 +1917,29 @@ USHORT MemFillListBox( HWND hwndLBox, PSZ pszBuffer, PSZ pszNAString )
 
   pszNAString;
 
-  SETCURSOR( SPTR_WAIT );
-  ENABLEUPDATEHWND_FALSE ( hwndLBox);
-  DELETEALLHWND( hwndLBox );
+  //SETCURSOR( SPTR_WAIT );
+  //ENABLEUPDATEHWND_FALSE ( hwndLBox);
+  //DELETEALLHWND( hwndLBox );
 
   FillListData.pszBuffer = pszBuffer;
   FillListData.hwndLBox = hwndLBox;
 
   pFactory->listMemories( FillListBox, (PVOID)&FillListData, TRUE );
 
-  SETCURSOR( SPTR_ARROW );
+  //SETCURSOR( SPTR_ARROW );
 
+#if 0
   USHORT usCount = QUERYITEMCOUNTHWND( hwndLBox );
 
   if ( usCount )
   {
-    SELECTITEMHWND( hwndLBox, 0 );
+    //SELECTITEMHWND( hwndLBox, 0 );
   } /* endif */
 
-  ENABLEUPDATEHWND_TRUE( hwndLBox );
+  //ENABLEUPDATEHWND_TRUE( hwndLBox );
 
   return( usCount );
+#endif
 } /* end of function MemFillListBox */
 
 /**********************************************************************/
@@ -1924,25 +1952,25 @@ USHORT MemFillCBNames( HWND hwndLBox, PSZ pszBuffer, PSZ pszNAString )
 
   pszNAString;
 
-  SETCURSOR( SPTR_WAIT );
-  ENABLEUPDATEHWND_FALSE( hwndLBox );
-  DELETEALLHWND( hwndLBox );
+  //SETCURSOR( SPTR_WAIT );
+  //ENABLEUPDATEHWND_FALSE( hwndLBox );
+  //DELETEALLHWND( hwndLBox );
 
   FillListData.pszBuffer = pszBuffer;
   FillListData.hwndLBox = hwndLBox;
 
   USHORT usCount = (USHORT)pFactory->listMemories( FillComboBox, (PVOID)&FillListData, TRUE );
 
-  SETCURSOR( SPTR_ARROW );
+  //SETCURSOR( SPTR_ARROW );
 
-  QUERYITEMCOUNTHWND( hwndLBox );
+  //QUERYITEMCOUNTHWND( hwndLBox );
 
   if ( usCount )
   {
-    SELECTITEMHWND( hwndLBox, 0 );
+    //SELECTITEMHWND( hwndLBox, 0 );
   } /* endif */
 
-  ENABLEUPDATEHWND_TRUE ( hwndLBox);
+  //ENABLEUPDATEHWND_TRUE ( hwndLBox);
 
   return( usCount );
 } /* end of function MemFillCBNames */
@@ -1971,7 +1999,7 @@ BOOL MemMakeListItem( PSZ pszObjName, PSZ pszBuffer,
     szDrive[0] = pInfo->szFullPath[0];
     szDrive[1] = ':';
     szDrive[2] = 0;
-    ltoa( pInfo->ulSize, szFileSize, 10 );
+    strncpy(szFileSize, std::to_string( pInfo->ulSize ).c_str(), 20);
     strcpy( pszDispName, pInfo->szName );
     strcpy( pszDescription, pInfo->szDescription );
     OEMTOANSI( pszDispName );
@@ -2290,9 +2318,9 @@ BOOL MTTMMergeStart
          //---       does not work correctly
          pLIDA->fDisabled = TRUE;
 
-         SETCURSOR( SPTR_ARROW );
+         //SETCURSOR( SPTR_ARROW );
          fOK = (BOOL)EqfSend2Handler( MEMORYHANDLER, WM_EQF_CREATE, MP1FROMSHORT( 0 ),  MP2FROMP( pLIDA->szMemName ) );
-         SETCURSOR( SPTR_WAIT );
+         //SETCURSOR( SPTR_WAIT );
 
          //--- reset dialog is disabled flag, dialog is active
          pLIDA->fDisabled = FALSE;
@@ -2470,6 +2498,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
      // notify OpenTM2 GUI to update
      if(fOK)
      {
+#if 0
         HWND hwnd = FindWindow( TWBMAIN ,NULL);
         if(hwnd != NULL)
         {
@@ -2482,6 +2511,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
           cds.lpData = (char*)strMemName.c_str();
           SendMessage(hwnd,WM_COPYDATA, 0,(LPARAM)(LPVOID)&cds);
         }
+#endif
      }// end if
 
    }
@@ -2585,7 +2615,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
        if ( pData->fUTF16Mem )
        {
          PSZ_W pszStart = ( fBOM ) ? ((PSZ_W)(chBOM+2)) : ((PSZ_W)(chBOM));
-         if( _wcsnicmp( pszStart, L"<NTMMemoryDb>", 13 ) != 0 )
+         if( wcsncasecmp( pszStart, L"<NTMMemoryDb>", 13 ) != 0 )
          {
            usRC = ERROR_FILE_INVALID_DATA;
     	     UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
@@ -2593,7 +2623,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
        }
        else
        {
-         if( strnicmp( (char *)chBOM, "<NTMMemoryDb>", 13 ) != 0 )
+         if( strncasecmp( (char *)chBOM, "<NTMMemoryDb>", 13 ) != 0 )
          {
            usRC = ERROR_FILE_INVALID_DATA;
     	     UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
@@ -2632,8 +2662,8 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
        char szCode[10];
 
        pszParms[0] = pData->szOutMem;
-       int iFileRC = GetLastError();
-       itoa( iFileRC, szCode, 10 );
+       //int iFileRC = GetLastError();
+       //strncpy( szCode, std::to_string(iFileRC), 10 );
        pszParms[1] = szCode;
        usRC = ERROR_FILE_WRITE_ERROR;
        UtlErrorHwnd( usRC, MB_CANCEL, 2, pszParms, EQF_ERROR, HWND_FUNCIF );
@@ -2667,7 +2697,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
                }
              }
            }
-           else if ( (iLen >= 9 ) && (_wcsnicmp( pData->szLineW, L"<control>", 9 ) == 0) ) 
+           else if ( (iLen >= 9 ) && (wcsncasecmp( pData->szLineW, L"<control>", 9 ) == 0) ) 
            {
              fControl = TRUE;
            }
@@ -2700,7 +2730,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
                }
              }
            }
-           else if ( (iLen >= 9 ) && (strnicmp( pData->szLine, "<control>", 9 ) == 0) ) 
+           else if ( (iLen >= 9 ) && (strncasecmp( pData->szLine, "<control>", 9 ) == 0) ) 
            {
              fControl = TRUE;
            }

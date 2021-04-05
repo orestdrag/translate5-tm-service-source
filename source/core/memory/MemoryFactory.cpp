@@ -20,13 +20,13 @@ Copyright Notice:
 
 //#define LOGGING
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
-#include "core\PluginManager\OtmSharedMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
+#include "../pluginmanager/OtmSharedMemory.h"
 #include "MemoryUtil.h"
-#include "core\memory\MemoryFactory.h"
-#include "OptionsDialog.h"
+#include "../memory/MemoryFactory.h"
+#include "OptionsDialog.H"
 
 
 #include "vector"
@@ -394,7 +394,7 @@ OtmMemory *MemoryFactory::createMemory
   char *pszSourceLanguage,
   char chDrive,
   char *pszOwner,
-  boolean bInvisible,
+  bool bInvisible,
   int *piErrorCode
 )
 {
@@ -1452,7 +1452,7 @@ OtmMemory *MemoryFactory::createSharedMemory(
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
       this->Log.writef( "   %s", this->strLastError.c_str() );
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
 
     return( NULL );
@@ -1564,7 +1564,7 @@ int MemoryFactory::connectToMemory(
     this->strLastError = "No plugin for shared memory handling is available";
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
 
     return( this->iLastError );
@@ -1579,7 +1579,7 @@ int MemoryFactory::connectToMemory(
     {
       if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
       {
-        MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+        //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
       } /* end */       
       return( iRC );
     }
@@ -1598,7 +1598,7 @@ int MemoryFactory::connectToMemory(
     this->iLastError = plugin->getLastError( this->strLastError );
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
     return( this->iLastError );
   } /* end */
@@ -1631,7 +1631,7 @@ int MemoryFactory::disconnectMemory(
     this->strLastError = "No plugin for shared memory handling is available";
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
 
     return( this->iLastError );
@@ -1644,7 +1644,7 @@ int MemoryFactory::disconnectMemory(
     this->iLastError = plugin->getLastError( this->strLastError );
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
     return( this->iLastError );
   } /* end */     
@@ -1690,7 +1690,7 @@ int MemoryFactory::getConnectOptions(
     this->strLastError = "No plugin for shared memory handling is available";
     if ( (hwndOwner != NULLHANDLE) && (hwndOwner != HWND_FUNCIF) )
     {
-      MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
+      //MessageBox( hwndOwner, this->strLastError.c_str(), "Error", MB_OK );
     } /* end */       
 
     return( -1 );
@@ -2028,7 +2028,7 @@ void MemoryFactory::refreshPluginList()
     if ( curPlugin != NULL ) 
     {
       pluginList->push_back( curPlugin );
-      if ( stricmp( curPlugin->getName(), DEFAULTMEMORYPLUGIN ) == 0 )
+      if ( strcasecmp( curPlugin->getName(), DEFAULTMEMORYPLUGIN ) == 0 )
       {
         strcpy( this->szDefaultMemoryPlugin, curPlugin->getName() );
       }
@@ -2052,7 +2052,7 @@ void MemoryFactory::refreshPluginList()
     if ( curSharedPlugin != NULL ) 
     {
       pSharedMemPluginList->push_back( curSharedPlugin );
-      if ( stricmp( curSharedPlugin->getName(), DEFAULTSHAREDMEMORYPLUGIN ) == 0 )
+      if ( strcasecmp( curSharedPlugin->getName(), DEFAULTSHAREDMEMORYPLUGIN ) == 0 )
       {
 		// P403634 
         //strcpy( this->szDefaultMemoryPlugin, curSharedPlugin->getName() );
@@ -2349,6 +2349,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
     WIN32_FIND_DATA FindData;
     std::string strSearchPattern = szTempDir;
     strSearchPattern.append( "\\*.*" );
+#if 0
     HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
     if ( hDir != INVALID_HANDLE_VALUE )
     {
@@ -2366,6 +2367,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
       } while ( fMoreFiles );
       FindClose( hDir );
     }
+#endif
   }
 
   // call memory plugin to process the files
@@ -2378,7 +2380,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
   // delete any files left over and remove the directory
   UtlDeleteAllFiles( (const char *)szTempDir );
-  RemoveDirectory( szTempDir );
+  //RemoveDirectory( szTempDir );
 
   return( (USHORT)iRC );
 }
@@ -2592,6 +2594,15 @@ USHORT MemoryFactory::APIQueryMem
   return( usRC );
 }
 
+static wchar_t* wcsupr(wchar_t *str)
+{
+    wchar_t *tmp = str;
+    while (tmp) {
+        *tmp = toupper((wchar_t)*tmp);
+        ++tmp;
+    }
+    return str;
+}
 
 /*! \brief process the API call: EqfSearchMem and search the given text string in the memory
   \param lHandle handle of a previously opened memory
@@ -2605,7 +2616,7 @@ USHORT MemoryFactory::APIQueryMem
 USHORT MemoryFactory::APISearchMem
 (
   LONG        lHandle,                 
-  __wchar_t  *pszSearchString,
+  wchar_t  *pszSearchString,
   PSZ         pszStartPosition,
   PMEMPROPOSAL pProposal,
   LONG        lSearchTime,
@@ -2648,7 +2659,7 @@ USHORT MemoryFactory::APISearchMem
   } /* endif */
 
   DWORD dwSearchStartTime = 0;
-  if ( lSearchTime != 0 ) dwSearchStartTime = GetTickCount();
+  //if ( lSearchTime != 0 ) dwSearchStartTime = GetTickCount();
 
   // get first or next proposal
   if ( *pszStartPosition == EOS )
@@ -2663,7 +2674,7 @@ USHORT MemoryFactory::APISearchMem
 
   // prepare searchstring
   wcscpy( m_szSearchString, pszSearchString );
-  if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) _wcsupr( m_szSearchString );
+  if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSearchString );
   if ( lOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSearchString );
 
 
@@ -2679,6 +2690,7 @@ USHORT MemoryFactory::APISearchMem
       if ( lSearchTime != 0 )
       {
         LONG lElapsedMillis = 0;
+#if 0
         DWORD dwCurTime = GetTickCount();
         if ( dwCurTime < dwSearchStartTime )
         {
@@ -2689,6 +2701,7 @@ USHORT MemoryFactory::APISearchMem
         {
           lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
         } /* endif */
+#endif
         if ( lElapsedMillis > lSearchTime )
         {
           iRC = TIMEOUT_RC;
@@ -2896,7 +2909,7 @@ LONG MemoryFactory::computeMemoryObjectChecksum
 {
   // compute checksum based on t3he individual byte values of the memory object pointer
   LONG lCheckSum = 0;
-  _int64 iPointerValue = (_int64)pMemory;  // use int64 value to enable code for 64bit pointers
+  INT64 iPointerValue = (INT64)pMemory;  // use int64 value to enable code for 64bit pointers
   int iSize = sizeof(*pMemory);
   while( iSize > 0 )
   {
@@ -2976,7 +2989,7 @@ BOOL MemoryFactory::searchInProposal
   if ( !fFound && (lSearchOptions & SEARCH_IN_SOURCE_OPT) )
   {
     pProposal->getSource( m_szSegmentText, sizeof(m_szSegmentText)/sizeof(CHAR_W) );
-    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) _wcsupr( m_szSegmentText );
+    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSegmentText );
     if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSegmentText );
     fFound = findString( m_szSegmentText, pszSearch );
   }
@@ -2984,7 +2997,7 @@ BOOL MemoryFactory::searchInProposal
   if ( !fFound && (lSearchOptions & SEARCH_IN_TARGET_OPT)  )
   {
     pProposal->getTarget( m_szSegmentText, sizeof(m_szSegmentText)/sizeof(CHAR_W) );
-    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) _wcsupr( m_szSegmentText );
+    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSegmentText );
     if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSegmentText );
     fFound = findString( m_szSegmentText, pszSearch );
   }
