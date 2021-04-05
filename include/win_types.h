@@ -481,4 +481,8 @@ typedef struct tagOFNA {
 #define get_max(a, b) (a > b) ? (a) : (b)
 #define get_min(a, b) (a > b) ? (b) : (a)
 
+/* https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499- */
+
+#define ERROR_INVALID_PARAMETER 0x57
+
 #endif
