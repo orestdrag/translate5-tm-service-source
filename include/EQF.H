@@ -2716,9 +2716,11 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Macro interface to property handler                                */
 /**********************************************************************/
+#if 0
 #define EqfCallPropertyHandler( msg, mp1, mp2)                                 \
                           (HPROP)WinSendMsg( EqfQueryHandler( PROPERTYHANDLER),\
                                                 msg, mp1, mp2)
+#endif
 
 /**********************************************************************/
 /**********************************************************************/
