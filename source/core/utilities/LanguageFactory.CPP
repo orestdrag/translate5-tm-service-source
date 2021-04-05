@@ -5,7 +5,7 @@
 	Corporation and others. All rights reserved
 */
 
-#include "eqf.h"                  // General .H for EQF
+#include "EQF.H"                  // General .H for EQF
 
 
 // the Win32 Xerces build requires the default structure packing...
@@ -25,8 +25,8 @@
 XERCES_CPP_NAMESPACE_USE
 
 
-#include "core\utilities\LogWriter.h"
-#include "LanguageFactory.h"
+#include "../utilities/LogWriter.h"
+#include "LanguageFactory.H"
 
 
 // currently hard-coded language information table
@@ -566,7 +566,7 @@ int LanguageFactory::findLanguage
   int iMax = pvLanguageList->size();
   while( i < iMax )
   {
-    if ( stricmp( pszLanguage, (*pvLanguageList)[i].szName ) == 0 )
+    if ( strcasecmp( pszLanguage, (*pvLanguageList)[i].szName ) == 0 )
     {
       return( i );
     }
@@ -587,7 +587,7 @@ int LanguageFactory::compareISO
 )
 {
 
-   int iResult = stricmp( pszISO1, pszISO2 );
+   int iResult = strcasecmp( pszISO1, pszISO2 );
    if ( iResult == 0 ) return( iResult );
 
    // return when both ISO names have no country ID
@@ -618,7 +618,7 @@ int LanguageFactory::compareISO
      strcpy( szLang2, (PSZ)pszISO2);
    } /* endif */
  
-   return ( stricmp( szLang1, szLang2 ) );
+   return ( strcasecmp( szLang1, szLang2 ) );
 }
 
 /* \brief Find the entry for the specified ISO language ID 
@@ -641,7 +641,7 @@ int LanguageFactory::findISO
   {
     if ( compareISO( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
     {
-      if ( stricmp( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
+      if ( strcasecmp( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
       {
         // perfect match, return if this is the preferred language
         if ( (*pvLanguageList)[i].fisPreferred )
@@ -717,7 +717,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     catch (const XMLException& toCatch) {
         toCatch;
 
-        return( ERROR_NOT_READY );
+        //return( ERROR_NOT_READY );
     }
 
     SAXParser* parser = new SAXParser();      // Create a SAX parser object
@@ -749,7 +749,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     {
       toCatch;
 
-      usRC = ERROR_READ_FAULT;
+      //usRC = ERROR_READ_FAULT;
     }
 
   } /* endif */
@@ -801,7 +801,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
   name;
 
   // convert collected data to ASCII
-  WideCharToMultiByte( CP_OEMCP, 0, this->szDataW, -1, this->szData, sizeof(this->szData), NULL, NULL );
+  //WideCharToMultiByte( CP_OEMCP, 0, this->szDataW, -1, this->szData, sizeof(this->szData), NULL, NULL );
 
   switch ( CurID )
   {
@@ -831,16 +831,16 @@ void LangParseHandler::endElement(const XMLCh* const name )
       strncpy( this->CurElement.szIcuID, this->szData, sizeof(this->CurElement.szIcuID) );
       break;
     case PREFERRED_ELEMENT:
-      this->CurElement.fisPreferred = (stricmp( this->szData, "yes" ) == 0);
+      this->CurElement.fisPreferred = (strcasecmp( this->szData, "yes" ) == 0);
       break;
     case GROUP_ELEMENT:
       strncpy( this->CurElement.szLangGroup, this->szData, sizeof(this->CurElement.szLangGroup) );
       break;
     case ISSOURCELANGUAGE_ELEMENT:
-      this->CurElement.isSourceLanguage = (stricmp( this->szData, "yes" ) == 0);
+      this->CurElement.isSourceLanguage = (strcasecmp( this->szData, "yes" ) == 0);
       break;
     case ISTARGETLANGUAGE_ELEMENT:
-      this->CurElement.isTargetLanguage = (stricmp( this->szData, "yes" ) == 0);
+      this->CurElement.isTargetLanguage = (strcasecmp( this->szData, "yes" ) == 0);
       break;
     case COMMENTS_ELEMENT:
       strncpy( this->CurElement.szAddInfo, this->szData, sizeof(this->CurElement.szAddInfo) );
@@ -914,7 +914,7 @@ static XMLNAMETOID XmlNameToID[] =
 
   while ( (IDFound == UNKNOWN_ELEMENT) && (XmlNameToID[i].szName[0] != 0) )
   {
-    if ( _wcsicmp( pszName, XmlNameToID[i].szName ) == 0 )
+    if ( wcscasecmp( pszName, XmlNameToID[i].szName ) == 0 )
     {
       IDFound = XmlNameToID[i].ID;
     }
