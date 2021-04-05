@@ -5,11 +5,12 @@
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
 extern "C" {
-#include "eqf.h"
+#include "EQF.H"
 }
-#include "core\PluginManager\OtmPlugin.h"
-#include "core\PluginManager\PluginManager.h"
+#include "../../core/pluginmanager/OtmPlugin.h"
+#include "../../core/pluginmanager/PluginManager.h"
 #include "InitPlugins.h"
+#include "OTMFUNC.H"
 
 // initialize the Plugin-Manager and load the available plugins
 USHORT InitializePlugins( char *szPluginPath )

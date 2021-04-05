@@ -5,6 +5,7 @@
 
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
+#include "OTMFUNC.H"
 
 /*! \mainpage PluginManager and plugins for OpenTM2
 	\par Copyright Notice:

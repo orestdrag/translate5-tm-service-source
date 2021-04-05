@@ -10,7 +10,7 @@
 
 #include <set>
 #include <vector>
-#include <core\utilities\LogWriter.h>
+#include "../utilities/LogWriter.h"
 
 class OtmPlugin;
 class PluginListener;
