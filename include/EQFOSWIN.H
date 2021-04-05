@@ -378,8 +378,8 @@ typedef FSALLOCATE *PFSALLOCATE;
 
 #define LIT_ERROR                  LB_ERR
 #define LIT_MEMERROR               LB_ERRSPACE
-#define LIT_NONE                   LB_ERR
-#define LIT_FIRST                  LB_ERR
+//#define LIT_NONE                   LB_ERR
+//#define LIT_FIRST                  LB_ERR
 
 /**********************************************************************/
 /* LM_INSERTITEM messages                                             */
@@ -556,7 +556,7 @@ typedef  struct _MESSAGEFILE
   #define WinPostMsg(a, b, c, d)     CPLUSPLUS   PostMessage(a, b, (WPARAM)c, (LPARAM)d)
   #define WinSendMsg(a, b, c, d)     CPLUSPLUS   SendMessage(a, b, (WPARAM)c, (LPARAM)d)
 #endif
-  #define WinDefWindowProc DefWindowProc
+  //#define WinDefWindowProc DefWindowProc
   #define GpiQueryFontMetrics(a,b,c) GetTextMetrics(a,c);
   #define FONTMETRICS TEXTMETRIC
   #define WinQuerySysValue(a,b) GetSystemMetrics(b)
@@ -1049,7 +1049,7 @@ typedef HELPTABLE *PHELPTABLE;
 /**********************************************************************/
 /* Defines for system color settings                                  */
 /**********************************************************************/
-#define SYSCLR_WINDOWSTATICTEXT  COLOR_HIGHLIGHT  // COLOR_WINDOWTEXT
+//#define SYSCLR_WINDOWSTATICTEXT  COLOR_HIGHLIGHT  // COLOR_WINDOWTEXT
 
 /**********************************************************************/
 /* OS/2 PM functions directly mapped to Windows functions             */

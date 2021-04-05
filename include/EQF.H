@@ -540,7 +540,7 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /* Access the name field in a findfirst/findnext result buffer        */
 /**********************************************************************/
-#define RESBUFNAME( resbuf ) resbuf.cAlternateFileName
+//#define RESBUFNAME( resbuf ) resbuf.cAlternateFileName
 #define RESBUFNAMELONG( resbuf ) resbuf.achName
 
 /**********************************************************************/
@@ -594,9 +594,11 @@ typedef PSWP  EQF_PSWP;
 #define LBSEARCHSTRING( hwnd, usID, pszString ) \
     (SHORT)SendDlgItemMessage( hwnd, usID, LB_FINDSTRING, MP1FROMSHORT( 0 ), \
                                MP2FROMP( pszString ) )
+#if 0
 #define LBSEARCHSTRINGHWND( hwnd, pszString ) \
     (SHORT)CPLUSPLUS SendMessage( hwnd, LB_FINDSTRING, MP1FROMSHORT( 0 ), \
                         MP2FROMP( pszString ) )
+#endif
 
 #define ISCTRLENABLED( hwnd, id ) \
     IsWindowEnabled( GetDlgItem( hwnd, id ) )
@@ -2707,7 +2709,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
                                                 WM_EQF_QUERYMENUTBL,           \
                                                 NULL, NULL)
 #endif
-#define EqfQueryTwbClient()          (HWND)EqfQueryHandler( TWBMAIN)
+//#define EqfQueryTwbClient()          (HWND)EqfQueryHandler( TWBMAIN)
 #define EqfQueryTwbFrame()  (HWND)WinQueryWindow( EqfQueryTwbClient(),\
                                                 QW_PARENT, FALSE)
 
@@ -3289,6 +3291,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
     CPLUSPLUS SendMessage( hwnd, WM_SETREDRAW, flag, 0L ); \
     if ( flag ) InvalidateRect( hwnd, NULL, FALSE ); \
   }
+#if 0
   #define ENABLEUPDATEHWND_TRUE( hwnd )                   \
     { \
       CPLUSPLUS SendMessage( hwnd, WM_SETREDRAW, TRUE, 0L ); \
@@ -3298,6 +3301,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
     { \
       CPLUSPLUS SendMessage( hwnd, WM_SETREDRAW, FALSE, 0L ); \
     }
+#endif
 
 /**********************************************************************/
 /* Add a new object to a restart list                                 */
@@ -3422,8 +3426,10 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get parent from specified handle                                   */
 /**********************************************************************/
+#if 0
 #define GETPARENT( hwnd )                   \
      CPLUSPLUS GetParent( hwnd )
+#endif
 
 /**********************************************************************/
 /* get owner from specified handle                                    */
@@ -3578,7 +3584,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
   #define SPTR_ARROW             IDC_ARROW
   #define SPTR_TEXT              IDC_IBEAM
-  #define SPTR_WAIT              IDC_WAIT
+  //#define SPTR_WAIT              IDC_WAIT
   #define SPTR_SIZE              IDC_SIZE
   #define SPTR_MOVE              IDC_UPARROW
   #define SPTR_SIZENWSE          IDC_SIZENWSE
@@ -3587,8 +3593,10 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
   #define SPTR_SIZENS            IDC_SIZEENS
   #define SPTR_APPICON           IDC_ICON
 
+#if 0
   #define SETCURSOR( id )       \
     SetCursor( LoadCursor( NULL, id )  )
+#endif
 
 /**********************************************************************/
 /* set mouse pointer from handle                                      */
@@ -7093,6 +7101,7 @@ BOOL TACheckAndAdaptLFChanges
 
 // keep other process from doing property related stuff..
 // GETMUTEX to create a mutex
+#if 0
 #define GETMUTEX(hMutexSem) \
 { hMutexSem = OpenMutex( MUTEX_ALL_ACCESS, TRUE, PROP_ACCESS_MUTEX );                \
   if ( hMutexSem == NULL) hMutexSem = CreateMutex( NULL, FALSE, PROP_ACCESS_MUTEX ); \
@@ -7103,6 +7112,7 @@ BOOL TACheckAndAdaptLFChanges
 { if ( hMutexSem )                                           \
   {  ReleaseMutex( hMutexSem ); CloseHandle( hMutexSem ); }  \
 }
+#endif
 
 MRESULT UtlInvokeHelp();
 BOOL    UtlIsHighContrast();
