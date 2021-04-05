@@ -9,8 +9,9 @@
 //+----------------------------------------------------------------------------+
 
 #define INCL_EQF_EDITORAPI        // editor API
-#include "eqf.h"                  // General .H for EQF
-#include "eqfpro00.h"             // Property Handler defines
+#include "EQF.H"                  // General .H for EQF
+#include "EQFPRO00.H"             // Property Handler defines
+#include "OTMFUNC.H"
 
 // activate the following define for property failure logging
 //#define PROPLOGGING
@@ -36,6 +37,7 @@ MRESULT APIENTRY PROPERTYHANDLERWP
     PPROPCNTL     pcntl;
     USHORT        size;
 
+#if 0
     switch( message) {
 /*--------------------------------------------------------------------------*/
       case WM_CREATE:
@@ -242,7 +244,8 @@ MRESULT APIENTRY PROPERTYHANDLERWP
 
 /*--------------------------------------------------------------------------*/
     }
-    return( WinDefWindowProc( hwnd, message, mp1, mp2));
+#endif
+    //return( WinDefWindowProc( hwnd, message, mp1, mp2));
 }
 
 /*!
@@ -347,8 +350,8 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
-      if( _stricmp( pszName, prophead.szName)
-       || _stricmp( pszPath + 2, prophead.szPath + 2))   // ignore drive !!!
+      if( strcasecmp( pszName, prophead.szName)
+       || strcasecmp( pszPath + 2, prophead.szPath + 2))   // ignore drive !!!
        {
         *pIda->pErrorInfo = ErrProp_InvalidFile;
         break;
@@ -814,7 +817,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
         HANDLE hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = pmsg->pErrorInfo;
@@ -837,13 +840,15 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
         } /* endif */
 
         // release Mutex
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
      hprop = (HPROP)EqfCallPropertyHandler( WM_EQF_OPENPROPERTIES,
                                             MP1FROMSHORT(0),
                                             MP2FROMP(pmsg) );
+#endif
      } /* endif */
    } /* endif */
    UtlAlloc( (PVOID *)&pmsg, 0L, 0L, NOMSG );
@@ -905,7 +910,7 @@ HPROP CreatePropertiesEx(
         HANDLE hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = pmsg->pErrorInfo;
@@ -932,14 +937,16 @@ HPROP CreatePropertiesEx(
         } /* endif */
 
         // release Mutex
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
        pmsg->fOverWrite = fOverwriteExisting;
+#if 0
        hprop = (HPROP)EqfCallPropertyHandler( WM_EQF_CREATEPROPERTIES,
                                               MP1FROMSHORT(0),
                                               MP2FROMP(pmsg) );
+#endif
      } /* endif */
    } while( fTrueFalse /*TRUE & FALSE*/);
    UtlAlloc( (PVOID *)&pmsg, 0L, 0L, NOMSG );
@@ -980,7 +987,7 @@ SHORT DeleteProperties(
         HANDLE hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = PropMsg.pErrorInfo;
@@ -998,13 +1005,15 @@ SHORT DeleteProperties(
         }
 
         // release Mutex
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_DELETEPROPERTIES,
                                                  MP1FROMSHORT(0),
                                                  MP2FROMP(&PropMsg) ) );
+#endif
      } /* endif */
    } while( fTrueFalse /*TRUE & FALSE*/);
 
@@ -1046,7 +1055,7 @@ SHORT CloseProperties(
         HANDLE hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = PropMsg.pErrorInfo;
@@ -1085,13 +1094,15 @@ SHORT CloseProperties(
         } /* endif */
 
         // release Mutex
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_CLOSEPROPERTIES,
                                                  MP1FROMSHORT(0),
                                                  MP2FROMP(&PropMsg) ) );
+#endif
      } /* endif */
 
    } while( fTrueFalse /*TRUE & FALSE*/);
@@ -1140,7 +1151,7 @@ SHORT GetAllProperties(
         HANDLE        hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = pmsg->pErrorInfo;
@@ -1160,13 +1171,15 @@ SHORT GetAllProperties(
           pcntl = hprop->pCntl;
           memcpy( pmsg->pBuffer, pcntl->pHead, pcntl->usFsize);
         }
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_GETALLPROPERTIES,
                                            MP1FROMSHORT(0),
                                            MP2FROMP(pmsg) ) );
+#endif
      } /* endif */
    } while( fTrueFalse /*TRUE & FALSE*/);
    UtlAlloc( (PVOID *)&pmsg, 0L, 0L, NOMSG );
@@ -1206,7 +1219,7 @@ SHORT PutAllProperties(
         PPROPHND      hprop;
         HANDLE        hMutexSem = NULL;
 
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
         pIda = pPropBatchIda;
         pIda->pErrorInfo = PropMsg.pErrorInfo;
         *pIda->pErrorInfo = 0L;      // assume a good return
@@ -1230,13 +1243,15 @@ SHORT PutAllProperties(
             rc = 0;
           }
         } /* endif */
-        RELEASEMUTEX(hMutexSem);
+        //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_PUTALLPROPERTIES,
                                            MP1FROMSHORT(0),
                                            MP2FROMP(&PropMsg) ) );
+#endif
      } /* endif */
    } while( fTrueFalse /*TRUE & FALSE*/);
 
@@ -1281,7 +1296,7 @@ SHORT SaveProperties(
         HANDLE hMutexSem = NULL;
 
         // keep other process from doing property related stuff..
-        GETMUTEX(hMutexSem);
+        //GETMUTEX(hMutexSem);
 
         pIda = pPropBatchIda;
         pIda->pErrorInfo = PropMsg.pErrorInfo;
@@ -1310,13 +1325,15 @@ SHORT SaveProperties(
         } /* endif */
 
         // release Mutex
-       RELEASEMUTEX(hMutexSem);
+       //RELEASEMUTEX(hMutexSem);
      }
      else
      {
+#if 0
        rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES,
                                            MP1FROMSHORT(0),
                                            MP2FROMP(&PropMsg) ) );
+#endif
      } /* endif */
  } while( fTrueFalse /*TRUE & FALSE*/);
 
@@ -1332,8 +1349,8 @@ PVOID MakePropPtrFromHnd( HPROP hprop)
 }
 PVOID MakePropPtrFromHwnd( HWND hObject)
 {
-   PIDA_HEAD pIda = ACCESSWNDIDA( hObject, PIDA_HEAD );
-    return( pIda ? MakePropPtrFromHnd( pIda->hProp) : NULL);
+   //PIDA_HEAD pIda = ACCESSWNDIDA( hObject, PIDA_HEAD );
+   // return( pIda ? MakePropPtrFromHnd( pIda->hProp) : NULL);
 }
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
@@ -1446,7 +1463,7 @@ PSZ MakePropPath( PSZ pbuf, PSZ pd, PSZ pp, PSZ pn, PSZ pe)
       return( pbuf);
     pprop = (PPROPSYSTEM) MakePropPtrFromHnd( hprop);
     sprintf( tmppath, "%s\\%s", pp, pprop->szPropertyPath );
-    _makepath( pbuf, pd, tmppath, pn, pe);
+    //_makepath( pbuf, pd, tmppath, pn, pe);
     return( pbuf);
 }
 
@@ -1468,13 +1485,13 @@ BOOL PropHandlerInitForBatch( void )
   { // keep other process from doing property related stuff..
 	  HANDLE hMutexSem = NULL;
 
-      GETMUTEX(hMutexSem);
+      //GETMUTEX(hMutexSem);
 
       if( GetSysProp( pPropBatchIda))
         fOK = FALSE;
     //   return( FALSE);      // do not create the window
 
-       RELEASEMUTEX(hMutexSem);     // release Mutex
+       //RELEASEMUTEX(hMutexSem);     // release Mutex
    }
 
  return( fOK );
@@ -1488,7 +1505,7 @@ PropHandlerTerminateForBatch( void )
   HANDLE hMutexSem = NULL;
   PPROP_IDA pIda = pPropBatchIda;
 
-  GETMUTEX(hMutexSem);
+  //GETMUTEX(hMutexSem);
   assert( pIda->hSystem != NULL );
 
   if ( pIda->hSystem != NULL )
@@ -1499,7 +1516,7 @@ PropHandlerTerminateForBatch( void )
     }
   } /* endif */
 
-  RELEASEMUTEX(hMutexSem);     // release Mutex
+  //RELEASEMUTEX(hMutexSem);     // release Mutex
   return( TRUE );
 } /* end of function PropHandlerTerminateForBatch */
 
@@ -1519,8 +1536,8 @@ HPROP EqfQuerySystemPropHnd( void )
 //                                        NULL, NULL);
       if (hwndPropertyHandler)
       {
-      	PPROP_IDA pIda = ACCESSWNDIDA( hwndPropertyHandler, PPROP_IDA );
-      	hprop = (HPROP)pIda->hSystem;
+      	//PPROP_IDA pIda = ACCESSWNDIDA( hwndPropertyHandler, PPROP_IDA );
+      	//hprop = (HPROP)pIda->hSystem;
 	  }
 	  else
 	  {
