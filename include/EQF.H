@@ -138,14 +138,14 @@
     #define _EQF_UNICODE 1
 
     #ifndef _WCHAR_T_DEFINED
-      //typedef unsigned short wchar_t;
+      typedef unsigned short wchar_t;
       #define _WCHAR_T_DEFINED
     #endif
 
     #if MSC_VER < 1400
         #ifndef _WCTYPE_T_DEFINED
-          //typedef wchar_t wint_t;
-          //typedef wchar_t wctype_t;
+          typedef wchar_t wint_t;
+          typedef wchar_t wctype_t;
           #define _WCTYPE_T_DEFINED
         #endif
     #endif
@@ -3414,9 +3414,11 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
   /* in case of error - for the first call it's the same, therefore   */
   /* try again to be sure....                                         */
   /********************************************************************/
+#if 0
   #define ANCHORWNDIDA( hwnd, pIda ) \
    ((SetWindowLong( hwnd, GWL_USERDATA /*0*/, (LONG)((PVOID) pIda) )) ?                   \
                     1 : SetWindowLong( hwnd, GWL_USERDATA /*0*/, (LONG)((PVOID) pIda) ) != 0L )
+#endif
 
 /**********************************************************************/
 /* Set the window word                                                */
@@ -3609,8 +3611,10 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get mouse pointer                                                  */
 /**********************************************************************/
+#if 0
 #define GETCURSOR()       \
     GetCursor()
+#endif
 /**********************************************************************/
 /* set/reset the mouse capture state...                               */
 /**********************************************************************/
