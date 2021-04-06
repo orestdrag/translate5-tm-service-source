@@ -19,6 +19,8 @@
 #include "../../../mri/EQFUTILS.ID" // IDs used by dialog utilities
 #include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
+#include "win_types.h"
+
 // includes for Xalan XSLT
 
 // the Win32 Xerces/Xalan build requires the default structure packing...
@@ -969,6 +971,7 @@ VOID UtlSetHorzScrollingForLB(HWND hLB) {
   SIZE size;
   HDC hdc;
 
+#if 0
   iNumEntries = SendMessage(hLB, LB_GETCOUNT, 0, 0);
   hdc = GetDC(hLB);
   for (i = 0; i < iNumEntries; i++) {
@@ -980,6 +983,7 @@ VOID UtlSetHorzScrollingForLB(HWND hLB) {
 //  SendMessage(hLB, LB_SETHORIZONTALEXTENT, (lMaxWidth + GetSystemMetrics(SM_CXVSCROLL)) * 4 /
 // (GetDialogBaseUnits() & 0xffff), 0);
   SendMessage(hLB, LB_SETHORIZONTALEXTENT, lMaxWidth + GetSystemMetrics(SM_CXVSCROLL), 0);
+#endif
 }
 
 /*!
@@ -1013,7 +1017,7 @@ SHORT UtlCopyListBox( HWND hwndTarget, HWND hwndSource)
    /*******************************************************************/
    if ( fOK )
    {
-     sNum = QUERYITEMCOUNTHWND( hwndSource );
+     //sNum = QUERYITEMCOUNTHWND( hwndSource );
    } /* endif */
 
    /*******************************************************************/
@@ -1027,12 +1031,12 @@ SHORT UtlCopyListBox( HWND hwndTarget, HWND hwndSource)
        SHORT sTargetItem;
 
        //get item text and handle of source listbox
-       QUERYITEMTEXTHWNDL( hwndSource, sIndex, pszString, ITEMBUFLEN );
-       lHandle = (LONG) QUERYITEMHANDLEHWND( hwndSource, sIndex );
+       //QUERYITEMTEXTHWNDL( hwndSource, sIndex, pszString, ITEMBUFLEN );
+       //lHandle = (LONG) QUERYITEMHANDLEHWND( hwndSource, sIndex );
 
        //display item text in target listbox
-       sTargetItem = INSERTITEMHWND( hwndTarget, pszString );
-       SETITEMHANDLEHWND( hwndTarget, sTargetItem, lHandle );
+       //sTargetItem = INSERTITEMHWND( hwndTarget, pszString );
+       //SETITEMHANDLEHWND( hwndTarget, sTargetItem, lHandle );
     } /* endfor */
    } /* endif */
 
@@ -1042,6 +1046,7 @@ SHORT UtlCopyListBox( HWND hwndTarget, HWND hwndSource)
 
 BOOL UtlIsHighContrast()
 {
+#if 0
   HIGHCONTRAST hc;
   BOOL         fHighContrast = FALSE;
 
@@ -1052,6 +1057,7 @@ BOOL UtlIsHighContrast()
 	  fHighContrast = TRUE;
   }
   return (fHighContrast);
+#endif
 }
 
 //+----------------------------------------------------------------------------+
@@ -1190,7 +1196,7 @@ BOOL UtlKeepInTWB( PSWP pswpWin )
 
   if ( (pswpWin->x + pswpWin->cx) > swpTWB.cx )
   {
-    pswpWin->x = max( (swpTWB.cx - pswpWin->cx), 0 );
+    pswpWin->x = get_max( (swpTWB.cx - pswpWin->cx), 0 );
     fChanged = TRUE;
   } /* endif */
 
@@ -1202,7 +1208,7 @@ BOOL UtlKeepInTWB( PSWP pswpWin )
 
   if ( pswpWin->y < 0L )
   {
-    pswpWin->y = min( (swpTWB.cy - pswpWin->cy), 0 );
+    pswpWin->y = get_min( (swpTWB.cy - pswpWin->cy), 0 );
     fChanged = TRUE;
   } /* endif */
 
@@ -1234,8 +1240,10 @@ USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow )
   /********************************************************************/
   /* Get width and height of visible desktop area                     */
   /********************************************************************/
+#if 0
   cxScreen = (LONG)WinQuerySysValue( HWND_DESKTOP, SV_CXSCREEN );
   cyScreen = (LONG)WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
+#endif
 
   /********************************************************************/
   /* Ensure that window is not outside of the visible desktop area    */
@@ -1248,7 +1256,7 @@ USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow )
 
   if ( (swpDlg.x + swpDlg.cx) > cxScreen )
   {
-    swpDlg.x = (SHORT)(max( (cxScreen - swpDlg.cx), 0 ));
+    swpDlg.x = (SHORT)(get_max( (cxScreen - swpDlg.cx), 0 ));
     fPosChanged = TRUE;
   } /* endif */
 
@@ -1271,6 +1279,7 @@ USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow )
   /********************************************************************/
   if ( fPosChanged || fShow )
   {
+#if 0
     if ( fShow )
     {
       WinSetWindowPos( hwndDlg, HWND_TOP, swpDlg.x, swpDlg.y, swpDlg.cx,
@@ -1282,6 +1291,7 @@ USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow )
       WinSetWindowPos( hwndDlg, HWND_TOP, swpDlg.x, swpDlg.y, swpDlg.cx,
                        swpDlg.cy, EQF_SWP_MOVE );
     } /* endif */
+#endif
   } /* endif */
   return( NO_ERROR );
 
@@ -1565,6 +1575,7 @@ ULONG UtlFileTimeToLong(PSZ pszFileName)
   memset(&SystemTime, 0, sizeof(SystemTime));
 
 
+#if 0
   if ((usRC = UtlOpen( pszFileName,
                    &hOutFile,
                    &usOpenAction, 0L,
@@ -1610,6 +1621,7 @@ ULONG UtlFileTimeToLong(PSZ pszFileName)
     }
     UtlClose( hOutFile, FALSE );
   }
+#endif
   return (ulTime);
 
 }
@@ -1706,7 +1718,7 @@ VOID UtlLoadStringW
   USHORT usBufWMax)
 {
   hInst;
-  LOADSTRINGLEN(hInst, hmod, sid, pszBuffer, usBufWMax);
+  //LOADSTRINGLEN(hInst, hmod, sid, pszBuffer, usBufWMax);
   ASCII2Unicode(pszBuffer, pBufW, 0L );
 }
 
@@ -1728,7 +1740,7 @@ USHORT UtlLoadWidth
   hab;
   // get width string
   szWidth[0] = EOS;
-  LOADSTRING( hab, hMod, sId, szWidth );
+  //LOADSTRING( hab, hMod, sId, szWidth );
 
   // convert string to number
   usWidth = (USHORT)atoi( szWidth );
@@ -1746,6 +1758,7 @@ USHORT UtlLoadWidth
 //The call back is used to set the initial directory when using SHBrowseForFolder
 int CALLBACK UtlBrowseForFolderCallbackProc(HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData)
 {
+#if 0
   lp;
 
   switch(uMsg)
@@ -1755,12 +1768,13 @@ int CALLBACK UtlBrowseForFolderCallbackProc(HWND hwnd,UINT uMsg,LPARAM lp, LPARA
         {
             // WParam is TRUE since you are passing a path.
             // It would be FALSE if you were passing a pidl.
-            SendMessage(hwnd,BFFM_SETSELECTION,TRUE,pData);
+            //SendMessage(hwnd,BFFM_SETSELECTION,TRUE,pData);
         }
         break;
     default:
         break;
   }
+#endif
   return 0;
 }
 
@@ -1780,6 +1794,7 @@ BOOL UtlPreloadIcons(void)
 
 	hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
 
+#if 0
 	hPtr = WinLoadPointer( HWND_DESKTOP, hResMod, DICTIMP_ICON );
 	UtlSetULong( QL_DICTIMPICON, (ULONG)hPtr );
 	hPtr = WinLoadPointer( HWND_DESKTOP, hResMod, DICTEXP_ICON );
@@ -1835,6 +1850,7 @@ BOOL UtlPreloadIcons(void)
 	UtlSetULong( QL_DICTENTRYDISPICO, (ULONG)hPtr );
 	hPtr = WinLoadPointer( HWND_DESKTOP, hResMod, ID_TMM_ICON );
 	UtlSetULong( QL_TMMICON, (ULONG)hPtr );
+#endif
 	return( TRUE );
 } /* end of function UtlPreloadIcons */
 
@@ -1857,6 +1873,7 @@ BOOL UtlPreloadIcons(void)
 LONG FAR PASCAL EqfHelpButtonProc(register HWND hwnd, UINT msg,
                                  register WPARAM mp1, LPARAM mp2)
 {
+#if 0
   MRESULT          mResult;            // function return code
 
   switch ( msg )
@@ -1888,10 +1905,12 @@ LONG FAR PASCAL EqfHelpButtonProc(register HWND hwnd, UINT msg,
   mResult = CallWindowProc( (WNDPROC)lpfnOldButtonProc, hwnd, msg, mp1, mp2 );
 
   return( mResult );
+#endif
 }
 
 MRESULT UtlInvokeHelp()
 {
+#if 0
 	HWND hTemp = NULL;
 	HWND hParent = GetFocus();
 	SHORT   sControlID = 0;
@@ -1944,6 +1963,7 @@ MRESULT UtlInvokeHelp()
 				 0,
 				 MP2FROM2SHORT( sParentID, sControlID ) );
     return( MRFROMSHORT(FALSE) );
+#endif
 }
 
 /******************************************************************/
@@ -1953,6 +1973,7 @@ BOOL UtlRegisterEqfHelp( HAB hAB )
 {
   BOOL fOK = TRUE;
 
+#if 0
   WNDCLASS  wc;
 
   // SuperClass the BUTTON window. This involves getting the info
@@ -1969,6 +1990,7 @@ BOOL UtlRegisterEqfHelp( HAB hAB )
 
   // Register the puppy -- don't care about return code...
   RegisterClass( &wc );
+#endif
 
   return fOK;
 }
@@ -2218,6 +2240,7 @@ MRESULT EXPENTRY UTLDEFHANDLERPROC
    LPARAM mp2
 )
 {
+#if 0
    MRESULT  mResult = 0L;             // result of message processing
    PIDA_HEAD pIda;                     // pointer to handler IDA
 
@@ -2247,6 +2270,7 @@ MRESULT EXPENTRY UTLDEFHANDLERPROC
 
    } /* endswitch */
    return( mResult );
+#endif
 }
 
 /*! UtlGetPidMultipleInstances                               
@@ -2313,8 +2337,10 @@ BOOL UtlKillProcess( DWORD dwPid )
 {
    HANDLE hProcess;
 
+#if 0
    hProcess = OpenProcess(PROCESS_TERMINATE, 0, dwPid);
   return(TerminateProcess(hProcess, (unsigned)-1));
+#endif
 }
 
 /*! UtlProcessWalk                                           
@@ -2336,6 +2362,7 @@ BOOL UtlKillProcess( DWORD dwPid )
 
 BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
 {
+#if 0
    PSZ szTemp;
 
    // Win95/98 structures
@@ -2406,7 +2433,7 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
 
       if (Mode == PROC_TABLE_CLOSE)
       {
-         FreeLibrary((HINSTANCE)psapi);
+         //FreeLibrary((HINSTANCE)psapi);
          return(TRUE);
       }
 
@@ -2414,11 +2441,12 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
       {
          i = 0;
 
-         psapi = LoadLibrary("PSAPI.DLL");
+         //psapi = LoadLibrary("PSAPI.DLL");
 
          if ( NULL == psapi )
             return(FALSE);
 
+#if 0
         EnumProcesses = (ENUMPROCESSES)GetProcAddress(
          (HINSTANCE)psapi, "EnumProcesses");
 
@@ -2427,6 +2455,7 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
 
         EnumProcessModules = (ENUMPROCESSMODULES)GetProcAddress(
           (HINSTANCE)psapi, "EnumProcessModules");
+#endif
 
         if (
           NULL == EnumProcesses   ||
@@ -2442,6 +2471,7 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
             return FALSE;
       }
 
+#if 0
       while (i < num_processes)
       {
 
@@ -2478,14 +2508,15 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
               else
                  strcpy(BaseName, file_name);
 
-              CloseHandle(process);
+              //CloseHandle(process);
 
               break;
            }
-           CloseHandle(process);
+           //CloseHandle(process);
          } /* endif */
          i++;
       }
+#endif
 
       if (i > num_processes)
          *pdwPid = 0L;
@@ -2500,18 +2531,20 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
 
        if (Mode == PROC_TABLE_CLOSE)
        {
-          CloseHandle(snapshot);
+          //CloseHandle(snapshot);
           return(TRUE);
        }
 
        if (Mode == PROC_TABLE_FIRST)
        {
-          kernel = (HANDLE)GetModuleHandle(NULL);
+          //kernel = (HANDLE)GetModuleHandle(NULL);
 
+#if 0
           CreateToolhelp32Snapshot =
          (CREATESNAPSHOT)GetProcAddress((HINSTANCE)kernel, "CreateToolhelp32Snapshot");
          Process32First = (PROCESSWALK)GetProcAddress((HINSTANCE)kernel, "Process32First");
          Process32Next  = (PROCESSWALK)GetProcAddress((HINSTANCE)kernel, "Process32Next");
+#endif
 
          if (
           NULL == CreateToolhelp32Snapshot  ||
@@ -2558,6 +2591,7 @@ BOOL UtlProcessWalk(SHORT Mode, PSZ BaseName, DWORD *pdwPid)
     default:
        return(FALSE);
     }
+#endif
 }
 
 /*! UtlCopyParameter                                         
@@ -2655,12 +2689,12 @@ USHORT UtlFindAndShowConversionError
 
   while ( !usRC && ulLen )
   {
-    ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
+    //ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
 
     // try conversion together with next byte, might be a DBCS character
     if ( !ulOutPut && ulLen )
     {
-      ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
+      //ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
       if ( ulOutPut )
       {
         pszBuffer++;
@@ -2674,7 +2708,7 @@ USHORT UtlFindAndShowConversionError
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
 
-      usRC = (USHORT)GetLastError();
+      //usRC = (USHORT)GetLastError();
 
       sprintf( szCharacter, "%d (hex %2.2X)", iCh, iCh );
       sprintf( szCP, "%lu", ulCP );
@@ -2741,6 +2775,7 @@ BOOL UtlInitUtils( HAB hab )
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
    //--- get profile information ---
+#if 0
    UtiVar[usId].usDateFormat = (USHORT)WinQueryProfileInt( hab,
                                             NATIONAL_SETTINGS,
                                             "iDate",
@@ -2775,6 +2810,7 @@ BOOL UtlInitUtils( HAB hab )
                           "PM",
                           UtiVar[usId].szTime2359,
                           sizeof(UtiVar[usId].szTime2359 ) );
+#endif
 /**********************************************************************/
 /* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
 /* 0 = DEFAULT                                                        */
@@ -2875,11 +2911,13 @@ BOOL UtlTerminateUtils( VOID )
     WORD   usTask;
     USHORT currTask;
 
+#if 0
           _asm
             {
               mov      ax, SS
               mov      usTask, ax
             }
+#endif
     for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
     {
       if ( UtiVar[currTask].usTask == usTask )
@@ -2970,6 +3008,7 @@ BOOL UtlIsAlreadyRunning
     strcat( szExclusiveFile, WINDIR );
 	strcat( szExclusiveFile, "\\TMSEM.DAT" );
 
+#if 0
 	*phTM_Sem = CreateFile( szExclusiveFile, GENERIC_READ | GENERIC_WRITE,
 	                             0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
 	                             NULL );
@@ -2977,6 +3016,7 @@ BOOL UtlIsAlreadyRunning
 	{
 	  fRunning = TRUE;
 	} /* endif */
+#endif
 
     return fRunning;
 }
@@ -3017,9 +3057,9 @@ void UtlLoadLastUsedStrings
   if ( pszBuffer == NULL ) return;
 
   // delete all contents in the list but preserver currently active value
-  QUERYTEXTHWNDLEN( GetDlgItem( hwndDlg, iID ), ((PSZ)pszBuffer), iMaxStringLen );
-  SendDlgItemMessage( hwndDlg, iID, CB_RESETCONTENT, 0, 0L );
-  SETTEXT( hwndDlg, iID, ((PSZ)pszBuffer) );
+  //QUERYTEXTHWNDLEN( GetDlgItem( hwndDlg, iID ), ((PSZ)pszBuffer), iMaxStringLen );
+  //SendDlgItemMessage( hwndDlg, iID, CB_RESETCONTENT, 0, 0L );
+  //SETTEXT( hwndDlg, iID, ((PSZ)pszBuffer) );
 
   // setup file name and the open file for input
   UtlMakeLUFileName( pszName, (PSZ)pszBuffer );
@@ -3051,7 +3091,7 @@ void UtlLoadLastUsedStrings
       // add non-empty lines to combobox
       if ( *pszBuffer != 0 )
       {
-        SendDlgItemMessageW( hwndDlg, iID, CB_INSERTSTRING, (WPARAM) -1, (LPARAM)pszBuffer );
+        //SendDlgItemMessageW( hwndDlg, iID, CB_INSERTSTRING, (WPARAM) -1, (LPARAM)pszBuffer );
       } /* endif */       
     } /* endif */       
   } /* endwhile */     
@@ -3088,12 +3128,12 @@ void UtlSaveLastUsedString
   fwrite( (void *)UNICODEFILEPREFIX, 1, 2, hf );
 
   // get strings from combobox
-  GetDlgItemTextW( hwndDlg, iID, pszBuffer, iMaxStringLen );
-  iElements = SendDlgItemMessage( hwndDlg, iID, CB_GETCOUNT, 0, 0L );
+  //GetDlgItemTextW( hwndDlg, iID, pszBuffer, iMaxStringLen );
+  //iElements = SendDlgItemMessage( hwndDlg, iID, CB_GETCOUNT, 0, 0L );
   pszCurPos = pszBuffer + iMaxStringLen;
   for ( i = 0; i < iElements; i++ )
   {
-    SendDlgItemMessageW( hwndDlg, iID, CB_GETLBTEXT, i, (LPARAM)pszCurPos );
+    //SendDlgItemMessageW( hwndDlg, iID, CB_GETLBTEXT, i, (LPARAM)pszCurPos );
     pszCurPos += iMaxStringLen;
   } /* endfor */     
 
@@ -3146,6 +3186,7 @@ BOOL UtlAddMenuItemToSingleMenu( HMENU hMainMenu, const char *pszMenuName, const
 
 //  fOk = AppendMenu( hSubMenu, MF_STRING, iMenuItemID, pszMenuItem ); 
 
+#if 0
   MENUITEMINFO mii;
 
   memset( &mii, 0, sizeof(MENUITEMINFO));
@@ -3159,7 +3200,7 @@ BOOL UtlAddMenuItemToSingleMenu( HMENU hMainMenu, const char *pszMenuName, const
   fOk = InsertMenuItem( hSubMenu, GetMenuItemCount( hSubMenu ), FALSE, &mii );
 
   if ( fOk ) DrawMenuBar( (HWND)UtlQueryULong( QL_TWBFRAME) );
-
+#endif
 
   return( fOk );
 }
@@ -3175,8 +3216,10 @@ BOOL UtlAddMenuItem( const char *pszMenuName, const char *pszMenuItem, int iMenu
   HMENU hMainMenu2 = (HMENU)UtlQueryULong( QL_TWBMENU );
   if ( (hMainMenu2 != NULL) && (hMainMenu2 != hMainMenu1)  ) fOk = fOk | UtlAddMenuItemToSingleMenu( hMainMenu2, pszMenuName, pszMenuItem, iMenuItemID, isSubMenu );
 
+#if 0
   HMENU hMainMenu3 = GetMenu( (HWND)UtlQueryULong( QL_TWBFRAME ) );
   if ( (hMainMenu3 != NULL) && (hMainMenu3 != hMainMenu1) && (hMainMenu3 != hMainMenu2) ) fOk = fOk | UtlAddMenuItemToSingleMenu( hMainMenu3, pszMenuName, pszMenuItem, iMenuItemID, isSubMenu );
+#endif
 
   return( fOk );
 }
@@ -3190,9 +3233,9 @@ BOOL UtlRemovedMenuItemFromSingleMenu( HMENU hMainMenu, const char *pszMenuName,
   
   if ( hSubMenu == NULL ) return( false );
 
-  fOk = DeleteMenu( hSubMenu, iMenuItemID, MF_BYCOMMAND ); 
+  //fOk = DeleteMenu( hSubMenu, iMenuItemID, MF_BYCOMMAND ); 
 
-  if ( fOk ) DrawMenuBar( (HWND)UtlQueryULong( QL_TWBFRAME) );
+  //if ( fOk ) DrawMenuBar( (HWND)UtlQueryULong( QL_TWBFRAME) );
 
   return( fOk );
 }
@@ -3208,8 +3251,10 @@ BOOL UtlDeleteMenuItem( const char *pszMenuName, int iMenuItemID )
   HMENU hMainMenu2 = (HMENU)UtlQueryULong( QL_TWBMENU );
   if ( (hMainMenu2 != NULL) && (hMainMenu2 != hMainMenu1)  ) fOk = fOk | UtlRemovedMenuItemFromSingleMenu( hMainMenu2, pszMenuName, iMenuItemID );
 
+#if 0
   HMENU hMainMenu3 = GetMenu( (HWND)UtlQueryULong( QL_TWBFRAME ) );
   if ( (hMainMenu3 != NULL) && (hMainMenu3 != hMainMenu1) && (hMainMenu3 != hMainMenu2) ) fOk = fOk | UtlRemovedMenuItemFromSingleMenu( hMainMenu3, pszMenuName, iMenuItemID );
+#endif
 
   return( fOk );
 }
@@ -3218,6 +3263,7 @@ BOOL UtlDeleteMenuItem( const char *pszMenuName, int iMenuItemID )
 #define MENU_NAME_LENGTH 1014
 HMENU UtlFindSubMenu( HMENU hMenu, const char *pszSubMenu )
 {
+#if 0
   HMENU hSubMenu = NULL;
   MENUITEMINFO MenuInfo;
   char *pszMenuName = NULL;
@@ -3228,7 +3274,7 @@ HMENU UtlFindSubMenu( HMENU hMenu, const char *pszSubMenu )
   if ( pszMenuName == NULL ) return( NULL );
 
 
-  int iItems = GetMenuItemCount( hMenu );
+  //int iItems = GetMenuItemCount( hMenu );
 
   int i = 0;
   while ( (i < iItems) && (hSubMenu == NULL) )
@@ -3276,6 +3322,7 @@ HMENU UtlFindSubMenu( HMENU hMenu, const char *pszSubMenu )
     i++;
   }
   return( hSubMenu );
+#endif
 }
 
 /**********************************************************************/
@@ -3296,6 +3343,7 @@ BOOL ActivateMDIChild
   /* Under Windows activate the MDI child window and, if it is        */
   /* minimized, restore it to its normal size                         */
   /********************************************************************/
+#if 0
   SendMessage( (HWND)UtlQueryULong( QL_TWBCLIENT ), WM_MDIACTIVATE,
                MP1FROMHWND(hwndChild), 0L );
   if ( IsIconic(hwndChild) )
@@ -3303,6 +3351,7 @@ BOOL ActivateMDIChild
     SendMessage( (HWND)UtlQueryULong( QL_TWBCLIENT ), WM_MDIRESTORE,
                  MP1FROMHWND(hwndChild), 0L );
   } /* endif */
+#endif
   return( TRUE );
 }
 
@@ -3339,6 +3388,7 @@ BOOL CreateProcessWindow2
   BOOL     fOK;                        // function return code
   PROCESSCREATEPARMS CreateParms;      // process creation parameter
 
+#if 0
   CreateParms.pvUserData  = pvUserData;
   CreateParms.pfnCallBack = pfnCallBack;
   CreateParms.fVisible    = fVisible;
@@ -3380,6 +3430,7 @@ BOOL CreateProcessWindow2
   {
     fOK = FALSE;
   } /* endif */
+#endif
   return( fOK );
 } /* end of function CreateProcessWindow */
 
@@ -3395,11 +3446,13 @@ PVOID AccessGenProcCommArea( HWND hwnd )
   PPROCESSCOMMAREA   pCommArea = NULL;
   PGENPROCESSINSTIDA pIda;
 
+#if 0
   pIda = ACCESSWNDIDA( hwnd, PGENPROCESSINSTIDA );
   if ( pIda != NULL )
   {
     pCommArea = &(pIda->CommArea);
   } /* endif */
+#endif
   return( pCommArea );
 } /* end of function AccessGenProcCommArea */
 
@@ -3430,7 +3483,7 @@ VOID EqfDisplayContextHelp( HWND hItemHandle, PHELPSUBTABLE pHlpTable )
   CHAR EqfSystemHlpFile[MAX_EQF_PATH];  
   UtlQueryString( QST_HLPFILE, EqfSystemHlpFile, sizeof(EqfSystemHlpFile) );
 
-  WinHelp( hItemHandle, EqfSystemHlpFile, HELP_WM_HELP, (LONG) &aItem[0]);
+  //WinHelp( hItemHandle, EqfSystemHlpFile, HELP_WM_HELP, (LONG) &aItem[0]);
 
 }
 
@@ -3461,6 +3514,7 @@ INT_PTR CALLBACK UTLCOLORCHOOSERDLG
   MRESULT              mResult = FALSE;// dlg procedure return value
   PSETCOLORSIDA        pIDA;           // dialog IDA
 
+#if 0
   switch ( msg )
   {
     case WM_EQF_QUERYID:
@@ -3501,7 +3555,7 @@ INT_PTR CALLBACK UTLCOLORCHOOSERDLG
           {
             swpDlg.y = (swpTWB.cy - swpDlg.cy) / 2;
           } /* endif */
-          WinSetWindowPos( hwnd, HWND_TOP, swpDlg.x, swpDlg.y, swpDlg.cx, swpDlg.cy, EQF_SWP_MOVE | EQF_SWP_SHOW | EQF_SWP_ACTIVATE );
+          //WinSetWindowPos( hwnd, HWND_TOP, swpDlg.x, swpDlg.y, swpDlg.cx, swpDlg.cy, EQF_SWP_MOVE | EQF_SWP_SHOW | EQF_SWP_ACTIVATE );
         }
 
         // leave the focus where we put it
@@ -3635,6 +3689,7 @@ INT_PTR CALLBACK UTLCOLORCHOOSERDLG
       mResult = WinDefDlgProc( hwnd, msg, mp1, mp2 );
       break;
   } /* endswitch */
+#endif
 
   return( mResult );
 
@@ -3673,7 +3728,7 @@ USHORT UtlColorChooserDlg
     memcpy( &(pIDA->InOutData), pColorChooserData, sizeof(pIDA->InOutData) );
 
   	hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
-    DIALOGBOX( QUERYACTIVEWINDOW(), UTLCOLORCHOOSERDLG, hResMod, ID_SETCOLOR_DLG, pIDA, fOK );
+    //DIALOGBOX( QUERYACTIVEWINDOW(), UTLCOLORCHOOSERDLG, hResMod, ID_SETCOLOR_DLG, pIDA, fOK );
 
     if ( fOK )
     {
@@ -3902,7 +3957,7 @@ BOOL TAAdjustWhiteSpace
         LONG lNewLen = UTF16strlenCHAR(pszTempSegW) + 1;
         // GQ: allocate segment at least large enough for the :NONE. tag!
         fOK = UtlAlloc( (PVOID *)ppszNewTargetSeg, 0L,
-                        max( lNewLen * sizeof(CHAR_W), (sizeof(EMPTY_TAG)+4)), ERROR_STORAGE );
+                        get_max( lNewLen * sizeof(CHAR_W), (sizeof(EMPTY_TAG)+4)), ERROR_STORAGE );
       } /* endif */
 
       if ( fOK )
@@ -4088,6 +4143,7 @@ BOOL CreateListWindow
 {
   HWND     hframe, hclient;            // handle of created windows
   BOOL     fOK;                        // function return code
+#if 0
   LISTCREATEPARMS CreateParms;         // list creation parameter
 
   CreateParms.pvUserData  = pvUserData;
@@ -4122,13 +4178,14 @@ BOOL CreateListWindow
   }
   if( hframe)
   {
-    WinPostMsg( hclient, WM_EQF_INITIALIZE, NULL, NULL);
+    //WinPostMsg( hclient, WM_EQF_INITIALIZE, NULL, NULL);
     fOK = TRUE;
   }
   else
   {
     fOK = FALSE;
   } /* endif */
+#endif
   return( fOK );
 } /* end of function CreateListWindow */
 

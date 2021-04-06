@@ -14,20 +14,20 @@
 #define INCL_EQF_MORPH            // morphologic functions
 #define INCL_EQF_DAM              // QDAM functions
 #define INCL_EQF_SLIDER           // slider utility functions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #include <time.h>                      // C library functions: time
-#include <tchar.h>
+//#include <tchar.h>
 #include "locale.h"
 
-#include "eqfstart.id"                 // our PM IDs
-#include "eqfstart.h"                  // our stuff
-#include "eqfstart.mri"                // for text of emergency messages
-#include "eqfdrvex.h"                  // drives dialog
-#include "eqfsetup.h"                  // directory names
-  #include "EQFPROGR.H"                // progress indicator defines
-  #include <dde.h>                     // DDE defines
-#include "eqfevent.h"                  // event logging facility
+#include "../../../mri/EQFSTART.ID"                 // our PM IDs
+#include "EQFSTART.H"                  // our stuff
+#include "../../../mri/EQFSTART.MRI"                // for text of emergency messages
+#include "EQFDRVEX.H"                  // drives dialog
+#include "EQFSETUP.H"                  // directory names
+#include "EQFPROGR.H"                  // progress indicator defines
+//#include <dde.h>                     // DDE defines
+#include "EQFEVENT.H"                  // event logging facility
 #include "EQFART.H"                    // ART registry functions
 #include "EQFRPT.H"                    // report handler defines
 
@@ -36,19 +36,20 @@
 #include "EQFMT00.H"
 
 #undef _WPTMIF                         // we don't care about WP I/F
-#include "eqfhelp.id"                  // help resource IDs
-#include "eqfhlp1.h"                   // first part of help tables
-#include "eqfmsg.htb"                          // message help table
+#include "../../../mri/EQFHELP.ID"                  // help resource IDs
+#include "EQFHLP1.H"                   // first part of help tables
+//#include "EQFMSG.HTB"                          // message help table
 
-#include "eqfutmdi.h"                // MDI Utilities
+#include "EQFUTMDI.H"                // MDI Utilities
 
+#include "win_types.h"
 
 /**********************************************************************/
 /* statics...                                                         */
 /**********************************************************************/
 
 static HHOOK  MessageFilterHook = NULL;// message filter hook
-static WNDPROC lpfnOldMDIClient = NULL;// ptr to original MDI client proc
+//static WNDPROC lpfnOldMDIClient = NULL;// ptr to original MDI client proc
 LONG FAR PASCAL NewMDIClientProc      (HWND, UINT, WPARAM, LPARAM);
 VOID PerformPendingUpdates();
 
@@ -327,7 +328,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
       /*******************************************************************/
       /* Register generic handler window class                           */
       /*******************************************************************/
-      fOK = WinRegisterClass( (HINSTANCE) hAB, GENERICHANDLER, GENERICHANDLERWP, 0L,
+      //fOK = WinRegisterClass( (HINSTANCE) hAB, GENERICHANDLER, GENERICHANDLERWP, 0L,
                               sizeof(PVOID) );
 
       /*******************************************************************/
@@ -335,6 +336,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
       /*******************************************************************/
       if ( fOK )
       {
+#if 0
         WNDCLASS   wndclass;
         ATOM       atom;
 
@@ -350,6 +352,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
         wndclass.lpszClassName = GENERICLIST;
 
         atom = RegisterClass( &wndclass );
+#endif
       } /* endif */
 
       /*******************************************************************/
@@ -357,6 +360,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
       /*******************************************************************/
       if ( fOK )
       {
+#if 0
         WNDCLASS   wndclass;
         ATOM       atom;
 
@@ -372,6 +376,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
         wndclass.lpszClassName = GENERICPROCESS;
 
         atom = RegisterClass( &wndclass );
+#endif
       } /* endif */
     } /* endif */
 
@@ -445,7 +450,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
        {
          int iHandles;
 
-         iHandles = SetHandleCount( 64 );
+         //iHandles = SetHandleCount( 64 );
          if ( iHandles < 64 )
          {
            UtlError( ERROR_INSUFF_RESOURCES, MB_OK, 0, NULL, EQF_ERROR );
@@ -544,6 +549,7 @@ HWND TwbWinInit( BOOL fMFC )
     /******************************************************************/
     if ( fOK )
     {
+#if 0
       WNDCLASS  wc;
 
       // SuperClass the MDI client window. This involves getting the info
@@ -560,6 +566,7 @@ HWND TwbWinInit( BOOL fMFC )
 
       // Register the puppy
       fOK = RegisterClass( &wc );
+#endif
     } /* endif */
 
     /******************************************************************/
@@ -575,6 +582,7 @@ HWND TwbWinInit( BOOL fMFC )
     /******************************************************************/
     if ( fOK )
     {
+#if 0
       {
         WNDCLASS   wc;
 
@@ -591,6 +599,7 @@ HWND TwbWinInit( BOOL fMFC )
         wc.lpszClassName = TWBMAIN;
         fOK = RegisterClass( &wc ) != NULLHANDLE;
       }
+#endif
        if ( !fOK )
        {
           pszParm = TWBMAIN;
@@ -607,7 +616,7 @@ HWND TwbWinInit( BOOL fMFC )
       {
 
         HMENU hmenu;
-        hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
+        //hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
         UtlSetULong( QL_TWBMENU, (ULONG)hmenu );
 
         /****************************************************************/
@@ -615,7 +624,7 @@ HWND TwbWinInit( BOOL fMFC )
         /* TWB actionbar, therefore we have to specify '3' as index.    */
         /*                                                         |    */
         /********************************************************* V ****/
-        UtlSetULong( QL_TWBWINDOWMENU, (ULONG) GetSubMenu( hmenu, 3 ));
+        //UtlSetULong( QL_TWBWINDOWMENU, (ULONG) GetSubMenu( hmenu, 3 ));
       }
       else
       {
@@ -625,13 +634,16 @@ HWND TwbWinInit( BOOL fMFC )
 
 
          {
+#if 0
                WinLoadString( (HAB)NULL, (HMODULE)hResMod, SID_TWBM_TITLE,
                               sizeof(szMsgBuf), szMsgBuf );
+#endif
          }
 
-         hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
+         //hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
          UtlSetULong( QL_TWBMENU, (ULONG)hmenu );
 
+#if 0
          hframe = CreateWindowEx(  WS_EX_CLIENTEDGE |
                                    WS_EX_RTLREADING |
                                   WS_EX_LEFTSCROLLBAR,
@@ -646,6 +658,7 @@ HWND TwbWinInit( BOOL fMFC )
                         hmenu,
                         (HINSTANCE) hAB,               //program instance handle
                         NULL );
+#endif
          if ( !hframe )
          {
             fOK = FALSE;
@@ -676,6 +689,7 @@ HWND TwbWinInit( BOOL fMFC )
     return( hframe);
 } /* end of function TwbWinInit */
 
+#if 0
 __declspec(dllexport)
 VOID TwbWinInitCS( CREATESTRUCT * pCS )
 {
@@ -695,7 +709,7 @@ VOID TwbWinInitCS( CREATESTRUCT * pCS )
                          sizeof(szMsgBuf), szMsgBuf );
     }
 
-    hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
+    //hmenu = LoadMenu( hResMod, MAKEINTRESOURCE(ID_TWBM_WINDOW));
     UtlSetULong( QL_TWBMENU, (ULONG)hmenu );
 
 
@@ -713,6 +727,7 @@ VOID TwbWinInitCS( CREATESTRUCT * pCS )
 
     return;
 }
+#endif
 
 //------------------------------------------------------------------------------
 // External function
@@ -872,6 +887,7 @@ VOID TwbWinInitCS( CREATESTRUCT * pCS )
 //                          default:
 //                            pass message to default window procedure
 //------------------------------------------------------------------------------
+#if 0
 MRESULT APIENTRY TwbMainWP
 (
     HWND      hwnd,
@@ -898,6 +914,7 @@ MRESULT APIENTRY TwbMainWP
 
     PHELPTABLE    pstHelpEntry;        // ptr for help table processing
 
+#if 0
     switch( message )
     {
       case WM_CREATE:
@@ -1009,6 +1026,7 @@ MRESULT APIENTRY TwbMainWP
           /************************************************************/
           /* Save focus object                                        */
           /************************************************************/
+#if 0
           if ( (usI = EqfQueryObjectCount( clsANY )) != 0 )
           {
              UtlAlloc( (PVOID *) &pObject, 0L, (LONG) ((usI * sizeof( *pObject)) + 20),
@@ -1027,6 +1045,7 @@ MRESULT APIENTRY TwbMainWP
                 } /* endfor */
              } /* endif */
           } /* endif */
+#endif
 
           /************************************************************/
           /* Reset write access to system properties                  */
@@ -1064,7 +1083,7 @@ MRESULT APIENTRY TwbMainWP
         /*   for instance loosing the focus OBJ_FOCUS is cleared    */
         /************************************************************/
         mpHwnd = (HWND)mp2;
-        pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
+        //pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
         if ( SHORT1FROMMP1( mp1) )      // if instance is activated ...
         {
           if( mpHwnd != pIda->hObjFocus) // is instance changed ?
@@ -1189,7 +1208,7 @@ MRESULT APIENTRY TwbMainWP
         if( fShutdownInProgress & TWBSAVE )
         {
           usClass = SHORT1FROMMP1( mp1);
-          pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
+          //pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
 
           mpObj = (PSZ) PVOIDFROMMP2(mp2);
 
@@ -1246,6 +1265,7 @@ MRESULT APIENTRY TwbMainWP
           // standard TWB AAB.
           // If the new AAB is active, the messages are passed on to
           // the focus window to handle the request....
+#if 0
           if ( GetMenu( hwnd ) != (HMENU) UtlQueryULong(QL_TWBMENU))
           {
              //--- leave it to active instance to set menu items ---
@@ -1259,6 +1279,7 @@ MRESULT APIENTRY TwbMainWP
           {
             TwbInitMenu( hwnd, LOWORD(mp2), mp2 );
           } /* endif */
+#endif
         } /* endif */
         return( (MRESULT)NULL);
 
@@ -1266,7 +1287,7 @@ MRESULT APIENTRY TwbMainWP
         /**************************************************************/
         /* Process command messages                                   */
         /**************************************************************/
-        pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
+        //pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
         usID = SHORT1FROMMP1( mp1);
 
         /**************************************************************/
@@ -1284,7 +1305,7 @@ MRESULT APIENTRY TwbMainWP
               {
                 if ( pUserHandler[i].fIsListHandler )
                 {
-                  WinSendMsg( pUserHandler[i].hwnd, WM_EQF_COMMAND, mp1, mp2 );
+                  //WinSendMsg( pUserHandler[i].hwnd, WM_EQF_COMMAND, mp1, mp2 );
                 }
                 else
                 {
@@ -1556,12 +1577,14 @@ MRESULT APIENTRY TwbMainWP
                /* Get name of language being activated                */
                /*******************************************************/
                hwndMenu = (HWND)UtlQueryULong(QL_TWBMENU);
+#if 0
                GetMenuString( GetMenu( hwnd ), usID, szNewLanguage,
                               sizeof(szNewLanguage), MF_BYCOMMAND );
+#endif
                /*******************************************************/
                /* Activate new language                               */
                /*******************************************************/
-               if ( stricmp( szEqfSysLanguage, szNewLanguage ) != 0 )
+               if ( strcasecmp( szEqfSysLanguage, szNewLanguage ) != 0 )
                {
                  PSZ pszErrParm = szNewLanguage;
                  UtlError( INFO_LANG_ACTIVATED, MB_OK, 1, &pszErrParm, EQF_INFO );
@@ -1580,11 +1603,13 @@ MRESULT APIENTRY TwbMainWP
                {
                  HWND hwndChild;
 
+#if 0
                  hwndChild = (HWND)SendMessage( (HWND)UtlQueryULong( QL_TWBCLIENT ),
                                                  WM_MDIGETACTIVE, 0, 0L );
+#endif
                  if ( IsWindow( hwndChild )  )
                  {
-                    SendMessage( hwndChild, WM_COMMAND, mp1, mp2 );
+                    //SendMessage( hwndChild, WM_COMMAND, mp1, mp2 );
                  } /* endif */
 
                    mResult = DefFrameProc( hwnd,
@@ -1756,16 +1781,20 @@ MRESULT APIENTRY TwbMainWP
      default:
        break;
     } /* endswitch */
+#endif
 
     /**************************************************************/
     /* pass message to default window procedure                   */
     /**************************************************************/
+#if 0
     mResult = DefFrameProc( hwnd,
                             (HWND)UtlQueryULong( QL_TWBCLIENT ),
                             message, mp1, mp2 );
+#endif
 
     return( mResult );
 } /* end of function TwbMainWP */
+#endif
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -1803,6 +1832,7 @@ MRESULT APIENTRY TwbMainWP
 //                    activate focus object
 //                    set final TWB window state
 //------------------------------------------------------------------------------
+#if 0
 MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
 {
   MRESULT       mResult = FALSE;       // function return code
@@ -1859,10 +1889,11 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /************************************************************/
     /* anchor IDA                                               */
     /************************************************************/
-    ANCHORWNDIDA( hwnd, pIda);
+    //ANCHORWNDIDA( hwnd, pIda);
 
 
     // Create client window (under OS/2 this is done by WInCreateStdWindow)
+#if 0
     {
       CLIENTCREATESTRUCT stClientCreate;
       HWND               hwndClient;
@@ -1873,7 +1904,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
       /*                                                         |    */
       /*                                                         |    */
       /********************************************************* V ****/
-      stClientCreate.hWindowMenu  = GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), 3 );
+      //stClientCreate.hWindowMenu  = GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), 3 );
       stClientCreate.idFirstChild = ID_FLIST_WINDOW;
       UtlSetULong( QL_TWBWINDOWMENU, (ULONG) stClientCreate.hWindowMenu );
       hwndClient = CreateWindow( MDISUPERCLASS, NULL,
@@ -1905,13 +1936,14 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
                  (LPARAM)(HWND) UtlQueryULong( QL_TWBWINDOWMENU ) );
 
     }
+#endif
     /************************************************************/
     /* Fill-in IDA fields and address sytem properties          */
     /************************************************************/
     strcpy( pIda->IdaHead.szObjName, TWBMAIN );
     pIda->IdaHead.pszObjName = pIda->IdaHead.szObjName;
     pIda->IdaHead.hFrame = hwnd;
-    pIda->hMenu = (HWND) GetMenu( hwnd );
+    //pIda->hMenu = (HWND) GetMenu( hwnd );
 
     pIda->hPropSys = EqfQuerySystemPropHnd();
     pIda->pPropSys = GetSystemPropPtr();
@@ -1955,7 +1987,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
 
               UtlMakeEQFPath( szFileName, NULC, DIC_PATH, NULL );
               strcat( szFileName, BACKSLASH_STR );
-              strcat( szFileName, RESBUFNAME(stFile) );
+              //strcat( szFileName, RESBUFNAME(stFile) );
               UtlDelete( szFileName, 0L, FALSE );
               UtlFindNext( hSearch, &stFile, sizeof(stFile), &usCount, FALSE );
             } /* endwhile */
@@ -2007,7 +2039,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /************************************************************/
     /* Start TWB initialization                                 */
     /************************************************************/
-    WinPostMsg( hwnd, WM_EQF_INITIALIZE, MP1FROMSHORT(1), NULL);
+    //WinPostMsg( hwnd, WM_EQF_INITIALIZE, MP1FROMSHORT(1), NULL);
 
 #ifdef STARTUP2_LOGGING
   if ( hStartLog )
@@ -2021,8 +2053,8 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /* Correct saved window position if it is larger than the   */
     /* current desktop or if the size is too small              */
     /************************************************************/
-    cxScreen = (SHORT)WinQuerySysValue( HWND_DESKTOP, SV_CXSCREEN );
-    cyScreen = (SHORT)WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
+    //cxScreen = (SHORT)WinQuerySysValue( HWND_DESKTOP, SV_CXSCREEN );
+    //cyScreen = (SHORT)WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
     if ( pIda->pPropSys->Swp.cx > cxScreen )
     {
       pIda->pPropSys->Swp.cx = cxScreen - 50;
@@ -2036,11 +2068,13 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     {
       pIda->pPropSys->Swp.cy = cyScreen - 50;
     }
+#if 0
     else if ( pIda->pPropSys->Swp.cy < (3 * (SHORT)WinQuerySysValue( HWND_DESKTOP, SV_CYTITLEBAR)) )
     {
       pIda->pPropSys->Swp.cy = 3 * (SHORT)WinQuerySysValue( HWND_DESKTOP,
                                                              SV_CYTITLEBAR );
     } /* endif */
+#endif
 
     if ( pIda->pPropSys->Swp.x < 0 )
     {
@@ -2048,7 +2082,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     } /* endif */
     if ( (pIda->pPropSys->Swp.x + pIda->pPropSys->Swp.cx) > cxScreen )
     {
-      pIda->pPropSys->Swp.x = max( (cxScreen - pIda->pPropSys->Swp.cx), 0 );
+      pIda->pPropSys->Swp.x = get_max( (cxScreen - pIda->pPropSys->Swp.cx), 0 );
     } /* endif */
 
     if ( pIda->pPropSys->Swp.y < 0 )
@@ -2057,7 +2091,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     } /* endif */
     if ( (pIda->pPropSys->Swp.y + pIda->pPropSys->Swp.cy) > cyScreen )
     {
-      pIda->pPropSys->Swp.y = max( (cyScreen - pIda->pPropSys->Swp.cy), 0 );
+      pIda->pPropSys->Swp.y = get_max( (cyScreen - pIda->pPropSys->Swp.cy), 0 );
     } /* endif */
 
 
@@ -2066,6 +2100,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /* let childs correctly size and set their window positions */
     /************************************************************/
 
+#if 0
     if ( !fMinimize )
     {
       WinSetWindowPos( pIda->IdaHead.hFrame, HWND_TOP,
@@ -2082,6 +2117,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
                        (USHORT)((pIda->pPropSys->Swp.fs & ~ (EQF_SWP_SHOW | EQF_SWP_MAXIMIZE) )
                                  | EQF_SWP_SIZE | EQF_SWP_MOVE ));
     } /* endif */
+#endif
 
 #ifdef STARTUP2_LOGGING
   if ( hStartLog )
@@ -2128,10 +2164,12 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     UtlMakeEQFPath( pIda->szObject + 1, NULC, SYSTEM_PATH, NULL );
     strcat( pIda->szObject, BACKSLASH_STR );
     strcat( pIda->szObject, DEFAULT_FOLDERLIST_NAME );
+#if 0
     SendMessage( (HWND)UtlQueryULong( QL_TWBCLIENT ),
                  WM_MDISETMENU,
                  (WPARAM)(HWND) UtlQueryULong( QL_TWBMENU ),
                  (LPARAM)(HWND) UtlQueryULong( QL_TWBWINDOWMENU ) );
+#endif
 #ifdef STARTUP2_LOGGING
   if ( hStartLog )
   {
@@ -2139,7 +2177,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
      fprintf( hStartLog, "---  Step 6c.                         %s", asctime( localtime( &lCurTime ) ) );
   } /* endif */
 #endif
-    DrawMenuBar( (HWND)UtlQueryULong( QL_TWBFRAME ) );
+    //DrawMenuBar( (HWND)UtlQueryULong( QL_TWBFRAME ) );
 #ifdef STARTUP2_LOGGING
   if ( hStartLog )
   {
@@ -2157,8 +2195,10 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
 #endif
 
     // delete any folder list item under file pulldown
-    DeleteMenu( GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), 0 ),
+#if 0
+    //DeleteMenu( GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), 0 ),
                 ID_FLIST_WINDOW, MF_BYCOMMAND );
+#endif
 #ifdef STARTUP2_LOGGING
   if ( hStartLog )
   {
@@ -2174,14 +2214,14 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /*************************************************************/
     {
       HMENU hwndMenu;
-      hwndMenu = GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), PID_TWBM_SM_VIEW );
+      //hwndMenu = GetSubMenu( (HMENU)UtlQueryULong( QL_TWBMENU ), PID_TWBM_SM_VIEW );
       if ( hwndMenu )
       {
-        DeleteMenu( hwndMenu, 12, MF_BYPOSITION );
+        //DeleteMenu( hwndMenu, 12, MF_BYPOSITION );
         /**************************************************************/
         /* delete SEPARATOR                                           */
         /**************************************************************/
-        DeleteMenu( hwndMenu, 11, MF_BYPOSITION );
+        //DeleteMenu( hwndMenu, 11, MF_BYPOSITION );
       } /* endif */
     } /* endif */
 
@@ -2279,7 +2319,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     /******************************************************************/
     if ( fMinimize )
     {
-      ShowWindow( pIda->IdaHead.hFrame, SW_SHOWMINNOACTIVE );
+      //ShowWindow( pIda->IdaHead.hFrame, SW_SHOWMINNOACTIVE );
     } /* endif */
 
     /******************************************************************/
@@ -2315,8 +2355,10 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
        hwndFocus = EqfQueryObject( pIda->pPropSys->FocusObject, clsANY, 0 );
        if ( hwndFocus )
        {
+#if 0
           SendMessage( (HWND)UtlQueryULong( QL_TWBCLIENT), WM_MDIACTIVATE,
                        MP1FROMHWND(hwndFocus), 0L );
+#endif
        } /* endif */
     } /* endif */
 
@@ -2353,6 +2395,7 @@ MRESULT TwbCreateMsg( HWND hwnd, WPARAM mp1, LPARAM mp2 )
   return( mResult );
 
 } /* end of function TwbCreateMsg */
+#endif
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -2396,40 +2439,44 @@ MRESULT TwbInitMenuMFC( HMENU hwndMenu, WPARAM mp1, LPARAM mp2 )
     POBJLST       pObject = NULL;        // pointer for object list processing
     POBJLST       pObjectStart = NULL;   // pointer for object list processing
     BOOL          fSeparator = FALSE;
-    USHORT        usItems = (USHORT)GetMenuItemCount( hwndMenu );
+    //USHORT        usItems = (USHORT)GetMenuItemCount( hwndMenu );
     int           i = 0;
 
-    PTWBMAIN_IDA  pIda = ACCESSWNDIDA( (HWND) mp1, PTWBMAIN_IDA );
+    //PTWBMAIN_IDA  pIda = ACCESSWNDIDA( (HWND) mp1, PTWBMAIN_IDA );
 
+#if 0
     while ( i < usItems )
     {
-      usID = (USHORT)GetMenuItemID( hwndMenu, i );
+      //usID = (USHORT)GetMenuItemID( hwndMenu, i );
       if ( (usID == 0xFFFF) || (usID == 0) )   // separator
       {
         fSeparator = TRUE;
-        DeleteMenu( hwndMenu, i, MF_BYPOSITION );
-        usItems = (USHORT) GetMenuItemCount( hwndMenu );
+        //DeleteMenu( hwndMenu, i, MF_BYPOSITION );
+        //usItems = (USHORT) GetMenuItemCount( hwndMenu );
       }
       else if ( fSeparator )
       {
-        DeleteMenu( hwndMenu, usID, MF_BYCOMMAND );
-        usItems = (USHORT)GetMenuItemCount( hwndMenu );
+        //DeleteMenu( hwndMenu, usID, MF_BYCOMMAND );
+        //usItems = (USHORT)GetMenuItemCount( hwndMenu );
       }
       else
       {
         i++;
       } /* endif */
     } /* endwhile */
+#endif
 
-    AppendMenu( hwndMenu, MF_SEPARATOR, 0xFFFF, "" );
+    //AppendMenu( hwndMenu, MF_SEPARATOR, 0xFFFF, "" );
 
+#if 0
     if ( pIda->hwndsInMenuWindows )
     {
        UtlAlloc( (PVOID *) &pIda->hwndsInMenuWindows, 0L, 0L, NOMSG );
     } /* endif */
     pIda->usInMenuWindows = 0;
+#endif
 
-    usI = EqfQueryObjectCount( clsANY );
+    //usI = EqfQueryObjectCount( clsANY );
     if( !usI )
     {
        return( FALSE );
@@ -2441,8 +2488,8 @@ MRESULT TwbInitMenuMFC( HMENU hwndMenu, WPARAM mp1, LPARAM mp2 )
     {
       BOOL fClsFolder = FALSE;
       pObject = pObjectStart;
-      pIda->hwndsInMenuWindows = pObject;
-      pIda->usInMenuWindows = usI;
+      //pIda->hwndsInMenuWindows = pObject;
+      //pIda->usInMenuWindows = usI;
 
       usI = EqfGetObjectList( clsANY, usI, pObject);
 
@@ -2460,6 +2507,7 @@ MRESULT TwbInitMenuMFC( HMENU hwndMenu, WPARAM mp1, LPARAM mp2 )
         else
         {
 
+#if 0
          if ( IDFROMWINDOW( pObject->hwnd ) == FID_CLIENT )
          {
              // a standard window ...
@@ -2476,10 +2524,13 @@ MRESULT TwbInitMenuMFC( HMENU hwndMenu, WPARAM mp1, LPARAM mp2 )
                WinQueryWindowText( GetParent( hwndObj ), sizeof( szObjName), (PSZ)szObjName);
              } /* endif */
          } /* endif */
+#endif
+#if 0
          usAttribute  = (((HWND)mp2 == pObject->hwnd) ||
                          ((HWND)mp2 == GetParent(pObject->hwnd)) ||
                          ((HWND)mp2 == GetParent(GetParent(pObject->hwnd)))) ? MF_CHECKED : 0;
          usAttribute |= WinIsWindowEnabled( pObject->hwnd) ? MF_ENABLED : 0;
+#endif
          if ( usWindow <= 9 )
          {
             sprintf( szMenuName, "&%d) %s", usWindow++, szObjName );
@@ -2488,7 +2539,7 @@ MRESULT TwbInitMenuMFC( HMENU hwndMenu, WPARAM mp1, LPARAM mp2 )
          {
             strcpy( szMenuName, szObjName );
          } /* endif */
-         AppendMenu( hwndMenu, usAttribute, usID, szMenuName );
+         //AppendMenu( hwndMenu, usAttribute, usID, szMenuName );
         } /* endif */
 
         if ( fIELookAndFeel &&
@@ -2511,7 +2562,7 @@ MRESULT TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 )
     PTWBMAIN_IDA  pIda;                // pointer to IDA
     CHAR          szEngineString[200]; // MT Engine in Win.ini
 
-   pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
+   //pIda = ACCESSWNDIDA( hwnd, PTWBMAIN_IDA );
 
 
    switch ( SHORT1FROMMP1( mp1) )
@@ -2540,10 +2591,10 @@ MRESULT TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 )
          if ( (SHORT1FROMMP1( mp1) == PID_TWBM_SM_UTILITIES) &&
               !fReportHandler )
          {
-           HMENU hwndMenu = GETMENU((HWND)UtlQueryULong( QL_TWBFRAME ));
+           //HMENU hwndMenu = GETMENU((HWND)UtlQueryULong( QL_TWBFRAME ));
 
 
-           DeleteMenu( hwndMenu, PID_UTILS_MI_REPORT, MF_BYCOMMAND );
+           //DeleteMenu( hwndMenu, PID_UTILS_MI_REPORT, MF_BYCOMMAND );
          } /* endif */
 
 
@@ -2553,16 +2604,16 @@ MRESULT TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 )
          if ( (SHORT1FROMMP1( mp1) == PID_TWBM_SM_UTILITIES) &&
               !szEngineString[0] )
          {
-           HMENU hwndMenu = GETMENU((HWND)UtlQueryULong( QL_TWBFRAME ));
+           //HMENU hwndMenu = GETMENU((HWND)UtlQueryULong( QL_TWBFRAME ));
 
 
-           DeleteMenu( hwndMenu, PID_UTILS_MI_MT, MF_BYCOMMAND );
+           //DeleteMenu( hwndMenu, PID_UTILS_MI_MT, MF_BYCOMMAND );
          } /* endif */
 
          //--- leave it to active instance to set menu items ---
          if ( pIda->hObjFocus )
          {
-           WinSendMsg( pIda->hObjFocus, WM_EQF_INITMENU, mp1, mp2);
+           //WinSendMsg( pIda->hObjFocus, WM_EQF_INITMENU, mp1, mp2);
          } /* endif */
 
          //--- ensure that some of the items are enabled anyway ---
@@ -2670,9 +2721,11 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     }
     else
     {
+#if 0
       WinMessageBox( HWND_DESKTOP, HWND_DESKTOP, STR_INSTALL_ERROR,
                      STR_INSTALL_ERROR_TITLE,
                      1, MB_ENTER | MB_ICONEXCLAMATION);
+#endif
       fOK = FALSE;
     } /* endif */
 
@@ -2736,8 +2789,7 @@ VOID TwbRestart
    PSZ   pszObject;                    // pointer to current object in list
    PSZ   pszNextObject;                // pointer to next object in restart list
 
-   UtlAlloc( (PVOID *) &pszList, 0L, (LONG) max( MIN_ALLOC, strlen( pszRestartList ) + 1),
-             ERROR_STORAGE );
+   UtlAlloc( (PVOID *) &pszList, 0L, (LONG) get_max( MIN_ALLOC, strlen( pszRestartList ) + 1), ERROR_STORAGE );
    if ( pszList )
    {
      strcpy( pszList, pszRestartList );
@@ -2902,13 +2954,14 @@ BOOL TwbStartHandler
    /*******************************************************************/
    /* Register handler window class                                   */
    /*******************************************************************/
-   fOK = WinRegisterClass( (HINSTANCE) hab, pszHandler, pfnWndProc, 0L, sizeof(PVOID) );
+   //fOK = WinRegisterClass( (HINSTANCE) hab, pszHandler, pfnWndProc, 0L, sizeof(PVOID) );
 
    /*******************************************************************/
    /* Create handler object window                                    */
    /*******************************************************************/
    if ( fOK )
    {
+#if 0
       hwnd = WinCreateWindow( HWND_OBJECT,
                               pszHandler, pszHandler,
                               WS_OVERLAPPEDWINDOW,   // window style(s)
@@ -2916,6 +2969,7 @@ BOOL TwbStartHandler
                               HWND_DESKTOP,
                               HWND_TOP,
                               0, 0, 0 );
+#endif
        fOK = ( hwnd != NULLHANDLE );
    } /* endif */
 
@@ -2948,6 +3002,7 @@ BOOL TwbStartListHandler( PSZ pszName, PFN_HANDLERCALLBACK pfnCallBack, PHWND ph
    CreateParms.usSize = sizeof(CreateParms);
    CreateParms.pfnCallBack = pfnCallBack;
 
+#if 0
    hwnd = WinCreateWindow( HWND_OBJECT,
                            GENERICHANDLER, GENERICHANDLER,
                            WS_OVERLAPPEDWINDOW,   // window style(s)
@@ -2957,6 +3012,7 @@ BOOL TwbStartListHandler( PSZ pszName, PFN_HANDLERCALLBACK pfnCallBack, PHWND ph
                            0,
                            (PVOID)&CreateParms,
                            NULL );
+#endif
    fOK = ( hwnd != NULLHANDLE );
 
    /*******************************************************************/
@@ -3016,7 +3072,7 @@ BOOL TwbCloseCheck( VOID )
   /* do not save status if window is minimized                      */
   /******************************************************************/
 
-    fNotMiniMized = !IsIconic( (HWND)UtlQueryULong( QL_TWBFRAME ) );
+    //fNotMiniMized = !IsIconic( (HWND)UtlQueryULong( QL_TWBFRAME ) );
 
   /**************************************************************/
   /* Get close confirmation and save status                     */
@@ -3060,22 +3116,25 @@ BOOL TwbCloseCheck( VOID )
   if( usFlags != MBID_CANCEL)
   {
     usFlags = (usFlags == MBID_YES) ? TWBSAVE | TWBCLOSE : TWBCLOSE;
+#if 0
     if( EqfStopObjectManager( usFlags) == NULLHANDLE )
     {
       fCanceled = FALSE;               // close can continue
     } /* endif */
+#endif
     {
         HANDLE hMapObject = NULL;
-        hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
+        //hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
         if (hMapObject)
         {
-            CloseHandle(hMapObject);
+            //CloseHandle(hMapObject);
         }
     }
   } /* endif */
 
   return( fCanceled );
 }
+#if 0
 /****************************************************************************
         HelpMessageFilterHook():
 ****************************************************************************/
@@ -3126,7 +3185,7 @@ DWORD CALLBACK HelpMessageFilterHook
                 }
                 else if ( GetClassName( hParent, szClass, sizeof(szClass) ) )
                 {
-                  if ( stricmp( szClass, WC_EQFMDIDLG ) == 0 )
+                  if ( strcasecmp( szClass, WC_EQFMDIDLG ) == 0 )
                   {
                     break;               // found a MDI dialog ==> leave loop
                   }
@@ -3144,7 +3203,7 @@ DWORD CALLBACK HelpMessageFilterHook
 
               if ( hParent != NULL )
               {
-                SendMessage( hParent, WM_EQF_QUERYID, 0, MP2FROMP(&sParentID) );
+                //SendMessage( hParent, WM_EQF_QUERYID, 0, MP2FROMP(&sParentID) );
               } /* endif */
             } /* endif */
 
@@ -3174,8 +3233,10 @@ DWORD CALLBACK HelpMessageFilterHook
 
   return CallNextHookEx( MessageFilterHook, nCode, wParam, (LONG)lpMsg);
 }
+#endif
 
 
+#if 0
 // Enumeration callback procedure for TWB child windows
 BOOL FAR PASCAL ChildEnumProc
 (
@@ -3226,8 +3287,10 @@ BOOL FAR PASCAL ChildEnumProc
         case PID_WIND_MI_RESTOREALL :
           if ( (IsIconic(hwnd) || IsZoomed(hwnd)) )
           {
+#if 0
             SendMessage( hwndMDIClient, WM_MDIRESTORE,
                          MP1FROMHWND(hwnd), 0L );
+#endif
           } /* endif */
           break;
       } /* endswitch */
@@ -3237,6 +3300,7 @@ BOOL FAR PASCAL ChildEnumProc
   return ( TRUE );
 
 } /* end of function ChildEnumProc */
+#endif
 
 
 //*************************************************************
@@ -3252,6 +3316,7 @@ BOOL FAR PASCAL ChildEnumProc
 //  Return: (LONG)
 //
 //*************************************************************
+#if 0
 LONG FAR PASCAL NewMDIClientProc (register HWND hwnd, UINT msg,
                                  register WPARAM mp1, LPARAM mp2)
 {
@@ -3266,7 +3331,7 @@ static BOOL bSizeChanged=FALSE;
       /* file                                                         */
       /****************************************************************/
       GetStringFromRegistry( APPL_Name, KEY_BG_BITMAP, szMsgBuf, sizeof(szMsgBuf), "NO" );
-      if ( stricmp( szMsgBuf, "YES" ) == 0 )
+      if ( strcasecmp( szMsgBuf, "YES" ) == 0 )
       {
         HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
         hbm = LoadBitmap( hResMod, MAKEINTRESOURCE(ID_BACKGROUND_BMP) );
@@ -3385,6 +3450,7 @@ static BOOL bSizeChanged=FALSE;
   // call old window procedure
   return CallWindowProc( (WNDPROC) lpfnOldMDIClient, hwnd, msg, mp1, mp2 );
 }
+#endif
 
 
 /**********************************************************************/
@@ -3728,10 +3794,12 @@ VOID TwbFreeResources( VOID )
 //------------------------------------------------------------------------------
 VOID TwbSetMessageFilterHook( HINSTANCE hInstance, HWND hFrame )
 {
+#if 0
     MessageFilterHook = SetWindowsHookEx( WH_MSGFILTER,
                                           (HOOKPROC)HelpMessageFilterHook,
                                           hInstance,
                                           GetWindowThreadProcessId( hFrame, NULL) );
+#endif
 
 } /* end of function TwbSetMessageFilterHook */
 
@@ -3741,20 +3809,24 @@ TwbUnSetMessageFilterHook()
 {
   if ( MessageFilterHook )
   {
-    UnhookWindowsHookEx( MessageFilterHook );
+    //UnhookWindowsHookEx( MessageFilterHook );
   } /* endif */
 }
 
 VOID EqfDisplayHelpIndex()
 {
+#if 0
   WinHelp( (HWND)UtlQueryULong( QL_TWBCLIENT ),
            EqfSystemHlpFile, HELP_CONTENTS, 0L );
+#endif
 }
 
 VOID EqfDisplayHelpForHelp()
 {
+#if 0
   WinHelp( (HWND)UtlQueryULong( QL_TWBCLIENT ),
            EqfSystemHlpFile, HELP_HELPONHELP, 0L );
+#endif
 }
 
 /**********************************************************************/
@@ -3809,20 +3881,20 @@ BOOL StartBrowser(PSZ content)
 
   strcpy(CmdLine,"");
 
-  if ( !stricmp(content,"home") )
+  if ( !strcasecmp(content,"home") )
   {
       GetStringFromRegistry( APPL_Name, "Homepage",  szTMTitle, sizeof(szTMTitle ), "http://www.opentm2.org/" );
       strcat(CmdLine,szTMTitle);
 
   }
-  else if ( !stricmp(content,"docu") )
+  else if ( !strcasecmp(content,"docu") )
   {
     UtlMakeEQFPath( CmdLine, NULC, SYSTEM_PATH, NULL );
     strcat( CmdLine, "\\doc\\Opentm2TranslatorsReference.pdf" );
       //GetStringFromRegistry( APPL_Name, "Documentation", szTMTitle, sizeof(szTMTitle ), "http://www.beo-doc.de/opentm2wiki/index.php/Main_Page" );
       //strcat(CmdLine,szTMTitle);
   }
-  else if ( !stricmp(content,"techguide") )
+  else if ( !strcasecmp(content,"techguide") )
   {
     UtlMakeEQFPath( CmdLine, NULC, SYSTEM_PATH, NULL );
     strcat( CmdLine, "\\doc\\OpenTM2TechnicalReference.pdf" );
@@ -3832,9 +3904,11 @@ BOOL StartBrowser(PSZ content)
       strcat(CmdLine,content);
   } // end if
 
+#if 0
   hi = ShellExecute( NULL,"open",
                      CmdLine,NULL,NULL,SW_SHOW);
-  return ((int) hi >= 32);
+#endif
+  //return ((int) hi >= 32);
 } // end of function start session
 
 // perform any pending updates on startup
@@ -3873,10 +3947,10 @@ VOID PerformPendingUpdates()
     strcat( szSource, BACKSLASH_STR );
     strcat( szSource, PENDINGEXITS_DIR );
     strcat( szSource, BACKSLASH_STR );
-    strcat( szSource, RESBUFNAME(stFile) );
+    //strcat( szSource, RESBUFNAME(stFile) );
     UtlMakeEQFPath( szTarget, NULC, WIN_PATH, NULL );
     strcat( szTarget, BACKSLASH_STR );
-    strcat( szTarget, RESBUFNAME(stFile) );
+    //strcat( szTarget, RESBUFNAME(stFile) );
 
     // move user exit
     UtlDelete( szTarget, 0L, FALSE );
@@ -3907,7 +3981,7 @@ VOID PerformPendingUpdates()
 
       UtlMakeEQFPath( szSource, NULC, PROPERTY_PATH, NULL );
       strcat( szSource, BACKSLASH_STR );
-      strcat( szSource, RESBUFNAME(stFile) );
+      //strcat( szSource, RESBUFNAME(stFile) );
       if ( UtlLoadFileL( szSource, (PVOID *)&pProp, &ulSize, FALSE, FALSE ) )
       {
         if ( pProp->fDisabled_UserExitRefresh )

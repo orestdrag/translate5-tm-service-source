@@ -16,16 +16,19 @@
 #define INCL_EQF_DAM              // low level dict. access functions (Nlp/Dam)
 #define INCL_EQF_LDB              // dictionary data encoding functions
 #define INCL_EQF_MORPH            // morph return codes
-#include <eqf.h>                  // General Translation Manager include file
+#include <string>
+#include <EQF.H>                  // General Translation Manager include file
 
 #include <time.h>                 // C time related functions
 
 
 #include "EQFUTPRI.H"                  // private utility header file
-#include <eqfutils.id>            // IDs used by dialog utilities
+#include "../../../mri/EQFUTILS.ID"    // IDs used by dialog utilities
 
 //#define DEF_EVENT_ENUMS
 #include "EQFEVENT.H"                  // event logging functions
+
+#include "win_types.h"
 
 //static PEVENTTABLE pEventTable;        // ptr to event logging table
 static SHORT  asLogGroups[30] = { -1 };// list of active debug log groups
@@ -369,50 +372,50 @@ USHORT UtlErrorHwnd
    switch ( ErrorType )
    {
       case EQF_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = EQF_ERROR_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case CMD_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = EQF_CMD_ERROR_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case CMD_INFO :
-         usMsgboxStyle = MB_INFORMATION;
+         //usMsgboxStyle = MB_INFORMATION;
          pMsgboxTitle = EQF_CMD_ERROR_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case EQF_WARNING:
-         usMsgboxStyle = MB_WARNING;
+         //usMsgboxStyle = MB_WARNING;
          pMsgboxTitle = EQF_WARNING_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case EQF_INFO:
-         usMsgboxStyle = MB_INFORMATION;
+         //usMsgboxStyle = MB_INFORMATION;
          pMsgboxTitle = EQF_INFO_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case EQF_QUERY:
-         usMsgboxStyle = MB_QUERY;
+         //usMsgboxStyle = MB_QUERY;
          pMsgboxTitle = EQF_QUERY_TXT;
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
       case SYSTEM_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = SYSTEM_ERROR_TXT;
          pErrorText = NO_ERRINFO_TXT;
          strncpy( chMsgBuffer, pErrorText, sizeof(chMsgBuffer) );
          break;
 
       case DOS_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = SYSTEM_ERROR_TXT;
          if ( usNoOfParms && pParmTable && *pParmTable )
          {
@@ -431,7 +434,7 @@ USHORT UtlErrorHwnd
          break;
 
       case QDAM_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = QDAM_ERROR_TXT;
          if ( usNoOfParms && pParmTable && *pParmTable )
          {
@@ -443,13 +446,13 @@ USHORT UtlErrorHwnd
             szError[0] = EOS;
          } /* endif */
          pQdamError[0] = szError;
-     pQdamError[1] = _itoa( sErrorNumber, chNum, 10 );
+     pQdamError[1] = strncpy( chNum, std::to_string(sErrorNumber).c_str(), 10 );
      sErrorNumber = UtlQdamMsgTxt ( sErrorNumber );
          UtlGetMsgTxt ( sErrorNumber, chMsgBuffer, 2, &pQdamError[0] );
          break;
 
       case QLDB_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = QLDB_ERROR_TXT;
          if ( usNoOfParms && pParmTable && *pParmTable )
          {
@@ -466,7 +469,7 @@ USHORT UtlErrorHwnd
          break;
 
       case PROP_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = PROP_ERROR_TXT;
          if ( usNoOfParms && pParmTable && *pParmTable )
          {
@@ -483,20 +486,21 @@ USHORT UtlErrorHwnd
          break;
 
       case SHOW_ERROR :
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = EQF_ERROR_TXT;
          strcpy( chMsgBuffer, *pParmTable );
          break;
 
       case INTERNAL_ERROR :
       default :                        // unknown error type ==> internal error!
-         usMsgboxStyle = MB_ERROR;
+         //usMsgboxStyle = MB_ERROR;
          pMsgboxTitle = INTERNAL_ERROR_TXT;
          UtlGetMsgTxt( ERROR_INTERNAL, chMsgBuffer, usNoOfParms, pParmTable );
          break;
 
    } /* endswitch */
 
+#if 0
    switch (usMsgboxStyle)
    {
      case MB_ERROR:
@@ -509,6 +513,7 @@ USHORT UtlErrorHwnd
 
    usMsgboxStyle |= MB_DEFBUTTON1 | MB_MOVEABLE | usMsgType;
    usMsgboxStyle |= MB_APPLMODAL;
+#endif
 
    // GQ 2015/10/13 Set parent handle of message box to HWND_FUNCIF when running in API mode and no parent handle has been specififed
    if ( !hwndMsgBoxParent && (UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE ) )
@@ -518,9 +523,10 @@ USHORT UtlErrorHwnd
   
    hwndParent = hwndMsgBoxParent;      // use supplied window handle
 
+#if 0
    if ( !hwndParent )
    {
-      hwndParent     = QUERYACTIVEWINDOW();
+      //hwndParent     = QUERYACTIVEWINDOW();
       hwndFrame      = ErrData[UtlGetTask()].hwndFrame;
       if ( (GETPARENT( hwndParent ) == hwndFrame) ||
             (GETOWNER( hwndParent ) == hwndFrame) )
@@ -533,6 +539,7 @@ USHORT UtlErrorHwnd
          hwndParent     = hwndFrame;
       } /* endif */
    } /* endif */
+#endif
 
    usMsgboxStyle |= ( ErrData[UtlGetTask()].hwndHelpInstance ) ? MB_HELP : 0;
 
@@ -568,12 +575,15 @@ USHORT UtlErrorHwnd
 		 IDA.sID      = sErrorNumber;
 		 IDA.usStyle  = (USHORT)usMsgboxStyle;
 
+#if 0
 		 DIALOGBOX( hwndParent, UTLYESTOALLDLG, hResMod,
 					ID_UTL_YESTOALL_DLG,
 					&IDA, usMsgboxRet );
+#endif
 	   }
 	   else
 	   { 
+#if 0
 		   //   No RightStyle for message boxes
 		   //     usMsgboxStyle |= MB_RTLREADING | MB_RIGHT;
 		   usMsgboxRet = WinMessageBox ( HWND_DESKTOP,
@@ -582,6 +592,7 @@ USHORT UtlErrorHwnd
 									     pMsgboxTitle,
 									     sErrorNumber,
 									     usMsgboxStyle );
+#endif
 	   } /* endif */
    }
    UtlSetUShort( QS_CURMSGID, 0 );
@@ -1733,6 +1744,7 @@ LPARAM mp2                          // second message parameter
   /*                         local variables                          */
   /********************************************************************/
 
+#if 0
   MRESULT              mResult = FALSE; // dlg procedure return value
   PYESTOALL_IDA        pIDA;            // dialog IDA
 
@@ -1847,5 +1859,6 @@ LPARAM mp2                          // second message parameter
   } /* endswitch */
 
   return( mResult );
+#endif
 
 } /* end of function UTLYESTOALLDLG */

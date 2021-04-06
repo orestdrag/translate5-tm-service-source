@@ -13,12 +13,13 @@
 /* Include files                                                      */
 /**********************************************************************/
 #define INCL_DEV
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 #include <time.h>                 // C time related functions
 #include "zip.h"
 #include "unzip.h"
 
 #include "EQFUTPRI.H"                  // private utility header file
+#include "OTMFUNC.H"
 
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
@@ -49,10 +50,12 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
+#if 0
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
       szCurDir[0] = EOS;
     } /* endif */
+#endif
     DosError(1);
 
     return (BYTE)szCurDir[0];
@@ -90,6 +93,7 @@ USHORT UtlGetDriveList( BYTE *szList)
     WORD   wReturn;                    // return value from GetDriveType
     register int i;
 
+#if 0
     for (i=0, wReturn=0; i<26;i++)
     {
       CHAR szRoot[4] = "C:\\";
@@ -111,6 +115,7 @@ USHORT UtlGetDriveList( BYTE *szList)
           break;
       } /* endswitch */
     } /* endfor */
+#endif
 
     *szList = '\0';
 
@@ -141,6 +146,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
   SHORT sDriveType;                    // type of currently tested drive
   USHORT usRC;
 
+#if 0
   usRC = UtlGetDriveList( pszList);    // get all available drives
 
   pSource = pTarget = pszList;         // start at begin of drive list
@@ -179,6 +185,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
     } /* endswitch */
   } /* endwhile */
   *pTarget = NULC;                     // terminate new drive list
+#endif
 
   return( usRC );
 } /* end of function UtlGetLANDriveList */
@@ -273,7 +280,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   BOOL    fCombo;                      // is-a-combobox flag
   BOOL    fMsg = !(flg & NAMFMT_NOERROR);
 
-  ISCOMBOBOX( hlbox, fCombo );
+  //ISCOMBOBOX( hlbox, fCombo );
 
   usRC = UtlFindFirstHwnd( pszSearch, &hDirHandle, atrb, &ResultBuf,
                            sizeof( ResultBuf), &usCount, 0L,
@@ -281,7 +288,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
 
   while ( usCount && !usRC )
   {
-     p2 = RESBUFNAME(ResultBuf);
+     //p2 = RESBUFNAME(ResultBuf);
      if( fdir && !(fdir & ResultBuf.dwFileAttributes) )
      {
        /***************************************************************/
@@ -343,6 +350,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
      /*****************************************************************/
      if ( p2 )
      {
+#if 0
         if ( fCombo )
         {
           CBINSERTITEMHWND( hlbox, p2 );
@@ -351,6 +359,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
         {
           INSERTITEMHWND( hlbox, p2 );
         } /* endif */
+#endif
      } /* endif */
 
      /*****************************************************************/
@@ -368,6 +377,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   /********************************************************************/
   /* Get total number of list box entries                             */
   /********************************************************************/
+#if 0
   if ( fCombo )
   {
     usTotal = (USHORT)CBQUERYITEMCOUNTHWND( hlbox );
@@ -376,12 +386,14 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   {
     usTotal = (USHORT)QUERYITEMCOUNTHWND( hlbox );
   } /* endif */
+#endif
 
   /********************************************************************/
   /* Select first item on request                                     */
   /********************************************************************/
   if ( (flg & NAMFMT_TOPSEL) && usTotal )
   {
+#if 0
     if ( fCombo )
     {
       CBSELECTITEMHWND(hlbox, 0);
@@ -390,6 +402,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
     {
       SELECTITEMHWND(hlbox, 0);
     } /* endif */
+#endif
   } /* endif */
 
   /********************************************************************/
@@ -455,6 +468,7 @@ SHORT UtlLoadFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
 //|                   endswitch;                                               |
 //+----------------------------------------------------------------------------+
 
+#if 0
 MRESULT APIENTRY UTLDRIVEBUTTONWP
 (
    HWND hwnd,                          // handle of window
@@ -487,8 +501,8 @@ MRESULT APIENTRY UTLDRIVEBUTTONWP
           chText[0] = (CHAR)(SHORT1FROMMP1(mp1));
           chText[1] = ':';
           chText[2] = EOS;
-          SetWindowText( hwnd, chText );
-          SetWindowLong( hwnd, GWL_USERDATA, (LONG)(CHAR)UtlDriveType( chText[0] )  );
+          //SetWindowText( hwnd, chText );
+          //SetWindowLong( hwnd, GWL_USERDATA, (LONG)(CHAR)UtlDriveType( chText[0] )  );
         }
         return( 0L);
 
@@ -505,8 +519,8 @@ MRESULT APIENTRY UTLDRIVEBUTTONWP
             {
               lButtonInfo = lButtonInfo & 0xFFFF;
             } /* endif */
-            SetWindowLong( hwnd, GWL_USERDATA, lButtonInfo );
-            InvalidateRgn( hwnd, NULL, FALSE);
+            //SetWindowLong( hwnd, GWL_USERDATA, lButtonInfo );
+            //InvalidateRgn( hwnd, NULL, FALSE);
           }
           return( 0L);
 
@@ -614,7 +628,7 @@ MRESULT APIENTRY UTLDRIVEBUTTONWP
             EndPaint(hwnd, &ps);
             if ( hbm )
             {
-              DeleteObject( hbm );
+              //DeleteObject( hbm );
             } /* endif */
           }
         return( 0L);
@@ -631,6 +645,7 @@ MRESULT APIENTRY UTLDRIVEBUTTONWP
    } /* endswitch */
    return( 0L);
 }
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
@@ -710,13 +725,13 @@ USHORT UtlSetPosDriveButtons2
 
 	  hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
       // load bitmap and get bitmap data
-      hbm = LoadBitmap( hResMod, MAKEINTRESOURCE( EQFFD_BITMAP ));
-      GetObject( hbm, sizeof( BITMAP ), (LPSTR) &bm );
+      //hbm = LoadBitmap( hResMod, MAKEINTRESOURCE( EQFFD_BITMAP ));
+      //GetObject( hbm, sizeof( BITMAP ), (LPSTR) &bm );
 
       // get width of W: drive string (should be largest text string)
-      hdc = GetDC( hwndParent );
-      GetTextExtentPoint32( hdc, "W", 1, &size );
-      ReleaseDC( hwndParent, hdc );
+      //hdc = GetDC( hwndParent );
+      //GetTextExtentPoint32( hdc, "W", 1, &size );
+      //ReleaseDC( hwndParent, hdc );
 
       // enlarge width if button would be too small
       size.cx += bm.bmWidth + 2;
@@ -725,12 +740,13 @@ USHORT UtlSetPosDriveButtons2
         ulSizex = size.cx;
       } /* endif */
       // cleanup
-      if ( hbm ) DeleteObject( hbm );
+      //if ( hbm ) DeleteObject( hbm );
     }
 
     ulx = ulStartx;
     uly = ulStarty;
     usLastID = usStartID +'Z' - 'A';   // set last ID
+#if 0
     for( usID = usStartID; usID <= usLastID; usID++)
     {
       if( (hwndButton = WinWindowFromID( hwndParent, usID )) != NULLHANDLE )
@@ -749,10 +765,11 @@ USHORT UtlSetPosDriveButtons2
                              EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ZORDER );
             ulx += ulSizex + ulDistx;
             hwndInsertBehind = hwndButton;
-            ShowWindow( hwndButton, SW_SHOWNORMAL );
+            //ShowWindow( hwndButton, SW_SHOWNORMAL );
          } /* endif */
       } /* endif */
     } /* endfor */
+#endif
     return( 0 );
 }
 
@@ -792,6 +809,7 @@ USHORT UtlSetPosDriveButtons2
 USHORT UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
                               ULONG style1, ULONG style)
 {
+#if 0
     HWND    hwndButton,
             hwndPrevButton = HWND_TOP;
     int     cnt = 0;
@@ -817,6 +835,7 @@ USHORT UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
       } /* endif */
     } /* endfor */
     return( (USHORT)cnt);
+#endif
 }
 
 
@@ -892,7 +911,7 @@ USHORT UtlDriveButtons
   /********************************************************************/
   /* hide dummy button - the default style under OS/2                 */
   /********************************************************************/
-  ShowWindow( hwndDummy, SW_HIDE );
+  //ShowWindow( hwndDummy, SW_HIDE );
 
   WinQueryWindowPos( hwndGroupBox, &swpBox );
   if ( hwndDelim != NULLHANDLE )
@@ -1055,7 +1074,7 @@ BOOL UtlLoadFileHwnd
           usMessage = ( fMsg ) ? ERROR_STORAGE : NOMSG;
           fOK = UtlAllocHwnd( (PVOID *)ppLoadedFile,  // Allocate storage for input data
                           0L,
-                          max( (LONG) MIN_ALLOC, ulSize ),
+                          get_max( (LONG) MIN_ALLOC, ulSize ),
                           usMessage, hwnd );
           fStorage = TRUE;
         } /* endif */
@@ -1458,6 +1477,7 @@ BOOL UtlFileExist( PSZ pszFile )
     FILEFINDBUF ResultBuf;               // DOS file find struct
     HDIR    hDirHandle = HDIR_CREATE;    // DosFind routine handle
 
+#if 0
     hDirHandle = FindFirstFile( pszFile, &ResultBuf );
     if ( hDirHandle == INVALID_HANDLE_VALUE )
     {
@@ -1466,8 +1486,9 @@ BOOL UtlFileExist( PSZ pszFile )
     else
     {
       fFound = TRUE;
-      FindClose( hDirHandle );
+      //FindClose( hDirHandle );
     } /* endif */
+#endif
 
     return( fFound );
 } /* endof UtlFileExist */
@@ -1542,9 +1563,9 @@ BOOL UtlDirExist( PSZ pszDir )
      }
    }
 
-   dwAttrib = GetFileAttributes(pszDir);
+   //dwAttrib = GetFileAttributes(pszDir);
 
-   return( dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) );
+   //return( dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) );
 } /* endof UtlDirExist */
 
 //+----------------------------------------------------------------------------+
@@ -1617,7 +1638,7 @@ BOOL UtlMoveIfNewerOrNotExistHwnd2( PSZ pszSource, PSZ pszTarget, HWND hwnd, BOO
    if ( usCount && !usDosRC )
    {
       fSource = TRUE;
-      FileTimeToDosDateTime( &ResultBuf.ftLastWriteTime, (LPWORD)&fdateSource, (LPWORD)&ftimeSource );
+      //FileTimeToDosDateTime( &ResultBuf.ftLastWriteTime, (LPWORD)&fdateSource, (LPWORD)&ftimeSource );
    }
    else
    {
@@ -1634,7 +1655,7 @@ BOOL UtlMoveIfNewerOrNotExistHwnd2( PSZ pszSource, PSZ pszTarget, HWND hwnd, BOO
    if ( usCount && !usDosRC )
    {
       fTarget = TRUE;
-      FileTimeToDosDateTime( &ResultBuf.ftLastWriteTime, (LPWORD)&fdateTarget, (LPWORD)&ftimeTarget );
+      //FileTimeToDosDateTime( &ResultBuf.ftLastWriteTime, (LPWORD)&fdateTarget, (LPWORD)&ftimeTarget );
    }
    else
    {
@@ -2534,7 +2555,7 @@ USHORT UtlBufWriteHwnd
 
    if ( pBufCB->fWrite )
    {
-     ulOutLength = min( ulLength, (pBufCB->ulSize - pBufCB->ulUsed) );
+     ulOutLength = get_min( ulLength, (pBufCB->ulSize - pBufCB->ulUsed) );
 
      if ( ulOutLength )
      {
@@ -2758,7 +2779,7 @@ USHORT UtlBufReadHwnd
          /* Get length of data area which can be copied to target     */
          /* buffer                                                    */
          /*************************************************************/
-         ulBytesToCopy   = min( pBufCB->ulUsed, (ulLength - ulBytesCopied) );
+         ulBytesToCopy   = get_min( pBufCB->ulUsed, (ulLength - ulBytesCopied) );
 
          /*************************************************************/
          /* copy data and adjust variables                            */
@@ -2776,7 +2797,7 @@ USHORT UtlBufReadHwnd
        /***************************************************************/
        if ( !pBufCB->ulUsed && pBufCB->ulRemaining )
        {
-         ulBytesToRead = min( pBufCB->ulSize, pBufCB->ulRemaining );
+         ulBytesToRead = get_min( pBufCB->ulSize, pBufCB->ulRemaining );
          usRC = UtlReadHwnd( pBufCB->hFile,
                          pBufCB->Buffer,
                          ulBytesToRead,
@@ -3063,6 +3084,17 @@ BOOL UtlCheckPath( PSZ pszPath, ULONG ulInFlags, PULONG pulFlags )
 //|Returncodes:       TRUE   name is valid                                     |
 //|                   FALSE  name is invalid                                   |
 //+----------------------------------------------------------------------------+
+
+static char* strupr(char *str)
+{
+    char *tmp = str;
+    while (*tmp) {
+        *tmp = toupper((unsigned char)*tmp);
+        ++tmp;
+    }
+    return str;
+}
+
 BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName )
 {
    BOOL    fOK  = TRUE;                // function return code
@@ -3076,7 +3108,7 @@ BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName )
      strncpy( szTempName, pszName, sizeof(szTempName) - 1 );
      szTempName[sizeof(szTempName)-1] = EOS;
      UtlStripBlanks( szTempName );
-     _strupr( szTempName );
+     strupr( szTempName );
      if ( szTempName[0] == EOS )
      {
        fOK = FALSE;                    // no name has been specified
@@ -3157,6 +3189,7 @@ BOOL UtlCheckLongName( PSZ pszName )
    if ( fOK )
    {
      pPropSys = GetSystemPropPtr();
+#if 0
      while ( fOK && (*pszName != EOS) )
      {
        if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
@@ -3176,6 +3209,7 @@ BOOL UtlCheckLongName( PSZ pszName )
          pszName++;                    // continue with next character
        } /* endif */
      } /* endwhile */
+#endif
    } /* endif */
 
    return ( fOK );
@@ -3360,7 +3394,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   BOOL    fMsg = !(flg & NAMFMT_NOERROR);
   BOOL    fhDirCreated = FALSE;        // directory handle has been created
 
-  ISCOMBOBOX( hlbox, fCombo );
+  //ISCOMBOBOX( hlbox, fCombo );
 
   usRC = UtlFindFirstLongHwnd( pszSearch, &hDirHandle, atrb, &ResultBuf,
                                fMsg, hwnd);
@@ -3434,6 +3468,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
      /*****************************************************************/
      if ( p2 )
      {
+#if 0
         if ( fCombo )
         {
           CBINSERTITEMHWND( hlbox, p2 );
@@ -3442,6 +3477,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
         {
           INSERTITEMHWND( hlbox, p2 );
         } /* endif */
+#endif
      } /* endif */
 
      /*****************************************************************/
@@ -3461,6 +3497,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   /********************************************************************/
   /* Get total number of list box entries                             */
   /********************************************************************/
+#if 0
   if ( fCombo )
   {
     usTotal = (USHORT)CBQUERYITEMCOUNTHWND( hlbox );
@@ -3469,12 +3506,14 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   {
     usTotal = (USHORT)QUERYITEMCOUNTHWND( hlbox );
   } /* endif */
+#endif
 
   /********************************************************************/
   /* Select first item on request                                     */
   /********************************************************************/
   if ( (flg & NAMFMT_TOPSEL) && usTotal )
   {
+#if 0
     if ( fCombo )
     {
       CBSELECTITEMHWND(hlbox, 0);
@@ -3483,6 +3522,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
     {
       SELECTITEMHWND(hlbox, 0);
     } /* endif */
+#endif
   } /* endif */
 
   /********************************************************************/
@@ -3695,6 +3735,7 @@ BOOL UtlSupportsLongNames( CHAR chDrive )
         DWORD dwMaxLength, dwFileSysFlags;
     CHAR szRoot[4] = "C:\\";
     szRoot[0] = chDrive;
+#if 0
     if ( GetVolumeInformation( szRoot,
                                                    NULL, // ptr to volume name buffer
                                        0,       // length of volume name buffer
@@ -3710,6 +3751,7 @@ BOOL UtlSupportsLongNames( CHAR chDrive )
         fSupportsLongNames = TRUE;
       } /* endif */
     } /* endif */
+#endif
   }
   return( fSupportsLongNames );
 } /* end of function UtlSupportsLongNames */
@@ -3761,7 +3803,7 @@ USHORT UtlHandleConversionStrings
   // check if target is a listbox or a combobox
   if ( usMode == CONVLOAD_MODE )
   {
-    ISCOMBOBOX( hwndLB, fCombo );
+    //ISCOMBOBOX( hwndLB, fCombo );
   }
   else if ( usMode == CONVCHECK_MODE )
   {
@@ -3854,6 +3896,7 @@ USHORT UtlHandleConversionStrings
             if ( usMode == CONVLOAD_MODE )
             {
               EQFOemToAnsi( szConversion, szConversion );
+#if 0
               if ( fCombo )
               {
                 CBINSERTITEMHWND( hwndLB, szConversion );
@@ -3862,11 +3905,12 @@ USHORT UtlHandleConversionStrings
               {
                 INSERTITEMHWND( hwndLB, szConversion );
               } /* endif */
+#endif
               usEntries++;
             }
             else if ( usMode == CONVCHECK_MODE )
             {
-              if ( _stricmp( pszConversion, szConversion ) == 0 )
+              if ( strcasecmp( pszConversion, szConversion ) == 0 )
               {
                 PSZ pszTemp = pszEndOfEntry;
                 USHORT   usCodePage = 0;
@@ -4019,6 +4063,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 
   hz = CreateZip( pszPackage, 0 );
   sprintf( szSearchPath, "%s\\*.*", pszSourcePath );
+#if 0
   hDir = FindFirstFile( szSearchPath, &FindData );
   if ( hDir != INVALID_HANDLE_VALUE )
   {
@@ -4030,8 +4075,9 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
         ZipAdd( hz, FindData.cFileName, szSearchPath );
       } /* endif */
     } while ( FindNextFile( hDir, &FindData  ) );
-    FindClose( hDir );
+    //FindClose( hDir );
   }
+#endif
   CloseZip( hz );
   return( 0 );
 }
@@ -4075,7 +4121,8 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  WIN32_FIND_DATA info;
  HANDLE hp; 
  sprintf( szFileFound, "%s\\*.*", pszDirectory );
- hp = FindFirstFile( szFileFound, &info );
+ //hp = FindFirstFile( szFileFound, &info );
+#if 0
  do
  {
     if ( !((strcmp( info.cFileName, ".") == 0 ) || (strcmp( info.cFileName, ".." ) == 0 )))
@@ -4084,13 +4131,14 @@ void UtlDeleteAllFiles( const char *pszDirectory )
       if(( info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
       {
         UtlDeleteAllFiles( szFileFound );
-        RemoveDirectory( szFileFound );
+        //RemoveDirectory( szFileFound );
       }
       else
       {
-        DeleteFile( szFileFound );
+        //DeleteFile( szFileFound );
       }
     }
   } while ( FindNextFile( hp, &info ) ); 
- FindClose( hp );
+#endif
+ //FindClose( hp );
 }

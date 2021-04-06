@@ -292,12 +292,16 @@
  * Initial revision.
 */
 //+----------------------------------------------------------------------------+
-#include <direct.h>
+//#include <direct.h>
 #include <time.h>
-#include <sys\types.h>
-#include <sys\stat.h>
-#include "eqf.h"                       // includes our .h file
-#include "eqfutpri.h"                  // private utility header file
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string>
+#include <wctype.h>
+#include "EQF.H"                       // includes our .h file
+#include "EQFUTPRI.H"                  // private utility header file
+#include "win_types.h"
+#include "OTMFUNC.H"
 
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
@@ -346,7 +350,7 @@ USHORT UtlRemoveSearchHandle( HDIR hdir );
 /**********************************************************************/
 
   #include "errno.h"                   // error number defines
-  #include "eqfstart.mri"              // hard coded fatal-msg.
+  #include "../../../mri/EQFSTART.MRI"              // hard coded fatal-msg.
   #undef MAX_PATH
 
 extern ERRDATA ErrData[];              // error structure
@@ -487,6 +491,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         DWORD dwShareMode = 0;
         DWORD dwFlagsAndAttr = usAttr;
 
+#if 0
         // get open mode
         if ( fsOpenMode & OPEN_ACCESS_READONLY )
         {
@@ -504,8 +509,10 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
             dwAccess = GENERIC_READ;   // use read access as default
         } /* endif */
+#endif
 
 
+#if 0
         // share flags
         if ( !(fsOpenMode & OPEN_SHARE_DENYREAD) )
         {
@@ -521,17 +528,21 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           dwFlagsAndAttr |= FILE_FLAG_WRITE_THROUGH;
         }
-
+#endif
 
 
         // open existing or create new file
         usRetCode = 1;                        // preset error condition
+#if 0
         if ( usRetCode && (fsOpenFlags & FILE_OPEN) )
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  OPEN_EXISTING, dwFlagsAndAttr, NULL );
+#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
+#endif
+#if 0
           if ( (usRetCode == ERROR_ACCESS_DENIED)          ||
                (usRetCode == ERROR_SHARING_VIOLATION)      ||
                (usRetCode == ERROR_LOCK_VIOLATION)         ||
@@ -547,14 +558,19 @@ USHORT UtlOpenHwnd                                                        /*@3BC
           {
             *pusAction = usRetCode ? 0 : FILE_EXISTED;
           } /* endif */
+#endif
         } /* endif */
+#endif
 
+#if 0
         if ( fTryCreate && usRetCode && (fsOpenFlags & FILE_TRUNCATE) )
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  CREATE_ALWAYS, dwFlagsAndAttr, NULL );
+#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
+#endif
           *pusAction = usRetCode ? 0 : FILE_TRUNCATED;
         } /* endif */
 
@@ -562,8 +578,10 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  CREATE_NEW, dwFlagsAndAttr, NULL );
+#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
+#endif
           /**************************************************************/
           /* if we are dealing with Os/2 server and DOS requester       */
           /* a file exist message is returning return code 2.           */
@@ -582,6 +600,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
           *phfOpen = NULLHANDLE;
         } /* endif */
 
+#endif
         /****************************************************************/
         /* check if we need to change the file size                     */
         /* In windows this has to be by hand - change filepointer, and  */
@@ -609,7 +628,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
                                        &ulNOffset, FALSE);
             if ( !usRetCode )
             {
-              usRetCode = UtlWriteL( *phfOpen, " ", ulBytes, &ulWritten, FALSE );
+              //usRetCode = UtlWriteL( *phfOpen, " ", ulBytes, &ulWritten, FALSE );
             } /* endif */
 
             if ( !usRetCode )
@@ -650,7 +669,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         } /* endwhile */
         if ( i < MAX_OPEN_FILES )
         {
-          DriveHandles[i].hf = *phfOpen;
+          DriveHandles[i].hf = &phfOpen;
           DriveHandles[i].chDrive = *pszFname;
         } /* endif */
       } /* endif */
@@ -733,6 +752,7 @@ USHORT UtlCloseHwnd
    {
      // remove handle from our handle/drive array
      int i = 0;
+#if 0
      while ( i < MAX_OPEN_FILES )
      {
        if ( DriveHandles[i].hf  == hf )
@@ -753,7 +773,7 @@ USHORT UtlCloseHwnd
 
         if ( CloseHandle( hf ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
 
         DosError(1);
@@ -763,6 +783,7 @@ USHORT UtlCloseHwnd
                                     hwndParent);
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    } /* endif */
    return( usRetCode );
 }
@@ -876,6 +897,7 @@ USHORT UtlReadHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    do {
       DosError(0);
 
@@ -883,7 +905,7 @@ USHORT UtlReadHwnd
         ULONG lRead;
         if ( ReadFile( hf, pBuf, cbBuf, &lRead, NULL ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         }
         else
         {
@@ -913,6 +935,7 @@ USHORT UtlReadHwnd
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
+#endif
 }
 
 //+----------------------------------------------------------------------------+
@@ -1031,11 +1054,12 @@ USHORT UtlWriteHwnd
 
    ULONG  ulTotBytesWritten = 0;
 
+#if 0
    do {
       DosError(0);
       if ( WriteFile( hf, pBuf, cbBuf, &ulBytesWritten, NULL ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
 
       DosError(1);
@@ -1071,6 +1095,7 @@ USHORT UtlWriteHwnd
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
 
    *pcbBytesWritten = ulTotBytesWritten;
    return( usRetCode );
@@ -1122,6 +1147,7 @@ USHORT UtlWriteWoCheckHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    do {
       DosError(0);
 
@@ -1129,7 +1155,7 @@ USHORT UtlWriteWoCheckHwnd
         ULONG lWritten;
         if ( WriteFile( hf, pBuf, cbBuf, &lWritten, NULL ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
           if ( usRetCode == ERROR_DISK_FULL )
           {
             // reset error code and leave it to caller to detect and
@@ -1165,6 +1191,7 @@ USHORT UtlWriteWoCheckHwnd
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -1263,6 +1290,7 @@ USHORT UtlChgFilePtrHwnd
    liNewOffset.HighPart = 0;
 
 
+#if 0
    do {
       DosError(0);
 
@@ -1272,7 +1300,7 @@ USHORT UtlChgFilePtrHwnd
 
       if ( !fOK )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
         *pulNewOffset = 0L;
       } /* endif */
 
@@ -1282,6 +1310,7 @@ USHORT UtlChgFilePtrHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -1363,17 +1392,18 @@ USHORT UtlDeleteHwnd
      ulReserved;
 
 	 // keep other process from doing property related stuff..
-	 GETMUTEX(hMutexSem);
+	 //GETMUTEX(hMutexSem);
 
      UtlSetFileMode(pszFName, FILE_NORMAL, 0L, FALSE);
 	 {
 
+#if 0
 	   do {
 		  DosError(0);
 
 		  if ( DeleteFile( pszFName ) == 0 )
 		  {
-			usRetCode = (USHORT)GetLastError();
+			//usRetCode = (USHORT)GetLastError();
 		  } /* endif */
 
 		  DosError(1);
@@ -1382,9 +1412,10 @@ USHORT UtlDeleteHwnd
 			 usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFName, DOS_ERROR, hwndParent );
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
 
       // release Mutex
-      RELEASEMUTEX(hMutexSem);
+      //RELEASEMUTEX(hMutexSem);
     }
    return( usRetCode );
 }
@@ -1460,6 +1491,7 @@ USHORT UtlMkDirHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    ulReserved;
    if ( !UtlDirExist( pszDirName  ) )
    {
@@ -1468,7 +1500,7 @@ USHORT UtlMkDirHwnd
 
         if ( CreateDirectory( pszDirName, NULL ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
 
         DosError(1);
@@ -1480,6 +1512,7 @@ USHORT UtlMkDirHwnd
                usRetCode &&
                (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
+#endif
    return( usRetCode );
 }
 
@@ -1554,13 +1587,14 @@ USHORT UtlRmDirHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    ulReserved;
    do {
       DosError(0);
 
       if ( RemoveDirectory( pszDir ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
 
       DosError(1);
@@ -1569,6 +1603,7 @@ USHORT UtlRmDirHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDir, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -1740,6 +1775,7 @@ USHORT UtlCopyHwnd2
 
         if ( usMBCode != MBID_CANCEL )
         {
+#if 0
           HPOINTER hPtr = GETCURSOR();
 
           if ( usRetCode == ERROR_NOT_READY         ||
@@ -1792,6 +1828,7 @@ USHORT UtlCopyHwnd2
             usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
           } /* endif */
           SETCURSORFROMHANDLE(hPtr);
+#endif
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1879,12 +1916,13 @@ USHORT UtlMoveHwnd
    ulReserved;
    UtlSetFileMode(pszSrc, FILE_NORMAL, 0L, FALSE);
 
+#if 0
    do {
       DosError(0);
 
       if ( MoveFile( pszSrc, pszDst ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
 
       DosError(1);
@@ -1893,6 +1931,7 @@ USHORT UtlMoveHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2024,6 +2063,7 @@ USHORT UtlFindFirstHwnd
       return (ERROR_INVALID_DATA);
    }
 
+#if 0
    do {
       DosError(0);
 
@@ -2031,10 +2071,10 @@ USHORT UtlFindFirstHwnd
        {
          usAttr = FILE_ATTRIBUTE_NORMAL; // use normal file as default
        } /* endif */
-       hdirNew = FindFirstFile( pszFSpecCompl, pffb );
+       //hdirNew = FindFirstFile( pszFSpecCompl, pffb );
        if ( hdirNew == INVALID_HANDLE_VALUE )
        {
-         usRetCode = (USHORT)GetLastError();
+         //usRetCode = (USHORT)GetLastError();
          if ( usRetCode == ERROR_FILE_NOT_FOUND )
               usRetCode = ERROR_NO_MORE_FILES;
          usSearch = 0;
@@ -2066,7 +2106,7 @@ USHORT UtlFindFirstHwnd
          {
             if ( FindNextFile( hdirNew, pffb ) == 0 )
             {
-              usRetCode = (USHORT)GetLastError();
+              //usRetCode = (USHORT)GetLastError();
               if ( usRetCode == ERROR_FILE_NOT_FOUND )
                 usRetCode = ERROR_NO_MORE_FILES;
             }
@@ -2128,6 +2168,7 @@ USHORT UtlFindFirstHwnd
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    *phdir = hdirNew;
    *pcSearch = (usRetCode == NO_ERROR ) ? usSearch : 0;
    return( usRetCode );
@@ -2221,6 +2262,7 @@ USHORT UtlFindNextHwnd
    USHORT usAttr;                      // file attribute for this file search
    BOOL   fFound = FALSE;              // matching file was found flag
 
+#if 0
    cbBuf;
    do {
       DosError(0);
@@ -2234,7 +2276,7 @@ USHORT UtlFindNextHwnd
       {
         if ( FindNextFile( hdir, pffb ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
           if ( usRetCode == ERROR_FILE_NOT_FOUND ) usRetCode = ERROR_NO_MORE_FILES;
         }
         else
@@ -2277,6 +2319,7 @@ USHORT UtlFindNextHwnd
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    *pcSearch = (usRetCode == NO_ERROR ) ? usSearch : 0;
    return( usRetCode );
 }
@@ -2345,11 +2388,13 @@ USHORT UtlFindCloseHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
 
+#if 0
    fMsg; hwndParent;
    if ( FindClose( hdir ) == 0 )
    {
-     usRetCode = (USHORT)GetLastError();
+     //usRetCode = (USHORT)GetLastError();
    } /* endif */
+#endif
 
    // remove file search handle from our list of open
    // file search handles
@@ -2444,6 +2489,7 @@ USHORT UtlQFileInfoHwnd
    USHORT usMBCode = 0;                    // message box/UtlError return code
    PFILESTATUS pstFileSt;              // file status buffer
 
+#if 0
    do {
       DosError(0);
 
@@ -2476,7 +2522,7 @@ USHORT UtlQFileInfoHwnd
         }
         else
         {
-            usRetCode = (USHORT)GetLastError();
+            //usRetCode = (USHORT)GetLastError();
         } /* endif */
 
       } /* endif */
@@ -2487,6 +2533,7 @@ USHORT UtlQFileInfoHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2581,6 +2628,7 @@ USHORT UtlQFSInfoHwnd
 
    cbInfoBuf;
 
+#if 0
    do {
       DosError(0);
 
@@ -2602,7 +2650,7 @@ USHORT UtlQFSInfoHwnd
         }
         else
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
       }
       else
@@ -2623,6 +2671,7 @@ USHORT UtlQFSInfoHwnd
         UtlSetDrive( *pszDriveNo);
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2705,13 +2754,14 @@ USHORT UtlSetFileModeHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    ulReserved;
    do {
       DosError(0);
 
       if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
 
       DosError(1);
@@ -2720,6 +2770,7 @@ USHORT UtlSetFileModeHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2795,6 +2846,7 @@ USHORT UtlQFileModeHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    ulReserved;
    do {
       DosError(0);
@@ -2807,7 +2859,7 @@ USHORT UtlQFileModeHwnd
         }
         else
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
       }
 
@@ -2817,6 +2869,7 @@ USHORT UtlQFileModeHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2891,12 +2944,13 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+#if 0
    do {
       DosError(0);
 
       if ( FlushFileBuffers( hf ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
 
       DosError(1);
@@ -2905,6 +2959,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -2933,6 +2988,7 @@ BOOL UtlSetDrive
   CHAR   szNewDrive                        // driveletter of new drive
 )
 {
+#if 0
   BOOL    fFlag=TRUE;
 
   CHAR szRootDir[5] = "A:\\";
@@ -2944,6 +3000,7 @@ BOOL UtlSetDrive
   } /* endif */
 
   return(fFlag);
+#endif
 }
 
 
@@ -2974,11 +3031,11 @@ BOOL UtlSetDrive
 
    pszFailName; cbFileName;
    DosError(0);                         // avoid error popup...
-   hmod = LoadLibrary(pszModName );
+   //hmod = LoadLibrary(pszModName );
    DosError(1);
    if ( hmod == NULL)
    {
-     usRc = (USHORT)GetLastError();
+     //usRc = (USHORT)GetLastError();
      *phMod = (HMODULE) NULL;
    }
    else
@@ -3005,7 +3062,7 @@ BOOL UtlSetDrive
  {
    USHORT usRc = 0;
 
-   *ppfnProcAddr = GetProcAddress( hMod, pszProcName );
+   //*ppfnProcAddr = GetProcAddress( hMod, pszProcName );
    if (!*ppfnProcAddr )
    {
 //#ifdef _DEBUG
@@ -3018,7 +3075,7 @@ BOOL UtlSetDrive
 //		fclose(pFile);
 //	 }
 //#endif
-     usRc = ERROR_PROC_NOT_FOUND;
+     //usRc = ERROR_PROC_NOT_FOUND;
    } /* endif */
    return usRc;
  }
@@ -3040,11 +3097,13 @@ BOOL UtlSetDrive
  {
    USHORT usRc = 0;                     // success indicator
 
+#if 0
    *phMod = GetModuleHandle( pszModName );
    if (!*phMod )
    {
      usRc = ERROR_MOD_NOT_FOUND ;
    } /* endif */
+#endif
 
    return usRc;
  }
@@ -3065,10 +3124,12 @@ BOOL UtlSetDrive
  {
    USHORT  usRc = 0;                    // success indicator
 
+#if 0
    if ( !GetModuleFileName( hMod, pchBuf, cbBuf ) )
    {
      usRc = ERROR_INVALID_NAME;
    } /* endif */
+#endif
 
    return usRc;
  }
@@ -3086,7 +3147,7 @@ BOOL UtlSetDrive
    HMODULE hMod                         // module handle
  )
  {
-   FreeModule( hMod );
+   //FreeModule( hMod );
    return 0;
  }
 
@@ -3103,6 +3164,7 @@ BOOL UtlSetDrive
    USHORT fEnable                       // action flag (bit field)
  )
  {
+#if 0
    switch ( fEnable )
    {
      case 0:
@@ -3112,6 +3174,7 @@ BOOL UtlSetDrive
        SetErrorMode(0);
        break;
    } /* endswitch */
+#endif
    return 0;
  }
 
@@ -3428,7 +3491,7 @@ BOOL UtlSetDrive
    {
      PSZ pszBuffer = chMsg + 9;
      ulMsgLen = sizeof(chMsg) - 10;
-     ulMsgLen = (ULONG)LoadString( hMessagesMod, usMsgNum, pszBuffer, (int)ulMsgLen );
+     //ulMsgLen = (ULONG)LoadString( hMessagesMod, usMsgNum, pszBuffer, (int)ulMsgLen );
    } /* endif */
    
    /********************************************************************/
@@ -3440,7 +3503,7 @@ BOOL UtlSetDrive
      /* prepare substitutions pointers                                   */
      /********************************************************************/
      pMsgSubst[0] = pszFileName;
-     pMsgSubst[1] = itoa( usMsgNum, chNum, 10 );
+     pMsgSubst[1] = strncpy(chNum, std::to_string(usMsgNum).c_str(), 10 );
      ppMsgSubst = &pMsgSubst[0];
      usVCount = 2;
      chMsg[8] = 'E';                   // it's an error message ....
@@ -3529,10 +3592,12 @@ BOOL UtlSetDrive
    USHORT  usRC = 0;                    // return code
    ulReserved;
 
+#if 0
    if ( CopyFile( pszSrc, pszTgt, (usOpt & DCPY_EXISTING) ? FALSE : TRUE ) == 0 )
    {
-     usRC = (USHORT)GetLastError();
+     //usRC = (USHORT)GetLastError();
    } /* endif */
+#endif
    /********************************************************************/
    /* return success indication                                        */
    /********************************************************************/
@@ -3556,19 +3621,23 @@ USHORT APIENTRY DosNewSize
 
   USHORT usRetCode = 0;                // no error yet
 
+#if 0
   // position to new end of file
   if (SetFilePointer( hf, ulNewSize, NULL, FILE_BEGIN ) == 0xFFFFFFFF )
   {
-    usRetCode = (USHORT)GetLastError();
+    //usRetCode = (USHORT)GetLastError();
   } /* endif */
+#endif
 
   // make current position the end of the file
   if ( usRetCode == NO_ERROR )
   {
+#if 0
     if ( SetEndOfFile( hf ) == 0 )
     {
-      usRetCode = (USHORT)GetLastError();
+      //usRetCode = (USHORT)GetLastError();
     } /* endif */
+#endif
   } /* endif */
   return usRetCode;
 }
@@ -3595,7 +3664,7 @@ void UtlGetArgs
   {
     PSZ pszSource, pszTarget;
 
-    GetModuleFileName( hInstance, pFileName, MAX_LONGPATH );
+    //GetModuleFileName( hInstance, pFileName, MAX_LONGPATH );
     argv[0] = pFileName;
     UtlStripBlanks( pCmdLine );
 
@@ -3752,6 +3821,7 @@ USHORT UtlQPathInfoHwnd
    USHORT usMBCode = 0;                    // message box/UtlError return code
    PFILESTATUS pstFileSt;              // file status buffer
 
+#if 0
    ulReserved;
    do {
       DosError(0);
@@ -3794,7 +3864,7 @@ USHORT UtlQPathInfoHwnd
         }
         else
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
           if ( usRetCode == ERROR_NO_MORE_FILES )
           {
             usRetCode = ERROR_FILE_NOT_FOUND;
@@ -3808,6 +3878,7 @@ USHORT UtlQPathInfoHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -3888,17 +3959,21 @@ USHORT UtlFileLocksHwnd
 
       if ( pUnlock != NULL )
       {
+#if 0
         if ( UnlockFile( hf, pUnlock->lOffset, 0L, pUnlock->lRange, 0L  ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
+#endif
       } /* endif */
       if ( (usRetCode == NO_ERROR) && (pLock != NULL) )
       {
+#if 0
         if ( LockFile( hf, pLock->lOffset, 0L, pLock->lRange, 0L ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
         } /* endif */
+#endif
       } /* endif */
       DosError(1);
       if ( fMsg && usRetCode )
@@ -3936,7 +4011,7 @@ VOID UtlWait
   SHORT     sWaitTime                  // wait time in miliseconds
 )
 {
-  Sleep( (LONG)sWaitTime );
+  //Sleep( (LONG)sWaitTime );
 } /* end of function UtlWait */
 
 /**********************************************************************/
@@ -3969,6 +4044,7 @@ USHORT UtlFindFirstLongHwnd
    HDIR   hdirNew;                     // new directory handle
    static WIN32_FIND_DATA FindData;    // find data structure
    memset( pffb, 0, sizeof(LONGFILEFIND) );
+#if 0
    do
    {
       DosError(0);
@@ -3979,7 +4055,7 @@ USHORT UtlFindFirstLongHwnd
        hdirNew = FindFirstFile( pszFSpec, &FindData );
        if ( hdirNew == INVALID_HANDLE_VALUE )
        {
-         usRetCode = (USHORT)GetLastError();
+         //usRetCode = (USHORT)GetLastError();
        }
        else
        {
@@ -3994,7 +4070,7 @@ USHORT UtlFindFirstLongHwnd
          {
             if ( FindNextFile( hdirNew, &FindData ) == 0 )
             {
-              usRetCode = (USHORT)GetLastError();
+              //usRetCode = (USHORT)GetLastError();
               if ( usRetCode == ERROR_FILE_NOT_FOUND )
                 usRetCode = ERROR_NO_MORE_FILES;
             }
@@ -4050,6 +4126,7 @@ USHORT UtlFindFirstLongHwnd
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usRetCode != ERROR_FILE_NOT_FOUND) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    *phdir = hdirNew;
    return( usRetCode );
 }
@@ -4076,6 +4153,7 @@ USHORT UtlFindNextLongHwnd
    USHORT usAttr;                      // file attributes for search
    static WIN32_FIND_DATA FindData;    // find data structure
 
+#if 0
    do {
       DosError(0);
 
@@ -4088,7 +4166,7 @@ USHORT UtlFindNextLongHwnd
       {
         if ( FindNextFile( hdir, &FindData  ) == 0 )
         {
-          usRetCode = (USHORT)GetLastError();
+          //usRetCode = (USHORT)GetLastError();
           if ( usRetCode == ERROR_FILE_NOT_FOUND ) usRetCode = ERROR_NO_MORE_FILES;
         }
         else if ( !(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
@@ -4123,6 +4201,7 @@ USHORT UtlFindNextLongHwnd
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -4188,12 +4267,13 @@ USHORT UtlFindCloseLongHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
+#if 0
    do {
       DosError(0);
 
       if ( FindClose( hdir ) == 0 )
       {
-        usRetCode = (USHORT)GetLastError();
+        //usRetCode = (USHORT)GetLastError();
       } /* endif */
       // remove file search handle from our list of open
       // file search handles
@@ -4205,6 +4285,7 @@ USHORT UtlFindCloseLongHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+#endif
    return( usRetCode );
 }
 
@@ -4229,6 +4310,7 @@ USHORT DosOpenLong
 /**********************************************************************/
 CHAR UtlGetDriveFromHandle( HFILE hf )
 {
+#if 0
   CHAR chDrive = EOS;
   // look for handle in our handle/drive array
   int i = 0;
@@ -4247,6 +4329,7 @@ CHAR UtlGetDriveFromHandle( HFILE hf )
   } /* endwhile */
 
   return( chDrive );
+#endif
 } /* end of function UtlGetDriveFromHandle */
 
 
@@ -4381,11 +4464,11 @@ USHORT UtlGetFileSizeHwnd
 
   fMsg; hwndParent;
   DosError(0);
-  dwSize = GetFileSize( hf, NULL );
+  //dwSize = GetFileSize( hf, NULL );
   DosError(1);
   if ( dwSize == 0xFFFFFFFF )
   {
-    usRC = (USHORT)GetLastError();
+    //usRC = (USHORT)GetLastError();
     *pulSize = 0L;
   }
   else

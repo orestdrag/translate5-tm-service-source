@@ -51,9 +51,9 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include <cwctype>
-
 #include "win_types.h"
+
+#include <cwctype>
 
 // define for memory import logging (remove to disable logging)
 #ifdef _DEBUG
