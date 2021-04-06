@@ -5,8 +5,9 @@
 	Corporation and others. All rights reserved
 */
 
-#include "..\PluginManager\PluginManager.h"
+#include "../pluginmanager/PluginManager.h"
 #include "OtmProposal.h"
+#include <cstring>
 
 /*! \brief Data class for the transport of memory proposals
  *

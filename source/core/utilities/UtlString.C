@@ -9,12 +9,14 @@
 //+----------------------------------------------------------------------------+
 
 #include <time.h>
-#include <tchar.h>
+//#include <tchar.h>
 
-#include "eqf.h"                  // General Translation Manager include file
-#include "eqfshape.h"
-#include "eqfutchr.h"
+#include "EQF.H"                  // General Translation Manager include file
+#include "EQFSHAPE.H"
+#include "EQFUTCHR.H"
 #include "Utility.h"
+#include "OTMFUNC.H"
+#include "win_types.h"
 
 //------------------------------------------------------------------------------
 // Function Name:     UtlParseX15            Parse X15 delimited strings        
@@ -747,11 +749,11 @@ BOOL UtlTimeStringToFTime
       else
       {
         // check for am/pm string following
-        if ( _stricmp( pszString+1, UtiVar[usId].szTime1159 ) == 0 )
+        if ( strcasecmp( pszString+1, UtiVar[usId].szTime1159 ) == 0 )
         {
           usOffset = 0;
         }
-        else if ( _stricmp( pszString+1, UtiVar[usId].szTime2359 ) == 0 )
+        else if ( strcasecmp( pszString+1, UtiVar[usId].szTime2359 ) == 0 )
         {
           usOffset = 12;
         }
@@ -930,11 +932,11 @@ UtlLowUpInit()
 
   // use the ANSILOW function
   EQFOemToAnsi( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
-  AnsiUpper( (PSZ)&(chEQFUpper[1]) );
+  //AnsiUpper( (PSZ)&(chEQFUpper[1]) );
   EQFAnsiToOem( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
 
   EQFOemToAnsi( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
-  AnsiLower( (PSZ)&(chEQFLower[1]) );
+  //AnsiLower( (PSZ)&(chEQFLower[1]) );
   EQFAnsiToOem( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
 
   return;
@@ -980,7 +982,7 @@ UtlLowerW
   PSZ_W  pData                           // pointer to data
 )
 {
-    CharLowerW(pData);
+    //CharLowerW(pData);
 
   return pData;
 } /* end of function UtlLower */
@@ -1001,8 +1003,10 @@ UtlToLowerW
   CHAR_W d                               // input character
 )
 {
+#if 0
    DWORD  dw = MAKELONG( d, 0 );
    return(LOWORD(CharLowerW( (PSZ_W)dw )));
+#endif
  } /* end of function UtlToLowerW */
 
 //------------------------------------------------------------------------------
@@ -1043,7 +1047,7 @@ UtlUpperW
   PSZ_W  pData                           // pointer to data
 )
 {
-  CharUpperW(pData);
+  //CharUpperW(pData);
   return pData;
 } /* end of function UtlUpper */
 
@@ -1063,8 +1067,10 @@ UtlToUpperW
   CHAR_W d                               // input character
 )
 {
+#if 0
    DWORD  dw = MAKELONG( d, 0 );
    return(LOWORD(CharUpperW( (PSZ_W)dw )));
+#endif
  } /* end of function UtlToUpperW */
 
 
@@ -1140,7 +1146,7 @@ BOOL UtlMatchStrings
   if ( fOK )
   {
     fOK = UtlAlloc( (PVOID *) &pszBuffer, 0L, (LONG)
-                    max( MIN_ALLOC, (strlen(pszString) +
+                    get_max( MIN_ALLOC, (strlen(pszString) +
                                      strlen(pPattern) + 2 ) ), NOMSG );
     if ( fOK )
     {
@@ -1364,7 +1370,7 @@ BOOL UtlMatchStringsW
   if ( fOK )
   {
     fOK = UtlAlloc( (PVOID *) &pszBuffer, 0L, (LONG)
-                    max( MIN_ALLOC, (UTF16strlenCHAR(pszString) +
+                    get_max( MIN_ALLOC, (UTF16strlenCHAR(pszString) +
                                      UTF16strlenCHAR(pPattern) + 2 )*sizeof(CHAR_W) ), NOMSG );
     if ( fOK )
     {
@@ -1693,12 +1699,12 @@ int UTF16strncmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
 
 int UTF16strnicmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen )
 {
-  return( _wcsnicmp( pszString1, pszString2, usLen));
+  return( wcsncasecmp( pszString1, pszString2, usLen));
 }
 
 int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
 {
-  return( _wcsnicmp( pszString1, pszString2, lLen));
+  return( wcsncasecmp( pszString1, pszString2, lLen));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1879,8 +1885,10 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 					break;
 				}
 			  }
+#if 0
 			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
+#endif
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
@@ -1909,20 +1917,26 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 			  }
 
 			  usCP = 862;     // we have to use CP862 since Windows only supports this
+#if 0
 			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
 								   pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
+#endif
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
           case 850:
             // Change the replacement character from '?' to '%'
             // '?' causes false breaks.
+#if 0
             WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
                                  pszASCII, MAX_SEGMENT_SIZE, "%", NULL );
+#endif
             break;
 		  default:
+#if 0
 			WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
+#endif
 			break;
 		}
     } /* endif */
@@ -1999,11 +2013,13 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 							}
 						}
 
+#if 0
 						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
+#endif
 						if (!ulOutPut )
 						{
-							lRc = GetLastError();
+							//lRc = GetLastError();
 						}
 
 						UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
@@ -2035,11 +2051,13 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 						}
 						usCP = 862;     // we have to use CP862 since Windows only supports this
 
+#if 0
 						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
+#endif
 						if (!ulOutPut )
 						{
-							lRc = GetLastError();
+							//lRc = GetLastError();
 						}
 
 						UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
@@ -2048,16 +2066,20 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 				case 850:
 		            // Change the replacement character from '?' to '%'
 		            // '?' causes false breaks.
+#if 0
 				    ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
 		                                            pszASCII, lBufLen, "%", NULL );
+#endif
 		            break;
 				default:
+#if 0
 					ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
 													pszASCII, lBufLen, NULL, NULL );
+#endif
 
 					if (!ulOutPut )
 					{
-						lRc = GetLastError();
+						//lRc = GetLastError();
 					}
 					break;
 			} /* endswitch */
@@ -2152,12 +2174,12 @@ PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG  ulCP )
     // always use 932 when 943 is specified
     if ( usCP == 943 ) usCP = 932;
 
-		iRC = MultiByteToWideChar( usCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
-    if ( iRC == 0 ) iRC = GetLastError();
+		//iRC = MultiByteToWideChar( usCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
+    //if ( iRC == 0 ) iRC = GetLastError();
     if ( iRC == ERROR_INVALID_PARAMETER )
     {
       // codepage not supported by OS, use default code page for conversion
-		  MultiByteToWideChar( CP_OEMCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
+		  //MultiByteToWideChar( CP_OEMCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
     } /* endif */
 
 		switch (usCP)
@@ -2252,23 +2274,30 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
     *pszUni = EOS;
     if (ulLen)
     {
+#if 0
       ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszASCII, ulLen,
                                     pszUni, ulLen );
+#endif
       if (!ulOutPut)
       {
-        lRc = GetLastError();
+        //lRc = GetLastError();
+#if 0
         if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP) )
         {// the last byte in the buffer may be half of a DBCS char...
          // so try again with one byte less..
+#if 0
             ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                             pszASCII, ulLen-1, pszUni, ulLen-1 );
+#endif
             if (!ulOutPut)
             { // the last byte was not the reason, so just go on
-				lRc = GetLastError();
+				//lRc = GetLastError();
+#if 0
 				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszASCII,
 				                                 ulLen, pszUni, ulLen );
-				lRc = GetLastError();
+#endif
+				//lRc = GetLastError();
 		    }
 		    else
 		    {
@@ -2279,6 +2308,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
 			    }
 		    }
 	    }
+#endif
       }
       else
       {
@@ -2438,42 +2468,52 @@ ULONG UTF82UnicodeBufEx( PSZ pszUTF8, PSZ_W pszUni, LONG Len, BOOL fMsg, PLONG p
 	 {// set dwFlags only if on WinXP, otherwise MultiByteToWideChar fails!
 	    if ( UtlGetOperatingSystemInfo()== OP_WINXP)
 	    {
-	        dwFlags = MB_ERR_INVALID_CHARS;
+	        //dwFlags = MB_ERR_INVALID_CHARS;
+#if 0
 	        ulOutPut = MultiByteToWideChar( CP_UTF8, dwFlags, pszUTF8, Len,
 			                                    pszUni, Len );
+#endif
 
 			if ( !ulOutPut)
 			{
-			  lRc = GetLastError();
+#if 0
+			  //lRc = GetLastError();
 			  while (lRc == ERROR_NO_UNICODE_TRANSLATION && !(usI == 4)) /* chg 3->4 11-4-14 */
 			  {// the last byte in the buffer may be part of a Multibyte char...
 				 // so try again with one byte less..
 				usI++;
+#if 0
 				ulOutPut = MultiByteToWideChar( CP_UTF8, dwFlags,
 											  pszUTF8,Len-usI, pszUni, Len-usI );
+#endif
 
 				if (!ulOutPut)
 				{ // the last byte was not the reason, so just go on
-					lRc = GetLastError();
+					//lRc = GetLastError();
 				}
 				else
 				{
 				   lRc = 0;
 				}
 			  } /* endwhile */
+#endif
 		    }
 	   }
 	   else
 	   {
 		   ULONG ulNewOutPut = 0;
+#if 0
 		   ulOutPut = MultiByteToWideChar( CP_UTF8, dwFlags, pszUTF8, Len,
 			                                    pszUni, Len );
+#endif
 		   ulNewOutPut = ulOutPut;
 		   while (ulNewOutPut && (usI < 4) && (Len > usI) && (ulNewOutPut == ulOutPut))
 		   {
 			 usI++;
+#if 0
 		     ulNewOutPut = MultiByteToWideChar( CP_UTF8, dwFlags, pszUTF8, Len-usI,
 			                                    pszUni, 0 );
+#endif
            }
            if (ulNewOutPut != ulOutPut)
            {
@@ -2481,7 +2521,7 @@ ULONG UTF82UnicodeBufEx( PSZ pszUTF8, PSZ_W pszUni, LONG Len, BOOL fMsg, PLONG p
 	       }
 	       if (!ulOutPut)
 	       {
-			   lRc = GetLastError();
+			   //lRc = GetLastError();
 	       }
 	       else
 	       {
@@ -2532,11 +2572,13 @@ ULONG Unicode2UTF8BufEx( PSZ_W pszUni, PSZ pszUTF8, LONG Len, LONG lBufLen, BOOL
 	  *pszUTF8 = EOS;
 	  if (Len)
 	  {
+#if 0
 		ulOutPut = WideCharToMultiByte( CP_UTF8, 0, (LPCWSTR)pszUni, Len,
 										pszUTF8, lBufLen, NULL, NULL );
+#endif
 		if (!ulOutPut)
 		{
-		  lRc = GetLastError();
+		  //lRc = GetLastError();
 			// this function is always called with fMsg==FALSE, so the following code-block
 			// is eliminated
 			fMsg;
@@ -2603,7 +2645,7 @@ PSZ_W UTF16strncpy(PSZ_W pusTarget, PSZ_W pusSource, LONG lLen)
 ///////////////////////////////////////////////////////////////////////////////
 int UTF16stricmp(PSZ_W pusTarget, PSZ_W pusSource)
 {
-  return _wcsicmp( pusTarget, pusSource );
+  return wcscasecmp( pusTarget, pusSource );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2695,11 +2737,13 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
     // always use 932 when 943 is specified
     if ( usAnsiCP == 943 ) usAnsiCP = 932;
 
+#if 0
 		ulOutPut = WideCharToMultiByte( usAnsiCP, 0, (LPCWSTR)pszUni, ulLen,
 											pszAnsi, lBufLen, NULL, NULL );
+#endif
 		if (plRc && !ulOutPut)
 		{
-			lRc = GetLastError();
+			//lRc = GetLastError();
 		  *(plRc) = lRc;
 		}
 		if (pszTemp && lRc)
@@ -2745,23 +2789,30 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
     if (ulLen)
     {
 		*pszUni = EOS;
+#if 0
 		ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszAnsi, ulLen,
                                     pszUni, ulLen );
+#endif
         if (!ulOutPut)
         {
-          lRc = GetLastError();
+#if 0
+          //lRc = GetLastError();
           if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP))
           {// the last byte in the buffer may be half of a DBCS char...
            // so try again with one byte less..
+#if 0
               ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                             pszAnsi, ulLen-1, pszUni, ulLen-1 );
+#endif
               if (!ulOutPut)
               { // the last byte was not the reason, so just go on
-  				lRc = GetLastError();
+  				//lRc = GetLastError();
+#if 0
 				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszAnsi,
 				                                 ulLen, pszUni, ulLen );
-				lRc = GetLastError();
+#endif
+				//lRc = GetLastError();
               }
               else
               {
@@ -2772,6 +2823,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 			    }
               }
            }
+#endif
         }
 
 		if (plRc && !ulOutPut)
@@ -2816,12 +2868,12 @@ PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP )
     if ( usCP == 943 ) usCP = 932;
 
 
-		iRC = MultiByteToWideChar( usCP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
-		if ( iRC == 0 ) iRC = GetLastError();
+		//iRC = MultiByteToWideChar( usCP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
+		//if ( iRC == 0 ) iRC = GetLastError();
 		if ( iRC == ERROR_INVALID_PARAMETER )
 		{
 		  // codepage not supported by OS, use default code page for conversion
-			  MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
+			  //MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
 		} /* endif */
      }/* endif */
   }
@@ -2857,14 +2909,16 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
     // always use 932 when 943 is specified
     if ( usCP == 943 ) usCP = 932;
 
+#if 0
 		iRC = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-		if ( iRC == 0) iRC = GetLastError();
+#endif
+		//if ( iRC == 0) iRC = GetLastError();
 		// possible: ERROR_INSUFFICIENT_BUFFER /ERROR_INVALID_FLAGS / ERROR_INVALID_PARAMETER
 		if ( iRC == ERROR_INVALID_PARAMETER )
 		{
 		  // codepage not supported by OS, use default code page for conversion
-		  MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
+		  //MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
 		} /* endif */
 
     } /* endif */
@@ -2956,8 +3010,8 @@ USHORT UtlQueryCharTableEx
         else
         {
            TCHAR        cp [6];
-           GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTCODEPAGE, cp, sizeof(cp));
-           usCP = (USHORT)_ttol (cp);
+           //GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTCODEPAGE, cp, sizeof(cp));
+           //usCP = (USHORT)_ttol (cp);
         } /* endif */
         switch ( usCP )
         {
@@ -2971,6 +3025,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862; break;
           case 813  : pTable = chAnsiToPC813; break;
           case 737  :
+#if 0
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869))
             { // fix for sev1 Greek: Win NT problem (01/09/23)
                   usCP = 869;
@@ -2980,6 +3035,7 @@ USHORT UtlQueryCharTableEx
             {
                 pTable = chAnsiToPC737;
             } /* endif */
+#endif
             break;
           case 775  : pTable = chAnsiToPC775; break;
           case 864  : pTable = chAnsiToPC864; break;  // Arabic OS/2
@@ -3018,8 +3074,8 @@ USHORT UtlQueryCharTableEx
         else
         {
           TCHAR        cp [6];
-          GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTCODEPAGE, cp, sizeof(cp));
-          usCP = (USHORT)_ttol (cp);
+          //GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTCODEPAGE, cp, sizeof(cp));
+          //usCP = (USHORT)_ttol (cp);
         } /* endif */
         switch ( usCP )
         {
@@ -3033,6 +3089,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862;  pInvTable = chPC862ToAnsi; break;
           case 813  : pTable = chAnsiToPC813;  pInvTable = chPC813ToAnsi; break;
           case 737  :
+#if 0
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) )
             { // fix for sev1 Greek: Win NT problem (01/09/23)
               usCP = 869;
@@ -3044,6 +3101,7 @@ USHORT UtlQueryCharTableEx
               pTable = chAnsiToPC737;
               pInvTable = chPC737ToAnsi;
             } /* endif */
+#endif
             break;
           case 775  : pTable = chAnsiToPC775;  pInvTable = chPC775ToAnsi; break;
           case 864  : pTable = chAnsiToPC864;  pInvTable = chPC864ToAnsi; break;  // Arabic OS/2
@@ -3119,6 +3177,7 @@ SHORT UtlGetOperatingSystemInfo( VOID )
     BOOL            fOsVersionInfoEx;
 
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+#if 0
     fOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *) &osvi);
     if (!fOsVersionInfoEx)
     {
@@ -3126,8 +3185,10 @@ SHORT UtlGetOperatingSystemInfo( VOID )
 		if (!GetVersionEx((OSVERSIONINFO *) &osvi))
 		  return FALSE;
     }
+#endif
 
 
+#if 0
     switch (osvi.dwPlatformId)
     {
     case VER_PLATFORM_WIN32s:
@@ -3149,6 +3210,7 @@ SHORT UtlGetOperatingSystemInfo( VOID )
     default:
        return (OP_NO_WINDOWS);
     }
+#endif
 } // end of UtlGetOperatingSystemInfo
 
 //+----------------------------------------------------------------------------+
@@ -3178,7 +3240,7 @@ VOID UtlReplString( SHORT sID, PSZ pszString )
    if ( (sID > QST_FIRST) && (sID < QST_LAST) )
    {
       if ( UtlAlloc( (PVOID *)&pszBuffer, 0L,
-                     (LONG)  max( MIN_ALLOC, strlen(pszString)+1 ),
+                     (LONG)  get_max( MIN_ALLOC, strlen(pszString)+1 ),
                      ERROR_STORAGE ) )
       {
         USHORT      usTask = UtlGetTask();
