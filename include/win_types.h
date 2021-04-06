@@ -8,6 +8,7 @@
 
 #define WINAPI /*__stdcall*/
 #define APIENTRY WINAPI
+#define EXPENTRY WINAPI
 #define CALLBACK /*__stdcall*/
 #define CONST const
 #define VOID void
@@ -459,6 +460,54 @@ typedef struct tagOFNA {
     DWORD         FlagsEx;
 } OPENFILENAMEA, *LPOPENFILENAMEA;
 
+/* https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmap */
+
+typedef struct tagBITMAP {
+    LONG   bmType;
+    LONG   bmWidth;
+    LONG   bmHeight;
+    LONG   bmWidthBytes;
+    WORD   bmPlanes;
+    WORD   bmBitsPixel;
+    LPVOID bmBits;
+} BITMAP, *PBITMAP, *NPBITMAP, *LPBITMAP;
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-large_integer-r1 */
+
+typedef union _LARGE_INTEGER {
+    DWORD LowPart;
+    LONG  HighPart;
+    LONGLONG QuadPart;
+} LARGE_INTEGER;
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-systemtime */
+
+typedef struct _SYSTEMTIME {
+    WORD wYear;
+    WORD wMonth;
+    WORD wDayOfWeek;
+    WORD wDay;
+    WORD wHour;
+    WORD wMinute;
+    WORD wSecond;
+    WORD wMilliseconds;
+} SYSTEMTIME, *PSYSTEMTIME, *LPSYSTEMTIME;
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/tlhelp32/ns-tlhelp32-processentry32 */
+
+typedef struct tagPROCESSENTRY32 {
+    DWORD     dwSize;
+    DWORD     cntUsage;
+    DWORD     th32ProcessID;
+    ULONG_PTR th32DefaultHeapID;
+    DWORD     th32ModuleID;
+    DWORD     cntThreads;
+    DWORD     th32ParentProcessID;
+    LONG      pcPriClassBase;
+    DWORD     dwFlags;
+    CHAR      szExeFile[MAX_PATH];
+} PROCESSENTRY32;
+
 /* https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfilepointer */
 
 #define FILE_BEGIN 0
@@ -474,16 +523,51 @@ typedef struct tagOFNA {
 
 /* https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles */
 
-#define WS_TABSTOP 0x00010000L
-#define WS_GROUP   0x00020000L
-#define WS_VISIBLE 0x10000000L
+#define WS_TABSTOP      0x00010000L
+#define WS_GROUP        0x00020000L
+#define WS_THICKFRAME   0x00040000L
+#define WS_MAXIMIZEBOX  0x00010000L
+#define WS_MINIMIZEBOX  0x00020000L
+#define WS_SYSMENU      0x00080000L
+#define WS_CAPTION      0x00C00000L
+#define WS_VISIBLE      0x10000000L
 
 #define get_max(a, b) (a > b) ? (a) : (b)
 #define get_min(a, b) (a > b) ? (b) : (a)
 
 /* https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/18d8fbe8-a967-4f1c-ae50-99ca8e491d2d */
 
-#define ERROR_INVALID_PARAMETER 0x00000057
-#define ERROR_DISK_FULL         0x00000070
+#define ERROR_INVALID_PARAMETER     0x00000057
+#define ERROR_DISK_FULL             0x00000070
+#define ERROR_INVALID_ACCESS        0x0000000C
+#define ERROR_READ_FAULT            0x0000001E
+#define ERROR_INVALID_ACCESS        0x0000000C
+#define ERROR_NO_MORE_FILES         0x00000012
+#define ERROR_FILE_NOT_FOUND        0x00000002
+#define ERROR_INVALID_DATA          0x0000000D
+#define ERROR_INVALID_NAME          0x0000007B
+#define ERROR_MOD_NOT_FOUND         0x0000007E
+#define ERROR_MR_MID_NOT_FOUND      0x0000013D
+#define ERROR_NOT_READY             0x00000015
+#define ERROR_WRITE_FAULT           0x0000001D
+#define ERROR_NET_WRITE_FAULT       0x00000058
+#define ERROR_INVALID_DRIVE         0x0000000F
+#define ERROR_BAD_NETPATH           0x00000035
+#define ERROR_BAD_NET_NAME          0x00000043
+#define ERROR_DEV_NOT_EXIST         0x00000037
+#define ERROR_SHARING_VIOLATION     0x00000020 
+#define ERROR_ACCESS_DENIED         0x00000005
+#define ERROR_NETWORK_ACCESS_DENIED 0x00000041
+#define ERROR_WRITE_PROTECT         0x00000013
+#define ERROR_INVALID_PASSWORD      0x00000056
+#define ERROR_DISK_CHANGE           0x0000006B
+#define ERROR_PATH_NOT_FOUND        0x00000003
+#define ERROR_DIRECTORY             0x0000010B
+#define ERROR_FILE_EXISTS           0x00000050
+#define ERROR_SECTOR_NOT_FOUND      0x0000001B
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsystemmetrics */
+
+#define SM_CXSCREEN 0
 
 #endif
