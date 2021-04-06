@@ -134,18 +134,22 @@
   /**********************************************************************/
   /* Include the special definitions for unicode                        */
   /**********************************************************************/
+  #include <wchar.h>
+
   #ifndef _EQF_UNICODE
     #define _EQF_UNICODE 1
 
     #ifndef _WCHAR_T_DEFINED
-      typedef unsigned short wchar_t;
+      //typedef unsigned short wchar_t;
       #define _WCHAR_T_DEFINED
     #endif
 
     #if MSC_VER < 1400
         #ifndef _WCTYPE_T_DEFINED
+#if 0
           typedef wchar_t wint_t;
           typedef wchar_t wctype_t;
+#endif
           #define _WCTYPE_T_DEFINED
         #endif
     #endif
