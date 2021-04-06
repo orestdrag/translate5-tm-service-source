@@ -328,8 +328,10 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
       /*******************************************************************/
       /* Register generic handler window class                           */
       /*******************************************************************/
-      //fOK = WinRegisterClass( (HINSTANCE) hAB, GENERICHANDLER, GENERICHANDLERWP, 0L,
+#if 0
+      fOK = WinRegisterClass( (HINSTANCE) hAB, GENERICHANDLER, GENERICHANDLERWP, 0L,
                               sizeof(PVOID) );
+#endif
 
       /*******************************************************************/
       /* Register generic list window class                              */

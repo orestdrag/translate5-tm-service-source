@@ -43,17 +43,16 @@
 #define WIDTHSTRING "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 typedef struct tagMDIDIALOGINFO {
-   int      dtItemCount ;
-//   FARPROC  lpDialogProc ;
-   //WNDPROC  lpDialogProc ;
-   HFONT    hFont ;
-   HMENU    hMenu ;
-   HICON    hIcon ;
-   LPARAM   lParam ;
-   LPSTR    lpDlgItems ;
-   WORD     wUnitsX, wUnitsY ;
-   BOOL     fDialogFrame;
-
+    int      dtItemCount;
+    //FARPROC  lpDialogProc ;
+    //WNDPROC  lpDialogProc ;
+    HFONT    hFont;
+    HMENU    hMenu;
+    HICON    hIcon;
+    LPARAM   lParam;
+    LPSTR    lpDlgItems;
+    WORD     wUnitsX, wUnitsY;
+    BOOL     fDialogFrame;
 } MDIDIALOGINFO, FAR *LPMDIDIALOGINFO ;
 
 // macros

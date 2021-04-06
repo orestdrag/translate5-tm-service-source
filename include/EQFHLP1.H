@@ -5062,5 +5062,6 @@ HELPTABLE htblMain[] =
  { ID_SUBFOLDERNEW_DLG,      hlpsubtblSubfoldernewDlg,    HID_SUBFOLDERNEW_EXTHELP },
  { ID_FOLMEMSEL_DLG,         hlpsubtblFolMemSelDlg,       HID_FOLMEMSEL_EXTHELP },
  { ID_FOLDICSEL_DLG,         hlpsubtblFolDicSelDlg,       HID_FOLDICSEL_EXTHELP },
+};
 
 #endif
