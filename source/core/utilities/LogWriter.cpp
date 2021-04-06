@@ -56,6 +56,7 @@ int LogWriter::open( const char *pszName, int iOpenMode )
   // get system path from the registry
   HKEY hKey = NULL;
   this->szLogFileName[0] = 0;
+#if 0
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;
@@ -79,6 +80,7 @@ int LogWriter::open( const char *pszName, int iOpenMode )
     } /* endif */        
     RegCloseKey( hKey );
   } /* endif */     
+#endif
   if ( this->szLogFileName[0] == 0 )
   {
     this->fOpen = FALSE;
@@ -88,7 +90,7 @@ int LogWriter::open( const char *pszName, int iOpenMode )
   
   // create directory but don't care for errors
   strcat ( this->szLogFileName, "\\LOGS" );
-  CreateDirectory( this->szLogFileName, NULL );
+  //CreateDirectory( this->szLogFileName, NULL );
 
   // setup complete log file name
   strcat( this->szLogFileName, "\\" );
@@ -99,7 +101,7 @@ int LogWriter::open( const char *pszName, int iOpenMode )
   this->hfLog = fopen( this->szLogFileName, this->szOpenFlags );
   if ( this->hfLog == NULL )
   {
-    return( GetLastError() );
+    //return( GetLastError() );
   } /* endif */     
 
   this->fOpen = TRUE;
@@ -110,7 +112,7 @@ int LogWriter::open( const char *pszName, int iOpenMode )
   {
     this->fUTF16 = TRUE;
     fwrite( UNICODEFILEPREFIX, 1, 2, this->hfLog );
-    fwprintf( hfLog, L"------ Loggin started at %s", _wasctime( localtime( &lCurTime ) ) );
+    //fwprintf( hfLog, L"------ Loggin started at %s", _wasctime( localtime( &lCurTime ) ) );
   }
   else
   {
