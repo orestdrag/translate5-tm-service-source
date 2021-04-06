@@ -10,37 +10,37 @@
 //+----------------------------------------------------------------------------+
 
 // the following includes are required for the control IDs used in the help tables
-#include "eqfutils.id"
-#include "eqfdoc01.id"
-#include "eqfiana1.id"
-#include "eqfmem.id"
-#include "eqffol.id"
-#include "eqffll.id"
-#include "eqftag00.id"                 // tag handler IDs
-#include <EQFTIMP.ID>
-#include <EQFTEXP.ID>
-#include <EQFLNG00.ID>
-#include "eqfdic00.id"
-#include "eqfutclb.id"
-#include "EQFDIMP.ID"
-#include "EQFDEX.ID"
-#include "EQFTIMP.ID"
-#include "EQFTEXP.ID"
-#include "EQFCNT01.ID"
-#include "EQFFILT.ID"
-#include "EQFQDPR.ID"
-#include "EQFTwb.ID"                   // IDs of Twb dialogs
-#include "EQFB.ID"                     // IDs of Translation Processor window
-#include "EQFITMD.ID"                  // IDs of ITM dialogs and windows
-#include "EQFBDLG.ID"                  // IDs of Translation Processor dialogs
-#include "EQFDPROP.ID"                 // IDs of Dictionary Dialogs - 1 -
-#include "EQFDDLG.ID"                  // IDs of Dictionary Dialogs - 2 -
-#include "EQFRDICS.ID"                 // IDs for remote dictionary
-#include "EQFLIST.ID"                  // IDs of list handler windows and dialogs
-#include "EQFTMM.ID"                   // IDs of TMM window
-#include "EQFTMFUN.ID"                 // IDs of TMM dialogs
-#include "eqfrpt.id"                   // IDs report handler dialog
-#include "eqfmt.id"                    // IDs Machine Translation Properties
+#include "../mri/EQFUTILS.ID"
+#include "../mri/EQFDOC01.ID"
+#include "../mri/EQFIANA1.ID"
+#include "../mri/EQFMEM.ID"
+#include "../mri/EQFFOL.ID"
+#include "../mri/EQFFLL.ID"
+#include "../mri/EQFTAG00.ID"                 // tag handler IDs
+#include "../mri/EQFTIMP.ID"
+#include "../mri/EQFTEXP.ID"
+#include "../mri/EQFLNG00.ID"
+#include "../mri/EQFDIC00.ID"
+#include "../mri/EQFUTCLB.ID"
+#include "../mri/EQFDIMP.ID"
+#include "../mri/EQFDEX.ID"
+#include "../mri/EQFTIMP.ID"
+#include "../mri/EQFTEXP.ID"
+#include "../mri/EQFCNT01.ID"
+#include "../mri/EQFFILT.ID"
+#include "../mri/EQFQDPR.ID"
+#include "../mri/EQFTWB.ID"                   // IDs of Twb dialogs
+#include "../mri/EQFB.ID"                     // IDs of Translation Processor window
+#include "../mri/EQFITMD.ID"                  // IDs of ITM dialogs and windows
+#include "../mri/EQFBDLG.ID"                  // IDs of Translation Processor dialogs
+#include "../mri/EQFDPROP.ID"                 // IDs of Dictionary Dialogs - 1 -
+#include "../mri/EQFDDLG.ID"                  // IDs of Dictionary Dialogs - 2 -
+#include "../mri/EQFRDICS.ID"                 // IDs for remote dictionary
+#include "../mri/EQFLIST.ID"                  // IDs of list handler windows and dialogs
+#include "../mri/EQFTMM.ID"                   // IDs of TMM window
+#include "../mri/EQFTMFUN.ID"                 // IDs of TMM dialogs
+#include "../mri/EQFRPT.ID"                   // IDs report handler dialog
+#include "../mri/EQFMT.ID"                    // IDs Machine Translation Properties
 
 
 
@@ -3672,28 +3672,28 @@ HELPSUBTABLE hlpsubtblLstEditAddDlg[] =
 HELPSUBTABLE hlpsubtblTwbsDictWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_DICT_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_DICT_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTwbsPropWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),             HID_TWBS_PROP_EXTHELP,
+   //LOWORD(FID_CLIENT),             HID_TWBS_PROP_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTBShowTransWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TB_SHOWTRANS_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TB_SHOWTRANS_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTwbsSourWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_SOURCE_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_SOURCE_EXTHELP,
    0, 0,
 };
 
@@ -3707,28 +3707,28 @@ HELPSUBTABLE hlpsubtblTextanalysis[] =
 HELPSUBTABLE hlpsubtblTwbsFrameWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_FRAME_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_FRAME_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTwbsOrigWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_ORIG_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_ORIG_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTwbsOtherWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_OTHER_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_OTHER_EXTHELP,
    0, 0,
 };
 
 HELPSUBTABLE hlpsubtblTwbsTRNoteWindow[] =
 {
    2,
-   LOWORD(FID_CLIENT),                    HID_TWBS_TRNOTE_EXTHELP,
+   //LOWORD(FID_CLIENT),                    HID_TWBS_TRNOTE_EXTHELP,
    0, 0,
 };
 

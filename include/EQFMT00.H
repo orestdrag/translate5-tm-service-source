@@ -165,7 +165,7 @@
 #define  MT_MAX_NUMBER_OF_PROFILES 100
 #define  MT_MAX_PROFILE_LENGTH     30
 
-#include "EQFMT.h"       // include special MT defines
+#include "EQFMT.H"       // include special MT defines
 
 // name of file containing subject areas
 #define SUBJAREALISTFILE  "MTSUBJAREAS.LST"

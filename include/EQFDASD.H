@@ -382,7 +382,7 @@ typedef enum _LUP_RC
 #define DLG_HIDDEN                      3       // - " -
 #define DLG_POSITIONED                  4       // - " -
 
-INT_PTR CALLBACK EXPENTRY  LOOKUPDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
+//INT_PTR CALLBACK EXPENTRY  LOOKUPDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
 
 
 // defines for the sListType of AsdGetTranslation

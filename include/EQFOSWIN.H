@@ -135,9 +135,9 @@ HWND WinQueryWindow ( HWND, SHORT, BOOL );
 /**********************************************************************/
 /* resource strings                                                   */
 /**********************************************************************/
-#define WinLoadString(a,b,c,d,e) LoadString(b,c,e,d)
+//#define WinLoadString(a,b,c,d,e) LoadString(b,c,e,d)
 #define WinLoadAccelTable(a,b,c) LoadAccelerators(b, MAKEINTRESOURCE(c))
-#define WinLoadPointer(desktop,mod,id) LoadIcon( mod, MAKEINTRESOURCE(id))
+//#define WinLoadPointer(desktop,mod,id) LoadIcon( mod, MAKEINTRESOURCE(id))
 #define WinDestroyPointer( handle) DestroyIcon( handle )
 
 
@@ -425,8 +425,8 @@ typedef FSALLOCATE *PFSALLOCATE;
 /* profile handling                                                   */
 /**********************************************************************/
 #define  PM_National                  intl
-#define  WinQueryProfileInt( a, b, c, d) GetProfileInt( b, c, d)
-#define  WinQueryProfileString( a, b, c, d, e, f) GetProfileString( b, c, d, e, f)
+//#define  WinQueryProfileInt( a, b, c, d) GetProfileInt( b, c, d)
+//#define  WinQueryProfileString( a, b, c, d, e, f) GetProfileString( b, c, d, e, f)
 #define  WinSetProfileString( a, b, c, d ) WriteProfileString( b, c, d )
 #define  WinWriteProfileString( a, b, c, d ) WriteProfileString( b, c, d )
 #define  PrfQueryProfileString( a, b, c, d, e, f) GetProfileString( b, c, d, e, f)
@@ -498,10 +498,12 @@ typedef  struct _MESSAGEFILE
 #define MB_CANCEL      MB_OK            // windows only provides OK button
 #define MB_ENTER       MB_OK
 #define MB_ENTERCANCEL MB_OKCANCEL
+#if 0
 #define MB_INFORMATION MB_ICONINFORMATION
 #define MB_QUERY       MB_ICONQUESTION
 #define MB_WARNING     MB_ICONEXCLAMATION  /* Message box IDs */
 #define MB_ERROR       MB_ICONSTOP
+#endif
 #define MB_MOVEABLE    0
 
 #define IDYES    6
@@ -559,7 +561,7 @@ typedef  struct _MESSAGEFILE
   //#define WinDefWindowProc DefWindowProc
   #define GpiQueryFontMetrics(a,b,c) GetTextMetrics(a,c);
   #define FONTMETRICS TEXTMETRIC
-  #define WinQuerySysValue(a,b) GetSystemMetrics(b)
+  //#define WinQuerySysValue(a,b) GetSystemMetrics(b)
     #define SV_CXMINMAXBUTTON SM_CXSIZE
     #define SV_CYMINMAXBUTTON SM_CYSIZE
     #define SV_CYTITLEBAR     SM_CYCAPTION
@@ -601,7 +603,9 @@ typedef  struct _MESSAGEFILE
   //#define WinWindowFromID                GetDlgItem
 //WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdlgitem
 
+#if 0
   #define WinMessageBox(a,b,c,d,e,f)     MessageBox(b,c,d,f)
+#endif
     #define MBID_OK      IDOK
     #define DID_OK       IDOK                /* Dialog IDs */
     #define DID_CANCEL   IDCANCEL
@@ -716,7 +720,7 @@ typedef MRESULT (*PFNWP)(HWND, UINT, WPARAM, LPARAM);
 
 /* the character classification macro definitions */
 #define isdbcs1(c)      ((IsDBCSLeadByte((BYTE) c )) ? DBCS_1ST : SBCS)
-#define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
+#//define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
 
 #if defined(WIN32BIT) & defined(DLLIMPORTDBCSCP)
     unsigned int _dbcs_cp;
@@ -1022,7 +1026,7 @@ USHORT EQFToWPConv ( PUCHAR pucData, PBYTE  pwzData, USHORT usLen );
 #define WS_SAVEBITS     0
 #define QWL_STYLE       GWL_STYLE
 #define WS_MINIMIZED    WS_MINIMIZE
-#define HWND_OBJECT     HWND_DESKTOP
+//#define HWND_OBJECT     HWND_DESKTOP
 #define CS_SIZEREDRAW   (CS_VREDRAW | CS_HREDRAW)
 
 /**********************************************************************/

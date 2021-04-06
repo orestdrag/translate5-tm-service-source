@@ -127,9 +127,11 @@
   #define ART_DLL       "ART"
   #define ART_REGISTER  "ARTREGISTER"
 
+#if 0
   APIRET ArtRegister(HAB  hAB,
                      HWND hwndOwnerFrame,
                      PSZ  pszProductID,
                      PSZ  pszDefDir,
                      long lForFutureUse);
+#endif
 #endif
