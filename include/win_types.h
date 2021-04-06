@@ -508,6 +508,22 @@ typedef struct tagPROCESSENTRY32 {
     CHAR      szExeFile[MAX_PATH];
 } PROCESSENTRY32;
 
+/* https://www.aldeid.com/wiki/OSVERSIONINFOEX  */
+
+typedef struct _OSVERSIONINFOEX {
+    DWORD dwOSVersionInfoSize;
+    DWORD dwMajorVersion;
+    DWORD dwMinorVersion;
+    DWORD dwBuildNumber;
+    DWORD dwPlatformId;
+    TCHAR szCSDVersion[128];
+    WORD  wServicePackMajor;
+    WORD  wServicePackMinor;
+    WORD  wSuiteMask;
+    BYTE  wProductType;
+    BYTE  wReserved;
+} OSVERSIONINFOEX, *POSVERSIONINFOEX, *LPOSVERSIONINFOEX;
+
 /* https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfilepointer */
 
 #define FILE_BEGIN 0
