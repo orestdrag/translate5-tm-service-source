@@ -30,23 +30,19 @@ add_library(OpenTM2
                     ${OPENTM2_MEM_DIR}/EQFMEMEP.CPP
                     ${OPENTM2_MEM_DIR}/EQFMEMCD.CPP
                     ${OPENTM2_UTIL_DIR}/UtlAlloc.C
-
-                    #${OPENTM2_UTIL_DIR}/UtlMATVal.c
-
-                    #${OPENTM2_UTIL_DIR}/UtlMisc.cpp
-                    #${OPENTM2_UTIL_DIR}/EQFUTERR.C
-
+                    ${OPENTM2_UTIL_DIR}/UtlMATVal.c
+                    ${OPENTM2_UTIL_DIR}/UtlMisc.cpp
+                    ${OPENTM2_UTIL_DIR}/EQFUTERR.C
                     ${OPENTM2_MEM_DIR}/EQFMEM00.CPP
-                    #${OPENTM2_WBN_DIR}/EQFMAIN.C
+                    ${OPENTM2_WBN_DIR}/EQFMAIN.C
                     ${OPENTM2_UTIL_DIR}/EQFPRO00.C
-                    #${OPENTM2_UTIL_DIR}/EQFUTFIL.C
-                    #${OPENTM2_UTIL_DIR}/EQFUTDOS.C
+                    ${OPENTM2_UTIL_DIR}/EQFUTFIL.C
+                    ${OPENTM2_UTIL_DIR}/EQFUTDOS.C
                     ${OPENTM2_TLCMN_DIR}/InitPlugins.cpp #nowinapi
                     ${OPENTM2_PLGMNG_DIR}/PluginManager.cpp #nowinapi
                     ${OPENTM2_UTIL_DIR}/EQFOBJ00.C
                     ${OPENTM2_MEM_DIR}/MemoryFactory.cpp
                     ${OPENTM2_UTIL_DIR}/LanguageFactory.CPP
-
                     ${OPENTM2_API_DIR}/OTMFUNC.C)
 
 add_executable(OtmMemoryService
