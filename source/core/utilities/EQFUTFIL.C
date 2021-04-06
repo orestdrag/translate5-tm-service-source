@@ -15,8 +15,10 @@
 #define INCL_DEV
 #include <EQF.H>                  // General Translation Manager include file
 #include <time.h>                 // C time related functions
+#if 0
 #include "zip.h"
 #include "unzip.h"
+#endif
 
 #include "EQFUTPRI.H"                  // private utility header file
 #include "OTMFUNC.H"
@@ -4021,6 +4023,7 @@ VOID CloseFile
   } /* endif */
 } /* end of function CloseFile */
 
+#if 0
 /*! \brief extract all files contained in a ZIP package to a directory
   \param pszPackage fully qualified name of the ZIP package
   \param pszDestPath fully qualified name of the destination directory
@@ -4109,6 +4112,7 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
   CloseZip( hz );
   return( 0 );
 }
+#endif
 
 
 /*! \brief delete all files and directories located in a specific directory
