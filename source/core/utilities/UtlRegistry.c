@@ -5,7 +5,7 @@
 //|      Copyright (C) 1990-2012, International Business Machines              |
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
-#include "eqf.h"
+#include "EQF.H"
 
 
 // get a string from the registry
@@ -14,6 +14,7 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
   BOOL fOK = FALSE;
   HKEY hKey = NULL;
 
+#if 0
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;
@@ -27,6 +28,7 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
     } /* endif */        
     RegCloseKey( hKey );
   } /* endif */     
+#endif
 
   if ( !fOK )
   {
@@ -42,6 +44,7 @@ int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
   HKEY hKey = NULL;
   int iResult = 0;
 
+#if 0
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;
@@ -72,6 +75,7 @@ int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
   {
     iResult = iDefault;
   } /* endif */     
+#endif
   return( iResult );
 } /* end of function GetIntFromRegistry */
 
@@ -81,6 +85,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
   HKEY hKey = NULL;
   BOOL fOK = FALSE;
 
+#if 0
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
       HKEY hSubKey = NULL;
@@ -100,6 +105,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 
       RegCloseKey( hKey );
   } /* endif */     
+#endif
   return( fOK );
 } /* end of function WriteStringToRegistry */
 
@@ -109,6 +115,7 @@ BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
   HKEY hKey = NULL;
   BOOL fOK = FALSE;
 
+#if 0
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
       HKEY hSubKey = NULL;
@@ -128,5 +135,6 @@ BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
 
       RegCloseKey( hKey );
   } /* endif */     
+#endif
   return( fOK );
 } /* end of function WriteIntToRegistry */

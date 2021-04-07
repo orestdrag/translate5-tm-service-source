@@ -5,8 +5,8 @@
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
 
-#include <tchar.h>
-#include "eqf.h"
+//#include <tchar.h>
+#include "EQF.H"
 
 BOOL IsDBCS_CP( ULONG ulCP )
 {
@@ -53,11 +53,11 @@ BOOL UtlIsLanguageSupported
   } /* endif */
 
   // convert our test string to UTF16
-  iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
+  //iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
 
   if ( iRC == 0 )
   {
-    iRC = GetLastError();
+    //iRC = GetLastError();
     fOK = (iRC != ERROR_INVALID_PARAMETER);
   } /* endif */
 
