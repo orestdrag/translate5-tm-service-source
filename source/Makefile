@@ -7,7 +7,7 @@ SRC := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 ifndef RESTBED_PATH
-export RESTBED_PATH=../../../Packages/restbed
+export RESTBED_PATH=../Packages/restbed
 endif
 
 INCLUDE := -I"$(RESTBED_PATH)/distribution/include"
