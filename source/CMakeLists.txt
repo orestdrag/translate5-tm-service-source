@@ -5,23 +5,26 @@ project(OtmMemoryService VERSION 1.0)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(RESTBED_PATH        "../../../Packages/restbed")
+set(ROOT                "..")
+set(RESTBED_PATH        "${ROOT}/Packages/restbed")
 set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
 set(XERCESC_INCLUDE_DIR "/usr/local/include/xercesc")
 set(XERCESC_LIBRARIES   "/usr/local/lib")
 
-set(OPENTM2_INCLUDE_DIR "../../../include")
-set(OPENTM2_API_DIR     "../../api")
-set(OPENTM2_MEM_DIR     "../../core/memory")
-set(OPENTM2_UTIL_DIR    "../../core/utilities")
-set(OPENTM2_WBN_DIR     "../../core/workbench")
-set(OPENTM2_TLCMN_DIR   "../../tools/common")
-set(OPENTM2_PLGMNG_DIR  "../../core/pluginmanager")
+set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
+set(OPENTM2_MRI_DIR     "${ROOT}/mri")
+set(OPENTM2_API_DIR     "opentm2/api")
+set(OPENTM2_MEM_DIR     "opentm2/core/memory")
+set(OPENTM2_UTIL_DIR    "opentm2/core/utilities")
+set(OPENTM2_WBN_DIR     "opentm2/core/workbench")
+set(OPENTM2_TLCMN_DIR   "opentm2/tools/common")
+set(OPENTM2_PLGMNG_DIR  "opentm2/core/pluginmanager")
 
 include_directories(${RESTBED_INCLUDE_DIR}
                     ${XERCESC_INCLUDE_DIR}
-                    ${OPENTM2_INCLUDE_DIR})
+                    ${OPENTM2_INCLUDE_DIR}
+                    ${OPENTM2_MRI_DIR})
 
 link_directories(${RESTBED_LIBRARIES})
 

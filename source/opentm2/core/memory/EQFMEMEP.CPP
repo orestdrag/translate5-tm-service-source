@@ -54,7 +54,7 @@
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
-#include "../../../mri/EQFMEM.ID" // Translation Memory IDs
+#include "EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
 #include "OTMFUNC.H"              // public defines for function call interface
 

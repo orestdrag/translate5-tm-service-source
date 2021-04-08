@@ -24,8 +24,8 @@
 
 #include <EQFDDE.H>                  // batch mode definitions
 #define INCL_EQFMEM_DLGIDAS
-#include "../../../mri/EQFMEM.ID"    // Translation Memory IDs
-#include "../../../mri/EQFCOLW.ID"   // column width IDs
+#include "EQFMEM.ID"                 // Translation Memory IDs
+#include "EQFCOLW.ID"                // column width IDs
 
 BOOL EQFTMMaintain( PSZ );
 

@@ -16,7 +16,7 @@
 #include "Utility.h"
 #include "EQFUTMDI.H"               // MDI Utilities
 #include "EQFFOL.H"
-#include "../../../mri/EQFUTILS.ID" // IDs used by dialog utilities
+#include "EQFUTILS.ID" // IDs used by dialog utilities
 #include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
 #include "win_types.h"

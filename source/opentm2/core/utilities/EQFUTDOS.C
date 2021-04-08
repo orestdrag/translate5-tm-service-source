@@ -350,7 +350,7 @@ USHORT UtlRemoveSearchHandle( HDIR hdir );
 /**********************************************************************/
 
   #include "errno.h"                   // error number defines
-  #include "../../../mri/EQFSTART.MRI"              // hard coded fatal-msg.
+  #include "EQFSTART.MRI"              // hard coded fatal-msg.
   #undef MAX_PATH
 
 extern ERRDATA ErrData[];              // error structure
