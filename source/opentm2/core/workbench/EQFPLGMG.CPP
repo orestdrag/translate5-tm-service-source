@@ -23,17 +23,17 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include "eqfplgmg.h"             // type definitions and function prototypes
-#include "core\utilities\LogWriter.h"
-#include <TlHelp32.h>
-#include <Shellapi.h>
-#include "eqfserno.h"
+#include "EQFPLGMG.H"             // type definitions and function prototypes
+#include "../utilities/LogWriter.h"
+#include "EQFSERNO.H"
 
 // prototype for non-public utility functions
 VOID UtlSetString(SHORT sID, PSZ pszString);
 static char gstrPluginPath[MAX_PATH];
 static char gstrAppPath[MAX_PATH];
 
+//HERE
+#if 0
 VOID AutoVerUpProps(BOOL bFromMenu)
 {
     // setting for log
@@ -46,6 +46,7 @@ VOID AutoVerUpProps(BOOL bFromMenu)
     }
 #endif
 
+#if 0
     // start our replicator program if it is not active yet
     if (!IsProgramRunning(AUTO_VERUP_EXE))
     {
@@ -76,8 +77,10 @@ VOID AutoVerUpProps(BOOL bFromMenu)
     {
         MessageBox(EqfQueryTwbClient(), WARNING_AVT_OPENED_STR, PLUGIN_MGR_APP_NAME_STR, MB_OK);
     }
+#endif
 }
 
+#if 0
 VOID PluginManagerMenuProps()
 {
     // wait for check thread
@@ -113,6 +116,7 @@ VOID PluginManagerMenuProps()
     HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
     DIALOGBOX(EqfQueryTwbClient(), PluginManagerDlgProc, hResMod, ID_PLUGIN_MANAGER_DLG, NULL, sRC);
 }
+#endif
 
 void PluginManagerAutoProps()
 {
@@ -131,6 +135,7 @@ void PluginManagerAutoProps()
     }
 }
 
+#if 0
 int PluginManagerGUIStart()
 {
     int nRC = NO_ERROR;
@@ -187,6 +192,7 @@ int PluginManagerGUIStart()
 
     return nRC;
 }
+#endif
 
 int CheckConfig(char * strPluginPath)
 {
@@ -1734,6 +1740,7 @@ char * GetLocalPluginVer(char * strPluginName)
     return strPluginVer;
 }
 
+#if 0
 void RemoveSelectedPlugin(HWND hwndInsTabDlg)
 {
     // cofirm the delete first
@@ -1802,6 +1809,7 @@ void RemoveSelectedPlugin(HWND hwndInsTabDlg)
     hcursorWait = LoadCursor(NULL,IDC_ARROW);
     hcursorHold = ::SetCursor(hcursorWait);
 }
+#endif
 
 int RemovePlugin(HWND hwndInsTabDlg, const char * strPluginName)
 {
@@ -1866,22 +1874,22 @@ int RemoveWithConfig(HWND hwndTabDlg, string strPluginName)
     else if (ERROR_EMPTY_FILE_A == nRC)
     {
         sprintf(strMsg, ERROR_EMPTY_LOC_CONFIG_STR, strXml);
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
     }
     else if (ERROR_CANNOT_FIND_KEY_C == nRC)
     {
 //        sprintf(strMsg, OtmGetMessageFromCode(ERROR_CANNOT_FIND_KEY_C), strXml, KEY_PLUGIN);
-//        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+//        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
     }
     else if (ERROR_PLUGIN_NO_ARRTI_B == nRC)
     {
         sprintf(strMsg, ERROR_CANNOT_FIND_ATTRI_STR, strPluginName.c_str());
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
     }
     else if (ERROR_REMOVE_PLUGIN_B == nRC)
     {
         sprintf(strMsg, OtmGetMessageFromCode(ERROR_REMOVE_PLUGIN_B), strPluginName.c_str());
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
     }
     else if (ERROR_DEREGISTER_PLUGIN_B == nRC)
     {
@@ -1890,7 +1898,7 @@ int RemoveWithConfig(HWND hwndTabDlg, string strPluginName)
     else
     {
         sprintf(strMsg, OtmGetMessageFromCode(ERROR_REMOVE_PLUGIN_B), strPluginName.c_str(), nRC);
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
     }
 
     return nRC;
@@ -1912,7 +1920,7 @@ int RemoveOneWithConfig(HWND hwndTabDlg, const char * strPluginName, POTMGRPSTIN
     if (nRC)
     {
         sprintf(strMsg, OtmGetMessageFromCode(ERROR_DEREGISTER_PLUGIN_B), strPluginName);
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
         return nRC;
     }
 
@@ -1994,7 +2002,7 @@ int RemoveAlone(HWND hwndTabDlg, const char * strPluginName)
     if (nRC)
     {
         sprintf(strMsg, OtmGetMessageFromCode(ERROR_DEREGISTER_PLUGIN_B), strPluginName);
-        MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+        //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
         return nRC;
     }
 
@@ -2023,7 +2031,7 @@ int RemoveAlone(HWND hwndTabDlg, const char * strPluginName)
             {
                 nRC = ERROR_REMOVE_PLUGIN_B;
                 sprintf(strMsg, OtmGetMessageFromCode(nRC), strPluginName);
-                MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+                //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
                 break;
             }
         }
@@ -2059,7 +2067,7 @@ int RemoveAlone(HWND hwndTabDlg, const char * strPluginName)
                 if (nRC)
                 {
                     sprintf(strMsg, OtmGetMessageFromCode(nRC), strSubdir.c_str());
-                    MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+                    //MessageBox(hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
                     break;
                 }
             }
@@ -2186,7 +2194,7 @@ void InstallSelectedPlugin(HWND hwndAvbTabDlg)
 			 errorMsg += ", yours is ";
 			 errorMsg += STR_DRIVER_LEVEL_NUMBER;
 
-			 MessageBox(hwndAvbTabDlg, errorMsg.c_str(), PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
+			 //MessageBox(hwndAvbTabDlg, errorMsg.c_str(), PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
              return;
 		}
 
@@ -2197,7 +2205,7 @@ void InstallSelectedPlugin(HWND hwndAvbTabDlg)
             int nChked = IsFixpackParentChked(hwndDlgLst, strLstName, 0, 2); // name index is 0, version index is 2
             if (PARENT_NOT_CHECKED == nChked)
             {
-                MessageBox(hwndAvbTabDlg, ERROR_FIXPACK_PARENT_NOT_CHECKED, PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
+               // MessageBox(hwndAvbTabDlg, ERROR_FIXPACK_PARENT_NOT_CHECKED, PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
                 return;
             }
             nTotal++;
@@ -2211,7 +2219,7 @@ void InstallSelectedPlugin(HWND hwndAvbTabDlg)
     // if there is no item is selected, just return
     if (0 == nTotal)
     {
-        MessageBox(hwndAvbTabDlg, WARNING_NO_ITEM_SELECTED, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_ICONEXCLAMATION);
+        //MessageBox(hwndAvbTabDlg, WARNING_NO_ITEM_SELECTED, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_ICONEXCLAMATION);
         return;
     }
 
@@ -2271,7 +2279,7 @@ void UpdateSelectedPlugin(HWND hwndUptTabDlg)
 			 errorMsg += ", yours is ";
 			 errorMsg += STR_DRIVER_LEVEL_NUMBER;
 
-			 MessageBox(hwndUptTabDlg, errorMsg.c_str(), PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
+			 //MessageBox(hwndUptTabDlg, errorMsg.c_str(), PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
              return;
 		}
 
@@ -2282,7 +2290,7 @@ void UpdateSelectedPlugin(HWND hwndUptTabDlg)
             int nChked = IsFixpackParentChked(hwndDlgLst, strLstName, 0, 3);
             if (PARENT_NOT_CHECKED == nChked)
             {
-                MessageBox(hwndUptTabDlg, ERROR_FIXPACK_PARENT_NOT_CHECKED, PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
+                //MessageBox(hwndUptTabDlg, ERROR_FIXPACK_PARENT_NOT_CHECKED, PLUGIN_MGR_APP_NAME_STR, MB_ICONEXCLAMATION | MB_OK);
                 return;
             }
             nTotal++;
@@ -2296,7 +2304,7 @@ void UpdateSelectedPlugin(HWND hwndUptTabDlg)
     // if there is no item is selected, just return
     if (0 == nTotal)
     {
-        MessageBox(hwndUptTabDlg, WARNING_NO_ITEM_SELECTED, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_ICONEXCLAMATION);
+        //MessageBox(hwndUptTabDlg, WARNING_NO_ITEM_SELECTED, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_ICONEXCLAMATION);
         return;
     }
 
@@ -2444,7 +2452,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
             // if download failed, show errror message and continue next
             SendMessage(pDownloadParam->hwndPCDlg, WM_OTM_UPDATE_ONE_START, (WPARAM) pDownloadParam, 0);
             sprintf(strMsg, OtmGetMessageFromCode(nRC), mainTdInfo.strName);
-            MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+            //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
             pDownloadParam->nRC = nRC;
             EndOneTask(pDownloadParam, &mainTdInfo);
             continue;
@@ -2494,7 +2502,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
             {
                 // if remove plugin failed, show error message and continue next
                 sprintf(strMsg, OtmGetMessageFromCode(nRC), strLstPluginName);
-                MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_OK);
+                //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_OK);
                 pDownloadParam->nRC = nRC;
                 EndOneTask(pDownloadParam, &mainTdInfo);
                 continue;
@@ -2511,7 +2519,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
                 {
                     // if get dependency failed, show error message and continue next
                     sprintf(strMsg, OtmGetMessageFromCode(nRC), strLstPluginName);
-                    MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+                    //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
                     pDownloadParam->nRC = nRC;
                     EndOneTask(pDownloadParam, &mainTdInfo);
                     continue;
@@ -2521,7 +2529,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
                 {
                     // show depedency warning message
                     sprintf(strMsg, WARNING_TRD_PATH_SFW_STR, strLstPluginName, strDepnsStr);
-                    MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_WARNING);
+                    //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_OK | MB_WARNING);
                 }
             }
         }
@@ -2532,7 +2540,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
         {
             // if failed to get DLL path, show error message and continue next
             sprintf(strMsg, OtmGetMessageFromCode(nRC));
-            MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+            //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
             pDownloadParam->nRC = nRC;
             EndOneTask(pDownloadParam, &mainTdInfo);
             continue;
@@ -2544,7 +2552,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
         {
             // if failed to download package, show error message and return
             sprintf(strMsg, OtmGetMessageFromCode(nRC));
-            MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+            //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
             pDownloadParam->nRC = ERROR_END_ALL_TASK;
             EndOneTask(pDownloadParam, &mainTdInfo);
             return nRC;
@@ -2615,7 +2623,7 @@ unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter)
             else
             {
                 sprintf(strMsg, OtmGetMessageFromCode(nRC));
-                MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
+                //MessageBox(pDownloadParam->hwndTabDlg, strMsg, PLUGIN_MGR_APP_NAME_STR, MB_CANCEL | MB_ERROR);
                 glogPlgMgr.writef("Download failed(%s).", pDownloadParam->strDLFile);
             }
         }
@@ -2819,6 +2827,7 @@ void SetInfoFromConfig(HWND hwndTabDlg)
 //    RefreshButtonSet(hwndTabDlg);
 }
 
+#if 0
 void SaveInfoToConfig(HWND hwndTabDlg, BOOL bSilent)
 {
     // set cursor to wait status
@@ -2911,6 +2920,7 @@ void SaveInfoToConfig(HWND hwndTabDlg, BOOL bSilent)
         MessageBox(hwndTabDlg, INFO_SAVE_SUCCESS_STR, PLUGIN_MGR_APP_NAME_STR, MB_OK);
     }
 }
+#endif
 
 BOOL IsSettingChanged(HWND hwndTabDlg)
 {
@@ -3032,6 +3042,7 @@ void DownloadStart(HWND hwndPCDlg, PDOWNLOADPARAM pDownloadParam)
     SendMessage(hwndPBTotal, PBM_SETPOS, (WPARAM)pDownloadParam->nProcessedCnt*2-1, (LPARAM)0);
 }
 
+#if 0
 void DownloadEnd(HWND hwndPCDlg, PDOWNLOADPARAM pDownloadParam)
 {
     char strStatic[MAX_BUF_SIZE];
@@ -3095,6 +3106,7 @@ void DownloadEnd(HWND hwndPCDlg, PDOWNLOADPARAM pDownloadParam)
         }
     }
 }
+#endif
 
 int GetPluginDllPath(const char * strDLUrl, BOOL bRestart, char * strDLFile)
 {
@@ -3943,3 +3955,5 @@ BOOL IfPluginExists(const char * strStartDir, const char * strPluginDllName, con
 
     return bExist;
 }
+#endif
+//HERE

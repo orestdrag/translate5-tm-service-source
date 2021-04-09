@@ -9,17 +9,18 @@ extern "C"
 #endif
 
 #pragma pack(push, TM2StructPacking, 1)
-#include "eqf.id"                 // general EQF ids
-#include "eqftwb.id"              // ids for Troja workbench
-#include "eqfstart.id"
+#include "EQF.ID"                 // general EQF ids
+#include "EQFTWB.ID"              // ids for Troja workbench
+#include "EQFSTART.ID"
 
 #pragma pack(pop, TM2StructPacking)
 #ifndef CPPTEST
 }
 #endif
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\PlgMgXmlParser.h"
+#include "../source/opentm2/core/pluginmanager/PluginManager.h"
+#include "../source/opentm2/core/pluginmanager/PlgMgXmlParser.h"
+#include "../source/opentm2/core/pluginmanager/HistoryWriter.h"
 
 // define user message
 #define WM_OTM_UPDATE                                 WM_USER + 0x700
@@ -164,8 +165,8 @@ void ClearFixpackState(const char * strPlugin);
 
 // method for download progress control
 INT_PTR CALLBACK DownloadPCDlgProc(HWND, WINMSG, WPARAM, LPARAM);
-unsigned int __stdcall DownloadPCThreadProc(LPVOID lpParameter);
-unsigned int __stdcall CheckNewVersionProc(LPVOID lpParameter);
+unsigned int /*__stdcall*/ DownloadPCThreadProc(LPVOID lpParameter);
+unsigned int /*__stdcall*/ CheckNewVersionProc(LPVOID lpParameter);
 void DownloadStart(HWND hwndTabDlg, PDOWNLOADPARAM pDownloadParam);
 void DownloadEnd(HWND hwndTabDlg, PDOWNLOADPARAM pDownloadParam);
 int GetPluginDllPath(const char * strDLUrl, BOOL bRestart, char * strDLFile);
