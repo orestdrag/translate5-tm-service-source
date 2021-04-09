@@ -27,7 +27,6 @@
 #pragma warning(disable:4996)
 
 #include "stdio.h"
-#include "windows.h"
 
 #define MAX_TIMESTAMP_LEN                            100
 

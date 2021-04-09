@@ -37,14 +37,13 @@
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/framework/LocalFileFormatTarget.hpp"
 
-#include "core\utilities\LogWriter.h"
-#include "core\PluginManager\PluginManager.h"
+#include "../utilities/LogWriter.h"
+#include "PluginManager.h"
 
-#include "core\PluginManager\OtmHttp.h"
-#include "core\PluginManager\OtmHttps.h"
-#include "core\PluginManager\OtmSftp.h"
-#include "core\PluginManager\OtmSftpConfig.h"
-#include "core\PluginManager\OtmPlgMgGUIComm.h"
+#include "OtmHttp.h"
+#include "OtmHttps.h"
+#include "OtmSftp.h"
+#include "OtmSftpConfig.h"
 
 XERCES_CPP_NAMESPACE_USE
 #define DOT_STR                                       "."
@@ -162,7 +161,7 @@ public:
     
 	//WLP P403853
 	//string&  GetOtmVersion(int iInx);
-	const char* CPlgMgXmlParser::GetOtmVersionByName(const char* pPlugginName);
+	const char* GetOtmVersionByName(const char* pPlugginName);
 
     char * GetMainDLUrl(int iInx, int jInx);
     char * GetMainDLType(int iInx, int jInx);

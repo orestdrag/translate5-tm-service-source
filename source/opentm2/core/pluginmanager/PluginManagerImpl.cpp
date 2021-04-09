@@ -8,7 +8,6 @@
 #include <set>
 #include <algorithm> 
 #include <string>
-#include <Windows.h>
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
@@ -21,7 +20,7 @@ using namespace std;
 extern "C"
 {
 #endif
-	#include "eqf.h"
+	#include "EQF.H"
 #ifndef CPPTEST
 }
 #endif
@@ -29,7 +28,7 @@ extern "C"
 /*! \typedef PLUGINPROC
 	Prototype for the registerPlugins() function
 */
-typedef unsigned short (__cdecl *PLUGINPROC) ();   // Modify for P402974
+typedef unsigned short (/*__cdecl*/ *PLUGINPROC) ();   // Modify for P402974
 
 // Add for P403115 start
 BOOL DllNameCheck(const char * strName);
@@ -236,8 +235,9 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 	strFileSpec += "\\*.dll";
   this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
 
-	hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
   
+#if 0
   if ( hDir != INVALID_HANDLE_VALUE )
   {
     fMoreFiles = TRUE;
@@ -254,7 +254,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
           else
           {
               this->Log.writef("Error:   DLL %s is not valid, skip", strDll.c_str());
-              fMoreFiles= FindNextFile(hDir, &ffb);
+              //fMoreFiles= FindNextFile(hDir, &ffb);
               continue;
           }
           // Modify end
@@ -272,20 +272,22 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
               usRC = usSubRC;
           }
           // Add end
-		  fMoreFiles= FindNextFile( hDir, &ffb );
+		  //fMoreFiles= FindNextFile( hDir, &ffb );
 	  } /* endwhile */
-    FindClose( hDir );
+    //FindClose( hDir );
   }
   else
   {
-    int iRC = GetLastError();
+    int iRC = 0;//GetLastError();
     this->Log.writef( "   FindFirstFile failed with rc=%ld", iRC );
   } /* endif */     
+#endif
 
 	// now search all subdirectories
 	strFileSpec = pszPluginDir;
 	strFileSpec += "\\*";
-	hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+#if 0
   if ( hDir != INVALID_HANDLE_VALUE )
   {
     fMoreFiles = TRUE;
@@ -312,10 +314,11 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
               }
               // Add end
 		  }
-		  fMoreFiles= FindNextFile( hDir, &ffb );
+		  //fMoreFiles= FindNextFile( hDir, &ffb );
 	  }
-    FindClose( hDir );
+    //FindClose( hDir );
   } /* endif */     
+#endif
   this->Log.write( "   ...Done" );
 
 	// disallow calling the registerPlugin()-method
@@ -330,22 +333,23 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 {
     USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
 
-    SetErrorMode(  SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX  );
+    //SetErrorMode(  SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX  );
     // Add for P402792 start
     if (!vLoadedPluginDLLs.empty())
     {
         for (size_t iInx = 0; iInx < vLoadedPluginDLLs.size(); iInx++)
         {
-            if (!stricmp(vLoadedPluginDLLs[iInx].strDll, pszName))
+            if (!strcasecmp(vLoadedPluginDLLs[iInx].strDll, pszName))
             {
                 return usRC;
             }
         }
     }
     // Add end
-	HMODULE hMod = LoadLibrary(pszName);
-    SetErrorMode(0);
+	//HMODULE hMod = LoadLibrary(pszName);
+    //SetErrorMode(0);
     this->Log.writef( "   Loading plugin %s", pszName );
+#if 0
 	if (hMod != 0)
 	{
     //this->Log.writef( "   Plugin %s successfully loaded", pszName );
@@ -398,6 +402,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 	{
     this->Log.writef( "   Plugin DLL %s failed to load", pszName );
 	}
+#endif
 
     return usRC;     // Add for P402974
 }
@@ -467,7 +472,7 @@ bool PluginManagerImpl::stopPlugin( OtmPlugin* pPlugin, bool fForce )
   // unload DLL when the last plugin of the DLL has been de-registered
   if ( (fStopped || fForce) && (vLoadedPluginDLLs[iPluginEntry].vPluginList.size() == 0) )
   {
-    FreeLibrary( vLoadedPluginDLLs[iPluginEntry].hMod );
+    //FreeLibrary( vLoadedPluginDLLs[iPluginEntry].hMod );
     vLoadedPluginDLLs.erase( (vLoadedPluginDLLs.begin()+iPluginEntry) );
   }
 
@@ -556,6 +561,16 @@ bool PluginManagerImpl::NotifyListeners( PluginListener::eNotifcationType eNotif
 	return (m_vPluginListener.size() > 0);
 }
 
+static char* strupr(char *str) 
+{ 
+    char *tmp = str; 
+    while (*tmp) { 
+        *tmp = toupper((unsigned char)*tmp); 
+        ++tmp; 
+    } 
+    return str; 
+}
+
 BOOL PluginManagerImpl::IsDepthOvered(const char * strPath)
 {
     BOOL bOvered = FALSE;
@@ -564,14 +579,14 @@ BOOL PluginManagerImpl::IsDepthOvered(const char * strPath)
     UtlMakeEQFPath( szPluginPath, NULC, PLUGIN_PATH, NULL );
 
     string strCheckPath(strPath);
-    if (!stricmp(strCheckPath.c_str(), szPluginPath))
+    if (!strcasecmp(strCheckPath.c_str(), szPluginPath))
     {
         return bOvered;
     }
 
     // convert to upper case
     strupr(szPluginPath);
-    transform(strCheckPath.begin(), strCheckPath.end(), strCheckPath.begin(), toupper);
+    std::transform(strCheckPath.begin(), strCheckPath.end(), strCheckPath.begin(), [](unsigned char c) -> unsigned char { return std::toupper(c); });
 
     string::size_type nPos = strCheckPath.find(szPluginPath);
     if (string::npos == nPos)
@@ -724,6 +739,7 @@ void PluginManagerImpl::processToolCommand( int iCommandID )
 // Add for P403115 start
 BOOL DllNameCheck(const char * strName)
 {
+#if 0
     BOOL bValid = TRUE;
     char strDiv[_MAX_DRIVE];
     char strDir[_MAX_DIR];
@@ -738,11 +754,12 @@ BOOL DllNameCheck(const char * strName)
         return bValid;
     }
 
-    if (stricmp(strExt, ".DLL") != 0)
+    if (strcasecmp(strExt, ".DLL") != 0)
     {
         bValid = FALSE;
     }
 
     return bValid;
+#endif
 }
 // Add end

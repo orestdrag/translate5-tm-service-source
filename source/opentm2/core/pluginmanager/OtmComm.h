@@ -26,21 +26,13 @@
 #pragma warning(disable:4996)
 
 #include <stdio.h>
-#include <io.h>
-#include <windows.h>
-#include <winbase.h>
-#include <process.h>
-#include <CommCtrl.h>
 #include <string>
 #include <vector>
-#include <TlHelp32.h>
-#include <Shellapi.h>
-#include <CommCtrl.h>
 #include <sys/stat.h>
 
-#include "curl\curl.h"
-#include "curl\zlib.h"
-#include "curl\unzip.h"
+#include "curl/curl.h"
+#include "zlib.h"
+#include "unzip.h"
 
 #include "TimeManager.h"
 

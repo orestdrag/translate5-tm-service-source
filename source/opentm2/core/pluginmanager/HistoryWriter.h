@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include "core\pluginmanager\OtmComm.h"
+#include "OtmComm.h"
 
 #define UNICODEFILEPREFIX                             "\xFF\xFE"
 
@@ -42,10 +42,10 @@ public:
   static const int OM_OVERWRITE = 8;
 
   /*! \brief Constructors */
-  HistoryWriter::HistoryWriter(void);
+  HistoryWriter(void);
 
   /*! \brief Denstructor */
-  HistoryWriter::~HistoryWriter(void);
+  ~HistoryWriter(void);
 
   /*! \brief open a log file
   \param pszName name of the log file (without path and extention)

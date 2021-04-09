@@ -26,7 +26,7 @@
 //#define CURL_STATICLIB  //HTTP_ONLY
 #pragma once
 
-#include "core\pluginmanager\OtmComm.h"
+#include "../pluginmanager/OtmComm.h"
 
 //#if defined(_DEBUG)
 //#pragma comment(lib, "libcurld.lib")

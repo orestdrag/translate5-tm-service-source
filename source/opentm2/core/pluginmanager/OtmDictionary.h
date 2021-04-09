@@ -11,7 +11,7 @@
 #ifndef CPPTEST
 extern "C" {
 #endif
-#include "eqf.h"
+#include "EQF.H"
 #ifndef CPPTEST
 }
 #endif

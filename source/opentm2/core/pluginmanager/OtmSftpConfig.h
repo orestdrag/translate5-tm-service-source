@@ -24,7 +24,7 @@
 //+----------------------------------------------------------------------------+
 #pragma once
 
-#include "core\pluginmanager\OtmComm.h"
+#include "OtmComm.h"
 
 #define KEY_SFTP_URL_AVU                              "URL_AVU"
 #define KEY_SFTP_URL_PLUGINS                          "URL_PLUGINS"

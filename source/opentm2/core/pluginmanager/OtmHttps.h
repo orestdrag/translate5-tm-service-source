@@ -24,7 +24,7 @@
 //+----------------------------------------------------------------------------+
 #pragma once
 
-#include "core\pluginmanager\OtmComm.h"
+#include "OtmComm.h"
 
 class __declspec(dllexport) COtmHttps
 {
