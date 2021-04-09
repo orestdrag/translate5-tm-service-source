@@ -586,4 +586,11 @@ typedef struct _OSVERSIONINFOEX {
 
 #define SM_CXSCREEN 0
 
+/* https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/splitpath-wsplitpath?view=msvc-160 */
+
+#define _MAX_DRIVE 0
+#define _MAX_DIR 256
+#define _MAX_FNAME 256
+#define _MAX_EXT 256
+
 #endif
