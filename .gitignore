@@ -5,7 +5,7 @@ VS-projects
 Debug
 TEMP
 my-config.bat
-/source/plugins/OtmMemoryService/build/
+source/build/
 .vscode/
 *.swp
 *.swo
