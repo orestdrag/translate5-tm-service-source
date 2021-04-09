@@ -8,13 +8,13 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmDictionaryPlugin.h"
-#include "core\PluginManager\OtmDictionary.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmDictionaryPlugin.h"
+#include "../pluginmanager/OtmDictionary.h"
 #ifndef CPPTEST
 extern "C" {
 #endif
-#include "OtmDictionaryIF.h"
+//#include "OtmDictionaryIF.h"
 #ifndef CPPTEST
 }
 #endif
