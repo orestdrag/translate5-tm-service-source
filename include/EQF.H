@@ -3946,7 +3946,8 @@ typedef struct _ERRDATA                // global data of UtlError
 /* prototypes for Setter functions for MAT ULONG/USHORT               */
 /**********************************************************************/
 VOID UtlSetULong( SHORT sID, ULONG ulValue );
-VOID UtlSetString( SHORT sID, PSZ pszString );
+//VOID UtlSetString( SHORT sID, const PSZ pszString );
+void UtlSetString( short sID, const char *pszString );
 VOID UtlSetUShort( SHORT sID, USHORT usValue );
 
 

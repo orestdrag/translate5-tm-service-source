@@ -47,6 +47,7 @@ static USHORT usLastDosRc;             // buffer for last DOS return code
 //|                   return to drive letter converted return code             |
 //+----------------------------------------------------------------------------+
 
+#if 0
 BYTE UtlQCurDisk()
 {
     static CHAR szCurDir[MAX_PATH+100];
@@ -1127,6 +1128,7 @@ BOOL UtlLoadFileHwnd
     } /* endif */
     return ( fOK );
  } /* end of function UtlLoadFile */
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

@@ -6,6 +6,7 @@
 //+----------------------------------------------------------------------------+
 #include "EQF.H"                  // General Translation Manager include file
 #include "Utility.h"
+#include "win_types.h"
 
 //------------------------------------------------------------------------------
 // Function Name:     UtlQueryULong          Query a MAT ulong value            
@@ -68,7 +69,7 @@ BOOL UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usBufLength )
    {
       if ( UtiVar[UtlGetTask()].pszQueryArea[sID] )
       {
-         usLength = (USHORT)min( strlen( UtiVar[UtlGetTask()].pszQueryArea[sID]) + 1, usBufLength );
+         usLength = (USHORT)get_min( strlen( UtiVar[UtlGetTask()].pszQueryArea[sID]) + 1, usBufLength );
          strncpy( pszBuffer, UtiVar[UtlGetTask()].pszQueryArea[sID], usLength );
          pszBuffer[usLength-1] = NULC;
       }
@@ -138,14 +139,15 @@ VOID UtlSetUShort( SHORT sID, USHORT usValue )
 // Parameters:        sID is the string ID (QST_...)                            
 //                    pszString is the value for the string                     
 //------------------------------------------------------------------------------
-VOID UtlSetString( SHORT sID, PSZ pszString )
+void UtlSetString( short sID, const char *pszString )
+//VOID UtlSetString( SHORT sID, const PSZ pszString )
 {
   PSZ  pszBuffer;                      // buffer for new string value
 
    if ( (sID > QST_FIRST) && (sID < QST_LAST) )
    {
      if ( UtlAlloc( (PVOID *)&pszBuffer, 0L,
-                    (LONG)  max( MIN_ALLOC, strlen(pszString)+1 ),
+                    (LONG)  get_max( MIN_ALLOC, strlen(pszString)+1 ),
                     ERROR_STORAGE ) )
      {
        strcpy( pszBuffer, pszString );

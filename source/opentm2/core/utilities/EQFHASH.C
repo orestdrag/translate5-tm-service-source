@@ -33,7 +33,8 @@
 //|To be done / known limitations / caveats:                                   |
 //+----------------------------------------------------------------------------+
 
-#include "eqf.h"                  // General .H for EQF
+#include "EQF.H"                  // General .H for EQF
+#include "win_types.h"
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -780,7 +781,7 @@ PVOID PoolAddData
   /********************************************************************/
   if ( !pAddPool )
   {
-    LONG lSize = max((LONG)(lDataLen + sizeof( POOL )), pPool->lSize );
+    LONG lSize = get_max((LONG)(lDataLen + sizeof( POOL )), pPool->lSize );
     UtlAlloc( (PVOID *)&pAddPool, 0L, lSize, NOMSG );
 
     if ( pAddPool )
@@ -872,7 +873,7 @@ HATOMTBL APIENTRY WinCreateAtomTable
  if ( fOK )
  {
    fOK = UtlAlloc( (PVOID *)&pAtomTable, 0L,
-                   max( MIN_ALLOC, (LONG)sizeof(ATOMTBL)), ERROR_STORAGE );
+                   get_max( MIN_ALLOC, (LONG)sizeof(ATOMTBL)), ERROR_STORAGE );
  } /* endif */
 
  /********************************************************************/
@@ -936,7 +937,7 @@ EQF_ATOM APIENTRY WinAddAtom
   /********************************************************************/
   /* build temporary atom table element in our atom table buffer      */
   /********************************************************************/
-  lNameLen = min( strlen(pszAtomName) + 1,
+  lNameLen = get_min( strlen(pszAtomName) + 1,
                   sizeof(hAtomTbl->szBuffer) );
   strncpy( hAtomTbl->NewEntry.szAtomName, pszAtomName, lNameLen );
 
@@ -952,7 +953,7 @@ EQF_ATOM APIENTRY WinAddAtom
   if ( pEntry == NULL )
   {
     UtlAlloc( (PVOID *) &pEntry, 0L,
-              max( MIN_ALLOC, lNameLen + sizeof(ATOMENTRY) ),
+              get_max( MIN_ALLOC, lNameLen + sizeof(ATOMENTRY) ),
               ERROR_STORAGE );
     if ( pEntry )
     {
@@ -983,7 +984,7 @@ EQF_ATOM     APIENTRY WinFindAtom
   /********************************************************************/
   /* build temporary atom table element in our atom table buffer      */
   /********************************************************************/
-  lNameLen = min( strlen(pszAtomName) + 1,
+  lNameLen = get_min( strlen(pszAtomName) + 1,
                   sizeof(hAtomTbl->szBuffer) );
   strncpy( hAtomTbl->NewEntry.szAtomName, pszAtomName, lNameLen );
 
@@ -1205,7 +1206,7 @@ EQF_ATOM     APIENTRY WinFindAtomW
   PATOMENTRY       pEntry;             // ptr to atom table elements
 
   lI = UTF16strlenCHAR(pszAtomNameW);
-  lLen = max( (lI+1) * sizeof(CHAR_W), MIN_ALLOC ); // to be sure if all is DBCS!
+  lLen = get_max( (lI+1) * sizeof(CHAR_W), MIN_ALLOC ); // to be sure if all is DBCS!
   if ( UtlAlloc( (PVOID *) &pszAtomName, 0L,
                     lLen, ERROR_STORAGE ) )
   {
@@ -1231,7 +1232,7 @@ EQF_ATOM APIENTRY WinAddAtomW
    PATOMENTRY       pEntry;             // ptr to atom table elements
 
    lI = UTF16strlenCHAR(pszAtomNameW);
-   lLen = max( (lI+1) * sizeof(CHAR_W), MIN_ALLOC ); // to be sure if all is DBCS!
+   lLen = get_max( (lI+1) * sizeof(CHAR_W), MIN_ALLOC ); // to be sure if all is DBCS!
    if ( UtlAlloc( (PVOID *) &pszAtomName, 0L,
                       lLen, ERROR_STORAGE ) )
    {
