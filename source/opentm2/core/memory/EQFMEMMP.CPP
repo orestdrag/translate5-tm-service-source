@@ -24,9 +24,9 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #define INCL_EQF_DLGUTILS         // dialog utilities
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
@@ -55,6 +55,7 @@ INT_PTR CALLBACK MEMMERGEDLG( HWND hwnd,
       If no TM is selected then or the dialog has been canceled then
       pMIDA->htm will be set to NULL. */
 
+#if 0
    PMEM_MERGE_IDA   pMIDA;                           // Pointer to merge IDA
    USHORT           usRc = TRUE;                     // Process return code
    MRESULT          mResult = (MRESULT)FALSE;        // Function return code
@@ -242,6 +243,7 @@ INT_PTR CALLBACK MEMMERGEDLG( HWND hwnd,
      POSTEQFCLOSE( hwnd, FALSE );
    } /* endif */
    return mResult;
+#endif
 }/* end of function MemMergeDlg */
 
 
@@ -255,6 +257,7 @@ BOOL MemGUIMergeMemory
   HWND hwnd
 )
 {
+#if 0
   BOOL fOK = TRUE;
   PMEM_MERGE_IDA    pMIDA = NULL;         // Pointer to the export IDA
   SHORT sRC = 0;
@@ -318,6 +321,7 @@ BOOL MemGUIMergeMemory
     UtlAlloc( (PVOID *)&pMIDA, 0L, 0L, NOMSG);
   } /* endif */
   return( fOK );
+#endif
 }
 
 
@@ -334,6 +338,7 @@ MRESULT MemMergeCallBack
   LPARAM           mp2                 // second message parameter
 )
 {
+#if 0
   PMEM_MERGE_IDA    pMIDA;             // pointer to instance area
   MRESULT           mResult = FALSE;   // return code for handler proc
 
@@ -469,6 +474,7 @@ MRESULT MemMergeCallBack
       break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function MemMergeCallBack */
 
 
@@ -500,7 +506,7 @@ MRESULT MemMergeCallBack
     UtlTime( &(pMIDA->tStamp));
 
     // Move process-ID into mp1 and post the message WM_EQF_MEMMERGE_PROCESS
-    WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_MERGE_TASK ), NULL);
+    //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_MERGE_TASK ), NULL);
   } /* end of function EQFMemMergeStart */
 
 // ================ Handle the message WM_EQF_MEMMERGE_PROCESS =====================
@@ -566,7 +572,7 @@ MRESULT MemMergeCallBack
         // and if it is dispatch it.
         pCommArea->usComplete = (USHORT)pMIDA->iComplete;
         UtlDispatch();
-        WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_MERGE_TASK ), NULL );
+        //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_MERGE_TASK ), NULL );
         break;
 
      case OtmMemory::INFO_ENDREACHED:
@@ -576,7 +582,7 @@ MRESULT MemMergeCallBack
         {
           //--- set the progress indicator to 100 percent
           pCommArea->usComplete = 100;
-          WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+          //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
 
           // -----------------------------------------------------
           //  Close the translation memory to be merged and the Tm
@@ -589,8 +595,8 @@ MRESULT MemMergeCallBack
           OEMTOANSI( pMIDA->szNameMem );
           pReplAddr[0] = pMIDA->szNameMergeMem;
           pReplAddr[1] = pMIDA->szNameMem;
-          pReplAddr[2] = ltoa( pMIDA->ulSegmentCounter, szNumber, 10 );
-          pReplAddr[3] = ltoa( pMIDA->ulInvSegmentCounter, szInvNumber, 10 );
+          pReplAddr[2] = strncpy(szNumber, std::to_string(pMIDA->ulSegmentCounter).c_str(), 10);
+          pReplAddr[3] = strncpy(szInvNumber, std::to_string(pMIDA->ulInvSegmentCounter).c_str(), 10);
           if ( usRc == NO_ERROR )
           {
             // Issue the message:
@@ -613,7 +619,7 @@ MRESULT MemMergeCallBack
         } /* endif */
 
         // Issue message WM_EQF_MEMMERGE_END
-        WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_MERGE ), NULL );
+        //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_MERGE ), NULL );
         break;
 
 
@@ -648,7 +654,7 @@ MRESULT MemMergeCallBack
        } /* endif */
 
        // Issue message WM_EQF_MEMMERGE_END
-       WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_MERGE ), NULL );
+       //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_MERGE ), NULL );
        break;
     } /* end switch */
   } /* end of function EQFMemMergeProcess */
@@ -755,7 +761,7 @@ MRESULT MemMergeCallBack
         } /* endif */
 
         // Dismiss the slider window if it had been created
-        EqfRemoveObject( TWBFORCE, hWnd );
+        //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
     } /* endif */
   } /* end of function EQFMemMergeEnd */

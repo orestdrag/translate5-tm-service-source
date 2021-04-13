@@ -26,9 +26,9 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 #include "MemoryUtil.h"
 
@@ -59,6 +59,7 @@ USHORT MemFuncOrganizeProcess( PFCTDATA pData );
 /* Callback function for Organize ProcessWindow */
 /************************************************/
 
+#if 0
 MRESULT MemOrganizeCallBack
 (
   PPROCESSCOMMAREA pCommArea,          // ptr to commmunication area
@@ -345,6 +346,7 @@ MRESULT MemOrganizeCallBack
   } /* endswitch */
   return( mResult );
 } /* end of function MemOrganizeCallBack */
+#endif
 
 
 
@@ -358,6 +360,7 @@ USHORT EQFMemOrganizeStart
   // The function initializes the TM organize. It returns TRUE if
   // the initialization was OK else it returns FASLE.
 {
+#if 0
     PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the dialog IDA
     USHORT            usRc = TRUE;    // Return code
     PSZ               pReplAddr[4];   // Pointer to an address list of replacement strings
@@ -500,6 +503,7 @@ USHORT EQFMemOrganizeStart
                   MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL);
     } /* endif */
     return usRc;
+#endif
   } /* end of function EQFMemOrganizeStart */
 
 
@@ -511,6 +515,7 @@ VOID EQFMemOrganizeProcess
   HWND              hWnd
 )
 {
+#if 0
     USHORT            usRc = TRUE;    // Return code to control a process
     USHORT            usDosRc;        // Dos Returncode
     PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the organize IDA
@@ -694,6 +699,7 @@ VOID EQFMemOrganizeProcess
         } /* endif */
       } /* endif */
     } /* endif */
+#endif
 } /* end of function EQFMemOrganizeProcess */
 
 
@@ -755,7 +761,7 @@ VOID EQFMemOrganizeEnd
     {
       if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
       {
-        EqfRemoveObject( TWBFORCE, hWnd );
+        //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
     } /* endif */
 

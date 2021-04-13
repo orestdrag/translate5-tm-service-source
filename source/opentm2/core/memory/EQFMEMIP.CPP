@@ -19,9 +19,9 @@
 #define INCL_EQF_ANALYSIS         // analysis functions
 #define INCL_EQF_TM               // general Transl. Memory functions
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 
 #include "EQFDDE.H"               // Batch mode definitions
@@ -71,6 +71,16 @@ USHORT CreatePropFromImportProp( PMEM_MERGE_IDA pMIDA, BOOL fUpdateTMList );
 
 BOOL NTMCreatePropandIndexFromImport ( PMEM_MERGE_IDA, BOOL );
 BOOL NTMGetOldImportInfo( PMEM_MERGE_IDA pMIDA );
+
+static char* strupr(char *str)
+{
+    char *tmp = str;
+    while(*tmp) {
+        *tmp = toupper((unsigned char)*tmp);
+        ++tmp;
+    }
+    return str;
+}
 
 // ================ Check the case of Import and handle it ========================
 
@@ -140,12 +150,18 @@ USHORT EQFMemImportTrojaStart
 
       if (usRc)
       {
+#if 0
+        /* This is platform-dependent code, should be rewritten and tested */
+        /* https://linux.die.net/man/3/splitpath  */
+        /* https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/splitpath-wsplitpath?view=msvc-160  */
+
         // Prepare the data to open the properties
         _splitpath( pMIDA->szPathMergeMem,
                     pMIDA->szDriveMergeMem,
                     pMIDA->szDirMergeMem,
                     pMIDA->szNameMergeMem,
                     pMIDA->szExtMergeMem );
+#endif
         pMIDA->szDriveMergeMem[1] = NULC;
         strcpy( pMIDA->szNameMem, pMIDA->szNameMergeMem );
 

@@ -10,14 +10,14 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #define INCL_EQF_EDITORAPI        // editor API
 #define INCL_EQF_TP               // public translation processor definitions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #undef   INIT_TABLES
 #include "EQFTPI.H"               // private translation processor definitions
 
 #define  INIT_TABLES  1
 #include "EQFTMM.H"              // TMM include file
-#include "EQFTMM.id"                   // TMM dialog include file
+#include "EQFTMM.ID"                   // TMM dialog include file
 
 #define MAX_RC_STRING  31
 #define TMM_TIMERID    5
@@ -73,6 +73,7 @@ BOOL TMMTextFitsRect
 //------------------------------------------------------------------------------
 BOOL EQFTMMaintain( PSZ pszTMName )
 {
+#if 0
   ULONG flCreate;                    // Window creation control flags
   HWND hwndFrame;                    // Frame window handle
   PTMMIDA pTMMIda;                   // pointer to main structure
@@ -248,6 +249,7 @@ BOOL EQFTMMaintain( PSZ pszTMName )
 
   return( fOK );
 
+#endif
 } /* end of function EQFTMMaintain */
 
 //------------------------------------------------------------------------------
@@ -311,6 +313,7 @@ MRESULT APIENTRY TMMWNDPROC
   LPARAM mp2
 )
 {
+#if 0
     MRESULT mResult = FALSE;           // window proc return value
     PTMMIDA  pTMMIda;                  // pointer to ida
     BOOL   fOK = TRUE;                 // success indicator
@@ -906,6 +909,7 @@ MRESULT APIENTRY TMMWNDPROC
 
     return mResult ;
 
+#endif
 } /* TMMWndProc */
 
 //------------------------------------------------------------------------------
@@ -941,6 +945,7 @@ BOOL DoVisualTMM
   PTMMIDA pTMMIda
 )
 {
+#if 0
   BOOL        fOK = TRUE;                                  // success indicator
   HMENU       hwndMenu;
 
@@ -1048,6 +1053,7 @@ BOOL DoVisualTMM
 
   return( fOK );
 
+#endif
 } /* end of function DoVisualTMM */
 
 //------------------------------------------------------------------------------
@@ -1128,6 +1134,7 @@ BOOL TMMDocStart
   PTMMVISDOC pstVisDoc
 )
 {
+#if 0
   ULONG flFrameFlags = FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_DLGBORDER |
                        FCF_TITLEBAR ;
   PVIOFONTCELLSIZE pVioFont;               // pointer to font
@@ -1225,7 +1232,7 @@ BOOL TMMDocStart
     if ( fOK )                    // allocate buffer for marking area
     {
       fOK = UtlAlloc( (PVOID *)&pTBDoc->pBlockMark, 0L,
-                      (LONG) max( sizeof( EQFBBLOCK ), MIN_ALLOC) ,
+                      (LONG) get_max( sizeof( EQFBBLOCK ), MIN_ALLOC) ,
                       ERROR_STORAGE );
     } /* endif */
 
@@ -1291,6 +1298,7 @@ BOOL TMMDocStart
 
    return (fOK);
 
+#endif
 } /* end of function TMMDocStart */
 
 //------------------------------------------------------------------------------
@@ -1320,6 +1328,7 @@ VOID TMMVertWindowPos
   SWP          swp
 )
 {
+#if 0
   USHORT  usCY = (USHORT) WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
   if ( pTBDoc->docType == SSOURCE_DOC )
   {
@@ -1342,6 +1351,7 @@ VOID TMMVertWindowPos
                      EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_SHOW );
   } /* endif */
   return;
+#endif
 } /* end of function TMMVertWindowPos */
 
 //------------------------------------------------------------------------------
@@ -1370,6 +1380,7 @@ VOID TMMSetWindowPos
   SHORT   cy
 )
 {
+#if 0
   /*******************************************************************/
   /* usCY statusbar height                                           */
   /*******************************************************************/
@@ -1414,6 +1425,7 @@ VOID TMMSetWindowPos
  } /* endif */
   UPDSTATUSBAR( pIda );
   return;
+#endif
 } /* end of function TMMSetWindowPos */
 
 //------------------------------------------------------------------------------
@@ -1445,6 +1457,7 @@ TMMTile
   BOOL fHorizontal
 )
 {
+#if 0
   PTMMVISDOC pVisDoc;
 
   pVisDoc = ACCESSWNDIDA( pTMMIda->hwndFocus, PTMMVISDOC );
@@ -1467,6 +1480,7 @@ TMMTile
   WinShowWindow( pTMMIda->hwnd, FALSE );
   WinSendMsg( pTMMIda->hwnd, WM_PAINT, NULL, NULL );
   WinShowWindow( pTMMIda->hwnd, TRUE );
+#endif
   return;
 } /* end of function TMMTile */
 
@@ -1501,6 +1515,7 @@ TMMFuncQuit
 )
 {
 
+#if 0
   //free all allocated space
   if ( pTMMIda->TBSourceDoc.pTBSeg )
     FreeTMMDoc( &pTMMIda->TBSourceDoc );
@@ -1528,6 +1543,7 @@ TMMFuncQuit
     ANCHORWNDIDA( pTMMIda->hwnd, 0L );
     UtlAlloc( (PVOID *)&pTMMIda, 0L, 0L, NOMSG );
   }
+#endif
   return;
 } /* end of function TMMFuncQuit */
 
@@ -1672,7 +1688,7 @@ VOID FreeTMMDoc
 	if ( pDoc->hlfIME )
 	 {
        ImeMoveConvertWin( pDoc, pDoc->hwndClient, -1, -1);
-	   GlobalFree(pDoc->hlfIME);
+	  // GlobalFree(pDoc->hlfIME);
 	   pDoc->hlfIME = 0;
 	 } /* endif */
 
@@ -1725,6 +1741,7 @@ void TMMCommand
  WPARAM  mp1
 )
 {
+#if 0
   PTMMIDA     pTMMIda;
   HMENU       hwndMenu;
   PTMMVISDOC  pVisDoc;
@@ -2260,6 +2277,7 @@ void TMMCommand
     EQFBRefreshScreen( &(pTMMIda->TBTargetDoc) );          // refresh the screen
   } /* endif */
 
+#endif
 } /* TMMCommand  */
 
 //------------------------------------------------------------------------------
@@ -2640,6 +2658,7 @@ VOID  EQFDispWindow
    PTBDOCUMENT  pTBDoc
 )
 {
+#if 0
   USHORT  usRow;
 
   EQFBScrnLinesFromSeg                   // build line table
@@ -2649,7 +2668,7 @@ VOID  EQFDispWindow
            &(pTBDoc->TBCursor) );        // starting segment
 
   // Set vertical scroll slider
-  usRow = (USHORT)max(pTBDoc->ulMaxSeg - 2, 2);
+  usRow = (USHORT)get_max(pTBDoc->ulMaxSeg - 2, 2);
   SetScrollRange( pTBDoc->hwndFrame, SB_VERT, 0, usRow, FALSE);
   SetScrollPos( pTBDoc->hwndFrame, SB_VERT, 0, TRUE );
 
@@ -2666,6 +2685,7 @@ VOID  EQFDispWindow
   pTBDoc->Redraw |= REDRAW_ALL;          // redraw the screen
   EQFBScreenData( pTBDoc );
   EQFBScreenCursor( pTBDoc );            // update cursor and sliders
+#endif
 } /* end of function EQFDispWindow */
 
 //------------------------------------------------------------------------------
@@ -2784,6 +2804,7 @@ BOOL ActivateSegment
   ULONG   ulSegNum                        // new segment number
 )
 {
+#if 0
   PTBSEGMENT pSrcSeg;                     // pointer to segment
   PTBSEGMENT pTgtSeg;                     // pointer to segment
   PTBDOCUMENT pDoc;                       // pointer to document instance
@@ -2872,6 +2893,7 @@ BOOL ActivateSegment
   } /* endif */
 
   return( fOK );
+#endif
 
 } /* end of function ActivateSegment */
 
@@ -3000,7 +3022,7 @@ BOOL UnchangedSegment
     pDoc->Redraw |= REDRAW_ALL;            // redraw screen
     pDoc->twin->Redraw |= REDRAW_ALL;                        // redraw screen
 
-    UPDSTATUSBAR( pTMMIda );
+    //UPDSTATUSBAR( pTMMIda );
   } /* endif */
 
   return( fOK );
@@ -3056,7 +3078,7 @@ BOOL TMMDocNext
   if ( fOK )                    // allocate buffer for marking area
   {
     fOK = UtlAlloc( &pTBDoc->pBlockMark, 0L,
-                    (LONG) max( sizeof( EQFBBLOCK ), MIN_ALLOC) ,
+                    (LONG) get_max( sizeof( EQFBBLOCK ), MIN_ALLOC) ,
                     ERROR_STORAGE );
   } /* endif */
 
@@ -3127,6 +3149,7 @@ MRESULT APIENTRY TMMSTATUSBARWNDPROC
   LPARAM mp2
 )
 {
+#if 0
   MRESULT mResult = FALSE;           // window proc return value
 
   switch( msg )
@@ -3151,6 +3174,7 @@ MRESULT APIENTRY TMMSTATUSBARWNDPROC
   } /* switch */
 
   return mResult ;
+#endif
 } /* end of function TMMSTATUSBARWNDPROC */
 
 
@@ -3186,6 +3210,7 @@ static VOID TMMFillStatusBar
   HPS hps                              // presentation space
 )
 {
+#if 0
   RECT        rectl;
   PTMMIDA     pTMMIda = ACCESSWNDIDA( hwnd, PTMMIDA);
   SWP         swp;
@@ -3433,6 +3458,7 @@ static VOID TMMFillStatusBar
   // restore original font
   SelectObject( hps, hOldFont );
 
+#endif
 } /* end of function TMMFillStatusBar */
 
 
@@ -3457,6 +3483,7 @@ VOID NextPrevious
    BOOL            fDeleted
 )
 {
+#if 0
    BOOL            fOK = TRUE;
    USHORT          usRc = 0;
    BOOL            fDummy;
@@ -3507,6 +3534,7 @@ VOID NextPrevious
      WinPostMsg( hwnd, WM_CLOSE, NULL, NULL );
    } /* endif */
 
+#endif
 } /* end of function NextPrevious */
 
 
@@ -3529,6 +3557,7 @@ VOID BackToQuery
    HWND            hwnd
 )
 {
+#if 0
    BOOL            fOK = TRUE;
    USHORT          usRc = 0;
 
@@ -3613,6 +3642,7 @@ VOID BackToQuery
      } /* endif */
 
    } /* endif */
+#endif
 
 } /* end of function BackToQuery */
 
@@ -3698,6 +3728,7 @@ VOID  LastSegDel
    PTMMIDA         pTMMIda
 )
 {
+#if 0
    USHORT          usResponse = 0;
 
    if ( !pTMMIda->fKill )
@@ -3738,6 +3769,7 @@ VOID  LastSegDel
      } /* endif */
    } /* endif */
 
+#endif
    return;
 
 } /* end of function LastSegDel */
@@ -3915,7 +3947,7 @@ BOOL         EmptySegDataCheck
       if ( !fWHITESPfound )                                  /* @KIT975A */
       {                                                      /* @KIT975A */
          // make space for EMPTY_TAG and copy it in
-         ulResult = max(1 +  UTF16strlenCHAR(EMPTY_TAG), MIN_ALLOC);
+         ulResult = get_max(1 +  UTF16strlenCHAR(EMPTY_TAG), MIN_ALLOC);
          if (pSeg->ulSegNum != pDoc->ulWorkSeg )
          {
            pTmpBuf = pSeg->pDataW;
@@ -4032,7 +4064,7 @@ TMMAddLFsAtEnd
 
   // add missing LF characters
   ulLen = UTF16strlenCHAR(pSeg->pDataW) + ulCount + 1;
-  ulLen = max(ulLen, MIN_ALLOC);
+  ulLen = get_max(ulLen, MIN_ALLOC);
   if (pSeg->ulSegNum != pDoc->ulWorkSeg )
   {
     pTmpBuf = pSeg->pDataW;
@@ -4082,6 +4114,7 @@ BOOL TMMTextFitsRect
   HPS         hps                      // presentation space handle
 )
 {
+#if 0
   RECT    rc;                          // temporary rectangle
   DWORD   dwRGB_PaleGray = CLR_PALEGRAY;
   DWORD   dwRGB_BLACK = CLR_BLACK;
@@ -4098,6 +4131,7 @@ BOOL TMMTextFitsRect
   DRAWTEXT( hps, pszText, rc, dwRGB_BLACK, dwRGB_PaleGray, DT_CALCRECT );
 
   return( rc.right <= (prc->right - prc->left - 4) );
+#endif
 } /* end of function TMMTextFitsRect */
 
 BOOL setMFlag(PTMMIDA pTMMIda, PTBDOCUMENT pDoc, USHORT usNewTranslationFlag) {

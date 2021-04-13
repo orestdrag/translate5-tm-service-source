@@ -17,16 +17,16 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #define INCL_EQF_DLGUTILS         // dialog utilities
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMEM.ID>              // Translation Memory IDs
-#include "SHLOBJ.H"             // shell functions
+//#include "SHLOBJ.H"             // shell functions
 extern HELPSUBTABLE pid_memimp_subtable[];
 
 //--- prototypes for internal functions
@@ -235,6 +235,7 @@ BOOL MemImportFileOpenDialog
   PMEM_LOAD_DLG_IDA   pLIDA
 )
 {
+#if 0
   BOOL fOK = TRUE;
   EQFINFO ErrorInfo;
   OPENFILENAME OpenStruct;
@@ -375,6 +376,7 @@ BOOL MemImportFileOpenDialog
   if ( pLIDA->hPropLast ) CloseProperties( pLIDA->hPropLast, PROP_QUIT, &ErrorInfo);
   return( fOK );
 
+#endif
 } /* end of function */
 
 //
@@ -388,6 +390,7 @@ UINT_PTR CALLBACK MemOpenFileHook
   LPARAM lParam   // message parameter
 )
 {
+#if 0
   UINT uiResult = 0;
   wParam;
 
@@ -820,5 +823,6 @@ UINT_PTR CALLBACK MemOpenFileHook
         break;
   } /*endswitch */
   return( uiResult );
+#endif
 } /* end of function MemOpenFileHook */
 

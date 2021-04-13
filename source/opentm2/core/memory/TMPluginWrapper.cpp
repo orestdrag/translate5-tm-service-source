@@ -13,9 +13,9 @@ Copyright Notice:
   #define INCL_EQF_ANALYSIS         // analysis functions
   #define INCL_EQF_TM               // general Transl. Memory functions
   #define INCL_EQF_TP              // editor functions
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMemoryPlugin.h"
-#include "core\PluginManager\OtmMemory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 
 // EQF.H is included by otmmemory.h
@@ -27,6 +27,9 @@ extern "C"
 }
 
 #include "vector"
+#include <wctype.h>
+
+#include "win_types.h"
 
 // prototypes for helper functions
 
@@ -46,6 +49,7 @@ void InitTMPluginWrapper()
 // callback function to insert memory names into a listbox
 int AddMemToListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo  )
 {
+#if 0
   static char szMemName[MAX_LONGFILESPEC];
 
   HWND hwndLB = (HWND)pvData;
@@ -55,6 +59,7 @@ int AddMemToListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO p
   strcpy( szMemName, pszName );
   OEMTOANSI( szMemName );
   INSERTITEMHWND( hwndLB, szMemName );
+#endif
   return( 0 );
 }
 
@@ -73,7 +78,7 @@ USHORT FillMemoryListBox
   pCommArea;
 
   // Check whether object name is correct
-  if ( _strcmpi((const char *) PVOIDFROMMP2(mp2), MEMORY_ALL) )
+  if ( strcasecmp((const char *) PVOIDFROMMP2(mp2), MEMORY_ALL) )
   {
      fOK = FALSE;
   } /* endif */
@@ -81,7 +86,7 @@ USHORT FillMemoryListBox
   if ( fOK )
   {
     // Stop list box enabeling
-    ENABLEUPDATEHWND_FALSE( (HWND)mp1 );
+    //ENABLEUPDATEHWND_FALSE( (HWND)mp1 );
 
     // GQ 2014/05/12: Use MemoryFactory to get the list of memories (old code has been commented out and left as reference in case of problems)
 
@@ -118,10 +123,10 @@ USHORT FillMemoryListBox
       
 
       // Enable the memory database list box
-      ENABLEUPDATEHWND_TRUE( (HWND)mp1 );
+      //ENABLEUPDATEHWND_TRUE( (HWND)mp1 );
   } /* endif */
 
-  return  ( QUERYITEMCOUNTHWND( ((HWND)mp1)) );
+  //return  ( QUERYITEMCOUNTHWND( ((HWND)mp1)) );
 } /* end of function FillMemoryListBox */
 
 
@@ -399,7 +404,7 @@ BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BO
     int iCurLen = wcslen(pszAddData);
     if ( (wcslen(pszMatchIDPrefix) + iCurLen + 23) < MAX_SEGMENT_SIZE )
     {
-      swprintf( pszAddData + iCurLen, L"<MatchSegID ID=\"%s%lu\"/>", pszMatchIDPrefix, ulNum );
+      swprintf( pszAddData + iCurLen, wcslen(pszAddData) - iCurLen, L"<MatchSegID ID=\"%s%lu\"/>", pszMatchIDPrefix, ulNum );
       fMatchIDAdded  = TRUE;
     } /* endif */
   } /* endif */
@@ -704,7 +709,7 @@ USHORT MemFillTableLB( HWND   hListBox,
   EQFINFO          ErrorInfo;             // Property handler error info
 
   //--- Disable the appropriate listbox
-  WinEnableWindow( hListBox, FALSE );
+  //WinEnableWindow( hListBox, FALSE );
   //--- allocate storage for IDA
   usRc = (USHORT)UtlAlloc( (PVOID *) &pFillTableIDA, 0L, (LONG)sizeof( FILLTABLE_DATA ),
                    ERROR_STORAGE );
@@ -782,7 +787,7 @@ USHORT MemFillTableLB( HWND   hListBox,
     // If usRc, Select last used item or top item
     if ( usRc && ( pszLastUsed != NULL ) )
     {
-      CBSEARCHSELECTHWND( sSelectItem, hListBox, pszCompare );
+      //CBSEARCHSELECTHWND( sSelectItem, hListBox, pszCompare );
     } /* endif */
   } /* endif */
 
@@ -801,7 +806,7 @@ USHORT MemFillTableLB( HWND   hListBox,
   } /* endif */
 
   // Enable the appropriate listbox again
-  WinEnableWindow( hListBox, TRUE );
+  //WinEnableWindow( hListBox, TRUE );
 
   return usNumbOfItems;
 } /* end of function MemFillTableLB */
@@ -991,7 +996,7 @@ USHORT NTMGetMatchLevel
 
     Utlstrccpy( szLang1, pSegment->szSourceLanguage, '(' );
     Utlstrccpy( szLang2, pProposal->szSourceLanguage, '(' );
-    if ( stricmp( szLang1, szLang2 ) != 0 )
+    if ( strcasecmp( szLang1, szLang2 ) != 0 )
     {
       *psMatchState = NONE_MATCHSTATE;
       *psMatchLevel = 0;
@@ -1000,7 +1005,7 @@ USHORT NTMGetMatchLevel
 
     Utlstrccpy( szLang1, pSegment->szTargetLanguage, '(' );
     Utlstrccpy( szLang2, pProposal->szTargetLanguage, '(' );
-    if ( stricmp( szLang1, szLang2 ) != 0 )
+    if ( strcasecmp( szLang1, szLang2 ) != 0 )
     {
       *psMatchState = NONE_MATCHSTATE;
       *psMatchLevel = 0;
@@ -1113,7 +1118,7 @@ USHORT NTMGetMatchLevel
 
   if ( !usRC )
   {
-    fTagTableEqual = (stricmp( pSegment->szMarkup, pProposal->szMarkup ) == 0);
+    fTagTableEqual = (strcasecmp( pSegment->szMarkup, pProposal->szMarkup ) == 0);
 
     // check if strings are equal
     if ( ulParm & GET_RESPECTCRLF )   
@@ -1248,7 +1253,7 @@ USHORT NTMGetMatchLevel
     {
       // check type of exact match
       if ( (pSegment->lSegNumber == pProposal->lSegNumber ) && 
-            (stricmp( pSegment->szDocument, pProposal->szDocument ) == 0) )
+            (strcasecmp( pSegment->szDocument, pProposal->szDocument ) == 0) )
       {
         *psMatchState = EXACTEXACT_MATCHSTATE;
       }
@@ -1560,7 +1565,7 @@ SHORT NTMSimpleGetMatchLevel
 #endif
 
 
-  fTagTableEqual = (stricmp( pszSegmentMarkup, pszProposalMarkup ) == 0);
+  fTagTableEqual = (strcasecmp( pszSegmentMarkup, pszProposalMarkup ) == 0);
 
   // check if strings are equal
   if ( ulParm & GET_RESPECTCRLF )   
@@ -2221,7 +2226,7 @@ USHORT TokenizeSourceEx2
                 if ( (pSentence->lTagAlloc - (pTagEntry - (PBYTE)pSentence->pTagRecord))
                                                        <= (SHORT)usTagEntryLen )
                 {
-                  LONG lBytesToAlloc = max( ((LONG)TOK_SIZE), ((LONG)usTagEntryLen) );
+                  LONG lBytesToAlloc = get_max( ((LONG)TOK_SIZE), ((LONG)usTagEntryLen) );
 
                   //remember offset of pTagEntry
                   usFilled = (USHORT)(pTagEntry - (PBYTE)pSentence->pTagRecord);
