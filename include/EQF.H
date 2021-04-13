@@ -3716,8 +3716,10 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Invalidate Rectangle                                               */
 /**********************************************************************/
+#if 0
 #define INVALIDATERECT( hwnd, pRect, fChildInclude )   \
       InvalidateRect( hwnd, pRect, FALSE )
+#endif
 /**********************************************************************/
 /* Invalidate Region                                                  */
 /**********************************************************************/

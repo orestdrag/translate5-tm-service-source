@@ -3,8 +3,8 @@
 */
 
 #include "OtmProposal.h"
-#include "core\PluginManager\OtmMemory.h"
-#include "core\memory\MemoryFactory.h"
+#include "../source/opentm2/core/pluginmanager/OtmMemory.h"
+#include "../source/opentm2/core/memory/MemoryFactory.h"
 #include "vector"
 
 
@@ -65,7 +65,7 @@ typedef enum _TMMTABLE
 /**********************************************************************/
 /* macro to update statusbar                                          */
 /**********************************************************************/
-#define UPDSTATUSBAR( p ) INVALIDATERECT( (p)->hStatusBarWnd, NULL, FALSE )
+//#define UPDSTATUSBAR( p ) INVALIDATERECT( (p)->hStatusBarWnd, NULL, FALSE )
 
 typedef enum _MONTH_CODE
 {
