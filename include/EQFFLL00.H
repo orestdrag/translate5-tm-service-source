@@ -48,11 +48,11 @@ USHORT  MakeDriveButtons( HWND hwnd, PSZ pCurDrvLst);
 
 typedef struct _FLLDUMPIDA
 {
-   CHAR   szObject[_MAX_PATH];         // name of folder object
-   CHAR   szFolder[_MAX_PATH];         // name of folder
-   CHAR   szSaveram[_MAX_PATH];        // buffer for program used to save data
-   CHAR   szTarget[_MAX_PATH];         // name of target file
-   CHAR   szSource[_MAX_PATH];         // buffer for name of source file(s)
+   CHAR   szObject[MAX_PATH];         // name of folder object
+   CHAR   szFolder[MAX_PATH];         // name of folder
+   CHAR   szSaveram[MAX_PATH];        // buffer for program used to save data
+   CHAR   szTarget[MAX_PATH];         // name of target file
+   CHAR   szSource[MAX_PATH];         // buffer for name of source file(s)
    CHAR szNote[MAX_DUMP_NOTE+1];       // text of attached note
 } FLLDUMPIDA, *PFLLDUMPIDA;
 

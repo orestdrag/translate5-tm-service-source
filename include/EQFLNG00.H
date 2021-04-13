@@ -48,6 +48,7 @@ static SHORT sLngDetailsView[12] =  { LNG_LANGUAGE_IND, LNG_ASCIICP_IND, LNG_ANS
 
 CHAR  ColHdr[ 12 ][80] = { "Language", "ASCII CP", "ANSI CP", "Codepage name", "ISO name", "ICU name", "Language group", "Source language", "Target language", "MorphSupport", "Spellcheck", "" };
 
+#if 0
 //declare table for colum listbox
 static CLBCOLDATA ColLngTable[] =
 { { ColHdr[0], 20,   TEXT_DATA, DT_LEFT },   //
@@ -62,7 +63,9 @@ static CLBCOLDATA ColLngTable[] =
   { ColHdr[9], 14,   TEXT_DATA, DT_CENTER },
   { ColHdr[10], 14,   TEXT_DATA, DT_CENTER },
   { NULL,      0,    TEXT_DATA, 0       }};
+#endif
 
+#if 0
 static CLBCTLDATA LngCLBData =
 {  sizeof(CLBCTLDATA),                 // size of structure
    11,                                 // we have 10 data columns
@@ -78,6 +81,7 @@ static CLBCTLDATA LngCLBData =
    sLngView,                           // set view list for 'name' view option
    sLngView,                           // set sort criteria list
    ColLngTable };                      // set address of column definition table
+#endif
 
 
 struct _lnginst_check

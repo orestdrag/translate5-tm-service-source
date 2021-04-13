@@ -11,20 +11,21 @@
 #define INCL_EQF_TAGTABLE         // tag table and format functions
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_ANALYSIS         // Analysis functions
-#include <eqf.h>                       // General Translation Manager include file
-#include <eqfstart.h>
+#include <EQF.H>                       // General Translation Manager include file
+#include <EQFSTART.H>
 
-#include "eqfdde.h"               // batch mode functions
-#include "eqffol00.h"             // Folder Handler defines
-#include "eqffll00.h"             // Folder list defines
-#include "eqfstart.id"            // EQFSTARR resource IDs
-#include "eqffol.id"              // Folder Handler IDs
-#include "eqfcolw.id"             // column width IDs
+#include "EQFDDE.H"               // batch mode functions
+#include "EQFFOL00.H"             // Folder Handler defines
+#include "EQFFLL00.H"             // Folder list defines
+#include "EQFSTART.ID"            // EQFSTARR resource IDs
+#include "EQFFOL.ID"              // Folder Handler IDs
+#include "EQFCOLW.ID"             // column width IDs
 
 //cv
-#include "eqfdoc01.h"
+#include "EQFDOC01.H"
 
 static CHAR ColHdr[MAX_DEFINEDCOLUMNS][80];       // Buffer for column header texts
+#if 0
 static CLBCOLDATA ColTable[] =
 { { "",               1,              TEXT_DATA,      DT_LEFT},        // object name
   { ColHdr[1],  CLB_MAX_DOC_LENGTH,   AUTOWIDTHTEXT_DATA, DT_LEFT},    // name
@@ -53,6 +54,7 @@ static CLBCOLDATA ColTable[] =
   { ColHdr[21], CLB_MAX_FNAME,        TEXT_DATA,      DT_LEFT},        // name wo path info
   { ColHdr[22], CLB_MAX_FNAME,        TEXT_DATA,      DT_LEFT},        // file name extension
   { NULL,       0,                    TEXT_DATA,            0}};
+#endif
 
 static SHORT sLastUsedView[MAX_VIEW+1] = { FOL_NAME_IND, CLBLISTEND};
 static SHORT sDefaultView[MAX_VIEW+1]  = { FOL_NAME_IND, CLBLISTEND};
@@ -60,6 +62,7 @@ static SHORT sNameView[MAX_VIEW+1]     = { FOL_NAME_IND, CLBLISTEND};
 static SHORT sDetailsView[MAX_VIEW+1]  = { FOL_NAME_IND, FOL_TRANSLATED_IND, CLBLISTEND};
 static SHORT sSortCriteria[MAX_VIEW+1] = { FOL_NAME_IND, CLBLISTEND};
 
+#if 0
 static CLBCTLDATA FolCLBData =
 {  sizeof(CLBCTLDATA),                // size of control structure
   21,                                 // we have max 20 data columns
@@ -75,6 +78,7 @@ static CLBCTLDATA FolCLBData =
   sNameView,                          // set view list for 'name' view option
   sSortCriteria,                      // set sort criteria list
   ColTable};                          // set address of column definition table
+#endif
 
 static BOOL  CheckPropertyExist( PSZ pData );
 MRESULT FolderCreateCall( PLISTCOMMAREA pCommArea );
@@ -98,6 +102,7 @@ WPARAM           mp1,
 LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
 
   switch ( message )
@@ -397,6 +402,7 @@ LPARAM           mp2
     break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function FolderHandlerCallBack */
 
 /**********************************************************************/
@@ -411,6 +417,7 @@ WPARAM           mp1,
 LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
   EQF_BOOL  fAFCFolderRestrict;   // Restricted AFC folder
 
@@ -1647,6 +1654,7 @@ LPARAM           mp2
     break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function FolderCallBack */
 
 
@@ -1723,6 +1731,7 @@ BOOL FolDeleteFolder
 /**********************************************************************/
 MRESULT FolderCreateCall( PLISTCOMMAREA pCommArea )
 {
+#if 0
   MRESULT    mResult = FALSE;
   BOOL       fOK = TRUE;         // initialisation is O.K. flag
   EQFINFO    ErrorInfo;          // error info of property handler
@@ -2044,6 +2053,7 @@ MRESULT FolderCreateCall( PLISTCOMMAREA pCommArea )
     mResult = MRFROMSHORT(DO_NOT_CREATE);
   } /* endif */
   return mResult;
+#endif
 }
 
 /**********************************************************************/
@@ -2098,6 +2108,7 @@ int FolCountSelectedElements
   int  *piDocs
 )
 {
+#if 0
   int iItem = 0;
   int iSelItems = 0;
   int *piSelItems = NULL;
@@ -2138,6 +2149,7 @@ int FolCountSelectedElements
 
   if ( piSelItems ) UtlAlloc( (PVOID *) &piSelItems, 0L, 0L, NOMSG );
 
+#endif
   return( 0 );
 } /* FolCountSelectedElements */
 
@@ -2148,6 +2160,7 @@ int DocImpInternalDeletePackage
   PSZ pszPackage                       // fully qualified file name of package being deleted
 )
 {
+#if 0
   CHAR szTempPath[MAX_EQF_PATH];
 
   // delete package file
@@ -2204,5 +2217,6 @@ int DocImpInternalDeletePackage
   RemoveDirectory( szTempPath );
   UtlSplitFnameFromPath( szTempPath );
   RemoveDirectory( szTempPath );
+#endif
   return( 0 );
 } /* end of function DocImpInternalDeletePackage */

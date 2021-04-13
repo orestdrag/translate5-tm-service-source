@@ -3,6 +3,10 @@ project(OpenTM2_Workbench)
 
 set(Workbench_Source_Files
         EQFMAIN.C
-        EQFPLGMG.CPP)
+        EQFPLGMG.CPP
+        EQFLNG00.C
+        EQFFLL00.CPP
+        EQFFOLLI.C
+)
 
 add_library(Workbench ${Workbench_Source_Files})

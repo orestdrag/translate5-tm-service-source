@@ -4,7 +4,7 @@
 #ifndef INCL_EQFFOL00
 #define INCL_EQFFOL00
 
-#include "eqfxliff.h"     // this include file is a prereq for the following....
+#include "EQFXLIFF.H"     // this include file is a prereq for the following....
 
 #define  FOL_ITEM_FORMAT       "%s\x15L%s\x15L%s\x15D%s\x15%s\x15%s\x15%s\x15%s\x15%s\x15%ld\x15"
 typedef enum               //    ^      ^      ^      ^

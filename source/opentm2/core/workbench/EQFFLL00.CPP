@@ -21,8 +21,8 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include "core\PluginManager\OtmPlugin.h"
-#include "core\PluginManager\PluginManager.h"
+#include "../pluginmanager/OtmPlugin.h"
+#include "../pluginmanager/PluginManager.h"
 
 
 #pragma pack( push, TM2StructPacking, 1 )
@@ -32,14 +32,15 @@
 #define INCL_EQF_ANALYSIS         // Analysis functions
 
 
-#include "eqf.h"                  // General .H for EQF
-#include "eqfstart.id"            // IDs for EQFSTARR resource
-#include "eqffll.id"              // IDs for folder lists
-#include "eqffll00.h"             // Folder List Handler defines
-#include "eqfdde.h"               // batch mode definitions
-#include "eqffol00.h"             // Document List Handler defines
+#include "EQF.H"                  // General .H for EQF
+#include "EQFSTART.ID"            // IDs for EQFSTARR resource
+#include "EQFFLL.ID"              // IDs for folder lists
+#include "EQFFLL00.H"             // Folder List Handler defines
+#include "EQFDDE.H"               // batch mode definitions
+#include "EQFFOL00.H"             // Document List Handler defines
 #include "EQFHLOG.H"            // defines for history log processing
-#include "eqfcolw.id"             // column width IDs
+#include "EQFCOLW.ID"             // column width IDs
+#include "OTMFUNC.H"
 
 
 BOOL FLLMakeFolderListItem ( PSZ, PVOID, PSZ );
@@ -49,6 +50,7 @@ USHORT FolDeleteDocsFromList( HWND hwndOwner, PSZ pszFolObjName );
 USHORT FolRestoreDeletedDocs( HWND hwndOwner, PSZ pszFolObjName );
 
 static CHAR ColHdr[13][80];             // Buffer for column header texts
+#if 0
 static CLBCOLDATA ColTable[] =
 { { "",               1,             TEXT_DATA,      DT_LEFT},
   { ColHdr[1], CLB_MAX_FNAME, AUTOWIDTHTEXT_DATA,    DT_LEFT},
@@ -64,6 +66,7 @@ static CLBCOLDATA ColTable[] =
   { ColHdr[11],CLB_MAX_FNAME, AUTOWIDTHTEXT_DATA,    DT_LEFT},
   { ColHdr[12],CLB_MAX_FNAME, AUTOWIDTHTEXT_DATA,    DT_LEFT},
   { NULL,      0,             (CLBDATATYPE)        0,             0}};
+#endif
 
 static SHORT sLastUsedView[] = { FLL_NAME_IND, CLBLISTEND};
 static SHORT sDefaultView[]  = { FLL_NAME_IND, FLL_DESCR_IND, CLBLISTEND};
@@ -71,6 +74,7 @@ static SHORT sNameView[]     = { FLL_NAME_IND, CLBLISTEND};
 static SHORT sDetailsView[]  = { FLL_NAME_IND, FLL_DESCR_IND, CLBLISTEND};
 static SHORT sSortCriteria[] = { FLL_NAME_IND, CLBLISTEND};
 
+#if 0
 static CLBCTLDATA FllCLBData =
 {  sizeof(CLBCTLDATA),                 // size of control structure
   13,                                 // we have 13 data columns
@@ -86,6 +90,7 @@ static CLBCTLDATA FllCLBData =
   sNameView,                          // set view list for 'name' view option
   sSortCriteria,                      // set sort criteria list
   ColTable};                         // set address of column definition table
+#endif
 
 // function creating object name list of selected folders
 int FolBuildSelItemslist
@@ -109,6 +114,7 @@ WPARAM           mp1,
 LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
 
   switch ( message )
@@ -166,6 +172,7 @@ LPARAM           mp2
       break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function FolderListHandlerCallBack */
 
 
@@ -262,6 +269,7 @@ void FolderListAnalysis
   LPARAM           mp2
   )
 {
+#if 0
   PSZ pszObj;
 
   mp1; hwnd;
@@ -313,6 +321,7 @@ void FolderListAnalysis
       } /* endif */
     } /* endif */
   } /* endif */
+#endif
 }
 
 // helper function: add a single change information to the changes list
@@ -518,8 +527,10 @@ void FolderListFolderProperties
       } /* endif */
 
 
+#if 0
       DIALOGBOX( hwnd, FOLDERPROPSDLG, hResMod, ID_FOLDERPROPS_DLG,
                   pFolProp, iRC );
+#endif
       if ( !iRC)                          // result returned ?
       {
         // Add properties changed record to history log             
@@ -592,11 +603,13 @@ void FolderListFolderProperties
       pszParm = szFolName;
       UtlError( ERROR_OPEN_FOL_PROPERTIES, MB_CANCEL, 1, &pszParm,
                 EQF_ERROR );
+#if 0
       sItem = QUERYSELECTIONHWND( pCommArea->hwndLB );
       if ( sItem != LIT_NONE )
       {
         CLBSETITEMSTATEHWND( pCommArea->hwndLB, sItem, FALSE );
       } /* endif */
+#endif
     } /* endif */
   } /* endif */
 
@@ -620,6 +633,7 @@ WPARAM           mp1,
 LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
 
   switch ( message )
@@ -1423,6 +1437,7 @@ LPARAM           mp2
       break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function FolderListCallBack */
 
 /**********************************************************************/
@@ -1430,6 +1445,7 @@ LPARAM           mp2
 /**********************************************************************/
 MRESULT  FolderListCreateCall( PLISTCOMMAREA pCommArea )
 {
+#if 0
   MRESULT    mResult = MRFROMSHORT(FALSE);
   BOOL       fOK = TRUE;         // initialisation is O.K. flag
   EQFINFO    ErrorInfo;          // error info of property handler
@@ -1596,6 +1612,7 @@ MRESULT  FolderListCreateCall( PLISTCOMMAREA pCommArea )
     mResult = MRFROMSHORT(DO_NOT_CREATE);
   } /* endif */
   return mResult;
+#endif
 }
 
 /*+--------------------------------------------------------------------------+
@@ -1608,6 +1625,7 @@ HWND   lbox,                        // handle of listbox
 PSZ    pszBuffer                    // buffer for item text
 )
 {
+#if 0
   PVOID           hProp;              // handle of folder properties
   PPROPFOLDER     pProp;              // pointer to folder properties
   EQFINFO         ErrorInfo;          // error code of property handler calls
@@ -1789,6 +1807,7 @@ PSZ    pszBuffer                    // buffer for item text
   } /* endif */
 
   ENABLEUPDATEHWND_TRUE( lbox );
+#endif
 }
 
 BOOL FLLMakeFolderListItem
@@ -1947,6 +1966,7 @@ PSZ       pszBuffer                 // buffer to fill with folderlist item
 */
 PSZ QuerySelFolderName( PLISTCOMMAREA pCommArea, BOOL fCheckItemState )
 {
+#if 0
   PSZ  pszObject = NULL;
   SHORT sItem;
 
@@ -1973,6 +1993,7 @@ PSZ QuerySelFolderName( PLISTCOMMAREA pCommArea, BOOL fCheckItemState )
     } /* endif */
   } /* endif */
   return( pszObject );
+#endif
 }
 
 // function creating object name list of selected folders
@@ -1982,6 +2003,7 @@ int FolBuildSelItemslist
   PSZ              *ppszList
 )
 {
+#if 0
   int iSelItems, iItems;
   PSZ pszList = NULL;
 
@@ -2016,6 +2038,7 @@ int FolBuildSelItemslist
   } /* endif */
   *ppszList = pszList;
   return( iItems );
+#endif
 } /* end of function FolBuildSelItemslist */
 
 // check if directory for removed documents is empty
@@ -2051,6 +2074,7 @@ BOOL FolIsRemovedDirEmpty( PSZ pszFolObjName )
 // function to remove documents from a folder based on a list in a text file (GUI version)
 USHORT FolDeleteDocsFromList( HWND hwndOwner, PSZ pszFolObjName )
 {
+#if 0
   USHORT usRC = 0;                     // function return code
   int iNumOfDocs = 0;                  // number of documents deleted
   CHAR szFileName[MAX_LONGFILESPEC];
@@ -2086,6 +2110,7 @@ USHORT FolDeleteDocsFromList( HWND hwndOwner, PSZ pszFolObjName )
   } /* endif */
 
   return( usRC );
+#endif
 } /* end of function FolDeleteDocsFromList */
 
 

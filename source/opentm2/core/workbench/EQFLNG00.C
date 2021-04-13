@@ -27,20 +27,20 @@
 
 #define INCL_EQF_MORPH            // morphologic functions
 #define INCL_EQF_LIST             // terminology list functions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
-#include <eqflng00.h>             // Language update  h-file
-#include <eqflng00.id>            // Language Update id-file
+#include <EQFLNG00.H>             // Language update  h-file
+#include <EQFLNG00.ID>            // Language Update id-file
 // cv already included, see above
 //#include <eqf.h>                  // General Translation Manager include file
 
-#include "eqflist.id"             // List Handler IDs
-#include "eqflp.h"                // Defines for generic list handlers
+#include "EQFLIST.ID"             // List Handler IDs
+#include "EQFLP.H"                // Defines for generic list handlers
 #define   EQFLIST_C               // initialize variables in EQFLISTI.H
-#include "eqflisti.h"             // Private List Handler defines
-#include "eqfcolw.id"             // column width IDs
+#include "EQFLISTI.H"             // Private List Handler defines
+#include "EQFCOLW.ID"             // column width IDs
 
-#include "core\utilities\LanguageFactory.H"
+#include "../utilities/LanguageFactory.H"
 
 
 #define QUERYITEMSTATE( hwnd, sItem ) \
@@ -61,15 +61,15 @@ int AddLangToColumnLB( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEIN
   char szAsciiCP[10];
   char szAnsiCP[10];
 
-  ltoa( pInfo->lAsciiCP, szAsciiCP, 10 );
-  ltoa( pInfo->lAnsiCP, szAnsiCP, 10 );
+  strncpy(szAsciiCP, std::to_string(pInfo->lAsciiCP).c_str(), 10);
+  strncpy(szAnsiCP, std::to_string(pInfo->lAnsiCP).c_str(), 10);
 
   sprintf( szTextBuffer, LNG_ITEM_FORMAT, pInfo->szName, szAsciiCP, szAnsiCP, pInfo->szIsoCPName, pInfo->szIsoID, pInfo->szIcuID, pInfo->szLangGroup, 
     pInfo->isSourceLanguage ? "yes" : "no",
     pInfo->isTargetLanguage ? "yes" : "no",
     "?", "?" );
 
-  INSERTITEMHWND( (HWND)pvData, szTextBuffer ); 
+  //INSERTITEMHWND( (HWND)pvData, szTextBuffer ); 
 
   return( 0 ); 
 }
@@ -95,6 +95,7 @@ MRESULT LngListHandlerCallBack
   LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
 
   mp1;                                 // avoid compiler warnings
@@ -141,6 +142,7 @@ MRESULT LngListHandlerCallBack
       break;
   } /* endswitch */
   return( mResult );
+#endif
 }
 
 //+----------------------------------------------------------------------------+
@@ -163,6 +165,7 @@ MRESULT LngListCallBack
   LPARAM           mp2
 )
 {
+#if 0
   MRESULT          mResult = MRFROMSHORT(FALSE);
 
   switch ( msg )
@@ -510,6 +513,7 @@ MRESULT LngListCallBack
       break;
   } /* endswitch */
   return( mResult );
+#endif
 } /* end of function LanguageListCallBack */
 
 
