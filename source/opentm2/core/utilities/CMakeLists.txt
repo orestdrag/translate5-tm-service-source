@@ -13,7 +13,16 @@ set(Util_Source_Files
         EQFPRO00.C
         EQFUTFIL.C
         EQFUTDOS.C
-        EQFOBJ00.C)
+        EQFOBJ00.C
+#EQFUTLNG.CPP
+#EQFOSWIN.C
+#EQFUTDLG.CPP
+#EQFPROPS.CPP
+#OptionsDialog.CPP
+#UtlLangCP.C
+#UtlRegistry.c
+#EQFUTCLB.C
+)
 
 include_directories(${XERCESC_INCLUDE_DIR})
 add_library(Util ${Util_Source_Files})

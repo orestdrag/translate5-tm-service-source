@@ -24,4 +24,11 @@ target_link_libraries(OTMFUNC
                         PluginManager
                         Util
                         Workbench
-                        Common)
+                        Common
+                        #Analysis
+                        #Counting
+                        #Document
+                        #Lists
+                        #Services
+                        #Tagtable
+)
