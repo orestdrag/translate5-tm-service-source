@@ -14,9 +14,9 @@ set(Util_Source_Files
         EQFUTFIL.C
         EQFUTDOS.C
         EQFOBJ00.C
-#EQFUTLNG.CPP
-#EQFOSWIN.C
-#EQFUTDLG.CPP
+        EQFUTLNG.CPP
+        EQFOSWIN.C
+EQFUTDLG.CPP
 #EQFPROPS.CPP
 #OptionsDialog.CPP
 #UtlLangCP.C

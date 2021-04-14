@@ -9,18 +9,20 @@
 
 #define INCL_EQF_MORPH            // general morph functions
 #define INCL_EQF_TM               // general Transl. Memory functions
-#include <eqf.h>                  // General Translation Manager include file
-#include <eqflng00.h>             // specific defines for Language properties
-#include <eqfsetup.h>             // specific defines for Language properties
+#include <EQF.H>                  // General Translation Manager include file
+#include <EQFLNG00.H>             // specific defines for Language properties
+#include <EQFSETUP.H>             // specific defines for Language properties
 
 #include "LanguageFactory.H"
 
 
+#if 0
 // callback function to add languages to a combobox
 int AddLangToComboBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINFO pInfo  ){ pInfo; CBINSERTITEMHWND( (HWND)pvData, pszName ); return( 0 ); }
 
 // callback function to add languages to a listbox
 int AddLangToListBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINFO pInfo  ){ pInfo; INSERTITEMHWND( (HWND)pvData, pszName ); return( 0 ); }
+#endif
 
 
 /*+---------------------------------------------------------------------------+
@@ -65,6 +67,7 @@ int AddLangToListBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINF
                          USHORT usBoxType
                        )
 {
+#if 0
   HDIR             hSearch = HDIR_CREATE; // Directory handle for DosFindxxx calls
   FILEFINDBUF      stFile;                // Output buffer of DosFindxxx
   USHORT           usDosRc;               // function return code of Dos calls
@@ -144,6 +147,7 @@ int AddLangToListBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINF
   ENABLEUPDATEHWND_TRUE( hListBox );
 
   return ( usNumbOfItems );
+#endif
 } /* end of function UtlFillTableLB */
 
 //+----------------------------------------------------------------------------+
@@ -308,7 +312,7 @@ BOOL UtlQuerySysLangFile
         /**************************************************************/
         /* compare the language name                                  */
         /**************************************************************/
-        if ( _strnicmp( pszStart, pszLanguage, strlen(pszLanguage) ) == 0 )
+        if ( strncasecmp( pszStart, pszLanguage, strlen(pszLanguage) ) == 0 )
         {
           PSZ pszTarget;
 
@@ -665,18 +669,20 @@ SHORT UtlFillSysLangPopUp
           fOK = UtlFileExist(szSysPath );
         } /* endif */
 
+#if 0
         /**************************************************************/
         /* Insert language menu item                                  */
         /**************************************************************/
         if ( fOK )
         {
-          BOOL fChecked = _stricmp( szLanguage, pszCurLanguage ) == 0;
+          BOOL fChecked = strcasecmp( szLanguage, pszCurLanguage ) == 0;
           InsertMenu( hMenu, sDummy,
                         (( fChecked ) ? MF_CHECKED : MF_UNCHECKED ) |
                         MF_BYCOMMAND,
                         sID++, szLanguage );
           sItems++;
         } /* endif */
+#endif
       } /* endif */
 
       /****************************************************************/
@@ -696,7 +702,7 @@ SHORT UtlFillSysLangPopUp
   /********************************************************************/
   /* Remove dummy menu item                                           */
   /********************************************************************/
-  DeleteMenu( hMenu, sDummy, MF_BYCOMMAND );
+  //DeleteMenu( hMenu, sDummy, MF_BYCOMMAND );
   /********************************************************************/
   /* cleanup                                                          */
   /********************************************************************/
@@ -840,6 +846,16 @@ static char szChachedLang2[MAX_LANG_LENGTH] = "";
 static ULONG ulCachedCP1 = 0;
 static ULONG ulCachedCP2 = 0;
 
+static char* strupr(char *str)
+{
+    char *tmp = str;
+    while(*tmp) {
+        *tmp = toupper((unsigned char)*tmp);
+        ++tmp;
+    }
+    return str;
+}
+
 static ULONG InternalGetLangOEMCP
 (
  PSZ pszLanguage
@@ -863,7 +879,7 @@ static ULONG InternalGetLangOEMCP
 
   // check if language is already in our cache
   strcpy( szUprLanguage, pszLanguage );
-  _strupr( szUprLanguage );
+  strupr( szUprLanguage );
   while ( (i < iLangCacheUsed) && !fFound )
   {
     if ( strcmp( szUprLanguage, LangCache[i].szLanguage ) == 0 )

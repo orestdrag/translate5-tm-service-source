@@ -11,10 +11,10 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMorphPlugin.h"
-#include "core\PluginManager\OtmMorph.h"
-#include "core\utilities\LogWriter.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMorphPlugin.h"
+#include "../pluginmanager/OtmMorph.h"
+#include "../utilities/LogWriter.h"
 
 /*! \brief   This class provides factory methods for morphology objects 
 */

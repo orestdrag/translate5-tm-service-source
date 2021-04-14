@@ -15,33 +15,33 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_TP               // public translation processor functions
 
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #undef _WPTMIF                         // we don't care about WP I/F
-#include "eqfhelp.id"                  // help resource IDs
-#include "eqfhlp1.h"                   // first part of help tables
-#include "eqfmsg.htb"                          // message help table
+#include "EQFHELP.ID"                  // help resource IDs
+#include "EQFHLP1.H"                   // first part of help tables
+//#include "EQFMSG.HTB"                          // message help table
 
-#include <eqfutils.id>            // IDs used by dialog utilities
-#include <eqftwb.id>              // IDs of other TWB dialogs
-#include <eqfutpri.h>             // private defines
-#include <eqfdoc01.id>             // private defines
-#include <eqfdoc01.h>             // private defines
-#include <eqfhlog.h>              // history log defines
+#include <EQFUTILS.ID>            // IDs used by dialog utilities
+#include <EQFTWB.ID>              // IDs of other TWB dialogs
+#include <EQFUTPRI.H>             // private defines
+#include <EQFDOC01.ID>             // private defines
+#include <EQFDOC01.H>             // private defines
+#include <EQFHLOG.H>              // history log defines
 #include <OTMFUNC.H>              // API calls
 
 #include <time.h>
-#include <io.h>
-#include <process.h>
+//#include <io.h>
+//#include <process.h>
 #include <string>
 #include <vector>
-#include <core\utilities\LogWriter.h>
-#include "core\memory\memoryfactory.h"
-#include "core\pluginmanager\PluginManager.h"
-#include "core\pluginmanager\OtmMarkup.h"
-#include "core\pluginmanager\OtmMarkupPlugin.h"
-#include "core\morph\MorphFactory.h"
-#include "markuppluginmapper.h"
+#include "LogWriter.h"
+#include "../memory/MemoryFactory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMarkup.h"
+#include "../pluginmanager/OtmMarkupPlugin.h"
+#include "../morph/MorphFactory.h"
+#include "MarkupPluginMapper.H"
 #include "OtmDictionaryIF.H"
 
 
@@ -258,6 +258,7 @@ BOOL FolRenameFolder( PSZ pszOldAndNewName, BOOL fMsg );
 VOID UtlControlsInit( HWND hwndDlg,              //window handle
                       PCONTROLSIDA pControlsIda )  //pointer to controls ida
 {
+#if 0
   USHORT      usId = 0;               //id of drive
   SHORT       sRc;                    //FillFileDir return code
   USHORT      usDrive;                //drive btn id
@@ -457,6 +458,7 @@ VOID UtlControlsInit( HWND hwndDlg,              //window handle
   } /* endif */
 
   ANSITOOEM( pControlsIda->szSelectedName );
+#endif
 
 }  /* end UtlControlsInit */
 
@@ -470,6 +472,7 @@ LPARAM           mp2,                // second message parameter
 PCONTROLSIDA pControlsIda            // pointer to ida
 )
 {
+#if 0
   MRESULT     mResult = (MRESULT)FALSE; //return code of this function
   HWND        hwndFocus;                //handle for input focus
 
@@ -506,6 +509,7 @@ PCONTROLSIDA pControlsIda            // pointer to ida
     } /* endif */
   } /* endif */
   return( mResult );
+#endif
 } /* end of function UtlDMGETDEFID */
 
 //+----------------------------------------------------------------------------+
@@ -635,6 +639,7 @@ SHORT  sNotification,                // notification
 PCONTROLSIDA pControlsIda            //ida with dialog ctl info
 )
 {
+#if 0
   SHORT       sIndexItem;                  //index for list box items
   PSZ         pszPointer;                  //pointer to string with dir info
   USHORT      usRc = TRUE;                 //process return code
@@ -1032,6 +1037,7 @@ PCONTROLSIDA pControlsIda            //ida with dialog ctl info
     ClearIME( hwndDlg );
   } /* endif */
   return( mResult );
+#endif
 } /* end of function DialogControls */
 
 //+----------------------------------------------------------------------------+
@@ -1158,6 +1164,7 @@ PCONTROLSIDA pControlsIda            //ida with dialog ctl info
 
 BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
 {
+#if 0
   USHORT      usRc = TRUE;                 //process return code
   USHORT      usId = 0;                    //selected drive id
   USHORT      usDrive;                     //selected drive
@@ -1710,6 +1717,7 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
     } /* endif */
   } /* endif */
   return(fOK);
+#endif
 } /* end UtlEFValidityTest */
 
 //+----------------------------------------------------------------------------+
@@ -1782,6 +1790,7 @@ BOOL             fMsg                // show messages flag
 )
 {
 
+#if 0
   SHORT  sRc;                      //return code
   SHORT  sFlags;                   // flags to be used for UtlLoadFileNames
   BOOL   fLongFileNames = FALSE;   // use-long-file-name-functions flag
@@ -1936,6 +1945,7 @@ BOOL             fMsg                // show messages flag
   SETCURSOR( SPTR_ARROW );
 
   return( sRc );
+#endif
 } /* end of function UtlFillFileDir */
 
 //+----------------------------------------------------------------------------+
@@ -2111,6 +2121,7 @@ HWND             hwndOwner,          // owner window of dialog
 PSZ              pszFileName         // ptr to filename buffer
 )
 {
+#if 0
   BOOL             fSet;               // return code of dialog
   HMODULE hResMod;
   hwndParent;                          // get rid of compiler warnings
@@ -2119,6 +2130,7 @@ PSZ              pszFileName         // ptr to filename buffer
   DIALOGBOX( hwndOwner, UTLSETFILEDLG, hResMod, ID_UTL_SETFILE_DLG,
              pszFileName, fSet );
   return( fSet );
+#endif
 } /* end of function UtlSetOutputFileNameDlg */
 
 //+----------------------------------------------------------------------------+
@@ -2194,6 +2206,7 @@ WPARAM mp1,                         // first message parameter
 LPARAM mp2                          // second message parameter
 )
 {
+#if 0
   /********************************************************************/
   /*                         local variables                          */
   /********************************************************************/
@@ -2386,6 +2399,7 @@ LPARAM mp2                          // second message parameter
   } /* endswitch */
 
   return( mResult );
+#endif
 
 } /* end of function UtlSetFileDlg */
 
@@ -2428,6 +2442,7 @@ PSZ         pszObjName,              // name of object
 CLASSES     ObjectClass              // class of object (e.g. clsFolder)                      
 )
 {
+#if 0
   USHORT      usRC = NO_ERROR;         // function return code
   PRENAMEDLGIDA pIDA = NULL;           // rename dialog IDA
   BOOL        fLocked = FALSE;         // object-has-been-locked flag
@@ -2542,6 +2557,7 @@ CLASSES     ObjectClass              // class of object (e.g. clsFolder)
 
   // return to caller
   return( usRC );
+#endif
 
 } /* end of function UtlRenameObjectDlg */
 
@@ -2615,7 +2631,7 @@ USHORT UtlAdjustFolderReferences
           strcpy( pData->stFolProp.szMemory, pData->szNewShortName );
           fPropChanged = TRUE;
         } /* endif */
-        if ( stricmp( pData->stFolProp.szLongMemory, pData->szOldName ) == 0 )
+        if ( strcasecmp( pData->stFolProp.szLongMemory, pData->szOldName ) == 0 )
         {
           strcpy( pData->stFolProp.szLongMemory, pData->szNewName );
           fPropChanged = TRUE;
@@ -2626,7 +2642,7 @@ USHORT UtlAdjustFolderReferences
           int i = 0;
           while ( (i < MAX_NUM_OF_READONLY_MDB) && (pData->stFolProp.aLongMemTbl[i][0] != EOS) )
           {
-            if ( stricmp( pData->szOldName, pData->stFolProp.aLongMemTbl[i] ) == 0 )
+            if ( strcasecmp( pData->szOldName, pData->stFolProp.aLongMemTbl[i] ) == 0 )
             {
               strcpy( pData->stFolProp.aLongMemTbl[i], pData->szNewName );
               fPropChanged = TRUE;
@@ -2849,7 +2865,7 @@ USHORT UtlAdjustReferences
       if ( (FileFindData.nFileSizeHigh != 0) || (FileFindData.nFileSizeLow != 0) )
       {
         // check if we deal with a real file or the dummy file containing the folder long name
-        if ( _stricmp( FileFindData.cFileName, szFolName ) != 0 )
+        if ( strcasecmp( FileFindData.cFileName, szFolName ) != 0 )
         {
           fMoreFilesExist = TRUE;
         } /* endif */

@@ -11,9 +11,9 @@
 #define _MARKUPPLUGINMAPPER_H_
 
 #include "vector"
-#include "core\pluginmanager\PluginManager.h"
-#include "core\pluginmanager\OtmMarkup.h"
-#include "core\pluginmanager\OtmMarkupPlugin.h"
+#include "../source/opentm2/core/pluginmanager/PluginManager.h"
+#include "../source/opentm2/core/pluginmanager/OtmMarkup.h"
+#include "../source/opentm2/core/pluginmanager/OtmMarkupPlugin.h"
 
 // find a markup table object by markup table name
 __declspec(dllexport)

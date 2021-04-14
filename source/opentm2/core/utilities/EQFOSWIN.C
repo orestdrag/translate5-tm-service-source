@@ -9,13 +9,14 @@
 
 #include <time.h>
 #include <locale.h>
-#include "eqf.h"
+#include "EQF.H"
 
-#include <tchar.h>
+//#include <tchar.h>
 
 // temporary defines to compile without DBCS LIB
 USHORT dbcscp = 0;
 
+#if 0
 /**********************************************************************/
 /* substitute WinQueryWindow call                                     */
 /**********************************************************************/
@@ -519,6 +520,7 @@ COLORREF UtlGetColorref( LONG lColor )
 
   return rgbColor;
 }
+#endif
 
 /*
  * DriveType
@@ -550,7 +552,7 @@ USHORT EqfDriveType(USHORT iDrive)
         {
       CHAR szRoot[4] = "A:\\";
       szRoot[0] = (CHAR)('A' + iDrive);
-      iType=(USHORT)GetDriveType(szRoot);
+      //iType=(USHORT)GetDriveType(szRoot);
         }
     /*
      * Under Windows NT, GetDriveType returns complete information
@@ -564,6 +566,7 @@ USHORT EqfDriveType(USHORT iDrive)
 SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
 {
 
+#if 0
   LONG             lItemData;          // buffer for item data
     BOOL             fSelected = FALSE;  // item-is-selected flag
     SHORT            sCurSelection;      // index of currently selected item
@@ -657,6 +660,7 @@ SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
     InvalidateRect( hwndLB, NULL, FALSE );
     UpdateWindow( hwndLB );
 
+#endif
     return( 0 );
   } /* end of function LBSetItemTextW */
 
@@ -666,6 +670,7 @@ SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
 /**********************************************************************/
 SHORT LBSetItemText( HWND hwndLB, SHORT index, PSZ pText )
 {
+#if 0
   LONG             lItemData;          // buffer for item data
   BOOL             fSelected = FALSE;  // item-is-selected flag
   SHORT            sCurSelection;      // index of currently selected item
@@ -760,6 +765,7 @@ SHORT LBSetItemText( HWND hwndLB, SHORT index, PSZ pText )
   InvalidateRect( hwndLB, NULL, FALSE );
   UpdateWindow( hwndLB );
 
+#endif
   return( 0 );
 } /* end of function LBSetItemText */
 
@@ -772,6 +778,7 @@ unsigned int _IsUnicodeSystem; // global variable
 
 VOID InitUnicode( VOID )
 {
+#if 0
     OSVERSIONINFO Osv ;
 
     Osv.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
@@ -795,6 +802,7 @@ VOID InitUnicode( VOID )
 
        exit(1);
     }
+#endif
 }
 
 BOOL IsUnicodeSystem()
@@ -807,6 +815,7 @@ VOID initdbcs( VOID )
 {
   unsigned int cp;
 
+#if 0
   cp = GetOEMCP();                     // Gets OEM Codepage
   switch(cp)
   {
@@ -823,6 +832,7 @@ VOID initdbcs( VOID )
       _dbcs_cp = NON_DBCS_CP;
       break;
   } /* endswitch */
+#endif
 
   return;
 }
@@ -836,6 +846,7 @@ BOOL UserDefaultLangIsAPLang()
 
   LANGID LangId;
 
+#if 0
   LangId = GetUserDefaultLangID();
 
   switch (LangId)
@@ -854,6 +865,7 @@ BOOL UserDefaultLangIsAPLang()
         return FALSE;
         break;
   }
+#endif
 }
 
 /**********************************************************************/
@@ -1011,6 +1023,7 @@ VOID SetCtrlFnt
    USHORT  usCtrl2ndId
 )
 {
+#if 0
       LOGFONT lFont;
       HFONT   hFontDlg;
 
@@ -1049,6 +1062,7 @@ VOID SetCtrlFnt
           }
         }
 //      }
+#endif
    return;
 } /* end of SetCtrlFnt */
 
@@ -1058,6 +1072,7 @@ VOID SetCtrlFntHwnd
    USHORT  lfCharSet
 )
 {
+#if 0
    LOGFONT lFont;
    HFONT   hFontDlg;
 
@@ -1083,9 +1098,11 @@ VOID SetCtrlFntHwnd
        }
      }
    }
+#endif
    return;
 } /* end of SetCtrlFntHwnd */
 
+#if 0
 //------------------------------------------------------------------------------
 // Function name:     DelCtrlFont
 //------------------------------------------------------------------------------
@@ -1196,6 +1213,7 @@ VOID ClearIME
   return;
 } /* end of ClearIME */
 
+#endif
 
 //------------------------------------------------------------------------------
 // External function
@@ -1222,6 +1240,7 @@ USHORT GetCharSet ( VOID )
 {
   USHORT   usCharSet = 0;                 // define of characterset
   DWORD         dwCodePage;
+#if 0
   CHARSETINFO  cs;
   CHAR         cp[10];
 
@@ -1292,6 +1311,7 @@ USHORT GetCharSet ( VOID )
 //  } /* endswitch */
 //
 //} /* endif */
+#endif
    return (usCharSet);
 } /* end of GetCharSet */
 
@@ -1492,6 +1512,7 @@ USHORT WPToEQFConv
   return( (USHORT)(pwzData - pStart + 1));
 } /* end of function WPToEQFConv */
 
+#if 0
 /**********************************************************************/
 /* Substition for OS/2 PM WinRegisterWindow function                  */
 /**********************************************************************/
@@ -2048,3 +2069,4 @@ void ERASERECT(HDC hdc, const RECT* pRect, LONG bg)
 	SelectObject(hdc, hbrOld);
 	DeleteObject(hbr);
 }
+#endif

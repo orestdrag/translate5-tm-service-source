@@ -7,7 +7,7 @@
 
 #ifndef OtmMorph_h__
 #define OtmMorph_h__
-#include <windows.h>
+//#include <windows.h>
 #include "string"
 #include "vector"
 using namespace std;
