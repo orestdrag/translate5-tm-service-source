@@ -121,6 +121,7 @@
   #define LOGCLOSE()
 #endif
 
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 // import a Translation Memory
@@ -311,6 +312,8 @@ USHORT EqfDeleteMem
 
   return( usRC );
 } /* end of function EqfDeleteMem */
+
+#endif // TEMPORARY_COMMENTED
 
 // OtmMemoryService
 USHORT EqfStartSession
@@ -574,6 +577,8 @@ USHORT EqfStartSession
 
   return( usRC );
 } /* end of function EqfStartSession */
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 USHORT EqfGetLastError
@@ -1184,3 +1189,5 @@ USHORT EqfGetIsoLang
 
   return( usRC );
 }
+
+#endif //TEMPORARY_COMMENTED

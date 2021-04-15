@@ -2723,7 +2723,7 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     }
     else
     {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       WinMessageBox( HWND_DESKTOP, HWND_DESKTOP, STR_INSTALL_ERROR,
                      STR_INSTALL_ERROR_TITLE,
                      1, MB_ENTER | MB_ICONEXCLAMATION);

@@ -10,9 +10,9 @@
 */
 
 #include "vector"
-#include "core\pluginmanager\PluginManager.h"
-#include "core\pluginmanager\OtmMarkup.h"
-#include "core\pluginmanager\OtmMarkupPlugin.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMarkup.h"
+#include "../pluginmanager/OtmMarkupPlugin.h"
 
 #ifndef CPPTEST
 extern "C"
@@ -21,8 +21,8 @@ extern "C"
   #define INCL_EQF_TAGTABLE         // tag table and format functions
 
   #pragma pack( push, TM2StructPacking, 1 )
-  #include "eqf.h"                  // General .H for EQF
-  #include "eqftag00.h"             // markup table info
+  #include "EQF.H"                  // General .H for EQF
+  #include "EQFTAG00.H"             // markup table info
   #pragma pack( pop, TM2StructPacking )
 
 #ifndef CPPTEST
@@ -80,6 +80,7 @@ void InitMarkupPluginMapper()
 	
 */
 
+#ifdef TEMPORARY_COMMENTED
 __declspec(dllexport)
 USHORT MUFillLBWithMarkups( HWND hwndLBox, PSZ pszBuffer, int iBufSize, MUFILLTYPES eFillType )
 {
@@ -152,6 +153,7 @@ USHORT MUFillLBWithMarkups( HWND hwndLBox, PSZ pszBuffer, int iBufSize, MUFILLTY
 
    return( usCount );
 } /* end of function MUFillLBWithMarkups */
+#endif //TEMPORARY_COMMENTED
 
 // find a markup table object by markup table name
 __declspec(dllexport)
@@ -163,8 +165,8 @@ __declspec(dllexport)
   for( int i = 0; i < (int)pluginList->size(); i++) {
      OtmMarkupPlugin* curPlugin = (*pluginList)[i];
      if ( ( pszPlugin == NULL ) || 
-          ( ! stricmp( curPlugin->getName(), pszPlugin ) ) ||
-          ( ! stricmp( curPlugin->getShortName(), pszPlugin ) ) ) 
+          ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
+          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) 
      { 
         pMarkup = curPlugin->getMarkup( pszMarkup );
         if ( pMarkup != NULL ) 
@@ -185,8 +187,8 @@ __declspec(dllexport)
   // loop through all markup table plugins 
   for( int i = 0; i < (int)pluginList->size(); i++) {
      OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-     if ( ( ! stricmp( curPlugin->getName(), pszPlugin ) ) ||
-          ( ! stricmp( curPlugin->getShortName(), pszPlugin ) ) ) 
+     if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
+          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) 
      { 
         return( curPlugin );
      }
@@ -280,8 +282,8 @@ BOOL TagMakeListItem( PSZ pszMarkup, PSZ pszPlugin, PSZ pszBuffer, int iBufSize 
      if ( pPlugin ) {
         for( i = 0; i < (int)pluginList->size(); i++) {
            curPlugin = (*pluginList)[i];
-           if ( ( ! stricmp( curPlugin->getName(), pPlugin ) ) ||
-                ( ! stricmp( curPlugin->getShortName(), pPlugin ) ) ) { 
+           if ( ( ! strcasecmp( curPlugin->getName(), pPlugin ) ) ||
+                ( ! strcasecmp( curPlugin->getShortName(), pPlugin ) ) ) { 
               break;
            }
         }
@@ -373,8 +375,8 @@ BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer
   if ( pszPlugin != NULL ) {
      for( int i = 0; i < (int)pluginList->size(); i++) {
         OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-        if ( ( ! stricmp( curPlugin->getName(), pszPlugin ) ) ||
-             ( ! stricmp( curPlugin->getShortName(), pszPlugin ) ) ) { 
+        if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
+             ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) { 
            strncpy( pszBuffer, curPlugin->getTablePath(), iBufSize ) ;
            pszBuffer[iBufSize-strlen(pszMarkup)-6] = NULL ;
            strcat( pszBuffer, "\\" ) ;
@@ -418,6 +420,7 @@ BOOL MUGetMarkupTablePlugin( char *pszMarkup, char *pszBuffer, int iBufSize )
 }
 
 
+#ifdef TEMPORARY_COMMENTED
 // load a markup table TBL file into memory
 __declspec(dllexport)
 BOOL MULoadMarkupTableFile( char *pszMarkup, char *pszPlugin, PVOID *ppLoadedTable, BOOL fErrorHandling )
@@ -431,6 +434,7 @@ BOOL MULoadMarkupTableFile( char *pszMarkup, char *pszPlugin, PVOID *ppLoadedTab
   } /* end */     
   return( false );
 }
+#endif //TEMPORARY_COMMENTED
 
 
 // update the files of a markup table

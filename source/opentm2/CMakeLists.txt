@@ -20,15 +20,15 @@ add_subdirectory(tools)
 add_library(OTMFUNC ${API_Source_Files})
 
 target_link_libraries(OTMFUNC
-                        Memory
+                       # Memory
                         PluginManager
                         Util
-                        Workbench
+                       # Workbench
                         Common
-                        #Analysis
-                        #Counting
-                        #Document
-                        #Lists
-                        #Services
-                        #Tagtable
+                    #Analysis
+                    #Counting
+                    Document
+                    #Lists
+                    #Services
+                    Tagtable
 )

@@ -3950,7 +3950,8 @@ typedef struct _ERRDATA                // global data of UtlError
 VOID UtlSetULong( SHORT sID, ULONG ulValue );
 //VOID UtlSetString( SHORT sID, const PSZ pszString );
 void UtlSetString( short sID, const char *pszString );
-VOID UtlSetUShort( SHORT sID, USHORT usValue );
+//VOID UtlSetUShort( SHORT sID, USHORT usValue );
+void UtlSetUShort( short sID, unsigned short usValue );
 
 
 /**********************************************************************/

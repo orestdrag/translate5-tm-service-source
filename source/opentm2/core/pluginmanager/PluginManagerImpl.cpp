@@ -47,6 +47,7 @@ PluginManagerImpl::~PluginManagerImpl()
 	delete pluginSet;
 }
 
+#ifdef TEMPORARY_COMMENTED
 PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
@@ -146,6 +147,8 @@ PluginManager::eRegRc PluginManagerImpl::deregisterPlugin(OtmPlugin* plugin)
 	return eRc;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 int PluginManagerImpl::getPluginCount()
 {
 	return pluginSet->size();
@@ -212,6 +215,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 
   BOOL fLogHasBeenOpened = FALSE;
 
+#ifdef TEMPORARY_COMMENTED
 #ifdef _DEBUG
   if ( !this->Log.isOpen() )
   {
@@ -220,24 +224,30 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
   } /* end */     
   this->Log.writef( "Loading plugin DLLs from directory %s...", pszPluginDir );
 #endif
+#endif //TEMPORARY_COMMENTED
 
+#ifdef TEMPORARY_COMMENTED
   // check the depths of the cycle
-  if (IsDepthOvered( pszPluginDir ))
+  if (IsDepthOvered( pszPluginDir )) // util
   {
+#ifdef TEMPORARY_COMMENTED
       this->Log.writef( "...skipping directory, max. nesting level reached" );
       if ( fLogHasBeenOpened ) this->Log.close();
+#endif
       return usRC;
   }
+#endif // TEMPORARY_COMMENTED
 
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
 
 	strFileSpec += "\\*.dll";
-  this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
+//TEMPORARY_COMMENTED
+ // this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
 
 	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
   
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( hDir != INVALID_HANDLE_VALUE )
   {
     fMoreFiles = TRUE;
@@ -249,11 +259,13 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
           // Modify for P403115 start
           if (DllNameCheck(strDll.c_str()))
           {
-              this->Log.writef( "   found DLL %s", strDll.c_str() );
+//TEMPORARY_COMMENTED
+//              this->Log.writef( "   found DLL %s", strDll.c_str() );
           }
           else
           {
-              this->Log.writef("Error:   DLL %s is not valid, skip", strDll.c_str());
+//TEMPORARY_COMMENTED
+//              this->Log.writef("Error:   DLL %s is not valid, skip", strDll.c_str());
               //fMoreFiles= FindNextFile(hDir, &ffb);
               continue;
           }
@@ -262,8 +274,9 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
           // Add for P402974 start
           if (PluginManager::ePluginExpired == usSubRC)
           {
+//TEMPORARY_COMMENTED
               // expired is the highest authority
-              this->Log.writef("Error:   DLL %s is expired.", strDll.c_str());
+//              this->Log.writef("Error:   DLL %s is expired.", strDll.c_str());
               usRC = usSubRC;
           }
           else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
@@ -279,7 +292,8 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
   else
   {
     int iRC = 0;//GetLastError();
-    this->Log.writef( "   FindFirstFile failed with rc=%ld", iRC );
+//TEMPORARY_COMMENTED
+//    this->Log.writef( "   FindFirstFile failed with rc=%ld", iRC );
   } /* endif */     
 #endif
 
@@ -287,7 +301,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 	strFileSpec = pszPluginDir;
 	strFileSpec += "\\*";
 	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( hDir != INVALID_HANDLE_VALUE )
   {
     fMoreFiles = TRUE;
@@ -303,8 +317,9 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
               // Add for P402974 start
               if (PluginManager::ePluginExpired == usSubRC)
               {
+//TEMPORARY_COMMENTED
                   // expired is the highest authority
-                  this->Log.writef("Error:   DLL %s is expired.", strSubdir.c_str());
+//                  this->Log.writef("Error:   DLL %s is expired.", strSubdir.c_str());
                   usRC = usSubRC;
               }
               else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
@@ -319,15 +334,19 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
     //FindClose( hDir );
   } /* endif */     
 #endif
-  this->Log.write( "   ...Done" );
+//TEMPORARY_COMMENTED
+//  this->Log.write( "   ...Done" );
 
 	// disallow calling the registerPlugin()-method
 	bRegisterAllowed = false;
 	
-  if ( fLogHasBeenOpened ) this->Log.close();
+//TEMPORARY_COMMENTED
+//  if ( fLogHasBeenOpened ) this->Log.close();
 
   return usRC;     // Add for P402974
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 {
@@ -349,7 +368,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 	//HMODULE hMod = LoadLibrary(pszName);
     //SetErrorMode(0);
     this->Log.writef( "   Loading plugin %s", pszName );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 	if (hMod != 0)
 	{
     //this->Log.writef( "   Plugin %s successfully loaded", pszName );
@@ -763,3 +782,4 @@ BOOL DllNameCheck(const char * strName)
 #endif
 }
 // Add end
+#endif //TEMPORARY_COMMENTED

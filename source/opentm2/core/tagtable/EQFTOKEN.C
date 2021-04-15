@@ -79,10 +79,10 @@
 #define INCL_EQF_ANALYSIS         // analysis functions
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions
 #define INCL_EQF_TP               // public translation processor functions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
-#include "eqftai.h"               // Private include file for Text Analysis
-#include "eqftag00.h"             
+#include "EQFTAI.H"               // Private include file for Text Analysis
+#include "EQFTAG00.H"             
 
 #define DBLQUOTE   '\"'                     // double quote character (")
 

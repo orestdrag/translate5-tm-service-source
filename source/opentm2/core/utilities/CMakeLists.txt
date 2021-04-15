@@ -2,21 +2,21 @@ cmake_minimum_required (VERSION 3.10)
 project(OpenTM2_Util)
 
 set(Util_Source_Files
-        LanguageFactory.CPP
-        LogWriter.cpp
-        OtmProposal.cpp
+       # LanguageFactory.CPP
+       # LogWriter.cpp
+       # OtmProposal.cpp
         UtlAlloc.C
         UtlMATVal.c
-        UtlMisc.cpp
-        UtlString.C
-        EQFUTERR.C
-        EQFPRO00.C
-        EQFUTFIL.C
-        EQFUTDOS.C
-        EQFOBJ00.C
-        EQFUTLNG.CPP
-        EQFOSWIN.C
-EQFUTDLG.CPP
+       # UtlMisc.cpp
+       # UtlString.C
+       # EQFUTERR.C
+       # EQFPRO00.C
+       # EQFUTFIL.C
+       # EQFUTDOS.C
+       # EQFOBJ00.C
+       # EQFUTLNG.CPP
+       # EQFOSWIN.C
+#EQFUTDLG.CPP
 #EQFPROPS.CPP
 #OptionsDialog.CPP
 #UtlLangCP.C

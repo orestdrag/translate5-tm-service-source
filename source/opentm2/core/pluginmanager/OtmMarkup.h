@@ -4,6 +4,7 @@
 #define _OTMMARKUP_H_
 
 #include <string>
+#include "win_types.h"
 
 #define  UPDATE_MARKUP_ERROR    0
 #define  UPDATE_MARKUP_OK       1

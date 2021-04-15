@@ -18,10 +18,12 @@ USHORT InitializePlugins( char *szPluginPath )
     USHORT usRC = NO_ERROR;         // function return code (add for P402974)
 	PluginManager* thePluginManager = PluginManager::getInstance();
 	usRC = thePluginManager->loadPluginDlls(szPluginPath);   // add for P402974
-	InitTMPluginWrapper();
-	InitDictPluginWrapper();
-	InitMarkupPluginMapper();
-	InitDocumentPluginMapper();
+#ifdef TEMPORARY_COMMENTED
+	InitTMPluginWrapper(); // seems like an empty method
+	InitDictPluginWrapper(); // dictionary is not needed
+#endif
+	InitMarkupPluginMapper(); // tagtable
+	InitDocumentPluginMapper(); // document
 
     return usRC;
 }

@@ -58,6 +58,7 @@ PluginManager* PluginManager::getInstance()
 	return instance;
 }
 
+#ifdef TEMPORARY_COMMENTED
 PluginManager::eRegRc PluginManager::registerPlugin(OtmPlugin* plugin)
 {
 	return instance->pImpl->registerPlugin(plugin);
@@ -67,6 +68,7 @@ PluginManager::eRegRc PluginManager::deregisterPlugin(OtmPlugin* plugin)
 {
 	return instance->pImpl->deregisterPlugin(plugin);
 }
+#endif //TEMPORARY_COMMENTED
 
 int PluginManager::getPluginCount()
 {
@@ -92,6 +94,8 @@ USHORT PluginManager::loadPluginDlls(const char* pszPluginDir)
 {
 	return instance->pImpl->loadPluginDlls(pszPluginDir);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 bool PluginManager::stopPlugin( OtmPlugin* pPlugin, bool fForce )
 {
@@ -155,6 +159,8 @@ void PluginManager::processToolCommand( int iCommandID )
 {
   instance->pImpl->processToolCommand( iCommandID ) ;
 }
+
+#endif //TEMPORARY_COMMENTED
 
 // Add for P403138 start
 int PluginManager::ValidationCheck(char * strParam)

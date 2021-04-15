@@ -42,7 +42,6 @@ Copyright Notice:
 /** Initialize the static instance variable */
 MemoryFactory* MemoryFactory::instance = 0;
 
-
 /*! \brief This static method returns a pointer to the MemoryFactory object.
 	The first call of the method creates the MemoryFactory instance.
 */

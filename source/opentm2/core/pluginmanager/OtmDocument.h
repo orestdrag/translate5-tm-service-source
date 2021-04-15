@@ -11,12 +11,12 @@
 #ifndef CPPTEST
 extern "C" {
 #endif
-#include "eqf.h"
-#include "otmapi.h"
-#include "eqftag.h"
-#include "eqftp.h"
-#include "eqftpi.h"
-#include "eqfhlog.h"
+#include "EQF.H"
+#include "OTMAPI.H"
+#include "EQFTAG.H"
+#include "EQFTP.H"
+#include "EQFTPI.H"
+#include "EQFHLOG.H"
 #ifndef CPPTEST
 }
 #endif

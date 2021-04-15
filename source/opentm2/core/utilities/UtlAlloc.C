@@ -90,6 +90,7 @@ BOOL UtlAlloc
   return fSuccess;
 } /* end of function UtlAlloc */
 
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -123,6 +124,7 @@ BOOL UtlAllocHwnd
   return( fOK );
 } /* end of UtlAllocHwnd */
 
+#endif //TEMPORARY_COMMENTED
 
 PVOID UtlIntAlloc
 (
@@ -301,7 +303,9 @@ PVOID UtlIntAlloc
   {
     if ( usMessageNo != NOMSG )
     {
+#ifdef TEMPORARY_COMMENTED
       UtlError( usMessageNo, MB_CANCEL, 0, NULL, EQF_ERROR );
+#endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
   return( pStorage );
@@ -481,13 +485,13 @@ USHORT UtlGetTask ( void )
   WORD   usTask;
   USHORT currTask;
 
-#if 0 //
+#ifdef TEMPORARY_COMMENTED
         _asm
           {
             mov      ax, SS
             mov      usTask, ax
           }
-#endif
+#endif //TEMPORARY_COMMENTED
   for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
   {
     if ( UtiVar[currTask].usTask == usTask )

@@ -120,7 +120,7 @@ VOID UtlSetULong( SHORT sID, ULONG ulValue )
 // Parameters:        sID is the ushort ID (QS_...)                             
 //                    usValue is the value for the ushort                       
 //------------------------------------------------------------------------------
-VOID UtlSetUShort( SHORT sID, USHORT usValue )
+void UtlSetUShort( short sID, unsigned short usValue )
 {
    if ( (sID > QS_FIRST) && (sID < QS_LAST) )
    {

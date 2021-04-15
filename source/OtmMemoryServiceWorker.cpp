@@ -150,6 +150,7 @@ int OtmMemoryServiceWorker::verifyAPISession
   return( this->iLastRC );
 }
 
+#ifdef TEMPORARY_COMMENTED
 /*! \brief build return JSON string in case of errors
   \param iRC error return code
   \param pszErrorMessage error message text
@@ -2203,4 +2204,5 @@ void importMemoryProcess( void *pvData )
   return;
 }
 
+#endif // TEMPORARY_COMMENTED
 

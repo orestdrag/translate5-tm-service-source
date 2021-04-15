@@ -3,7 +3,8 @@ project(OpenTM2_PluginManager)
 
 set(PlgMng_Source_Files
         PluginManager.cpp
-        PluginManagerImpl.cpp)
+        PluginManagerImpl.cpp
+)
 
 set(CURL_INDLUDE_DIR "${ROOT}/Packages/curl/include/curl")
 set(ZLIB_INDLUDE_DIR "${ROOT}/Packages/zlib")

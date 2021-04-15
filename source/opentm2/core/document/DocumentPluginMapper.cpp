@@ -8,9 +8,9 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmDocumentPlugin.h"
-#include "core\PluginManager\OtmDocument.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmDocumentPlugin.h"
+#include "../pluginmanager/OtmDocument.h"
 
 static OtmDocumentPlugin* thePlugin = 0;
 static OtmDocument* theDocument = 0;

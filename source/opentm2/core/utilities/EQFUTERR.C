@@ -128,6 +128,7 @@ static SHORT UtlPropMsgTxt ( SHORT );
 //------------------------------------------------------------------------------
 // Function flow:    Call UtlErrorHwnd with a NULL window handle
 //------------------------------------------------------------------------------
+#ifdef TEMPORARY_COMMENTED
 USHORT UtlErrorW
 (
    SHORT   sErrorNumber,               // number of message
@@ -215,6 +216,7 @@ USHORT UtlErrorHwndW
 
 
 
+#endif //TEMPORARY_COMMENTED
 USHORT UtlError
 (
    SHORT   sErrorNumber,               // number of message
@@ -233,6 +235,7 @@ USHORT UtlError
 }
 
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External Function
 //------------------------------------------------------------------------------
@@ -1862,3 +1865,4 @@ LPARAM mp2                          // second message parameter
 #endif
 
 } /* end of function UTLYESTOALLDLG */
+#endif //TEMPORARY_COMMENTED
