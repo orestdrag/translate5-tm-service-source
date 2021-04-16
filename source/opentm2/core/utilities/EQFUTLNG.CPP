@@ -16,14 +16,16 @@
 #include "LanguageFactory.H"
 
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
 // callback function to add languages to a combobox
 int AddLangToComboBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINFO pInfo  ){ pInfo; CBINSERTITEMHWND( (HWND)pvData, pszName ); return( 0 ); }
 
 // callback function to add languages to a listbox
 int AddLangToListBox( PVOID pvData, char *pszName, LanguageFactory::PLANGUAGEINFO pInfo  ){ pInfo; INSERTITEMHWND( (HWND)pvData, pszName ); return( 0 ); }
-#endif
+#endif //TEMPORARY_COMMENTED
 
+
+#ifdef TEMPORARY_COMMENTED
 
 /*+---------------------------------------------------------------------------+
   | Function Name:  UtlFillTableLB                                            |
@@ -187,6 +189,7 @@ USHORT UtlDeleteLanguage
 }/* end of UtlDeleteLanguage */
 
 
+#endif //TEMPORARY_COMMENTED
 
 
 /*
@@ -442,6 +445,8 @@ BOOL UtlQuerySysLangFile
 
   return( fOK && fFound );
 } /* end of function TWBQuerySysLangFile */
+
+#ifdef TEMPORARY_COMMENTED
 
 /*
  ** UtlFillSysLangPopup
@@ -1079,3 +1084,4 @@ BOOL GetLanguageGroup( PSZ pszLanguage, PSZ pszGroup )
   return( fOK );
 }
 
+#endif //TEMPORARY_COMMENTED

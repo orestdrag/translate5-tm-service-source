@@ -6,21 +6,21 @@ set(Util_Source_Files
        # LogWriter.cpp
        # OtmProposal.cpp
         UtlAlloc.C
-        UtlMATVal.c
-       # UtlMisc.cpp
-       # UtlString.C
+        UtlMATVal.C
+        #UtlMisc.cpp
+        #UtlString.C
        # EQFUTERR.C
-       # EQFPRO00.C
-       # EQFUTFIL.C
-       # EQFUTDOS.C
+        EQFPRO00.C
+        EQFUTFIL.C
+        EQFUTDOS.C
        # EQFOBJ00.C
-       # EQFUTLNG.CPP
-       # EQFOSWIN.C
+        EQFUTLNG.CPP
+        EQFOSWIN.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP
 #OptionsDialog.CPP
 #UtlLangCP.C
-#UtlRegistry.c
+        UtlRegistry.C
 #EQFUTCLB.C
 )
 

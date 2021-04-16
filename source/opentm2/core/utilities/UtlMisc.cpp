@@ -73,6 +73,8 @@ typedef WORD (WINAPI *LPMNETNETWORKENUM)( HANDLE FAR *hNetwork);
 typedef WORD (WINAPI *LPMNETGETNETINFO)( HANDLE hNetwork, WORD FAR *lpwNetInfo,
         LPSTR lpszButton, WORD FAR *lpcbButton, HANDLE FAR *lphInstance);
 
+#ifdef TEMPORARY_COMMENTED
+
 HMENU UtlFindSubMenu( HMENU hMenu, const char *pszSubMenu );
 
 /* function to get hinstWFWDriver handle for MNet calls */
@@ -2745,6 +2747,8 @@ BOOL UtlIsValidCP( ULONG ulCP )
   return( (ulOutPut != 0) && (ulCP != 0) );
 } /* end of function UtlIsValidCP */
 
+#endif //TEMPORARY_COMMENTED
+
 /*! UtlInitUtils           Initialization of utilities       
 	Description:       General utilities initialization routine                 
 	Function Call:     BOOL UtlInitUtils( HAB hab );                            
@@ -2775,7 +2779,7 @@ BOOL UtlInitUtils( HAB hab )
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
    //--- get profile information ---
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    UtiVar[usId].usDateFormat = (USHORT)WinQueryProfileInt( hab,
                                             NATIONAL_SETTINGS,
                                             "iDate",
@@ -2810,7 +2814,7 @@ BOOL UtlInitUtils( HAB hab )
                           "PM",
                           UtiVar[usId].szTime2359,
                           sizeof(UtiVar[usId].szTime2359 ) );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 /**********************************************************************/
 /* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
 /* 0 = DEFAULT                                                        */
@@ -2867,6 +2871,8 @@ BOOL UtlInitUtils( HAB hab )
    // Add exit procedure for this DLL
    return( fOK );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! UtlTerminateUtils   DeInitialization of utilities        
 	Description:       General utilities deinitialization routine for this      
@@ -4282,3 +4288,4 @@ BOOL UtlListOfFiles
   return ( fOK );
 } /* end of function UtlListOfFiles */
 
+#endif //TEMPORARY_COMMENTED

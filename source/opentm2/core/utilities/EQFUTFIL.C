@@ -25,6 +25,8 @@
 
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -47,7 +49,6 @@ static USHORT usLastDosRc;             // buffer for last DOS return code
 //|                   return to drive letter converted return code             |
 //+----------------------------------------------------------------------------+
 
-#if 0
 BYTE UtlQCurDisk()
 {
     static CHAR szCurDir[MAX_PATH+100];
@@ -812,7 +813,7 @@ USHORT UtlSetPosDriveButtons2
 USHORT UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
                               ULONG style1, ULONG style)
 {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     HWND    hwndButton,
             hwndPrevButton = HWND_TOP;
     int     cnt = 0;
@@ -838,7 +839,7 @@ USHORT UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
       } /* endif */
     } /* endfor */
     return( (USHORT)cnt);
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 
@@ -1010,6 +1011,8 @@ BOOL UtlLoadFile(PSZ    pszFilename,         // name of file to be loaded
     return(fOK);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 BOOL UtlLoadFileL(PSZ    pszFilename,         // name of file to be loaded
                   PVOID  *ppLoadedFile,       // return pointer to loaded file
                   ULONG *pulBytesRead,       // length of loaded file
@@ -1128,7 +1131,8 @@ BOOL UtlLoadFileHwnd
     } /* endif */
     return ( fOK );
  } /* end of function UtlLoadFile */
-#endif
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1481,7 +1485,7 @@ BOOL UtlFileExist( PSZ pszFile )
     FILEFINDBUF ResultBuf;               // DOS file find struct
     HDIR    hDirHandle = HDIR_CREATE;    // DosFind routine handle
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hDirHandle = FindFirstFile( pszFile, &ResultBuf );
     if ( hDirHandle == INVALID_HANDLE_VALUE )
     {
@@ -1492,7 +1496,7 @@ BOOL UtlFileExist( PSZ pszFile )
       fFound = TRUE;
       //FindClose( hDirHandle );
     } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     return( fFound );
 } /* endof UtlFileExist */
@@ -3193,7 +3197,7 @@ BOOL UtlCheckLongName( PSZ pszName )
    if ( fOK )
    {
      pPropSys = GetSystemPropPtr();
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      while ( fOK && (*pszName != EOS) )
      {
        if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
@@ -3213,7 +3217,7 @@ BOOL UtlCheckLongName( PSZ pszName )
          pszName++;                    // continue with next character
        } /* endif */
      } /* endwhile */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
 
    return ( fOK );
@@ -3472,7 +3476,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
      /*****************************************************************/
      if ( p2 )
      {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( fCombo )
         {
           CBINSERTITEMHWND( hlbox, p2 );
@@ -3481,7 +3485,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
         {
           INSERTITEMHWND( hlbox, p2 );
         } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      } /* endif */
 
      /*****************************************************************/
@@ -3501,7 +3505,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   /********************************************************************/
   /* Get total number of list box entries                             */
   /********************************************************************/
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fCombo )
   {
     usTotal = (USHORT)CBQUERYITEMCOUNTHWND( hlbox );
@@ -3510,14 +3514,14 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
   {
     usTotal = (USHORT)QUERYITEMCOUNTHWND( hlbox );
   } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   /********************************************************************/
   /* Select first item on request                                     */
   /********************************************************************/
   if ( (flg & NAMFMT_TOPSEL) && usTotal )
   {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( fCombo )
     {
       CBSELECTITEMHWND(hlbox, 0);
@@ -3526,7 +3530,7 @@ SHORT UtlLoadLongFileNamesHwnd( PSZ pszSearch, USHORT atrb, HWND hlbox,
     {
       SELECTITEMHWND(hlbox, 0);
     } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   } /* endif */
 
   /********************************************************************/
@@ -3739,7 +3743,7 @@ BOOL UtlSupportsLongNames( CHAR chDrive )
         DWORD dwMaxLength, dwFileSysFlags;
     CHAR szRoot[4] = "C:\\";
     szRoot[0] = chDrive;
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetVolumeInformation( szRoot,
                                                    NULL, // ptr to volume name buffer
                                        0,       // length of volume name buffer
@@ -3755,7 +3759,7 @@ BOOL UtlSupportsLongNames( CHAR chDrive )
         fSupportsLongNames = TRUE;
       } /* endif */
     } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   return( fSupportsLongNames );
 } /* end of function UtlSupportsLongNames */
@@ -3900,7 +3904,7 @@ USHORT UtlHandleConversionStrings
             if ( usMode == CONVLOAD_MODE )
             {
               EQFOemToAnsi( szConversion, szConversion );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
               if ( fCombo )
               {
                 CBINSERTITEMHWND( hwndLB, szConversion );
@@ -3909,7 +3913,7 @@ USHORT UtlHandleConversionStrings
               {
                 INSERTITEMHWND( hwndLB, szConversion );
               } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
               usEntries++;
             }
             else if ( usMode == CONVCHECK_MODE )
@@ -4025,7 +4029,7 @@ VOID CloseFile
   } /* endif */
 } /* end of function CloseFile */
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 /*! \brief extract all files contained in a ZIP package to a directory
   \param pszPackage fully qualified name of the ZIP package
   \param pszDestPath fully qualified name of the destination directory
@@ -4068,7 +4072,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 
   hz = CreateZip( pszPackage, 0 );
   sprintf( szSearchPath, "%s\\*.*", pszSourcePath );
-#if 0
+
   hDir = FindFirstFile( szSearchPath, &FindData );
   if ( hDir != INVALID_HANDLE_VALUE )
   {
@@ -4082,7 +4086,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
     } while ( FindNextFile( hDir, &FindData  ) );
     //FindClose( hDir );
   }
-#endif
+
   CloseZip( hz );
   return( 0 );
 }
@@ -4114,7 +4118,7 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
   CloseZip( hz );
   return( 0 );
 }
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 
 /*! \brief delete all files and directories located in a specific directory
@@ -4128,7 +4132,7 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  HANDLE hp; 
  sprintf( szFileFound, "%s\\*.*", pszDirectory );
  //hp = FindFirstFile( szFileFound, &info );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
  do
  {
     if ( !((strcmp( info.cFileName, ".") == 0 ) || (strcmp( info.cFileName, ".." ) == 0 )))
@@ -4145,6 +4149,8 @@ void UtlDeleteAllFiles( const char *pszDirectory )
       }
     }
   } while ( FindNextFile( hp, &info ) ); 
-#endif
- //FindClose( hp );
+ FindClose( hp );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
+
+#endif //TEMPORARY_COMMENTED

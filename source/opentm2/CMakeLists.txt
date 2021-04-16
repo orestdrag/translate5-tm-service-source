@@ -23,7 +23,7 @@ target_link_libraries(OTMFUNC
                        # Memory
                         PluginManager
                         Util
-                       # Workbench
+                        Workbench
                         Common
                     #Analysis
                     #Counting

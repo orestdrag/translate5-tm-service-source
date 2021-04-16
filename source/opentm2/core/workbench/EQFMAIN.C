@@ -82,6 +82,8 @@ static HAB          hAB;
 static BOOL         fIELookAndFeel = FALSE;
 
 
+#ifdef TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* Windows related function prototypes                                */
 /**********************************************************************/
@@ -2657,6 +2659,7 @@ MRESULT TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 )
    return( FALSE );
 } /* end of function TwbInitMenu */
 
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -2754,6 +2757,7 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
 
 } /* end of function TwbGetCheckProfileData */
 
+#ifdef TEMPORARY_COMMENTED
 
 
 //------------------------------------------------------------------------------
@@ -4000,3 +4004,5 @@ VOID PerformPendingUpdates()
     if ( hSearch != HDIR_CREATE ) UtlFindClose( hSearch, FALSE );
   } /* endif */     
 } /* end of function PerformPendingUpdates */
+
+#endif //TEMPORARY_COMMENTED

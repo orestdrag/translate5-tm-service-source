@@ -374,6 +374,8 @@ USHORT DosOpenLong
    USHORT   fsOpenMode                 // open mode
 );
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -752,7 +754,7 @@ USHORT UtlCloseHwnd
    {
      // remove handle from our handle/drive array
      int i = 0;
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      while ( i < MAX_OPEN_FILES )
      {
        if ( DriveHandles[i].hf  == hf )
@@ -783,7 +785,7 @@ USHORT UtlCloseHwnd
                                     hwndParent);
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
    return( usRetCode );
 }
@@ -2944,7 +2946,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -2959,7 +2961,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
 
@@ -3004,6 +3006,7 @@ BOOL UtlSetDrive
 }
 
 
+#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* the following section contains DOS-API functions which are not     */
@@ -3031,11 +3034,15 @@ BOOL UtlSetDrive
 
    pszFailName; cbFileName;
    DosError(0);                         // avoid error popup...
-   //hmod = LoadLibrary(pszModName );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+   hmod = LoadLibrary(pszModName );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    DosError(1);
    if ( hmod == NULL)
    {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      //usRc = (USHORT)GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      *phMod = (HMODULE) NULL;
    }
    else
@@ -3045,6 +3052,7 @@ BOOL UtlSetDrive
    return usRc;
  }
 
+#ifdef TEMPORARY_COMMENTED
 
  /***   DosGetProcAddr - Get dynamic link procedure address
   *
@@ -3151,6 +3159,8 @@ BOOL UtlSetDrive
    return 0;
  }
 
+#endif //TEMPORARY_COMMENTED
+
  /**********************************************************************/
  /* Dos Error handling  ...                                            */
  /**********************************************************************/
@@ -3164,7 +3174,7 @@ BOOL UtlSetDrive
    USHORT fEnable                       // action flag (bit field)
  )
  {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    switch ( fEnable )
    {
      case 0:
@@ -3174,9 +3184,11 @@ BOOL UtlSetDrive
        SetErrorMode(0);
        break;
    } /* endswitch */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE, https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-seterrormode
    return 0;
  }
+
+#ifdef TEMPORARY_COMMENTED
 
  /**********************************************************************/
  /* DosInsMessage  - copy message to a buffer, but substitute variables*/
@@ -4478,4 +4490,5 @@ USHORT UtlGetFileSizeHwnd
    return( usRC );
 } /* end of function UtlgetFileSizeHwnd */
 
+#endif //TEMPORARY_COMMENTED
 

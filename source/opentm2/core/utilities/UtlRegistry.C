@@ -14,7 +14,7 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
   BOOL fOK = FALSE;
   HKEY hKey = NULL;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;
@@ -28,7 +28,7 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
     } /* endif */        
     RegCloseKey( hKey );
   } /* endif */     
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   if ( !fOK )
   {
@@ -44,7 +44,7 @@ int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
   HKEY hKey = NULL;
   int iResult = 0;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;
@@ -75,7 +75,7 @@ int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
   {
     iResult = iDefault;
   } /* endif */     
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( iResult );
 } /* end of function GetIntFromRegistry */
 
@@ -85,7 +85,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
   HKEY hKey = NULL;
   BOOL fOK = FALSE;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
       HKEY hSubKey = NULL;
@@ -105,7 +105,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 
       RegCloseKey( hKey );
   } /* endif */     
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( fOK );
 } /* end of function WriteStringToRegistry */
 
@@ -115,7 +115,7 @@ BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
   HKEY hKey = NULL;
   BOOL fOK = FALSE;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
       HKEY hSubKey = NULL;
@@ -134,7 +134,7 @@ BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
       } /* endif */        
 
       RegCloseKey( hKey );
-  } /* endif */     
-#endif
+  } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( fOK );
 } /* end of function WriteIntToRegistry */

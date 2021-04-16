@@ -20,6 +20,8 @@
 PPROP_IDA pPropBatchIda = NULL;
 HWND      hwndPropertyHandler = NULL;
 
+#ifdef TEMPORARY_COMMENTED
+
 /*!
  Property Handler Window Proc
 */
@@ -1340,6 +1342,8 @@ SHORT SaveProperties(
    return( rc);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*!
     Miscellaneous properties functions
 */
@@ -1352,6 +1356,7 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
    //PIDA_HEAD pIda = ACCESSWNDIDA( hObject, PIDA_HEAD );
    // return( pIda ? MakePropPtrFromHnd( pIda->hProp) : NULL);
 }
+
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
@@ -1369,6 +1374,9 @@ PPROPSYSTEM GetSystemPropPtr( VOID )
     } /* endif */
     return( (PPROPSYSTEM)( MakePropPtrFromHnd( hSysProp )));
  }
+
+#ifdef TEMPORARY_COMMENTED
+
 BOOL SetPropAccess( HPROP hprop, USHORT flgs)
 {
     if( flgs & PROP_ACCESS_WRITE){
@@ -1485,13 +1493,17 @@ BOOL PropHandlerInitForBatch( void )
   { // keep other process from doing property related stuff..
 	  HANDLE hMutexSem = NULL;
 
-      //GETMUTEX(hMutexSem);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+      GETMUTEX(hMutexSem);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       if( GetSysProp( pPropBatchIda))
         fOK = FALSE;
     //   return( FALSE);      // do not create the window
 
-       //RELEASEMUTEX(hMutexSem);     // release Mutex
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+       RELEASEMUTEX(hMutexSem);     // release Mutex
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    }
 
  return( fOK );
@@ -1519,6 +1531,8 @@ PropHandlerTerminateForBatch( void )
   //RELEASEMUTEX(hMutexSem);     // release Mutex
   return( TRUE );
 } /* end of function PropHandlerTerminateForBatch */
+
+#endif //TEMPORARY_COMMENTED
 
 HPROP EqfQuerySystemPropHnd( void )
 {

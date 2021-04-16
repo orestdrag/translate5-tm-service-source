@@ -18,6 +18,8 @@
 #include "OTMFUNC.H"
 #include "win_types.h"
 
+#ifdef TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Function Name:     UtlParseX15            Parse X15 delimited strings        
 //------------------------------------------------------------------------------
@@ -894,6 +896,7 @@ VOID UtlStripBlanksW
 
 } /* end of function UtlStripBlanks */
 
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function name:     UtlLowUpInit                                              
@@ -942,6 +945,7 @@ UtlLowUpInit()
   return;
 } /* end of function UtlLowUpInit */
 
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function name:     UtlLower                                                  
@@ -3668,3 +3672,4 @@ USHORT usConvertCRLFW(PCHAR_W pcInput,     // pointer to character input area
    return (usOutputLen);
 } /* end of usConvertCRLF */
 
+#endif //TEMPORARY_COMMENTED

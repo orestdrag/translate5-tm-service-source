@@ -3953,7 +3953,6 @@ void UtlSetString( short sID, const char *pszString );
 //VOID UtlSetUShort( SHORT sID, USHORT usValue );
 void UtlSetUShort( short sID, unsigned short usValue );
 
-
 /**********************************************************************/
 /* MAT ULONG  identifiers                                             */
 /**********************************************************************/
