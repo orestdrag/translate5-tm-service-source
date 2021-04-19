@@ -25,8 +25,6 @@
 
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -54,12 +52,12 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
       szCurDir[0] = EOS;
     } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     DosError(1);
 
     return (BYTE)szCurDir[0];
@@ -97,7 +95,7 @@ USHORT UtlGetDriveList( BYTE *szList)
     WORD   wReturn;                    // return value from GetDriveType
     register int i;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     for (i=0, wReturn=0; i<26;i++)
     {
       CHAR szRoot[4] = "C:\\";
@@ -119,13 +117,15 @@ USHORT UtlGetDriveList( BYTE *szList)
           break;
       } /* endswitch */
     } /* endfor */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     *szList = '\0';
 
     bDrive = UtlQCurDisk();
     return( (USHORT) (bDrive - 'A' + 1));   // set index relative to 0
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
@@ -1055,6 +1055,7 @@ BOOL UtlLoadFileHwnd
       fMsg = FALSE;
     } /* endif */
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     usDosRc = UtlOpen(pszFilename, &hInputfile , &usAction,
                       0L,                            // Create file size
                       FILE_NORMAL,                   // Normal attribute
@@ -1064,6 +1065,7 @@ BOOL UtlLoadFileHwnd
                       FALSE );                       // no error handling
 
     fOK = ( usDosRc == 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     // If fOK. Get the size of the input data and allocate storage to load the file.
     // If an error occurred set usRc to FALSE and set the appropriate message code.
@@ -1458,6 +1460,7 @@ USHORT UtlMkMultDirHwnd( PSZ pszPath, BOOL fMsg, HWND hwnd )
    return( usRC );
 } /* UtlMkMultDir */
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1501,6 +1504,8 @@ BOOL UtlFileExist( PSZ pszFile )
     return( fFound );
 } /* endof UtlFileExist */
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1534,6 +1539,8 @@ BOOL UtlFileExistLong( PSZ pszFile )
   return( usDosRC == NO_ERROR );
 
 } /* endof UtlFileExistLong */
+
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1575,6 +1582,8 @@ BOOL UtlDirExist( PSZ pszDir )
 
    //return( dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) );
 } /* endof UtlDirExist */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2036,6 +2045,8 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
 
 } /* UtlWriteFile */
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2217,6 +2228,8 @@ BOOL UtlGetCheckedEqfDrives
 
    return( fOK );
 } /* end of UtlGetCheckedEqfDrives */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

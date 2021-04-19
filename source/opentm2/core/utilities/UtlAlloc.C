@@ -90,7 +90,6 @@ BOOL UtlAlloc
   return fSuccess;
 } /* end of function UtlAlloc */
 
-#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -123,8 +122,6 @@ BOOL UtlAllocHwnd
   } /* endif */
   return( fOK );
 } /* end of UtlAllocHwnd */
-
-#endif //TEMPORARY_COMMENTED
 
 PVOID UtlIntAlloc
 (

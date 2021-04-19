@@ -16,7 +16,9 @@
 // temporary defines to compile without DBCS LIB
 USHORT dbcscp = 0;
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
+
+#ifdef TEMPORARY_COMMENTED
 /**********************************************************************/
 /* substitute WinQueryWindow call                                     */
 /**********************************************************************/
@@ -520,7 +522,7 @@ COLORREF UtlGetColorref( LONG lColor )
 
   return rgbColor;
 }
-#endif
+#endif //TEMPORARY_COMMENTED
 
 /*
  * DriveType
@@ -566,7 +568,7 @@ USHORT EqfDriveType(USHORT iDrive)
 SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
 {
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
   LONG             lItemData;          // buffer for item data
     BOOL             fSelected = FALSE;  // item-is-selected flag
     SHORT            sCurSelection;      // index of currently selected item
@@ -660,7 +662,7 @@ SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
     InvalidateRect( hwndLB, NULL, FALSE );
     UpdateWindow( hwndLB );
 
-#endif
+#endif //TEMPORARY_COMMENTED
     return( 0 );
   } /* end of function LBSetItemTextW */
 
@@ -670,7 +672,7 @@ SHORT LBSetItemTextW( HWND hwndLB, SHORT index, PSZ_W pText)
 /**********************************************************************/
 SHORT LBSetItemText( HWND hwndLB, SHORT index, PSZ pText )
 {
-#if 0
+#ifdef TEMPORARY_COMMENTED
   LONG             lItemData;          // buffer for item data
   BOOL             fSelected = FALSE;  // item-is-selected flag
   SHORT            sCurSelection;      // index of currently selected item
@@ -765,7 +767,7 @@ SHORT LBSetItemText( HWND hwndLB, SHORT index, PSZ pText )
   InvalidateRect( hwndLB, NULL, FALSE );
   UpdateWindow( hwndLB );
 
-#endif
+#endif //TEMPORARY_COMMENTED
   return( 0 );
 } /* end of function LBSetItemText */
 
@@ -778,7 +780,7 @@ unsigned int _IsUnicodeSystem; // global variable
 
 VOID InitUnicode( VOID )
 {
-#if 0
+#ifdef TEMPORARY_COMMENTED
     OSVERSIONINFO Osv ;
 
     Osv.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
@@ -802,7 +804,7 @@ VOID InitUnicode( VOID )
 
        exit(1);
     }
-#endif
+#endif //TEMPORARY_COMMENTED
 }
 
 BOOL IsUnicodeSystem()
@@ -815,7 +817,8 @@ VOID initdbcs( VOID )
 {
   unsigned int cp;
 
-#if 0
+
+#ifdef TEMPORARY_COMMENTED
   cp = GetOEMCP();                     // Gets OEM Codepage
   switch(cp)
   {
@@ -832,7 +835,7 @@ VOID initdbcs( VOID )
       _dbcs_cp = NON_DBCS_CP;
       break;
   } /* endswitch */
-#endif
+#endif //TEMPORARY_COMMENTED
 
   return;
 }
@@ -846,7 +849,7 @@ BOOL UserDefaultLangIsAPLang()
 
   LANGID LangId;
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
   LangId = GetUserDefaultLangID();
 
   switch (LangId)
@@ -865,7 +868,7 @@ BOOL UserDefaultLangIsAPLang()
         return FALSE;
         break;
   }
-#endif
+#endif //TEMPORARY_COMMENTED
 }
 
 /**********************************************************************/
@@ -1512,7 +1515,6 @@ USHORT WPToEQFConv
   return( (USHORT)(pwzData - pStart + 1));
 } /* end of function WPToEQFConv */
 
-#if 0
 /**********************************************************************/
 /* Substition for OS/2 PM WinRegisterWindow function                  */
 /**********************************************************************/
@@ -1815,6 +1817,7 @@ SHORT GetNextSelection( HWND hwndLB, SHORT sPos )
   return( (SHORT)sNextItem );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* EQFAnsiToOem: do ANSI/ASCII conversion based on the currently      */
@@ -1843,6 +1846,8 @@ EQFAnsiToOem( PSZ pIn, PSZ pOut )
   } /* endif */
 }
 
+#define NO_ERROR 0
+
 /**********************************************************************/
 /* EQFCPAnsiToOem: do ANSI/ASCII conversion based on the passed code  */
 /*                 pages                                              */
@@ -1867,11 +1872,15 @@ EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   }
   else
   {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
     AnsiToOem( pIn, pOut );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* EQFAnsiToOemBuff: do ASCII/ANSI conversion based on the currently  */
@@ -1912,6 +1921,7 @@ EQFCPAnsiToOemBuffL( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, ULONG ulL
 }
 
 
+#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* EQFOemToAnsi: do ASCII/ANSI conversion based on the currently      */
@@ -1966,12 +1976,16 @@ EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   }
   else
   {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
     OemToAnsi( pIn, pOut );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
 
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* EQFOemToAnsiBuff: do ASCII/ANSI conversion based on the currently  */
@@ -2001,6 +2015,8 @@ EQFCPOemToAnsiBuff( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, USHORT usL
   pIn[usLen] = c;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* Get Codepage appropriate for the selected source and target langs  */
 /**********************************************************************/
@@ -2010,6 +2026,8 @@ ULONG GetCodePage( USHORT usType )
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+/* https://docs.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-getlocaleinfoa */
   switch ( usType )
   {
     case OEM_CP:
@@ -2031,9 +2049,12 @@ ULONG GetCodePage( USHORT usType )
       ulReturnCP = (ULONG) _ttol (&cp[0]);
       break;
   } /* endswitch */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return (ulReturnCP);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 ////////////////////////////////////////////////////////////////
 // Get Codepage appropriate for given language ( not OS-dependent!)
@@ -2069,4 +2090,5 @@ void ERASERECT(HDC hdc, const RECT* pRect, LONG bg)
 	SelectObject(hdc, hbrOld);
 	DeleteObject(hbr);
 }
-#endif
+
+#endif //TEMPORARY_COMMENTED

@@ -802,6 +802,7 @@ BOOL UtlTimeStringToFTime
   return( fOK );
 } /* end of function UtlTimeStringToFDate*/
 
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function name:     UtlStripBlanks         Remove leading and trailing blanks 
@@ -856,6 +857,8 @@ VOID UtlStripBlanks
   *pszLastNonBlank = EOS;
 
 } /* end of function UtlStripBlanks */
+
+#ifdef TEMPORARY_COMMENTED
 
 VOID UtlStripBlanksW
 (
@@ -2986,6 +2989,7 @@ USHORT UtlQueryCharTableLang
 
 } /* end of function UtlQueryCharTableLang */
 
+#endif //TEMPORARY_COMMENTED
 
 USHORT UtlQueryCharTableEx
 (
@@ -3029,7 +3033,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862; break;
           case 813  : pTable = chAnsiToPC813; break;
           case 737  :
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869))
             { // fix for sev1 Greek: Win NT problem (01/09/23)
                   usCP = 869;
@@ -3039,7 +3043,7 @@ USHORT UtlQueryCharTableEx
             {
                 pTable = chAnsiToPC737;
             } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
             break;
           case 775  : pTable = chAnsiToPC775; break;
           case 864  : pTable = chAnsiToPC864; break;  // Arabic OS/2
@@ -3093,7 +3097,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862;  pInvTable = chPC862ToAnsi; break;
           case 813  : pTable = chAnsiToPC813;  pInvTable = chPC813ToAnsi; break;
           case 737  :
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) )
             { // fix for sev1 Greek: Win NT problem (01/09/23)
               usCP = 869;
@@ -3105,7 +3109,7 @@ USHORT UtlQueryCharTableEx
               pTable = chAnsiToPC737;
               pInvTable = chPC737ToAnsi;
             } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
             break;
           case 775  : pTable = chAnsiToPC775;  pInvTable = chPC775ToAnsi; break;
           case 864  : pTable = chAnsiToPC864;  pInvTable = chPC864ToAnsi; break;  // Arabic OS/2
@@ -3152,6 +3156,8 @@ USHORT UtlQueryCharTableEx
 
   return( usRC );
 } /* end of UtlQueryCharTableEx */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function                                                            
@@ -3217,6 +3223,8 @@ SHORT UtlGetOperatingSystemInfo( VOID )
 #endif
 } // end of UtlGetOperatingSystemInfo
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 // Internal function                                                            
 //+----------------------------------------------------------------------------+
@@ -3259,6 +3267,8 @@ VOID UtlReplString( SHORT sID, PSZ pszString )
       } /* endif */
    } /* endif */
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //ulLen in number of CHAR_W's which are in pszUni!
 ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,

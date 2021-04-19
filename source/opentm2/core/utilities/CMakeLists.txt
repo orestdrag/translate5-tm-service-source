@@ -7,15 +7,16 @@ set(Util_Source_Files
        # OtmProposal.cpp
         UtlAlloc.C
         UtlMATVal.C
-        #UtlMisc.cpp
-        #UtlString.C
-       # EQFUTERR.C
+        UtlMisc.cpp
+        UtlString.C
+        EQFUTERR.C
         EQFPRO00.C
         EQFUTFIL.C
         EQFUTDOS.C
-       # EQFOBJ00.C
+        EQFOBJ00.C
         EQFUTLNG.CPP
         EQFOSWIN.C
+        EQFHASH.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP
 #OptionsDialog.CPP

@@ -127,6 +127,8 @@ PHASH HashCreate
   return pNewHash;
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -313,6 +315,8 @@ BOOL HashDelete
   return FALSE;                                            /* No match       */
 }
 
+#endif //TEMPORARY_COMMENTED
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -408,6 +412,8 @@ VOID HashDestroy
 
   return;
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -846,6 +852,8 @@ VOID PoolDestroy
   } /* endwhile */
 } /* end of function PoolDestroy */
 
+#endif //TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* Simulated OS/2 Atom functions for the Windows environment          */
 /*                                                                    */
@@ -908,6 +916,8 @@ HATOMTBL APIENTRY WinCreateAtomTable
 
   return( pAtomTable );
 } /* end of function WinCreateAtomTable */
+
+#ifdef TEMPORARY_COMMENTED
 
 VOID     APIENTRY WinDestroyAtomTable
 (
@@ -1031,6 +1041,8 @@ USHORT   APIENTRY WinQueryAtomName
   } /* endif */
   return( 0 );
 } /* end of function WinQueryAtomName */
+
+#endif //TEMPORARY_COMMENTED
 
 /* Two random permutations of the numbers 0..255                             */
 static BYTE random1[256] = {
@@ -1192,6 +1204,7 @@ SHORT AtomHashFree( PATOMENTRY pEntry, PVOID pUserPtr )
   return( TRUE );
 } /* end of function AtomHashFree */
 
+#ifdef TEMPORARY_COMMENTED
 
 EQF_ATOM     APIENTRY WinFindAtomW
 (
@@ -1265,3 +1278,5 @@ EQF_ATOM APIENTRY WinAddAtomW
 //
 //  return( 0 );
 //} /* end of function WinQueryAtomNameW */
+
+#endif //TEMPORARY_COMMENTED

@@ -250,6 +250,8 @@ MRESULT APIENTRY PROPERTYHANDLERWP
     //return( WinDefWindowProc( hwnd, message, mp1, mp2));
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*!
      Create a property handle
 */
@@ -285,6 +287,8 @@ PPROPHND MakePropHnd( PPROP_IDA pIda)
 //  pIda->TopUsedHnd->pHndID = pIda;   // for verification purposes
     return( ptr2);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
      Release a property handle
@@ -571,6 +575,8 @@ PPROPCNTL CreatePropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath,
     return( pcntl);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*!
      Read in system properties
 */
@@ -630,6 +636,8 @@ USHORT GetSysProp( PPROP_IDA pIda)
 
     return( 0 );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
      Reload system properties
@@ -1475,6 +1483,8 @@ PSZ MakePropPath( PSZ pbuf, PSZ pd, PSZ pp, PSZ pn, PSZ pe)
     return( pbuf);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 // Function PropHandlerInitForBatch
 // Initialize the property handler for non-windows environments;
 // i.e. perform WM_CREATE handling to allocate our IDA
@@ -1508,6 +1518,8 @@ BOOL PropHandlerInitForBatch( void )
 
  return( fOK );
 } /* end of function PropHandlerInitForBatch */
+
+#ifdef TEMPORARY_COMMENTED
 
 // Function PropHandlerTerminateForBatch
 // Terminate the property handler in non-windows environments;

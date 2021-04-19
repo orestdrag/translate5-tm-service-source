@@ -63,6 +63,8 @@ BOOL ObjLockTable_Delete( PFUNCIF_LOCK_TABLE, PSZ, DWORD );
 BOOL ObjLockTable_Add( PFUNCIF_LOCK_TABLE, PSZ, DWORD );
 BOOL ObjLockTable_WaitWhenUpdated( PFUNCIF_LOCK_TABLE pLockTable );
 
+#ifdef TEMPORARY_COMMENTED
+
 HWND EqfQueryObjectManager( VOID)
 {
     return( hObjMan[UtlGetTask()]);
@@ -838,6 +840,8 @@ MRESULT EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
   return( mResult );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 // Function PropHandlerInitForBatch
 // Initialize the property handler for non-windows environments;
 // i.e. perform WM_CREATE handling to allocate our IDA
@@ -876,6 +880,8 @@ BOOL ObjHandlerInitForBatch( void )
 
   return( TRUE );
 } /* end of function ObjHandlerInitForBatch */
+
+#ifdef TEMPORARY_COMMENTED
 
 // Function PropHandlerTerminateForBatch
 // Terminate the property handler in non-windows environments;
@@ -994,13 +1000,15 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
   return( sRC );
 } /* endif ObjRemoveSymbol */
 
+#endif //TEMPORARY_COMMENTED
+
 //////////////////////////////////////////////////////////////////
 /// Lock Table handling                                        ///
 //////////////////////////////////////////////////////////////////
 
 HANDLE ObjLockTable_CreateOrOpenTable()
 {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   HANDLE hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );
   if ( !hShMem )
   {
@@ -1018,8 +1026,10 @@ HANDLE ObjLockTable_CreateOrOpenTable()
     }
   }
   return( hShMem );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 } /* end of function ObjLockTable_CreateOrOpenTable */
+
+#ifdef TEMPORARY_COMMENTED
 
 PFUNCIF_LOCK_TABLE ObjLockTable_AccessTable( HANDLE hSharedMem )
 {
@@ -2061,6 +2071,8 @@ USHORT ObjShortToLongName
 
   return( usRC );
 } /* end of function ObjShortToLongName */
+
+#endif //TEMPORARY_COMMENTED
 
 //   End of EQFOBJ00.C
 //ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß

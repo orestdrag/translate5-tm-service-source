@@ -113,6 +113,8 @@ WORD FAR PASCAL UtlSetNextTarget( HANDLE hNetwork)
   return (retval);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*!
 	Function Name:     UtlPlugIn              Plug a new entry into a list
 
@@ -163,6 +165,8 @@ PPLUG UtlPlugOut( PPLUG pPlug)
       pPlug->Fw->Bw = pPlug->Bw;
     return( pPlug);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
 	Function Name:     UtlSplitFnameFromPath  Split a path at filename

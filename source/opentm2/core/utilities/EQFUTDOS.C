@@ -374,8 +374,6 @@ USHORT DosOpenLong
    USHORT   fsOpenMode                 // open mode
 );
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -428,6 +426,7 @@ USHORT UtlOpen                                                            /*@3BA
                         fMsg,                                             /*@3BA*/
                         (HWND) NULL ) );                                         /*@3BA*/
 }
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -485,6 +484,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
    USHORT usMBCode = 0;                    // message box/UtlError return code
    BOOL   fTryCreate = TRUE;           // try-creation-of-file flag
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
       DosError(0);
@@ -493,7 +493,6 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         DWORD dwShareMode = 0;
         DWORD dwFlagsAndAttr = usAttr;
 
-#if 0
         // get open mode
         if ( fsOpenMode & OPEN_ACCESS_READONLY )
         {
@@ -511,10 +510,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
             dwAccess = GENERIC_READ;   // use read access as default
         } /* endif */
-#endif
 
-
-#if 0
         // share flags
         if ( !(fsOpenMode & OPEN_SHARE_DENYREAD) )
         {
@@ -530,21 +526,15 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           dwFlagsAndAttr |= FILE_FLAG_WRITE_THROUGH;
         }
-#endif
-
 
         // open existing or create new file
         usRetCode = 1;                        // preset error condition
-#if 0
         if ( usRetCode && (fsOpenFlags & FILE_OPEN) )
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  OPEN_EXISTING, dwFlagsAndAttr, NULL );
-#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
-#endif
-#if 0
           if ( (usRetCode == ERROR_ACCESS_DENIED)          ||
                (usRetCode == ERROR_SHARING_VIOLATION)      ||
                (usRetCode == ERROR_LOCK_VIOLATION)         ||
@@ -560,19 +550,14 @@ USHORT UtlOpenHwnd                                                        /*@3BC
           {
             *pusAction = usRetCode ? 0 : FILE_EXISTED;
           } /* endif */
-#endif
         } /* endif */
-#endif
 
-#if 0
         if ( fTryCreate && usRetCode && (fsOpenFlags & FILE_TRUNCATE) )
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  CREATE_ALWAYS, dwFlagsAndAttr, NULL );
-#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
-#endif
           *pusAction = usRetCode ? 0 : FILE_TRUNCATED;
         } /* endif */
 
@@ -580,10 +565,8 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  CREATE_NEW, dwFlagsAndAttr, NULL );
-#if 0
           usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
                       (USHORT)GetLastError() : NO_ERROR);
-#endif
           /**************************************************************/
           /* if we are dealing with Os/2 server and DOS requester       */
           /* a file exist message is returning return code 2.           */
@@ -602,7 +585,6 @@ USHORT UtlOpenHwnd                                                        /*@3BC
           *phfOpen = NULLHANDLE;
         } /* endif */
 
-#endif
         /****************************************************************/
         /* check if we need to change the file size                     */
         /* In windows this has to be by hand - change filepointer, and  */
@@ -680,6 +662,9 @@ USHORT UtlOpenHwnd                                                        /*@3BC
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFname, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
    return( usRetCode );
 }
 
@@ -899,7 +884,7 @@ USHORT UtlReadHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -937,8 +922,10 @@ USHORT UtlReadHwnd
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -4431,6 +4418,8 @@ USHORT UtlRemoveSearchHandle
   return( NO_ERROR );
 } /* end of function UtlRemoveSearchHandle */
 
+#endif //TEMPORARY_COMMENTED
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -4476,6 +4465,7 @@ USHORT UtlGetFileSizeHwnd
 
   fMsg; hwndParent;
   DosError(0);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   //dwSize = GetFileSize( hf, NULL );
   DosError(1);
   if ( dwSize == 0xFFFFFFFF )
@@ -4487,8 +4477,7 @@ USHORT UtlGetFileSizeHwnd
   {
     *pulSize = dwSize;
   } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRC );
 } /* end of function UtlgetFileSizeHwnd */
-
-#endif //TEMPORARY_COMMENTED
 

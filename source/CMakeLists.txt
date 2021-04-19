@@ -14,6 +14,7 @@ set(OtmMemoryService_Source_Files
         OtmMemoryServiceWorker.cpp
         OTMMSJSONFactory.cpp
         #OtmMemoryServiceTester.cpp
+        dummy_main.cpp
 )
 
 include_directories(${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})

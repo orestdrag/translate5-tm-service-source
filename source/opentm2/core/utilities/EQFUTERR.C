@@ -235,7 +235,6 @@ USHORT UtlError
 }
 
 
-#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External Function
 //------------------------------------------------------------------------------
@@ -358,6 +357,7 @@ USHORT UtlErrorHwnd
    HWND    hwndMsgBoxParent            // window which should be msgbox parent
 )
 {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    unsigned int  usMsgboxStyle;               // style for WinMessageBox call
    unsigned int  usMsgboxRet = 0;             // msg box return value
    PSZ    pMsgboxTitle;                // title text of message box
@@ -503,7 +503,6 @@ USHORT UtlErrorHwnd
 
    } /* endswitch */
 
-#if 0
    switch (usMsgboxStyle)
    {
      case MB_ERROR:
@@ -516,7 +515,6 @@ USHORT UtlErrorHwnd
 
    usMsgboxStyle |= MB_DEFBUTTON1 | MB_MOVEABLE | usMsgType;
    usMsgboxStyle |= MB_APPLMODAL;
-#endif
 
    // GQ 2015/10/13 Set parent handle of message box to HWND_FUNCIF when running in API mode and no parent handle has been specififed
    if ( !hwndMsgBoxParent && (UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE ) )
@@ -526,7 +524,6 @@ USHORT UtlErrorHwnd
   
    hwndParent = hwndMsgBoxParent;      // use supplied window handle
 
-#if 0
    if ( !hwndParent )
    {
       //hwndParent     = QUERYACTIVEWINDOW();
@@ -542,7 +539,6 @@ USHORT UtlErrorHwnd
          hwndParent     = hwndFrame;
       } /* endif */
    } /* endif */
-#endif
 
    usMsgboxStyle |= ( ErrData[UtlGetTask()].hwndHelpInstance ) ? MB_HELP : 0;
 
@@ -578,15 +574,12 @@ USHORT UtlErrorHwnd
 		 IDA.sID      = sErrorNumber;
 		 IDA.usStyle  = (USHORT)usMsgboxStyle;
 
-#if 0
 		 DIALOGBOX( hwndParent, UTLYESTOALLDLG, hResMod,
 					ID_UTL_YESTOALL_DLG,
 					&IDA, usMsgboxRet );
-#endif
 	   }
 	   else
 	   { 
-#if 0
 		   //   No RightStyle for message boxes
 		   //     usMsgboxStyle |= MB_RTLREADING | MB_RIGHT;
 		   usMsgboxRet = WinMessageBox ( HWND_DESKTOP,
@@ -595,13 +588,15 @@ USHORT UtlErrorHwnd
 									     pMsgboxTitle,
 									     sErrorNumber,
 									     usMsgboxStyle );
-#endif
 	   } /* endif */
    }
    UtlSetUShort( QS_CURMSGID, 0 );
 
    return ( (USHORT)usMsgboxRet );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -1295,6 +1290,8 @@ static SHORT  UtlPropMsgTxt
   return (usErrID);
 }                                      // end 'UtlPropMsgText'
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // External Function
 //------------------------------------------------------------------------------
@@ -1376,6 +1373,8 @@ VOID UtlInitError
               FALSE );                           // no error handling
    }
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External Function
