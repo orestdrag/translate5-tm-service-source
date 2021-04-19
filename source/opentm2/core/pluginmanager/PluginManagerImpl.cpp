@@ -226,7 +226,6 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 #endif
 #endif //TEMPORARY_COMMENTED
 
-#ifdef TEMPORARY_COMMENTED
   // check the depths of the cycle
   if (IsDepthOvered( pszPluginDir )) // util
   {
@@ -236,7 +235,6 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 #endif
       return usRC;
   }
-#endif // TEMPORARY_COMMENTED
 
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
@@ -580,6 +578,8 @@ bool PluginManagerImpl::NotifyListeners( PluginListener::eNotifcationType eNotif
 	return (m_vPluginListener.size() > 0);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 static char* strupr(char *str) 
 { 
     char *tmp = str; 
@@ -628,6 +628,8 @@ BOOL PluginManagerImpl::IsDepthOvered(const char * strPath)
 
     return bOvered;
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*
 void PluginManagerImpl::destroy()
