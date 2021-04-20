@@ -3,7 +3,7 @@ project(OpenTM2_Util)
 
 set(Util_Source_Files
        # LanguageFactory.CPP
-       # LogWriter.cpp
+        LogWriter.cpp
        # OtmProposal.cpp
         UtlAlloc.C
         UtlMATVal.C

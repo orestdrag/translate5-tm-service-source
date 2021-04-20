@@ -61,7 +61,6 @@ MemoryFactory* MemoryFactory::getInstance()
 	return instance;
 }
 
-
 /* \brief Open an existing memory
    \param pszPluginName Name of the plugin or NULL
    \param pszMemoryName Name of the memory
@@ -138,6 +137,8 @@ OtmMemory *MemoryFactory::openMemory
 
   return( pMemory );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /* \brief Get information from an existing memory
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -531,6 +532,8 @@ int MemoryFactory::getMemoryPlugins
   return( iPlugins );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /* \brief Closed a previously opened memory
    \param pMemory pointer to memory object beign closed
 	 \returns 0 when successful or error code
@@ -579,6 +582,8 @@ int MemoryFactory::closeMemory
  
   return( iRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Rename a translation memory
   \param pszPluginName name of the memory being deleted
@@ -789,6 +794,8 @@ BOOL MemoryFactory::exists(
   return( fExists );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief Check if memory is a shared/synchronized memory
   \param pMemory pointer to memory object
 	\returns TRUE is memory is shared/synchronized
@@ -848,6 +855,8 @@ BOOL MemoryFactory::isSharedMemory(
   return( this->isSharedMemory( (char *)strMemory.c_str(), ppPlugin ) );
 }
 
+#ifdef TEMPORARY_COMMENTED
+
   /*! \brief Create a temporary memory
   \param pszPrefix prefix to be used for name of the temporary memory
   \param pszName buffer for the name of the temporary memory
@@ -884,8 +893,8 @@ void MemoryFactory::closeTempMemory(
 
   plugin->closeTempMemory( pMemory );
 }
-
  
+#endif //TEMPORARY_COMMENTED
 
 /*! \brief Show error message for the last error
   \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -923,6 +932,8 @@ std::string& MemoryFactory::getLastError( OtmMemory *pMemory, int& iLastError, s
     strError = this->strLastError;
     return strError;
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Copy best matches from one proposal vector into another
   and sort the proposals
@@ -1845,6 +1856,7 @@ int MemoryFactory::splitObjName( char *pszObjName, char *pszPluginName, int iPlu
   return( 0 );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 // helper functions 
 
@@ -1884,7 +1896,6 @@ OtmPlugin *MemoryFactory::getPlugin
 
   return( NULL );
 }
-
 
   /* \brief Find memory plugin for this memory using input
     data or find memory testing all memory plugins
@@ -2068,6 +2079,8 @@ void MemoryFactory::refreshPluginList()
   }
 
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /* \brief add a new user to a shared memory user list
    \param pszPlugin  name of the shared memory plugin to be used
@@ -2454,6 +2467,7 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   return( (USHORT)iRC );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 /*! \brief process the API call: EqfOpenMem and open the specified translation memory
   \param pszMemory name of the memory being opened
@@ -2509,6 +2523,7 @@ USHORT MemoryFactory::APIOpenMem
   return( 0 );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief process the API call: EqfCloseMem and close the translation memory referred by the handle
   \param lHandle handle of a previously opened memory
@@ -2897,6 +2912,8 @@ LONG MemoryFactory::getCheckSumFromHandle
   return( lHandle & 0xFFFFF800 );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief compute the checksum for a memory object
   \param pMemory pointer to a memory object
   \returns memory object checksum
@@ -2922,6 +2939,8 @@ LONG MemoryFactory::computeMemoryObjectChecksum
 
   return( lCheckSum );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief compute the checksum for a memory object
   \param lHandle handel referring to the memory object
@@ -2954,6 +2973,8 @@ OtmMemory *MemoryFactory::handleToMemoryObject
   return( (*pHandleToMemoryList)[lIndex] );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief convert a memory object and the index into the memory oject table to a memory handle
   \param lIndex index into the memory object table
   \param pMemory pointer to a memory object
@@ -2969,6 +2990,8 @@ LONG MemoryFactory::createHandle
 
   return( lCheckSum | lIndex );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief search a string in a proposal
   \param pProposal pointer to the proposal 
@@ -3193,3 +3216,5 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pOtmProposal->getContext( pProposal->szContext, sizeof(pProposal->szContext)/sizeof(CHAR_W) );
   pOtmProposal->getAddInfo( pProposal->szAddInfo, sizeof(pProposal->szAddInfo)/sizeof(CHAR_W) );
 }
+
+#endif //TEMPORARY_COMMENTED

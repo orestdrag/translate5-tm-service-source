@@ -637,6 +637,7 @@ USHORT EqfGetLastErrorW
   return( usRC );
 } /* end of function EqfGetLastErrorW */
 
+#endif //TEMPORARY_COMMENTED
 
 // FctValidateSession: check and convert a session handle to a FCTDATA pointer
 USHORT FctValidateSession
@@ -677,6 +678,8 @@ USHORT FctValidateSession
   } /* endif */
   return( usRC );
 } /* end of function FctValidateSession */
+
+#ifdef TEMPORARY_COMMENTED
 
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
@@ -846,6 +849,7 @@ USHORT EqfExportMemInInternalFormat
   return( usRC );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Open the specified translation memory
@@ -892,6 +896,7 @@ USHORT EqfOpenMem
   return( usRC );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Close the translation memory referred by the handle

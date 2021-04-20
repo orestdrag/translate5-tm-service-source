@@ -812,19 +812,23 @@ USHORT EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer )
 
 }
 
+#endif //TEMPORARY_COMMENTED
+
 MRESULT EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
   MRESULT mResult = FALSE;
-  //HWND hwnd = EqfQueryHandler( psz);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  HWND hwnd = EqfQueryHandler( psz);
 
-#if 0
   if ( hwnd )
   {
     mResult = WinSendMsg( hwnd, msg, mp1, mp2);
   } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( mResult );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 MRESULT EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
