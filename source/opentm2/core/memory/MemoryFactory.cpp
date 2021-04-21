@@ -2523,8 +2523,6 @@ USHORT MemoryFactory::APIOpenMem
   return( 0 );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief process the API call: EqfCloseMem and close the translation memory referred by the handle
   \param lHandle handle of a previously opened memory
   \param lOptions processing options 
@@ -2552,6 +2550,8 @@ USHORT MemoryFactory::APICloseMem
 
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief process the API call: EqfQueryMem and lookup a segment in the memory
   \param lHandle handle of a previously opened memory
@@ -2888,6 +2888,8 @@ USHORT MemoryFactory::APIListMem
   return( 0 );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief get the index into the memory object table from a memory handle
   \param lHandle handle of a previously opened memory
   \returns index into the memory object table
@@ -2911,8 +2913,6 @@ LONG MemoryFactory::getCheckSumFromHandle
 {
   return( lHandle & 0xFFFFF800 );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief compute the checksum for a memory object
   \param pMemory pointer to a memory object
@@ -2939,8 +2939,6 @@ LONG MemoryFactory::computeMemoryObjectChecksum
 
   return( lCheckSum );
 }
-
-#ifdef TEMPORARY_COMMENTED
 
 /*! \brief compute the checksum for a memory object
   \param lHandle handel referring to the memory object
@@ -2972,8 +2970,6 @@ OtmMemory *MemoryFactory::handleToMemoryObject
 
   return( (*pHandleToMemoryList)[lIndex] );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief convert a memory object and the index into the memory oject table to a memory handle
   \param lIndex index into the memory object table

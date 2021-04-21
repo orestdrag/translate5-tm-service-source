@@ -896,8 +896,6 @@ USHORT EqfOpenMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 /*! \brief Close the translation memory referred by the handle
   \param hSession the session handle returned by the EqfStartSession call
@@ -940,6 +938,8 @@ USHORT EqfCloseMem
 
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Search the given text string in the memory
