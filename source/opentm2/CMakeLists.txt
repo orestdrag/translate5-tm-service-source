@@ -31,4 +31,7 @@ target_link_libraries(OTMFUNC
                     #Lists
                     #Services
                     Tagtable
+                    Ling
+                    Morph
+                    Spell
 )

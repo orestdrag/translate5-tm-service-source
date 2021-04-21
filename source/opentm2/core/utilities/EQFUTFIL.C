@@ -125,8 +125,6 @@ USHORT UtlGetDriveList( BYTE *szList)
     return( (USHORT) (bDrive - 'A' + 1));   // set index relative to 0
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -150,11 +148,11 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
   SHORT sDriveType;                    // type of currently tested drive
   USHORT usRC;
 
-#if 0
   usRC = UtlGetDriveList( pszList);    // get all available drives
 
   pSource = pTarget = pszList;         // start at begin of drive list
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( *pSource != NULC )           // while not end of list ....
   {
     sDriveType = UtlDriveType( *pSource );
@@ -189,10 +187,12 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
     } /* endswitch */
   } /* endwhile */
   *pTarget = NULC;                     // terminate new drive list
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( usRC );
 } /* end of function UtlGetLANDriveList */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2299,6 +2299,8 @@ BOOL UtlGetCheckedEqfLanDrives
    return( fOK );
 } /* end of UtlGetCheckedEqfDrives */
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2517,6 +2519,8 @@ USHORT UtlBufCloseHwnd
   return( usRC );
 } /* end of function UtlBufClose */
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2725,6 +2729,7 @@ USHORT UtlBufWriteConv( PBUFCB pBufCB, PSZ_W pBuf, ULONG lLen, BOOL fMsg,
 } /* end of function UtlBufWriteConv */
 
 
+#endif //TEMPORARY_COMMENTED
 
 
 //+----------------------------------------------------------------------------+
@@ -2849,6 +2854,8 @@ USHORT UtlBufReadHwnd
 
    return( usRC );
 } /* end of function UtlBufRead */
+
+#ifdef TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* Array for drive name checking                                      */
@@ -3176,6 +3183,7 @@ BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName )
    return ( fOK );
 } /* end of UtlCheckIntName */
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -3210,9 +3218,9 @@ BOOL UtlCheckLongName( PSZ pszName )
    if ( fOK )
    {
      pPropSys = GetSystemPropPtr();
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      while ( fOK && (*pszName != EOS) )
      {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
             (isdbcs1ex((USHORT)pPropSys->ulSystemPrefCP, *pszName ) == DBCS_1ST) &&
             (pszName[1] != EOS) )
@@ -3220,6 +3228,7 @@ BOOL UtlCheckLongName( PSZ pszName )
          pszName++;                    // skip both bytes of DBCS character
          pszName++;
        }
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 //     if ( (*pszName == '\\') || (*pszName == '?') || (*pszName == '*') )
        if ( strchr("\\?*<>:|/", *pszName ) ) 
        {
@@ -3230,12 +3239,12 @@ BOOL UtlCheckLongName( PSZ pszName )
          pszName++;                    // continue with next character
        } /* endif */
      } /* endwhile */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
 
    return ( fOK );
 } /* end of UtlCheckLongName */
 
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

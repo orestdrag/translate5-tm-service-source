@@ -328,6 +328,7 @@ int MemoryFactory::importFromMemoryFiles
   return( iRC );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 /* \brief Create a memory 
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -349,7 +350,6 @@ OtmMemory *MemoryFactory::createMemory
 {
   return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, '\0', NULL, false, piErrorCode ) );
 }
-
 
 /* \brief Create a memory 
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -466,6 +466,7 @@ OtmMemory *MemoryFactory::createMemory
   return( pMemory );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 /* \brief List memories from all memory plugins
    \param pfnCallBack callback function to be called for each memory
@@ -755,6 +756,8 @@ int MemoryFactory::clearMemory(
   return( iRC );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief Check if memory exists
   \param pszPlugin plugin-name or NULL if not available or memory object name is used
   \param pszMemoryName name of the memory being cleared or
@@ -793,8 +796,6 @@ BOOL MemoryFactory::exists(
   } /* endif */
   return( fExists );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief Check if memory is a shared/synchronized memory
   \param pMemory pointer to memory object
@@ -1735,6 +1736,8 @@ int MemoryFactory::getConnectOptions(
   return( 0 );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief Get name of default memory plugin
 	\returns pointer to name of default memory plugin
 */
@@ -1752,7 +1755,6 @@ const char *MemoryFactory::getDefaultSharedMemoryPlugin(
 {
   return( this->szDefaultSharedMemoryPlugin );
 }
-
 
 
 /*! \brief Get the object name for the memory
@@ -1800,6 +1802,8 @@ int MemoryFactory::getObjectName( OtmMemory *pMemory, char *pszObjName, int iBuf
 
   return( 0 );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Get the plugin name and the memory name from a memory object name
   \param pszObjName pointer to the memory object name

@@ -5,10 +5,10 @@
 	Corporation and others. All rights reserved
 */
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmSpellPlugin.h"
-#include "core\PluginManager\OtmSpell.h"
-#include "core\spell\SpellFactory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmSpellPlugin.h"
+#include "../pluginmanager/OtmSpell.h"
+#include "SpellFactory.h"
 
 
 #ifdef _DEBUG

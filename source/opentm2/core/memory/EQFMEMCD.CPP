@@ -90,6 +90,7 @@ typedef struct _TMX_CREATE_IDA
   USHORT usLocation;                       //TM_LOCAL,TM_REMOTE, TM_LOCALREMOTE,
 } TMX_CREATE_IDA, * PTMX_CREATE_IDA;
 
+#ifdef TEMPORARY_COMMENTED
 
 VOID    MemCreateCommand( HWND hDlg );
 VOID    MemCreateControl( HWND hDlg, USHORT usId );
@@ -1823,6 +1824,7 @@ LPARAM    mp2
 } /* end of function MEMPROPDLG */
 #endif
 
+#endif //TEMPORARY_COMMENTED
 
 // create a new Translation Memory using the function I/F
 USHORT MemFuncCreateMem
@@ -2030,3 +2032,4 @@ LONG        lOptions                 // type of new Translation Memory
 
   return( usRC );
 } /* end of function MemFuncCreateMem */
+

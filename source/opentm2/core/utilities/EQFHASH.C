@@ -127,8 +127,6 @@ PHASH HashCreate
   return pNewHash;
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -315,9 +313,6 @@ BOOL HashDelete
   return FALSE;                                            /* No match       */
 }
 
-#endif //TEMPORARY_COMMENTED
-
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -413,8 +408,6 @@ VOID HashDestroy
   return;
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -491,6 +484,8 @@ PVOID HashSearch
   /***************************************************************************/
   return NULL;
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -573,6 +568,8 @@ PVOID HashIterate
   return NULL;
 } /* end of function HashIterate */
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -623,6 +620,8 @@ PPOOL PoolCreate
   return( pPool );
 } /* end of function PoolCreate */
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -670,6 +669,8 @@ PSZ PoolAddString
   return( pszStringInPool );
 
 } /* end of function PoolAddString */
+
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -720,9 +721,6 @@ PSZ_W PoolAddStringW
   return( pszStringInPool );
 
 } /* end of function PoolAddStringW */
-
-
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -851,8 +849,6 @@ VOID PoolDestroy
     pPool = pNextPool;                 // make next pool area the active one
   } /* endwhile */
 } /* end of function PoolDestroy */
-
-#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* Simulated OS/2 Atom functions for the Windows environment          */

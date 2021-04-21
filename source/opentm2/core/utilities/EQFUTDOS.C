@@ -1189,6 +1189,7 @@ USHORT UtlWriteWoCheckHwnd
    return( usRetCode );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1283,12 +1284,12 @@ USHORT UtlChgFilePtrHwnd
    liNewOffset.LowPart = 0;
    liNewOffset.HighPart = 0;
 
-
-#if 0
    do {
       DosError(0);
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       fOK = SetFilePointerEx( hf, liOffset, &liNewOffset, fsMethod );
+#endif
 
       *pulNewOffset = liNewOffset.LowPart;
 
@@ -1304,9 +1305,11 @@ USHORT UtlChgFilePtrHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

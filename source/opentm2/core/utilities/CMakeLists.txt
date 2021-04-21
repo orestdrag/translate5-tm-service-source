@@ -20,7 +20,7 @@ set(Util_Source_Files
 #EQFUTDLG.CPP
 #EQFPROPS.CPP
 #OptionsDialog.CPP
-#UtlLangCP.C
+        UtlLangCP.C
         UtlRegistry.C
 #EQFUTCLB.C
 )

@@ -52,8 +52,10 @@ BOOL UtlIsLanguageSupported
     ulCP = 932;
   } /* endif */
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // convert our test string to UTF16
-  //iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
+  iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   if ( iRC == 0 )
   {

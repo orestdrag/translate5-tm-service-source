@@ -5,10 +5,10 @@
 	Corporation and others. All rights reserved
 */
 
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmMorphPlugin.h"
-#include "core\PluginManager\OtmMorph.h"
-#include "core\morph\MorphFactory.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmMorphPlugin.h"
+#include "../pluginmanager/OtmMorph.h"
+#include "MorphFactory.h"
 
 
 /*! \brief the MorphFactory instance	 */
@@ -184,7 +184,6 @@ int MorphFactory::getLanguageList(
 	}
 }
 
-
 /* \brief check if the given language is supported by any of the available Morph plugins
    \param vName the language name
    \returns TRUE if the language is supported and FALS when no plugin for this language is available
@@ -246,3 +245,4 @@ BOOL isMorphSupportAvailable( PSZ pszLanguage )
   } 
   return( FALSE );
 }
+

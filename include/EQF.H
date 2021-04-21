@@ -4357,7 +4357,7 @@ USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg )
 USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
         BOOL fMsg, HWND hwndParent );
 BOOL    UtlIsEqfDrive( CHAR chDrive );
-BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
+extern "C" BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
 USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
 USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
 PSZ     UtlGetFnameFromPath( PSZ path);
@@ -4374,7 +4374,7 @@ PPLUG   UtlPlugOut( PPLUG plug);
 PSZ     UtlSplitFnameFromPath( PSZ path);
 PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
 USHORT  UtlGetDriveList( BYTE *szList);
-USHORT  UtlGetLANDriveList( BYTE *szList);
+extern "C" USHORT  UtlGetLANDriveList( BYTE *szList);
 BYTE    UtlQCurDisk( void);
 BOOL    UtlChangePropHead( PSZ, CHAR, PSZ, PSZ );
 SHORT   UtlLoadFileNames( PSZ search_path, USHORT atrb, HWND hlb, USHORT flg);
@@ -4672,7 +4672,7 @@ USHORT EqfDriveType(USHORT iDrive);
                                             // is not active yet!
 BOOL UtlCheckPath( PSZ pszPath, ULONG ulInFlags, PULONG pulOutFlags );
 BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName );
-BOOL UtlCheckLongName( PSZ pszName );
+extern "C" BOOL UtlCheckLongName( PSZ pszName );
 BOOL UtlKeepInTWB( PSWP pswpWin );
 USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow );
 LONG UtlTime( PLONG plTime );
@@ -6605,7 +6605,7 @@ BOOL ObjHandlerTerminateForBatch( void );
 SHORT ObjQuerySymbol( PSZ pszSymbol );
 SHORT ObjSetSymbol( PSZ pszSymbol );
 SHORT ObjRemoveSymbol( PSZ pszSymbol );
-USHORT MemFuncCreateMem
+extern "C" USHORT MemFuncCreateMem
 (
   PSZ         pszMemName,              // name of new Translation Memory
   PSZ         pszDescription,          // description for new Translation Memory or NULL

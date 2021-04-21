@@ -10,6 +10,7 @@
 //#include <windows.h>
 #include "string"
 #include "vector"
+#include "win_types.h"
 using namespace std;
 
 typedef vector<string> STRINGLIST;

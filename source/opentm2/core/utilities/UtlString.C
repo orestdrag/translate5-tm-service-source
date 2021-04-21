@@ -1627,6 +1627,7 @@ PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource )
   return( pszTarget );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strcmp   compare two Unicode UTF16 strings                        ///
@@ -1663,6 +1664,7 @@ int UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 )
   return( iResult);
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strncmp   compare two Unicode UTF16 strings up to usLen chars     ///
@@ -1722,6 +1724,8 @@ int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
   return( wcsncasecmp( pszString1, pszString2, lLen));
 }
 
+#endif //TEMPORARY_COMMENTED
+
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strlen   get the length in bytes of an Unicode UTF16 string       ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -1737,6 +1741,8 @@ int UTF16strlenCHAR( PSZ_W pszString )
   } /* endwhile */
   return( iLen );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 
 int UTF16strlenBYTE( PSZ_W pszString )

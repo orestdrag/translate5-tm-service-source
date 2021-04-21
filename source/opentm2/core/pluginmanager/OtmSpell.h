@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <stdio.h>
+#include "win_types.h"
 
 using namespace std;
 

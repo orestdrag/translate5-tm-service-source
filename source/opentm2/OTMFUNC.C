@@ -234,6 +234,8 @@ USHORT EqfExportMem
   return( usRC );
 } /* end of function EqfExportMem */
 
+#endif //TEMPORARY_COMMENTED
+
 // OtmMemoryService
 // create a new Translation Memory
 USHORT EqfCreateMem
@@ -277,6 +279,8 @@ USHORT EqfCreateMem
 
   return( usRC );
 } /* end of function EqfCreateMem */
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 // delete a Translation Memory
@@ -675,15 +679,12 @@ USHORT FctValidateSession
   return( usRC );
 } /* end of function FctValidateSession */
 
-#ifdef TEMPORARY_COMMENTED
-
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
     HANDLE        hMapObject = NULL;
 
-//WINAPI
-    //hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
-    /*
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
     if(!hMapObject)
     {
         hMapObject = CreateFileMapping(
@@ -697,21 +698,19 @@ void SetSharingFlag(ULONG ulRefreshFlag)
     if ( hMapObject == NULL )
     {
         usRC = ERROR_STORAGE;
-    }*/
+    }
     if ( hMapObject )
     {
-        /*ULONG *ulActFlag = (ULONG *)MapViewOfFile (hMapObject,
+        ULONG *ulActFlag = (ULONG *)MapViewOfFile (hMapObject,
                                   FILE_MAP_WRITE,
                                   0,
                                   0,
                                   0);
         *ulActFlag |= ulRefreshFlag;
-        UnmapViewOfFile(ulActFlag);*/
-
+        UnmapViewOfFile(ulActFlag);
     }
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
-
-#endif //TEMPORARY_COMMENTED
 
 // OtmMemoryService
 // API function checking the existence of a translation memory

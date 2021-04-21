@@ -10,10 +10,10 @@
 
 #include <string>
 #include <vector>
-#include "core\PluginManager\PluginManager.h"
-#include "core\PluginManager\OtmSpellPlugin.h"
-#include "core\PluginManager\OtmSpell.h"
-#include "core\utilities\LogWriter.h"
+#include "../pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmSpellPlugin.h"
+#include "../pluginmanager/OtmSpell.h"
+#include "../utilities/LogWriter.h"
 
 /*! \brief   This class provides factory methods for spell check objects 
 */

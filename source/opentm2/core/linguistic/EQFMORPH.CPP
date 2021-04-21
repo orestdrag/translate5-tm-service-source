@@ -10,22 +10,25 @@
 #define MORPH_BUILD_COMP_STEMS         // use compound sep. for stem forms
 #define INCL_EQF_ASD              // dictionary access functions (Asd...)
 #define INCL_EQF_MORPH            // morphologic functions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
-#include <eqfmorpi.h>                  // private header file of module
-#include <eqfchtbl.h>                  // character tables
+#include <EQFMORPI.H>                  // private header file of module
+#include <EQFCHTBL.H>                  // character tables
 #include "OTMFUNC.H"            // function call interface public defines
-#include "eqffunci.h"           // function call interface private defines
+#include "EQFFUNCI.H"           // function call interface private defines
 
 #include <ctype.h>
 #ifndef INCL_EQF_MORPH
 #define INCL_EQF_MORPH            // morphologic functions
 #endif
 
-#include "core\spell\SpellFactory.h"
-#include "core\morph\MorphFactory.h"
-#include "core\utilities\LogWriter.h"
+#include "../spell/SpellFactory.h"
+#include "../morph/MorphFactory.h"
+#include "../utilities/LogWriter.h"
+
+#ifdef TEMPORARY_COMMENTED
 #include "cxmlwriter.h"
+#endif //TEMPORARY_COMMENTED
 
 #define MAX_TERMSIZE        256
 #define REPLY_AREA_SIZE   40000        // size of reply area
@@ -142,10 +145,14 @@ static MORPHLANGTYPE LangTypes[] =
   }
 #endif
 
+#ifdef TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* indicator for DBCS initialisation                                  */
 /**********************************************************************/
 BOOL  fInit = FALSE;
+
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function name:     MorphInit
@@ -233,6 +240,8 @@ USHORT MorphInit
 
 	return( usRC );
 } /* end of function INIT */
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -1026,6 +1035,7 @@ USHORT GetPos
 
 } /* end of function GETPOS */
 
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -1077,6 +1087,7 @@ USHORT Terminate
 
 } /* end of function Terminate */
 
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -3488,6 +3499,8 @@ USHORT MorphThreadEnds
 
 } /* end of function MorphThreadEnds */
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -3563,11 +3576,13 @@ USHORT MorphGetLanguageID
     /******************************************************************/
         WORD   usTask;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         _asm
           {
             mov      ax, SS
             mov      usTask, ax
           }
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      usTid = usTask;
    }
 
@@ -3595,7 +3610,7 @@ USHORT MorphGetLanguageID
   {
     pLCBTemp = *ppLCBTemp;
     if ( ( pLCBTemp->tidThread == usTid ) &&
-           (stricmp( pszLanguage, pLCBTemp->szLanguage ) == 0) )
+           (strcasecmp( pszLanguage, pLCBTemp->szLanguage ) == 0) )
     {
       sID = sI;                        // remember ID of language
       break;                           // leave for loop
@@ -3776,6 +3791,8 @@ USHORT MorphGetLanguageID
   return( usRC );
 
 } /* end of function MorphGetLanguageID */
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -5941,6 +5958,8 @@ USHORT MorphCopyStringListUnicode2ASCII
 //                      bucked is freed and re-used for the ew entry
 //------------------------------------------------------------------------------
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -6153,6 +6172,8 @@ BOOL MorphHashDestroy
   return( TRUE );
 } /* end of function MorphHashDestroy */
 
+#ifdef TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -6203,6 +6224,8 @@ BOOL MorphHashReset
 
   return( TRUE );
 } /* end of function MorphHashReset */
+
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6386,6 +6409,8 @@ BOOL MorphHashDelete
 
   return( TRUE );
 } /* end of function MorphHashDelete */
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6629,6 +6654,8 @@ BOOL MorphHashWrite
 
   return( fOK );
 } /* end of function MorphHashWrite */
+
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6967,6 +6994,8 @@ USHORT MorphHashKeyValue
   }
   return (( hash1 << 8) | hash2);
 } /* end of function MorphHashKeyValue */
+
+#ifdef TEMPORARY_COMMENTED
 
 
 //------------------------------------------------------------------------------
@@ -7706,3 +7735,4 @@ unsigned short MorphFuncReduceToStemForm
   return( usRC );
 }
 
+#endif //TEMPORARY_COMMENTED
