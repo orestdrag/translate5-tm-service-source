@@ -580,8 +580,6 @@ USHORT EqfStartSession
   return( usRC );
 } /* end of function EqfStartSession */
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 USHORT EqfGetLastError
 (
@@ -636,8 +634,6 @@ USHORT EqfGetLastErrorW
 
   return( usRC );
 } /* end of function EqfGetLastErrorW */
-
-#endif //TEMPORARY_COMMENTED
 
 // FctValidateSession: check and convert a session handle to a FCTDATA pointer
 USHORT FctValidateSession
