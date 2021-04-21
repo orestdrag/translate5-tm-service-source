@@ -992,6 +992,9 @@ USHORT UtlWriteL
                          fMsg,
                          (HWND)NULL ) );
 }
+
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1043,13 +1046,14 @@ USHORT UtlWriteHwnd
 
    ULONG  ulTotBytesWritten = 0;
 
-#if 0
    do {
       DosError(0);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       if ( WriteFile( hf, pBuf, cbBuf, &ulBytesWritten, NULL ) == 0 )
       {
-        //usRetCode = (USHORT)GetLastError();
+        usRetCode = (USHORT)GetLastError();
       } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
 
@@ -1084,11 +1088,12 @@ USHORT UtlWriteHwnd
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
 
    *pcbBytesWritten = ulTotBytesWritten;
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1336,6 +1341,8 @@ USHORT UtlDelete
                           (HWND)NULL ) );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1380,20 +1387,23 @@ USHORT UtlDeleteHwnd
   	 HANDLE hMutexSem = NULL;
      ulReserved;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 	 // keep other process from doing property related stuff..
-	 //GETMUTEX(hMutexSem);
+	 GETMUTEX(hMutexSem);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
      UtlSetFileMode(pszFName, FILE_NORMAL, 0L, FALSE);
 	 {
 
-#if 0
 	   do {
 		  DosError(0);
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 		  if ( DeleteFile( pszFName ) == 0 )
 		  {
-			//usRetCode = (USHORT)GetLastError();
+			usRetCode = (USHORT)GetLastError();
 		  } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 		  DosError(1);
 		  if ( fMsg && usRetCode )
@@ -1401,13 +1411,16 @@ USHORT UtlDeleteHwnd
 			 usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFName, DOS_ERROR, hwndParent );
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       // release Mutex
-      //RELEASEMUTEX(hMutexSem);
+      RELEASEMUTEX(hMutexSem);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     }
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1924,6 +1937,8 @@ USHORT UtlMoveHwnd
    return( usRetCode );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1952,7 +1967,6 @@ USHORT UtlMoveHwnd
 //+----------------------------------------------------------------------------+
 //|Function flow:     call UtlFindFirstHwnd                                    |
 //+----------------------------------------------------------------------------+
-
 
 USHORT UtlFindFirst
 (
@@ -2048,11 +2062,10 @@ USHORT UtlFindFirstHwnd
    }
    else
    {
-      //pszFSpecCompl = pszFSpec;
+      pszFSpecCompl = pszFSpec;
       return (ERROR_INVALID_DATA);
    }
 
-#if 0
    do {
       DosError(0);
 
@@ -2060,10 +2073,14 @@ USHORT UtlFindFirstHwnd
        {
          usAttr = FILE_ATTRIBUTE_NORMAL; // use normal file as default
        } /* endif */
-       //hdirNew = FindFirstFile( pszFSpecCompl, pffb );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+       hdirNew = FindFirstFile( pszFSpecCompl, pffb );
+
        if ( hdirNew == INVALID_HANDLE_VALUE )
        {
-         //usRetCode = (USHORT)GetLastError();
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+         usRetCode = (USHORT)GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
          if ( usRetCode == ERROR_FILE_NOT_FOUND )
               usRetCode = ERROR_NO_MORE_FILES;
          usSearch = 0;
@@ -2079,6 +2096,7 @@ USHORT UtlFindFirstHwnd
                   (ISFILEATTR(usAttr) & !ISDIRATTR(pffb->dwFileAttributes));
          if ( fFound)
          {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // check if 8.3 name is available
            if ( pffb->cAlternateFileName[0] == EOS )
            {
@@ -2090,12 +2108,14 @@ USHORT UtlFindFirstHwnd
                fFound = FALSE; // ignore file with long name
              } /* endif */
            } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
          } /* endif */
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          while ( (usRetCode == NO_ERROR) && !fFound )
          {
             if ( FindNextFile( hdirNew, pffb ) == 0 )
             {
-              //usRetCode = (USHORT)GetLastError();
+              usRetCode = (USHORT)GetLastError();
               if ( usRetCode == ERROR_FILE_NOT_FOUND )
                 usRetCode = ERROR_NO_MORE_FILES;
             }
@@ -2119,15 +2139,18 @@ USHORT UtlFindFirstHwnd
               } /* endif */
             } /* endif */
          } /* endwhile */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
          if ( usRetCode == NO_ERROR )
          {
            usSearch = 1;
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // use normal file name if no alternate file name (8.3) is given
            if ( pffb->cAlternateFileName[0] == EOS )
            {
               strcpy( pffb->cAlternateFileName, pffb->cFileName );
            } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
            // add file search handle and attributes in our list of open
            // file search handles
@@ -2135,11 +2158,14 @@ USHORT UtlFindFirstHwnd
          }
          else
          {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // close file handle as it will not be used anymore
             FindClose( hdirNew );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
             hdirNew = HDIR_CREATE;
          } /* endif */
        } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
@@ -2157,7 +2183,7 @@ USHORT UtlFindFirstHwnd
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+
    *phdir = hdirNew;
    *pcSearch = (usRetCode == NO_ERROR ) ? usSearch : 0;
    return( usRetCode );
@@ -2251,7 +2277,6 @@ USHORT UtlFindNextHwnd
    USHORT usAttr;                      // file attribute for this file search
    BOOL   fFound = FALSE;              // matching file was found flag
 
-#if 0
    cbBuf;
    do {
       DosError(0);
@@ -2259,13 +2284,14 @@ USHORT UtlFindNextHwnd
       // get file attribute flags active for this search handle
       usAttr = UtlAttrOfSearchHandle( hdir );
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       // look for files until the correct file type has been found
       // or no more files are available
       do
       {
         if ( FindNextFile( hdir, pffb ) == 0 )
         {
-          //usRetCode = (USHORT)GetLastError();
+          usRetCode = (USHORT)GetLastError();
           if ( usRetCode == ERROR_FILE_NOT_FOUND ) usRetCode = ERROR_NO_MORE_FILES;
         }
         else
@@ -2304,11 +2330,12 @@ USHORT UtlFindNextHwnd
       {
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } while ( fMsg &&
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+
    *pcSearch = (usRetCode == NO_ERROR ) ? usSearch : 0;
    return( usRetCode );
 }
@@ -2342,6 +2369,7 @@ USHORT UtlFindClose
                              fMsg,
                              (HWND) NULL ) );
 }
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2377,13 +2405,13 @@ USHORT UtlFindCloseHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    fMsg; hwndParent;
    if ( FindClose( hdir ) == 0 )
    {
-     //usRetCode = (USHORT)GetLastError();
+     usRetCode = (USHORT)GetLastError();
    } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    // remove file search handle from our list of open
    // file search handles
@@ -2391,6 +2419,8 @@ USHORT UtlFindCloseHwnd
 
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2664,6 +2694,7 @@ USHORT UtlQFSInfoHwnd
    return( usRetCode );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2743,15 +2774,16 @@ USHORT UtlSetFileModeHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-#if 0
    ulReserved;
    do {
       DosError(0);
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 )
       {
-        //usRetCode = (USHORT)GetLastError();
+        usRetCode = (USHORT)GetLastError();
       } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
       if ( fMsg && usRetCode )
@@ -2759,9 +2791,10 @@ USHORT UtlSetFileModeHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2954,6 +2987,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
 
 
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2977,23 +3011,20 @@ BOOL UtlSetDrive
   CHAR   szNewDrive                        // driveletter of new drive
 )
 {
-#if 0
   BOOL    fFlag=TRUE;
-
   CHAR szRootDir[5] = "A:\\";
-
   szRootDir[0] = szNewDrive;
+
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( SetCurrentDirectory( szRootDir ) == 0 )
   {
     fFlag = FALSE;
   } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return(fFlag);
-#endif
 }
 
-
-#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* the following section contains DOS-API functions which are not     */
@@ -4303,16 +4334,18 @@ USHORT DosOpenLong
                     fsOpenFlags, fsOpenMode, 0L, FALSE ) );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* Get the drive letter /2 DosCopy as this function fails when copying   */
 /* files across FAT/HPFS network boundaries                           */
 /**********************************************************************/
 CHAR UtlGetDriveFromHandle( HFILE hf )
 {
-#if 0
   CHAR chDrive = EOS;
   // look for handle in our handle/drive array
   int i = 0;
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( i < MAX_OPEN_FILES )
   {
     if ( DriveHandles[i].hf  == hf )
@@ -4326,11 +4359,12 @@ CHAR UtlGetDriveFromHandle( HFILE hf )
       i++;
     } /* endif */
   } /* endwhile */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( chDrive );
-#endif
 } /* end of function UtlGetDriveFromHandle */
 
+#ifdef TEMPORARY_COMMENTED
 
 // add file search handle and attributes in our list of open
 // file search handles
@@ -4376,6 +4410,8 @@ USHORT UtlAddSearchHandle
   return( NO_ERROR );
 } /* end of function UtlAddSearchHandle */
 
+#endif //TEMPORARY_COMMENTED
+
 // get file attribute flags active for a specific search handle
 USHORT UtlAttrOfSearchHandle
 (
@@ -4417,9 +4453,6 @@ USHORT UtlRemoveSearchHandle
   } /* endfor */
   return( NO_ERROR );
 } /* end of function UtlRemoveSearchHandle */
-
-#endif //TEMPORARY_COMMENTED
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

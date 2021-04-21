@@ -711,6 +711,8 @@ void SetSharingFlag(ULONG ulRefreshFlag)
     }
 }
 
+#endif //TEMPORARY_COMMENTED
+
 // OtmMemoryService
 // API function checking the existence of a translation memory
 // 
@@ -751,6 +753,8 @@ USHORT EqfMemoryExists
 
   return( usRC );
 } /* end of function EqfMemoryExists */
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Import a memory using the internal memory files

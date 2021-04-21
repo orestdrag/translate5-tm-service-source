@@ -1258,6 +1258,8 @@ USHORT ObjBroadcast
   return( 0 );
 } /* endif ObjRemoveSymbol */
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1946,6 +1948,8 @@ USHORT ObjLongToShortNameEx2
 
   return( usRC );
 } /* end of function ObjLongToShortNameEx */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |

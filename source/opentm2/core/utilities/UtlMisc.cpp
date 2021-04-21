@@ -166,8 +166,6 @@ PPLUG UtlPlugOut( PPLUG pPlug)
     return( pPlug);
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*!
 	Function Name:     UtlSplitFnameFromPath  Split a path at filename
 
@@ -226,6 +224,9 @@ PSZ UtlGetFnameFromPath( PSZ path)
     pszFileName = path;
   return( pszFileName );
 }
+
+#ifdef TEMPORARY_COMMENTED
+
 /*!
 	Function Name:     UtlGetDriveType   Return type of a given drive
 

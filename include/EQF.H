@@ -4273,7 +4273,7 @@ USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
 USHORT  UtlRmDir( PSZ pszDir, ULONG ulReserved, BOOL fMsg );
 USHORT  UtlCopy( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved, BOOL fMsg );
 USHORT  UtlMove( PSZ pszSrc, PSZ pszDst, ULONG ulReserved, BOOL fMsg );
-USHORT  UtlFindFirst( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
+extern "C" USHORT  UtlFindFirst( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
                      PFILEFINDBUF pffb, USHORT cbBuf, PUSHORT pcSearch,
                      ULONG ulReserved, BOOL fMsg );
 USHORT  UtlFindNext( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
@@ -4419,7 +4419,7 @@ BOOL   UtlTimeStringToFTime( PSZ, FTIME * );
 USHORT UtlSetFileMode ( PSZ, USHORT, ULONG, BOOL );
 VOID   UtlStripBlanks ( PSZ );
 VOID   UtlStripBlanksW( PSZ_W );
-BOOL   UtlSetDrive( CHAR szNewDrive );
+extern "C" BOOL   UtlSetDrive( CHAR szNewDrive );
 USHORT  UtlBufOpen( PBUFCB *, PSZ, ULONG, ULONG, BOOL );
 USHORT  UtlBufClose( PBUFCB pBufCB, BOOL fMsg );
 USHORT  UtlBufWrite( PBUFCB pBufCB, PSZ pszData, ULONG ulDataLength, BOOL fMsg );

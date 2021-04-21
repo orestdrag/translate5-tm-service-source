@@ -1873,6 +1873,8 @@ USHORT UtlRemoveDir( PSZ pszDir, BOOL fMsg )
    return( usRC );
 } /* endof UtlRemoveDir */
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2044,8 +2046,6 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
     return ( usDosRC );
 
 } /* UtlWriteFile */
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

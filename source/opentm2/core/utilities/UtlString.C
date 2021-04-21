@@ -157,6 +157,8 @@ USHORT UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId )
   return( NO_ERROR );
 } /* end of function UtlExtractX15 */
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Function Name:     Utlstrccpy             strcpy up to a given character     
 //------------------------------------------------------------------------------
@@ -185,6 +187,8 @@ PSZ Utlstrccpy( PSZ pszTarget, PSZ pszSource, CHAR chStop )
    *pszTarget = NULC;
    return( pTemp );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function Name:     Utlstrnccpy            strcpy up to a char or a count     
@@ -1016,6 +1020,8 @@ UtlToLowerW
 #endif
  } /* end of function UtlToLowerW */
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Function name:     UtlUpper                                                  
 //------------------------------------------------------------------------------
@@ -1047,6 +1053,8 @@ UtlUpper
 
   return pData;
 } /* end of function UtlUpper */
+
+#ifdef TEMPORARY_COMMENTED
 
 PSZ_W
 UtlUpperW
