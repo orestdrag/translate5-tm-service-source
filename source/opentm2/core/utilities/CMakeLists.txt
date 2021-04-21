@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.10)
 project(OpenTM2_Util)
 
 set(Util_Source_Files
-       # LanguageFactory.CPP
+        LanguageFactory.CPP
         LogWriter.cpp
        # OtmProposal.cpp
         UtlAlloc.C

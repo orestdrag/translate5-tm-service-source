@@ -197,7 +197,6 @@ LanguageFactory::~LanguageFactory(void)
   }
 }
 
-
 /*! \brief This static method returns a pointer to the LanguageFactory object.
 	The first call of the method creates the LanguageFactory instance.
 */
