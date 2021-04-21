@@ -1803,7 +1803,7 @@ HWND      EqfQueryObject( PSZ pszObj, SHORT sClass, SHORT sFlags );
 SHORT     EqfQueryObjectName( HWND hwnd, PSZ pBuffer );
 USHORT    EqfSetObjectStatus( HWND hwnd, SHORT sMask, SHORT sStatus );
 USHORT    EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer );
-MRESULT   EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
+extern "C" MRESULT   EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
 MRESULT   EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
 USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 
@@ -4397,13 +4397,13 @@ SHORT UtlDriveType( CHAR chDrive );
 VOID UtlSetHorzScrollingForLB(HWND hLB);
 
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
-BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
+extern "C" BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
 BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
 BOOL   UtlInitUtils( HAB );
 BOOL   UtlRegisterEqfHelp( HAB );
 BOOL   UtlTerminateUtils( VOID );
 USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
-USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
+extern "C" USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
 USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
 USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
 VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
