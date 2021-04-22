@@ -539,9 +539,7 @@ USHORT EqfStartSession
             {
                 usRC = ERROR_PLUGIN_INVALID;
                 PSZ pszParam = strParam;
-#ifdef TEMPORARY_COMMENTED
                 UtlError(ERROR_PLUGIN_INVALID, MB_OK , 1, &pszParam, EQF_WARNING);
-#endif //TEMPORARY_COMMENTED
             }
             // Add end
         }
