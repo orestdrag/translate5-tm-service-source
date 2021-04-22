@@ -31,6 +31,7 @@ BOOL EQFTMMaintain( PSZ );
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 
+#ifdef TEMPORARY_COMMENTED
 
 static CHAR ColHdr[10][30];       // Buffer for column header texts
 #if 0
@@ -2444,6 +2445,8 @@ BOOL MemCreatePath( PSZ pszString )
   return (usRc==0);
 } /* end of function MemCreatePath */
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 //Internal function
 //------------------------------------------------------------------------------
@@ -2495,10 +2498,10 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
      int iRC = pFactory->deleteMemory( NULL,pszMemName);
      fOK = (iRC==0)?TRUE:FALSE;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      // notify OpenTM2 GUI to update
      if(fOK)
      {
-#if 0
         HWND hwnd = FindWindow( TWBMAIN ,NULL);
         if(hwnd != NULL)
         {
@@ -2511,8 +2514,8 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
           cds.lpData = (char*)strMemName.c_str();
           SendMessage(hwnd,WM_COPYDATA, 0,(LPARAM)(LPVOID)&cds);
         }
-#endif
      }// end if
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    }
 
@@ -2526,6 +2529,8 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
 
    return( usRC );
 } /* end of function MemFuncDeleteMem  */
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Data area of the MemFuncClearMTFlag function
 */
@@ -2849,3 +2854,5 @@ USHORT MemFuncChangeMFlag
 
     return( usRC );
 }
+
+#endif //TEMPORARY_COMMENTED

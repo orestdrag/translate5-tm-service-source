@@ -280,8 +280,6 @@ USHORT EqfCreateMem
   return( usRC );
 } /* end of function EqfCreateMem */
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 // delete a Translation Memory
 USHORT EqfDeleteMem
@@ -316,8 +314,6 @@ USHORT EqfDeleteMem
 
   return( usRC );
 } /* end of function EqfDeleteMem */
-
-#endif // TEMPORARY_COMMENTED
 
 // OtmMemoryService
 USHORT EqfStartSession

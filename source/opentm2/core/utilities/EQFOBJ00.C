@@ -63,8 +63,6 @@ BOOL ObjLockTable_Delete( PFUNCIF_LOCK_TABLE, PSZ, DWORD );
 BOOL ObjLockTable_Add( PFUNCIF_LOCK_TABLE, PSZ, DWORD );
 BOOL ObjLockTable_WaitWhenUpdated( PFUNCIF_LOCK_TABLE pLockTable );
 
-#ifdef TEMPORARY_COMMENTED
-
 HWND EqfQueryObjectManager( VOID)
 {
     return( hObjMan[UtlGetTask()]);
@@ -73,7 +71,9 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
     USHORT        usResult;             //
-    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     if (pIda != NULL  )                                                   /*@02A*/
     {                                                                     /*@02A*/
       usResult = SendAll( pIda->pHndlrTbl, clsANY, msg, mp1, mp2);
@@ -84,8 +84,6 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
     } /* endif */                                                         /*@02A*/
     return( usResult);                                                    /*@02A*/
 }
-
-#endif //TEMPORARY_COMMENTED
 
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
@@ -753,9 +751,12 @@ USHORT SendAll( POBJTBL pt, CLASSES objClass, WINMSG message,
 //  of objects which will be sent the message.
 
 //  wnd proc returns NULL if ok otherwise !NULL
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     for( i=pt->usUsed,pe=pt->pObjEntry+i-1; i; --i,--pe)
       if( objClass == clsANY || pe->usClassID == objClass)
-        //x = x + (USHORT)WinSendMsg( pe->hWnd, message, mp1, mp2);
+        x = x + (USHORT)WinSendMsg( pe->hWnd, message, mp1, mp2);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
     return( x);
 }
 

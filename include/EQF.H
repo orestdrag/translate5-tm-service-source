@@ -1794,7 +1794,7 @@ typedef struct _objlst {
 
 
 HWND      EqfQueryObjectManager( VOID);
-USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
+extern "C" USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
 extern "C" USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
 USHORT    InstallHandler( PSZ name, HWND hwnd, USHORT cls);
 USHORT    RegisterObject( PSZ name, HWND hwnd, USHORT cls);

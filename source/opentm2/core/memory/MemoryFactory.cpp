@@ -138,8 +138,6 @@ OtmMemory *MemoryFactory::openMemory
   return( pMemory );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /* \brief Get information from an existing memory
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
    \param pszMemoryName name of the memory or memory object name (pluginname + colon + memory name)
@@ -191,6 +189,8 @@ int MemoryFactory::getMemoryInfo
 
   return( iRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /* \brief Get the names of the actual memory data files
 
@@ -639,6 +639,8 @@ int MemoryFactory::renameMemory(
   return( iRC );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief Physically delete a translation memory
   \param pszPluginName name of the memory being deleted
   \param pszMemoryName name of the memory being deleted or
@@ -722,6 +724,8 @@ int MemoryFactory::deleteMemory(
   return( iRC );
 }
 
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Delete all entries contained in a translation memory
   \param pszPluginName name of the memory being cleared

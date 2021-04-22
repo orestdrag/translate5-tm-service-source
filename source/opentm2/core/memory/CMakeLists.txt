@@ -9,7 +9,7 @@ set(Mem_Source_Files
         EQFMEMLP.CPP
        # EQFMEMEP.CPP
         EQFMEMCD.CPP
-       # EQFMEM00.CPP
+        EQFMEM00.CPP
        # EQFMEMIP.CPP
        # EQFMEMRP.CPP
        # EQFMEMMP.CPP
