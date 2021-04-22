@@ -2405,8 +2405,6 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   return( (USHORT)iRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief process the API call: EqfExportMemInInternalFormat and export a memory to a ZIP package
   \param pszMemory name of the memory being exported
   \param pszMemoryPackage name of a new ZIP archive receiving the memory files
@@ -2476,8 +2474,6 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
 
   return( (USHORT)iRC );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief process the API call: EqfOpenMem and open the specified translation memory
   \param pszMemory name of the memory being opened

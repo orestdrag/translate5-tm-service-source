@@ -800,9 +800,6 @@ USHORT EqfImportMemInInternalFormat
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
-
 // OtmMemoryService
 /*! \brief Export a memory to a ZIP package
   \param hSession the session handle returned by the EqfStartSession call
@@ -847,8 +844,6 @@ USHORT EqfExportMemInInternalFormat
 
   return( usRC );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Open the specified translation memory

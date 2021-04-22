@@ -4575,7 +4575,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
+extern "C" int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
 
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
