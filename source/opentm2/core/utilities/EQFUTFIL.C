@@ -15,10 +15,11 @@
 #define INCL_DEV
 #include <EQF.H>                  // General Translation Manager include file
 #include <time.h>                 // C time related functions
-#if 0
+
+#ifdef TEMPORARY_COMMENTED
 #include "zip.h"
 #include "unzip.h"
-#endif
+#endif //TEMPORARY_COMMENTED
 
 #include "EQFUTPRI.H"                  // private utility header file
 #include "OTMFUNC.H"
@@ -1386,6 +1387,7 @@ ULONG64 UtlQueryFreeSpace( CHAR chDrive, BOOL fMsg )
    return( lFreeSpace );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1459,8 +1461,6 @@ USHORT UtlMkMultDirHwnd( PSZ pszPath, BOOL fMsg, HWND hwnd )
    } /* endwhile */
    return( usRC );
 } /* UtlMkMultDir */
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -4058,9 +4058,6 @@ VOID CloseFile
   } /* endif */
 } /* end of function CloseFile */
 
-#ifdef TEMPORARY_COMMENTED
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 /*! \brief extract all files contained in a ZIP package to a directory
   \param pszPackage fully qualified name of the ZIP package
   \param pszDestPath fully qualified name of the destination directory
@@ -4069,6 +4066,9 @@ VOID CloseFile
 __declspec(dllexport)
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
+#ifdef TEMPORARY_COMMENTED
+//TODO: fix issues with zip/unzip library
+
   HZIP hz;
 
   hz = OpenZip( pszPackage, 0 );
@@ -4083,6 +4083,7 @@ int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
     UnzipItem( hz, zi, ze.name );
   }
   CloseZip(hz);
+#endif //TEMPORARY_COMMENTED
 
   return( 0 );
 }
@@ -4096,6 +4097,7 @@ int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 __declspec(dllexport)
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
+#ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   HANDLE hDir;
   WIN32_FIND_DATA FindData;
@@ -4115,10 +4117,11 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
         ZipAdd( hz, FindData.cFileName, szSearchPath );
       } /* endif */
     } while ( FindNextFile( hDir, &FindData  ) );
-    //FindClose( hDir );
+    FindClose( hDir );
   }
 
   CloseZip( hz );
+#endif //TEMPORARY_COMMENTED
   return( 0 );
 }
 
@@ -4130,6 +4133,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 __declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
+#ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   char szCurFile[MAX_PATH];
 
@@ -4147,10 +4151,9 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
     if ( *pszFileList == ',' ) pszFileList++;
   } /* endwhile */
   CloseZip( hz );
+#endif //TEMPORARY_COMMENTED
   return( 0 );
 }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
 
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
@@ -4162,8 +4165,9 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  WIN32_FIND_DATA info;
  HANDLE hp; 
  sprintf( szFileFound, "%s\\*.*", pszDirectory );
- //hp = FindFirstFile( szFileFound, &info );
+
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+ hp = FindFirstFile( szFileFound, &info );
  do
  {
     if ( !((strcmp( info.cFileName, ".") == 0 ) || (strcmp( info.cFileName, ".." ) == 0 )))
@@ -4172,16 +4176,14 @@ void UtlDeleteAllFiles( const char *pszDirectory )
       if(( info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
       {
         UtlDeleteAllFiles( szFileFound );
-        //RemoveDirectory( szFileFound );
+        RemoveDirectory( szFileFound );
       }
       else
       {
-        //DeleteFile( szFileFound );
+        DeleteFile( szFileFound );
       }
     }
   } while ( FindNextFile( hp, &info ) ); 
  FindClose( hp );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
-
-#endif //TEMPORARY_COMMENTED

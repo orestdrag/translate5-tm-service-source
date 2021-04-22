@@ -4333,7 +4333,7 @@ BOOL    UtlLoadFileHwnd( PSZ, PVOID *, ULONG *, BOOL, BOOL, HWND );
 USHORT  UtlCheckSpaceForFile( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL );
 USHORT  UtlCheckSpaceForFileEx( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL, PUSHORT );
 ULONG64 UtlQueryFreeSpace( CHAR, BOOL );
-USHORT  UtlMkMultDir( PSZ, BOOL );
+extern "C" USHORT  UtlMkMultDir( PSZ, BOOL );
 USHORT  UtlMkMultDirHwnd( PSZ, BOOL, HWND );
 BOOL    UtlPrintOpen( PHPRINT phPrint, PSZ pszListName, HWND hwndOwner );
 BOOL    UtlPrintOpenW( PHPRINT phPrint, PSZ_W pszListName, HWND hwndOwner );
@@ -4560,7 +4560,7 @@ USHORT UtlMakeFileName
   \param pszDestPath fully qualified name of the destination directory
   \returns 0 in any case
 */
-int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
+extern "C" int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
 
 /*! \brief add all files of a directoy to a ZIP package
   The current version of this function does not recurse into subdirectories
@@ -4580,7 +4580,7 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
 */
-void UtlDeleteAllFiles( const char *pszDirectory );
+extern "C" void UtlDeleteAllFiles( const char *pszDirectory );
 
 // Mode defines for function UtlHandleConversionStrings
 // CONVLOAD_MODE loads the names of the conversion into a listbox or combo-box

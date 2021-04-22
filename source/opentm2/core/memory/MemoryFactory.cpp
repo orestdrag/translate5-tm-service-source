@@ -2321,6 +2321,8 @@ int MemoryFactory::replaceMemory
   return( iRC );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief process the API call: EqfImportMemInInternalFormat and import a memory using the internal memory files
   \param pszMemory name of the memory being imported
   \param pszMemoryPackage name of a ZIP archive containing the memory files
@@ -2365,7 +2367,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
     WIN32_FIND_DATA FindData;
     std::string strSearchPattern = szTempDir;
     strSearchPattern.append( "\\*.*" );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
     if ( hDir != INVALID_HANDLE_VALUE )
     {
@@ -2383,7 +2385,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
       } while ( fMoreFiles );
       FindClose( hDir );
     }
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
   // call memory plugin to process the files
@@ -2396,10 +2398,14 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
   // delete any files left over and remove the directory
   UtlDeleteAllFiles( (const char *)szTempDir );
-  //RemoveDirectory( szTempDir );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  RemoveDirectory( szTempDir );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( (USHORT)iRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief process the API call: EqfExportMemInInternalFormat and export a memory to a ZIP package
   \param pszMemory name of the memory being exported

@@ -753,8 +753,6 @@ USHORT EqfMemoryExists
   return( usRC );
 } /* end of function EqfMemoryExists */
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 /*! \brief Import a memory using the internal memory files
   \param hSession the session handle returned by the EqfStartSession call
@@ -801,6 +799,8 @@ USHORT EqfImportMemInInternalFormat
 
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 
 // OtmMemoryService

@@ -23,6 +23,7 @@ set(Util_Source_Files
         UtlLangCP.C
         UtlRegistry.C
 #EQFUTCLB.C
+        #unzip.cpp
 )
 
 include_directories(${XERCESC_INCLUDE_DIR})
