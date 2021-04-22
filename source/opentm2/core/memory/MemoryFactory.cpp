@@ -2612,6 +2612,8 @@ USHORT MemoryFactory::APIQueryMem
   return( usRC );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 static wchar_t* wcsupr(wchar_t *str)
 {
     wchar_t *tmp = str;
@@ -2708,7 +2710,7 @@ USHORT MemoryFactory::APISearchMem
       if ( lSearchTime != 0 )
       {
         LONG lElapsedMillis = 0;
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         DWORD dwCurTime = GetTickCount();
         if ( dwCurTime < dwSearchStartTime )
         {
@@ -2719,7 +2721,7 @@ USHORT MemoryFactory::APISearchMem
         {
           lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
         } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         if ( lElapsedMillis > lSearchTime )
         {
           iRC = TIMEOUT_RC;
@@ -2752,6 +2754,7 @@ USHORT MemoryFactory::APISearchMem
   return( usRC );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 
 /*! \brief process the API call: EqfUpdateMem and update a segment in the memory
@@ -2991,8 +2994,6 @@ LONG MemoryFactory::createHandle
   return( lCheckSum | lIndex );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief search a string in a proposal
   \param pProposal pointer to the proposal 
   \param pszSearch pointer to the search string (when fIngoreCase is being used, this strign has to be in uppercase)
@@ -3026,7 +3027,6 @@ BOOL MemoryFactory::searchInProposal
 
   return( fFound );
 }
-
 
 /*! \brief find the given string in the provided data
   \param pszData pointer to the data being searched
@@ -3133,6 +3133,8 @@ SHORT MemoryFactory::normalizeWhiteSpace
   return 0;
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 /*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
   \param pMemProposal pointer to MEMPROPOSAL structure 
   \param pOtmProposal pointer to OtmProposal object
@@ -3175,6 +3177,8 @@ void MemoryFactory::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmPro
   pOtmProposal->setAddInfo( pProposal->szAddInfo );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
   \param pMemProposal pointer to MEMPROPOSAL structure 
   \param pOtmProposal pointer to OtmProposal object
@@ -3216,5 +3220,3 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pOtmProposal->getContext( pProposal->szContext, sizeof(pProposal->szContext)/sizeof(CHAR_W) );
   pOtmProposal->getAddInfo( pProposal->szAddInfo, sizeof(pProposal->szAddInfo)/sizeof(CHAR_W) );
 }
-
-#endif //TEMPORARY_COMMENTED
