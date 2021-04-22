@@ -1038,8 +1038,6 @@ USHORT EqfUpdateMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 /*! \brief List the name of all memories
 \param hSession the session handle returned by the EqfStartSession call
@@ -1082,8 +1080,6 @@ USHORT EqfListMem
 
   return( usRC );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief Get the OpenTM2 language name for a ISO language identifier

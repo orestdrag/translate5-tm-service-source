@@ -2817,8 +2817,6 @@ USHORT MemoryFactory::APIUpdateMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 // data structure for the APIListMem function and the insert memory callback function
 typedef struct _APILISTMEMDATA
 {
@@ -2856,8 +2854,6 @@ int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInf
   return( 0 );
 }
 
-
-
 /*! \brief List the name of all memories
 \param hSession the session handle returned by the EqfStartSession call
 \param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
@@ -2894,8 +2890,6 @@ USHORT MemoryFactory::APIListMem
 
   return( 0 );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief get the index into the memory object table from a memory handle
   \param lHandle handle of a previously opened memory
