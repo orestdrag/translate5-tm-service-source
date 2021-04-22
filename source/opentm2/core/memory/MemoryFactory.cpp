@@ -2754,8 +2754,6 @@ USHORT MemoryFactory::APISearchMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 
 /*! \brief process the API call: EqfUpdateMem and update a segment in the memory
   \param lHandle handle of a previously opened memory
@@ -2818,6 +2816,8 @@ USHORT MemoryFactory::APIUpdateMem
 
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 // data structure for the APIListMem function and the insert memory callback function
 typedef struct _APILISTMEMDATA
@@ -3133,8 +3133,6 @@ SHORT MemoryFactory::normalizeWhiteSpace
   return 0;
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
   \param pMemProposal pointer to MEMPROPOSAL structure 
   \param pOtmProposal pointer to OtmProposal object
@@ -3176,8 +3174,6 @@ void MemoryFactory::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmPro
   pOtmProposal->setContext( pProposal->szContext );
   pOtmProposal->setAddInfo( pProposal->szAddInfo );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
   \param pMemProposal pointer to MEMPROPOSAL structure 

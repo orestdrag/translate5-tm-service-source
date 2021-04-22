@@ -993,8 +993,6 @@ USHORT EqfSearchMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 /*! \brief Update a segment in the memory
   \param hSession the session handle returned by the EqfStartSession call
@@ -1039,6 +1037,8 @@ USHORT EqfUpdateMem
 
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 /*! \brief List the name of all memories
