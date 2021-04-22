@@ -165,9 +165,9 @@ __declspec(dllexport) BOOL isMarkupImportable( char *pszMarkup, char *pszPlugin 
 __declspec(dllexport) BOOL isMarkupProtected( char *pszMarkup, char *pszPlugin );
 __declspec(dllexport) BOOL TagMakeListItem( PSZ pszMarkup, PSZ pszPlugin, PSZ pszBuffer, int iBufSize );
 __declspec(dllexport) BOOL MULoadMarkupTableFile( char *pszMarkup, char *pszPlugin, PVOID *ppLoadedTable, BOOL fErrorHandling );
-__declspec(dllexport) BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
+extern "C" __declspec(dllexport) BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
 __declspec(dllexport) BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
-__declspec(dllexport) BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
+extern "C" __declspec(dllexport) BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
 __declspec(dllexport) BOOL MUUpdateMarkupTableFiles( char *pszMarkup, char *pszPlugin, char *pszShortDescription, char *pszLongDescription, char *pszVersion, char *pszTableFile, char *pszUserExitFile, char *pszMarkupFiles );
 __declspec(dllexport) BOOL MUDeleteMarkupTable( char *pszMarkup, char *pszPlugin );
 

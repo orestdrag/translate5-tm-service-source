@@ -114,6 +114,7 @@ typedef struct _XMPMARKUPS
 } XMPMARKUPS, *PXMPMARKUPS;
 
 
+#ifdef TEMPORARY_COMMENTED
 
 
 
@@ -954,6 +955,9 @@ typedef struct _TAUNLOADTAGS
 /**********************************************************************/
 /* Defines for new tokenize function - part 2                         */
 /**********************************************************************/
+
+#endif //TEMPORARY_COMMENTED
+
 /**********************************************************************/
 /* structure for tag table extract (tag name + tag ID)                */
 /**********************************************************************/
@@ -968,7 +972,6 @@ typedef struct _TBTAGENTRY
    unsigned short fTranslInfo : 1;     // tag-has-translatable-info flag
    unsigned short fReserved   : 14;    // filler, fills bit flags up to 16bit
 } TBTAGENTRY, *PTBTAGENTRY;
-
 
 PNODEAREA  TACreateTagTree
 (
@@ -1037,8 +1040,6 @@ typedef struct _TOKSTATUS
   PLOADEDTABLE pTable;                 // ptr to loaded tag table
 } TOKSTATUS, *PTOKSTATUS;
 
-
-
 BOOL TAMatchTag
 (
   PTOKSTATUS  pTokStatus,              // ptr to tokenize status area
@@ -1058,6 +1059,8 @@ BOOL TAMatchTag
 #define TIMER     1
 #define TIMEOUT   500
 #define MAX_TITLE 100                  //length of title of analysis instance
+
+#ifdef TEMPORARY_COMMENTED
 
 //--- Analysis Instance Data Area
 typedef struct analysis_ida {
@@ -1998,3 +2001,6 @@ typedef enum _MATCHTYPE
   REPL_MATCH, FUZZYREPL_MATCH, MACHINE_MATCH, GLOBMEM_MATCH
 } MATCHTYPE;
 typedef MATCHTYPE *PMATCHTYPE;
+
+#endif //TEMPORARY_COMMENTED
+

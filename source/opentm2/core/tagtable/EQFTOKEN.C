@@ -82,7 +82,10 @@
 #include <EQF.H>                  // General Translation Manager include file
 
 #include "EQFTAI.H"               // Private include file for Text Analysis
+
 #include "EQFTAG00.H"             
+
+#include "win_types.h"
 
 #define DBLQUOTE   '\"'                     // double quote character (")
 
@@ -159,6 +162,8 @@ static void
 #define TA_IS_TAG(a,b)  ( (a < b) && (a >=0) )
 
 #define TA_IS_ATTRIBUTE(a,b)  (a >= b)
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 //  EQFTagTokenize
@@ -1234,6 +1239,8 @@ PSZ SkipTextString ( PSZ      pInput,       // pointer to input string
    return (pInput);
 }/* end SkipTextString */
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 //   New TagTokenize function TATagTokenize
 //   and related defines, macros and functions
@@ -1891,6 +1898,7 @@ BOOL TATagTokenizeW
    return( fOK );
 } /* end of function TATagTokenize */
 
+#ifdef TEMPORARY_COMMENTED
 
 BOOL TATagTokenize
 (
@@ -1977,7 +1985,7 @@ BOOL TATagTokenize
    return fOK;
 }
 
-
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -2545,7 +2553,6 @@ BOOL TAMatchTag
   return( (ProcState == TAG_MATCH_STATE) );
 } /* end of MatchTag */
 
-
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -2716,7 +2723,7 @@ PNODEAREA TACreateAttrTree
    // allocate attribute entry array
    ulLength = ulNoOfTags * sizeof(TBTAGENTRY);
    fOK = UtlAlloc( (PVOID *)&pExtractedTags, 0L,
-                   (LONG) max( ulLength, MIN_ALLOC ),
+                   (LONG) get_max( ulLength, MIN_ALLOC ),
                    ERROR_STORAGE);
 
    // extract fixed attributes from tag table
@@ -2835,7 +2842,7 @@ PNODEAREA TACreateNodeTree
   /********************************************************************/
   if ( fOK )
   {
-    ulAreaSize = min( (LONG)(ulNoOfTags * 3 * sizeof(TREENODE)) +
+    ulAreaSize = get_min( (LONG)(ulNoOfTags * 3 * sizeof(TREENODE)) +
                              sizeof(NODEAREA), MAX_ALLOC );
     fOK = UtlAlloc( (PVOID *)&pNodeArea, 0L, ulAreaSize,
                             (USHORT)(( fMsg ) ? ERROR_STORAGE : NOMSG) );
@@ -3206,6 +3213,8 @@ PNODEAREA TACreateNodeTree
 
   return( pRootArea );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 // Create SO/SI Protect table
 USHORT TASoSiProtectTable
@@ -5339,3 +5348,4 @@ BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID )
   return ( FALSE );
 }
 
+#endif //TEMPORARY_COMMENTED

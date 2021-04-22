@@ -218,7 +218,7 @@ void TAFillWSList
 );
 
 
-BOOL TAAdjustWhiteSpace
+extern "C" BOOL TAAdjustWhiteSpace
 (
   PSZ_W       pszSourceSeg,            // ptr to source segment data
   PSZ_W       pszTargetSeg,            // ptr to target segment

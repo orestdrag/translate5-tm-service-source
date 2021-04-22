@@ -466,8 +466,6 @@ OtmMemory *MemoryFactory::createMemory
   return( pMemory );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /* \brief List memories from all memory plugins
    \param pfnCallBack callback function to be called for each memory
 	 \param pvData caller's data pointetr, is passed to callback function
@@ -501,6 +499,8 @@ int MemoryFactory::listMemories
 
   return( iMemories );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /* \brief Get a list of the active memory plugins
    \param vPluginList reference to caller's vector receiving the list of memory plugins

@@ -347,7 +347,6 @@ BOOL MUMakeCLBListItem( OtmMarkupPlugin *plugin, OtmMarkup *markup, char *pszBuf
   return( true );
 }
 
-
 // get the file name of the markup table file
 __declspec(dllexport)
 BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize )

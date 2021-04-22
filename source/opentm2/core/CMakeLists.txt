@@ -6,7 +6,7 @@ add_subdirectory(pluginmanager)
 add_subdirectory(utilities)
 add_subdirectory(workbench)
 
-#add_subdirectory(analysis)
+add_subdirectory(analysis)
 add_subdirectory(document)
 #add_subdirectory(counting)
 #add_subdirectory(lists)

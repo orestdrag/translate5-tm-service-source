@@ -1289,13 +1289,15 @@ USHORT UtlChgFilePtrHwnd
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       fOK = SetFilePointerEx( hf, liOffset, &liNewOffset, fsMethod );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       *pulNewOffset = liNewOffset.LowPart;
 
       if ( !fOK )
       {
-        //usRetCode = (USHORT)GetLastError();
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+        usRetCode = (USHORT)GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         *pulNewOffset = 0L;
       } /* endif */
 
@@ -1423,8 +1425,6 @@ USHORT UtlDeleteHwnd
    return( usRetCode );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1496,17 +1496,18 @@ USHORT UtlMkDirHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-#if 0
    ulReserved;
    if ( !UtlDirExist( pszDirName  ) )
    {
      do {
         DosError(0);
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( CreateDirectory( pszDirName, NULL ) == 0 )
         {
-          //usRetCode = (USHORT)GetLastError();
+          usRetCode = (USHORT)GetLastError();
         } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
         DosError(1);
         if ( fMsg && usRetCode )
@@ -1517,9 +1518,10 @@ USHORT UtlMkDirHwnd
                usRetCode &&
                (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
-#endif
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -3028,7 +3030,6 @@ BOOL UtlSetDrive
   return(fFlag);
 }
 
-
 /**********************************************************************/
 /* the following section contains DOS-API functions which are not     */
 /* available under Windows.                                           */
@@ -3062,7 +3063,7 @@ BOOL UtlSetDrive
    if ( hmod == NULL)
    {
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-     //usRc = (USHORT)GetLastError();
+     usRc = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
      *phMod = (HMODULE) NULL;
    }
@@ -3072,8 +3073,6 @@ BOOL UtlSetDrive
    } /* endif */
    return usRc;
  }
-
-#ifdef TEMPORARY_COMMENTED
 
  /***   DosGetProcAddr - Get dynamic link procedure address
   *
@@ -3176,11 +3175,11 @@ BOOL UtlSetDrive
    HMODULE hMod                         // module handle
  )
  {
-   //FreeModule( hMod );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+   FreeModule( hMod );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return 0;
  }
-
-#endif //TEMPORARY_COMMENTED
 
  /**********************************************************************/
  /* Dos Error handling  ...                                            */
@@ -4502,11 +4501,11 @@ USHORT UtlGetFileSizeHwnd
   fMsg; hwndParent;
   DosError(0);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  //dwSize = GetFileSize( hf, NULL );
+  dwSize = GetFileSize( hf, NULL );
   DosError(1);
   if ( dwSize == 0xFFFFFFFF )
   {
-    //usRC = (USHORT)GetLastError();
+    usRC = (USHORT)GetLastError();
     *pulSize = 0L;
   }
   else

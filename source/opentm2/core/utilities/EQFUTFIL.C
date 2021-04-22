@@ -3682,6 +3682,8 @@ BOOL UtlIsLongFileName( PSZ pszFileName )
   return( fIsLongName );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3743,6 +3745,9 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
   // return to caller
   return( 0 );
 }
+
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External Function                                                           |
 //+----------------------------------------------------------------------------+
@@ -4035,6 +4040,8 @@ USHORT UtlMakeFileName
   return( 0 );
 } /* end of function UtlMakeFileName */
 
+#endif //TEMPORARY_COMMENTED
+
 VOID CloseFile
 (
   HFILE * hFile                   // Pointer to the file handle
@@ -4050,6 +4057,8 @@ VOID CloseFile
     *hFile  = NULLHANDLE;
   } /* endif */
 } /* end of function CloseFile */
+
+#ifdef TEMPORARY_COMMENTED
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 /*! \brief extract all files contained in a ZIP package to a directory

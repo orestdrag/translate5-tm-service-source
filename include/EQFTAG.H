@@ -353,21 +353,21 @@ BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID );
 VOID EQFTagTokenize(PSZ, TAGTABLE *, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT);
 
 
-BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
-BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
+extern "C" BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
+extern "C" BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
 
 
 /**********************************************************************/
 /* Load a tag table or access a loaded tag table                      */
 /**********************************************************************/
-USHORT TALoadTagTable                  // loads/accesses a tag table
+extern "C" USHORT TALoadTagTable                  // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
   PLOADEDTABLE     *ppTagTable,        // address of caller's tag table pointer
   BOOL             fInternal,          // internal-table flag
   BOOL             fMsg                // show-error-messages flag
 );
-USHORT TALoadTagTableHwnd              // loads/accesses a tag table
+extern "C" USHORT TALoadTagTableHwnd              // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
   PLOADEDTABLE     *ppTagTable,        // address of caller's tag table pointer
@@ -414,7 +414,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 /**********************************************************************/
 /* Free a tag table logically                                         */
 /**********************************************************************/
-USHORT TAFreeTagTable                  // frees a tag table
+extern "C" USHORT TAFreeTagTable                  // frees a tag table
 (
   PLOADEDTABLE     pTagTable           // tag table pointer returned by TALoadTagTable
 );

@@ -150,92 +150,96 @@ HWND WinQueryWindow ( HWND, SHORT, BOOL );
 // typedef USHORT    HMODULE;  /* hmod */
 typedef HMODULE *PHMODULE;
 
-USHORT DosLoadModule(
-        PSZ pszFailName,                /* object name buffer                 */
-        USHORT cbFileName,              /* length of object name buffer       */
-        PSZ pszModName,                 /* dynamic link module name string    */
-        PHMODULE hmod);                 /* module handle (returned)           */
+extern "C"
+{
+    USHORT DosLoadModule(
+            PSZ pszFailName,                /* object name buffer                 */
+            USHORT cbFileName,              /* length of object name buffer       */
+            PSZ pszModName,                 /* dynamic link module name string    */
+            PHMODULE hmod);                 /* module handle (returned)           */
 
-/***   DosFreeModule - Free dynamic link module
- *     Frees the reference to a dynamic link module for a process. When the
- *     dynamic link module is no longer needed by any process, the module is
- *     freed from system memory.
- */
-USHORT DosFreeModule(
-        HMODULE hmod);                  /* module handle                      */
+    /***   DosFreeModule - Free dynamic link module
+     *     Frees the reference to a dynamic link module for a process. When the
+     *     dynamic link module is no longer needed by any process, the module is
+     *     freed from system memory.
+     */
+    USHORT DosFreeModule(
+            HMODULE hmod);                  /* module handle                      */
 
-/***   DosGetProcAddr - Get dynamic link procedure address
- *     Returns a far address to a desired procedure within a dynamic link
- *     module.
- */
-USHORT DosGetProcAddr(
-        HMODULE hmod,          /* handle of module where procedure is located */
-        PSZ pszProcName,       /* name of module where procedure is located   */
-        PFN * ppfnProcAddr);        /* procedure address (returned)       */
+    /***   DosGetProcAddr - Get dynamic link procedure address
+     *     Returns a far address to a desired procedure within a dynamic link
+     *     module.
+     */
+    USHORT DosGetProcAddr(
+            HMODULE hmod,          /* handle of module where procedure is located */
+            PSZ pszProcName,       /* name of module where procedure is located   */
+            PFN * ppfnProcAddr);        /* procedure address (returned)       */
 
-/***   DosGetModHandle - Get dynamic link module handle
- *     Returns a handle to a previously loaded dynamic link module.
- */
-USHORT DosGetModHandle(
-        PSZ pszModName,                 /* dynamic link module name           */
-        PHMODULE phmod);                /* module handle (returned)           */
+    /***   DosGetModHandle - Get dynamic link module handle
+     *     Returns a handle to a previously loaded dynamic link module.
+     */
+    USHORT DosGetModHandle(
+            PSZ pszModName,                 /* dynamic link module name           */
+            PHMODULE phmod);                /* module handle (returned)           */
 
-/***   DosGetModName - Get dynamic link module name
- *     Returns the fully qualified drive, path, filename, and extension
- *     associated with a referenced module handle.
- */
-USHORT DosGetModName(
-        HMODULE hmod,            /* module handle                             */
-        USHORT cbBuf,            /* max length of buffer where name is stored */
-        PCHAR pchBuf);           /* buffer (returned) where info is stored    */
+    /***   DosGetModName - Get dynamic link module name
+     *     Returns the fully qualified drive, path, filename, and extension
+     *     associated with a referenced module handle.
+     */
+    USHORT DosGetModName(
+            HMODULE hmod,            /* module handle                             */
+            USHORT cbBuf,            /* max length of buffer where name is stored */
+            PCHAR pchBuf);           /* buffer (returned) where info is stored    */
 
-/***   DosError - Enable hard error processing
- *     Allows a process to disable user notification (from OS/2) on hard errors
- *     and program exceptions.
- */
-USHORT DosError(
-        USHORT fEnable);                /* action flag (bit field)            */
-/***   DosInsMessage - Insert variable text strings in message
- *
- *     Inserts variable text string information into the body of a message.
- *     This is useful when messages are loaded before insertion text strings
- *     are known.
- *
- */
-USHORT DosInsMessage(
-        PCHAR * ppchVTable,         /* table of variables to insert   */
-        USHORT usVCount,                /* number of variables            */
-        PSZ pszMsg,                     /* address of input message       */
-        ULONG cbMsg,                   /* length of input message        */
-        PCHAR pchBuf,                   /* data area address to return    */
-                                        /* message to                     */
-        ULONG  cbBuf,                   /* length of data area (returned) */
-        PULONG pcbMsg);                /* length of updated messsage     */
+    /***   DosError - Enable hard error processing
+     *     Allows a process to disable user notification (from OS/2) on hard errors
+     *     and program exceptions.
+     */
+    USHORT DosError(
+            USHORT fEnable);                /* action flag (bit field)            */
+    /***   DosInsMessage - Insert variable text strings in message
+     *
+     *     Inserts variable text string information into the body of a message.
+     *     This is useful when messages are loaded before insertion text strings
+     *     are known.
+     *
+     */
+    USHORT DosInsMessage(
+            PCHAR * ppchVTable,         /* table of variables to insert   */
+            USHORT usVCount,                /* number of variables            */
+            PSZ pszMsg,                     /* address of input message       */
+            ULONG cbMsg,                   /* length of input message        */
+            PCHAR pchBuf,                   /* data area address to return    */
+                                            /* message to                     */
+            ULONG  cbBuf,                   /* length of data area (returned) */
+            PULONG pcbMsg);                /* length of updated messsage     */
 
-USHORT DosInsMessageW(
-        PCHAR_W * ppchVTable,         /* table of variables to insert   */
-        USHORT usVCount,                  /* number of variables            */
-        PSZ_W pszMsg,                     /* address of input message       */
-        ULONG cbMsg,                     /* length of input message        */
-        PCHAR_W pchBuf,                   /* data area address to return    */
-                                          /* message to                     */
-        ULONG   cbBuf,                     /* length of data area (returned) */
-        PULONG  pcbMsg);                  /* length of updated messsage     */
+    USHORT DosInsMessageW(
+            PCHAR_W * ppchVTable,         /* table of variables to insert   */
+            USHORT usVCount,                  /* number of variables            */
+            PSZ_W pszMsg,                     /* address of input message       */
+            ULONG cbMsg,                     /* length of input message        */
+            PCHAR_W pchBuf,                   /* data area address to return    */
+                                              /* message to                     */
+            ULONG   cbBuf,                     /* length of data area (returned) */
+            PULONG  pcbMsg);                  /* length of updated messsage     */
 
-/***   DosGetMessage - Get message out of text file
- *
- *     Retrieves a message from a message file and inserts variable information
- *     into the body of the message.
- *
- */
-USHORT DosGetMessage (
-  PCHAR * ppchVTable ,             // table of variables to insert
-  USHORT  usVCount,                    // number of variables
-  PCHAR pchBuf,                        // data area (where message is returned)
-  ULONG  cbBuf,                        // length of data area
-  USHORT usMsgNum,                     // number of the message requested
-  PSZ pszFileName,                     // message path and file name
-  PULONG pcbMsg);                     // length of message (returned)
+    /***   DosGetMessage - Get message out of text file
+     *
+     *     Retrieves a message from a message file and inserts variable information
+     *     into the body of the message.
+     *
+     */
+    USHORT DosGetMessage (
+      PCHAR * ppchVTable ,             // table of variables to insert
+      USHORT  usVCount,                    // number of variables
+      PCHAR pchBuf,                        // data area (where message is returned)
+      ULONG  cbBuf,                        // length of data area
+      USHORT usMsgNum,                     // number of the message requested
+      PSZ pszFileName,                     // message path and file name
+      PULONG pcbMsg);                     // length of message (returned)
+
+} //extern "C"
 
 /**********************************************************************/
 /* DosRead/Write substitutes...                                       */

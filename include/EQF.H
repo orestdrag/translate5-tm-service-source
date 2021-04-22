@@ -1795,7 +1795,7 @@ typedef struct _objlst {
 
 HWND      EqfQueryObjectManager( VOID);
 USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
-USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
+extern "C" USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
 USHORT    InstallHandler( PSZ name, HWND hwnd, USHORT cls);
 USHORT    RegisterObject( PSZ name, HWND hwnd, USHORT cls);
 MRESULT   OBJECTMANAGERWP( HWND, WINMSG, WPARAM, LPARAM);
@@ -3951,7 +3951,7 @@ VOID UtlSetULong( SHORT sID, ULONG ulValue );
 //VOID UtlSetString( SHORT sID, const PSZ pszString );
 void UtlSetString( short sID, const char *pszString );
 //VOID UtlSetUShort( SHORT sID, USHORT usValue );
-void UtlSetUShort( short sID, unsigned short usValue );
+extern "C" void UtlSetUShort( short sID, unsigned short usValue );
 
 /**********************************************************************/
 /* MAT ULONG  identifiers                                             */
@@ -4255,7 +4255,7 @@ typedef ULONG HPRINT, *PHPRINT;
 USHORT  UtlOpen( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                 USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                 ULONG ulReserved, BOOL fMsg );
-USHORT  UtlClose( HFILE hf, BOOL fMsg );
+extern "C" USHORT  UtlClose( HFILE hf, BOOL fMsg );
 USHORT  UtlRead( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesRead,
                 BOOL fMsg );
 USHORT  UtlReadL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
@@ -4265,11 +4265,11 @@ USHORT  UtlWrite( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesWritten,
 USHORT  UtlWriteL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                  BOOL fMsg );
 USHORT  UtlDupHandle( HFILE hfOld, PHFILE phfNew, BOOL fMsg );
-USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
+extern "C" USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
                       PULONG pulNewOffset, BOOL fMsg );
 
 USHORT  UtlDelete( PSZ pszFName, ULONG ulReserved, BOOL fMsg );
-USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
+extern "C" USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
 USHORT  UtlRmDir( PSZ pszDir, ULONG ulReserved, BOOL fMsg );
 USHORT  UtlCopy( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved, BOOL fMsg );
 USHORT  UtlMove( PSZ pszSrc, PSZ pszDst, ULONG ulReserved, BOOL fMsg );
@@ -4281,7 +4281,7 @@ USHORT  UtlFindNext( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
 USHORT  UtlFindClose( HDIR hdir, BOOL fMsg );
 USHORT  UtlQFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
                      USHORT cbInfoBuf, BOOL fMsg );
-USHORT UtlGetFileSize
+extern "C" USHORT UtlGetFileSize
 (
    HFILE    hf,                        // file handle
    PULONG   pulSize,                   // points to buffer for file size
@@ -4319,7 +4319,7 @@ BOOL    UtlRegisterCLB( HAB );
 PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
 PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
 VOID    UtlDispatch( VOID );
-ULONG   UtlQueryULong( SHORT sID );
+extern "C" ULONG   UtlQueryULong( SHORT sID );
 VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
 VOID    UtlMenuDisableItem( SHORT sItemID );
 VOID    UtlMenuEnableItem( SHORT sItemID );
@@ -4342,7 +4342,7 @@ BOOL    UtlPrintFormFeed( HPRINT hPrint );
 BOOL    UtlPrintLineW( HPRINT hPrint, PSZ_W pszLine );
 BOOL    UtlPrintLine( HPRINT hPrint, PSZ pszLine );
 BOOL    UtlPrintSetAnsiConv( HPRINT hPrint, BOOL fAnsiConv );
-BOOL    UtlFileExist( PSZ pszFileName );
+extern "C" BOOL    UtlFileExist( PSZ pszFileName );
 BOOL    UtlDirExist( PSZ pszDirName );
 BOOL    UtlMoveIfNewerOrNotExist( PSZ pszSource, PSZ pszTarget );
 BOOL    UtlMoveIfNewerOrNotExistHwnd( PSZ pszSource, PSZ pszTarget, HWND hwnd );
@@ -4365,14 +4365,14 @@ PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
 VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
 PSZ     UtlParseX15( PSZ str, SHORT id);
 PSZ_W   UtlParseX15W( PSZ_W str, SHORT id);
-PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
+extern "C" PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
 USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
 
 PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
 PPLUG   UtlPlugOut( PPLUG plug);
 PSZ     UtlSplitFnameFromPath( PSZ path);
-PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
+extern "C" PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
 USHORT  UtlGetDriveList( BYTE *szList);
 extern "C" USHORT  UtlGetLANDriveList( BYTE *szList);
 BYTE    UtlQCurDisk( void);
@@ -4398,19 +4398,19 @@ VOID UtlSetHorzScrollingForLB(HWND hLB);
 
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
 extern "C" BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
-BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
+extern "C" BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
 BOOL   UtlInitUtils( HAB );
 BOOL   UtlRegisterEqfHelp( HAB );
 BOOL   UtlTerminateUtils( VOID );
-USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
+extern "C" USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
 extern "C" USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
-USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
-USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
+extern "C" USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
+extern "C" USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
 VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
 
 VOID   UtlInitError ( HAB, HWND, HWND, PSZ );
 VOID   UtlTerminateError ( VOID );
-USHORT UtlQueryUShort( SHORT sID );
+extern "C" USHORT UtlQueryUShort( SHORT sID );
 BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
 ULONG  UtlFDateToDateString( FDATE *, PSZ, ULONG );
 ULONG  UtlFTimeToTimeString( FTIME *, PSZ, ULONG );
@@ -4445,10 +4445,10 @@ BOOL    UtlProcessWalk(SHORT, PSZ, DWORD *);
 
 USHORT  UtlFindCloseHwnd( HDIR, BOOL, HWND );
 USHORT  UtlCloseHwnd( HFILE hf, BOOL fMsg, HWND hwndParent );
-USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
+extern "C" USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                      USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                      ULONG ulReserved, BOOL fMsg, HWND hwndParent );
-USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
+extern "C" USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                      BOOL fMsg, HWND hwndParent );
 USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                       BOOL fMsg, HWND hwndParent  );
@@ -4630,8 +4630,8 @@ USHORT UtlQueryCharTableForDocConv
 #define  ALL_SOURCE_LANGUAGES  8  // Identifier for source and target languages
 #define  ALL_TARGET_LANGUAGES  9  // including languages marked as disabled
 USHORT  UtlFillTableLB( HWND, USHORT );     // get languages
-ULONG GetLangOEMCP(PSZ pTargetLang);
-ULONG GetLangAnsiCP( PSZ pLanguage);
+extern "C" ULONG GetLangOEMCP(PSZ pTargetLang);
+extern "C" ULONG GetLangAnsiCP( PSZ pLanguage);
 
 USHORT SetSystemLanguage( PSZ pLanguage );
 PSZ    GetSystemLanguage( );
@@ -4712,7 +4712,7 @@ USHORT UtlFindCloseLongHwnd( HDIR, BOOL, HWND );
 SHORT  UtlLoadLongFileNames( PSZ, USHORT, HWND, USHORT );
 SHORT  UtlLoadLongFileNamesHwnd( PSZ, USHORT, HWND, USHORT, HWND );
 BOOL   UtlIsLongFileName( PSZ pszFileName );
-USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName );
+extern "C" USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName );
 BOOL   UtlSupportsLongNames( CHAR chDrive );
 BOOL   UtlFileExistLong( PSZ pszFileName );
 USHORT UtlRenameObjectDlg( PSZ pszObjName, CLASSES ObjClass );
@@ -6684,9 +6684,9 @@ VOID EqfDisplayContextHelp( HWND, PHELPSUBTABLE);
 // OEM/ASCII to ANSI conversions -- to be removed if full Unicode support implemented
 #define ANSI_CP 1
 #define OEM_CP  2
-VOID EQFAnsiToOem  ( PSZ pIn, PSZ pOut );
+extern "C" VOID EQFAnsiToOem  ( PSZ pIn, PSZ pOut );
 VOID EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut );
-VOID EQFOemToAnsi  ( PSZ pIn, PSZ pOut );
+extern "C" VOID EQFOemToAnsi  ( PSZ pIn, PSZ pOut );
 VOID EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut );
 VOID EQFOemToAnsiBuff( PSZ pIn, PSZ pOut, USHORT usLen );
 VOID EQFCPOemToAnsiBuff( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, USHORT usLen );
@@ -6751,25 +6751,28 @@ void LogSysInfo( VOID );
 ///                                                                         ///
 ///////////////////////////////////////////////////////////////////////////////
 
-PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource );
-PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource );
-PSZ_W UTF16strncpy(PSZ_W pusTarget, PSZ_W pusSource, LONG lLen);
-int   UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 );
-int   UTF16strncmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
-int   UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
-int   UTF16strncmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
-int   UTF16strnicmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
-int   UTF16strlenCHAR( PSZ_W pszString );
-int   UTF16strlenBYTE( PSZ_W pszString );
-int   UTF16strcspn( PSZ_W pszString1, PSZ_W pszString2 );
-PSZ_W UTF16strchr( PSZ_W pszString, CHAR_W ch );
-PSZ_W UTF16strstr( PSZ_W pszString1, PSZ_W pszString2 );
-PSZ_W UTF16strrev( PSZ_W pszString );
-PSZ   Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP );
-PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG ulCP );
+extern "C"
+{
+    PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource );
+    PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource );
+    PSZ_W UTF16strncpy(PSZ_W pusTarget, PSZ_W pusSource, LONG lLen);
+    int   UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 );
+    int   UTF16strncmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
+    int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen );
+    int   UTF16strncmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
+    int UTF16strnicmp( PSZ_W pszString1, PSZ_W pszString2, USHORT usLen );
+    int   UTF16strlenCHAR( PSZ_W pszString );
+    int   UTF16strlenBYTE( PSZ_W pszString );
+    int   UTF16strcspn( PSZ_W pszString1, PSZ_W pszString2 );
+    PSZ_W UTF16strchr( PSZ_W pszString, CHAR_W ch );
+    PSZ_W UTF16strstr( PSZ_W pszString1, PSZ_W pszString2 );
+    PSZ_W UTF16strrev( PSZ_W pszString );
+}
+extern "C" PSZ   Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP );
+extern "C" PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG ulCP );
 PSZ   Unicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulCP );
 PSZ_W Ansi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulCP );
-ULONG ASCII2UnicodeBuf( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
+extern "C" ULONG ASCII2UnicodeBuf( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
 ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
 ULONG Ansi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
 ULONG   UTF82UnicodeBuf( PSZ pszUTF8, PSZ_W pszUni, LONG Len );
@@ -6779,13 +6782,13 @@ ULONG   Unicode2UTF8BufEx( PSZ_W pszUni, PSZ pszUTF8, LONG Len, LONG lBufLen, BO
 
 // GQ: The lBufLen parameter in the following two functions specifies the
 //     actual size of the pAscii/pAnsi buffer in number of bytes
-ULONG Unicode2ASCIIBuf( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen, ULONG ulCP );
+extern "C" ULONG Unicode2ASCIIBuf( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen, ULONG ulCP );
 //ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen,
 //                              ULONG ulCP,BOOL fMsg, PLONG plRc, DWORD dwFlags );
 ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG usLen, LONG lBufLen, ULONG ulCP  );
 ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
                              ULONG ulAnsiCP, BOOL fMsg, PLONG plRc );
-ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulAnsiCP,
+extern "C" ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulAnsiCP,
                              BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
 PSZ   UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP );
 PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP );
@@ -6822,7 +6825,7 @@ LONG UtlCBFindStringExact( HWND hwnd, SHORT sPos, PSZ_W pText );
 LONG UtlGetTextW( HWND hwnd, USHORT id, PSZ_W pText, LONG len );
 LONG UtlQueryItemTextW( HWND hwnd, USHORT id,  SHORT index, PSZ_W buffer, USHORT usLen );
 LONG UtlCBQueryItemTextW( HWND hwnd, SHORT index, PSZ_W buffer, USHORT usLen );
-USHORT UtlFindAndShowConversionError
+extern "C" USHORT UtlFindAndShowConversionError
 (
   PSZ    pszBuffer,
   ULONG  ulLen,
@@ -7131,7 +7134,7 @@ MRESULT UtlInvokeHelp();
 BOOL    UtlIsHighContrast();
 
 // function checking a given codepage value by doing a test conversion
-BOOL UtlIsValidCP( ULONG ulCP );
+extern "C" BOOL UtlIsValidCP( ULONG ulCP );
 
 
 USHORT UtlFuncRenameObject( USHORT usMode, PSZ pszName, PSZ pszNewName,LONG lOptions );
@@ -7178,7 +7181,7 @@ BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BO
 BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID );
 
 
-VOID    CloseFile( HFILE * );
+extern "C" VOID CloseFile( HFILE * );
 
 void UtlSaveLastUsedString( HWND hwndDlg, int iID, char *pszName, int iMaxNumOfStrings );
 

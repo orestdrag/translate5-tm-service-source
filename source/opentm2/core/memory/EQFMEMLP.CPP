@@ -134,6 +134,7 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
                WPARAM,       // Message parameter 1
                LPARAM );     // Message parameter 2
 
+#ifdef TEMPORARY_COMMENTED
 
 BOOL MemGUIImportMemory
 (   
@@ -1109,6 +1110,8 @@ VOID EQFMemLoadEnd ( PPROCESSCOMMAREA   pCommArea,
 
 
 } /* end of function EQFMemLoadEnd */
+
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2339,10 +2342,10 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
          /* This is an old TM format display listbox to get           */
          /* source and target language                                */
          /*************************************************************/
-#if 0 //WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          DIALOGBOX( QUERYACTIVEWINDOW(), NTMTagLangDlg, hResMod,
                     ID_NTM_TAGLANG_DLG, pLIDA, iDlgRc );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
          if ( iDlgRc )
          {
            usRc = MEM_PROCESS_END;
@@ -2352,6 +2355,8 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
    } /* endif */
    return usRc;
 } /* end of function MemLoadReadFile */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2530,6 +2535,8 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg
   return mResult;
 } /* end of function NTMTagLangDlg */
 #endif
+
+#endif //TEMPORARY_COMMENTED
 
 static BOOL
 NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the load IDA  area
@@ -2914,6 +2921,7 @@ NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the
    return (fOk);
 } /* end of function NTMLoadPrepSeg */
 
+#ifdef TEMPORARY_COMMENTED
 
 USHORT MemBatchTMImport
 (
@@ -3077,6 +3085,8 @@ USHORT MemBatchTMImport
 
 } /* end of function MemBatchTMImport */
 
+#endif //TEMPORARY_COMMENTED
+
 static VOID MemReduceCRLF
 (
   PSZ_W      pString                  // string to be processed
@@ -3110,7 +3120,6 @@ static VOID MemReduceCRLF
   } /* endwhile */
   *pszTo = EOS;
 } /* end of function MemReduceCRLF */
-
 
 USHORT MemFuncImportMem
 (
@@ -3670,7 +3679,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
           if ( ulBytesRead && !pLIDA->fEOF )
           {
              BYTE bTest = (BYTE)pConvBuffer[ulBytesRead-1];
-#if 0 //WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
              if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )
              {
                  int iTry = 5;
@@ -3732,7 +3741,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
               }
               ulBytesRead = ulOutPut;
             } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
           }
           else
           {
@@ -3991,6 +4000,8 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
   return( usRC );
 } /* end of function MEMINSERTSEGMENT */
 
+#ifdef TEMPORARY_COMMENTED
+
 #ifdef IMPORT_LOGGING
 
 static LARGE_INTEGER liLast = { 0 };
@@ -4020,6 +4031,8 @@ static void GetElapsedTime( LONG64 *plTime )
 } /* end of function GetElapsedTime */
 
 #endif
+
+#endif //TEMPORARY_COMMENTED
 
 // Check if a specific tag is following
 BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID )
@@ -4095,6 +4108,8 @@ BOOL MemLPExtractValue
 
   return( fOK );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 // function searching first character causing a conversion error and showing an
 // approbriate error message
@@ -4198,3 +4213,5 @@ BOOL fMemIsAvail
     }
     return fOK;
 }
+
+#endif //TEMPORARY_COMMENTED

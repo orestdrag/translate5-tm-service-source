@@ -54,7 +54,9 @@ LONG FAR PASCAL NewMDIClientProc      (HWND, UINT, WPARAM, LPARAM);
 VOID PerformPendingUpdates();
 
 
+#ifdef TEMPORARY_COMMENTED
        CHAR     szMsgBuf[256];                   // general purpose message buffer
+#endif //TEMPORARY_COMMENTED
 static CHAR     szEqfResFile[MAX_EQF_PATH];      // name of resource file
 static CHAR     EqfSystemPath[MAX_EQF_PATH];     // global system path
 static CHAR     EqfSystemPropPath[MAX_EQF_PATH]; // global system properties path

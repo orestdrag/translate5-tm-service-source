@@ -34,7 +34,6 @@ extern "C"
 // prototypes for helper functions
 
 
-
 /* \brief Initialize the Memory Plugin Mapper
 */
 
@@ -191,6 +190,8 @@ BOOL  MADGetAttrValue( PSZ_W pszAttr, PSZ_W pszBuffer, int iBufSize );
 PSZ_W MADSkipName( PSZ_W pszName );
 PSZ_W MADSkipWhitespace( PSZ_W pszData );
 
+#ifdef TEMPORARY_COMMENTED
+
 //
 // retrieve the data associated with a specific key
 //
@@ -255,6 +256,8 @@ BOOL MDAGetValueForKey( HADDDATAKEY pKey, PSZ_W pszBuffer, int iBufSize, PSZ_W p
 
   return( FALSE );
 }
+
+#endif //TEMPORARY_COMMENTED
 
 //
 // Search a specific key in the additional memory data
@@ -355,6 +358,8 @@ BOOL MADDeleteKey( HADDDATAKEY pKey )
   return( FALSE );
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 //
 // get the value for a specific attribute
 //
@@ -383,6 +388,7 @@ BOOL MADGetAttr( HADDDATAKEY pKey, PSZ_W pszAttrName, PSZ_W pszBuffer, int iBufS
   return( FALSE);
 }
 
+#endif //TEMPORARY_COMMENTED
 
 // Add a match segment ID to the additional data section
 BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BOOL fForce )
@@ -466,11 +472,11 @@ BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID )
   return( fMatchIDPrepared );
 } /* end of MADPrepareMatchSegIDPrefix */
 
-
-
-
+#ifdef TEMPORARY_COMMENTED
 
 // ======== internal functions for Memory Additional Data processing
+
+#endif //TEMPORARY_COMMENTED
 
 // position to next attribute
 BOOL MADNextAttr( PSZ_W *ppszAttr )
@@ -492,7 +498,6 @@ BOOL MADNextAttr( PSZ_W *ppszAttr )
 
   return( iswalpha( *pszAttr ) );
 }
-
 
 // retrieve attribute value
 BOOL MADGetAttrValue( PSZ_W pszAttr, PSZ_W pszBuffer, int iBufSize )
@@ -526,6 +531,8 @@ BOOL MADGetAttrValue( PSZ_W pszAttr, PSZ_W pszBuffer, int iBufSize )
   return( TRUE );
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 // compare attribute names
 BOOL MADCompareAttr( PSZ_W pszAttr1, PSZ_W pszAttr2 )
 {
@@ -541,6 +548,8 @@ BOOL MADCompareAttr( PSZ_W pszAttr1, PSZ_W pszAttr2 )
 
   return( fMatch );
 }
+
+#endif //TEMPORARY_COMMENTED
 
 // compare two key names
 BOOL MADCompareKey( PSZ_W pszKey1, PSZ_W pszKey2 )
@@ -594,6 +603,7 @@ PSZ_W MADSkipWhitespace( PSZ_W pszData )
   return( pszData );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 
 USHORT MemOpenProp( HPROP * hProp,        // pointer to property handle
@@ -3117,4 +3127,5 @@ USHORT NTMTokenizeW
 
 } /* end of function TOKENIZE */
 
+#endif //TEMPORARY_COMMENTED
 

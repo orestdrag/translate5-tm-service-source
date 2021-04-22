@@ -877,6 +877,8 @@ VOID UtlMenuDisableAll( HWND hwnd, SHORT sMenuID )
 }
 #endif
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 // External function
 //+----------------------------------------------------------------------------+
@@ -907,6 +909,7 @@ LONG UtlTime( PLONG plTime )
   return( lTime );
 } /* end of function UtlTime */
 
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function
@@ -2677,6 +2680,8 @@ UtlCopyParameter
   return ( fOK );
 } /* end of function UtlCopyParameter */
 
+#endif //TEMPORARY_COMMENTED
+
 // function searching first character causing a conversion error and showing an
 // approbriate error message
 USHORT UtlFindAndShowConversionError
@@ -2696,12 +2701,16 @@ USHORT UtlFindAndShowConversionError
 
   while ( !usRC && ulLen )
   {
-    //ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     // try conversion together with next byte, might be a DBCS character
     if ( !ulOutPut && ulLen )
     {
-      //ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+      ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
       if ( ulOutPut )
       {
         pszBuffer++;
@@ -2714,8 +2723,9 @@ USHORT UtlFindAndShowConversionError
       PSZ  pszParms[3];
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
-
-      //usRC = (USHORT)GetLastError();
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+      usRC = (USHORT)GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       sprintf( szCharacter, "%d (hex %2.2X)", iCh, iCh );
       sprintf( szCP, "%lu", ulCP );
@@ -2751,8 +2761,6 @@ BOOL UtlIsValidCP( ULONG ulCP )
 
   return( (ulOutPut != 0) && (ulCP != 0) );
 } /* end of function UtlIsValidCP */
-
-#endif //TEMPORARY_COMMENTED
 
 /*! UtlInitUtils           Initialization of utilities       
 	Description:       General utilities initialization routine                 
@@ -3758,6 +3766,8 @@ USHORT UtlColorChooserDlg
 
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3983,6 +3993,8 @@ BOOL TAAdjustWhiteSpace
 
   return( fOK );
 } /* end of function TAAdjustWhiteSpace */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // Function name:  UtlMakeFNameAndPath                                          

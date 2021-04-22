@@ -766,6 +766,7 @@ PSZ UtlEditorLangSupport( PSZ pszEditor, PSZ pszSourceLang, PSZ pszTargetLang )
   return pFail;
 }
 
+#endif //TEMPORARY_COMMENTED
 
 ////////////////////////////////////////////////////////////////
 // Get Codepage appropriate for given language ( not OS-dependent!)
@@ -801,6 +802,8 @@ ULONG GetLangAnsiCP
   return(ulCP);
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 // same as GetLangxxxCP but returns unadjusted codepage
 ULONG GetOrgLangCP
 (
@@ -830,6 +833,8 @@ ULONG GetOrgLangCP
   }
   return(ulCP);
 }
+
+#endif //TEMPORARY_COMMENTED
 
 ////////////////////////////////////////////////////////////////
 // Get Codepage appropriate for given language ( not OS-dependent!)
@@ -1007,6 +1012,7 @@ ULONG GetLangOEMCP
   return(ulCP);
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 // Set System Language or return an error
 USHORT SetSystemLanguage( PSZ pLanguage )

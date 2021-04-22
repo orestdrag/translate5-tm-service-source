@@ -100,6 +100,8 @@ PSZ_W UtlParseX15W (PSZ_W pszX15String, SHORT sStringId)
    return (pszX15String);
 } /* end of UtlParseX15 */
 
+#endif //TEMPORARY_COMMENTED
+
 // parse string using given character
 PSZ_W UtlParseCharW (PSZ_W pszX15String, SHORT sStringId, CHAR_W chParse )
 {
@@ -133,6 +135,8 @@ PSZ_W UtlParseCharW (PSZ_W pszX15String, SHORT sStringId, CHAR_W chParse )
    // return the pointer to the result string
    return (pszX15String);
 } /* end of UtlParseCharW */
+
+#ifdef TEMPORARY_COMMENTED
 
 // extracts an specific column of an X15 seperated string
 USHORT UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId )
@@ -1584,6 +1588,8 @@ BOOL UtlMatchStringsW
 ///                                                                         ///
 ///////////////////////////////////////////////////////////////////////////////
 
+#endif //TEMPORARY_COMMENTED
+
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strcpy   copy an Unicode UTF16 string to another location         ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -1627,8 +1633,6 @@ PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource )
   return( pszTarget );
 }
 
-#endif //TEMPORARY_COMMENTED
-
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strcmp   compare two Unicode UTF16 strings                        ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -1663,8 +1667,6 @@ int UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 )
   } /* endwhile */
   return( iResult);
 }
-
-#ifdef TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strncmp   compare two Unicode UTF16 strings up to usLen chars     ///
@@ -1724,8 +1726,6 @@ int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
   return( wcsncasecmp( pszString1, pszString2, lLen));
 }
 
-#endif //TEMPORARY_COMMENTED
-
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strlen   get the length in bytes of an Unicode UTF16 string       ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -1742,8 +1742,6 @@ int UTF16strlenCHAR( PSZ_W pszString )
   return( iLen );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 
 int UTF16strlenBYTE( PSZ_W pszString )
 {
@@ -1757,6 +1755,8 @@ int UTF16strlenBYTE( PSZ_W pszString )
   return( iLen );
 }
 
+
+#ifdef TEMPORARY_COMMENTED
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1850,6 +1850,7 @@ int UTF16strcspn( PSZ_W pszSource, PSZ_W pszString )
 
 
 
+#endif //TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  Unicode2ASCII  convert unicode string to Ansi                          ///
@@ -1906,10 +1907,10 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 					break;
 				}
 			  }
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
@@ -1938,26 +1939,26 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 			  }
 
 			  usCP = 862;     // we have to use CP862 since Windows only supports this
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
 								   pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
           case 850:
             // Change the replacement character from '?' to '%'
             // '?' causes false breaks.
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
                                  pszASCII, MAX_SEGMENT_SIZE, "%", NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
             break;
 		  default:
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			break;
 		}
     } /* endif */
@@ -2034,10 +2035,10 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 							}
 						}
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 						if (!ulOutPut )
 						{
 							//lRc = GetLastError();
@@ -2072,10 +2073,10 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 						}
 						usCP = 862;     // we have to use CP862 since Windows only supports this
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 						if (!ulOutPut )
 						{
 							//lRc = GetLastError();
@@ -2087,16 +2088,16 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 				case 850:
 		            // Change the replacement character from '?' to '%'
 		            // '?' causes false breaks.
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 				    ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
 		                                            pszASCII, lBufLen, "%", NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		            break;
 				default:
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 					ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
 													pszASCII, lBufLen, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 					if (!ulOutPut )
 					{
@@ -2115,6 +2116,8 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 
   return( ulOutPut );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 PSZ Unicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulOemCP )
 {
@@ -2169,6 +2172,7 @@ ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
   return( ulOutPut );
 }
 
+#endif //TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  ASCII2Unicode convert ASCII string to Unicode                          ///
@@ -2295,30 +2299,24 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
     *pszUni = EOS;
     if (ulLen)
     {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszASCII, ulLen,
                                     pszUni, ulLen );
-#endif
       if (!ulOutPut)
       {
-        //lRc = GetLastError();
-#if 0
+        lRc = GetLastError();
         if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP) )
         {// the last byte in the buffer may be half of a DBCS char...
          // so try again with one byte less..
-#if 0
             ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                             pszASCII, ulLen-1, pszUni, ulLen-1 );
-#endif
             if (!ulOutPut)
             { // the last byte was not the reason, so just go on
-				//lRc = GetLastError();
-#if 0
+				lRc = GetLastError();
 				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszASCII,
 				                                 ulLen, pszUni, ulLen );
-#endif
-				//lRc = GetLastError();
+				lRc = GetLastError();
 		    }
 		    else
 		    {
@@ -2329,7 +2327,6 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
 			    }
 		    }
 	    }
-#endif
       }
       else
       {
@@ -2378,6 +2375,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
 			break;
           } /* endswitch */
 	    }
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      }
   }
   else if (pszUni)
@@ -2402,6 +2400,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
   return( ulOutPut );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 PSZ_W Ansi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulOemCP )
 {
@@ -2640,6 +2639,7 @@ BOOL EQFIsDBCSChar( CHAR_W c, ULONG ulCP)
 
 
 
+#endif //TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strncpy   copy up to ulLen wide characters                        ///
@@ -2758,13 +2758,15 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
     // always use 932 when 943 is specified
     if ( usAnsiCP == 943 ) usAnsiCP = 932;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 		ulOutPut = WideCharToMultiByte( usAnsiCP, 0, (LPCWSTR)pszUni, ulLen,
 											pszAnsi, lBufLen, NULL, NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		if (plRc && !ulOutPut)
 		{
-			//lRc = GetLastError();
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+			lRc = GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		  *(plRc) = lRc;
 		}
 		if (pszTemp && lRc)
@@ -2806,34 +2808,27 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
     // always use 932 when 943 is specified
     if ( ulTempCP == 943 ) ulTempCP = 932;
 
-
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if (ulLen)
     {
 		*pszUni = EOS;
-#if 0
 		ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszAnsi, ulLen,
                                     pszUni, ulLen );
-#endif
         if (!ulOutPut)
         {
-#if 0
           //lRc = GetLastError();
           if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP))
           {// the last byte in the buffer may be half of a DBCS char...
            // so try again with one byte less..
-#if 0
               ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                             pszAnsi, ulLen-1, pszUni, ulLen-1 );
-#endif
               if (!ulOutPut)
               { // the last byte was not the reason, so just go on
   				//lRc = GetLastError();
-#if 0
 				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszAnsi,
 				                                 ulLen, pszUni, ulLen );
-#endif
-				//lRc = GetLastError();
+				lRc = GetLastError();
               }
               else
               {
@@ -2844,7 +2839,6 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 			    }
               }
            }
-#endif
         }
 
 		if (plRc && !ulOutPut)
@@ -2858,6 +2852,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 //			UtlError( ERROR_DATA_CONVERSION, MB_CANCEL, 1, &pszTemp, EQF_ERROR );
 		}
      }
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   else if (pszUni)
   {
@@ -2866,6 +2861,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
   return( ulOutPut );   // # of bytes written
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP )
 {
@@ -2905,6 +2901,8 @@ PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP )
   return( pszUni );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 ///////////////////////////////////////////////////////////////////////////////
 ///  UtlDirectUnicode2Ansi  convert unicode string to Ansi                          ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -2930,11 +2928,11 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
     // always use 932 when 943 is specified
     if ( usCP == 943 ) usCP = 932;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 		iRC = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif
-		//if ( iRC == 0) iRC = GetLastError();
+		if ( iRC == 0) iRC = GetLastError();
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		// possible: ERROR_INSUFFICIENT_BUFFER /ERROR_INVALID_FLAGS / ERROR_INVALID_PARAMETER
 		if ( iRC == ERROR_INVALID_PARAMETER )
 		{
@@ -2951,6 +2949,7 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
   return( pszAnsi );
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function                                                            
@@ -3301,6 +3300,8 @@ ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBu
 	return( ulOutPut );     // # of bytes written
 }
 
+#endif //TEMPORARY_COMMENTED
+
 // ulLen in number of CHAR_W's which can be in pszUni!
 // rc ulOutPut2 in # of char-w's
 ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
@@ -3320,6 +3321,8 @@ ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 	}
 	return( ulOutPut );   // # of bytes written
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function                                                            

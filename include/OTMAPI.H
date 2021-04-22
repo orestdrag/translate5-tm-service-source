@@ -2268,7 +2268,7 @@ extern "C"
   );
 
 
- USHORT __cdecl EQFWORDCNTPERSEGW
+ extern "C" USHORT __cdecl EQFWORDCNTPERSEGW
     (
       PSZ_W          pszSeg,               // ptr to Segment
       PSZ            pszLang,              // ptr to Language of Segment

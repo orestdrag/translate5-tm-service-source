@@ -11,10 +11,10 @@
 #define INCL_EQF_ANALYSIS         // analysis functions
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions
 #define INCL_EQF_TP               // public translation processor functions
-#include "eqf.h"                  // General Translation Manager include file
-#include "eqftag00.h"
+#include "EQF.H"                  // General Translation Manager include file
+#include "EQFTAG00.H"
 
-#include "eqftai.h"               // Private include file for Text Analysis
+#include "EQFTAI.H"               // Private include file for Text Analysis
 
 /**********************************************************************/
 /* Static array of loaded tag tables                                  */
@@ -46,6 +46,16 @@ USHORT TALoadTagTableHwnd
   hwnd;
   return( TALoadTagTableExHwnd( pszTableName, ppTagTable, fInternal,
                                 0L, fMsg, NULLHANDLE ) );
+}
+
+static char* strupr(char *str) 
+{ 
+    char *tmp = str; 
+    while (*tmp) { 
+        *tmp = toupper((unsigned char)*tmp); 
+        ++tmp; 
+    } 
+    return str; 
 }
 
 USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
@@ -98,7 +108,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     i = 0;
     pTable = TALoadedTables[ usTaskId ];
     while ( (i < sTablesInUse[ usTaskId ]) &&
-            (stricmp( pTable->szName, pszTableName ) != 0) )
+            (strcasecmp( pTable->szName, pszTableName ) != 0) )
     {
       i++;
       pTable++;
@@ -164,8 +174,10 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
         }
         else
         {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
           // no more table space, all tables in use
           return( ERROR_OUT_OF_STRUCTURES );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         } /* endif */
       }
       else if ( i >= sTablesInUse[ usTaskId ] )
@@ -449,7 +461,6 @@ USHORT TALoadProtectFunctionIfAvailable( PLOADEDTABLE pTable )
   return( usRC ? usRC : usRCW );
 } /* end of function TALoadProtectFunctionIfAvailable */
 
-
 USHORT TAFreeTagTable
 (
   PLOADEDTABLE     pTagTable          // caller's tag table pointer
@@ -486,6 +497,7 @@ USHORT TAFreeTagTable
 
 } /* end of TAFreeTagTable */
 
+#ifdef TEMPORARY_COMMENTED
 
 USHORT TAInvalidateTagTable
 (
@@ -538,6 +550,7 @@ USHORT TAInvalidateTagTable
   return( NO_ERROR );
 } /* end of TAInvalidateTagTable */
 
+#endif //TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* Free space occupied by a loaded tag table                          */
@@ -610,6 +623,8 @@ USHORT TAFreeTableSpace
   } /* endif */
   return( NO_ERROR );
 } /* end of TAFreeTableSpace */
+
+#ifdef TEMPORARY_COMMENTED
 
 /**********************************************************************/
 /* Free all memory occupied by tag tables (don't care for use count!) */
@@ -749,6 +764,8 @@ BOOL TAGetTagNameByIDW
     return fOK;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 BOOL  TATagsToUnicode
 (
     PVOID         pvLoadedTable,
@@ -844,4 +861,3 @@ BOOL  TATagsToUnicode
 
     return fOK;
   }  /* end of TATagsToUnicode */
-

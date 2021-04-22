@@ -121,8 +121,6 @@
   #define LOGCLOSE()
 #endif
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 // import a Translation Memory
 USHORT EqfImportMem
@@ -182,6 +180,8 @@ USHORT EqfImportMem
 
   return( usRC );
 } /* end of function EqfImportMem */
+
+#ifdef TEMPORARY_COMMENTED
 
 // OtmMemoryService
 // export a Translation Memory

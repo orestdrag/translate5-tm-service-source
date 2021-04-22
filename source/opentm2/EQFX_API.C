@@ -12,16 +12,16 @@
 #define INCL_EQF_TP               // public translation processor functions
 //  #define DLLIMPORTRESMOD         // resource module handle imported from DLL
 
-#include <eqf.h>                  // General Translation Manager include file
+#include "EQF.H"                  // General Translation Manager include file
 
 #include "EQFB.ID"                // Translation Processor IDs
-#include <eqftpi.h>               // private Translation Processor include file
-#include "eqftai.h"               // Private include file for Text Analysis
+#include <EQFTPI.H>               // private Translation Processor include file
+#include "EQFTAI.H"               // Private include file for Text Analysis
 
-#include <eqfdoc00.h>
+#include <EQFDOC00.H>
 
-#include "eqffol.h"
-#include "eqfhlog.h"              // private history log include file
+#include "EQFFOL.H"
+#include "EQFHLOG.H"              // private history log include file
 
 #define SLIDER_INCREMENT    101                  // number of increments on slider bar
 
@@ -91,6 +91,9 @@ USHORT          usEQFSysRc   = NO_ERROR;        // system return code
 ERRTYPE         ErrorType;                      // error classes
 CHAR            szMsgFile[CCHMAXPATH] = "c:\\eqf\\msg\\eqf.msg"; // def. msg file
 CHAR_W          szMsgBuf[EQF_MSGBUF_SIZE];      // buffer for message
+
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -5541,6 +5544,8 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEG
 
 } /* end of function EQFWORDCNTPERSEG */
 
+#endif //TEMPORARY_COMMENTED
+
 __declspec(dllexport)
 USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
 (
@@ -5619,7 +5624,7 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
 
 } /* end of function EQFWORDCNTPERSEG */
 
-
+#ifdef TEMPORARY_COMMENTED
 
 
 
@@ -6994,3 +6999,4 @@ USHORT WriteHistLogAndAdjustCountInfo
   return( usRC );
 } /* end of function WriteHistLogAndAdjustCountInfo */
 
+#endif //TEMPORARY_COMMENTED

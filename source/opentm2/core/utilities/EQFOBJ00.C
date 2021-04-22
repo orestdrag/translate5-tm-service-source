@@ -84,12 +84,20 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
     } /* endif */                                                         /*@02A*/
     return( usResult);                                                    /*@02A*/
 }
+
+#endif //TEMPORARY_COMMENTED
+
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
-    //pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     return( SendAll( pIda->pObjTbl, (CLASSES) cls, msg, mp1, mp2));
 }
+
+#ifdef TEMPORARY_COMMENTED
+
 USHORT RegisterObject( PSZ name, HWND hwnd, USHORT cls)
 {
     POBJM_IDA     pIda;                // Our Ida
@@ -722,6 +730,8 @@ USHORT LoadObjList( POBJTBL pt, USHORT cls, POBJLST ptab, register int i)
     return( cnt);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /*+--------------------------------------------------------------------------+
      Send a message to all active EQF objects
      -> multiple tables not yet supported
@@ -748,6 +758,8 @@ USHORT SendAll( POBJTBL pt, CLASSES objClass, WINMSG message,
         //x = x + (USHORT)WinSendMsg( pe->hWnd, message, mp1, mp2);
     return( x);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 HWND EqfQueryObject( PSZ pszObj, SHORT sClass, SHORT sFlags )
 {
