@@ -923,6 +923,54 @@ USHORT EqfCloseMem
   return( usRC );
 }
 
+/*! \brief Lookup a segment in the memory
+  \param hSession the session handle returned by the EqfStartSession call
+  \param lHandle handle of a previously opened memory
+  \param pSearchKey pointer to a MemProposal structure containing the searched criteria
+  \param *piNumOfProposals pointer to the number of requested memory proposals, will be changed on return to the number of proposals found
+  \param pProposals pointer to a array of MemProposal structures receiving the search results
+  \param lOptions processing options 
+  \returns 0 if successful or an error code in case of failures
+*/
+USHORT EqfQueryMem
+(
+  HSESSION    hSession,    
+  LONG        lHandle,          
+  PMEMPROPOSAL pSearchKey, 
+  int         *piNumOfProposals,
+  PMEMPROPOSAL pProposals, 
+  LONG        lOptions     
+)
+{
+  USHORT      usRC = NO_ERROR;         // function return code
+  PFCTDATA    pData = NULL;            // ptr to function data area
+
+  // validate session handle
+  usRC = FctValidateSession( hSession, &pData );
+
+  if ( pData )
+  {
+    LOGWRITE1( "==EqfQueryMem==\n" );
+    LOGPARMLONG( "Handle", lHandle );
+    LOGPARMOPTION( "Options", lOptions );
+  } /* endif */
+
+  // call the memory factory to process the request
+  if ( usRC == NO_ERROR )
+  {
+    MemoryFactory *pFactory = MemoryFactory::getInstance();
+
+    usRC = pFactory->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
+  } /* endif */
+
+  if ( pData )
+  {
+    LOGWRITE2( "  RC=%u\n", usRC );
+  }
+
+  return( usRC );
+}
+
 // OtmMemoryService
 /*! \brief Search the given text string in the memory
 \param hSession the session handle returned by the EqfStartSession call

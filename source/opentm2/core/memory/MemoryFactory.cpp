@@ -2557,8 +2557,6 @@ USHORT MemoryFactory::APICloseMem
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief process the API call: EqfQueryMem and lookup a segment in the memory
   \param lHandle handle of a previously opened memory
   \param pSearchKey pointer to a MemProposal structure containing the searched criteria
@@ -2613,8 +2611,6 @@ USHORT MemoryFactory::APIQueryMem
 
   return( usRC );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 static wchar_t* wcsupr(wchar_t *str)
 {
