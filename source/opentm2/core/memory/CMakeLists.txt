@@ -7,7 +7,7 @@ set(Mem_Source_Files
         MemoryFactory.cpp
         TMPluginWrapper.cpp
         EQFMEMLP.CPP
-       # EQFMEMEP.CPP
+        EQFMEMEP.CPP
         EQFMEMCD.CPP
         EQFMEM00.CPP
        # EQFMEMIP.CPP

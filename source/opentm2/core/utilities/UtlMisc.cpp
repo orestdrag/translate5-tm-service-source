@@ -690,6 +690,8 @@ void UtlLogWrite( PSZ pszString ) { return; }
 
 #endif
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 // External function
 //+----------------------------------------------------------------------------+
@@ -721,7 +723,7 @@ VOID UtlDispatch( VOID )
    HWND hwndClient =  (HWND) UtlQueryULong( QL_TWBCLIENT );
    MSG msg;                      // message queue structure
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    while ( usMsg && PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
    {
      if ( msg.message == WM_QUIT)
@@ -750,8 +752,10 @@ VOID UtlDispatch( VOID )
      } /* endif */
      usMsg--;
    } /* endwhile */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // Internal function
@@ -780,7 +784,9 @@ BOOL UtlIsDialogMsg( MSG FAR * pMsg )
   sIndex = 0;
   while ( !fDispatched && (sIndex < sRegisteredDlgs) )
   {
-    //fDispatched = IsDialogMessage( hwndDlgs[sIndex], pMsg );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    fDispatched = IsDialogMessage( hwndDlgs[sIndex], pMsg );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     sIndex++;
   } /* endwhile */
 

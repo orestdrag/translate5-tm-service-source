@@ -136,6 +136,8 @@ USHORT  MemExportWriteFile( PMEM_EXPORT_IDA pExportIDA );
 USHORT  MemExportWrite(     PMEM_EXPORT_IDA pExportIDA, PSZ_W  pszToWrite );
 USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn, PSZ_W pszSegmentOut );
 
+#ifdef TEMPORARY_COMMENTED
+
 /* !brief function handling the GUI mode of the memory import */
 BOOL MemGUIExportMemory
 ( 
@@ -427,6 +429,7 @@ int MemExpSaveAsDlg( HWND hwndParent, MEM_EXPORT_IDA *pIDA )
   return( fOK ? 0 : 1 );
 } /* end of function MemExpSaveAsDlg */
 
+#endif //TEMPORARY_COMMENTED
 
 USHORT MemFuncPrepExport
 (
@@ -439,6 +442,8 @@ USHORT MemFuncExportProcess
 (
   PFCTDATA    pData                    // function I/F session data
 );
+
+#ifdef TEMPORARY_COMMENTED
 
 /**********************************************/
 /* Callback function for Export ProcessWindow */
@@ -603,6 +608,8 @@ MRESULT MemExportCallBack
 } /* end of function MemExportCallBack */
 #endif
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -683,8 +690,9 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     // Dismiss the slider window if it had been created
     if ( hwndErrMsg != HWND_FUNCIF )
     {
-//WINAPI
-      //EqfRemoveObject( TWBFORCE, hWnd );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+      EqfRemoveObject( TWBFORCE, hWnd );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
   }
   else if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
@@ -695,10 +703,10 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
   {
     // Move process-ID which is stored in usRc into the
     // mp1 and issue a message WM_EQF_MEMEXPORT_PROCESS
-/* //WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                 MP1FROMSHORT( MEM_EXPORT_TASK ), NULL);
-*/
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   } /* endif */
   return( usRC );
 } /* end of function EQFMemExportStart */
@@ -795,11 +803,10 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          UtlDispatch();
 
          //--- Post the next WM_EQF_MEMEXPORT_PROCESS
-#if 0
-//WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_EXPORT_TASK ), NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -817,8 +824,9 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        pCommArea->usComplete = 100;
        if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
        {
-//WINAPI
-         //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+         WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+#endif TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
 
        if ( pExportIDA->ulSegmentCounter == 0 )
@@ -846,11 +854,10 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        }
        else
        {
-#if 0
-//WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_END_EXPORT ), NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -874,11 +881,10 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      }
      else
      {
-#if 0
-//WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                    MP1FROMSHORT( MEM_END_EXPORT ), NULL );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      } /* endif */
      break;
   } /* end switch */
@@ -1014,10 +1020,10 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   /********************************************************************/
   if ( pExportIDA->pDDEMemExp != NULL )
   {
-#if 0 //WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                 MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   } /* endif */
 
   // continue with next TM if any
@@ -1209,18 +1215,16 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   if ( pExportIDA->pszNameList && pExportIDA->pszActiveName[0] )
   {
     HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);    
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // GQTODO update process window title bar and outfile static
-//WINAPI
-    //LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
+    LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
     sprintf( pCommArea->szText, "%s %s", pCommArea->szBuffer, pExportIDA->ControlsIda.szPathContent );
-    //LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
+    LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
     sprintf( pCommArea->szTitle, "%s %s", pCommArea->szBuffer, pExportIDA->szMemName );
 
     // restart TM export
-#if 0
-//WINAPI
     WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_START_EXPORT ), 0L );
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   else
   {
@@ -2158,6 +2162,9 @@ USHORT MemExportWrite
 
    return usRc;
 } /* end of function MemExportWrite  */
+
+#ifdef TEMPORARY_COMMENTED
+
 USHORT MemBatchTMExport
 (
   HWND             hwndParent,         // handle of memory list window
@@ -2309,6 +2316,8 @@ USHORT MemBatchTMExport
    return( pMemExp->DDEReturn.usRc );
 
 } /* end of function MemBatchTMExport */
+
+#endif //TEMPORARY_COMMENTED
 
 USHORT MemFuncExportMem
 (
@@ -2656,3 +2665,4 @@ USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn,
 #endif
   return( MEM_PROCESS_OK );
 }
+

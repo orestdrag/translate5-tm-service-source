@@ -4252,41 +4252,43 @@ typedef ULONG HPRINT, *PHPRINT;
 /**********************************************************************/
 /* Function prototypes                                                */
 /**********************************************************************/
-USHORT  UtlOpen( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
-                USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
-                ULONG ulReserved, BOOL fMsg );
-extern "C" USHORT  UtlClose( HFILE hf, BOOL fMsg );
-USHORT  UtlRead( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesRead,
-                BOOL fMsg );
-USHORT  UtlReadL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
-                BOOL fMsg );
-USHORT  UtlWrite( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesWritten,
-                 BOOL fMsg );
-USHORT  UtlWriteL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
-                 BOOL fMsg );
-USHORT  UtlDupHandle( HFILE hfOld, PHFILE phfNew, BOOL fMsg );
-extern "C" USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
-                      PULONG pulNewOffset, BOOL fMsg );
+extern "C" {
+    USHORT  UtlOpen( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
+                    USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
+                    ULONG ulReserved, BOOL fMsg );
+    USHORT  UtlClose( HFILE hf, BOOL fMsg );
+    USHORT  UtlRead( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesRead,
+                    BOOL fMsg );
+    USHORT  UtlReadL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
+                    BOOL fMsg );
+    USHORT  UtlWrite( HFILE hf, PVOID pBuf, USHORT cbBuf, PUSHORT pcbBytesWritten,
+                     BOOL fMsg );
+    USHORT  UtlWriteL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
+                     BOOL fMsg );
+    USHORT  UtlDupHandle( HFILE hfOld, PHFILE phfNew, BOOL fMsg );
+    USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
+                          PULONG pulNewOffset, BOOL fMsg );
 
-USHORT  UtlDelete( PSZ pszFName, ULONG ulReserved, BOOL fMsg );
-extern "C" USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
-USHORT  UtlRmDir( PSZ pszDir, ULONG ulReserved, BOOL fMsg );
-USHORT  UtlCopy( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved, BOOL fMsg );
-USHORT  UtlMove( PSZ pszSrc, PSZ pszDst, ULONG ulReserved, BOOL fMsg );
-extern "C" USHORT  UtlFindFirst( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
-                     PFILEFINDBUF pffb, USHORT cbBuf, PUSHORT pcSearch,
+    USHORT  UtlDelete( PSZ pszFName, ULONG ulReserved, BOOL fMsg );
+    USHORT  UtlMkDir( PSZ pszDirName, ULONG usReserved, BOOL fMsg );
+    USHORT  UtlRmDir( PSZ pszDir, ULONG ulReserved, BOOL fMsg );
+    USHORT  UtlCopy( PSZ pszSrc, PSZ pszDst, USHORT usOpt, ULONG ulReserved, BOOL fMsg );
+    USHORT  UtlMove( PSZ pszSrc, PSZ pszDst, ULONG ulReserved, BOOL fMsg );
+    USHORT  UtlFindFirst( PSZ pszFSpec, PHDIR phdir, USHORT usAttr,
+                         PFILEFINDBUF pffb, USHORT cbBuf, PUSHORT pcSearch,
                      ULONG ulReserved, BOOL fMsg );
-USHORT  UtlFindNext( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
-                    PUSHORT pcSearch, BOOL fMsg );
-USHORT  UtlFindClose( HDIR hdir, BOOL fMsg );
-USHORT  UtlQFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
-                     USHORT cbInfoBuf, BOOL fMsg );
-extern "C" USHORT UtlGetFileSize
-(
-   HFILE    hf,                        // file handle
-   PULONG   pulSize,                   // points to buffer for file size
-   BOOL     fMsg                        // if TRUE handle errors in utility
-);
+    USHORT  UtlFindNext( HDIR hdir, PFILEFINDBUF pffb, USHORT cbBuf,
+                        PUSHORT pcSearch, BOOL fMsg );
+    USHORT  UtlFindClose( HDIR hdir, BOOL fMsg );
+    USHORT  UtlQFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
+                         USHORT cbInfoBuf, BOOL fMsg );
+    USHORT UtlGetFileSize
+    (
+       HFILE    hf,                        // file handle
+       PULONG   pulSize,                   // points to buffer for file size
+       BOOL     fMsg                        // if TRUE handle errors in utility
+    );
+}
 USHORT UtlGetFileSizeHwnd
 (
    HFILE    hf,                        // file handle
@@ -4318,7 +4320,7 @@ MRESULT /*EXPENTRY*/ UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
 BOOL    UtlRegisterCLB( HAB );
 PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
 PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
-VOID    UtlDispatch( VOID );
+extern "C" VOID    UtlDispatch( VOID );
 extern "C" ULONG   UtlQueryULong( SHORT sID );
 VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
 VOID    UtlMenuDisableItem( SHORT sItemID );
@@ -4369,25 +4371,27 @@ extern "C" PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
 USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
 
-PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
-PPLUG   UtlPlugOut( PPLUG plug);
-PSZ     UtlSplitFnameFromPath( PSZ path);
-extern "C" PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
-USHORT  UtlGetDriveList( BYTE *szList);
-extern "C" USHORT  UtlGetLANDriveList( BYTE *szList);
-BYTE    UtlQCurDisk( void);
-BOOL    UtlChangePropHead( PSZ, CHAR, PSZ, PSZ );
-SHORT   UtlLoadFileNames( PSZ search_path, USHORT atrb, HWND hlb, USHORT flg);
-SHORT   UtlLoadFileNamesHwnd( PSZ search_path, USHORT atrb,
-                              HWND hlb, USHORT flg, HWND hwnd);
-PMNUTBL UtlLoadMenuTbl( HWND hmenu);
-VOID    UtlFreeMenuTbl( PMNUTBL ptbl);
-VOID    UtlSetMenuItemsAttr( PMNUTBL ptbl);
-MRESULT UTLDRIVEBUTTONWP( HWND, USHORT, WPARAM, LPARAM);
-USHORT  UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
-                               ULONG style1, ULONG style);
-USHORT UtlSetPosDriveButtons2( HWND, USHORT, ULONG, ULONG, ULONG, ULONG,
-                                ULONG, ULONG, ULONG, ULONG, HWND );
+extern "C" {
+    PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
+    PPLUG   UtlPlugOut( PPLUG plug);
+    PSZ     UtlSplitFnameFromPath( PSZ path);
+    PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
+    USHORT  UtlGetDriveList( BYTE *szList);
+    USHORT  UtlGetLANDriveList( BYTE *szList);
+    BYTE    UtlQCurDisk( void);
+    BOOL    UtlChangePropHead( PSZ, CHAR, PSZ, PSZ );
+    SHORT   UtlLoadFileNames( PSZ search_path, USHORT atrb, HWND hlb, USHORT flg);
+    SHORT   UtlLoadFileNamesHwnd( PSZ search_path, USHORT atrb,
+                                  HWND hlb, USHORT flg, HWND hwnd);
+    PMNUTBL UtlLoadMenuTbl( HWND hmenu);
+    VOID    UtlFreeMenuTbl( PMNUTBL ptbl);
+    VOID    UtlSetMenuItemsAttr( PMNUTBL ptbl);
+    MRESULT UTLDRIVEBUTTONWP( HWND, USHORT, WPARAM, LPARAM);
+    USHORT  UtlCreateDriveButtons( HWND hwnd, PSZ plist, USHORT sid,
+                                   ULONG style1, ULONG style);
+    USHORT UtlSetPosDriveButtons2( HWND, USHORT, ULONG, ULONG, ULONG, ULONG,
+                                    ULONG, ULONG, ULONG, ULONG, HWND );
+}
 
 USHORT UtlDriveButtons( HWND hwnd, PSZ plist, USHORT sid,                          // starting id
                         ULONG style1, ULONG style,
@@ -4434,7 +4438,7 @@ USHORT  UtlBufWriteConv( PBUFCB, PSZ_W, ULONG, BOOL, USHORT, ULONG, ULONG );
 
 VOID    UtlIncludeRemoteResources(VOID);
 VOID    UtlGetLastError( HWND, PSZ );
-USHORT  UtlGetDDEErrorCode( HWND );
+extern "C" USHORT  UtlGetDDEErrorCode( HWND );
 SHORT   UtlQdamMsgTxt ( SHORT );
 
 SHORT   UtlGetOperatingSystemInfo( VOID );
@@ -4450,7 +4454,7 @@ extern "C" USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction,
                      ULONG ulReserved, BOOL fMsg, HWND hwndParent );
 extern "C" USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                      BOOL fMsg, HWND hwndParent );
-USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
+extern "C" USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                       BOOL fMsg, HWND hwndParent  );
 USHORT  UtlWriteWoCheckHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf,
                              PULONG pcbBytesWritten, BOOL fMsg, HWND hwndParent  );
@@ -6598,13 +6602,15 @@ BOOL    PropHandlerTerminateForBatch( void );
 HPROP   EqfQuerySystemPropHnd( void );
 USHORT  ReloadSysProp(PPROPSYSTEM);
 
-// other function prototypes
-BOOL DDEIsBatchHwnd( HWND hwndInQuestion );
-BOOL ObjHandlerInitForBatch( void );
-BOOL ObjHandlerTerminateForBatch( void );
-SHORT ObjQuerySymbol( PSZ pszSymbol );
-SHORT ObjSetSymbol( PSZ pszSymbol );
-SHORT ObjRemoveSymbol( PSZ pszSymbol );
+extern "C" {
+    // other function prototypes
+    BOOL DDEIsBatchHwnd( HWND hwndInQuestion );
+    BOOL ObjHandlerInitForBatch( void );
+    BOOL ObjHandlerTerminateForBatch( void );
+    SHORT ObjQuerySymbol( PSZ pszSymbol );
+    SHORT ObjSetSymbol( PSZ pszSymbol );
+    SHORT ObjRemoveSymbol( PSZ pszSymbol );
+}
 extern "C" USHORT MemFuncCreateMem
 (
   PSZ         pszMemName,              // name of new Translation Memory
@@ -6695,7 +6701,7 @@ VOID EQFCPAnsiToOemBuff( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut, USHOR
 
 ULONG  GetCodePage( USHORT usType );
 ULONG GetLangCodePage( USHORT usType, PSZ pLanguage );
-ULONG GetOrgLangCP( PSZ pLanguage, BOOL  fASCII );
+extern "C" ULONG GetOrgLangCP( PSZ pLanguage, BOOL  fASCII );
 
 /**********************************************************************/
 /**********************************************************************/
@@ -6767,34 +6773,34 @@ extern "C"
     PSZ_W UTF16strchr( PSZ_W pszString, CHAR_W ch );
     PSZ_W UTF16strstr( PSZ_W pszString1, PSZ_W pszString2 );
     PSZ_W UTF16strrev( PSZ_W pszString );
-}
-extern "C" PSZ   Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP );
-extern "C" PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG ulCP );
-PSZ   Unicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulCP );
-PSZ_W Ansi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulCP );
-extern "C" ULONG ASCII2UnicodeBuf( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
-ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
-ULONG Ansi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
-ULONG   UTF82UnicodeBuf( PSZ pszUTF8, PSZ_W pszUni, LONG Len );
-ULONG   UTF82UnicodeBufEx( PSZ pszUTF8, PSZ_W pszUni, LONG Len, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
-ULONG   Unicode2UTF8Buf( PSZ_W pszUni, PSZ pszUTF8, LONG Len );
-ULONG   Unicode2UTF8BufEx( PSZ_W pszUni, PSZ pszUTF8, LONG Len, LONG lBufLen, BOOL fMsg, PLONG plRc );
+    PSZ   Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP );
+    PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG ulCP );
+    PSZ   Unicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulCP );
+    PSZ_W Ansi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulCP );
+    ULONG ASCII2UnicodeBuf( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
+    ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
+    ULONG Ansi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulCP );
+    ULONG   UTF82UnicodeBuf( PSZ pszUTF8, PSZ_W pszUni, LONG Len );
+    ULONG   UTF82UnicodeBufEx( PSZ pszUTF8, PSZ_W pszUni, LONG Len, BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
+    ULONG   Unicode2UTF8Buf( PSZ_W pszUni, PSZ pszUTF8, LONG Len );
+    ULONG   Unicode2UTF8BufEx( PSZ_W pszUni, PSZ pszUTF8, LONG Len, LONG lBufLen, BOOL fMsg, PLONG plRc );
 
-// GQ: The lBufLen parameter in the following two functions specifies the
-//     actual size of the pAscii/pAnsi buffer in number of bytes
-extern "C" ULONG Unicode2ASCIIBuf( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen, ULONG ulCP );
-//ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen,
-//                              ULONG ulCP,BOOL fMsg, PLONG plRc, DWORD dwFlags );
-ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG usLen, LONG lBufLen, ULONG ulCP  );
-ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
-                             ULONG ulAnsiCP, BOOL fMsg, PLONG plRc );
-extern "C" ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulAnsiCP,
-                             BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
-PSZ   UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP );
-PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP );
-ULONG UtlConvertBuf(USHORT usType, PVOID pvInString, PVOID pvOutString, ULONG ulLen,
-                    LONG lBufLen, ULONG ulASCIICP, ULONG ulAnsiCP,
-                    BOOL fMsg, PLONG plRc, PLONG plBytesLeft);
+    // GQ: The lBufLen parameter in the following two functions specifies the
+    //     actual size of the pAscii/pAnsi buffer in number of bytes
+    ULONG Unicode2ASCIIBuf( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen, ULONG ulCP );
+    //ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG usLen, LONG lBufLen,
+    //                              ULONG ulCP,BOOL fMsg, PLONG plRc, DWORD dwFlags );
+    ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG usLen, LONG lBufLen, ULONG ulCP  );
+    ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
+                                 ULONG ulAnsiCP, BOOL fMsg, PLONG plRc );
+    ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen, ULONG ulAnsiCP,
+                                 BOOL fMsg, PLONG plRc, PLONG plBytesLeft );
+    PSZ   UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP );
+    PSZ_W UtlDirectAnsi2Unicode( PSZ pszAnsi, PSZ_W pszUni, ULONG ulAnsiCP );
+    ULONG UtlConvertBuf(USHORT usType, PVOID pvInString, PVOID pvOutString, ULONG ulLen,
+                        LONG lBufLen, ULONG ulASCIICP, ULONG ulAnsiCP,
+                        BOOL fMsg, PLONG plRc, PLONG plBytesLeft);
+}
 
 USHORT usConvertCRLF(
   PCHAR  pcInput,            // pointer to input character array

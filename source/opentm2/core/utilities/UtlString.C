@@ -3281,8 +3281,6 @@ VOID UtlReplString( SHORT sID, PSZ pszString )
    } /* endif */
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //ulLen in number of CHAR_W's which are in pszUni!
 ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
                              ULONG ulAnsiCP, BOOL fMsg, PLONG plRc )
@@ -3299,8 +3297,6 @@ ULONG UtlDirectUnicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBu
 	}
 	return( ulOutPut );     // # of bytes written
 }
-
-#endif //TEMPORARY_COMMENTED
 
 // ulLen in number of CHAR_W's which can be in pszUni!
 // rc ulOutPut2 in # of char-w's

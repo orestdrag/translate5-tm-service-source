@@ -929,6 +929,8 @@ BOOL ObjHandlerTerminateForBatch( void )
   return( TRUE );
 } /* end of function ObjHandlerTerminateForBatch */
 
+#endif //TEMPORARY_COMMENTED
+
 SHORT ObjQuerySymbol( PSZ pszSymbol )
 {
   SHORT sRC = 0;
@@ -949,9 +951,10 @@ SHORT ObjQuerySymbol( PSZ pszSymbol )
   }
   else
   {
-    /*sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
                       WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );
-*/
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   } /* endif */
   return( sRC );
 } /* endif ObjQuerySymbol */
@@ -967,24 +970,24 @@ SHORT ObjSetSymbol( PSZ pszSymbol )
       PFUNCIF_LOCK_TABLE pLockTable = ObjLockTable_AccessTable( hSharedMem);
       if ( pLockTable )
       {
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( ObjLockTable_Add( pLockTable, pszSymbol, GetCurrentProcessId() ) )
         {
           sRC = 1;
         } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         ObjLockTable_ReleaseTable(pLockTable);
       } /* endif */
     } /* endif */
   }
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   else
   {
     WinSendMsg( EqfQueryObjectManager(), WM_EQF_SETSYMBOL,
                 MP1FROMSHORT( TRUE ),
                 MP2FROMP( pszSymbol ) );
   } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( sRC );
 } /* endif ObjSetSymbol */
 
@@ -1007,17 +1010,15 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
       } /* endif */
     } /* endif */
   }
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   else
   {
    sRC = (SHORT)WinSendMsg( EqfQueryObjectManager(), WM_EQF_REMOVESYMBOL,
                             NULL, MP2FROMP( pszSymbol ) );
   } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( sRC );
 } /* endif ObjRemoveSymbol */
-
-#endif //TEMPORARY_COMMENTED
 
 //////////////////////////////////////////////////////////////////
 /// Lock Table handling                                        ///
@@ -1046,23 +1047,23 @@ HANDLE ObjLockTable_CreateOrOpenTable()
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 } /* end of function ObjLockTable_CreateOrOpenTable */
 
-#ifdef TEMPORARY_COMMENTED
-
 PFUNCIF_LOCK_TABLE ObjLockTable_AccessTable( HANDLE hSharedMem )
 {
   PFUNCIF_LOCK_TABLE pTable;
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   pTable = (PFUNCIF_LOCK_TABLE )MapViewOfFile( hSharedMem,
                                                FILE_MAP_WRITE,
                                                0, 0, 0);
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   return( pTable );
 } /* end of function ObjLockTable_AccessTable */
 
 void ObjLockTable_ReleaseTable( PFUNCIF_LOCK_TABLE pTable )
 {
-  //UnmapViewOfFile(pTable);
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  UnmapViewOfFile(pTable);
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 } /* end of function ObjLockTable_AccessTable */
 
 BOOL ObjLockTable_SetUpdateFlag( PFUNCIF_LOCK_TABLE pLockTable )
@@ -1135,6 +1136,7 @@ PFUNCIF_LOCK_ENTRY ObjLockTable_Search
   return( pFound );
 } /* end of function ObjLockTable_Search */
 
+#ifdef TEMPORARY_COMMENTED
 
 // add a new entry to a lock table
 BOOL ObjLockTable_Add
@@ -1176,6 +1178,8 @@ BOOL ObjLockTable_Add
   } /* endif */
   return( fOK );
 } /* endif */
+
+#endif //TEMPORARY_COMMENTED
 
 // delete a specific entry or all entries belonging to the given process
 // either an object or a process ID has to be specified
@@ -1251,6 +1255,8 @@ BOOL ObjLockTable_WaitWhenUpdated( PFUNCIF_LOCK_TABLE pLockTable )
   }
   return( fTimeOut );
 } /* end of function ObjLockTable_Search */
+
+#ifdef TEMPORARY_COMMENTED
 
 USHORT ObjBroadcast
 (

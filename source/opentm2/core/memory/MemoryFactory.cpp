@@ -1807,8 +1807,6 @@ int MemoryFactory::getObjectName( OtmMemory *pMemory, char *pszObjName, int iBuf
   return( 0 );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief Get the plugin name and the memory name from a memory object name
   \param pszObjName pointer to the memory object name
   \param pszPluginName pointer to the buffer for the plugin name or 
@@ -1863,8 +1861,6 @@ int MemoryFactory::splitObjName( char *pszObjName, char *pszPluginName, int iPlu
   } /* end */     
   return( 0 );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 // helper functions 
 

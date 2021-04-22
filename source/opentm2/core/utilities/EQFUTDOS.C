@@ -976,6 +976,8 @@ USHORT UtlWrite
   return (usRC);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 USHORT UtlWriteL
 (
    HFILE    hf,                        // file handle
@@ -992,8 +994,6 @@ USHORT UtlWriteL
                          fMsg,
                          (HWND)NULL ) );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1311,8 +1311,6 @@ USHORT UtlChgFilePtrHwnd
    return( usRetCode );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1345,8 +1343,6 @@ USHORT UtlDelete
                           fMsg,
                           (HWND)NULL ) );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

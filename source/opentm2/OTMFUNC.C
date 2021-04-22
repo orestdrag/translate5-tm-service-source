@@ -181,8 +181,6 @@ USHORT EqfImportMem
   return( usRC );
 } /* end of function EqfImportMem */
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 // export a Translation Memory
 USHORT EqfExportMem
@@ -233,8 +231,6 @@ USHORT EqfExportMem
 
   return( usRC );
 } /* end of function EqfExportMem */
-
-#endif //TEMPORARY_COMMENTED
 
 // OtmMemoryService
 // create a new Translation Memory

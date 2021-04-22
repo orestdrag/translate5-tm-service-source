@@ -1435,6 +1435,8 @@ VOID UtlGetLastError( HWND hwndDDE, PSZ pszMsgText)
   } /* endif */
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -1476,6 +1478,8 @@ USHORT UtlGetDDEErrorCode( HWND hwndDDE )
   } /* endif */
   return( usRC );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function
