@@ -1141,8 +1141,6 @@ USHORT EqfGetOpenTM2Lang
   return( usRC );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 // OtmMemoryService
 /*! \brief Get the ISO language identifier for a OpenTM2 language name
 \param hSession the session handle returned by the EqfStartSession call
@@ -1198,5 +1196,3 @@ USHORT EqfGetIsoLang
 
   return( usRC );
 }
-
-#endif //TEMPORARY_COMMENTED
