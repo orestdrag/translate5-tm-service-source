@@ -134,11 +134,13 @@ int main( int argc, char *argv[], char *envp[] )
       {
         int iRC = 0;
         // end of parameter data reached, execute the command
+#ifdef TEMPORARY_COMMENTED
         if ( wcscasecmp( szCommand, L"importMemoryFromPackage" ) == 0 )
         {
-          //iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
+          iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
         }
-        else if ( wcscasecmp( szCommand, L"deleteMemory" ) == 0 )
+#endif //TEMPORARY_COMMENTED
+        /*else*/ if ( wcscasecmp( szCommand, L"deleteMemory" ) == 0 )
         {
           iRC = pService->deleteMem( strInParms, strOutParms );
         }
@@ -146,30 +148,32 @@ int main( int argc, char *argv[], char *envp[] )
         {
           iRC = pService->createMemory( strInParms, strOutParms );
         }
+#ifdef TEMPORARY_COMMENTED
         else if ( wcscasecmp( szCommand, L"importMemory" ) == 0 )
         {
-          //iRC = pService->importMemory( strInParms, strOutParms );
+          iRC = pService->importMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"openMemory" ) == 0 )
         {
-          //iRC = pService->openMemory( strInParms, strOutParms );
+          iRC = pService->openMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"closeMemory" ) == 0 )
         {
-          //iRC = pService->closeMemory( strInParms, strOutParms );
+          iRC = pService->closeMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"lookupInMemory" ) == 0 )
         {
-          //iRC = pService->lookupInMemory( strInParms, strOutParms );
+          iRC = pService->lookupInMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"searchMemory" ) == 0 )
         {
-          //iRC = pService->searchMemory( strInParms, strOutParms );
+          iRC = pService->searchMemory( strInParms, strOutParms );
         }
         else if ( wcscasecmp( szCommand, L"updateMemory" ) == 0 )
         {
-          //iRC = pService->updateMemory( strInParms, strOutParms );
+          iRC = pService->updateMemory( strInParms, strOutParms );
         }
+#endif //TEMPORARY_COMMENTED
         else
         {
           wprintf( L"Warning: unknown command \"%s\" ignored\n", szCommand );

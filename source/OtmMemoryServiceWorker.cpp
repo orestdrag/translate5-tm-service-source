@@ -605,10 +605,12 @@ std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8S
 {
 	int iUTF16Len;
 	int iUTF8Len = (int)strUTF8String.length() + 1;
-	//iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+	iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, 0, 0 );
 	std::wstring strUTF16( iUTF16Len, L'\0');
-	//MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
+	MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
 	return strUTF16;
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
@@ -619,10 +621,12 @@ std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16St
 {
 	int iUTF8Len;
 	int iUTF16Len = (int)strUTF16String.length() + 1;
-	//iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+	iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
 	std::string strUTF8( iUTF8Len, '\0');
-	//WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
+	WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
 	return strUTF8;
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
@@ -635,12 +639,14 @@ void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
   int iASCIILen;
   int iUTF8Len = (int)strText.length() + 1;
   char *pszNewData = NULL;
-  //iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
-  //MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
-  //iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
+  iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iASCIILen + 1 );
-  //WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
+  WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   strText = pszNewData;
   free( pszNewData );
 }
@@ -654,12 +660,14 @@ void OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText )
   int iUTF8Len;
   int iASCIILen = (int)strText.length() + 1;
   char *pszNewData = NULL;
-  //iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
-  //MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
-  //iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
+  iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iUTF8Len + 1);
-  //WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
+  WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   strText = pszNewData;
   free( pszNewData );
 }
@@ -796,7 +804,9 @@ int OtmMemoryServiceWorker::import
   strcpy( pData->szMemory, strMemory.c_str() );
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
-  //_beginthread( &importMemoryProcess, 0, (void *)pData );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  _beginthread( &importMemoryProcess, 0, (void *)pData );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( restbed::CREATED );
 }
@@ -922,7 +932,9 @@ int OtmMemoryServiceWorker::createMemory
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
 
-    //DeleteFile( szTempFile );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    DeleteFile( szTempFile );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
   if ( iRC != 0 )
@@ -978,17 +990,27 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"source", pProp->szSource );
   pJsonFactory->addParmToJSONW( strJSON, L"target", pProp->szTarget );
   pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
-  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"id", pData->lSegmentNum );
-  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", pData->szSource );
-  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
-  //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
-  //MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"targetLang", pData->szSource );
 
   switch ( pProp->eType )
@@ -1012,16 +1034,22 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   }
   pJsonFactory->addParmToJSONW( strJSON, L"matchType", pData->szSource );
 
-  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"author", pData->szSource );
 
   convertTimeToUTC( pProp->lTargetTime, pData->szDocName );
-  //MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );
 
-  //MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"markupTable", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"context", pProp->szContext );
@@ -1455,7 +1483,9 @@ int OtmMemoryServiceWorker::list
     // isolate TM name and convert it to UTF16
     PSZ pszEnd = strchr( pszCurTM, ',' );
     if ( pszEnd ) *pszEnd = 0;
-    //MultiByteToWideChar( CP_OEMCP, 0, pszCurTM, -1, szTM, sizeof( szTM ) / sizeof( szTM[0] ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    MultiByteToWideChar( CP_OEMCP, 0, pszCurTM, -1, szTM, sizeof( szTM ) / sizeof( szTM[0] ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     // add name to response area
     pJsonFactory->addElementStartToJSONW( strOutputParmsW );
@@ -1813,12 +1843,16 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     if ( hfLog ) fprintf( hfLog, "    Error: failed to load the temporary file\n" );
-    //DeleteFile( szTempFile );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    DeleteFile( szTempFile );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // cleanup
-  //DeleteFile( szTempFile );
+  DeleteFile( szTempFile );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( restbed::OK );
 }
@@ -1939,17 +1973,19 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
 
   // setup temp file name for TMX file 
   char szTempPath[PATH_MAX];
-  //iRC = GetTempPath( PATH_MAX, szTempPath );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  iRC = GetTempPath( PATH_MAX, szTempPath );
   if ( iRC > PATH_MAX || ( iRC == 0 ) )
   {
     iRC = -1;
   }
   else
   {
-    //iRC = GetTempFileName( szTempPath, "OTM", 0, pszTempFile );
+    iRC = GetTempFileName( szTempPath, "OTM", 0, pszTempFile );
     if ( iRC != 0 ) iRC = 0;
   }
   return( iRC );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief read a binary file and encode it using BASE64 encoding
@@ -1963,11 +1999,12 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
 {
   int iRC = 0;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // open file
-  HANDLE hFile = NULL;//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     strError = "open of package file "; 
     strError.append( pszFile ); 
     strError.append( " failed" );
@@ -1977,47 +2014,43 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
   // get the size of file
   DWORD dwFileSize = 0;
   DWORD dwFileSizeHigh = 0;
-  //dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
+  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
 
   // allocate byte array for file content
   BYTE *pByteArray = (BYTE *)malloc( dwFileSize );
   if ( pByteArray == NULL )
   {
-    //CloseFile( &hFile );
+    CloseFile( &hFile );
     strError = "Insufficient memory";
     return( iRC );
   }
 
   // read file into byte array
   DWORD dwBytesRead = 0;
-#if 0
   if ( !ReadFile( hFile, pByteArray, dwFileSize, &dwBytesRead, NULL ) )
   {
-    //CloseFile( &hFile );
+    CloseFile( &hFile );
     free( pByteArray );
-    //iRC = GetLastError();
+    iRC = GetLastError();
     strError = "read of package ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
-#endif
 
   // close file
-  //CloseFile( &hFile );
+  CloseFile( &hFile );
 
   // get encoded length of data
   DWORD dwEncodedLength = 0;
-#if 0
   if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, NULL, &dwEncodedLength ) )
   {
-    //CloseFile( &hFile );
+    CloseFile( &hFile );
     free( pByteArray );
-    //iRC = GetLastError();
+    iRC = GetLastError();
     strError = "encoding of binary data failed";
     return( iRC );
   }
-#endif
 
   // get area for encoded string
   char *pStringData = (char *)malloc( dwEncodedLength );
@@ -2028,17 +2061,15 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
     return( iRC );
   }
 
-#if 0
   // encode data
   if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, pStringData, &dwEncodedLength ) )
   {
     free( pByteArray );
     free( pStringData );
-    //iRC = GetLastError();
+    iRC = GetLastError();
     strError = "encoding of binary data failed";
     return( iRC );
   }
-#endif
 
   *ppStringData = pStringData;
 
@@ -2046,6 +2077,7 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
   free( pByteArray );
 
   return( iRC );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a BASE64 encoded string to a binary file
@@ -2060,14 +2092,14 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   // get decoded length of data
   DWORD dwDecodedLength = 0;
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
     return( iRC );
   }
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   // get byte array for decoded data
   BYTE *pData = (BYTE *)malloc( dwDecodedLength );
@@ -2077,49 +2109,45 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     return( iRC );
   }
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // decode data
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, pData, &dwDecodedLength, NULL, NULL ) )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     free( pData );
     strError = "decoding of BASE64 data failed";
     return( iRC );
   }
-#endif
 
-#if 0
   // open output file
   HANDLE hFile = CreateFile( pszFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == INVALID_HANDLE_VALUE )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     free( pData );
     strError = "creation of output file ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
-#endif
 
   // write byte array to the file
   DWORD dwBytesWritten = 0;
-#if 0
   if ( !WriteFile( hFile, pData, dwDecodedLength, &dwBytesWritten, NULL ) )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     free( pData );
-    //CloseFile( &hFile );
+    CloseFile( &hFile );
     strError = "write to output file  ";
     strError.append( pszFile );
     strError.append( " failed" );
     return( iRC );
   }
-#endif
 
   // close file
-  //CloseFile( &hFile );
+  CloseFile( &hFile );
 
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   // cleanup
   free( pData );
 
@@ -2137,11 +2165,12 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 {
   int iRC = 0;
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // open file
-  HANDLE hFile = NULL;//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
-    //iRC = GetLastError();
+    iRC = GetLastError();
     if ( hfLog ) fprintf( hfLog, "   Error: open of file %s failed with rc=%d\n", pszFile, iRC );
     return( iRC );
   }
@@ -2149,14 +2178,13 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   // get the size of file
   DWORD dwFileSize = 0;
   DWORD dwFileSizeHigh = 0;
-  //dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
+  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
 
   // adjust size of Byte vector
   vFileData.resize( dwFileSize );
 
   // read file into byte vector
   DWORD dwBytesRead = 0;
-#if 0
   if ( !ReadFile( hFile, &vFileData[0], dwFileSize, &dwBytesRead, NULL ) )
   {
     //CloseFile( &hFile );
@@ -2164,10 +2192,10 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
     if ( hfLog ) fprintf( hfLog, "   Error: reading of %ld bytes from file %s failed with rc=%ld\n", dwFileSize, pszFile, iRC );
     return( iRC );
   }
-#endif
 
   // close file
-  //CloseFile( &hFile );
+  CloseFile( &hFile );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( iRC );
 }
@@ -2196,8 +2224,10 @@ void importMemoryProcess( void *pvData )
   // update memory status
   pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pszError );
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // cleanup
-  //DeleteFile( pData->szInFile );
+  DeleteFile( pData->szInFile );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   delete( pData );
 
   return;

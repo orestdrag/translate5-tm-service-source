@@ -10,11 +10,10 @@ set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
 
 set(OtmMemoryService_Source_Files
-        #OtmMemoryService.cpp
+        OtmMemoryService.cpp
         OtmMemoryServiceWorker.cpp
         OTMMSJSONFactory.cpp
-        #OtmMemoryServiceTester.cpp
-        dummy_main.cpp
+        OtmMemoryServiceTester.cpp
 )
 
 include_directories(${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})

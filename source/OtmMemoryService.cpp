@@ -320,16 +320,18 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     {
       char szConfFileName[PATH_MAX];
 
-      //GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+      GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
       char *pszExt = strrchr( szConfFileName, '.' );
       if ( pszExt != NULL )strcpy( pszExt, ".conf" );
-      //GetPrivateProfileString( "Settings", "TimeOut", "3600", szValue, sizeof( szValue ), szConfFileName );
+      GetPrivateProfileString( "Settings", "TimeOut", "3600", szValue, sizeof( szValue ), szConfFileName );
       uiTimeOut = atoi( szValue );
-      //GetPrivateProfileString( "Settings", "Port", "8080", szValue, sizeof( szValue ), szConfFileName );
+      GetPrivateProfileString( "Settings", "Port", "8080", szValue, sizeof( szValue ), szConfFileName );
       uiPort = atoi( szValue );
-      //GetPrivateProfileString( "Settings", "Threads", "10", szValue, sizeof( szValue ), szConfFileName );
+      GetPrivateProfileString( "Settings", "Threads", "10", szValue, sizeof( szValue ), szConfFileName );
       uiWorkerThreads = atoi( szValue );
-      //GetPrivateProfileString( "Settings", "ServiceName", "otmmemoryservice", szServiceName, sizeof( szServiceName ), szConfFileName );
+      GetPrivateProfileString( "Settings", "ServiceName", "otmmemoryservice", szServiceName, sizeof( szServiceName ), szConfFileName );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       // set caller's service name and port fields
       strcpy( pszService, szServiceName );
@@ -397,8 +399,10 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( getStatus );
   }
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // prepare log file
-  //GetModuleFileName( NULL, szLogFile, PATH_MAX );
+  GetModuleFileName( NULL, szLogFile, PATH_MAX );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   strcat( szLogFile, ".log" );
 
   return( TRUE );
@@ -408,8 +412,10 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
 BOOL StartOtmMemoryService()
 {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // start web service
-  //_beginthread( ServiceThread, 0, NULL );
+  _beginthread( ServiceThread, 0, NULL );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( TRUE );
 }
