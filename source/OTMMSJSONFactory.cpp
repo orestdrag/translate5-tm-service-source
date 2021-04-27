@@ -133,14 +133,16 @@ JSONFactory* JSONFactory::getInstance()
   {
     int iUTF16Len;
     int iLen = (int)strASCII.length() + 1;
-/* // WINAPI
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strASCII.c_str(), iLen, 0, 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     wchar_t *pszUtf16String = new ( wchar_t[iUTF16Len] );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     MultiByteToWideChar( CP_OEMCP, 0, strASCII.c_str(), iLen, pszUtf16String, iUTF16Len );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     std::wstring strUTF16 = pszUtf16String;
     delete( pszUtf16String );
     return strUTF16;
-*/ return L"";
   }
 
 
@@ -787,10 +789,13 @@ int JSONFactory::extractString
 
               // convert to UTF8
               int iUTF8Len;
-//WINAPI
-              //iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, 0, 0, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+              iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, 0, 0, 0, 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
               std::string strUTF8( iUTF8Len, '\0' );
-              //WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+              WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
               // add UTF8 character to target string
               for ( int i = 0; i < iUTF8Len; i++ ) string[iTargetPos++] = strUTF8[i];
@@ -1057,16 +1062,17 @@ int JSONFactory::parseJSON
       {
         switch ( pParm->type )
         {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
           case ASCII_STRING_PARM_TYPE:
-//WINAPI
-            //WideCharToMultiByte( CP_OEMCP, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
+            WideCharToMultiByte( CP_OEMCP, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
 
           case UTF8_STRING_PARM_TYPE:
-           // WideCharToMultiByte( CP_UTF8, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
+            WideCharToMultiByte( CP_UTF8, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
           case UTF16_STRING_PARM_TYPE:
             wcsncpy( (wchar_t *)pParm->pvValue, value.c_str(), pParm->iBufferLen - 1 );

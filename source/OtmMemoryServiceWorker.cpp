@@ -2187,8 +2187,8 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   DWORD dwBytesRead = 0;
   if ( !ReadFile( hFile, &vFileData[0], dwFileSize, &dwBytesRead, NULL ) )
   {
-    //CloseFile( &hFile );
-    //iRC = GetLastError();
+    CloseFile( &hFile );
+    iRC = GetLastError();
     if ( hfLog ) fprintf( hfLog, "   Error: reading of %ld bytes from file %s failed with rc=%ld\n", dwFileSize, pszFile, iRC );
     return( iRC );
   }
