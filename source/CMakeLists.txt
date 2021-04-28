@@ -13,7 +13,8 @@ set(OtmMemoryService_Source_Files
         OtmMemoryService.cpp
         OtmMemoryServiceWorker.cpp
         OTMMSJSONFactory.cpp
-        OtmMemoryServiceTester.cpp
+        #OtmMemoryServiceTester.cpp
+        otmd.cpp
 )
 
 include_directories(${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})
