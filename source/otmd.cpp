@@ -1,3 +1,52 @@
+#include "OtmMemoryService.h"
+
+#include <iostream>
+#include <csignal>
+#include <cstdlib>
+#include <chrono>
+#include <thread>
+
+volatile std::sig_atomic_t stop;
+
+void handle_interrupt_sig(int sig) {
+    stop = 1;
+    std::cout << "Received interrupt signal\n";
+}
+
+int main() {
+    std::signal(SIGINT, handle_interrupt_sig);
+
+    char szServiceName[80];
+    unsigned int uiPort = 0;
+
+    int res = PrepareOtmMemoryService(szServiceName, &uiPort);
+    if (!res) {
+        std::cerr << "Failed to initialize OtmMemoryService\n";
+        std::exit(EXIT_FAILURE);
+    }
+    std::cout << "Initialized OtmMemoryService\n";
+
+    res = StartOtmMemoryService();
+    if (!res) {
+        std::cerr << "Failed to start OtmMemoryService\n";
+        std::exit(EXIT_FAILURE);
+    }
+    std::cout << "Started OtmMemoryService\n";
+
+    std::chrono::seconds time(3);
+    while (!stop) {
+        std::cout << "Working...\n";
+        std::this_thread::sleep_for(time);
+    }
+
+    //StopOtmMemoryService();
+}
+
+
+
+// TODO daemon
+#ifdef TEMPORARY_COMMENTED
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -10,7 +59,7 @@
 
 #include "OtmMemoryService.h"
 
-int main(void) {
+int main() {
     /* process ID, session ID */
     pid_t pid, sid;
 
@@ -53,8 +102,8 @@ int main(void) {
     /* OtmMemoryService */
     char szServiceName[80];
     unsigned int uiPort = 0;
+
     int res = PrepareOtmMemoryService(szServiceName, &uiPort);
-    // initialization of OtmMemoryService failed
     if (!res) {
         // TODO write logs, close log file
         exit(EXIT_FAILURE);
@@ -66,14 +115,13 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-#ifndef TEMPORARY_COMMENTED
     while (1) {
-        // TODO signal to stop
         sleep(1000);
     }
-#endif //TEMPORARY_COMMENTED
 
     StopOtmMemoryService();
 
     exit(EXIT_SUCCESS);
 }
+
+#endif //TEMPORARY_COMMENTED

@@ -12,6 +12,7 @@
 #define _OtmMemoryService_H_
 
 #include "win_types.h"
+#include <stdio.h>
 
 typedef struct _THREADDATA
 {
