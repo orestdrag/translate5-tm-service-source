@@ -34,12 +34,16 @@ int main() {
     std::cout << "Started OtmMemoryService\n";
 
     std::chrono::seconds time(3);
-    while (!stop) {
+    do {
+        if (stop) {
+            StopOtmMemoryService();
+            std::cout << "Stopped the service\n";
+            std::exit(EXIT_SUCCESS);
+        }
+
         std::cout << "Working...\n";
         std::this_thread::sleep_for(time);
-    }
-
-    //StopOtmMemoryService();
+    } while (!stop);
 }
 
 

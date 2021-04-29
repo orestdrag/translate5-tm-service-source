@@ -67,13 +67,8 @@ static TRANSACTLOG *pTransActLog = NULL;
 int AddToTransActLog( TRANSACTID Id, const char *pszMemory );
 int TransActDone( int iTransActIndex );
 
-void ServiceThread
-(
-	void   *pvSettings                       // pointer to thread data
-)
+void ServiceThread()
 {
-	pvSettings;
-
   // allocate array for transaction logging
   pTransActLog = new( TRANSACTLOG[NUM_OF_TRANSACTENTRIES] );
   if ( pTransActLog ) memset( pTransActLog, 0, NUM_OF_TRANSACTENTRIES * sizeof( TRANSACTLOG ) );
@@ -311,7 +306,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
   {
     unsigned int uiPort = 8080;
-    char szServiceName[100] = "";
+    char szServiceName[100] = "otmemoryservice";
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
     char szValue[150];
@@ -320,6 +315,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     {
       char szConfFileName[PATH_MAX];
 
+//TODO write config file and parse it insted of this
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
       char *pszExt = strrchr( szConfFileName, '.' );
@@ -412,12 +408,10 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
 BOOL StartOtmMemoryService()
 {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  // start web service
-  _beginthread( ServiceThread, 0, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+    std::thread service_thread(ServiceThread);
+    service_thread.join();
 
-  return( TRUE );
+    return(TRUE);
 }
 
 void StopOtmMemoryService()

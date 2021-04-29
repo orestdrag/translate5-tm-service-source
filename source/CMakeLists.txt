@@ -9,6 +9,8 @@ set(RESTBED_PATH        "${ROOT}/Packages/restbed")
 set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 set(OtmMemoryService_Source_Files
         OtmMemoryService.cpp
         OtmMemoryServiceWorker.cpp
@@ -21,4 +23,4 @@ include_directories(${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})
 link_directories(${RESTBED_LIBRARIES})
 
 add_executable(OtmMemoryService ${OtmMemoryService_Source_Files})
-target_link_libraries(OtmMemoryService OTMFUNC librestbed.so) 
+target_link_libraries(OtmMemoryService OTMFUNC librestbed.so)
