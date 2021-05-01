@@ -6,16 +6,13 @@
 #include <chrono>
 #include <thread>
 
-volatile std::sig_atomic_t stop;
-
 void handle_interrupt_sig(int sig) {
-    stop = 1;
     std::cout << "Received interrupt signal\n";
+    StopOtmMemoryService();
+    std::cout << "Stopped OtmMemoryService\n";
 }
 
-int main() {
-    std::signal(SIGINT, handle_interrupt_sig);
-
+void service_worker() {
     char szServiceName[80];
     unsigned int uiPort = 0;
 
@@ -26,24 +23,18 @@ int main() {
     }
     std::cout << "Initialized OtmMemoryService\n";
 
-    res = StartOtmMemoryService();
+    signal_handler sh = { SIGINT, handle_interrupt_sig };
+    res = StartOtmMemoryService(sh);
     if (!res) {
         std::cerr << "Failed to start OtmMemoryService\n";
         std::exit(EXIT_FAILURE);
     }
-    std::cout << "Started OtmMemoryService\n";
+}
 
-    std::chrono::seconds time(3);
-    do {
-        if (stop) {
-            StopOtmMemoryService();
-            std::cout << "Stopped the service\n";
-            std::exit(EXIT_SUCCESS);
-        }
-
-        std::cout << "Working...\n";
-        std::this_thread::sleep_for(time);
-    } while (!stop);
+int main() {
+    std::thread worker(service_worker);
+    worker.join();
+    std::cout << "Worker thread finished\n";
 }
 
 

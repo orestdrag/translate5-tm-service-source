@@ -19,9 +19,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <functional>
 #include <linux/limits.h>
 #include <restbed>
 #include "OTMMSJSONFactory.h"
+#include "OtmMemoryService.h"
 #include "OtmMemoryServiceWorker.h"
 #include "EQFSERNO.H"
 #include "win_types.h"
@@ -67,12 +69,13 @@ static TRANSACTLOG *pTransActLog = NULL;
 int AddToTransActLog( TRANSACTID Id, const char *pszMemory );
 int TransActDone( int iTransActIndex );
 
-void ServiceThread()
+void ServiceThread(const signal_handler& sh)
 {
   // allocate array for transaction logging
   pTransActLog = new( TRANSACTLOG[NUM_OF_TRANSACTENTRIES] );
   if ( pTransActLog ) memset( pTransActLog, 0, NUM_OF_TRANSACTENTRIES * sizeof( TRANSACTLOG ) );
 
+    service.set_signal_handler(sh.signal, sh.handler);
   // start the service
 	service.start(pSettings);
 }
@@ -121,6 +124,9 @@ void get_memory_method_handler( const shared_ptr< Session > session )
 
 void get_method_handler(const shared_ptr< Session > session)
 {
+    session->close( OK, "Hello, World!", { { "Content-Length", "13" } } );
+
+#ifdef TEMPORARY_COMMENTED
 	const auto request = session->get_request();
 
 	size_t content_length = request->get_header("Content-Length", 0);
@@ -133,6 +139,7 @@ void get_method_handler(const shared_ptr< Session > session)
   pMemService->list( strResponseBody );
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
   TransActDone( iTransActIndex );
+#endif //TEMPORARY_COMMENTED
 }
 
 void getStatus_method_handler( const shared_ptr< Session > session )
@@ -306,7 +313,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
   {
     unsigned int uiPort = 8080;
-    char szServiceName[100] = "otmemoryservice";
+    char szServiceName[100] = "otmmemoryservice";
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
     char szValue[150];
@@ -404,12 +411,9 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
   return( TRUE );
 }
 
-
-
-BOOL StartOtmMemoryService()
+BOOL StartOtmMemoryService(const signal_handler& sh)
 {
-    std::thread service_thread(ServiceThread);
-    service_thread.join();
+    ServiceThread(sh);
 
     return(TRUE);
 }

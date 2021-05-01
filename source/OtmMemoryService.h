@@ -13,6 +13,7 @@
 
 #include "win_types.h"
 #include <stdio.h>
+#include <functional>
 
 typedef struct _THREADDATA
 {
@@ -22,12 +23,16 @@ typedef struct _THREADDATA
   int nCmdShow;
 } THREADDATA, *PTHREADDATA;
 
+struct signal_handler
+{
+    int signal;
+    std::function<void(const int)> handler;
+};
+
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort );
-BOOL StartOtmMemoryService();
+BOOL StartOtmMemoryService(const signal_handler& sh);
 void StopOtmMemoryService();
 void SetLogFile( FILE *hfLog );
 void WriteCrashLog( char *pszLogDir );
-
-
 
 #endif
