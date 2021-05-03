@@ -126,9 +126,6 @@ void get_memory_method_handler( const shared_ptr< Session > session )
 
 void get_method_handler(const shared_ptr< Session > session)
 {
-    session->close( OK, "Hello, World!", { { "Content-Length", "13" } } );
-
-#ifdef TEMPORARY_COMMENTED
 	const auto request = session->get_request();
 
 	size_t content_length = request->get_header("Content-Length", 0);
@@ -137,11 +134,12 @@ void get_method_handler(const shared_ptr< Session > session)
 
   if ( hfLog != NULL ) fprintf( hfLog, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
 
-  string strResponseBody;
+  string strResponseBody = "Sample text";
+#ifdef TEMPORARY_COMMENTED
   pMemService->list( strResponseBody );
+#endif //TEMPORARY_COMMENTED
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
   TransActDone( iTransActIndex );
-#endif //TEMPORARY_COMMENTED
 }
 
 void getStatus_method_handler( const shared_ptr< Session > session )
