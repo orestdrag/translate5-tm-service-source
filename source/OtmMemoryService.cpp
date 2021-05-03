@@ -20,6 +20,7 @@
 #include <cstring>
 #include <sstream>
 #include <functional>
+#include <map>
 #include <linux/limits.h>
 #include <restbed>
 #include "OTMMSJSONFactory.h"
@@ -27,6 +28,7 @@
 #include "OtmMemoryServiceWorker.h"
 #include "EQFSERNO.H"
 #include "win_types.h"
+#include "config.h"
 
 
 using namespace std;
@@ -301,8 +303,6 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   } );
 }
 
-
-
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
   pMemService = OtmMemoryServiceWorker::getInstance();
@@ -312,34 +312,30 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
   } /* endif */
 
   {
-    unsigned int uiPort = 8080;
     char szServiceName[100] = "otmmemoryservice";
+    unsigned int uiPort = 8080;
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
-    char szValue[150];
 
-    // get configuration settings
+    /* get configuration settings */
     {
-      char szConfFileName[PATH_MAX];
+        config conf;
+        int res = conf.parse();
 
-//TODO write config file and parse it insted of this
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      GetModuleFileName( NULL, szConfFileName, sizeof( szConfFileName ) );
-      char *pszExt = strrchr( szConfFileName, '.' );
-      if ( pszExt != NULL )strcpy( pszExt, ".conf" );
-      GetPrivateProfileString( "Settings", "TimeOut", "3600", szValue, sizeof( szValue ), szConfFileName );
-      uiTimeOut = atoi( szValue );
-      GetPrivateProfileString( "Settings", "Port", "8080", szValue, sizeof( szValue ), szConfFileName );
-      uiPort = atoi( szValue );
-      GetPrivateProfileString( "Settings", "Threads", "10", szValue, sizeof( szValue ), szConfFileName );
-      uiWorkerThreads = atoi( szValue );
-      GetPrivateProfileString( "Settings", "ServiceName", "otmmemoryservice", szServiceName, sizeof( szServiceName ), szConfFileName );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-      // set caller's service name and port fields
-      strcpy( pszService, szServiceName );
-      *puiPort = uiPort;
+        if (!res) {
+            strncpy(szServiceName,
+                conf.get_value("name", "otmmemoryservice").c_str(), 100);
+            uiPort = std::stoi(conf.get_value("port", "8080"));
+            uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
+            uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
+        }
     }
+
+    // set caller's service name and port fields
+    strcpy( pszService, szServiceName );
+    *puiPort = uiPort;
+
+    char szValue[150];
 
     // handler for resource URL w/o memory name
     auto resource = make_shared< Resource >();
