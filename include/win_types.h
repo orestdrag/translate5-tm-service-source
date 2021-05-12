@@ -16,6 +16,8 @@
 #define FAR 
 #define NEAR 
 #define PASCAL 
+#define pascal
+#define _loadds
 
 #ifndef TRUE
 #define TRUE 1
