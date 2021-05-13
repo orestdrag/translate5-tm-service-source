@@ -357,10 +357,12 @@ USHORT EqfStartSession
     UtlInitError( NULLHANDLE, HWND_FUNCIF, (HWND)&(pData->LastMessage),
                   pData->szMsgFile );
 
+#ifdef TEMPORARY_COMMENTED
     if ( !fContinue )
     {
       usRC = 1;
     } /* endif */
+#endif //TEMPORARY_COMMENTED
   } /* endif */
 
   // set directory strings and main drive
@@ -464,8 +466,10 @@ USHORT EqfStartSession
     }
     else
     {
+#ifdef TEMPORARY_COMMENTED
       // access to system properties failed
       usRC = ERROR_READ_SYSTEMPROPERTIES;
+#endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
 
@@ -520,8 +524,11 @@ USHORT EqfStartSession
   // initialie plugins
   if ( usRC == NO_ERROR )
   {
-    char szPluginPath[MAX_EQF_PATH];
+//TODO rewrite function to return proper path
+    char szPluginPath[MAX_EQF_PATH] = "/opentm2/plugins/EqfMemoryPlugin";
+#ifdef TEMPORARY_COMMENTED
     UtlMakeEQFPath( szPluginPath, NULC, PLUGIN_PATH, NULL );
+#endif //TEMPORARY_COMMENTED
 		usRC = InitializePlugins( szPluginPath );    // add return value for P402974
         // Add for P403115;
         if (usRC != PluginManager::ePluginExpired)

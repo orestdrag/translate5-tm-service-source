@@ -8,6 +8,8 @@
 #include <set>
 #include <algorithm> 
 #include <string>
+#include <dlfcn.h>
+#include <gnu/lib-names.h>
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
@@ -239,13 +241,35 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
 
-	strFileSpec += "\\*.dll";
-//TEMPORARY_COMMENTED
- // this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
+strFileSpec += "/libEqfMemoryPlugin.so";
 
-	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+#ifdef TEMPORARY_COMMENTED
+	strFileSpec += "\\*.dll";
+#endif //TEMPORARY_COMMENTED
+
+    // Modify end
+    USHORT usSubRC = loadPluginDll(strFileSpec.c_str());  // add return value for P402974
+    // Add for P402974 start
+    if (PluginManager::ePluginExpired == usSubRC)
+    {
+    //TEMPORARY_COMMENTED
+      // expired is the highest authority
+    //              this->Log.writef("Error:   DLL %s is expired.", strDll.c_str());
+      usRC = usSubRC;
+    }
+    else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
+    {
+      // else is other error and skip already registered error
+      usRC = usSubRC;
+    }
+
+#ifdef TEMPORARY_COMMENTED
+ this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
+#endif //TEMPORARY_COMMENTED
   
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+
   if ( hDir != INVALID_HANDLE_VALUE )
   {
     fMoreFiles = TRUE;
@@ -344,10 +368,10 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
   return usRC;     // Add for P402974
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 {
+printf("Plugin name: %s", pszName);
+
     USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
 
     //SetErrorMode(  SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX  );
@@ -362,11 +386,72 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
             }
         }
     }
+
+    void *handle = dlopen("libEqfMemoryPlugin.so", RTLD_LAZY);
+    if (!handle) {
+        fprintf(stderr, "%s\n", dlerror());
+#ifdef TEMPORARY_COMMENTED
+        return PluginManager::eNotEnoughMemory;
+#endif //TEMPORARY_COMMENTED
+    }
+
+    dlerror();
+
+    unsigned short (*pFunc)();
+    pFunc = (unsigned short (*)())dlsym(handle, "registerPlugins");
+    char *error = dlerror();
+    if (error != NULL) {
+        fprintf(stderr, "%s\n", error);
+#ifdef TEMPORARY_COMMENTED
+        this->Log.write( "   Could not resolve address of function \"registerPlugins()\"" );
+        dlclose(handle);
+        return PluginManager::eNotEnoughMemory;
+#endif //TEMPORARY_COMMENTED
+    }
+
+    // prepare our loaded DLL entry
+    vLoadedPluginDLLs.push_back( LoadedPluginDLL() );
+    iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size() - 1;
+    vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].hMod = handle;
+
+    // Add for P402792 start
+    memset(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, 0x00,
+        sizeof(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll));
+    strcpy(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, pszName);
+    // Add end
+
+    // call plugin registration entry point
+    usRC = pFunc();     // Add return value for P402974
+    if (usRC) {
+        // if register dll error, just remove the dll from the group
+#ifdef TEMPORARY_COMMENTED
+        this->Log.writef( "Error: register plugin %s failed %d.", pszName, usRC);
+#endif //TEMPORARY_COMMENTED
+
+        // FOR P403268 begin
+        // if it's already in pluginSet, also erase it
+        // vLoadedPluginDLLs.pop_back();
+        LoadedPluginDLL lpdll = vLoadedPluginDLLs.back();
+        OtmPlugin *pToDel = lpdll.vPluginList.back();
+
+        if(pToDel != NULL)
+          pluginSet->erase(pToDel);
+
+        vLoadedPluginDLLs.pop_back();
+        // FOR P403268 end
+
+        dlclose(handle);
+    }
+
+    // reset active plugin DLL entry
+    iCurrentlyLoadedPluginDLL = -1;
+
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // Add end
 	//HMODULE hMod = LoadLibrary(pszName);
     //SetErrorMode(0);
     this->Log.writef( "   Loading plugin %s", pszName );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+
 	if (hMod != 0)
 	{
     //this->Log.writef( "   Plugin %s successfully loaded", pszName );
@@ -423,6 +508,8 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 
     return usRC;     // Add for P402974
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 int PluginManagerImpl::findPluginEntry( OtmPlugin *pPlugin )
 {

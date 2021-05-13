@@ -194,6 +194,7 @@ int PluginManager::ValidationCheck(char * strParam)
         }
     }
 
+#ifdef TEMPORARY_COMMENTED
     if (!bHasMemory)
     {
         nRC |= PLUGIN_MISS_MEMORY;
@@ -211,6 +212,7 @@ int PluginManager::ValidationCheck(char * strParam)
         nRC |= PLUGIN_MISS_DICT;
         StrcatName(STR_DICT_PLUGIN, COMMA_STR, strParam);
     }
+#endif //TEMPORARY_COMMENTED
 
     return nRC;
 }

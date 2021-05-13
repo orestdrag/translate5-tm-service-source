@@ -134,10 +134,11 @@ void get_method_handler(const shared_ptr< Session > session)
 
   if ( hfLog != NULL ) fprintf( hfLog, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
 
-  string strResponseBody = "Sample text";
-#ifdef TEMPORARY_COMMENTED
-  pMemService->list( strResponseBody );
-#endif //TEMPORARY_COMMENTED
+  std::string strResponseBody = "Sample text";
+printf("1, strResponseBody: %s\n", strResponseBody.c_str());
+  int ret = pMemService->list( strResponseBody );
+printf("ret: %d\n", ret);
+printf("2, strResponseBody: %s\n", strResponseBody.c_str());
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
   TransActDone( iTransActIndex );
 }

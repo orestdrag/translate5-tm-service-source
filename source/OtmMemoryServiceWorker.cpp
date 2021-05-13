@@ -146,6 +146,7 @@ int OtmMemoryServiceWorker::verifyAPISession
   if ( this->hSession != 0 ) return( 0 );
 
   this->iLastRC = EqfStartSession( &(this->hSession) );
+  printf("EqfStartSession return code is %d\n", this->iLastRC);
   if ( this->iLastRC != 0 ) swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   return( this->iLastRC );
 }
@@ -621,12 +622,20 @@ std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16St
 {
 	int iUTF8Len;
 	int iUTF16Len = (int)strUTF16String.length() + 1;
+
+	std::string strUTF8;
+#ifdef TEMPORARY_COMMENTED
+    char sUTF8[];
+    wcstombs(strUTF8, strUTF16String.c_str(), strUTF16String.length());
+#endif //TEMPORARY_COMMENTED
+
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 	iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
 	std::string strUTF8( iUTF8Len, '\0');
 	WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
-	return strUTF8;
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
+	return strUTF8;
 }
 
 /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
@@ -1441,6 +1450,7 @@ int OtmMemoryServiceWorker::list
 )
 {
   int iRC = verifyAPISession();
+printf("OtmMemoryServiceWorker::list verifyAPISession return: %d\n", iRC);
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
@@ -1476,6 +1486,7 @@ int OtmMemoryServiceWorker::list
   pJsonFactory->startJSONW( strOutputParmsW );
   pJsonFactory->addArrayStartToJSONW( strOutputParmsW );
   PSZ pszCurTM = pszBuffer;
+printf("OtmMemoryServiceWorker::list pszBuffer: %s\n", pszBuffer);
   while ( *pszCurTM != 0 )
   {
     wchar_t szTM[PATH_MAX];
@@ -1483,9 +1494,8 @@ int OtmMemoryServiceWorker::list
     // isolate TM name and convert it to UTF16
     PSZ pszEnd = strchr( pszCurTM, ',' );
     if ( pszEnd ) *pszEnd = 0;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    MultiByteToWideChar( CP_OEMCP, 0, pszCurTM, -1, szTM, sizeof( szTM ) / sizeof( szTM[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
+    mbstowcs(szTM, pszCurTM, PATH_MAX);
 
     // add name to response area
     pJsonFactory->addElementStartToJSONW( strOutputParmsW );
@@ -1504,6 +1514,7 @@ int OtmMemoryServiceWorker::list
   } /* endwhile */
   pJsonFactory->addArrayEndToJSONW( strOutputParmsW );
   pJsonFactory->terminateJSONW( strOutputParmsW );
+wprintf(L"strOutputParmsW: %ls\n", strOutputParmsW);
   strOutputParms = convertToUTF8( strOutputParmsW );
   iRC = restbed::OK;
 }

@@ -2794,6 +2794,7 @@ BOOL UtlInitUtils( HAB hab )
 
    hab;
 
+/* NOTE is not necessary */
    // set version info in registry
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
@@ -2887,6 +2888,7 @@ BOOL UtlInitUtils( HAB hab )
      fOK = ObjHandlerInitForBatch();
      if ( fOK ) fOK = PropHandlerInitForBatch();
    } /* endif */
+printf("UtlInitUtils fOK: %d\n", fOK);
    // Add exit procedure for this DLL
    return( fOK );
 }

@@ -594,6 +594,7 @@ USHORT GetSysProp( PPROP_IDA pIda)
       return( TRUE );
     memset( hprop, NULC, sizeof( *hprop));
     do {
+printf("path: %s\n", pIda->IdaHead.pszObjName);
       if( UtlOpen( pIda->IdaHead.pszObjName, &hf, &usAction, 0L,
                    FILE_NORMAL, FILE_OPEN,
                    OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, 0))
@@ -1505,13 +1506,11 @@ BOOL PropHandlerInitForBatch( void )
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       GETMUTEX(hMutexSem);
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       if( GetSysProp( pPropBatchIda))
         fOK = FALSE;
     //   return( FALSE);      // do not create the window
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        RELEASEMUTEX(hMutexSem);     // release Mutex
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
    }
