@@ -18,8 +18,9 @@ include_directories(${OPENTM2_ROOT}
 
 add_subdirectory(core)
 add_subdirectory(tools)
+add_subdirectory(plugins)
 
-add_library(OTMFUNC  ${API_Source_Files})
+add_library(OTMFUNC ${API_Source_Files})
 
 target_link_libraries(OTMFUNC
                         Memory
@@ -36,4 +37,5 @@ target_link_libraries(OTMFUNC
                     Ling
                     Morph
                     Spell
+                    EqfMemoryPlugin
 )
