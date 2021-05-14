@@ -204,7 +204,7 @@ extern "C"
      *     are known.
      *
      */
-    USHORT DosInsMessage(
+    extern "C" USHORT DosInsMessage(
             PCHAR * ppchVTable,         /* table of variables to insert   */
             USHORT usVCount,                /* number of variables            */
             PSZ pszMsg,                     /* address of input message       */
@@ -230,7 +230,7 @@ extern "C"
      *     into the body of the message.
      *
      */
-    USHORT DosGetMessage (
+    extern "C" USHORT DosGetMessage (
       PCHAR * ppchVTable ,             // table of variables to insert
       USHORT  usVCount,                    // number of variables
       PCHAR pchBuf,                        // data area (where message is returned)

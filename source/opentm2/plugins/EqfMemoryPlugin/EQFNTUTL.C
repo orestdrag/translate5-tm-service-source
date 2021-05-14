@@ -62,6 +62,8 @@ USHORT NTMAddNameToTable( PTMX_CLB, PSZ, USHORT, PUSHORT );
 int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2432,6 +2434,8 @@ USHORT NTMCreateLangGroupTable
   return( usRC );
 } /* end of function NTMCreateLangGroupTable */
 
+#endif //TEMPORARY_COMMENTED
+
 // 
 // function NTMOrganizeIndexFile
 //
@@ -2448,6 +2452,8 @@ USHORT NTMOrganizeIndexFile
 
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */
+
+#ifdef TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///   functions for working with the additional data area following the target CLB          ///
@@ -2742,3 +2748,5 @@ qqqqqqqqqqqqqqqqqqqq
   } /* endwhile */     
 }
 #endif
+
+#endif //TEMPORARY_COMMENTED

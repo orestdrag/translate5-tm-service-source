@@ -188,6 +188,8 @@ UCHAR  ucbEncodeTbl[30]
              14, 100, 108, 117, 104,  98, 103,  71, 102, 109, 112,  10,
              02,  03,  04,  05 };
 
+#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -461,6 +463,8 @@ SHORT EQFNTMClose
   return sRc;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -502,6 +506,8 @@ SHORT EQFNTMUpdSign
 {
   return( QDAMDictUpdSignLocal( (PBTREE) pBTIda, pUserData, usLen ) );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -843,6 +849,7 @@ EQFNTMGet
   return sRc;
 } /* end of function EQFNTMGet */
 
+#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -880,6 +887,8 @@ EQFNTMGetNextNumber
 
   return 0;
 } /* end of function EQFNTMGetNextNumber */
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1180,3 +1189,5 @@ USHORT EQFNTMOrganizeIndex
 
   return( (USHORT)sRc );
 } /* end of function EQFNTMOrganizeIndex */
+
+#endif //TEMPORARY_COMMENTED

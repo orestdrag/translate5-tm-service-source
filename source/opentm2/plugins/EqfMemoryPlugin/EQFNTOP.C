@@ -13,7 +13,7 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
@@ -79,7 +79,7 @@ USHORT TmtXOpen
     if ( pTmOpenIn->stTmOpen.usAccess == READONLYACCESS )
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
-      if ( (pszExt != NULL) && (_stricmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
+      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
       {
         pTmClb->usAccessMode = ASD_GUARDED | ASD_SHARED | ASD_READONLY;
         pTmClb->fShared = TRUE;
@@ -93,7 +93,7 @@ USHORT TmtXOpen
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
       pTmClb->usAccessMode = ASD_GUARDED | ASD_LOCKED;
-      if ( (pszExt != NULL) && (_stricmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
+      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
       {
         // avoid error if open flag in header of shared TMs is set
         pTmClb->usAccessMode |= ASD_NOOPENCHECK;
@@ -102,7 +102,7 @@ USHORT TmtXOpen
     else
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
-      if ( (pszExt != NULL) && (_stricmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
+      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
       {
         pTmClb->usAccessMode = ASD_GUARDED | ASD_SHARED;
         pTmClb->fShared = TRUE;

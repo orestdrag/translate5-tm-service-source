@@ -26,6 +26,8 @@ set(Util_Source_Files
         #unzip.cpp
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 include_directories(${XERCESC_INCLUDE_DIR})
 add_library(Util ${Util_Source_Files})
 target_link_libraries(Util libxerces-c-3.2.so)

@@ -2419,6 +2419,8 @@ BOOL MTTMMergeStart
   return fOK;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 // new function to replace CREATE_PATH task message
 BOOL MemCreatePath( PSZ pszString )
 {
@@ -2444,8 +2446,6 @@ BOOL MemCreatePath( PSZ pszString )
 
   return (usRc==0);
 } /* end of function MemCreatePath */
-
-#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 //Internal function

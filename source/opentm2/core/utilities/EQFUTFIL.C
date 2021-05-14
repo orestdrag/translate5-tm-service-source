@@ -938,6 +938,8 @@ USHORT UtlDriveButtons
   return( usCnt);
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1011,8 +1013,6 @@ BOOL UtlLoadFile(PSZ    pszFilename,         // name of file to be loaded
 
     return(fOK);
 }
-
-#endif //TEMPORARY_COMMENTED
 
 BOOL UtlLoadFileL(PSZ    pszFilename,         // name of file to be loaded
                   PVOID  *ppLoadedFile,       // return pointer to loaded file

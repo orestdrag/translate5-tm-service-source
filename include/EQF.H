@@ -4304,7 +4304,7 @@ USHORT  UtlQFSInfo( USHORT usDriveNo, USHORT usInfoLevel, PBYTE pInfoBuf,
                    USHORT cbInfoBuf, BOOL fMsg );
 USHORT  UtlQFileMode( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserved,
                      BOOL fMsg );
-USHORT  UtlQPathInfo( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
+extern "C" USHORT  UtlQPathInfo( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
                      USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg );
 VOID    UtlDestroyChildResources( VOID );
 BOOL    UtlCreateChildResources( HWND hwnd );
@@ -4320,7 +4320,7 @@ MRESULT /*EXPENTRY*/ UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
 #define UTLDEFWINDOWPROC( hwnd, usMsg, mp1, mp2) WinDefWindowProc( hwnd, usMsg, mp1, mp2 )
 #endif
 BOOL    UtlRegisterCLB( HAB );
-PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
+extern "C" PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
 PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
 extern "C" VOID    UtlDispatch( VOID );
 extern "C" ULONG   UtlQueryULong( SHORT sID );
@@ -4331,8 +4331,8 @@ ULONG   UtlLongToTimeString( LONG, PSZ, ULONG );
 ULONG   UtlLongToDateString( LONG, PSZ, ULONG );
 ULONG   UtlLongToTimeStringW( LONG, PSZ_W, ULONG );
 ULONG   UtlLongToDateStringW( LONG, PSZ_W, ULONG );
-BOOL    UtlLoadFile( PSZ, PVOID *, USHORT *, BOOL, BOOL );
-BOOL    UtlLoadFileL( PSZ, PVOID *, ULONG *, BOOL, BOOL );
+extern "C" BOOL    UtlLoadFile( PSZ, PVOID *, USHORT *, BOOL, BOOL );
+extern "C" BOOL    UtlLoadFileL( PSZ, PVOID *, ULONG *, BOOL, BOOL );
 BOOL    UtlLoadFileHwnd( PSZ, PVOID *, ULONG *, BOOL, BOOL, HWND );
 USHORT  UtlCheckSpaceForFile( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL );
 USHORT  UtlCheckSpaceForFileEx( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL, PUSHORT );
@@ -4356,15 +4356,15 @@ USHORT  UtlSmartMoveHwnd( PSZ pszSource, PSZ pszTarget, BOOL fMsg, HWND hwnd );
 USHORT  UtlRemoveDir( PSZ pszDir, BOOL fMsg );
 SHORT   UtlCopyListBox( HWND, HWND );
 PSZ     UtlMakeFullPath ( PSZ, PSZ, PSZ, PSZ, PSZ );
-USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
-USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
+extern "C" USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
+extern "C" USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
 USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
         BOOL fMsg, HWND hwndParent );
 BOOL    UtlIsEqfDrive( CHAR chDrive );
 extern "C" BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
 USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
 USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-PSZ     UtlGetFnameFromPath( PSZ path);
+extern "C" PSZ     UtlGetFnameFromPath( PSZ path);
 PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
 VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
 PSZ     UtlParseX15( PSZ str, SHORT id);
@@ -4412,12 +4412,12 @@ extern "C" USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
 extern "C" USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
 extern "C" USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
 extern "C" USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
-VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
+extern "C" VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
 
 VOID   UtlInitError ( HAB, HWND, HWND, PSZ );
 VOID   UtlTerminateError ( VOID );
 extern "C" USHORT UtlQueryUShort( SHORT sID );
-BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
+extern "C" BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
 ULONG  UtlFDateToDateString( FDATE *, PSZ, ULONG );
 ULONG  UtlFTimeToTimeString( FTIME *, PSZ, ULONG );
 BOOL   UtlDateStringToFDate( PSZ, FDATE * );
@@ -4681,7 +4681,7 @@ BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName );
 extern "C" BOOL UtlCheckLongName( PSZ pszName );
 BOOL UtlKeepInTWB( PSWP pswpWin );
 USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow );
-LONG UtlTime( PLONG plTime );
+extern "C" LONG UtlTime( PLONG plTime );
 
 #ifdef UTLFFST
 #define UtlAlloc( par1, par2, par3, par4 ) \
@@ -6640,14 +6640,14 @@ typedef enum _UTLCHECKOBJTYPES
 } UTLCHECKOBJTYPES;
 BOOL UtlCheckIfExist( PSZ pszName, SHORT sObjType );
 
-USHORT ObjLongToShortName
+extern "C" USHORT ObjLongToShortName
 (
   PSZ pszLongName,                     // ptr to object long name
   PSZ pszShortName,                    // ptr to buffer for short name
   UTLCHECKOBJTYPES ObjType,            // type of object
   PBOOL   pfIsNew                      // ptr to caller's is-new flag
 );
-USHORT ObjShortToLongName
+extern "C" USHORT ObjShortToLongName
 (
   PSZ pszShortName,                    // ptr to object short name
   PSZ pszLongName,                     // ptr to buffer for long name
@@ -6673,7 +6673,7 @@ USHORT ObjLongToShortNameEx
 );
 
 // Object long to short name conversion with check for shared resources and reservation of files
-USHORT ObjLongToShortNameEx2
+extern "C" USHORT ObjLongToShortNameEx2
 (
   PSZ         pszLongName,             // ptr to object long name
   CHAR        chDrive,                 // drive to use for shared resource checking

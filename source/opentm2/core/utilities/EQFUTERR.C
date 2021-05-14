@@ -591,8 +591,6 @@ USHORT UtlErrorHwnd
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -681,6 +679,8 @@ VOID UtlGetMsgTxt
    *pBuffer = '\0';                    // terminate string
 
 } /* end of function UtlGetMsgTxt */
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Internal function

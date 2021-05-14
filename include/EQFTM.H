@@ -1918,7 +1918,7 @@ USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
 /**********************************************************************/
 /* TmOpen                                                             */
 /**********************************************************************/
-USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
+extern "C" USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
                    //                   TM_REMOTE
                    //                   TM_LOCAL_REMOTE
         USHORT,    //(in)  message handling parameter
@@ -2068,7 +2068,7 @@ USHORT NTMWriteLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMDestroyLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMCreateLangGroupTable( PTMX_CLB pTmClb );
 USHORT NTMAddLangGroup( PTMX_CLB pTmClb, PSZ pszLang, USHORT sLangID );
-USHORT NTMOrganizeIndexFile
+extern "C" USHORT NTMOrganizeIndexFile
 (
   PTMX_CLB pTmClb               // ptr to control block,
 );
@@ -2110,7 +2110,7 @@ USHORT TmUpdSegHwnd
   HWND        hwnd                       //(in)  handle for error messages
 );
 
-USHORT TmUpdSegW
+extern "C" USHORT TmUpdSegW
 (
   HTM         htm,                       //(in)  TM handle
   PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
@@ -2155,7 +2155,7 @@ BOOL MTTMMergeStart
   PLISTCOMMAREA pCommArea,
   PMT_TMMERGE pTMMerge
 );
-BOOL MemCreatePath( PSZ pszString );
+extern "C" BOOL MemCreatePath( PSZ pszString );
 
 
 // Unicode additions

@@ -33,7 +33,7 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #include <EQFSETUP.H>             // Directory name defines and other
 #include "EQFDDE.H"               // Batch mode definitions
@@ -190,6 +190,8 @@ char *GetPropFileExtension( char *pszMemPath )
     return( EXT_OF_MEM );
   }
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -348,6 +350,8 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
 
   return usRc;
 } /* End of function TmCreate */
+
+#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -762,6 +766,8 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
 
   return usRc;
 } /* end of function TmClose */
+
+#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -3005,3 +3011,5 @@ void TMDeleteTempMem
   strcpy( szMemPath + (strlen(szMemPath)-4), ".TXX" );
   UtlDelete( szMemPath, 0L, FALSE );
 } /* end of function TMDeleteTempMemHwnd */
+
+#endif //TEMPORARY_COMMENTED

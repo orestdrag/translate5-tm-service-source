@@ -1838,6 +1838,8 @@ USHORT UtlCopyHwnd2
    return( usRetCode );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1919,7 +1921,7 @@ USHORT UtlMoveHwnd
    ulReserved;
    UtlSetFileMode(pszSrc, FILE_NORMAL, 0L, FALSE);
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -1934,11 +1936,9 @@ USHORT UtlMoveHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -3204,8 +3204,6 @@ BOOL UtlSetDrive
    return 0;
  }
 
-#ifdef TEMPORARY_COMMENTED
-
  /**********************************************************************/
  /* DosInsMessage  - copy message to a buffer, but substitute variables*/
  /*                  if necessary                                      */
@@ -3327,6 +3325,8 @@ BOOL UtlSetDrive
    return usRC;
  }
 
+#ifdef TEMPORARY_COMMENTED
+
  USHORT APIENTRY DosInsMessageW
  (
    PCHAR_W FAR * ppchVTable,              // table of variables to insert
@@ -3441,6 +3441,8 @@ BOOL UtlSetDrive
 
    return usRC;
  }  /* end of DosInsMessageW */
+
+#endif //TEMPORARY_COMMENTED
 
  /**********************************************************************/
  /* DosGetMessage  - get an error message from an OS/2 message file    */
@@ -3581,6 +3583,8 @@ BOOL UtlSetDrive
 
    return usRC;
  } /* end of function DosGetMessage */
+
+#ifdef TEMPORARY_COMMENTED
 
  //+----------------------------------------------------------------------------+
  //|External function                                                           |
@@ -3787,6 +3791,8 @@ void UtlGetArgs
   return;
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3849,7 +3855,7 @@ USHORT UtlQPathInfoHwnd
    USHORT usMBCode = 0;                    // message box/UtlError return code
    PFILESTATUS pstFileSt;              // file status buffer
 
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
       DosError(0);
@@ -3906,9 +3912,11 @@ USHORT UtlQPathInfoHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

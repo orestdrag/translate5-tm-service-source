@@ -28,7 +28,7 @@ Copyright Notice:
 //#define EQFMEMORYLOGGING
 
 /*! \brief Prototypes of helper functions */
-int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
+static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
 EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )

@@ -132,7 +132,7 @@ SHORT EQFNTMClose
 //                    for consistency reasons, the little overhead was used...
 //+----------------------------------------------------------------------------+
 
-SHORT EQFNTMUpdSign
+extern "C" SHORT EQFNTMUpdSign
 (
    PVOID  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
@@ -170,7 +170,7 @@ SHORT EQFNTMUpdSign
 //+----------------------------------------------------------------------------+
 
 
-SHORT EQFNTMSign
+extern "C" SHORT EQFNTMSign
 (
    PVOID  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
@@ -296,6 +296,7 @@ EQFNTMGet
 //+----------------------------------------------------------------------------+
 // Function flow:     access data from internal structure
 //+----------------------------------------------------------------------------+
+extern "C"
 SHORT
 EQFNTMGetNextNumber
 (
