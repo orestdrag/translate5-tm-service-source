@@ -29,7 +29,6 @@
 
 #include "win_types.h"
 
-
 //#define SESSIONLOG
 //#define DEBUGAPI
 
@@ -365,6 +364,7 @@ USHORT EqfStartSession
 #endif //TEMPORARY_COMMENTED
   } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
   // set directory strings and main drive
   if ( usRC == NO_ERROR )
   {
@@ -472,11 +472,15 @@ USHORT EqfStartSession
 #endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
+#endif //TEMPORARY_COMMENTED
 
   // load resource file
   if ( usRC == NO_ERROR )
   {
     HMODULE  hmod;                      // buffer for resource module handle
+
+//TODO
+    strncpy(pData->szEqfResFile, "libEqfMemoryPlugin.so", MAX_EQF_PATH - 1);
 
     DosLoadModule( NULL, NULLHANDLE, pData->szEqfResFile, &hmod );
     //hResMod = hmod;

@@ -1913,7 +1913,7 @@ USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 /**********************************************************************/
 /* TmCreate                                                           */
 /**********************************************************************/
-USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
+extern "C" USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
 
 /**********************************************************************/
 /* TmOpen                                                             */
@@ -1929,6 +1929,7 @@ extern "C" USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM
 /**********************************************************************/
 /* TmClose                                                            */
 /**********************************************************************/
+extern "C"
 USHORT
 TmClose( HTM,        //(in) TM handle returned from open
          PSZ,        //(in) full TM name x:\eqf\mem\mem.mem

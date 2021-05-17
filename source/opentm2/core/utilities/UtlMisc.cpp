@@ -494,7 +494,6 @@ BOOL FAR PASCAL UtlNetworkEnumAll()
   return (retval);
 }
 
-#if 0
 USHORT UtlGetLANUserID
 (
   PSZ    pszLANUserID,                 // LAN UserID - returned
@@ -535,7 +534,7 @@ USHORT UtlGetLANUserID
     static char szUser[80];
 
     iUserIDLen = sizeof(szUser) - 1;
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetUserName( szUser, &iUserIDLen ) )
     {
       strncpy( pszLANUserID, szUser, MAX_USERID - 1 );
@@ -546,7 +545,7 @@ USHORT UtlGetLANUserID
     {
       iRC = GetLastError();
     } /* endif */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     if ( iRC != WN_SUCCESS )
     {
@@ -559,7 +558,6 @@ USHORT UtlGetLANUserID
   } /* endif */
   return( usRC );
 }
-#endif
 
 USHORT UtlGetLANUserIDW
 (

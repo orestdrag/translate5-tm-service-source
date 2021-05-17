@@ -4,10 +4,15 @@ project(EqfMemoryPlugin)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 
 set(EqfMemoryPlugin_Source_Files
-    #EqfMemory.cpp
-    #EqfMemoryPlugin.cpp
-    #EQFNTM.C
-    #EQFNTOP.C
+    EqfMemory.cpp
+    EqfMemoryPlugin.cpp
+   # EQFNTOP.C
+   # EQFNTCR.C
+   # EQFNTM.C
+   # EQFNTEXT.C
+   # EQFNTMDB.C
+   # EQFNTEXT.C
+   # EQFNTPUT.C
 )
 
 include(GNUInstallDirs)

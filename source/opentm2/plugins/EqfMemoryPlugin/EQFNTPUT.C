@@ -11,9 +11,7 @@
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD     
-#include <eqf.h>                  // General Translation Manager include file
-
-#include <process.h>              // for exit function
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
@@ -21,6 +19,7 @@
 
 #include <EQFEVENT.H>             // event logging
 
+#include <wctype.h>
 
 //static data
 //distribution criteria for building tuples
@@ -77,6 +76,8 @@ USHORT NTMMorphTokenize
                                        //    MORPH_OFFSLIST
    USHORT usVersion                    // version of TM
 );
+
+#ifdef TEMPORARY_COMMENTED
 
   /********************************************************************/
   /* get the substitute for the isAlNum function                      */
@@ -507,7 +508,7 @@ USHORT HashTupelW70
   CHAR_W chHash[MAX_RANDOM];           // string to be hashed
   UCHAR   c;                           // active character
 
-  usLen = min(usLen, MAX_RANDOM - 1);
+  usLen = get_min(usLen, MAX_RANDOM - 1);
 
   // get a copy of the token to be normalized and hashed
   memcpy(chHash, pToken, usLen * sizeof(CHAR_W));
@@ -567,7 +568,7 @@ HashTupel
   CHAR   chHash[MAX_RANDOM];           // string to be hashed
   UCHAR   c;                           // active character
 
-  usLen = min(usLen, MAX_RANDOM - 1);
+  usLen = get_min(usLen, MAX_RANDOM - 1);
 
   // get a copy of the token to be normalized and hashed
   memcpy(chHash, pToken, usLen);
@@ -3072,6 +3073,8 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
   return ulLen+1;
 }
 
+#endif // TEMPORARY_COMMENTED
+
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 {
     ULONG  ulLen = ulLenComp-1;
@@ -3125,6 +3128,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
     return ulLen;
 }
 
+#ifdef TEMPORARY_COMMENTED
 
 // adjust context part of
 // target control block if necessary
@@ -3440,3 +3444,4 @@ NTRecPos
     return (pNewPosition);
 }
 
+#endif // TEMPORARY_COMMENTED

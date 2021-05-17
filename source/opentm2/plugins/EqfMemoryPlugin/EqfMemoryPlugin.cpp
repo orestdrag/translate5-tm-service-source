@@ -22,12 +22,11 @@ static char *pszSupplier = "International Business Machines Corporation";
 
 EqfMemoryPlugin::EqfMemoryPlugin()
 {
-    
-	  name = pszPluginName;
-	  shortDesc = pszShortDescription;
-	  longDesc = pszLongDescription;
-	  version = pszVersion;
-	  supplier = pszSupplier;
+    name = pszPluginName;
+    shortDesc = pszShortDescription;
+    longDesc = pszLongDescription;
+    version = pszVersion;
+    supplier = pszSupplier;
     descrType   = "Local Standard Translation Memory";
 
     iLastError  = 0;
@@ -39,10 +38,11 @@ EqfMemoryPlugin::EqfMemoryPlugin()
     this->refreshMemoryList();
 }
 
-
 EqfMemoryPlugin::~EqfMemoryPlugin()
 {
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 const char* EqfMemoryPlugin::getName()
 {
@@ -85,7 +85,6 @@ int EqfMemoryPlugin::getListOfSupportedDrives( char *pszDriveListBuffer )
   strcpy( pszDriveListBuffer, szSupportedDrives );
   return( 0 );
 };
-
 
 /*! \brief Create a new translation memory
   \param pszName name of the new memory
@@ -738,6 +737,8 @@ int EqfMemoryPlugin::getLastError
   return( this->iLastError );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 /* private methods */
 
 /*! \brief Refresh the internal list of translation memory dbs
@@ -795,6 +796,8 @@ void EqfMemoryPlugin::refreshMemoryList()
 
   return;
 } /* end of method RefreshMemoryList */
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Fill memory info structure from memory properties
   \param pszPropName name of the memory property file (w/o path) 
@@ -952,7 +955,7 @@ bool EqfMemoryPlugin::stopPlugin( bool fForce  )
 }
 
 extern "C" {
-__declspec(dllexport)
+__attribute__((visibility("default")))
 USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
@@ -1763,3 +1766,5 @@ extern "C" {
     return( 0 );
   }
 }
+
+#endif //TEMPORARY_COMMENTED

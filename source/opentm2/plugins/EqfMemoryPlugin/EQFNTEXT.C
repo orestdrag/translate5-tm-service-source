@@ -13,7 +13,7 @@
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
@@ -48,7 +48,6 @@ static USHORT ExtractRecordV6
   PTMX_EXT_IN_W   pTmExtIn,
   PTMX_EXT_OUT_W  pTmExtOut
 );
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -777,6 +776,8 @@ USHORT ExtractRecordV6
   return usRc;
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 static
 USHORT ExtractRecordV5
 (
@@ -1313,3 +1314,5 @@ USHORT FillExtStructureV5
 
   return( usRc );
 }
+
+#endif //TEMPORARY_COMMENTED

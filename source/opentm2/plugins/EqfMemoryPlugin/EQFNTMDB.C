@@ -180,7 +180,7 @@
 #define INCL_EQF_DAM
 #include "EQF.H"
 #include "EQFQDAMI.H"
-#include "eqfevent.h"                  // event logging facility
+#include "EQFEVENT.H"                  // event logging facility
 
 UCHAR  ucbEncodeTbl[30]
         =  { 00,  06,

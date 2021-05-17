@@ -191,8 +191,6 @@ char *GetPropFileExtension( char *pszMemPath )
   }
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -350,8 +348,6 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
 
   return usRc;
 } /* End of function TmCreate */
-
-#endif //TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function

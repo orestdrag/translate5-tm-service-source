@@ -58,7 +58,6 @@ PluginManager* PluginManager::getInstance()
 	return instance;
 }
 
-#ifdef TEMPORARY_COMMENTED
 PluginManager::eRegRc PluginManager::registerPlugin(OtmPlugin* plugin)
 {
 	return instance->pImpl->registerPlugin(plugin);
@@ -68,7 +67,6 @@ PluginManager::eRegRc PluginManager::deregisterPlugin(OtmPlugin* plugin)
 {
 	return instance->pImpl->deregisterPlugin(plugin);
 }
-#endif //TEMPORARY_COMMENTED
 
 int PluginManager::getPluginCount()
 {

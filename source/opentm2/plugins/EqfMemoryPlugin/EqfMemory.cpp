@@ -77,7 +77,7 @@ EqfMemory::~EqfMemory()
 
 }
 
-
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format
   	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
@@ -1302,3 +1302,5 @@ int EqfMemory::setGlobalMemoryOptions
   this->pvGlobalMemoryOptions = pvGlobalMemoryOptionsIn;
   return( 0 );
 }
+
+#endif //TEMPORARY_COMMENTED

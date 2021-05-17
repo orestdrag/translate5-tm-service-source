@@ -4362,7 +4362,7 @@ USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
         BOOL fMsg, HWND hwndParent );
 BOOL    UtlIsEqfDrive( CHAR chDrive );
 extern "C" BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
-USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
+extern "C" USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
 USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
 extern "C" PSZ     UtlGetFnameFromPath( PSZ path);
 PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);

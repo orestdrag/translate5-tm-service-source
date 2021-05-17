@@ -303,6 +303,9 @@
 #include "win_types.h"
 #include "OTMFUNC.H"
 
+#include <dlfcn.h>
+#include <gnu/lib-names.h>
+
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
 typedef struct _EQFHANDLEDRIVES
@@ -3052,9 +3055,24 @@ BOOL UtlSetDrive
 
    pszFailName; cbFileName;
    DosError(0);                         // avoid error popup...
+
+    hmod = dlopen(pszModName, RTLD_LAZY);
+    if (!hmod) {
+        fprintf(stderr, "%s\n", dlerror());
+        usRc = -1; //TODO proper error code
+        *phMod = (HMODULE) NULL;
+    }
+    dlerror();
+
+    *phMod = hmod;
+
+    usRc = NO_ERROR;
+
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    hmod = LoadLibrary(pszModName );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    DosError(1);
    if ( hmod == NULL)
    {
@@ -3067,6 +3085,8 @@ BOOL UtlSetDrive
    {
      *phMod = hmod;
    } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
    return usRc;
  }
 
@@ -4020,6 +4040,8 @@ USHORT UtlFileLocksHwnd
    return( usRetCode );
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -4080,7 +4102,7 @@ USHORT UtlFindFirstLongHwnd
    HDIR   hdirNew;                     // new directory handle
    static WIN32_FIND_DATA FindData;    // find data structure
    memset( pffb, 0, sizeof(LONGFILEFIND) );
-#if 0
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do
    {
       DosError(0);
@@ -4162,10 +4184,12 @@ USHORT UtlFindFirstLongHwnd
              (usRetCode != ERROR_NO_MORE_FILES) &&
              (usRetCode != ERROR_FILE_NOT_FOUND) &&
              (usMBCode == MBID_RETRY) ); /* enddo */
-#endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    *phdir = hdirNew;
    return( usRetCode );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 USHORT UtlFindNextLong
 (

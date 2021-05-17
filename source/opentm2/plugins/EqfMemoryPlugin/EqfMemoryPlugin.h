@@ -27,6 +27,9 @@ public:
 /*! \brief Destructor
 */
 	~EqfMemoryPlugin();
+
+#ifdef TEMPORARY_COMMENTED
+
 /*! \brief Returns the name of the plugin
 */
 	const char* getName();
@@ -299,7 +302,9 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
 private:
 
   BOOL makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &strPathName, BOOL fReserve = FALSE, PBOOL pfReserved = NULL );
+#endif //TEMPORARY_COMMENTED
   void refreshMemoryList();
+#ifdef TEMPORARY_COMMENTED
   OtmMemoryPlugin::PMEMORYINFO findMemory( char *pszName );
   int findMemoryIndex(char *pszName);
 /*! \brief Create memory properties
@@ -344,6 +349,8 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 */
   BOOL fillInfoStructure( char *pszPropName, PMEMORYINFO pInfo );
 
+#endif //TEMPORARY_COMMENTED
+
 	std::string name;
 	std::string shortDesc;
 	std::string longDesc;
@@ -356,6 +363,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
   char szBuffer[4000];                         // general purpose buffer area
   char szSupportedDrives[27]; // list of supported drives
 
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief make Index filename from memory data file name
   \param pszMemPath pointer to memory data file name
@@ -422,6 +430,8 @@ int importFromMemFilesInitialize
   (
     PVOID *ppPrivateData
   );
+
+#endif //TEMPORARY_COMMENTED
 
 };
 

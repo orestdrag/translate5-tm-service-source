@@ -30,6 +30,7 @@ public:
 */
 	~EqfMemory();
 
+#ifdef TEMPORARY_COMMENTED
 /*! \brief Store the supplied proposal in the memory
     When the proposal aready exists it will be overwritten with the supplied data
 
@@ -370,6 +371,9 @@ public:
 
 
 private:
+
+#endif //TEMPORARY_COMMENTED
+
   HTM htm;                                       // old fashioned memory handle for this memory
   PTMX_CLB pTmClb;                               // ptr to ctl block struct
   PTMX_EXT_IN_W  pTmExtIn;                       // ptr to extract input struct
@@ -386,6 +390,8 @@ private:
 	int iLastError;
   LogWriter Log;                                 // log object (only used when logging is active)
   void *pvGlobalMemoryOptions;                   // pointert to global memory options to be used for global memory proposals
+
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Fill OtmProposal from TMX_GET_OUT_W structure
     \param ulKey key of record containing the proposal
@@ -479,6 +485,8 @@ int OtmProposalToGetIn
   	\returns original or modified error return code
 */
 int handleError( int iRC, char *pszMemName, char *pszMarkup );
+
+#endif //TEMPORARY_COMMENTED
 
 };
 

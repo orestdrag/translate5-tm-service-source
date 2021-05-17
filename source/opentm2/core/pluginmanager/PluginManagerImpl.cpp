@@ -49,7 +49,6 @@ PluginManagerImpl::~PluginManagerImpl()
 	delete pluginSet;
 }
 
-#ifdef TEMPORARY_COMMENTED
 PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
@@ -60,7 +59,9 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 			std::string name(plugin->getName());
 			if (!name.empty())
       {
+#ifdef TEMPORARY_COMMENTED
         this->Log.writef( "   Registering plugin %s", name.c_str() );
+#endif //TEMPORARY_COMMENTED
 
         // insert plugin into list of active plugins
 				PLUGINSET::iterator it;
@@ -70,7 +71,9 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 					if (tmpName == name)
 					{
 						eRc = PluginManager::eAlreadyRegistered;
+#ifdef TEMPORARY_COMMENTED
                         this->Log.writef( "Error:   The plugin %s is already registered.", name.c_str() ); // Add for 403115
+#endif // TEMPORARY_COMMENTED
 					}
 				}
 
@@ -107,7 +110,9 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 		eRc = PluginManager::eInvalidRequest;
 	}
 
+#ifdef TEMPORARY_COMMENTED
     this->Log.writef( "   Registering plugin %d", eRc );
+#endif //TEMPORARY_COMMENTED
 
 	return eRc;
 }
@@ -148,8 +153,6 @@ PluginManager::eRegRc PluginManagerImpl::deregisterPlugin(OtmPlugin* plugin)
 	}
 	return eRc;
 }
-
-#endif //TEMPORARY_COMMENTED
 
 int PluginManagerImpl::getPluginCount()
 {
@@ -509,8 +512,6 @@ printf("Plugin name: %s", pszName);
     return usRC;     // Add for P402974
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 int PluginManagerImpl::findPluginEntry( OtmPlugin *pPlugin )
 {
   for ( int i = 0; i < (int)vLoadedPluginDLLs.size(); i++ )
@@ -525,6 +526,8 @@ int PluginManagerImpl::findPluginEntry( OtmPlugin *pPlugin )
   }
   return( -1 );
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 bool PluginManagerImpl::stopPlugin( OtmPlugin* pPlugin, bool fForce )
 {
@@ -655,6 +658,8 @@ bool PluginManagerImpl::removePluginListener( PluginListener *pListener )
 	
 }
 
+#endif //TEMPORARY_COMMENTED
+
 //This Method notifies all listeners
 bool PluginManagerImpl::NotifyListeners( PluginListener::eNotifcationType eNotifcation, const char *pszPluginName, OtmPlugin::ePluginType eType, bool fForce )
 {
@@ -664,8 +669,6 @@ bool PluginManagerImpl::NotifyListeners( PluginListener::eNotifcationType eNotif
   }
 	return (m_vPluginListener.size() > 0);
 }
-
-#endif //TEMPORARY_COMMENTED
 
 static char* strupr(char *str) 
 { 
