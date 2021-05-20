@@ -42,8 +42,6 @@ EqfMemoryPlugin::~EqfMemoryPlugin()
 {
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 const char* EqfMemoryPlugin::getName()
 {
 	return name.c_str();
@@ -113,8 +111,10 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
 
+#ifdef TEMPORARY_COMMENTED
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
+#endif //TEMPORARY_COMMENTED
 
   // setup memory properties
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
@@ -137,7 +137,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
 
   return( (OtmMemory *)pNewMemory );
 }
-	
+
 /*! \brief Open an existing translation memory
   \param pszName name of the existing memory
 	\param bMsgHandling true/false: display errors or not
@@ -162,7 +162,10 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   {
     // use old memory open code
     USHORT usMsgHandling = (USHORT)bMsgHandling;
+    USHORT usRC = NO_ERROR;
+#ifdef TEMPORARY_COMMENTED
     USHORT usRC = TmOpen(  pInfo->szFullPath, &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
+#endif //TEMPORARY_COMMENTED
 
     // create memory object if create function completed successfully
     if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
@@ -172,7 +175,9 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     else
     {
       handleError( (int)usRC, pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
+#ifdef TEMPORARY_COMMENTED
       if ( htm != 0 ) TmClose( htm, NULL,  FALSE,  NULL );
+#endif //TEMPORARY_COMMENTED
     } /* end */       
   } /* end */     
   else
@@ -198,7 +203,9 @@ int EqfMemoryPlugin::closeMemory(
   EqfMemory *pMem = (EqfMemory *)pMemory;
   HTM htm = pMem->getHTM();
 
+#ifdef TEMPORARY_COMMENTED
 	iRC = TmClose( htm, NULL,  FALSE,  NULL );
+#endif //TEMPORARY_COMMENTED
 
 
   // refresh memory info
@@ -639,7 +646,9 @@ int EqfMemoryPlugin::clearMemory(
     PTMX_CREATE_OUT pTmCreateOut = new (TMX_CREATE_OUT);
     memset( pTmCreateOut, 0, sizeof(TMX_CREATE_OUT) );
 
+#ifdef TEMPORARY_COMMENTED
     iRC = (int)TmtXCreate( pTmCreateIn, pTmCreateOut );
+#endif //TEMPORARY_COMMENTED
 
     free( pTmCreateIn );
     free( pTmCreateOut );
@@ -673,8 +682,10 @@ OtmMemory* EqfMemoryPlugin::createTempMemory(
 
   bMsgHandling;
 
+#ifdef TEMPORARY_COMMENTED
   // use old temporary memory create code
   usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );
+#endif //TEMPORARY_COMMENTED
   
   // create memory object if create function completed successfully
   if ( usRC == 0 )
@@ -700,8 +711,10 @@ void EqfMemoryPlugin::closeTempMemory(
   // close the memory
   this->closeMemory( pMemory );
 
+#ifdef TEMPORARY_COMMENTED
   // use old temporary memory delete code
   TMDeleteTempMem( (PSZ)strName.c_str() );
+#endif //TEMPORARY_COMMENTED
   
   return;
 }
@@ -736,8 +749,6 @@ int EqfMemoryPlugin::getLastError
   strncpy( pszError, this->strLastError.c_str(), iBufSize );
   return( this->iLastError );
 }
-
-#endif //TEMPORARY_COMMENTED
 
 /* private methods */
 
@@ -796,8 +807,6 @@ void EqfMemoryPlugin::refreshMemoryList()
 
   return;
 } /* end of method RefreshMemoryList */
-
-#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Fill memory info structure from memory properties
   \param pszPropName name of the memory property file (w/o path) 
@@ -1320,7 +1329,11 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
     // open the data file of the imported memory file
     // use old memory open code
     HTM htm = 0;
+    USHORT usRC = NO_ERROR;
+// commented temporarily to link the plugin
+#ifdef TEMPORARY_COMMENTED
     USHORT usRC = TmOpen( (PSZ)strDataFile.c_str(), &htm,  EXCLUSIVE, 0, FALSE,  NULLHANDLE );
+#endif //TEMPORARY_COMMENTED
     if ( usRC != 0 )
     {
       handleError( (int)usRC, (char *)strDataFile.c_str(), NULL, (char *)strDataFile.c_str(), this->strLastError, this->iLastError );
@@ -1482,7 +1495,9 @@ int EqfMemoryPlugin::importFromMemFilesEndProcessing
     if ( pData->pInputMemory != NULL ) 
     {
       HTM htm = pData->pInputMemory->getHTM();
+#ifdef TEMPORARY_COMMENTED
       TmClose( htm, NULL,  FALSE,  NULL );
+#endif //TEMPORARY_COMMENTED
 
       delete( pData->pInputMemory );  
     } /* end */       
@@ -1766,5 +1781,3 @@ extern "C" {
     return( 0 );
   }
 }
-
-#endif //TEMPORARY_COMMENTED

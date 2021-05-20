@@ -77,8 +77,6 @@ EqfMemory::~EqfMemory()
 
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format
   	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
 */
@@ -199,7 +197,9 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
+#ifdef TEMPORARY_COMMENTED
        usRc = EQFNTMUpdSign( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, sizeof(TMX_SIGN) );
+#endif //TEMPORARY_COMMENTED
        fOK = (usRc == NO_ERROR);
       } /* endif */
 
@@ -308,7 +308,9 @@ int EqfMemory::putProposal
   this->Log.writef( "*** method: putProposal, source=\"%S\"", this->pTmPutIn->stTmPut.szSource );
 #endif
 
+#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
+#endif //TEMPORARY_COMMENTED
 
 #ifdef EQFMEMORYLOGGING
   this->Log.writef( "  result=%ld", iRC );
@@ -392,7 +394,9 @@ int EqfMemory::getNextProposal
   this->pTmExtIn->usNextTarget = this->usNextTarget;
   this->pTmExtIn->usConvert    = MEM_OUTPUT_ASIS;
 
+#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
+#endif //TEMPORARY_COMMENTED
 
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
@@ -504,7 +508,9 @@ int EqfMemory::getProposal
 
   if ( iRC == 0 )
   {
+#ifdef TEMPORARY_COMMENTED
     iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
+#endif //TEMPORARY_COMMENTED
   } /* endif */     
 
   if ( iRC == 0 )
@@ -702,7 +708,9 @@ int EqfMemory::searchProposal
   this->Log.writef( "*** method: searchProposal, looking for \"%S\"", this->pTmGetIn->stTmGet.szSource );
 #endif
 
+#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmGetW ( this->htm,  NULL,  this->pTmGetIn,  this->pTmGetOut, FALSE );
+#endif //TEMPORARY_COMMENTED
   if ( iRC == 0 )
   {
 #ifdef EQFMEMORYLOGGING
@@ -788,7 +796,9 @@ int EqfMemory::deleteProposal
 
   if ( !iRC ) iRC = this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
 
+#ifdef TEMPORARY_COMMENTED
 	if ( !iRC ) iRC = TmDeleteSegmentW( this->htm,  NULL, this->pTmPutIn, this->pTmPutOut, FALSE );
+#endif //TEMPORARY_COMMENTED
 
   if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
   
@@ -838,7 +848,9 @@ unsigned long EqfMemory::getProposalNum()
 
   ULONG ulStartKey = 0;
   ULONG ulNextKey = 0;
+#ifdef TEMPORARY_COMMENTED
   EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
+#endif //TEMPORARY_COMMENTED
   return( (int)(ulNextKey - ulStartKey) );
 }
 
@@ -1302,5 +1314,3 @@ int EqfMemory::setGlobalMemoryOptions
   this->pvGlobalMemoryOptions = pvGlobalMemoryOptionsIn;
   return( 0 );
 }
-
-#endif //TEMPORARY_COMMENTED

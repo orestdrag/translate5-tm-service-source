@@ -1449,6 +1449,7 @@ int OtmMemoryServiceWorker::list
   std::string &strOutputParms
 )
 {
+printf("list\n");
   int iRC = verifyAPISession();
 printf("OtmMemoryServiceWorker::list verifyAPISession return: %d\n", iRC);
   if ( iRC != 0 )
