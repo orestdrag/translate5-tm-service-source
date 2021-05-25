@@ -760,9 +760,9 @@ void EqfMemoryPlugin::refreshMemoryList()
   USHORT          usCount;
   USHORT          usRC;                // return value of Utl/Dos calls
   HDIR            hDir = HDIR_CREATE;  // DosFind routine handle
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   PSZ             pszName = RESBUFNAME(ResultBuf);
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//TODO
+pszName = "hardcoded";
 
   //if ( this->pMemList != NULL )
   //{
@@ -791,11 +791,11 @@ void EqfMemoryPlugin::refreshMemoryList()
   usCount = 1;
   usRC = UtlFindFirst( this->szBuffer, &hDir, 0, &ResultBuf, sizeof(ResultBuf), &usCount, 0L, 0 );
   usCount = ( usRC ) ? 0 : usCount;
+//TODO usCount
+usCount = 1;
   while( usCount)
   {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     this->addToList( pszName );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     usCount = 1;
     usRC = UtlFindNext( hDir, &ResultBuf, sizeof(ResultBuf), &usCount, FALSE );

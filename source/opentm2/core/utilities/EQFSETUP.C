@@ -56,9 +56,9 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
-#include "eqfsetup.h"                   // MAT setup functions
-#include <eqfserno.h>                   // Serial number
+#include <EQF.H>                  // General Translation Manager include file
+#include "EQFSETUP.H"                   // MAT setup functions
+#include <EQFSERNO.H>                   // Serial number
 #ifdef _WINDOWS
   #include <direct.h>
 #endif
@@ -147,6 +147,7 @@ USHORT SetupMAT
    } /* endif */
 
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    /*******************************************************************/
    /* Get size of desktop window                                      */
    /*******************************************************************/
@@ -154,7 +155,9 @@ USHORT SetupMAT
    cyDesktop = WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
    cxDesktopDiv20 = cxDesktop / 20L;
    cyDesktopDiv20 = cyDesktop / 20L;
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )
    {
      HKEY hSubKey = NULL;
@@ -188,6 +191,7 @@ USHORT SetupMAT
 
      RegCloseKey( hKeySoftware );
    } /* endif */     
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    /****************************************************************/
    /* Create directories on primary MAT drive                      */
@@ -793,10 +797,12 @@ USHORT CreateEditProperties
                cyBorder,               // height of horizontal border
                cyProposals,            // height of TM/dict proposals windows
                cyProposalsClient;      // height of client window of proposals
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
     HVPS       hvps;                   // presentation space
     SHORT      sCx;
 #endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     SHORT      sCy;               // character cell size
 
     /******************************************************************/
@@ -827,6 +833,7 @@ USHORT CreateEditProperties
     /******************************************************************/
     if ( !usRC )
     {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       cyTitleBar = WinQuerySysValue( HWND_DESKTOP, SV_CYTITLEBAR );
       cyMenu = WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
       cyHorzSlider = WinQuerySysValue( HWND_DESKTOP, SV_CYHSCROLL );
@@ -849,6 +856,7 @@ USHORT CreateEditProperties
         sCy = (SHORT)txmtr.tmHeight;
       }
 #endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       /* calculate approx. value for size of TM and dict proposals */
       cyProposals = (cyDesktop - 2L * cyTitleBar - cyMenu) / 4L;
@@ -874,6 +882,7 @@ USHORT CreateEditProperties
       RECTL_YTOP(pstEQFGen->rclEditorTgt)       = cyDesktop;
 #endif
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifdef _WINDOWS
       pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
                                   FCF_VERTSCROLL  | FCF_HORZSCROLL;
@@ -912,6 +921,7 @@ USHORT CreateEditProperties
       pstEQFGen->flEditOtherStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
                                   FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_MENU;
 #endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
 
     /******************************************************************/
@@ -965,12 +975,14 @@ USHORT SetupCreateDir
   USHORT   usRC = NO_ERROR;            // function return code
 
   BuildPath( szPath, chDrive, pszFolder, usPathID );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
   if ( !CreateDirectory( szPath, NULL ) )
   {
     usRC = (USHORT)GetLastError();
   } /* endif */
   SetErrorMode( 0 );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   if ( usRC <= 5 )                     // directory exists already
   {
      usRC = 0;
@@ -1013,7 +1025,9 @@ USHORT DeletePropFile
   BuildPath( szPath, chDrive, NULL, PROPERTY_PATH );
   strcat( szPath, BACKSLASH_STR );
   strcat( szPath, pszName );
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   usRC = (USHORT)DosDelete( szPath, 0L );
+#endif TO_BE_REPLACED_WITH_LINUX_CODE
   return( usRC );
 } /* end of function DeletePropFile */
 
@@ -1284,7 +1298,9 @@ PPROPSYSTEM InstReadSysProps( VOID )
    /*******************************************************************/
    if ( fOK )
    {
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       lSize = _filelength( fileno( hSysProp ) );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
 
    /*******************************************************************/
@@ -1489,11 +1505,13 @@ VOID DeleteDictCacheFiles( CHAR chPrimaryDrive, USHORT usPathId )
 BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
 {
    CHAR     szPath[MAX_EQF_PATH];      // buffer for path name
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    FILEFINDBUF3 ResultBuf;              // DOS file find struct
 #else
    FILEFINDBUF ResultBuf;              // DOS file find struct
 #endif
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    DOSVALUE usCount = 1L;
    HDIR     hDirHandle = HDIR_CREATE;  // DosFind routine handle
    USHORT   usDosRC;                   // return code of Dos... alias Utl...
@@ -1502,6 +1520,7 @@ BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
    strcat( szPath, BACKSLASH_STR );
    strcat( szPath, pszFile );
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY,
                            &ResultBuf, sizeof( ResultBuf),
@@ -1512,6 +1531,7 @@ BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
                            &usCount, 0L );
 #endif
    DosFindClose( hDirHandle );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    return( usDosRC == 0 );
 } /* endof UtlPropFileExist */

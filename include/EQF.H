@@ -544,9 +544,7 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /* Access the name field in a findfirst/findnext result buffer        */
 /**********************************************************************/
-#ifdef TEMPORARY_COMMENTED
 #define RESBUFNAME( resbuf ) resbuf.cAlternateFileName
-#endif //TEMPORARY_COMMENTED
 #define RESBUFNAMELONG( resbuf ) resbuf.achName
 
 /**********************************************************************/

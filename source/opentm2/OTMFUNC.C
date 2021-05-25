@@ -321,6 +321,7 @@ USHORT EqfStartSession
 
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );
+printf("EqfStartSession, UtlAlloc returned\n");
   if ( pData != NULL )
   {
     pData->lMagicWord = FCTDATA_IDENTIFIER;
@@ -333,18 +334,22 @@ USHORT EqfStartSession
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
 
+printf("1 where is the crash?\n");
   // initialize utilities
   if ( usRC == NO_ERROR )
   {
     UtlSetUShort( QS_RUNMODE, FUNCCALL_RUNMODE );
     UtlSetUShort( QS_PROGRAMID, NONDDEAPI_PROGID );
 
+#ifdef TEMPORARY_COMMENTED
     if ( !UtlInitUtils( NULLHANDLE ) )
     {
       usRC = ERROR_READ_SYSTEMPROPERTIES;
     } /* endif */
+#endif //TEMPORARY_COMMENTED
   } /* endif */
 
+printf("2 where is the crash?\n");
   // get profile data and initialize error handler
   if ( usRC == NO_ERROR )
   {
@@ -480,11 +485,14 @@ USHORT EqfStartSession
     HMODULE  hmod;                      // buffer for resource module handle
 
 //TODO
+#if 0
     strncpy(pData->szEqfResFile, "libEqfMemoryPlugin.so", MAX_EQF_PATH - 1);
 
     DosLoadModule( NULL, NULLHANDLE, pData->szEqfResFile, &hmod );
+printf("libEqfMemoryPlugin loaded\n");
     //hResMod = hmod;
     UtlSetULong( QL_HRESMOD, (ULONG)hmod );
+#endif
   } /* endif */
 
   // set caller's session handle

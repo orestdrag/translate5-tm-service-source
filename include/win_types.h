@@ -316,6 +316,7 @@ typedef struct _FILETIME {
 
 #define MAX_PATH 260
 
+#if 0
 typedef struct _WIN32_FIND_DATA { 
   DWORD dwFileAttributes; 
   FILETIME ftCreationTime; 
@@ -342,6 +343,23 @@ typedef struct _WIN32_FIND_DATAA {
   DWORD    dwCreatorType;
   WORD     wFinderFlags;
 } WIN32_FIND_DATAA, *PWIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
+#endif
+
+typedef struct _WIN32_FIND_DATAA {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    dwReserved0;
+  DWORD    dwReserved1;
+  CHAR     cFileName[MAX_PATH];
+  CHAR     cAlternateFileName[14];
+  DWORD    dwFileType;
+  DWORD    dwCreatorType;
+  WORD     wFinderFlags;
+} WIN32_FIND_DATA, *PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;
 
 typedef HANDLE HGLOBAL;
 typedef DWORD LCID;
