@@ -928,8 +928,6 @@ USHORT UtlReadHwnd
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -978,8 +976,6 @@ USHORT UtlWrite
 
   return (usRC);
 }
-
-#endif //TEMPORARY_COMMENTED
 
 USHORT UtlWriteL
 (

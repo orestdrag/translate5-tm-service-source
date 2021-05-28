@@ -146,7 +146,7 @@ int OtmMemoryServiceWorker::verifyAPISession
   if ( this->hSession != 0 ) return( 0 );
 
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  printf("EqfStartSession return code is %d\n", this->iLastRC);
+printf("[verifyAPISession] EqfStartSession ret: %d\n", this->iLastRC);
   if ( this->iLastRC != 0 ) swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   return( this->iLastRC );
 }
@@ -1449,9 +1449,8 @@ int OtmMemoryServiceWorker::list
   std::string &strOutputParms
 )
 {
-printf("list\n");
   int iRC = verifyAPISession();
-printf("OtmMemoryServiceWorker::list verifyAPISession return: %d\n", iRC);
+printf("[OtmMemoryServiceWorker::list] verifyAPISession ret: %d\n", iRC);
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
@@ -1487,7 +1486,8 @@ printf("OtmMemoryServiceWorker::list verifyAPISession return: %d\n", iRC);
   pJsonFactory->startJSONW( strOutputParmsW );
   pJsonFactory->addArrayStartToJSONW( strOutputParmsW );
   PSZ pszCurTM = pszBuffer;
-printf("OtmMemoryServiceWorker::list pszBuffer: %s\n", pszBuffer);
+printf("[OtmMemoryServiceWorker::list] pszBuffer: %s\n", pszBuffer);
+
   while ( *pszCurTM != 0 )
   {
     wchar_t szTM[PATH_MAX];

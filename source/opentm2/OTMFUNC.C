@@ -319,9 +319,11 @@ USHORT EqfStartSession
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
+    if (SetupMAT())
+        printf("Failed to setup property files\n");
+
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );
-printf("EqfStartSession, UtlAlloc returned\n");
   if ( pData != NULL )
   {
     pData->lMagicWord = FCTDATA_IDENTIFIER;
@@ -334,7 +336,6 @@ printf("EqfStartSession, UtlAlloc returned\n");
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
 
-printf("1 where is the crash?\n");
   // initialize utilities
   if ( usRC == NO_ERROR )
   {
@@ -349,7 +350,6 @@ printf("1 where is the crash?\n");
 #endif //TEMPORARY_COMMENTED
   } /* endif */
 
-printf("2 where is the crash?\n");
   // get profile data and initialize error handler
   if ( usRC == NO_ERROR )
   {

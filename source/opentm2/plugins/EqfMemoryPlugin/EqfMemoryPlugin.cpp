@@ -792,7 +792,7 @@ pszName = "hardcoded";
   usRC = UtlFindFirst( this->szBuffer, &hDir, 0, &ResultBuf, sizeof(ResultBuf), &usCount, 0L, 0 );
   usCount = ( usRC ) ? 0 : usCount;
 //TODO usCount
-usCount = 1;
+#ifdef TEMPORARY_COMMENTED
   while( usCount)
   {
     this->addToList( pszName );
@@ -801,6 +801,7 @@ usCount = 1;
     usRC = UtlFindNext( hDir, &ResultBuf, sizeof(ResultBuf), &usCount, FALSE );
     usCount = ( usRC ) ? 0 : usCount;
   } /* endwhile */
+#endif //TEMPORARY_COMMENTED
 
   // close file search handle
   if ( hDir != HDIR_CREATE ) UtlFindClose( hDir, FALSE );

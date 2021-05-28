@@ -373,8 +373,6 @@ strFileSpec += "/libEqfMemoryPlugin.so";
 
 USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 {
-printf("Plugin name: %s", pszName);
-
     USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
 
     //SetErrorMode(  SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX  );

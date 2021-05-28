@@ -90,6 +90,7 @@ static BOOL             InstCheckAndAdd( PSZ *, PSZ, USHORT );
 static USHORT           ReadAndPrepareConfigSys ( VOID );
        USHORT           UpdateConfigSys ( VOID );
 
+int SetupMAT();
          USHORT SetupMAT( HAB hab, CHAR chPrimaryDrive, PSZ  pszSecondaryDrives, CHAR chLanDrive );
 static   USHORT CreateEditProperties( CHAR );
 static   USHORT CreateFolderListProperties( CHAR );

@@ -62,6 +62,8 @@
 #ifdef _WINDOWS
   #include <direct.h>
 #endif
+#include "property.h"
+
 /**********************************************************************/
 /* Global Variables                                                   */
 /**********************************************************************/
@@ -89,6 +91,7 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
   #define DosFindClose( a )           UtlFindClose( a, FALSE )
   #define DosQFileInfo( a, b, c, d )  UtlQFileInfo( a, b, c, d, FALSE )
 #endif
+
 //+----------------------------------------------------------------------------+
 //|Function name:     SetupMat                                                 |
 //|External function                                                           |
@@ -122,6 +125,22 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 //|                   delete old property files;                               |
 //|                   create new property files;                               |
 //+----------------------------------------------------------------------------+
+
+#ifdef __linux__
+int SetupMAT() {
+    if (property_init()) {
+        fprintf(stderr, "Failed to initialize property file\n");
+        return -1;
+    }
+
+    property_add_key(KEY_Vers, STR_DRIVER_LEVEL);
+    property_add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+
+    return 0;
+}
+#endif // __linux__
+
+#ifdef _WIN32
 __declspec(dllexport)
 USHORT SetupMAT
 (
@@ -146,8 +165,7 @@ USHORT SetupMAT
      chLanDrive = chPrimaryDrive;
    } /* endif */
 
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+#ifdef TO_BE_REMOVED
    /*******************************************************************/
    /* Get size of desktop window                                      */
    /*******************************************************************/
@@ -155,7 +173,7 @@ USHORT SetupMAT
    cyDesktop = WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
    cxDesktopDiv20 = cxDesktop / 20L;
    cyDesktopDiv20 = cyDesktop / 20L;
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+#endif //TO_BE_REMOVED
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )
@@ -268,9 +286,9 @@ USHORT SetupMAT
    sprintf( chTempPath, "%c:\\%s\\%s\\%s\\%s", chPrimaryDrive, PATH, "SHOWM000.F00", PROPDIR, "SHOWMEHT.000" );
    UpdateDocumentProp( chTempPath, chPrimaryDrive);
 
-
    return( usRC );
 } /* end of function SetupMat */
+#endif //_WIN32
 
 //+----------------------------------------------------------------------------+
 //|Function name:     CreateSystemProperties                                   |
