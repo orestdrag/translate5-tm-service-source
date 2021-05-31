@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 #include <unistd.h>
 #include <pwd.h>
@@ -41,19 +42,74 @@ static int write2file(FILE *fp, const char *key, const char *value) {
     fprintf(fp, "%s=%s\n", key, value);
 }
 
+static FILE * open_properties(char *buf) {
+    FILE *fp = fopen(property_file, "a+");
+    if (!fp)
+        return NULL;
+
+    fscanf(fp, "%s", buf);
+    return fp;
+}
+
 int property_add_key(const char *key, const char *value) {
-    FILE *fp = fopen(property_file, "w+");
+    char *buf;
+    FILE *fp = open_properties(buf);
     if (!fp)
         return -1;
 
-    write2file(fp, key, value);
+    int rv = 0;
+    char *ret;
+    if (buf && (ret = strstr(buf, key)))
+        rv = -1;
+    else
+        write2file(fp, key, value);
+
+    free(buf);
     fclose(fp);
 
-    return 0;
+    return rv;
+}
+
+static char * remove_substr(char *str, const char *sub) {
+    char *p, *q, *r;
+
+    q = r = strstr(str, sub);
+    if (!q)
+        return NULL;
+
+    int len = strlen(sub);
+    while ((r = strstr(p = r + len, sub)) != NULL) {
+        while (p < r)
+            *q++ = *p++;
+    }
+
+    while ((*q++ = *p++) != '\0')
+        continue;
+
+    return str;
 }
 
 int property_set_value(const char *key, const char *value) {
-    return 0;
+    char *buf;
+    FILE *fp = open_properties(buf);
+    if (!fp)
+        return -1;
+
+    int rv = 0;
+    char *ret = strstr(buf, key);
+
+    if (ret) {
+        //remove_substr(ret, );
+        write2file(fp, key, value);
+    }
+    else {
+        rv = -1;
+    }
+
+    free(buf);
+    fclose(fp);
+
+    return rv;
 }
 
 char * property_get_value(const char *key) {
