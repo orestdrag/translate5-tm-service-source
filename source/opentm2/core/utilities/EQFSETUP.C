@@ -62,7 +62,7 @@
 #ifdef _WINDOWS
   #include <direct.h>
 #endif
-#include "property.h"
+#include "PropertyWrapper.H"
 
 /**********************************************************************/
 /* Global Variables                                                   */
@@ -128,15 +128,13 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 
 #ifdef __linux__
 int SetupMAT() {
-#if 0
-    if (property_init()) {
+    if (properties_init()) {
         fprintf(stderr, "Failed to initialize property file\n");
         return -1;
     }
 
-    property_add_key(KEY_Vers, STR_DRIVER_LEVEL);
-    property_add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-#endif
+    properties_add_key(KEY_Vers, STR_DRIVER_LEVEL);
+    properties_add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
 
     return 0;
 }

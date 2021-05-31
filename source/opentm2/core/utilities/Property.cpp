@@ -1,4 +1,5 @@
 #include "Property.h"
+#include "PropertyWrapper.H"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -8,6 +9,30 @@
 
 #define HOME_ENV "HOME"
 #define OTMMEMORYSERVICE "OtmMemoryService"
+
+static Properties properties;
+
+int properties_init() {
+    if (properties.init())
+        return -1;
+    return 0;
+}
+
+void properties_deinit() {
+    properties.deinit();
+}
+
+int properties_add_key(const char *key, const char *value) {
+    if (properties.add_key(key, value))
+        return -1;
+    return 0;
+}
+
+int properties_set_value(const char *key, const char *value) {
+    if (properties.set_value(key, value))
+        return -1;
+    return 0;
+}
 
 int Properties::init() {
     if (get_home_dir())
@@ -28,8 +53,7 @@ void Properties::deinit() {
 }
 
 int Properties::add_key(const std::string& key, const std::string& value) {
-    if (read_data())
-        return -1;
+    read_data();
 
     if (data.count(key))
         return 1;
@@ -42,8 +66,7 @@ int Properties::add_key(const std::string& key, const std::string& value) {
 }
 
 int Properties::set_value(const std::string& key, const std::string& value) {
-    if (read_data())
-        return -1;
+    read_data();
 
     if (!data.count(key))
         return -1;
