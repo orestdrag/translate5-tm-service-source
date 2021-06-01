@@ -2792,7 +2792,11 @@ BOOL UtlInitUtils( HAB hab )
 
    hab;
 
-/* NOTE is not necessary */
+#if 0
+    properties_add_key("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+#endif
+
+#ifdef _WIN32
    // set version info in registry
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
@@ -2889,6 +2893,7 @@ BOOL UtlInitUtils( HAB hab )
 printf("UtlInitUtils fOK: %d\n", fOK);
    // Add exit procedure for this DLL
    return( fOK );
+#endif // _WIN32
 }
 
 #ifdef TEMPORARY_COMMENTED

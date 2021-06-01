@@ -10,6 +10,8 @@
 #define HOME_ENV "HOME"
 #define OTMMEMORYSERVICE "OtmMemoryService"
 
+/* Wrapper functions for C code usage */
+
 static Properties properties;
 
 int properties_init() {
@@ -34,6 +36,8 @@ int properties_set_value(const char *key, const char *value) {
     return 0;
 }
 
+/* Implementation */
+
 int Properties::init() {
     if (get_home_dir())
         return -1;
@@ -49,6 +53,7 @@ int Properties::init() {
 }
 
 void Properties::deinit() {
+    data.clear();
     fs.close();
 }
 
@@ -107,6 +112,8 @@ int Properties::read_data() {
     fs.open(filename, std::ios::binary | std::ios::in);
     if (!fs.is_open())
         return -1;
+
+    data.clear();
 
     while (std::getline(fs, line)) {
         n = line.find(delim);
