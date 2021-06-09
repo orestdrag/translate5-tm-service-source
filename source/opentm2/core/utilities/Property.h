@@ -11,6 +11,7 @@ public:
     void deinit();
     int add_key(const std::string& key, const std::string& value);
     int set_value(const std::string& key, const std::string& value);
+    std::string get_otm_dir() const;
 
 private:
     int get_home_dir();

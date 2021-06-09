@@ -6,6 +6,7 @@ extern "C" {
     void properties_deinit();
     int properties_add_key(const char *key, const char *value);
     int properties_set_value(const char *key, const char *value);
+    char * properties_get_otm_dir();
 }
 
 #endif // _PROPERTY_WRAPPER_H__

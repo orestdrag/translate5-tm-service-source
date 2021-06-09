@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <cstdio>
+#include <cstring>
 
 #define HOME_ENV "HOME"
 #define OTMMEMORYSERVICE "OtmMemoryService"
@@ -34,6 +35,15 @@ int properties_set_value(const char *key, const char *value) {
     if (properties.set_value(key, value))
         return -1;
     return 0;
+}
+
+char * properties_get_otm_dir() {
+    std::string otm_dir = properties.get_otm_dir();
+    char *otmdir = (char *)malloc(otm_dir.size() + 1);
+    if (!otmdir)
+        return NULL;
+    strncpy(otmdir, otm_dir.c_str(), otm_dir.size());
+    return otmdir;
 }
 
 /* Implementation */
@@ -81,6 +91,10 @@ int Properties::set_value(const std::string& key, const std::string& value) {
         return -1;
 
     return 0;
+}
+
+std::string Properties::get_otm_dir() const {
+    return otm_dir;
 }
 
 int Properties::get_home_dir() {

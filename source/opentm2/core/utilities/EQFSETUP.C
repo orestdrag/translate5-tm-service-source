@@ -59,6 +59,9 @@
 #include <EQF.H>                  // General Translation Manager include file
 #include "EQFSETUP.H"                   // MAT setup functions
 #include <EQFSERNO.H>                   // Serial number
+#ifdef __linux__
+    #include <linux/limits.h>
+#endif // __linux__
 #ifdef _WINDOWS
   #include <direct.h>
 #endif
@@ -135,7 +138,31 @@ int SetupMAT() {
 
     properties_add_key(KEY_Vers, STR_DRIVER_LEVEL);
     properties_add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    properties_add_key(KEY_SysProp, SYSTEM_PROPERTIES_NAME);
 
+    PSZ otmPath = NULL;
+    char *otmDir = properties_get_otm_dir();
+    int size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
+    if (size < 0)
+        return -1;
+
+    ++size;
+    otmPath = (PSZ)malloc(size);
+    if (otmPath == NULL)
+        return -1;
+
+    size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
+    if (size < 0) {
+        free(otmDir);
+        free(otmPath);
+        return -1;
+    }
+
+    CreateSystemProperties(otmPath);
+
+    free(otmDir);
+    free(otmPath);
+    properties_deinit();
     return 0;
 }
 #endif // __linux__
@@ -317,6 +344,131 @@ USHORT SetupMAT
 //|                   endif;                                                   |
 //|                   write properties and free data area;                     |
 //+----------------------------------------------------------------------------+
+#ifdef __linux__
+USHORT CreateSystemProperties(PSZ pszPath)
+{
+    PPROPSYSTEM  pSysPropsOld = 0;     // buffer for old system properties
+    PPROPSYSTEM  pSysProps = 0;        // buffer for new system properties
+    PSZ          pszEditor = 0;        // ptr for editor name processing
+    PSZ          pszTemp = 0;          // general purpose pointer
+    USHORT       usRC = 0;             // function return code
+
+    /******************************************************************/
+    /* Allocate area for new system properties                        */
+    /******************************************************************/
+    pSysProps = (PPROPSYSTEM)malloc(sizeof(PROPSYSTEM));
+    if ( pSysProps )
+    {
+        memset(pSysProps, NULC, sizeof(PROPSYSTEM));
+    }
+    else
+    {
+        usRC = ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    /******************************************************************/
+    /* Fill in property heading area                                  */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
+        sprintf(pSysProps->PropHead.szPath, "%s", PATH);
+        pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
+        pSysProps->PropHead.chType  = PROP_TYPE_INSTANCE;
+    }
+
+    /******************************************************************/
+    /* Fill rest of properties with default values                    */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        strcpy( pSysProps->szPropertyPath,    PROPDIR );
+        strcpy( pSysProps->szProgramPath,     WINDIR );
+        strcpy( pSysProps->szDicPath,         DICTDIR );
+        strcpy( pSysProps->szMemPath,         MEMDIR );
+        strcpy( pSysProps->szTablePath,       TABLEDIR );
+        strcpy( pSysProps->szCtrlPath,        CTRLDIR );
+        strcpy( pSysProps->szDllPath,         DLLDIR );
+        strcpy( pSysProps->szListPath,        LISTDIR );
+        strcpy( pSysProps->szMsgPath,         MSGDIR );
+        strcpy( pSysProps->szPrtPath,         PRTDIR );
+        strcpy( pSysProps->szExportPath,      EXPORTDIR );
+        strcpy( pSysProps->szBackupPath,      BACKUPDIR );
+        strcpy( pSysProps->szDirSourceDoc,    SOURCEDIR );
+        strcpy( pSysProps->szDirSegSourceDoc, SEGSOURCEDIR );
+        strcpy( pSysProps->szDirTargetDoc,    TARGETDIR );
+        strcpy( pSysProps->szDirSegTargetDoc, SEGTARGETDIR );
+        strcpy( pSysProps->szDirImport,       IMPORTDIR );
+        strcpy( pSysProps->szDirComMem,       COMMEMDIR );
+        strcpy( pSysProps->szDirComDict,      COMDICTDIR );
+        strcpy( pSysProps->szDirComProp,      COMPROPDIR );
+        strcpy( pSysProps->szWinPath,         WINDIR );
+        sprintf( pSysProps->RestartFolderLists, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
+        sprintf( pSysProps->FocusObject, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
+        sprintf( pSysProps->RestartMemory, "%s", MEMORY_PROPERTIES_NAME );
+        sprintf( pSysProps->RestartDicts, "%s/%s", PATH, DICT_PROPERTIES_NAME );
+        //pSysProps->fUseIELikeListWindows = TRUE;
+        strcpy( pSysProps->szPluginPath,      PLUGINDIR );
+    }
+
+    /******************************************************************/
+    /* Set intial restore size to 4/5 of desktop size and center      */
+    /* window inside desktop window                                   */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        pSysProps->Swp.x  = (SHORT) (cxDesktop / 5L / 2L);
+        pSysProps->Swp.y  = (SHORT) (cyDesktop / 5L / 2L);
+        pSysProps->Swp.cx = (SHORT) (cxDesktop * 4L / 5L);
+        pSysProps->Swp.cy = (SHORT) (cyDesktop * 4L / 5L);
+        pSysProps->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
+                            EQF_SWP_SHOW | EQF_SWP_MAXIMIZE;
+        pSysProps->SwpDef = pSysProps->Swp;
+    } /* endif */
+
+    /******************************************************************/
+    /* Add editor information                                         */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        pszEditor = EDITOR_PROPERTIES_NAME;
+        pszTemp = strchr( pszEditor, '.' );
+        strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
+    } /* endif */
+
+#ifdef TEMPORARY_COMMENTED
+    /******************************************************************/
+    /* Try to read old system properties                              */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        pSysPropsOld = InstReadSysProps();
+    }
+#endif //TEMPORARY_COMMENTED
+
+    /******************************************************************/
+    /* Save some of the values from the old properties to the new ones*/
+    /******************************************************************/
+    if ( !usRC && pSysPropsOld )
+    {
+        strcpy( pSysProps->szServerList, pSysPropsOld->szServerList );
+        free( pSysPropsOld );           // free storage used for old properties
+    }
+
+    /******************************************************************/
+    /* Write properties and free data area                            */
+    /******************************************************************/
+    if ( !usRC )
+    {
+        WritePropFile( pszPath, pSysProps, sizeof( PROPSYSTEM) );
+        free( pSysProps );
+    }
+
+    return (usRC);
+}
+#endif // __linux__
+
+#ifdef _WIN32
 USHORT CreateSystemProperties
 (
   CHAR chPrimaryDrive,                 // MAT primary drive
@@ -450,6 +602,7 @@ USHORT CreateSystemProperties
 
     return( usRC );
 } /* end of function CreateSystemProperties */
+#endif //_WIN32
 
 /* $KIT0890 A59 */
 //+----------------------------------------------------------------------------+
@@ -521,6 +674,7 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
     } /* endif */
 #endif
 
+#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -534,6 +688,7 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
     {
       usRc = 1;
     } /* endif */
+#endif //TEMPORARY_COMMENTED
 
     return ( usRc );
 } /* end of function UpdateSystemProperties */
@@ -606,6 +761,7 @@ USHORT CreateFolderListProperties
       *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
     } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -615,6 +771,7 @@ USHORT CreateFolderListProperties
                      sizeof( PROPFOLDERLIST) );
       free( pPropFll );
     } /* endif */
+#endif //TEMPORARY_COMMENTED
 
    return( usRC );
 
@@ -685,6 +842,7 @@ USHORT CreateImexProperties
       sprintf( pPropImex->szSavedDlgFExpoNPath, "\\%s\\", SNOMATCHDIR );
     } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -694,6 +852,7 @@ USHORT CreateImexProperties
                      sizeof( PROPIMEX) );
       free( pPropImex );
     } /* endif */
+#endif //TEMPORARY_COMMENTED
 
    return( usRC );
 
@@ -767,6 +926,7 @@ USHORT CreateDictProperties
 #endif
     } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -776,6 +936,7 @@ USHORT CreateDictProperties
                      sizeof( PROPDICTLIST ) );
       free( pPropDict );
     } /* endif */
+#endif //TEMPORARY_COMMENTED
 
    return( usRC );
 
@@ -942,6 +1103,7 @@ USHORT CreateEditProperties
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -951,6 +1113,7 @@ USHORT CreateEditProperties
                      sizeof( PROPEDIT ) );
       free( pPropEdit );
     } /* endif */
+#endif //TEMPORARY_COMMENTED
 
    return( usRC );
 } /* end of function CreateEditProperties */
@@ -1078,6 +1241,7 @@ USHORT DeletePropFile
 //|                   close property file;                                     |
 //|                   return return code to caller;                            |
 //+----------------------------------------------------------------------------+
+#ifdef _WIN32
 USHORT WritePropFile
 (
    CHAR    chDrive,                    // drive of property file
@@ -1127,7 +1291,45 @@ USHORT WritePropFile
 
   return( usRC );
 } /* end of function WritePropFile */
+#endif //_WIN32
 
+#ifdef __linux__
+USHORT WritePropFile(PSZ szPath, PVOID pProp, USHORT usSize)
+{
+    USHORT  usRC = NO_ERROR;             // function return code
+    FILE   *hFile = NULL;                // file handle for property files
+
+    /********************************************************************/
+    /* Open the property file                                           */
+    /********************************************************************/
+    hFile = fopen( szPath, "wb" );
+    if ( hFile == NULL )
+    {
+        usRC = ERROR_PATH_NOT_FOUND;
+    }
+
+    /********************************************************************/
+    /* Write property data to disk                                      */
+    /********************************************************************/
+    if ( !usRC  )
+    {
+        if ( fwrite( pProp, usSize, 1, hFile ) != 1 )
+        {
+            usRC = ERROR_WRITE_FAULT;
+        } /* endif */
+    } /* endif */
+
+    /********************************************************************/
+    /* Close property file                                              */
+    /********************************************************************/
+    if ( hFile )
+    {
+        fclose( hFile);
+    } /* endif */
+
+    return( usRC );
+}
+#endif //__linux__
 
 //+----------------------------------------------------------------------------+
 //|Function name:     BuildPath                                                |
