@@ -484,15 +484,12 @@ USHORT EqfStartSession
   {
     HMODULE  hmod;                      // buffer for resource module handle
 
-//TODO
-#if 0
-    strncpy(pData->szEqfResFile, "libEqfMemoryPlugin.so", MAX_EQF_PATH - 1);
-
+//TODO need to get res file from properties
+#ifdef TEMPORARY_COMMENTED
     DosLoadModule( NULL, NULLHANDLE, pData->szEqfResFile, &hmod );
-printf("libEqfMemoryPlugin loaded\n");
     //hResMod = hmod;
     UtlSetULong( QL_HRESMOD, (ULONG)hmod );
-#endif
+#endif //TEMPORARY_COMMENTED
   } /* endif */
 
   // set caller's session handle
