@@ -26,6 +26,15 @@
 #include "EQFTM.H"
 #include "win_types.h"
 
+// for string convertations
+#include <codecvt>
+template <class Facet>
+struct deletable_facet : Facet{
+  using Facet::Facet;//inherit constructors
+  ~deletable_facet(){};
+};
+// end for string convertations convert
+
 // import memory process
 void importMemoryProcess( void *pvData );
 
@@ -624,22 +633,9 @@ std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8S
 */
 std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16String)
 {
-	int iUTF8Len;
-	int iUTF16Len = (int)strUTF16String.length() + 1;
-
-	std::string strUTF8;
-#ifdef TEMPORARY_COMMENTED
-    char sUTF8[];
-    wcstombs(strUTF8, strUTF16String.c_str(), strUTF16String.length());
-#endif //TEMPORARY_COMMENTED
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-	iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, 0, 0, 0, 0 );
-	std::string strUTF8( iUTF8Len, '\0');
-	WideCharToMultiByte( CP_UTF8, 0, strUTF16String.c_str(), iUTF16Len, &strUTF8[0], iUTF8Len, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-	return strUTF8;
+  std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
+  std::string str = wconv.to_bytes(strUTF16String);
+	return str;
 }
 
 /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
