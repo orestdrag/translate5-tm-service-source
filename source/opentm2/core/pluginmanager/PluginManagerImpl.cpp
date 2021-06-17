@@ -324,7 +324,7 @@ strFileSpec += "/libEqfMemoryPlugin.so";
 
 	// now search all subdirectories
 	strFileSpec = pszPluginDir;
-	strFileSpec += "\\*";
+	strFileSpec += "/*";
 	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( hDir != INVALID_HANDLE_VALUE )
@@ -411,14 +411,15 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
     }
 
     // prepare our loaded DLL entry
+    //iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size(); vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL]
     vLoadedPluginDLLs.push_back( LoadedPluginDLL() );
-    iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size() - 1;
-    vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].hMod = handle;
+    LoadedPluginDLL& rNewPluginDll = vLoadedPluginDLLs.back();
+    rNewPluginDll.hMod = handle;
 
     // Add for P402792 start
-    memset(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, 0x00,
-        sizeof(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll));
-    strcpy(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, pszName);
+    memset(rNewPluginDll.strDll, 0x00,
+        sizeof(rNewPluginDll.strDll));
+    strcpy(rNewPluginDll.strDll, pszName);
     // Add end
 
     // call plugin registration entry point
@@ -646,7 +647,7 @@ bool PluginManagerImpl::addPluginListener( PluginListener* pListener)
 bool PluginManagerImpl::removePluginListener( PluginListener *pListener )
 {
 	std::vector<PluginListener*>::iterator temp = std::find(m_vPluginListener.begin(), m_vPluginListener.end(), pListener );
-	//Return false if the listener could not be found (and evidently can’t be removed.
+	//Return false if the listener could not be found (and evidently canï¿½t be removed.
 	if ( temp == m_vPluginListener.end() )
 		return false;
 	else

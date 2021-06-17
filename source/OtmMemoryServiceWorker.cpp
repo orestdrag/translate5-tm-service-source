@@ -146,8 +146,12 @@ int OtmMemoryServiceWorker::verifyAPISession
   if ( this->hSession != 0 ) return( 0 );
 
   this->iLastRC = EqfStartSession( &(this->hSession) );
-printf("[verifyAPISession] EqfStartSession ret: %d\n", this->iLastRC);
-  if ( this->iLastRC != 0 ) swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
+  printf("[verifyAPISession] EqfStartSession ret: %d\n", this->iLastRC);
+  
+  if ( this->iLastRC != 0 ) 
+    swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, 
+      L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
+  
   return( this->iLastRC );
 }
 

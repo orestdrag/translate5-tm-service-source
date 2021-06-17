@@ -142,25 +142,23 @@ int SetupMAT() {
 
     PSZ otmPath = NULL;
     char *otmDir = properties_get_otm_dir();
-    int size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
-    if (size < 0)
-        return -1;
+    int size = strlen(otmDir) + 1 /*'/'*/ + strlen(SYSTEM_PROPERTIES_NAME) + 1 /*'\0'*/;
 
-    ++size;
     otmPath = (PSZ)malloc(size);
-    if (otmPath == NULL)
+    if (otmPath == NULL){
+        free(otmDir);
         return -1;
+    }
 
     size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
-    if (size < 0) {
-        free(otmDir);
+    free(otmDir);
+    if (size < 0) {        
         free(otmPath);
         return -1;
     }
 
     CreateSystemProperties(otmPath);
 
-    free(otmDir);
     free(otmPath);
     properties_deinit();
     return 0;
