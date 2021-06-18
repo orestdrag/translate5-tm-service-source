@@ -25,6 +25,7 @@
 #include "EQFMSG.H"
 #include "EQFTM.H"
 #include "win_types.h"
+#include <sstream>
 
 // for string convertations
 #include <codecvt>
@@ -617,14 +618,10 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
 */
 std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8String )
 {
-	int iUTF16Len;
-	int iUTF8Len = (int)strUTF8String.length() + 1;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-	iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, 0, 0 );
-	std::wstring strUTF16( iUTF16Len, L'\0');
-	MultiByteToWideChar( CP_UTF8, 0, strUTF8String.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
-	return strUTF16;
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  //TODO: test 
+  std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
+  std::wstring wstr = wconv.from_bytes(strUTF8String);
+	return wstr;
 }
 
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
@@ -633,6 +630,7 @@ std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8S
 */
 std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16String)
 {
+  //TODO: check if fit for every needed scenario
   std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
   std::string str = wconv.to_bytes(strUTF16String);
 	return str;
@@ -1450,73 +1448,62 @@ int OtmMemoryServiceWorker::list
 )
 {
   int iRC = verifyAPISession();
-printf("[OtmMemoryServiceWorker::list] verifyAPISession ret: %d\n", iRC);
+
+  auto buildError = [&] (int errCode, bool getErrorFromEqf = false) mutable -> int{
+    unsigned short usRC = 0;
+    if(getErrorFromEqf)
+      EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    else
+      usRC = iRC;
+    buildErrorReturn( usRC, this->szLastError, strOutputParms );
+    return errCode;
+  };
+
   if ( iRC != 0 )
   {
-    buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
-  } /* endif */
+    buildError(restbed::BAD_REQUEST);
+  } 
 
   // get buffer size required for the list of TMs
   LONG lBufferSize = 0;
   iRC = EqfListMem( this->hSession, NULL, &lBufferSize );
+
   if ( iRC != 0 )
   {
-    unsigned short usRC = 0;
-    EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-    buildErrorReturn( usRC, this->szLastError, strOutputParms );
-    return( restbed::INTERNAL_SERVER_ERROR );
-  } /* endif */
+    return buildError(restbed::INTERNAL_SERVER_ERROR, true);
+  } 
 
   // get the list of TMs
-  PSZ pszBuffer = new( char[lBufferSize] );
+  PSZ pszBuffer = new char[lBufferSize];
+  pszBuffer[0] = 0;//terminated to avoid garbage output
+
   iRC = EqfListMem( this->hSession, pszBuffer, &lBufferSize );
   if ( iRC != 0 )
   {
-    unsigned short usRC = 0;
-    EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-    buildErrorReturn( usRC, this->szLastError, strOutputParms );
     delete pszBuffer;
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return buildError(restbed::INTERNAL_SERVER_ERROR, true);
   } /* endif */
 
   // add all TMs to reponse area
-  std::wstring strOutputParmsW;
-  JSONFactory *pJsonFactory = JSONFactory::getInstance();
-  pJsonFactory->startJSONW( strOutputParmsW );
-  pJsonFactory->addArrayStartToJSONW( strOutputParmsW );
-  PSZ pszCurTM = pszBuffer;
-printf("[OtmMemoryServiceWorker::list] pszBuffer: %s\n", pszBuffer);
+  std::stringstream jsonSS;
+  std::istringstream buffer(pszBuffer);
+  std::string strName;
 
-  while ( *pszCurTM != 0 )
+  jsonSS << "{[";
+  int elementCount = 0;
+
+  while (std::getline(buffer, strName, ','))
   {
-    wchar_t szTM[PATH_MAX];
-
-    // isolate TM name and convert it to UTF16
-    PSZ pszEnd = strchr( pszCurTM, ',' );
-    if ( pszEnd ) *pszEnd = 0;
-
-    mbstowcs(szTM, pszCurTM, PATH_MAX);
-
+    if(elementCount)//skip delim for first elem
+      jsonSS << ',';
+    
     // add name to response area
-    pJsonFactory->addElementStartToJSONW( strOutputParmsW );
-    pJsonFactory->addParmToJSONW( strOutputParmsW, L"name", szTM );
-    pJsonFactory->addElementEndToJSONW( strOutputParmsW );
-
-    // go to next TM
-    if ( pszEnd )
-    {
-      pszCurTM = pszEnd + 1;
-    }
-    else
-    {
-      pszCurTM += strlen( pszCurTM );
-    }
+    jsonSS << "{" << "name:" << strName << "}";
+    elementCount++;
   } /* endwhile */
-  pJsonFactory->addArrayEndToJSONW( strOutputParmsW );
-  pJsonFactory->terminateJSONW( strOutputParmsW );
-wprintf(L"strOutputParmsW: %ls\n", strOutputParmsW);
-  strOutputParms = convertToUTF8( strOutputParmsW );
+  
+  jsonSS << "]}";
+  strOutputParms = jsonSS.str();
   iRC = restbed::OK;
 }
 

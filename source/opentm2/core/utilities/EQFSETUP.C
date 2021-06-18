@@ -362,92 +362,83 @@ USHORT CreateSystemProperties(PSZ pszPath)
     else
     {
         usRC = ERROR_NOT_ENOUGH_MEMORY;
+        return usRC;
     }
 
     /******************************************************************/
     /* Fill in property heading area                                  */
     /******************************************************************/
-    if ( !usRC )
-    {
-        strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
-        sprintf(pSysProps->PropHead.szPath, "%s", PATH);
-        pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
-        pSysProps->PropHead.chType  = PROP_TYPE_INSTANCE;
-    }
-
+    strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
+    sprintf(pSysProps->PropHead.szPath, "%s", PATH);
+    pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
+    pSysProps->PropHead.chType  = PROP_TYPE_INSTANCE;
+    
     /******************************************************************/
     /* Fill rest of properties with default values                    */
     /******************************************************************/
-    if ( !usRC )
-    {
-        strcpy( pSysProps->szPropertyPath,    PROPDIR );
-        strcpy( pSysProps->szProgramPath,     WINDIR );
-        strcpy( pSysProps->szDicPath,         DICTDIR );
-        strcpy( pSysProps->szMemPath,         MEMDIR );
-        strcpy( pSysProps->szTablePath,       TABLEDIR );
-        strcpy( pSysProps->szCtrlPath,        CTRLDIR );
-        strcpy( pSysProps->szDllPath,         DLLDIR );
-        strcpy( pSysProps->szListPath,        LISTDIR );
-        strcpy( pSysProps->szMsgPath,         MSGDIR );
-        strcpy( pSysProps->szPrtPath,         PRTDIR );
-        strcpy( pSysProps->szExportPath,      EXPORTDIR );
-        strcpy( pSysProps->szBackupPath,      BACKUPDIR );
-        strcpy( pSysProps->szDirSourceDoc,    SOURCEDIR );
-        strcpy( pSysProps->szDirSegSourceDoc, SEGSOURCEDIR );
-        strcpy( pSysProps->szDirTargetDoc,    TARGETDIR );
-        strcpy( pSysProps->szDirSegTargetDoc, SEGTARGETDIR );
-        strcpy( pSysProps->szDirImport,       IMPORTDIR );
-        strcpy( pSysProps->szDirComMem,       COMMEMDIR );
-        strcpy( pSysProps->szDirComDict,      COMDICTDIR );
-        strcpy( pSysProps->szDirComProp,      COMPROPDIR );
-        strcpy( pSysProps->szWinPath,         WINDIR );
-        sprintf( pSysProps->RestartFolderLists, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
-        sprintf( pSysProps->FocusObject, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
-        sprintf( pSysProps->RestartMemory, "%s", MEMORY_PROPERTIES_NAME );
-        sprintf( pSysProps->RestartDicts, "%s/%s", PATH, DICT_PROPERTIES_NAME );
-        //pSysProps->fUseIELikeListWindows = TRUE;
-        strcpy( pSysProps->szPluginPath,      PLUGINDIR );
-    }
+    strcpy( pSysProps->szPropertyPath,    PROPDIR );
+    strcpy( pSysProps->szProgramPath,     WINDIR );
+    strcpy( pSysProps->szDicPath,         DICTDIR );
+    strcpy( pSysProps->szMemPath,         MEMDIR );
+    strcpy( pSysProps->szTablePath,       TABLEDIR );
+    strcpy( pSysProps->szCtrlPath,        CTRLDIR );
+    strcpy( pSysProps->szDllPath,         DLLDIR );
+    strcpy( pSysProps->szListPath,        LISTDIR );
+    strcpy( pSysProps->szMsgPath,         MSGDIR );
+    strcpy( pSysProps->szPrtPath,         PRTDIR );
+    strcpy( pSysProps->szExportPath,      EXPORTDIR );
+    strcpy( pSysProps->szBackupPath,      BACKUPDIR );
+    strcpy( pSysProps->szDirSourceDoc,    SOURCEDIR );
+    strcpy( pSysProps->szDirSegSourceDoc, SEGSOURCEDIR );
+    strcpy( pSysProps->szDirTargetDoc,    TARGETDIR );
+    strcpy( pSysProps->szDirSegTargetDoc, SEGTARGETDIR );
+    strcpy( pSysProps->szDirImport,       IMPORTDIR );
+    strcpy( pSysProps->szDirComMem,       COMMEMDIR );
+    strcpy( pSysProps->szDirComDict,      COMDICTDIR );
+    strcpy( pSysProps->szDirComProp,      COMPROPDIR );
+    strcpy( pSysProps->szWinPath,         WINDIR );
+    sprintf( pSysProps->RestartFolderLists, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
+    sprintf( pSysProps->FocusObject, "%s/%s", PATH, DEFAULT_FOLDERLIST_NAME );
+    sprintf( pSysProps->RestartMemory, "%s", MEMORY_PROPERTIES_NAME );
+    sprintf( pSysProps->RestartDicts, "%s/%s", PATH, DICT_PROPERTIES_NAME );
+    //pSysProps->fUseIELikeListWindows = TRUE;
+    strcpy( pSysProps->szPluginPath,      PLUGINDIR );
+    
 
     /******************************************************************/
     /* Set intial restore size to 4/5 of desktop size and center      */
     /* window inside desktop window                                   */
     /******************************************************************/
-    if ( !usRC )
-    {
-        pSysProps->Swp.x  = (SHORT) (cxDesktop / 5L / 2L);
-        pSysProps->Swp.y  = (SHORT) (cyDesktop / 5L / 2L);
-        pSysProps->Swp.cx = (SHORT) (cxDesktop * 4L / 5L);
-        pSysProps->Swp.cy = (SHORT) (cyDesktop * 4L / 5L);
-        pSysProps->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
-                            EQF_SWP_SHOW | EQF_SWP_MAXIMIZE;
-        pSysProps->SwpDef = pSysProps->Swp;
-    } /* endif */
+ 
+    pSysProps->Swp.x  = (SHORT) (cxDesktop / 5L / 2L);
+    pSysProps->Swp.y  = (SHORT) (cyDesktop / 5L / 2L);
+    pSysProps->Swp.cx = (SHORT) (cxDesktop * 4L / 5L);
+    pSysProps->Swp.cy = (SHORT) (cyDesktop * 4L / 5L);
+    pSysProps->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
+                         EQF_SWP_SHOW | EQF_SWP_MAXIMIZE;
+    pSysProps->SwpDef = pSysProps->Swp;
+
 
     /******************************************************************/
     /* Add editor information                                         */
     /******************************************************************/
-    if ( !usRC )
-    {
-        pszEditor = EDITOR_PROPERTIES_NAME;
-        pszTemp = strchr( pszEditor, '.' );
-        strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
-    } /* endif */
+    pszEditor = EDITOR_PROPERTIES_NAME;
+    pszTemp = strchr( pszEditor, '.' );
+    strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
+    
 
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Try to read old system properties                              */
     /******************************************************************/
-    if ( !usRC )
-    {
-        pSysPropsOld = InstReadSysProps();
-    }
+    pSysPropsOld = InstReadSysProps();
+    
 #endif //TEMPORARY_COMMENTED
 
     /******************************************************************/
     /* Save some of the values from the old properties to the new ones*/
     /******************************************************************/
-    if ( !usRC && pSysPropsOld )
+    if (pSysPropsOld )
     {
         strcpy( pSysProps->szServerList, pSysPropsOld->szServerList );
         free( pSysPropsOld );           // free storage used for old properties
@@ -456,12 +447,10 @@ USHORT CreateSystemProperties(PSZ pszPath)
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
-    if ( !usRC )
-    {
-        WritePropFile( pszPath, pSysProps, sizeof( PROPSYSTEM) );
-        free( pSysProps );
-    }
-
+    
+    WritePropFile( pszPath, pSysProps, sizeof( PROPSYSTEM) );
+    free( pSysProps );
+    
     return (usRC);
 }
 #endif // __linux__

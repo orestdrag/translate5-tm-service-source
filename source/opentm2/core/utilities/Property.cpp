@@ -109,7 +109,7 @@ int Properties::get_home_dir() {
 
     return 0;
 }
-
+//why not at parameter but as global???
 int Properties::create_otm_dir() {
     struct stat st;
     int ret = stat(otm_dir.c_str(), &st);
