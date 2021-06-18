@@ -132,12 +132,11 @@ void get_method_handler(const shared_ptr< Session > session)
 	std::string strType = request->get_header("Content-Type", "");
   int iTransActIndex = AddToTransActLog( GET_LISTMEM_TRANSACTID, "" );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  if ( hfLog != NULL ) 
+    fprintf( hfLog, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
 
   std::string strResponseBody = "Sample text";
-printf("\n[GET_HANDLER] before list strResponseBody: %s\n", strResponseBody.c_str());
   int ret = pMemService->list( strResponseBody );
-printf("[GET_HANDLER] after list strResponseBody: %s, ret: %d\n\n", strResponseBody.c_str(), ret);
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
   TransActDone( iTransActIndex );
 }

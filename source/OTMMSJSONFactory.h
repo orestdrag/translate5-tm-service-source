@@ -7,7 +7,6 @@
 #define _OTMMSJSONFACTORY_H_
 
 #include "string"
-#include <sstream>
 /*! \brief factory class for JSON related functions 
  
   This class is a singleton and provides functions for the processing
@@ -46,19 +45,6 @@ public:
     std::string &str
   ); 
 
-  /*! \brief Starts a JSON string in stringstream
-
-    This method cleans up and starts a JSON stringstream
-
-    \param ss reference to a stringstream receiving the JSON start sequence
-
-  	\returns 0 or error code in case of errors
-*/
-  int startJSON
-  (
-    std::stringstream &ss
-  );
-
   /*! \brief Starts a JSON string
 
     This method starts a JSON string
@@ -83,19 +69,6 @@ public:
   static int terminateJSON
   (
     std::string &JSONString
-  ); 
-
-/*! \brief Terminates a JSON in stringstream
-
-    This method terminates a JSON in stringstream
-
-    \param ss reference to a string receiving the JSON end sequence
-
-  	\returns 0 or error code in case of errors
-*/
-  static int terminateJSON
-  (
-    std::stringstream &ss
   ); 
 
   /*! \brief Terminates a JSON string
@@ -128,23 +101,16 @@ public:
     const std::string &value
   ); 
 
-/*! \brief Adds a parameter to a JSON stringstream
+/*! \brief Adds a parameter to a JSON string
 
     This method adds a parameter to a JSON string
 
-    \param ss reference to a string receiving the parameter
+    \param JSONString reference to a string receiving the parameter
     \param name parameter name
     \param value parameter value
 
   	\returns 0 or error code in case of errors
 */
-  int addParmToJSON
-  (
-    std::stringstream &ss,
-    const std::string &name,
-    const std::string &value
-  ); 
-
   int addParmToJSON
   (
     std::string &JSONString,
@@ -330,28 +296,12 @@ public:
     std::wstring &JSONString
   );
 
-  /*! \brief Add the start identifier for an array to a JSON stringstream
-  	  \returns 0 or error code in case of errors
-  */
-  int addArrayStartToJSON
-  (
-    std::stringstream &ss
-  );
-
   /*! \brief Add the end identifier for an array to a JSON string
   	  \returns 0 or error code in case of errors
   */
   int addArrayEndToJSONW
   (
     std::wstring &JSONString
-  );
-
-  /*! \brief Add the end identifier for an array to a JSON stringstream
-  	  \returns 0 or error code in case of errors
-  */
-  int addArrayEndToJSON
-  (
-    std::stringstream &ss
   );
 
   /*! \brief Add the start identifier for an element to a JSON string
