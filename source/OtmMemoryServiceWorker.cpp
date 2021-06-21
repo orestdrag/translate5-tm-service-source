@@ -1460,18 +1460,14 @@ int OtmMemoryServiceWorker::list
   };
 
   if ( iRC != 0 )
-  {
     buildError(restbed::BAD_REQUEST);
-  } 
-
+  
   // get buffer size required for the list of TMs
   LONG lBufferSize = 0;
   iRC = EqfListMem( this->hSession, NULL, &lBufferSize );
 
   if ( iRC != 0 )
-  {
     return buildError(restbed::INTERNAL_SERVER_ERROR, true);
-  } 
 
   // get the list of TMs
   PSZ pszBuffer = new char[lBufferSize];
@@ -1501,7 +1497,7 @@ int OtmMemoryServiceWorker::list
     jsonSS << "{" << "name:" << strName << "}";
     elementCount++;
   } /* endwhile */
-  
+
   jsonSS << "]}";
   strOutputParms = jsonSS.str();
   iRC = restbed::OK;

@@ -8,10 +8,8 @@
 // name delimiter for name lists (e.g. list of document names)
 #define NAME_DELIMITER            ','
 
-// max length of a file in an EQF dir
-#define MAX_EQF_PATH            60
-
 #include "win_types.h"
+#include "EQF.H"
 
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS
