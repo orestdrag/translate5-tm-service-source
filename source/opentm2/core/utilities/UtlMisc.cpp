@@ -19,6 +19,7 @@
 #include "EQFUTILS.ID" // IDs used by dialog utilities
 #include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
+#include "PropertyWrapper.H"
 #include "win_types.h"
 
 // includes for Xalan XSLT
@@ -2792,11 +2793,11 @@ BOOL UtlInitUtils( HAB hab )
 
    hab;
 
-#ifdef TEMPORARY_COMMENTED
-    properties_add_key("CurVersion", STR_DRIVER_LEVEL_NUMBER);
-#endif
+//#ifdef TEMPORARY_COMMENTED
+  properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+//#endif
 
-#ifdef _WIN32
+//#ifdef _WIN32
    // set version info in registry
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
@@ -2890,7 +2891,7 @@ BOOL UtlInitUtils( HAB hab )
      fOK = ObjHandlerInitForBatch();
      if ( fOK ) fOK = PropHandlerInitForBatch();
    } /* endif */
-#endif // _WIN32
+//#endif // _WIN32
 printf("UtlInitUtils fOK: %d\n", fOK);
    // Add exit procedure for this DLL
    return( fOK );

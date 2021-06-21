@@ -17,7 +17,6 @@ set(Util_Source_Files
         EQFUTLNG.CPP
         EQFOSWIN.C
         EQFHASH.C
-        SystemFunctionsWrapper.cpp
         Property.cpp
         EQFSETUP.C
 #EQFUTDLG.CPP

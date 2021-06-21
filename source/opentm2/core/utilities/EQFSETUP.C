@@ -136,9 +136,9 @@ int SetupMAT() {
         return -1;
     }
 
-    properties_add_key(KEY_Vers, STR_DRIVER_LEVEL);
-    properties_add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    properties_add_key(KEY_SysProp, SYSTEM_PROPERTIES_NAME);
+    properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
+    properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);
 
     PSZ otmPath = NULL;
     char *otmDir = properties_get_otm_dir();

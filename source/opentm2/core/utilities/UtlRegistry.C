@@ -8,37 +8,25 @@
 #include "EQF.H"
 #include "SystemFunctionsWrapper.h"
 #include <string>
+#include "PropertyWrapper.H"
 
 // get a string from the registry
 BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize, PSZ pszDefault )
 {
-  std::string sAppl = pszAppl;
-  std::string sKey = pszKey;
-  std::string sResult;
-
-  BOOL fOK = SystemFunctionsWrapper::GetStringFromRegistry(sAppl, sKey, sResult);
-  if ( fOK )
-  {
-    strncpy(pszBuffer, sResult.c_str(),iBufSize);
-  }else{
-    strncpy( pszBuffer, pszDefault, iBufSize );
-  } 
-
+  BOOL fOK = properties_get_str(pszKey, pszBuffer, iBufSize);
+  if(!fOK)
+    strncpy(pszBuffer, pszDefault, iBufSize);
   return( fOK );
 } /* end of function GetStringFromRegistry */
 
 // get a integer from the registry
 int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
-{
+{  
   int iResult = 0;
-  std::string sAppl = pszAppl;
-  std::string sKey = pszKey;
 
-  BOOL fOK = SystemFunctionsWrapper::GetIntFromRegistry(sAppl, sKey, iResult);
+  bool fOK = properties_get_int(pszKey, iResult);
   if ( !fOK )
-  {
       iResult = iDefault;
-  } 
 
   return( iResult );
 } /* end of function GetIntFromRegistry */
@@ -46,10 +34,9 @@ int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
 // write a string to the registry
 BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 {
-  std::string sAppl = pszAppl;
-  std::string sKey = pszKey;
-  std::string sValue = pszValue;
-  BOOL fOK = SystemFunctionsWrapper::WriteStringToRegistry(sAppl, sKey, sValue);
+  bool fOK = properties_add_str(pszKey, pszValue);
+  if(!fOK)
+    fOK = properties_set_str(pszKey, pszValue);
 
   return( fOK );
 } /* end of function WriteStringToRegistry */
@@ -57,9 +44,10 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 // write a int to the registry
 BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
 {
-  std::string sAppl = pszAppl;
-  std::string sKey = pszKey;
-  BOOL fOK = SystemFunctionsWrapper::WriteIntToRegistry(sAppl, sKey, iValue);
+  bool fOK = properties_add_int(pszKey, iValue);
+  if(!fOK)
+    fOK = properties_set_int(pszKey, iValue);
 
   return( fOK );
+
 } /* end of function WriteIntToRegistry */
