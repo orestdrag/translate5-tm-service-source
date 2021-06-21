@@ -300,9 +300,9 @@ PVOID UtlIntAlloc
   {
     if ( usMessageNo != NOMSG )
     {
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
       UtlError( usMessageNo, MB_CANCEL, 0, NULL, EQF_ERROR );
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
   return( pStorage );
@@ -483,19 +483,19 @@ USHORT UtlGetTask ( void )
   USHORT currTask;
 
 #ifdef TEMPORARY_COMMENTED
-        _asm
-          {
-            mov      ax, SS
-            mov      usTask, ax
-          }
+        __asm__
+          (
+            "MOV      %ax, %SS;"
+            "MOV      (usTask), %ax;"
+          );
 #endif //TEMPORARY_COMMENTED
   for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
   {
-    if ( UtiVar[currTask].usTask == usTask )
-    {
-      break;
-    }
-    else if ( UtiVar[currTask].usTask == 0 )
+    //if ( UtiVar[currTask].usTask == usTask )
+    //{
+    //  break;
+    //}
+    //else if ( UtiVar[currTask].usTask == 0 )
     {
       /****************************************************************/
       /* empty slot found                                             */
