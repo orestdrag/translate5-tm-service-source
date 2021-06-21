@@ -2364,7 +2364,7 @@ BOOL UtlKillProcess( DWORD dwPid )
 				PROC_TABLE_FIRST                                              
 				PROC_TABLE_NEXT                                               
 				PROC_TABLE_CLOSE                                              
-				íf there are no more processes, pid is set to 0               
+				ï¿½f there are no more processes, pid is set to 0               
 	Returncode type:  BOOL                                                      
 	Note: Win95/98 and NT/2000 require different handling                       
 																				
@@ -2792,7 +2792,7 @@ BOOL UtlInitUtils( HAB hab )
 
    hab;
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
     properties_add_key("CurVersion", STR_DRIVER_LEVEL_NUMBER);
 #endif
 
@@ -2890,10 +2890,10 @@ BOOL UtlInitUtils( HAB hab )
      fOK = ObjHandlerInitForBatch();
      if ( fOK ) fOK = PropHandlerInitForBatch();
    } /* endif */
+#endif // _WIN32
 printf("UtlInitUtils fOK: %d\n", fOK);
    // Add exit procedure for this DLL
    return( fOK );
-#endif // _WIN32
 }
 
 #ifdef TEMPORARY_COMMENTED
