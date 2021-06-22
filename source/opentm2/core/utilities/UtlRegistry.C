@@ -6,7 +6,6 @@
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
 #include "EQF.H"
-#include "SystemFunctionsWrapper.h"
 #include <string>
 #include "PropertyWrapper.H"
 

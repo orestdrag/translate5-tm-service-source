@@ -22,9 +22,28 @@ public:
 
     std::string get_otm_dir() const;
 
+    enum ERRORS {
+        NO_ERRORS = 0,
+
+        ERROR_FILE_CANT_OPEN,
+        ERROR_FILE_STRINGPROPERTIES_NOT_FOUND,
+        ERROR_FILE_INTPROPERTIES_NOT_FOUND,
+        ERROR_FILE_CANT_CREATE_OTM_DIRECTORY,
+        ERROR_FILE_CANT_CREATE_FILE,
+        ERROR_FILE_CANT_GET_HOME_DIR,
+        ERROR_FILE_CANT_GET_USER_PSWD,
+        
+        ERROR_STR_KEY_NOT_EXISTS,
+        ERROR_STR_KEY_ALREADY_EXISTS,
+        
+        ERROR_INT_KEY_NOT_EXISTS,
+        ERROR_INT_KEY_ALREADY_EXISTS
+    };
+
 private:
     int get_home_dir();
     int create_otm_dir();
+    int create_properties_file();
     int read_data();
     int write_data();
 
