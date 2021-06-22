@@ -1862,6 +1862,7 @@ LONG        lOptions                 // type of new Translation Memory
     } /* endif */
   } /* endif */
 
+#ifdef TEMPORARY_COMMENTED // commented in debuggging purposes
   // Check memory name syntax
   if ( usRC == NO_ERROR )
   {
@@ -1873,7 +1874,9 @@ LONG        lOptions                 // type of new Translation Memory
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
+#endif // TEMPORARY_COMMENTED
 
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // Check if target drive is valid
   if ( (usRC == NO_ERROR) && (chToDrive != EOS) )
   {
@@ -1920,6 +1923,7 @@ LONG        lOptions                 // type of new Translation Memory
       } /* endif */
     } /* endif */
   } /* endif */
+#endif // TO_BE_REPLACED_WITH_LINUX_CODE
 
   // check if TM exists already
   if ( usRC == NO_ERROR )
@@ -1931,6 +1935,7 @@ LONG        lOptions                 // type of new Translation Memory
     }
   } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
   // check if source language is valid
   if ( usRC == NO_ERROR )
   {
@@ -1943,6 +1948,7 @@ LONG        lOptions                 // type of new Translation Memory
                     &pszSourceLanguage, EQF_ERROR, HWND_FUNCIF  );
     } /* endif */
   } /* endif */
+#endif //TEMPORARY_COMMENTED
 
 
   // Check specified options

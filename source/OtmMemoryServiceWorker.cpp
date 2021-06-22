@@ -908,8 +908,10 @@ int OtmMemoryServiceWorker::createMemory
     return( restbed::BAD_REQUEST );
   } /* end */
 
+#ifdef TEMPORARY_COMMENTED
   // either create an empty memory or build the memory using binary input data
   convertUTF8ToASCII( strName );
+#endif //TEMPORARY_COMMENTED
   if ( strData.empty() )
   {
     iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
@@ -969,7 +971,10 @@ int OtmMemoryServiceWorker::createMemory
 
   factory->startJSON( strOutputParms );
 
+// TODO investigate how much do we need this
+#ifdef TEMPORARY_COMMENTED
   convertASCIIToUTF8( strName );
+#endif //TEMPORARY_COMMENTED
 
   factory->addParmToJSON( strOutputParms, "name", strName );
   factory->terminateJSON( strOutputParms );
