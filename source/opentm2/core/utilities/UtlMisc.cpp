@@ -2767,6 +2767,8 @@ BOOL UtlIsValidCP( ULONG ulCP )
   return( (ulOutPut != 0) && (ulCP != 0) );
 } /* end of function UtlIsValidCP */
 
+
+
 /*! UtlInitUtils           Initialization of utilities       
 	Description:       General utilities initialization routine                 
 	Function Call:     BOOL UtlInitUtils( HAB hab );                            
@@ -2785,58 +2787,33 @@ BOOL UtlIsValidCP( ULONG ulCP )
 */
 BOOL UtlInitUtils( HAB hab )
 {
-   BOOL fOK = TRUE;
-
-   CHAR chTemp[2];
-   USHORT  usId = UtlGetTask();
-   SHORT i;
-
-   hab;
+   bool fOK = TRUE;
+   char chTemp[2];
+   ushort  usId = UtlGetTask();
+   short i;
 
    // set version info in registry
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
-   //--- get profile information ---
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   UtiVar[usId].usDateFormat = (USHORT)WinQueryProfileInt( hab,
-                                            NATIONAL_SETTINGS,
-                                            "iDate",
-                                            MDY_DATE_FORMAT );
-   WinQueryProfileString( hab,
-                          NATIONAL_SETTINGS,
-                          "sDate",
-                          "/",
-                          chTemp,
-                          2 );
+   //--- get profile information --- 
+   int retCode = properties_get_int_or_default("iDate",UtiVar[usId].usDateFormat, MDY_DATE_FORMAT);
+   retcode = properties_get_str_or_default("iTime", chTemp, 2, "/");
+   UtiVar[usId].usDateFormat = (ushort)strlen(chTemp);
    UtiVar[usId].chDateSeperator = chTemp[0];
-   UtiVar[usId].usTimeFormat = (USHORT)WinQueryProfileInt( hab,
-                                            NATIONAL_SETTINGS,
-                                            "iTime",
-                                            S_12_HOURS_TIME_FORMAT );
-   WinQueryProfileString( hab,
-                          NATIONAL_SETTINGS,
-                          "sTime",
-                          ":",
-                          chTemp,
-                          2 );
+
+   retCode = properties_get_int_or_default("iTime",UtiVar[usId].usTimeFormat, S_12_HOURS_TIME_FORMAT);
+
+   retCode = properties_get_str_or_default("sTime", chTemp, 2, ":");
    UtiVar[usId].chTimeSeperator = chTemp[0];
-   WinQueryProfileString( hab,
-                          NATIONAL_SETTINGS,
-                          "s1159",
-                          "AM",
-                          UtiVar[usId].szTime1159,
-                          sizeof(UtiVar[usId].szTime1159 ) );
-   WinQueryProfileString( hab,
-                          NATIONAL_SETTINGS,
-                          "s2359",
-                          "PM",
-                          UtiVar[usId].szTime2359,
-                          sizeof(UtiVar[usId].szTime2359 ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-/**********************************************************************/
-/* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
-/* 0 = DEFAULT                                                        */
-/**********************************************************************/
+    
+   retCode = properties_get_str_or_default("s1159", UtiVar[usId].szTime1159, sizeof(UtiVar[usId].szTime1159), "AM");
+
+   retCode = properties_get_str_or_default("s2359", UtiVar[usId].szTime2359, sizeof(UtiVar[usId].szTime2359), "PM");
+
+   /**********************************************************************/
+   /* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
+   /* 0 = DEFAULT                                                        */
+   /**********************************************************************/
    UtlLowUpInit( );
 
    /*******************************************************************/
@@ -2856,6 +2833,7 @@ BOOL UtlInitUtils( HAB hab )
      // Setup event log file name
      char* otmDir = properties_get_otm_dir();
      strncpy(szLogFile, otmDir, MAX_EQF_PATH);
+     free(otmDir);
 
      strcat( szLogFile, "/" );
      strcat( szLogFile, EVENTLOGFILENAME );
@@ -2886,7 +2864,8 @@ BOOL UtlInitUtils( HAB hab )
    if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
    {
      fOK = ObjHandlerInitForBatch();
-     if ( fOK ) fOK = PropHandlerInitForBatch();
+     if ( fOK ) 
+      fOK = PropHandlerInitForBatch();
    } /* endif */
 
    // Add exit procedure for this DLL

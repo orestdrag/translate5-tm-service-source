@@ -367,7 +367,7 @@ USHORT EqfStartSession
 #endif //TEMPORARY_COMMENTED
   } /* endif */
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
   // set directory strings and main drive
   if ( usRC == NO_ERROR )
   {
@@ -475,7 +475,7 @@ USHORT EqfStartSession
 #endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 
   // load resource file
   if ( usRC == NO_ERROR )

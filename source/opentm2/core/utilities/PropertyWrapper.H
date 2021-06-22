@@ -5,6 +5,8 @@ extern "C" {
 
     enum PROPERTY_ERRORS {
         PROPERTY_NO_ERRORS = 0,
+        PROPERTY_USED_DEFAULT_VALUE,
+
 
         PROPERTY_ERROR_FILE_CANT_OPEN,
         PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND,
@@ -34,7 +36,8 @@ extern "C" {
     bool properties_exist (const char *key);
     int properties_get_str(const char *key, char* buff, int buffSize);
     int properties_get_int(const char *key, int& value);
-    
+    int properties_get_str_or_default(const char *key, char* buff, int buffSize, const char* defaultValue);
+    int properties_get_int_or_default(const char *key, int& value, const int defaultValue);
 
     char * properties_get_otm_dir();
 

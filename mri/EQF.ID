@@ -860,7 +860,7 @@
 // Add for R012027
 #define IDD_DLG_SPEC_CHAR               33000
 #define IDC_BTN_ADD_NEW_CHAR            33001
-#define IDC_BTN_HELP                    33002
+//#define IDC_BTN_HELP                    33002
 #define IDC_BTN_OPEN_WIN_CHAR_MAP       33003
 #define IDC_EDT_CHAR                    33004
 #define IDC_EDT_UNICODE                 33005

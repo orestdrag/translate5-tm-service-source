@@ -52,6 +52,22 @@ int properties_get_int(const char * key, int& value ){
     return properties.get_value(key, value);
 }
 
+int properties_get_int_or_default(const char* key, int& value, const int defaultValue){
+    int res = properties_get_int(key, value);
+    if(res != PROPERTY_NO_ERRORS)
+        value = defaultValue;
+    return PROPERTY_USED_DEFAULT_VALUE;
+}
+
+
+int properties_get_str_or_default(const char* key, char *buff, int buffSize, const char* defaultValue ){
+    int res = properties_get_str(key, buff, buffSize);
+    if(res != PROPERTY_NO_ERRORS)
+        strncpy(buff, defaultValue, buffSize);
+    return PROPERTY_USED_DEFAULT_VALUE;
+}
+
+
 bool properties_exist(const char * key){
     return properties.exist(key);
 }
@@ -75,12 +91,12 @@ char * properties_get_otm_dir() {
 
 char* filesystem_get_home_dir() {
     char* _home_dir = getenv(HOME_ENV);
-    if (!strlen(_home_dir))
-        return  0;//PROPERTY_NO_ERRORS;
+    if (!_home_dir || !strlen(_home_dir))
+        return  NULL;//PROPERTY_NO_ERRORS;
 
     struct passwd *pswd = getpwuid(getuid());
     if (!pswd)
-        return 0;//PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
+        return NULL;//PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
     _home_dir = pswd->pw_dir;
 
     return _home_dir;

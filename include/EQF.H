@@ -1901,9 +1901,9 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define MAX_FNAME                9     // max length of name part of a file names
 #define MAX_FEXT                 5     // max length of a file name extension
 #define MAX_EQF_PATH           260     // max length of a file in an EQF dir
-#define MAX_FOLDERNAME           8     // max length of a folder name
+#define MAX_FOLDERNAME         250     // max length of a folder name
 #define MAX_DRIVELIST           27     // max size of a drive list
-#define MAX_DRIVE                3     // max size of a drive specification
+#define MAX_DRIVE              250     // max size of a drive specification
 #define MAX_VIEW                20     // max. viewable # of columns in a CLB listbox
 #define MAX_DEFINEDCOLUMNS      50     // max. definable # of columns in a CLB listbox
 #define MAX_MEM_DESCRIPTION     41     // length of a memory description field
