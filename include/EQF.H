@@ -1854,7 +1854,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define NULC      '\0'
 #define NULP      (void *)0
 #define EOS          '\0'              // end of string delimiter
-#define BACKSLASH    '\\'              // backslash character
+#define BACKSLASH    '/'              // backslash character
 #define COLON        ':'               // colon character
 #define CR           '\r'              // carriage return character
 #define LF           '\n'              // line feed character

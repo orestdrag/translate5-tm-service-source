@@ -6,9 +6,11 @@
 */
 
 #include "core/pluginmanager/PluginManager.h"
+#include "core/utilities/PropertyWrapper.H"
 #include "EqfMemoryPlugin.h"
 #include "EqfMemory.h"
 #include "EQFTMI.H"
+#include "EQFSETUP.H"
 
 #include "string"
 #include "vector"
@@ -984,6 +986,7 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
 {
   char szShortName[MAX_FILESPEC];
   char szPathName[MAX_LONGFILESPEC];
+  std::string pathName = "";
   BOOL fOK = FALSE;
   OBJLONGTOSHORTSTATE ObjState;
   BOOL fReserved = FALSE;
@@ -995,10 +998,20 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
   // call path create function and set result string
   if ( ObjState == OBJ_IS_NEW )
   {
+#ifdef TEMPORARY_COMMENTED
     UtlMakeEQFPath( szPathName, chDrive, MEM_PATH, NULL );
     strcat( szPathName, "\\" );
     strcat( szPathName, szShortName );
     strcat( szPathName, EXT_OF_TMDATA  );
+#endif //TEMPORARY_COMMENTED
+    pathName = std::string(properties_get_otm_dir()) + "/"
+               + std::string(szShortName) + EXT_OF_TMDATA;
+#ifdef TEMPORARY_COMMENTED
+    strcpy(szPathName, properties_get_otm_dir());
+    strcat( szPathName, "/" );
+    strcat(szPathName, szShortName);
+    strcat(szPathName, EXT_OF_TMDATA);
+#endif //TEMPORARY_COMMENTED
   }
   else
   {
@@ -1006,7 +1019,10 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
     fOK = MemCreatePath( szPathName );
   } /* end */     
 
+#ifdef TEMPORARY_COMMENTED
   strPathName.assign( szPathName );
+#endif //TEMPORARY_COMMENTED
+  strPathName = pathName;
 
   return( fOK );
 }
@@ -1058,7 +1074,21 @@ BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathN
     // write properties to disk
     std::string strPropName;
     this->makePropName( strPathName, strPropName );
+
+#ifdef TEMPORARY_COMMENTED
+    std::fstream s(strPathName, s.binary | s.out);
+    if (!s.is_open())
+      std::cerr << "Failed to open properties file\n";
+#endif
+    char *cstr = new char[strPathName.length() + 1];
+    strcpy(cstr, strPathName.c_str());
+    WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
+    delete [] cstr;
+
+// TODO rewrite for linux
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     
   return( fOK );

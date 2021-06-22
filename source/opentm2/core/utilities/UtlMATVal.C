@@ -426,7 +426,9 @@ PSZ UtlMakeEQFPath
     /******************************************************************/
     if ( pszFolder )
     {
-       strcat( pszPath, "\\" );
+#ifdef TEMPORARY_COMMENTED
+       strcat( pszPath, "/" );
+#endif //TEMPORARY_COMMENTED
        strcat( pszPath, pszFolder );
     } /* endif */
 
@@ -435,7 +437,9 @@ PSZ UtlMakeEQFPath
     /******************************************************************/
     if ( usQSTSubDir != QST_LAST )
     {
-       strcat( pszPath, "\\" );
+#ifdef TEMPORARY_COMMENTED
+       strcat( pszPath, "/" );
+#endif //TEMPORARY_COMMENTED
        UtlQueryString( usQSTSubDir, pszPath + strlen(pszPath), MAX_EQF_PATH );
     } /* endif */
 
