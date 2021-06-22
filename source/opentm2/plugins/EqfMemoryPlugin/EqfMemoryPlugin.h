@@ -325,7 +325,7 @@ BOOL createMemoryProperties( PSZ pszName, std::string &strPathName, void *pvOldP
 */
 int makePropName( std::string &strPathName, std::string &strPropName );
 
-/*! \brief Add memory to our internal memory lisst
+/*! \brief Add memory to our internal memory list
   \param strPathName reference to the memory path name
 	\returns 0 when successful
 */

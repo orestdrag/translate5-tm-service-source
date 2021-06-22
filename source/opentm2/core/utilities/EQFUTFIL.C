@@ -1056,7 +1056,6 @@ BOOL UtlLoadFileHwnd
       fMsg = FALSE;
     } /* endif */
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     usDosRc = UtlOpen(pszFilename, &hInputfile , &usAction,
                       0L,                            // Create file size
                       FILE_NORMAL,                   // Normal attribute
@@ -1066,7 +1065,6 @@ BOOL UtlLoadFileHwnd
                       FALSE );                       // no error handling
 
     fOK = ( usDosRc == 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     // If fOK. Get the size of the input data and allocate storage to load the file.
     // If an error occurred set usRc to FALSE and set the appropriate message code.

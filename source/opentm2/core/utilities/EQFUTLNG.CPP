@@ -249,7 +249,7 @@ BOOL UtlQuerySysLangFile
   {
     strcpy(szLanDrive, szDrive);
   } /* endif */
-  sprintf( EqfSystemPath, "%s\\%s",  szLanDrive, szSysPath );
+  sprintf( EqfSystemPath, "%s/%s",  szLanDrive, szSysPath );
   strcpy( szFileName, EqfSystemPath );
   strcat( szFileName, BACKSLASH_STR );
   strcat( szFileName, TABLEDIR );
@@ -441,7 +441,8 @@ BOOL UtlQuerySysLangFile
   /********************************************************************/
   /* cleanup                                                          */
   /********************************************************************/
-  if ( pszLangFileBuffer ) UtlAlloc( (PVOID *)&pszLangFileBuffer, 0L, 0L, NOMSG );
+  if ( pszLangFileBuffer ) 
+    UtlAlloc( (PVOID *)&pszLangFileBuffer, 0L, 0L, NOMSG );
 
   return( fOK && fFound );
 } /* end of function TWBQuerySysLangFile */

@@ -2789,6 +2789,7 @@ BOOL UtlInitUtils( HAB hab )
 {
    bool fOK = TRUE;
    char chTemp[2];
+   int iTemp;
    ushort  usId = UtlGetTask();
    short i;
 
@@ -2796,13 +2797,15 @@ BOOL UtlInitUtils( HAB hab )
    WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
 
    //--- get profile information --- 
-   int retCode = properties_get_int_or_default("iDate",UtiVar[usId].usDateFormat, MDY_DATE_FORMAT);
-   retcode = properties_get_str_or_default("iTime", chTemp, 2, "/");
+   int retCode = properties_get_int_or_default("iDate", iTemp, MDY_DATE_FORMAT);
+   UtiVar[usId].usDateFormat = iTemp;
+
+   retCode = properties_get_str_or_default("iTime", chTemp, 2, "/");
    UtiVar[usId].usDateFormat = (ushort)strlen(chTemp);
    UtiVar[usId].chDateSeperator = chTemp[0];
 
-   retCode = properties_get_int_or_default("iTime",UtiVar[usId].usTimeFormat, S_12_HOURS_TIME_FORMAT);
-
+   retCode = properties_get_int_or_default("iTime", iTemp, S_12_HOURS_TIME_FORMAT);
+   UtiVar[usId].usTimeFormat = iTemp;
    retCode = properties_get_str_or_default("sTime", chTemp, 2, ":");
    UtiVar[usId].chTimeSeperator = chTemp[0];
     
@@ -2827,8 +2830,8 @@ BOOL UtlInitUtils( HAB hab )
 
    // Load or create event list
    {
-     CHAR szLogFile[MAX_EQF_PATH];
-     ULONG ulLength;
+     char szLogFile[MAX_EQF_PATH];
+     ulong ulLength;
 
      // Setup event log file name
      char* otmDir = properties_get_otm_dir();

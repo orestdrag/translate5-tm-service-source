@@ -1876,7 +1876,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define EMPTY_STRINGW L""       // empty string (Unicode version)
 #define DEFAULT_PATTERN  "*.*"         // default name when looking for files
 #define FILE_LISTSEL     "from list"
-#define BACKSLASH_STR           "\\"   // backslash string (directory seperator)
+#define BACKSLASH_STR           "/"    // backslash string (directory seperator)
 #define DEFAULT_PATTERN_NAME    "*"    // default names to be shown for load dialog
 #define DEFAULT_PATTERN_EXT     ".*"   // default extension to be shown for load dialog
 #define CURRENT_DIR_NAME        "."    // file name of current directory file

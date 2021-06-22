@@ -792,7 +792,6 @@ pszName = "hardcoded";
   usRC = UtlFindFirst( this->szBuffer, &hDir, 0, &ResultBuf, sizeof(ResultBuf), &usCount, 0L, 0 );
   usCount = ( usRC ) ? 0 : usCount;
 //TODO usCount
-#ifdef TEMPORARY_COMMENTED
   while( usCount)
   {
     this->addToList( pszName );
@@ -801,7 +800,6 @@ pszName = "hardcoded";
     usRC = UtlFindNext( hDir, &ResultBuf, sizeof(ResultBuf), &usCount, FALSE );
     usCount = ( usRC ) ? 0 : usCount;
   } /* endwhile */
-#endif //TEMPORARY_COMMENTED
 
   // close file search handle
   if ( hDir != HDIR_CREATE ) UtlFindClose( hDir, FALSE );
@@ -1540,7 +1538,7 @@ int EqfMemoryPlugin::addMemoryToList(PSZ pszName, CHAR chDrive)
     if(!fIsNew)
     {
         UtlMakeEQFPath( szPathName, chDrive, MEM_PATH, NULL );
-        strcat( szPathName, "\\" );
+        strcat( szPathName, "/" );
         strcat( szPathName, szShortName );
         strcat( szPathName, EXT_OF_TMDATA  );
 

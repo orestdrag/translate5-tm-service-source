@@ -305,6 +305,7 @@
 
 #include <dlfcn.h>
 #include <gnu/lib-names.h>
+#include <fstream>
 
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
@@ -492,26 +493,34 @@ USHORT UtlOpenHwnd                                                        /*@3BC
    do {
       DosError(0);
       {
-        DWORD dwAccess = 0;
+        //DWORD dwAccess = 0;
         DWORD dwShareMode = 0;
         DWORD dwFlagsAndAttr = usAttr;
+        
+        int access = 0;
+        std::fstream f;
 
         // get open mode
         if ( fsOpenMode & OPEN_ACCESS_READONLY )
         {
-            dwAccess |= GENERIC_READ;
+            //dwAccess |= GENERIC_READ;
+            access |= f.in;
         } /* endif */
         if ( fsOpenMode & OPEN_ACCESS_WRITEONLY )
         {
-            dwAccess |= GENERIC_WRITE;
+            //dwAccess |= GENERIC_WRITE;
+            access != f.out;
         } /* endif */
         if ( (fsOpenMode & OPEN_ACCESS_READWRITE) == OPEN_ACCESS_READWRITE)
         {
-            dwAccess |= GENERIC_WRITE | GENERIC_READ;
+            //dwAccess |= GENERIC_WRITE | GENERIC_READ;
+            access |= f.in | f.out;
         } /* endif */
-        if ( dwAccess == 0 )
+        //if ( dwAccess == 0 )
+        if( access == 0)
         {
-            dwAccess = GENERIC_READ;   // use read access as default
+            //dwAccess = GENERIC_READ;   // use read access as default
+            access = f.in;
         } /* endif */
 
         // share flags
