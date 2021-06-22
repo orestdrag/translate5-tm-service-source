@@ -53,7 +53,7 @@ int properties_get_int(const char * key, int& value ){
 }
 
 bool properties_exist(const char * key){
-    return properties.existInMap(key);
+    return properties.exist(key);
 }
 
 int properties_add_key(const char *key, int value) {
@@ -100,15 +100,9 @@ void Properties::deinit() {
 }
 
 int Properties::add_key(const std::string& key, const std::string& value) {
-    int updateRes = update_strData_from_file(key);
-
-    if(updateRes == ERROR_FILE_KEY_NOT_FOUND){
-        //add key to file
-    }
-
-    if (existStringInMap(key))
+    if (exist_string(key) == NO_ERRORS){
         return ERROR_STR_KEY_ALREADY_EXISTS;
-
+    }
     dataStr.insert({ key, value });
     if (int writeDataReturn = update_strData_in_file(key))
         return writeDataReturn;
@@ -117,14 +111,9 @@ int Properties::add_key(const std::string& key, const std::string& value) {
 }
 
 int Properties::add_key(const std::string& key, const int value) {
-    int updateRes = update_intData_from_file(key);
-    
-    if(updateRes == ERROR_FILE_KEY_NOT_FOUND){
-        //add key to file
+    if (exist_int(key) == NO_ERRORS){
+        return ERROR_INT_KEY_ALREADY_EXISTS;
     }
-
-    if (existIntInMap(key))
-        return ERROR_STR_KEY_ALREADY_EXISTS;
 
     dataInt.insert({ key, value });
     if (int writeDataReturn = update_strData_in_file(key))
@@ -134,14 +123,9 @@ int Properties::add_key(const std::string& key, const int value) {
 }
 
 int Properties::set_value(const std::string& key, const std::string& value) {
-    int updateRes = update_strData_from_file(key);
-
-    if(updateRes == ERROR_FILE_KEY_NOT_FOUND){
-        //error?
+    if(int existRet = exist_string(key)){
+        return existRet;
     }
-
-    if (!existStringInMap(key))
-        return ERROR_STR_KEY_NOT_EXISTS;
 
     dataStr.at(key) = value;
 
@@ -149,15 +133,11 @@ int Properties::set_value(const std::string& key, const std::string& value) {
     return writeDataReturn;
 }
 
-int Properties::set_value(const std::string& key, const int value) {
-    int updateRes = update_intData_from_file(key);
-
-    if(updateRes == ERROR_FILE_KEY_NOT_FOUND){
-        //error?
+int Properties::set_value(const std::string& key, const int value) { 
+    
+    if(int existRet = exist_int(key)){
+        return existRet;
     }
-
-    if (!existIntInMap(key))
-        return ERROR_INT_KEY_NOT_EXISTS;
 
     dataInt.at(key) = value;
     
@@ -166,38 +146,63 @@ int Properties::set_value(const std::string& key, const int value) {
 }
 
 int Properties::get_value(const std::string& key, std::string& value){
-    int updateRet = update_strData_from_file(key);
-
-    if(!existStringInMap(key))
-        return ERROR_STR_KEY_NOT_EXISTS;
-
+    if(int existRet = exist_string(key)){
+        return existRet;
+    }
     value = dataStr.at(key);
     return NO_ERRORS;    
 }
 
 int Properties::get_value(const std::string& key, int& value){
-    int updateRet = update_intData_from_file(key);
-
-    if(!existIntInMap(key))
-        return ERROR_INT_KEY_NOT_EXISTS;
+    if(int existRet = exist_int(key)){
+        return existRet;
+    }
 
     value = dataInt.at(key);
     return NO_ERRORS;    
 }
 
 
-bool Properties::existIntInMap(const std::string& key){
+bool Properties::exist_int_in_map(const std::string& key){
     return dataInt.count(key);
 }
 
-bool Properties::existStringInMap(const std::string& key){
+bool Properties::exist_string_in_map(const std::string& key){
     return dataStr.count(key);
 }
 
-bool Properties::existInMap(const std::string& key){
-    return existStringInMap(key) || existIntInMap(key);
+bool Properties::exist_in_map(const std::string& key){
+    return exist_string_in_map(key) || exist_int_in_map(key);
 }
 
+bool Properties::exist(const std::string& key){
+    return exist_string(key)==NO_ERRORS || exist_int(key)==NO_ERRORS;
+}
+
+int Properties::exist_int(const std::string& key){
+    if (!exist_int_in_map(key)){ // if we don't hame key in memory-trying to load from file
+        int updateRes = update_intData_from_file(key);
+        if(updateRes != NO_ERRORS){
+            return updateRes;
+        }
+        if(!exist_int_in_map(key)){
+            return ERROR_INT_KEY_NOT_EXISTS;
+        }
+    }
+    return NO_ERRORS;
+}
+int Properties::exist_string(const std::string& key){
+    if (!exist_string_in_map(key)){ // if we don't hame key in memory-trying to load from file
+        int updateRes = update_strData_from_file(key);
+        if(updateRes != NO_ERRORS){
+            return updateRes;
+        }
+        if(!exist_string_in_map(key)){
+            return ERROR_INT_KEY_NOT_EXISTS;
+        }
+    }
+    return NO_ERRORS;
+}
 
 std::string Properties::get_otm_dir() const {
     return otm_dir;
@@ -299,7 +304,7 @@ int Properties::write_all_data_to_file() {
     for (auto it = dataInt.begin(); it != dataInt.end(); ++it)
         fs << it->first << "=" << std::to_string(it->second) << "\n";
     fs << "</intProperties>\n";
-    
+
     fs.close();
     return NO_ERRORS;
 }
@@ -307,7 +312,7 @@ int Properties::write_all_data_to_file() {
 int Properties::update_intData_from_file(const std::string& key){
     //TODO rewrite for better optimization
     read_all_data_from_file();
-    if(!existIntInMap(key))
+    if(!exist_int_in_map(key))
         return ERROR_FILE_KEY_NOT_FOUND;
     return NO_ERRORS;
 }
@@ -315,7 +320,7 @@ int Properties::update_intData_from_file(const std::string& key){
 int Properties::update_strData_from_file(const std::string& key){
     //TODO rewrite for better optimization
     read_all_data_from_file();
-    if(!existStringInMap(key))
+    if(!exist_string_in_map(key))
         return ERROR_FILE_KEY_NOT_FOUND;
     return NO_ERRORS;
 }

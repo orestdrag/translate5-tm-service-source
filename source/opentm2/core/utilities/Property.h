@@ -11,7 +11,7 @@ public:
     void deinit();
     
     //checks if key exists in memory
-    bool existInMap(const std::string& key);
+    bool exist(const std::string& key);
 
     int add_key(const std::string& key, const std::string& value);
     int set_value(const std::string& key, const std::string& value);
@@ -58,8 +58,13 @@ private:
     int read_all_data_from_file();
     int write_all_data_to_file();
 
-    bool existIntInMap(const std::string& key);
-    bool existStringInMap(const std::string& key);
+    bool exist_in_map(const std::string& key);
+    bool exist_int_in_map(const std::string& key);
+    bool exist_string_in_map(const std::string& key);
+
+    //check memory and if not found- try to find in file
+    int exist_int(const std::string& key);
+    int exist_string(const std::string& key);
 
     std::map<std::string, std::string>  dataStr;
     std::map<std::string, int>          dataInt;
