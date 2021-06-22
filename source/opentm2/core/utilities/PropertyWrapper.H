@@ -37,6 +37,8 @@ extern "C" {
     
 
     char * properties_get_otm_dir();
+
+    char * filesystem_get_home_dir();
 }
 
 #endif // _PROPERTY_WRAPPER_H__

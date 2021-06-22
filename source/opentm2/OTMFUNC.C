@@ -342,12 +342,10 @@ USHORT EqfStartSession
     UtlSetUShort( QS_RUNMODE, FUNCCALL_RUNMODE );
     UtlSetUShort( QS_PROGRAMID, NONDDEAPI_PROGID );
 
-#ifdef TEMPORARY_COMMENTED
     if ( !UtlInitUtils( NULLHANDLE ) )
     {
       usRC = ERROR_READ_SYSTEMPROPERTIES;
     } /* endif */
-#endif //TEMPORARY_COMMENTED
   } /* endif */
 
   // get profile data and initialize error handler
@@ -535,6 +533,7 @@ USHORT EqfStartSession
   {
 //TODO rewrite function to return proper path
     char szPluginPath[MAX_EQF_PATH] = "/opentm2/plugins/EqfMemoryPlugin";
+    //char szPluginPath[MAX_EQF_PATH] = "/workspace/translate5/translate5-tm-service-source/source/build/opentm2/plugins/EqfMemoryPlugin/libEqfMemoryPlugin.so";
 #ifdef TEMPORARY_COMMENTED
     UtlMakeEQFPath( szPluginPath, NULC, PLUGIN_PATH, NULL );
 #endif //TEMPORARY_COMMENTED

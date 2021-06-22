@@ -25,7 +25,7 @@ public:
 
 
 private:
-    int get_home_dir();
+    
     int create_otm_dir();
     int create_properties_file();
 

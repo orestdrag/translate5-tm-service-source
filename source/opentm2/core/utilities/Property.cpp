@@ -73,10 +73,24 @@ char * properties_get_otm_dir() {
     return otmdir;
 }
 
+char* filesystem_get_home_dir() {
+    char* _home_dir = getenv(HOME_ENV);
+    if (!strlen(_home_dir))
+        return  0;//PROPERTY_NO_ERRORS;
+
+    struct passwd *pswd = getpwuid(getuid());
+    if (!pswd)
+        return 0;//PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
+    _home_dir = pswd->pw_dir;
+
+    return _home_dir;
+}
+
 /* Implementation */
 
 int Properties::init() {
-    if (get_home_dir())
+    home_dir = filesystem_get_home_dir();
+    if (home_dir.empty())
         return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
 
     otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
@@ -208,18 +222,7 @@ std::string Properties::get_otm_dir() const {
     return otm_dir;
 }
 
-int Properties::get_home_dir() {
-    home_dir = getenv(HOME_ENV);
-    if (!home_dir.empty())
-        return  PROPERTY_NO_ERRORS;
 
-    struct passwd *pswd = getpwuid(getuid());
-    if (!pswd)
-        return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
-    home_dir = pswd->pw_dir;
-
-    return PROPERTY_NO_ERRORS;
-}
 
 int Properties::create_otm_dir() {
     struct stat st;

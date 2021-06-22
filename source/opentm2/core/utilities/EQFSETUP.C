@@ -138,10 +138,15 @@ int SetupMAT() {
 
     properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
     properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);
+    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
+    properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
 
+    char* homeDir = filesystem_get_home_dir();
+    if(homeDir)
+      properties_add_str(KEY_Drive, homeDir);
+      
     PSZ otmPath = NULL;
-    char *otmDir = properties_get_otm_dir();
+    char *otmDir = properties_get_otm_dir(); 
     int size = strlen(otmDir) + 1 /*'/'*/ + strlen(SYSTEM_PROPERTIES_NAME) + 1 /*'\0'*/;
 
     otmPath = (PSZ)malloc(size);
