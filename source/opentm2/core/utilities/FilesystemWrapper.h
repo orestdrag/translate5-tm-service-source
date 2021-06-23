@@ -3,7 +3,7 @@
 
 #include "win_types.h"
 
-extern "C" {
+//extern "C" {
     
     typedef struct _SECURITY_ATTRIBUTES {
             DWORD  nLength;
@@ -44,37 +44,28 @@ extern "C" {
                         DWORD                 dwCreationDisposition,
                         DWORD                 dwFlagsAndAttributes,
                         HANDLE                hTemplateFile
-    ){
-        return (void*)0;
-    }
+    );
 
     BOOL WriteFile(     HANDLE       hFile,
                         LPCVOID      lpBuffer,
                         DWORD        nNumberOfBytesToWrite,
                         LPDWORD      lpNumberOfBytesWritten,
                         LPOVERLAPPED lpOverlapped
-                        ){
-                            return false;
-                        }
+                        );
 
-    BOOL DeleteFile(LPCTSTR lpFileName){
-        return false;
-    }
+    //BOOL DeleteFile(LPCTSTR lpFileName);
+    bool DeleteFile(char const* sFileName);
 
     //BOOL CloseFile(LPCTSTR lpFileName){
     //    return false;
     //}
-    BOOL CloseFile(HFILE* lpFileName){
-        return false;
-    }
+    BOOL CloseFile(HFILE* lpFileName);
 
     HFILE OpenFile(     LPCSTR     lpFileName,
                         LPOFSTRUCT lpReOpenBuff,
                         UINT       uStyle
-                        ){
-                            return -1;
-                        }
-}
+                        );
+//}
 
 
 
