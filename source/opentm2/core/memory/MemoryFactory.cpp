@@ -2828,7 +2828,7 @@ int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInf
 {
   PAPILISTMEMDATA pData = ( PAPILISTMEMDATA )pvData;
 
-  pInfo;
+  //pInfo;
 
   LONG lNameLen = strlen( pszName );
 
@@ -2875,7 +2875,8 @@ USHORT MemoryFactory::APIListMem
   {
     OtmMemoryPlugin *pluginCurrent = ( *pluginList )[i];
 
-    pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
+    //pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
+    pluginCurrent->listMemories( AddMemToList, (void *)&Data, TRUE );
   } /* endfor */
 
   for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )

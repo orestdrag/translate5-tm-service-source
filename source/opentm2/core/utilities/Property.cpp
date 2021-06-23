@@ -85,7 +85,7 @@ char * properties_get_otm_dir() {
     std::string otm_dir = properties.get_otm_dir();
     char *otmdir = (char *)malloc(otm_dir.size() + 1);
     if (otmdir)
-        strncpy(otmdir, otm_dir.c_str(), otm_dir.size());
+        strcpy(otmdir, otm_dir.c_str());
     return otmdir;
 }
 

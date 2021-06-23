@@ -1321,6 +1321,50 @@ USHORT WritePropFile(PSZ szPath, PVOID pProp, USHORT usSize)
 
     return( usRC );
 }
+
+USHORT ReadPropFile(PSZ szPath, PVOID *pProp, USHORT usSize)
+{
+  USHORT  usRC = NO_ERROR;             // function return code
+  FILE   *hFile = NULL;                // file handle for property files
+
+  /********************************************************************/
+  /* Open the property file                                           */
+  /********************************************************************/
+  hFile = fopen( szPath, "rb" );
+  if ( hFile == NULL )
+  {
+      usRC = ERROR_PATH_NOT_FOUND;
+  }
+
+  /********************************************************************/
+  /* Allocate memory                                                  */
+  /********************************************************************/
+  *pProp = malloc(usSize);
+  if (*pProp == NULL) {
+    usRC = ERROR_NOT_ENOUGH_MEMORY;
+  }
+
+  /********************************************************************/
+  /* Read property data from disk                                      */
+  /********************************************************************/
+  if ( !usRC  )
+  {
+      if ( fread( *pProp, usSize, 1, hFile ) != 1 )
+      {
+          usRC = ERROR_READ_FAULT;
+      } /* endif */
+  } /* endif */
+
+  /********************************************************************/
+  /* Close property file                                              */
+  /********************************************************************/
+  if ( hFile )
+  {
+      fclose( hFile);
+  } /* endif */
+
+  return( usRC );
+}
 #endif //__linux__
 
 //+----------------------------------------------------------------------------+

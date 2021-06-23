@@ -14,6 +14,7 @@
 
 #include "string"
 #include "vector"
+#include <fstream>
 
 // some constant values
 static char *pszPluginName = "EqfMemoryPlugin";
@@ -833,10 +834,22 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   // init it, if not meet some condition ,it will be set to false
   pInfo->fEnabled = TRUE;
 
+//TODO rewrite work with properties to avoid redundand actions and overhead
+  std::string mem_path = properties_get_otm_dir();
+  mem_path += "/" + std::string(pszPropName);
+  char *cstr = new char[mem_path.length() + 1];
+  strcpy(cstr, mem_path.c_str());
+  ReadPropFile(cstr, (PVOID*)&pProp, sizeof(PROP_NTM));
+  delete [] cstr;
+
+#ifdef TEMPORARY_COMMENTED
   UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
   strcat( szFullPropName, BACKSLASH_STR );
   strcat( szFullPropName, pszPropName );
   fOK = UtlLoadFile( szFullPropName, (PVOID *)&pProp, &usLen, FALSE, FALSE );
+#endif //TEMPORARY_COMMENTED
+
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fOK )
   {
     if ( (usLen >= sizeof(PROP_NTM)) && (pProp->szFullMemName[0] != EOS) )
@@ -902,8 +915,23 @@ BOOL EqfMemoryPlugin::fillInfoStructure
       UtlDelete( szFullPropName, 0, FALSE );
 
     } /* end */         
+
     UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
   } /* endif */
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
+  strcpy( pInfo->szDescription, pProp->stTMSignature.szDescription );
+  strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
+  //strcpy( pInfo->szFullPath, pProp->szFullMemName );
+// TODO for debugging purpises this temporarily returns properties name
+// as the name of memory, fix it after memory creation is done
+  strcpy( pInfo->szFullPath, pProp->stPropHead.szName);
+  strcpy( pInfo->szName, pProp->stPropHead.szName);
+
+  strcpy( pInfo->szPlugin, this->name.c_str() );
+  strcpy( pInfo->szDescrMemoryType, this->descrType.c_str() );
+  strcpy( pInfo->szOwner, "" );
+
   return( fOK );
 }
 
