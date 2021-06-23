@@ -1186,7 +1186,7 @@ int EqfMemoryPlugin::addToList( char *pszPropName )
   if(pInfo != 0)
   {
     // find the property name when pszPropName is fully qualified
-    PSZ pszName = strrchr( pszPropName, '\\' );
+    PSZ pszName = strrchr( pszPropName, '/' );
     pszName = (pszName == NULL) ? pszPropName : pszName + 1;
     if ( this->fillInfoStructure( pszName, pInfo ) )
     {

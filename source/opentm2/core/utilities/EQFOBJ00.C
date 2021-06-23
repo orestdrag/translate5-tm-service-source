@@ -11,6 +11,8 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include "EQF.H"                  // General .H for EQF
 #include "EQFOBJ00.H"             // Object manager defines
+#include "EQFSETUP.H"
+#include "core/utilities/PropertyWrapper.H"
 #include "win_types.h"
 
 static HWND hObjMan[MAX_TASK] = {NULLHANDLE};
@@ -1399,12 +1401,12 @@ USHORT ObjLongToShortNameEx2
       else
       {
         NameType = LONGNAME;
-#if 0
+#ifdef TEMPORARY_COMMENTED
         if ( IsDBCSLeadByteEx(ulCP,  *pszLongName ) && (pszLongName[1] != EOS) )
         {
           pszLongName++;                 // skip second byte of DBCS char
         }
-#endif
+#endif //TEMPORARY_COMMENTED
         pszLongName++;                   // try next character
       } /* endif */
     } /* endwhile */
@@ -1596,7 +1598,7 @@ USHORT ObjLongToShortNameEx2
       ULONG ulBytesRead;
 
       // in TM_OBJECT mode only: ignore all files but files with the .MEM and .SLM extension
-#if 0
+#ifdef TEMPORARY_COMMENTED
       PSZ pszExtension = strrchr( RESBUFNAME(pData->stResultBuf), DOT );
       if ( (ObjType != TM_OBJECT) || // no memory or
            (pszExtension == NULL) || // no extension found or
@@ -1681,7 +1683,7 @@ USHORT ObjLongToShortNameEx2
           UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
         } /* endif */
       } /* endif */
-#endif
+#endif //TEMPORARY_COMMENTED
 
       // try next object
       if ( ObjState == OBJ_IS_NEW )
@@ -1945,7 +1947,17 @@ USHORT ObjLongToShortNameEx2
                 strcpy( pProp->stPropHead.szPath, pData->szSearchPath );
                 strcpy( pProp->stPropHead.szName, UtlSplitFnameFromPath(pProp->stPropHead.szPath) );
                 UtlSplitFnameFromPath( pProp->stPropHead.szPath ); 
+#ifdef TEMPORARY_COMMENTED
                 UtlWriteFile( pData->szSearchPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
+#endif //TEMPORARY_COMMENTED
+//TODO
+                char *otm_dir = properties_get_otm_dir();
+                char *mem_path = (char*)malloc(strlen(otm_dir)
+                                  + strlen(pData->szSearchPath) + 1);
+                sprintf(mem_path, "%s%s", otm_dir, pData->szSearchPath);
+                free(otm_dir);
+                WritePropFile(mem_path, (PVOID)pProp, sizeof(PROP_NTM));
+                free(mem_path);
                 UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
                 if ( pfReserved ) *pfReserved = TRUE;
               } /* endif */
