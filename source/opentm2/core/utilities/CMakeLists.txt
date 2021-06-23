@@ -19,6 +19,7 @@ set(Util_Source_Files
         EQFHASH.C
         Property.cpp
         FilesystemHelper.cpp
+        FilesystemWrapper.cpp
         EQFSETUP.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP

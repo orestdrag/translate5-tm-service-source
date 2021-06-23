@@ -3,7 +3,7 @@
 
 #include <string>
 
-
+/*
 class FilesystemHelper{
 public:
     static int CreateFile(const std::string& path);
@@ -24,5 +24,5 @@ public:
         FILEHELPER_NOT_IMPLEMENTED,
     };
 };
-
+//*/
 #endif

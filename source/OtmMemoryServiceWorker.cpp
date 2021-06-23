@@ -25,8 +25,7 @@
 #include "EQFMSG.H"
 #include "EQFTM.H"
 #include "win_types.h"
-#include "../../../../source/opentm2/core/utilities/FilesystemWrapper.h"
-
+#include "opentm2/core/utilities/FilesystemWrapper.h"
 #include <sstream>
 
 // for string convertations

@@ -2,6 +2,7 @@
 #include "FilesystemWrapper.h"
 #include <fstream>
 
+/*
 int FilesystemHelper::CreateFile(const std::string& path){
     std::ofstream outfile(path);
     outfile.close();
@@ -39,3 +40,4 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff, const int bu
 int FilesystemHelper::GetFileSize(const std::string& path){
     return FILEHELPER_NOT_IMPLEMENTED;
 }
+//*/
