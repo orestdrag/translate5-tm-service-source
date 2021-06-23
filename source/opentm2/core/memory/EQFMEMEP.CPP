@@ -43,6 +43,7 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
 
+#include "../../core/utilities/FilesystemWrapper.h"
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"

@@ -69,6 +69,7 @@
 #define INCL_EQF_TP               // public translation processor functions
 #define INCL_EQF_FOLDER           // folder list and document list functions
 
+#include "../utilities/FilesystemWrapper.h"
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"

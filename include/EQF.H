@@ -7187,7 +7187,7 @@ BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BO
 BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID );
 
 
-extern "C" VOID CloseFile( HFILE * );
+//extern "C" VOID CloseFile( HFILE * );
 
 void UtlSaveLastUsedString( HWND hwndDlg, int iID, char *pszName, int iMaxNumOfStrings );
 

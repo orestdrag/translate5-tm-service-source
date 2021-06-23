@@ -25,6 +25,8 @@
 #include "EQFMSG.H"
 #include "EQFTM.H"
 #include "win_types.h"
+#include "../../../../source/opentm2/core/utilities/FilesystemWrapper.h"
+
 #include <sstream>
 
 // for string convertations
@@ -653,8 +655,8 @@ void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
   iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iASCIILen + 1 );
   WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   strText = pszNewData;
+  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   free( pszNewData );
 }
 
@@ -941,9 +943,7 @@ int OtmMemoryServiceWorker::createMemory
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     DeleteFile( szTempFile );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
   if ( iRC != 0 )
@@ -2224,10 +2224,8 @@ void importMemoryProcess( void *pvData )
   // update memory status
   pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pszError );
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // cleanup
   DeleteFile( pData->szInFile );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   delete( pData );
 
   return;
