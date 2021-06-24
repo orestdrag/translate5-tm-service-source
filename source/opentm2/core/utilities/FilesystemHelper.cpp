@@ -34,27 +34,75 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
 
 
 int FilesystemHelper::DeleteFile(const std::string& path){
-    return FILEHELPER_NO_ERROR;
+    std::string fixedPath = FixPath(path);
+    if(int errCode = remove(path.c_str())){
+        return errCode;
+    }else{
+        return FILEHELPER_NO_ERROR;
+    }
 }
+/*
+int FilesystemHelper::DeleteFile(FILE*  ptr){
+    if(!ptr)
+        return FILEHELPER_FILE_PTR_IS_NULL;
+    
+    return FILEHELPER_NO_ERROR;
+}//*/
+
 
 int FilesystemHelper::CloseFile(FILE* ptr){
-    return FILEHELPER_NOT_IMPLEMENTED;
+    if(ptr){
+        fclose(ptr);
+    }
+    return FILEHELPER_NO_ERROR;
 }
 
 int FilesystemHelper::WriteToFile(const std::string& path, char* buff, const int buffsize){
     std::string fixedPath = FixPath(path);
     FILE *ptr = OpenFile(fixedPath, "wb");
-    fwrite(buff, buffsize, 1, ptr);
-    CloseFile(ptr);
-    return FILEHELPER_NO_ERROR;
+    return WriteToFile(ptr, buff, buffsize);
 }
+
+
+int FilesystemHelper::WriteToFile(FILE* ptr, void* buff, const int buffsize){
+    int errCode = FILEHELPER_NO_ERROR;
+    if(ptr == NULL){
+        errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
+        errCode = ERROR_WRITE_FAULT;
+    }
+    CloseFile(ptr);
+    return errCode;
+}
+
+int FilesystemHelper::WriteToFile(FILE* ptr, char* buff, const int buffsize){
+    int errCode = FILEHELPER_NO_ERROR;
+    if(ptr == NULL){
+        errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
+        errCode = ERROR_WRITE_FAULT;
+    }
+    CloseFile(ptr);
+    return errCode;
+}
+
 
 int FilesystemHelper::ReadFile(const std::string& path, char* buff, const int buffSize, int& bytesRead){
     std::string fixedPath = FixPath(path);
     FILE *ptr = OpenFile(fixedPath, "rb");
-    bytesRead = fread(buff, buffSize, 1, ptr);
-    CloseFile(ptr);
-    return FILEHELPER_NO_ERROR;
+
+    return ReadFile(ptr, buff, buffSize, bytesRead);
+}
+
+int FilesystemHelper::ReadFile(FILE* ptr, char* buff, const int buffSize, int& bytesRead){
+    int errCode = FILEHELPER_NO_ERROR;
+    if(!ptr){
+        errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else{
+        bytesRead = fread(buff, buffSize, 1, ptr);
+        CloseFile(ptr);
+    }
+    return errCode;
 }
 
 int FilesystemHelper::GetFileSize(const std::string& path){

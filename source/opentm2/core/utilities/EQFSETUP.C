@@ -66,6 +66,7 @@
   #include <direct.h>
 #endif
 #include "PropertyWrapper.H"
+#include "FilesystemHelper.h"
 
 /**********************************************************************/
 /* Global Variables                                                   */
@@ -1291,33 +1292,14 @@ USHORT WritePropFile(PSZ szPath, PVOID pProp, USHORT usSize)
     USHORT  usRC = NO_ERROR;             // function return code
     FILE   *hFile = NULL;                // file handle for property files
 
-    /********************************************************************/
-    /* Open the property file                                           */
-    /********************************************************************/
-    hFile = fopen( szPath, "wb" );
+    hFile = FilesystemHelper::OpenFile( szPath, "wb" );
     if ( hFile == NULL )
     {
         usRC = ERROR_PATH_NOT_FOUND;
-    }
-
-    /********************************************************************/
-    /* Write property data to disk                                      */
-    /********************************************************************/
-    if ( !usRC  )
-    {
-        if ( fwrite( pProp, usSize, 1, hFile ) != 1 )
-        {
-            usRC = ERROR_WRITE_FAULT;
-        } /* endif */
-    } /* endif */
-
-    /********************************************************************/
-    /* Close property file                                              */
-    /********************************************************************/
-    if ( hFile )
-    {
-        fclose( hFile);
-    } /* endif */
+    }else{
+        usRC = FilesystemHelper::WriteToFile(hFile, pProp, usSize);    
+        FilesystemHelper::CloseFile(hFile);  
+    } 
 
     return( usRC );
 }
