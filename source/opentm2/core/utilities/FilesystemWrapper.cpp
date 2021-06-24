@@ -1,6 +1,7 @@
 #include "FilesystemWrapper.h"
 
-  HANDLE CreateFile(  LPCSTR                lpFileName,
+  //HANDLE
+  HFILE CreateFile(  LPCSTR                lpFileName,
                         DWORD                 dwDesiredAccess,
                         DWORD                 dwShareMode,
                         LPSECURITY_ATTRIBUTES lpSecurityAttributes,
@@ -8,10 +9,11 @@
                         DWORD                 dwFlagsAndAttributes,
                         HANDLE                hTemplateFile
     ){
-        return (void*)0;
+        return 0;
     }
 
-    BOOL WriteFile(     HANDLE       hFile,
+    BOOL WriteFile(     //HANDLE       hFile,
+                        HFILE        hFile,
                         LPCVOID      lpBuffer,
                         DWORD        nNumberOfBytesToWrite,
                         LPDWORD      lpNumberOfBytesWritten,
@@ -41,4 +43,9 @@
                         ){
                             return -1;
                         }
+
+
+    DWORD GetLastError(){
+        return 0;
+    }
 //}

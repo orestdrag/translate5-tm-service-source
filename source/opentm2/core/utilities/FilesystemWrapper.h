@@ -4,7 +4,27 @@
 #include "win_types.h"
 
 //extern "C" {
-    
+const int 
+  GENERIC_READ            = 0x80000000,
+  GENERIC_WRITE           = 0x40000000,
+  FILE_SHARE_READ         = 0x00000001,
+  FILE_SHARE_WRITE        = 0x00000002,
+  FILE_SHARE_DELETE       = 0x00000004,
+  FILE_FLAG_WRITE_THROUGH = 0x80000000,
+  
+  CREATE_NEW        = 1,
+  CREATE_ALWAYS     = 2,
+  OPEN_EXISTING     = 3, 
+  OPEN_ALWAYS       = 4,
+  TRUNCATE_EXISTING = 5,
+
+  ERROR_SHARING_BUFFER_EXCEEDED = 0x80070024,
+  ERROR_LOCK_VIOLATION          = 0x80070021 
+;
+
+
+const INT64 INVALID_HANDLE_VALUE = -1;
+
     typedef struct _SECURITY_ATTRIBUTES {
             DWORD  nLength;
             LPVOID lpSecurityDescriptor;
@@ -37,7 +57,8 @@
      } OFSTRUCT, *LPOFSTRUCT, *POFSTRUCT;
 
 
-    HANDLE CreateFile(  LPCSTR                lpFileName,
+    //HANDLE 
+    HFILE CreateFile(  LPCSTR                lpFileName,
                         DWORD                 dwDesiredAccess,
                         DWORD                 dwShareMode,
                         LPSECURITY_ATTRIBUTES lpSecurityAttributes,
@@ -46,7 +67,8 @@
                         HANDLE                hTemplateFile
     );
 
-    BOOL WriteFile(     HANDLE       hFile,
+    BOOL WriteFile(     //HANDLE       hFile,
+                        HFILE        hFile,
                         LPCVOID      lpBuffer,
                         DWORD        nNumberOfBytesToWrite,
                         LPDWORD      lpNumberOfBytesWritten,
@@ -65,6 +87,8 @@
                         LPOFSTRUCT lpReOpenBuff,
                         UINT       uStyle
                         );
+
+    DWORD GetLastError();
 //}
 
 

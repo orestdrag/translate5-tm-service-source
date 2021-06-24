@@ -305,7 +305,8 @@
 
 #include <dlfcn.h>
 #include <gnu/lib-names.h>
-#include <fstream>
+#include "FilesystemWrapper.h"
+
 
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
@@ -488,7 +489,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
    USHORT usMBCode = 0;                    // message box/UtlError return code
    BOOL   fTryCreate = TRUE;           // try-creation-of-file flag
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
       DosError(0);
@@ -496,31 +497,25 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         //DWORD dwAccess = 0;
         DWORD dwShareMode = 0;
         DWORD dwFlagsAndAttr = usAttr;
-        
-        int access = 0;
-        std::fstream f;
+        DWORD dwAccess = 0;
 
         // get open mode
         if ( fsOpenMode & OPEN_ACCESS_READONLY )
         {
-            //dwAccess |= GENERIC_READ;
-            access |= f.in;
+            dwAccess |= GENERIC_READ;
         } /* endif */
         if ( fsOpenMode & OPEN_ACCESS_WRITEONLY )
         {
-            //dwAccess |= GENERIC_WRITE;
-            access != f.out;
+            dwAccess |= GENERIC_WRITE;
         } /* endif */
         if ( (fsOpenMode & OPEN_ACCESS_READWRITE) == OPEN_ACCESS_READWRITE)
         {
-            //dwAccess |= GENERIC_WRITE | GENERIC_READ;
-            access |= f.in | f.out;
+            dwAccess |= GENERIC_WRITE | GENERIC_READ;
         } /* endif */
-        //if ( dwAccess == 0 )
-        if( access == 0)
+        
+        if ( dwAccess == 0 )
         {
-            //dwAccess = GENERIC_READ;   // use read access as default
-            access = f.in;
+            dwAccess = GENERIC_READ;   // use read access as default
         } /* endif */
 
         // share flags
@@ -675,7 +670,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    return( usRetCode );
 }
