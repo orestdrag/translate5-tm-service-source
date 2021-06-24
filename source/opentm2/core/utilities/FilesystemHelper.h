@@ -7,11 +7,11 @@
 class FilesystemHelper{
     static std::string FixPath(const std::string& path);
 public:
-    static int CreateFile(const std::string& path);
+    static FILE* CreateFile(const std::string& path, const std::string& mode);
 
-    static int WriteToFile(const std::string& path, char* buff, const int buffsize);
-    static int WriteToFile(FILE* ptr, char* buff, const int buffsize);
-    static int WriteToFile(FILE* ptr, void* buff, const int buffsize);
+    static int WriteToFile(const std::string& path, const char* buff, const int buffsize);
+    static int WriteToFile(FILE* ptr, const char* buff, const int buffsize);
+    static int WriteToFile(FILE* ptr, const void* buff, const int buffsize);
 
     static int ReadFile(const std::string& path, char* buff, const int buffSize, int& bytesRead);
     static int ReadFile(FILE* ptr, char* buff, const int buffSize, int& bytesRead);

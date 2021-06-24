@@ -18,12 +18,12 @@ std::string FilesystemHelper::FixPath(const std::string& path){
     return ret;
 }
 
-int FilesystemHelper::CreateFile(const std::string& path){
+FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
     std::string fixedPath = FixPath(path);
-    std::ofstream outfile(fixedPath);
-    outfile.close();
 
-    return FILEHELPER_NO_ERROR;
+    FILE* fp = fopen(fixedPath.c_str(), mode.c_str());
+
+    return fp;
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode){
@@ -57,14 +57,14 @@ int FilesystemHelper::CloseFile(FILE* ptr){
     return FILEHELPER_NO_ERROR;
 }
 
-int FilesystemHelper::WriteToFile(const std::string& path, char* buff, const int buffsize){
+int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, const int buffsize){
     std::string fixedPath = FixPath(path);
     FILE *ptr = OpenFile(fixedPath, "wb");
     return WriteToFile(ptr, buff, buffsize);
 }
 
 
-int FilesystemHelper::WriteToFile(FILE* ptr, void* buff, const int buffsize){
+int FilesystemHelper::WriteToFile(FILE* ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     if(ptr == NULL){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -75,7 +75,7 @@ int FilesystemHelper::WriteToFile(FILE* ptr, void* buff, const int buffsize){
     return errCode;
 }
 
-int FilesystemHelper::WriteToFile(FILE* ptr, char* buff, const int buffsize){
+int FilesystemHelper::WriteToFile(FILE* ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     if(ptr == NULL){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;

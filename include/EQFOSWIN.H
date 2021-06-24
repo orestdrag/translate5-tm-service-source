@@ -75,7 +75,7 @@ typedef unsigned char BYTE;     /* b   */
 typedef void *LHANDLE;
 typedef unsigned short SHANDLE;
 
-typedef HFILE * PHFILE;
+typedef FILE ** PHFILE;
 
 typedef int   (*PFN)();
 

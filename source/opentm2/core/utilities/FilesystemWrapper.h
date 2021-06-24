@@ -23,7 +23,7 @@ const int
 ;
 
 
-const INT64 INVALID_HANDLE_VALUE = -1;
+const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
 
     typedef struct _SECURITY_ATTRIBUTES {
             DWORD  nLength;

@@ -6,6 +6,7 @@
 #ifndef WIN_TYPES_H
 #define WIN_TYPES_H
 
+#include <cstdio>
 #define WINAPI /*__stdcall*/
 #define APIENTRY WINAPI
 #define EXPENTRY WINAPI
@@ -163,7 +164,8 @@ typedef HANDLE HWND;
 
 typedef HINSTANCE HMODULE;
 
-typedef int HFILE;
+//typedef int HFILE;
+typedef FILE *HFILE;
 
 typedef int HALF_PTR;
 
