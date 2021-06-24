@@ -3,8 +3,9 @@
 
 #include <string>
 
-/*
+
 class FilesystemHelper{
+    static std::string FixPath(const std::string& path);
 public:
     static int CreateFile(const std::string& path);
     static int WriteToFile(const std::string& path, char* buff, const int buffsize);
@@ -24,5 +25,5 @@ public:
         FILEHELPER_NOT_IMPLEMENTED,
     };
 };
-//*/
+
 #endif
