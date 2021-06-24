@@ -4,9 +4,10 @@
 
 std::string FilesystemHelper::FixPath(const std::string& path){
     std::string ret;
-    //fix double back slash
-    for(int i = 1; i < path.size(); i++){
-        if(path[i-1] == '\\' && path[i] == '\\'){
+
+    //fix back slash 
+    for(int i = 0; i < path.size(); i++){
+        if( ( (i+1) < path.size()) && path[i] == '\\' && path[i+1] == '\\'){
             ret.push_back('/');
             i++;
         }else if(path[i] == '\\'){
@@ -15,6 +16,7 @@ std::string FilesystemHelper::FixPath(const std::string& path){
             ret.push_back(path[i]);
         }
     }
+    
     return ret;
 }
 
