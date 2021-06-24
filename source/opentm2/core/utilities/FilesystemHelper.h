@@ -1,8 +1,8 @@
-#ifndef FILESYSTEM_HELPER_H
-#define FILESYSTEM_HELPER_H
+#ifndef _FILESYSTEM_HELPER_H_
+#define _FILESYSTEM_HELPER_H_
 
 #include <string>
-#include "../../../.././include/win_types.h"
+#include "win_types.h"
 
 class FilesystemHelper{
     static std::string FixPath(const std::string& path);

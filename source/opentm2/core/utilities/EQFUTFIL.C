@@ -4040,6 +4040,7 @@ USHORT UtlMakeFileName
 
 #endif //TEMPORARY_COMMENTED
 
+/*
 VOID CloseFile
 (
   HFILE * hFile                   // Pointer to the file handle
@@ -4053,8 +4054,10 @@ VOID CloseFile
   {
     usDosRc = UtlClose( *hFile, FALSE );
     *hFile  = NULLHANDLE;
-  } /* endif */
-} /* end of function CloseFile */
+  } 
+} 
+//* end of function CloseFile */
+
 
 /*! \brief extract all files contained in a ZIP package to a directory
   \param pszPackage fully qualified name of the ZIP package
