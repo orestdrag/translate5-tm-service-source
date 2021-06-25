@@ -10,7 +10,23 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
+#include <dirent.h>
+
 int __last_error_code = 0;
+
+std::string parseDirectory(const std::string path){
+    std::size_t found = path.rfind('/');
+    if (found!=std::string::npos)
+        return path.substr(0,found);
+    return path;
+}
+std::string parseFilename(const std::string path){
+    std::size_t found = path.rfind('/');
+
+    if (found!=std::string::npos)
+        return path.substr(found+1);
+    return path;
+}
 
 std::string FilesystemHelper::FixPath(const std::string& path){
     std::string ret;
@@ -72,6 +88,94 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
     ptr = NULL;
     return FILEHELPER_NO_ERROR;
 }
+
+#ifdef __USING_FILESYSTEM
+FILE* FilesystemHelper::FindFirstFile(const std::string& name){
+    auto files = FindFiles(name);
+    if(files.empty())
+        return NULL;
+    auto path = files[0].path().generic_string();
+    return OpenFile(path, "wb");
+}
+
+std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& name){
+    const std::string fixedName = FixPath(name);
+    const std::string dirPath = parseDirectory(name);
+    std::string fileName = parseFilename(name);
+    
+    int pos = fileName.rfind('*');
+    bool exactMatch = pos == std::string::npos;
+
+    if(!exactMatch)
+        fileName = fileName.substr(pos+1);
+
+    std::vector< fs::directory_entry> files;
+    for (const auto & file : fs::directory_iterator(dirPath)){
+        if(exactMatch){
+            if(file.path().generic_string().compare(fileName) == 0){
+                files.push_back(file);
+            }
+        }else{
+            if( file.path().generic_string().find(fileName) != std::string::npos ){
+                files.push_back(file);
+            }
+        }
+    }
+
+    return files;
+}
+#endif
+
+FILE* FilesystemHelper::FindFirstFile(const std::string& name){
+    auto files = FindFiles(name);
+    if(files.empty())
+        return NULL;
+    auto path = files[0];
+    return OpenFile(path, "wb");
+}
+
+std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
+    const std::string fixedName = FixPath(name);
+    const std::string dirPath = parseDirectory(name);
+    std::string fileName = parseFilename(name);
+    
+    int pos = fileName.rfind('*');
+    bool exactMatch = pos == std::string::npos;
+
+    if(!exactMatch)
+        fileName = fileName.substr(pos+1);
+
+ 
+    DIR *dir; struct dirent *diread;
+    std::vector<std::string> files;
+    std::vector<std::string> sel;
+
+    if ((dir = opendir(dirPath.c_str())) != nullptr) {
+        while ((diread = readdir(dir)) != nullptr) {
+            std::string file = diread->d_name;
+            if(exactMatch){
+                if(file.compare(fileName) == 0){
+                        sel.push_back(file);
+                    }
+            }else{
+                if( file.find(fileName) != std::string::npos ){
+                    sel.push_back(file);
+                }
+            }
+        }
+        closedir (dir);
+    } else {
+        __last_error_code = FILEHELPER_ERROR_CANT_OPEN_DIR;
+        return sel;
+    }
+
+    for (auto file : files){    
+        
+    }
+
+    return sel;
+}
+
 
 int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, const int buffsize){
     std::string fixedPath = FixPath(path);
@@ -161,6 +265,7 @@ int FilesystemHelper::GetLastError(){
 
 int FilesystemHelper::ResetLastError(){
     __last_error_code = FILEHELPER_NO_ERROR;
+    return 0;
 }
 
 

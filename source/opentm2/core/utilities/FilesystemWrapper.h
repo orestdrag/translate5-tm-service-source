@@ -105,6 +105,27 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
     DWORD GetLastError();
 
     int GetFileSize(HFILE file);
+
+/*
+    typedef struct _WIN32_FIND_DATA {
+        DWORD     dwFileAttributes; 
+        FILETIME  ftCreationTime; 
+        FILETIME  ftLastAccessTime; 
+        FILETIME  ftLastWriteTime; 
+        DWORD     nFileSizeHigh; 
+        DWORD     nFileSizeLow; 
+        DWORD     dwReserved0; 
+        DWORD     dwReserved1; 
+        TCHAR     cFileName[ MAX_PATH ]; 
+        TCHAR     cAlternateFileName[ 14 ]; 
+        } WIN32_FIND_DATA, *PWIN32_FIND_DATA;  
+//*/
+
+    HFILE FindFirstFile(
+         LPCTSTR lpFileName,               
+         LPWIN32_FIND_DATA lpFindFileData  
+        );
+
 }
 
 

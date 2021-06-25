@@ -535,9 +535,6 @@ USHORT EqfStartSession
     char szPluginPath[MAX_EQF_PATH];
     int errCode = properties_get_str_or_default(KEY_PLUGIN_DIR, szPluginPath, MAX_EQF_PATH,"");
 
-#ifdef TEMPORARY_COMMENTED
-    UtlMakeEQFPath( szPluginPath, NULC, PLUGIN_PATH, NULL );
-#endif //TEMPORARY_COMMENTED
 		usRC = InitializePlugins( szPluginPath );    // add return value for P402974
         // Add for P403115;
         if (usRC != PluginManager::ePluginExpired)

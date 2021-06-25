@@ -248,11 +248,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
   
-  strFileSpec += "/libEqfMemoryPlugin.so";
-
-#ifdef TEMPORARY_COMMENTED
-	strFileSpec += "\\*.dll";
-#endif //TEMPORARY_COMMENTED
+  strFileSpec += "libEqfMemoryPlugin.so";
 
     // Modify end
     USHORT usSubRC = loadPluginDll(strFileSpec.c_str());  // add return value for P402974

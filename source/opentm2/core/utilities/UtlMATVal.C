@@ -231,31 +231,13 @@ PSZ UtlMakeEQFPath
    PSZ    pszFolder                    // folder name or NULL
 )
 {
-   int pathSize = 255;
-   char path[pathSize];
    
-   char* otmDir = filesystem_get_otm_dir();
+    pszPath = new char[MAX_EQF_PATH];                   // no path info yet
    
-    
+    char* otmDir = filesystem_get_otm_dir();
     USHORT      usQSTSubDir;           // QST_ value for subdirectory
-    CHAR        szDrive[4];            // buffer for drive letter string
-    CHAR        szLanDrive[4];         // buffer for LAN drive letter string
 
-    *pszPath = NULC;                   // no path info yet
-
-    /******************************************************************/
-    /* Build drive string                                             */
-    /******************************************************************/
-    UtlQueryString( QST_LANDRIVE, szLanDrive, sizeof(szLanDrive) );
-    UtlQueryString( QST_PRIMARYDRIVE, szDrive, sizeof(szDrive) );
-    if (!szLanDrive[0])
-    {
-      strcpy(szLanDrive, szDrive);
-    }
-    if ( chDrive )
-    {
-       szDrive[0] = chDrive;
-    } /* endif */
+    strncpy(pszPath, otmDir, MAX_EQF_PATH);
 
     /******************************************************************/
     /* Get query string ID and folder subdirectory for requested path */
@@ -271,7 +253,7 @@ PSZ UtlMakeEQFPath
        case PROGRAM_PATH          :
           usQSTSubDir = QST_PROGRAMDIR;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case DIC_PATH              :
           usQSTSubDir = QST_DICDIR;
@@ -280,7 +262,7 @@ PSZ UtlMakeEQFPath
        case POE_PATH              :
           usQSTSubDir = QST_DICDIR;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case MEM_PATH              :
           usQSTSubDir = QST_MEMDIR;
@@ -289,7 +271,7 @@ PSZ UtlMakeEQFPath
        case TABLE_PATH            :
           usQSTSubDir = QST_TABLEDIR;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case TABLEIMPORT_PATH            :
           usQSTSubDir = QST_TABLEDIR;
@@ -314,7 +296,7 @@ PSZ UtlMakeEQFPath
        case DLL_PATH              :
           usQSTSubDir = QST_DLLDIR;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case DLLIMPORT_PATH              :
           usQSTSubDir = QST_DLLDIR;
@@ -323,7 +305,7 @@ PSZ UtlMakeEQFPath
        case MSG_PATH              :
           usQSTSubDir = QST_MSGDIR;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case EXPORT_PATH              :
           usQSTSubDir = QST_EXPORTDIR;
@@ -367,12 +349,12 @@ PSZ UtlMakeEQFPath
        case PRT_PATH              :
           usQSTSubDir = QST_PRTPATH;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case WIN_PATH              :
           usQSTSubDir = QST_WINPATH;
           pszFolder = NULL;
-          szDrive[0] = szLanDrive[0];
+          //szDrive[0] = szLanDrive[0];
           break;
        case WINIMPORT_PATH        :
           usQSTSubDir = QST_WINPATH;
@@ -426,7 +408,6 @@ PSZ UtlMakeEQFPath
     /******************************************************************/
     /* Build path up to system directory                              */
     /******************************************************************/
-    sprintf( pszPath, "%c:\\", szDrive[0] );
     UtlQueryString( QST_SYSTEMDIR, pszPath + strlen(pszPath), MAX_EQF_PATH );
 
     /******************************************************************/
@@ -434,9 +415,7 @@ PSZ UtlMakeEQFPath
     /******************************************************************/
     if ( pszFolder )
     {
-#ifdef TEMPORARY_COMMENTED
        strcat( pszPath, "/" );
-#endif //TEMPORARY_COMMENTED
        strcat( pszPath, pszFolder );
     } /* endif */
 
@@ -445,9 +424,7 @@ PSZ UtlMakeEQFPath
     /******************************************************************/
     if ( usQSTSubDir != QST_LAST )
     {
-#ifdef TEMPORARY_COMMENTED
        strcat( pszPath, "/" );
-#endif //TEMPORARY_COMMENTED
        UtlQueryString( usQSTSubDir, pszPath + strlen(pszPath), MAX_EQF_PATH );
     } /* endif */
 

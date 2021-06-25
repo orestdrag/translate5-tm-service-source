@@ -117,4 +117,11 @@ char* filesystem_get_home_dir() {
     int GetFileSize(HFILE file){
         return FilesystemHelper::GetFileSize(file);
     }
+
+    HFILE FindFirstFile(
+         LPCTSTR lpFileName,               
+         LPWIN32_FIND_DATA lpFindFileData  
+        ){
+            return FilesystemHelper::FindFirstFile(lpFileName);
+        }
 //}

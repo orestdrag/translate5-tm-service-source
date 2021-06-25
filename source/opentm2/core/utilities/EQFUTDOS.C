@@ -2059,7 +2059,7 @@ USHORT UtlFindFirstHwnd
       // add '*.*' if path ends with '\' (normally root) e.g. "C:\"
       // otherwise root directory isn't recognised
 
-      if (szFSpec[strlen(szFSpec)-1] == '\\')
+      if (szFSpec[strlen(szFSpec)-1] == '/')
          strcat(szFSpec, "*.*");
 
       pszFSpecCompl = szFSpec;
@@ -2077,14 +2077,13 @@ USHORT UtlFindFirstHwnd
        {
          usAttr = FILE_ATTRIBUTE_NORMAL; // use normal file as default
        } /* endif */
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        hdirNew = FindFirstFile( pszFSpecCompl, pffb );
 
        if ( hdirNew == INVALID_HANDLE_VALUE )
        {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          usRetCode = (USHORT)GetLastError();
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
          if ( usRetCode == ERROR_FILE_NOT_FOUND )
               usRetCode = ERROR_NO_MORE_FILES;
          usSearch = 0;
@@ -2154,11 +2153,12 @@ USHORT UtlFindFirstHwnd
            {
               strcpy( pffb->cAlternateFileName, pffb->cFileName );
            } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
 
            // add file search handle and attributes in our list of open
            // file search handles
            UtlAddSearchHandle( hdirNew, usAttr );
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
          }
          else
          {
@@ -2169,7 +2169,7 @@ USHORT UtlFindFirstHwnd
             hdirNew = HDIR_CREATE;
          } /* endif */
        } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )

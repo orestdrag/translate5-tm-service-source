@@ -3,6 +3,14 @@
 
 #include <string>
 #include "win_types.h"
+#include <vector>
+
+#ifdef _USING_FILESYSTEM_
+#include <filesystem>
+//#include <experimental/filesystem>
+//namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
+#endif
 
 class FilesystemHelper{
     static std::string FixPath(const std::string& path);
@@ -26,6 +34,12 @@ public:
     static FILE* OpenFile(const std::string& path, const std::string& mode);
     static int CloseFile(FILE*& ptr);
 
+    static FILE* FindFirstFile(const std::string& name);
+#ifdef _USING_FILESYSTEM_
+    static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
+#endif
+    static  std::vector<std::string> FindFiles(const std::string& name);
+
     static int GetLastError();
     static int ResetLastError();
 
@@ -34,6 +48,8 @@ public:
         FILEHELPER_NO_ERROR = 0,
         FILEHELPER_ERROR_WRITE_FAULT = ERROR_WRITE_FAULT,
         FILEHELPER_FILE_PTR_IS_NULL = ERROR_PATH_NOT_FOUND,
+
+        FILEHELPER_ERROR_CANT_OPEN_DIR,
 
     };
 

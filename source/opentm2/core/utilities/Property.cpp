@@ -98,10 +98,8 @@ int properties_set_value(const char *key, int value) {
 /* Implementation */
 
 int Properties::init() {
+    //errCode here can be not NO_ERROR, because properties files path not setuped yet, so it couldn't save data yet
     int errCode = init_home_dir_prop();
-    if(errCode != PROPERTY_NO_ERRORS ){
-        return errCode;
-    }
 
     std::string home_dir; 
     errCode = get_value(KEY_HOME_DIR, home_dir);
@@ -117,7 +115,7 @@ int Properties::init() {
     std::string plugin_dir = otm_dir + "/PLUGINS/";
     if(FilesystemHelper::CreateDir(plugin_dir))
         return PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR;
-        
+
     set_anyway(KEY_PLUGIN_DIR, plugin_dir);
 
     filename = otm_dir + "/" + "Properties";
@@ -282,6 +280,7 @@ int Properties::create_properties_file(){
 }
 
 int Properties::read_all_data_from_file() {
+    //return PROPERTY_ERROR_TEMPORARY_DISABLED_CODE; //temporary
     std::string line;
     std::string::size_type n;
     const char delim = '=';
@@ -290,8 +289,8 @@ int Properties::read_all_data_from_file() {
     if (!fs.is_open())
         return PROPERTY_ERROR_FILE_CANT_OPEN;
 
-    dataStr.clear();
-    dataInt.clear();
+    //dataStr.clear();
+    //dataInt.clear();
 
     std::string beginRegion = "<stringProperties>";
     std::string endRegion = "</stringProperties>";
@@ -371,12 +370,10 @@ int Properties::update_strData_from_file(const std::string& key){
 
 int Properties::update_intData_in_file(const std::string& key){
     //TODO rewrite to update only needed data in file
-    write_all_data_to_file();
-    return PROPERTY_NO_ERRORS;
+    return write_all_data_to_file();
 }
     
 int Properties::update_strData_in_file(const std::string& key){
     //TODO rewrite to update only needed data in file
-    write_all_data_to_file();
-    return PROPERTY_NO_ERRORS;
+    return write_all_data_to_file();
 }
