@@ -1,6 +1,16 @@
 #include "FilesystemHelper.h"
 #include "FilesystemWrapper.h"
+#include "PropertyWrapper.H"
+#include "EQF.H"
 #include <fstream>
+#include <cstring>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <pwd.h>
+
+int __last_error_code = 0;
 
 std::string FilesystemHelper::FixPath(const std::string& path){
     std::string ret;
@@ -12,7 +22,10 @@ std::string FilesystemHelper::FixPath(const std::string& path){
             i++;
         }else if(path[i] == '\\'){
             ret.push_back('/');
-        }else{
+        }else if( ((i+1) < path.size()) && path[i]=='/' && path[i+1] == '/'){
+            ret.push_back('/');
+            i++;
+        }else {
             ret.push_back(path[i]);
         }
     }
@@ -108,9 +121,80 @@ int FilesystemHelper::ReadFile(FILE* ptr, char* buff, const int buffSize, int& b
     return errCode;
 }
 
-int FilesystemHelper::GetFileSize(const std::string& path){
-    std::string fixedPath = FixPath(path);
 
-    return FILEHELPER_NOT_IMPLEMENTED;
+int FilesystemHelper::ReadFile(FILE* ptr, void* buff, const int buffSize, int& bytesRead){
+    int errCode = FILEHELPER_NO_ERROR;
+    if(!ptr){
+        errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else{
+        bytesRead = fread(buff, buffSize, 1, ptr);
+        CloseFile(ptr);
+    }
+    return errCode;
 }
 
+int FilesystemHelper::GetFileSize(const std::string& path){
+
+    FILE* ptr = OpenFile(path, "rb");
+    if(!ptr){
+        return -1;
+    }
+    int size = GetFileSize(ptr);
+    CloseFile(ptr);
+    return size;
+}
+
+
+int FilesystemHelper::GetFileSize(FILE* ptr){
+    if(!ptr){
+        __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
+        return -1;
+    }
+    int size = fseek(ptr, 0L, SEEK_SET);
+
+    return size;
+}
+
+int FilesystemHelper::GetLastError(){
+    return __last_error_code;
+}
+
+int FilesystemHelper::ResetLastError(){
+    __last_error_code = FILEHELPER_NO_ERROR;
+}
+
+
+std::string FilesystemHelper::GetOtmDir(){
+    int maxPath = 255;
+    char OTMdir[maxPath];
+    int res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
+    
+    //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
+    if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
+        properties_init();
+        res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
+    }
+
+    return OTMdir;
+}
+
+std::string FilesystemHelper::GetHomeDir(){
+    int maxPath = 255;
+    char HOMEdir[maxPath];
+    int res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
+    
+    //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
+    if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
+        properties_init();
+        res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
+    }
+    return HOMEdir;
+}
+
+int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
+    struct stat st;
+    int ret = stat(dir.c_str(), &st);
+    if (ret)
+        ret = mkdir(dir.c_str(), rights);
+    return ret;
+}

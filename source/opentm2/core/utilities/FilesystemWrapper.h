@@ -3,7 +3,12 @@
 
 #include "win_types.h"
 
-//extern "C" {
+extern "C" {
+        
+char * filesystem_get_otm_dir();
+
+char * filesystem_get_home_dir();
+
 const int 
   GENERIC_READ            = 0x80000000,
   GENERIC_WRITE           = 0x40000000,
@@ -75,6 +80,15 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
                         LPOVERLAPPED lpOverlapped
                         );
 
+
+    BOOL ReadFile(      //HANDLE       hFile,
+                        HFILE        hFile,
+                        LPVOID       lpBuffer,
+                        DWORD        nNumberOfBytesToRead,
+                        LPDWORD      lpNumberOfBytesRead,
+                        LPOVERLAPPED lpOverlapped
+                        );
+
     //BOOL DeleteFile(LPCTSTR lpFileName);
     bool DeleteFile(char const* sFileName);
 
@@ -89,7 +103,9 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
                         );
 
     DWORD GetLastError();
-//}
+
+    int GetFileSize(HFILE file);
+}
 
 
 

@@ -14,6 +14,7 @@
 #include "EQFSETUP.H"
 #include "core/utilities/PropertyWrapper.H"
 #include "win_types.h"
+#include "FilesystemWrapper.h"
 
 static HWND hObjMan[MAX_TASK] = {NULLHANDLE};
 POBJM_IDA     pObjBatchIda = NULL;     // Points to IDA when in function call mode
@@ -135,10 +136,10 @@ USHORT InstallHandler( PSZ name, HWND hwnd, USHORT cls)
     return( 0 );
 }
 
-/*ÛßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßÛ
-  Û  Object Manager Window Proc                                              Û
-  Û                                                                          Û
-  ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  ï¿½  Object Manager Window Proc                                              ï¿½
+  ï¿½                                                                          ï¿½
+  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 */
 MRESULT APIENTRY OBJECTMANAGERWP
 ( HWND hwnd, WINMSG message, WPARAM mp1, LPARAM mp2)
@@ -1947,11 +1948,11 @@ USHORT ObjLongToShortNameEx2
                 strcpy( pProp->stPropHead.szPath, pData->szSearchPath );
                 strcpy( pProp->stPropHead.szName, UtlSplitFnameFromPath(pProp->stPropHead.szPath) );
                 UtlSplitFnameFromPath( pProp->stPropHead.szPath ); 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
                 UtlWriteFile( pData->szSearchPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 //TODO
-                char *otm_dir = properties_get_otm_dir();
+                char *otm_dir = filesystem_get_otm_dir();
                 char *mem_path = (char*)malloc(strlen(otm_dir)
                                   + strlen(pData->szSearchPath) + 1);
                 sprintf(mem_path, "%s%s", otm_dir, pData->szSearchPath);
@@ -2114,4 +2115,4 @@ USHORT ObjShortToLongName
 #endif //TEMPORARY_COMMENTED
 
 //   End of EQFOBJ00.C
-//ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½

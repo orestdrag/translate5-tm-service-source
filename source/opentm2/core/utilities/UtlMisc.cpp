@@ -21,6 +21,7 @@
 
 #include "PropertyWrapper.H"
 #include "win_types.h"
+#include "FilesystemWrapper.h"
 
 // includes for Xalan XSLT
 
@@ -2834,7 +2835,7 @@ BOOL UtlInitUtils( HAB hab )
      ulong ulLength;
 
      // Setup event log file name
-     char* otmDir = properties_get_otm_dir();
+     char* otmDir = filesystem_get_otm_dir();
      strncpy(szLogFile, otmDir, MAX_EQF_PATH);
      free(otmDir);
 

@@ -835,7 +835,9 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   pInfo->fEnabled = TRUE;
 
 //TODO rewrite work with properties to avoid redundand actions and overhead
-  std::string mem_path = properties_get_otm_dir();
+  std::string mem_path;
+  mem_path.reserve(255);
+  int errCode = properties_get_str(KEY_OTM_DIR, &mem_path[0], 255);
   mem_path += "/" + std::string(pszPropName);
   char *cstr = new char[mem_path.length() + 1];
   strcpy(cstr, mem_path.c_str());
@@ -1032,10 +1034,11 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
     strcat( szPathName, szShortName );
     strcat( szPathName, EXT_OF_TMDATA  );
 #endif //TEMPORARY_COMMENTED
-    pathName = std::string(properties_get_otm_dir()) + "/"
-               + std::string(szShortName) + EXT_OF_TMDATA;
+    pathName.reserve(255);
+    properties_get_str(KEY_OTM_DIR, &pathName[0], 255);
+    pathName += "/" + std::string(szShortName) + EXT_OF_TMDATA;
 #ifdef TEMPORARY_COMMENTED
-    strcpy(szPathName, properties_get_otm_dir());
+    strcpy(szPathName, filesystem_get_otm_dir());
     strcat( szPathName, "/" );
     strcat(szPathName, szShortName);
     strcat(szPathName, EXT_OF_TMDATA);

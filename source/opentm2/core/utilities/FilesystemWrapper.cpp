@@ -1,5 +1,22 @@
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
+#include <cstring>
+
+char * filesystem_get_otm_dir() {
+    std::string sDir = FilesystemHelper::GetOtmDir();
+    char * pdir = (char *)malloc(sDir.size() + 1);
+    if (pdir)
+        strcpy(pdir, sDir.c_str());
+    return pdir;
+}
+
+char* filesystem_get_home_dir() {
+    std::string sDir = FilesystemHelper::GetHomeDir();
+    char *pDir = (char *)malloc(sDir.size() + 1);
+    if (pDir)
+        strcpy(pDir, sDir.c_str());
+    return pDir;
+}
 
   //HANDLE
   HFILE CreateFile(  LPCSTR                lpFileName,
@@ -42,6 +59,19 @@
         return pFile;
     }
 
+
+    BOOL ReadFile(      HFILE        hFile,
+                        LPVOID       lpBuffer,
+                        DWORD        nNumberOfBytesToRead,
+                        LPDWORD      lpNumberOfBytesRead,
+                        LPOVERLAPPED lpOverlapped
+                        ){
+                            int bytesRead = 0;
+                            int retCode = FilesystemHelper::ReadFile(hFile,lpBuffer,nNumberOfBytesToRead,bytesRead);
+                            *lpNumberOfBytesRead = bytesRead;
+                            return retCode == FilesystemHelper::FILEHELPER_NO_ERROR;
+                        }
+
     BOOL WriteFile(     //HANDLE       hFile,
                         HFILE        hFile,
                         LPCVOID      lpBuffer,
@@ -81,6 +111,10 @@
 
 
     DWORD GetLastError(){
-        return 0;
+        return FilesystemHelper::GetLastError();
+    }
+
+    int GetFileSize(HFILE file){
+        return FilesystemHelper::GetFileSize(file);
     }
 //}

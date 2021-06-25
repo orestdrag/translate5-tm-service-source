@@ -26,7 +26,7 @@
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138
 #include "core/memory/MemoryFactory.h"
 #include "core/utilities/LanguageFactory.H"
-
+#include "core/utilities/PropertyWrapper.H"
 #include "win_types.h"
 
 //#define SESSIONLOG
@@ -532,8 +532,9 @@ USHORT EqfStartSession
   if ( usRC == NO_ERROR )
   {
 //TODO rewrite function to return proper path
-    char szPluginPath[MAX_EQF_PATH] = "/opentm2/plugins/EqfMemoryPlugin";
-    //char szPluginPath[MAX_EQF_PATH] = "/workspace/translate5/translate5-tm-service-source/source/build/opentm2/plugins/EqfMemoryPlugin/libEqfMemoryPlugin.so";
+    char szPluginPath[MAX_EQF_PATH];
+    int errCode = properties_get_str_or_default(KEY_PLUGIN_DIR, szPluginPath, MAX_EQF_PATH,"");
+
 #ifdef TEMPORARY_COMMENTED
     UtlMakeEQFPath( szPluginPath, NULC, PLUGIN_PATH, NULL );
 #endif //TEMPORARY_COMMENTED

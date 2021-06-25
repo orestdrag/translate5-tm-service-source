@@ -11,7 +11,10 @@ extern "C" {
         PROPERTY_ERROR_FILE_CANT_OPEN,
         PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND,
         PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND,
+        
         PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY,
+        PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR,
+
         PROPERTY_ERROR_FILE_CANT_CREATE_FILE,
         PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR,
         PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD,
@@ -39,9 +42,9 @@ extern "C" {
     int properties_get_str_or_default(const char *key, char* buff, int buffSize, const char* defaultValue);
     int properties_get_int_or_default(const char *key, int& value, const int defaultValue);
 
-    char * properties_get_otm_dir();
+    bool properties_set_int_anyway(const char* key, const int value);
+    bool properties_set_str_anyway(const char* key, const char* value);
 
-    char * filesystem_get_home_dir();
 }
 
 #endif // _PROPERTY_WRAPPER_H__

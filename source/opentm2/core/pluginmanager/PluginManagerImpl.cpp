@@ -13,6 +13,8 @@
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
+#include "core/utilities/PropertyWrapper.H"
+
 
 using namespace std;
 
@@ -212,14 +214,15 @@ OtmPlugin* PluginManagerImpl::getPlugin(OtmPlugin::ePluginType type, int n)
 
 USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 {
-    USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
+  USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
 	std::string strFileSpec(pszPluginDir);
 	BOOL fMoreFiles = TRUE;
 	HANDLE hDir = HDIR_CREATE;
 	WIN32_FIND_DATA ffb;
 
   BOOL fLogHasBeenOpened = FALSE;
-
+  
+#ifdef TEMPORARY_COMMENTED
 #ifdef TEMPORARY_COMMENTED
 #ifdef _DEBUG
   if ( !this->Log.isOpen() )
@@ -240,11 +243,12 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 #endif
       return usRC;
   }
+#endif
 
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
-
-strFileSpec += "/libEqfMemoryPlugin.so";
+  
+  strFileSpec += "/libEqfMemoryPlugin.so";
 
 #ifdef TEMPORARY_COMMENTED
 	strFileSpec += "\\*.dll";

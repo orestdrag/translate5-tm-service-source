@@ -29,6 +29,8 @@
 #include "EQFSERNO.H"
 #include "win_types.h"
 #include "config.h"
+#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "EQF.H"
 
 
 using namespace std;
@@ -300,6 +302,18 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   } );
 }
 
+int init_properties(){
+  if (properties_init()) {
+        fprintf(stderr, "Failed to initialize property file\n");
+        return -1;
+    }
+
+    properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
+    properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
+    properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+
+}
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
   pMemService = OtmMemoryServiceWorker::getInstance();
@@ -393,6 +407,8 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( memname );
     service.publish( postEntry );
     service.publish( getStatus );
+
+    init_properties();
   }
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE

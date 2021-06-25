@@ -7,6 +7,8 @@
 #include "EQF.H"                  // General Translation Manager include file
 #include "Utility.h"
 #include "win_types.h"
+#include "PropertyWrapper.H"
+#include "FilesystemWrapper.h"
 
 //------------------------------------------------------------------------------
 // Function Name:     UtlQueryULong          Query a MAT ulong value            
@@ -229,6 +231,12 @@ PSZ UtlMakeEQFPath
    PSZ    pszFolder                    // folder name or NULL
 )
 {
+   int pathSize = 255;
+   char path[pathSize];
+   
+   char* otmDir = filesystem_get_otm_dir();
+   
+    
     USHORT      usQSTSubDir;           // QST_ value for subdirectory
     CHAR        szDrive[4];            // buffer for drive letter string
     CHAR        szLanDrive[4];         // buffer for LAN drive letter string

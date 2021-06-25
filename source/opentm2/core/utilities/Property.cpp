@@ -1,12 +1,17 @@
 #include "Property.h"
 #include "PropertyWrapper.H"
 
+#include <cstdio>
+#include <cstring>
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include <cstdio>
-#include <cstring>
+
+#include "EQF.H"
+#include "FilesystemWrapper.h"
+#include "FilesystemHelper.h"
 
 #define HOME_ENV "HOME"
 #define OTMMEMORYSERVICE "OtmMemoryService"
@@ -25,6 +30,16 @@ void properties_deinit() {
 
 int properties_add_str(const char* key, const char* value) {
     return properties.add_key(key, value);
+}
+
+bool properties_set_str_anyway(const char* key, const char* value){
+    return properties_add_str(key, value)==PROPERTY_NO_ERRORS 
+        || properties_set_str(key, value)==PROPERTY_NO_ERRORS;
+}
+
+bool properties_set_int_anyway(const char* key, const int value){
+    return properties_add_int(key, value)==PROPERTY_NO_ERRORS
+        || properties_set_int(key, value)==PROPERTY_NO_ERRORS;
 }
 
 int properties_set_str(const char* key, const char* value) {
@@ -80,39 +95,30 @@ int properties_set_value(const char *key, int value) {
     return properties.set_value(key, value);
 }
 
-
-char * properties_get_otm_dir() {
-    std::string otm_dir = properties.get_otm_dir();
-    char *otmdir = (char *)malloc(otm_dir.size() + 1);
-    if (otmdir)
-        strcpy(otmdir, otm_dir.c_str());
-    return otmdir;
-}
-
-char* filesystem_get_home_dir() {
-    char* _home_dir = getenv(HOME_ENV);
-    if (!_home_dir || !strlen(_home_dir))
-        return  NULL;//PROPERTY_NO_ERRORS;
-
-    struct passwd *pswd = getpwuid(getuid());
-    if (!pswd)
-        return NULL;//PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
-    _home_dir = pswd->pw_dir;
-
-    return _home_dir;
-}
-
 /* Implementation */
 
 int Properties::init() {
-    home_dir = filesystem_get_home_dir();
-    if (home_dir.empty())
-        return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
+    int errCode = init_home_dir_prop();
+    if(errCode != PROPERTY_NO_ERRORS ){
+        return errCode;
+    }
 
-    otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
+    std::string home_dir; 
+    errCode = get_value(KEY_HOME_DIR, home_dir);
+    
+    std::string otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
 
-    if (create_otm_dir())
+    if (FilesystemHelper::CreateDir(otm_dir))
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
+    
+    set_anyway(KEY_OTM_DIR, otm_dir);
+    
+    
+    std::string plugin_dir = otm_dir + "/PLUGINS/";
+    if(FilesystemHelper::CreateDir(plugin_dir))
+        return PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR;
+        
+    set_anyway(KEY_PLUGIN_DIR, plugin_dir);
 
     filename = otm_dir + "/" + "Properties";
     if (read_all_data_from_file() == PROPERTY_ERROR_FILE_CANT_OPEN){
@@ -127,6 +133,23 @@ void Properties::deinit() {
     //dataStr.clear();
     //dataInt.clear();
     fs.close();
+}
+
+int Properties::init_home_dir_prop(){
+    char* _home_dir = getenv(HOME_ENV);
+    if (_home_dir && strlen(_home_dir)){    
+        return set_anyway(KEY_HOME_DIR, _home_dir);
+    }
+    struct passwd *pswd = getpwuid(getuid());
+    
+    if (!pswd)
+        return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
+    
+    _home_dir = pswd->pw_dir;
+    if (!strlen(_home_dir))
+        return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
+
+    return set_anyway(KEY_HOME_DIR, _home_dir);
 }
 
 int Properties::add_key(const std::string& key, const std::string& value) {
@@ -157,7 +180,22 @@ int Properties::set_value(const std::string& key, const std::string& value) {
         return existRet;
     }
 
-    dataStr.at(key) = value;
+    dataStr[key] = value;
+
+    int writeDataReturn = update_strData_in_file(key);
+    return writeDataReturn;
+}
+
+
+int Properties::set_anyway(const std::string& key, const int value){
+    dataInt[key] = value;
+
+    int writeDataReturn = update_intData_in_file(key);
+    return writeDataReturn;
+}
+
+int Properties::set_anyway(const std::string& key, const std::string& value){
+    dataStr[key] = value;
 
     int writeDataReturn = update_strData_in_file(key);
     return writeDataReturn;
@@ -169,7 +207,7 @@ int Properties::set_value(const std::string& key, const int value) {
         return existRet;
     }
 
-    dataInt.at(key) = value;
+    dataInt[key] = value;
     
     int writeDataReturn = update_intData_in_file(key);
     return writeDataReturn;
@@ -234,19 +272,6 @@ int Properties::exist_string(const std::string& key){
     return PROPERTY_NO_ERRORS;
 }
 
-std::string Properties::get_otm_dir() const {
-    return otm_dir;
-}
-
-
-
-int Properties::create_otm_dir() {
-    struct stat st;
-    int ret = stat(otm_dir.c_str(), &st);
-    if (!ret)
-        return PROPERTY_NO_ERRORS;
-    return mkdir(otm_dir.c_str(), 0700);
-}
 
 int Properties::create_properties_file(){
     fs.open(filename, std::ios::binary | std::ios::out | std::ofstream::trunc);

@@ -8,6 +8,8 @@ class FilesystemHelper{
     static std::string FixPath(const std::string& path);
 public:
     static FILE* CreateFile(const std::string& path, const std::string& mode);
+    
+    static int CreateDir(const std::string& path, int rights = 0700);
 
     static int WriteToFile(const std::string& path, const char* buff, const int buffsize);
     static int WriteToFile(FILE* ptr, const char* buff, const int buffsize);
@@ -19,10 +21,13 @@ public:
 
     static int DeleteFile(const std::string& path);
     static int GetFileSize(const std::string& path);
+    static int GetFileSize(FILE* ptr);
 
     static FILE* OpenFile(const std::string& path, const std::string& mode);
     static int CloseFile(FILE*& ptr);
 
+    static int GetLastError();
+    static int ResetLastError();
 
     enum FilesystemHelpersMessage{
         FILEHELPER_NOT_IMPLEMENTED = -1,
@@ -31,6 +36,9 @@ public:
         FILEHELPER_FILE_PTR_IS_NULL = ERROR_PATH_NOT_FOUND,
 
     };
+
+    static std::string GetOtmDir();
+    static std::string GetHomeDir();
 };
 
 #endif

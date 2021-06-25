@@ -1976,6 +1976,12 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define LOGOS_ENGINE     "LOGOS"
 #define MTEngine_NA      "n/a"
 #define DEFAULT_SYSTEM_LANGUAGE "English(U.S.)"            // default user language
+//linux defines
+#define KEY_OTM_DIR "OTM_dir"
+#define KEY_HOME_DIR "HOME_dir"
+#define KEY_PLUGIN_DIR "PLUGIN_dir"
+
+//end def
 
 #if defined(_TLEX)
   #define SYSLANGFILE      "PANELL.LNG"

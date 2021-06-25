@@ -540,7 +540,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  OPEN_EXISTING, dwFlagsAndAttr, NULL );
-          usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) ?
+          usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) || phfOpen == NULL?
                       (USHORT)GetLastError() : NO_ERROR);
           if ( (usRetCode == ERROR_ACCESS_DENIED)          ||
                (usRetCode == ERROR_SHARING_VIOLATION)      ||
@@ -891,7 +891,7 @@ USHORT UtlReadHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -929,7 +929,7 @@ USHORT UtlReadHwnd
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 //+----------------------------------------------------------------------------+
@@ -4528,10 +4528,10 @@ USHORT UtlGetFileSizeHwnd
 
   fMsg; hwndParent;
   DosError(0);
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  dwSize = GetFileSize( hf, NULL );
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  dwSize = GetFileSize( hf );
   DosError(1);
-  if ( dwSize == 0xFFFFFFFF )
+  if ( dwSize == -1 )
   {
     usRC = (USHORT)GetLastError();
     *pulSize = 0L;
@@ -4540,7 +4540,7 @@ USHORT UtlGetFileSizeHwnd
   {
     *pulSize = dwSize;
   } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRC );
 } /* end of function UtlgetFileSizeHwnd */
 

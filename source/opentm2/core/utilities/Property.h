@@ -15,18 +15,16 @@ public:
 
     int add_key(const std::string& key, const std::string& value);
     int set_value(const std::string& key, const std::string& value);
+    int set_anyway(const std::string& key, const std::string& value);
     int get_value(const std::string& key, std::string& value);
 
     int add_key(const std::string& key, const int value);
     int set_value(const std::string& key, const int value);
+    int set_anyway(const std::string& key, const int value);
     int get_value(const std::string& key, int& value);
 
-    std::string get_otm_dir() const;
-
-
 private:
-    
-    int create_otm_dir();
+    int init_home_dir_prop();
     int create_properties_file();
 
     int update_intData_from_file(const std::string& key);
@@ -50,9 +48,6 @@ private:
     std::map<std::string, int>          dataInt;
 
     std::string filename;
-    std::string otm_dir;
-    std::string home_dir;
-
     std::fstream fs;
 };
 
