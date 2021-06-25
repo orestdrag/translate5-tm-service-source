@@ -52,10 +52,11 @@ int FilesystemHelper::DeleteFile(FILE*  ptr){
 }//*/
 
 
-int FilesystemHelper::CloseFile(FILE* ptr){
+int FilesystemHelper::CloseFile(FILE*& ptr){
     if(ptr){
         fclose(ptr);
     }
+    ptr = NULL;
     return FILEHELPER_NO_ERROR;
 }
 
@@ -73,7 +74,7 @@ int FilesystemHelper::WriteToFile(FILE* ptr, const void* buff, const int buffsiz
     }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
         errCode = ERROR_WRITE_FAULT;
     }
-    CloseFile(ptr);
+    //CloseFile(ptr);
     return errCode;
 }
 

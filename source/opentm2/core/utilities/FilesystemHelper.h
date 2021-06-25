@@ -21,7 +21,7 @@ public:
     static int GetFileSize(const std::string& path);
 
     static FILE* OpenFile(const std::string& path, const std::string& mode);
-    static int CloseFile(FILE* ptr);
+    static int CloseFile(FILE*& ptr);
 
 
     enum FilesystemHelpersMessage{
