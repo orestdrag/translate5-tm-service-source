@@ -746,7 +746,7 @@ USHORT UtlCloseHwnd
    {
      // remove handle from our handle/drive array
      int i = 0;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      while ( i < MAX_OPEN_FILES )
      {
        if ( DriveHandles[i].hf  == hf )
@@ -777,7 +777,7 @@ USHORT UtlCloseHwnd
                                     hwndParent);
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
    return( usRetCode );
 }
@@ -2288,7 +2288,7 @@ USHORT UtlFindNextHwnd
       // get file attribute flags active for this search handle
       usAttr = UtlAttrOfSearchHandle( hdir );
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+#ifdef WIN32
       // look for files until the correct file type has been found
       // or no more files are available
       do
@@ -2334,7 +2334,12 @@ USHORT UtlFindNextHwnd
       {
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+#else
+      FindNextFile(hdir, pffb);
+
+#endif //WIN32
+
+
    } while ( fMsg &&
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&

@@ -1978,6 +1978,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define DEFAULT_SYSTEM_LANGUAGE "English(U.S.)"            // default user language
 //linux defines
 #define KEY_OTM_DIR "OTM_dir"
+#define KEY_MEM_DIR "MEM_dir"
 #define KEY_HOME_DIR "HOME_dir"
 #define KEY_PLUGIN_DIR "PLUGIN_dir"
 

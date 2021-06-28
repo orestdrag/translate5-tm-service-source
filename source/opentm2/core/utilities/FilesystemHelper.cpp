@@ -126,18 +126,42 @@ std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& 
 }
 #endif
 
+
+
+std::vector<std::string> selFiles;
+int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     auto files = FindFiles(name);
-    if(files.empty())
+    if(selFiles.empty()){
+        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
-    auto path = files[0];
+    }
+    curSelFile = 0;
+    auto path = selFiles[curSelFile];
+    return OpenFile(path, "wb");
+}
+
+FILE* FilesystemHelper::FindNextFile(){
+    
+    if(selFiles.empty()){
+        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
+        return NULL;
+    }
+
+    curSelFile++;
+    if(curSelFile >= selFiles.size()){
+        __last_error_code == FILEHELPER_END_FILELIST;
+        return NULL;
+    }
+    auto path = selFiles[curSelFile];
     return OpenFile(path, "wb");
 }
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
+    selFiles.clear();
     const std::string fixedName = FixPath(name);
-    const std::string dirPath = parseDirectory(name);
-    std::string fileName = parseFilename(name);
+    const std::string dirPath = parseDirectory(fixedName);
+    std::string fileName = parseFilename(fixedName);
     
     int pos = fileName.rfind('*');
     bool exactMatch = pos == std::string::npos;
@@ -147,44 +171,41 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
 
  
     DIR *dir; struct dirent *diread;
-    std::vector<std::string> files;
-    std::vector<std::string> sel;
 
     if ((dir = opendir(dirPath.c_str())) != nullptr) {
         while ((diread = readdir(dir)) != nullptr) {
             std::string file = diread->d_name;
             if(exactMatch){
                 if(file.compare(fileName) == 0){
-                        sel.push_back(file);
+                        selFiles.push_back(file);
                     }
             }else{
                 if( file.find(fileName) != std::string::npos ){
-                    sel.push_back(file);
+                    selFiles.push_back(file);
                 }
             }
         }
         closedir (dir);
     } else {
         __last_error_code = FILEHELPER_ERROR_CANT_OPEN_DIR;
-        return sel;
     }
 
-    for (auto file : files){    
-        
-    }
-
-    return sel;
+    return selFiles;
 }
 
 
 int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, const int buffsize){
     std::string fixedPath = FixPath(path);
     FILE *ptr = OpenFile(fixedPath, "wb");
-    return WriteToFile(ptr, buff, buffsize);
+    int errCode = WriteToFile(ptr, buff, buffsize);
+    if(errCode == FILEHELPER_NO_ERROR){
+        CloseFile(ptr);
+    }
+    return errCode;
 }
 
 
-int FilesystemHelper::WriteToFile(FILE* ptr, const void* buff, const int buffsize){
+int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     if(ptr == NULL){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -195,7 +216,7 @@ int FilesystemHelper::WriteToFile(FILE* ptr, const void* buff, const int buffsiz
     return errCode;
 }
 
-int FilesystemHelper::WriteToFile(FILE* ptr, const char* buff, const int buffsize){
+int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     if(ptr == NULL){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -214,7 +235,7 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff, const int bu
     return ReadFile(ptr, buff, buffSize, bytesRead);
 }
 
-int FilesystemHelper::ReadFile(FILE* ptr, char* buff, const int buffSize, int& bytesRead){
+int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -226,7 +247,7 @@ int FilesystemHelper::ReadFile(FILE* ptr, char* buff, const int buffSize, int& b
 }
 
 
-int FilesystemHelper::ReadFile(FILE* ptr, void* buff, const int buffSize, int& bytesRead){
+int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -249,7 +270,7 @@ int FilesystemHelper::GetFileSize(const std::string& path){
 }
 
 
-int FilesystemHelper::GetFileSize(FILE* ptr){
+int FilesystemHelper::GetFileSize(FILE*& ptr){
     if(!ptr){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
         return -1;

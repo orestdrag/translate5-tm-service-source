@@ -1301,41 +1301,31 @@ USHORT ReadPropFile(PSZ szPath, PVOID *pProp, USHORT usSize)
   USHORT  usRC = NO_ERROR;             // function return code
   FILE   *hFile = NULL;                // file handle for property files
 
-  /********************************************************************/
-  /* Open the property file                                           */
-  /********************************************************************/
-  hFile = fopen( szPath, "rb" );
+  hFile = FilesystemHelper::OpenFile(szPath, "rb");
   if ( hFile == NULL )
   {
       usRC = ERROR_PATH_NOT_FOUND;
+      return usRC;
   }
 
-  /********************************************************************/
-  /* Allocate memory                                                  */
-  /********************************************************************/
   *pProp = malloc(usSize);
   if (*pProp == NULL) {
+    fclose (hFile);
     usRC = ERROR_NOT_ENOUGH_MEMORY;
+    return usRC;
   }
 
-  /********************************************************************/
-  /* Read property data from disk                                      */
-  /********************************************************************/
+  int bytesRead = 0;
   if ( !usRC  )
   {
-      if ( fread( *pProp, usSize, 1, hFile ) != 1 )
+      FilesystemHelper::ReadFile(hFile, pProp, usSize, bytesRead);
+      if ( bytesRead != 1 )
       {
           usRC = ERROR_READ_FAULT;
       } /* endif */
   } /* endif */
-
-  /********************************************************************/
-  /* Close property file                                              */
-  /********************************************************************/
-  if ( hFile )
-  {
-      fclose( hFile);
-  } /* endif */
+  FilesystemHelper::CloseFile(hFile);
+  /* endif */
 
   return( usRC );
 }

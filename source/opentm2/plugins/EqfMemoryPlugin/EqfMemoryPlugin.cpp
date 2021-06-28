@@ -11,6 +11,8 @@
 #include "EqfMemory.h"
 #include "EQFTMI.H"
 #include "EQFSETUP.H"
+#include "core/utilities/FilesystemHelper.h"
+#include "EQF.H"
 
 #include "string"
 #include "vector"
@@ -787,9 +789,12 @@ pszName = "hardcoded";
   // clear the old vector
   m_MemInfoVector.clear();
 
-  UtlMakeEQFPath( this->szBuffer, NULC, PROPERTY_PATH, NULL );
-  sprintf( this->szBuffer + strlen(szBuffer), "%c%s%s", BACKSLASH, DEFAULT_PATTERN_NAME, EXT_OF_MEM );
+  char otm_dir[MAX_EQF_PATH];
+  properties_get_str(KEY_OTM_DIR, otm_dir, MAX_EQF_PATH);
+  properties_get_str_or_default(KEY_MEM_DIR, this->szBuffer,  MAX_EQF_PATH, otm_dir);
+  sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
 
+#ifdef TEMPORARY_COMMENTED
   // loop over all memory property files
   usCount = 1;
   usRC = UtlFindFirst( this->szBuffer, &hDir, 0, &ResultBuf, sizeof(ResultBuf), &usCount, 0L, 0 );
@@ -806,9 +811,26 @@ pszName = "hardcoded";
 
   // close file search handle
   if ( hDir != HDIR_CREATE ) UtlFindClose( hDir, FALSE );
-
+#else
+  auto files = FilesystemHelper::FindFiles(this->szBuffer);
+  for(auto file: files){
+    addToList(file);
+  }
+#endif
   return;
 } /* end of method RefreshMemoryList */
+
+int tryStrCpy(char* dest, const char* src, const char* def){
+  if(src && strlen(src)){
+    strcpy(dest,src);
+    return 1;
+  }
+  else{
+    strcpy(dest, def);
+    return 2;
+  }
+  
+}
 
 /*! \brief Fill memory info structure from memory properties
   \param pszPropName name of the memory property file (w/o path) 
@@ -836,20 +858,23 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
 //TODO rewrite work with properties to avoid redundand actions and overhead
   std::string mem_path;
-  mem_path.reserve(255);
-  int errCode = properties_get_str(KEY_OTM_DIR, &mem_path[0], 255);
+  int errCode = 0;
+  {
+    char dir[MAX_EQF_PATH];
+    errCode = properties_get_str(KEY_MEM_DIR, dir, MAX_EQF_PATH);
+    mem_path = dir;
+  }
   mem_path += "/" + std::string(pszPropName);
-  char *cstr = new char[mem_path.length() + 1];
-  strcpy(cstr, mem_path.c_str());
-  ReadPropFile(cstr, (PVOID*)&pProp, sizeof(PROP_NTM));
-  delete [] cstr;
 
-#ifdef TEMPORARY_COMMENTED
-  UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
-  strcat( szFullPropName, BACKSLASH_STR );
-  strcat( szFullPropName, pszPropName );
-  fOK = UtlLoadFile( szFullPropName, (PVOID *)&pProp, &usLen, FALSE, FALSE );
-#endif //TEMPORARY_COMMENTED
+  ReadPropFile((char*)mem_path.c_str(), (PVOID*)&pProp, sizeof(PROP_NTM));
+
+//#ifdef TEMPORARY_COMMENTED
+  //UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
+  //strcat( szFullPropName, BACKSLASH_STR );
+  //strcat( szFullPropName, pszPropName );
+
+  //fOK = UtlLoadFile( (char*)mem_path.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
+//#endif //TEMPORARY_COMMENTED
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fOK )
@@ -921,19 +946,20 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
   } /* endif */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  if(pProp){
+    tryStrCpy(pInfo->szDescription, pProp->stTMSignature.szDescription, "" );
+    tryStrCpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage, "" );
+  
+    //strcpy( pInfo->szFullPath, pProp->szFullMemName );
+    // TODO for debugging purpises this temporarily returns properties name
+    // as the name of memory, fix it after memory creation is done
+    tryStrCpy( pInfo->szFullPath, pProp->stPropHead.szName, "");
+    tryStrCpy( pInfo->szName, pProp->stPropHead.szName, "");
 
-  strcpy( pInfo->szDescription, pProp->stTMSignature.szDescription );
-  strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
-  //strcpy( pInfo->szFullPath, pProp->szFullMemName );
-// TODO for debugging purpises this temporarily returns properties name
-// as the name of memory, fix it after memory creation is done
-  strcpy( pInfo->szFullPath, pProp->stPropHead.szName);
-  strcpy( pInfo->szName, pProp->stPropHead.szName);
-
-  strcpy( pInfo->szPlugin, this->name.c_str() );
-  strcpy( pInfo->szDescrMemoryType, this->descrType.c_str() );
-  strcpy( pInfo->szOwner, "" );
-
+    tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
+    tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
+    tryStrCpy( pInfo->szOwner, "" ,"");
+  }
   return( fOK );
 }
 
@@ -1021,34 +1047,24 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
   OBJLONGTOSHORTSTATE ObjState;
   BOOL fReserved = FALSE;
 
+  {
+      char buff[255];
+      properties_get_str(KEY_MEM_DIR, buff, 255);
+      pathName = buff;
+      
+      pathName += "/" + std::string(pszName) + EXT_OF_TMDATA;
+  }
   // build short name
   ObjLongToShortNameEx2( pszName, EOS, szShortName, TM_OBJECT, &ObjState, fReserve, &fReserved );
   if ( pfReserved != NULL ) *pfReserved = fReserved;
 
-  // call path create function and set result string
-  if ( ObjState == OBJ_IS_NEW )
-  {
-#ifdef TEMPORARY_COMMENTED
-    UtlMakeEQFPath( szPathName, chDrive, MEM_PATH, NULL );
-    strcat( szPathName, "\\" );
-    strcat( szPathName, szShortName );
-    strcat( szPathName, EXT_OF_TMDATA  );
-#endif //TEMPORARY_COMMENTED
-    pathName.reserve(255);
-    properties_get_str(KEY_OTM_DIR, &pathName[0], 255);
-    pathName += "/" + std::string(szShortName) + EXT_OF_TMDATA;
-#ifdef TEMPORARY_COMMENTED
-    strcpy(szPathName, filesystem_get_otm_dir());
-    strcat( szPathName, "/" );
-    strcat(szPathName, szShortName);
-    strcat(szPathName, EXT_OF_TMDATA);
-#endif //TEMPORARY_COMMENTED
+  if(FilesystemHelper::FindFiles(pathName).empty()){
+    
+  }else{
+    fOK = MemCreatePath( (char*) pathName.c_str() );
   }
-  else
-  {
-    strcpy( szPathName, szShortName );
-    fOK = MemCreatePath( szPathName );
-  } /* end */     
+  // call path create function and set result string
+     
 
 #ifdef TEMPORARY_COMMENTED
   strPathName.assign( szPathName );
@@ -1200,11 +1216,7 @@ int EqfMemoryPlugin::makePropName( std::string &strPathName, std::string &strPro
 */
 int EqfMemoryPlugin::addToList( std::string &strPathName )
 {
-  std::string strPropName;
-
-  this->makePropName( strPathName, strPropName );
-
-  return( this->addToList( (PSZ)strPropName.c_str() ) );
+  return( this->addToList( (PSZ)strPathName.c_str() ) );
 }
 
 /*! \brief Add memory to our internal memory lisst

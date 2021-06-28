@@ -15,6 +15,7 @@
 #include "core/utilities/PropertyWrapper.H"
 #include "win_types.h"
 #include "FilesystemWrapper.h"
+#include "FilesystemHelper.h"
 
 static HWND hObjMan[MAX_TASK] = {NULLHANDLE};
 POBJM_IDA     pObjBatchIda = NULL;     // Points to IDA when in function call mode
@@ -1346,12 +1347,16 @@ USHORT ObjLongToShortNameEx2
   // our private data area
   typedef struct _OBJL2SDATA
   {
+  #ifdef TEMPORARY_COMMENTED
     CHAR      szShortName[MAX_FILESPEC];    // buffer for short name
+  #endif
     CHAR      szFolder[MAX_FILESPEC];       // buffer for folder name
     CHAR      szSearchPath[MAX_EQF_PATH];   // object search path
     CHAR      szFullPath[MAX_EQF_PATH];     // fully qualified object name
+  #ifdef TEMPORARY_COMMENTED
     CHAR      szSharedSearchPath[MAX_EQF_PATH];// object search path for shared resources
     CHAR      szSharedFullPath[MAX_EQF_PATH];  // fully qualified object name for shared resources
+  #endif
     FILEFINDBUF stResultBuf;                // DOS file find structure
     CHAR      szExt[20];                    // buffer for object extention
     CHAR      szSharedExt[20];              // buffer for shared object extention
@@ -1373,101 +1378,11 @@ USHORT ObjLongToShortNameEx2
   // ignore any leading blanks
   while ( *pszOrgLongName == ' ' ) pszOrgLongName++;
 
-  // preset callers's variables
-  pszShortName[0] = EOS;
-
   // allocate our private data area
   if ( !UtlAlloc( (PVOID *)&pData, 0L, (LONG)sizeof(OBJL2SDATA), ERROR_STORAGE ) )
   {
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
-
-  // scan long name and add valid characters to short file name
-  if ( usRC == NO_ERROR )
-  {
-    while ( (i < 5) && (*pszLongName != EOS) )
-    {
-//    if ( isalnum(*pszLongName) )   // do not use isalnum anymore as isalnum
-                                     // returns TRUE for other chars than A-Z
-                                     // under Win2000/WinXP
-      CHAR chTest;
-      chTest = *pszLongName;
-      if ( ((chTest >= '0') && (chTest <= '9')) || // digit or
-           ((chTest >= 'a') && (chTest <= 'z')) || // lowercase char or
-           ((chTest >= 'A') && (chTest <= 'Z')) )  // uppercase char ?
-      {
-        CHAR c = *pszLongName++;
-        pData->szShortName[i++] = (CHAR)toupper(c);
-      }
-      else
-      {
-        NameType = LONGNAME;
-#ifdef TEMPORARY_COMMENTED
-        if ( IsDBCSLeadByteEx(ulCP,  *pszLongName ) && (pszLongName[1] != EOS) )
-        {
-          pszLongName++;                 // skip second byte of DBCS char
-        }
-#endif //TEMPORARY_COMMENTED
-        pszLongName++;                   // try next character
-      } /* endif */
-    } /* endwhile */
-
-    // scan rest of long file name for long object name recognition
-    if ( NameType != LONGNAME )        // no non-alphanumeric chars yet?
-    {
-      int iLen = i;                    // remember current length
-      while ( (iLen <= 8) && (NameType != LONGNAME) && (*pszLongName != EOS) )
-      {
-  //    if ( isalnum(*pszLongName) )   // do not use isalnum anymore as isalnum
-                                       // returns TRUE for other chars than A-Z
-                                       // under Win2000/WinXP
-        CHAR chTest;
-        chTest = *pszLongName;
-        if ( ((chTest >= '0') && (chTest <= '9')) || // digit or
-             ((chTest >= 'a') && (chTest <= 'z')) || // lowercase char or
-             ((chTest >= 'A') && (chTest <= 'Z')) )  // uppercase char ?
-        {
-          pszLongName++;
-          iLen++;
-        }
-        else
-        {
-          NameType = LONGNAME;
-        } /* endif */
-      } /* endwhile */
-
-      // due to a bug in a previous version short names with exactly
-      // 8 characters were treated as long names - so we have to
-      // check for it...
-      if ( (iLen == 8) && (NameType != LONGNAME) )
-      {
-        NameType = MAYBELONGNAME;
-      }
-      else if ( iLen > 8 )
-      {
-        NameType = LONGNAME;
-      } /* endif */
-    } /* endif */
-
-    // complete short name or use long name if it is a short one
-    if ( NameType != SHORTNAME )
-    {
-      // padd short name with A's up to a length of 5 characters
-      while ( i < 5 )
-      {
-        pData->szShortName[i++] = 'A';
-      } /* endif */
-
-      // terminate short file name
-      pData->szShortName[i] = EOS;
-    }
-    else
-    {
-      strcpy( pData->szShortName, pszOrgLongName );
-      UtlUpper( pData->szShortName );
-    } /* endif */
-  } /* endif */
-
 
   // setup search path and path of full object name depending on object type
   if ( usRC == NO_ERROR )
@@ -1478,7 +1393,9 @@ USHORT ObjLongToShortNameEx2
         UtlMakeEQFPath( pData->szSearchPath, NULC, PROPERTY_PATH, NULL );
         strcat( pData->szSearchPath, BACKSLASH_STR );
         strcpy( pData->szFullPath, pData->szSearchPath );
+        #ifdef TEMPORARY_COMMENTED
         strcat( pData->szSearchPath, pData->szShortName );
+        #endif
         if ( NameType == LONGNAME ) strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
         strcpy( pData->szExt, EXT_FOLDER_MAIN );
         strcat( pData->szSearchPath, pData->szExt );
@@ -1486,47 +1403,17 @@ USHORT ObjLongToShortNameEx2
         chDrive = EOS; // no shared resource checking for folders
 
         break;
-      case DICT_OBJECT:
-        UtlMakeEQFPath( pData->szSearchPath, NULC, PROPERTY_PATH, NULL );
-        strcat( pData->szSearchPath, BACKSLASH_STR );
-        strcpy( pData->szFullPath, pData->szSearchPath );
-        strcat( pData->szSearchPath, pData->szShortName );
-        if ( NameType == LONGNAME ) strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
-        strcpy( pData->szExt, EXT_OF_DICTPROP );
-        strcat( pData->szSearchPath, pData->szExt );
-
-        if ( chDrive != EOS )
-        {
-          UtlMakeEQFPath( pData->szSharedSearchPath, chDrive, DIC_PATH, NULL );
-          strcat( pData->szSharedSearchPath, BACKSLASH_STR );
-          strcpy( pData->szSharedFullPath, pData->szSharedSearchPath );
-          strcat( pData->szSharedSearchPath, pData->szShortName );
-          if ( NameType == LONGNAME ) strcat( pData->szSharedSearchPath, DEFAULT_PATTERN_NAME );
-          strcpy( pData->szSharedExt, EXT_OF_SHARED_DICTPROP );
-          strcat( pData->szSharedSearchPath, pData->szSharedExt );
-        } /* endif */
-        break;
 
       case TM_OBJECT:
-        UtlMakeEQFPath( pData->szSearchPath, NULC, PROPERTY_PATH, NULL );
+        properties_get_str(KEY_MEM_DIR, pData->szSearchPath, MAX_EQF_PATH);
+        //UtlMakeEQFPath( pData->szSearchPath, NULC, PROPERTY_PATH, NULL );
         strcat( pData->szSearchPath, BACKSLASH_STR );
         strcpy( pData->szFullPath, pData->szSearchPath );
-        strcat( pData->szSearchPath, pData->szShortName );
+        strcat( pData->szSearchPath, pszLongName );
         if ( NameType == LONGNAME ) strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
         // GQ: we have to check the properties of local memories (.MEM) and LAN based shared memories (.SLM)
-        strcpy( pData->szExt, ".??M" );
+        strcpy( pData->szExt, ".MEM");
         strcat( pData->szSearchPath, pData->szExt );
-
-        if ( chDrive != EOS )
-        {
-          UtlMakeEQFPath( pData->szSharedSearchPath, chDrive, MEM_PATH, NULL );
-          strcat( pData->szSharedSearchPath, BACKSLASH_STR );
-          strcpy( pData->szSharedFullPath, pData->szSharedSearchPath );
-          strcat( pData->szSharedSearchPath, pData->szShortName );
-          if ( NameType == LONGNAME ) strcat( pData->szSharedSearchPath, DEFAULT_PATTERN_NAME );
-          strcpy( pData->szSharedExt, EXT_OF_SHARED_MEMPROP );
-          strcat( pData->szSharedSearchPath, pData->szSharedExt );
-        } /* endif */
         break;
 
       default:
@@ -1544,51 +1431,13 @@ USHORT ObjLongToShortNameEx2
     HANDLE hMutexSem = NULL;
 
     //GETMUTEX(hMutexSem);
+    if(FilesystemHelper::FindFiles(pData->szSearchPath).empty()){
+      ObjState = OBJ_IS_NEW;
+    }else{
+      ObjState = OBJ_EXISTS_ALREADY;
+    }
 
-    // if specified long name has exactly 8 alphanumeric characters
-    // check if there is already an object with the given name
-    // if not we have to use the long name search method as previous
-    // versions of TMgr may have created this object using a long name
-    if ( NameType == MAYBELONGNAME )
-    {
-      strcpy( pData->szSearchPath, pData->szFullPath );
-      strcat( pData->szSearchPath, pszOrgLongName );
-      strcat( pData->szSearchPath, pData->szExt );
-      UtlUpper( pData->szSearchPath );
-
-      if ( UtlFileExist(pData->szSearchPath) )
-      {
-        // switch to short file mode as there is already an object with this
-        // short name
-        NameType = SHORTNAME;
-        strcpy( pData->szShortName, pszOrgLongName );
-      }
-      else
-      {
-        // restore long name search path
-        strcpy( pData->szSearchPath, pData->szFullPath );
-        strcat( pData->szSearchPath, pData->szShortName );
-        strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
-        strcat( pData->szSearchPath, pData->szExt );
-      } /* endif */
-    } /* endif */
-
-    // if specified long name is a short name use this name for search
-    if ( NameType == SHORTNAME )
-    {
-      strcpy( pData->szSearchPath, pData->szFullPath );
-      strcat( pData->szSearchPath, pData->szShortName );
-      strcat( pData->szSearchPath, pData->szExt );
-      strcpy( pszShortName, pData->szShortName );
-
-      if (chDrive != EOS )
-      {
-        strcpy( pData->szSharedSearchPath, pData->szSharedFullPath );
-        strcat( pData->szSharedSearchPath, pData->szShortName );
-        strcat( pData->szSharedSearchPath, pData->szSharedExt );
-      } /* endif */
-    } /* endif */
-
+#ifdef TEMPORARY_COMMENTED
     usDosRC = UtlFindFirst( pData->szSearchPath, &hDir, FILE_NORMAL,
                             &(pData->stResultBuf), sizeof(pData->stResultBuf),
                             &usCount, 0L, FALSE );
@@ -1599,7 +1448,7 @@ USHORT ObjLongToShortNameEx2
       ULONG ulBytesRead;
 
       // in TM_OBJECT mode only: ignore all files but files with the .MEM and .SLM extension
-#ifdef TEMPORARY_COMMENTED
+
       PSZ pszExtension = strrchr( RESBUFNAME(pData->stResultBuf), DOT );
       if ( (ObjType != TM_OBJECT) || // no memory or
            (pszExtension == NULL) || // no extension found or
@@ -1684,7 +1533,7 @@ USHORT ObjLongToShortNameEx2
           UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
         } /* endif */
       } /* endif */
-#endif //TEMPORARY_COMMENTED
+
 
       // try next object
       if ( ObjState == OBJ_IS_NEW )
@@ -1794,33 +1643,29 @@ USHORT ObjLongToShortNameEx2
 
     UtlFindClose( hDir, FALSE );
   } /* endif */
-
+#endif
+  }
   // find a unique name if document is not contained in the folder
-  if ( (usRC == NO_ERROR) && (ObjState == OBJ_IS_NEW) && (NameType != SHORTNAME)  )
+  if ( (usRC == NO_ERROR) && (ObjState == OBJ_IS_NEW) /*&& (NameType != SHORTNAME)*/  )
   {
-    if ( NameType == MAYBELONGNAME  )
-    {
-      // use long name as short name to create the new object
-      strcpy( pszShortName, pszOrgLongName );
-      UtlUpper( pszShortName );
-    }
-    else
+    
     {
       CHAR szCounter[4];                 // counter for object name
       BOOL fNameIsInUse = FALSE;
       HANDLE hMutexSem = NULL;
 
+      
+      #ifdef TEMPORARY_COMMENTED
       strcpy( szCounter, "000" );        // counter start value
 
       // do not allow other process to search while we search for a new name
       //GETMUTEX(hMutexSem);
-
       do
       {
         // build object name
         int iNameLenWithoutExt = 0;
         strcpy( pData->szSearchPath, pData->szFullPath );
-        strcat( pData->szSearchPath, pData->szShortName );
+        strcat( pData->szSearchPath, pszLongName );
         strcat( pData->szSearchPath, szCounter );
         iNameLenWithoutExt = strlen( pData->szSearchPath );
         if ( ObjType == TM_OBJECT )
@@ -1831,14 +1676,6 @@ USHORT ObjLongToShortNameEx2
         {
           strcat( pData->szSearchPath, pData->szExt );
         }
-
-        if ( chDrive != EOS )
-        {
-          strcpy( pData->szSharedSearchPath, pData->szSharedFullPath );
-          strcat( pData->szSharedSearchPath, pData->szShortName );
-          strcat( pData->szSharedSearchPath, szCounter );
-          strcat( pData->szSharedSearchPath, pData->szSharedExt );
-        } /* endif */
 
         // increment alphanumeric 'counter' (counts from '000' to 'ZZZ')
         {
@@ -1886,23 +1723,11 @@ USHORT ObjLongToShortNameEx2
 
         fNameIsInUse = UtlFileExist( pData->szSearchPath );
 
-        if ( !fNameIsInUse && (chDrive != EOS) )
-        {
-          fNameIsInUse = UtlFileExist( pData->szSharedSearchPath );
-        } /* endif */
-
-        // for TM_OBJECTs only: try lan-based property file as well
-        if ( !fNameIsInUse && (ObjType == TM_OBJECT) )
-        {
-          strcpy( pData->szSearchPath + iNameLenWithoutExt, ".SLM" );
-          fNameIsInUse = UtlFileExist( pData->szSearchPath );
-          strcpy( pData->szSearchPath + iNameLenWithoutExt, EXT_OF_MEM );
-        }
-
       } while ( fNameIsInUse ); /* enddo */
 
       Utlstrccpy( pszShortName, UtlGetFnameFromPath( pData->szSearchPath ), DOT );
-
+      #endif // TEMPORARY_COMMENTED
+      
       // reserve name if requested
       if ( fReserveName )
       {
@@ -1923,22 +1748,6 @@ USHORT ObjLongToShortNameEx2
               } /* endif */
             }
             break;
-          case DICT_OBJECT:
-            {
-              PPROPDICTIONARY pProp = NULL;
-              if ( UtlAlloc( (PVOID *)&pProp, 0L, sizeof(PROPDICTIONARY), NOMSG ) )
-              {
-                strcpy( pProp->szLongName, pszOrgLongName );
-                strcpy( pProp->PropHead.szPath, pData->szSearchPath );
-                strcpy( pProp->PropHead.szName, UtlSplitFnameFromPath(pProp->PropHead.szPath) );
-                UtlSplitFnameFromPath( pProp->PropHead.szPath ); 
-                UtlWriteFile( pData->szSearchPath, sizeof(PROPDICTIONARY), (PVOID)pProp, FALSE );
-                UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
-                if ( pfReserved ) *pfReserved = TRUE;
-              } /* endif */
-            }
-            break;
-
           case TM_OBJECT:
             {
               PPROP_NTM pProp = NULL;
@@ -1948,17 +1757,9 @@ USHORT ObjLongToShortNameEx2
                 strcpy( pProp->stPropHead.szPath, pData->szSearchPath );
                 strcpy( pProp->stPropHead.szName, UtlSplitFnameFromPath(pProp->stPropHead.szPath) );
                 UtlSplitFnameFromPath( pProp->stPropHead.szPath ); 
-//#ifdef TEMPORARY_COMMENTED
+
                 UtlWriteFile( pData->szSearchPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
-//#endif //TEMPORARY_COMMENTED
-//TODO
-                char *otm_dir = filesystem_get_otm_dir();
-                char *mem_path = (char*)malloc(strlen(otm_dir)
-                                  + strlen(pData->szSearchPath) + 1);
-                sprintf(mem_path, "%s%s", otm_dir, pData->szSearchPath);
-                free(otm_dir);
-                WritePropFile(mem_path, (PVOID)pProp, sizeof(PROP_NTM));
-                free(mem_path);
+                //WritePropFile(pData->szSearchPath, (PVOID)pProp, sizeof(PROP_NTM));
                 UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
                 if ( pfReserved ) *pfReserved = TRUE;
               } /* endif */

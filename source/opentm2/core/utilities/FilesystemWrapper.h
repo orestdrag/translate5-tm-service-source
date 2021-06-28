@@ -126,6 +126,13 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
          LPWIN32_FIND_DATA lpFindFileData  
         );
 
+    BOOL FindNextFile(
+        HANDLE             hFindFile,
+        LPWIN32_FIND_DATA lpFindFileData
+        );
+
+
+    BOOL CloseHandle(HFILE hf );
 }
 
 

@@ -124,4 +124,16 @@ char* filesystem_get_home_dir() {
         ){
             return FilesystemHelper::FindFirstFile(lpFileName);
         }
+
+    BOOL FindNextFile(
+        HANDLE             hFindFile,
+        LPWIN32_FIND_DATA lpFindFileData
+        ){
+            FilesystemHelper::FindNextFile();
+            return false;
+        }
+
+    BOOL CloseHandle(HFILE hf ){
+        FilesystemHelper::CloseFile(hf);
+    }
 //}

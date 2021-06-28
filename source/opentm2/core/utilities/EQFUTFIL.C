@@ -23,7 +23,7 @@
 
 #include "EQFUTPRI.H"                  // private utility header file
 #include "OTMFUNC.H"
-
+#include "core/utilities/FilesystemHelper.h"
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
 //+----------------------------------------------------------------------------+
@@ -1482,24 +1482,7 @@ USHORT UtlMkMultDirHwnd( PSZ pszPath, BOOL fMsg, HWND hwnd )
 //+----------------------------------------------------------------------------+
 BOOL UtlFileExist( PSZ pszFile )
 {
-    BOOL fFound = FALSE;
-    FILEFINDBUF ResultBuf;               // DOS file find struct
-    HDIR    hDirHandle = HDIR_CREATE;    // DosFind routine handle
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    hDirHandle = FindFirstFile( pszFile, &ResultBuf );
-    if ( hDirHandle == INVALID_HANDLE_VALUE )
-    {
-      fFound = FALSE;
-    }
-    else
-    {
-      fFound = TRUE;
-      //FindClose( hDirHandle );
-    } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-    return( fFound );
+    return !FilesystemHelper::FindFiles(pszFile).empty();
 } /* endof UtlFileExist */
 
 #ifdef TEMPORARY_COMMENTED
