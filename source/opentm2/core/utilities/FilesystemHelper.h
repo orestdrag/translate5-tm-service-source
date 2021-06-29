@@ -24,7 +24,8 @@ public:
     static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const void* buff, const int buffsize);
 
-    static int ReadFile(const std::string& path, char* buff, const int buffSize, int& bytesRead);
+    static int ReadFile(const std::string& path, char* buff, const int buffSize, 
+                            int& bytesRead, const std::string& mode = "rb");
     static int ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead);
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead);
 

@@ -198,9 +198,9 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     std::string fixedPath = FixPath(path);
     FILE *ptr = OpenFile(fixedPath, "wb");
     int errCode = WriteToFile(ptr, buff, buffsize);
-    if(errCode == FILEHELPER_NO_ERROR){
+    //if(errCode == FILEHELPER_NO_ERROR){
         CloseFile(ptr);
-    }
+    //}
     return errCode;
 }
 
@@ -223,16 +223,19 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
     }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
         errCode = ERROR_WRITE_FAULT;
     }
-    CloseFile(ptr);
+    //CloseFile(ptr);
     return errCode;
 }
 
 
-int FilesystemHelper::ReadFile(const std::string& path, char* buff, const int buffSize, int& bytesRead){
+int FilesystemHelper::ReadFile(const std::string& path, char* buff, 
+                                    const int buffSize, int& bytesRead, const std::string& mode ){
     std::string fixedPath = FixPath(path);
-    FILE *ptr = OpenFile(fixedPath, "rb");
+    FILE *ptr = OpenFile(fixedPath, mode);
 
-    return ReadFile(ptr, buff, buffSize, bytesRead);
+    int errcode = ReadFile(ptr, buff, buffSize, bytesRead);
+    CloseFile(ptr);
+    return errcode;
 }
 
 int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
@@ -241,7 +244,6 @@ int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& 
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
-        CloseFile(ptr);
     }
     return errCode;
 }
@@ -253,7 +255,6 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
-        CloseFile(ptr);
     }
     return errCode;
 }

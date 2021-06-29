@@ -1279,7 +1279,7 @@ USHORT WritePropFile
 #endif //_WIN32
 
 #ifdef __linux__
-USHORT WritePropFile(PSZ szPath, PVOID pProp, USHORT usSize)
+USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
 {
     USHORT  usRC = NO_ERROR;             // function return code
     FILE   *hFile = NULL;                // file handle for property files
@@ -1296,7 +1296,7 @@ USHORT WritePropFile(PSZ szPath, PVOID pProp, USHORT usSize)
     return( usRC );
 }
 
-USHORT ReadPropFile(PSZ szPath, PVOID *pProp, USHORT usSize)
+USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
 {
   USHORT  usRC = NO_ERROR;             // function return code
   FILE   *hFile = NULL;                // file handle for property files
@@ -1307,12 +1307,11 @@ USHORT ReadPropFile(PSZ szPath, PVOID *pProp, USHORT usSize)
       usRC = ERROR_PATH_NOT_FOUND;
       return usRC;
   }
-
-  *pProp = malloc(usSize);
+  
   if (*pProp == NULL) {
-    fclose (hFile);
     usRC = ERROR_NOT_ENOUGH_MEMORY;
-    return usRC;
+    FilesystemHelper::CloseFile(hFile);
+    return usRC;  
   }
 
   int bytesRead = 0;

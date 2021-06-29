@@ -826,10 +826,10 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   if(pInfo==0 || pszPropName==0)
       return FALSE;
 
-  BOOL fOK = TRUE;
-  char szFullPropName[MAX_LONGFILESPEC];
-  PPROP_NTM pProp = NULL;
-  USHORT usLen = 0;
+  //BOOL fOK = TRUE;
+  //char szFullPropName[MAX_LONGFILESPEC];
+  PROP_NTM prop;// = NULL;
+  //USHORT usLen = 0;
 
   memset( pInfo, 0, sizeof(MEMORYINFO) );
 
@@ -840,13 +840,38 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   std::string mem_path;
   int errCode = 0;
   {
-    char dir[MAX_EQF_PATH];
-    errCode = properties_get_str(KEY_MEM_DIR, dir, MAX_EQF_PATH);
-    mem_path = dir;
+    char path[MAX_EQF_PATH];
+    errCode = properties_get_str(KEY_MEM_DIR, path, MAX_EQF_PATH);
+    if(errCode)
+      return errCode;
+    if(strlen(path) && path[strlen(path)-1] != '/')
+      strcat(path, "/");
+    strcat(path, pszPropName);
+
+    mem_path = FilesystemHelper::FixPath(path);
   }
-  mem_path += "/" + std::string(pszPropName);
-  mem_path = FilesystemHelper::FixPath(mem_path);
-  ReadPropFile((char*)mem_path.c_str(), (PVOID*)&pProp, sizeof(PROP_NTM));
+  
+  std::string nameWithoutExtention = pszPropName;
+  auto dot = nameWithoutExtention.rfind('.');
+  if(dot != std::string::npos){
+    nameWithoutExtention = nameWithoutExtention.substr(0, dot);
+  }
+  //tryStrCpy( pInfo->szFullPath, prop.szFullMemName , "");
+  //tryStrCpy( pInfo->szName, prop.stPropHead.szName, "");
+  tryStrCpy( pInfo->szFullPath, mem_path.c_str(), "");
+  tryStrCpy( pInfo->szName, nameWithoutExtention.c_str(), "");
+  errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
+  if(errCode)
+    return errCode;
+  
+  tryStrCpy(pInfo->szDescription, prop.stTMSignature.szDescription, "" );
+  tryStrCpy( pInfo->szSourceLanguage, prop.stTMSignature.szSourceLanguage, "" );
+  
+  tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
+  tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
+  tryStrCpy( pInfo->szOwner, "" ,"");
+
+  return( errCode == 0 );
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fOK )
@@ -918,26 +943,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
   } /* endif */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
-  if(pProp){
-    tryStrCpy(pInfo->szDescription, pProp->stTMSignature.szDescription, "" );
-    tryStrCpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage, "" );
-  }
-
-  //tryStrCpy( pInfo->szFullPath, pProp->szFullMemName , "");
-  //tryStrCpy( pInfo->szName, pProp->stPropHead.szName, "");
-  tryStrCpy( pInfo->szFullPath, mem_path.c_str(), "");
-  std::string nameWithoutExtention = pszPropName;
-  auto dot = nameWithoutExtention.rfind('.');
-  if(dot != std::string::npos){
-    nameWithoutExtention = nameWithoutExtention.substr(0, dot);
-  }
-  tryStrCpy( pInfo->szName, nameWithoutExtention.c_str(), "");
-
-  tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
-  tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
-  tryStrCpy( pInfo->szOwner, "" ,"");
-
-  return( fOK );
+  
 }
 
 /*! \brief Find memory in our memory list and return pointer to memory info 

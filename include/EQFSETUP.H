@@ -81,8 +81,8 @@ static USHORT DeletePropFile( CHAR chDrive, PSZ pszName );
 static USHORT SetupCreateDir( CHAR chDrive, PSZ pFolder, USHORT usPathID );
        VOID   BuildPath( PSZ pszBuffer, CHAR chEqfDrive, PSZ pszFolder, USHORT usPathID );
 #ifdef __linux__
-extern "C" USHORT WritePropFile ( PSZ pszName, PVOID pProp, USHORT usSize );
-extern "C" USHORT ReadPropFile ( PSZ pszName, PVOID *pProp, USHORT usSize );
+extern "C" USHORT WritePropFile ( const char* pszName, PVOID pProp, USHORT usSize );
+extern "C" USHORT ReadPropFile ( const char* pszName, PVOID *pProp, USHORT usSize );
 #endif //__linux__
 #ifdef _WIN32
 static USHORT WritePropFile ( CHAR chDrive, PSZ pszName, PVOID pProp, USHORT usSize );
