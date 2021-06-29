@@ -1307,12 +1307,6 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
       usRC = ERROR_PATH_NOT_FOUND;
       return usRC;
   }
-  
-  if (*pProp == NULL) {
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
-    FilesystemHelper::CloseFile(hFile);
-    return usRC;  
-  }
 
   int bytesRead = 0;
   if ( !usRC  )

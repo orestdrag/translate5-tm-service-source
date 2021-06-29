@@ -826,17 +826,13 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   if(pInfo==0 || pszPropName==0)
       return FALSE;
 
-  //BOOL fOK = TRUE;
-  //char szFullPropName[MAX_LONGFILESPEC];
-  PROP_NTM prop;// = NULL;
-  //USHORT usLen = 0;
+  PROP_NTM prop;
 
   memset( pInfo, 0, sizeof(MEMORYINFO) );
 
   // init it, if not meet some condition ,it will be set to false
   pInfo->fEnabled = TRUE;
 
-//TODO rewrite work with properties to avoid redundand actions and overhead
   std::string mem_path;
   int errCode = 0;
   {
