@@ -761,13 +761,8 @@ int EqfMemoryPlugin::getLastError
 */
 void EqfMemoryPlugin::refreshMemoryList()
 {
-  FILEFINDBUF     ResultBuf;           // DOS file find struct
-  USHORT          usCount;
   USHORT          usRC;                // return value of Utl/Dos calls
-  HDIR            hDir = HDIR_CREATE;  // DosFind routine handle
-  PSZ             pszName = RESBUFNAME(ResultBuf);
-//TODO
-pszName = "hardcoded";
+
 
   //if ( this->pMemList != NULL )
   //{
@@ -789,34 +784,19 @@ pszName = "hardcoded";
   // clear the old vector
   m_MemInfoVector.clear();
 
+  {
+  //prepare path for searching
   char otm_dir[MAX_EQF_PATH];
   properties_get_str(KEY_OTM_DIR, otm_dir, MAX_EQF_PATH);
   properties_get_str_or_default(KEY_MEM_DIR, this->szBuffer,  MAX_EQF_PATH, otm_dir);
   sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
+  }
 
-#ifdef TEMPORARY_COMMENTED
-  // loop over all memory property files
-  usCount = 1;
-  usRC = UtlFindFirst( this->szBuffer, &hDir, 0, &ResultBuf, sizeof(ResultBuf), &usCount, 0L, 0 );
-  usCount = ( usRC ) ? 0 : usCount;
-//TODO usCount
-  while( usCount)
-  {
-    this->addToList( pszName );
-
-    usCount = 1;
-    usRC = UtlFindNext( hDir, &ResultBuf, sizeof(ResultBuf), &usCount, FALSE );
-    usCount = ( usRC ) ? 0 : usCount;
-  } /* endwhile */
-
-  // close file search handle
-  if ( hDir != HDIR_CREATE ) UtlFindClose( hDir, FALSE );
-#else
   auto files = FilesystemHelper::FindFiles(this->szBuffer);
   for(auto file: files){
     addToList(file);
   }
-#endif
+
   return;
 } /* end of method RefreshMemoryList */
 
@@ -865,16 +845,8 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     mem_path = dir;
   }
   mem_path += "/" + std::string(pszPropName);
-
+  mem_path = FilesystemHelper::FixPath(mem_path);
   ReadPropFile((char*)mem_path.c_str(), (PVOID*)&pProp, sizeof(PROP_NTM));
-
-//#ifdef TEMPORARY_COMMENTED
-  //UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
-  //strcat( szFullPropName, BACKSLASH_STR );
-  //strcat( szFullPropName, pszPropName );
-
-  //fOK = UtlLoadFile( (char*)mem_path.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
-//#endif //TEMPORARY_COMMENTED
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fOK )
@@ -949,17 +921,22 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   if(pProp){
     tryStrCpy(pInfo->szDescription, pProp->stTMSignature.szDescription, "" );
     tryStrCpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage, "" );
-  
-    //strcpy( pInfo->szFullPath, pProp->szFullMemName );
-    // TODO for debugging purpises this temporarily returns properties name
-    // as the name of memory, fix it after memory creation is done
-    tryStrCpy( pInfo->szFullPath, pProp->stPropHead.szName, "");
-    tryStrCpy( pInfo->szName, pProp->stPropHead.szName, "");
-
-    tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
-    tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
-    tryStrCpy( pInfo->szOwner, "" ,"");
   }
+
+  //tryStrCpy( pInfo->szFullPath, pProp->szFullMemName , "");
+  //tryStrCpy( pInfo->szName, pProp->stPropHead.szName, "");
+  tryStrCpy( pInfo->szFullPath, mem_path.c_str(), "");
+  std::string nameWithoutExtention = pszPropName;
+  auto dot = nameWithoutExtention.rfind('.');
+  if(dot != std::string::npos){
+    nameWithoutExtention = nameWithoutExtention.substr(0, dot);
+  }
+  tryStrCpy( pInfo->szName, nameWithoutExtention.c_str(), "");
+
+  tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
+  tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
+  tryStrCpy( pInfo->szOwner, "" ,"");
+
   return( fOK );
 }
 
