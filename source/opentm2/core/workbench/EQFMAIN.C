@@ -2696,7 +2696,7 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     GetStringFromRegistry( APPL_Name, KEY_Drive, szDrive, sizeof( szDrive  ), "" );
     GetStringFromRegistry( APPL_Name, KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), "" );
     GetStringFromRegistry( APPL_Name, KEY_Path, szSysPath, sizeof( szSysPath), "" );
-    sprintf( EqfSystemPath, "%s\\%s",  szDrive, szSysPath );
+    sprintf( EqfSystemPath, "%s/%s",  szDrive, szSysPath );
 
     // Get name of system property file
     GetStringFromRegistry( APPL_Name, KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), "" );
