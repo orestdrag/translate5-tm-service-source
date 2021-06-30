@@ -27,6 +27,7 @@
 #include "core/memory/MemoryFactory.h"
 #include "core/utilities/LanguageFactory.H"
 #include "core/utilities/PropertyWrapper.H"
+#include "core/utilities/LogWrapper.h"
 #include "win_types.h"
 
 //#define SESSIONLOG
@@ -320,7 +321,7 @@ USHORT EqfStartSession
   PFCTDATA    pData = NULL;            // ptr to function data area
 
     if (SetupMAT())
-        printf("Failed to setup property files\n");
+        LogMessage(ERROR, "Failed to setup property files");
 
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );

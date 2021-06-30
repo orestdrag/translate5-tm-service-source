@@ -26,6 +26,7 @@
 #include "EQFTM.H"
 #include "win_types.h"
 #include "opentm2/core/utilities/FilesystemWrapper.h"
+#include "opentm2/core/utilities/LogWrapper.h"
 #include <sstream>
 
 // for string convertations
@@ -154,14 +155,21 @@ int OtmMemoryServiceWorker::verifyAPISession
 (
 )
 {
-  if ( this->hSession != 0 ) return( 0 );
+  if ( this->hSession != 0 ){ 
+    return( 0 );
+  }
 
+  LogMessage(INFO, "Initializing API Session");
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  printf("[verifyAPISession] EqfStartSession ret: %d\n", this->iLastRC);
-  
-  if ( this->iLastRC != 0 ) 
-    swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, 
-      L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
+  std::string msg = "[verifyAPISession] EqfStartSession ret: " + std::to_string(this->iLastRC); 
+  LogMessage(INFO, msg.c_str());
+
+  if ( this->iLastRC != 0 ) {
+    msg = "OpenTM2 API session could not be started, the return code is" + this->iLastRC;
+    LogMessage(ERROR, msg.c_str());
+    //swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, 
+    //  L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
+  }
   
   return( this->iLastRC );
 }
@@ -202,7 +210,9 @@ int OtmMemoryServiceWorker::buildErrorReturn
 	std::wstring strUTF16;
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
   strErrorReturn = convertToUTF8( strUTF16 );
-
+  //strUTF16 += L" [utf16]";
+  //LogMessage(ERROR, strUTF16);
+  LogMessage(ERROR, strErrorReturn.c_str());
 	return(0);
 }
 

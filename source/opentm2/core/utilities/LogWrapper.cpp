@@ -6,6 +6,7 @@
 #include <iostream>
 
 std::string logFilename;
+int logLevelTreshold;
 
 std::string getDateStr(){
     // current date/time based on current system
@@ -13,9 +14,9 @@ std::string getDateStr(){
    
    // convert now to string form
    std::string sDate = ctime(&now);
-   int nLinePos = sDate.find("\n");
+   int nLinePos = sDate.find('\n');
     if(nLinePos != std::string::npos)
-        sDate[nLinePos] = '\0';
+        sDate[nLinePos] = ' ';
    return sDate;
 }
 
@@ -25,9 +26,9 @@ std::string getTimeStr(){
    
     // convert now to string form
     std::string sTime =  ctime(&now);
-    int nLinePos = sTime.find("\n");
+    int nLinePos = sTime.find('\n');
     if(nLinePos != std::string::npos)
-        sTime[nLinePos] = '\0';
+        sTime[nLinePos] = ' ';
     return sTime;
 }
 
@@ -53,8 +54,18 @@ int writeLog(const std::string& message){
 
     return 0;
 }
+int suppressLogging(){
+    int prevTreshold = logLevelTreshold;
+    logLevelTreshold = FATAL + 1;
+    return prevTreshold;
+}
+
+int desuppressLogging(int prevTreshold){
+    return logLevelTreshold = prevTreshold;
+}
 
 int initLog(){
+    int prevState = suppressLogging();
     std::string initLogMsg;
     //TODO: manage files clean-up if there more file
     logFilename = FilesystemHelper::GetOtmDir();
@@ -73,10 +84,15 @@ int initLog(){
     
     initLogMsg += "Log file created, name: ";
     initLogMsg += logFilename + ", time: " + getTimeStr();
+    desuppressLogging(prevState);
     return writeLog(initLogMsg);
 }
 
-int LogMessage(int LogLevel, const char* message){
+
+int LogMessageStr(int LogLevel, const std::string& message){
+    if(LogLevel<logLevelTreshold){
+        return LOG_SMALLER_THAN_TRESHOLD;
+    }
     if(logFilename.empty()){
         if( initLog() != 0)
             return LOG_FAIL_INIT;
@@ -105,9 +121,37 @@ int LogMessage(int LogLevel, const char* message){
     }
 
     logMessage += ": [" ;
-    logMessage += getTimeStr(); 
-    logMessage += "] :: ";
+    logMessage += getTimeStr() + "] :: " + message; 
     logMessage += message;
 
-    writeLog(logMessage);
+    return writeLog(logMessage);
+}
+
+int LogMessage(int LogLevel, const char* message){
+    return LogMessageStr(LogLevel, std::string(message));
+}
+
+int LogMessage2(int LogLevel, const char* message1, const char* message2){
+    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2));
+}
+
+int LogMessage3(int LogLevel, const char* message1, const char* message2, const char* message3){
+    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3));
+}
+
+int LogMessage4(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4){
+    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4));
+}
+int LogMessage5(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5){
+    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5));
+}
+
+int SetLogLevel(int level){
+    if(level <= FATAL && level>=DEBUG){
+        logLevelTreshold = level;
+    }
 }

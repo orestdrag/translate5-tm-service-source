@@ -132,15 +132,17 @@ void get_method_handler(const shared_ptr< Session > session)
 
 	size_t content_length = request->get_header("Content-Length", 0);
 	std::string strType = request->get_header("Content-Type", "");
-  int iTransActIndex = AddToTransActLog( GET_LISTMEM_TRANSACTID, "" );
-
-  if ( hfLog != NULL ) 
-    fprintf( hfLog, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  {
+    char buffer [250];
+    sprintf(buffer, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length);
+    LogMessage(INFO, buffer);
+  }
 
   std::string strResponseBody = "Sample text";
   int ret = pMemService->list( strResponseBody );
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-  TransActDone( iTransActIndex );
+  LogMessage(INFO, "get_method_handler done, strResponceBody: ");
+  LogMessage(INFO, strResponseBody.c_str());
 }
 
 void getStatus_method_handler( const shared_ptr< Session > session )
@@ -411,12 +413,6 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     init_properties();
   }
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  // prepare log file
-  GetModuleFileName( NULL, szLogFile, PATH_MAX );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-  strcat( szLogFile, ".log" );
 
   return( TRUE );
 }

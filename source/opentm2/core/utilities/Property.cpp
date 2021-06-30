@@ -8,10 +8,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <stdlib.h>
 
 #include "EQF.H"
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
+#include "LogWrapper.h"
 
 #define HOME_ENV "HOME"
 #define OTMMEMORYSERVICE "OtmMemoryService"
@@ -106,6 +108,7 @@ int properties_set_value(const char *key, int value) {
 /* Implementation */
 
 int Properties::init() {
+    LogMessage(DEBUG, "Properties::init()");
     //errCode here can be not NO_ERROR, because properties files path not setuped yet, so it couldn't save data yet
     int errCode = init_home_dir_prop();
 
@@ -114,26 +117,31 @@ int Properties::init() {
     
     std::string otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
 
-    if (FilesystemHelper::CreateDir(otm_dir))
+    if (FilesystemHelper::CreateDir(otm_dir)){
+        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
-    
+    }
     set_anyway(KEY_OTM_DIR, otm_dir);
     std::string mem_dir = otm_dir+ "/MEM/";
     set_anyway(KEY_MEM_DIR, mem_dir);
     
     std::string plugin_dir = otm_dir + "/PLUGINS/";
-    if(FilesystemHelper::CreateDir(plugin_dir))
+    if(FilesystemHelper::CreateDir(plugin_dir)){
+        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR, plugin_dir: ", plugin_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR;
-
+    }
     set_anyway(KEY_PLUGIN_DIR, plugin_dir);
 
     filename_str = otm_dir + "/" + "Properties_str";
     filename_int = otm_dir +"/" + "Properties_int";
     if (read_all_data_from_file() == PROPERTY_ERROR_FILE_CANT_OPEN){
-        errCode = create_properties_file();
+        LogMessage5(INFO, "PROPERTY_ERROR_FILE_CANT_OPEN, filename_int: ", 
+            filename_int.c_str(), "; filename_str: ", filename_str.c_str(), ", try creating new");
+        if( errCode = create_properties_file()){
+            LogMessage2(ERROR, "Failed to create properties file, errCode = ", std::to_string(errCode).c_str());
+        }
     }
-
-    read_all_data_from_file();
+    LogMessage(DEBUG, "Properties::init done");
     return PROPERTY_NO_ERRORS;
 }
 
@@ -239,6 +247,8 @@ int Properties::get_value(const std::string& key, int& value){
 }
 
 bool Properties::set_write_to_file(const bool writeToFile){
+    
+    LogMessage2(DEBUG, "set write to properties file ", std::to_string(writeToFile).c_str());
     fWriteToFile = writeToFile;
     return fWriteToFile;
 }
