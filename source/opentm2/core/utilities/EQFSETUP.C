@@ -135,8 +135,6 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 int SetupMAT() {
     properties_turn_off_saving_in_file(); // we don't have path for file to save till the end of this function
     char* homeDir = filesystem_get_home_dir();
-    if(homeDir)
-      properties_add_str(KEY_Drive, homeDir);
       
     PSZ otmPath = NULL;
     char *otmDir = filesystem_get_otm_dir(); 
@@ -145,6 +143,7 @@ int SetupMAT() {
     otmPath = (PSZ)malloc(size);
     if (otmPath == NULL){
         free(otmDir);
+        free(homeDir);
         return -1;
     }
 
@@ -152,13 +151,18 @@ int SetupMAT() {
     free(otmDir);
     if (size < 0) {        
         free(otmPath);
+        free(homeDir);
         return -1;
     }
 
     CreateSystemProperties(otmPath);
 
-    free(otmPath);
     properties_turn_on_saving_in_file();
+
+    free(otmPath);
+    if(homeDir)
+      properties_add_str(KEY_Drive, homeDir);
+    free(homeDir);
     //properties_deinit();
     return 0;
 }

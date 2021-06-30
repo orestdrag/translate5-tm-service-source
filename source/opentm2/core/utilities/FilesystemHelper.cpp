@@ -325,3 +325,20 @@ int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
         ret = mkdir(dir.c_str(), rights);
     return ret;
 }
+
+bool FilesystemHelper::DirExists(const std::string& path){
+    if ( path.empty())
+        return false;
+
+    bool bExists = false;
+    DIR *pDir = opendir (path.c_str());
+
+    if (pDir != NULL)
+    {
+        bExists = true;    
+        (void) closedir (pDir);
+    }
+
+    return bExists;
+
+}

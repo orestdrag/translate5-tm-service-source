@@ -19,7 +19,8 @@ public:
     static FILE* CreateFile(const std::string& path, const std::string& mode);
     
     static int CreateDir(const std::string& path, int rights = 0700);
-
+    static bool DirExists(const std::string& path);
+    
     static int WriteToFile(const std::string& path, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const void* buff, const int buffsize);

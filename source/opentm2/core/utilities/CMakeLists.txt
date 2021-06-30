@@ -20,6 +20,7 @@ set(Util_Source_Files
         Property.cpp
         FilesystemHelper.cpp
         FilesystemWrapper.cpp
+        LogWrapper.cpp
         EQFSETUP.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP

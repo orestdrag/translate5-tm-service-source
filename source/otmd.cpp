@@ -5,36 +5,36 @@
 #include <cstdlib>
 #include <chrono>
 #include <thread>
+#include "opentm2/core/utilities/LogWrapper.h"
 
 void handle_interrupt_sig(int sig) {
-    std::cout << "Received interrupt signal\n";
+    LogMessage(INFO, "Received interrupt signal\n");
     StopOtmMemoryService();
-    std::cout << "Stopped OtmMemoryService\n";
+    LogMessage(INFO, "Stopped OtmMemoryService\n");
 }
 
 void service_worker() {
     char szServiceName[80];
     unsigned int uiPort = 0;
-
     int res = PrepareOtmMemoryService(szServiceName, &uiPort);
     if (!res) {
-        std::cerr << "Failed to initialize OtmMemoryService\n";
+        LogMessage(FATAL,"Failed to initialize OtmMemoryService\n");
         std::exit(EXIT_FAILURE);
     }
-    std::cout << "Initialized OtmMemoryService\n";
-
+    LogMessage(INFO, "Initialized OtmMemoryService\n");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);
     if (!res) {
-        std::cerr << "Failed to start OtmMemoryService\n";
+        LogMessage(FATAL,"Failed to start OtmMemoryService\n");
         std::exit(EXIT_FAILURE);
     }
 }
 
 int main() {
+    LogMessage(INFO, "Worker thread starting\n");
     std::thread worker(service_worker);
     worker.join();
-    std::cout << "Worker thread finished\n";
+    LogMessage(INFO, "Worker thread finished\n");
 }
 
 

@@ -31,7 +31,7 @@
 #include "config.h"
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
-
+#include "opentm2/core/utilities/LogWrapper.h"
 
 using namespace std;
 using namespace restbed;
@@ -316,6 +316,7 @@ int init_properties(){
 }
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
+  LogMessage(INFO, "Try prepare otm memory service");
   pMemService = OtmMemoryServiceWorker::getInstance();
   if ( pMemService == NULL )
   {
