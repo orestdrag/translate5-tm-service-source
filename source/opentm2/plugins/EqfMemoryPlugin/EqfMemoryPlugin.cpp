@@ -1037,9 +1037,7 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
   ObjLongToShortNameEx2( pszName, EOS, szShortName, TM_OBJECT, &ObjState, fReserve, &fReserved );
   if ( pfReserved != NULL ) *pfReserved = fReserved;
 
-  if(FilesystemHelper::FindFiles(pathName).empty()){
-    
-  }else{
+  if(!FilesystemHelper::FindFiles(pathName).empty()){
     fOK = MemCreatePath( (char*) pathName.c_str() );
   }
   // call path create function and set result string

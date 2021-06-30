@@ -32,6 +32,14 @@ int properties_add_str(const char* key, const char* value) {
     return properties.add_key(key, value);
 }
 
+void properties_turn_on_saving_in_file(){
+    properties.set_write_to_file(true);
+}
+
+void properties_turn_off_saving_in_file(){
+    properties.set_write_to_file(false);
+}
+
 bool properties_set_str_anyway(const char* key, const char* value){
     return properties_add_str(key, value)==PROPERTY_NO_ERRORS 
         || properties_set_str(key, value)==PROPERTY_NO_ERRORS;
@@ -119,9 +127,10 @@ int Properties::init() {
 
     set_anyway(KEY_PLUGIN_DIR, plugin_dir);
 
-    filename = otm_dir + "/" + "Properties";
+    filename_str = otm_dir + "/" + "Properties_str";
+    filename_int = otm_dir +"/" + "Properties_int";
     if (read_all_data_from_file() == PROPERTY_ERROR_FILE_CANT_OPEN){
-        return create_properties_file();
+        errCode = create_properties_file();
     }
 
     read_all_data_from_file();
@@ -229,6 +238,10 @@ int Properties::get_value(const std::string& key, int& value){
     return PROPERTY_NO_ERRORS;    
 }
 
+bool Properties::set_write_to_file(const bool writeToFile){
+    fWriteToFile = writeToFile;
+    return fWriteToFile;
+}
 
 bool Properties::exist_int_in_map(const std::string& key){
     return dataInt.count(key);
@@ -273,108 +286,112 @@ int Properties::exist_string(const std::string& key){
 
 
 int Properties::create_properties_file(){
-    fs.open(filename, std::ios::binary | std::ios::out | std::ofstream::trunc);
-    fs << "<stringProperties>\n</stringProperties>\n";
-    fs << "<intProperties>\n</intProperties>\n";
+    fs.open(filename_str, std::ios::binary | std::ios::out | std::ofstream::trunc);
+    fs.close();
+    fs.open(filename_int, std::ios::binary | std::ios::out | std::ofstream::trunc);
     fs.close();
     return PROPERTY_NO_ERRORS;
 }
 
 int Properties::read_all_data_from_file() {
-    //return PROPERTY_ERROR_TEMPORARY_DISABLED_CODE; //temporary
     std::string line;
     std::string::size_type n;
     const char delim = '=';
 
-    fs.open(filename, std::ios::binary | std::ios::in);
-    if (!fs.is_open())
-        return PROPERTY_ERROR_FILE_CANT_OPEN;
+    fs.open(filename_str, std::ios::binary | std::ios::in);
+    if (!fs.is_open() || fs.eof())
+        return PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND;
 
     //dataStr.clear();
     //dataInt.clear();
 
-    std::string beginRegion = "<stringProperties>";
-    std::string endRegion = "</stringProperties>";
-
-    //searching for begining of region
-    while(std::getline(fs, line) && line != beginRegion);
-
-    if(fs.eof())
-        return PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND;
-    
-    std::getline(fs, line);
-    while (line != endRegion) {
+    while (std::getline(fs, line)) {
         n = line.find(delim);
         if (n != std::string::npos)
-            dataStr.insert({ line.substr(0, n), line.substr(n + 1,
-                                            std::string::npos) });
-        std::getline(fs, line);
+            dataStr[ line.substr(0, n)] = line.substr(n + 1, std::string::npos) ;
     }
+    fs.close();
 
-    beginRegion = "<intProperties>";
-    endRegion = "</intProperties>";
-    
-    //searching for begining of region
-    while(std::getline(fs, line) && line != beginRegion);
-    
-    if(fs.eof())
+    fs.open(filename_int, std::ios::binary | std::ios::in);
+
+    if (!fs.is_open() || fs.eof())
         return PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND;
 
-    std::getline(fs, line);
-    while (line != endRegion) {
+    while (std::getline(fs, line)) {
         n = line.find(delim);
         if (n != std::string::npos){
             int num = std::stoi(line.substr(n + 1, std::string::npos));
-            dataInt.insert({ line.substr(0, n), num });
+            dataInt[line.substr(0, n)] = num ;
         }
     }
-
     fs.close();
     return PROPERTY_NO_ERRORS;
 }
 
 int Properties::write_all_data_to_file() {
-    fs.open(filename, std::ios::binary | std::ios::out | std::ios::trunc);
-    
+    if(!fWriteToFile){
+        return PROPERTY_WRITING_TURNED_OFF;
+    }
+
+    fs.open(filename_str, std::ios::binary | std::ios::out | std::ios::trunc);
     if (!fs.is_open())
         return PROPERTY_ERROR_FILE_CANT_OPEN;
 
-    fs << "<stringProperties>\n";
     for (auto it = dataStr.begin(); it != dataStr.end(); ++it)
         fs << it->first << "=" << it->second << "\n";
-    fs << "</stringProperties>\n";
+    fs.close();
     
-    fs << "<intProperties>\n";
+    fs.open(filename_int, std::ios::binary | std::ios::out | std::ios::trunc);
     for (auto it = dataInt.begin(); it != dataInt.end(); ++it)
         fs << it->first << "=" << std::to_string(it->second) << "\n";
-    fs << "</intProperties>\n";
-
     fs.close();
+
     return PROPERTY_NO_ERRORS;
 }
 
 int Properties::update_intData_from_file(const std::string& key){
-    //TODO rewrite for better optimization
-    read_all_data_from_file();
-    if(!exist_int_in_map(key))
-        return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
-    return PROPERTY_NO_ERRORS;
+
+    std::string line;
+    std::string search = key + "=";
+    unsigned int curLine = 0;
+    fs.open(filename_int, std::ios::binary | std::ios::in);
+    while(getline(fs, line)) {
+        curLine++;
+        if (int pos = line.find(search, 0) != std::string::npos) {
+            std::string value = line.substr(pos+1);
+            int iVal = std::stoi(value);
+            dataStr[key] = iVal;
+            return PROPERTY_NO_ERRORS;
+        }
+    }
+    
+    return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
 
 int Properties::update_strData_from_file(const std::string& key){
-    //TODO rewrite for better optimization
-    read_all_data_from_file();
-    if(!exist_string_in_map(key))
-        return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
-    return PROPERTY_NO_ERRORS;
+    std::string line;
+    std::string search = key + "=";
+    unsigned int curLine = 0;
+    fs.open(filename_str, std::ios::binary | std::ios::in);
+    while(getline(fs, line)) {
+        curLine++;
+        if (int pos = line.find(search, 0) != std::string::npos) {
+            std::string value = line.substr(pos+1);
+            dataStr[key] = value;
+            return PROPERTY_NO_ERRORS;
+        }
+    }
+
+    return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
 
 int Properties::update_intData_in_file(const std::string& key){
     //TODO rewrite to update only needed data in file
+    read_all_data_from_file();
     return write_all_data_to_file();
 }
     
 int Properties::update_strData_in_file(const std::string& key){
-    //TODO rewrite to update only needed data in file
+    read_all_data_from_file();
     return write_all_data_to_file();
 }

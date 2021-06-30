@@ -23,6 +23,7 @@ public:
     int set_anyway(const std::string& key, const int value);
     int get_value(const std::string& key, int& value);
 
+    bool set_write_to_file(const bool writeToFile);
 private:
     int init_home_dir_prop();
     int create_properties_file();
@@ -47,8 +48,9 @@ private:
     std::map<std::string, std::string>  dataStr;
     std::map<std::string, int>          dataInt;
 
-    std::string filename;
+    std::string filename_str, filename_int;
     std::fstream fs;
+    bool fWriteToFile = true;
 };
 
 #endif // _PROPERTY_H_

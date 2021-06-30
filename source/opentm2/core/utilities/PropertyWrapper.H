@@ -6,6 +6,7 @@ extern "C" {
     enum PROPERTY_ERRORS {
         PROPERTY_NO_ERRORS = 0,
         PROPERTY_USED_DEFAULT_VALUE,
+        PROPERTY_WRITING_TURNED_OFF,
 
 
         PROPERTY_ERROR_FILE_CANT_OPEN,
@@ -19,6 +20,9 @@ extern "C" {
         PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR,
         PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD,
         PROPERTY_ERROR_FILE_KEY_NOT_FOUND,
+
+        PROPERTY_ERROR_FILE_STR_KEY_NOT_FOUND,
+        PROPERTY_ERROR_FILE_INT_KEY_NOT_FOUND,
 
         PROPERTY_ERROR_STR_KEY_NOT_EXISTS,
         PROPERTY_ERROR_STR_KEY_ALREADY_EXISTS,
@@ -47,6 +51,8 @@ extern "C" {
     bool properties_set_int_anyway(const char* key, const int value);
     bool properties_set_str_anyway(const char* key, const char* value);
 
+    void properties_turn_off_saving_in_file();
+    void properties_turn_on_saving_in_file();
 }
 
 #endif // _PROPERTY_WRAPPER_H__

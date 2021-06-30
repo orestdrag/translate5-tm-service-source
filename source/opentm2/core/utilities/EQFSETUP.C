@@ -133,7 +133,7 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 
 #ifdef __linux__
 int SetupMAT() {
-    
+    properties_turn_off_saving_in_file(); // we don't have path for file to save till the end of this function
     char* homeDir = filesystem_get_home_dir();
     if(homeDir)
       properties_add_str(KEY_Drive, homeDir);
@@ -158,6 +158,7 @@ int SetupMAT() {
     CreateSystemProperties(otmPath);
 
     free(otmPath);
+    properties_turn_on_saving_in_file();
     //properties_deinit();
     return 0;
 }
