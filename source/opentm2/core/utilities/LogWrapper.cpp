@@ -120,9 +120,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
         break;
     }
 
-    logMessage += ": [" ;
-    logMessage += getTimeStr() + "] :: " + message; 
-    logMessage += message;
+    logMessage += ": [" + getTimeStr() + "] :: " + message; 
 
     return writeLog(logMessage);
 }
