@@ -51,17 +51,16 @@ std::string FilesystemHelper::FixPath(const std::string& path){
 }
 
 FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
-    std::string fixedPath = FixPath(path);
-
-    FILE* fp = fopen(fixedPath.c_str(), mode.c_str());
-    LogMessage6(DEBUG, "FilesystemHelper::CreateFile(",fixedPath.c_str() , "; ", mode.c_str(), ";) fp = ", intToA((long int)fp));
-    return fp;
+    return OpenFile(path, mode);
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode){
     std::string fixedPath = FixPath(path);
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
+    if(ptr == NULL){
+        __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
+    }
     return ptr;
 }
 

@@ -1120,7 +1120,7 @@ BOOL UtlLoadFileHwnd
       UtlAlloc( (PVOID *)ppLoadedFile, 0L, 0L, NOMSG );
     } /* endif */
 
-    if ( !fOK && fMsg )                       // display error message if not ok
+    if ( !fOK )                       // display error message if not ok
     {                                         // set msg btn depending on Contin.
        usMsgButton = (USHORT)(( fContinue ) ? MB_OKCANCEL : MB_CANCEL);
        // Message text:   Table or file %1 could not be accessed.

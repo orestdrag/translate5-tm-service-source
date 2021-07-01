@@ -12,6 +12,7 @@
 
 #include "EQF.H"                  // General Translation Manager include file
 #include "LogWrapper.h"
+#include "ThreadingWrapper.h"
 #define STATIC_OWNER
 #include "Utility.h"
 #undef STATIC_OWNER
@@ -131,7 +132,8 @@ PVOID UtlIntAlloc
 )
 {
   PBYTE  pStorage;                     // pointer to allocated storage
-#ifndef UTL_TRACEALLOC
+#ifdef TEMPORARY_COMMENTED
+//#ifndef UTL_TRACEALLOC
   USHORT usRc;
   ULONG  ulRealLength;
   ULONG  ulAllocLength;
@@ -172,6 +174,8 @@ PVOID UtlIntAlloc
              !fWrapAround )           // not all segments searched thru ...
      {
         // try to obtain the requested storage from the current segment
+        auto seg = pSegTable->pSegment[sSegment];
+        auto sel = seg.pSel;
         usRc = UtlSubAlloc( pSegTable->pSegment[sSegment].pSel,
                             &pStorage, ulAllocLength);
         if ( usRc != 0 )              // if no storage is available ...
@@ -283,9 +287,11 @@ PVOID UtlIntAlloc
   /******************************************************************/
   /* allocate stuff                                                 */
   /******************************************************************/
-#else
+
+//#else
+#endif//TEMPORARY COMMENTED
     pStorage = (PBYTE) malloc( ulLength + 2 * sizeof(ULONG) );
-#endif
+//#endif
   /********************************************************************/
   /* preset head and trailer as anchor for kamikaze persons....       */
   /********************************************************************/
@@ -480,9 +486,9 @@ USHORT UtlIntFree
 /**********************************************************************/
 USHORT UtlGetTask ( void )
 {
-  WORD   usTask;
+  int   usTask;
   USHORT currTask;
-
+  
 #ifdef TEMPORARY_COMMENTED
         __asm__
           (
@@ -490,13 +496,15 @@ USHORT UtlGetTask ( void )
             "MOV      (usTask), %ax;"
           );
 #endif //TEMPORARY_COMMENTED
+  usTask = _getpid();
   for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
   {
-    //if ( UtiVar[currTask].usTask == usTask )
-    //{
-    //  break;
-    //}
-    //else if ( UtiVar[currTask].usTask == 0 )
+    if ( UtiVar[currTask].usTask == usTask )
+    {
+      LogMessage2(DEBUG, "UtlGetTask()::Task found, id = ", intToA(usTask));
+      break;
+    }
+    else if ( UtiVar[currTask].usTask == 0 )
     {
       /****************************************************************/
       /* empty slot found                                             */

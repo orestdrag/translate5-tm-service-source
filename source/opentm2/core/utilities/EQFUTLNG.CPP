@@ -228,7 +228,6 @@ BOOL UtlQuerySysLangFile
   ULONG    ulLength;                   // length of language file
   USHORT   usI;                        // loop index
   CHAR     szDrive[MAX_DRIVE];         // buffer for drive list
-  CHAR     szLanDrive[MAX_DRIVE];      // buffer for drive list
   CHAR     szSysPath[MAX_EQF_PATH];    // global system path
   CHAR     EqfSystemPath[MAX_EQF_PATH];// global system path
 
@@ -242,14 +241,10 @@ BOOL UtlQuerySysLangFile
   /********************************************************************/
   /* build name of system language file                               */
   /********************************************************************/
-  GetStringFromRegistry( APPL_Name, KEY_Drive, szDrive, sizeof( szDrive  ), "" );
-  GetStringFromRegistry( APPL_Name, KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), "" );
+  GetStringFromRegistry( APPL_Name, KEY_OTM_DIR, szDrive, sizeof( szDrive  ), "" );
   GetStringFromRegistry( APPL_Name, KEY_Path, szSysPath, sizeof( szSysPath), "" );
-  if ( !szLanDrive[0] )
-  {
-    strcpy(szLanDrive, szDrive);
-  } /* endif */
-  sprintf( EqfSystemPath, "%s/%s",  szLanDrive, szSysPath );
+
+  sprintf( EqfSystemPath, "%s/%s",  szDrive, szSysPath );
   strcpy( szFileName, EqfSystemPath );
   strcat( szFileName, BACKSLASH_STR );
   strcat( szFileName, TABLEDIR );

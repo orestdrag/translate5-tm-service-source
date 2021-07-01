@@ -494,7 +494,6 @@ USHORT UtlOpenHwnd                                                        /*@3BC
    do {
       DosError(0);
       {
-        //DWORD dwAccess = 0;
         DWORD dwShareMode = 0;
         DWORD dwFlagsAndAttr = usAttr;
         DWORD dwAccess = 0;
@@ -540,8 +539,8 @@ USHORT UtlOpenHwnd                                                        /*@3BC
         {
           *phfOpen = CreateFile( pszFname, dwAccess, dwShareMode, NULL,
                                  OPEN_EXISTING, dwFlagsAndAttr, NULL );
-          usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) || phfOpen == NULL?
-                      (USHORT)GetLastError() : NO_ERROR);
+          usRetCode = (USHORT)((*phfOpen == INVALID_HANDLE_VALUE ) || *phfOpen == NULL)?
+                      (USHORT)GetLastError() : NO_ERROR;
           if ( (usRetCode == ERROR_ACCESS_DENIED)          ||
                (usRetCode == ERROR_SHARING_VIOLATION)      ||
                (usRetCode == ERROR_LOCK_VIOLATION)         ||

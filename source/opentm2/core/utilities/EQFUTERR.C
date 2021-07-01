@@ -1358,8 +1358,10 @@ VOID UtlInitError
    if ( ErrData[UtlGetTask()].hMsgFile )
    {
 
+   #ifdef TEMPORARY_COMMENTED
      UtlClose( ErrData[UtlGetTask()].hMsgFile, FALSE );
      ErrData[UtlGetTask()].hMsgFile = 0;
+   #endif
    } /* endif */
    {
      USHORT  usDummy;

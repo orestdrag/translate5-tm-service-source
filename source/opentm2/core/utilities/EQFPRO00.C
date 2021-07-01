@@ -1379,7 +1379,10 @@ PPROPSYSTEM GetSystemPropPtr( VOID )
     else
     {
       hSysProp = EqfQuerySystemPropHnd();
+      
+      #ifdef TEMPORARY_COMMENTED
       assert( hSysProp != NULL );
+      #endif
     } /* endif */
     return( (PPROPSYSTEM)( MakePropPtrFromHnd( hSysProp )));
  }
