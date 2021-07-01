@@ -1514,6 +1514,7 @@ int OtmMemoryServiceWorker::list
 
   jsonSS << "]}";
   strOutputParms = jsonSS.str();
+  LogMessage3(INFO, "OtmMemoryServiceWorker::list()::strOutputParams = ", strOutputParms.c_str(), "; iRC = restbed::OK");
   iRC = restbed::OK;
 }
 

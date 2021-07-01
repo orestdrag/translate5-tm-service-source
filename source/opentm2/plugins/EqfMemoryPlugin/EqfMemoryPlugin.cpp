@@ -12,6 +12,7 @@
 #include "EQFTMI.H"
 #include "EQFSETUP.H"
 #include "core/utilities/FilesystemHelper.h"
+#include "core/utilities/LogWrapper.h"
 #include "EQF.H"
 
 #include "string"
@@ -823,8 +824,10 @@ BOOL EqfMemoryPlugin::fillInfoStructure
    PMEMORYINFO pInfo
 )
 {
-  if(pInfo==0 || pszPropName==0)
-      return FALSE;
+  if(pInfo==0 || pszPropName==0){
+    LogMessage(ERROR, "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0");
+    return false;
+  }
 
   PROP_NTM prop;
 
@@ -838,8 +841,10 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   {
     char path[MAX_EQF_PATH];
     errCode = properties_get_str(KEY_MEM_DIR, path, MAX_EQF_PATH);
-    if(errCode)
+    if(errCode){
+      LogMessage2(ERROR, "EqfMemoryPlugin::fillInfoStructure():: errCode = ", intToA(errCode));
       return errCode;
+    }
     if(strlen(path) && path[strlen(path)-1] != '/')
       strcat(path, "/");
     strcat(path, pszPropName);
@@ -852,20 +857,20 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   if(dot != std::string::npos){
     nameWithoutExtention = nameWithoutExtention.substr(0, dot);
   }
-  //tryStrCpy( pInfo->szFullPath, prop.szFullMemName , "");
-  //tryStrCpy( pInfo->szName, prop.stPropHead.szName, "");
-  tryStrCpy( pInfo->szFullPath, mem_path.c_str(), "");
-  tryStrCpy( pInfo->szName, nameWithoutExtention.c_str(), "");
+  //strcpy( pInfo->szFullPath, prop.szFullMemName);
+  //strcpy( pInfo->szName, prop.stPropHead.szName);
+  strcpy( pInfo->szFullPath, mem_path.c_str());
+  strcpy( pInfo->szName, nameWithoutExtention.c_str());
   errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
   if(errCode)
     return errCode;
   
-  tryStrCpy(pInfo->szDescription, prop.stTMSignature.szDescription, "" );
-  tryStrCpy( pInfo->szSourceLanguage, prop.stTMSignature.szSourceLanguage, "" );
+  strcpy(pInfo->szDescription, prop.stTMSignature.szDescription );
+  strcpy( pInfo->szSourceLanguage, prop.stTMSignature.szSourceLanguage );
   
-  tryStrCpy( pInfo->szPlugin, this->name.c_str(), "" );
-  tryStrCpy( pInfo->szDescrMemoryType, this->descrType.c_str(), "" );
-  tryStrCpy( pInfo->szOwner, "" ,"");
+  strcpy( pInfo->szPlugin, this->name.c_str());
+  strcpy( pInfo->szDescrMemoryType, this->descrType.c_str());
+  //strcpy( pInfo->szOwner, "");
 
   return( errCode == 0 );
 

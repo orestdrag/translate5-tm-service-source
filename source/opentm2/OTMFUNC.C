@@ -28,6 +28,7 @@
 #include "core/utilities/LanguageFactory.H"
 #include "core/utilities/PropertyWrapper.H"
 #include "core/utilities/LogWrapper.h"
+#include "core/utilities/ThreadingWrapper.h"
 #include "win_types.h"
 
 //#define SESSIONLOG
@@ -362,12 +363,13 @@ USHORT EqfStartSession
     UtlInitError( NULLHANDLE, HWND_FUNCIF, (HWND)&(pData->LastMessage),
                   pData->szMsgFile );
 
-#ifdef TEMPORARY_COMMENTED
     if ( !fContinue )
     {
+      LogMessage(ERROR, "EqfStartSession():: fContinue is false");
+#ifdef TEMPORARY_COMMENTED
       usRC = 1;
+#endif
     } /* endif */
-#endif //TEMPORARY_COMMENTED
   } /* endif */
 
 //#ifdef TEMPORARY_COMMENTED
@@ -472,6 +474,7 @@ USHORT EqfStartSession
     }
     else
     {
+      LogMessage(ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
 #ifdef TEMPORARY_COMMENTED
       // access to system properties failed
       usRC = ERROR_READ_SYSTEMPROPERTIES;
@@ -486,10 +489,13 @@ USHORT EqfStartSession
     HMODULE  hmod;                      // buffer for resource module handle
 
 //TODO need to get res file from properties
+
 #ifdef TEMPORARY_COMMENTED
     DosLoadModule( NULL, NULLHANDLE, pData->szEqfResFile, &hmod );
     //hResMod = hmod;
     UtlSetULong( QL_HRESMOD, (ULONG)hmod );
+#else
+  LogMessage(WARNING, "EqfStartSession():: TODO need to get res file from properties");
 #endif //TEMPORARY_COMMENTED
   } /* endif */
 
@@ -527,14 +533,13 @@ USHORT EqfStartSession
     }
 #endif
 
-    LOGWRITE1( "==EQFSTARTSESSION==\n" );
+    LogMessage(INFO, "==EQFSTARTSESSION==\n" );
 
-    LOGWRITE1( "   Starting plugins...\n" );
+    LogMessage(INFO,  "   Starting plugins...\n" );
 
   // initialie plugins
   if ( usRC == NO_ERROR )
   {
-//TODO rewrite function to return proper path
     char szPluginPath[MAX_EQF_PATH];
     int errCode = properties_get_str_or_default(KEY_PLUGIN_DIR, szPluginPath, MAX_EQF_PATH,"");
 
@@ -561,23 +566,26 @@ USHORT EqfStartSession
         }
         else
         {
+            LogMessage(ERROR, "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED");
             usRC = ERROR_PLUGIN_EXPIRED;
         }
         // Add end
   }
 
-    LOGWRITE1( "   ...Plugins have been started\n" );
+    LogMessage( INFO,"   ...Plugins have been started\n" );
 
-#ifdef SESSIONLOG
+//#ifdef SESSIONLOG
     {
       char szBuf[10];
       int i = 0;
-      UtlLogStart( "TMSession" );
+      //UtlLogStart( "TMSession" );
+      LogMessage(INFO, "TMSession");
       i = _getpid();
       sprintf( szBuf, "%ld", i );
-      UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
+      //UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
+      LogMessage2(INFO,"EqfStartSession: Process ID is ", szBuf);
     }
-#endif
+//#endif
     *phSession = (LONG)pData;
   }
   else
@@ -585,7 +593,7 @@ USHORT EqfStartSession
     *phSession = NULLHANDLE;
   } /* endif */
 
-  LOGWRITE2( "  RC=%u\n", usRC );
+  LogMessage2(INFO, "  RC=", intToA(usRC) );
 
   return( usRC );
 } /* end of function EqfStartSession */

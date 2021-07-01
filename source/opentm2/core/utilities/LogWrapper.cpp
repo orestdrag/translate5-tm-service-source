@@ -102,19 +102,19 @@ int LogMessageStr(int LogLevel, const std::string& message){
     switch (LogLevel)
     {
     case FATAL:
-        logMessage = "[FATAL]";
+        logMessage = "[FATAL]  ";
         break;
     case ERROR:
-        logMessage = "[ERROR]";
+        logMessage = "[ERROR]  ";
         break;
     case WARNING:
         logMessage = "[WARNING]";
         break;
     case DEBUG:
-        logMessage = "[DEBUG]";
+        logMessage = "[DEBUG]  ";
         break;
     case INFO:
-        logMessage = "[INFO]";
+        logMessage = "[INFO]   ";
         break;
     default:
         break;

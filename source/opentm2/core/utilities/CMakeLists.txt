@@ -21,6 +21,7 @@ set(Util_Source_Files
         FilesystemHelper.cpp
         FilesystemWrapper.cpp
         LogWrapper.cpp
+        ThreadingWrapper.cpp
         EQFSETUP.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP

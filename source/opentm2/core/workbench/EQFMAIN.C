@@ -43,6 +43,7 @@
 #include "EQFUTMDI.H"                // MDI Utilities
 
 #include "win_types.h"
+#include "core/utilities/LogWrapper.h"
 
 /**********************************************************************/
 /* statics...                                                         */
@@ -2687,6 +2688,8 @@ MRESULT TwbInitMenu( HWND hwnd, WPARAM mp1, LPARAM mp2 )
 BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
                              PSZ pEqfResFile )
 {
+    LogMessage7(DEBUG, "TwbGetCheckProfileData( pEqfSystemMsgFile= ", pEqfSystemMsgFile, ", pEqfSystemPropPath= ",  pEqfSystemPropPath,
+                             ", pEqfResFile = ", pEqfResFile,")" );
     CHAR   szDrive[MAX_DRIVE];         // buffer for drive list
     CHAR   szLanDrive[MAX_DRIVE];      // buffer for lan drive list
     CHAR   szSysPath[MAX_EQF_PATH];    // buffer for system path
@@ -2728,11 +2731,11 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     }
     else
     {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      WinMessageBox( HWND_DESKTOP, HWND_DESKTOP, STR_INSTALL_ERROR,
-                     STR_INSTALL_ERROR_TITLE,
-                     1, MB_ENTER | MB_ICONEXCLAMATION);
-#endif
+      LogMessage3(ERROR, "TwbGetCheckProfileData()::WinMessageBox, STR_INSAL_ERROR, STR_INSTALL_ERROR_TITLE, fOk=", intToA(fOK), ". " );
+      //WinMessageBox( HWND_DESKTOP, HWND_DESKTOP, STR_INSTALL_ERROR,
+      //               STR_INSTALL_ERROR_TITLE,
+      //               1, MB_ENTER | MB_ICONEXCLAMATION);
+
       fOK = FALSE;
     } /* endif */
 

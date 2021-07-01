@@ -54,13 +54,14 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
     std::string fixedPath = FixPath(path);
 
     FILE* fp = fopen(fixedPath.c_str(), mode.c_str());
-
+    LogMessage6(DEBUG, "FilesystemHelper::CreateFile(",fixedPath.c_str() , "; ", mode.c_str(), ";) fp = ", intToA((long int)fp));
     return fp;
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode){
     std::string fixedPath = FixPath(path);
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
+    LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
     return ptr;
 }
 
@@ -68,8 +69,10 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
 int FilesystemHelper::DeleteFile(const std::string& path){
     std::string fixedPath = FixPath(path);
     if(int errCode = remove(path.c_str())){
+        LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", intToA(errCode));
         return errCode;
     }else{
+        LogMessage3(DEBUG, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
         return FILEHELPER_NO_ERROR;
     }
 }
@@ -83,6 +86,7 @@ int FilesystemHelper::DeleteFile(FILE*  ptr){
 
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
+    LogMessage3(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , ")");
     if(ptr){
         fclose(ptr);
     }
@@ -134,6 +138,8 @@ int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     auto files = FindFiles(name);
     if(selFiles.empty()){
+
+        LogMessage3(INFO, "FilesystemHelper::FindFiles(",name.c_str() , ") - files not found");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
     }
@@ -150,7 +156,7 @@ FILE* FilesystemHelper::FindNextFile(){
     }
 
     curSelFile++;
-    if(curSelFile >= selFiles.size()){
+    if(curSelFile >= selFiles.size()){        
         __last_error_code == FILEHELPER_END_FILELIST;
         return NULL;
     }
@@ -188,6 +194,8 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
         }
         closedir (dir);
     } else {
+
+        LogMessage3(ERROR, "FilesystemHelper::FindFiles:: dir = ",dirPath.c_str() , "; can't open directory");
         __last_error_code = FILEHELPER_ERROR_CANT_OPEN_DIR;
     }
 
