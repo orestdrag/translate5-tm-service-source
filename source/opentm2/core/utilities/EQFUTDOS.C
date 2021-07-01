@@ -306,7 +306,7 @@
 #include <dlfcn.h>
 #include <gnu/lib-names.h>
 #include "FilesystemWrapper.h"
-
+#include "LogWrapper.h"
 
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
@@ -3215,6 +3215,7 @@ BOOL UtlSetDrive
    USHORT fEnable                       // action flag (bit field)
  )
  {
+   LogMessage2(WARNING, "DosError(): fEnable was set to ", intToA(fEnable));
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    switch ( fEnable )
    {

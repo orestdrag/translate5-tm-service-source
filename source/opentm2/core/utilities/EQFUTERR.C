@@ -18,7 +18,7 @@
 #define INCL_EQF_MORPH            // morph return codes
 #include <string>
 #include <EQF.H>                  // General Translation Manager include file
-
+#include "LogWrapper.h"
 #include <time.h>                 // C time related functions
 
 
@@ -352,6 +352,10 @@ USHORT UtlErrorHwnd
    HWND    hwndMsgBoxParent            // window which should be msgbox parent
 )
 {
+   char buff[255];
+   sprintf(buff, "UtlErrorHwnd(sErrorNumber=%d, usMsgType=%d, usNoOfParams=%d, pParamTable=%s, ErrorType=%d )", sErrorNumber, usMsgType,
+                  usNoOfParms, pParmTable, ErrorType);
+   LogMessage(ERROR,buff);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    unsigned int  usMsgboxStyle;               // style for WinMessageBox call
    unsigned int  usMsgboxRet = 0;             // msg box return value

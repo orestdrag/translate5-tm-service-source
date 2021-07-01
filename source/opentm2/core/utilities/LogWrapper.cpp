@@ -126,30 +126,52 @@ int LogMessageStr(int LogLevel, const std::string& message){
 }
 
 int LogMessage(int LogLevel, const char* message){
-    return LogMessageStr(LogLevel, std::string(message));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message));
 }
 
 int LogMessage2(int LogLevel, const char* message1, const char* message2){
-    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2));
 }
 
 int LogMessage3(int LogLevel, const char* message1, const char* message2, const char* message3){
-    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3));
 }
 
 int LogMessage4(int LogLevel, const char* message1, const char* message2, const char* message3,
                     const char* message4){
-    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
                             + std::string(message4));
 }
 int LogMessage5(int LogLevel, const char* message1, const char* message2, const char* message3,
                     const char* message4, const char* message5){
-    return LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
                             + std::string(message4) + std::string(message5));
+}
+
+int LogMessage6(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6));
+}
+
+int LogMessage7(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7));
+}
+
+char* intToA(int i){
+    int size = snprintf(NULL, 0, "%d", i);
+    char* buffer = new char[size+1];
+    snprintf(buffer, sizeof(size+1), "%d", i);
+    return buffer;
 }
 
 int SetLogLevel(int level){
     if(level <= FATAL && level>=DEBUG){
+        LogMessage2(WARNING, "Log level treshold was set to ",intToA(level));
         logLevelTreshold = level;
     }
 }

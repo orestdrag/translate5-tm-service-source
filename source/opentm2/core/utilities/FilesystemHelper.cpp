@@ -11,6 +11,7 @@
 #include <pwd.h>
 
 #include <dirent.h>
+#include "LogWrapper.h"
 
 int __last_error_code = 0;
 
@@ -298,6 +299,7 @@ std::string FilesystemHelper::GetOtmDir(){
     
     //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
+        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->trying to init propertie.\n res = ", intToA(res), ", OTMdir = ", OTMdir);
         properties_init();
         res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
     }

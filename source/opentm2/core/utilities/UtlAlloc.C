@@ -11,6 +11,7 @@
 #include <malloc.h>
 
 #include "EQF.H"                  // General Translation Manager include file
+#include "LogWrapper.h"
 #define STATIC_OWNER
 #include "Utility.h"
 #undef STATIC_OWNER
@@ -512,6 +513,7 @@ USHORT UtlGetTask ( void )
       UtiVar[currTask].usTask = usTask;
       memcpy(&UtiVar[currTask].SegTable, &SegTable,
              sizeof(SEGTABLE) * MAX_MEM_TABLES );
+      LogMessage4(INFO, "UtlGetTask():: allocated segtable, usTask = ",intToA(usTask), ", currTask = ", intToA(currTask));
       break;
     } /* endif */
   } /* endfor */

@@ -24,6 +24,7 @@
 #include "EQFUTPRI.H"                  // private utility header file
 #include "OTMFUNC.H"
 #include "core/utilities/FilesystemHelper.h"
+#include "core/utilities/LogWrapper.h"
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
 //+----------------------------------------------------------------------------+
@@ -1088,6 +1089,7 @@ BOOL UtlLoadFileHwnd
       }
       else
       {
+        LogMessage7(WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", intToA(usDosRc), ", ulSize: ", intToA(ulSize), "-> fOK=false now");
         fOK = FALSE;
       } /* endif */
     } /* endif */

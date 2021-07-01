@@ -334,6 +334,8 @@ USHORT EqfStartSession
   }
   else
   {
+    LogMessage(ERROR, "EqfStartSession():: Not enought memory for pData"  );
+
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
 

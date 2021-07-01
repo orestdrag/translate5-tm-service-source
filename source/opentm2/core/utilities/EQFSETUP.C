@@ -68,6 +68,7 @@
 #include "PropertyWrapper.H"
 #include "FilesystemHelper.h"
 #include "FilesystemWrapper.h"
+#include "LogWrapper.h"
 
 /**********************************************************************/
 /* Global Variables                                                   */
@@ -142,6 +143,7 @@ int SetupMAT() {
 
     otmPath = (PSZ)malloc(size);
     if (otmPath == NULL){
+        LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmPath");
         free(otmDir);
         free(homeDir);
         return -1;
@@ -150,6 +152,7 @@ int SetupMAT() {
     size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
     free(otmDir);
     if (size < 0) {        
+        LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmDir");
         free(otmPath);
         free(homeDir);
         return -1;
@@ -364,6 +367,7 @@ USHORT CreateSystemProperties(PSZ pszPath)
     }
     else
     {
+        LogMessage(ERROR, "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY");
         usRC = ERROR_NOT_ENOUGH_MEMORY;
         return usRC;
     }
@@ -1292,10 +1296,12 @@ USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
     hFile = FilesystemHelper::OpenFile( szPath, "wb" );
     if ( hFile == NULL )
     {
+        LogMessage2(ERROR, "WritePropFile(), path not found: ", szPath);
         usRC = ERROR_PATH_NOT_FOUND;
     }else{
         usRC = FilesystemHelper::WriteToFile(hFile, pProp, usSize);    
         FilesystemHelper::CloseFile(hFile);  
+        LogMessage5(INFO, "WritePropFile(), ", std::to_string(usSize).c_str() , " bytes writen to " , szPath, " file ");
     } 
 
     return( usRC );
@@ -1310,6 +1316,7 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
   if ( hFile == NULL )
   {
       usRC = ERROR_PATH_NOT_FOUND;
+      LogMessage2(ERROR, "ReadPropFile(), path not found: ", szPath);
       return usRC;
   }
 
@@ -1319,12 +1326,13 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
       FilesystemHelper::ReadFile(hFile, pProp, usSize, bytesRead);
       if ( bytesRead != 1 )
       {
+          LogMessage2(ERROR, "ReadPropFile(), ERROR_READ_FAULT ", szPath);
           usRC = ERROR_READ_FAULT;
       } /* endif */
   } /* endif */
   FilesystemHelper::CloseFile(hFile);
   /* endif */
-
+  LogMessage5(INFO, "ReadPropFile(",szPath,"):: reads ", std::to_string(usSize).c_str() , " bytes " );
   return( usRC );
 }
 #endif //__linux__

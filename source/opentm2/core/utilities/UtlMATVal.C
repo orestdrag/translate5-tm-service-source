@@ -9,6 +9,8 @@
 #include "win_types.h"
 #include "PropertyWrapper.H"
 #include "FilesystemWrapper.h"
+#include "LogWrapper.h"
+#include <stdlib.h>
 
 //------------------------------------------------------------------------------
 // Function Name:     UtlQueryULong          Query a MAT ulong value            
@@ -127,6 +129,8 @@ void UtlSetUShort( short sID, unsigned short usValue )
    if ( (sID > QS_FIRST) && (sID < QS_LAST) )
    {
       UtiVar[UtlGetTask()].usQueryArea[sID] = usValue;
+   }else{
+      LogMessage5(WARNING,"UtlSetUShort(", intToA(sID), ", ", intToA(usValue),") trying to set invalida value");
    } /* endif */
 }
 

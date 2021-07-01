@@ -170,24 +170,30 @@ int Properties::init_home_dir_prop(){
 
 int Properties::add_key(const std::string& key, const std::string& value) {
     if (exist_string(key) == PROPERTY_NO_ERRORS){
+        LogMessage5(WARNING, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", value.c_str(),").  Key already exists");
         return PROPERTY_ERROR_STR_KEY_ALREADY_EXISTS;
     }
     dataStr.insert({ key, value });
     if (int writeDataReturn = update_strData_in_file(key))
         return writeDataReturn;
-
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", value.c_str(),") added successfully");
     return PROPERTY_NO_ERRORS;
 }
 
 int Properties::add_key(const std::string& key, const int value) {
     if (exist_int(key) == PROPERTY_NO_ERRORS){
+        LogMessage5(WARNING, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", std::to_string(value).c_str(),").  Key already exists");
         return PROPERTY_ERROR_INT_KEY_ALREADY_EXISTS;
     }
 
     dataInt.insert({ key, value });
-    if (int writeDataReturn = update_strData_in_file(key))
+    if (int writeDataReturn = update_strData_in_file(key)){
+        LogMessage6(WARNING, "Properties::add_key(",key.c_str(),", ", 
+            std::to_string(value).c_str(),")::writeDataReturn() has error message:", 
+            std::to_string(writeDataReturn).c_str());
         return writeDataReturn;
-
+    }
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") added successfully");
     return PROPERTY_NO_ERRORS;
 }
 

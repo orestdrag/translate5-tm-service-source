@@ -26,6 +26,11 @@ extern "C"{
                     const char* message4);
     int LogMessage5(int LogLevel, const char* message1, const char* message2, const char* message3,
                     const char* message4, const char* message5);
+    int LogMessage6(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6);
+    int LogMessage7(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7);
+    char* intToA(int i);
 }
 
 #endif //_LOG_WRAPPER_H_
