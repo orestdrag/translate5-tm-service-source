@@ -91,7 +91,7 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
         fclose(ptr);
     }
     ptr = NULL;
-    return FILEHELPER_NO_ERROR;
+    return __last_error_code = FILEHELPER_NO_ERROR;
 }
 
 #ifdef __USING_FILESYSTEM
@@ -151,12 +151,14 @@ FILE* FilesystemHelper::FindFirstFile(const std::string& name){
 FILE* FilesystemHelper::FindNextFile(){
     
     if(selFiles.empty()){
+        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
     }
 
     curSelFile++;
-    if(curSelFile >= selFiles.size()){        
+    if(curSelFile >= selFiles.size()){    
+        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
         __last_error_code == FILEHELPER_END_FILELIST;
         return NULL;
     }
@@ -210,7 +212,7 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     //if(errCode == FILEHELPER_NO_ERROR){
         CloseFile(ptr);
     //}
-    return errCode;
+    return __last_error_code = errCode;
 }
 
 
@@ -222,18 +224,21 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
         errCode = ERROR_WRITE_FAULT;
     }
     //CloseFile(ptr);
-    return errCode;
+    return __last_error_code = errCode;
 }
 
 int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     if(ptr == NULL){
+        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
+        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
         errCode = ERROR_WRITE_FAULT;
     }
+    LogMessage4(DEBUG, "FilesystemHelper::WriteToFile(", intToA((long int)ptr), ", buff = ", buff);
     //CloseFile(ptr);
-    return errCode;
+    return __last_error_code = errCode;
 }
 
 
@@ -244,38 +249,56 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff,
 
     int errcode = ReadFile(ptr, buff, buffSize, bytesRead);
     CloseFile(ptr);
-    return errcode;
+    return __last_error_code = errcode;
 }
 
 int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
+        LogMessage(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
+        if(!bytesRead){
+            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr));
+            errCode = FILEHELPER_ERROR_FILE_NOT_READ;
+        }else{
+            LogMessage4(DEBUG, "FilesystemHelper::ReadFile():: readed ", intToA(bytesRead), "; data = ", buff);
+        }
     }
-    return errCode;
+    return __last_error_code = errCode;
 }
 
 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
+        LogMessage(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
+        if(!bytesRead){
+            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr));
+            errCode = FILEHELPER_ERROR_FILE_NOT_READ;
+        }else{
+            LogMessage2(DEBUG, "FilesystemHelper::ReadFile():: readed ", intToA(bytesRead)/*, "; data = ", (char*)buff*/);
+        }
     }
-    return errCode;
+    return __last_error_code = errCode;
 }
 
 int FilesystemHelper::GetFileSize(const std::string& path){
 
     FILE* ptr = OpenFile(path, "rb");
+    int size = -1;
     if(!ptr){
-        return -1;
+        __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
+        LogMessage(ERROR, "FilesystemHelper::GetFileSize()::FILEHELPER_FILE_PTR_IS_NULL ");
+    }else{
+        size = GetFileSize(ptr);
+        CloseFile(ptr);
+        LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
     }
-    int size = GetFileSize(ptr);
-    CloseFile(ptr);
     return size;
 }
 
@@ -286,7 +309,7 @@ int FilesystemHelper::GetFileSize(FILE*& ptr){
         return -1;
     }
     int size = fseek(ptr, 0L, SEEK_SET);
-
+    LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size));
     return size;
 }
 
@@ -295,6 +318,7 @@ int FilesystemHelper::GetLastError(){
 }
 
 int FilesystemHelper::ResetLastError(){
+    LogMessage(INFO, "FilesystemHelper::ResetLastError()");
     __last_error_code = FILEHELPER_NO_ERROR;
     return 0;
 }
@@ -307,7 +331,7 @@ std::string FilesystemHelper::GetOtmDir(){
     
     //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
-        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->trying to init propertie.\n res = ", intToA(res), ", OTMdir = ", OTMdir);
+        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = ", intToA(res), ", OTMdir = ", OTMdir);
         properties_init();
         res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
     }
@@ -322,6 +346,7 @@ std::string FilesystemHelper::GetHomeDir(){
     
     //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
+        LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", intToA(res), ", OTMdir = ", HOMEdir);
         properties_init();
         res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
     }
@@ -331,14 +356,15 @@ std::string FilesystemHelper::GetHomeDir(){
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;
     int ret = stat(dir.c_str(), &st);
-    if (ret)
+    LogMessage6(DEBUG, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", intToA(rights),")::stat():: ret = ", intToA(ret));
+    if (ret){
         ret = mkdir(dir.c_str(), rights);
+        LogMessage6(INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", intToA(rights),") was created, ret = ", intToA(ret));
+    }
     return ret;
 }
 
 bool FilesystemHelper::DirExists(const std::string& path){
-    if ( path.empty())
-        return false;
 
     bool bExists = false;
     DIR *pDir = opendir (path.c_str());
@@ -347,6 +373,9 @@ bool FilesystemHelper::DirExists(const std::string& path){
     {
         bExists = true;    
         (void) closedir (pDir);
+        LogMessage3(DEBUG, "FilesystemHelper::DirExists(", path.c_str(),") exists");
+    }else{
+        LogMessage3(INFO, "FilesystemHelper::DirExists(", path.c_str(),") not exists");
     }
 
     return bExists;

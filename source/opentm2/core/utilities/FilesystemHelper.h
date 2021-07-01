@@ -20,7 +20,7 @@ public:
     
     static int CreateDir(const std::string& path, int rights = 0700);
     static bool DirExists(const std::string& path);
-    
+
     static int WriteToFile(const std::string& path, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const void* buff, const int buffsize);
@@ -55,7 +55,8 @@ public:
         FILEHELPER_ERROR_WRITE_FAULT = ERROR_WRITE_FAULT,
         FILEHELPER_FILE_PTR_IS_NULL = ERROR_PATH_NOT_FOUND,
         FILEHELPER_END_FILELIST,
-
+        FILEHELPER_ERROR_FILE_NOT_READ,
+        
         FILEHELPER_ERROR_NO_FILES_FOUND,
 
         FILEHELPER_ERROR_CANT_OPEN_DIR,
