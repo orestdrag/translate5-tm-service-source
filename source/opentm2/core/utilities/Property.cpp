@@ -43,13 +43,11 @@ void properties_turn_off_saving_in_file(){
 }
 
 bool properties_set_str_anyway(const char* key, const char* value){
-    return properties_add_str(key, value)==PROPERTY_NO_ERRORS 
-        || properties_set_str(key, value)==PROPERTY_NO_ERRORS;
+    return properties.set_anyway(key, value) == PROPERTY_NO_ERRORS;
 }
 
 bool properties_set_int_anyway(const char* key, const int value){
-    return properties_add_int(key, value)==PROPERTY_NO_ERRORS
-        || properties_set_int(key, value)==PROPERTY_NO_ERRORS;
+    return properties.set_anyway(key, value) == PROPERTY_NO_ERRORS;
 }
 
 int properties_set_str(const char* key, const char* value) {
@@ -141,11 +139,12 @@ int Properties::init() {
             LogMessage2(ERROR, "Failed to create properties file, errCode = ", std::to_string(errCode).c_str());
         }
     }
-    LogMessage(DEBUG, "Properties::init done");
+    LogMessage4(DEBUG, "Properties::init done, filename_str = ",filename_str.c_str(), ", filename_int = ", filename_int.c_str() );
     return PROPERTY_NO_ERRORS;
 }
 
 void Properties::deinit() {
+    LogMessage(INFO, "Properties::deinit()");
     //dataStr.clear();
     //dataInt.clear();
     fs.close();
@@ -153,18 +152,19 @@ void Properties::deinit() {
 
 int Properties::init_home_dir_prop(){
     char* _home_dir = getenv(HOME_ENV);
-    if (_home_dir && strlen(_home_dir)){    
-        return set_anyway(KEY_HOME_DIR, _home_dir);
+    if (!_home_dir || !strlen(_home_dir)){         
+        struct passwd *pswd = getpwuid(getuid());        
+        if (!pswd){
+            LogMessage(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD");
+            return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
+        }
+        _home_dir = pswd->pw_dir;
+        if (!strlen(_home_dir)){
+            LogMessage(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR");
+            return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
+        }
     }
-    struct passwd *pswd = getpwuid(getuid());
-    
-    if (!pswd)
-        return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
-    
-    _home_dir = pswd->pw_dir;
-    if (!strlen(_home_dir))
-        return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
-
+    LogMessage2(DEBUG, "Properties::init_home_dir_prop() done, home_dir_path = ", _home_dir);
     return set_anyway(KEY_HOME_DIR, _home_dir);
 }
 
@@ -174,9 +174,10 @@ int Properties::add_key(const std::string& key, const std::string& value) {
         return PROPERTY_ERROR_STR_KEY_ALREADY_EXISTS;
     }
     dataStr.insert({ key, value });
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", value.c_str(),") added successfully");
     if (int writeDataReturn = update_strData_in_file(key))
         return writeDataReturn;
-    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", value.c_str(),") added successfully");
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", value.c_str(),") writed to file successfully");
     return PROPERTY_NO_ERRORS;
 }
 
@@ -187,13 +188,14 @@ int Properties::add_key(const std::string& key, const int value) {
     }
 
     dataInt.insert({ key, value });
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") added successfully");
     if (int writeDataReturn = update_strData_in_file(key)){
         LogMessage6(WARNING, "Properties::add_key(",key.c_str(),", ", 
             std::to_string(value).c_str(),")::writeDataReturn() has error message:", 
             std::to_string(writeDataReturn).c_str());
         return writeDataReturn;
     }
-    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") added successfully");
+    LogMessage5(DEBUG, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") writed to file successfully");
     return PROPERTY_NO_ERRORS;
 }
 
@@ -203,8 +205,9 @@ int Properties::set_value(const std::string& key, const std::string& value) {
     }
 
     dataStr[key] = value;
-
+    LogMessage5(DEBUG, "Properties::set_value(",key.c_str(),", ", value.c_str(),") added successfully");
     int writeDataReturn = update_strData_in_file(key);
+    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", value.c_str(),") was writed to file with ret code = ", intToA(writeDataReturn));
     return writeDataReturn;
 }
 
@@ -224,37 +227,41 @@ int Properties::set_anyway(const std::string& key, const std::string& value){
 }
 
 int Properties::set_value(const std::string& key, const int value) { 
-    
     if(int existRet = exist_int(key)){
         return existRet;
     }
 
     dataInt[key] = value;
-    
+    LogMessage5(DEBUG, "Properties::set_value(",key.c_str(),", ", intToA(value),") was added ");
     int writeDataReturn = update_intData_in_file(key);
+    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", intToA(value),") was writed to file with ret code = ", intToA(writeDataReturn));
     return writeDataReturn;
 }
 
 int Properties::get_value(const std::string& key, std::string& value){
     if(int existRet = exist_string(key)){
+        LogMessage3(WARNING, "Properties::get_value(", key.c_str(), ") not exists");
         return existRet;
     }
     value = dataStr.at(key);
+    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),", ", value.c_str(),")");
     return PROPERTY_NO_ERRORS;    
 }
 
 int Properties::get_value(const std::string& key, int& value){
     if(int existRet = exist_int(key)){
+        LogMessage3(WARNING, "Properties::get_value(", key.c_str(), ") not exists");
         return existRet;
     }
-
+    
     value = dataInt.at(key);
+    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),", ", intToA(value),")");
     return PROPERTY_NO_ERRORS;    
 }
 
 bool Properties::set_write_to_file(const bool writeToFile){
     
-    LogMessage2(DEBUG, "set write to properties file ", std::to_string(writeToFile).c_str());
+    LogMessage2(INFO, "set write to properties file ", std::to_string(writeToFile).c_str());
     fWriteToFile = writeToFile;
     return fWriteToFile;
 }
@@ -302,6 +309,7 @@ int Properties::exist_string(const std::string& key){
 
 
 int Properties::create_properties_file(){
+    LogMessage(INFO, "Properties::create_properties_file()");
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ofstream::trunc);
     fs.close();
     fs.open(filename_int, std::ios::binary | std::ios::out | std::ofstream::trunc);
@@ -310,14 +318,16 @@ int Properties::create_properties_file(){
 }
 
 int Properties::read_all_data_from_file() {
+    LogMessage(DEBUG, "Properties::read_all_data_from_file()");
     std::string line;
     std::string::size_type n;
     const char delim = '=';
 
     fs.open(filename_str, std::ios::binary | std::ios::in);
-    if (!fs.is_open() || fs.eof())
+    if (!fs.is_open() || fs.eof()){
+        LogMessage2(WARNING, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND, path = ", filename_str.c_str() );
         return PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND;
-
+    }
     //dataStr.clear();
     //dataInt.clear();
 
@@ -330,8 +340,10 @@ int Properties::read_all_data_from_file() {
 
     fs.open(filename_int, std::ios::binary | std::ios::in);
 
-    if (!fs.is_open() || fs.eof())
+    if (!fs.is_open() || fs.eof()){
+        LogMessage2(WARNING, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND, path = ", filename_int.c_str() );
         return PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND;
+    }
 
     while (std::getline(fs, line)) {
         n = line.find(delim);
@@ -346,12 +358,15 @@ int Properties::read_all_data_from_file() {
 
 int Properties::write_all_data_to_file() {
     if(!fWriteToFile){
+        LogMessage(WARNING, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
         return PROPERTY_WRITING_TURNED_OFF;
     }
 
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ios::trunc);
-    if (!fs.is_open())
+    if (!fs.is_open()){
+        LogMessage(ERROR, "Properties::write_all_data_to_file()::PROPERTY_ERROR_FILE_CANT_OPEN");
         return PROPERTY_ERROR_FILE_CANT_OPEN;
+    }
 
     for (auto it = dataStr.begin(); it != dataStr.end(); ++it)
         fs << it->first << "=" << it->second << "\n";
@@ -380,7 +395,7 @@ int Properties::update_intData_from_file(const std::string& key){
             return PROPERTY_NO_ERRORS;
         }
     }
-    
+    LogMessage3(WARNING, "Properties::update_intData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
     return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
 
@@ -398,16 +413,19 @@ int Properties::update_strData_from_file(const std::string& key){
         }
     }
 
+    LogMessage3(WARNING, "Properties::update_strData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
     return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
 
 int Properties::update_intData_in_file(const std::string& key){
     //TODO rewrite to update only needed data in file
+    LogMessage3(DEBUG, "Properties::update_intData_in_file( ", key.c_str(), " )");
     read_all_data_from_file();
     return write_all_data_to_file();
 }
     
 int Properties::update_strData_in_file(const std::string& key){
+    LogMessage3(DEBUG, "Properties::update_strData_in_file( ", key.c_str(), " )");
     read_all_data_from_file();
     return write_all_data_to_file();
 }
