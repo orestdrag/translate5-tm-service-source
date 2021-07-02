@@ -27,7 +27,7 @@ Copyright Notice:
 #include "MemoryUtil.h"
 #include "../memory/MemoryFactory.h"
 #include "OptionsDialog.H"
-
+#include "core/utilities/LogWrapper.h"
 
 #include "vector"
 
@@ -398,11 +398,18 @@ OtmMemory *MemoryFactory::createMemory
   int *piErrorCode
 )
 {
+  {
+    char buff[360];
+    sprintf("MemoryFactory::createMemory(pszPluginName = %s, pszMemoryName = %s, pszDescription = %s, \
+      pszSourceLanguage = %s, char chDrive = %s, pszOwner = %s, bInvisible = %d, piErrorCode = %d)",
+      pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage,chDrive, pszOwner, bInvisible, *piErrorCode);
+    LogMessage(DEBUG, buff);
+  }
   OtmMemory *pMemory = NULL;
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  this->Log.writef( "Create memory %s", pszMemoryName );
+  LogMessage2(INFO, "Create memory ", pszMemoryName);
 
   if ( piErrorCode != NULL ) *piErrorCode = 0;
 
@@ -420,7 +427,7 @@ OtmMemory *MemoryFactory::createMemory
   {
     this->iLastError = *piErrorCode = ERROR_PLUGINNOTAVAILABLE;
     this->strLastError = "No memory plugin available for the creation of the memory";
-    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    LogMessage2(ERROR, "MemoryFactory::createMemory()::ERROR_PLUGINNOTAVAILABLE, Create failed, with message ", this->strLastError.c_str());
     return( NULL );
   } /* endif */       
 
@@ -430,7 +437,10 @@ OtmMemory *MemoryFactory::createMemory
   if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
   {
     pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE, chDrive );
-    if ( pMemory == NULL ) this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+    if ( pMemory == NULL ){
+       this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+       LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
+    }
   }
   else   if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
   {
@@ -438,16 +448,19 @@ OtmMemory *MemoryFactory::createMemory
     if ( pMemory == NULL )
     {
       this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+      LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
+    
     }
     else if ( (pszOwner != NULL) && (*pszOwner != EOS) ) 
     {
+      LogMessage5(DEBUG, "MemoryFactory::createMemory()::setOwner(",strMemoryName.c_str(), ", owner = ", pszOwner,")");
       ((OtmSharedMemoryPlugin *)pluginSelected)->setOwner( (char *)strMemoryName.c_str(), pszOwner );
     }
   }
 
   if ( pMemory == NULL)
   {
-    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    LogMessage2(ERROR, "Create failed, with message ", this->strLastError.c_str());
     if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
   }
   else if ( !bInvisible )
@@ -459,8 +472,12 @@ OtmMemory *MemoryFactory::createMemory
     strcat( pszObjName, ":" );
     strcat( pszObjName, pszMemoryName );
     EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
-    if ( pszObjName != NULL ) UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
-    this->Log.write( "   Create successful" );
+    if ( pszObjName != NULL ){ 
+      UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
+    }else{
+      LogMessage(ERROR, "MemoryFactory::createMemory::pszObjName == NULL");
+    }
+    LogMessage(INFO, "Create successful ");
   } /* endif */     
 
   return( pMemory );
@@ -1927,6 +1944,7 @@ OtmPlugin *MemoryFactory::findPlugin
     {
       this->iLastError = ERROR_PLUGINNOTAVAILABLE;
       this->strLastError = "Error: selected plugin " + std::string( pszPluginName ) + " is not available";
+      LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
     } /* endif */       
   } /* endif */     
 
@@ -1948,6 +1966,7 @@ OtmPlugin *MemoryFactory::findPlugin
       {
         this->iLastError = ERROR_PLUGINNOTAVAILABLE;
         this->strLastError = "Error: selected plugin " + strPlugin + " is not available";
+        LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
       } /* endif */       
     }
     else
@@ -1984,6 +2003,7 @@ OtmPlugin *MemoryFactory::findPlugin
       {
         this->iLastError = ERROR_MEMORY_NOTFOUND;//ERROR_PLUGINNOTAVAILABLE
         this->strLastError = "Translation Memory "+std::string(pszMemoryName)+" was not found.";//"Error: no memory plugin for memory " + std::string(pszMemoryName) + " found or memory does not exist";
+        LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
       } /* endif */       
     } /* endif */       
   }
@@ -1991,6 +2011,7 @@ OtmPlugin *MemoryFactory::findPlugin
   {
     this->iLastError = ERROR_MISSINGPARAMETER;
     this->strLastError = "Error: Missing memory name";
+    LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
   } /* endif */     
 
   return( plugin );
@@ -2007,8 +2028,10 @@ int MemoryFactory::getMemoryName
   std::string &strMemoryName
 )
 {
- if ( (pszMemoryName == NULL) || (*pszMemoryName == '\0') ) return( -1 );
-
+ if ( (pszMemoryName == NULL) || (*pszMemoryName == '\0') ){
+    LogMessage2(ERROR, "MemoryFactory::getMemoryName()::(pszMemoryName == NULL) || (*pszMemoryName == '\0'), pszMemoryName = ", pszMemoryName);
+    return( -1 );
+ }
  char *pszColon  = strchr( pszMemoryName, ':' );
  if ( pszColon != NULL )
  {
@@ -2354,7 +2377,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   // make temporary directory for the memory files of the package
   char szTempDir[MAX_PATH];
   UtlMakeEQFPath( szTempDir, EOS, IMPORT_PATH, NULL );
-  strcat( szTempDir, "\\MemImp\\" );
+  strcat( szTempDir, "/MemImp/" );
   strcat( szTempDir, pszMemoryName );
   UtlMkMultDir( szTempDir, FALSE );
 
@@ -2366,7 +2389,9 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   {
     WIN32_FIND_DATA FindData;
     std::string strSearchPattern = szTempDir;
-    strSearchPattern.append( "\\*.*" );
+    strSearchPattern.append( "/*.*" );
+    LogMessage5(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), HANDLE hDir = FindFirstFile("
+      , strSearchPattern.c_str(), ", &FindData =","FindData",")");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
     if ( hDir != INVALID_HANDLE_VALUE )
@@ -2378,7 +2403,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
         {
           if ( !strMemFiles.length() == 0 ) strMemFiles.append( "," );
           strMemFiles.append( szTempDir );
-          strMemFiles.append( "\\" );
+          strMemFiles.append( "/" );
           strMemFiles.append( FindData.cFileName );
         }
         fMoreFiles = FindNextFile( hDir, &FindData );
@@ -2387,17 +2412,18 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
     }
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
-
   // call memory plugin to process the files
   OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)getPlugin( DEFAULTMEMORYPLUGIN );
   if ( pPlugin != NULL )
   {
     PVOID pvPluginData = NULL;
-    iRC = pPlugin->importFromMemoryFiles( pszMemoryName, (PSZ)strMemFiles.c_str(), OtmMemoryPlugin::IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT, &pvPluginData );
+    iRC = pPlugin->importFromMemoryFiles( pszMemoryName, (PSZ)strMemFiles.c_str(), 
+        OtmMemoryPlugin::IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT, &pvPluginData );
   }
 
   // delete any files left over and remove the directory
   UtlDeleteAllFiles( (const char *)szTempDir );
+  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), RemoveDirectory, szTempDir = ", szTempDir);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   RemoveDirectory( szTempDir );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

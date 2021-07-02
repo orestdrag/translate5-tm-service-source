@@ -42,6 +42,7 @@
 #include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 #include "EQFMORPH.H"
+#include "core/utilities/LogWrapper.h"
 
 #undef _WPTMIF                         // we don't care about WP I/F
 //#include "eqfhelp.id"                  // help resource IDs
@@ -1842,13 +1843,19 @@ LONG        lOptions                 // type of new Translation Memory
   MemoryFactory *pFactory = MemoryFactory::getInstance();
 
   szEmpty[0] = EOS;
-
+  {
+    char buff[255];
+    sprintf(buff, "MemFuncCreateMem( pszMemName = %s, pszDescription = %s, pszSourceLanguage = %s",
+          pszMemName, pszDescription, pszSourceLanguage);
+    LogMessage(DEBUG, buff);
+  }
   // check required parameters
   if ( usRC == NO_ERROR )
   {
     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
     {
       usRC = TMT_MANDCMDLINE;
+      LogMessage(ERROR, "MemFuncCreateMem()::TMT_MANDCMDLINE");
       UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
     } /* endif */
   } /* endif */
@@ -1857,11 +1864,12 @@ LONG        lOptions                 // type of new Translation Memory
   {
     if ( (pszSourceLanguage == NULL) || (*pszSourceLanguage == EOS) )
     {
+      LogMessage(ERROR, "MemFuncCreateMem()::ERROR_NO_SOURCELANG");
       usRC = ERROR_NO_SOURCELANG;
       UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
     } /* endif */
   } /* endif */
-
+  LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: Check memory name syntax");
 #ifdef TEMPORARY_COMMENTED // commented in debuggging purposes
   // Check memory name syntax
   if ( usRC == NO_ERROR )
@@ -1876,6 +1884,7 @@ LONG        lOptions                 // type of new Translation Memory
   } /* endif */
 #endif // TEMPORARY_COMMENTED
 
+LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemFuncCreateMem():: Check if target drive is valid");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // Check if target drive is valid
   if ( (usRC == NO_ERROR) && (chToDrive != EOS) )
@@ -1935,6 +1944,7 @@ LONG        lOptions                 // type of new Translation Memory
     }
   } /* endif */
 
+LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: check if source language is valid");
 #ifdef TEMPORARY_COMMENTED
   // check if source language is valid
   if ( usRC == NO_ERROR )
@@ -1976,7 +1986,7 @@ LONG        lOptions                 // type of new Translation Memory
 
 
   // create memory database
-  BOOL fOK = (usRC==NO_ERROR ? TRUE : FALSE);
+  BOOL fOK = (usRC==NO_ERROR);
   OtmMemory     *pMemory  = NULL; 
 
   if (fOK)
@@ -1987,20 +1997,20 @@ LONG        lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      // using this interface we can only use the LAN-based shared memory plugin...
+      LogMessage(INFO, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin...");
       strcpy( szPlugin, "EqfSharedOnLanMemoryPlugin" );
     }
     else
     {
-      // use the default memory plugin
+      LogMessage(INFO, "MemFuncCreateMem():: use the default memory plugin");
       strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
     }
 
-
-    // create the memory
+    LogMessage(INFO, "MemFuncCreateMem():: create the memory");    
     pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, chToDrive, &iRC );
     if ( pMemory == NULL )
     {
+      LogMessage(ERROR, "MemFuncCreateMem()::pMemory == NULL");
       fOK = FALSE;
     } 
   } 
@@ -2013,6 +2023,8 @@ LONG        lOptions                 // type of new Translation Memory
      pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
 
       // notify creation success
+
+  LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: notify creation success with win api");
 #if 0
       HWND hwnd = FindWindow( TWBMAIN ,NULL);
       if(hwnd != NULL)
@@ -2029,13 +2041,14 @@ LONG        lOptions                 // type of new Translation Memory
   //--- Tm is created. Close it. 
   if ( pMemory != NULL )
   {
-
+    LogMessage(INFO, "MemFuncCreateMem()::Tm is created. Close it");
     pFactory->closeMemory( pMemory );
     pMemory = NULL;
   }
   
   usRC = (fOK ? 0 : 1);
 
+  LogMessage2(INFO, "MemFuncCreateMem() done, usRC = ", intToA(usRC));
   return( usRC );
 } /* end of function MemFuncCreateMem */
 

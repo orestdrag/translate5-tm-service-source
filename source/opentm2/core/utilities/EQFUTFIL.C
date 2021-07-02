@@ -4150,8 +4150,8 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  char szFileFound[MAX_PATH];
  WIN32_FIND_DATA info;
  HANDLE hp; 
- sprintf( szFileFound, "%s\\*.*", pszDirectory );
-
+ sprintf( szFileFound, "%s/*.*", pszDirectory );
+LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles, pszDir = ", pszDirectory);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
  hp = FindFirstFile( szFileFound, &info );
  do

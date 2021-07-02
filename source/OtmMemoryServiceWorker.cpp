@@ -653,11 +653,12 @@ std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16St
 */
 void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
 {
+  LogMessage2(WARNING,"OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   int iUTF16Len;
   int iASCIILen;
   int iUTF8Len = (int)strText.length() + 1;
   char *pszNewData = NULL;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
   MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
@@ -665,8 +666,8 @@ void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
   pszNewData = (char *)malloc( iASCIILen + 1 );
   WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
   strText = pszNewData;
-  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   free( pszNewData );
+  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a ASCII std::string to UTF8 std::string (on spot conversion)
@@ -674,20 +675,23 @@ void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
 */
 void OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText )
 {
+  LogMessage2(WARNING,"OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText ) is not implemented, strText = ", strText.c_str());
+
+#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   int iUTF16Len;
   int iUTF8Len;
   int iASCIILen = (int)strText.length() + 1;
   char *pszNewData = NULL;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
   MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
   iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iUTF8Len + 1);
   WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
   strText = pszNewData;
   free( pszNewData );
+  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 
@@ -916,6 +920,9 @@ int OtmMemoryServiceWorker::createMemory
   char szOtmSourceLang[40];
   szOtmSourceLang[0] = 0;//terminate to avoid garbage
   EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
+  
+  LogMessage(WARNING, "TEMPORARY_COMMENTED in OtmMemoryServiceWorker::createMemory() if (szOtmSourceLang[0] == 0)");
+  #ifdef TEMPORARY_COMMENTED
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -923,17 +930,19 @@ int OtmMemoryServiceWorker::createMemory
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
+  #endif
 
-#ifdef TEMPORARY_COMMENTED
   // either create an empty memory or build the memory using binary input data
   convertUTF8ToASCII( strName );
-#endif //TEMPORARY_COMMENTED
+
   if ( strData.empty() )
   {
+    LogMessage(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()");
     iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
   }
   else
   {
+     LogMessage(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ");
     // setup temp file name for ZIP package file 
     char szTempFile[PATH_MAX];
     iRC = buildTempFileName( szTempFile );
@@ -987,9 +996,7 @@ int OtmMemoryServiceWorker::createMemory
   factory->startJSON( strOutputParms );
 
 // TODO investigate how much do we need this
-#ifdef TEMPORARY_COMMENTED
   convertASCIIToUTF8( strName );
-#endif //TEMPORARY_COMMENTED
 
   factory->addParmToJSON( strOutputParms, "name", strName );
   factory->terminateJSON( strOutputParms );
@@ -2108,11 +2115,13 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   // get decoded length of data
   DWORD dwDecodedLength = 0;
+  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile() get decoded length of data");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
   {
     iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
+    LogMessage3(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
     return( iRC );
   }
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2122,9 +2131,11 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   if ( pData == NULL )
   {
     strError = "Insufficient memory";
+    LogMessage2(ERROR, "decodeBase64ToFile()::Insufficient memory, iRC = ", intToA(iRC));
     return( iRC );
   }
 
+LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile()::CryptStringToBinary()");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // decode data
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, pData, &dwDecodedLength, NULL, NULL ) )
@@ -2132,6 +2143,7 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     iRC = GetLastError();
     free( pData );
     strError = "decoding of BASE64 data failed";
+    LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
     return( iRC );
   }
 
@@ -2144,6 +2156,8 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     strError = "creation of output file ";
     strError.append( pszFile );
     strError.append( " failed" );
+
+    LogMessage4(ERROR, "decodeBase64ToFile()::", strError.c_str() ,", iRC = ", intToA(iRC));
     return( iRC );
   }
 
@@ -2157,6 +2171,7 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     strError = "write to output file  ";
     strError.append( pszFile );
     strError.append( " failed" );
+    LogMessage4(ERROR, "decodeBase64ToFile()::", strError.c_str() ,", iRC = ", intToA(iRC));
     return( iRC );
   }
 

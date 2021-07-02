@@ -254,12 +254,6 @@ USHORT EqfCreateMem
               pszMemName, pszDescription, pszSourceLanguage, lOptions, chToDrive);
     LogMessage(INFO, buff);
   }
-  LOGWRITE1( "==EQFCreateMem==\n" );
-  LOGPARMSTRING("Memory", pszMemName );
-  LOGPARMSTRING("Description", pszDescription );
-  LOGPARMCHAR("ToDrive", chToDrive );
-  LOGPARMSTRING("Sourcelanguage", pszSourceLanguage );
-  LOGPARMOPTION("Options", lOptions );
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
@@ -277,8 +271,7 @@ USHORT EqfCreateMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-
-  LOGWRITE2( "  RC=%u\n", usRC );
+  LogMessage2(INFO, "EqfCreateMem() done ::RC=", intToA(usRC));
 
   return( usRC );
 } /* end of function EqfCreateMem */
@@ -685,6 +678,7 @@ USHORT FctValidateSession
   }
   else
   {
+    LogMessage(WARNING,"FctValidateSession():: [checksum validation commented out] -> NO_ERROR");
 //     LONG      lCheckSum;               // buffer for actual checksum
 
 //    FctBuildCheckSum( pData, &lCheckSum );
@@ -705,7 +699,7 @@ USHORT FctValidateSession
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
     HANDLE        hMapObject = NULL;
-
+  LogMessage3(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", intToA(ulRefreshFlag), " )" );
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
     if(!hMapObject)

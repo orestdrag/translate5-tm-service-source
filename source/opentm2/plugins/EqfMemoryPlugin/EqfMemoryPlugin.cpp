@@ -435,17 +435,22 @@ int EqfMemoryPlugin::importFromMemoryFiles
   PVOID *ppPrivateData
 )
 {
+  {
+    char buff[360];
+    sprintf(buff,"EqfMemoryPlugin::importFromMemoryFiles(pszMemoryName=%s,pFileList=%s, iOptions=%d, ppPrivateData=%s)", pszMemoryName,pFileList, iOptions, ppPrivateData);
+    LogMessage(DEBUG, buff);
+  }
   int iRC = OtmMemoryPlugin::eSuccess;
 
-  // check the type of method call
+  LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles check the type of method call");
   if ( *ppPrivateData == NULL )
   {
-    // this is an inital call to import a memory using its data files
+    LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is an inital call to import a memory using its data files");
     iRC = this->importFromMemFilesInitialize( pszMemoryName, pFileList, iOptions, ppPrivateData );
   }
   else
   {
-    // this is a continuation call
+    LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is a continuation call");
     iRC = this->importFromMemFilesContinueProcessing( ppPrivateData );
   } /* endif */     
 

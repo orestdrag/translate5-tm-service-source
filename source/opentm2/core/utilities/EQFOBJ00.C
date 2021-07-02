@@ -16,7 +16,7 @@
 #include "win_types.h"
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
-
+#include "LogWrapper.h"
 static HWND hObjMan[MAX_TASK] = {NULLHANDLE};
 POBJM_IDA     pObjBatchIda = NULL;     // Points to IDA when in function call mode
 
@@ -834,6 +834,7 @@ USHORT EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer )
 MRESULT EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
   MRESULT mResult = FALSE;
+  LogMessage(WARNING,"TO_BE_REPLACED_WITH_LINUX_CODE in EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2), HWND hwnd = EqfQueryHandler( psz);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   HWND hwnd = EqfQueryHandler( psz);
 
