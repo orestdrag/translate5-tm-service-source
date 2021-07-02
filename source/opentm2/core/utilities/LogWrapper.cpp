@@ -4,9 +4,15 @@
 #include <ctime>
 #include "FilesystemHelper.h"
 #include <iostream>
+#include "ThreadingWrapper.h"
+#include <mutex>
+#include <thread>
 
 std::string logFilename;
 int logLevelTreshold;
+
+#define THREAD_ID_WRITE_TO_LOGS 1
+#define CONSOLE_LOGGING 1
 
 std::string getDateStr(){
     // current date/time based on current system
@@ -41,17 +47,25 @@ std::string generateLogFileName(){
    return fName;
 }
 
-int writeLog(const std::string& message){
+std::mutex coutMutex;   
+int writeLog(std::string& message){
+    #ifdef THREAD_ID_WRITE_TO_LOGS
+        message += " [thread id = " + std::to_string(_getpid());
+        message += "]";
+    #endif
+
     //write log to file
-    std::ofstream logF;
-    logF.open(logFilename, std::ios_base::app); // append instead of overwrite
-    logF << message <<"\n"; 
-    logF.close();
+    {
+        std::lock_guard<std::mutex> coutLock(coutMutex); 
 
-//#ifdef DEBUG
-    std::cout << message<< '\n';
-//#endif
-
+    #ifdef CONSOLE_LOGGING
+        std::cout << message<< '\n';
+    #endif
+        std::ofstream logF;
+        logF.open(logFilename, std::ios_base::app); // append instead of overwrite
+        logF << message <<"\n"; 
+        logF.close();
+    }
     return 0;
 }
 int suppressLogging(){
