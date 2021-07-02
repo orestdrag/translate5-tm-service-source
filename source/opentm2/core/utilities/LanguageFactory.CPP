@@ -6,7 +6,7 @@
 */
 
 #include "EQF.H"                  // General .H for EQF
-
+#include "LogWrapper.h"
 
 // the Win32 Xerces build requires the default structure packing...
 #pragma pack( push )
@@ -67,7 +67,7 @@ LanguageFactory::LANGUAGEINFO DefaultLangTable[] = {
   { "Macedonian",         855,  1251,  "ISO-8859-5",  "mk-MK",        "?", FALSE, "", TRUE, TRUE },
   { "Malay",             1252,  1252,  "ISO-8859-1",  "ms-MY",        "?", FALSE, "", TRUE, TRUE },
   { "Mongolian",         1251,  1251,  "ISO-8859-5",  "mn-MN",        "?", FALSE, "", TRUE, TRUE },
-  { "Norwegian(Bokmål)", 850,  1252,  "ISO-8859-1",   "nb-NO",        "?", TRUE,  "", TRUE, TRUE },
+  { "Norwegian(Bokmï¿½l)", 850,  1252,  "ISO-8859-1",   "nb-NO",        "?", TRUE,  "", TRUE, TRUE },
   { "Norwegian(Nynorsk)",850,  1252,  "ISO-8859-1",   "nn-NO",        "?", FALSE, "", TRUE, TRUE },
   { "Polish",            852,  1250,  "ISO-8859-2",   "pl-PL",        "?", FALSE, "", TRUE, TRUE },
   { "Portuguese(Br.New)",850,  1252,  "ISO-8859-1",   "pt-BR",        "?", TRUE,  "", TRUE, TRUE },
@@ -359,6 +359,7 @@ int LanguageFactory::getOpenTM2NameFromISO
   int i = this->findISO( pszISO );
   if ( i < 0 )
   {
+    LogMessage2(ERROR, "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = ", pszISO);
     return( ERROR_LANGUAGENOTFOUND );
   }
 
@@ -636,6 +637,11 @@ int LanguageFactory::findISO
   int iPreferred = -1;
   int iBestMatch = -1;
 
+  if(iMax<=0){
+    LogMessage(ERROR,"LanguageFactory::findISO():: language list size is 0");
+    return (iFound);
+  }
+
   while( i < iMax )
   {
     if ( compareISO( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
@@ -666,6 +672,7 @@ int LanguageFactory::findISO
   {
     iFound = iPreferred ;
   }
+  LogMessage4(INFO, "LanguageFactory::findISO()::size of lang list = ", intToA(iMax), "; iFound = ", intToA(iFound));
   return( iFound );
 }
 

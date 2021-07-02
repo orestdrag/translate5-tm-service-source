@@ -248,6 +248,12 @@ USHORT EqfCreateMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
+  {
+    char buff[255];
+    sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d; ToDrive = %s",
+              pszMemName, pszDescription, pszSourceLanguage, lOptions, chToDrive);
+    LogMessage(INFO, buff);
+  }
   LOGWRITE1( "==EQFCreateMem==\n" );
   LOGPARMSTRING("Memory", pszMemName );
   LOGPARMSTRING("Description", pszDescription );
@@ -669,10 +675,12 @@ USHORT FctValidateSession
   // test magic word and checksum
   if ( pData == NULL )
   {
+    LogMessage(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   else if ( pData->lMagicWord != FCTDATA_IDENTIFIER )
   {
+    LogMessage(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   else
@@ -690,6 +698,7 @@ USHORT FctValidateSession
   {
      *ppData = pData;
   } /* endif */
+  LogMessage2(DEBUG, "FctValidateSession() usRC = ", intToA(usRC));
   return( usRC );
 } /* end of function FctValidateSession */
 
@@ -1160,8 +1169,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( pData )
   {
-    LOGWRITE1( "==EqfGetOpenTM2Lang==\n" );
-    LOGPARMSTRING( "ISOLang", pszIsoLanguage );
+    LogMessage3(INFO, "==EqfGetOpenTM2Lang== :: ", "ISOLang = ", pszISOLang);
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
@@ -1169,6 +1177,7 @@ USHORT EqfGetOpenTM2Lang
     PSZ pszParm = "pointer to ISO language id";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
+    LogMessage(ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL)");
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
@@ -1176,6 +1185,7 @@ USHORT EqfGetOpenTM2Lang
     PSZ pszParm = "buffer for OpenTM2 language name";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
+    LogMessage(ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL)");
   } /* endif */
 
 
@@ -1188,7 +1198,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( pData )
   {
-    LOGWRITE2( "  RC=%u\n", usRC );
+    LogMessage6(INFO, "EqfGetOpenTM2Lang()::pData != NULL, RC=", intToA(usRC),"; pszISOLang = ",pszISOLang,"; pszOpenTM2Lang = ", pszOpenTM2Lang);
   }
 
   return( usRC );

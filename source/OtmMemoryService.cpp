@@ -207,18 +207,20 @@ void post_method_handler( const shared_ptr< Session > session )
 
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing POST request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  LogMessage3(INFO, "==== processing POST request, content type=\"%s\", content length=%ld====\n", strType.c_str(), intToA(content_length) );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     int iTransActIndex = AddToTransActLog( POST_CREATEMEM_TRANSACTID, "" );
+    //TransActDone( iTransActIndex );
     string strInData = string( body.begin(), body.end() );
-    if ( hfLog != NULL ) fprintf( hfLog, "Input:\n-----\n%s\n----\n", strInData.c_str() );
+    LogMessage2(INFO, "Input: ", strInData.c_str() );
     string strResponseBody;
     int rc = pMemService->createMemory( strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    //if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    LogMessage4(INFO, "post_method_handler done, RC=", intToA(rc),"; Output: ", strResponseBody.c_str());
   } );
 }
 
@@ -480,7 +482,8 @@ int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
   pEntry->Id = Id;
   time( &( pEntry->lStartTimeStamp ) );
   strcpy( pEntry->szMemory, pszMemory );
-
+  //std::string message = "Transaction " + to_string(Id) + " started at " + pEntry->lStartTimeStamp + " timestamp with pszMemory = " + pszMemory;
+  //LogMessage(INFO, message.c_str());
   return( i );
 }
 
@@ -496,7 +499,8 @@ int TransActDone( int iTransActIndex )
   // set transaction stop time
   pTransActLog[iTransActIndex].lStopTimeStamp = 0;
   time( &(pTransActLog[iTransActIndex].lStopTimeStamp) );
-
+  //std::string message = "Transaction " + to_string(pTransActLog[iTransActIndex].Id) + " finished at " + pTransActLog[iTransActIndex].lStartTimeStamp + " timestamp iTransActIndex = " + to_string(iTransActIndex);
+  //LogMessage(INFO, message.c_str());
   return( 0 );
 }
 

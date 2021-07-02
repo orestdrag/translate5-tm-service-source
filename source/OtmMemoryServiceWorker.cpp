@@ -31,6 +31,7 @@
 
 // for string convertations
 #include <codecvt>
+#include <locale>
 template <class Facet>
 struct deletable_facet : Facet{
   using Facet::Facet;//inherit constructors
@@ -628,8 +629,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   \returns string converted to UTF16
 */
 std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8String )
-{
-  //TODO: test 
+{ 
   std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
   std::wstring wstr = wconv.from_bytes(strUTF8String);
 	return wstr;
@@ -641,10 +641,10 @@ std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8S
 */
 std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16String)
 {
-  //TODO: check if fit for every needed scenario
-  std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
-  std::string str = wconv.to_bytes(strUTF16String);
-	return str;
+  std::u16string u16str( strUTF16String.begin(), strUTF16String.end() );
+  std::string u8_conv = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
+
+	return u8_conv;
 }
 
 /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
@@ -867,6 +867,8 @@ int OtmMemoryServiceWorker::createMemory
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
+
+      LogMessage4(DEBUG, "JSON parsed name = ", name.c_str(), "; value = ",value.c_str());
       if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {
         strData = value;
@@ -878,6 +880,8 @@ int OtmMemoryServiceWorker::createMemory
       else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
       {
         strSourceLang = value;
+      }else{
+        LogMessage4(WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
       }
     }
   } /* endwhile */
@@ -910,11 +914,12 @@ int OtmMemoryServiceWorker::createMemory
 
   // convert the ISO source language to a OpenTM2 source language name
   char szOtmSourceLang[40];
+  szOtmSourceLang[0] = 0;//terminate to avoid garbage
   EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, 200, L"Error: Could not convert language %S to OpenTM2 language name", strSourceLang.c_str() );
+    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", convertToUTF16(strSourceLang).c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -939,7 +944,7 @@ int OtmMemoryServiceWorker::createMemory
       return( restbed::INTERNAL_SERVER_ERROR );
     }
 
-    if ( hfLog ) fprintf( hfLog, "+   Temp binary file is %s\n", szTempFile );
+    LogMessage2(INFO, "+   Temp binary file is ", szTempFile );
 
     // decode binary data and write it to temp file
     std::string strError;
@@ -975,6 +980,7 @@ int OtmMemoryServiceWorker::createMemory
       default:
         iRC = restbed::INTERNAL_SERVER_ERROR;
     }
+    LogMessage2(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC));
     return( iRC );
   }
 
