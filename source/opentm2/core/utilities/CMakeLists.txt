@@ -22,6 +22,7 @@ set(Util_Source_Files
         FilesystemWrapper.cpp
         LogWrapper.cpp
         ThreadingWrapper.cpp
+        OSWrapper.cpp
         EQFSETUP.C
 #EQFUTDLG.CPP
 #EQFPROPS.CPP

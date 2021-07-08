@@ -10,7 +10,8 @@
 #include <time.h>
 #include <locale.h>
 #include "EQF.H"
-
+#include "LogWrapper.h"
+#include "OSWrapper.h"
 //#include <tchar.h>
 
 // temporary defines to compile without DBCS LIB
@@ -2025,8 +2026,8 @@ ULONG GetCodePage( USHORT usType )
 {
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in GetCodePage, usType = ", intToA(usType));
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 /* https://docs.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-getlocaleinfoa */
   switch ( usType )
   {
@@ -2049,7 +2050,7 @@ ULONG GetCodePage( USHORT usType )
       ulReturnCP = (ULONG) _ttol (&cp[0]);
       break;
   } /* endswitch */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return (ulReturnCP);
 }

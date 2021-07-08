@@ -162,12 +162,10 @@ int OtmMemoryServiceWorker::verifyAPISession
 
   LogMessage(INFO, "Initializing API Session");
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  std::string msg = "[verifyAPISession] EqfStartSession ret: " + std::to_string(this->iLastRC); 
-  LogMessage(INFO, msg.c_str());
+  LogMessage2(INFO, "[verifyAPISession] EqfStartSession ret: " , intToA(this->iLastRC));
 
   if ( this->iLastRC != 0 ) {
-    msg = "OpenTM2 API session could not be started, the return code is" + this->iLastRC;
-    LogMessage(ERROR, msg.c_str());
+    LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , intToA( this->iLastRC ));
     //swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, 
     //  L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   }
@@ -980,16 +978,19 @@ int OtmMemoryServiceWorker::createMemory
     {
       case ERROR_MEM_NAME_INVALID:
         iRC = restbed::CONFLICT;
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::CONFLICT");
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
         iRC = restbed::BAD_REQUEST;
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::BAD_REQUEST");
         break;
       default:
         iRC = restbed::INTERNAL_SERVER_ERROR;
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::INTERNAL_SERVER_ERROR");
+        break;
     }
-    LogMessage2(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC));
     return( iRC );
   }
 
