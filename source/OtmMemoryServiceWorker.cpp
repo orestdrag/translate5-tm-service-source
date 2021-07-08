@@ -902,15 +902,13 @@ int OtmMemoryServiceWorker::createMemory
   if ( strName.empty() )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    wchar_t errMsg[] = L"Error: Missing memory name input parameter";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
+    buildErrorReturn( iRC, L"Error: Missing memory name input parameter", strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
   if ( strSourceLang.empty() )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    wchar_t errMsg[] = L"Error: Missing source language input parameter";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
+    buildErrorReturn( iRC, L"Error: Missing source language input parameter", strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
 

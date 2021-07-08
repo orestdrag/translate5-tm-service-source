@@ -1875,7 +1875,8 @@ EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   {
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
-    AnsiToOem( pIn, pOut );
+    //AnsiToOem( pIn, pOut );
+    EQFAnsiToOem( pIn, pOut );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
@@ -1977,10 +1978,12 @@ EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   }
   else
   {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
-    OemToAnsi( pIn, pOut );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+    //OemToAnsi( pIn, pOut );
+    EQFOemToAnsi( pIn, pOut );
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
 

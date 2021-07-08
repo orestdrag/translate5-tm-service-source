@@ -280,6 +280,7 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
             LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr));
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
+            bytesRead = buffSize;
             LogMessage2(DEBUG, "FilesystemHelper::ReadFile():: readed ", intToA(bytesRead)/*, "; data = ", (char*)buff*/);
         }
     }
@@ -307,7 +308,11 @@ int FilesystemHelper::GetFileSize(FILE*& ptr){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
         return -1;
     }
-    int size = fseek(ptr, 0L, SEEK_SET);
+    int pos = ftell(ptr);
+    fseek(ptr, 0L, SEEK_END);
+    int size = ftell(ptr);
+    fseek(ptr, 0L, pos);
+    
     LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size));
     return size;
 }
