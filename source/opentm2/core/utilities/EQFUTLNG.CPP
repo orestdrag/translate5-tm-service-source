@@ -244,12 +244,8 @@ BOOL UtlQuerySysLangFile
   GetStringFromRegistry( APPL_Name, KEY_OTM_DIR, szDrive, sizeof( szDrive  ), "" );
   GetStringFromRegistry( APPL_Name, KEY_Path, szSysPath, sizeof( szSysPath), "" );
 
-  sprintf( EqfSystemPath, "%s/%s",  szDrive, szSysPath );
-  strcpy( szFileName, EqfSystemPath );
-  strcat( szFileName, BACKSLASH_STR );
-  strcat( szFileName, TABLEDIR );
-  strcat( szFileName, BACKSLASH_STR );
-  strcat( szFileName, SYSLANGFILE );
+  sprintf( EqfSystemPath, "%s",  szSysPath );
+  sprintf( szFileName, "%s/%s/%s",  EqfSystemPath, TABLEDIR, SYSLANGFILE);
 
   /********************************************************************/
   /* load system language file into memory                            */

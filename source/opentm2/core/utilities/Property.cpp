@@ -77,17 +77,25 @@ int properties_get_int(const char * key, int& value ){
 
 int properties_get_int_or_default(const char* key, int& value, const int defaultValue){
     int res = properties_get_int(key, value);
-    if(res != PROPERTY_NO_ERRORS)
+    if(res != PROPERTY_NO_ERRORS){
         value = defaultValue;
-    return PROPERTY_USED_DEFAULT_VALUE;
+        properties_add_int(key, defaultValue);
+        LogMessage4(DEBUG, "Key ", key , " not saved yet -> saving default value : ", intToA(defaultValue));
+        return PROPERTY_USED_DEFAULT_VALUE;
+    }
+    return PROPERTY_NO_ERRORS;
 }
 
 
 int properties_get_str_or_default(const char* key, char *buff, int buffSize, const char* defaultValue ){
-    int res = properties_get_str(key, buff, buffSize);
-    if(res != PROPERTY_NO_ERRORS)
+     int res = properties_get_str(key, buff, buffSize);
+    if(res != PROPERTY_NO_ERRORS){
         strncpy(buff, defaultValue, buffSize);
-    return PROPERTY_USED_DEFAULT_VALUE;
+        properties_add_str(key, defaultValue);
+        LogMessage4(DEBUG, "Key ", key , " not saved yet -> saving default value : ", defaultValue);
+        return PROPERTY_USED_DEFAULT_VALUE;
+    }
+    return PROPERTY_NO_ERRORS;
 }
 
 

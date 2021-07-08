@@ -2836,11 +2836,8 @@ BOOL UtlInitUtils( HAB hab )
 
      // Setup event log file name
      char* otmDir = filesystem_get_otm_dir();
-     strncpy(szLogFile, otmDir, MAX_EQF_PATH);
+     sprintf(szLogFile, "%s/%s", otmDir, EVENTLOGFILENAME);
      free(otmDir);
-
-     strcat( szLogFile, "/" );
-     strcat( szLogFile, EVENTLOGFILENAME );
 
      // Load event log file
      pEventTable = NULL;

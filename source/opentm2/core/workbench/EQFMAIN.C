@@ -30,7 +30,7 @@
 #include "EQFEVENT.H"                  // event logging facility
 #include "EQFART.H"                    // ART registry functions
 #include "EQFRPT.H"                    // report handler defines
-
+#include "core/utilities/PropertyWrapper.H"
 
 // should be removed
 #include "EQFMT00.H"
@@ -2694,18 +2694,20 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     CHAR   szLanDrive[MAX_DRIVE];      // buffer for lan drive list
     CHAR   szSysPath[MAX_EQF_PATH];    // buffer for system path
     BOOL   fOK = TRUE;                 // internal OK flag
+    CHAR   szOTMPath[MAX_EQF_PATH];
 
     // Get system drive and system path
-    GetStringFromRegistry( APPL_Name, KEY_Drive, szDrive, sizeof( szDrive  ), "" );
-    GetStringFromRegistry( APPL_Name, KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), "" );
-    GetStringFromRegistry( APPL_Name, KEY_Path, szSysPath, sizeof( szSysPath), "" );
-    sprintf( EqfSystemPath, "%s/%s",  szDrive, szSysPath );
+    properties_get_str(KEY_OTM_DIR, szOTMPath, MAX_EQF_PATH);
+    properties_get_str_or_default( KEY_Drive, szDrive, sizeof( szDrive  ), szOTMPath );
+    properties_get_str_or_default( KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), szOTMPath );
+    properties_get_str_or_default( KEY_Path, szSysPath, sizeof( szSysPath), szOTMPath );
+    sprintf( EqfSystemPath, "%s",  szSysPath );
 
     // Get name of system property file
-    GetStringFromRegistry( APPL_Name, KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), "" );
+    properties_get_str_or_default( KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), "" );
 
     // Get name of current language
-    GetStringFromRegistry( APPL_Name, KEY_SYSLANGUAGE, szEqfSysLanguage, sizeof( szEqfSysLanguage ), DEFAULT_SYSTEM_LANGUAGE );
+    properties_get_str_or_default( KEY_SYSLANGUAGE, szEqfSysLanguage, sizeof( szEqfSysLanguage ), DEFAULT_SYSTEM_LANGUAGE );
 
     // Set name of resource, help file and message file for selected language
     fOK = UtlQuerySysLangFile( szEqfSysLanguage, szEqfResFile,

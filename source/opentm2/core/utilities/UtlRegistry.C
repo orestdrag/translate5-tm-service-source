@@ -12,9 +12,7 @@
 // get a string from the registry
 BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize, PSZ pszDefault )
 {
-  int res  = properties_get_str(pszKey, pszBuffer, iBufSize);
-  if( res != PROPERTY_NO_ERRORS )
-    strncpy(pszBuffer, pszDefault, iBufSize);
+  int res  = properties_get_str_or_default(pszKey, pszBuffer, iBufSize,pszDefault);
   return( res );
 } /* end of function GetStringFromRegistry */
 
@@ -22,20 +20,14 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
 int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
 {  
   int iResult = 0;
-
-  int res  = properties_get_int(pszKey, iResult);
-  if ( res != PROPERTY_NO_ERRORS )
-      iResult = iDefault;
-
+  int res  = properties_get_int_or_default(pszKey, iResult, iDefault);
   return( iResult );
 } /* end of function GetIntFromRegistry */
 
 // write a string to the registry
 BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 {
-  int res = properties_add_str(pszKey, pszValue);
-  if(res == PROPERTY_ERROR_STR_KEY_ALREADY_EXISTS)
-    res = properties_set_str(pszKey, pszValue);
+  int res = properties_set_str_anyway(pszKey, pszValue);
   
   return res == PROPERTY_NO_ERRORS;
 } /* end of function WriteStringToRegistry */
@@ -43,9 +35,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 // write a int to the registry
 BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
 {
-  int res = properties_add_int(pszKey, iValue);
-  if(res == PROPERTY_ERROR_INT_KEY_ALREADY_EXISTS)
-    res = properties_set_int(pszKey, iValue);
+  int res = properties_set_int_anyway(pszKey, iValue);
   
   return res == PROPERTY_NO_ERRORS;
 
