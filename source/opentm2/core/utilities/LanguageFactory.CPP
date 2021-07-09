@@ -7,10 +7,10 @@
 
 #include "EQF.H"                  // General .H for EQF
 #include "LogWrapper.h"
-
+#include "PropertyWrapper.H"
 // the Win32 Xerces build requires the default structure packing...
-#pragma pack( push )
-#pragma pack(8)
+//#pragma pack( push )
+//#pragma pack(8)
 
 #include <iostream>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -20,7 +20,7 @@
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
 
-#pragma pack( pop )
+//#pragma pack( pop )
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -140,6 +140,7 @@ private:
   bool fError;                         // TRUE = parsing ended with error
 
   ELEMENTID GetElementID( PSZ_W pszName );
+  ELEMENTID GetElementID( PSZ pszName );
 };
 
 
@@ -152,23 +153,20 @@ LanguageFactory::LanguageFactory(void)
 {
   std::vector<LANGUAGEINFO> *pvLanguageList  = new std::vector<LANGUAGEINFO>;
   this->pvoidLanguageList = (void *)pvLanguageList;
-  char *pszLogFile = "LanguageFactory";
 
-  LogWriter::registerLogFile( pszLogFile, "Logging of language name and language properties related information" );
-
-  LogWriter *pLogWriter = new LogWriter();
-  pvLogWriter = (PVOID)pLogWriter;
-  //pLogWriter->open( "LanguageFactory" );
-  pLogWriter->write( "Starting LanguageFactory" );
+  LogMessage(INFO, "Logging of language name and language properties related information. Starting LanguageFactory" );
 
   // try to load the external language list
   char szFile[256];
-  UtlMakeEQFPath( szFile, NULC, TABLE_PATH, NULL );
-  strcat( szFile, "\\languages.xml" );
+  properties_get_str(KEY_OTM_DIR, szFile, 255);
+  strcat(szFile, "/TABLE/languages_simpl.xml");
+  properties_get_str_or_default(KEY_LANG_FILE_PATH, szFile, 255, szFile);
   int iRC = loadLanguageList( szFile );
-  if ( iRC != 0 )
+  
+  if ( iRC != 0  || pvLanguageList->size() == 0)
   {
-    pLogWriter->writef( "Load of external language list file \"%s\"failed with error code %ld, switching to built-in language list", szFile, iRC );
+    LogMessage5(ERROR, "Load of external language list file \""
+      , szFile, " failed with error code ",intToA(iRC),", switching to built-in language list" );
     // load failed, used built-in list instead
     PLANGUAGEINFO pInfo = DefaultLangTable;
     pvLanguageList->clear();
@@ -177,11 +175,11 @@ LanguageFactory::LanguageFactory(void)
       pvLanguageList->push_back( *pInfo );
       pInfo++;
     }
-    pLogWriter->writef( "Built-in language list contains %ld entries", pvLanguageList->size() );
+    LogMessage3(ERROR, "Built-in language list contains ", intToA(pvLanguageList->size())," entries" );
   }
   else
   {
-    pLogWriter->writef( "Load of external language list file \"%s\" successfull, the list contains %ld entries", szFile, pvLanguageList->size()  );
+    LogMessage5(INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", intToA(pvLanguageList->size())," entries" );
   }
 }
 
@@ -755,9 +753,9 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     {
       toCatch;
 
-      //usRC = ERROR_READ_FAULT;
+      usRC = ERROR_READ_FAULT;
     }
-
+    XMLPlatformUtils::Terminate();
   } /* endif */
 
 
@@ -780,11 +778,11 @@ LangParseHandler::~LangParseHandler()
 
 void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
 {
-    PSZ_W pszName = (PSZ_W)name;
+    //PSZ_W pszName = (PSZ_W)name;
 
     attributes;
 
-    CurID = GetElementID( pszName );
+    CurID = GetElementID( (PSZ)name );
     vELementStack.push_back( CurID );
     szDataW[0] = 0;
     switch ( CurID )
@@ -931,6 +929,44 @@ static XMLNAMETOID XmlNameToID[] =
   } /*endwhile */
   return( IDFound );
 } /* end of method LangParseHandler::GetElementID */
+
+// get the ID for a XML element
+LangParseHandler::ELEMENTID LangParseHandler::GetElementID( PSZ pszName )
+{
+  int i = 0;
+  ELEMENTID IDFound = UNKNOWN_ELEMENT;
+/*
+static XMLNAMETOID XmlNameToID[] =
+{ { "languages",  LANGUAGES_ELEMENT },
+  { "language",   LANGUAGE_ELEMENT }, 
+  { "name",       NAME_ELEMENT }, 
+  { "cpASCII",    CPASCII_ELEMENT }, 
+  { "cpANSI",     CPANSI_ELEMENT }, 
+  { "cpName",     CPNAME_ELEMENT },
+  { "iso",        ISO_ELEMENT }, 
+  { "icu",        ICU_ELEMENT }, 
+  { "preferred",  PREFERRED_ELEMENT }, 
+  { "group",      GROUP_ELEMENT }, 
+  { "isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 
+  { "isTargetLanguage", ISTARGETLANGUAGE_ELEMENT },
+  { "comments",   COMMENTS_ELEMENT }, 
+  { "",           UNKNOWN_ELEMENT } };
+
+  while ( (IDFound == UNKNOWN_ELEMENT) && (XmlNameToID[i].szName[0] != 0) )
+  {
+    if ( cscasecmp( pszName, XmlNameToID[i].szName ) == 0 )
+    {
+      IDFound = XmlNameToID[i].ID;
+    }
+    else
+    {
+      i++;
+    }
+  } 
+  //*/
+  return( IDFound );
+} /* end of method LangParseHandler::GetElementID */
+
 
 bool LangParseHandler::ErrorOccured( void )
 {

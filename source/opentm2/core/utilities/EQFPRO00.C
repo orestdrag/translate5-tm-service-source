@@ -13,6 +13,8 @@
 #include "EQFPRO00.H"             // Property Handler defines
 #include "OTMFUNC.H"
 
+#include <pthread.h>
+
 // activate the following define for property failure logging
 //#define PROPLOGGING
 
@@ -1504,18 +1506,12 @@ BOOL PropHandlerInitForBatch( void )
   pPropBatchIda->IdaHead.pszObjName = pPropBatchIda->IdaHead.szObjName;
   GetStringFromRegistry( APPL_Name, KEY_SysProp, pPropBatchIda->IdaHead.pszObjName, size, "" );
 
+  pthread_mutex_t mutex;
   { // keep other process from doing property related stuff..
-	  HANDLE hMutexSem = NULL;
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      GETMUTEX(hMutexSem);
-
-      if( GetSysProp( pPropBatchIda))
-        fOK = FALSE;
-    //   return( FALSE);      // do not create the window
-
-       RELEASEMUTEX(hMutexSem);     // release Mutex
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+	  pthread_mutex_lock(&mutex);
+    if( GetSysProp( pPropBatchIda))
+      fOK = FALSE;
+    pthread_mutex_unlock(&mutex);
    }
 
  return( fOK );

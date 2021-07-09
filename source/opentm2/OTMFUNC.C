@@ -365,9 +365,7 @@ USHORT EqfStartSession
     if ( !fContinue )
     {
       LogMessage(ERROR, "EqfStartSession():: fContinue is false");
-#ifdef TEMPORARY_COMMENTED
       usRC = 1;
-#endif
     } /* endif */
   } /* endif */
 
@@ -474,10 +472,8 @@ USHORT EqfStartSession
     else
     {
       LogMessage(ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
-#ifdef TEMPORARY_COMMENTED
       // access to system properties failed
       usRC = ERROR_READ_SYSTEMPROPERTIES;
-#endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
 //#endif //TEMPORARY_COMMENTED

@@ -918,7 +918,7 @@ int OtmMemoryServiceWorker::createMemory
   EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
   
   LogMessage(WARNING, "TEMPORARY_COMMENTED in OtmMemoryServiceWorker::createMemory() if (szOtmSourceLang[0] == 0)");
-  #ifdef TEMPORARY_COMMENTED
+
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -926,7 +926,7 @@ int OtmMemoryServiceWorker::createMemory
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
-  #endif
+
 
   // either create an empty memory or build the memory using binary input data
   convertUTF8ToASCII( strName );

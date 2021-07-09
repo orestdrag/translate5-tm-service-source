@@ -12,6 +12,7 @@
 
 #include <dirent.h>
 #include "LogWrapper.h"
+#include "EQF.H"
 
 int __last_error_code = 0;
 
@@ -29,9 +30,15 @@ std::string parseFilename(const std::string path){
     return path;
 }
 
-std::string FilesystemHelper::FixPath(const std::string& path){
+std::string FilesystemHelper::FixPath(std::string& path){
     std::string ret;
-
+    //
+    if(path.find('/') == std::string::npos){
+        char folderPath[255];
+        properties_get_str(KEY_OTM_DIR, folderPath,255);
+        properties_get_str_or_default(KEY_DEFAULT_DIR, folderPath, 255, folderPath);
+        path = std::string(folderPath) + '/' + path;
+    }
     //fix back slash 
     for(int i = 0; i < path.size(); i++){
         if( ( (i+1) < path.size()) && path[i] == '\\' && path[i+1] == '\\'){
@@ -55,7 +62,8 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode){
-    std::string fixedPath = FixPath(path);
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
     if(ptr == NULL){
@@ -66,7 +74,8 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
 
 
 int FilesystemHelper::DeleteFile(const std::string& path){
-    std::string fixedPath = FixPath(path);
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
     if(int errCode = remove(path.c_str())){
         LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", intToA(errCode));
         return errCode;
@@ -167,9 +176,10 @@ FILE* FilesystemHelper::FindNextFile(){
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
     selFiles.clear();
-    const std::string fixedName = FixPath(name);
-    const std::string dirPath = parseDirectory(fixedName);
-    std::string fileName = parseFilename(fixedName);
+    std::string fixedPath = name;
+    fixedPath = FixPath(fixedPath);
+    const std::string dirPath = parseDirectory(fixedPath);
+    std::string fileName = parseFilename(fixedPath);
     
     int pos = fileName.rfind('*');
     bool exactMatch = pos == std::string::npos;
@@ -205,7 +215,8 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
 
 
 int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, const int buffsize){
-    std::string fixedPath = FixPath(path);
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
     FILE *ptr = OpenFile(fixedPath, "wb");
     int errCode = WriteToFile(ptr, buff, buffsize);
     //if(errCode == FILEHELPER_NO_ERROR){
@@ -243,7 +254,8 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
 
 int FilesystemHelper::ReadFile(const std::string& path, char* buff, 
                                     const int buffSize, int& bytesRead, const std::string& mode ){
-    std::string fixedPath = FixPath(path);
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
     FILE *ptr = OpenFile(fixedPath, mode);
 
     int errcode = ReadFile(ptr, buff, buffSize, bytesRead);

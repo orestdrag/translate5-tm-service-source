@@ -853,8 +853,8 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     if(strlen(path) && path[strlen(path)-1] != '/')
       strcat(path, "/");
     strcat(path, pszPropName);
-
-    mem_path = FilesystemHelper::FixPath(path);
+    mem_path = path;
+    mem_path = FilesystemHelper::FixPath(mem_path);
   }
   
   std::string nameWithoutExtention = pszPropName;

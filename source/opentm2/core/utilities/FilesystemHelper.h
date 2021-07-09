@@ -14,7 +14,7 @@ namespace fs = std::experimental::filesystem;
 
 class FilesystemHelper{
 public:
-    static std::string FixPath(const std::string& path);
+    static std::string FixPath(std::string& path);
 
     static FILE* CreateFile(const std::string& path, const std::string& mode);
     
