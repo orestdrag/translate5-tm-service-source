@@ -288,28 +288,6 @@ private:
   */
   int removeFromMemoryList( int iIndex );
 
-  /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
-  \param strUTF8String string in UTF8 encoding
-  \returns string converted to UTF16
-  */
-  std::wstring convertToUTF16(const std::string& strUTF8String);
-
-  /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
-  \param strUTF8String string in UTF8 encoding
-  \returns string converted to UTF16
-  */
-  std::string convertToUTF8( const std::wstring& strUTF16String );
-
-  /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
-  \param strText on input string in UTF8 encoding, on output string in ASCII encoding
-  */
-  void convertUTF8ToASCII( std::string& strText );
-
-  /*! \brief convert a ASCII std::string to UTF8 std::string (on spot conversion)
-  \param strText on input string in ASCII encoding, on output string in UTF8 encoding
-  */
-  void convertASCIIToUTF8( std::string& strText );
-
   /*! \brief build a unique name for of a temporary file 
   \param pszTempFile buffer reiceiving the temporary file name
   \returns 0 is sucessfull or a return code

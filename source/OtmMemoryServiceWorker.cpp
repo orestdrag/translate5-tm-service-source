@@ -28,16 +28,7 @@
 #include "opentm2/core/utilities/FilesystemWrapper.h"
 #include "opentm2/core/utilities/LogWrapper.h"
 #include <sstream>
-
-// for string convertations
-#include <codecvt>
-#include <locale>
-template <class Facet>
-struct deletable_facet : Facet{
-  using Facet::Facet;//inherit constructors
-  ~deletable_facet(){};
-};
-// end for string convertations convert
+#include "opentm2/core/utilities/EncodingHelper.h"
 
 // import memory process
 void importMemoryProcess( void *pvData );
@@ -208,7 +199,7 @@ int OtmMemoryServiceWorker::buildErrorReturn
 {
 	std::wstring strUTF16;
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
-  strErrorReturn = convertToUTF8( strUTF16 );
+  strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
   //LogMessage(ERROR, strUTF16);
   LogMessage(ERROR, strErrorReturn.c_str());
@@ -622,77 +613,6 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   return( 0 );
 } 
 
-/*! \brief convert a UTF8 std::string to a UTF16 std::wstring
-  \param strUTF8String string in UTF8 encoding
-  \returns string converted to UTF16
-*/
-std::wstring OtmMemoryServiceWorker::convertToUTF16( const std::string& strUTF8String )
-{ 
-  std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
-  std::wstring wstr = wconv.from_bytes(strUTF8String);
-	return wstr;
-}
-
-/*! \brief convert a UTF8 std::string to a UTF16 std::wstring
-\param strUTF8String string in UTF8 encoding
-\returns string converted to UTF16
-*/
-std::string OtmMemoryServiceWorker::convertToUTF8(const std::wstring& strUTF16String)
-{
-  std::u16string u16str( strUTF16String.begin(), strUTF16String.end() );
-  std::string u8_conv = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
-
-	return u8_conv;
-}
-
-/*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
-\param strText on input string in UTF8 encoding, on output string in ASCII encoding
-\returns string converted to UTF16
-*/
-void OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText )
-{
-  LogMessage2(WARNING,"OtmMemoryServiceWorker::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  int iUTF16Len;
-  int iASCIILen;
-  int iUTF8Len = (int)strText.length() + 1;
-  char *pszNewData = NULL;
-  iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
-  std::wstring strUTF16( iUTF16Len, L'\0' );
-  MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
-  iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
-  pszNewData = (char *)malloc( iASCIILen + 1 );
-  WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
-  strText = pszNewData;
-  free( pszNewData );
-  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
-}
-
-/*! \brief convert a ASCII std::string to UTF8 std::string (on spot conversion)
-\param strText on input string in ASCII encoding, on output string in UTF8 encoding
-*/
-void OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText )
-{
-  LogMessage2(WARNING,"OtmMemoryServiceWorker::convertASCIIToUTF8( std::string& strText ) is not implemented, strText = ", strText.c_str());
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  int iUTF16Len;
-  int iUTF8Len;
-  int iASCIILen = (int)strText.length() + 1;
-  char *pszNewData = NULL;
-  iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
-  std::wstring strUTF16( iUTF16Len, L'\0' );
-  MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
-  iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
-  pszNewData = (char *)malloc( iUTF8Len + 1);
-  WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
-
-  strText = pszNewData;
-  free( pszNewData );
-  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
-}
-
-
 /*! \brief Import a memory from a TMX file
 \param strMemory name of memory
 \param strInputParms input parameters in JSON format
@@ -706,7 +626,7 @@ int OtmMemoryServiceWorker::import
   std::string &strOutputParms
 )
 {
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( hfLog ) fprintf( hfLog, "+POST %s/import\n", strMemory.c_str() );
   int iRC = verifyAPISession();
   if ( iRC != 0 )
@@ -916,20 +836,18 @@ int OtmMemoryServiceWorker::createMemory
   char szOtmSourceLang[40];
   szOtmSourceLang[0] = 0;//terminate to avoid garbage
   EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
-  
-  LogMessage(WARNING, "TEMPORARY_COMMENTED in OtmMemoryServiceWorker::createMemory() if (szOtmSourceLang[0] == 0)");
-
+ 
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", convertToUTF16(strSourceLang).c_str() );
+    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(strSourceLang).c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
 
 
   // either create an empty memory or build the memory using binary input data
-  convertUTF8ToASCII( strName );
+  EncodingHelper::convertUTF8ToASCII( strName );
 
   if ( strData.empty() )
   {
@@ -995,7 +913,7 @@ int OtmMemoryServiceWorker::createMemory
   factory->startJSON( strOutputParms );
 
 // TODO investigate how much do we need this
-  convertASCIIToUTF8( strName );
+  EncodingHelper::convertASCIIToUTF8( strName );
 
   factory->addParmToJSON( strOutputParms, "name", strName );
   factory->terminateJSON( strOutputParms );
@@ -1144,7 +1062,7 @@ int OtmMemoryServiceWorker::search
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
@@ -1153,7 +1071,7 @@ int OtmMemoryServiceWorker::search
   } /* endif */
 
     // parse input parameters
-  std::wstring strInputParmsW = convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
@@ -1259,7 +1177,7 @@ int OtmMemoryServiceWorker::search
     } /* endif */
 
     factory->terminateJSONW( strOutputParmsW );
-    strOutputParms = convertToUTF8( strOutputParmsW );
+    strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
     iRC = restbed::OK;
   }
   else
@@ -1298,7 +1216,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
@@ -1307,7 +1225,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
@@ -1417,7 +1335,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     } /* endif */
 
     factory->terminateJSONW( strOutputParmsW );
-    strOutputParms = convertToUTF8( strOutputParmsW );
+    strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
     iRC = restbed::OK;
   }
   else
@@ -1558,10 +1476,10 @@ int OtmMemoryServiceWorker::updateEntry
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
 
     // parse input parameters
-  std::wstring strInputParmsW = convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
   // parse input parameters
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
@@ -1713,7 +1631,7 @@ int OtmMemoryServiceWorker::updateEntry
   pJsonFactory->addParmToJSONW( strOutputParmsW, L"timeStamp", pData->szDateTime );
   pJsonFactory->addParmToJSONW( strOutputParmsW, L"author", pData->szAuthor );
   pJsonFactory->terminateJSONW( strOutputParmsW );
-  strOutputParms = convertToUTF8( strOutputParmsW );
+  strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
 
   iRC = restbed::OK;
   delete pProp;
@@ -1741,7 +1659,7 @@ int OtmMemoryServiceWorker::deleteMem
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
@@ -1800,7 +1718,7 @@ int OtmMemoryServiceWorker::getMem
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     if ( hfLog ) fprintf( hfLog, "    Error: no memory name specified\n" );
@@ -1900,7 +1818,7 @@ int OtmMemoryServiceWorker::getStatus
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  convertUTF8ToASCII( strMemory );
+  EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";

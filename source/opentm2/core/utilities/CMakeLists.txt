@@ -18,6 +18,7 @@ set(Util_Source_Files
         EQFOSWIN.C
         EQFHASH.C
         Property.cpp
+        EncodingHelper.cpp
         FilesystemHelper.cpp
         FilesystemWrapper.cpp
         LogWrapper.cpp

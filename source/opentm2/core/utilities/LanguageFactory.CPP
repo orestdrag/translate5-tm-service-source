@@ -8,6 +8,7 @@
 #include "EQF.H"                  // General .H for EQF
 #include "LogWrapper.h"
 #include "PropertyWrapper.H"
+#include "EncodingHelper.h"
 // the Win32 Xerces build requires the default structure packing...
 //#pragma pack( push )
 //#pragma pack(8)
@@ -125,7 +126,7 @@ private:
 
   typedef struct _XMLNAMETOID
   {
-    CHAR_W   szName[30];                 // name of element
+    std::u16string   u16Name;                 // name of element
     LangParseHandler::ELEMENTID ID;                        // ID of element 
   } XMLNAMETOID, *PXMLNAMETOID;
 
@@ -139,8 +140,7 @@ private:
 
   bool fError;                         // TRUE = parsing ended with error
 
-  ELEMENTID GetElementID( PSZ_W pszName );
-  ELEMENTID GetElementID( PSZ pszName );
+  ELEMENTID GetElementID( const std::u16string& u16name );
 };
 
 
@@ -778,13 +778,13 @@ LangParseHandler::~LangParseHandler()
 
 void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
 {
-    //PSZ_W pszName = (PSZ_W)name;
-
     attributes;
-
-    CurID = GetElementID( (PSZ)name );
+    std::u16string u16name((char16_t*)name);
+    CurID = GetElementID( u16name );
     vELementStack.push_back( CurID );
     szDataW[0] = 0;
+    std::string sName = EncodingHelper::convertToUTF8(u16name);
+    
     switch ( CurID )
     {
       case LANGUAGE_ELEMENT:
@@ -793,6 +793,8 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
         break;
       case UNKNOWN_ELEMENT:
       default:
+        LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
+            EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", intToA(CurID) , "; skipping...");
         break;
     } /*endswitch */
 }
@@ -805,7 +807,9 @@ void LangParseHandler::endElement(const XMLCh* const name )
   name;
 
   // convert collected data to ASCII
-  //WideCharToMultiByte( CP_OEMCP, 0, this->szDataW, -1, this->szData, sizeof(this->szData), NULL, NULL );
+  std::u16string u16Data((char16_t*) this->szDataW);
+  std::string sData = EncodingHelper::convertToUTF8(u16Data);
+  strncpy(this->szData, sData.c_str(), sData.size());
 
   switch ( CurID )
   {
@@ -875,6 +879,7 @@ void LangParseHandler::fatalError(const SAXParseException& exception)
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
     sprintf( this->szErrorText, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+    LogMessage2(ERROR, "LangParseHandler::fatalError:: ", this->szErrorText);
     XMLString::release( &message );
 }
 
@@ -885,6 +890,7 @@ void LangParseHandler::error(const SAXParseException& exception)
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
     sprintf( this->szErrorText, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+    LogMessage2(ERROR, "LangParseHandler::error:: ", this->szErrorText);
     XMLString::release( &message );
 }
 
@@ -895,30 +901,29 @@ void LangParseHandler::warning(const SAXParseException& exception)
 
 
 // get the ID for a XML element
-LangParseHandler::ELEMENTID LangParseHandler::GetElementID( PSZ_W pszName )
+LangParseHandler::ELEMENTID LangParseHandler::GetElementID( const std::u16string& u16name )
 {
   int i = 0;
   ELEMENTID IDFound = UNKNOWN_ELEMENT;
-
 static XMLNAMETOID XmlNameToID[] =
-{ { L"languages",  LANGUAGES_ELEMENT },
-  { L"language",   LANGUAGE_ELEMENT }, 
-  { L"name",       NAME_ELEMENT }, 
-  { L"cpASCII",    CPASCII_ELEMENT }, 
-  { L"cpANSI",     CPANSI_ELEMENT }, 
-  { L"cpName",     CPNAME_ELEMENT },
-  { L"iso",        ISO_ELEMENT }, 
-  { L"icu",        ICU_ELEMENT }, 
-  { L"preferred",  PREFERRED_ELEMENT }, 
-  { L"group",      GROUP_ELEMENT }, 
-  { L"isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 
-  { L"isTargetLanguage", ISTARGETLANGUAGE_ELEMENT },
-  { L"comments",   COMMENTS_ELEMENT }, 
-  { L"",           UNKNOWN_ELEMENT } };
+{ { u"languages",  LANGUAGES_ELEMENT },
+  { u"language",   LANGUAGE_ELEMENT }, 
+  { u"name",       NAME_ELEMENT }, 
+  { u"cpASCII",    CPASCII_ELEMENT }, 
+  { u"cpANSI",     CPANSI_ELEMENT }, 
+  { u"cpName",     CPNAME_ELEMENT },
+  { u"iso",        ISO_ELEMENT }, 
+  { u"icu",        ICU_ELEMENT }, 
+  { u"preferred",  PREFERRED_ELEMENT }, 
+  { u"group",      GROUP_ELEMENT }, 
+  { u"isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 
+  { u"isTargetLanguage", ISTARGETLANGUAGE_ELEMENT },
+  { u"comments",   COMMENTS_ELEMENT }, 
+  { u"",           UNKNOWN_ELEMENT } };
 
-  while ( (IDFound == UNKNOWN_ELEMENT) && (XmlNameToID[i].szName[0] != 0) )
+  while ( (IDFound == UNKNOWN_ELEMENT) && !(XmlNameToID[i].u16Name.empty()) )
   {
-    if ( wcscasecmp( pszName, XmlNameToID[i].szName ) == 0 )
+    if ( u16name == XmlNameToID[i].u16Name )
     {
       IDFound = XmlNameToID[i].ID;
     }
@@ -929,44 +934,6 @@ static XMLNAMETOID XmlNameToID[] =
   } /*endwhile */
   return( IDFound );
 } /* end of method LangParseHandler::GetElementID */
-
-// get the ID for a XML element
-LangParseHandler::ELEMENTID LangParseHandler::GetElementID( PSZ pszName )
-{
-  int i = 0;
-  ELEMENTID IDFound = UNKNOWN_ELEMENT;
-/*
-static XMLNAMETOID XmlNameToID[] =
-{ { "languages",  LANGUAGES_ELEMENT },
-  { "language",   LANGUAGE_ELEMENT }, 
-  { "name",       NAME_ELEMENT }, 
-  { "cpASCII",    CPASCII_ELEMENT }, 
-  { "cpANSI",     CPANSI_ELEMENT }, 
-  { "cpName",     CPNAME_ELEMENT },
-  { "iso",        ISO_ELEMENT }, 
-  { "icu",        ICU_ELEMENT }, 
-  { "preferred",  PREFERRED_ELEMENT }, 
-  { "group",      GROUP_ELEMENT }, 
-  { "isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 
-  { "isTargetLanguage", ISTARGETLANGUAGE_ELEMENT },
-  { "comments",   COMMENTS_ELEMENT }, 
-  { "",           UNKNOWN_ELEMENT } };
-
-  while ( (IDFound == UNKNOWN_ELEMENT) && (XmlNameToID[i].szName[0] != 0) )
-  {
-    if ( cscasecmp( pszName, XmlNameToID[i].szName ) == 0 )
-    {
-      IDFound = XmlNameToID[i].ID;
-    }
-    else
-    {
-      i++;
-    }
-  } 
-  //*/
-  return( IDFound );
-} /* end of method LangParseHandler::GetElementID */
-
 
 bool LangParseHandler::ErrorOccured( void )
 {
