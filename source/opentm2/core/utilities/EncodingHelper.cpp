@@ -84,3 +84,15 @@ void EncodingHelper::convertASCIIToUTF8( std::string& strText )
   free( pszNewData );
   #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
+
+
+std::u16string EncodingHelper::toLower(const std::u16string& strText){
+    std::u16string ldata;
+    auto const& ct = std::use_facet<std::ctype<char16_t>>(std::locale());
+    for (std::u16string::const_iterator it = strText.begin(); it != strText.end(); ++it)
+    {
+        ldata.push_back( ct.tolower(*it) );
+    } 
+    return ldata;
+}
+

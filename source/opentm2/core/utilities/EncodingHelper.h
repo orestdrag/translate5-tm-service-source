@@ -34,6 +34,7 @@ class EncodingHelper{
     */
     void static convertASCIIToUTF8( std::string& strText );
 
+    std::u16string static toLower(const std::u16string& strText);
 };
 
 #endif

@@ -921,9 +921,11 @@ static XMLNAMETOID XmlNameToID[] =
   { u"comments",   COMMENTS_ELEMENT }, 
   { u"",           UNKNOWN_ELEMENT } };
 
+  std::u16string u16name_lower = EncodingHelper::toLower(u16name);
+
   while ( (IDFound == UNKNOWN_ELEMENT) && !(XmlNameToID[i].u16Name.empty()) )
   {
-    if ( u16name == XmlNameToID[i].u16Name )
+    if ( u16name_lower == EncodingHelper::toLower(XmlNameToID[i].u16Name) )
     {
       IDFound = XmlNameToID[i].ID;
     }
