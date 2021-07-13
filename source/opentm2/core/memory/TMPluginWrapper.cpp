@@ -603,7 +603,7 @@ PSZ_W MADSkipWhitespace( PSZ_W pszData )
   return( pszData );
 }
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
 
 
 USHORT MemOpenProp( HPROP * hProp,        // pointer to property handle
@@ -620,24 +620,30 @@ USHORT MemOpenProp( HPROP * hProp,        // pointer to property handle
 
   EQFINFO     ErrorInfo;                   // Property handler error info
   USHORT      fOk = TRUE;                  // Function return code
-
+  
+  #ifdef TEMPORARY_COMMENTED
   if( (*hProp = OpenProperties( pszPropName,
                                  pszPropPath,
                                  PROP_ACCESS_READ, &ErrorInfo))== NULL)
   {
     fOk = FALSE;
   } /* endif */
+  #endif
 
   if ( fOk && usMode == PROP_ACCESS_WRITE )
   {
+    #ifdef TEMPORARY_COMMENTED
     if( !SetPropAccess( *hProp, PROP_ACCESS_WRITE))
       fOk = FALSE;
+    #endif
   } /* endif */
 
   if ( fOk )
   {
+    #ifdef TEMPORARY_COMMENTED
     if( (*pProp = MakePropPtrFromHnd( *hProp ))== NULL )
       fOk = FALSE;
+    #endif
   } /* endif */
 
   if ( !fOk && fMsg )
@@ -740,15 +746,19 @@ USHORT MemFillTableLB( HWND   hListBox,
     if ( pszLastUsed != NULL )
     {
       UtlMakeEQFPath( pszFilePath, NULC, SYSTEM_PATH, NULL );
+      #ifdef TEMPORARY_COMMENTED
       hProp = OpenProperties( pszLastUsed, pszFilePath,
                               PROP_ACCESS_READ, &ErrorInfo );
+      #endif
       // Address the property area
       if (hProp)
       {
+        #ifdef TEMPORARY_COMMENTED
         if ( (pLastUsed = (PMEM_LAST_USED) MakePropPtrFromHnd( hProp ))== NULL)
         {
           usRc = FALSE;
         } /* endif */
+        #endif
       } /* endif */
     } /* endif */
   } /* endif */
@@ -790,7 +800,10 @@ USHORT MemFillTableLB( HWND   hListBox,
           } /* endswitch */
         } /* endif */
 
+        #ifdef TEMPORARY_COMMENTED
         usNumbOfItems = UtlFillTableLB( hListBox, usBoxType );
+        #endif
+
         break;
     } /* end switch */
 
@@ -804,7 +817,10 @@ USHORT MemFillTableLB( HWND   hListBox,
   // Close the last used value properties if they had been open
   if (hProp)
   {
+    #ifdef TEMPORARY_COMMENTED
     CloseProperties( hProp, PROP_QUIT, &ErrorInfo );
+    #endif
+
   } /* endif */
 
   // Free the allocated storage
@@ -1026,10 +1042,12 @@ USHORT NTMGetMatchLevel
   // allocate our data area
   if ( !usRC ) usRC = (UtlAlloc( (PVOID*)&pData, 0L, (LONG)sizeof(NTMGETMATCHLEVELDATA), NOMSG)) ? 0 : ERROR_NOT_ENOUGH_MEMORY;
 
+  #ifdef TEMPORARY_COMMENTED
   // allocate sentence structures
   if ( !usRC ) usRC = NTMAllocSentenceStructure( &pSentence );
   if ( !usRC ) usRC = NTMAllocSentenceStructure( &pMatchSentence );
   if ( !usRC ) usRC = NTMAllocSentenceStructure( &pMatchTarget );
+  #endif
 
   // allocate gerenic inline replacement tag data area
   if ( !usRC ) usRC = (UtlAlloc( (PVOID*)&pSubstProp, 0L, (LONG)sizeof(TMX_SUBSTPROP), NOMSG)) ? 0 : ERROR_NOT_ENOUGH_MEMORY;
@@ -1050,7 +1068,9 @@ USHORT NTMGetMatchLevel
   {
     // base on setting in system properties
     PPROPSYSTEM pSysProp;             // ptr to EQF system properties
+    #ifdef TEMPORARY_COMMENTED
     pSysProp = (PPROPSYSTEM)MakePropPtrFromHnd( EqfQuerySystemPropHnd());
+    #endif
     fGenericTagReplacement = !pSysProp->fNoGenericMarkup;
   } /* endif */
 
@@ -1112,13 +1132,14 @@ USHORT NTMGetMatchLevel
 #ifdef MEASURETIME
     QueryPerformanceCounter( &liTokenize );
 #endif
-
+    #ifdef TEMPORARY_COMMENTED
     if ( MorphGetLanguageID( pSegment->szSourceLanguage, &sLangID ) != 0 )
     {
       PSZ pszParm = pSegment->szSourceLanguage;
       usRC = ERROR_INV_LANGUAGE;
       UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     } /* endif */
+    #endif
 
 #ifdef MEASURETIME
     QueryPerformanceCounter( &liMorphAct );
@@ -1133,17 +1154,22 @@ USHORT NTMGetMatchLevel
     // check if strings are equal
     if ( ulParm & GET_RESPECTCRLF )   
     {
+      #ifdef TEMPORARY_COMMENTED
 	    BOOL fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 )== 0L);
+      
 	    fStringEqual = (UtlCompIgnWhiteSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 ) == 0L);
 	    if (fStringEqual && !fRespectCRLFStringEqual)
 	    {  
         // there is a LF difference!
         fStringEqual = fRespectCRLFStringEqual;
 	    }
+      #endif
     }
     else
     { 
+      #ifdef TEMPORARY_COMMENTED
       fStringEqual = (UtlCompIgnWhiteSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 ) == 0L);
+      #endif
     } /* endif*/
 
 #ifdef MEASURETIME
@@ -1162,7 +1188,10 @@ USHORT NTMGetMatchLevel
   if ( !usRC )
   {
     BOOL fFuzzynessOK;
+    #ifdef TEMPORARY_COMMENTED
     fFuzzynessOK = TMFuzzynessEx( pSegment->szMarkup, pSegment->szSource, pProposal->szSource, sLangID, &usFuzzy, ulSrcOemCP, &usWords );
+    #endif
+
     if ( usFuzzy != 100) fStringEqual = FALSE;
 #ifdef MATCHLEVEL_LOGGING
   if ( hfLog )
@@ -1213,7 +1242,9 @@ USHORT NTMGetMatchLevel
       strcpy( pSubstProp->szPropTagTable, pProposal->szMarkup );
       strcpy( pSubstProp->szTargetLanguage, pProposal->szTargetLanguage );
 
+      #ifdef TEMPORARY_COMMENTED
 		  fSubstAll =  NTMTagSubst( pSubstProp, ulSrcOemCP, ulTgtOemCP );
+      #endif
 #ifdef MATCHLEVEL_LOGGING
       if ( hfLog )
       {
@@ -1296,12 +1327,15 @@ USHORT NTMGetMatchLevel
         {
           sTgtLangID = sLangID;
         }
+        #ifdef TEMPORARY_COMMENTED
         else if ( MorphGetLanguageID( pProposal->szTargetLanguage, &sTgtLangID ) != 0 )
         {
           PSZ pszParm = pProposal->szTargetLanguage;
           usRC = ERROR_INV_LANGUAGE;
           UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
         } /* endif */
+        #endif
+
       } /* endif */
 
 #ifdef MATCHLEVEL_LOGGING
@@ -1317,6 +1351,7 @@ USHORT NTMGetMatchLevel
       if ( !usRC )
       {
         UTF16strcpy( pData->szSegment, pProposal->szTarget );
+        #ifdef TEMPORARY_COMMENTED
         usReplMatch = EQFBPrepareFuzzyPropEx2(
           pSegment->szSource,                        // pointer to source
           pProposal->szSource,                       // pointer to source of proposal
@@ -1330,6 +1365,7 @@ USHORT NTMGetMatchLevel
           pData->bTokenBuffer,                       // buffer for tokens
           ulSrcOemCP,
           ulTgtOemCP);
+          #endif
       } /* endif */
 
 #ifdef MATCHLEVEL_LOGGING
@@ -1427,12 +1463,14 @@ USHORT NTMGetMatchLevel
   }
 #endif
 
+#ifdef TEMPORARY_COMMENTED
   // cleanup
   NTMFreeSubstProp( pSubstProp );
   NTMFreeSentenceStructure( pSentence );
   NTMFreeSentenceStructure( pMatchSentence );
   NTMFreeSentenceStructure( pMatchTarget );
   if ( pData ) UtlAlloc( (PVOID*)&pData, 0L, 0L, NOMSG);
+#endif
 
 #ifdef MATCHLEVEL_LOGGING
   if ( hfLog )
@@ -1497,9 +1535,11 @@ SHORT NTMSimpleGetMatchLevel
   // allocate our data area
   if ( !usRC ) usRC = (UtlAlloc( (PVOID*)&pData, 0L, (LONG)sizeof(NTMGETMATCHLEVELDATA), NOMSG)) ? 0 : ERROR_NOT_ENOUGH_MEMORY;
 
+  #ifdef TEMPORARY_COMMENTED 
   // allocate sentence structures
   if ( !usRC ) usRC = NTMAllocSentenceStructure( &pSentence );
   if ( !usRC ) usRC = NTMAllocSentenceStructure( &pMatchSentence );
+  #endif
 
   // stop processing if languages do not match 
   if ( !usRC )
@@ -1523,7 +1563,9 @@ SHORT NTMSimpleGetMatchLevel
   {
     // base on setting in system properties
     PPROPSYSTEM pSysProp;             // ptr to EQF system properties
+    #ifdef TEMPORARY_COMMENTED
     pSysProp = (PPROPSYSTEM)MakePropPtrFromHnd( EqfQuerySystemPropHnd());
+    #endif
     fGenericTagReplacement = !pSysProp->fNoGenericMarkup;
   } /* endif */
 
@@ -1563,12 +1605,14 @@ SHORT NTMSimpleGetMatchLevel
   QueryPerformanceCounter( &liTokenize );
 #endif
 
+#ifdef TEMPORARY_COMMENTED
   if ( MorphGetLanguageID( pszLanguage, &sLangID ) != 0 )
   {
     PSZ pszParm = pszLanguage;
     usRC = ERROR_INV_LANGUAGE;
     UtlErrorHwnd( ERROR_INV_LANGUAGE, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
   } /* endif */
+#endif
 
 #ifdef MEASURETIME
   QueryPerformanceCounter( &liMorphAct );
@@ -1580,6 +1624,7 @@ SHORT NTMSimpleGetMatchLevel
   // check if strings are equal
   if ( ulParm & GET_RESPECTCRLF )   
   {
+    #ifdef TEMPORARY_COMMENTED
 	  BOOL fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 )== 0L);
 	  fStringEqual = (UtlCompIgnWhiteSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 ) == 0L);
 	  if (fStringEqual && !fRespectCRLFStringEqual)
@@ -1587,10 +1632,13 @@ SHORT NTMSimpleGetMatchLevel
       // there is a LF difference!
       fStringEqual = fRespectCRLFStringEqual;
 	  }
+    #endif
   }
   else
   { 
+    #ifdef TEMPORARY_COMMENTED
     fStringEqual = (UtlCompIgnWhiteSpaceW( pMatchSentence->pNormString, pSentence->pNormString, 0 ) == 0L);
+    #endif
   } /* endif*/
 
 #ifdef MEASURETIME
@@ -1601,7 +1649,10 @@ SHORT NTMSimpleGetMatchLevel
   if ( !usRC )
   {
     BOOL fFuzzynessOK;
+    #ifdef TEMPORARY_COMMENTED
     fFuzzynessOK = TMFuzzynessEx( pszSegmentMarkup, pszSegmentText, pszProposalText, sLangID, &usFuzzy, ulSrcOemCP, &usWords );
+    #endif
+    
     if ( usFuzzy != 100) fStringEqual = FALSE;
   } /* endif */
 
@@ -1636,7 +1687,9 @@ SHORT NTMSimpleGetMatchLevel
       strcpy( pSubstProp->szPropTagTable, pszProposalMarkup );
       strcpy( pSubstProp->szTargetLanguage, pszLanguage );
 
+      #ifdef TEMPORARY_COMMENTED
 		  fSubstAll =  NTMTagSubst( pSubstProp, ulSrcOemCP, ulTgtOemCP );
+      #endif
 
       if ( fSubstAll )
       {
@@ -1644,8 +1697,9 @@ SHORT NTMSimpleGetMatchLevel
         BOOL fFuzzynessOK;
         fFuzzynessOK = TMFuzzyness( pszSegmentMarkup, pSubstProp->szPropSource, pSubstProp->szSource, sLangID, &usFuzzy, ulSrcOemCP );
       } /* endif */
-
+#ifdef TEMPORARY_COMMENTED
       NTMFreeSubstProp( pSubstProp );
+#endif
     } /* endif */
   } /* endif */
 
@@ -1679,6 +1733,7 @@ SHORT NTMSimpleGetMatchLevel
       if ( !usRC )
       {
         UTF16strcpy( pData->szSegment, pszProposalText );
+        #ifdef TEMPORARY_COMMENTED
         usReplMatch = EQFBPrepareFuzzyPropEx2(
           pszSegmentText,                        // pointer to source
           pszProposalText,                       // pointer to source of proposal
@@ -1692,6 +1747,8 @@ SHORT NTMSimpleGetMatchLevel
           pData->bTokenBuffer,                       // buffer for tokens
           ulSrcOemCP,
           ulTgtOemCP);
+          #endif
+
       } /* endif */
 
       if ( pvTagTable ) TAFreeTagTable( (PLOADEDTABLE)pvTagTable );
@@ -1746,8 +1803,10 @@ SHORT NTMSimpleGetMatchLevel
 #endif
 
   // cleanup
+  #ifdef TEMPORARY_COMMENTED
   NTMFreeSentenceStructure( pSentence );
   NTMFreeSentenceStructure( pMatchSentence );
+  #endif
   if ( pData ) UtlAlloc( (PVOID*)&pData, 0L, 0L, NOMSG);
 
   return( (usRC == 0) ? (SHORT)usFuzzy : ((SHORT)usRC * -1) );
@@ -1819,22 +1878,28 @@ BOOL TMFuzzynessEx
   // load tag table
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
     fOK = (TALoadTagTableExHwnd( pszMarkup, &pTable, FALSE,
                                  TALOADUSEREXIT | TALOADPROTTABLEFUNC,
                                  FALSE, NULLHANDLE ) == NO_ERROR);
+                                 #endif
   } /* endif */
 
   // call function to evaluate the differences
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
     fOK = EQFBFindDiffEx( pTable, (PBYTE)pInBuf, (PBYTE)pTokBuf, pszSource,
                           pszMatch, sLanguageId, (PVOID *)&pFuzzyTok,
                           (PVOID *)&pFuzzyTgt, ulOemCP );
+    #endif
   } /* endif */
 
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
     EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
+    #endif
   } /* endif */
 
   // free allocated buffers and lists
@@ -2058,11 +2123,13 @@ USHORT TokenizeSourceEx2
     usLangId = 0;
     if ( !usRc )
     {
+      #ifdef TEMPORARY_COMMENTED
       //load tag table for tokenize function
       usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
                                    TALOADUSEREXIT | TALOADPROTTABLEFUNC |
                                    TALOADCOMPCONTEXTFUNC,
                                    FALSE, NULLHANDLE );
+                                   #endif
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
@@ -2073,10 +2140,12 @@ USHORT TokenizeSourceEx2
            if ( ptrMarkup ) {
               strcpy( ptrMarkup, "OTMUTF8.TBL" ) ;
               strcpy( szString, "OTMUTF8" ) ;
+              #ifdef TEMPORARY_COMMENTED
               usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
                                            TALOADUSEREXIT | TALOADPROTTABLEFUNC |
                                            TALOADCOMPCONTEXTFUNC,
                                            FALSE, NULLHANDLE );
+                                           #endif
               if ( usRc )
                  usRc = ERROR_TA_ACC_TAGTABLE;
            } 
@@ -2090,12 +2159,14 @@ USHORT TokenizeSourceEx2
 
     if ( !usRc )
     {
+      #ifdef TEMPORARY_COMMENTED
       // build protect start/stop table for tag recognition
        usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
                                    (PTOKENENTRY)pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
                                    pTable->pfnProtTableW, ulSrcCP, iMode);
+      #endif
 
 
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
@@ -2116,11 +2187,13 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
+          #ifdef TEMPORARY_COMMENTED
            usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
                                        (PTOKENENTRY)pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
                                        pTable->pfnProtTableW, ulSrcCP, iMode );
+          #endif
         } /* endif */
 
       } /* endwhile */
@@ -2427,6 +2500,7 @@ USHORT NTMMorphTokenize
     }
     else
     {
+      #ifdef TEMPORARY_COMMENTED
       usRC = MorphAddTermToList( (PSZ *)ppTermList,
                                  pusBufferSize,
                                  &usTermBufUsed,
@@ -2435,6 +2509,7 @@ USHORT NTMMorphTokenize
                                  0,
                                  0L,
                                  usListType );
+                                 #endif
     } /* endif */
   } /* endif */
 
@@ -2494,6 +2569,7 @@ USHORT NTMMorphTokenizeW
     }
     else
     {
+      #ifdef TEMPORARY_COMMENTED
       usRC = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                     pulBufferSize,
                                     &ulTermBufUsed,
@@ -2501,7 +2577,8 @@ USHORT NTMMorphTokenizeW
                                     0,
                                     0,
                                     0L,
-                                    usListType );
+                                    usListType ); 
+      #endif
     } /* endif */
   } /* endif */
 
@@ -2583,6 +2660,7 @@ USHORT NTMTokenize
   if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
        (usListType == MORPH_FLAG_OFFSLIST) )
   {
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                    pusTermListSize,
                                    &usTermBufUsed,
@@ -2591,6 +2669,7 @@ USHORT NTMTokenize
                                    0, // no offset possible
                                    TF_NEWSENTENCE,
                                    usListType );
+    #endif
   } /* endif */
 
   /********************************************************************/
@@ -2707,7 +2786,11 @@ USHORT NTMTokenize
         if ( fAlNum ) //&& !chIsText[c] )
         {
 			PUCHAR pTextTable;
+      
+      #ifdef TEMPORARY_COMMENTED
 			UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
+      #endif
+
 			if ( !pTextTable[c] )
 			{
 				fAlNum = FALSE;
@@ -2733,6 +2816,7 @@ USHORT NTMTokenize
       if ( fAllCaps ) lFlags |= TF_ALLCAPS;
       if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
       if ( fNumber )  lFlags |= TF_NUMBER;
+      #ifdef TEMPORARY_COMMENTED
       usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                      pusTermListSize,
                                      &usTermBufUsed,
@@ -2741,6 +2825,7 @@ USHORT NTMTokenize
                                      (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
                                      lFlags,
                                      usListType );
+      #endif
       pTerm    = pszCurPos;
       fAllCaps = TRUE;
       fAlNum   = TRUE;
@@ -2752,6 +2837,7 @@ USHORT NTMTokenize
     /******************************************************************/
     if ( fSingleToken && !usReturn )
     {
+      #ifdef TEMPORARY_COMMENTED
       usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                      pusTermListSize,
                                      &usTermBufUsed,
@@ -2760,6 +2846,7 @@ USHORT NTMTokenize
                                      (USHORT)(fOffsList ? (pszCurPos-pszInData) : 0),
                                      TF_NOLOOKUP,
                                      usListType );
+                                     #endif
       pTerm    = pszCurPos + 1;
     } /* endif */
 
@@ -2771,6 +2858,7 @@ USHORT NTMTokenize
       if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
            (usListType == MORPH_FLAG_OFFSLIST) )
       {
+        #ifdef TEMPORARY_COMMENTED
         usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                        pusTermListSize,
                                        &usTermBufUsed,
@@ -2779,6 +2867,7 @@ USHORT NTMTokenize
                                        0, // no offset possible
                                        TF_NEWSENTENCE,
                                        usListType );
+                                       #endif
       } /* endif */
     } /* endif */
 
@@ -2807,6 +2896,7 @@ USHORT NTMTokenize
     if ( fAllCaps ) lFlags |= TF_ALLCAPS;
     if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
     if ( fNumber )  lFlags |= TF_NUMBER;
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                    pusTermListSize,
                                    &usTermBufUsed,
@@ -2815,6 +2905,7 @@ USHORT NTMTokenize
                                    (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
                                    lFlags,
                                    usListType );
+    #endif
   } /* endif */
 
   /*****************************************************************/
@@ -2822,6 +2913,7 @@ USHORT NTMTokenize
   /*****************************************************************/
   if ( !usReturn )
   {
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList( (PSZ *)ppTermList,
                                    pusTermListSize,
                                    &usTermBufUsed,
@@ -2830,6 +2922,7 @@ USHORT NTMTokenize
                                    0,
                                    0L,
                                    usListType );
+                                   #endif
   } /* endif */
 
   return (usReturn);
@@ -2874,6 +2967,7 @@ USHORT NTMTokenizeW
   if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
        (usListType == MORPH_FLAG_OFFSLIST) )
   {
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                    pulTermListSize,
                                    &ulTermBufUsed,
@@ -2882,6 +2976,7 @@ USHORT NTMTokenizeW
                                    0, // no offset possible
                                    TF_NEWSENTENCE,
                                    usListType );
+                                   #endif
   } /* endif */
 
   /********************************************************************/
@@ -2998,7 +3093,9 @@ USHORT NTMTokenizeW
         if ( fAlNum ) //&& !chIsText[c] )
         {
 			PUCHAR pTextTable;
+      #ifdef TEMPORARY_COMMENTED
 			UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
+      #endif
 			if ( !pTextTable[c] )
 			{
 				fAlNum = FALSE;
@@ -3024,6 +3121,7 @@ USHORT NTMTokenizeW
       if ( fAllCaps ) lFlags |= TF_ALLCAPS;
       if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
       if ( fNumber )  lFlags |= TF_NUMBER;
+      #ifdef TEMPORARY_COMMENTED
       usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                      pulTermListSize,
                                      &ulTermBufUsed,
@@ -3032,6 +3130,8 @@ USHORT NTMTokenizeW
                                      (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
                                      lFlags,
                                      usListType );
+      #endif
+
       pTerm    = pszCurPos;
       fAllCaps = TRUE;
       fAlNum   = TRUE;
@@ -3043,6 +3143,7 @@ USHORT NTMTokenizeW
     /******************************************************************/
     if ( fSingleToken && !usReturn )
     {
+      #ifdef TEMPORARY_COMMENTED
       usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                      pulTermListSize,
                                      &ulTermBufUsed,
@@ -3051,6 +3152,7 @@ USHORT NTMTokenizeW
                                      (USHORT)(fOffsList ? (pszCurPos-pszInData) : 0),
                                      TF_NOLOOKUP,
                                      usListType );
+                                     #endif
       pTerm    = pszCurPos + 1;
     } /* endif */
 
@@ -3062,6 +3164,7 @@ USHORT NTMTokenizeW
       if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
            (usListType == MORPH_FLAG_OFFSLIST) )
       {
+        #ifdef TEMPORARY_COMMENTED
         usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                        pulTermListSize,
                                        &ulTermBufUsed,
@@ -3070,6 +3173,7 @@ USHORT NTMTokenizeW
                                        0, // no offset possible
                                        TF_NEWSENTENCE,
                                        usListType );
+                                       #endif
       } /* endif */
     } /* endif */
 
@@ -3098,6 +3202,7 @@ USHORT NTMTokenizeW
     if ( fAllCaps ) lFlags |= TF_ALLCAPS;
     if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
     if ( fNumber )  lFlags |= TF_NUMBER;
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                    pulTermListSize,
                                    &ulTermBufUsed,
@@ -3106,6 +3211,7 @@ USHORT NTMTokenizeW
                                    (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
                                    lFlags,
                                    usListType );
+                                   #endif
   } /* endif */
 
   /*****************************************************************/
@@ -3113,6 +3219,7 @@ USHORT NTMTokenizeW
   /*****************************************************************/
   if ( !usReturn )
   {
+    #ifdef TEMPORARY_COMMENTED
     usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
                                    pulTermListSize,
                                    &ulTermBufUsed,
@@ -3121,11 +3228,12 @@ USHORT NTMTokenizeW
                                    0,
                                    0L,
                                    usListType );
+                                   #endif
   } /* endif */
 
   return (usReturn);
 
 } /* end of function TOKENIZE */
 
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 

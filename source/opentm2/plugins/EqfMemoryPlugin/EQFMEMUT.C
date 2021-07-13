@@ -17,7 +17,7 @@
 #define INCL_EQF_LIST             // terminology list functions
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory

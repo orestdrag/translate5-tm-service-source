@@ -15,19 +15,20 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
+#include "core/utilities/OSWrapper.h"
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
 #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
-#include <OTMGLOBMem.h>         // Global Memory defines
+#include <OTMGLOBMEM.H>         // Global Memory defines
 #include "OtmProposal.h"
-#include "core\pluginmanager\otmmarkup.h"
-#include "MarkupPluginMapper.h"
-#include "core\memory\MemoryFactory.h"
+#include "core/pluginmanager/OtmMarkup.h"
+#include "MarkupPluginMapper.H"
+#include "core/memory/MemoryFactory.h"
 #include <map>
 
 #ifdef _DEBUG
@@ -682,7 +683,7 @@ USHORT TmtXGet
   /* by user                                                          */
   /********************************************************************/
   pTmGetOut->usNumMatchesFound =
-    min( pTmGetOut->usNumMatchesFound, pTmGetIn->stTmGet.usRequestedMatches );
+    std::min( pTmGetOut->usNumMatchesFound, pTmGetIn->stTmGet.usRequestedMatches );
 
 
   //release memory
@@ -1262,7 +1263,7 @@ USHORT ExactTest
                     {
                       pszName = pszCLBDocName;
                     } /* endif */             
-                    fMatchingDocName = stricmp( pszName, pszDocName ) == 0;
+                    fMatchingDocName = _stricmp( pszName, pszDocName ) == 0;
                   }
                   else
                   {
@@ -1847,8 +1848,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
             } /* endif */
 #endif
-
+            #ifdef TEMPORARY_COMMENTED
             fPreprocessed = DITAPreprocessProposals( pSubstProp->szPropSource, pSubstProp->szPropTarget, pGetIn->pvReplacementList );
+            #endif
 
             // if proposal has been preprocessed, the tag tagle records have to be rebuild
             if ( fPreprocessed )
@@ -2782,7 +2784,7 @@ USHORT GetFuzzyMatch
           LOGPRINTF2( L"GetFuzzyMatch: MaxVotes=%u, ActVote=%u\r\nEQFNTMGET of record %lu\r\n", pMatchEntry->usMaxVotes, pSentence->usActVote );
 
           //compare tm record data with data passed in the get in structure
-          usOverlaps = min( pMatchEntry->usMaxVotes, pSentence->usActVote );
+          usOverlaps = std::min( pMatchEntry->usMaxVotes, pSentence->usActVote );
           usRc = FuzzyTest( pTmClb, pTmRecord, pGetIn, pstMatchTable,
                             &usMatchEntries, &usOverlaps,
                             &pMatchEntry->usMaxVotes, &pSentence->usActVote,
@@ -3252,7 +3254,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                   usFuzzy = 0;
                 } /* endif */
 
-                usFuzzy = min( 99, usFuzzy );
+                usFuzzy = std::min( 99, (int)usFuzzy );
               } /* endif */
 
             } /* endif */
@@ -3718,7 +3720,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 #endif
 
   // limit number to really ones of interest ( the MAX_MATCHES best )
-  usEntries = min( usEntries, min(MAX_MATCHES, ABS_VOTES/2-1) );
+  usEntries = std::min( (int)usEntries, std::min(MAX_MATCHES, ABS_VOTES/2-1) );
 
   //fill pMatchEntry with the highest ranked entries
   pTempPos = pTempMatch;
@@ -3768,7 +3770,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
     PTMX_MATCHENTRY pTest = pTempPos-1;
     while ( (pTempPos->usMaxVotes == pTest->usMaxVotes)  &&
         (pTempPos->cCount == pTest->cCount) &&
-      (usEntries < min(ABS_VOTES/2-1,usEntriesInList)))
+      (usEntries < std::min(ABS_VOTES/2-1,(int)usEntriesInList)))
   {
       pMatchEntry = pMatchEntryStart;
 
@@ -4423,7 +4425,10 @@ BOOL     NTMTagSubst
           // test characters of start and end tag 
           PSZ_W pszStartTag = pToken->pData + 1;
           PSZ_W pszEndTag = pSegmentEndTags + 2;
-          while ( fAddTags && iswalpha(*pszEndTag) )
+          
+        #ifdef TEMPORARY_COMMENTED
+        #endif
+          while ( fAddTags /*&& iswalpha(*pszEndTag)//*/ )
           {
             if ( *pszStartTag == *pszEndTag )
             {
@@ -4534,7 +4539,10 @@ BOOL  isWhiteSpaceW( PSZ_W pData )
 {
   PSZ_W pTemp = pData;
   CHAR_W c;
-  while ( ((c = *pTemp)!= NULC) && iswspace( c ) )
+  
+  #ifdef TEMPORARY_COMMENTED
+  #endif
+  while ( ((c = *pTemp)!= NULC) /*&& iswspace( c )*/ )
   {
     pTemp++;
   } /* endwhile */
@@ -6114,18 +6122,22 @@ USHORT NTMCompareContext
       }
       else
       {
+        #ifdef TEMPORARY_COMMENTED
         if ( wcsicmp( pszContext1, pszContext2 ) == 0 )
         {
           usRanking = 100;
         }
+        #endif
       } /* endif */
     }
     else
     {
+      #ifdef TEMPORARY_COMMENTED
       if ( wcsicmp( pszContext1, pszContext2 ) == 0 )
       {
         usRanking = 100;
       }
+      #endif
     } /* endif */
   } /* endif */
 
@@ -6952,7 +6964,9 @@ SHORT NTMSimpleGetMatchLevel
   if ( !usRC )
   {
     BOOL fFuzzynessOK;
+    #ifdef TEMPORARYCOMMENTED
     fFuzzynessOK = TMFuzzynessEx( pszSegmentMarkup, pszSegmentText, pszProposalText, sLangID, &usFuzzy, ulSrcOemCP, &usWords );
+    #endif
     if ( usFuzzy != 100) fStringEqual = FALSE;
   } /* endif */
 
@@ -7174,7 +7188,7 @@ BOOL NTMAlignTags
   // allocate replacement list
   if ( fOK )
   {
-    int iSize = max( MAX_REPL, iSourceTags ) + 1;
+    int iSize = std::max( MAX_REPL, iSourceTags ) + 1;
     fOK = UtlAlloc( (PVOID *)ppReplaceList, 0L, iSize * sizeof(REPLLIST), ERROR_STORAGE );
     pReplaceList = *ppReplaceList;
   } /* endif */

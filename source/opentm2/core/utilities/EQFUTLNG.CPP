@@ -1000,7 +1000,7 @@ ULONG GetLangOEMCP
   return(ulCP);
 }
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
 
 // Set System Language or return an error
 USHORT SetSystemLanguage( PSZ pLanguage )
@@ -1078,4 +1078,4 @@ BOOL GetLanguageGroup( PSZ pszLanguage, PSZ pszGroup )
   return( fOK );
 }
 
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED

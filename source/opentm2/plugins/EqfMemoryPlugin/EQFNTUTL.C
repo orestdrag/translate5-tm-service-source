@@ -44,13 +44,15 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 // #include <time.h>
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 
-#include "eqfcmpr.h"
+//#include "eqfcmpr.h"
+#include "EQFCMPR.H"
+#include "core/utilities/OSWrapper.h"
 /**********************************************************************/
 /* prototypes for internal functions                                  */
 /**********************************************************************/
@@ -62,7 +64,7 @@ USHORT NTMAddNameToTable( PTMX_CLB, PSZ, USHORT, PUSHORT );
 int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -180,6 +182,15 @@ NTMGetIDFromName( PTMX_CLB pTmClb,   // input
 
 } /* end of function NTMGetIDFromName */
 
+
+void _strupr(PSZ str){
+  int len = strlen(str);
+  for(int i=0; i<len;i++){
+    if(str[i]>='a' && str[i]<='z'){
+      str[i]+= 'A' - 'a';
+    }
+  }
+}
 // NTMGetIDFromNameEx
 // this is an enhanced version of NTMGetIDFromName
 // using the new option NTMGETID_NOUPDATE_OPT the update of the name table can
@@ -1147,6 +1158,7 @@ NTMOpenProperties( HPROP   * phProp,    //(out) property handle
 
   return usRc;
 } /* end of function NTMOpenProperties */
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2379,6 +2391,9 @@ USHORT NTMAddLangGroup
   return( usRC );
 } /* end of function NTMAddLangGroup */
 
+unsigned long max(unsigned long a, unsigned long b){
+  return a>b? a:b;
+}
 USHORT NTMCreateLangGroupTable
 (
   PTMX_CLB    pTmClb                   // ptr to TM control block
@@ -2434,7 +2449,7 @@ USHORT NTMCreateLangGroupTable
   return( usRC );
 } /* end of function NTMCreateLangGroupTable */
 
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 
 // 
 // function NTMOrganizeIndexFile

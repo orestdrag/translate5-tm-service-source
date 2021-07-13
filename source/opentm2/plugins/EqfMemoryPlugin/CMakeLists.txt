@@ -6,13 +6,21 @@ set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
     EqfMemoryPlugin.cpp
-   # EQFNTOP.C
-   # EQFNTCR.C
-   # EQFNTM.C
-   # EQFNTEXT.C
-   # EQFNTMDB.C
-   # EQFNTEXT.C
-   # EQFNTPUT.C
+    EQFNTOP.C
+    EQFNTCR.C
+    EQFNTM.C
+    EQFNTEXT.C
+    EQFNTMDB.C
+    EQFNTEXT.C
+    EQFNTPUT.C
+    EQFMEMUT.C
+    EQFNTUTL.C
+    EQFNTCL.C
+    EQFNTMDB.C
+    EQFNTDEL.C
+    EQFNTGET.CPP
+    TMPluginWrapper.cpp 
+    
 )
 
 include(GNUInstallDirs)

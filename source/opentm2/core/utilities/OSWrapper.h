@@ -1,13 +1,21 @@
 #ifndef _OSWRAPPER_H_
 #define _OSWRAPPER_H_
 
+
 #include "win_types.h"
+#include "ThreadingWrapper.h"
+
 //typedef unsigned int DWORD;
 typedef DWORD LCID;
 typedef DWORD LCTYPE;
 typedef char* LPSTR;
 
 extern "C"{
+    typedef struct _SECURITY_ATTRIBUTES {   
+        DWORD  nLength;
+        LPVOID lpSecurityDescriptor;
+        BOOL   bInheritHandle;
+        } SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
 
     enum LCTYPES
         {
@@ -151,6 +159,48 @@ extern "C"{
     UINT GetOEMCP();
 
     unsigned long int _ttol(const char* source);
+
+    
+    int _strcmp(const char* a, const char* b);
+    int _strcmpi(const char* a, const char* b);
+    int _stricmp(const char* a, const char* b);
+
+    void GetSystemTime(LPSYSTEMTIME lpSystemTime);
+
+    BOOL SystemTimeToFileTime(
+        const SYSTEMTIME *lpSystemTime,
+        LPFILETIME       lpFileTime
+    );
+
+    BOOL FileTimeToSystemTime(
+        const FILETIME *lpFileTime,
+        LPSYSTEMTIME   lpSystemTime
+    );
+
+    HANDLE OpenMutex(
+        DWORD dwDesiredAccess,  // access flag
+        BOOL bInheritHandle,    // inherit flag
+        LPCTSTR lpName          // pointer to mutex-object name
+    );
+
+    DWORD WaitForSingleObject(
+        HANDLE hHandle,
+        DWORD  dwMilliseconds
+    );
+
+    HANDLE CreateMutex(
+        LPSECURITY_ATTRIBUTES lpMutexAttributes,
+        BOOL                  bInitialOwner,
+        LPCSTR                lpName
+    );
+
+    BOOL ReleaseMutex(
+        HANDLE hMutex
+    );
+
+    BOOL FindClose(
+        HANDLE hFindFile
+    );
 }
 
 

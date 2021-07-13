@@ -247,9 +247,11 @@ int MemExpSaveAsDlg( HWND hwndParent, MEM_EXPORT_IDA *pIDA )
   //--- access last used values by opening TM last used properties
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
      fOK = MemOpenProp(&(pIDA->hPropLast), (PVOID *)&(pIDA->pPropLast),
                        MEMORYLU_PROPERTIES_NAME, pIDA->szDummy,
                        PROP_ACCESS_WRITE, TRUE );
+    #endif
   } /* endif */
 
   if ( fOK )

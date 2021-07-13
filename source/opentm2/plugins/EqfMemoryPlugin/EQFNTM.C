@@ -39,6 +39,10 @@
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
+#include "core/utilities/OSWrapper.h"
+#include "core/utilities/FilesystemWrapper.h"
+#include "core/utilities/LogWrapper.h"
+
 
 #ifdef _DEBUG
   //#define SESSIONLOG
@@ -763,7 +767,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   return usRc;
 } /* end of function TmClose */
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // External function
@@ -1988,7 +1992,7 @@ C_TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD
       UtlMakeEQFPath( pDelTmIn->szFullPropName, NULC, PROPERTY_PATH, NULL );
       strcat( pDelTmIn->szFullPropName, BACKSLASH_STR );
       strcat( pDelTmIn->szFullPropName, szPropFileName );
-
+      
       if ( !MemOpenProp( &hProp,         // pointer to property handle
                          (PVOID *)&pProp,// pointer to property pointer
                          szPropFileName, // property file name
@@ -2961,7 +2965,11 @@ USHORT TMCreateTempMem
     UtlLogWriteString( "TMCreateTempMemHwnd: Releasing Mutex %s", szSemName );
 #endif
     ReleaseMutex( hMutexSem );
+
+    LogMessage(WARNING, "TEMPORARY_COMMENTED in TMCreateTempMem::CloseHandle( hMutexSem );");
+#ifdef TEMPORARY_COMMENTED
     CloseHandle( hMutexSem );
+#endif
   } /* endif */
 
   // create memory
@@ -3008,4 +3016,4 @@ void TMDeleteTempMem
   UtlDelete( szMemPath, 0L, FALSE );
 } /* end of function TMDeleteTempMemHwnd */
 
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
