@@ -809,7 +809,6 @@ void LangParseHandler::endElement(const XMLCh* const name )
   // convert collected data to ASCII
   std::u16string u16Data((char16_t*) this->szDataW);
   std::string sData = EncodingHelper::convertToUTF8(u16Data);
-  strncpy(this->szData, sData.c_str(), sData.size());
 
   switch ( CurID )
   {
@@ -821,37 +820,37 @@ void LangParseHandler::endElement(const XMLCh* const name )
       }
       break;
     case NAME_ELEMENT:
-      strncpy( this->CurElement.szName, this->szData, sizeof(this->CurElement.szName) );
+      strncpy( this->CurElement.szName, sData.c_str(), sizeof(this->CurElement.szName) );
       break;
     case CPASCII_ELEMENT:
-      this->CurElement.lAsciiCP = atol( this->szData);
+      this->CurElement.lAsciiCP = atol( sData.c_str() );
       break;
     case CPANSI_ELEMENT:
-      this->CurElement.lAnsiCP = atol( this->szData);
+      this->CurElement.lAnsiCP = atol( sData.c_str() );
       break;
     case CPNAME_ELEMENT:
-      strncpy( this->CurElement.szIsoCPName, this->szData, sizeof(this->CurElement.szIsoCPName) );
+      strncpy( this->CurElement.szIsoCPName, sData.c_str() , sizeof(this->CurElement.szIsoCPName) );
       break;
     case ISO_ELEMENT:
-      strncpy( this->CurElement.szIsoID, this->szData, sizeof(this->CurElement.szIsoID) );
+      strncpy( this->CurElement.szIsoID, sData.c_str() , sizeof(this->CurElement.szIsoID) );
       break;
     case ICU_ELEMENT:
-      strncpy( this->CurElement.szIcuID, this->szData, sizeof(this->CurElement.szIcuID) );
+      strncpy( this->CurElement.szIcuID, sData.c_str(), sizeof(this->CurElement.szIcuID) );
       break;
     case PREFERRED_ELEMENT:
-      this->CurElement.fisPreferred = (strcasecmp( this->szData, "yes" ) == 0);
+      this->CurElement.fisPreferred = (strcasecmp( sData.c_str(), "yes" ) == 0);
       break;
     case GROUP_ELEMENT:
-      strncpy( this->CurElement.szLangGroup, this->szData, sizeof(this->CurElement.szLangGroup) );
+      strncpy( this->CurElement.szLangGroup, sData.c_str(), sizeof(this->CurElement.szLangGroup) );
       break;
     case ISSOURCELANGUAGE_ELEMENT:
-      this->CurElement.isSourceLanguage = (strcasecmp( this->szData, "yes" ) == 0);
+      this->CurElement.isSourceLanguage = (strcasecmp( sData.c_str(), "yes" ) == 0);
       break;
     case ISTARGETLANGUAGE_ELEMENT:
-      this->CurElement.isTargetLanguage = (strcasecmp( this->szData, "yes" ) == 0);
+      this->CurElement.isTargetLanguage = (strcasecmp( sData.c_str(), "yes" ) == 0);
       break;
     case COMMENTS_ELEMENT:
-      strncpy( this->CurElement.szAddInfo, this->szData, sizeof(this->CurElement.szAddInfo) );
+      strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
       break;
     case UNKNOWN_ELEMENT:
     default:
