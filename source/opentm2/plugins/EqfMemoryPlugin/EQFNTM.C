@@ -302,7 +302,9 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /****************************************************************/
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
+      #ifdef TEMPORARY_COMMENTED
       usRc = TmtXCreate( pstCreateIn, pstCreateOut );
+      #endif
 //    usRc = U( htmDummy,
 //             (PXIN) pstCreateIn,
 //             (PXOUT) pstCreateOut,
@@ -333,7 +335,9 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   {
     if ( usMsgHandling )
     {
+      #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
+      #endif
     } /* endif */
   } /* endif */
 
@@ -417,7 +421,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   PTMX_OPEN_OUT     pstOpenOut = NULL; //open output structure
   USHORT            usUserPriviliges;  //returned from UtlGetLANUserID
   PSZ               pszTemp;           //temp ptr for UtlGetFnameFromPath
-
+#ifdef TEMPORARY_COMMENTED
   DEBUGEVENT( TMOPEN_LOC, FUNCENTRY_EVENT, 0 );
 
   /********************************************************************/
@@ -646,7 +650,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   {
     ERREVENT( TMOPEN_LOC, ERROR_EVENT, usRc );
   } /* endif */
-
+#endif
   return usRc;
 } /* end of function TmOpen */
 
@@ -692,7 +696,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   BOOL              fOk;                //process flag
   USHORT            usQRc;              //rc from EqfSend2Handler
   SERVERNAME        szServer;           //local var for server name
-
+#ifdef TEMPORARY_COMMENTED
   ERREVENT( TMCLOSE_LOC, ERROR_EVENT, 0 );
 
   /********************************************************************/
@@ -759,7 +763,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   {
     ERREVENT( TMCLOSE_LOC, ERROR_EVENT, usRc );
   } /* endif */
-
+#endif
   return usRc;
 } /* end of function TmClose */
 
@@ -1566,6 +1570,7 @@ C_TmInfo( HTM           htm,            //(in)  TM handle
   return( C_TmInfoHwnd( htm, szMemPath, usInfoLevel, pstInfoIn, pstInfoOut,
                       usMsgHandling, NULLHANDLE ) );
 }
+#endif
 
 USHORT
 C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
@@ -1595,7 +1600,9 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
+  #ifdef TEMPORARY_COMMENTED
   usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );
+  #endif
 //usRc = U( htm,
 //          (PXIN)pstInfoIn,               // Pointer to input structure
 //          (PXOUT)pstInfoOut,
@@ -1603,10 +1610,13 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 
   if ( usMsgHandling && usRc )
   {
+    #ifdef TEMPORARY_COMMENTED
     usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );
+    #endif
   } /* endif */
   return usRc;
 } /* End of function TmInfo */
+
 
 /**********************************************************************/
 /**********************************************************************/
@@ -1828,6 +1838,7 @@ NTMFillCreateInStruct( HTM             hModel,
   return usRc;
 } /* end of function NTMFillCreateInStruct */
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // Function name:     NTMGetThresholdFromProperties
 //------------------------------------------------------------------------------
@@ -1921,6 +1932,7 @@ C_TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD
             HWND    hwndOwner,
             PUSHORT pusYesToAllMode )      //(in/out) Yes-to-all mode
 {
+  
   BOOL       fDeleteGrayedOut = FALSE;     //delete greyed out flag
   CHAR       szSysPath[MAX_EQF_PATH];      //system path for NTMOpenProperties
   CHAR       szPropFileName[MAX_FILESPEC]; //property filename for NTMOpenProperties
@@ -1938,7 +1950,7 @@ C_TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD
   USHORT     usUserLevel;
   BOOL       fShared = FALSE;              // = TRUE for shared TMs
   CHAR       szMemShortName[MAX_FILESPEC]; // short name of TM
-
+#ifdef TEMPORARY_COMMENTED
   fDeleteGrayedOut = (usMsgHandling == DELETE_GREYEDOUT);
 
   // get user ID
@@ -2421,8 +2433,9 @@ C_TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD
   {
     usRc = MemRcHandlingHwnd( usRc, pszMemName, &htm, NULL, hwndOwner );
   } /* endif */
-
+#endif
   return usRc;
+
 } /* end of function TmDeleteTM */
 USHORT
 TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD

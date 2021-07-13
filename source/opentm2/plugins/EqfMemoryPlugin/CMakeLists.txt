@@ -8,7 +8,7 @@ set(EqfMemoryPlugin_Source_Files
     EqfMemoryPlugin.cpp
    # EQFNTOP.C
    # EQFNTCR.C
-   # EQFNTM.C
+    EQFNTM.C
    # EQFNTEXT.C
    # EQFNTMDB.C
    # EQFNTEXT.C
