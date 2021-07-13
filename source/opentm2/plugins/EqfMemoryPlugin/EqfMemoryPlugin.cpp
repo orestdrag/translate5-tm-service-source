@@ -118,10 +118,10 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
 
   LogMessage(WARNING, "TEMPORARY_COMMENTED in EqfMemoryPlugin::createMemory:: use old memory create code");
-  #ifdef TEMPORARY_COMMENTED
+  //#ifdef TEMPORARY_COMMENTED
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
-  #endif
+  //#endif
 
   // setup memory properties
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );

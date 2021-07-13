@@ -2,7 +2,7 @@
 #define _FILESYSTEMWRAPPER_H_
 
 #include "win_types.h"
-
+#include "OSWrapper.h"
 extern "C" {
         
 char * filesystem_get_otm_dir();
@@ -29,12 +29,6 @@ const int
 
 
 const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
-
-    typedef struct _SECURITY_ATTRIBUTES {
-            DWORD  nLength;
-            LPVOID lpSecurityDescriptor;
-            BOOL   bInheritHandle;
-    } SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
     
     typedef struct _OVERLAPPED {
             ULONG_PTR Internal;
