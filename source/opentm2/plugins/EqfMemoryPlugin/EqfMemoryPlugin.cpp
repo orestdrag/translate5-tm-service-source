@@ -117,10 +117,11 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
 
-#ifdef TEMPORARY_COMMENTED
+  LogMessage(WARNING, "TEMPORARY_COMMENTED in EqfMemoryPlugin::createMemory:: use old memory create code");
+  #ifdef TEMPORARY_COMMENTED
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
-#endif //TEMPORARY_COMMENTED
+  #endif
 
   // setup memory properties
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
@@ -1052,10 +1053,6 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
   }
   // call path create function and set result string
      
-
-#ifdef TEMPORARY_COMMENTED
-  strPathName.assign( szPathName );
-#endif //TEMPORARY_COMMENTED
   strPathName = pathName;
 
   return( fOK );
@@ -1109,20 +1106,11 @@ BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathN
     std::string strPropName;
     this->makePropName( strPathName, strPropName );
 
-#ifdef TEMPORARY_COMMENTED
-    std::fstream s(strPathName, s.binary | s.out);
-    if (!s.is_open())
-      std::cerr << "Failed to open properties file\n";
-#endif
     char *cstr = new char[strPathName.length() + 1];
     strcpy(cstr, strPathName.c_str());
     WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
     delete [] cstr;
 
-// TODO rewrite for linux
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     
   return( fOK );
