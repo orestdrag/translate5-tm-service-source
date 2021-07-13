@@ -398,13 +398,10 @@ OtmMemory *MemoryFactory::createMemory
   int *piErrorCode
 )
 {
-  {
-    char buff[360];
-    sprintf("MemoryFactory::createMemory(pszPluginName = %s, pszMemoryName = %s, pszDescription = %s, \
-      pszSourceLanguage = %s, char chDrive = %s, pszOwner = %s, bInvisible = %d, piErrorCode = %d)",
-      pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage,chDrive, pszOwner, bInvisible, *piErrorCode);
-    LogMessage(DEBUG, buff);
-  }
+  
+  LogMessage6(DEBUG,"MemoryFactory::createMemory::pszMemoryName = ",pszMemoryName, ", pszSourceLanguage = ", pszSourceLanguage,
+      ", pszDescription = ", pszDescription) ;
+  
   OtmMemory *pMemory = NULL;
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
