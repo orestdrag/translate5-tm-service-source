@@ -44,13 +44,13 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 // #include <time.h>
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 
-#include "eqfcmpr.h"
+#include "EQFCMPR.H"
 /**********************************************************************/
 /* prototypes for internal functions                                  */
 /**********************************************************************/
@@ -1437,8 +1437,10 @@ USHORT NTMCheckForUpdates
  USHORT usRc = 0;                      // function return code
  static LONG   alNewUpdCounter[MAX_UPD_COUNTERS]; // buffer for new update counters
 
+#ifdef TEMPORARY_COMMENTED
  // Get new update counter values
  usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );
+#endif
 
  // Check and update compact area
  if ( !usRc )
@@ -1625,6 +1627,7 @@ USHORT NTMCreateLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMCreateLongNameTable */
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1671,7 +1674,7 @@ USHORT NTMDestroyLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMDestroyLongNameTable */
-
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1876,6 +1879,7 @@ USHORT NTMReadLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMReadLongNameTable */
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1898,21 +1902,25 @@ USHORT NTMWriteLongNameTable
   USHORT      usRC = NO_ERROR;         // function return code
   ULONG       ulKey = LONGNAME_KEY;    //
 
+#ifdef TEMPORARY COMMENTED
   // write long document name buffer area to the database
   usRC = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                        (PBYTE)pTmClb->pLongNames->pszBuffer,
                        pTmClb->pLongNames->ulBufUsed );
-
+#endif
   if ( (usRC == NO_ERROR) && pTmClb->fShared )
   {
+    #ifdef TEMPORARY_COMMENTED
     usRC = EQFNTMIncrUpdCounter( pTmClb->pstTmBtree, LONGNAMES_UPD_COUNTER,
                                  &(pTmClb->alUpdCounter[LONGNAMES_UPD_COUNTER]) );
+    #endif
   } /* endif */
 
   // return to caller
   return( usRC );
 } /* end of function NTMWriteLongNameTable */
 
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2447,8 +2455,9 @@ USHORT NTMOrganizeIndexFile
 )
 {
   USHORT usRC = NO_ERROR;
-
+  #ifdef TEMPORARY_COMMENTED
   usRC = EQFNTMOrganizeIndex( &(pTmClb->pstInBtree), pTmClb->usAccessMode, START_KEY );
+  #endif
 
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */

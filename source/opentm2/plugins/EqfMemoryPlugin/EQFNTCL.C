@@ -222,8 +222,9 @@ USHORT TmtXClose
   UtlAlloc( (PVOID *) &(pTmClb->pLangGroups), 0L, 0L, NOMSG );
 
   UtlAlloc( (PVOID *) &(pTmClb->psLangIdToGroupTable), 0L, 0L, NOMSG );
-
+#ifdef TEMPORARY_COMMENTED
   NTMDestroyLongNameTable( pTmClb );
+#endif
 
   // free new structures allocated by sub functions
   if ( pTmClb->pvTempMatchList )      UtlAlloc( (PVOID *) &(pTmClb->pvTempMatchList), 0L, 0L, NOMSG );

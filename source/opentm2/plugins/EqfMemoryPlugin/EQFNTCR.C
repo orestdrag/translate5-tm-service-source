@@ -239,7 +239,9 @@ USHORT TmtXCreate
 
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
     usRc = NTMCreateLongNameTable( pTmClb );
+    #endif
     fOK = (usRc == NO_ERROR );
   } /* endif */
   if ( !fOK )
@@ -265,36 +267,46 @@ USHORT TmtXCreate
 
     //call create function for data file
     pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
-
+#ifdef TEMPORARY_COMMENTED
     usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szDataName,
                          (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
                          FIRST_KEY, &pTmClb->pstTmBtree );
+#endif
+
     if ( usRc == NO_ERROR )
     {
       //insert initialized record to tm data file
       ulKey = AUTHOR_KEY;
+      #ifdef TEMPORARY_COMMENTED
       usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
+                 #endif
 
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
+        #ifdef TEMPORARY_COMMENTED
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                     (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );
+                    #endif
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = TAGTABLE_KEY;
+        #ifdef TEMPORARY_COMMENTED
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                     (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
+                    #endif
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = LANG_KEY;
+        #ifdef TEMPORARY_COMMENTED
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
+                 #endif
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -303,20 +315,26 @@ USHORT TmtXCreate
         memset( pTmClb->bCompact, 0, sizeof( MAX_COMPACT_SIZE-1 ) );
 
         ulKey = COMPACT_KEY;
+        #ifdef TEMPORARY_COMMENTED
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                              pTmClb->bCompact, sizeof( MAX_COMPACT_SIZE-1 ));
+                             #endif
       } /* endif */
 
       // add long document table record
       if ( usRc == NO_ERROR )
       {
+        #ifdef TEMPORARY_COMMENTED
         usRc = NTMWriteLongNameTable( pTmClb );
+        #endif
       } /* endif */
 
       // create language group table
       if ( usRc == NO_ERROR )
       {
+        #ifdef TEMPORARY_COMMENTED
         usRc = NTMCreateLangGroupTable( pTmClb );
+        #endif
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -325,11 +343,12 @@ USHORT TmtXCreate
         pszName = UtlGetFnameFromPath( pTmCreateIn->stTmCreate.szIndexName );
         //fill signature record structure
         strcpy( pTmClb->stTmSign.szName, pszName );
-
+#ifdef TEMPORARY_COMMENTED
         usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
                              START_KEY, &pTmClb->pstInBtree );
+                             #endif
       } /* endif */
     } /* endif */
 
@@ -347,7 +366,9 @@ USHORT TmtXCreate
     UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
+    #ifdef TEMPORARY_COMMENTED
     NTMDestroyLongNameTable( pTmClb );
+    #endif
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
   } /* endif */
 
@@ -359,8 +380,10 @@ USHORT TmtXCreate
   // get inital update counters
   if ( !usRc && pTmClb->fShared )
   {
+    #ifdef TEMPORARY_COMMENTED
     usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, pTmClb->alUpdCounter,
                                 0, MAX_UPD_COUNTERS );
+                                #endif
   } /* endif */
   return( usRc );
 }

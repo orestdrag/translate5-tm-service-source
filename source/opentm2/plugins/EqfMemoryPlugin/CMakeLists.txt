@@ -7,12 +7,13 @@ set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
     EqfMemoryPlugin.cpp
    # EQFNTOP.C
-   # EQFNTCR.C
+    EQFNTCR.C
     EQFNTM.C
    # EQFNTEXT.C
    # EQFNTMDB.C
    # EQFNTEXT.C
    # EQFNTPUT.C
+   EQFNTUTL.C
 )
 
 include(GNUInstallDirs)

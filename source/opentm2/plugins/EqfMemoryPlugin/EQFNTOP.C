@@ -325,8 +325,10 @@ USHORT TmtXOpen
                 // O.K. no problems at all
                 break;
               case BTREE_NOT_FOUND :
+              #ifdef TEMPORARY_COMMENTED
                 // no long name tabel yet,create one ...
                 usTempRc = NTMWriteLongNameTable( pTmClb );
+                #endif
                 break;
               default:
                 // read of long name table failed, assume TM is corrupted
@@ -362,10 +364,11 @@ USHORT TmtXOpen
       if ( !usRc && pTmClb->fShared )
       {
         USHORT usTempRc;
-
+#ifdef TEMPORARY_COMMENTED
         usTempRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree,
                                         pTmClb->alUpdCounter,
                                         0, MAX_UPD_COUNTERS );
+#endif
 
         if ( usTempRc != NO_ERROR )
         {

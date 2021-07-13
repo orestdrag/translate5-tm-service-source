@@ -35,6 +35,7 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #include <EQF.H>                  // General Translation Manager include file
 
+#include "core/utilities/LogWrapper.h"
 #include <EQFSETUP.H>             // Directory name defines and other
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
@@ -302,6 +303,7 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /****************************************************************/
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
+      LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: TmtXCreate");
       #ifdef TEMPORARY_COMMENTED
       usRc = TmtXCreate( pstCreateIn, pstCreateOut );
       #endif
@@ -335,6 +337,7 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   {
     if ( usMsgHandling )
     {
+      LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
       #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif

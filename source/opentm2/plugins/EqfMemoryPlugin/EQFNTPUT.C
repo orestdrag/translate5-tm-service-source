@@ -1521,7 +1521,9 @@ USHORT UpdateTmIndex
 
              if ( usRc == NO_ERROR )
              {
+               #ifdef TEMPORARY_COMMENTED
                usRc = EQFNTMInsert( pTmClb->pstInBtree, &ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+              #endif
              } /* endif */
           } /* endif */
 

@@ -572,6 +572,7 @@ SHORT EQFNTMSign
   return( sRc );
 
 }
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -683,6 +684,7 @@ EQFNTMInsert
     } /* endif */
   } /* endif */
 
+#ifdef TEMPORARY_COMMENTED
   /********************************************************************/
   /* call QDAMDictInsert to do the dirty work of inserting entry...   */
   /********************************************************************/
