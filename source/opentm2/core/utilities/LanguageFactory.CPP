@@ -159,7 +159,7 @@ LanguageFactory::LanguageFactory(void)
   // try to load the external language list
   char szFile[256];
   properties_get_str(KEY_OTM_DIR, szFile, 255);
-  strcat(szFile, "/TABLE/languages_simpl.xml");
+  strcat(szFile, "/TABLE/languages.xml");
   properties_get_str_or_default(KEY_LANG_FILE_PATH, szFile, 255, szFile);
   int iRC = loadLanguageList( szFile );
   
@@ -596,8 +596,8 @@ int LanguageFactory::compareISO
    if ( (pszDash1 == NULL) && (pszDash2 == NULL)  ) return( iResult );
 
    // compare ISO names without country suffix
-   char szLang1[20];
-   char szLang2[20];
+   char szLang1[100];
+   char szLang2[100];
 
    if ( pszDash1 )
    {
