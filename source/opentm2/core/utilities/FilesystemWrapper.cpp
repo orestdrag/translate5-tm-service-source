@@ -1,5 +1,7 @@
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
+#include "LogWrapper.h"
+#include <unistd.h>
 #include <cstring>
 
 char * filesystem_get_otm_dir() {
@@ -137,6 +139,15 @@ char* filesystem_get_home_dir() {
         FilesystemHelper::CloseFile(hf);
     }
 
+LARGE_INTEGER intToLargeInt(int i) {
+    LARGE_INTEGER li;
+    li.QuadPart = i;
+    return li;
+}
+
+int largeIntToInt(LARGE_INTEGER li) {
+    return (int)li.QuadPart;
+}
 
     BOOL SetFilePointerEx(
         HANDLE hFile,                    
@@ -144,6 +155,26 @@ char* filesystem_get_home_dir() {
         PLARGE_INTEGER lpNewFilePointer, 
         DWORD dwMoveMethod               
         ){
-            
+            int res = 0;
+            if(liDistanceToMove.QuadPart == 0){
+                return true;
+            }if(dwMoveMethod == FILE_BEGIN){
+                
+                //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
+                res = lseek(*((int*)hFile), largeIntToInt(liDistanceToMove), SEEK_SET);
+            }else if(dwMoveMethod == FILE_CURRENT){
+                //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_CUR);
+                LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
+            }else if(dwMoveMethod == FILE_END){
+                //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_END);
+                LogMessage(ERROR, "SetFilePointerEx::FILE_END not implemented");
+            }else{
+
+                LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+            }
+            if(lpNewFilePointer && res >= 0){
+                *lpNewFilePointer = intToLargeInt(res);
+            }
+            return res >=0;
         }
 //}
