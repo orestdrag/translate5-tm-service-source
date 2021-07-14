@@ -308,6 +308,10 @@
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
 
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
 #define MAX_OPEN_FILES    256          // max number of stored filehandles
 
 typedef struct _EQFHANDLEDRIVES
@@ -1050,12 +1054,21 @@ USHORT UtlWriteHwnd
 
    do {
       DosError(0);
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       if ( WriteFile( hf, pBuf, cbBuf, &ulBytesWritten, NULL ) == 0 )
       {
+        const int MAXSIZE = 0xFFF;
+        char filename[MAXSIZE];
+        char proclnk[MAXSIZE];
+      
         usRetCode = (USHORT)GetLastError();
+
+        int fno = fileno(hf);
+        sprintf(proclnk, "/proc/self/fd/%d", fno);
+        int r = readlink(proclnk, filename, MAXSIZE-1);
+        filename[r] = '\0';
+        LogMessage4(ERROR, "UtlWriteHwnd:: can't write file, path = ", filename, ", usRetCode = ", intToA(usRetCode));
+
       } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
 
@@ -1289,17 +1302,16 @@ USHORT UtlChgFilePtrHwnd
    do {
       DosError(0);
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+    LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in UtlChgFilePtrHwnd::SetFilePointerEx");
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       fOK = SetFilePointerEx( hf, liOffset, &liNewOffset, fsMethod );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       *pulNewOffset = liNewOffset.LowPart;
 
       if ( !fOK )
       {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         usRetCode = (USHORT)GetLastError();
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         *pulNewOffset = 0L;
       } /* endif */
 

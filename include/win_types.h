@@ -500,7 +500,7 @@ typedef union _LARGE_INTEGER {
     DWORD LowPart;
     LONG  HighPart;
     LONGLONG QuadPart;
-} LARGE_INTEGER;
+} LARGE_INTEGER, *PLARGE_INTEGER;
 
 /* https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-systemtime */
 

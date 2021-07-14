@@ -136,4 +136,14 @@ char* filesystem_get_home_dir() {
     BOOL CloseHandle(HFILE hf ){
         FilesystemHelper::CloseFile(hf);
     }
+
+
+    BOOL SetFilePointerEx(
+        HANDLE hFile,                    
+        LARGE_INTEGER liDistanceToMove,  
+        PLARGE_INTEGER lpNewFilePointer, 
+        DWORD dwMoveMethod               
+        ){
+            
+        }
 //}

@@ -228,27 +228,39 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
 
 int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
+    int writenBytes = buffsize;
     if(ptr == NULL){
-        errCode = FILEHELPER_FILE_PTR_IS_NULL;
-    }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
-        errCode = ERROR_WRITE_FAULT;
+        __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else{ 
+        writenBytes *= fwrite(buff, buffsize, 1, ptr);
+        if ( writenBytes <=0 ){
+            LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
+            __last_error_code = errCode = ERROR_WRITE_FAULT;
+        }
     }
+    LogMessage4(DEBUG, "FilesystemHelper::WriteToFile(", intToA((long int)ptr), ", buff = ", "void" /*buff*/);
     //CloseFile(ptr);
-    return __last_error_code = errCode;
+    //return __last_error_code = errCode;
+    return writenBytes;
 }
 
 int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
+    int writenBytes = buffsize;
     if(ptr == NULL){
         LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
-        errCode = FILEHELPER_FILE_PTR_IS_NULL;
-    }else if ( fwrite(buff, buffsize, 1, ptr) != 1 ){
-        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
-        errCode = ERROR_WRITE_FAULT;
+        __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
+    }else{ 
+        writenBytes *= fwrite(buff, buffsize, 1, ptr);
+        if ( writenBytes <=0 ){
+            LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
+            __last_error_code = errCode = ERROR_WRITE_FAULT;
+        }
     }
     LogMessage4(DEBUG, "FilesystemHelper::WriteToFile(", intToA((long int)ptr), ", buff = ", buff);
     //CloseFile(ptr);
-    return __last_error_code = errCode;
+    //return __last_error_code = errCode;
+    return writenBytes;
 }
 
 

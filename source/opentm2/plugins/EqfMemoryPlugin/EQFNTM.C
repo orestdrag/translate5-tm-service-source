@@ -303,7 +303,6 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /****************************************************************/
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
-      LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: TmtXCreate");
       
       usRc = TmtXCreate( pstCreateIn, pstCreateOut );
       
