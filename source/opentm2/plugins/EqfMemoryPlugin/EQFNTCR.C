@@ -338,6 +338,7 @@ USHORT TmtXCreate
         //fill signature record structure
         strcpy( pTmClb->stTmSign.szName, pszName );
 
+      //HERE .TMI file supposed to be created
         usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
