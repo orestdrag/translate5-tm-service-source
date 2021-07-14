@@ -127,6 +127,14 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
 
 
     BOOL CloseHandle(HFILE hf );
+
+    BOOL SetFilePointerEx(
+        HANDLE hFile,                    
+        LARGE_INTEGER liDistanceToMove,  
+        PLARGE_INTEGER lpNewFilePointer, 
+        DWORD dwMoveMethod               
+        );
+
 }
 
 
