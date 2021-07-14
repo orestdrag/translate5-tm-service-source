@@ -461,6 +461,9 @@ typedef struct _STENCODEBITS
   USHORT usVal;
 } STENCODEBITS;
 
+// defines for retries in case of BTREE_IN_USE conditions
+#define MAX_RETRY_COUNT 30
+#define MAX_WAIT_TIME   100
 /**********************************************************************/
 /*  encoding sequence used                                            */
 /*  The following should never be changed......                       */
@@ -1792,6 +1795,347 @@ SHORT QDAMDictCreateLocal
 }
 
 
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictInsertLocal   Insert entry
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictInsertLocal( PBTREE, PCHAR, PCHAR, USHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Add a key and all associated data.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE          pointer to btree structure
+//                    PCHAR           key to be inserted
+//                    PCHAR           user data to be associated with the key
+//                    USHORT          length of the user data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_USERDATA    user data too long
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_DATA_RANGE  key to long or too short
+//------------------------------------------------------------------------------
+// Function flow:     if dictionary corrupted then
+//                      set Rc to BTREE_CORRUPTED
+//                    else
+//                      find the appropriate record and set Rc accordingly
+//                    endif
+//                    if okay then
+//                      add data to buffer and set Rc
+//                      if okay then
+//                        insert the key and the data and set Rc
+//                      endif
+//                    endif
+//                    return Rc
+//
+//------------------------------------------------------------------------------
+SHORT QDAMDictInsertLocal
+(
+  PBTREE  pBTIda,           // pointer to binary tree struct
+  PCHAR_W pKey,             // pointer to key data
+  PBYTE   pData,            // pointer to user data
+  ULONG   ulLen             // length of user data in bytes
+)
+{
+   SHORT sRc = 0;                            // return code
+   RECPARAM   recData;                       // offset/node of data storage
+   RECPARAM   recKey;                        // offset/node of key storage
+   USHORT     usKeyLen;                      // length of the key
+   BOOL       fLocked = FALSE;               // file-has-been-locked flag
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+   memset( &recKey, 0, sizeof( recKey ) );
+   memset( &recData,  0, sizeof( recData ) );
+   #ifdef TEMPRORARY_COMMENTED
+   DEBUGEVENT2( QDAMDICTINSERTLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+   #endif
+
+   if ( pBT->fCorrupted )
+   {
+      sRc = BTREE_CORRUPTED;
+   } /* endif */
+   if ( !sRc && !pBT->fOpen )
+   {
+     sRc = BTREE_READONLY;
+   } /* endif */
+
+   /*******************************************************************/
+   /* check if entry is locked ....                                   */
+   /*******************************************************************/
+   #ifdef TEMPORARY_COMMENTED
+   if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
+   {
+     sRc = BTREE_ENTRY_LOCKED;
+   } /* endif */ 
+   #endif
+
+   /*******************************************************************/
+   /* For shared databases: lock complete file                        */
+   /*                                                                 */
+   /* Note: this will also update our internal buffers and the        */
+   /*       header record. No need to call QDamCheckForUpdates here.  */
+   /*******************************************************************/
+   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
+   {
+     #ifdef TEMPORARY_COMMENTED
+     sRc = QDAMPhysLock( pBTIda, TRUE, &fLocked );
+     #endif
+   } /* endif */
+
+   if ( pBT->bRecSizeVersion == BTREE_V3 )
+   {
+      PBTREEBUFFER_V3  pNode = NULL;
+
+      if ( !sRc )
+      {
+        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
+        if ( (usKeyLen == 0) ||
+             ((usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) ||
+             (ulLen == 0) ||
+             ((pBT->usVersion < NTM_VERSION2) && (ulLen >= MAXDATASIZE)) )
+        {
+          sRc = BTREE_DATA_RANGE;
+        }
+        else
+        {
+          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
+          #ifdef TEMPORARY_COMMENTED
+          QDAMDictUpdStatus ( pBTIda );
+          sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
+          #endif
+        } /* endif */
+      } /* endif */
+
+      if ( !sRc )
+      {
+        #ifdef TEMPORARY_COMMENTED
+          BTREELOCKRECORD( pNode );
+          sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
+          if ( !sRc )
+          {
+            recData.ulLen = ulLen;
+            sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
+          } /* endif */
+
+          BTREEUNLOCKRECORD( pNode );
+        #endif
+          /****************************************************************/
+          /* change time to indicate modifications on dictionary...       */
+          /****************************************************************/
+          pBT->lTime ++;
+      }
+   }
+   else
+   {
+      PBTREEBUFFER_V2  pNode = NULL;
+
+      if ( !sRc )
+      {
+        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
+        if ( usKeyLen == 0 ||(  (usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) || ulLen == 0 || ulLen >= MAXDATASIZE )
+        {
+          sRc = BTREE_DATA_RANGE;
+        }
+        else
+        {
+          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
+          #ifdef TEMPORARY_COMMENTED
+          QDAMDictUpdStatus ( pBTIda );
+          sRc = QDAMFindRecord_V2( pBTIda, pKey, &pNode );
+          #endif
+        } /* endif */
+      } /* endif */
+
+      if ( !sRc )
+      {
+        #ifdef TEMPORARY_COMMENTED
+          BTREELOCKRECORD( pNode );
+          sRc = QDAMAddToBuffer_V2( pBTIda, pData, ulLen, &recData );
+          if ( !sRc )
+          {
+            recData.ulLen = ulLen;
+            sRc = QDAMInsertKey_V2 (pBTIda, pNode, pKey, recKey, recData);
+          } /* endif */
+
+          BTREEUNLOCKRECORD( pNode );
+        #endif
+          /****************************************************************/
+          /* change time to indicate modifications on dictionary...       */
+          /****************************************************************/
+          pBT->lTime ++;
+      }
+   } /* endif */
+
+   /*******************************************************************/
+   /* For shared databases: unlock complete file                      */
+   /*                                                                 */
+   /* Note: this will also incement the dictionary update counter     */
+   /*       if the dictionary has been modified                       */
+   /*******************************************************************/
+   if ( fLocked )
+   {
+     #ifdef TEMPORARY_COMMENTED
+     sRc = QDAMPhysLock( pBTIda, FALSE, NULL );
+     #endif
+   } /* endif */
+
+   if ( sRc )
+   {
+     #ifdef TEMPORARY_COMMENTED
+     ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     #endif
+   } /* endif */
+
+   return sRc;
+}
+
+
+#ifdef TEMPORARY_COMMENTED
+//+----------------------------------------------------------------------------+
+//|External function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     EQFNTMInsert                                             |
+//+----------------------------------------------------------------------------+
+//|Function call:     sRc = EQFNTMInsert( pBTIda, &ulKey, pData, usLen );      |
+//+----------------------------------------------------------------------------+
+//|Description:       insert a new key (ULONG) with data                       |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PBTREE  pBTIda,      pointer to binary tree struct       |
+//|                   PULONG  pulKey,      pointer to key                      |
+//|                   PBYTE   pData,       pointer to user data                |
+//|                   USHORT  usLen        length of user data                 |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   SHORT                                                    |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       BTREE_NUMBER_RANGE   requested key not in allowed range  |
+//|                   BTREE_READONLY       file is opened read only - no write |
+//|                   BTREE_CORRUPTED      file is corrupted                   |
+//|                   errors returned by QDAMDictInsertLocal                   |
+//|                   0                    success indicator                   |
+//+----------------------------------------------------------------------------+
+//|Function flow:     check for corruption and open in correct mode            |
+//|                   if okay                                                  |
+//|                     either check passed key or assign new key              |
+//|                                    and update the header                   |
+//|                   endif                                                    |
+//|                   if okay                                                  |
+//|                     call QDAMDictInsertLocal                               |
+//|                   endif                                                    |
+//|                   return success indicator..                               |
+// ----------------------------------------------------------------------------+
+SHORT
+EQFNTMInsert
+(
+  PVOID   pBTIda,           // pointer to binary tree struct
+  PULONG  pulKey,           // pointer to key
+  PBYTE   pData,            // pointer to user data
+  ULONG   ulLen             // length of user data
+)
+{
+   SHORT         sRc = 0;   // return code
+   PBTREEGLOB    pBT = NULL;
+#ifdef TEMPORARY_COMMENTED
+   DEBUGEVENT( EQFNTMINSERT_LOC, FUNCENTRY_EVENT, 0 );
+#endif
+   /*******************************************************************/
+   /* validate passed pointer ...                                     */
+   /*******************************************************************/
+   if ( !pBTIda )
+   {
+     sRc = BTREE_INVALID;
+   }
+   else
+   {
+     pBT = ((PBTREE)pBTIda)->pBTree;
+   } /* endif */
+
+  /********************************************************************/
+  /* do initial security checking...                                  */
+  /********************************************************************/
+   if ( !sRc && pBT->fCorrupted )
+   {
+      sRc = BTREE_CORRUPTED;
+   } /* endif */
+   if ( !sRc && !pBT->fOpen )
+   {
+     sRc = BTREE_READONLY;
+   } /* endif */
+  /********************************************************************/
+  /* if user wants that we find an appropriate key, we have to do so..*/
+  /********************************************************************/
+  if ( !sRc )
+  {
+    if ( *pulKey == NTMREQUESTNEWKEY )
+    {
+      /******************************************************************/
+      /* find next free key and anchor new value in file ...            */
+      /******************************************************************/
+      ULONG  ulKey;
+      ulKey = *pulKey = (NTMNEXTKEY( pBT ))++;
+      if ( ulKey > 0xFFFFFF )
+      {
+        sRc = BTREE_NUMBER_RANGE;
+      }
+      else
+      {
+        /**************************************************************/
+        /* force update of header (only from time to time to avoid    */
+        /* too much performance degration)...                         */
+        /**************************************************************/
+        if ( (ulKey & 0x020) || (pBT->usOpenFlags & ASD_SHARED) )
+        {
+          sRc = QDAMWriteHeader( (PBTREE)pBTIda );
+          pBT->fUpdated = TRUE;
+        } /* endif */
+      } /* endif */
+    }
+    else
+    {
+      /****************************************************************/
+      /* check if key is in valid range ...                           */
+      /****************************************************************/
+      if ( *pulKey > NTMSTARTKEY( pBT ) )
+      {
+        sRc = BTREE_NUMBER_RANGE;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  /********************************************************************/
+  /* call QDAMDictInsert to do the dirty work of inserting entry...   */
+  /********************************************************************/
+  if ( !sRc )
+  {
+    SHORT  RetryCount;                  // retry counter for in-use condition
+    RetryCount = MAX_RETRY_COUNT;
+    do
+    {
+      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PSZ_W) pulKey, pData, ulLen );
+      if ( sRc == BTREE_IN_USE )
+      {
+        RetryCount--;
+        UtlWait( MAX_WAIT_TIME );
+      } /* endif */
+    } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+              (RetryCount > 0) ); /* enddo */
+  } /* endif */
+
+  if ( sRc )
+  {
+    #ifdef TEMPORARY_COMMENTED
+    ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
+    #endif
+  } /* endif */
+
+  return sRc;
+} /* end of function EQFNTMInsert */
+#endif
 
 //------------------------------------------------------------------------------
 // Internal function
