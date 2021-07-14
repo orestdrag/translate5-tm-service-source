@@ -348,6 +348,21 @@ typedef struct _BTREEIDA
 
 static BTREEHEADRECORD header; // Static buffer for database header record
 
+
+
+/**********************************************************************/
+/* typedef used for all vital information on our new approach...      */
+/* NOTE: this structure is limited to COLLATE_SIZE, which is 256      */
+/**********************************************************************/
+typedef struct _TMVITALINFO
+{
+  ULONG   ulStartKey;                  // key to start with
+  ULONG   ulNextKey;                   // currently active key
+} NTMVITALINFO, * PNTMVITALINFO;
+
+#define NTMNEXTKEY( pBT )  ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulNextKey
+#define NTMSTARTKEY( pBT ) ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulStartKey
+
 /**********************************************************************/
 /* 'Magic word' for record containing locked terms                    */
 /**********************************************************************/
@@ -355,6 +370,623 @@ static CHAR szLOCKEDTERMSKEY[] = "0x010x020x03LOCKEDTERMS0x010x020x030x040x050x0
 static CHAR_W szLOCKEDTERMSKEYW[] = L"0x010x020x03LOCKEDTERMS0x010x020x030x040x050x060x070x080x09";
 static CHAR szLockRec[MAX_LOCKREC_SIZE]; // buffer for locked terms
 
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictCreateLocal   Create local Dictionary
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictCreateLocal( PSZ, PSZ, SHORT, PCHAR, USHORT,
+//                                         PCHAR, PCHAR, PCHAR, PBTREE);
+//------------------------------------------------------------------------------
+// Description:       Establishes the basic parameters for searching a
+//                    user dictionary.
+//                    These parameters are stored in the first record of the
+//                    index file so that subsequent accesses
+//                    know what the index is like.
+//
+//                    If no server name is given (NULL pointer or EOS) than
+//                    it is tried to open a local dictionary.
+//                    If no collating sequence is given (NULL pointer) the
+//                    default collating sequence is assumed
+//------------------------------------------------------------------------------
+// Parameters:        PSZ              name of the index file
+//                    PSZ              name of the server
+//                    SHORT            number of buffers used
+//                    PCHAR            pointer to user data
+//                    USHORT           length of user data
+//                    PCHAR            pointer to term encoding sequence
+//                    PCHAR            pointer to collating sequence
+//                    PCHAR            pointer to case map file
+//                    PBTREE *         pointer to btree structure
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_NO_ROOM     memory shortage
+//                    BTREE_USERDATA    user data too long
+//                    BTREE_OPEN_ERROR  dictionary already exists
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//------------------------------------------------------------------------------
+// Function flow:     allocate space for BTREE
+//                    if not possible
+//                      set Rc = BTREE_NO_ROOM
+//                    else
+//                      open the index file which holds the BTREE
+//                      if ok
+//                        set initial structure heading
+//                        allocate buffer space (for NUMBER_OF_BUFFERS many)
+//                        if not possible
+//                          set Rc = BTREE_NO_ROOM
+//                        if not Rc
+//                          call QDAMAllocTempAreas
+//                        endif
+//                        if not Rc
+//                          write header to file
+//                          if ok
+//                            write 2nd part of first record
+//                          endif
+//                          if ok
+//                            write out an empty root node
+//                          endif
+//                        endif
+//                      else
+//                        set Rc = BTREE_OPEN_ERROR
+//                      endif
+//                      if not Rc
+//                        return pointer to BTree
+//                      else
+//                        destroy BTree
+//                      endif
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictCreateLocal
+(
+   PSZ    pName,                       // name of file
+   SHORT  sNumberOfKey,                // number of key buffers
+   PCHAR  pUserData,                   // user data
+   USHORT usLen,                       // length of user data
+   PCHAR  pTermTable,                  // term encoding sequence
+   PCHAR  pCollating,                  // collating sequence
+   PCHAR  pCaseMap,                    // case map string
+   PBTREE * ppBTIda,                   // pointer to btree structure
+   PNTMVITALINFO pNTMVitalInfo         // translation memory
+)
+{
+  PBTREE  pBTIda = *ppBTIda;           // init return value
+  SHORT i;
+  SHORT sRc = 0;                       // return code
+  USHORT  usAction;                    // used in open of file
+  PBTREEGLOB pBT;                      // set work pointer to passed pointer
+  BOOL   fTransMem = (pNTMVitalInfo != NULL);   // translation memory
+
+  sNumberOfKey;                        // get rid of compiler warnings
+    #ifdef TEMPORARY_COMMENTED
+  /********************************************************************/
+  /* allocate global area first ...                                   */
+  /********************************************************************/
+  if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
+  {
+     sRc = BTREE_NO_ROOM;
+  }
+  else
+  {
+    pBTIda->pBTree = pBT;          // anchor pointer
+
+    // Try to create the index file
+    sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
+                   OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
+  } /* endif */
+
+  if ( !sRc )
+  {
+    // remember file name
+    strcpy( pBTIda->szFileName, pName );
+
+    // set initial structure heading
+    UtlTime( &(pBT->lTime) );                                     // set open time
+    pBTIda->sCurrentIndex = 0;
+    pBT->usFirstNode=pBT->usFirstLeaf = 1;
+    pBTIda->usCurrentRecord = 0;
+    pBT->compare = QDAMKeyCompare;
+    pBT->usNextFreeRecord = 1;
+    pBT->usFreeKeyBuffer = 0;
+    pBT->usFreeDataBuffer = 0;
+    pBT->usFirstDataBuffer = 0;  // first data buffer
+    pBT->fOpen  = TRUE;                          // open flag set
+    strcpy(pBT->chFileName, pName);              // copy file name into struct
+    pBT->fTransMem = fTransMem;
+    pBT->fpDummy = NULLHANDLE;
+    if ( pBT->fTransMem )
+    {
+      pBT->bVersion = BTREE_V2;
+      pBT->bRecSizeVersion = BTREE_V3;
+      pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
+    }
+    else
+    {
+      pBT->bVersion = BTREE_V2;
+      pBT->bRecSizeVersion = BTREE_V2;
+      pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
+    } /* endif */
+
+    /******************************************************************/
+    /* do settings depending if we are dealing with a dict or a tm..  */
+    /******************************************************************/
+    if ( !fTransMem )
+    {
+      pBT->usVersion = BTREE_VERSION3;
+      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_V3);
+      // use passed compression table if available else use default one
+      if ( pTermTable )
+      {
+         memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
+         QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // initialise for compression
+         pBT->fTerse = TRUE;
+      }
+      else
+      {
+         pBT->fTerse = FALSE;
+      } /* endif */
+      /******************************************************************/
+      /* support user defined collating sequence and case mapping       */
+      /******************************************************************/
+      if ( pCollating )
+      {
+         memcpy( pBT->chCollate, pCollating, COLLATE_SIZE );
+      }
+      else
+      {
+        memcpy( pBT->chCollate, chDefCollate, COLLATE_SIZE );
+      } /* endif */
+
+      if ( pCaseMap )
+      {
+         memcpy( pBT->chCaseMap, pCaseMap, COLLATE_SIZE );
+      }
+      else
+      {
+        /****************************************************************/
+        /* fill in the characters and use the UtlLower function ...     */
+        /****************************************************************/
+        PBYTE  pTable;
+        UCHAR  chTemp;
+
+        pTable = pBT->chCaseMap;
+        for ( i=0;i < COLLATE_SIZE; i++ )
+        {
+           *pTable++ = (CHAR) i;
+        } /* endfor */
+        chTemp = pBT->chCaseMap[ COLLATE_SIZE - 1];
+        pBT->chCaseMap[ COLLATE_SIZE - 1] = EOS;
+        pTable = pBT->chCaseMap;
+        pTable++;
+        UtlLower( (PSZ)pTable );
+        pBT->chCaseMap[ COLLATE_SIZE - 1] = chTemp;
+      } /* endif */
+    }
+    else
+    {
+      pBT->usVersion = NTM_VERSION2;
+      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
+      if ( pTermTable )
+      {
+         memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
+         QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // initialise for compression
+         pBT->fTerse = TRUE;
+      }
+      else
+      {
+         pBT->fTerse = FALSE;
+      } /* endif */
+      /******************************************************************/
+      /* use the free collating sequence buffer to store our vital info */
+      /* Its taken care, that the structure will not jeopardize the     */
+      /* header...                                                      */
+      /******************************************************************/
+      memcpy( pBT->chCollate, pNTMVitalInfo, sizeof(NTMVITALINFO));
+      /******************************************************************/
+      /* new key compare routine ....                                   */
+      /******************************************************************/
+      pBT->compare = NTMKeyCompare;
+    } /* endif */
+
+    /* Allocate space for LookupTable */
+    pBT->usNumberOfLookupEntries = 0;
+    if ( pBT->bRecSizeVersion == BTREE_V3 )
+    {
+      UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+
+      if ( pBT->LookupTable_V3 )
+      {
+        /* Allocate space for AccessCtrTable */
+        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+        if ( !pBT->AccessCtrTable )
+        {
+          UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
+          sRc = BTREE_NO_ROOM;
+        }
+        else
+        {
+          pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+        } /* endif */
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    }
+    else
+    {
+      UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V2), NOMSG );
+
+      if ( pBT->LookupTable_V2 )
+      {
+        /* Allocate space for AccessCtrTable */
+        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+        if ( !pBT->AccessCtrTable )
+        {
+          UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, 0L, NOMSG );
+          sRc = BTREE_NO_ROOM;
+        }
+        else
+        {
+          pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+        } /* endif */
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    } /* endif */
+
+    pBT->usNumberOfAllocatedBuffers = 0;
+
+    if ( !sRc )
+    {
+      sRc =  QDAMAllocTempAreas( pBTIda );
+    } /* endif */
+
+
+    if (! sRc )
+    {
+      /****************************************************************/
+      /* in order to initialize the area of the first record we       */
+      /* write an empty record buffer to the file before writing the  */
+      /* header                                                       */
+      /****************************************************************/
+      if ( pBT->bRecSizeVersion == BTREE_V3 )
+      {
+        USHORT usBytesWritten;
+        PBTREEBUFFER_V3 pbuffer;
+        UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
+        if ( ! pbuffer )
+        {
+          sRc = BTREE_NO_ROOM;
+        } /* endif */
+        else
+        {
+          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+
+          UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
+
+          sRc = QDAMWriteHeader( pBTIda );
+        } /* endif */
+      }
+      else
+      {
+        USHORT usBytesWritten;
+        PBTREEBUFFER_V2 pbuffer;
+        UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V2 , NOMSG );
+        if ( ! pbuffer )
+        {
+          sRc = BTREE_NO_ROOM;
+        } /* endif */
+        else
+        {
+          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V2, &usBytesWritten, FALSE );
+
+          UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
+
+          sRc = QDAMWriteHeader( pBTIda );
+        } /* endif */
+      } /* endif */
+
+      if (! sRc )
+      {
+        sRc = QDAMDictUpdSignLocal(pBTIda, pUserData, usLen );
+      } /* endif */
+
+      if ( !sRc )
+      {
+        /*******************************************************************/
+        /* Write out an empty root node                                    */
+        /*******************************************************************/
+        if ( pBT->bRecSizeVersion == BTREE_V3 )
+        {
+          PBTREEBUFFER_V3 pRecord;
+          sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
+          if ( !sRc )
+          {
+            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
+            sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
+          } /* endif */
+          if ( !sRc )
+          {
+            sRc = QDAMAllocKeyRecords( pBTIda, 1 );
+            if (! sRc )
+            {
+                pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
+            } /* endif */
+          } /* endif */
+        }
+        else
+        {
+          PBTREEBUFFER_V2 pRecord;
+          sRc = QDAMReadRecord_V2(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
+          if ( !sRc )
+          {
+            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
+            sRc = QDAMWriteRecord_V2(pBTIda,pRecord);
+          } /* endif */
+          if ( !sRc )
+          {
+            sRc = QDAMAllocKeyRecords( pBTIda, 1 );
+            if (! sRc )
+            {
+                pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
+            } /* endif */
+          } /* endif */
+        } /* endif */
+      } /* endif */
+    } /* endif */
+  }
+  else
+  {
+    switch ( sRc )
+    {
+      case  ERROR_INVALID_DRIVE:
+        sRc = BTREE_INVALID_DRIVE;
+        break;
+      case  ERROR_OPEN_FAILED :
+        sRc = BTREE_OPEN_FAILED;
+        break;
+      case  ERROR_NETWORK_ACCESS_DENIED:
+        sRc = BTREE_NETWORK_ACCESS_DENIED;
+        break;
+      default :
+        sRc = BTREE_OPEN_ERROR;
+        break;
+    } /* endswitch */
+  } /* endif */
+
+  if ( !sRc )
+  {
+     *ppBTIda = pBTIda;                          // return pointer to BTree
+     /****************************************************************/
+     /* add this dictionary to our list ...                          */
+     /****************************************************************/
+     sRc = QDAMAddDict( pName, pBTIda );
+  }
+  else
+  {
+    // leave the return code from create
+    // file will not be destroyed if create failed, since then
+    // filename is not set
+    QDAMDestroy( pBTIda );
+  } /* endif */
+
+  if ( sRc )
+  {
+    #ifdef TEMPORARY_COMMENTED
+    ERREVENT2( QDAMDICTCREATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    #endif
+  } /* endif */
+
+
+    #endif
+  return( sRc );
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictUpdSignLocal Write User Data
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictUpdSignLocal( PBTREE, PCHAR, USHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Writes the second part of the first record (user data)
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  pointer to user data
+//                    USHORT                 length of user data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_INVALID     pointer invalid
+//                    BTREE_USERDATA    user data too long
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//------------------------------------------------------------------------------
+// Function flow:     if tree is corrupted
+//                      set sRC = BTREE_CORRUPTED
+//                    else
+//                      give 1K at beginning as space (UtlChgFilePtr)
+//                    endif
+//                    if ok then
+//                      check if length of user data is correct
+//                      if ok then
+//                        write length of UserData to disk
+//                        check if disk is full
+//                        if ok
+//                          write pUserData to the disk
+//                          check if disk is full
+//                        endif
+//                      endif
+//                      if ok
+//                        fill rest up with zeros
+//                        check if disk is full
+//                      endif
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictUpdSignLocal
+(
+   PBTREE pBTIda,                      // pointer to btree structure
+   PCHAR  pUserData,                   // pointer to user data
+   ULONG  ulLen                        // length of user data
+)
+{
+  SHORT  sRc=0;                        // return code
+  ULONG   ulDataLen;                   // number of bytes to be written
+  USHORT  usBytesWritten;              // bytes written to disk
+  PCHAR   pchBuffer;                   // pointer to buffer
+  LONG    lFilePos;                    // file position to position at
+  ULONG   ulNewOffset;                 // new offset
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  if ( pBT->fCorrupted )
+  {
+     sRc = BTREE_CORRUPTED;
+  } /* endif */
+  if ( !sRc && !pBT->fOpen )
+  {
+    sRc = BTREE_READONLY;
+  }
+  else
+  {
+     // let 2K at beginning as space
+     lFilePos = (LONG) USERDATA_START;
+     sRc = UtlChgFilePtr( pBT->fp, lFilePos, FILE_BEGIN,
+                          &ulNewOffset, FALSE);
+  } /* endif */
+
+  if ( ! sRc )
+  {
+    if ( pBT->bRecSizeVersion == BTREE_V3 )
+    {
+      ulDataLen = ulLen < BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT)? ulLen : BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT);
+    }
+    else
+    {
+      ulDataLen =  ulLen < BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT)? ulLen : BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT);
+    } /* endif */
+    if ( ulDataLen < ulLen )
+    {
+       sRc = BTREE_USERDATA;
+    }
+    else
+    {
+       if ( !pUserData  )
+       {
+         pUserData = "";
+         ulDataLen = 0;
+       } /* endif */
+
+       /*************************************************************/
+       /*  write length of userdata                                 */
+       /*************************************************************/
+       {
+         USHORT usDataLen = (USHORT)ulDataLen;
+         sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
+         ulDataLen = usDataLen;
+       }
+
+       // check if disk is full
+       if ( ! sRc )
+       {
+          if (  usBytesWritten != sizeof(USHORT) )
+          {
+             sRc = BTREE_DISK_FULL;
+          } /* endif */
+       }
+       else
+       {
+          sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+       } /* endif */
+       if ( ! sRc)
+       {
+         /***********************************************************/
+         /* write user data itselft                                 */
+         /***********************************************************/
+          sRc = UtlWrite( pBT->fp, pUserData, (USHORT)ulDataLen,
+                          &usBytesWritten, FALSE );
+          // check if disk is full
+          if ( ! sRc )
+          {
+             if (  usBytesWritten != ulDataLen )
+             {
+                sRc = BTREE_DISK_FULL;
+             } /* endif */
+          }
+          else
+          {
+             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+          } /* endif */
+       } /* endif */
+    } /* endif */
+    if ( ! sRc )
+    {
+       // fill rest up with zeros
+       if ( pBT->bRecSizeVersion == BTREE_V3 )
+       {
+         ulDataLen = BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT) - ulDataLen;
+       }
+       else
+       {
+         ulDataLen = BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT) - ulDataLen;
+       } /* endif */
+       UtlAlloc( (PVOID *)&pchBuffer, 0L, (LONG) ulDataLen, NOMSG );
+       if ( pchBuffer )
+       {
+          sRc = UtlWrite( pBT->fp, pchBuffer, (USHORT)ulDataLen, &usBytesWritten, FALSE );
+          // check if disk is full
+          if ( ! sRc )
+          {
+             if ( usBytesWritten != ulDataLen )
+             {
+                sRc = BTREE_DISK_FULL;
+             } /* endif */
+          }
+          else
+          {
+             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+          } /* endif */
+          // free the buffer
+          UtlAlloc( (PVOID *)&pchBuffer, 0L, 0L, NOMSG );
+       }
+       else
+       {
+          sRc = BTREE_NO_ROOM;
+       } /* endif */
+    } /* endif */
+  } /* endif */
+
+   if ( sRc )
+   {
+    #ifdef TEMPORARY_COMMENTED
+     ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     #endif
+   } /* endif */
+
+  return sRc;
+}
 
 
 //------------------------------------------------------------------------------
@@ -489,7 +1121,7 @@ SHORT QDAMWriteHeader
     ERREVENT2( QDAMWRITEHEADER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
     #endif
   } /* endif */
-  
+
   #ifdef TEMPORARY_COMMENTED
   DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
   #endif

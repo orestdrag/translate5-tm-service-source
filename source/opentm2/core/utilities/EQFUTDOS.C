@@ -2943,7 +2943,7 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
 }
-
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2974,6 +2974,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
+    LogMessage(WARNING,"TO_BE_REPLACED_WITH_LINUX_CODE in UtlBufResetHwnd");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
@@ -2993,9 +2994,6 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    return( usRetCode );
 }
 
-
-
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

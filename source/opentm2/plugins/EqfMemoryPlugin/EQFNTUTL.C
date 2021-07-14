@@ -1553,7 +1553,7 @@ USHORT NTMCheckForUpdates
  return( usRc );
 } /* end of function NTMCheckForUpdates */
 
-
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1627,7 +1627,7 @@ USHORT NTMCreateLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMCreateLongNameTable */
-#endif 
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

@@ -239,9 +239,8 @@ USHORT TmtXCreate
 
   if ( fOK )
   {
-    #ifdef TEMPORARY_COMMENTED
     usRc = NTMCreateLongNameTable( pTmClb );
-    #endif
+    
     fOK = (usRc == NO_ERROR );
   } /* endif */
   if ( !fOK )
@@ -343,12 +342,12 @@ USHORT TmtXCreate
         pszName = UtlGetFnameFromPath( pTmCreateIn->stTmCreate.szIndexName );
         //fill signature record structure
         strcpy( pTmClb->stTmSign.szName, pszName );
-#ifdef TEMPORARY_COMMENTED
+
         usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
                              START_KEY, &pTmClb->pstInBtree );
-                             #endif
+                             
       } /* endif */
     } /* endif */
 
