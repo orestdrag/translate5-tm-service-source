@@ -956,7 +956,6 @@ UtlLowUpInit()
   return;
 } /* end of function UtlLowUpInit */
 
-#ifdef TEMPORARY_COMMENTED
 
 //------------------------------------------------------------------------------
 // Function name:     UtlLower                                                  
@@ -1003,6 +1002,7 @@ UtlLowerW
 } /* end of function UtlLower */
 
 
+#ifdef TEMPORARY_COMMENTED
 BYTE
 UtlToLower
 (
