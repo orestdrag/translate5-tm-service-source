@@ -188,7 +188,7 @@ UCHAR  ucbEncodeTbl[30]
              14, 100, 108, 117, 104,  98, 103,  71, 102, 109, 112,  10,
              02,  03,  04,  05 };
 
-#ifdef TEMPORARY_COMMENTED
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -262,6 +262,7 @@ EQFNTMCreate
   return( sRc );
 } /* end of function EQFNTMCreate */
 
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -708,10 +709,11 @@ EQFNTMInsert
   {
     ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
-
+#endif
   return sRc;
 } /* end of function EQFNTMInsert */
 
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+

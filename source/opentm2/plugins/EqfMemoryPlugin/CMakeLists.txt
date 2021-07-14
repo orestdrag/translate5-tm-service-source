@@ -14,6 +14,8 @@ set(EqfMemoryPlugin_Source_Files
    # EQFNTEXT.C
    # EQFNTPUT.C
    EQFNTUTL.C
+   EQFNTMDB.C
+   
 )
 
 include(GNUInstallDirs)

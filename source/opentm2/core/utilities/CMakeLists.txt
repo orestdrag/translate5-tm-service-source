@@ -32,6 +32,7 @@ set(Util_Source_Files
         UtlRegistry.C
 #EQFUTCLB.C
         #unzip.cpp
+        EQFDICT.C
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")

@@ -267,11 +267,11 @@ USHORT TmtXCreate
 
     //call create function for data file
     pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
-#ifdef TEMPORARY_COMMENTED
+
     usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szDataName,
                          (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
                          FIRST_KEY, &pTmClb->pstTmBtree );
-#endif
+
 
     if ( usRc == NO_ERROR )
     {
