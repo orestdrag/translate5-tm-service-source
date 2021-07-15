@@ -135,6 +135,8 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
         DWORD dwMoveMethod               
         );
 
+    void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext);
+
 }
 
 

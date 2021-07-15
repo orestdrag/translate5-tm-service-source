@@ -40,6 +40,7 @@
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
+#include "core/utilities/FilesystemWrapper.h"
 
 #ifdef _DEBUG
   //#define SESSIONLOG
@@ -1810,24 +1811,21 @@ NTMFillCreateInStruct( HTM             hModel,
       /************************************************************/
       /* TM is a shared one, use "shared" index name              */
       /************************************************************/
-      Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-      strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_SHARED_MEMINDEX );
+      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
     }
     else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
     {
       /************************************************************/
       /* TM is no temporaray TM, use "normal" index name          */
       /************************************************************/
-      Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-      strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_TMINDEX );
+      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TMINDEX);
     }
     else
     {
       /************************************************************/
       /* TM is a temporary TM, use temporary index name           */
       /************************************************************/
-      Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-      strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_TEMP_TMINDEX );
+      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TEMP_TMINDEX);
     } /* endif */
 
     strcpy( pstCreateIn->stTmCreate.szServer,         pszServer       );

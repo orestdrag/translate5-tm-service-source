@@ -177,4 +177,15 @@ int largeIntToInt(LARGE_INTEGER li) {
             }
             return res >=0;
         }
+
+
+        void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext){
+            std::string str(src);
+            int pos = str.rfind('.');
+            if(pos>0)
+                str = str.substr(0, pos);
+            str+= new_ext;
+
+            strcpy(dest, str.c_str());
+        }
 //}
