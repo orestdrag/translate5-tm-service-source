@@ -195,6 +195,13 @@ typedef struct _BTREEHEADRECORD
 #endif
 
 
+typedef enum _RECTYPE
+{
+  DATAREC,                 // record contains data
+  KEYREC,                  // record contains keys
+  ROOTREC                  // record contains root key data
+} RECTYPE;
+
 /**********************************************************************/
 /* List of event locations (only use macro EVENTDEF for entries in        */
 /* this list)                                                         */
@@ -312,6 +319,16 @@ EVENTDEF( ASDLISTINDEX_LOC,         110 )
 EVENTDEF( NTMGETIDFROMNAME_LOC,     111 )
 EVENTDEF( TWBEXCEPTION_LOC,         112 )
 EVENTLISTEND( TEVENTLOC, DUMMY_LOC )
+
+
+
+/**********************************************************************/
+/* defines for the tersing to be used....                             */
+/**********************************************************************/
+#define BTREE_TERSE_HUFFMAN  1
+#define BTREE_TERSE_LZSSHMAN 2
+#define  QDAM_TERSE_FLAG   0x8000
+#define  QDAM_TERSE_FLAGL   0x80000000L
 
 
 /**********************************************************************/
@@ -639,6 +656,18 @@ typedef enum _DICTCMD
   QDAMDICTCLOSEORGANIZE,      // end the organize
   QDAMDICTUPDTIME             // get update status
 } DICTCMD;
+
+
+
+  #define STARTOFDATA( pBT, pData ) \
+    ((pBT->usVersion >= NTM_VERSION2) ? (PBYTE)pData + sizeof(ULONG) : (PBYTE)pData + sizeof(USHORT) )
+
+  #define SETDATALENGTH( pBT, pData, ulLen ) \
+    { if (pBT->usVersion >= NTM_VERSION2) \
+        *((PULONG)(pData)) = ulLen; \
+      else \
+        *((PUSHORT)(pData)) = (USHORT)ulLen; }
+
 
 /**********************************************************************/
 /*  structure for Client/Server access                                */
@@ -1925,8 +1954,6 @@ SHORT QDAMWriteRecord_V3
 {
    SHORT  sRc = 0;                               // return code
 
-   LogMessage(FATAL, "called commented out function QDAMWriteRecord_V3");
-  #ifdef TEMPORARY_COMMENTED
    PBTREEGLOB  pBT = pBTIda->pBTree;
 
    DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
@@ -1969,9 +1996,7 @@ SHORT QDAMWriteRecord_V3
      ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
    DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
-   
-   #endif
-   
+      
    return sRc;
 }
 
@@ -3588,6 +3613,233 @@ SHORT QDAMFindRecord_V3
 }
 
 
+
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     QDAMTerseData   Terse Data                               |
+//+----------------------------------------------------------------------------+
+//|Function call:     QDAMTerseData( PBTREE, PUCHAR, PUSHORT );                |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Description:       This function will run the passed string against the     |
+//|                   compression table.                                       |
+//|                   If the resulting string is shorter the compressed one is |
+//|                   used, otherwise the original is used.                    |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PBTREE                 pointer to btree structure        |
+//|                   PUCHAR                 pointer to data string            |
+//|                   PUSHORT                length of the string              |
+//|                   PUCHAR                 pointer to output data string     |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   VOID                                                     |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Side effects:      The most frequent 15 characters will be stored as 3 to 5 |
+//|                   bits. The rest is stored as 11 bits, i.e. '000' plus the |
+//|                   character.                                               |
+//+----------------------------------------------------------------------------+
+//|Function flow:      -- use the modified Huffman algorithm to terse data     |
+//|                    get length of passed string                             |
+//|                    set output pointer and length of output string          |
+//|                    while remaining length > 0                              |
+//|                      encode byte; increase encodelen appropriatly          |
+//|                      if byte filled up move it into data record;           |
+//|                      if byte to encode is not one of the majors then       |
+//|                        get next byte and put it into encode sequence       |
+//|                      endif                                                 |
+//|                    endwhile                                                |
+//|                    if still something left in encode table                 |
+//|                      put it into output string                             |
+//|                    endif                                                   |
+//|                    if output string shorter than input string then         |
+//|                      set return code to TRUE; store length                 |
+//|                    endif                                                   |
+//|                    return return code                                      |
+//+----------------------------------------------------------------------------+
+
+BOOL QDAMTerseData
+(
+   PBTREE  pBTIda,                  //
+   PUCHAR  pData,                   // pointer to data
+   PULONG  pulLen,                  // length of the string
+   PUCHAR  pTempRecord              // area for getting data
+)
+{
+   ULONG    ulLen ;                    // length of string
+   BOOL     fShorter = FALSE;          // new string is not shorter
+   USHORT   usCurByte = 0;             // currently processed byte
+   PUCHAR   pTempData;                 // pointer to temp data area
+   PUCHAR   pEndData;                  // pointer to end data area
+   USHORT   usI;                       // index
+   USHORT   usEncodeLen = 0;           // currently encoded bits
+   USHORT   usTerseLen;                // length of tersed byte
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+#if defined(MEASURE)
+  ulBeg = pGlobInfoSeg->msecs;
+#endif
+   // get length of passed string
+   ulLen = *pulLen;
+
+
+   if ( pTempRecord )
+   {
+      pTempData = STARTOFDATA( pBT, pTempRecord );
+
+      pEndData = pTempData + ulLen;             // position  Tersed > untersed
+      while ( ulLen > 0)
+      {
+         usI = *pData ++;
+         ulLen --;                               // point to next character
+
+         usTerseLen = (USHORT) pBT->bEncodeLen[usI];
+         usCurByte = (usCurByte << usTerseLen) + pBT->chEncodeVal[usI];
+
+         usEncodeLen = usEncodeLen + usTerseLen;
+
+         /*************************************************************/
+         /* byte filled up so move it into data record                */
+         /*************************************************************/
+         if ( usEncodeLen >= 8  )
+
+         {
+           usEncodeLen -= 8;
+           if ( pTempData < pEndData  )
+           {
+             *pTempData = (CHAR) (usCurByte >> usEncodeLen);
+             usCurByte -= (*pTempData << usEncodeLen );
+           }
+           else
+           {
+             ulLen = 0;       // loop end condition
+           } /* endif */
+           pTempData ++;
+         } /* endif */
+
+         /*************************************************************/
+         /* if it is not one of the majors put in the full character  */
+         /*************************************************************/
+         if ( !pBT->chEncodeVal[usI] )
+         {
+           usCurByte = (usCurByte << 8) + usI;
+           if ( pTempData < pEndData  )
+           {
+             *pTempData = (CHAR) (usCurByte >> usEncodeLen);
+             usCurByte -= (*pTempData << usEncodeLen);
+           }
+           else
+           {
+             ulLen = 0;       // loop end condition
+           } /* endif */
+           pTempData ++;
+         } /* endif */
+      } /* endwhile */
+
+      /****************************************************************/
+      /* save last chunk if some bits are left...                     */
+      /* move them left so they will fill up a full byte              */
+      /****************************************************************/
+      if ( usEncodeLen )
+      {
+        if ( pTempData < pEndData  )
+        {
+          usCurByte = ( usCurByte << ( 8 - usEncodeLen ) );
+          *pTempData++ = (CHAR) usCurByte;
+        } /* endif */
+      } /* endif */
+
+      /****************************************************************/
+      /* check if compression longer than org data                    */
+      /* return TRUE/FALSE accordingly                                */
+      /****************************************************************/
+      ulLen = pTempData - pTempRecord;
+      if ( ulLen < *pulLen )
+      {
+//        *(PUSHORT) pTempRecord = (USHORT)*pulLen;  // insert record length
+        SETDATALENGTH( pBT, pTempRecord, *pulLen );
+        *pulLen = ulLen;                           // set new length
+        fShorter = TRUE;
+      } /* endif */
+
+   } /* endif */
+#if defined(MEASURE)
+  ulTerseEnd += (pGlobInfoSeg->msecs -ulBeg );
+#endif
+   return ( fShorter );
+}
+
+
+SHORT QDAMNewRecord_V3
+(
+   PBTREE          pBTIda,
+   PBTREEBUFFER_V3  * ppRecord,
+   RECTYPE         recType          // data or key record
+)
+{
+  SHORT   sRc = 0;                         // return code
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  //
+  // Try and use a record within the file if there are any.  This saves
+  // on disk usage
+  //
+  *ppRecord = NULL;                       // in case of error
+  if ( recType == DATAREC )
+  {
+     if ( pBT->usFreeDataBuffer )
+     {
+       sRc = QDAMReadRecord_V3( pBTIda, pBT->usFreeDataBuffer, ppRecord, FALSE );
+       if ( ! sRc )
+       {
+         pBT->usFreeDataBuffer = NEXT( *ppRecord );
+       } /* endif */
+     }
+     else
+     {
+       if ( pBT->usNextFreeRecord == 0xFFFF ) // end reached ???
+       {
+         sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
+       }
+       else
+       {
+         pBT->usNextFreeRecord++;
+         sRc = QDAMReadRecord_V3( pBTIda, pBT->usNextFreeRecord, ppRecord, TRUE );
+       }
+     }
+  }
+  else
+  {
+     if ( !pBT->usFreeKeyBuffer)
+     {
+       sRc = QDAMAllocKeyRecords( pBTIda, 5 );
+     } /* endif */
+
+     if ( !sRc )
+     {
+       sRc = QDAMReadRecord_V3( pBTIda, pBT->usFreeKeyBuffer, ppRecord, FALSE  );
+       if ( ! sRc )
+       {
+         pBT->usFreeKeyBuffer = NEXT( *ppRecord );
+       } /* endif */
+     } /* endif */
+  } /* endif */
+
+  if ( *ppRecord )
+  {
+     NEXT(*ppRecord) = 0;                          // reset information
+     PREV(*ppRecord) = 0;                          // reset information
+  } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMNEWRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+  return ( sRc );
+}
+
 SHORT  QDAMAddToBuffer_V3
 (
    PBTREE  pBTIda,                     // pointer to btree struct
@@ -3598,8 +3850,6 @@ SHORT  QDAMAddToBuffer_V3
 {
    SHORT sRc = 0;                      // success indicator
 
-   LogMessage(FATAL, "called commented out function QDAMAddToBuffer_V3");
-  #ifdef TEMPORARY_COMMENTED
    USHORT  usFilled;                   // number of bytes filled in record
    USHORT  usMaxRec= 0;                // most filled record
    RECPARAM recStart;                  // return code where data are stored
@@ -3834,7 +4084,7 @@ SHORT  QDAMAddToBuffer_V3
              usLastPos = pRecord->contents.header.usLastFilled;
              {
                ULONG ulMax = (ULONG)(BTREE_REC_SIZE_V3 - pRecord->contents.header.usFilled );
-               ulFitLen = min( ulDataLen, ulMax );
+               ulFitLen =  ulDataLen < ulMax? ulDataLen : ulMax;
                ulFitLen -= (ULONG)(usLenFieldSize + sizeof(USHORT));
              }
              usLastPos = usLastPos - (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
@@ -3957,7 +4207,7 @@ SHORT  QDAMAddToBuffer_V3
    {
      ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
-#endif
+
    return sRc;
 }
 
