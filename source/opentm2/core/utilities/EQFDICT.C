@@ -113,6 +113,12 @@ SHORT QDAMCaseCompare
 #define NTM_VERSION3       3
 #define BTREE_HEADER_VALUE_TM3 "NT"
 
+
+
+#define IS_LEAF(x)          ((TYPE(x) & INNER_NODE) == 0)
+#define IS_ROOT(x)          ((TYPE(x) & ROOT_NODE) != 0)
+
+
  typedef struct _RECPARAM
   {
     USHORT  usNum;           // record number
@@ -465,6 +471,34 @@ typedef enum
 } EVENTTYPE;
 #endif
 
+
+
+#define MAX_LIST           20          // number of recently used records
+#define MIN_SIZE          128          // minimum free space requested in entry
+#define MAXWASTESIZE      512          // max size  to be wasted due to updates
+#define MAXDATASIZE    0x8000          // maximum data size allowed
+#define MAX_LOCKREC_SIZE 4000          // max size for locked terms record
+#define MAX_UPD_CTR        10          // max number of update counters
+#define HEADTERM_SIZE     256          // size of the head term
+#define COLLATE_SIZE      256          // size of the collating sequence
+#define ENTRYENCODE_LEN    15          // number of significant characters
+#define ENTRYDECODE_LEN    32          // length of decoding array
+#define USERDATA_START   2046          // start of user data
+#define INDEX_BUFFERS      20          // index buffers
+#define NUMBER_OF_BUFFERS  20          // 20 // number of buffers to be used
+#define MAX_NUM_DICTS      99          // max. number of dict concurrently open
+
+#define RESET_VALUE       -3
+
+#define RETRY_COUNT        5           // number of retries for BTREE_IN_USE condition
+
+// max time [ms] to wait for resources currently in use
+#define MAX_WAIT_TIME     100
+
+// max number of retries for resources currently in use
+#define MAX_RETRY_COUNT    30
+
+
 /**********************************************************************/
 /* Event macros                                                       */
 /**********************************************************************/
@@ -643,6 +677,18 @@ typedef struct _BTREEIDA
  } BTREE, * PBTREE, ** PPBTREE;
 
 
+typedef struct _QDAMDICT
+{
+   PBTREEGLOB   pBTree;                           // pointer to global struct
+   ULONG        ulNum;
+   USHORT       usNextHandle;
+   USHORT       usOpenCount;                      // number of accesses...
+   USHORT       usOpenRC;
+   CHAR         chDictName[ MAX_EQF_PATH ];
+   BOOL         fDictLock;                        // is dictionary locked
+   PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
+} QDAMDICT, *PQDAMDICT;
+
 static BTREEHEADRECORD header; // Static buffer for database header record
 
 
@@ -694,6 +740,10 @@ UCHAR chDefCollate[] = {
     79,  83,  79,  79,  79,  79, 230, 232, 232,  85,  85,  85,  89,  89, 238, 239,
    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255 };
 
+/**********************************************************************/
+/* global struct containing struct. for open dicts ...                */
+/**********************************************************************/
+QDAMDICT QDAMDict[MAX_NUM_DICTS];
 
 /**********************************************************************/
 /* Table for punctuation detection                                    */
@@ -772,7 +822,12 @@ static STENCODEBITS stEncodeBits[16] = { {3,0},     // 000
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
+#define PREV(x)             ((x)->contents.header.usPrevious)
+#define NEXT(x)             ((x)->contents.header.usNext)
+#define PARENT(x)           ((x)->contents.header.usParent)
+#define RECORDNUM(x)        ((x)->usRecordNumber)
+#define OCCUPIED(x)         ((x)->contents.header.usOccupied)
+#define FILLEDUP(x)         ((x)->contents.header.usFilled)
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -1240,8 +1295,7 @@ SHORT QDAMWRecordToDisk_V3
 )
 {
   SHORT sRc = 0;                          // return code
-  LogMessage(FATAL, "called commented out function QDAMWRecordToDisk_V3");
-  #ifdef TEMPORARY_COMMENTED
+  
   LONG  lOffset;                          // offset in file
   ULONG ulNewOffset;                      // new file pointer position
   USHORT usBytesWritten;                  // number of bytes written
@@ -1293,7 +1347,6 @@ SHORT QDAMWRecordToDisk_V3
   {
     ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
   } /* endif */
-  #endif
   return sRc;
 }
 
@@ -1767,8 +1820,6 @@ QDAMAddDict
 {
   USHORT usI = 1;
   SHORT  sRc = 0;
-  LogMessage(FATAL, "called commented out function QDAMAddDict");
-  #ifdef TEMPORARY_COMMENTED
   PQDAMDICT  pQDict;
 
   while ( QDAMDict[usI].usOpenCount )
@@ -1791,7 +1842,6 @@ QDAMAddDict
   {
     sRc = BTREE_MAX_DICTS;
   } /* endif */
-  #endif
 
   return sRc;
 } /* end of function QDAMAddDict */
@@ -2594,8 +2644,7 @@ SHORT QDAMAllocKeyRecords
    SHORT  sRc = 0;
    PBTREEHEADER  pHeader;
    PBTREEGLOB    pBT = pBTIda->pBTree;
-LogMessage(FATAL, "called commented out function QDAMAllocKeyRecords");
-  #ifdef TEMPORARY_COMMENTED
+
    if ( pBT->bRecSizeVersion == BTREE_V3 )
    {
       PBTREEBUFFER_V3  pRecord;
@@ -2654,7 +2703,6 @@ LogMessage(FATAL, "called commented out function QDAMAllocKeyRecords");
           } /* endif */
       } /* endwhile */
    } /* endif */
-    #endif
    return sRc;
 }
 
@@ -2698,7 +2746,6 @@ SHORT QDAMWriteRecord_V2
    SHORT  sRc = 0;                               // return code
    PBTREEGLOB  pBT = pBTIda->pBTree;
   LogMessage(FATAL, "called commented out function QDAMWriteRecord_V2");
-  #ifdef TEMPORARY_COMMENTED
    DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
 
    INC_WRITE_COUNT;
@@ -2739,7 +2786,6 @@ SHORT QDAMWriteRecord_V2
      ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
    DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
-   #endif
    
    return sRc;
 }
@@ -3197,8 +3243,6 @@ QDAMDictLockStatus
   /******************************************************************/
   /* check the subject entry is not locked somewhere else...        */
   /******************************************************************/
-  LogMessage(FATAL, "called commented out function QDAMDictLockStatus");
-  #ifdef TEMPORARY_COMMENTED
 
   PPBTREE  ppBTemp;
   PQDAMDICT pQDict;
@@ -3228,8 +3272,6 @@ QDAMDictLockStatus
   } /* endwhile */
 
   return( fLock );
-  #endif 
-  return false;
 } /* end of function QDAMDictLockStatus */
 
 
@@ -3374,9 +3416,6 @@ QDAMDictUpdStatus
   PBTREE  pBTIda
 )
 {
-
-  LogMessage(FATAL, "called commented out function QDAMDictUpdStatus");
-  #ifdef TEMPORARY_COMMENTED
   PPBTREE  ppBTemp;
   PQDAMDICT pQDict;
   /********************************************************************/
@@ -3391,8 +3430,89 @@ QDAMDictUpdStatus
     (*ppBTemp)->usCurrentRecord = 0;
     ppBTemp++;
   } /* endwhile */
-  #endif 
 } /* end of function QDAMDictUpdStatus */
+
+PSZ_W QDAMGetszKey_V3
+(
+   PBTREEBUFFER_V3  pRecord,              // active record
+   USHORT  i,                          // get data term
+   USHORT  usVersion                   // version of database
+)
+{
+   PBYTE    pData, pEndOfRec;
+   PUSHORT  pusOffset;
+   usVersion;
+
+   // get max pointer value
+
+   pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3;
+
+   // use record number of passed entry , read in record and pass
+   // back pointer
+   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   pusOffset += i;                     // point to key
+   if ( (PBYTE)pusOffset > pEndOfRec )
+   {
+     // offset pointer is out of range
+     pData = NULL;
+     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+   }
+   else
+   {
+     pData = pRecord->contents.uchData + *pusOffset;
+     if ( usVersion >= NTM_VERSION2 )
+     {
+       pData += sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
+     }
+     else
+     {
+       pData += sizeof(USHORT ) + sizeof(RECPARAMOLD); // get pointer to data
+     } /* endif */
+     if ( pData > pEndOfRec )
+     {
+       // data pointer is out of range
+       pData = NULL;
+       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+     } /* endif */
+   } /* endif */
+
+   return ( (PSZ_W)pData );
+}
+
+RECPARAM  QDAMGetrecData_V3
+(
+   PBTREEBUFFER_V3  pRecord,
+   SHORT         sMid,                           // key number
+   USHORT        usVersion                       // version of database
+)
+{
+   PCHAR   pData = NULL;
+   RECPARAM      recData;               // data description structure
+   PUSHORT  pusOffset;
+
+   // use record number of passed entry , read in record and pass
+   // back pointer
+   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   pusOffset += sMid;                            // point to key
+   pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+   pData += sizeof(USHORT );                    // get pointer to datarec
+
+   if ( usVersion >= NTM_VERSION2 )
+   {
+     memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM ) );
+   }
+   else
+   {
+     RECPARAMOLD recDataOld;
+
+     memcpy( &recDataOld, (PRECPARAMOLD) pData, sizeof(RECPARAMOLD) );
+     recData.usOffset = recDataOld.usOffset;
+     recData.usNum    = recDataOld.usNum;
+     recData.ulLen    = (ULONG)recDataOld.sLen;
+   } /* endif */
+   return ( recData );
+}
+
 
 
 SHORT QDAMFindRecord_V3
@@ -3411,8 +3531,6 @@ SHORT QDAMFindRecord_V3
   SHORT         sRc;                               // return code
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
-  LogMessage(FATAL, "called commented out function QDAMFindRecord_V3");
-  #ifdef TEMPORARY_COMMENTED
   memset(&recData, 0, sizeof(recData));
   sRc = QDAMReadRecord_V3( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );
   while ( !sRc && !IS_LEAF( *ppRecord ))
@@ -3466,7 +3584,6 @@ SHORT QDAMFindRecord_V3
       sRc = QDAMReadRecord_V3( pBTIda, recData.usNum, ppRecord, FALSE  );
     } /* endif */
   } /* endwhile */
-  #endif 
   return( sRc );
 }
 
