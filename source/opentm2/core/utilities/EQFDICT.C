@@ -12,6 +12,7 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include <EQF.H>                  // General Translation Manager include file
 #include "core/utilities/LogWrapper.h"
+#include "win_types.h"
 
 //#include <EQFQDMAI.H>             // Private QDAM defines
 //#include <eqfcmpr.h>              // defines for compression/expand...
@@ -1251,13 +1252,19 @@ SHORT QDAMAllocTempAreas
 }
 
 
+#define ERROR_LOCK_VIOLATION        33
+#define ERROR_DRIVE_LOCKED          108 /* drive locked by another process */
+#define ERROR_OPEN_FAILED           110 /* open/created failed due to */
+                        /* explicit fail command */
+#define ERROR_VC_DISCONNECTED       240
+
+
 SHORT QDAMDictUpdSignLocal
 (
    PBTREE pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    ULONG  ulLen                        // length of user data
 );
-
 
 // Convert Dos... return codes to BTREE return codes
 SHORT QDAMDosRC2BtreeRC
@@ -1269,8 +1276,6 @@ SHORT QDAMDosRC2BtreeRC
 {
 
    SHORT sRc = 0;                           // converted return code
-  LogMessage(FATAL, "called commented out function QDAMDosRC2BtreeRC");
-  #ifdef TEMPORARY_COMMENTED
   switch ( sDosRC )
   {
      case  NO_ERROR:
@@ -1314,7 +1319,6 @@ SHORT QDAMDosRC2BtreeRC
       sRc = sDefaultRC;
       break;
   } /* endswitch */
-  #endif
 
   return( sRc );
 } /* end of function QDAMDosRC2BtreeRC  */
@@ -1416,9 +1420,6 @@ SHORT QDAMWRecordToDisk_V3
 {
   SHORT  sRc=0;
   
-  LogMessage(FATAL, "called commented out function QDAMGetUpdCounter");
-  #ifdef TEMPORARY_COMMENTED
-
   USHORT usNumBytes;                   // number of bytes written or read
   ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda->pBTree;
@@ -1459,7 +1460,6 @@ SHORT QDAMWRecordToDisk_V3
   {
     ERREVENT2( QDAMGETUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
   } /* endif */
-  #endif
   return sRc;
 }
 
@@ -1883,6 +1883,249 @@ QDAMAddDict
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
+// Function name:     QDAMDictCloseLocal  close the dictionary
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictCloseLocal( PPBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Close the file
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_CLOSE_ERROR error closing dictionary
+//------------------------------------------------------------------------------
+// Function flow:     if corrupted
+//                      set RC = BTREE_CORRUPTED
+//                    else
+//                      Flush all records
+//                    endif
+//                    if okay then
+//                      reset open flag in header and force a write to disk
+//                    endif
+//                    if okay then
+//                      close file and set RC to BTREE_CLOSE_ERROR in case of
+//                      problems
+//                    endif
+//                    if okay then
+//                      free space of buffers
+//                      free space of BTree
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictCloseLocal
+(
+   PBTREE pBTIda
+)
+{
+   SHORT sRc = 0;                            // error return
+   PBTREEGLOB  pBT = NULL;
+
+  LogMessage(FATAL, "called commented out function QDAMDictCloseLocal");
+  #ifdef TEMPORARY_COMMENTED
+   /*******************************************************************/
+   /* validate passed pointer ...                                     */
+   /*******************************************************************/
+   CHECKPBTREE( pBTIda, sRc );
+   if ( !sRc )
+   {
+     pBT = pBTIda->pBTree;
+   } /* endif */
+
+   /*******************************************************************/
+   /* decrement the counter and check if we have to physically close  */
+   /* the dictionary                                                  */
+   /*******************************************************************/
+   if ( !sRc && ! QDAMRemoveDict( pBTIda ) )
+   {
+      sRc = QDAMDictFlushLocal( pBTIda );
+
+     //  reset open flag in header and force a write to disk
+     // open flag will only be set if opened for r/w
+     if ( !sRc && pBT->fOpen && ! pBT->fCorrupted )
+     {
+        pBT->fOpen = FALSE;
+
+        // Only for non-shared databases:
+        // re-write header record
+        if ( !(pBT->usOpenFlags & ASD_SHARED) || !(pBT->usOpenFlags & ASD_LOCKED & ASD_GUARDED) )
+        {
+          if ( sRc == NO_ERROR ) sRc = QDAMWriteHeader( pBTIda );
+        } /* endif */
+     } /* endif */
+
+     if ( UtlClose(pBT->fp, FALSE) && !sRc )
+     {
+        sRc = BTREE_CLOSE_ERROR;
+     } /* endif */
+
+     if ( pBT->fpDummy )
+     {
+      UtlClose( pBT->fpDummy, FALSE );
+     } /* endif */
+
+     /*******************************************************************/
+     /* free the allocated buffers                                      */
+     /*******************************************************************/
+     if ( pBT  )
+     {
+       /* free allocated space for lookup-table and buffers */
+       if ( pBT->bRecSizeVersion == BTREE_V3)
+       {
+        if ( pBT->LookupTable_V3 )
+        {
+          USHORT i;
+          PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+
+          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+          {
+            if ( pLEntry->pBuffer )
+            {
+              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+            } /* endif */
+            pLEntry++;
+          } /* endfor */
+
+          UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
+          UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
+          pBT->usNumberOfLookupEntries = 0;
+          pBT->usNumberOfAllocatedBuffers = 0;
+        } /* endif */
+       }
+       else
+       {
+        if ( pBT->LookupTable_V2 )
+        {
+          USHORT i;
+          PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
+
+          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+          {
+            if ( pLEntry->pBuffer )
+            {
+              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+            } /* endif */
+            pLEntry++;
+          } /* endfor */
+
+          UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, 0L, NOMSG );
+          UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
+          pBT->usNumberOfLookupEntries = 0;
+          pBT->usNumberOfAllocatedBuffers = 0;
+        } /* endif */
+       } /* endif */
+
+       /*****************************************************************/
+       /* free index buffer list                                        */
+       /*****************************************************************/
+       if ( pBT->bRecSizeVersion == BTREE_V3)
+       {
+         PBTREEINDEX_V3 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
+         pIndexBuffer = pBT->pIndexBuffer_V3;
+         while ( pIndexBuffer  )
+         {
+           pTempIndexBuffer = pIndexBuffer->pNext;
+           UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
+           pIndexBuffer = pTempIndexBuffer;
+         } /* endwhile */
+       }
+       else
+       {
+         PBTREEINDEX_V2 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
+         pIndexBuffer = pBT->pIndexBuffer_V2;
+         while ( pIndexBuffer  )
+         {
+           pTempIndexBuffer = pIndexBuffer->pNext;
+           UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
+           pIndexBuffer = pTempIndexBuffer;
+         } /* endwhile */
+       } /* endif */
+
+       UtlAlloc( (PVOID *)&pBT->pTempKey, 0L, 0L, NOMSG );
+       UtlAlloc( (PVOID *)&pBT->pTempRecord, 0L, 0L, NOMSG );
+       UtlAlloc( (PVOID *)&pBTIda->pQDAMLanIn, 0L, 0L, NOMSG );  // free allocated memory
+       UtlAlloc( (PVOID *)&pBTIda->pQDAMLanOut,0L, 0L, NOMSG );     // free allocated memory
+
+       UtlAlloc( (PVOID *)&pBTIda->pBTree,0L, 0L, NOMSG );     // free allocated memory
+     } /* endif */
+     /********************************************************************/
+     /* unlock the dictionary                                            */
+     /* -- do not take care about return code...                         */
+     /********************************************************************/
+     QDAMDictLockDictLocal( pBTIda, FALSE );
+     #endif
+   } /* endif */
+
+
+
+//------------------------------------------------------------------------------
+// External function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictClose    close the dictionary
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictClose( PPBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Close the file
+//
+//------------------------------------------------------------------------------
+// Parameters:        PPBTREE                pointer to btree structure
+//
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_CLOSE_ERROR error closing dictionary
+//------------------------------------------------------------------------------
+// Function flow:     if BTree does not exist
+//                      set Rc = BTREE_INVALID
+//                    else
+//                      depending on type (fRemote or local) call the
+//                      appropriate routine
+//                      if okay so far then
+//                        free space of BTree
+//                      endif
+//                    endif
+//------------------------------------------------------------------------------
+SHORT QDAMDictClose
+(
+   PPBTREE ppBTIda
+)
+{
+   SHORT sRc = 0;                      // error return
+
+   if ( ! *ppBTIda )
+   {
+     sRc = BTREE_INVALID;
+   }
+   else
+   {
+      sRc = QDAMDictCloseLocal( *ppBTIda );
+      if ( !sRc )
+      {
+        UtlAlloc( (PVOID *)ppBTIda, 0L, 0L, NOMSG );
+      } /* endif */
+   } /* endif */
+
+   return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
 // Function name:     QDAMDestroy     Destroy dictionary
 //------------------------------------------------------------------------------
 // Function call:     QDAMDestroy( PBTREE );
@@ -1922,8 +2165,6 @@ SHORT QDAMDestroy
 {
    SHORT sRc = 0;                   // return code
 
-   LogMessage(FATAL, "called commented out function QDAMDestroy");
-  #ifdef TEMPORARY_COMMENTED
    CHAR  chName[ MAX_EQF_PATH ];    // file name
    PBTREEGLOB  pBT = pBTIda->pBTree;
 
@@ -1944,7 +2185,6 @@ SHORT QDAMDestroy
         UtlDelete( chName, 0L, FALSE);
      }
    }
-  #endif
    return ( sRc );
 }
 
@@ -2296,8 +2536,7 @@ SHORT QDAMWRecordToDisk_V2
 )
 {
   SHORT sRc = 0;                          // return code
-  LogMessage(FATAL, "called commented out function QDAMWRecordToDisk_V2");
-  #ifdef TEMPORARY_COMMENTED
+  
   LONG  lOffset;                          // offset in file
   ULONG ulNewOffset;                      // new file pointer position
   USHORT usBytesWritten;                  // number of bytes written
@@ -2349,7 +2588,6 @@ SHORT QDAMWRecordToDisk_V2
   {
     ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
   } /* endif */
-  #endif
 
   return sRc;
 }
@@ -3200,11 +3438,9 @@ SHORT QDAMDictCreateLocal
       case  ERROR_INVALID_DRIVE:
         sRc = BTREE_INVALID_DRIVE;
         break;
-      #ifdef TEMPORARY_COMMENTED
       case  ERROR_OPEN_FAILED :
         sRc = BTREE_OPEN_FAILED;
         break;
-        #endif
       case  ERROR_NETWORK_ACCESS_DENIED:
         sRc = BTREE_NETWORK_ACCESS_DENIED;
         break;
