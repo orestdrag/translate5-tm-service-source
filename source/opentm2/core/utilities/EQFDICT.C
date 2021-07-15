@@ -31,13 +31,6 @@
 #endif
 
 
-SHORT QDAMCaseCompare
-(
-    PVOID pvBT,                        // pointer to tree structure
-    PVOID pKey1,                       // pointer to first key
-    PVOID pKey2,                       // pointer to second key
-    BOOL  fIgnorePunctuation           // ignore punctuation flag
-);
 
 #define INC_READ_COUNT
 #define INC_CACHED_COUNT
@@ -329,6 +322,16 @@ EVENTLISTEND( TEVENTLOC, DUMMY_LOC )
 #define BTREE_TERSE_LZSSHMAN 2
 #define  QDAM_TERSE_FLAG   0x8000
 #define  QDAM_TERSE_FLAGL   0x80000000L
+
+
+
+typedef enum _SEARCHTYPE
+{
+  FEXACT,                  // exact match requested
+  FSUBSTR,                 // only substring match
+  FEQUIV,                  // equivalent match
+  FEXACT_EQUIV             // editor: exact match then equivalent
+} SEARCHTYPE;
 
 
 /**********************************************************************/
@@ -4212,6 +4215,674 @@ SHORT  QDAMAddToBuffer_V3
 }
 
 
+SHORT QDAMCaseCompare
+(
+    PVOID pvBT,                        // pointer to tree structure
+    PVOID pKey1,                       // pointer to first key
+    PVOID pKey2,                       // pointer to second key
+    BOOL  fIgnorePunctuation           // ignore punctuation flag
+)
+{
+  SHORT sDiff;
+  BYTE  c;
+  PBTREE pBTIda = (PBTREE)pvBT;        // pointer to tree structure
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+  PBYTE  pbKey1 = (PBYTE) pKey1;
+  PBYTE  pbKey2 = (PBYTE) pKey2;
+  PBYTE  pMap = pBT->chCaseMap;        // pointer to mapping table
+
+  while ( (c = *pbKey1) != 0 )
+  {
+    /******************************************************************/
+    /* ignore the following characters during matching: '/', '-', ' ' */
+    /******************************************************************/
+    if ( fIgnorePunctuation )
+    {
+       while ( (c = *pbKey2) == ' ' || fIsPunctuation[c] )
+       {
+         pbKey2++;
+       } /* endwhile */
+       while ( (c = *pbKey1) == ' ' || fIsPunctuation[c] )
+       {
+         pbKey1++;
+       } /* endwhile */
+    } /* endif */
+
+    sDiff = *(pMap+c) - *(pMap + *pbKey2);
+    if ( !sDiff && *pbKey1 && *pbKey2 )
+    {
+      pbKey1++;
+      pbKey2++;
+    }
+    else
+    {
+      return ( sDiff );
+    } /* endif */
+  } /* endwhile */
+  return ( *(pMap + c) - *(pMap + *pbKey2));
+
+}
+
+SHORT QDAMLocateKey_V3
+(
+   PBTREE pBTIda,                         // pointer to btree structure
+   PBTREEBUFFER_V3 pRecord,                  // record to be dealt with
+   PCHAR_W pKey,                          // key to be searched
+   PSHORT  psKeyPos,                      // located key
+   SEARCHTYPE  searchType,                // search type
+   PSHORT  psNearPos                      // near position
+)
+{
+  SHORT  sLow;                             // low value
+  SHORT  sHigh;                            // high value
+  SHORT  sResult;
+  SHORT  sMid = 0;                         //
+  SHORT  sRc = 0;                          // return value
+  PCHAR_W  pKey2;                            // pointer to key string
+  BOOL   fFound = FALSE;
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  *psKeyPos = -1;                         // key not found
+  if ( pRecord )
+  {
+    BTREELOCKRECORD( pRecord );
+    sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
+    sLow = 0;                                    // start here
+
+    while ( !fFound && sLow <= sHigh )
+    {
+       sMid = (sLow + sHigh)/2;
+       pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
+
+       if ( pKey2 )
+       {
+          sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+          if ( sResult < 0 )
+          {
+            sHigh = sMid - 1;                        // Go left
+          }
+          else if (sResult > 0)
+          {
+            sLow = sMid+1;                           // Go right
+          }
+          else
+          {
+             fFound = TRUE;
+             // if exact match is required we have to do a strcmp
+             // to ensure it and probably check the previous or the
+             // next one because our insertion is case insensitive
+
+             /*********************************************************/
+             /* checking will be done in any case to return the best  */
+             /* matching substring                                    */
+             /*********************************************************/
+             if ( pBT->fTransMem )
+             {
+               if (*((PULONG)pKey) == *((PULONG)pKey2))
+               {
+                  *psKeyPos = sMid;
+               }
+               else
+               {
+                  // try with previous
+                  if ( sMid > sLow )
+                  {
+                    pKey2 = QDAMGetszKey_V3( pRecord, (SHORT)(sMid-1), pBT->usVersion );
+                    if ( pKey2 == NULL )
+                    {
+                      sRc = BTREE_CORRUPTED;
+                    }
+                    else if ( *((PULONG)pKey) == *((PULONG)pKey2) )
+                    {
+                      *psKeyPos = sMid-1 ;
+                    } /* endif */
+                  } /* endif */
+                  //  still not found
+                  if ( !sRc && *psKeyPos == -1 && sMid < sHigh )
+                  {
+                    pKey2 = QDAMGetszKey_V3(  pRecord, (SHORT)(sMid+1), pBT->usVersion );
+                    if ( pKey2 == NULL )
+                    {
+                      sRc = BTREE_CORRUPTED;
+                    }
+                    else if ( *((PULONG)pKey) == *((PULONG)pKey2) )
+                    {
+                          *psKeyPos = sMid+1 ;
+                    } /* endif */
+                  } /* endif */
+               } /* endif */
+             }
+             else
+             {
+               /*******************************************************/
+               /* if dealing with exacts we have to do some more      */
+               /* explicit checking, else we have to find first pos.  */
+               /* substring match...                                  */
+               /*******************************************************/
+               enum KEYMATCH
+               {
+                 EXACT_KEY,            // keys are exactly the same
+                 CASEDIFF_KEY,         // case of keys is different
+                 PUNCTDIFF_KEY,        // punctuation of keys differs
+                 NOMATCH_KEY           // keys do not match at all
+               } BestKeyMatch = NOMATCH_KEY; // match level of best key so far
+               SHORT sBestKey = -1;    // best key found so far
+
+               /*****************************************************/
+               /* go back as long as the keys are the same ...      */
+               /*****************************************************/
+
+               while ( sMid > sLow )
+               {
+                 pKey2 = QDAMGetszKey_V3( pRecord, (SHORT)(sMid-1), pBT->usVersion );
+                 if ( pKey2 == NULL )
+                 {
+                   sRc = BTREE_CORRUPTED;
+                   break;
+                 }
+                 else if ( (*pBT->compare)(pBTIda, pKey, pKey2) == 0 )
+                 {
+                   sMid --;
+                 }
+                 else
+                 {
+                   break;
+                 } /* endif */
+               } /* endwhile */
+
+               *psKeyPos = sMid;      // set key position
+
+               /*****************************************************/
+               /* go forward as long as the keys are the same  ..   */
+               /* and no matching sentence found                    */
+               /*****************************************************/
+               if ( (searchType == FEXACT) ||
+                    (searchType == FEQUIV) )
+               {
+                 *psKeyPos = -1;       // reset key position for exact search
+                                       // and equivalent search
+               } /* endif */
+
+               while ( sMid <= sHigh )
+               {
+                 pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
+                 if ( pKey2 == NULL )
+                 {
+                   sRc = BTREE_CORRUPTED;
+                   break;
+                 }
+                 else if ( (*pBT->compare)(pBTIda, pKey, pKey2) == 0 )
+                 {
+                   if ( searchType == FEQUIV)
+                   {
+                     if ( UTF16strcmp( pKey, pKey2 ) == 0 )
+                     {
+                       // the match will not get better anymore ...
+                       *psKeyPos = sMid;
+                       break;
+                     }
+                     else if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
+                     {
+                       // match but case of characters differ
+                       // so remember match if we have no better match yet and
+                       // look for better ones...
+                       if ( BestKeyMatch > CASEDIFF_KEY )
+                       {
+                         BestKeyMatch = CASEDIFF_KEY;
+                         sBestKey = sMid;
+                       } /* endif */
+                     }
+                     else if ( QDAMCaseCompare( pBTIda, pKey, pKey2, TRUE ) == 0 )
+                     {
+                       // match but punctuation differs
+                       // so remember match if we have no other yet and
+                       // look for better ones...
+                       if ( BestKeyMatch == NOMATCH_KEY )
+                       {
+                         BestKeyMatch = PUNCTDIFF_KEY;
+                         sBestKey = sMid;
+                       } /* endif */
+                     } /* endif */
+                     sMid++;           // continue with next key
+                   }
+                   else if (UTF16strcmp( pKey, pKey2 ))
+                   {
+                     sMid ++;
+                   }
+                   else
+                   {
+                     *psKeyPos = sMid;
+                     break;
+                   } /* endif */
+                 }
+                 else
+                 {
+                   break;
+                 } /* endif */
+               } /* endwhile */
+
+               // use best matching key if no other was found
+               if ( *psKeyPos == -1 )
+               {
+                 *psKeyPos = sBestKey;
+               } /* endif */
+             } /* endif */
+
+             /*********************************************************/
+             /* if we are checking only for substrings and didn't     */
+             /* find a match yet, we will set the prev. found substrin*/
+             /*********************************************************/
+             if ( (*psKeyPos == -1) && (searchType == FSUBSTR)  )
+             {
+                *psKeyPos = sMid;
+             } /* endif */
+             *psNearPos = *psKeyPos;
+          } /* endif */
+       }
+       else
+       {
+          fFound = TRUE;
+          sRc = BTREE_CORRUPTED;                // tree is corrupted
+       } /* endif */
+    } /* endwhile */
+    if ( !fFound )
+    {
+      *psNearPos = sLow < (SHORT)OCCUPIED(pRecord)-1 ? sLow : (SHORT)OCCUPIED(pRecord)-1 ;// set nearest pos
+    } /* endif */
+    BTREEUNLOCKRECORD( pRecord );
+  } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+  return sRc;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMSplitNode    Split a Node
+//------------------------------------------------------------------------------
+// Function call:     QDAMSplitNode( PBTREE, PPBTREEBUFFER, PCHAR );
+//
+//------------------------------------------------------------------------------
+// Description:       A node in the index is full, split the node.
+//                    Insert the new key and value into the parent node.
+//                    Return the node that the key belongs in.
+//
+//------------------------------------------------------------------------------
+// Side effects:      Splitting a record will affect the parent node(s)
+//                    of a record, too.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PBTREEBUFFER  *        pointer to active node
+//                    PCHAR                  key passed
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//------------------------------------------------------------------------------
+// Function flow:     lock the active node-record
+//                    if active node is root (it needs to be split)
+//                      allocate space for new record
+//                      if ok
+//                        lock the new record
+//                        create a new root
+//                        unlock the new record
+//                        if ok
+//                          update first_leaf information
+//                        endif
+//                        if ok
+//                          write header to disk
+//                        endif
+//                      endif
+//                    endif
+//                    if ok
+//                      allocate space for new record
+//                      if ok
+//                        lock new record
+//                        if a next rec (child) exists
+//                          read the next (child)record
+//                          if ok then
+//                            reset the ptr to prev. record in child rec.
+//                            write this record
+//                          endif
+//                        endif
+//                        if ok
+//                          adjust sibling pointers
+//                          get key string of middle key in record
+//                          if possible
+//                            set indicator = TRUE
+//                          else
+//                            set rc = BTREE_CORRUPTED
+//                          endif
+//                          if ok
+//                            set start no. where to split record
+//                            while counter not at last key in record
+//                              copy key to new record
+//                            endwhile
+//                            adjust count of keys
+//                            Rearrange the key record
+//                            insert pointer to new record into parent node
+//                            decide where to add the new key
+//                            add key and write this record
+//                          endif
+//                        endif
+//                        unlock new record
+//                      endif
+//                    endif
+//                    unlock temp record
+//------------------------------------------------------------------------------
+SHORT QDAMSplitNode_V3
+(
+   PBTREE pBTIda,                // pointer to generic structure
+   PBTREEBUFFER_V3 *record,         // pointer to pointer to node
+   PCHAR_W pKey                 // new key
+)
+{
+  SHORT i,j;
+  PBTREEBUFFER_V3 newRecord;
+  PBTREEBUFFER_V3 child;
+  PBTREEBUFFER_V3 parent = NULL;
+  USHORT       usParent;               // number of parent
+  PBTREEBUFFER_V3 pRecTemp;               // temporary buffer
+  RECPARAM   recKey;                   // position/offset for key
+  RECPARAM   recData;                  // position/offset for data
+  PCHAR_W    pParentKey;               // new key to be inserted
+  PUSHORT    pusOffset;                // pointer to offset table
+  BOOL       fCompare;                 // indicator where to insert new key
+  USHORT     usFreeKeys = 0;               // number of free keys required
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  SHORT sRc = 0;                       // success indicator
+
+
+  LogMessage(FATAL, "called commented out function QDAMSplitNode_V3");
+  #ifdef TEMPORARY_COMMENTED
+  memset( &recKey, 0, sizeof( recKey ) );
+  memset( &recData,  0, sizeof( recData ) );
+
+  pRecTemp = *record;
+  BTREELOCKRECORD( pRecTemp );
+
+  // if root needs to be split do it first
+  if (IS_ROOT(*record))
+  {
+    sRc = QDAMNewRecord_V3( pBTIda, &newRecord, KEYREC );
+    if ( newRecord )
+    {
+      BTREELOCKRECORD( newRecord );
+      /* We can't simply split a root node, since only one is allowed */
+      /* so a new root is created to hold the records                 */
+      pBT->usFirstNode = PARENT(*record) = RECORDNUM(newRecord);
+      TYPE(newRecord) = ROOT_NODE | INNER_NODE | DATA_KEYNODE;
+      PARENT(newRecord) = PREV(newRecord) = NEXT(newRecord) = 0L;
+      TYPE(*record) &= ~ROOT_NODE;
+      recData.usNum = RECORDNUM(*record);
+      recData.usOffset = 0;
+      pParentKey = QDAMGetszKey_V3( *record, 0, pBT->usVersion );
+      if ( pParentKey )
+      {
+         // store key temporarily, because record with key data is
+         // not locked.
+         sRc = QDAMInsertKey_V3(pBTIda, newRecord, pParentKey, recKey, recData);
+         // might be freed during insert
+         BTREELOCKRECORD( pRecTemp );
+      }
+      else
+      {
+        sRc = BTREE_CORRUPTED;
+        ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+      } /* endif */
+      BTREEUNLOCKRECORD(newRecord);
+      // update usFirstLeaf information
+      if ( !sRc )
+      {
+         sRc = QDAMFirstEntry_V3( pBTIda, &newRecord );
+      } /* endif */
+      if ( !sRc )
+      {
+         sRc = QDAMWriteHeader( pBTIda );
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+     // allocate space for the new record
+    sRc = QDAMNewRecord_V3( pBTIda, &newRecord, KEYREC );
+    if ( newRecord )
+    {
+      BTREELOCKRECORD(newRecord);
+      if ( NEXT(*record) )
+      {
+        sRc = QDAMReadRecord_V3(pBTIda, NEXT(*record), &child, FALSE );
+        if ( !sRc )
+        {
+          PREV(child) = RECORDNUM(newRecord);
+          sRc = QDAMWriteRecord_V3(pBTIda, child);
+        }
+      }
+
+      if ( !sRc )
+      {
+        /* Adjust Sibling pointers */
+        NEXT(newRecord) = NEXT(*record);
+        PREV(newRecord) = RECORDNUM(*record);
+        NEXT(*record) = RECORDNUM(newRecord);
+        PARENT(newRecord) = PARENT(*record);
+        TYPE(newRecord) = (CHAR)(TYPE(*record) & ~ROOT_NODE);  // don't copy Root bit
+
+        // Decide where to split the record
+        pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), pBT->usVersion );
+        if ( pParentKey )
+        {
+           fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+           /***********************************************************/
+           /* check in which part we will lay                         */
+           /***********************************************************/
+           if ( fCompare )
+           {
+              pParentKey = QDAMGetszKey_V3(*record, (SHORT)(OCCUPIED(*record)-MINFREEKEYS), pBT->usVersion);
+              fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+              if ( fCompare )
+              {
+                usFreeKeys = MINFREEKEYS;
+              }
+              else
+              {
+                usFreeKeys = OCCUPIED( *record )/2;
+              } /* endif */
+           }
+           else
+           {
+              pParentKey = QDAMGetszKey_V3( *record,MINFREEKEYS, pBT->usVersion);
+              fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+              if ( fCompare )
+              {
+                usFreeKeys = OCCUPIED( *record )/2;
+              }
+              else
+              {
+                usFreeKeys = OCCUPIED( *record ) -MINFREEKEYS;
+              } /* endif */
+           } /* endif */
+        }
+        else
+        {
+           sRc = BTREE_CORRUPTED;
+           ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+        } /* endif */
+
+        // leave space for at least nn further keys instead of splitting at half
+        // regard the fact that IMPORT is normally in alphabetical increasing
+        // order
+        // in case of reverse copying ( as done in old DAM ) we are in the
+        // ELSE case...
+        if ( !sRc )
+        {
+           i = (SHORT) (OCCUPIED( *record ) - usFreeKeys);
+           j = 0;
+           pusOffset = (PUSHORT) (*record)->contents.uchData;
+           while ( i < (SHORT) OCCUPIED( *record ))
+           {
+             QDAMCopyKeyTo_V3( *record, i, newRecord, j, pBT->usVersion );
+             *(pusOffset+i) = 0 ;    // mark it as deleted
+             j++;
+             i++;
+           }
+           /* Adjust count of keys */
+           OCCUPIED(*record) = OCCUPIED(*record) - usFreeKeys;
+           OCCUPIED(newRecord) =  usFreeKeys;
+           QDAMReArrangeKRec_V3( pBTIda, *record );
+        /* Insert pointer to new record into the parent node */
+        /* due to the construction parent MUST be the same   */
+           sRc = QDAMFindParent_V3( pBTIda, *record, &usParent );
+           if ( !sRc && usParent )
+           {
+             sRc = QDAMReadRecord_V3(pBTIda, usParent, &parent, FALSE );
+           } /* endif */
+        } /* endif */
+
+        if ( !sRc )
+        {
+          recData.usNum = RECORDNUM( newRecord );
+          recData.usOffset = 0;
+          pParentKey = QDAMGetszKey_V3( newRecord,0, pBT->usVersion );
+          if ( pParentKey )
+          {
+             sRc = QDAMInsertKey_V3(pBTIda, parent, pParentKey, recKey, recData);
+          }
+          else
+          {
+             sRc = BTREE_CORRUPTED;
+             ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+          } /* endif */
+        } /* endif */
+      } /* endif */
+
+      /* Decide whether to add the new key to the old or new record */
+      if ( !sRc )
+      {
+//       newRecord->ulCheckSum = QDAMComputeCheckSum( newRecord );
+//       (*record)->ulCheckSum = QDAMComputeCheckSum( *record );
+         pParentKey = QDAMGetszKey_V3( newRecord, 0, pBT->usVersion );
+         if ( pParentKey )
+         {
+           if ( (*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0)
+           {
+             sRc = QDAMWriteRecord_V3( pBTIda, *record);
+             *record = newRecord;                     // add to new record
+           }
+           else
+           {
+             sRc = QDAMWriteRecord_V3( pBTIda, newRecord );
+           } /* endif */
+         }
+         else
+         {
+            sRc = BTREE_CORRUPTED;
+            ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+         } /* endif */
+      } /* endif */
+      BTREEUNLOCKRECORD(newRecord);
+    } /* endif */
+  } /* endif */
+  BTREEUNLOCKRECORD( pRecTemp );
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMSPLITNODE_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+  
+  #endif
+
+  return ( sRc );
+}
+
+
+
+SHORT QDAMChangeKey_V3
+(
+   PBTREE   pBTIda,                                 // ptr to tree structure
+   USHORT   usNode,                                 // start node
+   PCHAR_W  pOldKey,                                // find old key
+   PCHAR_W  pNewKey                                 // find new key
+)
+{
+  PBTREEBUFFER_V3 pRecord;                            // buffer for record
+  PBTREEBUFFER_V3 pNewRecord = NULL;                  // buffer for new record
+  SHORT i = 0;                                     // index
+  SHORT sRc = 0;                                   // return code
+  SHORT sNearKey;
+  PUSHORT  pusOffset;                              // pointer to offset table
+  RECPARAM recKey;                                 // record parameter descrip.
+
+  LogMessage(FATAL, "called commented out function QDAMChangeKey_V3");
+  #ifdef TEMPORARY_COMMENTED
+
+  sRc = QDAMReadRecord_V3( pBTIda, usNode, &pRecord, FALSE  );
+  if ( !sRc )
+  {
+    BTREELOCKRECORD(pRecord);
+    if ( !sRc )
+    {
+       /* Locate the Leaf node that contains the appropriate key */
+       sRc = QDAMFindChild_V3( pBTIda, pNewKey, usNode, &pNewRecord );
+    } /* endif */
+    if ( !sRc )
+    {
+       // get the key description and insert the new key
+       recKey.usNum = pNewRecord->contents.header.usNum;
+       sRc = QDAMLocateKey_V3(pBTIda, pNewRecord, pNewKey, &i, FEXACT, &sNearKey);
+       if ( !sRc && i != -1 )
+       {
+          recKey.usOffset = i;
+          recKey.ulLen = 0;            // init length
+          sRc = QDAMInsertKey_V3( pBTIda, pRecord, pNewKey, recKey, recKey);
+       } /* endif */
+    } /* endif */
+    if ( !sRc )
+    {
+       sRc = QDAMLocateKey_V3( pBTIda, pRecord, pOldKey, &i, FEXACT, &sNearKey);
+    } /* endif */
+
+    if (!sRc && i!= -1)
+    {
+       // delete the oldkey at offset i
+       pusOffset = (PUSHORT) pRecord->contents.uchData;
+       *(pusOffset + i) = 0;
+       OCCUPIED(pRecord) --;
+       // record should be rearranged - it will be written during the insert
+       // of the new key
+       QDAMReArrangeKRec_V3( pBTIda, pRecord );
+
+    }
+    BTREEUNLOCKRECORD(pRecord);
+  }
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMCHANGEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+  
+  #endif
+
+  return sRc;
+}
+
+
 
 
 //------------------------------------------------------------------------------
@@ -4284,8 +4955,6 @@ SHORT QDAMInsertKey_V3
   SHORT  sNearKey;                     // key found
   SHORT  sRc = 0;                      // return code
 
-  LogMessage(FATAL, "called commented out function QDAMInsertKey_V3");
-  #ifdef TEMPORARY_COMMENTED
   USHORT usLastPos;
   USHORT usKeyLen = 0;                 // length of key
   USHORT usDataRec = 0;                // length of key record
@@ -4476,7 +5145,6 @@ SHORT QDAMInsertKey_V3
    {
      ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
-  #endif
   return sRc;
 }
 
