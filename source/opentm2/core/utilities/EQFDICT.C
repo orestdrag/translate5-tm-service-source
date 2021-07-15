@@ -11,6 +11,7 @@
 #define INCL_EQF_DAM              // low level dict. access functions (Nlp/Dam)
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include <EQF.H>                  // General Translation Manager include file
+#include "core/utilities/LogWrapper.h"
 
 //#include <EQFQDMAI.H>             // Private QDAM defines
 //#include <eqfcmpr.h>              // defines for compression/expand...
@@ -159,6 +160,194 @@ typedef struct _BTREEHEADRECORD
   USHORT    usNextFreeRecord;                     // Next record to expand to
 } BTREEHEADRECORD, PBTREEHEADRECORD ;
 
+/**********************************************************************/
+/* Defines the header of the event list either as a structure or as   */
+/* a enumeration                                                      */
+/**********************************************************************/
+#ifdef STRING_EVENT_IDS
+   #define EVENTLISTSTART( type, var ) \
+     EVENTSTRING var[] = {
+#else
+   #define EVENTLISTSTART( type, var) typedef enum type {
+#endif
+
+#ifdef STRING_EVENT_IDS
+   #define EVENTLISTEND( type, dummy ) { #dummy, 32000 } };
+#else
+   #define EVENTLISTEND( type, dummy ) dummy = 32000} type;
+#endif
+
+
+/**********************************************************************/
+/* Macro to either define the event ID as a numeric value or to       */
+/* use the event ID as a string (used by EVENTLOG program).           */
+/**********************************************************************/
+#ifdef STRING_EVENT_IDS
+   #define EVENTDEF( id, num ) { #id, num },
+#else
+   #define EVENTDEF( id, num ) id = num,
+#endif
+
+
+/**********************************************************************/
+/* List of event locations (only use macro EVENTDEF for entries in        */
+/* this list)                                                         */
+/**********************************************************************/
+EVENTLISTSTART( _EVENTLOC, EventLocations )
+EVENTDEF( UTLERROR_LOC,              1 )
+EVENTDEF( TWBSTART_LOC,              2 )
+EVENTDEF( TWBSHUTDOWN_LOC,           3 )
+EVENTDEF( QDAMUPDATELOCKREC_LOC,     4 )
+EVENTDEF( QDAMGETUPDCOUNTER_LOC,     5 )
+EVENTDEF( QDAMINCRUPDCOUNTER_LOC,    6 )
+EVENTDEF( QDAMCHECKFORUPDATES_LOC,   7 )
+EVENTDEF( QDAMPHYSLOCK_LOC,          8 )
+EVENTDEF( QDAMRECORDTODISK_LOC,      9 )
+EVENTDEF( QDAMDICTCREATELOCAL_LOC,   10 )
+EVENTDEF( QDAMREADRECORD_LOC,        12 )
+EVENTDEF( QDAMWRITEHEADER_LOC,       13 )
+EVENTDEF( QDAMDICTOPENLOCAL_LOC,     14 )
+EVENTDEF( QDAMDICTCLOSELOCAL_LOC,    15 )
+EVENTDEF( QDAMDICTEXACTLOCAL_LOC,    16 )
+EVENTDEF( QDAMDICTSUBSTRLOCAL_LOC,   17 )
+EVENTDEF( QDAMDICTEQUIVLOCAL_LOC,    18 )
+EVENTDEF( QDAMDICTFIRSTLOCAL_LOC,    19 )
+EVENTDEF( QDAMDICTNEXTLOCAL_LOC,     20 )
+EVENTDEF( QDAMDICTPREVLOCAL_LOC,     21 )
+EVENTDEF( QDAMDICTCURRENTLOCAL_LOC,  22 )
+EVENTDEF( QDAMNEXT_LOC,              23 )
+EVENTDEF( QDAMFIRST_LOC,             24 )
+EVENTDEF( QDAMGETSZKEYPARAM_LOC,     25 )
+EVENTDEF( QDAMGETSZDATA_LOC,         26 )
+EVENTDEF( QDAMLOCATEKEY_LOC,         27 )
+EVENTDEF( QDAMVALIDATEINDEX_LOC,     28 )
+EVENTDEF( NLPBACKWARDLIST_LOC,       29  )
+EVENTDEF( NLPFORWARDDLIST_LOC,       30 )
+EVENTDEF( NLPTERMLIST_LOC,           31 )
+EVENTDEF( NLPLOCKENTRY_LOC,          32 )
+EVENTDEF( NLPDELENTRYASD_LOC,        33 )
+EVENTDEF( NLPUPDENTRYASD_LOC,        34 )
+EVENTDEF( NLPINSENTRYASD_LOC,        35 )
+EVENTDEF( NLPPRVTERMASD_LOC,         36 )
+EVENTDEF( NLPNXTTERMASD_LOC,         37 )
+EVENTDEF( NLPFNDNUMBERASD_LOC,       38 )
+EVENTDEF( NLPRETENTRYASD_LOC,        39 )
+EVENTDEF( NLPFNDMATCHASD_LOC,        40 )
+EVENTDEF( NLPFNDEQUIVASD_LOC,        41 )
+EVENTDEF( NLPFNDBEGINASD_LOC,        42 )
+EVENTDEF( QDAMOPENASD_LOC,           43 )
+EVENTDEF( QDAMWRITERECORD_LOC,       44 )
+EVENTDEF( QDAMNEWRECORD_LOC,         45 )
+EVENTDEF( QDAMFREERECORD_LOC,        46 )
+EVENTDEF( QDAMUPDSIGNLOCAL_LOC,      47 )
+EVENTDEF( QDAMDICTFLUSHLOCAL_LOC,    48 )
+EVENTDEF( QDAMSPLITNODE_LOC,         49 )
+EVENTDEF( QDAMINSERTKEY_LOC,         50 )
+EVENTDEF( QDAMDICTINSERTLOCAL_LOC,   51 )
+EVENTDEF( QDAMCHANGEKEY_LOC,         52 )
+EVENTDEF( QDAMADDTOBUFFER_LOC,       53 )
+EVENTDEF( QDAMDELETEDATAFROMBUFFER_LOC, 54 )
+EVENTDEF( QDAMDICTUPDATELOCAL_LOC,   55 )
+EVENTDEF( QDAMDICTCOPYLOCAL_LOC,     56 )
+EVENTDEF( QDAMREDUCENODE_LOC,        57 )
+EVENTDEF( QDAMDICTDELETELOCAL_LOC,   58 )
+EVENTDEF( QDAMREADRECORDFROMDISK_LOC,59 )
+EVENTDEF( EQFNTMUPDATE_LOC,          60 )
+EVENTDEF( EQFNTMINSERT_LOC,          61 )
+EVENTDEF( EQFNTMGET_LOC,             62 )
+EVENTDEF( EQFNTMPHYSLOCK_LOC,        63 )
+EVENTDEF( TMTXREPLACE_LOC,           64 )
+EVENTDEF( TOKENIZESOURCE_LOC,        65 )
+EVENTDEF( TOKENIZETARGET_LOC,        66 )
+EVENTDEF( ADDTOTM_LOC,               67 )
+EVENTDEF( FILLCLB_LOC,               68 )
+EVENTDEF( DETERMINETMRECORD_LOC,     69 )
+EVENTDEF( UPDATETMRECORD_LOC,        70 )
+EVENTDEF( COMPAREPUTDATA_LOC,        71 )
+EVENTDEF( ADDTMTARGET_LOC,           72 )
+EVENTDEF( REPLACETMTARGET_LOC,       73 )
+EVENTDEF( TMTXGET_LOC,               74 )
+EVENTDEF( GETEXACTMATCH_LOC,         75 )
+EVENTDEF( EXACTTEST_LOC,             76 )
+EVENTDEF( FILLMATCHTABLE_LOC,        77 )
+EVENTDEF( GETFUZZYMATCH_LOC,         78 )
+EVENTDEF( FUZZYTEST_LOC,             79 )
+EVENTDEF( FILLMATCHENTRY_LOC,        80 )
+EVENTDEF( NTMREADWRITESEGMENT_LOC,   81 )
+EVENTDEF( NTMLOCKTM_LOC,             82 )
+EVENTDEF( NTMCHECKFORUPDATES_LOC,    83 )
+EVENTDEF( TMOPEN_LOC,                84 )
+EVENTDEF( TMCLOSE_LOC,               85 )
+EVENTDEF( TMREPLACE_LOC,             86 )
+EVENTDEF( TMGET_LOC,                 87 )
+EVENTDEF( TMTXOPEN_LOC,              88 )
+EVENTDEF( EQFNTMOPEN_LOC,            89 )
+EVENTDEF( EQFNTMCLOSE_LOC,           90 )
+EVENTDEF( EQFNTMSIGN_LOC,            91 )
+EVENTDEF( UTILSEXIT_LOC,             92 )
+EVENTDEF( QDAMLOCSUBSTR_LOC,         93 )
+EVENTDEF( QDAMGETSZKEY_LOC,          94 )
+EVENTDEF( QDAMCHECKCHECKSUM_LOC,     95 )
+EVENTDEF( QDAMFINDRECORD_LOC,        96 )
+EVENTDEF( QDAMSETRECDATA_LOC,        97 )
+EVENTDEF( EQFDA_LOC,                 98 )
+EVENTDEF( DICTCLEANUP_LOC,           99 )
+EVENTDEF( EQFDACLOSE_LOC,           100 )
+EVENTDEF( ASDOPEN_LOC,              101 )
+EVENTDEF( ASDCLOSE_LOC,             102 )
+EVENTDEF( ASDTRANSLATE_LOC,         103 )
+EVENTDEF( TMUPDSEG_LOC,             104 )
+EVENTDEF( DOCEXPCOMMAND_LOC,        105 )
+EVENTDEF( DOCUMENTUNLOAD_LOC,       106 )
+EVENTDEF( UNLOADDOCUMENT_LOC,       107 )
+EVENTDEF( EQFUNSEGREVMARK_LOC,      108 )
+EVENTDEF( UNSEGMENT_LOC,            109 )
+EVENTDEF( ASDLISTINDEX_LOC,         110 )
+EVENTDEF( NTMGETIDFROMNAME_LOC,     111 )
+EVENTDEF( TWBEXCEPTION_LOC,         112 )
+EVENTLISTEND( TEVENTLOC, DUMMY_LOC )
+
+
+/**********************************************************************/
+/* Group/Area of events                                               */
+/**********************************************************************/
+EVENTLISTSTART( _EVENTGROUP, EventGroups )
+EVENTDEF( NONE_GROUP,           0 )
+EVENTDEF( TM_GROUP,             1 )
+EVENTDEF( DICT_GROUP,           2 )
+EVENTDEF( ANALYSIS_GROUP,       3 )
+EVENTDEF( MORPH_GROUP,          4 )
+EVENTDEF( DOC_GROUP,            5 )
+EVENTDEF( GENERAL_GROUP,        6 )
+EVENTDEF( DB_GROUP,             7 )
+EVENTLISTEND( TEVENTGROUP, DUMMY_GROUP )
+
+#define  MINFREEKEYS        3
+// minimum keys to be in a record - otherwise try to reduce the node
+#define  MIN_KEY            MINFREEKEYS
+// lock a record for fixing it in the memory
+#define  BTREELOCKRECORD(x)  ((x)->fLocked=TRUE)
+// test if a record is locked
+#define  BTREETESTLOCKRECORD(x)  ((x)->fLocked)
+// unlock a (previously locked) record
+#define  BTREEUNLOCKRECORD(x)  ((x)->fLocked=FALSE)
+
+/**********************************************************************/
+/* List of event classes                                              */
+/**********************************************************************/
+EVENTLISTSTART( _EVENTCLASS, EventClasses )
+EVENTDEF( NA_EVENT,             1 )
+EVENTDEF( FUNCENTRY_EVENT,      2 )
+EVENTDEF( REFRESH_EVENT,        5 )
+EVENTDEF( INTFUNCFAILED_EVENT,  6 )
+EVENTDEF( MSGBOX_EVENT,         7 )
+EVENTDEF( INVOPERATION_EVENT,   8 )
+EVENTDEF( READ_EVENT,           9 )
+EVENTDEF( WAIT_EVENT,           10 )
+EVENTDEF( STATE_EVENT,          11 )
+EVENTDEF( FUNCEXIT_EVENT,       12 )
+EVENTDEF( CHECKSUM_EVENT,       13 )
+EVENTLISTEND( TEVENTCLASS, DUMMY_CLASS )
 
 /*****************************************************************************/
 /* Used to determine amount of padding required for the Btree record so      */
@@ -228,6 +417,14 @@ typedef struct _BTREEBUFFER_V3
   BTREERECORD_V3 contents;                            // data from disk
 } BTREEBUFFER_V3, *PBTREEBUFFER_V3;
 
+/* Access Macros */
+#define TYPE(x)          ((x)->contents.header.chType)
+#define LEAF_NODE        0x00
+#define INNER_NODE       0x01
+#define ROOT_NODE        0x02
+#define DATA_NODE        0x04
+#define DATA_NEXTNODE    0x08
+#define DATA_KEYNODE     0x10
 
 typedef struct _BTREEINDEX_V3
 {
@@ -254,6 +451,79 @@ typedef struct _ACCESSCOUNTERTABLEENTRY
 {
   ULONG ulAccessCounter;
 } ACCESSCTRTABLEENTRY, * PACCESSCTRTABLEENTRY;
+
+
+/**********************************************************************/
+/* Event types                                                        */
+/**********************************************************************/
+#ifndef STRING_EVENT_IDS
+typedef enum
+{
+  ERROR_EVENT,                         // event is caused by an error condition
+  INFO_EVENT,                          // informational events (e.g. status events)
+  EQFDEBUG_EVENT                       // only logged when debug version is build
+} EVENTTYPE;
+#endif
+
+/**********************************************************************/
+/* Event macros                                                       */
+/**********************************************************************/
+BOOL UtlEvent2
+(
+  SHORT sEventType,                    // type of the event
+  SHORT sEventID,                      // the event identifier
+  SHORT sEventClass,                   // the event class
+  SHORT sEventRC,                      // the event return code or error code
+  SHORT sGroup,                        // the event group
+  PSZ   pszAddData                     // additional data for event (string)
+);
+#ifndef STRING_EVENT_IDS
+  #ifndef NO_ERREVENTS
+    #define ERREVENT( id, class, rc ) \
+      UtlEvent( ERROR_EVENT, id, class, rc )
+  #else
+    #define ERREVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_ERREVENTS
+    #define ERREVENT2( id, class, rc, gr, str ) \
+      UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
+  #else
+    #define ERREVENT2( id, class, rc, gr, str )
+  #endif
+
+  #ifndef NO_INFOEVENTS
+    #define INFOEVENT( id, class, rc ) \
+      UtlEvent( INFO_EVENT, id, class, rc )
+  #else
+    #define INFOEVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_INFOEVENTS
+    #define INFOEVENT2( id, class, rc, gr, str ) \
+      UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
+  #else
+    #define INFOEVENT2( id, class, rc, gr, str )
+  #endif
+
+  #ifndef _DEBUG
+    #define NO_DEBUGEVENTS
+  #endif
+
+  #ifndef NO_DEBUGEVENTS
+    #define DEBUGEVENT( id, class, rc ) \
+      UtlEvent( EQFDEBUG_EVENT, id, class, rc )
+  #else
+    #define DEBUGEVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_DEBUGEVENTS
+    #define DEBUGEVENT2( id, class, rc, gr, str ) \
+      UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
+  #else
+    #define DEBUGEVENT2( id, class, rc, gr, str )
+  #endif
+#endif
 
 
 typedef struct _BTREEGLOB
@@ -798,9 +1068,8 @@ SHORT QDAMAllocTempAreas
   ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
-#ifdef TEMPORARY_COMMENTED
   DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
-#endif
+
 
   // Write the initial record (describing the index) out to disk
 
@@ -885,14 +1154,11 @@ SHORT QDAMAllocTempAreas
 
   if ( sRc )
   {
-      #ifdef TEMPORARY_COMMENTED
     ERREVENT2( QDAMWRITEHEADER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-    #endif
   } /* endif */
 
-  #ifdef TEMPORARY_COMMENTED
   DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
-  #endif
+
 
   return sRc;
 }
@@ -906,6 +1172,211 @@ SHORT QDAMDictUpdSignLocal
 );
 
 
+// Convert Dos... return codes to BTREE return codes
+SHORT QDAMDosRC2BtreeRC
+(
+  SHORT sDosRC,                        // Dos return code
+  SHORT sDefaultRC,                    // RC for default case
+  USHORT usOpenFlags                   // open flags of database
+)
+{
+
+   SHORT sRc = 0;                           // converted return code
+  LogMessage(FATAL, "called commented out function QDAMDosRC2BtreeRC");
+  #ifdef TEMPORARY_COMMENTED
+  switch ( sDosRC )
+  {
+     case  NO_ERROR:
+       sRc = NO_ERROR;
+      break;
+    case  ERROR_INVALID_DRIVE:
+      sRc = BTREE_INVALID_DRIVE;
+      break;
+    case  ERROR_OPEN_FAILED :
+      sRc = BTREE_OPEN_FAILED;
+      break;
+    case  ERROR_NETWORK_ACCESS_DENIED:
+    case  ERROR_VC_DISCONNECTED:
+      sRc = BTREE_NETWORK_ACCESS_DENIED;
+      break;
+    case ERROR_ACCESS_DENIED:
+      if ( usOpenFlags & ASD_SHARED )
+      {
+        // map ACCESS_DENIED to IN_USE for shared databases as
+        // a locked local file returns ERROR_ACCESS_DENIED rather than
+        // ERROR_SHARING_VIOLATION
+        sRc = BTREE_IN_USE;
+      }
+      else
+      {
+        sRc = BTREE_ACCESS_ERROR;
+      } /* endif */
+      break;
+    case ERROR_DRIVE_LOCKED:
+    case ERROR_INVALID_ACCESS:
+      sRc = BTREE_ACCESS_ERROR;
+      break;
+    case ERROR_FILE_NOT_FOUND:
+      sRc = BTREE_FILE_NOTFOUND;
+      break;
+    case ERROR_LOCK_VIOLATION:
+    case ERROR_SHARING_VIOLATION:
+      sRc = BTREE_IN_USE;
+      break;
+    default :
+      sRc = sDefaultRC;
+      break;
+  } /* endswitch */
+  #endif
+
+  return( sRc );
+} /* end of function QDAMDosRC2BtreeRC  */
+
+
+SHORT QDAMWRecordToDisk_V3
+(
+   PBTREE     pBTIda,                     // pointer to btree structure
+   PBTREEBUFFER_V3  pBuffer               // pointer to buffer to write
+)
+{
+  SHORT sRc = 0;                          // return code
+  LogMessage(FATAL, "called commented out function QDAMWRecordToDisk_V3");
+  #ifdef TEMPORARY_COMMENTED
+  LONG  lOffset;                          // offset in file
+  ULONG ulNewOffset;                      // new file pointer position
+  USHORT usBytesWritten;                  // number of bytes written
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  INC_REAL_WRITE_COUNT;
+
+  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+
+//QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
+
+  if ( !sRc )
+  {
+    lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3;
+
+    sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
+  } /* endif */
+
+  if ( ! sRc )
+  {
+    sRc = UtlWrite( pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+
+    // check if disk is full
+    if ( ! sRc )
+    {
+       if ( usBytesWritten == BTREE_REC_SIZE_V3 )
+       {
+          pBuffer->fNeedToWrite = FALSE;
+       }
+       else
+       {
+          sRc = BTREE_DISK_FULL;
+          pBT->fCorrupted = TRUE;                     // indicate corruption
+       } /* endif */
+    }
+    else
+    {
+       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+       pBT->fCorrupted = TRUE;                     // indicate corruption
+    } /* endif */
+  }
+  else
+  {
+    sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+    pBT->fCorrupted = TRUE;                        // indicate corruption
+  } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+  #endif
+  return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMGetUpdCounter       Get database update counter
+//------------------------------------------------------------------------------
+// Function call:     QDAMGetUpdCounter( PBTREE, PLONG, SHORT, SHORT );
+//------------------------------------------------------------------------------
+// Description:       Get one or more of the the database update counters
+//                    from the dummy/locked terms file
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PLONG                  ptr to buffer for update counter
+//                    SHORT                  index of requested update counter
+//                    SHORT                  number of counters requested
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_READ_RROR   read error from disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read update counter from dummy file
+//------------------------------------------------------------------------------
+ SHORT QDAMGetUpdCounter
+(
+   PBTREE     pBTIda,                   // pointer to btree structure
+   PLONG      plUpdCount,               // ptr to buffer for update counter
+   SHORT      sIndex,                   // index of requested update counter
+   SHORT      sNumCounters              // number of counters requested
+)
+{
+  SHORT  sRc=0;
+  
+  LogMessage(FATAL, "called commented out function QDAMGetUpdCounter");
+  #ifdef TEMPORARY_COMMENTED
+
+  USHORT usNumBytes;                   // number of bytes written or read
+  ULONG  ulNewOffset;                  // new offset in file
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+  SHORT      sRetries;                 // number of retries
+
+  sRetries = 0; // MAX_RETRY_COUNT;
+  do
+  {
+     // Position to requested update counter
+    sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
+                         FILE_BEGIN, &ulNewOffset, FALSE);
+    sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+    // Read requested update counter(s)
+    if ( !sRc )
+    {
+      memset( plUpdCount, 0, sizeof(LONG)*sNumCounters );
+
+      sRc = UtlRead( pBT->fpDummy, (PVOID)plUpdCount,
+                     (USHORT)(sizeof(LONG) * sNumCounters),
+                     &usNumBytes, FALSE);
+      sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+     } /* endif */
+
+     if ( sRc == BTREE_IN_USE )
+     {
+  //   UtlWait( MAX_WAIT_TIME );
+       sRetries--;
+     } /* endif */
+
+  // if ( sRetries != MAX_RETRY_COUNT )
+  // {
+  //   DEBUGEVENT2( QDAMGETUPDCOUNTER_LOC, WAIT_EVENT, (MAX_RETRY_COUNT - sRetries), DB_GROUP, NULL );
+  // } /* endif */
+  } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMGETUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+  #endif
+  return sRc;
+}
 
 SHORT QDAMReadRecordFromDisk_V3
 (
@@ -923,9 +1394,7 @@ SHORT QDAMReadRecordFromDisk_V3
   SHORT    sRc = 0;                             // return code
   PBTREEGLOB  pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V3 pLEntry = NULL;
-#ifdef TEMPORARY_COMMENTED
   DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
-#endif
 
   /********************************************************************/
   /* Allocate space for a new buffer and let pBuffer point to it      */
@@ -974,16 +1443,14 @@ SHORT QDAMReadRecordFromDisk_V3
     // Mark the next buffer for future allocations
     if ( !sRc )
     {
-      #ifdef TEMPORARY_COMMENTED
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
-      #endif
       sRc = UtlRead( pBT->fp,
                      (PVOID)&pBuffer->contents,
                      BTREE_REC_SIZE_V3, &usNumBytesRead, FALSE);
       
-      #ifdef TEMPORARY_COMMENTED
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-      #endif
+      if (sRc ) 
+        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
 
       /****************************************************************/
       /* The following check added by XQG                             */
@@ -1029,9 +1496,7 @@ SHORT QDAMReadRecordFromDisk_V3
            pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
 
-            #ifdef TEMPORARY_COMMENTED
            sRc = QDAMWRecordToDisk_V3(pBTIda, pBuffer);
-           #endif
 
            if (! sRc )
            {
@@ -1040,16 +1505,10 @@ SHORT QDAMReadRecordFromDisk_V3
                // this condition should NEVER occur for shared resources
                // as write is only allowed if the database has been
                // previously locked
-               #ifdef TEMPORARY_COMMENTED
                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, NULL );
-               #endif
 
- #ifdef _DEBUG
-               WinMessageBox( HWND_DESKTOP,
-                              (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                              "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/2\nPlease save info required to reproduce this condition.",
-                              "Gotcha!", 9999, MB_ERROR );
- #endif
+              LogMessage(ERROR, "Gotcha! Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/2\nPlease save info required to reproduce this condition.");
+
              } /* endif */
              sRc = QDAMWriteHeader( pBTIda );
            } /* endif */
@@ -1057,15 +1516,10 @@ SHORT QDAMReadRecordFromDisk_V3
          }
          else
          {
-           #ifdef TEMPORARY_COMMENTED
            ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, NULL );
-           #endif
-#ifdef _DEBUG
-           WinMessageBox( HWND_DESKTOP,
-                          (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                          "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\n",
-                          "Internal Error", 9998, MB_ERROR );
-#endif
+
+          LogMessage(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
+
            sRc = BTREE_READ_ERROR;
          } /* endif */
        } /* endif */
@@ -1082,9 +1536,7 @@ SHORT QDAMReadRecordFromDisk_V3
      /**********************************************************************/
      /* Get current database update count                                  */
      /**********************************************************************/
-     #ifdef TEMPORARY_COMMENTED
      sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
-     #endif
 
      if ( !sRc )
      {
@@ -1110,9 +1562,7 @@ SHORT QDAMReadRecordFromDisk_V3
 
   if ( sRc )
   {
-    #ifdef TEMPORARY_COMMENTED
     ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-    #endif
   } /* endif */
   return sRc;
 }
@@ -1132,9 +1582,7 @@ SHORT  QDAMReadRecord_V3
   PBTREEGLOB    pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V3  pLEntry;
   PACCESSCTRTABLEENTRY  pACTEntry;
-#ifdef TEMPORARY_COMMENTED
   DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
-#endif
 
   *ppReadBuffer = NULL;
   INC_READ_COUNT;
@@ -1238,20 +1686,11 @@ SHORT  QDAMReadRecord_V3
                 // this condition should NEVER occur for shared resources
                 // as write is only allowed if the database has been
                 // previously locked
-                #ifdef TEMPORARY_COMMENTED
                 ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
-                #endif
+                LogMessage(ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
 
-              #ifdef _DEBUG
-                WinMessageBox( HWND_DESKTOP,
-                   (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                   "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.",
-                   "Gotcha!", 9999, MB_ERROR );
-              #endif
               } /* endif */
-              #ifdef TEMPORARY_COMMENTED
               sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
-              #endif
             } /* endif */
             if ( !sRc )
             {
@@ -1286,10 +1725,7 @@ SHORT  QDAMReadRecord_V3
 
   if ( sRc )
   {
-    #ifdef TEMPORARY_COMMENTED
     ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-    #endif
-
   } /* endif */
 
   return ( sRc );
@@ -1331,6 +1767,7 @@ QDAMAddDict
 {
   USHORT usI = 1;
   SHORT  sRc = 0;
+  LogMessage(FATAL, "called commented out function QDAMAddDict");
   #ifdef TEMPORARY_COMMENTED
   PQDAMDICT  pQDict;
 
@@ -1358,6 +1795,955 @@ QDAMAddDict
 
   return sRc;
 } /* end of function QDAMAddDict */
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDestroy     Destroy dictionary
+//------------------------------------------------------------------------------
+// Function call:     QDAMDestroy( PBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Destroy the file if something went wrong during the
+//                    create
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_CLOSE_ERROR error closing dictionary
+//
+//------------------------------------------------------------------------------
+// Function flow:     if ptr to BTree does not exist
+//                      set RC = BTREE_INVALID
+//                    else
+//                      if filename exists
+//                        call QDAMDictClose
+//                        delete the file 'filename'
+//                      endif
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDestroy
+(
+   PBTREE  pBTIda                   // pointer to generic structure
+)
+{
+   SHORT sRc = 0;                   // return code
+
+   LogMessage(FATAL, "called commented out function QDAMDestroy");
+  #ifdef TEMPORARY_COMMENTED
+   CHAR  chName[ MAX_EQF_PATH ];    // file name
+   PBTREEGLOB  pBT = pBTIda->pBTree;
+
+   if ( !pBT )
+   {
+     sRc = BTREE_INVALID;
+   }
+   else if (* (pBT->chFileName) )
+   {
+     //
+     // QDAMDictClose frees up all of the memory associated with a B-tree,
+     // we need to save the filename as we'll be deleteing the file by name
+     //
+     strcpy(chName, pBT->chFileName);
+     sRc = QDAMDictClose( &pBTIda );
+     if ( chName[0] )
+     {
+        UtlDelete( chName, 0L, FALSE);
+     }
+   }
+  #endif
+   return ( sRc );
+}
+
+
+SHORT QDAMWriteRecord_V3
+(
+   PBTREE       pBTIda,
+   PBTREEBUFFER_V3 pBuffer
+)
+{
+   SHORT  sRc = 0;                               // return code
+
+   LogMessage(FATAL, "called commented out function QDAMWriteRecord_V3");
+  #ifdef TEMPORARY_COMMENTED
+   PBTREEGLOB  pBT = pBTIda->pBTree;
+
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+
+   INC_WRITE_COUNT;
+
+   /********************************************************************/
+   /* write header with corruption flag -- if not yet done             */
+   /********************************************************************/
+   if ( pBT->fWriteHeaderPending )
+   {
+     sRc = QDAMWriteHeader( pBTIda );
+     pBT->fWriteHeaderPending = FALSE;
+   } /* endif */
+
+   //  if guard flag is on write it to disk
+   //  else set only the flag
+   if ( !sRc )
+   {
+     if ( !pBT->fGuard )
+     {
+        pBuffer->fNeedToWrite = TRUE;
+     }
+     else
+     {
+        sRc = QDAMWRecordToDisk_V3(pBTIda, pBuffer);
+     } /* endif */
+   } /* endif */
+
+
+   // For shared databases only: set internal update flag, the
+   // update counter will be written once the file lock is removed
+   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
+   {
+     pBT->fUpdated = TRUE;;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
+   
+   #endif
+   
+   return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMReadRecordFromDisk   Read record from disk
+//------------------------------------------------------------------------------
+// Function call:     QDAMReadRecordFromDisk( PBTREE, USHORT, PPBTREERECORD );
+//
+//------------------------------------------------------------------------------
+// Description:       read the requested record from disk
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The B-tree to read
+//                    USHORT             number of buffer to read
+//                    PPBTREERECORD      The buffer read
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_LOOKUPTABLE_CORRUPTED lookup table is corrupted
+//------------------------------------------------------------------------------
+// Side effects:      The read record routine is one of the most
+//                    performance critical routines in the module.
+//
+//------------------------------------------------------------------------------
+// Function flow:     allocate memory for a new buffer and set pBuffer
+//                    if still okay
+//                      position in file and set sRc;
+//                      if still okay then
+//                        read buffer from disk, set sRc;
+//                      endif
+//                      if still okay then
+//                        if new record then
+//                          init header information
+//                        endif
+//                        set pointer to next buffer to be looked at
+//                      else
+//                        set BTREE_READ_ERROR
+//                      endif
+//------------------------------------------------------------------------------
+SHORT QDAMReadRecordFromDisk_V2
+(
+   PBTREE         pBTIda,
+   USHORT         usNumber,
+   PBTREEBUFFER_V2 * ppReadBuffer,
+   BOOL           fNewRec              // allow new records flag
+)
+{
+  USHORT    usNumBytesRead = 0;                   // number of bytes read
+  PBTREEHEADER pHeader;                          // pointer to header
+  LONG     lOffset;                              // file offset to be set
+  ULONG    ulNewOffset;                          // new position
+  PBTREEBUFFER_V2   pBuffer = NULL;
+  SHORT    sRc = 0;                             // return code
+  
+  LogMessage(FATAL, "called commented out function QDAMReadRecordFromDisk_V2");
+  #ifdef TEMPORARY_COMMENTED
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+  PLOOKUPENTRY_V2 pLEntry = NULL;
+
+  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+
+  /********************************************************************/
+  /* Allocate space for a new buffer and let pBuffer point to it      */
+  /********************************************************************/
+  if ( !pBT->LookupTable_V2 || ( usNumber >= pBT->usNumberOfLookupEntries ))
+  {
+    sRc = BTREE_LOOKUPTABLE_CORRUPTED;
+  }
+  else
+  {
+    pLEntry = pBT->LookupTable_V2 + usNumber;
+
+    /* Safety-Check: is the lookup table entry (ptr. to buffer) for the
+                     record to read NULL ? */
+    if ( pLEntry->pBuffer )
+    {
+      /* ptr. isn't NULL: this should never occur */
+      sRc = BTREE_LOOKUPTABLE_CORRUPTED;
+    }
+    else
+    {
+      /* Allocate memory for a buffer */
+      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, (LONG) BTREE_BUFFER_V2 , NOMSG );
+      if ( pLEntry->pBuffer )
+      {
+        (pBT->usNumberOfAllocatedBuffers)++;
+        pBuffer = pLEntry->pBuffer;
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+    INC_REAL_READ_COUNT;
+    if ( !sRc )
+    {
+      lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V2;
+      sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
+    } /* endif */
+
+    // Read the record in to the buffer space
+    // Mark the next buffer for future allocations
+    if ( !sRc )
+    {
+      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
+      sRc = UtlRead( pBT->fp,
+                     (PVOID)&pBuffer->contents,
+                     BTREE_REC_SIZE_V2, &usNumBytesRead, FALSE);
+      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+      /****************************************************************/
+      /* The following check added by XQG                             */
+      /* (Sometimes UtlRead terminates with sRc = 0 and usNumBytes = 0*/
+      /*  if the database is locked and although we are NOT at the    */
+      /*  end of the file!)                                           */
+      /****************************************************************/
+      if ( !sRc && !usNumBytesRead )
+      {
+        if ( usNumber < pBT->usNextFreeRecord )
+        {
+          // this is rather an error condition than an end-of-file condition!
+          if ( pBT->usOpenFlags & ASD_SHARED )
+          {
+            sRc = BTREE_IN_USE;
+          }
+          else
+          {
+            sRc = BTREE_READ_ERROR;
+          } /* endif */
+        } /* endif */
+      } /* endif */
+    } /* endif */
+
+    if ( !sRc )
+    {
+       pBuffer->usRecordNumber = usNumber;
+//     pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
+       *ppReadBuffer = pBuffer;
+       if ( !usNumBytesRead )
+       {
+         /*************************************************************/
+         /* we are at the end of the file                             */
+         /*************************************************************/
+         if ( fNewRec )                // new record mode ???
+         {
+           memset (&pBuffer->contents, 0, sizeof(BTREERECORD_V2));
+           // init this record
+           pHeader = &(pBuffer->contents.header);
+           pHeader->usOccupied = 0;
+           pHeader->usNum = usNumber;
+           pHeader->usFilled = sizeof(BTREEHEADER );
+           pHeader->usLastFilled = BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER );
+//         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
+
+           sRc = QDAMWRecordToDisk_V2(pBTIda, pBuffer);
+           if (! sRc )
+           {
+             if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
+             {
+               // this condition should NEVER occur for shared resources
+               // as write is only allowed if the database has been
+               // previously locked
+               ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, NULL );
+ #ifdef _DEBUG
+               WinMessageBox( HWND_DESKTOP,
+                              (HWND)UtlQueryULong( QL_TWBCLIENT ),
+                              "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/2\nPlease save info required to reproduce this condition.",
+                              "Gotcha!", 9999, MB_ERROR );
+ #endif
+             } /* endif */
+             sRc = QDAMWriteHeader( pBTIda );
+           } /* endif */
+//         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
+         }
+         else
+         {
+           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, NULL );
+#ifdef _DEBUG
+           WinMessageBox( HWND_DESKTOP,
+                          (HWND)UtlQueryULong( QL_TWBCLIENT ),
+                          "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\n",
+                          "Internal Error", 9998, MB_ERROR );
+#endif
+           sRc = BTREE_READ_ERROR;
+         } /* endif */
+       } /* endif */
+    } /* endif */
+  } /* endif */
+
+  // For shared databases, check if database has been changed since last access
+  // in case of changes force a BTREE_IN_USE return code thus triggering a retry
+  // on one the outer calling levels
+  if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
+  {
+      LONG  lUpdCount;                 // buffer for new value of update counter
+
+     /**********************************************************************/
+     /* Get current database update count                                  */
+     /**********************************************************************/
+     sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
+
+     if ( !sRc )
+     {
+        if ( lUpdCount != pBT->alUpdCtr[0] )
+        {
+           sRc = BTREE_INVALIDATED;
+        } /* endif */
+     } /* endif */
+  } /* endif */
+
+  /********************************************************************/
+  /* Free record buffer in case of errors so record will be re-read   */
+  /* during retry operations                                          */
+  /********************************************************************/
+  if ( sRc )
+  {
+    if ( (pLEntry != NULL) && (pLEntry->pBuffer != NULL) )
+    {
+      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+      (pBT->usNumberOfAllocatedBuffers)--;
+    } /* endif */
+  } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+  #endif
+  return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMWRecordToDisk    Write record to disk
+//------------------------------------------------------------------------------
+// Function call:     QDAMWRecordToDisk( PBTREE, PBTREERECORD );
+//
+//------------------------------------------------------------------------------
+// Description:       Write the requested record to disk
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The B-tree to flush
+//                    PBTREERECORD       The buffer to write
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//------------------------------------------------------------------------------
+// Function flow:     init return value (sRc )
+//                    position in file to record to be written
+//                    if okay so far then
+//                      write record to disk and set sRC
+//                      if okay then
+//                        check if disk was full, i.e.
+//                        if written bytes equal BTREE_REC_SIZE then
+//                          reset fNeedToWrite flag;
+//                          init buffer
+//                        else
+//                          set return code BTREE_DISK_FULL;
+//                          set fCorrupted flag
+//                        endif
+//                      else
+//                        set BTREE_WRITE_ERROR;
+//                        set fCorrupted flag
+//                      endif
+//                    else
+//                      set BTREE_WRITE_ERROR;
+//                      set fCorrupted flag
+//                    endif
+//                    return sRc;
+//------------------------------------------------------------------------------
+SHORT QDAMWRecordToDisk_V2
+(
+   PBTREE     pBTIda,                     // pointer to btree structure
+   PBTREEBUFFER_V2  pBuffer               // pointer to buffer to write
+)
+{
+  SHORT sRc = 0;                          // return code
+  LogMessage(FATAL, "called commented out function QDAMWRecordToDisk_V2");
+  #ifdef TEMPORARY_COMMENTED
+  LONG  lOffset;                          // offset in file
+  ULONG ulNewOffset;                      // new file pointer position
+  USHORT usBytesWritten;                  // number of bytes written
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  INC_REAL_WRITE_COUNT;
+
+  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+
+//QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
+
+  if ( !sRc )
+  {
+    lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V2;
+
+    sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
+  } /* endif */
+
+  if ( ! sRc )
+  {
+    sRc = UtlWrite( pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V2, &usBytesWritten, FALSE );
+
+    // check if disk is full
+    if ( ! sRc )
+    {
+       if ( usBytesWritten == BTREE_REC_SIZE_V2 )
+       {
+          pBuffer->fNeedToWrite = FALSE;
+       }
+       else
+       {
+          sRc = BTREE_DISK_FULL;
+          pBT->fCorrupted = TRUE;                     // indicate corruption
+       } /* endif */
+    }
+    else
+    {
+       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+       pBT->fCorrupted = TRUE;                     // indicate corruption
+    } /* endif */
+  }
+  else
+  {
+    sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+    pBT->fCorrupted = TRUE;                        // indicate corruption
+  } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+  #endif
+
+  return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMReadRecord   Read record
+//------------------------------------------------------------------------------
+// Function call:     QDAMReadRecord( PBTREE, USHORT, PPBTREERECORD );
+//
+//------------------------------------------------------------------------------
+// Description:       read the requested record either from cache or from disk
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The B-tree to read
+//                    USHORT             number of buffer to read
+//                    PPBTREERECORD      The buffer read
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_LOOKUPTABLE_TOO_SMALL file is too big for l.table
+//                    BTREE_LOOKUPTABLE_NULL      ptr to lookup table is NULL
+//                    BTREE_LOOKUPTABLE_CORRUPTED lookup table is corrupted
+//------------------------------------------------------------------------------
+// Side effects:      The read record routine is one of the most performance
+//                    critical routines in the module.
+//
+//------------------------------------------------------------------------------
+// Concept:
+//
+//   AccessCounter  Record       LookupTable       Memory
+//       Table      Number
+//     +-------+                  +-------+
+//         0           0             NULL
+//     +-------+                  +-------+       +--------------------------+
+//        700          1             ptr  +------>  Buffer contains Record 1
+//     +-------+                  +-------+       +--------------------------+
+//         0           2             NULL
+//     +-------+                  +-------+
+//         .                          .
+//         .                          .
+//     +-------+                  +-------+       +--------------------------+
+//        200          i             ptr  +------>  Buffer contains Record i
+//     +-------+                  +-------+       +--------------------------+
+//         .                          .
+//         .                          .
+//     +-------+  pBT->usNumberOf +-------+
+//         0       LookupEntries     NULL
+//     +-------+                  +-------+
+//
+//  The lookup table is a dynamically growing array of ptrs to BTREEBUFFER.
+//  If the entry for record i is NULL record i isn't buffered in memory.
+//  If the rec.num. of the record to read is > pBT->usNumberOfLookupEntries
+//  lookup and access counter table will be resized.
+//
+//  The access counter table is a dynamically growing array of unsigned long.
+//  On every read access of record i the entry for record i is increased by
+//  ACCESSBONUSPOINTS.
+//
+//  From time to time (every MAX_READREC_CALLS calls to QDAMReadRecord)
+//  unlocked records which aren't read very often ( accesscounter <
+//  MAX_READREC_CALLS ) will be written to disk (if fNeedToWrite is set) and
+//  the buffer that contains the record will be freed.
+//
+//------------------------------------------------------------------------------
+// Function flow:
+//
+//     initialize return code (sRc) and pointer to record
+//
+//     if rec.num. >= MAX_NUMBER_OF_LOOKUP_ENTRIES (l.table would exceed 64kB)
+//        or ptr. to lookup- or access-counter-table is NULL
+//         set appropriate return code
+//     else
+//        if rec.num >= number of lookup table entries
+//           resize lookup and access counter table
+//           and set appropriate return code
+//
+//     if no error occured
+//        if record is already in memory
+//          set pointer to it
+//        else
+//          read record from disk (QDAMReadRecordFromDisk)
+//            and set appropriate return code
+//          initialize access counter (set it to 0)
+//        endif
+//
+//     if no error occured
+//        if #calls to QDAMReadRecord >= MAX_READREC_CALLS
+//           write unlocked records with access counter < MAX_READREC_CALLS
+//           to disk (if fNeedToWrite is set) and free allocated buffer
+//           set pBT->ulReadRecCalls to 0
+//        else
+//           increment pBT->ulReadRecCalls
+//
+//     if no error occured
+//        increase access counter of the record read by ACCESSBONUSPOINTS
+//
+//     return sRc
+//------------------------------------------------------------------------------
+SHORT  QDAMReadRecord_V2
+(
+   PBTREE  pBTIda,
+   USHORT  usNumber,
+   PBTREEBUFFER_V2 * ppReadBuffer,
+   BOOL    fNewRec
+)
+{
+  USHORT   i;
+  SHORT    sRc = 0;                  // return code
+  BOOL     fMemOK = FALSE;
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+  PLOOKUPENTRY_V2  pLEntry;
+  PACCESSCTRTABLEENTRY  pACTEntry;
+
+  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+
+  *ppReadBuffer = NULL;
+  INC_READ_COUNT;
+
+  /********************************************************************/
+  /* If Lookup-Table is too small allocate additional memory for it   */
+  /********************************************************************/
+  if ( usNumber >= MAX_NUMBER_OF_LOOKUP_ENTRIES )
+  {
+    /* There is no room for this record number in the lookup table */
+    sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
+  }
+  else if ( !pBT->LookupTable_V2 || !pBT->AccessCtrTable )
+  {
+    sRc = BTREE_LOOKUPTABLE_NULL;
+  }
+  else
+  {
+    if ( usNumber >= pBT->usNumberOfLookupEntries )
+    {
+      /* The lookup-table entry for the record to read doesn't exist */
+      /* Reallocate memory for LookupTable and AccessCounterTable */
+      fMemOK = UtlAlloc( (PVOID *)&pBT->LookupTable_V2,
+              (LONG) pBT->usNumberOfLookupEntries * sizeof(LOOKUPENTRY_V2),
+              (LONG) (usNumber + 10) * sizeof(LOOKUPENTRY_V2), NOMSG );
+      if ( fMemOK==TRUE )
+      {
+        fMemOK = UtlAlloc( (PVOID *)&pBT->AccessCtrTable,
+                (LONG) pBT->usNumberOfLookupEntries * sizeof(ACCESSCTRTABLEENTRY),
+                (LONG) (usNumber + 10) * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+        if ( fMemOK==TRUE )
+        {
+          pBT->usNumberOfLookupEntries = usNumber + 10;
+        }
+        else
+        {
+          sRc = BTREE_NO_ROOM;
+        } /* endif */
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+    /******************************************************************/
+    /* If record is in memory set ppReadBuffer                        */
+    /* else call QDAMReadRecordFromDisk to read it into memory        */
+    /******************************************************************/
+    pLEntry = pBT->LookupTable_V2 + usNumber;
+
+    if ( pLEntry->pBuffer )
+    {
+      /* Safety-Check: is rec.number = number of rec. to read ? */
+      if ( (pLEntry->pBuffer)->usRecordNumber == usNumber )
+      {
+        /* Record is already in memory */
+        *ppReadBuffer = pLEntry->pBuffer;
+      }
+      else
+      {
+        /* This should never occur ! */
+        sRc = BTREE_LOOKUPTABLE_CORRUPTED;
+      } /* endif */
+    }
+    else
+    {
+      /* Record isn't in memory -> read it from disk */
+      sRc =  QDAMReadRecordFromDisk_V2( pBTIda, usNumber, ppReadBuffer, fNewRec );
+      pACTEntry=pBT->AccessCtrTable + usNumber;
+      pACTEntry->ulAccessCounter = 0L;
+    } /* endif */
+  } /* endif */
+
+  /****************************************************************************/
+  /* If #calls of QDAMReadRecord is greater than MAX_READREC_CALLS:           */
+  /*   write unlocked records with access counter < MAX_READREC_CALLS to disk */
+  /*   (if fNeedToWrite is set) and free the allocated memory                 */
+  /*   set #calls of QDAMReadRecord = 0                                       */
+  /* else increment #calls of QDAMReadRecord                                  */
+  /****************************************************************************/
+  if ( !sRc )
+  {
+    if ( pBT->ulReadRecCalls >= MAX_READREC_CALLS )
+    {
+      for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
+      {
+        pLEntry = pBT->LookupTable_V2 + i;
+        pACTEntry = pBT->AccessCtrTable + i;
+        if ( pLEntry->pBuffer && !((pLEntry->pBuffer)->fLocked) && (i!=usNumber)
+             && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
+        {
+            /* write buffer and free allocated space */
+            if ( (pLEntry->pBuffer)->fNeedToWrite )
+            {
+              if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
+              {
+                // this condition should NEVER occur for shared resources
+                // as write is only allowed if the database has been
+                // previously locked
+                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+              #ifdef _DEBUG
+                WinMessageBox( HWND_DESKTOP,
+                   (HWND)UtlQueryULong( QL_TWBCLIENT ),
+                   "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.",
+                   "Gotcha!", 9999, MB_ERROR );
+              #endif
+              } /* endif */
+              sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer);
+            } /* endif */
+            if ( !sRc )
+            {
+              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L , NOMSG );
+              pBT->usNumberOfAllocatedBuffers--;
+            } /* endif */
+        } /* endif */
+
+        if ( pACTEntry->ulAccessCounter<MAX_READREC_CALLS )
+        {
+          pACTEntry->ulAccessCounter = 0L;
+        }
+        else
+        {
+          pACTEntry->ulAccessCounter -= MAX_READREC_CALLS;
+        } /* endif */
+      } /* endfor */
+      pBT->ulReadRecCalls = 0L;
+    }
+    else
+    {
+      pBT->ulReadRecCalls++;
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+    /* Increase the access counter for the record just read by  ACCESSBONUSPOINTS */
+    pACTEntry=pBT->AccessCtrTable + usNumber;
+    pACTEntry->ulAccessCounter += ACCESSBONUSPOINTS;
+  } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+  return ( sRc );
+}
+
+SHORT  QDAMReadRecord_V3
+(
+   PBTREE  pBTIda,
+   USHORT  usNumber,
+   PBTREEBUFFER_V3 * ppReadBuffer,
+   BOOL    fNewRec
+);
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMAllocKeyRecords   Allocate space for key records
+//------------------------------------------------------------------------------
+// Function call:     QDAMAllocKeyRecords( PBTREEBUFFER, USHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Allocate a chunk of records for keys
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREEBUFFER           record pointer from where to copy
+//                    USHORT                 number of records to be allocated
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     allocate the number of requested records and
+//                    put them into a linked list
+//
+//------------------------------------------------------------------------------
+SHORT QDAMAllocKeyRecords
+(
+   PBTREE pBTIda,
+   USHORT usNum
+)
+{
+   SHORT  sRc = 0;
+   PBTREEHEADER  pHeader;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+LogMessage(FATAL, "called commented out function QDAMAllocKeyRecords");
+  #ifdef TEMPORARY_COMMENTED
+   if ( pBT->bRecSizeVersion == BTREE_V3 )
+   {
+      PBTREEBUFFER_V3  pRecord;
+      while ( usNum-- && !sRc )
+      {
+          pBT->usNextFreeRecord++;
+          sRc = QDAMReadRecord_V3( pBTIda, pBT->usNextFreeRecord, &pRecord, TRUE  );
+
+          if ( !sRc )
+          {
+            // add free record to the free list
+            NEXT( pRecord ) = pBT->usFreeKeyBuffer;
+            PREV( pRecord ) = 0;
+            pBT->usFreeKeyBuffer = RECORDNUM( pRecord );
+
+            // init this record
+            pHeader = &pRecord->contents.header;
+            pHeader->usNum = pBT->usFreeKeyBuffer;
+            pHeader->usOccupied = 0;
+            pHeader->usFilled = sizeof(BTREEHEADER );
+            pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
+
+            /*************************************************************/
+            /* force write                                               */
+            /*************************************************************/
+            sRc = QDAMWRecordToDisk_V3( pBTIda, pRecord);
+          } /* endif */
+      } /* endwhile */
+   }
+   else
+   {
+      PBTREEBUFFER_V2  pRecord;
+      while ( usNum-- && !sRc )
+      {
+          pBT->usNextFreeRecord++;
+          sRc = QDAMReadRecord_V2( pBTIda, pBT->usNextFreeRecord, &pRecord, TRUE  );
+
+          if ( !sRc )
+          {
+            // add free record to the free list
+            NEXT( pRecord ) = pBT->usFreeKeyBuffer;
+            PREV( pRecord ) = 0;
+            pBT->usFreeKeyBuffer = RECORDNUM( pRecord );
+
+            // init this record
+            pHeader = &pRecord->contents.header;
+            pHeader->usNum = pBT->usFreeKeyBuffer;
+            pHeader->usOccupied = 0;
+            pHeader->usFilled = sizeof(BTREEHEADER );
+            pHeader->usLastFilled = BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER );
+
+            /*************************************************************/
+            /* force write                                               */
+            /*************************************************************/
+            sRc = QDAMWRecordToDisk_V2( pBTIda, pRecord);
+          } /* endif */
+      } /* endwhile */
+   } /* endif */
+    #endif
+   return sRc;
+}
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMWriteRecord  Write record
+//------------------------------------------------------------------------------
+// Function call:     QDAMWriteRecord( PBTREE, PBTREERECORD );
+//
+//------------------------------------------------------------------------------
+// Description:       Write the requested record either in cash ( mark it )
+//                    or to disk
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The B-tree to write
+//                    PBTREERECORD       The buffer to write
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//------------------------------------------------------------------------------
+// Function flow:     init return code
+//                    write header with open flag set if not yet done
+//                    if guard flag is on then
+//                      write it to disk and set sRc
+//                    else
+//                      set only flag
+//                    endif
+//                    return sRc
+//------------------------------------------------------------------------------
+SHORT QDAMWriteRecord_V2
+(
+   PBTREE       pBTIda,
+   PBTREEBUFFER_V2 pBuffer
+)
+{
+   SHORT  sRc = 0;                               // return code
+   PBTREEGLOB  pBT = pBTIda->pBTree;
+  LogMessage(FATAL, "called commented out function QDAMWriteRecord_V2");
+  #ifdef TEMPORARY_COMMENTED
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+
+   INC_WRITE_COUNT;
+
+   /********************************************************************/
+   /* write header with corruption flag -- if not yet done             */
+   /********************************************************************/
+   if ( pBT->fWriteHeaderPending )
+   {
+     sRc = QDAMWriteHeader( pBTIda );
+     pBT->fWriteHeaderPending = FALSE;
+   } /* endif */
+
+   //  if guard flag is on write it to disk
+   //  else set only the flag
+   if ( !sRc )
+   {
+     if ( !pBT->fGuard )
+     {
+        pBuffer->fNeedToWrite = TRUE;
+     }
+     else
+     {
+        sRc = QDAMWRecordToDisk_V2(pBTIda, pBuffer);
+     } /* endif */
+   } /* endif */
+
+
+   // For shared databases only: set internal update flag, the
+   // update counter will be written once the file lock is removed
+   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
+   {
+     pBT->fUpdated = TRUE;;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
+   #endif
+   
+   return sRc;
+}
+
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -1700,16 +3086,12 @@ SHORT QDAMDictCreateLocal
           sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
           {
-            #ifdef TEMPORARY_COMMENTED
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
-            #endif
           } /* endif */
           if ( !sRc )
           {
-            #ifdef TEMPORARY_COMMENTED
             sRc = QDAMAllocKeyRecords( pBTIda, 1 );
-            #endif
             if (! sRc )
             {
                 pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
@@ -1719,22 +3101,15 @@ SHORT QDAMDictCreateLocal
         else
         {
           PBTREEBUFFER_V2 pRecord;
-          #ifdef TEMPORARY_COMMENTED
           sRc = QDAMReadRecord_V2(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
-          #endif
           if ( !sRc )
           {
-
-            #ifdef TEMPORARY_COMMENTED
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
             sRc = QDAMWriteRecord_V2(pBTIda,pRecord);
-            #endif
           } /* endif */
           if ( !sRc )
           {
-            #ifdef TEMPORARY_COMMENTED
             sRc = QDAMAllocKeyRecords( pBTIda, 1 );
-            #endif
             if (! sRc )
             {
                 pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
@@ -1775,23 +3150,1744 @@ SHORT QDAMDictCreateLocal
   }
   else
   {
-    #ifdef TEMPORARY_COMMENTED
     // leave the return code from create
     // file will not be destroyed if create failed, since then
     // filename is not set
     QDAMDestroy( pBTIda );
-    #endif
   } /* endif */
 
   if ( sRc )
   {
-    #ifdef TEMPORARY_COMMENTED
     ERREVENT2( QDAMDICTCREATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-    #endif
   } /* endif */
 
 
   return( sRc );
+}
+
+
+//------------------------------------------------------------------------------
+// External function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictLockStatus
+//------------------------------------------------------------------------------
+// Function call:     fLocked = QDAMDictLockStatus( pBTIda, pHeadTerm );
+//------------------------------------------------------------------------------
+// Description:       This call returns the status of the current entry
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE  pBTIDa   pointer to instance data
+//                    PSZ     pHeadTerm  pointer to head term
+//------------------------------------------------------------------------------
+// Returncode type:   BOOL
+//------------------------------------------------------------------------------
+// Returncodes:       TRUE   entry is locked
+//                    FALSE  entry is free for update
+//------------------------------------------------------------------------------
+// Function flow:     get pointer to list of all open instances of our dict..
+//                    run thru list and check if this headterm is locked ..
+//------------------------------------------------------------------------------
+BOOL
+QDAMDictLockStatus
+(
+  PBTREE  pBTIda,
+  PSZ_W   pKey
+)
+{
+  BOOL     fLock = FALSE;
+  /******************************************************************/
+  /* check the subject entry is not locked somewhere else...        */
+  /******************************************************************/
+  LogMessage(FATAL, "called commented out function QDAMDictLockStatus");
+  #ifdef TEMPORARY_COMMENTED
+
+  PPBTREE  ppBTemp;
+  PQDAMDICT pQDict;
+  pQDict = &(QDAMDict[pBTIda->usDictNum]);
+  ppBTemp = &(pQDict->pIdaList[1]);
+
+  while ( *ppBTemp && !fLock)
+  {
+    if ( (*ppBTemp)->fLock && ! UTF16stricmp( pKey, (*ppBTemp)->chLockedTerm) )
+    {
+      /****************************************************************/
+      /* set fLock only if it's not me who want to update ....        */
+      /****************************************************************/
+      if ( pBTIda != *ppBTemp )
+      {
+        fLock = TRUE;
+      }
+      else
+      {
+        ppBTemp++;
+      } /* endif */
+    }
+    else
+    {
+      ppBTemp++;
+    } /* endif */
+  } /* endwhile */
+
+  return( fLock );
+  #endif 
+  return false;
+} /* end of function QDAMDictLockStatus */
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMPhysLock           Physical lock file
+//------------------------------------------------------------------------------
+// Function call:     QDAMPhysLock( PBTREE, BOOL, PBOOL );
+//
+//------------------------------------------------------------------------------
+// Description:       lock or unlock the database
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The database to be locked
+//                    BOOL               TRUE = LOCK, FALSE = Unlock
+//                    PBOOL              ptr to locked flag (set to TRUE if
+//                                       locking was successful
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+SHORT QDAMPhysLock
+(
+   PBTREE         pBTIda,
+   BOOL           fLock,
+   PBOOL          pfLocked
+)
+{
+  LogMessage(FATAL, "called commented out function QDAMPhysLock");
+  #ifdef TEMPORARY_COMMENTED
+  SHORT    sRc = 0;                    // return code
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+  FILELOCK  Lock;                      // range to be locked or unlocked
+
+  if ( pfLocked != NULL ) *pfLocked = FALSE;  // set initial value
+  Lock.lOffset = 0L;                   // start at begin of file
+  Lock.lRange  = 0x7FFFFFFF;
+
+  if ( fLock )
+  {
+    if ( !pBTIda->fPhysLock )
+    {
+       SHORT sRetries = MAX_RETRY_COUNT;
+
+       // lock update counter file
+       do
+       {
+         sRc = UtlFileLocks( pBT->fpDummy, (PFILELOCK)NULL, &Lock, FALSE );
+         if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+         if ( sRc == BTREE_IN_USE )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( (sRc == BTREE_IN_USE) && (sRetries > 0));
+
+       // lock database file (here we do not use a retry loop as the database
+       // file should not be locked if the update counter file was not locked)
+       if ( sRc == NO_ERROR )
+       {
+         sRc = UtlFileLocks( pBT->fp, (PFILELOCK)NULL, &Lock, FALSE );
+         if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+         // unlock update counter file in case of errors
+         if ( sRc != NO_ERROR )
+         {
+           UtlFileLocks( pBT->fpDummy, &Lock, (PFILELOCK)NULL, FALSE );
+         } /* endif */
+       } /* endif */
+
+       if ( sRc == NO_ERROR )
+       {
+         pBTIda->fPhysLock = TRUE;
+         if ( pfLocked != NULL ) *pfLocked = TRUE;
+
+         // ensure we work with up-to-date data
+         sRc = QDAMCheckForUpdates( pBTIda );
+       } /* endif */
+    } /* endif */
+  }
+  else
+  {
+     // Set update counter in case of database updates
+    if ( pBT->fUpdated )
+    {
+      sRc = QDAMDictFlushLocal( pBTIda );
+      if ( sRc == NO_ERROR )
+      {
+        sRc = QDAMWriteHeader( pBTIda );
+      } /* endif */
+      QDAMIncrUpdCounter( pBTIda, 0, NULL );
+      pBT->fUpdated = FALSE;
+    } /* endif */
+
+    // unlock database file
+    sRc = UtlFileLocks( pBT->fp, &Lock, (PFILELOCK)NULL, FALSE );
+
+    // unlock update counter file
+    if ( sRc == NO_ERROR )
+    {
+      UtlFileLocks( pBT->fpDummy, &Lock, (PFILELOCK)NULL, FALSE );
+      pBTIda->fPhysLock = FALSE;
+    } /* endif */
+  } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMPHYSLOCK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+//    sRc = BTREE_IN_USE;
+  } /* endif */
+
+  return( sRc ) ;
+  #endif 
+  return 0;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictUpdStatus
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictUpdStatus( pBTIda );
+//------------------------------------------------------------------------------
+// Description:       invalidates the status of the current record
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE  pBTIda   pointer to instance data
+//------------------------------------------------------------------------------
+// Returncode type:   VOID
+//------------------------------------------------------------------------------
+// Function flow:     get pointer to list of instances
+//                    run through list and invalidate the current entry for
+//                      all instances ...
+//                    Our instance data will be updated after this call, so
+//                      it's okay to get rid of it, too.
+//------------------------------------------------------------------------------
+VOID
+QDAMDictUpdStatus
+(
+  PBTREE  pBTIda
+)
+{
+
+  LogMessage(FATAL, "called commented out function QDAMDictUpdStatus");
+  #ifdef TEMPORARY_COMMENTED
+  PPBTREE  ppBTemp;
+  PQDAMDICT pQDict;
+  /********************************************************************/
+  /* update, i.e. invalidate the sCurrent record and offset           */
+  /********************************************************************/
+  pQDict = &(QDAMDict[pBTIda->usDictNum]);
+  ppBTemp = &(pQDict->pIdaList[1]);
+
+  while ( *ppBTemp )
+  {
+    (*ppBTemp)->sCurrentIndex = RESET_VALUE;
+    (*ppBTemp)->usCurrentRecord = 0;
+    ppBTemp++;
+  } /* endwhile */
+  #endif 
+} /* end of function QDAMDictUpdStatus */
+
+
+SHORT QDAMFindRecord_V3
+(
+    PBTREE   pBTIda,
+    PCHAR_W  pKey,
+    PBTREEBUFFER_V3 * ppRecord
+)
+{
+  SHORT         sResult;
+  SHORT         sLow;                              // Far left
+  SHORT         sHigh;                             // Far right
+  SHORT         sMid = 0;                          // Middle
+  RECPARAM      recData;                           // data structure
+  PCHAR_W       pKey2;                             // pointer to search key
+  SHORT         sRc;                               // return code
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  LogMessage(FATAL, "called commented out function QDAMFindRecord_V3");
+  #ifdef TEMPORARY_COMMENTED
+  memset(&recData, 0, sizeof(recData));
+  sRc = QDAMReadRecord_V3( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );
+  while ( !sRc && !IS_LEAF( *ppRecord ))
+  {
+    BTREELOCKRECORD( *ppRecord );
+
+    sLow = 0;                                    // start here
+    sHigh = (SHORT) OCCUPIED( *ppRecord) -1 ;    // counting starts at zero
+
+
+    while ( !sRc && (sLow <= sHigh) )
+    {
+      sMid = (sLow + sHigh)/2;
+      pKey2 = QDAMGetszKey_V3( *ppRecord, sMid, pBT->usVersion );
+      if ( pKey2 == NULL )
+      {
+        sRc = BTREE_CORRUPTED;
+      }
+      else
+      {
+        sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+        if ( sResult < 0 )
+        {
+          sHigh = sMid - 1;                        // Go left
+        }
+        else
+        {
+          sLow = sMid + 1;                         // Go right
+        } /* endif */
+      } /* endif */
+    } /* endwhile */
+
+    /******************************************************************/
+    /* it is the lower one due the construction of the BTREE          */
+    /*  -- according to the while loop it must be the sHIGH value     */
+    /* if sHigh < 0 we should use the first one                      */
+    /******************************************************************/
+    if ( !sRc )
+    {
+      if ( sHigh == -1 )
+      {
+        sHigh = 0;
+      } /* endif */
+      recData = QDAMGetrecData_V3( *ppRecord, sHigh, pBT->usVersion );
+    } /* endif */
+
+    BTREEUNLOCKRECORD( *ppRecord );                        // unlock previous record.
+
+    if ( !sRc )
+    {
+      sRc = QDAMReadRecord_V3( pBTIda, recData.usNum, ppRecord, FALSE  );
+    } /* endif */
+  } /* endwhile */
+  #endif 
+  return( sRc );
+}
+
+
+SHORT  QDAMAddToBuffer_V3
+(
+   PBTREE  pBTIda,                     // pointer to btree struct
+   PBYTE   pData,                      // pointer to data
+   ULONG   ulDataLen,                  // length of data to be filled in
+   PRECPARAM  precReturn               // pointer to return code
+)
+{
+   SHORT sRc = 0;                      // success indicator
+
+   LogMessage(FATAL, "called commented out function QDAMAddToBuffer_V3");
+  #ifdef TEMPORARY_COMMENTED
+   USHORT  usFilled;                   // number of bytes filled in record
+   USHORT  usMaxRec= 0;                // most filled record
+   RECPARAM recStart;                  // return code where data are stored
+   PRECPARAM pRecParam;                // parameter to stored list
+   PRECPARAM pRecTemp ;                // parameter to stored list
+   BOOL  fFit = FALSE;                 // indicator if record found
+   USHORT  i;                          // index
+   PBTREEHEADER  pHeader;              // record header
+   PBTREEBUFFER_V3 pRecord = NULL;        // buffer record
+   PBTREEBUFFER_V3 pTempRecord;           // buffer record
+   CHAR     chNodeType;                // type of node
+   BOOL     fTerse = FALSE;            // data are not tersed
+   USHORT   usLastPos;
+   ULONG    ulFullDataLen;             // length of record
+   PUSHORT  pusOffset;
+   PCHAR    pRecData;                  // pointer to record data
+   ULONG    ulFitLen;                  // currently used length
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+   USHORT   usLenFieldSize;            // size of length field
+
+   memset(&recStart, 0, sizeof(recStart));
+   /*******************************************************************/
+   /* Enlarge pTempRecord area if it is not large enough to contain   */
+   /* the data for this record                                        */
+   /*******************************************************************/
+#ifdef _DEBUG
+   {
+     CHAR szTemp[8];
+     sprintf( szTemp, "%ld", ulDataLen );
+     INFOEVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 4711, DB_GROUP, szTemp );
+   }
+#endif
+   if ( (ulDataLen + sizeof(ULONG)) > pBT->ulTempRecSize )
+   {
+     if ( UtlAlloc( (PVOID *)&(pBT->pTempRecord), pBT->ulTempRecSize, ulDataLen + sizeof(ULONG), NOMSG ) )
+     {
+       pBT->ulTempRecSize = ulDataLen + sizeof(ULONG);
+     }
+     else
+     {
+       sRc = BTREE_NO_ROOM;
+     } /* endif */
+   } /* endif */
+
+  if ( pBT->usVersion >= NTM_VERSION2 )
+  {
+    usLenFieldSize = sizeof(ULONG);
+  }
+  else
+  {
+    usLenFieldSize = sizeof(USHORT);
+  } /* endif */
+
+   pRecParam = pBT->DataRecList;
+   /*******************************************************************/
+   /* determine type of compression....                               */
+   /*******************************************************************/
+   switch ( pBT->fTerse )
+   {
+     case  BTREE_TERSE_HUFFMAN :
+       fTerse = QDAMTerseData( pBTIda, pData, &ulDataLen, pBT->pTempRecord );
+       break;
+     default :
+       fTerse = FALSE;
+       break;
+   } /* endswitch */
+
+   chNodeType = DATA_NODE;
+
+   // data should be in pBT->pTempRecord for further processing
+   // copy them if not yet done.....
+   if ( !fTerse )
+   {
+      memcpy( pBT->pTempRecord, pData, ulDataLen );
+   } /* endif */
+
+   if ( !sRc && (ulDataLen <= BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER)) )
+   {
+      pRecTemp = pRecParam;
+      i = 0;
+      //  find slot in list
+      usFilled = (USHORT)(BTREE_REC_SIZE_V3 - ulDataLen - 2 * usLenFieldSize);
+      while ( !fFit && i < MAX_LIST )
+      {
+         if ( pRecTemp->usOffset == 0 || pRecTemp->usOffset > usFilled )   // will not fit
+         {
+            pRecTemp++;
+            i++;
+         }
+         else                                     // data will fit
+         {
+            fFit = TRUE;
+         } /* endif */
+      } /* endwhile */
+
+
+      if ( fFit )
+      {
+         // store position where data will be stored
+         recStart.usNum    = pRecTemp->usNum;
+
+         // get record, copy data and write them
+         sRc = QDAMReadRecord_V3( pBTIda, recStart.usNum, &pRecord, FALSE  );
+         if ( !sRc )
+         {
+            BTREELOCKRECORD( pRecord );
+            if ( TYPE( pRecord ) != chNodeType )
+            {
+               sRc = BTREE_CORRUPTED;
+               ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+            }
+            else
+            {
+               // fill in key data
+               usLastPos = pRecord->contents.header.usLastFilled;
+               usLastPos = usLastPos - (USHORT)(ulDataLen + usLenFieldSize);
+               pData = pRecord->contents.uchData + usLastPos;
+               // insert reference
+               if ( pBT->usVersion >= NTM_VERSION2 )
+               {
+                 *(PULONG) pData = ulDataLen;
+               }
+               else
+               {
+                 *(PUSHORT) pData = (USHORT)ulDataLen;
+               }
+               memcpy( pData+usLenFieldSize, pBT->pTempRecord, ulDataLen );
+
+               // set address of key data at next free offset
+               pusOffset = (PUSHORT) pRecord->contents.uchData;
+               *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+               OCCUPIED(pRecord) += 1;
+               pRecord->contents.header.usLastFilled = usLastPos;
+               pRecord->contents.header.usFilled = pRecord->contents.header.usFilled + (USHORT)(ulDataLen+usLenFieldSize+sizeof(USHORT));
+
+               // mark if tersed or not
+               if ( fTerse )
+               {
+                 if ( pBT->usVersion >= NTM_VERSION2 )
+                 {
+                   *(PULONG) pData |= QDAM_TERSE_FLAGL;
+                 }
+                 else
+                 {
+                   *(PUSHORT) pData |= QDAM_TERSE_FLAG;
+                 }
+               } /* endif */
+//             pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+               sRc = QDAMWriteRecord_V3(pBTIda, pRecord);
+               // update list entry
+               if ( !sRc )
+               {
+                  pRecTemp->usOffset = pRecord->contents.header.usFilled;
+               } /* endif */
+            } /* endif */
+            BTREEUNLOCKRECORD( pRecord );
+         } /* endif */
+      } /* endif */
+   } /* endif */
+
+   //  either record is too large or no space left in list of records
+
+   if ( !sRc && !fFit )
+   {
+      pRecTemp = pRecParam;
+      i = 0;
+      // scan list and find empty slot
+      while ( (i < MAX_LIST) && !fFit )
+      {
+         if ( pRecTemp->usNum == 0 )     // empty slot found
+         {
+            fFit = TRUE;
+         }
+         else
+         {
+            pRecTemp++;                  // point to next slot
+            i++;
+         } /* endif */
+      } /* endwhile */
+
+      /****************************************************************/
+      /* if not found remove slot which is most filled                */
+      /****************************************************************/
+      if ( !fFit )
+      {
+         pRecTemp = pRecParam;
+         usFilled = 0;
+         for ( i=0 ; i < MAX_LIST ;i++ )
+         {
+            if ( pRecTemp->usOffset > usFilled)
+            {
+               usMaxRec = i;
+               usFilled = pRecTemp->usOffset;
+            } /* endif */
+            pRecTemp++;                // next record in list
+         } /* endfor */
+         // set pRecTemp to the selected slot
+         pRecTemp = pRecParam + usMaxRec;
+      } /* endif */
+
+      // get record and store start position
+      memset( pRecTemp, 0 , sizeof(RECPARAM));
+
+      sRc = QDAMNewRecord_V3( pBTIda, &pRecord, DATAREC );
+      // fill it up to length or record size
+      if ( ! sRc )
+      {
+         TYPE( pRecord ) = chNodeType;     // indicate that it is a data node
+         BTREELOCKRECORD( pRecord );
+         pRecData = (PCHAR)(pBT->pTempRecord + ulDataLen);
+         ulFullDataLen = ulDataLen;         // store original data len
+         while ( !sRc && ulDataLen + pRecord->contents.header.usFilled  >= (BTREE_REC_SIZE_V3 - (usLenFieldSize + sizeof(SHORT))))
+         {
+           /***********************************************************/
+           /* get a new record, anchor it and fill data from end      */
+           /* new record will be predecessor of already allocated rec.*/
+           /***********************************************************/
+           sRc = QDAMNewRecord_V3( pBTIda, &pTempRecord, DATAREC );
+           if ( !sRc )
+           {
+             TYPE( pTempRecord ) = chNodeType;   // data node
+             NEXT( pTempRecord ) = RECORDNUM( pRecord );
+             PREV( pRecord ) = RECORDNUM( pTempRecord );
+             TYPE( pRecord ) = DATA_NEXTNODE;              // data node
+
+             // fill in key data
+             /*********************************************************/
+             /* adjust sizes of relevant data                         */
+             /*********************************************************/
+             usLastPos = pRecord->contents.header.usLastFilled;
+             {
+               ULONG ulMax = (ULONG)(BTREE_REC_SIZE_V3 - pRecord->contents.header.usFilled );
+               ulFitLen = min( ulDataLen, ulMax );
+               ulFitLen -= (ULONG)(usLenFieldSize + sizeof(USHORT));
+             }
+             usLastPos = usLastPos - (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+             pData = pRecord->contents.uchData + usLastPos;
+             pRecData -= ulFitLen;
+             ulDataLen -= ulFitLen;
+             /*********************************************************/
+             /* store length and copy data of part contained in record*/
+             /*********************************************************/
+             if ( pBT->usVersion >= NTM_VERSION2 )
+             {
+               *(PULONG) pData = ulFitLen;
+             }
+             else
+             {
+               *(PUSHORT) pData = (USHORT)ulFitLen;
+             }
+             memcpy( pData+usLenFieldSize, pRecData,  ulFitLen );
+             // set address of key data at next free offset
+             pusOffset = (PUSHORT) pRecord->contents.uchData;
+             *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+             OCCUPIED(pRecord) += 1;
+             pRecord->contents.header.usLastFilled = usLastPos;
+             pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
+                                           (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+//           pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+             sRc = QDAMWriteRecord_V3(pBTIda, pRecord);
+             BTREEUNLOCKRECORD( pRecord );
+
+             /*********************************************************/
+             /* toggle for adressing purposes                         */
+             /* now: pRecord will be the free one for later filling   */
+             /*********************************************************/
+             pRecord = pTempRecord;
+             BTREELOCKRECORD( pRecord );
+           } /* endif */
+         } /* endwhile */
+
+         /*************************************************************/
+         /* write out rest (this is the normal way in most cases      */
+         /*************************************************************/
+         if ( !sRc )
+         {
+           pHeader = &(pRecord->contents.header);
+           pHeader->usParent = sizeof(BTREEHEADER );
+
+           // store position where data will be stored
+           recStart.usNum    = pHeader->usNum;
+
+           // fill in key data
+           usLastPos = pRecord->contents.header.usLastFilled;
+
+           usLastPos = usLastPos - (USHORT)(ulDataLen + (ULONG)usLenFieldSize);
+           pData = pRecord->contents.uchData + usLastPos;
+           pRecData -= ulDataLen;
+
+           // insert reference
+           if ( pBT->usVersion >= NTM_VERSION2 )
+           {
+             *(PULONG) pData = ulFullDataLen;
+           }
+           else
+           {
+             *(PUSHORT) pData = (USHORT)ulFullDataLen;
+           }
+           memcpy( pData+usLenFieldSize, pRecData, ulDataLen );
+
+           // set address of key data at next free offset
+           pusOffset = (PUSHORT) pRecord->contents.uchData;
+           *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+           OCCUPIED(pRecord) += 1;
+           pRecord->contents.header.usLastFilled = usLastPos;
+           pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
+                                    (USHORT)(ulDataLen+usLenFieldSize+sizeof(USHORT));
+
+           // mark if tersed or not
+           if ( fTerse )
+           {
+             if ( pBT->usVersion >= NTM_VERSION2 )
+             {
+               *(PULONG) pData |= QDAM_TERSE_FLAGL;
+             }
+             else
+             {
+               *(PUSHORT) pData |= QDAM_TERSE_FLAG;
+             }
+           } /* endif */
+
+
+           // write record
+  //       pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+           sRc = QDAMWriteRecord_V3(pBTIda, pRecord);
+           BTREEUNLOCKRECORD( pRecord );         // free the locking
+           // update list entry
+           if ( !sRc )
+           {
+              pRecTemp->usOffset = pHeader->usFilled;
+              pRecTemp->usNum    = pHeader->usNum;
+           } /* endif */
+         } /* endif */
+      } /* endif */
+   } /* endif */
+
+   //  return record parameters
+   if ( !sRc )
+   {
+      precReturn->usNum = recStart.usNum - pBT->usFirstDataBuffer;
+      precReturn->usOffset = OCCUPIED( pRecord ) - 1;
+   }
+   else
+   {
+      memset(&recStart, 0, sizeof(RECPARAM));
+      precReturn = &recStart;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+#endif
+   return sRc;
+}
+
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMInsertKey       Insert a key
+//------------------------------------------------------------------------------
+// Function call:     QDAMInsertKey( PBTREE, PBTREEBUFFER, PCHAR,
+//                                    RECPARAM, RECPARAM );
+//------------------------------------------------------------------------------
+// Description:       Add a key and offset to a record. If there is no room,
+//                    the record is split in half and the key is add to the
+//                    appropriate half. The key being inserted must be unique.
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             pointer to btree structure
+//                    PBTREEBUFFER       record where to insert the key
+//                    PCHAR              key to be inserted
+//                    RECPARAM           position/offset of the key string
+//                    RECPARAM           pos.   /offset of data (if data node)
+//                                               else position of child record
+//
+//------------------------------------------------------------------------------
+// Returncode type:   BOOL
+//------------------------------------------------------------------------------
+// Returncodes:       TRUE   if key could be inserted
+//                    FALSE  else
+//
+//------------------------------------------------------------------------------
+// Side effects:      Splitting a record will affect the parent node(s) of a
+//                    record.
+//------------------------------------------------------------------------------
+// Function flow:     lock record
+//                    check if key is already there
+//                    if key found
+//                      set RC=BTREE_DUPLICATE_KEY
+//                    else
+//                      get next free position in record
+//                      if node is full
+//                        split node before inserting
+//                      endif
+//                    endif
+//                    find proper location in record to insert key
+//                    set new current positioon
+//                    fill in key data
+//                    insert reference, set data information
+//                    set address of key data at correct offset
+//                    write record
+//                    if this is first key in record
+//                      adjust above pointers
+//                    endif
+//                    unlock record
+//
+//------------------------------------------------------------------------------
+SHORT QDAMInsertKey_V3
+(
+   PBTREE       pBTIda,
+   PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
+   PCHAR_W      pKey,
+   RECPARAM   recKey,                  // position/offset for key
+   RECPARAM   recData                  // position/offset for data
+)
+{
+  SHORT i = 0;
+  PBTREEBUFFER_V3 pTempRec;
+  PCHAR_W   pCompKey = NULL;           // key to be compared with
+  PCHAR_W   pOldKey;                   // old key at first position
+  PCHAR_W   pNewKey;                   // new key at first position
+  BOOL fFound = FALSE;
+  SHORT  sKeyFound;                    // key found
+  SHORT  sNearKey;                     // key found
+  SHORT  sRc = 0;                      // return code
+
+  LogMessage(FATAL, "called commented out function QDAMInsertKey_V3");
+  #ifdef TEMPORARY_COMMENTED
+  USHORT usLastPos;
+  USHORT usKeyLen = 0;                 // length of key
+  USHORT usDataRec = 0;                // length of key record
+  PBYTE  pData;
+  PUSHORT  pusOffset = NULL;
+  USHORT usCurrentRecord;              // current record
+  SHORT  sCurrentIndex;                // current index
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
+
+  recKey;                              // get rid of compiler warnings
+  //  check if key is already there -- duplicates will not be supported
+  sRc = QDAMLocateKey_V3( pBTIda, pRecord, pKey, &sKeyFound, FEXACT, &sNearKey);
+  BTREELOCKRECORD( pRecord );
+  fRecLocked = TRUE;
+  if ( !sRc )
+  {
+     if ( sKeyFound != -1)
+     {
+       sRc = BTREE_DUPLICATE_KEY;
+     }
+     else
+     {
+       i = (SHORT) OCCUPIED(pRecord);
+       usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(CHAR_W)));
+
+       if ( pBT->usVersion >= NTM_VERSION2 )
+       {
+         usDataRec = usKeyLen + sizeof(USHORT) + sizeof(RECPARAM);
+       }
+       else
+       {
+         usDataRec = usKeyLen + sizeof(USHORT) + sizeof(RECPARAMOLD);
+       } /* endif */
+       /* If node is full. Split the node before inserting */
+       if ( usDataRec+sizeof(USHORT)+pRecord->contents.header.usFilled > BTREE_REC_SIZE_V3 )
+       {
+         BTREEUNLOCKRECORD( pRecord );
+         fRecLocked = FALSE;
+         sRc = QDAMSplitNode_V3( pBTIda, &pRecord, pKey );
+         if ( !sRc )
+         {
+           // SplitNode may have passed a new record back
+           BTREELOCKRECORD( pRecord );
+           fRecLocked = TRUE;
+
+           /* if we split an inner node, the parent of the key we are */
+           /* inserting must be changed                               */
+           if ( !IS_LEAF( pRecord ) )
+           {
+             sRc = QDAMReadRecord_V3(pBTIda, recData.usNum, &pTempRec, FALSE );
+             if ( ! sRc )
+             {
+               PARENT( pTempRec ) = RECORDNUM( pRecord );
+//             pTempRec->ulCheckSum = QDAMComputeCheckSum( pTempRec );
+               sRc = QDAMWriteRecord_V3( pBTIda, pTempRec );
+             } /* endif */
+           } /* endif */
+         } /* endif */
+       } /* endif */
+     } /* endif */
+  } /* endif */
+
+
+  if ( !sRc )
+  {
+    i = (SHORT) OCCUPIED(pRecord);               // number of keys in record
+    // Insert key at the proper location
+    pusOffset = (PUSHORT) pRecord->contents.uchData;
+    while ( i > 0 && !fFound )
+    {
+       pCompKey = QDAMGetszKey_V3( pRecord, (SHORT)(i-1), pBT->usVersion );
+       if ( pCompKey )
+       {
+          if ( (*(pBT->compare))(pBTIda, pKey, pCompKey)  < 0 )
+          {
+             *(pusOffset+i) = *(pusOffset+i-1);
+             i--;
+          }
+          else
+          {
+             fFound = TRUE;
+          } /* endif */
+       }
+       else
+       {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+       } /* endif */
+    } /* endwhile */
+
+    // set new current position
+    pBTIda->sCurrentIndex = i;
+    pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+  } /* endif */
+
+  if ( !sRc )
+  {
+      CHAR chHeadTerm[128];
+      // fill in key data
+      usLastPos = pRecord->contents.header.usLastFilled;
+      usLastPos = usLastPos - usDataRec;
+      pData = pRecord->contents.uchData + usLastPos;
+      // insert reference
+      if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
+      {
+         Unicode2ASCII( pKey, chHeadTerm, 0L );
+         usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
+         pKey = (PSZ_W)&chHeadTerm[0];
+      }
+      *(PUSHORT) pData = usKeyLen;
+      {
+        PBYTE pTarget;
+        if ( pBT->usVersion >= NTM_VERSION2 )
+        {
+          pTarget = pData + sizeof(USHORT) + sizeof(RECPARAM);
+        }
+        else
+        {
+          pTarget = pData + sizeof(USHORT) + sizeof(RECPARAMOLD);
+        } /* endif */
+
+        memcpy(pTarget, (PBYTE) pKey, usKeyLen );
+
+      }
+      // set data information
+      if ( pBT->usVersion >= NTM_VERSION2 )
+      {
+        memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recData, sizeof(RECPARAM));
+      }
+      else
+      {
+        RECPARAMOLD recDataOld;
+        recDataOld.usOffset = recData.usOffset;
+        recDataOld.usNum    = recData.usNum;
+        recDataOld.sLen     = (SHORT)recData.ulLen;
+        memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recDataOld, sizeof(RECPARAMOLD));
+      } /* endif */
+
+      // set address of key data at offset i
+      *(pusOffset+i) = usLastPos;
+
+      OCCUPIED(pRecord) += 1;
+      pRecord->contents.header.usLastFilled = usLastPos;
+      pRecord->contents.header.usFilled += usDataRec + sizeof(USHORT);
+//    pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+      sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
+  } /* endif */
+
+  // If this is the first key in the record, we must adjust pointers above
+  if ( !sRc )
+  {
+    if ((i == 0) && (!IS_ROOT(pRecord)))
+    {
+       pOldKey = QDAMGetszKey_V3( pRecord, 1, pBT->usVersion );
+       pNewKey = QDAMGetszKey_V3( pRecord, 0, pBT->usVersion );
+       if ( pOldKey && pNewKey )
+       {
+         if ( pCompKey && PARENT(pRecord) )
+         {
+            /**********************************************************/
+            /* save old current record since ChangeKey will update it */
+            /* (implicit call to QDAMInsertKey) and restore it ...   */
+            /**********************************************************/
+            usCurrentRecord = pBTIda->usCurrentRecord;
+            sCurrentIndex   = pBTIda->sCurrentIndex;
+            sRc = QDAMChangeKey_V3( pBTIda, PARENT(pRecord), pOldKey, pNewKey);
+            pBTIda->usCurrentRecord = usCurrentRecord;
+            pBTIda->sCurrentIndex   = sCurrentIndex;
+
+         } /* endif */
+       }
+       else
+       {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, NULL );
+       } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( pRecord && fRecLocked )
+  {
+    BTREEUNLOCKRECORD(pRecord);
+  } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+  #endif
+  return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMFindRecord      Find Record
+//------------------------------------------------------------------------------
+// Function call:     QDAMFindRecord( PBTREE, PCHAR, PPBTREEBUFFER );
+//
+//------------------------------------------------------------------------------
+// Description:       Locates the record containing the leaf node that the
+//                    given key is in or should be in if inserted.
+//
+//                    Returns record pointer that might contain the record,
+//                    or NULL if it is unable to find it due to lack of buffers
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  key passed
+//                    PPBTREEBUFFER          pointer to leaf mode
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read record of 1st node
+//                    while ok and record is not the leaf
+//                      lock the record
+//                      init for binary search (starting points)
+//                      if lower start point < upper start point
+//                        do
+//                          set fFound
+//                          get key string at middle position
+//                          compare key found with the passed key
+//                          decide whether to go left or right
+//                        while not found
+//                        if ok
+//                          if sResult = '>'
+//                            record found (sLow fits)
+//                          else
+//                            additional check: get key string
+//                            compare keys
+//                          endif
+//                        endif
+//                      else
+//                        lower start point is position searched for
+//                      endif
+//                      if ok
+//                        get data in data structure
+//                        unlock previous record
+//                        read record
+//                    endwhile
+//------------------------------------------------------------------------------
+SHORT QDAMFindRecord_V2
+(
+    PBTREE   pBTIda,
+    PCHAR_W  pKey,
+    PBTREEBUFFER_V2 * ppRecord
+)
+{
+  SHORT         sResult;
+  SHORT         sLow;                              // Far left
+  SHORT         sHigh;                             // Far right
+  SHORT         sMid = 0;                          // Middle
+  RECPARAM      recData;                           // data structure
+  PCHAR_W       pKey2;                             // pointer to search key
+  SHORT         sRc = 0;                           // return code
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  LogMessage(FATAL, "called commented out function QDAMFindRecord_V2");
+  #ifdef TEMPORARY_COMMENTED
+  memset(&recData, 0, sizeof(recData));
+  sRc = QDAMReadRecord_V2( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );
+  while ( !sRc && !IS_LEAF( *ppRecord ))
+  {
+    BTREELOCKRECORD( *ppRecord );
+
+    sLow = 0;                                    // start here
+    sHigh = (SHORT) OCCUPIED( *ppRecord) -1 ;    // counting starts at zero
+
+
+    while ( !sRc && (sLow <= sHigh) )
+    {
+      sMid = (sLow + sHigh)/2;
+      pKey2 = QDAMGetszKey_V2( *ppRecord, sMid, pBT->usVersion );
+      if ( pKey2 == NULL )
+      {
+        sRc = BTREE_CORRUPTED;
+      }
+      else
+      {
+        sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+        if ( sResult < 0 )
+        {
+          sHigh = sMid - 1;                        // Go left
+        }
+        else
+        {
+          sLow = sMid + 1;                         // Go right
+        } /* endif */
+      } /* endif */
+    } /* endwhile */
+
+    /******************************************************************/
+    /* it is the lower one due the construction of the BTREE          */
+    /*  -- according to the while loop it must be the sHIGH value     */
+    /* if sHigh < 0 we should use the first one                      */
+    /******************************************************************/
+    if ( !sRc )
+    {
+      if ( sHigh == -1 )
+      {
+        sHigh = 0;
+      } /* endif */
+      recData = QDAMGetrecData_V2( *ppRecord, sHigh, pBT->usVersion );
+    } /* endif */
+
+    BTREEUNLOCKRECORD( *ppRecord );                        // unlock previous record.
+
+    if ( !sRc )
+    {
+      sRc = QDAMReadRecord_V2( pBTIda, recData.usNum, ppRecord, FALSE  );
+    } /* endif */
+  } /* endwhile */
+  #endif
+  return( sRc );
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMAddToBuffer       Add Data to buffer
+//------------------------------------------------------------------------------
+// Function call:     QDAMAddToBuffer( PBTREE, PCHAR, PCHAR, PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Add the passed data to the string buffer
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  key to be inserted
+//                    PCHAR                  buffer for user data
+//                    PRECPARAM              contains position of data stored
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_NOT_FOUND   key not found
+//                    BTREE_INVALID     tree pointer invalid
+//
+//------------------------------------------------------------------------------
+// Function flow:     if terse flag is on
+//                      terse the data
+//                    endif
+//                    get list for currently used record type
+//                    check if sufficient space is available to
+//                       fit into one of these records
+//                    if it fits
+//                      read record
+//                      fill in key data, insert reference
+//                      set address of key data
+//                      mark if tersed or not
+//                      write record update list entry
+//                    endif
+//                    if record is too large or no space left in list of recs
+//                       scan list and find empty slot
+//                       if not found
+//                         remove slot which is most filled
+//                       endif
+//                       get record and store start position
+//                       fill it up to length or record size
+//                       update list entry
+//                    endif
+//                    return record parameters
+//
+//------------------------------------------------------------------------------
+SHORT  QDAMAddToBuffer_V2
+(
+   PBTREE  pBTIda,                     // pointer to btree struct
+   PBYTE   pData,                      // pointer to data
+   ULONG   ulDataLen,                  // length of data to be filled in
+   PRECPARAM  precReturn               // pointer to return code
+)
+{
+   SHORT sRc = 0;                      // success indicator
+
+   LogMessage(FATAL, "called commented out function QDAMAddToBuffer_V2");
+  #ifdef TEMPORARY_COMMENTED
+   USHORT  usFilled;                   // number of bytes filled in record
+   USHORT  usMaxRec= 0;                // most filled record
+   RECPARAM recStart;                  // return code where data are stored
+   PRECPARAM pRecParam;                // parameter to stored list
+   PRECPARAM pRecTemp ;                // parameter to stored list
+   BOOL  fFit = FALSE;                 // indicator if record found
+   USHORT  i;                          // index
+   PBTREEHEADER  pHeader;              // record header
+   PBTREEBUFFER_V2 pRecord = NULL;        // buffer record
+   PBTREEBUFFER_V2 pTempRecord;           // buffer record
+   CHAR     chNodeType;                // type of node
+   BOOL     fTerse = FALSE;            // data are not tersed
+   USHORT   usLastPos;
+   ULONG    ulFullDataLen;             // length of record
+   PUSHORT  pusOffset;
+   PCHAR    pRecData;                  // pointer to record data
+   ULONG    ulFitLen;                  // currently used length
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+   USHORT   usLenFieldSize;            // size of length field
+
+   memset(&recStart, 0, sizeof(recStart));
+   /*******************************************************************/
+   /* Enlarge pTempRecord area if it is not large enough to contain   */
+   /* the data for this record                                        */
+   /*******************************************************************/
+#ifdef _DEBUG
+   {
+     CHAR szTemp[8];
+     sprintf( szTemp, "%ld", ulDataLen );
+     INFOEVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 4711, DB_GROUP, szTemp );
+   }
+#endif
+   if ( (ulDataLen + sizeof(ULONG)) > pBT->ulTempRecSize )
+   {
+     if ( UtlAlloc( (PVOID *)&(pBT->pTempRecord), pBT->ulTempRecSize, ulDataLen + sizeof(ULONG), NOMSG ) )
+     {
+       pBT->ulTempRecSize = ulDataLen + sizeof(ULONG);
+     }
+     else
+     {
+       sRc = BTREE_NO_ROOM;
+     } /* endif */
+   } /* endif */
+
+  if ( pBT->usVersion >= NTM_VERSION2 )
+  {
+    usLenFieldSize = sizeof(ULONG);
+  }
+  else
+  {
+    usLenFieldSize = sizeof(USHORT);
+  } /* endif */
+
+   pRecParam = pBT->DataRecList;
+   /*******************************************************************/
+   /* determine type of compression....                               */
+   /*******************************************************************/
+   switch ( pBT->fTerse )
+   {
+     case  BTREE_TERSE_HUFFMAN :
+       fTerse = QDAMTerseData( pBTIda, pData, &ulDataLen, pBT->pTempRecord );
+       break;
+     default :
+       fTerse = FALSE;
+       break;
+   } /* endswitch */
+
+   chNodeType = DATA_NODE;
+
+   // data should be in pBT->pTempRecord for further processing
+   // copy them if not yet done.....
+   if ( !fTerse )
+   {
+      memcpy( pBT->pTempRecord, pData, ulDataLen );
+   } /* endif */
+
+   if ( !sRc && (ulDataLen <= BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER)) )
+   {
+      pRecTemp = pRecParam;
+      i = 0;
+      //  find slot in list
+      usFilled = (USHORT)(BTREE_REC_SIZE_V2 - ulDataLen - 2 * usLenFieldSize);
+      while ( !fFit && i < MAX_LIST )
+      {
+         if ( pRecTemp->usOffset == 0 || pRecTemp->usOffset > usFilled )   // will not fit
+         {
+            pRecTemp++;
+            i++;
+         }
+         else                                     // data will fit
+         {
+            fFit = TRUE;
+         } /* endif */
+      } /* endwhile */
+
+
+      if ( fFit )
+      {
+         // store position where data will be stored
+         recStart.usNum    = pRecTemp->usNum;
+
+         // get record, copy data and write them
+         sRc = QDAMReadRecord_V2( pBTIda, recStart.usNum, &pRecord, FALSE  );
+         if ( !sRc )
+         {
+            BTREELOCKRECORD( pRecord );
+            if ( TYPE( pRecord ) != chNodeType )
+            {
+               sRc = BTREE_CORRUPTED;
+               ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+            }
+            else
+            {
+               // fill in key data
+               usLastPos = pRecord->contents.header.usLastFilled;
+               usLastPos = usLastPos - (USHORT)(ulDataLen + usLenFieldSize);
+               pData = pRecord->contents.uchData + usLastPos;
+               // insert reference
+               if ( pBT->usVersion >= NTM_VERSION2 )
+               {
+                 *(PULONG) pData = ulDataLen;
+               }
+               else
+               {
+                 *(PUSHORT) pData = (USHORT)ulDataLen;
+               }
+               memcpy( pData+usLenFieldSize, pBT->pTempRecord, ulDataLen );
+
+               // set address of key data at next free offset
+               pusOffset = (PUSHORT) pRecord->contents.uchData;
+               *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+               OCCUPIED(pRecord) += 1;
+               pRecord->contents.header.usLastFilled = usLastPos;
+               pRecord->contents.header.usFilled = pRecord->contents.header.usFilled + (USHORT)(ulDataLen+usLenFieldSize+sizeof(USHORT));
+
+               // mark if tersed or not
+               if ( fTerse )
+               {
+                 if ( pBT->usVersion >= NTM_VERSION2 )
+                 {
+                   *(PULONG) pData |= QDAM_TERSE_FLAGL;
+                 }
+                 else
+                 {
+                   *(PUSHORT) pData |= QDAM_TERSE_FLAG;
+                 }
+               } /* endif */
+//             pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+               sRc = QDAMWriteRecord_V2(pBTIda, pRecord);
+               // update list entry
+               if ( !sRc )
+               {
+                  pRecTemp->usOffset = pRecord->contents.header.usFilled;
+               } /* endif */
+            } /* endif */
+            BTREEUNLOCKRECORD( pRecord );
+         } /* endif */
+      } /* endif */
+   } /* endif */
+
+   //  either record is too large or no space left in list of records
+
+   if ( !sRc && !fFit )
+   {
+      pRecTemp = pRecParam;
+      i = 0;
+      // scan list and find empty slot
+      while ( (i < MAX_LIST) && !fFit )
+      {
+         if ( pRecTemp->usNum == 0 )     // empty slot found
+         {
+            fFit = TRUE;
+         }
+         else
+         {
+            pRecTemp++;                  // point to next slot
+            i++;
+         } /* endif */
+      } /* endwhile */
+
+      /****************************************************************/
+      /* if not found remove slot which is most filled                */
+      /****************************************************************/
+      if ( !fFit )
+      {
+         pRecTemp = pRecParam;
+         usFilled = 0;
+         for ( i=0 ; i < MAX_LIST ;i++ )
+         {
+            if ( pRecTemp->usOffset > usFilled)
+            {
+               usMaxRec = i;
+               usFilled = pRecTemp->usOffset;
+            } /* endif */
+            pRecTemp++;                // next record in list
+         } /* endfor */
+         // set pRecTemp to the selected slot
+         pRecTemp = pRecParam + usMaxRec;
+      } /* endif */
+
+      // get record and store start position
+      memset( pRecTemp, 0 , sizeof(RECPARAM));
+
+      sRc = QDAMNewRecord_V2( pBTIda, &pRecord, DATAREC );
+      // fill it up to length or record size
+      if ( ! sRc )
+      {
+         TYPE( pRecord ) = chNodeType;     // indicate that it is a data node
+         BTREELOCKRECORD( pRecord );
+         pRecData = (PCHAR)(pBT->pTempRecord + ulDataLen);
+         ulFullDataLen = ulDataLen;         // store original data len
+         while ( !sRc && ulDataLen + pRecord->contents.header.usFilled  >= (BTREE_REC_SIZE_V2 - (usLenFieldSize + sizeof(SHORT))))
+         {
+           /***********************************************************/
+           /* get a new record, anchor it and fill data from end      */
+           /* new record will be predecessor of already allocated rec.*/
+           /***********************************************************/
+           sRc = QDAMNewRecord_V2( pBTIda, &pTempRecord, DATAREC );
+           if ( !sRc )
+           {
+             TYPE( pTempRecord ) = chNodeType;   // data node
+             NEXT( pTempRecord ) = RECORDNUM( pRecord );
+             PREV( pRecord ) = RECORDNUM( pTempRecord );
+             TYPE( pRecord ) = DATA_NEXTNODE;              // data node
+
+             // fill in key data
+             /*********************************************************/
+             /* adjust sizes of relevant data                         */
+             /*********************************************************/
+             usLastPos = pRecord->contents.header.usLastFilled;
+             {
+               ULONG ulMax = (ULONG)(BTREE_REC_SIZE_V2 - pRecord->contents.header.usFilled );
+               ulFitLen = min( ulDataLen, ulMax );
+               ulFitLen -= (ULONG)(usLenFieldSize + sizeof(USHORT));
+             }
+             usLastPos = usLastPos - (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+             pData = pRecord->contents.uchData + usLastPos;
+             pRecData -= ulFitLen;
+             ulDataLen -= ulFitLen;
+             /*********************************************************/
+             /* store length and copy data of part contained in record*/
+             /*********************************************************/
+             if ( pBT->usVersion >= NTM_VERSION2 )
+             {
+               *(PULONG) pData = ulFitLen;
+             }
+             else
+             {
+               *(PUSHORT) pData = (USHORT)ulFitLen;
+             }
+             memcpy( pData+usLenFieldSize, pRecData,  ulFitLen );
+             // set address of key data at next free offset
+             pusOffset = (PUSHORT) pRecord->contents.uchData;
+             *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+             OCCUPIED(pRecord) += 1;
+             pRecord->contents.header.usLastFilled = usLastPos;
+             pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
+                                           (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+//           pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+             sRc = QDAMWriteRecord_V2(pBTIda, pRecord);
+             BTREEUNLOCKRECORD( pRecord );
+
+             /*********************************************************/
+             /* toggle for adressing purposes                         */
+             /* now: pRecord will be the free one for later filling   */
+             /*********************************************************/
+             pRecord = pTempRecord;
+             BTREELOCKRECORD( pRecord );
+           } /* endif */
+         } /* endwhile */
+
+         /*************************************************************/
+         /* write out rest (this is the normal way in most cases      */
+         /*************************************************************/
+         if ( !sRc )
+         {
+           pHeader = &(pRecord->contents.header);
+           pHeader->usParent = sizeof(BTREEHEADER );
+
+           // store position where data will be stored
+           recStart.usNum    = pHeader->usNum;
+
+           // fill in key data
+           usLastPos = pRecord->contents.header.usLastFilled;
+
+           usLastPos = usLastPos - (USHORT)(ulDataLen + (ULONG)usLenFieldSize);
+           pData = pRecord->contents.uchData + usLastPos;
+           pRecData -= ulDataLen;
+
+           // insert reference
+           if ( pBT->usVersion >= NTM_VERSION2 )
+           {
+             *(PULONG) pData = ulFullDataLen;
+           }
+           else
+           {
+             *(PUSHORT) pData = (USHORT)ulFullDataLen;
+           }
+           memcpy( pData+usLenFieldSize, pRecData, ulDataLen );
+
+           // set address of key data at next free offset
+           pusOffset = (PUSHORT) pRecord->contents.uchData;
+           *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
+
+           OCCUPIED(pRecord) += 1;
+           pRecord->contents.header.usLastFilled = usLastPos;
+           pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
+                                    (USHORT)(ulDataLen+usLenFieldSize+sizeof(USHORT));
+
+           // mark if tersed or not
+           if ( fTerse )
+           {
+             if ( pBT->usVersion >= NTM_VERSION2 )
+             {
+               *(PULONG) pData |= QDAM_TERSE_FLAGL;
+             }
+             else
+             {
+               *(PUSHORT) pData |= QDAM_TERSE_FLAG;
+             }
+           } /* endif */
+
+
+           // write record
+  //       pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+           sRc = QDAMWriteRecord_V2(pBTIda, pRecord);
+           BTREEUNLOCKRECORD( pRecord );         // free the locking
+           // update list entry
+           if ( !sRc )
+           {
+              pRecTemp->usOffset = pHeader->usFilled;
+              pRecTemp->usNum    = pHeader->usNum;
+           } /* endif */
+         } /* endif */
+      } /* endif */
+   } /* endif */
+
+   //  return record parameters
+   if ( !sRc )
+   {
+      precReturn->usNum = recStart.usNum - pBT->usFirstDataBuffer;
+      precReturn->usOffset = OCCUPIED( pRecord ) - 1;
+   }
+   else
+   {
+      memset(&recStart, 0, sizeof(RECPARAM));
+      precReturn = &recStart;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+    #endif
+   return sRc;
+}
+
+SHORT QDAMInsertKey_V2
+(
+   PBTREE       pBTIda,
+   PBTREEBUFFER_V2 pRecord,               // record where key is to be inserted
+   PCHAR_W      pKey,
+   RECPARAM   recKey,                  // position/offset for key
+   RECPARAM   recData                  // position/offset for data
+)
+{
+  SHORT i = 0;
+  PBTREEBUFFER_V2 pTempRec;
+  PCHAR_W   pCompKey = NULL;           // key to be compared with
+  PCHAR_W   pOldKey;                   // old key at first position
+  PCHAR_W   pNewKey;                   // new key at first position
+  BOOL fFound = FALSE;
+  SHORT  sKeyFound;                    // key found
+  SHORT  sNearKey;                     // key found
+  SHORT  sRc = 0;                      // return code
+
+  LogMessage(FATAL, "called commented out function QDAMInsertKey_V2");
+  #ifdef TEMPORARY_COMMENTED
+  USHORT usLastPos;
+  USHORT usKeyLen = 0;                 // length of key
+  USHORT usDataRec = 0;                // length of key record
+  PBYTE  pData;
+  PUSHORT  pusOffset = NULL;
+  USHORT usCurrentRecord;              // current record
+  SHORT  sCurrentIndex;                // current index
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
+
+  recKey;                              // get rid of compiler warnings
+  //  check if key is already there -- duplicates will not be supported
+  sRc = QDAMLocateKey_V2( pBTIda, pRecord, pKey, &sKeyFound, FEXACT, &sNearKey, FEXACT );
+  BTREELOCKRECORD( pRecord );
+  fRecLocked = TRUE;
+  if ( !sRc )
+  {
+     if ( sKeyFound != -1)
+     {
+       sRc = BTREE_DUPLICATE_KEY;
+     }
+     else
+     {
+       i = (SHORT) OCCUPIED(pRecord);
+       usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(CHAR_W)));
+
+       if ( pBT->usVersion >= NTM_VERSION2 )
+       {
+         usDataRec = usKeyLen + sizeof(USHORT) + sizeof(RECPARAM);
+       }
+       else
+       {
+         usDataRec = usKeyLen + sizeof(USHORT) + sizeof(RECPARAMOLD);
+       } /* endif */
+       /* If node is full. Split the node before inserting */
+       if ( usDataRec+sizeof(USHORT)+pRecord->contents.header.usFilled > BTREE_REC_SIZE_V2 )
+       {
+         BTREEUNLOCKRECORD( pRecord );
+         fRecLocked = FALSE;
+         sRc = QDAMSplitNode_V2( pBTIda, &pRecord, pKey );
+         if ( !sRc )
+         {
+           // SplitNode may have passed a new record back
+           BTREELOCKRECORD( pRecord );
+           fRecLocked = TRUE;
+
+           /* if we split an inner node, the parent of the key we are */
+           /* inserting must be changed                               */
+           if ( !IS_LEAF( pRecord ) )
+           {
+             sRc = QDAMReadRecord_V2(pBTIda, recData.usNum, &pTempRec, FALSE );
+             if ( ! sRc )
+             {
+               PARENT( pTempRec ) = RECORDNUM( pRecord );
+//             pTempRec->ulCheckSum = QDAMComputeCheckSum( pTempRec );
+               sRc = QDAMWriteRecord_V2( pBTIda, pTempRec );
+             } /* endif */
+           } /* endif */
+         } /* endif */
+       } /* endif */
+     } /* endif */
+  } /* endif */
+
+
+  if ( !sRc )
+  {
+    i = (SHORT) OCCUPIED(pRecord);               // number of keys in record
+    // Insert key at the proper location
+    pusOffset = (PUSHORT) pRecord->contents.uchData;
+    while ( i > 0 && !fFound )
+    {
+       pCompKey = QDAMGetszKey_V2( pRecord, (SHORT)(i-1), pBT->usVersion );
+       if ( pCompKey )
+       {
+          if ( (*(pBT->compare))(pBTIda, pKey, pCompKey)  < 0 )
+          {
+             *(pusOffset+i) = *(pusOffset+i-1);
+             i--;
+          }
+          else
+          {
+             fFound = TRUE;
+          } /* endif */
+       }
+       else
+       {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+       } /* endif */
+    } /* endwhile */
+
+    // set new current position
+    pBTIda->sCurrentIndex = i;
+    pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+  } /* endif */
+
+  if ( !sRc )
+  {
+      CHAR chHeadTerm[128];
+      // fill in key data
+      usLastPos = pRecord->contents.header.usLastFilled;
+      usLastPos = usLastPos - usDataRec;
+      pData = pRecord->contents.uchData + usLastPos;
+      // insert reference
+      if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
+      {
+         Unicode2ASCII( pKey, chHeadTerm, 0L );
+         usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
+         pKey = (PSZ_W)&chHeadTerm[0];
+      }
+      *(PUSHORT) pData = usKeyLen;
+      {
+        PBYTE pTarget;
+        if ( pBT->usVersion >= NTM_VERSION2 )
+        {
+          pTarget = pData + sizeof(USHORT) + sizeof(RECPARAM);
+        }
+        else
+        {
+          pTarget = pData + sizeof(USHORT) + sizeof(RECPARAMOLD);
+        } /* endif */
+
+        memcpy(pTarget, (PBYTE) pKey, usKeyLen );
+
+      }
+      // set data information
+      if ( pBT->usVersion >= NTM_VERSION2 )
+      {
+        memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recData, sizeof(RECPARAM));
+      }
+      else
+      {
+        RECPARAMOLD recDataOld;
+        recDataOld.usOffset = recData.usOffset;
+        recDataOld.usNum    = recData.usNum;
+        recDataOld.sLen     = (SHORT)recData.ulLen;
+        memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recDataOld, sizeof(RECPARAMOLD));
+      } /* endif */
+
+      // set address of key data at offset i
+      *(pusOffset+i) = usLastPos;
+
+      OCCUPIED(pRecord) += 1;
+      pRecord->contents.header.usLastFilled = usLastPos;
+      pRecord->contents.header.usFilled += usDataRec + sizeof(USHORT);
+//    pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+      sRc = QDAMWriteRecord_V2(pBTIda,pRecord);
+  } /* endif */
+
+  // If this is the first key in the record, we must adjust pointers above
+  if ( !sRc )
+  {
+    if ((i == 0) && (!IS_ROOT(pRecord)))
+    {
+       pOldKey = QDAMGetszKey_V2( pRecord, 1, pBT->usVersion );
+       pNewKey = QDAMGetszKey_V2( pRecord, 0, pBT->usVersion );
+       if ( pOldKey && pNewKey )
+       {
+         if ( pCompKey && PARENT(pRecord) )
+         {
+            /**********************************************************/
+            /* save old current record since ChangeKey will update it */
+            /* (implicit call to QDAMInsertKey) and restore it ...   */
+            /**********************************************************/
+            usCurrentRecord = pBTIda->usCurrentRecord;
+            sCurrentIndex   = pBTIda->sCurrentIndex;
+            sRc = QDAMChangeKey_V2( pBTIda, PARENT(pRecord), pOldKey, pNewKey);
+            pBTIda->usCurrentRecord = usCurrentRecord;
+            pBTIda->sCurrentIndex   = sCurrentIndex;
+
+         } /* endif */
+       }
+       else
+       {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, NULL );
+       } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( pRecord && fRecLocked )
+  {
+    BTREEUNLOCKRECORD(pRecord);
+  } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+  #endif
+  return sRc;
 }
 
 
@@ -1852,9 +4948,8 @@ SHORT QDAMDictInsertLocal
 
    memset( &recKey, 0, sizeof( recKey ) );
    memset( &recData,  0, sizeof( recData ) );
-   #ifdef TEMPRORARY_COMMENTED
    DEBUGEVENT2( QDAMDICTINSERTLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
-   #endif
+
 
    if ( pBT->fCorrupted )
    {
@@ -1868,12 +4963,10 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   #ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
-   #endif
 
    /*******************************************************************/
    /* For shared databases: lock complete file                        */
@@ -1883,9 +4976,7 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
    {
-     #ifdef TEMPORARY_COMMENTED
      sRc = QDAMPhysLock( pBTIda, TRUE, &fLocked );
-     #endif
    } /* endif */
 
    if ( pBT->bRecSizeVersion == BTREE_V3 )
@@ -1905,16 +4996,15 @@ SHORT QDAMDictInsertLocal
         else
         {
           memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
-          #ifdef TEMPORARY_COMMENTED
+          
           QDAMDictUpdStatus ( pBTIda );
           sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
-          #endif
+
         } /* endif */
       } /* endif */
 
       if ( !sRc )
       {
-        #ifdef TEMPORARY_COMMENTED
           BTREELOCKRECORD( pNode );
           sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
           if ( !sRc )
@@ -1924,7 +5014,6 @@ SHORT QDAMDictInsertLocal
           } /* endif */
 
           BTREEUNLOCKRECORD( pNode );
-        #endif
           /****************************************************************/
           /* change time to indicate modifications on dictionary...       */
           /****************************************************************/
@@ -1945,16 +5034,14 @@ SHORT QDAMDictInsertLocal
         else
         {
           memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
-          #ifdef TEMPORARY_COMMENTED
+          
           QDAMDictUpdStatus ( pBTIda );
           sRc = QDAMFindRecord_V2( pBTIda, pKey, &pNode );
-          #endif
         } /* endif */
       } /* endif */
 
       if ( !sRc )
       {
-        #ifdef TEMPORARY_COMMENTED
           BTREELOCKRECORD( pNode );
           sRc = QDAMAddToBuffer_V2( pBTIda, pData, ulLen, &recData );
           if ( !sRc )
@@ -1964,7 +5051,6 @@ SHORT QDAMDictInsertLocal
           } /* endif */
 
           BTREEUNLOCKRECORD( pNode );
-        #endif
           /****************************************************************/
           /* change time to indicate modifications on dictionary...       */
           /****************************************************************/
@@ -1980,162 +5066,17 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    if ( fLocked )
    {
-     #ifdef TEMPORARY_COMMENTED
      sRc = QDAMPhysLock( pBTIda, FALSE, NULL );
-     #endif
    } /* endif */
 
    if ( sRc )
    {
-     #ifdef TEMPORARY_COMMENTED
      ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-     #endif
    } /* endif */
 
    return sRc;
 }
 
-
-#ifdef TEMPORARY_COMMENTED
-//+----------------------------------------------------------------------------+
-//|External function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     EQFNTMInsert                                             |
-//+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMInsert( pBTIda, &ulKey, pData, usLen );      |
-//+----------------------------------------------------------------------------+
-//|Description:       insert a new key (ULONG) with data                       |
-//+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE  pBTIda,      pointer to binary tree struct       |
-//|                   PULONG  pulKey,      pointer to key                      |
-//|                   PBYTE   pData,       pointer to user data                |
-//|                   USHORT  usLen        length of user data                 |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   SHORT                                                    |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       BTREE_NUMBER_RANGE   requested key not in allowed range  |
-//|                   BTREE_READONLY       file is opened read only - no write |
-//|                   BTREE_CORRUPTED      file is corrupted                   |
-//|                   errors returned by QDAMDictInsertLocal                   |
-//|                   0                    success indicator                   |
-//+----------------------------------------------------------------------------+
-//|Function flow:     check for corruption and open in correct mode            |
-//|                   if okay                                                  |
-//|                     either check passed key or assign new key              |
-//|                                    and update the header                   |
-//|                   endif                                                    |
-//|                   if okay                                                  |
-//|                     call QDAMDictInsertLocal                               |
-//|                   endif                                                    |
-//|                   return success indicator..                               |
-// ----------------------------------------------------------------------------+
-SHORT
-EQFNTMInsert
-(
-  PVOID   pBTIda,           // pointer to binary tree struct
-  PULONG  pulKey,           // pointer to key
-  PBYTE   pData,            // pointer to user data
-  ULONG   ulLen             // length of user data
-)
-{
-   SHORT         sRc = 0;   // return code
-   PBTREEGLOB    pBT = NULL;
-#ifdef TEMPORARY_COMMENTED
-   DEBUGEVENT( EQFNTMINSERT_LOC, FUNCENTRY_EVENT, 0 );
-#endif
-   /*******************************************************************/
-   /* validate passed pointer ...                                     */
-   /*******************************************************************/
-   if ( !pBTIda )
-   {
-     sRc = BTREE_INVALID;
-   }
-   else
-   {
-     pBT = ((PBTREE)pBTIda)->pBTree;
-   } /* endif */
-
-  /********************************************************************/
-  /* do initial security checking...                                  */
-  /********************************************************************/
-   if ( !sRc && pBT->fCorrupted )
-   {
-      sRc = BTREE_CORRUPTED;
-   } /* endif */
-   if ( !sRc && !pBT->fOpen )
-   {
-     sRc = BTREE_READONLY;
-   } /* endif */
-  /********************************************************************/
-  /* if user wants that we find an appropriate key, we have to do so..*/
-  /********************************************************************/
-  if ( !sRc )
-  {
-    if ( *pulKey == NTMREQUESTNEWKEY )
-    {
-      /******************************************************************/
-      /* find next free key and anchor new value in file ...            */
-      /******************************************************************/
-      ULONG  ulKey;
-      ulKey = *pulKey = (NTMNEXTKEY( pBT ))++;
-      if ( ulKey > 0xFFFFFF )
-      {
-        sRc = BTREE_NUMBER_RANGE;
-      }
-      else
-      {
-        /**************************************************************/
-        /* force update of header (only from time to time to avoid    */
-        /* too much performance degration)...                         */
-        /**************************************************************/
-        if ( (ulKey & 0x020) || (pBT->usOpenFlags & ASD_SHARED) )
-        {
-          sRc = QDAMWriteHeader( (PBTREE)pBTIda );
-          pBT->fUpdated = TRUE;
-        } /* endif */
-      } /* endif */
-    }
-    else
-    {
-      /****************************************************************/
-      /* check if key is in valid range ...                           */
-      /****************************************************************/
-      if ( *pulKey > NTMSTARTKEY( pBT ) )
-      {
-        sRc = BTREE_NUMBER_RANGE;
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* call QDAMDictInsert to do the dirty work of inserting entry...   */
-  /********************************************************************/
-  if ( !sRc )
-  {
-    SHORT  RetryCount;                  // retry counter for in-use condition
-    RetryCount = MAX_RETRY_COUNT;
-    do
-    {
-      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PSZ_W) pulKey, pData, ulLen );
-      if ( sRc == BTREE_IN_USE )
-      {
-        RetryCount--;
-        UtlWait( MAX_WAIT_TIME );
-      } /* endif */
-    } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-              (RetryCount > 0) ); /* enddo */
-  } /* endif */
-
-  if ( sRc )
-  {
-    #ifdef TEMPORARY_COMMENTED
-    ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
-    #endif
-  } /* endif */
-
-  return sRc;
-} /* end of function EQFNTMInsert */
-#endif
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -2317,9 +5258,7 @@ SHORT QDAMDictUpdSignLocal
 
    if ( sRc )
    {
-    #ifdef TEMPORARY_COMMENTED
      ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-     #endif
    } /* endif */
 
   return sRc;

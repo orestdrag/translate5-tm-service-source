@@ -1549,6 +1549,7 @@ VOID UtlGetWinError( HRESULT hResult, PSZ pszErrString )
         sprintf(pszErrString, "0x%08lx", WinErrTagArray[sI].ErrCode);
    }
 }
+#endif
 
 BOOL UtlEvent
 (
@@ -1558,8 +1559,31 @@ BOOL UtlEvent
   SHORT sEventRC                       // the event return code or error code
 )
 {
+   #ifdef TEMPORARY_COMMENTED
   return( UtlEvent2( sEventType, sEventID, sEventClass, sEventRC, NONE_GROUP,
                      NULL ) );
+                     #endif
+   char buff[255];
+   sprintf(buff, "UtlEvent::sEventID = %h, sEventClass = %h, sEventRC = %h", sEventID, sEventClass, sEventRC);
+   switch (sEventType)
+   {
+   case ERROR_EVENT:
+      LogMessage(ERROR, buff);
+      break;
+   
+   case INFO_EVENT:
+      LogMessage(INFO, buff);
+      break;
+   
+   case EQFDEBUG_EVENT:
+      LogMessage(DEBUG, buff);
+      break;
+      
+   default:
+      LogMessage2(WARNING, "value not specified in UtlEvent, used default :", buff);
+      break;
+   }
+   return true;
 }
 BOOL UtlEvent2
 (
@@ -1571,6 +1595,8 @@ BOOL UtlEvent2
   PSZ   pszAddData                     // additional data for event (string)
 )
 {
+
+   #ifdef TEMPORARY_COMMENTED
   PEVENTENTRY2 pEvent;
   BOOL fLogGroup = FALSE;              // TRUE = logging for group is active
 
@@ -1664,11 +1690,34 @@ BOOL UtlEvent2
       // Write event log file
       UtlWriteFile( szLogFile, sizeof(EVENTTABLE), pEventTable, FALSE );
     } /* endif */
+    
   } /* endif */
+   #endif
 
+   char buff[255];
+   sprintf(buff, "UtlEvent::sEventID = %h, sEventClass = %h, sEventRC = %h, sGroup = %h, pszAddData = %s", sEventID, sEventClass, sEventRC,pszAddData);
+   switch (sEventType)
+   {
+   case ERROR_EVENT:
+      LogMessage(ERROR, buff);
+      break;
+   
+   case INFO_EVENT:
+      LogMessage(INFO, buff);
+      break;
+   
+   case EQFDEBUG_EVENT:
+      LogMessage(DEBUG, buff);
+      break;
+      
+   default:
+      LogMessage2(WARNING, "value not specified in UtlEvent, used default :", buff);
+      break;
+   }
   return( TRUE );
 } /* end of function UtlEvent */
 
+#ifdef TEMPORARY_COMMENTED
 /*! UtlAddEventGroup     Adds a group to be logged
 	Description:       Adds a group to the list of events being logged
 	Function Call:     UtlAddEventGroup( SHORT sGroup );
