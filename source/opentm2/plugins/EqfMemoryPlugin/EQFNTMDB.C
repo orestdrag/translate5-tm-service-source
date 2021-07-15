@@ -685,7 +685,6 @@ EQFNTMInsert
     } /* endif */
   } /* endif */
 
-#ifdef TEMPORARY_COMMENTED
   /********************************************************************/
   /* call QDAMDictInsert to do the dirty work of inserting entry...   */
   /********************************************************************/
@@ -709,7 +708,7 @@ EQFNTMInsert
   {
     ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
-#endif
+
   return sRc;
 } /* end of function EQFNTMInsert */
 

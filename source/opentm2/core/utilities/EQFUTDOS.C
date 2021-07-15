@@ -2987,7 +2987,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
     LogMessage(WARNING,"TO_BE_REPLACED_WITH_LINUX_CODE in UtlBufResetHwnd");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -3002,7 +3002,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
 

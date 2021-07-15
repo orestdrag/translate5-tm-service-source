@@ -61,6 +61,9 @@ char* filesystem_get_home_dir() {
         return pFile;
     }
 
+    BOOL FlushFileBuffers( HANDLE hFile){
+        return true;
+    }
 
     BOOL ReadFile(      HFILE        hFile,
                         LPVOID       lpBuffer,
