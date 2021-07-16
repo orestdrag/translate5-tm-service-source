@@ -793,8 +793,8 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
         break;
       case UNKNOWN_ELEMENT:
       default:
-        LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
-            EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", intToA(CurID) , "; skipping...");
+        //LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
+        //    EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", intToA(CurID) , "; skipping...");
         break;
     } /*endswitch */
 }

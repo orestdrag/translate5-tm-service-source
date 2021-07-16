@@ -1869,8 +1869,7 @@ LONG        lOptions                 // type of new Translation Memory
       UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
     } /* endif */
   } /* endif */
-  LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: Check memory name syntax");
-#ifdef TEMPORARY_COMMENTED // commented in debuggging purposes
+
   // Check memory name syntax
   if ( usRC == NO_ERROR )
   {
@@ -1882,10 +1881,9 @@ LONG        lOptions                 // type of new Translation Memory
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
-#endif // TEMPORARY_COMMENTED
 
-LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemFuncCreateMem():: Check if target drive is valid");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+LogMessage(WARNING, "REQUIRED_ONLY_FOR_WINDOWS in MemFuncCreateMem():: Check if target drive is valid");
+#ifdef REQUIRED_ONLY_FOR_WINDOWS
   // Check if target drive is valid
   if ( (usRC == NO_ERROR) && (chToDrive != EOS) )
   {
@@ -1932,7 +1930,7 @@ LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemFuncCreateMem():: Chec
       } /* endif */
     } /* endif */
   } /* endif */
-#endif // TO_BE_REPLACED_WITH_LINUX_CODE
+#endif // 
 
   // check if TM exists already
   if ( usRC == NO_ERROR )
@@ -1944,21 +1942,22 @@ LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemFuncCreateMem():: Chec
     }
   } /* endif */
 
-LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: check if source language is valid");
-#ifdef TEMPORARY_COMMENTED
+
   // check if source language is valid
   if ( usRC == NO_ERROR )
   {
     SHORT sID = 0;
-
+    
+    LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: check if source language is valid : morphs not initialized");
+    #ifdef TEMPORARY_COMMENTED
     if ( MorphGetLanguageID( pszSourceLanguage, &sID ) != MORPH_OK )
     {
       usRC = ERROR_PROPERTY_LANG_DATA;
       UtlErrorHwnd( ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
                     &pszSourceLanguage, EQF_ERROR, HWND_FUNCIF  );
     } /* endif */
+    #endif
   } /* endif */
-#endif //TEMPORARY_COMMENTED
 
 
   // Check specified options

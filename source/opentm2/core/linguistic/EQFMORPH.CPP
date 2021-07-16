@@ -25,6 +25,7 @@
 #include "../spell/SpellFactory.h"
 #include "../morph/MorphFactory.h"
 #include "../utilities/LogWriter.h"
+#include "../utilities/ThreadingWrapper.h"
 
 #ifdef TEMPORARY_COMMENTED
 #include "cxmlwriter.h"
@@ -3568,23 +3569,14 @@ USHORT MorphGetLanguageID
   PLCB*    ppLCBTemp;
   USHORT   usTid;
 
-  {
     /******************************************************************/
     /* get Task-ID                                                    */
     /* use stack segment as differentiator to define what application */
     /* is calling this time..                                         */
     /******************************************************************/
-        WORD   usTask;
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-        _asm
-          {
-            mov      ax, SS
-            mov      usTask, ax
-          }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-     usTid = usTask;
-   }
+    
+  usTid = _getpid();
+   
 
   /********************************************************************/
   /* Allocate LCB table if necessary                                  */

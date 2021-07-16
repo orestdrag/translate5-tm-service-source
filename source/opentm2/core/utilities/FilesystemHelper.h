@@ -40,6 +40,8 @@ public:
     static FILE* FindFirstFile(const std::string& name);
     static FILE* FindNextFile();
 
+    static std::string GetFileName(HFILE ptr);
+
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
 #endif

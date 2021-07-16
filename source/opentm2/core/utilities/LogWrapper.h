@@ -19,6 +19,7 @@ extern "C"{
     };
 
     int SetLogLevel(int level);
+    bool CheckLogLevel(int level);
     int LogMessage(int LogLevel, const char* message);
     int LogMessage2(int LogLevel, const char* message1, const char* message2);
     int LogMessage3(int LogLevel, const char* message1, const char* message2, const char* message3);

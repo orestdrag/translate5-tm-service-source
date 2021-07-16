@@ -189,3 +189,7 @@ int SetLogLevel(int level){
         logLevelTreshold = level;
     }
 }
+
+bool CheckLogLevel(int level){
+    return level >= logLevelTreshold;
+}

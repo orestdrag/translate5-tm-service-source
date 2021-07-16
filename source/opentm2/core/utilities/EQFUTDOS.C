@@ -493,7 +493,6 @@ USHORT UtlOpenHwnd                                                        /*@3BC
    USHORT usMBCode = 0;                    // message box/UtlError return code
    BOOL   fTryCreate = TRUE;           // try-creation-of-file flag
 
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
       DosError(0);
@@ -672,8 +671,6 @@ USHORT UtlOpenHwnd                                                        /*@3BC
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFname, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    return( usRetCode );
 }
@@ -1302,10 +1299,7 @@ USHORT UtlChgFilePtrHwnd
    do {
       DosError(0);
 
-    LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in UtlChgFilePtrHwnd::SetFilePointerEx");
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       fOK = SetFilePointerEx( hf, liOffset, &liNewOffset, fsMethod );
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       *pulNewOffset = liNewOffset.LowPart;
 

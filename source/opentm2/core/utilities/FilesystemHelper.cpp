@@ -72,6 +72,19 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     return ptr;
 }
 
+std::string FilesystemHelper::GetFileName(HFILE ptr){
+    const int MAXSIZE = 0xFFF;
+    char filename[MAXSIZE];
+    char proclnk[MAXSIZE];
+
+    int fno = fileno(ptr);
+    sprintf(proclnk, "/proc/self/fd/%d", fno);
+    int r = readlink(proclnk, filename, MAXSIZE-1);
+    filename[r] = '\0';
+
+    return filename;
+}
+
 
 int FilesystemHelper::DeleteFile(const std::string& path){
     std::string fixedPath = path;
@@ -218,10 +231,20 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
     FILE *ptr = OpenFile(fixedPath, "wb");
+    int oldSize = 0;
+    if(CheckLogLevel(DEBUG)){
+        oldSize = GetFileSize(ptr);
+    }
     int errCode = WriteToFile(ptr, buff, buffsize);
     //if(errCode == FILEHELPER_NO_ERROR){
         CloseFile(ptr);
     //}
+    /*
+    if(CheckLogLevel(DEBUG)){
+        std::string msg = "FilesystemHelper::WriteToFile" + " buff = " + buff;
+        msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + path;
+        LogMessage(DEBUG, msg.c_str());
+    }//*/
     return __last_error_code = errCode;
 }
 
@@ -229,6 +252,10 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
 int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     int writenBytes = buffsize;
+    int oldSize = 0;
+    if(CheckLogLevel(DEBUG)){
+        oldSize = GetFileSize(ptr);
+    }
     if(ptr == NULL){
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{ 
@@ -238,7 +265,12 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
             __last_error_code = errCode = ERROR_WRITE_FAULT;
         }
     }
-    LogMessage4(DEBUG, "FilesystemHelper::WriteToFile(", intToA((long int)ptr), ", buff = ", "void" /*buff*/);
+    if(CheckLogLevel(DEBUG)){
+        std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + "void";
+        msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
+        msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
+        LogMessage(DEBUG, msg.c_str());
+    }
     //CloseFile(ptr);
     //return __last_error_code = errCode;
     return writenBytes;
@@ -247,6 +279,10 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
 int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     int writenBytes = buffsize;
+    int oldSize = 0;
+    if(CheckLogLevel(DEBUG)){
+        oldSize = GetFileSize(ptr);
+    }
     if(ptr == NULL){
         LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
@@ -257,7 +293,12 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
             __last_error_code = errCode = ERROR_WRITE_FAULT;
         }
     }
-    LogMessage4(DEBUG, "FilesystemHelper::WriteToFile(", intToA((long int)ptr), ", buff = ", buff);
+     if(CheckLogLevel(DEBUG)){
+        std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + buff;
+        msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
+        msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
+        LogMessage(DEBUG, msg.c_str());
+    }
     //CloseFile(ptr);
     //return __last_error_code = errCode;
     return writenBytes;

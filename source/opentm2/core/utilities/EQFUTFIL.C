@@ -3168,6 +3168,19 @@ BOOL UtlCheckIntName( PSZ pszName, PSZ pszOutName )
 
 #endif //TEMPORARY_COMMENTED
 
+
+BOOL IsDBCSLeadByteEx(
+  UINT CodePage,
+  BYTE TestChar
+){
+  LogMessage(WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
+  if(TestChar & 128){
+    return true;
+  }
+  return false;
+}
+#define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3203,7 +3216,6 @@ BOOL UtlCheckLongName( PSZ pszName )
      pPropSys = GetSystemPropPtr();
      while ( fOK && (*pszName != EOS) )
      {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
             (isdbcs1ex((USHORT)pPropSys->ulSystemPrefCP, *pszName ) == DBCS_1ST) &&
             (pszName[1] != EOS) )
@@ -3211,7 +3223,6 @@ BOOL UtlCheckLongName( PSZ pszName )
          pszName++;                    // skip both bytes of DBCS character
          pszName++;
        }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 //     if ( (*pszName == '\\') || (*pszName == '?') || (*pszName == '*') )
        if ( strchr("\\?*<>:|/", *pszName ) ) 
        {

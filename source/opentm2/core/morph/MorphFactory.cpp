@@ -9,7 +9,7 @@
 #include "../pluginmanager/OtmMorphPlugin.h"
 #include "../pluginmanager/OtmMorph.h"
 #include "MorphFactory.h"
-
+#include "core/utilities/LogWrapper.h"
 
 /*! \brief the MorphFactory instance	 */
 MorphFactory* MorphFactory::pMorphInstance = NULL;
@@ -190,6 +190,11 @@ int MorphFactory::getLanguageList(
 */
 bool MorphFactory::isSupported(const char* pszName )
 {
+  if((int)pvPluginList->size() == 0){
+	LogMessage(WARNING, "MorphFactory::isSupported :: pvPluginList size == 0");
+	return true;//temporary
+  }
+
   for (int i = 0; i < (int)pvPluginList->size(); i++)
 	{
 	  OtmMorphPlugin* pOtmMorphPlugin = pvPluginList->at(i);
