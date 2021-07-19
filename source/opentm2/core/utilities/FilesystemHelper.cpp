@@ -248,6 +248,10 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     return __last_error_code = errCode;
 }
 
+int FilesystemHelper::WriteToFile(const std::string& path, const unsigned char* buff, const int buffsize){
+    return WriteToFile(path, (const char*)buff, buffsize);
+}
+
 
 int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;

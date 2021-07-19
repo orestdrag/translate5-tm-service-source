@@ -3214,7 +3214,7 @@ BOOL UtlCheckLongName( PSZ pszName )
    if ( fOK )
    {
      pPropSys = GetSystemPropPtr();
-     while ( fOK && (*pszName != EOS) )
+     while ( pPropSys && fOK && (*pszName != EOS) )
      {
        if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
             (isdbcs1ex((USHORT)pPropSys->ulSystemPrefCP, *pszName ) == DBCS_1ST) &&

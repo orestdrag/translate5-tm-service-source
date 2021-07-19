@@ -30,6 +30,9 @@
 #include <sstream>
 #include "opentm2/core/utilities/EncodingHelper.h"
 
+#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "opentm2/core/utilities/FilesystemHelper.h"
+
 // import memory process
 void importMemoryProcess( void *pvData );
 
@@ -627,7 +630,7 @@ int OtmMemoryServiceWorker::import
 )
 {
   EncodingHelper::convertUTF8ToASCII( strMemory );
-  if ( hfLog ) fprintf( hfLog, "+POST %s/import\n", strMemory.c_str() );
+  LogMessage3(INFO, "+POST ", strMemory.c_str(),"/import\n");
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -666,11 +669,16 @@ int OtmMemoryServiceWorker::import
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
+      LogMessage4(INFO, "parsed json name = ", name.c_str(), "; value = ", value.c_str());
       if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
       {
         strTmxData = value;
         break;
+      }else{
+        LogMessage2(WARNING, "JSON parsed unexpected name, ", name.c_str());
       }
+    }else{
+        LogMessage4(ERROR, "failed to parse JSON \"", strInputParms.c_str(), "\", iRC = ", intToA(iRC));
     }
   } /* endwhile */
   factory->parseJSONStop( parseHandle );
@@ -691,7 +699,7 @@ int OtmMemoryServiceWorker::import
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 
-  if ( hfLog ) fprintf( hfLog, "+   Temp TMX File is %s\n", szTempFile );
+  LogMessage2(INFO, "+   Temp TMX File is ", szTempFile);
 
   // decode TMX data and write it to temp file
   std::string strError;
@@ -744,6 +752,8 @@ int OtmMemoryServiceWorker::import
   strcpy( pData->szMemory, strMemory.c_str() );
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
+
+  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in import::_beginthread(importMemoryProcess)");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   _beginthread( &importMemoryProcess, 0, (void *)pData );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1910,22 +1920,47 @@ void OtmMemoryServiceWorker::importDone( char *pszMemory, int iRC, char *pszErro
 int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
 { 
   int iRC = 0;
-
+  std::string sTempPath;
   // setup temp file name for TMX file 
-  char szTempPath[PATH_MAX];
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  iRC = GetTempPath( PATH_MAX, szTempPath );
-  if ( iRC > PATH_MAX || ( iRC == 0 ) )
+  {
+    char szTempPath[PATH_MAX];
+    properties_get_str(KEY_OTM_DIR, szTempPath, PATH_MAX);
+    sTempPath = szTempPath;
+    sTempPath += "/TEMP/";
+    iRC = properties_get_str_or_default(KEY_TEMP_DIR, szTempPath, PATH_MAX, sTempPath.c_str());
+    sTempPath = szTempPath;
+  }
+
+  if ( iRC != PROPERTY_USED_DEFAULT_VALUE && iRC != PROPERTY_NO_ERRORS )
   {
     iRC = -1;
   }
   else
   {
-    iRC = GetTempFileName( szTempPath, "OTM", 0, pszTempFile );
-    if ( iRC != 0 ) iRC = 0;
+    if(!FilesystemHelper::DirExists(sTempPath)){
+      iRC = FilesystemHelper::CreateDir(sTempPath);
+    }
+
+    int i = 0;
+    sTempPath += "OTM";
+    std::string checkName = sTempPath;
+    while(i<1000){
+      checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
+      auto files = FilesystemHelper::FindFiles(checkName);
+      
+      if(files.size() == 0){// we can use this name
+        LogMessage2(INFO, "Temp file's Name found :", checkName.c_str());
+        strcpy(pszTempFile, checkName.c_str());
+        break;
+      }
+      i++;
+    }
+    if( i == 1000){
+      LogMessage(ERROR, "All temp names is already used - delete some of them");
+    }
+
   }
   return( iRC );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief read a binary file and encode it using BASE64 encoding
@@ -2032,17 +2067,23 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   // get decoded length of data
   DWORD dwDecodedLength = 0;
-  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile() get decoded length of data");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
+//  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile() get decoded length of data");
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  std::string sData(pStringData);
+  unsigned char* pData = NULL;
+  int pDataSize = 0;
+  EncodingHelper::Base64Decode(sData, pData, pDataSize);
+  //if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
+  if(pDataSize == 0 || pData == NULL)
   {
     iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
-    LogMessage3(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
+    LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
     return( iRC );
   }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
+#ifdef TEMPORARY_COMMENTED
   // get byte array for decoded data
   BYTE *pData = (BYTE *)malloc( dwDecodedLength );
   if ( pData == NULL )
@@ -2052,8 +2093,6 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     return( iRC );
   }
 
-LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile()::CryptStringToBinary()");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // decode data
   if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, pData, &dwDecodedLength, NULL, NULL ) )
   {
@@ -2074,7 +2113,7 @@ LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile()::Cry
     strError.append( pszFile );
     strError.append( " failed" );
 
-    LogMessage4(ERROR, "decodeBase64ToFile()::", strError.c_str() ,", iRC = ", intToA(iRC));
+    LogMessage4(ERROR, "decodeBase64ToFile()::can't create file ", strError.c_str() ,", iRC = ", intToA(iRC));
     return( iRC );
   }
 
@@ -2088,14 +2127,15 @@ LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile()::Cry
     strError = "write to output file  ";
     strError.append( pszFile );
     strError.append( " failed" );
-    LogMessage4(ERROR, "decodeBase64ToFile()::", strError.c_str() ,", iRC = ", intToA(iRC));
+    LogMessage4(ERROR, "decodeBase64ToFile()::write to file", strError.c_str() ,", iRC = ", intToA(iRC));
     return( iRC );
   }
 
   // close file
   CloseFile( &hFile );
+  #endif
 
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  FilesystemHelper::WriteToFile(pszFile, pData, pDataSize);
   // cleanup
   free( pData );
 

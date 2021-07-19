@@ -1,6 +1,7 @@
 #include "EncodingHelper.h"
 #include "LogWrapper.h"
 
+#include "Base64.h"
 
 #include <codecvt>
 #include <locale>
@@ -98,3 +99,12 @@ std::u16string EncodingHelper::toLower(const std::u16string& strText){
     return ldata;
 }
 
+
+
+void EncodingHelper::Base64Decode (const std::string& input, unsigned char*& output, int& output_size){
+  output = base64_decode(input, output_size);
+}
+
+void EncodingHelper::Base64Encode (const unsigned char*& input, int inSize, std::string& output){
+  output = base64_encode(input, inSize);
+}

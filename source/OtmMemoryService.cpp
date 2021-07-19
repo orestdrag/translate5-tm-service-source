@@ -182,8 +182,7 @@ void postImport_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing POST mem/import request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
-
+  LogMessage4(INFO, "==== processing POST mem/import request, content type=\"", strType.c_str(),"\", content length=", intToA(content_length));
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
@@ -192,12 +191,11 @@ void postImport_method_handler( const shared_ptr< Session > session )
     int iTransActIndex = AddToTransActLog( POST_IMPORT_TRANSACTID, strTM.c_str() );
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    if ( hfLog != NULL ) fprintf( hfLog, "Memory name=\"%s\"\n", strTM.c_str() );
-    if ( hfLog != NULL ) fprintf( hfLog, "Input:\n-----\n%s\n----\n", strInData.c_str() );
+    LogMessage5(INFO, "===================\n    Memory name = ", strTM.c_str(), "\n    Input = ", strInData.c_str(), "\n==================");
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    LogMessage5(INFO, "...Done, RC=", intToA(rc),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
   } );
 }
 
@@ -212,7 +210,6 @@ void post_method_handler( const shared_ptr< Session > session )
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     int iTransActIndex = AddToTransActLog( POST_CREATEMEM_TRANSACTID, "" );
-    //TransActDone( iTransActIndex );
     string strInData = string( body.begin(), body.end() );
     LogMessage2(INFO, "Input: ", strInData.c_str() );
     string strResponseBody;
@@ -482,8 +479,8 @@ int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
   pEntry->Id = Id;
   time( &( pEntry->lStartTimeStamp ) );
   strcpy( pEntry->szMemory, pszMemory );
-  //std::string message = "Transaction " + to_string(Id) + " started at " + pEntry->lStartTimeStamp + " timestamp with pszMemory = " + pszMemory;
-  //LogMessage(INFO, message.c_str());
+  std::string message = "Transaction " + to_string(Id) + " started at " + to_string(pEntry->lStartTimeStamp) + " timestamp with pszMemory = " + pszMemory;
+  LogMessage(INFO, message.c_str());
   return( i );
 }
 
@@ -499,8 +496,8 @@ int TransActDone( int iTransActIndex )
   // set transaction stop time
   pTransActLog[iTransActIndex].lStopTimeStamp = 0;
   time( &(pTransActLog[iTransActIndex].lStopTimeStamp) );
-  //std::string message = "Transaction " + to_string(pTransActLog[iTransActIndex].Id) + " finished at " + pTransActLog[iTransActIndex].lStartTimeStamp + " timestamp iTransActIndex = " + to_string(iTransActIndex);
-  //LogMessage(INFO, message.c_str());
+  std::string message = "Transaction " + to_string(pTransActLog[iTransActIndex].Id) + " finished at " + std::to_string(pTransActLog[iTransActIndex].lStartTimeStamp) + " timestamp iTransActIndex = " + to_string(iTransActIndex);
+  LogMessage(INFO, message.c_str());
   return( 0 );
 }
 
