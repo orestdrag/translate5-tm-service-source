@@ -167,10 +167,10 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   {
     // use old memory open code
     USHORT usMsgHandling = (USHORT)bMsgHandling;
-    USHORT usRC = NO_ERROR;
-#ifdef TEMPORARY_COMMENTED
+    //USHORT usRC = NO_ERROR;
+//#ifdef TEMPORARY_COMMENTED
     USHORT usRC = TmOpen(  pInfo->szFullPath, &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 
     // create memory object if create function completed successfully
     if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
@@ -180,9 +180,10 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     else
     {
       handleError( (int)usRC, pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
-#ifdef TEMPORARY_COMMENTED
-      if ( htm != 0 ) TmClose( htm, NULL,  FALSE,  NULL );
-#endif //TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
+      if ( htm != 0 ) 
+        TmClose( htm, NULL,  FALSE,  NULL );
+//#endif //TEMPORARY_COMMENTED
     } /* end */       
   } /* end */     
   else
@@ -207,7 +208,8 @@ int EqfMemoryPlugin::closeMemory(
 
   EqfMemory *pMem = (EqfMemory *)pMemory;
   HTM htm = pMem->getHTM();
-
+  
+  LogMessage(WARNING, "TEMPORARY_COMMENTED in EqfMemoryPlugin::closeMemory");
 #ifdef TEMPORARY_COMMENTED
 	iRC = TmClose( htm, NULL,  FALSE,  NULL );
 #endif //TEMPORARY_COMMENTED
@@ -225,6 +227,8 @@ int EqfMemoryPlugin::closeMemory(
     PSZ pszName = strrchr( (char*)strPropName.c_str(), '\\' );
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
     this->fillInfoStructure( pszName, pMemInfo );
+  }else{
+    LogMessage(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
   }
 
   delete( pMemory );  
