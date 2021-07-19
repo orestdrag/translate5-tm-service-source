@@ -52,7 +52,7 @@
 //+----------------------------------------------------------------------------+
 
 #include "win_types.h"
-
+#include "../utilities/LogWrapper.h"
 #include <cwctype>
 
 // define for memory import logging (remove to disable logging)
@@ -3191,7 +3191,7 @@ USHORT MemFuncPrepImport
   PMEM_LOAD_DLG_IDA pLoadIDA = NULL;   // Pointer to the load IDA
 
   pszUnused1; pszUnused2;
-
+  bool fOkFailHandled = false;
    /*******************************************************************/
    /* Allocate storage for the MEM_LOAD_DLG_IDA. The area will be free*/
    /* in the function  EQFMemloadStart. Only in case of an error      */
@@ -3202,6 +3202,9 @@ USHORT MemFuncPrepImport
     {  // use def.target lang. from system preferences of TM
           pLoadIDA->ulOemCP = GetLangOEMCP(NULL);
           pLoadIDA->ulAnsiCP = GetLangAnsiCP(NULL);
+    }else if(!fOkFailHandled){
+      fOkFailHandled = true;
+      LogMessage(ERROR,"MemFuncPrepImport:: memory allocation fails");
     }
 
    // check if a TM has been specified
@@ -3214,8 +3217,10 @@ USHORT MemFuncPrepImport
        UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
                      EQF_ERROR, HWND_FUNCIF );
      } /* endif */
-   } /* endif */
-
+   }else if(!fOkFailHandled){ 
+      fOkFailHandled = true;
+      LogMessage(ERROR,"MemFuncPrepImport:: check if a TM has been specified fails");
+   }/* endif */
    // set options for import
    if ( fOK )
    {
@@ -3270,9 +3275,16 @@ USHORT MemFuncPrepImport
    if ( fOK )
    {
      pLoadIDA->fCreateMatchID = MADPrepareMatchSegIDPrefix( pszTM_ID, pszStoreID, pLoadIDA->szMatchIDPrefix );
-#if 0 //WINAPI
-     if ( pLoadIDA->fCreateMatchID  ) MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
-#endif
+
+     if ( pLoadIDA->fCreateMatchID  ) {
+        LogMessage(INFO,"pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented");
+        //MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
+        //EncodingHelper::MultiByteToWideChar(CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
+     }
+
+   }else if(!fOkFailHandled){
+     fOkFailHandled = true;
+     LogMessage(ERROR,"MemFuncPrepImport::set options for import fails");
    } /* endif */
 
    /*******************************************************************/
@@ -3284,12 +3296,16 @@ USHORT MemFuncPrepImport
      MemoryFactory *pFactory = MemoryFactory::getInstance();
      if ( !pFactory->exists( NULL, pszMemName ) )
      {
+       LogMessage2(ERROR, "Mem file not found:: ", pszMemName);
 	   fOK = FALSE;
        pszParm = pszMemName;
        usRC = ERROR_MEMORY_NOTFOUND;
        UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
      } /* endif */
-   } /* endif */
+  }else if(!fOkFailHandled){
+     fOkFailHandled = true;
+     LogMessage(ERROR,"MemFuncPrepImport::prepare segment match ID prefix fails");
+  } /* endif */
 
    /*******************************************************************/
    /* Open the TM                                                     */
@@ -3301,10 +3317,13 @@ USHORT MemFuncPrepImport
      pLoadIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      if ( iRC != 0 )
      {
-	   fOK = FALSE;
+	     fOK = FALSE;
        pFactory->showLastError( NULL, pszMemName, pLoadIDA->pMem, (HWND)HWND_FUNCIF );
      } /* end */        
-   } /* endif */
+  }else if(!fOkFailHandled){
+      fOkFailHandled = true;
+      LogMessage(ERROR,"MemFuncPrepImport::Check if there is a TM with the given name fails");
+  } /* endif */
 
    /*******************************************************************/
    /* Check if input file exists                                      */
@@ -3318,7 +3337,10 @@ USHORT MemFuncPrepImport
                      1, &pszParm, EQF_ERROR, HWND_FUNCIF );
        fOK = FALSE;
      } /* endif */
-   } /* endif */
+  }else if(!fOkFailHandled){
+     fOkFailHandled = true;
+     LogMessage(ERROR,"MemFuncPrepImport::Open the TM fails");
+  } /* endif */
 
    /*******************************************************************/
    /* Open the input file                                             */
@@ -3345,6 +3367,9 @@ USHORT MemFuncPrepImport
         pLoadIDA->hFile = NULLHANDLE;
         fOK = FALSE;
      }/* endif */
+   }else if(!fOkFailHandled){
+      fOkFailHandled = true;
+      LogMessage(ERROR,"MemFuncPrepImport::Check if input file exists fails");
    } /* endif */
 
    /*******************************************************************/
@@ -3355,6 +3380,9 @@ USHORT MemFuncPrepImport
      pLoadIDA->fBatch     = TRUE;
      pLoadIDA->hwndErrMsg = HWND_FUNCIF;
      pData->pvMemLoadIda = (PVOID)pLoadIDA;
+   }else if(!fOkFailHandled){
+      fOkFailHandled = true;
+      LogMessage(ERROR,"MemFuncPrepImport::Open the input file  fails");
    } /* endif */
 
    /*******************************************************************/
@@ -3362,6 +3390,7 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( !fOK )
    {
+      LogMessage(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
       if ( pLoadIDA )
       {
          if ( pLoadIDA->pMem )
@@ -3384,8 +3413,10 @@ USHORT MemFuncPrepImport
      pData->usMemLoadPhase = MEM_START_IMPORT;
      pData->usMemLoadRC    = NO_ERROR;
    }
-   else
+   else if(!fOkFailHandled)
    {
+     fOkFailHandled = true;
+     LogMessage(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
      usRC = UtlQueryUShort( QS_LASTERRORMSGID );
    } /* endif */
    return( usRC );

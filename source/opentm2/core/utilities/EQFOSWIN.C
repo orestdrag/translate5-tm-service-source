@@ -2029,7 +2029,10 @@ ULONG GetCodePage( USHORT usType )
 {
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
-  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in GetCodePage, usType = ", intToA(usType));
+
+  LogMessage2(INFO, "GetCodePage::usType = ", intToA(usType));
+
+//  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in GetCodePage, usType = ", intToA(usType));
 //#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 /* https://docs.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-getlocaleinfoa */
   switch ( usType )

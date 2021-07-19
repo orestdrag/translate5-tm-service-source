@@ -861,6 +861,7 @@ static ULONG InternalGetLangOEMCP
 {
   BOOL        fFound = FALSE;                    // true if language found in cache
   CHAR        szUprLanguage[MAX_LANG_LENGTH];    // uppercased language name
+  szUprLanguage[0] = '\0';
   int         i = 0;                             // index for language cache table
   ULONG       ulCP = 0L;                         // evaluated OEM codepage
   int         iCachePos = -1;                    // position of language within cache, -1 = not in cache

@@ -32,6 +32,8 @@
 
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "opentm2/core/utilities/FilesystemHelper.h"
+#include <thread>
+#include <utility>
 
 // import memory process
 void importMemoryProcess( void *pvData );
@@ -246,7 +248,9 @@ int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
     return( *pi );
   } /* endif */
 #endif
-
+  if(this->vMemoryList.size()==0){
+    LogMessage(WARNING,"findMemoryInList:: vMemoryList.size == 0");
+  }
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
   {
@@ -753,10 +757,12 @@ int OtmMemoryServiceWorker::import
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
-  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in import::_beginthread(importMemoryProcess)");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  _beginthread( &importMemoryProcess, 0, (void *)pData );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+ // LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in import::_beginthread(importMemoryProcess)");
+//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  //_beginthread( &importMemoryProcess, 0, (void *)pData );
+  //std::thread importThread(&importMemoryProcess, (void*)pData);
+  importMemoryProcess(pData);
+//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( restbed::CREATED );
 }
@@ -1933,10 +1939,11 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
 
   if ( iRC != PROPERTY_USED_DEFAULT_VALUE && iRC != PROPERTY_NO_ERRORS )
   {
-    iRC = -1;
+    return iRC;
   }
   else
   {
+    iRC = 0;
     if(!FilesystemHelper::DirExists(sTempPath)){
       iRC = FilesystemHelper::CreateDir(sTempPath);
     }
@@ -2137,7 +2144,7 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   FilesystemHelper::WriteToFile(pszFile, pData, pDataSize);
   // cleanup
-  free( pData );
+  delete[] pData ;
 
   return( iRC );
 }

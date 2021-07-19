@@ -82,12 +82,12 @@ OtmMemory *MemoryFactory::openMemory
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  this->Log.writef( "Open memory %s", pszMemoryName );
+  LogMessage2(INFO, "MemoryFactory::openMemory, pszMemoryName = ", pszMemoryName);
 
   pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
-    this->Log.write( "   Could not identify plugin processing the memory" );
+    LogMessage2(ERROR, "MemoryFactory::openMemory, Could not identify plugin processing the memory,", pszMemoryName);
     *piErrorCode = this->iLastError;
     return( NULL );
   } /* endif */
@@ -102,36 +102,43 @@ OtmMemory *MemoryFactory::openMemory
   if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
   {
     pMemory = ((OtmMemoryPlugin *)pluginSelected)->openMemory( (char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
-    if ( pMemory == NULL ) *piErrorCode = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+    if ( pMemory == NULL ){
+        *piErrorCode = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+        LogMessage2(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType, pMemory is NULL, ", pszMemoryName);
+    }
   }
   else if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
   {
     pMemory = ((OtmSharedMemoryPlugin *)pluginSelected)->openMemory( (char *)strMemoryName.c_str() , NULL, (usOpenFlags == 0) ? NONEXCLUSIVE : usOpenFlags );
-    if ( pMemory == NULL ) *piErrorCode = this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+    if ( pMemory == NULL ) {
+      *piErrorCode = this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+      LogMessage2(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType, pMemory is NULL, ", pszMemoryName);
+    }
   }
   if ( pMemory == NULL )
   {
-    this->Log.writef( "   Open of local memory %s using plugin %s failed, the return code is %ld", strMemoryName.c_str(), pluginSelected->getName(), this->iLastError );
+    LogMessage6(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ,"  using plugin",
+        pluginSelected->getName(), " failed, the return code is ", intToA(this->iLastError) );
     return( NULL );
   } /* end */     
 
   // for shared memories using a local memory as a copy: open the associated shared memory
   if ( fIsShared && pSharedMemPlugin->isLocalMemoryUsed() )
   {
-    this->Log.writef( "  Open shared component of memory using plugin %s", pSharedMemPlugin->getName(), this->iLastError );
+    LogMessage4(INFO, "MemoryFactory::openMemory::Open shared component of memory using plugin ", pSharedMemPlugin->getName(),", error message is "  , intToA(this->iLastError ) );
     OtmMemory *pSharedMem = pSharedMemPlugin->openMemory( (char *)strMemoryName.c_str(), pMemory, 0 );
     if ( pSharedMem == NULL )
     {
       // close local memory
       this->closeMemory( pMemory );
       this->iLastError = pSharedMemPlugin->getLastError( this->strLastError );
-      this->Log.writef( "  Open failed, return code is %ld, error message is %s", this->iLastError, this->strLastError.c_str() );
+      LogMessage4(ERROR, "MemoryFactory::openMemory::Open failed, return code is ", intToA(this->iLastError),", error message is "  , this->strLastError.c_str() );
     }
     else
     {
       // use shared memory object from now on
       pMemory = pSharedMem;
-      this->Log.write( "  Open successful" );
+      LogMessage2(INFO, " Open successful,",strMemoryName.c_str() );
     } /* endif */
   } /* endif */
 
@@ -560,10 +567,15 @@ int MemoryFactory::closeMemory
 {
   int iRC = 0;
 
-  if ( pMemory == NULL  ) return( -1 );
-
+  if ( pMemory == NULL  ){
+    LogMessage(ERROR,"MemoryFactory::closeMemory, pMemory is NULL");
+    return( -1 );
+  }
   OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
-  if ( pPlugin == NULL  ) return( -2 );
+  if ( pPlugin == NULL  ){
+     LogMessage(ERROR,"MemoryFactory::closeMemory, pPlugin is NULL");
+     return( -2 );
+  }
 
   // build memory object name
   PSZ pszObjName = NULL;
@@ -593,7 +605,9 @@ int MemoryFactory::closeMemory
   // send a properties changed msg to memory handler
   EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pszObjName ));
 
-  if ( pszObjName != NULL ) UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
+  if ( pszObjName != NULL ) {
+      UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
+  }
  
   return( iRC );
 }

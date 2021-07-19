@@ -15,6 +15,7 @@
 #include "EQFTAG00.H"
 
 #include "EQFTAI.H"               // Private include file for Text Analysis
+#include "../utilities/LogWrapper.h"
 
 /**********************************************************************/
 /* Static array of loaded tag tables                                  */
@@ -174,6 +175,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
         }
         else
         {
+LogMessage(ERROR, "TO_BE_REPLACED_WITH_LINUX_CODE in TALoadTagTableExHwnd");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
           // no more table space, all tables in use
           return( ERROR_OUT_OF_STRUCTURES );

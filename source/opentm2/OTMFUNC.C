@@ -138,13 +138,17 @@ USHORT EqfImportMem
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
+  
+  LogMessage2(INFO, "==EQFImportMem== Memory: ", pszMemName);
+  
+  if(!pData){
+    LogMessage(WARNING, "EqfImportMem::pData is NULL");
+  }
+
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
   {
-    LOGWRITE1( "==EQFImportMem==\n" );
-    LOGPARMSTRING("Memory", pszMemName );
-    LOGPARMSTRING("InFile", pszInFile );
-    LOGPARMOPTION("Options", lOptions );
+    LogMessage4(INFO, "InFile = ", pszInFile, ", Options = ", intToA(lOptions) );
   } /* endif */
 
 
@@ -160,7 +164,9 @@ USHORT EqfImportMem
   // call TM import
   if ( usRC == NO_ERROR )
   {
-    if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFIMPORTMEM;
+    LogMessage(INFO, "EqfImportMem:: call TM import");
+    if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
+      pData->sLastFunction = FCT_EQFIMPORTMEM;
     usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions );
   } /* endif */
 
@@ -177,7 +183,8 @@ USHORT EqfImportMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-  if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) LOGWRITE2( "  RC=%u\n", usRC );
+  if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) 
+    LogMessage2(INFO, "EqfImportMem:: RC=%u\n", intToA(usRC) );
 
   return( usRC );
 } /* end of function EqfImportMem */
