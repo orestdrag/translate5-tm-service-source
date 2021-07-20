@@ -41,6 +41,7 @@
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 #include "core/utilities/FilesystemWrapper.h"
+#include "core/utilities/PropertyWrapper.H"
 
 #ifdef _DEBUG
   //#define SESSIONLOG
@@ -1863,6 +1864,7 @@ NTMGetThresholdFromProperties
                                //FALSE: display no error message
 {
   CHAR      szSysPath[MAX_EQF_PATH];      //EQF system path X:\EQF
+  szSysPath[0] = '\0';
   PSZ       pszTemp;                      //temp ptr for property name
   CHAR      szPropertyName[MAX_FILESPEC]; //property name TMTEST.MEM
   HPROP     hProp;                        //handle of TM properties
@@ -1883,7 +1885,8 @@ NTMGetThresholdFromProperties
   /* NTMOpenProperties and therefore OpenProperties needs only the    */
   /* system path and the TM property name with ext                    */
   /********************************************************************/
-  UtlMakeEQFPath ( szSysPath, NULC, SYSTEM_PATH, NULL );
+  //UtlMakeEQFPath ( szSysPath, NULC, SYSTEM_PATH, NULL );
+  properties_get_str(KEY_MEM_DIR, szSysPath, MAX_EQF_PATH);
 
   /********************************************************************/
   /* open the properties of the TM                                    */
@@ -1904,10 +1907,9 @@ NTMGetThresholdFromProperties
     /* if no error, return the threshold from the TM properties       */
     /******************************************************************/
     *pusThreshold = pProp->usThreshold;
-    LogMessage(WARNING,"TEMPORARY_COMMENTED CloseProperties");
-    #ifdef TEMPORARY_COMMENTED
+    
     CloseProperties( hProp, PROP_QUIT, &ErrorInfo);
-    #endif
+    
   } /* endif */
 
   return usRc;

@@ -14,7 +14,7 @@
 #include "OTMFUNC.H"
 
 #include <pthread.h>
-
+#include "LogWrapper.h"
 // activate the following define for property failure logging
 //#define PROPLOGGING
 
@@ -343,7 +343,8 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         pcntl->usUser++;
         return( pcntl);
       }
-    MakePropPath( fname, "", pszPath, pszName, ""); // no drive, no .ext
+    //MakePropPath( fname, "", pszPath, pszName, ""); // no drive, no .ext
+    sprintf(fname, "%s%s", pszPath, pszName);
     do {
       usrc = UtlOpen( fname, &hf, &usAction, 0L,
                       FILE_NORMAL, FILE_OPEN,
@@ -355,11 +356,13 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       }
       usrc = UtlRead( hf, &prophead, sizeof( prophead), &sizread, 0);
       if( usrc || (sizread != sizeof( prophead))){
+        LogMessage4(ERROR, "LoadPropFile, couldn't read file: ", fname, ", bytes read: ", intToA(sizread));
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
       if( strcasecmp( pszName, prophead.szName)
-       || strcasecmp( pszPath + 2, prophead.szPath + 2))   // ignore drive !!!
+       //|| strcasecmp( pszPath + 2, prophead.szPath + 2)   // ignore drive !!!
+       )
        {
         *pIda->pErrorInfo = ErrProp_InvalidFile;
         break;
@@ -381,6 +384,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       usrc = UtlRead( hf, pcntl->pHead+1, size, &sizread, 0);
       if( usrc || (sizread != size))
       {
+        LogMessage6(ERROR,"UtlRead:: usrc = ",intToA(usrc), "; sizread = ", intToA(sizread), ", size = ", intToA(size));
         // for folder property files it is O.K. to read less than
         // size bytes
         if ( (prophead.usClass == PROP_CLASS_FOLDER) &&
@@ -403,7 +407,10 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         }
         else
         {
+          LogMessage(WARNING, "TEMPORARY_COMMENTED :: Err_ReadFile");
+          #ifdef TEMPORARY_COMMENTED
           *pIda->pErrorInfo = Err_ReadFile;
+          #endif
           break;
         } /* endif */
       }
@@ -707,7 +714,6 @@ USHORT PutItAway( PPROPCNTL pcntl)
     return( usrc);
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 /*!
      Drop properties file from memory
@@ -723,6 +729,7 @@ VOID DropPropFile( PPROP_IDA pIda, PPROPCNTL pcntl)
     UtlAlloc( (PVOID *)&pcntl, 0L, 0L, NOMSG );
 }
 
+#ifdef TEMPORARY_COMMENTED
 /*!
      Delete a properties file
 */
@@ -863,7 +870,8 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
      }
      else
      {
-#if 0
+       LogMessage(WARNING, "TEMPORARY_COMMENTED call EqfCallPropertyHandler ");
+#ifdef TEMPORARY_COMMENTED
      hprop = (HPROP)EqfCallPropertyHandler( WM_EQF_OPENPROPERTIES,
                                             MP1FROMSHORT(0),
                                             MP2FROMP(pmsg) );
@@ -1040,6 +1048,8 @@ SHORT DeleteProperties(
    return( rc);
 }
 
+#endif 
+
 /*!
     Close Properties
 */
@@ -1118,7 +1128,8 @@ SHORT CloseProperties(
      }
      else
      {
-#if 0
+       LogMessage(WARNING,"TEMPORARY_COMMENTED in Close Properties, SHORT1FROMMR");
+#if TEMPORARY_COMMENTED
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_CLOSEPROPERTIES,
                                                  MP1FROMSHORT(0),
                                                  MP2FROMP(&PropMsg) ) );
@@ -1129,6 +1140,8 @@ SHORT CloseProperties(
 
    return( rc);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
     Get All Properties
