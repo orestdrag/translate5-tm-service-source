@@ -17,11 +17,12 @@
 #define INCL_EQF_LIST             // terminology list functions
 #define INCL_EQF_DAM
 #define INCL_EQF_ASD
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFQDAMI.H>
+#include "core/utilities/LogWrapper.h"
 
 //#include <eqflstex.h>
 
@@ -194,7 +195,10 @@ USHORT MemRcHandlingHwnd
      Utlstrccpy( szMemName,
                  UtlGetFnameFromPath( pszMemPath ),
                  DOT );
+      LogMessage(WARNING,"TEMPORARY_COMMENTED ObjShortToLongName");
+      #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
+     #endif
      OEMTOANSI( szLongName );
 
      pReplAddr[0] = szLongName;
@@ -202,7 +206,11 @@ USHORT MemRcHandlingHwnd
    else if ( strchr( pszMemPath,'.' ) )
    {
      Utlstrccpy( szMemName, pszMemPath, DOT );
+     
+     LogMessage(WARNING,"TEMPORARY_COMMENTED ObjShortToLongName");
+     #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
+     #endif
 
      OEMTOANSI( szLongName );
      pReplAddr[0] = szLongName;
@@ -837,7 +845,10 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
     PBTREE pbTree = &pData->BtreeIn;
     PBTREE pbNewTree = &pData->BtreeOut;
 
+    LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMDictOpenLocal");
+    #ifdef TEMPORARY_COMMENTED
     sRc = QDAMDictOpenLocal( pszMem, 20, ASD_ORGANIZE | ASD_GUARDED, &pbTree );
+    #endif
 
     // get user data
     if ( !sRc )
@@ -867,7 +878,10 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
       ULONG ulDataLen = sizeof(pData->bData);
       ULONG ulKeyLen  = sizeof(pData->szKey) / sizeof(CHAR_W);
 
+      LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictNextLocal");
+      #ifdef TEMPORARY_COMMENTED
       sRc = QDAMDictNextLocal( pbTree, pData->szKey, &ulKeyLen, pData->bData, &ulDataLen );
+      #endif
 
       if ( !sRc )
       {

@@ -19,6 +19,7 @@
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
+#include "core/utilities/LogWrapper.h"
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -130,7 +131,11 @@ USHORT TmtXOpen
       // do on-spot conversion for version 6 memories
       if ( (usRc == NO_ERROR ) && (pTmClb->stTmSign.bMajorVersion == TM_MAJ_VERSION_6) )
       {
+        LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
+        #ifdef TEMPORARY_COMMENTED
         EQFNTMClose( &pTmClb->pstTmBtree );
+        #endif 
+
         MemConvertMem( pTmOpenIn->stTmOpen.szDataName );
         usRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName, (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE), &pTmClb->pstTmBtree );
         usLen = sizeof( TMX_SIGN );
@@ -204,7 +209,10 @@ USHORT TmtXOpen
           }
           else
           {
+            LogMessage(WARNING,"TEMPORARY_COMMENTED NTMCreateLangGroupTable");
+            #ifdef TEMPORARY_COMMENTED
             usTempRc = NTMCreateLangGroupTable( pTmClb );
+            #endif
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -315,7 +323,11 @@ USHORT TmtXOpen
           // Translation Memory
           if ( usTempRc == NO_ERROR )
           {
+            LogMessage(WARNING, "TEMPORARY_COMMENTED NTMReadLongNameTable");
+            #ifdef TEMPORARY_COMMENTED
             usTempRc = NTMReadLongNameTable( pTmClb );
+            #endif 
+
             switch ( usTempRc)
             {
               case ERROR_NOT_ENOUGH_MEMORY:
@@ -439,8 +451,13 @@ USHORT TmtXOpen
     UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
+
+    LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
+    #ifdef TEMPORARY_COMMENTED
     if ( pTmClb->pstTmBtree != NULL ) EQFNTMClose( &pTmClb->pstTmBtree );
     if ( pTmClb->pstInBtree != NULL ) EQFNTMClose( &pTmClb->pstInBtree );
+    #endif 
+
     NTMDestroyLongNameTable( pTmClb );
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
   } /* endif */

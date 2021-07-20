@@ -22,6 +22,7 @@
 #include "PropertyWrapper.H"
 #include "win_types.h"
 #include "FilesystemWrapper.h"
+#include "LogWrapper.h"
 
 // includes for Xalan XSLT
 
@@ -495,6 +496,7 @@ BOOL FAR PASCAL UtlNetworkEnumAll()
 
   return (retval);
 }
+#endif 
 
 USHORT UtlGetLANUserID
 (
@@ -506,6 +508,8 @@ USHORT UtlGetLANUserID
   USHORT usRC = LANUID_NO_LAN;         // function return code
   static BOOL notfirst = FALSE;   /* the first time Windows for Workgroups gives a bogus value */
 
+  LogMessage(WARNING,"TEMPORARY_COMMENTED in UtlGetLANUserID");
+  #ifdef TEMPORARY_COMMENTED
   usMsgHandling;
   // Preset the user priviliges and the LAN userid
   *pusUserPriv = USER_USER;
@@ -558,9 +562,12 @@ USHORT UtlGetLANUserID
       usRC = NO_ERROR;
     } /* endif */
   } /* endif */
+  #endif 
+
   return( usRC );
 }
 
+#ifdef TEMPORARY_COMMENTED
 USHORT UtlGetLANUserIDW
 (
   PSZ_W  pszLANUserIDW,                 // LAN UserID - returned

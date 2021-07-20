@@ -181,6 +181,7 @@
 #include "EQF.H"
 #include "EQFQDAMI.H"
 #include "EQFEVENT.H"                  // event logging facility
+#include "core/utilities/LogWrapper.h"
 
 UCHAR  ucbEncodeTbl[30]
         =  { 00,  06,
@@ -262,7 +263,6 @@ EQFNTMCreate
   return( sRc );
 } /* end of function EQFNTMCreate */
 
-#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -329,7 +329,9 @@ SHORT  EQFNTMOpen
    SHORT     sRc = 0;                  // return code
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
-
+  
+  LogMessage(WARNING,"TEMPORARY_COMMENTED in EQFNTMOpen");
+  #ifdef TEMPORARY_COMMENTED
    if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
    {
       sRc = BTREE_NO_ROOM;
@@ -404,10 +406,11 @@ SHORT  EQFNTMOpen
    } /* endif */
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCEXIT_EVENT, 0 );
-
+    #endif
    return ( sRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -508,8 +511,6 @@ SHORT EQFNTMUpdSign
   return( QDAMDictUpdSignLocal( (PBTREE) pBTIda, pUserData, usLen ) );
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -573,7 +574,7 @@ SHORT EQFNTMSign
   return( sRc );
 
 }
-#endif 
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -779,6 +780,7 @@ EQFNTMUpdate
 
   return sRc;
 } /* end of function EQFNTMUpdate */
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -830,7 +832,12 @@ EQFNTMGet
 
       ulLength = *pulLength;
       pBT->fCorrupted = FALSE;
+
+      LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
+      #ifdef TEMPORARY_COMMENTED
       sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      #endif 
+
       pBT->fCorrupted = fCorrupted;
 
       if ( sRc == BTREE_IN_USE )
@@ -852,7 +859,6 @@ EQFNTMGet
   return sRc;
 } /* end of function EQFNTMGet */
 
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

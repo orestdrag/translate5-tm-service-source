@@ -6536,3 +6536,117 @@ SHORT QDAMDictUpdSignLocal
 }
 
 
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictSignLocal    Read User Data
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictSignLocal( PBTREE, PCHAR, PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Gets the second part of the first record ( user data )
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  pointer to user data
+//                    PUSHORT                length of user data area (input)
+//                                           filled length (output)
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     pointer invalid
+//                    BTREE_USERDATA    user data too long
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//
+//------------------------------------------------------------------------------
+// Side effects:      return signature record even if dictionary is corrupted
+//
+//------------------------------------------------------------------------------
+// Function flow:
+//                    position to begin of data start in first record
+//                    if not possible set  Rc = BTREE_READ_ERROR
+//                    if not Rc
+//                      read in length of userdata
+//                      if ok
+//                        if user requests only length
+//                          return only length
+//                        else
+//                          if length not correct
+//                            set Rc =BTREE_USERDATA
+//                          else
+//                            read in user data
+//                          endif
+//                        endif
+//                      else
+//                        set Rc = BTREE_READ_ERROR
+//                      endif
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictSignLocal
+(
+   PBTREE pBTIda,                      // pointer to btree structure
+   PCHAR  pUserData,                   // pointer to user data
+   PUSHORT pusLen                      // length of user data
+)
+{
+  SHORT  sRc=0;                        // return code
+  USHORT  usNumBytesRead;              // bytes read from disk
+  ULONG   ulNewOffset;                 // new offset
+  USHORT  usLen;                       // contain length of user record
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  if ( UtlChgFilePtr( pBT->fp, (LONG) USERDATA_START,
+                      FILE_BEGIN, &ulNewOffset, FALSE) )
+  {
+    sRc = BTREE_READ_ERROR;
+  } /* endif */
+
+  if ( ! sRc )
+  {
+     ASDLOG();
+
+     sRc = UtlRead( pBT->fp, (PVOID) &usLen, sizeof(USHORT),
+                    &usNumBytesRead, FALSE );
+     if ( !sRc )
+     {
+        // user requests only length or full data
+        if ( ! pUserData  || *pusLen == 0 )
+        {
+           *pusLen = usLen;         // return only length
+        }
+        else
+        {
+           if ( *pusLen <  usLen )
+           {
+              sRc = BTREE_USERDATA;
+           }
+           else
+           {
+              // read in data part
+              sRc = UtlRead( pBT->fp, pUserData, usLen,
+                             &usNumBytesRead, FALSE );
+              if ( !sRc )
+              {
+                 *pusLen = usLen;
+              }
+              else
+              {
+                 sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+              } /* endif */
+           } /* endif */
+        } /* endif */
+
+        ASDLOG();
+     }
+     else
+     {
+        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+     } /* endif */
+  } /* endif */
+  return sRc;
+}
+

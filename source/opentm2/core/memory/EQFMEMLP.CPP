@@ -3297,7 +3297,7 @@ USHORT MemFuncPrepImport
      if ( !pFactory->exists( NULL, pszMemName ) )
      {
        LogMessage2(ERROR, "Mem file not found:: ", pszMemName);
-	   fOK = FALSE;
+	     fOK = FALSE;
        pszParm = pszMemName;
        usRC = ERROR_MEMORY_NOTFOUND;
        UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );

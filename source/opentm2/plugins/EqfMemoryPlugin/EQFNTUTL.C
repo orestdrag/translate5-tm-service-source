@@ -49,6 +49,7 @@
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
+#include "core/utilities/LogWrapper.h"
 
 #include "EQFCMPR.H"
 /**********************************************************************/
@@ -61,6 +62,7 @@ USHORT NTMCheckPropFile( PSZ, PVOID *);
 USHORT NTMAddNameToTable( PTMX_CLB, PSZ, USHORT, PUSHORT );
 int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
+
 
 #ifdef TEMPORARY_COMMENTED
 
@@ -1749,12 +1751,15 @@ USHORT NTMReadLongNameTable
           memcpy( pNewArea,
                   (PBYTE)pTmClb->pLongNames->pszBuffer + sizeof(TERSEHEADER),
                   ulLen - sizeof(TERSEHEADER) );
+          
+          #ifdef TEMPORARY_COMMENTED
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )
           {
             usRC = ERROR_NOT_ENOUGH_MEMORY; // expand failed most likely to
                                             // memory shortage
           } /* endif */
+          #endif
         } /* endif */
 
         // set table data and cleanup
@@ -2172,6 +2177,7 @@ USHORT NTMSaveNameTable
   // return to caller
   return( usRc );
 } /* end of function NTMSaveNameTable */
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2235,12 +2241,15 @@ USHORT NTMLoadNameTable
 
         memcpy( pNewArea, *ppTMTable + sizeof(TERSEHEADER),
                 *pulSize - sizeof(TERSEHEADER) );
+        LogMessage(WARNING,"#ifdef TEMPORARY_COMMENTED in NTMLoadNameTable");
+        #ifdef TEMPORARY_COMMENTED
         if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                               &ulNewLen ) )
         {
           usRc = ERROR_NOT_ENOUGH_MEMORY; // expand failed most likely to
                                           // memory shortage
         } /* endif */
+        #endif
       } /* endif */
 
       // set table data and cleanup
@@ -2320,7 +2329,7 @@ USHORT NTMLoadNameTable
 
 
 
-
+#ifdef TEMPORARY_COMMENTED
 USHORT NTMAddLangGroup
 (
   PTMX_CLB    pTmClb,                  // ptr to TM control block

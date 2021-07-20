@@ -15,6 +15,10 @@ set(EqfMemoryPlugin_Source_Files
    # EQFNTPUT.C
    EQFNTUTL.C
    EQFNTMDB.C
+   EQFNTM.C
+   EQFNTOP.C
+   EQFMEMUT.C
+   EQFNTUTL.C
    
 )
 

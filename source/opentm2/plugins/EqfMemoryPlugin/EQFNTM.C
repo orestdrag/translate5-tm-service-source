@@ -424,7 +424,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   PTMX_OPEN_OUT     pstOpenOut = NULL; //open output structure
   USHORT            usUserPriviliges;  //returned from UtlGetLANUserID
   PSZ               pszTemp;           //temp ptr for UtlGetFnameFromPath
-#ifdef TEMPORARY_COMMENTED
+
   DEBUGEVENT( TMOPEN_LOC, FUNCENTRY_EVENT, 0 );
 
   /********************************************************************/
@@ -653,7 +653,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   {
     ERREVENT( TMOPEN_LOC, ERROR_EVENT, usRc );
   } /* endif */
-#endif
+
   return usRc;
 } /* end of function TmOpen */
 
@@ -1838,7 +1838,6 @@ NTMFillCreateInStruct( HTM             hModel,
   return usRc;
 } /* end of function NTMFillCreateInStruct */
 
-#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // Function name:     NTMGetThresholdFromProperties
 //------------------------------------------------------------------------------
@@ -1889,24 +1888,33 @@ NTMGetThresholdFromProperties
   /********************************************************************/
   /* open the properties of the TM                                    */
   /********************************************************************/
+  LogMessage(WARNING,"TEMPORARY_COMMENTED NTMOpenProperties");
+  #ifdef TEMPORARY_COMMENTED
   usRc = NTMOpenProperties( &hProp,
                             (PVOID *)&pProp,
                             szPropertyName,
                             szSysPath,
                             PROP_ACCESS_READ,
                             usMsgHandling );
+  #endif
+
   if ( usRc == NO_ERROR || usRc == ERROR_OLD_PROPERTY_FILE )
   {
     /******************************************************************/
     /* if no error, return the threshold from the TM properties       */
     /******************************************************************/
     *pusThreshold = pProp->usThreshold;
+    LogMessage(WARNING,"TEMPORARY_COMMENTED CloseProperties");
+    #ifdef TEMPORARY_COMMENTED
     CloseProperties( hProp, PROP_QUIT, &ErrorInfo);
+    #endif
   } /* endif */
 
   return usRc;
 } /* end of function NTMGetThresholdFromProperties */
 
+
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
