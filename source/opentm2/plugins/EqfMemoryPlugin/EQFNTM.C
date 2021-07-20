@@ -1888,15 +1888,15 @@ NTMGetThresholdFromProperties
   /********************************************************************/
   /* open the properties of the TM                                    */
   /********************************************************************/
-  LogMessage(WARNING,"TEMPORARY_COMMENTED NTMOpenProperties");
-  #ifdef TEMPORARY_COMMENTED
+//  LogMessage(WARNING,"TEMPORARY_COMMENTED NTMOpenProperties");
+//  #ifdef TEMPORARY_COMMENTED
   usRc = NTMOpenProperties( &hProp,
                             (PVOID *)&pProp,
                             szPropertyName,
                             szSysPath,
                             PROP_ACCESS_READ,
                             usMsgHandling );
-  #endif
+//  #endif
 
   if ( usRc == NO_ERROR || usRc == ERROR_OLD_PROPERTY_FILE )
   {

@@ -290,8 +290,6 @@ PPROPHND MakePropHnd( PPROP_IDA pIda)
     return( ptr2);
 }
 
-#ifdef TEMPORARY_COMMENTED
-
 /*!
      Release a property handle
 */
@@ -306,6 +304,7 @@ SHORT FreePropHnd( PPROP_IDA pIda, PPROPHND hprop)
     return( 0);
 }
 
+
 /*!
      Search for a property handle
 */
@@ -318,6 +317,7 @@ PPROPHND FindPropHnd( PPROPHND ptop, PPROPHND hprop)
 //    return( NULP);
     return( hprop);
 }
+
 
 /*!
      Load the properties file
@@ -427,6 +427,8 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       pIda->LastCntl = pcntl;
     return( pcntl);
 }
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
      Create the properties file
@@ -674,7 +676,7 @@ USHORT ReloadSysProp( PPROPSYSTEM pIda)
     return( 0 );
 }
 
-
+#endif
 
 /*!
      PutItAway
@@ -705,6 +707,8 @@ USHORT PutItAway( PPROPCNTL pcntl)
     return( usrc);
 }
 
+#ifdef TEMPORARY_COMMENTED
+
 /*!
      Drop properties file from memory
 */
@@ -732,6 +736,8 @@ SHORT DeletePropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath)
       *pIda->pErrorInfo = Err_DeleteFile;
     return( usrc);
 }
+
+#endif 
 
 /*!
      Find Properties Control block
@@ -869,6 +875,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
    return( hprop);
 }
 
+#ifdef TEMPORARY_COMMENTED
 /*!
     Create Properties
 */
@@ -1275,6 +1282,7 @@ SHORT PutAllProperties(
    return( rc);
 }
 
+#endif
 
 /*!
     Save Properties
@@ -1353,7 +1361,6 @@ SHORT SaveProperties(
    return( rc);
 }
 
-#endif //TEMPORARY_COMMENTED
 
 /*!
     Miscellaneous properties functions
@@ -1389,7 +1396,6 @@ PPROPSYSTEM GetSystemPropPtr( VOID )
     return( (PPROPSYSTEM)( MakePropPtrFromHnd( hSysProp )));
  }
 
-#ifdef TEMPORARY_COMMENTED
 
 BOOL SetPropAccess( HPROP hprop, USHORT flgs)
 {
@@ -1408,7 +1414,8 @@ VOID ResetPropAccess( HPROP hprop, USHORT flgs)
 {
     ((PPROPHND)hprop)->pCntl->lFlgs &= (ULONG)~flgs;
     ((PPROPHND)hprop)->lFlgs &= (ULONG)~flgs;
-    if( flgs & PROP_ACCESS_WRITE) NotifyAll( hprop);
+    if( flgs & PROP_ACCESS_WRITE) 
+        NotifyAll( hprop);
 }
 
 /*!
@@ -1484,12 +1491,11 @@ PSZ MakePropPath( PSZ pbuf, PSZ pd, PSZ pp, PSZ pn, PSZ pe)
     if( (hprop = (PPROPHND) EqfQuerySystemPropHnd())== NULL)
       return( pbuf);
     pprop = (PPROPSYSTEM) MakePropPtrFromHnd( hprop);
-    sprintf( tmppath, "%s\\%s", pp, pprop->szPropertyPath );
+    sprintf( tmppath, "%s/%s", pp, pprop->szPropertyPath );
     //_makepath( pbuf, pd, tmppath, pn, pe);
     return( pbuf);
 }
 
-#endif //TEMPORARY_COMMENTED
 
 // Function PropHandlerInitForBatch
 // Initialize the property handler for non-windows environments;

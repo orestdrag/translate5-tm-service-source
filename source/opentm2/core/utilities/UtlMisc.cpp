@@ -287,6 +287,8 @@ SHORT UtlDriveType( CHAR chDrive )
 
 } /* end of function UtlDriveType */
 
+#endif 
+
 //+----------------------------------------------------------------------------+
 //External function
 //+----------------------------------------------------------------------------+
@@ -378,6 +380,7 @@ LONG UtlCompareTime( FTIME *pfTimeFirst, FTIME *pfTimeSecond )
    return( sCompare );
 } /* endof UtlCompareTime */
 
+#ifdef TEMPORARY_COMMENTED
 
 BOOL UtlMNetDetect()
 {
@@ -922,7 +925,6 @@ LONG UtlTime( PLONG plTime )
   return( lTime );
 } /* end of function UtlTime */
 
-#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function
@@ -986,6 +988,9 @@ USHORT UtlCompFDates
 
   return usRC;
 } /* end of function UtlCompFDates */
+
+
+#ifdef TEMPORARY_COMMENTED
 
 VOID UtlSetHorzScrollingForLB(HWND hLB) {
   int iNumEntries, i;

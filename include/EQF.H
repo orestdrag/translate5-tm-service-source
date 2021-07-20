@@ -1894,11 +1894,11 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 /**********************************************************************/
 /* size and length defines                                            */
 /**********************************************************************/
-#define MAX_FILESPEC            13     // max length of file name + extension
+#define MAX_FILESPEC           256     // max length of file name + extension
 #define MAX_LONGFILESPEC       256     // max length of long file name + extension
 #define MAX_PATH144            144     // max length of fully qualified path
 #define MAX_LONGPATH           260     // max length of fully qualified path
-#define MAX_FNAME                9     // max length of name part of a file names
+#define MAX_FNAME              250     // max length of name part of a file names
 #define MAX_FEXT                 5     // max length of a file name extension
 #define MAX_EQF_PATH           255     // max length of a file in an EQF dir
 #define MAX_FOLDERNAME         250     // max length of a folder name

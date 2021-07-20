@@ -931,6 +931,7 @@ NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
 
   return usRc;
 } /* end of function NTMGetPointersToTable */
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1196,7 +1197,8 @@ NTMCheckPropFile( PSZ    pszPropName,
     /* A dot was found in the passed filename, so ew assume that      */
     /* an extension is also available.                                */
     /******************************************************************/
-    if ( (_strcmpi( pszTemp, EXT_OF_TMPROP ) != 0) || (_strcmpi( pszTemp, LANSHARED_MEM_PROP ) != 0) )
+    //if ( (_strcmpi( pszTemp, EXT_OF_TMPROP ) != 0) || (_strcmpi( pszTemp, LANSHARED_MEM_PROP ) != 0) )
+    if ( (strcmp( pszTemp, EXT_OF_TMPROP ) != 0) || (strcmp( pszTemp, LANSHARED_MEM_PROP ) != 0) )
     {
       /****************************************************************/
       /* the extension of the passed property file name is the correct*/
@@ -1221,6 +1223,7 @@ NTMCheckPropFile( PSZ    pszPropName,
 
 
 
+#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
