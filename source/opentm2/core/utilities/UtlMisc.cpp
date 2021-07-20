@@ -2874,7 +2874,8 @@ BOOL UtlInitUtils( HAB hab )
    }
 
    // Init Object Handler and Property handler for FUNCCALL runmode
-   if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+   LogMessage(WARNING, "if(true) hardcoded in UtlInitUtils");
+   if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
    {
      fOK = ObjHandlerInitForBatch();
      if ( fOK ) 

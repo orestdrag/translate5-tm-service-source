@@ -1031,8 +1031,10 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
 
 HANDLE ObjLockTable_CreateOrOpenTable()
 {
+  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in ObjLockTable_CreateOrOpenTable::OpenFileMapping, CreateFileMapping");
+  HANDLE hShMem = NULL;
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  HANDLE hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );
+  hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );
   if ( !hShMem )
   {
     hShMem = CreateFileMapping(
@@ -1048,8 +1050,8 @@ HANDLE ObjLockTable_CreateOrOpenTable()
         Error = GetLastError();
     }
   }
-  return( hShMem );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  return( hShMem );
 } /* end of function ObjLockTable_CreateOrOpenTable */
 
 PFUNCIF_LOCK_TABLE ObjLockTable_AccessTable( HANDLE hSharedMem )

@@ -18,14 +18,14 @@ void service_worker() {
     unsigned int uiPort = 0;
     int res = PrepareOtmMemoryService(szServiceName, &uiPort);
     if (!res) {
-        LogMessage(FATAL,"Failed to initialize OtmMemoryService\n");
+        LogMessage(FATAL,"Failed to initialize OtmMemoryService");
         std::exit(EXIT_FAILURE);
     }
-    LogMessage(INFO, "Initialized OtmMemoryService\n");
+    LogMessage(INFO, "Initialized OtmMemoryService");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);
     if (!res) {
-        LogMessage(FATAL,"Failed to start OtmMemoryService\n");
+        LogMessage(FATAL,"Failed to start OtmMemoryService");
         std::exit(EXIT_FAILURE);
     }
 }

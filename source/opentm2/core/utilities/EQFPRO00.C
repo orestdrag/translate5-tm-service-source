@@ -604,23 +604,35 @@ USHORT GetSysProp( PPROP_IDA pIda)
     if( (hprop = MakePropHnd( pIda)) == NULL)
       return( TRUE );
     memset( hprop, NULC, sizeof( *hprop));
+
     do {
-printf("path: %s\n", pIda->IdaHead.pszObjName);
+      LogMessage2(INFO, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
       if( UtlOpen( pIda->IdaHead.pszObjName, &hf, &usAction, 0L,
                    FILE_NORMAL, FILE_OPEN,
-                   OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, 0))
-        break;
+                   OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, 0)){
+                      break;
+                   }
+
       size = sizeof( PROPSYSTEM);
       UtlAlloc( (PVOID *)&pcntl, 0L, (LONG)(size + sizeof( *pcntl)), ERROR_STORAGE );
-      if( !pcntl) break;
+      
+      if( !pcntl){ 
+          break;
+      }
+
       memset( pcntl, NULC, sizeof( *pcntl));
       pcntl->pHead = (PPROPHEAD)(pcntl+1);
       usrc = UtlRead( hf, pcntl->pHead, size, &sizread, 0);
-      if( usrc || (sizread != size)) break;
+      
+      if( usrc || (sizread != size)){
+        break;
+      }
       error = FALSE;
     } while( fTrueFalse /*TRUE & FALSE*/);
+
     if( hf)
       UtlClose( hf, 0);
+
     if( error)
     {
       if ( pcntl )
@@ -1391,7 +1403,8 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
-    if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+    LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
+    if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
     {
       PPROP_IDA     pIda;           // Points to instance area
       pIda = pPropBatchIda;
@@ -1563,14 +1576,23 @@ PropHandlerTerminateForBatch( void )
 
 #endif //TEMPORARY_COMMENTED
 
+#define ACCESSWNDIDA( hwnd, type ) \
+    (type)GetWindowLong( hwnd, GWL_USERDATA /*0*/ )
+
 HPROP EqfQuerySystemPropHnd( void )
 {
   HPROP hprop;
 
-  if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+  LogMessage(WARNING, "hardcoded if(true) in EqfQuerySystemPropHnd");
+  if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
   {
     PPROP_IDA pIda = pPropBatchIda;
-    hprop = pIda->hSystem;
+    if(pIda){
+      hprop = pIda->hSystem;
+    }else{
+      hprop = NULL;
+      LogMessage(ERROR,"pId and pPropBatchIda are NULL");
+    }
   }
   else
   {
@@ -1581,11 +1603,11 @@ HPROP EqfQuerySystemPropHnd( void )
       {
       	//PPROP_IDA pIda = ACCESSWNDIDA( hwndPropertyHandler, PPROP_IDA );
       	//hprop = (HPROP)pIda->hSystem;
-	  }
-	  else
-	  {
-		hprop = NULL;
-	  }
+	    }
+	    else
+	    {
+		    hprop = NULL;
+	    }
   } /* endif */
   return( hprop );
 } /* end of function EqfQuerySystemPropHnd */

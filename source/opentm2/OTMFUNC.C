@@ -454,26 +454,32 @@ USHORT EqfStartSession
       }
 
       // set fuzziness limits
-      if ( !pPropSys->lSmallLkupFuzzLevel )  pPropSys->lSmallLkupFuzzLevel = 3300;
+      if ( !pPropSys->lSmallLkupFuzzLevel )  
+          pPropSys->lSmallLkupFuzzLevel = 3300;
       UtlSetULong( QL_SMALLLOOKUPFUZZLEVEL,    pPropSys->lSmallLkupFuzzLevel );
-      if ( !pPropSys->lMediumLkupFuzzLevel ) pPropSys->lMediumLkupFuzzLevel = 3300;
+      if ( !pPropSys->lMediumLkupFuzzLevel ) 
+          pPropSys->lMediumLkupFuzzLevel = 3300;
       UtlSetULong( QL_MEDIUMLOOKUPFUZZLEVEL,   pPropSys->lMediumLkupFuzzLevel );
-      if ( !pPropSys->lLargeLkupFuzzLevel )  pPropSys->lLargeLkupFuzzLevel = 3300;
+      if ( !pPropSys->lLargeLkupFuzzLevel )  
+          pPropSys->lLargeLkupFuzzLevel = 3300;
       UtlSetULong( QL_LARGELOOKUPFUZZLEVEL,    pPropSys->lLargeLkupFuzzLevel );
 
-      if ( !pPropSys->lSmallFuzzLevel )  pPropSys->lSmallFuzzLevel = 3300;
-	  UtlSetULong( QL_SMALLFUZZLEVEL,    pPropSys->lSmallFuzzLevel );
-	  if ( !pPropSys->lMediumFuzzLevel ) pPropSys->lMediumFuzzLevel = 3300;
-	  UtlSetULong( QL_MEDIUMFUZZLEVEL,   pPropSys->lMediumFuzzLevel );
-	  if ( !pPropSys->lLargeFuzzLevel )  pPropSys->lLargeFuzzLevel = 3300;
+      if ( !pPropSys->lSmallFuzzLevel )  
+          pPropSys->lSmallFuzzLevel = 3300;
+	    UtlSetULong( QL_SMALLFUZZLEVEL,    pPropSys->lSmallFuzzLevel );
+	    if ( !pPropSys->lMediumFuzzLevel ) 
+          pPropSys->lMediumFuzzLevel = 3300;
+	    UtlSetULong( QL_MEDIUMFUZZLEVEL,   pPropSys->lMediumFuzzLevel );
+	    if ( !pPropSys->lLargeFuzzLevel )  
+          pPropSys->lLargeFuzzLevel = 3300;
       UtlSetULong( QL_LARGEFUZZLEVEL,    pPropSys->lLargeFuzzLevel );
 
-    // set SGML/DITA processing flag
-    UtlSetUShort( QS_SGMLDITAPROCESSING, (USHORT)!pPropSys->fNoSgmlDitaProcessing );
+      // set SGML/DITA processing flag
+      UtlSetUShort( QS_SGMLDITAPROCESSING, (USHORT)!pPropSys->fNoSgmlDitaProcessing );
 
-    UtlSetUShort( QS_ENTITYPROCESSING, (USHORT)pPropSys->fEntityProcessing );
+      UtlSetUShort( QS_ENTITYPROCESSING, (USHORT)pPropSys->fEntityProcessing );
 
-    UtlSetUShort( QS_MEMIMPMRKUPACTION, (USHORT)pPropSys->usMemImpMrkupAction );
+      UtlSetUShort( QS_MEMIMPMRKUPACTION, (USHORT)pPropSys->usMemImpMrkupAction );
 
     }
     else
