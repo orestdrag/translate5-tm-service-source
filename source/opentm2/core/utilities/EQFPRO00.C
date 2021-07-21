@@ -413,6 +413,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         else
         {
           LogMessage(WARNING, "TEMPORARY_COMMENTED :: Err_ReadFile");
+          // files created in linux don't have that filler to fit 2k
           #ifdef TEMPORARY_COMMENTED
           *pIda->pErrorInfo = Err_ReadFile;
           #endif
@@ -1095,7 +1096,9 @@ SHORT CloseProperties(
        *pErrorInfo = ErrProp_InvalidParms;
        break;
      }
-     if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+     
+     LogMessage(WARNING, "if(true) hardcoded in CloseProperties");
+     if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
         PPROPCNTL     pcntl;

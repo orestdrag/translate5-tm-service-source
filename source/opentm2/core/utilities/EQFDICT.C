@@ -91,21 +91,21 @@
 //#define BTREE_VERSION2      2   // moved to EQFQDAM.h
 //#define BTREE_VERSION3      3   // moved to EQFQDAM.h
 #define BTREE_HEADER_VALUE_V0 "EQF "
-#define BTREE_HEADER_VALUE_V1 "EQFSOH"
-#define BTREE_HEADER_VALUE_V2 "EQFSTX"
-#define BTREE_HEADER_VALUE_V3 "EQFETX"
+#define BTREE_HEADER_VALUE_V1 "EQF"
+#define BTREE_HEADER_VALUE_V2 "EQF"
+#define BTREE_HEADER_VALUE_V3 "EQF"
 
 
 #define NTM_VERSION         1
-#define BTREE_HEADER_VALUE_TM1 "NTMSOH"
+#define BTREE_HEADER_VALUE_TM1 "NTM"
 // BTREE databases of version NTM_VERSION2 support data records with
 // a size of more than 32k, the length field at the begin of the
 // data record is of type ULONG instead of USHORT
 #define NTM_VERSION2       2
-#define BTREE_HEADER_VALUE_TM2 "NTMSTX"
+#define BTREE_HEADER_VALUE_TM2 "NTM"
 
 #define NTM_VERSION3       3
-#define BTREE_HEADER_VALUE_TM3 "NT"
+#define BTREE_HEADER_VALUE_TM3 "NTM"
 
 
 
@@ -5879,14 +5879,14 @@ SHORT  QDAMDictOpenLocal
       pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
       pBT->usOpenFlags = usOpenFlags;
 
-      ASDLOG();
+      LogMessage4(INFO, "QDAM: file = ",__FILE__, " line = ", intToA(__LINE__ ));
 
       // open the file
       sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
                      FILE_NORMAL, FILE_OPEN,
                      usFlags,
                      0L, FALSE);
-      ASDLOG();
+      LogMessage4(INFO, "File readed QDAM: file = ",__FILE__, " line = ", intToA(__LINE__ ));
    } /* endif */
 
 
@@ -5915,6 +5915,12 @@ SHORT  QDAMDictOpenLocal
         /**************************************************************/
         /* support either old or new format or TM...                  */
         /**************************************************************/
+        #ifndef TEMPORARY_HARDCODED
+//          LogMessage(WARNING, "Temporary_hardcoded value BTREE_HEADER_VALUE_V3");
+//          strncpy(header.chEQF, BTREE_HEADER_VALUE_V3,
+//                      sizeof(BTREE_HEADER_VALUE_V3));
+        #endif
+
         if ( (strncmp( header.chEQF, BTREE_HEADER_VALUE_V3,
                       sizeof(BTREE_HEADER_VALUE_V3) ) == 0) ||
              (strncmp( header.chEQF, BTREE_HEADER_VALUE_V2,
@@ -6120,6 +6126,7 @@ SHORT  QDAMDictOpenLocal
         }
         else
         {
+          LogMessage3(ERROR,"Can't understand file ", pName, ". File has illegal structure!");
            sRc = BTREE_ILLEGAL_FILE;
         } /* endif */
      }

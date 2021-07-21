@@ -346,7 +346,7 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
         if(!bytesRead){
-            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr));
+            LogMessage4(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr), ", path = ", GetFileName(ptr).c_str());
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
             bytesRead = buffSize;

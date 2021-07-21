@@ -66,6 +66,14 @@ USHORT TmtXOpen
 
   DEBUGEVENT( TMTXOPEN_LOC, FUNCENTRY_EVENT, 0 );
 
+  #ifndef TEMPORARY_HARDCODED
+    LogMessage(WARNING, "TEMPORARY_HARDCODED in TmtXOpen to fix data and index names");
+    char *temp = strrchr(pTmOpenIn->stTmOpen.szDataName,'.');
+    strcpy(temp, ".TMD");
+    strcpy(pTmOpenIn->stTmOpen.szIndexName,pTmOpenIn->stTmOpen.szDataName);
+    temp = strrchr(pTmOpenIn->stTmOpen.szIndexName,'.');
+    strcpy(temp, ".TMI");
+  #endif
   //allocate control block
   fOK = UtlAlloc( (PVOID *) &(pTmClb), 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
 
@@ -126,15 +134,19 @@ USHORT TmtXOpen
     {
       //get signature record and add to control block
       USHORT usLen = sizeof( TMX_SIGN );
+
+      LogMessage(WARNING, "TEMPORAY_COMMENTED out EQFNTMSign");
+      #ifdef TEMPORAY_COMMENTED
       usRc = EQFNTMSign( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
+      #endif
 
       // do on-spot conversion for version 6 memories
       if ( (usRc == NO_ERROR ) && (pTmClb->stTmSign.bMajorVersion == TM_MAJ_VERSION_6) )
       {
-        LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
-        #ifdef TEMPORARY_COMMENTED
+        //LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
+        //#ifdef TEMPORARY_COMMENTED
         EQFNTMClose( &pTmClb->pstTmBtree );
-        #endif 
+        //#endif 
 
         MemConvertMem( pTmOpenIn->stTmOpen.szDataName );
         usRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName, (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE), &pTmClb->pstTmBtree );
@@ -452,11 +464,11 @@ USHORT TmtXOpen
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
 
-    LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
+    //#ifdef TEMPORARY_COMMENTED
     if ( pTmClb->pstTmBtree != NULL ) EQFNTMClose( &pTmClb->pstTmBtree );
     if ( pTmClb->pstInBtree != NULL ) EQFNTMClose( &pTmClb->pstInBtree );
-    #endif 
+    //#endif 
 
     NTMDestroyLongNameTable( pTmClb );
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );

@@ -988,7 +988,11 @@ ULONG GetLangOEMCP
 
     pPropSys = GetSystemPropPtr();
     pSystemPrefLang = &pPropSys->szSystemPrefLang[0];         // must be filled!!
-    ulCP = pPropSys->ulSystemPrefCP;
+    if(pPropSys)
+    {
+      ulCP = pPropSys->ulSystemPrefCP;
+    
+    }
     if (!ulCP)
     {
       pPropSys->ulSystemPrefCP = ulCP = InternalGetLangOEMCP( pSystemPrefLang );

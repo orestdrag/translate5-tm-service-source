@@ -413,11 +413,10 @@ SHORT  EQFNTMOpen
    } /* endif */
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCEXIT_EVENT, 0 );
-   
+
    return ( sRc );
 }
 
-#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -474,7 +473,6 @@ SHORT EQFNTMClose
   return sRc;
 }
 
-#endif //TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
