@@ -367,6 +367,11 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         *pIda->pErrorInfo = ErrProp_InvalidFile;
         break;
       }
+
+      #ifndef IGNORE_TEMPORARY_HARDCODED
+        LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", intToA(prophead.usClass));
+        prophead.usClass = PROP_CLASS_MEMORY;
+      #endif
       if( (size = sizeprop = GetPropSize( prophead.usClass)) == 0)
       {
         *pIda->pErrorInfo = ErrProp_InvalidClass;
@@ -848,7 +853,8 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
    }
    else
    {
-     if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+     LogMessage(WARNING,"if(true) hardcoded in OpenProperties");
+     if (true ||  UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
         PPROPHND      hProp;
@@ -1486,7 +1492,8 @@ SHORT GetPropSize( USHORT usClass)
       case PROP_CLASS_MEMORY :
       case PROP_CLASS_MEMORYDB :
       case PROP_CLASS_MEMORY_LASTUSED :
-         if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
+        LogMessage(WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
+         if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
          {
            usSize = 2048; // MEM_PROP_SIZE;
          }

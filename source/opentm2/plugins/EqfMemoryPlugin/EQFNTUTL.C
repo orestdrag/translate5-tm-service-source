@@ -1198,7 +1198,9 @@ NTMCheckPropFile( PSZ    pszPropName,
     /* an extension is also available.                                */
     /******************************************************************/
     //if ( (_strcmpi( pszTemp, EXT_OF_TMPROP ) != 0) || (_strcmpi( pszTemp, LANSHARED_MEM_PROP ) != 0) )
-    if ( (strcmp( pszTemp, EXT_OF_TMPROP ) != 0) || (strcmp( pszTemp, LANSHARED_MEM_PROP ) != 0) )
+    if ( (strcmp( pszTemp, EXT_OF_TMPROP ) != 0) 
+      //|| (strcmp( pszTemp, LANSHARED_MEM_PROP ) != 0) 
+      )
     {
       /****************************************************************/
       /* the extension of the passed property file name is the correct*/

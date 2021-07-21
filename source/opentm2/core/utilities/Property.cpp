@@ -271,6 +271,9 @@ bool Properties::set_write_to_file(const bool writeToFile){
     
     LogMessage2(INFO, "set write to properties file ", std::to_string(writeToFile).c_str());
     fWriteToFile = writeToFile;
+    if(fWriteToFile){
+        write_all_data_to_file();
+    }
     return fWriteToFile;
 }
 

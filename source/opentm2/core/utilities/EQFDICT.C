@@ -1881,6 +1881,67 @@ QDAMAddDict
 
 
 //------------------------------------------------------------------------------
+// External function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictLockDictLocal
+//------------------------------------------------------------------------------
+// Function call:     _
+//------------------------------------------------------------------------------
+// Description:       try to lock the dictionary for exclusive use
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE  pBTIda,               pointer to ida
+//                    BOOL    fLock                 lock or unlock
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0   success
+//                    BTREE_DICT_LOCKED   dictionary could not be locked
+//------------------------------------------------------------------------------
+// Function flow:      if locking
+//                        if open count > 1  then
+//                          set return code to BTREE_DICT_LOCKED;
+//                        else
+//                          set lock flag
+//                        endif
+//                     else
+//                        set lock flag as passed as input parameter
+//                     endif
+//                     return success
+//------------------------------------------------------------------------------
+SHORT
+QDAMDictLockDictLocal
+(
+  PBTREE  pBTIda,                      // pointer to ida
+  BOOL    fLock                        // lock or unlock
+)
+{
+  SHORT  sRc = 0;
+
+  /********************************************************************/
+  /* check if open count > 1, then no exclusive use possible any more */
+  /********************************************************************/
+  if ( fLock )
+  {
+    if ( QDAMDict[ pBTIda->usDictNum ].usOpenCount > 1 )
+    {
+      sRc = BTREE_DICT_LOCKED;
+    }
+    else
+    {
+      QDAMDict[ pBTIda->usDictNum ].fDictLock = fLock;
+    } /* endif */
+  }
+  else
+  {
+    QDAMDict[ pBTIda->usDictNum ].fDictLock = fLock;
+  } /* endif */
+
+  return sRc;
+} /* end of function QDAMDictLockDictLocal */
+
+
+
+//------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
 // Function name:     QDAMDictCloseLocal  close the dictionary
@@ -3538,6 +3599,107 @@ QDAMDictLockStatus
   return( fLock );
 } /* end of function QDAMDictLockStatus */
 
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMIncrUpdCounter      Inrement database update counter
+//------------------------------------------------------------------------------
+// Function call:     QDAMIncrUpdCounter( PBTREE, SHORT sIndex )
+//
+//------------------------------------------------------------------------------
+// Description:       Update one of the update counter field in the dummy
+//                    /locked terms file
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    SHORT                  index of counter field
+//                    PLONG                  ptr to buffer for new counte value
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read update counter from dummy file
+//                    increment update counter
+//                    position ptr to begin of file
+//                    write update counter to disk
+//------------------------------------------------------------------------------
+SHORT QDAMIncrUpdCounter
+(
+   PBTREE     pBTIda,                  // pointer to btree structure
+   SHORT      sIndex,                  // index of update counter
+   PLONG      plNewValue               // ptr to buffer for new counte value
+)
+{
+  SHORT       sRc=0;
+  USHORT      usNumBytes;              // number of bytes written or read
+  ULONG       ulNewOffset;             // new offset in file
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+  SHORT       sRetries;                // number of retries
+  LONG     lNewUpdCounter;      // buffer for new update counter
+
+  lNewUpdCounter = 0L;
+  sRetries = MAX_RETRY_COUNT;
+  do
+  {
+     // Position to requested update counter
+    sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
+                         FILE_BEGIN, &ulNewOffset, FALSE);
+    if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+    // Read current update counter
+     if ( !sRc )
+     {
+      sRc = UtlRead( pBT->fpDummy, (PVOID)&lNewUpdCounter, sizeof(LONG),
+                     &usNumBytes, FALSE);
+      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+     } /* endif */
+
+     // Increment update counter
+     if ( !sRc )
+     {
+       lNewUpdCounter++;
+        pBT->alUpdCtr[sIndex] = lNewUpdCounter;;
+        if ( plNewValue )
+        {
+          *plNewValue = pBT->alUpdCtr[sIndex];
+        } /* endif */
+     } /*endif */
+
+     // Position to requested update counter
+     if ( !sRc )
+     {
+      sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
+                           FILE_BEGIN, &ulNewOffset, FALSE);
+      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+     } /* endif */
+
+     //  Rewrite update counter
+     if ( !sRc )
+     {
+       sRc = UtlWrite( pBT->fpDummy, (PVOID)&lNewUpdCounter,
+                       sizeof(LONG), &usNumBytes, FALSE );
+       if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_WRITE_ERROR, pBT->usOpenFlags );
+     } /* endif */
+
+    if ( sRc == BTREE_IN_USE )
+    {
+      UtlWait( MAX_WAIT_TIME );
+      sRetries--;
+    } /* endif */
+  } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMINCRUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+  return sRc;
+}
 
 
 //------------------------------------------------------------------------------
@@ -5518,6 +5680,604 @@ SHORT QDAMFindRecord_V2
 }
 
 
+SHORT QDAMKeyCompareNonUnicode
+(
+    PVOID pvBT,                        // pointer to tree structure
+    PVOID pKey1,                       // pointer to first key
+    PVOID pKey2                        // pointer to second key
+)
+{
+  SHORT sDiff;
+  BYTE  c;
+  PBTREE pBTIda = (PBTREE)pvBT;        // pointer to tree structure
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+  PBYTE  pCollate = pBT->chCollate;    // pointer to collating sequence
+  CHAR   chHeadTerm[128];
+  PBYTE  pbKey1;
+  PBYTE  pbKey2 = (PBYTE) pKey2;
+
+  pbKey1 = (PBYTE)Unicode2ASCII( (PSZ_W)pKey1, chHeadTerm, 0L );
+
+
+  while ( (c = *pbKey1) != 0 )
+  {
+    /******************************************************************/
+    /* ignore the following characters during matching: '/', '-', ' ' */
+    /******************************************************************/
+    while ( (c = *pbKey2) == ' ' || fIsPunctuation[c] )
+    {
+      pbKey2++;
+    } /* endwhile */
+    while ( (c = *pbKey1) == ' ' || fIsPunctuation[c] )
+    {
+      pbKey1++;
+    } /* endwhile */
+
+    sDiff = *(pCollate+c) - *(pCollate + *pbKey2);
+    if ( !sDiff && *pbKey1 && *pbKey2 )
+    {
+      pbKey1++;
+      pbKey2++;
+    }
+    else
+    {
+      return ( sDiff );
+    } /* endif */
+  } /* endwhile */
+  return ( *(pCollate + c) - *(pCollate + *pbKey2));
+}
+
+
+//+----------------------------------------------------------------------------+
+//|External function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     UtlSetFHandState/...Hwnd DosSetFHandState: set file state|
+//+----------------------------------------------------------------------------+
+//|Function call:     UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg ); |
+//+----------------------------------------------------------------------------+
+//|Description:       Interface function to DosSetFHandState                   |
+//+----------------------------------------------------------------------------+
+//|Input parameter:   HFILE    hf             handle of an openend file        |
+//|                   USHORT   fsState        new state for file               |
+//|                   BOOL     fMsg           if TRUE handle errors in utility |
+//|                 ( HWND     hwnd )                                          |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   USHORT                                                   |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       return code of DosSetFHandState                          |
+//+----------------------------------------------------------------------------+
+//|Function flow:     call DosSetFHandState                                    |
+//+----------------------------------------------------------------------------+
+USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg )
+{
+  return UtlSetFHandStateHwnd( hf, fsState, fMsg, (HWND)NULL );
+}
+USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
+{
+   USHORT usRetCode = 0;               // function return code
+   USHORT usMBCode = 0;                    // message box/UtlError return code
+
+   hf; fsState;
+   do {
+      DosError(0);
+      DosError(1);
+      if ( fMsg && usRetCode )
+      {
+         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
+      } /* endif */
+   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
+   return( usRetCode );
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictOpenLocal   Open local Dictionary
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictOpenLocal( PSZ, SHORT, BOOL, PPBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Open a file locally for processing
+//
+//------------------------------------------------------------------------------
+// Parameters:        PSZ              name of the index file
+//                    SHORT            number of bytes per record
+//                    BOOL             TRUE  read/write FALSE  read/only
+//                    PPBTREE          pointer to btree structure
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_NO_ROOM     memory shortage
+//                    BTREE_OPEN_ERROR  dictionary already exists
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_ILLEGAL_FILE not a valid dictionary
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//------------------------------------------------------------------------------
+// Function flow:     Open the file read/write or readonly
+//                    if ok
+//                      read in header
+//                      if ok
+//                        check for validity of the header
+//                        if ok
+//                          fill tree structure
+//                          call UtlQFileInfo to get the next free record
+//                          if ok
+//                            allocate buffer space
+//                            if alloc fails
+//                              set Rc = BTREE_NO_ROOM
+//                            endif
+//                          endif
+//                        endif
+//                      else
+//                        set Rc = BTREE_READ_ERROR
+//                      endif
+//                      if error
+//                        close dictionary
+//                      endif
+//                      if read/write open was done
+//                        set open flag and write it into file
+//                      endif
+//                      get corruption flag and set rc if nec.
+//                    else
+//                     set Rc = BTREE_OPEN_ERROR
+//                    endif
+//                    return Rc
+//------------------------------------------------------------------------------
+SHORT  QDAMDictOpenLocal
+(
+  PSZ   pName,                        // name of the file
+  SHORT sNumberOfBuffers,             // number of buffers
+  USHORT usOpenFlags,                 // Read Only or Read/Write
+  PPBTREE  ppBTIda                    // pointer to BTREE structure
+)
+{
+   SHORT     i;
+   BTREEHEADRECORD header;
+   SHORT sRc = 0;                      // return code
+   USHORT  usFlags;                    // set the open flags
+   USHORT  usAction;                   // return code from UtlOpen
+   USHORT  usNumBytesRead;             // number of bytes read
+   PBTREE  pBTIda = *ppBTIda;          // set work pointer to passed pointer
+   PBTREEGLOB pBT;                     // set work pointer to passed pointer
+   BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
+   BOOL    fTransMem = FALSE;          // Transl. Memory...
+   SHORT   sRc1;
+
+   sNumberOfBuffers;
+   /*******************************************************************/
+   /* allocate global area first ...                                  */
+   /*******************************************************************/
+   if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
+   {
+      sRc = BTREE_NO_ROOM;
+   }
+   else
+   {
+      pBTIda->pBTree = pBT;
+
+      if ( usOpenFlags & ASD_SHARED )
+      {
+         usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE;
+      }
+      else if ( fWrite )
+      {
+         usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE;
+      }
+      else
+      {
+         usFlags = OPEN_ACCESS_READONLY | OPEN_SHARE_DENYREADWRITE;
+      } /* endif */
+
+      /****************************************************************/
+      /* check if immeadiate write of any changed necessary           */
+      /****************************************************************/
+      pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
+      pBT->usOpenFlags = usOpenFlags;
+
+      ASDLOG();
+
+      // open the file
+      sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
+                     FILE_NORMAL, FILE_OPEN,
+                     usFlags,
+                     0L, FALSE);
+      ASDLOG();
+   } /* endif */
+
+
+   if ( !sRc )
+   {
+     // remember file name
+     strcpy( pBTIda->szFileName, pName );
+
+     // Read in the data for this index, make sure it is an index file
+
+     sRc = UtlRead( pBT->fp, (PVOID)&header,
+                    sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
+     if ( ! sRc )
+     {
+        memcpy( pBT->chEQF, header.chEQF, sizeof(pBT->chEQF));
+        pBT->bVersion = header.Flags.bVersion;
+        if ( header.Flags.f16kRec )
+        {
+          pBT->bRecSizeVersion = BTREE_V3;
+        }
+        else
+        {
+          pBT->bRecSizeVersion = BTREE_V2;
+        } /* endif */
+
+        /**************************************************************/
+        /* support either old or new format or TM...                  */
+        /**************************************************************/
+        if ( (strncmp( header.chEQF, BTREE_HEADER_VALUE_V3,
+                      sizeof(BTREE_HEADER_VALUE_V3) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V2,
+                      sizeof(BTREE_HEADER_VALUE_V2) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V0,
+                      sizeof(BTREE_HEADER_VALUE_V0) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V1,
+                      sizeof(BTREE_HEADER_VALUE_V1) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM2,
+                      sizeof(BTREE_HEADER_VALUE_TM2) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM1,
+                      sizeof(BTREE_HEADER_VALUE_TM1) ) == 0) ||
+             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3,
+                      sizeof(BTREE_HEADER_VALUE_TM1) ) == 0) )
+        {
+          /************************************************************/
+          /* check if we are dealing with a TM...                     */
+          /* (Check only first 3 characters of BTREE identifier to    */
+          /*  ignore the version number)                              */
+          /************************************************************/
+          if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM1, 3 ) == 0 )
+          {
+            fTransMem = TRUE;
+            pBT->usVersion = (USHORT) header.chEQF[3];
+            pBT->compare =  NTMKeyCompare;
+          }
+          else
+          {
+            pBT->compare =  QDAMKeyCompare;
+            /************************************************************/
+            /* determine version                                        */
+            /* for UNICODE dicts: usVersion is BTREE_VERSION2, which is */
+            /* the same as NTM_VERSION2 ( has also length field         */
+            /* ULONG at begin to support data recs > 32 k      )        */
+            /************************************************************/
+            if ( header.chEQF[3] == BTREE_VERSION3 )
+            {
+              pBT->usVersion = BTREE_VERSION3;
+            }
+            else
+            if ( header.chEQF[3] == BTREE_VERSION2 )
+            {
+                pBT->usVersion = BTREE_VERSION2;
+                header.fOpen = TRUE;  // force sRc = BTREE_CORRUPTED in ln 946
+            }
+            else
+            {
+                pBT->usVersion = 0;
+                pBT->compare =  QDAMKeyCompareNonUnicode;
+
+                /******************************************************/
+                /* we do not support version 0 any more -> force a    */
+                /* reorganize                                         */
+                /******************************************************/
+                header.fOpen = TRUE;  // force sRc = BTREE_CORRUPTED in ln 946
+ //               sRc = BTREE_CORRUPTED;
+            } /* endif */
+          } /* endif */
+          UtlTime( &(pBT->lTime) );                             // set open time
+          pBTIda->sCurrentIndex = 0;
+          pBT->usFirstNode = header.usFirstNode;
+          pBT->usFirstLeaf = header.usFirstLeaf;
+          pBTIda->usCurrentRecord = 0;
+          pBT->usFreeKeyBuffer = header.usFreeKeyBuffer;
+          pBT->usFreeDataBuffer = header.usFreeDataBuffer;
+          pBT->usFirstDataBuffer = header.usFirstDataBuffer;  //  data buffer
+          pBT->fTransMem = fTransMem;
+          pBT->fpDummy = NULLHANDLE;
+          if ( pBT->bRecSizeVersion == BTREE_V3 )
+          {
+            pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
+          }
+          else
+          {
+            pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
+          } /* endif */
+
+          // load usNextFreeRecord either from header record of from file info
+          if ( pBT->bVersion == BTREE_V1 )
+          {
+              pBT->usNextFreeRecord = header.usNextFreeRecord;
+          }
+          else
+          {
+            ULONG ulTemp;
+            sRc1 = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
+            if (!sRc)
+              sRc = sRc1;
+            pBT->usNextFreeRecord = (USHORT)(ulTemp/pBT->usBtreeRecSize);
+          } /* endif */
+          ASDLOG();
+
+          if ( !sRc )
+          {
+             strcpy(pBT->chFileName, pName);
+
+             // copy prev. allocated free list
+             // DataRecList in header is in old format (RECPARAMOLD),
+             // so convert it to the new format (RECPARAM)
+             {
+               int i;
+               for ( i = 0; i < MAX_LIST; i++ )
+               {
+                 pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
+                 pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
+                 pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].sLen;
+               } /* endfor */
+             }
+             memcpy( pBT->chEntryEncode,header.chEntryEncode,ENTRYENCODE_LEN );
+             pBT->fTerse = header.fTerse;
+             if ( pBT->fTerse == BTREE_TERSE_HUFFMAN )
+             {
+               QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // init compression
+             } /* endif */
+
+             memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
+             /*********************************************************/
+             /* check if something is in collating sequence - this is */
+             /* mandatory for the dictionary processing -             */
+             /* use the character A as checking point                 */
+             /* if nothing in there, we will use the default collating*/
+             /* sequence - in addition we will put it in the          */
+             /*********************************************************/
+             if ( (! pBT->fTransMem) && (pBT->chCollate[65] == 0) )
+             {
+               memcpy( pBT->chCollate, chDefCollate, COLLATE_SIZE );
+             } /* endif */
+
+             memcpy( pBT->chCaseMap, header.chCaseMap, COLLATE_SIZE );
+             if ( (!pBT->fTransMem) && (pBT->chCaseMap[65] == 0) )
+             {
+               /****************************************************************/
+               /* fill in the characters and use the UtlLower function ...     */
+               /****************************************************************/
+               PUCHAR pTable;
+               UCHAR  chTemp;
+               pTable = pBT->chCaseMap;
+               for ( i=0;i < COLLATE_SIZE; i++ )
+               {
+                  *pTable++ = (UCHAR) i;
+               } /* endfor */
+               chTemp = pBT->chCaseMap[ COLLATE_SIZE - 1];
+               pBT->chCaseMap[ COLLATE_SIZE - 1] = EOS;
+               pTable = pBT->chCaseMap;
+               pTable++;
+               UtlLower( (PSZ)pTable );
+               pBT->chCaseMap[ COLLATE_SIZE - 1] = chTemp;
+             } /* endif */
+
+             ASDLOG();
+
+
+             /* Allocate space for AccessCtrTable */
+             pBT->usNumberOfLookupEntries = 0;
+             UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+             if ( !pBT->AccessCtrTable )
+             {
+               sRc = BTREE_NO_ROOM;
+             } /* endif */
+
+             /* Allocate space for LookupTable */
+             if ( !sRc )
+             {
+                if ( pBT->bRecSizeVersion == BTREE_V3 )
+                {
+                  UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+                  if ( pBT->LookupTable_V3 )
+                  {
+                    pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+                  }
+                  else
+                  {
+                    sRc = BTREE_NO_ROOM;
+                  } /* endif */
+                } /* endif */
+                else
+                {
+                  UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V2), NOMSG );
+                  if ( pBT->LookupTable_V2 )
+                  {
+                    pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+                  }
+                  else
+                  {
+                    sRc = BTREE_NO_ROOM;
+                  } /* endif */
+                } /* endif */
+             } /* endif */
+
+             pBT->usNumberOfAllocatedBuffers = 0;
+
+          } /* endif */
+
+          if ( !sRc )
+          {
+            ASDLOG();
+
+            if ( !sRc )
+            {
+              sRc =  QDAMAllocTempAreas( pBTIda );
+            } /* endif */
+          } /* endif */
+        }
+        else
+        {
+           sRc = BTREE_ILLEGAL_FILE;
+        } /* endif */
+     }
+     else
+     {
+        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+     } /* endif */
+     ASDLOG();
+
+     /*******************************************************************/
+     /* for shared databases only:                                      */
+     /* open/create dummy file as update semaphore and buffer for       */
+     /* locked terms                                                   */
+     /*                                                                */
+     /* for all other databases:                                         */
+     /* delete any existing dummy file                                 */
+     /*******************************************************************/
+     if ( !sRc )
+     {
+        CHAR szDummyName[MAX_EQF_PATH];   // buffer for name of dummy file
+        PSZ  pszExt;                      // points to extension of file name
+
+        // Setup name of dummy file
+        strcpy( szDummyName, pName );
+        pszExt = strrchr( szDummyName, DOT );
+        pszExt[2] = '-';
+
+
+         if ( usOpenFlags & ASD_SHARED )
+         {
+           sRc = UtlOpen( szDummyName, &pBT->fpDummy, &usAction, 0L,
+                          FILE_NORMAL, FILE_OPEN | FILE_CREATE,
+                          OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE,
+                          0L, FALSE);
+          sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+          if ( !sRc )
+          {
+            if ( usAction == FILE_CREATED )
+            {
+//              // Write initial update counter setting
+//              sRc = UtlWrite( pBT->fpDummy, (PVOID)pBT->alUpdCtr,
+//                              sizeof(pBT->alUpdCtr), &usNumBytes, FALSE );
+//              if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_WRITE_ERROR, pBT->usOpenFlags );
+
+              // Close and re-open dummy file to set correct share flags
+              if ( !sRc )
+              {
+                UtlClose( pBT->fpDummy, FALSE );
+                pBT->fpDummy = NULLHANDLE;
+                sRc = UtlOpen( szDummyName, &pBT->fpDummy, &usAction, 0L,
+                            FILE_NORMAL, FILE_OPEN | FILE_CREATE,
+                            OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE,
+                            0L, FALSE);
+                sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+              } /* endif */
+
+              // Write initial file update counter
+              if ( sRc == NO_ERROR )
+              {
+                memset( pBT->alUpdCtr, 0, sizeof(pBT->alUpdCtr) );
+                sRc = QDAMIncrUpdCounter( pBTIda, 0, NULL );
+              } /* endif */
+            }
+            else
+            {
+              // Read last update counter
+              sRc = QDAMGetUpdCounter( pBTIda, pBT->alUpdCtr, 0, MAX_UPD_CTR );
+            } /* endif */
+          }
+          else
+          {
+            pBT->fpDummy = NULLHANDLE;
+          } /* endif */
+        }
+        else
+        {
+          UtlDelete( szDummyName, 0L, FALSE );
+        } /* endif */
+     } /* endif */
+
+     // close in case of error
+     if ( sRc && pBTIda )
+     {
+       QDAMDictClose( &pBTIda );
+     } /* endif */
+     ASDLOG();
+
+     if ( !sRc && fWrite && !header.fOpen)
+     {
+        pBT->fOpen = TRUE;                       // set open flag
+        pBT->fWriteHeaderPending = TRUE;         // postpone write until change
+     } /* endif */
+
+     if ( !sRc && (pBT->usOpenFlags & (ASD_SHARED | ASD_NOOPENCHECK)))
+     {
+        pBT->fOpen = TRUE;                       // set open flag
+     } /* endif */
+
+
+     // get the corruption flag but still go ahead - nec. for Organize
+     // ignore the corruption flag for shared resources (here we allow
+     // open of our database more than once)
+     if ( !sRc && header.fOpen &&
+          !(pBT->usOpenFlags & (ASD_SHARED | ASD_NOOPENCHECK)) )
+     {
+        sRc = BTREE_CORRUPTED;
+
+        /**************************************************************/
+        /* if in Write Mode opened disable write in case of Corruption*/
+        /* and reset it to Read/Only mode                             */
+        /**************************************************************/
+        if ( fWrite  )
+        {
+          i  = UtlSetFHandState( pBT->fp, OPEN_ACCESS_READONLY, FALSE );
+
+          if ( i )               // handle could not be set read/only
+          {
+            pBT->fCorrupted = TRUE;
+          } /* endif */
+        } /* endif */
+     } /* endif */
+
+     ASDLOG();
+   }
+   else
+   {
+    sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+   } /* endif */
+
+   /*******************************************************************/
+   /* set BTREE pointer in case it was changed or freed               */
+   /*******************************************************************/
+   *ppBTIda = pBTIda;
+
+   /*******************************************************************/
+   /* add the dictionary to the open list ...                         */
+   /*******************************************************************/
+   if ( !sRc || (sRc == BTREE_CORRUPTED) )
+   {
+     QDAMAddDict( pName, pBTIda );
+     /*****************************************************************/
+     /* add the lock if necessary                                     */
+     /*****************************************************************/
+     if ( usOpenFlags & ASD_LOCKED )
+     {
+       QDAMDictLockDictLocal( pBTIda, TRUE );
+     } /* endif */
+   } /* endif */
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+   return ( sRc );
+}
+
+
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6649,4 +7409,89 @@ SHORT QDAMDictSignLocal
   } /* endif */
   return sRc;
 }
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMCheckDict
+//------------------------------------------------------------------------------
+// Function call:     _
+//------------------------------------------------------------------------------
+// Description:       check if the specified dictionary is already open
+//------------------------------------------------------------------------------
+// Parameters:        PSZ    pName,           name of dictionary
+//                    PBTREE pBTIda           pointer to ida
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0  success
+//                    BTREE_DICT_LOCKED   dictionary is locked
+//                    BTREE_MAX_DICTS     maximum of dictionaries exceeded
+//------------------------------------------------------------------------------
+// Function flow:     check if dict is already open
+//                    if so use this handle and check for lock;
+//                    if locked then
+//                      set return code to locked
+//                    else
+//                      copy significant data into our global structure
+//                    endif
+//                    if too many open dicts
+//                      set return code to BTREE_MAX_DICTS
+//                    endif
+//                    return success
+//
+//------------------------------------------------------------------------------
+SHORT
+QDAMCheckDict
+(
+  PSZ    pName,                        // name of dictionary
+  PBTREE pBTIda                        // pointer to ida
+)
+{
+  USHORT  usI = 1;
+  SHORT   sRc = 0;
+  PQDAMDICT pQDict;
+
+  /*******************************************************************/
+  /* check if dict is already open - if so use this handle           */
+  /*******************************************************************/
+  while ( QDAMDict[usI].usOpenCount )
+  {
+    //if ( stricmp(QDAMDict[usI].chDictName, pName ) == 0)
+    if ( strcmp(QDAMDict[usI].chDictName, pName ) == 0)
+    {
+      /***************************************************************/
+      /* check if dictionary is locked                               */
+      /***************************************************************/
+      if ( QDAMDict[usI].fDictLock )
+      {
+        sRc = BTREE_DICT_LOCKED;
+      }
+      else
+      {
+        /***************************************************************/
+        /* copy relevant data from global struct                       */
+        /***************************************************************/
+        pQDict = &(QDAMDict[usI]);
+        pQDict->usOpenCount++;
+        pQDict->pIdaList[ pQDict->usOpenCount ] = pBTIda;
+        pBTIda->pBTree = pQDict->pBTree;
+        pBTIda->usDictNum = usI;
+      } /* endif */
+      break;
+    }
+    else
+    {
+      usI++;
+    } /* endif */
+  } /* endwhile */
+
+  if ( usI >= MAX_NUM_DICTS - 1 )
+  {
+    sRc = BTREE_MAX_DICTS;
+  } /* endif */
+
+  return ( sRc );
+} /* end of function QDAMCheckDict */
 

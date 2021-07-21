@@ -263,6 +263,14 @@ EQFNTMCreate
   return( sRc );
 } /* end of function EQFNTMCreate */
 
+SHORT
+QDAMCheckDict
+(
+  PSZ    pName,                        // name of dictionary
+  PBTREE pBTIda                        // pointer to ida
+);
+
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -330,8 +338,7 @@ SHORT  EQFNTMOpen
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
   
-  LogMessage(WARNING,"TEMPORARY_COMMENTED in EQFNTMOpen");
-  #ifdef TEMPORARY_COMMENTED
+
    if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
    {
       sRc = BTREE_NO_ROOM;
@@ -406,7 +413,7 @@ SHORT  EQFNTMOpen
    } /* endif */
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCEXIT_EVENT, 0 );
-    #endif
+   
    return ( sRc );
 }
 

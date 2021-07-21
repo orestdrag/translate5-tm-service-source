@@ -3690,56 +3690,10 @@ SHORT QDAMKeyCompare
   } /* endwhile */
   return ( *(pCollate + (BYTE)c) - *(pCollate + (BYTE)*pbKey2));
 }
+#endif 
 
 
-SHORT QDAMKeyCompareNonUnicode
-(
-    PVOID pvBT,                        // pointer to tree structure
-    PVOID pKey1,                       // pointer to first key
-    PVOID pKey2                        // pointer to second key
-)
-{
-  SHORT sDiff;
-  BYTE  c;
-  PBTREE pBTIda = (PBTREE)pvBT;        // pointer to tree structure
-  PBTREEGLOB    pBT = pBTIda->pBTree;
-  PBYTE  pCollate = pBT->chCollate;    // pointer to collating sequence
-  CHAR   chHeadTerm[128];
-  PBYTE  pbKey1;
-  PBYTE  pbKey2 = (PBYTE) pKey2;
-
-  pbKey1 = (PBYTE)Unicode2ASCII( (PSZ_W)pKey1, chHeadTerm, 0L );
-
-
-  while ( (c = *pbKey1) != 0 )
-  {
-    /******************************************************************/
-    /* ignore the following characters during matching: '/', '-', ' ' */
-    /******************************************************************/
-    while ( (c = *pbKey2) == ' ' || fIsPunctuation[c] )
-    {
-      pbKey2++;
-    } /* endwhile */
-    while ( (c = *pbKey1) == ' ' || fIsPunctuation[c] )
-    {
-      pbKey1++;
-    } /* endwhile */
-
-    sDiff = *(pCollate+c) - *(pCollate + *pbKey2);
-    if ( !sDiff && *pbKey1 && *pbKey2 )
-    {
-      pbKey1++;
-      pbKey2++;
-    }
-    else
-    {
-      return ( sDiff );
-    } /* endif */
-  } /* endwhile */
-  return ( *(pCollate + c) - *(pCollate + *pbKey2));
-}
-
-
+#ifdef TEMPORARY_COMMENTED
 /**********************************************************************/
 /* Variant of QDAMKeyCompare ignoring the case of the characters      */
 /**********************************************************************/
@@ -5740,106 +5694,6 @@ SHORT QDAMCheckForUpdates
   return( sRc ) ;
 }
 
-//------------------------------------------------------------------------------
-// Internal function
-//------------------------------------------------------------------------------
-// Function name:     QDAMIncrUpdCounter      Inrement database update counter
-//------------------------------------------------------------------------------
-// Function call:     QDAMIncrUpdCounter( PBTREE, SHORT sIndex )
-//
-//------------------------------------------------------------------------------
-// Description:       Update one of the update counter field in the dummy
-//                    /locked terms file
-//
-//------------------------------------------------------------------------------
-// Parameters:        PBTREE                 pointer to btree structure
-//                    SHORT                  index of counter field
-//                    PLONG                  ptr to buffer for new counte value
-//------------------------------------------------------------------------------
-// Returncode type:   SHORT
-//------------------------------------------------------------------------------
-// Returncodes:       0                 no error happened
-//                    BTREE_DISK_FULL   disk full condition encountered
-//                    BTREE_WRITE_ERROR write error to disk
-//
-//------------------------------------------------------------------------------
-// Function flow:     read update counter from dummy file
-//                    increment update counter
-//                    position ptr to begin of file
-//                    write update counter to disk
-//------------------------------------------------------------------------------
-SHORT QDAMIncrUpdCounter
-(
-   PBTREE     pBTIda,                  // pointer to btree structure
-   SHORT      sIndex,                  // index of update counter
-   PLONG      plNewValue               // ptr to buffer for new counte value
-)
-{
-  SHORT       sRc=0;
-  USHORT      usNumBytes;              // number of bytes written or read
-  ULONG       ulNewOffset;             // new offset in file
-  PBTREEGLOB  pBT = pBTIda->pBTree;
-  SHORT       sRetries;                // number of retries
-  LONG     lNewUpdCounter;      // buffer for new update counter
-
-  lNewUpdCounter = 0L;
-  sRetries = MAX_RETRY_COUNT;
-  do
-  {
-     // Position to requested update counter
-    sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
-                         FILE_BEGIN, &ulNewOffset, FALSE);
-    if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-    // Read current update counter
-     if ( !sRc )
-     {
-      sRc = UtlRead( pBT->fpDummy, (PVOID)&lNewUpdCounter, sizeof(LONG),
-                     &usNumBytes, FALSE);
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-     // Increment update counter
-     if ( !sRc )
-     {
-       lNewUpdCounter++;
-        pBT->alUpdCtr[sIndex] = lNewUpdCounter;;
-        if ( plNewValue )
-        {
-          *plNewValue = pBT->alUpdCtr[sIndex];
-        } /* endif */
-     } /*endif */
-
-     // Position to requested update counter
-     if ( !sRc )
-     {
-      sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
-                           FILE_BEGIN, &ulNewOffset, FALSE);
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-     //  Rewrite update counter
-     if ( !sRc )
-     {
-       sRc = UtlWrite( pBT->fpDummy, (PVOID)&lNewUpdCounter,
-                       sizeof(LONG), &usNumBytes, FALSE );
-       if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_WRITE_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-    if ( sRc == BTREE_IN_USE )
-    {
-      UtlWait( MAX_WAIT_TIME );
-      sRetries--;
-    } /* endif */
-  } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMINCRUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-  } /* endif */
-
-  return sRc;
-}
 
 //------------------------------------------------------------------------------
 // Internal function

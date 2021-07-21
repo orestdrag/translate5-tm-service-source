@@ -398,7 +398,7 @@ int FilesystemHelper::ResetLastError(){
 
 
 std::string FilesystemHelper::GetOtmDir(){
-    int maxPath = 255;
+    const int maxPath = 255;
     char OTMdir[maxPath];
     int res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
     

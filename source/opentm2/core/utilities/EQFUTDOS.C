@@ -2909,46 +2909,6 @@ USHORT UtlQFileModeHwnd
    return( usRetCode );
 }
 
-//+----------------------------------------------------------------------------+
-//|External function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     UtlSetFHandState/...Hwnd DosSetFHandState: set file state|
-//+----------------------------------------------------------------------------+
-//|Function call:     UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg ); |
-//+----------------------------------------------------------------------------+
-//|Description:       Interface function to DosSetFHandState                   |
-//+----------------------------------------------------------------------------+
-//|Input parameter:   HFILE    hf             handle of an openend file        |
-//|                   USHORT   fsState        new state for file               |
-//|                   BOOL     fMsg           if TRUE handle errors in utility |
-//|                 ( HWND     hwnd )                                          |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT                                                   |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       return code of DosSetFHandState                          |
-//+----------------------------------------------------------------------------+
-//|Function flow:     call DosSetFHandState                                    |
-//+----------------------------------------------------------------------------+
-USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg )
-{
-  return UtlSetFHandStateHwnd( hf, fsState, fMsg, (HWND)NULL );
-}
-USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
-{
-   USHORT usRetCode = 0;               // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-
-   hf; fsState;
-   do {
-      DosError(0);
-      DosError(1);
-      if ( fMsg && usRetCode )
-      {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
-      } /* endif */
-   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-   return( usRetCode );
-}
 #endif
 
 //+----------------------------------------------------------------------------+

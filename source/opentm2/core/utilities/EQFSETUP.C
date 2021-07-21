@@ -434,13 +434,13 @@ USHORT CreateSystemProperties(PSZ pszPath)
     strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
     
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Try to read old system properties                              */
     /******************************************************************/
     pSysPropsOld = InstReadSysProps();
     
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 
     /******************************************************************/
     /* Save some of the values from the old properties to the new ones*/
@@ -1512,7 +1512,7 @@ PPROPSYSTEM InstReadSysProps( VOID )
    /*******************************************************************/
    if ( fOK )
    {
-      hSysProp = fopen( szSysProp, "rb" );
+      hSysProp = FilesystemHelper::OpenFile( szSysProp, "rb" );
       if ( hSysProp == NULL  )
       {
         fOK = FALSE;
@@ -1524,9 +1524,8 @@ PPROPSYSTEM InstReadSysProps( VOID )
    /*******************************************************************/
    if ( fOK )
    {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      lSize = _filelength( fileno( hSysProp ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+      //lSize = _filelength( fileno( hSysProp ) );
+      lSize = FilesystemHelper::GetFileSize(hSysProp);
    } /* endif */
 
    /*******************************************************************/
@@ -1554,7 +1553,7 @@ PPROPSYSTEM InstReadSysProps( VOID )
    /*******************************************************************/
    if ( hSysProp )
    {
-      fclose( hSysProp );
+     FilesystemHelper::CloseFile(hSysProp);
    } /* endif */
 
    if ( !fOK )
