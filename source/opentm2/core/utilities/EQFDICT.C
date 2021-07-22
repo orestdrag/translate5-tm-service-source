@@ -196,6 +196,80 @@ typedef enum _RECTYPE
   ROOTREC                  // record contains root key data
 } RECTYPE;
 
+
+
+static  USHORT us1BitNibble[16] = { 0,       // 00000000 00000000
+                                    1,       // 00000000 00000001
+                                    2,       // 00000000 00000010
+                                    4,       // 00000000 00000100
+                                    8,       // 00000000 00001000
+                                    16,      // 00000000 00010000
+                                    32,      // 00000000 00100000
+                                    64,      // 00000000 01000000
+                                    128,     // 00000000 10000000
+                                    256,     // 00000001 00000000
+                                    512,     // 00000010 00000000
+                                    1024,    // 00000100 00000000
+                                    2048,    // 00001000 00000000
+                                    4096,    // 00010000 00000000
+                                    8192,    // 00100000 00000000
+                                    16384 }; // 01000000 00000000
+
+static  USHORT us2BitNibble[16] = { 0,       // 00000000 00000000
+                                    1,       // 00000000 00000001
+                                    3,       // 00000000 00000011
+                                    6,       // 00000000 00000110
+                                    12,      // 00000000 00001100
+                                    24,      // 00000000 00011000
+                                    48,      // 00000000 00110000
+                                    96,      // 00000000 01100000
+                                    192,     // 00000000 11000000
+                                    384,     // 00000001 10000000
+                                    768,     // 00000011 00000000
+                                    1536,    // 00000110 00000000
+                                    3072,    // 00001100 00000000
+                                    6144,    // 00011000 00000000
+                                    12288,   // 00110000 00000000
+                                    24576 }; // 01100000 00000000
+
+static  USHORT us3BitNibble[16] = { 0,       // 00000000 00000000
+                                    1,       // 00000000 00000001
+                                    3,       // 00000000 00000011
+                                    7,       // 00000000 00000111
+                                    14,      // 00000000 00001110
+                                    28,      // 00000000 00011100
+                                    56,      // 00000000 00111000
+                                    112,     // 00000000 01110000
+                                    224,     // 00000000 11100000
+                                    448,     // 00000001 11000000
+                                    896,     // 00000011 10000000
+                                    1792,    // 00000111 00000000
+                                    3584,    // 00001110 00000000
+                                    7168,    // 00011100 00000000
+                                    14336,   // 00111000 00000000
+                                    28672 }; // 01110000 00000000
+
+static  USHORT us8BitNibble[16] = { 0,       // 00000000 00000000
+                                    1,       // 00000000 00000001
+                                    3,       // 00000000 00000011
+                                    7,       // 00000000 00000111
+                                    15,      // 00000000 00001111
+                                    31,      // 00000000 00011111
+                                    63,      // 00000000 00111111
+                                    127,     // 00000000 01111111
+                                    255,     // 00000000 11111111
+                                    510,     // 00000001 11111110
+                                    1020,    // 00000011 11111100
+                                    2040,    // 00000111 11111000
+                                    4080,    // 00001111 11110000
+                                    8160,    // 00011111 11100000
+                                    16320,   // 00111111 11000000
+                                    32640 }; // 01111111 10000000
+
+
+
+
+
 /**********************************************************************/
 /* List of event locations (only use macro EVENTDEF for entries in        */
 /* this list)                                                         */
@@ -532,6 +606,15 @@ BOOL UtlEvent2
   SHORT sGroup,                        // the event group
   PSZ   pszAddData                     // additional data for event (string)
 );
+
+BOOL UtlEvent
+(
+  SHORT sEventType,                    // type of the event
+  SHORT sEventID,                      // the event identifier
+  SHORT sEventClass,                   // the event class
+  SHORT sEventRC                       // the event return code or error code
+);
+
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
@@ -3705,6 +3788,227 @@ SHORT QDAMIncrUpdCounter
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
+// Function name:     QDAMCheckForUpdates    Check is database has been changed
+//------------------------------------------------------------------------------
+// Function call:     QDAMCheckForUpdates( PBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Check if the QDAm database has been modified since the
+//                    last read or write operation. If a modification is
+//                    detected all internal buffers are cleared thus forcing
+//                    read of data from disk.
+//                    Only shared databases are handled this way. For all
+//                    other databases this function is a NOP
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The database to be checked for updates
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+SHORT QDAMCheckForUpdates
+(
+   PBTREE         pBTIda
+)
+{
+  SHORT    sRc = 0;                             // return code
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+
+  if ( pBT->usOpenFlags & ASD_SHARED )
+  {
+      LONG  lUpdCount;                 // buffer for new value of update counter
+
+     /**********************************************************************/
+     /* Get current database update count                                  */
+     /**********************************************************************/
+     sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
+
+     if ( !sRc )
+     {
+      if ( lUpdCount != pBT->alUpdCtr[0] )
+      {
+        USHORT usNumBytesRead;          // Buffer fornumber of bytes read
+        ULONG  ulNewOffset;             // new offset in file
+
+        INFOEVENT2( QDAMCHECKFORUPDATES_LOC, REFRESH_EVENT, 0, DB_GROUP, NULL );
+
+        /**********************************************************************/
+        /* Get current header record                                          */
+        /**********************************************************************/
+        sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
+        if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+        if ( sRc == NO_ERROR )
+        {
+           SHORT sRetries = 0; // MAX_RETRY_COUNT;
+
+           do
+           {
+             sRc = UtlRead( pBT->fp, (PVOID)&header,
+                           sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
+             if ( sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+
+             if (sRc == BTREE_IN_USE )
+             {
+//             UtlWait( MAX_WAIT_TIME );
+               sRetries--;
+             } /* endif */
+           } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
+        } /* endif */
+
+        /****************************************************************/
+        /* Use new update count as time of last update                   */
+        /****************************************************************/
+        if ( !sRc )
+        {
+          pBT->alUpdCtr[0] = lUpdCount;
+        } /* endif */
+
+        /****************************************************************/
+        /* Refresh internal info with data from header record           */
+        /****************************************************************/
+        if ( !sRc )
+        {
+          pBT->usFirstNode        = header.usFirstNode;
+          pBT->usFirstLeaf        = header.usFirstLeaf;
+          pBT->usFreeKeyBuffer    = header.usFreeKeyBuffer;
+          pBT->usFreeDataBuffer   = header.usFreeDataBuffer;
+          pBT->usFirstDataBuffer  = header.usFirstDataBuffer;
+          // DataRecList in header is in old format (RECPARAMOLD),
+          // so convert it to the new format (RECPARAM)
+          {
+            int i;
+            for ( i = 0; i < MAX_LIST; i++ )
+            {
+              pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
+              pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
+              pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].sLen;
+            } /* endfor */
+          }
+          memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
+          memcpy( pBT->chCaseMap, header.chCaseMap, COLLATE_SIZE );
+          memcpy( pBT->chEntryEncode, header.chEntryEncode, ENTRYENCODE_LEN );
+
+          // Get value for next free record
+          if ( header.Flags.bVersion == BTREE_V1 )
+          {
+            pBT->usNextFreeRecord = header.usNextFreeRecord;
+          }
+          else
+          {
+            USHORT     usNextFreeRecord;
+            ULONG      ulTemp;
+            sRc = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
+            if ( !sRc )
+            {
+              usNextFreeRecord = (USHORT)(ulTemp/pBT->usBtreeRecSize);
+              if ( usNextFreeRecord != pBT->usNextFreeRecord )
+              {
+                INFOEVENT2( QDAMCHECKFORUPDATES_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+              } /* endif */
+              pBT->usNextFreeRecord = usNextFreeRecord;
+            } /* endif */
+          } /* endif */
+        } /* endif */
+
+        /****************************************************************/
+        /* Free all index pages                                         */
+        /****************************************************************/
+        if ( !sRc )
+        {
+          if ( pBT->bRecSizeVersion == BTREE_V3 )
+          {
+            PBTREEINDEX_V3  pIndexBuffer;             // temp ptr to index buffers
+
+            while ( pBT->pIndexBuffer_V3 != NULL )
+            {
+              pIndexBuffer = pBT->pIndexBuffer_V3;
+              pBT->pIndexBuffer_V3 = pIndexBuffer->pNext;
+
+              UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
+            } /* endwhile */
+          }
+          else
+          {
+            PBTREEINDEX_V2  pIndexBuffer;             // temp ptr to index buffers
+
+            while ( pBT->pIndexBuffer_V2 != NULL )
+            {
+              pIndexBuffer = pBT->pIndexBuffer_V2;
+              pBT->pIndexBuffer_V2 = pIndexBuffer->pNext;
+
+              UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
+            } /* endwhile */
+          } /* endif */
+          pBT->usIndexBuffer = 0;      // no buffers in linked list anymore
+        } /* endif */
+
+        /****************************************************************/
+        /* Invalidate all data buffers                                  */
+        /****************************************************************/
+        /* Free allocated space for buffers */
+        if ( pBT->bRecSizeVersion == BTREE_V3 )
+        {
+          if ( !sRc && pBT->LookupTable_V3 )
+          {
+            USHORT i;
+            PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+
+            for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+            {
+              if ( pLEntry->pBuffer )
+              {
+                UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+              } /* endif */
+              pLEntry++;
+            } /* endfor */
+            pBT->usNumberOfAllocatedBuffers = 0;
+          } /* endif */
+
+        }
+        else
+        {
+          if ( !sRc && pBT->LookupTable_V2 )
+          {
+            USHORT i;
+            PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
+
+            for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+            {
+              if ( pLEntry->pBuffer )
+              {
+                UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+              } /* endif */
+              pLEntry++;
+            } /* endfor */
+            pBT->usNumberOfAllocatedBuffers = 0;
+          } /* endif */
+
+        } /* endif */
+        /****************************************************************/
+        /* Invalidate current record and current index                  */
+        /****************************************************************/
+        if ( !sRc )
+        {
+          pBTIda->sCurrentIndex = RESET_VALUE;
+          pBTIda->usCurrentRecord = 0;
+        } /* endif */
+      } /* endif */
+     } /* endif */
+  } /* endif */
+
+  if ( sRc != 0 )
+  {
+    ERREVENT2( QDAMCHECKFORUPDATES_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+  return( sRc ) ;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
 // Function name:     QDAMPhysLock           Physical lock file
 //------------------------------------------------------------------------------
 // Function call:     QDAMPhysLock( PBTREE, BOOL, PBOOL );
@@ -5210,6 +5514,754 @@ SHORT QDAMSplitNode_V3
 }
 
 
+#define LENGTHOFDATA( pBT, pData ) \
+    ((pBT->usVersion >= NTM_VERSION2) ? *((PULONG)(pData)) : (ULONG)*((PUSHORT)(pData)) )
+
+
+
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     QDAMUnTerseData      UnTerse Data                        |
+//+----------------------------------------------------------------------------+
+//|Function call:     QDAMUnTerseData( PBTREE, PUCHAR, USHORT, PUSHORT );      |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Description:       This function will run the passed string against         |
+//|                   the decompression table.                                 |
+//|                   If the resulting string will not fit in the passed       |
+//|                   data area a warning return code is issued.               |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PBTREE                 pointer to btree structure        |
+//|                   PUCHAR                 pointer to data string            |
+//|                   USHORT                 data length on input              |
+//|                   PUSHORT                length of the string on output    |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   SHORT                                                    |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       0                     okay                               |
+//|                   BTREE_BUFFER_SMALL    provided buffer too small          |
+//|                   BTREE_NO_ROOM         not enough memory                  |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Side effects:      The most frequent 15 characters will be stored as 3 to 5 |
+//|                   bits. The rest is stored as 11 bits, i.e. '000' plus the |
+//|                   character.                                               |
+//+----------------------------------------------------------------------------+
+//|Function flow:      -- use the modified Huffman algorithm to unterse data   |
+//|                   while remaining length > 0                               |
+//|                     if usStartBit < 8 then                                 |
+//|                       get next byte and add it to usCurByte                |
+//|                       increase usStartBit                                  |
+//|                     endif                                                  |
+//|                     get the next three significant bits, adjust usStartBit |
+//|                     decode them according to the decode table, i.e.        |
+//|                      case 0:                                               |
+//|                        get next character, decode it and put it into output|
+//|                        string.                                             |
+//|                      case 1, 2, 3:                                         |
+//|                        just decode the character and put into output string|
+//|                      case 4, 6:                                            |
+//|                        get the next bit and decode it afterwards           |
+//|                      case 5, 7:                                            |
+//|                        get the next 2 bits and decode them afterwards      |
+//|                      default:                                              |
+//|                        we are out of synch, indicate that something went   |
+//|                        wrong.                                              |
+//|                                                                            |
+//|                      endswitch                                             |
+//|                   endwhile                                                 |
+//|                   if enough space in passed record then                    |
+//|                     copy data into passed record                           |
+//|                   else                                                     |
+//|                     set Rc to BTREE_BUFFER_SMALL                           |
+//|                   endif                                                    |
+//|                   return Rc                                                |
+//+----------------------------------------------------------------------------+
+SHORT QDAMUnTerseData
+(
+   PBTREE  pBTIda,                  //
+   PUCHAR  pData,                   // pointer to data
+   ULONG   ulDataLen,               // data length (uncompressed)
+   PULONG  pulLen                   // length of the string
+)
+{
+   ULONG    ulLen ;                    // length of string
+   PUCHAR   pTempData;                 // pointer to temp data area
+   USHORT   usCurByte = 0;             // current byte
+   USHORT   usStartBit = 0;            // start bit looking at from high to low
+   USHORT   usDecode;                  // value to be decoded
+   SHORT    sRc = 0;                   // okay;
+   PSZ      pInData = (PSZ)pData;           // pointer to input data
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+#if defined(MEASURE)
+  ulBeg =  pGlobInfoSeg->msecs;
+#endif
+
+   // get length of passed string
+   ulLen = ulDataLen;
+
+   // try to uncompress the passed string ( use pTempData as temporary space)
+
+   if ( pBT->pTempRecord )
+   {
+     pTempData = pBT->pTempRecord;
+
+     while ( ulLen )
+     {
+       /***************************************************************/
+       /* get next byte for decoding                                  */
+       /***************************************************************/
+       if ( usStartBit < 8 )
+       {
+         usCurByte = (usCurByte << 8) + *pData++;
+         usStartBit += 8;
+       } /* endif */
+
+       /***************************************************************/
+       /* get three significant bits                                  */
+       /***************************************************************/
+       usDecode = (usCurByte & us3BitNibble[usStartBit]) >> (usStartBit-3);
+       usStartBit -= 3;
+
+       /***************************************************************/
+       /* decode the next character                                   */
+       /***************************************************************/
+       switch ( usDecode )
+       {
+         case  0:    // get next character
+           if ( usStartBit < 8 )
+           {
+             usCurByte = (usCurByte << 8) + *pData++;
+             usStartBit += 8;
+           } /* endif */
+           *pTempData++ =
+              (CHAR) ((usCurByte & us8BitNibble[usStartBit]) >> (usStartBit-8));
+           ulLen --;
+           usStartBit -= 8;
+           if ( usStartBit < 8 )
+           {
+             usCurByte = (usCurByte << 8) + *pData++;
+             usStartBit += 8;
+           } /* endif */
+           break;
+         case  1:
+         case  2:
+         case  3:    // we are done ...
+           *pTempData++ = pBT->chDecode[usDecode];
+           ulLen--;                       // another character found
+           break;
+         case  4:
+         case  6:    // get the next bit and decode it afterwards
+           usDecode = (usDecode<<1) +
+                     ((usCurByte & us1BitNibble[usStartBit])>> (usStartBit-1));
+           usStartBit --;
+           *pTempData++ = pBT->chDecode[usDecode];
+           ulLen--;                       // another character found
+           break;
+         case  5:
+         case  7:    // get the next 2 bits and decode it afterwards
+           usDecode = (usDecode<<2) +
+                    ((usCurByte & us2BitNibble[usStartBit]) >> (usStartBit-2));
+           usStartBit -= 2;
+           *pTempData++ = pBT->chDecode[usDecode];
+           ulLen--;                       // another character found
+           break;
+         default :   // we are out of synch, should never happen.....
+           sRc = BTREE_CORRUPTED;
+           ulLen = 0;
+           break;
+       } /* endswitch */
+
+     } /* endwhile */
+   } /* endif */
+
+   /*******************************************************************/
+   /* copy untersed data back ....                                    */
+   /*******************************************************************/
+   if ( !sRc  )
+   {
+     if ( *pulLen >= ulDataLen )
+     {
+       memcpy( pInData, pBT->pTempRecord, *pulLen );
+       *pulLen = ulDataLen;
+     }
+     else
+     {
+      sRc = BTREE_BUFFER_SMALL;
+     } /* endif */
+   } /* endif */
+#if defined(MEASURE)
+  ulUnTerseEnd += (pGlobInfoSeg->msecs - ulBeg);
+#endif
+   return sRc;
+}
+
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMGetszData    Get Data String
+//------------------------------------------------------------------------------
+// Function call:     QDAMGetszData( PBTREE, PBTREEBUFFER, PCHAR,
+//                                   RECPARAM, RECPARAM );
+//------------------------------------------------------------------------------
+// Description:       Get the data string for this offset.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             pointer to btree structure
+//                    PBTREEBUFFER       record where to insert the key
+//                    PCHAR              key to be inserted
+//                    RECPARAM           position/offset of the key string
+//                    RECPARAM           position/offset of data (if data node)
+//                                               else position of child record
+//
+//------------------------------------------------------------------------------
+// Returncode type:   BOOL
+//------------------------------------------------------------------------------
+// Returncodes:       TRUE   if string could be extracted
+//                    FALSE  else
+//
+//------------------------------------------------------------------------------
+// Function flow:     read record
+//                    copy data
+//                    if it is tersed
+//                      set flag
+//                      remove terse indication
+//                      unterse data
+//                    endif
+//
+//------------------------------------------------------------------------------
+SHORT QDAMGetszData_V2
+(
+   PBTREE    pBTIda,
+   RECPARAM  recDataParam,
+   PBYTE     pData,
+   PULONG    pulDataLen,
+   CHAR      chType                             // type of record key/data
+)
+{
+   SHORT sRc = 0;
+   PBTREEBUFFER_V2 pRecord;                         // pointer to record
+   PBTREEHEADER pHeader;                         // pointer to header
+   PCHAR        pTempData = NULL;                // pointer to data pointer
+   PCHAR        pStartData = (PCHAR)pData;       // pointer to data pointer
+   ULONG        ulLen = 0;                       // length of string
+   ULONG        ulTerseLen = 0;                  // length of tersed string
+   BOOL         fTerse = FALSE;                  // entry tersed??
+   PUSHORT      pusOffset = NULL;                // pointer to offset
+   ULONG        ulFitLen;                        // free to be filled length
+   USHORT       usNum;                           // record number
+   ULONG        ulLZSSLen;
+   PBTREEGLOB   pBT = pBTIda->pBTree;
+   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
+
+   USHORT       usLenFieldSize;                            // size of record length field
+
+   // get size of record length field
+   if ( pBT->usVersion >= NTM_VERSION2 )
+   {
+     usLenFieldSize = sizeof(ULONG);
+   }
+   else
+   {
+     usLenFieldSize = sizeof(USHORT);
+   } /* endif */
+
+   recDataParam.usNum = recDataParam.usNum + pBT->usFirstDataBuffer;
+   // get record and copy data
+   sRc = QDAMReadRecord_V2( pBTIda, recDataParam.usNum, &pRecord, FALSE  );
+   if ( !sRc )
+   {
+      BTREELOCKRECORD( pRecord );
+      fRecLocked = TRUE;
+      if ( TYPE( pRecord ) != chType )
+      {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+      }
+      else
+      {
+         pusOffset = (PUSHORT) pRecord->contents.uchData;
+         pusOffset += recDataParam.usOffset;        // point to key
+         pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+         if ( *pusOffset > pBT->usBtreeRecSize )
+         {
+           sRc = BTREE_CORRUPTED;
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+         }
+         else
+         {
+           if ( pBT->usVersion >= NTM_VERSION2 )
+           {
+             ulLen = *((PULONG)pTempData);
+             if ( ulLen & QDAM_TERSE_FLAGL )
+           {
+            fTerse = TRUE;
+            ulLen &= ~QDAM_TERSE_FLAGL;
+            ulLZSSLen = ulLen;         // length of compressed record ....
+           } /* endif */
+           pTempData += sizeof(ULONG ); // get pointer to data
+#ifdef _DEBUG
+           {
+             CHAR szTemp[8];
+             sprintf( szTemp, "%ld", ulLen );
+             INFOEVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, recDataParam.usNum,
+                         DB_GROUP, szTemp );
+           }
+#endif
+         }
+         else
+         {
+           USHORT usLen = *((PUSHORT)pTempData);
+           if ( usLen & QDAM_TERSE_FLAG )
+           {
+            fTerse = TRUE;
+            usLen &= ~QDAM_TERSE_FLAG;
+            ulLen = (ULONG)usLen;
+            ulLZSSLen = ulLen;         // length of compressed record ....
+           }
+           else
+           {
+            ulLen = (ULONG)usLen;
+           } /* endif */
+           pTempData += sizeof(USHORT); // get pointer to data
+         } /* endif */
+           pHeader = &(pRecord->contents.header);
+         } /* endif */
+
+         /*************************************************************/
+         /* check if it is a valid length                             */
+         /*************************************************************/
+         if ( !sRc && (ulLen == 0) )
+         {
+           sRc = BTREE_CORRUPTED;
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+         } /* endif */
+       } /* endif */
+
+       if ( !sRc )
+       {
+         if ( *pulDataLen == 0 || !pData )
+         {
+            // give back only length
+            if ( fTerse )
+            {
+              // first field contains real length
+              *pulDataLen = LENGTHOFDATA(pBT,pTempData);
+            }
+            else
+            {
+               *pulDataLen = ulLen;    // give back only length
+            } /* endif */
+         }
+         else if ( *pulDataLen >= ulLen )
+         {
+            ulFitLen = pBT->usBtreeRecSize - sizeof(BTREEHEADER) - *pusOffset;
+            ulFitLen = ulLen < ulFitLen - usLenFieldSize ?  ulLen : ulFitLen - usLenFieldSize ;
+
+            if ( fTerse )
+            {
+               memcpy(pData,pTempData+usLenFieldSize,ulFitLen-usLenFieldSize);
+               ulTerseLen = LENGTHOFDATA(pBT,pTempData);
+               /**********************************************************/
+               /* adjust pointers                                        */
+               /**********************************************************/
+               ulLen -= ulFitLen;
+               pData += (ulFitLen - usLenFieldSize);
+            }
+            else
+            {
+               memcpy( pData, pTempData, ulFitLen );
+               *pulDataLen = ulLen;
+               /**********************************************************/
+               /* adjust pointers                                        */
+               /**********************************************************/
+               ulLen -= ulFitLen;
+               pData += ulFitLen;
+            } /* endif */
+
+
+            /**********************************************************/
+            /* copy as long as still data are available               */
+            /**********************************************************/
+            while ( !sRc && ulLen )
+            {
+               usNum = NEXT( pRecord );
+               BTREEUNLOCKRECORD( pRecord );
+               fRecLocked = FALSE;
+               if ( usNum )
+               {
+                  sRc = QDAMReadRecord_V2( pBTIda, usNum, &pRecord, FALSE  );
+                  if ( !sRc && TYPE( pRecord ) != DATA_NEXTNODE )
+                  {
+                    sRc = BTREE_CORRUPTED;
+                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+                  } /* endif */
+                  if ( !sRc  )
+                  {
+                     BTREELOCKRECORD( pRecord );
+                     fRecLocked = TRUE;
+                     pusOffset = (PUSHORT) pRecord->contents.uchData;
+                     pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+
+                     ulFitLen =  LENGTHOFDATA( pBT, pTempData );
+                     ulFitLen =  ulLen < ulFitLen ? ulLen : ulFitLen ;
+                     pTempData += usLenFieldSize;      // get pointer to data
+
+                     memcpy( pData, pTempData, ulFitLen );
+                     ulLen -= ulFitLen;
+                     pData += ulFitLen;
+                  } /* endif */
+               }
+               else
+               {
+                 sRc = BTREE_CORRUPTED;
+                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+               } /* endif */
+            } /* endwhile */
+            if ( !sRc && fTerse )
+            {
+              switch ( pBT->fTerse )
+              {
+                case  BTREE_TERSE_HUFFMAN :
+                  {
+                    sRc = QDAMUnTerseData( pBTIda, (PUCHAR)pStartData, ulTerseLen,
+                                           pulDataLen );
+                  }
+                  break;
+                default :
+                  sRc = BTREE_CORRUPTED;
+                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, NULL );
+                  break;
+              } /* endswitch */
+            } /* endif */
+         }
+         else
+         {
+            sRc = BTREE_BUFFER_SMALL;
+         } /* endif */
+
+      } /* endif */
+      if ( fRecLocked )
+      {
+        BTREEUNLOCKRECORD( pRecord );
+      } /* endif */
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+   return sRc;
+}
+SHORT QDAMGetszData_V3
+(
+   PBTREE    pBTIda,
+   RECPARAM  recDataParam,
+   PBYTE     pData,
+   PULONG    pulDataLen,
+   CHAR      chType                             // type of record key/data
+)
+{
+   SHORT sRc = 0;
+   PBTREEBUFFER_V3 pRecord;                         // pointer to record
+   PBTREEHEADER pHeader;                         // pointer to header
+   PCHAR        pTempData = NULL;                // pointer to data pointer
+   PCHAR        pStartData = (PCHAR)pData;       // pointer to data pointer
+   ULONG        ulLen = 0;                       // length of string
+   ULONG        ulTerseLen = 0;                  // length of tersed string
+   BOOL         fTerse = FALSE;                  // entry tersed??
+   PUSHORT      pusOffset = NULL;                // pointer to offset
+   ULONG        ulFitLen;                        // free to be filled length
+   USHORT       usNum;                           // record number
+   ULONG        ulLZSSLen;
+   PBTREEGLOB   pBT = pBTIda->pBTree;
+   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
+
+   USHORT       usLenFieldSize;                            // size of record length field
+
+   // get size of record length field
+   if ( pBT->usVersion >= NTM_VERSION2 )
+   {
+     usLenFieldSize = sizeof(ULONG);
+   }
+   else
+   {
+     usLenFieldSize = sizeof(USHORT);
+   } /* endif */
+
+   recDataParam.usNum = recDataParam.usNum + pBT->usFirstDataBuffer;
+   // get record and copy data
+   sRc = QDAMReadRecord_V3( pBTIda, recDataParam.usNum, &pRecord, FALSE  );
+   if ( !sRc )
+   {
+      BTREELOCKRECORD( pRecord );
+      fRecLocked = TRUE;
+      if ( TYPE( pRecord ) != chType )
+      {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+      }
+      else
+      {
+         pusOffset = (PUSHORT) pRecord->contents.uchData;
+         pusOffset += recDataParam.usOffset;        // point to key
+         pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+         if ( *pusOffset > pBT->usBtreeRecSize )
+         {
+           sRc = BTREE_CORRUPTED;
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+         }
+         else
+         {
+           if ( pBT->usVersion >= NTM_VERSION2 )
+           {
+             ulLen = *((PULONG)pTempData);
+             if ( ulLen & QDAM_TERSE_FLAGL )
+           {
+            fTerse = TRUE;
+            ulLen &= ~QDAM_TERSE_FLAGL;
+            ulLZSSLen = ulLen;         // length of compressed record ....
+           } /* endif */
+           // check if length is in a normal range
+           if ( ulLen > 134217728L ) // for now assume that no record exceeds a size of 128 MB )
+           {
+             sRc = BTREE_CORRUPTED;
+           }
+           pTempData += sizeof(ULONG ); // get pointer to data
+#ifdef _DEBUG
+           {
+             CHAR szTemp[40];
+             sprintf( szTemp, "%ld", ulLen );
+             INFOEVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, recDataParam.usNum,
+                         DB_GROUP, szTemp );
+           }
+#endif
+         }
+         else
+         {
+           USHORT usLen = *((PUSHORT)pTempData);
+           if ( usLen & QDAM_TERSE_FLAG )
+           {
+            fTerse = TRUE;
+            usLen &= ~QDAM_TERSE_FLAG;
+            ulLen = (ULONG)usLen;
+            ulLZSSLen = ulLen;         // length of compressed record ....
+           }
+           else
+           {
+            ulLen = (ULONG)usLen;
+           } /* endif */
+           pTempData += sizeof(USHORT); // get pointer to data
+         } /* endif */
+           pHeader = &(pRecord->contents.header);
+         } /* endif */
+
+         /*************************************************************/
+         /* check if it is a valid length                             */
+         /*************************************************************/
+         if ( !sRc && (ulLen == 0) )
+         {
+           sRc = BTREE_CORRUPTED;
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+         } /* endif */
+       } /* endif */
+
+       if ( !sRc )
+       {
+         if ( *pulDataLen == 0 || !pData )
+         {
+            // give back only length
+            if ( fTerse )
+            {
+              // first field contains real length
+              *pulDataLen = LENGTHOFDATA(pBT,pTempData);
+            }
+            else
+            {
+               *pulDataLen = ulLen;    // give back only length
+            } /* endif */
+         }
+         else if ( *pulDataLen >= ulLen )
+         {
+            ulFitLen = pBT->usBtreeRecSize - sizeof(BTREEHEADER) - *pusOffset;
+            ulFitLen = ulLen < ulFitLen - usLenFieldSize ?  ulLen : ulFitLen - usLenFieldSize ;
+
+            if ( fTerse )
+            {
+               memcpy(pData,pTempData+usLenFieldSize,ulFitLen-usLenFieldSize);
+               ulTerseLen = LENGTHOFDATA(pBT,pTempData);
+               /**********************************************************/
+               /* adjust pointers                                        */
+               /**********************************************************/
+               ulLen -= ulFitLen;
+               pData += (ulFitLen - usLenFieldSize);
+            }
+            else
+            {
+               memcpy( pData, pTempData, ulFitLen );
+               *pulDataLen = ulLen;
+               /**********************************************************/
+               /* adjust pointers                                        */
+               /**********************************************************/
+               ulLen -= ulFitLen;
+               pData += ulFitLen;
+            } /* endif */
+
+
+            /**********************************************************/
+            /* copy as long as still data are available               */
+            /**********************************************************/
+            while ( !sRc && ulLen )
+            {
+               usNum = NEXT( pRecord );
+               BTREEUNLOCKRECORD( pRecord );
+               fRecLocked = FALSE;
+               if ( usNum )
+               {
+                  sRc = QDAMReadRecord_V3( pBTIda, usNum, &pRecord, FALSE  );
+                  if ( !sRc && TYPE( pRecord ) != DATA_NEXTNODE )
+                  {
+                    sRc = BTREE_CORRUPTED;
+                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+                  } /* endif */
+                  if ( !sRc  )
+                  {
+                     BTREELOCKRECORD( pRecord );
+                     fRecLocked = TRUE;
+                     pusOffset = (PUSHORT) pRecord->contents.uchData;
+                     pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+
+                     ulFitLen =  LENGTHOFDATA( pBT, pTempData );
+                     ulFitLen = ulLen < ulFitLen?  ulLen: ulFitLen ;
+                     pTempData += usLenFieldSize;      // get pointer to data
+
+                     memcpy( pData, pTempData, ulFitLen );
+                     ulLen -= ulFitLen;
+                     pData += ulFitLen;
+                  } /* endif */
+               }
+               else
+               {
+                 sRc = BTREE_CORRUPTED;
+                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+               } /* endif */
+            } /* endwhile */
+            if ( !sRc && fTerse )
+            {
+              switch ( pBT->fTerse )
+              {
+                case  BTREE_TERSE_HUFFMAN :
+                  {
+                    sRc = QDAMUnTerseData( pBTIda, (PUCHAR)pStartData, ulTerseLen,
+                                           pulDataLen );
+                  }
+                  break;
+                default :
+                  sRc = BTREE_CORRUPTED;
+                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, NULL );
+                  break;
+              } /* endswitch */
+            } /* endif */
+         }
+         else
+         {
+            sRc = BTREE_BUFFER_SMALL;
+         } /* endif */
+
+      } /* endif */
+      if ( fRecLocked )
+      {
+        BTREEUNLOCKRECORD( pRecord );
+      } /* endif */
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+   return sRc;
+}
+
+
+
+SHORT QDAMDictSignLocal
+(
+   PBTREE pBTIda,                      // pointer to btree structure
+   PCHAR  pUserData,                   // pointer to user data
+   PUSHORT pusLen                      // length of user data
+);
+
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     EQFNTMSign      Read signature record                    |
+//+----------------------------------------------------------------------------+
+//|Function call:     QDAMDictSignLocal( PBTREE, PCHAR, PUSHORT );             |
+//+----------------------------------------------------------------------------+
+//|Description:       Gets the second part of the first record ( user data )   |
+//|                   This is done using the original QDAMDictSignLocal func.  |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PBTREE                 pointer to btree structure        |
+//|                   PCHAR                  pointer to user data              |
+//|                   PUSHORT                length of user data area (input)  |
+//|                                          filled length (output)            |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   SHORT                                                    |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       0                 no error happened                      |
+//|                   BTREE_INVALID     pointer invalid                        |
+//|                   BTREE_USERDATA    user data too long                     |
+//|                   BTREE_NO_BUFFER   no buffer free                         |
+//|                   BTREE_READ_ERROR  read error from disk                   |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+//|Side effects:      return signature record even if dictionary is corrupted  |
+//+----------------------------------------------------------------------------+
+//|NOTE:              This function could be implemented as MACRO too, but     |
+//|                   for consistency reasons, the little overhead was used... |
+//+----------------------------------------------------------------------------+
+//|Function flow:     call QDAMDictSignLocal ....                              |
+// ----------------------------------------------------------------------------+
+
+SHORT EQFNTMSign1
+(
+   PVOID  pBTIda,                      // pointer to btree structure
+   PCHAR  pUserData,                   // pointer to user data
+   PUSHORT pusLen                      // length of user data
+)
+{
+  SHORT sRc;                           // function return code
+  SHORT RetryCount;                    // retry counter for in-use condition
+
+  RetryCount = MAX_RETRY_COUNT;
+  do
+  {
+    sRc = QDAMDictSignLocal( (PBTREE) pBTIda, pUserData, pusLen );
+    if ( sRc == BTREE_IN_USE )
+    {
+      RetryCount--;
+      UtlWait( MAX_WAIT_TIME );
+    } /* endif */
+  } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+            (RetryCount > 0) ); /* enddo */
+
+  if ( sRc != NO_ERROR )
+  {
+    ERREVENT( EQFNTMSIGN_LOC, ERROR_EVENT, sRc );
+  } /* endif */
+
+
+  return( sRc );
+
+}
 
 SHORT QDAMChangeKey_V3
 (
@@ -5546,6 +6598,65 @@ SHORT QDAMInsertKey_V3
   return sRc;
 }
 
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMGetrecData   Get data pointer back
+//------------------------------------------------------------------------------
+// Function call:     QDAMGetrecData( PBTREEBUFFER, SHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Get data record pointer back
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREEBUFFER           record pointer
+//                    SHORT                  key to be used
+//
+//
+//------------------------------------------------------------------------------
+// Returncode type:   RECPARAM
+//------------------------------------------------------------------------------
+// Returncodes:       filled recparam structure
+//
+//------------------------------------------------------------------------------
+// Function flow:     use offset in table and point to data description
+//                    copy it data description structure for return
+//
+//------------------------------------------------------------------------------
+RECPARAM  QDAMGetrecData_V2
+(
+   PBTREEBUFFER_V2  pRecord,
+   SHORT         sMid,                           // key number
+   USHORT        usVersion                       // version of database
+)
+{
+   PCHAR   pData = NULL;
+   RECPARAM      recData;               // data description structure
+   PUSHORT  pusOffset;
+
+   // use record number of passed entry , read in record and pass
+   // back pointer
+   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   pusOffset += sMid;                            // point to key
+   pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+   pData += sizeof(USHORT );                    // get pointer to datarec
+
+   if ( usVersion >= NTM_VERSION2 )
+   {
+     memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM ) );
+   }
+   else
+   {
+     RECPARAMOLD recDataOld;
+
+     memcpy( &recDataOld, (PRECPARAMOLD) pData, sizeof(RECPARAMOLD) );
+     recData.usOffset = recDataOld.usOffset;
+     recData.usNum    = recDataOld.usNum;
+     recData.ulLen    = (ULONG)recDataOld.sLen;
+   } /* endif */
+   return ( recData );
+}
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6712,6 +7823,441 @@ SHORT  QDAMAddToBuffer_V2
     #endif
    return sRc;
 }
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMGetszKey    Get Key String
+//------------------------------------------------------------------------------
+// Function call:     QDAMGetszKey( PBTREEBUFFER, USHORT, PCHAR );
+//
+//------------------------------------------------------------------------------
+// Description:       Get the key string for this offset.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREEBUFFER           active record
+//                    USHORT                 get data for this offset
+//
+//------------------------------------------------------------------------------
+// Returncode type:   PSZ
+//------------------------------------------------------------------------------
+// Returncodes:       pointer to data
+//
+//------------------------------------------------------------------------------
+// Function flow:     point to key
+//                    set data pointer
+//                    pass it back
+//
+//------------------------------------------------------------------------------
+PSZ_W QDAMGetszKey_V2
+(
+   PBTREEBUFFER_V2  pRecord,              // active record
+   USHORT  i,                          // get data term
+   USHORT  usVersion                   // version of database
+)
+{
+   PBYTE    pData, pEndOfRec;
+   PUSHORT  pusOffset;
+   usVersion;
+
+   // get max pointer value
+
+   pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V2;
+
+   // use record number of passed entry , read in record and pass
+   // back pointer
+   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   pusOffset += i;                     // point to key
+   if ( (PBYTE)pusOffset > pEndOfRec )
+   {
+     // offset pointer is out of range
+     pData = NULL;
+     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+   }
+   else
+   {
+     pData = pRecord->contents.uchData + *pusOffset;
+     if ( usVersion >= NTM_VERSION2 )
+     {
+       pData += sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
+     }
+     else
+     {
+       pData += sizeof(USHORT ) + sizeof(RECPARAMOLD); // get pointer to data
+     } /* endif */
+     if ( pData > pEndOfRec )
+     {
+       // data pointer is out of range
+       pData = NULL;
+       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+     } /* endif */
+   } /* endif */
+
+   return ( (PSZ_W)pData );
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMLocateKey     Locate a key in passed record
+//------------------------------------------------------------------------------
+// Function call:     QDAMLocateKey( PBTREE, PBTREEBUFFER, PCHAR, PSHORT,
+//                                    SEARCHTYPE, PSHORT );
+//------------------------------------------------------------------------------
+// Description:       locate a key in the passed record via a binary search
+//                    Either pass back the position of the key or -1 if
+//                    not found
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PBTREEBUFFER           record to be dealt with
+//                    PCHAR                  key to be searched
+//                    PSHORT                 located key position
+//                    SEARCHTYPE             Exact, substring or equivalent
+//                    PSHORT                 near position
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       -1         if key is not in record
+//                    position   position of key
+//
+//------------------------------------------------------------------------------
+// Side Effects:      record will be temporarily locked and unlocked at
+//------------------------------------------------------------------------------
+// Function flow:     if record exists
+//                      lock record
+//                      set upper/lower start points for binary search
+//                      if valid area for search
+//                        while key not found
+//                          get key in the middle of lower/upper
+//                          decide where to go on (lower/upper part)
+//                          if match found
+//                            if exact match is required
+//                               ensure it and check prev/next
+//                               (insertion is case sensitive)
+//                            endif
+//                          endif
+//                        endwhile
+//                        if ok
+//                          ensure that end slots are checked
+//                        endif
+//                      endif
+//                      unlock record
+//                    endif
+//------------------------------------------------------------------------------
+SHORT QDAMLocateKey_V2
+(
+   PBTREE pBTIda,                         // pointer to btree structure
+   PBTREEBUFFER_V2 pRecord,               // record to be dealt with
+   PCHAR_W pKey,                          // key to be searched
+   PSHORT  psKeyPos,                      // located key
+   SEARCHTYPE  searchType,                // search type
+   PSHORT  psNearPos,                     // near position
+   USHORT  searchSubType                  // search subtype for hyphenation
+)
+{
+  SHORT  sLow;                             // low value
+  SHORT  sHigh;                            // high value
+  SHORT  sResult;
+  SHORT  sMid = 0;                         //
+  SHORT  sRc = 0;                          // return value
+  PCHAR_W  pKey2;                            // pointer to key string
+  PCHAR_W  pHyphen;                            // pointer to key string
+  SHORT    sCheckVariants=0;
+  BOOL   fFound = FALSE;
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+  CHAR_W  szKey[512];
+  SHORT   sKeyLen = 512 ;
+
+  *psKeyPos = -1;                         // key not found
+  if ( pRecord )
+  {
+    BTREELOCKRECORD( pRecord );
+    sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
+    sLow = 0;                                    // start here
+
+    wcsncpy( szKey, pKey, sKeyLen ) ;
+    szKey[sKeyLen-1] = NULL ;
+    pHyphen = wcschr(szKey, L'-') ;
+    if ( ( pHyphen ) &&
+         ( searchSubType == FEXACT_EQUIV ) ) { // special hyphenation lookup
+       sCheckVariants = 3 ;             // 3 variations when term contains hyphen
+    }  else {
+       sCheckVariants = 1 ;
+    }
+    while( sCheckVariants > 0 && !fFound ) {
+
+      while ( !fFound && sLow <= sHigh )
+      {
+         sMid = (sLow + sHigh)/2;
+         pKey2 = QDAMGetszKey_V2( pRecord, sMid, pBT->usVersion );
+  
+         if ( pKey2 )
+         {
+            sResult = (*pBT->compare)(pBTIda, szKey, pKey2);
+            if ( sResult < 0 )
+            {
+              sHigh = sMid - 1;                        // Go left
+            }
+            else if (sResult > 0)
+            {
+              sLow = sMid+1;                           // Go right
+            }
+            else
+            {
+               fFound = TRUE;
+               // if exact match is required we have to do a strcmp
+               // to ensure it and probably check the previous or the
+               // next one because our insertion is case insensitive
+  
+               /*********************************************************/
+               /* checking will be done in any case to return the best  */
+               /* matching substring                                    */
+               /*********************************************************/
+               if ( pBT->fTransMem )
+               {
+                 if (*((PULONG)szKey) == *((PULONG)pKey2))
+                 {
+                    *psKeyPos = sMid;
+                 }
+                 else
+                 {
+                    // try with previous
+                    if ( sMid > sLow )
+                    {
+                      pKey2 = QDAMGetszKey_V2( pRecord, (SHORT)(sMid-1), pBT->usVersion );
+                      if ( pKey2 == NULL )
+                      {
+                        sRc = BTREE_CORRUPTED;
+                      }
+                      else if ( *((PULONG)szKey) == *((PULONG)pKey2) )
+                      {
+                        *psKeyPos = sMid-1 ;
+                      } /* endif */
+                    } /* endif */
+                    //  still not found
+                    if ( !sRc && *psKeyPos == -1 && sMid < sHigh )
+                    {
+                      pKey2 = QDAMGetszKey_V2(  pRecord, (SHORT)(sMid+1), pBT->usVersion );
+                      if ( pKey2 == NULL )
+                      {
+                        sRc = BTREE_CORRUPTED;
+                      }
+                      else if ( *((PULONG)szKey) == *((PULONG)pKey2) )
+                      {
+                            *psKeyPos = sMid+1 ;
+                      } /* endif */
+                    } /* endif */
+                 } /* endif */
+               }
+               else
+               {
+                 /*******************************************************/
+                 /* if dealing with exacts we have to do some more      */
+                 /* explicit checking, else we have to find first pos.  */
+                 /* substring match...                                  */
+                 /*******************************************************/
+                 enum KEYMATCH
+                 {
+                   EXACT_KEY,            // keys are exactly the same
+                   FIRSTCHARCASEDIFF_KEY,// case of first char of keys is different
+                   CASEDIFF_KEY,         // case of keys is different
+                   PUNCTDIFF_KEY,        // punctuation of keys differs
+                   NOMATCH_KEY           // keys do not match at all
+                 } BestKeyMatch = NOMATCH_KEY; // match level of best key so far
+                 SHORT sBestKey = -1;    // best key found so far
+  
+                 /*****************************************************/
+                 /* go back as long as the keys are the same ...      */
+                 /*****************************************************/
+  
+                 /* DAW  If sMid == sLow and keys still the same, then may need to look at previous entry */
+                 /*      For example, if "Submit" is first entry of this record, and "submit" is last     */
+                 /*      entry of previous record, and looking for "submit".                              */
+  
+                 while ( sMid > sLow )
+                 {
+                   pKey2 = QDAMGetszKey_V2( pRecord, (SHORT)(sMid-1), pBT->usVersion );
+  
+                   if ( pKey2 == NULL )
+                   {
+                     sRc = BTREE_CORRUPTED;
+                     break;
+                   }
+                   else if ( (*pBT->compare)(pBTIda, szKey, pKey2) == 0 )
+                   {
+                     sMid --;
+                   }
+                   else
+                   {
+                     break;
+                   } /* endif */
+                 } /* endwhile */
+  
+                 *psKeyPos = sMid;      // set key position
+  
+                 /*****************************************************/
+                 /* go forward as long as the keys are the same  ..   */
+                 /* and no matching sentence found                    */
+                 /*****************************************************/
+                 if ( (searchType == FEXACT) ||
+                      (searchType == FEQUIV) )
+                 {
+                   *psKeyPos = -1;       // reset key position for exact search
+                                         // and equivalent search
+                 } /* endif */
+  
+                 while ( sMid <= sHigh )
+                 {
+                   pKey2 = QDAMGetszKey_V2( pRecord, sMid, pBT->usVersion );
+                   if ( pKey2 == NULL )
+                   {
+                     sRc = BTREE_CORRUPTED;
+                     break;
+                   }
+                   else if ( (*pBT->compare)(pBTIda, szKey, pKey2) == 0 )
+                   {
+                     if ( searchType == FEQUIV)
+                     {
+                       PBTREEGLOB    pBT = pBTIda->pBTree;
+                       PBYTE  pMap = pBT->chCaseMap; 
+                       PBYTE  pbKey1 = (PBYTE)szKey;
+                       PBYTE  pbKey2 = (PBYTE)pKey2;
+
+                       if ( UTF16strcmp( szKey, pKey2 ) == 0 )
+                       {
+                         // the match will not get better anymore ...
+                         *psKeyPos = sMid;
+                         break;
+                       }
+                       else if ( (pMap[*pbKey1] == pMap[*pbKey2]) && (UTF16strcmp( szKey+1, pKey2+1 ) == 0 ) )
+                       {
+                         // case of first character does not match
+                         // so remember match if we have no better match yet and
+                         // look for better ones...
+                         if ( BestKeyMatch > FIRSTCHARCASEDIFF_KEY )
+                         {
+                           BestKeyMatch = FIRSTCHARCASEDIFF_KEY;
+                           sBestKey = sMid;
+                         } /* endif */
+                       }
+                       else if ( QDAMCaseCompare( pBTIda, szKey, pKey2, FALSE ) == 0 )
+                       {
+                         // match but case of characters differ
+                         // so remember match if we have no better match yet and
+                         // look for better ones...
+                         if ( BestKeyMatch > CASEDIFF_KEY )
+                         {
+                           BestKeyMatch = CASEDIFF_KEY;
+                           sBestKey = sMid;
+                         } /* endif */
+                       }
+                       else if ( QDAMCaseCompare( pBTIda, szKey, pKey2, TRUE ) == 0 )
+                       {
+                         // match but punctuation differs
+                         // so remember match if we have no other yet and
+                         // look for better ones...
+                         if ( BestKeyMatch == NOMATCH_KEY )
+                         {
+                           BestKeyMatch = PUNCTDIFF_KEY;
+                           sBestKey = sMid;
+                         } /* endif */
+                       } /* endif */
+                       sMid++;           // continue with next key
+                     }
+                     else if (UTF16strcmp( szKey, pKey2 ))
+                     {
+                       // show similar terms as one in document edidtor
+                       if ( searchSubType == FEXACT_EQUIV ) {
+                          if ( QDAMCaseCompare( pBTIda, szKey, pKey2, TRUE ) == 0 )
+                          {
+                            // match but punctuation differs
+                            // so remember match if we have no other yet and
+                            // look for better ones...
+                            if ( BestKeyMatch == NOMATCH_KEY )
+                            {
+                              BestKeyMatch = PUNCTDIFF_KEY;
+                              sBestKey = sMid;
+                            } /* endif */
+                          } /* endif */
+                       }
+                       sMid ++;
+                     }
+                     else
+                     {
+                       *psKeyPos = sMid;
+                       break;
+                     } /* endif */
+                   }
+                   else
+                   {
+                     break;
+                   } /* endif */
+                 } /* endwhile */
+  
+                 // use best matching key if no other was found
+                 if ( *psKeyPos == -1 )
+                 {
+                   *psKeyPos = sBestKey;
+                 } /* endif */
+               } /* endif */
+  
+               /*********************************************************/
+               /* if we are checking only for substrings and didn't     */
+               /* find a match yet, we will set the prev. found substrin*/
+               /*********************************************************/
+               if ( (*psKeyPos == -1) && (searchType == FSUBSTR)  )
+               {
+                  *psKeyPos = sMid;
+               } /* endif */
+               *psNearPos = *psKeyPos;
+            } /* endif */
+         }
+         else
+         {
+            fFound = TRUE;
+            sRc = BTREE_CORRUPTED;                // tree is corrupted
+         } /* endif */
+      } /* endwhile */
+      if ( !fFound )
+      {
+        *psNearPos = sLow < ((SHORT)OCCUPIED(pRecord)-1) ? sLow : ((SHORT)OCCUPIED(pRecord)-1);// set nearest pos
+      } /* endif */
+
+      --sCheckVariants ;
+      if ( ( ! fFound  ) &&                      // No match yet and term with hyphen
+           ( pHyphen ) ) {
+         sHigh = (SHORT) OCCUPIED( pRecord) -1 ; // counting restarts at zero
+         sLow = 0;                               // start here
+         if ( sCheckVariants == 2 ) {            // 1st hyphen variant
+           wcsncpy( szKey, pKey, sKeyLen ) ;     // Replace hyphen with blank 
+           szKey[sKeyLen-1] = NULL ;
+           *pHyphen = NULL ;
+         } else
+         if ( sCheckVariants == 1 ) {            // 2nd hyphen variant
+           wcsncpy( szKey, pKey, sKeyLen ) ;     // Remove hyphen and concatenate words 
+           szKey[sKeyLen-1] = NULL ;
+           memmove( pHyphen, pHyphen+1, (wcslen(pHyphen+1)+1)*sizeof(WCHAR) ) ;
+         } else {
+            sCheckVariants = 0 ;
+         }
+      } 
+    }
+    BTREEUNLOCKRECORD( pRecord );
+  } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+  return sRc;
+}
+
 
 SHORT QDAMInsertKey_V2
 (
