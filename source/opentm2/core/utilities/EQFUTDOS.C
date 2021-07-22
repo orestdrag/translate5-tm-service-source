@@ -1290,7 +1290,18 @@ USHORT UtlChgFilePtrHwnd
    LARGE_INTEGER liOffset;
    LARGE_INTEGER liNewOffset;
    BOOL  fOK = TRUE;
+   PLONG pNewOffset = NULL;
+   if(pulNewOffset){
+     pNewOffset = new LONG;
+     *pNewOffset = *pulNewOffset;
+   }
 
+  SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
+
+  if(pulNewOffset){
+     *pulNewOffset = *pNewOffset;
+   }
+/*
    liOffset.LowPart = lOffset;
    liOffset.HighPart = 0;
    liNewOffset.LowPart = 0;
@@ -1307,15 +1318,15 @@ USHORT UtlChgFilePtrHwnd
       {
         usRetCode = (USHORT)GetLastError();
         *pulNewOffset = 0L;
-      } /* endif */
+      } 
 
       DosError(1);
       if ( fMsg && usRetCode )
       {
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
-      } /* endif */
+      } 
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-
+//*/
    return( usRetCode );
 }
 

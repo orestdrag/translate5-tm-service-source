@@ -128,18 +128,31 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
 
     BOOL CloseHandle(HFILE hf );
 
+/*
     BOOL SetFilePointerEx(
         HANDLE hFile,                    
         LARGE_INTEGER liDistanceToMove,  
         PLARGE_INTEGER lpNewFilePointer, 
         DWORD dwMoveMethod               
+        );//*/
+
+    BOOL SetFilePointerEx(
+        HFILE hFile,                    
+        LARGE_INTEGER liDistanceToMove,  
+        PLARGE_INTEGER lpNewFilePointer, 
+        DWORD dwMoveMethod               
         );
+
+    //DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet);
+    DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet);
 
     void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext);
 
     BOOL FlushFileBuffers(
         HANDLE hFile
     );
+
+    int GetFileId(HFILE ptr);
 }
 
 

@@ -181,7 +181,7 @@ void EqfMemory::setDescription
 
     // get current signature record
     USHORT usSignLen = sizeof(TMX_SIGN);
-    USHORT usRc = EQFNTMSign( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, &usSignLen );
+    USHORT usRc = EQFNTMSign1( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, &usSignLen );
     fOK = (usRc == NO_ERROR);
 
      // update description field

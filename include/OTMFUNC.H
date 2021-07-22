@@ -13,7 +13,8 @@
 #define _OTMFUNC_H_INCLUDED
 
 #include "win_types.h"
-
+#include "EQF.H"
+/*
 #ifndef _EQF_H_INCLUDED
   typedef long LONG;
   typedef unsigned short USHORT;
@@ -25,8 +26,9 @@
   #define MAX_LONGFILESPEC         256   // max length of long file name + extension
   #define NUM_OF_FOLDER_DICS        10   // number of dictionaries per folder
   #define MAX_NUM_OF_READONLY_MDB   25   // folder's R/O memory dbs
-  #define MAX_FILESPEC              13   // max length of file name + extension
+  //#define MAX_FILESPEC              13   // max length of file name + extension
 #endif
+//*/
 
 // include EQFPAPI.H for segment definitions
 #ifndef _EQFPAPI_H_INCLUDED

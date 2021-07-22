@@ -3,6 +3,7 @@
 #include "LogWrapper.h"
 #include <unistd.h>
 #include <cstring>
+#include <unistd.h>
 
 char * filesystem_get_otm_dir() {
     std::string sDir = FilesystemHelper::GetOtmDir();
@@ -152,12 +153,161 @@ int largeIntToInt(LARGE_INTEGER li) {
     return (int)li.QuadPart;
 }
 
+#ifndef __NR__llseek
+#define __NR__llseek            140
+#endif
+
+/*
+DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
+{
+    DWORD ret = 0 ;
+
+    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", LoPart, ", direction is ", OffSet);
+    //loff_t res ; //It is also LONGLONG variable.
+    LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
+
+    unsigned int whence = 0 ;
+    
+    if(OffSet == FILE_BEGIN)
+        whence = SEEK_SET ;
+    if(OffSet == FILE_CURRENT)
+        whence = SEEK_CUR ;
+    if(OffSet == FILE_END)
+        whence = SEEK_END ;
+
+    if(HiPart == NULL)
+        *HiPart = 0 ;
+
+    ret = syscall(__NR__llseek, fp, *HiPart, LoPart, &res, whence) ; //syscall2
+
+    int k = errno ;
+    if( ret == 0 )
+    {
+        LARGE_INTEGER li ;
+        li.QuadPart = res ; //It will move High & Low Order bits.
+        ret = li.LowPart ;
+
+        if(*HiPart != 0) //If High Order is not NULL
+        {
+            *HiPart = li.HighPart ;
+        }
+    }else{
+        ret = -1 ;
+
+        switch(errno){
+            case EBADF : 
+                LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
+                //FilesystemHelper::GetFileName(fp).c_str()
+                ) ;
+            break ;
+            case EFAULT : 
+                 LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
+                 //FilesystemHelper::GetFileName(fp).c_str() 
+                 ) ;
+                break ;
+            case EINVAL : 
+                 LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
+                 //FilesystemHelper::GetFileName(fp).c_str() 
+                 ) ;
+                break ;
+            default:
+                 LogMessage2(ERROR," default, fname = ", "" 
+                 //FilesystemHelper::GetFileName(fp).c_str() 
+                 );
+        }
+
+    }
+
+    return ret ;
+}
+//*/
+
+DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
+{
+    DWORD ret = 0 ;
+
+    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", intToA(LoPart), ", direction is ", intToA(OffSet));
+    //loff_t res ; //It is also LONGLONG variable.
+    LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
+
+    unsigned int whence = 0 ;
+    
+    if(OffSet == FILE_BEGIN)
+        whence = SEEK_SET ;
+    if(OffSet == FILE_CURRENT)
+        whence = SEEK_CUR ;
+    if(OffSet == FILE_END)
+        whence = SEEK_END ;
+
+    if(HiPart == NULL)
+        *HiPart = 0 ;
+
+    //int res = 0;
+    if(LoPart== 0){
+        return true;
+    }if(OffSet == FILE_BEGIN){           
+        //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
+        //res = lseek(*((int*)fp), LoPart, SEEK_SET);
+        int fildes = fileno(fp);
+        res = lseek(fildes, LoPart, SEEK_SET);
+    }else if(OffSet == FILE_CURRENT){
+        //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_CUR);
+        LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
+        }else if(OffSet == FILE_END){
+        //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_END);
+        LogMessage(ERROR, "SetFilePointerEx::FILE_END not implemented");
+    }else{
+        LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+    }
+    
+    if(res >= 0){
+        LARGE_INTEGER li ;
+        li.QuadPart = res ; //It will move High & Low Order bits.
+        ret = li.LowPart ;
+
+        if(*HiPart != 0) //If High Order is not NULL
+        {
+            *HiPart = li.HighPart ;
+        }
+    }
+    if(res == -1){
+        int k = errno ;
+        switch(errno){
+        case EBADF : 
+            LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
+            //FilesystemHelper::GetFileName(fp).c_str()
+            ) ;
+            break ;
+        case EFAULT : 
+            LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            ) ;
+            break ;
+        case EINVAL : 
+            LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            ) ;
+            break ;
+        default:
+            LogMessage2(ERROR," default, fname = ", "" 
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            );
+        }
+
+    }
+
+    return ret ;
+}
+
+
+/*
     BOOL SetFilePointerEx(
         HANDLE hFile,                    
         LARGE_INTEGER liDistanceToMove,  
         PLARGE_INTEGER lpNewFilePointer, 
         DWORD dwMoveMethod               
         ){
+            #if 0
             int res = 0;
             if(liDistanceToMove.QuadPart == 0){
                 return true;
@@ -179,8 +329,52 @@ int largeIntToInt(LARGE_INTEGER li) {
                 *lpNewFilePointer = intToLargeInt(res);
             }
             return res >=0;
-        }
+            #else
+            LONG a, *b, c;
+            int h = GetFileId((HFILE) hd);
+            a = (LONG)liDistanceToMove.QuadPart;
+            if(lpNewFilePointer){
+                c = lpNewFilePointer->QuadPart;
+                b = &c;
+            }else{
+                b = NULL;
+            }
+            return SetFilePointer( hFile, a, b, dwMoveMethod  );
 
+            if(lpNewFilePointer)
+                lpNewFilePointer->QuadPart = *b;
+            #endif
+        }
+//*/
+
+//*
+BOOL SetFilePointerEx(
+        HFILE hFile,                    
+        LARGE_INTEGER liDistanceToMove,  
+        PLARGE_INTEGER lpNewFilePointer, 
+        DWORD dwMoveMethod               
+        ){
+            if(liDistanceToMove.QuadPart == 0){
+                return true;
+            }
+            LogMessage2(FATAL, "calling not implemented function SetFilePointerEx for file ", FilesystemHelper::GetFileName(hFile).c_str());
+            //int h = GetFileId( hFile);
+            //PVOID ph = &h;
+            LONG a, *b, c;
+            a = (LONG)liDistanceToMove.QuadPart;
+            if(lpNewFilePointer){
+                c = lpNewFilePointer->QuadPart;
+                b = &c;
+            }else{
+                b = NULL;
+            }
+            SetFilePointer( hFile, a, b, dwMoveMethod  );
+
+            if(lpNewFilePointer)
+                lpNewFilePointer->QuadPart = *b;
+            return false;
+        }
+//*/
 
         void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext){
             std::string str(src);
@@ -190,5 +384,12 @@ int largeIntToInt(LARGE_INTEGER li) {
             str+= new_ext;
 
             strcpy(dest, str.c_str());
+        }
+
+        int GetFileId(HFILE ptr){
+            int fno = fileno(ptr);
+            //sprintf(proclnk, "/proc/self/fd/%d", fno);
+            LogMessage6(INFO, "GetFileId(", intToA((long int) ptr),") = ", intToA(fno), ", fname = ", FilesystemHelper::GetFileName(ptr).c_str());
+            return fno;
         }
 //}

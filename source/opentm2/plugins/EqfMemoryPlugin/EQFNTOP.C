@@ -21,6 +21,7 @@
 #include <EQFEVENT.H>             // event logging
 #include "core/utilities/LogWrapper.h"
 
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -135,10 +136,10 @@ USHORT TmtXOpen
       //get signature record and add to control block
       USHORT usLen = sizeof( TMX_SIGN );
 
-      LogMessage(WARNING, "TEMPORAY_COMMENTED out EQFNTMSign");
-      #ifdef TEMPORAY_COMMENTED
-      usRc = EQFNTMSign( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
-      #endif
+      //LogMessage(WARNING, "TEMPORAY_COMMENTED out EQFNTMSign");
+      //#ifdef TEMPORAY_COMMENTED
+      usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
+      //#endif
 
       // do on-spot conversion for version 6 memories
       if ( (usRc == NO_ERROR ) && (pTmClb->stTmSign.bMajorVersion == TM_MAJ_VERSION_6) )
@@ -151,7 +152,7 @@ USHORT TmtXOpen
         MemConvertMem( pTmOpenIn->stTmOpen.szDataName );
         usRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName, (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE), &pTmClb->pstTmBtree );
         usLen = sizeof( TMX_SIGN );
-        if ( !usRc1 ) usRc = EQFNTMSign( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
+        if ( !usRc1 ) usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
       } /* endif */
 
       if ( usRc == NO_ERROR )

@@ -139,7 +139,7 @@ SHORT EQFNTMSign
 {
   pBTIda; pUserData; pusLen;
 
-//	return theMemory->CPP_EQFNTMSign(  pBTIda,  pUserData,  pusLen);
+//  	return theMemory->CPP_EQFNTMSign(  pBTIda,  pUserData,  pusLen);
     return( 1 );
 
 }

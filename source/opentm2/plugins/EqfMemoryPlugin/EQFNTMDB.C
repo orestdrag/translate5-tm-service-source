@@ -787,6 +787,239 @@ EQFNTMUpdate
 } /* end of function EQFNTMUpdate */
 #endif 
 
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictExactLocal   Find Exact match
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictExactLocal( PBTREE, PCHAR, PCHAR, PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:        Find an exact match for the passed key
+//
+//------------------------------------------------------------------------------
+// Parameters:         PBTREE               pointer to btree structure
+//                     PCHAR                key to be inserted
+//                     PCHAR                buffer for user data
+//                     PUSHORT              on input length of buffer
+//                                          on output length of filled data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_NOT_FOUND   key not found
+//------------------------------------------------------------------------------
+// Function flow:     if dictionary corrupted, then
+//                      set Rc = BTREE_CORRUPTED
+//                    else
+//                      locate the leaf node that contains appropriate key
+//                      set Rc correspondingly
+//                    endif
+//                    if okay so far then
+//                      locate the key with option set to FEXACT;  set Rc
+//                      if key found then
+//                        set current position to the found key
+//                        pass back either length only or already data,
+//                         depending on user request.
+//                        endif
+//                      else
+//                        set Rc to BTREE_NOT_FOUND
+//                        set current position to the nearest key
+//                      endif
+//                    endif
+//                    return Rc
+//
+//
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictExactLocal
+(
+   PBTREE pBTIda,                      // pointer to btree struct
+   PCHAR_W pKey,                       // key to be searched for
+   PBYTE  pchBuffer,                   // space for user data
+   PULONG pulLength,                   // in/out length of returned user data
+   USHORT usSearchSubType              // special hyphenation lookup flag
+)
+{
+  SHORT    i;
+  SHORT    sNearKey;                   // nearest key position
+  SHORT    sRc  = 0;                   // return code
+  RECPARAM     recData;                // point to data structure
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  if ( pBT->fCorrupted )
+  {
+     sRc = BTREE_CORRUPTED;
+  } /* endif */
+
+   if ( !sRc )
+   {
+     if ( pBT->bRecSizeVersion == BTREE_V3)
+     {
+       PBTREEBUFFER_V3 pRecord = NULL;
+       SHORT sRetries = MAX_RETRY_COUNT;
+       do
+       {
+          /*******************************************************************/
+          /* For shared databases: discard all in-memory pages if database   */
+          /* has been changed since last access                              */
+          /*******************************************************************/
+         if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+         {
+            sRc = QDAMCheckForUpdates( pBTIda );
+          } /* endif */
+
+          if ( !sRc )
+          {
+             /* Locate the Leaf node that contains the appropriate key */
+             sRc = QDAMFindRecord_V3( pBTIda, pKey, &pRecord );
+          } /* endif */
+
+          if ( !sRc )
+          {
+            sRc = QDAMLocateKey_V3(pBTIda, pRecord, pKey, &i, FEXACT, &sNearKey);
+            if ( !sRc )
+            {
+               if ( i != -1 )
+               {
+                  // set new current position
+                 pBTIda->sCurrentIndex = i;
+                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+
+                 if ( pBT->fTransMem )
+                 {
+                   memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG) );  // save data
+                 }
+                 else
+                 {
+                   UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+                 } /* endif */
+                 recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
+                 if ( *pulLength == 0 || ! pchBuffer )
+                 {
+                    *pulLength = recData.ulLen;
+                 }
+                 else if ( *pulLength < recData.ulLen )
+                 {
+                    *pulLength = recData.ulLen;
+                    sRc = BTREE_BUFFER_SMALL;
+                 }
+                 else
+                 {
+                    sRc = QDAMGetszData_V3( pBTIda, recData, pchBuffer, pulLength, DATA_NODE );
+                 } /* endif */
+               }
+               else
+               {
+                 sRc = BTREE_NOT_FOUND;
+                  // set new current position
+                 pBTIda->sCurrentIndex = sNearKey;
+                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+                 *pulLength = 0;            // init returned length
+               } /* endif */
+            } /* endif */
+          } /* endif */
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) && (sRetries > 0));
+     }
+     else
+     {
+       PBTREEBUFFER_V2 pRecord = NULL;
+       SHORT sRetries = MAX_RETRY_COUNT;
+       do
+       {
+          /*******************************************************************/
+          /* For shared databases: discard all in-memory pages if database   */
+          /* has been changed since last access                              */
+          /*******************************************************************/
+         if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+         {
+            sRc = QDAMCheckForUpdates( pBTIda );
+          } /* endif */
+
+          if ( !sRc )
+          {
+             /* Locate the Leaf node that contains the appropriate key */
+             sRc = QDAMFindRecord_V2( pBTIda, pKey, &pRecord );
+          } /* endif */
+
+          if ( !sRc )
+          {
+            sRc = QDAMLocateKey_V2(pBTIda, pRecord, pKey, &i, FEXACT, &sNearKey, usSearchSubType );
+            if ( !sRc )
+            {
+               if ( i != -1 )
+               {
+                  // set new current position
+                 pBTIda->sCurrentIndex = i;
+                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+
+                 if ( pBT->fTransMem )
+                 {
+                   memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG) );  // save data
+                 }
+                 else
+                 {
+                   UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+                 } /* endif */
+                 recData = QDAMGetrecData_V2( pRecord, i, pBT->usVersion );
+                 if ( *pulLength == 0 || ! pchBuffer )
+                 {
+                    *pulLength = recData.ulLen;
+                 }
+                 else if ( *pulLength < recData.ulLen )
+                 {
+                    *pulLength = recData.ulLen;
+                    sRc = BTREE_BUFFER_SMALL;
+                 }
+                 else
+                 {
+                    sRc = QDAMGetszData_V2( pBTIda, recData, pchBuffer, pulLength, DATA_NODE );
+                 } /* endif */
+               }
+               else
+               {
+                 sRc = BTREE_NOT_FOUND;
+                  // set new current position
+                 pBTIda->sCurrentIndex = sNearKey;
+                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+                 *pulLength = 0;            // init returned length
+               } /* endif */
+            } /* endif */
+          } /* endif */
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) && (sRetries > 0));
+     } /* endif */
+   } /* endif */
+
+
+  if ( sRc && (sRc != BTREE_NOT_FOUND))
+  {
+    ERREVENT2( QDAMDICTEXACTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+  return ( sRc );
+}
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -838,10 +1071,10 @@ EQFNTMGet
       ulLength = *pulLength;
       pBT->fCorrupted = FALSE;
 
-      LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
-      #ifdef TEMPORARY_COMMENTED
+      //LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
+      //#ifdef TEMPORARY_COMMENTED
       sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
-      #endif 
+      //#endif 
 
       pBT->fCorrupted = fCorrupted;
 

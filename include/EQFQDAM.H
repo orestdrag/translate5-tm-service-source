@@ -169,8 +169,16 @@ extern "C" SHORT EQFNTMUpdSign
 //                    for consistency reasons, the little overhead was used...
 //+----------------------------------------------------------------------------+
 
-
+/*
 extern "C" SHORT EQFNTMSign
+(
+   PVOID  pBTIda,                      // pointer to btree structure
+   PCHAR  pUserData,                   // pointer to user data
+   PUSHORT pusLen                      // length of user data
+);
+//*/
+
+extern "C" SHORT EQFNTMSign1
 (
    PVOID  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
