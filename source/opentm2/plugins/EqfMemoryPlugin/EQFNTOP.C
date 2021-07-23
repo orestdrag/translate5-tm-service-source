@@ -67,14 +67,6 @@ USHORT TmtXOpen
 
   DEBUGEVENT( TMTXOPEN_LOC, FUNCENTRY_EVENT, 0 );
 
-  #ifndef TEMPORARY_HARDCODED
-    LogMessage(WARNING, "TEMPORARY_HARDCODED in TmtXOpen to fix data and index names");
-    char *temp = strrchr(pTmOpenIn->stTmOpen.szDataName,'.');
-    strcpy(temp, ".TMD");
-    strcpy(pTmOpenIn->stTmOpen.szIndexName,pTmOpenIn->stTmOpen.szDataName);
-    temp = strrchr(pTmOpenIn->stTmOpen.szIndexName,'.');
-    strcpy(temp, ".TMI");
-  #endif
   //allocate control block
   fOK = UtlAlloc( (PVOID *) &(pTmClb), 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
 

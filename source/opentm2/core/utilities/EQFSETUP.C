@@ -1324,7 +1324,7 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
   if ( !usRC  )
   {
       FilesystemHelper::ReadFile(hFile, pProp, usSize, bytesRead);
-      if ( bytesRead != 1 )
+      if ( bytesRead != usSize )
       {
           LogMessage2(ERROR, "ReadPropFile(), ERROR_READ_FAULT ", szPath);
           usRC = ERROR_READ_FAULT;

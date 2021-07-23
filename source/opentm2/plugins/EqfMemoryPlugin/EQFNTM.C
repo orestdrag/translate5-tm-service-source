@@ -540,7 +540,18 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
       pstOpenIn->stPrefixIn.usTmCommand = TMC_OPEN;
       strcpy( pstOpenIn->stTmOpen.szDataName, szMemFullPath );
       Utlstrccpy( pstOpenIn->stTmOpen.szIndexName, szMemFullPath, DOT );
-      INDEXNAMEFROMMEMPATH( szMemFullPath, pstOpenIn->stTmOpen.szIndexName );
+
+      
+      strcpy(pstOpenIn->stTmOpen.szIndexName,pstOpenIn->stTmOpen.szDataName);
+      char * temp = strrchr(pstOpenIn->stTmOpen.szIndexName,'.');
+      strcpy(temp, ".TMI");
+    
+    #ifndef TEMPORARY_HARDCODED
+      LogMessage(WARNING, "TEMPORARY_HARDCODED in TmtXOpen to fix data and index names");
+      temp = strrchr(pstOpenIn->stTmOpen.szDataName,'.');
+      //strcpy(temp, ".TMD");
+    #endif
+
       pstOpenIn->stTmOpen.szServer[0] = EOS;
       UtlGetLANUserID( pstOpenIn->stTmOpen.szUserid, &usUserPriviliges, FALSE );
       pstOpenIn->stTmOpen.usAccess = usAccess;

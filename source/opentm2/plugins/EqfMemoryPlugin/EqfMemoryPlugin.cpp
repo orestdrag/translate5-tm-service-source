@@ -837,7 +837,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     return false;
   }
 
-  PROP_NTM prop;
+  //PROP_NTM prop;
 
   memset( pInfo, 0, sizeof(MEMORYINFO) );
 
@@ -869,16 +869,27 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   //strcpy( pInfo->szName, prop.stPropHead.szName);
   strcpy( pInfo->szFullPath, mem_path.c_str());
   strcpy( pInfo->szName, nameWithoutExtention.c_str());
-  errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
+
+  //errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
+  PPROP_NTM pProp = NULL;
+  USHORT usLen = 0;
+  bool fOK = UtlLoadFile( (char*)mem_path.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
+
   if(errCode)
     return errCode;
   
-  strcpy(pInfo->szDescription, prop.stTMSignature.szDescription );
-  strcpy( pInfo->szSourceLanguage, prop.stTMSignature.szSourceLanguage );
+  strcpy(pInfo->szDescription, pProp->stTMSignature.szDescription );
+  strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
   
   strcpy( pInfo->szPlugin, this->name.c_str());
   strcpy( pInfo->szDescrMemoryType, this->descrType.c_str());
   //strcpy( pInfo->szOwner, "");
+
+  pInfo->ulSize = FilesystemHelper::GetFileSize(mem_path);
+  std::string indexName = mem_path.substr(0, mem_path.size()-4);
+  indexName += EXT_OF_TMINDEX;
+
+  pInfo->ulSize += FilesystemHelper::GetFileSize(indexName);
 
   return( errCode == 0 );
 
@@ -951,7 +962,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
     UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
   } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+ #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   
 }
 
