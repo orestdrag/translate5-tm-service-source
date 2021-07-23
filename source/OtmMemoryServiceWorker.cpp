@@ -1868,15 +1868,15 @@ int OtmMemoryServiceWorker::getStatus
   } /* endif */
 
   // check if memory exists
-  //if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
-  //{
+  if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
+  {
     return( restbed::NOT_FOUND );
-  //}
+  }
 
-  //factory->startJSON( strOutputParms );
-  //factory->addParmToJSON( strOutputParms, "tmxImportStatus", "available" );
-  //factory->terminateJSON( strOutputParms );
-  //return( restbed::OK );
+  factory->startJSON( strOutputParms );
+  factory->addParmToJSON( strOutputParms, "tmxImportStatus", "available" );
+  factory->terminateJSON( strOutputParms );
+  return( restbed::OK );
 }
 
 MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
