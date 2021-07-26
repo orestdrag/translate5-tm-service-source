@@ -368,7 +368,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         break;
       }
 
-      #ifndef IGNORE_TEMPORARY_HARDCODED
+      #ifdef IGNORE_TEMPORARY_HARDCODED
         LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", intToA(prophead.usClass));
         prophead.usClass = PROP_CLASS_MEMORY;
       #endif

@@ -12,6 +12,7 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include <EQF.H>                  // General Translation Manager include file
 #include "core/utilities/LogWrapper.h"
+#include "core/utilities/FilesystemWrapper.h"
 #include "win_types.h"
 
 //#include <EQFQDMAI.H>             // Private QDAM defines
@@ -1604,7 +1605,8 @@ SHORT QDAMReadRecordFromDisk_V3
     if ( !sRc )
     {
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
-      sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
+      sRc = SkipBytesFromBeginningInFile(pBT->fp, lOffset);
+      //sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
     } /* endif */
 
     // Read the record in to the buffer space
@@ -8912,11 +8914,13 @@ SHORT QDAMDictSignLocal
   USHORT  usLen;                       // contain length of user record
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
-  if ( UtlChgFilePtr( pBT->fp, (LONG) USERDATA_START,
+
+  sRc = SkipBytesFromBeginningInFile(pBT->fp, USERDATA_START);
+  /*if ( UtlChgFilePtr( pBT->fp, (LONG) USERDATA_START,
                       FILE_BEGIN, &ulNewOffset, FALSE) )
   {
     sRc = BTREE_READ_ERROR;
-  } /* endif */
+  } //*/
 
   if ( ! sRc )
   {

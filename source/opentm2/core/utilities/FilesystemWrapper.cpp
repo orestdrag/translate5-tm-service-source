@@ -248,8 +248,9 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
     }if(OffSet == FILE_BEGIN){           
         //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
         //res = lseek(*((int*)fp), LoPart, SEEK_SET);
-        int fildes = fileno(fp);
+        int fildes = *fp;//fileno(fp);
         res = lseek(fildes, LoPart, SEEK_SET);
+        //fp->_IO_read_ptr = fp->_IO_read_ptr + LoPart;
     }else if(OffSet == FILE_CURRENT){
         //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_CUR);
         LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
@@ -391,5 +392,24 @@ BOOL SetFilePointerEx(
             //sprintf(proclnk, "/proc/self/fd/%d", fno);
             LogMessage6(INFO, "GetFileId(", intToA((long int) ptr),") = ", intToA(fno), ", fname = ", FilesystemHelper::GetFileName(ptr).c_str());
             return fno;
+        }
+
+
+        int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes){
+            LogMessage4(INFO, "SkipBytesFromBeginningInFile, file = ", FilesystemHelper::GetFileName(ptr).c_str(),
+                        "; bytes = ", intToA(numOfBytes));
+            int err = 0;
+            if(ptr == NULL){
+                return -1;
+            }
+
+            if(numOfBytes <= 0){
+                return -1;
+            }
+            char* dummy = new char[numOfBytes];
+            rewind(ptr);
+            int readed = 0;
+            FilesystemHelper::ReadFile(ptr, dummy, numOfBytes, readed);
+            return readed != 1;
         }
 //}

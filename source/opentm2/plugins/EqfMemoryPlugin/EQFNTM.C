@@ -547,9 +547,9 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
       strcpy(temp, ".TMI");
     
     #ifndef TEMPORARY_HARDCODED
-      LogMessage(WARNING, "TEMPORARY_HARDCODED in TmtXOpen to fix data and index names");
+      LogMessage(WARNING, "TEMPORARY_HARDCODED in TmtXOpen to fix data name");
       temp = strrchr(pstOpenIn->stTmOpen.szDataName,'.');
-      //strcpy(temp, ".TMD");
+      strcpy(temp, ".TMD");
     #endif
 
       pstOpenIn->stTmOpen.szServer[0] = EOS;

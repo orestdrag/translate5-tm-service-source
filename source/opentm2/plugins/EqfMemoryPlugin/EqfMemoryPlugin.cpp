@@ -168,9 +168,11 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     // use old memory open code
     USHORT usMsgHandling = (USHORT)bMsgHandling;
     //USHORT usRC = NO_ERROR;
-//#ifdef TEMPORARY_COMMENTED
-    USHORT usRC = TmOpen(  pInfo->szFullPath, &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
-//#endif //TEMPORARY_COMMENTED
+    
+    std::string path = pInfo->szFullPath;
+
+    USHORT usRC = TmOpen(  (char*)path.c_str(), &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
+
 
     // create memory object if create function completed successfully
     if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )

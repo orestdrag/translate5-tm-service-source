@@ -1011,9 +1011,13 @@ typedef struct _TM_HEADER { /* tmh */
 //#endif
 
 //signature structure
+
+//#define _TMX_SIGN_SZ_NAME 13
+#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
+
 typedef struct _TMX_SIGN
 {
-  CHAR szName[MAX_FILESPEC];
+  CHAR szName[_TMX_SIGN_SZ_NAME];
   CHAR szServer[MAX_SERVER_NAME];
   CHAR szUserid[MAX_USERID];
   TIME_L lTime;
