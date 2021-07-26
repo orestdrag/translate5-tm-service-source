@@ -5532,15 +5532,20 @@ typedef enum {
 #define PROP_QUIT               0x00
 #define PROP_FILE               0x10
 
+#define _PROPHEAD_SZNAME 13
+//#define _PROPHEAD_SZNAME MAX_FILESPEC
+
+#define _PROPHEAD_SZPATH 144
+//#define _PROPHEAD_SZPATH MAX_PATH144
 
 // Structure of properties heading area
 typedef struct _PROPHEAD
 {
-   char szName[MAX_FILESPEC];   // Properties name (= object name)
-   char szPath[MAX_PATH144];    // Path to properties
    USHORT usClass;              // Class name ID of properties
    char chType;                 // Indicator to type of properties
-                                // T=Template, I=Instance, N=New
+   char dummy;                  // T=Template, I=Instance, N=New
+   char szName[_PROPHEAD_SZNAME];   // Properties name (= object name)
+   char szPath[_PROPHEAD_SZPATH];    // Path to properties
 } PROPHEAD, *PPROPHEAD;
 
 // list of internal code versions and current code version

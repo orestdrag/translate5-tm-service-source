@@ -248,7 +248,7 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
     }if(OffSet == FILE_BEGIN){           
         //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
         //res = lseek(*((int*)fp), LoPart, SEEK_SET);
-        int fildes = *fp;//fileno(fp);
+        int fildes = fileno(fp);
         res = lseek(fildes, LoPart, SEEK_SET);
         //fp->_IO_read_ptr = fp->_IO_read_ptr + LoPart;
     }else if(OffSet == FILE_CURRENT){

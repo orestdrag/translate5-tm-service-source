@@ -457,7 +457,7 @@ EVENTLISTEND( TEVENTCLASS, DUMMY_CLASS )
 /*****************************************************************************/
 typedef struct _BTREEHEADER
 {
-  CHAR    chType;                                 // record type
+  USHORT    chType;                                 // record type
   USHORT  usNum;                                  // record number
   USHORT  usPrevious;                             // previous leaf node
   USHORT  usNext;                                 // next leaf node
@@ -4164,7 +4164,7 @@ QDAMDictUpdStatus
   } /* endwhile */
 } /* end of function QDAMDictUpdStatus */
 
-PSZ_W QDAMGetszKey_V3
+PUSHORT QDAMGetszKey_V3
 (
    PBTREEBUFFER_V3  pRecord,              // active record
    USHORT  i,                          // get data term
@@ -4182,33 +4182,47 @@ PSZ_W QDAMGetszKey_V3
    // use record number of passed entry , read in record and pass
    // back pointer
    pusOffset = (PUSHORT) pRecord->contents.uchData;
+   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset = pRecord->contents.uchData = ", intToA((ULONG)pusOffset));
+   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3 = ", intToA((ULONG)pEndOfRec));
+   LogMessage2(DEBUG, "QDAMGetszKey_V3::  i = ", intToA((ULONG((PUSHORT)i))));
    pusOffset += i;                     // point to key
+   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset += i :", intToA((ULONG)pusOffset));
+
+   int step = 0;
+   if ( usVersion >= NTM_VERSION2 )
+   {
+      step = sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
+   }
+   else
+   {
+     step = sizeof(USHORT ) + sizeof(RECPARAMOLD); // get pointer to data
+   }
+
    if ( (PBYTE)pusOffset > pEndOfRec )
    {
      // offset pointer is out of range
      pData = NULL;
-     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+     LogMessage4(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", intToA((long int)pusOffset), "; pEndOfRec = ", intToA((long int)pEndOfRec));
+     LogMessage2(ERROR, "pusOffset - pEndOfRec = ", intToA((long int) ((PBYTE)pusOffset - pEndOfRec)));
+     //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
    }
    else
    {
-     pData = pRecord->contents.uchData + *pusOffset;
-     if ( usVersion >= NTM_VERSION2 )
-     {
-       pData += sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
-     }
-     else
-     {
-       pData += sizeof(USHORT ) + sizeof(RECPARAMOLD); // get pointer to data
-     } /* endif */
+     LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
+     pData = pRecord->contents.uchData + *pusOffset ;/*+ step;//*/
+     
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
+       LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", intToA((long int)pusOffset),
+             "; pEndOfRec = ", intToA((long int)pEndOfRec));
+       LogMessage2(ERROR, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
        pData = NULL;
-       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+       //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
      } /* endif */
    } /* endif */
 
-   return ( (PSZ_W)pData );
+   return ( (PUSHORT)pData );
 }
 
 RECPARAM  QDAMGetrecData_V3
@@ -4250,7 +4264,7 @@ RECPARAM  QDAMGetrecData_V3
 SHORT QDAMFindRecord_V3
 (
     PBTREE   pBTIda,
-    PCHAR_W  pKey,
+    PUSHORT  pKey,
     PBTREEBUFFER_V3 * ppRecord
 )
 {
@@ -4259,7 +4273,7 @@ SHORT QDAMFindRecord_V3
   SHORT         sHigh;                             // Far right
   SHORT         sMid = 0;                          // Middle
   RECPARAM      recData;                           // data structure
-  PCHAR_W       pKey2;                             // pointer to search key
+  PUSHORT       pKey2;                             // pointer to search key
   SHORT         sRc;                               // return code
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
@@ -4971,7 +4985,7 @@ SHORT QDAMLocateKey_V3
 (
    PBTREE pBTIda,                         // pointer to btree structure
    PBTREEBUFFER_V3 pRecord,                  // record to be dealt with
-   PCHAR_W pKey,                          // key to be searched
+   PUSHORT pKey,                          // key to be searched
    PSHORT  psKeyPos,                      // located key
    SEARCHTYPE  searchType,                // search type
    PSHORT  psNearPos                      // near position
@@ -4982,7 +4996,7 @@ SHORT QDAMLocateKey_V3
   SHORT  sResult;
   SHORT  sMid = 0;                         //
   SHORT  sRc = 0;                          // return value
-  PCHAR_W  pKey2;                            // pointer to key string
+  PUSHORT  pKey2;                            // pointer to key string
   BOOL   fFound = FALSE;
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
@@ -4990,9 +5004,11 @@ SHORT QDAMLocateKey_V3
   if ( pRecord )
   {
     BTREELOCKRECORD( pRecord );
-    sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
+    sHigh = (SHORT) pRecord->contents.header.usOccupied -1 ;      // counting starts at zero
     sLow = 0;                                    // start here
 
+    LogMessage2(INFO, "QDAMLocateKey_V3:: sHigh = ", (intToA(sHigh)));
+    
     while ( !fFound && sLow <= sHigh )
     {
        sMid = (sLow + sHigh)/2;
@@ -5119,13 +5135,17 @@ SHORT QDAMLocateKey_V3
                  {
                    if ( searchType == FEQUIV)
                    {
+                     LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
+                     #ifdef TEMPORARY_COMMENTED
                      if ( UTF16strcmp( pKey, pKey2 ) == 0 )
                      {
                        // the match will not get better anymore ...
                        *psKeyPos = sMid;
                        break;
                      }
-                     else if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
+                     else 
+                     #endif
+                     if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
                      {
                        // match but case of characters differ
                        // so remember match if we have no better match yet and
@@ -5149,12 +5169,15 @@ SHORT QDAMLocateKey_V3
                      } /* endif */
                      sMid++;           // continue with next key
                    }
+                   #ifdef TEMPORARY_COMMENTED
                    else if (UTF16strcmp( pKey, pKey2 ))
                    {
                      sMid ++;
                    }
+                   #endif
                    else
                    {
+                     LogMessage(ERROR,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
                      *psKeyPos = sMid;
                      break;
                    } /* endif */
@@ -5292,7 +5315,7 @@ SHORT QDAMSplitNode_V3
 (
    PBTREE pBTIda,                // pointer to generic structure
    PBTREEBUFFER_V3 *record,         // pointer to pointer to node
-   PCHAR_W pKey                 // new key
+   PUSHORT pKey                 // new key
 )
 {
   SHORT i,j;
@@ -5303,7 +5326,7 @@ SHORT QDAMSplitNode_V3
   PBTREEBUFFER_V3 pRecTemp;               // temporary buffer
   RECPARAM   recKey;                   // position/offset for key
   RECPARAM   recData;                  // position/offset for data
-  PCHAR_W    pParentKey;               // new key to be inserted
+  PUSHORT    pParentKey;               // new key to be inserted
   PUSHORT    pusOffset;                // pointer to offset table
   BOOL       fCompare;                 // indicator where to insert new key
   USHORT     usFreeKeys = 0;               // number of free keys required
@@ -6269,8 +6292,8 @@ SHORT QDAMChangeKey_V3
 (
    PBTREE   pBTIda,                                 // ptr to tree structure
    USHORT   usNode,                                 // start node
-   PCHAR_W  pOldKey,                                // find old key
-   PCHAR_W  pNewKey                                 // find new key
+   PUSHORT  pOldKey,                                // find old key
+   PUSHORT  pNewKey                                 // find new key
 )
 {
   PBTREEBUFFER_V3 pRecord;                            // buffer for record
@@ -6392,16 +6415,16 @@ SHORT QDAMInsertKey_V3
 (
    PBTREE       pBTIda,
    PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
-   PCHAR_W      pKey,
+   PUSHORT      pKey,
    RECPARAM   recKey,                  // position/offset for key
    RECPARAM   recData                  // position/offset for data
 )
 {
   SHORT i = 0;
   PBTREEBUFFER_V3 pTempRec;
-  PCHAR_W   pCompKey = NULL;           // key to be compared with
-  PCHAR_W   pOldKey;                   // old key at first position
-  PCHAR_W   pNewKey;                   // new key at first position
+  PUSHORT   pCompKey = NULL;           // key to be compared with
+  PUSHORT   pOldKey;                   // old key at first position
+  PUSHORT   pNewKey;                   // new key at first position
   BOOL fFound = FALSE;
   SHORT  sKeyFound;                    // key found
   SHORT  sNearKey;                     // key found
@@ -6431,7 +6454,10 @@ SHORT QDAMInsertKey_V3
      else
      {
        i = (SHORT) OCCUPIED(pRecord);
+       LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
+       #ifdef TEMPORARY_COMMENTED
        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(CHAR_W)));
+      #endif
 
        if ( pBT->usVersion >= NTM_VERSION2 )
        {
@@ -6513,9 +6539,12 @@ SHORT QDAMInsertKey_V3
       // insert reference
       if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
       {
+        LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
+        #ifdef TEMPORARY_COMMENTED
          Unicode2ASCII( pKey, chHeadTerm, 0L );
+         #endif 
          usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
-         pKey = (PSZ_W)&chHeadTerm[0];
+         pKey = (PUSHORT)&chHeadTerm[0];
       }
       *(PUSHORT) pData = usKeyLen;
       {
@@ -6720,7 +6749,7 @@ RECPARAM  QDAMGetrecData_V2
 SHORT QDAMFindRecord_V2
 (
     PBTREE   pBTIda,
-    PCHAR_W  pKey,
+    PUSHORT  pKey,
     PBTREEBUFFER_V2 * ppRecord
 )
 {
@@ -6729,7 +6758,7 @@ SHORT QDAMFindRecord_V2
   SHORT         sHigh;                             // Far right
   SHORT         sMid = 0;                          // Middle
   RECPARAM      recData;                           // data structure
-  PCHAR_W       pKey2;                             // pointer to search key
+  PUSHORT       pKey2;                             // pointer to search key
   SHORT         sRc = 0;                           // return code
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
@@ -7955,7 +7984,7 @@ SHORT QDAMLocateKey_V2
 (
    PBTREE pBTIda,                         // pointer to btree structure
    PBTREEBUFFER_V2 pRecord,               // record to be dealt with
-   PCHAR_W pKey,                          // key to be searched
+   PUSHORT pKey,                          // key to be searched
    PSHORT  psKeyPos,                      // located key
    SEARCHTYPE  searchType,                // search type
    PSHORT  psNearPos,                     // near position
@@ -7982,7 +8011,9 @@ SHORT QDAMLocateKey_V2
     sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
     sLow = 0;                                    // start here
 
+  #ifdef TEMPORARY_COMMENTED
     wcsncpy( szKey, pKey, sKeyLen ) ;
+  #endif
     szKey[sKeyLen-1] = NULL ;
     pHyphen = wcschr(szKey, L'-') ;
     if ( ( pHyphen ) &&
@@ -8236,12 +8267,16 @@ SHORT QDAMLocateKey_V2
          sHigh = (SHORT) OCCUPIED( pRecord) -1 ; // counting restarts at zero
          sLow = 0;                               // start here
          if ( sCheckVariants == 2 ) {            // 1st hyphen variant
+         #ifdef TEMPORARY_COMMENTED 
            wcsncpy( szKey, pKey, sKeyLen ) ;     // Replace hyphen with blank 
+          #endif
            szKey[sKeyLen-1] = NULL ;
            *pHyphen = NULL ;
          } else
          if ( sCheckVariants == 1 ) {            // 2nd hyphen variant
+         #ifdef TEMPORARY_COMMENTED
            wcsncpy( szKey, pKey, sKeyLen ) ;     // Remove hyphen and concatenate words 
+          #endif
            szKey[sKeyLen-1] = NULL ;
            memmove( pHyphen, pHyphen+1, (wcslen(pHyphen+1)+1)*sizeof(WCHAR) ) ;
          } else {
@@ -8520,7 +8555,7 @@ SHORT QDAMInsertKey_V2
 SHORT QDAMDictInsertLocal
 (
   PBTREE  pBTIda,           // pointer to binary tree struct
-  PCHAR_W pKey,             // pointer to key data
+  PUSHORT pKey,             // pointer to key data
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data in bytes
 )
@@ -8549,10 +8584,13 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
+   LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
+   #ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
+  #endif
 
    /*******************************************************************/
    /* For shared databases: lock complete file                        */
@@ -8571,9 +8609,12 @@ SHORT QDAMDictInsertLocal
 
       if ( !sRc )
       {
+        LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
+        #ifdef TEMPORARY_COMMENTED
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
+        #endif
         if ( (usKeyLen == 0) ||
-             ((usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) ||
+             ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
              (ulLen == 0) ||
              ((pBT->usVersion < NTM_VERSION2) && (ulLen >= MAXDATASIZE)) )
         {
@@ -8612,7 +8653,10 @@ SHORT QDAMDictInsertLocal
 
       if ( !sRc )
       {
+        LogMessage(ERROR,"TEMPORARY_COMMENTED, UTF16strlenBYTE");
+        #ifdef TEMPORARY_COMMENTED
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
+        #endif
         if ( usKeyLen == 0 ||(  (usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) || ulLen == 0 || ulLen >= MAXDATASIZE )
         {
           sRc = BTREE_DATA_RANGE;
@@ -8622,7 +8666,10 @@ SHORT QDAMDictInsertLocal
           memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
           
           QDAMDictUpdStatus ( pBTIda );
+          LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
+          #ifdef TEMPORARY_COMMENTED
           sRc = QDAMFindRecord_V2( pBTIda, pKey, &pNode );
+          #endif
         } /* endif */
       } /* endif */
 
@@ -8633,7 +8680,10 @@ SHORT QDAMDictInsertLocal
           if ( !sRc )
           {
             recData.ulLen = ulLen;
+            LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
+            #ifdef TEMPORARY_COMMENTED
             sRc = QDAMInsertKey_V2 (pBTIda, pNode, pKey, recKey, recData);
+            #endif
           } /* endif */
 
           BTREEUNLOCKRECORD( pNode );

@@ -1012,19 +1012,22 @@ typedef struct _TM_HEADER { /* tmh */
 
 //signature structure
 
-//#define _TMX_SIGN_SZ_NAME 13
-#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
+#define _TMX_SIGN_SZ_NAME 13
+//#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
 
+//#define _TMX_SIGN_SERVER_NAME MAX_SERVER_NAME
+#define _TMX_SIGN_SERVER_NAME 7
 typedef struct _TMX_SIGN
 {
-  CHAR szName[_TMX_SIGN_SZ_NAME];
-  CHAR szServer[MAX_SERVER_NAME];
-  CHAR szUserid[MAX_USERID];
-  TIME_L lTime;
-  CHAR szSourceLanguage[MAX_LANG_LENGTH];
+  TIME_L lTime;  
   BYTE bMajorVersion;
   BYTE bMinorVersion;
+  CHAR szName[_TMX_SIGN_SZ_NAME];
+  CHAR szSourceLanguage[MAX_LANG_LENGTH];
   CHAR szDescription[MAX_MEM_DESCRIPTION];
+  CHAR szServer[_TMX_SIGN_SERVER_NAME];
+  CHAR szUserid[MAX_USERID];
+  //CHAR dummmy[9];
 } TMX_SIGN, * PTMX_SIGN;
 
 //table entry structure
@@ -1756,6 +1759,9 @@ typedef struct _TMXDELTM_OUT
   TMX_PREFIX_OUT stPrefixOut;
 } TMX_DELTM_OUT, * PTMX_DELTM_OUT;
 
+
+//#define PROP_NTM_SZ_FULL_MEM_NAME_SIZE MAX_EQF_PATH
+#define PROP_NTM_SZ_FULL_MEM_NAME_SIZE 54
 /**********************************************************************/
 /* TM property structure                                              */
 /**********************************************************************/
@@ -1764,7 +1770,7 @@ typedef struct _PROP_NTM
   PROPHEAD stPropHead;
   TMX_SIGN stTMSignature;
   CHAR     szNTMMarker[sizeof(NTM_MARKER)];
-  CHAR     szFullMemName[MAX_EQF_PATH];
+  CHAR     szFullMemName[PROP_NTM_SZ_FULL_MEM_NAME_SIZE];
   USHORT   usThreshold;
   USHORT   usLocation;
   CHAR     szLongName[MAX_LONGFILESPEC];

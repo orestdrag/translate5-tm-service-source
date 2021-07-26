@@ -700,7 +700,7 @@ EQFNTMInsert
     RetryCount = MAX_RETRY_COUNT;
     do
     {
-      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PSZ_W) pulKey, pData, ulLen );
+      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PUSHORT) pulKey, pData, ulLen );
       if ( sRc == BTREE_IN_USE )
       {
         RetryCount--;
@@ -844,7 +844,7 @@ EQFNTMUpdate
 SHORT QDAMDictExactLocal
 (
    PBTREE pBTIda,                      // pointer to btree struct
-   PCHAR_W pKey,                       // key to be searched for
+   PUSHORT pKey,                       // key to be searched for
    PBYTE  pchBuffer,                   // space for user data
    PULONG pulLength,                   // in/out length of returned user data
    USHORT usSearchSubType              // special hyphenation lookup flag
@@ -901,7 +901,9 @@ SHORT QDAMDictExactLocal
                  }
                  else
                  {
+                   #ifdef TEMPORARY_COMMENTED
                    UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+                   #endif
                  } /* endif */
                  recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )
@@ -975,7 +977,9 @@ SHORT QDAMDictExactLocal
                  }
                  else
                  {
+                   #ifdef TEMPORARY_COMMENTED
                    UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+                   #endif
                  } /* endif */
                  recData = QDAMGetrecData_V2( pRecord, i, pBT->usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )
@@ -1075,7 +1079,8 @@ EQFNTMGet
 
       //LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
       //#ifdef TEMPORARY_COMMENTED
-      sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      //sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PUSHORT) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
       //#endif 
 
       pBT->fCorrupted = fCorrupted;

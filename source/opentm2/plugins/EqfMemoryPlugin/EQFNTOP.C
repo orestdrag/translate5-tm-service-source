@@ -144,7 +144,8 @@ USHORT TmtXOpen
         MemConvertMem( pTmOpenIn->stTmOpen.szDataName );
         usRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName, (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE), &pTmClb->pstTmBtree );
         usLen = sizeof( TMX_SIGN );
-        if ( !usRc1 ) usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
+        if ( !usRc1 ) 
+            usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
       } /* endif */
 
       if ( usRc == NO_ERROR )
