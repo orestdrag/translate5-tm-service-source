@@ -1295,7 +1295,7 @@ USHORT UtlChgFilePtrHwnd
      pNewOffset = new LONG;
      *pNewOffset = *pulNewOffset;
    }
-
+  
   SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
 
   if(pulNewOffset){

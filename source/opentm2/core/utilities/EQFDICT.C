@@ -1288,7 +1288,11 @@ SHORT QDAMAllocTempAreas
     HeadRecord.Flags.f16kRec  = FALSE;
   } /* endif */
 
+  LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMWriteHeader::UtlChgFilePtr, don't need to use that on linux");
+  //#ifdef TEMPORARY_COMMENTED
   sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
+  //#endif
+  //TruncateFileForBytes(pBT->fp, 0);
 
   if ( ! sRc )
   {
@@ -4192,6 +4196,8 @@ PUSHORT QDAMGetszKey_V3
    if ( usVersion >= NTM_VERSION2 )
    {
       step = sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
+      LogMessage(WARNING, "TEMPORARY HARDCODED in QDAMGetszKey_V3:: step /= 2;//in windows this structure takes 8 bytes, but on linux 16");
+      step /= 2;//in windows this structure takes 8 bytes, but on linux 16
    }
    else
    {
@@ -4208,15 +4214,15 @@ PUSHORT QDAMGetszKey_V3
    }
    else
    {
-     LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
-     pData = pRecord->contents.uchData + *pusOffset ;/*+ step;//*/
+     //LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
+     pData = pRecord->contents.uchData + (*pusOffset) + step ;
      
+     LogMessage2(DEBUG, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
        LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", intToA((long int)pusOffset),
              "; pEndOfRec = ", intToA((long int)pEndOfRec));
-       LogMessage2(ERROR, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
        pData = NULL;
        //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
      } /* endif */
@@ -4241,11 +4247,25 @@ RECPARAM  QDAMGetrecData_V3
    pusOffset = (PUSHORT) pRecord->contents.uchData;
    pusOffset += sMid;                            // point to key
    pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-   pData += sizeof(USHORT );                    // get pointer to datarec
+   LogMessage(WARNING, "TEMPORARY_COMMENTED pData += sizeof(USHORT );                    // get pointer to datarec");
+   //pData += sizeof(USHORT );                    // get pointer to datarec
 
+   char buff[256];
    if ( usVersion >= NTM_VERSION2 )
    {
-     memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM ) );
+     memcpy(buff, pData, 255);
+     memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM) );
+
+     memcpy( &recData.usNum, (PUSHORT) pData, sizeof(USHORT ) );
+     memcpy( &recData.usOffset, (PUSHORT) (pData+2), sizeof(USHORT ) );
+     //memcpy( &recData.ulLen, (PULONG) (pData+4), sizeof(PULONG ) );
+     //memcpy( &recData.ulLen, (PULONG) (pData+8), sizeof(PULONG ) );
+     //memcpy( &recData.ulLen, pData+4, sizeof(PULONG ) );
+     //memcpy( &recData.ulLen, pData+4, sizeof(PUINT ) );
+     recData.ulLen = *(PUINT (pData+4));
+     //recData.ulLen = *(PUINT (pData+8));
+     //recData.ulLen = *(PUINT (pData+8));
+     //recData.ulLen = *(PULONG(pData+4));
    }
    else
    {
@@ -5006,16 +5026,18 @@ SHORT QDAMLocateKey_V3
     BTREELOCKRECORD( pRecord );
     sHigh = (SHORT) pRecord->contents.header.usOccupied -1 ;      // counting starts at zero
     sLow = 0;                                    // start here
-
-    LogMessage2(INFO, "QDAMLocateKey_V3:: sHigh = ", (intToA(sHigh)));
     
     while ( !fFound && sLow <= sHigh )
     {
+
+       LogMessage4(DEBUG, "QDAMLocateKey_V3:: sLow = ",intToA(sLow),", sHigh = ", (intToA(sHigh)));
        sMid = (sLow + sHigh)/2;
        pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
-
+       LogMessage4(DEBUG, "found key = ", intToA(*pKey2),", searched for = ", intToA(*pKey));
        if ( pKey2 )
        {
+         LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMLocateKey_V3::pBT->compare");
+         #ifdef TEMPORARY_COMMENTED
           sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
           if ( sResult < 0 )
           {
@@ -5026,7 +5048,12 @@ SHORT QDAMLocateKey_V3
             sLow = sMid+1;                           // Go right
           }
           else
-          {
+          #endif
+          if( (*pKey) < (*pKey2) ){
+            sHigh = sMid - 1;
+          }else if(  (*pKey) > (*pKey2) ){
+            sLow = sMid+1; 
+          }else{
              fFound = TRUE;
              // if exact match is required we have to do a strcmp
              // to ensure it and probably check the previous or the
@@ -5038,7 +5065,11 @@ SHORT QDAMLocateKey_V3
              /*********************************************************/
              if ( pBT->fTransMem )
              {
-               if (*((PULONG)pKey) == *((PULONG)pKey2))
+               ULONG pk1 = *((PULONG)pKey);
+               ULONG pk2 = *((PULONG)pKey2);
+               //if (*((PULONG)pKey) == *((PULONG)pKey2))
+               LogMessage(WARNING, "TEMPORARY HARDCODED //if (*((PULONG)pKey) == *((PULONG)pKey2)) => if (*(pKey) == *(pKey2))");
+               if (*(pKey) == *(pKey2))
                {
                   *psKeyPos = sMid;
                }
@@ -5216,7 +5247,7 @@ SHORT QDAMLocateKey_V3
     {
       *psNearPos = sLow < (SHORT)OCCUPIED(pRecord)-1 ? sLow : (SHORT)OCCUPIED(pRecord)-1 ;// set nearest pos
     } /* endif */
-    BTREEUNLOCKRECORD( pRecord );
+    BTREEUNLOCKRECORD( pRecord );  
   } /* endif */
 
    if ( sRc )
@@ -6014,7 +6045,9 @@ SHORT QDAMGetszData_V3
    // get size of record length field
    if ( pBT->usVersion >= NTM_VERSION2 )
    {
-     usLenFieldSize = sizeof(ULONG);
+     LogMessage(WARNING,"TEMPORARY_COMMENTED //usLenFieldSize = sizeof(ULONG);");
+     //usLenFieldSize = sizeof(ULONG);
+     usLenFieldSize = sizeof(UINT);
    }
    else
    {
@@ -8774,7 +8807,7 @@ SHORT QDAMDictUpdSignLocal
   LONG    lFilePos;                    // file position to position at
   ULONG   ulNewOffset;                 // new offset
   PBTREEGLOB  pBT = pBTIda->pBTree;
-
+  int writingPosition = 0;
   if ( pBT->fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
@@ -8786,8 +8819,10 @@ SHORT QDAMDictUpdSignLocal
   else
   {
      // let 2K at beginning as space
-     lFilePos = (LONG) USERDATA_START;
-     sRc = UtlChgFilePtr( pBT->fp, lFilePos, FILE_BEGIN,
+     writingPosition = (LONG) USERDATA_START;
+
+     
+     sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
                           &ulNewOffset, FALSE);
   } /* endif */
 
@@ -8820,6 +8855,7 @@ SHORT QDAMDictUpdSignLocal
          USHORT usDataLen = (USHORT)ulDataLen;
          sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
+         writingPosition += usBytesWritten;
        }
 
        // check if disk is full
@@ -8839,8 +8875,12 @@ SHORT QDAMDictUpdSignLocal
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
+         sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+                          &ulNewOffset, FALSE);
           sRc = UtlWrite( pBT->fp, pUserData, (USHORT)ulDataLen,
                           &usBytesWritten, FALSE );
+          
+          writingPosition += usBytesWritten;
           // check if disk is full
           if ( ! sRc )
           {
@@ -8857,6 +8897,9 @@ SHORT QDAMDictUpdSignLocal
     } /* endif */
     if ( ! sRc )
     {
+      LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
+      LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMDictUpdSignLocal:: fill rest up with zeros => don't need to do that"); 
+      #ifdef TEMPORARY_COMMENTED
        // fill rest up with zeros
        if ( pBT->bRecSizeVersion == BTREE_V3 )
        {
@@ -8869,7 +8912,10 @@ SHORT QDAMDictUpdSignLocal
        UtlAlloc( (PVOID *)&pchBuffer, 0L, (LONG) ulDataLen, NOMSG );
        if ( pchBuffer )
        {
+          sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+                          &ulNewOffset, FALSE);
           sRc = UtlWrite( pBT->fp, pchBuffer, (USHORT)ulDataLen, &usBytesWritten, FALSE );
+          writingPosition += usBytesWritten;
           // check if disk is full
           if ( ! sRc )
           {
@@ -8889,6 +8935,7 @@ SHORT QDAMDictUpdSignLocal
        {
           sRc = BTREE_NO_ROOM;
        } /* endif */
+      #endif
     } /* endif */
   } /* endif */
 

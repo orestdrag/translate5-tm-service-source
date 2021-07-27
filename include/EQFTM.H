@@ -1402,13 +1402,14 @@ typedef struct _TMX_PREFIX_OUT
 //======================================================
 typedef struct _TMX_CREATE
 {
+  USHORT usThreshold;
   CHAR szDataName[MAX_EQF_PATH];
   CHAR szIndexName[MAX_EQF_PATH];
+  CHAR szSourceLanguage[MAX_LANG_LENGTH];
+  CHAR szDescription[MAX_DESCRIPTION];
+  //TODO: check if we need that in Linux
   CHAR szServer[MAX_SERVER_NAME];
   CHAR szUserid[MAX_USERID];
-  CHAR szSourceLanguage[MAX_LANG_LENGTH];
-  USHORT usThreshold;
-  CHAR szDescription[MAX_DESCRIPTION];
 } TMX_CREATE, * PTMX_CREATE;
 
 typedef struct _TMX_CREATE_IN

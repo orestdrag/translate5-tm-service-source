@@ -912,6 +912,7 @@ SHORT QDAMDictExactLocal
                  }
                  else if ( *pulLength < recData.ulLen )
                  {
+                   LogMessage4(ERROR, "BTREE_BUFFER_SMALL, pulLength = ", intToA(*pulLength), "; recData.ulLen = ", intToA(recData.ulLen));
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;
                  }

@@ -216,6 +216,7 @@ typedef unsigned int UHALF_PTR;
 typedef UHALF_PTR *PUHALF_PTR;
 
 typedef unsigned long ULONG;
+//typedef unsigned int ULONG;
 typedef ULONG *PULONG;
 typedef ULONGLONG *PULONGLONG;
 typedef ULONG_PTR *PULONG_PTR;

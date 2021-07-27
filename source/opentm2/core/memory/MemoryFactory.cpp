@@ -415,7 +415,8 @@ OtmMemory *MemoryFactory::createMemory
   this->iLastError = 0;
   LogMessage2(INFO, "Create memory ", pszMemoryName);
 
-  if ( piErrorCode != NULL ) *piErrorCode = 0;
+  if ( piErrorCode != NULL ) 
+      *piErrorCode = 0;
 
   pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 

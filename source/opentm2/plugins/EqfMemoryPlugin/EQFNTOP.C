@@ -208,7 +208,8 @@ USHORT TmtXOpen
           usTempRc = NTMLoadNameTable( pTmClb, LANG_KEY,
                                        (PBYTE *)&pTmClb->pLanguages, &ulLen );
 
-          if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
+          if ( usTempRc == BTREE_READ_ERROR ) 
+              usTempRc = BTREE_CORRUPTED;
           if ( pTmClb->pLanguages == NULL )
           {
             usTempRc = TM_FILE_SCREWED_UP; // cannot continue if no languages

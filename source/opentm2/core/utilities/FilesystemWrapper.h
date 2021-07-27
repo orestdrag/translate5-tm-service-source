@@ -155,6 +155,8 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
     int GetFileId(HFILE ptr);
 
     int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes);
+
+    int TruncateFileForBytes(HFILE ptr, int numOfBytes);
 }
 
 

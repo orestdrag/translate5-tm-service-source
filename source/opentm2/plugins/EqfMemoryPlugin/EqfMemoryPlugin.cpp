@@ -117,6 +117,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
 
+  strMemPath = FilesystemHelper::FixPath(strMemPath);
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
 
@@ -1061,7 +1062,8 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
   }
   // build short name
   ObjLongToShortNameEx2( pszName, EOS, szShortName, TM_OBJECT, &ObjState, fReserve, &fReserved );
-  if ( pfReserved != NULL ) *pfReserved = fReserved;
+  if ( pfReserved != NULL ) 
+      *pfReserved = fReserved;
 
   if(!FilesystemHelper::FindFiles(pathName).empty()){
     fOK = MemCreatePath( (char*) pathName.c_str() );

@@ -243,14 +243,30 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
         *HiPart = 0 ;
 
     //int res = 0;
-    if(LoPart== 0){
-        return true;
-    }if(OffSet == FILE_BEGIN){           
+    //if(LoPart== 0){
+   //     return true;
+    //}
+    if(OffSet == FILE_BEGIN){           
+        int size = FilesystemHelper::GetFileSize(fp);
+        if(size < LoPart){
+
+            LogMessage2(WARNING, "File is smaller than requested position -> writing, fname = ", 
+                    FilesystemHelper::GetFileName(fp).c_str());
+            TruncateFileForBytes(fp, LoPart);
+            //res = lseek(fp->_fileno, LoPart-1, SEEK_SET);
+            //int writeRes = FilesystemHelper::WriteToFile(fp,"\0",1);
+
+        }else{
+            //res = lseek(fp->_fileno, LoPart, SEEK_SET);
+        }
         //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
         //res = lseek(*((int*)fp), LoPart, SEEK_SET);
-        int fildes = fileno(fp);
-        res = lseek(fildes, LoPart, SEEK_SET);
+        //int fildes = fileno(fp);
+        //res = lseek(fildes, LoPart, SEEK_SET);
         //fp->_IO_read_ptr = fp->_IO_read_ptr + LoPart;
+        int fno = fileno(fp);
+        res = lseek(fno, LoPart, SEEK_SET);        
+
     }else if(OffSet == FILE_CURRENT){
         //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_CUR);
         LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
@@ -262,6 +278,7 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
     }
     
     if(res >= 0){
+        fp->_offset = LoPart;
         LARGE_INTEGER li ;
         li.QuadPart = res ; //It will move High & Low Order bits.
         ret = li.LowPart ;
@@ -411,5 +428,12 @@ BOOL SetFilePointerEx(
             int readed = 0;
             FilesystemHelper::ReadFile(ptr, dummy, numOfBytes, readed);
             return readed != 1;
+        }
+
+        int TruncateFileForBytes(HFILE ptr, int numOfBytes){
+            LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", intToA(numOfBytes));
+            off_t lDistance = numOfBytes;
+            int retCode = ftruncate(ptr->_fileno, lDistance);
+            return retCode;
         }
 //}
