@@ -405,7 +405,9 @@ USHORT EqfStartSession
       UtlSetString( QST_COMMEMDIR,    pPropSys->szDirComMem );
       UtlSetString( QST_COMPROPDIR,   pPropSys->szDirComProp );
       UtlSetString( QST_COMDICTDIR,   pPropSys->szDirComDict );
+      #ifdef TEMPORARY_COMMENTED
       UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );
+      #endif
       UtlSetString( QST_DIRSEGNOMATCHDIR, "SNOMATCH" );
       UtlSetString( QST_MTLOGPATH,    "MTLOG" );
       UtlSetString( QST_DIRSEGMTDIR, "MT" );
@@ -765,8 +767,10 @@ USHORT EqfMemoryExists
     {
       BOOL fIsNew = FALSE;
       CHAR szShortName[MAX_FILESPEC];
-
+     
+      #ifdef TEMPORARY_COMMENTED
       ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);
+      #endif
       if ( fIsNew )
       {
         PSZ pszParm = pszMemoryName;

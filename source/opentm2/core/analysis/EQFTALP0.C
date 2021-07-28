@@ -292,7 +292,9 @@ BOOL   LPInit (
             fIsNew = FALSE;                   // is-new flag
             memset( szDictShortName, 0, sizeof(szDictShortName) );
             ANSITOOEM(pID);
+            #ifdef TEMPORARY_COMMENTED
             ObjLongToShortName( pID, szDictShortName, DICT_OBJECT, &fIsNew );
+            #endif
             OEMTOANSI(pID);
              pszTemp1 = (PSZ)(pDictProp->szDictPropName [i]);
              sprintf (pszTemp1,
@@ -450,7 +452,9 @@ BOOL   LPInit (
                pszTemp1 = (PSZ)(pDictProp->szDictPropName [0]);  // prepare properties
                memset( szShortName, 0, sizeof(szShortName) );
                ANSITOOEM(pTAInput->szExclDictname);
+               #ifdef TEMPORARY_COMMENTED
                ObjLongToShortName( pTAInput->szExclDictname, szShortName, DICT_OBJECT, &fIsNew );
+               #endif
                OEMTOANSI(pTAInput->szExclDictname);
                sprintf( pszTemp1, PATHCATFILECATEXTENSION, szPropPath, szShortName, EXT_OF_DICTPROP);
                pDictProp->pszDictProp [0] = pszTemp1;      // store pointer in array
@@ -534,7 +538,9 @@ BOOL   LPInit (
               pszTemp1 = (PSZ)(pDictProp->szDictPropName[0]);  // prepare properties
               strcpy( pszTemp1, (PSZ)szPropPath );
               strcat( pszTemp1, BACKSLASH_STR );
+              #ifdef TEMPORARY_COMMENTED
               ObjLongToShortName( pTAInput->szOutDictName, pszTemp1 + strlen(pszTemp1), DICT_OBJECT, &fIsNew );
+              #endif
               strcat( pszTemp1, EXT_OF_DICTPROP);
               pDictProp->pszDictProp[0] = pszTemp1; // store pointer in array
             } /* endif */

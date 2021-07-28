@@ -524,7 +524,9 @@ USHORT CntBatchCount
    /*******************************************************************/
    if ( fOK )
    {
+     #ifdef TEMPORARY_COMMENTED
      ObjLongToShortName( pWrdCnt->szFolder, szShortName, FOLDER_OBJECT, &fIsNew );
+     #endif
      if ( fIsNew )
      {
        fOK = FALSE;
@@ -1092,8 +1094,10 @@ USHORT CntFuncPrepCount
          strcpy( pData->szObjName, pszFolderName );
          pszDelim = strchr( pData->szObjName, BACKSLASH );
          if ( pszDelim ) *pszDelim = EOS;
+         #ifdef TEMPORARY_COMMENTED
          ObjLongToShortName( pData->szObjName, szShortName, FOLDER_OBJECT, &fIsNew );
-
+         #endif
+         
          // store main folder object name in count area
          if ( !fIsNew ) 
          { 

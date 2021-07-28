@@ -117,7 +117,6 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
 
-  strMemPath = FilesystemHelper::FixPath(strMemPath);
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
 
@@ -482,8 +481,11 @@ int EqfMemoryPlugin::renameMemory(
     // get new short name for memory
     BOOL fIsNew = FALSE;
     char szShortName[MAX_FILESPEC];
-
+    
+    #ifdef TEMPORARY_COMMENTED
     ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
+    #endif
+
     if ( !fIsNew ) return( OtmMemory::ERROR_MEMORYEXISTS );
 
     // get memory property file name
@@ -536,6 +538,8 @@ int EqfMemoryPlugin::renameMemory(
     ULONG ulRead = 0;
     if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
     {
+      
+      #ifdef TEMPORARY_COMMENTED
          // adjust name in property header
       strcpy( pstMemProp->stPropHead.szName, szShortName );
       strcat( pstMemProp->stPropHead.szName, EXT_OF_TMPROP );
@@ -550,8 +554,10 @@ int EqfMemoryPlugin::renameMemory(
         pstMemProp->szLongName[0] = EOS;
       } /* endif */
 
+
       // adjust fully qualified TM name
       strcpy( pstMemProp->szFullMemName, pMemInfo->szFullPath );
+      #endif 
 
       // update name in signature structure
       strcpy( pstMemProp->stTMSignature.szName, szShortName );
@@ -1046,31 +1052,26 @@ USHORT registerPlugins()
 */
 BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &strPathName, BOOL fReserve, PBOOL pfReserved )
 {
-  char szShortName[MAX_FILESPEC];
-  char szPathName[MAX_LONGFILESPEC];
-  std::string pathName = "";
   BOOL fOK = FALSE;
   OBJLONGTOSHORTSTATE ObjState;
-  BOOL fReserved = FALSE;
 
-  {
+  CreateMemFile( pszName , &ObjState);
+
+  if ( pfReserved != NULL ) 
+      *pfReserved = ObjState == OBJ_IS_NEW;
+
+  if ( ObjState == OBJ_IS_NEW ){
       char buff[255];
       properties_get_str(KEY_MEM_DIR, buff, 255);
-      pathName = buff;
-      
-      pathName += "/" + std::string(pszName) + EXT_OF_TMDATA;
+      strPathName = buff;      
+      strPathName += "/" + std::string(pszName) + EXT_OF_TMDATA;
+      fOK = true;
+  }else{
+    strPathName = pszName;
+    fOK = MemCreatePath( (char*) strPathName.c_str() );
   }
-  // build short name
-  ObjLongToShortNameEx2( pszName, EOS, szShortName, TM_OBJECT, &ObjState, fReserve, &fReserved );
-  if ( pfReserved != NULL ) 
-      *pfReserved = fReserved;
-
-  if(!FilesystemHelper::FindFiles(pathName).empty()){
-    fOK = MemCreatePath( (char*) pathName.c_str() );
-  }
-  // call path create function and set result string
-     
-  strPathName = pathName;
+  
+  strPathName = FilesystemHelper::FixPath(strPathName);
 
   return( fOK );
 }
@@ -1097,22 +1098,38 @@ BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathN
     // fill properties file
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
+    
+     #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
+    #endif 
+
+
+    #ifdef TEMPORARY_COMMENTED
     Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
+    #endif
 
+    #ifdef TEMPORARY_COMMENTED
+
+    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
+    #endif
+
+     #ifdef TEMPORARY_COMMENTED
     //in case of overflow. change these strcpy to strncpy
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
+    #endif
+    #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
+    #endif
     strncpy( pProp->stTMSignature.szDescription, 
              pszDescription, 
              sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
     strncpy( pProp->stTMSignature.szSourceLanguage, pszSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
-
+    #ifdef TEMPORARY_COMMENTED
     strcpy( pProp->stTMSignature.szUserid, "" );
+    #endif
     pProp->stTMSignature.bMajorVersion = TM_MAJ_VERSION;
     pProp->stTMSignature.bMinorVersion = TM_MIN_VERSION;
     strcpy( pProp->szNTMMarker, NTM_MARKER );
@@ -1155,21 +1172,35 @@ BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathN
     // fill properties file
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
+
+    #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
-    Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
-    strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
+    #endif 
 
+    #ifdef TEMPORARY_COMMENTED
+    Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
+    #endif 
+
+    strcat( pProp->stPropHead.szName, EXT_OF_MEM );
+    #ifdef TEMPORARY_COMMENTED
+    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
+    #endif
     //in case of overflow. change these strcpy to strncpy
+     #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
+    //#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
+    #endif
     strncpy( pProp->stTMSignature.szDescription, pOldProp->stTMSignature.szDescription, 
              sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
     strncpy( pProp->stTMSignature.szSourceLanguage, pOldProp->stTMSignature.szSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
 
+    #ifdef TEMPORARY_COMMENTED
     strcpy( pProp->stTMSignature.szUserid, pOldProp->stTMSignature.szUserid );
+    #endif
+
     pProp->stTMSignature.bMajorVersion = pOldProp->stTMSignature.bMajorVersion;
     pProp->stTMSignature.bMinorVersion = pOldProp->stTMSignature.bMinorVersion;
     strcpy( pProp->szNTMMarker, NTM_MARKER );
@@ -1597,8 +1628,11 @@ int EqfMemoryPlugin::addMemoryToList(PSZ pszName, CHAR chDrive)
     // already exist, just return
     if( findMemory(pszName) != NULL)
         return -1;
-
+    
+    #ifdef TEMPORARY_COMMENTED
     ObjLongToShortName( pszName, szShortName, TM_OBJECT, &fIsNew );
+    #endif
+
     // only could be added when its property exists
     if(!fIsNew)
     {

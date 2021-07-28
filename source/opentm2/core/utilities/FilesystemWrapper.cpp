@@ -21,6 +21,11 @@ char* filesystem_get_home_dir() {
     return pDir;
 }
 
+int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
+    ptr = FilesystemHelper::OpenFile(path, mode);
+    return ptr == NULL;
+}
+
   //HANDLE
   HFILE CreateFile(  LPCSTR                lpFileName,
                         DWORD                 dwDesiredAccess,

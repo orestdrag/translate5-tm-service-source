@@ -9,6 +9,9 @@ char * filesystem_get_otm_dir();
 
 char * filesystem_get_home_dir();
 
+int filesystem_open_file(const char* path, FILE*& ptr, const char* mode);
+
+
 const int 
   GENERIC_READ            = 0x80000000,
   GENERIC_WRITE           = 0x40000000,

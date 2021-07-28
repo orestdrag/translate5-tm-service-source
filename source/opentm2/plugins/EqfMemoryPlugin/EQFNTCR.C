@@ -254,8 +254,6 @@ USHORT TmtXCreate
 
     //fill signature record structure
     strcpy( pTmClb->stTmSign.szName, pszName );
-    strcpy( pTmClb->stTmSign.szServer, pTmCreateIn->stTmCreate.szServer );
-    strcpy( pTmClb->stTmSign.szUserid, pTmCreateIn->stTmCreate.szUserid );
     UtlTime( &(pTmClb->stTmSign.lTime) );
     strcpy( pTmClb->stTmSign.szSourceLanguage,
             pTmCreateIn->stTmCreate.szSourceLanguage );

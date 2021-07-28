@@ -1340,7 +1340,9 @@ USHORT TAFuncPrepArchTM
           PSZ pszDelim;
           pszDelim = strchr( szFolderName, BACKSLASH );
           if ( pszDelim ) *pszDelim = EOS;
+          #ifdef TEMPORARY_COMMENTED
           ObjLongToShortName( szFolderName, szFolShortName, FOLDER_OBJECT, &fIsNew );
+          #endif
           if ( pszDelim ) *pszDelim = BACKSLASH;
         } /* endif */
 

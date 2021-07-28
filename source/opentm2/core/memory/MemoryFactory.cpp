@@ -423,9 +423,9 @@ OtmMemory *MemoryFactory::createMemory
   {
     // use first available memory plugin for the new memory
     pluginSelected = (*pluginList)[0];
-	// reset the iLastError
-	// because the flag can be set in findPlugin if not plug exist
-	this->iLastError = 0;
+	  // reset the iLastError
+	  // because the flag can be set in findPlugin if not plug exist
+	  this->iLastError = 0;
   } /* endif */
 
   if ( pluginSelected == NULL )
@@ -447,26 +447,15 @@ OtmMemory *MemoryFactory::createMemory
        LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
     }
   }
-  else   if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
-  {
-    pMemory = ((OtmSharedMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, chDrive, NULL, NULL );
-    if ( pMemory == NULL )
-    {
-      this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-      LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
-    
-    }
-    else if ( (pszOwner != NULL) && (*pszOwner != EOS) ) 
-    {
-      LogMessage5(DEBUG, "MemoryFactory::createMemory()::setOwner(",strMemoryName.c_str(), ", owner = ", pszOwner,")");
-      ((OtmSharedMemoryPlugin *)pluginSelected)->setOwner( (char *)strMemoryName.c_str(), pszOwner );
-    }
+  else{
+    LogMessage(FATAL,"MemoryFactory::createMemory, plugin type is not supported");
   }
 
   if ( pMemory == NULL)
   {
     LogMessage2(ERROR, "Create failed, with message ", this->strLastError.c_str());
-    if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
+    if ( piErrorCode != NULL ) 
+        *piErrorCode = this->iLastError;
   }
   else if ( !bInvisible )
   {
@@ -482,9 +471,10 @@ OtmMemory *MemoryFactory::createMemory
     }else{
       LogMessage(ERROR, "MemoryFactory::createMemory::pszObjName == NULL");
     }
-    LogMessage(INFO, "Create successful ");
   } /* endif */     
-
+  
+  if(pMemory)
+    LogMessage(INFO, "Create successful ");
   return( pMemory );
 }
 

@@ -1256,6 +1256,7 @@ SHORT QDAMAllocTempAreas
   // DataRecList in header is in old format (RECPARAMOLD),
   // so convert in-memory copy of list (in the RECPARAM format) to
   // the old format
+  LogMessage(INFO, "TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
   {
     int i;
     for ( i = 0; i < MAX_LIST; i++ )
@@ -1288,11 +1289,7 @@ SHORT QDAMAllocTempAreas
     HeadRecord.Flags.f16kRec  = FALSE;
   } /* endif */
 
-  LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMWriteHeader::UtlChgFilePtr, don't need to use that on linux");
-  //#ifdef TEMPORARY_COMMENTED
   sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
-  //#endif
-  //TruncateFileForBytes(pBT->fp, 0);
 
   if ( ! sRc )
   {
@@ -3314,8 +3311,15 @@ SHORT QDAMDictCreateLocal
     pBTIda->pBTree = pBT;          // anchor pointer
 
     // Try to create the index file
-    sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
-                   OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
+    sRc = filesystem_open_file(pName, pBT->fp, "w+");
+    if(pBT->fp){
+      CloseFile(&(pBT->fp));
+      sRc = filesystem_open_file(pName, pBT->fp, "r+b");
+    }else{
+      LogMessage2(ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
+    }
+    //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
+    //               OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
   } /* endif */
 
   if ( !sRc )
@@ -3337,24 +3341,16 @@ SHORT QDAMDictCreateLocal
     strcpy(pBT->chFileName, pName);              // copy file name into struct
     pBT->fTransMem = fTransMem;
     pBT->fpDummy = NULLHANDLE;
-    if ( pBT->fTransMem )
-    {
-      pBT->bVersion = BTREE_V2;
-      pBT->bRecSizeVersion = BTREE_V3;
-      pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
-    }
-    else
-    {
-      pBT->bVersion = BTREE_V2;
-      pBT->bRecSizeVersion = BTREE_V2;
-      pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
-    } /* endif */
 
     /******************************************************************/
     /* do settings depending if we are dealing with a dict or a tm..  */
     /******************************************************************/
     if ( !fTransMem )
     {
+      pBT->bVersion = BTREE_V2;
+      pBT->bRecSizeVersion = BTREE_V2;
+      pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
+
       pBT->usVersion = BTREE_VERSION3;
       strcpy(pBT->chEQF,BTREE_HEADER_VALUE_V3);
       // use passed compression table if available else use default one
@@ -3407,6 +3403,9 @@ SHORT QDAMDictCreateLocal
     }
     else
     {
+      pBT->bVersion = BTREE_V2;
+      pBT->bRecSizeVersion = BTREE_V3;
+      pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
       pBT->usVersion = NTM_VERSION2;
       strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
       if ( pTermTable )
@@ -8853,6 +8852,8 @@ SHORT QDAMDictUpdSignLocal
        /*************************************************************/
        {
          USHORT usDataLen = (USHORT)ulDataLen;
+         sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+                          &ulNewOffset, FALSE);
          sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
          writingPosition += usBytesWritten;

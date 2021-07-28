@@ -1296,10 +1296,12 @@ USHORT UtlChgFilePtrHwnd
      *pNewOffset = *pulNewOffset;
    }
   
-  SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
+  hf->_offset = lOffset;
+  //SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
 
   if(pulNewOffset){
-     *pulNewOffset = *pNewOffset;
+     //*pulNewOffset = *pNewOffset;
+     *pulNewOffset = lOffset;
    }
 /*
    liOffset.LowPart = lOffset;

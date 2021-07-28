@@ -1263,6 +1263,75 @@ BOOL ObjLockTable_WaitWhenUpdated( PFUNCIF_LOCK_TABLE pLockTable )
   return( fTimeOut );
 } /* end of function ObjLockTable_Search */
 
+
+
+USHORT CreateMemFile
+(
+  PSZ         pszName,             // ptr to object long name
+  POBJLONGTOSHORTSTATE pObjState      // ptr to buffer for returned object state
+)
+{
+  CHAR      szFullMemPath[MAX_EQF_PATH];   // object path
+  // local variables
+  PSZ         pszOrgName = pszName; // original start of long name
+  USHORT      usRC = NO_ERROR;         // function return code
+  OBJLONGTOSHORTSTATE  ObjState = OBJ_IS_NEW;  // local copy of caller's object state buffer
+  ULONG   ulCP =  GetCodePage( OEM_CP );       // use CP of installed OS
+
+  // ignore any leading blanks
+  while ( *pszOrgName == ' ' ) pszOrgName++;
+
+  // setup search path and path of full object name depending on object type
+  if ( usRC == NO_ERROR )
+  {
+        properties_get_str(KEY_MEM_DIR, szFullMemPath, MAX_EQF_PATH);
+        strcat( szFullMemPath, BACKSLASH_STR );
+        strcat( szFullMemPath, pszOrgName );
+        strcat( szFullMemPath, ".MEM" );
+  }
+
+  // look for objects having the same short name
+  if ( usRC == NO_ERROR )
+  {
+    USHORT usDosRC = NO_ERROR;         // return code of called DOS functions
+    BOOL   fOK;
+    HANDLE hMutexSem = NULL;
+
+    //GETMUTEX(hMutexSem);
+    if(FilesystemHelper::FindFiles(szFullMemPath).empty()){
+      ObjState = OBJ_IS_NEW;
+    }else{
+      ObjState = OBJ_EXISTS_ALREADY;
+    }
+  }
+  // find a unique name if document is not contained in the folder
+  if ( (usRC == NO_ERROR) && (ObjState == OBJ_IS_NEW)  )
+  {
+    HANDLE hMutexSem = NULL;
+      
+    PPROP_NTM pProp = NULL;
+    if ( UtlAlloc( (PVOID *)&pProp, 0L, sizeof(PROP_NTM ), NOMSG ) )
+    {
+      strcpy( pProp->stPropHead.szName, UtlGetFnameFromPath(szFullMemPath));
+      strcat( pProp->stPropHead.szName, "$_RESERVED");
+      UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
+      //UtlWriteFile( szFullMemPath, strlen(szFullMemPath), (PVOID)szFullMemPath, FALSE );
+
+      UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
+    } /* endif */
+    // release Mutex
+    //RELEASEMUTEX(hMutexSem);
+   
+  } /* endif */
+
+  // return to caller
+  if ( pObjState != NULL ) 
+      *pObjState = ObjState;
+
+  return( usRC );
+}
+
+
 #ifdef TEMPORARY_COMMENTED
 
 USHORT ObjBroadcast
@@ -1284,7 +1353,8 @@ USHORT ObjBroadcast
   return( 0 );
 } /* endif ObjRemoveSymbol */
 
-#endif //TEMPORARY_COMMENTED
+
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -1413,7 +1483,8 @@ USHORT ObjLongToShortNameEx2
         strcat( pData->szSearchPath, BACKSLASH_STR );
         strcpy( pData->szFullPath, pData->szSearchPath );
         strcat( pData->szSearchPath, pszLongName );
-        if ( NameType == LONGNAME ) strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
+        if ( NameType == LONGNAME ) 
+            strcat( pData->szSearchPath, DEFAULT_PATTERN_NAME );
         // GQ: we have to check the properties of local memories (.MEM) and LAN based shared memories (.SLM)
         strcpy( pData->szExt, ".MEM");
         strcat( pData->szSearchPath, pData->szExt );
@@ -1756,15 +1827,16 @@ USHORT ObjLongToShortNameEx2
               PPROP_NTM pProp = NULL;
               if ( UtlAlloc( (PVOID *)&pProp, 0L, sizeof(PROP_NTM ), NOMSG ) )
               {
-                strcpy( pProp->szLongName, pszOrgLongName );
+                LogMessage(WARNING, "TEMPORARY COMMENTED in ObjLongToShortNameEx2");
+                //strcpy( pProp->szLongName, pszOrgLongName );
                 strcpy( pProp->stPropHead.szPath, pData->szSearchPath );
                 strcpy( pProp->stPropHead.szName, UtlSplitFnameFromPath(pProp->stPropHead.szPath) );
-                UtlSplitFnameFromPath( pProp->stPropHead.szPath ); 
 
                 UtlWriteFile( pData->szSearchPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
                 //WritePropFile(pData->szSearchPath, (PVOID)pProp, sizeof(PROP_NTM));
                 UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
-                if ( pfReserved ) *pfReserved = TRUE;
+                if ( pfReserved ) 
+                    *pfReserved = TRUE;
               } /* endif */
             }
             break;
@@ -1785,7 +1857,6 @@ USHORT ObjLongToShortNameEx2
   return( usRC );
 } /* end of function ObjLongToShortNameEx */
 
-#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |

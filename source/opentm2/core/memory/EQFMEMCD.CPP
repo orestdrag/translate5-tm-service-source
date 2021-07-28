@@ -1845,7 +1845,7 @@ LONG        lOptions                 // type of new Translation Memory
   szEmpty[0] = EOS;
   {
     char buff[255];
-    sprintf(buff, "MemFuncCreateMem( pszMemName = %s, pszDescription = %s, pszSourceLanguage = %s",
+    sprintf(buff, "MemFuncCreateMem( pszMemName = %s, pszDescription = %s, pszSourceLanguage = %s )",
           pszMemName, pszDescription, pszSourceLanguage);
     LogMessage(DEBUG, buff);
   }
@@ -1881,56 +1881,6 @@ LONG        lOptions                 // type of new Translation Memory
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
-
-LogMessage(WARNING, "REQUIRED_ONLY_FOR_WINDOWS in MemFuncCreateMem():: Check if target drive is valid");
-#ifdef REQUIRED_ONLY_FOR_WINDOWS
-  // Check if target drive is valid
-  if ( (usRC == NO_ERROR) && (chToDrive != EOS) )
-  {
-    if ( lOptions & SHARED_OPT )
-    {
-      CHAR szLANDrives[MAX_DRIVELIST];   // buffer for LAN drive letters
-
-      // Get LAN drives
-      UtlGetLANDriveList( (PBYTE)szLANDrives );
-
-      // Check if specified target drive is in list of valid drives
-      if ( strchr( szLANDrives, toupper(chToDrive) ) == NULL )
-      {
-        CHAR szDrive[MAX_DRIVE];
-
-        szDrive[0] = chToDrive;
-        szDrive[1] = COLON;
-        szDrive[2] = EOS;
-        pszParm = szDrive;
-        usRC = ERROR_LAN_DRIVE_NOT_VALID;
-        UtlErrorHwnd( usRC, MB_CANCEL, 1,
-                      &pszParm, EQF_ERROR, HWND_FUNCIF );
-      } /* endif */
-    }
-    else
-    {
-      CHAR szEqfDrives[MAX_DRIVELIST];   // buffer for EQF drive letters
-
-      // Get local EQF drives
-      UtlGetCheckedEqfDrives( szEqfDrives );
-
-      // Check if specified target drive is in list of valid drives
-      if ( strchr( szEqfDrives, toupper(chToDrive) ) == NULL )
-      {
-        CHAR szDrive[MAX_DRIVE];
-
-        szDrive[0] = chToDrive;
-        szDrive[1] = COLON;
-        szDrive[2] = EOS;
-        pszParm = szDrive;
-        usRC = ERROR_EQF_DRIVE_NOT_VALID;
-        UtlErrorHwnd( usRC, MB_CANCEL, 1,
-                      &pszParm, EQF_ERROR, HWND_FUNCIF  );
-      } /* endif */
-    } /* endif */
-  } /* endif */
-#endif // 
 
   // check if TM exists already
   if ( usRC == NO_ERROR )
@@ -1971,12 +1921,9 @@ LogMessage(WARNING, "REQUIRED_ONLY_FOR_WINDOWS in MemFuncCreateMem():: Check if 
     {
       // O.K. option is valid
     }
-    else if ( lOptions == SHARED_OPT )
-    {
-      // O.K. option is valid
-    }
     else
     {
+      LogMessage(FATAL, "MemFuncCreateMem supports only local_opt");
       usRC = WRONG_OPTIONS_RC;
       UtlErrorHwnd( ERROR_INTERNAL, MB_CANCEL, 0,
                     NULL, EQF_ERROR, HWND_FUNCIF  );
@@ -1997,7 +1944,8 @@ LogMessage(WARNING, "REQUIRED_ONLY_FOR_WINDOWS in MemFuncCreateMem():: Check if 
     if ( lOptions == SHARED_OPT )
     {
       LogMessage(INFO, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin...");
-      strcpy( szPlugin, "EqfSharedOnLanMemoryPlugin" );
+      LogMessage(FATAL, "MemFuncCreateMem():: we don't support LAN");
+      //strcpy( szPlugin, "EqfSharedOnLanMemoryPlugin" );
     }
     else
     {

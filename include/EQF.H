@@ -5532,10 +5532,10 @@ typedef enum {
 #define PROP_QUIT               0x00
 #define PROP_FILE               0x10
 
-#define _PROPHEAD_SZNAME 13
+//#define _PROPHEAD_SZNAME 13
 //#define _PROPHEAD_SZNAME MAX_FILESPEC
 
-#define _PROPHEAD_SZPATH 144
+#define _PROPHEAD_SZNAME 144
 //#define _PROPHEAD_SZPATH MAX_PATH144
 
 // Structure of properties heading area
@@ -5543,9 +5543,8 @@ typedef struct _PROPHEAD
 {
    USHORT usClass;              // Class name ID of properties
    char chType;                 // Indicator to type of properties
-   char dummy;                  // T=Template, I=Instance, N=New
-   char szName[_PROPHEAD_SZNAME];   // Properties name (= object name)
-   char szPath[_PROPHEAD_SZPATH];    // Path to properties
+   //char dummy;                  // T=Template, I=Instance, N=New
+   char szName[_PROPHEAD_SZNAME];    // Path to properties
 } PROPHEAD, *PPROPHEAD;
 
 // list of internal code versions and current code version
@@ -6653,6 +6652,7 @@ typedef enum _UTLCHECKOBJTYPES
 } UTLCHECKOBJTYPES;
 BOOL UtlCheckIfExist( PSZ pszName, SHORT sObjType );
 
+#ifdef TEMPORARY_COMMENTED
 extern "C" USHORT ObjLongToShortName
 (
   PSZ pszLongName,                     // ptr to object long name
@@ -6666,6 +6666,7 @@ extern "C" USHORT ObjShortToLongName
   PSZ pszLongName,                     // ptr to buffer for long name
   UTLCHECKOBJTYPES ObjType             // type of object
 );
+#endif 
 
 // possible return stated of ObjLongToShortEx function
 typedef enum _OBJLONGTOSHORTSTATE
@@ -6697,7 +6698,11 @@ extern "C" USHORT ObjLongToShortNameEx2
   PBOOL       pfReserved               // points to callers fReserved flag
 );
 
-
+extern "C" USHORT CreateMemFile
+(
+  PSZ         pszName,             // ptr to object long name
+  POBJLONGTOSHORTSTATE pObjState   // ptr to buffer for returned object state
+);
 
 BOOL StartBrowser( PSZ pszUrl );       // start the standard Browser
 VOID EqfDisplayContextHelp( HWND, PHELPSUBTABLE);

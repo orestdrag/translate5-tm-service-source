@@ -573,8 +573,9 @@ USHORT TABatchAnalysis
      DELETEALLHWND( hwndLB );
      {
        BOOL fIsNew;
-
+       #ifdef TEMPORARY_COMMENTED
        ObjLongToShortName( pAnalysis->szFolder, pIda->szFolder, FOLDER_OBJECT, &fIsNew );
+       #endif
        if ( fIsNew )
        {
          fOK = FALSE;
@@ -877,8 +878,10 @@ USHORT TABatchAnalysis
              pTAInput->fInsertNewMatch || pTAInput->fMachTrans )
         {
             BOOL fIsNew = FALSE;
+            #ifdef TEMPORARY_COMMENTED
             ObjLongToShortName( pIda->szMemProp, pTAInput->szOutputMemDb,
                                 TM_OBJECT, &fIsNew );
+            #endif
 
             fOK = (USHORT)EqfSend2Handler( MEMORYHANDLER, WM_EQF_PROCESSTASK,
                                            MP1FROMSHORT( CREATE_PATH ),
@@ -1252,7 +1255,9 @@ USHORT TAFuncPrepAnalysis
          strcpy( pData->szObjName, pszFolderName );
          pszDelim = strchr( pData->szObjName, BACKSLASH );
          if ( pszDelim ) *pszDelim = EOS;
+         #ifdef TEMPORARY_COMMENTED
          ObjLongToShortName( pData->szObjName, szFolShortName, FOLDER_OBJECT, &fIsNew );
+         #endif
        } /* endif */
 
        if ( fIsNew )

@@ -1444,7 +1444,9 @@ BOOL HandleOkButtonAna2
        BOOL fIsNew = FALSE;
        UtlMakeEQFPath( szPropName, NULC, PROPERTY_PATH, NULL );
        strcat( szPropName, BACKSLASH_STR );
+       #ifdef TEMPORARY_COMMENTED
        ObjLongToShortName( pAIda->szAddTermsToDicDd, szPropName + strlen(szPropName), DICT_OBJECT, &fIsNew );
+       #endif
        strcat( szPropName, EXT_OF_DICTPROP );
      } /* endif */
 

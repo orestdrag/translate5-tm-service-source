@@ -5,12 +5,13 @@
 #ifndef INCL_EQF_SETUP
   #define INCL_EQF_SETUP
 //------ macro to initialize the property head area
+/*
 #define SETPROPHEAD( Head, name, class )                      \
   { strcpy( Head.szName, name );                              \
     sprintf( Head.szPath, "%c:\\%s", chPrimaryDrive, PATH );  \
     Head.usClass = class;                                     \
     Head.chType  = PROP_TYPE_INSTANCE; }
-
+//*/
 
 #define PATH           "OTM"           // eqf system directory
 #define CTRLDIR        "CTRL"          // control directory

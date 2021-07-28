@@ -375,8 +375,12 @@ USHORT CreateSystemProperties(PSZ pszPath)
     /******************************************************************/
     /* Fill in property heading area                                  */
     /******************************************************************/
+    
     strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
+    
+    #ifdef TEMPORARY_COMMENTED
     sprintf(pSysProps->PropHead.szPath, "%s", PATH);
+    #endif
     pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
     pSysProps->PropHead.chType  = PROP_TYPE_INSTANCE;
     
@@ -733,8 +737,10 @@ USHORT CreateFolderListProperties
     /******************************************************************/
     if ( !usRC )
     {
+      #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME,
                    PROP_CLASS_FOLDERLIST );
+                   #endif
     } /* endif */
 
 
@@ -752,7 +758,9 @@ USHORT CreateFolderListProperties
 #ifdef _PTM
       pPropFll->Swp.fs |= EQF_SWP_MINIMIZE;
 #endif
+#ifdef TEMPORARY_COMMENTED
       *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
+#endif
     } /* endif */
 
 #ifdef TEMPORARY_COMMENTED
@@ -818,8 +826,10 @@ USHORT CreateImexProperties
     /* Load property heading area                                     */
     /******************************************************************/
     if ( !usRC )
-    {
+    { 
+      #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );
+      #endif
     } /* endif */
 
     /******************************************************************/
@@ -900,8 +910,10 @@ USHORT CreateDictProperties
     /******************************************************************/
     if ( !usRC )
     {
+       #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropDict->PropHead, DICT_PROPERTIES_NAME,
                    PROP_CLASS_DICTLIST );
+                   #endif
     } /* endif */
 
     /******************************************************************/
@@ -997,8 +1009,10 @@ USHORT CreateEditProperties
     /******************************************************************/
     if ( !usRC )
     {
+       #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropEdit->PropHead, EDITOR_PROPERTIES_NAME,
                    PROP_CLASS_EDITOR );
+                   #endif
     } /* endif */
 
     /******************************************************************/
@@ -1815,7 +1829,9 @@ USHORT UpdateFolderProp
    /*******************************************************************/
    if ( !usRC )
    {
+     #ifdef TEMPORARY_COMMENTED
      pFolProp->PropHead.szPath[0] = chDrive;
+     #endif
      pFolProp->chDrive = chDrive;
    } /* endif */
 
@@ -1900,11 +1916,13 @@ USHORT UpdateDocumentProp
                       &usBytesRead, FALSE );
    }
 
+   #ifdef TEMPORARY_COMMENTED
    /*******************************************************************/
    /* copy EQF drive into properties                                  */
    /*******************************************************************/
     if ( !usRC )
       pDocProp->PropHead.szPath[0] = chDrive;
+      #endif
 
    /********************************************************************/
    /* Write property data to disk                                      */
@@ -1993,7 +2011,10 @@ USHORT UpdateDictProp
     {
       pDictProp->szDictPath[0] = chDrive;
       pDictProp->szIndexPath[0] = chDrive;
+      
+     #ifdef TEMPORARY_COMMENTED
       pDictProp->PropHead.szPath[0] = chDrive;
+      #endif
     }
    /********************************************************************/
    /* Write property data to disk                                      */
@@ -2086,12 +2107,17 @@ USHORT UpdateTMProp
       pNTMProp = (PPROP_NTM) pTMProp;
       if ( strcmp( pNTMProp->szNTMMarker, NTM_MARKER) == 0 )
       {
+     #ifdef TEMPORARY_COMMENTED
         pNTMProp->stPropHead.szPath[0] = chDrive;
         pNTMProp->szFullMemName[0] = chDrive;
+        #endif
       }
       else
       {
+        
+     #ifdef TEMPORARY_COMMENTED
         pTMProp->stPropHead.szPath[0] = chDrive;
+        #endif
         pTMProp->szPath[0]            = chDrive;
         pTMProp->szMemPath[0]         = chDrive;
         pTMProp->szFullMemName[0]     = chDrive;

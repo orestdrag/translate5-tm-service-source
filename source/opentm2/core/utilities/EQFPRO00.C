@@ -360,6 +360,9 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
+
+      LogMessage(WARNING, "TEMPORARY_COMMENTED name comparing in LoadPropFile");
+      #ifdef TEMPORARY_COMMENTED
       if( strcasecmp( pszName, prophead.szName)
        //|| strcasecmp( pszPath + 2, prophead.szPath + 2)   // ignore drive !!!
        )
@@ -367,6 +370,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         *pIda->pErrorInfo = ErrProp_InvalidFile;
         break;
       }
+      #endif
 
       #ifdef IGNORE_TEMPORARY_HARDCODED
         LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", intToA(prophead.usClass));
@@ -771,7 +775,8 @@ PPROPCNTL FindPropCntl( PPROPCNTL ptop, PSZ pszName, PSZ pszPath)
 {
     for(; ptop; ptop=(PPROPCNTL)ptop->Plug.Fw){
       if( !strcmp( ptop->pHead->szName, pszName)
-       && !strcmp( ptop->pHead->szPath, pszPath))
+       //&&!strcmp( ptop->pHead->szPath, pszPath)
+       )
         return( ptop);
     }
     return( (PPROPCNTL) NULP);
@@ -815,7 +820,9 @@ VOID NotifyAll( HPROP hprop)
     if ( UtlQueryUShort( QS_RUNMODE ) != FUNCCALL_RUNMODE )
     {
       ph = (PPROPHEAD)(((PPROPHND)hprop)->pCntl->pHead);
+      #ifdef TEMPORARY_COMMENTED
       strcat( strcat( strcpy( name, ph->szPath), "\\"), ph->szName);
+      #endif
       EqfSend2AllHandlers( WM_EQFN_PROPERTIESCHANGED,
                            MP1FROMSHORT( ph->usClass ),
                            MP2FROMP(name) );

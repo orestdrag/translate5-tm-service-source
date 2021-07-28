@@ -293,11 +293,8 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /****************************************************************/
       /* error from NTMFillCreateInStruct                             */
       /* stop further processing                                      */
-      /* set usMsgHandling  to FALSE because error message is already */
-      /* displayed by NTMFillCreateInStruct                           */
       /****************************************************************/
       fOk = FALSE;
-      usMsgHandling = FALSE;
     } /* endif */
 
     if ( fOk )
@@ -306,12 +303,7 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
       
-      usRc = TmtXCreate( pstCreateIn, pstCreateOut );
-      
-//    usRc = U( htmDummy,
-//             (PXIN) pstCreateIn,
-//             (PXOUT) pstCreateOut,
-//             NEW_TM );
+      usRc = TmtXCreate( pstCreateIn, pstCreateOut );      
 
       if ( !usRc )
       {
@@ -336,13 +328,10 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   if ( !fOk )
   {
-    if ( usMsgHandling )
-    {
-      LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
+    LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
       #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif
-    } /* endif */
   } /* endif */
 
   /********************************************************************/
@@ -1780,10 +1769,6 @@ NTMFillCreateInStruct( HTM             hModel,
           strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_TEMP_TMINDEX );
         } /* endif */
 
-        strcpy( pstCreateIn->stTmCreate.szServer,
-                pstInfoOut->stTmSign.szServer );
-        strcpy( pstCreateIn->stTmCreate.szUserid,
-                pstInfoOut->stTmSign.szUserid );
         strcpy( pstCreateIn->stTmCreate.szSourceLanguage,
                 pstInfoOut->stTmSign.szSourceLanguage );
         strcpy( pstCreateIn->stTmCreate.szDescription,
@@ -1823,6 +1808,7 @@ NTMFillCreateInStruct( HTM             hModel,
       /************************************************************/
       /* TM is a shared one, use "shared" index name              */
       /************************************************************/
+      LogMessage(FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
       CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
     }
     else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
@@ -1840,8 +1826,6 @@ NTMFillCreateInStruct( HTM             hModel,
       CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TEMP_TMINDEX);
     } /* endif */
 
-    strcpy( pstCreateIn->stTmCreate.szServer,         pszServer       );
-    strcpy( pstCreateIn->stTmCreate.szUserid,         pszUserID       );
     strcpy( pstCreateIn->stTmCreate.szSourceLanguage, pszSourceLang   );
     strcpy( pstCreateIn->stTmCreate.szDescription,    pszDescription  );
     pstCreateIn->stTmCreate.usThreshold = TM_DEFAULT_THRESHOLD;
