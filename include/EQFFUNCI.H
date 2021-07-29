@@ -417,12 +417,11 @@ USHORT MemFuncExportMem
 // create a new Translation Memory
 USHORT MemFuncCreateMem
 (
-  PSZ         pszMemname,              // name of new Translation Memory
-  PSZ         pszDescription,          // description for new Translation Memory or NULL
-  CHAR        chToDrive,               // target drive for new Translation Memory
-  PSZ         pszSourceLanguage,       // Translation Memory source language
-  LONG        lOptions                 // type of new Translation Memory
-                                       // LOCAL_TM_OPT is the default
+  const char*         pszMemname,              // name of new Translation Memory
+  const char*         pszDescription,          // description for new Translation Memory or NULL
+  const char*         pszSourceLanguage,       // Translation Memory source language
+  LONG                lOptions                 // type of new Translation Memory
+                                               // LOCAL_TM_OPT is the default
 );
 
 // delete a Translation Memory

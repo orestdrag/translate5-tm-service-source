@@ -279,7 +279,7 @@ typedef struct _BTREEGLOB
    BOOL         fGuard;                           // write every record
    BOOL         fOpen;                            // open flag
    BOOL         fCorrupted;                       // mark as corrupted
-   PCHAR_W      pTempKey;                         // pointer to temp. key
+   PTMWCHAR      pTempKey;                         // pointer to temp. key
    PBYTE        pTempRecord;                      // pointer to temp record
    ULONG        ulTempRecSize;                    // size of temp record area
    BOOL         fTerse;                           // tersing requested
@@ -676,7 +676,7 @@ typedef struct _DICTSIGN
 SHORT QDAMDictInsert
 (
   PBTREE  pBT,               // pointer to binary tree struct
-  PCHAR_W   pKey,              // pointer to key data
+  PTMWCHAR   pKey,              // pointer to key data
   PBYTE   pData,             // pointer to user data
   ULONG   ulLen              // length of user data
 );
@@ -721,7 +721,7 @@ typedef struct _DICTINSERT
 SHORT QDAMDictExact
 (
    PBTREE   pBT,                         // pointer to btree struct
-   PCHAR_W  pKey,                        // key to be searched for
+   PTMWCHAR  pKey,                        // key to be searched for
    PBYTE    pchBuffer,                   // space for user data
    PULONG   pulLength,                   // in/out length of returned user data
    USHORT   usSeachSubType  
@@ -767,7 +767,7 @@ SHORT QDAMDictExact
 SHORT QDAMDictSubStr
 (
    PBTREE pBT,                         // pointer to btree struct
-   PCHAR_W  pKey,                        // key to be searched for
+   PTMWCHAR  pKey,                        // key to be searched for
    PBYTE  pchBuffer,                   // space for key data
    PULONG pulLength,                  // in/out length of returned key data
    PBYTE  pchUserData,                 // space for user data
@@ -813,7 +813,7 @@ SHORT QDAMDictSubStr
 SHORT QDAMDictEquiv
 (
    PBTREE pBT,                         // pointer to btree struct
-   PCHAR_W  pKey,                        // key to be searched for
+   PTMWCHAR  pKey,                        // key to be searched for
    PBYTE  pchBuffer,                   // space for key data
    PULONG pulLength,                   // in/out length of returned key data
    PBYTE  pchUserData,                 // space for user data
@@ -902,7 +902,7 @@ SHORT QDAMDictLockEntry
 SHORT QDAMDictFirst
 (
    PBTREE     pBT,
-   PCHAR_W      pKeyData,            //   pointer to space for key data
+   PTMWCHAR      pKeyData,            //   pointer to space for key data
    PULONG     pulKeyLen,           //   length of space for key data
    PBYTE      pUserData,           //   pointer to space for user data
    PULONG     pulUserLen           //   length of space for user data
@@ -942,7 +942,7 @@ SHORT QDAMDictFirst
 SHORT QDAMDictNext
 (
    PBTREE     pBT,
-   PCHAR_W    pKeyData,            //   pointer to space for key data
+   PTMWCHAR    pKeyData,            //   pointer to space for key data
    PULONG     pulKeyLen,           //   length of space for key data
    PBYTE      pUserData,           //   pointer to space for user data
    PULONG     pulUserLen           //   length of space for user data
@@ -983,7 +983,7 @@ SHORT QDAMDictNext
 SHORT QDAMDictPrev
 (
    PBTREE     pBT,
-   PCHAR_W      pKeyData,            //   pointer to space for key data
+   PTMWCHAR      pKeyData,            //   pointer to space for key data
    PULONG     pulKeyLen,           //   length of space for key data
    PBYTE      pUserData,           //   pointer to space for user data
    PULONG     pulUserLen           //   length of space for user data
@@ -1110,7 +1110,7 @@ SHORT QDAMDictNumber
 (
     PBTREE   pBT,                    // pointer to generic structure
     ULONG    ulTermNum,              // term number
-    PCHAR_W   pKey,                   // pointer to space for term
+    PTMWCHAR   pKey,                   // pointer to space for term
     PULONG   pulKeyLen,              // length of key
     PBYTE    pData,                  // pointer to data
     PULONG   pulLen                  // length of data
@@ -1224,51 +1224,49 @@ __declspec(dllexport)
 __declspec(dllexport)
  SHORT QDAMDictUpdSignLocal( PBTREE, PCHAR, ULONG  );
 __declspec(dllexport)
- SHORT QDAMDictSubStrLocal ( PBTREE, PCHAR_W, PBYTE, PULONG,  PBYTE,PULONG );
+ SHORT QDAMDictSubStrLocal ( PBTREE, PTMWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
 __declspec(dllexport)
- SHORT QDAMDictEquivLocal  ( PBTREE, PCHAR_W, PBYTE, PULONG,  PBYTE,PULONG );
+ SHORT QDAMDictEquivLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
 __declspec(dllexport)
- SHORT QDAMDictExactLocal  ( PBTREE, PCHAR_W, PBYTE, PULONG, USHORT );
+ SHORT QDAMDictExactLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG, USHORT );
 __declspec(dllexport)
- SHORT QDAMDictNextLocal   ( PBTREE, PCHAR_W, PULONG,  PBYTE, PULONG  );
+ SHORT QDAMDictNextLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
 __declspec(dllexport)
- SHORT QDAMDictPrevLocal   ( PBTREE, PCHAR_W, PULONG,  PBYTE, PULONG  );
+ SHORT QDAMDictPrevLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
 __declspec(dllexport)
  SHORT QDAMDictCurrentLocal( PBTREE, PBYTE, PULONG,  PBYTE, PULONG  );
 __declspec(dllexport)
- SHORT QDAMDictInsertLocal ( PBTREE, PUSHORT, PBYTE, ULONG );
+ SHORT QDAMDictInsertLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
 __declspec(dllexport)
- SHORT QDAMDictUpdateLocal ( PBTREE, PCHAR_W, PBYTE, ULONG );
- SHORT QDAMDictDeleteLocal ( PBTREE, PCHAR_W );
+ SHORT QDAMDictUpdateLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
+ SHORT QDAMDictDeleteLocal ( PBTREE, PTMWCHAR );
  SHORT QDAMDictFlushLocal  ( PBTREE );
  SHORT QDAMDictCopyLocal   ( PBTREE, PBTREE );
  __declspec(dllexport)
  SHORT QDAMDictNumEntriesLocal ( PBTREE, PULONG );
 __declspec(dllexport)
- SHORT QDAMDictFirstLocal ( PBTREE, PCHAR_W, PULONG, PBYTE, PULONG );
+ SHORT QDAMDictFirstLocal ( PBTREE, PTMWCHAR, PULONG, PBYTE, PULONG );
 
 
- SHORT QDAMInsertKey_V2( PBTREE, PBTREEBUFFER_V2, PCHAR_W, RECPARAM, RECPARAM );
- SHORT QDAMInsertKey_V3( PBTREE, PBTREEBUFFER_V3, PCHAR_W, RECPARAM, RECPARAM );
+ SHORT QDAMInsertKey_V2( PBTREE, PBTREEBUFFER_V2, PTMWCHAR, RECPARAM, RECPARAM );
+ SHORT QDAMInsertKey_V3( PBTREE, PBTREEBUFFER_V3, PTMWCHAR, RECPARAM, RECPARAM );
  SHORT QDAMWRecordToDisk_V2( PBTREE, PBTREEBUFFER_V2 );
  SHORT QDAMWRecordToDisk_V3( PBTREE, PBTREEBUFFER_V3 );
  SHORT QDAMFindParent_V2(PBTREE, PBTREEBUFFER_V2, PUSHORT );
  SHORT QDAMFindParent_V3(PBTREE, PBTREEBUFFER_V3, PUSHORT );
 
- SHORT QDAMFindChild_V2 ( PBTREE, PCHAR_W, USHORT, PBTREEBUFFER_V2 * );
- SHORT QDAMFindChild_V3 ( PBTREE, PCHAR_W, USHORT, PBTREEBUFFER_V3 * );
- SHORT QDAMLocateKey_V2(PBTREE, PBTREEBUFFER_V2, PUSHORT, PSHORT, SEARCHTYPE, PSHORT, USHORT);
- SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PUSHORT, PSHORT, SEARCHTYPE, PSHORT);
- //SHORT QDAMLocateKey_V2(PBTREE, PBTREEBUFFER_V2, PCHAR_W, PSHORT, SEARCHTYPE, PSHORT, USHORT);
- //SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PCHAR_W, PSHORT, SEARCHTYPE, PSHORT);
+ SHORT QDAMFindChild_V2 ( PBTREE, PTMWCHAR, USHORT, PBTREEBUFFER_V2 * );
+ SHORT QDAMFindChild_V3 ( PBTREE, PTMWCHAR, USHORT, PBTREEBUFFER_V3 * );
+ SHORT QDAMLocateKey_V2(PBTREE, PBTREEBUFFER_V2, PTMWCHAR, PSHORT, SEARCHTYPE, PSHORT, USHORT);
+ SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PTMWCHAR, PSHORT, SEARCHTYPE, PSHORT);
  SHORT QDAMFreeRecord_V2 ( PBTREE, PBTREEBUFFER_V2, RECTYPE );
  SHORT QDAMFreeRecord_V3 ( PBTREE, PBTREEBUFFER_V3, RECTYPE );
 __declspec(dllexport)
  SHORT QDAMWriteHeader ( PBTREE );
  SHORT QDAMWriteRecord_V2(PBTREE, PBTREEBUFFER_V2);
  SHORT QDAMWriteRecord_V3(PBTREE, PBTREEBUFFER_V3);
- SHORT QDAMChangeKey_V2(PBTREE, USHORT, PCHAR_W, PCHAR_W );
- SHORT QDAMChangeKey_V3(PBTREE, USHORT, PCHAR_W, PCHAR_W );
+ SHORT QDAMChangeKey_V2(PBTREE, USHORT, PTMWCHAR, PTMWCHAR );
+ SHORT QDAMChangeKey_V3(PBTREE, USHORT, PTMWCHAR, PTMWCHAR );
  SHORT QDAMNewRecord_V2( PBTREE, PBTREEBUFFER_V2 *, RECTYPE );
  SHORT QDAMNewRecord_V3( PBTREE, PBTREEBUFFER_V3 *, RECTYPE );
  SHORT QDAMReadRecord_V2( PBTREE, USHORT, PBTREEBUFFER_V2 *, BOOL );
@@ -1278,11 +1276,11 @@ __declspec(dllexport)
  SHORT QDAMAddToBuffer_V2(PBTREE, PBYTE, ULONG, PRECPARAM);
  SHORT QDAMAddToBuffer_V3(PBTREE, PBYTE, ULONG, PRECPARAM);
  SHORT QDAMDeleteDataFromBuffer ( PBTREE, RECPARAM );
- SHORT QDAMSplitNode_V2( PBTREE, PBTREEBUFFER_V2 *, PCHAR_W );
- SHORT QDAMSplitNode_V3( PBTREE, PBTREEBUFFER_V3 *, PCHAR_W );
+ SHORT QDAMSplitNode_V2( PBTREE, PBTREEBUFFER_V2 *, PTMWCHAR );
+ SHORT QDAMSplitNode_V3( PBTREE, PBTREEBUFFER_V3 *, PTMWCHAR );
 
- SHORT QDAMGetszKeyParam_V2( PBTREE, RECPARAM, PCHAR_W, PULONG );
- SHORT QDAMGetszKeyParam_V3( PBTREE, RECPARAM, PCHAR_W, PULONG );
+ SHORT QDAMGetszKeyParam_V2( PBTREE, RECPARAM, PTMWCHAR, PULONG );
+ SHORT QDAMGetszKeyParam_V3( PBTREE, RECPARAM, PTMWCHAR, PULONG );
  SHORT QDAMGetszData_V2 ( PBTREE, RECPARAM,  PBYTE, PULONG, CHAR );
  SHORT QDAMGetszData_V3 ( PBTREE, RECPARAM,  PBYTE, PULONG, CHAR );
 
@@ -1338,8 +1336,8 @@ __declspec(dllexport)
 
 
  SHORT  QDAMAllocKeyRecords ( PBTREE, USHORT );
- SHORT  QDAMLocSubstr_V2( PBTREE, PBTREEBUFFER_V2, PCHAR_W, PBYTE, PULONG, PBYTE, PULONG );
- SHORT  QDAMLocSubstr_V3( PBTREE, PBTREEBUFFER_V3, PCHAR_W, PBYTE, PULONG, PBYTE, PULONG );
+ SHORT  QDAMLocSubstr_V2( PBTREE, PBTREEBUFFER_V2, PTMWCHAR, PBYTE, PULONG, PBYTE, PULONG );
+ SHORT  QDAMLocSubstr_V3( PBTREE, PBTREEBUFFER_V3, PTMWCHAR, PBYTE, PULONG, PBYTE, PULONG );
 
 /*
 __declspec(dllexport)
@@ -1348,14 +1346,13 @@ __declspec(dllexport)
  USHORT QDAMRemoveDict( PBTREE );
  SHORT  QDAMDictLockDictLocal( PBTREE, BOOL );
  SHORT  QDAMDictLockEntryLocal( PBTREE, PSZ_W, BOOL );
- BOOL   QDAMDictLockStatus ( PBTREE, PCHAR_W );
+ BOOL   QDAMDictLockStatus ( PBTREE, PTMCHAR );
  VOID   QDAMDictUpdStatus ( PBTREE);
  USHORT QDAMMoveProperties ( PPROPDICTIONARY , PSZ );
  PBTREE QDAMFindInstance ( PBTREE, PSZ );
- SHORT QDAMFindRecord_V2( PBTREE, PCHAR_W, PBTREEBUFFER_V2 * );
- SHORT QDAMFindRecord_V3( PBTREE, PCHAR_W, PBTREEBUFFER_V3 * );
+ SHORT QDAMFindRecord_V2( PBTREE, PTMCHAR, PBTREEBUFFER_V2 * );
+ SHORT QDAMFindRecord_V3( PBTREE, PTMCHAR, PBTREEBUFFER_V3 * );
 
- 
  SHORT QDAMDictCloseOrganizeLocal ( PQDAMLAN pQDAMLan );
  SHORT QDAMDictCloseOrganize ( PPBTREE, PSZ, CHAR, USHORT );
 
@@ -1372,8 +1369,8 @@ __declspec(dllexport)
  VOID   QDAMDictUpdStatus ( PBTREE);
  USHORT QDAMMoveProperties ( PPROPDICTIONARY , PUSHORT );
  PBTREE QDAMFindInstance ( PBTREE, PUSHORT );
- SHORT QDAMFindRecord_V2( PBTREE, PUSHORT, PBTREEBUFFER_V2 * );
- SHORT QDAMFindRecord_V3( PBTREE, PUSHORT, PBTREEBUFFER_V3 * );
+ SHORT QDAMFindRecord_V2( PBTREE, PTMWCHAR, PBTREEBUFFER_V2 * );
+ SHORT QDAMFindRecord_V3( PBTREE, PTMWCHAR, PBTREEBUFFER_V3 * );
 
  SHORT QDAMDictCloseOrganizeLocal ( PQDAMLAN pQDAMLan );
  SHORT QDAMDictCloseOrganize ( PPBTREE, PUSHORT, CHAR, USHORT );

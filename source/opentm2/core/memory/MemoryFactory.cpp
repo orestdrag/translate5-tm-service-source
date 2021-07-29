@@ -348,14 +348,14 @@ int MemoryFactory::importFromMemoryFiles
 */
 OtmMemory *MemoryFactory::createMemory
 (
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
+  const char *pszPluginName,
+  const char *pszMemoryName,
+  const char *pszDescription,
+  const char *pszSourceLanguage,
   int *piErrorCode
 )
 {
-  return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, '\0', NULL, false, piErrorCode ) );
+  return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, NULL, false, piErrorCode ) );
 }
 
 /* \brief Create a memory 
@@ -364,30 +364,6 @@ OtmMemory *MemoryFactory::createMemory
     memory object name (pluginname + colon + memory name)
    \param pszDescription description of the memory
    \param pszSourceLanguage source language of the memory
-   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-OtmMemory *MemoryFactory::createMemory
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  int *piErrorCode
-)
-{
-  return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, chDrive, NULL, false, piErrorCode ) );
-}
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
    \param pszOwner owner of the newly created memory
    \param bInvisible don't display memory in memory loist window when true, 
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
@@ -395,12 +371,11 @@ OtmMemory *MemoryFactory::createMemory
 */
 OtmMemory *MemoryFactory::createMemory
 (
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  char *pszOwner,
+  const char *pszPluginName,
+  const char *pszMemoryName,
+  const char *pszDescription,
+  const char *pszSourceLanguage,
+  const char *pszOwner,
   bool bInvisible,
   int *piErrorCode
 )
@@ -441,7 +416,7 @@ OtmMemory *MemoryFactory::createMemory
   this->getMemoryName( pszMemoryName, strMemoryName );
   if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
   {
-    pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE, chDrive );
+    pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
     if ( pMemory == NULL ){
        this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
        LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
@@ -460,7 +435,7 @@ OtmMemory *MemoryFactory::createMemory
   else if ( !bInvisible )
   {
     // send created notifcation
-    PSZ pszObjName = NULL;
+    char* pszObjName = NULL;
     UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
     strcpy( pszObjName, pluginSelected->getName() );
     strcat( pszObjName, ":" );
@@ -569,7 +544,7 @@ int MemoryFactory::closeMemory
   }
 
   // build memory object name
-  PSZ pszObjName = NULL;
+  char* pszObjName = NULL;
   UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
   strcpy( pszObjName, pPlugin->getName() );
   strcat( pszObjName, ":" );
@@ -788,8 +763,8 @@ int MemoryFactory::clearMemory(
 	\returns 0 if successful or error return code
 */
 BOOL MemoryFactory::exists(
-  char *pszPluginName,
-  char *pszMemoryName
+  const char *pszPluginName,
+  const char *pszMemoryName
 )
 {
   BOOL fExists = FALSE;
@@ -943,7 +918,7 @@ void MemoryFactory::showLastError(
   } /* endif */     
 
  // show error message
-  PSZ pszParm = (PSZ)this->strLastError.c_str();
+  char* pszParm = (char*)this->strLastError.c_str();
   UtlErrorHwnd( (USHORT)this->iLastError, MB_CANCEL, 1, &pszParm, SHOW_ERROR, hwndErrMsg );
 }
 
@@ -1928,8 +1903,8 @@ OtmPlugin *MemoryFactory::getPlugin
 */
 OtmPlugin *MemoryFactory::findPlugin
 (
-  char *pszPluginName,
-  char *pszMemoryName
+  const char *pszPluginName,
+  const char *pszMemoryName
 )
 {
   OtmPlugin *plugin = NULL;
@@ -1953,7 +1928,7 @@ OtmPlugin *MemoryFactory::findPlugin
   // check for memory object names
   if ( (pszMemoryName != NULL) && (*pszMemoryName != '\0') )
   {
-    char *pszColon  = strchr( pszMemoryName, ':' );
+    char *pszColon  = strchr( (PSZ)pszMemoryName, ':' );
     if ( pszColon != NULL )
     {
       // split object name into plugin name and memory name
@@ -1979,7 +1954,7 @@ OtmPlugin *MemoryFactory::findPlugin
       for ( std::size_t i = 0; i < pluginList->size(); i++ )
       {
         OtmMemoryPlugin *pluginCurrent = (*pluginList)[i];
-        if ( pluginCurrent->getMemoryInfo( pszMemoryName, pInfo ) == 0 )
+        if ( pluginCurrent->getMemoryInfo( (PSZ)pszMemoryName, pInfo ) == 0 )
         {
           plugin = (OtmPlugin *)pluginCurrent;
           break;
@@ -1993,7 +1968,7 @@ OtmPlugin *MemoryFactory::findPlugin
         for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
         {
           OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
-          if ( pluginCurrent->isMemoryOwnedByPlugin( pszMemoryName ) )
+          if ( pluginCurrent->isMemoryOwnedByPlugin((PSZ) pszMemoryName ) )
           {
             plugin = (OtmPlugin *)pluginCurrent;
             break;
@@ -2026,7 +2001,7 @@ OtmPlugin *MemoryFactory::findPlugin
 */
 int MemoryFactory::getMemoryName
 (
-  char *pszMemoryName,
+  const char *pszMemoryName,
   std::string &strMemoryName
 )
 {
@@ -2034,7 +2009,7 @@ int MemoryFactory::getMemoryName
     LogMessage2(ERROR, "MemoryFactory::getMemoryName()::(pszMemoryName == NULL) || (*pszMemoryName == '\0'), pszMemoryName = ", pszMemoryName);
     return( -1 );
  }
- char *pszColon  = strchr( pszMemoryName, ':' );
+ const char *pszColon  = strchr( pszMemoryName, ':' );
  if ( pszColon != NULL )
  {
    strMemoryName = pszColon + 1;
@@ -2355,8 +2330,8 @@ int MemoryFactory::replaceMemory
 */
 USHORT MemoryFactory::APIImportMemInInternalFormat
 (
-  PSZ         pszMemoryName,
-  PSZ         pszMemoryPackage,
+  const char* pszMemoryName,
+  const char* pszMemoryPackage,
   LONG        lOptions 
 )
 {
@@ -2419,7 +2394,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   if ( pPlugin != NULL )
   {
     PVOID pvPluginData = NULL;
-    iRC = pPlugin->importFromMemoryFiles( pszMemoryName, (PSZ)strMemFiles.c_str(), 
+    iRC = pPlugin->importFromMemoryFiles( (PSZ)pszMemoryName,(PSZ) strMemFiles.c_str(), 
         OtmMemoryPlugin::IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT, &pvPluginData );
   }
 
@@ -2440,16 +2415,17 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 */
 USHORT MemoryFactory::APIExportMemInInternalFormat
 (
-  PSZ         pszMemoryName,
-  PSZ         pszMemoryPackage,
+  const char* pszMemoryName,
+  const char* pszMemoryPackage,
   LONG        lOptions 
 )
 {
   int iRC = 0;
 
   lOptions;
-
-  if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
+  
+  PSZ pszMemName = (PSZ) pszMemoryName;
+  if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
     UtlErrorHwnd( TA_MANDTM, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
     return( TA_MANDTM );
@@ -2462,14 +2438,14 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   } /* endif */
 
   // check if memory exists
-  if ( !this->exists( NULL, pszMemoryName ) )
+  if ( !this->exists( NULL, pszMemName ) )
   {
-    UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszMemoryName, EQF_ERROR, HWND_FUNCIF );
+    UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &(pszMemName), EQF_ERROR, HWND_FUNCIF );
     return( ERROR_MEMORY_NOTFOUND );
   } /* endif */
 
   // get the memory plugin for the memory
-  OtmPlugin* pPlugin = findPlugin( NULL, pszMemoryName  );
+  OtmPlugin* pPlugin = findPlugin( NULL, pszMemName  );
   if( pPlugin == NULL )
   {
     this->iLastError = ERROR_MEMORYOBJECTISNULL;
@@ -2482,11 +2458,11 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   char *pszFileList = new char[iFileListBufferSize];
   if( pPlugin->getType() ==  OtmPlugin::eTranslationMemoryType )
   {
-    iRC = ((OtmMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemoryName, pszFileList, iFileListBufferSize );
+    iRC = ((OtmMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
   }
   else if(pPlugin->getType() == OtmPlugin::eSharedTranslationMemoryType)
   {
-    iRC = ((OtmSharedMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemoryName, pszFileList, iFileListBufferSize );
+    iRC = ((OtmSharedMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
   }
   if( iRC != 0  )
   {
@@ -2511,13 +2487,13 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
 */
 USHORT MemoryFactory::APIOpenMem
 (
-  PSZ         pszMemoryName, 
+  const char*         pszMemoryName, 
   LONG        *plHandle,
   LONG        lOptions 
 )
 {
   lOptions;
-
+  PSZ pszMemName = (PSZ)pszMemoryName;
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
     UtlErrorHwnd( TA_MANDTM, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
@@ -2526,16 +2502,16 @@ USHORT MemoryFactory::APIOpenMem
 
   if ( plHandle == NULL )
   {
-    PSZ pszParm = "pointer to memory handle";
+    char* pszParm = "pointer to memory handle";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   int iRC = 0;
-  OtmMemory *pMem = this->openMemory( NULL, pszMemoryName, 0, &iRC );
+  OtmMemory *pMem = this->openMemory( NULL, pszMemName, 0, &iRC );
   if ( pMem == NULL )
   {
-    this->showLastError( NULL, pszMemoryName, NULL, HWND_FUNCIF );
+    this->showLastError( NULL, pszMemName, NULL, HWND_FUNCIF );
     return( (USHORT)iRC );
   } /* endif */
 
@@ -2609,14 +2585,14 @@ USHORT MemoryFactory::APIQueryMem
 
   if ( pSearchKey == NULL )
   {
-    PSZ pszParm = "pointer to search key";
+    char* pszParm = "pointer to search key";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   if ( pProposals == NULL )
   {
-    PSZ pszParm = "pointer to proposal array";
+    char* pszParm = "pointer to proposal array";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
@@ -2663,7 +2639,7 @@ USHORT MemoryFactory::APISearchMem
 (
   LONG        lHandle,                 
   wchar_t  *pszSearchString,
-  PSZ         pszStartPosition,
+  const char*         pszStartPosition,
   PMEMPROPOSAL pProposal,
   LONG        lSearchTime,
   LONG        lOptions
@@ -2677,21 +2653,21 @@ USHORT MemoryFactory::APISearchMem
 
   if ( (pszSearchString == NULL) || (*pszSearchString  == EOS)  )
   {
-    PSZ pszParm = "Search string";
+    char* pszParm = "Search string";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   if ( pszStartPosition == NULL ) 
   {
-    PSZ pszParm = "pointer to start position";
+    char* pszParm = "pointer to start position";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   if ( pProposal == NULL )
   {
-    PSZ pszParm = "pointer to proposal";
+    char* pszParm = "pointer to proposal";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
@@ -2714,7 +2690,7 @@ USHORT MemoryFactory::APISearchMem
   }
   else
   {
-    pMem->setSequentialAccessKey( pszStartPosition );
+    pMem->setSequentialAccessKey((PSZ) pszStartPosition );
     iRC = pMem->getNextProposal( *pOtmProposal );
   } /* endif */
 
@@ -2763,7 +2739,7 @@ USHORT MemoryFactory::APISearchMem
   // search given string in proposal
   if ( fFound || (iRC == TIMEOUT_RC) )
   {
-    pMem->getSequentialAccessKey( pszStartPosition, 20 );
+    pMem->getSequentialAccessKey( (PSZ)pszStartPosition, 20 );
     usRC = (USHORT)iRC;
   } /* endif */
   else if ( iRC == OtmMemory::INFO_ENDREACHED )
@@ -2800,7 +2776,7 @@ USHORT MemoryFactory::APIUpdateMem
 
   if ( ( pNewProposal == NULL ) )
   {
-    PSZ pszParm = "pointer to proposal";
+    char* pszParm = "pointer to proposal";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
@@ -2815,7 +2791,7 @@ USHORT MemoryFactory::APIUpdateMem
   // generate short document name if none given (otherwise the long document name will not be stored in the memory...)
   if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )
   {
-    PSZ pszTemp = pNewProposal->szDocName;
+    char* pszTemp = pNewProposal->szDocName;
     int iLen = 0;
     while ( (iLen < 8) && (*pszTemp != EOS) )
     {
@@ -2846,7 +2822,7 @@ USHORT MemoryFactory::APIUpdateMem
 // data structure for the APIListMem function and the insert memory callback function
 typedef struct _APILISTMEMDATA
 {
-  PSZ   pszBuffer;   // pointer to buffer for memory names or NULL to compute the size of the required buffer
+  const char*   pszBuffer;   // pointer to buffer for memory names or NULL to compute the size of the required buffer
   LONG  lBufSize;  // size of the buffer
   LONG *plLength;    // pointer to a variable containing the current length of the data in the buffer
 } APILISTMEMDATA, *PAPILISTMEMDATA;
@@ -2866,10 +2842,10 @@ int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInf
     {
       if ( *(pData->plLength) != 0 )
       {
-        strcpy( pData->pszBuffer + *(pData->plLength), "," );
+        strcpy( (PSZ)pData->pszBuffer + *(pData->plLength), (PSZ)"," );
         *( pData->plLength ) += 1;
       }
-      strcpy( pData->pszBuffer + *(pData->plLength), pszName );
+      strcpy( (PSZ)pData->pszBuffer + *(pData->plLength), (PSZ)pszName );
       *( pData->plLength ) += lNameLen;
     }
   }
@@ -2888,7 +2864,7 @@ int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInf
 */
 USHORT MemoryFactory::APIListMem
 (
-  PSZ         pszBuffer,
+  const char*         pszBuffer,
   LONG        *plLength
 )
 {

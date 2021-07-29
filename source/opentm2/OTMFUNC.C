@@ -244,12 +244,11 @@ USHORT EqfExportMem
 // create a new Translation Memory
 USHORT EqfCreateMem
 (
-  HSESSION    hSession,                // Eqf session handle
-  PSZ         pszMemName,              // name of new Translation Memory
-  PSZ         pszDescription,          // description for new Translation Memory or NULL
-  CHAR        chToDrive,               // target drive for new Translation Memory
-  PSZ         pszSourceLanguage,       // Translation Memory source language
-  LONG        lOptions                 // type of new Translation Memory
+  HSESSION      hSession,                // Eqf session handle
+  const char*   pszMemName,              // name of new Translation Memory
+  const char*   pszDescription,          // description for new Translation Memory or NULL
+  const char*   pszSourceLanguage,       // Translation Memory source language
+  LONG          lOptions                 // type of new Translation Memory
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -257,8 +256,8 @@ USHORT EqfCreateMem
 
   {
     char buff[255];
-    sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d; ToDrive = %s",
-              pszMemName, pszDescription, pszSourceLanguage, lOptions, chToDrive);
+    sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d",
+              pszMemName, pszDescription, pszSourceLanguage, lOptions);
     LogMessage(INFO, buff);
   }
 
@@ -268,7 +267,7 @@ USHORT EqfCreateMem
   // call TM create function
   if ( usRC == NO_ERROR )
   {
-    usRC = MemFuncCreateMem( pszMemName, pszDescription, chToDrive,
+    usRC = MemFuncCreateMem( pszMemName, pszDescription, 
                              pszSourceLanguage, lOptions );
     pData->fComplete = TRUE;   // one-shot function are always complete
   } /* endif */
@@ -1163,9 +1162,9 @@ USHORT EqfListMem
 */
 USHORT EqfGetOpenTM2Lang
 (
-  HSESSION    hSession,
-  PSZ         pszISOLang,
-  PSZ         pszOpenTM2Lang
+  HSESSION         hSession,
+  char*         pszISOLang,
+  char*         pszOpenTM2Lang
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1181,7 +1180,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
   {
-    PSZ pszParm = "pointer to ISO language id";
+    char*  pszParm = "pointer to ISO language id";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
     LogMessage(ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL)");
@@ -1189,7 +1188,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
-    PSZ pszParm = "buffer for OpenTM2 language name";
+    char* pszParm = "buffer for OpenTM2 language name";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
     LogMessage(ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL)");

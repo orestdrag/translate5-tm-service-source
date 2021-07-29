@@ -1051,10 +1051,9 @@ USHORT EqfOrganizeMem
 USHORT EqfCreateMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
-  PSZ         pszMemname,              // mand: name of new Translation Memory
-  PSZ         pszDescription,          // opt: description for new Translation Memory or NULL
-  CHAR        chToDrive,               // opt: target drive for new Translation Memory
-  PSZ         pszSourceLanguage,       // mand: Translation Memory source language
+  const char*         pszMemname,              // mand: name of new Translation Memory
+  const char*         pszDescription,          // opt: description for new Translation Memory or NULL
+  const char*         pszSourceLanguage,       // mand: Translation Memory source language
   LONG        lOptions                 // opt: type of new Translation Memory
                                        // @Location:SHARED_OPT,LOCAL_OPT(default)
 );

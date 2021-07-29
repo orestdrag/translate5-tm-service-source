@@ -590,9 +590,9 @@ int LanguageFactory::compareISO
 
    // return when both ISO names have no country ID
    PSZ pszDash1 = (PSZ)strchr( pszISO1, '-' );
-   if ( pszDash1 == NULL ) pszDash1 = (PSZ)strchr( pszISO1, '_' );
+   if ( pszDash1 == NULL ) pszDash1 = (char*)strchr( pszISO1, '_' );
    PSZ pszDash2 = (PSZ)strchr( pszISO2, '-' );
-   if ( pszDash2 == NULL ) pszDash2 = (PSZ)strchr( pszISO2, '_' );
+   if ( pszDash2 == NULL ) pszDash2 = (char*)strchr( pszISO2, '_' );
    if ( (pszDash1 == NULL) && (pszDash2 == NULL)  ) return( iResult );
 
    // compare ISO names without country suffix

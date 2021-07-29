@@ -30,10 +30,14 @@
 
 
 //CHANGE BASIC TYPE OF STRINGS HERE
-//typedef unsigned short TMCHAR;
-typedef wchar_t TMCHAR;
-typedef TMCHAR * PTMCHAR;
-typedef PTMCHAR WCHAR;
+typedef char TM_CHAR;
+typedef TM_CHAR * PTM_CHAR;
+
+//typedef unsigned short TMWCHAR;
+typedef wchar_t TMWCHAR;
+typedef TMWCHAR * PTMWCHAR;
+typedef PTMWCHAR WCHAR;
+
 
 typedef char CHAR;
 typedef char CCHAR;

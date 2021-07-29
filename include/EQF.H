@@ -161,7 +161,7 @@
       typedef wchar_t * PCHAR_W;
       typedef wchar_t * PSZ_W;
       //*/
-      typedef TMCHAR CHAR_W;
+      typedef TMWCHAR CHAR_W;
       typedef CHAR_W * PCHAR_W;
       typedef PCHAR_W  PSZ_W;
       #define _CHAR_W_DEFINED
@@ -6633,11 +6633,10 @@ extern "C" {
 }
 extern "C" USHORT MemFuncCreateMem
 (
-  PSZ         pszMemName,              // name of new Translation Memory
-  PSZ         pszDescription,          // description for new Translation Memory or NULL
-  CHAR        chToDrive,               // target drive for new Translation Memory
-  PSZ         pszSourceLanguage,       // Translation Memory source language
-  LONG        lOptions                 // type of new Translation Memory
+  const char*         pszMemName,              // name of new Translation Memory
+  const char*         pszDescription,          // description for new Translation Memory or NULL
+  const char*         pszSourceLanguage,       // Translation Memory source language
+  LONG                lOptions                 // type of new Translation Memory
 );
 USHORT MarkupFuncCreateMarkup
 (

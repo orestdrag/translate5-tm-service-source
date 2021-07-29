@@ -69,16 +69,14 @@ public:
 	\param pszDescription description of the memory
 	\param bMsgHandling true/false: display errors or not
 	\param hwnd owner-window needed for modal error-message
-  \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
 	\returns Pointer to created translation memory or NULL in case of errors
 */
 	virtual OtmMemory* createMemory(
-		PSZ pszName,			  
-		PSZ pszSourceLang,
-		PSZ pszDescription,
+		const char* pszName,			  
+		const char* pszSourceLang,
+		const char* pszDescription,
 		BOOL bMsgHandling,
-		HWND hwnd,
-    CHAR chDrive
+		HWND hwnd
 	) = 0;
 	
 /*! \brief Open an existing translation memory
@@ -89,7 +87,7 @@ public:
 	\returns Pointer to translation memory or NULL in case of errors
 */
 	virtual OtmMemory* openMemory(
-		PSZ pszName,			  
+		const char* pszName,			  
 		BOOL bMsgHandling,
 		HWND hwnd,
     unsigned short usAccessMode = 0
@@ -100,7 +98,7 @@ public:
 	\returns 0 if successful or error return code
 */
 	virtual int deleteMemory(
-		PSZ pszName			  
+		const char* pszName			  
 	) = 0;
 
 /*! \brief Clear (i.e. remove all entries) a translation memory
@@ -108,7 +106,7 @@ public:
 	\returns 0 if successful or error return code
 */
 	virtual int clearMemory(
-		PSZ pszName			  
+		const char* pszName			  
 	) = 0;
 
   /*! \brief Closes a translation memory
@@ -156,7 +154,7 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, PMEMORYINFO
 	\returns 0 if successful or error return code
 */
 	virtual int getMemoryInfo(
-		PSZ pszName,
+		const char* pszName,
     PMEMORYINFO pInfo
 	) = 0;
 
@@ -178,7 +176,7 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, PMEMORYINFO
 */
   virtual int getMemoryFiles
   (
-    PSZ pszName,
+    const char* pszName,
     char *pFileListBuffer,
     int  iBufferSize
   ) = 0;
@@ -213,8 +211,8 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 */
 virtual int importFromMemoryFiles
 (
-  char *pszMemoryName,
-  char *pFileListBuffer,
+  const char *pszMemoryName,
+  const char *pFileListBuffer,
   int  iOptions,
   PVOID *ppPrivateData
 ) = 0;
@@ -225,8 +223,8 @@ virtual int importFromMemoryFiles
 	\returns 0 if successful or error return code
 */
   virtual int renameMemory(
-	  PSZ pszOldNae,
-    PSZ pszNewName
+	  const char* pszOldNae,
+    const char* pszNewName
   ) = 0;
 
   /*! \brief Create a temporary memory
@@ -238,9 +236,9 @@ virtual int importFromMemoryFiles
 	\returns Pointer to created translation memory or NULL in case of errors
 */
   virtual OtmMemory* createTempMemory(
-	  PSZ pszPrefix,			  
-	  PSZ pszName,			  
-	  PSZ pszSourceLang,
+	  const char* pszPrefix,			  
+	  const char* pszName,			  
+	  const char* pszSourceLang,
 	  BOOL bMsgHandling,
 	  HWND hwnd
   ) = 0;
@@ -295,23 +293,22 @@ virtual int importFromMemoryFiles
 
     /* \brief add a new memory information to memory list
        \param pszName memory name
-       \param chToDrive drive letter
        \returns 0 if success
    */
-    virtual int addMemoryToList( PSZ pszName, CHAR chDrive ) = 0;
+    virtual int addMemoryToList( const char* pszName ) = 0;
 
     /* \brief remove a memory information from memory list
        \param  pszName memory name
        \returns 0 if success
     */
-    virtual int removeMemoryFromList( PSZ pszName ) = 0;
+    virtual int removeMemoryFromList( const char* pszName ) = 0;
 
  /* \brief Replace the data of one memory with the data of another memory and delete the remains of the second memory
     \param pszReplace name of the memory whose data is being replaced
     \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
    \returns 0 if success
 */
- virtual int replaceMemory( PSZ pszReplace, PSZ pszReplaceWith ) = 0;
+ virtual int replaceMemory( const char* pszReplace, const char* pszReplaceWith ) = 0;
 
 
 };

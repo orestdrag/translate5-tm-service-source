@@ -700,7 +700,7 @@ EQFNTMInsert
     RetryCount = MAX_RETRY_COUNT;
     do
     {
-      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PUSHORT) pulKey, pData, ulLen );
+      sRc = QDAMDictInsertLocal( (PBTREE) pBTIda, (PTMWCHAR) pulKey, pData, ulLen );
       if ( sRc == BTREE_IN_USE )
       {
         RetryCount--;
@@ -844,7 +844,7 @@ EQFNTMUpdate
 SHORT QDAMDictExactLocal
 (
    PBTREE pBTIda,                      // pointer to btree struct
-   PUSHORT pKey,                       // key to be searched for
+   PTMWCHAR pKey,                       // key to be searched for
    PBYTE  pchBuffer,                   // space for user data
    PULONG pulLength,                   // in/out length of returned user data
    USHORT usSearchSubType              // special hyphenation lookup flag
@@ -1081,7 +1081,7 @@ EQFNTMGet
       //LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
       //#ifdef TEMPORARY_COMMENTED
       //sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
-      sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PUSHORT) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PTMWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
       //#endif 
 
       pBT->fCorrupted = fCorrupted;

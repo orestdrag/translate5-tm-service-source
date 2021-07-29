@@ -347,7 +347,7 @@ USHORT UtlErrorHwnd
    SHORT   sErrorNumber,               // number of message
    USHORT  usMsgType,                  // type of message
    USHORT  usNoOfParms,                // number of message parameters
-   PSZ     *pParmTable,                // pointer to parameter table
+   PSZ *   pParmTable,                 // pointer to parameter table
    ERRTYPE ErrorType,                  // type of error
    HWND    hwndMsgBoxParent            // window which should be msgbox parent
 )

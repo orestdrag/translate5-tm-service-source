@@ -1830,15 +1830,14 @@ LPARAM    mp2
 // create a new Translation Memory using the function I/F
 USHORT MemFuncCreateMem
 (
-PSZ         pszMemName,              // name of new Translation Memory
-PSZ         pszDescription,          // description for new Translation Memory or NULL
-CHAR        chToDrive,               // target drive for new Translation Memory
-PSZ         pszSourceLanguage,       // Translation Memory source language
-LONG        lOptions                 // type of new Translation Memory
+const char*         pszMemName,              // name of new Translation Memory
+const char*         pszDescription,          // description for new Translation Memory or NULL
+const char*         pszSourceLanguage,       // Translation Memory source language
+LONG                lOptions                 // type of new Translation Memory
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PSZ         pszParm;                 // pointer for error parameters
+  char*       pszParm;                 // pointer for error parameters
   char        szEmpty[2];
   MemoryFactory *pFactory = MemoryFactory::getInstance();
 
@@ -1872,10 +1871,10 @@ LONG        lOptions                 // type of new Translation Memory
 
   // Check memory name syntax
   if ( usRC == NO_ERROR )
-  {
-    if ( !UtlCheckLongName( pszMemName ) )
+  { 
+    if ( !UtlCheckLongName( (PSZ) pszMemName ))
     {
-      pszParm = pszMemName;
+      pszParm = (PSZ) pszMemName;
       UtlErrorHwnd(  ERROR_INV_LONGNAME, MB_CANCEL, 1,
                      &pszParm, EQF_ERROR, HWND_FUNCIF );
       usRC = ERROR_MEM_NAME_INVALID;
@@ -1887,7 +1886,8 @@ LONG        lOptions                 // type of new Translation Memory
   {
     if ( pFactory->exists( NULL, pszMemName ) )
     {
-      UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszMemName, EQF_ERROR, HWND_FUNCIF );
+      PSZ pszParam = (PSZ)pszMemName;
+      UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszParam, EQF_ERROR, HWND_FUNCIF );
       usRC = ERROR_MEM_NAME_INVALID;
     }
   } /* endif */
@@ -1954,7 +1954,7 @@ LONG        lOptions                 // type of new Translation Memory
     }
 
     LogMessage(INFO, "MemFuncCreateMem():: create the memory");    
-    pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, chToDrive, &iRC );
+    pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, &iRC );
     if ( pMemory == NULL )
     {
       LogMessage(ERROR, "MemFuncCreateMem()::pMemory == NULL");

@@ -140,45 +140,6 @@ int importFromMemoryFiles
     memory object name (pluginname + colon + memory name)
    \param pszDescription description of the memory
    \param pszSourceLanguage source language of the memory
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-OtmMemory *createMemory
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  int *piErrorCode
-);
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-OtmMemory *createMemory
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  int *piErrorCode
-);
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
    \param pszOwner owner of the newly created memory
    \param bInvisible don't display memory in memory loist window when true, 
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
@@ -186,16 +147,32 @@ OtmMemory *createMemory
 */
 OtmMemory *createMemory
 (
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  char *pszOwner,
+  const char *pszPluginName,
+  const char *pszMemoryName,
+  const char *pszDescription,
+  const char *pszSourceLanguage,
+  const char *pszOwner,
   bool bInvisible,
   int *piErrorCode
 );
 
+/* \brief Create a memory 
+   \param pszPlugin plugin-name or NULL if not available or memory object name is used
+   \param pszMemoryName name of the memory being created or
+    memory object name (pluginname + colon + memory name)
+   \param pszDescription description of the memory
+   \param pszSourceLanguage source language of the memory
+   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
+   \returns pointer to created memory object 
+*/
+OtmMemory *createMemory
+(
+  const char *pszPluginName,
+  const char *pszMemoryName,
+  const char *pszDescription,
+  const char *pszSourceLanguage,
+  int *piErrorCode
+);
 
 /* \brief List all available memories from all installed memory plugins
    \param pfnCallBack callback function to be called for each memory found
@@ -302,8 +279,8 @@ int clearMemory(
 	\returns 0 if successful or error return code
 */
 int exists(
-  char *pszPluginName,
-  char *pszMemoryName
+  const char *pszPluginName,
+  const char *pszMemoryName
 );
 
 /*! \brief Check if memory is a shared/synchronized memory
@@ -571,9 +548,9 @@ int listSharedMemoryUsers( char *pszPlugin, char  *pszMemName, std::vector<std::
 	\returns Pointer to created translation memory or NULL in case of errors
 */
  OtmMemory* createTempMemory(
-	  PSZ pszPrefix,			  
-	  PSZ pszName,			  
-	  PSZ pszSourceLang
+	  const char* pszPrefix,			  
+	  const char* pszName,			  
+	  const char* pszSourceLang
   );
 
   /*! \brief Close and delete a temporary memory
@@ -585,16 +562,15 @@ int listSharedMemoryUsers( char *pszPlugin, char  *pszMemName, std::vector<std::
 
 /* \brief add a new memory information to memory list
    \param pszName memory name, format as "pluginName:memoryName"
-   \param chToDrive drive letter
    \returns 0 if success
 */
-int addMemoryToList(PSZ pszName, CHAR chToDrive);
+int addMemoryToList(const char* pszName);
 
 /* \brief remove a memory information from memory list
    \param  pszName format as "pluginName:memoryName"
    \returns 0 if success
 */
-int removeMemoryFromList(PSZ pszName);
+int removeMemoryFromList(const char* pszName);
 
   /*! \brief Replace a memory with the data from another memory
     This method bevaves like deleting the replace memory and renaming the
@@ -622,8 +598,8 @@ int removeMemoryFromList(PSZ pszName);
   */
   USHORT APIImportMemInInternalFormat
   (
-    PSZ         pszMemoryName,
-    PSZ         pszMemoryPackage,
+    const char*         pszMemoryName,
+    const char*         pszMemoryPackage,
     LONG        lOptions 
   );
 
@@ -634,8 +610,8 @@ int removeMemoryFromList(PSZ pszName);
   */
   USHORT APIExportMemInInternalFormat
   (
-    PSZ         pszMemoryName,
-    PSZ         pszMemoryPackage,
+    const char*         pszMemoryName,
+    const char*         pszMemoryPackage,
     LONG        lOptions 
   );
 
@@ -647,7 +623,7 @@ int removeMemoryFromList(PSZ pszName);
   */
   USHORT APIOpenMem
   (
-    PSZ         pszMemoryName, 
+    const char*         pszMemoryName, 
     LONG        *plHandle,
     LONG        lOptions 
   );
@@ -698,7 +674,7 @@ int removeMemoryFromList(PSZ pszName);
   (
     LONG        lHandle,                 
     wchar_t     *pszSearchString,
-    PSZ         pszStartPosition,
+    const char*         pszStartPosition,
     PMEMPROPOSAL pProposal,
     LONG        lSearchTime,
     LONG        lOptions
@@ -725,7 +701,7 @@ int removeMemoryFromList(PSZ pszName);
   */
   USHORT APIListMem
   (
-    PSZ         pszBuffer,
+    const char*         pszBuffer,
     LONG        *plLength
   );
 
@@ -748,8 +724,8 @@ OtmPlugin *getPlugin
 */
 OtmPlugin *findPlugin
 (
-  char *pszPluginName,
-  char *pszMemoryName
+  const char *pszPluginName,
+  const char *pszMemoryName
 );
 
 /* \brief Get the memory name from a potential memory object name
@@ -759,7 +735,7 @@ OtmPlugin *findPlugin
 */
 int getMemoryName
 (
-  char *pszMemoryName,
+  const char *pszMemoryName,
   std::string &strMemoryName
 );
 

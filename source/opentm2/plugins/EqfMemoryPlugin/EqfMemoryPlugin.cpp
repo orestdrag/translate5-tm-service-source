@@ -96,16 +96,14 @@ int EqfMemoryPlugin::getListOfSupportedDrives( char *pszDriveListBuffer )
 	\param pszDescription description of the memory
 	\param bMsgHandling true/false: display errors or not
 	\param hwnd owner-window needed for modal error-message
-  \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
 	\returns Pointer to created translation memory or NULL in case of errors
 */
 OtmMemory* EqfMemoryPlugin::createMemory(
-	PSZ pszName,			  
-	PSZ pszSourceLang,
-	PSZ pszDescription,
+	const char* pszName,			  
+	const char* pszSourceLang,
+	const char* pszDescription,
 	BOOL bMsgHandling,
-	HWND hwnd,
-  CHAR chDrive
+	HWND hwnd
 )
 {
   EqfMemory *pNewMemory = NULL;        // new memory object
@@ -115,17 +113,17 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   BOOL fReserved = FALSE;
 
   // build memory path and reserve a short name
-  this->makeMemoryPath( pszName, chDrive, strMemPath, TRUE, &fReserved );
+  this->makeMemoryPath( pszName, strMemPath, TRUE, &fReserved );
 
   // use old memory create code
-  TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  pszSourceLang,  pszDescription,  usMsgHandling,  hwnd );
+  TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  (PSZ)pszSourceLang,  (PSZ)pszDescription,  usMsgHandling,  hwnd );
 
 
   // setup memory properties
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
   
   // create memory object if create function completed successfully
-  pNewMemory = new EqfMemory( this, htm, pszName );
+  pNewMemory = new EqfMemory( this, htm, (PSZ)pszName );
 
 
   // add memory info to our internal memory list
@@ -151,7 +149,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
 	\returns Pointer to translation memory or NULL in case of errors
 */
 OtmMemory* EqfMemoryPlugin::openMemory(
-	PSZ pszName,			 
+	const char* pszName,			 
 	BOOL bMsgHandling,
 	HWND hwnd,
   unsigned short usAccessMode
@@ -162,7 +160,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   std::string strMemPath;
 
   // find memory in our list
-  OtmMemoryPlugin::PMEMORYINFO pInfo = this->findMemory( pszName );
+  OtmMemoryPlugin::PMEMORYINFO pInfo = this->findMemory( (PSZ)pszName );
   if ( pInfo != NULL )
   {
     // use old memory open code
@@ -177,11 +175,11 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     // create memory object if create function completed successfully
     if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
     {
-      pMemory = new EqfMemory( this, htm, pszName );
+      pMemory = new EqfMemory( this, htm, (PSZ)pszName );
     }
     else
     {
-      handleError( (int)usRC, pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
+      handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
 //#ifdef TEMPORARY_COMMENTED
       if ( htm != 0 ) 
         TmClose( htm, NULL,  FALSE,  NULL );
@@ -191,7 +189,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   else
   {
     // no memory found
-    handleError( ERROR_MEMORY_NOTFOUND, pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
+    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
   }
 
   return( pMemory );
@@ -226,9 +224,9 @@ int EqfMemoryPlugin::closeMemory(
     std::string strPropName;
     std::string pathName = pMemInfo->szFullPath;
     this->makePropName( pathName, strPropName );
-    PSZ pszName = strrchr( (char*)strPropName.c_str(), '\\' );
+    const char* pszName = strrchr( (char*)strPropName.c_str(), '\\' );
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
-    this->fillInfoStructure( pszName, pMemInfo );
+    this->fillInfoStructure( (PSZ)pszName, pMemInfo );
   }else{
     LogMessage(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
   }
@@ -268,12 +266,12 @@ int EqfMemoryPlugin::listMemories(
 	\returns 0 if successful or error return code
 */
 int EqfMemoryPlugin::getMemoryInfo(
-	PSZ pszName,
+	const char* pszName,
   OtmMemoryPlugin::PMEMORYINFO pInfo
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszName );
+  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo != NULL )
   {
     memcpy( pInfo, pMemInfo, sizeof(OtmMemoryPlugin::MEMORYINFO) );
@@ -291,16 +289,16 @@ int EqfMemoryPlugin::getMemoryInfo(
 //  \param pszDesc description information
 //	\returns 0 if successful or error return code
 //*/
-int EqfMemoryPlugin::setDescription(PSZ pszName, PSZ pszDesc)
+int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
 {
     if(pszName==NULL || pszDesc==NULL)
         return 0;
 
-    OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszName );
+    OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
     if ( pMemInfo == NULL )
     {
       // no memory found
-      handleError( ERROR_MEMORY_NOTFOUND, pszName, NULL, NULL, this->strLastError, this->iLastError );
+      handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszName, NULL, NULL, this->strLastError, this->iLastError );
       return( ERROR_MEMORY_NOTFOUND );
     }
 
@@ -354,7 +352,7 @@ int EqfMemoryPlugin::setDescription(PSZ pszName, PSZ pszDesc)
 */
 int EqfMemoryPlugin::getMemoryFiles
 (
-  PSZ pszName,
+  const char* pszName,
   char *pFileListBuffer,
   int  iBufferSize
 )
@@ -362,7 +360,7 @@ int EqfMemoryPlugin::getMemoryFiles
   int iRC = OtmMemoryPlugin::eSuccess;
   *pFileListBuffer = '\0';
 
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszName );
+  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
 
   if ( pMemInfo != NULL )
   {
@@ -434,8 +432,8 @@ int EqfMemoryPlugin::getMemoryFiles
 */
 int EqfMemoryPlugin::importFromMemoryFiles
 (
-  char *pszMemoryName,
-  char *pFileList,
+  const char *pszMemoryName,
+  const char *pFileList,
   int  iOptions,
   PVOID *ppPrivateData
 )
@@ -470,12 +468,12 @@ int EqfMemoryPlugin::importFromMemoryFiles
 	\returns 0 if successful or error return code
 */
 int EqfMemoryPlugin::renameMemory(
-	PSZ pszOldName,
-  PSZ pszNewName
+	const char* pszOldName,
+  const char* pszNewName
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszOldName );
+  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszOldName );
   if ( pMemInfo != NULL )
   {
     // get new short name for memory
@@ -584,7 +582,7 @@ int EqfMemoryPlugin::renameMemory(
 	\returns 0 if successful or error return code
 */
 int EqfMemoryPlugin::deleteMemory(
-	PSZ pszName			  
+	const char* pszName			  
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
@@ -634,11 +632,11 @@ int EqfMemoryPlugin::deleteMemory(
 	\returns 0 if successful or error return code
 */
 int EqfMemoryPlugin::clearMemory(
-	PSZ pszName			  
+	const char* pszName			  
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszName );
+  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo != NULL )
   {
     // delete data and index file
@@ -692,9 +690,9 @@ int EqfMemoryPlugin::clearMemory(
 	\returns Pointer to created translation memory or NULL in case of errors
 */
 OtmMemory* EqfMemoryPlugin::createTempMemory(
-	PSZ pszPrefix,			  
-	PSZ pszName,			  
-	PSZ pszSourceLang,
+	const char* pszPrefix,			  
+	const char* pszName,			  
+	const char* pszSourceLang,
 	BOOL bMsgHandling,
 	HWND hwnd
 )
@@ -713,7 +711,7 @@ OtmMemory* EqfMemoryPlugin::createTempMemory(
   // create memory object if create function completed successfully
   if ( usRC == 0 )
   {
-    pNewMemory = new EqfMemory( this, htm, pszName );
+    pNewMemory = new EqfMemory( this, htm, (PSZ)pszName );
   } /* end */     
 
   return( (OtmMemory *)pNewMemory );
@@ -981,7 +979,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 */
 OtmMemoryPlugin::PMEMORYINFO EqfMemoryPlugin::findMemory
 (
-   char *pszName
+   const char *pszName
 )
 {
   int idx = findMemoryIndex(pszName);
@@ -995,7 +993,7 @@ OtmMemoryPlugin::PMEMORYINFO EqfMemoryPlugin::findMemory
 // return the memory index of the specified memory name
 int EqfMemoryPlugin::findMemoryIndex
 (
-   char *pszName
+   const char *pszName
 )
 {
     for ( int i = 0; i < (int)m_MemInfoVector.size(); i++ )
@@ -1050,12 +1048,12 @@ USHORT registerPlugins()
 	\param string receiving the memory path name
 	\returns TRUE when successful 
 */
-BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &strPathName, BOOL fReserve, PBOOL pfReserved )
+BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathName, BOOL fReserve, PBOOL pfReserved )
 {
   BOOL fOK = FALSE;
   OBJLONGTOSHORTSTATE ObjState;
 
-  CreateMemFile( pszName , &ObjState);
+  CreateMemFile( (PSZ)pszName , &ObjState);
 
   if ( pfReserved != NULL ) 
       *pfReserved = ObjState == OBJ_IS_NEW;
@@ -1083,7 +1081,7 @@ BOOL EqfMemoryPlugin::makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &st
 	\param pszSourceLanguage memory source language
 	\returns TRUE when successful, FALSE in case of errors
 */
-BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathName, PSZ pszDescription, PSZ pszSourceLanguage )
+BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &strPathName, const char* pszDescription, const char* pszSourceLanguage )
 {
   BOOL fOK = TRUE;
   PPROP_NTM pProp = NULL;
@@ -1156,7 +1154,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathN
 	\param pvOldProperties existing property file to be used for the fields of the new properties
 	\returns TRUE when successful, FALSE in case of errors
 */
-BOOL EqfMemoryPlugin::createMemoryProperties( PSZ pszName, std::string &strPathName, void *pvOldProperties )
+BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &strPathName, void *pvOldProperties )
 {
   BOOL fOK = TRUE;
   PPROP_NTM pProp = NULL;
@@ -1252,9 +1250,9 @@ int EqfMemoryPlugin::addToList( char *pszPropName )
   if(pInfo != 0)
   {
     // find the property name when pszPropName is fully qualified
-    PSZ pszName = strrchr( pszPropName, '/' );
+    const char* pszName = strrchr( pszPropName, '/' );
     pszName = (pszName == NULL) ? pszPropName : pszName + 1;
-    if ( this->fillInfoStructure( pszName, pInfo ) )
+    if ( this->fillInfoStructure( (PSZ)pszName, pInfo ) )
     {
       m_MemInfoVector.push_back( std::shared_ptr<MEMORYINFO>(pInfo) );
     }
@@ -1336,8 +1334,8 @@ typedef struct _MEMIMPORTFROMFILEDATA
 */
 int EqfMemoryPlugin::importFromMemFilesInitialize
 (
-  char *pszMemoryName,
-  char *pFileList,
+  const char *pszMemoryName,
+  const char *pFileList,
   int  iOptions,
   PVOID *ppPrivateData
 )
@@ -1443,7 +1441,7 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
       return( this->iLastError );      
     } /* end */   
 
-    pData->pInputMemory = new EqfMemory( this, htm, pszMemoryName  );
+    pData->pInputMemory = new EqfMemory( this, htm, (PSZ)pszMemoryName  );
 
     // get first proposal and copy it to output memory
     int iMemRC = pData->pInputMemory->getFirstProposal( pData->Proposal );
@@ -1477,7 +1475,7 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
      std::string strMemPath;
 
      // build memory path for the imported memory
-     this->makeMemoryPath( pszMemoryName, '\0', strMemPath );
+     this->makeMemoryPath( pszMemoryName, strMemPath );
 
       // process property file
       {
@@ -1615,7 +1613,7 @@ int EqfMemoryPlugin::importFromMemFilesEndProcessing
    \param chToDrive drive letter
    \returns 0 if success
 */
-int EqfMemoryPlugin::addMemoryToList(PSZ pszName, CHAR chDrive)
+int EqfMemoryPlugin::addMemoryToList(const char* pszName)
 {
     if(pszName==NULL)
         return -1;
@@ -1636,7 +1634,7 @@ int EqfMemoryPlugin::addMemoryToList(PSZ pszName, CHAR chDrive)
     // only could be added when its property exists
     if(!fIsNew)
     {
-        UtlMakeEQFPath( szPathName, chDrive, MEM_PATH, NULL );
+        UtlMakeEQFPath( szPathName, '\0', MEM_PATH, NULL );
         strcat( szPathName, "/" );
         strcat( szPathName, szShortName );
         strcat( szPathName, EXT_OF_TMDATA  );
@@ -1653,7 +1651,7 @@ int EqfMemoryPlugin::addMemoryToList(PSZ pszName, CHAR chDrive)
    \param  pszName memory name
    \returns 0 if success
 */
-int EqfMemoryPlugin::removeMemoryFromList(PSZ pszName)
+int EqfMemoryPlugin::removeMemoryFromList(const char* pszName)
 {
     if(pszName==NULL)
         return -1;
@@ -1678,7 +1676,7 @@ int EqfMemoryPlugin::removeMemoryFromList(PSZ pszName)
 */
 int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMemPath, std::string &strLastError, int &iLastError )
 {
-  PSZ          pReplAddr[2];
+  char*          pReplAddr[2];
 
   if ( iRC == 0 ) return( iRC );
 
@@ -1829,19 +1827,20 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
     \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
    \returns 0 if success
 */
-int EqfMemoryPlugin::replaceMemory( PSZ pszReplace, PSZ pszReplaceWith )
+int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszReplaceWith )
 {
   OtmMemoryPlugin::PMEMORYINFO pInfoReplace = this->findMemory( pszReplace );
+  
   if ( pszReplace == NULL )
   {
-    handleError( ERROR_MEMORY_NOTFOUND, pszReplace, NULL, NULL, this->strLastError, this->iLastError );
+    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplace, NULL, NULL, this->strLastError, this->iLastError );
     return( ERROR_MEMORY_NOTFOUND );
   }
 
   OtmMemoryPlugin::PMEMORYINFO pInfoReplaceWith = this->findMemory( pszReplaceWith );
   if ( pszReplaceWith == NULL )
   {
-    handleError( ERROR_MEMORY_NOTFOUND, pszReplaceWith, NULL, NULL, this->strLastError, this->iLastError );
+    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplaceWith, NULL, NULL, this->strLastError, this->iLastError );
     return( ERROR_MEMORY_NOTFOUND );
   }
 

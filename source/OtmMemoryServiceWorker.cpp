@@ -868,7 +868,7 @@ int OtmMemoryServiceWorker::createMemory
   if ( strData.empty() )
   {
     LogMessage(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()");
-    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), (PSZ)"", 0, szOtmSourceLang, 0 );
+    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), 0, (PSZ)szOtmSourceLang, 0 );
   }
   else
   {

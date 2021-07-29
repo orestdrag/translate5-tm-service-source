@@ -825,8 +825,7 @@ typedef struct _CONVERSIONAREA
 {
   BTREE BtreeIn;                      // structure for input BTREE
   BTREE BtreeOut;                     // structure for output BTREE
-  //CHAR_W  szKey[1024];
-  USHORT  szKey[1024];
+  TMWCHAR  szKey[1024];
   BYTE    bData[0xFFFFFF];
   TMX_SIGN TMXSign;                    // signature record
   char szOutFile[MAX_LONGFILESPEC];

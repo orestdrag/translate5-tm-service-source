@@ -3653,7 +3653,7 @@ BOOL
 QDAMDictLockStatus
 (
   PBTREE  pBTIda,
-  PTMCHAR   pKey
+  PTMWCHAR   pKey
 )
 {
   BOOL     fLock = FALSE;
@@ -4290,7 +4290,7 @@ RECPARAM  QDAMGetrecData_V3
 SHORT QDAMFindRecord_V3
 (
     PBTREE   pBTIda,
-    PUSHORT  pKey,
+    PTMWCHAR  pKey,
     PBTREEBUFFER_V3 * ppRecord
 )
 {
@@ -5011,7 +5011,7 @@ SHORT QDAMLocateKey_V3
 (
    PBTREE pBTIda,                         // pointer to btree structure
    PBTREEBUFFER_V3 pRecord,                  // record to be dealt with
-   PUSHORT pKey,                          // key to be searched
+   PTMWCHAR pKey,                          // key to be searched
    PSHORT  psKeyPos,                      // located key
    SEARCHTYPE  searchType,                // search type
    PSHORT  psNearPos                      // near position
@@ -5352,7 +5352,7 @@ SHORT QDAMSplitNode_V3
 (
    PBTREE pBTIda,                // pointer to generic structure
    PBTREEBUFFER_V3 *record,         // pointer to pointer to node
-   PUSHORT pKey                 // new key
+   PTMWCHAR pKey                 // new key
 )
 {
   SHORT i,j;
@@ -6454,7 +6454,7 @@ SHORT QDAMInsertKey_V3
 (
    PBTREE       pBTIda,
    PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
-   PUSHORT      pKey,
+   PTMWCHAR      pKey,
    RECPARAM   recKey,                  // position/offset for key
    RECPARAM   recData                  // position/offset for data
 )
@@ -6465,7 +6465,7 @@ SHORT QDAMInsertKey_V3
   PUSHORT   pOldKey;                   // old key at first position
   PUSHORT   pNewKey;                   // new key at first position
   BOOL fFound = FALSE;
-  SHORT  sKeyFound;                    // key found
+  SHORT sKeyFound;                    // key found
   SHORT  sNearKey;                     // key found
   SHORT  sRc = 0;                      // return code
 
@@ -6583,9 +6583,9 @@ SHORT QDAMInsertKey_V3
          Unicode2ASCII( pKey, chHeadTerm, 0L );
          #endif 
          usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
-         pKey = (PUSHORT)&chHeadTerm[0];
+         pKey = (PTMWCHAR)&chHeadTerm[0];
       }
-      *(PUSHORT) pData = usKeyLen;
+      *(PTMWCHAR) pData = usKeyLen;
       {
         PBYTE pTarget;
         if ( pBT->usVersion >= NTM_VERSION2 )
@@ -6788,7 +6788,7 @@ RECPARAM  QDAMGetrecData_V2
 SHORT QDAMFindRecord_V2
 (
     PBTREE   pBTIda,
-    PUSHORT  pKey,
+    PTMWCHAR  pKey,
     PBTREEBUFFER_V2 * ppRecord
 )
 {
@@ -8023,7 +8023,7 @@ SHORT QDAMLocateKey_V2
 (
    PBTREE pBTIda,                         // pointer to btree structure
    PBTREEBUFFER_V2 pRecord,               // record to be dealt with
-   PUSHORT pKey,                          // key to be searched
+   PTMWCHAR pKey,                          // key to be searched
    PSHORT  psKeyPos,                      // located key
    SEARCHTYPE  searchType,                // search type
    PSHORT  psNearPos,                     // near position
@@ -8043,6 +8043,8 @@ SHORT QDAMLocateKey_V2
   CHAR_W  szKey[512];
   SHORT   sKeyLen = 512 ;
 
+  LogMessage(FATAL,"QDAMLocateKey_V2 are not implemented and not supposed to be used");
+  #ifdef TEMPORARY_COMMENTED
   *psKeyPos = -1;                         // key not found
   if ( pRecord )
   {
@@ -8050,9 +8052,8 @@ SHORT QDAMLocateKey_V2
     sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
     sLow = 0;                                    // start here
 
-  #ifdef TEMPORARY_COMMENTED
     wcsncpy( szKey, pKey, sKeyLen ) ;
-  #endif
+
     szKey[sKeyLen-1] = NULL ;
     pHyphen = wcschr(szKey, L'-') ;
     if ( ( pHyphen ) &&
@@ -8330,7 +8331,7 @@ SHORT QDAMLocateKey_V2
    {
      ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
-
+  #endif
   return sRc;
 }
 
@@ -8339,7 +8340,7 @@ SHORT QDAMInsertKey_V2
 (
    PBTREE       pBTIda,
    PBTREEBUFFER_V2 pRecord,               // record where key is to be inserted
-   PCHAR_W      pKey,
+   PTMWCHAR      pKey,
    RECPARAM   recKey,                  // position/offset for key
    RECPARAM   recData                  // position/offset for data
 )
@@ -8594,7 +8595,7 @@ SHORT QDAMInsertKey_V2
 SHORT QDAMDictInsertLocal
 (
   PBTREE  pBTIda,           // pointer to binary tree struct
-  PUSHORT pKey,             // pointer to key data
+  PTMWCHAR pKey,             // pointer to key data
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data in bytes
 )

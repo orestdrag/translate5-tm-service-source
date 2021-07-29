@@ -1892,7 +1892,7 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 
 			  UTF16strcpy( pTemp, pszUni );
 
-        LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMCHAR data type migration");
+        LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMWCHAR data type migration");
         #ifdef TEMPORARY_COMMENTED
 			  BidiConvert06ToFE(pTemp, UTF16strlenCHAR(pTemp)+1);
         #endif
@@ -2021,7 +2021,7 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 					{
 						CHAR_W c;
 						PSZ_W  p = pTemp;
-            LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMCHAR data type migration");
+            LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMWCHAR data type migration");
             #ifdef TEMPORARY_COMMENTED
 						UTF16strncpy( pTemp, pszUni, ulLen );
 						BidiConvert06ToFE(pTemp, ulLen);
@@ -2234,7 +2234,7 @@ PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG  ulCP )
 					break;
 				}
 			  }
-          LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvertFETo06, because of basic TMCHAR data type migration");
+          LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvertFETo06, because of basic TMWCHAR data type migration");
           #ifdef TEMPORARY_COMMENTED
 		      // do special handling for Arabic to allow shaping in even for 864 stuff
 		      BidiConvertFETo06(pszUni, UTF16strlenCHAR(pszUni));
@@ -2655,7 +2655,7 @@ BOOL EQFIsDBCSChar( CHAR_W c, ULONG ulCP)
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strncpy   copy up to ulLen wide characters                        ///
 ///////////////////////////////////////////////////////////////////////////////
-PTMCHAR UTF16strncpy(PTMCHAR pusTarget, PTMCHAR pusSource, LONG lLen)
+PTMWCHAR UTF16strncpy(PTMWCHAR pusTarget, PTMWCHAR pusSource, LONG lLen)
 {
   // usLen is number of CHAR_W's!!
   PSZ_W pszTarget = pusTarget;
@@ -2676,7 +2676,7 @@ PTMCHAR UTF16strncpy(PTMCHAR pusTarget, PTMCHAR pusSource, LONG lLen)
 ///  UTF16stricmp   copy up to usLen wide characters                        ///
 ///////////////////////////////////////////////////////////////////////////////
 
-int UTF16stricmp(PTMCHAR pusTarget, PTMCHAR pusSource)
+int UTF16stricmp(PTMWCHAR pusTarget, PTMWCHAR pusSource)
 {
   LogMessage(FATAL, "UTF16stricmp is not implemented");
   //return wcscasecmp( pusTarget, pusSource );
@@ -2686,14 +2686,14 @@ int UTF16stricmp(PTMCHAR pusTarget, PTMCHAR pusSource)
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16memset   initializes ulLen wide characters with c                 ///
 ///////////////////////////////////////////////////////////////////////////////
-PTMCHAR UTF16memset( PTMCHAR pusString, TMCHAR c, USHORT usNum )
+PTMWCHAR UTF16memset( PTMWCHAR pusString, TMWCHAR c, USHORT usNum )
 {
   PSZ_W p = pusString;
   while ( usNum -- )
     *pusString++ = c;
   return p;
 }
-PTMCHAR UTF16memsetL( PTMCHAR pusString, TMCHAR c, ULONG ulNum )
+PTMWCHAR UTF16memsetL( PTMWCHAR pusString, TMWCHAR c, ULONG ulNum )
 {
   PSZ_W p = pusString;
   while ( ulNum -- )
@@ -2738,7 +2738,7 @@ void BidiConvert06ToFE(LPWSTR lpWideCharStr, int Length) //lpWideCharStr is a Ze
   int i = 0;
   for ( i=0; i<Length; i++)
   {
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMCHAR data type migration");
+    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
           #ifdef TEMPORARY_COMMENTED
     if ( (lpWideCharStr[i] >= 0x0621) && (lpWideCharStr[i] <= 0x064A ) )
         lpWideCharStr[i] = (CHAR_W)(Tab06ToFE [ (lpWideCharStr[i] - 0x0621) ] );

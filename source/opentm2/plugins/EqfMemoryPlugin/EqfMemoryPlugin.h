@@ -58,12 +58,11 @@ public:
 	\returns Pointer to created translation memory or NULL in case of errors
 */
 	OtmMemory* createMemory(
-		PSZ pszName,			  
-		PSZ pszSourceLang,
-		PSZ pszDescription,
+		const char* pszName,			  
+		const char* pszSourceLang,
+		const char* pszDescription,
 		BOOL bMsgHandling,
-		HWND hwnd,
-    CHAR chDrive
+		HWND hwnd
 	);
 	
 /*! \brief Open an existing translation memory
@@ -74,7 +73,7 @@ public:
 	\returns Pointer to translation memory or NULL in case of errors
 */
 	OtmMemory* openMemory(
-		PSZ pszName,			  
+		const char* pszName,			  
 		BOOL bMsgHandling,
 		HWND hwnd,
     unsigned short usAccessMode = 0
@@ -105,7 +104,7 @@ public:
 	\returns 0 if successful or error return code
 */
 	int deleteMemory(
-		PSZ pszName			  
+		const char* pszName			  
 	);
 
 /*! \brief Clear (i.e. remove all entries) a translation memory
@@ -113,7 +112,7 @@ public:
 	\returns 0 if successful or error return code
 */
 	int clearMemory(
-		PSZ pszName			  
+		const char* pszName			  
 	);
 
 /*! \brief Get information about a memory
@@ -122,7 +121,7 @@ public:
 	\returns 0 if successful or error return code
 */
 	int getMemoryInfo(
-		PSZ pszName,
+		const char* pszName,
     PMEMORYINFO pInfo
 	);
 
@@ -132,8 +131,8 @@ public:
 	\returns 0 if successful or error return code
 */
     int setDescription(
-        PSZ pszName,
-        PSZ pszDesc);
+        const char* pszName,
+        const char* pszDesc);
 
   /*! \brief provides a list of the memory data files
 
@@ -153,7 +152,7 @@ public:
 */
   int getMemoryFiles
   (
-    PSZ pszName,
+    const char* pszName,
     char *pFileListBuffer,
     int  iBufferSize
   );
@@ -185,8 +184,8 @@ public:
 */
 int importFromMemoryFiles
 (
-  char *pszMemoryName,
-  char *pFileListBuffer,
+  const char *pszMemoryName,
+  const char *pFileListBuffer,
   int  iOptions,
   PVOID *ppPrivateData
 );
@@ -197,8 +196,8 @@ int importFromMemoryFiles
 	\returns 0 if successful or error return code
 */
   int renameMemory(
-	  PSZ pszOldNae,
-    PSZ pszNewName
+	  const char* pszOldName,
+    const char* pszNewName
   );
 
   /*! \brief Create a temporary memory
@@ -210,9 +209,9 @@ int importFromMemoryFiles
 	\returns Pointer to created translation memory or NULL in case of errors
 */
   OtmMemory* createTempMemory(
-	  PSZ pszPrefix,			  
-	  PSZ pszName,			  
-	  PSZ pszSourceLang,
+	  const char* pszPrefix,			  
+	  const char* pszName,			  
+	  const char* pszSourceLang,
 	  BOOL bMsgHandling,
 	  HWND hwnd
   );
@@ -281,27 +280,27 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
        \param chToDrive drive letter
        \returns 0 if success
     */
-    int addMemoryToList( PSZ pszName, CHAR chDrive );
+    int addMemoryToList( const char* pszName );
 
     /* \brief remove a memory information from memory list
        \param  pszName memory name
        \returns 0 if success
     */
-    int removeMemoryFromList(PSZ pszName);
+    int removeMemoryFromList(const char* pszName);
 
     /* \brief Replace the data of one memory with the data of another memory and delete the remains of the second memory
       \param pszReplace name of the memory whose data is being replaced
       \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
      \returns 0 if success
     */
-    int replaceMemory( PSZ pszReplace, PSZ pszReplaceWith );
+    int replaceMemory( const char* pszReplace, const char* pszReplaceWith );
 
 private:
 
-  BOOL makeMemoryPath( PSZ pszName, CHAR chDrive, std::string &strPathName, BOOL fReserve = FALSE, PBOOL pfReserved = NULL );
+  BOOL makeMemoryPath( const char* pszName, std::string &strPathName, BOOL fReserve = FALSE, PBOOL pfReserved = NULL );
   void refreshMemoryList();
-  OtmMemoryPlugin::PMEMORYINFO findMemory( char *pszName );
-  int findMemoryIndex(char *pszName);
+  OtmMemoryPlugin::PMEMORYINFO findMemory( const char *pszName );
+  int findMemoryIndex(const char *pszName);
 /*! \brief Create memory properties
   \param pszName long name of the memory
   \param strPathName memory path name
@@ -309,14 +308,14 @@ private:
 	\param pszSourceLanguage memory source language
 	\returns TRUE when successful, FALSE in case of errors
 */
-BOOL createMemoryProperties( PSZ pszName, std::string &strPathName, PSZ pszDescription, PSZ pszSourceLanguage );
+BOOL createMemoryProperties( const char* pszName, std::string &strPathName, const char*  pszDescription, const char*  pszSourceLanguage );
 /*! \brief Create memory properties
   \param pszName long name of the memory
   \param strPathName memory path name
 	\param pvOldProperties existing property file to be used for the fields of the new properties
 	\returns TRUE when successful, FALSE in case of errors
 */
-BOOL createMemoryProperties( PSZ pszName, std::string &strPathName, void *pvOldProperties );
+BOOL createMemoryProperties( const char*  pszName, std::string &strPathName, void *pvOldProperties );
 
 /*! \brief Make the fully qualified property file name for a memory
   \param strPathName reference to the memory path name
@@ -386,8 +385,8 @@ int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
 */
 int importFromMemFilesInitialize
 (
-  char *pszMemoryName,
-  char *pFileList,
+  const char *pszMemoryName,
+  const char *pFileList,
   int  iOptions,
   PVOID *ppPrivateData
 );
