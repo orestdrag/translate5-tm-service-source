@@ -60,7 +60,7 @@
 #include "OTMFUNC.H"              // public defines for function call interface
 
 #include "EQFFUNCI.H"             // private defines for function call interface
-
+#include "core/utilities/LogWrapper.h"
 
 #define MEM_START_EXPORT    USER_TASK + 1
 #define MEM_EXPORT_TASK     USER_TASK + 2
@@ -1527,10 +1527,14 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getMarkup( pExportIDA->pstSegment->szFormat, sizeof(pExportIDA->pstSegment->szFormat) );
          pExportIDA->pProposal->getDocName( pExportIDA->pstSegment->szDocument, sizeof(pExportIDA->pstSegment->szDocument) );
          OEMTOANSI( pExportIDA->pstSegment->szDocument );
+      
+         LogMessage(FATAL,"TEMPORARY_COMMENTED in called function MemExportProcess, because of basic TMCHAR data type migration");
+         #ifdef TEMPORARY_COMMENTED
          pExportIDA->pProposal->getSource( pExportIDA->pstSegment->szSource, sizeof(pExportIDA->pstSegment->szSource) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
+         #endif
 
          usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
 

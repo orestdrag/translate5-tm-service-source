@@ -432,6 +432,7 @@ BOOL SetFilePointerEx(
             rewind(ptr);
             int readed = 0;
             FilesystemHelper::ReadFile(ptr, dummy, numOfBytes, readed);
+            delete [] dummy;
             return readed != 1;
         }
 

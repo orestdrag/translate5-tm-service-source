@@ -135,6 +135,7 @@
   /* Include the special definitions for unicode                        */
   /**********************************************************************/
   #include <wchar.h>
+  #include "win_types.h"
 
   #ifndef _EQF_UNICODE
     #define _EQF_UNICODE 1
@@ -155,9 +156,14 @@
     #endif
 
     #ifndef _CHAR_W_DEFINED
+      /*
       typedef wchar_t CHAR_W;
       typedef wchar_t * PCHAR_W;
       typedef wchar_t * PSZ_W;
+      //*/
+      typedef TMCHAR CHAR_W;
+      typedef CHAR_W * PCHAR_W;
+      typedef PCHAR_W  PSZ_W;
       #define _CHAR_W_DEFINED
     #endif
   #endif

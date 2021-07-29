@@ -781,9 +781,9 @@ typedef struct _BTREEIDA
    USHORT       usCurrentRecord;                  // current sequence record
    PBTREEGLOB   pBTree;                           // pointer to global struct
    USHORT       usDictNum;                        // index in global structure
-   CHAR_W       chHeadTerm[HEADTERM_SIZE];        // last active head term
+   USHORT       chHeadTerm[HEADTERM_SIZE];        // last active head term
    BOOL         fLock;                            // head term is locked
-   CHAR_W       chLockedTerm[HEADTERM_SIZE];      // locked term if any
+   USHORT       chLockedTerm[HEADTERM_SIZE];      // locked term if any
    CHAR         chServer[ MAX_SERVER_NAME + 1];   // server name
    PQDAMLAN     pQDAMLanIn;                       // pointer to buffer for LAN
    PQDAMLAN     pQDAMLanOut;                      // pointer to buffer for LAN
@@ -3311,15 +3311,18 @@ SHORT QDAMDictCreateLocal
     pBTIda->pBTree = pBT;          // anchor pointer
 
     // Try to create the index file
-    sRc = filesystem_open_file(pName, pBT->fp, "w+");
+    //*
+    sRc = filesystem_open_file(pName, pBT->fp, "w+b");
+    
     if(pBT->fp){
-      CloseFile(&(pBT->fp));
-      sRc = filesystem_open_file(pName, pBT->fp, "r+b");
+      //CloseFile(&(pBT->fp));
+      //sRc = filesystem_open_file(pName, pBT->fp, "r+b");
     }else{
       LogMessage2(ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
     }
+    //*/
     //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
-    //               OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
+     //              OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
   } /* endif */
 
   if ( !sRc )
@@ -3505,7 +3508,8 @@ SHORT QDAMDictCreateLocal
         } /* endif */
         else
         {
-          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+          LogMessage(WARNING, "TEMPORARY_COMMENTED writing firs record to the file");
+          //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
 
           UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
@@ -3649,7 +3653,7 @@ BOOL
 QDAMDictLockStatus
 (
   PBTREE  pBTIda,
-  PSZ_W   pKey
+  PTMCHAR   pKey
 )
 {
   BOOL     fLock = FALSE;
@@ -3664,6 +3668,8 @@ QDAMDictLockStatus
 
   while ( *ppBTemp && !fLock)
   {
+    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
+    #ifdef TEMPORARY_COMMENTED
     if ( (*ppBTemp)->fLock && ! UTF16stricmp( pKey, (*ppBTemp)->chLockedTerm) )
     {
       /****************************************************************/
@@ -3682,6 +3688,7 @@ QDAMDictLockStatus
     {
       ppBTemp++;
     } /* endif */
+    #endif
   } /* endwhile */
 
   return( fLock );
@@ -8616,13 +8623,16 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
-   #ifdef TEMPORARY_COMMENTED
+   //LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
+   //#ifdef TEMPORARY_COMMENTED
+   LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
+    #ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
-  #endif
+   #endif
+  //#endif
 
    /*******************************************************************/
    /* For shared databases: lock complete file                        */
@@ -8819,10 +8829,45 @@ SHORT QDAMDictUpdSignLocal
   {
      // let 2K at beginning as space
      writingPosition = (LONG) USERDATA_START;
-
+     ULONG size = 0;
+     UtlGetFileSize( pBT->fp, &size, false );
+     int bytesToWrite = writingPosition - size;
      
-     sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
-                          &ulNewOffset, FALSE);
+     
+     if(bytesToWrite > 0){
+      UtlAlloc( (PVOID *)&pchBuffer, 0L, (LONG) bytesToWrite, NOMSG );
+       if ( pchBuffer )
+       {
+          sRc = UtlWrite( pBT->fp, pchBuffer, (USHORT)bytesToWrite, &usBytesWritten, FALSE );
+          // check if disk is full
+          if ( ! sRc )
+          {
+             if ( usBytesWritten != bytesToWrite )
+             {
+                sRc = BTREE_DISK_FULL;
+             } /* endif */
+          }
+          else
+          {
+             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+          } /* endif */
+          // free the buffer
+          UtlAlloc( (PVOID *)&pchBuffer, 0L, 0L, NOMSG );
+       }
+       else
+       {
+          sRc = BTREE_NO_ROOM;
+       } /* endif */
+       //////////////////
+      /*
+       void* bytes = malloc(bytesToWrite);
+       memset(bytes, 0, bytesToWrite);
+       sRc = UtlWrite( pBT->fp, bytes, bytesToWrite, &usBytesWritten, FALSE );
+       free(bytes);//*/
+     }
+     
+     //sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+     //                     &ulNewOffset, FALSE);
   } /* endif */
 
   if ( ! sRc )
@@ -8854,6 +8899,9 @@ SHORT QDAMDictUpdSignLocal
          USHORT usDataLen = (USHORT)ulDataLen;
          sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
                           &ulNewOffset, FALSE);
+
+         //fseek(pBT->fp, writingPosition, SEEK_SET);
+         //usBytesWritten = fwrite(&usDataLen, sizeof(USHORT), 1, pBT->fp) * sizeof(USHORT);
          sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
          writingPosition += usBytesWritten;
@@ -8899,8 +8947,8 @@ SHORT QDAMDictUpdSignLocal
     if ( ! sRc )
     {
       LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
-      LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMDictUpdSignLocal:: fill rest up with zeros => don't need to do that"); 
-      #ifdef TEMPORARY_COMMENTED
+      //LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMDictUpdSignLocal:: fill rest up with zeros => don't need to do that"); 
+      //#ifdef TEMPORARY_COMMENTED
        // fill rest up with zeros
        if ( pBT->bRecSizeVersion == BTREE_V3 )
        {
@@ -8936,7 +8984,7 @@ SHORT QDAMDictUpdSignLocal
        {
           sRc = BTREE_NO_ROOM;
        } /* endif */
-      #endif
+      //#endif
     } /* endif */
   } /* endif */
 

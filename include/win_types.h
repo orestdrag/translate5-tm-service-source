@@ -28,7 +28,12 @@
 #define FALSE 0
 #endif
 
-typedef wchar_t WCHAR;
+
+//CHANGE BASIC TYPE OF STRINGS HERE
+//typedef unsigned short TMCHAR;
+typedef wchar_t TMCHAR;
+typedef TMCHAR * PTMCHAR;
+typedef PTMCHAR WCHAR;
 
 typedef char CHAR;
 typedef char CCHAR;
