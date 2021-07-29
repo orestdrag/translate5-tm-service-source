@@ -683,7 +683,7 @@ typedef struct _BTREEGLOB
    BOOL         fGuard;                           // write every record
    BOOL         fOpen;                            // open flag
    BOOL         fCorrupted;                       // mark as corrupted
-   PCHAR_W      pTempKey;                         // pointer to temp. key
+   PTMWCHAR     pTempKey;                         // pointer to temp. key
    PBYTE        pTempRecord;                      // pointer to temp record
    ULONG        ulTempRecSize;                    // size of temp record area
    BOOL         fTerse;                           // tersing requested
@@ -781,9 +781,9 @@ typedef struct _BTREEIDA
    USHORT       usCurrentRecord;                  // current sequence record
    PBTREEGLOB   pBTree;                           // pointer to global struct
    USHORT       usDictNum;                        // index in global structure
-   USHORT       chHeadTerm[HEADTERM_SIZE];        // last active head term
+   TMWCHAR       chHeadTerm[HEADTERM_SIZE];       // last active head term
    BOOL         fLock;                            // head term is locked
-   USHORT       chLockedTerm[HEADTERM_SIZE];      // locked term if any
+   TMWCHAR       chLockedTerm[HEADTERM_SIZE];     // locked term if any
    CHAR         chServer[ MAX_SERVER_NAME + 1];   // server name
    PQDAMLAN     pQDAMLanIn;                       // pointer to buffer for LAN
    PQDAMLAN     pQDAMLanOut;                      // pointer to buffer for LAN
@@ -1114,8 +1114,8 @@ SHORT NTMKeyCompare
     PVOID  pulKey2                     // pointer to second key
 )
 {
-  ULONG  ulKey1 = *((PULONG)pulKey1);
-  ULONG  ulKey2 = *((PULONG)pulKey2);
+  TMWCHAR  ulKey1 = *((PTMWCHAR)pulKey1);
+  TMWCHAR  ulKey2 = *((PTMWCHAR)pulKey2);
   SHORT  sRc;
   pBTIda;                              // avoid compiler warnings
 
@@ -3668,8 +3668,8 @@ QDAMDictLockStatus
 
   while ( *ppBTemp && !fLock)
   {
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
+    //#ifdef TEMPORARY_COMMENTED
     if ( (*ppBTemp)->fLock && ! UTF16stricmp( pKey, (*ppBTemp)->chLockedTerm) )
     {
       /****************************************************************/
@@ -3688,7 +3688,7 @@ QDAMDictLockStatus
     {
       ppBTemp++;
     } /* endif */
-    #endif
+    //#endif
   } /* endwhile */
 
   return( fLock );
@@ -4174,7 +4174,7 @@ QDAMDictUpdStatus
   } /* endwhile */
 } /* end of function QDAMDictUpdStatus */
 
-PUSHORT QDAMGetszKey_V3
+PTMWCHAR QDAMGetszKey_V3
 (
    PBTREEBUFFER_V3  pRecord,              // active record
    USHORT  i,                          // get data term
@@ -4234,7 +4234,7 @@ PUSHORT QDAMGetszKey_V3
      } /* endif */
    } /* endif */
 
-   return ( (PUSHORT)pData );
+   return ( (PTMWCHAR)pData );
 }
 
 RECPARAM  QDAMGetrecData_V3
@@ -4299,7 +4299,7 @@ SHORT QDAMFindRecord_V3
   SHORT         sHigh;                             // Far right
   SHORT         sMid = 0;                          // Middle
   RECPARAM      recData;                           // data structure
-  PUSHORT       pKey2;                             // pointer to search key
+  PTMWCHAR      pKey2;                             // pointer to search key
   SHORT         sRc;                               // return code
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
@@ -5022,7 +5022,7 @@ SHORT QDAMLocateKey_V3
   SHORT  sResult;
   SHORT  sMid = 0;                         //
   SHORT  sRc = 0;                          // return value
-  PUSHORT  pKey2;                            // pointer to key string
+  PTMWCHAR  pKey2;                         // pointer to key string
   BOOL   fFound = FALSE;
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
@@ -5351,7 +5351,7 @@ SHORT QDAMLocateKey_V3
 SHORT QDAMSplitNode_V3
 (
    PBTREE pBTIda,                // pointer to generic structure
-   PBTREEBUFFER_V3 *record,         // pointer to pointer to node
+   PBTREEBUFFER_V3 *record,      // pointer to pointer to node
    PTMWCHAR pKey                 // new key
 )
 {
@@ -6331,8 +6331,8 @@ SHORT QDAMChangeKey_V3
 (
    PBTREE   pBTIda,                                 // ptr to tree structure
    USHORT   usNode,                                 // start node
-   PUSHORT  pOldKey,                                // find old key
-   PUSHORT  pNewKey                                 // find new key
+   PTMWCHAR pOldKey,                                // find old key
+   PTMWCHAR pNewKey                                 // find new key
 )
 {
   PBTREEBUFFER_V3 pRecord;                            // buffer for record
@@ -6454,16 +6454,16 @@ SHORT QDAMInsertKey_V3
 (
    PBTREE       pBTIda,
    PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
-   PTMWCHAR      pKey,
+   PTMWCHAR     pKey,
    RECPARAM   recKey,                  // position/offset for key
    RECPARAM   recData                  // position/offset for data
 )
 {
   SHORT i = 0;
   PBTREEBUFFER_V3 pTempRec;
-  PUSHORT   pCompKey = NULL;           // key to be compared with
-  PUSHORT   pOldKey;                   // old key at first position
-  PUSHORT   pNewKey;                   // new key at first position
+  PTMWCHAR   pCompKey = NULL;         // key to be compared with
+  PTMWCHAR   pOldKey;                 // old key at first position
+  PTMWCHAR   pNewKey;                 // new key at first position
   BOOL fFound = FALSE;
   SHORT sKeyFound;                    // key found
   SHORT  sNearKey;                     // key found
@@ -6493,10 +6493,10 @@ SHORT QDAMInsertKey_V3
      else
      {
        i = (SHORT) OCCUPIED(pRecord);
-       LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
-       #ifdef TEMPORARY_COMMENTED
-       usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(CHAR_W)));
-      #endif
+       //LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
+       //#ifdef TEMPORARY_COMMENTED
+       usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(TMWCHAR)));
+       //#endif
 
        if ( pBT->usVersion >= NTM_VERSION2 )
        {
@@ -8626,25 +8626,14 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    //LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
    //#ifdef TEMPORARY_COMMENTED
-   LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
-    #ifdef TEMPORARY_COMMENTED
+   //LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
+  //#ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
-   #endif
+   //#endif
   //#endif
-
-   /*******************************************************************/
-   /* For shared databases: lock complete file                        */
-   /*                                                                 */
-   /* Note: this will also update our internal buffers and the        */
-   /*       header record. No need to call QDamCheckForUpdates here.  */
-   /*******************************************************************/
-   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-   {
-     sRc = QDAMPhysLock( pBTIda, TRUE, &fLocked );
-   } /* endif */
 
    if ( pBT->bRecSizeVersion == BTREE_V3 )
    {
@@ -8652,10 +8641,10 @@ SHORT QDAMDictInsertLocal
 
       if ( !sRc )
       {
-        LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
-        #ifdef TEMPORARY_COMMENTED
+        //LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
+        //#ifdef TEMPORARY_COMMENTED
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
-        #endif
+        //#endif
         if ( (usKeyLen == 0) ||
              ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
              (ulLen == 0) ||
@@ -8665,7 +8654,7 @@ SHORT QDAMDictInsertLocal
         }
         else
         {
-          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
+          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(TMWCHAR) );   // save current data
           
           QDAMDictUpdStatus ( pBTIda );
           sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
@@ -8696,10 +8685,10 @@ SHORT QDAMDictInsertLocal
 
       if ( !sRc )
       {
-        LogMessage(ERROR,"TEMPORARY_COMMENTED, UTF16strlenBYTE");
-        #ifdef TEMPORARY_COMMENTED
+        //LogMessage(ERROR,"TEMPORARY_COMMENTED, UTF16strlenBYTE");
+        //#ifdef TEMPORARY_COMMENTED
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
-        #endif
+        //#endif
         if ( usKeyLen == 0 ||(  (usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) || ulLen == 0 || ulLen >= MAXDATASIZE )
         {
           sRc = BTREE_DATA_RANGE;
@@ -8709,10 +8698,10 @@ SHORT QDAMDictInsertLocal
           memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
           
           QDAMDictUpdStatus ( pBTIda );
-          LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
-          #ifdef TEMPORARY_COMMENTED
+          //LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
+          //#ifdef TEMPORARY_COMMENTED
           sRc = QDAMFindRecord_V2( pBTIda, pKey, &pNode );
-          #endif
+          //#endif
         } /* endif */
       } /* endif */
 
@@ -8735,17 +8724,6 @@ SHORT QDAMDictInsertLocal
           /****************************************************************/
           pBT->lTime ++;
       }
-   } /* endif */
-
-   /*******************************************************************/
-   /* For shared databases: unlock complete file                      */
-   /*                                                                 */
-   /* Note: this will also incement the dictionary update counter     */
-   /*       if the dictionary has been modified                       */
-   /*******************************************************************/
-   if ( fLocked )
-   {
-     sRc = QDAMPhysLock( pBTIda, FALSE, NULL );
    } /* endif */
 
    if ( sRc )
