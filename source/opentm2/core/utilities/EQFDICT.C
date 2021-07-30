@@ -466,6 +466,7 @@ typedef struct _BTREEHEADER
   USHORT  usFilled;                               // number of bytes filled
   USHORT  usLastFilled;                           // ptr. to next free byte
   USHORT  usWasteSize;                            // waste size?
+  char MARK[8] = "@#MARK#";
 } BTREEHEADER , * PBTREEHEADER;
 
 /*****************************************************************************/
@@ -781,14 +782,16 @@ typedef struct _BTREEIDA
    USHORT       usCurrentRecord;                  // current sequence record
    PBTREEGLOB   pBTree;                           // pointer to global struct
    USHORT       usDictNum;                        // index in global structure
-   TMWCHAR       chHeadTerm[HEADTERM_SIZE];       // last active head term
+   TMWCHAR      chHeadTerm[HEADTERM_SIZE];       // last active head term
    BOOL         fLock;                            // head term is locked
-   TMWCHAR       chLockedTerm[HEADTERM_SIZE];     // locked term if any
+   TMWCHAR      chLockedTerm[HEADTERM_SIZE];     // locked term if any
+   //probably don't need that
    CHAR         chServer[ MAX_SERVER_NAME + 1];   // server name
    PQDAMLAN     pQDAMLanIn;                       // pointer to buffer for LAN
    PQDAMLAN     pQDAMLanOut;                      // pointer to buffer for LAN
    struct       _BTREEIDA  *  pBTreeRemote;       // pointer to remote BTREE
    CHAR         szUserId [MAX_USERID];            // logged on userid
+   //till this
    BOOL         fPhysLock;                        // db has been physically locked
    CHAR         szFileName[MAX_LONGPATH];         // fully qualified name of file
  } BTREE, * PBTREE, ** PPBTREE;
@@ -1417,6 +1420,9 @@ SHORT QDAMWRecordToDisk_V3
 {
   SHORT sRc = 0;                          // return code
   
+  //temporary hardcoded mark to identify records
+  strcpy(pBuffer->contents.header.MARK,"@MARK#");
+  strcat(pBuffer->contents.header.MARK, intToA(pBTIda->usCurrentRecord));
   LONG  lOffset;                          // offset in file
   ULONG ulNewOffset;                      // new file pointer position
   USHORT usBytesWritten;                  // number of bytes written
@@ -4706,7 +4712,9 @@ SHORT  QDAMAddToBuffer_V3
             if ( TYPE( pRecord ) != chNodeType )
             {
                sRc = BTREE_CORRUPTED;
-               ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+               LogMessage(ERROR,"ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );, BTREE_CORRUPTED");
+               LogMessage(ERROR, "TYPE( pRecord ) != chNodeType");
+               //ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
             }
             else
             {
@@ -8681,49 +8689,7 @@ SHORT QDAMDictInsertLocal
    }
    else
    {
-      PBTREEBUFFER_V2  pNode = NULL;
-
-      if ( !sRc )
-      {
-        //LogMessage(ERROR,"TEMPORARY_COMMENTED, UTF16strlenBYTE");
-        //#ifdef TEMPORARY_COMMENTED
-        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
-        //#endif
-        if ( usKeyLen == 0 ||(  (usKeyLen >= HEADTERM_SIZE * sizeof(CHAR_W))) || ulLen == 0 || ulLen >= MAXDATASIZE )
-        {
-          sRc = BTREE_DATA_RANGE;
-        }
-        else
-        {
-          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(CHAR_W) );   // save current data
-          
-          QDAMDictUpdStatus ( pBTIda );
-          //LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
-          //#ifdef TEMPORARY_COMMENTED
-          sRc = QDAMFindRecord_V2( pBTIda, pKey, &pNode );
-          //#endif
-        } /* endif */
-      } /* endif */
-
-      if ( !sRc )
-      {
-          BTREELOCKRECORD( pNode );
-          sRc = QDAMAddToBuffer_V2( pBTIda, pData, ulLen, &recData );
-          if ( !sRc )
-          {
-            recData.ulLen = ulLen;
-            LogMessage(ERROR,"TEMPORARY_COMMENTED, QDAMFindRecord_V2");
-            #ifdef TEMPORARY_COMMENTED
-            sRc = QDAMInsertKey_V2 (pBTIda, pNode, pKey, recKey, recData);
-            #endif
-          } /* endif */
-
-          BTREEUNLOCKRECORD( pNode );
-          /****************************************************************/
-          /* change time to indicate modifications on dictionary...       */
-          /****************************************************************/
-          pBT->lTime ++;
-      }
+      LogMessage(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
    } /* endif */
 
    if ( sRc )
