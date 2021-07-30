@@ -13,6 +13,7 @@ int logLevelTreshold;
 
 #define THREAD_ID_WRITE_TO_LOGS 1
 #define CONSOLE_LOGGING 1
+#define LOGERRORSINOTHERFILE 1
 
 std::string getDateStr(){
     // current date/time based on current system
@@ -48,7 +49,7 @@ std::string generateLogFileName(){
 }
 
 std::mutex coutMutex;   
-int writeLog(std::string& message){
+int writeLog(std::string& message, bool fFatal = false){
     #ifdef THREAD_ID_WRITE_TO_LOGS
         message += " [thread id = " + std::to_string(_getpid());
         message += "]";
@@ -61,6 +62,16 @@ int writeLog(std::string& message){
     #ifdef CONSOLE_LOGGING
         std::cout << message<< '\n';
     #endif
+
+    #ifdef LOGERRORSINOTHERFILE
+    if(fFatal){
+        std::ofstream logErrorF;
+        logErrorF.open(logFilename+"_FATAL", std::ios_base::app); // append instead of overwrite
+        logErrorF << message <<"\n"; 
+        logErrorF.close();
+    }
+    #endif
+
         std::ofstream logF;
         logF.open(logFilename, std::ios_base::app); // append instead of overwrite
         logF << message <<"\n"; 
@@ -112,14 +123,17 @@ int LogMessageStr(int LogLevel, const std::string& message){
             return LOG_FAIL_INIT;
     }
 
+    bool fFatal = false;
     std::string logMessage;
     switch (LogLevel)
     {
     case FATAL:
         logMessage = "[FATAL]  ";
+        fFatal = true;
         break;
     case ERROR:
         logMessage = "[ERROR]  ";
+        fFatal = true;
         break;
     case WARNING:
         logMessage = "[WARNING]";
@@ -136,7 +150,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
 
     logMessage += ": [" + getTimeStr() + "] :: " + message; 
 
-    return writeLog(logMessage);
+    return writeLog(logMessage, fFatal);
 }
 
 int LogMessage(int LogLevel, const char* message){
