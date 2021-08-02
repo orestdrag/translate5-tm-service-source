@@ -217,15 +217,15 @@ PSZ UtlSplitFnameFromPath( PSZ path)
 
 	Function flow:     Return pointer to position of last backslash plus one
 */
-PSZ UtlGetFnameFromPath( PSZ path)
+char* UtlGetFnameFromPath( const char*  path)
 {
-  PSZ   pszFileName = NULL;                   // ptr to begin of filename
+  const char*  pszFileName = NULL;                   // ptr to begin of filename
 
   if( (pszFileName = strrchr( path, BACKSLASH)) != NULL )
     pszFileName++;
   else
     pszFileName = path;
-  return( pszFileName );
+  return( (char*)pszFileName );
 }
 
 #ifdef TEMPORARY_COMMENTED
