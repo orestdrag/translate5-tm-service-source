@@ -100,6 +100,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
 
     bool DeleteFile(char const* sFileName){
         int res = FilesystemHelper::DeleteFile(sFileName);
+        return res == 0;
     }
 
     //BOOL CloseFile(LPCTSTR lpFileName){

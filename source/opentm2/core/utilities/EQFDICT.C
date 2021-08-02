@@ -466,7 +466,7 @@ typedef struct _BTREEHEADER
   USHORT  usFilled;                               // number of bytes filled
   USHORT  usLastFilled;                           // ptr. to next free byte
   USHORT  usWasteSize;                            // waste size?
-  char MARK[8] = "@#MARK#";
+  char MARK[10] = "@#MARK#";
 } BTREEHEADER , * PBTREEHEADER;
 
 /*****************************************************************************/
@@ -1420,9 +1420,6 @@ SHORT QDAMWRecordToDisk_V3
 {
   SHORT sRc = 0;                          // return code
   
-  //temporary hardcoded mark to identify records
-  strcpy(pBuffer->contents.header.MARK,"@MARK#");
-  strcat(pBuffer->contents.header.MARK, intToA(pBTIda->usCurrentRecord));
   LONG  lOffset;                          // offset in file
   ULONG ulNewOffset;                      // new file pointer position
   USHORT usBytesWritten;                  // number of bytes written
@@ -3089,12 +3086,17 @@ SHORT QDAMAllocKeyRecords
             /*************************************************************/
             /* force write                                               */
             /*************************************************************/
+
+            //temporary hardcoded mark to identify records
+            strcpy(pHeader->MARK,"MARKKEYS");
             sRc = QDAMWRecordToDisk_V3( pBTIda, pRecord);
           } /* endif */
       } /* endwhile */
    }
    else
    {
+      LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      #ifdef TEMPORARY_COMMENTED
       PBTREEBUFFER_V2  pRecord;
       while ( usNum-- && !sRc )
       {
@@ -3121,6 +3123,7 @@ SHORT QDAMAllocKeyRecords
             sRc = QDAMWRecordToDisk_V2( pBTIda, pRecord);
           } /* endif */
       } /* endwhile */
+      #endif
    } /* endif */
    return sRc;
 }
@@ -3315,20 +3318,12 @@ SHORT QDAMDictCreateLocal
   else
   {
     pBTIda->pBTree = pBT;          // anchor pointer
-
     // Try to create the index file
-    //*
     sRc = filesystem_open_file(pName, pBT->fp, "w+b");
     
-    if(pBT->fp){
-      //CloseFile(&(pBT->fp));
-      //sRc = filesystem_open_file(pName, pBT->fp, "r+b");
-    }else{
+    if(!pBT->fp){
       LogMessage2(ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
     }
-    //*/
-    //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
-     //              OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, FALSE);
   } /* endif */
 
   if ( !sRc )
@@ -3356,63 +3351,7 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     if ( !fTransMem )
     {
-
       LogMessage(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
-      #ifdef TEMPORARY_COMMENTED
-      pBT->bVersion = BTREE_V2;
-      pBT->bRecSizeVersion = BTREE_V2;
-      pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
-
-      pBT->usVersion = BTREE_VERSION3;
-      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_V3);
-      // use passed compression table if available else use default one
-      if ( pTermTable )
-      {
-         memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
-         QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // initialise for compression
-         pBT->fTerse = TRUE;
-      }
-      else
-      {
-         pBT->fTerse = FALSE;
-      } /* endif */
-      /******************************************************************/
-      /* support user defined collating sequence and case mapping       */
-      /******************************************************************/
-      if ( pCollating )
-      {
-         memcpy( pBT->chCollate, pCollating, COLLATE_SIZE );
-      }
-      else
-      {
-        memcpy( pBT->chCollate, chDefCollate, COLLATE_SIZE );
-      } /* endif */
-
-      if ( pCaseMap )
-      {
-         memcpy( pBT->chCaseMap, pCaseMap, COLLATE_SIZE );
-      }
-      else
-      {
-        /****************************************************************/
-        /* fill in the characters and use the UtlLower function ...     */
-        /****************************************************************/
-        PBYTE  pTable;
-        UCHAR  chTemp;
-
-        pTable = pBT->chCaseMap;
-        for ( i=0;i < COLLATE_SIZE; i++ )
-        {
-           *pTable++ = (CHAR) i;
-        } /* endfor */
-        chTemp = pBT->chCaseMap[ COLLATE_SIZE - 1];
-        pBT->chCaseMap[ COLLATE_SIZE - 1] = EOS;
-        pTable = pBT->chCaseMap;
-        pTable++;
-        UtlLower( (PSZ)pTable );
-        pBT->chCaseMap[ COLLATE_SIZE - 1] = chTemp;
-      } /* endif */
-      #endif 
     }
     else
     {
@@ -3471,28 +3410,6 @@ SHORT QDAMDictCreateLocal
     else
     {
       LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
-      #ifdef TEMPORARY_COMMENTED
-      UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V2), NOMSG );
-
-      if ( pBT->LookupTable_V2 )
-      {
-        /* Allocate space for AccessCtrTable */
-        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-        if ( !pBT->AccessCtrTable )
-        {
-          UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, 0L, NOMSG );
-          sRc = BTREE_NO_ROOM;
-        }
-        else
-        {
-          pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-        } /* endif */
-      }
-      else
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-      #endif
     } /* endif */
 
     pBT->usNumberOfAllocatedBuffers = 0;
@@ -3511,8 +3428,11 @@ SHORT QDAMDictCreateLocal
       /* header                                                       */
       /****************************************************************/
       if ( pBT->bRecSizeVersion == BTREE_V3 )
-      {
-        USHORT usBytesWritten;
+      {        
+        LogMessage(WARNING, "TEMPORARY_COMMENTED writing first record to the file");
+
+        #ifdef TEMPORARY_COMMENTED
+        USHORT usBytesWritten;        
         PBTREEBUFFER_V3 pbuffer;
         UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
         if ( ! pbuffer )
@@ -3521,34 +3441,19 @@ SHORT QDAMDictCreateLocal
         } /* endif */
         else
         {
-          LogMessage(WARNING, "TEMPORARY_COMMENTED writing firs record to the file");
-          //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
 
           UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
           sRc = QDAMWriteHeader( pBTIda );
         } /* endif */
+        #else 
+        sRc = QDAMWriteHeader( pBTIda );
+        #endif
       }
       else
       {
         LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
-        #ifdef TEMPORARY_COMMENTED
-        USHORT usBytesWritten;
-        PBTREEBUFFER_V2 pbuffer;
-        UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V2 , NOMSG );
-        if ( ! pbuffer )
-        {
-          sRc = BTREE_NO_ROOM;
-        } /* endif */
-        else
-        {
-          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V2, &usBytesWritten, FALSE );
-
-          UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
-
-          sRc = QDAMWriteHeader( pBTIda );
-        } /* endif */
-        #endif
       } /* endif */
 
       if (! sRc )
@@ -3567,6 +3472,7 @@ SHORT QDAMDictCreateLocal
           sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
           {
+            strcpy(pRecord->contents.header.MARK,"MARKROOT");
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
           } /* endif */
@@ -3582,23 +3488,6 @@ SHORT QDAMDictCreateLocal
         else
         {
           LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
-          #ifdef TEMPORARY_COMMENTED
-          PBTREEBUFFER_V2 pRecord;
-          sRc = QDAMReadRecord_V2(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
-          if ( !sRc )
-          {
-            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
-            sRc = QDAMWriteRecord_V2(pBTIda,pRecord);
-          } /* endif */
-          if ( !sRc )
-          {
-            sRc = QDAMAllocKeyRecords( pBTIda, 1 );
-            if (! sRc )
-            {
-                pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
-            } /* endif */
-          } /* endif */
-          #endif
         } /* endif */
       } /* endif */
     } /* endif */

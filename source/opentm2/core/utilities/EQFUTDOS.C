@@ -1421,12 +1421,10 @@ USHORT UtlDeleteHwnd
 	   do {
 		  DosError(0);
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 		  if ( DeleteFile( pszFName ) == 0 )
 		  {
-			usRetCode = (USHORT)GetLastError();
+			  usRetCode = (USHORT)GetLastError();
 		  } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 		  DosError(1);
 		  if ( fMsg && usRetCode )
