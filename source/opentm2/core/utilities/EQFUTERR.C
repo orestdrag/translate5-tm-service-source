@@ -1695,7 +1695,13 @@ BOOL UtlEvent2
    #endif
 
    char buff[255];
-   sprintf(buff, "UtlEvent::sEventID = %h, sEventClass = %h, sEventRC = %h, sGroup = %h, pszAddData = %s", sEventID, sEventClass, sEventRC,pszAddData);
+
+   sprintf(buff, "UtlEvent::sEventID = %h, sEventClass = %h, sEventRC = %h, pszAddData = ", sEventID, sEventClass, sEventRC);
+   if(pszAddData){
+      strcat(buff, pszAddData);
+   }else{
+      strcat(buff, "NULL");
+   }
    switch (sEventType)
    {
    case ERROR_EVENT:

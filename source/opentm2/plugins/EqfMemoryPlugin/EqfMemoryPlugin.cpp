@@ -1102,14 +1102,10 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
     #endif 
 
-
-    #ifdef TEMPORARY_COMMENTED
-    Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
+    Utlstrccpy( pProp->stPropHead.szName, UtlGetFnameFromPath(  strPathName.c_str() ), DOT );
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-    #endif
 
     #ifdef TEMPORARY_COMMENTED
-
     UtlSplitFnameFromPath( pProp->stPropHead.szPath );
     #endif
 
@@ -1117,17 +1113,13 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     //in case of overflow. change these strcpy to strncpy
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
     #endif
-    #ifdef TEMPORARY_COMMENTED
-    strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
-    #endif
+
     strncpy( pProp->stTMSignature.szDescription, 
              pszDescription, 
              sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
     strncpy( pProp->stTMSignature.szSourceLanguage, pszSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
-    #ifdef TEMPORARY_COMMENTED
-    strcpy( pProp->stTMSignature.szUserid, "" );
-    #endif
+
     pProp->stTMSignature.bMajorVersion = TM_MAJ_VERSION;
     pProp->stTMSignature.bMinorVersion = TM_MIN_VERSION;
     strcpy( pProp->szNTMMarker, NTM_MARKER );

@@ -316,17 +316,17 @@ USHORT TmtXCreate
       // add long document table record
       if ( usRc == NO_ERROR )
       {
-        #ifdef TEMPORARY_COMMENTED
-        usRc = NTMWriteLongNameTable( pTmClb );
-        #endif
+         ulKey = LONGNAME_KEY;
+        // write long document name buffer area to the database
+        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+                            (PBYTE)pTmClb->pLongNames->pszBuffer,
+                            pTmClb->pLongNames->ulBufUsed );
       } /* endif */
 
       // create language group table
       if ( usRc == NO_ERROR )
       {
-        #ifdef TEMPORARY_COMMENTED
         usRc = NTMCreateLangGroupTable( pTmClb );
-        #endif
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -336,7 +336,7 @@ USHORT TmtXCreate
         //fill signature record structure
         strcpy( pTmClb->stTmSign.szName, pszName );
 
-      //HERE .TMI file supposed to be created
+        //HERE .TMI file supposed to be created
         usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),

@@ -1056,6 +1056,8 @@ USHORT SetSystemLanguage( PSZ pLanguage )
     return usRC;
 }
 
+
+#endif //TEMPORARY_COMMENTED
 // Get the currently set codepage.
 PSZ GetSystemLanguage( VOID )
 {
@@ -1082,5 +1084,3 @@ BOOL GetLanguageGroup( PSZ pszLanguage, PSZ pszGroup )
   if ( fOK ) strcpy( pszGroup, LangInfo.szLangGroup );
   return( fOK );
 }
-
-#endif //TEMPORARY_COMMENTED
