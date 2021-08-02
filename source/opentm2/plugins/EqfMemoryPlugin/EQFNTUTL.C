@@ -64,7 +64,6 @@ int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 
 
-#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -224,7 +223,8 @@ USHORT NTMGetIDFromNameEx
     if ( pTmClb && pszName[0] != EOS )
     {
       //--- capitalize input string
-      _strupr( pszName );
+      LogMessage(WARNING,"TEMPORARY_COMMENTED in NTMGetIDFromNameEx::_strupr");
+      //_strupr( pszName );
 
       /******************************************************************/
       /* get pointer to table and table entries in dependency of the    */
@@ -541,6 +541,8 @@ USHORT NTMGetIDFromNameEx
   return usRc;
 } /* end of function NTMGetIDFromNameEx */
 
+
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -785,7 +787,7 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
   return( pszFoundName );
 } /* end of function NTMFindNameForID */
 
-
+#endif 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -931,7 +933,7 @@ NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
 
   return usRc;
 } /* end of function NTMGetPointersToTable */
-#endif 
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1789,46 +1791,6 @@ USHORT NTMReadLongNameTable
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
-//|Function name:     NTMWriteLongNameTable                                    |
-//+----------------------------------------------------------------------------+
-//|Function call:     usRC = NTMWriteLongnameTable( pTmClb );                  |
-//+----------------------------------------------------------------------------+
-//|Description:       Writes the data of a long name table to the database.    |
-//+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB   pTmClb           pointer to control block     |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
-// ----------------------------------------------------------------------------+
-USHORT NTMWriteLongNameTable
-(
-  PTMX_CLB    pTmClb                   // pointer to control block
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  ULONG       ulKey = LONGNAME_KEY;    //
-
-#ifdef TEMPORARY COMMENTED
-  // write long document name buffer area to the database
-  usRC = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
-                       (PBYTE)pTmClb->pLongNames->pszBuffer,
-                       pTmClb->pLongNames->ulBufUsed );
-#endif
-  if ( (usRC == NO_ERROR) && pTmClb->fShared )
-  {
-    #ifdef TEMPORARY_COMMENTED
-    usRC = EQFNTMIncrUpdCounter( pTmClb->pstTmBtree, LONGNAMES_UPD_COUNTER,
-                                 &(pTmClb->alUpdCounter[LONGNAMES_UPD_COUNTER]) );
-    #endif
-  } /* endif */
-
-  // return to caller
-  return( usRC );
-} /* end of function NTMWriteLongNameTable */
-
-#ifdef TEMPORARY_COMMENTED
-//+----------------------------------------------------------------------------+
-//|External function                                                           |
-//+----------------------------------------------------------------------------+
 //|Function name:     NTMAddNameToTable                                        |
 //+----------------------------------------------------------------------------+
 //|Function call:     NTMAddNameToTable( PTMX_CLB pTmClb,    //input           |
@@ -2017,6 +1979,7 @@ USHORT NTMAddNameToTable
   return usRc;
 } /* end of function NTMAddNameToTable */
 
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2048,7 +2011,9 @@ int NTMLongNameTableCompCaseIgnore
   /********************************************************************/
   /* compare the long names of the passed table entries using strcmp  */
   /********************************************************************/
-  return( _stricmp( ((PTMX_LONGNAME_TABLE_ENTRY)pEntry1)->pszLongName,
+  //return( _stricmp( ((PTMX_LONGNAME_TABLE_ENTRY)pEntry1)->pszLongName,
+  //                 ((PTMX_LONGNAME_TABLE_ENTRY)pEntry2)->pszLongName ));
+  return( strcmp( ((PTMX_LONGNAME_TABLE_ENTRY)pEntry1)->pszLongName,
                    ((PTMX_LONGNAME_TABLE_ENTRY)pEntry2)->pszLongName ));
 } /* end of function NTMCompNames */
 
@@ -2077,7 +2042,7 @@ USHORT NTMSaveNameTable
   // return to caller
   return( usRc );
 } /* end of function NTMSaveNameTable */
-#endif 
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2228,8 +2193,6 @@ USHORT NTMLoadNameTable
 } /* end of function NTMLoadNameTable */
 
 
-
-#ifdef TEMPORARY_COMMENTED
 USHORT NTMAddLangGroup
 (
   PTMX_CLB    pTmClb,                  // ptr to TM control block
@@ -2319,7 +2282,7 @@ USHORT NTMCreateLangGroupTable
   if ( usRC == NO_ERROR )
   {
 
-    LONG lSize = max( pTmClb->pLanguages->ulMaxEntries, 100L );
+    LONG lSize = pTmClb->pLanguages->ulMaxEntries > 100L ?  pTmClb->pLanguages->ulMaxEntries : 100L;
     lSize *= sizeof(SHORT);
     if( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
                   0L, lSize, NOMSG ) )
@@ -2351,7 +2314,6 @@ USHORT NTMCreateLangGroupTable
   return( usRC );
 } /* end of function NTMCreateLangGroupTable */
 
-#endif //TEMPORARY_COMMENTED
 
 // 
 // function NTMOrganizeIndexFile
