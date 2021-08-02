@@ -3356,6 +3356,9 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     if ( !fTransMem )
     {
+
+      LogMessage(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
+      #ifdef TEMPORARY_COMMENTED
       pBT->bVersion = BTREE_V2;
       pBT->bRecSizeVersion = BTREE_V2;
       pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
@@ -3409,6 +3412,7 @@ SHORT QDAMDictCreateLocal
         UtlLower( (PSZ)pTable );
         pBT->chCaseMap[ COLLATE_SIZE - 1] = chTemp;
       } /* endif */
+      #endif 
     }
     else
     {
@@ -3466,6 +3470,8 @@ SHORT QDAMDictCreateLocal
     }
     else
     {
+      LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      #ifdef TEMPORARY_COMMENTED
       UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V2), NOMSG );
 
       if ( pBT->LookupTable_V2 )
@@ -3486,6 +3492,7 @@ SHORT QDAMDictCreateLocal
       {
         sRc = BTREE_NO_ROOM;
       } /* endif */
+      #endif
     } /* endif */
 
     pBT->usNumberOfAllocatedBuffers = 0;
@@ -3524,6 +3531,8 @@ SHORT QDAMDictCreateLocal
       }
       else
       {
+        LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+        #ifdef TEMPORARY_COMMENTED
         USHORT usBytesWritten;
         PBTREEBUFFER_V2 pbuffer;
         UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V2 , NOMSG );
@@ -3539,6 +3548,7 @@ SHORT QDAMDictCreateLocal
 
           sRc = QDAMWriteHeader( pBTIda );
         } /* endif */
+        #endif
       } /* endif */
 
       if (! sRc )
@@ -3571,6 +3581,8 @@ SHORT QDAMDictCreateLocal
         }
         else
         {
+          LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+          #ifdef TEMPORARY_COMMENTED
           PBTREEBUFFER_V2 pRecord;
           sRc = QDAMReadRecord_V2(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
@@ -3586,6 +3598,7 @@ SHORT QDAMDictCreateLocal
                 pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
             } /* endif */
           } /* endif */
+          #endif
         } /* endif */
       } /* endif */
     } /* endif */
