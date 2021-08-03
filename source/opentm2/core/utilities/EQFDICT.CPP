@@ -13,6 +13,7 @@
 #include <EQF.H>                  // General Translation Manager include file
 #include "core/utilities/LogWrapper.h"
 #include "core/utilities/FilesystemWrapper.h"
+#include "core/utilities/FilesystemHelper.h"
 #include "win_types.h"
 
 //#include <EQFQDMAI.H>             // Private QDAM defines
@@ -1292,12 +1293,13 @@ SHORT QDAMAllocTempAreas
     HeadRecord.Flags.f16kRec  = FALSE;
   } /* endif */
 
-  sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
+  //sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
 
   if ( ! sRc )
   {
-    sRc = UtlWrite( pBT->fp, (PVOID) &HeadRecord,
-                    sizeof(BTREEHEADRECORD), &usBytesWritten, FALSE );
+    //sRc = UtlWrite( pBT->fp, (PVOID) &HeadRecord,
+    //                sizeof(BTREEHEADRECORD), &usBytesWritten, FALSE );
+    FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), &usBytesWritten, FILE_BEGIN);
     if ( sRc )
     {
       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
@@ -1609,8 +1611,8 @@ SHORT QDAMReadRecordFromDisk_V3
     if ( !sRc )
     {
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
-      sRc = SkipBytesFromBeginningInFile(pBT->fp, lOffset);
-      //sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
+      //sRc = SkipBytesFromBeginningInFile(pBT->fp, lOffset);
+      sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
     } /* endif */
 
     // Read the record in to the buffer space
@@ -1669,6 +1671,10 @@ SHORT QDAMReadRecordFromDisk_V3
            pHeader->usFilled = sizeof(BTREEHEADER );
            pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
+           
+           if(strlen(pHeader->MARK) == 0){
+             strcpy(pHeader->MARK, "@@FIRST");
+           }
 
            sRc = QDAMWRecordToDisk_V3(pBTIda, pBuffer);
 
@@ -3319,9 +3325,11 @@ SHORT QDAMDictCreateLocal
   {
     pBTIda->pBTree = pBT;          // anchor pointer
     // Try to create the index file
-    sRc = filesystem_open_file(pName, pBT->fp, "w+b");
+    pBT->fp = FilesystemHelper::OpenFile(pName, "w+b", true);
+    //sRc = filesystem_open_file(pName, pBT->fp, "w+b");
     
     if(!pBT->fp){
+      sRc = -1;
       LogMessage2(ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
     }
   } /* endif */
@@ -3432,23 +3440,23 @@ SHORT QDAMDictCreateLocal
         LogMessage(WARNING, "TEMPORARY_COMMENTED writing first record to the file");
 
         #ifdef TEMPORARY_COMMENTED
-        USHORT usBytesWritten;        
-        PBTREEBUFFER_V3 pbuffer;
-        UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
-        if ( ! pbuffer )
-        {
-          sRc = BTREE_NO_ROOM;
-        } /* endif */
-        else
-        {
-          UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+          USHORT usBytesWritten;        
+          PBTREEBUFFER_V3 pbuffer;
+          UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
+          if ( ! pbuffer )
+          {
+            sRc = BTREE_NO_ROOM;
+          } /* endif */
+          else
+          {
+            UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
 
-          UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
+            UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
-          sRc = QDAMWriteHeader( pBTIda );
-        } /* endif */
+            sRc = QDAMWriteHeader( pBTIda );
+          } /* endif */
         #else 
-        sRc = QDAMWriteHeader( pBTIda );
+          sRc = QDAMWriteHeader( pBTIda );
         #endif
       }
       else
@@ -3472,8 +3480,12 @@ SHORT QDAMDictCreateLocal
           sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
           {
-            strcpy(pRecord->contents.header.MARK,"MARKROOT");
+            strcpy(pRecord->contents.header.MARK,"@@ROOT@@");
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
+            
+            LogMessage(WARNING, "TEMPORARY_HARDCODED inQDAMDictCreateLocal:: pBTIda->pBTree->fGuard = true;");
+            pBTIda->pBTree->fGuard = true;
+            
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
           } /* endif */
           if ( !sRc )
@@ -8676,46 +8688,9 @@ SHORT QDAMDictUpdSignLocal
   {
      // let 2K at beginning as space
      writingPosition = (LONG) USERDATA_START;
-     ULONG size = 0;
-     UtlGetFileSize( pBT->fp, &size, false );
-     int bytesToWrite = writingPosition - size;
-     
-     
-     if(bytesToWrite > 0){
-      UtlAlloc( (PVOID *)&pchBuffer, 0L, (LONG) bytesToWrite, NOMSG );
-       if ( pchBuffer )
-       {
-          sRc = UtlWrite( pBT->fp, pchBuffer, (USHORT)bytesToWrite, &usBytesWritten, FALSE );
-          // check if disk is full
-          if ( ! sRc )
-          {
-             if ( usBytesWritten != bytesToWrite )
-             {
-                sRc = BTREE_DISK_FULL;
-             } /* endif */
-          }
-          else
-          {
-             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-          } /* endif */
-          // free the buffer
-          UtlAlloc( (PVOID *)&pchBuffer, 0L, 0L, NOMSG );
-       }
-       else
-       {
-          sRc = BTREE_NO_ROOM;
-       } /* endif */
-       //////////////////
-      /*
-       void* bytes = malloc(bytesToWrite);
-       memset(bytes, 0, bytesToWrite);
-       sRc = UtlWrite( pBT->fp, bytes, bytesToWrite, &usBytesWritten, FALSE );
-       free(bytes);//*/
-     }
-     
-     //sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
-     //                     &ulNewOffset, FALSE);
-  } /* endif */
+     sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+                           &ulNewOffset, FALSE);     
+  } 
 
   if ( ! sRc )
   {
@@ -8794,51 +8769,29 @@ SHORT QDAMDictUpdSignLocal
     if ( ! sRc )
     {
       LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
-      //LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMDictUpdSignLocal:: fill rest up with zeros => don't need to do that"); 
-      //#ifdef TEMPORARY_COMMENTED
-       // fill rest up with zeros
-       if ( pBT->bRecSizeVersion == BTREE_V3 )
-       {
-         ulDataLen = BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT) - ulDataLen;
-       }
-       else
-       {
-         ulDataLen = BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT) - ulDataLen;
-       } /* endif */
-       UtlAlloc( (PVOID *)&pchBuffer, 0L, (LONG) ulDataLen, NOMSG );
-       if ( pchBuffer )
-       {
-          sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
-                          &ulNewOffset, FALSE);
-          sRc = UtlWrite( pBT->fp, pchBuffer, (USHORT)ulDataLen, &usBytesWritten, FALSE );
-          writingPosition += usBytesWritten;
-          // check if disk is full
-          if ( ! sRc )
-          {
-             if ( usBytesWritten != ulDataLen )
-             {
-                sRc = BTREE_DISK_FULL;
-             } /* endif */
-          }
-          else
-          {
-             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-          } /* endif */
-          // free the buffer
-          UtlAlloc( (PVOID *)&pchBuffer, 0L, 0L, NOMSG );
-       }
-       else
-       {
-          sRc = BTREE_NO_ROOM;
-       } /* endif */
-      //#endif
+      // fill rest up with zeros
+      sRc = UtlChgFilePtr( pBT->fp, BTREE_REC_SIZE_V3, FILE_BEGIN,
+                         &ulNewOffset, FALSE);
+      if ( ! sRc )
+      {
+        if ( BTREE_REC_SIZE_V3 != ulNewOffset )
+        {
+          sRc = BTREE_DISK_FULL;
+        }
+      }
+      else
+      {
+        sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+      }
+
     } /* endif */
-  } /* endif */
+  } 
 
    if ( sRc )
    {
+     LogMessage2(ERROR, "QDAMDictUpdSignLocal:: sRc = ", intToA(sRc));
      ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
-   } /* endif */
+   } 
 
   return sRc;
 }

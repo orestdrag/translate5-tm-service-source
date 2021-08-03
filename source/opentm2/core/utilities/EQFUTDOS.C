@@ -1296,11 +1296,11 @@ USHORT UtlChgFilePtrHwnd
      *pNewOffset = *pulNewOffset;
    }
   
-  fseek(hf, lOffset, SEEK_SET);
+  //fseek(hf, lOffset, SEEK_SET);
   //hf->_offset = lOffset;
-  //SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
+  int res = SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
 
-  if(pulNewOffset){
+  if(pulNewOffset && !res){
      //*pulNewOffset = *pNewOffset;
      *pulNewOffset = lOffset;
    }

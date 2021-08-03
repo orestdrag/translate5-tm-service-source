@@ -32,7 +32,7 @@ set(Util_Source_Files
         UtlRegistry.C
 #EQFUTCLB.C
         #unzip.cpp
-        EQFDICT.C
+        EQFDICT.CPP
         EQFPRO00.C
         
 )

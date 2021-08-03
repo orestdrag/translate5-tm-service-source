@@ -13,8 +13,11 @@
 #include <dirent.h>
 #include "LogWrapper.h"
 #include "EQF.H"
+#include <map>
 
 int __last_error_code = 0;
+
+std::map <std::string, std::vector<UCHAR>> fileBuffers;
 
 std::string parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
@@ -61,9 +64,19 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
     return OpenFile(path, mode);
 }
 
-FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode){
+FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode, bool useBuffer){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
+
+    if(useBuffer){
+        if(fileBuffers.find(fixedPath) != fileBuffers.end()){
+            LogMessage(ERROR, "OpenFile::Filebuffer wasn't created, it's already exists");
+        }else{
+            fileBuffers[fixedPath].resize(1048575);//F FFFF
+            LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(fileBuffers[fixedPath].size()));
+        }
+    }
+
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
     if(ptr == NULL){
@@ -106,10 +119,51 @@ int FilesystemHelper::DeleteFile(FILE*  ptr){
 }//*/
 
 
+int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition){
+    std::string fName = GetFileName(ptr);
+    if(fileBuffers.find(fName)!= fileBuffers.end()){        
+        if(startingPosition + buffSize > fileBuffers[fName].size()){
+            fileBuffers[fName].resize(startingPosition + buffSize);
+        }
+        void* pStPos = &(fileBuffers[fName][startingPosition]);
+        memcpy(pStPos, buff, buffSize);
+    }
+}
+
+int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
+    std::string fName = GetFileName(ptr);
+    if(fileBuffers.find(fName) == fileBuffers.end()){
+        LogMessage2(DEBUG,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
+        return -1;
+    }
+    if(fileBuffers[fName].size()< startingPos+buffSize){
+        LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
+        return -2;
+    }
+    memcpy(buff, &(fileBuffers[fName][startingPos]), buffSize);
+    LogMessage6(INFO, "ReadBuffer::", intToA(buffSize)," bytes read from buffer to ", fName.c_str(), " starting from ", intToA(startingPos) );
+    return 0;
+}
+
+int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
+    if(fileBuffers.find(fName)!= fileBuffers.end()){
+        LogMessage(INFO, "CloseFile:: removing files from buffer");
+        PUCHAR bufStart = &fileBuffers[fName][0];
+        WriteToFile(fName, bufStart, fileBuffers[fName].size());
+        fileBuffers.erase(fName);
+    }
+    return 0;
+}
+
+
+
 int FilesystemHelper::CloseFile(FILE*& ptr){
     LogMessage3(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , ")");
     if(ptr){
+        std::string fName = GetFileName(ptr);
         fclose(ptr);
+        FlushBufferIntoFile(fName);
+
     }
     ptr = NULL;
     return __last_error_code = FILEHELPER_NO_ERROR;
@@ -248,6 +302,98 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     return __last_error_code = errCode;
 }
 
+
+int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffSize, const int startingPosition){
+    LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", GetFileName(ptr).c_str()," starting from position ", intToA(startingPosition));
+    WriteToBuffer(ptr, buff, buffSize, startingPosition);
+    
+    long lPart = startingPosition, hPart = 0;
+
+    int ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+    
+    fseek(ptr, startingPosition, SEEK_SET);
+    return WriteToFile(ptr, buff, buffSize);
+}
+
+int FilesystemHelper::TruncateFileForBytes(HFILE ptr, int numOfBytes){
+    LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", intToA(numOfBytes));
+    off_t lDistance = numOfBytes;
+    int retCode = ftruncate(ptr->_fileno, lDistance);
+    return retCode;
+}
+
+short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet)
+{
+    DWORD ret = 0 ;
+
+    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", intToA(LoPart), ", direction is ", intToA(OffSet));
+    //loff_t res ; //It is also LONGLONG variable.
+    LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
+
+    unsigned int whence = 0 ;
+    
+    if(OffSet == FILE_BEGIN)
+        whence = SEEK_SET ;
+    else if(OffSet == FILE_CURRENT)
+        whence = SEEK_CUR ;
+    else if(OffSet == FILE_END)
+        whence = SEEK_END ;
+    else
+        LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+
+    if(OffSet != FILE_BEGIN){           
+        LogMessage(WARNING, "SetFilePointerEx::FILE_CURRENT\FILE_END not implemented\tested");
+    }
+    
+    int size = FilesystemHelper::GetFileSize(fp);
+    if(size < LoPart){
+        LogMessage2(WARNING, "SetFilePointer::File is smaller than requested position -> writing, fname = ", 
+            FilesystemHelper::GetFileName(fp).c_str());
+        TruncateFileForBytes(fp, LoPart);
+    }
+
+    res = fseek(fp, LoPart, whence);   
+
+    if(res >= 0){
+        fp->_offset = LoPart;
+        LARGE_INTEGER li ;
+        li.QuadPart = res ; //It will move High & Low Order bits.
+        ret = li.LowPart ;
+
+        if(HiPart != 0) //If High Order is not NULL
+        {
+            HiPart = li.HighPart ;
+        }
+    }else{
+        int k = errno ;
+        switch(errno){
+        case EBADF : 
+            LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
+            //FilesystemHelper::GetFileName(fp).c_str()
+            ) ;
+            break ;
+        case EFAULT : 
+            LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            ) ;
+            break ;
+        case EINVAL : 
+            LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            ) ;
+            break ;
+        default:
+            LogMessage2(ERROR," default, fname = ", "" 
+            //FilesystemHelper::GetFileName(fp).c_str() 
+            );
+        }
+
+    }
+    LogMessage2(INFO,"SetFilePointer success, file = ", FilesystemHelper::GetFileName(fp).c_str());
+    return ret ;
+}
+
+
 int FilesystemHelper::WriteToFile(const std::string& path, const unsigned char* buff, const int buffsize){
     return WriteToFile(path, (const char*)buff, buffsize);
 }
@@ -308,6 +454,17 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
     return writenBytes;
 }
 
+
+int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
+    int err = 0;
+    if(err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos)){
+        LogMessage2(INFO, "File not found in buffers -> reading from disk, fName = ", GetFileName(ptr).c_str());
+        long lPart = startingPos, hPart = 0;
+        err = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+        err = ReadFile(ptr, buff, buffSize, bytesRead);
+    }
+    return err;
+}
 
 int FilesystemHelper::ReadFile(const std::string& path, char* buff, 
                                     const int buffSize, int& bytesRead, const std::string& mode ){

@@ -230,97 +230,12 @@ DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 
 DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 {
-    DWORD ret = 0 ;
-
     LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", intToA(LoPart), ", direction is ", intToA(OffSet));
-    //loff_t res ; //It is also LONGLONG variable.
-    LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
-
-    unsigned int whence = 0 ;
-    
-    if(OffSet == FILE_BEGIN)
-        whence = SEEK_SET ;
-    if(OffSet == FILE_CURRENT)
-        whence = SEEK_CUR ;
-    if(OffSet == FILE_END)
-        whence = SEEK_END ;
-
-    if(HiPart == NULL)
-        *HiPart = 0 ;
-
-    //int res = 0;
-    //if(LoPart== 0){
-   //     return true;
-    //}
-    if(OffSet == FILE_BEGIN){           
-        int size = FilesystemHelper::GetFileSize(fp);
-        if(size < LoPart){
-
-            LogMessage2(WARNING, "File is smaller than requested position -> writing, fname = ", 
-                    FilesystemHelper::GetFileName(fp).c_str());
-            TruncateFileForBytes(fp, LoPart);
-            //res = lseek(fp->_fileno, LoPart-1, SEEK_SET);
-            //int writeRes = FilesystemHelper::WriteToFile(fp,"\0",1);
-
-        }else{
-            //res = lseek(fp->_fileno, LoPart, SEEK_SET);
-        }
-        //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
-        //res = lseek(*((int*)fp), LoPart, SEEK_SET);
-        //int fildes = fileno(fp);
-        //res = lseek(fildes, LoPart, SEEK_SET);
-        //fp->_IO_read_ptr = fp->_IO_read_ptr + LoPart;
-        int fno = fileno(fp);
-        res = lseek(fno, LoPart, SEEK_SET);        
-
-    }else if(OffSet == FILE_CURRENT){
-        //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_CUR);
-        LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
-        }else if(OffSet == FILE_END){
-        //res = lseek(fp, largeIntToInt(liDistanceToMove), SEEK_END);
-        LogMessage(ERROR, "SetFilePointerEx::FILE_END not implemented");
-    }else{
-        LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
-    }
-    
-    if(res >= 0){
-        fp->_offset = LoPart;
-        LARGE_INTEGER li ;
-        li.QuadPart = res ; //It will move High & Low Order bits.
-        ret = li.LowPart ;
-
-        if(*HiPart != 0) //If High Order is not NULL
-        {
-            *HiPart = li.HighPart ;
-        }
-    }
-    if(res == -1){
-        int k = errno ;
-        switch(errno){
-        case EBADF : 
-            LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
-            //FilesystemHelper::GetFileName(fp).c_str()
-            ) ;
-            break ;
-        case EFAULT : 
-            LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
-            //FilesystemHelper::GetFileName(fp).c_str() 
-            ) ;
-            break ;
-        case EINVAL : 
-            LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
-            //FilesystemHelper::GetFileName(fp).c_str() 
-            ) ;
-            break ;
-        default:
-            LogMessage2(ERROR," default, fname = ", "" 
-            //FilesystemHelper::GetFileName(fp).c_str() 
-            );
-        }
-
-    }
-
-    return ret ;
+    LONG hipart;
+    int ret = FilesystemHelper::SetFileCursor(fp, LoPart, hipart, OffSet);
+    if(HiPart)
+        *HiPart = hipart;
+    return ret;
 }
 
 
@@ -438,9 +353,6 @@ BOOL SetFilePointerEx(
         }
 
         int TruncateFileForBytes(HFILE ptr, int numOfBytes){
-            LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", intToA(numOfBytes));
-            off_t lDistance = numOfBytes;
-            int retCode = ftruncate(ptr->_fileno, lDistance);
-            return retCode;
+            return FilesystemHelper::TruncateFileForBytes(ptr, numOfBytes);
         }
 //}
