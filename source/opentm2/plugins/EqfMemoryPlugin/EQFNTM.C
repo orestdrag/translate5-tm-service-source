@@ -700,7 +700,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   BOOL              fOk;                //process flag
   USHORT            usQRc;              //rc from EqfSend2Handler
   SERVERNAME        szServer;           //local var for server name
-#ifdef TEMPORARY_COMMENTED
+
   ERREVENT( TMCLOSE_LOC, ERROR_EVENT, 0 );
 
   /********************************************************************/
@@ -767,7 +767,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   {
     ERREVENT( TMCLOSE_LOC, ERROR_EVENT, usRc );
   } /* endif */
-#endif
+
   return usRc;
 } /* end of function TmClose */
 

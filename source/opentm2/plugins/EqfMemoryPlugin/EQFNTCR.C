@@ -176,7 +176,7 @@
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
-
+#include "core/utilities/FilesystemWrapper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -262,6 +262,7 @@ USHORT TmtXCreate
     strcpy( pTmClb->stTmSign.szDescription,
             pTmCreateIn->stTmCreate.szDescription );
 
+    const char* pFullName = pTmCreateIn->stTmCreate.szDataName;
     //call create function for data file
     pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
 
@@ -269,7 +270,9 @@ USHORT TmtXCreate
                          (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
                          FIRST_KEY, &pTmClb->pstTmBtree );
 
-
+    bool tempFile = false;
+    filesystem_flush_buffers(pFullName, tempFile);
+    
     if ( usRc == NO_ERROR )
     {
       //insert initialized record to tm data file
@@ -277,12 +280,15 @@ USHORT TmtXCreate
       usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
 
+      filesystem_flush_buffers(pFullName, tempFile);
 
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
-                    (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );
+                    (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );        
+
+        filesystem_flush_buffers(pFullName, tempFile);
 
       } /* endif */
 
@@ -291,6 +297,8 @@ USHORT TmtXCreate
         ulKey = TAGTABLE_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                     (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
+        
+        filesystem_flush_buffers(pFullName, tempFile);
 
       } /* endif */
 
@@ -299,6 +307,8 @@ USHORT TmtXCreate
         ulKey = LANG_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
+
+        filesystem_flush_buffers(pFullName, tempFile);
 
       } /* endif */
 
@@ -310,6 +320,8 @@ USHORT TmtXCreate
         ulKey = COMPACT_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                              pTmClb->bCompact, sizeof( MAX_COMPACT_SIZE-1 ));
+  
+        filesystem_flush_buffers(pFullName, tempFile);
  
       } /* endif */
 
@@ -321,12 +333,18 @@ USHORT TmtXCreate
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                             (PBYTE)pTmClb->pLongNames->pszBuffer,
                             pTmClb->pLongNames->ulBufUsed );
+        
+        filesystem_flush_buffers(pFullName, tempFile);
+  
       } /* endif */
 
       // create language group table
       if ( usRc == NO_ERROR )
       {
         usRc = NTMCreateLangGroupTable( pTmClb );
+        
+        //filesystem_flush_buffers(pFullName, true);
+  
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -341,6 +359,7 @@ USHORT TmtXCreate
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
                              START_KEY, &pTmClb->pstInBtree );
+        filesystem_flush_buffers(pTmCreateIn->stTmCreate.szIndexName, tempFile);
                              
       } /* endif */
     } /* endif */

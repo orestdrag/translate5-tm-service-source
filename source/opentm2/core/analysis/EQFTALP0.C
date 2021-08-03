@@ -925,6 +925,66 @@ BOOL   LPTerminate (
    return (TRUE);
    }
 
+#ifdef TEMPORARY_COMMENTED
+  /*----------------------------------------------------------------------------*/
+/* The following structure defines the internal format of a formatting table. */
+/* The external SGML format will always be converted to the internal format   */
+/* by a conversion routine.                                                   */
+/* The internal format consists of the control structure with pointers to the */
+/* different parts of the table plus the tag data, the length of which is     */
+/* defined in the control structure.                                          */
+/*----------------------------------------------------------------------------*/
+// TagTables are e.g.: eqfbook.tbl, ... qftags.ibl, listformat.ibl...
+// For Unicode enabling: During TALoadTagTable: all tags and attributes are converted
+// to Unicode. This is done additionally to the old approach.
+// These Unicode tags are stored in a buffer pointed to by pTagTableW.
+// pTagTableW is stored in PLOADEDTABLE and must be freed when the Tagtable is freed.
+
+
+typedef struct _TAGTABLE           /* Tagtable                                    */
+{
+  USHORT      uLength;             /* length of data following                    */
+  CHAR        chId[30];            /* file id for tagtab   @@                 */
+  USHORT      uNumTags;            /* number of tags                              */
+  USHORT      usVersion;           // version string
+  TAGLIST     stTagIndex[27];      /* offset to tags in variable tag part of table */
+  TAGLIST     stAttributeIndex[27];/* offset to attributes in variable attribute */
+                                   /* part of table                               */
+  TAGLIST     stFixTag;          /* offset to first fixed length TAG           */
+  TAGLIST     stVarStartTag;     /* offset to first tag starting with wildcard */
+  TAGLIST     stAttribute;       /* offset to first attribute                  */
+  USHORT        uTagstart;         /* offset to first entry in Tagstart table    */
+  USHORT        uStartpos;         /* offset to first entry in Tagstart position table */
+  USHORT        uAttrEndDelim;     /* offset to first attribute end delimiter   */
+  USHORT      uAttrLength;       /* attribute length, not used at moment    */
+  USHORT        uTagNames;         /* offset to first Tagstring                  */
+  CHAR    szSegmentExit[MAX_FILESPEC];    // name of user exit dll
+  CHAR    chTrnote1Text[MAX_TRNOTE_DESC]; // Indicates a note of level 1
+  CHAR    chTrnote2Text[MAX_TRNOTE_DESC]; // indicates a note of level 2
+  CHAR    chStartText[MAX_TRNOTE_DESC];       // tag, may be followed by TRNote
+  CHAR    chEndText[MAX_TRNOTE_DESC];            // end tag
+  USHORT  uAddInfos;                             // offset to additional tag infos
+   // new fields contained in tagtables TAGTABLE_VERSION3 and above
+   CHAR        chSingleSubst;          // character to use for single substitution
+   CHAR        chMultSubst;            // character to use for multiple substitution
+   CHAR        szDescriptiveName[MAX_DESCRIPTION]; // descriptive name for format (displayed in format combobox)
+   CHAR        szDescription[MAX_DESCRIPTION]; // format description
+   USHORT      usCharacterSet;         // characterset to use for import/export
+   BOOL        fUseUnicodeForSegFile;  // TRUE = store segmented files in Unicode format
+   ULONG       ulPassword;             // protection password
+   ULONG       aulFree[9];             // for future use
+   BOOL        fProtected;             // TRUE = markup table is protected
+     /*******************************************************************/
+      /* The following BOOL fReflow is a 3state BOOL:                    */
+      /* 0           = not used, as previously                           */
+      /* 1           = Reflow allowed                                    */
+      /* 2           = no Reflow, for MRI etc                            */
+      /*******************************************************************/
+   BOOL        fReflow;                //status of Reflow
+   BOOL        afFree[8];              // for future use
+   CHAR        szFree[80];             // for future use
+} TAGTABLE, *PTAGTABLE; 
+#endif
 /*----------------------------------------------------------------------------*\
 | LPSegProc                                                                    |
 | purpose   : Extract terms from segments; pass the terms extracted to         |

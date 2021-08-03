@@ -72,7 +72,10 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         if(fileBuffers.find(fixedPath) != fileBuffers.end()){
             LogMessage(ERROR, "OpenFile::Filebuffer wasn't created, it's already exists");
         }else{
-            fileBuffers[fixedPath].resize(1048575);//F FFFF
+            //fileBuffers[fixedPath].resize(1048575);//F FFFF
+            //fileBuffers[fixedPath].resize(65536);//0x1000
+            //fileBuffers[fixedPath].resize(32768);
+            fileBuffers[fixedPath].resize(16384);
             LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(fileBuffers[fixedPath].size()));
         }
     }
@@ -128,6 +131,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         void* pStPos = &(fileBuffers[fName][startingPosition]);
         memcpy(pStPos, buff, buffSize);
     }
+    return 0;
 }
 
 int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
@@ -136,21 +140,39 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
         LogMessage2(DEBUG,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
         return -1;
     }
-    if(fileBuffers[fName].size()< startingPos+buffSize){
+    if(fileBuffers[fName].size()< startingPos + buffSize){
         LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
         return -2;
     }
-    memcpy(buff, &(fileBuffers[fName][startingPos]), buffSize);
+    PUCHAR p = &(fileBuffers[fName][startingPos]);
+    memcpy(buff, p, buffSize);
     LogMessage6(INFO, "ReadBuffer::", intToA(buffSize)," bytes read from buffer to ", fName.c_str(), " starting from ", intToA(startingPos) );
     return 0;
 }
 
-int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
+int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){ 
     if(fileBuffers.find(fName)!= fileBuffers.end()){
-        LogMessage(INFO, "CloseFile:: removing files from buffer");
-        PUCHAR bufStart = &fileBuffers[fName][0];
-        WriteToFile(fName, bufStart, fileBuffers[fName].size());
+        WriteBuffToFile(fName);
         fileBuffers.erase(fName);
+    }
+    return 0;
+}
+
+int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
+    #ifdef TEMPORARY_COMMENTED
+    if(tempFile) 
+        return 0;
+    #endif
+
+    if(fileBuffers.find(fName)!= fileBuffers.end()){
+        LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
+        PUCHAR bufStart = &fileBuffers[fName][0];
+        int size = fileBuffers[fName].size();
+        if(tempFile)
+            fName+="_buff";
+        HFILE ptr = fopen(fName.c_str(),"w+b");
+        WriteToFile(ptr, bufStart, size);
+        fclose(ptr);
     }
     return 0;
 }
@@ -303,7 +325,7 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
 }
 
 
-int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffSize, const int startingPosition){
+int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
     LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", GetFileName(ptr).c_str()," starting from position ", intToA(startingPosition));
     WriteToBuffer(ptr, buff, buffSize, startingPosition);
     
@@ -311,8 +333,8 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffSi
 
     int ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
     
-    fseek(ptr, startingPosition, SEEK_SET);
-    return WriteToFile(ptr, buff, buffSize);
+    iBytesWritten =  WriteToFile(ptr, buff, buffSize);
+    return 0;
 }
 
 int FilesystemHelper::TruncateFileForBytes(HFILE ptr, int numOfBytes){
@@ -456,13 +478,15 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
 
 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
-    int err = 0;
+    int err = 0, size = 0;
     if(err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos)){
         LogMessage2(INFO, "File not found in buffers -> reading from disk, fName = ", GetFileName(ptr).c_str());
         long lPart = startingPos, hPart = 0;
         err = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
         err = ReadFile(ptr, buff, buffSize, bytesRead);
     }
+    if((size = GetFileSize(ptr)) < startingPos+buffSize)
+        return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     return err;
 }
 

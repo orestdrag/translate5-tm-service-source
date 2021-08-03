@@ -26,7 +26,7 @@ public:
     static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const void* buff, const int buffsize);
 
-    static int WriteToFile(FILE*& ptr, const void* buff, const int buffSize, const int startingPosition);
+    static int WriteToFile(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition);
 
     static int ReadFile(const std::string& path, char* buff, const int buffSize, 
                             int& bytesRead, const std::string& mode = "rb");
@@ -49,12 +49,7 @@ public:
     static int TruncateFileForBytes(HFILE ptr, int numOfBytes);
     static short SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet);
 
-
-    //buffers
-    static int WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition);
-    static int FlushBufferIntoFile(const std::string& fName);
-    static int ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
-
+    static int WriteBuffToFile(std::string fName, bool tempFile = false);
 
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
@@ -77,10 +72,19 @@ public:
 
         FILEHELPER_ERROR_CANT_OPEN_DIR,
 
+        FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED,
+
     };
 
     static std::string GetOtmDir();
     static std::string GetHomeDir();
+
+    private:
+
+    //buffers
+    static int WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition);
+    static int FlushBufferIntoFile(const std::string& fName);
+    static int ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 };
 
 #endif

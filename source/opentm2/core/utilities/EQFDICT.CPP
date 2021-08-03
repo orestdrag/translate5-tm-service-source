@@ -1240,7 +1240,7 @@ SHORT QDAMAllocTempAreas
 ){
   SHORT  sRc=0;
   BTREEHEADRECORD HeadRecord;          // header record
-  USHORT usBytesWritten;               // number of bytes written
+  int iBytesWritten;               // number of bytes written
   ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
@@ -1293,13 +1293,10 @@ SHORT QDAMAllocTempAreas
     HeadRecord.Flags.f16kRec  = FALSE;
   } /* endif */
 
-  //sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
 
   if ( ! sRc )
   {
-    //sRc = UtlWrite( pBT->fp, (PVOID) &HeadRecord,
-    //                sizeof(BTREEHEADRECORD), &usBytesWritten, FALSE );
-    FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), &usBytesWritten, FILE_BEGIN);
+    FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
     if ( sRc )
     {
       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
@@ -1307,7 +1304,7 @@ SHORT QDAMAllocTempAreas
     else
     {
       // check if disk is full
-      if ( usBytesWritten != sizeof(BTREEHEADRECORD)  )
+      if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
       {
         sRc = BTREE_DISK_FULL;
       }
@@ -1422,9 +1419,9 @@ SHORT QDAMWRecordToDisk_V3
 {
   SHORT sRc = 0;                          // return code
   
-  LONG  lOffset;                          // offset in file
+  LONG  lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3; // offset in file
   ULONG ulNewOffset;                      // new file pointer position
-  USHORT usBytesWritten;                  // number of bytes written
+  int iBytesWritten;                  // number of bytes written
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
   INC_REAL_WRITE_COUNT;
@@ -1433,21 +1430,13 @@ SHORT QDAMWRecordToDisk_V3
 
 //QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
 
-  if ( !sRc )
-  {
-    lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3;
-
-    sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
-  } /* endif */
-
   if ( ! sRc )
   {
-    sRc = UtlWrite( pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-
+    sRc = FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
     // check if disk is full
     if ( ! sRc )
     {
-       if ( usBytesWritten == BTREE_REC_SIZE_V3 )
+       if ( iBytesWritten == BTREE_REC_SIZE_V3 )
        {
           pBuffer->fNeedToWrite = FALSE;
        }
@@ -1561,7 +1550,7 @@ SHORT QDAMReadRecordFromDisk_V3
    BOOL           fNewRec              // allow new records flag
 )
 {
-  USHORT    usNumBytesRead = 0;                   // number of bytes read
+  int    iNumBytesRead = 0;                   // number of bytes read
   PBTREEHEADER pHeader;                          // pointer to header
   LONG     lOffset;                              // file offset to be set
   ULONG    ulNewOffset;                          // new position
@@ -1570,7 +1559,8 @@ SHORT QDAMReadRecordFromDisk_V3
   PBTREEGLOB  pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V3 pLEntry = NULL;
   DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
-
+  int resRead = 0;
+  
   /********************************************************************/
   /* Allocate space for a new buffer and let pBuffer point to it      */
   /********************************************************************/
@@ -1620,9 +1610,9 @@ SHORT QDAMReadRecordFromDisk_V3
     if ( !sRc )
     {
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
-      sRc = UtlRead( pBT->fp,
-                     (PVOID)&pBuffer->contents,
-                     BTREE_REC_SIZE_V3, &usNumBytesRead, FALSE);
+      resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
+                     BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
+
       
       if (sRc ) 
         sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
@@ -1634,7 +1624,7 @@ SHORT QDAMReadRecordFromDisk_V3
       /*  if the database is locked and although we are NOT at the    */
       /*  end of the file!)                                           */
       /****************************************************************/
-      if ( !sRc && !usNumBytesRead )
+      if ( !sRc && !iNumBytesRead )
       {
         if ( usNumber < pBT->usNextFreeRecord )
         {
@@ -1656,7 +1646,7 @@ SHORT QDAMReadRecordFromDisk_V3
        pBuffer->usRecordNumber = usNumber;
 //     pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
        *ppReadBuffer = pBuffer;
-       if ( !usNumBytesRead )
+       if ( !iNumBytesRead || resRead == FilesystemHelper::FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED)
        {
          /*************************************************************/
          /* we are at the end of the file                             */
@@ -2372,7 +2362,8 @@ SHORT QDAMWriteRecord_V3
    //  else set only the flag
    if ( !sRc )
    {
-     if ( !pBT->fGuard )
+     LogMessage(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
+     if ( !pBT->fGuard && false)
      {
         pBuffer->fNeedToWrite = TRUE;
      }
@@ -3484,9 +3475,11 @@ SHORT QDAMDictCreateLocal
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
             
             LogMessage(WARNING, "TEMPORARY_HARDCODED inQDAMDictCreateLocal:: pBTIda->pBTree->fGuard = true;");
+            bool fGuard = pBTIda->pBTree->fGuard;
             pBTIda->pBTree->fGuard = true;
             
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
+            pBTIda->pBTree->fGuard = fGuard;
           } /* endif */
           if ( !sRc )
           {
@@ -3547,6 +3540,153 @@ SHORT QDAMDictCreateLocal
 
   return( sRc );
 }
+
+
+
+#define INCL_EQF_ANALYSIS         // analysis functions
+#define INCL_EQF_TM               // general Transl. Memory functions
+#define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
+#define INCL_EQF_DLGUTILS         // dialog utilities
+#define INCL_EQF_MORPH
+#define INCL_EQF_DAM
+#include <EQF.H>                  // General Translation Manager include file
+
+#define INCL_EQFMEM_DLGIDAS
+#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <EQFMORPI.H>
+
+//+----------------------------------------------------------------------------+
+//|External function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     TmtXClose    closes data and index files                 |
+//+----------------------------------------------------------------------------+
+//|Description:       closes qdam data and index files                         |
+//+----------------------------------------------------------------------------+
+//|Function call:  TmtXClose( PTMX_CLOSE_IN pTmCloseIn, //input struct         |
+//|                           PTMX_CLOSE_OUT pTmCloseOut ) //output struct     |
+//+----------------------------------------------------------------------------+
+//|Input parameter: PTMX_CLOSE_IN  pTmCloseIn     input structure              |
+//+----------------------------------------------------------------------------+
+//|Output parameter: PTMX_CLOSE_OUT pTmCloseOut   output structure             |
+//+----------------------------------------------------------------------------+
+//|Returncode type: USHORT                                                     |
+//+----------------------------------------------------------------------------+
+//|Returncodes: identical to return code in close out structure                |
+//+----------------------------------------------------------------------------+
+//|Function flow:                                                              |
+//| copy compact area record to tm data file                                   |
+//| close tm index file                                                        |
+//| close tm data file                                                         |
+//|                                                                            |
+//| return close out structure                                                 |
+// ----------------------------------------------------------------------------+
+
+USHORT TmtXClose
+(
+  PTMX_CLB pTmClb,             //ptr to control block
+  PTMX_CLOSE_IN pTmCloseIn,    //ptr to input struct
+  PTMX_CLOSE_OUT pTmCloseOut   //ptr to output struct
+)
+{
+  USHORT     usRc = NO_ERROR;          //return value
+  USHORT     usRc1 = NO_ERROR;          //return value
+
+  pTmCloseIn = pTmCloseIn;
+
+  //insert compact area, language, file name and author from pTmClb to respective
+  //record in tm data file
+  if ( pTmClb->bCompactChanged )
+  {
+    SHORT sRetries = MAX_RETRY_COUNT;
+    do
+    {
+      usRc = EQFNTMUpdate( pTmClb->pstTmBtree, COMPACT_KEY,
+                           pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
+      if ( pTmClb->fShared && (usRc == BTREE_IN_USE) )
+      {
+        UtlWait( MAX_WAIT_TIME );
+        sRetries--;
+      } /* endif */
+    }
+    while( pTmClb->fShared && (usRc == BTREE_IN_USE) && (sRetries > 0));
+  } /* endif */
+
+  //close index file regardless of errors
+  usRc1 = EQFNTMClose( &pTmClb->pstInBtree );
+  if ( !usRc )
+    usRc = usRc1;
+
+  //close data file
+  usRc1 = EQFNTMClose( &pTmClb->pstTmBtree );
+  if ( !usRc )
+    usRc = usRc1;
+
+  UtlAlloc( (PVOID *) &(pTmClb->pLanguages), 0L, 0L, NOMSG );
+
+  UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
+
+  UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
+
+  UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
+
+  UtlAlloc( (PVOID *) &(pTmClb->pLangGroups), 0L, 0L, NOMSG );
+
+  UtlAlloc( (PVOID *) &(pTmClb->psLangIdToGroupTable), 0L, 0L, NOMSG );
+#ifdef TEMPORARY_COMMENTED
+  NTMDestroyLongNameTable( pTmClb );
+#endif
+
+  // free new structures allocated by sub functions
+  if ( pTmClb->pvTempMatchList )      UtlAlloc( (PVOID *) &(pTmClb->pvTempMatchList), 0L, 0L, NOMSG );
+  if ( pTmClb->pvIndexRecord )        UtlAlloc( (PVOID *) &(pTmClb->pvIndexRecord), 0L, 0L, NOMSG );
+  if ( pTmClb->pvTmRecord )           UtlAlloc( (PVOID *) &(pTmClb->pvTmRecord), 0L, 0L, NOMSG );
+  
+/*
+  // write logging info if logginf is active
+  if ( pTmClb->fTimeLogging )
+  {
+    FILE *hfLog = NULL;
+    CHAR szLogFile[MAX_EQF_PATH];
+
+    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
+    UtlMkDir( szLogFile, 0L, NOMSG );
+    strcat( szLogFile, "\\MEMTIME.LOG" );
+    hfLog = fopen( szLogFile, "a" );
+    
+    if ( hfLog )
+    {
+      fprintf( hfLog, "**** Memory Time Measurement Log ****\n" );
+      fprintf( hfLog, "Allocation time            %12I64d [ms]\n", pTmClb->lAllocTime );
+      fprintf( hfLog, "Tokenization time          %12I64d [ms]\n", pTmClb->lTokenizeTime );
+      fprintf( hfLog, "GetExact time              %12I64d [ms]\n", pTmClb->lGetExactTime );
+      fprintf( hfLog, "GetFuzzy time              %12I64d [ms]\n", pTmClb->lGetFuzzyTime );
+      fprintf( hfLog, "Other times                %12I64d [ms]\n", pTmClb->lOtherTime );
+      fprintf( hfLog, "GetFuzzy time              %12I64d [ms]\n", pTmClb->lGetFuzzyTime );
+      fprintf( hfLog, "GetFuzzy FuzzyTest time    %12I64d [ms]\n", pTmClb->lFuzzyTestTime );
+      fprintf( hfLog, "GetFuzzy FillMatchEntry    %12I64d [ms]\n", pTmClb->lFuzzyFillMatchEntry );
+      fprintf( hfLog, "GetFuzzy NTMGet time       %12I64d [ms]\n", pTmClb->lFuzzyGetTime );
+      fprintf( hfLog, "GetFuzzy other times       %12I64d [ms]\n", pTmClb->lFuzzyOtherTime );
+      fprintf( hfLog, "FillMatchEntry alloctime   %12I64d [ms]\n", pTmClb->lFillMatchAllocTime );
+      fprintf( hfLog, "FillMatchEntry other time  %12I64d [ms]\n", pTmClb->lFillMatchOtherTime );
+      fprintf( hfLog, "FillMatchEntry read time   %12I64d [ms]\n", pTmClb->lFillMatchReadTime );
+      fprintf( hfLog, "FillMatchEntry fill time   %12I64d [ms]\n", pTmClb->lFillMatchFillTime );
+      fprintf( hfLog, "FillMatchEntry fill1 time  %12I64d [ms]\n", pTmClb->lFillMatchFill1Time );
+      fprintf( hfLog, "FillMatchEntry fill2 time  %12I64d [ms]\n", pTmClb->lFillMatchFill2Time );
+      fprintf( hfLog, "FillMatchEntry fill3 time  %12I64d [ms]\n", pTmClb->lFillMatchFill3Time );
+      fprintf( hfLog, "FillMatchEntry fill4 time  %12I64d [ms]\n", pTmClb->lFillMatchFill4Time );
+      fprintf( hfLog, "FillMatchEntry clean time  %12I64d [ms]\n", pTmClb->lFillMatchCleanupTime );
+      fclose( hfLog );
+    } 
+  } 
+  //*/
+  //release control block memory
+  UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
+
+  pTmCloseOut->stPrefixOut.usLengthOutput = sizeof( TMX_CLOSE_OUT );
+  pTmCloseOut->stPrefixOut.usTmtXRc = usRc;
+  return( usRc );
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -8670,7 +8810,7 @@ SHORT QDAMDictUpdSignLocal
 {
   SHORT  sRc=0;                        // return code
   ULONG   ulDataLen;                   // number of bytes to be written
-  USHORT  usBytesWritten;              // bytes written to disk
+  int      iBytesWritten;              // bytes written to disk
   PCHAR   pchBuffer;                   // pointer to buffer
   LONG    lFilePos;                    // file position to position at
   ULONG   ulNewOffset;                 // new offset
@@ -8719,20 +8859,17 @@ SHORT QDAMDictUpdSignLocal
        /*************************************************************/
        {
          USHORT usDataLen = (USHORT)ulDataLen;
-         sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
-                          &ulNewOffset, FALSE);
+         FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
 
-         //fseek(pBT->fp, writingPosition, SEEK_SET);
-         //usBytesWritten = fwrite(&usDataLen, sizeof(USHORT), 1, pBT->fp) * sizeof(USHORT);
-         sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
+         //sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
-         writingPosition += usBytesWritten;
+         writingPosition += iBytesWritten;
        }
 
        // check if disk is full
        if ( ! sRc )
        {
-          if (  usBytesWritten != sizeof(USHORT) )
+          if (  iBytesWritten != sizeof(USHORT) )
           {
              sRc = BTREE_DISK_FULL;
           } /* endif */
@@ -8746,16 +8883,13 @@ SHORT QDAMDictUpdSignLocal
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
-         sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
-                          &ulNewOffset, FALSE);
-          sRc = UtlWrite( pBT->fp, pUserData, (USHORT)ulDataLen,
-                          &usBytesWritten, FALSE );
+         FilesystemHelper::WriteToFile(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
           
-          writingPosition += usBytesWritten;
+          writingPosition += iBytesWritten;
           // check if disk is full
           if ( ! sRc )
           {
-             if (  usBytesWritten != ulDataLen )
+             if (  iBytesWritten != ulDataLen )
              {
                 sRc = BTREE_DISK_FULL;
              } /* endif */
@@ -8770,19 +8904,19 @@ SHORT QDAMDictUpdSignLocal
     {
       LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
       // fill rest up with zeros
-      sRc = UtlChgFilePtr( pBT->fp, BTREE_REC_SIZE_V3, FILE_BEGIN,
-                         &ulNewOffset, FALSE);
-      if ( ! sRc )
-      {
-        if ( BTREE_REC_SIZE_V3 != ulNewOffset )
-        {
-          sRc = BTREE_DISK_FULL;
-        }
-      }
-      else
-      {
-        sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-      }
+      //sRc = UtlChgFilePtr( pBT->fp, BTREE_REC_SIZE_V3, FILE_BEGIN,
+      //                   &ulNewOffset, FALSE);
+      //if ( ! sRc )
+      //{
+      //  if ( BTREE_REC_SIZE_V3 != ulNewOffset )
+      //  {
+      //    sRc = BTREE_DISK_FULL;
+      //  }
+      //}
+      //else
+      //{
+      //  sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+      //}
 
     } /* endif */
   } 

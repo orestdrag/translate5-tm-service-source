@@ -356,3 +356,8 @@ BOOL SetFilePointerEx(
             return FilesystemHelper::TruncateFileForBytes(ptr, numOfBytes);
         }
 //}
+
+
+int filesystem_flush_buffers(const char* fname, bool tempFile){
+    return FilesystemHelper::WriteBuffToFile(fname, tempFile);
+}

@@ -210,9 +210,9 @@ int EqfMemoryPlugin::closeMemory(
   HTM htm = pMem->getHTM();
   
   LogMessage(WARNING, "TEMPORARY_COMMENTED in EqfMemoryPlugin::closeMemory");
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
 	iRC = TmClose( htm, NULL,  FALSE,  NULL );
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
 
 
   // refresh memory info
