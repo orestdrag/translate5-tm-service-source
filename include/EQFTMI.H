@@ -1,7 +1,8 @@
 /*! EQFTMI.H      Internal header file for Translation Memory functions
 	Copyright (c) 1990-2016, International Business Machines Corporation and others. All rights reserved.
 */
-
+#ifndef _EQFTMI_H_
+#define _EQFTMI_H_
 /**********************************************************************/
 /* This include file requires EQFDDE.H!!!                             */
 /**********************************************************************/
@@ -195,6 +196,7 @@
     }                        \
   }
 
+#include "EQFTAG.H"
 /*---------------------------------------------------------------------*\
                  Typedefs Definition
 +-----------------------------------------------------------------------+
@@ -1653,3 +1655,4 @@ BOOL MemGUIImportMemory( PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA,
 
 #endif
 
+#endif

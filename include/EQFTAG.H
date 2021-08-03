@@ -2,6 +2,8 @@
 	Copyright (c) 1990-2012, International Business Machines Corporation and others. All rights reserved.
 */
 
+#ifndef _EQFTAG_H_
+#define _EQFTAG_H_ 1
 /**********************************************************************/
 /**********************************************************************/
 /*        Structures and Types for Token Lists and Tagtables          */
@@ -461,3 +463,4 @@ BOOL TALoadExternalMarkupTableList
   PSZ         *ppListArea,             // caller's list area pointer
   BOOL        fMsg                     // TRUE = show error messages
 );
+#endif
