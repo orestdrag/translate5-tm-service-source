@@ -844,7 +844,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     return false;
   }
 
-  //PROP_NTM prop;
+  PROP_NTM prop;
 
   memset( pInfo, 0, sizeof(MEMORYINFO) );
 
@@ -877,8 +877,9 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   strcpy( pInfo->szFullPath, mem_path.c_str());
   strcpy( pInfo->szName, nameWithoutExtention.c_str());
 
-  //errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
   PPROP_NTM pProp = NULL;
+  //errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
+  //pProp = &prop;
   USHORT usLen = 0;
   bool fOK = UtlLoadFile( (char*)mem_path.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
 
@@ -1102,7 +1103,9 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
     #endif 
 
-    Utlstrccpy( pProp->stPropHead.szName, UtlGetFnameFromPath(  strPathName.c_str() ), DOT );
+    char * fname = UtlGetFnameFromPath(  strPathName.c_str() );
+    Utlstrccpy( pProp->stPropHead.szName, fname, DOT );
+    strcpy(pProp->stTMSignature.szName, pProp->stPropHead.szName);
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
 
     #ifdef TEMPORARY_COMMENTED
@@ -1130,13 +1133,9 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     std::string strPropName;
     this->makePropName( strPathName, strPropName );
 
-    char *cstr = new char[strPathName.length() + 1];
-    strcpy(cstr, strPathName.c_str());
-    int size = sizeof(usPropSize);
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    LogMessage(WARNING, "createMemoryProperties called for file ", cstr, " with fsize = ", intToA(size));
-    WritePropFile(cstr, (PVOID)pProp, size);
-    delete [] cstr;
+    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", intToA(usPropSize));    
+    WritePropFile(strPropName.c_str(), (PVOID)pProp, usPropSize);
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     

@@ -1307,7 +1307,7 @@ USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
     USHORT  usRC = NO_ERROR;             // function return code
     FILE   *hFile = NULL;                // file handle for property files
 
-    hFile = FilesystemHelper::OpenFile( szPath, "wb" );
+    hFile = FilesystemHelper::OpenFile( szPath, "w+b" );
     if ( hFile == NULL )
     {
         LogMessage2(ERROR, "WritePropFile(), path not found: ", szPath);
