@@ -1297,12 +1297,7 @@ SHORT QDAMAllocTempAreas
   if ( ! sRc )
   {
     FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
-    if ( sRc )
-    {
-      sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-    }
-    else
-    {
+
       // check if disk is full
       if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
       {
@@ -1319,7 +1314,6 @@ SHORT QDAMAllocTempAreas
           sRc = BTREE_WRITE_ERROR;
         } /* endif */
       } /* endif */
-    } /* endif */
   } /* endif */
 
   if ( sRc == NO_ERROR )
@@ -2024,6 +2018,212 @@ QDAMDictLockDictLocal
   return sRc;
 } /* end of function QDAMDictLockDictLocal */
 
+#define CHECKPBTREE(pBTIda, sRc)                  \
+   if ( !pBTIda )                                 \
+   {                                              \
+     sRc = BTREE_INVALID;                         \
+   }                                              \
+   else                                           \
+   {                                              \
+     sRc = pBTIda->pBTree ? 0 : BTREE_INVALID;    \
+   } /* endif */
+
+//------------------------------------------------------------------------------
+// External function
+//------------------------------------------------------------------------------
+// Function name:     QDAMRemoveDict
+//------------------------------------------------------------------------------
+// Function call:     _
+//------------------------------------------------------------------------------
+// Description:       _
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE pBTIda           pointer to ida
+//------------------------------------------------------------------------------
+// Returncode type:   USHORT
+//------------------------------------------------------------------------------
+// Returncodes:       open count of current dict
+//------------------------------------------------------------------------------
+// Function flow:     find dictionary in list
+//                    remove our entry from the list
+//                    we closed one dictionary..
+//                    if open count=0
+//                      clear structure
+//                    endif
+//                    return number of open count
+//------------------------------------------------------------------------------
+USHORT
+QDAMRemoveDict
+(
+  PBTREE pBTIda                        // pointer to ida
+)
+{
+  USHORT usI;
+  PPBTREE  ppBTSrc;
+  PPBTREE  ppBTTgt;
+  PQDAMDICT  pQDict;
+  /********************************************************************/
+  /* find dictionary in list                                          */
+  /********************************************************************/
+  usI = pBTIda->usDictNum;
+
+  pQDict = &(QDAMDict[usI]);
+  ppBTSrc = &(pQDict->pIdaList[1]);
+  ppBTTgt = ppBTSrc;
+
+  /********************************************************************/
+  /* remove our entry from the list                                   */
+  /********************************************************************/
+  while ( (*ppBTTgt = *ppBTSrc) != NULL )
+  {
+    if ( *ppBTSrc != pBTIda )
+    {
+      ppBTTgt++;           // copy entry
+    } /* endif */
+    ppBTSrc++;
+  } /* endwhile */
+  *ppBTTgt = NULL;
+
+  /********************************************************************/
+  /* we closed one dictionary..                                       */
+  /********************************************************************/
+  if ( pQDict->usOpenCount )
+  {
+    pQDict->usOpenCount --;
+  } /* endif */
+
+  if ( ! pQDict->usOpenCount  )
+  {
+    memset( pQDict, 0, sizeof( QDAMDICT ));
+  } /* endif */
+
+  return( pQDict->usOpenCount );
+} /* end of function QDAMRemoveDict */
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictFlushLocal    Flush records
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictFlushLocal( PBTREE );
+//
+//------------------------------------------------------------------------------
+// Description:       Writes all records necessary to disk and clears
+//                    the buffers
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//------------------------------------------------------------------------------
+// Function flow:     if BTree is corrupted
+//                      set RC = BTREE_CORRUPTED
+//                    else
+//                      while not rc and not all buffers written
+//                        if buffer exists and needs to be written
+//                          write buffer to disk
+//                        endif
+//                      endwhile
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictFlushLocal
+(
+   PBTREE pBTIda
+)
+{
+  int i = 0;
+  SHORT sRc = 0;                                 // return code
+  PBTREEGLOB  pBT = pBTIda->pBTree;
+
+  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+
+  if ( pBT->fCorrupted )
+  {
+     sRc = BTREE_CORRUPTED;
+  }
+  else
+  {
+    if ( pBT->bRecSizeVersion == BTREE_V3 )
+    {
+      if ( pBT->LookupTable_V3 != NULL  )
+      {
+        BOOL fRecordWritten = FALSE;
+        PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+        for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
+        {
+          if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
+          {
+            sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
+            fRecordWritten = TRUE;
+          } /* endif */
+          pLEntry++;
+        } /* endfor */
+
+        if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock && fRecordWritten )
+        {
+            // this condition should NEVER occur for shared resources
+            // as write is only allowed if the database has been
+            // previously locked
+            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+    #ifdef _DEBUG
+            WinMessageBox( HWND_DESKTOP, (HWND)UtlQueryULong( QL_TWBCLIENT ),
+              "Insecure write to dictionary/TM detected!\nLoc=QDAMDICTFLUSHLOCAL1\nPlease save info required to reproduce this condition.",
+              "Gotcha!", 9999, MB_ERROR );
+    #endif
+        } /* endif */
+      } /* endif */
+    }
+    else
+    {
+      if ( pBT->LookupTable_V2 != NULL  )
+      {
+        BOOL fRecordWritten = FALSE;
+        PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
+        for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
+        {
+          if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
+          {
+            #ifdef TEMPORARY_COMMENTED
+            sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer);
+            fRecordWritten = TRUE;
+            #endif
+          } /* endif */
+          pLEntry++;
+        } /* endfor */
+
+        if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock && fRecordWritten )
+        {
+            // this condition should NEVER occur for shared resources
+            // as write is only allowed if the database has been
+            // previously locked
+            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+    #ifdef _DEBUG
+            WinMessageBox( HWND_DESKTOP, (HWND)UtlQueryULong( QL_TWBCLIENT ),
+              "Insecure write to dictionary/TM detected!\nLoc=QDAMDICTFLUSHLOCAL1\nPlease save info required to reproduce this condition.",
+              "Gotcha!", 9999, MB_ERROR );
+    #endif
+        } /* endif */
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  if ( sRc )
+  {
+     ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
+
+  return sRc;
+}
 
 
 //------------------------------------------------------------------------------
@@ -2074,8 +2274,6 @@ SHORT QDAMDictCloseLocal
    SHORT sRc = 0;                            // error return
    PBTREEGLOB  pBT = NULL;
 
-  LogMessage(FATAL, "called commented out function QDAMDictCloseLocal");
-  #ifdef TEMPORARY_COMMENTED
    /*******************************************************************/
    /* validate passed pointer ...                                     */
    /*******************************************************************/
@@ -2084,7 +2282,7 @@ SHORT QDAMDictCloseLocal
    {
      pBT = pBTIda->pBTree;
    } /* endif */
-
+  
    /*******************************************************************/
    /* decrement the counter and check if we have to physically close  */
    /* the dictionary                                                  */
@@ -2206,9 +2404,8 @@ SHORT QDAMDictCloseLocal
      /* -- do not take care about return code...                         */
      /********************************************************************/
      QDAMDictLockDictLocal( pBTIda, FALSE );
-     #endif
    } /* endif */
-
+}
 
 
 //------------------------------------------------------------------------------
@@ -3428,10 +3625,10 @@ SHORT QDAMDictCreateLocal
       /****************************************************************/
       if ( pBT->bRecSizeVersion == BTREE_V3 )
       {        
-        LogMessage(WARNING, "TEMPORARY_COMMENTED writing first record to the file");
+        //LogMessage(WARNING, "TEMPORARY_COMMENTED writing first record to the file");
 
-        #ifdef TEMPORARY_COMMENTED
-          USHORT usBytesWritten;        
+        //#ifdef TEMPORARY_COMMENTED
+          int iBytesWritten;        
           PBTREEBUFFER_V3 pbuffer;
           UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
           if ( ! pbuffer )
@@ -3440,15 +3637,16 @@ SHORT QDAMDictCreateLocal
           } /* endif */
           else
           {
-            UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+            //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+            FilesystemHelper::WriteToFile(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
 
             UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
             sRc = QDAMWriteHeader( pBTIda );
           } /* endif */
-        #else 
-          sRc = QDAMWriteHeader( pBTIda );
-        #endif
+        //#else 
+        //  sRc = QDAMWriteHeader( pBTIda );
+        //#endif
       }
       else
       {
@@ -4262,8 +4460,8 @@ PTMWCHAR QDAMGetszKey_V3
    if ( usVersion >= NTM_VERSION2 )
    {
       step = sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
-      LogMessage(WARNING, "TEMPORARY HARDCODED in QDAMGetszKey_V3:: step /= 2;//in windows this structure takes 8 bytes, but on linux 16");
-      step /= 2;//in windows this structure takes 8 bytes, but on linux 16
+      //LogMessage(WARNING, "TEMPORARY HARDCODED in QDAMGetszKey_V3:: step /= 2;//in windows this structure takes 8 bytes, but on linux 16");
+      //step /= 2;//in windows this structure takes 8 bytes, but on linux 16
    }
    else
    {
@@ -5104,8 +5302,8 @@ SHORT QDAMLocateKey_V3
        LogMessage4(DEBUG, "found key = ", intToA(*pKey2),", searched for = ", intToA(*pKey));
        if ( pKey2 )
        {
-         LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMLocateKey_V3::pBT->compare");
-         #ifdef TEMPORARY_COMMENTED
+         //LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMLocateKey_V3::pBT->compare");
+         //#ifdef TEMPORARY_COMMENTED
           sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
           if ( sResult < 0 )
           {
@@ -5114,13 +5312,7 @@ SHORT QDAMLocateKey_V3
           else if (sResult > 0)
           {
             sLow = sMid+1;                           // Go right
-          }
-          else
-          #endif
-          if( (*pKey) < (*pKey2) ){
-            sHigh = sMid - 1;
-          }else if(  (*pKey) > (*pKey2) ){
-            sLow = sMid+1; 
+
           }else{
              fFound = TRUE;
              // if exact match is required we have to do a strcmp

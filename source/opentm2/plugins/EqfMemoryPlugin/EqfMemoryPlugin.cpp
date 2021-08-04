@@ -224,7 +224,7 @@ int EqfMemoryPlugin::closeMemory(
     std::string strPropName;
     std::string pathName = pMemInfo->szFullPath;
     this->makePropName( pathName, strPropName );
-    const char* pszName = strrchr( (char*)strPropName.c_str(), '\\' );
+    const char* pszName = strrchr( (char*)strPropName.c_str(), '/' );
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
     this->fillInfoStructure( (PSZ)pszName, pMemInfo );
   }else{
@@ -1132,7 +1132,10 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
 
     char *cstr = new char[strPathName.length() + 1];
     strcpy(cstr, strPathName.c_str());
-    WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
+    int size = sizeof(usPropSize);
+    //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
+    LogMessage(WARNING, "createMemoryProperties called for file ", cstr, " with fsize = ", intToA(size));
+    WritePropFile(cstr, (PVOID)pProp, size);
     delete [] cstr;
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
@@ -1216,6 +1219,7 @@ int EqfMemoryPlugin::makePropName( std::string &strPathName, std::string &strPro
   char szFullPropName[MAX_LONGFILESPEC];
 
   UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
+  properties_get_str(KEY_MEM_DIR, szFullPropName, MAX_LONGFILESPEC-1);
   strcat( szFullPropName, BACKSLASH_STR );
   Utlstrccpy( szFullPropName + strlen(szFullPropName), UtlGetFnameFromPath( (char *)strPathName.c_str() ), DOT );
   strcat( szFullPropName, EXT_OF_MEM );
