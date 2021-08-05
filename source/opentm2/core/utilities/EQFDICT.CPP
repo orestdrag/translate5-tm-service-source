@@ -4511,8 +4511,7 @@ RECPARAM  QDAMGetrecData_V3
    pusOffset = (PUSHORT) pRecord->contents.uchData;
    pusOffset += sMid;                            // point to key
    pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-   LogMessage(WARNING, "TEMPORARY_COMMENTED pData += sizeof(USHORT );                    // get pointer to datarec");
-   //pData += sizeof(USHORT );                    // get pointer to datarec
+   pData += sizeof(USHORT );                    // get pointer to datarec
 
    char buff[256];
    if ( usVersion >= NTM_VERSION2 )
@@ -4522,14 +4521,8 @@ RECPARAM  QDAMGetrecData_V3
 
      memcpy( &recData.usNum, (PUSHORT) pData, sizeof(USHORT ) );
      memcpy( &recData.usOffset, (PUSHORT) (pData+2), sizeof(USHORT ) );
-     //memcpy( &recData.ulLen, (PULONG) (pData+4), sizeof(PULONG ) );
-     //memcpy( &recData.ulLen, (PULONG) (pData+8), sizeof(PULONG ) );
-     //memcpy( &recData.ulLen, pData+4, sizeof(PULONG ) );
-     //memcpy( &recData.ulLen, pData+4, sizeof(PUINT ) );
-     recData.ulLen = *(PUINT (pData+4));
-     //recData.ulLen = *(PUINT (pData+8));
-     //recData.ulLen = *(PUINT (pData+8));
-     //recData.ulLen = *(PULONG(pData+4));
+     memcpy( &recData.ulLen, (PULONG) (pData+4), sizeof(PULONG ) );
+     memcpy( &recData.ulLen, (PULONG) (pData+8), sizeof(PULONG ) );
    }
    else
    {
@@ -5327,9 +5320,9 @@ SHORT QDAMLocateKey_V3
              {
                ULONG pk1 = *((PULONG)pKey);
                ULONG pk2 = *((PULONG)pKey2);
-               //if (*((PULONG)pKey) == *((PULONG)pKey2))
-               LogMessage(WARNING, "TEMPORARY HARDCODED //if (*((PULONG)pKey) == *((PULONG)pKey2)) => if (*(pKey) == *(pKey2))");
-               if (*(pKey) == *(pKey2))
+               if (*((PULONG)pKey) == *((PULONG)pKey2))
+               //LogMessage(WARNING, "TEMPORARY HARDCODED //if (*((PULONG)pKey) == *((PULONG)pKey2)) => if (*(pKey) == *(pKey2))");
+               //if (*(pKey) == *(pKey2))
                {
                   *psKeyPos = sMid;
                }
@@ -8878,16 +8871,10 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   //LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
-   //#ifdef TEMPORARY_COMMENTED
-   //LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
-  //#ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
-   //#endif
-  //#endif
 
    if ( pBT->bRecSizeVersion == BTREE_V3 )
    {
@@ -8895,8 +8882,6 @@ SHORT QDAMDictInsertLocal
 
       if ( !sRc )
       {
-        //LogMessage(ERROR,"TEMPORARY_COMMENTED UTF16strlenBYTE");
-        //#ifdef TEMPORARY_COMMENTED
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
         //#endif
         if ( (usKeyLen == 0) ||

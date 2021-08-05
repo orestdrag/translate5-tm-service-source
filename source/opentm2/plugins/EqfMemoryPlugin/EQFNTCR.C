@@ -314,12 +314,14 @@ USHORT TmtXCreate
 
       if ( usRc == NO_ERROR )
       {
+        int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
+        size = MAX_COMPACT_SIZE-1 ;
         //initialize and insert compact area record
-        memset( pTmClb->bCompact, 0, sizeof( MAX_COMPACT_SIZE-1 ) );
+        memset( pTmClb->bCompact, 0, size );
 
         ulKey = COMPACT_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
-                             pTmClb->bCompact, sizeof( MAX_COMPACT_SIZE-1 ));
+                             pTmClb->bCompact, size);
   
         filesystem_flush_buffers(pFullName, tempFile);
  

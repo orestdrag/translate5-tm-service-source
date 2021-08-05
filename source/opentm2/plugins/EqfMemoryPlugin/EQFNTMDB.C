@@ -353,23 +353,6 @@ SHORT  EQFNTMOpen
      if ( !sRc )
      {
        /***************************************************************/
-       /* Set shared flag for shared TMs (only if TM is not opened    */
-       /* exclusively)                                                */
-       /***************************************************************/
-       if ( !(usOpenFlags & ASD_LOCKED) )
-       {
-         PSZ   pszExt;
-
-         pszExt = strrchr( pName, DOT );
-         if ( (pszExt != NULL) &&
-              ( (strcmp( pszExt, EXT_OF_SHARED_MEM ) == 0) ||
-                (strcmp( pszExt, EXT_OF_SHARED_MEMINDEX ) == 0) ) )
-         {
-           usOpenFlags |= ASD_SHARED;
-         } /* endif */
-       } /* endif */
-
-       /***************************************************************/
        /* check if dictionary is locked                               */
        /***************************************************************/
        if ( ! pBTIda->usDictNum )
