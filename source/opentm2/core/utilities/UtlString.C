@@ -2186,8 +2186,10 @@ ULONG Unicode2AnsiBuf( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, LONG lBufLen,
 ///  ASCII2Unicode convert ASCII string to Unicode                          ///
 ///////////////////////////////////////////////////////////////////////////////
 
-PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG  ulCP )
+PTMWCHAR ASCII2Unicode( PSZ pszASCII, PTMWCHAR pszUni, ULONG  ulCP )
 {
+  mbstowcs(pszUni, pszASCII, MAX_SEGMENT_SIZE);
+  #ifdef TEMPORARY_COMMENTED
   int iRC = 0;
   USHORT  usCP = (USHORT)ulCP;
 
@@ -2269,6 +2271,7 @@ PSZ_W ASCII2Unicode( PSZ pszASCII, PSZ_W pszUni, ULONG  ulCP )
   {
       *pszUni = 0;
     }
+    #endif
   return( pszUni );
 }
 

@@ -16,6 +16,7 @@
 
 #include "EQFTAI.H"               // Private include file for Text Analysis
 #include "../utilities/LogWrapper.h"
+#include "../utilities/PropertyWrapper.H"
 
 /**********************************************************************/
 /* Static array of loaded tag tables                                  */
@@ -70,6 +71,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 )
 {
   CHAR             szTagTableFileName[MAX_EQF_PATH]; // buffer for file name
+  szTagTableFileName[0]='\0';
   PLOADEDTABLE     pTable = NULL;            // ptr for processing of loaded tables
   SHORT            i;                 // loop counter
   USHORT           usRC = NO_ERROR;   // return value of function
@@ -175,11 +177,9 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
         }
         else
         {
-LogMessage(ERROR, "TO_BE_REPLACED_WITH_LINUX_CODE in TALoadTagTableExHwnd");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
           // no more table space, all tables in use
-          return( ERROR_OUT_OF_STRUCTURES );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+          //return( ERROR_OUT_OF_STRUCTURES );
+          return -1;
         } /* endif */
       }
       else if ( i >= sTablesInUse[ usTaskId ] )
@@ -197,8 +197,8 @@ LogMessage(ERROR, "TO_BE_REPLACED_WITH_LINUX_CODE in TALoadTagTableExHwnd");
       /******************************************************************/
       if ( fInternal )
       {
-        UtlMakeEQFPath( szTagTableFileName, NULC, TABLE_PATH, NULL );
-        strcat( szTagTableFileName, BACKSLASH_STR );
+        properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
+        strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );
         strcat( szTagTableFileName, EXT_OF_INTTABLE );
       }
@@ -220,7 +220,8 @@ LogMessage(ERROR, "TO_BE_REPLACED_WITH_LINUX_CODE in TALoadTagTableExHwnd");
         /****************************************************************/
         /* Fill/Initialize data area for loaded tag table               */
         /****************************************************************/
-        memset( pTable, 0, sizeof(LOADEDTABLE) );
+        int loadedTableSize = sizeof(LOADEDTABLE);
+        memset( pTable, 0, loadedTableSize );
         strcpy( pTable->szName, pszTableName );
         strupr( pTable->szName );
         pTable->pTagTable = pTagTable;
@@ -783,7 +784,7 @@ BOOL  TATagsToUnicode
     USHORT     i,j = 0;
 
     PSZ     pCurName;
-    PSZ_W   pTmpW;
+    PTMWCHAR   pTmpW;
     PBYTE   pByte;
     PTAG    pTag;
     PSZ     pTagNames;
@@ -798,7 +799,7 @@ BOOL  TATagsToUnicode
     usAttrCount = pTagTable->stAttribute.uNumber;
     pAttr = (PATTRIBUTE) (pByte + pTagTable->stAttribute.uOffset);
 
-    if ( UtlAlloc( (PVOID *)&pTmpW, 0L, usSize * sizeof(CHAR_W), ERROR_STORAGE ) )
+    if ( UtlAlloc( (PVOID *)&pTmpW, 0L, usSize * sizeof(TMWCHAR), ERROR_STORAGE ) )
     {
         pTable->pTagTableW = pTmpW;
         for ( i = 0; i < usTagCount; i++ )

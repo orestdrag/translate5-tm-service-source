@@ -273,7 +273,8 @@ PSZ UtlMakeEQFPath
           pszFolder = NULL;
           break;
        case TABLE_PATH            :
-          usQSTSubDir = QST_TABLEDIR;
+          //usQSTSubDir = QST_TABLEDIR;
+          strcat(pszPath,"/TABLE");
           pszFolder = NULL;
           //szDrive[0] = szLanDrive[0];
           break;

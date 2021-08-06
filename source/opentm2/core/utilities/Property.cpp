@@ -252,7 +252,7 @@ int Properties::get_value(const std::string& key, std::string& value){
         return existRet;
     }
     value = dataStr.at(key);
-    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),", ", value.c_str(),")");
+    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),") = ", value.c_str(),";");
     return PROPERTY_NO_ERRORS;    
 }
 

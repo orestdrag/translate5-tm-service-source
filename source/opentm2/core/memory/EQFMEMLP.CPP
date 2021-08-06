@@ -85,7 +85,7 @@
 #include "EQFHLOG.H"              // for word count category limits
 #include <EQFQDAM.H>              // Low level TM access functions
 #include "EQFFUNCI.H"             // private defines for function call interface
-
+#include "core/utilities/PropertyWrapper.H"
 
 #define MEM_START_IMPORT    USER_TASK + 1
 #define MEM_IMPORT_TASK     USER_TASK + 2
@@ -1275,8 +1275,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       else
       {
         // Create full path to the memory database format table
-        UtlMakeEQFPath( pLIDA->szFullFtabPath, NULC, TABLE_PATH, NULL );
-        strcat(pLIDA->szFullFtabPath, BACKSLASH_STR );
+        properties_get_str( KEY_OTM_DIR, pLIDA->szFullFtabPath, MAX_EQF_PATH );
+        strcat(pLIDA->szFullFtabPath, "/TABLE/");
         strcat(pLIDA->szFullFtabPath, MEM_FORMAT_TABLE);
 
         // Load the format table and allocate storage for it

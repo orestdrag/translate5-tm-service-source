@@ -7307,14 +7307,11 @@ SHORT  QDAMDictOpenLocal
       pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
       pBT->usOpenFlags = usOpenFlags;
 
-      LogMessage4(INFO, "QDAM: file = ",__FILE__, " line = ", intToA(__LINE__ ));
-
       // open the file
       sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
                      FILE_NORMAL, FILE_OPEN,
                      usFlags,
                      0L, FALSE);
-      LogMessage4(INFO, "File readed QDAM: file = ",__FILE__, " line = ", intToA(__LINE__ ));
    } /* endif */
 
 
@@ -7343,11 +7340,6 @@ SHORT  QDAMDictOpenLocal
         /**************************************************************/
         /* support either old or new format or TM...                  */
         /**************************************************************/
-        #ifndef TEMPORARY_HARDCODED
-//          LogMessage(WARNING, "Temporary_hardcoded value BTREE_HEADER_VALUE_V3");
-//          strncpy(header.chEQF, BTREE_HEADER_VALUE_V3,
-//                      sizeof(BTREE_HEADER_VALUE_V3));
-        #endif
 
         if ( (strncmp( header.chEQF, BTREE_HEADER_VALUE_V3,
                       sizeof(BTREE_HEADER_VALUE_V3) ) == 0) ||
@@ -7564,76 +7556,6 @@ SHORT  QDAMDictOpenLocal
      } /* endif */
      ASDLOG();
 
-     /*******************************************************************/
-     /* for shared databases only:                                      */
-     /* open/create dummy file as update semaphore and buffer for       */
-     /* locked terms                                                   */
-     /*                                                                */
-     /* for all other databases:                                         */
-     /* delete any existing dummy file                                 */
-     /*******************************************************************/
-     if ( !sRc )
-     {
-        CHAR szDummyName[MAX_EQF_PATH];   // buffer for name of dummy file
-        PSZ  pszExt;                      // points to extension of file name
-
-        // Setup name of dummy file
-        strcpy( szDummyName, pName );
-        pszExt = strrchr( szDummyName, DOT );
-        pszExt[2] = '-';
-
-
-         if ( usOpenFlags & ASD_SHARED )
-         {
-           sRc = UtlOpen( szDummyName, &pBT->fpDummy, &usAction, 0L,
-                          FILE_NORMAL, FILE_OPEN | FILE_CREATE,
-                          OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE,
-                          0L, FALSE);
-          sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
-          if ( !sRc )
-          {
-            if ( usAction == FILE_CREATED )
-            {
-//              // Write initial update counter setting
-//              sRc = UtlWrite( pBT->fpDummy, (PVOID)pBT->alUpdCtr,
-//                              sizeof(pBT->alUpdCtr), &usNumBytes, FALSE );
-//              if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_WRITE_ERROR, pBT->usOpenFlags );
-
-              // Close and re-open dummy file to set correct share flags
-              if ( !sRc )
-              {
-                UtlClose( pBT->fpDummy, FALSE );
-                pBT->fpDummy = NULLHANDLE;
-                sRc = UtlOpen( szDummyName, &pBT->fpDummy, &usAction, 0L,
-                            FILE_NORMAL, FILE_OPEN | FILE_CREATE,
-                            OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE,
-                            0L, FALSE);
-                sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
-              } /* endif */
-
-              // Write initial file update counter
-              if ( sRc == NO_ERROR )
-              {
-                memset( pBT->alUpdCtr, 0, sizeof(pBT->alUpdCtr) );
-                sRc = QDAMIncrUpdCounter( pBTIda, 0, NULL );
-              } /* endif */
-            }
-            else
-            {
-              // Read last update counter
-              sRc = QDAMGetUpdCounter( pBTIda, pBT->alUpdCtr, 0, MAX_UPD_CTR );
-            } /* endif */
-          }
-          else
-          {
-            pBT->fpDummy = NULLHANDLE;
-          } /* endif */
-        }
-        else
-        {
-          UtlDelete( szDummyName, 0L, FALSE );
-        } /* endif */
-     } /* endif */
 
      // close in case of error
      if ( sRc && pBTIda )
@@ -7646,11 +7568,6 @@ SHORT  QDAMDictOpenLocal
      {
         pBT->fOpen = TRUE;                       // set open flag
         pBT->fWriteHeaderPending = TRUE;         // postpone write until change
-     } /* endif */
-
-     if ( !sRc && (pBT->usOpenFlags & (ASD_SHARED | ASD_NOOPENCHECK)))
-     {
-        pBT->fOpen = TRUE;                       // set open flag
      } /* endif */
 
 
