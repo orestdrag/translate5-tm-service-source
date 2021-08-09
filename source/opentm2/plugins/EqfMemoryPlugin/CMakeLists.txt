@@ -29,7 +29,7 @@ add_library(EqfMemoryPlugin SHARED ${EqfMemoryPlugin_Source_Files})
 
 set_target_properties(EqfMemoryPlugin PROPERTIES PUBLIC_HEADER EqfMemory.h)
 
-target_link_libraries(EqfMemoryPlugin ${CMAKE_DL_LIBS} PluginManager Util)
+target_link_libraries(EqfMemoryPlugin ${CMAKE_DL_LIBS} PluginManager Util Tools)
 
 configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 

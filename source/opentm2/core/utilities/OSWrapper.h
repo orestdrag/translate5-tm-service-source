@@ -163,7 +163,7 @@ extern "C"{
     
     int _strcmp(const char* a, const char* b);
     int _strcmpi(const char* a, const char* b);
-    int _stricmp(const char* a, const char* b);
+    //int _stricmp(const char* a, const char* b);
 
     void GetSystemTime(LPSYSTEMTIME lpSystemTime);
 

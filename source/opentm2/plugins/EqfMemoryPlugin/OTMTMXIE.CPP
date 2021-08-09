@@ -21,7 +21,12 @@
 // should use the new version of the function asap
 #define _CRT_NON_CONFORMING_SWPRINTFS
 
+#ifdef __STRICT_ANSI__
+#undef __STRICT_ANSI__
+#endif
+
 #include "../../../../include/win_types.h"
+#include "core/utilities/LogWrapper.h"
 //#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +72,7 @@ extern "C"
 #endif
 
 #include "CXMLWRITER.H"
-#include "core/utilities/LanguageFactory.h"
+#include "core/utilities/LanguageFactory.H"
 
 // mask for character entitites below 0x20
 #define ENTITY_MASK_STARTCHAR_W L'_'
@@ -170,6 +175,7 @@ extern "C"
 #define MATCHSEGID_PROP           "tmgr:MatchSegID"
 #define MATCHSEGID_PROP_W        L"tmgr:MatchSegID"
 
+#define ERROR_BAD_FORMAT 136464
 
 // IDs of TMX elelements
 typedef enum { TMX_ELEMENT, PROP_ELEMENT, HEADER_ELEMENT, TU_ELEMENT, TUV_ELEMENT, BODY_ELEMENT,
@@ -202,7 +208,7 @@ TMXNAMETOID TmxNameToID[] =
 // PROP types
 typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
   TRANSLATIONFLAG_PROP, TMTMMATCHTYPE_PROP, TMMTSERVICE_PROP, TMMTMETRICNAME_PROP, TMMTMETRICVALUE_PROP, TMPEEDITDISTANCECHARS_PROP, TMPEEDITDISTANCEWORDS_PROP,  
-  TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID;
+  TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID, PROPID;
 
 // stack elements
 typedef struct _TMXELEMENT
@@ -413,7 +419,7 @@ class CTMXExportImport
 //+----------------------------------------------------------------------------+
 extern "C" 
 __declspec(dllexport)
-USHORT __cdecl EXTMEMEXPORTSTART
+USHORT EXTMEMEXPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszOutFile,         // fully qualified file name for the exported memory
@@ -433,7 +439,7 @@ USHORT __cdecl EXTMEMEXPORTSTART
 
 extern "C" 
 __declspec(dllexport)
-USHORT __cdecl EXTMEMEXPORTPROCESS
+USHORT EXTMEMEXPORTPROCESS
 ( 
   LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
   PMEMEXPIMPSEG    pSegment                 // pointer to structure containing the segment data
@@ -454,7 +460,7 @@ USHORT __cdecl EXTMEMEXPORTPROCESS
 // This function is called once at the end of the memory export
 extern "C" 
 __declspec(dllexport)
-USHORT __cdecl EXTMEMEXPORTEND
+USHORT EXTMEMEXPORTEND
 ( 
   LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
 )
@@ -471,7 +477,7 @@ USHORT __cdecl EXTMEMEXPORTEND
 } /* end of function EXTMEMEXPORTEND */
 
 extern "C" 
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTSTART
+__declspec(dllexport) USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
@@ -492,7 +498,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTSTART
 } /* end of function EXTMEMIMPORTSTART */
 
 extern "C" 
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTPROCESS
+__declspec(dllexport) USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
@@ -510,7 +516,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTPROCESS
 } /* end of function EXTMEMIMPORTPROCESS */
 
 extern "C" 
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTEND
+__declspec(dllexport) USHORT  EXTMEMIMPORTEND
 ( 
   LONG             lHandle                  // Import/import handle as set by ExtMemImportStart function
 )
@@ -527,7 +533,7 @@ __declspec(dllexport) USHORT __cdecl EXTMEMIMPORTEND
 } /* end of function EXTMEMIMPORTEND */
 
 extern "C" 
-__declspec(dllexport) USHORT __cdecl EXTMEMIMPORTGETLASTERROR
+__declspec(dllexport) USHORT EXTMEMIMPORTGETLASTERROR
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PSZ              pszErrorBuffer,          // pointer to buffer for the error text
@@ -778,6 +784,7 @@ USHORT CTMXExportImport::WriteSegment
       while ( fAttribute )
       {
         fAttribute = MADGetNextAttr( &hKey, szAttrNameBuffer, szBuffer, sizeof(szBuffer) / sizeof(CHAR_W) );
+        //if ( fAttribute && (wcsicmp( szAttrNameBuffer, L"words" ) == 0) )
         if ( fAttribute && (wcsicmp( szAttrNameBuffer, L"words" ) == 0) )
         {
           m_xw.WriteStartElement( "prop" );
@@ -891,7 +898,7 @@ USHORT CTMXExportImport::WriteTUV
   {
     USHORT usRC = 0;
 
-    if ( strcmp( m_szActiveTagTable, pszMarkup ) != 0 )
+    if ( stricmp( m_szActiveTagTable, pszMarkup ) != 0 )
     {
       // free loaded tag table
       if ( m_pLoadedTable )
@@ -1061,6 +1068,8 @@ USHORT CTMXExportImport::StartImport
   // get size of input file
   if ( !usRC )
   {
+    LogMessage(WARNING,"TEMPORARY COMMENTED in CTMXExportImport::StartImport");
+    #ifdef TEMPORARY_COMMENTED
     WIN32_FIND_DATA FindData;
     HANDLE hFind = FindFirstFile( this->m_TempFile, &FindData );
     if ( hFind != INVALID_HANDLE_VALUE )
@@ -1072,6 +1081,7 @@ USHORT CTMXExportImport::StartImport
     {
       usRC = ERROR_FILE_NOT_FOUND;
     } /* endif */
+    #endif
   }
 
   // parse the TMX file
@@ -1720,7 +1730,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               else
               {
                 TMXLanguage2TMLanguage( "", pszValue, pBuf->szMemSourceLang );
-                if ( strcmp( pBuf->szMemSourceLang, OTHERLANGUAGES ) == 0 )
+                if ( stricmp( pBuf->szMemSourceLang, OTHERLANGUAGES ) == 0 )
                 {
                   pBuf->szMemSourceLang[0] = 0; 
                 } /* endif */
@@ -2052,25 +2062,29 @@ void TMXParseHandler::fillSegmentInfo
   pSegment->szAddInfo[0] = 0;
   if ( (pBuf->szNote[0]!= 0) || (pBuf->szNoteStyle[0] != 0)  )
   {
-    swprintf( pSegment->szAddInfo, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
+    LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    //swprintf( pSegment->szAddInfo, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
   } /* endif */     
 
   // MT meta data
   if ( (pBuf->szMTMetrics[0] != 0) )
   {
-    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MT%s></MT>", pBuf->szMTMetrics );
+     LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MT%s></MT>", pBuf->szMTMetrics );
   } /* endif */     
 
   // word count info
   if ( (pBuf->ulWords != 0) )
   {
-    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<wcnt words=\"%lu\"></wcnt>", pBuf->ulWords );
+     LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<wcnt words=\"%lu\"></wcnt>", pBuf->ulWords );
   } /* endif */     
 
   // Match segment ID
   if ( (pBuf->szMatchSegID[0] != 0) )
   {
-    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MatchSegID ID=\"%s\"/>", pBuf->szMatchSegID );
+     LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MatchSegID ID=\"%s\"/>", pBuf->szMatchSegID );
   } /* endif */     
 }
 
@@ -2155,7 +2169,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
               int iTestTuv = iCurrent + 1;
               while ( !fSkipTuv && (iTestTuv < iCurTuv) )
               {
-                if ( (strcmp( pTestTuv->szLang, pCurrentTuv->szLang ) == 0) && (wcslen( pTestTuv->szText ) != 0) )
+                if ( (stricmp( pTestTuv->szLang, pCurrentTuv->szLang ) == 0) && (wcslen( pTestTuv->szText ) != 0) )
                 {
                   fSkipTuv = TRUE; // skip this TUV as there is another tuv for the same language having text information
                 } /* endif */
@@ -2567,7 +2581,8 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     wcsncpy( pBuf->szPropW + iCurLength, pszChars, iLength );
     pBuf->szPropW[iCurLength+iLength] = 0;
 
-    int iBytes = WideCharToMultiByte( CP_OEMCP, 0, pBuf->szPropW, -1, pBuf->szProp, sizeof(pBuf->szProp), NULL, NULL );
+    LogMessage(ERROR, "TEMPORARY_COMMENTED");
+    int iBytes = 0;//WideCharToMultiByte( CP_OEMCP, 0, pBuf->szPropW, -1, pBuf->szProp, sizeof(pBuf->szProp), NULL, NULL );
     pBuf->szProp[iBytes] = '\0';
   }
   else if ( fCatchData && (CurElement.ID == INVCHAR_ELEMENT) )
@@ -3107,14 +3122,17 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
       WriteMemHeader( pData );
     } /* endif */
     pData->lSegCounter++;
-    swprintf( pData->szBufferW, L"<Segment>%10.10ld\r\n", pData->lSegCounter );
+     LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    //swprintf( pData->szBufferW, L"<Segment>%10.10ld\r\n", pData->lSegCounter );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"<Control>\r\n" );
-    swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
+    
+     LogMessage(ERROR, "TEMPORARY_COMMENTED");
+    /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
       pSegment->lSegNum, X15_STRW, pSegment->usTranslationFlag, X15_STRW,
       pSegment->lTime, X15_STRW, pSegment->szSourceLang, X15_STRW, 
       (pData->MemInfo.fSourceSource) ? pSegment->szSourceLang : pSegment->szTargetLang, X15_STRW,
-      pSegment->szAuthor, X15_STRW, pSegment->szFormat, X15_STRW, L"na", X15_STRW, pSegment->szDocument );
+      pSegment->szAuthor, X15_STRW, pSegment->szFormat, X15_STRW, L"na", X15_STRW, pSegment->szDocument );//*/
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"\r\n</Control>\r\n" );
     if ( pSegment->szAddInfo[0] != 0 )
@@ -3350,7 +3368,8 @@ USHORT EXPTOTMX
     pData->hfLog = hfLog;
     pData->MemInfo.fUTF16 = (lOutMode & TMX_UTF16_OPT) != 0;
     pData->MemInfo.fNoCRLF = (lOutMode & TMX_NOCRLF_OPT) != 0;
-    WideCharToMultiByte( CP_ACP, 0, pData->szDescription, -1, pData->MemInfo.szDescription, sizeof(pData->MemInfo.szDescription), NULL, NULL );
+    LogMessage(ERROR,"TEMPORARY COMMENTED in CTMXExportImport");
+    //WideCharToMultiByte( CP_ACP, 0, pData->szDescription, -1, pData->MemInfo.szDescription, sizeof(pData->MemInfo.szDescription), NULL, NULL );
 
     usRC = EXTMEMEXPORTSTART( &lHandle, pszOutMem, &(pData->MemInfo) );
   } /* endif */
@@ -3415,12 +3434,14 @@ USHORT WriteStringToMemory
 {
   if ( pData->MemInfo.lOutMode & ASCII_OPT )
   {
-    WideCharToMultiByte( CP_OEMCP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
+    LogMessage(ERROR,"TEMPORARY COMMENTED");
+    //WideCharToMultiByte( CP_OEMCP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
     fwrite( pData->szASCIIBuffer, strlen(pData->szASCIIBuffer), 1, pData->hfOut );
   }
   else if ( pData->MemInfo.lOutMode & ANSI_OPT )
   {
-    WideCharToMultiByte( CP_ACP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
+    LogMessage(ERROR,"TEMPORARY COMMENTED");
+    //WideCharToMultiByte( CP_ACP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
     fwrite( pData->szASCIIBuffer, strlen(pData->szASCIIBuffer), 1, pData->hfOut );
   }
   else
@@ -3436,7 +3457,8 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
   {
     WriteStringToMemory( pData, L"<NTMMemoryDb>\r\n" );
     WriteStringToMemory( pData, L"<Description>\r\n" );
-    MultiByteToWideChar( CP_ACP, 0, pData->MemInfo.szDescription, -1, pData->szBufferW, sizeof(pData->szBufferW)/sizeof(CHAR_W) );
+    LogMessage(ERROR,"TEMPORARY COMMENTED");
+    //MultiByteToWideChar( CP_ACP, 0, pData->MemInfo.szDescription, -1, pData->szBufferW, sizeof(pData->szBufferW)/sizeof(CHAR_W) );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"\r\n</Description>\r\n" );
     WriteStringToMemory( pData, L"<Codepage>" );
@@ -3444,14 +3466,16 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
     {
       CHAR_W szCP[14];
       ULONG ulCP = GetLangAnsiCP( NULL );
-      swprintf( szCP, L"ANSI=&lu", ulCP );
+      LogMessage(ERROR,"TEMPORARY COMMENTED");
+      //swprintf( szCP, L"ANSI=&lu", ulCP );
       WriteStringToMemory( pData, szCP );
     }
     else if ( pData->MemInfo.lOutMode & ASCII_OPT )
     {
       CHAR_W szCP[14];
       ULONG ulCP = GetLangOEMCP( NULL );
-      swprintf( szCP, L"ASCII=&lu", ulCP );
+      LogMessage(ERROR,"TEMPORARY COMMENTED");
+      //swprintf( szCP, L"ASCII=&lu", ulCP );
       WriteStringToMemory( pData, szCP );
     }
     else
@@ -3508,6 +3532,8 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
 
   pData;                               // suppress 'unreferenced formal parameter' warning
 
+  LogMessage(ERROR,"TEMPORARY COMMENTED");
+  #ifdef TEMPORARY_COMMENTED
   hdir = FindFirstFile( pszInMemory, &FindData );
   if ( hdir == INVALID_HANDLE_VALUE )
   {
@@ -3518,6 +3544,7 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
   {
     FindClose( hdir );
   } /* endif */
+  #endif
 
   return( usRC );
 } /* end of function CheckExistence */
@@ -3542,7 +3569,8 @@ USHORT GetSourceLangW( PCONVERTERDATA pData, PSZ pszSourceLanguage )
 
       // retrieve source language
       wcscpy( pData->szBufferW, ParseX15W( pData->szLine, 3 ) );
-      WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pszSourceLanguage, MAX_LANG_LENGTH, NULL, NULL );
+      LogMessage(ERROR,"TEMPORARY COMMENTED");
+      //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pszSourceLanguage, MAX_LANG_LENGTH, NULL, NULL );
 
       fWaitingForControlRecord = FALSE;
     }
@@ -3831,13 +3859,17 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           } /* endif */
           pData->Segment.lTime = _wtol( ParseX15W( pData->szControl, 2 ) );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 3 ) );
-          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szSourceLang, sizeof(pData->Segment.szSourceLang), NULL, NULL );
+          LogMessage(ERROR,"TEMPORARY COMMENTED");
+          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szSourceLang, sizeof(pData->Segment.szSourceLang), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 4 ));
-          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szTargetLang, sizeof(pData->Segment.szTargetLang), NULL, NULL );
+          LogMessage(ERROR,"TEMPORARY COMMENTED");
+          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szTargetLang, sizeof(pData->Segment.szTargetLang), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 6 ));
-          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szFormat, sizeof(pData->Segment.szFormat), NULL, NULL );
+          LogMessage(ERROR,"TEMPORARY COMMENTED");
+          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szFormat, sizeof(pData->Segment.szFormat), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 8 ) );
-          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szDocument, sizeof(pData->Segment.szDocument), NULL, NULL );
+          LogMessage(ERROR,"TEMPORARY COMMENTED");
+          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szDocument, sizeof(pData->Segment.szDocument), NULL, NULL );
 
           // get contol string end tag and check it
           GetLine( pData, pData->szLine, sizeof(pData->szLine), pData->fUnicode, &fEOF  );
@@ -4240,7 +4272,8 @@ USHORT GetLine( PCONVERTERDATA pData, PSZ_W pszLine, int iSize, BOOL fUnicode, P
       usRC = 0;
     } /* endif */
 
-    MultiByteToWideChar( pData->ulInputCP, 0, szAsciiLine, -1, pszLine, iSize-1 );
+    LogMessage(ERROR,"TEMPORARY COMMENTED");
+    //MultiByteToWideChar( pData->ulInputCP, 0, szAsciiLine, -1, pszLine, iSize-1 );
   } /* endif */
 
   pData->iLineNum++;
@@ -4779,3 +4812,59 @@ void CopyTextAndProcessMaskedEntitites( PSZ_W pszTarget, PSZ_W pszSource )
   } /* endwhile */
   *pszTarget = 0;
 } /* end of function CopyTextAndProcessMaskedEntitites */
+
+
+
+int _wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2){
+  return wcscasecmp(p1, p2);
+}
+
+int _stricmp(const char* p1, const char* p2){
+  return strcasecmp(p1, p2);
+}
+
+
+int wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2){
+  return _wcsicmp(p1, p2);
+}
+
+int stricmp(const char* p1, const char* p2){
+  return _stricmp(p1, p2);
+}
+
+int _wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz){
+  return wcsncasecmp(p1,p2,sz);
+}
+
+int wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz){
+  return _wcsnicmp(p1,p2,sz);
+}
+
+int _strnicmp(const char* p1, const char* p2, const int sz){
+  return strncasecmp(p1, p2, sz);
+}
+
+int strnicmp(const char* p1, const char* p2, const int sz){
+  return _strnicmp(p1, p2, sz);
+}
+
+long _wtol(
+   const wchar_t *str
+){
+    return std::stol(str);
+}
+
+/*
+wchar_t *wcscpy(
+   wchar_t *strDestination,
+   const wchar_t *strSource
+){
+  return _mbscpy(strDestination, strSour);
+}
+
+int wcslen(
+   const wchar_t *strSource
+){
+  return _mbslen(strSource);
+}
+//*/

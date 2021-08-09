@@ -3,10 +3,16 @@
     https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types
 */
 
+#ifdef __STRICT_ANSI__
+#undef __STRICT_ANSI__
+#endif
+
 #ifndef WIN_TYPES_H
 #define WIN_TYPES_H
 
 #include <cstdio>
+#include <strings.h>
+
 #define WINAPI /*__stdcall*/
 #define APIENTRY WINAPI
 #define EXPENTRY WINAPI
@@ -29,6 +35,7 @@
 #endif
 
 
+
 //CHANGE BASIC TYPE OF STRINGS HERE
 typedef char TM_CHAR;
 typedef TM_CHAR * PTM_CHAR;
@@ -36,7 +43,7 @@ typedef TM_CHAR * PTM_CHAR;
 //typedef unsigned short TMWCHAR;
 typedef wchar_t TMWCHAR;
 typedef TMWCHAR * PTMWCHAR;
-typedef PTMWCHAR WCHAR;
+typedef TMWCHAR WCHAR;
 
 
 typedef char CHAR;
@@ -624,5 +631,37 @@ typedef struct _OSVERSIONINFOEX {
 #define _MAX_DIR 256
 #define _MAX_FNAME 256
 #define _MAX_EXT 256
+
+
+
+
+
+int _wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2);
+
+int _stricmp(const char* p1, const char* p2);
+
+int wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2);
+
+int stricmp(const char* p1, const char* p2);
+
+int _wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz);
+
+int wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz);
+
+int _strnicmp(const char* p1, const char* p2, const int sz);
+
+int strnicmp(const char* p1, const char* p2, const int sz);
+
+long _wtol(const wchar_t *str);
+
+
+/*
+wchar_t *wcscpy(
+   wchar_t *strDestination,
+   const wchar_t *strSource
+);
+int wcslen(
+   const wchar_t *strSource
+);//*/
 
 #endif

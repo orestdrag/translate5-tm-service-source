@@ -140,9 +140,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+#include <wchar.h>
+//#include <windows.h>
 
-#include "cxmlwriter.h"
+#include "CXMLWRITER.H"
+#include "../core/utilities/LogWrapper.h"
 
 CXmlWriter::CXmlWriter( const char *strFileName )
 {
@@ -312,7 +314,8 @@ void CXmlWriter::WriteCDataString( const WCHAR *text )
 void CXmlWriter::WriteInt( int iValue )
 {
   WCHAR szValue[20];
-  swprintf( szValue, L"%d", iValue );
+  LogMessage(ERROR, "TEMPORARY_COMMENTED");
+  //swprintf( szValue, L"%d", iValue );
   WriteString( szValue );
 }
 
@@ -437,7 +440,8 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       }
       else
       {
-        int iBytes = WideCharToMultiByte( CP_UTF8, 0, text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
+        LogMessage(ERROR, "TEMPORARY_COMMENTED");
+        int iBytes = 0;//WideCharToMultiByte( CP_UTF8, 0, text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
         fwrite( m_Buffer, 1, iBytes, m_hf );
       } /* endif */
       m_iColumn += iLFPos;
@@ -734,7 +738,8 @@ int CXmlWriter::Push( enum _ElementType type, const WCHAR *name )
   memset( pNewElement, 0, sizeof(struct _Element) );
   pNewElement->ElementType = type;
   pNewElement->pPrev = m_pRoot;
-  pNewElement->pName = _wcsdup( name );
+  LogMessage(ERROR, "TEMPORARY_COMMENTED");
+  //pNewElement->pName = _wcsdup( name );
   m_iStackSize++;
   m_pRoot = pNewElement;
 
@@ -806,6 +811,7 @@ void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
 {
   int iUnicodeLen = sizeof(WCHAR) * strlen(pAnsiText) + 10;
   WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen );
-  MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
+  LogMessage(ERROR, "TEMPORARY_COMMENTED");
+  //MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
   *ppUnicodeText = pBuffer;
 }

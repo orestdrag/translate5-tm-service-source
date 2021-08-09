@@ -221,6 +221,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
         /* Fill/Initialize data area for loaded tag table               */
         /****************************************************************/
         int loadedTableSize = sizeof(LOADEDTABLE);
+        int tagTableSize = sizeof(TAGTABLE);
         memset( pTable, 0, loadedTableSize );
         strcpy( pTable->szName, pszTableName );
         strupr( pTable->szName );
@@ -860,7 +861,6 @@ BOOL  TATagsToUnicode
     {
       fOK = FALSE;
     }
-
 
     return fOK;
   }  /* end of TATagsToUnicode */

@@ -16,6 +16,7 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 //
+#include "win_types.h"
 
 class __declspec(dllexport) CXmlWriter
 {
@@ -120,7 +121,8 @@ protected:
   int m_iStackSize;
   int m_iCurIndention;
   int m_iColumn;
-  char m_strFileName[_MAX_PATH];
+  //char m_strFileName[_MAX_PATH];
+  char m_strFileName[MAX_PATH];
   char m_Buffer[2048];
   BOOL m_fLFBeforeEnd;                 // TRUE = insert LF before adding end element
   typedef enum _ElementType { Tag, Attribute, Document, Undefined } ElementType;
