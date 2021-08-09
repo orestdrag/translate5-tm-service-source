@@ -27,6 +27,9 @@
 
 #include "../../../../include/win_types.h"
 #include "core/utilities/LogWrapper.h"
+#include "core/utilities/PropertyWrapper.H"
+#include "core/utilities/FilesystemHelper.h"
+
 //#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,6 +76,7 @@ extern "C"
 
 #include "CXMLWRITER.H"
 #include "core/utilities/LanguageFactory.H"
+#include "core/utilities/EncodingHelper.h"
 
 // mask for character entitites below 0x20
 #define ENTITY_MASK_STARTCHAR_W L'_'
@@ -144,30 +148,37 @@ extern "C"
 #define TMMATCHTYPE_PROP            "TM:MatchType"
 #define TMMATCHTYPE_PROP_W         L"TM:MatchType"
 #define TMMATCHTYPE_PROP_W_OLD     L"TM-MatchType"
+#define TMMATCHTYPE_PROP_OLD     "TM-MatchType"
 
 #define MTSERVICE_PROP              "MT:ServiceID"
 #define MTSERVICE_PROP_W           L"MT:ServiceID"
 #define MTSERVICE_PROP_W_OLD       L"MT-ServiceID"
+#define MTSERVICE_PROP_OLD          "MT-ServiceID"
 
 #define MTMETRICNAME_PROP           "MT:MetricName"
 #define MTMETRICNAME_PROP_W        L"MT:MetricName"
 #define MTMETRICNAME_PROP_W_OLD    L"MT-MetricName"
+#define MTMETRICNAME_PROP_OLD       "MT-MetricName"
 
 #define MTMETRICVALUE_PROP          "MT:MetricValue"
 #define MTMETRICVALUE_PROP_W       L"MT:MetricValue"
 #define MTMETRICVALUE_PROP_W_OLD   L"MT-MetricValue"
+#define MTMETRICVALUE_PROP_OLD      "MT-MetricValue"
 
 #define PEEDITDISTANCECHARS_PROP    "PE:EditDistanceChars"
 #define PEEDITDISTANCECHARS_PROP_W L"PE:EditDistanceChars"
 #define PEEDITDISTANCECHARS_PROP_W_OLD L"PE-EditDistanceChars"
+#define PEEDITDISTANCECHARS_PROP_OLD "PE-EditDistanceChars"
 
 #define PEEDITDISTANCEWORDS_PROP    "PE:EditDistanceWords"
 #define PEEDITDISTANCEWORDS_PROP_W L"PE:EditDistanceWords"
 #define PEEDITDISTANCEWORDS_PROP_W_OLD L"PE-EditDistanceWords"
+#define PEEDITDISTANCEWORDS_PROP_OLD "PE-EditDistanceWords"
 
 #define MTFIELDS_PROP               "MT:Fields"
 #define MTFIELDS_PROP_W            L"MT:Fields"
 #define MTFIELDS_PROP_W_OLD        L"MT-Fields"
+#define MTFIELDS_PROP_OLD        "MT-Fields"
 
 #define WORDS_PROP                 "tmgr:words"
 #define WORDS_PROP_W               L"tmgr:words"
@@ -183,27 +194,28 @@ typedef enum { TMX_ELEMENT, PROP_ELEMENT, HEADER_ELEMENT, TU_ELEMENT, TUV_ELEMEN
                SUB_ELEMENT, UT_ELEMENT, INVCHAR_ELEMENT, UNKNOWN_ELEMENT } ELEMENTID;
 typedef struct _TMXNAMETOID
 {
-  CHAR_W   szName[30];                 // name of element
+  //CHAR_W   szName[30];                 // name of element
+  char       szName[30];
   ELEMENTID ID;                        // ID of element 
 } TMXNAMETOID, *PTMXNAMETOID;
 
 TMXNAMETOID TmxNameToID[] =
-{ { L"tmx",    TMX_ELEMENT },
-  { L"prop",   PROP_ELEMENT }, 
-  { L"header", HEADER_ELEMENT }, 
-  { L"tu",     TU_ELEMENT }, 
-  { L"tuv",    TUV_ELEMENT }, 
-  { L"body",   BODY_ELEMENT },
-  { L"seg",    SEG_ELEMENT }, 
-  { L"bpt",    BPT_ELEMENT }, 
-  { L"ept",    EPT_ELEMENT }, 
-  { L"ph",     PH_ELEMENT }, 
-  { L"hi",     HI_ELEMENT }, 
-  { L"it",     IT_ELEMENT },
-  { L"sub",    SUB_ELEMENT }, 
-  { L"ut",     UT_ELEMENT }, 
-  { L"invchar", INVCHAR_ELEMENT }, 
-  { L"",       UNKNOWN_ELEMENT } };
+{ { "tmx",     TMX_ELEMENT },
+  { "prop",    PROP_ELEMENT }, 
+  { "header",  HEADER_ELEMENT }, 
+  { "tu",      TU_ELEMENT }, 
+  { "tuv",     TUV_ELEMENT }, 
+  { "body",    BODY_ELEMENT },
+  { "seg",     SEG_ELEMENT }, 
+  { "bpt",     BPT_ELEMENT }, 
+  { "ept",     EPT_ELEMENT }, 
+  { "ph",      PH_ELEMENT }, 
+  { "hi",      HI_ELEMENT }, 
+  { "it",      IT_ELEMENT },
+  { "sub",     SUB_ELEMENT }, 
+  { "ut",      UT_ELEMENT }, 
+  { "invchar", INVCHAR_ELEMENT }, 
+  { "",        UNKNOWN_ELEMENT } };
 
 // PROP types
 typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
@@ -276,7 +288,7 @@ public:
 
 
 private:
-  ELEMENTID GetElementID( PSZ_W pszName );
+  ELEMENTID GetElementID( PSZ pszName );
   void Push( PTMXELEMENT pElement );
   void Pop( PTMXELEMENT pElement );
   BOOL GetValue( PSZ pszString, int iLen, int *piResult );
@@ -908,8 +920,10 @@ USHORT CTMXExportImport::WriteTUV
       } /* endif */
 
       // load document tag table
-      usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
-                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
+      
+      LogMessage(ERROR, "TEMPORARY_COMMENTED");
+      //usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
+      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
     } /* endif */
 
     // copy segment data to our buffer and use this buffer from now on
@@ -962,9 +976,10 @@ USHORT CTMXExportImport::WriteTUV
 
         // build protect start/stop table for tag recognition
         PBYTE  pStartStop = NULL;
-        usRC = TACreateProtectTableW( pszSegmentData, m_pLoadedTable, 0, (PTOKENENTRY)m_pTokBuf, TMXTOKBUFSIZE,
-                                      (PSTARTSTOP *)&pStartStop, m_pLoadedTable->pfnProtTable, 
-                                      m_pLoadedTable->pfnProtTableW, ulCP );
+        LogMessage(ERROR, "TEMPORARY_COMMENTED");
+        //usRC = TACreateProtectTableW( pszSegmentData, m_pLoadedTable, 0, (PTOKENENTRY)m_pTokBuf, TMXTOKBUFSIZE,
+        //                              (PSTARTSTOP *)&pStartStop, m_pLoadedTable->pfnProtTable, 
+        //                              m_pLoadedTable->pfnProtTableW, ulCP );
 
         if ( !usRC )
         {
@@ -1049,9 +1064,10 @@ USHORT CTMXExportImport::StartImport
   if ( !usRC )
   {
     // setup tempory file name
-    UtlMakeEQFPath( this->m_TempFile, NULC, MEM_PATH, NULL );
+    properties_get_str(KEY_MEM_DIR, this->m_TempFile, sizeof(this->m_TempFile));
+    //UtlMakeEQFPath( this->m_TempFile, NULC, MEM_PATH, NULL );
     strcat( this->m_TempFile, BACKSLASH_STR );
-    if ( strchr( (PSZ)pszInFile, '\\' ) == NULL )
+    if ( strchr( (PSZ)pszInFile, '/' ) == NULL )
     {
       strcat( this->m_TempFile, (PSZ)pszInFile );
     }
@@ -1065,28 +1081,11 @@ USHORT CTMXExportImport::StartImport
     usRC = this->PreProcessInFile( pszInFile, this->m_TempFile );
   } /* endif */
 
-  // get size of input file
-  if ( !usRC )
-  {
-    LogMessage(WARNING,"TEMPORARY COMMENTED in CTMXExportImport::StartImport");
-    #ifdef TEMPORARY_COMMENTED
-    WIN32_FIND_DATA FindData;
-    HANDLE hFind = FindFirstFile( this->m_TempFile, &FindData );
-    if ( hFind != INVALID_HANDLE_VALUE )
-    {
-      m_iSourceSize = FindData.nFileSizeLow;
-      FindClose( hFind );
-    }
-    else
-    {
-      usRC = ERROR_FILE_NOT_FOUND;
-    } /* endif */
-    #endif
-  }
-
   // parse the TMX file
   if ( !usRC )
   {
+      m_iSourceSize = FilesystemHelper::GetFileSize(this->m_TempFile);
+
       try {
           XMLPlatformUtils::Initialize();
       }
@@ -1577,10 +1576,13 @@ TMXParseHandler::~TMXParseHandler()
 
 void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
 {
-    PSZ_W pszName = (PSZ_W)name;
+    std::u16string u16name((char16_t*)name);
+    std::string sName = EncodingHelper::convertToUTF8(u16name);
+    char* pszName = (char*) sName.c_str();
     int iAttribs = attributes.getLength(); 
 
-    if ( hfLog ) fprintf( hfLog, "StartElement: %S\n", pszName );
+    //if ( hfLog ) fprintf( hfLog, "StartElement: %S\n", pszName );
+    LogMessage2(INFO, "StartElement: ", pszName);
 
     Push( &CurElement );
 
@@ -1599,81 +1601,87 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         CurElement.PropID = UNKNOWN_PROP;
         for( int i = 0; i < iAttribs; i++ )
         {
-          PSZ_W pszName = (PSZ_W)attributes.getName( i );
-          if ( _wcsicmp( pszName, L"type" ) == 0 )
+          u16name = (char16_t*) attributes.getName( i );
+          sName = EncodingHelper::convertToUTF8(u16name);
+          char* pszAttName = (char*) sName.c_str();
+          if ( strcasecmp( pszAttName, "type" ) == 0 )
           {
-            PSZ_W pszValue = (PSZ_W)attributes.getValue( i );
-            if ( pszValue != NULL )
+            //PSZ_W pszValue = (PSZ_W)attributes.getValue( i );
+            u16name = (char16_t*) attributes.getValue( i );
+            sName = EncodingHelper::convertToUTF8(u16name);
+            char* pszAttVal = (char*) sName.c_str();
+
+            if ( pszAttVal != NULL )
             {
-              if ( (wcsicmp( pszValue, MARKUP_PROP_W ) == 0) || (wcsicmp( pszValue, MARKUP_PROP_W_OLD ) == 0) )
+              if ( (strcasecmp( pszAttVal, MARKUP_PROP ) == 0) || (strcasecmp( pszAttVal, MARKUP_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMMARKUP_PROP;
               }
-              else if ( (wcsicmp( pszValue, LANGUAGE_PROP_W ) == 0) || (wcsicmp( pszValue, LANGUAGE_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, LANGUAGE_PROP ) == 0) || (strcasecmp( pszAttVal, LANGUAGE_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMLANGUAGE_PROP;
               }
-              else if ( (wcsicmp( pszValue, DOCNAME_PROP_W ) == 0) || (wcsicmp( pszValue, DOCNAME_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, DOCNAME_PROP ) == 0) || (strcasecmp( pszAttVal, DOCNAME_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMDOCNAME_PROP;
               }
-              else if ( (wcsicmp( pszValue, MACHFLAG_PROP_W ) == 0) || (wcsicmp( pszValue, MACHFLAG_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, MACHFLAG_PROP ) == 0) || (strcasecmp( pszAttVal, MACHFLAG_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = MACHINEFLAG_PROP;
               } 
-              else if ( (wcsicmp( pszValue, TRANSLFLAG_PROP_W ) == 0) || (wcsicmp( pszValue, TRANSLFLAG_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, TRANSLFLAG_PROP ) == 0) || (strcasecmp( pszAttVal, TRANSLFLAG_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TRANSLATIONFLAG_PROP;
               } 
-              else if ( (wcsicmp( pszValue, NOTE_PROP_W ) == 0) || (wcsicmp( pszValue, NOTE_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, NOTE_PROP ) == 0) || (strcasecmp( pszAttVal, NOTE_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMNOTE_PROP;
               } 
-              else if ( (wcsicmp( pszValue, NOTESTYLE_PROP_W ) == 0) || (wcsicmp( pszValue, NOTE_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, NOTESTYLE_PROP ) == 0) || (strcasecmp( pszAttVal, NOTE_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMNOTESTYLE_PROP;
               } 
-              else if ( (wcsicmp( pszValue, SEGNUM_PROP_W ) == 0) || (wcsicmp( pszValue, SEGNUM_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, SEGNUM_PROP ) == 0) || (strcasecmp( pszAttVal, SEGNUM_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = SEG_PROP;
               } 
-              else if ( (wcsicmp( pszValue, DESCRIPTION_PROP_W ) == 0) || (wcsicmp( pszValue, DESCRIPTION_PROP_W_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, DESCRIPTION_PROP ) == 0) || (strcasecmp( pszAttVal, DESCRIPTION_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMDESCRIPTION_PROP;
               } 
-              else if ( (wcsicmp( pszValue, TMMATCHTYPE_PROP_W ) == 0 ) || (wcsicmp( pszValue, TMMATCHTYPE_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, TMMATCHTYPE_PROP ) == 0 ) || (strcasecmp( pszAttVal, TMMATCHTYPE_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMTMMATCHTYPE_PROP;
               } 
-              else if ( (wcsicmp( pszValue, MTSERVICE_PROP_W ) == 0 ) || (wcsicmp( pszValue, MTSERVICE_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, MTSERVICE_PROP ) == 0 ) || (strcasecmp( pszAttVal, MTSERVICE_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMMTSERVICE_PROP;
               } 
-              else if ( (wcsicmp( pszValue, MTMETRICNAME_PROP_W ) == 0 ) || (wcsicmp( pszValue, MTMETRICNAME_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, MTMETRICNAME_PROP ) == 0 ) || (strcasecmp( pszAttVal, MTMETRICNAME_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMMTMETRICNAME_PROP;
               } 
-              else if ( (wcsicmp( pszValue, MTMETRICVALUE_PROP_W ) == 0 ) || (wcsicmp( pszValue, MTMETRICVALUE_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, MTMETRICVALUE_PROP ) == 0 ) || (strcasecmp( pszAttVal, MTMETRICVALUE_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMMTMETRICVALUE_PROP;
               } 
-              else if ( (wcsicmp( pszValue, PEEDITDISTANCECHARS_PROP_W ) == 0 ) || (wcsicmp( pszValue, PEEDITDISTANCECHARS_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, PEEDITDISTANCECHARS_PROP ) == 0 ) || (strcasecmp( pszAttVal, PEEDITDISTANCECHARS_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMPEEDITDISTANCECHARS_PROP;
               } 
-              else if ( (wcsicmp( pszValue, PEEDITDISTANCEWORDS_PROP_W ) == 0 ) || (wcsicmp( pszValue, PEEDITDISTANCEWORDS_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, PEEDITDISTANCEWORDS_PROP ) == 0 ) || (strcasecmp( pszAttVal, PEEDITDISTANCEWORDS_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMPEEDITDISTANCEWORDS_PROP;
               } 
-              else if ( (wcsicmp( pszValue, MTFIELDS_PROP_W ) == 0 ) || (wcsicmp( pszValue, MTFIELDS_PROP_W_OLD ) == 0 ) )
+              else if ( (strcasecmp( pszAttVal, MTFIELDS_PROP ) == 0 ) || (strcasecmp( pszAttVal, MTFIELDS_PROP_OLD ) == 0 ) )
               {
                 CurElement.PropID = TMMTFIELDS_PROP;
               } 
-              else if ( wcsicmp( pszValue, WORDS_PROP_W ) == 0 )
+              else if ( strcasecmp( pszAttVal, WORDS_PROP ) == 0 )
               {
                 CurElement.PropID = TMWORDS_PROP;
               } 
-              else if ( wcsicmp( pszValue, MATCHSEGID_PROP_W ) == 0 )
+              else if ( strcasecmp( pszAttVal, MATCHSEGID_PROP ) == 0 )
               {
                 CurElement.PropID = TMMATCHSEGID_PROP;
               } /* endif */
@@ -1698,8 +1706,10 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         // scan header attributes, currently only the source language and the data type are of interest
         for( int i = 0; i < iAttribs; i++ )
         {
-          PSZ_W pszName = (PSZ_W)attributes.getName( i );
-          if ( _wcsicmp( pszName, L"datatype" ) == 0 )
+          u16name = (char16_t*)attributes.getName( i );
+          sName = EncodingHelper::convertToUTF8(u16name);
+          PSZ pszName = (char*) sName.c_str();
+          if ( strcasecmp( pszName, "datatype" ) == 0 )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL ) strcpy( CurElement.szDataType, pszValue );
@@ -1717,12 +1727,12 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             } /* endif */
 
           }
-          else if ( _wcsicmp( pszName, L"srclang" ) == 0 )
+          else if ( strcasecmp( pszName, "srclang" ) == 0 )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL )
             {
-              if ( _stricmp( pszValue, "*all*" ) == 0 )
+              if ( strcasecmp( pszValue, "*all*" ) == 0 )
               {
                 // use source language of memory
                 pBuf->szMemSourceLang[0] = 0; 
@@ -1760,20 +1770,22 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         // scan <tu> attributes, currently the data type, the tuid and the creationdate are of interest
         for( int i = 0; i < iAttribs; i++ )
         {
-          PSZ_W pszName = (PSZ_W)attributes.getName( i );
-          if ( _wcsicmp( pszName, L"tuid" ) == 0 )
+          u16name = (char16_t*)attributes.getName( i );
+          sName = EncodingHelper::convertToUTF8(u16name);
+          PSZ pszName = (char*) sName.c_str();
+          if ( strcasecmp( pszName, "tuid" ) == 0 )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL ) ulSegNo = atol( pszValue );
             XMLString::release( &pszValue );
           } 
-          else if ( _wcsicmp( pszName, L"datatype" ) == 0 )
+          else if ( strcasecmp( pszName, "datatype" ) == 0 )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL ) strcpy( CurElement.szDataType, pszValue );
             XMLString::release( &pszValue );
           } 
-          else if ( _wcsicmp( pszName, L"creationdate" ) == 0 )
+          else if ( strcasecmp( pszName, "creationdate" ) == 0 )
           {
             char *pszDate = XMLString::transcode(attributes.getValue( i ));
             // we currently support only dates in the form YYYYMMDDThhmmssZ
@@ -1827,8 +1839,10 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         // scan tuv attributes, currently only the language is of interest
         for( int i = 0; i < iAttribs; i++ )
         {
-          PSZ_W pszName = (PSZ_W)attributes.getName( i );
-          if ( (_wcsicmp( pszName, L"xml:lang" ) == 0) || (_wcsicmp( pszName, L"lang" ) == 0) )
+          u16name = (char16_t*)attributes.getName( i );
+          sName = EncodingHelper::convertToUTF8(u16name);
+          PSZ pszName = (char*) sName.c_str();
+          if ( (strcasecmp( pszName, "xml:lang" ) == 0) || (strcasecmp( pszName, "lang" ) == 0) )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL )
@@ -1979,15 +1993,18 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         break;
     } /*endswitch */
 
-    if ( hfLog )
-    {
       for( int i = 0; i < iAttribs; i++ )
       {
-        PSZ_W pszName = (PSZ_W)attributes.getName( i );
-        PSZ_W pszValue = (PSZ_W)attributes.getValue( i );
-        fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
+        u16name = (char16_t*)attributes.getName( i );
+        sName = EncodingHelper::convertToUTF8(u16name);
+        PSZ pszName = (char*) sName.c_str();
+
+        u16name = (char16_t*)attributes.getValue( i );
+        sName = EncodingHelper::convertToUTF8(u16name);
+        PSZ pszValue = (char*) sName.c_str();
+        LogMessage6(INFO, "Parsed aatribute : ", intToA(i), ", Name = ", pszName, ", Value = ", pszValue);
+        //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
-    } /* endif */
 }
 
 void TMXParseHandler::fillSegmentInfo
@@ -2659,14 +2676,15 @@ void TMXParseHandler::warning(const SAXParseException& exception)
 
 
 // get the ID for a TMX element
-ELEMENTID TMXParseHandler::GetElementID( PSZ_W pszName )
+ELEMENTID TMXParseHandler::GetElementID( PSZ pszName )
 {
   int i = 0;
   ELEMENTID IDFound = UNKNOWN_ELEMENT;
 
   while ( (IDFound == UNKNOWN_ELEMENT) && (TmxNameToID[i].szName[0] != 0) )
   {
-    if ( _wcsicmp( pszName, TmxNameToID[i].szName ) == 0 )
+    //if ( _wcsicmp( pszName, TmxNameToID[i].szName ) == 0 )
+    if( strcasecmp(pszName, TmxNameToID[i].szName ) == 0)
     {
       IDFound = TmxNameToID[i].ID;
     }
@@ -3595,7 +3613,8 @@ USHORT GetSourceLang( PCONVERTERDATA pData, PSZ pszSourceLanguage )
       fgets( (PSZ)pData->szLine, sizeof(pData->szLine), pData->hInFile );
 
       // retrieve source language
-      strcpy( pszSourceLanguage, UtlParseX15( (PSZ)pData->szLine, 3 ) );
+      LogMessage(ERROR, "TEMPORARY_COMMENTED");
+      //strcpy( pszSourceLanguage, UtlParseX15( (PSZ)pData->szLine, 3 ) );
 
       fWaitingForControlRecord = FALSE;
     }

@@ -86,6 +86,10 @@
 #include "EQFTAG00.H"             
 
 #include "win_types.h"
+#include <stdio.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <locale.h>
 
 #define DBLQUOTE   '\"'                     // double quote character (")
 
@@ -3214,7 +3218,6 @@ PNODEAREA TACreateNodeTree
   return( pRootArea );
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 // Create SO/SI Protect table
 USHORT TASoSiProtectTable
@@ -3256,10 +3259,8 @@ USHORT TASoSiProtectTable
     } /* endwhile */
     usCountSOSI++;
 
-
-    if ( !UtlAlloc( (PVOID *)&pCurrent, 0L,
-                   (LONG) max( (usCountSOSI * sizeof(STARTSTOP)), MIN_ALLOC),
-                   NOMSG ))
+    LONG size = (usCountSOSI * sizeof(STARTSTOP)) > MIN_ALLOC ? (usCountSOSI * sizeof(STARTSTOP)) : MIN_ALLOC;
+    if ( !UtlAlloc( (PVOID *)&pCurrent, 0L, size,  NOMSG ))
     {
       usRC = ERROR_NOT_ENOUGH_MEMORY;
     } /* endif */
@@ -3326,6 +3327,12 @@ USHORT TASoSiProtectTable
   return (usRC);
 }
 
+
+typedef EQF_BOOL (//__cdecl /*APIENTRY*/ 
+*PFNSTARTSTOPEXIT) ( PSZ, PSTARTSTOP *);
+typedef EQF_BOOL (//__cdecl /*APIENTRY*/ 
+*PFNSTARTSTOPEXITW) ( PSZ_W, PSTARTSTOP *);
+
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -3365,6 +3372,10 @@ USHORT TACreateProtectTableW
 {
   return( TACreateProtectTableWEx( pszSegment, pVoidTable, usColPos, pTokBuffer, usTokBufferSize,
           ppStartStop, pvUserExit, pvUserExitW, ulCP, 0 ) );
+}
+
+int memicmp(const void *buf1, const void *buf2, size_t count){
+  return memcmp(buf1, buf2, count);
 }
 
 USHORT TACreateProtectTableWEx
@@ -4327,6 +4338,7 @@ USHORT TAFreeEditUserExit
 } /* end of function TAFreeEditUserExit */
 
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -5245,6 +5257,13 @@ PNODE TAFastCreateAttrTree(PLOADEDTABLE pLoadedTable,  PTAGTABLE pTagTable )
 
    return ( pRoot );
 }
+#endif 
+
+/*
+bool iswspace(wchar_t ch){
+  return std::iswspace(ch);
+}
+//*/
 
 // P016804:
  static void
@@ -5295,6 +5314,8 @@ PNODE TAFastCreateAttrTree(PLOADEDTABLE pLoadedTable,  PTAGTABLE pTagTable )
         return;
 	}
 
+
+#ifdef TEMPORARY_COMMENTED
 // test if markup table contains tags with a special class ID
 BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID )
 {

@@ -14,6 +14,8 @@
 #include "OTMFUNC.H"
 #include "EQFFUNCI.H"
 #include "EQFSTART.H"                  // for TwbGetCheckProfileData
+#include "core/utilities/FilesystemWrapper.h"
+#include "core/utilities/FilesystemHelper.h"
 
 #define INCL_EQFMEM_DLGIDAS            // include dialog IDA definitions
 
@@ -770,6 +772,17 @@ USHORT EqfMemoryExists
       #ifdef TEMPORARY_COMMENTED
       ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);
       #endif
+      //FilesystemHelper::FileExists(pszMemoryName);
+      char fname[MAX_EQF_PATH];
+      properties_get_str(KEY_MEM_DIR, fname, MAX_EQF_PATH);
+      strcat(fname, pszMemoryName);
+      strcat(fname, ".MEM");
+
+      bool exists = !FilesystemHelper::FindFiles(fname).empty();
+      if(!exists){
+        usRC = -1;
+      }
+
       if ( fIsNew )
       {
         PSZ pszParm = pszMemoryName;

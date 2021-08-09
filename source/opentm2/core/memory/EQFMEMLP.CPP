@@ -1410,7 +1410,15 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      if ( fOK ) fOK = UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE );
 
      // load external memory import module
-     if ( fOK ) fOK = (DosLoadModule( NULL, 0, "OTMTMXIE.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
+     // load external memory import module
+     if ( fOK ){
+
+        char libPath[MAX_EQF_PATH];
+        properties_get_str(KEY_PLUGIN_DIR, libPath, MAX_EQF_PATH);
+        strcat(libPath, "libEqfMemoryPlugin.so");
+        fOK = (DosLoadModule( NULL, 0, libPath, &(pLIDA->hmodMemExtImport)) == 0 );
+        //fOK = (DosLoadModule( NULL, 0, "OTMTMXIE.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
+     }
 
      // load entry points
      if ( fOK )
@@ -1423,7 +1431,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      } /* endif */
 
      // prepare segment logging
-     if ( fOK )
+     LogMessage(WARNING, "TEMPORARY hardcoded if(false) for other logging system");
+     if ( fOK  && false)
      {
        UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
        UtlMkDir( pLIDA->szSegLog, 0, FALSE );
@@ -1497,8 +1506,9 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      if ( fOK ) fOK = UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE );
 
      // load external memory import module
-     if ( fOK ) fOK = (DosLoadModule( NULL, 0, "OTMXLFMT.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
-
+     if ( fOK ){
+        fOK = (DosLoadModule( NULL, 0, "OTMXLFMT.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
+     }
      // load entry points
      if ( fOK )
      {

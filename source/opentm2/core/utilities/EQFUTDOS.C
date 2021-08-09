@@ -3086,9 +3086,11 @@ BOOL UtlSetDrive
  {
    USHORT usRc = 0;
 
+   *ppfnProcAddr = (PFN)dlsym(hMod, pszProcName);
    //*ppfnProcAddr = GetProcAddress( hMod, pszProcName );
    if (!*ppfnProcAddr )
    {
+     LogMessage2(ERROR, "DosGetProcAddr:: can't find function ", pszProcName);
 //#ifdef _DEBUG
 //     char szFilename[2048];
 //	 FILE *pFile = fopen("missfunc.out", "a");
