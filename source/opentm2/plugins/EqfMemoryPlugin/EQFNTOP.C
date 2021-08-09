@@ -216,10 +216,7 @@ USHORT TmtXOpen
           }
           else
           {
-            LogMessage(WARNING,"TEMPORARY_COMMENTED NTMCreateLangGroupTable");
-            #ifdef TEMPORARY_COMMENTED
             usTempRc = NTMCreateLangGroupTable( pTmClb );
-            #endif
           } /* endif */
 
           if ( usTempRc != NO_ERROR )

@@ -95,9 +95,6 @@ OtmMemory *MemoryFactory::openMemory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
 
-  OtmSharedMemoryPlugin *pSharedMemPlugin = NULL;
-  BOOL fIsShared = this->isSharedMemory( strMemoryName, &pSharedMemPlugin );
-
   // use the plugin to open the memory
   if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
   {
@@ -107,13 +104,10 @@ OtmMemory *MemoryFactory::openMemory
         LogMessage2(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType, pMemory is NULL, ", pszMemoryName);
     }
   }
-  else if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
+  else
   {
-    pMemory = ((OtmSharedMemoryPlugin *)pluginSelected)->openMemory( (char *)strMemoryName.c_str() , NULL, (usOpenFlags == 0) ? NONEXCLUSIVE : usOpenFlags );
-    if ( pMemory == NULL ) {
-      *piErrorCode = this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-      LogMessage2(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType, pMemory is NULL, ", pszMemoryName);
-    }
+    LogMessage2(ERROR, "Tried to open shared memory. Shared files are not supported, fname = ", strMemoryName.c_str() );
+    pMemory = NULL;
   }
   if ( pMemory == NULL )
   {
@@ -121,26 +115,6 @@ OtmMemory *MemoryFactory::openMemory
         pluginSelected->getName(), " failed, the return code is ", intToA(this->iLastError) );
     return( NULL );
   } /* end */     
-
-  // for shared memories using a local memory as a copy: open the associated shared memory
-  if ( fIsShared && pSharedMemPlugin->isLocalMemoryUsed() )
-  {
-    LogMessage4(INFO, "MemoryFactory::openMemory::Open shared component of memory using plugin ", pSharedMemPlugin->getName(),", error message is "  , intToA(this->iLastError ) );
-    OtmMemory *pSharedMem = pSharedMemPlugin->openMemory( (char *)strMemoryName.c_str(), pMemory, 0 );
-    if ( pSharedMem == NULL )
-    {
-      // close local memory
-      this->closeMemory( pMemory );
-      this->iLastError = pSharedMemPlugin->getLastError( this->strLastError );
-      LogMessage4(ERROR, "MemoryFactory::openMemory::Open failed, return code is ", intToA(this->iLastError),", error message is "  , this->strLastError.c_str() );
-    }
-    else
-    {
-      // use shared memory object from now on
-      pMemory = pSharedMem;
-      LogMessage2(INFO, " Open successful,",strMemoryName.c_str() );
-    } /* endif */
-  } /* endif */
 
   return( pMemory );
 }

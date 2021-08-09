@@ -1744,15 +1744,19 @@ int UTF16strlenCHAR( PSZ_W pszString )
 }
 
 
-int UTF16strlenBYTE( PSZ_W pszString )
+int UTF16strlenBYTE( PTMWCHAR pszString )
 {
   int iLen = 0;
-
+  iLen = wcslen(pszString);
+  
+  #ifdef TEMPORARY_COMMENTED
   while ( pszString && *pszString != 0 )
   {
     iLen += 2;
     pszString++;
   } /* endwhile */
+  #endif
+  
   return( iLen );
 }
 

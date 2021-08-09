@@ -3035,18 +3035,18 @@ BOOL UtlSetDrive
 
    pszFailName; cbFileName;
    DosError(0);                         // avoid error popup...
+  
+   usRc = NO_ERROR;
+   hmod = dlopen(pszModName, RTLD_LAZY);
+   if (!hmod) {
+       fprintf(stderr, "%s\n", dlerror());
+       usRc = -1; //TODO proper error code
+       *phMod = (HMODULE) NULL;
+   }
+   dlerror();
 
-    hmod = dlopen(pszModName, RTLD_LAZY);
-    if (!hmod) {
-        fprintf(stderr, "%s\n", dlerror());
-        usRc = -1; //TODO proper error code
-        *phMod = (HMODULE) NULL;
-    }
-    dlerror();
+   *phMod = hmod;
 
-    *phMod = hmod;
-
-    usRc = NO_ERROR;
 
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    hmod = LoadLibrary(pszModName );

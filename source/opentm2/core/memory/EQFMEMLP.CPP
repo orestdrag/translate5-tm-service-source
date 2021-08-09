@@ -1308,7 +1308,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
    // use the default token values
    if ( fOK )
    {
-     PSZ_W pRest = NULL;
+     PTMWCHAR pRest = NULL;
      USHORT usLastColPos = 0;
 
      pRest = NULL;

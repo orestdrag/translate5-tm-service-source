@@ -19,7 +19,8 @@ set(EqfMemoryPlugin_Source_Files
    EQFNTOP.C
    EQFMEMUT.C
    EQFNTUTL.C
-   
+   OTMTMXIE.CPP
+   OTMXLFMT.CPP
 )
 
 include(GNUInstallDirs)

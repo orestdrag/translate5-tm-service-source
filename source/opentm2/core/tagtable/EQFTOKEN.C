@@ -1261,13 +1261,13 @@ PSZ SkipTextString ( PSZ      pInput,       // pointer to input string
 //                The node tree for this trivial tag table looks like this:
 //
 //                                        :
-//                                    +---Á---+
+//                                    +---ï¿½---+
 //                                    N       T
 //
 //                                    O       A
 //
 //                                    N       G
-//                                         +--Á--+
+//                                         +--ï¿½--+
 //                                    E    1     2
 //
 //                                    .    .     .
@@ -1504,19 +1504,19 @@ CHAR fWhiteSpace[256] =
 //------------------------------------------------------------------------------
 BOOL TATagTokenizeW
 (
-   PSZ_W       pszInput,                 // pointer to input data
+   PTMWCHAR       pszInput,            // pointer to input data
    PLOADEDTABLE pVoidTable,            // pointer to loaded tag table
    BOOL      fComplete,                // TRUE = no more buffers to follow
-   PSZ_W      *ppRest,                   // pointer to not processed data in buffer
+   PTMWCHAR      *ppRest,              // pointer to not processed data in buffer
    PUSHORT   pusColPos,                // column position
    PTOKENENTRY pTokBuf,                // buffer for created tokens
-   USHORT      usTokens                  // max entries in token buffer
+   USHORT      usTokens                // max entries in token buffer
 )
 {
-   PSZ_W       pszData;                // pointer for input data processing
-   PSZ_W       pszDataStart;           // pointer for end of data block
+   PTMWCHAR       pszData;             // pointer for input data processing
+   PTMWCHAR       pszDataStart;        // pointer for end of data block
    PTOKENENTRY pToken;                 // pointer to current token
-   PSZ_W       pszEnd;                 // pointer to end of data
+   PTMWCHAR       pszEnd;              // pointer to end of data
    BOOL        fFound = FALSE;         // flag used in setting pRest
    PLOADEDTABLE pTable = (PLOADEDTABLE)pVoidTable;   // pointer to loaded tag table
    TOKSTATUS   TokStatus;              // tokenize status area
@@ -2991,17 +2991,17 @@ PNODEAREA TACreateNodeTree
           /*                                                          */
           /*               Node Character                             */
           /*                %     ?    EOS   Pos   other              */
-          /*         ----Å-----Å-----Å-----Å-----Å-------+            */
+          /*         ----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /*            %   >     >     <     >      >                */
-          /*         ----Å-----Å-----Å-----Å-----Å-------+            */
+          /*         ----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /* current    ?   <     >     <     >      >                */
-          /*  char  -----Å-----Å-----Å-----Å-----Å-------+            */
+          /*  char  -----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /*          EOS   >     >     >     >      >                */
-          /*        -----Å-----Å-----Å-----Å-----Å-------+            */
+          /*        -----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /*          Pos   <     <     <     =      <                */
-          /*        -----Å-----Å-----Å-----Å-----Å-------+            */
+          /*        -----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /*        Other   <     <     <     >      =                */
-          /*        -----Á-----Á-----Á-----Á-----Á-------+            */
+          /*        -----ï¿½-----ï¿½-----ï¿½-----ï¿½-----ï¿½-------+            */
           /************************************************************/
 
 
