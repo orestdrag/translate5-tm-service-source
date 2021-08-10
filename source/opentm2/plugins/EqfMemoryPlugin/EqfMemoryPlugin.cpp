@@ -309,9 +309,11 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
 
     // then change in disk
     char szPathMem[512];
+    memset(szPathMem, 0, 512);
     
-    UtlMakeEQFPath( szPathMem, NULC, PROPERTY_PATH, NULL );
-    strcat( szPathMem, "\\" );
+    //UtlMakeEQFPath( szPathMem, NULC, PROPERTY_PATH, NULL );
+    properties_get_str(KEY_MEM_DIR, szPathMem, 512);
+    strcat(szPathMem, "/");
     Utlstrccpy( szPathMem+strlen(szPathMem), UtlGetFnameFromPath( pMemInfo->szFullPath ), DOT );
     strcat( szPathMem, EXT_OF_MEM );
 

@@ -1194,7 +1194,7 @@ USHORT CTMXExportImport::ImportNext
 )
 {
   USHORT usRC = 0;
-  int  iIteration = 10;
+  int  iIteration = 50;
   BOOL fContinue  = TRUE;
   int errorCode = 0;
   int errorCount = 0;
@@ -1581,7 +1581,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
     char* pszName = (char*) sName.c_str();
     int iAttribs = attributes.getLength(); 
 
-    //if ( hfLog ) fprintf( hfLog, "StartElement: %S\n", pszName );
     LogMessage2(INFO, "StartElement: ", pszName);
 
     Push( &CurElement );
@@ -1818,6 +1817,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
                         (iMin       *         60L) +
                         (iHour      *       3600L) +
                         ((iDaysSince1970) * 86400L);
+                LogMessage(INFO, "Do we need to corect for OS/2 format?");
                 lTime -= 10800L;                  // correction for OS/2 format: - 3 hours
               } /* endif */
             } /* endif */
@@ -1997,12 +1997,10 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       {
         u16name = (char16_t*)attributes.getName( i );
         sName = EncodingHelper::convertToUTF8(u16name);
-        PSZ pszName = (char*) sName.c_str();
 
         u16name = (char16_t*)attributes.getValue( i );
-        sName = EncodingHelper::convertToUTF8(u16name);
-        PSZ pszValue = (char*) sName.c_str();
-        LogMessage6(INFO, "Parsed aatribute : ", intToA(i), ", Name = ", pszName, ", Value = ", pszValue);
+        std::string sVal = EncodingHelper::convertToUTF8(u16name);
+        LogMessage6(INFO, "Parsed aatribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
         //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
 }
@@ -2107,8 +2105,11 @@ void TMXParseHandler::fillSegmentInfo
 
 void TMXParseHandler::endElement(const XMLCh* const name )
 {
-  PSZ_W pszName = (PSZ_W)name;
-  if ( hfLog ) fprintf( hfLog, "EndElement: %S\n", pszName );
+  std::u16string u16name((char16_t*)name);
+  std::string sName = EncodingHelper::convertToUTF8(u16name);
+  char* pszName = (char*) sName.c_str();
+
+  LogMessage2(INFO, "endElement: ", pszName);
   ELEMENTID CurrentID = CurElement.ID;
   PROPID    CurrentProp = CurElement.PropID;
 
@@ -2144,7 +2145,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         PTMXTUV pCurrentTuv = pTuvArray;
         while ( (iCurrent < iCurTuv) && (pSourceTuv == NULL) )
         {
-          if ( stricmp( pCurrentTuv->szLang, pBuf->szMemSourceLang ) == 0 )
+          if ( strcasecmp( pCurrentTuv->szLang, pBuf->szMemSourceLang ) == 0 )
           {
             pSourceTuv = pCurrentTuv;
           }
@@ -2186,7 +2187,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
               int iTestTuv = iCurrent + 1;
               while ( !fSkipTuv && (iTestTuv < iCurTuv) )
               {
-                if ( (stricmp( pTestTuv->szLang, pCurrentTuv->szLang ) == 0) && (wcslen( pTestTuv->szText ) != 0) )
+                if ( (strcasecmp( pTestTuv->szLang, pCurrentTuv->szLang ) == 0) && (wcslen( pTestTuv->szText ) != 0) )
                 {
                   fSkipTuv = TRUE; // skip this TUV as there is another tuv for the same language having text information
                 } /* endif */
@@ -2571,7 +2572,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
 
 void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t length)
 {
-  PSZ_W pszChars = (PSZ_W)chars;
+  char16_t* pzChars = (char16_t*)chars;
+  std::string sChars = EncodingHelper::convertToUTF8(pzChars);
+  std::wstring wChars = EncodingHelper::convertToUTF16(sChars);
+  char* c_chars = (char*) sChars.c_str();
+  wchar_t* w_chars = (wchar_t*) wChars.c_str();
   int iLength = length;
 
   if ( this->fTMXTagStarted )
@@ -2586,7 +2591,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     this->fTMXTagStarted = FALSE;
   } /* endif */
 
-  if ( hfLog ) fprintf( hfLog, "%ld Characters; \"%S\"\n", length, pszChars );
+  LogMessage4(INFO, "TMXParseHandler::characters ", intToA(length) ," characters; ", c_chars );
 
   if ( (CurElement.ID == PROP_ELEMENT) && (CurElement.PropID != UNKNOWN_PROP) )
   {
@@ -2595,11 +2600,12 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iFree = (sizeof(pBuf->szPropW) / sizeof(CHAR_W)) - iCurLength - 1;
     if ( iLength > iFree ) iLength = iFree;
 
-    wcsncpy( pBuf->szPropW + iCurLength, pszChars, iLength );
+    wcsncpy( pBuf->szPropW + iCurLength, w_chars, iLength );
+    strncpy( pBuf->szProp, c_chars, iLength);
     pBuf->szPropW[iCurLength+iLength] = 0;
 
-    LogMessage(ERROR, "TEMPORARY_COMMENTED");
-    int iBytes = 0;//WideCharToMultiByte( CP_OEMCP, 0, pBuf->szPropW, -1, pBuf->szProp, sizeof(pBuf->szProp), NULL, NULL );
+
+    int iBytes = iLength;//WideCharToMultiByte( CP_OEMCP, 0, pBuf->szPropW, -1, pBuf->szProp, sizeof(pBuf->szProp), NULL, NULL );
     pBuf->szProp[iBytes] = '\0';
   }
   else if ( fCatchData && (CurElement.ID == INVCHAR_ELEMENT) )
@@ -2608,7 +2614,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iCurLen = wcslen( pBuf->szData );
     if ( (iCurLen + 1 + 1) < DATABUFFERSIZE)
     {
-      LONG lChar = _wtol( pszChars );
+      LONG lChar = _wtol( w_chars );
       if ( lChar != 0 )
       {
         USHORT usChar = (USHORT)lChar;
@@ -2635,7 +2641,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
         pBuf->szData[iCurLen+length] = 0;
       }
 #else
-      wcsncpy( pBuf->szData + iCurLen, pszChars, length );
+      wcsncpy( pBuf->szData + iCurLen, w_chars, length );
       pBuf->szData[iCurLen+length] = 0;
 #endif
     } /* endif */

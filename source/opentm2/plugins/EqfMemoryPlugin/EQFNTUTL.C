@@ -2320,15 +2320,13 @@ USHORT NTMCreateLangGroupTable
 //
 // compact/organize the index part of a memory
 //
-USHORT NTMOrganizeIndexFile
+USHORT NTMOrganizeIndexFile1
 (
   PTMX_CLB pTmClb               // ptr to control block,
 )
 {
   USHORT usRC = NO_ERROR;
-  #ifdef TEMPORARY_COMMENTED
   usRC = EQFNTMOrganizeIndex( &(pTmClb->pstInBtree), pTmClb->usAccessMode, START_KEY );
-  #endif
 
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */

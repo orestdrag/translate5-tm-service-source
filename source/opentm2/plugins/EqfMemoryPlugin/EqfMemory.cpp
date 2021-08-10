@@ -197,9 +197,7 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
-#ifdef TEMPORARY_COMMENTED
        usRc = EQFNTMUpdSign( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, sizeof(TMX_SIGN) );
-#endif //TEMPORARY_COMMENTED
        fOK = (usRc == NO_ERROR);
       } /* endif */
 
@@ -817,7 +815,7 @@ int EqfMemory::rebuildIndex
 {
   int iRC = 0;
 
-  if ( !iRC ) iRC = NTMOrganizeIndexFile( this->pTmClb );
+  if ( !iRC ) iRC = NTMOrganizeIndexFile1( this->pTmClb );
 
   return( iRC );
 }

@@ -2076,7 +2076,10 @@ extern "C" USHORT NTMOrganizeIndexFile
   PTMX_CLB pTmClb               // ptr to control block,
 );
 
-
+extern "C" USHORT NTMOrganizeIndexFile1
+(
+  PTMX_CLB pTmClb               // ptr to control block,
+);
 
 // Update specific parts of segment
 

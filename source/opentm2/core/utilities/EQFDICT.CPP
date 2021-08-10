@@ -5512,6 +5512,74 @@ SHORT QDAMLocateKey_V3
 }
 
 
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMFirstEntry      Position at first entry
+//------------------------------------------------------------------------------
+// Function call:     QDAMFirstEntry ( PBTREE, PPBTREEBUFFER );
+//
+//------------------------------------------------------------------------------
+// Description:       This function will position to the first entry in the
+//                    dictionary
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PPBTREEBUFFER          pointer to selected record
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EOF_REACHED end or start of dictionary reached
+//
+//------------------------------------------------------------------------------
+// Function flow:     read in root record and set Rc
+//                    if okay then
+//                      while okay and record not leaf
+//                        read in record pointed to by first entry
+//                      endwhile
+//                      if okay then
+//                        set current record and current index
+//                      endif
+//                    endif
+//                    return Rc
+//
+//------------------------------------------------------------------------------
+SHORT  QDAMFirstEntry_V3
+(
+   PBTREE  pBTIda,
+   PBTREEBUFFER_V3  * ppRecord               // pointer to pointer of record
+)
+{
+   SHORT  sRc = 0;
+   RECPARAM     recData;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+   // read in root record
+   sRc = QDAMReadRecord_V3( pBTIda, pBT->usFirstNode, ppRecord, FALSE );
+   if ( !sRc )
+   {
+      while (!sRc && !IS_LEAF(*ppRecord))
+      {
+         recData = QDAMGetrecData_V3( *ppRecord, 0, pBT->usVersion);
+         sRc = QDAMReadRecord_V3( pBTIda, recData.usNum, ppRecord , FALSE );
+      } /* endwhile */
+      if ( !sRc )
+      {
+         pBTIda->usCurrentRecord = RECORDNUM(*ppRecord);
+         pBT->usFirstLeaf = pBTIda->usCurrentRecord;    // determine first leaf
+         pBTIda->sCurrentIndex = 0;
+      } /* endif */
+   } /* endif */
+
+   return (sRc);
+}
+
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -9225,4 +9293,1348 @@ QDAMCheckDict
 
   return ( sRc );
 } /* end of function QDAMCheckDict */
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMLocSubstr   locate the substring in the record
+//------------------------------------------------------------------------------
+// Function call:     QDAMLocSubStr(PBTREE, PBTREEBUFFER, PCHAR, PCHAR,
+//                                  PUSHORT, PCHAR, PUSHORT);
+//
+//------------------------------------------------------------------------------
+// Description:       Find the first key starting with the passed key and
+//                    pass it back.
+//                    If no error happened set this location as new
+//                    current position
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PBTREEBUFFER           currently active key
+//                    PCHAR                  key to be looked for
+//                    PCHAR                  buffer for the key
+//                    PUSHORT                on input length of buffer
+//                                           on output length of filled data
+//                    PCHAR                  buffer for the user data
+//                    PUSHORT                on input length of buffer
+//                                           on output length of filled data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_NOT_FOUND   key not found
+//                    BTREE_INVALID     tree pointer invalid
+//
+//------------------------------------------------------------------------------
+// Function flow:     locate the key with option set to FSUBSTR; set Rc
+//                    if key found then
+//                      check that key fulfills substring option
+//                      if not okay
+//                        set current position to the nearest key
+//                        set Rc  = BTREE_NOT_FOUND
+//                      else
+//                        set current position to the found key
+//                        pass back either length only or already data,
+//                         depending on user request.
+//                      endif
+//                    else
+//                      set Rc to BTREE_NOT_FOUND
+//                      set current position to the nearest key
+//                    endif
+//                    return Rc
+//------------------------------------------------------------------------------
+SHORT QDAMLocSubstr_V3
+(
+   PBTREE        pBTIda,
+   PBTREEBUFFER_V3  pRecord,
+   PCHAR_W       pKey,
+   PBYTE         pchBuffer,            // space for key data
+   PULONG        pulLength,            // in/out length of returned key data
+   PBYTE         pchUserData,          // space for user data
+   PULONG        pulUserLen            // in/out length of returned user data
+)
+{
+  SHORT  i;                            // index
+  SHORT  sNearKey;                     // nearest key
+  USHORT   usLen;                      // length of key
+  SHORT    sRc  = 0;                   // return code
+  PCHAR_W  pKey2;                      // key to be compared with
+  RECPARAM recData;
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  sRc = QDAMLocateKey_V3(pBTIda, pRecord, pKey, &i, FSUBSTR, &sNearKey);
+  if ( !sRc )
+  {
+     if ( i != -1 )
+     {
+       sNearKey = i;
+     } /* endif */
+
+     // set new current position
+     pBTIda->sCurrentIndex = sNearKey;
+     pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+
+     BTREELOCKRECORD( pRecord );
+     //  check if the key fulfills the substring option
+     if ( sNearKey != -1)
+     {
+       pKey2 = QDAMGetszKey_V3( pRecord, sNearKey, pBT->usVersion );
+       if ( pKey2  )
+       {
+         if ( UTF16strnicmp(pKey, pKey2, (USHORT)UTF16strlenCHAR(pKey)) )
+         {
+           if ( sNearKey < (SHORT)OCCUPIED(pRecord)-1 )
+           {
+             sNearKey++;
+           } /* endif */
+
+           pKey2 = QDAMGetszKey_V3( pRecord, sNearKey, pBT->usVersion );
+           if ( pKey2 )
+           {
+             if ( UTF16strnicmp(pKey, pKey2, (USHORT)UTF16strlenCHAR(pKey)) )
+             {
+               sRc = BTREE_NOT_FOUND;
+             }
+             else
+             {
+               pBTIda->sCurrentIndex = sNearKey;
+             } /* endif */
+           }
+           else
+           {
+             sRc = BTREE_NOT_FOUND;
+           } /* endif */
+         } /* endif */
+       }
+       else
+       {
+         sRc = BTREE_CORRUPTED;
+         ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+       } /* endif */
+
+       if ( !sRc )
+       {
+         usLen = (USHORT)(UTF16strlenBYTE( pKey2 ) + sizeof(CHAR_W));
+         if ( !pchBuffer || *pulLength == 0)
+         {
+            *pulLength = usLen ;  // give back length only
+         }
+         else
+         {
+            if ( *pulLength >= usLen )
+            {
+               *pulLength = usLen;
+               memcpy( pchBuffer, pKey2, usLen );
+            }
+            else
+            {
+               ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+               sRc = BTREE_BUFFER_SMALL;
+            } /* endif */
+         } /* endif */
+         if ( !sRc )
+         {
+            recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
+            if ( *pulUserLen == 0 || ! pchUserData )
+            {
+               *pulUserLen = recData.ulLen;
+            }
+            else
+            {
+               sRc =  QDAMGetszData_V3( pBTIda, recData, pchUserData, pulUserLen, DATA_NODE );
+             } /* endif */
+         } /* endif */
+       } /* endif */
+     }
+     else
+     {
+        sRc = BTREE_NOT_FOUND;
+     } /* endif */
+     BTREEUNLOCKRECORD( pRecord );
+  } /* endif */
+
+  return sRc;
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictSubStrLocal   Find Key starting with stubstring
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictSubStrLocal( PBTREE, PCHAR, PCHAR, PUSHORT,
+//                                         PCHAR,  PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Find the first key starting with the passed key and
+//                    pass it back.
+//                    Special attention has to be taken in the cases where
+//                    the first entry of a record is the substring!!!
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  key to be looked for
+//                    PCHAR                  buffer for the key
+//                    PUSHORT                on input length of buffer
+//                                           on output length of filled data
+//                    PCHAR                  buffer for the user data
+//                    PUSHORT                on input length of buffer
+//                                           on output length of filled data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_NOT_FOUND   key not found
+//                    BTREE_INVALID     tree pointer invalid
+//
+//------------------------------------------------------------------------------
+// Function flow:     if dictionary corrupted, then
+//                      set Rc = BTREE_CORRUPTED
+//                    else
+//                      locate the leaf node that contains appropriate key
+//                      set Rc correspondingly
+//                    endif
+//                    if okay so far then
+//                      call QDAMLocSubstr to locate the substring
+//                      if Rc is BTREE_NOT_FOUND and next record exists,
+//                      try to locate the substring in the next record
+//                    endif
+//                    return Rc
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictSubStrLocal
+(
+   PBTREE pBTIda,                      // pointer to btree struct
+   PCHAR_W  pKey,                        // key to be searched for
+   PBYTE  pchBuffer,                   // space for key data
+   PULONG pulLength,                  // in/out length of returned key data
+   PBYTE  pchUserData,                 // space for user data
+   PULONG pulUserLen                  // in/out length of returned user data
+)
+{
+  SHORT    sRc  = 0;                   // return code
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  if ( pBT->fCorrupted )
+  {
+     sRc = BTREE_CORRUPTED;
+  } /* endif */
+
+   if ( !sRc )
+   {
+     if ( pBT->bRecSizeVersion == BTREE_V3 )
+     {
+       PBTREEBUFFER_V3 pRecord = NULL;
+       SHORT sRetries = MAX_RETRY_COUNT;
+       ULONG ulKeyLen;
+
+       do
+       {
+          ulKeyLen = *pulLength;
+          /*******************************************************************/
+          /* For shared databases: discard all in-memory pages if database   */
+          /* has been changed since last access                              */
+          /*******************************************************************/
+          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+          {
+            sRc = QDAMCheckForUpdates( pBTIda );
+          } /* endif */
+
+          if ( !sRc )
+          {
+             UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+             /* Locate the Leaf node that contains the appropriate key */
+             sRc = QDAMFindRecord_V3( pBTIda, pKey, &pRecord );
+          } /* endif */
+          if ( !sRc )
+          {
+             sRc = QDAMLocSubstr_V3( pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+
+             /*****************************************************************/
+             /* if substring not found try it again in the next record, we may*/
+             /* have missed a matching substring due to the construction of   */
+             /* the dictionary.                                               */
+             /* This only could happen if the best matching key is the last   */
+             /* one in the current record.                                    */
+             /* Example: look for term starting with 'pig' and 'pigskin' is   */
+             /*          the first entry in a record.                         */
+             /*          Due to the construction 'pig' will be looked for in  */
+             /*          the previous record, since it is '<' than 'pigskin'  */
+             /*****************************************************************/
+             if ( (sRc == BTREE_NOT_FOUND) &&
+                  ((SHORT) OCCUPIED( pRecord ) == pBTIda->sCurrentIndex))
+             {
+               if ( NEXT(pRecord)  )
+               {
+                 sRc = QDAMReadRecord_V3( pBTIda, NEXT( pRecord ), &pRecord, FALSE  );
+                 if ( !sRc )
+                 {
+                    ulKeyLen = *pulLength;
+                    sRc = QDAMLocSubstr_V3(pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+                 } /* endif */
+               } /* endif */
+             } /* endif */
+          } /* endif */
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+              (sRetries > 0));
+       *pulLength = ulKeyLen;
+     }
+     else
+     {
+       PBTREEBUFFER_V2 pRecord = NULL;
+       SHORT sRetries = MAX_RETRY_COUNT;
+       ULONG ulKeyLen;
+
+       do
+       {
+          ulKeyLen = *pulLength;
+          /*******************************************************************/
+          /* For shared databases: discard all in-memory pages if database   */
+          /* has been changed since last access                              */
+          /*******************************************************************/
+          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+          {
+            sRc = QDAMCheckForUpdates( pBTIda );
+          } /* endif */
+
+          if ( !sRc )
+          {
+             UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+             /* Locate the Leaf node that contains the appropriate key */
+             sRc = QDAMFindRecord_V2( pBTIda, pKey, &pRecord );
+          } /* endif */
+          if ( !sRc )
+          {
+            LogMessage(ERROR,"TEMPORARY COMMENTED QDAMLocSubstr_V2");
+             //sRc = QDAMLocSubstr_V2( pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+
+             /*****************************************************************/
+             /* if substring not found try it again in the next record, we may*/
+             /* have missed a matching substring due to the construction of   */
+             /* the dictionary.                                               */
+             /* This only could happen if the best matching key is the last   */
+             /* one in the current record.                                    */
+             /* Example: look for term starting with 'pig' and 'pigskin' is   */
+             /*          the first entry in a record.                         */
+             /*          Due to the construction 'pig' will be looked for in  */
+             /*          the previous record, since it is '<' than 'pigskin'  */
+             /*****************************************************************/
+             if ( (sRc == BTREE_NOT_FOUND) &&
+                  ((SHORT) OCCUPIED( pRecord ) == pBTIda->sCurrentIndex))
+             {
+               if ( NEXT(pRecord)  )
+               {
+                 sRc = QDAMReadRecord_V2( pBTIda, NEXT( pRecord ), &pRecord, FALSE  );
+                 if ( !sRc )
+                 {
+                    ulKeyLen = *pulLength;
+                    LogMessage(ERROR,"TEMPORARY COMMENTED QDAMLocSubstr_V2");
+                    //sRc = QDAMLocSubstr_V2(pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+                 } /* endif */
+               } /* endif */
+             } /* endif */
+          } /* endif */
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+              (sRetries > 0));
+       *pulLength = ulKeyLen;
+     } /* endif */
+   } /* endif */
+
+
+  if ( sRc && (sRc != BTREE_NOT_FOUND))
+  {
+    ERREVENT2( QDAMDICTSUBSTRLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+  } /* endif */
+
+  return ( sRc );
+}
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMValidateIndex    Find next valid position
+//------------------------------------------------------------------------------
+// Function call:     QDAMValidateIndex( PBTREE, PPBTREEBUFFER );
+//
+//------------------------------------------------------------------------------
+// Description:       This function will return the next valid position
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PPBTREEBUFFER          pointer to selected record
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EOF_REACHED end or start of dictionary reached
+//------------------------------------------------------------------------------
+// Function flow:     if current index < 0 or current index > occupied then
+//                      if current index < 0 then
+//                        if previous record available then
+//                          read in prev. record and set Rc
+//                          if okay then
+//                            set current index and current record to new data
+//                          endif
+//                        else
+//                          set current record and index to 0
+//                          set Rc to BTREE_EOF_REACHED
+//                        endif
+//                      elsif current index >= occupied then
+//                        if next record available then
+//                          set record to next record; current index to 0
+//                          read in record and set Rc
+//                        else
+//                          set current record and index to 0
+//                          set Rc to BTREE_EOF_REACHED
+//                        endif
+//                      endif
+//                    endif
+//                    return Rc
+//
+//------------------------------------------------------------------------------
+SHORT QDAMValidateIndex_V3
+(
+   PBTREE         pBTIda,
+   PBTREEBUFFER_V3 * ppRecord
+)
+{
+   SHORT    sRc = 0;                   // set return code
+   USHORT   usRecord;
+
+   if ( pBTIda->sCurrentIndex < 0 ||
+           pBTIda->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
+   {
+      if ( pBTIda->sCurrentIndex < 0 )
+      {
+         if ( PREV( *ppRecord ))
+         {
+            usRecord = PREV(*ppRecord);
+            sRc = QDAMReadRecord_V3( pBTIda, usRecord, ppRecord, FALSE  );
+            if (!sRc )
+            {
+               pBTIda->usCurrentRecord = usRecord;
+               pBTIda->sCurrentIndex = (SHORT) (OCCUPIED(*ppRecord) - 1);
+            } /* endif */
+         }
+         else
+         {
+            pBTIda->usCurrentRecord = 0;
+            pBTIda->sCurrentIndex =  0;
+            sRc = BTREE_EOF_REACHED;
+         } /* endif */
+      }
+      else if ( pBTIda->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
+      {
+         if ( NEXT(*ppRecord) )
+         {
+            pBTIda->usCurrentRecord = NEXT(*ppRecord);
+            sRc = QDAMReadRecord_V3( pBTIda, pBTIda->usCurrentRecord, ppRecord, FALSE  );
+            pBTIda->sCurrentIndex = 0;
+         }
+         else
+         {
+            pBTIda->usCurrentRecord = 0;
+            pBTIda->sCurrentIndex =  0;
+            sRc = BTREE_EOF_REACHED;
+         } /* endif */
+      } /* endif */
+   } /* endif */
+   if ( sRc )
+   {
+     ERREVENT2( QDAMVALIDATEINDEX_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+   return sRc;
+}
+
+RECPARAM  QDAMGetrecKey_V3
+(
+   PBTREEBUFFER_V3  pRecord,
+   SHORT         sMid                            // key number
+);
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMNext     Get the next entry back
+//------------------------------------------------------------------------------
+// Function call:     QDAMNext( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
+//
+//------------------------------------------------------------------------------
+// Description:       Locate the next entry (by ascending key) and
+//                    pass back the associated information
+//
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PRECPARAM              position of key
+//                    PRECPARAM              position of key data
+//                    PRECPARAM              position of data part
+//
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EMPTY       dictionary contains no data
+//                    BTREE_INVALID     invalid pointer passed
+//
+//------------------------------------------------------------------------------
+// Function flow:     init passed areas
+//                    if BTree exists
+//                      if current record = 0
+//                        position at first entry
+//                      else
+//                        read next record
+//                      endif
+//                      if ok
+//                        check and validate the record read
+//                        if ok
+//                          get associated info
+//                        endif
+//                      endif
+//                    else
+//                      set rc = BTREE_INVALID
+//                    endif
+//
+//
+//------------------------------------------------------------------------------
+SHORT QDAMNext_V3
+(
+   PBTREE     pBTIda,
+   PRECPARAM  precBTree,
+   PRECPARAM  precKey,
+   PRECPARAM  precData
+)
+{
+   SHORT  sRc = 0;
+   PBTREEBUFFER_V3 pRecord;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+   memset( precBTree, 0, sizeof(RECPARAM));
+   memset( precKey, 0, sizeof(RECPARAM));
+   memset( precData, 0, sizeof(RECPARAM));
+
+   if ( pBT )
+   {
+      // Step to next index in the chain and read the record                     */
+      // if usCurrentRecord = 0 we are at EOF
+      if ( !pBTIda->usCurrentRecord )
+      {
+         sRc = QDAMFirstEntry_V3( pBTIda, &pRecord );
+      }
+      else
+      {
+         pBTIda->sCurrentIndex ++;
+         sRc = QDAMReadRecord_V3( pBTIda, pBTIda->usCurrentRecord, &pRecord, FALSE  );
+      } /* endif */
+
+
+      if ( !sRc )
+      {
+        sRc = QDAMValidateIndex_V3( pBTIda, &pRecord );
+        if ( !sRc )
+        {
+            precBTree->usOffset = pBTIda->sCurrentIndex;
+            precBTree->usNum = pBTIda->usCurrentRecord;
+            *precKey = QDAMGetrecKey_V3( pRecord, pBTIda->sCurrentIndex  );
+            *precData = QDAMGetrecData_V3( pRecord, pBTIda->sCurrentIndex,
+                                        pBT->usVersion );
+        } /* endif */
+      } /* endif */
+   }
+   else
+   {
+      sRc = BTREE_INVALID;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMNEXT_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+  return sRc;
+}
+
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMGetszKeyParam     Get Key String from param
+//------------------------------------------------------------------------------
+// Function call:     QDAMGetszKeyParam( PBTREE, RECPARAM, PCHAR, PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Get the key string from passed offset.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    RECPARAM               record position
+//                    PCHAR                  key to be retrieved
+//                    PUSHORT                length of data
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read record
+//                    if ok
+//                      copy key string from passed offset to output area
+//                    endif
+//
+//------------------------------------------------------------------------------
+SHORT QDAMGetszKeyParam_V3
+(
+   PBTREE  pBTIda,               // pointer to btree structure
+   RECPARAM  recKey,             // active record
+   PCHAR_W   pKeyData,             // pointer to data
+   PULONG  pulLen                // length of data
+)
+{
+   PCHAR   pData = NULL;
+   PBTREEBUFFER_V3  pRecord;              // active record
+   SHORT   sRc = 0;                    // return code
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+   USHORT  usLen;
+
+   sRc = QDAMReadRecord_V3( pBTIda, recKey.usNum, &pRecord, FALSE  );
+
+   /*******************************************************************/
+   /* check length                                                    */
+   /*******************************************************************/
+   if ( !sRc )
+   {
+     pData = (PCHAR)(pRecord->contents.uchData + recKey.usOffset);
+     usLen = *(PUSHORT) pData;
+
+     // as data is now in Unicode the length of the key may be up to
+     // HEADTERM_SIZE *2 !!!
+     if ( (usLen < (HEADTERM_SIZE + HEADTERM_SIZE)) && ( *pulLen > usLen ) )
+     {
+       *pulLen = usLen;
+       if ( pBT->usVersion >= NTM_VERSION2 )
+       {
+         pData += sizeof(USHORT ) + sizeof(RECPARAM);       // get pointer to data
+       }
+       else
+       {
+         pData += sizeof(USHORT ) + sizeof(RECPARAMOLD);       // get pointer to data
+       } /* endif */
+       memcpy( pKeyData, pData, *pulLen );
+     }
+     else
+     {
+       sRc = BTREE_CORRUPTED;
+       ERREVENT2( QDAMGETSZKEYPARAM_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+       if ( pBT->usOpenFlags & ASD_SHARED )
+       {
+         LONG  lUpdCount;
+         SHORT sTempRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
+         if ( !sTempRc )
+         {
+           if ( lUpdCount != pBT->alUpdCtr[0] )
+           {
+             // Corruption has ben caused by an update of the database from another user
+             // switch to BTREE_IN_USE error code to allow retry of the current operation
+             INFOEVENT2( QDAMGETSZKEYPARAM_LOC, REFRESH_EVENT, sRc, DB_GROUP, NULL );
+             sRc = BTREE_IN_USE;
+           } /* endif */
+         } /* endif */
+       } /* endif */
+     } /* endif */
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMGETSZKEYPARAM_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+   return ( sRc );
+}
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictNextLocal   Get the next entry back
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictNextLocal( PBTREE, PCHAR,PUSHORT, PCHAR,PUSHORT);
+//
+//------------------------------------------------------------------------------
+// Description:       Locate the next entry (by collating sequence) and
+//                    pass back the associated information into
+//                    the user provided buffers
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  pointer to space for key data
+//                    PUSHORT                length of space for key data
+//                    PCHAR                  pointer to space for user data
+//                    PUSHORT                length of space for user data
+//
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EMPTY       dictionary contains no data
+//
+//------------------------------------------------------------------------------
+// Function flow:     if dictionary corrupted then
+//                      set Rc to BTREE_CORRUPTED
+//                    else
+//                      call internal function for getting next tree element
+//                      and set Rc accordingly
+//                    endif
+//                    if okay then
+//                      Get the key data from the returned record key parameter
+//                    endif
+//                    if okay then
+//                      Get the data from the returned record data parameter
+//                    endif
+//                    return Rc
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictNextLocal
+(
+   PBTREE     pBTIda,
+   PCHAR_W    pKeyData,            //   pointer to space for key data
+   PULONG     pulKeyLen,           //   length of space for key data
+   PBYTE      pUserData,           //   pointer to space for user data
+   PULONG     pulUserLen           //   length of space for user data
+)
+{
+
+   //CHAR   szLOCKEDTERMSKEY[] =   "0x010x020x03LOCKEDTERMS0x010x020x030x040x050x060x070x080x09";
+   //CHAR_W szLOCKEDTERMSKEYW[] = L"0x010x020x03LOCKEDTERMS0x010x020x030x040x050x060x070x080x09";
+   SHORT  sRc = 0;                     // return code
+   RECPARAM  recBTree;                 // record parameter for index data
+   RECPARAM  recKey;                   //      ...   for key value
+   RECPARAM  recData;                  //      ...   for user value
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+   ULONG      ulKeyLen = *pulKeyLen;
+
+   memset(&recData, 0, sizeof(recData));
+   if ( pBT->fCorrupted )
+   {
+      sRc = BTREE_CORRUPTED;
+   } /* endif */
+
+   if ( !sRc )
+   {
+       SHORT sRetries = MAX_RETRY_COUNT;
+       do
+       {
+           ulKeyLen = *pulKeyLen;
+
+           /*******************************************************************/
+           /* For shared databases: discard all in-memory pages if database   */
+           /* has been changed since last access                              */
+           /*******************************************************************/
+           if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+           {
+             sRc = QDAMCheckForUpdates( pBTIda );
+           } /* endif */
+
+           if ( pBT->bRecSizeVersion == BTREE_V3 )
+           {
+              if ( !sRc )
+              {
+                if ( !pBTIda->usCurrentRecord )
+                {
+                  /****************************************************************/
+                  /* try a substring call first to check if an invalidate might   */
+                  /* be the reason                                                */
+                  /****************************************************************/
+                  if ( pBTIda->chHeadTerm[0] && (pBTIda->sCurrentIndex == RESET_VALUE) )
+                  {
+                    ULONG ulKeyLen = *pulKeyLen;
+                    ULONG ulUserLen = *pulUserLen;
+                    sRc = QDAMDictSubStrLocal( pBTIda, pBTIda->chHeadTerm,
+                                                (PBYTE) pKeyData, &ulKeyLen,
+                                                pUserData, &ulUserLen );
+                  } /* endif */
+                } /* endif */
+                while ( !sRc )
+                {
+                  sRc = QDAMNext_V3( pBTIda, &recBTree,&recKey, &recData);
+                  if ( !sRc )
+                  {
+                      ULONG ulLocalKeyLen = ulKeyLen;
+                      sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulLocalKeyLen );
+                      if ( ulLocalKeyLen )
+                      {
+                        if ( (UTF16strcmp( pKeyData, szLOCKEDTERMSKEYW ) != 0 ) ||
+                              ( strcmp((PSZ)pKeyData, szLOCKEDTERMSKEY) != 0 ) )
+                        {
+                          /********************************************************/
+                          /* found a valid record ...                             */
+                          /********************************************************/
+                          ulKeyLen = ulLocalKeyLen;
+                          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKeyData, ulKeyLen );
+                          break;                   // exit while loop
+                        } /* endif */
+                      }
+                      else
+                      {
+                          break;                   // exit while loop
+                      } /* endif */
+                  } /* endif */
+                } /* endif */
+              } /* endif */
+
+
+              if ( !sRc )
+              {
+                  sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+              } /* endif */
+           }
+           else
+           {
+              if ( !sRc )
+              {
+                if ( !pBTIda->usCurrentRecord )
+                {
+                  /****************************************************************/
+                  /* try a substring call first to check if an invalidate might   */
+                  /* be the reason                                                */
+                  /****************************************************************/
+                  if ( pBTIda->chHeadTerm[0] && (pBTIda->sCurrentIndex == RESET_VALUE) )
+                  {
+                    ULONG ulKeyLen = *pulKeyLen;
+                    ULONG ulUserLen = *pulUserLen;
+                    LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMDictSubStrLocal");
+                    //sRc = QDAMDictSubStrLocal( pBTIda, pBTIda->chHeadTerm,
+                    //                            (PBYTE) pKeyData, &ulKeyLen,
+                    //                            pUserData, &ulUserLen );
+                  } /* endif */
+                } /* endif */
+                while ( !sRc )
+                {
+                  LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMNext_V2");
+                  //sRc = QDAMNext_V2( pBTIda, &recBTree,&recKey, &recData);
+                  if ( !sRc )
+                  {
+                      ULONG ulLocalKeyLen = ulKeyLen;
+                      LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMGetszKeyParam_V2");
+                      //sRc = QDAMGetszKeyParam_V2( pBTIda, recKey, pKeyData, &ulLocalKeyLen );
+                      if ( ulLocalKeyLen )
+                      {
+                        if ( (UTF16strcmp( pKeyData, szLOCKEDTERMSKEYW ) != 0 ) ||
+                              ( strcmp((PSZ)pKeyData, szLOCKEDTERMSKEY) != 0 ) )
+                        {
+                          /********************************************************/
+                          /* found a valid record ...                             */
+                          /********************************************************/
+                          ulKeyLen = ulLocalKeyLen;
+                          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKeyData, ulKeyLen );
+                          break;                   // exit while loop
+                        } /* endif */
+                      }
+                      else
+                      {
+                          break;                   // exit while loop
+                      } /* endif */
+                  } /* endif */
+                } /* endif */
+              } /* endif */
+
+
+              if ( !sRc )
+              {
+                LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMGetszData_V2");
+                  //sRc =  QDAMGetszData_V2( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+              } /* endif */
+           } /* endif */
+
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+              (sRetries > 0));
+   } /* endif */
+
+   *pulKeyLen = ulKeyLen;
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMDICTNEXTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+   return ( sRc );
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMFirst    Get the first entry back
+//------------------------------------------------------------------------------
+// Function call:     QDAMFirst( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
+//
+//------------------------------------------------------------------------------
+// Description:       Locate the first entry and pass back the
+//                    associated information
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PRECPARAM              position of key
+//                    PRECPARAM              position of key data
+//                    PRECPARAM              position of data part
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EMPTY       dictionary contains no data
+//                    BTREE_INVALID     invalid pointer passed
+//
+//------------------------------------------------------------------------------
+// Function flow:     init passed records
+//                    if BTree exists
+//                      set current pointer to first record of BTree
+//                      if record == 0
+//                        set RC = BTREE_EMPTY
+//                      else
+//                        read record
+//                        check that record actually has values in it
+//                      endif
+//                    else
+//                      set rc = BTREE_INVALID
+//                    endif
+//------------------------------------------------------------------------------
+SHORT QDAMFirst_V3
+(
+   PBTREE     pBTIda,
+   PRECPARAM  precBTree,
+   PRECPARAM  precKey,
+   PRECPARAM  precData
+)
+{
+   SHORT  sRc = 0;
+   PBTREEBUFFER_V3 pRecord;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+   memset( precBTree, 0, sizeof(RECPARAM));
+   memset( precKey, 0, sizeof(RECPARAM));
+   memset( precData, 0, sizeof(RECPARAM));
+
+   if ( pBT )
+   {
+      pBTIda->usCurrentRecord = pBT->usFirstLeaf;
+      pBTIda->sCurrentIndex = 0;
+      if ( pBTIda->usCurrentRecord == 0)
+      {
+        sRc = BTREE_EMPTY;
+      }
+      else
+      {
+        sRc = QDAMReadRecord_V3( pBTIda, pBTIda->usCurrentRecord, &pRecord, FALSE  );
+        if ( !sRc )
+        {
+          /***********************************************************************/
+          /* Check that the record actually has some values in it                */
+          /***********************************************************************/
+          if ( ! OCCUPIED( pRecord))
+          {
+            sRc = BTREE_EMPTY;
+          }
+          else
+          {
+            precBTree->usOffset = pBTIda->sCurrentIndex;
+            precBTree->usNum = pBTIda->usCurrentRecord;
+            *precKey = QDAMGetrecKey_V3( pRecord, 0 );
+            *precData = QDAMGetrecData_V3( pRecord, 0, pBT->usVersion );
+          }
+        }
+      }
+   }
+   else
+   {
+      sRc = BTREE_INVALID;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMFIRST_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+
+  return sRc;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMDictFirstLocal   Get the first entry back
+//------------------------------------------------------------------------------
+// Function call:     QDAMDictFirstLocal(PBTREE,PCHAR,PUSHORT,PCHAR,PUSHORT);
+//------------------------------------------------------------------------------
+// Description:       Locate the first entry and pass back the
+//                    associated information into the user provided
+//                    buffers
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  pointer to space for key data
+//                    PUSHORT                length of space for key data
+//                    PCHAR                  pointer to space for user data
+//                    PUSHORT                length of space for user data
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_EMPTY       dictionary contains no data
+//                    BTREE_INVALID     invalid pointer passed
+//
+//------------------------------------------------------------------------------
+// Function flow:     if tree is corrupted
+//                      set RC = BTREE_CORRUPTED
+//                    else
+//                      locate first entry
+//                    endif
+//                    if ok
+//                      set ptr to key data, length of key data
+//                    endif
+//                    if ok
+//                      set ptr to user data, length of user data
+//                    endif
+//------------------------------------------------------------------------------
+
+SHORT QDAMDictFirstLocal
+(
+   PBTREE     pBTIda,
+   PCHAR_W    pKeyData,            //   pointer to space for key data
+   PULONG     pulKeyLen,           //   length of space for key data
+   PBYTE      pUserData,           //   pointer to space for user data
+   PULONG     pulUserLen           //   length of space for user data
+)
+{
+   SHORT     sRc = 0;                  // return code
+   RECPARAM  recBTree;                 // record parameter for index data
+   RECPARAM  recKey;                   //      ...   for key value
+   RECPARAM  recData;                  //      ...   for user value
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+   ULONG ulKeyLen;
+
+   memset(&recData, 0, sizeof(recData));
+   memset(&recKey, 0, sizeof(recKey));
+   if ( pBT->fCorrupted )
+   {
+      sRc = BTREE_CORRUPTED;
+   } /* endif */
+
+   if ( !sRc )
+   {
+       SHORT sRetries = MAX_RETRY_COUNT;
+
+       do
+       {
+          ulKeyLen = *pulKeyLen;
+
+          /*******************************************************************/
+          /* For shared databases: discard all in-memory pages if database   */
+          /* has been changed since last access                              */
+          /*******************************************************************/
+          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+          {
+            sRc = QDAMCheckForUpdates( pBTIda );
+          } /* endif */
+
+           if ( !sRc )
+           {
+              if ( pBT->bRecSizeVersion == BTREE_V3 )
+              {
+                 sRc = QDAMFirst_V3( pBTIda, &recBTree,&recKey, &recData);
+              }
+              else
+              {
+                LogMessage(ERROR,"TEMPORARY COMMENTED QDAMFirst_V2");
+                 //sRc = QDAMFirst_V2( pBTIda, &recBTree,&recKey, &recData);
+              } /* endif */
+           } /* endif */
+
+           if ( !sRc )
+           {
+              if ( pBT->bRecSizeVersion == BTREE_V3 )
+              {
+                sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulKeyLen );
+              }
+              else
+              {
+                LogMessage(ERROR,"TEMPORARY COMMENTED QDAMGetszKeyParam_V2");
+                //sRc = QDAMGetszKeyParam_V2( pBTIda, recKey, pKeyData, &ulKeyLen );
+              } /* endif */
+              if ( !sRc && ulKeyLen )
+              {
+                if ( pBT->fTransMem )
+                {
+                  ULONG ul = 0l;
+                  memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );
+                }
+                else
+                {
+                  pBTIda->chHeadTerm[0] = EOS;
+                } /* endif */
+              } /* endif */
+           } /* endif */
+
+           if ( !sRc )
+           {
+             if ( pBT->bRecSizeVersion == BTREE_V3 )
+             {
+                sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+             }
+             else
+             {
+                sRc =  QDAMGetszData_V2( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+             } /* endif */
+           } /* endif */
+
+         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+         {
+           UtlWait( MAX_WAIT_TIME );
+           sRetries--;
+         } /* endif */
+       }
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+              (sRetries > 0));
+       *pulKeyLen = ulKeyLen;
+   } /* endif */
+
+   if ( sRc )
+   {
+     ERREVENT2( QDAMDICTFIRSTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+   } /* endif */
+   return ( sRc );
+}
+
+
+
+// function EQFNTMOrganizeIndex
+//
+// re-organizes the index part of a memory by seuentially writing the
+// index records into a new file
+//
+USHORT EQFNTMOrganizeIndex
+(
+   PVOID          *ppBTIda,            // ptr to BTREE being organized
+   USHORT         usOpenFlags,         // open flags to be used for index file
+   ULONG          ulStartKey           // first key to start automatic insert...
+)
+{
+  SHORT          sRc = 0;              // function return code
+  PBTREE         pbTree = (PBTREE)(*ppBTIda);
+  PCHAR_W        pchKeyBuffer = NULL;  // buffer for record keys
+  ULONG          ulKeyBufSize = 0;     // current size of key buffer (number of characters)
+  PBYTE          pbData = NULL;        // buffer for record data
+  ULONG          ulDataBufSize = 0;    // current size of record data buffer (number of bytes)
+  BOOL           fNewIndexCreated = FALSE; // new-index-has-been-created flag
+  CHAR           szNewIndex[MAX_LONGPATH]; // buffer for new index name
+  PBTREE         pBtreeOut = NULL;     // structure for output BTREE
+  USHORT         usSigLen = 0;         // length of signature record
+  ULONG          ulKey;
+
+  // allocate buffer areas
+  ulKeyBufSize = 256;
+  if ( !UtlAlloc( (PVOID *)&pchKeyBuffer, 0, ulKeyBufSize*sizeof(CHAR_W) , ERROR_STORAGE ) ) 
+  {
+    sRc = ERROR_NOT_ENOUGH_MEMORY;
+  } /* endif */
+
+  if ( !sRc )
+  {
+    ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
+    if ( !UtlAlloc( (PVOID *)&pbData, 0, ulDataBufSize, ERROR_STORAGE ) ) 
+    {
+      sRc = ERROR_NOT_ENOUGH_MEMORY;
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+    if ( !UtlAlloc( (PVOID *)&pBtreeOut, 0, sizeof(BTREE), ERROR_STORAGE ) ) 
+    {
+      sRc = ERROR_NOT_ENOUGH_MEMORY;
+    } /* endif */
+  } /* endif */
+
+  // get user data (signature record)
+  if ( !sRc )
+  {
+    usSigLen = (USHORT)ulDataBufSize;
+    sRc = QDAMDictSignLocal( pbTree, (PCHAR)pbData, &usSigLen );
+  } /* endif */
+
+  // check if index is empty
+  if ( !sRc )
+  {
+    ULONG ulDataLen = ulDataBufSize; 
+    ULONG ulKeyLen  = sizeof(ULONG) + 1; // ulKeyBufSize;
+
+    sRc = QDAMDictFirstLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
+  } /* endif */
+
+  // setup name for new index file
+  if ( !sRc )
+  {
+    PSZ pszExt;
+
+    strcpy( szNewIndex, pbTree->szFileName );
+    pszExt = strrchr( szNewIndex, DOT );
+    if ( pszExt )
+    {
+      strcpy( pszExt, ".XMI" );
+    }
+    else
+    {
+      strcat( pszExt, ".XMI" );
+    } /* endif */
+  } /* endif */
+
+  // create new index file
+  if ( !sRc )
+  {
+    NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
+
+    memset( &NtmVitalInfo, 0, sizeof(NtmVitalInfo) );
+
+    NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = ulStartKey;
+    sRc = QDAMDictCreateLocal( szNewIndex, 20, (PCHAR)pbData, usSigLen,
+                                NULL, NULL, NULL, &pBtreeOut, &NtmVitalInfo );
+    if ( !sRc )
+    {
+      fNewIndexCreated = TRUE;
+    } /* endif */
+  } /* endif */
+
+  // write all data from existing index to new index file
+  if ( !sRc )
+  {
+    ULONG ulDataLen = ulDataBufSize; 
+    ULONG ulKeyLen  = sizeof(ULONG) + 1; // ulKeyBufSize;
+    
+    sRc = QDAMDictFirstLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
+
+    while ( !sRc )
+    {
+      sRc = QDAMDictInsertLocal( pBtreeOut, (PCHAR_W)&ulKey, pbData, ulDataLen );
+
+      if ( !sRc )
+      {
+        ulDataLen = ulDataBufSize; 
+        ulKeyLen  = sizeof(ULONG) + 1; // ulKeyBufSize;
+
+        sRc = QDAMDictNextLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
+      } /* endif */
+    } /*endwhile */
+
+    if ( sRc == BTREE_EOF_REACHED )
+    {
+      sRc = 0;
+    } /* endif */
+  } /* endif */
+
+  // close dictionaries
+  if ( !sRc ) QDAMDictCloseLocal( pbTree );
+  if ( fNewIndexCreated )QDAMDictCloseLocal( pBtreeOut );
+
+  // replace index file with newly created one or discard new index file in case of errors
+  if ( !sRc )
+  {
+    CHAR szOldIndex[MAX_LONGPATH];
+
+    // replace old index file
+    strcpy( szOldIndex, pbTree->szFileName );
+    UtlDelete( szOldIndex, 0L, NOMSG );
+    UtlMove( szNewIndex, szOldIndex, 0L, NOMSG );
+
+    // re-open new index file 
+    UtlAlloc( ppBTIda, 0, 0, NOMSG );
+    sRc = EQFNTMOpen( szOldIndex, usOpenFlags, ppBTIda );
+  }
+  else if ( fNewIndexCreated )
+  {
+    // discard new index file (if created)
+    UtlDelete( szNewIndex, 0L, NOMSG );
+  } /* endif */
+
+  // cleanup
+  if ( pchKeyBuffer ) UtlAlloc( (PVOID *)&pchKeyBuffer, 0, 0, NOMSG );
+  if ( pbData ) UtlAlloc( (PVOID *)&pbData, 0, 0, NOMSG );
+  if ( pBtreeOut ) UtlAlloc( (PVOID *)pBtreeOut, 0, 0, NOMSG );
+
+  // re-map some return codes..
+  switch ( sRc )
+  {
+    case BTREE_EMPTY:
+      sRc = 0;
+      break;
+    default:
+      break;
+  } /*endswitch */
+
+  return( (USHORT)sRc );
+} /* end of function EQFNTMOrganizeIndex */
 
