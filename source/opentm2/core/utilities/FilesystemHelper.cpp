@@ -67,21 +67,36 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode, bool useBuffer){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
+    long fileSize = 0;
 
     if(useBuffer){
+        if(!FindFiles(fixedPath).empty()){
+            fileSize = GetFileSize(fixedPath);
+        }
         if(fileBuffers.find(fixedPath) != fileBuffers.end()){
             LogMessage(ERROR, "OpenFile::Filebuffer wasn't created, it's already exists");
         }else{
             //fileBuffers[fixedPath].resize(1048575);//F FFFF
             //fileBuffers[fixedPath].resize(65536);//0x1000
             //fileBuffers[fixedPath].resize(32768);
-            fileBuffers[fixedPath].resize(16384);
+            if( fileSize > 0 ){
+                fileBuffers[fixedPath].resize(fileSize);
+                LogMessage(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",intToA(fileSize),"), fname = ", fixedPath);
+                fread(&fileBuffers[fixedPath][0], fileSize, 1, ptr);
+            }else{
+                LogMessage(INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath);
+                fileBuffers[fixedPath].resize(16384);
+            }
             LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(fileBuffers[fixedPath].size()));
         }
     }
 
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
+    if(fileSize > 0){
+        LogMessage(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",intToA(fileSize),"), fname = ", fixedPath);
+        fread(&fileBuffers[fixedPath][0], fileSize, 1, ptr);
+    }
     if(ptr == NULL){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
     }

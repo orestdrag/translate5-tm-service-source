@@ -7376,10 +7376,11 @@ SHORT  QDAMDictOpenLocal
       pBT->usOpenFlags = usOpenFlags;
 
       // open the file
-      sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
-                     FILE_NORMAL, FILE_OPEN,
-                     usFlags,
-                     0L, FALSE);
+      FilesystemHelper::OpenFile( pName, "r+b", true );
+      //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
+      //               FILE_NORMAL, FILE_OPEN,
+      //               usFlags,
+      //               0L, FALSE);
    } /* endif */
 
 

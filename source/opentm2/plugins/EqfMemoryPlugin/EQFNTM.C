@@ -445,72 +445,12 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     /* assign memory to pointer pstOpenOut                           */
     /******************************************************************/
     pstOpenOut = (PTMX_OPEN_OUT)(pstOpenIn + 1);
-
+    
+    pstOpenIn->stTmOpen.szServer[0] = EOS;
     if ( usLocation != TM_LOCAL )
     {
-      /****************************************************************/
-      /* TM may be LOCAL or LOCALREMOTE                               */
-      /* it must be determined if it is a local or remoted TM         */
-      /* for this a query is send to the TM handler                   */
-      /****************************************************************/
-      /****************************************************************/
-      /* split the TM name form the path                              */
-      /****************************************************************/
-      pszTemp = UtlGetFnameFromPath( szMemFullPath );
-
-      if ( pszTemp )
-      {
-        /**************************************************************/
-        /* file name found in full TM path                            */
-        /* get the server of the TM                                   */
-        /**************************************************************/
-        Utlstrccpy( pstOpenIn->stTmOpen.szServer,
-                    pszTemp,
-                    DOT );
-        if ( UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
-        {
-          // no server in function call IF
-          pstOpenIn->stTmOpen.szServer[0] = EOS;
-        }
-        else
-        {
-          EqfSend2Handler ( MEMORYHANDLER,
-                            WM_EQF_PROCESSTASK,
-                            MP1FROMSHORT( TM_QUERY_SERVER_TASK ),
-                            MP2FROMP( pstOpenIn->stTmOpen.szServer ) );
-        } /* endif */
-
-        /**************************************************************/
-        /* because usLocation mybe TM_LOCALREMOTE, check return from  */
-        /* previous message to see if it is really a remote TM        */
-        /**************************************************************/
-        if ( pstOpenIn->stTmOpen.szServer[0] != EOS )
-        {
-          /****************************************************************/
-          /* remote processing currently not implemented for the new TM   */
-          /* approach !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                      */
-          /****************************************************************/
-          usRc = ERROR_REMOTE_TM_NOT_SUPPORTED;
-          fOk  = FALSE;
-        } /* endif */
-      }
-      else
-      {
-        /**************************************************************/
-        /* NULL pointer in pszTemp, means internal programming error  */
-        /* stop further processing and set usRc                       */
-        /**************************************************************/
-        fOk = FALSE;
-        usRc = ERROR_INTERNAL;
-      } /* endif */
+      LogMessage(FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
     }
-    else
-    {
-      /****************************************************************/
-      /* set server string to EOS for correct processing of local TM  */
-      /****************************************************************/
-      pstOpenIn->stTmOpen.szServer[0] = EOS;
-    } /* endif */
 
     if ( fOk )
     {
