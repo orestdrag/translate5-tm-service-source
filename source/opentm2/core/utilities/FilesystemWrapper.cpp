@@ -78,7 +78,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
                         LPOVERLAPPED lpOverlapped
                         ){
                             int bytesRead = 0;
-                            int retCode = FilesystemHelper::ReadFile(hFile,lpBuffer,nNumberOfBytesToRead,bytesRead);
+                            int retCode = FilesystemHelper::ReadFileBuff(hFile,lpBuffer,nNumberOfBytesToRead,bytesRead, -1);
                             *lpNumberOfBytesRead = bytesRead;
                             return retCode == FilesystemHelper::FILEHELPER_NO_ERROR;
                         }
@@ -86,13 +86,29 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
     BOOL WriteFile(     //HANDLE       hFile,
                         HFILE        hFile,
                         LPCVOID      lpBuffer,
+                        int        nNumberOfBytesToWrite,
+                        int&      riNumberOfBytesWritten,
+                        LPOVERLAPPED lpOverlapped
+                        ){                            
+                            //*lpNumberOfBytesWritten = 
+                            FilesystemHelper::WriteToFileBuff(hFile, lpBuffer, nNumberOfBytesToWrite, riNumberOfBytesWritten, -1);
+                            
+                            return (riNumberOfBytesWritten > 0);
+                        }
+    BOOL WriteFile(     //HANDLE       hFile,
+                        HFILE        hFile,
+                        LPCVOID      lpBuffer,
                         DWORD        nNumberOfBytesToWrite,
                         LPDWORD      lpNumberOfBytesWritten,
                         LPOVERLAPPED lpOverlapped
-                        ){
-                            *lpNumberOfBytesWritten = FilesystemHelper::WriteToFile(hFile, lpBuffer, nNumberOfBytesToWrite);
+                        ){                            
+                            int written = 0; 
+                            FilesystemHelper::WriteToFileBuff(hFile, lpBuffer, nNumberOfBytesToWrite, written, -1);
+                            *lpNumberOfBytesWritten = written;
+                            
                             return (*lpNumberOfBytesWritten > 0);
                         }
+
 
     //BOOL DeleteFile(LPCTSTR lpFileName){
     //    return false;
@@ -341,15 +357,18 @@ BOOL SetFilePointerEx(
                 return -1;
             }
 
-            if(numOfBytes <= 0){
+            if(numOfBytes < 0){
                 return -1;
             }
-            char* dummy = new char[numOfBytes];
-            rewind(ptr);
-            int readed = 0;
-            FilesystemHelper::ReadFile(ptr, dummy, numOfBytes, readed);
-            delete [] dummy;
-            return readed != 1;
+
+            LONG readed = 0;
+            if(!FilesystemHelper::SetFileCursor(ptr, numOfBytes, readed, FILE_BEGIN)){
+                readed = numOfBytes;
+            }
+            
+            FilesystemHelper::SetOffsetInFilebuffer(ptr,numOfBytes);
+
+            return readed == 0 && numOfBytes != 0;
         }
 
         int TruncateFileForBytes(HFILE ptr, int numOfBytes){

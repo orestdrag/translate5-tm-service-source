@@ -23,14 +23,17 @@ public:
 
     static int WriteToFile(const std::string& path, const char* buff, const int buffsize);
     static int WriteToFile(const std::string& path, const unsigned char* buff, const int buffsize);
-    static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
+    //static int WriteToFile(FILE*& ptr, const char* buff, const int buffsize);
     static int WriteToFile(FILE*& ptr, const void* buff, const int buffsize);
 
     static int WriteToFile(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition);
+    static int WriteToFileBuff(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition);
+    static int ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPosition);
+    static int SetOffsetInFilebuffer(FILE* ptr,int offset);
 
     static int ReadFile(const std::string& path, char* buff, const int buffSize, 
                             int& bytesRead, const std::string& mode = "rb");
-    static int ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead);
+    //static int ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead);
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead);
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 
@@ -48,6 +51,7 @@ public:
 
     static int TruncateFileForBytes(HFILE ptr, int numOfBytes);
     static short SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet);
+    
 
     static int WriteBuffToFile(std::string fName, bool tempFile = false);
 
@@ -67,6 +71,7 @@ public:
         FILEHELPER_FILE_PTR_IS_NULL = ERROR_PATH_NOT_FOUND,
         FILEHELPER_END_FILELIST,
         FILEHELPER_ERROR_FILE_NOT_READ,
+        FILEHELPER_ERROR_READING_OUT_OF_RANGE,
         
         FILEHELPER_ERROR_NO_FILES_FOUND,
 

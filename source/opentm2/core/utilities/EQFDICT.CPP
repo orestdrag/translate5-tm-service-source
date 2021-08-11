@@ -1296,7 +1296,7 @@ SHORT QDAMAllocTempAreas
 
   if ( ! sRc )
   {
-    FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
+    FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
 
       // check if disk is full
       if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
@@ -1426,7 +1426,7 @@ SHORT QDAMWRecordToDisk_V3
 
   if ( ! sRc )
   {
-    sRc = FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
+    sRc = FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
     // check if disk is full
     if ( ! sRc )
     {
@@ -3638,7 +3638,7 @@ SHORT QDAMDictCreateLocal
           else
           {
             //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-            FilesystemHelper::WriteToFile(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
+            FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
 
             UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
@@ -7376,7 +7376,7 @@ SHORT  QDAMDictOpenLocal
       pBT->usOpenFlags = usOpenFlags;
 
       // open the file
-      FilesystemHelper::OpenFile( pName, "r+b", true );
+      pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
       //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
       //               FILE_NORMAL, FILE_OPEN,
       //               usFlags,
@@ -9022,7 +9022,7 @@ SHORT QDAMDictUpdSignLocal
        /*************************************************************/
        {
          USHORT usDataLen = (USHORT)ulDataLen;
-         FilesystemHelper::WriteToFile(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
 
          //sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
@@ -9046,7 +9046,7 @@ SHORT QDAMDictUpdSignLocal
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
-         FilesystemHelper::WriteToFile(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuff(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
           
           writingPosition += iBytesWritten;
           // check if disk is full
