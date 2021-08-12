@@ -156,6 +156,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         pFb = &fileBuffers[fName];    
 
         if(offset + buffSize > pFb->data.size()){
+            LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", intToA(pFb->data.size())," to ", intToA(offset+buffSize));
             pFb->data.resize(offset + buffSize);
         }
 
@@ -164,8 +165,9 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         pFb->offset += buffSize;
     }else{
         LogMessage2(ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
+        return -1;
     }
-
+    LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", intToA(buffSize)," bytes written to ", fName.c_str());
     return 0;
 }
 
@@ -176,7 +178,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
 
     if(fileBuffers.find(fName) == fileBuffers.end()){
         LogMessage2(DEBUG,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
-        return -1;
+        return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
     pFb = &fileBuffers[fName];
     if(startingPos < 0){
@@ -185,7 +187,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
 
     if(pFb->data.size()< offset + buffSize){
         LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
-        return -2;
+        return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     }
     PUCHAR p = &(pFb->data[offset]);
     memcpy(buff, p, buffSize);
@@ -380,21 +382,20 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const long unsig
 
 
 int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
-    LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", GetFileName(ptr).c_str(),
-            " starting from position ", intToA(startingPosition));
-
     std::string fName = GetFileName(ptr);
+    LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", fName.c_str(),
+            " starting from position ", intToA(startingPosition));
 
     if(fileBuffers.find(fName) != fileBuffers.end()){
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
+        iBytesWritten = buffSize;
     }else{
-        LogMessage2(INFO, "File is not opened in filebuffers, fName = ", fName.c_str());
-    }
-    long lPart = startingPosition, hPart = 0;
+        LogMessage2(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str());
 
-    int ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
-    
-    iBytesWritten =  WriteToFile(ptr, buff, buffSize);
+        long lPart = startingPosition, hPart = 0;
+        int ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+        iBytesWritten =  WriteToFile(ptr, buff, buffSize);
+    }
     return 0;
 }
 
@@ -566,14 +567,18 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
     int err = 0, size = 0;
-    if(err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos)){
+    err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos);
+    if(err == FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED){
         LogMessage2(INFO, "File not found in buffers -> reading from disk, fName = ", GetFileName(ptr).c_str());
-        long lPart = startingPos, hPart = 0;
-        err = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
-        err = ReadFile(ptr, buff, buffSize, bytesRead);
+
+        if((size = GetFileSize(ptr)) < startingPos+buffSize){
+            err = FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
+        }else{
+            long lPart = startingPos, hPart = 0;
+            err = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+            err = ReadFile(ptr, buff, buffSize, bytesRead);
+        }
     }
-    if((size = GetFileSize(ptr)) < startingPos+buffSize)
-        return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     return err;
 }
 

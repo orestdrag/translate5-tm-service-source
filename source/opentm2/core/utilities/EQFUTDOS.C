@@ -1296,40 +1296,11 @@ USHORT UtlChgFilePtrHwnd
      *pNewOffset = *pulNewOffset;
    }
   
-  //fseek(hf, lOffset, SEEK_SET);
-  //hf->_offset = lOffset;
   int res = SetFilePointer(hf, lOffset, pNewOffset, fsMethod);
 
   if(pulNewOffset && !res){
-     //*pulNewOffset = *pNewOffset;
      *pulNewOffset = lOffset;
    }
-/*
-   liOffset.LowPart = lOffset;
-   liOffset.HighPart = 0;
-   liNewOffset.LowPart = 0;
-   liNewOffset.HighPart = 0;
-
-   do {
-      DosError(0);
-
-      fOK = SetFilePointerEx( hf, liOffset, &liNewOffset, fsMethod );
-
-      *pulNewOffset = liNewOffset.LowPart;
-
-      if ( !fOK )
-      {
-        usRetCode = (USHORT)GetLastError();
-        *pulNewOffset = 0L;
-      } 
-
-      DosError(1);
-      if ( fMsg && usRetCode )
-      {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
-      } 
-   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-//*/
    return( usRetCode );
 }
 

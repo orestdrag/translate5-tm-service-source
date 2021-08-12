@@ -391,14 +391,6 @@ USHORT TmtXCreate
   pTmCreateOut->stPrefixOut.usLengthOutput = sizeof( TMX_CREATE_OUT );
   pTmCreateOut->stPrefixOut.usTmtXRc = usRc;
 
-  // get inital update counters
-  if ( !usRc && pTmClb->fShared )
-  {
-    #ifdef TEMPORARY_COMMENTED
-    usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, pTmClb->alUpdCounter,
-                                0, MAX_UPD_COUNTERS );
-                                #endif
-  } /* endif */
   return( usRc );
 }
 

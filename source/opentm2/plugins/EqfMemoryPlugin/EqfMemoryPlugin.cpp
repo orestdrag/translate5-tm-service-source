@@ -209,11 +209,7 @@ int EqfMemoryPlugin::closeMemory(
   EqfMemory *pMem = (EqfMemory *)pMemory;
   HTM htm = pMem->getHTM();
   
-  LogMessage(WARNING, "TEMPORARY_COMMENTED in EqfMemoryPlugin::closeMemory");
-//#ifdef TEMPORARY_COMMENTED
 	iRC = TmClose( htm, NULL,  FALSE,  NULL );
-//#endif //TEMPORARY_COMMENTED
-
 
   // refresh memory info
   std::string strMemName;
@@ -873,6 +869,11 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   auto dot = nameWithoutExtention.rfind('.');
   if(dot != std::string::npos){
     nameWithoutExtention = nameWithoutExtention.substr(0, dot);
+  }
+  dot = mem_path.rfind('.');
+  if(dot != std::string::npos){
+    mem_path = mem_path.substr(0, dot);
+    mem_path = mem_path + ".MEM";
   }
   //strcpy( pInfo->szFullPath, prop.szFullMemName);
   //strcpy( pInfo->szName, prop.stPropHead.szName);

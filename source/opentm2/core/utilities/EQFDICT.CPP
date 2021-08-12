@@ -1592,17 +1592,13 @@ SHORT QDAMReadRecordFromDisk_V3
   if ( !sRc )
   {
     INC_REAL_READ_COUNT;
-    if ( !sRc )
-    {
-      lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
-      //sRc = SkipBytesFromBeginningInFile(pBT->fp, lOffset);
-      sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
-    } /* endif */
 
     // Read the record in to the buffer space
     // Mark the next buffer for future allocations
     if ( !sRc )
     {
+      lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
+
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
       resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
                      BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
@@ -1622,15 +1618,7 @@ SHORT QDAMReadRecordFromDisk_V3
       {
         if ( usNumber < pBT->usNextFreeRecord )
         {
-          // this is rather an error condition than an end-of-file condition!
-          if ( pBT->usOpenFlags & ASD_SHARED )
-          {
-            sRc = BTREE_IN_USE;
-          }
-          else
-          {
-            sRc = BTREE_READ_ERROR;
-          } /* endif */
+          sRc = BTREE_READ_ERROR;
         } /* endif */
       } /* endif */
     } /* endif */
@@ -1664,16 +1652,6 @@ SHORT QDAMReadRecordFromDisk_V3
 
            if (! sRc )
            {
-             if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
-             {
-               // this condition should NEVER occur for shared resources
-               // as write is only allowed if the database has been
-               // previously locked
-               ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, NULL );
-
-              LogMessage(ERROR, "Gotcha! Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/2\nPlease save info required to reproduce this condition.");
-
-             } /* endif */
              sRc = QDAMWriteHeader( pBTIda );
            } /* endif */
 //         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
@@ -1681,34 +1659,11 @@ SHORT QDAMReadRecordFromDisk_V3
          else
          {
            ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, NULL );
-
-          LogMessage(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
-
+           LogMessage(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
            sRc = BTREE_READ_ERROR;
          } /* endif */
        } /* endif */
     } /* endif */
-  } /* endif */
-
-  // For shared databases, check if database has been changed since last access
-  // in case of changes force a BTREE_IN_USE return code thus triggering a retry
-  // on one the outer calling levels
-  if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-  {
-      LONG  lUpdCount;                 // buffer for new value of update counter
-
-     /**********************************************************************/
-     /* Get current database update count                                  */
-     /**********************************************************************/
-     sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
-
-     if ( !sRc )
-     {
-        if ( lUpdCount != pBT->alUpdCtr[0] )
-        {
-           sRc = BTREE_INVALIDATED;
-        } /* endif */
-     } /* endif */
   } /* endif */
 
   /********************************************************************/
@@ -2167,19 +2122,6 @@ SHORT QDAMDictFlushLocal
           } /* endif */
           pLEntry++;
         } /* endfor */
-
-        if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock && fRecordWritten )
-        {
-            // this condition should NEVER occur for shared resources
-            // as write is only allowed if the database has been
-            // previously locked
-            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
-    #ifdef _DEBUG
-            WinMessageBox( HWND_DESKTOP, (HWND)UtlQueryULong( QL_TWBCLIENT ),
-              "Insecure write to dictionary/TM detected!\nLoc=QDAMDICTFLUSHLOCAL1\nPlease save info required to reproduce this condition.",
-              "Gotcha!", 9999, MB_ERROR );
-    #endif
-        } /* endif */
       } /* endif */
     }
     else
@@ -3670,14 +3612,8 @@ SHORT QDAMDictCreateLocal
           if ( !sRc )
           {
             strcpy(pRecord->contents.header.MARK,"@@ROOT@@");
-            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;
-            
-            LogMessage(WARNING, "TEMPORARY_HARDCODED inQDAMDictCreateLocal:: pBTIda->pBTree->fGuard = true;");
-            bool fGuard = pBTIda->pBTree->fGuard;
-            pBTIda->pBTree->fGuard = true;
-            
+            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
-            pBTIda->pBTree->fGuard = fGuard;
           } /* endif */
           if ( !sRc )
           {
@@ -9159,11 +9095,6 @@ SHORT QDAMDictSignLocal
 
 
   sRc = SkipBytesFromBeginningInFile(pBT->fp, USERDATA_START);
-  /*if ( UtlChgFilePtr( pBT->fp, (LONG) USERDATA_START,
-                      FILE_BEGIN, &ulNewOffset, FALSE) )
-  {
-    sRc = BTREE_READ_ERROR;
-  } //*/
 
   if ( ! sRc )
   {
