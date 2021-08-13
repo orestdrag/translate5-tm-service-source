@@ -2598,15 +2598,13 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     // append data in prop value buffer
     int iCurLength = wcslen( pBuf->szPropW );
     int iFree = (sizeof(pBuf->szPropW) / sizeof(CHAR_W)) - iCurLength - 1;
-    if ( iLength > iFree ) iLength = iFree;
+    if ( iLength > iFree ) 
+      iLength = iFree;
 
     wcsncpy( pBuf->szPropW + iCurLength, w_chars, iLength );
-    strncpy( pBuf->szProp, c_chars, iLength);
+    strncpy( pBuf->szProp  + iCurLength, c_chars, iLength );
     pBuf->szPropW[iCurLength+iLength] = 0;
-
-
-    int iBytes = iLength;//WideCharToMultiByte( CP_OEMCP, 0, pBuf->szPropW, -1, pBuf->szProp, sizeof(pBuf->szProp), NULL, NULL );
-    pBuf->szProp[iBytes] = '\0';
+    pBuf->szProp [iCurLength+iLength] = 0;
   }
   else if ( fCatchData && (CurElement.ID == INVCHAR_ELEMENT) )
   {

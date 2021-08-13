@@ -191,6 +191,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     }
     PUCHAR p = &(pFb->data[offset]);
     memcpy(buff, p, buffSize);
+    bytesRead = buffSize;
     LogMessage6(INFO, "ReadBuffer::", intToA(buffSize)," bytes read from buffer to ", fName.c_str(), " starting from ", intToA(offset) );
     return 0;
 }
@@ -199,6 +200,8 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
     if(fileBuffers.find(fName)!= fileBuffers.end()){
         WriteBuffToFile(fName);
         fileBuffers.erase(fName);
+    }else{
+        LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
     }
     return 0;
 }
@@ -232,9 +235,10 @@ int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
 
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
-    LogMessage3(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , ")");
+    LogMessage(DEBUG, "called FilesystemHelper::CloseFile()");
     if(ptr){
         std::string fName = GetFileName(ptr);
+        LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , "), fName = ", fName.c_str() );
         fclose(ptr);
         FlushBufferIntoFile(fName);
 

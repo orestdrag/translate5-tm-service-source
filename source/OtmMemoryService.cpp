@@ -216,7 +216,6 @@ void post_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->createMemory( strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    //if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
     LogMessage4(INFO, "post_method_handler done, RC=", intToA(rc),"; Output: ", strResponseBody.c_str());
   } );
 }
