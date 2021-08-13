@@ -3998,8 +3998,8 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     UtlLongToShortName( pSegment->szDocument, szShortName );
     pLIDA->pProposal->setDocShortName( szShortName );
     pLIDA->pProposal->setDocName( pSegment->szDocument );
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function MEMINSERTSEGMENT, because of basic TMCHAR data type migration");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED in called function MEMINSERTSEGMENT, because of basic TMCHAR data type migration");
+    //#ifdef TEMPORARY_COMMENTED
     pLIDA->pProposal->setSource( pSegment->szSource );
     pLIDA->pProposal->setSourceLanguage( pSegment->szSourceLang );
     pLIDA->pProposal->setMarkup( pSegment->szFormat );
@@ -4007,7 +4007,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setTargetLanguage( pSegment->szTargetLang );
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
-    #endif
+    //#endif
 
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
