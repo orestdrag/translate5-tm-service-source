@@ -195,7 +195,9 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       /******************************************************************/
       /* Build fully qualified tag table name for internal tables       */
       /******************************************************************/
-      if ( fInternal )
+      //LogMessage2(WARNING,"TEMPORARY HARDCODED if(true) in building tag table name for ", pszTableName);
+      if ( fInternal //|| true
+      )
       {
         properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");

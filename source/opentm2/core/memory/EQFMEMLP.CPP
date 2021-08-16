@@ -4012,7 +4012,6 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
 
-
     if ( !usRC )
     {
       pLIDA->ulSegmentCounter++;         // Increase the segment counter

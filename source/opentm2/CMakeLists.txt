@@ -8,6 +8,8 @@ set(ZLIB_INCLUDE_DIR    "${ROOT}/Packages/zlib")
 set(MINIZIP_INCLUDE_DIR "${ROOT}/Packages/zlib/contrib/minizip")
 set(OPENTM2_ROOT ".")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 set(API_Source_Files OTMFUNC.C)
 
 include_directories(${OPENTM2_ROOT}

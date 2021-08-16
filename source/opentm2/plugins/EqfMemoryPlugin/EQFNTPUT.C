@@ -308,10 +308,10 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       //load tag table for tokenize function
-      //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-      //                             TALOADCOMPCONTEXTFUNC,
-      //                             FALSE, NULLHANDLE );
+      usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+                                   TALOADCOMPCONTEXTFUNC,
+                                   FALSE, NULLHANDLE );
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
@@ -322,10 +322,10 @@ USHORT TokenizeSourceEx2
            if ( ptrMarkup ) {
               strcpy( ptrMarkup, "OTMUTF8.TBL" ) ;
               strcpy( szString, "OTMUTF8" ) ;
-              //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-              //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-              //                             TALOADCOMPCONTEXTFUNC,
-              //                             FALSE, NULLHANDLE );
+              usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+                                           TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+                                           TALOADCOMPCONTEXTFUNC,
+                                           FALSE, NULLHANDLE );
               if ( usRc )
                  usRc = ERROR_TA_ACC_TAGTABLE;
            } 
@@ -340,11 +340,11 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       //usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-       //                            (PTOKENENTRY)pTokenList,
-       //                            TOK_SIZE, &pStartStop,
-       //                            pTable->pfnProtTable,
-       //                            pTable->pfnProtTableW, ulSrcCP, iMode);
+       usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+                                   (PTOKENENTRY)pTokenList,
+                                   TOK_SIZE, &pStartStop,
+                                   pTable->pfnProtTable,
+                                   pTable->pfnProtTableW, ulSrcCP, iMode);
 
 
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
@@ -365,11 +365,11 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
-          // usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-          //                            (PTOKENENTRY)pTokenList,
-          //                             (USHORT)lNewSize, &pStartStop,
-          //                             pTable->pfnProtTable,
-          //                             pTable->pfnProtTableW, ulSrcCP, iMode );
+          usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+                                      (PTOKENENTRY)pTokenList,
+                                       (USHORT)lNewSize, &pStartStop,
+                                       pTable->pfnProtTable,
+                                       pTable->pfnProtTableW, ulSrcCP, iMode );
         } /* endif */
 
       } /* endwhile */
@@ -677,7 +677,7 @@ USHORT TmtXReplace
     UTF16strcpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource );
 
     //tokenize source segment, resulting in norm. string and tag table record
-    LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeSource");
+    //LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeSource");
     usRc = TokenizeSource( pTmClb, pSentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage,
                            (USHORT)pTmClb->stTmSign.bMajorVersion );
@@ -692,7 +692,7 @@ USHORT TmtXReplace
   {
     pSentence->pNormString = pSentence->pNormStringStart;
     LogMessage(ERROR,"TEMPORARY_COMMENTED HashSentence");
-    //HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
     if ( pTmClb )  /* 4-13-15 */
     {
       usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
@@ -826,9 +826,6 @@ USHORT TmtXReplace
 }
 
 
-
-
-#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -919,6 +916,8 @@ VOID HashSentence
     BuildVotes( pSentence );
   } /* endif */
 }
+
+
 
 //------------------------------------------------------------------------------
 // Internal function                                                            
@@ -1029,6 +1028,7 @@ USHORT HashTupelW
   } /* endif */
 }
 
+#ifdef TEMPORARY_COMMENTED
 USHORT
 HashTupel
 (
@@ -1087,6 +1087,8 @@ HashTupel
   } /* endif */
   return (usHash);
 } /* end of function HashTupel */
+
+#endif
 
 //------------------------------------------------------------------------------
 // Internal function                                                            
@@ -1242,7 +1244,6 @@ Vote
     pSentence->usActVote++;
   } /* endif */
 } /* end of function Vote */
-#endif
 
 //------------------------------------------------------------------------------
 // Internal function                                                            
