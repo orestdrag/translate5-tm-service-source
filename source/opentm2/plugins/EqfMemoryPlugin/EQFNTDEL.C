@@ -12,11 +12,12 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
+#include "../../core/utilities/LogWrapper.h"
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -454,7 +455,8 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
             ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
             //tokenize target string in del structure
-            usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
+            LogMessage(ERROR,"TEMPORARY_COMMENTED");
+            //usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
 
             if ( !usRc )
             {

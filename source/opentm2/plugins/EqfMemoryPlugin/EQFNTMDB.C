@@ -2161,8 +2161,6 @@ EQFNTMGetNextNumber
   return 0;
 } /* end of function EQFNTMGetNextNumber */
 
-#ifdef TEMPORARY_COMMENTED
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2208,7 +2206,6 @@ SHORT EQFNTMPhysLock
   return sRc;
 } /* end of function EQFNTMPhysLock */
 
-#endif 
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |

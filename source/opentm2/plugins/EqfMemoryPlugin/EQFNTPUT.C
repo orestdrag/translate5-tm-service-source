@@ -677,7 +677,6 @@ USHORT TmtXReplace
     UTF16strcpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource );
 
     //tokenize source segment, resulting in norm. string and tag table record
-    //LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeSource");
     usRc = TokenizeSource( pTmClb, pSentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage,
                            (USHORT)pTmClb->stTmSign.bMajorVersion );
@@ -691,7 +690,6 @@ USHORT TmtXReplace
   if ( !usRc )
   {
     pSentence->pNormString = pSentence->pNormStringStart;
-    LogMessage(ERROR,"TEMPORARY_COMMENTED HashSentence");
     HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
     if ( pTmClb )  /* 4-13-15 */
     {
@@ -701,31 +699,6 @@ USHORT TmtXReplace
     {
       pSentence->pTagRecord->usTagTableId = 0;
     } /* endif */
-  } /* endif */
-
-  // lock TM database
-  if ( !usRc && pTmClb->fShared )
-  {
-    // use only two retries as locking already uses a wait loop...
-    SHORT sRetries = 2;
-    do
-    {
-      LogMessage(ERROR,"TEMPORART_COMMENTED");
-      //usRc = NTMLockTM( pTmClb, TRUE, &fLocked );
-      if ( usRc == BTREE_IN_USE )
-      {
-        UtlWait( MAX_WAIT_TIME );
-        sRetries--;
-      } /* endif */
-    }
-    while( (usRc == BTREE_IN_USE) && (sRetries > 0));
-  } /* endif */
-
-  // Update internal buffers if database has been modified by other users
-  if ( !usRc && pTmClb->fShared )
-  {
-    LogMessage(ERROR,"TEMPORARY_COMMENTED");
-    //usRc = NTMCheckForUpdates( pTmClb );
   } /* endif */
 
   if ( !usRc )
@@ -744,7 +717,7 @@ USHORT TmtXReplace
         if ( !usRc )
         {
           LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
-          //usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+          usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
       } /* endif */
@@ -758,7 +731,7 @@ USHORT TmtXReplace
       if ( !usRc )
       {
         LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
-        //usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+        usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
     } /* endif */
@@ -768,7 +741,7 @@ USHORT TmtXReplace
   if ( fLocked )
   {
     LogMessage(ERROR,"TEMPORART_COMMENTED");
-    //NTMLockTM( pTmClb, FALSE, &fLocked );
+    NTMLockTM( pTmClb, FALSE, &fLocked );
   } /* endif */
 
   //release allocated memory
@@ -812,7 +785,7 @@ USHORT TmtXReplace
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
      LogMessage(ERROR,"TEMPORARY_COMMENTED");
-      //TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
+      TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
     } /* endif */
@@ -1883,6 +1856,7 @@ USHORT FillClb
 
   return (usRc);
 }
+#endif 
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -2005,9 +1979,7 @@ USHORT UpdateTmIndex
 
              if ( usRc == NO_ERROR )
              {
-               #ifdef TEMPORARY_COMMENTED
                usRc = EQFNTMInsert( pTmClb->pstInBtree, &ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
-              #endif
              } /* endif */
           } /* endif */
 
@@ -2126,7 +2098,6 @@ USHORT UpdateTmIndex
 
   return( usRc );
 }
-#endif 
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -3419,6 +3390,7 @@ USHORT TmtXUpdSeg
 
   return( usRc );
 } /* end of function TmtXUpdSeg */
+#endif
 
 
 /**********************************************************************/
@@ -3485,6 +3457,7 @@ BOOL TMDelTargetClb
   return( fTargetRemoved );
 } /* end of function TMDelTargetClb */
 
+
 // Do a primitive on BOCU (see IBM DeveloperWorks) based compression...
 static long lBoundary[6] = {   -0x02F41,   -0x041,  -0x01, 0x03f, 0x02f3f, 0x010ffff };
 static int  byteCount[6] = {          3,        2,      1,     1,       2,         3 };
@@ -3493,7 +3466,7 @@ static long lCompress[6] = {       0x10,    0x03f,  0x07f, 0x0bf,   0x0ee,     0
 
 
 
-
+#ifdef TEMPORARY_COMMENTED
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 {
   ULONG ulLen = ulLenChar * sizeof(CHAR_W);
@@ -3565,7 +3538,6 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 
 #endif // TEMPORARY_COMMENTED
 
-#ifdef TEMPORARY_COMMENTED
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 {
     ULONG  ulLen = ulLenComp-1;
@@ -3618,8 +3590,6 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
     }
     return ulLen;
 }
-#endif
-
 #endif 
 
 #ifdef TEMPORARY_COMMENTED

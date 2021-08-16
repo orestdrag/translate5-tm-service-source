@@ -1236,6 +1236,7 @@ NTMGetHandlesFromCLB
   } /* endif */
   return;
 } /* end of function NTMGetHandlesFromCLB */
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1318,6 +1319,7 @@ USHORT NTMLockTM
 
  return( usRc );
 } /* end of function NTMLockTM */
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1439,7 +1441,8 @@ USHORT NTMCheckForUpdates
      // Get new table
      if ( !usRc )
      {
-       usRc = NTMReadLongNameTable( pTmClb );
+       LogMessage(ERROR,"TEMPORARY COMMENTED NTMReadLongNameTable"); 
+       //usRc = NTMReadLongNameTable( pTmClb );
      } /* endif */
    } /* endif */
  } /* endif */
@@ -1456,8 +1459,6 @@ USHORT NTMCheckForUpdates
  } /* endif */
  return( usRc );
 } /* end of function NTMCheckForUpdates */
-
-#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1578,7 +1579,7 @@ USHORT NTMDestroyLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMDestroyLongNameTable */
-#ifdef TEMPORARY_COMMENTED
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1786,7 +1787,7 @@ USHORT NTMReadLongNameTable
   // return to caller
   return( usRC );
 } /* end of function NTMReadLongNameTable */
-#endif 
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
