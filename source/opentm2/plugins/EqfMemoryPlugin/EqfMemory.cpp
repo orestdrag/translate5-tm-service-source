@@ -17,6 +17,8 @@ Copyright Notice:
 //#include <eqf.h>                  // General Translation Manager include file
 
 #include "../../core/pluginmanager/PluginManager.h"
+#include "../../core/utilities/LogWrapper.h"
+#include "../../core/utilities/EncodingHelper.h"
 #include "OtmProposal.h"
 #include "EqfMemory.h"
 
@@ -302,19 +304,15 @@ int EqfMemory::putProposal
 
   this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
 
-#ifdef EQFMEMORYLOGGING
-  this->Log.writef( "*** method: putProposal, source=\"%S\"", this->pTmPutIn->stTmPut.szSource );
-#endif
+  std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
+  LogMessage2(INFO,"EqfMemory::putProposal, source = ", source.c_str());
 
-#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
-#endif //TEMPORARY_COMMENTED
 
-#ifdef EQFMEMORYLOGGING
-  this->Log.writef( "  result=%ld", iRC );
-#endif
+  LogMessage2(INFO, "EqfMemory::putProposal result = ", intToA(iRC));
 
-  if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+  if ( iRC != 0 ) 
+      handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
 
   if ( ( iRC == 0 ) &&
        ( this->pTmPutIn->stTmPut.fMarkupChanged ) ) {

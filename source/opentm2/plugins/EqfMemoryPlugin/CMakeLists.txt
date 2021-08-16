@@ -12,7 +12,7 @@ set(EqfMemoryPlugin_Source_Files
    # EQFNTEXT.C
    # EQFNTMDB.C
    # EQFNTEXT.C
-   # EQFNTPUT.C
+   EQFNTPUT.C
    EQFNTUTL.C
    EQFNTMDB.C
    EQFNTM.C

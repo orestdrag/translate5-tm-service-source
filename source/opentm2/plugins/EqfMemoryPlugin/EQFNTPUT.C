@@ -20,6 +20,7 @@
 #include <EQFEVENT.H>             // event logging
 
 #include <wctype.h>
+#include "../../core/utilities/LogWrapper.h"
 
 //static data
 //distribution criteria for building tuples
@@ -213,9 +214,11 @@ USHORT TmtXReplace
     UTF16strcpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource );
 
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString,
-                           pTmPutIn->stTmPut.szSourceLanguage,
-                           (USHORT)pTmClb->stTmSign.bMajorVersion );
+    LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeSource");
+    //usRc = TokenizeSource( pTmClb, pSentence, szString,
+    //                       pTmPutIn->stTmPut.szSourceLanguage,
+    //                       (USHORT)pTmClb->stTmSign.bMajorVersion );
+    
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );
        pTmPutIn->stTmPut.fMarkupChanged = TRUE ;
@@ -225,7 +228,8 @@ USHORT TmtXReplace
   if ( !usRc )
   {
     pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    LogMessage(ERROR,"TEMPORARY_COMMENTED HashSentence");
+    //HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
     if ( pTmClb )  /* 4-13-15 */
     {
       usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
@@ -243,7 +247,8 @@ USHORT TmtXReplace
     SHORT sRetries = 2;
     do
     {
-      usRc = NTMLockTM( pTmClb, TRUE, &fLocked );
+      LogMessage(ERROR,"TEMPORART_COMMENTED");
+      //usRc = NTMLockTM( pTmClb, TRUE, &fLocked );
       if ( usRc == BTREE_IN_USE )
       {
         UtlWait( MAX_WAIT_TIME );
@@ -256,7 +261,8 @@ USHORT TmtXReplace
   // Update internal buffers if database has been modified by other users
   if ( !usRc && pTmClb->fShared )
   {
-    usRc = NTMCheckForUpdates( pTmClb );
+    LogMessage(ERROR,"TEMPORARY_COMMENTED");
+    //usRc = NTMCheckForUpdates( pTmClb );
   } /* endif */
 
   if ( !usRc )
@@ -274,7 +280,8 @@ USHORT TmtXReplace
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+          LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
+          //usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
       } /* endif */
@@ -287,7 +294,8 @@ USHORT TmtXReplace
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+        LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
+        //usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
     } /* endif */
@@ -296,7 +304,8 @@ USHORT TmtXReplace
   // unlock TM database if database has been locked
   if ( fLocked )
   {
-    NTMLockTM( pTmClb, FALSE, &fLocked );
+    LogMessage(ERROR,"TEMPORART_COMMENTED");
+    //NTMLockTM( pTmClb, FALSE, &fLocked );
   } /* endif */
 
   //release allocated memory
@@ -339,7 +348,8 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-      TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
+     LogMessage(ERROR,"TEMPORARY_COMMENTED");
+      //TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
     } /* endif */
@@ -355,7 +365,7 @@ USHORT TmtXReplace
 
 
 
-
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -769,6 +779,7 @@ Vote
     pSentence->usActVote++;
   } /* endif */
 } /* end of function Vote */
+#endif
 
 //------------------------------------------------------------------------------
 // Internal function                                                            
@@ -816,6 +827,7 @@ USHORT CheckCompactArea
   return( usMatch );
 }
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1050,6 +1062,8 @@ USHORT TokenizeTarget
   return( usRc );
 }
 
+#endif 
+
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1115,7 +1129,8 @@ USHORT AddToTm
   //allocate target control block record
   if ( fOK )
   {
-    usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+    LogMessage(ERROR,"TEMPORARY_COMMENTED");
+    //usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
 
     fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+usAddDataLen), NOMSG );
   } /* endif */
@@ -1140,20 +1155,24 @@ USHORT AddToTm
   }
   else
   {
-    usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
-                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
+    LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeTarget");
+    //usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
+    //                       &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
+    
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
+      LogMessage(ERROR,"TEMPORART_COMMENTED");
+      //usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
       if ( usRc == NO_ERROR )
       {
+        LogMessage(ERROR,"TEMPORART_COMMENTED");
         //fill tm record to add to database
-        FillTmRecord ( pSentence,    // ptr to sentence struct for source info
-                       pTagRecord,   // ptr to target string tag table
-                       pNormString,  // ptr to target normalized string
-                       usNormLen,    // length of target normalized string
-                       pTmRecord,    // filled tm record returned
-                       pTargetClb );
+        //FillTmRecord ( pSentence,    // ptr to sentence struct for source info
+        //               pTagRecord,   // ptr to target string tag table
+        //               pNormString,  // ptr to target normalized string
+        //               usNormLen,    // length of target normalized string
+        //               pTmRecord,    // filled tm record returned
+        //               pTargetClb );
 
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
@@ -1179,6 +1198,7 @@ USHORT AddToTm
   return( usRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1642,6 +1662,7 @@ USHORT UpdateTmIndex
 
   return( usRc );
 }
+#endif 
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -1889,6 +1910,7 @@ USHORT DetermineTmRecord
   return( usRc );
 }
 
+
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1995,9 +2017,10 @@ USHORT UpdateTmRecord
 
         if ( usRc == NO_ERROR )
         {
+          LogMessage(ERROR,"TEMPORARY_COMMENTED ComparePutData");
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
-                                 pTmPut, pSentence, &ulKey );
+          //usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
+          //                       pTmPut, pSentence, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -2035,6 +2058,7 @@ USHORT UpdateTmRecord
   return( usRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -3077,6 +3101,7 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 
 #endif // TEMPORARY_COMMENTED
 
+#ifdef TEMPORARY_COMMENTED
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 {
     ULONG  ulLen = ulLenComp-1;
@@ -3129,6 +3154,9 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
     }
     return ulLen;
 }
+#endif
+
+#endif 
 
 #ifdef TEMPORARY_COMMENTED
 

@@ -758,7 +758,7 @@ TmReplace( HTM           htm,            //(in)  TM handle
 {
   return( C_TmReplace( htm, szMemPath, pstPutIn, pstPutOut, usMsgHandling ) );
 } /* end of function TmReplace */
-
+#endif
 
 
 USHORT
@@ -898,6 +898,9 @@ C_TmReplaceHwndW( HTM       htm,            //(in)  TM handle
   return usRc;
 } /* End of function TmReplace */
 
+
+
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -2631,6 +2634,7 @@ VOID  TMX_PUT_IN_Unicode2ASCII( PTMX_PUT_IN_W pstPutInW, PTMX_PUT_IN pstPutIn, U
 
   memcpy( &pstPutIn->stPrefixIn, &pstPutInW->stPrefixIn, sizeof( TMX_PREFIX_IN ));
 }
+#endif
 
 VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstPutIn, PTMX_PUT_IN_W pstPutInW, ULONG cp )
 {
@@ -2664,7 +2668,7 @@ VOID  TMX_PUT_OUT_Unicode2ASCII( PTMX_PUT_OUT_W pstPutOutW, PTMX_PUT_OUT pstPutO
   memcpy( &pstPutOut->stPrefixOut, &pstPutOutW->stPrefixOut, sizeof( TMX_PREFIX_OUT ));
 }
 
-
+#ifdef TEMPORARY_COMMENTED
 VOID  TMX_EXT_IN_Unicode2ASCII( PTMX_EXT_IN_W pstExtInW, PTMX_EXT_IN pstExtIn )
 {
   // PTMX_EXT_IN_W same as PTMX_EXT_IN
