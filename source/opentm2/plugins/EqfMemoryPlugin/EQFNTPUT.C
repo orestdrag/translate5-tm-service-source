@@ -21,6 +21,7 @@
 
 #include <wctype.h>
 #include "../../core/utilities/LogWrapper.h"
+#include "../../core/utilities/PropertyWrapper.H"
 
 //static data
 //distribution criteria for building tuples
@@ -100,6 +101,467 @@ USHORT NTMMorphTokenize
 	}
 
 
+
+static
+BOOL CheckForAlloc
+(
+   PTMX_SENTENCE      pSentence,
+   PTMX_TERM_TOKEN  * ppTermTokens,
+   USHORT             usEntries
+)
+{
+  LONG     lFilled = 0L;
+  USHORT   usNewAlloc = 0;
+  BOOL     fOK = TRUE;
+  PTMX_TERM_TOKEN  pTermTokens;
+
+  pTermTokens = *ppTermTokens;
+  lFilled = ( (PBYTE)pTermTokens - (PBYTE)pSentence->pTermTokens);
+  if ( (pSentence->lTermAlloc - lFilled) <= (LONG)(usEntries * sizeof(TMX_TERM_TOKEN)) )
+  {
+    //remember offset of pTagEntry
+    lFilled = pTermTokens - pSentence->pTermTokens;
+    if (usEntries == 1)
+    {
+      usNewAlloc = TOK_SIZE;
+    }
+    else
+    {
+      usNewAlloc = usEntries * sizeof(TMX_TERM_TOKEN);
+    }
+    //allocate another 4k for pTagRecord
+    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, pSentence->lTermAlloc,
+                    pSentence->lTermAlloc + (LONG)usNewAlloc, NOMSG );
+    if ( fOK )
+    {
+      pSentence->lTermAlloc += (LONG)usNewAlloc;
+
+      //set new position of pTagEntry
+      pTermTokens = pSentence->pTermTokens + lFilled;
+    } /* endif */
+  } /* endif */
+  *ppTermTokens= pTermTokens;
+  return(fOK);
+}
+
+
+
+
+//------------------------------------------------------------------------------
+// External function                                                            
+//------------------------------------------------------------------------------
+// Function name:     TokenizeSource      Split a segment into tags and words   
+//------------------------------------------------------------------------------
+// Description:       Tokenizes a string and stores all tags and terms found.   
+//------------------------------------------------------------------------------
+// Function call:     TokenizeSource( PTMX_CLB pClb,  //ptr to ctl block        
+//                                PTMX_SENTENCE pSentence, //ptr sent struct    
+//                                PSZ pTagTableName )  //name of tag table      
+//------------------------------------------------------------------------------
+// Input parameter:   PTMX_CLB  pClb           control block                    
+//                    PTMX_SENTENCE pSentence  sentence structure               
+//                    PSZ      pTagTableName  name of tag table                 
+//                    USHORT usVersion       version of TM                      
+//------------------------------------------------------------------------------
+// Output parameter:                                                            
+//------------------------------------------------------------------------------
+// Returncode type:   USHORT                                                    
+//------------------------------------------------------------------------------
+// Returncodes:       MORPH_OK    function completed successfully               
+//                    other       MORPH_ error code, see EQFMORPH.H for a list  
+//------------------------------------------------------------------------------
+// Prerequesits:                                                                
+//------------------------------------------------------------------------------
+// Side effects:      none                                                      
+//------------------------------------------------------------------------------
+// Samples:                                                                     
+//------------------------------------------------------------------------------
+// Function flow:                                                               
+//     allocate storage                                                         
+//     tokenize string with correct tag table                                   
+//     process outputed token list                                              
+//     if tag                                                                   
+//       remember position of tag and add to entry structure                    
+//       add length of tag to structure                                         
+//       add string to structure                                                
+//     else if text                                                             
+//       morph tokenize returning list of terms                                 
+//       add term info to structure                                             
+//                                                                              
+//------------------------------------------------------------------------------
+USHORT TokenizeSource
+(
+   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   PTMX_SENTENCE pSentence,             // pointer to sentence structure
+   PSZ pTagTableName,                   // name of tag table
+   PSZ pSourceLang,                     // source language
+   USHORT usVersion                     // version of TM
+)
+{
+  ULONG ulSrcCP = GetLangOEMCP( pSourceLang);
+  return( TokenizeSourceEx( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP ) );
+}
+
+USHORT TokenizeSourceEx
+(
+   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   PTMX_SENTENCE pSentence,             // pointer to sentence structure
+   PSZ pTagTableName,                   // name of tag table
+   PSZ pSourceLang,                     // source language
+   USHORT usVersion,                    // version of TM
+   ULONG  ulSrcCP                       // OEM CP of source language     
+)
+{
+    return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
+}
+
+
+
+USHORT TokenizeSourceEx2
+(
+   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   PTMX_SENTENCE pSentence,             // pointer to sentence structure
+   PSZ pTagTableName,                   // name of tag table
+   PSZ pSourceLang,                     // source language
+   USHORT usVersion,                    // version of TM
+   ULONG  ulSrcCP,                      // OEM CP of source language     
+   int iMode                            // mode to be passed to create protect table function
+)
+{
+
+  PVOID     pTokenList = NULL;         // ptr to token table
+  BOOL      fOK;                       // success indicator
+  PBYTE     pTagEntry;                 // pointer to tag entries
+  PTMX_TERM_TOKEN pTermTokens;         // pointer to term tokens
+  PLOADEDTABLE pTable = NULL;          // pointer to tagtable
+  PTMX_TAGTABLE_RECORD pTagRecord;     // pointer to record
+  USHORT    usLangId;                  // language id
+  USHORT    usRc = NO_ERROR;           // returned value
+  USHORT    usFilled;                  // counter
+  USHORT    usTagEntryLen;             // length indicator
+  CHAR      szString[MAX_FNAME];       // name without extension
+  USHORT    usStart;                   // position counter
+  PSTARTSTOP pStartStop = NULL;        // ptr to start/stop table
+  int        iIterations = 0;
+  USHORT     usAddEntries = 0;
+  PSZ_W  pszNormStringPos = pSentence->pNormString; // current pNpormString output pointer
+
+  pSourceLang;                         // avoid compiler warnings
+
+  /********************************************************************/
+  /* normalize \r\n combinations in input string ..                   */
+  /********************************************************************/
+  {
+    PSZ_W  pSrc = pSentence->pInputString;
+    PSZ_W  pTgt = pSentence->pInputString;
+    CHAR_W c;
+
+    while ( (c = *pSrc++) != NULC )
+    {
+      /****************************************************************/
+      /* in case of \r we have to do some checking, else only copy..  */
+      /****************************************************************/
+      if ( c == '\r' )
+      {
+        if ( *pSrc == '\n' )
+        {
+          /************************************************************/
+          /* ignore the character                                     */
+          /************************************************************/
+        }
+        else
+        {
+          *pTgt++ = c;
+        } /* endif */
+      }
+      else
+      {
+        *pTgt++ = c;
+      } /* endif */
+    } /* endwhile */
+    *pTgt = EOS;
+  }
+
+  //allocate 4K pTokenlist for TaTagTokenize
+  fOK = UtlAlloc( (PVOID *) &(pTokenList), 0L, (LONG)TOK_SIZE, NOMSG );
+
+  if ( !fOK )
+  {
+    usRc = ERROR_NOT_ENOUGH_MEMORY;
+  }
+  else
+  {
+    pTagRecord = pSentence->pTagRecord;
+    pTermTokens = pSentence->pTermTokens;
+    pTagEntry = (PBYTE)pTagRecord;
+    pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
+    RECLEN(pTagRecord) = 0;
+    pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
+
+    //get id of tag table, call
+    Utlstrccpy( szString, UtlGetFnameFromPath( pTagTableName ), DOT );
+
+    pTagRecord->usTagTableId = 0;
+
+    //get lang id of source lang for morphtokenize call
+    usLangId = 0;
+    if ( !usRc )
+    {
+      //load tag table for tokenize function
+      //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+      //                             TALOADCOMPCONTEXTFUNC,
+      //                             FALSE, NULLHANDLE );
+      if ( usRc )
+      {
+        USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
+        usRc = ERROR_TA_ACC_TAGTABLE;
+        if ( usAction == MEMIMP_MRKUP_ACTION_RESET ) {
+           CHAR  *ptrMarkup ;
+           ptrMarkup = strstr( pTagTableName, szString ) ;
+           if ( ptrMarkup ) {
+              strcpy( ptrMarkup, "OTMUTF8.TBL" ) ;
+              strcpy( szString, "OTMUTF8" ) ;
+              //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+              //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+              //                             TALOADCOMPCONTEXTFUNC,
+              //                             FALSE, NULLHANDLE );
+              if ( usRc )
+                 usRc = ERROR_TA_ACC_TAGTABLE;
+           } 
+        } else
+        if ( usAction == MEMIMP_MRKUP_ACTION_SKIP ) {
+           usRc = SEG_SKIPPED_BAD_MARKUP ;
+        }
+      } /* endif */
+
+    } /* endif */
+
+    if ( !usRc )
+    {
+      // build protect start/stop table for tag recognition
+       //usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+       //                            (PTOKENENTRY)pTokenList,
+       //                            TOK_SIZE, &pStartStop,
+       //                            pTable->pfnProtTable,
+       //                            pTable->pfnProtTableW, ulSrcCP, iMode);
+
+
+      while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
+      {
+        // (re)allocate token buffer
+        LONG lOldSize = (usAddEntries * sizeof(TOKENENTRY)) + (LONG)TOK_SIZE;
+        LONG lNewSize = ((usAddEntries+128) * sizeof(TOKENENTRY)) + (LONG)TOK_SIZE;
+
+        if (UtlAlloc((PVOID *) &pTokenList, lOldSize, lNewSize, NOMSG) )
+        {
+          usAddEntries += 128;
+          iIterations++;
+        }
+        else
+        {
+          iIterations = 10;    // force end of loop
+        } /* endif */
+        // retry tokenization
+        if (iIterations < 10 )
+        {
+          // usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+          //                            (PTOKENENTRY)pTokenList,
+          //                             (USHORT)lNewSize, &pStartStop,
+          //                             pTable->pfnProtTable,
+          //                             pTable->pfnProtTableW, ulSrcCP, iMode );
+        } /* endif */
+
+      } /* endwhile */
+    } /* endif */
+
+    if ( !usRc )
+    {
+      USHORT usEntries = 0; // number of entries in start stop table
+
+      PSTARTSTOP pEntry = pStartStop;
+      while ( (pEntry->usStart != 0) ||
+              (pEntry->usStop != 0)  ||
+              (pEntry->usType != 0) )
+      {
+        switch ( pEntry->usType )
+        {
+          case UNPROTECTED_CHAR :
+            // handle translatable text
+            {
+              PFLAGOFFSLIST pTerm;                   // pointer to terms list
+              PFLAGOFFSLIST pTermList = NULL;        // pointer to offset/length term list
+              ULONG     ulListSize = 0;
+              CHAR_W    chTemp;                      // buffer for character values
+              USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
+
+              chTemp = pSentence->pInputString[pEntry->usStop+1];
+              pSentence->pInputString[pEntry->usStop+1] = EOS;
+
+              //usRc = NTMMorphTokenizeW( usLangId,
+              //                         pSentence->pInputString + pEntry->usStart,
+              //                         &ulListSize, (PVOID *)&pTermList,
+              //                         MORPH_FLAG_OFFSLIST, usVersion );
+
+              pSentence->pInputString[pEntry->usStop+1] = chTemp;
+
+              if ( usRc == MORPH_OK )
+              {
+                pTerm = pTermList;
+                fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
+                if ( !fOK )
+                {
+                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                }
+                else
+                {
+                  usStart = pEntry->usStart;
+                  if ( pTerm )
+                  {
+                      while ( pTerm->usLen && !usRc )
+                      {
+                        if ( !(pTerm->lFlags & TF_NEWSENTENCE) )
+                        {
+                          BOOL fAddToken = FALSE;
+
+                          // ignore TF_NOLOOKUP flag for TM versions 2 and above
+                          if ( !pClb )
+                          {
+                            fAddToken = TRUE;
+                          }
+                          else if ( pClb->stTmSign.bMajorVersion != TM_VERSION_1 )
+                          {
+                            fAddToken = TRUE;
+                          }
+                          else
+                          {
+                            fAddToken = ((pTerm->lFlags & TF_NOLOOKUP) &&
+                                           (pTerm->lFlags & TF_NUMBER) ) ||
+                                          !(pTerm->lFlags & TF_NOLOOKUP);
+                          } /* endif */
+
+                          if ( fAddToken )
+                          {
+                            fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
+                            if ( !fOK )
+                            {
+                              usRc = ERROR_NOT_ENOUGH_MEMORY;
+                            }
+                            else
+                            {
+                              pTermTokens->usOffset = pTerm->usOffs + usStart;
+                              pTermTokens->usLength = pTerm->usLen;
+                              pTermTokens->usHash = 0;
+                              pTermTokens++;
+                            }
+                          } /* endif */
+                        } /* endif */
+                        pTerm++;
+                      } /* endwhile */
+                  } /* endif */
+                  memcpy( pszNormStringPos, pSentence->pInputString + pEntry->usStart, usTokLen * sizeof(CHAR_W));
+                  pSentence->usNormLen =  pSentence->usNormLen + usTokLen;
+                  pszNormStringPos += usTokLen;
+                } /* endif */
+              } /* endif */
+              UtlAlloc( (PVOID *) &pTermList, 0L, 0L, NOMSG );
+            } /* end case UNPROTECTED_CHAR */
+            break;
+          default :
+            // handle not-translatable data
+            {
+              // if next start/stop-entry is a protected one ...
+              if ( ((pEntry+1)->usStart != 0) &&
+                   ((pEntry+1)->usType != UNPROTECTED_CHAR) )
+              {
+                // enlarge next entry and ignore current one
+                (pEntry+1)->usStart = pEntry->usStart;
+              }
+              else
+              {
+                // add tag data
+                usTagEntryLen = sizeof(TMX_TAGENTRY) +
+                                (pEntry->usStop - pEntry->usStart + 1) * sizeof(CHAR_W);
+                if ( (pSentence->lTagAlloc - (pTagEntry - (PBYTE)pSentence->pTagRecord))
+                                                       <= (SHORT)usTagEntryLen )
+                {
+                  LONG lBytesToAlloc = get_max( ((LONG)TOK_SIZE), ((LONG)usTagEntryLen) );
+
+                  //remember offset of pTagEntry
+                  usFilled = (USHORT)(pTagEntry - (PBYTE)pSentence->pTagRecord);
+
+                  //allocate another 4k for pTagRecord
+                  fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, pSentence->lTagAlloc,
+                                  pSentence->lTagAlloc + lBytesToAlloc, NOMSG );
+                  if ( fOK )
+                  {
+                    pSentence->lTagAlloc += lBytesToAlloc;
+
+                    //set new position of pTagEntry
+                    pTagEntry = (PBYTE)(pSentence->pTagRecord) + usFilled;
+                  } /* endif */
+                } /* endif */
+
+                if ( !fOK )
+                {
+                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                }
+                else
+                {
+                  ((PTMX_TAGENTRY)pTagEntry)->usOffset = pEntry->usStart;
+                  ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
+                    (pEntry->usStop - pEntry->usStart + 1);
+                  memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
+                          pSentence->pInputString + pEntry->usStart,
+                          ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
+                  pTagEntry += usTagEntryLen;
+                } /* endif */
+              } /* endif */
+            } /* end default */
+            break;
+        } /* endswitch */
+        pEntry++;
+        usEntries++;
+      } /* endwhile */
+
+      /********************************************************/
+      /* check if we filled at least one term token -- if not */
+      /* use a dummy token - just to get an exact match ...   */
+      /********************************************************/
+      if ( pTermTokens == pSentence->pTermTokens )
+      {
+        pTermTokens->usOffset = 0;
+        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputString );
+        pTermTokens->usHash = 0;
+        pTermTokens++;
+      } /* endif */
+
+      fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
+      if ( !fOK )
+      {
+        usRc = ERROR_NOT_ENOUGH_MEMORY;
+      }
+
+      //set total tag record length
+      RECLEN(pTagRecord) = pTagEntry - (PBYTE)pTagRecord;
+    } /* endif */
+  } /* endif */
+
+  //release allocated memory
+  if ( pStartStop ) UtlAlloc( (PVOID *) &pStartStop, 0L, 0L, NOMSG );
+  if ( pTokenList ) UtlAlloc( (PVOID *) &pTokenList, 0L, 0L, NOMSG );
+
+  //free tag table / decrement use count
+  if ( pTable != NULL )
+  {
+    TAFreeTagTable( pTable );
+  } /* endif */
+
+  return ( usRc );
+}
+
+
+
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -161,6 +623,7 @@ USHORT TmtXReplace
   USHORT     usRc = NO_ERROR;          // return code
   USHORT     usMatchesFound;           // compact area hits
   CHAR       szString[MAX_EQF_PATH];   // character string
+  szString[0] = 0;
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
 
@@ -203,8 +666,8 @@ USHORT TmtXReplace
   if ( !usRc )
   {
     //build tag table path
-    UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
-    strcat( szString, BACKSLASH_STR );
+    properties_get_str(KEY_OTM_DIR, szString, sizeof(szString));
+    strcat( szString, "/TABLE/");
     strcat( szString, pTmPutIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );
 
@@ -215,9 +678,9 @@ USHORT TmtXReplace
 
     //tokenize source segment, resulting in norm. string and tag table record
     LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeSource");
-    //usRc = TokenizeSource( pTmClb, pSentence, szString,
-    //                       pTmPutIn->stTmPut.szSourceLanguage,
-    //                       (USHORT)pTmClb->stTmSign.bMajorVersion );
+    usRc = TokenizeSource( pTmClb, pSentence, szString,
+                           pTmPutIn->stTmPut.szSourceLanguage,
+                           (USHORT)pTmClb->stTmSign.bMajorVersion );
     
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );

@@ -3,6 +3,7 @@ project(OpenTM2_Tagtable)
 
 set(Tagtable_Source_Files
         EQFTOKEN.C
+        #EQFTATAG.C
         MarkupPluginMapper.cpp)
 
 add_library(Tagtable ${Tagtable_Source_Files})

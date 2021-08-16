@@ -45,6 +45,7 @@ void InitTMPluginWrapper()
 
 }
 
+/*
 // callback function to insert memory names into a listbox
 int AddMemToListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo  )
 {
@@ -60,7 +61,8 @@ int AddMemToListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO p
   INSERTITEMHWND( hwndLB, szMemName );
 #endif
   return( 0 );
-}
+}//*/
+
 
 
 /*   Function Name:   FillMemoryListBox */
@@ -117,8 +119,8 @@ USHORT FillMemoryListBox
     //  } /* endif */
     // old code end
 
-      MemoryFactory *pFactory = MemoryFactory::getInstance();
-      pFactory->listMemories( AddMemToListBox, (PVOID)mp1, FALSE );
+      //MemoryFactory *pFactory = MemoryFactory::getInstance();
+      //pFactory->listMemories( AddMemToListBox, (PVOID)mp1, FALSE );
       
 
       // Enable the memory database list box
@@ -129,7 +131,7 @@ USHORT FillMemoryListBox
 } /* end of function FillMemoryListBox */
 
 
-
+/*
 SHORT EQFNTMSign
 (
    PVOID  pBTIda,                      // pointer to btree structure
@@ -142,7 +144,7 @@ SHORT EQFNTMSign
 //  	return theMemory->CPP_EQFNTMSign(  pBTIda,  pUserData,  pusLen);
     return( 1 );
 
-}
+}//*/
 
 USHORT NTMOrganizeIndexFile
 (
@@ -257,8 +259,6 @@ BOOL MDAGetValueForKey( HADDDATAKEY pKey, PSZ_W pszBuffer, int iBufSize, PSZ_W p
   return( FALSE );
 }
 
-#endif //TEMPORARY_COMMENTED
-
 //
 // Search a specific key in the additional memory data
 //
@@ -289,6 +289,7 @@ HADDDATAKEY MADSearchKey( PSZ_W pAddData, PSZ_W pszKey )
 
   return( pKey );
 }
+#endif
 
 //
 // Delete a key with all its atttributes and data
@@ -476,7 +477,7 @@ BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID )
 
 // ======== internal functions for Memory Additional Data processing
 
-#endif //TEMPORARY_COMMENTED
+
 
 // position to next attribute
 BOOL MADNextAttr( PSZ_W *ppszAttr )
@@ -531,7 +532,6 @@ BOOL MADGetAttrValue( PSZ_W pszAttr, PSZ_W pszBuffer, int iBufSize )
   return( TRUE );
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 // compare attribute names
 BOOL MADCompareAttr( PSZ_W pszAttr1, PSZ_W pszAttr2 )
@@ -549,7 +549,6 @@ BOOL MADCompareAttr( PSZ_W pszAttr1, PSZ_W pszAttr2 )
   return( fMatch );
 }
 
-#endif //TEMPORARY_COMMENTED
 
 // compare two key names
 BOOL MADCompareKey( PSZ_W pszKey1, PSZ_W pszKey2 )
@@ -565,6 +564,7 @@ BOOL MADCompareKey( PSZ_W pszKey1, PSZ_W pszKey2 )
 
   return( fMatch );
 }
+
 
 // skip attribute value: loop until end of current attribute value
 PSZ_W MADSkipAttrValue( PSZ_W pszValue )
@@ -589,6 +589,7 @@ PSZ_W MADSkipAttrValue( PSZ_W pszValue )
   return( pszValue );
 }
 
+
 // skip name: loop until end of current name
 PSZ_W MADSkipName( PSZ_W pszName )
 {
@@ -603,7 +604,6 @@ PSZ_W MADSkipWhitespace( PSZ_W pszData )
   return( pszData );
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 
 USHORT MemOpenProp( HPROP * hProp,        // pointer to property handle
@@ -1849,7 +1849,7 @@ BOOL TMFuzzynessEx
   if ( pusWords ) *pusWords = usWords; 
   return fOK;
 } /* end of function TMFuzzyness */
-
+#endif
 
 static
 BOOL CheckForAlloc( PTMX_SENTENCE pSentence, PTMX_TERM_TOKEN * ppTermTokens, USHORT usEntries );
@@ -1895,7 +1895,6 @@ BOOL CheckForAlloc
   *ppTermTokens= pTermTokens;
   return(fOK);
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -2059,10 +2058,10 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       //load tag table for tokenize function
-      usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-                                   TALOADCOMPCONTEXTFUNC,
-                                   FALSE, NULLHANDLE );
+      //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+      //                             TALOADCOMPCONTEXTFUNC,
+      //                             FALSE, NULLHANDLE );
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
@@ -2073,10 +2072,10 @@ USHORT TokenizeSourceEx2
            if ( ptrMarkup ) {
               strcpy( ptrMarkup, "OTMUTF8.TBL" ) ;
               strcpy( szString, "OTMUTF8" ) ;
-              usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-                                           TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-                                           TALOADCOMPCONTEXTFUNC,
-                                           FALSE, NULLHANDLE );
+              //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+              //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+              //                             TALOADCOMPCONTEXTFUNC,
+              //                             FALSE, NULLHANDLE );
               if ( usRc )
                  usRc = ERROR_TA_ACC_TAGTABLE;
            } 
@@ -2091,11 +2090,11 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-                                   (PTOKENENTRY)pTokenList,
-                                   TOK_SIZE, &pStartStop,
-                                   pTable->pfnProtTable,
-                                   pTable->pfnProtTableW, ulSrcCP, iMode);
+       //usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+       //                            (PTOKENENTRY)pTokenList,
+       //                            TOK_SIZE, &pStartStop,
+       //                            pTable->pfnProtTable,
+       //                            pTable->pfnProtTableW, ulSrcCP, iMode);
 
 
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
@@ -2116,11 +2115,11 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
-           usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-                                       (PTOKENENTRY)pTokenList,
-                                       (USHORT)lNewSize, &pStartStop,
-                                       pTable->pfnProtTable,
-                                       pTable->pfnProtTableW, ulSrcCP, iMode );
+          // usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+          //                            (PTOKENENTRY)pTokenList,
+          //                             (USHORT)lNewSize, &pStartStop,
+          //                             pTable->pfnProtTable,
+          //                             pTable->pfnProtTableW, ulSrcCP, iMode );
         } /* endif */
 
       } /* endwhile */
@@ -2149,10 +2148,10 @@ USHORT TokenizeSourceEx2
               chTemp = pSentence->pInputString[pEntry->usStop+1];
               pSentence->pInputString[pEntry->usStop+1] = EOS;
 
-              usRc = NTMMorphTokenizeW( usLangId,
-                                       pSentence->pInputString + pEntry->usStart,
-                                       &ulListSize, (PVOID *)&pTermList,
-                                       MORPH_FLAG_OFFSLIST, usVersion );
+              //usRc = NTMMorphTokenizeW( usLangId,
+              //                         pSentence->pInputString + pEntry->usStart,
+              //                         &ulListSize, (PVOID *)&pTermList,
+              //                         MORPH_FLAG_OFFSLIST, usVersion );
 
               pSentence->pInputString[pEntry->usStop+1] = chTemp;
 
@@ -2311,6 +2310,7 @@ USHORT TokenizeSourceEx2
   return ( usRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------

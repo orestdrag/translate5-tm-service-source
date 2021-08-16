@@ -3,6 +3,8 @@ project(OpenTM2_Memory)
 
 set(OPENTM2_ROOT "../..")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 set(Mem_Source_Files
         MemoryFactory.cpp
         TMPluginWrapper.cpp
@@ -18,5 +20,6 @@ set(Mem_Source_Files
         ${OPENTM2_ROOT}/EQFX_API.C
 )
 
+
 add_library(Memory ${Mem_Source_Files})
-target_link_libraries(Memory Util)
+target_link_libraries(Memory Util Tagtable Analysis)

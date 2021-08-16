@@ -5595,7 +5595,7 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
     // Get Language ID
     if ( usRC == NO_ERROR )
     {
-      usRC = MorphGetLanguageID( pszLang, &sLangID );
+      //usRC = MorphGetLanguageID( pszLang, &sLangID );
     } /* end if */
 
     // do the actual counting
