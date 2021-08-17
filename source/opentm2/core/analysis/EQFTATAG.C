@@ -206,7 +206,12 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       }
       else
       {
-        MUGetMarkupTableFileName( pszTableName, NULL, szTagTableFileName, sizeof(szTagTableFileName) );
+        LogMessage2(WARNING,"TEMPORARY HARDCODED table name composition for ", pszTableName);
+        properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
+        strcat( szTagTableFileName,"/TABLE/");
+        strcat( szTagTableFileName, pszTableName );
+        strcat( szTagTableFileName, EXT_OF_FORMAT );
+        //MUGetMarkupTableFileName( pszTableName, NULL, szTagTableFileName, sizeof(szTagTableFileName) );
       } /* endif */
 
       /******************************************************************/
