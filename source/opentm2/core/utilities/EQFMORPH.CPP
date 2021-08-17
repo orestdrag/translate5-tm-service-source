@@ -5460,6 +5460,7 @@ USHORT MorphAddTermToList2
   return( usRC );
 
 } /* end of function MorphAddTermToList2 */
+#endif
 
 USHORT MorphAddTermToList2W
 (
@@ -5560,8 +5561,8 @@ USHORT MorphAddTermToList2W
   if ( fOK && ((*pulUsed + ulDataLen) > *pulSize) )
   {
     LONG lOldLen = 0L;
-    LONG lNewLen = ((LONG)*pulSize) +
-                    (LONG)max( TERMLIST_INCR, ulDataLen );
+    LONG max = TERMLIST_INCR > ulDataLen? TERMLIST_INCR : ulDataLen ;
+    LONG lNewLen = ((LONG)*pulSize) + max ;
 
     LONG lMaxLen = (usListType == MORPH_LARGE_ZTERMLIST) ?
                                           MORPH_LARGE_ZTERMLIST_LEN : MAX_ALLOC;
@@ -5573,7 +5574,7 @@ USHORT MorphAddTermToList2W
       if ( usListType == MORPH_LARGE_ZTERMLIST )
       {
         lNewLen = (LONG)sizeof(PSZ_W) +
-                   (LONG)sizeof(CHAR_W) * max( TERMLIST_INCR, ulDataLen );
+                   (LONG)sizeof(CHAR_W) * max;
         *pulSize = 0;                  // no size yet
         lOldLen = 0L;
         pAnchor  = (PSZ_W *)pList;       // use current list as anchor
@@ -5699,6 +5700,7 @@ USHORT MorphAddTermToList2W
 } /* end of function MorphAddTermToList2W */
 
 
+#ifdef TEMPORARY_COMMENTED
 USHORT MorphCopyTermListASCII2Unicode
 (
   PSZ      pList,                      // ptr to ASCII termlist

@@ -206,7 +206,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       }
       else
       {
-        LogMessage2(WARNING,"TEMPORARY HARDCODED table name composition for ", pszTableName);
+        LogMessage2(WARNING,"TEMPORARY HARDCODED table name for ", pszTableName);
         properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );

@@ -18,16 +18,17 @@
 
 
 
-#include <windows.h>
-#include <wtypes.h>
-#include <tchar.h>
+//#include <windows.h>
+//#include <wtypes.h>
+#include"win_types.h"
+//#include <tchar.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <malloc.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <io.h>
+//#include <io.h>
 #include <time.h>
 
 #ifdef __cplusplus
@@ -56,8 +57,8 @@ extern "C" {
 #define  TEMPNAME_STARGET  3
 #define  TEMPNAME_TARGET   4
 
-#define  OTM_MARKUPPLUGIN_TABLE_DIR   "PLUGINS\\OTMMARKUPTABLEPLUGIN\\TABLE"
-#define  OTM_MARKUPPLUGIN_DLL_DIR     "PLUGINS\\OTMMARKUPTABLEPLUGIN\\BIN"
+#define  OTM_MARKUPPLUGIN_TABLE_DIR   "PLUGINS/OTMMARKUPTABLEPLUGIN/TABLE"
+#define  OTM_MARKUPPLUGIN_DLL_DIR     "PLUGINS/OTMMARKUPTABLEPLUGIN/BIN"
 
 
 extern _TCHAR * __cdecl cleanString( _TCHAR * tempString );

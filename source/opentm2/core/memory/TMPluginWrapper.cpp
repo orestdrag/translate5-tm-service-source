@@ -30,12 +30,29 @@ extern "C"
 #include <wctype.h>
 
 #include "win_types.h"
-
+#include "core/utilities/LogWrapper.h"
 // prototypes for helper functions
 
 
 /* \brief Initialize the Memory Plugin Mapper
 */
+
+
+USHORT MorphAddTermToList2W
+(
+  PSZ_W    *ppList,                    // ptr to term list pointer
+  PULONG   pulSize,                    // alloc. size of term list in # of w's
+  PULONG   pulUsed,                    // used # of w's in term list
+  PSZ_W    pszTerm,                    // ptr to new term being added to list
+  USHORT   usLength,                   // length of term in # of w's
+  USHORT   usOffs,                     // offset of term in # of w's???
+  ULONG    ulFlags,                    // flags describing the term
+  USHORT   usListType                  // type of list
+)
+{ 
+    LogMessage(ERROR,"TEMPORARY_COMMENTED MorphAddTermToList2W linking issue");
+    return 0;
+}
 
 __declspec(dllexport)
 void InitTMPluginWrapper()
@@ -2441,6 +2458,20 @@ USHORT NTMMorphTokenize
   return( usRC );
 
 } /* endof MorphTokenize */
+#endif
+
+USHORT NTMTokenizeW
+(
+  PVOID    pvLangCB,                   // IN : ptr to language control block
+  PSZ_W    pszInData,                  // IN : ptr to data being tokenized
+  PULONG   pulTermListSize,            // IN/OUT:  address of variable
+                                       //    containing size of term list buffer
+  PVOID    *ppTermList,                // IN/OUT: address of term list pointer
+  USHORT   usListType,                 // IN: type of term list MORPH_ZTERMLIST,
+                                       //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
+                                       //    or MORPH_FLAG_ZTERMLIST
+   USHORT usVersion                    // version of TM
+);
 
 USHORT NTMMorphTokenizeW
 (
@@ -2510,7 +2541,7 @@ USHORT NTMMorphTokenizeW
 } /* endof NTMMorphTokenizeW */
 
 
-
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -2835,6 +2866,7 @@ USHORT NTMTokenize
   return (usReturn);
 
 } /* end of function TOKENIZE */
+#endif
 
 USHORT NTMTokenizeW
 (
@@ -2998,8 +3030,12 @@ USHORT NTMTokenizeW
         if ( fAlNum ) //&& !chIsText[c] )
         {
 			PUCHAR pTextTable;
-			UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
-			if ( !pTextTable[c] )
+			
+      #ifdef TEMPORARY_COMMENTED
+      UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
+      #endif
+			
+      if ( !pTextTable[c] )
 			{
 				fAlNum = FALSE;
 			}
@@ -3127,5 +3163,4 @@ USHORT NTMTokenizeW
 
 } /* end of function TOKENIZE */
 
-#endif //TEMPORARY_COMMENTED
 

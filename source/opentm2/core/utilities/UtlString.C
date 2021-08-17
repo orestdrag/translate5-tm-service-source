@@ -2974,7 +2974,6 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
   return( pszAnsi );
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function                                                            
@@ -3027,7 +3026,6 @@ USHORT UtlQueryCharTableLang
 
 } /* end of function UtlQueryCharTableLang */
 
-#endif //TEMPORARY_COMMENTED
 
 USHORT UtlQueryCharTableEx
 (

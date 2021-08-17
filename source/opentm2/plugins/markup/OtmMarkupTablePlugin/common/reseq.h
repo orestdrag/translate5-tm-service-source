@@ -13,6 +13,6 @@
 #ifndef _RESEQ_H_INCLUDE_
 #define _RESEQ_H_INCLUDE_
 
-extern BOOL __cdecl resequence_TM2(char *fileName);
+extern BOOL resequence_TM2(char *fileName);
 
 #endif

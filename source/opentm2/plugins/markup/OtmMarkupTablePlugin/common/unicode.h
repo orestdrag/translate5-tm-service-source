@@ -27,15 +27,15 @@ base class.*/
 #define _UNICODE_H_INCLUDE_
 
 
-#include <afxwin.h>
+//#include <afxwin.h>
 #include <iostream>
 #include <fstream>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <io.h>
-#include <tchar.h>
+//#include <io.h>
+//#include <tchar.h>
 #include "usrcalls.h"
 
 #define BYTE_ORDER_MARK 0xFEFF

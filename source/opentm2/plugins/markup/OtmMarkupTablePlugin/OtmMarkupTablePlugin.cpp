@@ -20,9 +20,9 @@
 #endif
 
 
-#include "windows.h"
-#include "core\pluginmanager\PluginManager.h"
-#include "core\pluginmanager\OtmMarkupPlugin.h"
+//#include "windows.h"
+#include "core/pluginmanager/PluginManager.h"
+#include "core/pluginmanager/OtmMarkupPlugin.h"
 #include "OtmMarkupTablePlugin.h"
 
 #include "eqftag.h"             // tag table functions

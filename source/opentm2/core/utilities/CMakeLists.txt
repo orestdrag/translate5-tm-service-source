@@ -34,6 +34,8 @@ set(Util_Source_Files
         #unzip.cpp
         EQFDICT.CPP
         EQFPRO00.C
+        EQFMORPW.C
+        EQFMORPH.CPP
         
 )
 

@@ -24,11 +24,11 @@
 
 #define INCL_EQF_ASD              // dictionary access functions (Asd...)
 #define INCL_EQF_MORPH            // morphologic functions
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #include "OtmDictionaryIF.H"
-#include <eqfmorpi.h>                  // private header file of module
-#include <eqfchtbl.h>                  // character tables
+#include <EQFMORPI.H>                  // private header file of module
+#include <EQFCHTBL.H>                  // character tables
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -217,7 +217,12 @@ USHORT MorphWordRecognition
    return usRC;
 }  /* endof MorphWordRecognition */
 
-
+BOOL IsDBCSLeadByteEx(
+  UINT CodePage,
+  BYTE TestChar
+);
+#define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
+#define NO_ERROR 0
 
 USHORT MorphWordRecognitionW
 (
@@ -435,9 +440,9 @@ USHORT MorphWordRecognitionW
   {
     ULONG  ulRedSegSize;            // size of punctuation reduced segment
     ulRedSegSize = UTF16strlenCHAR(pucNormSeg) + 1;
-
+    LONG max = MIN_ALLOC > ulRedSegSize * sizeof(CHAR_W)? MIN_ALLOC : ulRedSegSize * sizeof(CHAR_W);
     if ( !UtlAlloc( (PVOID *)&pucRedSeg, 0L,
-                    (LONG)max(MIN_ALLOC,ulRedSegSize * sizeof(CHAR_W)), NOMSG ) )
+                    max, NOMSG ) )
     {
        usRC = MORPH_NO_MEMORY;        // set short on memory RC
     }
@@ -702,7 +707,7 @@ USHORT MorphWordRecognitionW
                    )
                 {
                   fcheck = TRUE;
-                  swprintf( szMWT, L"%s %s", szWord1, szWord2 );
+                  swprintf( szMWT, TERM_SIZE, L"%s %s", szWord1, szWord2 );
                 }
                 else
                 {
@@ -722,7 +727,7 @@ USHORT MorphWordRecognitionW
                    )
                 {
                   fcheck = TRUE;
-                  swprintf( szMWT, L"%s %s",szWord2, szWord3 );
+                  swprintf( szMWT, TERM_SIZE, L"%s %s", szWord2, szWord3 );
                 }
                 else
                 {
@@ -746,7 +751,7 @@ USHORT MorphWordRecognitionW
                    )
                 {
                   fcheck = TRUE;
-                  swprintf( szMWT, L"%s %s %s", szWord1, szWord2, szWord3 );
+                  swprintf( szMWT, TERM_SIZE,  L"%s %s %s", szWord1, szWord2, szWord3 );
                 }
                 else
                 {
@@ -915,7 +920,8 @@ USHORT MorphWordRecognitionW
                 ulLookupLength = ulMWTLength;
               }
               else if ( (ulMWTLength <= ulRemainLength) &&
-                   !memicmp( pucTerm, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
+                   //!memicmp( pucTerm, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
+                   !memcmp( pucTerm, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
                    (!pucIsText[pucTerm[ulMWTLength]] || fDBCSLang) )
               {
                 // only use this match as best match if its length is larger than any
@@ -933,7 +939,8 @@ USHORT MorphWordRecognitionW
                 usMWTTerms--;
               }
               else if ( (ulMWTLength <= ulRemainLength) &&
-                        !memicmp( pucTermInStemSeg, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
+                        //!memicmp( pucTermInStemSeg, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
+                        !memcmp( pucTermInStemSeg, pucMWT, ulMWTLength *sizeof(CHAR_W)) &&
                         (!pucIsText[pucTermInStemSeg[ulMWTLength]] || fDBCSLang) )
               {
                 pucMWTHeadword = pucMWT;
@@ -1091,7 +1098,8 @@ USHORT MorphWordRecognitionW
                      ulLookupLength = UTF16strlenCHAR(pucMWTHeadword);
                    }
                    else if ( (ulMWTLength <= ulRemainLength) &&
-                        !memicmp( pucTerm, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
+                        //!memicmp( pucTerm, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
+                        !memcmp( pucTerm, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
                         !pucIsText[pucTerm[ulMWTLength]] )
                    {
                      pucBestMatch = pucMWTHeadword;
@@ -1099,7 +1107,8 @@ USHORT MorphWordRecognitionW
                      if ( usMWTTerms ) usMWTTerms--;
                    }
                    else if ( (ulMWTLength <= ulRemainLength) &&
-                             !memicmp( pucTermInStemSeg, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
+                             //!memicmp( pucTermInStemSeg, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
+                             !memcmp( pucTermInStemSeg, pucMWT, ulMWTLength * sizeof(CHAR_W) ) &&
                              !pucIsText[pucTermInStemSeg[ulMWTLength]] )
                    {
                      pucLookupTerm = pucMWTHeadword;

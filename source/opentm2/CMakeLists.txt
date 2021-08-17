@@ -36,7 +36,7 @@ target_link_libraries(OTMFUNC
                     #Lists
                     #Services
                     Tagtable
-                    Ling
+                    #Ling
                     Morph
                     Spell
                     EqfMemoryPlugin

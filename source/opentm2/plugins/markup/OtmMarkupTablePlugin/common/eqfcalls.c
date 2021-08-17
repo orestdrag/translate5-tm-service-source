@@ -10,10 +10,11 @@
 /* 7/08/2010: IBM : Original Source                                         */
 /*==========================================================================*/
 
-#include <windows.h>
-#include <wtypes.h>
+//#include <windows.h>
+//#include <wtypes.h>
+#include"win_types.h"
 #include <ctype.h>
-#include <io.h>
+//#include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

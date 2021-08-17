@@ -11,15 +11,16 @@
 /*==========================================================================*/
 
 
-#include <windows.h>
-#include <wtypes.h>
+//#include <windows.h>
+//#include <wtypes.h>
 
+#include"win_types.h"
 
 #define DosCopy(FILE1, FILE2, BOOL) CopyFile(FILE1, FILE2, FALSE)
 
 
-#include <sys\stat.h>
-#include <io.h>
+//#include <sys\stat.h>
+//#include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

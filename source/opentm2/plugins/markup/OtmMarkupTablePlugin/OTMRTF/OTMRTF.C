@@ -2155,8 +2155,10 @@ USHORT ParseRTF
       // Get type of code conversion
       if ( RTFContainsAnsiTag( (PSZ)pParseData->abInBuf ) )
       {
+        
         UtlQueryCharTableEx( ANSI_TO_ASCII_TABLE, (PUCHAR *)&(pParseData->pConvTable),
                              (USHORT)pParseData->ulSrcOemCP );
+                             
         pParseData->pOrgConvTable = pParseData->pConvTable;
         if ( IsAPLang(szLang) )
         {
