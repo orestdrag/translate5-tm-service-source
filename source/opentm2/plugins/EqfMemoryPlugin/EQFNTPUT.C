@@ -1563,7 +1563,7 @@ USHORT AddToTm
   //allocate target control block record
   if ( fOK )
   {
-    LogMessage(ERROR,"TEMPORARY_COMMENTED");
+    //LogMessage(ERROR,"TEMPORARY_COMMENTED");
     usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
 
     fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+usAddDataLen), NOMSG );

@@ -15,6 +15,8 @@
 #include "EQF.H"
 #include <map>
 
+#include <filesystem>
+
 int __last_error_code = 0;
 
 struct FileBuffer{
@@ -66,7 +68,17 @@ std::string FilesystemHelper::FixPath(std::string& path){
 }
 
 FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
-    return OpenFile(path, mode);
+    const char* cpath = path.c_str();
+    bool useBuffer = false;
+    if(    (strcasestr(cpath, ".TMI") )
+        || (strcasestr(cpath, ".TMD") )
+        || (strcasestr(cpath, ".MEM") )
+    ){
+        LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
+                        cpath, ", useFilebuffer before = ", intToA(useBuffer));
+        useBuffer = true;
+    }
+    return OpenFile(path, mode, useBuffer);
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode, bool useBuffer){
@@ -74,6 +86,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     fixedPath = FixPath(fixedPath);
     long fileSize = 0;
     FileBuffer* pFb = NULL;
+
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
 
     if(useBuffer){
@@ -669,7 +682,6 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
 }
 
 int FilesystemHelper::GetFileSize(const std::string& path){
-
     FILE* ptr = OpenFile(path, "rb");
     int size = -1;
     if(!ptr){

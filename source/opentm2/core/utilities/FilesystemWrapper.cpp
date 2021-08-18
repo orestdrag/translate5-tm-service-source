@@ -22,7 +22,16 @@ char* filesystem_get_home_dir() {
 }
 
 int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
-    ptr = FilesystemHelper::OpenFile(path, mode);
+    bool useBuffer = false;
+    if(    (strcasestr(path, ".TMI") )
+        || (strcasestr(path, ".TMD") )
+        || (strcasestr(path, ".MEM") )
+    ){
+        LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
+                        path, ", useFilebuffer before = ", intToA(useBuffer));
+        useBuffer = true;
+    }
+    ptr = FilesystemHelper::OpenFile(path, mode, useBuffer);
     return ptr == NULL;
 }
 

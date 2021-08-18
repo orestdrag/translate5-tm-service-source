@@ -1326,7 +1326,7 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
   USHORT  usRC = NO_ERROR;             // function return code
   FILE   *hFile = NULL;                // file handle for property files
 
-  hFile = FilesystemHelper::OpenFile(szPath, "rb");
+  hFile = FilesystemHelper::OpenFile(szPath, "rb", true);
   if ( hFile == NULL )
   {
       usRC = ERROR_PATH_NOT_FOUND;
