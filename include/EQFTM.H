@@ -2231,6 +2231,7 @@ BOOL TMFuzzynessEx
   PUSHORT     pusWords                 // number of words in segment
 );
 
+extern "C"{ 
 USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
 USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
 USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
@@ -2280,4 +2281,4 @@ USHORT NTMGetMatchLevel
   SHORT            *psMatchState,      // pointer to caller's match state field
   LONG             lOptions            // options to be used by the function
 );
-
+};

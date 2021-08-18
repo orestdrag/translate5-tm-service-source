@@ -17,6 +17,7 @@ Copyright Notice:
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
+#include "EQFMORPI.H"
 
 // EQF.H is included by otmmemory.h
 // #include <eqf.h>                  // General Translation Manager include file EQF:H 
@@ -37,22 +38,6 @@ extern "C"
 /* \brief Initialize the Memory Plugin Mapper
 */
 
-
-USHORT MorphAddTermToList2W
-(
-  PSZ_W    *ppList,                    // ptr to term list pointer
-  PULONG   pulSize,                    // alloc. size of term list in # of w's
-  PULONG   pulUsed,                    // used # of w's in term list
-  PSZ_W    pszTerm,                    // ptr to new term being added to list
-  USHORT   usLength,                   // length of term in # of w's
-  USHORT   usOffs,                     // offset of term in # of w's???
-  ULONG    ulFlags,                    // flags describing the term
-  USHORT   usListType                  // type of list
-)
-{ 
-    LogMessage(ERROR,"TEMPORARY_COMMENTED MorphAddTermToList2W linking issue");
-    return 0;
-}
 
 __declspec(dllexport)
 void InitTMPluginWrapper()
@@ -2075,10 +2060,10 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       //load tag table for tokenize function
-      //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-      //                             TALOADCOMPCONTEXTFUNC,
-      //                             FALSE, NULLHANDLE );
+      usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+                                   TALOADCOMPCONTEXTFUNC,
+                                   FALSE, NULLHANDLE );
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
@@ -2089,10 +2074,10 @@ USHORT TokenizeSourceEx2
            if ( ptrMarkup ) {
               strcpy( ptrMarkup, "OTMUTF8.TBL" ) ;
               strcpy( szString, "OTMUTF8" ) ;
-              //usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
-              //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-              //                             TALOADCOMPCONTEXTFUNC,
-              //                             FALSE, NULLHANDLE );
+              usRc = TALoadTagTableExHwnd( szString, &pTable, FALSE,
+                                           TALOADUSEREXIT | TALOADPROTTABLEFUNC |
+                                           TALOADCOMPCONTEXTFUNC,
+                                           FALSE, NULLHANDLE );
               if ( usRc )
                  usRc = ERROR_TA_ACC_TAGTABLE;
            } 
@@ -2107,11 +2092,11 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       //usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-       //                            (PTOKENENTRY)pTokenList,
-       //                            TOK_SIZE, &pStartStop,
-       //                            pTable->pfnProtTable,
-       //                            pTable->pfnProtTableW, ulSrcCP, iMode);
+       usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+                                   (PTOKENENTRY)pTokenList,
+                                   TOK_SIZE, &pStartStop,
+                                   pTable->pfnProtTable,
+                                   pTable->pfnProtTableW, ulSrcCP, iMode);
 
 
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
@@ -2132,11 +2117,11 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
-          // usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
-          //                            (PTOKENENTRY)pTokenList,
-          //                             (USHORT)lNewSize, &pStartStop,
-          //                             pTable->pfnProtTable,
-          //                             pTable->pfnProtTableW, ulSrcCP, iMode );
+           usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+                                      (PTOKENENTRY)pTokenList,
+                                       (USHORT)lNewSize, &pStartStop,
+                                       pTable->pfnProtTable,
+                                       pTable->pfnProtTableW, ulSrcCP, iMode );
         } /* endif */
 
       } /* endwhile */
@@ -2165,10 +2150,10 @@ USHORT TokenizeSourceEx2
               chTemp = pSentence->pInputString[pEntry->usStop+1];
               pSentence->pInputString[pEntry->usStop+1] = EOS;
 
-              //usRc = NTMMorphTokenizeW( usLangId,
-              //                         pSentence->pInputString + pEntry->usStart,
-              //                         &ulListSize, (PVOID *)&pTermList,
-              //                         MORPH_FLAG_OFFSLIST, usVersion );
+              usRc = NTMMorphTokenizeW( usLangId,
+                                       pSentence->pInputString + pEntry->usStart,
+                                       &ulListSize, (PVOID *)&pTermList,
+                                       MORPH_FLAG_OFFSLIST, usVersion );
 
               pSentence->pInputString[pEntry->usStop+1] = chTemp;
 
@@ -2459,6 +2444,245 @@ USHORT NTMMorphTokenize
 
 } /* endof MorphTokenize */
 #endif
+
+
+
+USHORT MorphAddTermToList2W
+(
+  PSZ_W    *ppList,                    // ptr to term list pointer
+  PULONG   pulSize,                    // alloc. size of term list in # of w's
+  PULONG   pulUsed,                    // used # of w's in term list
+  PSZ_W    pszTerm,                    // ptr to new term being added to list
+  USHORT   usLength,                   // length of term in # of w's
+  USHORT   usOffs,                     // offset of term in # of w's???
+  ULONG    ulFlags,                    // flags describing the term
+  USHORT   usListType                  // type of list
+)
+{
+  USHORT   usRC = MORPH_OK;            // function return code
+  ULONG    ulDataLenBytes = 0;         // length of data to add in # of bytes
+  ULONG    ulDataLen = 0;              // length of data to add in w's
+  BOOL     fOK  = TRUE;                // internal OK flag
+
+  PBYTE    pList = (PBYTE)*ppList;     // ptr to term list
+  PSZ_W    *pAnchor = NULL;            // ptr to anchor for list
+
+  /********************************************************************/
+  /* position to last block for large term lists                      */
+  /********************************************************************/
+  if ( usListType == MORPH_LARGE_ZTERMLIST )
+  {
+    PSZ_W  pNextList;
+
+    // use caller's list pointer as default anchor
+    pAnchor = ppList;
+
+    if ( pList != NULL )
+    {
+      pNextList = *((PSZ_W *)pList);
+
+      while ( pNextList != NULL )
+      {
+        pAnchor = (PSZ_W *)pList;
+        pList = (PBYTE)pNextList;
+        pNextList = *((PSZ_W *)pList);
+      } /* endwhile */
+    } /* endif */
+  } /* endif */
+
+  /********************************************************************/
+  /* get required size for new entry                                  */
+  /********************************************************************/
+  switch ( usListType )
+  {
+    case MORPH_OFFSLIST :
+      /******************************************************************/
+      /* space for offset and length of term plus end of term list      */
+      /* indicator which is a zero offset and length value              */
+      /******************************************************************/
+      ulDataLenBytes = 4 * sizeof(USHORT);
+      break;
+
+    case MORPH_ZTERMLIST :
+      /******************************************************************/
+      /* space for term, term delimiter and end of term list indicator  */
+      /******************************************************************/
+      ulDataLenBytes = (usLength + 1 + 1)*sizeof(CHAR_W);
+      break;
+
+    case MORPH_FLAG_OFFSLIST :
+      /******************************************************************/
+      /* space for flag, offset and length of term plus end of term list*/
+      /* indicator which is a zero flag, offset and length value        */
+      /******************************************************************/
+      ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(USHORT));
+      break;
+
+    case MORPH_FLAG_ZTERMLIST :
+      /******************************************************************/
+      /* space for flag, term, term delimiter and end of term list      */
+      /* indicator which is a empty flag and a term delimiter           */
+      /******************************************************************/
+      ulDataLenBytes = sizeof(ULONG) + (usLength + 1)*sizeof(CHAR_W)
+                      + sizeof(ULONG) + sizeof(CHAR_W);
+      break;
+
+    case MORPH_LARGE_ZTERMLIST :
+      /******************************************************************/
+      /* space for term, term delimiter and end of term list indicator  */
+      /******************************************************************/
+      ulDataLenBytes = (usLength + 1 + 1)*sizeof(CHAR_W);
+      break;
+
+    default :
+      fOK = FALSE;
+      break;
+  } /* endswitch */
+
+  /********************************************************************/
+  /* enlarge term list if necessary                                   */
+  /********************************************************************/
+  ulDataLen = ulDataLenBytes / sizeof(CHAR_W);        // # of w's needed
+  if ( fOK && ((*pulUsed + ulDataLen) > *pulSize) )
+  {
+    LONG lOldLen = 0L;
+    LONG max = TERMLIST_INCR > ulDataLen? TERMLIST_INCR : ulDataLen ;
+    LONG lNewLen = ((LONG)*pulSize) + max ;
+
+    LONG lMaxLen = (usListType == MORPH_LARGE_ZTERMLIST) ?
+                                          MORPH_LARGE_ZTERMLIST_LEN : MAX_ALLOC;
+    lNewLen = lNewLen * sizeof(CHAR_W);         //  len in # of bytes
+    lOldLen = (*pulSize) * sizeof(CHAR_W);
+    if ( lNewLen >= lMaxLen )
+    {
+      // for large termlists allocate another buffer else set error condition
+      if ( usListType == MORPH_LARGE_ZTERMLIST )
+      {
+        lNewLen = (LONG)sizeof(PSZ_W) +
+                   (LONG)sizeof(CHAR_W) * max;
+        *pulSize = 0;                  // no size yet
+        lOldLen = 0L;
+        pAnchor  = (PSZ_W *)pList;       // use current list as anchor
+      }
+    } /* endif */
+
+    if ( fOK )
+    {
+      fOK = UtlAlloc( (PVOID *)&pList, lOldLen, lNewLen, NOMSG );
+      if ( fOK )
+      {  // set caller's termlist pointer
+         if ( usListType == MORPH_LARGE_ZTERMLIST )
+         {
+           *pAnchor = (PSZ_W)pList;
+           if (*pulSize == 0 )         // new block???
+           {
+             *pulUsed = sizeof(PSZ_W)/ sizeof(CHAR_W);   // leave room for pointer to next block
+           } /* endif */
+           *pulSize = lNewLen / sizeof(CHAR_W);
+         }
+         else
+         {
+           *pulSize = lNewLen / sizeof(CHAR_W);  //@@+= max( TERMLIST_INCR, ulDataLength );??
+           *ppList = (PSZ_W)pList;
+         } /* endif */
+      }
+      else
+      {
+         usRC = MORPH_NO_MEMORY;
+
+         // free the term list in case of erros
+         if ( usListType == MORPH_LARGE_ZTERMLIST )
+         {
+           pList = (PBYTE)*ppList;
+           while ( pList != NULL )
+           {
+             PSZ_W pNextList = *((PSZ_W *)pList);
+             UtlAlloc( (PVOID *)&pList, 0L, 0L, NOMSG );
+             pList = (PBYTE)pNextList;
+           } /* endwhile */
+         }
+         else
+         {
+           UtlAlloc( (PVOID *)ppList, 0L, 0L, NOMSG );
+         } /* endif */
+         *ppList = NULL;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+
+  /********************************************************************/
+  /* add term to term list (pList is a PBYTE ptr                      */
+  /********************************************************************/
+  if ( fOK )
+  {
+    ULONG  ulByteUsedInList = (*pulUsed) * sizeof(CHAR_W);
+    switch ( usListType )
+    {
+      case MORPH_OFFSLIST :
+        *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
+        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(USHORT);
+
+        *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
+        *pulUsed += sizeof(USHORT)/sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(USHORT);
+        break;
+
+      case MORPH_LARGE_ZTERMLIST :
+      case MORPH_ZTERMLIST :
+        if ( usLength )
+        {
+          memcpy( (PBYTE)(pList + ulByteUsedInList),
+                  (PBYTE) pszTerm, usLength*sizeof(CHAR_W) );
+          *pulUsed += usLength;
+          ulByteUsedInList += usLength * sizeof(CHAR_W);
+        } /* endif */
+        *((PSZ_W)(pList + ((*pulUsed) * sizeof(CHAR_W)))) = EOS;        /* 10-11-16 */
+        *pulUsed += 1;
+        ulByteUsedInList += sizeof(CHAR_W);
+        break;
+
+      case MORPH_FLAG_OFFSLIST :
+        *((PULONG)(pList + ulByteUsedInList)) = ulFlags;
+        *pulUsed += sizeof(ULONG)/ sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(ULONG);
+
+        *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
+        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(USHORT);
+
+        *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
+        *pulUsed += sizeof(USHORT) / sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(USHORT);
+        break;
+
+      case MORPH_FLAG_ZTERMLIST :
+        *((PULONG)(pList + ulByteUsedInList)) = ulFlags;
+        *pulUsed += sizeof(ULONG)/ sizeof(CHAR_W);
+        ulByteUsedInList += sizeof(ULONG);
+
+        if ( usLength )
+        {
+          memcpy( pList + ulByteUsedInList,
+                 (PBYTE)pszTerm, usLength*sizeof(CHAR_W) );
+          *pulUsed += usLength;
+          ulByteUsedInList += usLength * sizeof(CHAR_W);
+        } /* endif */
+        *((PSZ_W)(pList + ulByteUsedInList)) = EOS;     /* 10-11-16 */
+        *pulUsed += 1;
+        break;
+
+      default :
+        break;
+    } /* endswitch */
+  } /* endif */
+
+  /********************************************************************/
+  /* return usRC to calling function                                  */
+  /********************************************************************/
+  return( usRC );
+
+} /* end of function MorphAddTermToList2W */
 
 USHORT NTMTokenizeW
 (
@@ -3031,9 +3255,9 @@ USHORT NTMTokenizeW
         {
 			PUCHAR pTextTable;
 			
-      #ifdef TEMPORARY_COMMENTED
+      //#ifdef TEMPORARY_COMMENTED
       UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
-      #endif
+      //#endif
 			
       if ( !pTextTable[c] )
 			{

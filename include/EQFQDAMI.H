@@ -1366,6 +1366,7 @@ __declspec(dllexport)
  SHORT  QDAMDictLockDictLocal( PBTREE, BOOL );
  SHORT  QDAMDictLockEntryLocal( PBTREE, PUSHORT, BOOL );
  BOOL   QDAMDictLockStatus ( PBTREE, PUSHORT );
+ BOOL   QDAMDictLockStatus ( PBTREE, PCHAR_W );
  VOID   QDAMDictUpdStatus ( PBTREE);
  USHORT QDAMMoveProperties ( PPROPDICTIONARY , PUSHORT );
  PBTREE QDAMFindInstance ( PBTREE, PUSHORT );

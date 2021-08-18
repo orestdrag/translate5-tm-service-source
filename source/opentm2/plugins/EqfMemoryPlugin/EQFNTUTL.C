@@ -2332,7 +2332,6 @@ USHORT NTMOrganizeIndexFile1
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */
 
-#ifdef TEMPORARY_COMMENTED
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///   functions for working with the additional data area following the target CLB          ///
@@ -2420,7 +2419,6 @@ USHORT NtmGetAddDataLen( PTMX_TARGET_CLB pCLB, USHORT usDataID )
   return( usLength );
 } /* end of function NtmGetAddDataLen */
 
-
 // store/combine additional data in the combined area, returns new size of combined data area or 0 in case of errors
 USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData )
 {
@@ -2493,6 +2491,7 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
   return( pCLB->usAddDataLen );
 } /* end of function NtmStoreAddData */
 
+#ifdef TEMPORARY_COMMENTED
 // retrieve specific data from the combined data area, returns length of retrieved data (incl. string end delimiter)
 USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, USHORT usBufSize )
 {

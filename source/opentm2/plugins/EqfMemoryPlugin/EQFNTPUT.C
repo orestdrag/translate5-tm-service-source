@@ -189,6 +189,7 @@ BOOL CheckForAlloc
 //       add term info to structure                                             
 //                                                                              
 //------------------------------------------------------------------------------
+#ifdef TEMPORARY_COMMENTED
 USHORT TokenizeSource
 (
    PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
@@ -214,8 +215,6 @@ USHORT TokenizeSourceEx
 {
     return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
 }
-
-
 
 USHORT TokenizeSourceEx2
 (
@@ -398,10 +397,10 @@ USHORT TokenizeSourceEx2
               chTemp = pSentence->pInputString[pEntry->usStop+1];
               pSentence->pInputString[pEntry->usStop+1] = EOS;
 
-              //usRc = NTMMorphTokenizeW( usLangId,
-              //                         pSentence->pInputString + pEntry->usStart,
-              //                         &ulListSize, (PVOID *)&pTermList,
-              //                         MORPH_FLAG_OFFSLIST, usVersion );
+              usRc = NTMMorphTokenizeW( usLangId,
+                                       pSentence->pInputString + pEntry->usStart,
+                                       &ulListSize, (PVOID *)&pTermList,
+                                       MORPH_FLAG_OFFSLIST, usVersion );
 
               pSentence->pInputString[pEntry->usStop+1] = chTemp;
 
@@ -559,7 +558,7 @@ USHORT TokenizeSourceEx2
 
   return ( usRc );
 }
-
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -730,7 +729,7 @@ USHORT TmtXReplace
       //update index
       if ( !usRc )
       {
-        LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
+        //LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
         usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
@@ -1264,7 +1263,7 @@ USHORT CheckCompactArea
   return( usMatch );
 }
 
-#ifdef TEMPORARY_COMMENTED
+
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1499,8 +1498,6 @@ USHORT TokenizeTarget
   return( usRc );
 }
 
-#endif 
-
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1567,7 +1564,7 @@ USHORT AddToTm
   if ( fOK )
   {
     LogMessage(ERROR,"TEMPORARY_COMMENTED");
-    //usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+    usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
 
     fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+usAddDataLen), NOMSG );
   } /* endif */
@@ -1592,24 +1589,24 @@ USHORT AddToTm
   }
   else
   {
-    LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeTarget");
-    //usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
-    //                       &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
+    //LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeTarget");
+    usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
+                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
     
     if ( usRc == NO_ERROR )
     {
-      LogMessage(ERROR,"TEMPORART_COMMENTED");
-      //usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
+      //LogMessage(ERROR,"TEMPORART_COMMENTED");
+      usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
       if ( usRc == NO_ERROR )
       {
-        LogMessage(ERROR,"TEMPORART_COMMENTED");
+        //LogMessage(ERROR,"TEMPORART_COMMENTED");
         //fill tm record to add to database
-        //FillTmRecord ( pSentence,    // ptr to sentence struct for source info
-        //               pTagRecord,   // ptr to target string tag table
-        //               pNormString,  // ptr to target normalized string
-        //               usNormLen,    // length of target normalized string
-        //               pTmRecord,    // filled tm record returned
-        //               pTargetClb );
+        FillTmRecord ( pSentence,    // ptr to sentence struct for source info
+                       pTagRecord,   // ptr to target string tag table
+                       pNormString,  // ptr to target normalized string
+                       usNormLen,    // length of target normalized string
+                       pTmRecord,    // filled tm record returned
+                       pTargetClb );
 
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
@@ -1635,7 +1632,6 @@ USHORT AddToTm
   return( usRc );
 }
 
-#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -1856,7 +1852,6 @@ USHORT FillClb
 
   return (usRc);
 }
-#endif 
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -3466,7 +3461,6 @@ static long lCompress[6] = {       0x10,    0x03f,  0x07f, 0x0bf,   0x0ee,     0
 
 
 
-#ifdef TEMPORARY_COMMENTED
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 {
   ULONG ulLen = ulLenChar * sizeof(CHAR_W);
@@ -3536,7 +3530,6 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
   return ulLen+1;
 }
 
-#endif // TEMPORARY_COMMENTED
 
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 {

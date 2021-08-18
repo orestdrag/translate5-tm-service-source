@@ -1542,12 +1542,12 @@ SHORT QDAMDictUpdateLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   #ifdef TEMPORARY_COMMENTED
+   //#ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */
-   #endif
+   //#endif
 
    /*******************************************************************/
    /* For shared databases: lock complete file                        */

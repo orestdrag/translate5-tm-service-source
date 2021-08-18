@@ -1798,10 +1798,10 @@ typedef struct _objlst {
    USHORT  usClassID;
 } OBJLST, *POBJLST;
 
-
+extern "C" {
 HWND      EqfQueryObjectManager( VOID);
-extern "C" USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
-extern "C" USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
+USHORT    Send2AllHandlers( WINMSG, WPARAM, LPARAM);
+USHORT    Send2AllObjects( USHORT, WINMSG, WPARAM, LPARAM);
 USHORT    InstallHandler( PSZ name, HWND hwnd, USHORT cls);
 USHORT    RegisterObject( PSZ name, HWND hwnd, USHORT cls);
 MRESULT   OBJECTMANAGERWP( HWND, WINMSG, WPARAM, LPARAM);
@@ -1809,10 +1809,10 @@ HWND      EqfQueryObject( PSZ pszObj, SHORT sClass, SHORT sFlags );
 SHORT     EqfQueryObjectName( HWND hwnd, PSZ pBuffer );
 USHORT    EqfSetObjectStatus( HWND hwnd, SHORT sMask, SHORT sStatus );
 USHORT    EqfGetObjectList( SHORT sClass, SHORT sCount, PVOID pBuffer );
-extern "C" MRESULT   EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
+MRESULT   EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
 MRESULT   EqfPost2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2);
 USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
-
+};
 /**********************************************************************/
 /* parent and ownership for dialogs called using WinDlgBox            */
 /**********************************************************************/
@@ -3963,12 +3963,13 @@ typedef struct _ERRDATA                // global data of UtlError
 /**********************************************************************/
 /* prototypes for Setter functions for MAT ULONG/USHORT               */
 /**********************************************************************/
+extern "C" {
 VOID UtlSetULong( SHORT sID, ULONG ulValue );
 //VOID UtlSetString( SHORT sID, const PSZ pszString );
 void UtlSetString( short sID, const char *pszString );
 //VOID UtlSetUShort( SHORT sID, USHORT usValue );
-extern "C" void UtlSetUShort( short sID, unsigned short usValue );
-
+void UtlSetUShort( short sID, unsigned short usValue );
+};
 /**********************************************************************/
 /* MAT ULONG  identifiers                                             */
 /**********************************************************************/
@@ -4304,90 +4305,89 @@ extern "C" {
        PULONG   pulSize,                   // points to buffer for file size
        BOOL     fMsg                        // if TRUE handle errors in utility
     );
-}
-USHORT UtlGetFileSizeHwnd
-(
-   HFILE    hf,                        // file handle
-   PULONG   pulSize,                   // points to buffer for file size
-   BOOL     fMsg,                       // if TRUE handle errors in utility
-   HWND     hwndParent
-);
-USHORT  UtlSetFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
-                       USHORT cbInfoBuf, BOOL fMsg );
-USHORT  UtlQFSInfo( USHORT usDriveNo, USHORT usInfoLevel, PBYTE pInfoBuf,
-                   USHORT cbInfoBuf, BOOL fMsg );
-USHORT  UtlQFileMode( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserved,
-                     BOOL fMsg );
-extern "C" USHORT  UtlQPathInfo( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
-                     USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg );
-VOID    UtlDestroyChildResources( VOID );
-BOOL    UtlCreateChildResources( HWND hwnd );
-MRESULT UtlCreateChildSysMenu( HWND hwnd );
-MRESULT UtlTransAccel ( HWND, WPARAM, LPARAM );
-// not compatible with MFC-DLL compiling bt 10042001
-#ifndef _CEQFPPT
-//MRESULT EXPENTRY UTLDEFDIALOGPROC( HWND, WINMSG, WPARAM, LPARAM );
-#define UTLDEFDIALOGPROC( hwnd, usMsg, mp1, mp2) WinDefDlgProc( hwnd, usMsg, mp1, mp2 )
-MRESULT /*EXPENTRY*/ UTLDEFHANDLERPROC( HWND, WINMSG, WPARAM, LPARAM );
-MRESULT /*EXPENTRY*/ UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
-//MRESULT EXPENTRY UTLDEFWINDOWPROC( HWND, WINMSG, WPARAM, LPARAM );
-#define UTLDEFWINDOWPROC( hwnd, usMsg, mp1, mp2) WinDefWindowProc( hwnd, usMsg, mp1, mp2 )
-#endif
-BOOL    UtlRegisterCLB( HAB );
-extern "C" PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
-PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
-extern "C" VOID    UtlDispatch( VOID );
-extern "C" ULONG   UtlQueryULong( SHORT sID );
-VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
-VOID    UtlMenuDisableItem( SHORT sItemID );
-VOID    UtlMenuEnableItem( SHORT sItemID );
-ULONG   UtlLongToTimeString( LONG, PSZ, ULONG );
-ULONG   UtlLongToDateString( LONG, PSZ, ULONG );
-ULONG   UtlLongToTimeStringW( LONG, PSZ_W, ULONG );
-ULONG   UtlLongToDateStringW( LONG, PSZ_W, ULONG );
-extern "C" BOOL    UtlLoadFile( PSZ, PVOID *, USHORT *, BOOL, BOOL );
-extern "C" BOOL    UtlLoadFileL( PSZ, PVOID *, ULONG *, BOOL, BOOL );
-BOOL    UtlLoadFileHwnd( PSZ, PVOID *, ULONG *, BOOL, BOOL, HWND );
-USHORT  UtlCheckSpaceForFile( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL );
-USHORT  UtlCheckSpaceForFileEx( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL, PUSHORT );
-ULONG64 UtlQueryFreeSpace( CHAR, BOOL );
-extern "C" USHORT  UtlMkMultDir( PSZ, BOOL );
-USHORT  UtlMkMultDirHwnd( PSZ, BOOL, HWND );
-BOOL    UtlPrintOpen( PHPRINT phPrint, PSZ pszListName, HWND hwndOwner );
-BOOL    UtlPrintOpenW( PHPRINT phPrint, PSZ_W pszListName, HWND hwndOwner );
-BOOL    UtlPrintClose( HPRINT hPrint );
-BOOL    UtlPrintFormFeed( HPRINT hPrint );
-BOOL    UtlPrintLineW( HPRINT hPrint, PSZ_W pszLine );
-BOOL    UtlPrintLine( HPRINT hPrint, PSZ pszLine );
-BOOL    UtlPrintSetAnsiConv( HPRINT hPrint, BOOL fAnsiConv );
-extern "C" BOOL    UtlFileExist( PSZ pszFileName );
-BOOL    UtlDirExist( PSZ pszDirName );
-BOOL    UtlMoveIfNewerOrNotExist( PSZ pszSource, PSZ pszTarget );
-BOOL    UtlMoveIfNewerOrNotExistHwnd( PSZ pszSource, PSZ pszTarget, HWND hwnd );
-BOOL    UtlMoveIfNewerOrNotExistHwnd2( PSZ pszSource, PSZ pszTarget, HWND hwnd, BOOL fMsg, PUSHORT pusDosRC );
-USHORT  UtlSmartMove( PSZ pszSource, PSZ pszTarget, BOOL fMsg );
-USHORT  UtlSmartMoveHwnd( PSZ pszSource, PSZ pszTarget, BOOL fMsg, HWND hwnd );
-USHORT  UtlRemoveDir( PSZ pszDir, BOOL fMsg );
-SHORT   UtlCopyListBox( HWND, HWND );
-PSZ     UtlMakeFullPath ( PSZ, PSZ, PSZ, PSZ, PSZ );
-extern "C" USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
-extern "C" USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
-USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
-        BOOL fMsg, HWND hwndParent );
-BOOL    UtlIsEqfDrive( CHAR chDrive );
-extern "C" BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
-extern "C" USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-extern "C" char*     UtlGetFnameFromPath( const char* path);
-PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
-VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
-PSZ     UtlParseX15( PSZ str, SHORT id);
-PSZ_W   UtlParseX15W( PSZ_W str, SHORT id);
-extern "C" PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
-USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
+    USHORT UtlGetFileSizeHwnd
+    (
+      HFILE    hf,                        // file handle
+      PULONG   pulSize,                   // points to buffer for file size
+      BOOL     fMsg,                       // if TRUE handle errors in utility
+      HWND     hwndParent
+    );
+    USHORT  UtlSetFileInfo( HFILE hf, USHORT usInfoLevel, PBYTE pInfoBuf,
+                          USHORT cbInfoBuf, BOOL fMsg );
+    USHORT  UtlQFSInfo( USHORT usDriveNo, USHORT usInfoLevel, PBYTE pInfoBuf,
+                      USHORT cbInfoBuf, BOOL fMsg );
+    USHORT  UtlQFileMode( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserved,
+                        BOOL fMsg );
+    USHORT  UtlQPathInfo( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
+                        USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg );
+    VOID    UtlDestroyChildResources( VOID );
+    BOOL    UtlCreateChildResources( HWND hwnd );
+    MRESULT UtlCreateChildSysMenu( HWND hwnd );
+    MRESULT UtlTransAccel ( HWND, WPARAM, LPARAM );
+    // not compatible with MFC-DLL compiling bt 10042001
+    #ifndef _CEQFPPT
+    //MRESULT EXPENTRY UTLDEFDIALOGPROC( HWND, WINMSG, WPARAM, LPARAM );
+    #define UTLDEFDIALOGPROC( hwnd, usMsg, mp1, mp2) WinDefDlgProc( hwnd, usMsg, mp1, mp2 )
+    MRESULT /*EXPENTRY*/ UTLDEFHANDLERPROC( HWND, WINMSG, WPARAM, LPARAM );
+    MRESULT /*EXPENTRY*/ UTLDEFINSTANCEPROC( HWND, WINMSG, WPARAM, LPARAM );
+    //MRESULT EXPENTRY UTLDEFWINDOWPROC( HWND, WINMSG, WPARAM, LPARAM );
+    #define UTLDEFWINDOWPROC( hwnd, usMsg, mp1, mp2) WinDefWindowProc( hwnd, usMsg, mp1, mp2 )
+    #endif
+    BOOL    UtlRegisterCLB( HAB );
+    PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
+    PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
+    VOID    UtlDispatch( VOID );
+    ULONG   UtlQueryULong( SHORT sID );
+    VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
+    VOID    UtlMenuDisableItem( SHORT sItemID );
+    VOID    UtlMenuEnableItem( SHORT sItemID );
+    ULONG   UtlLongToTimeString( LONG, PSZ, ULONG );
+    ULONG   UtlLongToDateString( LONG, PSZ, ULONG );
+    ULONG   UtlLongToTimeStringW( LONG, PSZ_W, ULONG );
+    ULONG   UtlLongToDateStringW( LONG, PSZ_W, ULONG );
+    BOOL    UtlLoadFile( PSZ, PVOID *, USHORT *, BOOL, BOOL );
+    BOOL    UtlLoadFileL( PSZ, PVOID *, ULONG *, BOOL, BOOL );
+    BOOL    UtlLoadFileHwnd( PSZ, PVOID *, ULONG *, BOOL, BOOL, HWND );
+    USHORT  UtlCheckSpaceForFile( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL );
+    USHORT  UtlCheckSpaceForFileEx( PSZ, USHORT, LONG, PSZ *, LONG *, BOOL, PUSHORT );
+    ULONG64 UtlQueryFreeSpace( CHAR, BOOL );
+    USHORT  UtlMkMultDir( PSZ, BOOL );
+    USHORT  UtlMkMultDirHwnd( PSZ, BOOL, HWND );
+    BOOL    UtlPrintOpen( PHPRINT phPrint, PSZ pszListName, HWND hwndOwner );
+    BOOL    UtlPrintOpenW( PHPRINT phPrint, PSZ_W pszListName, HWND hwndOwner );
+    BOOL    UtlPrintClose( HPRINT hPrint );
+    BOOL    UtlPrintFormFeed( HPRINT hPrint );
+    BOOL    UtlPrintLineW( HPRINT hPrint, PSZ_W pszLine );
+    BOOL    UtlPrintLine( HPRINT hPrint, PSZ pszLine );
+    BOOL    UtlPrintSetAnsiConv( HPRINT hPrint, BOOL fAnsiConv );
+    BOOL    UtlFileExist( PSZ pszFileName );
+    BOOL    UtlDirExist( PSZ pszDirName );
+    BOOL    UtlMoveIfNewerOrNotExist( PSZ pszSource, PSZ pszTarget );
+    BOOL    UtlMoveIfNewerOrNotExistHwnd( PSZ pszSource, PSZ pszTarget, HWND hwnd );
+    BOOL    UtlMoveIfNewerOrNotExistHwnd2( PSZ pszSource, PSZ pszTarget, HWND hwnd, BOOL fMsg, PUSHORT pusDosRC );
+    USHORT  UtlSmartMove( PSZ pszSource, PSZ pszTarget, BOOL fMsg );
+    USHORT  UtlSmartMoveHwnd( PSZ pszSource, PSZ pszTarget, BOOL fMsg, HWND hwnd );
+    USHORT  UtlRemoveDir( PSZ pszDir, BOOL fMsg );
+    SHORT   UtlCopyListBox( HWND, HWND );
+    PSZ     UtlMakeFullPath ( PSZ, PSZ, PSZ, PSZ, PSZ );
+    USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
+    USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
+    USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
+            BOOL fMsg, HWND hwndParent );
+    BOOL    UtlIsEqfDrive( CHAR chDrive );
+    BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
+    USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
+    USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
+    char*     UtlGetFnameFromPath( const char* path);
+    PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
+    VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
+    PSZ     UtlParseX15( PSZ str, SHORT id);
+    PSZ_W   UtlParseX15W( PSZ_W str, SHORT id);
+    PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
-extern "C" {
+    USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
+
     PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
     PPLUG   UtlPlugOut( PPLUG plug);
     PSZ     UtlSplitFnameFromPath( PSZ path);
@@ -4407,7 +4407,6 @@ extern "C" {
                                    ULONG style1, ULONG style);
     USHORT UtlSetPosDriveButtons2( HWND, USHORT, ULONG, ULONG, ULONG, ULONG,
                                     ULONG, ULONG, ULONG, ULONG, HWND );
-}
 
 USHORT UtlDriveButtons( HWND hwnd, PSZ plist, USHORT sid,                          // starting id
                         ULONG style1, ULONG style,
@@ -4417,21 +4416,21 @@ SHORT UtlDriveType( CHAR chDrive );
 VOID UtlSetHorzScrollingForLB(HWND hLB);
 
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
-extern "C" BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
-extern "C" BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
+BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
+BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
 BOOL   UtlInitUtils( HAB );
 BOOL   UtlRegisterEqfHelp( HAB );
 BOOL   UtlTerminateUtils( VOID );
-extern "C" USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
-extern "C" USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
-extern "C" USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
-extern "C" USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
-extern "C" VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
+USHORT UtlError ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE );
+USHORT UtlErrorHwnd ( SHORT, USHORT, USHORT, PSZ *, ERRTYPE, HWND );
+USHORT UtlErrorW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, BOOL );
+USHORT UtlErrorHwndW ( SHORT, USHORT, USHORT, PSZ_W *, ERRTYPE, HWND, BOOL );
+VOID UtlGetMsgTxt( SHORT, PSZ, USHORT, PSZ *);
 
 VOID   UtlInitError ( HAB, HWND, HWND, PSZ );
 VOID   UtlTerminateError ( VOID );
-extern "C" USHORT UtlQueryUShort( SHORT sID );
-extern "C" BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
+USHORT UtlQueryUShort( SHORT sID );
+BOOL   UtlQueryString( SHORT sID, PSZ pszBuffer, USHORT usLength );
 ULONG  UtlFDateToDateString( FDATE *, PSZ, ULONG );
 ULONG  UtlFTimeToTimeString( FTIME *, PSZ, ULONG );
 BOOL   UtlDateStringToFDate( PSZ, FDATE * );
@@ -4439,7 +4438,7 @@ BOOL   UtlTimeStringToFTime( PSZ, FTIME * );
 USHORT UtlSetFileMode ( PSZ, USHORT, ULONG, BOOL );
 VOID   UtlStripBlanks ( PSZ );
 VOID   UtlStripBlanksW( PSZ_W );
-extern "C" BOOL   UtlSetDrive( CHAR szNewDrive );
+BOOL   UtlSetDrive( CHAR szNewDrive );
 USHORT  UtlBufOpen( PBUFCB *, PSZ, ULONG, ULONG, BOOL );
 USHORT  UtlBufClose( PBUFCB pBufCB, BOOL fMsg );
 USHORT  UtlBufWrite( PBUFCB pBufCB, PSZ pszData, ULONG ulDataLength, BOOL fMsg );
@@ -4454,7 +4453,7 @@ USHORT  UtlBufWriteConv( PBUFCB, PSZ_W, ULONG, BOOL, USHORT, ULONG, ULONG );
 
 VOID    UtlIncludeRemoteResources(VOID);
 VOID    UtlGetLastError( HWND, PSZ );
-extern "C" USHORT  UtlGetDDEErrorCode( HWND );
+USHORT  UtlGetDDEErrorCode( HWND );
 SHORT   UtlQdamMsgTxt ( SHORT );
 
 SHORT   UtlGetOperatingSystemInfo( VOID );
@@ -4465,12 +4464,12 @@ BOOL    UtlProcessWalk(SHORT, PSZ, DWORD *);
 
 USHORT  UtlFindCloseHwnd( HDIR, BOOL, HWND );
 USHORT  UtlCloseHwnd( HFILE hf, BOOL fMsg, HWND hwndParent );
-extern "C" USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
+USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                      USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                      ULONG ulReserved, BOOL fMsg, HWND hwndParent );
-extern "C" USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
+USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                      BOOL fMsg, HWND hwndParent );
-extern "C" USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
+USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                       BOOL fMsg, HWND hwndParent  );
 USHORT  UtlWriteWoCheckHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf,
                              PULONG pcbBytesWritten, BOOL fMsg, HWND hwndParent  );
@@ -4580,7 +4579,7 @@ USHORT UtlMakeFileName
   \param pszDestPath fully qualified name of the destination directory
   \returns 0 in any case
 */
-extern "C" int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
+int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
 
 /*! \brief add all files of a directoy to a ZIP package
   The current version of this function does not recurse into subdirectories
@@ -4595,12 +4594,12 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-extern "C" int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
+int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
 
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
 */
-extern "C" void UtlDeleteAllFiles( const char *pszDirectory );
+void UtlDeleteAllFiles( const char *pszDirectory );
 
 // Mode defines for function UtlHandleConversionStrings
 // CONVLOAD_MODE loads the names of the conversion into a listbox or combo-box
@@ -4635,7 +4634,7 @@ USHORT UtlQueryCharTableForDocConv
   PCHAR       *ppConvTable,             // ptr to conversion table pointer
   ULONG       ulOemCodePage
 );
-
+}
 
 
 
@@ -7321,5 +7320,4 @@ typedef struct _CALCREPORTBINDATA
 #define FUZZY_THRESHOLD_0                  0.5 // Theshold for different fuzzy classes
 #define FUZZY_THRESHOLD_1                  0.7 // Theshold for different fuzzy classes
 #define FUZZY_THRESHOLD_2                  0.9 // Theshold for different fuzzy classes
-
 
