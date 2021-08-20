@@ -4,6 +4,7 @@
 #include <locale.h>
 #include <string.h>
 #include <wchar.h>
+#include <ctype.h>
 
 int GetLocaleInfo(
         LCID   Locale,
@@ -56,6 +57,15 @@ unsigned long int _ttol(const char* source){
  int _stricmp(const char* a, const char* b){
     return strcmp(a,b);
  }//*/ 
+
+
+int strupr(char * str){
+    int len = strlen(str);
+    for(int i=0; i<len; i++){
+        str[i] = toupper(str[i]);
+    }
+    return 0;
+}
 
 void GetSystemTime(LPSYSTEMTIME lpSystemTime){
     LogMessage(FATAL, "Called not implemented function::GetSystemTime");

@@ -2074,13 +2074,10 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
 
   // get decoded length of data
   DWORD dwDecodedLength = 0;
-//  LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in decodeBase64ToFile() get decoded length of data");
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   std::string sData(pStringData);
   unsigned char* pData = NULL;
   int pDataSize = 0;
   EncodingHelper::Base64Decode(sData, pData, pDataSize);
-  //if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedLength, NULL, NULL ) )
   if(pDataSize == 0 || pData == NULL)
   {
     iRC = GetLastError();
@@ -2088,7 +2085,6 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
     return( iRC );
   }
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 #ifdef TEMPORARY_COMMENTED
   // get byte array for decoded data
@@ -2141,8 +2137,9 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   // close file
   CloseFile( &hFile );
   #endif
-
-  FilesystemHelper::WriteToFile(pszFile, pData, pDataSize);
+  auto file = FilesystemHelper::OpenFile(pszFile, "w+", false);
+  FilesystemHelper::WriteToFile(file, pData, pDataSize);
+  FilesystemHelper::CloseFile(file);
   // cleanup
   delete[] pData ;
 

@@ -2096,11 +2096,7 @@ EQFNTMGet
       ulLength = *pulLength;
       pBT->fCorrupted = FALSE;
 
-      //LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictExactLocal");
-      //#ifdef TEMPORARY_COMMENTED
-      //sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PSZ_W) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
       sRc = QDAMDictExactLocal( (PBTREE) pBTIda,(PTMWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
-      //#endif 
 
       pBT->fCorrupted = fCorrupted;
 

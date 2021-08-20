@@ -15,6 +15,9 @@
 #include "EQF.H"
 #include <map>
 
+#include <errno.h>
+
+
 #include <filesystem>
 
 int __last_error_code = 0;
@@ -69,7 +72,8 @@ std::string FilesystemHelper::FixPath(std::string& path){
 
 FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
     const char* cpath = path.c_str();
-    bool useBuffer = false;
+    //LogMessage2(WARNING,"TEMPORARY HARDCODED useBuffer= true in FilesystemHelper::CreateFile, fName = ", cpath);
+    bool useBuffer = false ;//true; //false;
     if(    (strcasestr(cpath, ".TMI") )
         || (strcasestr(cpath, ".TMD") )
         || (strcasestr(cpath, ".MEM") )
@@ -79,6 +83,21 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
         useBuffer = true;
     }
     return OpenFile(path, mode, useBuffer);
+}
+
+int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
+    std::string fixedOldPath = FixPath(oldPath);
+    std::string fixedNewPath = FixPath(newPath);
+    errno = 0;
+    
+   if(rename(fixedOldPath.c_str(), fixedNewPath.c_str()) == -1){
+       LogMessage6(ERROR, "MoveFile:: cannot move ", fixedOldPath.c_str()," to ", fixedNewPath.c_str(), ", error = ", strerror(errno));
+       return errno;
+    }else{
+        LogMessage4(INFO,"MoveFile:: file moved from ", fixedOldPath.c_str()," to ", fixedNewPath.c_str());
+    }
+    return 0;
+
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode, bool useBuffer){
@@ -682,16 +701,22 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
 }
 
 int FilesystemHelper::GetFileSize(const std::string& path){
-    FILE* ptr = OpenFile(path, "rb");
     int size = -1;
-    if(!ptr){
-        __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
-        LogMessage(ERROR, "FilesystemHelper::GetFileSize()::FILEHELPER_FILE_PTR_IS_NULL ");
+    if(fileBuffers.find(path) != fileBuffers.end() && fileBuffers[path].data.size()>0){
+        size = fileBuffers[path].data.size();
+        LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") used filebuffer ");
     }else{
-        size = GetFileSize(ptr);
-        CloseFile(ptr);
-        LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
+        FILE* ptr = OpenFile(path, "rb", false);
+        LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") filebuffer not found->reading file");
+        if(!ptr){
+            __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
+            LogMessage(ERROR, "FilesystemHelper::GetFileSize()::FILEHELPER_FILE_PTR_IS_NULL ");
+        }else{
+            size = GetFileSize(ptr);
+            CloseFile(ptr);            
+        }
     }
+    LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
     return size;
 }
 
@@ -706,7 +731,8 @@ int FilesystemHelper::GetFileSize(FILE*& ptr){
     int size = ftell(ptr);
     fseek(ptr, 0L, pos);
     
-    LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size));
+    std::string fName = GetFileName(ptr);
+    LogMessage6(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size),", fName = ",fName.c_str());
     return size;
 }
 

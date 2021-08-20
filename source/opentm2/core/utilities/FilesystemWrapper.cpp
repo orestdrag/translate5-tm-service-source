@@ -22,7 +22,8 @@ char* filesystem_get_home_dir() {
 }
 
 int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
-    bool useBuffer = false;
+    LogMessage2(WARNING,"TEMPORARY HARDCODED useBuffer= true in filesystem_open_file, fname = ", path);
+    bool useBuffer = true;//false;
     if(    (strcasestr(path, ".TMI") )
         || (strcasestr(path, ".TMD") )
         || (strcasestr(path, ".MEM") )
@@ -263,6 +264,13 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
     return ret;
 }
 
+BOOL MoveFile(
+  LPCTSTR lpExistingFileName, 
+  LPCTSTR lpNewFileName       
+){
+    LogMessage4(INFO,"MoveFile:: moving file from ", lpExistingFileName, " to ", lpNewFileName);
+    return FilesystemHelper::MoveFile(lpExistingFileName, lpNewFileName);
+}
 
 /*
     BOOL SetFilePointerEx(

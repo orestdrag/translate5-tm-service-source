@@ -1057,7 +1057,7 @@ USHORT CTMXExportImport::StartImport
 
   if ( pMemInfo->fCleanRTF )
   {
-    //TALoadTagTableExHwnd( "EQFRTF", &m_pLoadedRTFTable, FALSE, TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, HWND_FUNCIF );
+    TALoadTagTableExHwnd( "EQFRTF", &m_pLoadedRTFTable, FALSE, TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, HWND_FUNCIF );
   } /* endif */
 
   // preprocess TMX file
@@ -2075,31 +2075,36 @@ void TMXParseHandler::fillSegmentInfo
 
   // note style and text
   pSegment->szAddInfo[0] = 0;
+  int iLeft = SEGDATABUFLEN;
   if ( (pBuf->szNote[0]!= 0) || (pBuf->szNoteStyle[0] != 0)  )
   {
-    LogMessage(WARNING, "TEMPORARY_COMMENTED");
-    //swprintf( pSegment->szAddInfo, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    swprintf( pSegment->szAddInfo, iLeft, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
+    iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
 
   // MT meta data
   if ( (pBuf->szMTMetrics[0] != 0) )
   {
-     LogMessage(WARNING, "TEMPORARY_COMMENTED");
-    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MT%s></MT>", pBuf->szMTMetrics );
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<MT%s></MT>", pBuf->szMTMetrics );
+    iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
 
   // word count info
   if ( (pBuf->ulWords != 0) )
   {
-     LogMessage(WARNING, "TEMPORARY_COMMENTED");
-    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<wcnt words=\"%lu\"></wcnt>", pBuf->ulWords );
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<wcnt words=\"%lu\"></wcnt>", pBuf->ulWords );
+    iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
 
   // Match segment ID
   if ( (pBuf->szMatchSegID[0] != 0) )
   {
-     LogMessage(WARNING, "TEMPORARY_COMMENTED");
-    //swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), L"<MatchSegID ID=\"%s\"/>", pBuf->szMatchSegID );
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
+    swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<MatchSegID ID=\"%s\"/>", pBuf->szMatchSegID );
+    iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
 }
 

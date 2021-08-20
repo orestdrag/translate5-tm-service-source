@@ -162,6 +162,11 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
     int TruncateFileForBytes(HFILE ptr, int numOfBytes);
 
     int filesystem_flush_buffers(const char* fname, bool tempFile);
+
+    BOOL MoveFile(
+        LPCTSTR lpExistingFileName, 
+        LPCTSTR lpNewFileName       
+    );
 }
 
 

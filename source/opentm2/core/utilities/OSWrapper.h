@@ -160,7 +160,7 @@ extern "C"{
 
     unsigned long int _ttol(const char* source);
 
-    
+    int strupr(char * str);
     int _strcmp(const char* a, const char* b);
     int _strcmpi(const char* a, const char* b);
     //int _stricmp(const char* a, const char* b);

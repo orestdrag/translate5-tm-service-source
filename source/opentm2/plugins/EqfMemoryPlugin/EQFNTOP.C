@@ -128,25 +128,7 @@ USHORT TmtXOpen
       //get signature record and add to control block
       USHORT usLen = sizeof( TMX_SIGN );
 
-      //LogMessage(WARNING, "TEMPORAY_COMMENTED out EQFNTMSign");
-      //#ifdef TEMPORAY_COMMENTED
       usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
-      //#endif
-
-      // do on-spot conversion for version 6 memories
-      if ( (usRc == NO_ERROR ) && (pTmClb->stTmSign.bMajorVersion == TM_MAJ_VERSION_6) )
-      {
-        //LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
-        //#ifdef TEMPORARY_COMMENTED
-        EQFNTMClose( &pTmClb->pstTmBtree );
-        //#endif 
-
-        MemConvertMem( pTmOpenIn->stTmOpen.szDataName );
-        usRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName, (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE), &pTmClb->pstTmBtree );
-        usLen = sizeof( TMX_SIGN );
-        if ( !usRc1 ) 
-            usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
-      } /* endif */
 
       if ( usRc == NO_ERROR )
       {
@@ -327,10 +309,10 @@ USHORT TmtXOpen
           // Translation Memory
           if ( usTempRc == NO_ERROR )
           {
-            LogMessage(WARNING, "TEMPORARY_COMMENTED NTMReadLongNameTable");
-            #ifdef TEMPORARY_COMMENTED
+            //LogMessage(WARNING, "TEMPORARY_COMMENTED NTMReadLongNameTable");
+            //#ifdef TEMPORARY_COMMENTED
             usTempRc = NTMReadLongNameTable( pTmClb );
-            #endif 
+            //#endif 
 
             switch ( usTempRc)
             {
@@ -376,21 +358,6 @@ USHORT TmtXOpen
       //add threshold to control block
       pTmClb->usThreshold = pTmOpenIn->stTmOpen.usThreshold;
 
-      // get inital update counters
-      if ( !usRc && pTmClb->fShared )
-      {
-        USHORT usTempRc;
-#ifdef TEMPORARY_COMMENTED
-        usTempRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree,
-                                        pTmClb->alUpdCounter,
-                                        0, MAX_UPD_COUNTERS );
-#endif
-
-        if ( usTempRc != NO_ERROR )
-        {
-          usRc = usTempRc;
-        } /* endif */
-      } /* endif */
 
       if ( (usRc == NO_ERROR) ||
            (usRc == BTREE_CORRUPTED) ||
@@ -456,11 +423,10 @@ USHORT TmtXOpen
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
 
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED EQFNTMClose");
-    //#ifdef TEMPORARY_COMMENTED
-    if ( pTmClb->pstTmBtree != NULL ) EQFNTMClose( &pTmClb->pstTmBtree );
-    if ( pTmClb->pstInBtree != NULL ) EQFNTMClose( &pTmClb->pstInBtree );
-    //#endif 
+    if ( pTmClb->pstTmBtree != NULL ) 
+        EQFNTMClose( &pTmClb->pstTmBtree );
+    if ( pTmClb->pstInBtree != NULL ) 
+        EQFNTMClose( &pTmClb->pstInBtree );
 
     NTMDestroyLongNameTable( pTmClb );
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );

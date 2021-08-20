@@ -46,10 +46,12 @@
 #define INCL_EQF_ASD
 #include <EQF.H>                  // General Translation Manager include file
 // #include <time.h>
+#include <string.h>
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 #include "core/utilities/LogWrapper.h"
+#include "core/utilities/OSWrapper.h"
 
 #include "EQFCMPR.H"
 /**********************************************************************/
@@ -223,8 +225,7 @@ USHORT NTMGetIDFromNameEx
     if ( pTmClb && pszName[0] != EOS )
     {
       //--- capitalize input string
-      LogMessage(WARNING,"TEMPORARY_COMMENTED in NTMGetIDFromNameEx::_strupr");
-      //_strupr( pszName );
+      strupr( pszName );
 
       /******************************************************************/
       /* get pointer to table and table entries in dependency of the    */
@@ -1654,7 +1655,7 @@ USHORT NTMReadLongNameTable
           memcpy( pNewArea,
                   (PBYTE)pTmClb->pLongNames->pszBuffer + sizeof(TERSEHEADER),
                   ulLen - sizeof(TERSEHEADER) );
-          
+          LogMessage(ERROR,"TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand");
           #ifdef TEMPORARY_COMMENTED
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )

@@ -17,6 +17,7 @@ public:
     static std::string FixPath(std::string& path);
 
     static FILE* CreateFile(const std::string& path, const std::string& mode);
+    static int MoveFile(std::string oldPath, std::string newPath);
     
     static int CreateDir(const std::string& path, int rights = 0700);
     static bool DirExists(const std::string& path);
@@ -41,7 +42,7 @@ public:
     static int GetFileSize(const std::string& path);
     static int GetFileSize(FILE*& ptr);
 
-    static FILE* OpenFile(const std::string& path, const std::string& mode, bool useBuffer = false);
+    static FILE* OpenFile(const std::string& path, const std::string& mode, bool useBuffer = true);
     static int CloseFile(FILE*& ptr);
 
     static FILE* FindFirstFile(const std::string& name);

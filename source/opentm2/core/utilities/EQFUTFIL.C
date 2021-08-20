@@ -3708,7 +3708,9 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
       pszLongName = pszTemp + 1;
     } /* endif */
   }
-
+  strcpy(pszShortName, pszLongName);
+  LogMessage2(INFO, "TEMPORARY COMMENTED UtlLongToShortName, fName = ", pszShortName);
+  #ifdef TEMPORARY_COMMENTED
   // scan long name and add valid characters to short file name
   while ( (i < 8) && (*pszLongName != EOS) )
   {
@@ -3735,7 +3737,7 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
 
   // terminate short file name
   *pszShortName = EOS;
-
+  #endif
   // return to caller
   return( 0 );
 }

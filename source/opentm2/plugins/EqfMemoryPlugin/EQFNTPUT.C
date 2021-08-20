@@ -715,7 +715,7 @@ USHORT TmtXReplace
         //update index
         if ( !usRc )
         {
-          LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
+          //LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
           usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
@@ -739,7 +739,7 @@ USHORT TmtXReplace
   // unlock TM database if database has been locked
   if ( fLocked )
   {
-    LogMessage(ERROR,"TEMPORART_COMMENTED");
+    //LogMessage(ERROR,"TEMPORART_COMMENTED");
     NTMLockTM( pTmClb, FALSE, &fLocked );
   } /* endif */
 
@@ -783,7 +783,7 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-     LogMessage(ERROR,"TEMPORARY_COMMENTED");
+      //LogMessage(ERROR,"TEMPORARY_COMMENTED");
       TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );

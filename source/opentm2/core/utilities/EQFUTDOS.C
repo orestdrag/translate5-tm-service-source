@@ -1911,15 +1911,11 @@ USHORT UtlMoveHwnd
 
    ulReserved;
    UtlSetFileMode(pszSrc, FILE_NORMAL, 0L, FALSE);
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+   
    do {
       DosError(0);
 
-      if ( MoveFile( pszSrc, pszDst ) == 0 )
-      {
-        //usRetCode = (USHORT)GetLastError();
-      } /* endif */
+      usRetCode = MoveFile( pszSrc, pszDst );
 
       DosError(1);
       if ( fMsg && usRetCode )
@@ -1927,7 +1923,6 @@ USHORT UtlMoveHwnd
          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
 
@@ -3163,18 +3158,6 @@ BOOL UtlSetDrive
    USHORT fEnable                       // action flag (bit field)
  )
  {
-   LogMessage2(WARNING, "DosError(): fEnable was set to ", intToA(fEnable));
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   switch ( fEnable )
-   {
-     case 0:
-       SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
-       break;
-     case 1:
-       SetErrorMode(0);
-       break;
-   } /* endswitch */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE, https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-seterrormode
    return 0;
  }
 
