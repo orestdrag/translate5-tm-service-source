@@ -1283,7 +1283,6 @@ SHORT QDAMAllocTempAreas
   HeadRecord.usNextFreeRecord = pBT->usNextFreeRecord;
   HeadRecord.Flags.bVersion         = BTREE_V1;
 
-
   if ( pBT->bRecSizeVersion == BTREE_V3 )
   {
     HeadRecord.Flags.f16kRec  = TRUE;
@@ -1292,7 +1291,6 @@ SHORT QDAMAllocTempAreas
   {
     HeadRecord.Flags.f16kRec  = FALSE;
   } /* endif */
-
 
   if ( ! sRc )
   {
@@ -1303,17 +1301,6 @@ SHORT QDAMAllocTempAreas
       {
         sRc = BTREE_DISK_FULL;
       }
-      /****************************************************************/
-      /* write through of header record if in GUARD mode or for       */
-      /* shared databases                                             */
-      /****************************************************************/
-      else if ( pBT->fGuard || (pBT->usOpenFlags & ASD_SHARED) )
-      {
-        if ( UtlBufReset( pBT->fp, FALSE ))
-        {
-          sRc = BTREE_WRITE_ERROR;
-        } /* endif */
-      } /* endif */
   } /* endif */
 
   if ( sRc == NO_ERROR )
@@ -1327,7 +1314,6 @@ SHORT QDAMAllocTempAreas
   } /* endif */
 
   DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
-
 
   return sRc;
 }
@@ -2243,7 +2229,8 @@ SHORT QDAMDictCloseLocal
         // re-write header record
         if ( !(pBT->usOpenFlags & ASD_SHARED) || !(pBT->usOpenFlags & ASD_LOCKED & ASD_GUARDED) )
         {
-          if ( sRc == NO_ERROR ) sRc = QDAMWriteHeader( pBTIda );
+          if ( sRc == NO_ERROR ) 
+            sRc = QDAMWriteHeader( pBTIda );
         } /* endif */
      } /* endif */
 
@@ -2510,14 +2497,6 @@ SHORT QDAMWriteRecord_V3
      {
         sRc = QDAMWRecordToDisk_V3(pBTIda, pBuffer);
      } /* endif */
-   } /* endif */
-
-
-   // For shared databases only: set internal update flag, the
-   // update counter will be written once the file lock is removed
-   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-   {
-     pBT->fUpdated = TRUE;;
    } /* endif */
 
    if ( sRc )
@@ -3586,9 +3565,6 @@ SHORT QDAMDictCreateLocal
 
             sRc = QDAMWriteHeader( pBTIda );
           } /* endif */
-        //#else 
-        //  sRc = QDAMWriteHeader( pBTIda );
-        //#endif
       }
       else
       {
@@ -10437,7 +10413,9 @@ USHORT EQFNTMOrganizeIndex
 
   if ( !sRc )
   {
-    ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
+    //LogMessage(WARNING, "TEMPORARY HARDCODED ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4 => = MAX_INDEX_LEN * sizeof(LONG) * 2");
+    //ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
+    ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 2;
     if ( !UtlAlloc( (PVOID *)&pbData, 0, ulDataBufSize, ERROR_STORAGE ) ) 
     {
       sRc = ERROR_NOT_ENOUGH_MEMORY;
