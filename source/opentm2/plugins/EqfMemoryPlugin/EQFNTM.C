@@ -450,6 +450,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     if ( usLocation != TM_LOCAL )
     {
       LogMessage(FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
+      fOk = false;
     }
 
     if ( fOk )
@@ -482,7 +483,6 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     #endif
 
       pstOpenIn->stTmOpen.szServer[0] = EOS;
-      UtlGetLANUserID( pstOpenIn->stTmOpen.szUserid, &usUserPriviliges, FALSE );
       pstOpenIn->stTmOpen.usAccess = usAccess;
 
       /****************************************************************/
@@ -521,10 +521,6 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
         /* call U code to pass TM command to server or handle it local*/
         /**************************************************************/
         usRc = TmtXOpen ( pstOpenIn, pstOpenOut );
-//      usRc = U( *phtm,
-//                (PXIN)pstOpenIn,
-//                (PXOUT)pstOpenOut,
-//                NEW_TM );
 
         /**************************************************************/
         /* return pointer to TM CLB as handle                         */

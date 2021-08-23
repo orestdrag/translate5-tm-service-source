@@ -190,6 +190,13 @@ int LogMessage7(int LogLevel, const char* message1, const char* message2, const 
                             + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7));
 }
 
+int LogMessage8(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8));
+}
+
 char* intToA(int i){
     int size = snprintf(NULL, 0, "%d", i);
     char* buffer = new char[size+1];

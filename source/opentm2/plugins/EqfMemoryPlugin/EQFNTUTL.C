@@ -1943,25 +1943,6 @@ USHORT NTMAddNameToTable
                                 (PBYTE)pstTMTable,
                                 pstTMTable->ulAllocSize );
           } /* endif */
-
-          // Increment update counter for given record type
-          if ( !usRc && pTmClb->fShared )
-          {
-            SHORT sIndex = -1;
-
-            switch ( usTableType )
-            {
-              case LANG_KEY :     sIndex = LANGUAGES_UPD_COUNTER; break;
-              case FILE_KEY :     sIndex = FILENAMES_UPD_COUNTER; break;
-              case AUTHOR_KEY :   sIndex = AUTHORS_UPD_COUNTER;   break;
-              case TAGTABLE_KEY : sIndex = TAGTABLES_UPD_COUNTER; break;
-            } /* end switch */
-            if ( sIndex != -1 )
-            {
-              usRc = EQFNTMIncrUpdCounter( pTmClb->pstTmBtree, sIndex,
-                                            &(pTmClb->alUpdCounter[sIndex]) );
-            } /* endif */
-          } /* endif */
         } /* endif */
       } /* endif */
     } /* endif */
@@ -2000,8 +1981,9 @@ int NTMLongNameTableComp
   /********************************************************************/
   /* compare the long names of the passed table entries using strcmp  */
   /********************************************************************/
-  return( strcmp( ((PTMX_LONGNAME_TABLE_ENTRY)pEntry1)->pszLongName,
-                  ((PTMX_LONGNAME_TABLE_ENTRY)pEntry2)->pszLongName ));
+  PSZ lname1 = ((PTMX_LONGNAME_TABLE_ENTRY)pEntry1)->pszLongName;
+  PSZ lname2 = ((PTMX_LONGNAME_TABLE_ENTRY)pEntry2)->pszLongName;
+  return( strcmp( lname1, lname2 ) );
 } /* end of function NTMCompNames */
 
 int NTMLongNameTableCompCaseIgnore

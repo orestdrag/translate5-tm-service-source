@@ -2233,7 +2233,8 @@ SHORT QDAMDictCloseLocal
             sRc = QDAMWriteHeader( pBTIda );
         } /* endif */
      } /* endif */
-
+     
+     filesystem_flush_buffers_ptr(pBT->fp, false);
      if ( UtlClose(pBT->fp, FALSE) && !sRc )
      {
         sRc = BTREE_CLOSE_ERROR;
@@ -3210,7 +3211,7 @@ SHORT QDAMAllocKeyRecords
    }
    else
    {
-      LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
       #ifdef TEMPORARY_COMMENTED
       PBTREEBUFFER_V2  pRecord;
       while ( usNum-- && !sRc )
@@ -3469,6 +3470,7 @@ SHORT QDAMDictCreateLocal
     if ( !fTransMem )
     {
       LogMessage(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
+      sRc = BTREE_INVALID;
     }
     else
     {
@@ -3536,7 +3538,6 @@ SHORT QDAMDictCreateLocal
       sRc =  QDAMAllocTempAreas( pBTIda );
     } /* endif */
 
-
     if (! sRc )
     {
       /****************************************************************/
@@ -3546,9 +3547,6 @@ SHORT QDAMDictCreateLocal
       /****************************************************************/
       if ( pBT->bRecSizeVersion == BTREE_V3 )
       {        
-        //LogMessage(WARNING, "TEMPORARY_COMMENTED writing first record to the file");
-
-        //#ifdef TEMPORARY_COMMENTED
           int iBytesWritten;        
           PBTREEBUFFER_V3 pbuffer;
           UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
@@ -8907,18 +8905,22 @@ SHORT QDAMDictUpdSignLocal
                            &ulNewOffset, FALSE);     
   } 
 
+  if ( pBT->bRecSizeVersion != BTREE_V3)
+  {
+      LogMessage(FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
+      sRc = BTREE_INVALID;
+  }
+
+  ulDataLen = BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT);
+  ulDataLen = ulLen < ulDataLen? ulLen : ulDataLen;
+
   if ( ! sRc )
   {
-    if ( pBT->bRecSizeVersion == BTREE_V3 )
-    {
-      ulDataLen = ulLen < BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT)? ulLen : BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT);
-    }
-    else
-    {
-      ulDataLen =  ulLen < BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT)? ulLen : BTREE_REC_SIZE_V2 - USERDATA_START - sizeof(USHORT);
-    } /* endif */
     if ( ulDataLen < ulLen )
     {
+       //LogMessage(WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
+       //ulLen = ulDataLen;
+       LogMessage4(ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", intToA(ulDataLen), ", ulLen = ", intToA(ulLen));
        sRc = BTREE_USERDATA;
     }
     else
@@ -8979,19 +8981,18 @@ SHORT QDAMDictUpdSignLocal
     {
       LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
       // fill rest up with zeros
-      //sRc = UtlChgFilePtr( pBT->fp, BTREE_REC_SIZE_V3, FILE_BEGIN,
-      //                   &ulNewOffset, FALSE);
-      //if ( ! sRc )
-      //{
-      //  if ( BTREE_REC_SIZE_V3 != ulNewOffset )
-      //  {
-      //    sRc = BTREE_DISK_FULL;
-      //  }
-      //}
-      //else
-      //{
-      //  sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-      //}
+      int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
+      char* buff = new char[leftToFill];
+      memset(buff, 0, leftToFill);
+      FilesystemHelper::WriteToFileBuff(pBT->fp, buff, leftToFill, iBytesWritten, writingPosition);
+      writingPosition += iBytesWritten;
+      delete[] buff;
+
+      if ( BTREE_REC_SIZE_V3 != writingPosition )
+      {
+        sRc = BTREE_DISK_FULL;
+      }
+
 
     } /* endif */
   } 
@@ -10292,6 +10293,11 @@ SHORT QDAMDictFirstLocal
    {
       sRc = BTREE_CORRUPTED;
    } /* endif */
+   
+   if ( pBT->bRecSizeVersion != BTREE_V3 ){
+     LogMessage(FATAL,"QDAMDictFirstLocal:: QDAMFirst_V2 is not supported");
+     sRc = BTREE_INVALID;
+   }
 
    if ( !sRc )
    {
@@ -10301,63 +10307,33 @@ SHORT QDAMDictFirstLocal
        {
           ulKeyLen = *pulKeyLen;
 
-          /*******************************************************************/
-          /* For shared databases: discard all in-memory pages if database   */
-          /* has been changed since last access                              */
-          /*******************************************************************/
-          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+          if ( !sRc )
           {
-            sRc = QDAMCheckForUpdates( pBTIda );
+             sRc = QDAMFirst_V3( pBTIda, &recBTree,&recKey, &recData);
+          } /* endif */
+
+          if ( !sRc )
+          {
+             sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulKeyLen );
+          }
+          if ( !sRc && ulKeyLen )
+            {
+              if ( pBT->fTransMem )
+              {
+                ULONG ul = 0l;
+                memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );
+              }
+              else
+              {
+                pBTIda->chHeadTerm[0] = EOS;
+              } /* endif */
+            
           } /* endif */
 
            if ( !sRc )
            {
-              if ( pBT->bRecSizeVersion == BTREE_V3 )
-              {
-                 sRc = QDAMFirst_V3( pBTIda, &recBTree,&recKey, &recData);
-              }
-              else
-              {
-                LogMessage(ERROR,"TEMPORARY COMMENTED QDAMFirst_V2");
-                 //sRc = QDAMFirst_V2( pBTIda, &recBTree,&recKey, &recData);
-              } /* endif */
-           } /* endif */
-
-           if ( !sRc )
-           {
-              if ( pBT->bRecSizeVersion == BTREE_V3 )
-              {
-                sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulKeyLen );
-              }
-              else
-              {
-                LogMessage(ERROR,"TEMPORARY COMMENTED QDAMGetszKeyParam_V2");
-                //sRc = QDAMGetszKeyParam_V2( pBTIda, recKey, pKeyData, &ulKeyLen );
-              } /* endif */
-              if ( !sRc && ulKeyLen )
-              {
-                if ( pBT->fTransMem )
-                {
-                  ULONG ul = 0l;
-                  memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );
-                }
-                else
-                {
-                  pBTIda->chHeadTerm[0] = EOS;
-                } /* endif */
-              } /* endif */
-           } /* endif */
-
-           if ( !sRc )
-           {
-             if ( pBT->bRecSizeVersion == BTREE_V3 )
-             {
-                sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
-             }
-             else
-             {
-                sRc =  QDAMGetszData_V2( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
-             } /* endif */
+              sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+             
            } /* endif */
 
          if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
@@ -10414,8 +10390,8 @@ USHORT EQFNTMOrganizeIndex
   if ( !sRc )
   {
     //LogMessage(WARNING, "TEMPORARY HARDCODED ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4 => = MAX_INDEX_LEN * sizeof(LONG) * 2");
-    //ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
-    ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 2;
+    ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
+    //ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 2;
     if ( !UtlAlloc( (PVOID *)&pbData, 0, ulDataBufSize, ERROR_STORAGE ) ) 
     {
       sRc = ERROR_NOT_ENOUGH_MEMORY;
@@ -10433,6 +10409,7 @@ USHORT EQFNTMOrganizeIndex
   // get user data (signature record)
   if ( !sRc )
   {
+    //LogMessage(WARNING, "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
     usSigLen = (USHORT)ulDataBufSize;
     sRc = QDAMDictSignLocal( pbTree, (PCHAR)pbData, &usSigLen );
   } /* endif */
@@ -10446,6 +10423,8 @@ USHORT EQFNTMOrganizeIndex
     sRc = QDAMDictFirstLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
   } /* endif */
 
+  LogMessage(INFO, "TEMPORARY_COMMENTED in EQFNTMOrganizeIndex:: .xmi file creation");
+  #ifdef TEMPORARY_COMMENTED
   // setup name for new index file
   if ( !sRc )
   {
@@ -10529,7 +10508,7 @@ USHORT EQFNTMOrganizeIndex
     // discard new index file (if created)
     UtlDelete( szNewIndex, 0L, NOMSG );
   } /* endif */
-
+  #endif
   // cleanup
   if ( pchKeyBuffer ) UtlAlloc( (PVOID *)&pchKeyBuffer, 0, 0, NOMSG );
   if ( pbData ) UtlAlloc( (PVOID *)&pbData, 0, 0, NOMSG );

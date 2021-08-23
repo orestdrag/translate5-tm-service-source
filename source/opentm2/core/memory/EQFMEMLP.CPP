@@ -53,6 +53,7 @@
 
 #include "win_types.h"
 #include "../utilities/LogWrapper.h"
+#include "../utilities/FilesystemHelper.h"
 #include <cwctype>
 
 // define for memory import logging (remove to disable logging)
@@ -3357,11 +3358,12 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( fOK )
    {
-     USHORT      usDosRc;              // Return code from Dos functions
+     //USHORT      usDosRc;              // Return code from Dos functions
      USHORT      usAction;             // Action for DosOpen
 
      strcpy( pLoadIDA->szFilePath, pszInFile );
-     usDosRc = UtlOpenHwnd ( pLoadIDA->szFilePath, //filename
+     pLoadIDA->hFile = FilesystemHelper::OpenFile(pszInFile, "r", false);
+     /*usDosRc = UtlOpenHwnd ( pLoadIDA->szFilePath, //filename
                        &(pLoadIDA->hFile),    //file handle (out)
                        &usAction,      // action taken (out)
                        0L,             // Create file size
@@ -3370,13 +3372,17 @@ USHORT MemFuncPrepImport
                        OPEN_SHARE_DENYWRITE,// Deny Write access
                        0L,             // Reserved but handle errors
                        TRUE,           // display error message
-                       HWND_FUNCIF );
-     if ( usDosRc )  //--- error from open
+                       HWND_FUNCIF );//*/
+     if( pLoadIDA->hFile == NULLHANDLE )
      {
-        //--- Reset file handle to NULL and set fOk to FALSE
-        pLoadIDA->hFile = NULLHANDLE;
         fOK = FALSE;
-     }/* endif */
+     }
+     //if ( usDosRc )  //--- error from open
+     //{
+     //   //--- Reset file handle to NULL and set fOk to FALSE
+     //   pLoadIDA->hFile = NULLHANDLE;
+     //   fOK = FALSE;
+     //}/* endif */
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
       LogMessage(ERROR,"MemFuncPrepImport::Check if input file exists fails");

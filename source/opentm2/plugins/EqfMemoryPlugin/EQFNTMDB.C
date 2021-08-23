@@ -1127,7 +1127,10 @@ VOID QDAMCopyDataTo_V3
       }
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
-      assert( (usLastPos >= usLen) );
+      if(usLastPos < usLen){
+        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", intToA(usLastPos), ", usLen = ", intToA(usLen) );
+      }
+      //assert( (usLastPos >= usLen) );
 
       usLastPos = usLastPos - usLen;
       memcpy( pNew->contents.uchData+usLastPos, pOldData, usLen );

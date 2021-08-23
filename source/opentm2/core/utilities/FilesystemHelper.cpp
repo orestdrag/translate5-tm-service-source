@@ -105,9 +105,9 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     fixedPath = FixPath(fixedPath);
     long fileSize = 0;
     FileBuffer* pFb = NULL;
-
+    LogMessage6(INFO, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", intToA(useBuffer));
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
-
+    
     if(useBuffer){
         if(!FindFiles(fixedPath).empty()){
             fileSize = GetFileSize(fixedPath);
@@ -123,6 +123,8 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
                 LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",intToA(fileSize),"), fname = ", fixedPath.c_str());
+                int readed = fread(&pFb->data[0], fileSize, 1, ptr);
+                LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",intToA(fileSize),"), fname = ", fixedPath.c_str(), "; readed = ", intToA(readed));
             }else{
                 LogMessage2(INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath.c_str());
                 pFb->data.resize(16384);
@@ -134,11 +136,8 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         pFb->offset = 0;
     }
 
-    LogMessage6(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr));
-    if(fileSize > 0){
-        int readed = fread(&pFb->data[0], fileSize, 1, ptr);
-        LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",intToA(fileSize),"), fname = ", fixedPath.c_str(), "; readed = ", intToA(readed));
-    }
+    LogMessage8(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr), "size = ", intToA(fileSize));
+
     if(ptr == NULL){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
     }
