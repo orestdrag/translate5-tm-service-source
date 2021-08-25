@@ -44,6 +44,8 @@
 #define INCL_EQF_DAM
 
 #include "../utilities/FilesystemWrapper.h"
+#include "../utilities/PropertyWrapper.H"
+#include "../utilities/FilesystemHelper.h"
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
@@ -827,9 +829,10 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        {
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
-#endif TO_BE_REPLACED_WITH_LINUX_CODE
+#endif// TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
 
+       #ifdef TEMPORARY_COMMENTED
        if ( pExportIDA->ulSegmentCounter == 0 )
        {
          // Delete the exported file because it is empty
@@ -839,7 +842,9 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
                        &(pReplString[0]), EQF_WARNING, pExportIDA->hwndErrMsg );
          fOk=FALSE;
        }
-       else if ( !pExportIDA->pszNameList )
+       else
+       #endif 
+       if ( !pExportIDA->pszNameList )
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
          UtlErrorHwnd( MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
@@ -1336,7 +1341,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
      } /* endif */
 
      // load external memory export module
-     usRc = DosLoadModule( NULL, 0, "OTMTMXIE", &(pExportIDA->hmodMemExtExport) );
+     //usRc = DosLoadModule( NULL, 0, "OTMTMXIE", &(pExportIDA->hmodMemExtExport) );
+    char libPath[MAX_EQF_PATH];
+    properties_get_str(KEY_PLUGIN_DIR, libPath, MAX_EQF_PATH);
+    strcat(libPath, "libEqfMemoryPlugin.so");
+    usRc = DosLoadModule( NULL, 0, libPath, &(pExportIDA->hmodMemExtExport));
 
      // load entry points
      if ( !usRc )
@@ -2463,9 +2472,13 @@ USHORT MemFuncPrepExport
   // open output file
   if ( fOK )
   {
+    
+    pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
+    fOK = pIDA->hFile != NULL;
+
+    #ifdef TEMPORARY_COMMENTED
     USHORT      usDosRc;              // Return code from Dos functions
     USHORT      usAction;             // Action for DosOpen
-
     usDosRc = UtlOpenHwnd
       ( pIDA->ControlsIda.szPathContent, // file Name
         &(pIDA->hFile),          // file Handle (Out)
@@ -2481,12 +2494,14 @@ USHORT MemFuncPrepExport
         0L,                        // Reserved
         TRUE,                         // display no error message
         HWND_FUNCIF );
+       
     if ( usDosRc )  //--- error from open
     {
        //--- Reset file handle to NULL and set fOk to FALSE
        pIDA->hFile = NULLHANDLE;
        fOK = FALSE;
     }/* endif */
+     #endif
   } /* endif */
 
   // prepare memory Export
@@ -2541,6 +2556,7 @@ USHORT MemFuncPrepExport
 
     // build object name
     sprintf( ObjName, "MEMEXP: %s", pIDA->szMemName );
+    #ifdef TEMPORARY_COMMENTED
     sRC = QUERYSYMBOL( ObjName );
     if ( sRC == -1 )
     {
@@ -2555,7 +2571,7 @@ USHORT MemFuncPrepExport
                     1, &pTemp, EQF_ERROR, HWND_FUNCIF );
       fOK = FALSE;
     } /* endif */
-
+    #endif
   } /* endif */
 
   // cleanup
@@ -2599,7 +2615,6 @@ USHORT MemFuncExportProcess
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-
   PPROCESSCOMMAREA pCommArea;          // ptr to commmunication area
   PMEM_EXPORT_IDA  pIDA;               // pointer to instance area
 

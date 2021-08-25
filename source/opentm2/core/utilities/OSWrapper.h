@@ -201,6 +201,56 @@ extern "C"{
     BOOL FindClose(
         HANDLE hFindFile
     );
+
+/* Begin compatibility fixes required for Win8/VS2012 RTM sal.h */
+#ifndef _SAL_L_Source_
+
+// Some annotations aren't officially SAL2 yet.
+#if _USE_ATTRIBUTES_FOR_SAL /*IFSTRIP=IGN*/
+#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _Group_(annotes _SAL_nop_impl_)
+#else
+#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+#endif
+
+#endif
+
+// NLS APIs allow strings to be specified either by an element count or
+// null termination. Unlike _In_reads_or_z_, this is not whichever comes
+// first, but based on whether the size is negative or not.
+#define _In_NLS_string_(size)     _SAL_L_Source_(_In_NLS_string_, (size),  _When_((size) < 0,  _In_z_)           \
+                                  _When_((size) >= 0, _In_reads_(size)))
+
+
+    //#ifndef CP_UTF8
+        #define CP_UTF8 65001
+        #define CP_ACP 0
+        #define CP_OEMCP 1
+    //#endif
+
+    int WideCharToMultiByte(
+        UINT                               CodePage,
+        DWORD                              dwFlags,
+        //_In_NLS_string_(cchWideChar)LPCWCH lpWideCharStr,
+        LPWSTR                             lpWideCharStr,
+        int                                cchWideChar,
+        LPSTR                              lpMultiByteStr,
+        int                                cbMultiByte,
+        //LPCCH
+        char*                              lpDefaultChar,
+        LPBOOL                             lpUsedDefaultChar
+    );
+    
+    int MultiByteToWideChar(
+        UINT                              CodePage,
+        DWORD                             dwFlags,
+        //_In_NLS_string_(cbMultiByte)LPCCH lpMultiByteStr,
+        LPCSTR                             lpMultiByteStr,
+        int                               cbMultiByte,
+        LPWSTR                            lpWideCharStr,
+        int                               cchWideChar
+        );
+
+
 }
 
 

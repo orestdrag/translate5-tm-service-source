@@ -145,6 +145,8 @@
 
 #include "CXMLWRITER.H"
 #include "../core/utilities/LogWrapper.h"
+#include "../core/utilities/OSWrapper.h"
+#include "../core/utilities/FilesystemHelper.h"
 
 CXmlWriter::CXmlWriter( const char *strFileName )
 {
@@ -167,6 +169,7 @@ void CXmlWriter::Init( void )
   this->m_iCurIndention = 0;
   this->m_fOpenTag = FALSE;
   this->m_fLFBeforeEnd = TRUE;
+  memset(m_Buffer,0,sizeof(m_Buffer));
 }
 
 void CXmlWriter::SetFileName( const char *strFileName )
@@ -179,10 +182,12 @@ BOOL CXmlWriter::WriteStartDocument()
 {
   BOOL fOK = TRUE;
 
-  m_hf = fopen( m_strFileName, "wb" );
+  //m_hf = fopen( m_strFileName, "wb" );
+  m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
 
   if ( m_hf )
   {
+    //#ifdef TEMPORARY_COMMENTED
     // write BOM 
     if ( Encoding == UTF16 )
     {
@@ -192,6 +197,7 @@ BOOL CXmlWriter::WriteStartDocument()
     {
       fwrite( "\xEF\xBB\xBF", 1, 3, m_hf );
     } /* endif */
+    //#endif
 
     WriteRaw( L"<?xml version=\"1.0\" encoding=\"" );
     if ( Encoding == UTF16 )
@@ -314,8 +320,8 @@ void CXmlWriter::WriteCDataString( const WCHAR *text )
 void CXmlWriter::WriteInt( int iValue )
 {
   WCHAR szValue[20];
-  LogMessage(ERROR, "TEMPORARY_COMMENTED");
-  //swprintf( szValue, L"%d", iValue );
+  //LogMessage(ERROR, "TEMPORARY_COMMENTED");
+  swprintf( szValue, 20, L"%d", iValue );
   WriteString( szValue );
 }
 
@@ -410,8 +416,12 @@ void CXmlWriter::WriteStringInt( const WCHAR *text )
 // write string as-is 
 void CXmlWriter::WriteRaw( const WCHAR * text )
 {
-  int iLen = wcslen( text );
-  WriteRaw( text, iLen );
+  if(text){
+    int iLen = wcslen( text );
+    WriteRaw( text, iLen );
+  }else{
+    LogMessage(ERROR,"CXmlWriter::WriteRaw, text is NULL");
+  }
 }
 
 // write string as-is 
@@ -440,8 +450,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       }
       else
       {
-        LogMessage(ERROR, "TEMPORARY_COMMENTED");
-        int iBytes = 0;//WideCharToMultiByte( CP_UTF8, 0, text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
+        int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
         fwrite( m_Buffer, 1, iBytes, m_hf );
       } /* endif */
       m_iColumn += iLFPos;
@@ -738,8 +747,7 @@ int CXmlWriter::Push( enum _ElementType type, const WCHAR *name )
   memset( pNewElement, 0, sizeof(struct _Element) );
   pNewElement->ElementType = type;
   pNewElement->pPrev = m_pRoot;
-  LogMessage(ERROR, "TEMPORARY_COMMENTED");
-  //pNewElement->pName = _wcsdup( name );
+  pNewElement->pName = wcsdup( name );
   m_iStackSize++;
   m_pRoot = pNewElement;
 
@@ -811,7 +819,6 @@ void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
 {
   int iUnicodeLen = sizeof(WCHAR) * strlen(pAnsiText) + 10;
   WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen );
-  LogMessage(ERROR, "TEMPORARY_COMMENTED");
-  //MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
+  MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
   *ppUnicodeText = pBuffer;
 }

@@ -18,6 +18,7 @@
 #include "OTMFUNC.H"
 #include "win_types.h"
 #include "LogWrapper.h"
+#include "OSWrapper.h"
 
 #ifdef TEMPORARY_COMMENTED
 
@@ -1916,10 +1917,9 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 					break;
 				}
 			  }
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
+			  WideCharToMultiByte( usCP, 0, //(LPCWSTR)
+                  pTemp, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
@@ -1948,26 +1948,20 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 			  }
 
 			  usCP = 862;     // we have to use CP862 since Windows only supports this
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-			  WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, -1,
+			  WideCharToMultiByte( usCP, 0, pTemp, -1,
 								   pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
 			}
 			break;
           case 850:
             // Change the replacement character from '?' to '%'
             // '?' causes false breaks.
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-            WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
+            WideCharToMultiByte( usCP, 0, pszUni, -1,
                                  pszASCII, MAX_SEGMENT_SIZE, "%", NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
             break;
 		  default:
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-			WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
+			WideCharToMultiByte( usCP, 0, pszUni, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 			break;
 		}
     } /* endif */
@@ -2047,10 +2041,8 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 							}
 						}
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
+						ulOutPut = WideCharToMultiByte( usCP, 0, (LPWSTR)pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 						if (!ulOutPut )
 						{
 							//lRc = GetLastError();
@@ -2085,10 +2077,8 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 						}
 						usCP = 862;     // we have to use CP862 since Windows only supports this
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-						ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pTemp, ulLen,
+						ulOutPut = WideCharToMultiByte( usCP, 0, pTemp, ulLen,
 														pszASCII, lBufLen, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 						if (!ulOutPut )
 						{
 							//lRc = GetLastError();
@@ -2100,16 +2090,12 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 				case 850:
 		            // Change the replacement character from '?' to '%'
 		            // '?' causes false breaks.
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-				    ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
+				    ulOutPut = WideCharToMultiByte( usCP, 0, pszUni, ulLen,
 		                                            pszASCII, lBufLen, "%", NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		            break;
 				default:
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-					ulOutPut = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, ulLen,
+					ulOutPut = WideCharToMultiByte( usCP, 0, pszUni, ulLen,
 													pszASCII, lBufLen, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
 					if (!ulOutPut )
 					{
@@ -2783,10 +2769,8 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
     // always use 932 when 943 is specified
     if ( usAnsiCP == 943 ) usAnsiCP = 932;
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-		ulOutPut = WideCharToMultiByte( usAnsiCP, 0, (LPCWSTR)pszUni, ulLen,
+		ulOutPut = WideCharToMultiByte( usAnsiCP, 0, (LPWSTR)pszUni, ulLen,
 											pszAnsi, lBufLen, NULL, NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 		if (plRc && !ulOutPut)
 		{
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2953,18 +2937,19 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
     // always use 932 when 943 is specified
     if ( usCP == 943 ) usCP = 932;
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-		iRC = WideCharToMultiByte( usCP, 0, (LPCWSTR)pszUni, -1,
+		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
+    LogMessage(ERROR," TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
+#ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
 		// possible: ERROR_INSUFFICIENT_BUFFER /ERROR_INVALID_FLAGS / ERROR_INVALID_PARAMETER
 		if ( iRC == ERROR_INVALID_PARAMETER )
 		{
 		  // codepage not supported by OS, use default code page for conversion
-		  //MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
+		  MultiByteToWideChar( CP_ACP, 0, pszAnsi, -1, pszUni, MAX_SEGMENT_SIZE );
 		} /* endif */
-
+#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
   }
   else if (pszAnsi)

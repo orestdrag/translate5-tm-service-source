@@ -390,10 +390,7 @@ int EqfMemory::getNextProposal
   this->pTmExtIn->usNextTarget = this->usNextTarget;
   this->pTmExtIn->usConvert    = MEM_OUTPUT_ASIS;
 
-#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
-#endif //TEMPORARY_COMMENTED
-
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
   {

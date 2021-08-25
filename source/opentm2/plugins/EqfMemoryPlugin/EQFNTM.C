@@ -1819,21 +1819,17 @@ NTMGetThresholdFromProperties
   /* NTMOpenProperties and therefore OpenProperties needs only the    */
   /* system path and the TM property name with ext                    */
   /********************************************************************/
-  //UtlMakeEQFPath ( szSysPath, NULC, SYSTEM_PATH, NULL );
   properties_get_str(KEY_MEM_DIR, szSysPath, MAX_EQF_PATH);
 
   /********************************************************************/
   /* open the properties of the TM                                    */
   /********************************************************************/
-//  LogMessage(WARNING,"TEMPORARY_COMMENTED NTMOpenProperties");
-//  #ifdef TEMPORARY_COMMENTED
   usRc = NTMOpenProperties( &hProp,
                             (PVOID *)&pProp,
                             szPropertyName,
                             szSysPath,
                             PROP_ACCESS_READ,
                             usMsgHandling );
-//  #endif
 
   if ( usRc == NO_ERROR || usRc == ERROR_OLD_PROPERTY_FILE )
   {

@@ -1796,19 +1796,15 @@ int OtmMemoryServiceWorker::getMem
 
   // fill the vMemData vector with the content of zTempFile
   iRC = this->loadFileIntoByteVector( szTempFile, vMemData );
+
+  //cleanup
+  //DeleteFile( szTempFile );
   if ( iRC != 0 )
   {
     if ( hfLog ) fprintf( hfLog, "    Error: failed to load the temporary file\n" );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    DeleteFile( szTempFile );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
     return( restbed::INTERNAL_SERVER_ERROR );
   }
-
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  // cleanup
-  DeleteFile( szTempFile );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( restbed::OK );
 }
@@ -2157,9 +2153,8 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 {
   int iRC = 0;
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // open file
-  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HFILE hFile = FilesystemHelper::OpenFile(pszFile, "r", false);//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
     iRC = GetLastError();
@@ -2168,9 +2163,7 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   }
 
   // get the size of file
-  DWORD dwFileSize = 0;
-  DWORD dwFileSizeHigh = 0;
-  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
+  DWORD dwFileSize = FilesystemHelper::GetFileSize(hFile);//GetFileSize( hFile, &dwFileSizeHigh );
 
   // adjust size of Byte vector
   vFileData.resize( dwFileSize );
@@ -2187,8 +2180,9 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 
   // close file
   CloseFile( &hFile );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
+  wchar_t* wc = (wchar_t*)&vFileData[0];
+  size_t len = wcslen(wc);
+  vFileData.resize(len * sizeof(*wc));
   return( iRC );
 }
 

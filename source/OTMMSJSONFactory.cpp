@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cwctype>
 #include "OTMMSJSONFactory.h"
+#include "opentm2/core/utilities/OSWrapper.h"
 
 /** Initialize the static instance variable */
 JSONFactory* JSONFactory::instance = 0;
@@ -789,13 +790,9 @@ int JSONFactory::extractString
 
               // convert to UTF8
               int iUTF8Len;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-              iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, 0, 0, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+              iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, 0, 0, 0, 0 );
               std::string strUTF8( iUTF8Len, '\0' );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-              WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+              WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
 
               // add UTF8 character to target string
               for ( int i = 0; i < iUTF8Len; i++ ) string[iTargetPos++] = strUTF8[i];
@@ -1062,17 +1059,15 @@ int JSONFactory::parseJSON
       {
         switch ( pParm->type )
         {
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
           case ASCII_STRING_PARM_TYPE:
-            WideCharToMultiByte( CP_OEMCP, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
+            WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
 
           case UTF8_STRING_PARM_TYPE:
-            WideCharToMultiByte( CP_UTF8, 0, value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
+            WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
           case UTF16_STRING_PARM_TYPE:
             wcsncpy( (wchar_t *)pParm->pvValue, value.c_str(), pParm->iBufferLen - 1 );

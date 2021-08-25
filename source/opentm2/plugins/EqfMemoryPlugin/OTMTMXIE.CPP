@@ -29,6 +29,7 @@
 #include "core/utilities/LogWrapper.h"
 #include "core/utilities/PropertyWrapper.H"
 #include "core/utilities/FilesystemHelper.h"
+#include "core/utilities/OSWrapper.h"
 
 //#include <windows.h>
 #include <stdlib.h>
@@ -610,7 +611,8 @@ USHORT CTMXExportImport::WriteHeader
 
   m_xw.WriteStartElement( "header" );
   char szVersion[20];
-  sprintf( szVersion, "%d.%d.%d.%d", EQF_DRIVER_VERSION, EQF_DRIVER_RELEASE, EQF_DRIVER_SUBRELEASE, EQF_DRIVER_BUILD );
+  //sprintf( szVersion, "%d.%d.%d.%d", EQF_DRIVER_VERSION, EQF_DRIVER_RELEASE, EQF_DRIVER_SUBRELEASE, EQF_DRIVER_BUILD );
+  sprintf( szVersion, "otmd_linux_1.0");
   m_xw.WriteAttributeString( "creationtoolversion", szVersion ); 
   m_xw.WriteAttributeString( "segtype", "sentence" ); 
   m_xw.WriteAttributeString( "adminlang", "en-us" ); 
@@ -3395,8 +3397,7 @@ USHORT EXPTOTMX
     pData->hfLog = hfLog;
     pData->MemInfo.fUTF16 = (lOutMode & TMX_UTF16_OPT) != 0;
     pData->MemInfo.fNoCRLF = (lOutMode & TMX_NOCRLF_OPT) != 0;
-    LogMessage(ERROR,"TEMPORARY COMMENTED in CTMXExportImport");
-    //WideCharToMultiByte( CP_ACP, 0, pData->szDescription, -1, pData->MemInfo.szDescription, sizeof(pData->MemInfo.szDescription), NULL, NULL );
+    WideCharToMultiByte( CP_ACP, 0, pData->szDescription, -1, pData->MemInfo.szDescription, sizeof(pData->MemInfo.szDescription), NULL, NULL );
 
     usRC = EXTMEMEXPORTSTART( &lHandle, pszOutMem, &(pData->MemInfo) );
   } /* endif */
@@ -3461,14 +3462,12 @@ USHORT WriteStringToMemory
 {
   if ( pData->MemInfo.lOutMode & ASCII_OPT )
   {
-    LogMessage(ERROR,"TEMPORARY COMMENTED");
-    //WideCharToMultiByte( CP_OEMCP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
+    WideCharToMultiByte( CP_OEMCP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
     fwrite( pData->szASCIIBuffer, strlen(pData->szASCIIBuffer), 1, pData->hfOut );
   }
   else if ( pData->MemInfo.lOutMode & ANSI_OPT )
   {
-    LogMessage(ERROR,"TEMPORARY COMMENTED");
-    //WideCharToMultiByte( CP_ACP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
+    WideCharToMultiByte( CP_ACP, 0, pszString, -1, pData->szASCIIBuffer, sizeof(pData->szASCIIBuffer), NULL, NULL );
     fwrite( pData->szASCIIBuffer, strlen(pData->szASCIIBuffer), 1, pData->hfOut );
   }
   else
@@ -3484,8 +3483,7 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
   {
     WriteStringToMemory( pData, L"<NTMMemoryDb>\r\n" );
     WriteStringToMemory( pData, L"<Description>\r\n" );
-    LogMessage(ERROR,"TEMPORARY COMMENTED");
-    //MultiByteToWideChar( CP_ACP, 0, pData->MemInfo.szDescription, -1, pData->szBufferW, sizeof(pData->szBufferW)/sizeof(CHAR_W) );
+    MultiByteToWideChar( CP_ACP, 0, pData->MemInfo.szDescription, -1, pData->szBufferW, sizeof(pData->szBufferW)/sizeof(CHAR_W) );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"\r\n</Description>\r\n" );
     WriteStringToMemory( pData, L"<Codepage>" );
@@ -3596,8 +3594,7 @@ USHORT GetSourceLangW( PCONVERTERDATA pData, PSZ pszSourceLanguage )
 
       // retrieve source language
       wcscpy( pData->szBufferW, ParseX15W( pData->szLine, 3 ) );
-      LogMessage(ERROR,"TEMPORARY COMMENTED");
-      //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pszSourceLanguage, MAX_LANG_LENGTH, NULL, NULL );
+      WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pszSourceLanguage, MAX_LANG_LENGTH, NULL, NULL );
 
       fWaitingForControlRecord = FALSE;
     }
@@ -3887,17 +3884,17 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           } /* endif */
           pData->Segment.lTime = _wtol( ParseX15W( pData->szControl, 2 ) );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 3 ) );
-          LogMessage(ERROR,"TEMPORARY COMMENTED");
-          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szSourceLang, sizeof(pData->Segment.szSourceLang), NULL, NULL );
+
+          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szSourceLang, sizeof(pData->Segment.szSourceLang), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 4 ));
-          LogMessage(ERROR,"TEMPORARY COMMENTED");
-          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szTargetLang, sizeof(pData->Segment.szTargetLang), NULL, NULL );
+ 
+          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szTargetLang, sizeof(pData->Segment.szTargetLang), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 6 ));
-          LogMessage(ERROR,"TEMPORARY COMMENTED");
-          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szFormat, sizeof(pData->Segment.szFormat), NULL, NULL );
+
+          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szFormat, sizeof(pData->Segment.szFormat), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 8 ) );
-          LogMessage(ERROR,"TEMPORARY COMMENTED");
-          //WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szDocument, sizeof(pData->Segment.szDocument), NULL, NULL );
+;
+          WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szDocument, sizeof(pData->Segment.szDocument), NULL, NULL );
 
           // get contol string end tag and check it
           GetLine( pData, pData->szLine, sizeof(pData->szLine), pData->fUnicode, &fEOF  );

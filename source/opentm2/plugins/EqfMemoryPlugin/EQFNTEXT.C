@@ -18,6 +18,7 @@
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
+#include "core/utilities/LogWrapper.h"
 
 static USHORT ExtractRecordV5
 (
@@ -488,14 +489,8 @@ USHORT TmtXExtract
 
           if ( usRc == NO_ERROR )
           {
-            if (pTmClb->stTmSign.bMajorVersion < TM_MAJ_VERSION_6)
-            {
-               usRc = ExtractRecordV5( pTmClb, pTmRecord, pTmExtIn, pTmExtOut, ulOemCP );
-            }
-            else
-            {
-               usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );
-            }
+            usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );
+            
           }
           /****************************************************************/
           /* setup new starting point (do this even in the case we are    */
@@ -712,11 +707,14 @@ USHORT ExtractRecordV6
           //if target record exists
           if ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) )
           {
+            LogMessage(ERROR, "TEMPORARY_COMMENTED call FillExtStructure");
+            #ifdef TEMPORARY_COMMENTED
             //fill out the put structure as output of the extract function
             usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
                                      pTargetClb,
                                      pSourceString, &ulSourceLen,
                                      &pTmExtOut->stTmExt );
+                                     #endif
             if ( ! usRc )
             {
               //check for another target
@@ -1015,6 +1013,7 @@ USHORT ExtractRecordV5
 //|       fill extract stucture                                                |
 //|     output extract structure                                               |
 // ----------------------------------------------------------------------------+
+
 
 USHORT FillExtStructure
 (

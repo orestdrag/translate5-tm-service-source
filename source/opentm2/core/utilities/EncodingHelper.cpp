@@ -1,5 +1,6 @@
 #include "EncodingHelper.h"
 #include "LogWrapper.h"
+#include "OSWrapper.h"
 
 #include "Base64.h"
 
@@ -45,8 +46,7 @@ std::string EncodingHelper::convertToUTF8( const std::u16string& strUTF16String 
 */
 void EncodingHelper::convertUTF8ToASCII( std::string& strText )
 {
-  LogMessage2(WARNING,"EncodingHelper::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
+  //LogMessage2(WARNING,"EncodingHelper::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
   int iUTF16Len;
   int iASCIILen;
   int iUTF8Len = (int)strText.length() + 1;
@@ -54,12 +54,11 @@ void EncodingHelper::convertUTF8ToASCII( std::string& strText )
   iUTF16Len = MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
   MultiByteToWideChar( CP_UTF8, 0, strText.c_str(), iUTF8Len, &strUTF16[0], iUTF16Len );
-  iASCIILen = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  iASCIILen = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iASCIILen + 1 );
-  WideCharToMultiByte( CP_OEMCP, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
+  WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)strUTF16.c_str(), iUTF16Len, pszNewData, iASCIILen, 0, 0 );
   strText = pszNewData;
   free( pszNewData );
-  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a ASCII std::string to UTF8 std::string (on spot conversion)
@@ -67,9 +66,8 @@ void EncodingHelper::convertUTF8ToASCII( std::string& strText )
 */
 void EncodingHelper::convertASCIIToUTF8( std::string& strText )
 {
-  LogMessage2(WARNING,"EncodingHelper::convertASCIIToUTF8( std::string& strText ) is not implemented, strText = ", strText.c_str());
+  //LogMessage2(WARNING,"EncodingHelper::convertASCIIToUTF8( std::string& strText ) is not implemented, strText = ", strText.c_str());
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   int iUTF16Len;
   int iUTF8Len;
   int iASCIILen = (int)strText.length() + 1;
@@ -77,13 +75,12 @@ void EncodingHelper::convertASCIIToUTF8( std::string& strText )
   iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, 0, 0 );
   std::wstring strUTF16( iUTF16Len, L'\0' );
   MultiByteToWideChar( CP_OEMCP, 0, strText.c_str(), iASCIILen, &strUTF16[0], iUTF16Len );
-  iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
+  iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iUTF16Len, 0, 0, 0, 0 );
   pszNewData = (char *)malloc( iUTF8Len + 1);
-  WideCharToMultiByte( CP_UTF8, 0, strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
+  WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iUTF16Len, pszNewData, iUTF8Len, 0, 0 );
 
   strText = pszNewData;
   free( pszNewData );
-  #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 
