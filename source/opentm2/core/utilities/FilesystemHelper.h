@@ -4,6 +4,8 @@
 #include <string>
 #include "win_types.h"
 #include <vector>
+#include <map>
+
 
 #ifdef _USING_FILESYSTEM_
 #include <filesystem>
@@ -11,6 +13,19 @@
 //namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
+
+
+struct FileBuffer{
+    std::vector<UCHAR> data;
+    long offset = 0;
+    FILE* file = NULL;
+} ;
+
+typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
+
+PFileBufferMap getFileBufferInstance();
+PFileBufferMap GetPFileBufferMap();
+void SetFileBufferMap(const PFileBufferMap pbm);
 
 class FilesystemHelper{
 public:
@@ -49,6 +64,9 @@ public:
     static FILE* FindNextFile();
 
     static std::string GetFileName(HFILE ptr);
+    
+    static PFileBufferMap GetPFileBufferMap();
+    static void SetFileBufferMap(const PFileBufferMap pbm);
 
     static int TruncateFileForBytes(HFILE ptr, int numOfBytes);
     static short SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet);

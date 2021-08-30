@@ -22,12 +22,33 @@
 
 int __last_error_code = 0;
 
-struct FileBuffer{
-    std::vector<UCHAR> data;
-    long offset = 0;
-    FILE* file = NULL;
-} ;
-std::map <std::string, FileBuffer> fileBuffers;
+
+PFileBufferMap pFileBuffers = NULL;
+PFileBufferMap getFileBufferInstance(){
+    if(!pFileBuffers){
+        LogMessage(INFO, "FILEBUFFERS not exist yet-> creating new instance");
+        pFileBuffers = new FileBufferMap();
+    }
+    return pFileBuffers;
+}
+
+PFileBufferMap GetPFileBufferMap(){
+    return pFileBuffers;
+}
+
+void SetFileBufferMap(const PFileBufferMap pbm){
+    if(pFileBuffers){
+        if(pFileBuffers->empty()){
+            LogMessage(INFO,"SetFileBufferMap:: deleting old empty buffer and replacing with new");
+            delete pFileBuffers;
+        }else{
+            LogMessage(ERROR,"SetFileBufferMap:: existing filebuffer not empty, so can't replace it");
+        }
+    }
+    LogMessage(INFO, "SetFileBufferMap:: replaced filebuffer");
+    pFileBuffers = pbm;
+}
+
 
 std::string parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
@@ -76,7 +97,7 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
     bool useBuffer = false ;//true; //false;
     if(    (strcasestr(cpath, ".TMI") )
         || (strcasestr(cpath, ".TMD") )
-        || (strcasestr(cpath, ".MEM") )
+        //|| (strcasestr(cpath, ".MEM") )
     ){
         LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
                         cpath, ", useFilebuffer before = ", intToA(useBuffer));
@@ -107,16 +128,25 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     FileBuffer* pFb = NULL;
     LogMessage6(INFO, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", intToA(useBuffer));
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
-    
-    if(useBuffer){
+    if(!ptr){
+        LogMessage2(ERROR, "FilesystemHelper::OpenFile:: can't open file ", path.c_str());
+    }else if(useBuffer){
         if(!FindFiles(fixedPath).empty()){
-            fileSize = GetFileSize(fixedPath);
+            fileSize = GetFileSize(ptr);//GetFileSize(fixedPath);
         }
 
-        if(fileBuffers.find(fixedPath) != fileBuffers.end()){
-            LogMessage(ERROR, "OpenFile::Filebuffer wasn't created, it's already exists");
+
+        if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
+            LogMessage2(WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
+            pFb = &(*getFileBufferInstance())[fixedPath];
+            if(pFb->file == 0){
+                pFb->file = ptr;
+                pFb->offset = 0;
+            }else{
+                LogMessage2(ERROR,"File buffer already have filepointer, ", fixedPath.c_str());
+            }
         }else{
-            pFb = &fileBuffers[fixedPath];
+            pFb = &(*getFileBufferInstance())[fixedPath];
             //fileBuffers[fixedPath].resize(1048575);//F FFFF
             //fileBuffers[fixedPath].resize(65536);//0x1000
             //fileBuffers[fixedPath].resize(32768);
@@ -183,8 +213,8 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
     FileBuffer* pFb = NULL;
     int offset = startingPosition;
 
-    if(fileBuffers.find(fName)!= fileBuffers.end()){
-        pFb = &fileBuffers[fName];    
+    if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
+        pFb = &(*getFileBufferInstance())[fName];    
 
         if(offset + buffSize > pFb->data.size()){
             LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", intToA(pFb->data.size())," to ", intToA(offset+buffSize));
@@ -207,11 +237,11 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     int offset = startingPos;
     FileBuffer* pFb = NULL;
 
-    if(fileBuffers.find(fName) == fileBuffers.end()){
+    if(getFileBufferInstance()->find(fName) == getFileBufferInstance()->end()){
         LogMessage2(DEBUG,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
-    pFb = &fileBuffers[fName];
+    pFb = &(*getFileBufferInstance())[fName];
     if(startingPos < 0){
         offset = pFb->offset;
     }
@@ -228,9 +258,12 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
 }
 
 int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){ 
-    if(fileBuffers.find(fName)!= fileBuffers.end()){
+    if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         WriteBuffToFile(fName);
-        fileBuffers.erase(fName);
+        LogMessage2(ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
+        (*getFileBufferInstance())[fName].file = 0;
+        (*getFileBufferInstance())[fName].offset = 0;
+        //pFileBuffers->erase(fName);
     }else{
         LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
     }
@@ -244,8 +277,8 @@ int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
     #endif
 
     FileBuffer* pFb = NULL;
-    if(fileBuffers.find(fName)!= fileBuffers.end()){
-        pFb = &fileBuffers[fName];
+    if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
+        pFb = &(*getFileBufferInstance())[fName];
 
         LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
         PUCHAR bufStart = &pFb->data[0];
@@ -421,14 +454,28 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
     LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", fName.c_str(),
             " starting from position ", intToA(startingPosition));
 
-    if(fileBuffers.find(fName) != fileBuffers.end()){
+    if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
-        LogMessage2(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str());
+        LogMessage4(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", intToA((long)ptr));
 
+        #ifndef TEMPORARY_HARDCODED
+        {
+            std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\n";
+            for (auto it = getFileBufferInstance()->begin(); it != getFileBufferInstance()->end(); ++it)
+            {
+                filesInBuf += it->first + '\n';
+            }
+            LogMessage(INFO, filesInBuf.c_str());
+        }
+
+        #endif 
         long lPart = startingPosition, hPart = 0;
-        int ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+        int ret = 0;
+        if(startingPosition >=0){
+            ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
+        }
         iBytesWritten =  WriteToFile(ptr, buff, buffSize);
     }
     return 0;
@@ -441,9 +488,9 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
     if(ptr){
         std::string fName = GetFileName(ptr);
         int fSize = GetFileSize(ptr);
-        if(fileBuffers.find(fName) != fileBuffers.end()){
+        if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
 
-            pFb = &fileBuffers[fName]; 
+            pFb = &(*getFileBufferInstance())[fName]; 
             if(offset <= fSize){       
                 LogMessage4(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", intToA(pFb->offset), " to ", intToA(offset));
                 pFb->offset = offset;
@@ -676,8 +723,8 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
         return __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }
     std::string fName = GetFileName(ptr);
-    if(fileBuffers.find(fName) != fileBuffers.end()){
-        pFb = &fileBuffers[fName];
+    if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
+        pFb = &(*getFileBufferInstance())[fName];
         if(offset < 0){
             LogMessage4(DEBUG, "FilesystemHelper::ReadFileBuff::  offset[", intToA(offset),"] is less than 0 ->  using pFb->offset", intToA(pFb->offset));
             offset = pFb->offset; 
@@ -701,7 +748,20 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
 
 int FilesystemHelper::GetFileSize(const std::string& path){
     int size = -1;
-    if(fileBuffers.find(path) != fileBuffers.end() && fileBuffers[path].data.size()>0){
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
+
+    FILE* ptr = fopen(fixedPath.c_str(), "rb");
+    
+    if(!ptr){
+        LogMessage2(ERROR, "FilesystemHelper::GetFileSize,can't open file ", path.c_str());
+    }else{
+        size = GetFileSize(fixedPath);
+        fclose(ptr);
+    }
+    return size;
+    #ifdef TEMPORARY_COMMENTED
+    if(pFileBuffers->find(path) != pFileBuffers->end() && fileBuffers[path].data.size()>0){
         size = fileBuffers[path].data.size();
         LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") used filebuffer ");
     }else{
@@ -716,6 +776,7 @@ int FilesystemHelper::GetFileSize(const std::string& path){
         }
     }
     LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
+    #endif
     return size;
 }
 

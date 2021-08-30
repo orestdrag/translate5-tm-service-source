@@ -171,7 +171,9 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     USHORT usRC = TmOpen(  (char*)path.c_str(), &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
 
     // create memory object if create function completed successfully
-    if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
+    LogMessage(WARNING,"TEMPORARY_HARDCODED //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) ) => if ( (usRC == 0) || (usRC == BTREE_CORRUPTED) )");
+    //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
+    if ( (usRC == 0) || (usRC == BTREE_CORRUPTED) )
     {
       pMemory = new EqfMemory( this, htm, (PSZ)pszName );
     }

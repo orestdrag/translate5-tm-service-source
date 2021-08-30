@@ -160,6 +160,9 @@ typedef struct _BTREEHEADRECORD
   USHORT    usFirstDataBuffer;                    // first data buffer
   ULONG     ulUpdCount;                           // last update counter
   USHORT    usNextFreeRecord;                     // Next record to expand to
+  #ifndef TEMPORARY_HARDCODED
+  char HEADER_MARK[8] = "HRECORD"; 
+  #endif 
 } BTREEHEADRECORD, PBTREEHEADRECORD ;
 
 /**********************************************************************/
@@ -467,7 +470,7 @@ typedef struct _BTREEHEADER
   USHORT  usFilled;                               // number of bytes filled
   USHORT  usLastFilled;                           // ptr. to next free byte
   USHORT  usWasteSize;                            // waste size?
-  char MARK[10] = "@#MARK#";
+  //char MARK[10] = "@#MARK#";
 } BTREEHEADER , * PBTREEHEADER;
 
 /*****************************************************************************/
@@ -1273,7 +1276,9 @@ SHORT QDAMAllocTempAreas
   HeadRecord.fTerse = (EQF_BOOL) pBT->fTerse;
   memcpy( HeadRecord.chCollate, pBT->chCollate, COLLATE_SIZE );
   memcpy( HeadRecord.chCaseMap, pBT->chCaseMap, COLLATE_SIZE );
-
+  #ifndef TEMPORARY_HARDCODED
+  memcpy( HeadRecord.HEADER_MARK, "HRECORD\0",8);
+  #endif
   memcpy( HeadRecord.chEntryEncode, pBT->chEntryEncode, ENTRYENCODE_LEN );
 
   /********************************************************************/
@@ -1630,9 +1635,11 @@ SHORT QDAMReadRecordFromDisk_V3
            pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
            
+           #ifdef TEMPORARY_COMMENTED
            if(strlen(pHeader->MARK) == 0){
              strcpy(pHeader->MARK, "@@FIRST");
            }
+           #endif
 
            sRc = QDAMWRecordToDisk_V3(pBTIda, pBuffer);
 
@@ -3203,8 +3210,10 @@ SHORT QDAMAllocKeyRecords
             /* force write                                               */
             /*************************************************************/
 
+            #ifdef TEMPORARY_COMMENTED
             //temporary hardcoded mark to identify records
             strcpy(pHeader->MARK,"MARKKEYS");
+            #endif
             sRc = QDAMWRecordToDisk_V3( pBTIda, pRecord);
           } /* endif */
       } /* endwhile */
@@ -3585,7 +3594,9 @@ SHORT QDAMDictCreateLocal
           sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
           {
+            #ifdef TEMPORARY_COMMENTED
             strcpy(pRecord->contents.header.MARK,"@@ROOT@@");
+            #endif
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
             sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
           } /* endif */
@@ -7285,12 +7296,19 @@ SHORT  QDAMDictOpenLocal
       pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
       pBT->usOpenFlags = usOpenFlags;
 
-      // open the file
-      pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
+      #ifdef TEMPORARY_COMMENTED
+      if(pBT->PFileBufferMap == NULL){
+        LogMessage(INFO,"QDAMDictOpenLocal::pBT->PFileBufferMap == NULL, saving pointer to filebuffersmap");
+        pBT->PFileBufferMap = (PVOID)GetPFileBufferMap();
+      }
+      
       //sRc = UtlOpen( pName, &pBT->fp, &usAction, 0L,
       //               FILE_NORMAL, FILE_OPEN,
       //               usFlags,
       //               0L, FALSE);
+      #endif
+      // open the file
+      pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
    } /* endif */
 
 

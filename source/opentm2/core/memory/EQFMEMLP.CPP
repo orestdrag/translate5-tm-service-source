@@ -1468,6 +1468,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pLIDA->pstMemInfo->fCleanRTF = TRUE;
          pLIDA->pstMemInfo->fTagsInCurlyBracesOnly = TRUE;
        }
+       
+       pLIDA->pstMemInfo->pFileBuffersMap = GetPFileBufferMap();
        fOK = (pLIDA->pfnMemImpStart( &(pLIDA->lExternalImportHandle), pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
        pLIDA->pMem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 
