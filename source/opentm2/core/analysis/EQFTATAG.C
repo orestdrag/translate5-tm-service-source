@@ -629,7 +629,7 @@ USHORT TAFreeTableSpace
   /********************************************************************/
   if ( pTable->hmodUserExit != NULL )
   {
-    DosFreeModule( pTable->hmodUserExit );
+    DosFreeModule( &(pTable->hmodUserExit) );
     pTable->hmodUserExit = NULL;
   } /* endif */
   return( NO_ERROR );

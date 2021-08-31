@@ -1735,12 +1735,17 @@ int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
 int UTF16strlenCHAR( PSZ_W pszString )
 {
   int iLen = 0;
+  iLen = wcslen(pszString);
+  LogMessage2(WARNING,"TEMPORARY_COMMENTED in UTF16strlenCHAR, ", "");
+  #ifdef TEMPORARY_COMMENTED
 
   while ( pszString && *pszString != 0 )
   {
     iLen ++;
     pszString++;
   } /* endwhile */
+  #endif
+
   return( iLen );
 }
 
@@ -1748,7 +1753,7 @@ int UTF16strlenCHAR( PSZ_W pszString )
 int UTF16strlenBYTE( PTMWCHAR pszString )
 {
   int iLen = 0;
-  iLen = wcslen(pszString);
+  iLen = wcslen(pszString) * sizeof(TMWCHAR);
   
   #ifdef TEMPORARY_COMMENTED
   while ( pszString && *pszString != 0 )

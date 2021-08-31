@@ -4331,7 +4331,8 @@ USHORT TAFreeEditUserExit
 {
   if ( *phModule )
   {
-      DosFreeModule( *phModule );
+      //DosFreeModule( *phModule );
+      DosFreeModule( phModule );
       *phModule = NULLHANDLE;
   } /* endif */
   return( NO_ERROR );

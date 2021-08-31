@@ -164,7 +164,7 @@ extern "C"
      *     freed from system memory.
      */
     USHORT DosFreeModule(
-            HMODULE hmod);                  /* module handle                      */
+            PHMODULE hmod);                  /* module handle                      */
 
     /***   DosGetProcAddr - Get dynamic link procedure address
      *     Returns a far address to a desired procedure within a dynamic link

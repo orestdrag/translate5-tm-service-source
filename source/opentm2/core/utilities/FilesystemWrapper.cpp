@@ -26,7 +26,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
     bool useBuffer = true;//false;
     if(    (strcasestr(path, ".TMI") )
         || (strcasestr(path, ".TMD") )
-        || (strcasestr(path, ".MEM") )
+        //|| (strcasestr(path, ".MEM") )
     ){
         LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
                         path, ", useFilebuffer before = ", intToA(useBuffer));

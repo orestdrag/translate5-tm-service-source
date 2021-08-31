@@ -3136,9 +3136,16 @@ BOOL UtlSetDrive
 
  USHORT APIENTRY DosFreeModule
  (
-   HMODULE hMod                         // module handle
+   PHMODULE hMod                         // module handle
  )
  {
+   if(*hMod){
+     LogMessage(INFO,"DosFreeModule::closing hMod");
+     dlclose(*hMod);
+     *hMod = NULL;
+   }else{
+     LogMessage(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
+   }
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    FreeModule( hMod );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

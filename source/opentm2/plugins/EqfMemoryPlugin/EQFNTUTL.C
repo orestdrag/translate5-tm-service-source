@@ -543,7 +543,6 @@ USHORT NTMGetIDFromNameEx
 } /* end of function NTMGetIDFromNameEx */
 
 
-#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -705,6 +704,8 @@ NTMGetNameFromID( PTMX_CLB pTmClb,      //input
   return usRc;
 } /* end of function NTMGetNameFromID */
 
+
+#ifdef TEMPORARY_COMMENTED
 PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType )  // input
@@ -2474,7 +2475,6 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
   return( pCLB->usAddDataLen );
 } /* end of function NtmStoreAddData */
 
-#ifdef TEMPORARY_COMMENTED
 // retrieve specific data from the combined data area, returns length of retrieved data (incl. string end delimiter)
 USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, USHORT usBufSize )
 {
@@ -2522,6 +2522,8 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
   return( usLength );
 } /* end of function NtmGetAddData */
 
+
+#ifdef TEMPORARY_COMMENTED
 // find a string in a specific data area
 BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch )
 {

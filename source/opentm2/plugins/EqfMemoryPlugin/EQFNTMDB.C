@@ -644,7 +644,9 @@ EQFNTMInsert
       /* find next free key and anchor new value in file ...            */
       /******************************************************************/
       ULONG  ulKey;
-      ulKey = *pulKey = (NTMNEXTKEY( pBT ))++;
+      PNTMVITALINFO pvi = (PNTMVITALINFO)(&pBT->chCollate[0]);
+      //ulKey = *pulKey = ++(pvi->ulNextKey);
+      ulKey = *pulKey = (pvi->ulNextKey)++;
       if ( ulKey > 0xFFFFFF )
       {
         sRc = BTREE_NUMBER_RANGE;
@@ -697,6 +699,24 @@ EQFNTMInsert
   {
     ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
+
+  #ifndef TEMPORARY_HARDCODED
+  {
+    //write data in empty file for debugging
+    PBTREE pbt = (PBTREE)pBTIda;
+    char path[255];
+    strcpy(path, pbt->szFileName);
+    strcat(path,"_data");    
+    strcat(path, intToA(*pulKey));
+    FILE* filePtr = fopen(path, "wb+");
+    //fwrite( L"Key:=", 5*sizeof(wchar_t),1,filePtr);
+    //fwrite(pulKey, sizeof(*pulKey), 1, filePtr);
+    //fwrite(";data:=", 7,1,filePtr);
+    fwrite(pData, ulLen, 1, filePtr);
+    fclose(filePtr);
+
+  }
+  #endif
 
   return sRc;
 } /* end of function EQFNTMInsert */
@@ -1108,6 +1128,9 @@ VOID QDAMCopyDataTo_V3
    if ( usDataOffs)
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
+       if(usLastPos < usLen){
+        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", intToA(usLastPos), ", usLen = ", intToA(usLen) );
+      }
       if ( usVersion >= NTM_VERSION2 )
       {
         ULONG ulLen = *(PULONG) pOldData;

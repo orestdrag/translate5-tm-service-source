@@ -7,6 +7,7 @@
 #include "ThreadingWrapper.h"
 #include <mutex>
 #include <thread>
+#include <cstring>
 
 std::string logFilename;
 int logLevelTreshold;
@@ -198,9 +199,14 @@ int LogMessage8(int LogLevel, const char* message1, const char* message2, const 
 }
 
 char* intToA(int i){
-    int size = snprintf(NULL, 0, "%d", i);
-    char* buffer = new char[size+1];
-    snprintf(buffer, sizeof(size+1), "%d", i);
+    //int size = snprintf(NULL, 0, "%d", i);
+    //char* buffer = new char[size+1];
+    //snprintf(buffer, sizeof(size+1), "%d", i);
+    std::string str = std::to_string(i);
+    int len = str.size();
+    char* buffer = new char[len+1];
+    std::strcpy(buffer, str.c_str());
+    buffer[len] = '\0';
     return buffer;
 }
 

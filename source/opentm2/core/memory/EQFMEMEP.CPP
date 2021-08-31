@@ -980,7 +980,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     } /* endif */
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
-    if ( pExportIDA->hmodMemExtExport ) DosFreeModule( pExportIDA->hmodMemExtExport );
+    if ( pExportIDA->hmodMemExtExport ) DosFreeModule( &(pExportIDA->hmodMemExtExport) );
   }
 
   //--- Check if the termination was due to a

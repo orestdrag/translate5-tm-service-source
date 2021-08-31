@@ -3530,7 +3530,7 @@ USHORT MemFuncImportProcess
            if ( pLoadData->pfnMemImpEnd )     pLoadData->pfnMemImpEnd( pLoadData->lExternalImportHandle );
            if ( pLoadData->pstMemInfo )       UtlAlloc( (PVOID *)&pLoadData->pstMemInfo, 0L, 0L, NOMSG );
            if ( pLoadData->pstSegment)        UtlAlloc( (PVOID *)&pLoadData->pstSegment, 0L, 0L, NOMSG );
-           if ( pLoadData->hmodMemExtImport ) DosFreeModule( pLoadData->hmodMemExtImport );
+           if ( pLoadData->hmodMemExtImport ) DosFreeModule( &(pLoadData->hmodMemExtImport) );
          } /* endif */
 
          if ( pLoadData->pMem )
