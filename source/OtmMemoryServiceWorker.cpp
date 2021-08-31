@@ -2180,15 +2180,34 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 
   // close file
   CloseFile( &hFile );
-  wchar_t* wc = (wchar_t*)&vFileData[0];
-  //#ifndef TEMPORARY_HARDCODED
-  
-  //#else
+  wchar_t* wc = (wchar_t*)&vFileData[0]; 
+  size_t len = wcslen(wc);
 
-    size_t len = wcslen(wc);
-    wc[len-1] = L'\0';
+  #ifdef TEMPORARY_COMMENTED
+    //std::wstring wstr(wc);
+    std::wstring wstr(vFileData.begin(), vFileData.end());
+    size_t endDataPos = wstr.rfind(L"</tmx>");
+
+    if(endDataPos != -1){
+      wstr = wstr.substr(0,endDataPos+6);//including </tmx> which is 6 symbols in len
+    }
+    
+    size_t numOfBytes = wstr.length() * sizeof(wstr[0]);
+    vFileData.resize(numOfBytes);
+    memcpy(&vFileData[0], &wstr[0], numOfBytes);
+  #else
+
     vFileData.resize(len * sizeof(*wc));
-  //#endif
+    wc = (wchar_t*)&vFileData[0];
+    wchar_t* pEnd = wcsstr(wc, L"</tmx>");
+    
+    if(pEnd){
+      *pEnd = L'\0';
+    }else{
+      //wc[len-1] = L'\0';
+    }
+  #endif
+  
   return( iRC );
 }
 

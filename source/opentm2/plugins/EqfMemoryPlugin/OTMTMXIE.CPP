@@ -1203,7 +1203,7 @@ USHORT CTMXExportImport::ImportNext
 )
 {
   USHORT usRC = 0;
-  int  iIteration = 50;
+  int  iIteration = 10;
   BOOL fContinue  = TRUE;
   int errorCode = 0;
   int errorCount = 0;
