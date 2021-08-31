@@ -2181,8 +2181,14 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   // close file
   CloseFile( &hFile );
   wchar_t* wc = (wchar_t*)&vFileData[0];
-  size_t len = wcslen(wc);
-  vFileData.resize(len * sizeof(*wc));
+  //#ifndef TEMPORARY_HARDCODED
+  
+  //#else
+
+    size_t len = wcslen(wc);
+    wc[len-1] = L'\0';
+    vFileData.resize(len * sizeof(*wc));
+  //#endif
   return( iRC );
 }
 

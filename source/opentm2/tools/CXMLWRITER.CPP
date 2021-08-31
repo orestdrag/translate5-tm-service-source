@@ -427,6 +427,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text )
 // write string as-is 
 void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
 {
+  int ret = 0;
   // write string as-is except for LFs which are replaced by CRLF
   do
   {
@@ -445,13 +446,13 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       {
         if ( m_hf )
         {
-          fwrite( text, sizeof(WCHAR), iLFPos, m_hf );
+          ret = fwrite( text, sizeof(WCHAR), iLFPos, m_hf );
         } /* endif */
       }
       else
       {
         int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
-        fwrite( m_Buffer, 1, iBytes, m_hf );
+        ret = fwrite( m_Buffer, 1, iBytes, m_hf );
       } /* endif */
       m_iColumn += iLFPos;
     } /* endif */

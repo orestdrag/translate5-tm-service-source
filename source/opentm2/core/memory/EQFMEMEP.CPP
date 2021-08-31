@@ -847,9 +847,10 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        if ( !pExportIDA->pszNameList )
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
-         UtlErrorHwnd( MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
-                   &(pReplString[0]), EQF_INFO,
-                   pExportIDA->hwndErrMsg );
+         LogMessage(INFO,"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED");
+         //UtlErrorHwnd( MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
+         //          &(pReplString[0]), EQF_INFO,
+         //          pExportIDA->hwndErrMsg );
        } /* endif */
        ANSITOOEM( pExportIDA->szMemName );
 
@@ -1537,13 +1538,11 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getDocName( pExportIDA->pstSegment->szDocument, sizeof(pExportIDA->pstSegment->szDocument) );
          OEMTOANSI( pExportIDA->pstSegment->szDocument );
       
-         LogMessage(FATAL,"TEMPORARY_COMMENTED in called function MemExportProcess, because of basic TMCHAR data type migration");
-         #ifdef TEMPORARY_COMMENTED
          pExportIDA->pProposal->getSource( pExportIDA->pstSegment->szSource, sizeof(pExportIDA->pstSegment->szSource) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
-         #endif
+
 
          usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
 

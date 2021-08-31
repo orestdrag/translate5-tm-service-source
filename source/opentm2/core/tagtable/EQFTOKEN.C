@@ -90,6 +90,7 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <locale.h>
+#include "core/utilities/LogWrapper.h"
 
 #define DBLQUOTE   '\"'                     // double quote character (")
 
@@ -3445,7 +3446,7 @@ USHORT TACreateProtectTableWEx
         usRC = ERROR_NOT_ENOUGH_MEMORY;
       } /* endif */
     }
-    else  if ( pvUserExit )
+    else  if ( false && pvUserExit )
     {
       /****************************************************************/
       /* Let user exit create the start/stop table                    */
@@ -3459,6 +3460,7 @@ USHORT TACreateProtectTableWEx
     }
     else
     {
+      LogMessage(INFO, "TEMPORARY_HARDCODED in TACreateProtectTableWEx if ( false &sa& pvUserExit )");
       /******************************************************************/
       /* Create start/stop table using tokenizer                        */
       /******************************************************************/

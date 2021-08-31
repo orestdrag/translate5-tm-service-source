@@ -695,6 +695,7 @@ USHORT CTMXExportImport::WriteSegment
   // creation date/time
   {
     CHAR szTime[30];
+    memset(szTime, 0, 30*sizeof(szTime[0]));
     LONG lTime = pSegment->lTime;
     struct tm   *pTimeDate;            // time/date structure
 
@@ -923,9 +924,9 @@ USHORT CTMXExportImport::WriteTUV
 
       // load document tag table
       
-      LogMessage(ERROR, "TEMPORARY_COMMENTED");
-      //usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
-      //                             TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
+      //LogMessage(ERROR, "TEMPORARY_COMMENTED");
+      usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
+                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
     } /* endif */
 
     // copy segment data to our buffer and use this buffer from now on
@@ -978,10 +979,11 @@ USHORT CTMXExportImport::WriteTUV
 
         // build protect start/stop table for tag recognition
         PBYTE  pStartStop = NULL;
-        LogMessage(ERROR, "TEMPORARY_COMMENTED");
-        //usRC = TACreateProtectTableW( pszSegmentData, m_pLoadedTable, 0, (PTOKENENTRY)m_pTokBuf, TMXTOKBUFSIZE,
-        //                              (PSTARTSTOP *)&pStartStop, m_pLoadedTable->pfnProtTable, 
-        //                              m_pLoadedTable->pfnProtTableW, ulCP );
+        //LogMessage(ERROR, "TEMPORARY_HARDCODED in CTMXExportImport::WriteTUV, m_pLoadedRTFTable->pfnProtTable = 0;");
+        //m_pLoadedRTFTable->pfnProtTable = 0;
+        usRC = TACreateProtectTableW( pszSegmentData, m_pLoadedTable, 0, (PTOKENENTRY)m_pTokBuf, TMXTOKBUFSIZE,
+                                      (PSTARTSTOP *)&pStartStop, m_pLoadedTable->pfnProtTable, 
+                                      m_pLoadedTable->pfnProtTableW, ulCP );
 
         if ( !usRC )
         {
@@ -1054,9 +1056,14 @@ USHORT CTMXExportImport::StartImport
 {
   USHORT usRC = 0;
 
+  if(pMemInfo->pFileBuffersMap){
+    PFileBufferMap pfvm = (PFileBufferMap)pMemInfo->pFileBuffersMap;
+    SetFileBufferMap(pfvm);
+  }
+
   this->m_TempFile[0] = EOS;
   this->m_pMemInfo = pMemInfo;
-
+  
   if ( pMemInfo->fCleanRTF )
   {
     TALoadTagTableExHwnd( "EQFRTF", &m_pLoadedRTFTable, FALSE, TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, HWND_FUNCIF );

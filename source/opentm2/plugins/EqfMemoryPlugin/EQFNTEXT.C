@@ -343,150 +343,6 @@ USHORT TmtXExtract
             } /* endif */
           } /* endif */
 
-          // adjust records of older TMs (Major Version < 4) (in-spot)
-          if ( (usRc == NO_ERROR) &&
-               (pTmClb->stTmSign.bMajorVersion < TM_MAJ_VERSION_4) )
-          {
-            PBYTE  pbTemp;             // byte pointer for bytewise access
-            ULONG  ulLen;              // length of record
-            ULONG ulRemaining;        // remaining (unprocessed) record length
-            PTMX_TAGTABLE_RECORD pTagTable; // ptr to tag table record
-
-            // get original length and byte pointer to start of record
-            ulLen = *((PUSHORT)pTmRecord);
-            ulRemaining = ulLen;
-            pbTemp = (PBYTE)pTmRecord;
-
-            // make room for larger RecordLen
-            memmove ( pbTemp + 2, pbTemp, ulLen );
-
-            // increase overall record length
-            pTmRecord->ulRecordLen = ulLen + 2;
-            ulRemaining = (pTmRecord->ulRecordLen - sizeof(TMX_RECORD));
-
-            // adjust offset of source record
-            pTmRecord->usSourceRecord += 2;
-
-            // adjust offset of first target record
-            // (first target offset is affected by longer record length
-            // field of TM record and longer record length field of
-            // source record)
-            pTmRecord->usFirstTargetRecord += 4;
-
-            // check if source record offset is  valid
-            if ( pTmRecord->usSourceRecord < sizeof(TMX_RECORD) )
-            {
-              usRc = BTREE_CORRUPTED;
-            } /* endif */
-
-            if ( usRc == NO_ERROR )
-            {
-              //
-              // process source record
-              //
-
-              // position to source record
-              pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
-
-              // get original length and byte pointer to start of record
-              ulLen = *((PUSHORT)pTMXSourceRecord);
-              pbTemp = (PBYTE)pTMXSourceRecord;
-
-              // make room for larger RecordLen
-              memmove ( pbTemp + 2, pbTemp, ulRemaining );
-
-              // record length is increased, adjust source offset
-              pTMXSourceRecord->ulRecordLen = ulLen + 2;
-              pTmRecord->ulRecordLen += 2;
-              pTMXSourceRecord->usSource += 2;
-              ulRemaining -= ulLen;
-            } /* endif */
-
-            if ( usRc == NO_ERROR )
-            {
-              //
-              // process target records
-              //
-
-              // position to first target record
-              pbTemp = (PBYTE)pTmRecord;
-              pbTemp += pTmRecord->usFirstTargetRecord;
-              pTMXTargetRecord = (PTMX_TARGET_RECORD)(pbTemp);
-
-              // for all target records do...
-              while ( ulRemaining != 0 )
-              {
-                // get original length and byte pointer to start of record
-                ulLen = *((PUSHORT)pTMXTargetRecord);
-                pbTemp = (PBYTE)pTMXTargetRecord;
-
-                // make room for larger RecordLen
-                memmove ( pbTemp + 2, pbTemp, ulRemaining );
-
-                // record length is increased
-                pTmRecord->ulRecordLen             += 2;
-                pTMXTargetRecord->ulRecordLen = ulLen + 2;
-
-                // adjust offsets
-                pTMXTargetRecord->usSourceTagTable += 2;
-                pTMXTargetRecord->usTargetTagTable += 2;
-                pTMXTargetRecord->usTarget         += 2;
-                pTMXTargetRecord->usClb            += 2;
-                ulRemaining += 2;
-
-                // correct record length of source tag table record
-
-                // position to source tag table and get length
-                pbTemp = (PBYTE)pTMXTargetRecord +
-                         pTMXTargetRecord->usSourceTagTable;
-                pTagTable = (PTMX_TAGTABLE_RECORD)pbTemp;
-                ulLen = *((PUSHORT)pbTemp);
-
-                // make room for larger RecordLen
-                memmove ( pbTemp + 2, pbTemp, ulRemaining -
-                          pTMXTargetRecord->usSourceTagTable);
-
-                // adjust offsets and lengths
-                pTmRecord->ulRecordLen             += 2;
-                pTMXTargetRecord->ulRecordLen      += 2;
-                pTagTable->ulRecordLen = (ULONG)ulLen + 2;
-                pTagTable->usFirstTagEntry         += 2;
-                pTMXTargetRecord->usTargetTagTable += 2;
-                pTMXTargetRecord->usTarget         += 2;
-                pTMXTargetRecord->usClb            += 2;
-                ulRemaining += 2;
-
-                // correct record length of target tag table record
-
-                // position to target tag table and get length
-                pbTemp = (PBYTE)pTMXTargetRecord +
-                         pTMXTargetRecord->usTargetTagTable;
-                pTagTable = (PTMX_TAGTABLE_RECORD)pbTemp;
-                ulLen = *((PUSHORT)pbTemp);
-
-                // make room for larger RecordLen
-                memmove ( pbTemp + 2, pbTemp, ulRemaining -
-                          pTMXTargetRecord->usTargetTagTable);
-
-                // adjust offsets and lengths
-                pTmRecord->ulRecordLen             += 2;
-                pTMXTargetRecord->ulRecordLen      += 2;
-                pTagTable->ulRecordLen = (ULONG)ulLen + 2;
-                pTagTable->usFirstTagEntry         += 2;
-                pTMXTargetRecord->usTarget         += 2;
-                pTMXTargetRecord->usClb            += 2;
-                ulRemaining += 2;
-
-                // continue with next target record
-                pbTemp = (PBYTE)pTMXTargetRecord;
-                pbTemp += pTMXTargetRecord->ulRecordLen;
-                ulRemaining -= pTMXTargetRecord->ulRecordLen;
-                pTMXTargetRecord = (PTMX_TARGET_RECORD)pbTemp;
-              } /* endwhile */
-            } /* endif */
-          } /* endif */
-
-
           if ( usRc == NO_ERROR )
           {
             usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );
@@ -707,14 +563,11 @@ USHORT ExtractRecordV6
           //if target record exists
           if ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) )
           {
-            LogMessage(ERROR, "TEMPORARY_COMMENTED call FillExtStructure");
-            #ifdef TEMPORARY_COMMENTED
             //fill out the put structure as output of the extract function
             usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
                                      pTargetClb,
                                      pSourceString, &ulSourceLen,
                                      &pTmExtOut->stTmExt );
-                                     #endif
             if ( ! usRc )
             {
               //check for another target
@@ -982,7 +835,7 @@ USHORT ExtractRecordV5
   UtlAlloc( (PVOID *) &pSourceString, 0L, 0L, NOMSG );
   return usRc;
 }
-
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1174,6 +1027,7 @@ USHORT FillExtStructure
   return( usRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 static
 USHORT FillExtStructureV5
 (

@@ -15,7 +15,7 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
@@ -23,11 +23,11 @@
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
 #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
-#include <OTMGLOBMem.h>         // Global Memory defines
+#include <OTMGLOBMEM.H>         // Global Memory defines
 #include "OtmProposal.h"
-#include "core\pluginmanager\otmmarkup.h"
-#include "MarkupPluginMapper.h"
-#include "core\memory\MemoryFactory.h"
+#include "core/pluginmanager/OtmMarkup.h"
+#include "MarkupPluginMapper.H"
+#include "core/memory/MemoryFactory.h"
 #include <map>
 
 #ifdef _DEBUG
@@ -265,7 +265,7 @@ USHORT NTMCompareContext
 //typedef USHORT (APIENTRY *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
 typedef USHORT (__cdecl *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
 
-
+#ifdef TEMPORARY_COMMENTED
 VOID SetAvailFlags( PTMX_GET_OUT_W pTmGetOut, USHORT usMatchesFound)
 {
   // store indication if more matches are available
@@ -2315,7 +2315,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   return( usRc );
 }
 
-
+#endif
 
 
 //+----------------------------------------------------------------------------+
@@ -2509,6 +2509,8 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
 
 }
 
+
+#ifdef TEMPORARY_COMMENTED
 BOOL AddTagsToString( PSZ pInString,            //character string
                   PULONG pulInStringLen,       //length of pInString
                   PTMX_TAGTABLE_RECORD pTMXTagTable,  //ptr to tag table record
@@ -7237,3 +7239,5 @@ std::string& GetAndCacheFamilyName(char* pszMarkupName)
   }
   return Name2FamilyMap[pszMarkupName];
 }
+
+#endif

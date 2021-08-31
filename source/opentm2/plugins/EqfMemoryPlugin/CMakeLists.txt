@@ -22,6 +22,7 @@ set(EqfMemoryPlugin_Source_Files
    OTMTMXIE.CPP
    OTMXLFMT.CPP
    EQFNTDEL.C
+   EQFNTGET.CPP
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
