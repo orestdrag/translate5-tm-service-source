@@ -2183,6 +2183,7 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   wchar_t* wc = (wchar_t*)&vFileData[0]; 
   size_t len = wcslen(wc);
 
+  /*
   #ifdef TEMPORARY_COMMENTED
     //std::wstring wstr(wc);
     std::wstring wstr(vFileData.begin(), vFileData.end());
@@ -2207,7 +2208,7 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
       //wc[len-1] = L'\0';
     }
   #endif
-  
+  //*/
   return( iRC );
 }
 

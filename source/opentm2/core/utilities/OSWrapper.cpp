@@ -6,6 +6,8 @@
 #include <wchar.h>
 #include <iconv.h>
 #include <ctype.h>
+#include <string>
+#include "EncodingHelper.h"
 
 int GetLocaleInfo(
         LCID   Locale,
@@ -99,7 +101,11 @@ int WideCharToMultiByte(
         mbstate_t state;
         int cnt = 0;
         memset (&state, '\0', sizeof (state));
+
         return wcsnrtombs(lpMultiByteStr, (const wchar_t**)&lpWideCharStr, cchWideChar, cbMultiByte, &state );
+        
+        //int ret = wcstombs(lpMultiByteStr, lpWideCharStr, cchWideChar);
+        //return ret;
             #ifdef TEMPORARY_COMMENTED
             char   *inptr;  /* Pointer used for input buffer  */
             char   *outptr; /* Pointer used for output buffer */

@@ -147,6 +147,7 @@
 #include "../core/utilities/LogWrapper.h"
 #include "../core/utilities/OSWrapper.h"
 #include "../core/utilities/FilesystemHelper.h"
+#include "../core/utilities/EncodingHelper.h"
 
 CXmlWriter::CXmlWriter( const char *strFileName )
 {
@@ -451,8 +452,12 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       }
       else
       {
-        int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
-        ret = fwrite( m_Buffer, 1, iBytes, m_hf );
+
+        std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
+        int iBytes = str.size();
+
+        //int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
+        ret = fwrite( str.c_str(), 1, iBytes, m_hf );
       } /* endif */
       m_iColumn += iLFPos;
     } /* endif */

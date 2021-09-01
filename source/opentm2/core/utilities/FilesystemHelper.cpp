@@ -384,7 +384,9 @@ FILE* FilesystemHelper::FindNextFile(){
 }
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
-    selFiles.clear();
+    
+    if(!selFiles.empty())
+        selFiles.clear();
     std::string fixedPath = name;
     fixedPath = FixPath(fixedPath);
     const std::string dirPath = parseDirectory(fixedPath);

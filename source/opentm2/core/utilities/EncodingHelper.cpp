@@ -18,8 +18,13 @@ struct deletable_facet : Facet{
 */
 std::wstring EncodingHelper::convertToUTF16( const std::string& strUTF8String )
 { 
+  #ifdef TEMPORARY_COMMENTED
   std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> wconv;
   std::wstring wstr = wconv.from_bytes(strUTF8String);
+  #else
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> convert;
+  std::wstring wstr = convert.from_bytes( strUTF8String );
+  #endif
 	return wstr;
 }
 
