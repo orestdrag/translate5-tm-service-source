@@ -350,9 +350,11 @@ std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& 
 
 
 
-std::vector<std::string> selFiles;
+//std::vector<std::string> selFiles;
 int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
+    LogMessage2(FATAL, "called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
+    #ifdef TEMPORARY_COMMENTED
     auto files = FindFiles(name);
     if(selFiles.empty()){
 
@@ -363,10 +365,14 @@ FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     curSelFile = 0;
     auto path = selFiles[curSelFile];
     return OpenFile(path, "wb");
+    #endif
+
+    return NULL;
 }
 
 FILE* FilesystemHelper::FindNextFile(){
-    
+    LogMessage(FATAL, "called not implemented function FilesystemHelper::FindNextFile()");
+    #ifdef TEMPORARY_COMMENTED
     if(selFiles.empty()){
         LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
@@ -381,12 +387,14 @@ FILE* FilesystemHelper::FindNextFile(){
     }
     auto path = selFiles[curSelFile];
     return OpenFile(path, "wb");
+    #endif 
+
 }
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
-    
-    if(!selFiles.empty())
-        selFiles.clear();
+    std::vector<std::string> selFiles;
+    //if(selFiles.size())
+    //    selFiles.clear();
     std::string fixedPath = name;
     fixedPath = FixPath(fixedPath);
     const std::string dirPath = parseDirectory(fixedPath);
@@ -536,7 +544,7 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
         LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
 
     if(OffSet != FILE_BEGIN){           
-        LogMessage(WARNING, "SetFilePointerEx::FILE_CURRENT\FILE_END not implemented\tested");
+        LogMessage(WARNING, "SetFilePointerEx::FILE_CURRENT/FILE_END not implemented/tested");
     }
     
     int size = FilesystemHelper::GetFileSize(fp);
