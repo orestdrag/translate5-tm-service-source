@@ -1598,8 +1598,8 @@ BOOL UtlMatchStringsW
 
 PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource )
 {
-  PUSHORT pusTarget = (PUSHORT)pszTarget;
-  PUSHORT pusSource = (PUSHORT)pszSource;
+  PWCHAR pusTarget = (PWCHAR)pszTarget;
+  PWCHAR pusSource = (PWCHAR)pszSource;
   while ( *pusSource != 0 )
   {
     *pusTarget++ = *pusSource++;
