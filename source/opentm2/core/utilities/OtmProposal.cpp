@@ -6,6 +6,7 @@
 */
 
 #include "../pluginmanager/PluginManager.h"
+#include "core/utilities/LogWrapper.h"
 #include "OtmProposal.h"
 #include <cstring>
 
@@ -193,7 +194,16 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
 {
   if ( this->pvProposalData == NULL ) return;
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  size_t len = wcslen(pszBuffer);
+  //len = len < OTMPROPOSAL_MAXSEGLEN ? len: OTMPROPOSAL_MAXSEGLEN;
+  //memccpy(pData->szSource, pszBuffer, L'\0', len * sizeof(wchar_t));
+  if(len > OTMPROPOSAL_MAXSEGLEN){
+    LogMessage(FATAL,"OtmProposal::setSource:: pszBuffer is too big");
+    pszBuffer[OTMPROPOSAL_MAXSEGLEN-1] = L'\0';
+  }
+  //wcscpy(pData->szSource, pszBuffer);
   wcsncpy( pData->szSource, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
+  pData->szSource[len] = pszBuffer[len]; // it's not copying last symbol, so add it manually
   pData->szSource[OTMPROPOSAL_MAXSEGLEN] = 0;
   pData->fFilled = 1;
 }
@@ -227,7 +237,18 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
 {
   if ( this->pvProposalData == NULL ) return;
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  
+  size_t len = wcslen(pszBuffer);
+  len = len < OTMPROPOSAL_MAXSEGLEN ? len: OTMPROPOSAL_MAXSEGLEN;
+
+  //memccpy(pData->szTarget, pszBuffer, L'\0', len * sizeof(wchar_t));
+  if(len > OTMPROPOSAL_MAXSEGLEN){
+    LogMessage(FATAL,"OtmProposal::setTarget:: pszBuffer is too big");
+    pszBuffer[OTMPROPOSAL_MAXSEGLEN-1] = L'\0';
+  }
+  //wcscpy(pData->szTarget, pszBuffer);
   wcsncpy( pData->szTarget, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
+  pData->szTarget[len] = pszBuffer[len]; // it's not copying last symbol, so add it manually
   pData->szTarget[OTMPROPOSAL_MAXSEGLEN] = 0;
   pData->fFilled = 1;
 }
