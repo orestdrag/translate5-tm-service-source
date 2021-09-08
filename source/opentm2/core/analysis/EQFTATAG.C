@@ -96,11 +96,14 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   /********************************************************************/
   if ( usRC == NO_ERROR )
   {
+    LogMessage(WARNING,"TEMPORARY COMMENTED in TALoadTagTableExHwnd:: set user exit load flag if one of the exit functions is to be loaded");
+    #ifdef TEMPORARY_COMMENTED
     // set user exit load flag if one of the exit functions is to be loaded
     if ( ulFlags & TALOADPROTTABLEFUNC )
     {
       ulFlags |= TALOADUSEREXIT;
     } /* endif */
+    #endif
   } /* endif */
 
   /********************************************************************/
@@ -195,7 +198,6 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       /******************************************************************/
       /* Build fully qualified tag table name for internal tables       */
       /******************************************************************/
-      //LogMessage2(WARNING,"TEMPORARY HARDCODED if(true) in building tag table name for ", pszTableName);
       if ( fInternal //|| true
       )
       {

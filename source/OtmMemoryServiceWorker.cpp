@@ -757,12 +757,8 @@ int OtmMemoryServiceWorker::import
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
- // LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in import::_beginthread(importMemoryProcess)");
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  //_beginthread( &importMemoryProcess, 0, (void *)pData );
-  //std::thread importThread(&importMemoryProcess, (void*)pData);
-  importMemoryProcess(pData);
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  std::thread worker_thread(importMemoryProcess, pData);
+  //importMemoryProcess(pData);
 
   return( restbed::CREATED );
 }
