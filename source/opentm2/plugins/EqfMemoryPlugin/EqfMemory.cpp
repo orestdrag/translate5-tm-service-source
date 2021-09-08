@@ -501,9 +501,7 @@ int EqfMemory::getProposal
 
   if ( iRC == 0 )
   {
-//#ifdef TEMPORARY_COMMENTED
     iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
-//#endif //TEMPORARY_COMMENTED
   } /* endif */     
 
   if ( iRC == 0 )

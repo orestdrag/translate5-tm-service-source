@@ -24,13 +24,15 @@ Copyright Notice:
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "../pluginmanager/OtmSharedMemory.h"
+#include "../../core/utilities/OSWrapper.h"
 #include "MemoryUtil.h"
 #include "../memory/MemoryFactory.h"
 #include "OptionsDialog.H"
 #include "core/utilities/LogWrapper.h"
 
 #include "vector"
-
+#include <string>
+#include <climits>
 
 // default memory plugins
 #define DEFAULTMEMORYPLUGIN "EqfMemoryPlugin"
@@ -2591,13 +2593,19 @@ USHORT MemoryFactory::APIQueryMem
 }
 
 static wchar_t* wcsupr(wchar_t *str)
-{
-    wchar_t *tmp = str;
-    while (tmp) {
-        *tmp = toupper((wchar_t)*tmp);
-        ++tmp;
+{       
+    int len = wcslen(str);
+    for(int i=0; i<len; i++) {
+        str[i] = toupper(str[i]);
     }
     return str;
+}
+
+ULONG GetTickCount(){
+  struct timespec *t;
+  t = (struct timespec *)malloc(sizeof(t)); 
+  clock_gettime(CLOCK_MONOTONIC, t);
+  return t->tv_nsec;
 }
 
 /*! \brief process the API call: EqfSearchMem and search the given text string in the memory
@@ -2655,7 +2663,7 @@ USHORT MemoryFactory::APISearchMem
   } /* endif */
 
   DWORD dwSearchStartTime = 0;
-  //if ( lSearchTime != 0 ) dwSearchStartTime = GetTickCount();
+  if ( lSearchTime != 0 ) dwSearchStartTime = GetTickCount();
 
   // get first or next proposal
   if ( *pszStartPosition == EOS )
@@ -2686,7 +2694,6 @@ USHORT MemoryFactory::APISearchMem
       if ( lSearchTime != 0 )
       {
         LONG lElapsedMillis = 0;
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         DWORD dwCurTime = GetTickCount();
         if ( dwCurTime < dwSearchStartTime )
         {
@@ -2697,7 +2704,6 @@ USHORT MemoryFactory::APISearchMem
         {
           lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
         } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
         if ( lElapsedMillis > lSearchTime )
         {
           iRC = TIMEOUT_RC;

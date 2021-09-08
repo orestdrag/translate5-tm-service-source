@@ -953,27 +953,17 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"source", pProp->szSource );
   pJsonFactory->addParmToJSONW( strJSON, L"target", pProp->szTarget );
   pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"id", pData->lSegmentNum );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", pData->szSource );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", pData->szSource );
   EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"targetLang", pData->szSource );
 
   switch ( pProp->eType )
@@ -997,22 +987,16 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   }
   pJsonFactory->addParmToJSONW( strJSON, L"matchType", pData->szSource );
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"author", pData->szSource );
 
   convertTimeToUTC( pProp->lTargetTime, pData->szDocName );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   pJsonFactory->addParmToJSONW( strJSON, L"markupTable", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"context", pProp->szContext );
@@ -1329,14 +1313,14 @@ int OtmMemoryServiceWorker::concordanceSearch
   {
     std::wstring strOutputParmsW;
     factory->startJSONW( strOutputParmsW );
-//    factory->addParmToJSONW( strOutputParmsW, L"ReturnValue", iRC );
+    factory->addParmToJSONW( strOutputParmsW, L"ReturnValue", iRC );
     if ( iRC == ENDREACHED_RC )
     {
       factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );
     }
     else
     {
-      factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition", pData->szSearchPos );
+      factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition", EncodingHelper::convertToUTF16(std::string(pData->szSearchPos)).c_str() );
     }
     if ( iFoundProposals > 0 )
     {
