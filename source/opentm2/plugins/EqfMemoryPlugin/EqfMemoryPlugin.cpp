@@ -591,27 +591,18 @@ int EqfMemoryPlugin::deleteMemory(
 
   if ( (pMemInfo != NULL) && (pMemInfo->szFullPath[0] != EOS) )
   {
-    // delete data and index file
+    // delete the property file
     UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
 
-    char szIndexPath[MAX_LONGFILESPEC];
-    strcpy( szIndexPath, pMemInfo->szFullPath );
-    char *pszExt = strrchr( szIndexPath, DOT );
-    if ( strcmp( pszExt, EXT_OF_TMDATA ) == 0 )
-    {
-      strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
-    }
-    else
-    {
-      strcpy( strrchr( szIndexPath, DOT ), EXT_OF_SHARED_MEMINDEX );
-    } /* endif */
-    UtlDelete( szIndexPath, 0L, FALSE );
-
-    // delete the property file
-    std::string strPropName;
-    std::string strMemPath = pMemInfo->szFullPath;
-    this->makePropName( strMemPath, strPropName ); 
-    UtlDelete( (char *)strPropName.c_str(), 0L, FALSE );
+    char szPath[MAX_LONGFILESPEC];
+    strcpy( szPath, pMemInfo->szFullPath );
+    strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
+    // delete index file
+    UtlDelete( szPath, 0L, FALSE );
+    
+    // delete data file
+    strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
+    UtlDelete( szPath, 0L, FALSE );
 
     // remove memory infor from our memory info vector
     m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
@@ -663,9 +654,7 @@ int EqfMemoryPlugin::clearMemory(
     PTMX_CREATE_OUT pTmCreateOut = new (TMX_CREATE_OUT);
     memset( pTmCreateOut, 0, sizeof(TMX_CREATE_OUT) );
 
-#ifdef TEMPORARY_COMMENTED
     iRC = (int)TmtXCreate( pTmCreateIn, pTmCreateOut );
-#endif //TEMPORARY_COMMENTED
 
     free( pTmCreateIn );
     free( pTmCreateOut );

@@ -336,15 +336,15 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
         return( restbed::OK );
         break;
       case IMPORT_RUNNING_STATUS:
-        //wcsncpy( pszError, L"TM is busy, import is running", iErrorBufSize );
-        //*piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        //return( restbed::PROCESSING );
-        //break;
+        wcsncpy( pszError, L"TM is busy, import is running", iErrorBufSize );
+        *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
+        return( restbed::PROCESSING );
+        break;
       case IMPORT_FAILED_STATUS:
-        //wcsncpy( pszError, L"TM import failed, memory may be not usable", iErrorBufSize );
-        //*piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        //return( restbed::INTERNAL_SERVER_ERROR );
-        //break;
+        wcsncpy( pszError, L"TM import failed, memory may be not usable", iErrorBufSize );
+        *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
+        return( restbed::INTERNAL_SERVER_ERROR );
+        break;
       case AVAILABLE_STATUS:
         {
           // open the memory
@@ -1957,85 +1957,35 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
 {
   int iRC = 0;
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  // open file
-  HANDLE hFile = CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
-  if ( hFile == NULL )
-  {
-    iRC = GetLastError();
-    strError = "open of package file "; 
-    strError.append( pszFile ); 
-    strError.append( " failed" );
-    return( iRC );
+  auto file = FilesystemHelper::OpenFile(pszFile, "r", false);
+  size_t fSize = FilesystemHelper::GetFileSize(file);
+  int bytesRead = 0;
+  if(fSize == 0){
+
+  }else{
+
+    unsigned char* pData = new unsigned char[fSize];
+    FilesystemHelper::ReadFile(file, pData, fSize, bytesRead);
+    FilesystemHelper::CloseFile(file);
+
+    if(bytesRead != fSize){
+
+    }else{    
+      std::string encodedData;
+      EncodingHelper::Base64Encode(pData, fSize, encodedData);
+        if(encodedData.empty())
+        {
+          iRC = GetLastError();
+          strError = "encoding of BASE64 data failed";
+          LogMessage2(ERROR, "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = ", intToA(iRC));
+          return( iRC );
+        }
+    }
+
+    // cleanup
+    delete[] pData ;
   }
-
-  // get the size of file
-  DWORD dwFileSize = 0;
-  DWORD dwFileSizeHigh = 0;
-  dwFileSize = GetFileSize( hFile, &dwFileSizeHigh );
-
-  // allocate byte array for file content
-  BYTE *pByteArray = (BYTE *)malloc( dwFileSize );
-  if ( pByteArray == NULL )
-  {
-    CloseFile( &hFile );
-    strError = "Insufficient memory";
-    return( iRC );
-  }
-
-  // read file into byte array
-  DWORD dwBytesRead = 0;
-  if ( !ReadFile( hFile, pByteArray, dwFileSize, &dwBytesRead, NULL ) )
-  {
-    CloseFile( &hFile );
-    free( pByteArray );
-    iRC = GetLastError();
-    strError = "read of package ";
-    strError.append( pszFile );
-    strError.append( " failed" );
-    return( iRC );
-  }
-
-  // close file
-  CloseFile( &hFile );
-
-  // get encoded length of data
-  DWORD dwEncodedLength = 0;
-  if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, NULL, &dwEncodedLength ) )
-  {
-    CloseFile( &hFile );
-    free( pByteArray );
-    iRC = GetLastError();
-    strError = "encoding of binary data failed";
-    return( iRC );
-  }
-
-  // get area for encoded string
-  char *pStringData = (char *)malloc( dwEncodedLength );
-  if ( pStringData == NULL )
-  {
-    free( pByteArray );
-    strError = "Insufficient memory";
-    return( iRC );
-  }
-
-  // encode data
-  if ( !CryptBinaryToString( pByteArray, dwBytesRead, CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, pStringData, &dwEncodedLength ) )
-  {
-    free( pByteArray );
-    free( pStringData );
-    iRC = GetLastError();
-    strError = "encoding of binary data failed";
-    return( iRC );
-  }
-
-  *ppStringData = pStringData;
-
-  // cleanup
-  free( pByteArray );
-
   return( iRC );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 /*! \brief convert a BASE64 encoded string to a binary file
@@ -2062,57 +2012,6 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
     return( iRC );
   }
 
-#ifdef TEMPORARY_COMMENTED
-  // get byte array for decoded data
-  BYTE *pData = (BYTE *)malloc( dwDecodedLength );
-  if ( pData == NULL )
-  {
-    strError = "Insufficient memory";
-    LogMessage2(ERROR, "decodeBase64ToFile()::Insufficient memory, iRC = ", intToA(iRC));
-    return( iRC );
-  }
-
-  // decode data
-  if ( !CryptStringToBinary( pStringData, 0, CRYPT_STRING_BASE64, pData, &dwDecodedLength, NULL, NULL ) )
-  {
-    iRC = GetLastError();
-    free( pData );
-    strError = "decoding of BASE64 data failed";
-    LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
-    return( iRC );
-  }
-
-  // open output file
-  HANDLE hFile = CreateFile( pszFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
-  if ( hFile == INVALID_HANDLE_VALUE )
-  {
-    iRC = GetLastError();
-    free( pData );
-    strError = "creation of output file ";
-    strError.append( pszFile );
-    strError.append( " failed" );
-
-    LogMessage4(ERROR, "decodeBase64ToFile()::can't create file ", strError.c_str() ,", iRC = ", intToA(iRC));
-    return( iRC );
-  }
-
-  // write byte array to the file
-  DWORD dwBytesWritten = 0;
-  if ( !WriteFile( hFile, pData, dwDecodedLength, &dwBytesWritten, NULL ) )
-  {
-    iRC = GetLastError();
-    free( pData );
-    CloseFile( &hFile );
-    strError = "write to output file  ";
-    strError.append( pszFile );
-    strError.append( " failed" );
-    LogMessage4(ERROR, "decodeBase64ToFile()::write to file", strError.c_str() ,", iRC = ", intToA(iRC));
-    return( iRC );
-  }
-
-  // close file
-  CloseFile( &hFile );
-  #endif
   auto file = FilesystemHelper::OpenFile(pszFile, "w+", false);
   FilesystemHelper::WriteToFile(file, pData, pDataSize);
   FilesystemHelper::CloseFile(file);
@@ -2163,32 +2062,6 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   wchar_t* wc = (wchar_t*)&vFileData[0]; 
   size_t len = wcslen(wc);
 
-  /*
-  #ifdef TEMPORARY_COMMENTED
-    //std::wstring wstr(wc);
-    std::wstring wstr(vFileData.begin(), vFileData.end());
-    size_t endDataPos = wstr.rfind(L"</tmx>");
-
-    if(endDataPos != -1){
-      wstr = wstr.substr(0,endDataPos+6);//including </tmx> which is 6 symbols in len
-    }
-    
-    size_t numOfBytes = wstr.length() * sizeof(wstr[0]);
-    vFileData.resize(numOfBytes);
-    memcpy(&vFileData[0], &wstr[0], numOfBytes);
-  #else
-
-    vFileData.resize(len * sizeof(*wc));
-    wc = (wchar_t*)&vFileData[0];
-    wchar_t* pEnd = wcsstr(wc, L"</tmx>");
-    
-    if(pEnd){
-      *pEnd = L'\0';
-    }else{
-      //wc[len-1] = L'\0';
-    }
-  #endif
-  //*/
   return( iRC );
 }
 

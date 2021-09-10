@@ -57,6 +57,7 @@ public:
 		eUnknown,		            	/*!< plugin with that name was not registered before */
 		eNotSupported,		        /*!< method is not supported by this plugin */
 		eBufferTooSmall,          /*!< the provided buffer is too small */
+    eNotSupportedMemoryType,
     eNotEnoughMemory,         /*!< not enough system memory to process the request */
     eRepeat                   /*!< repeat calling this method until processing has been completed*/
 	};

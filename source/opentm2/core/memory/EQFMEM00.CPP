@@ -2498,25 +2498,6 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
      int iRC = pFactory->deleteMemory( NULL,pszMemName);
      fOK = (iRC==0)?TRUE:FALSE;
 
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-     // notify OpenTM2 GUI to update
-     if(fOK)
-     {
-        HWND hwnd = FindWindow( TWBMAIN ,NULL);
-        if(hwnd != NULL)
-        {
-          COPYDATASTRUCT cds;
-          std::string strMemName(Info.szPlugin);
-          strMemName = strMemName+":";
-          strMemName = strMemName +pszMemName;
-          cds.dwData = 2;
-          cds.cbData = (strMemName.size()+1)*sizeof(char);
-          cds.lpData = (char*)strMemName.c_str();
-          SendMessage(hwnd,WM_COPYDATA, 0,(LPARAM)(LPVOID)&cds);
-        }
-     }// end if
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
    }
 
    /*******************************************************************/

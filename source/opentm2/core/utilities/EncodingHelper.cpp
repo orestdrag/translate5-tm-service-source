@@ -107,6 +107,6 @@ void EncodingHelper::Base64Decode (const std::string& input, unsigned char*& out
   output = base64_decode(input, output_size);
 }
 
-void EncodingHelper::Base64Encode (const unsigned char*& input, int inSize, std::string& output){
+void EncodingHelper::Base64Encode (const unsigned char* input, int inSize, std::string& output){
   output = base64_encode(input, inSize);
 }

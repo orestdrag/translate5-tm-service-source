@@ -36,7 +36,7 @@ class EncodingHelper{
 
     std::u16string static toLower(const std::u16string& strText);
 
-    void static Base64Encode (const unsigned char*& input, int inSize, std::string& output);
+    void static Base64Encode (const unsigned char* input, int inSize, std::string& output);
     void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
 
 };

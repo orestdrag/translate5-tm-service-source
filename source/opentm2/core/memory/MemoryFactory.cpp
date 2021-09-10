@@ -650,31 +650,16 @@ int MemoryFactory::deleteMemory(
     std::string strMemoryName;
     this->getMemoryName( pszMemoryName, strMemoryName );
 
-    // delete the shared memory on server
-    OtmSharedMemoryPlugin *pSharedMemPlugin = NULL;
-    if ( this->isSharedMemory( (char *)strMemoryName.c_str(), &pSharedMemPlugin ) && pSharedMemPlugin->isLocalMemoryUsed() )
-    {
-      this->Log.writef( " Delete shared memory using plugin %s", 
-          pSharedMemPlugin->getName(), this->iLastError );
-      iRC = pSharedMemPlugin->deleteMemory((char *)strMemoryName.c_str());
-      if(iRC != 0)
-      {
-        pSharedMemPlugin->getLastError(strError);
-        this->Log.writef( " Delete shared memory failed ");
-        return iRC;
-      }
-    } 
-
     // use the given plugin to delete local memory
     if ( plugin->getType() == OtmMemoryPlugin::eTranslationMemoryType )
     {
       iRC = ((OtmMemoryPlugin *)plugin)->deleteMemory( (char *)strMemoryName.c_str());
       if ( iRC != 0 ) ((OtmMemoryPlugin *)plugin)->getLastError(strError);
     }
-    else if ( plugin->getType() == OtmMemoryPlugin::eSharedTranslationMemoryType )
+    else
     {
-      iRC = ((OtmSharedMemoryPlugin *)plugin)->deleteMemory((char *)strMemoryName.c_str());
-      if ( iRC != 0 ) ((OtmSharedMemoryPlugin *)plugin)->getLastError(strError);
+      LogMessage4(FATAL,"MemoryFactory::deleteMemory:: shared memory plugins not supported, memory: ", strMemoryName.c_str()," plugin: ", pszPluginName);
+      iRC = OtmMemoryPlugin::eNotSupportedMemoryType;
     }
 
     // broadcast deleted memory name
