@@ -182,6 +182,8 @@
 #include "EQFQDAMI.H"
 #include "EQFEVENT.H"                  // event logging facility
 #include "core/utilities/LogWrapper.h"
+#include "core/utilities/FilesystemWrapper.h"
+#include "core/utilities/PropertyWrapper.H"
 
 UCHAR  ucbEncodeTbl[30]
         =  { 00,  06,
@@ -700,22 +702,24 @@ EQFNTMInsert
     ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
 
+  
   #ifndef TEMPORARY_HARDCODED
-  {
+  int fWriteEachKeyInSeparateFiles = 0;
+  properties_get_int_or_default(KEY_DEBUG_KEYS_SEPARATE_FILES,fWriteEachKeyInSeparateFiles, 0);
+  if(fWriteEachKeyInSeparateFiles){    
     //write data in empty file for debugging
     PBTREE pbt = (PBTREE)pBTIda;
     char path[255];
     strcpy(path, pbt->szFileName);
-    strcat(path,"_data");    
+    strcat(path,"_data/");
+    CreateDir(path);
+    strcat(path, "key_");    
     strcat(path, intToA(*pulKey));
     FILE* filePtr = fopen(path, "wb+");
-    //fwrite( L"Key:=", 5*sizeof(wchar_t),1,filePtr);
-    //fwrite(pulKey, sizeof(*pulKey), 1, filePtr);
-    //fwrite(";data:=", 7,1,filePtr);
     fwrite(pData, ulLen, 1, filePtr);
     fclose(filePtr);
-
   }
+  
   #endif
 
   return sRc;

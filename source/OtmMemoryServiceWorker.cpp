@@ -657,6 +657,7 @@ int OtmMemoryServiceWorker::import
 
   // extract TMX data
   std::string strTmxData;
+  int loggingThreshold = 0; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
   JSONFactory *factory = JSONFactory::getInstance();
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
@@ -677,7 +678,11 @@ int OtmMemoryServiceWorker::import
       if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
       {
         strTmxData = value;
-        break;
+        //break;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", intToA(loggingThreshold));
+        SetLogLevel(loggingThreshold);        
       }else{
         LogMessage2(WARNING, "JSON parsed unexpected name, ", name.c_str());
       }
@@ -815,6 +820,10 @@ int OtmMemoryServiceWorker::createMemory
       else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
       {
         strSourceLang = value;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        int loggingThreshold = std::stoi(value);
+        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", intToA(loggingThreshold));
+        SetLogLevel(loggingThreshold);        
       }else{
         LogMessage4(WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
       }
@@ -1072,6 +1081,7 @@ int OtmMemoryServiceWorker::search
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
+  int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
                                                    { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( pData->lSegmentNum ), 0 },
                                                    { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDocName ), sizeof( pData->szDocName ) },
@@ -1080,6 +1090,7 @@ int OtmMemoryServiceWorker::search
                                                    { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szMarkup ), sizeof( pData->szMarkup ) },
                                                    { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szContext ), sizeof( pData->szContext ) / sizeof( pData->szContext[0] ) },
                                                    { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
+                                                   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
                                                    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = factory->parseJSON( strInputParmsW, parseControl );
@@ -1132,6 +1143,10 @@ int OtmMemoryServiceWorker::search
   if ( pData->iNumOfProposals == 0 )
   {
     pData->iNumOfProposals = 5;
+  }
+  if(loggingThreshold >= 0){
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::search::set new threshold for logging", intToA(loggingThreshold));
+    SetLogLevel(loggingThreshold);
   }
 
   // get the handle of the memory 
@@ -1226,6 +1241,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
+  int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSearchString ), sizeof( pData->szSearchString ) / sizeof( pData->szSearchString[0] ) },
   { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchMode ), sizeof( pData->szSearchMode ) },
@@ -1233,6 +1249,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
   { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE,          &( pData->iSearchTime ), 0 },
+  { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,          &loggingThreshold, 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = factory->parseJSON( strInputParmsW, parseControl );
@@ -1266,6 +1283,10 @@ int OtmMemoryServiceWorker::concordanceSearch
     pData->iNumOfProposals = 5;
   }
 
+  if(loggingThreshold >= 0){
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging", intToA(loggingThreshold));
+    SetLogLevel(loggingThreshold);
+  }
     // get the handle of the memory 
   long lHandle = 0;
   int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );

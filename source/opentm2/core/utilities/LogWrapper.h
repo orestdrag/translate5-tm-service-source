@@ -3,7 +3,11 @@
 
 extern "C"{
     
+
+#define LOG_DEBUG true
+
     enum LOGLEVEL{
+        DEVELOP=0,
         DEBUG=1,
         INFO=2,
         WARNING=3,

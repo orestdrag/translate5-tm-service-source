@@ -2632,21 +2632,21 @@ USHORT MemoryFactory::APISearchMem
 
   if ( (pszSearchString == NULL) || (*pszSearchString  == EOS)  )
   {
-    char* pszParm = "Search string";
+    char* pszParm = "Error in MemoryFactory::APISearchMem::Search string";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   if ( pszStartPosition == NULL ) 
   {
-    char* pszParm = "pointer to start position";
+    char* pszParm = "Error in MemoryFactory::APISearchMem::pointer to start position";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */
 
   if ( pProposal == NULL )
   {
-    char* pszParm = "pointer to proposal";
+    char* pszParm = "Error in MemoryFactory::APISearchMem::Error in ::pointer to proposal";
     UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     return( DDE_MANDPARAMISSING );
   } /* endif */

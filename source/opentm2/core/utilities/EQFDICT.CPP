@@ -4371,12 +4371,15 @@ PTMWCHAR QDAMGetszKey_V3
    // use record number of passed entry , read in record and pass
    // back pointer
    pusOffset = (PUSHORT) pRecord->contents.uchData;
-   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset = pRecord->contents.uchData = ", intToA((ULONG)pusOffset));
-   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3 = ", intToA((ULONG)pEndOfRec));
-   LogMessage2(DEBUG, "QDAMGetszKey_V3::  i = ", intToA((ULONG((PUSHORT)i))));
+   #ifdef LOGS_TO_BE_REMOVED
+    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset = pRecord->contents.uchData = ", intToA((ULONG)pusOffset));
+    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3 = ", intToA((ULONG)pEndOfRec));
+    LogMessage2(DEBUG, "QDAMGetszKey_V3::  i = ", intToA((ULONG((PUSHORT)i))));
+   #endif
    pusOffset += i;                     // point to key
-   LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset += i :", intToA((ULONG)pusOffset));
-
+   #ifdef LOGS_TO_BE_REMOVED
+    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset += i :", intToA((ULONG)pusOffset));
+   #endif
    int step = 0;
    if ( usVersion >= NTM_VERSION2 )
    {
@@ -4401,8 +4404,11 @@ PTMWCHAR QDAMGetszKey_V3
    {
      //LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
      pData = pRecord->contents.uchData + (*pusOffset) + step ;
-     
-     LogMessage2(DEBUG, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
+
+
+     #ifdef TO_BE_REMOVED
+      LogMessage2(DEBUG, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
+     #endif
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
@@ -5210,10 +5216,14 @@ SHORT QDAMLocateKey_V3
     while ( !fFound && sLow <= sHigh )
     {
 
-       LogMessage4(DEBUG, "QDAMLocateKey_V3:: sLow = ",intToA(sLow),", sHigh = ", (intToA(sHigh)));
+       #ifdef LOGS_TO_BE_REMOVED
+        LogMessage4(DEBUG, "QDAMLocateKey_V3:: sLow = ",intToA(sLow),", sHigh = ", (intToA(sHigh)));
+       #endif
        sMid = (sLow + sHigh)/2;
        pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
-       LogMessage4(DEBUG, "found key = ", intToA(*pKey2),", searched for = ", intToA(*pKey));
+       #ifdef LOGS_TO_BE_REMOVED
+        LogMessage4(DEBUG, "found key = ", intToA(*pKey2),", searched for = ", intToA(*pKey));
+       #endif
        if ( pKey2 )
        {
          //LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMLocateKey_V3::pBT->compare");

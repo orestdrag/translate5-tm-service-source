@@ -31,6 +31,7 @@
 #include "core/utilities/PropertyWrapper.H"
 #include "core/utilities/LogWrapper.h"
 #include "core/utilities/ThreadingWrapper.h"
+#include "core/utilities/EncodingHelper.h"
 #include "win_types.h"
 
 //#define SESSIONLOG
@@ -924,9 +925,9 @@ USHORT EqfOpenMem
 
   if ( pData )
   {
-    LOGWRITE1( "==EqfOpenMem==\n" );
-    LOGPARMSTRING( "Memory", pszMemoryName );
-    LOGPARMOPTION( "Options", lOptions );
+    LogMessage4(INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", intToA(lOptions));
+  }else{
+    LogMessage(ERROR, "Error in EqfOpenMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -935,12 +936,12 @@ USHORT EqfOpenMem
     MemoryFactory *pFactory = MemoryFactory::getInstance();
 
     usRC = pFactory->APIOpenMem( pszMemoryName, plHandle, lOptions );
+  }else{
+    LogMessage2(ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", intToA(usRC));
   } /* endif */
 
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
+  LogMessage2(INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", intToA(usRC));
+  
 
   return( usRC );
 }
@@ -1068,11 +1069,9 @@ USHORT EqfSearchMem
 
   if ( pData )
   {
-    LOGWRITE1( "==EqfSearchMem==\n" );
-    LOGPARMLONG( "Handle", lHandle );
-    LOGPARMSTRINGW( "SearchString", pszSearchString );
-    LOGPARMSTRING( "StartPosition", pszStartPosition );
-    LOGPARMOPTION( "Options", lOptions );
+    LogMessage8(INFO, "EqfSearchMem::Handle", intToA(lHandle),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", intToA(lOptions));
+  }else{
+    LogMessage(ERROR, "Error in EqfSearchMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -1083,9 +1082,11 @@ USHORT EqfSearchMem
     usRC = pFactory->APISearchMem( lHandle, pszSearchString, pszStartPosition, pProposal, lSearchTime, lOptions );
   } /* endif */
 
-  if ( pData )
+  if ( usRC)
   {
-    LOGWRITE2( "  RC=%u\n", usRC );
+    LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", intToA(usRC) );
+  }else{
+    LogMessage(INFO, "Success in EqfSearchMem" );
   }
 
   return( usRC );

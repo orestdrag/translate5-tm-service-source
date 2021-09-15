@@ -51,6 +51,8 @@ std::string generateLogFileName(){
 
 std::mutex coutMutex;   
 int writeLog(std::string& message, bool fFatal = false){
+
+    static std::ofstream logErrorF, logF;
     #ifdef THREAD_ID_WRITE_TO_LOGS
         message += " [thread id = " + std::to_string(_getpid());
         message += "]";
@@ -66,17 +68,18 @@ int writeLog(std::string& message, bool fFatal = false){
 
     #ifdef LOGERRORSINOTHERFILE
     if(fFatal){
-        std::ofstream logErrorF;
-        logErrorF.open(logFilename+"_FATAL", std::ios_base::app); // append instead of overwrite
+        if(!logErrorF.is_open()){
+            logErrorF.open(logFilename+"_FATAL", std::ios_base::app); // append instead of overwrite
+        }
         logErrorF << message <<"\n"; 
-        logErrorF.close();
+        //logErrorF.close();
     }
     #endif
-
-        std::ofstream logF;
-        logF.open(logFilename, std::ios_base::app); // append instead of overwrite
+        if(!logErrorF.is_open()){
+            logF.open(logFilename, std::ios_base::app); // append instead of overwrite
+        }
         logF << message <<"\n"; 
-        logF.close();
+        //logF.close();
     }
     return 0;
 }
@@ -211,9 +214,13 @@ char* intToA(int i){
 }
 
 int SetLogLevel(int level){
-    if(level <= FATAL && level>=DEBUG){
-        LogMessage2(WARNING, "Log level treshold was set to ",intToA(level));
+    if(level <= FATAL && level>=DEVELOP){
+        LogMessage2(WARNING, "SetLogLevel::Log level treshold was set to ",intToA(level));
         logLevelTreshold = level;
+        return level;
+    }else{
+        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", intToA(level), ", level must be between 0 and 5");
+        return -1;
     }
 }
 
