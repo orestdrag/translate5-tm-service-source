@@ -16,6 +16,7 @@
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
+#include "core/utilities/LogWrapper.h"
 #include "MemoryFactory.h"
 #include "MemoryUtil.h"
 
@@ -2473,6 +2474,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
        fOK = FALSE;
        UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
                      EQF_ERROR, HWND_FUNCIF );
+        LogMessage(ERROR, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
      } /* endif */
    } /* endif */
 
@@ -2489,6 +2491,8 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
             fOK = FALSE;
 	        UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1,
                           &pszMemName, EQF_ERROR, HWND_FUNCIF );
+                          
+          LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", intToA(usRC));
         }
    }
 
@@ -2497,7 +2501,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
    {
      int iRC = pFactory->deleteMemory( NULL,pszMemName);
      fOK = (iRC==0)?TRUE:FALSE;
-
+     
    }
 
    /*******************************************************************/

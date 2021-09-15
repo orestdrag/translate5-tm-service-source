@@ -179,6 +179,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     }
     else
     {
+      LogMessage6(ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", intToA(this->iLastError));
       handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
       if ( htm != 0 ) 
         TmClose( htm, NULL,  FALSE,  NULL );
@@ -592,16 +593,19 @@ int EqfMemoryPlugin::deleteMemory(
   if ( (pMemInfo != NULL) && (pMemInfo->szFullPath[0] != EOS) )
   {
     // delete the property file
+    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete property file: ", pMemInfo->szFullPath );
     UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
 
     char szPath[MAX_LONGFILESPEC];
     strcpy( szPath, pMemInfo->szFullPath );
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
     // delete index file
+    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete index file: ", szPath );
     UtlDelete( szPath, 0L, FALSE );
     
     // delete data file
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
+    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );
     UtlDelete( szPath, 0L, FALSE );
 
     // remove memory infor from our memory info vector
@@ -609,6 +613,7 @@ int EqfMemoryPlugin::deleteMemory(
   }
   else
   {
+    LogMessage2(ERROR,"EqfMemoryPlugin::deleteMemory:: OtmMemoryPlugin::eMemoryNotFound name = ", pszName );
     iRC = OtmMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );

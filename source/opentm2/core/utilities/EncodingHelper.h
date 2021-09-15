@@ -23,6 +23,7 @@ class EncodingHelper{
     \returns string converted to UTF16
     */
     std::string static convertToUTF8( const std::u16string& strUTF16String );
+    std::string static convertToUTF8( const wchar_t* UTF16String);
 
     /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
     \param strText on input string in UTF8 encoding, on output string in ASCII encoding

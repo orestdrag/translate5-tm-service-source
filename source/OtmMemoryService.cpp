@@ -94,8 +94,7 @@ void delete_method_handler( const shared_ptr< Session > session )
   restoreBlanks( strTM );
   int iTransActIndex = AddToTransActLog( DELETE_MEMORY_TRANSACTID, strTM.c_str() );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing DELETE request, content type=\"%s\", content length=%ld, mem=\"%s\"====\n", strType.c_str(), content_length,
-    strTM.c_str() );
+  LogMessage6(INFO,"==== processing DELETE request, content type=",strType.c_str(),"; content length=", intToA(content_length), "; mem=", strTM.c_str() );
 
   string strResponseBody;
   int rc = pMemService->deleteMem( strTM, strResponseBody );
@@ -103,7 +102,7 @@ void delete_method_handler( const shared_ptr< Session > session )
 
   TransActDone( iTransActIndex );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+  LogMessage4(INFO,"==== processing DELETE request...Done, , RC=",intToA(rc),"; strResponseBody=", strResponseBody.c_str() );
 }
 
 void get_memory_method_handler( const shared_ptr< Session > session )
@@ -115,15 +114,14 @@ void get_memory_method_handler( const shared_ptr< Session > session )
   restoreBlanks( strTM );
   int iTransActIndex = AddToTransActLog( GET_MEMORY_TRANSACTID, strTM.c_str() );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing GET memory request, Accept=\"%s\", mem=\"%s\"====\n", strAccept.c_str(), strTM.c_str() );
+  LogMessage4(INFO,"get_memory_method_handler::==== processing GET memory request, Accept = ", strAccept.c_str(), "; mem = ", strTM.c_str());
 
   restbed::Bytes vMemData;
   int rc = pMemService->getMem( strTM, strAccept, vMemData );
+  
   session->close( rc, vMemData, { { "Content-Length", ::to_string( vMemData.size() ) },{ "Content-Type", strAccept.c_str() },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-
   TransActDone( iTransActIndex );
-
-  if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\n", rc );
+  LogMessage2(INFO,"get_memory_method_handler::==== processing GET memory request..Done, RC = ", intToA(rc));
 }
 
 void get_method_handler(const shared_ptr< Session > session)
@@ -255,7 +253,7 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing POST mem/concordancesearch request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  LogMessage4(INFO,"postConcordanceSearch_method_handler::starting,  content type = ", strType.c_str(), ";  content length= = ", intToA(content_length));
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -266,12 +264,13 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    if ( hfLog != NULL ) fprintf( hfLog, "Memory name=\"%s\"\n", strTM.c_str() );
-    if ( hfLog != NULL ) fprintf( hfLog, "Input:\n-----\n%s\n----\n", strInData.c_str() );
+    LogMessage4(INFO,"postConcordanceSearch_method_handler:: Memory name = ", strTM.c_str(), "; Input: ", strInData.c_str());
+
     int rc = pMemService->concordanceSearch( strTM, strInData, strResponseBody );
+    
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    LogMessage4(INFO,"postConcordanceSearch_method_handler::Done! RC = ", intToA(rc), "; Output = ", strResponseBody.c_str());
   } );
 }
 

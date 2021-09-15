@@ -168,6 +168,8 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
         LPCTSTR lpExistingFileName, 
         LPCTSTR lpNewFileName       
     );
+
+    bool CreateDir(const char* path);
 }
 
 

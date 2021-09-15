@@ -210,10 +210,18 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
   {
-    LOGWRITE1( "==EQFExportMem==\n" );
-    LOGPARMSTRING( "Memory", pszMemName );
-    LOGPARMSTRING( "OutFile", pszOutFile );
-    LOGPARMOPTION( "Options", lOptions );
+    LogMessage2(INFO, "==EQFExportMem==, Options = ", intToA(lOptions));
+    if(pszMemName){
+      LogMessage2(INFO,"EqfExportMem:: Memory = ", pszMemName);
+    }else{
+      LogMessage(ERROR,"EqfExportMem:: Memory = NULL");
+    }
+
+    if(pszOutFile){
+      LogMessage2(INFO,"EqfExportMem:: Output File = ", pszOutFile);
+    }else{
+      LogMessage(ERROR,"EqfExportMem:: Output File = NULL");
+    }
   } /* endif */
 
   // check sequence of calls
@@ -237,8 +245,13 @@ USHORT EqfExportMem
     usRC = CONTINUE_RC;
   } /* endif */
 
-  if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) LOGWRITE2( "  RC=%u\n", usRC );
-
+  if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ){
+    if(usRC){
+      LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", intToA(usRC) );
+    }else{ 
+      LogMessage(INFO,"end of function EqfExportMem::success ");
+    }
+  }
   return( usRC );
 } /* end of function EqfExportMem */
 
@@ -295,8 +308,7 @@ USHORT EqfDeleteMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
-  LOGWRITE1( "==EQFDeleteMem==\n" );
-  LOGPARMSTRING( "Memory", pszMemName );
+  LogMessage2(INFO, "==EQFDeleteMem==::memName = ", pszMemName);
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
@@ -306,6 +318,8 @@ USHORT EqfDeleteMem
   {
     usRC = MemFuncDeleteMem( pszMemName );
     pData->fComplete = TRUE;   // one-shot function are always complete
+  }else{
+    LogMessage4(ERROR, "Error in EQFDeleteMem::FctValidateSession:: MemName = ", pszMemName, "; RC = ", intToA(usRC));
   } /* endif */
 
   if ( !usRC )
@@ -313,8 +327,7 @@ USHORT EqfDeleteMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-
-  LOGWRITE2( "  RC=%u\n", usRC );
+  LogMessage4(INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", intToA(usRC));
 
   return( usRC );
 } /* end of function EqfDeleteMem */

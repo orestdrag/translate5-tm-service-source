@@ -852,7 +852,7 @@ USHORT CTMXExportImport::WriteTUV
 {
   CHAR szTMXLang[20];                  // buffer for TMX language
 
-
+  LogMessage4(DEBUG, "WriteTUV:: lang = ", pszLanguage, "; markup = ", pszMarkup);
   // get TMX language name
   szTMXLang[0] = EOS;
   LanguageFactory *pLangFactory = LanguageFactory::getInstance();

@@ -103,7 +103,8 @@ OtmMemory *MemoryFactory::openMemory
     pMemory = ((OtmMemoryPlugin *)pluginSelected)->openMemory( (char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
     if ( pMemory == NULL ){
         *piErrorCode = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-        LogMessage2(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType, pMemory is NULL, ", pszMemoryName);
+        LogMessage4(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType, pMemory is NULL, ", pszMemoryName, 
+            "; error code = ", intToA(*piErrorCode));
     }
   }
   else
@@ -138,12 +139,12 @@ int MemoryFactory::getMemoryInfo
   int iRC = 0;
   this->strLastError = "";
   this->iLastError = 0;
-  this->Log.writef( "Get info for memory %s", pszMemoryName );
+  LogMessage2(INFO,"MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
 
   pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
-    this->Log.write( "   Could not identify plugin processing the memory" );
+    LogMessage(ERROR,"MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
     return OtmMemoryPlugin::eUnknownPlugin;
   } /* endif */
 
@@ -154,20 +155,23 @@ int MemoryFactory::getMemoryInfo
   if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
   {
     iRC = ((OtmMemoryPlugin *)pluginSelected)->getMemoryInfo( (char *)strMemoryName.c_str(), pInfo );
-    if ( iRC != 0 ) iRC = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-  }
-  else if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
-  {
-    iRC = ((OtmSharedMemoryPlugin *)pluginSelected)->getMemoryInfo( (char *)strMemoryName.c_str(), pInfo );
-    if ( iRC != 0 ) iRC = this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-  }
-  if ( iRC != 0 )
-  {
-    this->Log.writef( "   Could not retrieve information for local memory %s using plugin %s, the return code is %ld", strMemoryName.c_str(), pluginSelected->getName(), this->iLastError );
+    if ( iRC != 0 ) {
+      iRC = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+    }
   }
   else
   {
-    this->Log.write( "   info retrieval was successful" );
+    LogMessage2(FATAL,"MemoryFactory::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = ",pszPluginName);
+    return OtmMemoryPlugin::eNotSupportedMemoryType;
+  }
+  if ( iRC != 0 )
+  {
+    LogMessage6(INFO," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
+        pluginSelected->getName(),", the return code is ", intToA(this->iLastError) );
+  }
+  else
+  {
+    LogMessage(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
   } /* end */     
 
   return( iRC );
@@ -622,9 +626,16 @@ int MemoryFactory::deleteMemory(
   char *pszMemoryName
 )
 {
+  if(pszPluginName == NULL){
+    LogMessage(ERROR,"MemoryFactory::deleteMemory::pszPluginName = NULL");
+  }else if(pszMemoryName == NULL){
+    LogMessage3(ERROR,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = NULL");
+  }else{
+    LogMessage4(INFO,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = ", pszMemoryName);
+  }
   std::string strError;
   int iRC = deleteMemory(pszPluginName,pszMemoryName, strError);
-
+  LogMessage2(INFO,"deleteMemory::strError = ", strError.c_str());
   return iRC;
 }
 
@@ -880,6 +891,7 @@ void MemoryFactory::showLastError(
 
  // show error message
   char* pszParm = (char*)this->strLastError.c_str();
+  LogMessage4(ERROR,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", intToA(this->iLastError));
   UtlErrorHwnd( (USHORT)this->iLastError, MB_CANCEL, 1, &pszParm, SHOW_ERROR, hwndErrMsg );
 }
 

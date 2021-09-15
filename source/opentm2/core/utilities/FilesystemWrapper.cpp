@@ -156,6 +156,11 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
         return FilesystemHelper::GetFileSize(file);
     }
 
+    bool CreateDir(const char* path){
+        return FilesystemHelper::CreateDir(path);
+
+    }
+
     HFILE FindFirstFile(
          LPCTSTR lpFileName,               
          LPWIN32_FIND_DATA lpFindFileData  
