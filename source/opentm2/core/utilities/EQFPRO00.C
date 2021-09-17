@@ -15,6 +15,7 @@
 
 #include <pthread.h>
 #include "LogWrapper.h"
+#include "PropertyWrapper.H"
 // activate the following define for property failure logging
 //#define PROPLOGGING
 
@@ -1553,7 +1554,8 @@ BOOL PropHandlerInitForBatch( void )
   memset( pPropBatchIda, NULC, sizeof( *pPropBatchIda));
   size = sizeof(pPropBatchIda->IdaHead.szObjName);
   pPropBatchIda->IdaHead.pszObjName = pPropBatchIda->IdaHead.szObjName;
-  GetStringFromRegistry( APPL_Name, KEY_SysProp, pPropBatchIda->IdaHead.pszObjName, size, "" );
+  properties_get_str(KEY_OTM_DIR, pPropBatchIda->IdaHead.pszObjName, size);
+  strcat(pPropBatchIda->IdaHead.pszObjName, "/EQFSYSW.PRP");
 
   pthread_mutex_t mutex;
   { // keep other process from doing property related stuff..

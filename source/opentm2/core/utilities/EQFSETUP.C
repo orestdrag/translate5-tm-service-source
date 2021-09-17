@@ -142,10 +142,10 @@ int init_properties(){
         return rc;
     }
 
-    //properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
-    //properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    //properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
-    //properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+    properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
+    properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
+    properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
     return 0;
 
 }
@@ -1543,7 +1543,9 @@ PPROPSYSTEM InstReadSysProps( VOID )
    /*******************************************************************/
    /* Get name of system properties file                              */
    /*******************************************************************/
-   GetStringFromRegistry( APPL_Name, KEY_SysProp, szSysProp, sizeof(szSysProp), "" );
+   properties_get_str(KEY_OTM_DIR,szSysProp,sizeof(szSysProp));
+   strcat(szSysProp, "/EQFSYSW.PRP");
+   //GetStringFromRegistry( APPL_Name, KEY_SysProp, szSysProp, sizeof(szSysProp), "" );
 
    /*******************************************************************/
    /* Open system property file                                       */

@@ -2704,7 +2704,8 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     sprintf( EqfSystemPath, "%s",  szSysPath );
 
     // Get name of system property file
-    properties_get_str_or_default( KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), "" );
+
+    properties_get_str_or_default( KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), szOTMPath );
 
     // Get name of current language
     properties_get_str_or_default( KEY_SYSLANGUAGE, szEqfSysLanguage, sizeof( szEqfSysLanguage ), DEFAULT_SYSTEM_LANGUAGE );
@@ -2725,7 +2726,8 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     } /* endif */
 
     if ( fOK && szDrive[0] && szSysPath[0] && EqfSystemPropPath[0] &&
-         EqfSystemHlpFile[0] && szEqfResFile[0] )
+         //EqfSystemHlpFile[0] && 
+         szEqfResFile[0] )
     {
       UtlSetString( QST_MSGFILE, EqfSystemMsgFile );
       UtlSetString( QST_HLPFILE, EqfSystemHlpFile );
