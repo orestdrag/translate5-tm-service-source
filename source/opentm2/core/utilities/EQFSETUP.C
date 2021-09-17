@@ -133,8 +133,29 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 //+----------------------------------------------------------------------------+
 
 #ifdef __linux__
+
+
+
+int init_properties(){
+  if (int rc = properties_init()) {
+        LogMessage2(FATAL,"Error in init_properties::Failed to initialize property file", intToA(rc));
+        return rc;
+    }
+
+    //properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
+    //properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    //properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
+    //properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+    return 0;
+
+}
+
+
 int SetupMAT() {
     properties_turn_off_saving_in_file(); // we don't have path for file to save till the end of this function
+
+    init_properties();
+
     char* homeDir = filesystem_get_home_dir();
       
     PSZ otmPath = NULL;
@@ -1474,6 +1495,8 @@ VOID BuildPath
    /*******************************************************************/
    /* Build path name                                                 */
    /*******************************************************************/
+   LogMessage(WARNING,"TEMPORARY_COMMENTED in BuildPath");
+   #ifdef TEMPORARY_COMMENTED
    sprintf( pszBuffer, "%c:\\%s", chEqfDrive, PATH );
    if ( pszFolder )
    {
@@ -1485,6 +1508,7 @@ VOID BuildPath
       strcat( pszBuffer, "\\" );
       strcat( pszBuffer, pszSubDir );
    } /* endif */
+   #endif
 } /* end of function BuildPath */
 
 

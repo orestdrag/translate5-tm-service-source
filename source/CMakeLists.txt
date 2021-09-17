@@ -25,3 +25,9 @@ link_directories(${RESTBED_LIBRARIES})
 
 add_executable(OtmMemoryService ${OtmMemoryService_Source_Files})
 target_link_libraries(OtmMemoryService OTMFUNC librestbed.so)
+
+include(InstallRequiredSystemLibraries)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+include(CPack)

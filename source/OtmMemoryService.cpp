@@ -301,18 +301,6 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   } );
 }
 
-int init_properties(){
-  if (properties_init()) {
-        fprintf(stderr, "Failed to initialize property file\n");
-        return -1;
-    }
-
-    properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
-    properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
-    properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
-
-}
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
   LogMessage(INFO, "Try prepare otm memory service");
@@ -408,7 +396,6 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( postEntry );
     service.publish( getStatus );
 
-    init_properties();
   }
 
   return( TRUE );
