@@ -1496,19 +1496,19 @@ VOID BuildPath
    /* Build path name                                                 */
    /*******************************************************************/
    LogMessage(WARNING,"TEMPORARY_COMMENTED in BuildPath");
-   #ifdef TEMPORARY_COMMENTED
-   sprintf( pszBuffer, "%c:\\%s", chEqfDrive, PATH );
+   //#ifdef TEMPORARY_COMMENTED
+   //sprintf( pszBuffer, "%c:\\%s", chEqfDrive, PATH );
    if ( pszFolder )
    {
-      strcat( pszBuffer, "\\" );
+      strcat( pszBuffer, "/" );
       strcat( pszBuffer, pszFolder );
    } /* endif */
    if ( pszSubDir )
    {
-      strcat( pszBuffer, "\\" );
+      strcat( pszBuffer, "/" );
       strcat( pszBuffer, pszSubDir );
    } /* endif */
-   #endif
+   //#endif
 } /* end of function BuildPath */
 
 
