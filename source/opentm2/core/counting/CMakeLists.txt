@@ -5,3 +5,5 @@ set(Counting_Source_Files
         EQFRPT.C)
 
 add_library(Counting ${Counting_Source_Files})
+
+install(TARGETS Counting DESTINATION lib)

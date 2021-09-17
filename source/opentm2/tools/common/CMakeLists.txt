@@ -5,3 +5,6 @@ set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 
 set(Common_Source_Files InitPlugins.cpp)
 add_library(Common ${Common_Source_Files})
+
+
+install(TARGETS Common DESTINATION lib)

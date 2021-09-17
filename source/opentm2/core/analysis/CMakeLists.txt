@@ -8,3 +8,6 @@ set(Analysis_Source_Files
 )
 
 add_library(Analysis ${Analysis_Source_Files})
+
+
+install(TARGETS Analysis DESTINATION lib)

@@ -15,3 +15,6 @@ add_subdirectory(common)
 
 add_library(Tools ${Tools_Source_Files})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+
+#install(TARGETS OpenTM2_Tools DESTINATION lib)

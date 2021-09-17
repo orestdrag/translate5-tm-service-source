@@ -6,3 +6,5 @@ set(Morph_Source_Files
 )
 
 add_library(Morph ${Morph_Source_Files})
+
+install(TARGETS Morph DESTINATION lib)

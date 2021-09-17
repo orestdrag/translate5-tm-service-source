@@ -19,3 +19,5 @@ include_directories(${CURL_INDLUDE_DIR}
 add_library(PluginManager ${PlgMng_Source_Files})
 
 target_link_libraries(PluginManager libcurl.so libz.so)
+
+install(TARGETS PluginManager DESTINATION lib)

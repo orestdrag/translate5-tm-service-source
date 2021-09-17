@@ -12,3 +12,7 @@ set(Workbench_Source_Files
 add_library(Workbench ${Workbench_Source_Files})
 
 target_link_libraries(Workbench Util)
+
+
+install(TARGETS Workbench DESTINATION lib)
+

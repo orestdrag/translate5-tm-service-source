@@ -6,3 +6,5 @@ set(Document_Source_Files
         DocumentPluginMapper.cpp)
 
 add_library(Document ${Document_Source_Files})
+
+install(TARGETS Document DESTINATION lib)

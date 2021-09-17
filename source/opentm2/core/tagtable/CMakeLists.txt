@@ -7,3 +7,7 @@ set(Tagtable_Source_Files
         MarkupPluginMapper.cpp)
 
 add_library(Tagtable ${Tagtable_Source_Files})
+
+
+
+install(TARGETS Tagtable DESTINATION lib)

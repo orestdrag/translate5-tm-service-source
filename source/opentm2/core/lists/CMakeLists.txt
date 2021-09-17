@@ -5,3 +5,5 @@ set(Lists_Source_Files
         EQFLIST.C)
 
 add_library(Lists ${Lists_Source_Files})
+
+install(TARGETS Lists DESTINATION lib)

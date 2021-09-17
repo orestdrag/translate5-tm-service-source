@@ -24,6 +24,7 @@ add_subdirectory(plugins)
 
 add_library(OTMFUNC ${API_Source_Files})
 
+
 target_link_libraries(OTMFUNC
                         Memory
                         PluginManager
@@ -41,3 +42,6 @@ target_link_libraries(OTMFUNC
                     Spell
                     EqfMemoryPlugin
 )
+
+
+install(TARGETS OTMFUNC DESTINATION lib)

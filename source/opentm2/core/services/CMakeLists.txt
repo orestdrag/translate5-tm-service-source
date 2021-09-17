@@ -5,3 +5,5 @@ set(Services_Source_Files
         EQFDDE00.C)
 
 add_library(Services ${Services_Source_Files})
+
+install(TARGETS Services DESTINATION lib)

@@ -6,3 +6,5 @@ set(Spell_Source_Files
 )
 
 add_library(Spell ${Spell_Source_Files})
+
+install(TARGETS Spell DESTINATION lib)
