@@ -1,13 +1,16 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 project(OpenTM2_Tagtable)
 
-set(Tagtable_Source_Files
-        EQFTOKEN.C
-        #EQFTATAG.C
-        MarkupPluginMapper.cpp)
+set(TAGTABLE_SOURCE_FILES
+    EQFTOKEN.C
+    #EQFTATAG.C
+    MarkupPluginMapper.cpp
+)
 
-add_library(Tagtable ${Tagtable_Source_Files})
+add_library(Tagtable ${TAGTABLE_SOURCE_FILES})
 
+set_target_properties(Tagtable PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+target_include_directories(Tagtable PRIVATE ${OPENTM2_INCLUDE_DIR})
 
 install(TARGETS Tagtable DESTINATION lib)

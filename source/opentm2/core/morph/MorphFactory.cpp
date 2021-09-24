@@ -9,7 +9,7 @@
 #include "../pluginmanager/OtmMorphPlugin.h"
 #include "../pluginmanager/OtmMorph.h"
 #include "MorphFactory.h"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 /*! \brief the MorphFactory instance	 */
 MorphFactory* MorphFactory::pMorphInstance = NULL;
