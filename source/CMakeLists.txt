@@ -1,15 +1,6 @@
 cmake_minimum_required (VERSION 3.10)
+
 project(OtmMemoryService VERSION 0.1)
-
-
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
-
-
-add_subdirectory(opentm2)
 
 set(ROOT "..")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
@@ -17,22 +8,33 @@ set(RESTBED_PATH        "${ROOT}/Packages/restbed")
 set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR}
+                    ${OPENTM2_INCLUDE_DIR}
+                    ${RESTBED_INCLUDE_DIR}
+)
+
+link_directories(${RESTBED_LIBRARIES})
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 set(OtmMemoryService_Source_Files
-        OtmMemoryService.cpp
-        OtmMemoryServiceWorker.cpp
-        OTMMSJSONFactory.cpp
-        #OtmMemoryServiceTester.cpp
-        otmd.cpp
-        config.cpp
+    OtmMemoryService.cpp
+    OtmMemoryServiceWorker.cpp
+    OTMMSJSONFactory.cpp
+    #OtmMemoryServiceTester.cpp
+    otmd.cpp
+    config.cpp
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})
-link_directories(${RESTBED_LIBRARIES})
-
 add_executable(OtmMemoryService ${OtmMemoryService_Source_Files})
+
+target_compile_features(OtmMemoryService PRIVATE cxx_std_14)
+
 target_link_libraries(OtmMemoryService OTMFUNC librestbed.so)
+
+configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
+
+add_subdirectory(opentm2)
 
 #configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
