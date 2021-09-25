@@ -3,9 +3,9 @@ project(OtmMemoryService VERSION 0.1)
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
-set(RESTBED_PATH        "${ROOT}/Packages/restbed")
-set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
-set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
+set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
+set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
+set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 
 set(OtmMemoryService_Source_Files
     OtmMemoryService.cpp

@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 project(OpenTM2)
 
-set(OPENTM2_MRI_DIR "${ROOT}/mri")
+set(OPENTM2_MRI_DIR     "${ROOT}/mri")
 set(ZLIB_INCLUDE_DIR    "${ROOT}/Packages/zlib")
-set(MINIZIP_INCLUDE_DIR "${ROOT}/Packages/zlib/contrib/minizip")
-
-set(OPENTM2_ROOT ".")
+set(MINIZIP_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}/contrib/minizip")
 
 set(API_Source_Files OTMFUNC.C)
 
-include_directories(${OPENTM2_INCLUDE_DIR} ${OPENTM2_MRI_DIR})
+include_directories(${OPENTM2_INCLUDE_DIR}
+                    ${OPENTM2_MRI_DIR}
+)
 
 add_subdirectory(core)
 add_subdirectory(tools)
@@ -24,22 +24,21 @@ target_include_directories(OTMFUNC PRIVATE
     ${MINIZIP_INCLUDE_DIR}
 )
 
-target_link_libraries(OTMFUNC PRIVATE
-                      Memory
-                      PluginManager
-                      Util
-                      Workbench
-                      Common
-                      Analysis
-                      #Counting
-                      Document
-                      #Lists
-                      #Services
-                      Tagtable
-                      #Ling
-                      Morph
-                      Spell
-                      EqfMemoryPlugin
+target_link_libraries(OTMFUNC PRIVATE Memory
+                                      PluginManager
+                                      Util
+                                      Workbench
+                                      Common
+                                      Analysis
+                                      #Counting
+                                      Document
+                                      #Lists
+                                      #Services
+                                      Tagtable
+                                      #Ling
+                                      Morph
+                                      Spell
+                                      EqfMemoryPlugin
 )
 
 install(TARGETS OTMFUNC DESTINATION lib)
