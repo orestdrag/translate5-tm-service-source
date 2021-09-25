@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 project(EqfMemoryPlugin)
 
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../core)
@@ -6,23 +6,23 @@ set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../core)
 set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
     EqfMemoryPlugin.cpp
-   # EQFNTOP.C
+    #EQFNTOP.C
     EQFNTCR.C
-   # EQFNTM.C
+    #EQFNTM.C
     EQFNTEXT.C
-   # EQFNTMDB.C
-   # EQFNTEXT.C
-   EQFNTPUT.C
-   EQFNTUTL.C
-   EQFNTMDB.C
-   EQFNTM.C
-   EQFNTOP.C
-   EQFMEMUT.C
-   EQFNTUTL.C
-   OTMTMXIE.CPP
-   OTMXLFMT.CPP
-   EQFNTDEL.C
-   EQFNTGET.CPP
+    #EQFNTMDB.C
+    #EQFNTEXT.C
+    EQFNTPUT.C
+    EQFNTUTL.C
+    EQFNTMDB.C
+    EQFNTM.C
+    EQFNTOP.C
+    EQFMEMUT.C
+    EQFNTUTL.C
+    OTMTMXIE.CPP
+    OTMXLFMT.CPP
+    EQFNTDEL.C
+    EQFNTGET.CPP
 )
 
 include(GNUInstallDirs)
