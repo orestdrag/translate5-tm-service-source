@@ -30,7 +30,7 @@
 #include "EQFEVENT.H"                  // event logging facility
 #include "EQFART.H"                    // ART registry functions
 #include "EQFRPT.H"                    // report handler defines
-#include "core/utilities/PropertyWrapper.H"
+#include "PropertyWrapper.H"
 
 // should be removed
 #include "EQFMT00.H"
@@ -43,7 +43,7 @@
 #include "EQFUTMDI.H"                // MDI Utilities
 
 #include "win_types.h"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 /**********************************************************************/
 /* statics...                                                         */

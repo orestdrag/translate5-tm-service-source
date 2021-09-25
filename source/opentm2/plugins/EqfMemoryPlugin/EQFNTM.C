@@ -35,13 +35,13 @@
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
 #include <EQF.H>                  // General Translation Manager include file
 
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 #include <EQFSETUP.H>             // Directory name defines and other
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
-#include "core/utilities/FilesystemWrapper.h"
-#include "core/utilities/PropertyWrapper.H"
+#include "FilesystemWrapper.h"
+#include "PropertyWrapper.H"
 
 #ifdef _DEBUG
   //#define SESSIONLOG

@@ -6,7 +6,7 @@
 */
 
 #include "../pluginmanager/PluginManager.h"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 #include "OtmProposal.h"
 #include <cstring>
 

@@ -181,9 +181,9 @@
 #include "EQF.H"
 #include "EQFQDAMI.H"
 #include "EQFEVENT.H"                  // event logging facility
-#include "core/utilities/LogWrapper.h"
-#include "core/utilities/FilesystemWrapper.h"
-#include "core/utilities/PropertyWrapper.H"
+#include "LogWrapper.h"
+#include "FilesystemWrapper.h"
+#include "PropertyWrapper.H"
 
 UCHAR  ucbEncodeTbl[30]
         =  { 00,  06,

@@ -26,10 +26,10 @@
 #endif
 
 #include "../../../../include/win_types.h"
-#include "core/utilities/LogWrapper.h"
-#include "core/utilities/PropertyWrapper.H"
-#include "core/utilities/FilesystemHelper.h"
-#include "core/utilities/OSWrapper.h"
+#include "LogWrapper.h"
+#include "PropertyWrapper.H"
+#include "FilesystemHelper.h"
+#include "OSWrapper.h"
 
 //#include <windows.h>
 #include <stdlib.h>
@@ -76,8 +76,8 @@ extern "C"
 #endif
 
 #include "CXMLWRITER.H"
-#include "core/utilities/LanguageFactory.H"
-#include "core/utilities/EncodingHelper.h"
+#include "LanguageFactory.H"
+#include "EncodingHelper.h"
 
 // mask for character entitites below 0x20
 #define ENTITY_MASK_STARTCHAR_W L'_'

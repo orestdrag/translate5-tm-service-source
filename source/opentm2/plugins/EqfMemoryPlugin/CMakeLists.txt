@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.10)
 project(EqfMemoryPlugin)
 
-set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
+set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../core)
 
 set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
@@ -25,18 +25,24 @@ set(EqfMemoryPlugin_Source_Files
    EQFNTGET.CPP
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-
 include(GNUInstallDirs)
 
 add_library(EqfMemoryPlugin SHARED ${EqfMemoryPlugin_Source_Files})
 
-set_target_properties(EqfMemoryPlugin PROPERTIES PUBLIC_HEADER EqfMemory.h)
+set_target_properties(EqfMemoryPlugin PROPERTIES
+    PUBLIC_HEADER EqfMemory.h
+    POSITION_INDEPENDENT_CODE ON
+)
+
+target_include_directories(EqfMemoryPlugin PRIVATE
+    ${CORE_DIR}/utilities
+    ${CORE_DIR}/pluginmanager
+    ${CORE_DIR}/memory
+)
 
 target_link_libraries(EqfMemoryPlugin ${CMAKE_DL_LIBS} PluginManager Util Tools Analysis Memory Tagtable )
 
 configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
-
 
 install(TARGETS EqfMemoryPlugin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

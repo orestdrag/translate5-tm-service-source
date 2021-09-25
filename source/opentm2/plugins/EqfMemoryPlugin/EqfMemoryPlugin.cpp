@@ -5,14 +5,14 @@
 	Corporation and others. All rights reserved
 */
 
-#include "core/pluginmanager/PluginManager.h"
-#include "core/utilities/PropertyWrapper.H"
+#include "PluginManager.h"
+#include "PropertyWrapper.H"
 #include "EqfMemoryPlugin.h"
 #include "EqfMemory.h"
 #include "EQFTMI.H"
 #include "EQFSETUP.H"
-#include "core/utilities/FilesystemHelper.h"
-#include "core/utilities/LogWrapper.h"
+#include "FilesystemHelper.h"
+#include "LogWrapper.h"
 #include "EQF.H"
 
 #include "string"

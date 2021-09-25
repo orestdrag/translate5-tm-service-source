@@ -90,7 +90,7 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <locale.h>
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 #define DBLQUOTE   '\"'                     // double quote character (")
 

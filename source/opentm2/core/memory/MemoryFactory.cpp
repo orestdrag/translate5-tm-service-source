@@ -28,7 +28,7 @@ Copyright Notice:
 #include "MemoryUtil.h"
 #include "../memory/MemoryFactory.h"
 #include "OptionsDialog.H"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 #include "vector"
 #include <string>

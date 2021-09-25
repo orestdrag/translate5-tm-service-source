@@ -11,6 +11,9 @@ add_library(Tagtable ${TAGTABLE_SOURCE_FILES})
 
 set_target_properties(Tagtable PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_include_directories(Tagtable PRIVATE ${OPENTM2_INCLUDE_DIR})
+target_include_directories(Tagtable PRIVATE
+    ${OPENTM2_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../utilities
+)
 
 install(TARGETS Tagtable DESTINATION lib)

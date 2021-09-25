@@ -22,6 +22,11 @@ set(Mem_Source_Files
 
 
 add_library(Memory ${Mem_Source_Files})
+
+target_include_directories(Memory PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../utilities
+)
+
 target_link_libraries(Memory Util Tagtable Analysis)
 
 install(TARGETS Memory DESTINATION lib)

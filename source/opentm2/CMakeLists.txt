@@ -9,10 +9,7 @@ set(OPENTM2_ROOT ".")
 
 set(API_Source_Files OTMFUNC.C)
 
-include_directories(${OPENTM2_INCLUDE_DIR}
-                    ${OPENTM2_ROOT}
-                    ${OPENTM2_MRI_DIR}
-)
+include_directories(${OPENTM2_INCLUDE_DIR} ${OPENTM2_MRI_DIR})
 
 add_subdirectory(core)
 add_subdirectory(tools)
@@ -23,13 +20,9 @@ add_library(OTMFUNC ${API_Source_Files})
 set_target_properties(OTMFUNC PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(OTMFUNC PRIVATE
-    ${OPENTM2_ROOT}
-    #${OPENTM2_INCLUDE_DIR}
-    ${OPENTM2_MRI_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${MINIZIP_INCLUDE_DIR}
 )
-
 
 target_link_libraries(OTMFUNC PRIVATE
                       Memory

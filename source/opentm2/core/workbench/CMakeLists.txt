@@ -11,8 +11,11 @@ set(Workbench_Source_Files
 
 add_library(Workbench ${Workbench_Source_Files})
 
-target_link_libraries(Workbench Util)
+target_include_directories(Workbench PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../utilities
+)
 
+target_link_libraries(Workbench Util)
 
 install(TARGETS Workbench DESTINATION lib)
 

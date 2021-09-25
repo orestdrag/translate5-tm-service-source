@@ -22,7 +22,7 @@
 #include "EQFDDE.H"               // Batch mode definitions
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFQDAMI.H>
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 //#include <eqflstex.h>
 

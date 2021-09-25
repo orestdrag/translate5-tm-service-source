@@ -176,7 +176,7 @@
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
-#include "core/utilities/FilesystemWrapper.h"
+#include "FilesystemWrapper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+

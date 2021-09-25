@@ -25,9 +25,9 @@
 #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
 #include <OTMGLOBMEM.H>         // Global Memory defines
 #include "OtmProposal.h"
-#include "core/pluginmanager/OtmMarkup.h"
+#include "OtmMarkup.h"
 #include "MarkupPluginMapper.H"
-#include "core/memory/MemoryFactory.h"
+#include "MemoryFactory.h"
 #include <map>
 
 #ifdef _DEBUG
