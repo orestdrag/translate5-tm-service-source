@@ -40,7 +40,16 @@ target_include_directories(EqfMemoryPlugin PRIVATE
     ${CORE_DIR}/memory
 )
 
-target_link_libraries(EqfMemoryPlugin ${CMAKE_DL_LIBS} PluginManager Util Tools Analysis Memory Tagtable )
+target_link_libraries(EqfMemoryPlugin PRIVATE
+    PluginManager
+    Util
+    Tools
+    Analysis
+    Memory
+    Tagtable
+)
+
+target_link_libraries(EqfMemoryPlugin PUBLIC ${CMAKE_DL_LIBS})
 
 configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
