@@ -49,6 +49,7 @@ target_link_libraries(EqfMemoryPlugin PRIVATE
     Tagtable
 )
 
+# Contains dlopen, dlclose
 target_link_libraries(EqfMemoryPlugin PUBLIC ${CMAKE_DL_LIBS})
 
 configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
