@@ -699,9 +699,9 @@ int EqfMemory::searchProposal
   this->Log.writef( "*** method: searchProposal, looking for \"%S\"", this->pTmGetIn->stTmGet.szSource );
 #endif
 
-#ifdef TEMPORARY_COMMENTED
+//#ifdef TEMPORARY_COMMENTED
   iRC = (int)TmGetW ( this->htm,  NULL,  this->pTmGetIn,  this->pTmGetOut, FALSE );
-#endif //TEMPORARY_COMMENTED
+//#endif //TEMPORARY_COMMENTED
   if ( iRC == 0 )
   {
 #ifdef EQFMEMORYLOGGING

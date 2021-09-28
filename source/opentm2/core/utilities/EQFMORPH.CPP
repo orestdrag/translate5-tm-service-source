@@ -25,6 +25,7 @@
 #include "../spell/SpellFactory.h"
 #include "../morph/MorphFactory.h"
 #include "../utilities/LogWriter.h"
+#include "../utilities/LogWrapper.h"
 #include "../utilities/ThreadingWrapper.h"
 
 #ifdef TEMPORARY_COMMENTED
@@ -222,12 +223,14 @@ USHORT MorphInit
     // .. nothing to do here for the spell instance...
 
     // activate the morphologic functions
-		MorphFactory* tMorphFactoryInstance = MorphFactory::getInstance();
+    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::MorphFactory::getInstance(); 1");
+		MorphFactory* tMorphFactoryInstance = NULL;//MorphFactory::getInstance();
 		if (NULL == tMorphFactoryInstance)
 		{
 			usRC = MORPH_NO_MEMORY;
 		}
-		pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
+    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );");
+		//pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
 		if (NULL == pLangCB->m_MorphInstance)
 		{
 			usRC = MORPH_NO_MEMORY;
@@ -1081,8 +1084,11 @@ USHORT Terminate
 	/********************************************************************/
 	UtlAlloc( (PVOID *) &pLangCB, 0L, 0L, NOMSG );
 
+  LogMessage(FATAL,"TEMPORARY_COMMENTED in Terminate::  SpellFactory::close();MorphFactory::close();");
+  #ifdef TEMPORARY_COMMENTED 
 	SpellFactory::close();
 	MorphFactory::close();
+  #endif
 
 	return( usRC );
 
@@ -3633,16 +3639,20 @@ USHORT MorphGetLanguageID
     pLCB->usCodePage = 850;
     pLCB->fCompSep = FALSE;
 
-    SpellFactory* tSpellFactoryInstance = SpellFactory::getInstance();
+    LogMessage(FATAL,"TEMPORARY_COMMENTED  SpellFactory::getInstance();");
+    SpellFactory* tSpellFactoryInstance = NULL;// SpellFactory::getInstance();
     if (NULL == tSpellFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
-    MorphFactory* tMorphFactoryInstance = MorphFactory::getInstance();
+    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphFactory::getInstance(); 2");
+    MorphFactory* tMorphFactoryInstance =  NULL;//MorphFactory::getInstance();
     if (NULL == tMorphFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
+    LogMessage(FATAL,"TEMPORARY_COMMENTED in MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))");
+    #ifdef TEMPORARY_COMMENTED
     if (MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))
     {
     }
@@ -3650,6 +3660,7 @@ USHORT MorphGetLanguageID
     {
       usRC = MORPH_OK; // GQ: disabled temporarely the result of isSupported, correct code is: usRC = MORPH_NO_LANG_PROPS;
     } /* endif */
+    #endif
   } /* endif */
 
   /********************************************************************/

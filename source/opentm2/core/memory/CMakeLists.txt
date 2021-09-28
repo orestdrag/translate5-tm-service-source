@@ -15,6 +15,7 @@ set(Mem_Source_Files MemoryFactory.cpp
                      #EQFMEMMP.CPP
                      #EQFTMM.CPP
                      #EQFMEMLD.CPP
+                     GenericTagReplace.cpp
                      ${OPENTM2_DIR}/EQFX_API.C
 )
 

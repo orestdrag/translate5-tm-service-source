@@ -29,6 +29,7 @@
 #include "MarkupPluginMapper.H"
 #include "MemoryFactory.h"
 #include <map>
+#include "../../core/utilities/LogWrapper.h"
 
 #ifdef _DEBUG
   //#define MEASURETIME
@@ -265,7 +266,6 @@ USHORT NTMCompareContext
 //typedef USHORT (APIENTRY *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
 typedef USHORT (__cdecl *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
 
-#ifdef TEMPORARY_COMMENTED
 VOID SetAvailFlags( PTMX_GET_OUT_W pTmGetOut, USHORT usMatchesFound)
 {
   // store indication if more matches are available
@@ -289,6 +289,7 @@ VOID SetAvailFlags( PTMX_GET_OUT_W pTmGetOut, USHORT usMatchesFound)
   }
 }
 
+#ifdef TEMPORARY_COMMENTED
 // get match type 
 OtmProposal::eMatchType GetMatchTypeFromMatchLevel( USHORT usMatchLevel )
 {
@@ -332,6 +333,7 @@ static BOOL NTMCheckAndDeleteTagPairs
 #endif
 );
 
+#endif 
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -525,10 +527,14 @@ USHORT TmtXGet
               //if usNumMatchesFound is zero then try for fuzzies
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
               {
+                
+                LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 1");
+                #ifdef TEMPORARY_COMMENTED
                 LOGPRINTF0( L"TmtXGet: No exact matches found, trying GetFuzzyMatch\r\n" );
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
+                #endif
               } /* endif */
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
@@ -537,9 +543,13 @@ USHORT TmtXGet
             else
             {
                 LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
+                
+                LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 2");
+                #ifdef TEMPORARY_COMMENTED
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
+                #endif
 #ifdef MEASURETIME
                 GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -583,8 +593,12 @@ USHORT TmtXGet
             GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
               LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
+              
+              LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 3");
+              #ifdef TEMPORARY_COMMENTED
               usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
               LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
+              #endif
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -661,6 +675,8 @@ USHORT TmtXGet
        pstActMatch = &(pTmGetOut->stMatchTable[j]);
        for ( i=j+1; i< pTmGetOut->usNumMatchesFound ; i++)
        {
+         LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::UtlCompIgnWhiteSpaceW");
+          #ifdef TEMPORARY_COMMENTED
          if (UtlCompIgnWhiteSpaceW(pstActMatch->szTarget, (pstMatchTable+i)->szTarget, 0) == 0L)
          {
            /*************************************************************/
@@ -671,6 +687,7 @@ USHORT TmtXGet
            pTmGetOut->usNumMatchesFound--;
            i--;                    // reset i because we deleted the i-th one
          } /* endif */
+         #endif
        } /* endfor */
      } /* endfor */
   } /* endif */
@@ -681,8 +698,9 @@ USHORT TmtXGet
   /* restrict number of matches found to the maximum number requested */
   /* by user                                                          */
   /********************************************************************/
-  pTmGetOut->usNumMatchesFound =
-    min( pTmGetOut->usNumMatchesFound, pTmGetIn->stTmGet.usRequestedMatches );
+  
+  pTmGetOut->usNumMatchesFound =  pTmGetOut->usNumMatchesFound < pTmGetIn->stTmGet.usRequestedMatches ?
+               pTmGetOut->usNumMatchesFound : pTmGetIn->stTmGet.usRequestedMatches;
 
 
   //release memory
@@ -734,8 +752,6 @@ USHORT TmtXGet
 
   return( usRc );
 }
-
-
 
 
 //+----------------------------------------------------------------------------+
@@ -843,11 +859,14 @@ USHORT GetExactMatch
         } /* endif */
         if ( usRc == NO_ERROR )
         {
+          LogMessage(FATAL,"TEMPORARY_COMMENTED in GetExactMatch::ExactTest");
+          #ifdef TEMPORARY_COMMENTED
           //compare tm record data with data passed in the get in structure
           LOGPRINTF1( L"GetExactMatch: ExactTest of record %lu\r\n", ulKey );
           usRc = ExactTest( pTmClb, pTmRecord, pGetIn, pSentence,
                             pstMatchTable, &usMatchEntries, ulKey );
           LOGPRINTF1( L"GetExactMatch: ExactTest found %u matching entries\r\n", usMatchEntries );
+          #endif
           if ( !usRc )
           {
             //nr of matches found
@@ -911,6 +930,9 @@ USHORT GetExactMatch
   return( usRc );
 }
 
+
+
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+

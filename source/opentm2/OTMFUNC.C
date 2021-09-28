@@ -1016,9 +1016,9 @@ USHORT EqfQueryMem
 
   if ( pData )
   {
-    LOGWRITE1( "==EqfQueryMem==\n" );
-    LOGPARMLONG( "Handle", lHandle );
-    LOGPARMOPTION( "Options", lOptions );
+    LogMessage4(INFO,"EqfQueryMem:: handle = ", intToA(lHandle), "; options = ", intToA(lOptions));
+  }else{
+    LogMessage(ERROR,"ERROR in EqfQueryMem:: pData is null");
   } /* endif */
 
   // call the memory factory to process the request
@@ -1029,10 +1029,9 @@ USHORT EqfQueryMem
     usRC = pFactory->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
   } /* endif */
 
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
+  LOGLEVEL logLevel = usRC? ERROR : INFO;
+  //if ( pData )
+  LogMessage2(logLevel,"End of EqfQueryMem, RC = ", intToA(usRC));
 
   return( usRC );
 }

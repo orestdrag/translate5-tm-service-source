@@ -1135,6 +1135,7 @@ TmGet (HTM            htm,           //(in)  TM handle
        pstGetOut,
        usMsgHandling );
 }
+#endif
 
 USHORT
 C_TmGetW(HTM            htm,             //(in)  TM handle
@@ -1192,6 +1193,8 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
           /************************************************************/
           /* convert source string                                    */
           /************************************************************/
+          LogMessage(FATAL,"TEMPORARY_COMMENTED in C_TmGetW::NTMConvertCRLFW");
+          #ifdef TEMPORARY_COMMENTED
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szSource,
                           pszTempString,
                           pstGetIn->stTmGet.usConvert );
@@ -1202,6 +1205,7 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szTarget,
                           pszTempString,
                           pstGetIn->stTmGet.usConvert );
+          #endif
         } /* endfor */
         /**************************************************************/
         /* free storage for temp string                               */
@@ -1248,7 +1252,7 @@ TmGetW (HTM            htm,           //(in)  TM handle
 }
 
 
-
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------

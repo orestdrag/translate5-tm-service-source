@@ -17,13 +17,14 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 #define INCL_EQF_MORPH
 #define INCL_EQF_DAM
-#include <eqf.h>                  // General Translation Manager include file
+#include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
+#include "../../core/utilities/LogWrapper.h"
 
 static VOID
 MakeHashValueW
@@ -327,12 +328,15 @@ BOOL     NTMTagSubst
   if ( fOK && pReplaceList )
   {
     memcpy( pCopyTokList2, pSubstProp->pTokSource, pSubstProp->usTokenSource * sizeof(FUZZYTOK));
+    LogMessage(FATAL,"TEMPORARY_COMMENTED in NTMTagSubst::FuzzyLCSReplList");
+          #ifdef TEMPORARY_COMMENTED
     fOK = (BOOL)FuzzyLCSReplList( (PFUZZYTOK)pSubstProp->pTokPropSource,
                                   (PFUZZYTOK)pSubstProp->pTokSource,
                                   &pReplaceSourceList,
                                   pSubstProp->usTokenPropSource,
                                   pSubstProp->usTokenSource,
                                   NULL, TRUE );
+                                  #endif
     /******************************************************************/
     /* restore original content, but keep fConnected...               */
     /******************************************************************/
@@ -573,7 +577,8 @@ BOOL     NTMTagSubst
           // test characters of start and end tag 
           PSZ_W pszStartTag = pToken->pData + 1;
           PSZ_W pszEndTag = pSegmentEndTags + 2;
-          while ( fAddTags && iswalpha(*pszEndTag) )
+          while ( fAddTags && isalpha(*pszEndTag) )
+          //while ( fAddTags && iswalpha(*pszEndTag) )
           {
             if ( *pszStartTag == *pszEndTag )
             {
@@ -681,7 +686,8 @@ BOOL  isWhiteSpaceW( PSZ_W pData )
 {
   PSZ_W pTemp = pData;
   CHAR_W c;
-  while ( ((c = *pTemp)!= NULC) && iswspace( c ) )
+  //while ( ((c = *pTemp)!= NULC) && iswspace( c ) )
+  while ( ((c = *pTemp)!= NULC) && isspace( c ) )
   {
     pTemp++;
   } /* endwhile */
@@ -964,10 +970,13 @@ NTMSplitAndAddTokens
     {
       chTemp = *(pString + (usStop+(USHORT)1));
       *(pString + (usStop+(USHORT)1)) = EOS;
-
+      
+      LogMessage(FATAL,"TEMPORARY_COMMENTED NTMSplitAndAddTokens::MorphTokenizeW");
+      #ifdef TEMPORARY_COMMENTED
       usRC = MorphTokenizeW( sLangID, pString+usStart,
                             &usListSize, (PVOID *)&pTermList,
                             MORPH_OFFSLIST, ulOemCP );
+      #endif 
 
       *(pString + (usStop+(USHORT)1)) = chTemp;
 
@@ -1954,7 +1963,11 @@ NTMFindTagPair
             CHAR_W chTemp2 = pSubstProp->szPropSource[pCurPairPropTok->usStop+1];
             pTempTokData[pTempTok->usStop+1] = 0;  
             pSubstProp->szPropSource[pCurPairPropTok->usStop+1] = 0;
+
+            LogMessage(FATAL,"TEMPORARY_COMMENTED in NTMFindTagPair::UtlCompIgnWhiteSpaceW");
+            #ifdef TEMPORARY_COMMENTED
             fFound = (UtlCompIgnWhiteSpaceW( pTempData, pPairData, 0 ) == 0 );
+            #endif
             pTempTokData[pTempTok->usStop+1] = chTemp1;  
             pSubstProp->szPropSource[pCurPairPropTok->usStop+1] = chTemp2;
           } /* endif */
@@ -2157,7 +2170,8 @@ BOOL NTMAlignTags
   // allocate replacement list
   if ( fOK )
   {
-    int iSize = max( MAX_REPL, iSourceTags ) + 1;
+    int iSize =  MAX_REPL > iSourceTags?  MAX_REPL : iSourceTags;
+    iSize++;
     fOK = UtlAlloc( (PVOID *)ppReplaceList, 0L, iSize * sizeof(REPLLIST), ERROR_STORAGE );
     pReplaceList = *ppReplaceList;
   } /* endif */
