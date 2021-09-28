@@ -12,7 +12,7 @@
 #include "EQF.H"                  // General .H for EQF
 #include "EQFOBJ00.H"             // Object manager defines
 #include "EQFSETUP.H"
-#include "core/utilities/PropertyWrapper.H"
+#include "PropertyWrapper.H"
 #include "win_types.h"
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"

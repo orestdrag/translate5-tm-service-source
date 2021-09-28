@@ -16,7 +16,7 @@
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 #include "MemoryFactory.h"
 #include "MemoryUtil.h"
 

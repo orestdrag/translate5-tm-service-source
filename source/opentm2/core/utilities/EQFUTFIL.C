@@ -23,8 +23,8 @@
 
 #include "EQFUTPRI.H"                  // private utility header file
 #include "OTMFUNC.H"
-#include "core/utilities/FilesystemHelper.h"
-#include "core/utilities/LogWrapper.h"
+#include "FilesystemHelper.h"
+#include "LogWrapper.h"
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
 //+----------------------------------------------------------------------------+

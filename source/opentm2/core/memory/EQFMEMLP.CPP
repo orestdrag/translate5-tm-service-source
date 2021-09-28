@@ -86,7 +86,7 @@
 #include "EQFHLOG.H"              // for word count category limits
 #include <EQFQDAM.H>              // Low level TM access functions
 #include "EQFFUNCI.H"             // private defines for function call interface
-#include "core/utilities/PropertyWrapper.H"
+#include "PropertyWrapper.H"
 
 #define MEM_START_IMPORT    USER_TASK + 1
 #define MEM_IMPORT_TASK     USER_TASK + 2

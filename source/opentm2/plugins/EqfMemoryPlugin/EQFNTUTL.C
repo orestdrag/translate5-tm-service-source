@@ -50,8 +50,8 @@
 
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
-#include "core/utilities/LogWrapper.h"
-#include "core/utilities/OSWrapper.h"
+#include "LogWrapper.h"
+#include "OSWrapper.h"
 
 #include "EQFCMPR.H"
 /**********************************************************************/

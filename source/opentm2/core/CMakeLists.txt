@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 project(OpenTM2_Core)
 
 add_subdirectory(memory)
@@ -15,6 +15,5 @@ add_subdirectory(tagtable)
 #add_subdirectory(linguistic)
 add_subdirectory(morph)
 add_subdirectory(spell)
-
 
 #install(TARGETS OpenTM2_Core DESTINATION lib)

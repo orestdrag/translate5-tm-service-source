@@ -42,7 +42,7 @@
 #include "../pluginmanager/OtmMemory.h"
 #include "MemoryFactory.h"
 #include "EQFMORPH.H"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 #undef _WPTMIF                         // we don't care about WP I/F
 //#include "eqfhelp.id"                  // help resource IDs

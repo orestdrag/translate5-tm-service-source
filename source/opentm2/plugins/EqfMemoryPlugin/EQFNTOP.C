@@ -19,7 +19,7 @@
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 
 //+----------------------------------------------------------------------------+

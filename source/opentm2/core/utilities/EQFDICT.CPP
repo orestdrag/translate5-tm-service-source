@@ -11,9 +11,9 @@
 #define INCL_EQF_DAM              // low level dict. access functions (Nlp/Dam)
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include <EQF.H>                  // General Translation Manager include file
-#include "core/utilities/LogWrapper.h"
-#include "core/utilities/FilesystemWrapper.h"
-#include "core/utilities/FilesystemHelper.h"
+#include "LogWrapper.h"
+#include "FilesystemWrapper.h"
+#include "FilesystemHelper.h"
 #include "win_types.h"
 
 //#include <EQFQDMAI.H>             // Private QDAM defines

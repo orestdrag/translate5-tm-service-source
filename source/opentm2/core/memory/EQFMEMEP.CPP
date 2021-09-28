@@ -62,7 +62,7 @@
 #include "OTMFUNC.H"              // public defines for function call interface
 
 #include "EQFFUNCI.H"             // private defines for function call interface
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 
 #define MEM_START_EXPORT    USER_TASK + 1
 #define MEM_EXPORT_TASK     USER_TASK + 2

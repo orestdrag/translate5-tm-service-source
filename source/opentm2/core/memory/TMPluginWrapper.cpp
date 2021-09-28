@@ -31,7 +31,7 @@ extern "C"
 #include <wctype.h>
 
 #include "win_types.h"
-#include "core/utilities/LogWrapper.h"
+#include "LogWrapper.h"
 // prototypes for helper functions
 
 

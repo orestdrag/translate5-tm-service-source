@@ -1,39 +1,46 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 project(OtmMemoryService VERSION 0.1)
 
-
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
-
-
-add_subdirectory(opentm2)
-
-set(ROOT "..")
+set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
-set(RESTBED_PATH        "${ROOT}/Packages/restbed")
-set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/distribution/include")
-set(RESTBED_LIBRARIES   "${RESTBED_PATH}/distribution/library")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
+set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
+set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 
 set(OtmMemoryService_Source_Files
-        OtmMemoryService.cpp
-        OtmMemoryServiceWorker.cpp
-        OTMMSJSONFactory.cpp
-        #OtmMemoryServiceTester.cpp
-        otmd.cpp
-        config.cpp
+    OtmMemoryService.cpp
+    OtmMemoryServiceWorker.cpp
+    OTMMSJSONFactory.cpp
+    #OtmMemoryServiceTester.cpp
+    otmd.cpp
+    config.cpp
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${OPENTM2_INCLUDE_DIR} ${RESTBED_INCLUDE_DIR})
 link_directories(${RESTBED_LIBRARIES})
 
 add_executable(OtmMemoryService ${OtmMemoryService_Source_Files})
-target_link_libraries(OtmMemoryService OTMFUNC librestbed.so)
 
+set(CMAKE_CXX_STANDARD 14)
+target_compile_features(OtmMemoryService PRIVATE cxx_std_14)
+
+target_include_directories(OtmMemoryService PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${OPENTM2_INCLUDE_DIR}
+    ${RESTBED_INCLUDE_DIR}
+)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+target_link_libraries(OtmMemoryService PRIVATE
+    OTMFUNC
+    restbed
+    Threads::Threads
+)
+
+add_subdirectory(opentm2)
+
+configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
 #configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
 install(TARGETS OtmMemoryService DESTINATION bin)

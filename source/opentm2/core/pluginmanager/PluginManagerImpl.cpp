@@ -13,7 +13,7 @@
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
-#include "core/utilities/PropertyWrapper.H"
+#include "PropertyWrapper.H"
 
 
 using namespace std;
