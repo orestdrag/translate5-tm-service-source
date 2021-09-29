@@ -41,7 +41,6 @@ target_include_directories(EqfMemoryPlugin PRIVATE
 )
 
 target_link_libraries(EqfMemoryPlugin PRIVATE
-    PluginManager
     Util
     Tools
     Analysis
