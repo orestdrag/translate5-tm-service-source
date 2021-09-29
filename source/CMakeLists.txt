@@ -34,7 +34,7 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(OtmMemoryService PRIVATE
     OTMFUNC
-    restbed
+    librestbed.a
     Threads::Threads
 )
 
