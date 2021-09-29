@@ -26,4 +26,6 @@ set_target_properties(Memory PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(Memory PRIVATE ${CORE_DIR}/utilities)
 target_link_libraries(Memory PRIVATE Util Tagtable Analysis)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Memory DESTINATION lib)

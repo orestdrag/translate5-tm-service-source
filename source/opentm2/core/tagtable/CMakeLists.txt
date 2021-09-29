@@ -17,4 +17,6 @@ target_include_directories(Tagtable PRIVATE
     ${CORE_DIR}/utilities
 )
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Tagtable DESTINATION lib)

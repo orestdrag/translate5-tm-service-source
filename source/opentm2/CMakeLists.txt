@@ -41,4 +41,6 @@ target_link_libraries(OTMFUNC PRIVATE Memory
                                       EqfMemoryPlugin
 )
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS OTMFUNC DESTINATION lib)

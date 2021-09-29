@@ -7,4 +7,6 @@ set_target_properties(Tools PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(common)
 
-#install(TARGETS OpenTM2_Tools DESTINATION lib)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
+install(TARGETS Tools DESTINATION lib)

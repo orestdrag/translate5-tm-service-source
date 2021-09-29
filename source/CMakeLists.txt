@@ -40,6 +40,8 @@ target_link_libraries(OtmMemoryService PRIVATE
 
 add_subdirectory(opentm2)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
 #configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
@@ -55,8 +57,17 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
 )
 
+# Configure CPack
 include(InstallRequiredSystemLibraries)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR "${OtmMemoryService_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${OtmMemoryService_VERSION_MINOR}")
+set(CPACK_PACKAGE_NAME                    "OtmMemoryService")
+#set(CPACK_PACKAGE_VENDOR                  "Translate 5")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     "OtmMemoryService")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY       ${CPACK_PACKAGE_NAME})
+set(CPACK_PACKAGE_VERSION_MAJOR           "${OtmMemoryService_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR           "${OtmMemoryService_VERSION_MINOR}")
+set(CPACK_VERBATIM_VARIABLES              TRUE)
+#set(CPACK_PACKAGE_DESCRIPTION_FILE        "${CMAKE_CURRENT_SOURCE_DIR}/Description.txt")
+#set(CPACK_RESOURCE_FILE_WELCOME           "${CMAKE_CURRENT_SOURCE_DIR}/Welcome.txt")
+#set(CPACK_RESOURCE_FILE_LICENSE           "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+#set(CPACK_RESOURCE_FILE_README            "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
 include(CPack)

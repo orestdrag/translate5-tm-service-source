@@ -11,4 +11,6 @@ target_include_directories(Morph PRIVATE
     ${CORE_DIR}/utilities
 )
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Morph DESTINATION lib)

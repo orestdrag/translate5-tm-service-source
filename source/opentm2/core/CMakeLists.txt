@@ -15,5 +15,3 @@ add_subdirectory(tagtable)
 #add_subdirectory(linguistic)
 add_subdirectory(morph)
 add_subdirectory(spell)
-
-#install(TARGETS OpenTM2_Core DESTINATION lib)

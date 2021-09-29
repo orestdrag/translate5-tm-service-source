@@ -52,6 +52,8 @@ target_link_libraries(EqfMemoryPlugin PRIVATE
 # Contains dlopen, dlclose
 target_link_libraries(EqfMemoryPlugin PUBLIC ${CMAKE_DL_LIBS})
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
 install(TARGETS EqfMemoryPlugin

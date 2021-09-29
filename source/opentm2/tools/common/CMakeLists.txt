@@ -3,4 +3,6 @@ project(OpenTM2_Common)
 
 add_library(Common InitPlugins.cpp)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Common DESTINATION lib)

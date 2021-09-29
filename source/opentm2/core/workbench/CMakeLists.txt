@@ -14,4 +14,6 @@ add_library(Workbench ${Workbench_Source_Files})
 target_include_directories(Workbench PRIVATE ${CORE_DIR}/utilities)
 target_link_libraries(Workbench PRIVATE Util)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Workbench DESTINATION lib)

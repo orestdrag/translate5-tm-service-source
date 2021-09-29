@@ -5,4 +5,6 @@ set(Services_Source_Files EQFDDE00.C)
 
 add_library(Services ${Services_Source_Files})
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
 install(TARGETS Services DESTINATION lib)
