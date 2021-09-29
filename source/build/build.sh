@@ -3,6 +3,11 @@
 BUILD_TYPE=Debug
 CORES=8
 
+do_install() {
+  echo "Installing..."
+  make install -j${CORES}
+}
+
 do_clean() {
   echo "Cleaning..."
   for file in *; do
@@ -21,6 +26,8 @@ do_build() {
 do_main() {
   if [ "$1" = "clean" ]; then
     do_clean
+  elif [ "$1" = "install" ]; then
+    do_install
   else
     do_build
   fi

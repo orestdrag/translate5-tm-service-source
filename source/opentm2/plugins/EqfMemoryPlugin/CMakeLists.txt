@@ -62,6 +62,6 @@ install(TARGETS EqfMemoryPlugin
 )
 
 install(FILES
-    ${CMAKE_BINARY_DIR}/OpenTM2_EqfMemoryPlugin.pc
+  ${CMAKE_CURRENT_SOURCE_DIR}/OpenTM2_EqfMemoryPlugin.pc
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
 )

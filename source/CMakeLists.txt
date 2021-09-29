@@ -52,10 +52,10 @@ install(TARGETS OtmMemoryService DESTINATION bin)
 #    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 #)
 
-install(FILES
-    ${CMAKE_BINARY_DIR}/OpenTM2_EqfMemoryPlugin.pc
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
-)
+#install(FILES
+#    ${CMAKE_BINARY_DIR}/OpenTM2_EqfMemoryPlugin.pc
+#    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+#)
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
