@@ -27,12 +27,9 @@ set(EqfMemoryPlugin_Source_Files
 
 include(GNUInstallDirs)
 
-add_library(EqfMemoryPlugin SHARED ${EqfMemoryPlugin_Source_Files})
+add_library(EqfMemoryPlugin ${EqfMemoryPlugin_Source_Files})
 
-set_target_properties(EqfMemoryPlugin PROPERTIES
-    PUBLIC_HEADER EqfMemory.h
-    POSITION_INDEPENDENT_CODE ON
-)
+set_target_properties(EqfMemoryPlugin PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(EqfMemoryPlugin PRIVATE
     ${CORE_DIR}/utilities
@@ -53,14 +50,4 @@ target_link_libraries(EqfMemoryPlugin PUBLIC ${CMAKE_DL_LIBS})
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 
-configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
-
-install(TARGETS EqfMemoryPlugin
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-install(FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/OpenTM2_EqfMemoryPlugin.pc
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
-)
+install(TARGETS EqfMemoryPlugin DESTINATION lib)

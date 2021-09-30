@@ -15,8 +15,7 @@ target_include_directories(PluginManager PRIVATE
     ${CORE_DIR}/utilities
 )
 
-# Contains dlopen, dlclose
-target_link_libraries(PluginManager PUBLIC ${CMAKE_DL_LIBS})
+target_link_libraries(PluginManager PRIVATE EqfMemoryPlugin)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 
