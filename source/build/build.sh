@@ -3,6 +3,11 @@
 BUILD_TYPE=Debug
 CORES=8
 
+do_package() {
+  echo "Packaging..."
+  cpack -G TXZ -C ${BUILD_TYPE}
+}
+
 do_install() {
   echo "Installing..."
   make install -j${CORES}
@@ -28,6 +33,8 @@ do_main() {
     do_clean
   elif [ "$1" = "install" ]; then
     do_install
+  elif [ "$1" = "package" ]; then
+    do_package
   else
     do_build
   fi
