@@ -14,9 +14,11 @@
 //+----------------------------------------------------------------------------+
 
 #ifndef EQFMEMIE_H_INCLUDED
-
 #define EQFMEMIE_H_INCLUDED
 
+
+//#include "EQFOSWIN.H"
+typedef char* PSZ;
 
 // general defines
 

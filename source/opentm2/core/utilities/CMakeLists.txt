@@ -33,6 +33,7 @@ set(Util_Source_Files
     #EQFUTCLB.C
     #unzip.cpp
     EQFDICT.CPP
+    EqfPluginWrapper.cpp
     EQFPRO00.C
     EQFMORPW.C
     EQFMORPH.CPP

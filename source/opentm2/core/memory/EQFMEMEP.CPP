@@ -46,6 +46,7 @@
 #include "../utilities/FilesystemWrapper.h"
 #include "../utilities/PropertyWrapper.H"
 #include "../utilities/FilesystemHelper.h"
+#include "../utilities/EqfPluginWrapper.h"
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
@@ -115,9 +116,13 @@ typedef struct _MEM_EXPORT_IDA
  HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
+
+ #ifdef TO_BE_REMOVED
  PFN_EXTMEMEXPORTSTART   pfnMemExpStart;         // function handling start of export
  PFN_EXTMEMEXPORTPROCESS pfnMemExpProcess;       // function handling export of a segment
  PFN_EXTMEMEXPORTEND     pfnMemExpEnd;           // function handling end of export
+ #endif
+
  BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
  CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
  OtmMemory    *pMem;                      // pointer to memory being exported
@@ -976,10 +981,14 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
        (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
   {
+    #ifdef TO_BE_REMOVED
     if ( pExportIDA->pfnMemExpEnd )
     {
       pExportIDA->pfnMemExpEnd( pExportIDA->lExternalExportHandle );
     } /* endif */
+    #endif 
+    EqfPluginWrapper::MemExportEnd();
+
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
     if ( pExportIDA->hmodMemExtExport ) DosFreeModule( &(pExportIDA->hmodMemExtExport) );
@@ -1343,12 +1352,9 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
      } /* endif */
 
      // load external memory export module
-     //usRc = DosLoadModule( NULL, 0, "OTMTMXIE", &(pExportIDA->hmodMemExtExport) );
-    char libPath[MAX_EQF_PATH];
-    properties_get_str(KEY_PLUGIN_DIR, libPath, MAX_EQF_PATH);
-    strcat(libPath, "libEqfMemoryPlugin.so");
-    usRc = DosLoadModule( NULL, 0, libPath, &(pExportIDA->hmodMemExtExport));
-
+     EqfPluginWrapper::init();
+     
+     #ifdef TO_REPLACE
      // load entry points
      if ( !usRc )
      {
@@ -1361,6 +1367,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
      }else{
        LogMessage2(ERROR, "MemExportStart:: can't load module ", libPath);
      } /* endif */
+     #endif
 
      // call start entry point
      if ( !usRc )
@@ -1390,9 +1397,12 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
        LogMessage6(INFO,"MemExportStart::calling external function, mem name = ", pExportIDA->pstMemInfo->szName,"; source lang = ", pExportIDA->pstMemInfo->szSourceLang,
             "; markup = ", pExportIDA->pstMemInfo->szFormat);
 
+       #ifdef TO_REPLACE
        usRc = pExportIDA->pfnMemExpStart( &(pExportIDA->lExternalExportHandle),  
                                            pExportIDA->ControlsIda.szPathContent,
                                            pExportIDA->pstMemInfo );
+       #endif
+       usRc = EqfPluginWrapper::MemExportStart(pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
      } /* endif */
      
 
@@ -1552,7 +1562,8 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
 
 
-         usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
+         //usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
+         usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->pstSegment );
 
          // map return code to the ones used by memory export...
          switch ( usRc )
