@@ -759,7 +759,7 @@ typedef struct _MEM_LOAD_IDA
  SHORT sAddInfoTokenID;
 
  // fields for external memory import methods
- HMODULE       hmodMemExtImport;                 // handle of external import module/DLL
+ //HMODULE       hmodMemExtImport;                 // handle of external import module/DLL
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
  

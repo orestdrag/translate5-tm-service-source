@@ -113,7 +113,7 @@ typedef struct _MEM_EXPORT_IDA
  ULONG         ulAnsiCP;
  // fields for external memory export methods
  LONG          lExternalExportHandle;  // handle of external memory export functions
- HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
+ //HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
 
@@ -987,11 +987,11 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
       pExportIDA->pfnMemExpEnd( pExportIDA->lExternalExportHandle );
     } /* endif */
     #endif 
-    EqfPluginWrapper::MemExportEnd();
+    EqfPluginWrapper::MemExportEnd(pExportIDA->lExternalExportHandle );
 
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
-    if ( pExportIDA->hmodMemExtExport ) DosFreeModule( &(pExportIDA->hmodMemExtExport) );
+    //if ( pExportIDA->hmodMemExtExport ) DosFreeModule( &(pExportIDA->hmodMemExtExport) );
   }
 
   //--- Check if the termination was due to a
@@ -1402,7 +1402,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
                                            pExportIDA->ControlsIda.szPathContent,
                                            pExportIDA->pstMemInfo );
        #endif
-       usRc = EqfPluginWrapper::MemExportStart(pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
+       usRc = EqfPluginWrapper::MemExportStart(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
      } /* endif */
      
 
@@ -1563,7 +1563,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
 
 
          //usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
-         usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->pstSegment );
+         usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
 
          // map return code to the ones used by memory export...
          switch ( usRc )
