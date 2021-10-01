@@ -1325,7 +1325,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
 USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
                         HWND              hWnd )
 {
-   USHORT           usRc = TRUE;          // Process control switch
+   USHORT           usRc = 0;          // Process control switch
    PMEM_EXPORT_IDA  pExportIDA;           // Pointer to the export IDA
    PSZ              pReplAddr[2];         // Pointer to an address list of
                                           // replacement strings

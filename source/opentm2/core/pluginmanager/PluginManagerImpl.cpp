@@ -388,6 +388,8 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
         }
     }
 
+    #ifdef TO_BE_REMOVED
+    
     void *handle = dlopen("libEqfMemoryPlugin.so", RTLD_LAZY);
     if (!handle) {
         fprintf(stderr, "%s\n", dlerror());
@@ -410,12 +412,17 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 #endif //TEMPORARY_COMMENTED
     }
 
+  #endif//TO_BE_REMOVED
+
+
     // prepare our loaded DLL entry
     //iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size(); vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL]
     vLoadedPluginDLLs.push_back( LoadedPluginDLL() );
     LoadedPluginDLL& rNewPluginDll = vLoadedPluginDLLs.back();
+    #ifdef TO_BE_REMOVED
     rNewPluginDll.hMod = handle;
-
+    #endif
+    
     // Add for P402792 start
     memset(rNewPluginDll.strDll, 0x00,
         sizeof(rNewPluginDll.strDll));
@@ -423,7 +430,9 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
     // Add end
 
     // call plugin registration entry point
-    usRC = pFunc();     // Add return value for P402974
+    //usRC = pFunc();     // Add return value for P402974
+    usRC = registerPlugins();
+
     if (usRC) {
         // if register dll error, just remove the dll from the group
 #ifdef TEMPORARY_COMMENTED
@@ -442,7 +451,9 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
         vLoadedPluginDLLs.pop_back();
         // FOR P403268 end
 
+      #ifdef TO_BE_REMOVED
         dlclose(handle);
+        #endif
     }
 
     // reset active plugin DLL entry
