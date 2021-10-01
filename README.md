@@ -16,11 +16,20 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/corvusoft/restbed   
 &nbsp;&nbsp;&nbsp;&nbsp;Clone the repo into the Packages dir, and build it.
 
-**Build**  
-cd source/plugins/OtmMemoryService  
-mkdir build  
-cmake ..  
-make  
+sudo apt install libxerces-c-dev
 
-**Status notes**  
-The project can be built (excluding OtmMemoryServiceGUI.CPP and WinService.CPP) when Win API calls and data types are commented.
+**Build**  
+cd source/build  
+./build.sh
+
+**Clean**
+cd source/build  
+./build.sh clean  
+
+**Install**
+cd source/build  
+./build.sh install  
+
+**Package**
+cd source/build  
+./build.sh package  
