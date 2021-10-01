@@ -3053,21 +3053,10 @@ BOOL UtlSetDrive
    USHORT usRc = 0;
 
    *ppfnProcAddr = (PFN)dlsym(hMod, pszProcName);
-   //*ppfnProcAddr = GetProcAddress( hMod, pszProcName );
    if (!*ppfnProcAddr )
    {
      LogMessage2(ERROR, "DosGetProcAddr:: can't find function ", pszProcName);
-//#ifdef _DEBUG
-//     char szFilename[2048];
-//	 FILE *pFile = fopen("missfunc.out", "a");
-//	 if (pFile)
-//	 {
-//		GetModuleFileName(hMod, szFilename, sizeof(szFilename) - 1);
-//		fprintf(pFile, "%s not found in %s\n", pszProcName, szFilename);
-//		fclose(pFile);
-//	 }
-//#endif
-     //usRc = ERROR_PROC_NOT_FOUND;
+
    } /* endif */
    return usRc;
  }

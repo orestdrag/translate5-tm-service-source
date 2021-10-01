@@ -39,7 +39,9 @@ EqfMemoryPlugin::EqfMemoryPlugin()
     pluginType  = OtmPlugin::eTranslationMemoryType;
     usableState = OtmPlugin::eUsable;
 
+    //#ifdef TEMPORARY_COMMENTED
     UtlGetCheckedEqfDrives( szSupportedDrives );
+    //#endif
 
     this->refreshMemoryList();
 }

@@ -20,7 +20,10 @@ class PluginListener;
 */
 struct LoadedPluginDLL
 {
+  #ifdef TO_BE_REMOVED
   HMODULE hMod;                        // DLL module handle
+  #endif
+
   char strDll[MAX_PATH];               // Add for P402792, dll path
   std::vector<OtmPlugin*> vPluginList; // list of plugins contained in DLL
 };
