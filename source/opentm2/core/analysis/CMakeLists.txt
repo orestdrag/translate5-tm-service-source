@@ -7,7 +7,3 @@ set(Analysis_Source_Files EQFTATAG.C
 )
 
 add_library(Analysis ${Analysis_Source_Files})
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS Analysis DESTINATION lib)

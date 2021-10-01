@@ -45,7 +45,3 @@ set_target_properties(Util PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(Util PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Util PRIVATE libxerces-c-3.2.so)
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS Util DESTINATION lib)

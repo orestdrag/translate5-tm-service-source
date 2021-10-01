@@ -16,7 +16,3 @@ target_include_directories(PluginManager PRIVATE
 )
 
 target_link_libraries(PluginManager PRIVATE EqfMemoryPlugin)
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS PluginManager DESTINATION lib)

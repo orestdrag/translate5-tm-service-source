@@ -16,7 +16,3 @@ target_include_directories(Tagtable PRIVATE
     ${OPENTM2_INCLUDE_DIR}
     ${CORE_DIR}/utilities
 )
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS Tagtable DESTINATION lib)

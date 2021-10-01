@@ -3,7 +3,3 @@ project(OpenTM2_Spell)
 
 add_library(Spell SpellFactory.cpp)
 target_include_directories(Spell PRIVATE ${OPENTM2_INCLUDE_DIR})
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS Spell DESTINATION lib)

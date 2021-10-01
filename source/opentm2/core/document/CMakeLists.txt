@@ -6,7 +6,3 @@ set(Document_Source_Files #EQFDOC00.C
 )
 
 add_library(Document ${Document_Source_Files})
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-install(TARGETS Document DESTINATION lib)
