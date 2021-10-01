@@ -72,13 +72,15 @@ int writeLog(std::string& message, bool fFatal = false){
             logErrorF.open(logFilename+"_FATAL", std::ios_base::app); // append instead of overwrite
         }
         logErrorF << message <<"\n"; 
+        logErrorF.flush();
         //logErrorF.close();
     }
     #endif
-        if(!logErrorF.is_open()){
+        if(!logF.is_open()){
             logF.open(logFilename, std::ios_base::app); // append instead of overwrite
         }
         logF << message <<"\n"; 
+        logF.flush();
         //logF.close();
     }
     return 0;
