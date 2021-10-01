@@ -22,14 +22,14 @@ sudo apt install libxerces-c-dev
 cd source/build  
 ./build.sh
 
-**Clean**
+**Clean**  
 cd source/build  
 ./build.sh clean  
 
-**Install**
+**Install**  
 cd source/build  
 ./build.sh install  
 
-**Package**
+**Package**  
 cd source/build  
 ./build.sh package  
