@@ -127,16 +127,18 @@ int Properties::init() {
         LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
     }
-    set_anyway(KEY_OTM_DIR, otm_dir);
+    set_value(KEY_OTM_DIR, otm_dir);
     std::string mem_dir = otm_dir+ "/MEM/";
-    set_anyway(KEY_MEM_DIR, mem_dir);
+    set_value(KEY_MEM_DIR, mem_dir);
     
+    /*
     std::string plugin_dir = otm_dir + "/PLUGINS/";
     if(FilesystemHelper::CreateDir(plugin_dir)){
         LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR, plugin_dir: ", plugin_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR;
     }
     set_anyway(KEY_PLUGIN_DIR, plugin_dir);
+    //*/
 
     filename_str = otm_dir + "/" + "Properties_str";
     filename_int = otm_dir +"/" + "Properties_int";

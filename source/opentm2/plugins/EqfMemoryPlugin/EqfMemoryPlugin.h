@@ -20,6 +20,7 @@ class EqfMemoryPlugin: public OtmMemoryPlugin
 */
 
 {
+  static EqfMemoryPlugin* _instance;
 public:
 /*! \brief Constructor
 */
@@ -27,6 +28,8 @@ public:
 /*! \brief Destructor
 */
 	~EqfMemoryPlugin();
+
+  static EqfMemoryPlugin* GetInstance();
 
 /*! \brief Returns the name of the plugin
 */

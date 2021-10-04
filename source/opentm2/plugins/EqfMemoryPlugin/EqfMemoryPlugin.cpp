@@ -25,6 +25,7 @@ static char *pszShortDescription = "TranslationMemoryPlugin";
 static char *pszLongDescription	= "This is the standard Translation-Memory implementation";
 static char *pszVersion = "1.0";
 static char *pszSupplier = "International Business Machines Corporation";
+EqfMemoryPlugin* EqfMemoryPlugin::_instance = NULL;
 
 EqfMemoryPlugin::EqfMemoryPlugin()
 {
@@ -48,6 +49,13 @@ EqfMemoryPlugin::EqfMemoryPlugin()
 
 EqfMemoryPlugin::~EqfMemoryPlugin()
 {
+}
+
+EqfMemoryPlugin* EqfMemoryPlugin::GetInstance(){
+  if(_instance == NULL){
+    _instance = new EqfMemoryPlugin();
+  }
+  return _instance;
 }
 
 const char* EqfMemoryPlugin::getName()
@@ -1007,6 +1015,7 @@ int EqfMemoryPlugin::findMemoryIndex
 }
 
 
+//#ifdef TEMPORARY_COMMENTED
 bool EqfMemoryPlugin::stopPlugin( bool fForce  )
 {
 
@@ -1034,12 +1043,15 @@ USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
 	PluginManager *manager = PluginManager::getInstance();
-	EqfMemoryPlugin* plugin = new EqfMemoryPlugin();
+  
+	//EqfMemoryPlugin* plugin = new EqfMemoryPlugin();
+  EqfMemoryPlugin* plugin = EqfMemoryPlugin::GetInstance();
 	eRc = manager->registerPlugin((OtmPlugin*) plugin);
     USHORT usRC = (USHORT) eRc;
     return usRC;
 }
 }
+//#endif
 
 /*! \brief Build the path name for a memory
   \param pszName (long) name of the new memory

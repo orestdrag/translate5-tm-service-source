@@ -22,6 +22,7 @@
 
 #include "EQFFOL.H"
 #include "EQFHLOG.H"              // private history log include file
+#include "core/utilities/LogWrapper.h"
 
 #define SLIDER_INCREMENT    101                  // number of increments on slider bar
 
@@ -5607,12 +5608,15 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
       *pulMarkUp = 0L;
 
       ulOEMCP = GetLangOEMCP(pszLang);
+      //LogMessage(FATAL,"Called TEMPORARY COMMENTED FUNCTION EQFWORDCNTPERSEGW::EQFBWordCntPerSeg() ");
+  //#ifdef TEMPORARY_COMMENTED
       usRC = EQFBWordCntPerSeg(
                        (PLOADEDTABLE)pVoidTable,
                        pTokBuf,
                        pszSeg,
                        sLangID,
                        pulResult, pulMarkUp, ulOEMCP);
+  //                     #endif
     } /* endif */
 
     // cleanup

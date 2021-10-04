@@ -38,6 +38,9 @@ extern "C"{
     int LogMessage8(int LogLevel, const char* message1, const char* message2, const char* message3,
                     const char* message4, const char* message5, const char* message6, const char* message7, const char* message8);
     char* intToA(int i);
+
+    //int SuppressLoggingInFile();
+    int DesuppressLoggingInFile();
 }
 
 #endif //_LOG_WRAPPER_H_

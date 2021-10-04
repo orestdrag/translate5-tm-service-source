@@ -31,10 +31,11 @@ void service_worker() {
 }
 
 int main() {
-    LogMessage(INFO, "Worker thread starting\n");
+    //SuppressFileLogging();
+    LogMessage(INFO, "Worker thread starting");
     std::thread worker(service_worker);
     worker.join();
-    LogMessage(INFO, "Worker thread finished\n");
+    LogMessage(INFO, "Worker thread finished");
 }
 
 

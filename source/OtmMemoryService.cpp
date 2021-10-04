@@ -30,6 +30,7 @@
 #include "win_types.h"
 #include "config.h"
 #include "opentm2/core/utilities/PropertyWrapper.H"
+#include "opentm2/core/utilities/FilesystemWrapper.h"
 #include "EQF.H"
 #include "opentm2/core/utilities/LogWrapper.h"
 
@@ -312,24 +313,48 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
   {
     char szServiceName[100] = "otmmemoryservice";
+    char szOtmDirPath[255] ="";
     unsigned int uiPort = 8080;
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
 
     /* get configuration settings */
     {
-        config conf;
+        string defOtmDirPath, path = filesystem_get_home_dir();
+        defOtmDirPath = path;
+        defOtmDirPath += "/.OtmMemoryService/";
+        path += "/.OtmMemoryService/otm_service.conf";
+        strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
+
+        LogMessage2(INFO,"Try to open server config file, path = ", path.c_str());
+        config conf(path);
         int res = conf.parse();
 
         if (!res) {
             strncpy(szServiceName,
                 conf.get_value("name", "otmmemoryservice").c_str(), 100);
+            strncpy(szOtmDirPath,
+                conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
             uiPort = std::stoi(conf.get_value("port", "8080"));
             uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
+        }else{
+          LogMessage2(ERROR, "can't open otm_service.conf, path = ", path.c_str());
         }
     }
+    
+    properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
+    std::string memDir = szOtmDirPath;
+    memDir += "/MEM/";
+    properties_add_str(KEY_MEM_DIR, memDir.c_str());
 
+    //From here we have logging in file turned on
+    DesuppressLoggingInFile();
+
+    LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", intToA(uiPort), "; Worker threads = ", intToA(uiWorkerThreads),
+            "; timeout = ", intToA(uiTimeOut));
+    LogMessage2(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath);
+    
     // set caller's service name and port fields
     strcpy( pszService, szServiceName );
     *puiPort = uiPort;

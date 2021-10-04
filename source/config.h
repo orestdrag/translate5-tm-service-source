@@ -12,7 +12,7 @@ public:
     { return data.count(key) ? data.at(key) : def; }
 
 private:
-    std::string filename = "../.OtmMemoryService.conf";
+    std::string filename = "~/.OtmMemoryService/.OtmMemoryService.conf";
 
     std::map<std::string, std::string> data;
 };

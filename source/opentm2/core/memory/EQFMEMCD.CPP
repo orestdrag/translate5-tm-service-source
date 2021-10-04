@@ -1884,12 +1884,15 @@ LONG                lOptions                 // type of new Translation Memory
   // check if TM exists already
   if ( usRC == NO_ERROR )
   {
+    //LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: plugins");
+    //#ifdef TEMPORARY_COMMENTED
     if ( pFactory->exists( NULL, pszMemName ) )
     {
       PSZ pszParam = (PSZ)pszMemName;
       UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszParam, EQF_ERROR, HWND_FUNCIF );
       usRC = ERROR_MEM_NAME_INVALID;
     }
+    //#endif
   } /* endif */
 
 

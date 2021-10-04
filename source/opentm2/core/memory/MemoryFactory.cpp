@@ -25,6 +25,7 @@ Copyright Notice:
 #include "../pluginmanager/OtmMemory.h"
 #include "../pluginmanager/OtmSharedMemory.h"
 #include "../../core/utilities/OSWrapper.h"
+#include "../../plugins/EqfMemoryPlugin/EqfMemoryPlugin.h"
 #include "MemoryUtil.h"
 #include "../memory/MemoryFactory.h"
 #include "OptionsDialog.H"
@@ -373,6 +374,8 @@ OtmMemory *MemoryFactory::createMemory
   if ( piErrorCode != NULL ) 
       *piErrorCode = 0;
 
+  //LogMessage(WARNING,"TEMPORARY_COMMENTED in MemoryFactory::createMemory: plugins");
+  //#ifdef TEMPORARY_COMMENTED
   pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
@@ -390,6 +393,7 @@ OtmMemory *MemoryFactory::createMemory
     LogMessage2(ERROR, "MemoryFactory::createMemory()::ERROR_PLUGINNOTAVAILABLE, Create failed, with message ", this->strLastError.c_str());
     return( NULL );
   } /* endif */       
+  //#endif
 
   // use the plugin to create the memory
   std::string strMemoryName;
@@ -405,6 +409,18 @@ OtmMemory *MemoryFactory::createMemory
   else{
     LogMessage(FATAL,"MemoryFactory::createMemory, plugin type is not supported");
   }
+  //#endif // TEMPORARY_COMMENTED
+
+  #ifdef TEMPORARY_COMMENTED
+  std::string strMemoryName;
+  this->getMemoryName( pszMemoryName, strMemoryName );
+  auto pluginSelected = EqfMemoryPlugin::GetInstance();
+  pMemory = pluginSelected->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+  if ( pMemory == NULL ){
+     this->iLastError = pluginSelected->getLastError( this->strLastError );
+     LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
+  }
+  #endif
 
   if ( pMemory == NULL)
   {
@@ -1996,6 +2012,8 @@ int MemoryFactory::getMemoryName
 
 void MemoryFactory::refreshPluginList() 
 {
+  //LogMessage(ERROR,"Called TEMPORARY COMMENTED FUNCTION MemoryFactory::refreshPluginList() ");
+  //#ifdef TEMPORARY_COMMENTED
   if ( this->pluginList != NULL ) delete( this->pluginList );
   if ( this->pSharedMemPluginList != NULL ) delete( this->pSharedMemPluginList );
 
@@ -2054,6 +2072,8 @@ void MemoryFactory::refreshPluginList()
   {
     strcpy( this->szDefaultSharedMemoryPlugin, (*pSharedMemPluginList)[0]->getName() );
   }
+
+//#endif
 
 }
 

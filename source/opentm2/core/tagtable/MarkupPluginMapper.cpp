@@ -13,6 +13,7 @@
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMarkup.h"
 #include "../pluginmanager/OtmMarkupPlugin.h"
+#include "../utilities/LogWrapper.h"
 
 #ifndef CPPTEST
 extern "C"
@@ -55,6 +56,8 @@ typedef struct _MARKUPENTRY
 __declspec(dllexport)
 void InitMarkupPluginMapper()
 {
+   //LogMessage(ERROR,"Called TEMPORARY COMMENTED FUNCTION InitMarkupPluginMapper() ");
+  //#ifdef TEMPORARY_COMMENTED
   OtmMarkupPlugin* curPlugin = NULL;
 
   // access plugin manager
@@ -69,6 +72,7 @@ void InitMarkupPluginMapper()
     curPlugin = (OtmMarkupPlugin*) thePluginManager->getPlugin(OtmPlugin::eMarkupType, i );
     if ( curPlugin != NULL ) pluginList->push_back( curPlugin );
   }  while ( curPlugin != NULL ); /* end */     
+  //#endif
 }
 
 

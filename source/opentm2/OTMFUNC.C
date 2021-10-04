@@ -508,21 +508,6 @@ USHORT EqfStartSession
   } /* endif */
 //#endif //TEMPORARY_COMMENTED
 
-  // load resource file
-  if ( usRC == NO_ERROR )
-  {
-    HMODULE  hmod;                      // buffer for resource module handle
-
-//TODO need to get res file from properties
-
-#ifdef TEMPORARY_COMMENTED
-    DosLoadModule( NULL, NULLHANDLE, pData->szEqfResFile, &hmod );
-    //hResMod = hmod;
-    UtlSetULong( QL_HRESMOD, (ULONG)hmod );
-#else
-  LogMessage(WARNING, "EqfStartSession():: TODO need to get res file from properties");
-#endif //TEMPORARY_COMMENTED
-  } /* endif */
 
   // set caller's session handle
   if ( usRC == NO_ERROR )
@@ -560,13 +545,16 @@ USHORT EqfStartSession
 
     LogMessage(INFO, "==EQFSTARTSESSION==\n" );
 
-    LogMessage(INFO,  "   Starting plugins...\n" );
+  LogMessage(WARNING,"EqfStartSession::TEMPORARY_COMMENTED plugins init");
+  
+  //#ifdef TEMPORARY_COMMENTED
+  LogMessage(INFO,  "   Starting plugins...\n" );
 
   // initialie plugins
   if ( usRC == NO_ERROR )
   {
     char szPluginPath[MAX_EQF_PATH];
-    int errCode = properties_get_str_or_default(KEY_PLUGIN_DIR, szPluginPath, MAX_EQF_PATH,"");
+    int errCode = properties_get_str_or_default(KEY_OTM_DIR, szPluginPath, MAX_EQF_PATH,"");
 
 		usRC = InitializePlugins( szPluginPath );    // add return value for P402974
         // Add for P403115;
@@ -597,7 +585,8 @@ USHORT EqfStartSession
         // Add end
   }
 
-    LogMessage( INFO,"   ...Plugins have been started\n" );
+  LogMessage( INFO,"   ...Plugins have been started\n" );
+  //#endif
 
 //#ifdef SESSIONLOG
     {
