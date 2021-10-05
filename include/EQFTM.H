@@ -1313,6 +1313,10 @@ typedef struct _TMX_MATCHENTRY
   BYTE cCount;
 } TMX_MATCHENTRY, * PTMX_MATCHENTRY;
 
+
+#pragma pack(push, 1)
+#ifndef TEMPORARY_COMMENTED
+extern "C"{
 typedef struct _TMX_SENTENCE
 {
   PSZ_W pInputString;
@@ -1329,6 +1333,25 @@ typedef struct _TMX_SENTENCE
   PSZ_W pPropString;                   // proposal string (with tagging)
   PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
 } TMX_SENTENCE, * PTMX_SENTENCE;
+};
+#else
+{
+  PSZ_W pInputString;
+  PSZ_W pNormString;
+  PSZ_W pNormStringStart;
+  PSZ_W pPropString; 
+  PTMX_TERM_TOKEN pTermTokens;
+  PULONG  pulVotes;                  // proposal string (with tagging)
+  PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
+  PTMX_TAGTABLE_RECORD pTagRecord;
+  PTMX_TAGENTRY pTagEntryList;
+  LONG lTermAlloc;
+  LONG lTagAlloc;  
+  USHORT  usNormLen;
+  USHORT  usActVote;
+} TMX_SENTENCE, * PTMX_SENTENCE;
+#endif
+#pragma pack(pop)
 
 typedef struct _TMX_SENTENCE_V5
 {
@@ -2231,10 +2254,22 @@ BOOL TMFuzzynessEx
   PUSHORT     pusWords                 // number of words in segment
 );
 
+
+
 extern "C"{ 
 USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
 USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
 USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
+USHORT TokenizeSourceEx2Ref(
+   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   TMX_SENTENCE& rSentence,             // pointer to sentence structure
+   PSZ pTagTableName,                   // name of tag table
+   PSZ pSourceLang,                     // source language
+   USHORT usVersion,                    // version of TM
+   ULONG  ulSrcCP,                      // OEM CP of source language     
+   int iMode                            // mode to be passed to create protect table function
+);
+
 USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT, USHORT);
 
 USHORT NTMTokenize
