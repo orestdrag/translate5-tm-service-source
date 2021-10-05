@@ -705,7 +705,6 @@ NTMGetNameFromID( PTMX_CLB pTmClb,      //input
 } /* end of function NTMGetNameFromID */
 
 
-#ifdef TEMPORARY_COMMENTED
 PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType )  // input
@@ -789,7 +788,7 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
   return( pszFoundName );
 } /* end of function NTMFindNameForID */
 
-#endif 
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2523,7 +2522,6 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
 } /* end of function NtmGetAddData */
 
 
-#ifdef TEMPORARY_COMMENTED
 // find a string in a specific data area
 BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch )
 {
@@ -2571,6 +2569,7 @@ BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch )
 } /* end of function NtmFindInAddData */
 
 
+#ifdef TEMPORARY_COMMENTED
 #ifdef NEWCODE
 // skip the key part of additional info data and return pointer to next character
 static PSZ_W NtmSkipKey( PSZ_W pszKey )

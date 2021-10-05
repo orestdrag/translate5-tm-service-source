@@ -12,7 +12,7 @@
 //| Description: Global Memory processing functions                            |
 //+----------------------------------------------------------------------------+
 
-#include <windows.h>
+//#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,7 +32,7 @@
 
 #pragma pack( pop )
 
-#include "cxmlwriter.H"
+#include "CXMLWRITER.H"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -51,7 +51,7 @@ extern "C"
   #define INCL_EQF_DLGUTILS         // dialog utilities
   #define INCL_EQF_MORPH
   #define INCL_EQF_DAM
-  #include "eqf.h"                  // General .H for EQF
+  #include "EQF.H"                  // General .H for EQF
   #include <OTMGLOBMEM.H>           // Global memory defines and prototypes
 
   #pragma pack( pop, TM2StructPacking )
@@ -103,6 +103,7 @@ private:
   PGMOPTIONFILE m_pList;                         // ptr to current CTID list
 };
 
+#ifdef TEMPORARY_COMMENTED
 BOOL GlobMemLoadOptionFile
 ( 
   PSZ         pszCTIDListFile,                // fully qualified CTID list file name (XML format)
@@ -273,144 +274,8 @@ BOOL GlobMemFreeOptionFile
   return( TRUE );
 } /* end of function GlobMemFreeOptionFile */
 
-// helper function for searching text strings
-PSZ_W GlobMemFind( PSZ_W pszText, PSZ_W pszFind )
-{
-  PSZ_W pszSearchPos = pszText;
-  PSZ_W pszResult = NULL;
-  int iFindLen = wcslen( pszFind );
-  int iRemaining = wcslen( pszText );
+#endif 
 
-
-  while ( (iFindLen <= iRemaining) && (pszResult == NULL ) )
-  {
-    if ( *pszSearchPos == *pszFind )
-    {
-      if ( wcsnicmp( pszSearchPos, pszFind, iFindLen ) == 0 )
-      {
-        pszResult = pszSearchPos;
-      } /* endif */         
-    } /* endif */
-
-    if ( pszResult == NULL )
-    {
-      pszSearchPos++;
-      iRemaining--;
-    } /* endif */       
-  } /* endwhile */     
-
-  return( pszResult );
-}
-
-// get the flag for a global memory proposal based on the project-ID
-GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
-{
-  BOOL fFound = FALSE;
-  PGMOPTIONFILE pList = (PGMOPTIONFILE)pCTIDList;
-  CHAR_W szProjectID[PROJECTID_SIZE+1];
-  CHAR_W chICU = 0;
-  GMMEMOPT optReturn = GM_HFLAG_OPT;
-  PSZ_W pszGlobMemKeyword = L"<GlobMem>";
-  PSZ_W pszGlobMemEndKeyword = L"</GlobMem>";
-  PSZ_W pszHamsterKeyword = L"<Hamster>";
-  PSZ_W pszHamsterEndKeyword = L"</Hamster>";
-  PSZ_W pszCTIDKeyword = L"<CTID>";
-  PSZ_W pszCTIDEndKeyword = L"</CTID>";
-
-  // search CTID entry in additional data
-  PSZ_W pszGlobMemGroup = GlobMemFind( pszAddData, pszGlobMemKeyword );
-  if ( pszGlobMemGroup != NULL )
-  { 
-    pszGlobMemGroup += wcslen(pszGlobMemKeyword);
-    PSZ_W pszGlobMemGroupEnd = GlobMemFind( pszGlobMemGroup, pszGlobMemEndKeyword );
-    if ( pszGlobMemGroupEnd != NULL )
-    {
-      // copy global memory group to our buffer for further processing
-      wcsncpy( pList->szBufferW, pszGlobMemGroup, pszGlobMemGroupEnd - pszGlobMemGroup ); 
-       
-      // search our CTID group
-      PSZ_W pszCTID = GlobMemFind( pList->szBufferW, pszCTIDKeyword );
-      if ( pszCTID != NULL )
-      {
-        pszCTID += wcslen(pszCTIDKeyword);
-        PSZ_W pszCTIDEnd = GlobMemFind( pList->szBufferW, pszCTIDEndKeyword );
-        if ( pszCTID != NULL )
-        {
-          // extract projectID and ICU
-          *pszCTIDEnd = 0;
-          if ( wcslen( pszCTID ) >= 11 )
-          {
-            fFound = TRUE;
-            memset( szProjectID, 0, sizeof(szProjectID) );
-            wcsncpy( szProjectID, pszCTID, PROJECTID_SIZE ); 
-            chICU = pszCTID[7];
-          } /* endif */             
-        } /* endif */         
-      } /* endif */         
-    } /* endif */       
-  } /* endif */     
-
-  // search CTID entry in additional data using old name (Hamster)
-  if ( !fFound ) 
-  {
-    PSZ_W pszGlobMemGroup = GlobMemFind( pszAddData, pszHamsterKeyword );
-    if ( pszGlobMemGroup != NULL )
-    { 
-      pszGlobMemGroup += wcslen(pszHamsterKeyword);
-      PSZ_W pszGlobMemGroupEnd = GlobMemFind( pszGlobMemGroup, pszHamsterEndKeyword );
-      if ( pszGlobMemGroupEnd != NULL )
-      {
-        // copy global memory group to our buffer for further processing
-        wcsncpy( pList->szBufferW, pszGlobMemGroup, pszGlobMemGroupEnd - pszGlobMemGroup ); 
-       
-        // search our CTID group
-        PSZ_W pszCTID = GlobMemFind( pList->szBufferW, pszCTIDKeyword );
-        if ( pszCTID != NULL )
-        {
-          pszCTID += wcslen(pszCTIDKeyword);
-          PSZ_W pszCTIDEnd = GlobMemFind( pList->szBufferW, pszCTIDEndKeyword );
-          if ( pszCTID != NULL )
-          {
-            // extract projectID and ICU
-            *pszCTIDEnd = 0;
-            if ( wcslen( pszCTID ) >= 11 )
-            {
-              fFound = TRUE;
-              memset( szProjectID, 0, sizeof(szProjectID) );
-              wcsncpy( szProjectID, pszCTID, PROJECTID_SIZE ); 
-              chICU = pszCTID[7];
-            } /* endif */             
-          } /* endif */         
-        } /* endif */         
-      } /* endif */       
-    } /* endif */     
-  }
-
-  // search entry for found CTID
-  if ( fFound )
-  {
-    fFound = FALSE;
-    LONG lEntry = 0;
-    while ( !fFound && (lEntry < pList->lNumOfEntries) )
-    {
-      if ( (pList->Options[lEntry].chICU == chICU) && (wcsicmp( pList->Options[lEntry].szProjectID, szProjectID ) == 0 ) )
-      {
-        fFound = TRUE;
-      }
-      else
-      {
-        lEntry++;
-      } /* endif */       
-    } /* endwhile */  
-
-    if ( fFound )
-    {
-      optReturn = pList->Options[lEntry].Option;
-    } /* endif */       
-  } /* endif */     
-
-  return( optReturn );
-}
 
 //
 // Implementation of CTID List SAX parser

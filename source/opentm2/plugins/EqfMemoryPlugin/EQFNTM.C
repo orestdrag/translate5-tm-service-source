@@ -1168,7 +1168,8 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  usRc = TmtXGet( (PTMX_CLB)htm, pstGetIn, pstGetOut );
+  PTMX_CLB ptmx = (PTMX_CLB)htm;
+  usRc = TmtXGet( ptmx, pstGetIn, pstGetOut );
 
   if ( (usRc == NO_ERROR) && pstGetOut->usNumMatchesFound )
   {

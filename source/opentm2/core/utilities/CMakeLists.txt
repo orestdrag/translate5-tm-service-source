@@ -37,6 +37,8 @@ set(Util_Source_Files
     EQFPRO00.C
     EQFMORPW.C
     EQFMORPH.CPP
+    OTMGLOBM.CPP
+    EQFTADIT.CPP
 )
 
 add_library(Util ${Util_Source_Files})

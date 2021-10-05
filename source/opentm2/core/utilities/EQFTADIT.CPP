@@ -14,7 +14,7 @@
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 
-#include <windows.h>
+//#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -52,7 +52,7 @@ extern "C"
   #define INCL_EQF_DLGUTILS         // dialog utilities
   #define INCL_EQF_MORPH
   #define INCL_EQF_DAM
-  #include "eqf.h"                  // General .H for EQF
+  #include "EQF.H"                  // General .H for EQF
   #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
   #include "EQFMEMIE.H"
 
@@ -128,8 +128,10 @@ public:
   void fatalError(const SAXParseException& exc);
 
 private:
-  int ReplListParseHandler::AddStringToBuffer( PSZ_W pszText );
-  BOOL ReplListParseHandler::AddChangeEntry( PTMO_REPLACE_ENTRY pEntry );
+  //int ReplListParseHandler::AddStringToBuffer( PSZ_W pszText );
+  //BOOL ReplListParseHandler::AddChangeEntry( PTMO_REPLACE_ENTRY pEntry );
+  int AddStringToBuffer( PSZ_W pszText );
+  BOOL AddChangeEntry( PTMO_REPLACE_ENTRY pEntry );
 
   enum { FROM_ELEMENT, TO_ELEMENT } m_CurrentElement;
   BOOL        m_fCaptureText;                    // TRUE = capture text to our text buffer
@@ -145,21 +147,6 @@ private:
           static CHAR_W szSegBuf[4096];
           static CHAR_W szLineBuf[4096];
 #endif
-
-BOOL DITASpecialProcessingRequired
-(
-  PSZ         pszDocMarkup,                      // markup of document
-  PSZ         pszMemMarkup,                      // markup of memory proposal
-  DITAPROCESSINGMODES mode                       // type of special processing
-)
-{
-  BOOL fDitaProcessing = ( (stricmp( pszMemMarkup , "IBMIDDOC" ) == 0) &&
-                           (stricmp( pszDocMarkup, "IBMDITA" ) == 0) );
-
-  mode;                                          // currently not used
-
-  return( fDitaProcessing );
-} /* end of DITASpecialProcessingRequired */
 
 // return value 2 = TMO replacement performed
 BOOL DITAPreprocessProposals
@@ -1588,7 +1575,7 @@ int ReplListParseHandler::AddStringToBuffer( PSZ_W pszText )
   // enlarge buffer area if required
   if ( (m_pList->iBufferSize - m_pList->iBufferUsed) < iTextLen )
   {
-    int iNewSize = m_pList->iBufferSize + max ( 4096, iTextLen );
+    int iNewSize = m_pList->iBufferSize + std::max ( 4096, iTextLen );
     if ( !UtlAlloc( (PVOID *)&(m_pList->pszStringBuffer), m_pList->iBufferSize * sizeof(CHAR_W), 
          iNewSize * sizeof(CHAR_W), NOMSG ) )
     {

@@ -16,6 +16,7 @@ Copyright Notice:
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
+#include "../utilities/LogWrapper.h"
 #include "MemoryFactory.h"
 #include "EQFMORPI.H"
 
@@ -1967,7 +1968,17 @@ USHORT TokenizeSourceEx
     return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
 }
 
-
+USHORT TokenizeSourceEx2Ref(
+   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   TMX_SENTENCE& rSentence,             // pointer to sentence structure
+   PSZ pTagTableName,                   // name of tag table
+   PSZ pSourceLang,                     // source language
+   USHORT usVersion,                    // version of TM
+   ULONG  ulSrcCP,                      // OEM CP of source language     
+   int iMode                            // mode to be passed to create protect table function
+){
+  return TokenizeSourceEx2(pClb, &rSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, iMode);
+}
 
 USHORT TokenizeSourceEx2
 (
@@ -2043,10 +2054,13 @@ USHORT TokenizeSourceEx2
   }
   else
   {
+    LogMessage(DEVELOP, "TokenizeSourceEx2");
     pTagRecord = pSentence->pTagRecord;
     pTermTokens = pSentence->pTermTokens;
-    pTagEntry = (PBYTE)pTagRecord;
+    pTagEntry = (PBYTE)pTagRecord;// + 4;
+    auto len = &(pSentence->lTermAlloc) - (long)pSentence;
     pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
+    //pSentence->pTagRecord->ulRecordLen = 0;
     RECLEN(pTagRecord) = 0;
     pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
 

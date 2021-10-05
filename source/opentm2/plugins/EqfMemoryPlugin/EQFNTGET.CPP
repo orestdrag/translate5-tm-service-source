@@ -30,6 +30,7 @@
 #include "MemoryFactory.h"
 #include <map>
 #include "../../core/utilities/LogWrapper.h"
+#include "../../core/utilities/PropertyWrapper.H"
 
 #ifdef _DEBUG
   //#define MEASURETIME
@@ -289,7 +290,6 @@ VOID SetAvailFlags( PTMX_GET_OUT_W pTmGetOut, USHORT usMatchesFound)
   }
 }
 
-#ifdef TEMPORARY_COMMENTED
 // get match type 
 OtmProposal::eMatchType GetMatchTypeFromMatchLevel( USHORT usMatchLevel )
 {
@@ -333,8 +333,14 @@ static BOOL NTMCheckAndDeleteTagPairs
 #endif
 );
 
-#endif 
 
+
+void testSentenceFunc(PTMX_SENTENCE pSentence){
+  
+      pSentence->pTagRecord->ulRecordLen = -1;
+      pSentence->pTagRecord->usFirstTagEntry = -2;
+      pSentence->pTagRecord->usTagTableId = -3;  
+}
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -383,10 +389,14 @@ USHORT TmtXGet
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
+  // FIX for strange alignment issue TODO: Replace with better solution
+  pTmGetIn = (PTMX_GET_IN_W)(((PCHAR) pTmGetIn)+4);
+  //pTmGetIn = (PTMX_GET_IN_W) &(pTmGetIn->stPrefixIn.usTmCommand);
   PTMX_SENTENCE pSentence = NULL;      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string
+  szString[0] = '\0';
 #ifdef MATCHLIST_LOG
   FILE *hfMatchListLog = NULL;
 #endif
@@ -444,6 +454,13 @@ USHORT TmtXGet
 
   //allocate pSentence
   usRc = NTMAllocSentenceStructure( &pSentence ); 
+  
+  //DEBUG
+  #ifdef TEMPORARY_COMMENTED
+  pSentence->pTagRecord->ulRecordLen = 6;
+  pSentence->pTagRecord->usFirstTagEntry = 4;
+  pSentence->pTagRecord->usTagTableId = 5;  
+  #endif 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lAllocTime) );
@@ -452,9 +469,12 @@ USHORT TmtXGet
   if ( !usRc )
   {
     //build tag table path
-    UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
-    strcat( szString, BACKSLASH_STR );
-    strcat( szString, pTmGetIn->stTmGet.szTagTable );
+    //FIX here
+    //UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
+    properties_get_str(KEY_OTM_DIR, szString, sizeof(szString));
+    strcat( szString, "/TABLE/");
+    //LogMessage(WARNING,"Temporary hardcoded offset for TmtXGet:: strcat( szString, pTmGetIn->stTmGet.szTagTable+4 );");
+    strcat( szString, pTmGetIn->stTmGet.szTagTable ); // + 4);
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
@@ -463,8 +483,11 @@ USHORT TmtXGet
     UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion );
-
+    //usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion );
+    
+    //testSentenceFunc(pSentence);
+    ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);
+    usRc = TokenizeSourceEx2Ref( pTmClb, *pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -595,10 +618,10 @@ USHORT TmtXGet
               LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
               
               LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 3");
-              #ifdef TEMPORARY_COMMENTED
+              //#ifdef TEMPORARY_COMMENTED
               usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
               LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-              #endif
+              //#endif
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -931,8 +954,147 @@ USHORT GetExactMatch
 }
 
 
+// helper function for searching text strings
+PSZ_W GlobMemFind( PSZ_W pszText, PSZ_W pszFind )
+{
+  PSZ_W pszSearchPos = pszText;
+  PSZ_W pszResult = NULL;
+  int iFindLen = wcslen( pszFind );
+  int iRemaining = wcslen( pszText );
 
-#ifdef TEMPORARY_COMMENTED
+
+  while ( (iFindLen <= iRemaining) && (pszResult == NULL ) )
+  {
+    if ( *pszSearchPos == *pszFind )
+    {
+      if ( wcsnicmp( pszSearchPos, pszFind, iFindLen ) == 0 )
+      {
+        pszResult = pszSearchPos;
+      } /* endif */         
+    } /* endif */
+
+    if ( pszResult == NULL )
+    {
+      pszSearchPos++;
+      iRemaining--;
+    } /* endif */       
+  } /* endwhile */     
+
+  return( pszResult );
+}
+
+// get the flag for a global memory proposal based on the project-ID
+GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
+{
+  BOOL fFound = FALSE;
+  PGMOPTIONFILE pList = (PGMOPTIONFILE)pCTIDList;
+  CHAR_W szProjectID[PROJECTID_SIZE+1];
+  CHAR_W chICU = 0;
+  GMMEMOPT optReturn = GM_HFLAG_OPT;
+  PSZ_W pszGlobMemKeyword = L"<GlobMem>";
+  PSZ_W pszGlobMemEndKeyword = L"</GlobMem>";
+  PSZ_W pszHamsterKeyword = L"<Hamster>";
+  PSZ_W pszHamsterEndKeyword = L"</Hamster>";
+  PSZ_W pszCTIDKeyword = L"<CTID>";
+  PSZ_W pszCTIDEndKeyword = L"</CTID>";
+
+  // search CTID entry in additional data
+  PSZ_W pszGlobMemGroup = GlobMemFind( pszAddData, pszGlobMemKeyword );
+  if ( pszGlobMemGroup != NULL )
+  { 
+    pszGlobMemGroup += wcslen(pszGlobMemKeyword);
+    PSZ_W pszGlobMemGroupEnd = GlobMemFind( pszGlobMemGroup, pszGlobMemEndKeyword );
+    if ( pszGlobMemGroupEnd != NULL )
+    {
+      // copy global memory group to our buffer for further processing
+      wcsncpy( pList->szBufferW, pszGlobMemGroup, pszGlobMemGroupEnd - pszGlobMemGroup ); 
+       
+      // search our CTID group
+      PSZ_W pszCTID = GlobMemFind( pList->szBufferW, pszCTIDKeyword );
+      if ( pszCTID != NULL )
+      {
+        pszCTID += wcslen(pszCTIDKeyword);
+        PSZ_W pszCTIDEnd = GlobMemFind( pList->szBufferW, pszCTIDEndKeyword );
+        if ( pszCTID != NULL )
+        {
+          // extract projectID and ICU
+          *pszCTIDEnd = 0;
+          if ( wcslen( pszCTID ) >= 11 )
+          {
+            fFound = TRUE;
+            memset( szProjectID, 0, sizeof(szProjectID) );
+            wcsncpy( szProjectID, pszCTID, PROJECTID_SIZE ); 
+            chICU = pszCTID[7];
+          } /* endif */             
+        } /* endif */         
+      } /* endif */         
+    } /* endif */       
+  } /* endif */     
+
+  // search CTID entry in additional data using old name (Hamster)
+  if ( !fFound ) 
+  {
+    PSZ_W pszGlobMemGroup = GlobMemFind( pszAddData, pszHamsterKeyword );
+    if ( pszGlobMemGroup != NULL )
+    { 
+      pszGlobMemGroup += wcslen(pszHamsterKeyword);
+      PSZ_W pszGlobMemGroupEnd = GlobMemFind( pszGlobMemGroup, pszHamsterEndKeyword );
+      if ( pszGlobMemGroupEnd != NULL )
+      {
+        // copy global memory group to our buffer for further processing
+        wcsncpy( pList->szBufferW, pszGlobMemGroup, pszGlobMemGroupEnd - pszGlobMemGroup ); 
+       
+        // search our CTID group
+        PSZ_W pszCTID = GlobMemFind( pList->szBufferW, pszCTIDKeyword );
+        if ( pszCTID != NULL )
+        {
+          pszCTID += wcslen(pszCTIDKeyword);
+          PSZ_W pszCTIDEnd = GlobMemFind( pList->szBufferW, pszCTIDEndKeyword );
+          if ( pszCTID != NULL )
+          {
+            // extract projectID and ICU
+            *pszCTIDEnd = 0;
+            if ( wcslen( pszCTID ) >= 11 )
+            {
+              fFound = TRUE;
+              memset( szProjectID, 0, sizeof(szProjectID) );
+              wcsncpy( szProjectID, pszCTID, PROJECTID_SIZE ); 
+              chICU = pszCTID[7];
+            } /* endif */             
+          } /* endif */         
+        } /* endif */         
+      } /* endif */       
+    } /* endif */     
+  }
+
+  // search entry for found CTID
+  if ( fFound )
+  {
+    fFound = FALSE;
+    LONG lEntry = 0;
+    while ( !fFound && (lEntry < pList->lNumOfEntries) )
+    {
+      if ( (pList->Options[lEntry].chICU == chICU) && (wcsicmp( pList->Options[lEntry].szProjectID, szProjectID ) == 0 ) )
+      {
+        fFound = TRUE;
+      }
+      else
+      {
+        lEntry++;
+      } /* endif */       
+    } /* endwhile */  
+
+    if ( fFound )
+    {
+      optReturn = pList->Options[lEntry].Option;
+    } /* endif */       
+  } /* endif */     
+
+  return( optReturn );
+}
+
+
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1579,6 +1741,7 @@ USHORT ExactTest
   return( usRc );
 }
 
+#ifdef TEMPORARY_COMMENTED
 #if defined(SGMLDITA_LOGGING) || defined(INLINE_TAG_REPL_LOGGING) || defined(MATCHLIST_LOG)
   void NTMMarkCRLF( PSZ_W pszSource, PSZ_W pszTarget )
   {
@@ -1662,6 +1825,27 @@ void NTMRemoveAdditionalWhitepace
     } /* endif */
   } /* endif */
 } /* end of function NTMRemoveAdditionalWhitepace */
+
+#endif 
+
+
+
+
+BOOL DITASpecialProcessingRequired
+(
+  PSZ         pszDocMarkup,                      // markup of document
+  PSZ         pszMemMarkup,                      // markup of memory proposal
+  DITAPROCESSINGMODES mode                       // type of special processing
+)
+{
+  BOOL fDitaProcessing = ( (stricmp( pszMemMarkup , "IBMIDDOC" ) == 0) &&
+                           (stricmp( pszDocMarkup, "IBMDITA" ) == 0) );
+
+  mode;                                          // currently not used
+
+  return( fDitaProcessing );
+} /* end of DITASpecialProcessingRequired */
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -1870,8 +2054,10 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
             } /* endif */
 #endif
 
+LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
+#ifdef TEMPORARY_COMMENTED
             fPreprocessed = DITAPreprocessProposals( pSubstProp->szPropSource, pSubstProp->szPropTarget, pGetIn->pvReplacementList );
-
+#endif
             // if proposal has been preprocessed, the tag tagle records have to be rebuild
             if ( fPreprocessed )
             {
@@ -1889,19 +2075,25 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               strcat( szTagTablePath, pSubstProp->szPropTagTable );
               strcat( szTagTablePath, EXT_OF_FORMAT );
 
+
+LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
+#ifdef TEMPORARY_COMMENTED
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchSource, szTagTablePath, pSubstProp->szSourceLanguage, TM_MAJ_VERSION, ulSrcCP, CREATEPROTTABLE_NOTRANSLVAR );
               if ( !usRC ) pSubstProp->pTagsPropSource = pMatchSource->pTagRecord;
               if ( !usRC ) UTF16strcpy( pMatchTarget->pInputString, pSubstProp->szPropTarget );
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchTarget, szTagTablePath, pSubstProp->szTargetLanguage, TM_MAJ_VERSION, ulTgtCP, CREATEPROTTABLE_NOTRANSLVAR  );
               if ( !usRC ) pSubstProp->pTagsPropTarget = pMatchTarget->pTagRecord;
-
+#endif
               if ( fPreprocessed == 2 )     // 2 = TMO replacements have been done
               {
                 // recompute fuzziness and skip postprocessing if we have an exact match
                 USHORT usFuzzy = 0;
                 BOOL fFuzzyOK;
+                LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+#ifdef TEMPORARY_COMMENTED
                 fFuzzyOK = TMFuzzyness( pGetIn->szTagTable, pSubstProp->szPropSource, pSubstProp->szSource,
                                              sLangID, &usFuzzy, ulSrcOemCP );
+                                             #endif
                 if ( usFuzzy == 100 )
                 {
                   fSkipPostprocessing = TRUE;
@@ -1944,8 +2136,11 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           { 
             if ( !fSkipPostprocessing )
             {
+              LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
+#ifdef TEMPORARY_COMMENTED
               fSubstAll = DITAProcessProposal( pGetIn->szSource, pSubstProp->szPropSource, 
                                               pSubstProp->szPropTarget, pSubstProp->szPropTagTable, ulSrcOemCP  );
+                                              #endif
             } /* endif */
             if ( !fSubstAll && fPreprocessed )
             {
@@ -1993,12 +2188,14 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
     {
       BOOL fEndOfTable = (usCurrentEntry + 1) >= MAX_MATCHES;
 
+LogMessage(FATAL,"TEMPORARY_COMMENTED nt iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), (int)pstMatchTable->usMatchLevel , -1,  pstMatchTable->usContextRanking, fEndOfTable );");
+#ifdef TEMPORARY_COMMENTED
       int iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), (int)pstMatchTable->usMatchLevel , -1, 
                           pstMatchTable->usContextRanking, fEndOfTable );
       int iNewMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( *pusMatchLevel ), GetProposalTypeFromFlag( usTranslationFlag ), 
                              (int)*pusMatchLevel, -1, usContextRanking, fEndOfTable );
-
-
+#endif
+  int iMatchSortKey=0, iNewMatchSortKey=0;
       if ( iMatchSortKey  > iNewMatchSortKey  )
       {
         pstMatchTable++;
@@ -2017,6 +2214,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         /* one, but have in mind that proposals from the same file have */
         /* higher priority                                              */
         /****************************************************************/
+        
+LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
+#ifdef TEMPORARY_COMMENTED
         if ( NTMDocMatch( szTgtFileName, szTgtLongName, pSrcFileName, pSrcLongName ) )
         {
           /**************************************************************/
@@ -2067,7 +2267,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               fFound = TRUE;
           } /* endif */
         } /* endif */
-
+#endif
 
       }
       else
@@ -2162,9 +2362,12 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               USHORT usFuzzy = 0;
               BOOL fFuzzynessOK;
 
+LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+#ifdef TEMPORARY_COMMENTED
 /*Q!*/        fFuzzynessOK = TMFuzzyness( pGetIn->szTagTable,
                                           pSubstProp->szPropSource, pSubstProp->szSource,
                                           sLangID, &usFuzzy, ulSrcOemCP );
+#endif
 
               if ( pGetIn->ulParm & GET_RESPECTCRLF )
               {
@@ -2280,11 +2483,19 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
             {
               PTMX_MATCH_TABLE_W pstMatchTableTemp = pstMatchTable-1;
               BOOL fEndOfTable = FALSE;
+
+              
+LogMessage(FATAL,"TEMPORARY_COMMENTED iMatchSortKey");
+#ifdef TEMPORARY_COMMENTED
               int iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), 
                   (int)pstMatchTable->usMatchLevel , -1, pstMatchTable->usContextRanking, fEndOfTable );
               int iMatchSortKeyTemp = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTableTemp->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTableTemp->usTranslationFlag ), 
                   (int)pstMatchTableTemp->usMatchLevel, -1, pstMatchTableTemp->usContextRanking, fEndOfTable );
-
+#endif
+              int iMatchSortKey = 0, iMatchSortKeyTemp = 0;
+                            
+LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
+#ifdef TEMPORARY_COMMENTED
               if ((iMatchSortKeyTemp <  iMatchSortKey) ||
                   ((iMatchSortKeyTemp == iMatchSortKey) &&
                    (pstMatchTableTemp->lTargetTime  <   pstMatchTable->lTargetTime) &&
@@ -2303,6 +2514,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                 // leave loop
                 pstMatchTableStart = pstMatchTable;
               }
+              #endif
             }
 
 
@@ -2337,7 +2549,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   return( usRc );
 }
 
-#endif
 
 
 //+----------------------------------------------------------------------------+
@@ -2685,6 +2896,7 @@ BOOL AddTagsToString( PSZ pInString,            //character string
   return fOK;
 }
 
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2711,6 +2923,7 @@ BOOL AddTagsToString( PSZ pInString,            //character string
 //|                     determine the fuzzines of each target record in the tm |
 //|                     record                                                 |
 // ----------------------------------------------------------------------------+
+#endif
 
 USHORT GetFuzzyMatch
 (
@@ -2806,7 +3019,7 @@ USHORT GetFuzzyMatch
           LOGPRINTF2( L"GetFuzzyMatch: MaxVotes=%u, ActVote=%u\r\nEQFNTMGET of record %lu\r\n", pMatchEntry->usMaxVotes, pSentence->usActVote );
 
           //compare tm record data with data passed in the get in structure
-          usOverlaps = min( pMatchEntry->usMaxVotes, pSentence->usActVote );
+          usOverlaps = std::min( pMatchEntry->usMaxVotes, pSentence->usActVote );
           usRc = FuzzyTest( pTmClb, pTmRecord, pGetIn, pstMatchTable,
                             &usMatchEntries, &usOverlaps,
                             &pMatchEntry->usMaxVotes, &pSentence->usActVote,
@@ -2857,6 +3070,7 @@ USHORT GetFuzzyMatch
 
   return( usRc );
 }
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -3168,6 +3382,9 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */
             } /* endif */
 
+
+LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+#ifdef TEMPORARY_COMMENTED
             fFuzzynessOK = TMFuzzyness( pGetIn->szTagTable,
 //                                        pSentence->pNormString,
                                         pSentence->pInputString,
@@ -3175,6 +3392,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                                         pSentence->pPropString,
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP);
+                                        #endif
             // RJ: P018279 etc: NO, must be active!
             // GQ: the following code has been disabled as the fuzziness
             // now includes any inline tagging
@@ -3248,12 +3466,15 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 					   // but we do not know about tag tokens
 					   BOOL fTempStringEqual = FALSE;
 					   BOOL fOK = FALSE;
+             
+LogMessage(FATAL,"TEMPORARY_COMMENTED NTMCompareBetweenTokens");
+#ifdef TEMPORARY_COMMENTED
 					   fOK = NTMCompareBetweenTokens(pSentence->pPropString,
 									 pSentence->pInputString,
 									 pGetIn->szTagTable,
 									 sLangID,
 									 pGetIn->ulSrcOemCP, &fTempStringEqual);
-
+#endif
 					   if (fOK)
 					   {
 						 fStringEqual = fTempStringEqual;
@@ -3276,7 +3497,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                   usFuzzy = 0;
                 } /* endif */
 
-                usFuzzy = min( 99, usFuzzy );
+                usFuzzy = std::min( (USHORT)99, usFuzzy );
               } /* endif */
 
             } /* endif */
@@ -3339,6 +3560,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   return( usRc );
 }
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -3627,6 +3849,7 @@ USHORT FillMatchEntry
   return( usRc );
 }
 
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3742,7 +3965,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 #endif
 
   // limit number to really ones of interest ( the MAX_MATCHES best )
-  usEntries = min( usEntries, min(MAX_MATCHES, ABS_VOTES/2-1) );
+  usEntries = std::min( usEntries, (USHORT)std::min(MAX_MATCHES, (int)(ABS_VOTES/2-1)) );
 
   //fill pMatchEntry with the highest ranked entries
   pTempPos = pTempMatch;
@@ -3792,7 +4015,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
     PTMX_MATCHENTRY pTest = pTempPos-1;
     while ( (pTempPos->usMaxVotes == pTest->usMaxVotes)  &&
         (pTempPos->cCount == pTest->cCount) &&
-      (usEntries < min(ABS_VOTES/2-1,usEntriesInList)))
+      (usEntries < std::min((USHORT)(ABS_VOTES/2-1),usEntriesInList)))
   {
       pMatchEntry = pMatchEntryStart;
 
@@ -3890,6 +4113,7 @@ CompCountVotes
 
 
 
+#ifdef TEMPORARY_COMMENTED
 // helper function for token logging
 #ifdef INLINE_TAG_REPL_LOGGING
 
@@ -6102,6 +6326,7 @@ NTMCopyTokData
 
   return (fAllReplace);
 }
+#endif
 
 // function to compare the context strings of two segments
 USHORT NTMCompareContext
@@ -6175,6 +6400,8 @@ static char szLastTargetLang[MAX_LANG_LENGTH] = "";
 static ULONG ulLastSrcOemCP = 0;
 static ULONG ulLastTgtOemCP = 0;               
 
+
+#ifdef TEMPORARY_COMMENTED
 void NTMCopyAndClean( PSZ_W pszTarget, PSZ_W pszSource )
 {
   while ( *pszSource )
@@ -7247,6 +7474,7 @@ BOOL NTMAlignTags
 
   return( fOK );
 } /* end of function NTMAlignTags */
+#endif
 
 // If existed, return it, otherwise it will determine markup family name then cache it
 std::string& GetAndCacheFamilyName(char* pszMarkupName)
@@ -7262,4 +7490,3 @@ std::string& GetAndCacheFamilyName(char* pszMarkupName)
   return Name2FamilyMap[pszMarkupName];
 }
 
-#endif

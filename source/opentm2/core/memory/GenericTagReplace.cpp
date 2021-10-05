@@ -2075,14 +2075,15 @@ USHORT NTMAllocSentenceStructure
   PTMX_SENTENCE pSentence;
 
   //allocate pSentence
-  fOK = UtlAlloc( (PVOID *)ppSentence, 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
-  pSentence = *ppSentence;
+  //fOK = UtlAlloc( (PVOID *)ppSentence, 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
+  //pSentence = *ppSentence;
+  fOK = UtlAlloc( (PVOID*)&pSentence, 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
 
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, (LONG)(2*TOK_SIZE), NOMSG);
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, (LONG)TOK_SIZE, NOMSG );
+  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
+  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pTermTokens), 0L, (LONG)TOK_SIZE, NOMSG );
 
   if ( fOK )
   {
@@ -2094,7 +2095,14 @@ USHORT NTMAllocSentenceStructure
   if ( !fOK )
   {
     usRc = ERROR_NOT_ENOUGH_MEMORY;
-  } /* endif */
+  }else{
+    #ifdef TEMPORARY_COMMENTED// debugging code
+      pSentence->pTagRecord->ulRecordLen = 1;
+      pSentence->pTagRecord->usFirstTagEntry = 2;
+      pSentence->pTagRecord->usTagTableId = 3;  
+      #endif
+      *ppSentence = pSentence;
+    }/* endif */
 
   return( usRc );
 } /* end of funcion NTMAllocSentenceStructure */

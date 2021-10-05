@@ -3331,7 +3331,6 @@ ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 	return( ulOutPut );   // # of bytes written
 }
 
-#ifdef TEMPORARY_COMMENTED
 
 //+----------------------------------------------------------------------------+
 // External function                                                            
@@ -3458,6 +3457,7 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
   return lRc;
 }
 
+#ifdef TEMPORARY_COMMENTED
 SHORT UtlCompIgnWhiteSpace( PSZ pD1, PSZ pD2, USHORT usLen )
 {
   SHORT sRc = 0;
@@ -3507,6 +3507,7 @@ SHORT UtlCompIgnWhiteSpace( PSZ pD1, PSZ pD2, USHORT usLen )
   } /* endwhile */
   return sRc;
 }
+#endif
 
 LONG UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
 {
@@ -3563,6 +3564,9 @@ BOOL UtlIsWhiteSpaceW( CHAR_W c )
   BOOL isWhiteSpace = ( (c == L' ') || (c == L'\r') || (c == L'\n') || (c == L'\t') );
   return ( isWhiteSpace );
 }
+
+
+#ifdef TEMPORARY_COMMENTED
 
 /*!
     Name:         usConvertCRLF                                               
