@@ -420,7 +420,8 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( memname );
     service.publish( postEntry );
     service.publish( getStatus );
-
+    //std::string add = pSettings->get_bind_address();
+    LogMessage4(INFO,"PrepareOtmMemoryService:: done, port/path = :", intToA(uiPort),"/", szServiceName);
   }
 
   return( TRUE );

@@ -390,7 +390,7 @@ USHORT TmtXGet
 )
 {
   // FIX for strange alignment issue TODO: Replace with better solution
-  pTmGetIn = (PTMX_GET_IN_W)(((PCHAR) pTmGetIn)+4);
+  //pTmGetIn = (PTMX_GET_IN_W)(((PCHAR) pTmGetIn)+4);
   //pTmGetIn = (PTMX_GET_IN_W) &(pTmGetIn->stPrefixIn.usTmCommand);
   PTMX_SENTENCE pSentence = NULL;      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
@@ -617,7 +617,7 @@ USHORT TmtXGet
 #endif
               LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
               
-              LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 3");
+              //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 3");
               //#ifdef TEMPORARY_COMMENTED
               usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
               LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );

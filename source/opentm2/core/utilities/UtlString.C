@@ -1736,7 +1736,7 @@ int UTF16strlenCHAR( PSZ_W pszString )
 {
   int iLen = 0;
   iLen = wcslen(pszString);
-  LogMessage2(WARNING,"TEMPORARY_COMMENTED in UTF16strlenCHAR, ", "");
+  //LogMessage2(WARNING,"TEMPORARY_COMMENTED in UTF16strlenCHAR, ", "");
   #ifdef TEMPORARY_COMMENTED
 
   while ( pszString && *pszString != 0 )
