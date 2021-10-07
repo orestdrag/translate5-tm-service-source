@@ -22,7 +22,9 @@ void service_worker() {
         LogMessage(FATAL,"Failed to initialize OtmMemoryService");
         std::exit(EXIT_FAILURE);
     }
-    LogMessage2(INFO, "Git hash: ", kGitHash);
+    //LogMessage2(INFO, "Git hash: ", gitHash);
+    LogMessage2(WARNING,"BUILD DATE:", buildDate);
+    LogMessage2(WARNING, "GIT COMMINT INFO: ", gitHash);
     LogMessage(INFO, "Initialized OtmMemoryService");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);

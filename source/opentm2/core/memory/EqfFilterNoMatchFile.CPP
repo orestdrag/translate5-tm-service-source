@@ -34,8 +34,8 @@
 #include "eqfserno.h"
 
 // the Win32 Xerces build requires the default structure packing...
-#pragma pack( push )
-#pragma pack(8)
+//#pragma pack( push )
+//#pragma pack(8)
 
 #include <iostream>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -45,7 +45,7 @@
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
 
-#pragma pack( pop )
+//#pragma pack( pop )
 
 
 #include <time.h>                 // C library for time functions

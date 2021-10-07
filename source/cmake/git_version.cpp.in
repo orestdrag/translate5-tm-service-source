@@ -1,2 +1,5 @@
 #include "git_version.h"
-const char *kGitHash = "@GIT_HASH@";
+
+const char *gitHash = "@GIT_HASH@";
+//const char *gitHashFull = "@GIT_HASH_FULL@";
+const char *buildDate="@BUILD_DATE@";

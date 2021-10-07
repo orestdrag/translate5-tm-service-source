@@ -26,12 +26,15 @@ endfunction()
 
 function(CheckGitVersion)
     # Get the latest abbreviated commit hash of the working branch
+    
+
     execute_process(
-        COMMAND git log -1 --format=%h
+        COMMAND git log -1 --oneline
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         OUTPUT_VARIABLE GIT_HASH
         OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
+    )
+    string(TIMESTAMP BUILD_DATE "%Y/%m/%d  %H:%M:%S")
 
     CheckGitRead(GIT_HASH_CACHE)
     if (NOT EXISTS ${post_configure_dir})
