@@ -7,6 +7,10 @@ set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
 set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 
+
+include(./cmake/CheckGit.cmake)
+CheckGitSetup()
+
 set(OtmMemoryService_Source_Files
     OtmMemoryService.cpp
     OtmMemoryServiceWorker.cpp
@@ -35,6 +39,7 @@ find_package(Threads REQUIRED)
 target_link_libraries(OtmMemoryService PRIVATE
     OTMFUNC
     librestbed.a
+    git_version
     Threads::Threads
 )
 

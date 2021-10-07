@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include "opentm2/core/utilities/LogWrapper.h"
+#include "cmake/git_version.h"
 
 void handle_interrupt_sig(int sig) {
     LogMessage(INFO, "Received interrupt signal\n");
@@ -21,6 +22,7 @@ void service_worker() {
         LogMessage(FATAL,"Failed to initialize OtmMemoryService");
         std::exit(EXIT_FAILURE);
     }
+    LogMessage2(INFO, "Git hash: ", kGitHash);
     LogMessage(INFO, "Initialized OtmMemoryService");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);
@@ -31,7 +33,6 @@ void service_worker() {
 }
 
 int main() {
-    //SuppressFileLogging();
     LogMessage(INFO, "Worker thread starting");
     std::thread worker(service_worker);
     worker.join();
