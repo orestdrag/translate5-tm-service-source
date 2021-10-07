@@ -27,15 +27,15 @@
 // includes for Xalan XSLT
 
 // the Win32 Xerces/Xalan build requires the default structure packing...
-#pragma pack( push )
-#pragma pack(8)
+//#pragma pack( push )
+//#pragma pack(8)
 #include <iostream>
 #ifdef XALANCODEDOESWORK
   #include <xercesc/util/PlatformUtils.hpp>
   #include <xercesc/util/PlatformUtils.hpp>
   #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 #endif
-#pragma pack( pop )
+//#pragma pack( pop )
 
 
 #define NATIONAL_SETTINGS     "intl"

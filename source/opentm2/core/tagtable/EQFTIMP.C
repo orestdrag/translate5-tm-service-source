@@ -18,7 +18,7 @@
 //
 // *********************** End Prolog *********************************
 
-#pragma pack(1)
+//#pragma pack(1)
 
 #define INCL_EQF_ANALYSIS         // analysis functions
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions

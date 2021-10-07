@@ -12,7 +12,7 @@
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions
 #define INCL_EQF_EDITORAPI        // editor API (required for EQFTPI.H)
 
-#pragma pack( push, TM2StructPacking, 1 )
+//#pragma pack( push, TM2StructPacking, 1 )
 
   #include "eqf.h"                  // General .H for EQF
 
@@ -25,7 +25,7 @@
   #include "ValDocExp.h"
   #include "eqfserno.h"
   #include <time.h>
-#pragma pack( pop, TM2StructPacking )
+//#pragma pack( pop, TM2StructPacking )
 
 
 #include "cxmlwriter.h"

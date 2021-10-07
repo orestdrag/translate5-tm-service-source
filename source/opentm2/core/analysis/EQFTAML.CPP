@@ -12,7 +12,7 @@
 #define INCL_EQF_TAGTABLE         // tagtable defines and functions
 #define INCL_EQF_EDITORAPI        // editor API (required for EQFTPI.H)
 
-#pragma pack( push, TM2StructPacking, 1 )
+//#pragma pack( push, TM2StructPacking, 1 )
 
   #include "eqf.h"                  // General .H for EQF
 
@@ -25,7 +25,7 @@
   #include "eqftaml.h"
   #include "eqfserno.h"
   #include <time.h>
-#pragma pack( pop, TM2StructPacking )
+//#pragma pack( pop, TM2StructPacking )
 
 
 #include "cxmlwriter.h"
@@ -42,8 +42,8 @@ __declspec(dllexport)
 // includes for Xalan XSLT
 
 // the Win32 Xerces/Xalan build requires the default structure packing...
-#pragma pack( push )
-#pragma pack(8)
+//#pragma pack( push )
+//#pragma pack(8)
 
 #include <iostream>
 #ifdef XALANCODEDOESWORK
@@ -51,7 +51,7 @@ __declspec(dllexport)
   #include <xercesc/util/PlatformUtils.hpp>
   #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 #endif
-#pragma pack( pop )
+//#pragma pack( pop )
 
 // includes for OLE interface
 #include <ole2.h>

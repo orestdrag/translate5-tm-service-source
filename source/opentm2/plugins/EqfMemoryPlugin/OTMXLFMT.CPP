@@ -29,8 +29,8 @@
 #include <time.h>
 
 // the Win32 Xerces build requires the default structure packing...
-#pragma pack( push )
-#pragma pack(8)
+//#pragma pack( push )
+//#pragma pack(8)
 
 #include <iostream>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -40,7 +40,7 @@
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
 
-#pragma pack( pop )
+//#pragma pack( pop )
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -49,7 +49,7 @@ XERCES_CPP_NAMESPACE_USE
 extern "C"
 {
 #endif
-  #pragma pack( push, TM2StructPacking, 1 )
+  //#pragma pack( push, TM2StructPacking, 1 )
 
   #define INCL_EQF_TM               // general Transl. Memory functions
   #define INCL_EQF_ANALYSIS         // analysis functions
@@ -59,7 +59,7 @@ extern "C"
   #include "EQFMEMIE.H"
   #include "OTMFUNC.H"
 
-  #pragma pack( pop, TM2StructPacking )
+  //#pragma pack( pop, TM2StructPacking )
 #ifndef CPPTEST
 }
 #endif

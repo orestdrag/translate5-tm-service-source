@@ -1313,8 +1313,9 @@ typedef struct _TMX_MATCHENTRY
   BYTE cCount;
 } TMX_MATCHENTRY, * PTMX_MATCHENTRY;
 
-
-#pragma pack(push, 1)
+//#pragma pack(show)      
+//#pragma pack(push, 8)
+//#pragma pack(8)
 #ifndef TEMPORARY_COMMENTED
 extern "C"{
 typedef struct _TMX_SENTENCE
@@ -1351,7 +1352,8 @@ typedef struct _TMX_SENTENCE
   USHORT  usActVote;
 } TMX_SENTENCE, * PTMX_SENTENCE;
 #endif
-#pragma pack(pop)
+//#pragma pack(pop)
+//#pragma pack()
 
 typedef struct _TMX_SENTENCE_V5
 {

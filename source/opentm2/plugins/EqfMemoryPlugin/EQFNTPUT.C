@@ -990,14 +990,14 @@ USHORT HashTupelW
   USHORT usMinVersion                  // minor version of TM 
 )
 {
-  if ( (usMajVersion > TM_MAJ_VERSION_7) || ((usMajVersion == TM_MAJ_VERSION_7) && (usMinVersion >= TMMIN_VERSION_1)) )
-  {
+  //if ( (usMajVersion > TM_MAJ_VERSION_7) || ((usMajVersion == TM_MAJ_VERSION_7) && (usMinVersion >= TMMIN_VERSION_1)) )
+  //{
     return( HashTupelW71( pToken, usLen ) );
-  }
-  else
-  {
-    return( HashTupelW70( pToken, usLen ) );
-  } /* endif */
+  //}
+  //else
+  //{
+  //  return( HashTupelW70( pToken, usLen ) );
+  //} /* endif */
 }
 
 #ifdef TEMPORARY_COMMENTED

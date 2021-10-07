@@ -25,7 +25,7 @@
 #include "../pluginmanager/PluginManager.h"
 
 
-#pragma pack( push, TM2StructPacking, 1 )
+//#pragma pack( push, TM2StructPacking, 1 )
 
 #define INCL_EQF_TAGTABLE         // tag table and format functions
 #define INCL_EQF_FOLDER           // folder list and document list functions
@@ -99,7 +99,7 @@ int FolBuildSelItemslist
   PSZ              *ppszList
 );
 
-#pragma pack( pop, TM2StructPacking )
+//#pragma pack( pop, TM2StructPacking )
 
 
 /**********************************************************************/
