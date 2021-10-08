@@ -8,12 +8,12 @@ extern "C"
 {
 #endif
 
-#pragma pack(push, TM2StructPacking, 1)
+//#pragma pack(push, TM2StructPacking, 1)
 #include "EQF.ID"                 // general EQF ids
 #include "EQFTWB.ID"              // ids for Troja workbench
 #include "EQFSTART.ID"
 
-#pragma pack(pop, TM2StructPacking)
+//#pragma pack(pop, TM2StructPacking)
 #ifndef CPPTEST
 }
 #endif

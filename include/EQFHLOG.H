@@ -100,7 +100,7 @@ typedef enum
 //                                   correct document name (no handling for short
 //                                   documents required)
 
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _HISTLOGRECORD
 {
    LONG    lEyeCatcher;                // bit pattern as start-of-record marker
@@ -124,7 +124,7 @@ typedef struct _HISTLOGRECORD
 //+----------------------------------------------------------------------------+
 
 // summery of words per class
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _SumPerClass
 {
    USHORT  usNumSegs;                  // number of segs in this class
@@ -140,7 +140,7 @@ typedef struct _SumPerClass
 
 
 // a criteria is, what the kind best proposal is:
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _CriteriaSum
 {
    SUMPERCLASS  SimpleSum;             // number of segs in this class
@@ -148,7 +148,7 @@ typedef struct _CriteriaSum
    SUMPERCLASS  ComplexSum;            // number of segs in this class
 }  CRITERIASUM, *PCRITERIASUM;
 
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _DocSaveHist
 {
    CRITERIASUM  AnalAutoSubst;         // sums for segs transl. by analauto
@@ -165,7 +165,7 @@ typedef struct _DocSaveHist
 // new structure for additional counting information
 //--------------------------------------------------
 
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _DocSaveHist2
 {
    CRITERIASUM  AnalAutoSubst;         // sums for segs transl. by analauto
@@ -191,7 +191,7 @@ typedef struct _DocSaveHist2
 
 
 // same structure as DOCSAVEHIST2 with fuzziness level info
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _DocSaveHist3
 {
    CRITERIASUM  AnalAutoSubst;         // sums for segs transl. by analauto

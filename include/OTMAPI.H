@@ -447,7 +447,7 @@ typedef struct _countinout         //count structure, used for data exchange
 *******************************************************************************/
 
 // summery of words per class
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _APISumPerClass
 {
    USHORT  usNumSegs;                  // number of segs in this class
@@ -458,7 +458,7 @@ typedef struct _APISumPerClass
 
 
 // a criteria is, what the kind best proposal is:
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _APICriteriaSum
 {
    APISUMPERCLASS  SimpleSum;             // number of segs in this class
@@ -470,7 +470,7 @@ typedef struct _APICriteriaSum
 // additional counting information
 //--------------------------------
 
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _APIDocSaveHist
 {
    APICRITERIASUM  EditAutoSubst;         // sums for segs transl. by editauto

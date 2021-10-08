@@ -43,7 +43,7 @@ typedef char* PSZ;
 // return codes
 #define MEM_IMPORT_COMPLETE  7001                // the import is complete
 
-#pragma pack( push, segmentpacking, 1 )
+//#pragma pack( push, segmentpacking, 1 )
 
 // structure to pass/receive general memory information
 typedef struct _MEMEXPIMPINFO
@@ -93,7 +93,7 @@ typedef struct _MEMEXPIMPSEG
   WCHAR            szAddInfo[SEGDATABUFLEN+1];    // buffer for additional information of segment 
 } MEMEXPIMPSEG, *PMEMEXPIMPSEG;
 
-#pragma pack( pop, segmentpacking )
+//#pragma pack( pop, segmentpacking )
 
 // callback function which is used by ExtMemImportprocess to insert segments into the memory
 typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );

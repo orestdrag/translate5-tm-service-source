@@ -13,7 +13,7 @@ typedef HANDLE HPARSSEGFILE;           // handle of a segmented file loaded into
 typedef HANDLE HPARSMARKUP;            // handle of loaded markup table
 
 
-#pragma pack( push, segmentpacking, 1 )
+//#pragma pack( push, segmentpacking, 1 )
 
 // status of a segment
 typedef enum _PARSSEGSTATUS
@@ -96,7 +96,7 @@ typedef struct _PARSSEGMENTW
   unsigned short   usModWords;         // number of modified words
 } PARSSEGMENTW, *PPARSSEGMENTW;
 
-#pragma pack( pop, segmentpacking )
+//#pragma pack( pop, segmentpacking )
 
 // special token IDs
 #define PARSTOKEN_TEXT -1              // text token

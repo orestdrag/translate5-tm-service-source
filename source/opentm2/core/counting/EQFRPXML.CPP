@@ -22,7 +22,7 @@ extern "C"
   #define INCL_EQF_EDITORAPI        // editor API
   #define INCL_EQF_FOLDER           // folder list and document list functions
 
-#pragma pack( push, TM2StructPacking, 1 )
+//#pragma pack( push, TM2StructPacking, 1 )
 
   #include "eqf.h"                  // General .H for EQF
   #include "eqfhlog.h"                   // defines and structures of history log
@@ -33,7 +33,7 @@ extern "C"
   #include "eqfserno.h"
   #include "eqfrpt.mri"   // private mri's for report
   #include <time.h>
-#pragma pack( pop, TM2StructPacking )
+//#pragma pack( pop, TM2StructPacking )
 
 #ifndef CPPTEST
 }

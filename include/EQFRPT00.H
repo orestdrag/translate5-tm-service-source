@@ -397,7 +397,7 @@ typedef struct _allInfo
 
 
 // extended structure of words per class
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _sumPerClassEx
 {
   ULONG  ulNumSegs;   // number of segments in this class
@@ -407,7 +407,7 @@ typedef struct _sumPerClassEx
 } SUMPERCLASSEX, *PSUMPERCLASSEX;
 
 // extended structure of criteria
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _criteriaSumEx
 {
    SUMPERCLASSEX  SimpleSum;     // number of segs in this class
@@ -418,7 +418,7 @@ typedef struct _criteriaSumEx
 // extended structure of docsavehist
 ////////////////////////////////////
 
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct _docSaveHistEx
 {
    CRITERIASUMEX  AnalAutoSubst;   // sums for segs transl. by analauto before edit

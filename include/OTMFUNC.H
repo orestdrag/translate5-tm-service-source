@@ -1839,7 +1839,7 @@ USHORT EqfGetSegmentNumber
      This structure is used by the EqfGetMatchLevel API for the segment from the
      document and for the memory proposal
 */
-#pragma pack( push, TM2StructPacking, 1 )
+//#pragma pack( push, TM2StructPacking, 1 )
 typedef struct _EQFSEGINFO
 {
   WCHAR           szSource[EQF_SEGLEN];          // segment source text (UTF-16 encoded)
@@ -1850,7 +1850,7 @@ typedef struct _EQFSEGINFO
   CHAR            szTargetLanguage[MAX_LANG_LENGTH];   // target language of segment
   CHAR            szMarkup[MAX_FILESPEC];        // markup of segment
 } EQFSEGINFO, *PEQFSEGINFO;
-#pragma pack( pop, TM2StructPacking )
+//#pragma pack( pop, TM2StructPacking )
 
 //
 // options for EqfGetMatchLevel API
