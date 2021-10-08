@@ -551,13 +551,13 @@ USHORT TmtXGet
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
               {
                 
-                LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 1");
-                #ifdef TEMPORARY_COMMENTED
+                //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 1");
+                //#ifdef TEMPORARY_COMMENTED
                 LOGPRINTF0( L"TmtXGet: No exact matches found, trying GetFuzzyMatch\r\n" );
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-                #endif
+                //#endif
               } /* endif */
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
@@ -567,12 +567,12 @@ USHORT TmtXGet
             {
                 LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
                 
-                LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 2");
-                #ifdef TEMPORARY_COMMENTED
+                //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 2");
+                //#ifdef TEMPORARY_COMMENTED
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-                #endif
+                //#endif
 #ifdef MEASURETIME
                 GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -3383,8 +3383,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
             } /* endif */
 
 
-LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-#ifdef TEMPORARY_COMMENTED
+//LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+//#ifdef TEMPORARY_COMMENTED
             fFuzzynessOK = TMFuzzyness( pGetIn->szTagTable,
 //                                        pSentence->pNormString,
                                         pSentence->pInputString,
@@ -3392,7 +3392,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
                                         pSentence->pPropString,
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP);
-                                        #endif
+                                        //#endif
             // RJ: P018279 etc: NO, must be active!
             // GQ: the following code has been disabled as the fuzziness
             // now includes any inline tagging

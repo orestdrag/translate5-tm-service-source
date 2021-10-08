@@ -2720,6 +2720,7 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     /* (The resource file is not checked here, it will be checked     */
     /*  later on while loading the resource into memory)              */
     /******************************************************************/
+    #ifdef TEMPORARY_COMMENTED
     if ( fOK )
     {
       fOK = UtlFileExist( EqfSystemHlpFile );
@@ -2742,24 +2743,29 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
 
       fOK = FALSE;
     } /* endif */
+    #endif
 
     /******************************************************************/
     /* return strings to caller if requested...                       */
     /******************************************************************/
     if ( fOK )
     {
-      if ( pEqfSystemMsgFile )
-      {
-        strcpy( pEqfSystemMsgFile, EqfSystemMsgFile );
-      } /* endif */
       if ( pEqfSystemPropPath )
       {
         strcpy( pEqfSystemPropPath, EqfSystemPropPath );
       } /* endif */
+      
+      #ifdef TEMPORARY_COMMENTED
+      if ( pEqfSystemMsgFile )
+      {
+        strcpy( pEqfSystemMsgFile, EqfSystemMsgFile );
+      } /* endif */
+      
       if ( pEqfResFile )
       {
         strcpy( pEqfResFile, szEqfResFile );
       } /* endif */
+      #endif
     } /* endif */
 
     return( fOK);
