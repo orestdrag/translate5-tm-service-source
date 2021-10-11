@@ -31,6 +31,7 @@
 #include <map>
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/PropertyWrapper.H"
+//#include "EQFTM.H"
 
 #ifdef _DEBUG
   //#define MEASURETIME
@@ -1830,6 +1831,81 @@ void NTMRemoveAdditionalWhitepace
 
 
 
+BOOL TMFuzzynessEx
+(
+  PSZ pszMarkup,                       // markup table name
+  PSZ_W pszSource,                     // original string
+  PSZ_W pszMatch,                      // found match
+  SHORT sLanguageId,                   // language id to be used
+  PUSHORT     pusFuzzy,                 // fuzzyness
+  ULONG       ulOemCP,
+  PUSHORT     pusWords                 // number of words in segment
+)
+{
+  BOOL  fOK;
+  PFUZZYTOK    pFuzzyTgt = NULL;
+  PFUZZYTOK    pFuzzyTok = NULL;       // returned token list
+  PSZ          pInBuf = NULL;          // buffer for EQFBFindDiffEx function
+  PSZ          pTokBuf = NULL;         // buffer for EQFBFindDiffEx function
+  USHORT       usDiff = 0;             // number of differences
+  USHORT       usWords = 0;            // number of words/tokens
+  PLOADEDTABLE pTable = NULL;          // ptr to loaded tag table
+
+
+  // fast exit if one or both strings are empty...
+  if ( (*pszSource == EOS) || (*pszMatch == EOS) )
+  {
+    if ( (*pszSource == EOS) && (*pszMatch == EOS) )
+    {
+      *pusFuzzy = 100;
+    }
+    else
+    {
+      *pusFuzzy = 0;
+    } /* endif */
+    return( TRUE );
+  } /*   endif */
+
+  // allocate required buffers
+  fOK = UtlAlloc((PVOID *)&pInBuf, 0L, 64000L, NOMSG );
+  if ( fOK ) fOK = UtlAlloc((PVOID *)&pTokBuf, 0L, 64000 /*(LONG)TOK_BUFFER_SIZE*/, NOMSG );
+
+  // load tag table
+  if ( fOK )
+  {
+    fOK = (TALoadTagTableExHwnd( pszMarkup, &pTable, FALSE,
+                                 TALOADUSEREXIT | TALOADPROTTABLEFUNC,
+                                 FALSE, NULLHANDLE ) == NO_ERROR);
+  } /* endif */
+
+  // call function to evaluate the differences
+  if ( fOK )
+  {
+    fOK = EQFBFindDiffEx( pTable, (PBYTE)pInBuf, (PBYTE)pTokBuf, pszSource,
+                          pszMatch, sLanguageId, (PVOID *)&pFuzzyTok,
+                          (PVOID *)&pFuzzyTgt, ulOemCP );
+  } /* endif */
+
+  if ( fOK )
+  {
+    #ifdef TEMPORARY_COMMENTED
+    EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
+    #endif
+  } /* endif */
+
+  // free allocated buffers and lists
+  if ( pFuzzyTgt ) UtlAlloc( (PVOID *)&pFuzzyTgt, 0L, 0L, NOMSG );
+  if ( pFuzzyTok ) UtlAlloc( (PVOID *)&pFuzzyTok, 0L, 0L, NOMSG );
+  if ( pInBuf )    UtlAlloc( (PVOID *)&pInBuf, 0L, 0L, NOMSG );
+  if ( pTokBuf )   UtlAlloc( (PVOID *)&pTokBuf, 0L, 0L, NOMSG );
+  if ( pTable )    TAFreeTagTable( pTable );
+
+  *pusFuzzy = (usWords != 0) ? ((usWords - usDiff) * 100 / usWords) : 100;
+
+  if ( pusWords ) *pusWords = usWords; 
+  return fOK;
+} /* end of function TMFuzzyness */
+
 
 BOOL DITASpecialProcessingRequired
 (
@@ -2089,11 +2165,11 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
                 // recompute fuzziness and skip postprocessing if we have an exact match
                 USHORT usFuzzy = 0;
                 BOOL fFuzzyOK;
-                LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-#ifdef TEMPORARY_COMMENTED
-                fFuzzyOK = TMFuzzyness( pGetIn->szTagTable, pSubstProp->szPropSource, pSubstProp->szSource,
-                                             sLangID, &usFuzzy, ulSrcOemCP );
-                                             #endif
+                //LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+//#ifdef TEMPORARY_COMMENTED
+                fFuzzyOK = TMFuzzynessEx( pGetIn->szTagTable, pSubstProp->szPropSource, pSubstProp->szSource,
+                                             sLangID, &usFuzzy, ulSrcOemCP , 0 );
+                                             //#endif
                 if ( usFuzzy == 100 )
                 {
                   fSkipPostprocessing = TRUE;
@@ -2362,12 +2438,12 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
               USHORT usFuzzy = 0;
               BOOL fFuzzynessOK;
 
-LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-#ifdef TEMPORARY_COMMENTED
-/*Q!*/        fFuzzynessOK = TMFuzzyness( pGetIn->szTagTable,
+//LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+//#ifdef TEMPORARY_COMMENTED
+/*Q!*/        fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
                                           pSubstProp->szPropSource, pSubstProp->szSource,
-                                          sLangID, &usFuzzy, ulSrcOemCP );
-#endif
+                                          sLangID, &usFuzzy, ulSrcOemCP, 0 );
+//#endif
 
               if ( pGetIn->ulParm & GET_RESPECTCRLF )
               {
@@ -6736,7 +6812,7 @@ USHORT NTMGetMatchLevel
       {
         // recompute fuzziness
         BOOL fFuzzynessOK;
-        fFuzzynessOK = TMFuzzyness( pSegment->szMarkup, pSegment->szSource, pSubstProp->szPropSource, sLangID, &usFuzzy, ulSrcOemCP );
+        fFuzzynessOK = TMFuzzynessEx( pSegment->szMarkup, pSegment->szSource, pSubstProp->szPropSource, sLangID, &usFuzzy, ulSrcOemCP ,0 );
 #ifdef MATCHLEVEL_LOGGING
         if ( hfLog )
         {
@@ -7245,7 +7321,7 @@ SHORT NTMSimpleGetMatchLevel
       {
         // recompute fuzziness
         BOOL fFuzzynessOK;
-        fFuzzynessOK = TMFuzzyness( pszSegmentMarkup, pSubstProp->szPropSource, pSubstProp->szSource, sLangID, &usFuzzy, ulSrcOemCP );
+        fFuzzynessOK = TMFuzzynessEx( pszSegmentMarkup, pSubstProp->szPropSource, pSubstProp->szSource, sLangID, &usFuzzy, ulSrcOemCP , 0 );
       } /* endif */
 
       NTMFreeSubstProp( pSubstProp );

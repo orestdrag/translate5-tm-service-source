@@ -2,6 +2,9 @@
 	Copyright (c) 1990-2016, International Business Machines Corporation and others. All rights reserved.
 */
 
+#ifndef _EQFTM_H_
+#define _EQFTM_H_
+
 #ifndef _OTMFUNC_H_INCLUDED
     #include "OTMFUNC.H"
 #endif 
@@ -2242,9 +2245,6 @@ void TMDeleteTempMem
   PSZ         pszMemPath                                    // ptr to memory path
 );
 
-BOOL TMFuzzyness( PSZ, PSZ_W, PSZ_W, SHORT, PUSHORT, ULONG );
-
-
 BOOL TMFuzzynessEx
 (
   PSZ pszMarkup,                       // markup table name
@@ -2319,3 +2319,5 @@ USHORT NTMGetMatchLevel
   LONG             lOptions            // options to be used by the function
 );
 };
+
+#endif 
