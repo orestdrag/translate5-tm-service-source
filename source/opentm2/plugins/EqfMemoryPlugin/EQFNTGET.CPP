@@ -3383,8 +3383,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
             } /* endif */
 
 
-//LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-//#ifdef TEMPORARY_COMMENTED
+LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
+#ifdef TEMPORARY_COMMENTED
             fFuzzynessOK = TMFuzzyness( pGetIn->szTagTable,
 //                                        pSentence->pNormString,
                                         pSentence->pInputString,
@@ -3392,7 +3392,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                                         pSentence->pPropString,
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP);
-                                        //#endif
+#endif
+
             // RJ: P018279 etc: NO, must be active!
             // GQ: the following code has been disabled as the fuzziness
             // now includes any inline tagging

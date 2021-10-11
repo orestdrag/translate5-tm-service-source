@@ -1784,6 +1784,7 @@ PSZ_W UTF16strchr( PSZ_W pszString, CHAR_W ch  )
   return( (c == ch) ? pszString : NULL );
 }
 
+#endif 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strrev    reverse a Unicode string                                ///
@@ -1806,7 +1807,7 @@ PSZ_W UTF16strrev( PSZ_W pszString )
   return( pszString);
 }
 
-
+#ifdef TEMPORARY_COMMENTED
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strstr   find the specified string in the source string           ///
 ///////////////////////////////////////////////////////////////////////////////

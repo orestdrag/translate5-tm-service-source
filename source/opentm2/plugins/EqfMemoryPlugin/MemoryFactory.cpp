@@ -27,7 +27,7 @@ Copyright Notice:
 #include "../../core/utilities/OSWrapper.h"
 #include "../../plugins/EqfMemoryPlugin/EqfMemoryPlugin.h"
 #include "MemoryUtil.h"
-#include "../memory/MemoryFactory.h"
+#include "../../plugins/EqfMemoryPlugin/MemoryFactory.h"
 #include "OptionsDialog.H"
 #include "LogWrapper.h"
 

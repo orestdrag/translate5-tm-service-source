@@ -10,11 +10,11 @@
 
 #include <string>
 #include <vector>
-#include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmSharedMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
-#include "../utilities/LogWriter.h"
+#include "../../core/pluginmanager/PluginManager.h"
+#include "../../core/pluginmanager/OtmMemoryPlugin.h"
+#include "../../core/pluginmanager/OtmSharedMemoryPlugin.h"
+#include "../../core/pluginmanager/OtmMemory.h"
+#include "../../core/utilities/LogWriter.h"
 extern "C"
 {
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions

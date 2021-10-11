@@ -33,6 +33,7 @@ extern "C"
 
 #include "win_types.h"
 #include "LogWrapper.h"
+//#include "EQFFUZZ.H"
 // prototypes for helper functions
 
 
@@ -159,6 +160,22 @@ USHORT NTMOrganizeIndexFile
     return( 1 );
 
 }
+
+
+/**********************************************************************/
+/* macro to calculate the number of tokens in the list ...            */
+/* and to adjust ends of tokens                                       */
+/**********************************************************************/
+#define  NUMBEROFTOKENS(usLenStr, pTokenList)   \
+         {                                      \
+           PFUZZYTOK pTest = pTokenList;        \
+           usLenStr = 0;                        \
+           while ( pTest->ulHash )              \
+           {                                    \
+             usLenStr++;                        \
+             pTest++;                           \
+           } /* endwhile */                     \
+         }
 
 USHORT TmUpdSegW
 (
@@ -1767,6 +1784,678 @@ SHORT NTMSimpleGetMatchLevelCleanup
 }
 
 
+//static  ULONG  ulRandom[MAX_RANDOM];   // random sequence
+
+
+
+
+//static 
+VOID MakeHashValue ( PULONG, USHORT, PSZ_W, PULONG );
+
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     SplitTokens                                              |
+//+----------------------------------------------------------------------------+
+//|Function call:     SplitTokens(PFUZZYTOK, USHORT, USHORT, USHORT, PSZ)      |
+//+----------------------------------------------------------------------------+
+//|Description:       build pstCurrent and split token if it contains          |
+//|                   digits or punctuations                                   |
+//+----------------------------------------------------------------------------+
+//|Parameters:        _                                                        |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   PFUZZYTOK                                                |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       pstCurrent  points to next free position                 |
+//+----------------------------------------------------------------------------+
+//|Function flow:     splitting of tokens added on request,                    |
+//|                   now deleted again (July 93)                              |
+//+----------------------------------------------------------------------------+
+
+//static 
+PFUZZYTOK SplitTokens
+ (
+  PFUZZYTOK  pstCurrent,
+  USHORT     usStart,
+  SHORT      sType,
+  USHORT     usLength,
+  PSZ_W      pString
+ )
+{
+  CHAR_W    chTemp;
+  pstCurrent->pData = pString;
+  pstCurrent->usStart = usStart;
+  pstCurrent->sType   = sType;
+  pstCurrent->usStop  = usStart + usLength - 1;
+  pstCurrent->fConnected = FALSE;
+  chTemp = *(pString + usLength);
+  *(pString + usLength) = EOS;
+  MakeHashValue ( ulRandom, MAX_RANDOM,
+                  pString , &pstCurrent->ulHash );
+  *(pString + usLength) = chTemp;
+  pstCurrent++;
+
+  return (pstCurrent);
+} /* end of function SplitTokens */
+
+
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     PrepareTokens                                            |
+//+----------------------------------------------------------------------------+
+//|Function call:     fOK = PrepareTokens( pDoc, pString, sId, &pTokList );    |
+//+----------------------------------------------------------------------------+
+//|Description:       prepare the token list and build hash values for them    |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PVOID         pTagTable      ptr to tagtable             |
+//|                   PBYTE         pInBuf         temp work buffer            |
+//|                   PBYTE         pTokBuf        token buffer                |
+//|                   PSZ           pString,       ptr to string               |
+//|                   SHORT         sLanguageId,   language ID                 |
+//|                   PFUZZYTOK   * ppTransTokList resulting list of tokens    |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   BOOL                                                     |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       TRUE     everything okay                                 |
+//|                   FALSE    allocation went wrong                           |
+//+----------------------------------------------------------------------------+
+//|Function flow:     if not done yet                                          |
+//|                     prepare random sequence (according to K.Wirth)         |
+//|                   call EQFTagTokenize to tokenize the passed string        |
+//|                   build tokenlist, i.e. convert tokens/text strings to     |
+//|                      entries in start-stop table                           |
+//|                      (Note: for text tokens returned we have to call       |
+//|                             MorphTokenize to split them up further )       |
+//|                   allocate memory for start/stop table and copy list into  |
+//|                   return success indicator                                 |
+//+----------------------------------------------------------------------------+
+//static 
+BOOL
+PrepareTokens
+(
+  PLOADEDTABLE  pTagTable,
+  PBYTE         pInBuf,
+  PBYTE         pTokBuf,
+  PSZ_W         pString,               // pointer to string to be tokenized
+  SHORT         sLanguageId,           // language ID
+  PFUZZYTOK   * ppTransTokList,         // resulting list of tokens
+  ULONG         ulOemCP
+)
+{
+  PCHAR_W     pRest;                   // ptr to start of not-processed bytes
+  USHORT      usColPos = 0;            // column pos used by EQFTagTokenize
+  PTOKENENTRY pTok;                    // ptr for token table processing
+  USHORT      usCurOffs;               // current offset into segment
+  ULONG       ulLength;                // length of start/stop table
+  PFUZZYTOK   pstCurrent;              // ptr to entries of start/stop table
+  CHAR_W      chTemp;                  // temp character
+  BOOL        fOK = TRUE;              // success indicator
+  USHORT      usRandomIndex;           // index in random sequence
+  USHORT      usListSize;              // size of buffer
+  PTERMLENOFFS  pTermList;             // ptr to created term list
+  PTERMLENOFFS  pActTerm;              // actual term
+  USHORT       usRC;                   // return code
+  SHORT        sNumTags;               // number of tags       /* KIT0857A    */
+  BOOL         fTag;                   // currently in tagging /* KIT0857A    */
+  PFUZZYTOK    pstAct;                 // ptr start/stop table /* KIT0857A    */
+  PSZ_W        pStart;
+
+   if ( !ulRandom[0] )
+   {
+     /********************************************************************/
+     /* random sequences, see e.g. the book of Wirth...                  */
+     /********************************************************************/
+     ulRandom[0] = 0xABCDEF01;
+     for (usRandomIndex = 1; usRandomIndex < MAX_RANDOM; usRandomIndex++)
+     {
+         ulRandom[usRandomIndex] = ulRandom[usRandomIndex - 1] * 5 + 0xABCDEF01;
+     }
+   } /* endif */
+  /********************************************************************/
+  /* run TATagTokenize to find tokens ....                            */
+  /********************************************************************/
+  TATagTokenizeW(pString,
+                 pTagTable,
+                 TRUE,
+                 &pRest,
+                 &usColPos,
+                 (PTOKENENTRY) pTokBuf,
+                 TOK_BUFFER_SIZE / sizeof(TOKENENTRY) );
+
+  /********************************************************************/
+  /* build tokenlist, i.e.                                            */
+  /* convert tokens/text strings to entries in start-stop table       */
+  /*                                                                  */
+  /* Rational: use input buffer for temporary list ....               */
+  /*           this is large enough, we can avoid any checking...     */
+  /********************************************************************/
+  pstCurrent = (PFUZZYTOK) pInBuf;  // use input buffer for table
+  pTok = (PTOKENENTRY) pTokBuf;
+  usCurOffs = 0;
+  pStart = pTok->pDataStringW;
+  while ( (pTok->sTokenid != ENDOFLIST) )
+  {
+    if ( pTok->sTokenid == TEXT_TOKEN )
+    {
+      usListSize = 0;
+      pTermList = NULL;
+
+      chTemp = *(pTok->pDataStringW+pTok->usLength);
+      *(pTok->pDataStringW+pTok->usLength) = EOS;
+
+      usRC = MorphTokenizeW( sLanguageId, pTok->pDataStringW,
+                            &usListSize, (PVOID *)&pTermList,
+                            MORPH_OFFSLIST, ulOemCP );
+
+      *(pTok->pDataStringW+pTok->usLength) = chTemp;
+
+      if ( pTermList )
+      {
+        pActTerm = pTermList;
+        if ( pTermList->usLength )
+        {
+          while ( pActTerm->usLength )
+          {
+            pString = pTok->pDataStringW + pActTerm->usOffset;
+            /**********************************************************/
+            /* ignore the linefeeds and tabs in the matching          */
+            /**********************************************************/
+            if ( (*pString != LF) && (*pString != 0x09))
+            {
+              pstCurrent = SplitTokens(pstCurrent,
+                                       (USHORT)(usCurOffs + pActTerm->usOffset),
+                                       TEXT_TOKEN,
+                                       pActTerm->usLength,
+                                       pString);
+            } /* endif */
+            pActTerm++;
+          } /* endwhile */
+        }
+        else
+        {
+          pstCurrent = SplitTokens(pstCurrent,
+                                   usCurOffs,
+                                   pTok->sTokenid,
+                                   pTok->usLength,
+                                   pTok->pDataStringW);
+
+        } /* endif */
+      } /* endif */
+      /****************************************************************/
+      /* free allocated resource ...                                  */
+      /****************************************************************/
+      UtlAlloc( (PVOID *)&pTermList, 0L, 0L, NOMSG );
+    }
+    else
+    {
+      pstCurrent =  SplitTokens(pstCurrent,
+                               usCurOffs,
+                               pTok->sTokenid,
+                               pTok->usLength,
+                               pTok->pDataStringW);
+    } /* endif */
+    /****************************************************************/
+    /* adjust current offset to point to new offset in string...    */
+    /****************************************************************/
+    pTok++;
+    usCurOffs = (USHORT)(pTok->pDataStringW - pStart);
+  } /* endwhile */
+
+  // terminate start/stop table
+  memset( pstCurrent, 0, sizeof(  FUZZYTOK ));
+
+
+  /********************************************************************/
+  /* get number of tags ...                                           */
+  /********************************************************************/
+  sNumTags = (SHORT) pTagTable->pTagTable->uNumTags;
+  /********************************************************************/
+  /* streamline tokenlist, i.e. treat tags and their attributes as    */
+  /* one unit                                                         */
+  /*    pstAct -- points to active one                                */
+  /*    pstCurrent  -- points to next one...                          */
+  /********************************************************************/
+  pstCurrent = (PFUZZYTOK) pInBuf;         // use input buffer for table
+  pstAct = pstCurrent;
+  /********************************************************************/
+  /* set tag indication                                               */
+  /********************************************************************/
+  fTag = ((pstCurrent->sType < sNumTags ) &&
+          (pstCurrent->sType >= 0));
+  pstCurrent++;                                  // point to next entry
+
+  while ( pstCurrent->usStop )
+  {
+    if ( pstCurrent->sType < sNumTags )          // tags or text;
+    {
+      fTag = ( pstCurrent->sType >= 0 );
+      pstAct++;
+      memcpy( pstAct, pstCurrent, sizeof( FUZZYTOK ));
+      pstCurrent++;
+    }
+    else                                        // it is an attribute
+    {
+      /****************************************************************/
+      /* if we are in a tag -- join it, i.e. update the length        */
+      /****************************************************************/
+      if ( fTag )
+      {
+        pstAct->usStop = pstCurrent->usStop;
+        pstAct->ulHash += pstCurrent->ulHash;
+        pstCurrent++;
+      }
+      else
+      {
+        pstAct++;
+        memcpy( pstAct, pstCurrent, sizeof( FUZZYTOK ));
+        pstCurrent++;
+      } /* endif */
+    } /* endif */
+  } /* endwhile */
+  /********************************************************************/
+  /* put in end indication                                            */
+  /********************************************************************/
+  pstAct++;
+  memcpy( pstAct, pstCurrent, sizeof( FUZZYTOK ));
+  /********************************************************************/
+  /* have to point to next one, because we use it as length parameter */
+  /********************************************************************/
+  pstAct++;
+
+  /********************************************************************/
+  /* allocate memory for start/stop table and copy list into it       */
+  /********************************************************************/
+  *ppTransTokList = NULL;              // init token list..
+  ulLength = (ULONG)(((PBYTE) pstAct) - pInBuf);
+
+  fOK = UtlAlloc( (PVOID *)ppTransTokList, 0L, ulLength, ERROR_STORAGE );
+  if ( fOK )
+  {
+    memcpy( *ppTransTokList, pInBuf, ulLength );
+  } /* endif */
+
+  return( fOK );
+} /* end of function 
+  */
+#endif
+
+#ifdef TEMPORARY_COMMENTED
+//+----------------------------------------------------------------------------+
+//|Internal function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     EQFBCallLCS                                              |
+//+----------------------------------------------------------------------------+
+//|Function call:     EQFBCallLCS     ( PFUZZYTOK,PFUZZYTOK,PREPLLIST)         |
+//+----------------------------------------------------------------------------+
+//|Description:       fill structure needed in LCS and call LCS                |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PFUZZYTOK    pPropTokList,   pointer to token list       |
+//|                   PFUZZYTOK    pTransTokList,  pointer to token list       |
+//|                   PREPLLIST  * ppReplaceList   pointer to replace list     |
+//|                   BOOL         fCompareAll     TRUE is strncmp nec.        |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   BOOL                                                     |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       1       success                                          |
+//|                   0       error                                            |
+//+----------------------------------------------------------------------------+
+//|Function flow:      set up pointer array                                    |
+//|                    return success indicator                                |
+//+----------------------------------------------------------------------------+
+BOOL EQFBCallLCS
+(
+  PFUZZYTOK    pTokenList1,             // ptr to token list1
+  PFUZZYTOK    pTokenList2,                      // ptr to token list2
+  USHORT       usLenStr1,
+  USHORT       usLenStr2,
+  BOOL         fCompareAll
+)
+{
+  BOOL         fOK = TRUE;             // success indicator
+  PFUZZYTOK    pTestToken;
+  LCSTOKEN     LCSString1;
+  LCSTOKEN     LCSString2;
+  PFUZZYTOK    pBackList1;
+  PFUZZYTOK    pBackList2 = NULL;
+  SHORT        k;
+
+
+  fOK = UtlAlloc( (PVOID *)&pBackList1,
+                  0L,
+                  (LONG) (usLenStr1 +1) * sizeof(FUZZYTOK),
+                  ERROR_STORAGE );
+  if (fOK )
+  {
+    fOK = UtlAlloc( (PVOID *)&pBackList2,
+                    0L,
+                    (LONG) (usLenStr2 +1) * sizeof(FUZZYTOK),
+                    ERROR_STORAGE );
+  } /* endif */
+  if ( fOK )
+  {
+    /******************************************************************/
+    /* fill backward tokenlists                                       */
+    /******************************************************************/
+    pTestToken = pTokenList1;
+    for ( k=(usLenStr1-1); k >= 0 ; k-- )
+    {
+      *(pBackList1+k) = *pTestToken;
+      pTestToken++;
+    } /* endfor */
+
+    pTestToken = pTokenList2;
+    for ( k = (usLenStr2-1); k >= 0 ; k-- )
+    {
+      *(pBackList2+k) = *pTestToken;
+      pTestToken++;
+    } /* endfor */
+
+    /******************************************************************/
+    /* call recursive function to find shortest edit script           */
+    /******************************************************************/
+    LCSString1.pTokenList = pTokenList1;
+    LCSString1.pBackList = pBackList1;
+    LCSString1.sStart = 0;
+    LCSString1.sStop = usLenStr1;
+    LCSString1.sTotalLen = usLenStr1;
+
+    LCSString2.pTokenList = pTokenList2;
+    LCSString2.pBackList = pBackList2;
+    LCSString2.sStart = 0;
+    LCSString2.sStop = usLenStr2;
+    LCSString2.sTotalLen = usLenStr2;
+
+    LCS ( LCSString1,LCSString2, fCompareAll);
+
+    UtlAlloc( (PVOID *)&pBackList1, 0L, 0L, NOMSG);
+    UtlAlloc( (PVOID *)&pBackList2, 0L, 0L, NOMSG);
+
+  } /* endif */
+  return fOK;
+} /* end of function EQFBCallLCS */
+
+
+//+----------------------------------------------------------------------------+
+//|External function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     EQFBMarkModDelIns                                        |
+//+----------------------------------------------------------------------------+
+//|Function call:     _                                                        |
+//+----------------------------------------------------------------------------+
+//|Description:       convert output from LCS into fuzzytoks with              |
+//|                   MARK_MODIFIED, MARK_INSERTED, MARK_DELETED               |
+//+----------------------------------------------------------------------------+
+//|Parameters:        PFUZZYTOK   pTokenList1,     // tokenlist from LCS       |
+//|                   PFUZZYTOK   pTokenList2,     // tokenlist from LCS       |
+//|                   PFUZZYTOK * ppFuzzyTgt,      // returned token of str 1  |
+//|                   PFUZZYTOK * ppFuzzyTok,      // returned token of str2   |
+//|                   USHORT      usLenStr1,       // # of toks in TokenList1  |
+//|                   USHORT      usLenStr2        // # of toks in tokenlist2  |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   BOOL                                                     |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       TRUE    every thing okay                                 |
+//|                   FALSE   else                                             |
+//+----------------------------------------------------------------------------+
+//|Side effects:      The returned token list has to be freed by the caller    |
+//+----------------------------------------------------------------------------+
+//|Function flow:     allocate ppFuzzy1 ppFuzzy2                               |
+//|                   convert output from LCS into PFUZZYTOKS with             |
+//|                   MARK_MODIFIED, MARK_DELETED, MARK_INSERTED               |
+//|                   return success indicator                                 |
+//+----------------------------------------------------------------------------+
+//static 
+BOOL
+EQFBMarkModDelIns
+(
+    PFUZZYTOK   pTokenList1,
+    PFUZZYTOK   pTokenList2,
+    PFUZZYTOK  * ppFuzzy1,
+    PFUZZYTOK  * ppFuzzy2,
+    USHORT      usLenStr1,
+    USHORT      usLenStr2
+)
+
+{
+  BOOL         fOK;
+  PFUZZYTOK    pTestToken;             // pointer to token lists 2
+  USHORT       usStringA, usStringB;   // indices into strings (A=1, B=2)
+  PFUZZYTOK    pT1Token;               // pointer to token lists 1
+
+  LONG         lTokBufLen  = (LONG)(usLenStr1 + usLenStr2 + 1);
+  LONG         lTokBufSize = lTokBufLen * sizeof(FUZZYTOK);
+  LONG         lTokBufUsed = 0;
+
+  fOK = UtlAlloc( (PVOID *)ppFuzzy2, 0L, lTokBufSize, ERROR_STORAGE );
+  if (fOK ) fOK = UtlAlloc( (PVOID *)ppFuzzy1, 0L, lTokBufSize, ERROR_STORAGE );
+
+  if ( fOK )
+  {
+    pTestToken = *ppFuzzy2;
+    pT1Token = *ppFuzzy1;
+    usStringA = usStringB = 0;
+    while ((usStringA < usLenStr1) && (usStringB < usLenStr2) )
+    {
+      if ( ((pTokenList2+usStringB)->sType == MARK_EQUAL)
+           && ((pTokenList1+usStringA)->sType == MARK_EQUAL)    )
+      {
+         *pTestToken = *(pTokenList2+usStringB);
+         pTestToken++;
+         lTokBufUsed++;
+         *pT1Token = *(pTokenList1+usStringA);
+         pT1Token++;
+
+         usStringA++; usStringB++;
+      }
+      else if ((pTokenList1+usStringA)->sType == MARK_EQUAL)
+      {
+        *pTestToken = *(pTokenList2+usStringB);
+        pTestToken->sType = MARK_INSERTED;
+        pTestToken++;
+        lTokBufUsed++;
+        *pT1Token = *(pTokenList2+usStringB);
+        pT1Token->sType = MARK_DELETED;
+        pT1Token++;
+
+        usStringB++;
+      }
+      else if ((pTokenList2+usStringB)->sType == MARK_EQUAL)
+      {
+        *pTestToken = *(pTokenList1+usStringA);
+        pTestToken->sType = MARK_DELETED;
+        pTestToken++;
+        lTokBufUsed++;
+        *pT1Token = *(pTokenList1+usStringA);
+        pT1Token->sType = MARK_INSERTED;
+        pT1Token++;
+
+        usStringA++;
+      }
+      else
+      {
+        *pTestToken = *(pTokenList2+usStringB);
+        pTestToken->sType = MARK_MODIFIED;
+        pTestToken++;
+        lTokBufUsed++;
+        *pT1Token = *(pTokenList1+usStringA);
+        pT1Token->sType = MARK_MODIFIED;
+        pT1Token++;
+
+        usStringA++;
+        usStringB++;
+      } /* endif */
+    } /* endwhile */
+
+    while ( usStringA < usLenStr1   )
+    {
+      *pTestToken = *(pTokenList1+usStringA);
+      pTestToken->sType = MARK_DELETED;
+      pTestToken++;
+      lTokBufUsed++;
+      *pT1Token = *(pTokenList1+usStringA);
+      pT1Token->sType = MARK_INSERTED;
+      pT1Token++;
+
+      usStringA++;
+    } /* endwhile */
+    while ( usStringB < usLenStr2   )
+    {
+      *pTestToken = *(pTokenList2+usStringB);
+      pTestToken->sType = MARK_INSERTED;
+      pTestToken++;
+      lTokBufUsed++;
+
+      *pT1Token = *(pTokenList2+usStringB);
+      pT1Token->sType = MARK_DELETED;
+      pT1Token++;
+      usStringB++;
+    } /* endwhile */
+  } /* endif */
+
+  return( fOK );
+} /* end of function EQFBMarkModDelIns */
+#endif
+
+
+
+BOOL
+PrepareTokens
+(
+  PLOADEDTABLE  pTagTable,
+  PBYTE         pInBuf,
+  PBYTE         pTokBuf,
+  PSZ_W         pString,               // pointer to string to be tokenized
+  SHORT         sLanguageId,           // language ID
+  PFUZZYTOK   * ppTransTokList,         // resulting list of tokens
+  ULONG         ulOemCP
+);
+
+
+
+
+BOOL EQFBCallLCS
+(
+  PFUZZYTOK    pTokenList1,             // ptr to token list1
+  PFUZZYTOK    pTokenList2,                      // ptr to token list2
+  USHORT       usLenStr1,
+  USHORT       usLenStr2,
+  BOOL         fCompareAll
+);
+
+BOOL EQFBMarkModDelIns
+(
+    PFUZZYTOK   pTokenList1,
+    PFUZZYTOK   pTokenList2,
+    PFUZZYTOK  * ppFuzzy1,
+    PFUZZYTOK  * ppFuzzy2,
+    USHORT      usLenStr1,
+    USHORT      usLenStr2
+);
+
+
+/**********************************************************************/
+/* find the differences in two strings (w/o cleanup if consecutives   */
+/* delete and inserts)                                                */
+/**********************************************************************/
+BOOL
+EQFBFindDiffEx
+(
+  PVOID pTable,                        // pointer to loaded tagtable
+  PBYTE pInBuf,                        // pointer to input buffer
+  PBYTE pTokBuf,                       // pointer to temp token buffer
+  PSZ_W pString1,                      // first string passed
+  PSZ_W pString2,                      // second string
+  SHORT sLanguageId,                   // language id to be used for pString1
+  PVOID * ppFuzzyTok,                  // returned token list of pString2
+  PVOID * ppFuzzyTgt,                   // returned token list of pString1
+  ULONG   ulOemCP
+)
+{
+  BOOL fOK = TRUE;                     // success indicator
+  USHORT       usLenStr1 = 0;          // length of string 1 (in num. of tokens)
+  USHORT       usLenStr2 = 0;          // length of string 2 (in num. of tokens)
+  PFUZZYTOK    pTokenList2 = NULL;     // pointer to token lists
+  PFUZZYTOK    pTokenList1 = NULL;     // pointer to token lists
+  PFUZZYTOK    pToken;                 // pointer to token lists
+  PLOADEDTABLE pTagTable = (PLOADEDTABLE) pTable;
+
+  /******************************************************************/
+  /* prepare tokens for String1 and string 2                        */
+  /******************************************************************/
+  fOK = PrepareTokens( //pDoc,
+                       pTagTable,
+                       pInBuf,
+                       pTokBuf,
+                       pString1, sLanguageId, &pTokenList1, ulOemCP );
+  if ( fOK )
+  {
+    fOK = PrepareTokens( // pDoc,
+                         pTagTable,
+                         pInBuf,
+                         pTokBuf,
+                         pString2, sLanguageId, &pTokenList2, ulOemCP );
+  } /* endif */
+  if (fOK )
+  {
+    /********************************************************************/
+    /* get number of tokens in strings                                  */
+    /********************************************************************/
+    NUMBEROFTOKENS(usLenStr1, pTokenList1);
+    NUMBEROFTOKENS(usLenStr2, pTokenList2);
+
+    /******************************************************************/
+    /* call LCS and compare tokens with strncmp                       */
+    /******************************************************************/
+    fOK = EQFBCallLCS(pTokenList1, pTokenList2,
+                      usLenStr1, usLenStr2, TRUE);
+  } /* endif */
+  /********************************************************************/
+  /* get number of tokens in strings                                  */
+  /********************************************************************/
+  if ( fOK )
+  {
+    /****************************************************************/
+    /* adjust length to avoid non-marked spaces between marked tokens*/
+    /****************************************************************/
+    pToken = pTokenList1;                   //current pointers
+    while ( pToken->ulHash )
+    {
+      if ( (pToken->usStop < (pToken+1)->usStart) )
+      {
+        pToken->usStop = (pToken+1)->usStart - 1;
+      } /* endif */
+      pToken++;
+    } /* endwhile */
+
+    pToken = pTokenList2;                   //current pointers
+    while ( pToken->ulHash )
+    {
+      if ( (pToken->usStop < (pToken+1)->usStart) )
+      {
+        pToken->usStop = (pToken+1)->usStart - 1;
+      } /* endif */
+      pToken++;
+    } /* endwhile */
+    /****************************************************************/
+    /* allocate space for fuzzy tokens ,.,,,                        */
+    /* this area MUST be freed by the calling application           */
+    /****************************************************************/
+    fOK = EQFBMarkModDelIns( pTokenList1, pTokenList2,
+                          (PFUZZYTOK *)ppFuzzyTgt, (PFUZZYTOK *)ppFuzzyTok,
+                         usLenStr1, usLenStr2);
+
+  } /* endif */
+  /********************************************************************/
+  /* free any allocated resources                                     */
+  /********************************************************************/
+  UtlAlloc( (PVOID *)&pTokenList1, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *)&pTokenList2, 0L, 0L, NOMSG );
+  return( fOK );
+} /* end of function EQFBFindDiffEx */
+
+
+
 BOOL TMFuzzyness
 (
   PSZ pszMarkup,                       // markup table name
@@ -1837,7 +2526,9 @@ BOOL TMFuzzynessEx
 
   if ( fOK )
   {
+    #ifdef TEMPORARY_COMMENTED
     EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
+    #endif
   } /* endif */
 
   // free allocated buffers and lists
@@ -1852,7 +2543,7 @@ BOOL TMFuzzynessEx
   if ( pusWords ) *pusWords = usWords; 
   return fOK;
 } /* end of function TMFuzzyness */
-#endif
+
 
 static
 BOOL CheckForAlloc( PTMX_SENTENCE pSentence, PTMX_TERM_TOKEN * ppTermTokens, USHORT usEntries );
@@ -3217,16 +3908,10 @@ USHORT NTMTokenizeW
         break;
 
       case ':' :
-        if ( usVersion == TM_VERSION_1 )
-        {
-          fAllCaps = FALSE;
-          fAlNum   = FALSE;
-        }
-        else
-        {
-          fEndOfToken  = TRUE;
-          fSingleToken  = TRUE;
-        } /* endif */
+        
+        fEndOfToken  = TRUE;
+        fSingleToken  = TRUE;
+        
         break;
 
       case '/' :

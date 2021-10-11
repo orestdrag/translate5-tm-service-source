@@ -24,7 +24,7 @@ target_include_directories(OTMFUNC PRIVATE
     ${MINIZIP_INCLUDE_DIR}
 )
 
-target_link_libraries(OTMFUNC PRIVATE Memory
+target_link_libraries(OTMFUNC PRIVATE #Memory
                                       PluginManager
                                       Util
                                       Workbench

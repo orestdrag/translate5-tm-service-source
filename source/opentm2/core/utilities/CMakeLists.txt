@@ -39,6 +39,7 @@ set(Util_Source_Files
     EQFMORPH.CPP
     OTMGLOBM.CPP
     EQFTADIT.CPP
+    EQFMORPH.CPP
 )
 
 add_library(Util ${Util_Source_Files})
@@ -46,4 +47,4 @@ add_library(Util ${Util_Source_Files})
 set_target_properties(Util PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(Util PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(Util PRIVATE libxerces-c-3.2.so)
+target_link_libraries(Util PRIVATE libxerces-c-3.2.so EqfMemoryPlugin)

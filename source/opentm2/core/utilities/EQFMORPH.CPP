@@ -528,6 +528,7 @@ USHORT Tokenize
     return (usReturn);
 
 } /* end of function TOKENIZE */
+#endif
 
 USHORT TokenizeW
 (
@@ -679,6 +680,8 @@ USHORT TokenizeW
 
 } /* end of function TOKENIZEW */
 
+
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------
@@ -1333,6 +1336,8 @@ USHORT ListDict
 
 } /* end of function LISTDICT */
 
+#endif
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -1666,6 +1671,8 @@ USHORT MorphTokenizeW
 
 } /* endof MorphTokenizeW */
 
+
+#ifdef TEMPORARY_COMMENTED
 USHORT MorphTokenize
 (
    SHORT    sLanguageID,               // language ID
@@ -5101,6 +5108,7 @@ USHORT MorphMultStemForm
 
 } /* endof MorphMultStemForm */
 
+#endif 
 
 //------------------------------------------------------------------------------
 //   General private functions
@@ -5164,6 +5172,7 @@ USHORT MorphGetLCB
 } /* end of function MorphGetLCB */
 
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -7071,6 +7080,8 @@ USHORT MorphRefreshDicts
   return( usRC );
 } /* end of function MorphRefreshDicts */
 
+#endif
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -7109,6 +7120,7 @@ USHORT MorphCheck4Refresh
 } /* end of function MorphCheck4Refresh */
 
 
+#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function
 //------------------------------------------------------------------------------

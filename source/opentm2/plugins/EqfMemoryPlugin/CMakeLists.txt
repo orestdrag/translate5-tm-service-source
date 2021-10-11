@@ -3,6 +3,8 @@ project(EqfMemoryPlugin)
 
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../core)
 
+set(OPENTM2_DIR ${ROOT}/source/opentm2)
+
 set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
     EqfMemoryPlugin.cpp
@@ -23,6 +25,22 @@ set(EqfMemoryPlugin_Source_Files
     OTMXLFMT.CPP
     EQFNTDEL.C
     EQFNTGET.CPP
+    EQFFUZZ.cpp
+
+    #from MEMORY folder
+    MemoryFactory.cpp
+    TMPluginWrapper.cpp
+    EQFMEMLP.CPP
+    EQFMEMEP.CPP
+    EQFMEMCD.CPP
+    EQFMEM00.CPP
+    #EQFMEMIP.CPP
+    #EQFMEMRP.CPP
+    #EQFMEMMP.CPP
+    #EQFTMM.CPP
+    #EQFMEMLD.CPP
+    GenericTagReplace.cpp
+    ${OPENTM2_DIR}/EQFX_API.C
 )
 
 include(GNUInstallDirs)
@@ -34,14 +52,14 @@ set_target_properties(EqfMemoryPlugin PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(EqfMemoryPlugin PRIVATE
     ${CORE_DIR}/utilities
     ${CORE_DIR}/pluginmanager
-    ${CORE_DIR}/memory
+    #${CORE_DIR}/memory
 )
 
 target_link_libraries(EqfMemoryPlugin PRIVATE
     Util
     Tools
     Analysis
-    Memory
+    #Memory
     Tagtable
 )
 
