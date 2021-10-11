@@ -28,8 +28,8 @@ set(EqfMemoryPlugin_Source_Files
     EQFFUZZ.cpp
 
     #from MEMORY folder
-    MemoryFactory.cpp
     TMPluginWrapper.cpp
+    MemoryFactory.cpp
     EQFMEMLP.CPP
     EQFMEMEP.CPP
     EQFMEMCD.CPP

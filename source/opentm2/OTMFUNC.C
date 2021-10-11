@@ -26,7 +26,7 @@
 
 #include "tools/common/InitPlugins.h"
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138
-#include "plugins/EqfMemoryPlugin/MemoryFactory.h"
+#include "core/EqfMemoryPlugin/MemoryFactory.h"
 #include "core/utilities/LanguageFactory.H"
 #include "core/utilities/PropertyWrapper.H"
 #include "core/utilities/LogWrapper.h"

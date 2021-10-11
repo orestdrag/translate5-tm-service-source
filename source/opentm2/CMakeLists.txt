@@ -13,7 +13,6 @@ include_directories(${OPENTM2_INCLUDE_DIR}
 
 add_subdirectory(core)
 add_subdirectory(tools)
-add_subdirectory(plugins)
 
 add_library(OTMFUNC ${API_Source_Files})
 

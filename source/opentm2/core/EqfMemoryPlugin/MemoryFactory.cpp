@@ -24,10 +24,10 @@ Copyright Notice:
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "../pluginmanager/OtmSharedMemory.h"
-#include "../../core/utilities/OSWrapper.h"
-#include "../../plugins/EqfMemoryPlugin/EqfMemoryPlugin.h"
+#include "../utilities/OSWrapper.h"
+#include "EqfMemoryPlugin.h"
 #include "MemoryUtil.h"
-#include "../../plugins/EqfMemoryPlugin/MemoryFactory.h"
+#include "MemoryFactory.h"
 #include "OptionsDialog.H"
 #include "LogWrapper.h"
 
