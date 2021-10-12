@@ -175,16 +175,21 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
 }
 
 std::string FilesystemHelper::GetFileName(HFILE ptr){
-    const int MAXSIZE = 0xFFF;
-    char filename[MAXSIZE];
-    char proclnk[MAXSIZE];
+    if(ptr){
+        const int MAXSIZE = 0xFFF;
+        char filename[MAXSIZE];
+        char proclnk[MAXSIZE];
 
-    int fno = fileno(ptr);
-    sprintf(proclnk, "/proc/self/fd/%d", fno);
-    int r = readlink(proclnk, filename, MAXSIZE-1);
-    filename[r] = '\0';
+        int fno = fileno(ptr);
+        sprintf(proclnk, "/proc/self/fd/%d", fno);
+        int r = readlink(proclnk, filename, MAXSIZE-1);
+        filename[r] = '\0';
 
-    return filename;
+        return filename;
+    }else{
+        LogMessage(ERROR,"FilesystemHelper::GetFileName:: file ptr is null");
+        return "";
+    }
 }
 
 

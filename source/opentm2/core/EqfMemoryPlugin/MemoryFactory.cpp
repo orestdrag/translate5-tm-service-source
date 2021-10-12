@@ -1129,6 +1129,8 @@ void MemoryFactory::insertProposalData(
   return;
 }
 
+#endif
+
 
 /*! \brief Get the sort order key for a memory match
 
@@ -1355,6 +1357,7 @@ int MemoryFactory::getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmPr
   return( 0 );
 } /* end of method MemoryFactory::getProposalSortKey */
 
+#ifdef TEMPORARY_COMMENTED
 
 /*! \brief Check if first proposal in the list can be used for automatic substitution 
   \param Proposals reference to a vector containing the proposals

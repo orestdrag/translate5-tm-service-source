@@ -1949,9 +1949,9 @@ SHORT QDAMDictExactLocal
                  }
                  else
                  {
-                   #ifdef TEMPORARY_COMMENTED
+                   //#ifdef TEMPORARY_COMMENTED
                    UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-                   #endif
+                   //#endif
                  } /* endif */
                  recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )

@@ -2138,40 +2138,6 @@ USHORT NTMLoadNameTable
     } /* endwhile */
   } /* endif */
 
-
-  // convert old format tables to new format
-  if (pTmClb->stTmSign.bMajorVersion < TM_MAJ_VERSION_5 )
-  {
-    PTMX_TABLE      pNewTable = NULL;  // ptr to new name table
-    PTMX_VER1_TABLE pOldTable;         // ptr to old name table
-    ULONG     ulNewSize;               // new table size
-
-    // allocate buffer for new format name table
-    pOldTable = (PTMX_VER1_TABLE)*ppTMTable;
-    ulNewSize = *pulSize + sizeof(TMX_TABLE) - sizeof(TMX_VER1_TABLE);
-    if ( !UtlAlloc( (PVOID *)&pNewTable, 0L, ulNewSize, NOMSG ))
-    {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
-    } /* endif */
-
-    if ( usRc == NO_ERROR )
-    {
-      // copy data to new area
-      ULONG ulMoveSize = *pulSize - (sizeof(TMX_VER1_TABLE) - sizeof(TMX_TABLE_ENTRY));
-      memcpy( &(pNewTable->stTmTableEntry), &(pOldTable->stTmTableEntry),
-              ulMoveSize );
-
-      // set fields in new area
-      pNewTable->ulAllocSize = ulNewSize;
-      pNewTable->ulMaxEntries = pOldTable->usMaxEntries;
-
-      // get rid of old table and set caller's fields
-      UtlAlloc( (PVOID *)&pOldTable, 0L, 0L, NOMSG );
-      *pulSize = ulNewSize;
-      *ppTMTable = (PBYTE)pNewTable;
-    } /* endif */
-  } /* endif */
-
   // return to caller
   return( usRc );
 } /* end of function NTMLoadNameTable */

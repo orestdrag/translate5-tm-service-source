@@ -3486,7 +3486,7 @@ SHORT QDAMDictCreateLocal
       pBT->bVersion = BTREE_V2;
       pBT->bRecSizeVersion = BTREE_V3;
       pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
-      pBT->usVersion = NTM_VERSION2;
+      pBT->usVersion = NTM_VERSION3;// changed from NTM_VERSION2
       strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
       if ( pTermTable )
       {
@@ -4371,15 +4371,9 @@ PTMWCHAR QDAMGetszKey_V3
    // use record number of passed entry , read in record and pass
    // back pointer
    pusOffset = (PUSHORT) pRecord->contents.uchData;
-   #ifdef LOGS_TO_BE_REMOVED
-    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset = pRecord->contents.uchData = ", intToA((ULONG)pusOffset));
-    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3 = ", intToA((ULONG)pEndOfRec));
-    LogMessage2(DEBUG, "QDAMGetszKey_V3::  i = ", intToA((ULONG((PUSHORT)i))));
-   #endif
+   
    pusOffset += i;                     // point to key
-   #ifdef LOGS_TO_BE_REMOVED
-    LogMessage2(DEBUG, "QDAMGetszKey_V3::  pusOffset += i :", intToA((ULONG)pusOffset));
-   #endif
+   
    int step = 0;
    if ( usVersion >= NTM_VERSION2 )
    {
@@ -4405,10 +4399,6 @@ PTMWCHAR QDAMGetszKey_V3
      //LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
      pData = pRecord->contents.uchData + (*pusOffset) + step ;
 
-
-     #ifdef TO_BE_REMOVED
-      LogMessage2(DEBUG, "pData - pEndOfRec = ", intToA((long int) (pData - pEndOfRec)));
-     #endif
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
@@ -5215,19 +5205,11 @@ SHORT QDAMLocateKey_V3
     
     while ( !fFound && sLow <= sHigh )
     {
-
-       #ifdef LOGS_TO_BE_REMOVED
-        LogMessage4(DEBUG, "QDAMLocateKey_V3:: sLow = ",intToA(sLow),", sHigh = ", (intToA(sHigh)));
-       #endif
        sMid = (sLow + sHigh)/2;
        pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
-       #ifdef LOGS_TO_BE_REMOVED
-        LogMessage4(DEBUG, "found key = ", intToA(*pKey2),", searched for = ", intToA(*pKey));
-       #endif
+
        if ( pKey2 )
        {
-         //LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMLocateKey_V3::pBT->compare");
-         //#ifdef TEMPORARY_COMMENTED
           sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
           if ( sResult < 0 )
           {
@@ -5350,8 +5332,8 @@ SHORT QDAMLocateKey_V3
                  {
                    if ( searchType == FEQUIV)
                    {
-                     LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
-                     #ifdef TEMPORARY_COMMENTED
+                     //LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
+                     //#ifdef TEMPORARY_COMMENTED
                      if ( UTF16strcmp( pKey, pKey2 ) == 0 )
                      {
                        // the match will not get better anymore ...
@@ -5359,7 +5341,7 @@ SHORT QDAMLocateKey_V3
                        break;
                      }
                      else 
-                     #endif
+                     //#endif
                      if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
                      {
                        // match but case of characters differ
@@ -5384,15 +5366,15 @@ SHORT QDAMLocateKey_V3
                      } /* endif */
                      sMid++;           // continue with next key
                    }
-                   #ifdef TEMPORARY_COMMENTED
+                   //#ifdef TEMPORARY_COMMENTED
                    else if (UTF16strcmp( pKey, pKey2 ))
                    {
                      sMid ++;
                    }
-                   #endif
+                   //#endif
                    else
                    {
-                     LogMessage(ERROR,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
+                     //LogMessage(ERROR,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
                      *psKeyPos = sMid;
                      break;
                    } /* endif */

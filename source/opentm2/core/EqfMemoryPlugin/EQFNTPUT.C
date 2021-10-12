@@ -2449,8 +2449,8 @@ USHORT UpdateTmRecord
         {
           LogMessage(ERROR,"TEMPORARY_COMMENTED ComparePutData");
           //compare tm record data with data passed in the get in structure
-          //usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
-          //                       pTmPut, pSentence, &ulKey );
+          usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
+                                 pTmPut, pSentence, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -2488,7 +2488,6 @@ USHORT UpdateTmRecord
   return( usRc );
 }
 
-#ifdef TEMPORARY_COMMENTED
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -2858,6 +2857,8 @@ USHORT ComparePutData
   return( usRc );
 }
 
+
+
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -3011,6 +3012,7 @@ USHORT AddTmTarget(
 
   return( usRc );
 }
+
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -3385,7 +3387,6 @@ USHORT TmtXUpdSeg
 
   return( usRc );
 } /* end of function TmtXUpdSeg */
-#endif
 
 
 /**********************************************************************/
@@ -3585,7 +3586,6 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 }
 #endif 
 
-#ifdef TEMPORARY_COMMENTED
 
 // adjust context part of
 // target control block if necessary
@@ -3695,6 +3695,8 @@ USHORT NTMAdjustAddDataInTgtCLB
   *ppClb = pCurClb;
   return (usRc);
 } // end of context handling
+
+
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -3848,6 +3850,7 @@ USHORT TMLoopAndDelTargetClb
 //     endswitch                                                                
 //------------------------------------------------------------------------------
 
+
 static
 PBYTE
 NTRecPos
@@ -3900,5 +3903,3 @@ NTRecPos
 
     return (pNewPosition);
 }
-
-#endif // TEMPORARY_COMMENTED

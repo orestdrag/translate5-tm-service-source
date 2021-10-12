@@ -842,6 +842,8 @@ USHORT MemFillTableLB( HWND   hListBox,
   return usNumbOfItems;
 } /* end of function MemFillTableLB */
 
+#endif
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -887,6 +889,8 @@ BOOL NTMDocMatch
   } /* endif */
   return( fMatch );
 } /* end of function NTMDocMatch */
+
+#ifdef TEMPORARY_COMMENTED
 
 USHORT NTMTokenizeW( PVOID, PSZ_W, PULONG, PVOID *, USHORT, USHORT);
 

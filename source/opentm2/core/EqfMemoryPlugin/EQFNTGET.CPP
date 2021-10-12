@@ -699,8 +699,6 @@ USHORT TmtXGet
        pstActMatch = &(pTmGetOut->stMatchTable[j]);
        for ( i=j+1; i< pTmGetOut->usNumMatchesFound ; i++)
        {
-         LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::UtlCompIgnWhiteSpaceW");
-          #ifdef TEMPORARY_COMMENTED
          if (UtlCompIgnWhiteSpaceW(pstActMatch->szTarget, (pstMatchTable+i)->szTarget, 0) == 0L)
          {
            /*************************************************************/
@@ -711,7 +709,6 @@ USHORT TmtXGet
            pTmGetOut->usNumMatchesFound--;
            i--;                    // reset i because we deleted the i-th one
          } /* endif */
-         #endif
        } /* endfor */
      } /* endfor */
   } /* endif */
@@ -883,14 +880,14 @@ USHORT GetExactMatch
         } /* endif */
         if ( usRc == NO_ERROR )
         {
-          LogMessage(FATAL,"TEMPORARY_COMMENTED in GetExactMatch::ExactTest");
-          #ifdef TEMPORARY_COMMENTED
+          //LogMessage(FATAL,"TEMPORARY_COMMENTED in GetExactMatch::ExactTest");
+          //#ifdef TEMPORARY_COMMENTED
           //compare tm record data with data passed in the get in structure
           LOGPRINTF1( L"GetExactMatch: ExactTest of record %lu\r\n", ulKey );
           usRc = ExactTest( pTmClb, pTmRecord, pGetIn, pSentence,
                             pstMatchTable, &usMatchEntries, ulKey );
           LOGPRINTF1( L"GetExactMatch: ExactTest found %u matching entries\r\n", usMatchEntries );
-          #endif
+          //#endif
           if ( !usRc )
           {
             //nr of matches found
@@ -1888,9 +1885,9 @@ BOOL TMFuzzynessEx
 
   if ( fOK )
   {
-    #ifdef TEMPORARY_COMMENTED
+    //#ifdef TEMPORARY_COMMENTED
     EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
-    #endif
+    //#endif
   } /* endif */
 
   // free allocated buffers and lists
@@ -2264,14 +2261,11 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
     {
       BOOL fEndOfTable = (usCurrentEntry + 1) >= MAX_MATCHES;
 
-LogMessage(FATAL,"TEMPORARY_COMMENTED nt iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), (int)pstMatchTable->usMatchLevel , -1,  pstMatchTable->usContextRanking, fEndOfTable );");
-#ifdef TEMPORARY_COMMENTED
       int iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), (int)pstMatchTable->usMatchLevel , -1, 
                           pstMatchTable->usContextRanking, fEndOfTable );
       int iNewMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( *pusMatchLevel ), GetProposalTypeFromFlag( usTranslationFlag ), 
                              (int)*pusMatchLevel, -1, usContextRanking, fEndOfTable );
-#endif
-  int iMatchSortKey=0, iNewMatchSortKey=0;
+
       if ( iMatchSortKey  > iNewMatchSortKey  )
       {
         pstMatchTable++;
@@ -2291,8 +2285,8 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED nt iMatchSortKey = pFactory->getProposalSo
         /* higher priority                                              */
         /****************************************************************/
         
-LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
-#ifdef TEMPORARY_COMMENTED
+//LogMessage(FATAL,"TEMPORARY_COMMENTED_FUZZY NTMDocMatch");
+//#ifdef TEMPORARY_COMMENTED_FUZZY
         if ( NTMDocMatch( szTgtFileName, szTgtLongName, pSrcFileName, pSrcLongName ) )
         {
           /**************************************************************/
@@ -2343,7 +2337,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
               fFound = TRUE;
           } /* endif */
         } /* endif */
-#endif
+//#endif
 
       }
       else
@@ -2561,17 +2555,17 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
               BOOL fEndOfTable = FALSE;
 
               
-LogMessage(FATAL,"TEMPORARY_COMMENTED iMatchSortKey");
-#ifdef TEMPORARY_COMMENTED
+//LogMessage(FATAL,"TEMPORARY_COMMENTED iMatchSortKey");
+//#ifdef TEMPORARY_COMMENTED_FUZZY
               int iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), 
                   (int)pstMatchTable->usMatchLevel , -1, pstMatchTable->usContextRanking, fEndOfTable );
               int iMatchSortKeyTemp = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTableTemp->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTableTemp->usTranslationFlag ), 
                   (int)pstMatchTableTemp->usMatchLevel, -1, pstMatchTableTemp->usContextRanking, fEndOfTable );
-#endif
-              int iMatchSortKey = 0, iMatchSortKeyTemp = 0;
+//#endif
+//              int iMatchSortKey = 0, iMatchSortKeyTemp = 0;
                             
-LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
-#ifdef TEMPORARY_COMMENTED
+//LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
+//#ifdef TEMPORARY_COMMENTED
               if ((iMatchSortKeyTemp <  iMatchSortKey) ||
                   ((iMatchSortKeyTemp == iMatchSortKey) &&
                    (pstMatchTableTemp->lTargetTime  <   pstMatchTable->lTargetTime) &&
@@ -2590,7 +2584,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
                 // leave loop
                 pstMatchTableStart = pstMatchTable;
               }
-              #endif
+//#endif
             }
 
 
