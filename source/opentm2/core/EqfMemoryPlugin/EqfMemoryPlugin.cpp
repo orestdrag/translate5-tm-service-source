@@ -25,7 +25,7 @@ static char *pszShortDescription = "TranslationMemoryPlugin";
 static char *pszLongDescription	= "This is the standard Translation-Memory implementation";
 static char *pszVersion = "1.0";
 static char *pszSupplier = "International Business Machines Corporation";
-EqfMemoryPlugin* EqfMemoryPlugin::_instance = NULL;
+//EqfMemoryPlugin* EqfMemoryPlugin::_instance = NULL;
 
 EqfMemoryPlugin::EqfMemoryPlugin()
 {
@@ -52,10 +52,11 @@ EqfMemoryPlugin::~EqfMemoryPlugin()
 }
 
 EqfMemoryPlugin* EqfMemoryPlugin::GetInstance(){
-  if(_instance == NULL){
-    _instance = new EqfMemoryPlugin();
-  }
-  return _instance;
+  static EqfMemoryPlugin instance;
+  //if(_instance == NULL){
+  //  _instance = new EqfMemoryPlugin();
+  //}
+  return &instance;
 }
 
 const char* EqfMemoryPlugin::getName()

@@ -8,7 +8,7 @@
 #ifndef OtmMorphPlugin_h__
 #define OtmMorphPlugin_h__
 
-#include "OtmPlugin.h"
+#include "../pluginmanager/OtmPlugin.h"
 #include "OtmMorph.h"
 
 /*! \brief Abstract base-class for plugins handling morphology

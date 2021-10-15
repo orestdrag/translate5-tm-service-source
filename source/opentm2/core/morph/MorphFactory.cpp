@@ -6,8 +6,9 @@
 */
 
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMorphPlugin.h"
-#include "../pluginmanager/OtmMorph.h"
+#include "OtmMorphPlugin.h"
+#include "OtmMorph.h"
+#include "OtmMorphICUPlugin.h"
 #include "MorphFactory.h"
 #include "LogWrapper.h"
 
@@ -112,33 +113,8 @@ OtmMorphPlugin* MorphFactory::getPlugin( const char* pszPluginName )
 */
 OtmMorph* MorphFactory::getMorph(const char* pszName, const char* pszPluginName)
 {
-
-	if ( (pszPluginName == NULL) || (strcmp( pszPluginName, "" ) == 0) )
-	{
-		Log.writef("searching Morph for language %s\n", pszName );
-		for (int i = 0; i < (int)pvPluginList->size(); i++)
-		{
-			OtmMorphPlugin* pMorphPlugin = pvPluginList->at(i);
-			OtmMorph *pMorphChecker = pMorphPlugin->openMorph(pszName);
-			if ( pMorphChecker != NULL )
-			{
-				return( pMorphChecker );
-			}
-		}
-		Log.writef("no Morph found for language %s\n", pszName );
-	}
-	else
-	{
-		Log.writef("get Morph of %s and %s \n", pszName, pszPluginName);
-		OtmMorphPlugin* pOtmMorphPlugin = getPlugin(pszPluginName);
-		if (NULL != pOtmMorphPlugin)
-		{
-			return pOtmMorphPlugin->openMorph(pszName);
-		}
-		Log.writef("get Morph of %s and %s failed\n", pszName, pszPluginName);
-	}
-
-	return NULL;
+	//OtmMorphICUPlugin* pOtmMorphPlugin = OtmMorphICUPlugin::GetInstance();
+	return OtmMorphICUPlugin::GetInstance().openMorph(pszName);
 }
 
 /*! \brief get the language support list of the specific plugin, if the plugin name is null, the result will contain all the languages

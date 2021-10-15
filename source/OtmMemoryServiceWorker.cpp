@@ -633,7 +633,7 @@ int OtmMemoryServiceWorker::import
   std::string &strOutputParms
 )
 {
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   LogMessage3(INFO, "+POST ", strMemory.c_str(),"/import\n");
   int iRC = verifyAPISession();
   if ( iRC != 0 )
@@ -869,7 +869,7 @@ int OtmMemoryServiceWorker::createMemory
 
 
   // either create an empty memory or build the memory using binary input data
-  EncodingHelper::convertUTF8ToASCII( strName );
+  //EncodingHelper::convertUTF8ToASCII( strName );
 
   if ( strData.empty() )
   {
@@ -935,7 +935,7 @@ int OtmMemoryServiceWorker::createMemory
   factory->startJSON( strOutputParms );
 
 // TODO investigate how much do we need this
-  EncodingHelper::convertASCIIToUTF8( strName );
+  //EncodingHelper::convertASCIIToUTF8( strName );
 
   factory->addParmToJSON( strOutputParms, "name", strName );
   factory->terminateJSON( strOutputParms );
@@ -1068,7 +1068,7 @@ int OtmMemoryServiceWorker::search
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
@@ -1228,7 +1228,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Missing name of memory";
@@ -1496,7 +1496,7 @@ int OtmMemoryServiceWorker::updateEntry
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
 
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
@@ -1681,7 +1681,7 @@ int OtmMemoryServiceWorker::deleteMem
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem error:: iRC = ", intToA(iRC), "; strOutputParams = ", 
@@ -1747,7 +1747,7 @@ int OtmMemoryServiceWorker::getMem
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     LogMessage(ERROR,"OtmMemoryServiceWorker::getMem::Error: no memory name specified" );
@@ -1846,7 +1846,7 @@ int OtmMemoryServiceWorker::getStatus
     return( restbed::BAD_REQUEST );
   } /* endif */
 
-  EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";

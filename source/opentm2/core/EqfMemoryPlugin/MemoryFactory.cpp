@@ -87,38 +87,14 @@ OtmMemory *MemoryFactory::openMemory
   this->iLastError = 0;
   LogMessage2(INFO, "MemoryFactory::openMemory, pszMemoryName = ", pszMemoryName);
 
-  pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
-  if ( pluginSelected == NULL ) 
-  {
-    LogMessage2(ERROR, "MemoryFactory::openMemory, Could not identify plugin processing the memory,", pszMemoryName);
-    *piErrorCode = this->iLastError;
-    return( NULL );
-  } /* endif */
-
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
 
-  // use the plugin to open the memory
-  if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
-  {
-    pMemory = ((OtmMemoryPlugin *)pluginSelected)->openMemory( (char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
-    if ( pMemory == NULL ){
-        *piErrorCode = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-        LogMessage4(ERROR, "MemoryFactory::openMemory::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType, pMemory is NULL, ", pszMemoryName, 
-            "; error code = ", intToA(*piErrorCode));
-    }
-  }
-  else
-  {
-    LogMessage2(ERROR, "Tried to open shared memory. Shared files are not supported, fname = ", strMemoryName.c_str() );
-    pMemory = NULL;
-  }
-  if ( pMemory == NULL )
-  {
-    LogMessage6(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ,"  using plugin",
-        pluginSelected->getName(), " failed, the return code is ", intToA(this->iLastError) );
-    return( NULL );
-  } /* end */     
+  pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
+  if ( pMemory == NULL ){
+        *piErrorCode = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
+        LogMessage4(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", intToA(this->iLastError) );
+  }    
 
   return( pMemory );
 }
@@ -374,42 +350,14 @@ OtmMemory *MemoryFactory::createMemory
   if ( piErrorCode != NULL ) 
       *piErrorCode = 0;
 
-  //LogMessage(WARNING,"TEMPORARY_COMMENTED in MemoryFactory::createMemory: plugins");
-  //#ifdef TEMPORARY_COMMENTED
-  pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
-  if ( pluginSelected == NULL ) 
-  {
-    // use first available memory plugin for the new memory
-    pluginSelected = (*pluginList)[0];
-	  // reset the iLastError
-	  // because the flag can be set in findPlugin if not plug exist
-	  this->iLastError = 0;
-  } /* endif */
-
-  if ( pluginSelected == NULL )
-  {
-    this->iLastError = *piErrorCode = ERROR_PLUGINNOTAVAILABLE;
-    this->strLastError = "No memory plugin available for the creation of the memory";
-    LogMessage2(ERROR, "MemoryFactory::createMemory()::ERROR_PLUGINNOTAVAILABLE, Create failed, with message ", this->strLastError.c_str());
-    return( NULL );
-  } /* endif */       
-  //#endif
-
-  // use the plugin to create the memory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
-  if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
-  {
-    pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
-    if ( pMemory == NULL ){
-       this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-       LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
-    }
+  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+  if ( pMemory == NULL ){
+     this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
+     LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
   }
-  else{
-    LogMessage(FATAL,"MemoryFactory::createMemory, plugin type is not supported");
-  }
-  //#endif // TEMPORARY_COMMENTED
+  
 
   #ifdef TEMPORARY_COMMENTED
   std::string strMemoryName;
@@ -428,24 +376,9 @@ OtmMemory *MemoryFactory::createMemory
     if ( piErrorCode != NULL ) 
         *piErrorCode = this->iLastError;
   }
-  else if ( !bInvisible )
-  {
-    // send created notifcation
-    char* pszObjName = NULL;
-    UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
-    strcpy( pszObjName, pluginSelected->getName() );
-    strcat( pszObjName, ":" );
-    strcat( pszObjName, pszMemoryName );
-    EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
-    if ( pszObjName != NULL ){ 
-      UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
-    }else{
-      LogMessage(ERROR, "MemoryFactory::createMemory::pszObjName == NULL");
-    }
-  } /* endif */     
-  
-  if(pMemory)
+  else{
     LogMessage(INFO, "Create successful ");
+  }
   return( pMemory );
 }
 

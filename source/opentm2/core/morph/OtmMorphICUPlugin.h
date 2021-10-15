@@ -18,7 +18,10 @@ using namespace std;
 class OtmMorphICUPlugin :
 	public OtmMorphPlugin
 {
+	//static OtmMorphICUPlugin* instance;
 public:
+	
+	static OtmMorphICUPlugin& GetInstance();
 
 	/*! \brief constructor	 */
 	OtmMorphICUPlugin(void);

@@ -20,7 +20,7 @@ class EqfMemoryPlugin: public OtmMemoryPlugin
 */
 
 {
-  static EqfMemoryPlugin* _instance;
+  //static EqfMemoryPlugin* _instance;
 public:
 /*! \brief Constructor
 */

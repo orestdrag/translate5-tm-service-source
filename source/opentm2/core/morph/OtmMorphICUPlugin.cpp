@@ -16,10 +16,32 @@ static char *pszLongDescription	= "This is the standard morphology functionality
 static char *pszVersion = STR_DRIVER_LEVEL_NUMBER;
 static char *pszSupplier = "International Business Machines Corporation";
 
+//OtmMorphICUPlugin* OtmMorphICUPlugin::instance = nullptr;
+
+OtmMorphICUPlugin& OtmMorphICUPlugin::GetInstance(){
+	static OtmMorphICUPlugin instance;
+	return instance;
+	/*
+	if(instance == nullptr){
+		instance = new OtmMorphICUPlugin;
+	}
+	return instance;
+	//*/
+}
+
 
 char* strcpy_s(char* dest, size_t n, const char* src){
 	return strncpy(dest, src, n);
 }
+
+/*
+static OtmMorphICUPlugin& get() {
+  static OtmMorphICUPlugin instance;
+  return instance;
+}
+OtmMorphICUPlugin& OtmMorphICUPlugin::GetInstance(){
+		return get();
+}//*/
 
 /*! \brief constructor	 */
 OtmMorphICUPlugin::OtmMorphICUPlugin(void)
@@ -172,7 +194,7 @@ bool OtmMorphICUPlugin::stopPlugin( bool fForce  )
 
   return( true );
 }
-
+#ifdef TEMPORARY_COMMENTED
 extern "C" {
 	__declspec(dllexport)
 		USHORT registerPlugins()
@@ -202,3 +224,4 @@ extern "C" {
     return( 0 );
   }
 }
+#endif

@@ -12,8 +12,8 @@
 #include <string>
 #include <vector>
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMorphPlugin.h"
-#include "../pluginmanager/OtmMorph.h"
+#include "OtmMorphPlugin.h"
+#include "OtmMorph.h"
 #include "../utilities/LogWriter.h"
 
 /*! \brief   This class provides factory methods for morphology objects 

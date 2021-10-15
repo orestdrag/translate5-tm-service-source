@@ -4,8 +4,9 @@ project(OpenTM2_PluginManager)
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(PlgMng_Source_Files PluginManager.cpp
                         PluginManagerImpl.cpp
-                        OtmMorphICU.cpp 
-        OtmMorphICUPlugin.cpp
+                        #OtmMorphICU.cpp 
+                        #OtmMorphICUPlugin.cpp
+                        #MorphFactory.cpp 
         )
 
 
@@ -20,4 +21,4 @@ target_include_directories(PluginManager PRIVATE
     ${CORE_DIR}/utilities
 )
 
-target_link_libraries(PluginManager PRIVATE EqfMemoryPlugin ICU::uc ICU::i18n)
+target_link_libraries(PluginManager PRIVATE EqfMemoryPlugin ICU::uc ICU::i18n )
