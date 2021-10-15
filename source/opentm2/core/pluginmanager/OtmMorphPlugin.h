@@ -13,7 +13,7 @@
 
 /*! \brief Abstract base-class for plugins handling morphology
 */
-class __declspec(dllexport) OtmMorphPlugin: public OtmPlugin
+class OtmMorphPlugin: public OtmPlugin
 {
 public:
 

@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 project(OpenTM2_Morph)
 
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-set(Morph_Source_Files MorphFactory.cpp)
+set(Morph_Source_Files MorphFactory.cpp
+        #OtmMorphICU.cpp 
+        #OtmMorphICUPlugin.cpp
+        #OtmMorph.cpp 
+        #OtmMorphICUPlugin.cpp
+        )
 
 add_library(Morph ${Morph_Source_Files})
 

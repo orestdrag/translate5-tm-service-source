@@ -8,6 +8,9 @@
 #ifndef _OTMPLUGIN_H_
 #define _OTMPLUGIN_H_
 
+
+#include "win_types.h"
+
 /*! \brief Abstract base-class for OpenTM2 plugins */
 class OtmPlugin
 {
@@ -122,7 +125,7 @@ extern "C" {
 	The function should call PluginManager::registerPlugin() for each avaliable
 	plugin.
 */
-unsigned short registerPlugins();   // add return value for P402974
+USHORT registerPlugins();   // add return value for P402974
 }
 
 /*! Structure for plugin infomation

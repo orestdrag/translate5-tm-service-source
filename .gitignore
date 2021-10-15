@@ -22,3 +22,10 @@ SAMPLEDATA/MEM/MITTA000.TMD
 source/build
 source/builds/
 
+include/build/CMakeCache.txt
+include/build/.cmake/api/v1/query/client-integration-vscode/cache-v2
+include/build/.cmake/api/v1/query/client-integration-vscode/cmakeFiles-v1
+include/build/.cmake/api/v1/query/client-integration-vscode/codemodel-v2
+include/build/CMakeFiles/cmake.check_cache
+include/build/CMakeFiles/CMakeOutput.log
+include/build/CMakeFiles/3.16.3/CMakeSystem.cmake

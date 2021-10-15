@@ -18,7 +18,7 @@
 
 /*! \brief   This class provides factory methods for morphology objects 
 */
-class __declspec(dllexport) MorphFactory
+class MorphFactory
 {
 public:
 

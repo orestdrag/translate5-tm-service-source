@@ -223,16 +223,17 @@ USHORT MorphInit
     // .. nothing to do here for the spell instance...
 
     // activate the morphologic functions
-    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::MorphFactory::getInstance(); 1");
-		MorphFactory* tMorphFactoryInstance = NULL;//MorphFactory::getInstance();
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::MorphFactory::getInstance(); 1");
+		MorphFactory* tMorphFactoryInstance = MorphFactory::getInstance();
 		if (NULL == tMorphFactoryInstance)
 		{
 			usRC = MORPH_NO_MEMORY;
 		}
-    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );");
-		//pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );");
+		pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
 		if (NULL == pLangCB->m_MorphInstance)
 		{
+      LogMessage2(WARNING,__func__, ":: pLangCB->m_MorphInstance == NULL");
 			usRC = MORPH_NO_MEMORY;
 		}
 
@@ -3646,20 +3647,20 @@ USHORT MorphGetLanguageID
     pLCB->usCodePage = 850;
     pLCB->fCompSep = FALSE;
 
-    LogMessage(FATAL,"TEMPORARY_COMMENTED  SpellFactory::getInstance();");
-    SpellFactory* tSpellFactoryInstance = NULL;// SpellFactory::getInstance();
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED  SpellFactory::getInstance();");
+    SpellFactory* tSpellFactoryInstance = SpellFactory::getInstance();
     if (NULL == tSpellFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
-    LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphFactory::getInstance(); 2");
-    MorphFactory* tMorphFactoryInstance =  NULL;//MorphFactory::getInstance();
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphFactory::getInstance(); 2");
+    MorphFactory* tMorphFactoryInstance =  MorphFactory::getInstance();
     if (NULL == tMorphFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(FATAL,"TEMPORARY_COMMENTED in MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))");
+    //#ifdef TEMPORARY_COMMENTED
     if (MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))
     {
     }
@@ -3667,7 +3668,7 @@ USHORT MorphGetLanguageID
     {
       usRC = MORPH_OK; // GQ: disabled temporarely the result of isSupported, correct code is: usRC = MORPH_NO_LANG_PROPS;
     } /* endif */
-    #endif
+    //#endif
   } /* endif */
 
   /********************************************************************/
@@ -5655,11 +5656,11 @@ USHORT MorphAddTermToList2W
     {
       case MORPH_OFFSLIST :
         *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
-        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT)/ sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        *pulUsed += sizeof(USHORT)/sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT)/sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
         break;
 
@@ -5683,11 +5684,11 @@ USHORT MorphAddTermToList2W
         ulByteUsedInList += sizeof(ULONG);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
-        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT)/ sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        *pulUsed += sizeof(USHORT) / sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT) / sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
         break;
 

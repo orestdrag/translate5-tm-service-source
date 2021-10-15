@@ -28,6 +28,15 @@ std::wstring EncodingHelper::convertToUTF16( const std::string& strUTF8String )
 	return wstr;
 }
 
+std::u16string EncodingHelper::toUtf16(std::wstring&& wstr){
+  //std::wstring_convert<std::codecvt_utf16<char16_t>> convert;
+  std::string u8str = EncodingHelper::convertToUTF8(wstr);
+
+  //std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
+
+  return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(u8str);
+}
+
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
 \param strUTF8String string in UTF8 encoding
 \returns string converted to UTF16

@@ -3239,11 +3239,11 @@ USHORT MorphAddTermToList2W
     {
       case MORPH_OFFSLIST :
         *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
-        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT)/ sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        *pulUsed += sizeof(USHORT)/sizeof(CHAR_W);
+        *pulUsed += 1;//sizeof(USHORT)/sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
         break;
 
@@ -3267,11 +3267,11 @@ USHORT MorphAddTermToList2W
         ulByteUsedInList += sizeof(ULONG);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
-        *pulUsed += sizeof(USHORT)/ sizeof(CHAR_W);
+        *pulUsed += 1;//TEMPORARY_HARDCODED sizeof(USHORT)/ sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        *pulUsed += sizeof(USHORT) / sizeof(CHAR_W);
+        *pulUsed += 1; //sizeof(USHORT) / sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
         break;
 

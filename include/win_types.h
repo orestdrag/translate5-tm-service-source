@@ -240,6 +240,7 @@ typedef unsigned int ULONG32;
 typedef ULONG32 *PULONG32;
 typedef ULONG64 *PULONG64;
 typedef unsigned short USHORT;
+//typedef unsigned int USHORT;
 typedef USHORT *PUSHORT;
 typedef WCHAR *PWCHAR;
 typedef WORD *PWORD;

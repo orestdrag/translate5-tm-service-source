@@ -13,6 +13,7 @@
 #include "../../core/pluginmanager/OtmMemory.h"
 #include "OtmProposal.h"
 #include "EqfMemoryPlugin.h"
+#include "win_types.h"
 
 class EqfMemory: public OtmMemory
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
@@ -379,8 +380,8 @@ private:
   PTMX_PUT_OUT_W pTmPutOut;                      // ptr to TMX_PUT_OUT_W structure
   PTMX_GET_IN_W  pTmGetIn;                       // ptr to TMX_PUT_IN_W structure
   PTMX_GET_OUT_W pTmGetOut;                      // ptr to TMX_PUT_OUT_W structure
-  unsigned long ulNextKey;                       // next TM key for GetFirstProposal/GetNextProposal
-  unsigned short usNextTarget;                   // next TM target for GetFirstProposal/GetNextProposal
+  ULONG ulNextKey;                       // next TM key for GetFirstProposal/GetNextProposal
+  USHORT usNextTarget;                   // next TM target for GetFirstProposal/GetNextProposal
   EqfMemoryPlugin *pMemoryPlugin;                // memory plugin for this memory
   char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;

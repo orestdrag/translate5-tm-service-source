@@ -8,15 +8,14 @@
 #ifndef OtmMorph_h__
 #define OtmMorph_h__
 //#include <windows.h>
-#include "string"
-#include "vector"
-#include "win_types.h"
+#include <string>
+#include <vector>
 using namespace std;
 
 typedef vector<string> STRINGLIST;
 
 /*! \brief Abstract base-class for morphology objects */
-class __declspec(dllexport) OtmMorph
+class OtmMorph
 {
 public:
 
