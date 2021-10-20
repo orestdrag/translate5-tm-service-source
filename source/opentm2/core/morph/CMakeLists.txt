@@ -14,6 +14,6 @@ target_include_directories(Morph PRIVATE
     ${CORE_DIR}/utilities
     ${CORE_DIR}/pluginmanager
 )
-find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
+find_package(ICU 60.0 COMPONENTS uc i18n REQUIRED)
 
 target_link_libraries(Morph PRIVATE ICU::uc ICU::i18n )
