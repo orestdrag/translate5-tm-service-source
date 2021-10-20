@@ -14,7 +14,7 @@ add_library(PluginManager ${PlgMng_Source_Files})
 
 set_target_properties(PluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
+find_package(ICU 60.0 COMPONENTS uc i18n REQUIRED)
 
 target_include_directories(PluginManager PRIVATE
     ${OPENTM2_INCLUDE_DIR}
