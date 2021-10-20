@@ -643,25 +643,40 @@ USHORT TokenizeW
       return MORPH_FUNC_FAILED;
     }
     else
-    {
+    { 
+      int reservedSize = wcslen(pszStartOfSegment) + vTermList.size() +1;
+      wchar_t* resultedStr = new wchar_t[reservedSize];
+      memset(resultedStr, 0, reservedSize * sizeof(wchar_t));
+
+      int resPos = 0;//for inserting '\0''s
       // convert returned term list into morph term list
       for( size_t i = 0; i < vTermList.size(); i++ )
       {
-        USHORT usPos = (USHORT)(vSentenceList[j].iStartOffset + vTermList[i].iStartOffset);
+        auto iStartOffs = vTermList[i].iStartOffset;
+        auto iLen = vTermList[i].iLength;
+        auto insertingPoint = &resultedStr[iStartOffs + i];
+        auto toBeInserted = &pszStartOfSegment[iStartOffs];
+
+        wcsncpy(insertingPoint, toBeInserted, iLen );
+        
         if ( (vTermList[i].iTermType & OtmMorph::TERMTYPE_WHITESPACE) != 0 )
         {
           // ignore whitespace tokens
         }
-        else if ( vTermList[i].iLength == 0 ) 
+        else if ( iLen == 0 ) 
         {
           // ignore empty tokens
         }
         else
         {
-          usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList, pulTermListSize, &ulTermBufUsed, pszStartOfSegment + vTermList[i].iStartOffset, 
-                                            (USHORT)vTermList[i].iLength, usPos, vTermList[i].iTermType, usListType );
+          USHORT usPos = (USHORT)(vSentenceList[j].iStartOffset + iStartOffs + i);
+          usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList, pulTermListSize, &ulTermBufUsed, 
+                                            pszStartOfSegment + iStartOffs, 
+                                            (USHORT)iLen, usPos, vTermList[i].iTermType, usListType );
         }
       }
+      memcpy((void*) pszStartOfSegment, (const void*)resultedStr, reservedSize * sizeof(wchar_t));
+      delete[] resultedStr;
     }
   }
 
@@ -5536,6 +5551,7 @@ USHORT MorphAddTermToList2W
       /* space for offset and length of term plus end of term list      */
       /* indicator which is a zero offset and length value              */
       /******************************************************************/
+      //ulDataLenBytes = 4 * sizeof(CHAR_W);
       ulDataLenBytes = 4 * sizeof(USHORT);
       break;
 
@@ -5551,7 +5567,7 @@ USHORT MorphAddTermToList2W
       /* space for flag, offset and length of term plus end of term list*/
       /* indicator which is a zero flag, offset and length value        */
       /******************************************************************/
-      ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(USHORT));
+      ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(CHAR_W));
       break;
 
     case MORPH_FLAG_ZTERMLIST :
@@ -5660,7 +5676,7 @@ USHORT MorphAddTermToList2W
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        *pulUsed += 1;//sizeof(USHORT)/sizeof(CHAR_W);
+        //*pulUsed += 1;//sizeof(USHORT)/sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
         break;
 

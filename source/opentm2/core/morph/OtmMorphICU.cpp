@@ -92,8 +92,8 @@ int OtmMorphICU::stem( const wchar_t * pszTerm, vector<std::wstring>& vResult )
  */
 int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
 {
-    LogMessage(FATAL,"called TEMPORARY_COMMENTED OtmMorphICU::tokenizeByTerm");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(FATAL,"called TEMPORARY_COMMENTED OtmMorphICU::tokenizeByTerm");
+    //#ifdef TEMPORARY_COMMENTED
 	if (NULL == pText)
 	{
 		return OtmMorph::ERROR_PARAMETAR;
@@ -105,7 +105,10 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
   Log.writef( "tokenizeByTerm, input is \"%S\"", pText );
 #endif
 
-	pWordBoundary->setText(pText);
+    std::u16string vSection_u16 = EncodingHelper::toUtf16(pText);
+    UnicodeString text(vSection_u16.c_str());
+
+	pWordBoundary->setText(text);
 	getResultFromIterator(pWordBoundary, vResult);
 
     /* Force maximum length to 511, since temp buffers are 512  10-6-16 */
@@ -122,7 +125,7 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
   }
   Log.close();
 #endif
-    #endif//temporary_commented
+    //#endif//temporary_commented
 	return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -246,6 +249,7 @@ void OtmMorphICU::getResultFromIterator( BreakIterator* vIterator, OtmMorph::TER
 {
     CharacterIterator *tStrIter = vIterator->getText().clone();
     UnicodeString  tUnicodeStr;
+    
     tStrIter->getText(tUnicodeStr);
     struct OtmMorph::TERMENTRY Term;
     vResult.clear();
@@ -615,8 +619,8 @@ void OtmMorphICU::setupSentenceBoundary(UErrorCode &tStatus) {
 
 #define MAX_ABREV_LENGTH 15 // Max size of the abbreviations?
 bool OtmMorphICU::isBreakOnAbbreviation(UnicodeString text, int start, int end) {
-    LogMessage(FATAL,"called TEMPORARY_COMMENTED function OtmMorphICU::isBreakOnAbbreviation");
-    #ifdef TEMPORARY_COMMENTED
+    //LogMessage(FATAL,"called TEMPORARY_COMMENTED function OtmMorphICU::isBreakOnAbbreviation");
+    //#ifdef TEMPORARY_COMMENTED
 
 	bool newline = false;
     int abbrevlist_size = abbrevlist.size();
@@ -664,8 +668,8 @@ bool OtmMorphICU::isBreakOnAbbreviation(UnicodeString text, int start, int end) 
 
         // null terminate buffer
         buffer[wb_length] = 0;
-        EncodingHelper::
-        wstring wordToTest(buffer);
+        std::u16string u16str(buffer);
+        wstring wordToTest = EncodingHelper::toWChar(u16str);
         
         for (int i = 0; i < abbrevlist_size; i++) {
             if (wordToTest == abbrevlist[i]) {
@@ -684,7 +688,7 @@ bool OtmMorphICU::isBreakOnAbbreviation(UnicodeString text, int start, int end) 
         
         wb_end = wb_start;
     }
-#endif
+//#endif
     return false;
 }
 

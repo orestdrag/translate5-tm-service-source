@@ -2149,14 +2149,14 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
               strcat( szTagTablePath, EXT_OF_FORMAT );
 
 
-LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
-#ifdef TEMPORARY_COMMENTED
+//LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
+//#ifdef TEMPORARY_COMMENTED
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchSource, szTagTablePath, pSubstProp->szSourceLanguage, TM_MAJ_VERSION, ulSrcCP, CREATEPROTTABLE_NOTRANSLVAR );
               if ( !usRC ) pSubstProp->pTagsPropSource = pMatchSource->pTagRecord;
               if ( !usRC ) UTF16strcpy( pMatchTarget->pInputString, pSubstProp->szPropTarget );
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchTarget, szTagTablePath, pSubstProp->szTargetLanguage, TM_MAJ_VERSION, ulTgtCP, CREATEPROTTABLE_NOTRANSLVAR  );
               if ( !usRC ) pSubstProp->pTagsPropTarget = pMatchTarget->pTagRecord;
-#endif
+//#endif
               if ( fPreprocessed == 2 )     // 2 = TMO replacements have been done
               {
                 // recompute fuzziness and skip postprocessing if we have an exact match
@@ -2209,11 +2209,11 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
           { 
             if ( !fSkipPostprocessing )
             {
-              LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
+LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
 #ifdef TEMPORARY_COMMENTED
               fSubstAll = DITAProcessProposal( pGetIn->szSource, pSubstProp->szPropSource, 
                                               pSubstProp->szPropTarget, pSubstProp->szPropTagTable, ulSrcOemCP  );
-                                              #endif
+#endif
             } /* endif */
             if ( !fSubstAll && fPreprocessed )
             {

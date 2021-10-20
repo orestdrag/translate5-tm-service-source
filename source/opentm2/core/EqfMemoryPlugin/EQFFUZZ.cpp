@@ -729,7 +729,7 @@ PrepareTokens
       chTemp = *(pTok->pDataStringW+pTok->usLength);
       *(pTok->pDataStringW+pTok->usLength) = EOS;
 
-      usRC = MorphTokenizeW( sLanguageId, pTok->pDataStringW,
+        usRC = MorphTokenizeW( sLanguageId, pTok->pDataStringW,
                             &usListSize, (PVOID *)&pTermList,
                             MORPH_OFFSLIST, ulOemCP );
 

@@ -2792,40 +2792,19 @@ USHORT TokenizeSourceEx2
                       while ( pTerm->usLen && !usRc )
                       {
                         if ( !(pTerm->lFlags & TF_NEWSENTENCE) )
-                        {
-                          BOOL fAddToken = FALSE;
-
-                          // ignore TF_NOLOOKUP flag for TM versions 2 and above
-                          if ( !pClb )
+                        {                         
+                          fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
+                          if ( !fOK )
                           {
-                            fAddToken = TRUE;
-                          }
-                          else if ( pClb->stTmSign.bMajorVersion != TM_VERSION_1 )
-                          {
-                            fAddToken = TRUE;
+                            usRc = ERROR_NOT_ENOUGH_MEMORY;
                           }
                           else
                           {
-                            fAddToken = ((pTerm->lFlags & TF_NOLOOKUP) &&
-                                           (pTerm->lFlags & TF_NUMBER) ) ||
-                                          !(pTerm->lFlags & TF_NOLOOKUP);
-                          } /* endif */
-
-                          if ( fAddToken )
-                          {
-                            fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
-                            if ( !fOK )
-                            {
-                              usRc = ERROR_NOT_ENOUGH_MEMORY;
-                            }
-                            else
-                            {
-                              pTermTokens->usOffset = pTerm->usOffs + usStart;
-                              pTermTokens->usLength = pTerm->usLen;
-                              pTermTokens->usHash = 0;
-                              pTermTokens++;
-                            }
-                          } /* endif */
+                            pTermTokens->usOffset = pTerm->usOffs + usStart;
+                            pTermTokens->usLength = pTerm->usLen;
+                            pTermTokens->usHash = 0;
+                            pTermTokens++;
+                          }
                         } /* endif */
                         pTerm++;
                       } /* endwhile */
@@ -3134,7 +3113,8 @@ USHORT MorphAddTermToList2W
       /* space for flag, offset and length of term plus end of term list*/
       /* indicator which is a zero flag, offset and length value        */
       /******************************************************************/
-      ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(USHORT));
+      //ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(USHORT));
+      ulDataLenBytes = (2 * sizeof(ULONG)) + (4 * sizeof(wchar_t));
       break;
 
     case MORPH_FLAG_ZTERMLIST :
