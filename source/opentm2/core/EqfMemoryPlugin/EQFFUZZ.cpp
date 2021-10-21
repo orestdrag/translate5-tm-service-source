@@ -1735,23 +1735,6 @@ BOOL EQFBCountDiff
    USHORT usDiff = 0;
    USHORT       usPrevType;
 
-   while ( pTest->ulHash )
-   {
-     if (pTest->sType == MARK_DELETED)
-     {
-       usLen ++;
-     }
-     else if (pTest->sType == MARK_INSERTED)
-     {
-       usLen ++;
-     }
-     else
-     {
-       usLen ++;
-     }
-     pTest ++;
-   } /* endwhile */
-
    /******************************************************************/
    /* browse through marks and simplifiy:                            */
    /* MODIFIED DELETED is changed to MODIFIED                        */
@@ -1764,6 +1747,7 @@ BOOL EQFBCountDiff
 
    while ( pToken->ulHash )
    {
+     usLen++;
      switch ( pToken->sType )
      {
        case MARK_DELETED:
@@ -2613,7 +2597,8 @@ LCS
       /***************************************************************/
       sJ = (MidSnake.sY);
       sI = (MidSnake.sX);
-      while ( (sI < MidSnake.sU) && (sJ < MidSnake.sV)  )
+      //TODO - verify , because this is changed from original algorhythm 
+      while ( (sI <= MidSnake.sU) && (sJ <= MidSnake.sV)  )
       {
         (LCSStringA.pTokenList + sI)->sType = MARK_EQUAL;
         (LCSStringB.pTokenList + sJ)->sType = MARK_EQUAL;
