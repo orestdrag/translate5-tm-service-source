@@ -2573,18 +2573,6 @@ USHORT TokenizeSourceEx
     return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
 }
 
-USHORT TokenizeSourceEx2Ref(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   TMX_SENTENCE& rSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP,                      // OEM CP of source language     
-   int iMode                            // mode to be passed to create protect table function
-){
-  return TokenizeSourceEx2(pClb, &rSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, iMode);
-}
-
 USHORT TokenizeSourceEx2
 (
    PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
@@ -3848,9 +3836,7 @@ USHORT NTMTokenizeW
         {
 			PUCHAR pTextTable;
 			
-      //#ifdef TEMPORARY_COMMENTED
       UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
-      //#endif
 			
       if ( !pTextTable[c] )
 			{

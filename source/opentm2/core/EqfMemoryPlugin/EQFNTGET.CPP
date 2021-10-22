@@ -29,8 +29,9 @@
 #include "MarkupPluginMapper.H"
 #include "MemoryFactory.h"
 #include <map>
-#include "../../core/utilities/LogWrapper.h"
-#include "../../core/utilities/PropertyWrapper.H"
+#include "../utilities/LogWrapper.h"
+#include "../utilities/PropertyWrapper.H"
+#include "../utilities/EncodingHelper.h"
 //#include "EQFTM.H"
 
 #ifdef _DEBUG
@@ -87,11 +88,18 @@
 #else
   #define LOGOPEN( a )
   #define LOGCLOSE()
-  #define LOGPRINTF0( f)
-  #define LOGPRINTF1( f, v1 )
-  #define LOGPRINTF2( f, v1, v2 )
-  #define LOGPRINTF3( f, v1, v2, v3 )
-  #define LOGPRINTF4( f, v1, v2, v3, v4 )
+  #define LOGPRINTF0( level) LogMessage(level, __func__); 
+  #define LOGPRINTF1( level, v1 ) LogMessage2(level, __func__, v1); 
+  #define LOGPRINTF2( level, v1, v2 ) LogMessage3(level, __func__, v1, v2); 
+  #define LOGPRINTF3( level, v1, v2, v3 ) LogMessage4(level, __func__, v1, v2, v3); 
+  #define LOGPRINTF4( level, v1, v2, v3, v4 ) LogMessage5(level, __func__, v1, v2, v3, v4); 
+  #define LOGPRINTF5( level, v1, v2, v3, v4, v5 ) LogMessage6(level, __func__, v1, v2, v3, v4, v5); 
+  #define LOGPRINTF6( level, v1, v2, v3, v4, v5, v6 ) LogMessage7(level, __func__, v1, v2, v3, v4, v5, v6); 
+  #define LOGPRINTF7( level, v1, v2, v3, v4, v5, v6, v7 ) LogMessage8(level, __func__, v1, v2, v3, v4, v5, v6, v7); 
+  
+  
+  
+  
 #endif
 
 #ifdef MEASURETIME
@@ -447,8 +455,10 @@ USHORT TmtXGet
   }
 #endif
 
-  LOGPRINTF1( L"--------------\r\nLooking up:\r\n%s\r\n", pTmGetIn->stTmGet.szSource );
-
+  if(CheckLogLevel(INFO)){
+    auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
+    LOGPRINTF3(INFO, "-------------- Looking up:\n", str.c_str(),"\n" );
+  }
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
@@ -456,12 +466,6 @@ USHORT TmtXGet
   //allocate pSentence
   usRc = NTMAllocSentenceStructure( &pSentence ); 
   
-  //DEBUG
-  #ifdef TEMPORARY_COMMENTED
-  pSentence->pTagRecord->ulRecordLen = 6;
-  pSentence->pTagRecord->usFirstTagEntry = 4;
-  pSentence->pTagRecord->usTagTableId = 5;  
-  #endif 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lAllocTime) );
@@ -470,12 +474,9 @@ USHORT TmtXGet
   if ( !usRc )
   {
     //build tag table path
-    //FIX here
-    //UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
     properties_get_str(KEY_OTM_DIR, szString, sizeof(szString));
     strcat( szString, "/TABLE/");
-    //LogMessage(WARNING,"Temporary hardcoded offset for TmtXGet:: strcat( szString, pTmGetIn->stTmGet.szTagTable+4 );");
-    strcat( szString, pTmGetIn->stTmGet.szTagTable ); // + 4);
+    strcat( szString, pTmGetIn->stTmGet.szTagTable ); 
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
@@ -484,11 +485,8 @@ USHORT TmtXGet
     UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    //usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion );
-    
-    //testSentenceFunc(pSentence);
     ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);
-    usRc = TokenizeSourceEx2Ref( pTmClb, *pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
+    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -532,7 +530,7 @@ USHORT TmtXGet
 #endif
 
           usOverlaps = CheckCompactArea( pSentence, pTmClb );
-          LOGPRINTF1( L"TmtXGet: Checked compact area, usOverlaps=%u\r\n", usOverlaps );
+          LOGPRINTF2( INFO, "TmtXGet: Checked compact area, usOverlaps=", intToA(usOverlaps) );
           if ( usOverlaps == pSentence->usActVote ) //all hash triples found
           {
 #ifdef MEASURETIME
@@ -540,7 +538,7 @@ USHORT TmtXGet
 #endif
             if ( ulStrippedParm & GET_EXACT ) 
             {
-              LOGPRINTF0( L"TmtXGet: Calling GetExactMatch\r\n" );
+              LOGPRINTF1( INFO, "TmtXGet: Calling GetExactMatch" );
               //get exact matches only
               usRc = GetExactMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound, pTmGetOut );
@@ -550,15 +548,11 @@ USHORT TmtXGet
 #endif
               //if usNumMatchesFound is zero then try for fuzzies
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
-              {
-                
-                //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 1");
-                //#ifdef TEMPORARY_COMMENTED
-                LOGPRINTF0( L"TmtXGet: No exact matches found, trying GetFuzzyMatch\r\n" );
+              {                
+                LOGPRINTF1( INFO, "TmtXGet: No exact matches found, trying GetFuzzyMatch" );
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
-                LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-                //#endif
+                LOGPRINTF3( INFO, "TmtXGet: GetFuzzyMatch returned ",intToA(pTmGetOut->usNumMatchesFound), " matches" );
               } /* endif */
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
@@ -566,14 +560,12 @@ USHORT TmtXGet
             }
             else
             {
-                LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
+                LOGPRINTF1( INFO, "TmtXGet: Calling GetFuzzyMatch" );
                 
-                //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 2");
-                //#ifdef TEMPORARY_COMMENTED
                 usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
-                LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-                //#endif
+                LOGPRINTF3( INFO,  "TmtXGet: GetFuzzyMatch returned ",intToA(pTmGetOut->usNumMatchesFound), " matches" );
+
 #ifdef MEASURETIME
                 GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -610,19 +602,17 @@ USHORT TmtXGet
 
             if ( fCheckForFuzzyMatches )
             {
-              LOGPRINTF3( L"TmtXGet: usOverlaps=%u, usActVote=%u, usMatchThreshold=%u\r\n", usOverlaps, pSentence->usActVote, pTmGetIn->stTmGet.usMatchThreshold );
+              LOGPRINTF6(INFO, "TmtXGet: usOverlaps= ",intToA(usOverlaps)," , usActVote=", intToA(pSentence->usActVote), ", usMatchThreshold=",  intToA(pTmGetIn->stTmGet.usMatchThreshold) );
 
               //not all triples on in compact area so fuzzy match
 #ifdef MEASURETIME
             GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
-              LOGPRINTF0( L"TmtXGet: Calling GetFuzzyMatch\r\n" );
+              LOGPRINTF1( INFO, "TmtXGet: Calling GetFuzzyMatch" );
               
-              //LogMessage(FATAL,"TEMPORARY_COMMENTED in TmtXGet::GetFuzzyMatch 3");
-              //#ifdef TEMPORARY_COMMENTED
               usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
-              LOGPRINTF1( L"TmtXGet: GetFuzzyMatch returned %u matches\r\n", pTmGetOut->usNumMatchesFound );
-              //#endif
+              LOGPRINTF3( INFO, "TmtXGet: GetFuzzyMatch returned ",intToA(pTmGetOut->usNumMatchesFound)," matches" );
+              
 #ifdef MEASURETIME
               GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
 #endif
@@ -750,26 +740,32 @@ USHORT TmtXGet
             GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
 
-#ifdef MATCHLIST_LOG
-  if ( hfMatchListLog )
+
+  LogMessage3(INFO,"TmtXGet::Lookup complete, found ",intToA(pTmGetOut->usNumMatchesFound)," matches" );
+
+//#ifdef MATCHLIST_LOG
+  //if ( hfMatchListLog )
+  if(CheckLogLevel(DEVELOP))
   {
-    int i = 0;
-
-    fwprintf( hfMatchListLog, L"Lookup complete, found %u matches\r\n", pTmGetOut->usNumMatchesFound );
-
-    for ( i = 0; i < pTmGetOut->usNumMatchesFound; i++ )
+    for ( int i = 0; i < pTmGetOut->usNumMatchesFound; i++ )
     {
       PTMX_MATCH_TABLE_W pMatch = &(pTmGetOut->stMatchTable[i]);
-      fwprintf( hfMatchListLog, L"Match %ld, MatchLevel=%u%% MFlag=%u, Origin=%S, Segment=%lu\r\n", i, 
-        pMatch->usMatchLevel, pMatch->usTranslationFlag,
-        (pMatch->szLongName[0] != '0') ? pMatch->szLongName : pMatch->szFileName, pMatch->ulSegmentId );
-      NTMLogSegData( hfMatchListLog, L"  Source = >>>%s<<<\r\n", pMatch->szSource );
-      NTMLogSegData( hfMatchListLog, L"  Target = >>>%s<<<\r\n", pMatch->szTarget );
-    } /* endfor */
-    fclose( hfMatchListLog );
-  } /* endif */       
-#endif
+      LogMessage8(DEVELOP, "TmtXGet:: Match ", intToA(i), " , MatchLevel = ", intToA(pMatch->usMatchLevel), 
+          " , MFlag = ", intToA(pMatch->usTranslationFlag), " ,  segment = ", intToA(pMatch->ulSegmentId));
+      if(pMatch->szLongName[0] != '0') {
+        LogMessage2(DEVELOP,"TmtXGet:: origin = ",pMatch->szFileName);
+      }else{
+        LogMessage2(DEVELOP,"TmtXGet:: origin = ",pMatch->szLongName);
+      }
 
+      auto strSource = EncodingHelper::convertToUTF8(pMatch->szSource);
+      auto strTarget = EncodingHelper::convertToUTF8(pMatch->szTarget);
+      LogMessage5(DEVELOP,"TmtXGet::\n  Source = >>>", strSource.c_str(),"<<<\n  Target = >>>", strTarget.c_str(), "<<< ");
+      //NTMLogSegData( hfMatchListLog, L"TmtXGet::  Source = >>>%s<<<\r\n", pMatch->szSource );
+      //NTMLogSegData( hfMatchListLog, L"TmtXGet::  Target = >>>%s<<<\r\n", pMatch->szTarget );
+    } /* endfor */
+  } /* endif */       
+//#endif
 
   return( usRc );
 }
@@ -858,7 +854,7 @@ USHORT GetExactMatch
       {
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
-        LOGPRINTF1( L"GetExactMatch: EQFNTMGET of record %lu\r\n", ulKey );
+        LOGPRINTF2( INFO, "GetExactMatch: EQFNTMGET of record", intToA(ulKey) );
         usRc = EQFNTMGet( pTmClb->pstTmBtree, ulKey, (PCHAR)pTmRecord, &ulLen );
 
         if ( usRc == BTREE_BUFFER_SMALL)
@@ -880,14 +876,12 @@ USHORT GetExactMatch
         } /* endif */
         if ( usRc == NO_ERROR )
         {
-          //LogMessage(FATAL,"TEMPORARY_COMMENTED in GetExactMatch::ExactTest");
-          //#ifdef TEMPORARY_COMMENTED
           //compare tm record data with data passed in the get in structure
-          LOGPRINTF1( L"GetExactMatch: ExactTest of record %lu\r\n", ulKey );
+          LOGPRINTF2( INFO, "GetExactMatch: ExactTest of record ", intToA(ulKey) );
           usRc = ExactTest( pTmClb, pTmRecord, pGetIn, pSentence,
                             pstMatchTable, &usMatchEntries, ulKey );
-          LOGPRINTF1( L"GetExactMatch: ExactTest found %u matching entries\r\n", usMatchEntries );
-          //#endif
+          LOGPRINTF3( INFO, "GetExactMatch: ExactTest found ", intToA(usMatchEntries)," matching entries" );
+          
           if ( !usRc )
           {
             //nr of matches found
@@ -1295,7 +1289,7 @@ USHORT ExactTest
         {
           if ( NtmFindInAddData( pTMXTargetClb, ADDDATA_ADDINFO_ID, L"<Note" ) )
           {
-            LOGPRINTF0( L"CLB with comment skipped\r\n" );
+            LOGPRINTF1( INFO, "::CLB with comment skipped" );
             fTestCLB = FALSE;
           } 
         } 
@@ -1739,7 +1733,6 @@ USHORT ExactTest
   return( usRc );
 }
 
-#ifdef TEMPORARY_COMMENTED
 #if defined(SGMLDITA_LOGGING) || defined(INLINE_TAG_REPL_LOGGING) || defined(MATCHLIST_LOG)
   void NTMMarkCRLF( PSZ_W pszSource, PSZ_W pszTarget )
   {
@@ -1764,6 +1757,7 @@ USHORT ExactTest
     *pszTarget = 0;
   }
 
+
   void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData )
   {
     static CHAR_W szSegBuf[4096];
@@ -1772,10 +1766,9 @@ USHORT ExactTest
 
     NTMMarkCRLF( pszSegData, szSegBuf );
     iLen = swprintf( szLineBuf, pszForm, szSegBuf );
-    fwrite( szLineBuf, 2, iLen, hfLog ); 
+    LogMessage(INFO,""):
+    //fwrite( szLineBuf, 2, iLen, hfLog ); 
   }
-
-#endif
 
 // removed superfluos whitespace at the beggining or end of the proposal
 void NTMRemoveAdditionalWhitepace
@@ -3062,7 +3055,7 @@ USHORT GetFuzzyMatch
 #endif
         ulLen = ulRecBufSize;
 
-        LOGPRINTF1( L"GetFuzzyMatch: EQFNTMGET of record %lu\r\n", pMatchEntry->ulKey );
+        LOGPRINTF2( INFO, "GetFuzzyMatch: EQFNTMGET of record ", intToA(pMatchEntry->ulKey) );
 
         usRc = EQFNTMGet( pTmClb->pstTmBtree, pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
 
@@ -3086,7 +3079,7 @@ USHORT GetFuzzyMatch
 #endif
         if ( usRc == NO_ERROR )
         {
-          LOGPRINTF2( L"GetFuzzyMatch: MaxVotes=%u, ActVote=%u\r\nEQFNTMGET of record %lu\r\n", pMatchEntry->usMaxVotes, pSentence->usActVote );
+          LOGPRINTF5( INFO, "GetFuzzyMatch: MaxVotes=",intToA(pMatchEntry->usMaxVotes),", ActVote=",intToA( pSentence->usActVote)," EQFNTMGET of record ");
 
           //compare tm record data with data passed in the get in structure
           usOverlaps = std::min( pMatchEntry->usMaxVotes, pSentence->usActVote );
@@ -3206,7 +3199,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     pGetIn->ulSrcOemCP = GetLangOEMCP( pGetIn->szSourceLanguage);
   }
 
-  LOGPRINTF1( L"FuzzyTest for record %lu\r\n", ulKeyNum );
+  LOGPRINTF2( INFO, "FuzzyTest for record ", intToA(ulKeyNum) );
 
   pusGetMaxVotes;
   //allocate pString
@@ -3232,8 +3225,10 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
 
-    LOGPRINTF1( L"FuzzyTest: <SOURCE>\r\n%s\r\n</SOURCE>\r\n", pString );
-
+    if(CheckLogLevel(INFO)){
+      auto str= EncodingHelper::convertToUTF8(pString);
+      LOGPRINTF3( INFO, "::FuzzyTest: <SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
+    }
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
 	    fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pString, pSentence->pNormString, 0 )== 0L);
@@ -3249,7 +3244,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
        fStringEqual = (UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L);
     } /* endif*/
 
-    LOGPRINTF1( L"FuzzyTest: After String compare, fStringEqual = %d\r\n", (SHORT)fStringEqual );
+    LOGPRINTF2( INFO, "FuzzyTest: After String compare, fStringEqual = ", intToA(fStringEqual) );
 
     /******************************************************************/
     /* if strings equal - apply equal test first ...                  */
@@ -3263,7 +3258,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       usRc = ExactTest( pTmClb, pTmRecord, pGetIn, pSentence, pstMatchTable, pusMatchesFound, ulKeyNum );
 
       fStringEqual = ( *pusMatchesFound > usNumMatches );
-      LOGPRINTF1( L"FuzzyTest: After ExactTest, fStringEqual = %d\r\n", (SHORT)fStringEqual );
+      LOGPRINTF2(INFO, "FuzzyTest: After ExactTest, fStringEqual = ", intToA(fStringEqual) );
     } /* endif */
 
     if ( !fStringEqual && !usRc )
@@ -3309,7 +3304,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       //loop through target records
       ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
-      LOGPRINTF1( L"FuzzyTest: Checking targets, ulLeftTgtLen = %lu\r\n", ulLeftTgtLen );
+      LOGPRINTF2( INFO, "FuzzyTest: Checking targets, ulLeftTgtLen = ", intToA(ulLeftTgtLen) );
       while ( ulLeftTgtLen && (RECLEN(pTMXTargetRecord) != 0) )
       {
         BOOL fTestCLB = TRUE;
@@ -3332,7 +3327,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         //compare target language group IDs
         if ( pTmClb->psLangIdToGroupTable[pTMXTargetClb->usLangId] != pTmClb->psLangIdToGroupTable[usTargetId] )
         {
-          LOGPRINTF0( L"FuzzyTest: Wrong target language!\r\n" );
+          LOGPRINTF1( INFO,"FuzzyTest: Wrong target language!" );
           fTestCLB = FALSE;
         } 
 
@@ -3341,7 +3336,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         {
           if ( NtmFindInAddData( pTMXTargetClb, ADDDATA_ADDINFO_ID, L"<Note" ) )
           {
-            LOGPRINTF0( L"FuzzyTest: CLB with comment skipped\r\n" );
+            LOGPRINTF1( INFO, "FuzzyTest: CLB with comment skipped" );
             fTestCLB = FALSE;
           } 
         } 
@@ -3366,7 +3361,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
           } /* endif */                   
         } /* endif */                 
 
-        LOGPRINTF1( L"FuzzyTest: fTestCLB=%s\r\n", fTestCLB ? L"Yes" : L"NO" );
+        LOGPRINTF2( INFO, "FuzzyTest: fTestCLB=", fTestCLB ? "Yes" : "NO" );
 
         // compare target table IDs
         if ( fTestCLB )
@@ -3452,9 +3447,6 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */
             } /* endif */
 
-
-//LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-//#ifdef TEMPORARY_COMMENTED
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
 //                                        pSentence->pNormString,
                                         pSentence->pInputString,
@@ -3462,7 +3454,6 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                                         pSentence->pPropString,
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP,0);
-//#endif
 
             // RJ: P018279 etc: NO, must be active!
             // GQ: the following code has been disabled as the fuzziness
@@ -3575,7 +3566,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMCompareBetweenTokens");
           }
 
           //fill get output structure
-          LOGPRINTF2( L"FuzzyTest: usFuzzy=%u, fTagTableEqual=%d\r\n", usFuzzy, (SHORT)fTagTableEqual );
+          LOGPRINTF4( INFO, "FuzzyTest: usFuzzy=",intToA(usFuzzy),", fTagTableEqual=", intToA(fTagTableEqual) );
           if ( (usModifiedTranslationFlag == TRANSLFLAG_MACHINE) && (usFuzzy < 100) )
           {
             // ignore machine fuzzy matches
@@ -3744,7 +3735,7 @@ USHORT FillMatchEntry
       if ( usRc == NO_ERROR )
       {
         //calculate number of index entries in index record
-        LOGPRINTF1( L"Processing index record %lu\r\n", ulKey );
+        LOGPRINTF2( INFO,"Processing index record ", intToA(ulKey) );
 
         ulLen = pIndexRecord->usRecordLen;
         usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
@@ -3839,7 +3830,7 @@ USHORT FillMatchEntry
         {
           PTMX_MATCHENTRY pTemp1Start;
 
-          LOGPRINTF0( L"Cleaning up...\r\n" );
+          LOGPRINTF1( INFO,"Cleaning up..." );
 
           fOK = UtlAlloc( (PVOID *) &(pTemp1Start), 0L,
                          (LONG)((usMaxSentences+1)* sizeof(TMX_MATCHENTRY)), NOMSG );
@@ -3914,7 +3905,7 @@ USHORT FillMatchEntry
     ERREVENT2( FILLMATCHENTRY_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
   } /* endif */
 
-  LOGPRINTF2( L"FillMatchEntry: lMatchEntries=%ld, rc=%u\r\n", lMatchEntries, usRc );
+  LOGPRINTF4( INFO, "FillMatchEntry: lMatchEntries=",intToA(lMatchEntries),", rc=", intToA(usRc) );
 
 
   return( usRc );
@@ -3973,8 +3964,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 
   usThreshold =  ((usActVote) * (*pusMatchThreshold)) / 100;
 
-  LOGPRINTF3( L"Threshhold computation, usThreshold=%u, *pusActVote=%u, *pusMatchThreshold=%u\r\n", 
-              usThreshold, *pusActVote, *pusMatchThreshold );
+  LOGPRINTF6( INFO, "::Threshhold computation, usThreshold=",intToA(usThreshold),", *pusActVote=",intToA(*pusActVote),", *pusMatchThreshold=", intToA(*pusMatchThreshold) );
 
   // if threshold is no restriction, i.e. sentence too short
   // only allow for exact match
@@ -3987,7 +3977,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
   pActualPos = pTempMatch;
   pTempPos = pTempMatch;
   usEntries = 0;
-  LOGPRINTF0( L"CleanupTempMatch, temp matches before cleaning up\r\n" );
+  LOGPRINTF1( INFO, "CleanupTempMatch, temp matches before cleaning up" );
   while ( pTempPos->cCount )
   {
     // reduce temp act vote if MAX_VOTES is reached (the cCount value can never reach MAX_VOTES)
@@ -3998,8 +3988,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
       usTempMaxVotes = MAX_VOTES - 3;
     } /* endif */
 
-    LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTempPos->ulKey,
-                pTempPos->usMaxVotes, pTempPos->cCount );
+    LOGPRINTF6( INFO, "ulKey=",intToA(pTempPos->ulKey)," usMaxVotes=",intToA(pTempPos->usMaxVotes)," cCount=", intToA(pTempPos->cCount) );
 
     /******************************************************************/
     /* check that threshold criteria is fulfilled for BOTH sources    */
@@ -4023,45 +4012,46 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
   //with the highest frequency are at the top
   usEntriesInList = usEntries;
   qsort( pTempMatch, usEntries, sizeof(TMX_MATCHENTRY), CompCount );
-  LOGPRINTF0( L"CleanupTempMatch: Ranked entries after sort are:\r\n" );
-#ifdef _DEBUG
+  LOGPRINTF1( INFO, "CleanupTempMatch: Ranked entries after sort are:" );
+//#ifdef _DEBUG
+  if(CheckLogLevel(DEBUG))
   {
     PTMX_MATCHENTRY pTest = pTempMatch;
     for ( i = 0; i < usEntries; i++, pTest++ )
     {
-      LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTest->ulKey,
-                  pTest->usMaxVotes, pTest->cCount );
+      LOGPRINTF6( DEBUG, "ulKey=",intToA(pTest->ulKey)," usMaxVotes=",intToA(pTest->usMaxVotes)," cCount=", intToA(pTest->cCount) );
+      //LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTest->ulKey,
+      //            pTest->usMaxVotes, pTest->cCount );
     } /* endfor */
   }
-#endif
+//#endif
 
   // limit number to really ones of interest ( the MAX_MATCHES best )
   usEntries = std::min( usEntries, (USHORT)std::min(MAX_MATCHES, (int)(ABS_VOTES/2-1)) );
 
   //fill pMatchEntry with the highest ranked entries
   pTempPos = pTempMatch;
-  LOGPRINTF0( L"CleanupTempMatch: Highest ranked entries returned are:\r\n" );
+  LOGPRINTF1( INFO, "CleanupTempMatch: Highest ranked entries returned are:" );
   for ( i = 0; i < usEntries; i++, pMatchEntry++, pTempPos++ )
   {
     memcpy( pMatchEntry, pTempPos, sizeof(TMX_MATCHENTRY ));
-    LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTempPos->ulKey,
-                pTempPos->usMaxVotes, pTempPos->cCount );
+    LOGPRINTF6(INFO,  "::ulKey=",intToA(pTempPos->ulKey)," usMaxVotes=",intToA(pTempPos->usMaxVotes)," cCount=", intToA( pTempPos->cCount ) );
   } /* endfor */
 
 
   // add highest matches by using a different metric
   qsort( pTempMatch, usEntriesInList, sizeof(TMX_MATCHENTRY), CompCountVotes );
-  LOGPRINTF0( L"CleanupTempMatch: Ranked entries after sort are:\r\n" );
-#ifdef _DEBUG
+  LOGPRINTF1( INFO, "CleanupTempMatch: Ranked entries after sort are:" );
+//#ifdef _DEBUG
+  if(CheckLogLevel(DEBUG))
   {
     PTMX_MATCHENTRY pTest = pTempMatch;
     for ( i = 0; i < usEntries; i++, pTest++ )
     {
-      LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTest->ulKey,
-                  pTest->usMaxVotes, pTest->cCount );
+      LOGPRINTF6( DEBUG, "ulKey=",intToA(pTest->ulKey)," usMaxVotes=",intToA(pTest->usMaxVotes)," cCount=", intToA(pTest->cCount) );
     } /* endfor */
   }
-#endif
+//#endif
 
   // copy new possible match entry into list
   pTempPos = pTempMatch;

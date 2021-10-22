@@ -695,18 +695,16 @@ int EqfMemory::searchProposal
   this->pTmGetIn->stTmGet.ulParm = ulOptions;
   this->pTmGetIn->stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
 
-#ifdef EQFMEMORYLOGGING
-  this->Log.writef( "*** method: searchProposal, looking for \"%S\"", this->pTmGetIn->stTmGet.szSource );
-#endif
-
-//#ifdef TEMPORARY_COMMENTED
+  if(CheckLogLevel(DEBUG)){
+    auto str = EncodingHelper::convertToUTF8(this->pTmGetIn->stTmGet.szSource);
+    LogMessage2(DEBUG,"EqfMemory::searchProposal::*** method: searchProposal, looking for ",  str.c_str());
+  } 
   iRC = (int)TmGetW ( this->htm,  NULL,  this->pTmGetIn,  this->pTmGetOut, FALSE );
-//#endif //TEMPORARY_COMMENTED
+
   if ( iRC == 0 )
   {
-#ifdef EQFMEMORYLOGGING
-    this->Log.writef( "   lookup complete, found %u proposals", this->pTmGetOut->usNumMatchesFound  );
-#endif
+    LogMessage3(DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",intToA(this->pTmGetOut->usNumMatchesFound)," proposals"   );
+
     for ( int i = 0; i < (int)FoundProposals.size(); i++ )
     {
       if ( i >= this->pTmGetOut->usNumMatchesFound )
@@ -715,18 +713,17 @@ int EqfMemory::searchProposal
       }
       else
       {
-#ifdef EQFMEMORYLOGGING
-        this->Log.writef( "   proposal %ld: match=%3u, source=\"%S\"", i, pTmGetOut->stMatchTable[i].usMatchLevel, pTmGetOut->stMatchTable[i].szSource );
-#endif
+        if(CheckLogLevel(DEBUG)){
+          auto strSource = EncodingHelper::convertToUTF8(pTmGetOut->stMatchTable[i].szSource );
+          LogMessage6(DEBUG,"EqfMemory::searchProposal::   proposal ",intToA(i),": match=",intToA(pTmGetOut->stMatchTable[i].usMatchLevel),", source=", strSource.c_str() );
+        }
         this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );
       } /* end */         
     } /* end */       
   }
   else
   {
-#ifdef EQFMEMORYLOGGING
-    this->Log.writef( "   lookup failed, rc=%ld", iRC );
-#endif
+    LogMessage2(DEBUG,"EqfMemory::searchProposal::  lookup failed, rc=", intToA(iRC) );
   } /* end */     
 
   if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmGetIn->stTmGet.szTagTable );

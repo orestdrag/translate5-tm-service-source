@@ -227,7 +227,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing POST mem/fuzzysearch request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  LogMessage4(INFO, "==== processing POST mem/fuzzysearch request, content type=\"",strType.c_str(),"\", content length=", intToA( content_length ) );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -238,12 +238,11 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    if ( hfLog != NULL ) fprintf( hfLog, "Memory name=\"%s\"\n", strTM.c_str() );
-    if ( hfLog != NULL ) fprintf( hfLog, "Input:\n-----\n%s\n----\n", strInData.c_str() );
+    LogMessage5(INFO,  "Memory name=", strTM.c_str() ,"Input:\n-----\n",strInData.c_str(),"\n----" );
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    LogMessage5(INFO,  "...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   } );
 }
 

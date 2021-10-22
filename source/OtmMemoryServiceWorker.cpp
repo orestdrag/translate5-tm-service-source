@@ -1129,6 +1129,7 @@ int OtmMemoryServiceWorker::search
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
+    LogMessage(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMANSI");
     // use default markup table if none given
     strcpy( pData->szMarkup, "OTMANSI" );
   } /* end */
