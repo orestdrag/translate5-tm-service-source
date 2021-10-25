@@ -1978,12 +1978,9 @@ EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   }
   else
   {
-
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
     //OemToAnsi( pIn, pOut );
     EQFOemToAnsi( pIn, pOut );
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
 
 
@@ -2032,9 +2029,6 @@ ULONG GetCodePage( USHORT usType )
 
   LogMessage2(INFO, "GetCodePage::usType = ", intToA(usType));
 
-//  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in GetCodePage, usType = ", intToA(usType));
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-/* https://docs.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-getlocaleinfoa */
   switch ( usType )
   {
     case OEM_CP:
@@ -2056,7 +2050,6 @@ ULONG GetCodePage( USHORT usType )
       ulReturnCP = (ULONG) _ttol (&cp[0]);
       break;
   } /* endswitch */
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return (ulReturnCP);
 }

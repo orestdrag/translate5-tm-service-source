@@ -22,6 +22,7 @@
 #include <wctype.h>
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/PropertyWrapper.H"
+#include "../../core/utilities/EncodingHelper.h"
 
 //static data
 //distribution criteria for building tuples
@@ -851,6 +852,10 @@ VOID HashSentence
   while ( pTermTokens->usLength )
   {
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
+    if(CheckLogLevel(DEBUG)){
+      auto str = EncodingHelper::convertToUTF8(pNormOffset);
+      LogMessage6(DEBUG,"HashSentence:: pNormOffset = \"", str.c_str(), "\"; len = ", intToA(pTermTokens->usLength),"; hash = ", intToA(pTermTokens->usHash));
+    }
     //max nr of hashes built
     usCount++;
     pTermTokens++;
@@ -881,10 +886,15 @@ VOID HashSentence
     } /* endfor */
   } /* endif */
 
+  if(CheckLogLevel(DEBUG)){
+    auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
+    LogMessage4(DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", intToA(usCount) );
 
+  }
   //build tuples of the term hashes
   if ( usCount >= 3 )
   {
+    LogMessage(DEBUG,"HashSentence:: Building Votes");
     BuildVotes( pSentence );
   } /* endif */
 }

@@ -971,12 +971,9 @@ NTMSplitAndAddTokens
       chTemp = *(pString + (usStop+(USHORT)1));
       *(pString + (usStop+(USHORT)1)) = EOS;
       
-      //LogMessage(FATAL,"TEMPORARY_COMMENTED NTMSplitAndAddTokens::MorphTokenizeW");
-      //#ifdef TEMPORARY_COMMENTED
       usRC = MorphTokenizeW( sLangID, pString+usStart,
                             &usListSize, (PVOID *)&pTermList,
                             MORPH_OFFSLIST, ulOemCP );
-      //#endif 
 
       *(pString + (usStop+(USHORT)1)) = chTemp;
 

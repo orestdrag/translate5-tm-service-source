@@ -3662,20 +3662,16 @@ USHORT MorphGetLanguageID
     pLCB->usCodePage = 850;
     pLCB->fCompSep = FALSE;
 
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED  SpellFactory::getInstance();");
     SpellFactory* tSpellFactoryInstance = SpellFactory::getInstance();
     if (NULL == tSpellFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphFactory::getInstance(); 2");
     MorphFactory* tMorphFactoryInstance =  MorphFactory::getInstance();
     if (NULL == tMorphFactoryInstance)
     {
       usRC = MORPH_NO_MEMORY;
     }
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED in MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))");
-    //#ifdef TEMPORARY_COMMENTED
     if (MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))
     {
     }
@@ -3683,7 +3679,6 @@ USHORT MorphGetLanguageID
     {
       usRC = MORPH_OK; // GQ: disabled temporarely the result of isSupported, correct code is: usRC = MORPH_NO_LANG_PROPS;
     } /* endif */
-    //#endif
   } /* endif */
 
   /********************************************************************/

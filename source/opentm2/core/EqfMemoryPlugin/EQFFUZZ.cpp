@@ -17,7 +17,8 @@
 
 #include "EQFTPI.H"               // Translation Processor priv. include file
 #include "EQFFUZZ.H"
-
+#include "EncodingHelper.h"
+#include "LogWrapper.h"
 
 
 #ifdef EQFBFUZZ_LOG
@@ -943,6 +944,7 @@ VOID MakeHashValue
   USHORT usRandomIndex = 0;
   ULONG  ulHashVal = 0;
   CHAR_W c;
+  CHAR_W* pDataStart = pData;
 
   while ( ((c = *pData++) != NULC) && (usRandomIndex < usMaxRandom))
   {
@@ -962,6 +964,10 @@ VOID MakeHashValue
 
   *pulHashVal = ulHashVal;
 
+  if(CheckLogLevel(DEBUG)){
+    auto str = EncodingHelper::convertToUTF8(pDataStart);
+    LogMessage4(DEBUG,"MakeHashValue:: data = \'",str.c_str(),"\' ; hash = ", intToA(ulHashVal));
+  }
   return;
 } /* end of function MakeHashValue */
 
@@ -1824,6 +1830,7 @@ EQFBFindDiffEx
   /******************************************************************/
   /* prepare tokens for String1 and string 2                        */
   /******************************************************************/
+  LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for first string: ");
   fOK = PrepareTokens( //pDoc,
                        pTagTable,
                        pInBuf,
@@ -1831,6 +1838,8 @@ EQFBFindDiffEx
                        pString1, sLanguageId, &pTokenList1, ulOemCP );
   if ( fOK )
   {
+
+    LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for second string: ");
     fOK = PrepareTokens( // pDoc,
                          pTagTable,
                          pInBuf,

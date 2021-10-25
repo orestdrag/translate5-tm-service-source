@@ -160,6 +160,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
                 pFb->data.resize(16384);
             }
             LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(pFb->data.size()));
+            pFb->status = FileBufferStatus::OPEN;
         }
 
         pFb->file = ptr;
@@ -221,6 +222,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         pFb = &(*getFileBufferInstance())[fName];    
 
+        pFb->status |= MODIFIED;
         if(offset + buffSize > pFb->data.size()){
             LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", intToA(pFb->data.size())," to ", intToA(offset+buffSize));
             pFb->data.resize(offset + buffSize);
@@ -233,7 +235,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         LogMessage2(ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
         return -1;
     }
-    LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", intToA(buffSize)," bytes written to ", fName.c_str());
+    LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", intToA(buffSize)," bytes written to buffer for ", fName.c_str());
     return 0;
 }
 
@@ -266,8 +268,9 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         WriteBuffToFile(fName);
         LogMessage2(ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
-        (*getFileBufferInstance())[fName].file = 0;
+        (*getFileBufferInstance())[fName].file = nullptr;
         (*getFileBufferInstance())[fName].offset = 0;
+        (*getFileBufferInstance())[fName].status = CLOSED;
         //pFileBuffers->erase(fName);
     }else{
         LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
@@ -285,19 +288,22 @@ int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         pFb = &(*getFileBufferInstance())[fName];
 
-        LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
-        PUCHAR bufStart = &pFb->data[0];
-        int size = pFb->data.size();
-        
-        if(tempFile)
-            fName+="_buff";
-        
-        HFILE ptr = fopen(fName.c_str(),"w+b");
-        WriteToFile(ptr, bufStart, size);
-        fclose(ptr);
+        if(pFb->status & FileBufferStatus::MODIFIED){
+            LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
+            PUCHAR bufStart = &pFb->data[0];
+            int size = pFb->data.size();
+            
+            if(tempFile)
+                fName+="_buff";
+            
+            HFILE ptr = fopen(fName.c_str(),"w+b");
+            WriteToFile(ptr, bufStart, size);
+            fclose(ptr);
+        }
     }else{
         LogMessage2(ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
     }
+    
     return 0;
 }
 
@@ -466,14 +472,18 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const long unsig
 
 int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
     std::string fName = GetFileName(ptr);
-    LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", fName.c_str(),
-            " starting from position ", intToA(startingPosition));
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
+
+        LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to filebuffer ", fName.c_str(),
+            " starting from position ", intToA(startingPosition));
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
         LogMessage4(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", intToA((long)ptr));
+
+        LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", fName.c_str(),
+            " starting from position ", intToA(startingPosition));
 
         #ifndef TEMPORARY_HARDCODED
         {

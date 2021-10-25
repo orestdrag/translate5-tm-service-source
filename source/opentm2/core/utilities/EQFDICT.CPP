@@ -3847,8 +3847,6 @@ QDAMDictLockStatus
 
   while ( *ppBTemp && !fLock)
   {
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED in called function QDAMDictLockStatus, because of basic TMCHAR data type migration");
-    //#ifdef TEMPORARY_COMMENTED
     if ( (*ppBTemp)->fLock && ! UTF16stricmp( pKey, (*ppBTemp)->chLockedTerm) )
     {
       /****************************************************************/
@@ -3867,7 +3865,6 @@ QDAMDictLockStatus
     {
       ppBTemp++;
     } /* endif */
-    //#endif
   } /* endwhile */
 
   return( fLock );
@@ -5332,8 +5329,6 @@ SHORT QDAMLocateKey_V3
                  {
                    if ( searchType == FEQUIV)
                    {
-                     //LogMessage(WARNING,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
-                     //#ifdef TEMPORARY_COMMENTED
                      if ( UTF16strcmp( pKey, pKey2 ) == 0 )
                      {
                        // the match will not get better anymore ...
@@ -5341,7 +5336,6 @@ SHORT QDAMLocateKey_V3
                        break;
                      }
                      else 
-                     //#endif
                      if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
                      {
                        // match but case of characters differ
@@ -5366,7 +5360,6 @@ SHORT QDAMLocateKey_V3
                      } /* endif */
                      sMid++;           // continue with next key
                    }
-                   //#ifdef TEMPORARY_COMMENTED
                    else if (UTF16strcmp( pKey, pKey2 ))
                    {
                      sMid ++;
@@ -5374,7 +5367,6 @@ SHORT QDAMLocateKey_V3
                    //#endif
                    else
                    {
-                     //LogMessage(ERROR,"TEMPORARY_COMMENTED in QDAMLocateKey_V3");
                      *psKeyPos = sMid;
                      break;
                    } /* endif */
@@ -6721,10 +6713,7 @@ SHORT QDAMInsertKey_V3
      else
      {
        i = (SHORT) OCCUPIED(pRecord);
-       //LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
-       //#ifdef TEMPORARY_COMMENTED
        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(TMWCHAR)));
-       //#endif
 
        if ( pBT->usVersion >= NTM_VERSION2 )
        {

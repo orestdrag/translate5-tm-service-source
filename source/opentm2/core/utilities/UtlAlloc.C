@@ -150,9 +150,7 @@ PVOID UtlIntAlloc
   {
     if ( usMessageNo != NOMSG )
     {
-//#ifdef TEMPORARY_COMMENTED
       UtlError( usMessageNo, MB_CANCEL, 0, NULL, EQF_ERROR );
-//#endif //TEMPORARY_COMMENTED
     } /* endif */
   } /* endif */
   return( pStorage );

@@ -1948,8 +1948,6 @@ int MemoryFactory::getMemoryName
 
 void MemoryFactory::refreshPluginList() 
 {
-  //LogMessage(ERROR,"Called TEMPORARY COMMENTED FUNCTION MemoryFactory::refreshPluginList() ");
-  //#ifdef TEMPORARY_COMMENTED
   if ( this->pluginList != NULL ) delete( this->pluginList );
   if ( this->pSharedMemPluginList != NULL ) delete( this->pSharedMemPluginList );
 
@@ -2008,8 +2006,6 @@ void MemoryFactory::refreshPluginList()
   {
     strcpy( this->szDefaultSharedMemoryPlugin, (*pSharedMemPluginList)[0]->getName() );
   }
-
-//#endif
 
 }
 

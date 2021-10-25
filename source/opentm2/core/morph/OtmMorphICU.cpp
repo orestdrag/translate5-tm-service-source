@@ -92,8 +92,6 @@ int OtmMorphICU::stem( const wchar_t * pszTerm, vector<std::wstring>& vResult )
  */
 int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
 {
-    //LogMessage(FATAL,"called TEMPORARY_COMMENTED OtmMorphICU::tokenizeByTerm");
-    //#ifdef TEMPORARY_COMMENTED
 	if (NULL == pText)
 	{
 		return OtmMorph::ERROR_PARAMETAR;
@@ -125,7 +123,6 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
   }
   Log.close();
 #endif
-    //#endif//temporary_commented
 	return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -419,8 +416,6 @@ int OtmMorphICU::tokenizeBySentence( const char* vSection, STRINGLIST& vResult )
  */
 int OtmMorphICU::tokenizeBySentence( const wchar_t* vSection, TERMLIST& vResult )
 {
-    //LogMessage(FATAL,"called TEMPORARY_COMMENTED OtmMorphICU::tokenizeBySentence");
-    //#ifdef TEMPORARY_COMMENTED
     if (NULL == vSection)
     {
         return OtmMorph::ERROR_PARAMETAR;
@@ -446,7 +441,6 @@ int OtmMorphICU::tokenizeBySentence( const wchar_t* vSection, TERMLIST& vResult 
   }
   Log.close();
 #endif
-//#endif//Temporary_commepted
 
     return OtmMorph::SUCCESS_RETURN;
 }
@@ -619,8 +613,6 @@ void OtmMorphICU::setupSentenceBoundary(UErrorCode &tStatus) {
 
 #define MAX_ABREV_LENGTH 15 // Max size of the abbreviations?
 bool OtmMorphICU::isBreakOnAbbreviation(UnicodeString text, int start, int end) {
-    //LogMessage(FATAL,"called TEMPORARY_COMMENTED function OtmMorphICU::isBreakOnAbbreviation");
-    //#ifdef TEMPORARY_COMMENTED
 
 	bool newline = false;
     int abbrevlist_size = abbrevlist.size();
@@ -688,7 +680,6 @@ bool OtmMorphICU::isBreakOnAbbreviation(UnicodeString text, int start, int end) 
         
         wb_end = wb_start;
     }
-//#endif
     return false;
 }
 

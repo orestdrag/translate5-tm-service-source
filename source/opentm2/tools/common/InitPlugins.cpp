@@ -17,9 +17,7 @@ USHORT InitializePlugins( char *szPluginPath )
 {
     USHORT usRC = NO_ERROR;         // function return code (add for P402974)
 	PluginManager* thePluginManager = PluginManager::getInstance();
-	//#ifdef TEMPORARY_COMMENTED
 	usRC = thePluginManager->loadPluginDlls(szPluginPath);   // add for P402974
-	//#endif
 
 	InitMarkupPluginMapper(); // tagtable
 	InitDocumentPluginMapper(); // document

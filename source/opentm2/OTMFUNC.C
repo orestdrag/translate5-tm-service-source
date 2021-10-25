@@ -391,7 +391,6 @@ USHORT EqfStartSession
     } /* endif */
   } /* endif */
 
-//#ifdef TEMPORARY_COMMENTED
   // set directory strings and main drive
   if ( usRC == NO_ERROR )
   {
@@ -506,7 +505,6 @@ USHORT EqfStartSession
       usRC = ERROR_READ_SYSTEMPROPERTIES;
     } /* endif */
   } /* endif */
-//#endif //TEMPORARY_COMMENTED
 
 
   // set caller's session handle
@@ -545,7 +543,7 @@ USHORT EqfStartSession
 
     LogMessage(INFO, "==EQFSTARTSESSION==\n" );
 
-  LogMessage(WARNING,"EqfStartSession::TEMPORARY_COMMENTED plugins init");
+  //LogMessage(WARNING,"EqfStartSession::TEMPORARY_COMMENTED plugins init");
   
   //#ifdef TEMPORARY_COMMENTED
   LogMessage(INFO,  "   Starting plugins...\n" );

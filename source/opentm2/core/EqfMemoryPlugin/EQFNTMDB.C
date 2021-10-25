@@ -1572,12 +1572,10 @@ SHORT QDAMDictUpdateLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   //#ifdef TEMPORARY_COMMENTED
    if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */
-   //#endif
 
    /*******************************************************************/
    /* For shared databases: lock complete file                        */
@@ -1949,9 +1947,7 @@ SHORT QDAMDictExactLocal
                  }
                  else
                  {
-                   //#ifdef TEMPORARY_COMMENTED
                    UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-                   //#endif
                  } /* endif */
                  recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )

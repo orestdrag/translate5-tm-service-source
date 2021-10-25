@@ -1884,32 +1884,25 @@ LONG                lOptions                 // type of new Translation Memory
   // check if TM exists already
   if ( usRC == NO_ERROR )
   {
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: plugins");
-    //#ifdef TEMPORARY_COMMENTED
     if ( pFactory->exists( NULL, pszMemName ) )
     {
       PSZ pszParam = (PSZ)pszMemName;
       UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszParam, EQF_ERROR, HWND_FUNCIF );
       usRC = ERROR_MEM_NAME_INVALID;
     }
-    //#endif
   } /* endif */
 
 
   // check if source language is valid
   if ( usRC == NO_ERROR )
   {
-    SHORT sID = 0;
-    
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: check if source language is valid : morphs not initialized");
-    //#ifdef TEMPORARY_COMMENTED
+    SHORT sID = 0;    
     if ( MorphGetLanguageID( (PSZ)pszSourceLanguage, &sID ) != MORPH_OK )
     {
       usRC = ERROR_PROPERTY_LANG_DATA;
       //UtlErrorHwnd( ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
       //              &((PSZ)pszSourceLanguage), EQF_ERROR, HWND_FUNCIF  );
     } /* endif */
-    //#endif
   } /* endif */
 
 

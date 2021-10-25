@@ -746,7 +746,6 @@ USHORT UtlCloseHwnd
    {
      // remove handle from our handle/drive array
      int i = 0;
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      while ( i < MAX_OPEN_FILES )
      {
        if ( DriveHandles[i].hf  == hf )
@@ -777,7 +776,6 @@ USHORT UtlCloseHwnd
                                     hwndParent);
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    } /* endif */
    return( usRetCode );
 }
@@ -891,7 +889,6 @@ USHORT UtlReadHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -929,7 +926,6 @@ USHORT UtlReadHwnd
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 }
 
 //+----------------------------------------------------------------------------+
@@ -2060,7 +2056,6 @@ USHORT UtlFindFirstHwnd
        {
          usAttr = FILE_ATTRIBUTE_NORMAL; // use normal file as default
        } /* endif */
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        hdirNew = FindFirstFile( pszFSpecCompl, pffb );
 
        if ( hdirNew == INVALID_HANDLE_VALUE )
@@ -2152,7 +2147,6 @@ USHORT UtlFindFirstHwnd
             hdirNew = HDIR_CREATE;
          } /* endif */
        } /* endif */
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
@@ -2918,8 +2912,6 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-    LogMessage(WARNING,"TO_BE_REPLACED_WITH_LINUX_CODE in UtlBufResetHwnd");
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do {
       DosError(0);
 
@@ -2934,7 +2926,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
          usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
    return( usRetCode );
 }
 
@@ -4461,7 +4453,6 @@ USHORT UtlGetFileSizeHwnd
 
   fMsg; hwndParent;
   DosError(0);
-//#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   dwSize = GetFileSize( hf );
   DosError(1);
   if ( dwSize == -1 )
@@ -4473,7 +4464,6 @@ USHORT UtlGetFileSizeHwnd
   {
     *pulSize = dwSize;
   } /* endif */
-//#endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRC );
 } /* end of function UtlgetFileSizeHwnd */
 

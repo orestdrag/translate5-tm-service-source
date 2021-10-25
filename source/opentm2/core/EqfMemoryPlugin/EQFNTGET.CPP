@@ -1878,9 +1878,7 @@ BOOL TMFuzzynessEx
 
   if ( fOK )
   {
-    //#ifdef TEMPORARY_COMMENTED
     EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
-    //#endif
   } /* endif */
 
   // free allocated buffers and lists
@@ -1891,6 +1889,8 @@ BOOL TMFuzzynessEx
   if ( pTable )    TAFreeTagTable( pTable );
 
   *pusFuzzy = (usWords != 0) ? ((usWords - usDiff) * 100 / usWords) : 100;
+  LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100;\n Words = ", 
+            intToA(usWords), ";\n Diff  = ", intToA(usDiff),";\n Fuzzy = ", intToA(*pusFuzzy), ";\n");
 
   if ( pusWords ) *pusWords = usWords; 
   return fOK;
@@ -2142,24 +2142,19 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
               strcat( szTagTablePath, EXT_OF_FORMAT );
 
 
-//LogMessage(FATAL,"TEMPORARY_COMMENTED TokenizeSourceEx2");
-//#ifdef TEMPORARY_COMMENTED
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchSource, szTagTablePath, pSubstProp->szSourceLanguage, TM_MAJ_VERSION, ulSrcCP, CREATEPROTTABLE_NOTRANSLVAR );
               if ( !usRC ) pSubstProp->pTagsPropSource = pMatchSource->pTagRecord;
               if ( !usRC ) UTF16strcpy( pMatchTarget->pInputString, pSubstProp->szPropTarget );
               if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchTarget, szTagTablePath, pSubstProp->szTargetLanguage, TM_MAJ_VERSION, ulTgtCP, CREATEPROTTABLE_NOTRANSLVAR  );
               if ( !usRC ) pSubstProp->pTagsPropTarget = pMatchTarget->pTagRecord;
-//#endif
+
               if ( fPreprocessed == 2 )     // 2 = TMO replacements have been done
               {
                 // recompute fuzziness and skip postprocessing if we have an exact match
                 USHORT usFuzzy = 0;
                 BOOL fFuzzyOK;
-                //LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-//#ifdef TEMPORARY_COMMENTED
                 fFuzzyOK = TMFuzzynessEx( pGetIn->szTagTable, pSubstProp->szPropSource, pSubstProp->szSource,
                                              sLangID, &usFuzzy, ulSrcOemCP , 0 );
-                                             //#endif
                 if ( usFuzzy == 100 )
                 {
                   fSkipPostprocessing = TRUE;
@@ -2278,8 +2273,6 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
         /* higher priority                                              */
         /****************************************************************/
         
-//LogMessage(FATAL,"TEMPORARY_COMMENTED_FUZZY NTMDocMatch");
-//#ifdef TEMPORARY_COMMENTED_FUZZY
         if ( NTMDocMatch( szTgtFileName, szTgtLongName, pSrcFileName, pSrcLongName ) )
         {
           /**************************************************************/
@@ -2330,7 +2323,6 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
               fFound = TRUE;
           } /* endif */
         } /* endif */
-//#endif
 
       }
       else
@@ -2425,12 +2417,9 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
               USHORT usFuzzy = 0;
               BOOL fFuzzynessOK;
 
-//LogMessage(FATAL,"TEMPORARY_COMMENTED TMFuzzyness");
-//#ifdef TEMPORARY_COMMENTED
 /*Q!*/        fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
                                           pSubstProp->szPropSource, pSubstProp->szSource,
                                           sLangID, &usFuzzy, ulSrcOemCP, 0 );
-//#endif
 
               if ( pGetIn->ulParm & GET_RESPECTCRLF )
               {
@@ -2548,17 +2537,11 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
               BOOL fEndOfTable = FALSE;
 
               
-//LogMessage(FATAL,"TEMPORARY_COMMENTED iMatchSortKey");
-//#ifdef TEMPORARY_COMMENTED_FUZZY
               int iMatchSortKey = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTable->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTable->usTranslationFlag ), 
                   (int)pstMatchTable->usMatchLevel , -1, pstMatchTable->usContextRanking, fEndOfTable );
               int iMatchSortKeyTemp = pFactory->getProposalSortKey( GetMatchTypeFromMatchLevel( pstMatchTableTemp->usMatchLevel ), GetProposalTypeFromFlag( pstMatchTableTemp->usTranslationFlag ), 
                   (int)pstMatchTableTemp->usMatchLevel, -1, pstMatchTableTemp->usContextRanking, fEndOfTable );
-//#endif
-//              int iMatchSortKey = 0, iMatchSortKeyTemp = 0;
-                            
-//LogMessage(FATAL,"TEMPORARY_COMMENTED NTMDocMatch");
-//#ifdef TEMPORARY_COMMENTED
+
               if ((iMatchSortKeyTemp <  iMatchSortKey) ||
                   ((iMatchSortKeyTemp == iMatchSortKey) &&
                    (pstMatchTableTemp->lTargetTime  <   pstMatchTable->lTargetTime) &&
@@ -2577,7 +2560,6 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
                 // leave loop
                 pstMatchTableStart = pstMatchTable;
               }
-//#endif
             }
 
 
@@ -4042,7 +4024,7 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
   // add highest matches by using a different metric
   qsort( pTempMatch, usEntriesInList, sizeof(TMX_MATCHENTRY), CompCountVotes );
   LOGPRINTF1( INFO, "CleanupTempMatch: Ranked entries after sort are:" );
-//#ifdef _DEBUG
+
   if(CheckLogLevel(DEBUG))
   {
     PTMX_MATCHENTRY pTest = pTempMatch;
@@ -4051,7 +4033,6 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
       LOGPRINTF6( DEBUG, "ulKey=",intToA(pTest->ulKey)," usMaxVotes=",intToA(pTest->usMaxVotes)," cCount=", intToA(pTest->cCount) );
     } /* endfor */
   }
-//#endif
 
   // copy new possible match entry into list
   pTempPos = pTempMatch;

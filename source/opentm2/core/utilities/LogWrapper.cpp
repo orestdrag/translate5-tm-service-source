@@ -179,6 +179,8 @@ int LogMessageStr(int LogLevel, const std::string& message){
     case INFO:
         logMessage = "[INFO]   ";
         break;
+    case DEVELOP:
+        logMessage = "[DEVELOP]";
     default:
         break;
     }

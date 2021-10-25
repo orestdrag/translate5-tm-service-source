@@ -2650,10 +2650,10 @@ USHORT TokenizeSourceEx2
     LogMessage(DEVELOP, "TokenizeSourceEx2");
     pTagRecord = pSentence->pTagRecord;
     pTermTokens = pSentence->pTermTokens;
-    pTagEntry = (PBYTE)pTagRecord;// + 4;
+    pTagEntry = (PBYTE)pTagRecord;
     auto len = &(pSentence->lTermAlloc) - (long)pSentence;
     pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
-    //pSentence->pTagRecord->ulRecordLen = 0;
+    
     RECLEN(pTagRecord) = 0;
     pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
 

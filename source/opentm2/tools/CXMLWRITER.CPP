@@ -188,7 +188,6 @@ BOOL CXmlWriter::WriteStartDocument()
 
   if ( m_hf )
   {
-    //#ifdef TEMPORARY_COMMENTED
     // write BOM 
     if ( Encoding == UTF16 )
     {
@@ -198,7 +197,6 @@ BOOL CXmlWriter::WriteStartDocument()
     {
       fwrite( "\xEF\xBB\xBF", 1, 3, m_hf );
     } /* endif */
-    //#endif
 
     WriteRaw( L"<?xml version=\"1.0\" encoding=\"" );
     if ( Encoding == UTF16 )

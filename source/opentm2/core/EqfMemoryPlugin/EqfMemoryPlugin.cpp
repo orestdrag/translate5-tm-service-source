@@ -39,10 +39,7 @@ EqfMemoryPlugin::EqfMemoryPlugin()
     iLastError  = 0;
     pluginType  = OtmPlugin::eTranslationMemoryType;
     usableState = OtmPlugin::eUsable;
-
-    //#ifdef TEMPORARY_COMMENTED
     UtlGetCheckedEqfDrives( szSupportedDrives );
-    //#endif
 
     this->refreshMemoryList();
 }
@@ -1016,7 +1013,6 @@ int EqfMemoryPlugin::findMemoryIndex
 }
 
 
-//#ifdef TEMPORARY_COMMENTED
 bool EqfMemoryPlugin::stopPlugin( bool fForce  )
 {
 
@@ -1191,7 +1187,6 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     //in case of overflow. change these strcpy to strncpy
      #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
-    //#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
     #endif
     strncpy( pProp->stTMSignature.szDescription, pOldProp->stTMSignature.szDescription, 

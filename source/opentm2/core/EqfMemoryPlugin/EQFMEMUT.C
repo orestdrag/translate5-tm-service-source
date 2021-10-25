@@ -845,10 +845,7 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
     PBTREE pbTree = &pData->BtreeIn;
     PBTREE pbNewTree = &pData->BtreeOut;
 
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED in QDAMDictOpenLocal");
-    //#ifdef TEMPORARY_COMMENTED
     sRc = QDAMDictOpenLocal( pszMem, 20, ASD_ORGANIZE | ASD_GUARDED, &pbTree );
-    //#endif
 
     // get user data
     if ( !sRc )

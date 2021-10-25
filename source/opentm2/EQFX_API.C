@@ -5608,15 +5608,12 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
       *pulMarkUp = 0L;
 
       ulOEMCP = GetLangOEMCP(pszLang);
-      //LogMessage(FATAL,"Called TEMPORARY COMMENTED FUNCTION EQFWORDCNTPERSEGW::EQFBWordCntPerSeg() ");
-  //#ifdef TEMPORARY_COMMENTED
       usRC = EQFBWordCntPerSeg(
                        (PLOADEDTABLE)pVoidTable,
                        pTokBuf,
                        pszSeg,
                        sLangID,
                        pulResult, pulMarkUp, ulOEMCP);
-  //                     #endif
     } /* endif */
 
     // cleanup

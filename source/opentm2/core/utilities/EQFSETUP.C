@@ -458,14 +458,10 @@ USHORT CreateSystemProperties(PSZ pszPath)
     pszTemp = strchr( pszEditor, '.' );
     strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
     
-
-//#ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Try to read old system properties                              */
     /******************************************************************/
-    pSysPropsOld = InstReadSysProps();
-    
-//#endif //TEMPORARY_COMMENTED
+    pSysPropsOld = InstReadSysProps();    
 
     /******************************************************************/
     /* Save some of the values from the old properties to the new ones*/
@@ -1495,9 +1491,6 @@ VOID BuildPath
    /*******************************************************************/
    /* Build path name                                                 */
    /*******************************************************************/
-   LogMessage(WARNING,"TEMPORARY_COMMENTED in BuildPath");
-   //#ifdef TEMPORARY_COMMENTED
-   //sprintf( pszBuffer, "%c:\\%s", chEqfDrive, PATH );
    if ( pszFolder )
    {
       strcat( pszBuffer, "/" );
@@ -1508,7 +1501,6 @@ VOID BuildPath
       strcat( pszBuffer, "/" );
       strcat( pszBuffer, pszSubDir );
    } /* endif */
-   //#endif
 } /* end of function BuildPath */
 
 

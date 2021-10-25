@@ -14,11 +14,21 @@
 namespace fs = std::experimental::filesystem;
 #endif
 
+enum  FileBufferStatus{
+        CLOSED = 1,
+        OPEN = 2,
+        MODIFIED = 4,
+        
+    };
 
 struct FileBuffer{
+    
+
+    int status ;//FILEBUFFERSTATUS
     std::vector<UCHAR> data;
     long offset = 0;
     FILE* file = NULL;
+    
 } ;
 
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;

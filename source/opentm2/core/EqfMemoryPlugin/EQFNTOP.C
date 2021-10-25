@@ -309,10 +309,7 @@ USHORT TmtXOpen
           // Translation Memory
           if ( usTempRc == NO_ERROR )
           {
-            //LogMessage(WARNING, "TEMPORARY_COMMENTED NTMReadLongNameTable");
-            //#ifdef TEMPORARY_COMMENTED
             usTempRc = NTMReadLongNameTable( pTmClb );
-            //#endif 
 
             switch ( usTempRc)
             {
