@@ -455,6 +455,13 @@ USHORT TmtXGet
   }
 #endif
 
+  if(CheckLogLevel(DEVELOP)){
+    
+      //auto str_name = EncodingHelper::convertToUTF8(pTmClb->stTmSign.szName);
+      auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
+      LogMessage6(DEVELOP, __func__,"== Lookup in memory  ==",pTmClb->stTmSign.szName," ==\nLookupSource = >>>",str_source.c_str(),"<<<"  );
+  }
+
   if(CheckLogLevel(INFO)){
     auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
     LOGPRINTF3(INFO, "-------------- Looking up:\n", str.c_str(),"\n" );
@@ -2119,6 +2126,14 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
             } /* endif */
 #endif
+            if(CheckLogLevel(DEVELOP)){
+              //auto str_doc = EncodingHelper::convertToUTF8(pGetIn->szLongName);
+              auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
+              auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
+              LogMessage5(DEVELOP, __func__,"::Doc = ", pGetIn->szLongName, "; preparing IBMIDDOC segment, Seg = ", intToA(pGetIn->ulSegmentId));
+              LogMessage6(DEVELOP,__func__,"::before preparation\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
+            }
+
 
 LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
 #ifdef TEMPORARY_COMMENTED
@@ -2163,36 +2178,25 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
               } /* endif */
             } /* endif */
 
-#ifdef SGMLDITA_LOGGING
-            if ( hfLog )
-            {
-              if ( fPreprocessed )
-              {
-                fwprintf( hfLog, L"after preprocessing\r\n" );
-                NTMLogSegData( hfLog, L"  <PropSource>%s</PropSource>\r\n", pSubstProp->szPropSource );
-                NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
+            if(CheckLogLevel(DEVELOP)){
+              if(fPreprocessed){
+                auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
+                auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
+                LogMessage6(DEVELOP,__func__,"::after preparation\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
+              }else{
+                LogMessage2(DEVELOP, __func__,"::no preprocessing has been performed");
               }
-              else
-              {
-                fwprintf( hfLog, L"no preprocessing has been performed\r\n" );
-              } /* endif */
-            } /* endif */
-#endif
+            }
           } /* endif */
 
     		  fSubstAll =  NTMTagSubst( pSubstProp, ulSrcOemCP, ulTgtOemCP );
 
-#ifdef SGMLDITA_LOGGING
-          if ( hfLog && fSpecialProcessing )
-          {
-            if ( fSubstAll )
-            {
-              fwprintf( hfLog, L"all inline tagging replaced by generic inline tag replacement\r\n" );
-              NTMLogSegData( hfLog, L"  <PropSource>%s</PropSource>\r\n", pSubstProp->szPropSource );
-              NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
-            } /* endif */
-          } /* endif */
-#endif
+          if(CheckLogLevel(DEVELOP)){
+              auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
+              auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
+              LogMessage6(DEVELOP,__func__,"::all inline tagging replaced by generic inline tag replacement\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
+              
+          }
           if ( !fSubstAll && fSpecialProcessing ) 
           { 
             if ( !fSkipPostprocessing )
@@ -2208,18 +2212,16 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
               // segment has been modified by preprocessing, so force a re-computation of the fuzziness
               fSubstAll = TRUE;
             } /* endif */
-#ifdef SGMLDITA_LOGGING
-            if ( hfLog && fSubstAll )
-            {
-              fwprintf( hfLog, L"after post processing\r\n" );
-              NTMLogSegData( hfLog, L"  <PropSource>%s</PropSource>\r\n", pSubstProp->szPropSource );
-              NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
+
+            if(CheckLogLevel(DEVELOP)){
+              if(fSubstAll){
+                auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
+                auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
+                LogMessage6(DEVELOP,__func__,"::after post processing\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
+              }else{
+                LogMessage2(DEVELOP, __func__,"::no post processing has been performed");
+              }
             }
-            else
-            {
-              fwprintf( hfLog, L"no postprocessing has been performed\r\n" );
-            } /* endif */
-#endif
           } /* endif */
 
           if ( pMatchSource ) NTMFreeSentenceStructure( pMatchSource );

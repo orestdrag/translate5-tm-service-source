@@ -716,7 +716,6 @@ USHORT TmtXReplace
         //update index
         if ( !usRc )
         {
-          //LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
           usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */

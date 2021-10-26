@@ -2717,6 +2717,7 @@ USHORT MemoryFactory::APIUpdateMem
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
 
+  #ifdef TEMPORARY_COMMENTED
   // generate short document name if none given (otherwise the long document name will not be stored in the memory...)
   if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )
   {
@@ -2739,6 +2740,9 @@ USHORT MemoryFactory::APIUpdateMem
     // add dummy extension to name
     strcpy( pNewProposal->szDocShortName + strlen(pNewProposal->szDocShortName), ".000" );
   } /* endif */
+  #endif
+  
+  strcpy(pNewProposal->szDocShortName , pNewProposal->szDocName);
   copyMemProposalToOtmProposal( pNewProposal, pOtmProposal );
 
   USHORT usRC = (USHORT)pMem->putProposal( *pOtmProposal );

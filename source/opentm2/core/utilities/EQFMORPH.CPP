@@ -24,8 +24,9 @@
 
 #include "../spell/SpellFactory.h"
 #include "../morph/MorphFactory.h"
-#include "../utilities/LogWriter.h"
+//#include "../utilities/LogWriter.h"
 #include "../utilities/LogWrapper.h"
+#include "../utilities/EncodingHelper.h"
 #include "../utilities/ThreadingWrapper.h"
 
 #ifdef TEMPORARY_COMMENTED
@@ -59,9 +60,9 @@ typedef struct _LANGCB
 } LANGCB, *PLANGCB;
 
 // activate this define to do logging
-  //#define ACTIVATE_LOGGING
-  //#define LOG_TOKENIZE
-  //#define LOG_TOKENIZEW
+  #define ACTIVATE_LOGGING
+  #define LOG_TOKENIZE
+  #define LOG_TOKENIZEW
   //#define LOG_JVMDLL_PRELOAD
 
 #ifdef ACTIVATE_LOGGING
@@ -223,13 +224,11 @@ USHORT MorphInit
     // .. nothing to do here for the spell instance...
 
     // activate the morphologic functions
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::MorphFactory::getInstance(); 1");
 		MorphFactory* tMorphFactoryInstance = MorphFactory::getInstance();
 		if (NULL == tMorphFactoryInstance)
 		{
 			usRC = MORPH_NO_MEMORY;
 		}
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED  MorphInit::pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );");
 		pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
 		if (NULL == pLangCB->m_MorphInstance)
 		{
@@ -546,9 +545,6 @@ USHORT TokenizeW
 	USHORT     usReturn = 0;             // return code
 	ULONG      ulTermBufUsed = 0;        // amount of space used in term buffer
 	BOOL       fOffsList;                // TRUE = return a offset/length list
-#ifdef LOG_TOKENIZEW
-  LogWriter Log;
-#endif
 
 	fOffsList  = (usListType == MORPH_OFFSLIST) ||
 		(usListType == MORPH_FLAG_OFFSLIST);
@@ -569,8 +565,10 @@ USHORT TokenizeW
   }
 
 #ifdef LOG_TOKENIZEW
-        Log.open( "TOKENIZEW" );
-        Log.writef( "Input string is >>>%S<<<", pszInData );
+        if(CheckLogLevel(DEVELOP)){
+          auto str = EncodingHelper::convertToUTF8(pszInData);
+          LogMessage4(DEVELOP, __func__,  "::Input string is >>>",str.c_str() , "<<<");
+        }
 #endif
 
   // split text block into segments (sentences)
@@ -582,16 +580,19 @@ USHORT TokenizeW
   }
 
 #ifdef LOG_TOKENIZEW
-  Log.write( "---------------results from tokenizeBySentence----------------" );
-  for (size_t j = 0; j < vSentenceList.size(); j++)
-  {
-    PSZ_W pszStartOfSegment = pszInData + vSentenceList[j].iStartOffset;
-    wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
-    pszStartOfSegment[vSentenceList[j].iLength] = 0;
-    Log.writef( "Segment %ld >>>%S<<<", j, pszStartOfSegment );
-    pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
+  if(CheckLogLevel(DEVELOP)){
+    LogMessage2(DEVELOP, __func__, "---------------results from tokenizeBySentence----------------" );
+    for (size_t j = 0; j < vSentenceList.size(); j++)
+    {
+      PSZ_W pszStartOfSegment = pszInData + vSentenceList[j].iStartOffset;
+      wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
+      pszStartOfSegment[vSentenceList[j].iLength] = 0;
+      auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
+      LogMessage6(DEVELOP, __func__, "::Segment ",intToA(j)," >>>",str.c_str(),"<<<" );
+      pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
+    }
+    LogMessage2(DEVELOP, __func__, "--------------------------------------------------------------" );
   }
-  Log.write( "--------------------------------------------------------------" );
 #endif
 
 
@@ -613,27 +614,32 @@ USHORT TokenizeW
     pszStartOfSegment[vSentenceList[j].iLength] = 0;
     int tRet = tMorphInstance->tokenizeByTerm( pszStartOfSegment, vTermList );
 #ifdef LOG_TOKENIZEW
-    Log.writef( "---------tokenizeByTerm of string >>>%S<<<---------", pszStartOfSegment );
-    for( size_t i = 0; i < vTermList.size(); i++ )
-    {
-      std::string strFlags = "";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NOLOOKUP )    strFlags += "TERMTYPE_NOLOOKUP ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NUMBER )      strFlags += "TERMTYPE_NUMBER ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_ABBR )        strFlags += "TERMTYPE_ABBR ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_ALLCAPS )     strFlags += "TERMTYPE_ALLCAPS ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NEWSENTENCE ) strFlags += "TERMTYPE_NEWSENTENCE ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_PREFIX )      strFlags += "TERMTYPE_PREFIX ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_COMPLEX )     strFlags += "TERMTYPE_COMPLEX ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_INITCAP )     strFlags += "TERMTYPE_INITCAP ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_WHITESPACE )  strFlags += "TERMTYPE_WHITESPACE ";
-      if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_PUNCTUATION ) strFlags += "TERMTYPE_PUNCTUATION ";
-      wchar_t chTemp2 = pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength];
-      pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = 0;
-      Log.writef( "Term %3ld: Start=%3ld, Length=%3ld, Term=\"%S\", Flags=%s", i, vTermList[i].iStartOffset, vTermList[i].iLength, 
-        pszStartOfSegment + vTermList[i].iStartOffset, strFlags.c_str() );
-      pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
+    if(CheckLogLevel(DEVELOP)){
+      auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
+      LogMessage4(DEVELOP, __func__, "::---------tokenizeByTerm of string >>>",str.c_str() ,"<<<---------" );
+      for( size_t i = 0; i < vTermList.size(); i++ )
+      {
+        std::string strFlags = "";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NOLOOKUP )    strFlags += "TERMTYPE_NOLOOKUP ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NUMBER )      strFlags += "TERMTYPE_NUMBER ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_ABBR )        strFlags += "TERMTYPE_ABBR ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_ALLCAPS )     strFlags += "TERMTYPE_ALLCAPS ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_NEWSENTENCE ) strFlags += "TERMTYPE_NEWSENTENCE ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_PREFIX )      strFlags += "TERMTYPE_PREFIX ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_COMPLEX )     strFlags += "TERMTYPE_COMPLEX ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_INITCAP )     strFlags += "TERMTYPE_INITCAP ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_WHITESPACE )  strFlags += "TERMTYPE_WHITESPACE ";
+        if ( vTermList[i].iTermType & OtmMorph::TERMTYPE_PUNCTUATION ) strFlags += "TERMTYPE_PUNCTUATION ";
+        wchar_t chTemp2 = pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength];
+        pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = 0;
+        str = EncodingHelper::convertToUTF8(pszStartOfSegment + vTermList[i].iStartOffset);
+        LogMessage7(DEVELOP, __func__, "::Term ",intToA(i)," Start=",intToA(vTermList[i].iStartOffset),", Length=",intToA(vTermList[i].iLength));
+        LogMessage5(DEVELOP, __func__,":: Term=\"",str.c_str(),"\", Flags=",  strFlags.c_str() );
+      
+        pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
+      }
+      LogMessage2(DEVELOP, __func__, "::--------------------------------------------------------------" );
     }
-    Log.write( "--------------------------------------------------------------" );
 #endif
     pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
 
@@ -687,10 +693,6 @@ USHORT TokenizeW
 	{
 		usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList, pulTermListSize, &ulTermBufUsed, L" ", 0, 0, 0L, usListType );
 	} /* endif */
-
-#ifdef LOG_TOKENIZEW
-  Log.close();
-#endif
 
 	return (usReturn);
 
@@ -1574,9 +1576,6 @@ USHORT MorphTokenizeW
    LARGE_INTEGER iEndTime;
 #endif
 
-#ifdef LOG_TOKENIZE
-  LogWriter Log;
-#endif
 
 #ifdef MEASURE_TOKENIZE_TIME
   QueryPerformanceCounter( &iStartTime );
@@ -1618,8 +1617,10 @@ USHORT MorphTokenizeW
     if ( *pszInData != EOS )
     {
 #ifdef LOG_TOKENIZE
-        Log.open( "MorphTokenizeW" );
-        Log.writef( "Tokenizing \"%S\"\n", pszInData );
+        if(CheckLogLevel(DEVELOP)){
+          auto str = EncodingHelper::convertToUTF8(pszInData);
+          LogMessage4(DEVELOP, __func__, "::Tokenizing \"",str.c_str(),"\""  );
+        }
 #endif
 
       usRC = TokenizeW( pLCB->pvLangCB, pszInData, &ulBufferSize, ppTermList, usListType );
@@ -1638,7 +1639,7 @@ USHORT MorphTokenizeW
             psData += 2;
             sLen   = *psData++;
             sStart = *psData++;
-            Log.writef( "   Start=%2.2d Len=%2.2d Flag=%8.8lX\n", sStart, sLen, lFlag );
+            LogMessage7(DEVELOP, __func__, "::  Start=",intToA(sStart)," Len=",intToA(sLen), " Flag=", std::to_string(lFlag).c_str() );
           } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
         }
         else if ( usListType == MORPH_OFFSLIST )
@@ -1649,15 +1650,15 @@ USHORT MorphTokenizeW
           {
             sLen   = *psData++;
             sStart = *psData++;
-            Log.writef( "Start=%2.2d Len=%2.2d\n", sStart, sLen);
+            LogMessage5(DEVELOP, __func__, "::Start=",intToA(sStart), ", Len=", intToA(sLen));
           } while ( (sStart != 0) || (sLen != 0) );
         } /* endif */
       }
       else
       {
-        Log.writef( "   TokenizeW failed with rc=%u\n", usRC );
+        LogMessage3(DEVELOP, __func__, ":: TokenizeW failed with rc=", intToA(usRC) );
       } /* endif */
-      Log.close();
+      
 #endif
 
     }
@@ -1704,7 +1705,7 @@ USHORT MorphTokenize
   PLCB      pLCB = NULL;                      // pointer to language control block
   USHORT    usTermBufUsed = 0;         // number of bytes used in term buffer
 #ifdef LOG_TOKENIZE
-  LogWriter Log;
+  //LogWriter Log;
 #endif
 
   /********************************************************************/
@@ -1742,8 +1743,8 @@ USHORT MorphTokenize
     if ( *pszInData != EOS )
     {
 #ifdef LOG_TOKENIZE
-        Log.open( "MorphTokenize" );
-        Log.writef( "Text: %s\n", pszInData );
+        //Log.open( "MorphTokenize" );
+        LogMessage2(DEVELOP, __func__, "Text: %s\n", pszInData );
 #endif
 
       usRC = Tokenize( pLCB->pvLangCB,
@@ -1764,7 +1765,7 @@ USHORT MorphTokenize
             sLen   = *psData++;
             sStart = *psData++;
             sFlag  = *psData++;
-            Log.writef( "Start=%2.2d Len=%2.2d Flag=%4.4X\n", sStart, sLen, sFlag );
+            LogMessage2(DEVELOP, __func__, "Start=%2.2d Len=%2.2d Flag=%4.4X\n", sStart, sLen, sFlag );
           } while ( (sStart != 0) || (sLen != 0) || (sFlag != 0) );
         }
         else if ( usListType == MORPH_OFFSLIST )
@@ -1775,13 +1776,13 @@ USHORT MorphTokenize
           {
             sLen   = *psData++;
             sStart = *psData++;
-            Log.writef( "Start=%2.2d Len=%2.2d\n", sStart, sLen);
+            LogMessage2(DEVELOP, __func__, "Start=%2.2d Len=%2.2d\n", sStart, sLen);
           } while ( (sStart != 0) || (sLen != 0) );
         } /* endif */
       }
       else
       {
-        Log.writef( "Tokenize failed with rc=%u\n", usRC );
+        LogMessage2(DEVELOP, __func__, "Tokenize failed with rc=%u\n", usRC );
       } /* endif */
       Log.close();
 #endif
@@ -2406,7 +2407,7 @@ USHORT MorphSpellAid
   PLCB       pLCB = NULL;              // pointer to language control block
 
 #ifdef ACTIVATE_LOGGING
-  FILE      *hfLog = NULL;
+  //FILE      *hfLog = NULL;
 #endif
 
   ulOemCP;
