@@ -2,6 +2,8 @@
 	Description: internal header file for QDAM
 	Copyright (c) 1990-2016, International Business Machines Corporation and others. All rights reserved.
 */
+#ifndef _EQFQDAMI_H_
+#define _EQFQDAMI_H_
 
 #define BTREE_REC_SIZE_V2  (4096)          // record size V2
 #define BTREE_REC_SIZE_V3 (16384)          // record size V3
@@ -1797,3 +1799,6 @@ USHORT DAMGetNextDict
 
 __declspec(dllexport)
 PBTREE DamGetBTreeFromDamRec(USHORT usIndex);
+
+
+#endif //_EQFQDAMI_H_

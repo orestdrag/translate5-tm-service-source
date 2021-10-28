@@ -1249,8 +1249,8 @@ int OtmMemoryServiceWorker::concordanceSearch
   { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchPos ), sizeof( pData->szSearchPos ) },
   { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
-  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE,          &( pData->iSearchTime ), 0 },
-  { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,          &loggingThreshold, 0 },
+  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( pData->iSearchTime ), 0 },
+  { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = factory->parseJSON( strInputParmsW, parseControl );
@@ -1505,7 +1505,8 @@ int OtmMemoryServiceWorker::updateEntry
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
 
-
+  auto loggingThreshold = -1;
+       
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
@@ -1520,6 +1521,7 @@ int OtmMemoryServiceWorker::updateEntry
   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szContext ), sizeof( pData->szContext ) / sizeof( pData->szContext[0] ) },
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDateTime ), sizeof( pData->szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szAddInfo ), sizeof( pData->szAddInfo ) / sizeof( pData->szAddInfo[0] ) },
+  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = pJsonFactory->parseJSON( strInputParmsW, parseControl );
@@ -1573,6 +1575,11 @@ int OtmMemoryServiceWorker::updateEntry
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
+
+  if(loggingThreshold >=0){
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", intToA(loggingThreshold));
+    SetLogLevel(loggingThreshold); 
+  }
 
     // get the handle of the memory 
   long lHandle = 0;
@@ -1640,19 +1647,22 @@ int OtmMemoryServiceWorker::updateEntry
   } /* endif */
 
   // return the entry data
-  std::wstring strOutputParmsW;
-  pJsonFactory->startJSONW( strOutputParmsW );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"sourceLang", pData->szIsoSourceLang );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"targetLang", pData->szIsoTargetLang );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"source", pData->szSource );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"target", pData->szTarget );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"documentName", pData->szDocName );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"segmentNumber", pData->lSegmentNum );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"markupTable", pData->szMarkup );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"timeStamp", pData->szDateTime );
-  pJsonFactory->addParmToJSONW( strOutputParmsW, L"author", pData->szAuthor );
-  pJsonFactory->terminateJSONW( strOutputParmsW );
-  strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
+  //std::string strOutputParms;
+  std::string str_src = EncodingHelper::convertToUTF8(pData->szSource );
+  std::string str_trg = EncodingHelper::convertToUTF8(pData->szTarget );
+
+  pJsonFactory->startJSON( strOutputParms );
+  pJsonFactory->addParmToJSON( strOutputParms, "sourceLang", pData->szIsoSourceLang );
+  pJsonFactory->addParmToJSON( strOutputParms, "targetLang", pData->szIsoTargetLang );
+  pJsonFactory->addParmToJSON( strOutputParms, "source", str_src.c_str());
+  pJsonFactory->addParmToJSON( strOutputParms, "target", str_trg.c_str() );
+  pJsonFactory->addParmToJSON( strOutputParms, "documentName", pData->szDocName );
+  pJsonFactory->addParmToJSON( strOutputParms, "segmentNumber", pData->lSegmentNum );
+  pJsonFactory->addParmToJSON( strOutputParms, "markupTable", pData->szMarkup );
+  pJsonFactory->addParmToJSON( strOutputParms, "timeStamp", pData->szDateTime );
+  pJsonFactory->addParmToJSON( strOutputParms, "author", pData->szAuthor );
+  pJsonFactory->terminateJSON( strOutputParms );
+  //strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
 
   iRC = restbed::OK;
   delete pProp;

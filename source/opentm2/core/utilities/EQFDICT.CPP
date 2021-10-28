@@ -16,7 +16,8 @@
 #include "FilesystemHelper.h"
 #include "win_types.h"
 
-//#include <EQFQDMAI.H>             // Private QDAM defines
+
+//#include <EQFQDAMI.H>             // Private QDAM defines
 //#include <eqfcmpr.h>              // defines for compression/expand...
 //#include <eqfchtbl.h>             // character tables
 #include <time.h>
@@ -114,7 +115,6 @@
 #define IS_LEAF(x)          ((TYPE(x) & INNER_NODE) == 0)
 #define IS_ROOT(x)          ((TYPE(x) & ROOT_NODE) != 0)
 
-
  typedef struct _RECPARAM
   {
     USHORT  usNum;           // record number
@@ -164,6 +164,7 @@ typedef struct _BTREEHEADRECORD
   char HEADER_MARK[8] = "HRECORD"; 
   #endif 
 } BTREEHEADRECORD, PBTREEHEADRECORD ;
+
 
 /**********************************************************************/
 /* Defines the header of the event list either as a structure or as   */
@@ -5486,6 +5487,323 @@ SHORT  QDAMFirstEntry_V3
 }
 
 
+
+
+SHORT QDAMInsertKey_V3
+(
+   PBTREE       pBTIda,
+   PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
+   PTMWCHAR     pKey,
+   RECPARAM   recKey,                  // position/offset for key
+   RECPARAM   recData                  // position/offset for data
+);
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMFindParent       Find Parent for record
+//------------------------------------------------------------------------------
+// Function call:     QDAMFindParent ( PBTREE, PBTREEBUFFER, PUSHORT );
+//
+//------------------------------------------------------------------------------
+// Description:       Locates the record being the parent node to the passed
+//                    record.
+//
+//                    Returns record number of parent node or NULL
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PBTREEBUFFER           record for which parent is wanted
+//                    PUSHORT                record number of parent node
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read record of 1st node
+//                    while ok and record is not the leaf
+//                      lock the record
+//                      init for binary search (starting points)
+//                      if lower start point < upper start point
+//                        do
+//                          set fFound
+//                          get key string at middle position
+//                          compare key found with the passed key
+//                          decide whether to go left or right
+//                        while not found
+//                        if ok
+//                          if sResult = '>'
+//                            record found (sLow fits)
+//                          else
+//                            additional check: get key string
+//                            compare keys
+//                          endif
+//                        endif
+//                      else
+//                        lower start point is position searched for
+//                      endif
+//                      if ok
+//                        get data in data structure
+//                        unlock previous record
+//                        read record
+//                    endwhile
+//------------------------------------------------------------------------------
+SHORT QDAMFindParent_V3
+(
+    PBTREE pBTIda,
+    PBTREEBUFFER_V3  pRecord,
+    PUSHORT       pusParent                      // record number of parent
+)
+{
+  SHORT         sResult;
+  SHORT         sLow;                            // Far left
+  SHORT         sHigh;                           // Far right
+  SHORT         sMid = 0;                        // Middle
+  RECPARAM      recData;                         // data structure
+  PCHAR_W       pKey2;                           // pointer to search key
+  PCHAR_W       pKey ;                           // pointer to search key
+  CHAR_W        chKey[HEADTERM_SIZE];            // key to be found
+  SHORT         sRc;                             // return code
+  PBTREEBUFFER_V3  pTempRec;                        // temp. record buffer
+  USHORT        usRecNum;                        // passed record number
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  memset(&recData, 0, sizeof(recData));
+
+  *pusParent = pBT->usFirstNode;                 // set parent to first node
+  usRecNum = RECORDNUM( pRecord );
+  pKey = QDAMGetszKey_V3( pRecord, 0, pBT->usVersion );
+  if ( pKey == NULL )
+  {
+    sRc = BTREE_CORRUPTED;
+  }
+  else
+  {
+    if ( pBT->fTransMem )
+    {
+      memcpy( chKey, pKey, sizeof(ULONG));
+    }
+    else
+    {
+      UTF16strcpy( chKey, pKey );
+    } /* endif */
+  } /* endif */
+
+  sRc = QDAMReadRecord_V3( pBTIda, pBT->usFirstNode, &pTempRec, FALSE  );
+
+  while ( !sRc && !IS_LEAF( pTempRec ) && (usRecNum != RECORDNUM(pTempRec)) )
+  {
+    BTREELOCKRECORD( pTempRec );
+    *pusParent = RECORDNUM( pTempRec );          // set parent to active node
+
+    sLow = 0;                                    // start here
+    sHigh = (SHORT) OCCUPIED( pTempRec ) -1 ;    // counting starts at zero
+
+
+    while ( !sRc && (sLow <= sHigh) )
+    {
+      sMid = (sLow + sHigh)/2;
+      pKey2 = QDAMGetszKey_V3( pTempRec, sMid, pBT->usVersion );
+      if ( pKey2 == NULL )
+      {
+        sRc = BTREE_CORRUPTED;
+      }
+      else
+      {
+        sResult = (*pBT->compare)(pBTIda, chKey, pKey2);
+        if ( sResult < 0 )
+        {
+          sHigh = sMid - 1;                        // Go left
+        }
+        else
+        {
+          sLow = sMid + 1;                         // Go right
+        } /* endif */
+      } /* endif */
+    } /* endwhile */
+
+    /******************************************************************/
+    /* it is the lower one due the construction of the BTREE          */
+    /*  -- according to the while loop it must be the sHIGH value     */
+    /* if sHigh < 0 we should use the first one                      */
+    /******************************************************************/
+    if ( !sRc )
+    {
+      if ( sHigh == -1 )
+      {
+        sHigh = 0;
+      } /* endif */
+      recData = QDAMGetrecData_V3( pTempRec, sHigh, pBT->usVersion );
+    } /* endif */
+
+    BTREEUNLOCKRECORD( pTempRec  );                        // unlock previous record.
+
+    if ( !sRc )
+    {
+      sRc = QDAMReadRecord_V3( pBTIda, recData.usNum, &pTempRec, FALSE  );
+    } /* endif */
+  } /* endwhile */
+  return( sRc );
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMCopyKeyTo     Copy Key into new record
+//------------------------------------------------------------------------------
+// Function call:     QDAMCopyKeyTo( PBTREEBUFFER, SHORT, PBTREEBUFFER, SHORT);
+//
+//------------------------------------------------------------------------------
+// Description:       Copy specified key to new record
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREEBUFFER           record pointer from where to copy
+//                    SHORT                  key to be used
+//                    PBTREEBUFFER           record pointer to copy into
+//                    SHORT                  key to be used
+//
+//------------------------------------------------------------------------------
+// Returncode type:   VOID
+//
+//------------------------------------------------------------------------------
+// Function flow:     copy the key at the passed offset to the new location
+//                    return
+//------------------------------------------------------------------------------
+
+VOID QDAMCopyKeyTo_V3
+(
+   PBTREEBUFFER_V3  pRecord,
+   SHORT         i,
+   PBTREEBUFFER_V3  pNew,
+   SHORT         j,
+   USHORT        usVersion             // version of database
+)
+{
+   PUSHORT  pusOldOffset;              // offset of data
+   PUSHORT  pusNewOffset;              // new data
+   USHORT   usLen;                     // length of data
+   USHORT   usLastPos;                 // last position filled
+   USHORT   usDataOffs;                // data offset
+   PUCHAR   pOldData;                  // pointer to data
+
+   pusOldOffset = (PUSHORT) pRecord->contents.uchData;
+   pusNewOffset = (PUSHORT) pNew->contents.uchData;
+   usLastPos = pNew->contents.header.usLastFilled;
+
+   usDataOffs = *(pusOldOffset+i);
+   if ( usDataOffs)
+   {
+      pOldData = pRecord->contents.uchData + usDataOffs;
+      usLen = *(PUSHORT) pOldData + sizeof(USHORT) + sizeof(RECPARAM);
+      if ( usVersion >= NTM_VERSION2 )
+      {
+        usLen = *(PUSHORT) pOldData + sizeof(USHORT) + sizeof(RECPARAM);
+      }
+      else
+      {
+        usLen = *(PUSHORT) pOldData + sizeof(USHORT) + sizeof(RECPARAMOLD);
+      } /* endif */
+
+      usLastPos = usLastPos - usLen;
+      memcpy( pNew->contents.uchData+usLastPos, pOldData, usLen );
+      *(pusNewOffset+j) = usLastPos;
+      pNew->contents.header.usFilled += (usLen + sizeof(USHORT));
+      pNew->contents.header.usLastFilled = usLastPos;
+   }
+   else
+   {
+      *(pusNewOffset+j) = 0;
+      pNew->contents.header.usFilled += sizeof(USHORT);
+   } /* endif */
+
+   return;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMReArrangeKRec    Rearrange key record
+//------------------------------------------------------------------------------
+// Function call:     QDAMReArrangeKRec( PBTREE, PBTREEBUFFER );
+//
+//------------------------------------------------------------------------------
+// Description:       Rearranges the key record, i.e. deletes physically any
+//                    logically deleted keys.
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PBTREEBUFFER           pointer to record
+//
+//------------------------------------------------------------------------------
+// Returncode type:   VOID
+//------------------------------------------------------------------------------
+// Function flow:     get temp. record
+//                    reset info in temp header
+//                    for all key values
+//                      if key exists
+//                        copy key to temp buffer
+//                      endif
+//                    endfor
+//                    copy record data back from temp to usual buffer
+//------------------------------------------------------------------------------
+VOID QDAMReArrangeKRec_V3
+(
+  PBTREE        pBTIda,
+  PBTREEBUFFER_V3  pRecord
+)
+{
+   PBTREEBUFFER_V3 pNew;
+   PBTREEHEADER  pHeader;               // pointer to header
+   PUSHORT     pusOffset;
+   SHORT i;
+   SHORT j;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
+
+   // get temp record
+   pNew = &pBT->BTreeTempBuffer_V3;
+   pHeader = &pNew->contents.header;
+   pHeader->usOccupied = 0;
+   pHeader->usFilled = sizeof(BTREEHEADER );
+   pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
+
+   // for all key values move them into new record
+   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   i = 0; j = 0;
+   while ( j <  (SHORT) OCCUPIED( pRecord ))
+   {
+      if ( *(pusOffset+i) )
+      {
+         QDAMCopyKeyTo_V3( pRecord, i, pNew, j, pBT->usVersion );
+         i++;
+         j++;
+      }
+      else
+      {
+         i++;                                // it is a deleted key
+      } /* endif */
+   } /* endwhile */
+   // copy record data back to avoid misplacement in file
+   memcpy( pRecord->contents.uchData, pNew->contents.uchData, FREE_SIZE_V3 );
+   pRecord->contents.header.usFilled = pNew->contents.header.usFilled;
+   pRecord->contents.header.usLastFilled = pNew->contents.header.usLastFilled;
+
+// pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
+
+   return;
+}
+
+
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -5583,7 +5901,7 @@ SHORT QDAMSplitNode_V3
   PBTREEBUFFER_V3 pRecTemp;               // temporary buffer
   RECPARAM   recKey;                   // position/offset for key
   RECPARAM   recData;                  // position/offset for data
-  PUSHORT    pParentKey;               // new key to be inserted
+  PTMWCHAR    pParentKey;               // new key to be inserted
   PUSHORT    pusOffset;                // pointer to offset table
   BOOL       fCompare;                 // indicator where to insert new key
   USHORT     usFreeKeys = 0;               // number of free keys required
@@ -5592,8 +5910,8 @@ SHORT QDAMSplitNode_V3
   SHORT sRc = 0;                       // success indicator
 
 
-  LogMessage(FATAL, "called commented out function QDAMSplitNode_V3");
-  #ifdef TEMPORARY_COMMENTED
+  //LogMessage(FATAL, "called commented out function QDAMSplitNode_V3");
+  //#ifdef TEMPORARY_COMMENTED
   memset( &recKey, 0, sizeof( recKey ) );
   memset( &recData,  0, sizeof( recData ) );
 
@@ -5615,7 +5933,10 @@ SHORT QDAMSplitNode_V3
       TYPE(*record) &= ~ROOT_NODE;
       recData.usNum = RECORDNUM(*record);
       recData.usOffset = 0;
+      
+      //pParentKey = QDAMGetszKey_V3( *record, 0, pBT->usVersion );
       pParentKey = QDAMGetszKey_V3( *record, 0, pBT->usVersion );
+      
       if ( pParentKey )
       {
          // store key temporarily, because record with key data is
@@ -5669,7 +5990,9 @@ SHORT QDAMSplitNode_V3
         TYPE(newRecord) = (CHAR)(TYPE(*record) & ~ROOT_NODE);  // don't copy Root bit
 
         // Decide where to split the record
+        //pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), pBT->usVersion );
         pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), pBT->usVersion );
+        
         if ( pParentKey )
         {
            fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
@@ -5790,7 +6113,7 @@ SHORT QDAMSplitNode_V3
      ERREVENT2( QDAMSPLITNODE_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
    } /* endif */
   
-  #endif
+  //#endif
 
   return ( sRc );
 }

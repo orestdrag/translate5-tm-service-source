@@ -1102,9 +1102,9 @@ USHORT EqfUpdateMem
 
   if ( pData )
   {
-    LOGWRITE1( "==EqfUpdateMem==\n" );
-    LOGPARMLONG( "Handle", lHandle );
-    LOGPARMOPTION( "Options", lOptions );
+    LogMessage5( INFO, __func__, "==EqfUpdateMem==, Handle = ", intToA(lHandle), "; Options = ", intToA(lOptions) );
+  }else{
+    LogMessage2( ERROR,__func__,"::pData is nullptr");
   } /* endif */
 
   // call the memory factory to process the request
@@ -1115,10 +1115,8 @@ USHORT EqfUpdateMem
     usRC = pFactory->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
+  auto logLevel = usRC? ERROR : INFO;
+  LogMessage3(logLevel, __func__, ":: RC = ",intToA(usRC));
 
   return( usRC );
 }

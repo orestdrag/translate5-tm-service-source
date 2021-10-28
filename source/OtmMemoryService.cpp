@@ -152,7 +152,7 @@ void getStatus_method_handler( const shared_ptr< Session > session )
   restoreBlanks( strTM );
   int iTransActIndex = AddToTransActLog( GET_STATUS_TRANSACTID, strTM.c_str() );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing GET Status request mem=\"%s\"====\n", strTM.c_str() );
+  LogMessage3(INFO, "getStatus_method_handler::==== processing GET Status request mem=\"",strTM.c_str() ,"\"====\n");
 
 
   string strResponseBody;
@@ -281,7 +281,7 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  if ( hfLog != NULL ) fprintf( hfLog, "==== processing POST mem/entry request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length );
+  LogMessage5(INFO, "==== processing POST mem/entry request, content type=\"",strType.c_str(),"\", content length=",intToA(content_length),"====\n" );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -292,12 +292,14 @@ void postEntry_method_handler( const shared_ptr< Session > session )
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    if ( hfLog != NULL ) fprintf( hfLog, "Memory name=\"%s\"\n", strTM.c_str() );
-    if ( hfLog != NULL ) fprintf( hfLog, "Input:\n-----\n%s\n----\n", strInData.c_str() );
+
+    LogMessage5(INFO, "Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
     int rc = pMemService->updateEntry( strTM, strInData, strResponseBody );
+    
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    
     TransActDone( iTransActIndex );
-    if ( hfLog != NULL ) fprintf( hfLog, "...Done, RC=%d\nOutput:\n-----\n%s\n----\n====\n", rc, strResponseBody.c_str() );
+    LogMessage7(INFO,"postEntry_method_handler::...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );
 }
 
@@ -453,7 +455,7 @@ void SetLogFile( FILE *hfLog )
 int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
 {
   // return when no transaction log array exists
-  if ( pTransActLog == NULL ) return( -1 );
+  //if ( pTransActLog == NULL ) return( -1 );
 
   // find a free slot in the transaction log array
   int i = 0;
@@ -498,7 +500,7 @@ int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
 int TransActDone( int iTransActIndex )
 {
   // return when no transaction log array exists
-  if ( pTransActLog == NULL ) return( 0 );
+  //if ( pTransActLog == NULL ) return( 0 );
 
   // return when no valid index is given
   if ( ( iTransActIndex < 0 ) || ( iTransActIndex >= NUM_OF_TRANSACTENTRIES ) ) return( 0 );
@@ -545,12 +547,13 @@ void MakeDateTimeString( time_t lTime, char chDateDelim, char chDateTimeDelim, c
 }
 
 // write a timestamp to the log file
-void WriteTimeStamp( const char *pszPrefix, time_t lTime, FILE *hfLog )
+std::string WriteTimeStamp( const char *pszPrefix, time_t lTime, FILE *hfLog )
 {
   char szDateTime[20];
   MakeDateTimeString( lTime, '/', ' ', ':', szDateTime );
-  fwrite( pszPrefix, 1, strlen( pszPrefix ), hfLog );
-  fwrite( szDateTime, 1, strlen( szDateTime ), hfLog );
+  return std::string(szDateTime);
+  //fwrite( pszPrefix, 1, strlen( pszPrefix ), hfLog );
+  //fwrite( szDateTime, 1, strlen( szDateTime ), hfLog );
 }
 
 // write a transaction log entry to a log file
@@ -572,13 +575,11 @@ void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
     default: break;
   }
 
-  fprintf( hfLog, "%s(", pszFunction.c_str() );
-  WriteTimeStamp( "Start=", pEntry->lStartTimeStamp, hfLog );
-
+  pszFunction += WriteTimeStamp( "(\tStart=", pEntry->lStartTimeStamp, hfLog );
   if ( pEntry->lStopTimeStamp != 0 )
   {
-    fwrite( " ", 1, 1, hfLog );
-    WriteTimeStamp( "Stop=", pEntry->lStopTimeStamp, hfLog );
+    //fwrite( " ", 1, 1, hfLog );
+    pszFunction += WriteTimeStamp( ";\tStop=", pEntry->lStopTimeStamp, hfLog );
   }
 
   if ( pEntry->szMemory[0] != 0 )
@@ -586,7 +587,8 @@ void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
     fprintf( hfLog, " Mem=%s", pEntry->szMemory );
   }
 
-  fputs( ")\n", hfLog );
+
+  LogMessage2(INFO, pszFunction.c_str(), "\t)\n");
 
 }
 

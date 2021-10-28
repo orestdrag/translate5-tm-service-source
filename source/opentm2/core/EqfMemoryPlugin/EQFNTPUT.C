@@ -729,7 +729,6 @@ USHORT TmtXReplace
       //update index
       if ( !usRc )
       {
-        //LogMessage(ERROR,"TEMPORARY_COMMENTED UpdateTmIndex");
         usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
@@ -739,7 +738,6 @@ USHORT TmtXReplace
   // unlock TM database if database has been locked
   if ( fLocked )
   {
-    //LogMessage(ERROR,"TEMPORART_COMMENTED");
     NTMLockTM( pTmClb, FALSE, &fLocked );
   } /* endif */
 
@@ -1598,17 +1596,14 @@ USHORT AddToTm
   }
   else
   {
-    //LogMessage(ERROR,"TEMPORARY_COMMENTED TokenizeTarget");
     usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
                            &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
     
     if ( usRc == NO_ERROR )
     {
-      //LogMessage(ERROR,"TEMPORART_COMMENTED");
       usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
       if ( usRc == NO_ERROR )
       {
-        //LogMessage(ERROR,"TEMPORART_COMMENTED");
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
@@ -2456,7 +2451,6 @@ USHORT UpdateTmRecord
 
         if ( usRc == NO_ERROR )
         {
-          LogMessage(ERROR,"TEMPORARY_COMMENTED ComparePutData");
           //compare tm record data with data passed in the get in structure
           usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
                                  pTmPut, pSentence, &ulKey );

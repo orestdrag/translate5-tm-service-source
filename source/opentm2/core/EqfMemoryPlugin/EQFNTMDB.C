@@ -703,7 +703,7 @@ EQFNTMInsert
   } /* endif */
 
   
-  #ifndef TEMPORARY_HARDCODED
+  #ifndef TEMPORARY_HARDCODED_SEPARATE_KEYS
   int fWriteEachKeyInSeparateFiles = 0;
   properties_get_int_or_default(KEY_DEBUG_KEYS_SEPARATE_FILES,fWriteEachKeyInSeparateFiles, 0);
   if(fWriteEachKeyInSeparateFiles){    
