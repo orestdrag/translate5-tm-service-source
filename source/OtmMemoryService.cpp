@@ -71,6 +71,23 @@ typedef struct _TRANSACTLOG
 
 static TRANSACTLOG *pTransActLog = NULL;
 
+inline std::string ToString(TRANSACTID id)
+{
+  const std::map<TRANSACTID,const char*> IdEnumToStringsMap {
+        { UNUSED_TRANSACTID, "UNUSED_TRANSACTID" },
+        { POST_CREATEMEM_TRANSACTID, "POST_IMPORT_TRANSACTID" },
+        { POST_FUZZYSEARCH_TRANSACTID, "POST_FUZZYSEARCH_TRANSACTID" },
+        { POST_CONCORDANCE_TRANSACTID, "POST_CONCORDANCE_TRANSACTID" },
+        { POST_UPDATEENTRY_TRANSACTID, "POST_UPDATEENTRY_TRANSACTID" },
+        { DELETE_MEMORY_TRANSACTID, "DELETE_MEMORY_TRANSACTID" },
+        { GET_MEMORY_TRANSACTID, "GET_MEMORY_TRANSACTID" },
+        { GET_STATUS_TRANSACTID, "GET_STATUS_TRANSACTID" }
+
+    };
+    auto   it  = IdEnumToStringsMap.find(id);
+    return it == IdEnumToStringsMap.end() ? "Out of range" : it->second;    
+}
+
 int AddToTransActLog( TRANSACTID Id, const char *pszMemory );
 int TransActDone( int iTransActIndex );
 
@@ -491,7 +508,7 @@ int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
   pEntry->Id = Id;
   time( &( pEntry->lStartTimeStamp ) );
   strcpy( pEntry->szMemory, pszMemory );
-  std::string message = "Transaction " + to_string(Id) + " started at " + to_string(pEntry->lStartTimeStamp) + " timestamp with pszMemory = " + pszMemory;
+  std::string message = "Transaction " + ToString(Id) + " started at " + to_string(pEntry->lStartTimeStamp) + " timestamp with pszMemory = " + pszMemory;
   LogMessage(INFO, message.c_str());
   return( i );
 }
@@ -500,7 +517,7 @@ int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
 int TransActDone( int iTransActIndex )
 {
   // return when no transaction log array exists
-  //if ( pTransActLog == NULL ) return( 0 );
+  if ( pTransActLog == NULL ) return( 0 );
 
   // return when no valid index is given
   if ( ( iTransActIndex < 0 ) || ( iTransActIndex >= NUM_OF_TRANSACTENTRIES ) ) return( 0 );
@@ -508,7 +525,7 @@ int TransActDone( int iTransActIndex )
   // set transaction stop time
   pTransActLog[iTransActIndex].lStopTimeStamp = 0;
   time( &(pTransActLog[iTransActIndex].lStopTimeStamp) );
-  std::string message = "Transaction " + to_string(pTransActLog[iTransActIndex].Id) + " finished at " + std::to_string(pTransActLog[iTransActIndex].lStartTimeStamp) + " timestamp iTransActIndex = " + to_string(iTransActIndex);
+  std::string message = "Transaction " + ToString(pTransActLog[iTransActIndex].Id) + " finished at " + std::to_string(pTransActLog[iTransActIndex].lStartTimeStamp) + " timestamp iTransActIndex = " + to_string(iTransActIndex);
   LogMessage(INFO, message.c_str());
   return( 0 );
 }

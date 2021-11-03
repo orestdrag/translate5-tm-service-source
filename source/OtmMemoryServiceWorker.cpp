@@ -657,7 +657,7 @@ int OtmMemoryServiceWorker::import
 
   // extract TMX data
   std::string strTmxData;
-  int loggingThreshold = 0; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
   JSONFactory *factory = JSONFactory::getInstance();
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
@@ -763,8 +763,9 @@ int OtmMemoryServiceWorker::import
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
-  //std::thread worker_thread(importMemoryProcess, pData);
-  importMemoryProcess(pData);
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
 
   return( restbed::CREATED );
 }
@@ -1338,14 +1339,23 @@ int OtmMemoryServiceWorker::concordanceSearch
   {
     std::wstring strOutputParmsW;
     factory->startJSONW( strOutputParmsW );
-    factory->addParmToJSONW( strOutputParmsW, L"ReturnValue", iRC );
+    
+    //TODO: REPLACE LATER WITH just adding RC 
+    if(iRC && iRC!=ENDREACHED_RC && iRC!=TIMEOUT_RC){
+      factory->addParmToJSONW( strOutputParmsW, L"ReturnValue", iRC );
+    }else{
+      factory->addParmToJSONW( strOutputParmsW, L"ReturnValue", 0 );
+    }
     if ( iRC == ENDREACHED_RC )
     {
       factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );
     }
     else
-    {
-      factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition", EncodingHelper::convertToUTF16(std::string(pData->szSearchPos)).c_str() );
+    {      
+      std::wstring searchPos = EncodingHelper::convertToUTF16(pData->szSearchPos);
+      //const char*  searchSubPos = &(pData->szSearchPos[searchPos.size()+1]);
+      //searchPos += ';' + searchSubPos;
+      factory->addParmToJSONW( strOutputParmsW, L"NewSearchPosition", searchPos );
     }
     if ( iFoundProposals > 0 )
     {
@@ -1355,6 +1365,7 @@ int OtmMemoryServiceWorker::concordanceSearch
       factory->addArrayEndToJSONW( strOutputParmsW );
     } /* endif */
 
+    factory->addParmToJSONW( strOutputParmsW, L"ErrorMsg", L"\0");
     factory->terminateJSONW( strOutputParmsW );
     strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
     iRC = restbed::OK;
