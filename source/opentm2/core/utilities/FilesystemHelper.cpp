@@ -771,7 +771,31 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
     return errCode;
 }
 
+
+
+#include <sys/stat.h>
+
+long FnGetFileSize(std::string&& filename)
+{
+    struct stat stat_buf;
+    int rc = stat(filename.c_str(), &stat_buf);
+    int logLevel = rc ==0? INFO : ERROR;
+    LogMessage6(logLevel, "FnGetFileSize:: for ", filename.c_str(), " is ", intToA(stat_buf.st_size)," , rc = ", intToA(rc) );
+    return rc == 0 ? stat_buf.st_size : -1;
+}
+
+long FdGetFileSize(int fd)
+{
+    struct stat stat_buf;
+    int rc = fstat(fd, &stat_buf);
+    return rc == 0 ? stat_buf.st_size : -1;
+}
+
 int FilesystemHelper::GetFileSize(const std::string& path){
+
+    auto size = FnGetFileSize(path.c_str());
+
+    #ifdef TEMPORARY_COMMENTED
     int size = -1;
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
@@ -801,6 +825,7 @@ int FilesystemHelper::GetFileSize(const std::string& path){
         }
     }
     LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
+    #endif
     #endif
     return size;
 }

@@ -37,6 +37,16 @@ extern "C"{
                     const char* message4, const char* message5, const char* message6, const char* message7);
     int LogMessage8(int LogLevel, const char* message1, const char* message2, const char* message3,
                     const char* message4, const char* message5, const char* message6, const char* message7, const char* message8);
+
+    int LogMessage9(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9);
+    int LogMessage10(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9, const char* message10);
+    int LogMessage11(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9, const char* message10, const char* message11);
     char* intToA(int i);
 
     //int SuppressLoggingInFile();

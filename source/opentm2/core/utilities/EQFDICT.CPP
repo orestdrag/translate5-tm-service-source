@@ -625,46 +625,52 @@ BOOL UtlEvent
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
-      UtlEvent( ERROR_EVENT, id, class, rc )
+      LogMessage7(ERROR, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+      //UtlEvent( ERROR_EVENT, id, class, rc )
   #else
     #define ERREVENT( id, class, rc )
   #endif
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
+      LogMessage11(ERROR, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+      //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
   #else
     #define ERREVENT2( id, class, rc, gr, str )
   #endif
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT( id, class, rc ) \
-      UtlEvent( INFO_EVENT, id, class, rc )
+    LogMessage7(INFO, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+      //UtlEvent( INFO_EVENT, id, class, rc )
   #else
     #define INFOEVENT( id, class, rc )
   #endif
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
+      LogMessage11(INFO, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+      //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
   #else
     #define INFOEVENT2( id, class, rc, gr, str )
   #endif
 
   #ifndef _DEBUG
-    #define NO_DEBUGEVENTS
+    //#define NO_DEBUGEVENTS
   #endif
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-      UtlEvent( EQFDEBUG_EVENT, id, class, rc )
+    LogMessage7(DEBUG, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+      //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
   #else
     #define DEBUGEVENT( id, class, rc )
   #endif
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
+    LogMessage11(DEBUG, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+      //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
   #else
     #define DEBUGEVENT2( id, class, rc, gr, str )
   #endif

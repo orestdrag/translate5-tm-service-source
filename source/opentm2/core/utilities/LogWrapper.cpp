@@ -185,7 +185,14 @@ int LogMessageStr(int LogLevel, const std::string& message){
         break;
     }
 
+    
+
     logMessage += ": [" + getTimeStr() + "] :: " + message; 
+
+    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 256){
+        logMessage.resize(256);
+        logMessage += ". . . ";
+    }
 
     return writeLog(logMessage, fFatal);
 }
@@ -233,6 +240,36 @@ int LogMessage8(int LogLevel, const char* message1, const char* message2, const 
     return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
                             + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8));
 }
+
+int LogMessage9(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
+                            + std::string(message9));
+}
+
+int LogMessage10(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9, const char* message10){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
+                            + std::string(message9) + std::string(message10));
+}
+
+
+int LogMessage11(int LogLevel, const char* message1, const char* message2, const char* message3,
+                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
+                        const char* message9, const char* message10, const char* message11){
+    
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
+                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
+                            + std::string(message9) + std::string(message10) + std::string(message11));
+}
+
+
 
 int DesuppressLoggingInFile(){
     //desuppressLoggingInFile();
