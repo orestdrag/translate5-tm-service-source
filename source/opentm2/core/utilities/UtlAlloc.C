@@ -275,7 +275,7 @@ USHORT UtlGetTask ( void )
   {
     if ( UtiVar[currTask].usTask == usTask )
     {
-      LogMessage2(DEBUG, "UtlGetTask()::Task found, id = ", intToA(usTask));
+      LogMessage2(DEVELOP, "UtlGetTask()::Task found, id = ", intToA(usTask));
       break;
     }
     else if ( UtiVar[currTask].usTask == 0 )

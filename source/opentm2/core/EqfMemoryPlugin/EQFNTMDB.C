@@ -1008,7 +1008,7 @@ SHORT QDAMFreeRecord_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMFREERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMFREERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
   return sRc;
@@ -1273,7 +1273,7 @@ SHORT QDAMDeleteDataFromBuffer_V3
             if ( TYPE(pNew) != DATA_NEXTNODE )
             {
               sRc = BTREE_CORRUPTED;
-              ERREVENT2( QDAMDELETEDATAFROMBUFFER_LOC, STATE_EVENT, sRc, DB_GROUP, NULL );
+              ERREVENT2( QDAMDELETEDATAFROMBUFFER_LOC, STATE_EVENT, sRc, DB_GROUP, "" );
             }
             else
             {
@@ -1347,7 +1347,7 @@ SHORT QDAMDeleteDataFromBuffer_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMDELETEDATAFROMBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDELETEDATAFROMBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return ( sRc );
@@ -1401,7 +1401,7 @@ VOID QDAMSetrecData_V3
    {
      // offset pointer is out of range
      pData = NULL;
-     ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+     ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
    else
    {
@@ -1412,7 +1412,7 @@ VOID QDAMSetrecData_V3
      {
        // data pointer is out of range
        pData = NULL;
-       ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+       ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      }
      else
      {
@@ -1547,7 +1547,7 @@ SHORT QDAMDictUpdateLocal
    BOOL          fLocked = FALSE;       // file-has-been-locked flag
    PBTREEGLOB    pBT = NULL;            // pointer to btree
 
-   DEBUGEVENT2( QDAMDICTUPDATELOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMDICTUPDATELOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
    /*******************************************************************/
    /* validate passed pointer ...                                     */
@@ -1646,7 +1646,7 @@ SHORT QDAMDictUpdateLocal
               else
               {
                   sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMDICTUPDATELOCAL_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+                  ERREVENT2( QDAMDICTUPDATELOCAL_LOC, STATE_EVENT, 1, DB_GROUP, "" );
               } /* endif */
 
               //  mark old value as deleted
@@ -1726,7 +1726,7 @@ SHORT QDAMDictUpdateLocal
               else
               {
                   sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMDICTUPDATELOCAL_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+                  ERREVENT2( QDAMDICTUPDATELOCAL_LOC, STATE_EVENT, 1, DB_GROUP, "" );
               } /* endif */
 
               //  mark old value as deleted
@@ -1762,7 +1762,7 @@ SHORT QDAMDictUpdateLocal
 
    if ( sRc )
    {
-     ERREVENT2( QDAMDICTUPDATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDICTUPDATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return sRc;
@@ -2065,7 +2065,7 @@ SHORT QDAMDictExactLocal
 
   if ( sRc && (sRc != BTREE_NOT_FOUND))
   {
-    ERREVENT2( QDAMDICTEXACTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMDICTEXACTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return ( sRc );

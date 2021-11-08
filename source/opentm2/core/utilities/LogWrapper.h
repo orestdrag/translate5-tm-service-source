@@ -12,7 +12,8 @@ extern "C"{
         INFO=2,
         WARNING=3,
         ERROR=4,
-        FATAL=5
+        FATAL=5,
+        TRANSACTION=6// not an error, but for separate logs
     };
 
     enum LOGCODES{

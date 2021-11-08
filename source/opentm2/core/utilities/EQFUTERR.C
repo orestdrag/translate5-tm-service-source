@@ -505,10 +505,10 @@ USHORT UtlErrorHwnd
    switch (usMsgboxStyle)
    {
      case MB_ERROR:
-        ERREVENT2( UTLERROR_LOC, MSGBOX_EVENT, sErrorNumber, GENERAL_GROUP, NULL );
+        ERREVENT2( UTLERROR_LOC, MSGBOX_EVENT, sErrorNumber, GENERAL_GROUP, "" );
         break;
      default:
-        INFOEVENT2( UTLERROR_LOC, MSGBOX_EVENT, sErrorNumber, GENERAL_GROUP, NULL );
+        INFOEVENT2( UTLERROR_LOC, MSGBOX_EVENT, sErrorNumber, GENERAL_GROUP, "" );
         break;
    } /* endswitch */
 

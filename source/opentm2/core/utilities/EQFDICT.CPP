@@ -1254,7 +1254,7 @@ SHORT QDAMAllocTempAreas
   ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
-  DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
 
   // Write the initial record (describing the index) out to disk
@@ -1322,10 +1322,10 @@ SHORT QDAMAllocTempAreas
 
   if ( sRc )
   {
-    ERREVENT2( QDAMWRITEHEADER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMWRITEHEADER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
-  DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, "" );
 
   return sRc;
 }
@@ -1418,7 +1418,7 @@ SHORT QDAMWRecordToDisk_V3
 
   INC_REAL_WRITE_COUNT;
 
-  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
 
 //QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
 
@@ -1452,7 +1452,7 @@ SHORT QDAMWRecordToDisk_V3
 
   if ( sRc )
   {
-    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
   return sRc;
 }
@@ -1523,13 +1523,13 @@ SHORT QDAMWRecordToDisk_V3
 
   // if ( sRetries != MAX_RETRY_COUNT )
   // {
-  //   DEBUGEVENT2( QDAMGETUPDCOUNTER_LOC, WAIT_EVENT, (MAX_RETRY_COUNT - sRetries), DB_GROUP, NULL );
+  //   DEBUGEVENT2( QDAMGETUPDCOUNTER_LOC, WAIT_EVENT, (MAX_RETRY_COUNT - sRetries), DB_GROUP, "" );
   // } /* endif */
   } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
 
   if ( sRc )
   {
-    ERREVENT2( QDAMGETUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMGETUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
   return sRc;
 }
@@ -1550,7 +1550,7 @@ SHORT QDAMReadRecordFromDisk_V3
   SHORT    sRc = 0;                             // return code
   PBTREEGLOB  pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V3 pLEntry = NULL;
-  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
   int resRead = 0;
   
   /********************************************************************/
@@ -1597,7 +1597,7 @@ SHORT QDAMReadRecordFromDisk_V3
     {
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
 
-      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
+      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
       resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
                      BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
 
@@ -1658,7 +1658,7 @@ SHORT QDAMReadRecordFromDisk_V3
          }
          else
          {
-           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, NULL );
+           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
            LogMessage(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
            sRc = BTREE_READ_ERROR;
          } /* endif */
@@ -1681,7 +1681,7 @@ SHORT QDAMReadRecordFromDisk_V3
 
   if ( sRc )
   {
-    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
   return sRc;
 }
@@ -1701,7 +1701,7 @@ SHORT  QDAMReadRecord_V3
   PBTREEGLOB    pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V3  pLEntry;
   PACCESSCTRTABLEENTRY  pACTEntry;
-  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
 
   *ppReadBuffer = NULL;
   INC_READ_COUNT;
@@ -1805,7 +1805,7 @@ SHORT  QDAMReadRecord_V3
                 // this condition should NEVER occur for shared resources
                 // as write is only allowed if the database has been
                 // previously locked
-                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
                 LogMessage(ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
 
               } /* endif */
@@ -1844,7 +1844,7 @@ SHORT  QDAMReadRecord_V3
 
   if ( sRc )
   {
-    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return ( sRc );
@@ -2099,7 +2099,7 @@ SHORT QDAMDictFlushLocal
   SHORT sRc = 0;                                 // return code
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
-  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
   if ( pBT->fCorrupted )
   {
@@ -2147,7 +2147,7 @@ SHORT QDAMDictFlushLocal
             // this condition should NEVER occur for shared resources
             // as write is only allowed if the database has been
             // previously locked
-            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
     #ifdef _DEBUG
             WinMessageBox( HWND_DESKTOP, (HWND)UtlQueryULong( QL_TWBCLIENT ),
               "Insecure write to dictionary/TM detected!\nLoc=QDAMDICTFLUSHLOCAL1\nPlease save info required to reproduce this condition.",
@@ -2160,9 +2160,9 @@ SHORT QDAMDictFlushLocal
 
   if ( sRc )
   {
-     ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
-  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, "" );
 
   return sRc;
 }
@@ -2486,7 +2486,7 @@ SHORT QDAMWriteRecord_V3
 
    PBTREEGLOB  pBT = pBTIda->pBTree;
 
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
 
    INC_WRITE_COUNT;
 
@@ -2516,9 +2516,9 @@ SHORT QDAMWriteRecord_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, "" );
       
    return sRc;
 }
@@ -2588,7 +2588,7 @@ SHORT QDAMReadRecordFromDisk_V2
   PBTREEGLOB  pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V2 pLEntry = NULL;
 
-  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
 
   /********************************************************************/
   /* Allocate space for a new buffer and let pBuffer point to it      */
@@ -2637,7 +2637,7 @@ SHORT QDAMReadRecordFromDisk_V2
     // Mark the next buffer for future allocations
     if ( !sRc )
     {
-      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, NULL );
+      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
       sRc = UtlRead( pBT->fp,
                      (PVOID)&pBuffer->contents,
                      BTREE_REC_SIZE_V2, &usNumBytesRead, FALSE);
@@ -2695,7 +2695,7 @@ SHORT QDAMReadRecordFromDisk_V2
                // this condition should NEVER occur for shared resources
                // as write is only allowed if the database has been
                // previously locked
-               ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, NULL );
+               ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, "" );
  #ifdef _DEBUG
                WinMessageBox( HWND_DESKTOP,
                               (HWND)UtlQueryULong( QL_TWBCLIENT ),
@@ -2709,7 +2709,7 @@ SHORT QDAMReadRecordFromDisk_V2
          }
          else
          {
-           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, NULL );
+           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
 #ifdef _DEBUG
            WinMessageBox( HWND_DESKTOP,
                           (HWND)UtlQueryULong( QL_TWBCLIENT ),
@@ -2758,7 +2758,7 @@ SHORT QDAMReadRecordFromDisk_V2
 
   if ( sRc )
   {
-    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
   #endif
   return sRc;
@@ -2824,7 +2824,7 @@ SHORT QDAMWRecordToDisk_V2
 
   INC_REAL_WRITE_COUNT;
 
-  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
 
 //QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
 
@@ -2866,7 +2866,7 @@ SHORT QDAMWRecordToDisk_V2
 
   if ( sRc )
   {
-    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return sRc;
@@ -2990,7 +2990,7 @@ SHORT  QDAMReadRecord_V2
   PLOOKUPENTRY_V2  pLEntry;
   PACCESSCTRTABLEENTRY  pACTEntry;
 
-  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, NULL );
+  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
 
   *ppReadBuffer = NULL;
   INC_READ_COUNT;
@@ -3094,7 +3094,7 @@ SHORT  QDAMReadRecord_V2
                 // this condition should NEVER occur for shared resources
                 // as write is only allowed if the database has been
                 // previously locked
-                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, NULL );
+                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
               #ifdef _DEBUG
                 WinMessageBox( HWND_DESKTOP,
                    (HWND)UtlQueryULong( QL_TWBCLIENT ),
@@ -3137,7 +3137,7 @@ SHORT  QDAMReadRecord_V2
 
   if ( sRc )
   {
-    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return ( sRc );
@@ -3300,7 +3300,7 @@ SHORT QDAMWriteRecord_V2
    SHORT  sRc = 0;                               // return code
    PBTREEGLOB  pBT = pBTIda->pBTree;
   LogMessage(FATAL, "called commented out function QDAMWriteRecord_V2");
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
 
    INC_WRITE_COUNT;
 
@@ -3337,9 +3337,9 @@ SHORT QDAMWriteRecord_V2
 
    if ( sRc )
    {
-     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, "" );
    
    return sRc;
 }
@@ -3660,7 +3660,7 @@ SHORT QDAMDictCreateLocal
 
   if ( sRc )
   {
-    ERREVENT2( QDAMDICTCREATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMDICTCREATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
 
@@ -3973,7 +3973,7 @@ SHORT QDAMIncrUpdCounter
 
   if ( sRc )
   {
-    ERREVENT2( QDAMINCRUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMINCRUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return sRc;
@@ -4025,7 +4025,7 @@ SHORT QDAMCheckForUpdates
         USHORT usNumBytesRead;          // Buffer fornumber of bytes read
         ULONG  ulNewOffset;             // new offset in file
 
-        INFOEVENT2( QDAMCHECKFORUPDATES_LOC, REFRESH_EVENT, 0, DB_GROUP, NULL );
+        INFOEVENT2( QDAMCHECKFORUPDATES_LOC, REFRESH_EVENT, 0, DB_GROUP, "" );
 
         /**********************************************************************/
         /* Get current header record                                          */
@@ -4099,7 +4099,7 @@ SHORT QDAMCheckForUpdates
               usNextFreeRecord = (USHORT)(ulTemp/pBT->usBtreeRecSize);
               if ( usNextFreeRecord != pBT->usNextFreeRecord )
               {
-                INFOEVENT2( QDAMCHECKFORUPDATES_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+                INFOEVENT2( QDAMCHECKFORUPDATES_LOC, STATE_EVENT, 1, DB_GROUP, "" );
               } /* endif */
               pBT->usNextFreeRecord = usNextFreeRecord;
             } /* endif */
@@ -4194,7 +4194,7 @@ SHORT QDAMCheckForUpdates
 
   if ( sRc != 0 )
   {
-    ERREVENT2( QDAMCHECKFORUPDATES_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMCHECKFORUPDATES_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return( sRc ) ;
@@ -4306,7 +4306,7 @@ SHORT QDAMPhysLock
 
   if ( sRc )
   {
-    ERREVENT2( QDAMPHYSLOCK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMPHYSLOCK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
 //    sRc = BTREE_IN_USE;
   } /* endif */
 
@@ -4396,7 +4396,7 @@ PTMWCHAR QDAMGetszKey_V3
      pData = NULL;
      LogMessage4(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", intToA((long int)pusOffset), "; pEndOfRec = ", intToA((long int)pEndOfRec));
      LogMessage2(ERROR, "pusOffset - pEndOfRec = ", intToA((long int) ((PBYTE)pusOffset - pEndOfRec)));
-     //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+     //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
    else
    {
@@ -4409,7 +4409,7 @@ PTMWCHAR QDAMGetszKey_V3
        LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", intToA((long int)pusOffset),
              "; pEndOfRec = ", intToA((long int)pEndOfRec));
        pData = NULL;
-       //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+       //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      } /* endif */
    } /* endif */
 
@@ -4753,7 +4753,7 @@ SHORT QDAMNewRecord_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMNEWRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMNEWRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
   return ( sRc );
@@ -4878,9 +4878,9 @@ SHORT  QDAMAddToBuffer_V3
             if ( TYPE( pRecord ) != chNodeType )
             {
                sRc = BTREE_CORRUPTED;
-               LogMessage(ERROR,"ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );, BTREE_CORRUPTED");
+               LogMessage(ERROR,"ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, "" );, BTREE_CORRUPTED");
                LogMessage(ERROR, "TYPE( pRecord ) != chNodeType");
-               //ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+               //ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, "" );
             }
             else
             {
@@ -5126,7 +5126,7 @@ SHORT  QDAMAddToBuffer_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return sRc;
@@ -5417,7 +5417,7 @@ SHORT QDAMLocateKey_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
   return sRc;
@@ -5954,7 +5954,7 @@ SHORT QDAMSplitNode_V3
       else
       {
         sRc = BTREE_CORRUPTED;
-        ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+        ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 1, DB_GROUP, "" );
       } /* endif */
       BTREEUNLOCKRECORD(newRecord);
       // update usFirstLeaf information
@@ -6035,7 +6035,7 @@ SHORT QDAMSplitNode_V3
         else
         {
            sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+           ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 2, DB_GROUP, "" );
         } /* endif */
 
         // leave space for at least nn further keys instead of splitting at half
@@ -6080,7 +6080,7 @@ SHORT QDAMSplitNode_V3
           else
           {
              sRc = BTREE_CORRUPTED;
-             ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+             ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 3, DB_GROUP, "" );
           } /* endif */
         } /* endif */
       } /* endif */
@@ -6106,7 +6106,7 @@ SHORT QDAMSplitNode_V3
          else
          {
             sRc = BTREE_CORRUPTED;
-            ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+            ERREVENT2( QDAMSPLITNODE_LOC, STATE_EVENT, 4, DB_GROUP, "" );
          } /* endif */
       } /* endif */
       BTREEUNLOCKRECORD(newRecord);
@@ -6116,7 +6116,7 @@ SHORT QDAMSplitNode_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMSPLITNODE_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMSPLITNODE_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
   
   //#endif
@@ -6393,7 +6393,7 @@ SHORT QDAMGetszData_V2
       if ( TYPE( pRecord ) != chType )
       {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, "" );
       }
       else
       {
@@ -6403,7 +6403,7 @@ SHORT QDAMGetszData_V2
          if ( *pusOffset > pBT->usBtreeRecSize )
          {
            sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, "" );
          }
          else
          {
@@ -6451,7 +6451,7 @@ SHORT QDAMGetszData_V2
          if ( !sRc && (ulLen == 0) )
          {
            sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
          } /* endif */
        } /* endif */
 
@@ -6511,7 +6511,7 @@ SHORT QDAMGetszData_V2
                   if ( !sRc && TYPE( pRecord ) != DATA_NEXTNODE )
                   {
                     sRc = BTREE_CORRUPTED;
-                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
                   } /* endif */
                   if ( !sRc  )
                   {
@@ -6532,7 +6532,7 @@ SHORT QDAMGetszData_V2
                else
                {
                  sRc = BTREE_CORRUPTED;
-                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, "" );
                } /* endif */
             } /* endwhile */
             if ( !sRc && fTerse )
@@ -6547,7 +6547,7 @@ SHORT QDAMGetszData_V2
                   break;
                 default :
                   sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, NULL );
+                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, "" );
                   break;
               } /* endswitch */
             } /* endif */
@@ -6566,7 +6566,7 @@ SHORT QDAMGetszData_V2
 
    if ( sRc )
    {
-     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return sRc;
@@ -6619,7 +6619,7 @@ SHORT QDAMGetszData_V3
       if ( TYPE( pRecord ) != chType )
       {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, "" );
       }
       else
       {
@@ -6629,7 +6629,7 @@ SHORT QDAMGetszData_V3
          if ( *pusOffset > pBT->usBtreeRecSize )
          {
            sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, "" );
          }
          else
          {
@@ -6682,7 +6682,7 @@ SHORT QDAMGetszData_V3
          if ( !sRc && (ulLen == 0) )
          {
            sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
          } /* endif */
        } /* endif */
 
@@ -6742,7 +6742,7 @@ SHORT QDAMGetszData_V3
                   if ( !sRc && TYPE( pRecord ) != DATA_NEXTNODE )
                   {
                     sRc = BTREE_CORRUPTED;
-                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, NULL );
+                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
                   } /* endif */
                   if ( !sRc  )
                   {
@@ -6763,7 +6763,7 @@ SHORT QDAMGetszData_V3
                else
                {
                  sRc = BTREE_CORRUPTED;
-                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, NULL );
+                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, "" );
                } /* endif */
             } /* endwhile */
             if ( !sRc && fTerse )
@@ -6778,7 +6778,7 @@ SHORT QDAMGetszData_V3
                   break;
                 default :
                   sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, NULL );
+                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, "" );
                   break;
               } /* endswitch */
             } /* endif */
@@ -6797,7 +6797,7 @@ SHORT QDAMGetszData_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return sRc;
@@ -6937,7 +6937,7 @@ SHORT QDAMChangeKey_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMCHANGEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMCHANGEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
   
   #endif
@@ -7105,7 +7105,7 @@ SHORT QDAMInsertKey_V3
        else
        {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, "" );
        } /* endif */
     } /* endwhile */
 
@@ -7197,7 +7197,7 @@ SHORT QDAMInsertKey_V3
        else
        {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, NULL );
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, "" );
        } /* endif */
     } /* endif */
   } /* endif */
@@ -7209,7 +7209,7 @@ SHORT QDAMInsertKey_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
   return sRc;
 }
@@ -7930,7 +7930,7 @@ SHORT  QDAMDictOpenLocal
 
   if ( sRc )
   {
-    ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
    return ( sRc );
@@ -8113,7 +8113,7 @@ SHORT  QDAMAddToBuffer_V2
             if ( TYPE( pRecord ) != chNodeType )
             {
                sRc = BTREE_CORRUPTED;
-               ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+               ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, "" );
             }
             else
             {
@@ -8359,7 +8359,7 @@ SHORT  QDAMAddToBuffer_V2
 
    if ( sRc )
    {
-     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMADDTOBUFFER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
     #endif
    return sRc;
@@ -8415,7 +8415,7 @@ PSZ_W QDAMGetszKey_V2
    {
      // offset pointer is out of range
      pData = NULL;
-     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, NULL );
+     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
    else
    {
@@ -8432,7 +8432,7 @@ PSZ_W QDAMGetszKey_V2
      {
        // data pointer is out of range
        pData = NULL;
-       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, NULL );
+       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      } /* endif */
    } /* endif */
 
@@ -8800,7 +8800,7 @@ SHORT QDAMLocateKey_V2
 
    if ( sRc )
    {
-     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
   #endif
   return sRc;
@@ -8915,7 +8915,7 @@ SHORT QDAMInsertKey_V2
        else
        {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 1, DB_GROUP, "" );
        } /* endif */
     } /* endwhile */
 
@@ -9004,7 +9004,7 @@ SHORT QDAMInsertKey_V2
        else
        {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, NULL );
+         ERREVENT2( QDAMINSERTKEY_LOC, STATE_EVENT, 10, DB_GROUP, "" );
        } /* endif */
     } /* endif */
   } /* endif */
@@ -9016,7 +9016,7 @@ SHORT QDAMInsertKey_V2
 
    if ( sRc )
    {
-     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMINSERTKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
   #endif
   return sRc;
@@ -9080,7 +9080,7 @@ SHORT QDAMDictInsertLocal
 
    memset( &recKey, 0, sizeof( recKey ) );
    memset( &recData,  0, sizeof( recData ) );
-   DEBUGEVENT2( QDAMDICTINSERTLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, NULL );
+   DEBUGEVENT2( QDAMDICTINSERTLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
 
    if ( pBT->fCorrupted )
@@ -9149,7 +9149,7 @@ SHORT QDAMDictInsertLocal
 
    if ( sRc )
    {
-     ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return sRc;
@@ -9328,7 +9328,7 @@ SHORT QDAMDictUpdSignLocal
    if ( sRc )
    {
      LogMessage2(ERROR, "QDAMDictUpdSignLocal:: sRc = ", intToA(sRc));
-     ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } 
 
   return sRc;
@@ -9653,7 +9653,7 @@ SHORT QDAMLocSubstr_V3
        else
        {
          sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+         ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 1, DB_GROUP, "" );
        } /* endif */
 
        if ( !sRc )
@@ -9672,7 +9672,7 @@ SHORT QDAMLocSubstr_V3
             }
             else
             {
-               ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, NULL );
+               ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, "" );
                sRc = BTREE_BUFFER_SMALL;
             } /* endif */
          } /* endif */
@@ -9907,7 +9907,7 @@ SHORT QDAMDictSubStrLocal
 
   if ( sRc && (sRc != BTREE_NOT_FOUND))
   {
-    ERREVENT2( QDAMDICTSUBSTRLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+    ERREVENT2( QDAMDICTSUBSTRLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
   return ( sRc );
@@ -10010,7 +10010,7 @@ SHORT QDAMValidateIndex_V3
    } /* endif */
    if ( sRc )
    {
-     ERREVENT2( QDAMVALIDATEINDEX_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMVALIDATEINDEX_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
    return sRc;
 }
@@ -10122,7 +10122,7 @@ SHORT QDAMNext_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMNEXT_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMNEXT_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
   return sRc;
@@ -10205,7 +10205,7 @@ SHORT QDAMGetszKeyParam_V3
      else
      {
        sRc = BTREE_CORRUPTED;
-       ERREVENT2( QDAMGETSZKEYPARAM_LOC, STATE_EVENT, 1, DB_GROUP, NULL );
+       ERREVENT2( QDAMGETSZKEYPARAM_LOC, STATE_EVENT, 1, DB_GROUP, "" );
        if ( pBT->usOpenFlags & ASD_SHARED )
        {
          LONG  lUpdCount;
@@ -10216,7 +10216,7 @@ SHORT QDAMGetszKeyParam_V3
            {
              // Corruption has ben caused by an update of the database from another user
              // switch to BTREE_IN_USE error code to allow retry of the current operation
-             INFOEVENT2( QDAMGETSZKEYPARAM_LOC, REFRESH_EVENT, sRc, DB_GROUP, NULL );
+             INFOEVENT2( QDAMGETSZKEYPARAM_LOC, REFRESH_EVENT, sRc, DB_GROUP, "" );
              sRc = BTREE_IN_USE;
            } /* endif */
          } /* endif */
@@ -10226,7 +10226,7 @@ SHORT QDAMGetszKeyParam_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMGETSZKEYPARAM_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMGETSZKEYPARAM_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return ( sRc );
@@ -10446,7 +10446,7 @@ SHORT QDAMDictNextLocal
 
    if ( sRc )
    {
-     ERREVENT2( QDAMDICTNEXTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDICTNEXTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
    return ( sRc );
@@ -10549,7 +10549,7 @@ SHORT QDAMFirst_V3
 
    if ( sRc )
    {
-     ERREVENT2( QDAMFIRST_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMFIRST_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
 
   return sRc;
@@ -10677,7 +10677,7 @@ SHORT QDAMDictFirstLocal
 
    if ( sRc )
    {
-     ERREVENT2( QDAMDICTFIRSTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, NULL );
+     ERREVENT2( QDAMDICTFIRSTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
    return ( sRc );
 }

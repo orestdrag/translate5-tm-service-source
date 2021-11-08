@@ -3474,6 +3474,7 @@ USHORT MemFuncImportProcess
   switch ( usPhase )
   {
     case MEM_START_IMPORT:
+       LogMessage2(INFO, __func__, "::MEM_START_IMPORT");
        pData->usProgress = 0;
        pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
 
@@ -3495,6 +3496,8 @@ USHORT MemFuncImportProcess
 
     case MEM_IMPORT_TASK:
       {
+        
+        LogMessage3(INFO, __func__, "::MEM_IMPORT_TASK, progress = " , intToA(pData->usProgress));
         USHORT usRc = MemLoadProcess( pLoadData );
         switch ( usRc )
         {
@@ -3598,6 +3601,27 @@ USHORT MemFuncImportProcess
             } /* endif */
           }
 #endif
+              
+              LONG lCurTime = 0;  
+
+              time( &lCurTime );
+              LogMessage9(TRANSACTION, __func__ , "::Memory import ended at     : ", asctime( localtime( &lCurTime )),
+                            "\n\tNumber of segments imported : ", intToA(pLoadData->ulSegmentCounter) ,
+                           "\n\tNumber of invalid segments  : ", intToA(pLoadData->ulInvSegmentCounter), 
+                           "\n\tNumber of OTMUTF8 segments  : ", intToA(pLoadData->ulResetSegmentCounter) );
+              
+              #ifdef TEMPORARY_COMMENTED
+              if ( lImportStartTime )
+              {
+                LONG lDiff = lCurTime - lImportStartTime;
+                fprintf( hfLog, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
+                        (lDiff - (lDiff / 3600 * 3600)) / 60,
+                        (lDiff - (lDiff / 3600 * 3600)) % 60 );
+                fprintf( hfLog, "Memory update time %I64d [ms]\n", lMemAccessTime );
+                fprintf( hfLog, "File read time     %I64d [ms]\n", lFileReadTime );
+                fprintf( hfLog, "Other times        %I64d [ms]\n", lOtherTime );
+              }
+              #endif
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
          if ( pLoadData->pProposal != NULL ) free(pLoadData->pProposal);

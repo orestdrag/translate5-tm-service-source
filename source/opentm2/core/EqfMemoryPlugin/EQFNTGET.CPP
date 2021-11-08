@@ -731,7 +731,7 @@ USHORT TmtXGet
 
   pTmGetOut->stPrefixOut.usTmtXRc = usRc;
 
-  if ( usRc ) ERREVENT2( TMTXGET_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+  if ( usRc ) ERREVENT2( TMTXGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
 
   LOGCLOSE();
 
@@ -946,7 +946,7 @@ USHORT GetExactMatch
 
   if ( usRc )
   {
-    ERREVENT2( GETEXACTMATCH_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( GETEXACTMATCH_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -1733,7 +1733,7 @@ USHORT ExactTest
 
   if ( usRc )
   {
-    ERREVENT2( EXACTTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( EXACTTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
 
@@ -2581,7 +2581,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
 
   if ( usRc )
   {
-    ERREVENT2( FILLMATCHTABLE_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( FILLMATCHTABLE_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
 #ifdef SGMLDITA_LOGGING
@@ -3108,7 +3108,7 @@ USHORT GetFuzzyMatch
 
   if ( usRc )
   {
-    ERREVENT2( GETFUZZYMATCH_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( GETFUZZYMATCH_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
 #ifdef MEASURETIME
@@ -3601,7 +3601,7 @@ LogMessage(FATAL,"TEMPORARY_COMMENTED NTMCompareBetweenTokens");
 
   if ( usRc )
   {
-    ERREVENT2( FUZZYTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( FUZZYTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -3886,7 +3886,7 @@ USHORT FillMatchEntry
 #endif
   if ( usRc )
   {
-    ERREVENT2( FILLMATCHENTRY_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( FILLMATCHENTRY_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   LOGPRINTF4( INFO, "FillMatchEntry: lMatchEntries=",intToA(lMatchEntries),", rc=", intToA(usRc) );

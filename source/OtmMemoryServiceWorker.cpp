@@ -658,6 +658,9 @@ int OtmMemoryServiceWorker::import
   // extract TMX data
   std::string strTmxData;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  SetLogLevel(2);//for debugging
+  
   JSONFactory *factory = JSONFactory::getInstance();
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
@@ -763,9 +766,9 @@ int OtmMemoryServiceWorker::import
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
-  //importMemoryProcess(pData);//to do in same thread
-  std::thread worker_thread(importMemoryProcess, pData);
-  worker_thread.detach();
+  importMemoryProcess(pData);//to do in same thread
+  //std::thread worker_thread(importMemoryProcess, pData);
+  //worker_thread.detach();
 
   return( restbed::CREATED );
 }

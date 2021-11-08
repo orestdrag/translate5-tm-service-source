@@ -852,7 +852,7 @@ USHORT CTMXExportImport::WriteTUV
 {
   CHAR szTMXLang[20];                  // buffer for TMX language
 
-  LogMessage4(DEBUG, "WriteTUV:: lang = ", pszLanguage, "; markup = ", pszMarkup);
+  LogMessage4(DEVELOP, "WriteTUV:: lang = ", pszLanguage, "; markup = ", pszMarkup);
   // get TMX language name
   szTMXLang[0] = EOS;
   LanguageFactory *pLangFactory = LanguageFactory::getInstance();
@@ -924,7 +924,6 @@ USHORT CTMXExportImport::WriteTUV
 
       // load document tag table
       
-      //LogMessage(ERROR, "TEMPORARY_COMMENTED");
       usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
                                    TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
     } /* endif */
@@ -1590,7 +1589,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
     char* pszName = (char*) sName.c_str();
     int iAttribs = attributes.getLength(); 
 
-    LogMessage2(INFO, "StartElement: ", pszName);
+    LogMessage2(DEVELOP, "StartElement: ", pszName);
 
     Push( &CurElement );
 
@@ -1826,7 +1825,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
                         (iMin       *         60L) +
                         (iHour      *       3600L) +
                         ((iDaysSince1970) * 86400L);
-                LogMessage(INFO, "Do we need to corect for OS/2 format?");
+                LogMessage(DEVELOP, "Do we need to corect for OS/2 format?");
                 lTime -= 10800L;                  // correction for OS/2 format: - 3 hours
               } /* endif */
             } /* endif */
@@ -2009,7 +2008,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         u16name = (char16_t*)attributes.getValue( i );
         std::string sVal = EncodingHelper::convertToUTF8(u16name);
-        LogMessage6(INFO, "Parsed aatribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
+        LogMessage6(DEVELOP, "Parsed aatribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
         //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
 }
@@ -2087,7 +2086,6 @@ void TMXParseHandler::fillSegmentInfo
   int iLeft = SEGDATABUFLEN;
   if ( (pBuf->szNote[0]!= 0) || (pBuf->szNoteStyle[0] != 0)  )
   {
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
     swprintf( pSegment->szAddInfo, iLeft, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
     iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
@@ -2095,7 +2093,6 @@ void TMXParseHandler::fillSegmentInfo
   // MT meta data
   if ( (pBuf->szMTMetrics[0] != 0) )
   {
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
     swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<MT%s></MT>", pBuf->szMTMetrics );
     iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
@@ -2103,7 +2100,6 @@ void TMXParseHandler::fillSegmentInfo
   // word count info
   if ( (pBuf->ulWords != 0) )
   {
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
     swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<wcnt words=\"%lu\"></wcnt>", pBuf->ulWords );
     iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
@@ -2111,7 +2107,6 @@ void TMXParseHandler::fillSegmentInfo
   // Match segment ID
   if ( (pBuf->szMatchSegID[0] != 0) )
   {
-    //LogMessage(WARNING, "TEMPORARY_COMMENTED");
     swprintf( pSegment->szAddInfo + wcslen(pSegment->szAddInfo), iLeft, L"<MatchSegID ID=\"%s\"/>", pBuf->szMatchSegID );
     iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
@@ -2123,7 +2118,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   std::string sName = EncodingHelper::convertToUTF8(u16name);
   char* pszName = (char*) sName.c_str();
 
-  LogMessage2(INFO, "endElement: ", pszName);
+  LogMessage2(DEBUG, "endElement: ", pszName);
   ELEMENTID CurrentID = CurElement.ID;
   PROPID    CurrentProp = CurElement.PropID;
 
@@ -2605,7 +2600,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     this->fTMXTagStarted = FALSE;
   } /* endif */
 
-  LogMessage4(INFO, "TMXParseHandler::characters ", intToA(length) ," characters; ", c_chars );
+  LogMessage4(DEVELOP, "TMXParseHandler::characters ", intToA(length) ," characters; ", c_chars );
 
   if ( (CurElement.ID == PROP_ELEMENT) && (CurElement.PropID != UNKNOWN_PROP) )
   {
@@ -3163,7 +3158,7 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"<Control>\r\n" );
     
-     LogMessage(ERROR, "TEMPORARY_COMMENTED");
+     LogMessage(ERROR, "TEMPORARY_COMMENTED WRITEEXPSEGMENT");
     /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
       pSegment->lSegNum, X15_STRW, pSegment->usTranslationFlag, X15_STRW,
       pSegment->lTime, X15_STRW, pSegment->szSourceLang, X15_STRW, 
@@ -3498,7 +3493,7 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
     {
       CHAR_W szCP[14];
       ULONG ulCP = GetLangAnsiCP( NULL );
-      LogMessage(ERROR,"TEMPORARY COMMENTED");
+      LogMessage(ERROR,"TEMPORARY COMMENTED WriteMemHeader");
       //swprintf( szCP, L"ANSI=&lu", ulCP );
       WriteStringToMemory( pData, szCP );
     }
@@ -3506,7 +3501,7 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
     {
       CHAR_W szCP[14];
       ULONG ulCP = GetLangOEMCP( NULL );
-      LogMessage(ERROR,"TEMPORARY COMMENTED");
+      LogMessage(ERROR,"TEMPORARY COMMENTED WriteMemHeader 2");
       //swprintf( szCP, L"ASCII=&lu", ulCP );
       WriteStringToMemory( pData, szCP );
     }
@@ -3564,7 +3559,7 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
 
   pData;                               // suppress 'unreferenced formal parameter' warning
 
-  LogMessage(ERROR,"TEMPORARY COMMENTED");
+  LogMessage(ERROR,"TEMPORARY COMMENTED CheckExistence");
   #ifdef TEMPORARY_COMMENTED
   hdir = FindFirstFile( pszInMemory, &FindData );
   if ( hdir == INVALID_HANDLE_VALUE )
@@ -3626,7 +3621,7 @@ USHORT GetSourceLang( PCONVERTERDATA pData, PSZ pszSourceLanguage )
       fgets( (PSZ)pData->szLine, sizeof(pData->szLine), pData->hInFile );
 
       // retrieve source language
-      LogMessage(ERROR, "TEMPORARY_COMMENTED");
+      LogMessage(ERROR, "TEMPORARY_COMMENTED GetSourceLangW");
       //strcpy( pszSourceLanguage, UtlParseX15( (PSZ)pData->szLine, 3 ) );
 
       fWaitingForControlRecord = FALSE;
@@ -4304,7 +4299,7 @@ USHORT GetLine( PCONVERTERDATA pData, PSZ_W pszLine, int iSize, BOOL fUnicode, P
       usRC = 0;
     } /* endif */
 
-    LogMessage(ERROR,"TEMPORARY COMMENTED");
+    LogMessage(ERROR,"TEMPORARY COMMENTED GetLine");
     //MultiByteToWideChar( pData->ulInputCP, 0, szAsciiLine, -1, pszLine, iSize-1 );
   } /* endif */
 

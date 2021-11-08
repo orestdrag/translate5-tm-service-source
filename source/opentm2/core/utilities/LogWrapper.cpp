@@ -52,7 +52,7 @@ std::string generateLogFileName(){
 }
 
 std::mutex coutMutex;   
-int writeLog(std::string& message, bool fFatal = false){
+int writeLog(std::string& message, int logLevel){
 
     static std::ofstream logErrorF, logF;
     #ifdef THREAD_ID_WRITE_TO_LOGS
@@ -75,9 +75,9 @@ int writeLog(std::string& message, bool fFatal = false){
 
         if( fileLoggingSuppressed == false){
             #ifdef LOGERRORSINOTHERFILE
-                if(fFatal){
+                if(logLevel >= ERROR){
                     if(!logErrorF.is_open()){
-                        logErrorF.open(logFilename+"_FATAL", std::ios_base::app); // append instead of overwrite
+                        logErrorF.open(logFilename+"_IMPORTANT", std::ios_base::app); // append instead of overwrite
                     }
                     logErrorF << message ; 
                     logErrorF.flush();
@@ -143,7 +143,7 @@ int initLog(){
     desuppressLogging(prevState);
     desuppressLoggingInFile();
 
-    return writeLog(initLogMsg);
+    return writeLog(initLogMsg, TRANSACTION);
 }
 
 
@@ -158,17 +158,14 @@ int LogMessageStr(int LogLevel, const std::string& message){
         }
     }
 
-    bool fFatal = false;
     std::string logMessage;
     switch (LogLevel)
     {
     case FATAL:
         logMessage = "[FATAL]  ";
-        fFatal = true;
         break;
     case ERROR:
         logMessage = "[ERROR]  ";
-        fFatal = true;
         break;
     case WARNING:
         logMessage = "[WARNING]";
@@ -181,11 +178,13 @@ int LogMessageStr(int LogLevel, const std::string& message){
         break;
     case DEVELOP:
         logMessage = "[DEVELOP]";
+        break;
+    case TRANSACTION:
+        logMessage = "[TRANSACTION]";
+        break;
     default:
         break;
-    }
-
-    
+    }    
 
     logMessage += ": [" + getTimeStr() + "] :: " + message; 
 
@@ -194,7 +193,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
         logMessage += ". . . ";
     }
 
-    return writeLog(logMessage, fFatal);
+    return writeLog(logMessage, LogLevel);
 }
 
 int LogMessage(int LogLevel, const char* message){

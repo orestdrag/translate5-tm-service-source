@@ -6331,7 +6331,7 @@ BOOL EQFUnSegRevMark2
    pfnEQFPreUnSeg  = NULL;
 
 
-   INFOEVENT2( EQFUNSEGREVMARK_LOC, FUNCENTRY_EVENT, 0, DOC_GROUP, NULL );
+   INFOEVENT2( EQFUNSEGREVMARK_LOC, FUNCENTRY_EVENT, 0, DOC_GROUP, "" );
 
    // allocate storage for several buffers
    if (fOK) fOK = UtlAlloc( (PVOID *)&(pszTemp), 0L, (LONG) MAX_PATH144, ERROR_STORAGE);
@@ -6377,7 +6377,7 @@ BOOL EQFUnSegRevMark2
 
      if ( usRc != NO_ERROR )
      {
-       ERREVENT2( EQFUNSEGREVMARK_LOC, INTFUNCFAILED_EVENT, usRc, DOC_GROUP, NULL );
+       ERREVENT2( EQFUNSEGREVMARK_LOC, INTFUNCFAILED_EVENT, usRc, DOC_GROUP, "" );
      } /* endif */
      fOK = (usRc == NO_ERROR );
      if  ( fOK )
@@ -6391,7 +6391,7 @@ BOOL EQFUnSegRevMark2
    /********************************************************/
    if ( fOK )
    {
-     INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 1, DOC_GROUP, NULL );
+     INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 1, DOC_GROUP, "" );
      fOK = (TALoadTagTable( szFormat, &pLoadedTable, FALSE, TRUE ) == NO_ERROR );
    } /* endif */
 
@@ -6403,7 +6403,7 @@ BOOL EQFUnSegRevMark2
      CHAR szExitName[MAX_LONGFILESPEC];
      if ( MUGetUserExitFileName(  szFormat, NULL, szExitName, sizeof(szExitName) ) )
      {
-       INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 2, DOC_GROUP, NULL );
+       INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 2, DOC_GROUP, "" );
         usRc = DosLoadModule( NULL, 0 , szExitName, &hmodSegmentDll );
     
         if ( usRc == NO_ERROR )
@@ -6536,7 +6536,7 @@ BOOL EQFUnSegRevMark2
 
    if (fOK && !fNoUnSeg && !fKill )
    {  // call normal unsegmentation utility
-      INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 3, DOC_GROUP, NULL );
+      INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 3, DOC_GROUP, "" );
       if (*pszTemp )
       {
          pFile = pszTemp;
@@ -6610,7 +6610,7 @@ BOOL EQFUnSegRevMark2
    }
    else if (fOK)
    {
-      INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 5, DOC_GROUP, NULL );
+      INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 5, DOC_GROUP, "" );
       usRc = UtlCopy(pszTemp,
                     pTarget,
                     DCPY_EXISTING,            // copy even if exist
@@ -6629,7 +6629,7 @@ BOOL EQFUnSegRevMark2
 
    if ( fOK && (pLoadedTable->pTagTable->szSegmentExit[0] != EOS) && !fKill )
    {
-     INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 6, DOC_GROUP, NULL );
+     INFOEVENT2( EQFUNSEGREVMARK_LOC, STATE_EVENT, 6, DOC_GROUP, "" );
      if ( pfnEQFPostUnSegW != NULL )
      {
         fOK = pfnEQFPostUnSegW( szFormat, szEdit, pszPath, pTarget, pTATag, &fKill);
@@ -6694,7 +6694,7 @@ BOOL EQFUnSegRevMark2
    if ( pszPath )        UtlAlloc( (PVOID *)&(pszPath), 0L, 0L, NOMSG);
    if ( pszTemp )        UtlAlloc( (PVOID *)&(pszTemp), 0L, 0L, NOMSG);
 
-   INFOEVENT2( EQFUNSEGREVMARK_LOC, FUNCEXIT_EVENT, (SHORT)fOK, DOC_GROUP, NULL );
+   INFOEVENT2( EQFUNSEGREVMARK_LOC, FUNCEXIT_EVENT, (SHORT)fOK, DOC_GROUP, "" );
 
    return (fOK);
 }

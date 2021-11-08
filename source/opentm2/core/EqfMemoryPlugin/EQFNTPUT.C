@@ -96,7 +96,7 @@ USHORT NTMMorphTokenize
 #define NTASSERTLEN(ulLeft, ulRight, iEvent)\
 	if ( (ULONG)ulLeft < (ULONG)ulRight )                               \
 	{                                                                   \
-	  ERREVENT2( ADDTOTM_LOC, ERROR_EVENT, iEvent, TM_GROUP, NULL );    \
+	  ERREVENT2( ADDTOTM_LOC, ERROR_EVENT, iEvent, TM_GROUP, "" );      \
 	  UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );   \
 	  abort();                                                          \
 	}
@@ -627,7 +627,7 @@ USHORT TmtXReplace
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
 
-  DEBUGEVENT2( TMTXREPLACE_LOC, FUNCENTRY_EVENT, 0, TM_GROUP, NULL );
+  DEBUGEVENT2( TMTXREPLACE_LOC, FUNCENTRY_EVENT, 0, TM_GROUP, "" );
 
   //allocate pSentence
   fOK = UtlAlloc( (PVOID *) &(pSentence), 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
@@ -790,7 +790,7 @@ USHORT TmtXReplace
 
   if ( usRc )
   {
-    ERREVENT2( TMTXREPLACE_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( TMTXREPLACE_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
   return( usRc );
 }
@@ -1499,7 +1499,7 @@ USHORT TokenizeTarget
 
   if ( usRc )
   {
-    ERREVENT2( TOKENIZETARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( TOKENIZETARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -1630,7 +1630,7 @@ USHORT AddToTm
 
   if ( usRc )
   {
-    ERREVENT2( ADDTOTM_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( ADDTOTM_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -1851,7 +1851,7 @@ USHORT FillClb
 
   if ( usRc )
   {
-    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return (usRc);
@@ -2092,7 +2092,7 @@ USHORT UpdateTmIndex
 
   if ( usRc )
   {
-    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -2338,7 +2338,7 @@ USHORT DetermineTmRecord
 
   if ( usRc )
   {
-    ERREVENT2( DETERMINETMRECORD_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( DETERMINETMRECORD_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -2485,7 +2485,7 @@ USHORT UpdateTmRecord
 
   if ( usRc )
   {
-    ERREVENT2( UPDATETMRECORD_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( UPDATETMRECORD_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -2854,7 +2854,7 @@ USHORT ComparePutData
 
   if ( usRc )
   {
-    ERREVENT2( COMPAREPUTDATA_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( COMPAREPUTDATA_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
   return( usRc );
@@ -3009,7 +3009,7 @@ USHORT AddTmTarget(
 
   if ( usRc )
   {
-    ERREVENT2( ADDTMTARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, NULL );
+    ERREVENT2( ADDTMTARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
 
 
