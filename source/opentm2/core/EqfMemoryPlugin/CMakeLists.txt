@@ -57,9 +57,7 @@ target_include_directories(EqfMemoryPlugin PRIVATE
 
 target_link_libraries(EqfMemoryPlugin PRIVATE
     Util
-    Tools
-    Analysis
-    #Memory
+    Document
     Tagtable
 )
 

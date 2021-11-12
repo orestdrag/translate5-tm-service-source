@@ -24,7 +24,7 @@
 #include "EQFRPT.H"
 #include "EQFSERNO.H"
 
-#include "tools/common/InitPlugins.h"
+#include "core/document/InitPlugins.h"
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138
 #include "core/EqfMemoryPlugin/MemoryFactory.h"
 #include "core/utilities/LanguageFactory.H"

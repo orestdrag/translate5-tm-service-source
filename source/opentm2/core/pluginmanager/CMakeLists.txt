@@ -4,9 +4,6 @@ project(OpenTM2_PluginManager)
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(PlgMng_Source_Files PluginManager.cpp
                         PluginManagerImpl.cpp
-                        #OtmMorphICU.cpp 
-                        #OtmMorphICUPlugin.cpp
-                        #MorphFactory.cpp 
         )
 
 

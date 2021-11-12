@@ -144,10 +144,10 @@
 //#include <windows.h>
 
 #include "CXMLWRITER.H"
-#include "../core/utilities/LogWrapper.h"
-#include "../core/utilities/OSWrapper.h"
-#include "../core/utilities/FilesystemHelper.h"
-#include "../core/utilities/EncodingHelper.h"
+#include "../utilities/LogWrapper.h"
+#include "../utilities/OSWrapper.h"
+#include "../utilities/FilesystemHelper.h"
+#include "../utilities/EncodingHelper.h"
 
 CXmlWriter::CXmlWriter( const char *strFileName )
 {

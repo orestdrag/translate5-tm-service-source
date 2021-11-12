@@ -25,13 +25,8 @@ set(Util_Source_Files
     ThreadingWrapper.cpp
     OSWrapper.cpp
     EQFSETUP.C
-    #EQFUTDLG.CPP
-    #EQFPROPS.CPP
-    #OptionsDialog.CPP
     UtlLangCP.C
     UtlRegistry.C
-    #EQFUTCLB.C
-    #unzip.cpp
     EQFDICT.CPP
     EqfPluginWrapper.cpp
     EQFPRO00.C
@@ -47,4 +42,4 @@ add_library(Util ${Util_Source_Files})
 set_target_properties(Util PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(Util PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(Util PRIVATE libxerces-c-3.2.so EqfMemoryPlugin Morph Spell)
+target_link_libraries(Util PRIVATE libxerces-c-3.2.so EqfMemoryPlugin Morph)

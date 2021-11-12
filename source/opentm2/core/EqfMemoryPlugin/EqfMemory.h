@@ -8,9 +8,9 @@
 #ifndef _EqfMemory_h_
 #define _EqfMemory_h_
 
-#include "../../core/utilities/LogWriter.h"
+#include "../utilities/LogWriter.h"
 #include <string>
-#include "../../core/pluginmanager/OtmMemory.h"
+#include "../pluginmanager/OtmMemory.h"
 #include "OtmProposal.h"
 #include "EqfMemoryPlugin.h"
 #include "win_types.h"

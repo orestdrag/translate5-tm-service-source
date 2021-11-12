@@ -4,7 +4,6 @@ project(OpenTM2_Tagtable)
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(TAGTABLE_SOURCE_FILES
     EQFTOKEN.C
-    #EQFTATAG.C
     MarkupPluginMapper.cpp
 )
 

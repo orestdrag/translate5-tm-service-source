@@ -20,9 +20,10 @@
 #include <EQFEVENT.H>             // event logging
 
 #include <wctype.h>
-#include "../../core/utilities/LogWrapper.h"
-#include "../../core/utilities/PropertyWrapper.H"
-#include "../../core/utilities/EncodingHelper.h"
+#include "../utilities/LogWrapper.h"
+#include "../utilities/PropertyWrapper.H"
+#include "../utilities/EncodingHelper.h"
+#include "../utilities/FilesystemHelper.h"
 
 //static data
 //distribution criteria for building tuples

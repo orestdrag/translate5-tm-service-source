@@ -12,7 +12,7 @@ include_directories(${OPENTM2_INCLUDE_DIR}
 )
 
 add_subdirectory(core)
-add_subdirectory(tools)
+#add_subdirectory(tools)
 
 add_library(OTMFUNC ${API_Source_Files})
 
@@ -23,19 +23,11 @@ target_include_directories(OTMFUNC PRIVATE
     ${MINIZIP_INCLUDE_DIR}
 )
 
-target_link_libraries(OTMFUNC PRIVATE #Memory
-                                      PluginManager
+target_link_libraries(OTMFUNC PRIVATE PluginManager
                                       Util
-                                      Workbench
-                                      Common
-                                      Analysis
-                                      #Counting
                                       Document
-                                      #Lists
-                                      #Services
+                                      Document
                                       Tagtable
-                                      #Ling
                                       Morph
-                                      Spell
                                       EqfMemoryPlugin
 )

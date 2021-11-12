@@ -86,7 +86,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   {
     if ( fMsg )
     {
-      UtlErrorHwnd( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR, hwnd );
+      LogMessage7(ERROR, __func__,  "ERROR_INTERNAL", "MB_CANCEL", "0", "", "INTERNAL_ERROR", "hwnd" );
     } /* endif */
     usRC = ERROR_INVALID_PARAMETER;
   } /* endif */

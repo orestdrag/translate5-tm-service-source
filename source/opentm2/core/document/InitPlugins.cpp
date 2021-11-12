@@ -7,8 +7,8 @@
 extern "C" {
 #include "EQF.H"
 }
-#include "../../core/pluginmanager/OtmPlugin.h"
-#include "../../core/pluginmanager/PluginManager.h"
+#include "../pluginmanager/OtmPlugin.h"
+#include "../pluginmanager/PluginManager.h"
 #include "InitPlugins.h"
 #include "OTMFUNC.H"
 

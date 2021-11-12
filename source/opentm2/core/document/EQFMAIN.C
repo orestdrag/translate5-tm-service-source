@@ -30,7 +30,7 @@
 #include "EQFEVENT.H"                  // event logging facility
 #include "EQFART.H"                    // ART registry functions
 #include "EQFRPT.H"                    // report handler defines
-#include "PropertyWrapper.H"
+#include "../utilities/PropertyWrapper.H"
 
 // should be removed
 #include "EQFMT00.H"
@@ -43,7 +43,7 @@
 #include "EQFUTMDI.H"                // MDI Utilities
 
 #include "win_types.h"
-#include "LogWrapper.h"
+#include "../utilities/LogWrapper.h"
 
 /**********************************************************************/
 /* statics...                                                         */
@@ -175,7 +175,7 @@ HWND TwbInit( BOOL fMFC, BOOL fMinTWB )
        if((hObjMan=EqfQueryObjectManager()) == NULL)   // object manager anchored ?
        {
           pszErrParm = OBJECTMANAGER;
-          UtlError( ERROR_DID_NOT_START, MB_CANCEL, 1, &pszErrParm, EQF_ERROR );
+          UtlError( ERROR_DID_NOT_START, pszErrParm, EQF_ERROR );
           fOK = FALSE;
        } /* endif */
     } /* endif */
@@ -610,7 +610,7 @@ HWND TwbWinInit( BOOL fMFC )
        if ( !fOK )
        {
           pszParm = TWBMAIN;
-          UtlError( ERROR_DID_NOT_START, MB_CANCEL, 1, &pszParm, EQF_ERROR );
+          UtlError( ERROR_DID_NOT_START, pszParm, EQF_ERROR );
        } /* endif */
     } /* endif */
 
@@ -670,7 +670,7 @@ HWND TwbWinInit( BOOL fMFC )
          {
             fOK = FALSE;
             pszParm = TWBMAIN;
-            UtlError( ERROR_DID_NOT_START, MB_CANCEL, 1, &pszParm, EQF_ERROR );
+            UtlError( ERROR_DID_NOT_START, pszParm, EQF_ERROR );
          } /* endif */
       } /* endif */
       /******************************************************************/
@@ -3003,7 +3003,7 @@ BOOL TwbStartHandler
    }
    else
    {
-      UtlError( ERROR_DID_NOT_START, MB_CANCEL, 1, &pszHandler, EQF_ERROR );
+      UtlError( ERROR_DID_NOT_START, pszHandler, EQF_ERROR );
    } /* endif */
 
    if ( fOK && phwnd )
@@ -3047,7 +3047,7 @@ BOOL TwbStartListHandler( PSZ pszName, PFN_HANDLERCALLBACK pfnCallBack, PHWND ph
    else
    {
       PSZ pszParm = pszName;
-      UtlError( ERROR_DID_NOT_START, MB_CANCEL, 1, &pszParm, EQF_ERROR );
+      UtlError( ERROR_DID_NOT_START, pszParm, EQF_ERROR );
    } /* endif */
 
    return ( fOK );

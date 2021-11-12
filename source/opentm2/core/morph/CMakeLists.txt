@@ -5,6 +5,7 @@ set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(Morph_Source_Files MorphFactory.cpp
         OtmMorphICU.cpp 
         OtmMorphICUPlugin.cpp 
+        SpellFactory.cpp
         )
 
 add_library(Morph ${Morph_Source_Files})
