@@ -3546,6 +3546,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
         ulLen = ulLenComp / sizeof(CHAR_W);
         pOutput[ ulLen ] = EOS;
     }
+    //*
     else if (b == BOCU_COMPRESS)
     {
       PSZ_W pTemp = pOutput;
@@ -3584,8 +3585,10 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
     }
     else
     {
+        FilesystemHelper::FlushAllBuffers();
         assert( 0 == 1);
     }
+    //*/
     return ulLen;
 }
 #endif 

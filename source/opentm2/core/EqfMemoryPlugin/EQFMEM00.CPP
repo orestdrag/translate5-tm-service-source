@@ -2472,8 +2472,6 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
      if ( (pszMemName == NULL) || (*pszMemName == EOS) )
      {
        fOK = FALSE;
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
-                     EQF_ERROR, HWND_FUNCIF );
         LogMessage(ERROR, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
      } /* endif */
    } /* endif */
@@ -2489,8 +2487,6 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
         if (usRC != 0)
         {
             fOK = FALSE;
-	        UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1,
-                          &pszMemName, EQF_ERROR, HWND_FUNCIF );
                           
           LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", intToA(usRC));
         }
@@ -2554,7 +2550,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
      if ( (pszInMemory == NULL) || (*pszInMemory == EOS) )
      {
        usRC = TMT_MANDCMDLINE;
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+       LogMessage7(ERROR, __func__,  TMT_MANDCMDLINE,  NULL);
      } /* endif */
    } /* endif */
 
@@ -2608,7 +2604,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
          if( wcsncasecmp( pszStart, L"<NTMMemoryDb>", 13 ) != 0 )
          {
            usRC = ERROR_FILE_INVALID_DATA;
-    	     UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
+    	     LogMessage7(ERROR, __func__,  usRC, pszInMemory);
          }
        }
        else
@@ -2616,14 +2612,14 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
          if( strncasecmp( (char *)chBOM, "<NTMMemoryDb>", 13 ) != 0 )
          {
            usRC = ERROR_FILE_INVALID_DATA;
-    	     UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
+    	     LogMessage7(ERROR, __func__,  usRC, pszInMemory);
          }
        }
      } 
      else
      {
         usRC = ERROR_MEMORY_NOTFOUND;
-  	    UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
+  	    LogMessage7(ERROR, __func__,  usRC, pszInMemory);
      } /* endif */
    } /* endif */
 
@@ -2644,7 +2640,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
      if ( pData->pfInMem == NULL )
      {
         usRC = ERROR_MEMORY_NOTFOUND;
-  	    UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszInMemory, EQF_ERROR, HWND_FUNCIF );
+  	    LogMessage7(ERROR, __func__,  usRC, pszInMemory);
      } 
      else if ( pData->pfOutMem == NULL )
      {
@@ -2656,7 +2652,7 @@ USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory )
        //strncpy( szCode, std::to_string(iFileRC), 10 );
        pszParms[1] = szCode;
        usRC = ERROR_FILE_WRITE_ERROR;
-       UtlErrorHwnd( usRC, MB_CANCEL, 2, pszParms, EQF_ERROR, HWND_FUNCIF );
+       LogMessage7(ERROR, __func__,  usRC,  pszParms);
      } /* endif */
    } /* endif */
 
@@ -2772,7 +2768,7 @@ USHORT MemFuncChangeMFlag
         if ( (pszMemName == NULL) || (*pszMemName == EOS) )
         {
             usRC = TMT_MANDCMDLINE;
-            UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+            LogMessage7(ERROR, __func__,  usRC,  NULL);
         } /* endif */
     } /* endif */
 
@@ -2782,7 +2778,7 @@ USHORT MemFuncChangeMFlag
       {
           PSZ pszParm = pszMemName;
           usRC = ERROR_MEMORY_NOTFOUND;
-          UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+          LogMessage7(ERROR, __func__,  usRC, pszParm);
       } /* endif */
     }
 
@@ -2791,7 +2787,7 @@ USHORT MemFuncChangeMFlag
       if ((lAction != CLEAR_MMOPT) && (lAction != SET_MMOPT) )
       {
           usRC = ERROR_CMD_TASKLISTWRONG;
-          UtlErrorHwnd( usRC, MB_CANCEL, 1, NULL, EQF_ERROR, HWND_FUNCIF );
+          LogMessage7(ERROR, __func__,  usRC, MB_CANCEL, 1, NULL);
       }
     }
 

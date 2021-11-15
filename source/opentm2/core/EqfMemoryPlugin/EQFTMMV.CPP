@@ -2063,7 +2063,7 @@ VOID TMM_Error
     itoa( usErr, szRC, 10 );
     pszMsgTable[0] = szMemName;
     pszMsgTable[1] = szRC;
-    UtlError( usErrID, MB_CANCEL, 2, pszMsgTable, EQF_ERROR );
+    UtlError( usErrID,  pszMsgTable, EQF_ERROR );
   }
   else
   {
@@ -2075,7 +2075,7 @@ VOID TMM_Error
     ch[1] = EOS;
     pszMsgTable[0] = ch;
     pszMsgTable[1] = pServer;
-    UtlError( usErrID, MB_CANCEL, 2, pszMsgTable, EQF_ERROR );
+    UtlError( usErrID,  pszMsgTable, EQF_ERROR );
   } /* endif */
 } /* end of function TMMError */
 

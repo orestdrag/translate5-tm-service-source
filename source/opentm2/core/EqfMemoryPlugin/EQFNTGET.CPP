@@ -46,9 +46,46 @@
 #endif
 
 // import logging 
-#ifdef MEASURETIME
-  static void GetElapsedTime( LONG64 *plTime );
-#endif
+//#ifdef MEASURETIME
+
+static LARGE_INTEGER liLast = { 0 };
+static LARGE_INTEGER liFrequency = { 0 };
+static int QueryPerformanceFrequency(LARGE_INTEGER* li){
+  //int res = clock_gettime(CLOCK_REALTIME, li->QuadPart);
+  return 0;
+}
+
+
+void GetElapsedTime( LONG64 *plTime )
+{
+  
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
+  #ifdef TEMPORARY_COMMENTED
+  LARGE_INTEGER liCurrent;
+
+  QueryPerformanceCounter( &liCurrent );
+
+  if ( liFrequency.QuadPart == 0)
+  {
+    QueryPerformanceFrequency( &liFrequency );
+  } /* endif */
+
+  if ( liLast.QuadPart != 0 )
+  {
+    if ( liFrequency.QuadPart != 0 )
+    {
+      LONGLONG ldwDiff = liCurrent.QuadPart - liLast.QuadPart;
+      DWORD dwTime = (DWORD)((ldwDiff * 1000000) / liFrequency.QuadPart);
+      *plTime = *plTime + dwTime;
+    }
+  } /* endif */
+  liLast.QuadPart = liCurrent.QuadPart;
+  #endif
+} /* end of function GetElapsedTime */
+
+//#endif
 
 #define ACTIVATE_NTMGenericDelete 
 
@@ -6657,7 +6694,7 @@ USHORT NTMGetMatchLevel
   {
     PSZ pszParm = pSegment->szSourceLanguage;
     usRC = ERROR_INV_LANGUAGE;
-    UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+    LogMessage7(ERROR, __func__,  usRC, pszParm);
   } /* endif */
 
 #ifdef MEASURETIME
@@ -6848,7 +6885,7 @@ USHORT NTMGetMatchLevel
         {
           PSZ pszParm = pProposal->szTargetLanguage;
           usRC = ERROR_INV_LANGUAGE;
-          UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+          LogMessage7(ERROR, __func__,  usRC, pszParm);
         } /* endif */
       } /* endif */
 
@@ -7201,7 +7238,7 @@ SHORT NTMSimpleGetMatchLevel
   {
     PSZ pszParm = pszLanguage;
     usRC = ERROR_INV_LANGUAGE;
-    UtlErrorHwnd( ERROR_INV_LANGUAGE, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+    LogMessage7(ERROR, __func__,  ERROR_INV_LANGUAGE, pszParm);
   } /* endif */
 
 #ifdef MEASURETIME
@@ -7409,35 +7446,7 @@ SHORT NTMSimpleGetMatchLevelCleanup
   return( 0 );
 }
 
-#ifdef MEASURETIME
 
-static LARGE_INTEGER liLast = { 0 };
-static LARGE_INTEGER liFrequency = { 0 };
-
-static void GetElapsedTime( LONG64 *plTime )
-{
-  LARGE_INTEGER liCurrent;
-
-  QueryPerformanceCounter( &liCurrent );
-
-  if ( liFrequency.QuadPart == 0)
-  {
-    QueryPerformanceFrequency( &liFrequency );
-  } /* endif */
-
-  if ( liLast.QuadPart != 0 )
-  {
-    if ( liFrequency.QuadPart != 0 )
-    {
-      LONGLONG ldwDiff = liCurrent.QuadPart - liLast.QuadPart;
-      DWORD dwTime = (DWORD)((ldwDiff * 1000000) / liFrequency.QuadPart);
-      *plTime = *plTime + dwTime;
-    }
-  } /* endif */
-  liLast.QuadPart = liCurrent.QuadPart;
-} /* end of function GetElapsedTime */
-
-#endif
 
 // function aligning tags between source and target of a proposal
 BOOL NTMAlignTags

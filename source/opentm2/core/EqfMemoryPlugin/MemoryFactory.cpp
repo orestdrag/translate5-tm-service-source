@@ -357,18 +357,6 @@ OtmMemory *MemoryFactory::createMemory
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
      LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
   }
-  
-
-  #ifdef TEMPORARY_COMMENTED
-  std::string strMemoryName;
-  this->getMemoryName( pszMemoryName, strMemoryName );
-  auto pluginSelected = EqfMemoryPlugin::GetInstance();
-  pMemory = pluginSelected->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
-  if ( pMemory == NULL ){
-     this->iLastError = pluginSelected->getLastError( this->strLastError );
-     LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
-  }
-  #endif
 
   if ( pMemory == NULL)
   {
@@ -840,8 +828,7 @@ void MemoryFactory::showLastError(
 
  // show error message
   char* pszParm = (char*)this->strLastError.c_str();
-  LogMessage4(ERROR,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", intToA(this->iLastError));
-  UtlErrorHwnd( (USHORT)this->iLastError, MB_CANCEL, 1, &pszParm, SHOW_ERROR, hwndErrMsg );
+  LogMessage5(ERROR,__func__,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", intToA(this->iLastError));
 }
 
 std::string& MemoryFactory::getLastError( OtmMemory *pMemory, int& iLastError, std::string& strError)
@@ -2266,13 +2253,13 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
-    UtlErrorHwnd( TA_MANDTM, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::TA_MANDTM::if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS))");
     return( TA_MANDTM );
   } /* endif */
 
   if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
   {
-    UtlErrorHwnd( FUNC_MANDINFILE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::FUNC_MANDINFILE::  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )");
     return( FUNC_MANDINFILE );
   } /* endif */
 
@@ -2352,20 +2339,20 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   PSZ pszMemName = (PSZ) pszMemoryName;
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
-    UtlErrorHwnd( TA_MANDTM, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::TA_MANDTM::");
     return( TA_MANDTM );
   } /* endif */
 
   if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
   {
-    UtlErrorHwnd( FUNC_MANDINFILE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::FUNC_MANDINFILE::");
     return( FUNC_MANDINFILE );
   } /* endif */
 
   // check if memory exists
   if ( !this->exists( NULL, pszMemName ) )
   {
-    UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &(pszMemName), EQF_ERROR, HWND_FUNCIF );
+    LogMessage3(ERROR, __func__,  "::ERROR_MEMORY_NOTFOUND::", (pszMemName));
     return( ERROR_MEMORY_NOTFOUND );
   } /* endif */
 
@@ -2421,15 +2408,15 @@ USHORT MemoryFactory::APIOpenMem
   PSZ pszMemName = (PSZ)pszMemoryName;
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
-    UtlErrorHwnd( TA_MANDTM, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::TA_MANDTM");
     return( TA_MANDTM );
   } /* endif */
 
   if ( plHandle == NULL )
   {
     char* pszParm = "pointer to memory handle";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   int iRC = 0;
@@ -2477,7 +2464,7 @@ USHORT MemoryFactory::APICloseMem
 
   if ( pMem == NULL )
   {
-    UtlErrorHwnd( FUNC_INVALID_MEMORY_HANDLE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL )");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -2511,22 +2498,22 @@ USHORT MemoryFactory::APIQueryMem
   if ( pSearchKey == NULL )
   {
     char* pszParm = "pointer to search key";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pProposals == NULL )
   {
     char* pszParm = "pointer to proposal array";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );
 
   if ( pMem == NULL )
   {
-    UtlErrorHwnd( FUNC_INVALID_MEMORY_HANDLE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -2585,29 +2572,29 @@ USHORT MemoryFactory::APISearchMem
   if ( (pszSearchString == NULL) || (*pszSearchString  == EOS)  )
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::Search string";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, " DDE_MANDPARAMISSING", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pszStartPosition == NULL ) 
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::pointer to start position";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pProposal == NULL )
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::Error in ::pointer to proposal";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );
 
   if ( pMem == NULL )
   {
-    UtlErrorHwnd( FUNC_INVALID_MEMORY_HANDLE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+    LogMessage2(ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE::");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -2706,8 +2693,8 @@ USHORT MemoryFactory::APIUpdateMem
   if ( ( pNewProposal == NULL ) )
   {
     char* pszParm = "pointer to proposal";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
-    return( DDE_MANDPARAMISSING );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );

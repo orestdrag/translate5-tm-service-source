@@ -1124,11 +1124,7 @@ BOOL UtlLoadFileHwnd
     {                                         // set msg btn depending on Contin.
        usMsgButton = (USHORT)(( fContinue ) ? MB_OKCANCEL : MB_CANCEL);
        // Message text:   Table or file %1 could not be accessed.
-       usDosRc = UtlErrorHwnd( ERROR_TA_ACC_FILE,
-                           usMsgButton,
-                           1,
-                           &pszFilename,
-                           EQF_ERROR, hwnd);
+       usDosRc = LogMessage3(ERROR, __func__,  "::ERROR_TA_ACC_FILE:: fName = ",pszFilename);
 
        fOK = fContinue && ( usDosRc == MBID_OK );
     } /* endif */
@@ -2016,7 +2012,7 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
 //           if ( fMsg )                                           /*KIT1274*/
 //           {                                                     /*KIT1274*/
 //             pszErrParm = pszFile;                               /*KIT1274*/
-//             UtlErrorHwnd( ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
+//             LogMessage7(ERROR, __func__,  ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
 //                           &pszErrParm, EQF_ERROR,               /*KIT1274*/
 //                           hwndParent );                         /*KIT1274*/
 //           } /* endif */                                         /*KIT1274*/
@@ -2484,7 +2480,7 @@ USHORT UtlBufCloseHwnd
       if ( fMsg )
       {
         pszErrParm = pBufCB->szFileName,
-        UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszErrParm, DOS_ERROR, hwnd );
+        LogMessage5(ERROR, __func__,  "; rc = ", intToA(usRC), "; ", pszErrParm );
       } /* endif */
     } /* endif */
   } /* endif */
@@ -2584,7 +2580,7 @@ USHORT UtlBufWriteHwnd
          if ( fMsg )
          {
            pszErrParm = pBufCB->szFileName,
-           UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszErrParm, DOS_ERROR, hwnd );
+           LogMessage7(ERROR, __func__,  usRC, pszErrParm, DOS_ERROR, hwnd );
          } /* endif */
        } /* endif */
        pBufCB->ulUsed = 0;
@@ -2609,7 +2605,7 @@ USHORT UtlBufWriteHwnd
          if ( fMsg )
          {
            pszErrParm = pBufCB->szFileName,
-           UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszErrParm, DOS_ERROR, hwnd );
+           LogMessage7(ERROR, __func__,  usRC, pszErrParm, DOS_ERROR, hwnd );
          } /* endif */
        } /* endif */
      }

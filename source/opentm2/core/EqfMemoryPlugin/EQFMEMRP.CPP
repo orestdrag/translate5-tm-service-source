@@ -470,7 +470,7 @@ USHORT EQFMemOrganizeStart
         {
           OEMTOANSI( pRIDA->szMemName );
           pReplAddr[0] = pRIDA->szMemName;
-          UtlErrorHwnd( ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
+          LogMessage7(ERROR, __func__,  ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
                         &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
           ANSITOOEM( pRIDA->szMemName );
         } /* endif */
@@ -638,7 +638,7 @@ VOID EQFMemOrganizeProcess
           // something in the termination process failed
           OEMTOANSI( pRIDA->szMemName );
           pReplAddr[0] = pRIDA->szMemName;
-          UtlErrorHwnd( ERROR_MEM_ORGANIZE_TERMFAILED, MB_CANCEL, 1, &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
+          LogMessage7(ERROR, __func__,  ERROR_MEM_ORGANIZE_TERMFAILED, pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
           ANSITOOEM( pRIDA->szMemName );
           if ( pRIDA->fBatch )
           {
@@ -877,7 +877,7 @@ USHORT MemFuncPrepOrganize
      if ( (pszMemName == NULL) || (*pszMemName == EOS) )
      {
        fOK = FALSE;
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
+       LogMessage7(ERROR, __func__,  TMT_MANDCMDLINE,  NULL,
                      EQF_ERROR, HWND_FUNCIF );
      } /* endif */
    } /* endif */
@@ -891,8 +891,8 @@ USHORT MemFuncPrepOrganize
      if ( iRC != 0)
      {
        pszParm = pszMemName;
-       UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1,
-                     &pszParm, EQF_ERROR, HWND_FUNCIF );
+       LogMessage7(ERROR, __func__,  ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1,
+                     &pszParm);
      } /* endif */
    } /* endif */
 
@@ -937,8 +937,8 @@ USHORT MemFuncPrepOrganize
          else
          {
            PSZ pTemp = pszMemName;
-           UtlErrorHwnd( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
-                         1, &pTemp, EQF_ERROR, HWND_FUNCIF );
+           LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
+                         1, &pTemp);
            fOK = FALSE;
          } /* endif */
 

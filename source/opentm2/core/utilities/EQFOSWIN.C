@@ -1982,8 +1982,6 @@ EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
     //OemToAnsi( pIn, pOut );
     EQFOemToAnsi( pIn, pOut );
   }
-
-
 }
 
 #ifdef TEMPORARY_COMMENTED

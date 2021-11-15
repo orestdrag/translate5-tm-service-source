@@ -1276,7 +1276,7 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
             {
               fOK = FALSE;
               pszError = pControlsIda->szPathContent;
-              UtlErrorHwnd( ERROR_FILENAME_NOT_VALID,
+              LogMessage7(ERROR, __func__,  ERROR_FILENAME_NOT_VALID,
                             MB_CANCEL,
                             1,
                             &pszError,
@@ -1391,7 +1391,7 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
     {
       fOK = FALSE;
       pszError = pControlsIda->szPathContent;
-      UtlErrorHwnd( ERROR_FILENAME_NOT_VALID,
+      LogMessage7(ERROR, __func__,  ERROR_FILENAME_NOT_VALID,
                     MB_CANCEL,
                     1,
                     &pszError,
@@ -1498,7 +1498,7 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
                         MULTIPLE_SUBSTITUTION ) )
           {
             pszError = pControlsIda->szPath;
-            usRc = UtlErrorHwnd( PATH_NOTEXIST_CREATEIT,
+            usRc = LogMessage7(ERROR, __func__,  PATH_NOTEXIST_CREATEIT,
                                  MB_YESNO, 1, &pszError,
                                  EQF_ERROR, hwndDlg );
             fOK = ( usRc != MBID_NO );
@@ -1515,8 +1515,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
               {
                 fOK = FALSE;
                 pszError = pControlsIda->szPathContent;
-                UtlErrorHwnd( ERROR_FILENAME_NOT_VALID,
-                              MB_CANCEL, 1, &pszError, EQF_ERROR,
+                LogMessage7(ERROR, __func__,  ERROR_FILENAME_NOT_VALID,
+                              pszError, EQF_ERROR,
                               hwndDlg );
                 SETFOCUS( hwndDlg, pControlsIda->idPathEF );
               } /* endif */
@@ -1525,8 +1525,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
           else
           {
             pszError = pControlsIda->szPathContent;
-            UtlErrorHwnd( ERROR_FILENAME_NOT_VALID,
-                          MB_CANCEL, 1, &pszError, EQF_ERROR,
+            LogMessage7(ERROR, __func__,  ERROR_FILENAME_NOT_VALID,
+                          pszError, EQF_ERROR,
                           hwndDlg );
             fOK = FALSE;
             SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -1559,8 +1559,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
                 //deselect any old file selection
                 DESELECTITEM( hwndDlg, pControlsIda->idFilesLB, sItem );
 
-                UtlErrorHwnd( NO_FILE_SELECTED,
-                              MB_CANCEL, 0, NULL, EQF_ERROR,
+                LogMessage7(ERROR, __func__,  NO_FILE_SELECTED,
+                               NULL, EQF_ERROR,
                               hwndDlg );
 
                 SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -1570,8 +1570,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
             else
             {
               pszError = pControlsIda->szPathContent;
-              UtlErrorHwnd( ERROR_FILENAME_NOT_VALID,
-                            MB_CANCEL, 1, &pszError, EQF_ERROR,
+              LogMessage7(ERROR, __func__,  ERROR_FILENAME_NOT_VALID,
+                            pszError, EQF_ERROR,
                             hwndDlg );
               fOK = FALSE;
               SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -1582,8 +1582,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
             if ( usRc == ERROR_INVALID_NAME ||
                  usRc == ERROR_FILENAME_EXCED_RANGE )
             {
-              UtlErrorHwnd( INVALID_OS2_FILENAME,
-                            MB_CANCEL, 0, NULL, EQF_ERROR,
+              LogMessage7(ERROR, __func__,  INVALID_OS2_FILENAME,
+                             NULL, EQF_ERROR,
                             hwndDlg );
               fOK = FALSE;
               SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -1694,8 +1694,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
               sItem = QUERYSELECTION( hwndDlg, pControlsIda->idFilesLB );
               if ( sItem == LIT_NONE )
               {
-                UtlErrorHwnd( NO_FILE_SELECTED,
-                              MB_CANCEL, 0, NULL, EQF_ERROR,
+                LogMessage7(ERROR, __func__,  NO_FILE_SELECTED,
+                               NULL, EQF_ERROR,
                               hwndDlg );
                 fOK = FALSE;
                 SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -1705,8 +1705,8 @@ BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
             //for import & export cases with *  when ok button is pressed
             if ( fOK )
             {
-              UtlErrorHwnd( INVALID_OS2_FILENAME,
-                            MB_CANCEL, 0, NULL, EQF_ERROR,
+              LogMessage7(ERROR, __func__,  INVALID_OS2_FILENAME,
+                             NULL, EQF_ERROR,
                             hwndDlg );
               fOK = FALSE;
               SETFOCUS( hwndDlg, pControlsIda->idPathEF );
@@ -2728,7 +2728,7 @@ USHORT UtlAdjustFolderReferences
       PSZ pszErrParm = pData->stFolProp.szLongName;
       fOK = FALSE;
       usRC = ERROR_FOLDER_LOCKED;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszErrParm, EQF_INFO, pData->hwndErrMsg );
+      LogMessage7(ERROR, __func__,  usRC, pszErrParm, EQF_INFO, pData->hwndErrMsg );
     } /* endif */
   } /* endif */
 
@@ -3095,7 +3095,7 @@ LPARAM mp2                          // second message parameter
             // check if name has been specified
             if ( strlen(pIDA->szBuffer) == 0 )
             {
-              UtlErrorHwnd( ERROR_NEW_NAME_MISSING, MB_CANCEL, 0, NULL, EQF_ERROR, hwnd );
+              LogMessage7(ERROR, __func__,  ERROR_NEW_NAME_MISSING,  NULL, EQF_ERROR, hwnd );
               SETFOCUS( hwnd, ID_RENAME_NEWNAME_EF );
               fOK = FALSE;
             } /* endif */
@@ -3108,7 +3108,7 @@ LPARAM mp2                          // second message parameter
                 PSZ    pszParm;          // points to error msg parameter
                 pszParm = pIDA->szBuffer;
                 OEMTOANSI( pIDA->szBuffer );
-                UtlErrorHwnd( ERROR_INV_LONGNAME, MB_CANCEL, 1, &pszParm, EQF_ERROR, hwnd );
+                LogMessage7(ERROR, __func__,  ERROR_INV_LONGNAME, pszParm, EQF_ERROR, hwnd );
                 SETFOCUS( hwnd, ID_RENAME_NEWNAME_EF );
                 fOK = FALSE;
               } /* endif */
@@ -3132,7 +3132,7 @@ LPARAM mp2                          // second message parameter
 
                 pszParm = pIDA->szNewName;
                 OEMTOANSI( pIDA->szNewName );
-                UtlErrorHwnd( usMsgNo, MB_CANCEL, 1, &pszParm, EQF_ERROR, hwnd );
+                LogMessage7(ERROR, __func__,  usMsgNo, pszParm, EQF_ERROR, hwnd );
                 SETFOCUS( hwnd, ID_RENAME_NEWNAME_EF );
                 fOK = FALSE;
               } /* endif */
@@ -3684,7 +3684,7 @@ USHORT UtlFuncRenameObject( USHORT usMode, PSZ pszName, PSZ pszNewName,LONG lOpt
         case clsDICTIONARY: usRC = ERROR_NEWFOLDER_EXISTS; break;
       } /* endswitch */
 
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszNewName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszNewName);
     } /* endif */
   } /* endif */
 
@@ -3700,7 +3700,7 @@ USHORT UtlFuncRenameObject( USHORT usMode, PSZ pszName, PSZ pszNewName,LONG lOpt
         case TM_OBJECT:     usRC = ERROR_MEMORY_NOTFOUND; break;
         case DICT_OBJECT:   usRC = ERROR_DIC_NOTFOUND; break;
       } /*endswitch */
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszName);
     }
     else
     {
@@ -3881,7 +3881,7 @@ USHORT UtlFuncGetShortName( USHORT ObjectType, PSZ pszLongName, PSZ pszShortName
         case DICT_OBJECT:   usRC = ERROR_DIC_NOTFOUND; break;
       } /* endswitch */
 
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszLongName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszLongName);
       return( usRC );
     } /* endif */
   }
@@ -3894,7 +3894,7 @@ USHORT UtlFuncGetShortName( USHORT ObjectType, PSZ pszLongName, PSZ pszShortName
     if ( pszDocName == NULL )
     {
       usRC = INVALID_OS2_FILENAME;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszLongName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszLongName);
       return( usRC );
     } /* endif */
 
@@ -3912,7 +3912,7 @@ USHORT UtlFuncGetShortName( USHORT ObjectType, PSZ pszLongName, PSZ pszShortName
     if ( fIsNew )
     {
       usRC = ERROR_XLATE_FOLDER_NOT_EXIST;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszLongName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszLongName);
       pszDocName--;
       *pszDocName = ':';
       return( usRC );
@@ -3923,7 +3923,7 @@ USHORT UtlFuncGetShortName( USHORT ObjectType, PSZ pszLongName, PSZ pszShortName
     if ( fIsNew )
     {
       usRC = ERROR_TA_SOURCEFILE;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszDocName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszDocName);
     } /* end */         
 
     pszDocName--;
@@ -4081,7 +4081,7 @@ LPARAM mp2                          // second message parameter
               // check if name has been specified
               if ( strlen(pIDA->szUserObject) == 0 )
               {
-                UtlErrorHwnd( ERROR_NEW_NAME_MISSING, MB_CANCEL, 0, NULL, EQF_ERROR, hwnd );
+                LogMessage7(ERROR, __func__,  ERROR_NEW_NAME_MISSING,  NULL, EQF_ERROR, hwnd );
                 SETFOCUS( hwnd, ID_ADDUSER_DLG_USERID_EF );
                 return FALSE;
               } 

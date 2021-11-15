@@ -214,7 +214,7 @@ INT_PTR CALLBACK MEMMERGEDLG( HWND hwnd,
             else
             {
               // Issue the message "No memory database has been selected"
-              UtlError( WARNING_MEM_NOT_SELECTED, MB_CANCEL, 0, NULL, EQF_ERROR );
+              UtlError( WARNING_MEM_NOT_SELECTED,  NULL, EQF_ERROR );
             } /* endif */
 
             // Enable the Merge and Cancel button if the dialog is not ready to be closed
@@ -612,7 +612,7 @@ MRESULT MemMergeCallBack
             // Issue the message:
             // Termination of merge of translation memory
             // %1 into translation memory %2 failed.
-            UtlError( ERROR_MEM_MERGE_TERMFAILED, MB_CANCEL, 2, &pReplAddr[0], EQF_ERROR );
+            UtlError( ERROR_MEM_MERGE_TERMFAILED,  &pReplAddr[0], EQF_ERROR );
           } /* endif */
           ANSITOOEM( pMIDA->szNameMergeMem );
           ANSITOOEM( pMIDA->szNameMem );

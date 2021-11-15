@@ -22,7 +22,7 @@
 #define INCL_EQF_MORPH            // morphologic functions
 #endif
 
-#include "../spell/SpellFactory.h"
+#include "../morph/SpellFactory.h"
 #include "../morph/MorphFactory.h"
 //#include "../utilities/LogWriter.h"
 #include "../utilities/LogWrapper.h"

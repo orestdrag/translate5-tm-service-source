@@ -31,39 +31,39 @@
 //  Import logic:
 //              Check whether properties of TM to be imported exist
 //                  no                                   yes
-//  ------------------------------------Å-------------------------------------------
+//  ------------------------------------ï¿½-------------------------------------------
 //  Check if a TM with equal name and              Check if TM-ID's match
 //  equal ID exists on the same drive as        no                   yes
-//  the TM to be imported or user want  +---------------------Å---------------------
+//  the TM to be imported or user want  +---------------------ï¿½---------------------
 //  to import(merge) anyway              display question if 
 //           ja                no       merge anyway.        Check space on disk
-//  -----------------------Å------------+ if answer is         and issue message if
+//  -----------------------ï¿½------------+ if answer is         and issue message if
 //   Check space on disk                YES      NO         necessary.
-//   and issue message if             +---------Å-----------+  Abort        Go
-//   necessary.                       post msg End with:  +----------Å------------
+//   and issue message if             +---------ï¿½-----------+  Abort        Go
+//   necessary.                       post msg End with:  +----------ï¿½------------
 //    Abort        Go                to start TM_IMPORT_ End with: Post message
-//  ----------Å------------+           merge    FAILED     TM_IMPORT_to start
+//  ----------ï¿½------------+           merge    FAILED     TM_IMPORT_to start
 //  End with: Create                                     FAILED    merge
-//  TM_IMPORT_properties                                 +----------Á------------
-//  FAILED    and correct             +---------Á-----------+
+//  TM_IMPORT_properties                                 +----------ï¿½------------
+//  FAILED    and correct             +---------ï¿½-----------+
 //  ----------+them.        Check if a TM with equal name and
 //            Post message equal ID exists on a other drive as
 //            to start     the TM to be imported or user want to be anyway
 //            merge                 ja                no
-//            +------------+ -----------------------Å--------------------------
+//            +------------+ -----------------------ï¿½--------------------------
 //                            Check space on disk    Create properties
 //                            and issue message if   and correct them.
 //                            necessary.            
 //                             Abort        Go      Rename translation memory
-//                           ----------Å------------+   did an error occure ?
+//                           ----------ï¿½------------+   did an error occure ?
 //                           End with: Create           no           yes
-//                           TM_IMPORT_properties  +-------------Å-------------
+//                           TM_IMPORT_properties  +-------------ï¿½-------------
 //                           FAILED    and correct  End with:    Issue error.
 //                           ----------+them.        TM_IMPOR_OK  End with:
 //                                     Post message              TM_IMPORT_
 //                                     to start                  FAILED
 //                                     merge                    
-//                                     +------------Á-------------Á-------------
+//                                     +------------ï¿½-------------ï¿½-------------
 
 USHORT CheckSpaceStartMerge( HWND hWnd, PMEM_MERGE_IDA pMIDA );
 USHORT SearchAndOpenEqualMem( PMEM_MERGE_IDA pMIDA, PSZ szDriveList, USHORT usLocation );
@@ -298,7 +298,7 @@ USHORT EQFMemImportTrojaStart
             pReplAddr[0] = ( pMIDA->szLongName[0] ? pMIDA->szLongName : pMIDA->szNameMergeMem );
             if ( (pMIDA->hwndErrMsg != HWND_FUNCIF) && !ISBATCHHWND(pMIDA->hwndErrMsg) )
             {
-              usMBCode = UtlErrorHwnd( QUERY_MEM_FOLIMP_MERGE,
+              usMBCode = LogMessage7(ERROR, __func__,  QUERY_MEM_FOLIMP_MERGE,
                                        MB_YESNO | MB_DEFBUTTON2,
                                        1,
                                        &pReplAddr[0], EQF_QUERY,
@@ -340,7 +340,7 @@ USHORT EQFMemImportTrojaStart
           // A translation memory with the same name exists already but
           // it is reserved for other purposes.
           pReplAddr[0] = pMIDA->szLongName;
-          UtlErrorHwnd( ERROR_MEMIMPORT_TM_EXISTS, MB_CANCEL, 1,
+          LogMessage7(ERROR, __func__,  ERROR_MEMIMPORT_TM_EXISTS, MB_CANCEL, 1,
                         &pReplAddr[0], EQF_ERROR, pMIDA->hwndErrMsg );
           usRc = FALSE;
           pMIDA->fMsg = TRUE;
@@ -417,7 +417,7 @@ USHORT EQFMemImportTrojaStart
             // A translation memory with the same name exists already but
             // it is reserved for other purposes.
             pReplAddr[0] = pMIDA->szNameMergeMem;
-            UtlErrorHwnd( ERROR_MEMIMPORT_TM_EXISTS, MB_CANCEL, 1,
+            LogMessage7(ERROR, __func__,  ERROR_MEMIMPORT_TM_EXISTS, MB_CANCEL, 1,
                           &pReplAddr[0], EQF_ERROR, pMIDA->hwndErrMsg );
             usRc = FALSE;
             pMIDA->fMsg = TRUE;
@@ -857,7 +857,7 @@ USHORT SearchAndOpenEqualMem
     {
       // Issue error message:The properties for the new object %1 could not be created.
       pReplAddr[0] = pMIDA->szNameMergeMem;
-      UtlErrorHwnd( ERROR_CREATE_PROPERTIES, MB_CANCEL, 1,
+      LogMessage7(ERROR, __func__,  ERROR_CREATE_PROPERTIES, MB_CANCEL, 1,
                 &pReplAddr[0], EQF_ERROR, pMIDA->hwndErrMsg );
     } /* endif */
 
@@ -1012,7 +1012,7 @@ NTMCreatePropandIndexFromImport
     /* The properties for the new object %1 could not be created.     */
     /******************************************************************/
     pReplAddr[0] = pMIDA->szNameMergeMem;
-    UtlErrorHwnd( ERROR_CREATE_PROPERTIES, MB_CANCEL, 1,
+    LogMessage7(ERROR, __func__,  ERROR_CREATE_PROPERTIES, MB_CANCEL, 1,
                   &pReplAddr[0], EQF_ERROR, pMIDA->hwndErrMsg );
   } /* endif */
 

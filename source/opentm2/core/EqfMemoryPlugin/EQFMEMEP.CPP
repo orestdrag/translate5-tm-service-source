@@ -843,7 +843,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          // Delete the exported file because it is empty
          // and issue error message
          UtlDelete ( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
-         UtlErrorHwnd( ERROR_MEM_EXPORT_NOSEGMENTS, MB_CANCEL, 2,
+         LogMessage7(ERROR, __func__,  ERROR_MEM_EXPORT_NOSEGMENTS, 
                        &(pReplString[0]), EQF_WARNING, pExportIDA->hwndErrMsg );
          fOk=FALSE;
        }
@@ -853,7 +853,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
          LogMessage(INFO,"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED");
-         //UtlErrorHwnd( MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
+         //LogMessage7(ERROR, __func__,  MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
        } /* endif */
@@ -882,8 +882,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      pReplString[1] = pExportIDA->szMemName;
      CloseFile( &(pExportIDA->hFile) );
      UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
-     UtlErrorHwnd( ERROR_MEM_EXPORT_TERMINATED, MB_CANCEL, 2,
-               &(pReplString[0]), EQF_ERROR, pExportIDA->hwndErrMsg );
+     LogMessage3(ERROR, __func__,  "::ERROR_MEM_EXPORT_TERMINATED::", (pReplString[0]));
      ANSITOOEM( pExportIDA->szMemName );
      fOk=FALSE;
 
@@ -1251,7 +1250,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     if ( (hwndErrMsg == HWND_FUNCIF) && pExportIDA->fDataCorrupted )
     {
       PSZ pszParm = "ANSI/ASCII";
-      UtlErrorHwnd( ERROR_MEM_EXPORT_DATACORRUPT, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage3(ERROR, __func__,"::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm);
       usRC = ERROR_MEM_EXPORT_DATACORRUPT;
     } /* endif */
 
@@ -1429,8 +1428,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
         OEMTOANSI( pExportIDA->szMemName );
         pReplAddr[0] = pExportIDA->szMemName;
         pReplAddr[1] = pExportIDA->ControlsIda.szPathContent;
-        UtlErrorHwnd( ERROR_MEM_EXPORT_INITFAILED, MB_CANCEL, 2,
-                      &pReplAddr[0], EQF_ERROR, pExportIDA->hwndErrMsg );
+        LogMessage3(ERROR, __func__,  "::ERROR_MEM_EXPORT_INITFAILED::",pReplAddr[0] );
         ANSITOOEM( pExportIDA->szMemName );
       } /* endif */
     } /* endif */
@@ -2026,7 +2024,8 @@ USHORT MemExportWrite
                 if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
                 {
                   PSZ pszParm = "ANSI";
-                  USHORT usMBCode = UtlErrorHwnd( ERROR_MEM_EXPORT_DATACORRUPT, MB_OKCANCEL, 1, &pszParm, EQF_QUERY, pExportIDA->hwndErrMsg );
+                  USHORT usMBCode = MBID_CANCEL;
+                  LogMessage3(ERROR, __func__,  "::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm);
                   if ( usMBCode == MBID_CANCEL )
                   {
                     usRc = MEM_WRITE_ERR;
@@ -2065,7 +2064,8 @@ USHORT MemExportWrite
              if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
             {
                PSZ pszParm = "ASCII";
-               USHORT usMBCode = UtlErrorHwnd( ERROR_MEM_EXPORT_DATACORRUPT, MB_OKCANCEL, 1, &pszParm, EQF_QUERY, pExportIDA->hwndErrMsg );
+               USHORT usMBCode = MBID_CANCEL;
+                LogMessage3(ERROR, __func__,  "::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm );
                if ( usMBCode == MBID_CANCEL )
                {
                  usRc = MEM_WRITE_ERR;
@@ -2118,9 +2118,7 @@ USHORT MemExportWrite
            szDrive[2] = NULC;
            pReplString[0] = szDrive;
            CloseFile( &(pExportIDA->hFile) );
-           UtlErrorHwnd( ERROR_WRITING, MB_CANCEL, 1,
-                     &(pReplString[0]), EQF_ERROR,
-                     pExportIDA->hwndErrMsg);
+           LogMessage3(ERROR, __func__,"::ERROR_WRITING::",  (pReplString[0]));
            usRc = MEM_WRITE_ERR;
         }
         else
@@ -2168,8 +2166,7 @@ USHORT MemExportWrite
           szDrive[2] = NULC;
           pReplString[0] = szDrive;
           CloseFile( &(pExportIDA->hFile) );
-          UtlErrorHwnd( ERROR_WRITING, MB_CANCEL, 1,
-                        &(pReplString[0]), EQF_ERROR, pExportIDA->hwndErrMsg );
+          LogMessage3(ERROR, __func__,  "::ERROR_WRITING::",(pReplString[0]) );
           usRc = MEM_WRITE_ERR;
        }
        else
@@ -2245,7 +2242,7 @@ USHORT MemBatchTMExport
           !pMemExp->fOverWrite )
      {
        pszParm = pIDA->ControlsIda.szPathContent;
-       UtlErrorHwnd( ERROR_FILE_EXISTS_ALREADY_BATCH, MB_CANCEL, 1, &pszParm,
+       LogMessage7(ERROR, __func__,  ERROR_FILE_EXISTS_ALREADY_BATCH, pszParm,
                      EQF_ERROR, pMemExp->hwndErrMsg );
        fOK = FALSE;
      } /* endif */
@@ -2311,7 +2308,7 @@ USHORT MemBatchTMExport
      {
        PSZ pTemp = pIDA->szMemName;
 
-       UtlErrorHwnd( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
+       LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
                      1, &pTemp, EQF_ERROR, pMemExp->hwndErrMsg );
        fOK = FALSE;
      } /* endif */
@@ -2451,9 +2448,7 @@ USHORT MemFuncPrepExport
      if ( (pszMemName == NULL) || (*pszMemName == EOS) )
      {
        fOK = FALSE;
-       LogMessage(ERROR,"ERROR in MemFuncPrepExport::(pszMemName == NULL) || (*pszMemName == EOS); TM was not specified");
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
-                     EQF_ERROR, HWND_FUNCIF );
+       LogMessage2(ERROR,__func__, "::ERROR in MemFuncPrepExport::(pszMemName == NULL) || (*pszMemName == EOS); TM was not specified");
      }
      else
      {
@@ -2481,9 +2476,7 @@ USHORT MemFuncPrepExport
   {
     if ( (pszOutFile == NULL) || (*pszOutFile == EOS) )
     {
-      LogMessage(ERROR,"ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME");
-      UtlErrorHwnd( ERROR_NO_EXPORT_NAME, MB_CANCEL, 0, NULL,
-                    EQF_ERROR, HWND_FUNCIF );
+      LogMessage2(ERROR,__func__, "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME");
       fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -2496,9 +2489,7 @@ USHORT MemFuncPrepExport
          !(lOptions & OVERWRITE_OPT) )
     {
       pszParm = pIDA->ControlsIda.szPathContent;
-      LogMessage2(ERROR,"ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = ", pIDA->ControlsIda.szPathContent );
-      UtlErrorHwnd( ERROR_FILE_EXISTS_ALREADY_BATCH, MB_CANCEL, 1, &pszParm,
-                    EQF_ERROR, HWND_FUNCIF );
+      LogMessage5(ERROR,__func__, ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = ", pIDA->ControlsIda.szPathContent , "; pszParam = ", pszParm);
       fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -2613,8 +2604,8 @@ USHORT MemFuncPrepExport
     {
       PSZ pTemp = pIDA->szMemName;
 
-      UtlErrorHwnd( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
-                    1, &pTemp, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
+                    1, &pTemp);
       fOK = FALSE;
     } /* endif */
     #endif

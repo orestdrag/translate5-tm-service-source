@@ -120,7 +120,7 @@ BOOL UtlAllocHwnd
   usMessageNo;
   if ( !fOK && (usMessageNo != NOMSG ))
   {
-    UtlErrorHwnd( usMessageNo, MB_CANCEL, 0, NULL, EQF_ERROR, hwnd );
+    LogMessage3(ERROR, __func__, "::rc = ", intToA(usMessageNo) );
   } /* endif */
   return( fOK );
 } /* end of UtlAllocHwnd */

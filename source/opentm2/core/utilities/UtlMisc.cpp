@@ -4100,7 +4100,7 @@ int XSLTConversion
         pszParms[0] = (PSZ)pszError;
         pszParms[1] = pszXmlFile;
         pszParms[2] = pszStyleSheet;
-        if ( fMsg ) UtlErrorHwnd( ERROR_XML_CONVERSION, MB_CANCEL, 3, pszParms, EQF_ERROR, hwndErrMsg );
+        if ( fMsg ) LogMessage7(ERROR, __func__,  ERROR_XML_CONVERSION, MB_CANCEL, 3, pszParms, EQF_ERROR, hwndErrMsg );
         iRC = ERROR_XML_CONVERSION;
 			}
 		}
@@ -4122,7 +4122,7 @@ int XSLTConversion
     pszParms[0] = pszError;
     pszParms[1] = pszXmlFile;
     pszParms[2] = pszStyleSheet;
-    if ( fMsg ) UtlErrorHwnd( ERROR_XML_CONVERSION, MB_CANCEL, 3, pszParms, EQF_ERROR, hwndErrMsg );
+    if ( fMsg ) LogMessage7(ERROR, __func__,  ERROR_XML_CONVERSION, MB_CANCEL, 3, pszParms, EQF_ERROR, hwndErrMsg );
     iRC = ERROR_XML_CONVERSION;
 	}
 #else

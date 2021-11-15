@@ -892,7 +892,7 @@ MRESULT QueryWM_COMMAND
          else
          {
            // display error returned through uiErrCode
-           UtlErrorHwnd( (SHORT)pTMIda->uiErrCode, MB_CANCEL,
+           LogMessage7(ERROR, __func__,  (SHORT)pTMIda->uiErrCode, MB_CANCEL,
                          0, NULL, EQF_ERROR, hwndDlg );
            // set entryfield for entering the number selected and focus
            switch (pTMIda -> uiErrCode) {
@@ -1474,7 +1474,7 @@ BOOL  QueryDateSetting
    if ( pTMIda->lEndDate < pTMIda->lStartDate )
    {
      // warning: end date is earlier than start date
-     UtlErrorHwnd( ERROR_TMM_EDATE_EARLY, MB_CANCEL,
+     LogMessage7(ERROR, __func__,  ERROR_TMM_EDATE_EARLY, MB_CANCEL,
                    0, NULL, EQF_ERROR, hwndDlg );
      fOK = FALSE;
    }
@@ -1483,7 +1483,7 @@ BOOL  QueryDateSetting
      if ( pTMIda->lStartDate > pTMIda->lCurrentDate )
      {
        // warning: end date is earlier than start date
-       UtlErrorHwnd( ERROR_TMM_START_DATE, MB_CANCEL,
+       LogMessage7(ERROR, __func__,  ERROR_TMM_START_DATE, MB_CANCEL,
                      0, NULL, EQF_ERROR, hwndDlg );
        fOK = FALSE;
      } /* endif */

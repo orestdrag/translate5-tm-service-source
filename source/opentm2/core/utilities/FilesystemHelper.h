@@ -22,8 +22,6 @@ enum  FileBufferStatus{
     };
 
 struct FileBuffer{
-    
-
     int status ;//FILEBUFFERSTATUS
     std::vector<UCHAR> data;
     long offset = 0;
@@ -83,6 +81,7 @@ public:
     
 
     static int WriteBuffToFile(std::string fName, bool tempFile = false);
+    static int FlushAllBuffers();
 
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);

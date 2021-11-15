@@ -1451,7 +1451,7 @@ HWND            hwnd                 // window handle for error messages
       {
         strncpy( pCIDA->szTemp, pCIDA->szMemPropPath, 1 );
         pReplAddr = pCIDA->szTemp;
-        UtlErrorHwnd(  ERROR_DISK_IS_FULL, MB_CANCEL, 1,
+        LogMessage7(ERROR, __func__,   ERROR_DISK_IS_FULL, MB_CANCEL, 1,
                        &pReplAddr, EQF_ERROR, hwnd );
       }
       else
@@ -1460,7 +1460,7 @@ HWND            hwnd                 // window handle for error messages
         {
           OEMTOANSI( pCIDA->szMemName );
           pReplAddr = pCIDA->szMemName;
-          UtlErrorHwnd( ERROR_MEM_NAME_INVALID , MB_CANCEL, 1,
+          LogMessage7(ERROR, __func__,  ERROR_MEM_NAME_INVALID , MB_CANCEL, 1,
                         &pReplAddr, EQF_ERROR, hwnd );
           ANSITOOEM( pCIDA->szMemName );
         }/*endif*/
@@ -1511,7 +1511,7 @@ HWND            hwnd                 // window handle for error messages
     if ( SaveProperties( hProp, &ErrorInfo) )
     {
       pReplAddr = pCIDA->szMemName;
-      UtlErrorHwnd( ERROR_WRITE_PROPERTIES, MB_CANCEL, 1, &pReplAddr,
+      LogMessage7(ERROR, __func__,  ERROR_WRITE_PROPERTIES, pReplAddr,
                     EQF_ERROR, hwnd );
       fOK = FALSE;
     } /* endif */
@@ -1854,8 +1854,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
     {
       usRC = TMT_MANDCMDLINE;
-      LogMessage(ERROR, "MemFuncCreateMem()::TMT_MANDCMDLINE");
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage2(ERROR, __func__, "::MemFuncCreateMem()::TMT_MANDCMDLINE");
     } /* endif */
   } /* endif */
 
@@ -1863,9 +1862,8 @@ LONG                lOptions                 // type of new Translation Memory
   {
     if ( (pszSourceLanguage == NULL) || (*pszSourceLanguage == EOS) )
     {
-      LogMessage(ERROR, "MemFuncCreateMem()::ERROR_NO_SOURCELANG");
+      LogMessage2(ERROR,__func__,  "::MemFuncCreateMem()::ERROR_NO_SOURCELANG");
       usRC = ERROR_NO_SOURCELANG;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
     } /* endif */
   } /* endif */
 
@@ -1875,8 +1873,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( !UtlCheckLongName( (PSZ) pszMemName ))
     {
       pszParm = (PSZ) pszMemName;
-      UtlErrorHwnd(  ERROR_INV_LONGNAME, MB_CANCEL, 1,
-                     &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage3(ERROR, __func__,   "::ERROR_INV_LONGNAME::",pszParm);
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
@@ -1887,7 +1884,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( pFactory->exists( NULL, pszMemName ) )
     {
       PSZ pszParam = (PSZ)pszMemName;
-      UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszParam, EQF_ERROR, HWND_FUNCIF );
+      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_INVALID::", pszParam);
       usRC = ERROR_MEM_NAME_INVALID;
     }
   } /* endif */
@@ -1900,8 +1897,8 @@ LONG                lOptions                 // type of new Translation Memory
     if ( MorphGetLanguageID( (PSZ)pszSourceLanguage, &sID ) != MORPH_OK )
     {
       usRC = ERROR_PROPERTY_LANG_DATA;
-      //UtlErrorHwnd( ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
-      //              &((PSZ)pszSourceLanguage), EQF_ERROR, HWND_FUNCIF  );
+      //LogMessage7(ERROR, __func__,  ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
+      //              &((PSZ)pszSourceLanguage) );
     } /* endif */
   } /* endif */
 
@@ -1919,10 +1916,8 @@ LONG                lOptions                 // type of new Translation Memory
     }
     else
     {
-      LogMessage(FATAL, "MemFuncCreateMem supports only local_opt");
+      LogMessage2(FATAL,__func__,  "MemFuncCreateMem supports only local_opt, rc = WRONG_OPTIONS_RC");
       usRC = WRONG_OPTIONS_RC;
-      UtlErrorHwnd( ERROR_INTERNAL, MB_CANCEL, 0,
-                    NULL, EQF_ERROR, HWND_FUNCIF  );
     } /* endif */
   } /* endif */
 

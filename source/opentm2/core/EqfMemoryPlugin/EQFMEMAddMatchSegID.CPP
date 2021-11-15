@@ -104,7 +104,7 @@ USHORT AddMatchSegIDPrepare
     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
     {
       fOK = FALSE;
-      UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  TMT_MANDCMDLINE,  NULL);
     } /* endif */
   } /* endif */
 
@@ -114,7 +114,7 @@ USHORT AddMatchSegIDPrepare
     if ( !pFactory->exists( NULL, pszMemName ) )
     {
       fOK = FALSE;
-      UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszMemName, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  ERROR_MEMORY_NOTFOUND, pszMemName);
     } /* endif */
   } /* endif */
 
@@ -124,7 +124,7 @@ USHORT AddMatchSegIDPrepare
     if ( ((pszTM_ID == NULL) || (*pszTM_ID == EOS)) && ((pszStoreID == NULL) || (*pszStoreID == EOS)) )
     {
       fOK = FALSE;
-      UtlErrorHwnd( FUNC_ADDMATCHSEGID_NOIDSPECS, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  FUNC_ADDMATCHSEGID_NOIDSPECS,  NULL);
     } /* endif */
   } /* endif */
 
@@ -333,7 +333,7 @@ int AddMatchSegIDWork( PADDMATCHSEGIDDATA  pMatchSegIDData )
     {
       OEMTOANSI( pMatchSegIDData->szMemName );
       pReplAddr[0] = pMatchSegIDData->szMemName;
-      UtlErrorHwnd( ERROR_MEM_ORGANIZE_TERMINATED, MB_CANCEL, 1, &pReplAddr[0], EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  ERROR_MEM_ORGANIZE_TERMINATED, pReplAddr[0]);
       ANSITOOEM( pMatchSegIDData->szMemName );
 
       pMatchSegIDData->NextTask = MATCHID_END_TASK;

@@ -763,7 +763,7 @@ USHORT EqfMemoryExists
     if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
     {
       usRC = TA_MANDFOLDER;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage4(ERROR, __func__, ":: rc = ", intToA(usRC), " EQF_ERROR" );
     }
     else
     {
@@ -788,7 +788,7 @@ USHORT EqfMemoryExists
       {
         PSZ pszParm = pszMemoryName;
         usRC = ERROR_MEMORY_NOTFOUND;
-        UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+        LogMessage6(ERROR, __func__,  "::if ( fIsNew ) rc = ", intToA(usRC), "; pszParm = ",pszParm, " EQF_ERROR" );
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1192,17 +1192,15 @@ USHORT EqfGetOpenTM2Lang
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
   {
     char*  pszParm = "pointer to ISO language id";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
-    LogMessage(ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL)");
+    LogMessage2(ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL), pszParam =" , pszParm);
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     char* pszParm = "buffer for OpenTM2 language name";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
     usRC = DDE_MANDPARAMISSING;
-    LogMessage(ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL)");
+    LogMessage2(ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL), pszParam = ", pszParm);
   } /* endif */
 
 
@@ -1250,14 +1248,14 @@ USHORT EqfGetIsoLang
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "pointer to OpenTM2 language name";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING ::", pszParm);
     usRC = DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "buffer for ISO language id";
-    UtlErrorHwnd( DDE_MANDPARAMISSING, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING :: ", pszParm);
     usRC = DDE_MANDPARAMISSING;
   } /* endif */
 

@@ -668,7 +668,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
       } /* endif */
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFname, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode), "; fName = ", pszFname );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -772,8 +772,8 @@ USHORT UtlCloseHwnd
         DosError(1);
         if ( fMsg && usRetCode )
         {
-           usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR,
-                                    hwndParent);
+           usMBCode = MB_CANCEL;
+           LogMessage3(ERROR, __func__,":: rc = " , intToA(usRetCode));
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
@@ -915,13 +915,11 @@ USHORT UtlReadHwnd
           PSZ    pszDrive;
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDrive,
-                                    DOS_ERROR, hwndParent );
+          usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode),"; pszDrive = ",pszDrive);
         }
         else
         {
-           usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL,
-                                    DOS_ERROR, hwndParent );
+           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1086,13 +1084,11 @@ USHORT UtlWriteHwnd
         {
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDrive,
-                                    DOS_ERROR, hwndParent );
+          usMBCode = LogMessage5(ERROR, __func__,  ":: rc = ", intToA(usRetCode), "; pszDrive = ", pszDrive);
         }
         else
         {
-           usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL,
-                                    DOS_ERROR, hwndParent );
+           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1183,12 +1179,12 @@ USHORT UtlWriteWoCheckHwnd
 
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDrive,
+          usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszDrive,
                                     DOS_ERROR, hwndParent );
         }
         else
         {
-           usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL,
+           usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL,
                                     DOS_ERROR, hwndParent );
         } /* endif */
       } /* endif */
@@ -1396,7 +1392,8 @@ USHORT UtlDeleteHwnd
 		  DosError(1);
 		  if ( fMsg && usRetCode )
 		  {
-			 usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFName, DOS_ERROR, hwndParent );
+			 usMBCode = MB_CANCEL;
+       LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode) , "; fName = ", pszFName );
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -1495,7 +1492,8 @@ USHORT UtlMkDirHwnd
         DosError(1);
         if ( fMsg && usRetCode )
         {
-           usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDirName, DOS_ERROR, hwndParent );
+           usMBCode = MB_CANCEL;
+           LogMessage5(ERROR, __func__,  ":: rc = ", intToA(usRetCode) , "; dirName ", pszDirName );
         } /* endif */
      } while ( fMsg &&
                usRetCode &&
@@ -1590,7 +1588,7 @@ USHORT UtlRmDirHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDir, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszDir, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 #endif
@@ -1797,16 +1795,16 @@ USHORT UtlCopyHwnd2
                    usRcCode == ERROR_PATH_NOT_FOUND ||
                    usRcCode == ERROR_ACCESS_DENIED    )
               {
-                usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
+                usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
               }
               else
               {
-                usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDst, DOS_ERROR, hwndParent );
+                usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszDst, DOS_ERROR, hwndParent );
               } /* endif */
             }
             else
             {
-              usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDst, DOS_ERROR, hwndParent );
+              usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszDst, DOS_ERROR, hwndParent );
               if ( usMBCode == MBID_RETRY && usRetCode == ERROR_DISK_CHANGE)
               {
                   UtlSetDrive( *pszDst);
@@ -1815,7 +1813,7 @@ USHORT UtlCopyHwnd2
           } /* endif */
           else
           {
-            usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
+            usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
           } /* endif */
           SETCURSORFROMHANDLE(hPtr);
 #endif
@@ -1916,7 +1914,8 @@ USHORT UtlMoveHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszSrc, DOS_ERROR, hwndParent );
+         usMBCode = MB_CANCEL;
+         LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode), "; pszSrc = ", pszSrc );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -2151,7 +2150,8 @@ USHORT UtlFindFirstHwnd
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFSpecCompl, DOS_ERROR, hwndParent );
+         usMBCode = MB_CANCEL;
+         LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode) , "; pszFSecCompl = ",pszFSpecCompl);
          /*************************************************************/
          /* change the drive if necessary ...                         */
          /*************************************************************/
@@ -2309,7 +2309,7 @@ USHORT UtlFindNextHwnd
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
 #else
       FindNextFile(hdir, pffb);
@@ -2535,7 +2535,7 @@ USHORT UtlQFileInfoHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 #endif
@@ -2669,7 +2669,7 @@ USHORT UtlQFSInfoHwnd
           szDrive[0] =  (CHAR) (usDriveNo + 'A' - 1);
           szDrive[1]= EOS;
          pszDriveNo = szDrive;
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszDriveNo, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszDriveNo, DOS_ERROR, hwndParent );
       } /* endif */
       if ( usMBCode == MBID_RETRY && usRetCode == ERROR_DISK_CHANGE)
       {
@@ -2774,7 +2774,8 @@ USHORT UtlSetFileModeHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = MB_CANCEL;
+         LogMessage3(ERROR, __func__,":: rc = ", intToA(usRetCode) );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -2874,7 +2875,7 @@ USHORT UtlQFileModeHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 #endif
@@ -2923,7 +2924,8 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
+         usMBCode = MB_CANCEL;
+         LogMessage3(ERROR, __func__, ":: rc = ",  intToA(usRetCode));
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -3854,7 +3856,7 @@ USHORT UtlQPathInfoHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -3959,7 +3961,7 @@ USHORT UtlFileLocksHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -4095,7 +4097,7 @@ USHORT UtlFindFirstLongHwnd
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) &&
            (usRetCode != ERROR_FILE_NOT_FOUND))
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 1, &pszFSpec, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszFSpec, DOS_ERROR, hwndParent );
          /*************************************************************/
          /* change the drive if necessary ...                         */
          /*************************************************************/
@@ -4180,7 +4182,7 @@ USHORT UtlFindNextLongHwnd
       DosError(1);
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg &&
              usRetCode &&
@@ -4267,7 +4269,7 @@ USHORT UtlFindCloseLongHwnd
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
+         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 #endif

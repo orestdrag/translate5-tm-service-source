@@ -278,7 +278,7 @@ USHORT MemFuncPrepCleanMemory
     {
       fOK = FALSE;
       usRC = TA_MANDFOLDER;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC,  NULL);
     }
     else
     {
@@ -291,7 +291,7 @@ USHORT MemFuncPrepCleanMemory
         fOK = FALSE;
         pszParm = pszFolder;
         usRC = ERROR_XLATE_FOLDER_NOT_EXIST;
-        UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+        LogMessage7(ERROR, __func__,  usRC, pszParm);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -303,7 +303,7 @@ USHORT MemFuncPrepCleanMemory
     {
       fOK = FALSE;
       usRC = WRONG_OPTIONS_RC;
-      UtlErrorHwnd( EQFRS_INVALID_CMD, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  EQFRS_INVALID_CMD,  NULL);
     }
     else if ( (lOptions & CLEANMEM_INTERNAL_MEMORY_OPT) )
     {
@@ -322,7 +322,7 @@ USHORT MemFuncPrepCleanMemory
       {
         fOK = FALSE;
         usRC = WRONG_OPTIONS_RC;
-        UtlErrorHwnd( EQFRS_INVALID_CMD, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+        LogMessage7(ERROR, __func__,  EQFRS_INVALID_CMD,  NULL);
       } /* endif */
     } /* endif */
 
@@ -333,7 +333,7 @@ USHORT MemFuncPrepCleanMemory
       {
         fOK = FALSE;
         usRC = WRONG_OPTIONS_RC;
-        UtlErrorHwnd( EQFRS_INVALID_CMD, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+        LogMessage7(ERROR, __func__,  EQFRS_INVALID_CMD,  NULL);
       } /* endif */
     } /* endif */
 
@@ -371,12 +371,12 @@ USHORT MemFuncPrepCleanMemory
     {
       fOK = FALSE;
       usRC = TMT_MANDCMDLINE;
-      UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  TMT_MANDCMDLINE,  NULL);
     }
     else if ( !UtlFileExist( pszInMemory ) )
     {
        pszParm = pszInMemory;
-       UtlErrorHwnd( FILE_NOT_EXISTS, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+       LogMessage7(ERROR, __func__,  FILE_NOT_EXISTS, pszParm);
        fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -388,12 +388,12 @@ USHORT MemFuncPrepCleanMemory
     {
       fOK = FALSE;
       usRC = TMT_MANDCMDLINE;
-      UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  TMT_MANDCMDLINE,  NULL);
     }
     else if ( (lOptions & CLEANMEM_EXTERNAL_MEMORY_OPT) && !(lOptions & OVERWRITE_OPT) && UtlFileExist( pszOutMemory ) )
     {
        pszParm = pszOutMemory;
-       UtlErrorHwnd( DDE_FILE_NO_OVERWRITE, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+       LogMessage7(ERROR, __func__,  DDE_FILE_NO_OVERWRITE, pszParm);
        fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -665,7 +665,7 @@ USHORT MemFuncCLMDocStart
     {
       // stop process
       PSZ pszParm = pCLMData->szLongName;
-      UtlErrorHwnd( ERROR_NOT_ANALYZED, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_NOT_ANALYZED, pszParm, EQF_ERROR, HWND_FUNCIF);
       usRC = ERROR_NOT_ANALYZED;
     } /* endif */
   } /* endif */
@@ -929,7 +929,7 @@ USHORT MemFuncCLMMemStart
     if ( pCLMData->hOutFile == NULL )
     {
       PSZ pszParm = pCLMData->szOutMemory;
-      UtlErrorHwnd( ERROR_FILE_WRITE_ERROR, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_FILE_WRITE_ERROR, pszParm, EQF_ERROR, HWND_FUNCIF);
       usRC = ERROR_FILE_WRITE_ERROR;
     }
     else
@@ -956,7 +956,7 @@ USHORT MemFuncCLMMemStart
         {
           PSZ pszParm = pCLMData->szOutMemory;
           usRC = ERROR_MEM_NAME_INVALID;
-          UtlErrorHwnd( ERROR_MEM_NAME_INVALID, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+          LogMessage7(ERROR, __func__,  ERROR_MEM_NAME_INVALID, pszParm);
         }
         else
         {
@@ -1024,7 +1024,7 @@ USHORT MemFuncCLMMemStart
 
     if ( wcsnicmp( pCLMData->szLine, L"<ntmmemorydb>", 13 ) != 0 )
     {
-      UtlErrorHwnd( ERROR_MEM_INVALID_SGML, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_MEM_INVALID_SGML,  NULL, EQF_ERROR, HWND_FUNCIF);
       usRC = NO_VALID_UNICODEFORMAT;
     } /* endif */
   } /* endif */
@@ -1243,7 +1243,7 @@ USHORT MemFuncCLMMemProcess
       pszParms[0] = "n/a";
       pszParms[1] = pCLMData->szInMemory;
 
-      UtlErrorHwnd( ERROR_INVALID_SEGMENT, MB_CANCEL, 2, pszParms, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_INVALID_SEGMENT,  pszParms, EQF_ERROR, HWND_FUNCIF);
     } /* endif */
   } /* endif */
 
@@ -1586,7 +1586,7 @@ USHORT MemFuncCLMMemProcess
   else
   {
     PSZ pszParm = pCLMData->szInMemory;
-    UtlErrorHwnd( ERROR_SGML_TAG, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+    LogMessage7(ERROR, __func__,  ERROR_SGML_TAG, pszParm, EQF_ERROR, HWND_FUNCIF);
     usRC = ERROR_SGML_TAG;
     pCLMData->fErrorStop = TRUE;
     pCLMData->Task = CLM_STOP_TASK;
@@ -1690,7 +1690,7 @@ USHORT MemFuncCLMMemEnd
       if ( pCLMData->hInFile == NULL )
       {
         PSZ pszParm = pCLMData->szTempMemory;
-        UtlErrorHwnd( FILE_NOT_EXISTS, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+        LogMessage7(ERROR, __func__,  FILE_NOT_EXISTS, pszParm, EQF_ERROR, HWND_FUNCIF);
         usRC = FILE_NOT_EXISTS;
       } /* endif */
     } /* endif */
@@ -1702,7 +1702,7 @@ USHORT MemFuncCLMMemEnd
       if ( pCLMData->hInFile == NULL )
       {
         PSZ pszParm = pCLMData->szOutMemory;
-        UtlErrorHwnd( FILE_NOT_EXISTS, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+        LogMessage7(ERROR, __func__,  FILE_NOT_EXISTS, pszParm, EQF_ERROR, HWND_FUNCIF);
         usRC = FILE_NOT_EXISTS;
       } /* endif */
     } /* endif */
@@ -1713,7 +1713,7 @@ USHORT MemFuncCLMMemEnd
       if ( fread( pCLMData->bReadBuffer, pCLMData->ulMemHeaderSize, 1, pCLMData->hInFile) != 1 )
       {
         PSZ pszParm = pCLMData->szTempMemory;
-        UtlErrorHwnd( ERROR_FILE_READ_ERROR, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+        LogMessage7(ERROR, __func__,  ERROR_FILE_READ_ERROR, pszParm, EQF_ERROR, HWND_FUNCIF);
         usRC = FILE_NOT_EXISTS;
       } /* endif */
 
@@ -1742,7 +1742,7 @@ USHORT MemFuncCLMMemEnd
         if ( fread( pCLMData->bReadBuffer, pMatchTable[i].ulLen, 1, pCLMData->hInFile) != 1 )
         {
           PSZ pszParm = pCLMData->szTempMemory;
-          UtlErrorHwnd( ERROR_FILE_READ_ERROR, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF);
+          LogMessage7(ERROR, __func__,  ERROR_FILE_READ_ERROR, pszParm, EQF_ERROR, HWND_FUNCIF);
           usRC = FILE_NOT_EXISTS;
         } /* endif */
 

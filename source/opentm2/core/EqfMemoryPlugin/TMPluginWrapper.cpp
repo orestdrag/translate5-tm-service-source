@@ -1142,7 +1142,7 @@ USHORT NTMGetMatchLevel
     {
       PSZ pszParm = pSegment->szSourceLanguage;
       usRC = ERROR_INV_LANGUAGE;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszParm);
     } /* endif */
 
 #ifdef MEASURETIME
@@ -1325,7 +1325,7 @@ USHORT NTMGetMatchLevel
         {
           PSZ pszParm = pProposal->szTargetLanguage;
           usRC = ERROR_INV_LANGUAGE;
-          UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+          LogMessage7(ERROR, __func__,  usRC, pszParm);
         } /* endif */
       } /* endif */
 
@@ -1592,7 +1592,7 @@ SHORT NTMSimpleGetMatchLevel
   {
     PSZ pszParm = pszLanguage;
     usRC = ERROR_INV_LANGUAGE;
-    UtlErrorHwnd( ERROR_INV_LANGUAGE, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+    LogMessage7(ERROR, __func__,  ERROR_INV_LANGUAGE, pszParm);
   } /* endif */
 
 #ifdef MEASURETIME

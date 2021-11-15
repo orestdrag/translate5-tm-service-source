@@ -216,7 +216,7 @@ BOOL MemCheckFileType
   if ( ( usImpMode == MEM_FORMAT_XLIFF_MT ) &&
        ( usNewImpMode != MEM_FORMAT_TMX   ) ) 
   {
-    UtlError( ERROR_MEMORY_IMPORT_XLIFF, MB_CANCEL, 0, NULL, EQF_ERROR );
+    UtlError( ERROR_MEMORY_IMPORT_XLIFF,  NULL, EQF_ERROR );
     fOK = FALSE;
   } /* endif */
 
@@ -676,7 +676,7 @@ UINT_PTR CALLBACK MemOpenFileHook
                 // check selected to memory
                 if( !QUERYTEXTHWND( pLIDA->hwndToCombo, pLIDA->szMemName ) )
                 {
-                  UtlErrorHwnd( ERROR_NO_MEM_NAME, MB_CANCEL, 0, NULL, EQF_WARNING, hdlg );
+                  LogMessage7(ERROR, __func__,  ERROR_NO_MEM_NAME,  NULL, EQF_WARNING, hdlg );
                   SETFOCUSHWND( pLIDA->hwndToCombo );
                   uiResult = 1;
                   SetWindowLong( hdlg, DWL_MSGRESULT, ERROR_NO_MEM_NAME ); 
@@ -691,7 +691,7 @@ UINT_PTR CALLBACK MemOpenFileHook
                     // display error message that incorrect translation memory name has been specified
                     OEMTOANSI( pLIDA->szMemName );
                     pszReplace[0] = pLIDA->szMemName;
-                    UtlErrorHwnd(  ERROR_INV_LONGNAME, MB_CANCEL, 1, pszReplace, EQF_ERROR, hdlg );
+                    LogMessage7(ERROR, __func__,   ERROR_INV_LONGNAME, MB_CANCEL, 1, pszReplace, EQF_ERROR, hdlg );
                     SETFOCUSHWND( pLIDA->hwndToCombo );
                     uiResult = 1;
                     SetWindowLong( hdlg, DWL_MSGRESULT, ERROR_INV_LONGNAME ); 
@@ -737,11 +737,11 @@ UINT_PTR CALLBACK MemOpenFileHook
                       OEMTOANSI( pLIDA->szMemName );
                       if ( pLIDA->pszList )
                       {
-                        usResponse = UtlErrorHwnd( MEM_LOAD_MERGE_CONFIRMATION, MB_EQF_YESTOALL, 2, &pszReplace[0], EQF_QUERY, hdlg );
+                        usResponse = LogMessage7(ERROR, __func__,  MEM_LOAD_MERGE_CONFIRMATION, MB_EQF_YESTOALL, 2, &pszReplace[0], EQF_QUERY, hdlg );
                       }
                       else
                       {
-                        usResponse = UtlErrorHwnd( MEM_LOAD_MERGE_CONFIRMATION, MB_YESNO, 2, &pszReplace[0], EQF_QUERY, hdlg );
+                        usResponse = LogMessage7(ERROR, __func__,  MEM_LOAD_MERGE_CONFIRMATION, MB_YESNO, 2, &pszReplace[0], EQF_QUERY, hdlg );
                       } /* endif */
                       ANSITOOEM( pLIDA->szMemName );
 

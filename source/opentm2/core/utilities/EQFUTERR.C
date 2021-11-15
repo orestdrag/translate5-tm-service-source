@@ -80,6 +80,16 @@ static SHORT UtlQldbMsgTxt ( SHORT );
 static SHORT UtlPropMsgTxt ( SHORT );
 
 
+USHORT UtlErrorHwnd
+(
+   SHORT   sErrorNumber,               // number of message
+   USHORT  usMsgType,                  // type of message
+   USHORT  usNoOfParms,                // number of message parameters
+   PSZ *   pParmTable,                 // pointer to parameter table
+   ERRTYPE ErrorType,                  // type of error
+   HWND    hwndMsgBoxParent            // window which should be msgbox parent
+);
+
 //------------------------------------------------------------------------------
 // External Function
 //------------------------------------------------------------------------------
@@ -128,6 +138,16 @@ static SHORT UtlPropMsgTxt ( SHORT );
 //------------------------------------------------------------------------------
 // Function flow:    Call UtlErrorHwnd with a NULL window handle
 //------------------------------------------------------------------------------
+USHORT UtlErrorHwndW
+(
+   SHORT   sErrorNumber,               // number of message
+   USHORT  usMsgType,                  // type of message
+   USHORT  usNoOfParms,                // number of message parameters
+   PSZ_W   *pParmTableW,               // pointer to parameter table
+   ERRTYPE ErrorType,                  // type of error
+   HWND    hwnd,                       // window handle
+   BOOL    fUnicode                    // parameter table contains unicode strings
+);
 USHORT UtlErrorW
 (
    SHORT   sErrorNumber,               // number of message

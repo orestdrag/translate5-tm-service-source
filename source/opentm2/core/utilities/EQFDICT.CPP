@@ -7490,7 +7490,8 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
       DosError(1);
       if ( fMsg && usRetCode )
       {
-         usMBCode = UtlErrorHwnd( usRetCode, 0, 0, NULL, DOS_ERROR, hwnd );
+         usMBCode = MB_CANCEL;
+         LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );

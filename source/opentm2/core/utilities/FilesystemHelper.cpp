@@ -308,6 +308,17 @@ int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
 }
 
 
+int FilesystemHelper::FlushAllBuffers(){
+    if(!pFileBuffers){
+        return -1;
+    }
+
+    for(auto file : *pFileBuffers){
+        WriteBuffToFile(file.first);
+    }
+    return 0;
+
+}
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
     LogMessage(DEBUG, "called FilesystemHelper::CloseFile()");

@@ -2055,7 +2055,7 @@ C_TmDeleteTM( PSZ     pszMemName,            //in)  TM name MEM.TMD
                 {
                   PSZ pszErrParm = pszMemName;
                   OEMTOANSI( pszMemName );
-                  UtlErrorHwnd( ERROR_MEM_NOT_DELETED,
+                  LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_DELETED,
                                 MB_OK, 1, &pszErrParm,
                                 EQF_ERROR, hwndOwner );
                   ANSITOOEM( pszMemName );

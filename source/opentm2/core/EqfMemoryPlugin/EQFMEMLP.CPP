@@ -75,6 +75,7 @@
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
+#include "../utilities/EncodingHelper.h"
 #include "MemoryFactory.h"
 
 #include "EQFDDE.H"               // Batch mode definitions
@@ -111,6 +112,15 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
   PMEMEXPIMPSEG pSegment 
 );
 
+
+static void GetElapsedTime( LONG64 *plTime )
+{
+  
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
+}
+
 USHORT MemHandleCodePageValue
 (
   PMEM_LOAD_IDA pLIDA,                           // ptr to memory load IDA
@@ -120,7 +130,7 @@ USHORT MemHandleCodePageValue
 
 
 // import logging 
-#ifdef IMPORT_LOGGING
+//#ifdef IMPORT_LOGGING
   static LONG lImportStartTime = 0;
   static LONG64 lMemAccessTime = 0;
   static LONG64 lFileReadTime = 0;
@@ -128,7 +138,7 @@ USHORT MemHandleCodePageValue
 
 static void GetElapsedTime( LONG64 *plTime );
 
-#endif
+//#endif
 
 USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG usSize, PULONG pusBytesRead );
 
@@ -189,7 +199,7 @@ BOOL MemGUIImportMemory
     {
       PSZ pTemp = pIDA->szMemName;
 
-      UtlError( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL, 1, &pTemp, EQF_ERROR );
+      UtlError( ERROR_MEM_NOT_ACCESSIBLE, pTemp, EQF_ERROR );
       fOK = FALSE;
     } /* endif */
 
@@ -589,7 +599,7 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
 #endif
              if ( !pLoadData->hwndNotify )
              {
-               UtlErrorHwnd( ERROR_MEM_LOAD_NOSEGMENTS , MB_CANCEL, 2,
+               LogMessage7(ERROR, __func__,  ERROR_MEM_LOAD_NOSEGMENTS , 
                              &pReplAddr[0], EQF_WARNING, pLoadData->hwndErrMsg );
              } /* endif */
            }
@@ -603,7 +613,7 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
                /**************************************************/
                pReplAddr[0] = pLoadData->szFilePath;
                pReplAddr[1] = pLoadData->szSegmentID;
-               UtlErrorHwnd( ERROR_MEM_INVALID_SGML, MB_CANCEL, 1,
+               LogMessage7(ERROR, __func__,  ERROR_MEM_INVALID_SGML, MB_CANCEL, 1,
                              &pReplAddr[0], EQF_ERROR, pLoadData->hwndErrMsg );
              } /* endif */
            } /* endif */
@@ -711,7 +721,7 @@ VOID EQFMemLoadProcess ( PPROCESSCOMMAREA pCommArea,
                             PSZ   pReplAddr[2]; 
                             pReplAddr[0] = pLoadData->pstMemInfo->szSourceLang;
                             pReplAddr[1] = szMemSourceLang;
-                            USHORT usMBCode = UtlErrorHwnd( ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT, MB_OKCANCEL, 2,
+                            USHORT usMBCode = LogMessage7(ERROR, __func__,  ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT, MB_OKCANCEL, 2,
                                                      &pReplAddr[0], EQF_ERROR, pLoadData->hwndErrMsg );
                             if ( usMBCode == MBID_CANCEL )
                             {
@@ -1486,8 +1496,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         usMBCode = UtlErrorHwnd( ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT, MB_OKCANCEL, 2,
-                                  &pReplAddr[0], EQF_ERROR, pLIDA->hwndErrMsg );
+         usMBCode = LogMessage3(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0] );
          if ( usMBCode == MBID_CANCEL )
          {
            fOK = FALSE;
@@ -1574,8 +1583,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         usMBCode = UtlErrorHwnd( ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT, MB_OKCANCEL, 2,
-                                  &pReplAddr[0], EQF_ERROR, pLIDA->hwndErrMsg );
+         usMBCode = LogMessage3(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] );
          if ( usMBCode == MBID_CANCEL )
          {
            fOK = FALSE;
@@ -1622,8 +1630,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          // file %1 into translation memory %2 failed."
          pReplAddr[0] = pLIDA->szFilePath;
          pReplAddr[1] = pLIDA->szMemName;
-         UtlErrorHwnd( ERROR_MEM_LOAD_INITFAILED, MB_CANCEL, 2,
-                   &pReplAddr[0], EQF_ERROR, pLIDA->hwndErrMsg );
+         LogMessage3(ERROR, __func__,  "::ERROR_MEM_LOAD_INITFAILED::", pReplAddr[0] );
 
          if ( pLIDA->pProposal != NULL ) free(pLIDA->pProposal);
 
@@ -1656,10 +1663,16 @@ static USHORT  MemLoadStart( PVOID *ppIda,
     GetElapsedTime( &lDummyTime );
   }
 #endif
+   time( &lImportStartTime );
+   LogMessage2(DEBUG,__func__, "************ Memory Import Log *********************"  );
+   LogMessage3(DEBUG,__func__, "Memory import started at   : ", asctime( localtime( &lImportStartTime ) ) );
+   LogMessage3(DEBUG,__func__, "Memory name                : ", pLIDA->szMemName );
 
 
    return ((USHORT)fOK);
 } /* end of function MemLoadStart */
+
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -1753,7 +1766,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
      if ( pLIDA->pstMemInfo->fError )  
      {
        PSZ pszMsg = pLIDA->pstMemInfo->szError;
-       UtlErrorHwnd( ERROR_MEMIMP_ERROR, MB_CANCEL, 1, &pszMsg, EQF_ERROR, pLIDA->hwndErrMsg );
+       LogMessage3(ERROR, __func__,  "::ERROR_MEMIMP_ERROR::MEM_SEG_SYN_ERR::", pszMsg );
        usRc = MEM_SEG_SYN_ERR;
      } /* endif */
 
@@ -1925,8 +1938,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
               pReplAddrW[0] = pTEW->pDataStringW;
               pReplAddrW[1] = ASCII2Unicode(pLIDA->szFilePath, szFilePath, pLIDA->ulOemCP );
               CloseFile( &(pLIDA->hFile));
-              UtlErrorHwndW( ERROR_INVALID_SEGMENT_ID, MB_CANCEL, 2,
-                              &pReplAddrW[0], EQF_ERROR, pLIDA->hwndErrMsg, TRUE);
+              LogMessage5(ERROR, __func__, ":: ERROR_INVALID_SEGMENT_ID ::  pDataStringW = ", EncodingHelper::convertToUTF8(pReplAddrW[0]).c_str(), "; filepath: ", pLIDA->szFilePath);
 
               pTEW->pDataStringW[pTEW->usLength] = b ;
               usRc = MEM_SEG_SYN_ERR;
@@ -2001,14 +2013,12 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
             else
             {
 
-#ifdef IMPORT_LOGGING
               GetElapsedTime( &lOtherTime );
-#endif
+
               usTmRc = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
 
-#ifdef IMPORT_LOGGING
               GetElapsedTime( &lMemAccessTime );
-#endif
+
               // count received MT segments and words if requested
               if ( pLIDA->fMTReceiveCounting )
               {
@@ -2127,8 +2137,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
 
                 pszParms[0] = pLIDA->szMemName;
                 pszParms[1] = pLIDA->szSegmentID;
-                UtlErrorHwnd( ERROR_MEM_DB_FULL_W_SEG, MB_CANCEL, 2,
-                              pszParms, EQF_ERROR, pLIDA->hwndErrMsg );
+                LogMessage3(ERROR, __func__,  "::ERROR_MEM_DB_FULL_W_SEG::", *pszParms);
               }
               else
               {
@@ -2157,7 +2166,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
                   USHORT usMsg = fSegmentTooLarge ? ERROR_MEM_SEGMENT_TOO_LARGE_IMP : ERROR_INVALID_SEGMENT;
                   pReplAddr[0] = pLIDA->szSegmentID;
                   pReplAddr[1] = pLIDA->szFilePath;
-                  usResponse = UtlErrorHwnd( usMsg, MB_EQF_YESTOALL, 2, &pReplAddr[0], EQF_ERROR, pLIDA->hwndErrMsg );
+                  usResponse = LogMessage4(ERROR, __func__, ":: usMsg = " ,intToA(usMsg),pReplAddr[0]);
                 }
                 else
                 {
@@ -2291,8 +2300,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
         pReplAddr[0] = pLIDA->szFilePath;
         pReplAddr[1] = pLIDA->szSegmentID;
         CloseFile( &(pLIDA->hFile));
-        UtlErrorHwnd( ERROR_MEM_INVALID_SGML, MB_CANCEL, 2, pReplAddr, EQF_ERROR,
-                      pLIDA->hwndErrMsg );
+        LogMessage3(ERROR, __func__,  "::ERROR_MEM_INVALID_SGML::",  *pReplAddr);
         usRc = MEM_FILE_SYN_ERR;
      } /* endif */
 
@@ -2520,7 +2528,7 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg
               fMemIsAvail( pLIDA->szMemName, NULL, szSrcLang );
               if ( _stricmp( pLIDA->szTargetLang, szSrcLang ) == 0 )
               {
-                if ( UtlErrorHwnd( ERROR_MEM_SAME_LANGUAGES,
+                if ( LogMessage7(ERROR, __func__,  ERROR_MEM_SAME_LANGUAGES,
                                    MB_YESNO | MB_DEFBUTTON2,
                                    0, NULL, EQF_QUERY, hDlg ) == MBID_NO )
                 {
@@ -2988,7 +2996,7 @@ USHORT MemBatchTMImport
      {
        fOK = FALSE;
        pszParm = pMemImp->szName;
-       UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszParm, EQF_ERROR, pMemImp->hwndErrMsg );
+       LogMessage7(ERROR, __func__,  ERROR_MEMORY_NOTFOUND, pszParm, EQF_ERROR, pMemImp->hwndErrMsg );
      } /* endif */
    } /* endif */
 
@@ -3014,7 +3022,7 @@ USHORT MemBatchTMImport
      if ( !UtlFileExist( pMemImp->szInFile ) )
      {
        pszParm = pMemImp->szInFile;
-       UtlErrorHwnd( FILE_NOT_EXISTS, MB_CANCEL,
+       LogMessage7(ERROR, __func__,  "::FILE_NOT_EXISTS::"_CANCEL,
                      1, &pszParm, EQF_ERROR, pMemImp->hwndErrMsg );
        fOK = FALSE;
      } /* endif */
@@ -3073,7 +3081,7 @@ USHORT MemBatchTMImport
      {
        PSZ pTemp = pLoadIDA->szMemName;
 
-       UtlErrorHwnd( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
+       LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
                      1, &pTemp, EQF_ERROR, pMemImp->hwndErrMsg );
        fOK = FALSE;
      } /* endif */
@@ -3242,8 +3250,7 @@ USHORT MemFuncPrepImport
      {
        fOK = FALSE;
        usRC = TMT_MANDCMDLINE;
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
-                     EQF_ERROR, HWND_FUNCIF );
+       LogMessage2(ERROR, __func__,  "::TMT_MANDCMDLINE");
      } /* endif */
    }else if(!fOkFailHandled){ 
       fOkFailHandled = true;
@@ -3328,7 +3335,7 @@ USHORT MemFuncPrepImport
 	     fOK = FALSE;
        pszParm = pszMemName;
        usRC = ERROR_MEMORY_NOTFOUND;
-       UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+       LogMessage3(ERROR, __func__,  "::ERROR_MEMORY_NOTFOUND::", pszParm);
      } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
@@ -3361,8 +3368,7 @@ USHORT MemFuncPrepImport
      if ( !UtlFileExist( pszInFile ) )
      {
        pszParm = pszInFile;
-       UtlErrorHwnd( FILE_NOT_EXISTS, MB_CANCEL,
-                     1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+       LogMessage3(ERROR, __func__,  "::FILE_NOT_EXISTS::",pszParm);
        fOK = FALSE;
      } /* endif */
   }else if(!fOkFailHandled){
@@ -3569,38 +3575,6 @@ USHORT MemFuncImportProcess
            TAFreeTagTable( pLoadData->pFormatTable );
            pLoadData->pFormatTable = NULL;
          } /* endif */
-
-#ifdef IMPORT_LOGGING
-          {
-            FILE *hfLog = NULL;
-            CHAR szLogFile[MAX_EQF_PATH];
-
-            UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-            strcat( szLogFile, "\\MEMIMP.LOG" );
-            hfLog = fopen( szLogFile, "a" );
-            if ( hfLog )
-            {
-              LONG lCurTime = 0;  
-
-              time( &lCurTime );
-              fprintf( hfLog, "Memory import ended at     : %s", asctime( localtime( &lCurTime ) ) );
-              if ( lImportStartTime )
-              {
-                LONG lDiff = lCurTime - lImportStartTime;
-                fprintf( hfLog, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
-                        (lDiff - (lDiff / 3600 * 3600)) / 60,
-                        (lDiff - (lDiff / 3600 * 3600)) % 60 );
-                fprintf( hfLog, "Memory update time %I64d [ms]\n", lMemAccessTime );
-                fprintf( hfLog, "File read time     %I64d [ms]\n", lFileReadTime );
-                fprintf( hfLog, "Other times        %I64d [ms]\n", lOtherTime );
-              }
-              fprintf( hfLog, "Number of segments imported : %lu\n", pLoadData->ulSegmentCounter );
-              fprintf( hfLog, "Number of invalid segments  : %lu\n", pLoadData->ulInvSegmentCounter );
-              fprintf( hfLog, "Number of OTMUTF8 segments  : %lu\n", pLoadData->ulResetSegmentCounter );
-              fclose( hfLog );
-            } /* endif */
-          }
-#endif
               
               LONG lCurTime = 0;  
 
@@ -3609,7 +3583,18 @@ USHORT MemFuncImportProcess
                             "\n\tNumber of segments imported : ", intToA(pLoadData->ulSegmentCounter) ,
                            "\n\tNumber of invalid segments  : ", intToA(pLoadData->ulInvSegmentCounter), 
                            "\n\tNumber of OTMUTF8 segments  : ", intToA(pLoadData->ulResetSegmentCounter) );
-              
+            
+              if ( lImportStartTime )
+              {
+                LONG lDiff = lCurTime - lImportStartTime;
+                char buff[256];
+                sprintf( buff, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
+                        (lDiff - (lDiff / 3600 * 3600)) / 60,
+                        (lDiff - (lDiff / 3600 * 3600)) % 60 );
+                LogMessage9(TRANSACTION, __func__ , "Memory update time ",intToA(lMemAccessTime)," [ms]\nFile read time     ",
+                    intToA(lFileReadTime), " [ms]\nOther times        ",intToA(lOtherTime), " [ms]\n Overall import time is " , buff);
+              }
+
               #ifdef TEMPORARY_COMMENTED
               if ( lImportStartTime )
               {
@@ -3903,8 +3888,7 @@ USHORT MemHandleCodePageValue
 		      {
 				    usRc = NO_VALID_ASCIIANSIFORMAT;
 		        pMsgError[0] = L"SGML ANSI";
-            UtlErrorHwndW( NO_VALID_ASCIIANSIFORMAT, MB_CANCEL | MB_DEFBUTTON1, 
-                           1, pMsgError, EQF_ERROR, pLIDA->hwndErrMsg, TRUE);
+            LogMessage3(ERROR, __func__,"::NO_VALID_ASCIIANSIFORMAT::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
 		      }
 		      else // usImpMode == SGMLFORMAT_ASCII
 		      { 
@@ -3916,8 +3900,8 @@ USHORT MemHandleCodePageValue
             {
 		          pMsgError[1] = L"SGML ASCII";
 				      pMsgError[0] = pszCodePage;
-              usRc = UtlErrorHwndW( WARNING_DIMP_FORMAT, MB_OKCANCEL | MB_DEFBUTTON1, 2, pMsgError, 
-                                    EQF_QUERY, pLIDA->hwndErrMsg, TRUE);
+              LogMessage3(ERROR, __func__, ":: WARNING_DIMP_FORMAT_SGML ASCII::",    EncodingHelper::convertToUTF8(pMsgError[0]).c_str() );
+              usRc = WARNING_DIMP_FORMAT;
 			      } /* endif */
 
 			      if ( usRc == MBID_OK )
@@ -3934,7 +3918,7 @@ USHORT MemHandleCodePageValue
           {
 			       usRc = NO_VALID_ASCIIANSICP;
              pMsgError[0] = pszCodePage + 5;
-             UtlErrorHwndW( usRc, MB_CANCEL, 1, pMsgError, EQF_ERROR, pLIDA->hwndErrMsg, TRUE );
+             LogMessage5(ERROR, __func__,"::rc = ", intToA(usRc), ":: ", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
 		      } /* endif */
 		    }
 
@@ -3955,8 +3939,7 @@ USHORT MemHandleCodePageValue
 		     {
 				  usRc = NO_VALID_ASCIIANSIFORMAT;
 				  pMsgError[0] = L"SGML ASCII";
-          UtlErrorHwndW( NO_VALID_ASCIIANSIFORMAT, MB_CANCEL | MB_DEFBUTTON1, 
-                          1, pMsgError, EQF_ERROR, pLIDA->hwndErrMsg, TRUE);
+          LogMessage2(ERROR, __func__,"::NO_VALID_ASCIIANSIFORMAT::SGML ASCII");
 		    }
 		    else
 		    {
@@ -3968,8 +3951,7 @@ USHORT MemHandleCodePageValue
 			    {
 		        pMsgError[1] = L"SGML ANSI";
 				    pMsgError[0] = pszCodePage;
-            usRc = UtlErrorHwndW( WARNING_DIMP_FORMAT, MB_OKCANCEL | MB_DEFBUTTON1, 2, pMsgError, 
-                                  EQF_QUERY, pLIDA->hwndErrMsg, TRUE);
+            usRc = LogMessage2(ERROR, __func__, ":: WARNING_DIMP_FORMAT::SGML ANSI");
 			    } /* endif */
 
 			    if (usRc == MBID_OK)
@@ -3986,7 +3968,7 @@ USHORT MemHandleCodePageValue
          {
 			     usRc = NO_VALID_ASCIIANSICP;
            pMsgError[0] = pszCodePage + 6;
-           UtlErrorHwndW( usRc, MB_CANCEL, 1, pMsgError, EQF_ERROR, pLIDA->hwndErrMsg, TRUE );
+           LogMessage5(ERROR, __func__, ":: ",intToA(usRc), "::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
 		     } /* endif */
   		 } /* endif */
 
@@ -4003,13 +3985,13 @@ USHORT MemHandleCodePageValue
 		   if ( usImpMode != pLIDA->usImpMode )
 		   {
 		     usRc = ERROR_DIMP_UTF16WRONG;
-		     UtlErrorHwndW( usRc, MB_CANCEL, 0, NULL, EQF_ERROR, pLIDA->hwndErrMsg, TRUE );
+		     LogMessage3(ERROR, __func__, "::rc = ERROR_DIMP_UTF16WRONG = ", intToA(usRc) );
 		   } /* endif */
 	   }
 	   else
 	   {  // error - this should not occur...
 		   usRc = ERROR_MEM_INVALID_SGML;
-		   UtlErrorHwnd( ERROR_MEM_INVALID_SGML, MB_CANCEL, 0, NULL, EQF_ERROR, pLIDA->hwndErrMsg );
+		   LogMessage2(ERROR, __func__, "::rc =  ERROR_MEM_INVALID_SGML" );
 	   } /* endif */
   } /* endif */
 
@@ -4096,7 +4078,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 
 #ifdef TEMPORARY_COMMENTED
 
-#ifdef IMPORT_LOGGING
+//#ifdef IMPORT_LOGGING
 
 static LARGE_INTEGER liLast = { 0 };
 static LARGE_INTEGER liFrequency = { 0 };
@@ -4124,7 +4106,7 @@ static void GetElapsedTime( LONG64 *plTime )
   liLast.QuadPart = liCurrent.QuadPart;
 } /* end of function GetElapsedTime */
 
-#endif
+//#endif
 
 #endif //TEMPORARY_COMMENTED
 

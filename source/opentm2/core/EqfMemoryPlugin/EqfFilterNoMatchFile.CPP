@@ -338,14 +338,14 @@ USHORT FilterNoMatchPrepare
     {
       fOK = FALSE;
       usRC = FUNC_MANDINFILE;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC,  NULL);
     }
     else if ( !UtlFileExist( pszInNoMatchXML ) )
     {
       fOK = FALSE;
       pszParm = pszInNoMatchXML;
       usRC = ERROR_FILENAME_NOT_VALID ;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszParm);
     } /* endif */
   } /* endif */
 
@@ -356,14 +356,14 @@ USHORT FilterNoMatchPrepare
     {
       fOK = FALSE;
       usRC = EEA_MANDCMDLINE;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC,  NULL);
     }
     else if ( !GlobMemLoadOptionFile( pszGlobMemOptionFile, &(pData->pvGlobMemFile) ) ) 
     {
       fOK = FALSE;
       pszParm = pszGlobMemOptionFile;
       usRC = ERROR_PROFILE_LOAD ;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszParm);
     } /* endif */
   } /* endif */
 
@@ -376,14 +376,14 @@ USHORT FilterNoMatchPrepare
     {
       fOK = FALSE;
       usRC = TA_MANDTM;
-      UtlErrorHwnd( usRC, MB_CANCEL, 0, NULL, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC,  NULL);
     }
     else if ( !pFactory->exists( NULL, pszMemory ) )
     {
       fOK = FALSE;
       pszParm = pszMemory;
       usRC = ERROR_MEMORY_NOTFOUND ;
-      UtlErrorHwnd( usRC, MB_CANCEL, 1, &pszParm, EQF_ERROR, HWND_FUNCIF );
+      LogMessage7(ERROR, __func__,  usRC, pszParm);
     } /* endif */
   } /* endif */
 
@@ -519,7 +519,7 @@ USHORT FilterNoMatchStart
       ltoa( iRC, szRC, 10 );
       pszParm[0] = pData->szOutNoMatchEXP;
       pszParm[1] = szRC;
-      UtlErrorHwnd( ERROR_FILE_WRITE_ERROR, MB_CANCEL, 2, pszParm, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_FILE_WRITE_ERROR,  pszParm, EQF_ERROR, HWND_FUNCIF);
       usRC = ERROR_FILE_WRITE_ERROR;
     } /* endif */
   } /* endif */
@@ -535,7 +535,7 @@ USHORT FilterNoMatchStart
       ltoa( iRC, szRC, 10 );
       pszParm[0] = pData->szOutNoMatchXML;
       pszParm[1] = szRC;
-      UtlErrorHwnd( ERROR_FILE_WRITE_ERROR, MB_CANCEL, 2, pszParm, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_FILE_WRITE_ERROR,  pszParm, EQF_ERROR, HWND_FUNCIF);
       usRC = ERROR_FILE_WRITE_ERROR;
     } /* endif */
   } /* endif */
@@ -551,7 +551,7 @@ USHORT FilterNoMatchStart
       ltoa( iRC, szRC, 10 );
       pszParm[0] = pData->szWordCountReport;
       pszParm[1] = szRC;
-      UtlErrorHwnd( ERROR_FILE_WRITE_ERROR, MB_CANCEL, 2, pszParm, EQF_ERROR, HWND_FUNCIF);
+      LogMessage7(ERROR, __func__,  ERROR_FILE_WRITE_ERROR,  pszParm, EQF_ERROR, HWND_FUNCIF);
       usRC = ERROR_FILE_WRITE_ERROR;
     } /* endif */
   } /* endif */
