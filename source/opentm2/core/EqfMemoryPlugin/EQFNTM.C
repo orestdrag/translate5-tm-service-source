@@ -329,7 +329,8 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   if ( !fOk )
   {
     LogMessage(WARNING, "TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 42");
+#ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif
   } /* endif */
@@ -905,7 +906,8 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
           /* convert source string                                    */
           /************************************************************/
           LogMessage(FATAL,"TEMPORARY_COMMENTED in C_TmGetW::NTMConvertCRLFW");
-          #ifdef TEMPORARY_COMMENTED
+          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 43");
+#ifdef TEMPORARY_COMMENTED
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szSource,
                           pszTempString,
                           pstGetIn->stTmGet.usConvert );
@@ -991,7 +993,8 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 44");
+#ifdef TEMPORARY_COMMENTED
   usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );
   #endif
 //usRc = U( htm,
@@ -1001,7 +1004,8 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 
   if ( usMsgHandling && usRc )
   {
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 45");
+#ifdef TEMPORARY_COMMENTED
     usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );
     #endif
   } /* endif */

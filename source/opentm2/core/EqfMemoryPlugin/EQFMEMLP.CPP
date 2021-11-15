@@ -2268,7 +2268,8 @@ USHORT MemFuncImportProcess
                     intToA(lFileReadTime), " [ms]\nOther times        ",intToA(lOtherTime), " [ms]\n Overall import time is " , buff);
               }
 
-              #ifdef TEMPORARY_COMMENTED
+              LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 10");
+#ifdef TEMPORARY_COMMENTED
               if ( lImportStartTime )
               {
                 LONG lDiff = lCurTime - lImportStartTime;

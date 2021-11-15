@@ -485,7 +485,8 @@ int EqfMemoryPlugin::renameMemory(
     BOOL fIsNew = FALSE;
     char szShortName[MAX_FILESPEC];
     
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 16");
+#ifdef TEMPORARY_COMMENTED
     ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
     #endif
 
@@ -542,7 +543,8 @@ int EqfMemoryPlugin::renameMemory(
     if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
     {
       
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 17");
+#ifdef TEMPORARY_COMMENTED
          // adjust name in property header
       strcpy( pstMemProp->stPropHead.szName, szShortName );
       strcat( pstMemProp->stPropHead.szName, EXT_OF_TMPROP );
@@ -701,6 +703,7 @@ OtmMemory* EqfMemoryPlugin::createTempMemory(
 
   bMsgHandling;
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 18");
 #ifdef TEMPORARY_COMMENTED
   // use old temporary memory create code
   usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );
@@ -730,6 +733,7 @@ void EqfMemoryPlugin::closeTempMemory(
   // close the memory
   this->closeMemory( pMemory );
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 19");
 #ifdef TEMPORARY_COMMENTED
   // use old temporary memory delete code
   TMDeleteTempMem( (PSZ)strName.c_str() );
@@ -1104,7 +1108,8 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
     
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 20");
+#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
     #endif 
@@ -1114,11 +1119,13 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     strcpy(pProp->stTMSignature.szName, pProp->stPropHead.szName);
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 21");
+#ifdef TEMPORARY_COMMENTED
     UtlSplitFnameFromPath( pProp->stPropHead.szPath );
     #endif
 
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 22");
+#ifdef TEMPORARY_COMMENTED
     //in case of overflow. change these strcpy to strncpy
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
     #endif
@@ -1171,21 +1178,25 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 23");
+#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
     #endif 
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 24");
+#ifdef TEMPORARY_COMMENTED
     Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
     #endif 
 
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 25");
+#ifdef TEMPORARY_COMMENTED
     UtlSplitFnameFromPath( pProp->stPropHead.szPath );
     #endif
     //in case of overflow. change these strcpy to strncpy
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 26");
+#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
     strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
     #endif
@@ -1194,7 +1205,8 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     strncpy( pProp->stTMSignature.szSourceLanguage, pOldProp->stTMSignature.szSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 27");
+#ifdef TEMPORARY_COMMENTED
     strcpy( pProp->stTMSignature.szUserid, pOldProp->stTMSignature.szUserid );
     #endif
 
@@ -1424,6 +1436,7 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
     HTM htm = 0;
     USHORT usRC = NO_ERROR;
 // commented temporarily to link the plugin
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 28");
 #ifdef TEMPORARY_COMMENTED
     USHORT usRC = TmOpen( (PSZ)strDataFile.c_str(), &htm,  EXCLUSIVE, 0, FALSE,  NULLHANDLE );
 #endif //TEMPORARY_COMMENTED
@@ -1588,6 +1601,7 @@ int EqfMemoryPlugin::importFromMemFilesEndProcessing
     if ( pData->pInputMemory != NULL ) 
     {
       HTM htm = pData->pInputMemory->getHTM();
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 29");
 #ifdef TEMPORARY_COMMENTED
       TmClose( htm, NULL,  FALSE,  NULL );
 #endif //TEMPORARY_COMMENTED
@@ -1627,7 +1641,8 @@ int EqfMemoryPlugin::addMemoryToList(const char* pszName)
     if( findMemory(pszName) != NULL)
         return -1;
     
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 30");
+#ifdef TEMPORARY_COMMENTED
     ObjLongToShortName( pszName, szShortName, TM_OBJECT, &fIsNew );
     #endif
 

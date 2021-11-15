@@ -59,7 +59,8 @@ USHORT MemFuncOrganizeProcess( PFCTDATA pData );
 /* Callback function for Organize ProcessWindow */
 /************************************************/
 
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 31");
+#ifdef TEMPORARY_COMMENTED
 MRESULT MemOrganizeCallBack
 (
   PPROCESSCOMMAREA pCommArea,          // ptr to commmunication area
@@ -360,7 +361,8 @@ USHORT EQFMemOrganizeStart
   // The function initializes the TM organize. It returns TRUE if
   // the initialization was OK else it returns FASLE.
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 32");
+#ifdef TEMPORARY_COMMENTED
     PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the dialog IDA
     USHORT            usRc = TRUE;    // Return code
     PSZ               pReplAddr[4];   // Pointer to an address list of replacement strings
@@ -515,7 +517,8 @@ VOID EQFMemOrganizeProcess
   HWND              hWnd
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 33");
+#ifdef TEMPORARY_COMMENTED
     USHORT            usRc = TRUE;    // Return code to control a process
     USHORT            usDosRc;        // Dos Returncode
     PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the organize IDA

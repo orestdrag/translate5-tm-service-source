@@ -419,7 +419,8 @@ USHORT EqfStartSession
       UtlSetString( QST_COMMEMDIR,    pPropSys->szDirComMem );
       UtlSetString( QST_COMPROPDIR,   pPropSys->szDirComProp );
       UtlSetString( QST_COMDICTDIR,   pPropSys->szDirComDict );
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 1");
+#ifdef TEMPORARY_COMMENTED
       UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );
       #endif
       UtlSetString( QST_DIRSEGNOMATCHDIR, "SNOMATCH" );
@@ -770,7 +771,8 @@ USHORT EqfMemoryExists
       BOOL fIsNew = FALSE;
       CHAR szShortName[MAX_FILESPEC];
      
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 2");
+#ifdef TEMPORARY_COMMENTED
       ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);
       #endif
       //FilesystemHelper::FileExists(pszMemoryName);

@@ -502,7 +502,7 @@ typedef  struct _MESSAGEFILE
 #define MB_CANCEL      MB_OK            // windows only provides OK button
 #define MB_ENTER       MB_OK
 #define MB_ENTERCANCEL MB_OKCANCEL
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define MB_INFORMATION MB_ICONINFORMATION
 #define MB_QUERY       MB_ICONQUESTION
 #define MB_WARNING     MB_ICONEXCLAMATION  /* Message box IDs */
@@ -558,7 +558,7 @@ typedef  struct _MESSAGEFILE
   #define GpiSetColor      SetTextColor
   #define GpiSetBackColor  SetBkColor
 //WINAPI
-#if 0
+#ifdef TEMPORARY_COMMENTED
   #define WinPostMsg(a, b, c, d)     CPLUSPLUS   PostMessage(a, b, (WPARAM)c, (LPARAM)d)
   #define WinSendMsg(a, b, c, d)     CPLUSPLUS   SendMessage(a, b, (WPARAM)c, (LPARAM)d)
 #endif
@@ -607,7 +607,7 @@ typedef  struct _MESSAGEFILE
   //#define WinWindowFromID                GetDlgItem
 //WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdlgitem
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
   #define WinMessageBox(a,b,c,d,e,f)     MessageBox(b,c,d,f)
 #endif
     #define MBID_OK      IDOK
@@ -1093,7 +1093,7 @@ typedef struct _DATETIME {
 /**********************************************************************/
 /* OS/2 PM functions converted to Windows                             */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 BOOL WinRegisterClass( HINSTANCE hInstance, PSZ pszClass,
                                 WNDPROC lpfnWindowProc, LONG lStyle,
                                 SHORT sExtraBytes );

@@ -226,8 +226,8 @@ LONG                lOptions                 // type of new Translation Memory
 
       // notify creation success
 
-  LogMessage(WARNING, "TEMPORARY_COMMENTED in MemFuncCreateMem():: notify creation success with win api");
-#if 0
+  LogMessage2(WARNING, __func__,"::TEMPORARY_COMMENTED in MemFuncCreateMem():: notify creation success with win api");
+#ifdef TEMPORARY_COMMENTED
       HWND hwnd = FindWindow( TWBMAIN ,NULL);
       if(hwnd != NULL)
       {

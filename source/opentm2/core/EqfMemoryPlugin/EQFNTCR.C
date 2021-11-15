@@ -177,6 +177,7 @@
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
 #include "FilesystemWrapper.h"
+#include "LogWrapper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -380,7 +381,8 @@ USHORT TmtXCreate
     UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 37");
+#ifdef TEMPORARY_COMMENTED
     NTMDestroyLongNameTable( pTmClb );
     #endif
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );

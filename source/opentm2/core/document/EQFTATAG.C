@@ -96,8 +96,8 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   /********************************************************************/
   if ( usRC == NO_ERROR )
   {
-    LogMessage(WARNING,"TEMPORARY COMMENTED in TALoadTagTableExHwnd:: set user exit load flag if one of the exit functions is to be loaded");
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(WARNING,__func__,"::TEMPORARY COMMENTED in TALoadTagTableExHwnd:: set user exit load flag if one of the exit functions is to be loaded");
+#ifdef TEMPORARY_COMMENTED
     // set user exit load flag if one of the exit functions is to be loaded
     if ( ulFlags & TALOADPROTTABLEFUNC )
     {

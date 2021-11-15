@@ -141,7 +141,8 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
     /* (The resource file is not checked here, it will be checked     */
     /*  later on while loading the resource into memory)              */
     /******************************************************************/
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 3");
+#ifdef TEMPORARY_COMMENTED
     if ( fOK )
     {
       fOK = UtlFileExist( EqfSystemHlpFile );
@@ -176,7 +177,8 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
         strcpy( pEqfSystemPropPath, EqfSystemPropPath );
       } /* endif */
       
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4");
+#ifdef TEMPORARY_COMMENTED
       if ( pEqfSystemMsgFile )
       {
         strcpy( pEqfSystemMsgFile, EqfSystemMsgFile );

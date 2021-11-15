@@ -150,7 +150,8 @@ USHORT EQFMemImportTrojaStart
 
       if (usRc)
       {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 7");
+#ifdef TEMPORARY_COMMENTED
         /* This is platform-dependent code, should be rewritten and tested */
         /* https://linux.die.net/man/3/splitpath  */
         /* https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/splitpath-wsplitpath?view=msvc-160  */

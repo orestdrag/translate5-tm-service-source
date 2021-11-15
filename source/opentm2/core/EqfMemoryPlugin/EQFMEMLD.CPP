@@ -235,7 +235,8 @@ BOOL MemImportFileOpenDialog
   PMEM_LOAD_DLG_IDA   pLIDA
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 8");
+#ifdef TEMPORARY_COMMENTED
   BOOL fOK = TRUE;
   EQFINFO ErrorInfo;
   OPENFILENAME OpenStruct;
@@ -390,7 +391,8 @@ UINT_PTR CALLBACK MemOpenFileHook
   LPARAM lParam   // message parameter
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 9");
+#ifdef TEMPORARY_COMMENTED
   UINT uiResult = 0;
   wParam;
 

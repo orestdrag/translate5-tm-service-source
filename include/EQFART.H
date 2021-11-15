@@ -127,7 +127,7 @@
   #define ART_DLL       "ART"
   #define ART_REGISTER  "ARTREGISTER"
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
   APIRET ArtRegister(HAB  hAB,
                      HWND hwndOwnerFrame,
                      PSZ  pszProductID,

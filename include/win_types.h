@@ -336,7 +336,7 @@ typedef struct _FILETIME {
 
 #define MAX_PATH 260
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
 typedef struct _WIN32_FIND_DATA { 
   DWORD dwFileAttributes; 
   FILETIME ftCreationTime; 

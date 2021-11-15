@@ -196,7 +196,8 @@ USHORT MemRcHandlingHwnd
                  UtlGetFnameFromPath( pszMemPath ),
                  DOT );
       LogMessage(WARNING,"TEMPORARY_COMMENTED ObjShortToLongName");
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 34");
+#ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
      OEMTOANSI( szLongName );
@@ -208,7 +209,8 @@ USHORT MemRcHandlingHwnd
      Utlstrccpy( szMemName, pszMemPath, DOT );
      
      LogMessage(WARNING,"TEMPORARY_COMMENTED ObjShortToLongName");
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 35");
+#ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
 
@@ -870,7 +872,8 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
       ULONG ulKeyLen  = sizeof(pData->szKey) / sizeof(CHAR_W);
 
       LogMessage(WARNING, "TEMPORARY_COMMENTED QDAMDictNextLocal");
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 36");
+#ifdef TEMPORARY_COMMENTED
       sRc = QDAMDictNextLocal( pbTree, pData->szKey, &ulKeyLen, pData->bData, &ulDataLen );
       #endif
 

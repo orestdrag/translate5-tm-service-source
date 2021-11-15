@@ -147,7 +147,7 @@
 
     #if MSC_VER < 1400
         #ifndef _WCTYPE_T_DEFINED
-#if 0
+#ifdef TEMPORARY_COMMENTED
           typedef wchar_t wint_t;
           typedef wchar_t wctype_t;
 #endif
@@ -565,7 +565,8 @@ typedef PSWP  EQF_PSWP;
     } \
   }
 
-#if 0
+
+#ifdef TEMPORARY_COMMENTED
 #define CBQUERYSELECTEDITEMTEXT( sItem, hwnd, id, szBuffer ) \
   { \
     sItem = (SHORT)SendDlgItemMessage( hwnd, id, CB_GETCURSEL, 0, 0L ); \
@@ -604,7 +605,7 @@ typedef PSWP  EQF_PSWP;
 #define LBSEARCHSTRING( hwnd, usID, pszString ) \
     (SHORT)SendDlgItemMessage( hwnd, usID, LB_FINDSTRING, MP1FROMSHORT( 0 ), \
                                MP2FROMP( pszString ) )
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define LBSEARCHSTRINGHWND( hwnd, pszString ) \
     (SHORT)CPLUSPLUS SendMessage( hwnd, LB_FINDSTRING, MP1FROMSHORT( 0 ), \
                         MP2FROMP( pszString ) )
@@ -2659,7 +2660,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define EqfSend2AllHandlers( msg, mp1, mp2) Send2AllHandlers( msg, mp1, mp2)
 #define EqfSend2AllObjects( cls, msg, mp1, mp2)                                \
                                            Send2AllObjects( cls, msg, mp1, mp2)
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define EqfQueryHandler( psz)        (HWND)WinSendMsg( EqfQueryObjectManager(),\
                                                 WM_EQF_QUERYHANDLER,           \
                                                 NULL, MP2FROMP(psz) )
@@ -2720,7 +2721,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Macro interface to workbench code (EQFSTART)                       */
 /**********************************************************************/
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define EqfActivateInstance( hwnd, flg)                                        \
                                    (VOID)WinSendMsg( EqfQueryHandler( TWBMAIN),\
                                                 WM_EQF_ACTIVATEINSTANCE,       \
@@ -2737,7 +2738,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Macro interface to property handler                                */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define EqfCallPropertyHandler( msg, mp1, mp2)                                 \
                           (HPROP)WinSendMsg( EqfQueryHandler( PROPERTYHANDLER),\
                                                 msg, mp1, mp2)
@@ -2758,7 +2759,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define  SENDMESSAGE( hwnd, msg, mp1, mp2 )       \
     SendMessageW( hwnd, msg, mp1, mp2)
 
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 // macro to get the index of the first selected item in a listbox
 #define QUERYSELECTION( hwnd, id )                              \
      (SHORT) SendDlgItemMessage( (hwnd), (id), LB_GETCURSEL, 0, 0L )
@@ -2768,7 +2769,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define QUERYSELECTIONHWND( hwnd )                       \
      (SHORT) CPLUSPLUS SendMessage( (hwnd), LB_GETCURSEL, 0, 0L )
 
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define CBQUERYSELECTION( hwnd, id )                              \
      (SHORT) SendDlgItemMessage( (hwnd), (id), CB_GETCURSEL, 0, 0L )
 #endif
@@ -2784,7 +2785,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /* 2.) Windows does not send a notification in such cases - we have   */
 /*     to do it on our own...                                         */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define SELECTITEM( hwnd, id, index )                                  \
   {                                                                      \
      SendDlgItemMessage( hwnd, id, LB_SETCURSEL, index, 0L );            \
@@ -2985,7 +2986,8 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #define IDFROMDRIVE( startid, drive )                           \
    ( (SHORT) (drive - 'A') + startid )
 
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
+#ifdef TEMPORARY_COMMENTED
 // macro to set the hilite state of a drive icon
 #define SETDRIVE( hwnd, id, flag )                           \
     SendDlgItemMessage( hwnd, id, WM_DRIVEBUTTON_SELECT, flag, 0L )
@@ -3078,7 +3080,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #endif //WINAPI
 
 // macro to get text from a dialog control
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define QUERYTEXT( hwnd, id, buffer ) \
     GetDlgItemText( hwnd, id, buffer, sizeof(buffer) )
 #define QUERYTEXTW( hwnd, id, buffer ) \
@@ -3126,7 +3128,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
      } \
   }
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
 // Post a WM_CLOSE message to close window
 #define POSTCLOSE( hwnd, flag ) \
     CPLUSPLUS PostMessage( hwnd, WM_CLOSE, flag, 0L )
@@ -3286,7 +3288,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 #endif
 
 // macro to enable or disable a dialog control
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define ENABLECTRL( hwnd, id, flag ) \
      EnableWindow( GetDlgItem( hwnd, id ), flag )
 #endif
@@ -3314,7 +3316,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
     CPLUSPLUS SendMessage( hwnd, WM_SETREDRAW, flag, 0L ); \
     if ( flag ) InvalidateRect( hwnd, NULL, FALSE ); \
   }
-#if 0
+#ifdef TEMPORARY_COMMENTED
   #define ENABLEUPDATEHWND_TRUE( hwnd )                   \
     { \
       CPLUSPLUS SendMessage( hwnd, WM_SETREDRAW, TRUE, 0L ); \
@@ -3402,7 +3404,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
      CPLUSPLUS SendMessage( hwnd, WM_COMMAND, MAKELONG( id, BN_CLICKED ), 0 ); \
     }
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
 // SETTEXTFROMRES:  do a WinSetWindowText from a resource string table string
 #define SETTEXTFROMRES( hwnd, id, buffer, hmod, sid )              \
     if ( LoadString( hmod, sid, buffer, sizeof(buffer) ) ) \
@@ -3435,7 +3437,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
   /* in case of error - for the first call it's the same, therefore   */
   /* try again to be sure....                                         */
   /********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
   #define ANCHORWNDIDA( hwnd, pIda ) \
    ((SetWindowLong( hwnd, GWL_USERDATA /*0*/, (LONG)((PVOID) pIda) )) ?                   \
                     1 : SetWindowLong( hwnd, GWL_USERDATA /*0*/, (LONG)((PVOID) pIda) ) != 0L )
@@ -3451,7 +3453,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get parent from specified handle                                   */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define GETPARENT( hwnd )                   \
      CPLUSPLUS GetParent( hwnd )
 #endif
@@ -3465,7 +3467,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get active window                                                  */
 /**********************************************************************/
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define QUERYACTIVEWINDOW() GetActiveWindow()
 #endif
 
@@ -3478,17 +3480,17 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* macro to retrieve store IDA pointer from window structure          */
 /**********************************************************************/
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define ACCESSDLGIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, DWL_USER)
 #endif
 
-#if 0 // WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga
+#ifdef TEMPORARY_COMMENTED // WINAPI https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga
 #define ACCESSWNDIDA( hwnd, type ) \
     (type)GetWindowLong( hwnd, GWL_USERDATA /*0*/ )
 #endif
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define DISMISSDLG( hwnd, value ) \
     EndDialog( hwnd, value )
 #endif
@@ -3551,7 +3553,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* anchor pointer in listbox item handle                              */
 /**********************************************************************/
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
 #define SETITEMHANDLE( hwnd, id, index, handle ) \
      SendDlgItemMessage( hwnd, id, LB_SETITEMDATA, index, (ULONG) handle)
 // Add for R012027 start
@@ -3586,7 +3588,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* modal dialog                                                       */
 /**********************************************************************/
-#if 0 //WINAPI
+#ifdef TEMPORARY_COMMENTED //WINAPI
   #define DIALOGBOX( hwnd, proc, hresource, id, param, rc )    \
     rc = DialogBoxParam( hresource, MAKEINTRESOURCE( id ), hwnd, proc, (LPARAM)param );
   #define DIALOGBOXW( hwnd, proc, hresource, id, param, rc )    \
@@ -3618,7 +3620,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
   #define SPTR_SIZENS            IDC_SIZEENS
   #define SPTR_APPICON           IDC_ICON
 
-#if 0
+#ifdef TEMPORARY_COMMENTED
   #define SETCURSOR( id )       \
     SetCursor( LoadCursor( NULL, id )  )
 #endif
@@ -3632,7 +3634,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* get mouse pointer                                                  */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define GETCURSOR()       \
     GetCursor()
 #endif
@@ -3733,7 +3735,7 @@ extern HPOINTER hiconTMM;              // translation memory maintenance icon
 /**********************************************************************/
 /* Invalidate Rectangle                                               */
 /**********************************************************************/
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define INVALIDATERECT( hwnd, pRect, fChildInclude )   \
       InvalidateRect( hwnd, pRect, FALSE )
 #endif
@@ -7133,7 +7135,7 @@ BOOL TACheckAndAdaptLFChanges
 
 // keep other process from doing property related stuff..
 // GETMUTEX to create a mutex
-#if 0
+#ifdef TEMPORARY_COMMENTED
 #define GETMUTEX(hMutexSem) \
 { hMutexSem = OpenMutex( MUTEX_ALL_ACCESS, TRUE, PROP_ACCESS_MUTEX );                \
   if ( hMutexSem == NULL) hMutexSem = CreateMutex( NULL, FALSE, PROP_ACCESS_MUTEX ); \

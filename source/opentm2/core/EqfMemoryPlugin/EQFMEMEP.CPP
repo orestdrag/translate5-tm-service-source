@@ -375,7 +375,8 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
 #endif// TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
 
-       #ifdef TEMPORARY_COMMENTED
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4");
+#ifdef TEMPORARY_COMMENTED
        if ( pExportIDA->ulSegmentCounter == 0 )
        {
          // Delete the exported file because it is empty
@@ -1889,7 +1890,8 @@ USHORT MemFuncPrepExport
       fOK = false;
     }
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 5");
+#ifdef TEMPORARY_COMMENTED
     USHORT      usDosRc;              // Return code from Dos functions
     USHORT      usAction;             // Action for DosOpen
     usDosRc = UtlOpenHwnd
@@ -1974,7 +1976,8 @@ USHORT MemFuncPrepExport
     } /* endif */
 
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 6");
+#ifdef TEMPORARY_COMMENTED
     // build object name
     sprintf( ObjName, "MEMEXP: %s", pIDA->szMemName );
     sRC = QUERYSYMBOL( ObjName );
