@@ -1319,7 +1319,6 @@ typedef struct _TMX_MATCHENTRY
 //#pragma pack(show)      
 //#pragma pack(push, 8)
 //#pragma pack(8)
-#ifndef TEMPORARY_COMMENTED
 extern "C"{
 typedef struct _TMX_SENTENCE
 {
@@ -1338,23 +1337,7 @@ typedef struct _TMX_SENTENCE
   PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
 } TMX_SENTENCE, * PTMX_SENTENCE;
 };
-#else
-{
-  PSZ_W pInputString;
-  PSZ_W pNormString;
-  PSZ_W pNormStringStart;
-  PSZ_W pPropString; 
-  PTMX_TERM_TOKEN pTermTokens;
-  PULONG  pulVotes;                  // proposal string (with tagging)
-  PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
-  PTMX_TAGTABLE_RECORD pTagRecord;
-  PTMX_TAGENTRY pTagEntryList;
-  LONG lTermAlloc;
-  LONG lTagAlloc;  
-  USHORT  usNormLen;
-  USHORT  usActVote;
-} TMX_SENTENCE, * PTMX_SENTENCE;
-#endif
+
 //#pragma pack(pop)
 //#pragma pack()
 

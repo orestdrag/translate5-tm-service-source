@@ -6657,21 +6657,6 @@ typedef enum _UTLCHECKOBJTYPES
 } UTLCHECKOBJTYPES;
 BOOL UtlCheckIfExist( PSZ pszName, SHORT sObjType );
 
-#ifdef TEMPORARY_COMMENTED
-extern "C" USHORT ObjLongToShortName
-(
-  PSZ pszLongName,                     // ptr to object long name
-  PSZ pszShortName,                    // ptr to buffer for short name
-  UTLCHECKOBJTYPES ObjType,            // type of object
-  PBOOL   pfIsNew                      // ptr to caller's is-new flag
-);
-extern "C" USHORT ObjShortToLongName
-(
-  PSZ pszShortName,                    // ptr to object short name
-  PSZ pszLongName,                     // ptr to buffer for long name
-  UTLCHECKOBJTYPES ObjType             // type of object
-);
-#endif 
 
 // possible return stated of ObjLongToShortEx function
 typedef enum _OBJLONGTOSHORTSTATE

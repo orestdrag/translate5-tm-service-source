@@ -81,81 +81,6 @@ void InitMarkupPluginMapper()
 	
 */
 
-#ifdef TEMPORARY_COMMENTED
-__declspec(dllexport)
-USHORT MUFillLBWithMarkups( HWND hwndLBox, PSZ pszBuffer, int iBufSize, MUFILLTYPES eFillType )
-{
-  USHORT          usCount;
-  static char     szBuffer[MAX_LONGFILESPEC]; // buffer for markup names
-  BOOL            fCombo = FALSE;
-
-  ISCOMBOBOX( hwndLBox, fCombo );
-  SETCURSOR( SPTR_WAIT );
-  ENABLEUPDATEHWND_FALSE( hwndLBox);
-  DELETEALLHWND( hwndLBox );
-
-  // loop through all markup table plugins 
-  for( int i = 0; i < (int)pluginList->size(); i++)
-  {
-    OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-
-    // loop over all markups of plugin
-    int iNumOfMarkups = curPlugin->getCount();
-    for ( int j = 0; j < iNumOfMarkups; j++ )
-    {
-      OtmMarkup *markup = curPlugin->getMarkup( j );
-      if ( markup != NULL ) 
-      {
-        switch ( eFillType )
-        {
-          case MUFILL_NAMES:
-            markup->getName( szBuffer, sizeof(szBuffer) );
-            if ( fCombo )
-            {
-              CBINSERTITEMHWND( hwndLBox, szBuffer );
-            }
-            else
-            {
-              INSERTITEMHWND( hwndLBox, szBuffer );
-            } /* endif */
-            break;
-          case MUFILL_CLBITEMS:
-            MUMakeCLBListItem( curPlugin, markup, pszBuffer, iBufSize );
-            if ( fCombo )
-            {
-              CBINSERTITEMHWND( hwndLBox, pszBuffer );
-            }
-            else
-            {
-              INSERTITEMHWND( hwndLBox, pszBuffer );
-            } /* endif */
-            break;
-        } /* end */           
-      } /* end */         
-    } /* end */       
-  }
-
-  SETCURSOR( SPTR_ARROW );
-
-  if ( fCombo )
-  {
-    usCount = CBQUERYITEMCOUNTHWND( hwndLBox );
-//    if ( usCount ) CBSELECTITEMHWND( hwndLBox, 0 );
-  }
-  else
-  {
-    usCount = QUERYITEMCOUNTHWND( hwndLBox );
-//    if ( usCount ) SELECTITEMHWND( hwndLBox, 0 );
-  } /* endif */
-
-
-
-   ENABLEUPDATEHWND_TRUE( hwndLBox  );
-
-   return( usCount );
-} /* end of function MUFillLBWithMarkups */
-#endif //TEMPORARY_COMMENTED
-
 // find a markup table object by markup table name
 __declspec(dllexport)
  OtmMarkup *GetMarkupObject( char *pszMarkup, char *pszPlugin )
@@ -418,23 +343,6 @@ BOOL MUGetMarkupTablePlugin( char *pszMarkup, char *pszBuffer, int iBufSize )
   } /* end */     
   return( false );
 }
-
-
-#ifdef TEMPORARY_COMMENTED
-// load a markup table TBL file into memory
-__declspec(dllexport)
-BOOL MULoadMarkupTableFile( char *pszMarkup, char *pszPlugin, PVOID *ppLoadedTable, BOOL fErrorHandling )
-{
-  char szFileName[MAX_LONGFILESPEC];
-  ULONG ulBytes = 0;
-
-  if ( MUGetMarkupTableFileName( pszMarkup, pszPlugin, szFileName, sizeof(szFileName) ) )
-  {
-    return ( UtlLoadFileL( szFileName, ppLoadedTable, &ulBytes, FALSE, fErrorHandling ) );
-  } /* end */     
-  return( false );
-}
-#endif //TEMPORARY_COMMENTED
 
 
 // update the files of a markup table

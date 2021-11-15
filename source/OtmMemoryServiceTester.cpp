@@ -134,12 +134,10 @@ int main( int argc, char *argv[], char *envp[] )
       {
         int iRC = 0;
         // end of parameter data reached, execute the command
-#ifdef TEMPORARY_COMMENTED
         if ( wcscasecmp( szCommand, L"importMemoryFromPackage" ) == 0 )
         {
           iRC = pService->importMemoryFromPackage( strInParms, strOutParms );
         }
-#endif //TEMPORARY_COMMENTED
         /*else*/ if ( wcscasecmp( szCommand, L"deleteMemory" ) == 0 )
         {
           iRC = pService->deleteMem( strInParms, strOutParms );
@@ -148,7 +146,6 @@ int main( int argc, char *argv[], char *envp[] )
         {
           iRC = pService->createMemory( strInParms, strOutParms );
         }
-#ifdef TEMPORARY_COMMENTED
         else if ( wcscasecmp( szCommand, L"importMemory" ) == 0 )
         {
           iRC = pService->importMemory( strInParms, strOutParms );
@@ -173,7 +170,6 @@ int main( int argc, char *argv[], char *envp[] )
         {
           iRC = pService->updateMemory( strInParms, strOutParms );
         }
-#endif //TEMPORARY_COMMENTED
         else
         {
           wprintf( L"Warning: unknown command \"%s\" ignored\n", szCommand );

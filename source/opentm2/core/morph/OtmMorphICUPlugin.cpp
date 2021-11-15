@@ -194,34 +194,4 @@ bool OtmMorphICUPlugin::stopPlugin( bool fForce  )
 
   return( true );
 }
-#ifdef TEMPORARY_COMMENTED
-extern "C" {
-	__declspec(dllexport)
-		USHORT registerPlugins()
-	{
-		PluginManager::eRegRc eRc = PluginManager::eSuccess;
-		PluginManager *pManager = PluginManager::getInstance();
-		OtmMorphICUPlugin* pMorphPlugin = new OtmMorphICUPlugin();
-		eRc = pManager->registerPlugin((OtmPlugin*) pMorphPlugin);
-        USHORT usRC = (USHORT) eRc;
-        return usRC;
-	}
-}
 
-
-extern "C" {
-  __declspec(dllexport)
-  unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
-  {
-    strcpy( pPluginInfo->szName, pszPluginName );
-    strcpy( pPluginInfo->szShortDescription, pszShortDescription );
-    strcpy( pPluginInfo->szLongDescription, pszLongDescription );
-    strcpy( pPluginInfo->szVersion, pszVersion );
-    strcpy( pPluginInfo->szSupplier, pszSupplier );
-    pPluginInfo->eType = OtmPlugin::eMorphType;
-    strcpy( pPluginInfo->szDependencies, "" );
-    pPluginInfo->iMinOpenTM2Version= -1;
-    return( 0 );
-  }
-}
-#endif
