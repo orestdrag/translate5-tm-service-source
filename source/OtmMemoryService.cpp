@@ -334,6 +334,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     unsigned int uiPort = 8080;
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
+    unsigned int uiLogLevel = 0;
 
     /* get configuration settings */
     {
@@ -355,6 +356,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiPort = std::stoi(conf.get_value("port", "8080"));
             uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
+            uiLogLevel = std::stoi(conf.get_value("logLevl","2"));
         }else{
           LogMessage2(ERROR, "can't open otm_service.conf, path = ", path.c_str());
         }
@@ -370,8 +372,9 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", intToA(uiPort), "; Worker threads = ", intToA(uiWorkerThreads),
             "; timeout = ", intToA(uiTimeOut));
-    LogMessage2(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath);
-    
+    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", intToA(uiLo
+    gLevel));
+    SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     strcpy( pszService, szServiceName );
     *puiPort = uiPort;

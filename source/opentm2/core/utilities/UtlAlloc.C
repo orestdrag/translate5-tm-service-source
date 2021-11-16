@@ -243,7 +243,9 @@ USHORT UtlIntFree
     /* display error message - someone killed us...                   */
     /******************************************************************/
     usRC = ERROR_INTERNAL;
-    UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
+    LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
+      intToA(ulActLength), "; ulActLength2 = ", intToA(ulActLength2));
+    //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
   else
   {
