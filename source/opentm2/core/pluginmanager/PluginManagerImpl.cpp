@@ -14,7 +14,7 @@
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
 #include "PropertyWrapper.H"
-
+#include "../utilities/LogWrapper.h"
 
 using namespace std;
 
@@ -61,7 +61,7 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 			std::string name(plugin->getName());
 			if (!name.empty())
       {
-#ifdef TEMPORARY_COMMENTED
+#ifdef TEMPORARY_COMMENTED_LOGS
         this->Log.writef( "   Registering plugin %s", name.c_str() );
 #endif //TEMPORARY_COMMENTED
 
@@ -73,7 +73,8 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 					if (tmpName == name)
 					{
 						eRc = PluginManager::eAlreadyRegistered;
-#ifdef TEMPORARY_COMMENTED
+
+#ifdef TEMPORARY_COMMENTED_LOGS
                         this->Log.writef( "Error:   The plugin %s is already registered.", name.c_str() ); // Add for 403115
 #endif // TEMPORARY_COMMENTED
 					}
@@ -112,7 +113,7 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 		eRc = PluginManager::eInvalidRequest;
 	}
 
-#ifdef TEMPORARY_COMMENTED
+#ifdef TEMPORARY_COMMENTED_LOGS
     this->Log.writef( "   Registering plugin %d", eRc );
 #endif //TEMPORARY_COMMENTED
 
@@ -222,7 +223,9 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 
   BOOL fLogHasBeenOpened = FALSE;
   
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 75");
 #ifdef TEMPORARY_COMMENTED
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 76");
 #ifdef TEMPORARY_COMMENTED
 #ifdef _DEBUG
   if ( !this->Log.isOpen() )
@@ -237,6 +240,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
   // check the depths of the cycle
   if (IsDepthOvered( pszPluginDir )) // util
   {
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 77");
 #ifdef TEMPORARY_COMMENTED
       this->Log.writef( "...skipping directory, max. nesting level reached" );
       if ( fLogHasBeenOpened ) this->Log.close();
@@ -266,10 +270,11 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
       usRC = usSubRC;
     }
 
-#ifdef TEMPORARY_COMMENTED
+#ifdef TEMPORARY_COMMENTED_LOGS
  this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
 #endif //TEMPORARY_COMMENTED
   
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 23");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
 
@@ -326,6 +331,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 	strFileSpec = pszPluginDir;
 	strFileSpec += "/*";
 	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 24");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( hDir != INVALID_HANDLE_VALUE )
   {
@@ -393,6 +399,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
     void *handle = dlopen("libEqfMemoryPlugin.so", RTLD_LAZY);
     if (!handle) {
         fprintf(stderr, "%s\n", dlerror());
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 #ifdef TEMPORARY_COMMENTED
         return PluginManager::eNotEnoughMemory;
 #endif //TEMPORARY_COMMENTED
@@ -405,6 +412,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
     char *error = dlerror();
     if (error != NULL) {
         fprintf(stderr, "%s\n", error);
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 #ifdef TEMPORARY_COMMENTED
         this->Log.write( "   Could not resolve address of function \"registerPlugins()\"" );
         dlclose(handle);
@@ -435,6 +443,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 
     if (usRC) {
         // if register dll error, just remove the dll from the group
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 #ifdef TEMPORARY_COMMENTED
         this->Log.writef( "Error: register plugin %s failed %d.", pszName, usRC);
 #endif //TEMPORARY_COMMENTED
@@ -459,6 +468,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
     // reset active plugin DLL entry
     iCurrentlyLoadedPluginDLL = -1;
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 25");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // Add end
 	//HMODULE hMod = LoadLibrary(pszName);

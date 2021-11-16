@@ -326,7 +326,8 @@ void OtmMorphICU::getResultFromIterator( BreakIterator* vIterator, OtmMorph::TER
 void OtmMorphICU::getResultFromIterator( BreakIterator* vIterator, STRINGLIST& vResult, bool SentenceBoundaryCheck )
 {
     LogMessage(FATAL,"called TEMPORARY_COMMENTED OtmMorphICU::getResultFromIterator");
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 72");
+#ifdef TEMPORARY_COMMENTED
     CharacterIterator *tStrIter = vIterator->getText().clone();
     UnicodeString  tUnicodeStr;
     tStrIter->getText(tUnicodeStr);
@@ -542,7 +543,8 @@ BreakIterator* OtmMorphICU::loadFromRules() {
         delete b;
         return NULL;
     }
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 73");
+#ifdef TEMPORARY_COMMENTED
     // This code loads the rules from text file.
     char line[MAX_RULE_LINE];
 	char buffer[MAX_RULE_BUFFER_SIZE];

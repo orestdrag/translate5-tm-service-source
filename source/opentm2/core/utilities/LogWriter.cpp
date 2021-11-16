@@ -6,6 +6,7 @@
 */
 
 #include "LogWriter.h"
+#include "LogWrapper.h"
 #include <time.h>
 #include <stdarg.h>
 
@@ -56,7 +57,8 @@ int LogWriter::open( const char *pszName, int iOpenMode )
   // get system path from the registry
   HKEY hKey = NULL;
   this->szLogFileName[0] = 0;
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 148");
+#ifdef TEMPORARY_COMMENTED
   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKey ) == ERROR_SUCCESS )
   {
     HKEY hSubKey = NULL;

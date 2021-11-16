@@ -1275,6 +1275,7 @@ USHORT UtlDeleteHwnd
   	 HANDLE hMutexSem = NULL;
      ulReserved;
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 	 // keep other process from doing property related stuff..
 	 GETMUTEX(hMutexSem);
@@ -1299,6 +1300,7 @@ USHORT UtlDeleteHwnd
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 47");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       // release Mutex
       RELEASEMUTEX(hMutexSem);
@@ -1384,6 +1386,7 @@ USHORT UtlMkDirHwnd
      do {
         DosError(0);
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 48");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( CreateDirectory( pszDirName, NULL ) == 0 )
         {
@@ -1655,6 +1658,7 @@ USHORT UtlFindFirstHwnd
                   (ISFILEATTR(usAttr) & !ISDIRATTR(pffb->dwFileAttributes));
          if ( fFound)
          {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // check if 8.3 name is available
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1669,6 +1673,7 @@ USHORT UtlFindFirstHwnd
            } /* endif */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
          } /* endif */
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          while ( (usRetCode == NO_ERROR) && !fFound )
          {
@@ -1703,6 +1708,7 @@ USHORT UtlFindFirstHwnd
          if ( usRetCode == NO_ERROR )
          {
            usSearch = 1;
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // use normal file name if no alternate file name (8.3) is given
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1718,6 +1724,7 @@ USHORT UtlFindFirstHwnd
          }
          else
          {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // close file handle as it will not be used anymore
             FindClose( hdirNew );
@@ -1970,6 +1977,7 @@ USHORT UtlFindCloseHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    fMsg; hwndParent;
    if ( FindClose( hdir ) == 0 )
@@ -2068,6 +2076,7 @@ USHORT UtlSetFileModeHwnd
    do {
       DosError(0);
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 54");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 )
       {
@@ -2160,6 +2169,7 @@ BOOL UtlSetDrive
   CHAR szRootDir[5] = "A:\\";
   szRootDir[0] = szNewDrive;
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( SetCurrentDirectory( szRootDir ) == 0 )
   {
@@ -2209,14 +2219,17 @@ BOOL UtlSetDrive
    *phMod = hmod;
 
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 56");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    hmod = LoadLibrary(pszModName );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 57");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    DosError(1);
    if ( hmod == NULL)
    {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 58");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      usRc = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2273,7 +2286,8 @@ BOOL UtlSetDrive
  {
    USHORT usRc = 0;                     // success indicator
 
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135");
+#ifdef TEMPORARY_COMMENTED
    *phMod = GetModuleHandle( pszModName );
    if (!*phMod )
    {
@@ -2300,7 +2314,8 @@ BOOL UtlSetDrive
  {
    USHORT  usRc = 0;                    // success indicator
 
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136");
+#ifdef TEMPORARY_COMMENTED
    if ( !GetModuleFileName( hMod, pchBuf, cbBuf ) )
    {
      usRc = ERROR_INVALID_NAME;
@@ -2330,6 +2345,7 @@ BOOL UtlSetDrive
    }else{
      LogMessage(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
    }
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    FreeModule( hMod );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2675,6 +2691,7 @@ USHORT UtlQPathInfoHwnd
    USHORT usMBCode = 0;                    // message box/UtlError return code
    PFILESTATUS pstFileSt;              // file status buffer
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 60");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
@@ -2796,6 +2813,7 @@ USHORT UtlFindFirstLongHwnd
    HDIR   hdirNew;                     // new directory handle
    static WIN32_FIND_DATA FindData;    // find data structure
    memset( pffb, 0, sizeof(LONGFILEFIND) );
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 61");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do
    {
@@ -2892,6 +2910,7 @@ CHAR UtlGetDriveFromHandle( HFILE hf )
   CHAR chDrive = EOS;
   // look for handle in our handle/drive array
   int i = 0;
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 62");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( i < MAX_OPEN_FILES )
   {

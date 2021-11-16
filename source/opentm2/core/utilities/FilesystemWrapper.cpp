@@ -284,7 +284,8 @@ BOOL MoveFile(
         PLARGE_INTEGER lpNewFilePointer, 
         DWORD dwMoveMethod               
         ){
-            #if 0
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 147");
+#ifdef TEMPORARY_COMMENTED
             int res = 0;
             if(liDistanceToMove.QuadPart == 0){
                 return true;

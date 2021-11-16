@@ -1642,7 +1642,8 @@ SHORT QDAMReadRecordFromDisk_V3
            pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
            
-           #ifdef TEMPORARY_COMMENTED
+           LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 79");
+#ifdef TEMPORARY_COMMENTED
            if(strlen(pHeader->MARK) == 0){
              strcpy(pHeader->MARK, "@@FIRST");
            }
@@ -2134,7 +2135,8 @@ SHORT QDAMDictFlushLocal
         {
           if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
           {
-            #ifdef TEMPORARY_COMMENTED
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 80");
+#ifdef TEMPORARY_COMMENTED
             sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer);
             fRecordWritten = TRUE;
             #endif
@@ -2584,7 +2586,8 @@ SHORT QDAMReadRecordFromDisk_V2
   SHORT    sRc = 0;                             // return code
   
   LogMessage(FATAL, "called commented out function QDAMReadRecordFromDisk_V2");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 81");
+#ifdef TEMPORARY_COMMENTED
   PBTREEGLOB  pBT = pBTIda->pBTree;
   PLOOKUPENTRY_V2 pLEntry = NULL;
 
@@ -3217,7 +3220,8 @@ SHORT QDAMAllocKeyRecords
             /* force write                                               */
             /*************************************************************/
 
-            #ifdef TEMPORARY_COMMENTED
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 82");
+#ifdef TEMPORARY_COMMENTED
             //temporary hardcoded mark to identify records
             strcpy(pHeader->MARK,"MARKKEYS");
             #endif
@@ -3228,7 +3232,8 @@ SHORT QDAMAllocKeyRecords
    else
    {
       LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
+#ifdef TEMPORARY_COMMENTED
       PBTREEBUFFER_V2  pRecord;
       while ( usNum-- && !sRc )
       {
@@ -3601,7 +3606,8 @@ SHORT QDAMDictCreateLocal
           sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
           if ( !sRc )
           {
-            #ifdef TEMPORARY_COMMENTED
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 83");
+#ifdef TEMPORARY_COMMENTED
             strcpy(pRecord->contents.header.MARK,"@@ROOT@@");
             #endif
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
@@ -3758,6 +3764,7 @@ USHORT TmtXClose
   UtlAlloc( (PVOID *) &(pTmClb->pLangGroups), 0L, 0L, NOMSG );
 
   UtlAlloc( (PVOID *) &(pTmClb->psLangIdToGroupTable), 0L, 0L, NOMSG );
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 84");
 #ifdef TEMPORARY_COMMENTED
   NTMDestroyLongNameTable( pTmClb );
 #endif
@@ -4226,7 +4233,8 @@ SHORT QDAMPhysLock
 )
 {
   LogMessage(FATAL, "called commented out function QDAMPhysLock");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 85");
+#ifdef TEMPORARY_COMMENTED
   SHORT    sRc = 0;                    // return code
   PBTREEGLOB  pBT = pBTIda->pBTree;
   FILELOCK  Lock;                      // range to be locked or unlocked
@@ -6893,7 +6901,8 @@ SHORT QDAMChangeKey_V3
   RECPARAM recKey;                                 // record parameter descrip.
 
   LogMessage(FATAL, "called commented out function QDAMChangeKey_V3");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 86");
+#ifdef TEMPORARY_COMMENTED
 
   sRc = QDAMReadRecord_V3( pBTIda, usNode, &pRecord, FALSE  );
   if ( !sRc )
@@ -7125,7 +7134,8 @@ SHORT QDAMInsertKey_V3
       if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
       {
         LogMessage(ERROR, "TEMPORARY_COMMENTED in QDAMInsertKey_V3");
-        #ifdef TEMPORARY_COMMENTED
+        LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 87");
+#ifdef TEMPORARY_COMMENTED
          Unicode2ASCII( pKey, chHeadTerm, 0L );
          #endif 
          usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
@@ -7348,7 +7358,8 @@ SHORT QDAMFindRecord_V2
   PBTREEGLOB    pBT = pBTIda->pBTree;
 
   LogMessage(FATAL, "called commented out function QDAMFindRecord_V2");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 88");
+#ifdef TEMPORARY_COMMENTED
   memset(&recData, 0, sizeof(recData));
   sRc = QDAMReadRecord_V2( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );
   while ( !sRc && !IS_LEAF( *ppRecord ))
@@ -7607,7 +7618,8 @@ SHORT  QDAMDictOpenLocal
       pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
       pBT->usOpenFlags = usOpenFlags;
 
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 89");
+#ifdef TEMPORARY_COMMENTED
       if(pBT->PFileBufferMap == NULL){
         LogMessage(INFO,"QDAMDictOpenLocal::pBT->PFileBufferMap == NULL, saving pointer to filebuffersmap");
         pBT->PFileBufferMap = (PVOID)GetPFileBufferMap();
@@ -8004,7 +8016,8 @@ SHORT  QDAMAddToBuffer_V2
    SHORT sRc = 0;                      // success indicator
 
    LogMessage(FATAL, "called commented out function QDAMAddToBuffer_V2");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 90");
+#ifdef TEMPORARY_COMMENTED
    USHORT  usFilled;                   // number of bytes filled in record
    USHORT  usMaxRec= 0;                // most filled record
    RECPARAM recStart;                  // return code where data are stored
@@ -8516,7 +8529,8 @@ SHORT QDAMLocateKey_V2
   SHORT   sKeyLen = 512 ;
 
   LogMessage(FATAL,"QDAMLocateKey_V2 are not implemented and not supposed to be used");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 91");
+#ifdef TEMPORARY_COMMENTED
   *psKeyPos = -1;                         // key not found
   if ( pRecord )
   {
@@ -8779,14 +8793,16 @@ SHORT QDAMLocateKey_V2
          sHigh = (SHORT) OCCUPIED( pRecord) -1 ; // counting restarts at zero
          sLow = 0;                               // start here
          if ( sCheckVariants == 2 ) {            // 1st hyphen variant
-         #ifdef TEMPORARY_COMMENTED 
+         LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 92");
+#ifdef TEMPORARY_COMMENTED 
            wcsncpy( szKey, pKey, sKeyLen ) ;     // Replace hyphen with blank 
           #endif
            szKey[sKeyLen-1] = NULL ;
            *pHyphen = NULL ;
          } else
          if ( sCheckVariants == 1 ) {            // 2nd hyphen variant
-         #ifdef TEMPORARY_COMMENTED
+         LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 93");
+#ifdef TEMPORARY_COMMENTED
            wcsncpy( szKey, pKey, sKeyLen ) ;     // Remove hyphen and concatenate words 
           #endif
            szKey[sKeyLen-1] = NULL ;
@@ -8828,7 +8844,8 @@ SHORT QDAMInsertKey_V2
   SHORT  sRc = 0;                      // return code
 
   LogMessage(FATAL, "called commented out function QDAMInsertKey_V2");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
+#ifdef TEMPORARY_COMMENTED
   USHORT usLastPos;
   USHORT usKeyLen = 0;                 // length of key
   USHORT usDataRec = 0;                // length of key record
@@ -10753,7 +10770,8 @@ USHORT EQFNTMOrganizeIndex
   } /* endif */
 
   LogMessage(INFO, "TEMPORARY_COMMENTED in EQFNTMOrganizeIndex:: .xmi file creation");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 94");
+#ifdef TEMPORARY_COMMENTED
   // setup name for new index file
   if ( !sRc )
   {

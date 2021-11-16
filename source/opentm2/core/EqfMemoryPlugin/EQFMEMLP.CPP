@@ -1400,6 +1400,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
          /* This is an old TM format display listbox to get           */
          /* source and target language                                */
          /*************************************************************/
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 5");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          DIALOGBOX( QUERYACTIVEWINDOW(), NTMTagLangDlg, hResMod,
                     ID_NTM_TAGLANG_DLG, pLIDA, iDlgRc );
@@ -2432,6 +2433,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
           if ( ulBytesRead && !pLIDA->fEOF )
           {
              BYTE bTest = (BYTE)pConvBuffer[ulBytesRead-1];
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
              if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )
              {

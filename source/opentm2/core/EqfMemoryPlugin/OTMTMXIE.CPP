@@ -3560,7 +3560,8 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
   pData;                               // suppress 'unreferenced formal parameter' warning
 
   LogMessage(ERROR,"TEMPORARY COMMENTED CheckExistence");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 71");
+#ifdef TEMPORARY_COMMENTED
   hdir = FindFirstFile( pszInMemory, &FindData );
   if ( hdir == INVALID_HANDLE_VALUE )
   {

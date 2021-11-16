@@ -625,7 +625,8 @@ CheckSimilar (PTMT_GLOBALS ptmtg,          /* pointer to Tmt globals...*/
      part of the secondary key, empty keys imply that the segment .
      consists of just tags & noise characters Therefore if the
      secondary is empty we resort to CheckExact ...................*/
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 69");
+#ifdef TEMPORARY_COMMENTED
   /* The case of empty secondary keys .............................*/
   if ((usLenInput == 0) && (usLenCurrent == 0))
   {

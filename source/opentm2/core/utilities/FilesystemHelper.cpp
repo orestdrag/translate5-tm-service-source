@@ -279,7 +279,8 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 }
 
 int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 142");
+#ifdef TEMPORARY_COMMENTED
     if(tempFile) 
         return 0;
     #endif
@@ -376,7 +377,8 @@ std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& 
 int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     LogMessage2(FATAL, "called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 143");
+#ifdef TEMPORARY_COMMENTED
     auto files = FindFiles(name);
     if(selFiles.empty()){
 
@@ -394,7 +396,8 @@ FILE* FilesystemHelper::FindFirstFile(const std::string& name){
 
 FILE* FilesystemHelper::FindNextFile(){
     LogMessage(FATAL, "called not implemented function FilesystemHelper::FindNextFile()");
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 144");
+#ifdef TEMPORARY_COMMENTED
     if(selFiles.empty()){
         LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
@@ -806,7 +809,8 @@ int FilesystemHelper::GetFileSize(const std::string& path){
 
     auto size = FnGetFileSize(path.c_str());
 
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 145");
+#ifdef TEMPORARY_COMMENTED
     int size = -1;
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
@@ -820,7 +824,8 @@ int FilesystemHelper::GetFileSize(const std::string& path){
         fclose(ptr);
     }
     return size;
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 146");
+#ifdef TEMPORARY_COMMENTED
     if(pFileBuffers->find(path) != pFileBuffers->end() && fileBuffers[path].data.size()>0){
         size = fileBuffers[path].data.size();
         LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") used filebuffer ");

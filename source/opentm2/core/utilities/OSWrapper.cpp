@@ -106,7 +106,8 @@ int WideCharToMultiByte(
         
         //int ret = wcstombs(lpMultiByteStr, lpWideCharStr, cchWideChar);
         //return ret;
-            #ifdef TEMPORARY_COMMENTED
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 149");
+#ifdef TEMPORARY_COMMENTED
             char   *inptr;  /* Pointer used for input buffer  */
             char   *outptr; /* Pointer used for output buffer */
                                                         /* input buffer */

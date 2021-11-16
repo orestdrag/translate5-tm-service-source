@@ -236,6 +236,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     // Dismiss the slider window if it had been created
     if ( hwndErrMsg != HWND_FUNCIF )
     {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 6");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       EqfRemoveObject( TWBFORCE, hWnd );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -249,6 +250,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
   {
     // Move process-ID which is stored in usRc into the
     // mp1 and issue a message WM_EQF_MEMEXPORT_PROCESS
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 7");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                 MP1FROMSHORT( MEM_EXPORT_TASK ), NULL);
@@ -349,6 +351,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          UtlDispatch();
 
          //--- Post the next WM_EQF_MEMEXPORT_PROCESS
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 8");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_EXPORT_TASK ), NULL );
@@ -370,6 +373,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        pCommArea->usComplete = 100;
        if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
        {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 9");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
 #endif// TO_BE_REPLACED_WITH_LINUX_CODE
@@ -405,6 +409,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        }
        else
        {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 10");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                      MP1FROMSHORT( MEM_END_EXPORT ), NULL );
@@ -432,6 +437,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      }
      else
      {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 11");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
        WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
                    MP1FROMSHORT( MEM_END_EXPORT ), NULL );
@@ -575,6 +581,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   /********************************************************************/
   if ( pExportIDA->pDDEMemExp != NULL )
   {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                 MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );
@@ -770,6 +777,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   if ( pExportIDA->pszNameList && pExportIDA->pszActiveName[0] )
   {
     HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);    
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 13");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // GQTODO update process window title bar and outfile static
     LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );

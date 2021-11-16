@@ -289,7 +289,8 @@ USHORT UtlGetLANUserID
   static BOOL notfirst = FALSE;   /* the first time Windows for Workgroups gives a bogus value */
 
   LogMessage(WARNING,"TEMPORARY_COMMENTED in UtlGetLANUserID");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 151");
+#ifdef TEMPORARY_COMMENTED
   usMsgHandling;
   // Preset the user priviliges and the LAN userid
   *pusUserPriv = USER_USER;
@@ -320,6 +321,7 @@ USHORT UtlGetLANUserID
     static char szUser[80];
 
     iUserIDLen = sizeof(szUser) - 1;
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 70");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetUserName( szUser, &iUserIDLen ) )
     {
@@ -379,6 +381,7 @@ VOID UtlDispatch( VOID )
    HWND hwndClient =  (HWND) UtlQueryULong( QL_TWBCLIENT );
    MSG msg;                      // message queue structure
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 69");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    while ( usMsg && PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
    {
@@ -526,6 +529,7 @@ USHORT UtlFindAndShowConversionError
 
   while ( !usRC && ulLen )
   {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 72");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -533,6 +537,7 @@ USHORT UtlFindAndShowConversionError
     // try conversion together with next byte, might be a DBCS character
     if ( !ulOutPut && ulLen )
     {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 73");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -548,6 +553,7 @@ USHORT UtlFindAndShowConversionError
       PSZ  pszParms[3];
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 74");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       usRC = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

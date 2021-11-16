@@ -227,6 +227,7 @@ USHORT SetupMAT
    cyDesktopDiv20 = cyDesktop / 20L;
 #endif //TO_BE_REMOVED
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 38");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )
    {
@@ -399,7 +400,8 @@ USHORT CreateSystemProperties(PSZ pszPath)
     
     strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
     
-    #ifdef TEMPORARY_COMMENTED
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 103");
+#ifdef TEMPORARY_COMMENTED
     sprintf(pSysProps->PropHead.szPath, "%s", PATH);
     #endif
     pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
@@ -689,6 +691,7 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
     } /* endif */
 #endif
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 104");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -754,7 +757,8 @@ USHORT CreateFolderListProperties
     /******************************************************************/
     if ( !usRC )
     {
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 105");
+#ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME,
                    PROP_CLASS_FOLDERLIST );
                    #endif
@@ -775,11 +779,13 @@ USHORT CreateFolderListProperties
 #ifdef _PTM
       pPropFll->Swp.fs |= EQF_SWP_MINIMIZE;
 #endif
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 106");
 #ifdef TEMPORARY_COMMENTED
       *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
 #endif
     } /* endif */
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 107");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -844,7 +850,8 @@ USHORT CreateImexProperties
     /******************************************************************/
     if ( !usRC )
     { 
-      #ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 108");
+#ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );
       #endif
     } /* endif */
@@ -863,6 +870,7 @@ USHORT CreateImexProperties
       sprintf( pPropImex->szSavedDlgFExpoNPath, "\\%s\\", SNOMATCHDIR );
     } /* endif */
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 109");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -927,7 +935,8 @@ USHORT CreateDictProperties
     /******************************************************************/
     if ( !usRC )
     {
-       #ifdef TEMPORARY_COMMENTED
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 110");
+#ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropDict->PropHead, DICT_PROPERTIES_NAME,
                    PROP_CLASS_DICTLIST );
                    #endif
@@ -949,6 +958,7 @@ USHORT CreateDictProperties
 #endif
     } /* endif */
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 119");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -999,6 +1009,7 @@ USHORT CreateEditProperties
                cyBorder,               // height of horizontal border
                cyProposals,            // height of TM/dict proposals windows
                cyProposalsClient;      // height of client window of proposals
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 39");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
     HVPS       hvps;                   // presentation space
@@ -1026,7 +1037,8 @@ USHORT CreateEditProperties
     /******************************************************************/
     if ( !usRC )
     {
-       #ifdef TEMPORARY_COMMENTED
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 120");
+#ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropEdit->PropHead, EDITOR_PROPERTIES_NAME,
                    PROP_CLASS_EDITOR );
                    #endif
@@ -1037,6 +1049,7 @@ USHORT CreateEditProperties
     /******************************************************************/
     if ( !usRC )
     {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       cyTitleBar = WinQuerySysValue( HWND_DESKTOP, SV_CYTITLEBAR );
       cyMenu = WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
@@ -1086,6 +1099,7 @@ USHORT CreateEditProperties
       RECTL_YTOP(pstEQFGen->rclEditorTgt)       = cyDesktop;
 #endif
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 41");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifdef _WINDOWS
       pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
@@ -1128,6 +1142,7 @@ USHORT CreateEditProperties
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 121");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -1181,6 +1196,7 @@ USHORT SetupCreateDir
   USHORT   usRC = NO_ERROR;            // function return code
 
   BuildPath( szPath, chDrive, pszFolder, usPathID );
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
   if ( !CreateDirectory( szPath, NULL ) )
@@ -1231,6 +1247,7 @@ USHORT DeletePropFile
   BuildPath( szPath, chDrive, NULL, PROPERTY_PATH );
   strcat( szPath, BACKSLASH_STR );
   strcat( szPath, pszName );
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   usRC = (USHORT)DosDelete( szPath, 0L );
 #endif TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1266,57 +1283,6 @@ USHORT DeletePropFile
 //|                   close property file;                                     |
 //|                   return return code to caller;                            |
 //+----------------------------------------------------------------------------+
-#ifdef _WIN32
-USHORT WritePropFile
-(
-   CHAR    chDrive,                    // drive of property file
-   PSZ     pszName,                    // name of property file
-   PVOID   pProp,                      // ptr to property data
-   USHORT  usSize                      // size of property data
-)
-{
-  CHAR    szPath[MAX_EQF_PATH];        // buffer for path name
-  USHORT  usRC = NO_ERROR;             // function return code
-  FILE   *hFile = NULL;                // file handle for property files
-
-  /********************************************************************/
-  /* Build name of property file                                      */
-  /********************************************************************/
-  BuildPath( szPath, chDrive, NULL, PROPERTY_PATH );
-  strcat( szPath, BACKSLASH_STR );
-  strcat( szPath, pszName );
-
-  /********************************************************************/
-  /* Open the property file                                           */
-  /********************************************************************/
-  hFile = fopen( szPath, "wb" );
-  if ( hFile == NULL )
-  {
-    usRC = ERROR_PATH_NOT_FOUND;
-  } /* endif */
-
-  /********************************************************************/
-  /* Write property data to disk                                      */
-  /********************************************************************/
-  if ( !usRC  )
-  {
-    if ( fwrite( pProp, usSize, 1, hFile ) != 1 )
-    {
-      usRC = ERROR_WRITE_FAULT;
-    } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* Close property file                                              */
-  /********************************************************************/
-  if ( hFile )
-  {
-    fclose( hFile);
-  } /* endif */
-
-  return( usRC );
-} /* end of function WritePropFile */
-#endif //_WIN32
 
 #ifdef __linux__
 USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
@@ -1762,6 +1728,7 @@ VOID DeleteDictCacheFiles( CHAR chPrimaryDrive, USHORT usPathId )
 BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
 {
    CHAR     szPath[MAX_EQF_PATH];      // buffer for path name
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    FILEFINDBUF3 ResultBuf;              // DOS file find struct
@@ -1777,6 +1744,7 @@ BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
    strcat( szPath, BACKSLASH_STR );
    strcat( szPath, pszFile );
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 45");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY,
@@ -1847,7 +1815,8 @@ USHORT UpdateFolderProp
    /*******************************************************************/
    if ( !usRC )
    {
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 122");
+#ifdef TEMPORARY_COMMENTED
      pFolProp->PropHead.szPath[0] = chDrive;
      #endif
      pFolProp->chDrive = chDrive;
@@ -1934,7 +1903,8 @@ USHORT UpdateDocumentProp
                       &usBytesRead, FALSE );
    }
 
-   #ifdef TEMPORARY_COMMENTED
+   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 123");
+#ifdef TEMPORARY_COMMENTED
    /*******************************************************************/
    /* copy EQF drive into properties                                  */
    /*******************************************************************/
@@ -2030,7 +2000,8 @@ USHORT UpdateDictProp
       pDictProp->szDictPath[0] = chDrive;
       pDictProp->szIndexPath[0] = chDrive;
       
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 124");
+#ifdef TEMPORARY_COMMENTED
       pDictProp->PropHead.szPath[0] = chDrive;
       #endif
     }
@@ -2125,7 +2096,8 @@ USHORT UpdateTMProp
       pNTMProp = (PPROP_NTM) pTMProp;
       if ( strcmp( pNTMProp->szNTMMarker, NTM_MARKER) == 0 )
       {
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 125");
+#ifdef TEMPORARY_COMMENTED
         pNTMProp->stPropHead.szPath[0] = chDrive;
         pNTMProp->szFullMemName[0] = chDrive;
         #endif
@@ -2133,7 +2105,8 @@ USHORT UpdateTMProp
       else
       {
         
-     #ifdef TEMPORARY_COMMENTED
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 126");
+#ifdef TEMPORARY_COMMENTED
         pTMProp->stPropHead.szPath[0] = chDrive;
         #endif
         pTMProp->szPath[0]            = chDrive;

@@ -1152,6 +1152,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
     strSearchPattern.append( "/*.*" );
     LogMessage5(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), HANDLE hDir = FindFirstFile("
       , strSearchPattern.c_str(), ", &FindData =","FindData",")");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 21");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
     if ( hDir != INVALID_HANDLE_VALUE )
@@ -1184,6 +1185,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   // delete any files left over and remove the directory
   UtlDeleteAllFiles( (const char *)szTempDir );
   LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), RemoveDirectory, szTempDir = ", szTempDir);
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 22");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   RemoveDirectory( szTempDir );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1575,7 +1577,8 @@ USHORT MemoryFactory::APIUpdateMem
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
 
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 70");
+#ifdef TEMPORARY_COMMENTED
   // generate short document name if none given (otherwise the long document name will not be stored in the memory...)
   if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )
   {

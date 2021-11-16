@@ -16,6 +16,7 @@
 #include <EQF.H>                  // General Translation Manager include file
 #include <time.h>                 // C time related functions
 
+
 #ifdef TEMPORARY_COMMENTED
 #include "zip.h"
 #include "unzip.h"
@@ -54,6 +55,7 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
@@ -97,6 +99,7 @@ USHORT UtlGetDriveList( BYTE *szList)
     WORD   wReturn;                    // return value from GetDriveType
     register int i;
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 66");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     for (i=0, wReturn=0; i<26;i++)
     {
@@ -154,6 +157,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
 
   pSource = pTarget = pszList;         // start at begin of drive list
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 67");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( *pSource != NULC )           // while not end of list ....
   {
@@ -1325,7 +1329,8 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
   }
   strcpy(pszShortName, pszLongName);
   LogMessage2(INFO, "TEMPORARY COMMENTED UtlLongToShortName, fName = ", pszShortName);
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 138");
+#ifdef TEMPORARY_COMMENTED
   // scan long name and add valid characters to short file name
   while ( (i < 8) && (*pszLongName != EOS) )
   {
@@ -1384,6 +1389,7 @@ VOID CloseFile
 __declspec(dllexport)
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139");
 #ifdef TEMPORARY_COMMENTED
 //TODO: fix issues with zip/unzip library
 
@@ -1415,6 +1421,7 @@ int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 __declspec(dllexport)
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140");
 #ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   HANDLE hDir;
@@ -1451,6 +1458,7 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 __declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 141");
 #ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   char szCurFile[MAX_PATH];
@@ -1484,6 +1492,7 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  HANDLE hp; 
  sprintf( szFileFound, "%s/*.*", pszDirectory );
 LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles, pszDir = ", pszDirectory);
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 64");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
  hp = FindFirstFile( szFileFound, &info );
  do

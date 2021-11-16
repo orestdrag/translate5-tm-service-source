@@ -409,7 +409,8 @@ int UTF16strlenCHAR( PSZ_W pszString )
   int iLen = 0;
   iLen = wcslen(pszString);
   //LogMessage2(WARNING,"TEMPORARY_COMMENTED in UTF16strlenCHAR, ", "");
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 152");
+#ifdef TEMPORARY_COMMENTED
 
   while ( pszString && *pszString != 0 )
   {
@@ -427,7 +428,8 @@ int UTF16strlenBYTE( PTMWCHAR pszString )
   int iLen = 0;
   iLen = wcslen(pszString) * sizeof(TMWCHAR);
   
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 153");
+#ifdef TEMPORARY_COMMENTED
   while ( pszString && *pszString != 0 )
   {
     iLen += 2;
@@ -499,7 +501,8 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 			  UTF16strcpy( pTemp, pszUni );
 
         LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMWCHAR data type migration");
-        #ifdef TEMPORARY_COMMENTED
+        LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 154");
+#ifdef TEMPORARY_COMMENTED
 			  BidiConvert06ToFE(pTemp, UTF16strlenCHAR(pTemp)+1);
         #endif
 			  //shapeUnicode(pTemp,UTF16strlenCHAR(pTemp)+1);
@@ -621,7 +624,8 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 						CHAR_W c;
 						PSZ_W  p = pTemp;
             LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMWCHAR data type migration");
-            #ifdef TEMPORARY_COMMENTED
+            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 155");
+#ifdef TEMPORARY_COMMENTED
 						UTF16strncpy( pTemp, pszUni, ulLen );
 						BidiConvert06ToFE(pTemp, ulLen);
             #endif
@@ -724,7 +728,8 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 PTMWCHAR ASCII2Unicode( PSZ pszASCII, PTMWCHAR pszUni, ULONG  ulCP )
 {
   mbstowcs(pszUni, pszASCII, MAX_SEGMENT_SIZE);
-  #ifdef TEMPORARY_COMMENTED
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 156");
+#ifdef TEMPORARY_COMMENTED
   int iRC = 0;
   USHORT  usCP = (USHORT)ulCP;
 
@@ -772,7 +777,8 @@ PTMWCHAR ASCII2Unicode( PSZ pszASCII, PTMWCHAR pszUni, ULONG  ulCP )
 				}
 			  }
           LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvertFETo06, because of basic TMWCHAR data type migration");
-          #ifdef TEMPORARY_COMMENTED
+          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 157");
+#ifdef TEMPORARY_COMMENTED
 		      // do special handling for Arabic to allow shaping in even for 864 stuff
 		      BidiConvertFETo06(pszUni, UTF16strlenCHAR(pszUni));
           #endif
@@ -848,6 +854,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
     *pszUni = EOS;
     if (ulLen)
     {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszASCII, ulLen,
@@ -1037,7 +1044,8 @@ void BidiConvert06ToFE(LPWSTR lpWideCharStr, int Length) //lpWideCharStr is a Ze
   for ( i=0; i<Length; i++)
   {
     LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
-          #ifdef TEMPORARY_COMMENTED
+          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 158");
+#ifdef TEMPORARY_COMMENTED
     if ( (lpWideCharStr[i] >= 0x0621) && (lpWideCharStr[i] <= 0x064A ) )
         lpWideCharStr[i] = (CHAR_W)(Tab06ToFE [ (lpWideCharStr[i] - 0x0621) ] );
     #endif
@@ -1077,6 +1085,7 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
 											pszAnsi, lBufLen, NULL, NULL );
 		if (plRc && !ulOutPut)
 		{
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 76");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			lRc = GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1121,6 +1130,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
     // always use 932 when 943 is specified
     if ( ulTempCP == 943 ) ulTempCP = 932;
 
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if (ulLen)
     {
@@ -1202,6 +1212,7 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
     LogMessage(ERROR," TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 159");
 #ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
 
@@ -1316,6 +1327,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862; break;
           case 813  : pTable = chAnsiToPC813; break;
           case 737  :
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869))
             { // fix for sev1 Greek: Win NT problem (01/09/23)
@@ -1380,6 +1392,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862;  pInvTable = chPC862ToAnsi; break;
           case 813  : pTable = chAnsiToPC813;  pInvTable = chPC813ToAnsi; break;
           case 737  :
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) )
             { // fix for sev1 Greek: Win NT problem (01/09/23)

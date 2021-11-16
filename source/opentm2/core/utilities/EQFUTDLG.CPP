@@ -258,7 +258,8 @@ BOOL FolRenameFolder( PSZ pszOldAndNewName, BOOL fMsg );
 VOID UtlControlsInit( HWND hwndDlg,              //window handle
                       PCONTROLSIDA pControlsIda )  //pointer to controls ida
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 127");
+#ifdef TEMPORARY_COMMENTED
   USHORT      usId = 0;               //id of drive
   SHORT       sRc;                    //FillFileDir return code
   USHORT      usDrive;                //drive btn id
@@ -472,7 +473,8 @@ LPARAM           mp2,                // second message parameter
 PCONTROLSIDA pControlsIda            // pointer to ida
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 128");
+#ifdef TEMPORARY_COMMENTED
   MRESULT     mResult = (MRESULT)FALSE; //return code of this function
   HWND        hwndFocus;                //handle for input focus
 
@@ -639,7 +641,8 @@ SHORT  sNotification,                // notification
 PCONTROLSIDA pControlsIda            //ida with dialog ctl info
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 129");
+#ifdef TEMPORARY_COMMENTED
   SHORT       sIndexItem;                  //index for list box items
   PSZ         pszPointer;                  //pointer to string with dir info
   USHORT      usRc = TRUE;                 //process return code
@@ -1164,7 +1167,8 @@ PCONTROLSIDA pControlsIda            //ida with dialog ctl info
 
 BOOL UtlEFValidityTest ( PCONTROLSIDA pControlsIda, HWND hwndDlg )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 130");
+#ifdef TEMPORARY_COMMENTED
   USHORT      usRc = TRUE;                 //process return code
   USHORT      usId = 0;                    //selected drive id
   USHORT      usDrive;                     //selected drive
@@ -1790,7 +1794,8 @@ BOOL             fMsg                // show messages flag
 )
 {
 
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 131");
+#ifdef TEMPORARY_COMMENTED
   SHORT  sRc;                      //return code
   SHORT  sFlags;                   // flags to be used for UtlLoadFileNames
   BOOL   fLongFileNames = FALSE;   // use-long-file-name-functions flag
@@ -2121,7 +2126,8 @@ HWND             hwndOwner,          // owner window of dialog
 PSZ              pszFileName         // ptr to filename buffer
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 132");
+#ifdef TEMPORARY_COMMENTED
   BOOL             fSet;               // return code of dialog
   HMODULE hResMod;
   hwndParent;                          // get rid of compiler warnings
@@ -2206,7 +2212,8 @@ WPARAM mp1,                         // first message parameter
 LPARAM mp2                          // second message parameter
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 133");
+#ifdef TEMPORARY_COMMENTED
   /********************************************************************/
   /*                         local variables                          */
   /********************************************************************/
@@ -2442,7 +2449,8 @@ PSZ         pszObjName,              // name of object
 CLASSES     ObjectClass              // class of object (e.g. clsFolder)                      
 )
 {
-#if 0
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 134");
+#ifdef TEMPORARY_COMMENTED
   USHORT      usRC = NO_ERROR;         // function return code
   PRENAMEDLGIDA pIDA = NULL;           // rename dialog IDA
   BOOL        fLocked = FALSE;         // object-has-been-locked flag

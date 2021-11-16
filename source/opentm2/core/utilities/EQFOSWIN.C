@@ -70,6 +70,7 @@ EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   }
   else
   {
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 26");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // standard conversion
     //AnsiToOem( pIn, pOut );

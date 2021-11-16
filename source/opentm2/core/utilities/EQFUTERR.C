@@ -376,6 +376,7 @@ USHORT UtlErrorHwnd
    sprintf(buff, "UtlErrorHwnd(sErrorNumber=%d, usMsgType=%d, usNoOfParams=%d, pParamTable=%s, ErrorType=%d )", sErrorNumber, usMsgType,
                   usNoOfParms, pParmTable, ErrorType);
    LogMessage(ERROR,buff);
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 63");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    unsigned int  usMsgboxStyle;               // style for WinMessageBox call
    unsigned int  usMsgboxRet = 0;             // msg box return value
@@ -772,7 +773,8 @@ VOID UtlInitError
    if ( ErrData[UtlGetTask()].hMsgFile )
    {
 
-   #ifdef TEMPORARY_COMMENTED
+   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 137");
+#ifdef TEMPORARY_COMMENTED
      UtlClose( ErrData[UtlGetTask()].hMsgFile, FALSE );
      ErrData[UtlGetTask()].hMsgFile = 0;
    #endif

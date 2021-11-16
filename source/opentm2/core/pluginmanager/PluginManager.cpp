@@ -6,7 +6,7 @@
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OTMFUNC.H"
-
+#include "../utilities/LogWrapper.h"
 /*! \mainpage PluginManager and plugins for OpenTM2
 	\par Copyright Notice:
 	Copyright (C) 1990-2012, International Business Machines Corporation and others. All rights reserved.
@@ -126,6 +126,7 @@ int PluginManager::ValidationCheck(char * strParam)
         }
     }
 
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 73");
 #ifdef TEMPORARY_COMMENTED
     if (!bHasMemory)
     {
