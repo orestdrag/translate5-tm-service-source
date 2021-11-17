@@ -288,8 +288,7 @@ USHORT UtlGetLANUserID
   USHORT usRC = LANUID_NO_LAN;         // function return code
   static BOOL notfirst = FALSE;   /* the first time Windows for Workgroups gives a bogus value */
 
-  LogMessage(WARNING,"TEMPORARY_COMMENTED in UtlGetLANUserID");
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 151");
+  LogMessage2(ERROR,__func__, "::called TEMPORARY_COMMENTED whole UtlGetLANUserID");
 #ifdef TEMPORARY_COMMENTED
   usMsgHandling;
   // Preset the user priviliges and the LAN userid

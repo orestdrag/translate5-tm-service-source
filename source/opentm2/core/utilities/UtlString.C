@@ -477,8 +477,7 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
 
 			  UTF16strcpy( pTemp, pszUni );
 
-        LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMWCHAR data type migration");
-        LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 154");
+        LogMessage2(FATAL,__func__, ":: TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMWCHAR data type migration");
 #ifdef TEMPORARY_COMMENTED
 			  BidiConvert06ToFE(pTemp, UTF16strlenCHAR(pTemp)+1);
         #endif
@@ -600,8 +599,7 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 					{
 						CHAR_W c;
 						PSZ_W  p = pTemp;
-            LogMessage(FATAL,"TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMWCHAR data type migration");
-            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 155");
+            LogMessage2(FATAL,__func__, ":: TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMWCHAR data type migration");
 #ifdef TEMPORARY_COMMENTED
 						UTF16strncpy( pTemp, pszUni, ulLen );
 						BidiConvert06ToFE(pTemp, ulLen);
@@ -935,8 +933,7 @@ void BidiConvert06ToFE(LPWSTR lpWideCharStr, int Length) //lpWideCharStr is a Ze
   int i = 0;
   for ( i=0; i<Length; i++)
   {
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
-          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 158");
+    LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
 #ifdef TEMPORARY_COMMENTED
     if ( (lpWideCharStr[i] >= 0x0621) && (lpWideCharStr[i] <= 0x064A ) )
         lpWideCharStr[i] = (CHAR_W)(Tab06ToFE [ (lpWideCharStr[i] - 0x0621) ] );
@@ -1103,8 +1100,7 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
 
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-    LogMessage(ERROR," TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 159");
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
 #ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
 

@@ -49,25 +49,6 @@ void InitTMPluginWrapper()
 
 }
 
-/*
-// callback function to insert memory names into a listbox
-int AddMemToListBox( PVOID pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo  )
-{
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
-#ifdef TEMPORARY_COMMENTED
-  static char szMemName[MAX_LONGFILESPEC];
-
-  HWND hwndLB = (HWND)pvData;
-
-  pInfo;
-
-  strcpy( szMemName, pszName );
-  OEMTOANSI( szMemName );
-  INSERTITEMHWND( hwndLB, szMemName );
-#endif
-  return( 0 );
-}//*/
-
 
 
 /*   Function Name:   FillMemoryListBox */

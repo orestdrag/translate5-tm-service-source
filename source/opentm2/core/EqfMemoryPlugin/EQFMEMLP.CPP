@@ -2268,20 +2268,7 @@ USHORT MemFuncImportProcess
                 LogMessage9(TRANSACTION, __func__ , "Memory update time ",intToA(lMemAccessTime)," [ms]\nFile read time     ",
                     intToA(lFileReadTime), " [ms]\nOther times        ",intToA(lOtherTime), " [ms]\n Overall import time is " , buff);
               }
-
-              LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 10");
-#ifdef TEMPORARY_COMMENTED
-              if ( lImportStartTime )
-              {
-                LONG lDiff = lCurTime - lImportStartTime;
-                fprintf( hfLog, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
-                        (lDiff - (lDiff / 3600 * 3600)) / 60,
-                        (lDiff - (lDiff / 3600 * 3600)) % 60 );
-                fprintf( hfLog, "Memory update time %I64d [ms]\n", lMemAccessTime );
-                fprintf( hfLog, "File read time     %I64d [ms]\n", lFileReadTime );
-                fprintf( hfLog, "Other times        %I64d [ms]\n", lOtherTime );
-              }
-              #endif
+              
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
          if ( pLoadData->pProposal != NULL ) free(pLoadData->pProposal);

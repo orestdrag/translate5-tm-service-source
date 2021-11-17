@@ -1359,7 +1359,7 @@ VOID CloseFile
 __declspec(dllexport)
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole function");
 #ifdef TEMPORARY_COMMENTED
 //TODO: fix issues with zip/unzip library
 
@@ -1391,7 +1391,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139");
 __declspec(dllexport)
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole function");
 #ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   HANDLE hDir;
@@ -1428,7 +1428,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140");
 __declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 141");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 141 whole function");
 #ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   char szCurFile[MAX_PATH];

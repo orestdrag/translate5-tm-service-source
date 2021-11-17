@@ -765,7 +765,7 @@ USHORT EqfMemoryExists
       BOOL fIsNew = FALSE;
       CHAR szShortName[MAX_FILESPEC];
      
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 2");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 2 ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);");
 #ifdef TEMPORARY_COMMENTED
       ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);
       #endif

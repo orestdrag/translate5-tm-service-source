@@ -400,7 +400,7 @@ USHORT CreateSystemProperties(PSZ pszPath)
     
     strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
     
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 103");
+    LogMessage4(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 103 sprintf(pSysProps->PropHead.szPath, \"",PATH,"\", PATH);");
 #ifdef TEMPORARY_COMMENTED
     sprintf(pSysProps->PropHead.szPath, "%s", PATH);
     #endif
@@ -691,7 +691,7 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
     } /* endif */
 #endif
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 104");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 104 /* Write properties and free data area                            */");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -757,7 +757,7 @@ USHORT CreateFolderListProperties
     /******************************************************************/
     if ( !usRC )
     {
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 105");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 105 SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME, PROP_CLASS_FOLDERLIST );");
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME,
                    PROP_CLASS_FOLDERLIST );
@@ -779,13 +779,13 @@ USHORT CreateFolderListProperties
 #ifdef _PTM
       pPropFll->Swp.fs |= EQF_SWP_MINIMIZE;
 #endif
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 106");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 106 *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];");
 #ifdef TEMPORARY_COMMENTED
       *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
 #endif
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 107");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 107 /* Write properties and free data area                            */");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -850,7 +850,7 @@ USHORT CreateImexProperties
     /******************************************************************/
     if ( !usRC )
     { 
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 108");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 108 SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );");
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );
       #endif
@@ -870,7 +870,7 @@ USHORT CreateImexProperties
       sprintf( pPropImex->szSavedDlgFExpoNPath, "\\%s\\", SNOMATCHDIR );
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 109");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 109 /* Write properties and free data area                            */");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -935,7 +935,7 @@ USHORT CreateDictProperties
     /******************************************************************/
     if ( !usRC )
     {
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 110");
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 110 /* Fill in property heading area                                  */");
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropDict->PropHead, DICT_PROPERTIES_NAME,
                    PROP_CLASS_DICTLIST );
@@ -958,7 +958,7 @@ USHORT CreateDictProperties
 #endif
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 119");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 119 /* Write properties and free data area                            */");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -1037,7 +1037,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 39");
     /******************************************************************/
     if ( !usRC )
     {
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 120");
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 120 /* Fill in property heading area                                  */");
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropEdit->PropHead, EDITOR_PROPERTIES_NAME,
                    PROP_CLASS_EDITOR );
@@ -1049,7 +1049,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 39");
     /******************************************************************/
     if ( !usRC )
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40 /* Fill properties with default values                            */");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       cyTitleBar = WinQuerySysValue( HWND_DESKTOP, SV_CYTITLEBAR );
       cyMenu = WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
@@ -1142,7 +1142,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 41");
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 121");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 121 /* Write properties and free data area                            */");
 #ifdef TEMPORARY_COMMENTED
     /******************************************************************/
     /* Write properties and free data area                            */
@@ -1815,7 +1815,7 @@ USHORT UpdateFolderProp
    /*******************************************************************/
    if ( !usRC )
    {
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 122");
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 122 /* copy EQF drive into properties                                  */");
 #ifdef TEMPORARY_COMMENTED
      pFolProp->PropHead.szPath[0] = chDrive;
      #endif
@@ -1903,7 +1903,7 @@ USHORT UpdateDocumentProp
                       &usBytesRead, FALSE );
    }
 
-   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 123");
+   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 123 /* copy EQF drive into properties                                  */");
 #ifdef TEMPORARY_COMMENTED
    /*******************************************************************/
    /* copy EQF drive into properties                                  */
@@ -2000,7 +2000,7 @@ USHORT UpdateDictProp
       pDictProp->szDictPath[0] = chDrive;
       pDictProp->szIndexPath[0] = chDrive;
       
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 124");
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 124 /* copy EQF drive into properties                                  */");
 #ifdef TEMPORARY_COMMENTED
       pDictProp->PropHead.szPath[0] = chDrive;
       #endif
@@ -2096,7 +2096,7 @@ USHORT UpdateTMProp
       pNTMProp = (PPROP_NTM) pTMProp;
       if ( strcmp( pNTMProp->szNTMMarker, NTM_MARKER) == 0 )
       {
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 125");
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 125 /* copy EQF drive into properties                                  */" );
 #ifdef TEMPORARY_COMMENTED
         pNTMProp->stPropHead.szPath[0] = chDrive;
         pNTMProp->szFullMemName[0] = chDrive;
@@ -2105,7 +2105,7 @@ USHORT UpdateTMProp
       else
       {
         
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 126");
+     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 126 pTMProp->stPropHead.szPath[0] = chDrive;");
 #ifdef TEMPORARY_COMMENTED
         pTMProp->stPropHead.szPath[0] = chDrive;
         #endif

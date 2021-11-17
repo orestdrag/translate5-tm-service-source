@@ -1668,8 +1668,7 @@ SHORT QDAMDictUpdateLocal
    }
    else
    {
-     LogMessage(FATAL, "TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 46");
+     LogMessage2(FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
 #ifdef TEMPORARY_COMMENTED
      PBTREEBUFFER_V2  pRecord = NULL;        // pointer to record
       if ( !sRc )
@@ -2023,7 +2022,7 @@ SHORT QDAMDictExactLocal
                  }
                  else
                  {
-                   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 47");
+                   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 47 UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data");
 #ifdef TEMPORARY_COMMENTED
                    UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
                    #endif

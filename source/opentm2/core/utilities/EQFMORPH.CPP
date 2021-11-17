@@ -453,8 +453,7 @@ USHORT Terminate
 	/********************************************************************/
 	UtlAlloc( (PVOID *) &pLangCB, 0L, 0L, NOMSG );
 
-  LogMessage(FATAL,"TEMPORARY_COMMENTED in Terminate::  SpellFactory::close();MorphFactory::close();");
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 95");
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED in Terminate::  SpellFactory::close();MorphFactory::close();");
 #ifdef TEMPORARY_COMMENTED 
 	SpellFactory::close();
 	MorphFactory::close();

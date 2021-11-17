@@ -235,7 +235,7 @@ BOOL MemImportFileOpenDialog
   PMEM_LOAD_DLG_IDA   pLIDA
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 8");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 8 whole function");
 #ifdef TEMPORARY_COMMENTED
   BOOL fOK = TRUE;
   EQFINFO ErrorInfo;
@@ -391,7 +391,7 @@ UINT_PTR CALLBACK MemOpenFileHook
   LPARAM lParam   // message parameter
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 9");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 9 whole function");
 #ifdef TEMPORARY_COMMENTED
   UINT uiResult = 0;
   wParam;

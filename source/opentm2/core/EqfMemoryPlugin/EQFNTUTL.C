@@ -1227,7 +1227,7 @@ USHORT NTMCheckForUpdates
  USHORT usRc = 0;                      // function return code
  static LONG   alNewUpdCounter[MAX_UPD_COUNTERS]; // buffer for new update counters
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 49");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );");
 #ifdef TEMPORARY_COMMENTED
  // Get new update counter values
  usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );
@@ -1539,8 +1539,7 @@ USHORT NTMReadLongNameTable
           memcpy( pNewArea,
                   (PBYTE)pTmClb->pLongNames->pszBuffer + sizeof(TERSEHEADER),
                   ulLen - sizeof(TERSEHEADER) );
-          LogMessage(ERROR,"TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand");
-          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 50");
+          LogMessage2(ERROR,__func__, "::TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand");
 #ifdef TEMPORARY_COMMENTED
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )

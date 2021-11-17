@@ -320,7 +320,7 @@ USHORT TmtXOpen
                 // O.K. no problems at all
                 break;
               case BTREE_NOT_FOUND :
-              LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 48");
+              LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable( pTmClb );");
 #ifdef TEMPORARY_COMMENTED
                 // no long name tabel yet,create one ...
                 usTempRc = NTMWriteLongNameTable( pTmClb );

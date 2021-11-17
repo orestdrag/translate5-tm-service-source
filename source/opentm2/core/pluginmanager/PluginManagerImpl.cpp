@@ -215,7 +215,10 @@ OtmPlugin* PluginManagerImpl::getPlugin(OtmPlugin::ePluginType type, int n)
 
 USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 {
+  
   USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
+  return usRC;
+
 	std::string strFileSpec(pszPluginDir);
 	BOOL fMoreFiles = TRUE;
 	HANDLE hDir = HDIR_CREATE;
@@ -223,7 +226,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 
   BOOL fLogHasBeenOpened = FALSE;
   
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 75");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 75 // check the depths of the cycle  if (IsDepthOvered( pszPluginDir )) // util");
 #ifdef TEMPORARY_COMMENTED
 LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 76");
 #ifdef TEMPORARY_COMMENTED
@@ -274,7 +277,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 77");
  this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
 #endif //TEMPORARY_COMMENTED
   
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 23");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 23 hDir = FindFirstFile( strFileSpec.c_str(), &ffb );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
 
@@ -443,10 +446,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 
     if (usRC) {
         // if register dll error, just remove the dll from the group
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
-#ifdef TEMPORARY_COMMENTED
-        this->Log.writef( "Error: register plugin %s failed %d.", pszName, usRC);
-#endif //TEMPORARY_COMMENTED
+LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", intToA(usRC));
 
         // FOR P403268 begin
         // if it's already in pluginSet, also erase it

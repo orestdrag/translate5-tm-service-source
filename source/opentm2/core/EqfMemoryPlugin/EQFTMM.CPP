@@ -73,7 +73,7 @@ BOOL TMMTextFitsRect
 //------------------------------------------------------------------------------
 BOOL EQFTMMaintain( PSZ pszTMName )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 52");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 52 whole function");
 #ifdef TEMPORARY_COMMENTED
   ULONG flCreate;                    // Window creation control flags
   HWND hwndFrame;                    // Frame window handle
@@ -314,7 +314,7 @@ MRESULT APIENTRY TMMWNDPROC
   LPARAM mp2
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 53");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 53 whole function");
 #ifdef TEMPORARY_COMMENTED
     MRESULT mResult = FALSE;           // window proc return value
     PTMMIDA  pTMMIda;                  // pointer to ida
@@ -947,7 +947,7 @@ BOOL DoVisualTMM
   PTMMIDA pTMMIda
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 54");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 54 whole function");
 #ifdef TEMPORARY_COMMENTED
   BOOL        fOK = TRUE;                                  // success indicator
   HMENU       hwndMenu;
@@ -1137,7 +1137,7 @@ BOOL TMMDocStart
   PTMMVISDOC pstVisDoc
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 55");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 55 whole function");
 #ifdef TEMPORARY_COMMENTED
   ULONG flFrameFlags = FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_DLGBORDER |
                        FCF_TITLEBAR ;
@@ -1332,7 +1332,7 @@ VOID TMMVertWindowPos
   SWP          swp
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 56");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 56 whole function");
 #ifdef TEMPORARY_COMMENTED
   USHORT  usCY = (USHORT) WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
   if ( pTBDoc->docType == SSOURCE_DOC )
@@ -1385,7 +1385,7 @@ VOID TMMSetWindowPos
   SHORT   cy
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 57");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 57 whole function");
 #ifdef TEMPORARY_COMMENTED
   /*******************************************************************/
   /* usCY statusbar height                                           */
@@ -1463,7 +1463,7 @@ TMMTile
   BOOL fHorizontal
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 58");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 58 whole function");
 #ifdef TEMPORARY_COMMENTED
   PTMMVISDOC pVisDoc;
 
@@ -1522,7 +1522,7 @@ TMMFuncQuit
 )
 {
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 59");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 59 whole function");
 #ifdef TEMPORARY_COMMENTED
   //free all allocated space
   if ( pTMMIda->TBSourceDoc.pTBSeg )
@@ -1749,7 +1749,7 @@ void TMMCommand
  WPARAM  mp1
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 60");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 60 whole function");
 #ifdef TEMPORARY_COMMENTED
   PTMMIDA     pTMMIda;
   HMENU       hwndMenu;
@@ -2667,7 +2667,7 @@ VOID  EQFDispWindow
    PTBDOCUMENT  pTBDoc
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 61");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 61 whole function");
 #ifdef TEMPORARY_COMMENTED
   USHORT  usRow;
 
@@ -2814,7 +2814,7 @@ BOOL ActivateSegment
   ULONG   ulSegNum                        // new segment number
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 62");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 62 whole function");
 #ifdef TEMPORARY_COMMENTED
   PTBSEGMENT pSrcSeg;                     // pointer to segment
   PTBSEGMENT pTgtSeg;                     // pointer to segment
@@ -3160,7 +3160,7 @@ MRESULT APIENTRY TMMSTATUSBARWNDPROC
   LPARAM mp2
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 63");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 63 whole function");
 #ifdef TEMPORARY_COMMENTED
   MRESULT mResult = FALSE;           // window proc return value
 
@@ -3222,7 +3222,7 @@ static VOID TMMFillStatusBar
   HPS hps                              // presentation space
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 64");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 64 whole function");
 #ifdef TEMPORARY_COMMENTED
   RECT        rectl;
   PTMMIDA     pTMMIda = ACCESSWNDIDA( hwnd, PTMMIDA);
@@ -3496,7 +3496,7 @@ VOID NextPrevious
    BOOL            fDeleted
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 65");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 65 whole function");
 #ifdef TEMPORARY_COMMENTED
    BOOL            fOK = TRUE;
    USHORT          usRc = 0;
@@ -3571,7 +3571,7 @@ VOID BackToQuery
    HWND            hwnd
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 66");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 66 whole function");
 #ifdef TEMPORARY_COMMENTED
    BOOL            fOK = TRUE;
    USHORT          usRc = 0;
@@ -3743,7 +3743,7 @@ VOID  LastSegDel
    PTMMIDA         pTMMIda
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 67");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 67 whole function");
 #ifdef TEMPORARY_COMMENTED
    USHORT          usResponse = 0;
 
@@ -4130,7 +4130,7 @@ BOOL TMMTextFitsRect
   HPS         hps                      // presentation space handle
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 68");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 68 whole function");
 #ifdef TEMPORARY_COMMENTED
   RECT    rc;                          // temporary rectangle
   DWORD   dwRGB_PaleGray = CLR_PALEGRAY;

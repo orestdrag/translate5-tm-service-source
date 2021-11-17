@@ -150,7 +150,7 @@ USHORT EQFMemImportTrojaStart
 
       if (usRc)
       {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 7");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 7 // Prepare the data to open the properties        _splitpath( pMIDA->szPathMergeMem,");
 #ifdef TEMPORARY_COMMENTED
         /* This is platform-dependent code, should be rewritten and tested */
         /* https://linux.die.net/man/3/splitpath  */

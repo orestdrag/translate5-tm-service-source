@@ -785,7 +785,7 @@ int EqfMemory::deleteProposal
 
   if ( !iRC ) iRC = this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 14");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 14 if ( !iRC ) iRC = TmDeleteSegmentW( this->htm,  NULL, this->pTmPutIn, this->pTmPutOut, FALSE );");
 #ifdef TEMPORARY_COMMENTED
 	if ( !iRC ) iRC = TmDeleteSegmentW( this->htm,  NULL, this->pTmPutIn, this->pTmPutOut, FALSE );
 #endif //TEMPORARY_COMMENTED
@@ -838,7 +838,7 @@ unsigned long EqfMemory::getProposalNum()
 
   ULONG ulStartKey = 0;
   ULONG ulNextKey = 0;
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 15");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);");
 #ifdef TEMPORARY_COMMENTED
   EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
 #endif //TEMPORARY_COMMENTED

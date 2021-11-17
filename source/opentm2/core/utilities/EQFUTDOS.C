@@ -2286,7 +2286,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 58");
  {
    USHORT usRc = 0;                     // success indicator
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135 whole function");
 #ifdef TEMPORARY_COMMENTED
    *phMod = GetModuleHandle( pszModName );
    if (!*phMod )
@@ -2314,7 +2314,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135");
  {
    USHORT  usRc = 0;                    // success indicator
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole function");
 #ifdef TEMPORARY_COMMENTED
    if ( !GetModuleFileName( hMod, pchBuf, cbBuf ) )
    {

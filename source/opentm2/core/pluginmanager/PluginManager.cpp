@@ -126,7 +126,7 @@ int PluginManager::ValidationCheck(char * strParam)
         }
     }
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 173");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 173 #ifdef TEMPORARY_COMMENTED    if (!bHasMemory)");
 #ifdef TEMPORARY_COMMENTED
     if (!bHasMemory)
     {

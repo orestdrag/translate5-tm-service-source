@@ -55,7 +55,7 @@ INT_PTR CALLBACK MEMMERGEDLG( HWND hwnd,
       If no TM is selected then or the dialog has been canceled then
       pMIDA->htm will be set to NULL. */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 11");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 11 whole function");
 #ifdef TEMPORARY_COMMENTED
    PMEM_MERGE_IDA   pMIDA;                           // Pointer to merge IDA
    USHORT           usRc = TRUE;                     // Process return code
@@ -258,7 +258,7 @@ BOOL MemGUIMergeMemory
   HWND hwnd
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 12");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 12 whole function");
 #ifdef TEMPORARY_COMMENTED
   BOOL fOK = TRUE;
   PMEM_MERGE_IDA    pMIDA = NULL;         // Pointer to the export IDA
@@ -340,7 +340,7 @@ MRESULT MemMergeCallBack
   LPARAM           mp2                 // second message parameter
 )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 13");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 13 whole function");
 #ifdef TEMPORARY_COMMENTED
   PMEM_MERGE_IDA    pMIDA;             // pointer to instance area
   MRESULT           mResult = FALSE;   // return code for handler proc

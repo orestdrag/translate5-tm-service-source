@@ -370,8 +370,7 @@ std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& 
 //std::vector<std::string> selFiles;
 int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
-    LogMessage2(FATAL, "called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 143");
+    LogMessage3(FATAL,__func__, ":: called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
 #ifdef TEMPORARY_COMMENTED
     auto files = FindFiles(name);
     if(selFiles.empty()){
@@ -389,8 +388,7 @@ FILE* FilesystemHelper::FindFirstFile(const std::string& name){
 }
 
 FILE* FilesystemHelper::FindNextFile(){
-    LogMessage(FATAL, "called not implemented function FilesystemHelper::FindNextFile()");
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 144");
+    LogMessage2(FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
 #ifdef TEMPORARY_COMMENTED
     if(selFiles.empty()){
         LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");

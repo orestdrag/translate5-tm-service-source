@@ -130,9 +130,8 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         break;
       }
 
-      LogMessage(WARNING, "TEMPORARY_COMMENTED name comparing in LoadPropFile");
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 96");
-#ifdef TEMPORARY_COMMENTED
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED name comparing in LoadPropFile");
+      #ifdef TEMPORARY_COMMENTED
       if( strcasecmp( pszName, prophead.szName)
        //|| strcasecmp( pszPath + 2, prophead.szPath + 2)   // ignore drive !!!
        )
@@ -186,9 +185,8 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         }
         else
         {
-          LogMessage(WARNING, "TEMPORARY_COMMENTED :: Err_ReadFile");
+          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED :: Err_ReadFile // files created in linux don't have that filler to fit 2k");
           // files created in linux don't have that filler to fit 2k
-          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 97");
 #ifdef TEMPORARY_COMMENTED
           *pIda->pErrorInfo = Err_ReadFile;
           #endif
@@ -387,7 +385,7 @@ VOID NotifyAll( HPROP hprop)
     if ( UtlQueryUShort( QS_RUNMODE ) != FUNCCALL_RUNMODE )
     {
       ph = (PPROPHEAD)(((PPROPHND)hprop)->pCntl->pHead);
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 98");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 98 strcat( strcat( strcpy( name, ph->szPath), \"\\\"), ph->szName);");
 #ifdef TEMPORARY_COMMENTED
       strcat( strcat( strcpy( name, ph->szPath), "\\"), ph->szName);
       #endif
@@ -464,8 +462,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
      }
      else
      {
-       LogMessage(WARNING, "TEMPORARY_COMMENTED call EqfCallPropertyHandler ");
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 99");
+       LogMessage2(ERROR,__func__, "::TEMPORARY_COMMENTED call EqfCallPropertyHandler ");
 #ifdef TEMPORARY_COMMENTED
      hprop = (HPROP)EqfCallPropertyHandler( WM_EQF_OPENPROPERTIES,
                                             MP1FROMSHORT(0),
@@ -639,7 +636,7 @@ SHORT SaveProperties(
      }
      else
      {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 100");
+LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 100 rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES, MP1FROMSHORT(0), MP2FROMP(&PropMsg) ) );");
 #ifdef TEMPORARY_COMMENTED
        rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES,
                                            MP1FROMSHORT(0),
@@ -680,7 +677,7 @@ PPROPSYSTEM GetSystemPropPtr( VOID )
     {
       hSysProp = EqfQuerySystemPropHnd();
       
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 101");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 101 assert( hSysProp != NULL );");
 #ifdef TEMPORARY_COMMENTED
       assert( hSysProp != NULL );
       #endif

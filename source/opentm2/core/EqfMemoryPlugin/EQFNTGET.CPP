@@ -62,7 +62,7 @@ void GetElapsedTime( LONG64 *plTime )
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
   *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 38");
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 38  whole function");
 #ifdef TEMPORARY_COMMENTED
   LARGE_INTEGER liCurrent;
 
@@ -2173,8 +2173,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
             }
 
 
-LogMessage(FATAL,"TEMPORARY_COMMENTED DITAPreprocessProposals");
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 39");
+LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED DITAPreprocessProposals");
 #ifdef TEMPORARY_COMMENTED
             fPreprocessed = DITAPreprocessProposals( pSubstProp->szPropSource, pSubstProp->szPropTarget, pGetIn->pvReplacementList );
 #endif
@@ -2240,8 +2239,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 39");
           { 
             if ( !fSkipPostprocessing )
             {
-LogMessage(FATAL,"TEMPORARY_COMMENTED DITAProcessProposal");
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 40");
+LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
 #ifdef TEMPORARY_COMMENTED
               fSubstAll = DITAProcessProposal( pGetIn->szSource, pSubstProp->szPropSource, 
                                               pSubstProp->szPropTarget, pSubstProp->szPropTagTable, ulSrcOemCP  );
@@ -3371,8 +3369,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 					   BOOL fTempStringEqual = FALSE;
 					   BOOL fOK = FALSE;
              
-LogMessage(FATAL,"TEMPORARY_COMMENTED NTMCompareBetweenTokens");
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 41");
+LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED NTMCompareBetweenTokens");
 #ifdef TEMPORARY_COMMENTED
 					   fOK = NTMCompareBetweenTokens(pSentence->pPropString,
 									 pSentence->pInputString,

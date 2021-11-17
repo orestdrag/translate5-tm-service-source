@@ -373,13 +373,13 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 8");
        pCommArea->usComplete = 100;
        if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
        {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 9");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 9 WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
 #endif// TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
 
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4");
+       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4 if ( pExportIDA->ulSegmentCounter == 0 )");
 #ifdef TEMPORARY_COMMENTED
        if ( pExportIDA->ulSegmentCounter == 0 )
        {
@@ -1898,7 +1898,7 @@ USHORT MemFuncPrepExport
       fOK = false;
     }
 
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 5");
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 5 USHORT      usDosRc;              // Return code from Dos functions");
 #ifdef TEMPORARY_COMMENTED
     USHORT      usDosRc;              // Return code from Dos functions
     USHORT      usAction;             // Action for DosOpen
@@ -1984,7 +1984,7 @@ USHORT MemFuncPrepExport
     } /* endif */
 
 
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 6");
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 6 // build object name   sprintf( ObjName, \"MEMEXP: %s\", pIDA->szMemName );");
 #ifdef TEMPORARY_COMMENTED
     // build object name
     sprintf( ObjName, "MEMEXP: %s", pIDA->szMemName );

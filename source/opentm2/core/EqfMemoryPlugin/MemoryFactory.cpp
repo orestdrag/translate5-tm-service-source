@@ -1577,7 +1577,7 @@ USHORT MemoryFactory::APIUpdateMem
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
 
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 70");
+  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 70 // generate short document name if none given (otherwise the long document name will not be stored in the memory...) if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )");
 #ifdef TEMPORARY_COMMENTED
   // generate short document name if none given (otherwise the long document name will not be stored in the memory...)
   if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )
