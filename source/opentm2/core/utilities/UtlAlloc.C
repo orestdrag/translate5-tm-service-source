@@ -265,14 +265,6 @@ USHORT UtlGetTask ( void )
   int   usTask;
   USHORT currTask;
   
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 150");
-#ifdef TEMPORARY_COMMENTED
-        __asm__
-          (
-            "MOV      %ax, %SS;"
-            "MOV      (usTask), %ax;"
-          );
-#endif //TEMPORARY_COMMENTED
   usTask = _getpid();
   for ( currTask = 0; currTask < MAX_TASK ; ++currTask )
   {

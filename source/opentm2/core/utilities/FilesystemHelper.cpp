@@ -279,12 +279,6 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 }
 
 int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 142");
-#ifdef TEMPORARY_COMMENTED
-    if(tempFile) 
-        return 0;
-    #endif
-
     FileBuffer* pFb = NULL;
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         pFb = &(*getFileBufferInstance())[fName];
@@ -806,43 +800,7 @@ long FdGetFileSize(int fd)
 }
 
 int FilesystemHelper::GetFileSize(const std::string& path){
-
     auto size = FnGetFileSize(path.c_str());
-
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 145");
-#ifdef TEMPORARY_COMMENTED
-    int size = -1;
-    std::string fixedPath = path;
-    fixedPath = FixPath(fixedPath);
-
-    FILE* ptr = fopen(fixedPath.c_str(), "rb");
-    
-    if(!ptr){
-        LogMessage2(ERROR, "FilesystemHelper::GetFileSize,can't open file ", path.c_str());
-    }else{
-        size = GetFileSize(fixedPath);
-        fclose(ptr);
-    }
-    return size;
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 146");
-#ifdef TEMPORARY_COMMENTED
-    if(pFileBuffers->find(path) != pFileBuffers->end() && fileBuffers[path].data.size()>0){
-        size = fileBuffers[path].data.size();
-        LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") used filebuffer ");
-    }else{
-        FILE* ptr = OpenFile(path, "rb", false);
-        LogMessage3(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") filebuffer not found->reading file");
-        if(!ptr){
-            __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
-            LogMessage(ERROR, "FilesystemHelper::GetFileSize()::FILEHELPER_FILE_PTR_IS_NULL ");
-        }else{
-            size = GetFileSize(ptr);
-            CloseFile(ptr);            
-        }
-    }
-    LogMessage4(DEBUG, "FilesystemHelper::GetFileSize(", path.c_str(), ") = ",  intToA(size));
-    #endif
-    #endif
     return size;
 }
 

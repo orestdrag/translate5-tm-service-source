@@ -372,8 +372,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", intToA(uiPort), "; Worker threads = ", intToA(uiWorkerThreads),
             "; timeout = ", intToA(uiTimeOut));
-    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", intToA(uiLo
-    gLevel));
+    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", intToA(uiLogLevel));
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     strcpy( pszService, szServiceName );

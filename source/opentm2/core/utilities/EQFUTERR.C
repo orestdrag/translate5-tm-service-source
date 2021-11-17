@@ -739,23 +739,22 @@ VOID UtlInitError
    PSZ  pMsgFile                       // name of message file
 )
 {
+   ERRDATA* errData = &ErrData[UtlGetTask()];
    // check for function mode I/F (in this mode we use the help instance
    // handle as pointer to the last message area
    if ( hwndFrame == HWND_FUNCIF )
    {
-     ErrData[UtlGetTask()].hab              = hab;
-     ErrData[UtlGetTask()].hwndFrame        = hwndFrame;
-     ErrData[UtlGetTask()].hwndHelpInstance = hwndHelpInstance;
-     strcpy( ErrData[UtlGetTask()].chMsgFile, pMsgFile );
-     ErrData[UtlGetTask()].pLastMessage     = (PDDEMSGBUFFER)hwndHelpInstance;
+     errData->hab              = hab;
+     errData->hwndFrame        = hwndFrame;
+     errData->hwndHelpInstance = hwndHelpInstance;   
+     errData->pLastMessage     = (PDDEMSGBUFFER)hwndHelpInstance;
    }
    else
    {
-     ErrData[UtlGetTask()].hab              = hab;
-     ErrData[UtlGetTask()].hwndFrame        = hwndFrame;
-     ErrData[UtlGetTask()].hwndHelpInstance = hwndHelpInstance;
-     strcpy( ErrData[UtlGetTask()].chMsgFile, pMsgFile );
-     ErrData[UtlGetTask()].pLastMessage     = NULL;
+     errData->hab              = hab;
+     errData->hwndFrame        = hwndFrame;
+     errData->hwndHelpInstance = hwndHelpInstance;
+     errData->pLastMessage     = NULL;
    } /* endif */
 
 
@@ -770,25 +769,6 @@ VOID UtlInitError
       strcpy(EQF_INFO_TXT       , "OpenTM2");
       strcpy(INTERNAL_ERROR_TXT , "OpenTM2");
 
-   if ( ErrData[UtlGetTask()].hMsgFile )
-   {
-
-   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 137");
-#ifdef TEMPORARY_COMMENTED
-     UtlClose( ErrData[UtlGetTask()].hMsgFile, FALSE );
-     ErrData[UtlGetTask()].hMsgFile = 0;
-   #endif
-   } /* endif */
-   {
-     USHORT  usDummy;
-     UtlOpen(pMsgFile, &ErrData[UtlGetTask()].hMsgFile , &usDummy,
-              0L,                            // Create file size
-              FILE_NORMAL,                   // Normal attribute
-              OPEN_ACTION_OPEN_IF_EXISTS,    // Open if exists
-              OPEN_SHARE_DENYWRITE,          // Deny Write access
-              0L,                            // Reserved
-              FALSE );                           // no error handling
-   }
 }
 
 

@@ -406,37 +406,14 @@ int UTF16strnicmpL( PSZ_W pszString1, PSZ_W pszString2, LONG lLen )
 
 int UTF16strlenCHAR( PSZ_W pszString )
 {
-  int iLen = 0;
-  iLen = wcslen(pszString);
-  //LogMessage2(WARNING,"TEMPORARY_COMMENTED in UTF16strlenCHAR, ", "");
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 152");
-#ifdef TEMPORARY_COMMENTED
-
-  while ( pszString && *pszString != 0 )
-  {
-    iLen ++;
-    pszString++;
-  } /* endwhile */
-  #endif
-
+  int iLen = wcslen(pszString);
   return( iLen );
 }
 
 
 int UTF16strlenBYTE( PTMWCHAR pszString )
 {
-  int iLen = 0;
-  iLen = wcslen(pszString) * sizeof(TMWCHAR);
-  
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 153");
-#ifdef TEMPORARY_COMMENTED
-  while ( pszString && *pszString != 0 )
-  {
-    iLen += 2;
-    pszString++;
-  } /* endwhile */
-  #endif
-  
+  int iLen = wcslen(pszString) * sizeof(TMWCHAR);  
   return( iLen );
 }
 
@@ -728,91 +705,6 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 PTMWCHAR ASCII2Unicode( PSZ pszASCII, PTMWCHAR pszUni, ULONG  ulCP )
 {
   mbstowcs(pszUni, pszASCII, MAX_SEGMENT_SIZE);
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 156");
-#ifdef TEMPORARY_COMMENTED
-  int iRC = 0;
-  USHORT  usCP = (USHORT)ulCP;
-
-  if ( pszASCII && pszUni )
-  {
-	  if (*pszASCII == EOS )
-	  {
-		  *pszUni = EOS;
-      }
-      else
-      {
-		if (!usCP)
-		{
-		  usCP = (USHORT)GetLangOEMCP(NULL);
-		}
-
-    // always use 932 when 943 is specified
-    if ( usCP == 943 ) usCP = 932;
-
-		//iRC = MultiByteToWideChar( usCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
-    //if ( iRC == 0 ) iRC = GetLastError();
-    if ( iRC == ERROR_INVALID_PARAMETER )
-    {
-      // codepage not supported by OS, use default code page for conversion
-		  //MultiByteToWideChar( CP_OEMCP, 0, pszASCII, -1, pszUni, MAX_SEGMENT_SIZE );
-    } /* endif */
-
-		switch (usCP)
-		{
-		  case 864:
-		  {
-			  PSZ_W p = pszUni;
-			  CHAR_W c;
-
-			  while ((c = *p++) != NULC)
-			  {
-				switch (c)
-				{
-				  case 0x009B:      // Left-to-Right marker
-					*(p-1) = 0x200E;// Unicode character converted from CP864 (0x9B)
-					break;
-				  case 0x009C:      // Right-to-Left marker
-					*(p-1) = 0x200F;// Unicode character converted from CP864 (0x9C)
-					break;
-				}
-			  }
-          LogMessage(FATAL,"TEMPORARY_COMMENTED in called function BidiConvertFETo06, because of basic TMWCHAR data type migration");
-          LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 157");
-#ifdef TEMPORARY_COMMENTED
-		      // do special handling for Arabic to allow shaping in even for 864 stuff
-		      BidiConvertFETo06(pszUni, UTF16strlenCHAR(pszUni));
-          #endif
-		    }
-			break;
-		  case 862:
-		  case 867:
-			{
-			  // Convert RLM&LRM characters correctly to UNICODE
-			  PSZ_W p = pszUni;
-			  CHAR_W c;
-			  while ((c = *p++)!= NULC)
-			  {
-				switch (c)
-				{
-				  case 0x00E1:    //0xA0:      // Left-to-Right marker
-					*(p-1) = 0x200E;
-					break;
-				  case 0x00ED:    //0xA1:      // Right-to-Left marker
-					*(p-1) = 0x200F;
-					break;
-				}
-			  }
-			}
-			break;
-		} /* endswitch */
-
-     }/* endif */
-  }
-  else if (pszUni)
-  {
-      *pszUni = 0;
-    }
-    #endif
   return( pszUni );
 }
 

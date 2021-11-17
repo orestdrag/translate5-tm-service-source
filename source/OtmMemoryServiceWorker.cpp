@@ -689,7 +689,7 @@ int OtmMemoryServiceWorker::import
       }else{
         LogMessage2(WARNING, "JSON parsed unexpected name, ", name.c_str());
       }
-    }else{
+    }else if(iRC != 2002){// iRC != INFO_ENDOFPARAMETERLISTREACHED
         LogMessage4(ERROR, "failed to parse JSON \"", strInputParms.c_str(), "\", iRC = ", intToA(iRC));
     }
   } /* endwhile */

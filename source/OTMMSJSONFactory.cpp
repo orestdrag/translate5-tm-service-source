@@ -8,6 +8,7 @@
 #include "OTMMSJSONFactory.h"
 #include "opentm2/core/utilities/OSWrapper.h"
 #include "opentm2/core/utilities/LogWrapper.h"
+#include "opentm2/core/utilities/EncodingHelper.h"
 
 /** Initialize the static instance variable */
 JSONFactory* JSONFactory::instance = 0;
@@ -132,20 +133,8 @@ JSONFactory* JSONFactory::getInstance()
   \returns string converted to UTF16
   */
   std::wstring convertToUTF16( const std::string& strASCII )
-  {
-    int iUTF16Len;
-    int iLen = (int)strASCII.length() + 1;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 1");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    iUTF16Len = MultiByteToWideChar( CP_OEMCP, 0, strASCII.c_str(), iLen, 0, 0 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-    wchar_t *pszUtf16String = new ( wchar_t[iUTF16Len] );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 2");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    MultiByteToWideChar( CP_OEMCP, 0, strASCII.c_str(), iLen, pszUtf16String, iUTF16Len );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-    std::wstring strUTF16 = pszUtf16String;
-    delete( pszUtf16String );
+  {  
+    std::wstring strUTF16 = EncodingHelper::convertToUTF16(strASCII);
     return strUTF16;
   }
 

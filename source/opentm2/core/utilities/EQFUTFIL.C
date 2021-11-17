@@ -1328,36 +1328,6 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
     } /* endif */
   }
   strcpy(pszShortName, pszLongName);
-  LogMessage2(INFO, "TEMPORARY COMMENTED UtlLongToShortName, fName = ", pszShortName);
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 138");
-#ifdef TEMPORARY_COMMENTED
-  // scan long name and add valid characters to short file name
-  while ( (i < 8) && (*pszLongName != EOS) )
-  {
-    BYTE bTemp = (BYTE)*pszLongName;
-    if ( isalnum(bTemp) || (bTemp == '@') ||
-         (bTemp == '$') || (bTemp == '_') ||
-         (bTemp == '-') )
-    {
-      CHAR c = *pszLongName++;
-      *pszShortName++ = (CHAR)toupper(c);
-      i++;
-    }
-    else
-    {
-      pszLongName++;                   // try next character
-    } /* endif */
-  } /* endwhile */
-
-  // add at least a dummy character if no valid characters were detected
-  if ( i == 0 )
-  {
-    *pszShortName++ = 'X';
-  } /* endif */
-
-  // terminate short file name
-  *pszShortName = EOS;
-  #endif
   // return to caller
   return( 0 );
 }

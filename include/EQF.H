@@ -3954,7 +3954,6 @@ typedef struct _ERRDATA                // global data of UtlError
    HWND hwndFrame;                     // handle of main window frame
    HWND hwndHelpInstance;              // help instance handle
    CHAR chMsgFile[CCHMAXPATH];         // name of message file
-   HFILE hMsgFile;                     // handle of message file
    PDDEMSGBUFFER pLastMessage;         // ptr to buffer for last message
 } ERRDATA, *PERRDATA;
 /**********************************************************************/

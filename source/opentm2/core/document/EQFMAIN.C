@@ -137,37 +137,6 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
 
 
     /******************************************************************/
-    /* Check if resources exist                                       */
-    /* (The resource file is not checked here, it will be checked     */
-    /*  later on while loading the resource into memory)              */
-    /******************************************************************/
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 3");
-#ifdef TEMPORARY_COMMENTED
-    if ( fOK )
-    {
-      fOK = UtlFileExist( EqfSystemHlpFile );
-    } /* endif */
-
-    if ( fOK && szDrive[0] && szSysPath[0] && EqfSystemPropPath[0] &&
-         //EqfSystemHlpFile[0] && 
-         szEqfResFile[0] )
-    {
-      UtlSetString( QST_MSGFILE, EqfSystemMsgFile );
-      UtlSetString( QST_HLPFILE, EqfSystemHlpFile );
-      UtlSetString( QST_RESFILE, szEqfResFile );
-    }
-    else
-    {
-      LogMessage3(ERROR, "TwbGetCheckProfileData()::WinMessageBox, STR_INSAL_ERROR, STR_INSTALL_ERROR_TITLE, fOk=", intToA(fOK), ". " );
-      //WinMessageBox( HWND_DESKTOP, HWND_DESKTOP, STR_INSTALL_ERROR,
-      //               STR_INSTALL_ERROR_TITLE,
-      //               1, MB_ENTER | MB_ICONEXCLAMATION);
-
-      fOK = FALSE;
-    } /* endif */
-    #endif
-
-    /******************************************************************/
     /* return strings to caller if requested...                       */
     /******************************************************************/
     if ( fOK )
@@ -176,19 +145,6 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
       {
         strcpy( pEqfSystemPropPath, EqfSystemPropPath );
       } /* endif */
-      
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4");
-#ifdef TEMPORARY_COMMENTED
-      if ( pEqfSystemMsgFile )
-      {
-        strcpy( pEqfSystemMsgFile, EqfSystemMsgFile );
-      } /* endif */
-      
-      if ( pEqfResFile )
-      {
-        strcpy( pEqfResFile, szEqfResFile );
-      } /* endif */
-      #endif
     } /* endif */
 
     return( fOK);

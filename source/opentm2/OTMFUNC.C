@@ -419,7 +419,7 @@ USHORT EqfStartSession
       UtlSetString( QST_COMMEMDIR,    pPropSys->szDirComMem );
       UtlSetString( QST_COMPROPDIR,   pPropSys->szDirComProp );
       UtlSetString( QST_COMDICTDIR,   pPropSys->szDirComDict );
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 1");
+      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );");
 #ifdef TEMPORARY_COMMENTED
       UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );
       #endif
@@ -544,9 +544,6 @@ USHORT EqfStartSession
 
     LogMessage(INFO, "==EQFSTARTSESSION==\n" );
 
-  //LogMessage(WARNING,"EqfStartSession::TEMPORARY_COMMENTED plugins init");
-  
-  //#ifdef TEMPORARY_COMMENTED
   LogMessage(INFO,  "   Starting plugins...\n" );
 
   // initialie plugins
@@ -585,9 +582,6 @@ USHORT EqfStartSession
   }
 
   LogMessage( INFO,"   ...Plugins have been started\n" );
-  //#endif
-
-//#ifdef SESSIONLOG
     {
       char szBuf[10];
       int i = 0;
@@ -598,7 +592,6 @@ USHORT EqfStartSession
       //UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
       LogMessage2(INFO,"EqfStartSession: Process ID is ", szBuf);
     }
-//#endif
     *phSession = (LONG)pData;
   }
   else
