@@ -55,7 +55,7 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 ) { szCurDir[0] = EOS; }");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
@@ -99,7 +99,7 @@ USHORT UtlGetDriveList( BYTE *szList)
     WORD   wReturn;                    // return value from GetDriveType
     register int i;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 66");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 66 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     for (i=0, wReturn=0; i<26;i++)
     {
@@ -157,7 +157,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
 
   pSource = pTarget = pszList;         // start at begin of drive list
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 67");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 67 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( *pSource != NULC )           // while not end of list ....
   {
@@ -1461,8 +1461,7 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  WIN32_FIND_DATA info;
  HANDLE hp; 
  sprintf( szFileFound, "%s/*.*", pszDirectory );
-LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles, pszDir = ", pszDirectory);
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 64");
+LogMessage3(ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles full function, pszDir = ", pszDirectory);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
  hp = FindFirstFile( szFileFound, &info );
  do

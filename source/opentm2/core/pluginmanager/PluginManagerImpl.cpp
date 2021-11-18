@@ -217,7 +217,7 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
 {
   
   USHORT usRC = PluginManager::eSuccess;         // function return code add for P402974
-  return usRC;
+  //return usRC;
 
 	std::string strFileSpec(pszPluginDir);
 	BOOL fMoreFiles = TRUE;
@@ -334,7 +334,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 23 hDir = Fi
 	strFileSpec = pszPluginDir;
 	strFileSpec += "/*";
 	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 24");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 24 if ( hDir != INVALID_HANDLE_VALUE )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( hDir != INVALID_HANDLE_VALUE )
   {
@@ -468,7 +468,7 @@ LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", i
     // reset active plugin DLL entry
     iCurrentlyLoadedPluginDLL = -1;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 25");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 25 HMODULE hMod = LoadLibrary(pszName);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     // Add end
 	//HMODULE hMod = LoadLibrary(pszName);

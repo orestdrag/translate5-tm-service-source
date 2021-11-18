@@ -517,7 +517,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         usMBCode = LogMessage3(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0] );
+         usMBCode = LogMessage5(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0], "; szMemSourceLang = ", pReplAddr[1]);
          if ( usMBCode == MBID_CANCEL )
          {
            fOK = FALSE;
@@ -1400,7 +1400,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
          /* This is an old TM format display listbox to get           */
          /* source and target language                                */
          /*************************************************************/
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 5");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 5 DIALOGBOX( QUERYACTIVEWINDOW(), NTMTagLangDlg, hResMod, ID_NTM_TAGLANG_DLG, pLIDA, iDlgRc );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          DIALOGBOX( QUERYACTIVEWINDOW(), NTMTagLangDlg, hResMod,
                     ID_NTM_TAGLANG_DLG, pLIDA, iDlgRc );
@@ -2420,7 +2420,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
           if ( ulBytesRead && !pLIDA->fEOF )
           {
              BYTE bTest = (BYTE)pConvBuffer[ulBytesRead-1];
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
              if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )
              {

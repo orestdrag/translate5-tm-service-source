@@ -227,7 +227,7 @@ USHORT SetupMAT
    cyDesktopDiv20 = cyDesktop / 20L;
 #endif //TO_BE_REMOVED
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 38");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 38 if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )
    {
@@ -1099,7 +1099,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40 /* Fill p
       RECTL_YTOP(pstEQFGen->rclEditorTgt)       = cyDesktop;
 #endif
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 41");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 41 pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |   FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_MENU;");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifdef _WINDOWS
       pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
@@ -1196,7 +1196,7 @@ USHORT SetupCreateDir
   USHORT   usRC = NO_ERROR;            // function return code
 
   BuildPath( szPath, chDrive, pszFolder, usPathID );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42 SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX ); if ( !CreateDirectory( szPath, NULL ) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
   if ( !CreateDirectory( szPath, NULL ) )
@@ -1247,7 +1247,7 @@ USHORT DeletePropFile
   BuildPath( szPath, chDrive, NULL, PROPERTY_PATH );
   strcat( szPath, BACKSLASH_STR );
   strcat( szPath, pszName );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43 usRC = (USHORT)DosDelete( szPath, 0L );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   usRC = (USHORT)DosDelete( szPath, 0L );
 #endif TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1728,7 +1728,7 @@ VOID DeleteDictCacheFiles( CHAR chPrimaryDrive, USHORT usPathId )
 BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
 {
    CHAR     szPath[MAX_EQF_PATH];      // buffer for path name
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44 FILEFINDBUF ResultBuf;              // DOS file find struct");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    FILEFINDBUF3 ResultBuf;              // DOS file find struct
@@ -1744,7 +1744,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44");
    strcat( szPath, BACKSLASH_STR );
    strcat( szPath, pszFile );
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 45");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 45 usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY, &ResultBuf, sizeof( ResultBuf),  &usCount, FIL_STANDARD );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 #ifndef _WINDOWS
    usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY,

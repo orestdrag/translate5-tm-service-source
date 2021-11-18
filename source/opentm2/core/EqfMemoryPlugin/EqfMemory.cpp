@@ -269,7 +269,7 @@ unsigned long EqfMemory::getFileSize()
     PBTREE pDataTree = (PBTREE)this->pTmClb->pstTmBtree;
     PBTREE pIndexTree = (PBTREE)this->pTmClb->pstInBtree;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 14");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 14 unsigned long ulDataSize = GetFileSize( pDataTree->pBTree->fp, NULL );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     unsigned long ulDataSize = GetFileSize( pDataTree->pBTree->fp, NULL );
     if ( ulDataSize == INVALID_FILE_SIZE ) ulDataSize = 0;

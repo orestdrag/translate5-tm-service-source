@@ -706,8 +706,7 @@ USHORT FctValidateSession
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
     HANDLE        hMapObject = NULL;
-  LogMessage3(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", intToA(ulRefreshFlag), " )" );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 4");
+  LogMessage4(ERROR,__func__,"::TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", intToA(ulRefreshFlag), " )" );
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
     if(!hMapObject)

@@ -744,7 +744,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
     *pszUni = EOS;
     if (ulLen)
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,   pszASCII, ulLen,  pszUni, ulLen );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
                                     pszASCII, ulLen,
@@ -974,7 +974,7 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
 											pszAnsi, lBufLen, NULL, NULL );
 		if (plRc && !ulOutPut)
 		{
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 76");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 76 lRc = GetLastError();");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			lRc = GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1019,7 +1019,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
     // always use 932 when 943 is specified
     if ( ulTempCP == 943 ) ulTempCP = 932;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if (ulLen)
     {
@@ -1215,7 +1215,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862; break;
           case 813  : pTable = chAnsiToPC813; break;
           case 737  :
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869)) { // fix for sev1 Greek: Win NT problem (01/09/23)");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869))
             { // fix for sev1 Greek: Win NT problem (01/09/23)
@@ -1280,7 +1280,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78");
           case 862  : pTable = chAnsiToPC862;  pInvTable = chPC862ToAnsi; break;
           case 813  : pTable = chAnsiToPC813;  pInvTable = chPC813ToAnsi; break;
           case 737  :
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) ) { // fix for sev1 Greek: Win NT problem (01/09/23)");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) )
             { // fix for sev1 Greek: Win NT problem (01/09/23)

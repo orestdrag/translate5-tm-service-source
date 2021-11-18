@@ -75,7 +75,7 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
     USHORT        usResult;             //
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 27");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 27 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -93,7 +93,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 27");
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -121,7 +121,7 @@ USHORT SendAll( POBJTBL pt, CLASSES objClass, WINMSG message,
 //  of objects which will be sent the message.
 
 //  wnd proc returns NULL if ok otherwise !NULL
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 29");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 29 //  wnd proc returns NULL if ok otherwise !NULL");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     for( i=pt->usUsed,pe=pt->pObjEntry+i-1; i; --i,--pe)
       if( objClass == clsANY || pe->usClassID == objClass)
@@ -134,8 +134,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 29");
 MRESULT EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
   MRESULT mResult = FALSE;
-  LogMessage(WARNING,"TO_BE_REPLACED_WITH_LINUX_CODE in EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2), HWND hwnd = EqfQueryHandler( psz);");
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 30");
+  LogMessage2(ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in EqfSend2Handler( PSZ psz, WINMSG msg, WPARAM mp1, LPARAM mp2), HWND hwnd = EqfQueryHandler( psz);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   HWND hwnd = EqfQueryHandler( psz);
 
@@ -207,7 +206,7 @@ SHORT ObjQuerySymbol( PSZ pszSymbol )
   }
   else
   {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31 sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(), WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
                       WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );
@@ -227,7 +226,7 @@ SHORT ObjSetSymbol( PSZ pszSymbol )
       PFUNCIF_LOCK_TABLE pLockTable = ObjLockTable_AccessTable( hSharedMem);
       if ( pLockTable )
       {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 32");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 32 if ( ObjLockTable_Add( pLockTable, pszSymbol, GetCurrentProcessId() ) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( ObjLockTable_Add( pLockTable, pszSymbol, GetCurrentProcessId() ) )
         {
@@ -238,7 +237,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 32");
       } /* endif */
     } /* endif */
   }
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 33");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 33 WinSendMsg( EqfQueryObjectManager(), WM_EQF_SETSYMBOL, MP1FROMSHORT( TRUE ), MP2FROMP( pszSymbol ) );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   else
   {
@@ -269,7 +268,7 @@ SHORT ObjRemoveSymbol( PSZ pszSymbol )
       } /* endif */
     } /* endif */
   }
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 34");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 34 sRC = (SHORT)WinSendMsg( EqfQueryObjectManager(), WM_EQF_REMOVESYMBOL, NULL, MP2FROMP( pszSymbol ) );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   else
   {
@@ -288,7 +287,7 @@ HANDLE ObjLockTable_CreateOrOpenTable()
 {
   LogMessage(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in ObjLockTable_CreateOrOpenTable::OpenFileMapping, CreateFileMapping");
   HANDLE hShMem = NULL;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 35");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 35 hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   hShMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, TRUE, EQFLOCKOBJ_SHMEM );
   if ( !hShMem )
@@ -314,7 +313,7 @@ PFUNCIF_LOCK_TABLE ObjLockTable_AccessTable( HANDLE hSharedMem )
 {
   PFUNCIF_LOCK_TABLE pTable;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 36");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 36 pTable = (PFUNCIF_LOCK_TABLE )MapViewOfFile( hSharedMem,   FILE_MAP_WRITE, 0, 0, 0);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   pTable = (PFUNCIF_LOCK_TABLE )MapViewOfFile( hSharedMem,
                                                FILE_MAP_WRITE,
@@ -325,7 +324,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 36");
 
 void ObjLockTable_ReleaseTable( PFUNCIF_LOCK_TABLE pTable )
 {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 37");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 37 UnmapViewOfFile(pTable);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   UnmapViewOfFile(pTable);
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

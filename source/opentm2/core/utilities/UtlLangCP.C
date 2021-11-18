@@ -8,6 +8,7 @@
 //#include <tchar.h>
 #include "EQF.H"
 #include "LogWrapper.h"
+#include "OSWrapper.h"
 
 BOOL IsDBCS_CP( ULONG ulCP )
 {
@@ -53,11 +54,8 @@ BOOL UtlIsLanguageSupported
     ulCP = 932;
   } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 68");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   // convert our test string to UTF16
   iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   if ( iRC == 0 )
   {

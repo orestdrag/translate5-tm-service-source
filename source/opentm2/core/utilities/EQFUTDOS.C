@@ -1275,7 +1275,7 @@ USHORT UtlDeleteHwnd
   	 HANDLE hMutexSem = NULL;
      ulReserved;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46 GETMUTEX(hMutexSem);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 	 // keep other process from doing property related stuff..
 	 GETMUTEX(hMutexSem);
@@ -1300,7 +1300,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46");
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 47");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 47 RELEASEMUTEX(hMutexSem);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       // release Mutex
       RELEASEMUTEX(hMutexSem);
@@ -1386,7 +1386,7 @@ USHORT UtlMkDirHwnd
      do {
         DosError(0);
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 48");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 48 if ( CreateDirectory( pszDirName, NULL ) == 0 ) {  usRetCode = (USHORT)GetLastError(); } /* endif */");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
         if ( CreateDirectory( pszDirName, NULL ) == 0 )
         {
@@ -1658,7 +1658,7 @@ USHORT UtlFindFirstHwnd
                   (ISFILEATTR(usAttr) & !ISDIRATTR(pffb->dwFileAttributes));
          if ( fFound)
          {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49 if ( (UtlIsLongFileName( pffb->cFileName ) == TRUE) && (strcmp(pffb->cFileName,\"..\") != 0) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // check if 8.3 name is available
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1673,7 +1673,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49");
            } /* endif */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
          } /* endif */
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50 while ( (usRetCode == NO_ERROR) && !fFound )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          while ( (usRetCode == NO_ERROR) && !fFound )
          {
@@ -1708,7 +1708,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50");
          if ( usRetCode == NO_ERROR )
          {
            usSearch = 1;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51 // use normal file name if no alternate file name (8.3) is given if ( pffb->cAlternateFileName[0] == EOS )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // use normal file name if no alternate file name (8.3) is given
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1724,7 +1724,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51");
          }
          else
          {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52 // close file handle as it will not be used anymore FindClose( hdirNew );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // close file handle as it will not be used anymore
             FindClose( hdirNew );
@@ -1977,7 +1977,7 @@ USHORT UtlFindCloseHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53 if ( FindClose( hdir ) == 0 ) { usRetCode = (USHORT)GetLastError();  } /* endif */");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    fMsg; hwndParent;
    if ( FindClose( hdir ) == 0 )
@@ -2076,7 +2076,7 @@ USHORT UtlSetFileModeHwnd
    do {
       DosError(0);
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 54");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 54 if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 ) { usRetCode = (USHORT)GetLastError(); }");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 )
       {
@@ -2169,7 +2169,7 @@ BOOL UtlSetDrive
   CHAR szRootDir[5] = "A:\\";
   szRootDir[0] = szNewDrive;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetCurrentDirectory( szRootDir ) == 0 ) { fFlag = FALSE; }");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( SetCurrentDirectory( szRootDir ) == 0 )
   {
@@ -2219,17 +2219,17 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55");
    *phMod = hmod;
 
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 56");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 56 hmod = LoadLibrary(pszModName );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    hmod = LoadLibrary(pszModName );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 57");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 57 DosError(1); if ( hmod == NULL) {");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    DosError(1);
    if ( hmod == NULL)
    {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 58");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 58 usRc = (USHORT)GetLastError();");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
      usRc = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2345,7 +2345,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole functi
    }else{
      LogMessage(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
    }
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    FreeModule( hMod );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2691,7 +2691,7 @@ USHORT UtlQPathInfoHwnd
    USHORT usMBCode = 0;                    // message box/UtlError return code
    PFILESTATUS pstFileSt;              // file status buffer
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 60");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 60 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    ulReserved;
    do {
@@ -2813,7 +2813,7 @@ USHORT UtlFindFirstLongHwnd
    HDIR   hdirNew;                     // new directory handle
    static WIN32_FIND_DATA FindData;    // find data structure
    memset( pffb, 0, sizeof(LONGFILEFIND) );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 61");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 61 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    do
    {
@@ -2910,7 +2910,7 @@ CHAR UtlGetDriveFromHandle( HFILE hf )
   CHAR chDrive = EOS;
   // look for handle in our handle/drive array
   int i = 0;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 62");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 62 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   while ( i < MAX_OPEN_FILES )
   {

@@ -376,7 +376,7 @@ USHORT UtlErrorHwnd
    sprintf(buff, "UtlErrorHwnd(sErrorNumber=%d, usMsgType=%d, usNoOfParams=%d, pParamTable=%s, ErrorType=%d )", sErrorNumber, usMsgType,
                   usNoOfParms, pParmTable, ErrorType);
    LogMessage(ERROR,buff);
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 63");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 63 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    unsigned int  usMsgboxStyle;               // style for WinMessageBox call
    unsigned int  usMsgboxRet = 0;             // msg box return value

@@ -908,7 +908,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
   return( errCode == 0 );
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 20");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 20 if ( (usLen >= sizeof(PROP_NTM)) && (pProp->szFullMemName[0] != EOS) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( fOK )
   {

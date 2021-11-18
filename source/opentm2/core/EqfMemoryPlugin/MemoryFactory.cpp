@@ -1150,9 +1150,8 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
     WIN32_FIND_DATA FindData;
     std::string strSearchPattern = szTempDir;
     strSearchPattern.append( "/*.*" );
-    LogMessage5(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), HANDLE hDir = FindFirstFile("
+    LogMessage6(ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), HANDLE hDir = FindFirstFile("
       , strSearchPattern.c_str(), ", &FindData =","FindData",")");
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 21");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
     if ( hDir != INVALID_HANDLE_VALUE )
@@ -1184,8 +1183,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 21");
 
   // delete any files left over and remove the directory
   UtlDeleteAllFiles( (const char *)szTempDir );
-  LogMessage2(WARNING, "TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), RemoveDirectory, szTempDir = ", szTempDir);
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 22");
+  LogMessage3(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), RemoveDirectory, szTempDir = ", szTempDir);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   RemoveDirectory( szTempDir );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

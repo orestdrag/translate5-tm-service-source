@@ -23,6 +23,7 @@
 #include "win_types.h"
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
+#include "OSWrapper.h"
 
 // includes for Xalan XSLT
 
@@ -320,7 +321,7 @@ USHORT UtlGetLANUserID
     static char szUser[80];
 
     iUserIDLen = sizeof(szUser) - 1;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 70");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 70 if ( GetUserName( szUser, &iUserIDLen ) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetUserName( szUser, &iUserIDLen ) )
     {
@@ -380,7 +381,7 @@ VOID UtlDispatch( VOID )
    HWND hwndClient =  (HWND) UtlQueryULong( QL_TWBCLIENT );
    MSG msg;                      // message queue structure
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 69");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 69 full function");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    while ( usMsg && PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
    {
@@ -511,6 +512,7 @@ USHORT UtlCompFDates
 
 // function searching first character causing a conversion error and showing an
 // approbriate error message
+const int MB_ERR_INVALID_CHARS = 1234;//just to compile
 USHORT UtlFindAndShowConversionError
 (
   PSZ    pszBuffer,
@@ -528,18 +530,12 @@ USHORT UtlFindAndShowConversionError
 
   while ( !usRC && ulLen )
   {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 72");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 1, chBufOut, 1 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
     // try conversion together with next byte, might be a DBCS character
     if ( !ulOutPut && ulLen )
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 73");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       ulOutPut = MultiByteToWideChar( ulCP, MB_ERR_INVALID_CHARS, pszBuffer, 2, chBufOut, 2 );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
       if ( ulOutPut )
       {
         pszBuffer++;
@@ -552,7 +548,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 73");
       PSZ  pszParms[3];
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 74");
+LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 74 usRC = (USHORT)GetLastError();");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       usRC = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
