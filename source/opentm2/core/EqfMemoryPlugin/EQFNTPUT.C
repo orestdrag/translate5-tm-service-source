@@ -3099,7 +3099,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
     }
     else
     {
-        FilesystemHelper::FlushAllBuffers();
+        //FilesystemHelper::FlushAllBuffers();
         assert( 0 == 1);
     }
     //*/

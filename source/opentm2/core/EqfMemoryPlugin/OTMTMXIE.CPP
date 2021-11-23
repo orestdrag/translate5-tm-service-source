@@ -25,6 +25,8 @@
 #undef __STRICT_ANSI__
 #endif
 
+#define FOR_OPENSRC
+
 #include "../../../../include/win_types.h"
 #include "LogWrapper.h"
 #include "PropertyWrapper.H"
@@ -1228,7 +1230,7 @@ USHORT CTMXExportImport::ImportNext
 
         INT64 iComplete = (INT64)iPos;
         INT64 iTotal = (INT64)m_iSourceSize;
-        INT64 iRatio = iComplete * (INT64)100 / iTotal;
+        INT64 iRatio = (INT64)(iComplete * 100.0 / iTotal);
         *plProgress = (USHORT)iRatio;
 
       } /* endif */
@@ -1928,6 +1930,9 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       case SUB_ELEMENT:
       case UT_ELEMENT:
         {
+          std::wstring wsName = EncodingHelper::convertToUTF16(sName);
+          wchar_t* pszwName = (wchar_t*) wsName.c_str();
+
           CurElement.fInlineTagging = FALSE;
           CurElement.fInsideTagging = TRUE;
           this->fWithTMXTags = TRUE;
@@ -1949,29 +1954,33 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
           // add tag start and text of tag to current text buffer 
           this->fTMXTagStarted = TRUE;
-          int iTagLen = wcslen( pszName );
+          int iTagLen = wcslen( pszwName );
           if ( (iCurLen + iTagLen + 1 + 1) < DATABUFFERSIZE)
           {
             pBuf->szData[iCurLen] = L'<';
-            wcsncpy( pBuf->szData + iCurLen + 1, pszName, iTagLen );
+            wcsncpy( pBuf->szData + iCurLen + 1, pszwName, iTagLen );
             iCurLen += iTagLen + 1;
           } /* endif */
 
           // add any attributes to current text buffer 
           for( int i = 0; i < iAttribs; i++ )
           {
-            PSZ_W pszAttrName = (PSZ_W)attributes.getName( i );
-            PSZ_W pszAttrValue = (PSZ_W)attributes.getValue( i );
-            int iAttrNameLen = wcslen( pszAttrName );
-            int iAttrValueLen = wcslen( pszAttrValue );
+            u16name = (char16_t*)attributes.getName( i );
+            std::wstring wsName = EncodingHelper::toWChar(u16name);
+            u16name = (char16_t*)attributes.getValue( i );
+            std::wstring wsVal = EncodingHelper::toWChar(u16name);
+            //PSZ_W pszAttrName = (PSZ_W)attributes.getName( i );
+            //PSZ_W pszAttrValue = (PSZ_W)attributes.getValue( i );
+            int iAttrNameLen = wsName.size();
+            int iAttrValueLen = wsVal.size();
             if ( (iCurLen + iAttrNameLen + iAttrValueLen + 1 + 4) < DATABUFFERSIZE)
             {
               pBuf->szData[iCurLen++] = L' ';
-              wcsncpy( pBuf->szData + iCurLen, pszAttrName, iAttrNameLen );
+              wcsncpy( pBuf->szData + iCurLen, wsName.c_str(), iAttrNameLen );
               iCurLen += iAttrNameLen;
               pBuf->szData[iCurLen++] = L'=';
               pBuf->szData[iCurLen++] = L'\"';
-              wcsncpy( pBuf->szData + iCurLen, pszAttrValue, iAttrValueLen );
+              wcsncpy( pBuf->szData + iCurLen, wsVal.c_str(), iAttrValueLen );
               iCurLen += iAttrValueLen;
               pBuf->szData[iCurLen++] = L'\"';
             } /* endif */
@@ -2008,7 +2017,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         u16name = (char16_t*)attributes.getValue( i );
         std::string sVal = EncodingHelper::convertToUTF8(u16name);
-        LogMessage6(DEVELOP, "Parsed aatribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
+        LogMessage6(DEVELOP, "Parsed atribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
         //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
 }
@@ -2250,6 +2259,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 pBuf->SegmentData.fValid = TRUE;
               } /* endif */
 
+              if(pBuf->SegmentData.fValid == FALSE){
+                LogMessage3(INFO, __func__,":: invalid segment, reason = ", pBuf->SegmentData.szReason);
+              }
               // add segment to memory (if fValid set) or count as skipped segment
               if ( pfnInsertSegment != NULL )
               {
@@ -2424,14 +2436,17 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         }
         else
         {
+          
+          std::wstring wsName = EncodingHelper::convertToUTF16(sName);
+          wchar_t* pszwName = (wchar_t*) wsName.c_str();
           // add end tag to current text buffer 
           int iCurLen = wcslen( pBuf->szData );
-          int iTagLen = wcslen( pszName );
+          int iTagLen = wcslen( pszwName );
           if ( (iCurLen + iTagLen + 3) < DATABUFFERSIZE)
           {
             pBuf->szData[iCurLen++] = L'<';
             pBuf->szData[iCurLen++] = L'/';
-            wcsncpy( pBuf->szData + iCurLen, pszName, iTagLen );
+            wcsncpy( pBuf->szData + iCurLen, pszwName, iTagLen );
             iCurLen += iTagLen;
             pBuf->szData[iCurLen++] = L'>';
             pBuf->szData[iCurLen++] = 0;
@@ -2640,11 +2655,11 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
       if ( CurElement.fInsideTagging )
       {
         // escape any special characters in inline tags
-        EscapeXMLChars( pszChars, pBuf->szData + iCurLen );
+        EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
       }
       else
       {
-        wcsncpy( pBuf->szData + iCurLen, pszChars, length );
+        wcsncpy( pBuf->szData + iCurLen, w_chars, length );
         pBuf->szData[iCurLen+length] = 0;
       }
 #else
@@ -2652,7 +2667,8 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
       pBuf->szData[iCurLen+length] = 0;
 #endif
     } /* endif */
-    if ( CurElement.fInlineTagging ) this->fInlineTags = TRUE;
+    if ( CurElement.fInlineTagging ) 
+        this->fInlineTags = TRUE;
   } /* endif */
 }
 

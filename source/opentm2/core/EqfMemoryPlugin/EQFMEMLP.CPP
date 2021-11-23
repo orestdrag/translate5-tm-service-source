@@ -2185,7 +2185,7 @@ USHORT MemFuncImportProcess
             {
               INT64 iComplete = (INT64)pLoadData->ulBytesRead;
               INT64 iTotal = (INT64)pLoadData->ulTotalSize;
-              INT64 iRatio = iComplete * (INT64)100 / iTotal;
+              INT64 iRatio = (iComplete * (INT64)100 / iTotal);
               pData->usProgress  = (USHORT)iRatio;
             }
             usPhase = MEM_IMPORT_TASK;

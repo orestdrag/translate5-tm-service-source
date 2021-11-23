@@ -455,7 +455,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
             ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
             //tokenize target string in del structure
-            LogMessage(ERROR,"TEMPORARY_COMMENTED");
+            LogMessage(ERROR,"TEMPORARY_COMMENTED usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );");
             //usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
 
             if ( !usRc )

@@ -24,7 +24,7 @@
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
-#include "../../core/utilities/LogWrapper.h"
+#include "../utilities/LogWrapper.h"
 
 static VOID
 MakeHashValueW

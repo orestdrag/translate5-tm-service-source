@@ -8,12 +8,8 @@ set(OPENTM2_DIR ${ROOT}/source/opentm2)
 set(EqfMemoryPlugin_Source_Files
     EqfMemory.cpp
     EqfMemoryPlugin.cpp
-    #EQFNTOP.C
     EQFNTCR.C
-    #EQFNTM.C
     EQFNTEXT.C
-    #EQFNTMDB.C
-    #EQFNTEXT.C
     EQFNTPUT.C
     EQFNTUTL.C
     EQFNTMDB.C
@@ -22,7 +18,6 @@ set(EqfMemoryPlugin_Source_Files
     EQFMEMUT.C
     EQFNTUTL.C
     OTMTMXIE.CPP
-    OTMXLFMT.CPP
     EQFNTDEL.C
     EQFNTGET.CPP
     EQFFUZZ.cpp
@@ -34,11 +29,6 @@ set(EqfMemoryPlugin_Source_Files
     EQFMEMEP.CPP
     EQFMEMCD.CPP
     EQFMEM00.CPP
-    #EQFMEMIP.CPP
-    #EQFMEMRP.CPP
-    #EQFMEMMP.CPP
-    #EQFTMM.CPP
-    #EQFMEMLD.CPP
     GenericTagReplace.cpp
     ${OPENTM2_DIR}/EQFX_API.C
 )
