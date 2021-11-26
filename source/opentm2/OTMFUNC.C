@@ -187,7 +187,7 @@ USHORT EqfImportMem
   }
 
   if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) 
-    LogMessage2(INFO, "EqfImportMem:: RC=%u\n", intToA(usRC) );
+    LogMessage2(INFO, "EqfImportMem:: RC=", intToA(usRC) );
 
   return( usRC );
 } /* end of function EqfImportMem */

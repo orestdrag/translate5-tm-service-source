@@ -25,7 +25,6 @@
 #undef __STRICT_ANSI__
 #endif
 
-#define FOR_OPENSRC
 
 #include "../../../../include/win_types.h"
 #include "LogWrapper.h"
@@ -844,6 +843,7 @@ USHORT CTMXExportImport::WriteSegment
   return( 0 );
 }
 
+#define FOR_OPENSRC
 // write a TUV
 USHORT CTMXExportImport::WriteTUV
 ( 

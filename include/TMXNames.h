@@ -17,7 +17,6 @@ typedef struct _NAMETABLE
   char *pszValue;
 } NAMETABLE, *PNAMETABLE;
 
-#define FOR_OPENSRC
 
 // Table for the conversion of the TranslationManager language name to the language name used in TMX
 NAMETABLE Language_Tmgr2TMX[] =
@@ -148,6 +147,7 @@ NAMETABLE Language_TMX2Tmgr[] = {
   { NULL, NULL } };
 
 
+#define FOR_OPENSRC
 #ifdef FOR_OPENSRC
 NAMETABLE Markup2Type[] = {
   { "OTMHTM32","html" },

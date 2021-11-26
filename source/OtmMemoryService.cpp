@@ -356,7 +356,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiPort = std::stoi(conf.get_value("port", "8080"));
             uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
-            uiLogLevel = std::stoi(conf.get_value("logLevl","2"));
+            uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
         }else{
           LogMessage2(ERROR, "can't open otm_service.conf, path = ", path.c_str());
         }
