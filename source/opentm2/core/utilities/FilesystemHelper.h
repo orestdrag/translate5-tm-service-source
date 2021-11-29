@@ -67,6 +67,7 @@ public:
 
     static FILE* OpenFile(const std::string& path, const std::string& mode, bool useBuffer = true);
     static int CloseFile(FILE*& ptr);
+    static int CloseFileBuffer(const std::string& path);
 
     static FILE* FindFirstFile(const std::string& name);
     static FILE* FindNextFile();

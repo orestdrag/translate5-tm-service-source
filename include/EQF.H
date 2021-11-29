@@ -5501,6 +5501,7 @@ MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #define BTREE_LOOKUPTABLE_NULL        BTREE_BASE+33  // pointer to lookup table is null
 #define BTREE_LOOKUPTABLE_CORRUPTED   BTREE_BASE+34  // lookup table is corrupted
 #define BTREE_LOOKUPTABLE_TOO_SMALL   BTREE_BASE+35  // lookup table is too small, file is too big
+#define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
 
 #define HPROP PVOID
 

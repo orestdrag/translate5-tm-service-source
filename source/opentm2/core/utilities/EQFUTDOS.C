@@ -307,6 +307,7 @@
 #include <gnu/lib-names.h>
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
+#include "FilesystemHelper.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -1286,7 +1287,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46 GETMUTEX(
 
 	   do {
 		  DosError(0);
-
+      FilesystemHelper::CloseFileBuffer(std::string(pszFName)); 
 		  if ( DeleteFile( pszFName ) == 0 )
 		  {
 			  usRetCode = (USHORT)GetLastError();

@@ -1904,13 +1904,14 @@ SHORT QDAMDictExactLocal
 
   if ( pBT->fCorrupted )
   {
+    LogMessage2(FATAL, __func__,":: BTREE_CORRUPTED");
      sRc = BTREE_CORRUPTED;
-  } /* endif */
+  }else if(pBT->bRecSizeVersion != BTREE_V3){
+    LogMessage2(FATAL, __func__,":: not supported btree version");
+    sRc = BTREE_NOT_SUPPORTED;
 
-   if ( !sRc )
-   {
-     if ( pBT->bRecSizeVersion == BTREE_V3)
-     {
+  } else
+  {    
        PBTREEBUFFER_V3 pRecord = NULL;
        SHORT sRetries = MAX_RETRY_COUNT;
        do
@@ -1982,85 +1983,7 @@ SHORT QDAMDictExactLocal
            sRetries--;
          } /* endif */
        }
-       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) && (sRetries > 0));
-     }
-     else
-     {
-       PBTREEBUFFER_V2 pRecord = NULL;
-       SHORT sRetries = MAX_RETRY_COUNT;
-       do
-       {
-          /*******************************************************************/
-          /* For shared databases: discard all in-memory pages if database   */
-          /* has been changed since last access                              */
-          /*******************************************************************/
-         if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-         {
-            sRc = QDAMCheckForUpdates( pBTIda );
-          } /* endif */
-
-          if ( !sRc )
-          {
-             /* Locate the Leaf node that contains the appropriate key */
-             sRc = QDAMFindRecord_V2( pBTIda, pKey, &pRecord );
-          } /* endif */
-
-          if ( !sRc )
-          {
-            sRc = QDAMLocateKey_V2(pBTIda, pRecord, pKey, &i, FEXACT, &sNearKey, usSearchSubType );
-            if ( !sRc )
-            {
-               if ( i != -1 )
-               {
-                  // set new current position
-                 pBTIda->sCurrentIndex = i;
-                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
-
-                 if ( pBT->fTransMem )
-                 {
-                   memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG) );  // save data
-                 }
-                 else
-                 {
-                   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 47 UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data");
-#ifdef TEMPORARY_COMMENTED
-                   UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-                   #endif
-                 } /* endif */
-                 recData = QDAMGetrecData_V2( pRecord, i, pBT->usVersion );
-                 if ( *pulLength == 0 || ! pchBuffer )
-                 {
-                    *pulLength = recData.ulLen;
-                 }
-                 else if ( *pulLength < recData.ulLen )
-                 {
-                    *pulLength = recData.ulLen;
-                    sRc = BTREE_BUFFER_SMALL;
-                 }
-                 else
-                 {
-                    sRc = QDAMGetszData_V2( pBTIda, recData, pchBuffer, pulLength, DATA_NODE );
-                 } /* endif */
-               }
-               else
-               {
-                 sRc = BTREE_NOT_FOUND;
-                  // set new current position
-                 pBTIda->sCurrentIndex = sNearKey;
-                 pBTIda->usCurrentRecord = RECORDNUM( pRecord );
-                 *pulLength = 0;            // init returned length
-               } /* endif */
-            } /* endif */
-          } /* endif */
-
-         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
-         {
-           UtlWait( MAX_WAIT_TIME );
-           sRetries--;
-         } /* endif */
-       }
-       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) && (sRetries > 0));
-     } /* endif */
+       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) && (sRetries > 0));    
    } /* endif */
 
 

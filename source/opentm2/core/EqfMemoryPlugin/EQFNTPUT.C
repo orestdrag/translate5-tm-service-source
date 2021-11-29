@@ -1085,7 +1085,6 @@ USHORT AddToTm
   //allocate target control block record
   if ( fOK )
   {
-    //LogMessage(ERROR,"TEMPORARY_COMMENTED");
     usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
 
     fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+usAddDataLen), NOMSG );
@@ -1694,26 +1693,19 @@ USHORT DetermineTmRecord
       ulLen = pIndexRecord->usRecordLen;
       usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
-#ifdef _DEBUG
-{
-  if ( fSidLog )
-  {
-    FILE *stream;
-    stream = fopen( "\\SIDS.LOG","a" );
+      if(CheckLogLevel(DEBUG)){
+        std::string msg = __func__ + std::string(":: Number Entries:  ") + intToA(usMaxEntries) +"; Entries:";
         pIndexEntry = &pIndexRecord->stIndexEntry;
-    fprintf(stream, "Number Entries: %d\n ", usMaxEntries );
-    for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
-    {
-      if (j % 10 == 0)
-      {
-        fprintf(stream,"\n");
-      } /* endif */
-      fprintf( stream, "%ul ", NTMKEY(*pIndexEntry) );
-    } /* endfor */
-    fclose( stream );
-  } /* endif */
-}
-#endif
+        for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
+        {
+          if (j % 10 == 0)
+          {
+            msg+="\n";
+          } /* endif */
+          msg +=  std::to_string(NTMKEY(*pIndexEntry)) + "; " ;
+        } /* endfor */
+        LogMessage(DEBUG, msg.c_str());
+      }
 
       pIndexEntry = &pIndexRecord->stIndexEntry;
 
@@ -1849,6 +1841,17 @@ USHORT DetermineTmRecord
   } /* endif */
 }
 #endif
+      if(CheckLogLevel(DEBUG)){
+        std::string msg = __func__ + std::string(":: Matching Sids: ");
+        pIndexEntry = &pIndexRecord->stIndexEntry;
+        while ( *pulSidStart )
+        {
+          msg +=  std::to_string(*pulSidStart) + "; ";
+          pulSidStart++;
+        } 
+        LogMessage(DEBUG, msg.c_str());
+      }
+
   UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG );
 
   if ( usRc )
@@ -3270,6 +3273,9 @@ USHORT TMLoopAndDelTargetClb
   PBOOL               pfNewerTargetExists
 )
 {
+
+  static int call_n = 0;
+  LogMessage4(INFO, __func__,":: call n = ", intToA(++call_n),"; Sentence = ");
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block
   PTMX_TAGTABLE_RECORD 	pTMXSrcTTable = NULL; //ptr to source tag info

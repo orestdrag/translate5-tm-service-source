@@ -328,6 +328,15 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
     return __last_error_code = FILEHELPER_NO_ERROR;
 }
 
+int FilesystemHelper::CloseFileBuffer(const std::string& path){
+    if(getFileBufferInstance()->find(path) == getFileBufferInstance()->end()){
+        return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
+    }
+
+    getFileBufferInstance()->erase(path);
+    return FILEHELPER_NO_ERROR;
+}
+
 #ifdef __USING_FILESYSTEM
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     auto files = FindFiles(name);

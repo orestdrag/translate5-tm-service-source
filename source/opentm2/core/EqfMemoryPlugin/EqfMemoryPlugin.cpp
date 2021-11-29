@@ -604,6 +604,7 @@ int EqfMemoryPlugin::deleteMemory(
   {
     // delete the property file
     LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete property file: ", pMemInfo->szFullPath );
+
     UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
 
     char szPath[MAX_LONGFILESPEC];
@@ -615,7 +616,7 @@ int EqfMemoryPlugin::deleteMemory(
     
     // delete data file
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
-    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );
+    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );    
     UtlDelete( szPath, 0L, FALSE );
 
     // remove memory infor from our memory info vector

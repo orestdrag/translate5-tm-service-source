@@ -9126,6 +9126,7 @@ SHORT QDAMDictInsertLocal
    else
    {
       LogMessage(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
+      sRc = BTREE_NOT_SUPPORTED;
    } /* endif */
 
    if ( sRc )
