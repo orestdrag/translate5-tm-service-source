@@ -1059,17 +1059,10 @@ ULONG QDAMGetrecDataLen_V3
    /* pusOffset should only be in the allowed range                   */
    /*******************************************************************/
    pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-   if ( pBT->usVersion >= NTM_VERSION2 )
-   {
-     ulLength = *(PULONG)pData;        // get length
-     ulLength &= ~QDAM_TERSE_FLAGL;    // get rid off any terse flag
-   }
-   else
-   {
-     USHORT usLength = *(PUSHORT)pData;
-     usLength &= ~QDAM_TERSE_FLAG;     // get rid off any terse flag
-     ulLength = (ULONG)usLength;
-   } /* endif */
+   
+   ulLength = *(PULONG)pData;        // get length
+   ulLength &= ~QDAM_TERSE_FLAGL;    // get rid off any terse flag
+   
    return( ulLength );
 }
 
@@ -1115,14 +1108,13 @@ VOID QDAMCopyDataTo_V3
    PUCHAR   pOldData;                  // pointer to data
    USHORT   usLenFieldSize;            // size of data length field
 
-   if ( usVersion >= NTM_VERSION2 )
+   if ( usVersion < NTM_VERSION2 )
    {
-     usLenFieldSize = sizeof(ULONG);
+     LogMessage3(FATAL,__func__, ":: btree version is not supported, version = ", intToA(usVersion));
+     BTREE_NOT_SUPPORTED;
    }
-   else
-   {
-     usLenFieldSize = sizeof(USHORT);
-   } /* endif */
+   
+   usLenFieldSize = sizeof(ULONG);
 
    pusOldOffset = (PUSHORT) pRecord->contents.uchData;
    pusNewOffset = (PUSHORT) pNew->contents.uchData;
@@ -1135,23 +1127,14 @@ VOID QDAMCopyDataTo_V3
        if(usLastPos < usLen){
         LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", intToA(usLastPos), ", usLen = ", intToA(usLen) );
       }
-      if ( usVersion >= NTM_VERSION2 )
+      ULONG ulLen = *(PULONG) pOldData;
+      if ( ulLen & QDAM_TERSE_FLAGL)
       {
-        ULONG ulLen = *(PULONG) pOldData;
-        if ( ulLen & QDAM_TERSE_FLAGL)
-        {
-          ulLen &= ~QDAM_TERSE_FLAGL;
-        } /* endif */
-        usLen = (USHORT)ulLen;
-      }
-      else
-      {
-        usLen = *(PUSHORT) pOldData;
-        if ( usLen & QDAM_TERSE_FLAG)
-        {
-          usLen &= ~QDAM_TERSE_FLAG;
-        } /* endif */
-      }
+        ulLen &= ~QDAM_TERSE_FLAGL;
+      } /* endif */
+      
+      usLen = (USHORT)ulLen;
+
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
       if(usLastPos < usLen){
@@ -1412,24 +1395,12 @@ VOID QDAMSetrecData_V3
      {
        // data pointer is out of range
        pData = NULL;
+       LogMessage2(FATAL,__func__,":: pData > 16kBt, it's out of range of record");
        ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      }
      else
-     {
-       if ( usVersion >= NTM_VERSION2 )
-       {
-         memcpy( (PRECPARAM) pData, &recData, sizeof(RECPARAM ) );
-       }
-       else
-       {
-         RECPARAMOLD recDataOld;
-
-         // convert to old style RECPARAMs before setting in record
-         recDataOld.sLen     = (SHORT)recData.ulLen;
-         recDataOld.usOffset = recData.usOffset;
-         recDataOld.usNum    = recData.usNum;
-         memcpy( (PRECPARAMOLD) pData, &recDataOld, sizeof(RECPARAMOLD) );
-       } /* endif */
+     {      
+       memcpy( (PRECPARAM) pData, &recData, sizeof(RECPARAM ) );       
      } /* endif */
 
      // re-compute record checksum
@@ -1593,7 +1564,7 @@ SHORT QDAMDictUpdateLocal
       PBTREEBUFFER_V3  pRecord = NULL;        // pointer to record
       if ( !sRc )
       {
-        if ( (ulLen == 0) || ((pBT->usVersion < NTM_VERSION2) && (ulLen >= MAXDATASIZE)) )
+        if ( ulLen == 0 )
         {
           sRc = BTREE_DATA_RANGE;
         }
@@ -1669,83 +1640,7 @@ SHORT QDAMDictUpdateLocal
    else
    {
      LogMessage2(FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
-#ifdef TEMPORARY_COMMENTED
-     PBTREEBUFFER_V2  pRecord = NULL;        // pointer to record
-      if ( !sRc )
-      {
-        if ( (ulLen == 0) || ((pBT->usVersion < NTM_VERSION2) && (ulLen >= MAXDATASIZE)) )
-        {
-          sRc = BTREE_DATA_RANGE;
-        }
-        else
-        {
-          if ( pBT->fTransMem )
-          {
-            memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG));   // save data
-          }
-          else
-          {
-            UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-          } /* endif */
-          QDAMDictUpdStatus( pBTIda );
-          sRc = QDAMFindRecord_V2( pBTIda, pKey, &pRecord );
-        } /* endif */
-      } /* endif */
-
-      // Locate the Leaf node that contains the appropriate key
-      if ( !sRc )
-      {
-        //  find the key
-        sRc = QDAMLocateKey_V2( pBTIda, pRecord, pKey, &i, FEXACT, &sNearKey, FEXACT ) ;
-        if ( !sRc )
-        {
-            if ( i != -1)
-            {
-              BTREELOCKRECORD( pRecord );
-              // set new current position
-              pBTIda->sCurrentIndex = i;
-              pBTIda->usCurrentRecord = RECORDNUM( pRecord );
-              // get data value associated with key
-              recOldKey = QDAMGetrecKey_V2( pRecord,i );
-              recOldData = QDAMGetrecData_V2( pRecord, i, pBT->usVersion );
-              //  set new data value
-              if ( recOldKey.usNum && recOldData.usNum )
-              {
-                  sRc = QDAMAddToBuffer_V2( pBTIda, pUserData, ulLen, &recData );
-                  if ( !sRc )
-                  {
-                    recData.ulLen = ulLen;
-                    QDAMSetrecData_V2( pRecord, i, recData, pBT->usVersion );
-                    sRc = QDAMWriteRecord_V2( pBTIda, pRecord );
-                  } /* endif */
-                /****************************************************************/
-                /* change time to indicate modifications on dictionary...       */
-                /****************************************************************/
-                pBT->lTime ++;
-              }
-              else
-              {
-                  sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMDICTUPDATELOCAL_LOC, STATE_EVENT, 1, DB_GROUP, "" );
-              } /* endif */
-
-              //  mark old value as deleted
-              if ( !sRc )
-              {
-                  sRc = QDAMDeleteDataFromBuffer_V2( pBTIda, recOldData );
-              } /* endif */
-              BTREEUNLOCKRECORD( pRecord );
-            }
-            else
-            {
-              sRc = BTREE_NOT_FOUND;
-              // set new current position
-              pBTIda->sCurrentIndex = sNearKey;
-              pBTIda->usCurrentRecord = RECORDNUM( pRecord );
-            } /* endif */
-        } /* endif */
-    } /* endif */
-     #endif
+     sRc = BTREE_NOT_SUPPORTED;
    } /* endif */
 
    /*******************************************************************/

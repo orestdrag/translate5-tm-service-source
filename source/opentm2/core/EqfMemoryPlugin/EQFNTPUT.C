@@ -1358,8 +1358,10 @@ USHORT FillClb
     pTargetClb->ulSegmId = pTmPut->ulSourceSegmentId;
     pTargetClb->usAuthorId = usAuthor;
     pTargetClb->usAddDataLen = 0;
-    if ( pTmPut->szContext[0] ) NtmStoreAddData( pTargetClb, ADDDATA_CONTEXT_ID, pTmPut->szContext );
-    if ( pTmPut->szAddInfo[0] ) NtmStoreAddData( pTargetClb, ADDDATA_ADDINFO_ID, pTmPut->szAddInfo );
+    if ( pTmPut->szContext[0] ) 
+      NtmStoreAddData( pTargetClb, ADDDATA_CONTEXT_ID, pTmPut->szContext );
+    if ( pTmPut->szAddInfo[0] ) 
+      NtmStoreAddData( pTargetClb, ADDDATA_ADDINFO_ID, pTmPut->szAddInfo );
     *ppTargetClb = pTargetClb;
   } /* endif */
 

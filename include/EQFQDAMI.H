@@ -56,7 +56,7 @@
 #define BTREE_HEADER_VALUE_V2 "EQF"
 #define BTREE_HEADER_VALUE_V3 "EQF"
 
-#define NTM_VERSION         1
+//#define NTM_VERSION         1
 #define BTREE_HEADER_VALUE_TM1 "NTM"
 // BTREE databases of version NTM_VERSION2 support data records with
 // a size of more than 32k, the length field at the begin of the
@@ -1693,17 +1693,11 @@ SHORT NTMKeyCompare
      sRc = pBTIda->pBTree ? 0 : BTREE_INVALID;    \
    } /* endif */
 
-  #define LENGTHOFDATA( pBT, pData ) \
-    ((pBT->usVersion >= NTM_VERSION2) ? *((PULONG)(pData)) : (ULONG)*((PUSHORT)(pData)) )
+  #define LENGTHOFDATA( pBT, pData ) *((PULONG)(pData)) 
 
-  #define STARTOFDATA( pBT, pData ) \
-    ((pBT->usVersion >= NTM_VERSION2) ? (PBYTE)pData + sizeof(ULONG) : (PBYTE)pData + sizeof(USHORT) )
+  #define STARTOFDATA( pBT, pData ) (PBYTE)pData + sizeof(ULONG) 
 
-  #define SETDATALENGTH( pBT, pData, ulLen ) \
-    { if (pBT->usVersion >= NTM_VERSION2) \
-        *((PULONG)(pData)) = ulLen; \
-      else \
-        *((PUSHORT)(pData)) = (USHORT)ulLen; }
+  #define SETDATALENGTH( pBT, pData, ulLen )   *((PULONG)(pData)) = ulLen; 
 
 __declspec(dllexport)
 SHORT QDAMPhysLock
