@@ -25,18 +25,20 @@
 #undef __STRICT_ANSI__
 #endif
 
-
-#include "../../../../include/win_types.h"
 #include "LogWrapper.h"
 #include "PropertyWrapper.H"
 #include "FilesystemHelper.h"
 #include "OSWrapper.h"
+#include "win_types.h"
 
 //#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 // the Win32 Xerces build requires the default structure packing...
 //#pragma pack( push )
@@ -192,9 +194,24 @@ extern "C"
 #define ERROR_BAD_FORMAT 136464
 
 // IDs of TMX elelements
-typedef enum { TMX_ELEMENT, PROP_ELEMENT, HEADER_ELEMENT, TU_ELEMENT, TUV_ELEMENT, BODY_ELEMENT,
-               SEG_ELEMENT, BPT_ELEMENT, EPT_ELEMENT, PH_ELEMENT, HI_ELEMENT, IT_ELEMENT,
-               SUB_ELEMENT, UT_ELEMENT, INVCHAR_ELEMENT, UNKNOWN_ELEMENT } ELEMENTID;
+typedef enum
+{
+  TMX_ELEMENT,
+  PROP_ELEMENT,
+  HEADER_ELEMENT,
+  TU_ELEMENT,
+  TUV_ELEMENT,
+  BODY_ELEMENT,
+  SEG_ELEMENT,
+  //pair xliff tag
+  BPT_ELEMENT, EPT_ELEMENT, G_ELEMENT, HI_ELEMENT, SUB_ELEMENT,
+  //standalone xliff tags
+  PH_ELEMENT, X_ELEMENT,BX_ELEMENT, EX_ELEMENT, IT_ELEMENT, UT_ELEMENT,
+
+  TMX_SENTENCE_ELEMENT,
+  INVCHAR_ELEMENT,
+  UNKNOWN_ELEMENT
+} ELEMENTID;
 typedef struct _TMXNAMETOID
 {
   //CHAR_W   szName[30];                 // name of element
@@ -203,22 +220,30 @@ typedef struct _TMXNAMETOID
 } TMXNAMETOID, *PTMXNAMETOID;
 
 TMXNAMETOID TmxNameToID[] =
-{ { "tmx",     TMX_ELEMENT },
-  { "prop",    PROP_ELEMENT }, 
-  { "header",  HEADER_ELEMENT }, 
-  { "tu",      TU_ELEMENT }, 
-  { "tuv",     TUV_ELEMENT }, 
-  { "body",    BODY_ELEMENT },
-  { "seg",     SEG_ELEMENT }, 
-  { "bpt",     BPT_ELEMENT }, 
-  { "ept",     EPT_ELEMENT }, 
-  { "ph",      PH_ELEMENT }, 
-  { "hi",      HI_ELEMENT }, 
-  { "it",      IT_ELEMENT },
-  { "sub",     SUB_ELEMENT }, 
-  { "ut",      UT_ELEMENT }, 
-  { "invchar", INVCHAR_ELEMENT }, 
-  { "",        UNKNOWN_ELEMENT } };
+    {{"tmx", TMX_ELEMENT},
+     {"prop", PROP_ELEMENT},
+     {"header", HEADER_ELEMENT},
+     {"tu",   TU_ELEMENT},
+     {"tuv",  TUV_ELEMENT},
+     {"body", BODY_ELEMENT},
+     {"seg",  SEG_ELEMENT},     
+     // paired tags     
+     { "bpt",     BPT_ELEMENT},
+     { "ept",     EPT_ELEMENT},
+     { "g",       G_ELEMENT },
+     { "hi",      HI_ELEMENT },
+     { "sub",     SUB_ELEMENT },
+     // standalone tags
+     { "ph",      PH_ELEMENT},
+     { "x",       X_ELEMENT },
+     { "bx",      BX_ELEMENT },
+     { "ex",      EX_ELEMENT },
+     { "it",      IT_ELEMENT },
+     { "ut",      UT_ELEMENT },
+     {"TMXSentence", TMX_SENTENCE_ELEMENT},
+
+     {"invchar", INVCHAR_ELEMENT},
+     {"", UNKNOWN_ELEMENT}};
 
 // PROP types
 typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
@@ -264,7 +289,11 @@ public:
   void SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLOADEDTABLE pTable, PTOKENENTRY pTokBuf, int iTokBufSize ); 
   void SetSourceLanguage( char *pszSourceLang );
 
-  // getter functions 
+  // getter functions
+  void GetDescription(char *pszDescription, int iBufSize);
+  void GetSourceLanguage(char *pszSourceLang, int iBufSize);
+  BOOL IsHeaderDone(void);
+  BOOL ErrorOccured(void);
   void GetErrorText(char *pszTextBuffer, int iBufSize);
   std::wstring GetParsedData() const;
 
@@ -325,6 +354,12 @@ private:
   // buffers
   #define DATABUFFERSIZE 4098
 
+  struct PairTagInfo
+  {
+    int i;
+    std::u16string name;
+  };
+  
   typedef struct _BUFFERAREAS
   {
     CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
@@ -840,8 +875,6 @@ USHORT CTMXExportImport::WriteSegment
 
   return( 0 );
 }
-
-#define FOR_OPENSRC
 // write a TUV
 USHORT CTMXExportImport::WriteTUV
 ( 
@@ -872,7 +905,6 @@ USHORT CTMXExportImport::WriteTUV
   m_xw.WriteStartElement( "seg" );
   m_xw.Formatting = CXmlWriter::None;             // no indention within segment
 
-#ifdef FOR_OPENSRC
   // write segment data as-is when one of the XLIFF markup tables is being used - but ensure that single ampersands are encoded properly
   if ( (stricmp( pszMarkup, "OTMXUXLF" ) == 0) || (stricmp( pszMarkup, "OTMXMXLF" ) == 0 ) || (stricmp( pszMarkup, "OTMXAXLF" ) == 0 ) )
   {
@@ -909,7 +941,6 @@ USHORT CTMXExportImport::WriteTUV
     if ( *pszCurPos != 0 ) m_xw.WriteRaw( pszCurPos );
   }
   else
-#endif
   {
     USHORT usRC = 0;
 
@@ -1882,10 +1913,8 @@ void TMXParseHandler::startElement(const XMLCh *const name, AttributeList &attri
         this->fInvalidChars = FALSE;
         this->fInlineTags = FALSE;
         this->fTMXTagStarted = FALSE;
-#ifdef FOR_OPENSRC
         this->fWithTMXTags = FALSE;
         this->fWithTagging = FALSE;
-#endif
         // scan tuv attributes, currently only the language is of interest
         for( int i = 0; i < iAttribs; i++ )
         {
@@ -2191,12 +2220,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
 
-#ifdef FOR_OPENSRC
-        // change markup table to XLIFF when segment data contains TMX inline tags
-        if ( this->fWithTMXTags )
-        {
-          strcpy( CurElement.szTMMarkup, "OTMXUXLF" );
-        } /* endif */
+      // change markup table to XLIFF when segment data contains TMX inline tags
+      if (this->fWithTMXTags)
+      {
+        strcpy(CurElement.szTMMarkup, "OTMXUXLF");
+      } /* endif */
 #endif
         // find <tuv> containing the source data
         iCurrent = 0;
@@ -2691,21 +2719,16 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iCurLen = wcslen( pBuf->szData );
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
-#ifdef FOR_OPENSRC
-      if ( CurElement.fInsideTagging )
+      if (CurElement.fInsideTagging)
       {
         // escape any special characters in inline tags
-        EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
+        EscapeXMLChars(w_chars, pBuf->szData + iCurLen);
       }
       else
       {
-        wcsncpy( pBuf->szData + iCurLen, w_chars, length );
-        pBuf->szData[iCurLen+length] = 0;
+        wcsncpy(pBuf->szData + iCurLen, w_chars, length);
+        pBuf->szData[iCurLen + length] = 0;
       }
-#else
-      wcsncpy( pBuf->szData + iCurLen, w_chars, length );
-      pBuf->szData[iCurLen+length] = 0;
-#endif
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;
