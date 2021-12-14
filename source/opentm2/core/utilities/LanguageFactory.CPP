@@ -755,7 +755,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
 
       usRC = ERROR_READ_FAULT;
     }
-    XMLPlatformUtils::Terminate();
+    //XMLPlatformUtils::Terminate();
   } /* endif */
 
 
