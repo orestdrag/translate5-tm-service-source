@@ -3067,7 +3067,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
     if(CheckLogLevel(INFO)){
       auto str= EncodingHelper::convertToUTF8(pString);
-      LOGPRINTF3( INFO, "::FuzzyTest: <SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
+      LOGPRINTF3( INFO, "::FuzzyTest: \n<SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
     }
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
@@ -3369,14 +3369,11 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 					   BOOL fTempStringEqual = FALSE;
 					   BOOL fOK = FALSE;
              
-LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED NTMCompareBetweenTokens");
-#ifdef TEMPORARY_COMMENTED
 					   fOK = NTMCompareBetweenTokens(pSentence->pPropString,
 									 pSentence->pInputString,
 									 pGetIn->szTagTable,
 									 sLangID,
 									 pGetIn->ulSrcOemCP, &fTempStringEqual);
-#endif
 					   if (fOK)
 					   {
 						 fStringEqual = fTempStringEqual;

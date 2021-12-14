@@ -35,6 +35,9 @@
 #include <thread>
 #include <utility>
 
+#include <xercesc/util/PlatformUtils.hpp>
+
+
 // import memory process
 void importMemoryProcess( void *pvData );
 
@@ -1934,6 +1937,26 @@ MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
     return( MANUAL_PROPTYPE );
   } /* endif */
   return( UNDEFINED_PROPTYPE );
+}
+
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&&);
+std::wstring OtmMemoryServiceWorker::replaceString(std::wstring&& data, int* rc){ 
+  std::wstring response;
+  *rc = 0;
+  try {
+        xercesc::XMLPlatformUtils::Initialize();
+        *rc = verifyAPISession();
+        if(*rc == 0){
+          response = ReplaceOriginalTagsWithPlaceholders(std::move(data));
+        }
+        xercesc::XMLPlatformUtils::Terminate();
+    }
+    //catch (const XMLException& toCatch) {
+      catch(...){
+        *rc = 500;
+        //return( ERROR_NOT_READY );
+    }
+  return response;
 }
 
 // update memory status

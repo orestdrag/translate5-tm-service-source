@@ -33,7 +33,7 @@
 #include "opentm2/core/utilities/FilesystemWrapper.h"
 #include "EQF.H"
 #include "opentm2/core/utilities/LogWrapper.h"
-
+#include "opentm2/core/utilities/EncodingHelper.h"
 using namespace std;
 using namespace restbed;
 
@@ -236,6 +236,29 @@ void post_method_handler( const shared_ptr< Session > session )
 }
 
 
+void postTagReplacement_method_handler( const shared_ptr< Session > session )
+{
+  const auto request = session->get_request();
+  size_t content_length = request->get_header( "Content-Length", 0 );
+  std::string strType = request->get_header( "Content-Type", "" );
+
+  LogMessage4(TRANSACTION, "==== processing tag replacement request, content type=\"",strType.c_str(),"\", content length=", intToA( content_length ) );
+
+  session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
+  {
+    int rc = 0;
+    string strInData = string( body.begin(), body.end() );
+    
+    wstring wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData), &rc);
+    string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
+
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
+      { "Content-Type", "application/json" },
+      { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    LogMessage5(TRANSACTION,  "...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
+  });
+}
+
 void postFuzzySearch_method_handler( const shared_ptr< Session > session )
 {
   const auto request = session->get_request();
@@ -254,7 +277,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    LogMessage5(TRANSACTION,  "Memory name=", strTM.c_str() ,"Input:\n-----\n",strInData.c_str(),"\n----" );
+    LogMessage5(TRANSACTION,  "Memory name=", strTM.c_str() ,"\nInput:\n-----\n",strInData.c_str(),"\n----" );
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
@@ -386,6 +409,14 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     resource->set_path( szValue );
     resource->set_method_handler( "GET", get_method_handler );
     resource->set_method_handler( "POST", post_method_handler );
+    resource->set_method_handler("PUT", postTagReplacement_method_handler);
+
+    // handler for resource URL w memory name/import
+    auto tagReplacement = make_shared< Resource >();
+    snprintf( szValue, 150, "/%s/tagreplacement", szServiceName );
+    tagReplacement->set_path( szValue );
+    tagReplacement->set_method_handler( "POST", postTagReplacement_method_handler );
+  
 
     // handler for resource URL w memory name/import
     auto memImport = make_shared< Resource >();
@@ -433,6 +464,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
 
     service.publish( resource );
+    service.publish( tagReplacement);
     service.publish( memImport );
     service.publish( fuzzysearch );
     service.publish( concordancesearch );
@@ -604,10 +636,7 @@ void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
   {
     fprintf( hfLog, " Mem=%s", pEntry->szMemory );
   }
-
-
   LogMessage2(TRANSACTION, pszFunction.c_str(), "\t)\n");
-
 }
 
 // compare time stamps of two transaction log entries

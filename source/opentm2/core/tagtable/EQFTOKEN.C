@@ -521,11 +521,11 @@ BOOL TATagTokenizeW
    pToken->pDataStringW = pszData;      // remember start of data
    usTokens--;                         // reserve space for end of list token
    fProcessingAttributes = FALSE;      // we are waiting for tags ...
-
+   memset(&NewToken, 0, sizeof(NewToken));
    while( fOK && *pszData && usTokens )// while not end of data and free tokens
    {
      USHORT      usProcessFlag;        // processing flag        /* @KWT0010A */
-
+     
 //   the following statement has been disabled to fix PTM KAT0330
 //   fProcessingAttributes = FALSE;    // we are waiting for tags ...
      pszDataStart = pszData;
