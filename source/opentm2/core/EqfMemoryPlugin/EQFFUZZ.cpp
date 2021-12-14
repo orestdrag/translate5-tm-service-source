@@ -3141,6 +3141,8 @@ NTMCompareBetweenTokens
            {
              ulLen1 = ulLen2;
            } /* endif */
+
+           //Comparing tags
            fStringEqual = ( UtlCompIgnWhiteSpaceW(pstTok1->pData, pstTok2->pData,
                                                 ulLen1 ) == 0);
        }

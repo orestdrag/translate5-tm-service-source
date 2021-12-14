@@ -207,6 +207,7 @@ UtlLower
   PSZ  pData                           // pointer to data
 )
 {
+  LogMessage2(FATAL,__func__,":: Called not implemented func");
   PSZ  pTempData = pData;              // get pointer to data
   BYTE c;                              // active byte
 
@@ -226,7 +227,7 @@ UtlLowerW
 )
 {
     //CharLowerW(pData);
-
+LogMessage2(FATAL,__func__,":: Called not implemented func");
   return pData;
 } /* end of function UtlLower */
 
@@ -252,6 +253,7 @@ UtlUpper
   PSZ  pData                           // pointer to data
 )
 {
+  LogMessage2(FATAL,__func__,":: Called not implemented func");
   PSZ  pTempData = pData;              // get pointer to data
   BYTE c;                              // active byte
 
@@ -270,13 +272,7 @@ UtlUpper
 
 PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource )
 {
-  PWCHAR pusTarget = (PWCHAR)pszTarget;
-  PWCHAR pusSource = (PWCHAR)pszSource;
-  while ( *pusSource != 0 )
-  {
-    *pusTarget++ = *pusSource++;
-  } /* endwhile */
-  *pusTarget = 0;
+  wcscpy(pszTarget, pszSource);
   return( pszTarget );
 }
 
@@ -284,6 +280,7 @@ PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource )
 
 PSZ_W UTF16strccpy( PSZ_W pszTarget, PSZ_W pszSource, CHAR_W chStop )
 {
+  LogMessage2(FATAL,__func__,":: Called not implemented func");
   PSZ_W pusTarget = pszTarget;
   PSZ_W pusSource = pszSource;
 
@@ -313,6 +310,7 @@ PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource )
 
 int UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 )
 {
+  LogMessage2(FATAL,__func__,":: Called not implemented func");
   int iResult = 0;
   PUSHORT pusString1 = (PUSHORT)pszString1;
   PUSHORT pusString2 = (PUSHORT)pszString2;
@@ -423,6 +421,7 @@ int UTF16strlenBYTE( PTMWCHAR pszString )
 
 PSZ_W UTF16strrev( PSZ_W pszString )
 {
+  LogMessage2(FATAL,__func__,":: Called not implemented func");
   ULONG ulLen = UTF16strlenCHAR( pszString );
   USHORT usPos = 0;
   ULONG  ulMid = ulLen/2;
@@ -1603,4 +1602,7 @@ BOOL UtlIsWhiteSpaceW( CHAR_W c )
   BOOL isWhiteSpace = ( (c == L' ') || (c == L'\r') || (c == L'\n') || (c == L'\t') );
   return ( isWhiteSpace );
 }
+
+
+
 
