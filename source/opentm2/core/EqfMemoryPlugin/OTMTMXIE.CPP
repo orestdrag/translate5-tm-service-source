@@ -49,6 +49,7 @@
 #include <xercesc/sax/HandlerBase.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
 
 //#pragma pack( pop )
 
@@ -264,11 +265,8 @@ public:
   void SetSourceLanguage( char *pszSourceLang );
 
   // getter functions 
-  void GetDescription( char *pszDescription, int iBufSize );
-  void GetSourceLanguage( char *pszSourceLang, int iBufSize );
-  BOOL IsHeaderDone( void );
-  BOOL ErrorOccured( void );
-  void GetErrorText( char *pszTextBuffer, int iBufSize );
+  void GetErrorText(char *pszTextBuffer, int iBufSize);
+  std::wstring GetParsedData() const;
 
   // -----------------------------------------------------------------------
   //  Handlers for the SAX DocumentHandler interface
@@ -1626,6 +1624,7 @@ std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
   return res;
 }
 
+void TMXParseHandler::startElement(const XMLCh *const name, AttributeList &attributes)
 {
     std::u16string u16name((char16_t*)name);
     std::string sName = EncodingHelper::convertToUTF8(u16name);
@@ -2971,7 +2970,14 @@ void TMXParseHandler::GetErrorText( char *pszTextBuffer, int iBufSize )
       strncpy( pszTextBuffer, this->pBuf->szErrorMessage, iBufSize );
       pszTextBuffer[iBufSize-1] = '\0';
     } /* endif */
-  } /* endif */
+
+std::wstring TMXParseHandler::GetParsedData() const
+{
+  if (pBuf == nullptr || pBuf->szData == nullptr)
+  {
+    return L"";
+  }
+  return pBuf->szData;
 }
 
 // remove RTFtags from string
