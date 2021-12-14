@@ -1578,13 +1578,54 @@ TMXParseHandler::TMXParseHandler()
 
 TMXParseHandler::~TMXParseHandler()
 {
-  if ( hfLog )  fclose( hfLog );
-  if ( pStack ) free( pStack );
-  if ( pBuf )   free( pBuf );
-  if ( pTuvArray ) free( pTuvArray );
+  if (hfLog)
+    fclose(hfLog);
+  if (pStack)
+    free(pStack);
+  if (pBuf)
+    free(pBuf);
+  if (pTuvArray)
+    free(pTuvArray);
 }
 
-void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
+{
+  USHORT usRc = 0;
+  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
+  //std::u16string src = EncodingHelper::toUtf16(w_src.c_str());
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler *handler = new TMXParseHandler();
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(handler);
+  parser->setErrorHandler( handler );
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+  LogMessage4(INFO,__func__,":: parsing str = \'", src.c_str(), "\'");
+  xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),//*4,
+                                      "src_buff (in memory)");
+
+  parser->parse(src_buff);
+  
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler->GetErrorText(buff, sizeof(buff));
+    LogMessage3(FATAL, __func__,":: error during parsing : ", buff);
+  }
+  
+  std::wstring res = handler->GetParsedData();
+  std::string res_s = EncodingHelper::convertToUTF8(res);
+  LogMessage6(INFO,__func__,":: original str = \n\'", src.c_str(), "\'\n replaced:\n\'", res_s.c_str(),"\'");
+  delete parser;
+  delete handler;
+  return res;
+}
+
 {
     std::u16string u16name((char16_t*)name);
     std::string sName = EncodingHelper::convertToUTF8(u16name);
