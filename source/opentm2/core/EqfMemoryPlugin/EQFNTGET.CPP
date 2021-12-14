@@ -436,9 +436,6 @@ USHORT TmtXGet
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
-  // FIX for strange alignment issue TODO: Replace with better solution
-  //pTmGetIn = (PTMX_GET_IN_W)(((PCHAR) pTmGetIn)+4);
-  //pTmGetIn = (PTMX_GET_IN_W) &(pTmGetIn->stPrefixIn.usTmCommand);
   PTMX_SENTENCE pSentence = NULL;      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
@@ -3067,7 +3064,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
     if(CheckLogLevel(INFO)){
       auto str= EncodingHelper::convertToUTF8(pString);
-      LOGPRINTF3( INFO, "::FuzzyTest: <SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
+      LOGPRINTF3( INFO, "::FuzzyTest: \n<SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
     }
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
@@ -3369,14 +3366,11 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 					   BOOL fTempStringEqual = FALSE;
 					   BOOL fOK = FALSE;
              
-LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED NTMCompareBetweenTokens");
-#ifdef TEMPORARY_COMMENTED
 					   fOK = NTMCompareBetweenTokens(pSentence->pPropString,
 									 pSentence->pInputString,
 									 pGetIn->szTagTable,
 									 sLangID,
 									 pGetIn->ulSrcOemCP, &fTempStringEqual);
-#endif
 					   if (fOK)
 					   {
 						 fStringEqual = fTempStringEqual;

@@ -361,20 +361,11 @@ USHORT TokenizeW
     }
     else
     { 
-      int reservedSize = wcslen(pszStartOfSegment) + vTermList.size() +1;
-      wchar_t* resultedStr = new wchar_t[reservedSize];
-      memset(resultedStr, 0, reservedSize * sizeof(wchar_t));
-
-      int resPos = 0;//for inserting '\0''s
       // convert returned term list into morph term list
       for( size_t i = 0; i < vTermList.size(); i++ )
       {
         auto iStartOffs = vTermList[i].iStartOffset;
         auto iLen = vTermList[i].iLength;
-        auto insertingPoint = &resultedStr[iStartOffs + i];
-        auto toBeInserted = &pszStartOfSegment[iStartOffs];
-
-        wcsncpy(insertingPoint, toBeInserted, iLen );
         
         if ( (vTermList[i].iTermType & OtmMorph::TERMTYPE_WHITESPACE) != 0 )
         {
@@ -392,8 +383,6 @@ USHORT TokenizeW
                                             (USHORT)iLen, usPos, vTermList[i].iTermType, usListType );
         }
       }
-      memcpy((void*) pszStartOfSegment, (const void*)resultedStr, reservedSize * sizeof(wchar_t));
-      delete[] resultedStr;
     }
   }
 

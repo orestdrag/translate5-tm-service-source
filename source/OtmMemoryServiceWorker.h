@@ -182,6 +182,7 @@ public:
   */
   void importDone( char *pszMemory, int iRC, char *pszError );
 
+  std::wstring replaceString(std::wstring&& data, int* rc);
 
 private:
   
