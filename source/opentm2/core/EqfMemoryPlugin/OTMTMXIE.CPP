@@ -382,15 +382,9 @@ private:
     CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
 
     //for tags replacement
-<<<<<<< HEAD
-    int      iHighestBPTI;  // 
-    int      iHighestId;    //
-    std::vector<PairTagInfo> openedTags;
-=======
     int      iHighestBPTI;              // increments with each opening pair tags
     //int      iHighestId;              // increments with each tag
     std::vector<PairTagInfo> openedTags;// holds all 'open' pair tags, remove
->>>>>>> * updated to v 0.1.7
   } BUFFERAREAS, *PBUFFERAREAS;
 
   PBUFFERAREAS pBuf; 
