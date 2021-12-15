@@ -678,7 +678,7 @@ int OtmMemoryServiceWorker::import
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
-      LogMessage4(INFO, "parsed json name = ", name.c_str(), "; value = ", value.c_str());
+      //LogMessage4(INFO, "parsed json name = ", name.c_str(), "; value = ", value.c_str());
       if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
       {
         strTmxData = value;
@@ -767,9 +767,9 @@ int OtmMemoryServiceWorker::import
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
-  importMemoryProcess(pData);//to do in same thread
-  //std::thread worker_thread(importMemoryProcess, pData);
-  //worker_thread.detach();
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
 
   return( restbed::CREATED );
 }
@@ -906,8 +906,9 @@ int OtmMemoryServiceWorker::createMemory
     }
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
-
-    DeleteFile( szTempFile );
+    if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+        DeleteFile( szTempFile );
+    }
   }
 
   if ( iRC != 0 )
@@ -1840,8 +1841,10 @@ int OtmMemoryServiceWorker::getMem
   iRC = this->loadFileIntoByteVector( szTempFile, vMemData );
 
   //cleanup
-  LogMessage2(WARNING, "OtmMemoryServiceWorker::getMem:: temporary commented deleting of temporary file, fName = ", szTempFile);
-  //DeleteFile( szTempFile );
+  if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+    DeleteFile( szTempFile );
+  }
+  
   if ( iRC != 0 )
   {
     LogMessage2(ERROR, "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = ", szTempFile );
@@ -1939,9 +1942,7 @@ MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
   return( UNDEFINED_PROPTYPE );
 }
 
-std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&&){
-  return std::wstring();
-}
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&&);
 std::wstring OtmMemoryServiceWorker::replaceString(std::wstring&& data, int* rc){ 
   std::wstring response;
   *rc = 0;
@@ -2181,7 +2182,9 @@ void importMemoryProcess( void *pvData )
   pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pszError );
 
   // cleanup
-  DeleteFile( pData->szInFile );
+  if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+    DeleteFile( pData->szInFile );
+  }
   delete( pData );
 
   return;

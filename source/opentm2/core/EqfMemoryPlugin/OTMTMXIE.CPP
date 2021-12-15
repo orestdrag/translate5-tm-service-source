@@ -26,7 +26,7 @@
 #endif
 
 
-#include "../../../../include/win_types.h"
+#include "win_types.h"
 #include "LogWrapper.h"
 #include "PropertyWrapper.H"
 #include "FilesystemHelper.h"
@@ -37,6 +37,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <algorithm>
+#include <vector>
 
 // the Win32 Xerces build requires the default structure packing...
 //#pragma pack( push )
@@ -49,6 +51,7 @@
 #include <xercesc/sax/HandlerBase.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
 
 //#pragma pack( pop )
 
@@ -190,10 +193,25 @@ extern "C"
 
 #define ERROR_BAD_FORMAT 136464
 
+
 // IDs of TMX elelements
-typedef enum { TMX_ELEMENT, PROP_ELEMENT, HEADER_ELEMENT, TU_ELEMENT, TUV_ELEMENT, BODY_ELEMENT,
-               SEG_ELEMENT, BPT_ELEMENT, EPT_ELEMENT, PH_ELEMENT, HI_ELEMENT, IT_ELEMENT,
-               SUB_ELEMENT, UT_ELEMENT, INVCHAR_ELEMENT, UNKNOWN_ELEMENT } ELEMENTID;
+typedef enum
+{
+  TMX_ELEMENT,
+  PROP_ELEMENT,
+  HEADER_ELEMENT,
+  TU_ELEMENT,
+  TUV_ELEMENT,
+  BODY_ELEMENT,
+  SEG_ELEMENT,
+  //pair tags
+  BPT_ELEMENT, EPT_ELEMENT, G_ELEMENT, HI_ELEMENT, SUB_ELEMENT,
+  //standalone tags
+  PH_ELEMENT, X_ELEMENT,BX_ELEMENT, EX_ELEMENT, IT_ELEMENT, UT_ELEMENT,
+  TMX_SENTENCE_ELEMENT,
+  INVCHAR_ELEMENT,
+  UNKNOWN_ELEMENT
+} ELEMENTID;
 typedef struct _TMXNAMETOID
 {
   //CHAR_W   szName[30];                 // name of element
@@ -201,23 +219,41 @@ typedef struct _TMXNAMETOID
   ELEMENTID ID;                        // ID of element 
 } TMXNAMETOID, *PTMXNAMETOID;
 
-TMXNAMETOID TmxNameToID[] =
-{ { "tmx",     TMX_ELEMENT },
-  { "prop",    PROP_ELEMENT }, 
-  { "header",  HEADER_ELEMENT }, 
-  { "tu",      TU_ELEMENT }, 
-  { "tuv",     TUV_ELEMENT }, 
-  { "body",    BODY_ELEMENT },
-  { "seg",     SEG_ELEMENT }, 
-  { "bpt",     BPT_ELEMENT }, 
-  { "ept",     EPT_ELEMENT }, 
-  { "ph",      PH_ELEMENT }, 
-  { "hi",      HI_ELEMENT }, 
-  { "it",      IT_ELEMENT },
-  { "sub",     SUB_ELEMENT }, 
-  { "ut",      UT_ELEMENT }, 
-  { "invchar", INVCHAR_ELEMENT }, 
-  { "",        UNKNOWN_ELEMENT } };
+TMXNAMETOID TmxNameToID[] = {
+     {"tmx", TMX_ELEMENT},
+     {"prop", PROP_ELEMENT},
+     {"header", HEADER_ELEMENT},
+     {"tu", TU_ELEMENT},
+     {"tuv", TUV_ELEMENT},
+     {"body", BODY_ELEMENT},
+     {"seg", SEG_ELEMENT},    
+
+     // paired tags     
+     {"bpt",      BPT_ELEMENT},
+     {"ept",      EPT_ELEMENT},
+     { "g",       G_ELEMENT },
+     { "hi",      HI_ELEMENT },
+     { "sub",     SUB_ELEMENT },
+
+     // standalone tags
+     {"ph",       PH_ELEMENT},
+     { "x",       X_ELEMENT },
+     { "bx",      BX_ELEMENT },
+     { "ex",      EX_ELEMENT },
+     { "it",      IT_ELEMENT },
+     { "ut",      UT_ELEMENT },
+
+     {"TMXSentence", TMX_SENTENCE_ELEMENT},
+     {"invchar", INVCHAR_ELEMENT},
+     {"", UNKNOWN_ELEMENT}
+};
+	 
+	 
+  struct PairTagInfo
+  {
+    int i;
+    std::u16string name;
+  };
 
 // PROP types
 typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
@@ -269,6 +305,7 @@ public:
   BOOL IsHeaderDone( void );
   BOOL ErrorOccured( void );
   void GetErrorText( char *pszTextBuffer, int iBufSize );
+  std::wstring GetParsedData() const;
 
   // -----------------------------------------------------------------------
   //  Handlers for the SAX DocumentHandler interface
@@ -331,7 +368,7 @@ private:
   {
     CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
     CHAR     szProp[DATABUFFERSIZE];  // buffer for collected prop values
-    CHAR_W   szPropW[DATABUFFERSIZE];  // buffer for collected prop values
+    CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
     MEMEXPIMPSEG SegmentData;         // buffer for segment data
@@ -340,9 +377,20 @@ private:
     CHAR     szErrorMessage[1024];    // buffer for error message text
     CHAR_W   szNote[MAX_SEGMENT_SIZE];// buffer for note text
     CHAR_W   szNoteStyle[100];        // buffer for note style
-    CHAR_W   szMTMetrics[MAX_SEGMENT_SIZE];// buffer for MT metrics data
-    ULONG    ulWords;                 // number of words in the segment text
+    CHAR_W   szMTMetrics[MAX_SEGMENT_SIZE]; // buffer for MT metrics data
+    ULONG    ulWords;                       // number of words in the segment text
     CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
+
+    //for tags replacement
+<<<<<<< HEAD
+    int      iHighestBPTI;  // 
+    int      iHighestId;    //
+    std::vector<PairTagInfo> openedTags;
+=======
+    int      iHighestBPTI;              // increments with each opening pair tags
+    //int      iHighestId;              // increments with each tag
+    std::vector<PairTagInfo> openedTags;// holds all 'open' pair tags, remove
+>>>>>>> * updated to v 0.1.7
   } BUFFERAREAS, *PBUFFERAREAS;
 
   PBUFFERAREAS pBuf; 
@@ -843,7 +891,6 @@ USHORT CTMXExportImport::WriteSegment
   return( 0 );
 }
 
-#define FOR_OPENSRC
 // write a TUV
 USHORT CTMXExportImport::WriteTUV
 ( 
@@ -874,7 +921,6 @@ USHORT CTMXExportImport::WriteTUV
   m_xw.WriteStartElement( "seg" );
   m_xw.Formatting = CXmlWriter::None;             // no indention within segment
 
-#ifdef FOR_OPENSRC
   // write segment data as-is when one of the XLIFF markup tables is being used - but ensure that single ampersands are encoded properly
   if ( (stricmp( pszMarkup, "OTMXUXLF" ) == 0) || (stricmp( pszMarkup, "OTMXMXLF" ) == 0 ) || (stricmp( pszMarkup, "OTMXAXLF" ) == 0 ) )
   {
@@ -911,7 +957,6 @@ USHORT CTMXExportImport::WriteTUV
     if ( *pszCurPos != 0 ) m_xw.WriteRaw( pszCurPos );
   }
   else
-#endif
   {
     USHORT usRC = 0;
 
@@ -1584,6 +1629,56 @@ TMXParseHandler::~TMXParseHandler()
   if ( pTuvArray ) free( pTuvArray );
 }
 
+
+
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
+{
+  USHORT usRc = 0;
+  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
+  //std::u16string src = EncodingHelper::toUtf16(w_src.c_str());
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler *handler = new TMXParseHandler();
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(handler);
+  parser->setErrorHandler( handler );
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+  LogMessage4(INFO,__func__,":: parsing str = \'", src.c_str(), "\'");
+  xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),//*4,
+                                      "src_buff (in memory)");
+
+  parser->parse(src_buff);
+  
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler->GetErrorText(buff, sizeof(buff));
+    LogMessage3(FATAL, __func__,":: error during parsing : ", buff);
+  }
+  
+  std::wstring res = handler->GetParsedData();
+  std::string res_s = EncodingHelper::convertToUTF8(res);
+  LogMessage6(INFO,__func__,":: original str = \n\'", src.c_str(), "\'\n replaced:\n\'", res_s.c_str(),"\'");
+  delete parser;
+  delete handler;
+  return res;
+}
+
+
+std::wstring TMXParseHandler::GetParsedData() const
+{
+  if (pBuf == nullptr || pBuf->szData == nullptr)
+  {
+    return L"";
+  }
+  return pBuf->szData;
+}
+
 void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
 {
     std::u16string u16name((char16_t*)name);
@@ -1842,10 +1937,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         this->fInvalidChars = FALSE;
         this->fInlineTags = FALSE;
         this->fTMXTagStarted = FALSE;
-#ifdef FOR_OPENSRC
         this->fWithTMXTags = FALSE;
         this->fWithTagging = FALSE;
-#endif
         // scan tuv attributes, currently only the language is of interest
         for( int i = 0; i < iAttribs; i++ )
         {
@@ -1865,142 +1958,123 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         } /* endfor */
 
         // set fWithTagging switch depending on datatype or TM markup
-#ifdef FOR_OPENSRC
-       fWithTagging = FALSE;
-#else
-        if ( CurElement.szTMMarkup[0] )
-        {
-          // TM markup available: add inline tags as well
-          fWithTagging = TRUE;
-        }
-        else if ( CurElement.szDataType[0] )
-        {
-          // check if TMX data type maps to a TM markup (only if no user define markup is available)
-          if ( m_pMemInfo->pszMarkupList != NULL )
-          {
-            fWithTagging = TRUE;
-          }
-          else if ( m_pMemInfo->szFormat[0] != EOS )
-          {
-            strcpy( CurElement.szTMMarkup, m_pMemInfo->szFormat );
-            fWithTagging = TRUE;
-          }
-          else if ( FindName( Type2Markup, CurElement.szDataType, CurElement.szTMMarkup, sizeof(CurElement.szTMMarkup) ) )
-          {
-            fWithTagging = TRUE;
-          }
-          else
-          {
-            fWithTagging = FALSE;
-          } /* endif */
-        }
-        else
-        {
-          if ( m_pMemInfo->pszMarkupList != NULL )
-          {
-            fWithTagging = TRUE;
-          }
-          else if ( m_pMemInfo->szFormat[0] != EOS )
-          {
-            strcpy( CurElement.szTMMarkup, m_pMemInfo->szFormat );
-            fWithTagging = TRUE;
-          }
-          else
-          {
-            // no data type or markup
-            fWithTagging = FALSE;
-          } /* endif */
-        } /* endif */
-#endif
+        fWithTagging = FALSE;
         break;
       case BODY_ELEMENT:
         break;
+      case TMX_SENTENCE_ELEMENT:
       case SEG_ELEMENT:
         CurElement.fInlineTagging = FALSE;
         CurElement.fInsideTagging = FALSE;
-        pBuf->szData[0] = 0;                 // reset data buffer
-        fCatchData = TRUE; 
+        pBuf->iHighestBPTI = 0;
+        pBuf->szData[0] = 0; // reset data buffer
+        fCatchData = TRUE;    
         break;
-#ifdef FOR_OPENSRC
-      case BPT_ELEMENT:
-      case EPT_ELEMENT:
+
       case PH_ELEMENT:
-      case HI_ELEMENT:
-      case IT_ELEMENT:
-      case SUB_ELEMENT:
+      case X_ELEMENT:
+      case BX_ELEMENT:
+      case EX_ELEMENT:
       case UT_ELEMENT:
-        {
-          std::wstring wsName = EncodingHelper::convertToUTF16(sName);
-          wchar_t* pszwName = (wchar_t*) wsName.c_str();
+      case IT_ELEMENT:
+      { 
+        int iCurLen = wcslen(pBuf->szData);
+        //std::wstring replacedTag = L"<ph id=\'" + std::to_wstring(++(pBuf->iHighestId)) + L"\'/>"; 
+        std::wstring replacingTag = L"<ph/>"; 
+        if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
+          LogMessage5(INFO,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
+          wcscat(pBuf->szData, replacingTag.c_str());
+          fCatchData = false;
+          CurElement.fInsideTagging = true;
+          break;
+        }else{
+          break;
+        }
+      }
 
-          CurElement.fInlineTagging = FALSE;
-          CurElement.fInsideTagging = TRUE;
-          this->fWithTMXTags = TRUE;
-          this->fWithTagging = TRUE;
+      case BPT_ELEMENT:
+      {    
+        std::wstring replacingTag = L"<bpt i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
+        int iCurLen = wcslen(pBuf->szData);
+        fCatchData = false;
+        CurElement.fInsideTagging = true;
+        if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
+          //save in pBuf that we have bpt with some id
+          PairTagInfo tag;
+          tag.i = pBuf->iHighestBPTI;
+          if(attributes.getValue("i") != nullptr){
+            tag.name = attributes.getValue("i");
+          }
+          if(tag.name.empty()){
+            LogMessage2(ERROR,__func__, ":: cant find i attribute in bpt tag");
+          }
 
-          int iCurLen = wcslen( pBuf->szData );
+          pBuf->openedTags.push_back(tag);            
 
-          // close any previous TMX tag
-          if ( this->fTMXTagStarted )
-          {
-            // close open TMX inline tag
-            if ( (iCurLen + 2) < DATABUFFERSIZE)
-            {
-              pBuf->szData[iCurLen++] = '>';
-              pBuf->szData[iCurLen] = 0;
-            } /* endif */
-            this->fTMXTagStarted = FALSE;
-          } /* endif */
+          LogMessage5(INFO,__func__,":: parsed btp tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
+          wcscat(pBuf->szData, replacingTag.c_str());
+          break;
+        }else{
+          pBuf->iHighestBPTI--;
+          break;
+        }
+      }
+      case EPT_ELEMENT:
+      {
+        std::u16string name;
+        fCatchData = false;
+        CurElement.fInsideTagging = true;
 
-          // add tag start and text of tag to current text buffer 
-          this->fTMXTagStarted = TRUE;
-          int iTagLen = wcslen( pszwName );
-          if ( (iCurLen + iTagLen + 1 + 1) < DATABUFFERSIZE)
-          {
-            pBuf->szData[iCurLen] = L'<';
-            wcsncpy( pBuf->szData + iCurLen + 1, pszwName, iTagLen );
-            iCurLen += iTagLen + 1;
-          } /* endif */
+        if(attributes.getValue("i") != nullptr){
+          name = attributes.getValue("i");
+        }
 
-          // add any attributes to current text buffer 
-          for( int i = 0; i < iAttribs; i++ )
-          {
-            u16name = (char16_t*)attributes.getName( i );
-            std::wstring wsName = EncodingHelper::toWChar(u16name);
-            u16name = (char16_t*)attributes.getValue( i );
-            std::wstring wsVal = EncodingHelper::toWChar(u16name);
-            //PSZ_W pszAttrName = (PSZ_W)attributes.getName( i );
-            //PSZ_W pszAttrValue = (PSZ_W)attributes.getValue( i );
-            int iAttrNameLen = wsName.size();
-            int iAttrValueLen = wsVal.size();
-            if ( (iCurLen + iAttrNameLen + iAttrValueLen + 1 + 4) < DATABUFFERSIZE)
-            {
-              pBuf->szData[iCurLen++] = L' ';
-              wcsncpy( pBuf->szData + iCurLen, wsName.c_str(), iAttrNameLen );
-              iCurLen += iAttrNameLen;
-              pBuf->szData[iCurLen++] = L'=';
-              pBuf->szData[iCurLen++] = L'\"';
-              wcsncpy( pBuf->szData + iCurLen, wsVal.c_str(), iAttrValueLen );
-              iCurLen += iAttrValueLen;
-              pBuf->szData[iCurLen++] = L'\"';
-            } /* endif */
-          } /* endfor */
-          pBuf->szData[iCurLen] = 0;
+        if(name.empty()){
+          LogMessage2(ERROR,__func__, ":: cant find i attribute in ept tag");
+        }
+
+        auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
+                                [&name](PairTagInfo& i) { return i.name == name;});
+
+        if(tag != pBuf->openedTags.rend()){
+          std::wstring replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\'/>"; 
+          int iCurLen = wcslen(pBuf->szData);
+          if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){        
+            LogMessage5(INFO,__func__,":: parsed ept tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacedTag).c_str());
+            wcscat(pBuf->szData, replacedTag.c_str());
+            //remove tag that we just close 
+            pBuf->openedTags.erase(tag.base());
+            break;
+          }else{
+            //pBuf->iHighestPHId--;
+            break;
+          }
+        }
+      }
+      case HI_ELEMENT:
+      case SUB_ELEMENT:
+      case G_ELEMENT:
+      {
+        fCatchData = false;
+        std::wstring replacingTag = L"<bpt id=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
+        int iCurLen = wcslen(pBuf->szData);
+        if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){     
+
+          //save in pBuf that we have bpt with some id
+          PairTagInfo tag;
+          tag.i = pBuf->iHighestBPTI;
+          tag.name = u16name;
+          pBuf->openedTags.push_back(tag);            
+
+          LogMessage5(INFO,__func__,":: parsed pair tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
+          wcscat(pBuf->szData, replacingTag.c_str());
+          break;
+        }else{
+          pBuf->iHighestBPTI--;
+          break;
         }
         break;
-#else
-      case BPT_ELEMENT:
-      case EPT_ELEMENT:
-      case PH_ELEMENT:
-      case HI_ELEMENT:
-      case IT_ELEMENT:
-        CurElement.fInlineTagging = TRUE;
-        break;
-      case SUB_ELEMENT:
-        break;
-      case UT_ELEMENT:
-        break;
-#endif
+      }
       case INVCHAR_ELEMENT:
         // segment contains invalid data
         this->fInvalidChars = TRUE;
@@ -2151,13 +2225,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
 
-#ifdef FOR_OPENSRC
         // change markup table to XLIFF when segment data contains TMX inline tags
         if ( this->fWithTMXTags )
         {
           strcpy( CurElement.szTMMarkup, "OTMXUXLF" );
         } /* endif */
-#endif
         // find <tuv> containing the source data
         iCurrent = 0;
         PTMXTUV pCurrentTuv = pTuvArray;
@@ -2301,21 +2373,15 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                   else
                   {
                     // use default markup table for the segment
-#ifndef FOR_OPENSRC
-                    strcpy( pBuf->SegmentData.szFormat, "EQFASCII" );
-#else
                     strcpy( pBuf->SegmentData.szFormat, "OTMANSI" );
-#endif
+
                     pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
                   } /* endif */                     
                 }
                 else
                 {
-#ifndef FOR_OPENSRC
-                   if ( pBuf->SegmentData.szFormat[0] == EOS ) strcpy( pBuf->SegmentData.szFormat, "EQFASCII" );
-#else
                    if ( pBuf->SegmentData.szFormat[0] == EOS ) strcpy( pBuf->SegmentData.szFormat, "OTMANSI" );
-#endif
+
                   pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
                 } /* endif */
               } /* endif */
@@ -2406,68 +2472,64 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       break;
 
     case SEG_ELEMENT:
+    case TMX_SENTENCE_ELEMENT:
+    {
       // data is complete, stop data catching
       CurElement.fInlineTagging = FALSE;
-      fCatchData = FALSE; 
-      break;
-#ifdef FOR_OPENSRC
-    case BPT_ELEMENT:
-    case EPT_ELEMENT:
-    case PH_ELEMENT:
-    case HI_ELEMENT:
-    case IT_ELEMENT:
-    case SUB_ELEMENT:
-    case UT_ELEMENT:
+      fCatchData = FALSE;    
+      std::string result = "pBuf is null"; 
+      if(pBuf && pBuf->szData)
       {
-        CurElement.fInsideTagging = FALSE;
-        // close self contained tag or add end tag
-        if ( this->fTMXTagStarted )
-        {
-          // close self contained inline tag
-          int iCurLen = wcslen( pBuf->szData );
-          if ( (iCurLen + 4) < DATABUFFERSIZE)
-          {
-            pBuf->szData[iCurLen++] = L' ';
-            pBuf->szData[iCurLen++] = L'/';
-            pBuf->szData[iCurLen++] = L'>';
-            pBuf->szData[iCurLen++] = 0;
-          } /* endif */
-          this->fTMXTagStarted = FALSE;
-        }
-        else
-        {
-          
-          std::wstring wsName = EncodingHelper::convertToUTF16(sName);
-          wchar_t* pszwName = (wchar_t*) wsName.c_str();
-          // add end tag to current text buffer 
-          int iCurLen = wcslen( pBuf->szData );
-          int iTagLen = wcslen( pszwName );
-          if ( (iCurLen + iTagLen + 3) < DATABUFFERSIZE)
-          {
-            pBuf->szData[iCurLen++] = L'<';
-            pBuf->szData[iCurLen++] = L'/';
-            wcsncpy( pBuf->szData + iCurLen, pszwName, iTagLen );
-            iCurLen += iTagLen;
-            pBuf->szData[iCurLen++] = L'>';
-            pBuf->szData[iCurLen++] = 0;
-          } /* endif */
-        } /* endif */
-        this->fWithTagging = FALSE;
+        result = EncodingHelper::convertToUTF8(pBuf->szData);
       }
-      break;
-#else
+      LogMessage4(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , "\' ");
+      break;  
+    }
+
+    case PH_ELEMENT:
+    case X_ELEMENT:
+    case BX_ELEMENT:
+    case EX_ELEMENT:
+    case UT_ELEMENT:
+    case IT_ELEMENT:
     case BPT_ELEMENT:
     case EPT_ELEMENT:
-    case PH_ELEMENT:
+    {
+      LogMessage4(INFO,__func__,":: parsed end of tag \'",sName.c_str() ,"\'");
+      fCatchData = true;
+      CurElement.fInsideTagging = false;
+      CurElement.fInlineTagging = true;
+      break;
+    }
+
     case HI_ELEMENT:
-    case IT_ELEMENT:
-      CurElement.fInlineTagging = FALSE;
-      break;
     case SUB_ELEMENT:
-      break;
-    case UT_ELEMENT:
-      break;
-#endif
+    case G_ELEMENT:
+    {        
+      auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
+                              [&u16name](PairTagInfo& i) { return i.name == u16name;});
+
+      std::wstring replacedTag;
+      if(tag != pBuf->openedTags.rend()){
+        replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\'/>"; 
+      }else{
+        LogMessage4(ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because not found corresponding bpt tag in buffer->generating new \'i\'"); 
+      replacedTag = L"<ept i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
+      }
+
+      int iCurLen = wcslen(pBuf->szData);
+      if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){       
+          //remove tag that we just close 
+          pBuf->openedTags.erase(tag.base());        
+          LogMessage6(INFO,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", intToA(tag->i),"\' />");
+          wcscat(pBuf->szData, replacedTag.c_str());          
+
+          break;
+        }else{
+          LogMessage4(ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because no space left in buffer");
+          break;
+        }  
+    }
     case INVCHAR_ELEMENT:
       break;
     case UNKNOWN_ELEMENT:
@@ -2651,7 +2713,6 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iCurLen = wcslen( pBuf->szData );
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
-#ifdef FOR_OPENSRC
       if ( CurElement.fInsideTagging )
       {
         // escape any special characters in inline tags
@@ -2662,10 +2723,6 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
         wcsncpy( pBuf->szData + iCurLen, w_chars, length );
         pBuf->szData[iCurLen+length] = 0;
       }
-#else
-      wcsncpy( pBuf->szData + iCurLen, w_chars, length );
-      pBuf->szData[iCurLen+length] = 0;
-#endif
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;
