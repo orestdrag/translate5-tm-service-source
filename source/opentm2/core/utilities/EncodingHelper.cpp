@@ -6,11 +6,37 @@
 
 #include <codecvt>
 #include <locale>
+
+
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/framework/XMLPScanToken.hpp>
+#include <xercesc/parsers/SAXParser.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+XERCES_CPP_NAMESPACE_USE
+
 template <class Facet>
 struct deletable_facet : Facet{
   using Facet::Facet;//inherit constructors
   ~deletable_facet(){};
 };
+
+void EscapeXMLChars( wchar_t* pszText, wchar_t* pszBuffer );
+
+std::wstring EncodingHelper::EscapeXML( std::wstring input ){
+  wchar_t buff[4096];  
+  EscapeXMLChars((wchar_t*)input.c_str(), buff);
+  return buff;
+
+}
+
+std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src);
+std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
+{
+  return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src));
+}
 
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
   \param strUTF8String string in UTF8 encoding

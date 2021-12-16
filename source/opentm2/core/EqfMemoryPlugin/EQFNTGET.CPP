@@ -380,9 +380,6 @@ static BOOL NTMCheckAndDeleteTagPairs
 #endif
 );
 
-
-
-std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&& originalString);
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -520,7 +517,7 @@ USHORT TmtXGet
     pSentence->pNormStringStart = pSentence->pNormString;
 
     UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
-    auto inputStringWithReplacedTags = ReplaceOriginalTagsWithPlaceholders(pSentence->pInputString);
+    auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pSentence->pInputString);
     wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags.c_str());
     //tokenize source segment, resuting in normalized string and
     //tag table record

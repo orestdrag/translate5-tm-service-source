@@ -1623,9 +1623,7 @@ TMXParseHandler::~TMXParseHandler()
   if ( pTuvArray ) free( pTuvArray );
 }
 
-
-
-std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
+std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src)
 {
   USHORT usRc = 0;
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
@@ -1662,7 +1660,6 @@ std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
   delete handler;
   return res;
 }
-
 
 std::wstring TMXParseHandler::GetParsedData() const
 {
@@ -2707,16 +2704,16 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iCurLen = wcslen( pBuf->szData );
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
-      if ( CurElement.fInsideTagging )
-      {
+      //if ( CurElement.fInsideTagging )
+      //{
         // escape any special characters in inline tags
         EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
-      }
-      else
-      {
-        wcsncpy( pBuf->szData + iCurLen, w_chars, length );
-        pBuf->szData[iCurLen+length] = 0;
-      }
+      //}
+      //else
+      //{
+      //  wcsncpy( pBuf->szData + iCurLen, w_chars, length );
+        //pBuf->szData[iCurLen+length] = 0;
+      //}
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;
@@ -4701,7 +4698,7 @@ PSZ_W MADSkipWhitespace( PSZ_W pszData )
 }
 
 // escape characters in segment data to form valid XML
-void EscapeXMLChars( PSZ_W pszText, PSZ_W pszBuffer )
+void EscapeXMLChars( PSZ_W pszText, PSZ_W pszBuffer)
 {
   while ( *pszText )
   {
