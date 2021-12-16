@@ -1942,7 +1942,9 @@ MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
   return( UNDEFINED_PROPTYPE );
 }
 
-std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&&);
+
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&& originalString);
+
 std::wstring OtmMemoryServiceWorker::replaceString(std::wstring&& data, int* rc){ 
   std::wstring response;
   *rc = 0;

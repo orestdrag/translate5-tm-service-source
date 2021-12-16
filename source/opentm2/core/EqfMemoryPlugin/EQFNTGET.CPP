@@ -382,12 +382,7 @@ static BOOL NTMCheckAndDeleteTagPairs
 
 
 
-void testSentenceFunc(PTMX_SENTENCE pSentence){
-  
-      pSentence->pTagRecord->ulRecordLen = -1;
-      pSentence->pTagRecord->usFirstTagEntry = -2;
-      pSentence->pTagRecord->usTagTableId = -3;  
-}
+std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring&& originalString);
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -525,6 +520,8 @@ USHORT TmtXGet
     pSentence->pNormStringStart = pSentence->pNormString;
 
     UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
+    auto inputStringWithReplacedTags = ReplaceOriginalTagsWithPlaceholders(pSentence->pInputString);
+    wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags.c_str());
     //tokenize source segment, resuting in normalized string and
     //tag table record
     ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);
@@ -1381,8 +1378,10 @@ USHORT ExactTest
               else
               {
                 fStringEqual = FALSE;
-                fStringEqual = (UtlCompIgnWhiteSpaceW(pSentence->pPropString,
-                                              pSentence->pInputString,
+                fStringEqual = (UtlCompIgnWhiteSpaceW(
+                                              pSentence->pPropString,
+                                              pSentence->pInputStringWNormalizedTags,
+                                              //pSentence->pInputString,
                                               0 ) == 0 );
               } /* endif */
             } /* endif */
@@ -3365,9 +3364,10 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 					   // but we do not know about tag tokens
 					   BOOL fTempStringEqual = FALSE;
 					   BOOL fOK = FALSE;
-             
-					   fOK = NTMCompareBetweenTokens(pSentence->pPropString,
-									 pSentence->pInputString,
+					   fOK = NTMCompareBetweenTokens(
+                   pSentence->pPropString,
+                   pSentence->pInputStringWNormalizedTags,
+									 //pSentence->pInputString,
 									 pGetIn->szTagTable,
 									 sLangID,
 									 pGetIn->ulSrcOemCP, &fTempStringEqual);
