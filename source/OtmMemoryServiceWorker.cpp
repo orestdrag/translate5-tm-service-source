@@ -165,8 +165,6 @@ int OtmMemoryServiceWorker::verifyAPISession
 
   if ( this->iLastRC != 0 ) {
     LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , intToA( this->iLastRC ));
-    //swprintf( this->szLastError, sizeof this->szLastError / sizeof *this->szLastError, 
-    //  L"OpenTM2 API session could not be started, the return code is %ld", this->iLastRC );
   }
   
   return( this->iLastRC );

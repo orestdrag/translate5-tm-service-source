@@ -779,8 +779,6 @@ USHORT TmtXGet
 
   LogMessage3(INFO,"TmtXGet::Lookup complete, found ",intToA(pTmGetOut->usNumMatchesFound)," matches" );
 
-//#ifdef MATCHLIST_LOG
-  //if ( hfMatchListLog )
   if(CheckLogLevel(DEVELOP))
   {
     for ( int i = 0; i < pTmGetOut->usNumMatchesFound; i++ )
@@ -797,11 +795,8 @@ USHORT TmtXGet
       auto strSource = EncodingHelper::convertToUTF8(pMatch->szSource);
       auto strTarget = EncodingHelper::convertToUTF8(pMatch->szTarget);
       LogMessage5(DEVELOP,"TmtXGet::\n  Source = >>>", strSource.c_str(),"<<<\n  Target = >>>", strTarget.c_str(), "<<< ");
-      //NTMLogSegData( hfMatchListLog, L"TmtXGet::  Source = >>>%s<<<\r\n", pMatch->szSource );
-      //NTMLogSegData( hfMatchListLog, L"TmtXGet::  Target = >>>%s<<<\r\n", pMatch->szTarget );
     } /* endfor */
-  } /* endif */       
-//#endif
+  } /* endif */  
 
   return( usRc );
 }
