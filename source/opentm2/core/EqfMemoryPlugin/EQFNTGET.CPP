@@ -1175,7 +1175,7 @@ USHORT ExactTest
   USHORT usMatchLevel;                 //pointer to ushort value
   BOOL   fStringEqual = FALSE;         // indicator for string equal
   BOOL   fEqualFound = FALSE;          // tagging equal ??
-  USHORT usEqual;
+  USHORT usEqual = 0;
   PSZ_W pContextBuffer = NULL;        //pointer to buffer for context processing
   USHORT usTargetTranslationFlag = (USHORT)-1;    // translation flag of target CLB (processed)
   PSZ pszDocName = NULL;             // document name to check for equal document names in GET_IGNORE_PATH mode

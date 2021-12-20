@@ -4557,8 +4557,6 @@ RECPARAM  QDAMGetrecData_V3
    pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
    pData += sizeof(USHORT );                    // get pointer to datarec
 
-   char buff[256];
-     memcpy(buff, pData, 255);
      memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM) );
 
      memcpy( &recData.usNum, (PUSHORT) pData, sizeof(USHORT ) );

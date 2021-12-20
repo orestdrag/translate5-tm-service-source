@@ -310,34 +310,7 @@ PSZ_W UTF16strcat( PSZ_W pszTarget, PSZ_W pszSource )
 
 int UTF16strcmp( PSZ_W pszString1, PSZ_W pszString2 )
 {
-  LogMessage2(FATAL,__func__,":: Called not implemented func");
-  int iResult = 0;
-  PUSHORT pusString1 = (PUSHORT)pszString1;
-  PUSHORT pusString2 = (PUSHORT)pszString2;
-
-  while ( iResult == 0 )
-  {
-    if ( *pusString1 == 0)
-    {
-      if ( *pusString2 == 0 )
-      {
-        break;                         // strings are identical
-      }
-      else
-      {
-        iResult = -1;                  // string1 ends while string2 continues
-      } /* endif */
-    }
-    else if ( *pusString2 == 0 )
-    {
-      iResult = 1;                     // string2 ends while string1 continues
-    }
-    else
-    {
-      iResult =  *pusString1++ - *pusString2++;
-    } /* endif */
-  } /* endwhile */
-  return( iResult);
+  return wcscmp(pszString1, pszString2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
