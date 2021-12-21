@@ -1921,10 +1921,15 @@ BOOL TMFuzzynessEx
   if ( pTokBuf )   UtlAlloc( (PVOID *)&pTokBuf, 0L, 0L, NOMSG );
   if ( pTable )    TAFreeTagTable( pTable );
 
-  *pusFuzzy = (usWords != 0) ? ((usWords - usDiff) * 100 / usWords) : 100;
-  LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100;\n Words = ", 
+  if(usWords > usDiff){
+    *pusFuzzy = (usWords != 0) ? ((usWords - usDiff) * 100 / usWords) : 100;
+    LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100;\n Words = ", 
             intToA(usWords), ";\n Diff  = ", intToA(usDiff),";\n Fuzzy = ", intToA(*pusFuzzy), ";\n");
-
+  }else{
+    *pusFuzzy = 0;
+    LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy: Words <= Diff:\n Words = ", 
+            intToA(usWords), ";\n Diff  = ", intToA(usDiff),";\n Fuzzy = ", intToA(*pusFuzzy), ";\n");
+  }
   if ( pusWords ) *pusWords = usWords; 
   return fOK;
 } /* end of function TMFuzzyness */
@@ -3296,6 +3301,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               {
                 usFuzzy = 0;
               } /* endif */
+                //usFuzzy = std::min( (USHORT)99, usFuzzy );
             } /* endif */
 
             /**********************************************************/

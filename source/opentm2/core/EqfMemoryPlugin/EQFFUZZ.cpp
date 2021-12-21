@@ -2906,7 +2906,7 @@ BOOL EQFBTokCountDiff
   UtlAlloc ((PVOID *) &pFuzzy1, 0L, 0L, NOMSG);
   UtlAlloc ((PVOID *) &pFuzzy2, 0L, 0L, NOMSG);
 
-  if (usDiff <= usWords )
+  if (usDiff < usWords )
   {
     *pusFuzzy = (usWords != 0) ? ((usWords - usDiff)*100 / usWords) : 100;
   }

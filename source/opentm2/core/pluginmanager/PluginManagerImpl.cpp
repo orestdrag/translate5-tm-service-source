@@ -451,13 +451,13 @@ LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", i
         // FOR P403268 begin
         // if it's already in pluginSet, also erase it
         // vLoadedPluginDLLs.pop_back();
-        LoadedPluginDLL lpdll = vLoadedPluginDLLs.back();
-        OtmPlugin *pToDel = lpdll.vPluginList.back();
+        //LoadedPluginDLL lpdll = vLoadedPluginDLLs.back();
+        //OtmPlugin *pToDel = lpdll.vPluginList.back();
 
-        if(pToDel != NULL)
-          pluginSet->erase(pToDel);
+        //if(pToDel != NULL)
+        //  pluginSet->erase(pToDel);
 
-        vLoadedPluginDLLs.pop_back();
+        //vLoadedPluginDLLs.pop_back();
         // FOR P403268 end
 
       #ifdef TO_BE_REMOVED
