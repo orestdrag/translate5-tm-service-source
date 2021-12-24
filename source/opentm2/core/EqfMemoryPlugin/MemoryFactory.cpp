@@ -197,8 +197,7 @@ OtmMemory *MemoryFactory::createMemory
   bool bInvisible,
   int *piErrorCode
 )
-{
-  
+{  
   LogMessage6(DEBUG,"MemoryFactory::createMemory::pszMemoryName = ",pszMemoryName, ", pszSourceLanguage = ", pszSourceLanguage,
       ", pszDescription = ", pszDescription) ;
   
@@ -206,7 +205,7 @@ OtmMemory *MemoryFactory::createMemory
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage2(INFO, "Create memory ", pszMemoryName);
+  LogMessage3(INFO, __func__,"::Create memory ", pszMemoryName);
 
   if ( piErrorCode != NULL ) 
       *piErrorCode = 0;
@@ -221,12 +220,12 @@ OtmMemory *MemoryFactory::createMemory
 
   if ( pMemory == NULL)
   {
-    LogMessage2(ERROR, "Create failed, with message ", this->strLastError.c_str());
+    LogMessage3(ERROR, __func__, "::Create failed, with message ", this->strLastError.c_str());
     if ( piErrorCode != NULL ) 
         *piErrorCode = this->iLastError;
   }
   else{
-    LogMessage(INFO, "Create successful ");
+    LogMessage2(INFO, __func__, "::Create successful ");
   }
   return( pMemory );
 }

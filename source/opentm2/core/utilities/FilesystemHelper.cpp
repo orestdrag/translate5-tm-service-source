@@ -22,33 +22,10 @@
 
 int __last_error_code = 0;
 
-
-PFileBufferMap pFileBuffers = NULL;
 PFileBufferMap getFileBufferInstance(){
-    if(!pFileBuffers){
-        LogMessage(INFO, "FILEBUFFERS not exist yet-> creating new instance");
-        pFileBuffers = new FileBufferMap();
-    }
-    return pFileBuffers;
+    static FileBufferMap map;
+    return &map;
 }
-
-PFileBufferMap GetPFileBufferMap(){
-    return pFileBuffers;
-}
-
-void SetFileBufferMap(const PFileBufferMap pbm){
-    if(pFileBuffers){
-        if(pFileBuffers->empty()){
-            LogMessage(INFO,"SetFileBufferMap:: deleting old empty buffer and replacing with new");
-            delete pFileBuffers;
-        }else{
-            LogMessage(ERROR,"SetFileBufferMap:: existing filebuffer not empty, so can't replace it");
-        }
-    }
-    LogMessage(INFO, "SetFileBufferMap:: replaced filebuffer");
-    pFileBuffers = pbm;
-}
-
 
 std::string parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
@@ -139,12 +116,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
             LogMessage2(WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
             pFb = &(*getFileBufferInstance())[fixedPath];
-            if(pFb->file == 0){
-                pFb->file = ptr;
-                pFb->offset = 0;
-            }else{
-                LogMessage2(ERROR,"File buffer already have filepointer, ", fixedPath.c_str());
-            }
+            pFb->offset = 0;
         }else{
             pFb = &(*getFileBufferInstance())[fixedPath];
             //fileBuffers[fixedPath].resize(1048575);//F FFFF
@@ -160,10 +132,9 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
                 pFb->data.resize(16384);
             }
             LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(pFb->data.size()));
-            pFb->status = FileBufferStatus::OPEN;
+            //pFb->status = FileBufferStatus::OPEN;
         }
 
-        pFb->file = ptr;
         pFb->offset = 0;
     }
 
@@ -265,45 +236,46 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
 }
 
 int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){ 
-    if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
+    auto pFBs = getFileBufferInstance();
+    if(pFBs->find(fName)!= pFBs->end()){
         WriteBuffToFile(fName);
-        LogMessage2(ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
-        (*getFileBufferInstance())[fName].file = nullptr;
-        (*getFileBufferInstance())[fName].offset = 0;
-        (*getFileBufferInstance())[fName].status = CLOSED;
-        //pFileBuffers->erase(fName);
+        //LogMessage2(ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
+        //(*getFileBufferInstance())[fName].file = nullptr;
+        //(*getFileBufferInstance())[fName].offset = 0;
+        (*pFBs)[fName].status &= ~MODIFIED;// reset modified flag
+        pFBs->erase(fName);
     }else{
         LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
     }
     return 0;
 }
 
-int FilesystemHelper::WriteBuffToFile(std::string fName, bool tempFile){
+int FilesystemHelper::WriteBuffToFile(std::string fName){
     FileBuffer* pFb = NULL;
-    if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
-        pFb = &(*getFileBufferInstance())[fName];
+    auto pFBs = getFileBufferInstance();
+    if(pFBs->find(fName)!= pFBs->end()){
+        pFb = &(*pFBs)[fName];
 
         if(pFb->status & FileBufferStatus::MODIFIED){
             LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
             PUCHAR bufStart = &pFb->data[0];
             int size = pFb->data.size();
             
-            if(tempFile)
-                fName+="_buff";
-            
             HFILE ptr = fopen(fName.c_str(),"w+b");
             WriteToFile(ptr, bufStart, size);
             fclose(ptr);
+        }else{
+            LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
         }
     }else{
         LogMessage2(ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
-    }
-    
+    }    
     return 0;
 }
 
 
 int FilesystemHelper::FlushAllBuffers(){
+    auto pFileBuffers = getFileBufferInstance();
     if(!pFileBuffers){
         return -1;
     }
@@ -329,11 +301,12 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
 }
 
 int FilesystemHelper::CloseFileBuffer(const std::string& path){
-    if(getFileBufferInstance()->find(path) == getFileBufferInstance()->end()){
+    auto fbs = getFileBufferInstance();
+    if(fbs->find(path) == fbs->end()){
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
-
-    getFileBufferInstance()->erase(path);
+    fbs->erase(path);
+    
     return FILEHELPER_NO_ERROR;
 }
 

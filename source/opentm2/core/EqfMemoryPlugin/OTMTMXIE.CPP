@@ -1096,11 +1096,6 @@ USHORT CTMXExportImport::StartImport
 {
   USHORT usRC = 0;
 
-  if(pMemInfo->pFileBuffersMap){
-    PFileBufferMap pfvm = (PFileBufferMap)pMemInfo->pFileBuffersMap;
-    SetFileBufferMap(pfvm);
-  }
-
   this->m_TempFile[0] = EOS;
   this->m_pMemInfo = pMemInfo;
   

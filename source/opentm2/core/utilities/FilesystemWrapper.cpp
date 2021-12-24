@@ -400,11 +400,11 @@ BOOL SetFilePointerEx(
 //}
 
 
-int filesystem_flush_buffers(const char* fname, bool tempFile){
-    return FilesystemHelper::WriteBuffToFile(fname, tempFile);
+int filesystem_flush_buffers(const char* fname){
+    return FilesystemHelper::WriteBuffToFile(fname);
 }
 
-int filesystem_flush_buffers_ptr(HFILE file, bool tempFile){
+int filesystem_flush_buffers_ptr(HFILE file){
     std::string fName = FilesystemHelper::GetFileName(file);
-    return FilesystemHelper::WriteBuffToFile(fName.c_str(), tempFile);
+    return FilesystemHelper::WriteBuffToFile(fName.c_str());
 }

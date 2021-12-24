@@ -179,9 +179,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     USHORT usRC = TmOpen(  (char*)path.c_str(), &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
 
     // create memory object if create function completed successfully
-    LogMessage(WARNING,"TEMPORARY_HARDCODED //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) ) => if ( (usRC == 0) || (usRC == BTREE_CORRUPTED) )");
-    //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
-    if ( (usRC == 0) || (usRC == BTREE_CORRUPTED) )
+    if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) && (usAccessMode == FOR_ORGANIZE)) )
     {
       pMemory = new EqfMemory( this, htm, (PSZ)pszName );
     }
@@ -876,14 +874,20 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     nameWithoutExtention = nameWithoutExtention.substr(0, dot);
   }
   dot = mem_path.rfind('.');
+  std::string dataFilePath;
+  std::string indexFilePath;
   if(dot != std::string::npos){
     mem_path = mem_path.substr(0, dot);
-    mem_path = mem_path + ".MEM";
+    dataFilePath = mem_path + EXT_OF_TMDATA;
+    indexFilePath = mem_path + EXT_OF_TMINDEX;
+    mem_path = mem_path + EXT_OF_MEM;
   }
   //strcpy( pInfo->szFullPath, prop.szFullMemName);
   //strcpy( pInfo->szName, prop.stPropHead.szName);
   strcpy( pInfo->szFullPath, mem_path.c_str());
   strcpy( pInfo->szName, nameWithoutExtention.c_str());
+  strcpy( pInfo->szFullDataFilePath, dataFilePath.c_str());
+  strcpy(pInfo->szFullIndexFilePath, indexFilePath.c_str());
 
   PPROP_NTM pProp = NULL;
   //errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
@@ -902,10 +906,8 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   //strcpy( pInfo->szOwner, "");
 
   pInfo->ulSize = FilesystemHelper::GetFileSize(mem_path);
-  std::string indexName = mem_path.substr(0, mem_path.size()-4);
-  indexName += EXT_OF_TMINDEX;
-
-  pInfo->ulSize += FilesystemHelper::GetFileSize(indexName);
+  pInfo->ulSize += FilesystemHelper::GetFileSize(dataFilePath);
+  pInfo->ulSize += FilesystemHelper::GetFileSize(indexFilePath);
 
   return( errCode == 0 );
 
@@ -1436,12 +1438,8 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
     // open the data file of the imported memory file
     // use old memory open code
     HTM htm = 0;
-    USHORT usRC = NO_ERROR;
-// commented temporarily to link the plugin
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 28 USHORT usRC = TmOpen( (PSZ)strDataFile.c_str(), &htm,  EXCLUSIVE, 0, FALSE,  NULLHANDLE );");
-#ifdef TEMPORARY_COMMENTED
+    // commented temporarily to link the plugin
     USHORT usRC = TmOpen( (PSZ)strDataFile.c_str(), &htm,  EXCLUSIVE, 0, FALSE,  NULLHANDLE );
-#endif //TEMPORARY_COMMENTED
     if ( usRC != 0 )
     {
       handleError( (int)usRC, (char *)strDataFile.c_str(), NULL, (char *)strDataFile.c_str(), this->strLastError, this->iLastError );

@@ -761,13 +761,8 @@ USHORT EqfMemoryExists
     }
     else
     {
-      BOOL fIsNew = FALSE;
-      CHAR szShortName[MAX_FILESPEC];
+      
      
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 2 ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);");
-#ifdef TEMPORARY_COMMENTED
-      ObjLongToShortName( pszMemoryName, szShortName, TM_OBJECT, &fIsNew);
-      #endif
       //FilesystemHelper::FileExists(pszMemoryName);
       char fname[MAX_EQF_PATH];
       properties_get_str(KEY_MEM_DIR, fname, MAX_EQF_PATH);
@@ -778,13 +773,6 @@ USHORT EqfMemoryExists
       if(!exists){
         usRC = -1;
       }
-
-      if ( fIsNew )
-      {
-        PSZ pszParm = pszMemoryName;
-        usRC = ERROR_MEMORY_NOTFOUND;
-        LogMessage6(ERROR, __func__,  "::if ( fIsNew ) rc = ", intToA(usRC), "; pszParm = ",pszParm, " EQF_ERROR" );
-      } /* endif */
     } /* endif */
   } /* endif */
 
@@ -924,7 +912,6 @@ USHORT EqfOpenMem
 
   LogMessage2(INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", intToA(usRC));
   
-
   return( usRC );
 }
 

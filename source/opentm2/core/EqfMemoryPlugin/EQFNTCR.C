@@ -270,10 +270,7 @@ USHORT TmtXCreate
     usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szDataName,
                          (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
                          FIRST_KEY, &pTmClb->pstTmBtree );
-
-    bool tempFile = false;
-    filesystem_flush_buffers(pFullName, tempFile);
-    
+  
     if ( usRc == NO_ERROR )
     {
       //insert initialized record to tm data file
@@ -281,16 +278,11 @@ USHORT TmtXCreate
       usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
 
-      filesystem_flush_buffers(pFullName, tempFile);
-
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
-                    (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );        
-
-        filesystem_flush_buffers(pFullName, tempFile);
-
+                    (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -298,9 +290,6 @@ USHORT TmtXCreate
         ulKey = TAGTABLE_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                     (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
-        
-        filesystem_flush_buffers(pFullName, tempFile);
-
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -308,9 +297,6 @@ USHORT TmtXCreate
         ulKey = LANG_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                  (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
-
-        filesystem_flush_buffers(pFullName, tempFile);
-
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -322,9 +308,7 @@ USHORT TmtXCreate
 
         ulKey = COMPACT_KEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
-                             pTmClb->bCompact, size);
-  
-        filesystem_flush_buffers(pFullName, tempFile);
+                             pTmClb->bCompact, size);  
  
       } /* endif */
 
@@ -335,9 +319,7 @@ USHORT TmtXCreate
         // write long document name buffer area to the database
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
                             (PBYTE)pTmClb->pLongNames->pszBuffer,
-                            pTmClb->pLongNames->ulBufUsed );
-        
-        filesystem_flush_buffers(pFullName, tempFile);
+                            pTmClb->pLongNames->ulBufUsed );        
   
       } /* endif */
 
@@ -346,7 +328,7 @@ USHORT TmtXCreate
       {
         usRc = NTMCreateLangGroupTable( pTmClb );
         
-        //filesystem_flush_buffers(pFullName, true);
+        filesystem_flush_buffers(pFullName);
   
       } /* endif */
 
@@ -357,12 +339,12 @@ USHORT TmtXCreate
         //fill signature record structure
         strcpy( pTmClb->stTmSign.szName, pszName );
 
-        //HERE .TMI file supposed to be created
+        //HERE .TMI file is created
         usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
                              START_KEY, &pTmClb->pstInBtree );
-        filesystem_flush_buffers(pTmCreateIn->stTmCreate.szIndexName, tempFile);
+        filesystem_flush_buffers(pTmCreateIn->stTmCreate.szIndexName);
                              
       } /* endif */
     } /* endif */

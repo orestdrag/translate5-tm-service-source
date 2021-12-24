@@ -62,7 +62,6 @@ typedef struct _MEMEXPIMPINFO
   BOOL    fNoCRLF;                        // remove CRLFs in segment text
   PSZ     pszMarkupList;                   // pointer to a list of markup tables (zero terminated C strigns followed by another zero)
   BYTE    fUnused[20];                     // room for enhancements
-  PVOID pFileBuffersMap;
 } MEMEXPIMPINFO, *PMEMEXPIMPINFO;
 
 #define SEGDATABUFLEN 8096

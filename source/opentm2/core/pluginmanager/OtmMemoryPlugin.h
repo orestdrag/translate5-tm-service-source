@@ -126,6 +126,8 @@ public:
     char szName[256];                            // name of the memory
     char szDescription[256];                     // description of the memory
     char szFullPath[256];                        // full path to memory file(s) (if applicable only)
+    char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
+    char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
     char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
     char szOwner[256];                           // ID of the memory owner
     char szDescrMemoryType[256];                 // descriptive name of the memory type

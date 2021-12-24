@@ -25,7 +25,7 @@ struct FileBuffer{
     int status ;//FILEBUFFERSTATUS
     std::vector<UCHAR> data;
     long offset = 0;
-    FILE* file = NULL;
+    //FILE* file = NULL;
     
 } ;
 
@@ -81,7 +81,7 @@ public:
     static short SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet);
     
 
-    static int WriteBuffToFile(std::string fName, bool tempFile = false);
+    static int WriteBuffToFile(std::string fName);
     static int FlushAllBuffers();
 
 #ifdef _USING_FILESYSTEM_

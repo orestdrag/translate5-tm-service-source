@@ -2263,36 +2263,8 @@ SHORT QDAMDictFlushLocal
     }
     else
     {
-      if ( pBT->LookupTable_V2 != NULL  )
-      {
-        BOOL fRecordWritten = FALSE;
-        PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
-        for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
-        {
-          if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
-          {
-            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 80 sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer); fRecordWritten = TRUE;");
-#ifdef TEMPORARY_COMMENTED
-            sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer);
-            fRecordWritten = TRUE;
-            #endif
-          } /* endif */
-          pLEntry++;
-        } /* endfor */
-
-        if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock && fRecordWritten )
-        {
-            // this condition should NEVER occur for shared resources
-            // as write is only allowed if the database has been
-            // previously locked
-            ERREVENT2( QDAMDICTFLUSHLOCAL_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
-    #ifdef _DEBUG
-            WinMessageBox( HWND_DESKTOP, (HWND)UtlQueryULong( QL_TWBCLIENT ),
-              "Insecure write to dictionary/TM detected!\nLoc=QDAMDICTFLUSHLOCAL1\nPlease save info required to reproduce this condition.",
-              "Gotcha!", 9999, MB_ERROR );
-    #endif
-        } /* endif */
-      } /* endif */
+      LogMessage2(FATAL,__func__, ":: BTREE_NOT_SUPPORTED");
+      sRc = BTREE_NOT_SUPPORTED;
     } /* endif */
   } /* endif */
 
@@ -2386,7 +2358,7 @@ SHORT QDAMDictCloseLocal
         } /* endif */
      } /* endif */
      
-     filesystem_flush_buffers_ptr(pBT->fp, false);
+     filesystem_flush_buffers_ptr(pBT->fp);
      if ( UtlClose(pBT->fp, FALSE) && !sRc )
      {
         sRc = BTREE_CLOSE_ERROR;

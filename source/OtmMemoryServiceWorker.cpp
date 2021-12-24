@@ -303,7 +303,7 @@ int OtmMemoryServiceWorker::cleanupMemoryList()
   // close any memory in the list which hasn't been used for a long time
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
   {
-    if ( this->vMemoryList[i].szName[0] == 0 )
+    if ( this->vMemoryList[i].szName[0] != 0 )
     {
       if ( (curTime - this->vMemoryList[i].tLastAccessTime) > OTMMEMSERVICE_MEMORY_TIMEOUT )
       {

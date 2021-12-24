@@ -170,7 +170,6 @@ void getStatus_method_handler( const shared_ptr< Session > session )
 
   LogMessage3(TRANSACTION, "getStatus_method_handler::==== processing GET Status request mem=\"",strTM.c_str() ,"\"====\n");
 
-
   string strResponseBody;
   int iRC = pMemService->getStatus( strTM, strResponseBody );
   session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );

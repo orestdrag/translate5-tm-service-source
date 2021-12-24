@@ -25,7 +25,7 @@
 /*! \brief constant defining the timeout for memories (in number of seconds)
   When a memory has not been used for the given time it is automatically closed
 */
-#define OTMMEMSERVICE_MEMORY_TIMEOUT 7200
+#define OTMMEMSERVICE_MEMORY_TIMEOUT 300
 
 class OtmMemoryServiceWorker
 /*! \brief   This class provides translation memory related services
