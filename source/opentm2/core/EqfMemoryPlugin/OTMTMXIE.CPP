@@ -2070,7 +2070,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       default:
         break;
     } /*endswitch */
-
+    if(CheckLogLevel(DEVELOP)){
       for( int i = 0; i < iAttribs; i++ )
       {
         u16name = (char16_t*)attributes.getName( i );
@@ -2081,6 +2081,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         LogMessage6(DEVELOP, "Parsed atribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
         //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
+    }
 }
 
 void TMXParseHandler::fillSegmentInfo

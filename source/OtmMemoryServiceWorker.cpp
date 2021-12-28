@@ -2026,7 +2026,7 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
       }
       i++;
     }
-    if( i == 1000){
+    if( i >= 1000){
       LogMessage(ERROR, "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them");
     }
 
@@ -2162,21 +2162,18 @@ void importMemoryProcess( void *pvData )
 
   // call the OpenTM2 API function
   pData->szError[0] = 0;
-  int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT );
+  int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);
 
   // handle any error
-  char *pszError = NULL;
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
-    EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
-    pszError = new char[strlen( pData->szError ) + 1];
-    strcpy( pszError, pData->szError );
-    LogMessage2(ERROR,"importMemoryProcess::", pszError);
+    //EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
+    LogMessage2(ERROR,"importMemoryProcess:: error = ", pData->szError);
   }
 
   // update memory status
-  pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pszError );
+  pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
 
   // cleanup
   if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs

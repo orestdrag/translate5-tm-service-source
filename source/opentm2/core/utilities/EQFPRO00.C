@@ -665,7 +665,7 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
-    LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
+    //LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
     if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
     {
       PPROP_IDA     pIda;           // Points to instance area

@@ -245,7 +245,13 @@ private:
   /*! \brief close any memories which haven't been used for a long time
     \returns 0
   */
-  int cleanupMemoryList();
+  int cleanupMemoryList(int memoryNeed);
+
+  /*! \brief calcuate total amount of RAM occupied by opened memory files
+    \returns 0
+  */
+  size_t calculateRAMOccupiedByOpenedMemories();
+
 
   /*! \brief convert a long time value into the UTC date/time format
     \param lTime long time value

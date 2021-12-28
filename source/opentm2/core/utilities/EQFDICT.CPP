@@ -2613,7 +2613,7 @@ SHORT QDAMWriteRecord_V3
    //  else set only the flag
    if ( !sRc )
    {
-     LogMessage(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
+    // LogMessage(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
      if ( !pBT->fGuard && false)
      {
         pBuffer->fNeedToWrite = TRUE;

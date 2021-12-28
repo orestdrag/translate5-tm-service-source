@@ -3291,7 +3291,9 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
             // RJ: P018279 etc: NO, must be active!
             // GQ: the following code has been disabled as the fuzziness
             // now includes any inline tagging
-            if (!fTagTableEqual  )
+            LogMessage3(INFO,__func__, ":: disable -3% fuzzy in case tag table are different usFuzzy = ", intToA(usFuzzy));// for "pSentence->pInputString);
+            #ifdef TEMPORARY_COMMENTED
+            if (!fTagTableEqual  && )
             {
               if ( usFuzzy > 3 )
               {
@@ -3303,6 +3305,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */
                 //usFuzzy = std::min( (USHORT)99, usFuzzy );
             } /* endif */
+            #endif
 
             /**********************************************************/
             /* additional comparison if normalized strings are equal  */
