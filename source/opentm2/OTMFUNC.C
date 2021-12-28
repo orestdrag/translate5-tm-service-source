@@ -132,7 +132,8 @@ USHORT EqfImportMem
   HSESSION    hSession,                // Eqf session handle
   PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
-  LONG        lOptions                 // options for Translation Memory import
+  LONG        lOptions,                 // options for Translation Memory import
+  PSZ         errorBuff
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -171,6 +172,7 @@ USHORT EqfImportMem
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
       pData->sLastFunction = FCT_EQFIMPORTMEM;
     usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions );
+    strcpy(errorBuff, pData->szError);
   } /* endif */
 
   if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) )

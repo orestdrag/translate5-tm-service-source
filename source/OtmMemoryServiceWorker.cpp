@@ -669,10 +669,10 @@ int OtmMemoryServiceWorker::import
     return( restbed::BAD_REQUEST );
   } /* end */
 
+  std::string name;
+  std::string value;
   while ( iRC == 0 )
   {
-    std::string name;
-    std::string value;
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {

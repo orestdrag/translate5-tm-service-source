@@ -947,10 +947,12 @@ USHORT EqfImportMem
   HSESSION    hSession,                // mand: Eqf session handle
   PSZ         pszMemName,              // mand: name of Translation Memory
   PSZ         pszInFile,               // mand: fully qualified name of input file
-  LONG        lOptions                 // opt: options for Translation Memory import
+  LONG        lOptions,                 // opt: options for Translation Memory import
                                        // @Import Mode: TMX_OPT{CLEANRTF_OPT}, XLIFF_MT_OPT,UTF16_OPT,ANSI_OPT,ASCII_OPT(default)
                                        // @Markup Table Handling: CANCEL_UNKNOWN_MARKUP_OPT(default), SKIP_UNKNOWN_MARKUP_OPT, GENERIC_UNKNOWN_MARKUP_OPT
 									                     // @Other: {CLEANRTF_OPT,IGNORE_OPT}
+                                       
+  PSZ         errorBuff
 );
 
 /*! \brief Import a Translation Memory (extended version)

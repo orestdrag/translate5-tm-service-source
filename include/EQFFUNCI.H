@@ -77,6 +77,7 @@ typedef struct _FCTDATA
   CHAR        szEqfResFile[MAX_EQF_PATH];// name of resource file
   CHAR        szSystemPropPath[MAX_EQF_PATH]; // system properties path
   CHAR        szMsgFile[MAX_EQF_PATH]; // message file for error messages
+  CHAR        szError[256]; // text buffer for error messages
   DDEMSGBUFFER LastMessage;            // buffer for last error message
   HWND        hwndErrMsg;              // handle for error mesages (HWND_FUNCIF)
 

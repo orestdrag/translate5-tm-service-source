@@ -32,8 +32,6 @@ struct FileBuffer{
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
 
 PFileBufferMap getFileBufferInstance();
-PFileBufferMap GetPFileBufferMap();
-void SetFileBufferMap(const PFileBufferMap pbm);
 
 class FilesystemHelper{
 public:
@@ -73,9 +71,6 @@ public:
     static FILE* FindNextFile();
 
     static std::string GetFileName(HFILE ptr);
-    
-    static PFileBufferMap GetPFileBufferMap();
-    static void SetFileBufferMap(const PFileBufferMap pbm);
 
     static int TruncateFileForBytes(HFILE ptr, int numOfBytes);
     static short SetFileCursor(HFILE fp,long LoPart,long& HiPart,short OffSet);

@@ -542,23 +542,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      fOK = UtlAlloc( (PVOID *)&pLIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE );
      if ( fOK ) fOK = UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE );
 
-
-       #ifdef TO_BE_REMOVED
-     // load external memory import module
-     if ( fOK ){
-        fOK = (DosLoadModule( NULL, 0, "OTMXLFMT.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
-     }
-     // load entry points
-     if ( fOK )
-     {
-       fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTSTART", (PFN*)(&(pLIDA->pfnMemImpStart))) == 0);
-       if ( fOK ) fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTPROCESS", 
-                                           (PFN*)(&(pLIDA->pfnMemImpProcess))) == 0);
-       if ( fOK ) fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTEND", 
-                                           (PFN*)(&(pLIDA->pfnMemImpEnd))) == 0);
-     } /* endif */
-     #endif
-
      // prepare segment logging
      if ( fOK )
      {
@@ -1860,6 +1843,10 @@ USHORT MemFuncImportMem
       }
       usRC = pPrivateData->usMemLoadRC;
     }
+    
+    if(usRC){
+      strcpy(pData->szError, pPrivateData->szError);
+    }
     free( pPrivateData );
   }
   else
@@ -1877,6 +1864,7 @@ USHORT MemFuncImportMem
       usRC = MemFuncImportProcess( pData );
     } /* endif */
   }
+
   return( usRC );
 } /* end of function MemFuncImportMem */
 
@@ -2206,7 +2194,8 @@ USHORT MemFuncImportProcess
           default:
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
             if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
-            usRC = pData->usMemLoadRC = UtlQueryUShort( QS_LASTERRORMSGID );
+            pData->usMemLoadRC = usRC = usRc? usRc : UtlQueryUShort( QS_LASTERRORMSGID );
+            strncpy(pData->szError, pLoadData->pstMemInfo->szError, sizeof(pData->szError));
             usPhase = MEM_END_IMPORT;
             break;
         } /* end switch */
@@ -2225,10 +2214,6 @@ USHORT MemFuncImportProcess
 
            if ( pLoadData->pstMemInfo )       UtlAlloc( (PVOID *)&pLoadData->pstMemInfo, 0L, 0L, NOMSG );
            if ( pLoadData->pstSegment)        UtlAlloc( (PVOID *)&pLoadData->pstSegment, 0L, 0L, NOMSG );
-
-       #ifdef TO_BE_REMOVED
-           if ( pLoadData->hmodMemExtImport ) DosFreeModule( &(pLoadData->hmodMemExtImport) );
-           #endif
          } /* endif */
 
          if ( pLoadData->pMem )

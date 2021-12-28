@@ -1156,6 +1156,7 @@ USHORT CTMXExportImport::StartImport
       m_parser->setLoadExternalDTD( FALSE );
       m_parser->setValidationScheme( SAXParser::Val_Never );
       m_parser->setExitOnFirstFatalError( FALSE );
+      //m_parser->setExitOnFirstFatalError( TRUE );
       
       strcpy( m_szInFile, pszInFile );
 
