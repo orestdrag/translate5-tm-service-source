@@ -294,7 +294,7 @@ int OtmMemoryServiceWorker::getFreeSlot()
 /*! \brief close any memories which haven't been used for a long time
   \returns 0
 */
-int OtmMemoryServiceWorker::cleanupMemoryList()
+int OtmMemoryServiceWorker::cleanupMemoryList(int memoryNeed)
 {
   time_t curTime;
 
@@ -377,7 +377,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
 
 
   // cleanup the memory list (close memories not used for a longer time)
-  cleanupMemoryList();
+  cleanupMemoryList(0);
 
   // find a free slot in the memory list
   iIndex = getFreeSlot();
@@ -739,7 +739,7 @@ int OtmMemoryServiceWorker::import
   else
   {
     // cleanup the memory list (close memories not used for a longer time)
-    cleanupMemoryList();
+    cleanupMemoryList(0);
 
     // find a free slot in the memory list
     iIndex = getFreeSlot();
