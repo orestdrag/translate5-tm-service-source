@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(OtmMemoryService VERSION 0.1.9)
+project(OtmMemoryService VERSION 0.1.10)
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
