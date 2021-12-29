@@ -63,6 +63,13 @@ std::wstring EncodingHelper::toWChar(std::u16string u16str){
   auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
   return convertToUTF16(u8str);
 }
+
+
+std::string EncodingHelper::toChar(std::u16string u16str){
+  auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
+  return u8str;
+}
+
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
 \param strUTF8String string in UTF8 encoding
 \returns string converted to UTF16

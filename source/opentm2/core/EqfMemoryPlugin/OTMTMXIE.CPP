@@ -39,6 +39,7 @@
 #include <time.h>
 #include <algorithm>
 #include <vector>
+#include <string>
 
 // the Win32 Xerces build requires the default structure packing...
 //#pragma pack( push )
@@ -1348,7 +1349,8 @@ USHORT CTMXExportImport::PreProcessInFile
   USHORT      usRC = 0;
   FILE        *hIn = NULL;
   FILE        *hOut = NULL;
-
+  BYTE* buff = nullptr;
+  
   hIn = fopen( pszInFile, "rb" );
   if ( hIn == NULL )
   {
@@ -1364,6 +1366,7 @@ USHORT CTMXExportImport::PreProcessInFile
     } /* endif */
   } /* endif */
 
+  
   // read/write files until done
   if ( !usRC )
   {
@@ -1376,14 +1379,12 @@ USHORT CTMXExportImport::PreProcessInFile
     {
       // file starts with BOM
       fUTF16 = TRUE;
-
       // write BOM to output file and advance buffer pointer
-      fwrite( m_bBuffer, 1, 2, hOut );
-      pCurPos += 2;
+      //fwrite( m_bBuffer, 1, 2, hOut );
+      //pCurPos += 2;
     }
     else if ( (m_bBuffer[0] != 0) && (m_bBuffer[1] == 0) ) 
-    {
-      
+    {      
       fUTF16 = TRUE;   // assume UTF16
       fseek( hIn, 0, SEEK_SET ); // re-position to begin of file
     }
@@ -1392,149 +1393,95 @@ USHORT CTMXExportImport::PreProcessInFile
       fseek( hIn, 0, SEEK_SET ); // re-position to begin of file
     } /* endif */
 
-    do
+    if ( !usRC  ){
+      fseek(hIn, 0, SEEK_END);
+      long fsize = ftell(hIn);
+      LogMessage5(INFO,__func__," Allocating filebuffer with ", intToA(fsize)," bytes for ", pszInFile);
+      fseek(hIn, 0, SEEK_SET);  /* same as rewind(f); */
+
+      buff = new BYTE[fsize+1];
+      fread(buff, fsize, 1, hIn);
+    }
+
+    if(!buff){
+      usRC = usRC? usRC : -1;
+    }
+    
+    if(hIn){
+      fclose(hIn);
+      hIn = nullptr;
+    }
+
+    if(fUTF16){      //convert utf16 to utf8
+      auto data = EncodingHelper::toChar((char16_t*) buff);
+      
+      if (data.find("UTF-16") != std::string::npos)
+        data.replace(data.find("UTF-16"), 6, "UTF-8");
+
+      strcpy((PSZ) buff, data.c_str());
+      ((PSZ)buff)[data.size()] = '\0';
+    }
+    
+    PSZ pszCurPos = (PSZ) buff;
+    PSZ pszStartPos = pszCurPos;
+
+    while ( *pszCurPos != 0 )
     {
-      if ( fUTF16 )
+      // check for entitities with values below 0x20
+      if ( *pszCurPos == '&' )
       {
-        PSZ_W pszBuffer = (PSZ_W)m_bBuffer;
-        if ( fgetws( pszBuffer, TMX_BUFFER_SIZE / 2, hIn ) != NULL )
+        int iValue = 0;
+        int iEntityLen = 0;
+        if ( CheckEntity( pszCurPos, &iValue, &iEntityLen ) )
         {
-          PSZ_W pszStartPos = (PSZ_W)pszBuffer;
-          PSZ_W pszCurPos = pszStartPos;
-          while ( *pszCurPos != 0 )
+          if ( iValue < 32 )
           {
-            CHAR_W c = *pszCurPos;
+            // mask entity
 
-            // is valid XML char
-            if ( (c == 0x9) || 
-                 (c == 0xA) || 
-                 (c == 0xD) || 
-                 ((c >= 0x20) && (c <= 0xD7FF)) || 
-                 ((c >= 0xE000) && (c <= 0xFFFD)) || 
-                 ((c >= 0x10000) && (c <= 0x10FFFF)))
-            {
-              // check for entitities with values below 0x20
-              if ( *pszCurPos == L'&' )
-              {
-                int iValue = 0;
-                int iEntityLen = 0;
-                if ( CheckEntityW( pszCurPos, &iValue, &iEntityLen ) )
-                {
-                  if ( iValue < 32 )
-                  {
-                    // mask entity
+            // write chars up to entity character
+            fwrite( pszStartPos, 1, pszCurPos - pszStartPos, hOut );
 
-                    // write chars up to entity character
-                    fwrite( pszStartPos, 2, pszCurPos - pszStartPos, hOut );
+            // write masked entity 
+            fputs( ENTITY_MASK_START, hOut );
+            fwrite( pszCurPos + 1, 1, iEntityLen - 1, hOut );
+            fputs( ENTITY_MASK_END, hOut );
 
-                    // write masked entity 
-                    fputws( ENTITY_MASK_START_W, hOut );
-                    fwrite( pszCurPos + 1, 2, iEntityLen - 1, hOut );
-                    fputws( ENTITY_MASK_END_W, hOut );
-
-                    // set new start position
-                    pszCurPos += iEntityLen;
-                    pszStartPos = pszCurPos;
-                  }
-                  else
-                  {
-                    // leave as-is
-                    pszCurPos += iEntityLen;
-                  } /* endif */
-                }
-                else
-                {
-                  pszCurPos++;
-                }
-              }
-              else
-              {
-                pszCurPos++;
-              }
-            }
-            else
-            {
-              // write chars up to invalid character
-              fwrite( pszStartPos, 2, pszCurPos - pszStartPos, hOut );
-
-              // write invalid character
-              fwprintf( hOut, L"<invchar>%u</invchar>", c );
-
-              // set new start position
-              pszCurPos++;
-              pszStartPos = pszCurPos;
-            } /* endif */
-          } /*endwhile */
-
-          // write remaining characters
-          if ( pszCurPos != pszStartPos )
+            // set new start position
+            pszCurPos += iEntityLen;
+            pszStartPos = pszCurPos;
+          }
+          else
           {
-            fwrite( pszStartPos, 2, pszCurPos - pszStartPos, hOut );
+            // leave as-is
+            pszCurPos += iEntityLen;
           } /* endif */
+        }
+        else
+        {
+          pszCurPos++;
         }
       }
       else
       {
-        PSZ pszBuffer = (PSZ)m_bBuffer;
-        if ( fgets( pszBuffer, TMX_BUFFER_SIZE, hIn ) != NULL )
-        {
-          PSZ pszStartPos = (PSZ)pszBuffer;
-          PSZ pszCurPos = pszStartPos;
-          while ( *pszCurPos != 0 )
-          {
-            // check for entitities with values below 0x20
-            if ( *pszCurPos == '&' )
-            {
-              int iValue = 0;
-              int iEntityLen = 0;
-              if ( CheckEntity( pszCurPos, &iValue, &iEntityLen ) )
-              {
-                if ( iValue < 32 )
-                {
-                  // mask entity
-
-                  // write chars up to entity character
-                  fwrite( pszStartPos, 1, pszCurPos - pszStartPos, hOut );
-
-                  // write masked entity 
-                  fputs( ENTITY_MASK_START, hOut );
-                  fwrite( pszCurPos + 1, 1, iEntityLen - 1, hOut );
-                  fputs( ENTITY_MASK_END, hOut );
-
-                  // set new start position
-                  pszCurPos += iEntityLen;
-                  pszStartPos = pszCurPos;
-                }
-                else
-                {
-                  // leave as-is
-                  pszCurPos += iEntityLen;
-                } /* endif */
-              }
-              else
-              {
-                pszCurPos++;
-              }
-            }
-            else
-            {
-              pszCurPos++;
-            } /* endif */
-          } /*endwhile */
-
-          // write remaining characters
-          if ( pszCurPos != pszStartPos )
-          {
-            fwrite( pszStartPos, 1, pszCurPos - pszStartPos, hOut );
-          } /* endif */
-        } /* endif */
+        pszCurPos++;
       } /* endif */
-    } while ( !feof( hIn ) );
+    } /*endwhile */
+
+    // write remaining characters
+    if ( pszCurPos != pszStartPos )
+    {
+      fwrite( pszStartPos, 1, pszCurPos - pszStartPos, hOut );
+    } /* endif */
   } /* endif */
+
 
   //cleanup
   if ( hIn )  fclose( hIn );
   if ( hOut ) fclose( hOut );
+  if ( buff ){
+    delete[] buff;
+    buff = nullptr;
+  }
 
   return( usRC );
 }
