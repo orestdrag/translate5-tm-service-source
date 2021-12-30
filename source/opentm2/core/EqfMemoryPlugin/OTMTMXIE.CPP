@@ -917,7 +917,6 @@ USHORT CTMXExportImport::WriteTUV
   m_xw.Formatting = CXmlWriter::None;             // no indention within segment
 
   // write segment data as-is when one of the XLIFF markup tables is being used - but ensure that single ampersands are encoded properly
-  if ( (stricmp( pszMarkup, "OTMXUXLF" ) == 0) || (stricmp( pszMarkup, "OTMXMXLF" ) == 0 ) || (stricmp( pszMarkup, "OTMXAXLF" ) == 0 ) )
   {
     PSZ_W pszCurPos, pszAmp;
 
@@ -951,127 +950,7 @@ USHORT CTMXExportImport::WriteTUV
     } /* endwhile */
     if ( *pszCurPos != 0 ) m_xw.WriteRaw( pszCurPos );
   }
-  else
-  {
-    USHORT usRC = 0;
-
-    if ( stricmp( m_szActiveTagTable, pszMarkup ) != 0 )
-    {
-      // free loaded tag table
-      if ( m_pLoadedTable )
-      {
-        TAFreeTagTable( m_pLoadedTable );
-        m_pLoadedTable = NULL;
-      } /* endif */
-
-      // load document tag table
-      
-      usRC = TALoadTagTableExHwnd( pszMarkup, (PLOADEDTABLE *)&m_pLoadedTable, FALSE, 
-                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC, FALSE, NULLHANDLE );
-    } /* endif */
-
-    // copy segment data to our buffer and use this buffer from now on
-    wcscpy( this->m_szSegBuffer, pszSegmentData );
-    pszSegmentData = this->m_szSegBuffer;
-
-    // reduce CRLF when requested (and tag table allows CRLF changes)
-    if ( (this->m_pMemInfo->fNoCRLF) && (m_pLoadedTable->fReflow != TAGREFLOW_NO) )
-    {
-      PSZ_W pszSource = pszSegmentData;
-      PSZ_W pszTarget = pszSegmentData;
-      CHAR_W chLastChar = L' ';
-      while ( *pszSource != 0 )
-      {
-        if ( *pszSource == L'\r'  )
-        {
-          pszSource++;
-          if ( *pszSource == L'\n' )
-          {
-            // skip following linefeed as well
-            pszSource++;
-          } /* endif */             
-
-          if ( (chLastChar != L' ') && (*pszSource != L' ') && (*pszSource != 0 ))
-          {
-            // insert a blank as linebreak is not prefixed or suffixed by whitespace
-            chLastChar = *pszTarget++ = L' ';
-          } /* endif */             
-        }
-        else if ( *pszSource == L'\n'  )
-        {
-          pszSource++;
-          if ( (chLastChar != L' ') && (*pszSource != L' ') && (*pszSource != 0 ))
-          {
-            // insert a blank as linebreak is not prefixed or suffixed by whitespace
-            chLastChar = *pszTarget++ = L' ';
-          } /* endif */             
-        }
-        else
-        {
-          chLastChar = *pszTarget++ = *pszSource++;
-        } /* endif */           
-      } /* endwhile */       
-      *pszTarget = 0;
-    } /* endif */       
-
-      if ( !usRC )
-      {
-        ULONG ulCP = GetLangAnsiCP( pszLanguage );
-
-        // build protect start/stop table for tag recognition
-        PBYTE  pStartStop = NULL;
-        //LogMessage(ERROR, "TEMPORARY_HARDCODED in CTMXExportImport::WriteTUV, m_pLoadedRTFTable->pfnProtTable = 0;");
-        //m_pLoadedRTFTable->pfnProtTable = 0;
-        usRC = TACreateProtectTableW( pszSegmentData, m_pLoadedTable, 0, (PTOKENENTRY)m_pTokBuf, TMXTOKBUFSIZE,
-                                      (PSTARTSTOP *)&pStartStop, m_pLoadedTable->pfnProtTable, 
-                                      m_pLoadedTable->pfnProtTableW, ulCP );
-
-        if ( !usRC )
-        {
-          PSTARTSTOP pEntry = (PSTARTSTOP)pStartStop;
-          while ( (pEntry->usStart != 0) || (pEntry->usStop != 0)  || (pEntry->usType != 0) )
-          {
-            switch ( pEntry->usType )
-            {
-              case UNPROTECTED_CHAR :
-                // write translatable text
-                {
-                  CHAR_W chTemp = pszSegmentData[pEntry->usStop+1];
-                  pszSegmentData[pEntry->usStop+1] = 0;
-                  m_xw.WriteString( pszSegmentData + pEntry->usStart ); 
-                  pszSegmentData[pEntry->usStop+1] = chTemp;
-                }
-                break;
-              default :
-                // handle not-translatable data
-
-                // if next entry is also a protected one ...
-                if ( ((pEntry+1)->usStart != 0) &&
-                      ((pEntry+1)->usStop != 0)  &&
-                      ((pEntry+1)->usType != UNPROTECTED_CHAR) )
-                {
-                  // combine this entry with the next one
-                  (pEntry+1)->usStart = pEntry->usStart;
-                }
-                else
-                {
-                  // mask tagging
-                  m_xw.WriteStartElement( "ph" );
-                  CHAR_W chTemp = pszSegmentData[pEntry->usStop+1];
-                  pszSegmentData[pEntry->usStop+1] = 0;
-                  m_xw.WriteString( pszSegmentData + pEntry->usStart ); 
-                  pszSegmentData[pEntry->usStop+1] = chTemp;
-                  m_xw.WriteEndElement(); 
-                } /* endif */
-                break;
-            } /* endswitch */
-            pEntry++;
-          } /* endwhile */
-        } /* endif */
-        UtlAlloc( (PVOID *)&pStartStop, 0L, 0L, NOMSG );
-      } /* endif */
-  }
-
+  
   // end open elements
   m_xw.WriteEndElement(); // seg
   m_xw.Formatting = CXmlWriter::Indented;             // restart indention 
