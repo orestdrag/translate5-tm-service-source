@@ -1989,8 +1989,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       case SUB_ELEMENT:
       case G_ELEMENT:
       {
-        fCatchData = false;
-        std::wstring replacingTag = L"<bpt id=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
+        //fCatchData = false;
+        std::wstring replacingTag = L"<bpt i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){     
 

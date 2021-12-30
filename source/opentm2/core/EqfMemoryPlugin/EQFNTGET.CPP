@@ -1211,14 +1211,18 @@ USHORT ExactTest
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
     //compare source strings
-    {
+    {    
       if ( pGetIn->ulParm & GET_RESPECTCRLF )
       {  // if LF different, strings are NOT EQUAL in this case!!
-        fStringEqual = (UtlCompIgnSpaceW(pString, pSentence->pNormString, 0 ) == 0L );
+        fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        if(!fStringEqual)
+          fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
       }
       else
       {
-        fStringEqual = (UtlCompIgnWhiteSpaceW(pString, pSentence->pNormString, 0 ) == 0L );
+        fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        if(!fStringEqual)
+          fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
       } /* endif */
     }
 
@@ -3074,7 +3078,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = (UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L);
+       fStringEqual = (UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L
+                      || UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L);
     } /* endif*/
 
     LOGPRINTF2( INFO, "FuzzyTest: After String compare, fStringEqual = ", intToA(fStringEqual) );

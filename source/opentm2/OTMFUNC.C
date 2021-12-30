@@ -687,7 +687,7 @@ USHORT FctValidateSession
   }
   else
   {
-    LogMessage(WARNING,"FctValidateSession():: [checksum validation commented out] -> NO_ERROR");
+    //LogMessage(WARNING,"FctValidateSession():: [checksum validation commented out] -> NO_ERROR");
 //     LONG      lCheckSum;               // buffer for actual checksum
 
 //    FctBuildCheckSum( pData, &lCheckSum );

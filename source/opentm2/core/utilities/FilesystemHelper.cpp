@@ -243,7 +243,7 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
         //(*getFileBufferInstance())[fName].file = nullptr;
         //(*getFileBufferInstance())[fName].offset = 0;
         (*pFBs)[fName].status &= ~MODIFIED;// reset modified flag
-        pFBs->erase(fName);
+        //pFBs->erase(fName);
     }else{
         LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
     }
@@ -294,6 +294,7 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
         LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , "), fName = ", fName.c_str() );
         fclose(ptr);
         FlushBufferIntoFile(fName);
+        CloseFileBuffer(fName);
 
     }
     ptr = NULL;
