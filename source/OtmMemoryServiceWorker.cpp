@@ -266,53 +266,110 @@ int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
 /*! \brief find a free slot in our list of active memories, add a new entry if none found
   \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
 */
-int OtmMemoryServiceWorker::getFreeSlot()
+int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
 {
-  // first look for a free slot in the existing list
-  for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
-  {
-    if ( this->vMemoryList[i].szName[0] == 0 )
-    {
-      return( i );
-    } /* endif */
-  } /* endfor */
+  size_t UsedMemory = 0;
+  int AllowedMemoryMB;
+  properties_get_int(KEY_ALLOWED_RAM, AllowedMemoryMB);
+  size_t AllowedMemory = AllowedMemoryMB * 1000000;
+
+  #ifdef CALCULATE_ONLY_MEM_FILES
+  std::string path; 
+  char memFolder[260];
+  properties_get_str(KEY_MEM_DIR, memFolder, 260);
+
+  for(int i = 0; i < vMemoryList.size() ;i++){
+    path = memFolder;
+    path += this->vMemoryList[i].szName;
+    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
+    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
+    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
+  }
+  #else
+  UsedMemory = calculateOccupiedRAM() + memoryRequested;
+  #endif
+
+  LogMessage6(TRANSACTION, __func__,":: ", intToA(UsedMemory), " bytes is used from ", intToA(AllowedMemory), " allowed");
 
   // add a new entry when the maximum list size has not been reached yet
-  if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
+  //if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
+  if( UsedMemory < AllowedMemory)
   {
+    // first look for a free slot in the existing list
+    for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
+    {
+      if ( this->vMemoryList[i].szName[0] == 0 )
+      {
+        return( i );
+      } /* endif */
+    } /* endfor */
+    
     OtmMemoryServiceWorker::OPENEDMEMORY NewEntry;
     memset( &NewEntry, 0, sizeof(NewEntry) );
     this->vMemoryList.push_back( NewEntry );
     return( this->vMemoryList.size() - 1 );
-  } /* endif */
+  } /* endif */  
 
   return( -1 );
 }
 
 
+size_t OtmMemoryServiceWorker::calculateOccupiedRAM(){
+  char memFolder[260];
+  size_t UsedMemory = 0;
+  #ifdef CALCULATE_ONLY_MEM_FILES
+  properties_get_str(KEY_MEM_DIR, memFolder, 260);
+  std::string path;
+  for(int i = 0; i < vMemoryList.size() ;i++){
+    if(this->vMemoryList[i].szName != 0){
+      path = memFolder;
+      path += this->vMemoryList[i].szName;
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
+    }
+  }
+  #else
+  UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
+  UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
+  #endif
+
+  LogMessage4(INFO, __func__,":: calculated occupied ram = ", intToA(UsedMemory/1000000), " MB");
+  return UsedMemory;
+}
+
 
 /*! \brief close any memories which haven't been used for a long time
   \returns 0
 */
-int OtmMemoryServiceWorker::cleanupMemoryList(int memoryNeed)
-{
+size_t OtmMemoryServiceWorker::cleanupMemoryList(size_t memoryRequested)
+{  
+  int AllowedMBMemory = 500;
+  properties_get_int(KEY_ALLOWED_RAM, AllowedMBMemory);
+  size_t AllowedMemory = AllowedMBMemory * 1000000;    
+  size_t memoryNeed = memoryRequested + calculateOccupiedRAM();
+
+  if(memoryNeed < AllowedMemory){
+    return( AllowedMemory - memoryNeed );
+  }
+
   time_t curTime;
-
   time( &curTime );
-
-  // close any memory in the list which hasn't been used for a long time
-  for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
-  {
-    if ( this->vMemoryList[i].szName[0] != 0 )
+  std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
+  for( int i = 0; i < (int)this->vMemoryList.size() ; i++ ){
+    if ( vMemoryList[i].szName[0] != 0 )
     {
-      if ( (curTime - this->vMemoryList[i].tLastAccessTime) > OTMMEMSERVICE_MEMORY_TIMEOUT )
-      {
-        removeFromMemoryList( i );
-      }
-    } /* endif */
-  } /* endfor */
+      openedMemoriesSortedByLastAccess.insert({vMemoryList[i].tLastAccessTime, i});
+    }
+  }
 
-  return( 0 );
+  for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
+    LogMessage6(INFO, __func__,":: removing memory  \'", vMemoryList[it->second].szName, "\' that wasns\'t used for ", intToA(curTime - vMemoryList[it->second].tLastAccessTime), " seconds" );
+    removeFromMemoryList(it->second);
+    memoryNeed = memoryRequested + calculateOccupiedRAM();
+  }
+
+  return( AllowedMemory - memoryNeed );
 }
 
 /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
@@ -376,11 +433,26 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   } /* endif */
 
 
+  size_t requiredMemory = 0;
+  {
+    char memFolder[260];
+    properties_get_str(KEY_MEM_DIR, memFolder, 260);
+    std::string path;
+
+    path = memFolder;
+    path += pszMemory;
+    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
+    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
+    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+  } 
+
   // cleanup the memory list (close memories not used for a longer time)
-  cleanupMemoryList(0);
+  size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
+
+  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", intToA(requiredMemory),"; RAM left after opening mem: ", intToA(memLeftAfterOpening));
 
   // find a free slot in the memory list
-  iIndex = getFreeSlot();
+  iIndex = getFreeSlot(requiredMemory);
 
   // handle "too many open memories" condition
   if ( iIndex == -1 )
@@ -738,11 +810,28 @@ int OtmMemoryServiceWorker::import
   }
   else
   {
+    size_t requiredMemory = 0;
+    {
+      char memFolder[260];
+      properties_get_str(KEY_MEM_DIR, memFolder, 260);
+      std::string path;
+
+      path = memFolder + strMemory;
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+
+      requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
+    }
+    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+
     // cleanup the memory list (close memories not used for a longer time)
-    cleanupMemoryList(0);
+    size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
+    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", intToA(requiredMemory),"; RAM left after opening mem: ", intToA(memLeftAfterOpening));
+
 
     // find a free slot in the memory list
-    iIndex = getFreeSlot();
+    iIndex = getFreeSlot(requiredMemory);
 
     // handle "too many open memories" condition
     if ( iIndex == -1 )

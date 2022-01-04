@@ -1987,7 +1987,10 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define KEY_OTM_DIR "OTM_dir"
 #define KEY_MEM_DIR "MEM_dir"
 #define KEY_HOME_DIR "HOME_dir"
+#define KEY_ALLOWED_RAM "AllowedRAM_MB"
 #define KEY_TEMP_DIR "TEMP_dir"
+//5MB reserved for service
+#define MEMORY_RESERVED_FOR_SERVICE 5000000
 //#define KEY_PLUGIN_DIR "PLUGIN_dir"
 #define KEY_DEFAULT_DIR "DEFAULT_dir"
 #define KEY_LANG_FILE_PATH "LANG_FILE_PATH"

@@ -240,17 +240,17 @@ private:
   /*! \brief find a free slot in our list of active memories, add a new entry if none found
     \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
   */
-  int getFreeSlot();
+  int getFreeSlot(size_t memoryRequested);
 
   /*! \brief close any memories which haven't been used for a long time
     \returns 0
   */
-  int cleanupMemoryList(int memoryNeed);
+  size_t cleanupMemoryList(size_t memoryRequested);
 
   /*! \brief calcuate total amount of RAM occupied by opened memory files
     \returns 0
   */
-  size_t calculateRAMOccupiedByOpenedMemories();
+  size_t calculateOccupiedRAM();
 
 
   /*! \brief convert a long time value into the UTC date/time format

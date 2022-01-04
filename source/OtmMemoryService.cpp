@@ -357,6 +357,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     unsigned int uiWorkerThreads = 10;
     unsigned int uiTimeOut = 3600;
     unsigned int uiLogLevel = 0;
+    unsigned int uiAllowedRAM = 1500; // MB
 
     /* get configuration settings */
     {
@@ -379,12 +380,14 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
             uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
+            uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
         }else{
           LogMessage2(ERROR, "can't open otm_service.conf, path = ", path.c_str());
         }
     }
     
     properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
+    properties_set_int_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
     std::string memDir = szOtmDirPath;
     memDir += "/MEM/";
     properties_add_str(KEY_MEM_DIR, memDir.c_str());
@@ -471,7 +474,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( postEntry );
     service.publish( getStatus );
     //std::string add = pSettings->get_bind_address();
-    LogMessage4(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", intToA(uiPort),"/", szServiceName);
+    LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", intToA(uiPort),"/", szServiceName,"; Allowed ram = ", intToA(uiAllowedRAM)," MB");
   }
 
   return( TRUE );

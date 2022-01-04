@@ -369,8 +369,13 @@ int Properties::read_all_data_from_file() {
     return PROPERTY_NO_ERRORS;
 }
 
+
+#define TURN_OFF_PROPERTIES_FILES
 int Properties::write_all_data_to_file() {
-    if(!fWriteToFile){
+    #ifndef TURN_OFF_PROPERTIES_FILES // 
+    if(!fWriteToFile)
+    #endif
+    {
         LogMessage(WARNING, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
         return PROPERTY_WRITING_TURNED_OFF;
     }

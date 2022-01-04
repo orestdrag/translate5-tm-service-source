@@ -1888,8 +1888,7 @@ USHORT MemFuncPrepExport
 
   // open output file
   if ( fOK )
-  {
-    
+  {    
     pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
     if(pIDA->hFile){
       LogMessage2(INFO,"MemFuncPrepExport:: opened output file, fName = ", pIDA->ControlsIda.szPathContent);

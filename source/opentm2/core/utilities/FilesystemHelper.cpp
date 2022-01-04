@@ -780,13 +780,13 @@ long FdGetFileSize(int fd)
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
-int FilesystemHelper::GetFileSize(const std::string& path){
+size_t FilesystemHelper::GetFileSize(const std::string& path){
     auto size = FnGetFileSize(path.c_str());
     return size;
 }
 
 
-int FilesystemHelper::GetFileSize(FILE*& ptr){
+size_t FilesystemHelper::GetFileSize(FILE*& ptr){
     if(!ptr){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
         return -1;
@@ -799,6 +799,28 @@ int FilesystemHelper::GetFileSize(FILE*& ptr){
     std::string fName = GetFileName(ptr);
     LogMessage6(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size),", fName = ",fName.c_str());
     return size;
+}
+
+size_t FilesystemHelper::GetFilebufferSize(const std::string& path){
+    auto fbs = getFileBufferInstance();
+    if(fbs->find(path) == fbs->end()){
+        LogMessage3(INFO,__func__,":: Requested filebuffer not found, path = ", path.c_str());
+        return 0;
+    }
+    auto size = (*fbs)[path].data.size();
+    LogMessage5(INFO,__func__,":: path = ", path.c_str(), "; size = ", intToA(size));
+    return size;
+}
+
+size_t FilesystemHelper::GetTotalFilebuffersSize(){
+    auto fbs = getFileBufferInstance();
+    size_t total = 0;
+    for (auto it = fbs->cbegin(); it != fbs->cend(); it++)
+    {
+        total += it->second.data.size();
+    }
+    LogMessage3(INFO,__func__,":: total size = ", intToA(total));
+    return total;
 }
 
 int FilesystemHelper::GetLastError(){
