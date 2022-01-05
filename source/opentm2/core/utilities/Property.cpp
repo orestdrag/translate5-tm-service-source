@@ -80,7 +80,7 @@ int properties_get_int_or_default(const char* key, int& value, const int default
     if(res != PROPERTY_NO_ERRORS){
         value = defaultValue;
         properties_add_int(key, defaultValue);
-        LogMessage4(DEBUG, "Key ", key , " not saved yet -> saving default value : ", intToA(defaultValue));
+        LogMessage4(DEBUG, "Key ", key , " not saved yet -> saving default value : ", toStr(defaultValue).c_str());
         return PROPERTY_USED_DEFAULT_VALUE;
     }
     return PROPERTY_NO_ERRORS;
@@ -90,7 +90,9 @@ int properties_get_int_or_default(const char* key, int& value, const int default
 int properties_get_str_or_default(const char* key, char *buff, int buffSize, const char* defaultValue ){
      int res = properties_get_str(key, buff, buffSize);
     if(res != PROPERTY_NO_ERRORS){
-        strncpy(buff, defaultValue, buffSize);
+        if(buff != defaultValue){
+            strncpy(buff, defaultValue, buffSize);
+        }
         properties_add_str(key, defaultValue);
         LogMessage4(DEBUG, "Key ", key , " not saved yet -> saving default value : ", defaultValue);
         return PROPERTY_USED_DEFAULT_VALUE;
@@ -217,7 +219,7 @@ int Properties::set_value(const std::string& key, const std::string& value) {
     dataStr[key] = value;
     LogMessage5(DEBUG, "Properties::set_value(",key.c_str(),", ", value.c_str(),") added successfully");
     int writeDataReturn = update_strData_in_file(key);
-    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", value.c_str(),") was writed to file with ret code = ", intToA(writeDataReturn));
+    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", value.c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
     return writeDataReturn;
 }
 
@@ -242,9 +244,9 @@ int Properties::set_value(const std::string& key, const int value) {
     }
 
     dataInt[key] = value;
-    LogMessage5(DEBUG, "Properties::set_value(",key.c_str(),", ", intToA(value),") was added ");
+    LogMessage5(DEBUG, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was added ");
     int writeDataReturn = update_intData_in_file(key);
-    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", intToA(value),") was writed to file with ret code = ", intToA(writeDataReturn));
+    LogMessage6(DEBUG, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
     return writeDataReturn;
 }
 
@@ -265,7 +267,7 @@ int Properties::get_value(const std::string& key, int& value){
     }
     
     value = dataInt.at(key);
-    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),", ", intToA(value),")");
+    LogMessage5(DEBUG, "Properties::get_value(",key.c_str(),", ", toStr(value).c_str(),")");
     return PROPERTY_NO_ERRORS;    
 }
 

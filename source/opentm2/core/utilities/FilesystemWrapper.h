@@ -3,11 +3,13 @@
 
 #include "win_types.h"
 #include "OSWrapper.h"
+#include <string>
+
 extern "C" {
         
-char * filesystem_get_otm_dir();
+std::string filesystem_get_otm_dir();
 
-char * filesystem_get_home_dir();
+std::string filesystem_get_home_dir();
 
 int filesystem_open_file(const char* path, FILE*& ptr, const char* mode);
 

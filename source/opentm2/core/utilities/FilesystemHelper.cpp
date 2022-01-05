@@ -77,7 +77,7 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
         //|| (strcasestr(cpath, ".MEM") )
     ){
         LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
-                        cpath, ", useFilebuffer before = ", intToA(useBuffer));
+                        cpath, ", useFilebuffer before = ", toStr(useBuffer).c_str());
         useBuffer = true;
     }
     return OpenFile(path, mode, useBuffer);
@@ -103,7 +103,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     fixedPath = FixPath(fixedPath);
     long fileSize = 0;
     FileBuffer* pFb = NULL;
-    LogMessage6(INFO, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", intToA(useBuffer));
+    LogMessage6(INFO, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", toStr(useBuffer).c_str());
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     if(!ptr){
         LogMessage2(ERROR, "FilesystemHelper::OpenFile:: can't open file ", path.c_str());
@@ -124,21 +124,24 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             //fileBuffers[fixedPath].resize(32768);
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
-                LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",intToA(fileSize),"), fname = ", fixedPath.c_str());
+                //pFb->data
+                LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
                 int readed = fread(&pFb->data[0], fileSize, 1, ptr);
-                LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",intToA(fileSize),"), fname = ", fixedPath.c_str(), "; readed = ", intToA(readed));
+                LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",toStr(fileSize).c_str(),
+                            "), fname = ", fixedPath.c_str(), "; readed = ", toStr(readed).c_str());
             }else{
                 LogMessage2(INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath.c_str());
                 pFb->data.resize(16384);
             }
-            LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", intToA(pFb->data.size()));
+            LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", toStr(pFb->data.size()).c_str());
             //pFb->status = FileBufferStatus::OPEN;
         }
 
         pFb->offset = 0;
     }
 
-    LogMessage8(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", intToA((long int)ptr), "size = ", intToA(fileSize));
+    LogMessage8(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", toStr((long int)ptr).c_str(),
+             "size = ", toStr(fileSize).c_str());
 
     if(ptr == NULL){
         __last_error_code = FILEHELPER_FILE_PTR_IS_NULL;
@@ -169,7 +172,7 @@ int FilesystemHelper::DeleteFile(const std::string& path){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
     if(int errCode = remove(path.c_str())){
-        LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", intToA(errCode));
+        LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         return errCode;
     }else{
         LogMessage3(DEBUG, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
@@ -195,7 +198,8 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
 
         pFb->status |= MODIFIED;
         if(offset + buffSize > pFb->data.size()){
-            LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", intToA(pFb->data.size())," to ", intToA(offset+buffSize));
+            LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", toStr(pFb->data.size()).c_str(),
+                    " to ", toStr(offset+buffSize).c_str());
             pFb->data.resize(offset + buffSize);
         }
 
@@ -206,7 +210,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         LogMessage2(ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
         return -1;
     }
-    LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", intToA(buffSize)," bytes written to buffer for ", fName.c_str());
+    LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", toStr(buffSize).c_str()," bytes written to buffer for ", fName.c_str());
     return 0;
 }
 
@@ -231,7 +235,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     PUCHAR p = &(pFb->data[offset]);
     memcpy(buff, p, buffSize);
     bytesRead = buffSize;
-    LogMessage6(INFO, "ReadBuffer::", intToA(buffSize)," bytes read from buffer to ", fName.c_str(), " starting from ", intToA(offset) );
+    LogMessage6(INFO, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
     return 0;
 }
 
@@ -291,7 +295,7 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
     LogMessage(DEBUG, "called FilesystemHelper::CloseFile()");
     if(ptr){
         std::string fName = GetFileName(ptr);
-        LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", intToA((long int) ptr) , "), fName = ", fName.c_str() );
+        LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", toStr((long int) ptr).c_str() , "), fName = ", fName.c_str() );
         fclose(ptr);
         FlushBufferIntoFile(fName);
         CloseFileBuffer(fName);
@@ -464,15 +468,15 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
 
-        LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to filebuffer ", fName.c_str(),
-            " starting from position ", intToA(startingPosition));
+        LogMessage6(INFO,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
+            " starting from position ", toStr(startingPosition).c_str());
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
-        LogMessage4(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", intToA((long)ptr));
+        LogMessage4(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
 
-        LogMessage6(INFO,"Writing ", intToA(buffSize), " bytes to file ", fName.c_str(),
-            " starting from position ", intToA(startingPosition));
+        LogMessage6(INFO,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
+            " starting from position ", toStr(startingPosition).c_str());
 
         #ifndef TEMPORARY_HARDCODED
         {
@@ -506,11 +510,12 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
 
             pFb = &(*getFileBufferInstance())[fName]; 
             if(offset <= fSize){       
-                LogMessage4(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", intToA(pFb->offset), " to ", intToA(offset));
+                LogMessage4(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", 
+                    toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str());
                 pFb->offset = offset;
             }else{
                 LogMessage6(WARNING, "FilesystemHelper::SetOffsetInFilebuffer -> can't change offset from ", 
-                        intToA(pFb->offset), " to ", intToA(offset), " because it's bigger than size:", intToA(fSize));
+                        toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str(), " because it's bigger than size:", toStr(fSize).c_str());
             }
         }else{
             LogMessage2(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
@@ -522,7 +527,7 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
 
 
 int FilesystemHelper::TruncateFileForBytes(HFILE ptr, int numOfBytes){
-    LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", intToA(numOfBytes));
+    LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", toStr(numOfBytes).c_str());
     off_t lDistance = numOfBytes;
     int retCode = ftruncate(ptr->_fileno, lDistance);
     return retCode;
@@ -532,7 +537,8 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
 {
     DWORD ret = 0 ;
 
-    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", intToA(LoPart), ", direction is ", intToA(OffSet));
+    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ",
+             toStr(LoPart).c_str(), ", direction is ", toStr(OffSet).c_str());
     //loff_t res ; //It is also LONGLONG variable.
     LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
 
@@ -698,10 +704,10 @@ int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& 
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
         if(!bytesRead){
-            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr));
+            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str());
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
-            LogMessage4(DEBUG, "FilesystemHelper::ReadFile():: readed ", intToA(bytesRead), "; data = ", buff);
+            LogMessage4(DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str(), "; data = ", buff);
         }
     }
     return __last_error_code = errCode;
@@ -717,11 +723,12 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
         if(!bytesRead){
-            LogMessage4(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", intToA((long int)ptr), ", path = ", GetFileName(ptr).c_str());
+            LogMessage4(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str(), 
+                    ", path = ", GetFileName(ptr).c_str());
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
             bytesRead = buffSize;
-            LogMessage2(DEBUG, "FilesystemHelper::ReadFile():: readed ", intToA(bytesRead)/*, "; data = ", (char*)buff*/);
+            LogMessage2(DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str()/*, "; data = ", (char*)buff*/);
         }
     }
     return __last_error_code = errCode;
@@ -740,14 +747,14 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
         pFb = &(*getFileBufferInstance())[fName];
         if(offset < 0){
-            LogMessage4(DEBUG, "FilesystemHelper::ReadFileBuff::  offset[", intToA(offset),"] is less than 0 ->  using pFb->offset", intToA(pFb->offset));
+            LogMessage4(DEBUG, "FilesystemHelper::ReadFileBuff::  offset[", toStr(offset),"] is less than 0 ->  using pFb->offset", toStr(pFb->offset));
             offset = pFb->offset; 
         }
         if(offset + buffSize <= pFb->data.size()){
             memcpy(buff, &(pFb->data[offset]), buffSize);
             bytesRead = buffSize;
             pFb->offset += bytesRead; 
-            LogMessage6(DEBUG, "FilesystemHelper::ReadFileBuff:: success, fName = ", fName.c_str(), "; offset = ", intToA(offset), "; bytesRead = ", intToA(bytesRead));
+            LogMessage6(DEBUG, "FilesystemHelper::ReadFileBuff:: success, fName = ", fName.c_str(), "; offset = ", toStr(offset), "; bytesRead = ", toStr(bytesRead));
         }else{ 
             LogMessage(ERROR, "FilesystemHelper::ReadFileBuff:: requested file position not exists");
             __last_error_code = errCode = FILEHELPER_ERROR_READING_OUT_OF_RANGE;
@@ -769,7 +776,7 @@ long FnGetFileSize(std::string&& filename)
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);
     int logLevel = rc ==0? INFO : ERROR;
-    LogMessage6(logLevel, "FnGetFileSize:: for ", filename.c_str(), " is ", intToA(stat_buf.st_size)," , rc = ", intToA(rc) );
+    LogMessage6(logLevel, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str()," , rc = ", toStr(rc).c_str() );
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
@@ -797,7 +804,7 @@ size_t FilesystemHelper::GetFileSize(FILE*& ptr){
     fseek(ptr, 0L, pos);
     
     std::string fName = GetFileName(ptr);
-    LogMessage6(DEBUG, "FilesystemHelper::GetFileSize(", intToA((long int)ptr), ") = ", intToA(size),", fName = ",fName.c_str());
+    LogMessage6(DEBUG, "FilesystemHelper::GetFileSize(", toStr((long int)ptr).c_str(), ") = ", toStr(size).c_str(),", fName = ",fName.c_str());
     return size;
 }
 
@@ -808,7 +815,7 @@ size_t FilesystemHelper::GetFilebufferSize(const std::string& path){
         return 0;
     }
     auto size = (*fbs)[path].data.size();
-    LogMessage5(INFO,__func__,":: path = ", path.c_str(), "; size = ", intToA(size));
+    LogMessage5(INFO,__func__,":: path = ", path.c_str(), "; size = ", toStr(size).c_str());
     return size;
 }
 
@@ -819,7 +826,7 @@ size_t FilesystemHelper::GetTotalFilebuffersSize(){
     {
         total += it->second.data.size();
     }
-    LogMessage3(INFO,__func__,":: total size = ", intToA(total));
+    LogMessage3(INFO,__func__,":: total size = ", toStr(total).c_str());
     return total;
 }
 
@@ -841,7 +848,7 @@ std::string FilesystemHelper::GetOtmDir(){
     
     //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
-        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = ", intToA(res), ", OTMdir = ", OTMdir);
+        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", OTMdir);
         properties_init();
         res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
     }
@@ -856,7 +863,7 @@ std::string FilesystemHelper::GetHomeDir(){
     
     //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
-        LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", intToA(res), ", OTMdir = ", HOMEdir);
+        LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", HOMEdir);
         properties_init();
         res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
     }
@@ -866,10 +873,10 @@ std::string FilesystemHelper::GetHomeDir(){
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;
     int ret = stat(dir.c_str(), &st);
-    LogMessage6(DEBUG, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", intToA(rights),")::stat():: ret = ", intToA(ret));
+    LogMessage6(DEBUG, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),")::stat():: ret = ", toStr(ret).c_str());
     if (ret){
         ret = mkdir(dir.c_str(), rights);
-        LogMessage6(INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", intToA(rights),") was created, ret = ", intToA(ret));
+        LogMessage6(INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),") was created, ret = ", toStr(ret).c_str());
     }
     return ret;
 }

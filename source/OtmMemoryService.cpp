@@ -112,7 +112,7 @@ void delete_method_handler( const shared_ptr< Session > session )
   restoreBlanks( strTM );
   int iTransActIndex = AddToTransActLog( DELETE_MEMORY_TRANSACTID, strTM.c_str() );
 
-  LogMessage6(TRANSACTION,"==== processing DELETE request, content type=",strType.c_str(),"; content length=", intToA(content_length), "; mem=", strTM.c_str() );
+  LogMessage6(TRANSACTION,"==== processing DELETE request, content type=",strType.c_str(),"; content length=", toStr(content_length).c_str(), "; mem=", strTM.c_str() );
 
   string strResponseBody;
   int rc = pMemService->deleteMem( strTM, strResponseBody );
@@ -120,7 +120,7 @@ void delete_method_handler( const shared_ptr< Session > session )
 
   TransActDone( iTransActIndex );
 
-  LogMessage4(TRANSACTION,"==== processing DELETE request...Done, , RC=",intToA(rc),"; strResponseBody=", strResponseBody.c_str() );
+  LogMessage4(TRANSACTION,"==== processing DELETE request...Done, , RC=",toStr(rc).c_str(),"; strResponseBody=", strResponseBody.c_str() );
 }
 
 void get_memory_method_handler( const shared_ptr< Session > session )
@@ -139,7 +139,7 @@ void get_memory_method_handler( const shared_ptr< Session > session )
   
   session->close( rc, vMemData, { { "Content-Length", ::to_string( vMemData.size() ) },{ "Content-Type", strAccept.c_str() },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
   TransActDone( iTransActIndex );
-  LogMessage2(TRANSACTION,"get_memory_method_handler::==== processing GET memory request..Done, RC = ", intToA(rc));
+  LogMessage2(TRANSACTION,"get_memory_method_handler::==== processing GET memory request..Done, RC = ", toStr(rc).c_str());
 }
 
 void get_method_handler(const shared_ptr< Session > session)
@@ -196,7 +196,7 @@ void postImport_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing POST mem/import request, content type=\"", strType.c_str(),"\", content length=", intToA(content_length));
+  LogMessage4(TRANSACTION, "==== processing POST mem/import request, content type=\"", strType.c_str(),"\", content length=", toStr(content_length).c_str());
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
@@ -209,7 +209,7 @@ void postImport_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    LogMessage5(TRANSACTION, "...Done, RC=", intToA(rc),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
+    LogMessage5(TRANSACTION, "...Done, RC=", toStr(rc).c_str(),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
   } );
 }
 
@@ -219,7 +219,7 @@ void post_method_handler( const shared_ptr< Session > session )
 
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
-  LogMessage3(TRANSACTION, "==== processing POST request, content type=\"%s\", content length=%ld====\n", strType.c_str(), intToA(content_length) );
+  LogMessage3(TRANSACTION, "==== processing POST request, content type=\"%s\", content length=%ld====\n", strType.c_str(), toStr(content_length).c_str() );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -230,7 +230,7 @@ void post_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->createMemory( strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    LogMessage4(TRANSACTION, "post_method_handler done, RC=", intToA(rc),"; Output: ", strResponseBody.c_str());
+    LogMessage4(TRANSACTION, "post_method_handler done, RC=", toStr(rc).c_str(),"; Output: ", strResponseBody.c_str());
   } );
 }
 
@@ -241,7 +241,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing tag replacement request, content type=\"",strType.c_str(),"\", content length=", intToA( content_length ) );
+  LogMessage4(TRANSACTION, "==== processing tag replacement request, content type=\"",strType.c_str(),"\", content length=", toStr( content_length ).c_str() );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -254,7 +254,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
       { "Content-Type", "application/json" },
       { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-    LogMessage5(TRANSACTION,  "...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
+    LogMessage5(TRANSACTION,  "...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   });
 }
 
@@ -265,7 +265,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing POST mem/fuzzysearch request, content type=\"",strType.c_str(),"\", content length=", intToA( content_length ) );
+  LogMessage4(TRANSACTION, "==== processing POST mem/fuzzysearch request, content type=\"",strType.c_str(),"\", content length=", toStr( content_length ).c_str() );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -280,7 +280,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    LogMessage5(TRANSACTION,  "...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
+    LogMessage5(TRANSACTION,  "...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   } );
 }
 
@@ -291,7 +291,7 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::starting,  content type = ", strType.c_str(), ";  content length= = ", intToA(content_length));
+  LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::starting,  content type = ", strType.c_str(), ";  content length= = ", toStr(content_length).c_str());
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -308,7 +308,7 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );
-    LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::Done! RC = ", intToA(rc), "; Output = ", strResponseBody.c_str());
+    LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::Done! RC = ", toStr(rc).c_str(), "; Output = ", strResponseBody.c_str());
   } );
 }
 
@@ -319,7 +319,7 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage5(TRANSACTION, "==== processing POST mem/entry request, content type=\"",strType.c_str(),"\", content length=",intToA(content_length),"====\n" );
+  LogMessage5(TRANSACTION, "==== processing POST mem/entry request, content type=\"",strType.c_str(),"\", content length=",toStr(content_length).c_str(),"====\n" );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -337,7 +337,7 @@ void postEntry_method_handler( const shared_ptr< Session > session )
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     
     TransActDone( iTransActIndex );
-    LogMessage7(TRANSACTION,"postEntry_method_handler::...Done, RC=",intToA(rc),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
+    LogMessage7(TRANSACTION,"postEntry_method_handler::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );
 }
 
@@ -395,9 +395,9 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     //From here we have logging in file turned on
     DesuppressLoggingInFile();
 
-    LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", intToA(uiPort), "; Worker threads = ", intToA(uiWorkerThreads),
-            "; timeout = ", intToA(uiTimeOut));
-    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", intToA(uiLogLevel));
+    LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", toStr(uiPort).c_str(), "; Worker threads = ", toStr(uiWorkerThreads).c_str(),
+            "; timeout = ", toStr(uiTimeOut).c_str());
+    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str());
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     strcpy( pszService, szServiceName );
@@ -474,7 +474,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( postEntry );
     service.publish( getStatus );
     //std::string add = pSettings->get_bind_address();
-    LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", intToA(uiPort),"/", szServiceName,"; Allowed ram = ", intToA(uiAllowedRAM)," MB");
+    LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
   }
 
   return( TRUE );

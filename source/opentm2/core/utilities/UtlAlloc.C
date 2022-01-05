@@ -120,7 +120,7 @@ BOOL UtlAllocHwnd
   usMessageNo;
   if ( !fOK && (usMessageNo != NOMSG ))
   {
-    LogMessage3(ERROR, __func__, "::rc = ", intToA(usMessageNo) );
+    LogMessage3(ERROR, __func__, "::rc = ", toStr(usMessageNo).c_str() );
   } /* endif */
   return( fOK );
 } /* end of UtlAllocHwnd */
@@ -244,7 +244,7 @@ USHORT UtlIntFree
     /******************************************************************/
     usRC = ERROR_INTERNAL;
     LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
-      intToA(ulActLength), "; ulActLength2 = ", intToA(ulActLength2));
+      toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
     //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
   else
@@ -270,7 +270,7 @@ USHORT UtlGetTask ( void )
   {
     if ( UtiVar[currTask].usTask == usTask )
     {
-      LogMessage2(DEVELOP, "UtlGetTask()::Task found, id = ", intToA(usTask));
+      LogMessage2(DEVELOP, "UtlGetTask()::Task found, id = ", toStr(usTask).c_str());
       break;
     }
     else if ( UtiVar[currTask].usTask == 0 )
@@ -290,7 +290,7 @@ USHORT UtlGetTask ( void )
       UtiVar[currTask].usTask = usTask;
       memcpy(&UtiVar[currTask].SegTable, &SegTable,
              sizeof(SEGTABLE) * MAX_MEM_TABLES );
-      LogMessage4(INFO, "UtlGetTask():: allocated segtable, usTask = ",intToA(usTask), ", currTask = ", intToA(currTask));
+      LogMessage4(INFO, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
       break;
     } /* endif */
   } /* endfor */

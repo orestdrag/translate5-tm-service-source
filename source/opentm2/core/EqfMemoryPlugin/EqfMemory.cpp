@@ -310,7 +310,7 @@ int EqfMemory::putProposal
 
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
 
-  LogMessage2(INFO, "EqfMemory::putProposal result = ", intToA(iRC));
+  LogMessage2(INFO, "EqfMemory::putProposal result = ", toStr(iRC).c_str());
 
   if ( iRC != 0 ) 
       handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
@@ -704,7 +704,7 @@ int EqfMemory::searchProposal
 
   if ( iRC == 0 )
   {
-    LogMessage3(DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",intToA(this->pTmGetOut->usNumMatchesFound)," proposals"   );
+    LogMessage3(DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",toStr(this->pTmGetOut->usNumMatchesFound).c_str()," proposals"   );
 
     for ( int i = 0; i < (int)FoundProposals.size(); i++ )
     {
@@ -716,7 +716,7 @@ int EqfMemory::searchProposal
       {
         if(CheckLogLevel(DEBUG)){
           auto strSource = EncodingHelper::convertToUTF8(pTmGetOut->stMatchTable[i].szSource );
-          LogMessage6(DEBUG,"EqfMemory::searchProposal::   proposal ",intToA(i),": match=",intToA(pTmGetOut->stMatchTable[i].usMatchLevel),", source=", strSource.c_str() );
+          LogMessage6(DEBUG,"EqfMemory::searchProposal::   proposal ",toStr(i).c_str(),": match=",toStr(pTmGetOut->stMatchTable[i].usMatchLevel).c_str(),", source=", strSource.c_str() );
         }
         this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );
       } /* end */         
@@ -724,7 +724,7 @@ int EqfMemory::searchProposal
   }
   else
   {
-    LogMessage2(DEBUG,"EqfMemory::searchProposal::  lookup failed, rc=", intToA(iRC) );
+    LogMessage2(DEBUG,"EqfMemory::searchProposal::  lookup failed, rc=", toStr(iRC).c_str() );
   } /* end */     
 
   if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmGetIn->stTmGet.szTagTable );

@@ -966,7 +966,7 @@ VOID MakeHashValue
 
   if(CheckLogLevel(DEBUG)){
     auto str = EncodingHelper::convertToUTF8(pDataStart);
-    LogMessage4(DEBUG,"MakeHashValue:: data = \'",str.c_str(),"\' ; hash = ", intToA(ulHashVal));
+    LogMessage4(DEBUG,"MakeHashValue:: data = \'",str.c_str(),"\' ; hash = ", toStr(ulHashVal).c_str());
   }
   return;
 } /* end of function MakeHashValue */

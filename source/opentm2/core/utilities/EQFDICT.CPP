@@ -625,7 +625,7 @@ BOOL UtlEvent
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
-      LogMessage7(ERROR, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+      LogMessage7(ERROR, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str());\
       //UtlEvent( ERROR_EVENT, id, class, rc )
   #else
     #define ERREVENT( id, class, rc )
@@ -633,7 +633,7 @@ BOOL UtlEvent
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
-      LogMessage11(ERROR, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+      LogMessage11(ERROR, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
   #else
     #define ERREVENT2( id, class, rc, gr, str )
@@ -641,7 +641,7 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT( id, class, rc ) \
-    LogMessage7(INFO, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+    LogMessage7(INFO, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( INFO_EVENT, id, class, rc )
   #else
     #define INFOEVENT( id, class, rc )
@@ -649,7 +649,7 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT2( id, class, rc, gr, str ) \
-      LogMessage11(INFO, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+      LogMessage11(INFO, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str(), "; str = ", str, "; gr = ", toStr(gr).c_str());\
       //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
   #else
     #define INFOEVENT2( id, class, rc, gr, str )
@@ -661,7 +661,7 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-    LogMessage7(DEBUG, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc));\
+    LogMessage7(DEBUG, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
   #else
     #define DEBUGEVENT( id, class, rc )
@@ -669,7 +669,8 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT2( id, class, rc, gr, str ) \
-    LogMessage11(DEBUG, __func__, ":: id = ", intToA(id), "; class = ", intToA(class), "; rc = ", intToA(rc), "; str = ", str, "; gr = ", intToA(gr));\
+    LogMessage11(DEBUG, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), \
+      "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
   #else
     #define DEBUGEVENT2( id, class, rc, gr, str )
@@ -4489,8 +4490,9 @@ PTMWCHAR QDAMGetszKey_V3
    {
      // offset pointer is out of range
      pData = NULL;
-     LogMessage4(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", intToA((long int)pusOffset), "; pEndOfRec = ", intToA((long int)pEndOfRec));
-     LogMessage2(ERROR, "pusOffset - pEndOfRec = ", intToA((long int) ((PBYTE)pusOffset - pEndOfRec)));
+     LogMessage4(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", toStr((long int)pusOffset).c_str(), 
+          "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str());
+     LogMessage2(ERROR, "pusOffset - pEndOfRec = ", toStr((long int) ((PBYTE)pusOffset - pEndOfRec)).c_str());
      //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
    else
@@ -4501,8 +4503,8 @@ PTMWCHAR QDAMGetszKey_V3
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
-       LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", intToA((long int)pusOffset),
-             "; pEndOfRec = ", intToA((long int)pEndOfRec));
+       LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", toStr((long int)pusOffset).c_str(),
+             "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str());
        pData = NULL;
        //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      } /* endif */
@@ -7593,7 +7595,7 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
+         LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -8787,7 +8789,7 @@ SHORT QDAMDictUpdSignLocal
     {
        //LogMessage(WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
        //ulLen = ulDataLen;
-       LogMessage4(ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", intToA(ulDataLen), ", ulLen = ", intToA(ulLen));
+       LogMessage4(ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", toStr(ulDataLen).c_str(), ", ulLen = ", toStr(ulLen).c_str());
        sRc = BTREE_USERDATA;
     }
     else
@@ -8846,7 +8848,7 @@ SHORT QDAMDictUpdSignLocal
     } /* endif */
     if ( ! sRc )
     {
-      LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", intToA(writingPosition), " bytes in file ");
+      LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", toStr(writingPosition).c_str(), " bytes in file ");
       // fill rest up with zeros
       int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
       char* buff = new char[leftToFill];
@@ -8866,7 +8868,7 @@ SHORT QDAMDictUpdSignLocal
 
    if ( sRc )
    {
-     LogMessage2(ERROR, "QDAMDictUpdSignLocal:: sRc = ", intToA(sRc));
+     LogMessage2(ERROR, "QDAMDictUpdSignLocal:: sRc = ", toStr(sRc).c_str());
      ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } 
 

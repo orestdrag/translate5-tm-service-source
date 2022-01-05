@@ -508,7 +508,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
           /**************************************************************/
           fOk           = FALSE;
           usMsgHandling = FALSE;
-          LogMessage4(ERROR,"Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = ", szMemFullPath,", usRC = ", intToA(usRc));
+          LogMessage4(ERROR,"Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = ", szMemFullPath,", usRC = ", toStr(usRc).c_str());
           DEBUGEVENT( TMOPEN_LOC, STATE_EVENT, 1 );
         } /* endif */
       } /* endif */

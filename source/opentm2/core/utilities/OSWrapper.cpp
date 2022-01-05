@@ -29,11 +29,11 @@ int GetLocaleInfo(
                 break;
 
             default:
-                LogMessage3(ERROR, "GetLocaleInfo():: LOCALE_USER_DEFAULT :: LCType {", intToA(LCType), "} is not implemented");
+                LogMessage3(ERROR, "GetLocaleInfo():: LOCALE_USER_DEFAULT :: LCType {", toStr(LCType).c_str(), "} is not implemented");
                 break;
             }
         }else{
-            LogMessage3(ERROR, "GetLocaleInfo():: Locale {", intToA(Locale), "} is not implemented");
+            LogMessage3(ERROR, "GetLocaleInfo():: Locale {", toStr(Locale).c_str(), "} is not implemented");
         }    
         return -1;
     }

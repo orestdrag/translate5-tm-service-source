@@ -669,7 +669,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
       } /* endif */
       if ( fMsg && usRetCode )
       {
-         usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode), "; fName = ", pszFname );
+         usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; fName = ", pszFname );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -774,7 +774,7 @@ USHORT UtlCloseHwnd
         if ( fMsg && usRetCode )
         {
            usMBCode = MB_CANCEL;
-           LogMessage3(ERROR, __func__,":: rc = " , intToA(usRetCode));
+           LogMessage3(ERROR, __func__,":: rc = " , toStr(usRetCode).c_str());
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
@@ -916,11 +916,11 @@ USHORT UtlReadHwnd
           PSZ    pszDrive;
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode),"; pszDrive = ",pszDrive);
+          usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(),"; pszDrive = ",pszDrive);
         }
         else
         {
-           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
+           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1058,7 +1058,7 @@ USHORT UtlWriteHwnd
         sprintf(proclnk, "/proc/self/fd/%d", fno);
         int r = readlink(proclnk, filename, MAXSIZE-1);
         filename[r] = '\0';
-        LogMessage4(ERROR, "UtlWriteHwnd:: can't write file, path = ", filename, ", usRetCode = ", intToA(usRetCode));
+        LogMessage4(ERROR, "UtlWriteHwnd:: can't write file, path = ", filename, ", usRetCode = ", toStr(usRetCode).c_str());
 
       } /* endif */
 
@@ -1085,11 +1085,11 @@ USHORT UtlWriteHwnd
         {
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = LogMessage5(ERROR, __func__,  ":: rc = ", intToA(usRetCode), "; pszDrive = ", pszDrive);
+          usMBCode = LogMessage5(ERROR, __func__,  ":: rc = ", toStr(usRetCode).c_str(), "; pszDrive = ", pszDrive);
         }
         else
         {
-           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", intToA(usRetCode) );
+           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1297,7 +1297,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46 GETMUTEX(
 		  if ( fMsg && usRetCode )
 		  {
 			 usMBCode = MB_CANCEL;
-       LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode) , "; fName = ", pszFName );
+       LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() , "; fName = ", pszFName );
 		  } /* endif */
 	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -1399,7 +1399,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 48 if ( Crea
         if ( fMsg && usRetCode )
         {
            usMBCode = MB_CANCEL;
-           LogMessage5(ERROR, __func__,  ":: rc = ", intToA(usRetCode) , "; dirName ", pszDirName );
+           LogMessage5(ERROR, __func__,  ":: rc = ", toStr(usRetCode).c_str() , "; dirName ", pszDirName );
         } /* endif */
      } while ( fMsg &&
                usRetCode &&
@@ -1498,7 +1498,7 @@ USHORT UtlMoveHwnd
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode), "; pszSrc = ", pszSrc );
+         LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; pszSrc = ", pszSrc );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -1738,7 +1738,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52 // close 
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
       {
          usMBCode = MB_CANCEL;
-         LogMessage5(ERROR, __func__, ":: rc = ", intToA(usRetCode) , "; pszFSecCompl = ",pszFSpecCompl);
+         LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() , "; pszFSecCompl = ",pszFSpecCompl);
          /*************************************************************/
          /* change the drive if necessary ...                         */
          /*************************************************************/
@@ -2089,7 +2089,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 54 if ( SetF
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__,":: rc = ", intToA(usRetCode) );
+         LogMessage3(ERROR, __func__,":: rc = ", toStr(usRetCode).c_str() );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -2136,7 +2136,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__, ":: rc = ",  intToA(usRetCode));
+         LogMessage3(ERROR, __func__, ":: rc = ",  toStr(usRetCode).c_str());
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 

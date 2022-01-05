@@ -152,7 +152,7 @@ USHORT EqfImportMem
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
   {
-    LogMessage4(INFO, "InFile = ", pszInFile, ", Options = ", intToA(lOptions) );
+    LogMessage4(INFO, "InFile = ", pszInFile, ", Options = ", toStr(lOptions).c_str() );
   } /* endif */
 
 
@@ -189,7 +189,7 @@ USHORT EqfImportMem
   }
 
   if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) 
-    LogMessage2(INFO, "EqfImportMem:: RC=", intToA(usRC) );
+    LogMessage2(INFO, "EqfImportMem:: RC=", toStr(usRC).c_str() );
 
   return( usRC );
 } /* end of function EqfImportMem */
@@ -213,7 +213,7 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
   {
-    LogMessage2(INFO, "==EQFExportMem==, Options = ", intToA(lOptions));
+    LogMessage2(INFO, "==EQFExportMem==, Options = ", toStr(lOptions).c_str());
     if(pszMemName){
       LogMessage2(INFO,"EqfExportMem:: Memory = ", pszMemName);
     }else{
@@ -250,7 +250,7 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ){
     if(usRC){
-      LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", intToA(usRC) );
+      LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", toStr(usRC).c_str() );
     }else{ 
       LogMessage(INFO,"end of function EqfExportMem::success ");
     }
@@ -295,7 +295,7 @@ USHORT EqfCreateMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-  LogMessage2(INFO, "EqfCreateMem() done ::RC=", intToA(usRC));
+  LogMessage2(INFO, "EqfCreateMem() done ::RC=", toStr(usRC).c_str());
 
   return( usRC );
 } /* end of function EqfCreateMem */
@@ -322,7 +322,7 @@ USHORT EqfDeleteMem
     usRC = MemFuncDeleteMem( pszMemName );
     pData->fComplete = TRUE;   // one-shot function are always complete
   }else{
-    LogMessage4(ERROR, "Error in EQFDeleteMem::FctValidateSession:: MemName = ", pszMemName, "; RC = ", intToA(usRC));
+    LogMessage4(ERROR, "Error in EQFDeleteMem::FctValidateSession:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
   } /* endif */
 
   if ( !usRC )
@@ -330,7 +330,7 @@ USHORT EqfDeleteMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-  LogMessage4(INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", intToA(usRC));
+  LogMessage4(INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
 
   return( usRC );
 } /* end of function EqfDeleteMem */
@@ -601,7 +601,7 @@ USHORT EqfStartSession
     *phSession = NULLHANDLE;
   } /* endif */
 
-  LogMessage2(INFO, "  RC=", intToA(usRC) );
+  LogMessage2(INFO, "  RC=", toStr(usRC).c_str() );
 
   return( usRC );
 } /* end of function EqfStartSession */
@@ -701,14 +701,14 @@ USHORT FctValidateSession
   {
      *ppData = pData;
   } /* endif */
-  LogMessage2(DEBUG, "FctValidateSession() usRC = ", intToA(usRC));
+  LogMessage2(DEBUG, "FctValidateSession() usRC = ", toStr(usRC).c_str());
   return( usRC );
 } /* end of function FctValidateSession */
 
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
     HANDLE        hMapObject = NULL;
-  LogMessage4(ERROR,__func__,"::TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", intToA(ulRefreshFlag), " )" );
+  LogMessage4(ERROR,__func__,"::TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", toStr(ulRefreshFlag).c_str(), " )" );
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
     if(!hMapObject)
@@ -759,7 +759,7 @@ USHORT EqfMemoryExists
     if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
     {
       usRC = TA_MANDFOLDER;
-      LogMessage4(ERROR, __func__, ":: rc = ", intToA(usRC), " EQF_ERROR" );
+      LogMessage4(ERROR, __func__, ":: rc = ", toStr(usRC).c_str(), " EQF_ERROR" );
     }
     else
     {
@@ -897,7 +897,7 @@ USHORT EqfOpenMem
 
   if ( pData )
   {
-    LogMessage4(INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", intToA(lOptions));
+    LogMessage4(INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", toStr(lOptions).c_str());
   }else{
     LogMessage(ERROR, "Error in EqfOpenMem:: pData == NULL");
   } /* endif */
@@ -909,10 +909,10 @@ USHORT EqfOpenMem
 
     usRC = pFactory->APIOpenMem( pszMemoryName, plHandle, lOptions );
   }else{
-    LogMessage2(ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", intToA(usRC));
+    LogMessage2(ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", toStr(usRC).c_str());
   } /* endif */
 
-  LogMessage2(INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", intToA(usRC));
+  LogMessage2(INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", toStr(usRC).c_str());
   
   return( usRC );
 }
@@ -987,7 +987,7 @@ USHORT EqfQueryMem
 
   if ( pData )
   {
-    LogMessage4(INFO,"EqfQueryMem:: handle = ", intToA(lHandle), "; options = ", intToA(lOptions));
+    LogMessage4(INFO,"EqfQueryMem:: handle = ", toStr(lHandle).c_str(), "; options = ", toStr(lOptions).c_str());
   }else{
     LogMessage(ERROR,"ERROR in EqfQueryMem:: pData is null");
   } /* endif */
@@ -1002,7 +1002,7 @@ USHORT EqfQueryMem
 
   LOGLEVEL logLevel = usRC? ERROR : INFO;
   //if ( pData )
-  LogMessage2(logLevel,"End of EqfQueryMem, RC = ", intToA(usRC));
+  LogMessage2(logLevel,"End of EqfQueryMem, RC = ", toStr(usRC).c_str());
 
   return( usRC );
 }
@@ -1039,7 +1039,7 @@ USHORT EqfSearchMem
 
   if ( pData )
   {
-    LogMessage8(INFO, "EqfSearchMem::Handle", intToA(lHandle),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", intToA(lOptions));
+    LogMessage8(INFO, "EqfSearchMem::Handle", toStr(lHandle).c_str(),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", toStr(lOptions).c_str());
   }else{
     LogMessage(ERROR, "Error in EqfSearchMem:: pData == NULL");
   } /* endif */
@@ -1054,7 +1054,7 @@ USHORT EqfSearchMem
 
   if ( usRC)
   {
-    LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", intToA(usRC) );
+    LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
   }else{
     LogMessage(INFO, "Success in EqfSearchMem" );
   }
@@ -1086,7 +1086,7 @@ USHORT EqfUpdateMem
 
   if ( pData )
   {
-    LogMessage5( INFO, __func__, "==EqfUpdateMem==, Handle = ", intToA(lHandle), "; Options = ", intToA(lOptions) );
+    LogMessage5( INFO, __func__, "==EqfUpdateMem==, Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
   }else{
     LogMessage2( ERROR,__func__,"::pData is nullptr");
   } /* endif */
@@ -1100,7 +1100,7 @@ USHORT EqfUpdateMem
   } /* endif */
 
   auto logLevel = usRC? ERROR : INFO;
-  LogMessage3(logLevel, __func__, ":: RC = ",intToA(usRC));
+  LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
 
   return( usRC );
 }
@@ -1197,7 +1197,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( pData )
   {
-    LogMessage6(INFO, "EqfGetOpenTM2Lang()::pData != NULL, RC=", intToA(usRC),"; pszISOLang = ",pszISOLang,"; pszOpenTM2Lang = ", pszOpenTM2Lang);
+    LogMessage6(INFO, "EqfGetOpenTM2Lang()::pData != NULL, RC=", toStr(usRC).c_str(),"; pszISOLang = ",pszISOLang,"; pszOpenTM2Lang = ", pszOpenTM2Lang);
   }
 
   return( usRC );

@@ -250,7 +250,7 @@ LONG                lOptions                 // type of new Translation Memory
   
   usRC = (fOK ? 0 : 1);
 
-  LogMessage2(INFO, "MemFuncCreateMem() done, usRC = ", intToA(usRC));
+  LogMessage2(INFO, "MemFuncCreateMem() done, usRC = ", toStr(usRC).c_str());
   return( usRC );
 } /* end of function MemFuncCreateMem */
 

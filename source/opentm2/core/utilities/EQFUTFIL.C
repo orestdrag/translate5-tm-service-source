@@ -347,7 +347,7 @@ BOOL UtlLoadFileHwnd
       }
       else
       {
-        LogMessage7(WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", intToA(usDosRc), ", ulSize: ", intToA(ulSize), "-> fOK=false now");
+        LogMessage7(WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", toStr(usDosRc).c_str(), ", ulSize: ", toStr(ulSize).c_str(), "-> fOK=false now");
         fOK = FALSE;
       } /* endif */
     } /* endif */
@@ -1084,7 +1084,7 @@ USHORT UtlBufCloseHwnd
       if ( fMsg )
       {
         pszErrParm = pBufCB->szFileName,
-        LogMessage5(ERROR, __func__,  "; rc = ", intToA(usRC), "; ", pszErrParm );
+        LogMessage5(ERROR, __func__,  "; rc = ", toStr(usRC).c_str(), "; ", pszErrParm );
       } /* endif */
     } /* endif */
   } /* endif */

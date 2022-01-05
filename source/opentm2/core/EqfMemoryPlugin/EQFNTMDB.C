@@ -714,7 +714,7 @@ EQFNTMInsert
     strcat(path,"_data/");
     CreateDir(path);
     strcat(path, "key_");    
-    strcat(path, intToA(*pulKey));
+    strcat(path, toStr(*pulKey).c_str());
     FILE* filePtr = fopen(path, "wb+");
     fwrite(pData, ulLen, 1, filePtr);
     fclose(filePtr);
@@ -1110,7 +1110,7 @@ VOID QDAMCopyDataTo_V3
 
    if ( usVersion < NTM_VERSION2 )
    {
-     LogMessage3(FATAL,__func__, ":: btree version is not supported, version = ", intToA(usVersion));
+     LogMessage3(FATAL,__func__, ":: btree version is not supported, version = ", toStr(usVersion).c_str());
      BTREE_NOT_SUPPORTED;
    }
    
@@ -1125,7 +1125,7 @@ VOID QDAMCopyDataTo_V3
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
        if(usLastPos < usLen){
-        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", intToA(usLastPos), ", usLen = ", intToA(usLen) );
+        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       ULONG ulLen = *(PULONG) pOldData;
       if ( ulLen & QDAM_TERSE_FLAGL)
@@ -1138,7 +1138,7 @@ VOID QDAMCopyDataTo_V3
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
       if(usLastPos < usLen){
-        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", intToA(usLastPos), ", usLen = ", intToA(usLen) );
+        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       //assert( (usLastPos >= usLen) );
 
@@ -1852,7 +1852,7 @@ SHORT QDAMDictExactLocal
                  }
                  else if ( *pulLength < recData.ulLen )
                  {
-                   LogMessage4(ERROR, "BTREE_BUFFER_SMALL, pulLength = ", intToA(*pulLength), "; recData.ulLen = ", intToA(recData.ulLen));
+                   LogMessage4(ERROR, "BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;
                  }

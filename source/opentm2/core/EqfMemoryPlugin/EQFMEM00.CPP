@@ -98,7 +98,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
         {
             fOK = FALSE;
                           
-          LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", intToA(usRC));
+          LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
         }
    }
 

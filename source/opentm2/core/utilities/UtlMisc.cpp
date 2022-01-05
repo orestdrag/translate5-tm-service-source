@@ -655,9 +655,8 @@ BOOL UtlInitUtils( HAB hab )
      ulong ulLength;
 
      // Setup event log file name
-     char* otmDir = filesystem_get_otm_dir();
-     sprintf(szLogFile, "%s/%s", otmDir, EVENTLOGFILENAME);
-     free(otmDir);
+     auto otmDir = filesystem_get_otm_dir();
+     sprintf(szLogFile, "%s/%s", otmDir.c_str(), EVENTLOGFILENAME);
 
      // Load event log file
      pEventTable = NULL;

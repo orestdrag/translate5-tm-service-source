@@ -196,76 +196,76 @@ int LogMessageStr(int LogLevel, const std::string& message){
     return writeLog(logMessage, LogLevel);
 }
 
-int LogMessage(int LogLevel, const char* message){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message));
+int LogMessage(int LogLevel, std::string&& message){
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message));
 }
 
-int LogMessage2(int LogLevel, const char* message1, const char* message2){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2));
+int LogMessage2(int LogLevel, std::string&& message1, std::string&& message2){
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2));
 }
 
-int LogMessage3(int LogLevel, const char* message1, const char* message2, const char* message3){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3));
+int LogMessage3(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3){
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3));
 }
 
-int LogMessage4(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4));
+int LogMessage4(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4){
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4));
 }
-int LogMessage5(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5));
+int LogMessage5(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5){
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5));
 }
 
-int LogMessage6(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6){
+int LogMessage6(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6));
 }
 
-int LogMessage7(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7){
+int LogMessage7(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6) + (message7));
 }
 
-int LogMessage8(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8){
+int LogMessage8(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6) + (message7) + (message8));
 }
 
-int LogMessage9(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9){
+int LogMessage9(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
+                        std::string&& message9){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
-                            + std::string(message9));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6) + (message7) + (message8)
+                            + (message9));
 }
 
-int LogMessage10(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9, const char* message10){
+int LogMessage10(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
+                        std::string&& message9, std::string&& message10){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
-                            + std::string(message9) + std::string(message10));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6) + (message7) + (message8)
+                            + (message9) + (message10));
 }
 
 
-int LogMessage11(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9, const char* message10, const char* message11){
+int LogMessage11(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
+                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
+                        std::string&& message9, std::string&& message10, std::string&& message11){
     
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, std::string(message1) + std::string(message2) + std::string(message3)
-                            + std::string(message4) + std::string(message5) + std::string(message6) + std::string(message7) + std::string(message8)
-                            + std::string(message9) + std::string(message10) + std::string(message11));
+    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
+                            + (message4) + (message5) + (message6) + (message7) + (message8)
+                            + (message9) + (message10) + (message11));
 }
 
 
@@ -276,7 +276,8 @@ int DesuppressLoggingInFile(){
     return 0;
 }
 
-char* intToA(int i){
+/*
+char* toStr(int i){
     //int size = snprintf(NULL, 0, "%d", i);
     //char* buffer = new char[size+1];
     //snprintf(buffer, sizeof(size+1), "%d", i);
@@ -287,15 +288,15 @@ char* intToA(int i){
     buffer[len] = '\0';
     return buffer;
 }
-
+//*/
 
 int SetLogLevel(int level){
     if(level <= FATAL && level>=DEVELOP){
-        LogMessage2(WARNING, "SetLogLevel::Log level treshold was set to ",intToA(level));
+        LogMessage2(WARNING, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;
         return level;
     }else{
-        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", intToA(level), ", level must be between 0 and 5");
+        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
         return -1;
     }
 }

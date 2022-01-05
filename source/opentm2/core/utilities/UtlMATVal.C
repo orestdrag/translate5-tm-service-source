@@ -130,7 +130,7 @@ void UtlSetUShort( short sID, unsigned short usValue )
    {
       UtiVar[UtlGetTask()].usQueryArea[sID] = usValue;
    }else{
-      LogMessage5(WARNING,"UtlSetUShort(", intToA(sID), ", ", intToA(usValue),") trying to set invalida value");
+      LogMessage5(WARNING,"UtlSetUShort(", toStr(sID).c_str(), ", ", toStr(usValue).c_str(),") trying to set invalida value");
    } /* endif */
 }
 
@@ -238,7 +238,7 @@ PSZ UtlMakeEQFPath
    
     pszPath = new char[MAX_EQF_PATH];                   // no path info yet
    
-    char* otmDir = filesystem_get_otm_dir();
+    const char* otmDir = filesystem_get_otm_dir().c_str();
     USHORT      usQSTSubDir;           // QST_ value for subdirectory
 
     strncpy(pszPath, otmDir, MAX_EQF_PATH);

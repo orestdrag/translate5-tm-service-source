@@ -435,7 +435,7 @@ VOID HashSentence
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
     if(CheckLogLevel(DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset);
-      LogMessage6(DEBUG,"HashSentence:: pNormOffset = \"", str.c_str(), "\"; len = ", intToA(pTermTokens->usLength),"; hash = ", intToA(pTermTokens->usHash));
+      LogMessage6(DEBUG,"HashSentence:: pNormOffset = \"", str.c_str(), "\"; len = ", toStr(pTermTokens->usLength).c_str(),"; hash = ", toStr(pTermTokens->usHash).c_str());
     }
     //max nr of hashes built
     usCount++;
@@ -469,7 +469,7 @@ VOID HashSentence
 
   if(CheckLogLevel(DEBUG)){
     auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
-    LogMessage4(DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", intToA(usCount) );
+    LogMessage4(DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", toStr(usCount).c_str() );
 
   }
   //build tuples of the term hashes
@@ -1696,7 +1696,7 @@ USHORT DetermineTmRecord
       usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
       if(CheckLogLevel(DEBUG)){
-        std::string msg = __func__ + std::string(":: Number Entries:  ") + intToA(usMaxEntries) +"; Entries:";
+        std::string msg = __func__ + std::string(":: Number Entries:  ") + toStr(usMaxEntries).c_str() +"; Entries:";
         pIndexEntry = &pIndexRecord->stIndexEntry;
         for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
         {
@@ -3277,7 +3277,7 @@ USHORT TMLoopAndDelTargetClb
 {
 
   static int call_n = 0;
-  LogMessage4(INFO, __func__,":: call n = ", intToA(++call_n),"; Sentence = ");
+  LogMessage4(INFO, __func__,":: call n = ", toStr(++call_n).c_str(),"; Sentence = ");
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block
   PTMX_TAGTABLE_RECORD 	pTMXSrcTTable = NULL; //ptr to source tag info

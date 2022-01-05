@@ -166,7 +166,7 @@ LanguageFactory::LanguageFactory(void)
   if ( iRC != 0  || pvLanguageList->size() == 0)
   {
     LogMessage5(ERROR, "Load of external language list file \""
-      , szFile, " failed with error code ",intToA(iRC),", switching to built-in language list" );
+      , szFile, " failed with error code ",toStr(iRC).c_str(),", switching to built-in language list" );
     // load failed, used built-in list instead
     PLANGUAGEINFO pInfo = DefaultLangTable;
     pvLanguageList->clear();
@@ -175,11 +175,11 @@ LanguageFactory::LanguageFactory(void)
       pvLanguageList->push_back( *pInfo );
       pInfo++;
     }
-    LogMessage3(ERROR, "Built-in language list contains ", intToA(pvLanguageList->size())," entries" );
+    LogMessage3(ERROR, "Built-in language list contains ", toStr(pvLanguageList->size()).c_str()," entries" );
   }
   else
   {
-    LogMessage5(INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", intToA(pvLanguageList->size())," entries" );
+    LogMessage5(INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", toStr(pvLanguageList->size()).c_str()," entries" );
   }
 }
 
@@ -670,7 +670,7 @@ int LanguageFactory::findISO
   {
     iFound = iPreferred ;
   }
-  LogMessage4(INFO, "LanguageFactory::findISO()::size of lang list = ", intToA(iMax), "; iFound = ", intToA(iFound));
+  LogMessage4(INFO, "LanguageFactory::findISO()::size of lang list = ", toStr(iMax).c_str(), "; iFound = ", toStr(iFound).c_str());
   return( iFound );
 }
 
@@ -794,7 +794,7 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
       case UNKNOWN_ELEMENT:
       default:
         //LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
-        //    EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", intToA(CurID) , "; skipping...");
+        //    EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", toStr(CurID).c_str() , "; skipping...");
         break;
     } /*endswitch */
 }

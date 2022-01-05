@@ -508,7 +508,7 @@ void JSONFactory::parseJSONStop
   if ( pvParseHandle != NULL )
   {
     PJSONPARSEDATA pData = (PJSONPARSEDATA)pvParseHandle;
-    free( pData );
+    delete ( pData );
   } /* endif */     
 }
 
@@ -520,8 +520,8 @@ void JSONFactory::parseJSONStopW
   if ( pvParseHandle != NULL )
   {
     PJSONPARSEDATAW pData = (PJSONPARSEDATAW)pvParseHandle;
-    if ( pData->pszJSONString ) free( pData->pszJSONString );
-    free( pData );
+    if ( pData->pszJSONString ) delete[]( pData->pszJSONString );
+    delete ( pData );
   } /* endif */     
 }
 

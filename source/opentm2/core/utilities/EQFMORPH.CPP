@@ -299,7 +299,7 @@ USHORT TokenizeW
       wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
       pszStartOfSegment[vSentenceList[j].iLength] = 0;
       auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
-      LogMessage6(DEVELOP, __func__, "::Segment ",intToA(j)," >>>",str.c_str(),"<<<" );
+      LogMessage6(DEVELOP, __func__, "::Segment ",toStr(j).c_str()," >>>",str.c_str(),"<<<" );
       pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
     }
     LogMessage2(DEVELOP, __func__, "--------------------------------------------------------------" );
@@ -344,7 +344,7 @@ USHORT TokenizeW
         wchar_t chTemp2 = pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength];
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = 0;
         str = EncodingHelper::convertToUTF8(pszStartOfSegment + vTermList[i].iStartOffset);
-        LogMessage7(DEVELOP, __func__, "::Term ",intToA(i)," Start=",intToA(vTermList[i].iStartOffset),", Length=",intToA(vTermList[i].iLength));
+        LogMessage7(DEVELOP, __func__, "::Term ",toStr(i).c_str()," Start=",toStr(vTermList[i].iStartOffset).c_str(),", Length=",toStr(vTermList[i].iLength).c_str());
         LogMessage5(DEVELOP, __func__,":: Term=\"",str.c_str(),"\", Flags=",  strFlags.c_str() );
       
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
@@ -735,7 +735,7 @@ USHORT MorphTokenizeW
             psData += 2;
             sLen   = *psData++;
             sStart = *psData++;
-            LogMessage7(DEVELOP, __func__, "::  Start=",intToA(sStart)," Len=",intToA(sLen), " Flag=", std::to_string(lFlag).c_str() );
+            LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
           } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
         }
         else if ( usListType == MORPH_OFFSLIST )
@@ -746,13 +746,13 @@ USHORT MorphTokenizeW
           {
             sLen   = *psData++;
             sStart = *psData++;
-            LogMessage5(DEVELOP, __func__, "::Start=",intToA(sStart), ", Len=", intToA(sLen));
+            LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
           } while ( (sStart != 0) || (sLen != 0) );
         } /* endif */
       }
       else
       {
-        LogMessage3(DEVELOP, __func__, ":: TokenizeW failed with rc=", intToA(usRC) );
+        LogMessage3(DEVELOP, __func__, ":: TokenizeW failed with rc=", toStr(usRC).c_str() );
       } /* endif */
       
 #endif

@@ -125,7 +125,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       }
       usrc = UtlRead( hf, &prophead, sizeof( prophead), &sizread, 0);
       if( usrc || (sizread != sizeof( prophead))){
-        LogMessage4(ERROR, "LoadPropFile, couldn't read file: ", fname, ", bytes read: ", intToA(sizread));
+        LogMessage4(ERROR, "LoadPropFile, couldn't read file: ", fname, ", bytes read: ", toStr(sizread).c_str());
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
@@ -142,7 +142,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       #endif
 
       #ifdef IGNORE_TEMPORARY_HARDCODED
-        LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", intToA(prophead.usClass));
+        LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", toStr(prophead.usClass).c_str());
         prophead.usClass = PROP_CLASS_MEMORY;
       #endif
       if( (size = sizeprop = GetPropSize( prophead.usClass)) == 0)
@@ -162,7 +162,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       usrc = UtlRead( hf, pcntl->pHead+1, size, &sizread, 0);
       if( usrc || (sizread != size))
       {
-        LogMessage6(ERROR,"UtlRead:: usrc = ",intToA(usrc), "; sizread = ", intToA(sizread), ", size = ", intToA(size));
+        LogMessage6(ERROR,"UtlRead:: usrc = ",toStr(usrc).c_str(), "; sizread = ", toStr(sizread).c_str(), ", size = ", toStr(size).c_str());
         // for folder property files it is O.K. to read less than
         // size bytes
         if ( (prophead.usClass == PROP_CLASS_FOLDER) &&

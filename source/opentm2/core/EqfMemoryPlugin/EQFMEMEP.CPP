@@ -420,7 +420,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 10 WinPostMs
     default:
      //--- Close the exported file
      //--- Issue a message "Memory Database Export abnormally terminated."
-     LogMessage3(ERROR,"Error in EQFMemExportProcess::switch MemExportProcess rc = ", intToA(usRC), "; ERROR_MEM_EXPORT_TERMINATED");
+     LogMessage3(ERROR,"Error in EQFMemExportProcess::switch MemExportProcess rc = ", toStr(usRC).c_str(), "; ERROR_MEM_EXPORT_TERMINATED");
      OEMTOANSI( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
@@ -1766,7 +1766,7 @@ USHORT MemFuncExportMem
         usRC = MemFuncExportProcess( pPrivateData );
       }
     }
-    LogMessage2(INFO,"MemFuncExportMem finished, RC = ", intToA(usRC));
+    LogMessage2(INFO,"MemFuncExportMem finished, RC = ", toStr(usRC).c_str());
     free( pPrivateData );
   }
   else
@@ -1806,9 +1806,9 @@ USHORT MemFuncPrepExport
   PPROCESSCOMMAREA pCommArea = NULL;   // ptr to commmunication area
 
   if(pszMemName && pszOutFile){
-    LogMessage6(INFO,"called MemFuncPrepExport memName = ", pszMemName, "; pszOutFile = ", pszOutFile, "; options = ", intToA(lOptions));
+    LogMessage6(INFO,"called MemFuncPrepExport memName = ", pszMemName, "; pszOutFile = ", pszOutFile, "; options = ", toStr(lOptions).c_str());
   }else{
-    LogMessage2(ERROR,"called MemFuncPrepExport memName or output file path is NULL; options = ", intToA(lOptions));
+    LogMessage2(ERROR,"called MemFuncPrepExport memName or output file path is NULL; options = ", toStr(lOptions).c_str());
   }
 
   UtlSetUShort( QS_LASTERRORMSGID, NO_ERROR );
@@ -2016,7 +2016,7 @@ USHORT MemFuncPrepExport
   {
      pData->fComplete = TRUE;
      usRC =  UtlGetDDEErrorCode( HWND_FUNCIF );
-     LogMessage2(ERROR,"error in the end of MemFuncPrepExport:: rc = ", intToA(usRC));
+     LogMessage2(ERROR,"error in the end of MemFuncPrepExport:: rc = ", toStr(usRC).c_str());
      if ( pIDA )
      {
         if ( pIDA->pMem != NULL)
@@ -2059,7 +2059,7 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportStart( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
-        LogMessage2(ERROR,"Error in MemFuncExportProcess::EQFMemExportStart, RC = ", intToA(usRC));
+        LogMessage2(ERROR,"Error in MemFuncExportProcess::EQFMemExportStart, RC = ", toStr(usRC).c_str());
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
@@ -2071,7 +2071,7 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportProcess( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
-        LogMessage2(ERROR,"Error in MemFuncExportProcess::EQFMemExportProcess, RC = ", intToA(usRC));
+        LogMessage2(ERROR,"Error in MemFuncExportProcess::EQFMemExportProcess, RC = ", toStr(usRC).c_str());
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
@@ -2083,7 +2083,7 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
       
       if(usRC){
-        LogMessage2(ERROR,"Error in MemFuncExportProcess::MEM_END_EXPORT, RC = ", intToA(usRC));
+        LogMessage2(ERROR,"Error in MemFuncExportProcess::MEM_END_EXPORT, RC = ", toStr(usRC).c_str());
       }else{
         LogMessage(INFO,"MemFuncExportProcess::MEM_END_EXPORT success");
       }

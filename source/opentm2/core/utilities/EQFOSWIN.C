@@ -150,7 +150,7 @@ ULONG GetCodePage( USHORT usType )
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
 
-  LogMessage2(INFO, "GetCodePage::usType = ", intToA(usType));
+  LogMessage2(INFO, "GetCodePage::usType = ", toStr(usType).c_str());
 
   switch ( usType )
   {

@@ -93,7 +93,7 @@ OtmMemory *MemoryFactory::openMemory
   pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
   if ( pMemory == NULL ){
         *piErrorCode = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-        LogMessage4(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", intToA(this->iLastError) );
+        LogMessage4(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", toStr(this->iLastError).c_str() );
   }    
 
   return( pMemory );
@@ -144,7 +144,7 @@ int MemoryFactory::getMemoryInfo
   if ( iRC != 0 )
   {
     LogMessage6(INFO," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
-        pluginSelected->getName(),", the return code is ", intToA(this->iLastError) );
+        pluginSelected->getName(),", the return code is ", toStr(this->iLastError).c_str() );
   }
   else
   {
@@ -519,7 +519,7 @@ void MemoryFactory::showLastError(
 
  // show error message
   char* pszParm = (char*)this->strLastError.c_str();
-  LogMessage5(ERROR,__func__,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", intToA(this->iLastError));
+  LogMessage5(ERROR,__func__,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", toStr(this->iLastError).c_str());
 }
 
 std::string& MemoryFactory::getLastError( OtmMemory *pMemory, int& iLastError, std::string& strError)

@@ -305,7 +305,7 @@ USHORT MemRcHandlingHwnd
        // Issue the message: "The translation memory %1 is corrupted/backlevel"
        //                    "\n Do you want to start the organize process of"
        //                    "the translation memory %1 now ?"
-       Response = LogMessage5(ERROR, __func__,"::",  intToA(usErrorMessage), "; ", pReplAddr[0] );
+       Response = LogMessage5(ERROR, __func__,"::",  toStr(usErrorMessage).c_str(), "; ", pReplAddr[0] );
        if ( Response == MBID_YES )   //--- user wants to organize TM now
        {
          // Close the open TM and set TM handle to NULL
@@ -552,7 +552,7 @@ USHORT MemRcHandlingHwnd
    case BTREE_NO_EXCLUSIVE  :
    case BTREE_OPEN_FAILED   :
      // Pass on error to generic error handling module
-     LogMessage5(ERROR, __func__,  "::rc = ", intToA(usMemRc),"; ", pReplAddr[0] );
+     LogMessage5(ERROR, __func__,  "::rc = ", toStr(usMemRc).c_str(),"; ", pReplAddr[0] );
      break;
    case ERROR_TA_ACC_TAGTABLE:
      if ( pszServer )
@@ -563,7 +563,7 @@ USHORT MemRcHandlingHwnd
      {
        pReplAddr[0] = "";
      } /* endif */
-     LogMessage5(ERROR, __func__,  "::rc = ", intToA(usMemRc),"; ", pReplAddr[0]  );
+     LogMessage5(ERROR, __func__,  "::rc = ", toStr(usMemRc).c_str(),"; ", pReplAddr[0]  );
      break;
    case  BTREE_IN_USE:
      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NOT_ACCESSIBLE::", pReplAddr[0] );
@@ -607,14 +607,14 @@ VOID MemRcHandlingErrorUndefinedHwnd( USHORT usMemRc,        // Error code
   {
     LogMessage5(ERROR, __func__,  
       ":: if ( (usMemRc >= ERR_MORPH_BASE) && (usMemRc <= ERR_MORPH_END)  )::usMemRc::",
-      intToA(usMemRc),"; ",  pReplAddr[0] );
+      toStr(usMemRc).c_str(),"; ",  pReplAddr[0] );
   }
   else
   if ( (usMemRc >= ERR_BTREE_BASE) && (usMemRc <= ERR_BTREE_END)  )
   {
     LogMessage5(ERROR, __func__,  
       "::if ( (usMemRc >= ERR_BTREE_BASE) && (usMemRc <= ERR_BTREE_END)  )::usMemRc::",
-      intToA(usMemRc),"; ",  pReplAddr[0] );
+      toStr(usMemRc).c_str(),"; ",  pReplAddr[0] );
   }
   else
   {

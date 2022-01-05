@@ -1275,7 +1275,7 @@ USHORT CTMXExportImport::PreProcessInFile
     if ( !usRC  ){
       fseek(hIn, 0, SEEK_END);
       long fsize = ftell(hIn);
-      LogMessage5(INFO,__func__," Allocating filebuffer with ", intToA(fsize)," bytes for ", pszInFile);
+      LogMessage5(INFO,__func__," Allocating filebuffer with ", toStr(fsize).c_str()," bytes for ", pszInFile);
       fseek(hIn, 0, SEEK_SET);  /* same as rewind(f); */
 
       buff = new BYTE[fsize+1];
@@ -1904,7 +1904,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         u16name = (char16_t*)attributes.getValue( i );
         std::string sVal = EncodingHelper::convertToUTF8(u16name);
-        LogMessage6(DEVELOP, "Parsed atribute : ", intToA(i), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
+        LogMessage6(DEVELOP, "Parsed atribute : ", toStr(i).c_str(), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
         //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
     }
@@ -2335,7 +2335,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){       
           //remove tag that we just close 
           pBuf->openedTags.erase(tag.base());        
-          LogMessage6(INFO,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", intToA(tag->i),"\' />");
+          LogMessage6(INFO,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", toStr(tag->i).c_str(),"\' />");
           wcscat(pBuf->szData, replacedTag.c_str());          
 
           break;
@@ -2491,7 +2491,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     this->fTMXTagStarted = FALSE;
   } /* endif */
 
-  LogMessage4(DEVELOP, "TMXParseHandler::characters ", intToA(length) ," characters; ", c_chars );
+  LogMessage4(DEVELOP, "TMXParseHandler::characters ", toStr(length).c_str() ," characters; ", c_chars );
 
   if ( (CurElement.ID == PROP_ELEMENT) && (CurElement.PropID != UNKNOWN_PROP) )
   {

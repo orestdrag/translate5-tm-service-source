@@ -5,20 +5,12 @@
 #include <cstring>
 #include <unistd.h>
 
-char * filesystem_get_otm_dir() {
-    std::string sDir = FilesystemHelper::GetOtmDir();
-    char * pdir = (char *)malloc(sDir.size() + 1);
-    if (pdir)
-        strcpy(pdir, sDir.c_str());
-    return pdir;
+std::string filesystem_get_otm_dir() {
+    return FilesystemHelper::GetOtmDir();
 }
 
-char* filesystem_get_home_dir() {
-    std::string sDir = FilesystemHelper::GetHomeDir();
-    char *pDir = (char *)malloc(sDir.size() + 1);
-    if (pDir)
-        strcpy(pDir, sDir.c_str());
-    return pDir;
+std::string filesystem_get_home_dir() {
+    return FilesystemHelper::GetHomeDir();
 }
 
 int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
@@ -29,7 +21,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
         //|| (strcasestr(path, ".MEM") )
     ){
         LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
-                        path, ", useFilebuffer before = ", intToA(useBuffer));
+                        path, ", useFilebuffer before = ", toStr(useBuffer).c_str());
         useBuffer = true;
     }
     ptr = FilesystemHelper::OpenFile(path, mode, useBuffer);
@@ -261,7 +253,8 @@ DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 
 DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 {
-    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", intToA(LoPart), ", direction is ", intToA(OffSet));
+    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", toStr(LoPart).c_str(), 
+            ", direction is ", toStr(OffSet).c_str());
     LONG hipart;
     int ret = FilesystemHelper::SetFileCursor(fp, LoPart, hipart, OffSet);
     if(HiPart)
@@ -367,14 +360,14 @@ BOOL SetFilePointerEx(
         int GetFileId(HFILE ptr){
             int fno = fileno(ptr);
             //sprintf(proclnk, "/proc/self/fd/%d", fno);
-            LogMessage6(INFO, "GetFileId(", intToA((long int) ptr),") = ", intToA(fno), ", fname = ", FilesystemHelper::GetFileName(ptr).c_str());
+            LogMessage6(INFO, "GetFileId(", toStr((long int) ptr).c_str(),") = ", toStr(fno).c_str(), ", fname = ", FilesystemHelper::GetFileName(ptr).c_str());
             return fno;
         }
 
 
         int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes){
             LogMessage4(INFO, "SkipBytesFromBeginningInFile, file = ", FilesystemHelper::GetFileName(ptr).c_str(),
-                        "; bytes = ", intToA(numOfBytes));
+                        "; bytes = ", toStr(numOfBytes).c_str());
             int err = 0;
             if(ptr == NULL){
                 return -1;

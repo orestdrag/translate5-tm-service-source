@@ -138,7 +138,7 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 
 int init_properties(){
   if (int rc = properties_init()) {
-        LogMessage2(FATAL,"Error in init_properties::Failed to initialize property file", intToA(rc));
+        LogMessage2(FATAL,"Error in init_properties::Failed to initialize property file", toStr(rc).c_str());
         return rc;
     }
 
@@ -156,37 +156,31 @@ int SetupMAT() {
 
     init_properties();
 
-    char* homeDir = filesystem_get_home_dir();
+    auto homeDir = filesystem_get_home_dir();
       
     PSZ otmPath = NULL;
-    char *otmDir = filesystem_get_otm_dir(); 
-    int size = strlen(otmDir) + 1 /*'/'*/ + strlen(SYSTEM_PROPERTIES_NAME) + 1 /*'\0'*/;
+    auto otmDir = filesystem_get_otm_dir(); 
+    int size = otmDir.size() + 1 /*'/'*/ + strlen(SYSTEM_PROPERTIES_NAME) + 1 /*'\0'*/;
 
     otmPath = (PSZ)malloc(size);
     if (otmPath == NULL){
         LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmPath");
-        free(otmDir);
-        free(homeDir);
         return -1;
     }
 
-    size = snprintf(otmPath, size, "%s/%s", otmDir, SYSTEM_PROPERTIES_NAME);
-    free(otmDir);
+    size = snprintf(otmPath, size, "%s/%s", otmDir.c_str(), SYSTEM_PROPERTIES_NAME);
     if (size < 0) {        
         LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmDir");
-        free(otmPath);
-        free(homeDir);
         return -1;
     }
 
     CreateSystemProperties(otmPath);
+    free (otmPath);
 
     properties_turn_on_saving_in_file();
 
-    free(otmPath);
-    if(homeDir)
-      properties_add_str(KEY_Drive, homeDir);
-    free(homeDir);
+    if(!homeDir.empty())
+      properties_add_str(KEY_Drive, homeDir.c_str());
     //properties_deinit();
     return 0;
 }

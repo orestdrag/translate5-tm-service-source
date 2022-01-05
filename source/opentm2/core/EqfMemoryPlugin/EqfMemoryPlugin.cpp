@@ -185,7 +185,8 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     }
     else
     {
-      LogMessage6(ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", intToA(this->iLastError));
+      LogMessage6(ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", 
+          toStr(this->iLastError).c_str());
       handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
       if ( htm != 0 ) 
         TmClose( htm, NULL,  FALSE,  NULL );
@@ -858,7 +859,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     char path[MAX_EQF_PATH];
     errCode = properties_get_str(KEY_MEM_DIR, path, MAX_EQF_PATH);
     if(errCode){
-      LogMessage2(ERROR, "EqfMemoryPlugin::fillInfoStructure():: errCode = ", intToA(errCode));
+      LogMessage2(ERROR, "EqfMemoryPlugin::fillInfoStructure():: errCode = ", toStr(errCode).c_str());
       return errCode;
     }
     if(strlen(path) && path[strlen(path)-1] != '/')
@@ -1151,7 +1152,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     this->makePropName( strPathName, strPropName );
 
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", intToA(usPropSize));    
+    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
     WritePropFile(strPropName.c_str(), (PVOID)pProp, usPropSize);
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );

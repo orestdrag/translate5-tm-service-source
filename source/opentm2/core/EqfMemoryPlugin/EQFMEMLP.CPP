@@ -1168,7 +1168,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
                   USHORT usMsg = fSegmentTooLarge ? ERROR_MEM_SEGMENT_TOO_LARGE_IMP : ERROR_INVALID_SEGMENT;
                   pReplAddr[0] = pLIDA->szSegmentID;
                   pReplAddr[1] = pLIDA->szFilePath;
-                  usResponse = LogMessage4(ERROR, __func__, ":: usMsg = " ,intToA(usMsg),pReplAddr[0]);
+                  usResponse = LogMessage4(ERROR, __func__, ":: usMsg = " ,toStr(usMsg).c_str(),pReplAddr[0]);
                 }
                 else
                 {
@@ -2163,7 +2163,7 @@ USHORT MemFuncImportProcess
     case MEM_IMPORT_TASK:
       {
         
-        LogMessage3(INFO, __func__, "::MEM_IMPORT_TASK, progress = " , intToA(pData->usProgress));
+        LogMessage3(INFO, __func__, "::MEM_IMPORT_TASK, progress = " , toStr(pData->usProgress).c_str());
         USHORT usRc = MemLoadProcess( pLoadData );
         switch ( usRc )
         {
@@ -2234,9 +2234,9 @@ USHORT MemFuncImportProcess
 
               time( &lCurTime );
               LogMessage9(TRANSACTION, __func__ , "::Memory import ended at     : ", asctime( localtime( &lCurTime )),
-                            "\n\tNumber of segments imported : ", intToA(pLoadData->ulSegmentCounter) ,
-                           "\n\tNumber of invalid segments  : ", intToA(pLoadData->ulInvSegmentCounter), 
-                           "\n\tNumber of OTMUTF8 segments  : ", intToA(pLoadData->ulResetSegmentCounter) );
+                            "\n\tNumber of segments imported : ", toStr(pLoadData->ulSegmentCounter).c_str() ,
+                           "\n\tNumber of invalid segments  : ", toStr(pLoadData->ulInvSegmentCounter).c_str(), 
+                           "\n\tNumber of OTMUTF8 segments  : ", toStr(pLoadData->ulResetSegmentCounter).c_str() );
             
               if ( lImportStartTime )
               {
@@ -2245,8 +2245,8 @@ USHORT MemFuncImportProcess
                 sprintf( buff, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                         (lDiff - (lDiff / 3600 * 3600)) / 60,
                         (lDiff - (lDiff / 3600 * 3600)) % 60 );
-                LogMessage9(TRANSACTION, __func__ , "Memory update time ",intToA(lMemAccessTime)," [ms]\nFile read time     ",
-                    intToA(lFileReadTime), " [ms]\nOther times        ",intToA(lOtherTime), " [ms]\n Overall import time is " , buff);
+                LogMessage9(TRANSACTION, __func__ , "Memory update time ",toStr(lMemAccessTime).c_str()," [ms]\nFile read time     ",
+                    toStr(lFileReadTime).c_str(), " [ms]\nOther times        ",toStr(lOtherTime).c_str(), " [ms]\n Overall import time is " , buff);
               }
               
 
@@ -2561,7 +2561,7 @@ USHORT MemHandleCodePageValue
           {
 			       usRc = NO_VALID_ASCIIANSICP;
              pMsgError[0] = pszCodePage + 5;
-             LogMessage5(ERROR, __func__,"::rc = ", intToA(usRc), ":: ", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
+             LogMessage5(ERROR, __func__,"::rc = ", toStr(usRc).c_str(), ":: ", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
 		      } /* endif */
 		    }
 
@@ -2611,7 +2611,7 @@ USHORT MemHandleCodePageValue
          {
 			     usRc = NO_VALID_ASCIIANSICP;
            pMsgError[0] = pszCodePage + 6;
-           LogMessage5(ERROR, __func__, ":: ",intToA(usRc), "::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
+           LogMessage5(ERROR, __func__, ":: ",toStr(usRc).c_str(), "::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
 		     } /* endif */
   		 } /* endif */
 
@@ -2628,7 +2628,7 @@ USHORT MemHandleCodePageValue
 		   if ( usImpMode != pLIDA->usImpMode )
 		   {
 		     usRc = ERROR_DIMP_UTF16WRONG;
-		     LogMessage3(ERROR, __func__, "::rc = ERROR_DIMP_UTF16WRONG = ", intToA(usRc) );
+		     LogMessage3(ERROR, __func__, "::rc = ERROR_DIMP_UTF16WRONG = ", toStr(usRc).c_str() );
 		   } /* endif */
 	   }
 	   else

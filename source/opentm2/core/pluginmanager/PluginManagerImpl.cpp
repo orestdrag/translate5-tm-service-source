@@ -446,7 +446,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 
     if (usRC) {
         // if register dll error, just remove the dll from the group
-LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", intToA(usRC));
+LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", toStr(usRC).c_str());
 
         // FOR P403268 begin
         // if it's already in pluginSet, also erase it

@@ -161,10 +161,10 @@ int OtmMemoryServiceWorker::verifyAPISession
 
   LogMessage(INFO, "Initializing API Session");
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  LogMessage2(INFO, "[verifyAPISession] EqfStartSession ret: " , intToA(this->iLastRC));
+  LogMessage2(INFO, "[verifyAPISession] EqfStartSession ret: " , toStr(this->iLastRC).c_str());
 
   if ( this->iLastRC != 0 ) {
-    LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , intToA( this->iLastRC ));
+    LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , toStr( this->iLastRC ).c_str());
   }
   
   return( this->iLastRC );
@@ -289,7 +289,7 @@ int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
   UsedMemory = calculateOccupiedRAM() + memoryRequested;
   #endif
 
-  LogMessage6(TRANSACTION, __func__,":: ", intToA(UsedMemory), " bytes is used from ", intToA(AllowedMemory), " allowed");
+  LogMessage6(TRANSACTION, __func__,":: ", toStr(UsedMemory).c_str(), " bytes is used from ", toStr(AllowedMemory).c_str(), " allowed");
 
   // add a new entry when the maximum list size has not been reached yet
   //if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
@@ -334,7 +334,7 @@ size_t OtmMemoryServiceWorker::calculateOccupiedRAM(){
   UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
   #endif
 
-  LogMessage4(INFO, __func__,":: calculated occupied ram = ", intToA(UsedMemory/1000000), " MB");
+  LogMessage4(INFO, __func__,":: calculated occupied ram = ", toStr(UsedMemory/1000000).c_str(), " MB");
   return UsedMemory;
 }
 
@@ -364,7 +364,7 @@ size_t OtmMemoryServiceWorker::cleanupMemoryList(size_t memoryRequested)
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    LogMessage6(INFO, __func__,":: removing memory  \'", vMemoryList[it->second].szName, "\' that wasns\'t used for ", intToA(curTime - vMemoryList[it->second].tLastAccessTime), " seconds" );
+    LogMessage6(INFO, __func__,":: removing memory  \'", vMemoryList[it->second].szName, "\' that wasns\'t used for ", toStr(curTime - vMemoryList[it->second].tLastAccessTime).c_str(), " seconds" );
     removeFromMemoryList(it->second);
     memoryNeed = memoryRequested + calculateOccupiedRAM();
   }
@@ -449,7 +449,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
 
-  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", intToA(requiredMemory),"; RAM left after opening mem: ", intToA(memLeftAfterOpening));
+  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
 
   // find a free slot in the memory list
   iIndex = getFreeSlot(requiredMemory);
@@ -755,13 +755,13 @@ int OtmMemoryServiceWorker::import
         //break;
       }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
         loggingThreshold = std::stoi(value);
-        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", intToA(loggingThreshold));
+        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
         SetLogLevel(loggingThreshold);        
       }else{
         LogMessage2(WARNING, "JSON parsed unexpected name, ", name.c_str());
       }
     }else if(iRC != 2002){// iRC != INFO_ENDOFPARAMETERLISTREACHED
-        LogMessage4(ERROR, "failed to parse JSON \"", strInputParms.c_str(), "\", iRC = ", intToA(iRC));
+        LogMessage4(ERROR, "failed to parse JSON \"", strInputParms.c_str(), "\", iRC = ", toStr(iRC).c_str());
     }
   } /* endwhile */
   factory->parseJSONStop( parseHandle );
@@ -827,7 +827,7 @@ int OtmMemoryServiceWorker::import
 
     // cleanup the memory list (close memories not used for a longer time)
     size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
-    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", intToA(requiredMemory),"; RAM left after opening mem: ", intToA(memLeftAfterOpening));
+    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
 
 
     // find a free slot in the memory list
@@ -914,7 +914,7 @@ int OtmMemoryServiceWorker::createMemory
         strSourceLang = value;
       }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
         int loggingThreshold = std::stoi(value);
-        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", intToA(loggingThreshold));
+        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
         SetLogLevel(loggingThreshold);        
       }else{
         LogMessage4(WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
@@ -1009,17 +1009,17 @@ int OtmMemoryServiceWorker::createMemory
     {
       case ERROR_MEM_NAME_INVALID:
         iRC = restbed::CONFLICT;
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::CONFLICT");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::CONFLICT");
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
         iRC = restbed::BAD_REQUEST;
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::BAD_REQUEST");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::BAD_REQUEST");
         break;
       default:
         iRC = restbed::INTERNAL_SERVER_ERROR;
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", intToA(usRC)," iRC = restbed::INTERNAL_SERVER_ERROR");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::INTERNAL_SERVER_ERROR");
         break;
     }
     return( iRC );
@@ -1239,7 +1239,7 @@ int OtmMemoryServiceWorker::search
     pData->iNumOfProposals = 5;
   }
   if(loggingThreshold >= 0){
-    LogMessage2(WARNING,"OtmMemoryServiceWorker::search::set new threshold for logging", intToA(loggingThreshold));
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::search::set new threshold for logging", toStr(loggingThreshold).c_str());
     SetLogLevel(loggingThreshold);
   }
 
@@ -1378,7 +1378,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   }
 
   if(loggingThreshold >= 0){
-    LogMessage2(WARNING,"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging", intToA(loggingThreshold));
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging", toStr(loggingThreshold).c_str());
     SetLogLevel(loggingThreshold);
   }
     // get the handle of the memory 
@@ -1681,7 +1681,7 @@ int OtmMemoryServiceWorker::updateEntry
   } /* end */
 
   if(loggingThreshold >=0){
-    LogMessage2(WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", intToA(loggingThreshold));
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", toStr(loggingThreshold).c_str());
     SetLogLevel(loggingThreshold); 
   }
 
@@ -1790,7 +1790,7 @@ int OtmMemoryServiceWorker::deleteMem
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
-    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem::verifyAPISession fails:: iRC = ", intToA(iRC), "; strOutputParams = ", 
+    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem::verifyAPISession fails:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
       strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
@@ -1799,7 +1799,7 @@ int OtmMemoryServiceWorker::deleteMem
   //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem error:: iRC = ", intToA(iRC), "; strOutputParams = ", 
+    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem error:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
       strOutputParms.c_str(), "; szLastError = ", "Missing name of memory");
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
@@ -1827,7 +1827,7 @@ int OtmMemoryServiceWorker::deleteMem
     unsigned short usRC = 0;
     EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     
-    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: iRC = ", intToA(iRC), "; strOutputParams = ", 
+    LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
       strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
 
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
@@ -1902,7 +1902,7 @@ int OtmMemoryServiceWorker::getMem
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMem failed with rc=", intToA(iRC), ", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
+      LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMem failed with rc=", toStr(iRC).c_str(), ", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
   }
@@ -1914,7 +1914,7 @@ int OtmMemoryServiceWorker::getMem
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMemInInternalFormat failed with rc=",intToA(iRC),", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
+      LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMemInInternalFormat failed with rc=",toStr(iRC).c_str(),", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
       return( restbed::INTERNAL_SERVER_ERROR );
     }
   }
@@ -2154,7 +2154,7 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
         {
           iRC = GetLastError();
           strError = "encoding of BASE64 data failed";
-          LogMessage2(ERROR, "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = ", intToA(iRC));
+          LogMessage2(ERROR, "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
           return( iRC );
         }
     }
@@ -2185,7 +2185,7 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   {
     iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
-    LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", intToA(iRC));
+    LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
     return( iRC );
   }
 
