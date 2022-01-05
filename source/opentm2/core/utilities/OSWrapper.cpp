@@ -98,11 +98,11 @@ int WideCharToMultiByte(
         char*                              lpDefaultChar,
         LPBOOL                             lpUsedDefaultChar
     ){
-        mbstate_t state;
-        int cnt = 0;
-        memset (&state, '\0', sizeof (state));
-
-        return wcsnrtombs(lpMultiByteStr, (const wchar_t**)&lpWideCharStr, cchWideChar, cbMultiByte, &state );       
+        //mbstate_t state;
+        //int cnt = 0;
+        //memset (&state, '\0', sizeof (state));
+        return wcstombs(lpMultiByteStr, (const wchar_t*) &lpWideCharStr, cchWideChar);
+        //return wcsnrtombs(lpMultiByteStr, (const wchar_t**)&lpWideCharStr, cchWideChar, cbMultiByte, &state );       
         
     }
 

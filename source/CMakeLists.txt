@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(OtmMemoryService VERSION 0.1.12)
 
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
