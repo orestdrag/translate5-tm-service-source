@@ -8657,7 +8657,7 @@ SHORT QDAMDictInsertLocal
         }
         else
         {
-          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen+sizeof(TMWCHAR) );   // save current data
+          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
           
           QDAMDictUpdStatus ( pBTIda );
           sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );

@@ -238,10 +238,10 @@ PSZ UtlMakeEQFPath
    
     pszPath = new char[MAX_EQF_PATH];                   // no path info yet
    
-    const char* otmDir = filesystem_get_otm_dir().c_str();
+    auto otmDir = filesystem_get_otm_dir();
     USHORT      usQSTSubDir;           // QST_ value for subdirectory
 
-    strncpy(pszPath, otmDir, MAX_EQF_PATH);
+    strncpy(pszPath, otmDir.c_str(), MAX_EQF_PATH);
 
     /******************************************************************/
     /* Get query string ID and folder subdirectory for requested path */

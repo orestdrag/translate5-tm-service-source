@@ -606,7 +606,7 @@ void OtmMorphICU::setupSentenceBoundary(UErrorCode &tStatus) {
     if (U_FAILURE(tStatus)) {
         return;
     }
-
+    return;
     // Read in abbreviation lists.  The "1" refers to the abbreviation list file.
     loadAbbrevList( true );   // load user abbreviation list
     loadAbbrevList( false );  // load system abbreviation list

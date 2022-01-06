@@ -124,7 +124,6 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             //fileBuffers[fixedPath].resize(32768);
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
-                //pFb->data
                 LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
                 int readed = fread(&pFb->data[0], fileSize, 1, ptr);
                 LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",toStr(fileSize).c_str(),

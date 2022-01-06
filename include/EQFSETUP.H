@@ -102,12 +102,9 @@ int SetupMAT();
 static   USHORT CreateEditProperties( CHAR );
 static   USHORT CreateFolderListProperties( CHAR );
 static   USHORT CreateImexProperties( CHAR );
-#ifdef __linux__
-static   USHORT CreateSystemProperties( CHAR[] );
-#endif // __linux__
-#ifdef _WIN32
-static   USHORT CreateSystemProperties( CHAR, PSZ, CHAR );
-#endif // _WIN32
+
+static   USHORT CreateSystemProperties( const char* );
+
 static   USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive ); /* $KIT0890 A */
 static   USHORT CreateDictProperties( CHAR chPrimaryDrive );
          USHORT SetupTmCom (CHAR chPrimaryDrive, PSZ pszSecondaryDrives);

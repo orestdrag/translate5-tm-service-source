@@ -158,24 +158,9 @@ int SetupMAT() {
 
     auto homeDir = filesystem_get_home_dir();
       
-    PSZ otmPath = NULL;
-    auto otmDir = filesystem_get_otm_dir(); 
-    int size = otmDir.size() + 1 /*'/'*/ + strlen(SYSTEM_PROPERTIES_NAME) + 1 /*'\0'*/;
-
-    otmPath = (PSZ)malloc(size);
-    if (otmPath == NULL){
-        LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmPath");
-        return -1;
-    }
-
-    size = snprintf(otmPath, size, "%s/%s", otmDir.c_str(), SYSTEM_PROPERTIES_NAME);
-    if (size < 0) {        
-        LogMessage(ERROR, "SetupMAT():: can't allocate memory for otmDir");
-        return -1;
-    }
-
-    CreateSystemProperties(otmPath);
-    free (otmPath);
+    auto otmDir = filesystem_get_otm_dir();    
+    std::string otmPath = otmDir +'/' + SYSTEM_PROPERTIES_NAME;
+    CreateSystemProperties(otmPath.c_str());
 
     properties_turn_on_saving_in_file();
 
@@ -365,7 +350,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 38 if ( RegO
 //|                   write properties and free data area;                     |
 //+----------------------------------------------------------------------------+
 #ifdef __linux__
-USHORT CreateSystemProperties(PSZ pszPath)
+USHORT CreateSystemProperties(const char* pszPath)
 {
     PPROPSYSTEM  pSysPropsOld = 0;     // buffer for old system properties
     PPROPSYSTEM  pSysProps = 0;        // buffer for new system properties
