@@ -2620,8 +2620,9 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModul
    /********************************************************************/
    /* call DosInsMessage to substitute data => they are all in ANSI    */
    /********************************************************************/
-   DosInsMessage( ppMsgSubst, usVCount, &chMsg[0], ulMsgLen,
-                  pchBuf, cbBuf, pcbMsg );
+   LogMessage3(FATAL,__func__,":: msg = ", pchBuf);
+   //DosInsMessage( ppMsgSubst, usVCount, &chMsg[0], ulMsgLen,
+   //               pchBuf, cbBuf, pcbMsg );
 
    /********************************************************************/
    /* close message file ( during stopping of workbench)               */

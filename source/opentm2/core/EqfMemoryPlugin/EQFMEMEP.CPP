@@ -2029,7 +2029,7 @@ USHORT MemFuncPrepExport
         {
            UtlClose( pIDA->hFile, FALSE );
         } /* endif */
-        if ( pIDA->pProposal != NULL ) free(pIDA->pProposal); 
+        if ( pIDA->pProposal != NULL ) delete (pIDA->pProposal); 
         UtlAlloc( (PVOID *) &pIDA, 0L, 0L, NOMSG );
      } /* endif */
      if ( pCommArea) UtlAlloc( (PVOID *) &pCommArea, 0L, 0L, NOMSG );
