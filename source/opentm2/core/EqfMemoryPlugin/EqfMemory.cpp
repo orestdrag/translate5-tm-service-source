@@ -204,7 +204,7 @@ void EqfMemory::setDescription
       } /* endif */
 
       // free any allocated buffer
-      free( pTmSign );
+      delete ( pTmSign );
   } /* endif */     
   return;
 }

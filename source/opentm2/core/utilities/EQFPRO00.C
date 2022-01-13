@@ -16,6 +16,8 @@
 #include <pthread.h>
 #include "LogWrapper.h"
 #include "PropertyWrapper.H"
+#include "FilesystemHelper.h"
+#include "EQFSETUP.H"
 // activate the following define for property failure logging
 //#define PROPLOGGING
 
@@ -224,7 +226,7 @@ USHORT GetSysProp( PPROP_IDA pIda)
     PPROPCNTL     pcntl = NULL;        // Points to properties cntl buffer
     USHORT        size, sizread;       // Size of properties area
     HFILE         hf=NULLHANDLE;       // pointer to variable for file handle        */
-    USHORT        usAction, usrc;
+    USHORT        usAction, usrc = 0;
     BOOL          error=TRUE;
     BOOL fTrueFalse = TRUE&FALSE;    // to avoid compile-w C4127
 
@@ -234,31 +236,27 @@ USHORT GetSysProp( PPROP_IDA pIda)
 
     do {
       LogMessage2(INFO, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
-      if( UtlOpen( pIda->IdaHead.pszObjName, &hf, &usAction, 0L,
-                   FILE_NORMAL, FILE_OPEN,
-                   OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE, 0L, 0)){
-                      break;
-                   }
-
-      size = sizeof( PROPSYSTEM);
-      UtlAlloc( (PVOID *)&pcntl, 0L, (LONG)(size + sizeof( *pcntl)), ERROR_STORAGE );
       
+      size = sizeof( PROPSYSTEM);
+      auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+      if( !pData  || pData->size() == 0){
+          break;
+      }
+
+      UtlAlloc( (PVOID *)&pcntl, 0L, (LONG)(size + sizeof( *pcntl)), ERROR_STORAGE );      
       if( !pcntl){ 
           break;
       }
 
       memset( pcntl, NULC, sizeof( *pcntl));
       pcntl->pHead = (PPROPHEAD)(pcntl+1);
-      usrc = UtlRead( hf, pcntl->pHead, size, &sizread, 0);
+      usrc = ReadPropFile( SYSTEM_PROPERTIES_NAME, (PVOID*)(pcntl->pHead), size);
       
-      if( usrc || (sizread != size)){
+      if( usrc ){
         break;
       }
       error = FALSE;
     } while( fTrueFalse /*TRUE & FALSE*/);
-
-    if( hf)
-      UtlClose( hf, 0);
 
     if( error)
     {
@@ -800,8 +798,9 @@ BOOL PropHandlerInitForBatch( void )
   memset( pPropBatchIda, NULC, sizeof( *pPropBatchIda));
   size = sizeof(pPropBatchIda->IdaHead.szObjName);
   pPropBatchIda->IdaHead.pszObjName = pPropBatchIda->IdaHead.szObjName;
-  properties_get_str(KEY_OTM_DIR, pPropBatchIda->IdaHead.pszObjName, size);
-  strcat(pPropBatchIda->IdaHead.pszObjName, "/EQFSYSW.PRP");
+  //properties_get_str(KEY_OTM_DIR, pPropBatchIda->IdaHead.pszObjName, size);
+  //strcat(pPropBatchIda->IdaHead.pszObjName, "/EQFSYSW.PRP");
+  strcpy(pPropBatchIda->IdaHead.pszObjName, SYSTEM_PROPERTIES_NAME);
 
   pthread_mutex_t mutex;
   { // keep other process from doing property related stuff..

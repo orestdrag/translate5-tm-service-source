@@ -890,14 +890,15 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   strcpy( pInfo->szFullDataFilePath, dataFilePath.c_str());
   strcpy(pInfo->szFullIndexFilePath, indexFilePath.c_str());
 
-  PPROP_NTM pProp = NULL;
-  //errCode = ReadPropFile(mem_path.c_str(), (PVOID*)&prop, sizeof(PROP_NTM));
-  //pProp = &prop;
-  USHORT usLen = 0;
-  bool fOK = UtlLoadFile( (char*)mem_path.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
+  auto memFile = FilesystemHelper::OpenFile(mem_path,"rb", true );
+  auto pData = FilesystemHelper::GetFilebufferData(mem_path);
+  
+  if(pData == NULL || pData->size()<sizeof(PROP_NTM)){
+    LogMessage3(ERROR, __func__,":: pData == NULL || pData->size()<sizeof(PROP_NTM) for ", mem_path.c_str());
+    return -1;
+  }
 
-  if(errCode)
-    return errCode;
+  PPROP_NTM pProp = (PPROP_NTM) (&((*pData)[0]));
   
   strcpy(pInfo->szDescription, pProp->stTMSignature.szDescription );
   strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
@@ -909,81 +910,10 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   pInfo->ulSize = FilesystemHelper::GetFileSize(mem_path);
   pInfo->ulSize += FilesystemHelper::GetFileSize(dataFilePath);
   pInfo->ulSize += FilesystemHelper::GetFileSize(indexFilePath);
+  FilesystemHelper::CloseFile(memFile);
 
   return( errCode == 0 );
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 20 if ( (usLen >= sizeof(PROP_NTM)) && (pProp->szFullMemName[0] != EOS) )");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  if ( fOK )
-  {
-    if ( (usLen >= sizeof(PROP_NTM)) && (pProp->szFullMemName[0] != EOS) )
-    {
-      // check if drive of memory is in list of active OpenTM2 drives
-      char szDrives[30];
-      UtlQueryString( QST_VALIDEQFDRIVES, szDrives, sizeof(szDrives)  );
-      if ( strchr( szDrives, pProp->szFullMemName[0] )  )
-      {
-        FILESTATUS      StatusBuf;           // DOS file find struct
-        USHORT          usRC;                // return value of Utl/Dos calls
-
-        /* get size of memory data file */
-        usRC = UtlQPathInfo(  pProp->szFullMemName, 1, (PBYTE)&StatusBuf, sizeof(StatusBuf), 0L, FALSE );
-        if ( usRC == 0 )
-        {
-          pInfo->ulSize = StatusBuf.cbFile;
-        }
-        else
-        {
-          pInfo->ulSize = 0;
-          pInfo->fEnabled = FALSE;
-        } /* end */             
-
-        // add size of memory index
-        strcpy( szFullPropName, pProp->szFullMemName );
-        char *pszExt = strrchr( szFullPropName, DOT );
-        if ( pszExt != NULL ) strcpy( pszExt, (strcmp( pszExt, EXT_OF_SHARED_MEM ) == 0 ) ? EXT_OF_SHARED_MEMINDEX : EXT_OF_TMINDEX );
-        usRC = UtlQPathInfo( szFullPropName, 1, (PBYTE)&StatusBuf, sizeof(StatusBuf), 0L, FALSE );
-        if ( usRC == 0 )
-        {
-          pInfo->ulSize += StatusBuf.cbFile;
-        }
-        else
-        {
-          pInfo->ulSize = 0;
-          pInfo->fEnabled = FALSE;
-        } /* end */             
-      }
-      else
-      {
-        pInfo->ulSize = 0;
-        pInfo->fEnabled = FALSE;
-      } /* endif */
-
-      strcpy( pInfo->szName, pProp->szLongName );
-      if ( pInfo->szName[0] == EOS )
-      {
-        Utlstrccpy( pInfo->szName, pProp->stTMSignature.szName, DOT );
-      } /* endif */
-      strcpy( pInfo->szDescription, pProp->stTMSignature.szDescription );
-      strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
-      strcpy( pInfo->szFullPath, pProp->szFullMemName );
-      strcpy( pInfo->szPlugin, this->name.c_str() );
-      strcpy( pInfo->szDescrMemoryType, this->descrType.c_str() );
-      strcpy( pInfo->szOwner, "" );
-    }
-    else
-    {
-      fOK = FALSE;
-
-      // automatically delete defective property files
-      UtlDelete( szFullPropName, 0, FALSE );
-
-    } /* end */         
-
-    UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
-  } /* endif */
- #endif //TO_BE_REPLACED_WITH_LINUX_CODE
-  
 }
 
 /*! \brief Find memory in our memory list and return pointer to memory info 
@@ -1153,7 +1083,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
 
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
     LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
-    WritePropFile(strPropName.c_str(), (PVOID)pProp, usPropSize);
+    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     

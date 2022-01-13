@@ -1272,6 +1272,8 @@ USHORT CTMXExportImport::PreProcessInFile
       fseek( hIn, 0, SEEK_SET ); // re-position to begin of file
     } /* endif */
 
+    
+    size_t len = 0;
     if ( !usRC  ){
       fseek(hIn, 0, SEEK_END);
       long fsize = ftell(hIn);
@@ -1280,6 +1282,7 @@ USHORT CTMXExportImport::PreProcessInFile
 
       buff = new BYTE[fsize+1];
       fread(buff, fsize, 1, hIn);
+      len = fsize;
     }
 
     if(!buff){
@@ -1290,21 +1293,22 @@ USHORT CTMXExportImport::PreProcessInFile
       fclose(hIn);
       hIn = nullptr;
     }
-
+        
     if(fUTF16){      //convert utf16 to utf8
       auto data = EncodingHelper::toChar((char16_t*) buff);
       
       if (data.find("UTF-16") != std::string::npos)
         data.replace(data.find("UTF-16"), 6, "UTF-8");
-
+      
       strcpy((PSZ) buff, data.c_str());
-      ((PSZ)buff)[data.size()] = '\0';
+      len = data.size();
+      ((PSZ)buff)[len] = '\0';
     }
     
     PSZ pszCurPos = (PSZ) buff;
     PSZ pszStartPos = pszCurPos;
 
-    while ( *pszCurPos != 0 )
+    while ( *pszCurPos != 0  && pszCurPos-pszStartPos < len)
     {
       // check for entitities with values below 0x20
       if ( *pszCurPos == '&' )
@@ -1343,7 +1347,7 @@ USHORT CTMXExportImport::PreProcessInFile
       else
       {
         pszCurPos++;
-      } /* endif */
+      } /* endif */    
     } /*endwhile */
 
     // write remaining characters

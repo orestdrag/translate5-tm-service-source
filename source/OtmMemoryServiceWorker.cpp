@@ -1295,7 +1295,7 @@ int OtmMemoryServiceWorker::search
   } /* endif */
 
   if ( pSearchKey ) delete pSearchKey;
-  if ( pFoundProposals ) delete pFoundProposals;
+  if ( pFoundProposals ) delete[] pFoundProposals;
   delete pData;
 
   return( iRC );
@@ -2058,7 +2058,6 @@ void OtmMemoryServiceWorker::importDone( char *pszMemory, int iRC, char *pszErro
     {
       vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS;
       LogMessage2(INFO,"OtmMemoryServiceWorker::importDone:: success, memName = ", pszMemory);
-
     }
     else
     {
@@ -2236,8 +2235,6 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 
   // close file
   CloseFile( &hFile );
-  wchar_t* wc = (wchar_t*)&vFileData[0]; 
-  size_t len = wcslen(wc);
 
   return( iRC );
 }

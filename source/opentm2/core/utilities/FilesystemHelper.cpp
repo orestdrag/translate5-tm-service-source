@@ -112,16 +112,12 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             fileSize = GetFileSize(ptr);//GetFileSize(fixedPath);
         }
 
-
         if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
             LogMessage2(WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
             pFb = &(*getFileBufferInstance())[fixedPath];
             pFb->offset = 0;
         }else{
             pFb = &(*getFileBufferInstance())[fixedPath];
-            //fileBuffers[fixedPath].resize(1048575);//F FFFF
-            //fileBuffers[fixedPath].resize(65536);//0x1000
-            //fileBuffers[fixedPath].resize(32768);
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
                 LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
@@ -276,6 +272,23 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
     return 0;
 }
 
+
+std::vector<UCHAR>* FilesystemHelper::GetFilebufferData(std::string name){
+    auto pfb = getFileBufferInstance();
+    if(pfb->find(name) == pfb->end())
+        return nullptr;
+
+    return &((*pfb)[name].data);    
+}
+
+int FilesystemHelper::CreateFilebuffer(std::string name){
+    auto pfb = getFileBufferInstance();
+    if(pfb->find(name) != pfb->end())
+        return FILEHELPER_WARNING_FILEBUFFER_EXISTS;
+    (*pfb)[name].offset=0;
+    
+    return FILEHELPER_NO_ERROR;
+}
 
 int FilesystemHelper::FlushAllBuffers(){
     auto pFileBuffers = getFileBufferInstance();

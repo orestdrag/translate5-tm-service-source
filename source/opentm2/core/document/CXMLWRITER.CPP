@@ -820,9 +820,12 @@ BOOL CXmlWriter::GetContentFlag( void )
 
 // convert given string to Unicode, dynamically allocate buffer for Unicode string 
 void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
-{
-  int iUnicodeLen = sizeof(WCHAR) * strlen(pAnsiText) + 10;
+{  
+  std::wstring wstr = EncodingHelper::convertToUTF16(pAnsiText);
+  int iUnicodeLen = (wstr.size()+1) * sizeof(WCHAR);//sizeof(WCHAR) * strlen(pAnsiText) + 10;
   WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen );
-  MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
+  wcscpy(pBuffer, wstr.c_str());
+  pBuffer[wstr.size()] = 0;
+  //MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
   *ppUnicodeText = pBuffer;
 }

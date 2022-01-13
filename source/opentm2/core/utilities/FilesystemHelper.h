@@ -81,6 +81,9 @@ public:
     static int WriteBuffToFile(std::string fName);
     static int FlushAllBuffers();
 
+    static std::vector<UCHAR>* GetFilebufferData(std::string name);
+    static int CreateFilebuffer(std::string name);
+
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
 #endif
@@ -105,6 +108,7 @@ public:
 
         FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED,
         FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED,
+        FILEHELPER_WARNING_FILEBUFFER_EXISTS
 
     };
 

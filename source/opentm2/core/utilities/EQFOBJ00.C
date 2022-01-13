@@ -526,9 +526,9 @@ USHORT CreateMemFile
     {
       strcpy( pProp->stPropHead.szName, UtlGetFnameFromPath(szFullMemPath));
       strcat( pProp->stPropHead.szName, "$_RESERVED");
-      //UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
+      UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
       //UtlWriteFile( szFullMemPath, strlen(szFullMemPath), (PVOID)szFullMemPath, FALSE );
-      WritePropFile(szFullMemPath, (PVOID)pProp, sizeof(PROP_NTM ));
+      //WritePropFile(szFullMemPath, (PVOID)pProp, sizeof(PROP_NTM ));
       
       UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
     } /* endif */

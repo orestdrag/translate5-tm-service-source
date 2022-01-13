@@ -438,21 +438,6 @@ USHORT CreateSystemProperties(const char* pszPath)
     pszEditor = EDITOR_PROPERTIES_NAME;
     pszTemp = strchr( pszEditor, '.' );
     strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
-    
-    /******************************************************************/
-    /* Try to read old system properties                              */
-    /******************************************************************/
-    pSysPropsOld = InstReadSysProps();    
-
-    /******************************************************************/
-    /* Save some of the values from the old properties to the new ones*/
-    /******************************************************************/
-    if (pSysPropsOld )
-    {
-        strcpy( pSysProps->szServerList, pSysPropsOld->szServerList );
-        free( pSysPropsOld );           // free storage used for old properties
-    }
-
     /******************************************************************/
     /* Write properties and free data area                            */
     /******************************************************************/
@@ -1267,17 +1252,16 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43 usRC = (U
 USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
 {
     USHORT  usRC = NO_ERROR;             // function return code
-    FILE   *hFile = NULL;                // file handle for property files
-
-    hFile = FilesystemHelper::OpenFile( szPath, "w+b" , false);
-    if ( hFile == NULL )
+    USHORT tempRC = FilesystemHelper::CreateFilebuffer( SYSTEM_PROPERTIES_NAME );
+    auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+    if ( pData == NULL )
     {
-        LogMessage2(ERROR, "WritePropFile(), path not found: ", szPath);
+        LogMessage2(ERROR, "WritePropFile(), filebuffer not created and not found: ", szPath);
         usRC = ERROR_PATH_NOT_FOUND;
     }else{
-        usRC = FilesystemHelper::WriteToFile(hFile, pProp, usSize);    
-        FilesystemHelper::CloseFile(hFile);  
-        LogMessage5(INFO, "WritePropFile(), ", std::to_string(usSize).c_str() , " bytes writen to " , szPath, " file ");
+        PUCHAR pPropData = (PUCHAR) pProp;
+        pData->resize(usSize+2);
+        std::copy(&pPropData[0], &pPropData[usSize], std::back_inserter(*pData));
     } 
 
     return( usRC );
@@ -1286,30 +1270,17 @@ USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
 USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
 {
   USHORT  usRC = NO_ERROR;             // function return code
-  FILE   *hFile = NULL;                // file handle for property files
 
-  hFile = FilesystemHelper::OpenFile(szPath, "rb", true);
-  if ( hFile == NULL )
+  auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+  if ( pData == NULL || pData->size() < usSize)
   {
+      LogMessage2(ERROR, "ReadPropFile(), filebuffer not found: ", szPath);
       usRC = ERROR_PATH_NOT_FOUND;
-      LogMessage2(ERROR, "ReadPropFile(), path not found: ", szPath);
-      return usRC;
-  }
+  }else{
+      memcpy((PVOID)*pProp,(const PVOID)(*pData)[0], usSize);
+  } 
+  return ( usRC );
 
-  int bytesRead = 0;
-  if ( !usRC  )
-  {
-      FilesystemHelper::ReadFile(hFile, pProp, usSize, bytesRead);
-      if ( bytesRead != usSize )
-      {
-          LogMessage2(ERROR, "ReadPropFile(), ERROR_READ_FAULT ", szPath);
-          usRC = ERROR_READ_FAULT;
-      } /* endif */
-  } /* endif */
-  FilesystemHelper::CloseFile(hFile);
-  /* endif */
-  LogMessage5(INFO, "ReadPropFile(",szPath,"):: reads ", std::to_string(usSize).c_str() , " bytes " );
-  return( usRC );
 }
 #endif //__linux__
 
@@ -1470,78 +1441,12 @@ VOID BuildPath
 //|                   buffers;                                                 |
 //+----------------------------------------------------------------------------+
 PPROPSYSTEM InstReadSysProps( VOID )
-{
-   BOOL             fOK = TRUE;        // Procssing status flag
-   CHAR    szSysProp[MAX_EQF_PATH];    // path to system properties
-   FILE             *hSysProp = NULL;  // File handle for system properties file
-   PPROPSYSTEM      pSysProp = NULL;   // ptr to system properties
-   LONG             lSize = 0;         // size of file
-
-   /*******************************************************************/
-   /* Get name of system properties file                              */
-   /*******************************************************************/
-   properties_get_str(KEY_OTM_DIR,szSysProp,sizeof(szSysProp));
-   strcat(szSysProp, "/EQFSYSW.PRP");
-   //GetStringFromRegistry( APPL_Name, KEY_SysProp, szSysProp, sizeof(szSysProp), "" );
-
-   /*******************************************************************/
-   /* Open system property file                                       */
-   /*******************************************************************/
-   if ( fOK )
-   {
-      hSysProp = FilesystemHelper::OpenFile( szSysProp, "rb" );
-      if ( hSysProp == NULL  )
-      {
-        fOK = FALSE;
-      } /* endif */
-   } /* endif */
-
-   /*******************************************************************/
-   /* Get size of system properties                                   */
-   /*******************************************************************/
-   if ( fOK )
-   {
-      //lSize = _filelength( fileno( hSysProp ) );
-      lSize = FilesystemHelper::GetFileSize(hSysProp);
-   } /* endif */
-
-   /*******************************************************************/
-   /* Allocate storage for system properties                          */
-   /*******************************************************************/
-   if ( fOK )
-   {
-      pSysProp = (PPROPSYSTEM) malloc( (USHORT)lSize );
-      fOK = (pSysProp != NULL );
-   } /* endif */
-
-   /*******************************************************************/
-   /* Load data from propery file                                     */
-   /*******************************************************************/
-   if ( fOK )
-   {
-      if ( fread( pSysProp, (USHORT)lSize, 1, hSysProp ) != 1 )
-      {
-        fOK = FALSE;
-      } /* endif */
-   } /* endif */
-
-   /*******************************************************************/
-   /* Cleanup                                                         */
-   /*******************************************************************/
-   if ( hSysProp )
-   {
-     FilesystemHelper::CloseFile(hSysProp);
-   } /* endif */
-
-   if ( !fOK )
-   {
-      if ( pSysProp )
-      {
-         free( pSysProp );
-         pSysProp = NULL;
-      } /* endif */
-   } /* endif */
-
+{  
+   PPROPSYSTEM pSysProp = nullptr;
+   std::vector<UCHAR>* pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+   if(pData && pData->size()){
+     pSysProp = (PPROPSYSTEM)&(*pData)[0];
+   }
    return( pSysProp );
 } /* end of function InstReadSysProps */
 

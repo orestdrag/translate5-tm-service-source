@@ -192,6 +192,7 @@ UCHAR  ucbEncodeTbl[30]
              02,  03,  04,  05 };
 
 
+//#define TEMPORARY_HARDCODED_SEPARATE_KEYS
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -703,7 +704,7 @@ EQFNTMInsert
   } /* endif */
 
   
-  #ifndef TEMPORARY_HARDCODED_SEPARATE_KEYS
+  #ifdef TEMPORARY_HARDCODED_SEPARATE_KEYS
   int fWriteEachKeyInSeparateFiles = 0;
   properties_get_int_or_default(KEY_DEBUG_KEYS_SEPARATE_FILES,fWriteEachKeyInSeparateFiles, 0);
   if(fWriteEachKeyInSeparateFiles){    

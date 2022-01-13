@@ -2251,7 +2251,7 @@ USHORT MemFuncImportProcess
               
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
-         if ( pLoadData->pProposal != NULL ) free(pLoadData->pProposal);
+         if ( pLoadData->pProposal != NULL ) delete(pLoadData->pProposal);
          UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;

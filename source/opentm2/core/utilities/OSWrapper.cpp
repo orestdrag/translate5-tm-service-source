@@ -83,7 +83,10 @@ int MultiByteToWideChar(
     int cnt = 0;
     memset (&state, '\0', sizeof (state));
     //return mbsnrtowcs(lpMultiByteStr, lpWideCharStr, cchWideChar, cbMultiByte, &state );
+    if(cbMultiByte<0) cbMultiByte = 0;
     return mbsnrtowcs(lpWideCharStr, (const char**)&lpMultiByteStr, cbMultiByte, cchWideChar, &state );
+    //EncodingHelper::convertToUTF16(lpMultiByteStr);
+    //return mbtowc(lpWideCharStr, lpMultiByteStr, cchWideChar);
 }
 
 int WideCharToMultiByte(

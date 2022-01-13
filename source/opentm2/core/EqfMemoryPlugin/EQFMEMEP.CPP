@@ -801,7 +801,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 13 // GQTODO
       usRC = ERROR_MEM_EXPORT_DATACORRUPT;
     } /* endif */
 
-    if ( pExportIDA->pProposal != NULL ) free(pExportIDA->pProposal); 
+    if ( pExportIDA->pProposal != NULL ) delete(pExportIDA->pProposal); 
     UtlAlloc( (PVOID *) &pExportIDA, 0L, 0L, NOMSG );
     pCommArea->pUserIDA = NULL;
 

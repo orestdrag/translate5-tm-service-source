@@ -5,6 +5,8 @@
 
 #include <cstdlib>
 #include <cwctype>
+#include <string>
+#include <cstring>
 #include "OTMMSJSONFactory.h"
 #include "opentm2/core/utilities/OSWrapper.h"
 #include "opentm2/core/utilities/LogWrapper.h"
@@ -1052,10 +1054,13 @@ int JSONFactory::parseJSON
         switch ( pParm->type )
         {
           case ASCII_STRING_PARM_TYPE:
-            WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
+          {
+            std::string str = EncodingHelper::convertToUTF8(value);
+            std::strncpy((char*)pParm->pvValue, str.c_str(), pParm->iBufferLen-1);
+            //WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
-
+          }
           case UTF8_STRING_PARM_TYPE:
             WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
