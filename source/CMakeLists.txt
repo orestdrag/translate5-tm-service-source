@@ -4,8 +4,25 @@ project(OtmMemoryService VERSION 0.1.12)
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+set(CMAKE_C_FLAGS_TSAN
+    "-fsanitize=thread -g -O1"
+    CACHE STRING "Flags used by the C compiler during ThreadSanitizer builds."
+    FORCE)
+set(CMAKE_CXX_FLAGS_TSAN
+    "-fsanitize=thread -g -O1"
+    CACHE STRING "Flags used by the C++ compiler during ThreadSanitizer builds."
+    FORCE)
+#address sanitizer
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer -fsanitize=address log_path=asan_log_file.$pid")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address ")
 set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+#
+
+#thread sanitizer
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=thread -g -O1")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -g -O1")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fsanitize=thread -g -O1")
+#
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
