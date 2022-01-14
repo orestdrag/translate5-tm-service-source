@@ -17,6 +17,7 @@ Copyright Notice:
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "../utilities/LogWrapper.h"
+#include "../utilities/EncodingHelper.h"
 #include "MemoryFactory.h"
 #include "EQFMORPI.H"
 
@@ -1357,20 +1358,26 @@ USHORT NTMTokenizeW
 
     switch ( c )
     {
-      case '.' :
-      case '!' :
-      case '?' :
+      //case '.' :
+      //case '!' :
+      //case '?' :
+      case L'.' :
+      case L'!' :
+      case L'?' :
         switch ( pszCurPos[1] )
         {
-          case ' ':
-          case '\n':
-          case '\0':
+          //case ' ':
+          //case '\n':
+          //case '\0':
+          case L' ':
+          case L'\n':
+          case L'\0':
             fNewSentence = TRUE;
             fEndOfToken  = TRUE;
             fSingleToken  = TRUE;
             break;
           default:
-            if ( c != '.' )
+            if ( c != '.'  && c != L'.' )
             {
               fEndOfToken  = TRUE;
               fSingleToken  = TRUE;
@@ -1384,34 +1391,46 @@ USHORT NTMTokenizeW
         } /* endswitch */
         break;
 
-      case '\n' :
-      case ' ' :
+      //case '\n' :
+      //case ' ' :
+      case L'\n' :
+      case L' ' :
         fEndOfToken  = TRUE;
         fSkip        = TRUE;
         break;
 
-      case '$' :
-      case '#' :
+      //case '$' :
+      //case '#' :
+      case L'$' :
+      case L'#' :
         fAllCaps = FALSE;
         fAlNum   = FALSE;
         break;
 
-      case ':' :
+      //case ':' :
+      case L':' :
         
         fEndOfToken  = TRUE;
         fSingleToken  = TRUE;
         
         break;
 
-      case '/' :
-      case '\\' :
-      case ',' :
-      case ';' :
+      //case '/' :
+      //case '\\' :
+      //case ',' :
+      //case ';' :
+      case L'/' :
+      case L'\\' :
+      case L',' :
+      case L';' :
         switch ( pszCurPos[1] )
         {
-          case ' ':
-          case '\n':
-          case '\0':
+          //case ' ':
+          //case '\n':
+          //case '\0':
+          case L' ':
+          case L'\n':
+          case L'\0':
             fEndOfToken  = TRUE;
             fSingleToken  = TRUE;
             break;
@@ -1422,18 +1441,28 @@ USHORT NTMTokenizeW
             break;
         } /* endswitch */
         break;
-
-      case '-' :            // dash within word or as 'Gedankenstrich'
-        if ( ((d = pszCurPos[1]) == ' ') || (d == '\n') || ( d == '\0' ) )
+      
+      case 8216://‘ symbol
+      case 8217://’ symbol
+      case L'-' :            // dash within word or as 'Gedankenstrich'
+        if (// ((d = pszCurPos[1]) ==  ' ') || (d ==  '\n') || ( d ==  '\0' ) 
+          //||
+          (((d = pszCurPos[1]) == L' ') || (d == L'\n') || ( d == L'\0' )) )
         {
           fEndOfToken  = TRUE;
           fSingleToken  = TRUE;
         } /* endif */
         break;
 
-      case '(' :
-      case ')' :
-      case '\"' :
+      //case '(' :
+      //case ')' :
+      //case '\"' :
+      //case '\'':
+      case L'(' :
+      case L')' :
+      case L'\"':
+      case 8243 ://″
+      case L'\'':
         fEndOfToken  = TRUE;
         fSingleToken  = TRUE;
         break;
@@ -1445,7 +1474,12 @@ USHORT NTMTokenizeW
 			
       UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
 			
-      if ( !pTextTable[c] )
+      if(c > 255){
+        wchar_t buff[2];
+        buff[0] = c;
+        buff[1] = 0;
+        LogMessage4(ERROR, __func__,"::not supported symbol \'", EncodingHelper::convertToUTF8(buff),"\'");
+      }else if ( !pTextTable[c] )
 			{
 				fAlNum = FALSE;
 			}

@@ -684,7 +684,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   this->vMemoryList[iIndex].lHandle = 0;
   this->vMemoryList[iIndex].tLastAccessTime = 0;
   this->vMemoryList[iIndex].szName[0] = 0;
-  if ( this->vMemoryList[iIndex].pszError ) free( this->vMemoryList[iIndex].pszError );
+  if ( this->vMemoryList[iIndex].pszError ) delete[]  this->vMemoryList[iIndex].pszError ;
   this->vMemoryList[iIndex].pszError = NULL;
 
   // close the memory

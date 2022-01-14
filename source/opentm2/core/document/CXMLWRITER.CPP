@@ -450,19 +450,21 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       }
       else
       {
-
         std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
+        str = str.substr(0, iLFPos);
         int iBytes = str.size();
 
         //int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
-        ret = fwrite( str.c_str(), 1, iBytes, m_hf );
+        if(m_hf){
+          ret = fwrite( str.c_str(), 1, iBytes, m_hf );
+        }
       } /* endif */
       m_iColumn += iLFPos;
     } /* endif */
 
     // handle any LF and prepare for next part of text
     if ( text[iLFPos] == L'\n' )
-    {
+    {      
       if ( Encoding == UTF16 )
       {
         fwrite( L"\r\n", sizeof(WCHAR), 2, m_hf );
