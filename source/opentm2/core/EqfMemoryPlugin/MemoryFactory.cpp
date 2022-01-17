@@ -385,7 +385,8 @@ int MemoryFactory::deleteMemory(
       strcpy( this->szMemObjName, plugin->getName() );
       strcat( this->szMemObjName,  ":" ); 
 		  strcat( this->szMemObjName, pszMemoryName );
-      EqfSend2AllHandlers( WM_EQFN_DELETED, MP1FROMSHORT(clsMEMORYDB), MP2FROMP(this->szMemObjName) );
+      LogMessage2(WARNING,__func__,"::TEMPORARY_COMMENTED call EqfSend2AllHandlers");
+      //EqfSend2AllHandlers( WM_EQFN_DELETED, MP1FROMSHORT(clsMEMORYDB), MP2FROMP(this->szMemObjName) );
 	  }
   }
   else
