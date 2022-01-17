@@ -13,9 +13,9 @@ set(CMAKE_CXX_FLAGS_TSAN
     CACHE STRING "Flags used by the C++ compiler during ThreadSanitizer builds."
     FORCE)
 #address sanitizer
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer -fsanitize=address log_path=asan_log_file.$pid -fsanitize-recover=address")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address log_path=asan_log_file.$pid -fsanitize-recover=address")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 #
 
 #thread sanitizer
@@ -57,13 +57,17 @@ target_include_directories(OtmMemoryService PRIVATE
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+#find_package(Threads REQUIRED)
+find_package(Threads)
+if(TARGET Threads::Threads)
+  target_link_libraries(OtmMemoryService PRIVATE Threads::Threads)
+endif()
 
 target_link_libraries(OtmMemoryService PRIVATE
     OTMFUNC
     librestbed.a
     git_version
-    Threads::Threads
+    #Threads::Threads
 )
 
 add_subdirectory(opentm2)
