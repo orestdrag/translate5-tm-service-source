@@ -804,10 +804,10 @@ BOOL PropHandlerInitForBatch( void )
 
   pthread_mutex_t mutex;
   { // keep other process from doing property related stuff..
-	  pthread_mutex_lock(&mutex);
+	  //pthread_mutex_lock(&mutex);
     if( GetSysProp( pPropBatchIda))
       fOK = FALSE;
-    pthread_mutex_unlock(&mutex);
+    //pthread_mutex_unlock(&mutex);
    }
 
  return( fOK );

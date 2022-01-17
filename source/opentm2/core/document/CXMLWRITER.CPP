@@ -427,6 +427,23 @@ void CXmlWriter::WriteRaw( const WCHAR * text )
 void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
 {
   int ret = 0;
+  /*
+  if(iLen && m_hf){
+    if ( Encoding == UTF16 )
+    {
+      ret = fwrite( text, sizeof(WCHAR), iLen, m_hf );      
+    }
+    else
+    {
+      std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
+      int iBytes = str.size();
+
+      ret = fwrite( str.c_str(), 1, iBytes, m_hf );
+    } 
+  }
+  return;
+  //*/
+
   // write string as-is except for LFs which are replaced by CRLF
   do
   {

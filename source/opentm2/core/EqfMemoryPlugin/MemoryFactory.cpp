@@ -1408,10 +1408,11 @@ static wchar_t* wcsupr(wchar_t *str)
 }
 
 ULONG GetTickCount(){
-  struct timespec *t;
-  t = (struct timespec *)malloc(sizeof(t)); 
-  clock_gettime(CLOCK_MONOTONIC, t);
-  return t->tv_nsec;
+  struct timespec t;
+  //t = (struct timespec *)malloc(sizeof(timespec)); 
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  
+  return t.tv_nsec;
 }
 
 /*! \brief process the API call: EqfSearchMem and search the given text string in the memory
