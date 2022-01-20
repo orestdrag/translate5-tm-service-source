@@ -1823,7 +1823,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             tag.name = attributes.getValue("i");
           }
           if(tag.name.empty()){
-            LogMessage2(ERROR,__func__, ":: cant find i attribute in bpt tag");
+            LogMessage2(WARNING,__func__, ":: cant find i attribute in bpt tag");
           }
 
           pBuf->openedTags.push_back(tag);            
@@ -2298,9 +2298,31 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       std::string result = "pBuf is null"; 
       if(pBuf && pBuf->szData)
       {
+        bool inclosingTagsSkipped = false;
+        {//filter out tag as start and end if it's in 
+          //<bpt i='1'/>Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence<ept i='1'/> 
+          //to
+          //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
+          int len = wcslen(pBuf->szData);
+          constexpr wchar_t begPairTag[] = L"<bpt i=\'1\'/>";
+          constexpr wchar_t endPairTag[] = L"<ept i=\'1\'/>";
+          constexpr int tagLen = sizeof(begPairTag)/sizeof(begPairTag[0]) - 1;
+
+          if( len >= tagLen*2 ){
+            wchar_t* segEnd = &(pBuf->szData[len-tagLen]);
+            if(  wcsncmp(pBuf->szData, begPairTag, tagLen) == 0 
+              && wcsncmp (segEnd,      endPairTag, tagLen) == 0){
+                //skip begin and end tags
+                wcsncpy(pBuf->szData, &(pBuf->szData[tagLen]), len-(tagLen*2));
+                pBuf->szData[len-(tagLen*2)] = 0;
+                inclosingTagsSkipped = true;
+            }
+          }
+        }        
         result = EncodingHelper::convertToUTF8(pBuf->szData);
+        LogMessage5(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
+            "\'  ->  fSkipped inclosed tag pair = ", toStr(inclosingTagsSkipped));      
       }
-      LogMessage4(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , "\' ");
       break;  
     }
 
@@ -2332,7 +2354,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\'/>"; 
       }else{
         LogMessage4(ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because not found corresponding bpt tag in buffer->generating new \'i\'"); 
-      replacedTag = L"<ept i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
+        replacedTag = L"<ept i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\'/>"; 
       }
 
       int iCurLen = wcslen(pBuf->szData);

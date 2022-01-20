@@ -645,31 +645,10 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       } /* endif */
    } /* endif */
 
-#ifdef IMPORT_LOGGING
-  {
-    FILE *hfLog = NULL;
-    CHAR szLogFile[MAX_EQF_PATH];
-    LONG64 lDummyTime = 0;
 
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    strcat( szLogFile, "\\MEMIMP.LOG" );
-    hfLog = fopen( szLogFile, "a" );
-    if ( hfLog )
-    {
-      time( &lImportStartTime );
-      fprintf( hfLog, "************ Memory Import Log *********************\n"  );
-      fprintf( hfLog, "Memory import started at   : %s", asctime( localtime( &lImportStartTime ) ) );
-      fprintf( hfLog, "Memory name                : %s\n", pLIDA->szMemName );
-      fclose( hfLog );
-    } /* endif */
-    GetElapsedTime( &lDummyTime );
-  }
-#endif
    time( &lImportStartTime );
-   LogMessage2(DEBUG,__func__, "************ Memory Import Log *********************"  );
-   LogMessage3(DEBUG,__func__, "Memory import started at   : ", asctime( localtime( &lImportStartTime ) ) );
-   LogMessage3(DEBUG,__func__, "Memory name                : ", pLIDA->szMemName );
-
+   LogMessage5(DEBUG,__func__, "************ Memory Import Log *********************\n Memory import started at   : ", 
+        asctime( localtime( &lImportStartTime ) ), "\nMemory name                : ", pLIDA->szMemName    );
 
    return ((USHORT)fOK);
 } /* end of function MemLoadStart */
