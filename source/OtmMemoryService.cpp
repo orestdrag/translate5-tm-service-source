@@ -199,13 +199,15 @@ void postImport_method_handler( const shared_ptr< Session > session )
   LogMessage4(TRANSACTION, "==== processing POST mem/import request, content type=\"", strType.c_str(),"\", content length=", toStr(content_length).c_str());
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
+    LogMessage2(TRANSACTION, __func__, ":: data fetched");
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
     int iTransActIndex = AddToTransActLog( POST_IMPORT_TRANSACTID, strTM.c_str() );
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    LogMessage5(TRANSACTION, "===================\n    Memory name = ", strTM.c_str(), "\n    Input = ", strInData.c_str(), "\n==================");
+    LogMessage3(TRANSACTION, "\n===================\n    Memory name = ", strTM.c_str(), //"\n    Input = ", strInData.c_str(), 
+    "\n==================\n");
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     TransActDone( iTransActIndex );

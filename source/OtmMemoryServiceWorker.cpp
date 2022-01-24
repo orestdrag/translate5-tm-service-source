@@ -702,7 +702,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
 int OtmMemoryServiceWorker::import
 (
   std::string  strMemory,
-  std::string strInputParms,
+  std::string &strInputParms,
   std::string &strOutputParms
 )
 {
@@ -728,6 +728,67 @@ int OtmMemoryServiceWorker::import
     return( restbed::NOT_FOUND );
   }
 
+  // find the memory to our memory list
+  int iIndex = this->findMemoryInList( strMemory.c_str() );
+  LONG lHandle = 0;
+  BOOL fClose = false;
+  MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+  MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+  if ( iIndex != -1 )
+  {
+    // close the memory - when open
+    if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+    {
+      fClose = true;
+      lHandle =          this->vMemoryList[iIndex].lHandle; //
+      lastStatus =       this->vMemoryList[iIndex].eStatus;
+      lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+
+      this->vMemoryList[iIndex].lHandle = 0;
+      this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+      this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+    }
+  }
+  else
+  {
+    size_t requiredMemory = 0;
+    {
+      char memFolder[260];
+      properties_get_str(KEY_MEM_DIR, memFolder, 260);
+      std::string path;
+
+      path = memFolder + strMemory;
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+
+      //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
+      requiredMemory += strInputParms.size() * 2;
+    }
+    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+
+    // cleanup the memory list (close memories not used for a longer time)
+    size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
+    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
+        toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+
+    // find a free slot in the memory list
+    iIndex = getFreeSlot(requiredMemory);
+
+    // handle "too many open memories" condition
+    if ( iIndex == -1 )
+    {
+      wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Error: too many open translation memory databases";
+      buildErrorReturn( iRC, errMsg, strOutputParms );
+      return( restbed::INTERNAL_SERVER_ERROR );
+    } /* endif */
+
+    this->vMemoryList[iIndex].lHandle = 0;
+    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+    this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+    strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
+  }
+  LogMessage4(TRANSACTION, __func__, "status for ", strMemory.c_str() , " was changed to import");
   // extract TMX data
   std::string strTmxData;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
@@ -738,6 +799,11 @@ int OtmMemoryServiceWorker::import
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Missing or incorrect JSON data in request body";
     buildErrorReturn( iRC, errMsg, strOutputParms );
+        
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+
     return( restbed::BAD_REQUEST );
   } /* end */
 
@@ -769,6 +835,12 @@ int OtmMemoryServiceWorker::import
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Missing TMX data";
     buildErrorReturn( iRC, errMsg, strOutputParms );
+  
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+
     return( restbed::BAD_REQUEST );
   } /* endif */
 
@@ -779,6 +851,11 @@ int OtmMemoryServiceWorker::import
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Could not create file name for temporary data";
     buildErrorReturn( -1, errMsg, strOutputParms );
+    
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 
@@ -791,60 +868,17 @@ int OtmMemoryServiceWorker::import
   {
     strError = "OtmMemoryServiceWorker::import::" + strError;
     buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
+    
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
     return( restbed::INTERNAL_SERVER_ERROR );
   }
-
-  // find the memory to our memory list
-  int iIndex = this->findMemoryInList( strMemory.c_str() );
-  if ( iIndex != -1 )
-  {
-    // close the memory - when open
-    if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
-    {
-      LONG lHandle = this->vMemoryList[iIndex].lHandle;
-      this->vMemoryList[iIndex].lHandle = 0;
-      this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-      this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-      EqfCloseMem( this->hSession, lHandle, 0 );
-    }
-  }
-  else
-  {
-    size_t requiredMemory = 0;
-    {
-      char memFolder[260];
-      properties_get_str(KEY_MEM_DIR, memFolder, 260);
-      std::string path;
-
-      path = memFolder + strMemory;
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
-
-      requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
-    }
-    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
-
-    // cleanup the memory list (close memories not used for a longer time)
-    size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
-    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
-
-
-    // find a free slot in the memory list
-    iIndex = getFreeSlot(requiredMemory);
-
-    // handle "too many open memories" condition
-    if ( iIndex == -1 )
-    {
-      wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Error: too many open translation memory databases";
-      buildErrorReturn( iRC, errMsg, strOutputParms );
-      return( restbed::INTERNAL_SERVER_ERROR );
-    } /* endif */
-
-    this->vMemoryList[iIndex].lHandle = 0;
-    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-    this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-    strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
+  
+  //success in parsing request data-> close mem if needed
+  if(lHandle && fClose){
+        EqfCloseMem( this->hSession, lHandle, 0 );
   }
 
   // start the import background process

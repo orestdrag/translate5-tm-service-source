@@ -63,7 +63,7 @@ public:
   int import
   (
     std::string  strMemory,
-    std::string strInputParms,
+    std::string &strInputParms,
     std::string &strOutputParms
   );
 
