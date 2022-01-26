@@ -681,6 +681,7 @@ BOOL UtlEvent
 typedef struct _BTREEGLOB
 {
    HFILE        fp;                               // index file handle
+   char         indexFName[MAX_EQF_PATH];         // index file path
    HTM          htm;                              // handle in remote case
 
    USHORT       usFirstNode;                      // file pointer of record
@@ -1248,7 +1249,7 @@ SHORT QDAMAllocTempAreas
 ){
   SHORT  sRc=0;
   BTREEHEADRECORD HeadRecord;          // header record
-  int iBytesWritten;               // number of bytes written
+  size_t iBytesWritten;               // number of bytes written
   ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
@@ -1304,7 +1305,7 @@ SHORT QDAMAllocTempAreas
 
   if ( ! sRc )
   {
-    FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
+    FilesystemHelper::WriteToFileBuffer(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
 
       // check if disk is full
       if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
@@ -1411,7 +1412,7 @@ SHORT QDAMWRecordToDisk_V3
   
   LONG  lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3; // offset in file
   ULONG ulNewOffset;                      // new file pointer position
-  int iBytesWritten;                  // number of bytes written
+  size_t iBytesWritten;                  // number of bytes written
   PBTREEGLOB  pBT = pBTIda->pBTree;
 
   INC_REAL_WRITE_COUNT;
@@ -1422,7 +1423,7 @@ SHORT QDAMWRecordToDisk_V3
 
   if ( ! sRc )
   {
-    sRc = FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
+    sRc = FilesystemHelper::WriteToFileBuffer(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
     // check if disk is full
     if ( ! sRc )
     {
@@ -1585,9 +1586,9 @@ SHORT QDAMReadRecordFromDisk_V3
    BOOL           fNewRec              // allow new records flag
 )
 {
-  int    iNumBytesRead = 0;                   // number of bytes read
+  size_t    iNumBytesRead = 0;                   // number of bytes read
   PBTREEHEADER pHeader;                          // pointer to header
-  LONG     lOffset;                              // file offset to be set
+  size_t     lOffset;                              // file offset to be set
   ULONG    ulNewOffset;                          // new position
   PBTREEBUFFER_V3   pBuffer = NULL;
   SHORT    sRc = 0;                             // return code
@@ -1641,8 +1642,9 @@ SHORT QDAMReadRecordFromDisk_V3
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
 
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
-      resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
-                     BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
+      //resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
+      resRead = FilesystemHelper::ReadFileBuffer(pBT->chFileName, (PVOID)&pBuffer->contents,
+                     BTREE_REC_SIZE_V3, iNumBytesRead,  lOffset);
 
       
       if (sRc ) 
@@ -3558,7 +3560,8 @@ SHORT QDAMDictCreateLocal
   {
     pBTIda->pBTree = pBT;          // anchor pointer
     // Try to create the index file
-    pBT->fp = FilesystemHelper::OpenFile(pName, "w+b", true);
+    //pBT->fp = FilesystemHelper::OpenFile(pName, "w+b", true);
+    FilesystemHelper::CreateFilebuffer(pName);
     //sRc = filesystem_open_file(pName, pBT->fp, "w+b");
     
     if(!pBT->fp){
@@ -3670,7 +3673,7 @@ SHORT QDAMDictCreateLocal
       /****************************************************************/
       if ( pBT->bRecSizeVersion == BTREE_V3 )
       {        
-          int iBytesWritten;        
+          size_t iBytesWritten = 0;        
           PBTREEBUFFER_V3 pbuffer;
           UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
           if ( ! pbuffer )
@@ -3680,7 +3683,7 @@ SHORT QDAMDictCreateLocal
           else
           {
             //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-            FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
+            FilesystemHelper::WriteToFileBuffer(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
 
             UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
@@ -7673,7 +7676,7 @@ SHORT  QDAMDictOpenLocal
    SHORT sRc = 0;                      // return code
    USHORT  usFlags;                    // set the open flags
    USHORT  usAction;                   // return code from UtlOpen
-   USHORT  usNumBytesRead;             // number of bytes read
+   size_t  usNumBytesRead;             // number of bytes read
    PBTREE  pBTIda = *ppBTIda;          // set work pointer to passed pointer
    PBTREEGLOB pBT;                     // set work pointer to passed pointer
    BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
@@ -7712,7 +7715,8 @@ SHORT  QDAMDictOpenLocal
       pBT->usOpenFlags = usOpenFlags;
 
       // open the file
-      pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
+      //pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
+      FilesystemHelper::LoadFileToFileBuffer(pName);
    } /* endif */
 
 
@@ -7723,8 +7727,9 @@ SHORT  QDAMDictOpenLocal
 
      // Read in the data for this index, make sure it is an index file
 
-     sRc = UtlRead( pBT->fp, (PVOID)&header,
-                    sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
+     //sRc = UtlRead( pBT->fp, (PVOID)&header,
+     //               sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
+     sRc = FilesystemHelper::ReadFileBuffer(pBTIda->szFileName, (PVOID) &header, sizeof(BTREEHEADRECORD), usNumBytesRead,0);
      if ( ! sRc )
      {
         memcpy( pBT->chEQF, header.chEQF, sizeof(pBT->chEQF));
@@ -8752,7 +8757,7 @@ SHORT QDAMDictUpdSignLocal
 {
   SHORT  sRc=0;                        // return code
   ULONG   ulDataLen;                   // number of bytes to be written
-  int      iBytesWritten;              // bytes written to disk
+  size_t      iBytesWritten;              // bytes written to disk
   PCHAR   pchBuffer;                   // pointer to buffer
   LONG    lFilePos;                    // file position to position at
   ULONG   ulNewOffset;                 // new offset
@@ -8805,7 +8810,7 @@ SHORT QDAMDictUpdSignLocal
        /*************************************************************/
        {
          USHORT usDataLen = (USHORT)ulDataLen;
-         FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuffer(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
 
          //sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
@@ -8829,7 +8834,7 @@ SHORT QDAMDictUpdSignLocal
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
-         FilesystemHelper::WriteToFileBuff(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuffer(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
           
           writingPosition += iBytesWritten;
           // check if disk is full
@@ -8853,7 +8858,7 @@ SHORT QDAMDictUpdSignLocal
       int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
       char* buff = new char[leftToFill];
       memset(buff, 0, leftToFill);
-      FilesystemHelper::WriteToFileBuff(pBT->fp, buff, leftToFill, iBytesWritten, writingPosition);
+      FilesystemHelper::WriteToFileBuffer(pBT->fp, buff, leftToFill, iBytesWritten, writingPosition);
       writingPosition += iBytesWritten;
       delete[] buff;
 

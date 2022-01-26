@@ -525,6 +525,7 @@ int EqfMemory::getProposal
 
 
 
+#ifdef TO_BE_REMOVED
 /*! \brief Provides a part of the memory in binary format
 
      The binary format is used by the folder export to add the memory
@@ -659,6 +660,7 @@ int EqfMemory::getMemoryPart
 
   return( iRC );
 }
+#endif
 
 /*! \brief Get a list of memory proposals matching the given search key
 

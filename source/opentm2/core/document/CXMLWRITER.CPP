@@ -175,7 +175,7 @@ void CXmlWriter::Init( void )
 
 void CXmlWriter::SetFileName( const char *strFileName )
 {
-  strcpy( m_strFileName, strFileName );
+  m_strFileName = strFileName ;
 }
 
 
@@ -184,7 +184,7 @@ BOOL CXmlWriter::WriteStartDocument()
   BOOL fOK = TRUE;
 
   //m_hf = fopen( m_strFileName, "wb" );
-  m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
+  m_hf = FilesystemHelper::OpenFileDisk(m_strFileName, "w");
 
   if ( m_hf )
   {
@@ -758,7 +758,7 @@ void CXmlWriter::Close()
 {
   if ( m_hf )
   {
-    fclose( m_hf );
+    FilesystemHelper::CloseFileDisk( m_hf );
   } /* endif */
 }
 

@@ -2187,7 +2187,7 @@ LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED DITAPreprocessProposals");
               if ( !usRC ) NTMAllocSentenceStructure( &pMatchTarget );
               if ( !usRC ) UTF16strcpy( pMatchSource->pInputString, pSubstProp->szPropSource  );
 
-              UtlMakeEQFPath( szTagTablePath, NULC, TABLE_PATH, NULL );
+              //UtlMakeEQFPath( szTagTablePath, NULC, TABLE_PATH, NULL );
               strcat( szTagTablePath, BACKSLASH_STR );
               strcat( szTagTablePath, pSubstProp->szPropTagTable );
               strcat( szTagTablePath, EXT_OF_FORMAT );

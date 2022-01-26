@@ -178,6 +178,7 @@
 #include <EQFMORPI.H>
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
+#include "FilesystemHelper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -352,7 +353,7 @@ USHORT TmtXCreate
     if ( usRc )
     {
       //something went wrong during create or insert so delete data file
-      UtlDelete( pTmCreateIn->stTmCreate.szDataName, 0L, FALSE );
+      FilesystemHelper::DeleteFile( pTmCreateIn->stTmCreate.szDataName );
     } /* endif */
   } /* endif */
 

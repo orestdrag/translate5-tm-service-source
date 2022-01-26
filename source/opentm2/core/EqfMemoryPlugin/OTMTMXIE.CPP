@@ -1008,7 +1008,7 @@ USHORT CTMXExportImport::StartImport
   // parse the TMX file
   if ( !usRC )
   {
-      m_iSourceSize = FilesystemHelper::GetFileSize(this->m_TempFile);
+      m_iSourceSize = FilesystemHelper::GetFileSizeDisk(this->m_TempFile);
 
       try {
           XMLPlatformUtils::Initialize();
@@ -1201,7 +1201,7 @@ USHORT CTMXExportImport::EndImport()
   // remove temporary file
   if ( this->m_TempFile[0] != EOS )
   {
-    UtlDelete( this->m_TempFile, 0, FALSE );
+    FilesystemHelper::DeleteFile( this->m_TempFile );
   } /* endif */
 
   return( usRC );

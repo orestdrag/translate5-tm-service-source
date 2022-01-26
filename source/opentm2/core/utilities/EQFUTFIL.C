@@ -199,6 +199,8 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 67 full func
 } /* end of function UtlGetLANDriveList */
 
 
+
+#ifdef TO_BE_REMOVED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -369,7 +371,8 @@ BOOL UtlLoadFileHwnd
 
     if ( hInputfile )
     {
-      UtlCloseHwnd( hInputfile, fMsg, hwnd );          // Close Input file if needed
+      FilesystemHelper::CloseFileDisk(hInputfile);
+      //UtlCloseHwnd( hInputfile, fMsg, hwnd );          // Close Input file if needed
     } /* endif */
 
     // Free storage allocation if allocated and something went wrong
@@ -388,7 +391,6 @@ BOOL UtlLoadFileHwnd
     } /* endif */
     return ( fOK );
  } /* end of function UtlLoadFile */
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -462,6 +464,7 @@ USHORT UtlMkMultDirHwnd( PSZ pszPath, BOOL fMsg, HWND hwnd )
    } /* endwhile */
    return( usRC );
 } /* UtlMkMultDir */
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -592,6 +595,7 @@ USHORT UtlWriteFileL
                              NULLHANDLE ) );
 }
 
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -701,6 +705,7 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
     return ( usDosRC );
 
 } /* UtlWriteFile */
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -774,29 +779,33 @@ BOOL UtlIsEqfDrive
    //
    if ( fIsEqfDrive )
    {
-      UtlMakeEQFPath( Buffers.szPath, chDrive, MEM_PATH, NULL );
-      if ( !UtlDirExist( Buffers.szPath ) )
+      LogMessage2(FATAL, __func__,":: commented out UtlMakeEQFPath");
+      //UtlMakeEQFPath( Buffers.szPath, chDrive, MEM_PATH, NULL );
+      if ( !FilesystemHelper::DirExists( Buffers.szPath ) )
       {
          fIsEqfDrive = FALSE;
       }
       else
       {
-         UtlMakeEQFPath( Buffers.szPath, chDrive, DIC_PATH, NULL );
-         if ( !UtlDirExist( Buffers.szPath ) )
+         LogMessage2(FATAL, __func__,":: commented out UtlMakeEQFPath");
+         //UtlMakeEQFPath( Buffers.szPath, chDrive, DIC_PATH, NULL );
+         if ( !FilesystemHelper::DirExists( Buffers.szPath ) )
          {
             fIsEqfDrive = FALSE;
          }
          else
          {
-            UtlMakeEQFPath( Buffers.szPath, chDrive, TABLE_PATH, NULL );
-            if ( !UtlDirExist( Buffers.szPath ) )
+            LogMessage2(FATAL, __func__,":: commented out UtlMakeEQFPath");
+            //UtlMakeEQFPath( Buffers.szPath, chDrive, TABLE_PATH, NULL );
+            if ( !FilesystemHelper::DirExists( Buffers.szPath ) )
             {
                fIsEqfDrive = FALSE;
             }
             else
             {
-               UtlMakeEQFPath( Buffers.szPath, chDrive, LIST_PATH, NULL );
-               if ( !UtlDirExist( Buffers.szPath ) )
+              LogMessage2(FATAL, __func__,":: commented out UtlMakeEQFPath");
+               //UtlMakeEQFPath( Buffers.szPath, chDrive, LIST_PATH, NULL );
+               if ( !FilesystemHelper::DirExists( Buffers.szPath ) )
                {
                   fIsEqfDrive = FALSE;
                }
@@ -884,6 +893,8 @@ BOOL UtlGetCheckedEqfDrives
    return( fOK );
 } /* end of UtlGetCheckedEqfDrives */
 
+
+#ifdef TEMPORARY_COMMENTED
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1226,6 +1237,7 @@ USHORT UtlBufReadHwnd
    return( usRC );
 } /* end of function UtlBufRead */
 
+#endif //TO_BE_REMOVED
 
 BOOL IsDBCSLeadByteEx(
   UINT CodePage,

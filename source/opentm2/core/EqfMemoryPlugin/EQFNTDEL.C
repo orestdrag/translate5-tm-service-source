@@ -116,7 +116,8 @@ USHORT TmtXDelSegm
   if ( !usRc )
   {
     //build tag table path
-    UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
+    LogMessage2(FATAL, __func__, ":: COMMENTED OUT UtlMakeEQFPath in build tag table path");
+    //UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
     strcat( szString, BACKSLASH_STR );
     strcat( szString, pTmDelIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );

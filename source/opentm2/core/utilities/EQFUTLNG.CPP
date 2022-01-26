@@ -14,6 +14,7 @@
 #include <EQFSETUP.H>             // specific defines for Language properties
 
 #include "LanguageFactory.H"
+#include "FilesystemHelper.h"
 
 
 /*
@@ -74,8 +75,22 @@ BOOL UtlQuerySysLangFile
   /********************************************************************/
   /* load system language file into memory                            */
   /********************************************************************/
-  fOK = UtlLoadFileL( szFileName, (PVOID *)&pszLangFileBuffer,
-                     &ulLength, FALSE, FALSE );
+  size_t bytesRead = 0, fSize = FilesystemHelper::GetFileSizeDisk(szFileName);
+  if(fSize > 0){
+    UtlAlloc((PVOID*) &pszLangFileBuffer, 0, fSize, 0);
+  }else{
+    fOK = false;
+  }
+  
+  if(pszLangFileBuffer){
+    FilesystemHelper::ReadFileFromDisk(szFileName, (PVOID)pszLangFileBuffer, fSize, bytesRead);
+  }else{
+    fOK = false;
+  }
+
+  if(fSize != bytesRead){
+    fOK = false;
+  }
 
   /********************************************************************/
   /* preprocess data in language file: replace CR by space            */

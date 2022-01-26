@@ -526,7 +526,12 @@ USHORT CreateMemFile
     {
       strcpy( pProp->stPropHead.szName, UtlGetFnameFromPath(szFullMemPath));
       strcat( pProp->stPropHead.szName, "$_RESERVED");
-      UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
+      size_t bytesWritten = 0;
+      FilesystemHelper::WriteToFileDisk(szFullMemPath, pProp, sizeof(PROP_NTM), bytesWritten);
+      if(bytesWritten != sizeof(PROP_NTM)){
+        usRC = ERROR_WRITE_FAULT;
+      }
+      //UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
       //UtlWriteFile( szFullMemPath, strlen(szFullMemPath), (PVOID)szFullMemPath, FALSE );
       //WritePropFile(szFullMemPath, (PVOID)pProp, sizeof(PROP_NTM ));
       

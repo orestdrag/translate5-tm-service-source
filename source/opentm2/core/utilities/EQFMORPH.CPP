@@ -1824,6 +1824,8 @@ BOOL MorphHashRead
   fOK = UtlAlloc( (PVOID *)&pStringBuffer, 0L,
                           (LONG)BUFFER_SIZE *sizeof(CHAR_W), ERROR_STORAGE );
 
+  LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED buffer work");
+  #ifdef TEMPORARY_COMMENTED
   /********************************************************************/
   /* Open the input file                                              */
   /********************************************************************/
@@ -1897,6 +1899,7 @@ BOOL MorphHashRead
   /* Close input file and free allocated memory                       */
   /********************************************************************/
   if ( pBufCB )         UtlBufClose( pBufCB, FALSE );
+  #endif//TEMPORARY_COMMENTED
   if ( pStringBuffer )  UtlAlloc( (PVOID *)&pStringBuffer, 0L, 0L, NOMSG );
 
   return( fOK );

@@ -39,8 +39,9 @@ EqfMemoryPlugin::EqfMemoryPlugin()
     iLastError  = 0;
     pluginType  = OtmPlugin::eTranslationMemoryType;
     usableState = OtmPlugin::eUsable;
+    #ifdef TO_BE_REMOVED
     UtlGetCheckedEqfDrives( szSupportedDrives );
-
+    #endif
     this->refreshMemoryList();
 }
 
@@ -143,7 +144,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
     std::string strPropName ;
 
     this->makePropName( strMemPath, strPropName );
-    UtlDelete( (char *)strPropName.c_str(), 0, FALSE );
+    FilesystemHelper::DeleteFile( strPropName.c_str() );
   } /* endif */
 
   return( (OtmMemory *)pNewMemory );
@@ -320,20 +321,20 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     strcat( szPathMem, EXT_OF_MEM );
 
     ULONG ulRead;
-    PPROP_NTM pProp = NULL;
-    BOOL fOK = UtlLoadFileL( szPathMem, (PVOID*)&pProp, &ulRead, FALSE, FALSE );
+    PROP_NTM prop;
+    size_t bytesRead = 0;
+    BOOL fOK = FilesystemHelper::ReadFileFromDisk(szPathMem, (PVOID) &prop , sizeof(prop), bytesRead);
+    //UtlLoadFileL( szPathMem, (PVOID*)&pProp, &ulRead, FALSE, FALSE );
 
-    if(!fOK || pProp == NULL)
+    if(!fOK || bytesRead != sizeof(prop))
         return -1;
 
-    int length = sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1;
-    strncpy(pProp->stTMSignature.szDescription, pszDesc, length);
-    pProp->stTMSignature.szDescription[length]='\0';
+    int length = sizeof(prop.stTMSignature.szDescription)/sizeof(prop.stTMSignature.szDescription[0])-1;
+    strncpy(prop.stTMSignature.szDescription, pszDesc, length);
+    prop.stTMSignature.szDescription[length]='\0';
 
-    int res = UtlWriteFileL( szPathMem, ulRead, (PVOID)pProp, FALSE );
-
-    // relase memory
-    UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
+    //int res = UtlWriteFileL( szPathMem, ulRead, (PVOID)&prop, FALSE );
+    int res = FilesystemHelper::WriteToFileDisk( szPathMem, (PVOID) &prop, sizeof(prop), bytesRead);
 
     return res;
 }
@@ -539,6 +540,8 @@ int EqfMemoryPlugin::renameMemory(
     // update property file
     PPROP_NTM pstMemProp = NULL;
     ULONG ulRead = 0;
+    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED  if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )");
+#ifdef TEMPORARY_COMMENTED
     if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
     {
       
@@ -572,7 +575,8 @@ int EqfMemoryPlugin::renameMemory(
       // free property area
       UtlAlloc( (PVOID *)&pstMemProp, 0, 0, NOMSG );
     } /* endif */     
-
+   
+#endif
     // update memory name in info data
     strcpy( pMemInfo->szName, pszNewName );
   }
@@ -604,19 +608,19 @@ int EqfMemoryPlugin::deleteMemory(
     // delete the property file
     LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete property file: ", pMemInfo->szFullPath );
 
-    UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
+    FilesystemHelper::DeleteFile( pMemInfo->szFullPath );
 
     char szPath[MAX_LONGFILESPEC];
     strcpy( szPath, pMemInfo->szFullPath );
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
     // delete index file
     LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete index file: ", szPath );
-    UtlDelete( szPath, 0L, FALSE );
+    FilesystemHelper::DeleteFile( szPath );
     
     // delete data file
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
     LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );    
-    UtlDelete( szPath, 0L, FALSE );
+    FilesystemHelper::DeleteFile( szPath );
 
     // remove memory infor from our memory info vector
     m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
@@ -642,7 +646,7 @@ int EqfMemoryPlugin::clearMemory(
   if ( pMemInfo != NULL )
   {
     // delete data and index file
-    UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
+    FilesystemHelper::DeleteFile( pMemInfo->szFullPath );
 
     char szIndexPath[MAX_LONGFILESPEC];
     strcpy( szIndexPath, pMemInfo->szFullPath );
@@ -655,7 +659,7 @@ int EqfMemoryPlugin::clearMemory(
     {
       strcpy( strrchr( szIndexPath, DOT ), EXT_OF_SHARED_MEMINDEX );
     } /* endif */
-    UtlDelete( szIndexPath, 0L, FALSE );
+    FilesystemHelper::DeleteFile( szIndexPath );
 
     // use TmtXCreate to create new data and index file
     PTMX_CREATE_IN pTmCreateIn = new (TMX_CREATE_IN);
@@ -846,8 +850,6 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     return false;
   }
 
-  PROP_NTM prop;
-
   memset( pInfo, 0, sizeof(MEMORYINFO) );
 
   // init it, if not meet some condition ,it will be set to false
@@ -890,30 +892,26 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   strcpy( pInfo->szFullDataFilePath, dataFilePath.c_str());
   strcpy(pInfo->szFullIndexFilePath, indexFilePath.c_str());
 
-  auto memFile = FilesystemHelper::OpenFile(mem_path,"rb", true );
-  auto pData = FilesystemHelper::GetFilebufferData(mem_path);
-  
-  if(pData == NULL || pData->size()<sizeof(PROP_NTM)){
-    LogMessage3(ERROR, __func__,":: pData == NULL || pData->size()<sizeof(PROP_NTM) for ", mem_path.c_str());
+  PROP_NTM prop;
+  size_t iBytesRead = 0;
+  FilesystemHelper::ReadFileFromDisk(mem_path.c_str(), (void*) &prop, sizeof(prop), iBytesRead);
+  if(iBytesRead != sizeof(prop)){
+    LogMessage5(ERROR, __func__,"::iBytesRead != sizeof(prop) for ", mem_path.c_str(), "; iBytesRead = ", toStr(iBytesRead));
     return -1;
   }
-
-  PPROP_NTM pProp = (PPROP_NTM) (&((*pData)[0]));
   
-  strcpy(pInfo->szDescription, pProp->stTMSignature.szDescription );
-  strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
+  strcpy(pInfo->szDescription, prop.stTMSignature.szDescription );
+  strcpy( pInfo->szSourceLanguage, prop.stTMSignature.szSourceLanguage );
   
   strcpy( pInfo->szPlugin, this->name.c_str());
   strcpy( pInfo->szDescrMemoryType, this->descrType.c_str());
   //strcpy( pInfo->szOwner, "");
 
-  pInfo->ulSize = FilesystemHelper::GetFileSize(mem_path);
-  pInfo->ulSize += FilesystemHelper::GetFileSize(dataFilePath);
-  pInfo->ulSize += FilesystemHelper::GetFileSize(indexFilePath);
-  FilesystemHelper::CloseFile(memFile);
+  pInfo->ulSize = FilesystemHelper::GetFileSizeDisk(mem_path);
+  pInfo->ulSize += FilesystemHelper::GetFileSizeDisk(dataFilePath);
+  pInfo->ulSize += FilesystemHelper::GetFileSizeDisk(indexFilePath);
 
   return( errCode == 0 );
-
 }
 
 /*! \brief Find memory in our memory list and return pointer to memory info 
@@ -1082,8 +1080,11 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     this->makePropName( strPathName, strPropName );
 
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
-    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
+    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str()); 
+    size_t bytesWritten = 0;
+    FilesystemHelper::WriteToFileDisk(strPropName.c_str(), pProp, usPropSize, bytesWritten);   
+    fOK = bytesWritten == usPropSize;
+    //fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     
@@ -1154,7 +1155,12 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     // write properties to disk
     std::string strPropName;
     this->makePropName( strPathName, strPropName );
-    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
+    
+    //fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
+    size_t bytesWritten;
+    int res = FilesystemHelper::WriteToFileDisk(strPropName.c_str(), pProp, usPropSize, bytesWritten);
+    fOK = !res && bytesWritten == usPropSize;
+    
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
   } /* endif */     
   return( fOK );
@@ -1168,8 +1174,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
 int EqfMemoryPlugin::makePropName( std::string &strPathName, std::string &strPropName )
 {
   char szFullPropName[MAX_LONGFILESPEC];
-
-  UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
+  
   properties_get_str(KEY_MEM_DIR, szFullPropName, MAX_LONGFILESPEC-1);
   strcat( szFullPropName, BACKSLASH_STR );
   Utlstrccpy( szFullPropName + strlen(szFullPropName), UtlGetFnameFromPath( (char *)strPathName.c_str() ), DOT );
@@ -1336,7 +1341,7 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
        else
        {
          // delete unknown file type
-         UtlDelete( (PSZ)strCurFile.c_str(), 0L, FALSE );
+         FilesystemHelper::DeleteFile( strCurFile.c_str() );
        } /* endif */
      } /* endwhile */        
   }
@@ -1424,15 +1429,23 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
       // process property file
       {
         PPROP_NTM pProp = NULL;
-        USHORT usLen = 0;
-        UtlLoadFile( (PSZ)strPropFile.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
+        size_t fSize = 0, bytesRead = 0;
+        fSize = FilesystemHelper::GetFileSizeDisk(strPropFile.c_str());
+        
+        if (fSize > 0 ){
+          UtlAlloc((PVOID*) &pProp, 0, fSize, 0);
+        }
+
         if ( pProp != NULL )
-        {
+        {          
+          FilesystemHelper::ReadFileFromDisk(strPropFile.c_str(), pProp, fSize, bytesRead);
+          //UtlLoadFile( (PSZ)strPropFile.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
+          
           // setup new memory properties based on imported memory property file
           this->createMemoryProperties( pszMemoryName, strMemPath, (void *)pProp );
 
           // delete imported property file
-          UtlDelete( (PSZ)strPropFile.c_str(), 0L, FALSE );
+          FilesystemHelper::DeleteFile( strPropFile.c_str() );
 
           // free memory of loaded property file
           UtlAlloc( (PVOID *)&pProp, 0L, 0L, NOMSG );
@@ -1441,14 +1454,14 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
 
        // process data file
        {
-         UtlMove( (PSZ)strDataFile.c_str(), (PSZ)strMemPath.c_str(), 0L, FALSE );
+         FilesystemHelper::MoveFile( strDataFile.c_str(), strMemPath.c_str() );
        }
 
        // process index file
        {
          std::string strNewIndexFile;
          this->makeIndexFileName( strMemPath, strNewIndexFile );
-         UtlMove( (PSZ)strIndexFile.c_str(), (PSZ)strNewIndexFile.c_str(), 0L, FALSE );
+         FilesystemHelper::MoveFile( strIndexFile.c_str(), strNewIndexFile.c_str() );
        } /* endif */
 
        // add memory to our memory list
@@ -1541,9 +1554,9 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 29 TmClose( htm,
     } /* end */       
 
     // delete memory data files
-    if ( pData->strPropFile.length() != 0 ) UtlDelete( (PSZ)pData->strPropFile.c_str(), 0L, FALSE );
-    if ( pData->strDataFile.length() != 0 ) UtlDelete( (PSZ)pData->strDataFile.c_str(), 0L, FALSE );
-    if ( pData->strIndexFile.length() != 0 ) UtlDelete( (PSZ)pData->strIndexFile.c_str(), 0L, FALSE );
+    if ( pData->strPropFile.length() != 0 ) FilesystemHelper::DeleteFile( pData->strPropFile.c_str() );
+    if ( pData->strDataFile.length() != 0 ) FilesystemHelper::DeleteFile( pData->strDataFile.c_str() );
+    if ( pData->strIndexFile.length() != 0 ) FilesystemHelper::DeleteFile( pData->strIndexFile.c_str() );
 
     // free data area
     free( pData );
@@ -1580,7 +1593,8 @@ int EqfMemoryPlugin::addMemoryToList(const char* pszName)
     // only could be added when its property exists
     if(!fIsNew)
     {
-        UtlMakeEQFPath( szPathName, '\0', MEM_PATH, NULL );
+      LogMessage2(FATAL, __func__ ,":: commente out UtlMakeEQFPath( szPathName, '\0', MEM_PATH, NULL );");
+        //UtlMakeEQFPath( szPathName, '\0', MEM_PATH, NULL );
         strcat( szPathName, "/" );
         strcat( szPathName, szShortName );
         strcat( szPathName, EXT_OF_TMDATA  );
@@ -1791,17 +1805,16 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
   }
 
   // delete and move data file
-  UtlDelete( pInfoReplace->szFullPath, 0L, FALSE );
-  UtlMove( pInfoReplaceWith->szFullPath, pInfoReplace->szFullPath, 0L, FALSE );
-
+  FilesystemHelper::DeleteFile( pInfoReplace->szFullPath );
+  FilesystemHelper::MoveFile( pInfoReplaceWith->szFullPath, pInfoReplace->szFullPath);
   char szSource[MAX_LONGFILESPEC];
   char szTarget[MAX_LONGFILESPEC];
 
   // delete and move index file
   this->makeIndexFileName( pInfoReplaceWith->szFullPath, szSource );
   this->makeIndexFileName( pInfoReplace->szFullPath, szTarget );
-  UtlDelete( szTarget, 0L, FALSE );
-  UtlMove( szSource, szTarget, 0L, FALSE );
+  FilesystemHelper::DeleteFile( szTarget );
+  FilesystemHelper::MoveFile( szSource, szTarget );
 
   // delete all remaining files using the normal memory delete
   deleteMemory( pszReplaceWith );

@@ -125,9 +125,9 @@ int initLog(){
     //TODO: manage files clean-up if there more file
     logFilename = FilesystemHelper::GetOtmDir();
     logFilename += "/LOG";
-    if(!FilesystemHelper::DirExists(logFilename)){
+    if(!FilesystemHelper::DirExists(logFilename.c_str())){
         initLogMsg += "Log directory created\n";
-        FilesystemHelper::CreateDir(logFilename, 0700);
+        FilesystemHelper::CreateDir(logFilename.c_str(), 0700);
     }
     auto logFiles = FilesystemHelper::FindFiles(logFilename + "/*.log");
     if(logFiles.size()>20){

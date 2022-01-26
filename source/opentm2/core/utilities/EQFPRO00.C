@@ -99,7 +99,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
     PROPHEAD      prophead;            // Properties heading area
     CHAR          fname[ MAX_EQF_PATH];// Temporary filename
     USHORT        sizeprop = 0;            // Size of properties area
-    USHORT        size, sizread;       //
+    size_t        size, sizread;       //
     HFILE         hf=NULLHANDLE;      // pointer to variable for file handle        */
     USHORT        usAction, usrc;
     BOOL fTrueFalse = TRUE&FALSE;    // to avoid compile-w C4127
@@ -116,16 +116,16 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       }
     //MakePropPath( fname, "", pszPath, pszName, ""); // no drive, no .ext
     sprintf(fname, "%s%s", pszPath, pszName);
-    do {
-      usrc = UtlOpen( fname, &hf, &usAction, 0L,
-                      FILE_NORMAL, FILE_OPEN,
-                      OPEN_ACCESS_READONLY | OPEN_SHARE_DENYWRITE, 0L, 0);
+    size_t bytesRead = 0;
 
-      if( usrc){
+    do {
+      hf = FilesystemHelper::OpenFileDisk(fname, "rb");
+
+      if( hf == 0 || usrc){
         *pIda->pErrorInfo = Err_OpenFile;
         break;
       }
-      usrc = UtlRead( hf, &prophead, sizeof( prophead), &sizread, 0);
+      usrc = FilesystemHelper::ReadFileFromDisk( hf, &prophead, sizeof( prophead), sizread);
       if( usrc || (sizread != sizeof( prophead))){
         LogMessage4(ERROR, "LoadPropFile, couldn't read file: ", fname, ", bytes read: ", toStr(sizread).c_str());
         *pIda->pErrorInfo = Err_ReadFile;
@@ -161,7 +161,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       memset( pcntl, NULC, sizeof( *pcntl));
       pcntl->pHead  = (PPROPHEAD)(pcntl+1);
       *pcntl->pHead = prophead;
-      usrc = UtlRead( hf, pcntl->pHead+1, size, &sizread, 0);
+      usrc = FilesystemHelper::ReadFileFromDisk( hf, pcntl->pHead+1, size, sizread );
       if( usrc || (sizread != size))
       {
         LogMessage6(ERROR,"UtlRead:: usrc = ",toStr(usrc).c_str(), "; sizread = ", toStr(sizread).c_str(), ", size = ", toStr(size).c_str());
@@ -197,7 +197,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       }
     } while( fTrueFalse /*TRUE & FALSE*/);
     if( hf)
-      UtlClose( hf, 0);
+      FilesystemHelper::CloseFileDisk( hf );
     if( *pIda->pErrorInfo){
       UtlAlloc( (PVOID *)&pcntl, 0L, 0L, NOMSG );
       return( (PPROPCNTL) NULP);
@@ -238,7 +238,7 @@ USHORT GetSysProp( PPROP_IDA pIda)
       LogMessage2(INFO, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
       
       size = sizeof( PROPSYSTEM);
-      auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+      auto pData = FilesystemHelper::GetFileBufferData( SYSTEM_PROPERTIES_NAME );
       if( !pData  || pData->size() == 0){
           break;
       }
@@ -294,8 +294,10 @@ USHORT PutItAway( PPROPCNTL pcntl)
 {
     USHORT        sizwrite;            // number of bytes written
     HFILE         hf=NULLHANDLE;       // pointer to variable for file handle        */
-    USHORT        usAction, usrc;
+    USHORT        usAction, usrc = 0;
 
+    LogMessage2(FATAL, __func__,"::called TEMPORARY COMMENTED function");
+    #ifdef TEMPORARY_COMMENTED
     // always reset updated flag even if save fails, otherwise
     // the properties cannot be closed
     pcntl->lFlgs &= ~PROP_STATUS_UPDATED;
@@ -313,6 +315,7 @@ USHORT PutItAway( PPROPCNTL pcntl)
     if( !usrc && (sizwrite != pcntl->usFsize))
       usrc = Err_WriteFile;
     UtlClose( hf, 0);
+    #endif
     return( usrc);
 }
 

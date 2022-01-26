@@ -11,8 +11,6 @@ std::string filesystem_get_otm_dir();
 
 std::string filesystem_get_home_dir();
 
-int filesystem_open_file(const char* path, FILE*& ptr, const char* mode);
-
 
 const int 
   GENERIC_READ            = 0x80000000,
@@ -60,7 +58,7 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
             CHAR szPathName[OFS_MAXPATHNAME];
      } OFSTRUCT, *LPOFSTRUCT, *POFSTRUCT;
 
-
+#ifdef TO_BE_REMOVED
     //HANDLE 
     HFILE CreateFile(  LPCSTR                lpFileName,
                         DWORD                 dwDesiredAccess,
@@ -150,6 +148,7 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
 
     //DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet);
     DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet);
+    #endif
 
     void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext);
 
@@ -161,7 +160,7 @@ const HFILE INVALID_HANDLE_VALUE = (HFILE)-1;
 
     int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes);
 
-    int TruncateFileForBytes(HFILE ptr, int numOfBytes);
+    //int TruncateFileForBytes(HFILE ptr, int numOfBytes);
 
     int filesystem_flush_buffers(const char* fname);
     int filesystem_flush_buffers_ptr(HFILE file);

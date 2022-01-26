@@ -384,6 +384,8 @@ USHORT DosOpenLong
    USHORT   fsOpenMode                 // open mode
 );
 
+
+#ifdef TO_BE_REMOVED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -436,6 +438,7 @@ USHORT UtlOpen                                                            /*@3BA
                         fMsg,                                             /*@3BA*/
                         (HWND) NULL ) );                                         /*@3BA*/
 }
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -475,6 +478,7 @@ USHORT UtlOpen                                                            /*@3BA
 //|                     endif                                                  |
 //|                   while fMsg and an error occured and MB code is RETRY     |
 //+----------------------------------------------------------------------------+
+#ifdef TO_BE_REMOVED
 USHORT UtlOpenHwnd                                                        /*@3BC*/
 (
    PSZ      pszFname,                  // path name of file to be opened
@@ -1342,6 +1346,7 @@ USHORT UtlMkDir
                          fMsg,
                          (HWND) NULL ) );
 }
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1994,6 +1999,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53 if ( Find
    return( usRetCode );
 }
 
+#endif // TO_BE_REMOVED
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2631,6 +2637,8 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModul
    return usRC;
  } /* end of function DosGetMessage */
 
+
+#ifdef TO_BE_REMOVED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2754,6 +2762,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 60 full func
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
    return( usRetCode );
 }
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -2974,6 +2983,8 @@ USHORT UtlRemoveSearchHandle
   return( NO_ERROR );
 } /* end of function UtlRemoveSearchHandle */
 
+
+#ifdef TO_BE_REMOVED
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3031,4 +3042,4 @@ USHORT UtlGetFileSizeHwnd
   } /* endif */
    return( usRC );
 } /* end of function UtlgetFileSizeHwnd */
-
+#endif

@@ -300,8 +300,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
         pLIDA->ulAnsiCP = GetLangAnsiCP(NULL);
 
       // read the file size of the file to be imported and store it in IDA
-      usDosRc = UtlGetFileSize( pLIDA->hFile, &(pLIDA->ulTotalSize), FALSE );
-      if (usDosRc)
+      pLIDA->ulTotalSize = FilesystemHelper::GetFileSizeDisk( pLIDA->hFile );
+      if (usDosRc || pLIDA->ulTotalSize <=0)
       {
         fOK = FALSE;
       }
@@ -470,8 +470,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      LogMessage(WARNING, "TEMPORARY hardcoded if(false) for other logging system");
      if ( fOK  && false)
      {
-       UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
-       UtlMkDir( pLIDA->szSegLog, 0, FALSE );
+       //UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
+       //UtlMkDir( pLIDA->szSegLog, 0, FALSE );
        strcat( pLIDA->szSegLog, "\\MEMIMPORT.LOG" );
 #ifdef _DEBUG
        pLIDA->hSegLog = fopen( pLIDA->szSegLog, "wb" );
@@ -490,7 +490,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        // close input file (if open) as external import process will open the file itself...
        if ( pLIDA->hFile ) 
        {
-         UtlClose( pLIDA->hFile, FALSE );
+         FilesystemHelper::CloseFileDisk( pLIDA->hFile );
          pLIDA->hFile = NULL; 
          pDialogIDA->hFile = NULL;
        } /* endif */
@@ -545,8 +545,9 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      // prepare segment logging
      if ( fOK )
      {
-       UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
-       UtlMkDir( pLIDA->szSegLog, 0, FALSE );
+      LogMessage2(FATAL, __func__,":: COMMENTED OUT UtlMakeEQFPath"); 
+      // UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
+      // UtlMkDir( pLIDA->szSegLog, 0, FALSE );
        strcat( pLIDA->szSegLog, "\\MEMIMPORT.LOG" );
 #ifdef _DEBUG
        pLIDA->hSegLog = fopen( pLIDA->szSegLog, "wb" );
@@ -565,7 +566,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        // close input file (if open) as external import process will open the file itself...
        if ( pLIDA->hFile ) 
        {
-         UtlClose( pLIDA->hFile, FALSE );
+         FilesystemHelper::CloseFileDisk( pLIDA->hFile );
          pLIDA->hFile = NULL; 
        } /* endif */
 
@@ -819,7 +820,10 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
               pLIDA->pTokenList->sTokenid = ENDOFLIST;
               pLIDA->fFirstRead = FALSE;
               pLIDA->ulFilled = 0;
+              LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED UtlChgFilePtr");
+              #ifdef TEMPORARY_COMMENTED
               UtlChgFilePtr( pLIDA->hFile, 0L, FILE_BEGIN, &pLIDA->ulBytesRead, FALSE );
+              #endif
               pLIDA->ulBytesRead = 0;
               pLIDA->fEOF = FALSE;
               pLIDA->pTokenEntryWork = pLIDA->pTokenList;
@@ -885,7 +889,8 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
           // the wrong item class
           if ( (pLIDA->hwndErrMsg != HWND_FUNCIF) && (pLIDA->szDescription[0] != EOS) )
           {
-            UtlMakeEQFPath( pLIDA->szTempPath, NULC, SYSTEM_PATH, NULL );
+            LogMessage2(FATAL,__func__,":: commented out UtlMakeEQFPath");
+            //UtlMakeEQFPath( pLIDA->szTempPath, NULC, SYSTEM_PATH, NULL );
             strcat( pLIDA->szTempPath, BACKSLASH_STR );
             strcat( pLIDA->szTempPath, pLIDA->szMemName );
             EqfSend2AllObjects( clsMEMORY, WM_EQFN_PROPERTIESCHANGED,
@@ -918,7 +923,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
               pTEW->pDataStringW[ pTEW->usLength ] = EOS;
               pReplAddrW[0] = pTEW->pDataStringW;
               pReplAddrW[1] = ASCII2Unicode(pLIDA->szFilePath, szFilePath, pLIDA->ulOemCP );
-              CloseFile( &(pLIDA->hFile));
+              FilesystemHelper::CloseFileDisk( pLIDA->hFile);
               LogMessage5(ERROR, __func__, ":: ERROR_INVALID_SEGMENT_ID ::  pDataStringW = ", EncodingHelper::convertToUTF8(pReplAddrW[0]).c_str(), "; filepath: ", pLIDA->szFilePath);
 
               pTEW->pDataStringW[pTEW->usLength] = b ;
@@ -1257,7 +1262,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
      if (usDosRc)
      {
        // Issue error message "File %1 can not be found or read"
-       CloseFile( &(pLIDA->hFile) );
+       FilesystemHelper::CloseFileDisk( pLIDA->hFile );
        usRc = MEM_READ_ERR;
      } /* endif */
 
@@ -1280,7 +1285,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
         // Issue the message "The file %1 contains data which can not be processed"
         pReplAddr[0] = pLIDA->szFilePath;
         pReplAddr[1] = pLIDA->szSegmentID;
-        CloseFile( &(pLIDA->hFile));
+        FilesystemHelper::CloseFileDisk( pLIDA->hFile);
         LogMessage3(ERROR, __func__,  "::ERROR_MEM_INVALID_SGML::",  *pReplAddr);
         usRc = MEM_FILE_SYN_ERR;
      } /* endif */
@@ -1316,7 +1321,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
        if (usDosRc)
        {
          // Issue error message "File %1 can not be found or read"
-         CloseFile( &(pLIDA->hFile) );
+         FilesystemHelper::CloseFileDisk( pLIDA->hFile );
          usRc = MEM_READ_ERR;
        } /* endif */
        pLIDA->ulFilled = ulBytesRead/sizeof(CHAR_W) + ulNotProcessed;
@@ -1329,7 +1334,10 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
      // file position
      if ( pLIDA->usImpMode == SGMLFORMAT_ASCII || pLIDA->usImpMode == SGMLFORMAT_ANSI)
      {
+       LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED UtlChgFilePtr");
+       #ifdef TEMPORARY_COMMENTED
         UtlChgFilePtr( pLIDA->hFile, 0L, FILE_CURRENT, &pLIDA->ulBytesRead, FALSE );
+        #endif
      }
      else
      {
@@ -2004,7 +2012,7 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( fOK )
    {
-     if ( !UtlFileExist( pszInFile ) )
+     if ( !FilesystemHelper::FileExistsDisk( pszInFile ) )
      {
        pszParm = pszInFile;
        LogMessage3(ERROR, __func__,  "::FILE_NOT_EXISTS::",pszParm);
@@ -2024,7 +2032,7 @@ USHORT MemFuncPrepImport
      USHORT      usAction;             // Action for DosOpen
 
      strcpy( pLoadIDA->szFilePath, pszInFile );
-     pLoadIDA->hFile = FilesystemHelper::OpenFile(pszInFile, "r", false);
+     pLoadIDA->hFile = FilesystemHelper::OpenFileDisk(pszInFile, "r");//, false);
      /*usDosRc = UtlOpenHwnd ( pLoadIDA->szFilePath, //filename
                        &(pLoadIDA->hFile),    //file handle (out)
                        &usAction,      // action taken (out)
@@ -2079,7 +2087,7 @@ USHORT MemFuncPrepImport
          } /* endif */
          if ( pLoadIDA->hFile )
          {
-            UtlClose( pLoadIDA->hFile, FALSE );
+            FilesystemHelper::CloseFileDisk( pLoadIDA->hFile );
          } /* endif */
          UtlAlloc( (PVOID *) &pLoadIDA, 0L, 0L, NOMSG );
       } /* endif */
@@ -2127,7 +2135,7 @@ USHORT MemFuncImportProcess
        {
          MemoryFactory *pFactory = MemoryFactory::getInstance();
          pFactory->closeMemory( pDialogIDA->pMem );
-         if ( pDialogIDA->hFile ) CloseFile( &(pDialogIDA->hFile));
+         if ( pDialogIDA->hFile ) FilesystemHelper::CloseFileDisk( pDialogIDA->hFile );
          pData->usMemLoadRC = UtlQueryUShort( QS_LASTERRORMSGID );
          if ( pData->usMemLoadRC == 0 ) pData->usMemLoadRC = ERROR_MEMIMP_ERROR;
          usPhase = 0;
@@ -2155,7 +2163,7 @@ USHORT MemFuncImportProcess
           case MEM_PROCESS_END:
             pData->usProgress = 100;
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
-            if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
+            if ( pDialogIDA->hFile ) FilesystemHelper::CloseFileDisk( pLoadData->hFile );
             if ( pLoadData->pMem )
             {
               // organize index file of imported memory
@@ -2172,7 +2180,7 @@ USHORT MemFuncImportProcess
             break;
           default:
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
-            if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
+            if ( pDialogIDA->hFile ) FilesystemHelper::CloseFileDisk( pLoadData->hFile );
             pData->usMemLoadRC = usRC = usRc? usRc : UtlQueryUShort( QS_LASTERRORMSGID );
             strncpy(pData->szError, pLoadData->pstMemInfo->szError, sizeof(pData->szError));
             usPhase = MEM_END_IMPORT;
@@ -2202,7 +2210,7 @@ USHORT MemFuncImportProcess
            pLoadData->pMem = NULLHANDLE;
          } /* endif */
          pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
-         if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
+         if ( pDialogIDA->hFile ) FilesystemHelper::CloseFileDisk( pLoadData->hFile );
          if ( pLoadData->pFormatTable )
          {
            TAFreeTagTable( pLoadData->pFormatTable );
@@ -2256,7 +2264,7 @@ USHORT MemFuncImportProcess
 USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PULONG pulBytesRead )
 {
   USHORT usDosRc = NO_ERROR;
-  ULONG  ulBytesRead = 0;
+  size_t  ulBytesRead = 0;
 
 #ifdef IMPORT_LOGGING
     GetElapsedTime( &lOtherTime );
@@ -2273,8 +2281,9 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
 
         if ( UtlAlloc( (PVOID *)&pConvBuffer, 0L, ulSize+1, ERROR_STORAGE ) )
         {
-          usDosRc = UtlReadHwnd( pLIDA->hFile, pConvBuffer, ulSize, &ulBytesRead,
-                                 TRUE, pLIDA->hwndErrMsg );
+          //usDosRc = UtlReadHwnd( pLIDA->hFile, pConvBuffer, ulSize, &ulBytesRead,
+          //                       TRUE, pLIDA->hwndErrMsg );
+          usDosRc = FilesystemHelper::ReadFileFromDisk(pLIDA->hFile, pConvBuffer, ulSize, ulBytesRead);
           if (ulBytesRead != ulSize )
           {
             pLIDA->fEOF = TRUE;
@@ -2293,9 +2302,12 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
 			      {    // undo the last character read...
 				        // reposition file pointer
 				      ULONG ulCurrentPos = 0;
+              LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED UtlChgFilePtr");
+              #ifdef TEMPORARY_COMMENTED
 				      UtlChgFilePtr( pLIDA->hFile, 0L, FILE_CURRENT,  &ulCurrentPos, FALSE);
 				      ulCurrentPos -= lBytesLeft;
 				      UtlChgFilePtr( pLIDA->hFile, ulCurrentPos, FILE_BEGIN,  &ulCurrentPos, FALSE);
+              #endif
             } /* endif */
             // GQ: use number of Unicode characters (which may differ from number of chars read in) for processing
             ulBytesRead = ulUnicodeChars;
@@ -2329,8 +2341,9 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
     case SGMLFORMAT_UNICODE :
       {
         // read data into conversion buffer
-        usDosRc = UtlReadHwnd( pLIDA->hFile, pszBuffer, (ulSize * sizeof(CHAR_W)),
-                               &ulBytesRead, TRUE, pLIDA->hwndErrMsg );
+        //usDosRc = UtlReadHwnd( pLIDA->hFile, pszBuffer, (ulSize * sizeof(CHAR_W)),
+        //                       &ulBytesRead, TRUE, pLIDA->hwndErrMsg );
+        usDosRc = FilesystemHelper::ReadFileFromDisk(pLIDA->hFile, pszBuffer, (ulSize * sizeof(CHAR_W)), ulBytesRead);
 
         // set EOF condition
         if ( (usDosRc == NO_ERROR ) && (ulBytesRead != ulSize * sizeof(CHAR_W) ) )
@@ -2367,8 +2380,9 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
         PSZ pConvBuffer = NULL;
         if ( UtlAlloc( (PVOID *)&pConvBuffer, 0L, ulSize+3, ERROR_STORAGE ) )
         {
-          usDosRc = UtlReadHwnd( pLIDA->hFile, pConvBuffer, (ulSize), &ulBytesRead,
-                                 TRUE, pLIDA->hwndErrMsg );
+          //usDosRc = UtlReadHwnd( pLIDA->hFile, pConvBuffer, (ulSize), &ulBytesRead,
+          //                       TRUE, pLIDA->hwndErrMsg );
+          int usRc = FilesystemHelper::ReadFileFromDisk( pLIDA->hFile, pConvBuffer, (ulSize), ulBytesRead);
           if (ulBytesRead != ulSize )
           {
             pLIDA->fEOF = TRUE;

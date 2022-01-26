@@ -15,6 +15,8 @@ class EncodingHelper{
     std::wstring static toWChar(std::u16string u16str);
     std::string static toChar(std::u16string u16str);
 
+    static int GetLastError();
+
     /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
     \param strUTF8String string in UTF8 encoding
     \returns string converted to UTF16
@@ -40,8 +42,8 @@ class EncodingHelper{
 
     std::u16string static toLower(const std::u16string& strText);
 
-    void static Base64Encode (const unsigned char* input, int inSize, std::string& output);
-    void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
+    void static Base64Encode (const unsigned char* input, size_t inSize, std::string& output);
+    void static Base64Decode (const std::string& input, unsigned char *& output, size_t& output_size);
 
     static std::wstring EscapeXML( std::wstring input );
     static std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src);

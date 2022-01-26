@@ -330,7 +330,7 @@ size_t OtmMemoryServiceWorker::calculateOccupiedRAM(){
     }
   }
   #else
-  UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
+  UsedMemory += FilesystemHelper::GetTotalFileBuffersSize();
   UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
   #endif
 
@@ -441,9 +441,9 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
 
     path = memFolder;
     path += pszMemory;
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+    requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".TMI"));
+    requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".TMD"));
+    requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".MEM"));
   } 
 
   // cleanup the memory list (close memories not used for a longer time)
@@ -758,9 +758,9 @@ int OtmMemoryServiceWorker::import
       std::string path;
 
       path = memFolder + strMemory;
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+      requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".TMI"));
+      requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".TMD"));
+      requiredMemory += FilesystemHelper::GetFileSizeDisk( std::string(path + ".MEM"));
 
       //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
       requiredMemory += strInputParms.size() * 2;
@@ -1028,7 +1028,7 @@ int OtmMemoryServiceWorker::createMemory
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
     if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-        DeleteFile( szTempFile );
+        FilesystemHelper::DeleteFile( szTempFile );
     }
   }
 
@@ -1963,7 +1963,7 @@ int OtmMemoryServiceWorker::getMem
 
   //cleanup
   if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-    DeleteFile( szTempFile );
+    FilesystemHelper::DeleteFile( szTempFile );
   }
   
   if ( iRC != 0 )
@@ -2130,8 +2130,8 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
   else
   {
     iRC = 0;
-    if(!FilesystemHelper::DirExists(sTempPath)){
-      iRC = FilesystemHelper::CreateDir(sTempPath);
+    if(!FilesystemHelper::DirExists(sTempPath.c_str())){
+      iRC = FilesystemHelper::CreateDir(sTempPath.c_str());
     }
 
     int i = 0;
@@ -2139,7 +2139,7 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
     std::string checkName = sTempPath;
     while(i<1000){
       checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
-      auto files = FilesystemHelper::FindFiles(checkName);
+      auto files = FilesystemHelper::FindFiles(checkName.c_str());
       
       if(files.size() == 0){// we can use this name
         LogMessage2(INFO, "OtmMemoryServiceWorker::buildTempFileName::Temp file's Name found :", checkName.c_str());
@@ -2167,17 +2167,14 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
 {
   int iRC = 0;
 
-  auto file = FilesystemHelper::OpenFile(pszFile, "r", false);
-  size_t fSize = FilesystemHelper::GetFileSize(file);
-  int bytesRead = 0;
+  size_t fSize = FilesystemHelper::GetFileSizeDisk(pszFile);
+  size_t bytesRead = 0;
   if(fSize == 0){
 
   }else{
 
     unsigned char* pData = new unsigned char[fSize];
-    FilesystemHelper::ReadFile(file, pData, fSize, bytesRead);
-    FilesystemHelper::CloseFile(file);
-
+    FilesystemHelper::ReadFileFromDisk(pszFile, pData, fSize, bytesRead);
     if(bytesRead != fSize){
 
     }else{    
@@ -2185,13 +2182,12 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
       EncodingHelper::Base64Encode(pData, fSize, encodedData);
         if(encodedData.empty())
         {
-          iRC = GetLastError();
+          iRC = EncodingHelper::GetLastError();
           strError = "encoding of BASE64 data failed";
           LogMessage2(ERROR, "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
           return( iRC );
         }
     }
-
     // cleanup
     delete[] pData ;
   }
@@ -2212,19 +2208,18 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   DWORD dwDecodedLength = 0;
   std::string sData(pStringData);
   unsigned char* pData = NULL;
-  int pDataSize = 0;
+  size_t pDataSize = 0;
   EncodingHelper::Base64Decode(sData, pData, pDataSize);
   if(pDataSize == 0 || pData == NULL)
   {
-    iRC = GetLastError();
+    iRC = EncodingHelper::GetLastError();
     strError = "decoding of BASE64 data failed";
     LogMessage2(ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
     return( iRC );
   }
 
-  auto file = FilesystemHelper::OpenFile(pszFile, "w+", false);
-  FilesystemHelper::WriteToFile(file, pData, pDataSize);
-  FilesystemHelper::CloseFile(file);
+  size_t iBytesWritten = 0;
+  FilesystemHelper::WriteToFileDisk(pszFile, pData, pDataSize, iBytesWritten,0);
   // cleanup
   delete[] pData ;
 
@@ -2241,34 +2236,20 @@ it is up to the caller to free this area using free()
 int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData )
 {
   int iRC = 0;
-
-  // open file
-  HFILE hFile = FilesystemHelper::OpenFile(pszFile, "r", false);//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
-  if ( hFile == NULL )
-  {
-    iRC = GetLastError();
-    if ( hfLog ) fprintf( hfLog, "   Error: open of file %s failed with rc=%d\n", pszFile, iRC );
-    return( iRC );
-  }
-
   // get the size of file
-  DWORD dwFileSize = FilesystemHelper::GetFileSize(hFile);//GetFileSize( hFile, &dwFileSizeHigh );
+  DWORD dwFileSize = FilesystemHelper::GetFileSizeDisk(pszFile);//GetFileSize( hFile, &dwFileSizeHigh );
 
   // adjust size of Byte vector
   vFileData.resize( dwFileSize );
 
   // read file into byte vector
-  DWORD dwBytesRead = 0;
-  if ( !ReadFile( hFile, &vFileData[0], dwFileSize, &dwBytesRead, NULL ) )
+  size_t dwBytesRead = 0;
+  if ( !FilesystemHelper::ReadFileFromDisk( pszFile, &vFileData[0], dwFileSize, dwBytesRead ) )
   {
-    CloseFile( &hFile );
-    iRC = GetLastError();
+    iRC = FilesystemHelper::GetLastError();
     if ( hfLog ) fprintf( hfLog, "   Error: reading of %ld bytes from file %s failed with rc=%ld\n", dwFileSize, pszFile, iRC );
     return( iRC );
   }
-
-  // close file
-  CloseFile( &hFile );
 
   return( iRC );
 }
@@ -2297,7 +2278,7 @@ void importMemoryProcess( void *pvData )
 
   // cleanup
   if(CheckLogLevel(DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-    DeleteFile( pData->szInFile );
+    FilesystemHelper::DeleteFile( pData->szInFile );
   }
   delete( pData );
 

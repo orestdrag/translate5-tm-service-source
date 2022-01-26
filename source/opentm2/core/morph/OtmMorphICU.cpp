@@ -506,7 +506,7 @@ void OtmMorphICU::loadAbbrevList( bool fUserAbbreviation ) {
 
 void OtmMorphICU::buildAbbrevListName( bool fUserAbbreviation, char *pszNameBuffer ) 
 {
-    UtlMakeEQFPath( pszNameBuffer, NULC, PLUGIN_PATH, NULL );
+    //UtlMakeEQFPath( pszNameBuffer, NULC, PLUGIN_PATH, NULL );
     strcat( pszNameBuffer, "\\OtmMorphICUPlugin\\AbbrevLists\\");
     strcat( pszNameBuffer, strLanguage.c_str());
     strcat( pszNameBuffer, ( fUserAbbreviation ) ? "_userabbrev.dic" : "_abbrev.dic" );
@@ -519,7 +519,7 @@ void OtmMorphICU::buildAbbrevListName( bool fUserAbbreviation, char *pszNameBuff
 BreakIterator* OtmMorphICU::loadFromRules() {
     CHAR szName[100];
     memset(szName, 0, sizeof(szName));
-    UtlMakeEQFPath(szName, NULC, PLUGIN_PATH, NULL);
+    //UtlMakeEQFPath(szName, NULC, PLUGIN_PATH, NULL);
     strcat(szName, "\\OtmMorphICUPlugin\\Rules\\");
     strcat(szName, getLanguage());
     strcat(szName, FILE_NAME_SUFFIX);

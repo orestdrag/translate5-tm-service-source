@@ -13,21 +13,7 @@ std::string filesystem_get_home_dir() {
     return FilesystemHelper::GetHomeDir();
 }
 
-int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
-    LogMessage2(WARNING,"TEMPORARY HARDCODED useBuffer= true in filesystem_open_file, fname = ", path);
-    bool useBuffer = true;//false;
-    if(    (strcasestr(path, ".TMI") )
-        || (strcasestr(path, ".TMD") )
-        //|| (strcasestr(path, ".MEM") )
-    ){
-        LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
-                        path, ", useFilebuffer before = ", toStr(useBuffer).c_str());
-        useBuffer = true;
-    }
-    ptr = FilesystemHelper::OpenFile(path, mode, useBuffer);
-    return ptr == NULL;
-}
-
+#ifdef TO_BE_REMOVED
   //HANDLE
   HFILE CreateFile(  LPCSTR                lpFileName,
                         DWORD                 dwDesiredAccess,
@@ -68,6 +54,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
         //modes could be r,w,a,r+,w+,a+ 
         return pFile;
     }
+    
 
     BOOL FlushFileBuffers( HANDLE hFile){
         return true;
@@ -93,7 +80,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
                         LPOVERLAPPED lpOverlapped
                         ){                            
                             //*lpNumberOfBytesWritten = 
-                            FilesystemHelper::WriteToFileBuff(hFile, lpBuffer, nNumberOfBytesToWrite, riNumberOfBytesWritten, -1);
+                            FilesystemHelper::WriteToFileBuffer(hFile, lpBuffer, nNumberOfBytesToWrite, riNumberOfBytesWritten, -1);
                             
                             return (riNumberOfBytesWritten > 0);
                         }
@@ -105,7 +92,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
                         LPOVERLAPPED lpOverlapped
                         ){                            
                             int written = 0; 
-                            FilesystemHelper::WriteToFileBuff(hFile, lpBuffer, nNumberOfBytesToWrite, written, -1);
+                            FilesystemHelper::WriteToFileBuffer(hFile, lpBuffer, nNumberOfBytesToWrite, written, -1);
                             *lpNumberOfBytesWritten = written;
                             
                             return (*lpNumberOfBytesWritten > 0);
@@ -126,11 +113,12 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
     //}
     BOOL CloseFile(HFILE* lpFileName){
         if(lpFileName){
-            return FilesystemHelper::CloseFile(*lpFileName) == FilesystemHelper::FILEHELPER_NO_ERROR;
+            return FilesystemHelper::CloseFileDisk(*lpFileName) == FilesystemHelper::FILEHELPER_NO_ERROR;
         }else{
             return false;
         }
     }
+    #endif //TO_BE_REMOVED
 
     HFILE OpenFile(     LPCSTR     lpFileName,
                         LPOFSTRUCT lpReOpenBuff,
@@ -145,7 +133,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
     }
 
     int GetFileSize(HFILE file){
-        return FilesystemHelper::GetFileSize(file);
+        return FilesystemHelper::GetFileSizeDisk(file);
     }
 
     bool CreateDir(const char* path){
@@ -156,21 +144,24 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
     HFILE FindFirstFile(
          LPCTSTR lpFileName,               
          LPWIN32_FIND_DATA lpFindFileData  
-        ){
-            return FilesystemHelper::FindFirstFile(lpFileName);
+        ){  LogMessage2(FATAL, __func__, " called not implemented function FindFirstFile");
+            //return FilesystemHelper::FindFirstFile(lpFileName);
+            return nullptr;
         }
 
     BOOL FindNextFile(
         HANDLE             hFindFile,
         LPWIN32_FIND_DATA lpFindFileData
         ){
-            FilesystemHelper::FindNextFile();
+            LogMessage2(FATAL, __func__, " called not implemented function FindNextFile");
+            //FilesystemHelper::FindNextFile();
             return false;
         }
 
     BOOL CloseHandle(HFILE hf ){
-        FilesystemHelper::CloseFile(hf);
+        FilesystemHelper::CloseFileDisk(hf);
     }
+    
 
 LARGE_INTEGER intToLargeInt(int i) {
     LARGE_INTEGER li;
@@ -251,6 +242,7 @@ DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 }
 //*/
 
+#ifdef TO_BE_REMOVED
 DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 {
     LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", toStr(LoPart).c_str(), 
@@ -262,6 +254,7 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
     return ret;
 }
 
+
 BOOL MoveFile(
   LPCTSTR lpExistingFileName, 
   LPCTSTR lpNewFileName       
@@ -269,6 +262,7 @@ BOOL MoveFile(
     LogMessage4(INFO,"MoveFile:: moving file from ", lpExistingFileName, " to ", lpNewFileName);
     return FilesystemHelper::MoveFile(lpExistingFileName, lpNewFileName);
 }
+#endif
 
 /*
     BOOL SetFilePointerEx(
@@ -318,7 +312,7 @@ BOOL MoveFile(
         }
 //*/
 
-//*
+#ifdef TO_BE_REMOVED
 BOOL SetFilePointerEx(
         HFILE hFile,                    
         LARGE_INTEGER liDistanceToMove,  
@@ -345,7 +339,7 @@ BOOL SetFilePointerEx(
                 lpNewFilePointer->QuadPart = *b;
             return false;
         }
-//*/
+#endif
 
         void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext){
             std::string str(src);
@@ -364,7 +358,7 @@ BOOL SetFilePointerEx(
             return fno;
         }
 
-
+#ifdef TO_BE_REMOVED
         int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes){
             LogMessage4(INFO, "SkipBytesFromBeginningInFile, file = ", FilesystemHelper::GetFileName(ptr).c_str(),
                         "; bytes = ", toStr(numOfBytes).c_str());
@@ -386,18 +380,19 @@ BOOL SetFilePointerEx(
 
             return readed == 0 && numOfBytes != 0;
         }
+#endif
 
-        int TruncateFileForBytes(HFILE ptr, int numOfBytes){
-            return FilesystemHelper::TruncateFileForBytes(ptr, numOfBytes);
-        }
+        //int TruncateFileForBytes(HFILE ptr, int numOfBytes){
+        //    return FilesystemHelper::TruncateFileForBytes(ptr, numOfBytes);
+        //}
 //}
 
 
 int filesystem_flush_buffers(const char* fname){
-    return FilesystemHelper::WriteBuffToFile(fname);
+    return FilesystemHelper::FlushBufferToFile(fname);
 }
 
 int filesystem_flush_buffers_ptr(HFILE file){
     std::string fName = FilesystemHelper::GetFileName(file);
-    return FilesystemHelper::WriteBuffToFile(fName.c_str());
+    return FilesystemHelper::FlushBufferToFile(fName.c_str());
 }

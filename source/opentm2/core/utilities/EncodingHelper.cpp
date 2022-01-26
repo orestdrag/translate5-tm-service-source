@@ -64,6 +64,9 @@ std::wstring EncodingHelper::toWChar(std::u16string u16str){
   return convertToUTF16(u8str);
 }
 
+int EncodingHelper::GetLastError(){
+  return -1;
+}
 
 std::string EncodingHelper::toChar(std::u16string u16str){
   auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
@@ -151,10 +154,10 @@ std::u16string EncodingHelper::toLower(const std::u16string& strText){
 
 
 
-void EncodingHelper::Base64Decode (const std::string& input, unsigned char*& output, int& output_size){
+void EncodingHelper::Base64Decode (const std::string& input, unsigned char*& output, size_t& output_size){
   output = base64_decode(input, output_size);
 }
 
-void EncodingHelper::Base64Encode (const unsigned char* input, int inSize, std::string& output){
+void EncodingHelper::Base64Encode (const unsigned char* input, size_t inSize, std::string& output){
   output = base64_encode(input, inSize);
 }

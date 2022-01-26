@@ -125,7 +125,7 @@ int Properties::init() {
     
     std::string otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
 
-    if (FilesystemHelper::CreateDir(otm_dir)){
+    if (FilesystemHelper::CreateDir(otm_dir.c_str())){
         LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
     }

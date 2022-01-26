@@ -117,12 +117,6 @@ typedef struct _MEM_EXPORT_IDA
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
 
- #ifdef TO_BE_REMOVED
- PFN_EXTMEMEXPORTSTART   pfnMemExpStart;         // function handling start of export
- PFN_EXTMEMEXPORTPROCESS pfnMemExpProcess;       // function handling export of a segment
- PFN_EXTMEMEXPORTEND     pfnMemExpEnd;           // function handling end of export
- #endif
-
  BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
  CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
  OtmMemory    *pMem;                      // pointer to memory being exported
@@ -223,10 +217,10 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
       pFactory->closeMemory( pExportIDA->pMem );
       pExportIDA->pMem = NULL;
     } /* endif */
-    CloseFile( &(pExportIDA->hFile));
+    FilesystemHelper::CloseFileDisk( (pExportIDA->hFile));
 
     //--- delete file to which the TM should be exported
-    UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
+    FilesystemHelper::DeleteFile( pExportIDA->ControlsIda.szPathContent );
 
     //--- free export IDA
     if ( pExportIDA->pProposal != NULL ) free(pExportIDA->pProposal); 
@@ -364,7 +358,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 8 WinPostMsg
        //--- If ulSegmentCounter = ZERO issue the message box
        //--- "No segments have been exported to %1." otherwise
        //--- issue a message "Memory Database Export successfully completed."
-       CloseFile( &(pExportIDA->hFile) );
+       FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
        OEMTOANSI( pExportIDA->szMemName );
        pReplString[0] = pExportIDA->ControlsIda.szPathContent;
        pReplString[1] = pExportIDA->szMemName;
@@ -424,8 +418,8 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 10 WinPostMs
      OEMTOANSI( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
-     CloseFile( &(pExportIDA->hFile) );
-     UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
+     FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
+     FilesystemHelper::DeleteFile( pExportIDA->ControlsIda.szPathContent );
      LogMessage3(ERROR, __func__,  "::ERROR_MEM_EXPORT_TERMINATED::", (pReplString[0]));
      ANSITOOEM( pExportIDA->szMemName );
      fOk=FALSE;
@@ -548,11 +542,11 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
      OEMTOANSI( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
-     if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
+     if ( pExportIDA->hFile ) FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
      pExportIDA->hFile = NULL;
 
      //--- delete file to which TM should be exported
-     UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
+     FilesystemHelper::DeleteFile( pExportIDA->ControlsIda.szPathContent );
      if ( !pExportIDA->fBatch )
      {
        UtlError( ERROR_MEM_EXPORT_TERM_FORCED, MB_CANCEL, 2, &(pReplString[0]), EQF_WARNING );
@@ -567,7 +561,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     pFactory->closeMemory( pExportIDA->pMem );
     pExportIDA->pMem = NULL;
   } /* endif */
-  if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
+  if ( pExportIDA->hFile ) FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
 
   // unlock memory export object
   {
@@ -616,7 +610,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMs
           strcat( pExportIDA->ControlsIda.szPathContent, MEM_EXPORT_PATTERN_EXT );
         } /* endif */
 
-        if ( UtlFileExist( pExportIDA->ControlsIda.szPathContent ) )
+        if ( FilesystemHelper::FileExistsDisk( pExportIDA->ControlsIda.szPathContent ) )
         {
           if ( pExportIDA->usYesToAllMode == MBID_EQF_YESTOALL )
           {
@@ -747,13 +741,14 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMs
 
     if ( fOK )
     {
-      USHORT usDosRc, usAction;
-
-
+      USHORT usAction, usDosRc =-1;
+      LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED UtlOpen");
+      #ifdef TEMPORARY_COMMENTED
       usDosRc = UtlOpen( pExportIDA->ControlsIda.szPathContent, &(pExportIDA->hFile), &usAction,
                          0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
                          (USHORT)(OPEN_ACCESS_WRITEONLY | OPEN_SHARE_DENYWRITE | OPEN_FLAGS_WRITE_THROUGH),
                          0L, TRUE );
+                         #endif
       if ( usDosRc )
       {
         pExportIDA->hFile = NULLHANDLE;
@@ -921,7 +916,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
        // close output file (if open) as external export process will open the file itself...
        if ( pExportIDA->hFile ) 
        {
-         UtlClose( pExportIDA->hFile, FALSE );
+         FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
          pExportIDA->hFile = NULL; 
        } /* endif */
 
@@ -939,15 +934,9 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
        pExportIDA->pstMemInfo->fUTF16 = (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) ;
        pExportIDA->pstMemInfo->fNoCRLF = (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF);
        
-       
        LogMessage6(INFO,"MemExportStart::calling external function, mem name = ", pExportIDA->pstMemInfo->szName,"; source lang = ", pExportIDA->pstMemInfo->szSourceLang,
             "; markup = ", pExportIDA->pstMemInfo->szFormat);
 
-       #ifdef TO_REPLACE
-       usRc = pExportIDA->pfnMemExpStart( &(pExportIDA->lExternalExportHandle),  
-                                           pExportIDA->ControlsIda.szPathContent,
-                                           pExportIDA->pstMemInfo );
-       #endif
        usRc = EqfPluginWrapper::MemExportStart(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
      } /* endif */
      
@@ -961,7 +950,10 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
     if ( pExportIDA->usExpMode == MEM_SGMLFORMAT_UNICODE )
     {
       ULONG ulWritten;
+      LogMessage2(FATAL, __func__, ":: TEMPORARY_COMMENTED UtlWriteL");
+      #ifdef TEMPORARY_COMMENTED
       UtlWriteL( pExportIDA->hFile, UNICODEFILEPREFIX, (USHORT)strlen(UNICODEFILEPREFIX), &ulWritten, FALSE );
+      #endif
     } /* endif */
 
     if ( !usRc )
@@ -1525,7 +1517,7 @@ USHORT MemExportWrite
    USHORT        usRc =  MEM_PROCESS_OK; // Function return code
    USHORT        usDosRc;                // Dos function return code
    ULONG        ulBytesToWrite;         // Number of bytes to write
-   ULONG        ulBytesWritten;         // Number of bytes written
+   size_t        ulBytesWritten;         // Number of bytes written
    ULONG        ulFillBytes;            // Number of bytes to fill buffer
    PSZ           pReplString[2];                 // Array of pointers to replacement strings
    CHAR          szDrive[MAX_DRIVE];     //drive name x:EOS
@@ -1650,8 +1642,9 @@ USHORT MemExportWrite
              pBuffer, ulFillBytes );
 
       //--- Now write the buffer because it is full
-      usDosRc = UtlWriteHwnd( pExportIDA->hFile, pExportIDA->acWriteBuffer, MEM_EXPORT_OUT_BUFFER,
-                              &ulBytesWritten, TRUE, pExportIDA->hwndErrMsg );
+      //usDosRc = UtlWriteHwnd( pExportIDA->hFile, pExportIDA->acWriteBuffer, MEM_EXPORT_OUT_BUFFER,
+      //                        &ulBytesWritten, TRUE, pExportIDA->hwndErrMsg );
+      usDosRc = FilesystemHelper::WriteToFileDisk(pExportIDA->hFile, (PVOID) pExportIDA->acWriteBuffer, MEM_EXPORT_OUT_BUFFER, ulBytesWritten);
 
 
       if ( usDosRc == NO_ERROR )
@@ -1664,7 +1657,7 @@ USHORT MemExportWrite
            memcpy( szDrive, pExportIDA->ControlsIda.szPathContent, 2 );
            szDrive[2] = NULC;
            pReplString[0] = szDrive;
-           CloseFile( &(pExportIDA->hFile) );
+           FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
            LogMessage3(ERROR, __func__,"::ERROR_WRITING::",  (pReplString[0]));
            usRc = MEM_WRITE_ERR;
         }
@@ -1699,8 +1692,9 @@ USHORT MemExportWrite
           ( pExportIDA->ulBytesInBuffer == MEM_EXPORT_OUT_BUFFER ) ) &&
         ( usRc == MEM_PROCESS_OK ) )
    {
-     usDosRc = UtlWriteHwnd( pExportIDA->hFile, pExportIDA->acWriteBuffer, pExportIDA->ulBytesInBuffer,
-                              &ulBytesWritten, TRUE, pExportIDA->hwndErrMsg );
+     //usDosRc = UtlWriteHwnd( pExportIDA->hFile, pExportIDA->acWriteBuffer, pExportIDA->ulBytesInBuffer,
+     //                         &ulBytesWritten, TRUE, pExportIDA->hwndErrMsg );
+     usDosRc = FilesystemHelper::WriteToFileDisk(pExportIDA->hFile, pExportIDA->acWriteBuffer, pExportIDA->ulBytesInBuffer, ulBytesWritten);
 
      if ( usDosRc == NO_ERROR )
      {
@@ -1712,7 +1706,7 @@ USHORT MemExportWrite
           memcpy( szDrive, pExportIDA->ControlsIda.szPathContent, 2 );
           szDrive[2] = NULC;
           pReplString[0] = szDrive;
-          CloseFile( &(pExportIDA->hFile) );
+          FilesystemHelper::CloseFileDisk( pExportIDA->hFile );
           LogMessage3(ERROR, __func__,  "::ERROR_WRITING::",(pReplString[0]) );
           usRc = MEM_WRITE_ERR;
        }
@@ -1877,7 +1871,7 @@ USHORT MemFuncPrepExport
   if ( fOK )
   {
     strcpy( pIDA->ControlsIda.szPathContent, pszOutFile );
-    if ( UtlFileExist( pIDA->ControlsIda.szPathContent ) &&
+    if ( FilesystemHelper::FileExistsDisk( pIDA->ControlsIda.szPathContent ) &&
          !(lOptions & OVERWRITE_OPT) )
     {
       pszParm = pIDA->ControlsIda.szPathContent;
@@ -1889,7 +1883,7 @@ USHORT MemFuncPrepExport
   // open output file
   if ( fOK )
   {    
-    pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
+    pIDA->hFile = FilesystemHelper::OpenFileDisk(pIDA->ControlsIda.szPathContent, "w+");//, false);
     if(pIDA->hFile){
       LogMessage2(INFO,"MemFuncPrepExport:: opened output file, fName = ", pIDA->ControlsIda.szPathContent);
     }else{
@@ -2027,7 +2021,7 @@ USHORT MemFuncPrepExport
         } /* endif */
         if ( pIDA->hFile )
         {
-           UtlClose( pIDA->hFile, FALSE );
+           FilesystemHelper::CloseFileDisk( pIDA->hFile );
         } /* endif */
         if ( pIDA->pProposal != NULL ) delete (pIDA->pProposal); 
         UtlAlloc( (PVOID *) &pIDA, 0L, 0L, NOMSG );

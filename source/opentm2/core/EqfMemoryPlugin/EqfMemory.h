@@ -130,7 +130,8 @@ public:
   int getMemoryPart
   (
     PMEMORYPARTDATA pData           // points to data area supplied by the caller
-  );
+  ){return 0;}
+  
 
 /*! \brief Get a list of memory proposals matching the given search key
 

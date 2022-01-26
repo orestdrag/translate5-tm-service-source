@@ -401,10 +401,11 @@ USHORT MemRcHandlingHwnd
          if ( pszServer[0] == EOS )
          {
            CHAR   szObjName[MAX_EQF_PATH];
-
+           
+           LogMessage2(FATAL, __func__,":: COMMENTED OUT UtlMakeEQFPath, send message to TM list handler to force update of TM listbox, so that the local TM is grayed out");
            //--- send message to TM list handler to force update of TM
            //--- listbox, so that the local TM is grayed out
-           UtlMakeEQFPath( szObjName, NULC, SYSTEM_PATH, NULL );
+           //UtlMakeEQFPath( szObjName, NULC, SYSTEM_PATH, NULL );
            strcat( szObjName, BACKSLASH_STR );
            strcat( szObjName, szMemName );
            strcat( szObjName, EXT_OF_MEM );
@@ -889,6 +890,8 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
     QDAMDictCloseLocal( pbTree );
     QDAMDictCloseLocal( pbNewTree );
 
+    LogMessage2(FATAL, __func__,":: TEMPORARY_COMMENTED \\MEM_TM611_VERSION\\");
+    #ifdef TEMPORARY_COMMENTED
     if ( !sRc  )
     {
       UtlMakeEQFPath( pData->szBackupName, NULC, SYSTEM_PATH, NULL );
@@ -907,6 +910,7 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
         UtlMove( pData->szOutFile, pszMem, 0L, FALSE );
       } /* endif */
    } /* endif */
+   #endif
 
     UtlAlloc( (PVOID *)&pData, 0, 0, NOMSG );
   } /* endif */
@@ -917,21 +921,24 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
 // convert a memory to the new record format
 USHORT MemConvertMem( PSZ pszFullMemName )
 {
+  USHORT         usRC = 0;
+  LogMessage2(FATAL,__func__,":: called TEMPORARY_COMMENTED function");
+#ifdef TEMPORARY_COMMENTED
   CHAR szBackupName[MAX_EQF_PATH];
   CHAR szPropName[MAX_EQF_PATH];
   CHAR szIndexName[MAX_EQF_PATH];
   BOOL           fPropFile = FALSE;
   PPROP_NTM      pProp = NULL;
   USHORT         usBytesRead = 0;
-  USHORT         usRC = 0;
   FILE           *hfLog = NULL;
 
   // open log file
   {
     CHAR szLogFile[MAX_EQF_PATH];
-
+    
     UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
     UtlMkMultDir( szLogFile, FALSE );
+
     strcat( szLogFile, "\\MEMCONV.LOG" );
 
     hfLog = fopen( szLogFile, "a" );
@@ -958,6 +965,7 @@ USHORT MemConvertMem( PSZ pszFullMemName )
   Utlstrccpy( szPropName + strlen(szPropName), UtlGetFnameFromPath( pszFullMemName ), DOT );
   strcat( szPropName, EXT_OF_MEM );
   fPropFile = UtlLoadFile( szPropName, (PVOID *)&pProp, &usBytesRead, FALSE, FALSE );
+    
 
   if ( fPropFile )
   {
@@ -1051,6 +1059,6 @@ USHORT MemConvertMem( PSZ pszFullMemName )
   } /* endif */
 
   if ( hfLog ) fclose (hfLog );
-
+#endif//TO_BE_REMOVED
   return( usRC  );
 }

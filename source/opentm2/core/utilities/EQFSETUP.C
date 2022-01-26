@@ -1253,7 +1253,7 @@ USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
 {
     USHORT  usRC = NO_ERROR;             // function return code
     USHORT tempRC = FilesystemHelper::CreateFilebuffer( SYSTEM_PROPERTIES_NAME );
-    auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+    auto pData = FilesystemHelper::GetFileBufferData( SYSTEM_PROPERTIES_NAME );
     if ( pData == NULL )
     {
         LogMessage2(ERROR, "WritePropFile(), filebuffer not created and not found: ", szPath);
@@ -1271,7 +1271,7 @@ USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
 {
   USHORT  usRC = NO_ERROR;             // function return code
 
-  auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+  auto pData = FilesystemHelper::GetFileBufferData( SYSTEM_PROPERTIES_NAME );
   if ( pData == NULL || pData->size() < usSize)
   {
       LogMessage2(ERROR, "ReadPropFile(), filebuffer not found: ", szPath);
@@ -1443,7 +1443,7 @@ VOID BuildPath
 PPROPSYSTEM InstReadSysProps( VOID )
 {  
    PPROPSYSTEM pSysProp = nullptr;
-   std::vector<UCHAR>* pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
+   std::vector<UCHAR>* pData = FilesystemHelper::GetFileBufferData( SYSTEM_PROPERTIES_NAME );
    if(pData && pData->size()){
      pSysProp = (PPROPSYSTEM)&(*pData)[0];
    }

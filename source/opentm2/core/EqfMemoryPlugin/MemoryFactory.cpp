@@ -1119,6 +1119,9 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 )
 {
   int iRC = 0;
+  LogMessage2(FATAL, __func__, ":: called TEMPORARY_COMMENTED function");
+  return iRC = 0;
+#ifdef TEMPORARY_COMMENTED
 
   lOptions;
 
@@ -1189,6 +1192,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
   return( (USHORT)iRC );
+  #endif
 }
 
 /*! \brief process the API call: EqfExportMemInInternalFormat and export a memory to a ZIP package

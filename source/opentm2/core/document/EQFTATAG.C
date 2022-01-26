@@ -17,6 +17,7 @@
 #include "EQFTAI.H"               // Private include file for Text Analysis
 #include "../utilities/LogWrapper.h"
 #include "../utilities/PropertyWrapper.H"
+#include "../utilities/FilesystemHelper.h"
 
 /**********************************************************************/
 /* Static array of loaded tag tables                                  */
@@ -75,7 +76,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   PLOADEDTABLE     pTable = NULL;            // ptr for processing of loaded tables
   SHORT            i;                 // loop counter
   USHORT           usRC = NO_ERROR;   // return value of function
-  ULONG            ulBytesRead;       // # of bytes read from file
+  size_t            ulBytesRead;       // # of bytes read from file
   PTAGTABLE        pTagTable = NULL;  // ptr to in-memory copy of tag table
   USHORT           usTaskId = UtlGetTask();
   /********************************************************************/
@@ -219,8 +220,18 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       /******************************************************************/
       /* Load tag table file into memory                                */
       /******************************************************************/
-      if ( !UtlLoadFileHwnd( szTagTableFileName, (PVOID *)&pTagTable,
-                        &ulBytesRead, FALSE, fMsg, hwnd ) )
+      size_t fSize = FilesystemHelper::GetFileSizeDisk( szTagTableFileName );
+      if(fSize == 0 ){
+        usRC = ERROR_READ_FAULT;
+      }else{
+        UtlAlloc((PVOID*) &pTagTable, 0, fSize, 0);
+      }
+      
+      if(!usRC && pTagTable != nullptr){
+        usRC = FilesystemHelper::ReadFileFromDisk( szTagTableFileName, (PVOID) pTagTable, fSize, ulBytesRead);
+      }
+
+      if ( usRC  || pTagTable == nullptr )
       {
          usRC = ERROR_READ_FAULT;        // indicate tag table read error
       }

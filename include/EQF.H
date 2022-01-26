@@ -4275,6 +4275,7 @@ typedef ULONG HPRINT, *PHPRINT;
 /* Function prototypes                                                */
 /**********************************************************************/
 extern "C" {
+  #ifdef TO_BE_REMOVED
     USHORT  UtlOpen( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                     USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
                     ULONG ulReserved, BOOL fMsg );
@@ -4340,10 +4341,6 @@ extern "C" {
     #define UTLDEFWINDOWPROC( hwnd, usMsg, mp1, mp2) WinDefWindowProc( hwnd, usMsg, mp1, mp2 )
     #endif
     BOOL    UtlRegisterCLB( HAB );
-    PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
-    PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
-    VOID    UtlDispatch( VOID );
-    ULONG   UtlQueryULong( SHORT sID );
     VOID    UtlMenuDisableAll( HWND hwnd, SHORT sMenuID );
     VOID    UtlMenuDisableItem( SHORT sItemID );
     VOID    UtlMenuEnableItem( SHORT sItemID );
@@ -4384,18 +4381,16 @@ extern "C" {
     BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
     USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
     USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-    char*     UtlGetFnameFromPath( const char* path);
+    
     PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
     VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );
     PSZ     UtlParseX15( PSZ str, SHORT id);
     PSZ_W   UtlParseX15W( PSZ_W str, SHORT id);
-    PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
 
     USHORT  UtlExtractX15( PSZ pszTarget, PSZ pszX15String, SHORT sStringId );
 
     PPLUG   UtlPlugIn( PPLUG new1, PPLUG bw, PPLUG fw);
     PPLUG   UtlPlugOut( PPLUG plug);
-    PSZ     UtlSplitFnameFromPath( PSZ path);
     PSZ     UtlMakeEQFPath( PSZ path, CHAR chDrive, USHORT usPathID, PSZ pszFolder );
     USHORT  UtlGetDriveList( BYTE *szList);
     USHORT  UtlGetLANDriveList( BYTE *szList);
@@ -4421,6 +4416,17 @@ SHORT UtlDriveType( CHAR chDrive );
 VOID UtlSetHorzScrollingForLB(HWND hLB);
 
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
+#endif //TO_BE_REMOVED
+
+char*     UtlGetFnameFromPath( const char* path);
+PSZ     Utlstrccpy( PSZ, PSZ, CHAR );
+PSZ     Utlstrnccpy( PSZ, PSZ, USHORT, CHAR );
+PSZ     UtlSplitFnameFromPath( PSZ path);
+VOID    UtlDispatch( VOID );
+ULONG   UtlQueryULong( SHORT sID );
+PSZ_W   UtlParseCharW( PSZ_W str, SHORT id, CHAR_W chParse );
+
+
 BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
 BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
 BOOL   UtlInitUtils( HAB );
@@ -4468,6 +4474,8 @@ BOOL    UtlKillProcess( DWORD );
 BOOL    UtlProcessWalk(SHORT, PSZ, DWORD *);
 
 USHORT  UtlFindCloseHwnd( HDIR, BOOL, HWND );
+
+#ifdef TO_BE_REMOVED
 USHORT  UtlCloseHwnd( HFILE hf, BOOL fMsg, HWND hwndParent );
 USHORT  UtlOpenHwnd( PSZ pszFname, PHFILE phfOpen, PUSHORT pusAction, ULONG ulFSize,
                      USHORT usAttr, USHORT fsOpenFlags, USHORT fsOpenMode,
@@ -4507,6 +4515,7 @@ USHORT  UtlQFileModeHwnd( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserve
 USHORT  UtlQPathInfoHwnd( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
                           USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg,
                           HWND hwndParent);
+                          #endif//TO_BE_REMOVED
 USHORT  UtlSetFileModeHwnd ( PSZ, USHORT, ULONG, BOOL, HWND );
 USHORT  UtlFileLocks( HFILE, PFILELOCK, PFILELOCK, BOOL );
 USHORT  UtlFileLocksHwnd( HFILE, PFILELOCK, PFILELOCK, BOOL, HWND );

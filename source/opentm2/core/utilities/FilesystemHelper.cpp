@@ -41,6 +41,7 @@ std::string parseFilename(const std::string path){
     return path;
 }
 
+    //helping functions
 std::string FilesystemHelper::FixPath(std::string& path){
     std::string ret;
     //
@@ -68,6 +69,59 @@ std::string FilesystemHelper::FixPath(std::string& path){
     return ret;
 }
 
+std::string FilesystemHelper::GetFileName (HFILE ptr) { return ""; }
+std::string FilesystemHelper::GetOtmDir   () { return ""; }
+std::string FilesystemHelper::GetHomeDir  () { return ""; }
+std::vector<std::string> FilesystemHelper::FindFiles(std::string&& name) { return {} ;}
+
+    //functions to work with filesystem
+int  FilesystemHelper::CreateFile (std::string&& path, std::string&& mode) { return 0; }
+int  FilesystemHelper::DeleteFile (std::string&& path) { return 0; }
+int  FilesystemHelper::MoveFile   (std::string&& oldPath, std::string&& newPath) { return 0; }    
+int  FilesystemHelper::CreateDir  (std::string&& path, int rights) { return 0; }
+bool FilesystemHelper::DirExists  (std::string&& path) { return 0; }
+
+    //functions to work with filebuffers
+bool FilesystemHelper::FilebufferExists     (std::string&& fName) { return 0; }
+int FilesystemHelper::LoadFileToFileBuffer  (std::string&& fName) { return 0; }
+int FilesystemHelper::CloseFileBuffer       (std::string&& fName) { return 0; }
+int FilesystemHelper::WriteToFileBuffer     (std::string&& fName, const void* buff, const size_t buffSize, size_t &iBytesWritten, const size_t startingPosition) { return 0; }
+int FilesystemHelper::ReadFileBuffer        (std::string&& fName, void* buff, const size_t buffSize, size_t& bytesRead, const size_t startingPosition) { return 0; }
+int FilesystemHelper::SetOffsetInFilebuffer (std::string&& fName, size_t offset) { return 0; }
+
+int FilesystemHelper::WriteToFileBuffer     (HFILE fPtr, const void* buff, const size_t buffSize, size_t &iBytesWritten, const size_t startingPosition) { return 0; }
+int FilesystemHelper::ReadFileBuffer        (HFILE fPtr, void* buff, const size_t buffSize, size_t& bytesRead, const size_t startingPosition) { return 0; }
+int FilesystemHelper::SetOffsetInFilebuffer (HFILE fPtr, size_t offset) { return 0; }
+
+int FilesystemHelper::CreateFilebuffer     (std::string&& name) { return 0; }// don't create file on disk 
+std::vector<UCHAR>* FilesystemHelper::GetFileBufferData(std::string&& name) { return 0; }
+    
+size_t FilesystemHelper::GetFileBufferSize (std::string&& path) { return 0; }
+size_t FilesystemHelper::GetTotalFileBuffersSize() { return 0; }
+
+int FilesystemHelper::FlushBufferToFile(std::string&& fName) { return 0; }
+int FilesystemHelper::FlushAllBuffers() { return 0; }
+
+int FilesystemHelper::ReadFile(std::string&& path, char* buff, const size_t buffSize, 
+                            size_t& bytesRead, const size_t startingPos, std::string&& mode) { return 0; }
+
+
+size_t FilesystemHelper::GetFileSizeDisk (const std::string& path) { return 0; }
+size_t FilesystemHelper::GetFileSizeDisk (FILE*& ptr) { return 0; }
+bool   FilesystemHelper::FileExistsDisk(std::string&& path){ return 0;}
+FILE*  FilesystemHelper::OpenFileDisk(const std::string& path, const std::string& mode) { return nullptr; }
+int    FilesystemHelper::CloseFileDisk(FILE*& ptr) { return 0; }
+
+int    FilesystemHelper::WriteToFileDisk   (std::string fName, const void* buff, const size_t buffSize, size_t &iBytesWritten, const size_t startingPosition) { return 0; }
+int    FilesystemHelper::WriteToFileDisk   (HFILE pFile, const void* buff, const size_t buffSize, size_t &iBytesWritten, const size_t startingPosition) { return 0; }
+int    FilesystemHelper::ReadFileFromDisk  (std::string fName, const void* buff, const size_t buffSize, size_t& iBytesRead) { return 0; }
+int    FilesystemHelper::ReadFileFromDisk  (HFILE pFile, const void* buff, const size_t buffSize, size_t& iBytesRead) { return 0; }
+short  FilesystemHelper::SetFileCursorDisk (HFILE fp,long LoPart,long& HiPart,size_t OffSet) { return 0; }   
+
+int FilesystemHelper::GetLastError() { return 0; }
+int FilesystemHelper::ResetLastError() { return 0; }
+
+#ifdef OLD_FUNCTIONS
 FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
     const char* cpath = path.c_str();
     //LogMessage2(WARNING,"TEMPORARY HARDCODED useBuffer= true in FilesystemHelper::CreateFile, fName = ", cpath);
@@ -260,9 +314,10 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
             PUCHAR bufStart = &pFb->data[0];
             int size = pFb->data.size();
             
-            HFILE ptr = fopen(fName.c_str(),"w+b");
-            WriteToFile(ptr, bufStart, size);
-            fclose(ptr);
+            //HFILE ptr = fopen(fName.c_str(),"w+b");
+            int iBytesWritten = 0;
+            WriteToFileDisk(fName, bufStart, size, iBytesWritten, 0);
+            //fclose(ptr);
         }else{
             LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
         }
@@ -273,7 +328,7 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
 }
 
 
-std::vector<UCHAR>* FilesystemHelper::GetFilebufferData(std::string name){
+std::vector<UCHAR>* FilesystemHelper::GetFileBufferData(std::string name){
     auto pfb = getFileBufferInstance();
     if(pfb->find(name) == pfb->end())
         return nullptr;
@@ -296,7 +351,7 @@ int FilesystemHelper::FlushAllBuffers(){
         return -1;
     }
 
-    for(auto file : *pFileBuffers){
+    for(auto&& file : *pFileBuffers){
         WriteBuffToFile(file.first);
     }
     return 0;
@@ -325,86 +380,6 @@ int FilesystemHelper::CloseFileBuffer(const std::string& path){
     fbs->erase(path);
     
     return FILEHELPER_NO_ERROR;
-}
-
-#ifdef __USING_FILESYSTEM
-FILE* FilesystemHelper::FindFirstFile(const std::string& name){
-    auto files = FindFiles(name);
-    if(files.empty())
-        return NULL;
-    auto path = files[0].path().generic_string();
-    return OpenFile(path, "wb");
-}
-
-std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& name){
-    const std::string fixedName = FixPath(name);
-    const std::string dirPath = parseDirectory(name);
-    std::string fileName = parseFilename(name);
-    
-    int pos = fileName.rfind('*');
-    bool exactMatch = pos == std::string::npos;
-
-    if(!exactMatch)
-        fileName = fileName.substr(pos+1);
-
-    std::vector< fs::directory_entry> files;
-    for (const auto & file : fs::directory_iterator(dirPath)){
-        if(exactMatch){
-            if(file.path().generic_string().compare(fileName) == 0){
-                files.push_back(file);
-            }
-        }else{
-            if( file.path().generic_string().find(fileName) != std::string::npos ){
-                files.push_back(file);
-            }
-        }
-    }
-
-    return files;
-}
-#endif
-
-
-
-//std::vector<std::string> selFiles;
-int curSelFile = -1;
-FILE* FilesystemHelper::FindFirstFile(const std::string& name){
-    LogMessage3(FATAL,__func__, ":: called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
-#ifdef TEMPORARY_COMMENTED
-    auto files = FindFiles(name);
-    if(selFiles.empty()){
-
-        LogMessage3(INFO, "FilesystemHelper::FindFiles(",name.c_str() , ") - files not found");
-        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
-        return NULL;
-    }
-    curSelFile = 0;
-    auto path = selFiles[curSelFile];
-    return OpenFile(path, "wb");
-    #endif
-
-    return NULL;
-}
-
-FILE* FilesystemHelper::FindNextFile(){
-    LogMessage2(FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
-#ifdef TEMPORARY_COMMENTED
-    if(selFiles.empty()){
-        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
-        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
-        return NULL;
-    }
-
-    curSelFile++;
-    if(curSelFile >= selFiles.size()){    
-        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
-        __last_error_code == FILEHELPER_END_FILELIST;
-        return NULL;
-    }
-    auto path = selFiles[curSelFile];
-    return OpenFile(path, "wb");
-    #endif 
-
 }
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
@@ -449,7 +424,7 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
 }
 
 
-int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, const int buffsize){
+int FilesystemHelper::WriteToFileDisk(std::string path, const char* buff, const int buffsize){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
     FILE *ptr = OpenFile(fixedPath, "wb");
@@ -457,9 +432,10 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     if(CheckLogLevel(DEBUG)){
         oldSize = GetFileSize(ptr);
     }
-    int errCode = WriteToFile(ptr, buff, buffsize);
+    int iBytesWritten = 0;
+    int errCode = WriteToFile(ptr, buff, buffsize, iBytesWritten, 0);
     //if(errCode == FILEHELPER_NO_ERROR){
-        CloseFile(ptr);
+    CloseFile(ptr);
     //}
     /*
     if(CheckLogLevel(DEBUG)){
@@ -470,12 +446,12 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     return __last_error_code = errCode;
 }
 
-int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
-    return WriteToFileBuff(ptr,buff,buffSize,iBytesWritten, startingPosition);
-}
+//int FilesystemHelper::WriteToFileDisk(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
+//    return WriteToFileBuffer(ptr,buff,buffSize,iBytesWritten, startingPosition);
+//}
 
 
-int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
+int FilesystemHelper::WriteToFileBuffer(FILE*& ptr, const void* buff, const long unsigned int buffSize, int &iBytesWritten, const int startingPosition){
     std::string fName = GetFileName(ptr);
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
@@ -492,21 +468,21 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
 
         #ifndef TEMPORARY_HARDCODED
         {
-            std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\n";
+            std::string filesInBuf = "FilesystemHelper::WriteToFileBuffer:: files in filebuffer:\n";
             for (auto it = getFileBufferInstance()->begin(); it != getFileBufferInstance()->end(); ++it)
             {
                 filesInBuf += it->first + '\n';
             }
             LogMessage(INFO, filesInBuf.c_str());
         }
+        #endif
 
-        #endif 
         long lPart = startingPosition, hPart = 0;
         int ret = 0;
         if(startingPosition >=0){
             ret = SetFileCursor(ptr, lPart, hPart, FILE_BEGIN);
         }
-        iBytesWritten =  WriteToFile(ptr, buff, buffSize);
+        iBytesWritten =  WriteToFile(ptr, buff, buffSize, iBytesWritten, 0);
     }
     return 0;
 }
@@ -615,11 +591,55 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
     return ret ;
 }
 
+#ifdef TO_BE_REMOVED
+
+
+
+//std::vector<std::string> selFiles;
+int curSelFile = -1;
+FILE* FilesystemHelper::FindFirstFile(const std::string& name){
+    LogMessage3(FATAL,__func__, ":: called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
+#ifdef TEMPORARY_COMMENTED
+    auto files = FindFiles(name);
+    if(selFiles.empty()){
+
+        LogMessage3(INFO, "FilesystemHelper::FindFiles(",name.c_str() , ") - files not found");
+        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
+        return NULL;
+    }
+    curSelFile = 0;
+    auto path = selFiles[curSelFile];
+    return OpenFile(path, "wb");
+    #endif
+
+    return NULL;
+}
+
+FILE* FilesystemHelper::FindNextFile(){
+    LogMessage2(FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
+#ifdef TEMPORARY_COMMENTED
+    if(selFiles.empty()){
+        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
+        __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
+        return NULL;
+    }
+
+    curSelFile++;
+    if(curSelFile >= selFiles.size()){    
+        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
+        __last_error_code == FILEHELPER_END_FILELIST;
+        return NULL;
+    }
+    auto path = selFiles[curSelFile];
+    return OpenFile(path, "wb");
+    #endif 
+
+}
+
 
 int FilesystemHelper::WriteToFile(const std::string& path, const unsigned char* buff, const int buffsize){
     return WriteToFile(path, (const char*)buff, buffsize);
 }
-
 
 int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
@@ -648,7 +668,6 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
     return writenBytes;
 }
 
-/*
 int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
     int errCode = FILEHELPER_NO_ERROR;
     int writenBytes = buffsize;
@@ -676,7 +695,7 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
     //return __last_error_code = errCode;
     return writenBytes;
 }
-//*/
+#endif // TO_BE_REMOVED
 
 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
@@ -707,7 +726,7 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff,
     return __last_error_code = errcode;
 }
 
-/*
+#ifdef TO_BE_REMOVED
 int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
@@ -724,8 +743,6 @@ int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& 
     }
     return __last_error_code = errCode;
 }
-//*/
-
 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
@@ -745,7 +762,7 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
     }
     return __last_error_code = errCode;
 }
-
+#endif // TO_BE_DELETED
 
 int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPosition){
     int errCode = FILEHELPER_NO_ERROR;
@@ -910,3 +927,4 @@ bool FilesystemHelper::DirExists(const std::string& path){
     return bExists;
 
 }
+#endif// OLD_FUNCTIONS

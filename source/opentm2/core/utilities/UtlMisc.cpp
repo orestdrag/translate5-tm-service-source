@@ -483,6 +483,8 @@ USHORT UtlCompFDates
   /********************************************************************/
   /* Get date and time of files                                       */
   /********************************************************************/
+  LogMessage5(FATAL, __func__, ":: TEMPORARY_COMMENTED, pszFile1 = ", pszFile1, "; pszFile2 = ", pszFile2);
+  #ifdef TEMPORARY_COMMENTED
   usRC = UtlQPathInfo( pszFile1, 1, (PBYTE)&stStatus1, sizeof(stStatus1),
                        0L, fMsg );
   if ( usRC == NO_ERROR )
@@ -505,7 +507,7 @@ USHORT UtlCompFDates
     } /* endif */
     *psResult = (SHORT)lResult;
   } /* endif */
-
+  #endif // TEMPORARY_COMMENTED
   return usRC;
 } /* end of function UtlCompFDates */
 
@@ -664,9 +666,9 @@ BOOL UtlInitUtils( HAB hab )
                     (LONG)sizeof(EVENTTABLE), NOMSG ) )
      {
        ulLength = sizeof(EVENTTABLE);
-       if ( !UtlLoadFileL( szLogFile, (PVOID *)&pEventTable, &ulLength,
-                          FALSE, FALSE )
-                          ||
+       if ( //!UtlLoadFileL( szLogFile, (PVOID *)&pEventTable, &ulLength,
+            //              FALSE, FALSE )
+            //              ||
              (memcmp( pEventTable->szMagicWord, EVENTMAGICWORD, 4 ) != 0) )
        {
          // event log not loaded or old format event table, create an empty one
