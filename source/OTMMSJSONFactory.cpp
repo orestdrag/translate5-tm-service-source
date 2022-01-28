@@ -136,7 +136,7 @@ JSONFactory* JSONFactory::getInstance()
   */
   std::wstring convertToUTF16( const std::string& strASCII )
   {  
-    std::wstring strUTF16 = EncodingHelper::convertToUTF16(strASCII);
+    std::wstring strUTF16 = EncodingHelper::convertToUTF16(strASCII.c_str());
     return strUTF16;
   }
 

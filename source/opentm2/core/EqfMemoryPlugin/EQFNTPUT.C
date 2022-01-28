@@ -3277,7 +3277,9 @@ USHORT TMLoopAndDelTargetClb
 {
 
   static int call_n = 0;
-  LogMessage4(INFO, __func__,":: call n = ", toStr(++call_n).c_str(),"; Sentence = ");
+  if(CheckLogLevel(INFO)){
+    LogMessage5(INFO, __func__,":: call n = ", toStr(++call_n).c_str(),"; Sentence = ", EncodingHelper::convertToUTF8(pSentence->pInputString).c_str() );
+  }
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block
   PTMX_TAGTABLE_RECORD 	pTMXSrcTTable = NULL; //ptr to source tag info

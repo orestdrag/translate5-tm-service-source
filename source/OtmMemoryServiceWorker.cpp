@@ -988,7 +988,7 @@ int OtmMemoryServiceWorker::createMemory
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(strSourceLang).c_str() );
+    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(strSourceLang.c_str()).c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::BAD_REQUEST );
   } /* end */
@@ -1090,18 +1090,13 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"source", pProp->szSource );
   pJsonFactory->addParmToJSONW( strJSON, L"target", pProp->szTarget );
   pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szId, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"id", pData->lSegmentNum );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"documentName", pData->szSource );
-  MultiByteToWideChar( CP_OEMCP, 0, pProp->szDocShortName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", pData->szSource );
+  pJsonFactory->addParmToJSONW( strJSON, L"id", EncodingHelper::convertToUTF16(pProp->szId).c_str());
+  pJsonFactory->addParmToJSONW( strJSON, L"documentName", EncodingHelper::convertToUTF16(pProp->szDocName).c_str() );
+  pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", EncodingHelper::convertToUTF16(pProp->szDocShortName).c_str() );
   EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", pData->szSource );
+  pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
   EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szIsoSourceLang, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"targetLang", pData->szSource );
+  pJsonFactory->addParmToJSONW( strJSON, L"targetLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
 
   switch ( pProp->eType )
   {
@@ -1204,7 +1199,7 @@ int OtmMemoryServiceWorker::search
   } /* endif */
 
     // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
@@ -1365,7 +1360,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
@@ -1638,7 +1633,7 @@ int OtmMemoryServiceWorker::updateEntry
   //EncodingHelper::convertUTF8ToASCII( strMemory );
 
     // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
   // parse input parameters
   PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );

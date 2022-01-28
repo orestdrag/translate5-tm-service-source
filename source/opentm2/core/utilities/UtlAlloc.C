@@ -22,13 +22,7 @@ PVOID UtlIntAlloc
   ULONG  ulLength,                     // length of area to allocate
   USHORT usMessageNo                   // message number for error calls
 );
-static
-USHORT UtlSubAlloc
-(
-  PBYTE pSel,
-  PBYTE * ppStorage,
-  ULONG  ulAllocLength
-);
+
 USHORT UtlIntFree
 (
   PVOID  pOldStorage,
@@ -148,78 +142,11 @@ PVOID UtlIntAlloc
   }
   else 
   {
-    if ( usMessageNo != NOMSG )
-    {
-      UtlError( usMessageNo, MB_CANCEL, 0, NULL, EQF_ERROR );
-    } /* endif */
+    LogMessage3(FATAL, __func__,"::Cant allocate memory size = ", toStr(ulLength));
   } /* endif */
   return( pStorage );
 }
 
-/**********************************************************************/
-/* do an efficient sub allocation...                                  */
-/**********************************************************************/
-static
-USHORT UtlSubAlloc
-(
-  PBYTE pSel,
-  PBYTE * ppStorage,
-  ULONG  ulAllocLength
-)
-{
-  USHORT usRc = 0;
-  PSUBALLOC_HDR pSubAlloc = (PSUBALLOC_HDR) pSel;
-  PBYTE  pData = pSel + sizeof( SUBALLOC_HDR );
-  USHORT usLast;
-
-  *ppStorage = NULL;
-  ulAllocLength = 0;
-
-  /********************************************************************/
-  /* check if we can find a free slot ...                             */
-  /********************************************************************/
-  usLast = pSubAlloc->usLastUsed;
-  pData += (ULONG)pSubAlloc->usLastUsed * (ULONG)pSubAlloc->usSizeOfBlock;
-
-  while ( *pData && ( usLast < pSubAlloc->usNumOfBlocks - 1 ))
-  {
-    pData += pSubAlloc->usSizeOfBlock;
-    usLast++;
-  } /* endwhile */
-
-  /********************************************************************/
-  /* check if we find a free slot, otherwise wrap around              */
-  /********************************************************************/
-  if ( usLast == pSubAlloc->usNumOfBlocks-1 )
-  {
-    /******************************************************************/
-    /* start at beginning ...                                         */
-    /******************************************************************/
-    usLast = 0;
-    pData = pSel + sizeof( SUBALLOC_HDR );
-    while ( *pData && ( usLast < pSubAlloc->usLastUsed ))
-    {
-      pData += pSubAlloc->usSizeOfBlock;
-      usLast++;
-    } /* endwhile */
-  } /* endif */
-
-  /********************************************************************/
-  /* return the found slot or an error condition                      */
-  /********************************************************************/
-  if ( *pData )
-  {
-    usRc = 1;
-  }
-  else
-  {
-    *pData = 1;
-    *ppStorage = pData+1;
-    pSubAlloc->usLastUsed = usLast;
-  } /* endif */
-
-  return usRc;
-}
 
 USHORT UtlIntFree
 (
@@ -242,18 +169,16 @@ USHORT UtlIntFree
     /******************************************************************/
     /* display error message - someone killed us...                   */
     /******************************************************************/
-    usRC = ERROR_INTERNAL;
+    //usRC = ERROR_INTERNAL;
     LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
       toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
     //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
-  else
-  {
-    /******************************************************************/
-    /* free the momory                                                */
-    /******************************************************************/
-     free( pStorage );
-  } /* endif */
+  /******************************************************************/
+  /* free the momory                                                */
+  /******************************************************************/
+  free( pStorage );
+  
   return usRC;
 } /* end of function UtlIntFree */
 

@@ -1575,32 +1575,6 @@ USHORT MemoryFactory::APIUpdateMem
   {
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
-
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 70 // generate short document name if none given (otherwise the long document name will not be stored in the memory...) if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )");
-#ifdef TEMPORARY_COMMENTED
-  // generate short document name if none given (otherwise the long document name will not be stored in the memory...)
-  if ( (pNewProposal->szDocShortName[0] == EOS) && (pNewProposal->szDocName[0] != EOS) )
-  {
-    char* pszTemp = pNewProposal->szDocName;
-    int iLen = 0;
-    while ( (iLen < 8) && (*pszTemp != EOS) )
-    {
-      CHAR chTest;
-      chTest = *pszTemp;
-      if ( ((chTest >= '0') && (chTest <= '9')) || ((chTest >= 'a') && (chTest <= 'z')) || ((chTest >= 'A') && (chTest <= 'Z')) ) 
-      {
-        pNewProposal->szDocShortName[iLen++] = *pszTemp;
-      } /* endif */
-      pszTemp++;
-    } /* endwhile */
-
-    // pad short names with 'A's
-    while ( iLen < 5 ) pNewProposal->szDocShortName[iLen++] = 'A';
-
-    // add dummy extension to name
-    strcpy( pNewProposal->szDocShortName + strlen(pNewProposal->szDocShortName), ".000" );
-  } /* endif */
-  #endif
   
   strcpy(pNewProposal->szDocShortName , pNewProposal->szDocName);
   copyMemProposalToOtmProposal( pNewProposal, pOtmProposal );

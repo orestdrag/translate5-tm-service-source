@@ -83,7 +83,12 @@ int MultiByteToWideChar(
     int cnt = 0;
     memset (&state, '\0', sizeof (state));
     //return mbsnrtowcs(lpMultiByteStr, lpWideCharStr, cchWideChar, cbMultiByte, &state );
-    if(cbMultiByte<0) cbMultiByte = 0;
+    if(cbMultiByte<=0){ 
+        cbMultiByte = strlen(lpMultiByteStr);        
+    }
+    if(cbMultiByte > cchWideChar-1) cbMultiByte = cchWideChar-1;
+    lpWideCharStr[cbMultiByte] = 0;
+
     return mbsnrtowcs(lpWideCharStr, (const char**)&lpMultiByteStr, cbMultiByte, cchWideChar, &state );
     //EncodingHelper::convertToUTF16(lpMultiByteStr);
     //return mbtowc(lpWideCharStr, lpMultiByteStr, cchWideChar);
@@ -104,6 +109,12 @@ int WideCharToMultiByte(
         //mbstate_t state;
         //int cnt = 0;
         //memset (&state, '\0', sizeof (state));
+
+        if(cchWideChar<=0){ 
+            cchWideChar = wcslen(lpWideCharStr);            
+        }
+        if(cchWideChar > cbMultiByte-1) cchWideChar = cbMultiByte-1;
+        lpMultiByteStr[cchWideChar] = 0;
         return wcstombs(lpMultiByteStr, (const wchar_t*) &lpWideCharStr, cchWideChar);
         //return wcsnrtombs(lpMultiByteStr, (const wchar_t**)&lpWideCharStr, cchWideChar, cbMultiByte, &state );       
         

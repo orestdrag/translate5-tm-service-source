@@ -7017,6 +7017,137 @@ SHORT EQFNTMSign1
 
 }
 
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMFindChild       Find Child
+//------------------------------------------------------------------------------
+// Function call:     QDAMFindChild ( PBTREE, PCHAR, USHORT, PPBTREEBUFFER );
+//
+//------------------------------------------------------------------------------
+// Description:       Locates the record containing the childnode that the
+//                    given key is in or should be in if inserted.
+//
+//                    Returns record pointer that might contain the record,
+//                    or NULL if it is unable to find it due to lack of buffers
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE                 pointer to btree structure
+//                    PCHAR                  key passed
+//                    PPBTREEBUFFER          pointer to leaf mode
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//
+//------------------------------------------------------------------------------
+// Function flow:     read record of 1st node
+//                    if    ok and record is not the leaf
+//                      lock the record
+//                      init for binary search (starting points)
+//                      if lower start point < upper start point
+//                        do
+//                          set fFound
+//                          get key string at middle position
+//                          compare key found with the passed key
+//                          decide whether to go left or right
+//                        while not found
+//                        if ok
+//                          if sResult = '>'
+//                            record found (sLow fits)
+//                          else
+//                            additional check: get key string
+//                            compare keys
+//                          endif
+//                        endif
+//                      else
+//                        lower start point is position searched for
+//                      endif
+//                      if ok
+//                        get data in data structure
+//                        unlock previous record
+//                        read record
+//                    endif
+//------------------------------------------------------------------------------
+SHORT QDAMFindChild_V3
+(
+    PBTREE pBTIda,
+    PCHAR_W  pKey,
+    USHORT   usNode,
+    PBTREEBUFFER_V3 * ppRecord
+)
+{
+  SHORT         sResult;
+  SHORT         sLow;                              // Far left
+  SHORT         sHigh;                             // Far right
+  SHORT         sMid = 0;                          // Middle
+  RECPARAM      recData;                           // data structure
+  PCHAR_W       pKey2;                             // pointer to search key
+  SHORT         sRc;                               // return code
+  PBTREEGLOB    pBT = pBTIda->pBTree;
+
+  memset(&recData, 0, sizeof(recData));
+  sRc = QDAMReadRecord_V3( pBTIda, usNode, ppRecord, FALSE  );
+  if ( !sRc && !IS_LEAF( *ppRecord ))
+  {
+    BTREELOCKRECORD( *ppRecord );
+
+    sLow = 0;                                    // start here
+    sHigh = (SHORT) OCCUPIED( *ppRecord) -1 ;    // counting starts at zero
+
+
+    while ( !sRc && (sLow <= sHigh) )
+    {
+      sMid = (sLow + sHigh)/2;
+      pKey2 = QDAMGetszKey_V3( *ppRecord, sMid, pBT->usVersion );
+      if ( pKey2 == NULL )
+      {
+        sRc = BTREE_CORRUPTED;
+      }
+      else
+      {
+        sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+        if ( sResult < 0 )
+        {
+          sHigh = sMid - 1;                        // Go left
+        }
+        else
+        {
+          sLow = sMid + 1;                         // Go right
+        } /* endif */
+      } /* endif */
+    } /* endwhile */
+
+    /******************************************************************/
+    /* it is the lower one due the construction of the BTREE          */
+    /*  -- according to the while loop it must be the sHIGH value     */
+    /* if sHigh < 0 we should use the first one                      */
+    /******************************************************************/
+    if ( !sRc )
+    {
+      if ( sHigh == -1 )
+      {
+        sHigh = 0;
+      } /* endif */
+      recData = QDAMGetrecData_V3( *ppRecord, sHigh, pBT->usVersion );
+    } /* endif */
+
+    BTREEUNLOCKRECORD( *ppRecord );    // unlock previous record.
+
+    if ( !sRc )
+    {
+      sRc = QDAMReadRecord_V3( pBTIda, recData.usNum, ppRecord, FALSE  );
+    } /* endif */
+  } /* endif */
+  return( sRc );
+}
+
+
 SHORT QDAMChangeKey_V3
 (
    PBTREE   pBTIda,                                 // ptr to tree structure
@@ -7033,8 +7164,6 @@ SHORT QDAMChangeKey_V3
   PUSHORT  pusOffset;                              // pointer to offset table
   RECPARAM recKey;                                 // record parameter descrip.
 
-  LogMessage2(FATAL, __func__, "::called commented out function QDAMChangeKey_V3");
-#ifdef TEMPORARY_COMMENTED
 
   sRc = QDAMReadRecord_V3( pBTIda, usNode, &pRecord, FALSE  );
   if ( !sRc )
@@ -7080,8 +7209,6 @@ SHORT QDAMChangeKey_V3
    {
      ERREVENT2( QDAMCHANGEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } /* endif */
-  
-  #endif
 
   return sRc;
 }

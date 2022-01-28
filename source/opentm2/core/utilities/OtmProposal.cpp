@@ -195,16 +195,15 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
   if ( this->pvProposalData == NULL ) return;
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   size_t len = wcslen(pszBuffer);
-  //len = len < OTMPROPOSAL_MAXSEGLEN ? len: OTMPROPOSAL_MAXSEGLEN;
-  //memccpy(pData->szSource, pszBuffer, L'\0', len * sizeof(wchar_t));
-  if(len > OTMPROPOSAL_MAXSEGLEN){
+  if(len >= OTMPROPOSAL_MAXSEGLEN){
     LogMessage(FATAL,"OtmProposal::setSource:: pszBuffer is too big");
-    pszBuffer[OTMPROPOSAL_MAXSEGLEN-1] = L'\0';
+    len = OTMPROPOSAL_MAXSEGLEN; 
+    pszBuffer[len] = L'\0';
   }
   //wcscpy(pData->szSource, pszBuffer);
-  wcsncpy( pData->szSource, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
-  pData->szSource[len] = pszBuffer[len]; // it's not copying last symbol, so add it manually
-  pData->szSource[OTMPROPOSAL_MAXSEGLEN] = 0;
+  wcsncpy( pData->szSource, pszBuffer, len );
+  //pData->szSource[len] = pszBuffer[len]; // it's not copying last symbol, so add it manually
+  pData->szSource[len] = 0;
   pData->fFilled = 1;
 }
   	

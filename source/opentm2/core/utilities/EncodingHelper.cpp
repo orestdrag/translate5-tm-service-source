@@ -42,7 +42,7 @@ std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&
   \param strUTF8String string in UTF8 encoding
   \returns string converted to UTF16
 */
-std::wstring EncodingHelper::convertToUTF16( const std::string& strUTF8String )
+std::wstring EncodingHelper::convertToUTF16(std::string&& strUTF8String )
 { 
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> convert;
   std::wstring wstr = convert.from_bytes( strUTF8String );
@@ -61,7 +61,7 @@ std::u16string EncodingHelper::toUtf16(std::wstring&& wstr){
 
 std::wstring EncodingHelper::toWChar(std::u16string u16str){
   auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
-  return convertToUTF16(u8str);
+  return convertToUTF16(u8str.c_str());
 }
 
 

@@ -2316,10 +2316,13 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     // no additional data yet, copy new data
     *pusData++ = usDataID;
     *pusData++ = usNewLength;
-    wcscpy( (PSZ_W)pusData, pszNewData );
-    pusData += usNewLength;
+    pusData += 2;
+    pszNewData[usNewLength] = 0;
+    //wcscpy( (PSZ_W)pusData, pszNewData);
+    memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
+    pusData += usNewLength * 2;
     *pusData = ADDDATA_ENDOFDATA_ID;
-    pCLB->usAddDataLen = (usNewLength + 3) * sizeof(USHORT);
+    pCLB->usAddDataLen = (usNewLength + 3) * sizeof(wchar_t);
   } /* endif */     
 
   return( pCLB->usAddDataLen );
@@ -2341,9 +2344,13 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
       if ( pusData != NULL )
       {
         usLength = pusData[1];
+        pusData += 4;
         if ( usLength < usBufSize )
         {
-          wcscpy( pszBuffer, (const wchar_t *) (pusData + 2) );
+          pszBuffer[0] = 0;
+          memcpy(pszBuffer, pusData, usLength*sizeof(wchar_t) );
+          pszBuffer[usLength] = 0;
+          //wcscpy( pszBuffer, (wchar_t *) pusData );
         }
         else
         {
@@ -2359,7 +2366,8 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
         usLength = (USHORT)(wcslen( (const wchar_t *) pusData ) + 1);
         if ( usLength < usBufSize )
         {
-          wcscpy( pszBuffer, (const wchar_t *) pusData );
+          memcpy( pszBuffer, pusData, (usLength)*sizeof(wchar_t) );
+          //wcscpy( pszBuffer, (const wchar_t *) pusData );
         }
         else
         {

@@ -250,7 +250,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
     int rc = 0;
     string strInData = string( body.begin(), body.end() );
     
-    wstring wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData), &rc);
+    wstring wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()), &rc);
     string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
 
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
@@ -321,7 +321,8 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage5(TRANSACTION, "==== processing POST mem/entry request, content type=\"",strType.c_str(),"\", content length=",toStr(content_length).c_str(),"====\n" );
+  LogMessage5(TRANSACTION, "==== processing POST mem/entry request, content type=\"",
+        strType.c_str(),"\", content length=",toStr(content_length).c_str(),"; ====\n" );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {

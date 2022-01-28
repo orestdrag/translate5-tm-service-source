@@ -450,26 +450,6 @@ USHORT TmtXGet
   FILE *hfLog = NULL;
 #endif
 
-#ifdef MATCHLIST_LOG
-  {
-    BOOL fNew = FALSE;
-    CHAR szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    UtlMkDir( szLogFile, 0L, FALSE );
-    strcat( szLogFile, BACKSLASH_STR );
-    strcat( szLogFile, "MATCHLIST.LOG" );
-    fNew = !UtlFileExist( szLogFile );
-    hfMatchListLog = fopen( szLogFile, "ab" );
-    if ( hfMatchListLog )
-    {
-      if ( fNew ) fwrite( UNICODEFILEPREFIX, 1, 2, hfMatchListLog ); 
-      fwprintf( hfMatchListLog, L"== Lookup in memory %S ==\r\n", pTmClb->stTmSign.szName );
-      NTMLogSegData( hfMatchListLog, L"  LookupSource=>>>%s<<<\r\n", pTmGetIn->stTmGet.szSource );
-    } /* endif */       
-  }
-#endif
-
 #ifdef _NTGET_LOG
   {
     char szLogFile[MAX_EQF_PATH];
@@ -482,11 +462,10 @@ USHORT TmtXGet
   }
 #endif
 
-  if(CheckLogLevel(DEVELOP)){
-    
+  if(CheckLogLevel(DEBUG)){    
       //auto str_name = EncodingHelper::convertToUTF8(pTmClb->stTmSign.szName);
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
-      LogMessage6(DEVELOP, __func__,"== Lookup in memory  ==",pTmClb->stTmSign.szName," ==\nLookupSource = >>>",str_source.c_str(),"<<<"  );
+      LogMessage6(DEBUG, __func__,"== Lookup in memory  ==",pTmClb->stTmSign.szName," ==\nLookupSource = >>>",str_source.c_str(),"<<<"  );
   }
 
   if(CheckLogLevel(INFO)){
@@ -745,8 +724,7 @@ USHORT TmtXGet
   /********************************************************************/
   /* restrict number of matches found to the maximum number requested */
   /* by user                                                          */
-  /********************************************************************/
-  
+  /********************************************************************/  
   pTmGetOut->usNumMatchesFound =  pTmGetOut->usNumMatchesFound < pTmGetIn->stTmGet.usRequestedMatches ?
                pTmGetOut->usNumMatchesFound : pTmGetIn->stTmGet.usRequestedMatches;
 
@@ -1455,7 +1433,10 @@ USHORT ExactTest
                 } /* endif */                 
 
                 // check context strings (if any)
-                if ( (!fIgnoreProposal) && pGetIn->szContext[0] && pClb->usAddDataLen )
+                if ( 
+                  (!fIgnoreProposal) 
+                    && pGetIn->szContext[0] 
+                    && pClb->usAddDataLen )
                 {
                   USHORT usContextLen = NtmGetAddData( pClb, ADDDATA_CONTEXT_ID, pContextBuffer, MAX_SEGMENT_SIZE );   
                   if ( usContextLen != 0 )

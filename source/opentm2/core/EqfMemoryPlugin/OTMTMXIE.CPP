@@ -2318,10 +2318,12 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 inclosingTagsSkipped = true;
             }
           }
-        }        
-        result = EncodingHelper::convertToUTF8(pBuf->szData);
-        LogMessage5(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
-            "\'  ->  fSkipped inclosed tag pair = ", toStr(inclosingTagsSkipped));      
+        }  
+        if(CheckLogLevel(INFO)){      
+          result = EncodingHelper::convertToUTF8(pBuf->szData);
+          LogMessage5(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
+              "\'  ->  fSkipped inclosed tag pair = ", toStr(inclosingTagsSkipped));     
+        } 
       }
       break;  
     }
@@ -2500,7 +2502,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
 {
   char16_t* pzChars = (char16_t*)chars;
   std::string sChars = EncodingHelper::convertToUTF8(pzChars);
-  std::wstring wChars = EncodingHelper::convertToUTF16(sChars);
+  std::wstring wChars = EncodingHelper::convertToUTF16(sChars.c_str());
   char* c_chars = (char*) sChars.c_str();
   wchar_t* w_chars = (wchar_t*) wChars.c_str();
   int iLength = length;

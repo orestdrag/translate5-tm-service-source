@@ -10,7 +10,7 @@ class EncodingHelper{
     \param strUTF8String string in UTF8 encoding
     \returns string converted to UTF16
     */
-    std::wstring static convertToUTF16(const std::string& strUTF8String);
+    std::wstring static convertToUTF16(std::string&& strUTF8String);
     std::u16string static toUtf16(std::wstring&& wstr);
     std::wstring static toWChar(std::u16string u16str);
     std::string static toChar(std::u16string u16str);
