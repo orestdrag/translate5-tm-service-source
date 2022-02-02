@@ -354,7 +354,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
   } /* endif */
 
   {
-    char szServiceName[100] = "otmmemoryservice";
+    char szServiceName[100] = "t5memory";
     char szOtmDirPath[255] ="";
     unsigned int uiPort = 8080;
     unsigned int uiWorkerThreads = 10;
@@ -365,18 +365,16 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     /* get configuration settings */
     {
         string defOtmDirPath, path = filesystem_get_home_dir();
-        defOtmDirPath = path;
-        defOtmDirPath += "/.OtmMemoryService/";
-        path += "/.OtmMemoryService/otm_service.conf";
+        defOtmDirPath = path + "/.t5memory/";
+        path = defOtmDirPath + "t5memory.conf";
         strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
 
-        LogMessage2(INFO,"Try to open server config file, path = ", path.c_str());
         config conf(path);
         int res = conf.parse();
 
         if (!res) {
             strncpy(szServiceName,
-                conf.get_value("name", "otmmemoryservice").c_str(), 100);
+                conf.get_value("name", "t5memory").c_str(), 100);
             strncpy(szOtmDirPath,
                 conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
             uiPort = std::stoi(conf.get_value("port", "8080"));
@@ -385,7 +383,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
             uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
         }else{
-          LogMessage2(ERROR, "can't open otm_service.conf, path = ", path.c_str());
+          LogMessage2(ERROR, "can't open t5memory.conf, path = ", path.c_str());
         }
     }
     

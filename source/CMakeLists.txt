@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(OtmMemoryService VERSION 0.1.14)
+project(OtmMemoryService VERSION 0.2.0)
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -91,9 +91,9 @@ install(TARGETS OtmMemoryService DESTINATION bin)
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_NAME                    "OtmMemoryService")
+set(CPACK_PACKAGE_NAME                    "t5memory")
 #set(CPACK_PACKAGE_VENDOR                  "Translate 5")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     "OtmMemoryService")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     "t5memory")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY       ${CPACK_PACKAGE_NAME})
 set(CPACK_PACKAGE_VERSION_MAJOR           "${OtmMemoryService_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR           "${OtmMemoryService_VERSION_MINOR}")

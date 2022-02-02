@@ -51,7 +51,7 @@ std::string generateLogFileName(){
    return fName;
 }
 
-std::mutex coutMutex;   
+std::mutex logMutex;   
 int writeLog(std::string& message, int logLevel){
 
     static std::ofstream logErrorF, logF;
@@ -67,7 +67,7 @@ int writeLog(std::string& message, int logLevel){
 
     //write log to file
     {
-        std::lock_guard<std::mutex> coutLock(coutMutex); 
+        std::lock_guard<std::mutex> logGuard(logMutex); 
 
         #ifdef CONSOLE_LOGGING
             std::cout << message;

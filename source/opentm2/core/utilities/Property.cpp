@@ -16,7 +16,7 @@
 #include "LogWrapper.h"
 
 #define HOME_ENV "HOME"
-#define OTMMEMORYSERVICE "OtmMemoryService"
+#define OTMMEMORYSERVICE "t5memory"
 
 /* Wrapper functions for C code usage */
 

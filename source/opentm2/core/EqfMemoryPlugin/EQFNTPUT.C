@@ -51,7 +51,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 		PTMX_TARGET_CLB    *ppClb,
 		PTMX_RECORD        *ppCurTmRecord,
 		PTMX_TARGET_RECORD	 *ppTMXTargetRecord,
-	    PULONG  		 pulLeftClbLen,
+	  PLONG  		 pulLeftClbLen,
  		PBOOL 			 pfUpdate);
 
 USHORT TMLoopAndDelTargetClb
@@ -2089,7 +2089,7 @@ USHORT ComparePutData
   BOOL        fUpdate = FALSE;         // TRUE = record has been updated
   PTMX_RECORD pTmRecord = *ppTmRecord; // pointer to tm record data
   USHORT      usAuthorId;              // ID for author string
-  ULONG ulLeftClbLen;
+  LONG lLeftClbLen;
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
@@ -2220,8 +2220,8 @@ USHORT ComparePutData
 
                 // loop over all target CLBs
                 pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
-                ulLeftClbLen = RECLEN(pTMXTargetRecord) - pTMXTargetRecord->usClb;
-                while ( ulLeftClbLen && !fStop )
+                lLeftClbLen = RECLEN(pTMXTargetRecord) - pTMXTargetRecord->usClb;
+                while ( lLeftClbLen > 0 && !fStop )
                 {
                   if ( ((pClb->ulSegmId == pTmPut->ulSourceSegmentId) &&
                         (pClb->usFileId == usPutFile)) ||
@@ -2264,13 +2264,13 @@ USHORT ComparePutData
                     } /* endif */
 
                     // adjust context part of target control block if necessary
-                    NTMAdjustAddDataInTgtCLB( ppTmRecord, pulRecBufSize, pTmPut, &pClb, &pTmRecord, &pTMXTargetRecord, &ulLeftClbLen, &fUpdate );
+                    NTMAdjustAddDataInTgtCLB( ppTmRecord, pulRecBufSize, pTmPut, &pClb, &pTmRecord, &pTMXTargetRecord, &lLeftClbLen, &fUpdate );
                   } /* endif */
 
                   // continue with next target CLB
                   if ( !fStop )
                   {
-                    ulLeftClbLen -= TARGETCLBLEN(pClb);
+                    lLeftClbLen -= TARGETCLBLEN(pClb);
                     pClb = NEXTTARGETCLB(pClb);
                   } /* endif */
                 } /* endwhile */
@@ -2301,10 +2301,15 @@ USHORT ComparePutData
                   // length and target record length
                   if ( fOK )
                   {
-                    ULONG ulNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
-                    memmove( (((PBYTE)pClb) + ulNewClbLen), pClb, RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord) );
-                    RECLEN(pTmRecord) += ulNewClbLen;
-                    RECLEN(pTMXTargetRecord) += ulNewClbLen;
+                    LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
+                    LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord); 
+                    if( size> 0 ){
+                      memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
+                      RECLEN(pTmRecord) += lNewClbLen;
+                      RECLEN(pTMXTargetRecord) += lNewClbLen;
+                    }else{
+                      LogMessage5(FATAL, __func__,"memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
+                    }
                   } /* endif */
 
                   // fill-in new target CLB
@@ -3124,7 +3129,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 	PTMX_TARGET_CLB    *ppClb,
 	PTMX_RECORD        *ppCurTmRecord,
 	PTMX_TARGET_RECORD *ppTMXTargetRecord,
-	PULONG  		   pulLeftClbLen,
+	PLONG  		   pulLeftClbLen,
 	PBOOL 			   pfUpdate)
 {
   BOOL    fOK = TRUE;
