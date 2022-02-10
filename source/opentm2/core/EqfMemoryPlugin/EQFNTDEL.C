@@ -17,8 +17,9 @@
 #define INCL_EQFMEM_DLGIDAS
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
-#include "../../core/utilities/LogWrapper.h"
-
+#include "./LogWrapper.h"
+#include "./PropertyWrapper.H"
+#include "./EncodingHelper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -116,8 +117,8 @@ USHORT TmtXDelSegm
   if ( !usRc )
   {
     //build tag table path
-    UtlMakeEQFPath( szString, NULC, TABLE_PATH, NULL );
-    strcat( szString, BACKSLASH_STR );
+    properties_get_str(KEY_OTM_DIR, szString, MAX_EQF_PATH);
+    strcat (szString, "/TABLE/");
     strcat( szString, pTmDelIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );
 
@@ -216,7 +217,6 @@ USHORT TmtXDelSegm
 
           if ( usRc == NO_ERROR )
           {
-
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
             usRc = FindTargetAndDelete( pTmClb, pTmRecord,
@@ -436,8 +436,11 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
           pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           //compare tag table records
-          if ( !memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
-                       RECLEN(pTMXSourceTagTable) ) )
+          //if ( !memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
+          //             RECLEN(pTMXSourceTagTable) ) )
+          //std::wstring pStringWNormalizedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring(pSentence->pInputString));
+          if(//UtlCompIgnWhiteSpaceW(pSentence->pInputString, (wchar_t*)pStringWNormalizedTags.c_str(), pStringWNormalizedTags.size() ) == 0
+          true) // we use the same tag tables in t5?
           {
             //source tag tables are identical
             pByte = pStartTarget;
@@ -455,8 +458,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
             ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
             //tokenize target string in del structure
-            LogMessage(ERROR,"TEMPORARY_COMMENTED usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );");
-            //usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
+            usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
 
             if ( !usRc )
             {
@@ -471,7 +473,8 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                 pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
                 //compare tag table records
-                if ( !memcmp( pTMXTargetTagTable, pTagRecord,
+                if (true ||   //we use the same tag tables
+                     !memcmp( pTMXTargetTagTable, pTagRecord,
                               RECLEN(pTMXTargetTagTable) ) )
                 {
                   //identical target tag table as in del structure so
@@ -495,14 +498,16 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                     {
                       if ( (pClb->usFileId == usId) &&
                            (pClb->ulSegmId == pTmDel->ulSourceSegmentId) &&
-                           (pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag))
+                           (pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag)
+                           ||true 
+                           )
                       {
                         //if segment id and filename are equal then delete
                         //target CLB and any empty target record
 
                         //check that multiple flag isn't on
                         //if on leave while loop as though delete was carried out
-                        if ( !pClb->bMultiple || (BOOL)pTmDel->lTime )
+                        if ( !pClb->bMultiple || (BOOL)pTmDel->lTime  || true)
                         {
                           TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
 

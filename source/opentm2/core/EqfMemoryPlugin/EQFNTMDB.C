@@ -1921,15 +1921,13 @@ EQFNTMGet
 )
 {
   SHORT sRc;                           // return code
-  ULONG ulLength;
-
   DEBUGEVENT( EQFNTMGET_LOC, FUNCENTRY_EVENT, 0 );
 
   CHECKPBTREE( ((PBTREE)pBTIda), sRc );
   if ( !sRc )
   {
-    SHORT  RetryCount;                  // retry counter for in-use condition
-    RetryCount = MAX_RETRY_COUNT;
+    SHORT  RetryCount = MAX_RETRY_COUNT;                  // retry counter for in-use condition
+    ULONG ulLength;
     do
     {
       /******************************************************************/
@@ -1960,7 +1958,6 @@ EQFNTMGet
   {
     ERREVENT( EQFNTMGET_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
-
 
   return sRc;
 } /* end of function EQFNTMGet */

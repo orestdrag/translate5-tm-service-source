@@ -654,7 +654,6 @@ USHORT TokenizeSourceEx2
    int iMode                            // mode to be passed to create protect table function
 )
 {
-
   PVOID     pTokenList = NULL;         // ptr to token table
   BOOL      fOK;                       // success indicator
   PBYTE     pTagEntry;                 // pointer to tag entries
@@ -671,8 +670,6 @@ USHORT TokenizeSourceEx2
   int        iIterations = 0;
   USHORT     usAddEntries = 0;
   PSZ_W  pszNormStringPos = pSentence->pNormString; // current pNpormString output pointer
-
-  pSourceLang;                         // avoid compiler warnings
 
   /********************************************************************/
   /* normalize \r\n combinations in input string ..                   */

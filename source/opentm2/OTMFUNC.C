@@ -1086,7 +1086,7 @@ USHORT EqfUpdateMem
 
   if ( pData )
   {
-    LogMessage5( INFO, __func__, "==EqfUpdateMem==, Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
+    LogMessage5( INFO, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
   }else{
     LogMessage2( ERROR,__func__,"::pData is nullptr");
   } /* endif */
@@ -1100,6 +1100,47 @@ USHORT EqfUpdateMem
   } /* endif */
 
   auto logLevel = usRC? ERROR : INFO;
+  LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
+
+  return( usRC );
+}
+
+
+// OtmMemoryService
+/*! \brief Delete a segment in the memory
+  \param hSession the session handle returned by the EqfStartSession call
+  \param lHandle handle of a previously opened memory
+  \param pProposalToDelete pointer to an MemProposal structure containing the segment data
+  \param lOptions processing options 
+  \returns 0 if successful or an error code in case of failures
+*/
+USHORT EqfUpdateDeleteMem
+(
+  HSESSION    hSession,
+  LONG        lHandle, 
+  PMEMPROPOSAL pProposalToDelete,
+  LONG        lOptions,
+  char*       errorStr
+)
+{         
+  PFCTDATA    pData = NULL;            // ptr to function data area
+
+  // validate session handle
+  USHORT usRC = FctValidateSession( hSession, &pData ); 
+  if ( pData )
+  {
+    LogMessage5( INFO, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
+  }else{
+    LogMessage2( ERROR,__func__,"::pData is nullptr");
+  } /* endif */
+
+  // call the memory factory to process the request
+  if ( usRC == NO_ERROR )
+  {
+    usRC = MemoryFactory::getInstance()->APIUpdateDeleteMem( lHandle, pProposalToDelete, lOptions , errorStr);
+  } /* endif */
+
+  auto logLevel = usRC && usRC != 6020 ? ERROR : INFO;
   LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
 
   return( usRC );

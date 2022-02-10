@@ -1251,13 +1251,13 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   {
     this->iLastError = ERROR_BUFFERTOOSMALL;
     this->strLastError = "Internal error: Failed to get list of memory files";
-    delete pszFileList;
+    delete[] pszFileList;
     return( (USHORT)this->iLastError );
   } /* endif */     
 
   // add the files to the package
   UtlZipFiles( pszFileList, pszMemoryPackage );
-  delete pszFileList;
+  delete[] pszFileList;
 
   return( (USHORT)iRC );
 }
@@ -1583,6 +1583,51 @@ USHORT MemoryFactory::APIUpdateMem
 
   delete( pOtmProposal );
 
+  return( usRC );
+}
+
+
+
+/*! \brief process the API call: EqfUpdateDeleteMem and deletes a segment in the memory
+    \param lHandle handle of a previously opened memory
+    \param pProposalToDelete pointer to an MemProposal structure containing the segment data
+    \param lOptions processing options 
+    \returns 0 if successful or an error code in case of failures
+  */
+USHORT MemoryFactory::APIUpdateDeleteMem
+(
+  LONG        lHandle,
+  PMEMPROPOSAL pProposalToDelete,
+  LONG        lOptions, 
+  char*       errorStr
+)
+{
+  if ( ( pProposalToDelete == NULL ) )
+  {
+    char* pszParm = "pointer to proposal";
+    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    return DDE_MANDPARAMISSING;
+  } /* endif */
+
+  OtmMemory *pMem = handleToMemoryObject( lHandle );
+
+  if ( pMem == NULL )
+  {
+    return( INVALIDFILEHANDLE_RC );
+  } /* endif */
+  
+  OtmProposal *pOtmProposal = new ( OtmProposal );
+  strcpy(pProposalToDelete->szDocShortName , pProposalToDelete->szDocName);
+  copyMemProposalToOtmProposal( pProposalToDelete, pOtmProposal );
+
+  USHORT usRC = (USHORT)pMem->deleteProposal( *pOtmProposal );
+  //strcpy( errorStr, pOtmProposal->errorStr);
+  if(usRC == 6020){
+    //seg not found
+    strcpy(errorStr, "Segment not found");
+  }
+
+  delete( pOtmProposal );
   return( usRC );
 }
 

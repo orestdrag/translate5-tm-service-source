@@ -1974,7 +1974,6 @@ void TMXParseHandler::fillSegmentInfo
     strcpy( pSegment->szSourceLang, pSource->szLang );
     wcsncpy( pSegment->szSource, pSource->szText, SEGDATABUFLEN );
   } /* endif */
-
   // target info
   if ( pTarget != NULL )
   {

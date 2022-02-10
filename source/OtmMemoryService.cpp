@@ -56,7 +56,7 @@ void WriteCrashLog( char *pszLogDir );
 typedef enum _TRANSACTID 
 {
   UNUSED_TRANSACTID = 0, GET_LISTMEM_TRANSACTID, POST_CREATEMEM_TRANSACTID, POST_IMPORT_TRANSACTID,
-  POST_FUZZYSEARCH_TRANSACTID, POST_CONCORDANCE_TRANSACTID, POST_UPDATEENTRY_TRANSACTID, DELETE_MEMORY_TRANSACTID, GET_MEMORY_TRANSACTID,
+  POST_FUZZYSEARCH_TRANSACTID, POST_CONCORDANCE_TRANSACTID, POST_UPDATEENTRY_TRANSACTID, POST_DELETEENTRY_TRANSACTID, DELETE_MEMORY_TRANSACTID, GET_MEMORY_TRANSACTID,
   GET_STATUS_TRANSACTID
 } TRANSACTID;
 
@@ -79,6 +79,7 @@ inline std::string ToString(TRANSACTID id)
         { POST_FUZZYSEARCH_TRANSACTID, "POST_FUZZYSEARCH_TRANSACTID" },
         { POST_CONCORDANCE_TRANSACTID, "POST_CONCORDANCE_TRANSACTID" },
         { POST_UPDATEENTRY_TRANSACTID, "POST_UPDATEENTRY_TRANSACTID" },
+        { POST_DELETEENTRY_TRANSACTID, "POST_DELETEENTRY_TRANSACTID" },
         { DELETE_MEMORY_TRANSACTID, "DELETE_MEMORY_TRANSACTID" },
         { GET_MEMORY_TRANSACTID, "GET_MEMORY_TRANSACTID" },
         { GET_STATUS_TRANSACTID, "GET_STATUS_TRANSACTID" }
@@ -344,6 +345,37 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   } );
 }
 
+
+void postEntryDelete_method_handler( const shared_ptr< Session > session )
+{
+  const auto request = session->get_request();
+
+  size_t content_length = request->get_header( "Content-Length", 0 );
+  std::string strType = request->get_header( "Content-Type", "" );
+
+  LogMessage5(TRANSACTION, "==== processing POST entry DELETE request, content type=\"",
+        strType.c_str(),"\", content length=",toStr(content_length).c_str(),"; ====\n" );
+
+  session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
+  {
+    const auto request = session->get_request();
+    string strTM = request->get_path_parameter( "id", "" );
+    restoreBlanks( strTM );
+    int iTransActIndex = AddToTransActLog( POST_DELETEENTRY_TRANSACTID, strTM.c_str() );
+
+    string strInData = string( body.begin(), body.end() );
+    string strResponseBody;
+
+    LogMessage6(TRANSACTION,__func__, "Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
+    int rc = pMemService->deleteEntry( strTM, strInData, strResponseBody );
+    
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    
+    TransActDone( iTransActIndex );
+    LogMessage8(TRANSACTION,__func__, "::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
+  } );
+}
+
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
   LogMessage(TRANSACTION, "Try prepare otm memory service");
@@ -445,6 +477,12 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     postEntry->set_path( szValue );
     postEntry->set_method_handler( "POST", postEntry_method_handler );
 
+    // handler for resource URL w memory name/entry
+    auto postEntryDelete = make_shared< Resource >();
+    snprintf( szValue, 150, "/%s/{id: .+}/entrydelete", szServiceName );
+    postEntryDelete->set_path( szValue );
+    postEntryDelete->set_method_handler( "POST", postEntryDelete_method_handler );
+
     // handler for resource URL w memory name
     auto memname = make_shared< Resource >();
     snprintf( szValue, 150, "/%s/{id: .+}", szServiceName );
@@ -474,6 +512,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( memname );
     service.publish( postEntry );
     service.publish( getStatus );
+    service.publish( postEntryDelete );
     //std::string add = pSettings->get_bind_address();
     LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
   }

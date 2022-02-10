@@ -442,46 +442,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      fOK = UtlAlloc( (PVOID *)&pLIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE );
      if ( fOK ) fOK = UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE );
 
-
-     #ifdef TO_BE_REMOVED
-     // load external memory import module
-     if ( fOK ){
-
-        char libPath[MAX_EQF_PATH];
-        properties_get_str(KEY_PLUGIN_DIR, libPath, MAX_EQF_PATH);
-        strcat(libPath, "libEqfMemoryPlugin.so");
-        fOK = (DosLoadModule( NULL, 0, libPath, &(pLIDA->hmodMemExtImport)) == 0 );
-        //fOK = (DosLoadModule( NULL, 0, "OTMTMXIE.DLL", &(pLIDA->hmodMemExtImport)) == 0 );
-     }
-
-     // load entry points
-     if ( fOK )
-     {
-       fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTSTART", (PFN*)(&(pLIDA->pfnMemImpStart))) == 0);
-       if ( fOK ) fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTPROCESS", 
-                                           (PFN*)(&(pLIDA->pfnMemImpProcess))) == 0);
-       if ( fOK ) fOK = (DosGetProcAddr( pLIDA->hmodMemExtImport, "EXTMEMIMPORTEND", 
-                                           (PFN*)(&(pLIDA->pfnMemImpEnd))) == 0);
-     } /* endif */
-
-     #endif //TO_BE_REMOVED
-     
-     // prepare segment logging
-     LogMessage(WARNING, "TEMPORARY hardcoded if(false) for other logging system");
-     if ( fOK  && false)
-     {
-       UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
-       UtlMkDir( pLIDA->szSegLog, 0, FALSE );
-       strcat( pLIDA->szSegLog, "\\MEMIMPORT.LOG" );
-#ifdef _DEBUG
-       pLIDA->hSegLog = fopen( pLIDA->szSegLog, "wb" );
-#endif
-       if ( pLIDA->hSegLog )
-       {
-         fwrite( UNICODEFILEPREFIX, 1, 2, pLIDA->hSegLog );
-       } /* endif */
-     } /* endif */
-
      // call start entry point
      if ( fOK )
      {
@@ -504,7 +464,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pLIDA->pstMemInfo->fTagsInCurlyBracesOnly = TRUE;
        }
        
-       //fOK = (pLIDA->pfnMemImpStart( &(pLIDA->lExternalImportHandle), pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
        fOK = (EqfPluginWrapper::MemImportStart( &(pLIDA->lExternalImportHandle) , pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
        pLIDA->pMem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 

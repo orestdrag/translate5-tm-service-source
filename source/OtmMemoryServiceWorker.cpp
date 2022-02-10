@@ -1804,6 +1804,206 @@ int OtmMemoryServiceWorker::updateEntry
   return( iRC );
 }
 
+/*! \brief Delete an entry of the memory
+\param strMemory name of memory
+\param strInputParms input parameters in JSON format
+\param strOutParms on return filled with the output parameters in JSON format
+\returns http return code
+*/
+int OtmMemoryServiceWorker::deleteEntry
+(
+  std::string strMemory,
+  std::string strInputParms,
+  std::string &strOutputParms
+)
+{
+  int iRC = verifyAPISession();
+  if ( iRC != 0 )
+  {
+    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    return( restbed::BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemory.empty() )
+  {
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    return( restbed::BAD_REQUEST );
+  } /* endif */
+
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
+
+    // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
+  // parse input parameters
+  PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
+  memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
+
+  auto loggingThreshold = -1;
+       
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
+  { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szTarget ), sizeof( pData->szTarget ) / sizeof( pData->szTarget[0] ) },
+  { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( pData->lSegmentNum ), 0 },
+  { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDocName ), sizeof( pData->szDocName ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },
+  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szType ), sizeof( pData->szType ) },
+  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szAuthor ), sizeof( pData->szAuthor ) },
+  { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szMarkup ), sizeof( pData->szMarkup ) },
+  { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szContext ), sizeof( pData->szContext ) / sizeof( pData->szContext[0] ) },
+  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDateTime ), sizeof( pData->szDateTime ) },
+  { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szAddInfo ), sizeof( pData->szAddInfo ) / sizeof( pData->szAddInfo[0] ) },
+  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  iRC = pJsonFactory->parseJSON( strInputParmsW, parseControl );
+
+  if ( iRC != 0 )
+  {
+    iRC = ERROR_INTERNALFUNCTION_FAILED;
+    wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( restbed::BAD_REQUEST );
+  } /* end */
+
+  if ( pData->szSource[0] == 0 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"Error: Missing source text";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( restbed::BAD_REQUEST );
+  } /* end */
+  if ( pData->szTarget[0] == 0 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"Error: Missing target text";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( restbed::BAD_REQUEST );
+  } /* end */
+  if ( pData->szIsoSourceLang[0] == 0 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"Error: Missing source language";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( restbed::BAD_REQUEST );
+  } /* end */
+  if ( pData->szIsoTargetLang[0] == 0 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"Error: Missing target language";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( restbed::BAD_REQUEST );
+  } /* end */
+  if ( pData->szMarkup[0] == 0 )
+  {
+    strcpy(pData->szMarkup, "OTMXUXLF");
+    //strcpy( pProp->szMarkup, "OTMANSI" );
+    //iRC = ERROR_INPUT_PARMS_INVALID;
+    //wchar_t errMsg[] = L"Error: Missing markup table";
+    //buildErrorReturn( iRC, errMsg, strOutputParms );
+    //delete pData;
+    //return( restbed::BAD_REQUEST );
+  } /* end */
+
+  if(loggingThreshold >=0){
+    LogMessage2(WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", toStr(loggingThreshold).c_str());
+    SetLogLevel(loggingThreshold); 
+  }
+
+    // get the handle of the memory 
+  long lHandle = 0;
+  int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  if ( httpRC != restbed::OK )
+  {
+    buildErrorReturn( iRC, pData->szError, strOutputParms );
+    delete pData;
+    return( httpRC );
+  } /* endif */
+
+  // prepare the proposal data
+  PMEMPROPOSAL pProp = new ( MEMPROPOSAL );
+  memset( pProp, 0, sizeof( *pProp ) );
+  wcscpy( pProp->szSource, pData->szSource );
+  wcscpy( pProp->szTarget, pData->szTarget );
+  pProp->lSegmentNum = pData->lSegmentNum;
+  strcpy( pProp->szDocName, pData->szDocName );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pProp->szTargetLanguage );
+  pProp->eType = this->getMemProposalType( pData->szType );
+  strcpy( pProp->szTargetAuthor, pData->szAuthor );
+  if ( strcasecmp( pData->szMarkup, "translate5" ) == 0 )
+  {
+    strcpy( pProp->szMarkup, "OTMXUXLF" );
+  }
+  else
+  {
+    strcpy( pProp->szMarkup, pData->szMarkup );
+  }
+  wcscpy( pProp->szContext, pData->szContext );
+  LONG lTime = 0;
+  if ( pData->szDateTime[0] != 0 )
+  {
+    // use provided time stamp
+    convertUTCTimeToLong( pData->szDateTime, &(pProp->lTargetTime) );
+  }
+  else
+  {
+    // a lTime value of zero automatically sets the update time
+    // so refresh the time stamp (using OpenTM2 very special time logic...)
+    // and convert the time to a date time string
+    LONG            lTimeStamp;             // buffer for current time
+    time( (time_t*)&lTimeStamp );
+    lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+    this->convertTimeToUTC( lTimeStamp, pData->szDateTime );
+  }
+  wcscpy( pProp->szAddInfo, pData->szAddInfo );
+
+  std::string errorStr;
+  errorStr.reserve(1000);
+  // update the memory delete entry
+  iRC = EqfUpdateDeleteMem( this->hSession, lHandle, pProp, 0,  &errorStr[0]);
+  if ( iRC != 0 )
+  {
+    unsigned short usRC = 0;
+    auto w_error_str = EncodingHelper::convertToUTF16(errorStr.c_str());
+    EqfGetLastErrorW( this->hSession, &usRC, (wchar_t*)w_error_str.c_str(), w_error_str.size());
+    // pData->szError , sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
+    buildErrorReturn( iRC, pData->szError, strOutputParms );
+    delete pProp;
+    delete pData;
+    return( restbed::INTERNAL_SERVER_ERROR );
+  } /* endif */
+
+  // return the entry data
+  std::string str_src = EncodingHelper::convertToUTF8(pData->szSource );
+  std::string str_trg = EncodingHelper::convertToUTF8(pData->szTarget );
+
+  pJsonFactory->startJSON( strOutputParms );
+  pJsonFactory->addParmToJSON( strOutputParms, "sourceLang", pData->szIsoSourceLang );
+  pJsonFactory->addParmToJSON( strOutputParms, "targetLang", pData->szIsoTargetLang );
+  pJsonFactory->addParmToJSON( strOutputParms, "source", str_src.c_str());
+  pJsonFactory->addParmToJSON( strOutputParms, "target", str_trg.c_str() );
+  pJsonFactory->addParmToJSON( strOutputParms, "documentName", pData->szDocName );
+  pJsonFactory->addParmToJSON( strOutputParms, "segmentNumber", pData->lSegmentNum );
+  pJsonFactory->addParmToJSON( strOutputParms, "markupTable", pData->szMarkup );
+  pJsonFactory->addParmToJSON( strOutputParms, "timeStamp", pData->szDateTime );
+  pJsonFactory->addParmToJSON( strOutputParms, "author", pData->szAuthor );
+  pJsonFactory->terminateJSON( strOutputParms );
+
+  iRC = restbed::OK;
+  delete pProp;
+  delete pData;
+
+  return( iRC );
+}
+
 
 /*! \brief delete a memory
 \param strMemory name of memory

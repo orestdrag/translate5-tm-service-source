@@ -141,6 +141,19 @@ public:
     std::string &strOutputParms
   );
 
+  /*! \brief Delete an entry of the memory
+  \param strMemory name of memory
+  \param strInputParms input parameters in JSON format
+  \param strOutParms on return filled with the output parameters in JSON format
+  \returns http return code
+  */
+  int deleteEntry
+  (
+    std::string strMemory,
+    std::string strInputParms,
+    std::string &strOutputParms
+  );
+
   /*! \brief delete a memory
   \param strMemory name of memory
   \param strOutParms on return filled with the output parameters in JSON format

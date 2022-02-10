@@ -2691,6 +2691,22 @@ USHORT EqfUpdateMem
   LONG        lOptions
 );
 
+/*! \brief Delete a segment in the memory
+  \param hSession the session handle returned by the EqfStartSession call
+  \param lHandle handle of a previously opened memory
+  \param pProposalToDelete pointer to an MemProposal structure containing the segment data
+  \param lOptions processing options 
+  \returns 0 if successful or an error code in case of failures
+*/
+USHORT EqfUpdateDeleteMem
+(
+  HSESSION    hSession,
+  LONG        lHandle, 
+  PMEMPROPOSAL pProposalToDelete,
+  LONG        lOptions,
+  char* errorStr
+);
+
 /*! \brief List the name of all memories
 \param hSession the session handle returned by the EqfStartSession call
 \param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list

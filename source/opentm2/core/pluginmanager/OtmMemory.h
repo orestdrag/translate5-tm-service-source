@@ -16,10 +16,6 @@ extern "C" {
 #define INCL_EQF_TM
 #define INCL_EQF_DAM
 #include "EQF.H"
-//#include "eqftmi.h"
-//#include "eqftmm.h"
-//#include "eqfqdami.h"
-//#include "eqftmrem.h"
 #ifndef CPPTEST
 }
 #endif

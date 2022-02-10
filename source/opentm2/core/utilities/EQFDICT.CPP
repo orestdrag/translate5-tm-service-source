@@ -4469,43 +4469,32 @@ PTMWCHAR QDAMGetszKey_V3
    USHORT  usVersion                   // version of database
 )
 {
-   PBYTE    pData, pEndOfRec;
-   PUSHORT  pusOffset;
-   usVersion;
-
-   // get max pointer value
-
-   pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3;
+   PBYTE    pData = nullptr, 
+    pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V3;// get max pointer value
 
    // use record number of passed entry , read in record and pass
    // back pointer
-   pusOffset = (PUSHORT) pRecord->contents.uchData;
+   PUSHORT pusOffset = (PUSHORT) pRecord->contents.uchData;
    
    pusOffset += i;                     // point to key
-   
    int step = sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
-      
 
    if ( (PBYTE)pusOffset > pEndOfRec )
    {
      // offset pointer is out of range
-     pData = NULL;
-     LogMessage4(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", toStr((long int)pusOffset).c_str(), 
-          "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str());
-     LogMessage2(ERROR, "pusOffset - pEndOfRec = ", toStr((long int) ((PBYTE)pusOffset - pEndOfRec)).c_str());
+     LogMessage6(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", toStr((long int)pusOffset).c_str(), 
+          "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str(), "\npusOffset - pEndOfRec = ", toStr((long int) ((PBYTE)pusOffset - pEndOfRec)).c_str());
      //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
    else
    {
-     //LogMessage(ERROR, "TEMPORARY_COMMENTED /*+ step;//*/");
      pData = pRecord->contents.uchData + (*pusOffset) + step ;
-
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
        LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", toStr((long int)pusOffset).c_str(),
              "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str());
-       pData = NULL;
+       pData = nullptr;
        //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      } /* endif */
    } /* endif */
@@ -4520,7 +4509,6 @@ RECPARAM  QDAMGetrecData_V3
    USHORT        usVersion                       // version of database
 )
 {
-   PCHAR   pData = NULL;
    RECPARAM      recData;               // data description structure
    PUSHORT  pusOffset;
 
@@ -4528,15 +4516,14 @@ RECPARAM  QDAMGetrecData_V3
    // back pointer
    pusOffset = (PUSHORT) pRecord->contents.uchData;
    pusOffset += sMid;                            // point to key
-   pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
+   PCHAR pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
    pData += sizeof(USHORT );                    // get pointer to datarec
 
-     memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM) );
-
-     memcpy( &recData.usNum, (PUSHORT) pData, sizeof(USHORT ) );
-     memcpy( &recData.usOffset, (PUSHORT) (pData+2), sizeof(USHORT ) );
-     memcpy( &recData.ulLen, (PULONG) (pData+4), sizeof(PULONG ) );
-     memcpy( &recData.ulLen, (PULONG) (pData+8), sizeof(PULONG ) );
+   memcpy( &recData,         (PRECPARAM)  pData,    sizeof( RECPARAM ));
+   memcpy( &recData.usNum,   (PUSHORT)    pData,    sizeof( USHORT )  );
+   memcpy( &recData.usOffset,(PUSHORT)   (pData+2), sizeof( USHORT )  );
+   memcpy( &recData.ulLen,   (PULONG)    (pData+4), sizeof( PULONG )  );
+   memcpy( &recData.ulLen,   (PULONG)    (pData+8), sizeof( PULONG )  );
    
    return ( recData );
 }
@@ -4629,7 +4616,7 @@ SHORT QDAMFindRecord_V3
     {
       sMid = (sLow + sHigh)/2;
       pKey2 = QDAMGetszKey_V3( *ppRecord, sMid, pBT->usVersion );
-      if ( pKey2 == NULL )
+      if ( pKey2 == nullptr )
       {
         sRc = BTREE_CORRUPTED;
       }
@@ -5423,7 +5410,6 @@ SHORT QDAMLocateKey_V3
           else if (sResult > 0)
           {
             sLow = sMid+1;                           // Go right
-
           }else{
              fFound = TRUE;
              // if exact match is required we have to do a strcmp
@@ -5436,11 +5422,7 @@ SHORT QDAMLocateKey_V3
              /*********************************************************/
              if ( pBT->fTransMem )
              {
-               ULONG pk1 = *((PULONG)pKey);
-               ULONG pk2 = *((PULONG)pKey2);
                if (*((PULONG)pKey) == *((PULONG)pKey2))
-               //LogMessage(WARNING, "TEMPORARY HARDCODED //if (*((PULONG)pKey) == *((PULONG)pKey2)) => if (*(pKey) == *(pKey2))");
-               //if (*(pKey) == *(pKey2))
                {
                   *psKeyPos = sMid;
                }

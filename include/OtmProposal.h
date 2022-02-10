@@ -17,8 +17,9 @@
  */
 class OtmProposal
 {
-
+  
 public:
+  //char errorStr[1000];
 
 /*! \brief Constructors */
 	OtmProposal();
