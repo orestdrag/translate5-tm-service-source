@@ -29,7 +29,7 @@ set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
 set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
 set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
-
+set(ZIPLIB_DIR          "${ROOT}/source/ZipLib")
 
 include(./cmake/CheckGit.cmake)
 CheckGitSetup()
@@ -54,6 +54,7 @@ target_include_directories(OtmMemoryService PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
     ${RESTBED_INCLUDE_DIR}
+    ${ZIPLIB_DIR}
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -71,6 +72,7 @@ target_link_libraries(OtmMemoryService PRIVATE
 )
 
 add_subdirectory(opentm2)
+add_subdirectory(ZipLib)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 
