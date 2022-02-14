@@ -1,5 +1,5 @@
 #include "ZipHelper.h"
-#include "../../../ZipLib/ZipFile.h"
+//#include "../../../ZipLib/ZipFile.h"
 
 ZIP* ZipHelper::ZipCreate ( const char* fName ){
     return nullptr;
@@ -10,7 +10,7 @@ int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
 
 
 ZIP*  ZipHelper::ZipOpen   ( const char* fName ){
-    ZipFile::Open(fName);
+    //ZipFile::Open(fName);
     return nullptr;
 }
 

@@ -35,6 +35,7 @@ set(Util_Source_Files
     OTMGLOBM.CPP
     EQFTADIT.CPP
     EQFMORPH.CPP
+    ZipHelper.cpp 
 )
 
 add_library(Util ${Util_Source_Files})
