@@ -149,7 +149,6 @@ USHORT EqfImportMem
     LogMessage(WARNING, "EqfImportMem::pData is NULL");
   }
 
-
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
   {
     LogMessage4(INFO, "InFile = ", pszInFile, ", Options = ", toStr(lOptions).c_str() );
@@ -899,9 +898,7 @@ USHORT EqfOpenMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIOpenMem( pszMemoryName, plHandle, lOptions );
+    usRC = MemoryFactory::getInstance()->APIOpenMem( pszMemoryName, plHandle, lOptions );
   }else{
     LogMessage2(ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", toStr(usRC).c_str());
   } /* endif */
@@ -941,9 +938,7 @@ USHORT EqfCloseMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APICloseMem( lHandle, lOptions );
+    usRC =  MemoryFactory::getInstance()->APICloseMem( lHandle, lOptions );
   } /* endif */
 
   if ( pData )
@@ -989,9 +984,7 @@ USHORT EqfQueryMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
+    usRC =  MemoryFactory::getInstance()->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
   } /* endif */
 
   LOGLEVEL logLevel = usRC? ERROR : INFO;
@@ -1041,9 +1034,7 @@ USHORT EqfSearchMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APISearchMem( lHandle, pszSearchString, pszStartPosition, pProposal, lSearchTime, lOptions );
+    usRC =  MemoryFactory::getInstance()->APISearchMem( lHandle, pszSearchString, pszStartPosition, pProposal, lSearchTime, lOptions );
   } /* endif */
 
   if ( usRC)
@@ -1088,9 +1079,7 @@ USHORT EqfUpdateMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIUpdateMem( lHandle, pNewProposal, lOptions );
+    usRC =  MemoryFactory::getInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
   auto logLevel = usRC? ERROR : INFO;
@@ -1170,9 +1159,7 @@ USHORT EqfListMem
     // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIListMem( pszBuffer, plLength );
+    usRC =  MemoryFactory::getInstance()->APIListMem( pszBuffer, plLength );
   } /* endif */
 
   if ( pData )

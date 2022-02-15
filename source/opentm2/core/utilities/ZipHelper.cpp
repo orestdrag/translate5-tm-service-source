@@ -2,28 +2,6 @@
 #include "EQF.H"
 #include "LogWrapper.h"
 
-ZIP* ZipHelper::ZipCreate ( const char* fName ){
-    struct zip_t *zip = zip_open(fName, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
-    if(zip){
-        LogMessage3(ERROR,__func__,"::created zip file ", fName);
-    }else{
-        LogMessage3(ERROR,__func__,":: can't open zip file ", fName);
-    }
-
-    return zip;
-    /*
-    {
-        zip_entry_open(zip, "foo-1.txt");
-        {
-            const char *buf = "Some data here...\0";
-            zip_entry_write(zip, buf, strlen(buf));
-        }
-        zip_entry_close(zip);
-    }//*/
-    //zip_close(zip);
-    //return nullptr;
-    //return ZipOpen(fName, 'w');
-}
 int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
     if(pZip){
         LogMessage3(ERROR,__func__,"::adding to zip file ", fName);
@@ -38,23 +16,14 @@ int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
     return 0;
 }
 
-
-int  ZipHelper::ZipAppend( const char* zipName, const char* fName){
-    struct zip_t *zip = zip_open(zipName, ZIP_DEFAULT_COMPRESSION_LEVEL, 'a');
-    {
-        zip_entry_open(zip, UtlGetFnameFromPath(fName));
-        {
-            zip_entry_fwrite( zip, fName);
-        }
-        zip_entry_close(zip);
-    }
-    zip_close(zip);
-}
-
-
 ZIP*  ZipHelper::ZipOpen   ( const char* fName , char mode){
-    auto zip = zip_open(fName, ZIP_DEFAULT_COMPRESSION_LEVEL, mode); 
-    return nullptr;
+    struct zip_t * zip = zip_open(fName, ZIP_DEFAULT_COMPRESSION_LEVEL, mode); 
+    if(zip){
+        LogMessage3(ERROR,__func__,":: Opened zip file ", fName);
+    }else{
+        LogMessage3(ERROR,__func__,":: can't open zip file ", fName);
+    }
+    return zip;
 }
 
 int  ZipHelper::ZipClose  ( ZIP* pZip ){
@@ -64,5 +33,18 @@ int  ZipHelper::ZipClose  ( ZIP* pZip ){
         LogMessage2(ERROR,__func__,":: can't close zip file , ptr = nullptr");
     }
     zip_close(pZip);
+    return 0;
+}
+
+int on_extract_entry(const char *filename, void *arg) {
+    int n = *(int *)arg;
+    LogMessage3(INFO,__func__,"::Extracted: ", filename);//," ("," of ", toStr(n),")\n" );
+    return 0;
+}
+
+int ZipHelper::ZipExtract( const char* zipPath, const char* destPath){
+    
+    int arg = 2;
+    zip_extract(zipPath, destPath, on_extract_entry, &arg);
     return 0;
 }

@@ -1431,22 +1431,20 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
   char szCurFile[MAX_PATH];
 
-  ZIP* pZip = ZipHelper::ZipCreate( pszPackage );
-  //ZipHelper::ZipClose( pZip );
+  ZIP* pZip = ZipHelper::ZipOpen( pszPackage , 'w' );
 
   while( *pszFileList != EOS )
   {
     // get current file name
     Utlstrccpy( szCurFile, (PSZ)pszFileList, ',' );
     // add it to theZIP package
-    //ZipHelper::ZipAdd( pZip, UtlGetFnameFromPath( szCurFile ), szCurFile );
-    //ZipHelper::ZipAppend( pszPackage, szCurFile  );
     ZipHelper::ZipAdd( pZip, szCurFile );
 
     // continue with next file
     pszFileList += strlen(szCurFile);
     if ( *pszFileList == ',' ) pszFileList++;
   } /* endwhile */
+  
   ZipHelper::ZipClose( pZip );
   return( 0 );
 }

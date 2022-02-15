@@ -1240,7 +1240,7 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   }
   else
   {
-    iRC = -1;//((OtmSharedMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
+    iRC = ERROR_VERSION_NOT_SUPPORTED;
   }
   if( iRC != 0  )
   {
