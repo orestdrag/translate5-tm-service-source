@@ -1120,8 +1120,6 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 {
   int iRC = 0;
 
-  lOptions;
-
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
     LogMessage2(ERROR, __func__,  "::TA_MANDTM::if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS))");
@@ -1203,10 +1201,7 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   LONG        lOptions 
 )
 {
-  int iRC = 0;
-
-  lOptions;
-  
+  int iRC = 0;  
   PSZ pszMemName = (PSZ) pszMemoryName;
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
@@ -1243,9 +1238,9 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   {
     iRC = ((OtmMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
   }
-  else if(pPlugin->getType() == OtmPlugin::eSharedTranslationMemoryType)
+  else
   {
-    iRC = ((OtmSharedMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
+    iRC = -1;//((OtmSharedMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
   }
   if( iRC != 0  )
   {

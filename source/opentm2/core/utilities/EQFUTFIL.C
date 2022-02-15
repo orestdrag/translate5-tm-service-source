@@ -26,6 +26,7 @@
 #include "OTMFUNC.H"
 #include "FilesystemHelper.h"
 #include "LogWrapper.h"
+#include "ZipHelper.h"
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
 //+----------------------------------------------------------------------------+
@@ -1428,26 +1429,25 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole functi
 __declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 141 whole function");
-#ifdef TEMPORARY_COMMENTED
-  HZIP hz; 
   char szCurFile[MAX_PATH];
 
-  hz = CreateZip( pszPackage, 0 );
+  ZIP* pZip = ZipHelper::ZipCreate( pszPackage );
+  //ZipHelper::ZipClose( pZip );
+
   while( *pszFileList != EOS )
   {
     // get current file name
     Utlstrccpy( szCurFile, (PSZ)pszFileList, ',' );
-
     // add it to theZIP package
-    ZipAdd( hz, UtlGetFnameFromPath( szCurFile ), szCurFile );
+    //ZipHelper::ZipAdd( pZip, UtlGetFnameFromPath( szCurFile ), szCurFile );
+    //ZipHelper::ZipAppend( pszPackage, szCurFile  );
+    ZipHelper::ZipAdd( pZip, szCurFile );
 
     // continue with next file
     pszFileList += strlen(szCurFile);
     if ( *pszFileList == ',' ) pszFileList++;
   } /* endwhile */
-  CloseZip( hz );
-#endif //TEMPORARY_COMMENTED
+  ZipHelper::ZipClose( pZip );
   return( 0 );
 }
 

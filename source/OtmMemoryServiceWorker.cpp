@@ -2164,7 +2164,6 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     LogMessage2(ERROR, "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = ", szTempFile );
-
     return( restbed::INTERNAL_SERVER_ERROR );
   }
 

@@ -762,9 +762,7 @@ USHORT EqfMemoryExists
       LogMessage4(ERROR, __func__, ":: rc = ", toStr(usRC).c_str(), " EQF_ERROR" );
     }
     else
-    {
-      
-     
+    {    
       //FilesystemHelper::FileExists(pszMemoryName);
       char fname[MAX_EQF_PATH];
       properties_get_str(KEY_MEM_DIR, fname, MAX_EQF_PATH);
@@ -815,9 +813,7 @@ USHORT EqfImportMemInInternalFormat
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIImportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
+    usRC = MemoryFactory::getInstance()->APIImportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
   } /* endif */
 
   if ( pData )
@@ -860,9 +856,7 @@ USHORT EqfExportMemInInternalFormat
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-    usRC = pFactory->APIExportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
+    usRC = MemoryFactory::getInstance()->APIExportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
   } /* endif */
 
   if ( pData )

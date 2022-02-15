@@ -63,7 +63,7 @@ std::string FilesystemHelper::FixPath(std::string& path){
         }else {
             ret.push_back(path[i]);
         }
-    }
+    } 
     
     return ret;
 }

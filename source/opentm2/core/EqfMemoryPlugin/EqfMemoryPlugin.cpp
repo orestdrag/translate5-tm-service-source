@@ -368,34 +368,16 @@ int EqfMemoryPlugin::getMemoryFiles
 
   if ( pMemInfo != NULL )
   {
-    // we need room for two full path names (data + index) plus room for the separator
-    int iRequiredLength = (2 * strlen(pMemInfo->szFullPath)) + 2 + 1;
-
     // get memory property file name
-    std::string strPropName;
-    std::string strMemPath = pMemInfo->szFullPath;
-    this->makePropName( strMemPath, strPropName ); 
+    std::string strPropName = pMemInfo->szFullPath;
+    std::string strMemName = strPropName.substr(0, strPropName.size()-4); 
+    std::string strMemDataFile = strMemName + EXT_OF_TMDATA ;
+    std::string strMemIndexFile = strMemName + EXT_OF_TMINDEX ;
+    std::string res = strPropName + ',' + strMemDataFile + ',' + strMemIndexFile;
 
-    // now add the length of the property file name
-    iRequiredLength += strPropName.length() + 1;
-
-    if ( iRequiredLength <= iBufferSize )
+    if ( res.size() <= iBufferSize )
     {
-      // add property name to buffer
-      strcat( pFileListBuffer, strPropName.c_str() ); 
-      strcat( pFileListBuffer, "," ); 
-
-      // add data file name to buffer
-      strcat( pFileListBuffer, pMemInfo->szFullPath ); 
-      strcat( pFileListBuffer, "," ); 
-
-      // setup index file name
-      char szIndexPath[MAX_LONGFILESPEC];
-      this->makeIndexFileName( pMemInfo->szFullPath, szIndexPath );
-
-      // add index file name to buffer
-      strcat( pFileListBuffer, szIndexPath ); 
-
+      strcpy( pFileListBuffer, res.c_str() ); 
     }
     else
     {
