@@ -175,6 +175,16 @@ int FilesystemHelper::DeleteFile(const std::string& path){
 }
 
 
+bool FilesystemHelper::FileExists(std::string&& path){
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
+    struct stat buffer;   
+    bool exists = (stat (fixedPath.c_str(), &buffer) == 0); 
+    LogMessage5(INFO, __func__, ":: file \'", fixedPath.c_str(),"\' returned ", toStr(exists));
+    return exists;
+}
+
+
 int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);

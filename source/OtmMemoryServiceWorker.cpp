@@ -932,39 +932,32 @@ int OtmMemoryServiceWorker::createMemory
   {
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
-    {
-      LogMessage4(DEBUG, "JSON parsed name = ", name.c_str(), "; value = ",value.c_str());
+    {      
       if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {
         strData = value;
+        LogMessage4(DEBUG, "JSON parsed name = ", name.c_str(), "; size = ", toStr(strData.size()));
       }
-      else if ( strcasecmp( name.c_str(), "name" ) == 0 )
-      {
-        strName = value;
-      }
-      else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
-      {
-        strSourceLang = value;
-      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
-        int loggingThreshold = std::stoi(value);
-        LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
-        SetLogLevel(loggingThreshold);        
-      }else{
-        LogMessage4(WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+      else{
+        LogMessage4(DEBUG, "JSON parsed name = ", name.c_str(), "; value = ",value.c_str());
+        if ( strcasecmp( name.c_str(), "name" ) == 0 )
+        {
+          strName = value;
+        }
+        else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
+        {
+          strSourceLang = value;
+        }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+          int loggingThreshold = std::stoi(value);
+          LogMessage2(WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
+          SetLogLevel(loggingThreshold);        
+        }else{
+          LogMessage4(WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+        }
       }
     }
   } /* endwhile */
   factory->parseJSONStop( parseHandle );
-
-  //std::wstring strInputParmsW = convertToUTF16( strInputParms );
-
-  //PCREATEMEMORYDATA pData = new( CREATEMEMORYDATA );
-  //memset( pData, 0, sizeof( CREATEMEMORYDATA ) );
-  //JSONFactory *factory = JSONFactory::getInstance();
-  //JSONFactory::JSONPARSECONTROL parseControl[] = { { L"name", JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szMemory ), sizeof( pData->szMemory ) },
-  //                                                 { L"sourceLang",  JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
-  //                                                 { L"data",  JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
-  //                                                 { L"",      JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   if ( strName.empty() )
   {

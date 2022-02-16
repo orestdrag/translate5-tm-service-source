@@ -1093,9 +1093,9 @@ void MemoryFactory::refreshPluginList()
       pSharedMemPluginList->push_back( curSharedPlugin );
       if ( strcasecmp( curSharedPlugin->getName(), DEFAULTSHAREDMEMORYPLUGIN ) == 0 )
       {
-		// P403634 
+		    // P403634 
         //strcpy( this->szDefaultMemoryPlugin, curSharedPlugin->getName() );
-		strcpy( this->szDefaultSharedMemoryPlugin, curSharedPlugin->getName() );
+		    strcpy( this->szDefaultSharedMemoryPlugin, curSharedPlugin->getName() );
 
       }
     }
@@ -1106,9 +1106,16 @@ void MemoryFactory::refreshPluginList()
   {
     strcpy( this->szDefaultSharedMemoryPlugin, (*pSharedMemPluginList)[0]->getName() );
   }
-
 }
 
+const char* GetFileExtention(std::string file){
+  auto lastDot = file.rfind('.');
+  if(lastDot>0){
+    return &file[lastDot];
+  }else{
+    return &file[0];
+  }
+}
 /*! \brief process the API call: EqfImportMemInInternalFormat and import a memory using the internal memory files
   \param pszMemory name of the memory being imported
   \param pszMemoryPackage name of a ZIP archive containing the memory files
@@ -1138,42 +1145,51 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   // make temporary directory for the memory files of the package
   char szTempDir[MAX_PATH];
   properties_get_str( KEY_OTM_DIR, szTempDir, MAX_PATH);
+  std::string memDir = szTempDir;
+  memDir  +=  "/MEM/";
   strcat( szTempDir, "/TEMP/" );
   FilesystemHelper::CreateDir( szTempDir );
   strcat( szTempDir, "/MemImp/" );
   FilesystemHelper::CreateDir( szTempDir );
   strcat( szTempDir, pszMemoryName );
+  strcat (szTempDir, "/");
   FilesystemHelper::CreateDir( szTempDir );
 
   // unpzip the package
   ZipHelper::ZipExtract( pszMemoryPackage, szTempDir );
-
-  // build list of files
-  std::string strMemFiles;
-  {
-    //std::string strFilenamePattern = szTempDir + std::string("/");
-    auto files = FilesystemHelper::GetFilesList(szTempDir);
-    std::string coma = ",";
-    //strMemFiles = strFilenamePattern + EXT_OF_MEM + coma 
-    //            + strFilenamePattern + EXT_OF_TMDATA + coma 
-    //            + strFilenamePattern + EXT_OF_TMINDEX;  
-    for(auto file: files){
-      strMemFiles += file + coma;
-    }
-    strMemFiles.pop_back();//to pop last coma
-
-  }
   
-  LogMessage3(INFO, __func__, ":: seached files list is ", strMemFiles.c_str());
-  // call memory plugin to process the files
-  OtmMemoryPlugin *pPlugin =  (OtmMemoryPlugin *)getPlugin( DEFAULTMEMORYPLUGIN );
-  if ( pPlugin != NULL )
-  {
-    PVOID pvPluginData = NULL;
-    iRC = pPlugin->importFromMemoryFiles( (PSZ)pszMemoryName,(PSZ) strMemFiles.c_str(), 
-        OtmMemoryPlugin::IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT, &pvPluginData );
-  }
+  {   
+    auto files = FilesystemHelper::GetFilesList(szTempDir);
 
+    //std::string fName;    
+    for( auto file: files ){
+      //auto lastSlash = file.rfind('/');
+      //fName = file.substr(lastSlash);
+      //std::string targetFName = memDir + fName;
+      if(file.size() <= 4){
+        continue;
+      }
+      std::string targetFName = memDir + pszMemoryName + GetFileExtention(file);
+      if(FilesystemHelper::FileExists(targetFName.c_str())){
+         LogMessage3(ERROR, __func__,":: file exists, fName = ", targetFName.c_str());
+         iRC = -1;
+         break;
+      }
+    }
+
+    if( !iRC ){
+      for( auto file:files){
+        //auto lastSlash = file.rfind('/');
+        //fName = file.substr(lastSlash);
+        if(file.size() <= 4){
+          continue;
+        }
+        std::string targetFName = memDir + pszMemoryName + GetFileExtention(file);
+        std::string oldFName = szTempDir + file;
+        FilesystemHelper::MoveFile(oldFName, targetFName);
+      }
+    }
+  }
   // delete any files left over and remove the directory
   if(CheckLogLevel(DEBUG) == false){
     FilesystemHelper::RemoveDirWithFiles( szTempDir );
@@ -1263,7 +1279,6 @@ USHORT MemoryFactory::APIOpenMem
   LONG        lOptions 
 )
 {
-  lOptions;
   PSZ pszMemName = (PSZ)pszMemoryName;
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
@@ -1315,19 +1330,14 @@ USHORT MemoryFactory::APICloseMem
   LONG        lOptions 
 )
 {
-  USHORT usRC = 0;
-
-  lOptions;
-
   OtmMemory *pMem = handleToMemoryObject( lHandle );
-
   if ( pMem == NULL )
   {
     LogMessage2(ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL )");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
-  usRC = (USHORT)this->closeMemory( pMem );
+  USHORT usRC = (USHORT)this->closeMemory( pMem );
 
   return( usRC );
 }
@@ -1350,7 +1360,6 @@ USHORT MemoryFactory::APIQueryMem
 )
 {
   USHORT usRC = 0;
-  OtmProposal SearchKey;
   std::vector<OtmProposal *> vProposals;
   for ( int i = 0; i < *piNumOfProposals; i++ ) vProposals.push_back( new(OtmProposal) );
 
@@ -1376,6 +1385,7 @@ USHORT MemoryFactory::APIQueryMem
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
+  OtmProposal SearchKey;
   copyMemProposalToOtmProposal( pSearchKey, &SearchKey );
   usRC = (USHORT)pMem->searchProposal( SearchKey, vProposals, lOptions );
   *piNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
@@ -1397,10 +1407,8 @@ static wchar_t* wcsupr(wchar_t *str)
 }
 
 ULONG GetTickCount(){
-  struct timespec t;
-  //t = (struct timespec *)malloc(sizeof(timespec)); 
+  struct timespec t; 
   clock_gettime(CLOCK_MONOTONIC, &t);
-  
   return t.tv_nsec;
 }
 
@@ -1426,7 +1434,6 @@ USHORT MemoryFactory::APISearchMem
   USHORT usRC = 0;
   int iRC = 0;                         // code returned from memory object methods
   BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
-
   OtmProposal *pOtmProposal = new (OtmProposal);
 
   if ( (pszSearchString == NULL) || (*pszSearchString  == EOS)  )
@@ -1451,7 +1458,6 @@ USHORT MemoryFactory::APISearchMem
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );
-
   if ( pMem == NULL )
   {
     LogMessage2(ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE::");
@@ -1528,7 +1534,6 @@ USHORT MemoryFactory::APISearchMem
   }
 
   delete( pOtmProposal );
-
   return( usRC );
 }
 
@@ -1548,8 +1553,6 @@ USHORT MemoryFactory::APIUpdateMem
 {
   OtmProposal *pOtmProposal = new ( OtmProposal );
 
-  lOptions;
-
   if ( ( pNewProposal == NULL ) )
   {
     char* pszParm = "pointer to proposal";
@@ -1558,7 +1561,6 @@ USHORT MemoryFactory::APIUpdateMem
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );
-
   if ( pMem == NULL )
   {
     return( INVALIDFILEHANDLE_RC );
@@ -1631,9 +1633,6 @@ typedef struct _APILISTMEMDATA
 int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo )
 {
   PAPILISTMEMDATA pData = ( PAPILISTMEMDATA )pvData;
-
-  //pInfo;
-
   LONG lNameLen = strlen( pszName );
 
   if ( pData->pszBuffer != NULL )
@@ -1686,10 +1685,8 @@ USHORT MemoryFactory::APIListMem
   for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
   {
     OtmSharedMemoryPlugin *pluginCurrent = ( *pSharedMemPluginList )[i];
-
     pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
   } /* endfor */
-
 
   return( 0 );
 }
