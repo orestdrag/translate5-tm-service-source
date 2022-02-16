@@ -95,7 +95,6 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
         LogMessage4(INFO,"MoveFile:: file moved from ", fixedOldPath.c_str()," to ", fixedNewPath.c_str());
     }
     return 0;
-
 }
 
 FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mode, bool useBuffer){
@@ -174,6 +173,26 @@ int FilesystemHelper::DeleteFile(const std::string& path){
         return FILEHELPER_NO_ERROR;
     }
 }
+
+
+int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
+    std::string fixedPath = path;
+    fixedPath = FixPath(fixedPath);
+    //if(int errCode = remove(path.c_str())){
+    std::string command = "rm -r ";
+    command += fixedPath;
+    system(command.c_str());
+    
+    if(int errCode = system(command.c_str()) ){
+        LogMessage4(ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
+        return errCode;
+    }else{
+        LogMessage3(DEBUG, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
+        return FILEHELPER_NO_ERROR;
+    }
+}
+
+
 /*
 int FilesystemHelper::DeleteFile(FILE*  ptr){
     if(!ptr)
@@ -405,6 +424,24 @@ FILE* FilesystemHelper::FindNextFile(){
     return OpenFile(path, "wb");
     #endif 
 
+}
+
+std::vector<std::string> FilesystemHelper::GetFilesList(std::string&& directory){
+    DIR *dir; struct dirent *diread;
+    std::vector<std::string> files;
+
+    if ((dir = opendir(directory.c_str())) != nullptr) {
+        while ((diread = readdir(dir)) != nullptr) {
+            files.push_back(diread->d_name);
+        }
+        closedir (dir);
+    } else {
+        LogMessage3(ERROR,__func__,":: can't open dir, path = ", directory.c_str());
+        return {};
+    }
+
+    LogMessage5(ERROR,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
+    return files;
 }
 
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){

@@ -424,7 +424,7 @@ int EqfMemoryPlugin::importFromMemoryFiles
   PVOID *ppPrivateData
 )
 {
-  {
+  if(CheckLogLevel(DEBUG)){
     char buff[360];
     sprintf(buff,"EqfMemoryPlugin::importFromMemoryFiles(pszMemoryName=%s,pFileList=%s, iOptions=%d, ppPrivateData=%s)", pszMemoryName,pFileList, iOptions, ppPrivateData);
     LogMessage(DEBUG, buff);

@@ -30,6 +30,9 @@ Copyright Notice:
 #include "MemoryFactory.h"
 #include "OptionsDialog.H"
 #include "LogWrapper.h"
+#include "FilesystemHelper.h"
+#include "PropertyWrapper.H"
+#include "ZipHelper.h"
 
 #include "vector"
 #include <string>
@@ -1134,44 +1137,36 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
   // make temporary directory for the memory files of the package
   char szTempDir[MAX_PATH];
-  UtlMakeEQFPath( szTempDir, EOS, IMPORT_PATH, NULL );
+  properties_get_str( KEY_OTM_DIR, szTempDir, MAX_PATH);
+  strcat( szTempDir, "/TEMP/" );
+  FilesystemHelper::CreateDir( szTempDir );
   strcat( szTempDir, "/MemImp/" );
+  FilesystemHelper::CreateDir( szTempDir );
   strcat( szTempDir, pszMemoryName );
-  UtlMkMultDir( szTempDir, FALSE );
+  FilesystemHelper::CreateDir( szTempDir );
 
   // unpzip the package
-  UtlUnzipToDirectory( pszMemoryPackage, szTempDir );
+  ZipHelper::ZipExtract( pszMemoryPackage, szTempDir );
 
   // build list of files
   std::string strMemFiles;
   {
-    WIN32_FIND_DATA FindData;
-    std::string strSearchPattern = szTempDir;
-    strSearchPattern.append( "/*.*" );
-    LogMessage6(ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), HANDLE hDir = FindFirstFile("
-      , strSearchPattern.c_str(), ", &FindData =","FindData",")");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    HANDLE hDir = FindFirstFile( strSearchPattern.c_str(), &FindData );
-    if ( hDir != INVALID_HANDLE_VALUE )
-    {
-      BOOL fMoreFiles = TRUE;
-      do
-      {
-        if ( !(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-        {
-          if ( !strMemFiles.length() == 0 ) strMemFiles.append( "," );
-          strMemFiles.append( szTempDir );
-          strMemFiles.append( "/" );
-          strMemFiles.append( FindData.cFileName );
-        }
-        fMoreFiles = FindNextFile( hDir, &FindData );
-      } while ( fMoreFiles );
-      FindClose( hDir );
+    //std::string strFilenamePattern = szTempDir + std::string("/");
+    auto files = FilesystemHelper::GetFilesList(szTempDir);
+    std::string coma = ",";
+    //strMemFiles = strFilenamePattern + EXT_OF_MEM + coma 
+    //            + strFilenamePattern + EXT_OF_TMDATA + coma 
+    //            + strFilenamePattern + EXT_OF_TMINDEX;  
+    for(auto file: files){
+      strMemFiles += file + coma;
     }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+    strMemFiles.pop_back();//to pop last coma
+
   }
+  
+  LogMessage3(INFO, __func__, ":: seached files list is ", strMemFiles.c_str());
   // call memory plugin to process the files
-  OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)getPlugin( DEFAULTMEMORYPLUGIN );
+  OtmMemoryPlugin *pPlugin =  (OtmMemoryPlugin *)getPlugin( DEFAULTMEMORYPLUGIN );
   if ( pPlugin != NULL )
   {
     PVOID pvPluginData = NULL;
@@ -1180,11 +1175,9 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   }
 
   // delete any files left over and remove the directory
-  UtlDeleteAllFiles( (const char *)szTempDir );
-  LogMessage3(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE in MemoryFactory::APIImportMemInInternalFormat(), RemoveDirectory, szTempDir = ", szTempDir);
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  RemoveDirectory( szTempDir );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  if(CheckLogLevel(DEBUG) == false){
+    FilesystemHelper::RemoveDirWithFiles( szTempDir );
+  }
 
   return( (USHORT)iRC );
 }

@@ -96,8 +96,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
         usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, &Info );
         if (usRC != 0)
         {
-            fOK = FALSE;
-                          
+          fOK = FALSE;                
           LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
         }
    }
@@ -107,7 +106,6 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
    {
      int iRC = pFactory->deleteMemory( NULL,pszMemName);
      fOK = (iRC==0)?TRUE:FALSE;
-     
    }
 
    /*******************************************************************/

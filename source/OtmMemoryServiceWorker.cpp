@@ -933,7 +933,6 @@ int OtmMemoryServiceWorker::createMemory
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
-
       LogMessage4(DEBUG, "JSON parsed name = ", name.c_str(), "; value = ",value.c_str());
       if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {

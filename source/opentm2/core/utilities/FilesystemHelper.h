@@ -60,10 +60,12 @@ public:
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 
     static int DeleteFile(const std::string& path);
+    static int RemoveDirWithFiles(const std::string& path);
     static size_t GetFileSize(const std::string& path);
     static size_t GetFileSize(FILE*& ptr);
     static size_t GetFilebufferSize(const std::string& path);
     static size_t GetTotalFilebuffersSize();
+
 
     static FILE* OpenFile(const std::string& path, const std::string& mode, bool useBuffer = true);
     static int CloseFile(FILE*& ptr);
@@ -71,6 +73,7 @@ public:
 
     static FILE* FindFirstFile(const std::string& name);
     static FILE* FindNextFile();
+    static std::vector<std::string>  GetFilesList(std::string&& directory);
 
     static std::string GetFileName(HFILE ptr);
 
