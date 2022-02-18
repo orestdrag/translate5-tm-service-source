@@ -1160,12 +1160,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
   
   {   
     auto files = FilesystemHelper::GetFilesList(szTempDir);
-
-    //std::string fName;    
     for( auto file: files ){
-      //auto lastSlash = file.rfind('/');
-      //fName = file.substr(lastSlash);
-      //std::string targetFName = memDir + fName;
       if(file.size() <= 4){
         continue;
       }
@@ -1179,8 +1174,6 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
     if( !iRC ){
       for( auto file:files){
-        //auto lastSlash = file.rfind('/');
-        //fName = file.substr(lastSlash);
         if(file.size() <= 4){
           continue;
         }

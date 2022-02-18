@@ -87,6 +87,9 @@ std::string EncodingHelper::convertToUTF8(const wchar_t* UTF16String)
 }
 
 std::string EncodingHelper::convertToUTF8( const std::u16string& strUTF16String ){
+  if(strUTF16String.empty()){
+    return {};
+  }
     std::string u8_conv = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(strUTF16String);
 
 	return u8_conv;
