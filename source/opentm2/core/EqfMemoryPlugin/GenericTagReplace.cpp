@@ -328,8 +328,6 @@ BOOL     NTMTagSubst
   if ( fOK && pReplaceList )
   {
     memcpy( pCopyTokList2, pSubstProp->pTokSource, pSubstProp->usTokenSource * sizeof(FUZZYTOK));
-    //LogMessage(FATAL,"TEMPORARY_COMMENTED in NTMTagSubst::FuzzyLCSReplList");
-    //      #ifdef TEMPORARY_COMMENTED
     fOK = (BOOL)FuzzyLCSReplList( (PFUZZYTOK)pSubstProp->pTokPropSource,
                                   (PFUZZYTOK)pSubstProp->pTokSource,
                                   &pReplaceSourceList,

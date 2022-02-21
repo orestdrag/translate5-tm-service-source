@@ -32,7 +32,7 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
 
 }
 
-std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src);
+std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, bool fSkipAttributes = false);
 std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
 {
   return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src));
