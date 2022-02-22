@@ -198,17 +198,28 @@ extern "C"
 // IDs of TMX elelements
 typedef enum
 {
-  TMX_ELEMENT,
-  PROP_ELEMENT,
-  HEADER_ELEMENT,
-  TU_ELEMENT,
-  TUV_ELEMENT,
-  BODY_ELEMENT,
-  SEG_ELEMENT,
+  TMX_ELEMENT     = 0,
+  PROP_ELEMENT    = 1,
+  HEADER_ELEMENT  = 2,
+  TU_ELEMENT      = 3,
+  TUV_ELEMENT     = 4,
+  BODY_ELEMENT    = 5,
+  SEG_ELEMENT     = 6,
+  SEGMENT_TAGS    = 7,
+
   //pair tags
-  BPT_ELEMENT, EPT_ELEMENT, G_ELEMENT, HI_ELEMENT, SUB_ELEMENT,
+  BEGIN_PAIR_TAGS = 10,
+  BPT_ELEMENT     = 10, 
+  EPT_ELEMENT     = 11,
+  G_ELEMENT       = 12,
+  HI_ELEMENT      = 13,
+  SUB_ELEMENT     = 14,
+  END_PAIR_TAGS   = 14,
+
   //standalone tags
-  PH_ELEMENT, X_ELEMENT,BX_ELEMENT, EX_ELEMENT, IT_ELEMENT, UT_ELEMENT,
+  BEGIN_STANDALONE_TAGS = 20,
+  PH_ELEMENT, X_ELEMENT,
+  BX_ELEMENT, EX_ELEMENT, IT_ELEMENT, UT_ELEMENT,
   TMX_SENTENCE_ELEMENT,
   INVCHAR_ELEMENT,
   UNKNOWN_ELEMENT
@@ -221,13 +232,13 @@ typedef struct _TMXNAMETOID
 } TMXNAMETOID, *PTMXNAMETOID;
 
 TMXNAMETOID TmxNameToID[] = {
-     {"tmx", TMX_ELEMENT},
-     {"prop", PROP_ELEMENT},
+     {"tmx",    TMX_ELEMENT},
+     {"prop",   PROP_ELEMENT},
      {"header", HEADER_ELEMENT},
-     {"tu", TU_ELEMENT},
-     {"tuv", TUV_ELEMENT},
-     {"body", BODY_ELEMENT},
-     {"seg", SEG_ELEMENT},    
+     {"tu",     TU_ELEMENT},
+     {"tuv",    TUV_ELEMENT},
+     {"body",   BODY_ELEMENT},
+     {"seg",    SEG_ELEMENT},    
 
      // paired tags     
      {"bpt",      BPT_ELEMENT},
@@ -245,8 +256,8 @@ TMXNAMETOID TmxNameToID[] = {
      { "ut",      UT_ELEMENT },
 
      {"TMXSentence", TMX_SENTENCE_ELEMENT},
-     {"invchar", INVCHAR_ELEMENT},
-     {"", UNKNOWN_ELEMENT}
+     {"invchar",     INVCHAR_ELEMENT},
+     {"",            UNKNOWN_ELEMENT}
 };
 	 
 
@@ -264,13 +275,23 @@ size_t str16len(const char16_t* source)
     while((*temp++ = *source++) != 0) ;
     return temp-source;
 }	 
-  struct PairTagInfo
+  struct TagInfo
   {
-    int i;
-    int x;
-    std::u16string name;
-    PairTagInfo(){
-      i=0;x=0; //name[0]=0;
+    bool fPairedTag;       // is tag is paired tag (bpt, ept, )
+    bool fPairedTagClosed; // false for bpt tag - waiting for matching ept tag 
+    bool fTagUsedInTarget; // we save tags only from source segment and then try to match\bind them in target
+    int i;                 // for pair tags - generated identifier to find matching tag. the same as in original_i if it's not binded to other tag in segment
+    int x;                 // id of tag. should match original_x, if it's not occupied by other tags
+    
+    int original_i;        // original paired tags i
+    int original_x;        // original id of tag
+    int original_tag;      // original tag
+    //std::u16string name;   // original tag
+
+    TagInfo(){
+      i = x = original_i = original_x = -1; // 
+      fPairedTag = fPairedTagClosed = fTagUsedInTarget = false; 
+      //name[0]=0;
     }
   };
 
@@ -357,7 +378,7 @@ private:
   //idAttr==-1 -> look for id in attributes
   //iAttr==-1 ->i attribute not used 
   //tag should be only "ph", "bpt", or "ept"
-  std::wstring GenerateReplacingTag(std::wstring tag, AttributeList* attributes, int idAttr=-1, int iAttr=-1);
+  std::wstring GenerateReplacingTag(int tagType, AttributeList* attributes, int idAttr=-1, int iAttr=-1);
 
   // date conversion help functions
   BOOL IsLeapYear( const int iYear );
@@ -386,6 +407,8 @@ private:
   USHORT usTranslationFlag;            // type of translation flag
   int   iNumOfTu;
 
+  std::vector<TagInfo> sourceTagList;
+
   // buffers
   #define DATABUFFERSIZE 4098
 
@@ -412,10 +435,10 @@ private:
     
     //for enclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> enclosing tags skipping should be ignored
     bool        fSegmentStartsWithBPTTag;
-    PairTagInfo firstBptTag;
-    PairTagInfo lastEptTag;
+    //PairTagInfo firstBptTag;
+    //PairTagInfo lastEptTag;
 
-    std::vector<PairTagInfo> openedTags;// holds all 'open' pair tags, remove
+    //std::vector<PairTagInfo> openedTags;// holds all 'open' pair tags, remove
   } BUFFERAREAS, *PBUFFERAREAS;
 
   PBUFFERAREAS pBuf; 
@@ -1469,6 +1492,8 @@ TMXParseHandler::TMXParseHandler()
 
   ulCP = GetLangOEMCP( NULL );
 
+  this->sourceTagList.reserve(50);
+
 }
 
 TMXParseHandler::~TMXParseHandler()
@@ -1527,8 +1552,9 @@ std::wstring TMXParseHandler::GetParsedData() const
   return pBuf->szData;
 }
 
-std::wstring TMXParseHandler::GenerateReplacingTag(std::wstring tag, AttributeList* attributes, int idAttr, int iAttr){
+std::wstring TMXParseHandler::GenerateReplacingTag(int TagType, AttributeList* attributes, int idAttr, int iAttr){
   
+  std::wstring tag;
   std::wstring res = L"<" +tag;
   if(  tag != L"bpt"
     && tag != L"ept"
@@ -1788,10 +1814,12 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szMatchSegID[0] = 0;
         pBuf->ulWords = 0;
 
+        sourceTagList.clear();
         // reset TUV array
         iCurTuv = 0;
         this->iNumOfTu += 1;
 
+        this->sourceTagList.clear();
         ulSegNo = this->iNumOfTu; // preset segment number
 
         // scan <tu> attributes, currently the data type, the tuid and the creationdate are of interest
@@ -1892,33 +1920,13 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->iHighestBPTI = 0;
         pBuf->iHighestId = 0;
         pBuf->szData[0] = 0; // reset data buffer
-        pBuf->openedTags.clear();
-
+        //pBuf->openedTags.clear();
 
         //reset enclosing tags flags
         pBuf->fSegmentStartsWithBPTTag = 0;
         
-        memset(&(pBuf->firstBptTag), 0, sizeof(pBuf->firstBptTag));
-        //pBuf->firstBptTag.i=0;
-        //pBuf->firstBptTag.x=0;
-        //pBuf->firstBptTag.name = std::u16string{};
-        /*
-        if(pBuf->firstBptTag){
-          delete pBuf->firstBptTag;
-        }
-        pBuf->firstBptTag = new PairTagInfo();
-        //*/
-
-        //pBuf->lastEptTag.i=0;
-        //pBuf->lastEptTag.x=0;
-        //pBuf->lastEptTag.name = u"";
-        /*
-        if(pBuf->lastEptTag){
-          delete pBuf->lastEptTag;
-        }
-        pBuf->lastEptTag = new PairTagInfo();
-        //*/
-        memset(&(pBuf->lastEptTag), 0, sizeof(pBuf->firstBptTag));
+        //memset(&(pBuf->firstBptTag), 0, sizeof(pBuf->firstBptTag));
+        //memset(&(pBuf->lastEptTag), 0, sizeof(pBuf->firstBptTag));
 
         fCatchData = TRUE;    
         break;
@@ -1930,7 +1938,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       { 
         int iCurLen = wcslen(pBuf->szData);        
 
-        std::wstring replacingTag = GenerateReplacingTag(L"ph", &attributes); //L"<ph x=\'"+ EncodingHelper::toWChar(id) + L"\'/>"; 
+        std::wstring replacingTag = GenerateReplacingTag(CurElement.ID , &attributes); //L"<ph x=\'"+ EncodingHelper::toWChar(id) + L"\'/>"; 
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
           LogMessage5(INFO,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
           wcscat(pBuf->szData, replacingTag.c_str());
@@ -1944,46 +1952,26 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
       case BPT_ELEMENT:
       case BX_ELEMENT:
-      {    
-         /*// delegate code belowe to GenerateReplacingTag()
-        std::u16string id; // id value could be stored in id attribute or x attribute
-        if( char16_t* _id = (char16_t*) attributes.getValue("id") ){
-          id = _id;          
-        }else if(char16_t* _id = (char16_t*) attributes.getValue("x")){
-          id = _id;  
-        }
-        
-        if(id.empty()){
-          id = EncodingHelper::toUtf16(std::to_wstring(++(pBuf->iHighestId)));
-          LogMessage6(ERROR,__func__, ":: cant find id attribute in \'", pszName, "\' tag, used autogenerated id = \'",EncodingHelper::toChar(id).c_str(), "\' ");
-        }else{ //we found id in attributes -> store it's value to generate highest values for other tags
-          int nId = std::stoi( EncodingHelper::toWChar(id) );
-          if(nId){
-            pBuf->iHighestId = nId;
-          }
-        }
-
-        std::wstring replacingTag = L"<bpt i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\' x=\'"+ EncodingHelper::toWChar(id) + L"\'/>"; 
-        //*/
-        std::wstring replacingTag = GenerateReplacingTag(L"bpt", &attributes, -1, -1);
+      {   
+        //std::wstring replacingTag = GenerateReplacingTag(L"bpt", &attributes, -1, -1);
+        std::wstring replacingTag = GenerateReplacingTag(CurElement.ID, &attributes, -1, -1);
         int iCurLen = wcslen(pBuf->szData);
         fCatchData = false;
         CurElement.fInsideTagging = true;
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
           //save in pBuf that we have bpt with some id
-          PairTagInfo tag;
-          tag.i = pBuf->iHighestBPTI;
-          if(char16_t* _i = (char16_t*)attributes.getValue("i")){
-            //str16cpy(tag.name, _i);
-            tag.name = _i;
-            tag.i = std::stoi(EncodingHelper::toChar(_i));
-          }
-          //if(str16len(tag.name)){
-          if(tag.name.empty()){
-            LogMessage2(WARNING,__func__, ":: cant find i attribute in bpt tag");
-          }
+          //TagInfo tag;
+          //tag.i = pBuf->iHighestBPTI;
+          //if(char16_t* _i = (char16_t*)attributes.getValue("i")){            
+          //  tag.name = _i;
+          //  tag.i = std::stoi(EncodingHelper::toChar(_i));
+          //}
+          
+          //if(tag.name.empty()){
+          //  LogMessage2(WARNING,__func__, ":: cant find i attribute in bpt tag");
+          //}
 
-          pBuf->openedTags.push_back(tag);            
+          //pBuf->openedTags.push_back(tag);            
 
           LogMessage5(INFO,__func__,":: parsed bpt tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           wcscat(pBuf->szData, replacingTag.c_str());
@@ -2006,84 +1994,49 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         if(name.empty()){
           LogMessage4(ERROR,__func__, ":: cant find i attribute in \'", pszName,"\' tag");
         }
-
-        /*// delegate code belowe to GenerateReplacingTag()
-        std::u16string id; // id value could be stored in id attribute or x attribute
-        if( char16_t* _id = (char16_t*) attributes.getValue("id") ){
-          id = _id;          
-        }else if(char16_t* _id = (char16_t*) attributes.getValue("x")){
-          id = _id;  
-        }
         
-        if(id.empty()){
-          id = EncodingHelper::toUtf16(std::to_wstring(++(pBuf->iHighestId)));
-          LogMessage6(ERROR,__func__, ":: cant find id attribute in \'", pszName, "\' tag, used autogenerated id = \'",EncodingHelper::toChar(id).c_str(), "\' ");
-        }else{ //we found id in attributes -> store it's value to generate highest values for other tags
-          int nId = std::stoi( EncodingHelper::toWChar(id) );
-          if(nId){
-            pBuf->iHighestId = nId;
-          }
-        }//*/
-        
-        auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
-                                [&name](PairTagInfo& i) { return i.name == name;});
+        //auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
+        //                        [&name](PairTagInfo& i) { return i.name == name;});
 
-        if(tag != pBuf->openedTags.rend()){
-          //std::wstring replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\' x=\'"+ EncodingHelper::toWChar(id) + L"\'/>"; 
-          std::wstring replacedTag = GenerateReplacingTag(L"ept", &attributes, -1 , tag->i);
+        //if(tag != pBuf->openedTags.rend()){
+          //std::wstring replacedTag = GenerateReplacingTag(L"ept", &attributes, -1 , -1); // tag->i);
+          std::wstring replacedTag = GenerateReplacingTag(CurElement.ID, &attributes, -1 , -1); // tag->i);
           int iCurLen = wcslen(pBuf->szData);
           if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){        
             LogMessage7(INFO,__func__,":: parsed \'", pszName,"\' tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacedTag).c_str());
             wcscat(pBuf->szData, replacedTag.c_str());
             //remove tag that we just close 
-            pBuf->openedTags.erase(tag.base());
+          //  pBuf->openedTags.erase(tag.base());
             break;
           }else{
             LogMessage3(WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacedTag).c_str());
             pBuf->iHighestId--;
             break;
           }
-        }else{
-          LogMessage4(WARNING, __func__,":: tag not found in opened tags",//, tag i=", // EncodingHelper::convertToUTF8(name).c_str(), 
-                ", name=", EncodingHelper::convertToUTF8(name.c_str()));
+        //}else{
+        //  LogMessage4(WARNING, __func__,":: tag not found in opened tags",//, tag i=", // EncodingHelper::convertToUTF8(name).c_str(), 
+        //        ", name=", EncodingHelper::convertToUTF8(name.c_str()));
           break;
-        }
+        //}
       }
       case HI_ELEMENT:
       case SUB_ELEMENT:
       case G_ELEMENT:
-      {
-        /*// delegate code belowe to GenerateReplacingTag()
-        std::u16string id; // id value could be stored in id attribute or x attribute
-        if( char16_t* _id = (char16_t*) attributes.getValue("id") ){
-          id = _id;          
-        }else if(char16_t* _id = (char16_t*) attributes.getValue("x")){
-          id = _id;  
-        }
-        
-        if(id.empty()){
-          id = EncodingHelper::toUtf16(std::to_wstring(++(pBuf->iHighestId)));
-          LogMessage6(ERROR,__func__, ":: cant find id attribute in \'", pszName, "\' tag, used autogenerated id = \'",EncodingHelper::toChar(id).c_str(), "\' ");
-        }else{ //we found id in attributes -> store it's value to generate highest values for other tags
-          int nId = std::stoi( EncodingHelper::toWChar(id) );
-          if(nId){
-            pBuf->iHighestId = nId;
-          }
-        }//*/
-
+      {      
         //fCatchData = false;
-        //std::wstring replacingTag = L"<bpt i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\' x=\'"+ EncodingHelper::toWChar(id) + L"\'/>"; 
 
-        std::wstring replacingTag = GenerateReplacingTag(L"bpt", &attributes, -1, -1);
+        //std::wstring replacingTag = GenerateReplacingTag(L"bpt", &attributes, -1, -1);
+        std::wstring replacingTag = GenerateReplacingTag(CurElement.ID, &attributes, -1, -1);
+
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){     
 
           //save in pBuf that we have bpt with some id
-          PairTagInfo tag;
-          tag.i = pBuf->iHighestBPTI;
+          //PairTagInfo tag;
+          //tag.i = pBuf->iHighestBPTI;
           //str16cpy(tag.name, u16name.c_str());
-          tag.name = u16name;
-          pBuf->openedTags.push_back(tag);            
+          //tag.name = u16name;
+          //pBuf->openedTags.push_back(tag);            
 
           LogMessage5(INFO,__func__,":: parsed pair tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           wcscat(pBuf->szData, replacingTag.c_str());
@@ -2111,7 +2064,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         u16name = (char16_t*)attributes.getValue( i );
         std::string sVal = EncodingHelper::convertToUTF8(u16name);
         LogMessage6(DEVELOP, "Parsed atribute : ", toStr(i).c_str(), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
-        //fprintf( hfLog, "Attribute %ld: Name=%S, Value=%S\n", i, pszName, pszValue );
       } /* endfor */
     }
 }
@@ -2505,11 +2457,10 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           //to
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
           int len = wcslen(pBuf->szData);
-          //std::wstring begPairTag = L"<bpt i=\'1\' id=\'" + std::to_wstring(++(pBuf->iHighestId)) + L"\'/>";// TO_DO - replace with actual first id
-          //std::wstring endPairTag = L"<ept i=\'1\' id=\'" + std::to_wstring(++(pBuf->iHighestId)) + L"\'/>";// TO_DO - replace with actual last id
-          
-          std::wstring begPairTag = GenerateReplacingTag(L"bpt", nullptr, pBuf->firstBptTag.x, pBuf->firstBptTag.i);
-          std::wstring endPairTag = GenerateReplacingTag(L"ept", nullptr, pBuf->lastEptTag.x, pBuf->lastEptTag.i);
+
+          //TODO
+          std::wstring begPairTag ;//= GenerateReplacingTag(L"bpt", nullptr, pBuf->firstBptTag.x, pBuf->firstBptTag.i);
+          std::wstring endPairTag ;//= GenerateReplacingTag(L"ept", nullptr, pBuf->lastEptTag.x, pBuf->lastEptTag.i);
 
           const size_t inclosingTagsLenSum = begPairTag.size() + endPairTag.size();
 
@@ -2553,21 +2504,23 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     case SUB_ELEMENT:
     case G_ELEMENT: 
     {        
-      auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
-                              [&u16name](PairTagInfo& i) { return i.name == u16name;});
+      //TODO
+      //auto tag = std::find_if(pBuf->openedTags.rbegin(), pBuf->openedTags.rend(),
+      //                        [&u16name](PairTagInfo& i) { return i.name == u16name;});
 
       std::wstring replacedTag;
-      if(tag != pBuf->openedTags.rend()){
-        replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\' id=\'" + std::to_wstring(++(pBuf->iHighestId)) +L"\'/>"; 
-      }else{
+      //if(tag != pBuf->openedTags.rend()){
+      //  replacedTag = L"<ept i=\'" + std::to_wstring(tag->i) + L"\' id=\'" + std::to_wstring(++(pBuf->iHighestId)) +L"\'/>"; 
+      //}else{
         LogMessage4(ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because not found corresponding bpt tag in buffer->generating new \'i\'"); 
         replacedTag = L"<ept i=\'" + std::to_wstring(++(pBuf->iHighestBPTI)) + L"\' id=\'" + std::to_wstring(++(pBuf->iHighestId)) + L"\'/>"; 
-      }
+      //}
 
       int iCurLen = wcslen(pBuf->szData);
       if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){       
           //remove tag that we just close 
-          pBuf->openedTags.erase(tag.base());        
+          //TODO
+          //pBuf->openedTags.erase(tag.base());        
           LogMessage6(INFO,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", "calculate i"/*toStr(tag->i).c_str()*/,"\' />");
           wcscat(pBuf->szData, replacedTag.c_str());    
           break;
@@ -2759,16 +2712,9 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iCurLen = wcslen( pBuf->szData );
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
-      //if ( CurElement.fInsideTagging )
-      //{
-        // escape any special characters in inline tags
-        EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
-      //}
-      //else
-      //{
-      //  wcsncpy( pBuf->szData + iCurLen, w_chars, length );
-        //pBuf->szData[iCurLen+length] = 0;
-      //}
+      // escape any special characters in inline tags
+      EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
+      
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;
@@ -5000,17 +4946,4 @@ long _wtol(
     return std::stol(str);
 }
 
-/*
-wchar_t *wcscpy(
-   wchar_t *strDestination,
-   const wchar_t *strSource
-){
-  return _mbscpy(strDestination, strSour);
-}
 
-int wcslen(
-   const wchar_t *strSource
-){
-  return _mbslen(strSource);
-}
-//*/
