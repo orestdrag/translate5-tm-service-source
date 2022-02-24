@@ -32,10 +32,10 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
 
 }
 
-std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, bool fSkipAttributes = false);
-std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src)
+std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes = false);
+std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg)
 {
-  return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src));
+  return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src), std::move(w_trg));
 }
 
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring

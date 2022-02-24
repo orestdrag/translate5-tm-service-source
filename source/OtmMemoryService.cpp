@@ -249,9 +249,62 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     int rc = 0;
+    //w
+    string strSrcData, strTrgData;
     string strInData = string( body.begin(), body.end() );
-    
-    wstring wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()), &rc);
+    //if(strInDat.size()){}
+    strSrcData.reserve( strInData.size() + 1 );
+    strTrgData.reserve( strInData.size() + 1 );
+
+    //wchar_t* pSrcData = (wchar_t*) &strSrcData[0];
+    //wchar_t* pTrgData = (wchar_t*) &strTrgData[0];
+   
+    wstring wstr;
+    //JSONFactory::JSONPARSECONTROL parseControl[] = { 
+    //  { L"src",     JSONFactory::UTF16_STRING_PARM_TYPE, &( pSrcData ),   strInData.size() },
+    //  { L"trg",     JSONFactory::UTF16_STRING_PARM_TYPE, &( pTrgData ),   strInData.size() },
+    //  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+    JSONFactory *factory = JSONFactory::getInstance();
+    void *parseHandle = factory->parseJSONStart( strInData, &rc );
+    if ( parseHandle == NULL )
+    {
+      //wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+      //buildErrorReturn( iRC, errMsg, strOutputParms );
+      //return( restbed::BAD_REQUEST );
+    }else{ 
+      std::string name;
+      std::string value;
+      while ( rc == 0 )
+      {
+        rc = factory->parseJSONGetNext( parseHandle, name, value );
+        if ( rc == 0 )
+        {      
+          if ( strcasecmp( name.c_str(), "src" ) == 0 )
+          {
+            strSrcData = value;
+            LogMessage5(DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
+          }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
+            strTrgData = value;
+            LogMessage5(DEBUG, __func__,"::JSON parsed trg = ", name.c_str(), "; size = ", toStr(strTrgData.size()));
+          }else{
+            LogMessage5(WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+          }
+        }
+      } /* endwhile */
+      factory->parseJSONStop( parseHandle );
+    }
+
+
+    //auto wInData = EncodingHelper::convertToUTF16(strInData.c_str());
+    //rc = factory->parseJSON( wInData, parseControl );
+
+    if( rc && strSrcData.size() && strTrgData.size()){
+      wstr =  pMemService->replaceString( EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
+                  EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(), &rc);
+    }else{
+      wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()).c_str(), L"", &rc);
+    }
     string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
 
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },

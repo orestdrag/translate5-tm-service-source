@@ -44,7 +44,7 @@ class EncodingHelper{
     void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
 
     static std::wstring EscapeXML( std::wstring input );
-    static std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src);
+    static std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg = L"");
 
 };
 
