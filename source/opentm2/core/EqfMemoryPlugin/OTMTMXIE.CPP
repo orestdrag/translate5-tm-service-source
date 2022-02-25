@@ -214,17 +214,17 @@ typedef enum
   G_ELEMENT       = 12,
   HI_ELEMENT      = 13,
   SUB_ELEMENT     = 14,
-  END_PAIR_TAGS   = 14,
+  BX_ELEMENT      = 15,
+  EX_ELEMENT      = 16,
+  END_PAIR_TAGS   = 16,
 
   //standalone tags
   BEGIN_STANDALONE_TAGS = 20,
   PH_ELEMENT            = 20, 
   X_ELEMENT             = 21,
-  BX_ELEMENT            = 22,
-  EX_ELEMENT            = 23,
-  IT_ELEMENT            = 24,
-  UT_ELEMENT            = 25,
-  END_STANDALONE_TAGS   = 25,
+  IT_ELEMENT            = 22,
+  UT_ELEMENT            = 23,
+  END_STANDALONE_TAGS   = 24,
 
   TMX_SENTENCE_ELEMENT  = 30,
   INVCHAR_ELEMENT       = 31,
@@ -310,8 +310,14 @@ size_t str16len(const char16_t* source)
     while((*temp++ = *source++) != 0) ;
     return temp-source;
 }	 
+
+enum TagLocation{
+  SOURCE_TAG = 0,
+  TARGET_TAG = 1
+};
   struct TagInfo
   {
+    TagLocation tagLocation;
     //bool fPairedTag;            // is tag is paired tag (bpt, ept, )
     bool fPairedTagClosed;        // false for bpt tag - waiting for matching ept tag 
     bool fTagAlreadyUsedInTarget; // we save tags only from source segment and then try to match\bind them in target
@@ -328,6 +334,7 @@ size_t str16len(const char16_t* source)
       i = x = tagType = original_i = original_x = original_tagType = -1; // 
       //fPairedTag = 
       fPairedTagClosed = fTagAlreadyUsedInTarget = false; 
+      tagLocation = SOURCE_TAG;
     }
   };
 
@@ -404,7 +411,7 @@ public:
 
 
     //for tags replacement
-  std::vector<TagInfo> sourceTagList;
+  std::vector<TagInfo> tagList;
   BOOL fTargetSegment;
   int      iHighestPTI;               // increments with each opening pair tags
   int      iHighestId;                // increments with each tag
@@ -1528,7 +1535,7 @@ TMXParseHandler::TMXParseHandler()
 
   ulCP = GetLangOEMCP( NULL );
 
-  this->sourceTagList.reserve(50);
+  this->tagList.reserve(50);
 
 }
 
@@ -1582,8 +1589,8 @@ std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::
       LogMessage6(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
             res_src_s.c_str(),"\'\n");
     }
-
-  }else{
+  }else{    
+    handler->fTargetSegment = true;
     trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_trg) + std::string("</TMXSentence>");
     xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                         "trg_buff (in memory)");
@@ -1593,13 +1600,16 @@ std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::
       handler->GetErrorText(buff, sizeof(buff));
       LogMessage3(FATAL, __func__,":: error during parsing trg : ", buff);
     }
-    std::wstring trg_res = handler->GetParsedData();
+
+    std::wstring trg_res = handler->GetParsedData();    
+
     if(CheckLogLevel(INFO)){
       std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
       std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
       LogMessage10(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
               res_src_s.c_str(),"\'\n target: \'", trg.c_str(), "\'\n replaced with:\n\'", res_trg_s.c_str(),"\'\n");
     }
+    res = L"{\n\'src\':\'" + src_res + L"\'\n\'trg\':\'" + trg_res + L"\'\n}";
   }
   
   delete parser;
@@ -1607,6 +1617,98 @@ std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::
   return res;
 }
 
+
+
+std::wstring ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg){
+
+  
+  USHORT usRc = 0; std::wstring res;
+
+  // parse and save request
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler *handler = new TMXParseHandler();
+  //handler->fReplaceWithTagsWithoutAttributes = fSkipAttributes;
+  handler->iHighestId = 0;
+  handler->iHighestPTI = 0;
+  handler->fTargetSegment = false;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(handler);
+  parser->setErrorHandler( handler );
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+
+  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_request) + std::string("</TMXSentence>");
+  LogMessage4(INFO,__func__,":: parsing request str = \'", req.c_str(), "\'");
+  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+                                      "src_buff (in memory)");
+
+  parser->parse(req_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler->GetErrorText(buff, sizeof(buff));
+    LogMessage3(FATAL, __func__,":: error during parsing req : ", buff);
+  }
+  std::wstring req_res = handler->GetParsedData();
+  auto tags = handler->tagList;
+  
+  // do tag replacement for source and target 
+  /*
+  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
+  LogMessage4(INFO,__func__,":: parsing str = \'", src.c_str(), "\'");
+  xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
+                                      "src_buff (in memory)");
+
+  parser->parse(src_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler->GetErrorText(buff, sizeof(buff));
+    LogMessage3(FATAL, __func__,":: error during parsing src : ", buff);
+  }
+  std::wstring src_res = handler->GetParsedData();
+
+  
+  std::string trg;
+  if(w_trg.empty() ){
+    res = src_res;
+    if(CheckLogLevel(INFO)){
+      std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
+      LogMessage6(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
+            res_src_s.c_str(),"\'\n");
+    }
+  }else{    
+    handler->fTargetSegment = true;
+    trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_trg) + std::string("</TMXSentence>");
+    xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
+                                        "trg_buff (in memory)");
+    parser->parse(trg_buff);
+    if(parser->getErrorCount()){
+      char buff[512];
+      handler->GetErrorText(buff, sizeof(buff));
+      LogMessage3(FATAL, __func__,":: error during parsing trg : ", buff);
+    }
+
+    std::wstring trg_res = handler->GetParsedData();    
+
+    if(CheckLogLevel(INFO)){
+      std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
+      std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
+      LogMessage10(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
+              res_src_s.c_str(),"\'\n target: \'", trg.c_str(), "\'\n replaced with:\n\'", res_trg_s.c_str(),"\'\n");
+    }
+    res = L"{\n\'src\':\'" + src_res + L"\'\n\'trg\':\'" + trg_res + L"\'\n}";
+  }
+  
+  delete parser;
+  delete handler;
+  //*/
+  return res;
+}
 std::wstring TMXParseHandler::GetParsedData() const
 {
   if (pBuf == nullptr || pBuf->szData == nullptr)
@@ -1635,7 +1737,7 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
   TagInfo tag;  
   
   if( tagType >= BEGIN_PAIR_TAGS && tagType <= END_PAIR_TAGS){
-    if(attributes && tagType != EPT_ELEMENT){
+    if(attributes && tagType != EPT_ELEMENT && tagType != EX_ELEMENT){
       tag.tagType = BPT_ELEMENT;
       tag.fPairedTagClosed = false;
     }else{
@@ -1674,8 +1776,92 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
 
   //generate new attributes or find matching 
   if(fTargetSegment){
+    tag.tagLocation = TARGET_TAG;
+    tag.fTagAlreadyUsedInTarget = true;
+    //try to find matching tag
+    std::vector<TagInfo>::iterator matchingSourceTag = std::find_if(tagList.begin(), tagList.end(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == SOURCE_TAG
+                                                          &&  i.fTagAlreadyUsedInTarget == false 
+                                                          &&  i.original_x       == tag.original_x
+                                                          &&  i.original_tagType == tag.original_tagType
+                                                          &&  i.original_i       == tag.original_i
+                                                          ;
+                                  });
+    if ( matchingSourceTag != tagList.end()){
+      // mark binded tag as already used in target
+      matchingSourceTag->fTagAlreadyUsedInTarget = true;
+      
+      //set 
+      tag.fTagAlreadyUsedInTarget = true;
+      //tag.fPairedTagClosed = false;
+      //copy data from matching tag
+      tag.i = matchingSourceTag->i;
+      tag.x = matchingSourceTag->x;
+      tag.tagType = matchingSourceTag->tagType;
+    }else{
+      //generate new id
+      tag.x = ++iHighestId;
+      tag.fPairedTagClosed = true;
+      //if(tag.tagType >= && tag.tagType <= END_PAIR_TAGS){
+      //  tag.i = ++iHighestPTI;
+      //}
+      if(tag.tagType == BPT_ELEMENT){
+        tag.i= ++iHighestPTI;
+        tag.fPairedTagClosed = false;
+      }else if(tag.tagType == EPT_ELEMENT){
+        //try to find matching 
+        
+        tag.fPairedTagClosed = true;// not sure if that nessessary
+
+        std::vector<TagInfo>::reverse_iterator matchingTargetTag;
+        if(tag.original_tagType == EPT_ELEMENT){
+           matchingTargetTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == TARGET_TAG
+                                                          //&&  i.fTagAlreadyUsedInTarget == false 
+                                                          &&  i.original_x       == tag.original_x
+                                                          &&  i.original_tagType == BPT_ELEMENT
+                                                          &&  i.original_i       == tag.original_i
+                                                          &&  i.fPairedTagClosed == false
+                                                          ;
+                                  });
+        }else if(tag.original_tagType == EX_ELEMENT){
+          matchingTargetTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == TARGET_TAG
+                                                          //&&  i.fTagAlreadyUsedInTarget == false 
+                                                          //&&  i.original_x       == tag.original_x
+                                                          &&  i.original_tagType == BX_ELEMENT
+                                                          &&  i.original_i       == tag.original_i
+                                                          &&  i.fPairedTagClosed == false
+                                                          ;
+                                  });
+        }else{
+           matchingTargetTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == TARGET_TAG
+                                                          //&&  i.fTagAlreadyUsedInTarget == false 
+                                                          //&&  i.original_x       == tag.original_x
+                                                          &&  i.original_tagType == tag.original_tagType
+                                                          //&&  i.original_i       == tag.original_i
+                                                          &&  i.fPairedTagClosed == false
+                                                          ;
+                                  });
+        }
+        
+        if(matchingTargetTag != tagList.rend()){
+          // mark matching tag as which have completed pair
+          matchingTargetTag->fPairedTagClosed = true;
+          tag.i = matchingTargetTag->i;
+        }
+        
+        //if not found -> generate new i
+        if(tag.i == -1){
+          tag.i = ++iHighestPTI;
+        }       
+      }
+    }
+    //tagList.push_bakc(tag);
 
   }else{ 
+    tag.tagLocation = SOURCE_TAG;
     tag.fTagAlreadyUsedInTarget = false;
     // generate new id
     tag.x = ++iHighestId;
@@ -1690,15 +1876,17 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
     }else if (tag.tagType == EPT_ELEMENT){
       //try to find matching and use it's attributes
       if(tag.original_tagType == EPT_ELEMENT ){
-        matchingBPTTag = std::find_if(sourceTagList.rbegin(), sourceTagList.rend(),
-                                  [&tag](TagInfo& i) { return i.fPairedTagClosed == false
+        matchingBPTTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == SOURCE_TAG
+                                                          &&  i.fPairedTagClosed == false
                                                           &&  i.original_tagType == BPT_ELEMENT
                                                           &&  i.original_i       == tag.original_i
                                                           ;
                                   });
       }else if(tag.original_tagType == EX_ELEMENT){
-        matchingBPTTag = std::find_if(sourceTagList.rbegin(), sourceTagList.rend(),
-                                  [&tag](TagInfo& i) { return i.fPairedTagClosed == false
+        matchingBPTTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == SOURCE_TAG
+                                                          &&  i.fPairedTagClosed == false
                                                           &&  i.original_tagType == BX_ELEMENT
                                                           &&  i.original_i       == tag.original_i
                                                           ;
@@ -1707,8 +1895,9 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
       }else //if()// we have closing tag like </hi> ,that don't have attributes, so we should find
                   // the same original opening tag, that was not closed yet(don't find matching closing tag)
       {
-        matchingBPTTag = std::find_if(sourceTagList.rbegin(), sourceTagList.rend(),
-                                  [&tag](TagInfo& i) { return i.fPairedTagClosed == false
+        matchingBPTTag = std::find_if(tagList.rbegin(), tagList.rend(),
+                                  [&tag](TagInfo& i) { return i.tagLocation == SOURCE_TAG
+                                                          &&  i.fPairedTagClosed == false
                                                           &&  i.tagType == BPT_ELEMENT
                                                           &&  i.original_tagType == tag.original_tagType
                                                           &&  i.original_i       == tag.original_i
@@ -1716,7 +1905,7 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
                                   });
       }
 
-      if(matchingBPTTag != sourceTagList.rend()){
+      if(matchingBPTTag != tagList.rend()){
           matchingBPTTag->fPairedTagClosed = true;
           tag.i = matchingBPTTag->i;
       }
@@ -1725,9 +1914,11 @@ TagInfo TMXParseHandler::GenerateReplacingTag(int tagType, AttributeList* attrib
         tag.i = ++iHighestPTI;
       }
     }
-    sourceTagList.push_back(tag);
+    //tagList.push_back(tag);
   }
 
+
+  tagList.push_back(tag);
   return tag;
 }
 
@@ -1919,13 +2110,13 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         
         iHighestId = 0;
         iHighestPTI = 0;
-        sourceTagList.clear();
+        tagList.clear();
 
         // reset TUV array
         iCurTuv = 0;
         this->iNumOfTu += 1;
 
-        this->sourceTagList.clear();
+        this->tagList.clear();
         ulSegNo = this->iNumOfTu; // preset segment number
 
         // scan <tu> attributes, currently the data type, the tuid and the creationdate are of interest
@@ -2532,9 +2723,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
           int len = wcslen(pBuf->szData);
 
-          if(sourceTagList.size()>=2){
-            auto&& firstTag = sourceTagList[0];
-            auto&& lastTag = sourceTagList[sourceTagList.size()-1];
+          if(tagList.size()>=2){
+            auto&& firstTag = tagList[0];
+            auto&& lastTag = tagList[tagList.size()-1];
 
             if(firstTag.tagType == BPT_ELEMENT 
                 && lastTag.tagType == EPT_ELEMENT

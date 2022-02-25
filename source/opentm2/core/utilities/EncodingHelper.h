@@ -45,6 +45,7 @@ class EncodingHelper{
 
     static std::wstring EscapeXML( std::wstring input );
     static std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg = L"");
+    static std::wstring ReplaceOriginalTagsWithTagsFromRequest(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
 
 };
 

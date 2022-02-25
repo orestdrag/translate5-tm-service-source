@@ -280,13 +280,12 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
         rc = factory->parseJSONGetNext( parseHandle, name, value );
         if ( rc == 0 )
         {      
+          LogMessage5(DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
           if ( strcasecmp( name.c_str(), "src" ) == 0 )
           {
             strSrcData = value;
-            LogMessage5(DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
           }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
             strTrgData = value;
-            LogMessage5(DEBUG, __func__,"::JSON parsed trg = ", name.c_str(), "; size = ", toStr(strTrgData.size()));
           }else{
             LogMessage5(WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
           }
@@ -294,10 +293,6 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
       } /* endwhile */
       factory->parseJSONStop( parseHandle );
     }
-
-
-    //auto wInData = EncodingHelper::convertToUTF16(strInData.c_str());
-    //rc = factory->parseJSON( wInData, parseControl );
 
     if( rc && strSrcData.size() && strTrgData.size()){
       wstr =  pMemService->replaceString( EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 

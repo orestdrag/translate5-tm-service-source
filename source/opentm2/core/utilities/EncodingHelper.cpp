@@ -38,6 +38,12 @@ std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&
   return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src), std::move(w_trg));
 }
 
+std::wstring ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
+std::wstring EncodingHelper::ReplaceOriginalTagsWithTagsFromRequest(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg)
+{
+  return ReplaceOriginalTagsWithTagsFromRequestFunc(std::move(w_request),std::move(w_src), std::move(w_trg));
+}
+
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
   \param strUTF8String string in UTF8 encoding
   \returns string converted to UTF16
