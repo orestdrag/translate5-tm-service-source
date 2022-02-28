@@ -1,0 +1,739 @@
+{
+	"info": {
+		"_postman_id": "853421c5-4a31-430c-aaea-87b2835ce2f6",
+		"name": "fuzzy_search_tags_issue_Import",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \"name\": \"memUK_fuzzy_one_tag_import\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <ph id=\\'12\\'/>View t<x/>o<ph id=\\'3\\'/> get <bpt id=\\\"one\\\">strong<bpt id=1/>displayed<bpt id=\\'2\\'>View<ept id=\\'2\\'>  <ept id=\\'1\\'>strong<ept id=\\'1\\'/>US patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementStandaloneTags",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <ph id=\\'123\\'/>View t<x/>o<bx/> get <ph>strong</ph>displayed<it>View</it> two <ut>strong</ut>US patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementStandaloneTags Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "get <ph>strong</ph>displayed<it>View</it> two <ut>strong</ut>US patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementPairTags",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <g>View t</g>o<hi> get </hi>strong<sub>displayed</sub>View<bpt i=\\'1\\'> two </bpt i=\\'1\\'>strong<ept i=\\'1\\'>US</ept i=\\'1\\'> patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i=\\'8\\'>View t</bpt>o<ept i=\\'8\\'> get </ept>strong<bpt i=\\'5\\'/>displayed<ept i=\\'5\\'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i=\\'8\\'>View t</bpt i=\\'8\\'>o<ept i=\\'8\\'> get </ept i=\\'8\\'>strong<bpt i=\\'5\\'/>displayed<ept i=\\'5\\'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable & carefree < 1 2"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable &amp; carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable &amp;amp; carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy 4",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable &lt; carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy 6",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable < carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy 5",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable > carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_GT_LT_AMP Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Durable & carefree"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportTag",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgICA8dHUgdHVpZD0iMSIgY3JlYXRpb25kYXRlPSIyMDE5MDQxNVQxMTU1MzlaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjEwOTY1MDA1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWFVYTEY8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6ZG9jbmFtZSI+bm9uZTwvcHJvcD4KICAgICAgPHR1diB4bWw6bGFuZz0iZW4tVUsiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkVuZ2xpc2goVS5LLik8L3Byb3A+CiAgICAgICAgPHNlZz5UYXAgPGJwdCBpPSIxIiB4PSIyMTUiPiZsdDtzdHJvbmcmZ3Q7PC9icHQ+VmlldzxlcHQgaT0iMSI+Jmx0Oy9zdHJvbmcmZ3Q7PC9lcHQ+IHQ8aXQgeD0iMSIgdHlwZT0ibGIiPiZsdDtici8mZ3Q7PC9pdD5vPHBoIHg9IjEiIHR5cGU9ImxiIj4mbHQ7YnIvJmd0OzwvcGg+IGdldCBkaXNwbGF5ZWQ8YnB0IGk9IjIiIHg9IjIxNSI+Y29kZSBjb2RlPC9icHQ+VmlldzxlcHQgaT0iMiIgLz4gVVM8aGkgeD0iMSI+IHBhdGVudHM8L2hpPi48L3NlZz4KICAgICAgPC90dXY+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImRlLURFIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5HRVJNQU4oUkVGT1JNKTwvcHJvcD4KICAgICAgICBUYXAgPGJwdCBpPSIxIiB4PSIyMTUiPiZsdDtzdHJvbmcmZ3Q7PC9icHQ+V2VpdjxlcHQgaT0iMSI+Jmx0Oy9zdHJvbmcmZ3Q7PC9lcHQ+IHQ8aXQgeD0iMSIgdHlwZT0ibGIiPiZsdDtici8mZ3Q7PC9pdD5vPHBoIHg9IjEiIHR5cGU9ImxiIj4mbHQ7YnIvJmd0OzwvcGg+IHRlZyBkaXNwbGF5ZWQ8YnB0IGk9IjIiIHg9IjIxNSI+Y29kZSBjb2RlPC9icHQ+V2lldjxlcHQgaT0iMiIgLz4gU1U8aGkgeD0iMSI+IHBhdGVudHM8L2hpPi4KICAgICAgPC90dXY+CiAgICA8L3R1PgogIDwvYm9keT4KPC90bXg+Cg==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportTagWAmp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgICA8dHUgdHVpZD0iMSIgY3JlYXRpb25kYXRlPSIyMDE5MDQxNVQxMTU1MzlaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjEwOTY1MDA1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWFVYTEY8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6ZG9jbmFtZSI+bm9uZTwvcHJvcD4KICAgICAgPHR1diB4bWw6bGFuZz0iZW4tVUsiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkVuZ2xpc2goVS5LLik8L3Byb3A+CiAgICAgICAgPHNlZz4gVGFwICZhbXA7IDxicHQgaT0iMSIgeD0iMjE1Ij4mbHQ7c3Ryb25nJmd0OzwvYnB0PlZpZXc8ZXB0IGk9IjEiPiZsdDsvc3Ryb25nJmd0OzwvZXB0PiB0PGl0IHg9IjEiIHR5cGU9ImxiIj4mbHQ7YnIvJmd0OzwvaXQ+bzxwaCB4PSIxIiB0eXBlPSJsYiI+Jmx0O2JyLyZndDs8L3BoPiBnZXQgZGlzcGxheWVkPGJwdCBpPSIyIiB4PSIyMTUiPmNvZGUgY29kZTwvYnB0PlZpZXc8ZXB0IGk9IjIiIC8+IFVTPGhpIHg9IjEiPiBwYXRlbnRzPC9oaT4uPC9zZWc+CiAgICAgIDwvdHV2PgogICAgICA8dHV2IHhtbDpsYW5nPSJkZS1ERSI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+R0VSTUFOKFJFRk9STSk8L3Byb3A+CiAgICAgICAgVGFwICZhbXA7PGJwdCBpPSIxIiB4PSIyMTUiPiZsdDtzdHJvbmcmZ3Q7PC9icHQ+V2VpdjxlcHQgaT0iMSI+Jmx0Oy9zdHJvbmcmZ3Q7PC9lcHQ+IHQ8aXQgeD0iMSIgdHlwZT0ibGIiPiZsdDtici8mZ3Q7PC9pdD5vPHBoIHg9IjEiIHR5cGU9ImxiIj4mbHQ7YnIvJmd0OzwvcGg+IHRlZyBkaXNwbGF5ZWQ8YnB0IGk9IjIiIHg9IjIxNSI+Y29kZSBjb2RlPC9icHQ+V2lldjxlcHQgaT0iMiIgLz4gU1U8aGkgeD0iMSI+IHBhdGVudHM8L2hpPi4KICAgICAgPC90dXY+CiAgICA8L3R1PgogIDwvYm9keT4KPC90bXg+Cg==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportTag_for_fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgICA8dHUgdHVpZD0iMSIgY3JlYXRpb25kYXRlPSIyMDE5MDQxNVQxMTU1MzlaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjEwOTY1MDA1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWFVYTEY8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6ZG9jbmFtZSI+bm9uZTwvcHJvcD4KICAgICAgPHR1diB4bWw6bGFuZz0iZW4tVUsiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkVuZ2xpc2goVS5LLik8L3Byb3A+CiAgICAgICAgPHNlZz5UYXAgPGJwdCBpPSIxIiB4PSIyMTUiLz5WaWV3PGVwdCBpPSIxIi8+IHQ8aXQgeD0iMSIvPm88cGggeD0iMSIgdHlwZT0ibGIiLz4gZ2V0IGRpc3BsYXllZDxicHQgaT0iMSIgeD0iMjE1Ii8+VmlldzxlcHQgaT0iMSIvPiBVUyBwYXRlbnRzLjwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkdFUk1BTihSRUZPUk0pPC9wcm9wPgogICAgICAgIDxzZWc+VGFwIDxicHQgaT0iMSIgeD0iMjE1Ii8+VmlldzxlcHQgaT0iMSIvPiB0PGl0IHg9IjEiLz5vPHBoIHg9IjEiIHR5cGU9ImxiIi8+IGdldCBkaXNwbGF5ZWQ8YnB0IGk9IjEiIHg9IjIxNSIvPlZpZXc8ZXB0IGk9IjEiLz4gVVMgcGF0ZW50cy48L3NlZz4KICAgICAgPC90dXY+CiAgICA8L3R1PgogIDwvYm9keT4KPC90bXg+Cg==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportTag Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <b>View</b> t<br/>o<br/> get displayed<i>View</i> US patents.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \" Tap &amp; \n                    <bpt i='1'/>View\n                    <ept i='1'/> t\n                    <ph/>o\n                    <ph/> get displayed\n                    <bpt i='2'/>View\n                    <ept i='2'/> US\n                    <bpt id='3'/>\n                    <ept i='3'/>\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <b>View</b> t<br/>o<br/> get displayed<i>View</i> US patents.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_server Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <g/>to\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_server Copy 4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <g/> &amp;to\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_server Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <ph id=\\'12\\'>View t<x/>o<ph id=\\'3\\'/> get displayed<i>View</i> US patents.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_server Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <b>View</b> t<br/>o<br/> get displayed<i>View</i> US patents.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_exact",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Tap <bpt i=\\\"1\\\" x=\\\"215\\\"/>View<ept i=\\\"1\\\"/> t<it x=\\\"1\\\"/>o<ph x=\\\"1\\\" type=\\\"lb\\\"/> get displayed<bpt i=\\\"1\\\" x=\\\"215\\\"/>View<ept i=\\\"1\\\"/> US patents.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_one_tag_import/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_one_tag_import",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

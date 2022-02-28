@@ -1,0 +1,424 @@
+{
+	"info": {
+		"_postman_id": "10fa699c-8b39-46f7-b213-54668ecb06f8",
+		"name": "FuzzyTagDiffIssue",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a new empty TM wi…en name and source lang\"",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \"name\": \"memUK_tag_fuzzy_issue_1\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload a small TMX file (base64 encoded) into the existing TM (can be done with multiple TMXes) UKR Longer Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cjx0bXg+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2w9IlNETCBMYW5ndWFnZSBQbGF0Zm9ybSIgY3JlYXRpb250b29sdmVyc2lvbj0iOC4wIgogICAgZGF0YXR5cGU9InhtbCIgc2VndHlwZT0ic2VudGVuY2UiIGFkbWlubGFuZz0iZW4tVVMiIHNyY2xhbmc9ImVuLXVzIgogICAgby10bWY9IlNETCBUTTggRm9ybWF0IiBjcmVhdGlvbmRhdGU9IjIwMjEwMzA0VDE0MzAyM1oiIGNyZWF0aW9uaWQ9IkpvaGFubmVzIFBmaXN0ZXIiPgogICAgPHByb3AgdHlwZT0ieC1SZWNvZ25pemVycyI+UmVjb2duaXplRGF0ZXMsIFJlY29nbml6ZVRpbWVzLCBSZWNvZ25pemVOdW1iZXJzLCBSZWNvZ25pemVBY3JvbnltcywgUmVjb2duaXplTWVhc3VyZW1lbnRzPC9wcm9wPgogICAgPHByb3AgdHlwZT0ieC1UTU5hbWUiPkhEU19MRDwvcHJvcD4KICAgIDxwcm9wIHR5cGU9IngtaWRpb20tZGItZGVzY3JpcHRpb24iPkZvciBMZWljYSBIRFMgRG9jdW1lbnRhdGlvbjwvcHJvcD4KICAgIDxwcm9wIHR5cGU9IngtaWRpb20tby10bWYiPklkaW9tIFRNIHYxMS4zLjI8L3Byb3A+CiAgPC9oZWFkZXI+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjM0MzgyIiBjcmVhdGlvbmRhdGU9IjIwMTkwNDE1VDExNTUzOVoiPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOnNlZ051bSI+MTA5NjQ5NTA8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bWFya3VwIj5PVE1YVVhMRjwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0idG1ncjpkb2NuYW1lIj5ub25lPC9wcm9wPgogICAgICA8dHV2IHhtbDpsYW5nPSJlbi1VSyI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+RW5nbGlzaChVLksuKTwvcHJvcD4KICAgICAgICA8c2VnPlRhcCB0aGUgY2hlY2tib3ggdG8gY29uZmlndXJlIHRoZSA8YnB0IGk9IjEiIHR5cGU9IjE5NTkxIiB4PSIxNTciIC8+UGluIENvZGU8ZXB0IGk9IjEiIC8+IHByb3RlY3Rpb24uPC9zZWc+CiAgICAgIDwvdHV2PgogICAgICA8dHV2IHhtbDpsYW5nPSJkZS1ERSI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+R0VSTUFOKFJFRk9STSk8L3Byb3A+CiAgICAgICAgPHNlZz5BdWYgZGFzIEtvbnRyb2xsa8Okc3RjaGVuIHRpcHBlbiwgdW0gZGVuIDxicHQgaT0iMSIgdHlwZT0iMTk1OTQiIHg9IjE1NyIgLz5QSU4tU2NodXR6PGVwdCBpPSIxIiAvPiB6dSBrb25maWd1cmllcmVuLjwvc2VnPgogICAgICA8L3R1dj4KICAgIDwvdHU+CjwvYm9keT4KPC90bXg+\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportBadSymbol",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJ4bWwiIC8+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjI4MSIgZGF0YXR5cGU9InhtbCIgY3JlYXRpb25kYXRlPSIyMDE3MDMyMlQwOTE3MDBaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjU3MzI2NTk8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bWFya3VwIj5PVE1YVVhMRjwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0idG1ncjpkb2NuYW1lIj5ub25lPC9wcm9wPgogICAgICA8dHV2IHhtbDpsYW5nPSJlbi1VSyI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+RW5nbGlzaChVLksuKTwvcHJvcD4KICAgICAgICA8c2VnPmVudOKAmHM8L3NlZz4KICAgICAgPC90dXY+CiAgICAgIDx0dXYgeG1sOmxhbmc9Im5vX0JPIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5OT1JXRUdJQU4oQk9LTUFMKTwvcHJvcD4KICAgICAgICA8c2VnPm1lbnRldHM8L3NlZz4KICAgICAgPC90dXY+CiAgICA8L3R1Pgo8L2JvZHk+CjwvdG14PgkK\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportBadSymbol2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJ4bWwiIC8+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjMyMzIiIGRhdGF0eXBlPSJ4bWwiIGNyZWF0aW9uZGF0ZT0iMjAxODAyMTNUMDgyMjUzWiI+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6c2VnTnVtIj44MzEzMzY1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWE1MPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOmRvY25hbWUiPm5vbmU8L3Byb3A+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImVuLUdCIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5FbmdsaXNoKFUuSy4pPC9wcm9wPgogICAgICAgIDxzZWc+bmVy4oCZczwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkdFUk1BTihSRUZPUk0pPC9wcm9wPgogICAgICAgIDxzZWc+U2Nhbm5lcnMuPC9zZWc+CiAgICAgIDwvdHV2PgogICAgPC90dT4KPC9ib2R5Pgo8L3RteD4J\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportBadSymbol2 Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJ4bWwiIC8+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjMyMzEiIGRhdGF0eXBlPSJ4bWwiIGNyZWF0aW9uZGF0ZT0iMjAxODAyMTNUMDgyMjUzWiI+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6c2VnTnVtIj44MzEzMzY1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWE1MPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOmRvY25hbWUiPm5vbmU8L3Byb3A+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImVuLUdCIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5FbmdsaXNoKFUuSy4pPC9wcm9wPgogICAgICAgIDxzZWc+4oCzXShEIHggVyB4IEgpIDwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkdFUk1BTihSRUZPUk0pPC9wcm9wPgogICAgICAgIDxzZWc+U2Nhbm5lcnMuPC9zZWc+CiAgICAgIDwvdHV2PgogICAgPC90dT4KPC9ib2R5Pgo8L3RteD4J\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportNewLineBreak",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJ4bWwiIC8+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjMyMzEiIGRhdGF0eXBlPSJ4bWwiIGNyZWF0aW9uZGF0ZT0iMjAxODAyMTNUMDgyMjUzWiI+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6c2VnTnVtIj44MzEzMzY1PC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOm1hcmt1cCI+T1RNWE1MPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOmRvY25hbWUiPm5vbmU8L3Byb3A+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImVuLUdCIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5FbmdsaXNoKFUuSy4pPC9wcm9wPgogICAgICAgIDxzZWc+b25lIHdvcmQKb3RoZXI8L3NlZz4KICAgICAgPC90dXY+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImRlLURFIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5HRVJNQU4oUkVGT1JNKTwvcHJvcD4KICAgICAgICA8c2VnPlNjYW5uZXJzIAp0aGlyZDwvc2VnPgogICAgICA8L3R1dj4KICAgIDwvdHU+CjwvYm9keT4KPC90bXg+CQ==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Status Copy",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"Tap\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search Copy 4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"One\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 9",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 10",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 11",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\"markupTable\":\"OTMXUXLF\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_fuzzy_issue_1/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_fuzzy_issue_1",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

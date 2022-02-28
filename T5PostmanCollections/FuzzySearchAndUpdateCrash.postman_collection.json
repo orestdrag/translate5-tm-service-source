@@ -1,0 +1,473 @@
+{
+	"info": {
+		"_postman_id": "a5bb023d-93f8-406b-a591-77d27935fbdd",
+		"name": "FuzzySearchAndUpdateCrash",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a new empty TM wi…en name and source lang\"",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \"name\": \"mem_fuzzy_search_and_update_crash\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Status Copy",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\": \"de\",\n\"targetLang\": \"en\",\n\"source\": \"Das ist das Haus des Nikolaus\",\n\"target\": \"This is the house of St. Nicholas\",\n\"documentName\": 'my file.sdlxliff',\n\"segmentNumber\": \"123\",\n\"markupTable\": \"translate5\",\n\"author\": \"Thomas Lauria\",\n\"type\": \"\",\n\"timeStamp\": \"\",\n\"context\": \"\",\n\"addInfo\": \"\",\n\"loggingThreshold\":\"0\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateFull",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\": \"en\",\n\"targetLang\": \"de\",\n\"target\": \"Das ist das Haus des Nikolaus kokokokokokokokokokokokokokokokokoko kokokokokokokokokok kokokokokokokokokokokokokoko\",\n\"source\": \"This is the house of St. Nicholas kikikikikikkikiki klklklklklklklk kpkpkpkpkpkpkpkpkpkp pkpkpkpkpkpkpkdsfadsfadsf\",\n\"documentName\": 'fdsafasfasgfdshgfmy file.sdlxliff',\n\"segmentNumber\": \"123\",\n\"markupTable\": \"OTMXUXLF\",\n\"author\": \"Thomas Lauria\",\n\"type\": \"type t type y type p ttype e\",\n\"timeStamp\": \"\",\n\"context\": \"some context here \",\n\"addInfo\": \"some additional info\",\n\"loggingThreshold\":\"0\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateFull_no_context",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\": \"en\",\n\"targetLang\": \"de\",\n\"target\": \"Das ist das Haus des Nikolaus kokokokokokokokokokokokokokokokokoko kokokokokokokokokok kokokokokokokokokokokokokoko\",\n\"source\": \"This is the house of St. Nicholas kikikikikikkikiki klklklklklklklk kpkpkpkpkpkpkpkpkpkp pkpkpkpkpkpkpkdsfadsfadsf\",\n\"documentName\": 'fdsafasfasgfdshgfmy file.sdlxliff',\n\"segmentNumber\": \"123\",\n\"markupTable\": \"OTMXUXLF\",\n\"author\": \"Thomas Lauria\",\n\"type\": \"type t type y type p ttype e\",\n\"timeStamp\": \"\",\n\"context\": \"\",\n\"addInfo\": \"some additional info\",\n\"loggingThreshold\":\"0\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateServer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"Method\":\"update\",\n\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\n\"target\":\"Auf das Kontrollk\\u00e4stchen tippen, um WLAN zu aktivieren.\",\n\"documentName\":\"OBJ_DCL-0000000931-011_hu.xml\",\n\"author\":\"Orest Dragush\",\n\"timeStamp\":\"20220128T103648Z\",\n\"context\":\"654_676\",\n\"type\":\"Manual\",\n\"markupTable\":\"OTMXUXLF\",\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateServerModified",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\n\"target\":\"Auf das Kontrollk\\u00e4stchen tippen, um WLAN zu aktivieren.\",\n\"documentName\":\"OBJ_DCL-0000000931-011_hu.xml\",\n\"author\":\"Orest Dragush\",\n\"context\":\"654_676\",\n\"type\":\"Manual\",\n\"markupTable\":\"OTMXUXLF\",\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"This is\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"This is the house of St. Nicholas kikikikikikkikiki klklklklklklklk kpkpkpkpkpkpkpkpkpkp pkpkpkpkpkpkpkdsfadsfadsf\",\"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"This is the house of St. Nicholas kikikikikikkikiki klklklklklklklk  \",\"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Tap the checkbox to configure the <g id=\\\"1\\\">Pin Code<\\/g> protection.\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Tap the checkbox to configure the protection.\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"656_678\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/mem_fuzzy_search_and_update_crash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"mem_fuzzy_search_and_update_crash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "<bpt i=\\'1\\'><b></bpt>ctrlX PLC Engineering - SPS-Bibliotheken<ept i=\\'1\\'></b></ept>"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

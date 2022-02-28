@@ -1,0 +1,474 @@
+{
+	"info": {
+		"_postman_id": "a3e06b92-064c-4804-baea-63f160976fca",
+		"name": "OTM_t5memory_Tag_replacement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Entry Delete Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sourceLang\": \"en\",\n    \"targetLang\": \"de\",\n    \"source\": \"Consulting, Support, Updates - MittagQI - Quality Informatics\",\n    \"target\": \"Consulting, Unterstützung, Updates - MittagQI - Quality Informatics\",\n    \"markupTable\": \"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/memDE/entrydelete/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"memDE",
+						"entrydelete",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementStandaloneTags Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <ph id=\\'123\\'/>View t<x/>o<bx/> get <ph>strong</ph>displayed<it>View</it> two <ut>strong</ut>US patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementStandaloneTags Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "get <ph>strong</ph>displayed<it>View</it> two <ut>strong</ut>US patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacementPairTags Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <g>View t</g>o<hi> get </hi>strong<sub>displayed</sub>View<bpt i='1'> two </bpt i='1'>strong<ept i='1'>US</ept i='1'> patents."
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i=\\'8\\'>View t</bpt>o<ept i=\\'8\\'> get </ept>strong<bpt i=\\'5\\'/>displayed<ept i=\\'5\\'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i=\\'8\\'>View t</bpt i=\\'8\\'>o<ept i=\\'8\\'> get </ept i=\\'8\\'>strong<bpt i=\\'5\\'/>displayed<ept i=\\'5\\'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i='8'>View t</bpt>o<ept i='8'> get </ept>strong<bpt i='5'/>displayed<ept i='5'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 5",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i='8'>View t</bpt>o<bpt i='5'> get </bpt>strong<ept i='5'/>displayed<ept i='8'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 6",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i='8'>View t</bpt>o<bpt i='5'> get </bpt>strong<ept i='5'/>displayed<ept i='8'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Pair_1",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n    \"src\":\"Tap <bpt i='8'>View t</bpt>o<bpt i='5'> get </bpt>strong<ept i='5'/>displayed<ept i='8'/>View\",\n \"trg\":\"<bpt x='3' i='2'/>sehr gut<ept x='4' i='2'/>, dieser <bpt x='1' i='1'/>Test<ept x='2' i='1'/>.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Pair_1 Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n    \"src\":\"This is <bx id='1' rid='1'/>a test<ex id='2' rid='1'/>, which is <bx id='3' rid='2'/>very good<ex id='4' rid='2'/>.\",\n    \"trg\":\"Der ist <ex id='6' rid='12'/> <bx id='7' rid='12'/> work <bx id='8' rid='31'/> target<ex id='9' rid='31'/> of <bx id='3' rid='2'/>sehr gut<ex id='4' rid='2'/>, dieser <bx id='1' rid='1'/>Test<ex id='2' rid='1'/>.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Pair_1 Copy 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n    \"src\":\"which is <bx id='3' rid='2'/>very good<ex id='4' rid='2'/>.\",\n    \"trg\":\"Der ist work <bx id='8' rid='31'/> target<ex id='9' rid='31'/> of <bx id='3' rid='2'/>sehr gut<ex id='4' rid='2'/>, dieser .\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Pair_1 Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n    \"src\":\"This is <bx id='1' rid='1'/>a test<ex id='2' rid='1'/>, which is <bx id='3' rid='2'/>very good<ex id='4' rid='2'/>.\",\n    \"trg\":\"Der ist <bx id='3' rid='2'/>sehr gut<ex id='4' rid='2'/>, dieser <bx id='1' rid='1'/>Test<ex id='2' rid='1'/>.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BPT_EPT_Tags Copy 4",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i='8'>View t</bpt i='8'>o<ept i='2'> get </ept i='2'>strong View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BX_EX",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap <bpt i='8' x='1'>View t</bpt i='8'>o<ept i='8'> get </ept i='8'>strong<bx i='5'/>displayed<ex i='5'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BX_EX Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "strong<bpt i='5'/>displayed<ept i='5'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BX_EX Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "strong<bx i='5' id='3'/>displayed<ex i='5' id='7'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BX_EX Copy 4",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "strong<bx i='5' id='3'/>displayed<ex i='5' id='7'/>View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_BX_EX Copy 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "strong<bx i='5' />displayed<ex i='5' />View"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/memDE/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"memDE",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

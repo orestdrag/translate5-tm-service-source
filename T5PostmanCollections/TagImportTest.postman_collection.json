@@ -1,0 +1,326 @@
+{
+	"info": {
+		"_postman_id": "34de8528-8a0a-46bd-90d8-146b9052b3e7",
+		"name": "TagImportTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a new empty TM wi…en name and source lang\"",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \"name\": \"memUK_tag_1\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload a small TMX file (base64 encoded) into the existing TM (can be done with multiple TMXes) UKR Longer Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"loggingThreshold\":\"0\",\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14PgogIDxoZWFkZXIgc3JjbGFuZz0iZGUtREUiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgICA8dHUgdHVpZD0iNjQ1OSIgY3JlYXRpb25kYXRlPSIyMDE3MDgyMlQxMDE5MjJaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjYyMzQ3OTg8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bWFya3VwIj5PVE1YVVhMRjwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0idG1ncjpkb2NuYW1lIj5ub25lPC9wcm9wPgogICAgICA8dHV2IHhtbDpsYW5nPSJlbi1VSyI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+RW5nbGlzaChVLksuKTwvcHJvcD4KICAgICAgICA8c2VnPk9wZW4gdGhlICA8cGggeD0iMzEiIHR5cGU9IjU4MTkiIC8+IGhvb2QuPC9zZWc+CiAgICAgIDwvdHV2PgogICAgICA8dHV2IHhtbDpsYW5nPSJkZS1ERSI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+R0VSTUFOKFJFRk9STSk8L3Byb3A+CiAgICAgICAgPHNlZz5EaWUgSGF1YmUgZGVzICA8cGggeD0iMzEiIHR5cGU9IjU4MjIiIC8+IMO2ZmZuZW4uPC9zZWc+CiAgICAgIDwvdHV2PgogICAgPC90dT4KICA8L2JvZHk+CjwvdG14Pg==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload a small TMX file (base64 encoded) into the existing TM (can be done with multiple TMXes) UKR Longer Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"loggingThreshold\":\"0\",\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14PgogIDxoZWFkZXIgc3JjbGFuZz0iZGUtREUiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgICA8dHUgdHVpZD0iNjQ1OSIgY3JlYXRpb25kYXRlPSIyMDE3MDgyMlQxMDE5MjJaIj4KICAgICAgPHByb3AgdHlwZT0idG1ncjpzZWdOdW0iPjYyMzQ3OTg8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bWFya3VwIj5PVE1YVVhMRjwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0idG1ncjpkb2NuYW1lIj5ub25lPC9wcm9wPgogICAgICA8dHV2IHhtbDpsYW5nPSJlbi1VSyI+CiAgICAgICAgPHByb3AgdHlwZT0idG1ncjpsYW5ndWFnZSI+RW5nbGlzaChVLksuKTwvcHJvcD4KICAgICAgICA8c2VnPk9wZW4gdGhlIDxieCBtaWQ9IjEiIHJpZD0iMSIvPjx4IG1pZD0iMiIvPjxleCBtaWQ9IjMiIHJpZD0iMSIvPiBob29kLjwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkdFUk1BTihSRUZPUk0pPC9wcm9wPgogICAgICAgIDxzZWc+RGllIEhhdWJlIGRlcyAgPHBoIHg9IjMxIiB0eXBlPSI1ODIyIiAvPiDDtmZmbmVuLjwvc2VnPgogICAgICA8L3R1dj4KICAgIDwvdHU+CiAgPC9ib2R5Pgo8L3RteD4=\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"hood\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 10",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Open the <ph x=\"31\" type=\"5819\" /> hood.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 6",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\",\n\"source\":\"Open the <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> hood.\",\"documentName\":\"OBJ_DCL-0000000845-004_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"208_208\"\n\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 9",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\",\n\"source\":\"Open the <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> hood.\"\n\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 8",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Open the &lt;ph x=\\\"31\\\" type=\\\"5819\\\" /&gt; hood.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 7",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"Open the &lt;ph x=\\\"31\\\" type=\\\"5819\\\" /&gt; hood.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_tag_1/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_tag_1",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

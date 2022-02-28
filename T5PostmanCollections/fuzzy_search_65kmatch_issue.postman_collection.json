@@ -1,0 +1,141 @@
+{
+	"info": {
+		"_postman_id": "6edf2c9c-5e49-4efb-92ae-0d8e9f7301dc",
+		"name": "fuzzy_search_65kmatch_issue",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \"name\": \"memUK_fuzzy_65kmatch\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ImportTag",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cgo8dG14IHZlcnNpb249IjEuNCI+CiAgPGhlYWRlciBjcmVhdGlvbnRvb2x2ZXJzaW9uPSIxLjUuMS4xIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi11cyIgc3JjbGFuZz0iZW4tVUsiIG8tdG1mPSJPcGVuVE0yIiBjcmVhdGlvbnRvb2w9Ik9wZW5UTTIiIGRhdGF0eXBlPSJwbGFpbnRleHQiIC8+CiAgPGJvZHk+CiAgPHR1IHR1aWQ9IjY3MzQiIGNyZWF0aW9uZGF0ZT0iMjAxOTA0MDFUMDg0MDUyWiI+CiAgICAgIDxwcm9wIHR5cGU9InRtZ3I6c2VnTnVtIj4xMDkwNjgwNjwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0idG1ncjptYXJrdXAiPk9UTVhVWExGPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ0bWdyOmRvY25hbWUiPm5vbmU8L3Byb3A+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImVuLVVLIj4KICAgICAgICA8cHJvcCB0eXBlPSJ0bWdyOmxhbmd1YWdlIj5FbmdsaXNoKFUuSy4pPC9wcm9wPgogICAgICAgIDxzZWc+SWYgdGhlIHJpbmctc2hhcGVkIExFRCBpcyBjb250aW51b3VzIGdyZWVuLCB0aGUgPGJwdCBpPSIxIiB0eXBlPSIxMDI1MCIgeD0iNDgiIC8+IDxwaCB4PSI0OSIgdHlwZT0iMTAyNTEiIC8+PGVwdCBpPSIxIiAvPiBpcyByZWFkeSBmb3Igb3BlcmF0aW9uLjwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxwcm9wIHR5cGU9InRtZ3I6bGFuZ3VhZ2UiPkdFUk1BTihSRUZPUk0pPC9wcm9wPgogICAgICAgIDxzZWc+V2VubiBkaWUgcmluZ2bDtnJtaWdlIExFRCBkYXVlcmhhZnQgZ3LDvG4gbGV1Y2h0ZXQsIGlzdCBkZXIgPGJwdCBpPSIxIiB0eXBlPSIxMDI1NiIgeD0iNDgiIC8+IDxwaCB4PSI0OSIgdHlwZT0iMTAyNTciIC8+PGVwdCBpPSIxIiAvPiBiZXRyaWVic2JlcmVpdC48L3NlZz4KICAgICAgPC90dXY+CiAgICA8L3R1PgogIDwvYm9keT4KPC90bXg+\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_65kmatch/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_65kmatch",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_65kmatch",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_65kmatch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"source\": \"If the ring-shaped LED is continuous green, the <bx mid=\\\"1\\\" rid=\\\"1\\\"/><x mid=\\\"2\\\"/><ex mid=\\\"3\\\" rid=\\\"1\\\"/> is ready for operation.\",\n\"sourceLang\": \"EN\",\n\"targetLang\":\"DE\",\n\"markupTable\":\"OTMXUXLF\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_65kmatch/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_65kmatch",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_fuzzy_65kmatch/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_fuzzy_65kmatch",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

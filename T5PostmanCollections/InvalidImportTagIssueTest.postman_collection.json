@@ -1,0 +1,453 @@
+{
+	"info": {
+		"_postman_id": "bec1a4bc-c8d5-48ed-8cae-04bd1f213caf",
+		"name": "InvalidImportTagIssueTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a new empty TM wi…en name and source lang\"",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \"name\": \"memUK_invalid_tag_import\",    \"sourceLang\": \"en-GB\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Import",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHRteCB2ZXJzaW9uPSIxLjQiPgogIDxoZWFkZXIgY3JlYXRpb250b29sPSJTREwgTGFuZ3VhZ2UgUGxhdGZvcm0iIGNyZWF0aW9udG9vbHZlcnNpb249IjguMCIKICAgIGRhdGF0eXBlPSJ4bWwiIHNlZ3R5cGU9InNlbnRlbmNlIiBhZG1pbmxhbmc9ImVuLVVTIiBzcmNsYW5nPSJlbi11cyIKICAgIG8tdG1mPSJTREwgVE04IEZvcm1hdCIgY3JlYXRpb25kYXRlPSIyMDIxMDMwNFQxNDMwMjNaIiBjcmVhdGlvbmlkPSJKb2hhbm5lcyBQZmlzdGVyIj4KICAgIDxwcm9wIHR5cGU9IngtUmVjb2duaXplcnMiPlJlY29nbml6ZURhdGVzLCBSZWNvZ25pemVUaW1lcywgUmVjb2duaXplTnVtYmVycywgUmVjb2duaXplQWNyb255bXMsIFJlY29nbml6ZU1lYXN1cmVtZW50czwvcHJvcD4KICAgIDxwcm9wIHR5cGU9IngtVE1OYW1lIj5IRFNfTEQ8L3Byb3A+CiAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLWRiLWRlc2NyaXB0aW9uIj5Gb3IgTGVpY2EgSERTIERvY3VtZW50YXRpb248L3Byb3A+CiAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLW8tdG1mIj5JZGlvbSBUTSB2MTEuMy4yPC9wcm9wPgogIDwvaGVhZGVyPgogIDxib2R5PgogIDx0dSBzcmNsYW5nPSJlbi1HQiIgY3JlYXRpb25pZD0iU3lzdGVtIgogICAgICBjcmVhdGlvbmRhdGU9IjIwMTkwNDE1VDExNTUzOVoiIGNoYW5nZWlkPSJXb3JsZFRyYW5zbGF0aW9uIgogICAgICBjaGFuZ2VkYXRlPSIyMDE5MDQxNVQxMTU1MzlaIiB0dWlkPSIxMDk2NDk1NC0xOTQiPgogICAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLXNvdXJjZS1pcGF0aCI+L1dTTW91bnQvTGVpY2EgRG9jdW1lbnRhdGlvbi9Qcm9qZWN0cy8xNTc5Ml9SVEMzNjAgVjIuMF9ERS9Tb3VyY2UtRW5nbGlzaCAoVW5pdGVkIEtpbmdkb20pL09CSl9EQ0wtMDAwMDAwMDkzMS0wMDRfZGUueG1sPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLXRhcmdldC1pcGF0aCI+L1dTTW91bnQvTGVpY2EgRG9jdW1lbnRhdGlvbi9Qcm9qZWN0cy8xNTc5Ml9SVEMzNjAgVjIuMF9ERS9UYXJnZXQtR2VybWFuIChHZXJtYW55KS9PQkpfRENMLTAwMDAwMDA5MzEtMDA0X2RlLnhtbDwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0ieC1pZGlvbS1wcmV2LWhhc2hjb2RlIj4yMDE4MTM3MzQ8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9IngtaWRpb20tbmV4dC1oYXNoY29kZSI+MTQxOTY0ODQ1PC9wcm9wPgogICAgICA8dHV2IHhtbDpsYW5nPSJlbi1HQiI+CiAgICAgICAgPHNlZz5UYXAgdGhlIGRyb3AtZG93biBsaXN0IHRvIHNlbGVjdCBhbiBpbmFjdGl2aXR5IDxicHQgaT0iMSIgeD0iMTYzIi8+VGltZW91dDxlcHQgaT0iMSIvPiBhZnRlciB3aGljaCB0aGUgUElOIGNvZGUgbXVzdCBiZSBlbnRlcmVkLjwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxzZWc+QXVmIGRpZSBEcm9wZG93bi1MaXN0ZSB0aXBwZW4sIHVtIHVudGVyIDxicHQgaT0iMSIgeD0iMTYzIi8+VGltZW91dDxlcHQgaT0iMSIvPiBlaW4gWmVpdGxpbWl0IGbDvHIgSW5ha3Rpdml0w6R0IGF1c3p1d8OkaGxlbiwgbmFjaCBkZW0gZGVyIFBJTi1Db2RlIGVpbmdlZ2ViZW4gd2VyZGVuIG11c3MuPC9zZWc+CiAgICAgIDwvdHV2PgogICAgPC90dT4KPC9ib2R5Pgo8L3RteD4=\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Import Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHRteCB2ZXJzaW9uPSIxLjQiPgogIDxoZWFkZXIgY3JlYXRpb250b29sPSJTREwgTGFuZ3VhZ2UgUGxhdGZvcm0iIGNyZWF0aW9udG9vbHZlcnNpb249IjguMCIKICAgIGRhdGF0eXBlPSJ4bWwiIHNlZ3R5cGU9InNlbnRlbmNlIiBhZG1pbmxhbmc9ImVuLVVTIiBzcmNsYW5nPSJlbi11cyIKICAgIG8tdG1mPSJTREwgVE04IEZvcm1hdCIgY3JlYXRpb25kYXRlPSIyMDIxMDMwNFQxNDMwMjNaIiBjcmVhdGlvbmlkPSJKb2hhbm5lcyBQZmlzdGVyIj4KICAgIDxwcm9wIHR5cGU9IngtUmVjb2duaXplcnMiPlJlY29nbml6ZURhdGVzLCBSZWNvZ25pemVUaW1lcywgUmVjb2duaXplTnVtYmVycywgUmVjb2duaXplQWNyb255bXMsIFJlY29nbml6ZU1lYXN1cmVtZW50czwvcHJvcD4KICAgIDxwcm9wIHR5cGU9IngtVE1OYW1lIj5IRFNfTEQ8L3Byb3A+CiAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLWRiLWRlc2NyaXB0aW9uIj5Gb3IgTGVpY2EgSERTIERvY3VtZW50YXRpb248L3Byb3A+CiAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLW8tdG1mIj5JZGlvbSBUTSB2MTEuMy4yPC9wcm9wPgogIDwvaGVhZGVyPgogIDxib2R5PgogIDx0dSBzcmNsYW5nPSJlbi1HQiIgY3JlYXRpb25pZD0iU3lzdGVtIgogICAgICBjcmVhdGlvbmRhdGU9IjIwMTcwODIyVDEwMTkyMloiIGNoYW5nZWlkPSJXb3JsZFRyYW5zbGF0aW9uIgogICAgICBjaGFuZ2VkYXRlPSIyMDE3MDgyMlQxMDE5MjJaIiB0dWlkPSI2MjM0ODA4LTE1NSI+CiAgICAgIDxwcm9wIHR5cGU9IngtaWRpb20tc291cmNlLWlwYXRoIj4vV1NNb3VudC9MZWljYSBEb2N1bWVudGF0aW9uL1Byb2plY3RzLzExNDI0X0xlaWNhX0JMSzM2MF9VTV92MS4wLjBfREUvU291cmNlLUVuZ2xpc2ggKFVuaXRlZCBLaW5nZG9tKS9PQkpfRE9LVS0wMDAwMDAwODQ1LTAwMV9kZS54bWw8L3Byb3A+CiAgICAgIDxwcm9wIHR5cGU9IngtaWRpb20tdGFyZ2V0LWlwYXRoIj4vV1NNb3VudC9MZWljYSBEb2N1bWVudGF0aW9uL1Byb2plY3RzLzExNDI0X0xlaWNhX0JMSzM2MF9VTV92MS4wLjBfREUvVGFyZ2V0LUdlcm1hbiAoR2VybWFueSkvT0JKX0RPS1UtMDAwMDAwMDg0NS0wMDFfZGUueG1sPC9wcm9wPgogICAgICA8cHJvcCB0eXBlPSJ4LWlkaW9tLXByZXYtaGFzaGNvZGUiPi02OTMyNTkyNzwvcHJvcD4KICAgICAgPHByb3AgdHlwZT0ieC1pZGlvbS1uZXh0LWhhc2hjb2RlIj4xODUyMDE3OTwvcHJvcD4KICAgICAgPHR1diB4bWw6bGFuZz0iZW4tR0IiPgogICAgICAgIDxzZWc+VGhlIDxwaCB4PSIzNiIgdHlwZT0iNjAxMSIvPiBpcyBjb3VudGluZyBkb3duIGZvciAxMMKgc2Vjb25kcyBiZWZvcmUgcmVjb3JkaW5nLjwvc2VnPgogICAgICA8L3R1dj4KICAgICAgPHR1diB4bWw6bGFuZz0iZGUtREUiPgogICAgICAgIDxzZWc+RGVyIDxwaCB4PSIzNiIgdHlwZT0iNjAxNiIvPiBmw7xocnQgZWluZW4gMTAtc2Vrw7xuZGlnZW4gQ291bnRkb3duIHZvciBkZXIgQXVmemVpY2hudW5nIGR1cmNoLjwvc2VnPgogICAgICA8L3R1dj4KICAgIDwvdHU+CjwvYm9keT4K\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Import Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cjx0bXg+CiAgPGhlYWRlciBzcmNsYW5nPSJkZS1ERSIgZGF0YXR5cGU9InBsYWludGV4dCIgLz4KICA8Ym9keT4KICA8dHUgc3JjbGFuZz0iZW4tR0IiID4KICAgICAgPHR1diB4bWw6bGFuZz0iZW4tR0IiPgogICAgICAgIDxzZWc+VGFwIHRoZSBkcm9wLWRvd24gbGlzdCB0byBzZWxlY3QgYW4gaW5hY3Rpdml0eSA8YnB0IGk9IjEiIHg9IjE2MyIvPlRpbWVvdXQ8ZXB0IGk9IjEiLz4gYWZ0ZXIgd2hpY2ggdGhlIFBJTiBjb2RlIG11c3QgYmUgZW50ZXJlZC48L3NlZz4KICAgICAgPC90dXY+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImRlLURFIj4KICAgICAgICA8c2VnPkF1ZiBkaWUgRHJvcGRvd24tTGlzdGUgdGlwcGVuLCB1bSB1bnRlciA8YnB0IGk9IjEiIHg9IjE2MyIvPlRpbWVvdXQ8ZXB0IGk9IjEiLz4gZWluIFplaXRsaW1pdCBmw7xyIEluYWt0aXZpdMOkdCBhdXN6dXfDpGhsZW4sIG5hY2ggZGVtIGRlciBQSU4tQ29kZSBlaW5nZWdlYmVuIHdlcmRlbiBtdXNzLjwvc2VnPgogICAgICA8L3R1dj4KICAgIDwvdHU+CjwvYm9keT4KPC90bXg+\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"hood\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 9",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\",\n\"source\":\"Tap the drop-down list to select an inactivity <bpt i=\\'1\\'/>Timeout<ept i=\\'1\\'/> after which the PIN code must be entered.\",\n\"markupTable\":\"OTMXUXLF\"\n\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 10",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"sourceLang\":\"en-GB\",\n\"targetLang\":\"de\",\n\"source\":\"Tap the drop-down list to select an inactivity <bpt i='1'/>Timeout<ept i='1'/> after which the PIN code must be entered.\",\n\"markupTable\":\"OTMXUXLF\"\n\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search Copy 11",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"The <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> is counting down for 10\\u00a0seconds before recording.\",\"documentName\":\"OBJ_DCL-0000000845-004_zh.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"220_222\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/memUK_invalid_tag_import/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"memUK_invalid_tag_import",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Tap the drop-down list to select an inactivity <bpt i=\"1\" x=\"163\"/>Timeout<ept i=\"1\"/> after which the PIN code must be entered."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy 2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "The <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> is counting down for 10\\u00a0seconds before recording."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "The <ph x=\"36\" type=\"6011\"/> is counting down for 10 seconds before recording."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy 4",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "The <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> is counting down for 10\\u00a0seconds before recording."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy 5",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "Do not touch or move the <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/>\n<ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> while the system is recording.\n"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement Copy 6",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "The <bx mid=\\\"1\\\" rid=\\\"1\\\"\\/><x mid=\\\"2\\\"\\/><ex mid=\\\"3\\\" rid=\\\"1\\\"\\/> is counting down for 10\\u00a0seconds before recording."
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

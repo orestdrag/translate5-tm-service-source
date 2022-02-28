@@ -1,0 +1,465 @@
+{
+	"info": {
+		"_postman_id": "88010e67-0022-49ec-bc12-55bda6a98266",
+		"name": "FuzzySearchAndUpdateCrashBigFile Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1)Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\"target\":\"-25 bis +70\",\n\"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n\"context\":\"1054_1082\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2)fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"879_907\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3)fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_cs.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"1055_1083\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4)Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\"target\":\"-25 bis +70\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_cs.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"1055_1083\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5)fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"1054_1082\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6)Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\"target\":\"Daten des Laserscan- systemsph\\/systemssystems\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"879_907\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7)fuzzy_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_fi.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"882_910\"}  "
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8)Update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\"target\":\"-25 bis +70\",\n   \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n   \"context\":\"1054_1082\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9)fuzzy_search_crash",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"<g id=\\\"1\\\">\\u2212<\\/g>40 to +70\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_fi.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"1057_1085\"}  "
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10)fuzzy_search_after_crash",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_fi.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"882_910\"} "
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11)Update Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\"target\":\"Daten des Laserscan- systemsph\\/systemssystems\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"879_908\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11)Update Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\"target\":\"Daten des Laserscan- systemsph\\/systemssystems\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"879_909\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11)Update Copy 4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\"target\":\"Daten des Laserscan- systemsph\\/systemssystems\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"879_95\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Concordance_search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"searchString\": \"to +70\",\n\"searchType\": \"source\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/concordancesearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"concordancesearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10)fuzzy_search_after_crash Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\"sourceLang\":\"en-GB\",\"targetLang\":\"de\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_fi.xml\",\"segmentNumber\":\"\",\"markupTable\":\"OTMXUXLF\",\"context\":\"882_910\"} "
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/OTM_-ID153-0_1_13_a/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"OTM_-ID153-0_1_13_a",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11)Update Copy 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Method\":\"update\",\"source\":\"Laser scanning <x mid=\\\"1\\\"\\/>system data\",\"target\":\"Daten des Laserscan- systemsph\\/systemssystems\",\n  \"documentName\":\"OBJ_DCL-0000000931-011_de.xml\",\"author\":\"Orest Dragush\",\n  \"context\":\"879_99\",\"type\":\"Manual\",\"markupTable\":\"OTMXUXLF\",\"sourceLang\":\"en-GB\",\"targetLang\":\"de\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/otmmemoryservice/OTM_-ID153-0_1_13_a/entry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"otmmemoryservice",
+						"OTM_-ID153-0_1_13_a",
+						"entry"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
