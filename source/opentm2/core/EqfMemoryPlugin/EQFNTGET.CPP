@@ -497,7 +497,7 @@ USHORT TmtXGet
 
     UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
     auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pSentence->pInputString);
-    wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags.c_str());
+    wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
     //tokenize source segment, resuting in normalized string and
     //tag table record
     ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);

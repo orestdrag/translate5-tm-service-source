@@ -2249,14 +2249,14 @@ MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
   return( UNDEFINED_PROPTYPE );
 }
 
-std::wstring OtmMemoryServiceWorker::replaceString(std::wstring&& src_data, std::wstring&& trg_data,  int* rc){ 
-  std::wstring response;
+std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
+  std::vector<std::wstring> response;
   *rc = 0;
   try {
         xercesc::XMLPlatformUtils::Initialize();
         *rc = verifyAPISession();
         if(*rc == 0){
-          response = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::move(src_data), std::move(trg_data) );
+          response = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::move(src_data), std::move(trg_data), std::move(req_data) );
         }
         xercesc::XMLPlatformUtils::Terminate();
     }

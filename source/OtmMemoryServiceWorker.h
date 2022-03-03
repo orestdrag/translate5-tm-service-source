@@ -195,7 +195,7 @@ public:
   */
   void importDone( char *pszMemory, int iRC, char *pszError );
 
-  std::wstring replaceString(std::wstring&& src_data, std::wstring&& trg_data,  int* rc);
+  std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc);
 
 private:
   

@@ -29,20 +29,19 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
   wchar_t buff[4096];  
   EscapeXMLChars((wchar_t*)input.c_str(), buff);
   return buff;
-
 }
 
-std::wstring ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes = false);
-std::wstring EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg)
+
+std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
+std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes = false);
+std::vector<std::wstring> EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg, std::wstring &&w_req)
 {
-  return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src), std::move(w_trg));
+  if(w_req.empty()){
+    return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src), std::move(w_trg));
+  }
+  return ReplaceOriginalTagsWithTagsFromRequestFunc(std::move(w_req),std::move(w_src), std::move(w_trg));
 }
 
-std::wstring ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
-std::wstring EncodingHelper::ReplaceOriginalTagsWithTagsFromRequest(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg)
-{
-  return ReplaceOriginalTagsWithTagsFromRequestFunc(std::move(w_request),std::move(w_src), std::move(w_trg));
-}
 
 /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
   \param strUTF8String string in UTF8 encoding
@@ -56,11 +55,7 @@ std::wstring EncodingHelper::convertToUTF16(std::string&& strUTF8String )
 }
 
 std::u16string EncodingHelper::toUtf16(std::wstring&& wstr){
-  //std::wstring_convert<std::codecvt_utf16<char16_t>> convert;
   std::string u8str = EncodingHelper::convertToUTF8(wstr);
-
-  //std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
-
   return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(u8str);
 }
 
@@ -128,8 +123,6 @@ void EncodingHelper::convertUTF8ToASCII( std::string& strText )
 */
 void EncodingHelper::convertASCIIToUTF8( std::string& strText )
 {
-  //LogMessage2(WARNING,"EncodingHelper::convertASCIIToUTF8( std::string& strText ) is not implemented, strText = ", strText.c_str());
-
   int iUTF16Len;
   int iUTF8Len;
   int iASCIILen = (int)strText.length() + 1;

@@ -2,6 +2,7 @@
 #define _ENCODING_HELPER_H_
 
 #include <string>
+#include <vector>
 
 
 class EncodingHelper{
@@ -44,8 +45,7 @@ class EncodingHelper{
     void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
 
     static std::wstring EscapeXML( std::wstring input );
-    static std::wstring ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg = L"");
-    static std::wstring ReplaceOriginalTagsWithTagsFromRequest(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
+    static std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg = L"", std::wstring &&w_req = L"");
 
 };
 

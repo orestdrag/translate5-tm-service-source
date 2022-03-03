@@ -249,21 +249,12 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     int rc = 0;
-    //w
-    string strSrcData, strTrgData;
+    string strSrcData, strTrgData, strReqData;
     string strInData = string( body.begin(), body.end() );
-    //if(strInDat.size()){}
     strSrcData.reserve( strInData.size() + 1 );
     strTrgData.reserve( strInData.size() + 1 );
-
-    //wchar_t* pSrcData = (wchar_t*) &strSrcData[0];
-    //wchar_t* pTrgData = (wchar_t*) &strTrgData[0];
-   
+    strReqData.reserve( strInData.size() + 1 );   
     wstring wstr;
-    //JSONFactory::JSONPARSECONTROL parseControl[] = { 
-    //  { L"src",     JSONFactory::UTF16_STRING_PARM_TYPE, &( pSrcData ),   strInData.size() },
-    //  { L"trg",     JSONFactory::UTF16_STRING_PARM_TYPE, &( pTrgData ),   strInData.size() },
-    //  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
     JSONFactory *factory = JSONFactory::getInstance();
     void *parseHandle = factory->parseJSONStart( strInData, &rc );
@@ -286,6 +277,8 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
             strSrcData = value;
           }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
             strTrgData = value;
+          }else if( strcasecmp (name.c_str(), "req") == 0 ){
+            strReqData = value;          
           }else{
             LogMessage5(WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
           }
@@ -293,13 +286,27 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
       } /* endwhile */
       factory->parseJSONStop( parseHandle );
     }
+    
+    auto result =  pMemService->replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
+                                                EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
+                                                EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
 
-    if( rc && strSrcData.size() && strTrgData.size()){
-      wstr =  pMemService->replaceString( EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
-                  EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(), &rc);
-    }else{
-      wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()).c_str(), L"", &rc);
+    //if( rc )
+    //   if(strSrcData.size() && strTrgData.size()){
+         
+    //   }
+    //}
+
+    //if(wstr.empty())
+    //{
+    //  wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()).c_str(), L"", &rc);
+    //}
+    int index=0;
+    wstr = L"{\n ";
+    for(auto& res: result){
+      wstr += L"\'" + std::to_wstring(++index) + L"\' :\'" + res + L"\',\n ";
     }
+    wstr += L"\n};";
     string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
 
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
