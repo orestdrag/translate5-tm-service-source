@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<languages>
+  <language>
+    <name>English(U.K.)</name>
+	<cpASCII>850</cpASCII>
+	<cpANSI>1252</cpANSI>
+	<cpName>ISO-8859-1</cpName>
+	<iso>en-GB</iso>
+	<icu>en-GB</icu>
+	<preferred>no</preferred>
+	<group>English</group>
+	<isSourceLanguage>yes</isSourceLanguage>
+	<isTargetLanguage>yes</isTargetLanguage>
+	<comments/>
+  </language>
+  <language>
+    <name>English(U.S.)</name>
+	<cpASCII>850</cpASCII>
+	<cpANSI>1252</cpANSI>
+	<cpName>ISO-8859-1</cpName>
+	<iso>en-US</iso>
+	<icu>en-US</icu>
+	<preferred>yes</preferred>
+	<group>English</group>
+	<isSourceLanguage>yes</isSourceLanguage>
+	<isTargetLanguage>yes</isTargetLanguage>
+	<comments/>
+  </language>
+</languages>
