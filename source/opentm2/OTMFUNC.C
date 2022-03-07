@@ -988,7 +988,6 @@ USHORT EqfQueryMem
   } /* endif */
 
   LOGLEVEL logLevel = usRC? ERROR : INFO;
-  //if ( pData )
   LogMessage2(logLevel,"End of EqfQueryMem, RC = ", toStr(usRC).c_str());
 
   return( usRC );

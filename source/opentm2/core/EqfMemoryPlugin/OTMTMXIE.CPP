@@ -1601,7 +1601,6 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
       LogMessage6(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
             res_src_s.c_str(),"\'\n");
     }
-    //res = src_res;
     res.push_back(src_res);
   }else{    
     handler->activeSegment = TMXParseHandler::TARGET_SEGMENT;
@@ -1625,7 +1624,6 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
     }
     res.push_back(src_res);
     res.push_back(trg_res);
-    //res = L"{\n\'src\':\'" + src_res + L"\'\n\'trg\':\'" + trg_res + L"\'\n}";
   }
   
   delete parser;
@@ -1676,7 +1674,6 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   auto tags = handler->tagList;
   
   // do tag replacement for source and target 
-  //*
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
   LogMessage4(INFO,__func__,":: parsing str = \'", src.c_str(), "\'");
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
@@ -1713,7 +1710,6 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
     LogMessage10(INFO,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
             res_src_s.c_str(),"\'\n target: \'", trg.c_str(), "\'\n replaced with:\n\'", res_trg_s.c_str(),"\'\n");
   }
-  //res = L"{\n\'src\':\'" + src_res + L"\'\n\'trg\':\'" + trg_res + L"\'\n}";
   
   res.push_back(req_res);
   res.push_back(src_res);
@@ -2306,25 +2302,25 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           if ( (strcasecmp( pszName, "xml:lang" ) == 0) || (strcasecmp( pszName, "lang" ) == 0) )
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
-            //bool fOkLang = false;
-            //CHAR     _szLang[50];
+            bool fOkLang = false;
+            CHAR     _szLang[50];
             if ( pszValue != NULL )
             {
               strcpy( CurElement.szTMXLanguage, pszValue );
               strcpy( pBuf->szLang, pszValue );
-            //  fOkLang = LanguageFactory::getInstance()->getOpenTM2NameFromISO( CurElement.szTMXLanguage, _szLang ) == 0;
+              fOkLang = LanguageFactory::getInstance()->getOpenTM2NameFromISO( CurElement.szTMXLanguage, _szLang ) == 0;
             } /* endif */
             
             //activeSegment = strcasecmp( pTuvArray[iCurTuv].szLang, pBuf->szMemSourceLang )? SOURCE_SEGMENT : TARGET_SEGMENT;
             //activeSegment = strcasecmp( pszValue, pBuf->szMemSourceLang )? SOURCE_SEGMENT : TARGET_SEGMENT;
-            //activeSegment = SOURCE_SEGMENT;
+            activeSegment = SOURCE_SEGMENT;
 
-            //if(fOkLang){
-            //  if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) 
-            //    activeSegment = TARGET_SEGMENT;
-            //}else{
-            //  LogMessage2(ERROR,__func__,":: language is not supported");
-            //}
+            if(fOkLang){
+              if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) 
+                activeSegment = TARGET_SEGMENT;
+            }else{
+              LogMessage2(ERROR,__func__,":: language is not supported");
+            }
 
             XMLString::release( &pszValue );
           } /* endif */
@@ -2394,13 +2390,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         std::u16string name;
         fCatchData = false;
         CurElement.fInsideTagging = true;
-
-        //if( char16_t* _i = (char16_t*)attributes.getValue("i") ){
-        //  name = _i;
-        //}
-        //if(name.empty()){
-        //  LogMessage4(ERROR,__func__, ":: cant find i attribute in \'", pszName,"\' tag");
-        //}  
         
         auto tag = GenerateReplacingTag(CurElement.ID, &attributes );//, -1 , -1); // tag->i);
         std::wstring replacedTag = GenerateTag(tag);
@@ -2410,7 +2399,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           wcscat(pBuf->szData, replacedTag.c_str());            
         }else{
           LogMessage3(WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacedTag).c_str());
-          //pBuf->iHighestId--;
         }
         break;
       }
@@ -2426,7 +2414,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           LogMessage5(INFO,__func__,":: parsed pair tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           wcscat(pBuf->szData, replacingTag.c_str());
         }else{
-          //pBuf->iHighestBPTI--;
+          LogMessage3(WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacingTag).c_str());
         }
         break;
       }
@@ -2930,8 +2918,6 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     {
       memset( CurElement.szTMLanguage, 0, sizeof(CurElement.szTMLanguage) );
       strncpy( CurElement.szTMLanguage, pBuf->szProp, sizeof(CurElement.szTMLanguage) - 1 );
-      if( strcasecmp( CurElement.szTMLanguage, pBuf->szMemSourceLang ) ) 
-        activeSegment = TARGET_SEGMENT;
     }
     else if ( CurrentProp == TMMARKUP_PROP )
     {

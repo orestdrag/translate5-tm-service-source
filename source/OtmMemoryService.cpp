@@ -291,16 +291,6 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
                                                 EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
                                                 EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
 
-    //if( rc )
-    //   if(strSrcData.size() && strTrgData.size()){
-         
-    //   }
-    //}
-
-    //if(wstr.empty())
-    //{
-    //  wstr =  pMemService->replaceString(EncodingHelper::convertToUTF16(strInData.c_str()).c_str(), L"", &rc);
-    //}
     int index=0;
     wstr = L"{\n ";
     for(auto& res: result){

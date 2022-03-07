@@ -705,6 +705,8 @@ int EqfMemory::searchProposal
   if ( iRC == 0 )
   {
     LogMessage3(DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",toStr(this->pTmGetOut->usNumMatchesFound).c_str()," proposals"   );
+    wchar_t szRequestedString[2049];
+    SearchKey.getSource( szRequestedString, sizeof(szRequestedString) );
 
     for ( int i = 0; i < (int)FoundProposals.size(); i++ )
     {
@@ -718,6 +720,13 @@ int EqfMemory::searchProposal
           auto strSource = EncodingHelper::convertToUTF8(pTmGetOut->stMatchTable[i].szSource );
           LogMessage6(DEBUG,"EqfMemory::searchProposal::   proposal ",toStr(i).c_str(),": match=",toStr(pTmGetOut->stMatchTable[i].usMatchLevel).c_str(),", source=", strSource.c_str() );
         }
+        //replace tags for proposal
+        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetOut->stMatchTable[i].szSource, 
+                                                                                     pTmGetOut->stMatchTable[i].szTarget, 
+                                                                                     szRequestedString); 
+        wcscpy(pTmGetOut->stMatchTable[i].szSource, result[1].c_str());
+        wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[2].c_str());
+
         this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );
       } /* end */         
     } /* end */       

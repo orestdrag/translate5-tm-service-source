@@ -3312,10 +3312,10 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
               //compare tag table records
-              fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
-                                     RECLEN(pTMXSourceTagTable) ) == 0;
-              if ( !fStringEqual )
-              {
+              //fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
+              //                       RECLEN(pTMXSourceTagTable) ) == 0;
+              //if ( !fStringEqual )
+              //{
                 /**********************************************************/
                 /* if tagging record is unequal than we have some         */
                 /* (slight) differences                                   */
@@ -3342,31 +3342,33 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                   else
                   {
                     fStringEqual = FALSE;
+                    
                     fStringEqual = (UtlCompIgnWhiteSpaceW(pSentence->pPropString,
-                                                  pSentence->pInputString,
+                                                  //pSentence->pInputString,
+                                                  pSentence->pInputStringWNormalizedTags,
                                                   0 ) == 0 );
                     if (!fStringEqual && (usFuzzy >= 100) )
                     {
                        // compare with respect to protected/unprotected parts
-					   // We can assume all Text tokens to be equal ( usFuzzy = 100),
-					   // but we do not know about tag tokens
-					   BOOL fTempStringEqual = FALSE;
-					   BOOL fOK = FALSE;
-					   fOK = NTMCompareBetweenTokens(
-                   pSentence->pPropString,
-                   pSentence->pInputStringWNormalizedTags,
-									 //pSentence->pInputString,
-									 pGetIn->szTagTable,
-									 sLangID,
-									 pGetIn->ulSrcOemCP, &fTempStringEqual);
-					   if (fOK)
-					   {
-						 fStringEqual = fTempStringEqual;
-					   }
+                      // We can assume all Text tokens to be equal ( usFuzzy = 100),
+                      // but we do not know about tag tokens
+                      BOOL fTempStringEqual = FALSE;
+                      BOOL fOK = FALSE;
+                      fOK = NTMCompareBetweenTokens(
+                            pSentence->pPropString,
+                            pSentence->pInputStringWNormalizedTags,
+                            //pSentence->pInputString,
+                            pGetIn->szTagTable,
+                            sLangID,
+                            pGetIn->ulSrcOemCP, &fTempStringEqual);
+                        if (fOK)
+                        {
+                          fStringEqual = fTempStringEqual;
+                        }
                     }
                   } /* endif */
                 } /* endif */
-              } /* endif */
+              //} /* endif */
               /********************************************************/
               /* ensure that we are dealing with a fuzzy match        */
               /********************************************************/
