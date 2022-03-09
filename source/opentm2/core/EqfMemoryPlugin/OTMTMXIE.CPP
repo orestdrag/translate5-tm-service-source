@@ -1055,7 +1055,8 @@ USHORT CTMXExportImport::WriteTUV
       }
       pszAmp = wcschr( pszCurPos, L'&' );
     } /* endwhile */
-    if ( *pszCurPos != 0 ) m_xw.WriteRaw( pszCurPos );
+    if ( *pszCurPos != 0 ) 
+      m_xw.WriteRaw( pszCurPos );
   }
   
   // end open elements
@@ -2642,7 +2643,6 @@ void TMXParseHandler::endElement(const XMLCh* const name )
 
               fillSegmentInfo( pSourceTuv, pCurrentTuv, &(pBuf->SegmentData) );
 
-
               if ( pCurrentTuv->fInvalidLang )
               {
                 pBuf->SegmentData.fValid = FALSE;
@@ -2792,7 +2792,6 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         if ( fTuvValid )
         {
           PTMXTUV pTuvData = pTuvArray + iCurTuv;
-
           CopyTextAndProcessMaskedEntitites( pTuvData->szText, pBuf->szData );
 
           strcpy( pTuvData->szLang, pBuf->szLang );

@@ -752,7 +752,8 @@ int CopyToBufferW( wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize )
 {
   int iCopied = wcslen( pszSource );
   if ( iCopied >= iBufSize ) iCopied = iBufSize - 1;
-  memcpy( pszBuffer, pszSource, iCopied * sizeof(wchar_t) );
+  //memcpy( pszBuffer, pszSource, iCopied * sizeof(wchar_t) );
+  wcsncpy(pszBuffer, pszSource, iCopied);
   pszBuffer[iCopied] = 0;
   return( iCopied );
 }

@@ -698,8 +698,6 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
         (pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT) )
    {
      pLIDA->lProgress = 0;
-
-     //usRc = pLIDA->pfnMemImpProcess( pLIDA->lExternalImportHandle, MEMINSERTSEGMENT, (LONG)pLIDA, &(pLIDA->lProgress) );
      usRc = EqfPluginWrapper::MemImportProcess( pLIDA->lExternalImportHandle , MEMINSERTSEGMENT, (LONG)pLIDA, &(pLIDA->lProgress));
 
      // handle any error conditions

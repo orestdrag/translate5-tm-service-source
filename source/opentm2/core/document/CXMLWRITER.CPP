@@ -183,7 +183,6 @@ BOOL CXmlWriter::WriteStartDocument()
 {
   BOOL fOK = TRUE;
 
-  //m_hf = fopen( m_strFileName, "wb" );
   m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
 
   if ( m_hf )
@@ -319,7 +318,6 @@ void CXmlWriter::WriteCDataString( const WCHAR *text )
 void CXmlWriter::WriteInt( int iValue )
 {
   WCHAR szValue[20];
-  //LogMessage(ERROR, "TEMPORARY_COMMENTED");
   swprintf( szValue, 20, L"%d", iValue );
   WriteString( szValue );
 }
@@ -427,23 +425,6 @@ void CXmlWriter::WriteRaw( const WCHAR * text )
 void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
 {
   int ret = 0;
-  /*
-  if(iLen && m_hf){
-    if ( Encoding == UTF16 )
-    {
-      ret = fwrite( text, sizeof(WCHAR), iLen, m_hf );      
-    }
-    else
-    {
-      std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
-      int iBytes = str.size();
-
-      ret = fwrite( str.c_str(), 1, iBytes, m_hf );
-    } 
-  }
-  return;
-  //*/
-
   // write string as-is except for LFs which are replaced by CRLF
   do
   {
@@ -468,10 +449,9 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       else
       {
         std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
-        str = str.substr(0, iLFPos);
+        //str = str.substr(0, iLFPos);
         int iBytes = str.size();
 
-        //int iBytes = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)text, iLFPos, m_Buffer, sizeof(m_Buffer), NULL, NULL );
         if(m_hf){
           ret = fwrite( str.c_str(), 1, iBytes, m_hf );
         }
@@ -515,8 +495,6 @@ void CXmlWriter::WriteStartAttribute( const char * prefix, const char * localnam
 
 void CXmlWriter::WriteStartAttribute( const WCHAR *prefix, const WCHAR *localname, const WCHAR *ns )
 {
-  ns; prefix; 
-
   if ( GetCurElement() == CXmlWriter::Tag && m_fOpenTag )
   {
     if ( GetCurElement() == CXmlWriter::Attribute )
@@ -530,6 +508,7 @@ void CXmlWriter::WriteStartAttribute( const WCHAR *prefix, const WCHAR *localnam
   }
   else
   {
+    LogMessage3(WARNING,__func__,":: wrong context! for attribute ", EncodingHelper::convertToUTF8(localname).c_str());
     // wrong context!
   } /* endif */
 }
@@ -551,6 +530,7 @@ void CXmlWriter::WriteEndAttribute()
   }
   else
   {
+    LogMessage2(WARNING,__func__,":: wrong context!");
     // wrong context!
   } /* endif */
 }
@@ -570,13 +550,10 @@ void CXmlWriter::WriteAttributeString( const char *localname, const char * ns, c
   if ( pUnicodeValue )     free( pUnicodeValue );
   if ( pUnicodeLocalName ) free( pUnicodeLocalName );
   if ( pUnicodeNameSpace ) free( pUnicodeNameSpace );
-
 }
 
 void CXmlWriter::WriteAttributeString( const WCHAR *localname, const WCHAR * ns, const WCHAR *value )
 {
-  ns;                                  // currently not used
-
   WriteStartAttribute( NULL, localname, ns );
   WriteStringInt( value );
   WriteEndAttribute();
@@ -612,8 +589,6 @@ void CXmlWriter::WriteStartElement( const char * prefix, const char * localname,
 
 void CXmlWriter::WriteStartElement( const WCHAR * prefix, const WCHAR * localname, const WCHAR * ns )
 {
-  ns; prefix;                          // currently not used
-
   // close any open attribute and start element tag
   if ( GetCurElement() == CXmlWriter::Attribute ) 
   {
@@ -845,6 +820,5 @@ void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
   WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen );
   wcscpy(pBuffer, wstr.c_str());
   pBuffer[wstr.size()] = 0;
-  //MultiByteToWideChar( CP_ACP, 0, pAnsiText, -1, pBuffer, iUnicodeLen ); 
   *ppUnicodeText = pBuffer;
 }
