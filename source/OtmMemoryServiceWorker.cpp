@@ -2459,9 +2459,6 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
   return( iRC );
 }
 
-
-
-
 void importMemoryProcess( void *pvData )
 {
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;

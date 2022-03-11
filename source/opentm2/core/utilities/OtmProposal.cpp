@@ -744,9 +744,6 @@ OtmProposal &OtmProposal::operator=( const OtmProposal &copyme )
   return *this; 
 }
 
-
-
-
 /*! \brief Copies a string to the user supplied buffer area*/
 int CopyToBufferW( wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize )
 {

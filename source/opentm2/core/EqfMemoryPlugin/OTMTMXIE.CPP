@@ -1776,18 +1776,18 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
     }
     
     if(x > 0){
-      res += " id=\'"+toStr(x)+"\'";
+      res += " id=\""+toStr(x)+"\"";
     }
     if(i > 0){
-      res += " rid=\'"+toStr(i)+"\'";
+      res += " rid=\""+toStr(i)+"\"";
     }
   }else{
     res += TmxIDToName[tag.tagType];
     if(tag.x > 0){
-      res += " x=\'"+toStr(tag.x)+"\'";
+      res += " x=\""+toStr(tag.x)+"\"";
     }
     if(tag.i > 0){
-      res += " i=\'"+toStr(tag.i)+"\'";
+      res += " i=\""+toStr(tag.i)+"\"";
     }
   }
   res += "/>";
