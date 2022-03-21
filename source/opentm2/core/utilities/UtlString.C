@@ -1439,10 +1439,8 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
 
   if (ulLen == 0 )
   {
-    ULONG   ulLenTmp;
-
     fNullTerminated = TRUE;
-    ulLenTmp = UTF16strlenCHAR(pD2);
+    ULONG ulLenTmp = UTF16strlenCHAR(pD2);
     ulLen    = UTF16strlenCHAR(pD1);
     if (ulLenTmp > ulLen )
     {

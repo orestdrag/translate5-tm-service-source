@@ -525,15 +525,12 @@ USHORT TmtXGet
     SHORT sRetries = MAX_RETRY_COUNT;
     do
     {
-
       usRc = NO_ERROR;                 // reset return code
-
       // Update internal buffers if database has been modified by other users
       if ( !usRc && pTmClb->fShared )
       {
         usRc = NTMCheckForUpdates( pTmClb );
       } /* endif */
-
 
       if ( !usRc )
       {
@@ -993,12 +990,12 @@ GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
   CHAR_W szProjectID[PROJECTID_SIZE+1];
   CHAR_W chICU = 0;
   GMMEMOPT optReturn = GM_HFLAG_OPT;
-  PSZ_W pszGlobMemKeyword = L"<GlobMem>";
-  PSZ_W pszGlobMemEndKeyword = L"</GlobMem>";
-  PSZ_W pszHamsterKeyword = L"<Hamster>";
-  PSZ_W pszHamsterEndKeyword = L"</Hamster>";
-  PSZ_W pszCTIDKeyword = L"<CTID>";
-  PSZ_W pszCTIDEndKeyword = L"</CTID>";
+  const PSZ_W pszGlobMemKeyword = L"<GlobMem>";
+  const PSZ_W pszGlobMemEndKeyword = L"</GlobMem>";
+  const PSZ_W pszHamsterKeyword = L"<Hamster>";
+  const PSZ_W pszHamsterEndKeyword = L"</Hamster>";
+  const PSZ_W pszCTIDKeyword = L"<CTID>";
+  const PSZ_W pszCTIDEndKeyword = L"</CTID>";
 
   // search CTID entry in additional data
   PSZ_W pszGlobMemGroup = GlobMemFind( pszAddData, pszGlobMemKeyword );
@@ -3045,7 +3042,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
 
     if(CheckLogLevel(INFO)){
-      auto str= EncodingHelper::convertToUTF8(pString);
+      auto str = EncodingHelper::convertToUTF8(pString);
       LOGPRINTF3( INFO, "::FuzzyTest: \n<SOURCE>\r\n", str.c_str() , "\r\n</SOURCE>\r\n" );
     }
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
@@ -3246,25 +3243,18 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
             if ( fOK )
             {
-              if ( fTagTableEqual )
+              ULONG  ulLenTmp = ulSourceLen;
+              PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
+              //position at source tag table record
+              pByte = pStartTarget;
+              pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+              pByte += pTMXTargetRecord->usSourceTagTable;
+              pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+              fOK = AddTagsToStringW( pString, &ulLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+              if ( !fOK )
               {
-                ULONG  ulLenTmp = ulSourceLen;
-                PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
-                //position at source tag table record
-                pByte = pStartTarget;
-                pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
-                pByte += pTMXTargetRecord->usSourceTagTable;
-                pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-                fOK = AddTagsToStringW( pString, &ulLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
-                if ( !fOK )
-                {
-                  usRc = BTREE_CORRUPTED;
-                } /* endif */
-              }
-              else
-              {
-                UTF16strcpy( pSentence->pPropString, pString );
-              } /* endif */
+                usRc = BTREE_CORRUPTED;
+              } /* endif */              
             } /* endif */
 
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,

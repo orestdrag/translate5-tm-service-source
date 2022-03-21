@@ -457,10 +457,8 @@ VOID HashSentence
   /********************************************************************/
   if ( usCount < 5 )
   {
-    USHORT  i;                         // index
-
     pTermTokens = pSentence->pTermTokens;
-    for ( i=0; i < usCount; i++ )
+    for (USHORT i=0; i < usCount; i++ )
     {
       pSentence->pulVotes[pSentence->usActVote] = pTermTokens[i].usHash;
       pSentence->usActVote++;
@@ -470,7 +468,6 @@ VOID HashSentence
   if(CheckLogLevel(DEBUG)){
     auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
     LogMessage4(DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", toStr(usCount).c_str() );
-
   }
   //build tuples of the term hashes
   if ( usCount >= 3 )

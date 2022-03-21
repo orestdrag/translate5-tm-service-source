@@ -684,7 +684,6 @@ int EqfMemory::searchProposal
 {
   int iRC = 0;
 
-
   if ( this->pTmGetIn == NULL ) this->pTmGetIn = new (TMX_GET_IN_W);
   if ( this->pTmGetOut == NULL ) this->pTmGetOut = new (TMX_GET_OUT_W);
   memset( this->pTmGetIn, 0, sizeof(TMX_GET_IN_W) );

@@ -2381,7 +2381,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           wcscat(pBuf->szData, replacingTag.c_str());
           break;
         }else{
-          //pBuf->iHighestBPTI--;
           break;
         }
       }

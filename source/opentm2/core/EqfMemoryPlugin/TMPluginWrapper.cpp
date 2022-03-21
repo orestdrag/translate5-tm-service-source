@@ -817,11 +817,10 @@ USHORT TokenizeSourceEx2
             {
               PFLAGOFFSLIST pTerm;                   // pointer to terms list
               PFLAGOFFSLIST pTermList = NULL;        // pointer to offset/length term list
-              ULONG     ulListSize = 0;
-              CHAR_W    chTemp;                      // buffer for character values
+              ULONG     ulListSize = 0;    
               USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
 
-              chTemp = pSentence->pInputString[pEntry->usStop+1];
+              CHAR_W chTemp = pSentence->pInputString[pEntry->usStop+1]; // buffer for character values
               pSentence->pInputString[pEntry->usStop+1] = EOS;
 
               usRc = NTMMorphTokenizeW( usLangId,

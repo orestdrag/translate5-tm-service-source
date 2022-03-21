@@ -2371,7 +2371,7 @@ USHORT TACreateProtectTableWEx
       // assure that ulTableAlloc * sizeof(STARTSTOP) is at least MIN_ALLOC
       if (ulTableAlloc < 4 )
       {
-		  ulTableAlloc = 4;
+		    ulTableAlloc = 4;
       }
 
       /********************************************************************/
@@ -2566,9 +2566,9 @@ USHORT TACreateProtectTableWEx
           if (pNextTok && pNextTok->pDataStringW &&
                (pCurrent->usStart >=(USHORT)(pNextTok->pDataStringW - pszSegment)))
           {
-			  pTok ++;
-			  pNextTok++;
-	      }
+            pTok ++;
+            pNextTok++;
+          }
 
           while ( pCurrent->usType )
           {
@@ -2609,8 +2609,8 @@ USHORT TACreateProtectTableWEx
                 if ( ((pCurrent->usStart == (USHORT)(pTok->pDataStringW-pszSegment))
 				      && (pTok->sTokenid == TEXT_TOKEN)) ||
 				      (pCurrent->usType == TRNOTE_CHAR))
-				{
-				    fTag = FALSE;
+                {
+                    fTag = FALSE;
                 }
                 // P016804: if text-token is from quoted text, do not reset!!
                 //fTag = FALSE;
@@ -2622,10 +2622,10 @@ USHORT TACreateProtectTableWEx
             pCurrent++;
             if (pNextTok && pNextTok->pDataStringW &&
                 (pCurrent->usStart >=(USHORT)(pNextTok->pDataStringW - pszSegment)))
-			{
-			  pTok ++;
-			  pNextTok++;
-	        }
+            {
+              pTok ++;
+              pNextTok++;
+            }
           } /* endwhile */
           /********************************************************************/
           /* add stopping mode....                                            */
