@@ -419,7 +419,7 @@ USHORT TmtXReplace
 VOID HashSentence
 (
   PTMX_SENTENCE pSentence,          // pointer to sentence structure
-  USHORT usMajVersion,               // major version of TM (req. for hash method)
+  USHORT usMajVersion,              // major version of TM (req. for hash method)
   USHORT usMinVersion               // minor version of TM (req. for hash method)
 )
 {
@@ -429,6 +429,7 @@ VOID HashSentence
 
   pTermTokens = pSentence->pTermTokens;
   pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+  //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
 
   while ( pTermTokens->usLength )
   {
@@ -440,7 +441,9 @@ VOID HashSentence
     //max nr of hashes built
     usCount++;
     pTermTokens++;
+    
     pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+    //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
   } /* endwhile */
 
   //duplicate term tokens if not sufficient; this is for very short sentences

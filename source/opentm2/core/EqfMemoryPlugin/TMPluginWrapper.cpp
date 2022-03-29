@@ -718,7 +718,6 @@ USHORT TokenizeSourceEx2
     pTagRecord = pSentence->pTagRecord;
     pTermTokens = pSentence->pTermTokens;
     pTagEntry = (PBYTE)pTagRecord;
-    auto len = &(pSentence->lTermAlloc) - (long)pSentence;
     pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
     
     RECLEN(pTagRecord) = 0;

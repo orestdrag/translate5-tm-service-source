@@ -1572,7 +1572,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
   handler->fReplaceWithTagsWithoutAttributes = fSkipAttributes;
   handler->iHighestId = 0;
   handler->iHighestPTI = 0;
-  handler->activeSegment = TMXParseHandler::TARGET_SEGMENT;
+  handler->activeSegment = TMXParseHandler::SOURCE_SEGMENT;
   XMLPScanToken saxToken;
 
   //  install our SAX handler as the document and error handler.

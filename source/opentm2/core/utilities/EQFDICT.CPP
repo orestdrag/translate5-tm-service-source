@@ -6796,7 +6796,7 @@ SHORT QDAMGetszData_V3
            }
 #endif
          
-        pHeader = &(pRecord->contents.header);
+          pHeader = &(pRecord->contents.header);
          } /* endif */
 
          /*************************************************************/

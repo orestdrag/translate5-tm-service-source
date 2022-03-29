@@ -19,6 +19,7 @@ Copyright Notice:
 #include "../../core/pluginmanager/PluginManager.h"
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/EncodingHelper.h"
+#include "../../core/utilities/PropertyWrapper.H"
 #include "OtmProposal.h"
 #include "EqfMemory.h"
 
@@ -766,8 +767,6 @@ int EqfMemory::updateProposal
 
   if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
 
-
-
   return( iRC );
 }
 
@@ -1312,7 +1311,11 @@ int EqfMemory::OtmProposalToGetIn
   Proposal.getContext( pGetIn->stTmGet.szContext, sizeof(pGetIn->stTmGet.szContext)  );
   Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
   Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
-  pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
+  
+  //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
+  int threshold = TM_DEFAULT_THRESHOLD;
+  properties_get_int_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
+  pGetIn->stTmGet.usMatchThreshold = threshold;
   pGetIn->stTmGet.ulSegmentId = Proposal.getSegmentNum();
   pGetIn->stTmGet.pvReplacementList = (PVOID)Proposal.getReplacementList();
 

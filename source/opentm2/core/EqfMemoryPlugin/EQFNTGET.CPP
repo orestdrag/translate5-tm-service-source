@@ -463,22 +463,18 @@ USHORT TmtXGet
 #endif
 
   if(CheckLogLevel(DEBUG)){    
-      //auto str_name = EncodingHelper::convertToUTF8(pTmClb->stTmSign.szName);
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
       LogMessage6(DEBUG, __func__,"== Lookup in memory  ==",pTmClb->stTmSign.szName," ==\nLookupSource = >>>",str_source.c_str(),"<<<"  );
+      auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
+      LOGPRINTF3(INFO, "-------------- Looking up:\n", str.c_str(),"\n" );
   }
 
-  if(CheckLogLevel(INFO)){
-    auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
-    LOGPRINTF3(INFO, "-------------- Looking up:\n", str.c_str(),"\n" );
-  }
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
 
   //allocate pSentence
   usRc = NTMAllocSentenceStructure( &pSentence ); 
-  
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lAllocTime) );
@@ -960,7 +956,6 @@ PSZ_W GlobMemFind( PSZ_W pszText, PSZ_W pszFind )
   PSZ_W pszResult = NULL;
   int iFindLen = wcslen( pszFind );
   int iRemaining = wcslen( pszText );
-
 
   while ( (iFindLen <= iRemaining) && (pszResult == NULL ) )
   {
@@ -3057,8 +3052,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = (UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L
-                      || UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L);
+       fStringEqual = ( UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L 
+                      ||UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L ) ;
     } /* endif*/
 
     LOGPRINTF2( INFO, "FuzzyTest: After String compare, fStringEqual = ", toStr(fStringEqual).c_str() );
@@ -3696,7 +3691,6 @@ USHORT FillMatchEntry
 
     //sort the sentence keys by frequency discard those below the given
     //threshold
-
     CleanupTempMatch( pTempMatch, &pMatchEntry, &pSentence->usActVote, pusMatchThreshold );
   } /* endif */
 
@@ -3720,7 +3714,6 @@ USHORT FillMatchEntry
   } /* endif */
 
   LOGPRINTF4( INFO, "FillMatchEntry: lMatchEntries=",toStr(lMatchEntries).c_str(),", rc=", toStr(usRc).c_str() );
-
 
   return( usRc );
 }
@@ -3828,18 +3821,15 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
   usEntriesInList = usEntries;
   qsort( pTempMatch, usEntries, sizeof(TMX_MATCHENTRY), CompCount );
   LOGPRINTF1( INFO, "CleanupTempMatch: Ranked entries after sort are:" );
-//#ifdef _DEBUG
+
   if(CheckLogLevel(DEBUG))
   {
     PTMX_MATCHENTRY pTest = pTempMatch;
     for ( i = 0; i < usEntries; i++, pTest++ )
     {
       LOGPRINTF6( DEBUG, "ulKey=",toStr(pTest->ulKey).c_str()," usMaxVotes=",toStr(pTest->usMaxVotes).c_str()," cCount=", toStr(pTest->cCount).c_str() );
-      //LOGPRINTF3( L"ulKey=%lu usMaxVotes=%u cCount=%d\r\n", pTest->ulKey,
-      //            pTest->usMaxVotes, pTest->cCount );
     } /* endfor */
   }
-//#endif
 
   // limit number to really ones of interest ( the MAX_MATCHES best )
   usEntries = std::min( usEntries, (USHORT)std::min(MAX_MATCHES, (int)(ABS_VOTES/2-1)) );
@@ -3891,21 +3881,21 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
     while ( (pTempPos->usMaxVotes == pTest->usMaxVotes)  &&
         (pTempPos->cCount == pTest->cCount) &&
       (usEntries < std::min((USHORT)(ABS_VOTES/2-1),usEntriesInList)))
-  {
-      pMatchEntry = pMatchEntryStart;
+    {
+        pMatchEntry = pMatchEntryStart;
 
-      while ( memcmp( pMatchEntry, pTempPos, sizeof( TMX_MATCHENTRY) ) != 0 && pMatchEntry->cCount )
-    {
-        pMatchEntry++;
+        while ( memcmp( pMatchEntry, pTempPos, sizeof( TMX_MATCHENTRY) ) != 0 && pMatchEntry->cCount )
+        {
+            pMatchEntry++;
+        }
+        if (pMatchEntry->cCount == 0)
+        {
+            memcpy( pMatchEntry, pTempPos, sizeof( TMX_MATCHENTRY ));
+        }
+        // point to next entry
+      pTempPos++;
+      usEntries++;
     }
-      if (pMatchEntry->cCount == 0)
-    {
-        memcpy( pMatchEntry, pTempPos, sizeof( TMX_MATCHENTRY ));
-    }
-      // point to next entry
-    pTempPos++;
-    usEntries++;
-  }
 
   }
   *ppMatchEntry = pMatchEntryStart;

@@ -438,6 +438,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     unsigned int uiTimeOut = 3600;
     unsigned int uiLogLevel = 0;
     unsigned int uiAllowedRAM = 1500; // MB
+    unsigned int uiThreshold = 33;
 
     /* get configuration settings */
     {
@@ -459,6 +460,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
             uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
             uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
+            uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, "33"));
         }else{
           LogMessage2(ERROR, "can't open t5memory.conf, path = ", path.c_str());
         }
@@ -466,6 +468,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     
     properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
     properties_set_int_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
+    properties_set_int_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
     std::string memDir = szOtmDirPath;
     memDir += "/MEM/";
     properties_add_str(KEY_MEM_DIR, memDir.c_str());
@@ -475,7 +478,8 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", toStr(uiPort).c_str(), "; Worker threads = ", toStr(uiWorkerThreads).c_str(),
             "; timeout = ", toStr(uiTimeOut).c_str());
-    LogMessage4(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str());
+    LogMessage6(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
+                          "; triples_threshold = ", toStr(uiThreshold));
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     strcpy( pszService, szServiceName );

@@ -152,12 +152,10 @@ USHORT TmtXOpen
         if ( (usRc == NO_ERROR) ||
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
-        {
-          USHORT usTempRc;
-
+        {          
           ulLen =  MAX_COMPACT_SIZE-1;
           //get compact area and add to control block
-          usTempRc = EQFNTMGet( pTmClb->pstTmBtree, COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
+          USHORT usTempRc = EQFNTMGet( pTmClb->pstTmBtree, COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
 
           // in organize mode allow continue if compact area is corrupted
           if ( (usTempRc != NO_ERROR) && (usTempRc != VERSION_MISMATCH) )
@@ -181,13 +179,11 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc;
-
           DEBUGEVENT( TMTXOPEN_LOC, STATE_EVENT, 2 );
 
           //call to obtain exact length of record
           ulLen = 0;
-          usTempRc = NTMLoadNameTable( pTmClb, LANG_KEY,
+          USHORT usTempRc = NTMLoadNameTable( pTmClb, LANG_KEY,
                                        (PBYTE *)&pTmClb->pLanguages, &ulLen );
 
           if ( usTempRc == BTREE_READ_ERROR ) 
@@ -212,9 +208,7 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc;
-
-          usTempRc = NTMLoadNameTable( pTmClb, FILE_KEY,
+          USHORT usTempRc = NTMLoadNameTable( pTmClb, FILE_KEY,
                                        (PBYTE *)&pTmClb->pFileNames,
                                        &ulLen );
 
@@ -244,9 +238,7 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc;
-
-          usTempRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY,
+          USHORT usTempRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY,
                                        (PBYTE *)&pTmClb->pAuthors, &ulLen );
 
           // in organize mode allow continue if author name area is corrupted
@@ -271,13 +263,11 @@ USHORT TmtXOpen
         } /* endif */
 
         //get tag tables and add to control block
-        if ( (usRc == NO_ERROR) ||
+      if ( (usRc == NO_ERROR) ||
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc;
-
-          usTempRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY,
+          USHORT usTempRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY,
                                        (PBYTE *)&pTmClb->pTagTables, &ulLen );
 
 
@@ -298,10 +288,8 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc;
-
           // error in memory allocations will force end of open!
-          usTempRc = NTMCreateLongNameTable( pTmClb );
+          USHORT usTempRc = NTMCreateLongNameTable( pTmClb );
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
 
           // now read any long name table from database, if there is
@@ -362,8 +350,7 @@ USHORT TmtXOpen
            (usRc == VERSION_MISMATCH) )
       {
         //call open function for index file
-        USHORT usIndexRc;
-        usIndexRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szIndexName,
+        USHORT usIndexRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szIndexName,
                                 pTmClb->usAccessMode, &pTmClb->pstInBtree );
         if ( usIndexRc != NO_ERROR )
         {
@@ -444,6 +431,4 @@ USHORT TmtXOpen
 
   return( usRc );
 }
-
-
 
