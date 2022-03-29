@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(OtmMemoryService VERSION 0.2.2)
+project(OtmMemoryService VERSION 0.2.4)
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
