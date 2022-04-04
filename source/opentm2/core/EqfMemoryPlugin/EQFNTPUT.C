@@ -759,24 +759,19 @@ USHORT CheckCompactArea
   PTMX_SENTENCE pSentence,             // pointer to sentence structure
   PTMX_CLB  pTmClb                     // pointer to tm control block
 )
-{
-  ULONG ulVote;                       // actual vote
-  PULONG pulVotes;                    // pointer to begin of votes
-  USHORT i;                           // counter
-  BYTE bTuple;                        // active byte
-  BYTE bRest;                         // relevant bit of byte
-  USHORT usMatch;                     // number of matches
-  PBYTE pByte;                        // byte pointer
+{                        
+  PULONG pulVotes = pSentence->pulVotes; // pointer to begin of votes                           
+  USHORT usMatch = 0;                    // number of matches                           
 
-  pulVotes = pSentence->pulVotes;
-  usMatch = 0;
-  for ( i = 0; ( i < pSentence->usActVote) ; i++, pulVotes++ )
+  for (USHORT i = 0; ( i < pSentence->usActVote) ; i++, pulVotes++ )
   {
-    ulVote = *pulVotes;
+    ULONG ulVote = *pulVotes;                                // actual vote
     ulVote = ulVote % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-    bTuple = (BYTE) ulVote;
-    bRest  = bTuple & 0x7;
-    pByte = ((PBYTE)pTmClb->bCompact) + (ulVote >> 3);
+    
+    BYTE bTuple = (BYTE) ulVote;                             // active byte
+    BYTE bRest  = bTuple & 0x7;                              // relevant bit of byte
+
+    PBYTE pByte = ((PBYTE)pTmClb->bCompact) + (ulVote >> 3); // byte pointer
     if ( *pByte & (1 << bRest) )
     {
       usMatch++;

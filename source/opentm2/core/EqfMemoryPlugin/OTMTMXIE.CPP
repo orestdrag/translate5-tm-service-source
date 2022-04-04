@@ -648,14 +648,8 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTSTART
   PMEMEXPIMPINFO   pMemInfo            // pointer to structure receiving general information for the imported memory
 )
 {
-  USHORT           usRC = 0;           // function return code
-
-  plHandle; pszInFile; pMemInfo;
-
   CTMXExportImport *pTMXExport = new CTMXExportImport;
-
-  usRC = pTMXExport->StartImport( pszInFile, pMemInfo ); 
-
+  USHORT usRC = pTMXExport->StartImport( pszInFile, pMemInfo ); 
   *plHandle = (LONG)pTMXExport;
 
   return( usRC );
@@ -670,11 +664,9 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTPROCESS
   PLONG            plProgress               // caller's progress indicator
 )
 {
-  USHORT           usRC = 0;           // function return code
-
   CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
 
-  usRC = pTMXExport->ImportNext( pfnInsertSegment, lMemHandle, plProgress ); 
+  USHORT usRC = pTMXExport->ImportNext( pfnInsertSegment, lMemHandle, plProgress ); 
 
   return( usRC );
 } /* end of function EXTMEMIMPORTPROCESS */
@@ -688,9 +680,7 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTEND
   USHORT           usRC = 0;           // function return code
 
   CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-
   usRC = pTMXExport->EndImport(); 
-
   delete pTMXExport;
 
   return( usRC );
@@ -1734,22 +1724,6 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
   std::string res = "<" ;
   if(fFuzzyRequest){
     ELEMENTID tagType;
-    switch(tag.tagType){
-      case BPT_ELEMENT:
-        tagType = BX_ELEMENT;
-        break;
-      case EPT_ELEMENT:
-        tagType = EX_ELEMENT;
-        break;
-      case PH_ELEMENT:
-        tagType = X_ELEMENT;
-        break;
-      default:
-        LogMessage4(WARNING, __func__,"::replacing tag element is not valid(should be BPT,EPT or PH), tagElement = \'", TmxIDToName[tagType].c_str(),"\'");
-        break;
-    }
-    
-    res += TmxIDToName[tagType];
 
     int x = -1,// tag.original_x, 
         i = -1 //tag.original_i
@@ -1757,6 +1731,20 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
     if(tag.tagLocation == REQUEST_TAG){
       x = tag.original_x;
       i = tag.original_i;
+      switch(tag.tagType){
+        case BPT_ELEMENT:
+          tagType = BX_ELEMENT;
+          break;
+        case EPT_ELEMENT:
+          tagType = EX_ELEMENT;
+          break;
+        case PH_ELEMENT:
+          tagType = X_ELEMENT;
+          break;
+        default:
+          LogMessage4(WARNING, __func__,"::replacing tag element is not valid(should be BPT,EPT or PH), tagElement = \'", TmxIDToName[tagType].c_str(),"\'");
+          break;
+      }
     }else{   
       //find corresponding tag in requests tag
       //try to find matching tag
@@ -1769,12 +1757,15 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
       if ( matchingRequestTag != requestTagList.end()){
         i = matchingRequestTag->original_i;
         x = matchingRequestTag->original_x;
+        tagType = matchingRequestTag->original_tagType;
       }else{
         //generate new id
         LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");           
       }
     }
     
+    res += TmxIDToName[tagType];
+
     if(x > 0){
       res += " id=\""+toStr(x)+"\"";
     }
