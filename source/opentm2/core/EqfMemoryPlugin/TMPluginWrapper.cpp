@@ -1465,19 +1465,25 @@ USHORT NTMTokenizeW
       default:
         if ( fAlNum ) //&& !chIsText[c] )
         {
-			PUCHAR pTextTable;
-			
-      UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
-			
-      if(c > 255){
-        wchar_t buff[2];
-        buff[0] = c;
-        buff[1] = 0;
-        LogMessage4(ERROR, __func__,"::not supported symbol \'", EncodingHelper::convertToUTF8(buff),"\'");
-      }else if ( !pTextTable[c] )
-			{
-				fAlNum = FALSE;
-			}
+          PUCHAR pTextTable;          
+          UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
+          
+          //if(c > 255){
+          //  wchar_t buff[2];
+          //  buff[0] = c;
+          //  buff[1] = 0;
+          //  LogMessage4(ERROR, __func__,"::not supported symbol \'", EncodingHelper::convertToUTF8(buff),"\'");
+          //}else
+          if( c > 255 ){
+            if( !iswalpha(c) ){
+              fAlNum = false;
+            }
+          }else{
+            if ( !pTextTable[c] )
+            {
+              fAlNum = FALSE;
+            }
+          }
         } /* endif */
         if ( fNumber && !iswdigit(c) )
         {

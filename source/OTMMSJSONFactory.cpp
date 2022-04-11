@@ -1023,9 +1023,7 @@ int JSONFactory::parseJSON
   if ( parseHandle == NULL )
   {
     return( iRC );
-  } /* end */       
-
-  
+  } /* end */         
 
   while ( iRC == 0 )
   {

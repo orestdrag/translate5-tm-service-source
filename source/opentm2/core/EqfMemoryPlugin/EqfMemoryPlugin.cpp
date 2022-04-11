@@ -208,14 +208,12 @@ int EqfMemoryPlugin::closeMemory(
 	OtmMemory *pMemory			 
 )
 {
-  int iRC = 0;
-
   if ( pMemory == NULL ) return( -1 );
 
   EqfMemory *pMem = (EqfMemory *)pMemory;
   HTM htm = pMem->getHTM();
   
-	iRC = TmClose( htm, NULL,  FALSE,  NULL );
+	int iRC = TmClose( htm, NULL,  FALSE,  NULL );
 
   // refresh memory info
   std::string strMemName;
@@ -761,9 +759,6 @@ int EqfMemoryPlugin::getLastError
 */
 void EqfMemoryPlugin::refreshMemoryList()
 {
-  USHORT          usRC;                // return value of Utl/Dos calls
-
-
   //if ( this->pMemList != NULL )
   //{
   //    // delete all the elements in vector
@@ -785,11 +780,11 @@ void EqfMemoryPlugin::refreshMemoryList()
   m_MemInfoVector.clear();
 
   {
-  //prepare path for searching
-  char otm_dir[MAX_EQF_PATH];
-  properties_get_str(KEY_OTM_DIR, otm_dir, MAX_EQF_PATH);
-  properties_get_str_or_default(KEY_MEM_DIR, this->szBuffer,  MAX_EQF_PATH, otm_dir);
-  sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
+    //prepare path for searching
+    char otm_dir[MAX_EQF_PATH];
+    properties_get_str(KEY_OTM_DIR, otm_dir, MAX_EQF_PATH);
+    properties_get_str_or_default(KEY_MEM_DIR, this->szBuffer,  MAX_EQF_PATH, otm_dir);
+    sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
   }
 
   auto files = FilesystemHelper::FindFiles(this->szBuffer);
@@ -962,11 +957,10 @@ USHORT registerPlugins()
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
 	PluginManager *manager = PluginManager::getInstance();
   
-	//EqfMemoryPlugin* plugin = new EqfMemoryPlugin();
   EqfMemoryPlugin* plugin = EqfMemoryPlugin::GetInstance();
-	eRc = manager->registerPlugin((OtmPlugin*) plugin);
-    USHORT usRC = (USHORT) eRc;
-    return usRC;
+  eRc = manager->registerPlugin((OtmPlugin*) plugin);
+  USHORT usRC = (USHORT) eRc;
+  return usRC;
 }
 }
 //#endif
@@ -1542,36 +1536,16 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 29 TmClose( htm,
 */
 int EqfMemoryPlugin::addMemoryToList(const char* pszName)
 {
-    if(pszName==NULL)
-        return -1;
-     
-    // build memory path
-    char szShortName[MAX_FILESPEC];
-    char szPathName[MAX_LONGFILESPEC];
-    BOOL fIsNew = FALSE;
-
-    // already exist, just return
-    if( findMemory(pszName) != NULL)
-        return -1;
-    
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 30 ObjLongToShortName( pszName, szShortName, TM_OBJECT, &fIsNew );");
-#ifdef TEMPORARY_COMMENTED
-    ObjLongToShortName( pszName, szShortName, TM_OBJECT, &fIsNew );
-    #endif
-
-    // only could be added when its property exists
-    if(!fIsNew)
-    {
-        UtlMakeEQFPath( szPathName, '\0', MEM_PATH, NULL );
-        strcat( szPathName, "/" );
-        strcat( szPathName, szShortName );
-        strcat( szPathName, EXT_OF_TMDATA  );
-
-        std::string pathName = szPathName;
+    if( pszName && findMemory(pszName) == NULL){
+        // only could be added when its property exists
+        std::string pathName = pszName;
+        pathName += EXT_OF_TMDATA;
         addToList( pathName );
+        return 0;
     }
-
-    return 0;
+    
+    // already exist, just return
+    return -1;
 }
 
 
@@ -1739,6 +1713,7 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
        char szError[20];
        sprintf( szError, "%ld", iRC );
        pReplAddr[1] = szError;
+       LogMessage3(ERROR, __func__, ":: error ", toStr(iRC));
        UtlGetMsgTxt( ERROR_MEM_UNDEFINED, pszErrorTextBuffer, 2, pReplAddr );
      }
  }

@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(OtmMemoryService VERSION 0.2.5)
+
+
+SET(APP_VERSION  "0.2.6")
+project(OtmMemoryService VERSION ${APP_VERSION})
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
 
 set(CMAKE_C_FLAGS_TSAN
     "-fsanitize=thread -g -O1"

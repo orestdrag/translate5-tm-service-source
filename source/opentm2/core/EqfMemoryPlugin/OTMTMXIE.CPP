@@ -31,6 +31,7 @@
 #include "PropertyWrapper.H"
 #include "FilesystemHelper.h"
 #include "OSWrapper.h"
+#include "../../../cmake/git_version.h"
 
 //#include <windows.h>
 #include <stdlib.h>
@@ -751,10 +752,8 @@ USHORT CTMXExportImport::WriteHeader
   m_xw.WriteAttributeString( "version", "1.4" ); 
 
   m_xw.WriteStartElement( "header" );
-  char szVersion[20];
-  //sprintf( szVersion, "%d.%d.%d.%d", EQF_DRIVER_VERSION, EQF_DRIVER_RELEASE, EQF_DRIVER_SUBRELEASE, EQF_DRIVER_BUILD );
-  sprintf( szVersion, "otmd_linux_1.0");
-  m_xw.WriteAttributeString( "creationtoolversion", szVersion ); 
+  m_xw.WriteAttributeString( "creationtoolversion", appVersion ); 
+  m_xw.WriteAttributeString( "gitCommit", gitHash ); 
   m_xw.WriteAttributeString( "segtype", "sentence" ); 
   m_xw.WriteAttributeString( "adminlang", "en-us" ); 
 
@@ -768,8 +767,8 @@ USHORT CTMXExportImport::WriteHeader
     m_xw.WriteAttributeString( "srclang", szTMXLang ); 
   }
  
-  m_xw.WriteAttributeString( "o-tmf", "OpenTM2" ); 
-  m_xw.WriteAttributeString( "creationtool", "OpenTM2" ); 
+  m_xw.WriteAttributeString( "o-tmf", "t5memory" ); 
+  m_xw.WriteAttributeString( "creationtool", "t5memory" ); 
 
   // try to get data type of markup
   {
@@ -1827,7 +1826,6 @@ TagInfo TMXParseHandler::GenerateReplacingTag(ELEMENTID tagType, AttributeList* 
       }
     }
   }
-
   
   if(activeSegment == REQUEST_SEGMENT){
     tag.tagLocation = REQUEST_TAG;
@@ -3075,8 +3073,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
       // escape any special characters in inline tags
-      EscapeXMLChars( w_chars, pBuf->szData + iCurLen );
-      
+      EscapeXMLChars( w_chars, pBuf->szData + iCurLen );      
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;

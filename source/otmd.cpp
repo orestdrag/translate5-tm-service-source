@@ -14,6 +14,7 @@ void handle_interrupt_sig(int sig) {
     LogMessage(INFO, "Stopped OtmMemoryService\n");
 }
 
+//const char* appVersion;
 void service_worker() {
     char szServiceName[80];
     unsigned int uiPort = 0;
@@ -25,6 +26,8 @@ void service_worker() {
     //LogMessage2(INFO, "Git hash: ", gitHash);
     LogMessage2(TRANSACTION,"BUILD DATE:", buildDate);
     LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
+
+    LogMessage2(TRANSACTION, "Version: ", appVersion);
     LogMessage(TRANSACTION, "Initialized OtmMemoryService");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);

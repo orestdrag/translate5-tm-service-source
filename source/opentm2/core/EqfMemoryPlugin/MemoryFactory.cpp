@@ -1181,8 +1181,18 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
         std::string oldFName = szTempDir + file;
         FilesystemHelper::MoveFile(oldFName, targetFName);
       }
+      
+      std::string memFilePath = memDir + pszMemoryName + EXT_OF_MEM;
+      if(FilesystemHelper::FileExists(memFilePath.c_str())){
+        LogMessage3(INFO, __func__,":: memory added to list, mem name = ", pszMemoryName);
+        EqfMemoryPlugin::GetInstance()->addMemoryToList(pszMemoryName);
+      }else{
+        LogMessage3(ERROR, __func__,":: memory not added to list, mem path = ", memFilePath.c_str());
+      }
     }
   }
+
+  
   // delete any files left over and remove the directory
   if(CheckLogLevel(DEBUG) == false){
     FilesystemHelper::RemoveDirWithFiles( szTempDir );

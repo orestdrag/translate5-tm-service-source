@@ -491,9 +491,10 @@ USHORT TmtXGet
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    UTF16strcpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource );
-    auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pSentence->pInputString);
-    wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
+    auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetIn->stTmGet.szSource);
+    //wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
+    wcscpy( pSentence->pInputString, inputStringWithReplacedTags[0].c_str());
+    
     //tokenize source segment, resuting in normalized string and
     //tag table record
     ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);
@@ -1185,13 +1186,15 @@ USHORT ExactTest
     {    
       if ( pGetIn->ulParm & GET_RESPECTCRLF )
       {  // if LF different, strings are NOT EQUAL in this case!!
-        fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        //fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputString, 0) == 0L;
         if(!fStringEqual)
           fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
       }
       else
       {
-        fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        //fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
+        fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString, 0) == 0L;
         if(!fStringEqual)
           fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
       } /* endif */
@@ -1347,8 +1350,8 @@ USHORT ExactTest
                 fStringEqual = FALSE;
                 fStringEqual = (UtlCompIgnWhiteSpaceW(
                                               pSentence->pPropString,
-                                              pSentence->pInputStringWNormalizedTags,
-                                              //pSentence->pInputString,
+                                              //pSentence->pInputStringWNormalizedTags,
+                                              pSentence->pInputString,
                                               0 ) == 0 );
               } /* endif */
             } /* endif */
@@ -3052,7 +3055,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = ( UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L 
+       fStringEqual = ( //UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L 
+                        UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L 
                       ||UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L ) ;
     } /* endif*/
 
@@ -3329,8 +3333,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                     fStringEqual = FALSE;
                     
                     fStringEqual = (UtlCompIgnWhiteSpaceW(pSentence->pPropString,
-                                                  //pSentence->pInputString,
-                                                  pSentence->pInputStringWNormalizedTags,
+                                                  pSentence->pInputString,
+                                                  //pSentence->pInputStringWNormalizedTags,
                                                   0 ) == 0 );
                     if (!fStringEqual && (usFuzzy >= 100) )
                     {
@@ -3341,8 +3345,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                       BOOL fOK = FALSE;
                       fOK = NTMCompareBetweenTokens(
                             pSentence->pPropString,
-                            pSentence->pInputStringWNormalizedTags,
-                            //pSentence->pInputString,
+                            //pSentence->pInputStringWNormalizedTags,
+                            pSentence->pInputString,
                             pGetIn->szTagTable,
                             sLangID,
                             pGetIn->ulSrcOemCP, &fTempStringEqual);

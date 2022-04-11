@@ -1324,7 +1324,7 @@ typedef struct _TMX_SENTENCE
 {
   PSZ_W pInputString;
   PSZ_W pNormString;
-  PSZ_W pInputStringWNormalizedTags;
+  //PSZ_W pInputStringWNormalizedTags;
   PSZ_W pNormStringStart;
   USHORT  usNormLen;
   PTMX_TERM_TOKEN pTermTokens;
