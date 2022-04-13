@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
 
-SET(APP_VERSION  "0.2.7")
-project(OtmMemoryService VERSION ${APP_VERSION})
+SET(APP_VERSION  "0.2.8")
+project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -39,23 +39,22 @@ set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 include(./cmake/CheckGit.cmake)
 CheckGitSetup()
 
-set(OtmMemoryService_Source_Files
+set(T5MEMORY_Source_Files
     OtmMemoryService.cpp
     OtmMemoryServiceWorker.cpp
     OTMMSJSONFactory.cpp
-    #OtmMemoryServiceTester.cpp
     otmd.cpp
     config.cpp
 )
 
 link_directories(${RESTBED_LIBRARIES})
 
-add_executable(OtmMemoryService ${OtmMemoryService_Source_Files})
+add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
 set(CMAKE_CXX_STANDARD 14)
-target_compile_features(OtmMemoryService PRIVATE cxx_std_14)
+target_compile_features(T5MEMORY PRIVATE cxx_std_14)
 
-target_include_directories(OtmMemoryService PRIVATE
+target_include_directories(T5MEMORY PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
     ${RESTBED_INCLUDE_DIR}
@@ -65,10 +64,10 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 #find_package(Threads REQUIRED)
 find_package(Threads)
 if(TARGET Threads::Threads)
-  target_link_libraries(OtmMemoryService PRIVATE Threads::Threads)
+  target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
 
-target_link_libraries(OtmMemoryService PRIVATE
+target_link_libraries(T5MEMORY PRIVATE
     OTMFUNC
     librestbed.a
     git_version
@@ -83,7 +82,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 configure_file(OtmMemoryServiceConfig.h.in OtmMemoryServiceConfig.h  @ONLY)
 #configure_file(OpenTM2_EqfMemoryPlugin.pc @ONLY)
 
-install(TARGETS OtmMemoryService DESTINATION bin)
+install(TARGETS T5MEMORY DESTINATION bin)
 
 #install(TARGETS OtmMemoryService
 #    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -97,14 +96,17 @@ install(TARGETS OtmMemoryService DESTINATION bin)
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_NAME                    "t5memory")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_${APP_VERSION})
+set(PNAME t5memory_${APP_VERSION})
+set(CPACK_PACKAGE_NAME                    ${PNAME})
 #set(CPACK_PACKAGE_VENDOR                  "Translate 5")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     "t5memory")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     ${PNAME})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY       ${CPACK_PACKAGE_NAME})
 set(CPACK_PACKAGE_VERSION_MAJOR           "${OtmMemoryService_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR           "${OtmMemoryService_VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH           "${OtmMemoryService_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION_PATCH           "${OtmMemoryService_VERSION_PATCH}")
 set(CPACK_VERBATIM_VARIABLES              TRUE)
+set(CPACK_GENERATOR                        "TXZ")
 #set(CPACK_PACKAGE_DESCRIPTION_FILE        "${CMAKE_CURRENT_SOURCE_DIR}/Description.txt")
 #set(CPACK_RESOURCE_FILE_WELCOME           "${CMAKE_CURRENT_SOURCE_DIR}/Welcome.txt")
 #set(CPACK_RESOURCE_FILE_LICENSE           "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")

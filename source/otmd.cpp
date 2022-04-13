@@ -11,7 +11,7 @@
 void handle_interrupt_sig(int sig) {
     LogMessage(INFO, "Received interrupt signal\n");
     StopOtmMemoryService();
-    LogMessage(INFO, "Stopped OtmMemoryService\n");
+    LogMessage(INFO, "Stopped t5memory\n");
 }
 
 //const char* appVersion;
@@ -20,7 +20,7 @@ void service_worker() {
     unsigned int uiPort = 0;
     int res = PrepareOtmMemoryService(szServiceName, &uiPort);
     if (!res) {
-        LogMessage(FATAL,"Failed to initialize OtmMemoryService");
+        LogMessage(FATAL,"Failed to initialize t5memory");
         std::exit(EXIT_FAILURE);
     }
     //LogMessage2(INFO, "Git hash: ", gitHash);
@@ -28,11 +28,11 @@ void service_worker() {
     LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
 
     LogMessage2(TRANSACTION, "Version: ", appVersion);
-    LogMessage(TRANSACTION, "Initialized OtmMemoryService");
+    LogMessage(TRANSACTION, "Initialized t5memory");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);
     if (!res) {
-        LogMessage(FATAL,"Failed to start OtmMemoryService");
+        LogMessage(FATAL,"Failed to start t5memory");
         std::exit(EXIT_FAILURE);
     }
 }
