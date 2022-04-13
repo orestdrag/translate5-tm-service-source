@@ -4,6 +4,7 @@ BUILD_TYPE=Debug
 CORES=8
 
 do_package() {
+  do_build
   echo "Packaging..."
   cpack -G TXZ -C ${BUILD_TYPE}
 }
@@ -35,8 +36,11 @@ do_main() {
     do_install
   elif [ "$1" = "package" ]; then
     do_package
+  elif [ "$1" = "rebuild" ]; then
+    do_clean
+    do_package
   else
-    do_build
+    do_package
   fi
 }
 
