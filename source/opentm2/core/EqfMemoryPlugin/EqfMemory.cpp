@@ -727,6 +727,12 @@ int EqfMemory::searchProposal
         wcscpy(pTmGetOut->stMatchTable[i].szSource, result[1].c_str());
         wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[2].c_str());
 
+        //correct match rate for exact match based on whitespace difference
+        int wsDiff = 0;
+        if( UtlCompIgnWhiteSpaceW(szRequestedString, pTmGetOut->stMatchTable[i].szSource, 0, &wsDiff) == 0 ){
+          pTmGetOut->stMatchTable[i].usMatchLevel -= wsDiff;
+        }
+
         this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );
       } /* end */         
     } /* end */       

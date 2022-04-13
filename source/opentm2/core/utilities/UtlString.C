@@ -1429,10 +1429,11 @@ ULONG UtlDirectAnsi2UnicodeBuf( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 //+----------------------------------------------------------------------------+
 // Function flow:     _                                                         
 //+----------------------------------------------------------------------------+
-LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
+LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceDiff)
 {
   LONG   lRc = 0;
   ULONG  ulI = 0;
+  INT ws1 = 0, ws2 = 0;// to count whitespaces
   CHAR_W c, d;
   BOOL fNullTerminated = FALSE;
   BOOL   ulIncreaseI = FALSE;
@@ -1448,6 +1449,7 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
     } /* endif */
   } /* endif */
 
+  int wspaceDiff = 0;
   // RJ: skip leading whitespaces in both strings
   if ( ulLen )
   {
@@ -1455,8 +1457,13 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
     {
       pD1++;
       ulI++;
+      ws1++;
     }
-    while ( UtlIsWhiteSpaceW( *pD2 ) ) pD2++;
+    while ( UtlIsWhiteSpaceW( *pD2 ) ) {
+      pD2++;
+      ws2++;
+    }
+    wspaceDiff = abs(ws1-ws2);
   }  /* endif */
 
   while ( ulI++ < ulLen )
@@ -1469,16 +1476,21 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
       /* skip any consecutive white spaces                            */
       /****************************************************************/
       ulIncreaseI = FALSE;
+      ws1 = ws2 = 0;
       while ( UtlIsWhiteSpaceW( *pD1 ) && (ulI < ulLen) )
       {
+        ws1++;
         pD1++;
         ulI++;
         ulIncreaseI = TRUE;
       } /* endwhile */
       while ( UtlIsWhiteSpaceW( *pD2 ) )
       {
+        ws2++;
         pD2++;
       } /* endwhile */
+      
+      wspaceDiff += abs(ws1-ws2);
       // if we reached the end of our string do a sRc setting
       // IV000162: i.e.RTF Tag "\line ": add ulIncreaseI
       // otherwise tags ending both with one blank are recognized as different!
@@ -1502,9 +1514,11 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
   // any trailing whitespace characters
   if ( !lRc && fNullTerminated )
   {
-    while ( *pD1 && UtlIsWhiteSpaceW( *pD1 ) ) pD1++;
-    while ( *pD2 && UtlIsWhiteSpaceW( *pD2 ) ) pD2++;
-
+    ws1 = ws2 = 0;
+    while ( *pD1 && UtlIsWhiteSpaceW( *pD1 ) ) { pD1++; ws1++; }
+    while ( *pD2 && UtlIsWhiteSpaceW( *pD2 ) ) { pD2++; ws2++; }
+    
+    wspaceDiff += abs(ws1 - ws2);
     if ( *pD1 )
     {
       lRc = 1;
@@ -1515,10 +1529,12 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
     } /* endif */
   } /* endif */
 
+  if( whitespaceDiff ) *whitespaceDiff = wspaceDiff; 
+  
   return lRc;
 }
 
-LONG UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen )
+LONG UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen, PINT whitespaceDiff)
 {
   LONG  lRc = 0;
   ULONG ulI = 0;

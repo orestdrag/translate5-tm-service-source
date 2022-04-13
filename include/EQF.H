@@ -4521,8 +4521,8 @@ PSZ_W   UtlLowerW( PSZ_W  pData );
 BYTE    UtlToLower (BYTE c);
 CHAR_W  UtlToLowerW(CHAR_W c);
 BOOL UtlIsWhiteSpaceW( CHAR_W c );
-LONG    UtlCompIgnWhiteSpaceW(PSZ_W, PSZ_W, ULONG);
-LONG    UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen );
+LONG    UtlCompIgnWhiteSpaceW(PSZ_W, PSZ_W, ULONG, PINT spaceDiff = nullptr);
+LONG    UtlCompIgnSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen, PINT whitespaceDiff = nullptr );
 LONG    UtlCompareDate( FDATE *fDateFirst, FDATE *fDateSecond );
 LONG    UtlCompareTime( FTIME *fTimeFirst, FTIME *fTimeSecond );
 USHORT UtlCompFDates

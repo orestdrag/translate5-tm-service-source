@@ -693,13 +693,15 @@ USHORT TmtXGet
      PTMX_MATCH_TABLE_W pstMatchTable = &(pTmGetOut->stMatchTable[0]);
      PTMX_MATCH_TABLE_W pstActMatch;
      USHORT   i, j;                     // index values
-
+     INT wsDiff;
+     
      for ( j = 0 ; j < pTmGetOut->usNumMatchesFound - 1  ;j++ )
      {
        pstActMatch = &(pTmGetOut->stMatchTable[j]);
        for ( i=j+1; i< pTmGetOut->usNumMatchesFound ; i++)
        {
-         if (UtlCompIgnWhiteSpaceW(pstActMatch->szTarget, (pstMatchTable+i)->szTarget, 0) == 0L)
+         //if (UtlCompIgnWhiteSpaceW(pstActMatch->szTarget, (pstMatchTable+i)->szTarget, 0, &wsDiff) == 0L && wsDiff == 0)
+         if(wcscmp(pstActMatch->szTarget, (pstMatchTable+i)->szTarget) == 0)
          {
            /*************************************************************/
            /* delete this match...                                      */

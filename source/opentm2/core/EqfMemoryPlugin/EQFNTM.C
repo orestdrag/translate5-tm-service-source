@@ -943,6 +943,7 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
 
   return usRc;
 } /* End of function TmGet */
+
 USHORT
 TmGetW (HTM            htm,           //(in)  TM handle
        PSZ            pszMemPath,    //(in)  full TM name x:\eqf\mem\mem.tmd

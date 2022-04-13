@@ -2532,9 +2532,9 @@ USHORT TACreateProtectTableWEx
 
        if (usRC == NO_ERROR)
        {
-         TASetStartStopType(pCurrent, 0,0,0 );     //terminate start/stoptabl.
+          TASetStartStopType(pCurrent, 0,0,0 );     //terminate start/stoptabl.
 
-	     usRC = TAGotoNextStartStopEntry( &pStartStop, &pCurrent,
+	        usRC = TAGotoNextStartStopEntry( &pStartStop, &pCurrent,
 	                                      &ulTableUsed, &ulTableAlloc);
 
        }
