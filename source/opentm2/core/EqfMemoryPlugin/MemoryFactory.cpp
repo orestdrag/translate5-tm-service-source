@@ -84,8 +84,6 @@ OtmMemory *MemoryFactory::openMemory
   int *piErrorCode
 )
 {
-  OtmMemory *pMemory = NULL;
-  OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
   LogMessage2(INFO, "MemoryFactory::openMemory, pszMemoryName = ", pszMemoryName);
@@ -93,7 +91,7 @@ OtmMemory *MemoryFactory::openMemory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
 
-  pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
+  OtmMemory *pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
   if ( pMemory == NULL ){
         *piErrorCode = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
         LogMessage4(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", toStr(this->iLastError).c_str() );
@@ -115,16 +113,15 @@ int MemoryFactory::getMemoryInfo
   OtmMemoryPlugin::PMEMORYINFO pInfo
 )
 {
-  OtmPlugin *pluginSelected = NULL;
   int iRC = 0;
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage2(INFO,"MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
+  LogMessage2(INFO," MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
 
-  pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
+  OtmPlugin * pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
-    LogMessage(ERROR,"MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
+    LogMessage(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
     return OtmMemoryPlugin::eUnknownPlugin;
   } /* endif */
 
@@ -141,7 +138,7 @@ int MemoryFactory::getMemoryInfo
   }
   else
   {
-    LogMessage2(FATAL,"MemoryFactory::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = ",pszPluginName);
+    LogMessage2(FATAL," MemoryFactory::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = ",pszPluginName);
     return OtmMemoryPlugin::eNotSupportedMemoryType;
   }
   if ( iRC != 0 )

@@ -1661,7 +1661,6 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   }
 
   std::wstring req_res = handler->GetParsedData();
-  auto tags = handler->tagList;
   
   // do tag replacement for source and target 
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");

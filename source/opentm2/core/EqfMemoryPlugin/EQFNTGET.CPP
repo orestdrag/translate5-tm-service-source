@@ -715,8 +715,6 @@ USHORT TmtXGet
      } /* endfor */
   } /* endif */
 
-
-
   /********************************************************************/
   /* restrict number of matches found to the maximum number requested */
   /* by user                                                          */
@@ -3782,8 +3780,8 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 
   // if threshold is no restriction, i.e. sentence too short
   // only allow for exact match
-  if ((usThreshold == 0 ) || (*pusActVote <= 3))
-    usThreshold = *pusActVote;
+  //if ((usThreshold == 0 ) || (*pusActVote <= 3))
+  //  usThreshold = *pusActVote;
 
   //eliminate all entries in pTempMatch that fall below usThreshold
   //move down the list with pTempPos and insert at pActualPos if the
