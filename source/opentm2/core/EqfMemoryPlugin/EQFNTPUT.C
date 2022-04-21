@@ -428,8 +428,6 @@ VOID HashSentence
   USHORT usCount = 0;               // counter
 
   pTermTokens = pSentence->pTermTokens;
-  //pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
-  //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
 
   while ( pTermTokens->usLength )
   {
@@ -442,18 +440,8 @@ VOID HashSentence
     //max nr of hashes built
     usCount++;
     pTermTokens++;
-    
-    //pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
-    //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
-  } /* endwhile */
 
-  //duplicate term tokens if not sufficient; this is for very short sentences
-//while ( usCount < 3 )
-//{
-//  memcpy( pTermTokens, pTermTokens-1, sizeof( TMX_TERM_TOKEN ));
-//  pTermTokens++;
-//  usCount ++;
-//} /* endwhile */
+  } /* endwhile */
 
   /********************************************************************/
   /* if usCount < 4 add single tokens to allow matching simple        */
@@ -473,6 +461,7 @@ VOID HashSentence
     auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
     LogMessage4(DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", toStr(usCount).c_str() );
   }
+  
   //build tuples of the term hashes
   if ( usCount >= 3 )
   {

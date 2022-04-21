@@ -15,6 +15,7 @@
 #include "../pluginmanager/OtmSharedMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "../utilities/LogWriter.h"
+#include "../utilities/LogWrapper.h"
 extern "C"
 {
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions
@@ -46,6 +47,14 @@ public:
 	The first call of the method creates the MemoryFactory instance.
 */
 	static MemoryFactory* getInstance();
+
+  MemoryFactory(){
+    LogMessage2(INFO, __func__,"::Ctor of MemoryFactory");
+    pluginList = NULL;
+    pSharedMemPluginList = NULL;
+    pHandleToMemoryList = new std::vector<OtmMemory *>;;
+    refreshPluginList();    
+  }
 
 /* \brief Open a memory 
    \param pszPlugin plugin-name or NULL if not available or memory object name is used

@@ -1290,6 +1290,7 @@ int OtmMemoryServiceWorker::search
   // do the lookup and handle the results
   int iNumOfProposals = pData->iNumOfProposals;
   iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+  
   if ( iRC == 0 )
   {
     std::wstring strOutputParmsW;

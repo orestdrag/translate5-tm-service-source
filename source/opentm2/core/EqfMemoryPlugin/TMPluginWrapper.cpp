@@ -1229,7 +1229,6 @@ USHORT NTMMorphTokenizeW
   USHORT    usRC = MORPH_OK;           // function return code
   ULONG     ulTermBufUsed = 0;         // number of bytes used in term buffer
 
-  sLanguageID;                         // avoid compiler warning
   /********************************************************************/
   /* Check input data                                                 */
   /********************************************************************/
@@ -1297,18 +1296,16 @@ USHORT NTMTokenizeW
   USHORT     usReturn = 0;             // returncode
   ULONG      ulTermBufUsed = 0;        // amount of space used in term buffer
   PSZ_W      pTerm;                    // pointer to current token string
-  PSZ_W      pszCurPos;                // current position in input data
+  PSZ_W      pszCurPos = pszInData;    // current position in input data
   BOOL       fOffsList;                // TRUE = return a offset/length list
   LONG       lFlags;                   // flags for current term/token
   BOOL       fAllCaps, fAlNum, fNumber;// character classification flags
   BOOL       fSkip, fNewSentence,      // token processing flags
-             fSingleToken, fEndOfToken;//,
-             //fTagEndFound;             // to identify tags in text;
+             fSingleToken, fEndOfToken;
   CHAR_W     c, d;
 
   fOffsList  = (usListType == MORPH_OFFSLIST) ||
                (usListType == MORPH_FLAG_OFFSLIST);
-  pszCurPos = pszInData;
 
   /********************************************************************/
   /* Always assume start of a new sentence                            */
@@ -1346,36 +1343,9 @@ USHORT NTMTokenizeW
     fNewSentence  = FALSE;
     fSingleToken  = FALSE;
     fEndOfToken   = FALSE;
-    //fTagEndFound  = FALSE;
     int tagLen = 0;
 
-    //if(
-      // pszCurPos[0] == L'<' || 
-    //  pszCurPos[1] == L'<') //probably tag start -> skip tag token 
-    //{
-    //  wchar_t* s = pszCurPos + 1;
-    //  while( *s++ != '\0'){
-    //    if( s[0] == '/' && s[1] == '>' ){
-          //fTagEndFound = TRUE;
-          //tagLen = s - pszCurPos + 2;
-          //fEndOfToken = TRUE;
-          //break;
-        //}
-      //}
-      //if( tagLen && pszCurPos[0] == L'<') tagLen--;
-
-      //if(fTagEndFound){
-        //pszCurPos = s + 2;
-        //pTerm = pszCurPos;
-        //c = *pszCurPos;
-        //fEndOfToken = TRUE;
-        //continue;
-      //}
-    //}
-    //else 
-    if(
-      // pszCurPos[0] == L'<' || 
-      pszCurPos[0] == L'<') //probably tag start -> skip tag token 
+    if( pszCurPos[0] == L'<' ) //probably tag start -> skip tag token 
     {
       wchar_t* s = pszCurPos;
       if(wcsncasecmp(L"<ph" , s, 3) == 0 ||
@@ -1384,171 +1354,135 @@ USHORT NTMTokenizeW
          ){
           while( *s++ != '\0'){
             if( s[0] == '/' && s[1] == '>' ){
-              //fTagEndFound = TRUE;
               tagLen = s - pszCurPos + 2;
               fEndOfToken = TRUE;
               break;
             }
           }      
         }
-      //if( tagLen && pszCurPos[0] == L'<') tagLen--;
-
     }
     
-    //if(fTagEndFound == FALSE)
+    
+    switch ( c )
     {
-      switch ( c )
-      {
-        //case '.' :
-        //case '!' :
-        //case '?' :
-        case L'.' :
-        case L'!' :
-        case L'?' :
-          switch ( pszCurPos[1] )
-          {
-            //case ' ':
-            //case '\n':
-            //case '\0':
-            case L' ':
-            case L'\n':
-            case L'\0':
-              fNewSentence = TRUE;
-              fEndOfToken  = TRUE;
-              fSingleToken  = TRUE;
-              break;
-            default:
-              if ( c != '.'  && c != L'.' )
-              {
-                fEndOfToken  = TRUE;
-                fSingleToken  = TRUE;
-              }
-              else
-              {
-                fAllCaps = FALSE;
-                fAlNum   = FALSE;
-              } /* endif */
-              break;
-          } /* endswitch */
-          break;
-
-        //case '\n' :
-        //case ' ' :
-        case L'\n' :
-        case L' ' :
-          fEndOfToken  = TRUE;
-          fSkip        = TRUE;
-          break;
-
-        //case '$' :
-        //case '#' :
-        case L'$' :
-        case L'#' :
-          fAllCaps = FALSE;
-          fAlNum   = FALSE;
-          break;
-
-        //case ':' :
-        case L':' :
-          
-          fEndOfToken  = TRUE;
-          fSingleToken  = TRUE;
-          
-          break;
-
-        //case '/' :
-        //case '\\' :
-        //case ',' :
-        //case ';' :
-        case L'/' :
-        case L'\\' :
-        case L',' :
-        case L';' :
-          switch ( pszCurPos[1] )
-          {
-            //case ' ':
-            //case '\n':
-            //case '\0':
-            case L' ':
-            case L'\n':
-            case L'\0':
-              fEndOfToken  = TRUE;
-              fSingleToken  = TRUE;
-              break;
-            default:
-              fAllCaps = FALSE;
-              fAlNum   = FALSE;
-              fNumber  = FALSE;
-              break;
-          } /* endswitch */
-          break;
-        
-        case 8216://‘ symbol
-        case 8217://’ symbol
-        case L'-' :            // dash within word or as 'Gedankenstrich'
-          if (// ((d = pszCurPos[1]) ==  ' ') || (d ==  '\n') || ( d ==  '\0' ) 
-            //||
-            (((d = pszCurPos[1]) == L' ') || (d == L'\n') || ( d == L'\0' )) )
-          {
+      case L'.' :
+      case L'!' :
+      case L'?' :
+        switch ( pszCurPos[1] )
+        {
+          case L' ':
+          case L'\n':
+          case L'\0':
+            fNewSentence = TRUE;
             fEndOfToken  = TRUE;
             fSingleToken  = TRUE;
-          } /* endif */
-          break;
+            break;
+          default:
+            if ( c != '.'  && c != L'.' )
+            {
+              fEndOfToken  = TRUE;
+              fSingleToken  = TRUE;
+            }
+            else
+            {
+              fAllCaps = FALSE;
+              fAlNum   = FALSE;
+            } /* endif */
+            break;
+        } /* endswitch */
+        break;
 
-        //case '(' :
-        //case ')' :
-        //case '\"' :
-        //case '\'':
-        case L'(' :
-        case L')' :
-        case L'\"':
-        case 8243 ://″
-        case L'\'':
+      case L'\n' :
+      case L' ' :
+        fEndOfToken  = TRUE;
+        fSkip        = TRUE;
+        break;
+
+      case L'$' :
+      case L'#' :
+        fAllCaps = FALSE;
+        fAlNum   = FALSE;
+        break;
+
+      //case ':' :
+      case L':' :
+        
+        fEndOfToken  = TRUE;
+        fSingleToken  = TRUE;
+        
+        break;
+
+      case L'/' :
+      case L'\\' :
+      case L',' :
+      case L';' :
+        switch ( pszCurPos[1] )
+        {
+          case L' ':
+          case L'\n':
+          case L'\0':
+            fEndOfToken  = TRUE;
+            fSingleToken  = TRUE;
+            break;
+          default:
+            fAllCaps = FALSE;
+            fAlNum   = FALSE;
+            fNumber  = FALSE;
+            break;
+        } /* endswitch */
+        break;
+      
+      case 8216://‘ symbol
+      case 8217://’ symbol
+      case L'-' :            // dash within word or as 'Gedankenstrich'
+        if ((((d = pszCurPos[1]) == L' ') || (d == L'\n') || ( d == L'\0' )) )
+        {
           fEndOfToken  = TRUE;
           fSingleToken  = TRUE;
-          break;
-        case L'<':
-          if(tagLen == 0){
-            fSingleToken = TRUE;
-            fEndOfToken  = TRUE;
-          //}else{
-            
-          }
-          break;
-        default:
-          if ( fAlNum ) //&& !chIsText[c] )
-          {
-            PUCHAR pTextTable;          
-            UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
-            
-            //if(c > 255){
-            //  wchar_t buff[2];
-            //  buff[0] = c;
-            //  buff[1] = 0;
-            //  LogMessage4(ERROR, __func__,"::not supported symbol \'", EncodingHelper::convertToUTF8(buff),"\'");
-            //}else
-            if( c > 255 ){
-              if( !iswalpha(c) ){
-                fAlNum = false;
-              }
-            }else{
-              if ( !pTextTable[c] )
-              {
-                fAlNum = FALSE;
-              }
+        } /* endif */
+        break;
+
+      case L'(' :
+      case L')' :
+      case L'\"':
+      case 8243 ://″
+      case L'\'':
+        fEndOfToken  = TRUE;
+        fSingleToken  = TRUE;
+        break;
+      case L'<':
+        if(tagLen == 0){
+          fSingleToken = TRUE;
+          fEndOfToken  = TRUE;            
+        }
+        break;
+      default:
+        if ( fAlNum ) //&& !chIsText[c] )
+        {
+          PUCHAR pTextTable;          
+          UtlQueryCharTable( IS_TEXT_TABLE, &pTextTable );
+          
+          if( c > 255 ){
+            if( !iswalpha(c) ){
+              fAlNum = false;
             }
-          } /* endif */
-          if ( fNumber && !iswdigit(c) )
-          {
-            fNumber  = FALSE;
-          } /* endif */
-          if ( fAllCaps && (!iswalpha(c) || iswlower(c)) )
-          {
-            fAllCaps = FALSE;
-          } /* endif */
-          break;
-      } /* endswitch */
-    }
+          }else{
+            if ( !pTextTable[c] )
+            {
+              fAlNum = FALSE;
+            }
+          }
+        } /* endif */
+        if ( fNumber && !iswdigit(c) )
+        {
+          fNumber  = FALSE;
+        } /* endif */
+        if ( fAllCaps && (!iswalpha(c) || iswlower(c)) )
+        {
+          fAllCaps = FALSE;
+        } /* endif */
+        break;
+    } /* endswitch */
 
     /******************************************************************/
     /* Terminate current token and start a new one if requested       */
@@ -1624,7 +1558,6 @@ USHORT NTMTokenizeW
       pszCurPos += tagLen;
       pTerm = pszCurPos;
     }else if ( c != EOS ) pszCurPos++;
-
   } /* endwhile */
 
   /********************************************************************/
@@ -1662,7 +1595,5 @@ USHORT NTMTokenizeW
   } /* endif */
 
   return (usReturn);
-
 } /* end of function TOKENIZE */
-
 

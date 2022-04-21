@@ -667,11 +667,9 @@ USHORT FctValidateSession
   PFCTDATA   *ppData                   // address of caller's FCTDATA pointer
 )
 {
-  PFCTDATA    pData;                   // pointer to FCTDATA area
-  USHORT      usRC = NO_ERROR;         // function return code
-
   // convert handle to pointer
-  pData = (PFCTDATA)hSession;
+  PFCTDATA    pData = (PFCTDATA)hSession;;                   // pointer to FCTDATA area
+  USHORT      usRC = NO_ERROR;         // function return code
 
   // test magic word and checksum
   if ( pData == NULL )
@@ -684,18 +682,7 @@ USHORT FctValidateSession
     LogMessage(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
-  else
-  {
-    //LogMessage(WARNING,"FctValidateSession():: [checksum validation commented out] -> NO_ERROR");
-//     LONG      lCheckSum;               // buffer for actual checksum
-
-//    FctBuildCheckSum( pData, &lCheckSum );
-//    if ( lCheckSum != pData->lCheckSum )
-//    {
-//       usRC =
-//    } /* endif */
-  } /* endif */
-
+  
   if ( usRC == NO_ERROR )
   {
      *ppData = pData;
@@ -968,11 +955,9 @@ USHORT EqfQueryMem
   LONG        lOptions     
 )
 {
-  USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
-
   // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
+  USHORT usRC = FctValidateSession( hSession, &pData );
 
   if ( pData )
   {

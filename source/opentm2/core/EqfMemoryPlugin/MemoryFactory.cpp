@@ -45,26 +45,14 @@ Copyright Notice:
 #define DEFAULTSHAREDMEMORYPLUGIN "EqfSharedMemoryPlugin"
 //#define DEFAULTSHAREDMEMORYPLUGIN "EqfSharedMemPlugin"
 
-/** Initialize the static instance variable */
-MemoryFactory* MemoryFactory::instance = 0;
 
 /*! \brief This static method returns a pointer to the MemoryFactory object.
 	The first call of the method creates the MemoryFactory instance.
 */
 MemoryFactory* MemoryFactory::getInstance()
 {
-	if (instance == 0)
-	{
-		instance = new MemoryFactory();
-    instance->pluginList = NULL;
-    instance->pSharedMemPluginList = NULL;
-    instance->pHandleToMemoryList = new std::vector<OtmMemory *>;;
-    instance->refreshPluginList();
-#ifdef LOGGING
-    instance->Log.open( "MemoryFactory" );
-#endif
-  }
-	return instance;
+  static MemoryFactory _instance;
+	return &_instance;
 }
 
 /* \brief Open an existing memory
