@@ -428,11 +428,12 @@ VOID HashSentence
   USHORT usCount = 0;               // counter
 
   pTermTokens = pSentence->pTermTokens;
-  pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+  //pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
   //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
 
   while ( pTermTokens->usLength )
   {
+    pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
     if(CheckLogLevel(DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset);
@@ -442,7 +443,7 @@ VOID HashSentence
     usCount++;
     pTermTokens++;
     
-    pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+    //pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
     //pNormOffset = pSentence->pNormStringStart + pTermTokens->usOffset;
   } /* endwhile */
 

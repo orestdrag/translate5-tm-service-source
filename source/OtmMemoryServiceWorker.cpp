@@ -2462,7 +2462,6 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Byte
 void importMemoryProcess( void *pvData )
 {
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
-
   // call the OpenTM2 API function
   pData->szError[0] = 0;
   int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);

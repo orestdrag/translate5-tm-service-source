@@ -5013,7 +5013,7 @@ SHORT  QDAMAddToBuffer_V3
    PUSHORT  pusOffset;
    PCHAR    pRecData;                  // pointer to record data
    ULONG    ulFitLen;                  // currently used length
-  PBTREEGLOB    pBT = pBTIda->pBTree;
+   PBTREEGLOB    pBT = pBTIda->pBTree;
    USHORT   usLenFieldSize;            // size of length field
 
    memset(&recStart, 0, sizeof(recStart));
@@ -8757,7 +8757,7 @@ SHORT QDAMDictInsertLocal
       if ( !sRc )
       {
         usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
-        //#endif
+
         if ( (usKeyLen == 0) ||
              ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
              (ulLen == 0) )

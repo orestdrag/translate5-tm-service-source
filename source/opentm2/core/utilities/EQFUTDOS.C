@@ -2219,29 +2219,6 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetC
 
    *phMod = hmod;
 
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 56 hmod = LoadLibrary(pszModName );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   hmod = LoadLibrary(pszModName );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 57 DosError(1); if ( hmod == NULL) {");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   DosError(1);
-   if ( hmod == NULL)
-   {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 58 usRc = (USHORT)GetLastError();");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-     usRc = (USHORT)GetLastError();
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-     *phMod = (HMODULE) NULL;
-   }
-   else
-   {
-     *phMod = hmod;
-   } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
    return usRc;
  }
 
