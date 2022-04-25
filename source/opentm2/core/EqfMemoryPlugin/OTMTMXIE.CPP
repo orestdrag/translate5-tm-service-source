@@ -1720,6 +1720,7 @@ std::wstring TMXParseHandler::GetParsedData() const
 
 std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
   std::string res = "<" ;
+  bool fClosingTag = false; // for </g> and similar tags
   if(fFuzzyRequest){
     ELEMENTID tagType;
 
@@ -1752,16 +1753,24 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
                                                             &&  i.i       == tag.i
                                                             ;
                                     });
+
+
       if ( matchingRequestTag != requestTagList.end()){
         i = matchingRequestTag->original_i;
         x = matchingRequestTag->original_x;
         tagType = matchingRequestTag->original_tagType;
+        fClosingTag = tag.tagType == EPT_ELEMENT 
+                  && tagType != EPT_ELEMENT 
+                  && tagType != EX_ELEMENT;
       }else{
         //generate new id
         LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");           
       }
     }
     
+    if(fClosingTag){
+      res += '/';
+    }
     res += TmxIDToName[tagType];
 
     if(x > 0){
@@ -1779,7 +1788,10 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
       res += " i=\""+toStr(tag.i)+"\"";
     }
   }
-  res += "/>";
+  
+  if(!fClosingTag)
+    res += '/';
+  res += ">";
   LogMessage3(DEBUG, __func__, ":: generated tag = ", res.c_str());
   return EncodingHelper::convertToUTF16(res.c_str());
 }
@@ -2278,7 +2290,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         CurElement.szTMXLanguage[0] = 0;
         CurElement.szTMLanguage[0] = 0;
         this->fInvalidChars = FALSE;
-        this->fInlineTags = FALSE;
+        this->fInlineTags = FALSE; 
         this->fTMXTagStarted = FALSE;
         this->fWithTMXTags = FALSE;
         this->fWithTagging = FALSE;
@@ -2300,8 +2312,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               fOkLang = LanguageFactory::getInstance()->getOpenTM2NameFromISO( CurElement.szTMXLanguage, _szLang ) == 0;
             } /* endif */
             
-            //activeSegment = strcasecmp( pTuvArray[iCurTuv].szLang, pBuf->szMemSourceLang )? SOURCE_SEGMENT : TARGET_SEGMENT;
-            //activeSegment = strcasecmp( pszValue, pBuf->szMemSourceLang )? SOURCE_SEGMENT : TARGET_SEGMENT;
             activeSegment = SOURCE_SEGMENT;
 
             if(fOkLang){
