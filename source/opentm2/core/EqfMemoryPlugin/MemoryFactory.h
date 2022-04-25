@@ -49,10 +49,10 @@ public:
 	static MemoryFactory* getInstance();
 
   MemoryFactory(){
-    LogMessage2(INFO, __func__,"::Ctor of MemoryFactory");
+    LogMessage2(DEBUG, __func__,"::Ctor of MemoryFactory");
     pluginList = NULL;
     pSharedMemPluginList = NULL;
-    pHandleToMemoryList = new std::vector<OtmMemory *>;;
+    pHandleToMemoryList = new std::vector<OtmMemory *>;
     refreshPluginList();    
   }
 

@@ -241,14 +241,6 @@ int OtmMemoryServiceWorker::buildErrorReturn
 */
 int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
 {
-  // for debugging only: cause an exception when the special memory name "XX_CauseAnException_XX" is being used
-#ifdef _DEBUG
-  if ( strcmp( pszMemory, "XX_CauseAnException_XX" ) == 0 )
-  {
-    int *pi = NULL;
-    return( *pi );
-  } /* endif */
-#endif
   if(this->vMemoryList.size()==0){
     LogMessage(WARNING,"findMemoryInList:: vMemoryList.size == 0");
   }
