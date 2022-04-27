@@ -1721,6 +1721,7 @@ std::wstring TMXParseHandler::GetParsedData() const
 std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
   std::string res = "<" ;
   bool fClosingTag = false; // for </g> and similar tags
+  bool fClosedTag = true; // for <ph/> and similar tags
   if(fFuzzyRequest){
     ELEMENTID tagType;
 
@@ -1761,16 +1762,27 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
         tagType = matchingRequestTag->original_tagType;
         fClosingTag = tag.tagType == EPT_ELEMENT 
                   && tagType != EPT_ELEMENT 
-                  && tagType != EX_ELEMENT;
+                  && tagType != EX_ELEMENT;        
       }else{
         //generate new id
         LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");           
       }
     }
+
     
+    if(TmxIDToName[tagType].empty())
+      return L"";
     if(fClosingTag){
-      res += '/';
-    }
+      res += '/';      
+    }else if(   tagType != BPT_ELEMENT && 
+          tagType != EPT_ELEMENT &&
+          tagType !=  PH_ELEMENT &&
+          tagType !=  BX_ELEMENT &&
+          tagType !=  EX_ELEMENT &&
+          tagType !=   X_ELEMENT ){
+          fClosedTag = false;
+        }
+
     res += TmxIDToName[tagType];
 
     if(x > 0){
@@ -1787,9 +1799,19 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
     if(tag.i > 0){
       res += " i=\""+toStr(tag.i)+"\"";
     }
+
+    if( tag.tagType != BPT_ELEMENT && 
+        tag.tagType != EPT_ELEMENT &&
+        tag.tagType !=  PH_ELEMENT &&
+        tag.tagType !=  BX_ELEMENT &&
+        tag.tagType !=  EX_ELEMENT &&
+        tag.tagType !=   X_ELEMENT ){
+          fClosedTag = false;
+        }
+
   }
   
-  if(!fClosingTag)
+  if(!fClosingTag && fClosedTag)
     res += '/';
   res += ">";
   LogMessage3(DEBUG, __func__, ":: generated tag = ", res.c_str());
@@ -2377,10 +2399,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){                
           LogMessage5(INFO,__func__,":: parsed bpt tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           wcscat(pBuf->szData, replacingTag.c_str());
-          break;
-        }else{
-          break;
         }
+        break;
       }
       case EPT_ELEMENT:
       case EX_ELEMENT:
