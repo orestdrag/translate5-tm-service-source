@@ -1221,8 +1221,6 @@ USHORT CTMXExportImport::ImportNext
   int errorCode = 0;
   int errorCount = 0;
 
-  plProgress; 
-
   m_handler->SetMemInterface( pfnInsertSegment, lMemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
     
     try
@@ -1726,8 +1724,8 @@ std::wstring TMXParseHandler::GenerateTag(TagInfo& tag){
     ELEMENTID tagType;
 
     int x = -1,// tag.original_x, 
-        i = -1 //tag.original_i
-        ;
+        i = -1;//tag.original_i
+        
     if(tag.tagLocation == REQUEST_TAG){
       x = tag.original_x;
       i = tag.original_i;
@@ -2371,19 +2369,25 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       case UT_ELEMENT:
       case IT_ELEMENT:
       { 
-        int iCurLen = wcslen(pBuf->szData);        
+        int iCurLen = wcslen(pBuf->szData);  
 
-        auto tag = GenerateReplacingTag(CurElement.ID , &attributes); 
-        std::wstring replacingTag = GenerateTag(tag);
-        if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
-          LogMessage5(INFO,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
-          wcscat(pBuf->szData, replacingTag.c_str());
-          fCatchData = false;
-          CurElement.fInsideTagging = true;
-          break;
-        }else{
-          break;
+        std::string type;
+        if( char16_t* _type = (char16_t*) attributes.getValue("type") ){
+          type = EncodingHelper::toChar(_type);       
         }
+        if(type == "lb"){
+          wcscat(pBuf->szData, L"\n");
+        }else{      
+          auto tag = GenerateReplacingTag(CurElement.ID , &attributes); \ 
+          std::wstring replacingTag = GenerateTag(tag);
+          if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
+            LogMessage5(INFO,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
+            wcscat(pBuf->szData, replacingTag.c_str());
+            fCatchData = false;
+            CurElement.fInsideTagging = true;
+          }
+        }
+        break;
       }
 
       case BPT_ELEMENT:
@@ -3251,8 +3255,6 @@ BOOL TMXParseHandler::TMXLanguage2TMLanguage( PSZ pszTMLanguage, PSZ pszTMXLangu
 
 void TMXParseHandler::SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsert, LONG lHandle, PLOADEDTABLE pTable, PTOKENENTRY pBuf, int iSize )
 {
-  pBuf;
-
   pfnInsertSegment = pfnInsert;
   lMemHandle = lHandle;
   pRTFTable = pTable;
