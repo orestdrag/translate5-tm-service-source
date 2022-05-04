@@ -14,7 +14,6 @@ void handle_interrupt_sig(int sig) {
     LogMessage(INFO, "Stopped t5memory\n");
 }
 
-//const char* appVersion;
 void service_worker() {
     char szServiceName[80];
     unsigned int uiPort = 0;
@@ -23,8 +22,7 @@ void service_worker() {
         LogMessage(FATAL,"Failed to initialize t5memory");
         std::exit(EXIT_FAILURE);
     }
-    //LogMessage2(INFO, "Git hash: ", gitHash);
-    LogMessage2(TRANSACTION,"BUILD DATE:", buildDate);
+    LogMessage2(TRANSACTION,"BUILD DATE: ", buildDate);
     LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
 
     LogMessage2(TRANSACTION, "Version: ", appVersion);
@@ -37,9 +35,15 @@ void service_worker() {
     }
 }
 
+//void handle_sigint(int sig)
+//{
+//    printf("Caught signal %d\n", sig);
+//}
+
 int main() {
     LogMessage(INFO, "Worker thread starting");
     std::thread worker(service_worker);
+    //signal(SIGINT, handle_sigint);
     worker.join();
     LogMessage(INFO, "Worker thread finished");
 }

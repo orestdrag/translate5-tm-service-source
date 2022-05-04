@@ -3,8 +3,6 @@
 
 #include <string>
 
-//#define strToPCh(str) ((str).c_str())
-//#define toStr(i)  (strToPCh(std::to_string(i)))
 #define toStr(i) std::to_string(i)
 
 extern "C"{
@@ -30,31 +28,6 @@ extern "C"{
 
     int SetLogLevel(int level);
     bool CheckLogLevel(int level);
-
-    /*
-    int LogMessage(int LogLevel, const char* message);
-    int LogMessage2(int LogLevel, const char* message1, const char* message2);
-    int LogMessage3(int LogLevel, const char* message1, const char* message2, const char* message3);
-    int LogMessage4(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4);
-    int LogMessage5(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5);
-    int LogMessage6(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6);
-    int LogMessage7(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7);
-    int LogMessage8(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8);
-
-    int LogMessage9(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9);
-    int LogMessage10(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9, const char* message10);
-    int LogMessage11(int LogLevel, const char* message1, const char* message2, const char* message3,
-                    const char* message4, const char* message5, const char* message6, const char* message7, const char* message8,
-                        const char* message9, const char* message10, const char* message11); //*/
 
     int LogMessage(int LogLevel, std::string&& message);
     int LogMessage2(int LogLevel, std::string&& message1, std::string&& message2);
@@ -83,6 +56,7 @@ extern "C"{
 
     //int SuppressLoggingInFile();
     int DesuppressLoggingInFile();
+    int LogStop();
 }
 
 #endif //_LOG_WRAPPER_H_

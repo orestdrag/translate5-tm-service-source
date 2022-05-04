@@ -281,24 +281,26 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 int FilesystemHelper::WriteBuffToFile(std::string fName){
     FileBuffer* pFb = NULL;
     auto pFBs = getFileBufferInstance();
-    if(pFBs->find(fName)!= pFBs->end()){
-        pFb = &(*pFBs)[fName];
-
-        if(pFb->status & FileBufferStatus::MODIFIED){
-            LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
-            PUCHAR bufStart = &pFb->data[0];
-            int size = pFb->data.size();
-            
-            HFILE ptr = fopen(fName.c_str(),"w+b");
-            WriteToFile(ptr, bufStart, size);
-            fclose(ptr);
-        }else{
-            LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
-        }
-    }else{
+    if(pFBs->find(fName) == pFBs->end()){
         LogMessage2(ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
-    }    
-    return 0;
+        return ERROR_FILE_NOT_FOUND;    
+    }
+    pFb = &(*pFBs)[fName];
+
+    if(pFb->status != FileBufferStatus::MODIFIED){
+        LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
+        return FILEHELPER_FILE_IS_NOT_MODIFIED;
+    }
+
+    LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
+    PUCHAR bufStart = &pFb->data[0];
+    int size = pFb->data.size();
+    
+    HFILE ptr = fopen(fName.c_str(),"w+b");
+    WriteToFile(ptr, bufStart, size);
+    fclose(ptr);
+    pFb->status = FileBufferStatus::OPEN;
+    return FILEHELPER_NO_ERROR;       
 }
 
 
@@ -319,14 +321,18 @@ int FilesystemHelper::CreateFilebuffer(std::string name){
     return FILEHELPER_NO_ERROR;
 }
 
-int FilesystemHelper::FlushAllBuffers(){
+int FilesystemHelper::FlushAllBuffers(std::string * modifiedFiles){
     auto pFileBuffers = getFileBufferInstance();
     if(!pFileBuffers){
         return -1;
     }
 
     for(auto file : *pFileBuffers){
-        WriteBuffToFile(file.first);
+        if(WriteBuffToFile(file.first) == FILEHELPER_NO_ERROR){
+            if(modifiedFiles){
+                *modifiedFiles += file.first + "; ";
+            }
+        }
     }
     return 0;
 
@@ -340,7 +346,6 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
         fclose(ptr);
         FlushBufferIntoFile(fName);
         CloseFileBuffer(fName);
-
     }
     ptr = NULL;
     return __last_error_code = FILEHELPER_NO_ERROR;
@@ -676,6 +681,7 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
         oldSize = GetFileSize(ptr);
     }
     if(ptr == NULL){
+        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{ 
         writenBytes *= fwrite(buff, buffsize, 1, ptr);

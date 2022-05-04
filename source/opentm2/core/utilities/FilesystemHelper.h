@@ -17,8 +17,7 @@ namespace fs = std::experimental::filesystem;
 enum  FileBufferStatus{
         CLOSED = 1,
         OPEN = 2,
-        MODIFIED = 4,
-        
+        MODIFIED = 4,        
     };
 
 struct FileBuffer{
@@ -83,7 +82,7 @@ public:
     
 
     static int WriteBuffToFile(std::string fName);
-    static int FlushAllBuffers();
+    static int FlushAllBuffers(std::string * modifiedFiles = nullptr);
 
     static std::vector<UCHAR>* GetFilebufferData(std::string name);
     static int CreateFilebuffer(std::string name);
@@ -105,6 +104,7 @@ public:
         FILEHELPER_END_FILELIST,
         FILEHELPER_ERROR_FILE_NOT_READ,
         FILEHELPER_ERROR_READING_OUT_OF_RANGE,
+        FILEHELPER_FILE_IS_NOT_MODIFIED,
         
         FILEHELPER_ERROR_NO_FILES_FOUND,
 

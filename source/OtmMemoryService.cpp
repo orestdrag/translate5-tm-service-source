@@ -20,6 +20,7 @@
 #include <cstring>
 #include <sstream>
 #include <functional>
+#include <unistd.h>
 #include <map>
 #include <linux/limits.h>
 //#include <restbed>
@@ -177,6 +178,41 @@ void getStatus_method_handler( const shared_ptr< Session > session )
   TransActDone( iTransActIndex );
 }
 
+
+void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session )
+{
+  const auto request = session->get_request();
+  LogMessage(TRANSACTION, "called saveAllOpenedTMService_method_handler::");
+
+  string strResponseBody;
+  int iRC = pMemService->saveAllTmOnDisk( strResponseBody );
+  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+}
+
+
+
+void shutdownService_method_handler( const shared_ptr< Session > session )
+{
+  const auto request = session->get_request();
+  int iRC;
+  LogMessage(TRANSACTION, "called shutdownService_method_handler::");
+  {
+    string strResponseBody;
+    if( request->has_query_parameter("dontsave") ){
+      strResponseBody = "{\n    'responce': 'shuting down service without saving tms'\n}";
+    }else{
+      saveAllOpenedTMService_method_handler(session);
+      //iRC = pMemService->saveAllTmOnDisk( strResponseBody );
+    }
+
+    //int iRC = pMemService->shutdownService( strResponseBody );
+    //session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
+  }
+  sleep(1);
+  StopOtmMemoryService();
+}
+
 // replace plus signs in string with blanks
 void restoreBlanks( std::string &strInOut )
 {
@@ -209,8 +245,11 @@ void postImport_method_handler( const shared_ptr< Session > session )
     string strResponseBody;
     LogMessage3(TRANSACTION, "\n===================\n    Memory name = ", strTM.c_str(), //"\n    Input = ", strInData.c_str(), 
     "\n==================\n");
+
     int rc = pMemService->import( strTM, strInData, strResponseBody );
+    
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    
     TransActDone( iTransActIndex );
     LogMessage5(TRANSACTION, "...Done, RC=", toStr(rc).c_str(),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
   } );
@@ -230,8 +269,11 @@ void post_method_handler( const shared_ptr< Session > session )
     string strInData = string( body.begin(), body.end() );
     LogMessage2(TRANSACTION, "Input: ", strInData.c_str() );
     string strResponseBody;
+    
     int rc = pMemService->createMemory( strInData, strResponseBody );
+    
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    
     TransActDone( iTransActIndex );
     LogMessage4(TRANSACTION, "post_method_handler done, RC=", toStr(rc).c_str(),"; Output: ", strResponseBody.c_str());
   } );
@@ -291,7 +333,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
                                                 EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
                                                 EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
 
-    int index=0;
+    int index = 0;
     wstr = L"{\n ";
     for(auto& res: result){
       wstr += L"\'" + std::to_wstring(++index) + L"\' :\'" + res + L"\',\n ";
@@ -545,6 +587,17 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     getStatus->set_path( szValue );
     getStatus->set_method_handler( "GET", getStatus_method_handler );
 
+    // handler for resource URL w memory name/status
+    auto shutdownService = make_shared< Resource >();
+    snprintf( szValue, 150, "/%s_service/shutdown", szServiceName );
+    shutdownService->set_path( szValue );
+    shutdownService->set_method_handler( "GET", shutdownService_method_handler );
+
+    // handler for resource URL w memory name/status
+    auto saveTms = make_shared< Resource >();
+    snprintf( szValue, 150, "/%s_service/savetms", szServiceName );
+    saveTms->set_path( szValue );
+    saveTms->set_method_handler( "GET", saveAllOpenedTMService_method_handler );
 
     pSettings = make_shared< Settings >();
     pSettings->set_port( (uint16_t)uiPort );
@@ -555,6 +608,8 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     service.publish( resource );
     service.publish( tagReplacement);
+    service.publish( shutdownService );
+    service.publish( saveTms );
     service.publish( memImport );
     service.publish( fuzzysearch );
     service.publish( concordancesearch );
@@ -562,7 +617,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     service.publish( postEntry );
     service.publish( getStatus );
     service.publish( postEntryDelete );
-    //std::string add = pSettings->get_bind_address();
+
     LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
   }
 
@@ -582,7 +637,8 @@ void StopOtmMemoryService()
 
   pMemService->closeAll();
 
-  if ( hfLog ) fclose( hfLog );
+  //close log file
+  LogStop();
 
 	return;
 }

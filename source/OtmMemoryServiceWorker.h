@@ -111,6 +111,12 @@ public:
   (
   );
 
+
+  /*! \brief Saves all open and modified memories
+  \returns http return code0 if successful or an error code in case of failures
+  */
+  int saveAllTmOnDisk( std::string &strOutputParms );
+
   /*! \brief Set the log file handle
   \param hfLog log file handle or NULL to stop logging
   */
@@ -194,6 +200,12 @@ public:
   \param
   */
   void importDone( char *pszMemory, int iRC, char *pszError );
+
+  /*! \brief shut down the service
+  \param strOutParms on return filled with the output parameters in JSON format
+  \returns http return code
+  */
+  //int shutdownService( std::string &strOutputParms );
 
   std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc);
 

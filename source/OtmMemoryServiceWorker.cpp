@@ -1509,6 +1509,22 @@ int OtmMemoryServiceWorker::closeAll
   return( 0 );
 }
 
+/*! \brief Saves all open and modified memories
+  \returns http return code0 if successful or an error code in case of failures
+  */
+int OtmMemoryServiceWorker::saveAllTmOnDisk( std::string &strOutputParms ){  
+  int iRC = verifyAPISession();
+  if(iRC) {
+    strOutputParms = "Error: Can't save tm files on disk";
+    return iRC;
+  };
+  std::string files; 
+  
+  FilesystemHelper::FlushAllBuffers(&files);
+  strOutputParms = "{\n   \'saved files\': \'" + files + "\' \n}";
+  return restbed::OK;
+}
+
 /*! \brief Set the log file handle
 \param hfLog log file handle or NULL to stop logging
 */
@@ -2156,6 +2172,20 @@ int OtmMemoryServiceWorker::getMem
 }
 
 
+/*! \brief shut down the service
+\param strOutParms on return filled with the output parameters in JSON format
+\returns http return code
+*/
+//int OtmMemoryServiceWorker::shutdownService
+//(
+//  std::string &strOutputParms
+//)
+//{
+//  int iRC = verifyAPISession();  
+//  int httpRC = this->saveAllTmOnDisk( strOutputParms );
+//  
+//  return httpRC;
+//}
 
 
 /*! \brief get the status of a memory

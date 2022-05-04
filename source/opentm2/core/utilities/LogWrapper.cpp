@@ -51,10 +51,29 @@ std::string generateLogFileName(){
    return fName;
 }
 
+
+
 std::mutex logMutex;   
+
+static std::ofstream& getLogFile() {
+    static std::ofstream logF;
+    if(!logF.is_open()){
+        logF.open(logFilename, std::ios_base::app); // append instead of overwrite
+    }
+    return logF;
+}
+
+static std::ofstream& getLogErrorFile() {
+    static std::ofstream logErrorF;
+    if(!logErrorF.is_open()){
+        logErrorF.open(logFilename+"_IMPORTANT", std::ios_base::app); // append instead of overwrite
+    }
+    return logErrorF;
+}
+
 int writeLog(std::string& message, int logLevel){
 
-    static std::ofstream logErrorF, logF;
+    //static std::ofstream logErrorF, logF;
     #ifdef THREAD_ID_WRITE_TO_LOGS
         message += " [thread id = " + std::to_string(_getpid());
         message += "]";
@@ -76,20 +95,19 @@ int writeLog(std::string& message, int logLevel){
         if( fileLoggingSuppressed == false){
             #ifdef LOGERRORSINOTHERFILE
                 if(logLevel >= ERROR){
-                    if(!logErrorF.is_open()){
-                        logErrorF.open(logFilename+"_IMPORTANT", std::ios_base::app); // append instead of overwrite
-                    }
-                    logErrorF << message ; 
-                    logErrorF.flush();
+                    getLogErrorFile() << message;
+                    //logErrorF << message ; 
+                    //logErrorF.flush();
                     //logErrorF.close();
                 }
             #endif
 
-            if(!logF.is_open()){
-                logF.open(logFilename, std::ios_base::app); // append instead of overwrite
-            }
-            logF << message; 
-            logF.flush();
+            //if(!logF.is_open()){
+            //    logF.open(logFilename, std::ios_base::app); // append instead of overwrite
+            //}
+            //logF << message; 
+            getLogFile() << message;
+            //logF.flush();
             //logF.close();
         }
     }
@@ -269,6 +287,17 @@ int LogMessage11(int LogLevel, std::string&& message1, std::string&& message2, s
 }
 
 
+int LogStop(){
+    LogMessage2(TRANSACTION, __func__, " called LogStop -> closing log files");
+    {
+        std::lock_guard<std::mutex> logGuard(logMutex); 
+        if(getLogFile().is_open())
+            getLogFile().close();
+        if(getLogErrorFile().is_open())
+            getLogErrorFile().close();
+    }    
+    return 0;
+}
 
 int DesuppressLoggingInFile(){
     //desuppressLoggingInFile();
