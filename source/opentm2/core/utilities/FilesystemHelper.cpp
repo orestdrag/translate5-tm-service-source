@@ -281,26 +281,24 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 int FilesystemHelper::WriteBuffToFile(std::string fName){
     FileBuffer* pFb = NULL;
     auto pFBs = getFileBufferInstance();
-    if(pFBs->find(fName) == pFBs->end()){
+    if(pFBs->find(fName)!= pFBs->end()){
+        pFb = &(*pFBs)[fName];
+
+        if(pFb->status & FileBufferStatus::MODIFIED){
+            LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
+            PUCHAR bufStart = &pFb->data[0];
+            int size = pFb->data.size();
+            
+            HFILE ptr = fopen(fName.c_str(),"w+b");
+            WriteToFile(ptr, bufStart, size);
+            fclose(ptr);
+        }else{
+            LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
+        }
+    }else{
         LogMessage2(ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
-        return ERROR_FILE_NOT_FOUND;    
-    }
-    pFb = &(*pFBs)[fName];
-
-    if(pFb->status != FileBufferStatus::MODIFIED){
-        LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
-        return FILEHELPER_FILE_IS_NOT_MODIFIED;
-    }
-
-    LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
-    PUCHAR bufStart = &pFb->data[0];
-    int size = pFb->data.size();
-    
-    HFILE ptr = fopen(fName.c_str(),"w+b");
-    WriteToFile(ptr, bufStart, size);
-    fclose(ptr);
-    pFb->status = FileBufferStatus::OPEN;
-    return FILEHELPER_NO_ERROR;       
+    }    
+    return 0;
 }
 
 
