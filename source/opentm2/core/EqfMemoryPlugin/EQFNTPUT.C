@@ -275,14 +275,15 @@ USHORT TmtXReplace
   {
     pSentence->pNormString = pSentence->pNormStringStart;
     HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    pSentence->pTagRecord->usTagTableId = 0;
     if ( pTmClb )  /* 4-13-15 */
     {
       usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+      if(usRc){
+        LogMessage3(WARNING, __func__, ":: NTMGetIDFromName( tagtable ) returned ", toStr(usRc));
+      }
     }
-    else
-    {
-      pSentence->pTagRecord->usTagTableId = 0;
-    } /* endif */
+    
   } /* endif */
 
   if ( !usRc )

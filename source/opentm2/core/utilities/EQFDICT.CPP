@@ -3335,34 +3335,7 @@ SHORT QDAMAllocKeyRecords
    else
    {
       LogMessage2(FATAL,__func__, "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
-#ifdef TEMPORARY_COMMENTED
-      PBTREEBUFFER_V2  pRecord;
-      while ( usNum-- && !sRc )
-      {
-          pBT->usNextFreeRecord++;
-          sRc = QDAMReadRecord_V2( pBTIda, pBT->usNextFreeRecord, &pRecord, TRUE  );
-
-          if ( !sRc )
-          {
-            // add free record to the free list
-            NEXT( pRecord ) = pBT->usFreeKeyBuffer;
-            PREV( pRecord ) = 0;
-            pBT->usFreeKeyBuffer = RECORDNUM( pRecord );
-
-            // init this record
-            pHeader = &pRecord->contents.header;
-            pHeader->usNum = pBT->usFreeKeyBuffer;
-            pHeader->usOccupied = 0;
-            pHeader->usFilled = sizeof(BTREEHEADER );
-            pHeader->usLastFilled = BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER );
-
-            /*************************************************************/
-            /* force write                                               */
-            /*************************************************************/
-            sRc = QDAMWRecordToDisk_V2( pBTIda, pRecord);
-          } /* endif */
-      } /* endwhile */
-      #endif
+      throw;
    } /* endif */
    return sRc;
 }
@@ -3544,8 +3517,6 @@ SHORT QDAMDictCreateLocal
   USHORT  usAction;                    // used in open of file
   PBTREEGLOB pBT;                      // set work pointer to passed pointer
   BOOL   fTransMem = (pNTMVitalInfo != NULL);   // translation memory
-
-  sNumberOfKey;                        // get rid of compiler warnings
     
   /********************************************************************/
   /* allocate global area first ...                                   */
@@ -7697,7 +7668,6 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
    USHORT usRetCode = 0;               // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-   hf; fsState;
    do {
       DosError(0);
       DosError(1);
@@ -7864,7 +7834,7 @@ SHORT  QDAMDictOpenLocal
              (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM1,
                       sizeof(BTREE_HEADER_VALUE_TM1) ) == 0) ||
              (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3,
-                      sizeof(BTREE_HEADER_VALUE_TM1) ) == 0) )
+                      sizeof(BTREE_HEADER_VALUE_TM3) ) == 0) )
         {
           /************************************************************/
           /* check if we are dealing with a TM...                     */

@@ -306,15 +306,17 @@ int EqfMemory::putProposal
 
   this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
 
-  std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
-  LogMessage2(INFO,"EqfMemory::putProposal, source = ", source.c_str());
+  if(CheckLogLevel(INFO)){
+    std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
+    LogMessage2(INFO,"EqfMemory::putProposal, source = ", source.c_str());
+  }
 
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
 
-  LogMessage2(INFO, "EqfMemory::putProposal result = ", toStr(iRC).c_str());
-
-  if ( iRC != 0 ) 
-      handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+  if ( iRC != 0 ){
+      LogMessage2(ERROR, "EqfMemory::putProposal result = ", toStr(iRC).c_str());   
+      //handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+  }
 
   if ( ( iRC == 0 ) &&
        ( this->pTmPutIn->stTmPut.fMarkupChanged ) ) {

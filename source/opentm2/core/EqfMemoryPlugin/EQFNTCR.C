@@ -328,8 +328,6 @@ USHORT TmtXCreate
       {
         usRc = NTMCreateLangGroupTable( pTmClb );
         
-        filesystem_flush_buffers(pFullName);
-  
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -344,9 +342,14 @@ USHORT TmtXCreate
                              (PCHAR) &(pTmClb->stTmSign),
                              sizeof( TMX_SIGN ),
                              START_KEY, &pTmClb->pstInBtree );
-        filesystem_flush_buffers(pTmCreateIn->stTmCreate.szIndexName);
                              
       } /* endif */
+
+      if(usRc == NO_ERROR){        
+        filesystem_flush_buffers(pFullName);  
+        filesystem_flush_buffers(pTmCreateIn->stTmCreate.szIndexName);
+      }/* endif */
+
     } /* endif */
 
     if ( usRc )
