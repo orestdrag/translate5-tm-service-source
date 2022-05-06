@@ -35,15 +35,10 @@ void service_worker() {
     }
 }
 
-//void handle_sigint(int sig)
-//{
-//    printf("Caught signal %d\n", sig);
-//}
 
 int main() {
     LogMessage(INFO, "Worker thread starting");
     std::thread worker(service_worker);
-    //signal(SIGINT, handle_sigint);
     worker.join();
     LogMessage(INFO, "Worker thread finished");
 }

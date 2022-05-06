@@ -50,9 +50,6 @@ EqfMemoryPlugin::~EqfMemoryPlugin()
 
 EqfMemoryPlugin* EqfMemoryPlugin::GetInstance(){
   static EqfMemoryPlugin instance;
-  //if(_instance == NULL){
-  //  _instance = new EqfMemoryPlugin();
-  //}
   return &instance;
 }
 
