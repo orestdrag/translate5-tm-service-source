@@ -1902,7 +1902,7 @@ int OtmMemoryServiceWorker::deleteEntry
     delete pData;
     return( restbed::BAD_REQUEST );
   } /* end */
-  if ( pData->szMarkup[0] == 0 )
+  if ( pData->szMarkup[0] == 0 || strcasecmp( pData->szMarkup, "translate5" ) == 0)
   {
     strcpy(pData->szMarkup, "OTMXUXLF");
     //strcpy( pProp->szMarkup, "OTMANSI" );
@@ -1939,14 +1939,7 @@ int OtmMemoryServiceWorker::deleteEntry
   EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pProp->szTargetLanguage );
   pProp->eType = this->getMemProposalType( pData->szType );
   strcpy( pProp->szTargetAuthor, pData->szAuthor );
-  if ( strcasecmp( pData->szMarkup, "translate5" ) == 0 )
-  {
-    strcpy( pProp->szMarkup, "OTMXUXLF" );
-  }
-  else
-  {
-    strcpy( pProp->szMarkup, pData->szMarkup );
-  }
+  strcpy( pProp->szMarkup, pData->szMarkup );  
   wcscpy( pProp->szContext, pData->szContext );
   LONG lTime = 0;
   if ( pData->szDateTime[0] != 0 )
