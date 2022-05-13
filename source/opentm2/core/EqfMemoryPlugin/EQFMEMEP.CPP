@@ -876,7 +876,6 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
    PSZ              pReplAddr[2];         // Pointer to an address list of
                                           // replacement strings
 
-   hWnd;                                  // get rid of compiler warnings
 
    //--- Get pointer to export IDA
    pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
@@ -1296,8 +1295,6 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
         UTF16strcat( pszWorkArea, NTM_CODEPAGE_END_TAGW );
         usRc = MemExportWrite( pExportIDA, pszWorkArea );
       } /* endif */
-
-
      } /* endif */
    } /* endif */
 

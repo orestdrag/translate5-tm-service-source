@@ -190,10 +190,12 @@ BOOL CXmlWriter::WriteStartDocument()
     // write BOM 
     if ( Encoding == UTF16 )
     {
+      //@@HEADER
       fwrite( "\xff\xfe", 1, 2, m_hf );
     }
     else
     {
+      //@@HEADER
       fwrite( "\xEF\xBB\xBF", 1, 3, m_hf );
     } /* endif */
 

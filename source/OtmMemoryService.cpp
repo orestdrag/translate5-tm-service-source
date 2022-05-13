@@ -302,9 +302,10 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
     void *parseHandle = factory->parseJSONStart( strInData, &rc );
     if ( parseHandle == NULL )
     {
-      //wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+      wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+      wstr = errMsg;
       //buildErrorReturn( iRC, errMsg, strOutputParms );
-      //return( restbed::BAD_REQUEST );
+      return( restbed::BAD_REQUEST );
     }else{ 
       std::string name;
       std::string value;
@@ -476,9 +477,9 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     char szServiceName[100] = "t5memory";
     char szOtmDirPath[255] ="";
     unsigned int uiPort = 8080;
-    unsigned int uiWorkerThreads = 10;
+    unsigned int uiWorkerThreads = 1;
     unsigned int uiTimeOut = 3600;
-    unsigned int uiLogLevel = 0;
+    unsigned int uiLogLevel = 2;
     unsigned int uiAllowedRAM = 1500; // MB
     unsigned int uiThreshold = 33;
 

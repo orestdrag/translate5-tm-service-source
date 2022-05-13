@@ -385,7 +385,8 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
     //compare source strings
-    if ( !UTF16strcmp( pString, pSentence->pNormString ) )
+    //if ( !UTF16strcmp( pString, pSentence->pNormString ) )
+    if ( !UTF16strcmp( pString, pSentence->pInputString ) )
     {
       ULONG   ulLeftTgtLen;            // remaining target length
       /****************************************************************/
@@ -424,7 +425,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                                  NULL,
                                  (USHORT)LANG_KEY, &usId );
         //compare target language ids
-        if ( (pClb->usLangId == usId) && !usRc )
+        //if ( (pClb->usLangId == usId) && !usRc )
         {
           //compare source tag table records
           //position at source tag table record
@@ -463,7 +464,8 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
             if ( !usRc )
             {
               //compare target strings
-              if ( !UTF16strcmp( pString, pNormString ) )
+              //if ( !UTF16strcmp( pString, pNormString ) )
+              if ( !UTF16strcmp( pString, pTmDel->szTarget ) )
               {
                 //target strings are equal so compare target tag records
                 //position at target tag table record
@@ -473,9 +475,11 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                 pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
                 //compare tag table records
-                if (true ||   //we use the same tag tables
-                     !memcmp( pTMXTargetTagTable, pTagRecord,
-                              RECLEN(pTMXTargetTagTable) ) )
+                if (true 
+                //||   //we use the same tag tables
+                //     !memcmp( pTMXTargetTagTable, pTagRecord,
+                //              RECLEN(pTMXTargetTagTable) ) 
+                )
                 {
                   //identical target tag table as in del structure so
                   //check segment id and file name in control block
@@ -496,10 +500,12 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                                          pTMXTargetRecord->usClb;
                     while ( ulLeftClbLen && !fStop )
                     {
-                      if ( (pClb->usFileId == usId) &&
-                           (pClb->ulSegmId == pTmDel->ulSourceSegmentId) &&
-                           (pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag)
-                           ||true 
+                      if ( 
+                           //(pClb->usFileId == usId) &&
+                           //(pClb->ulSegmId == pTmDel->ulSourceSegmentId) &&
+                           //(pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag)
+                           //||
+                           true 
                            )
                       {
                         //if segment id and filename are equal then delete

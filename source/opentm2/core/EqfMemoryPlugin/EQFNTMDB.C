@@ -1641,6 +1641,7 @@ SHORT QDAMDictUpdateLocal
    else
    {
      LogMessage2(FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
+     throw;
      sRc = BTREE_NOT_SUPPORTED;
    } /* endif */
 

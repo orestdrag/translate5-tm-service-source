@@ -2437,14 +2437,8 @@ SHORT QDAMDictCloseLocal
        }
        else
        {
-         PBTREEINDEX_V2 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
-         pIndexBuffer = pBT->pIndexBuffer_V2;
-         while ( pIndexBuffer  )
-         {
-           pTempIndexBuffer = pIndexBuffer->pNext;
-           UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
-           pIndexBuffer = pTempIndexBuffer;
-         } /* endwhile */
+          LogMessage2(FATAL,__func__, ":: BTREE_V2 is not supported");
+          sRc = BTREE_INVALID;   
        } /* endif */
 
        UtlAlloc( (PVOID *)&pBT->pTempKey, 0L, 0L, NOMSG );
@@ -2687,192 +2681,9 @@ SHORT QDAMReadRecordFromDisk_V2
    BOOL           fNewRec              // allow new records flag
 )
 {
-  USHORT    usNumBytesRead = 0;                   // number of bytes read
-  PBTREEHEADER pHeader;                          // pointer to header
-  LONG     lOffset;                              // file offset to be set
-  ULONG    ulNewOffset;                          // new position
-  PBTREEBUFFER_V2   pBuffer = NULL;
-  SHORT    sRc = 0;                             // return code
-  
-  LogMessage2(FATAL,__func__, "called commented out function QDAMReadRecordFromDisk_V2");
-#ifdef TEMPORARY_COMMENTED
-  PBTREEGLOB  pBT = pBTIda->pBTree;
-  PLOOKUPENTRY_V2 pLEntry = NULL;
-
-  DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
-
-  /********************************************************************/
-  /* Allocate space for a new buffer and let pBuffer point to it      */
-  /********************************************************************/
-  if ( !pBT->LookupTable_V2 || ( usNumber >= pBT->usNumberOfLookupEntries ))
-  {
-    sRc = BTREE_LOOKUPTABLE_CORRUPTED;
-  }
-  else
-  {
-    pLEntry = pBT->LookupTable_V2 + usNumber;
-
-    /* Safety-Check: is the lookup table entry (ptr. to buffer) for the
-                     record to read NULL ? */
-    if ( pLEntry->pBuffer )
-    {
-      /* ptr. isn't NULL: this should never occur */
-      sRc = BTREE_LOOKUPTABLE_CORRUPTED;
-    }
-    else
-    {
-      /* Allocate memory for a buffer */
-      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, (LONG) BTREE_BUFFER_V2 , NOMSG );
-      if ( pLEntry->pBuffer )
-      {
-        (pBT->usNumberOfAllocatedBuffers)++;
-        pBuffer = pLEntry->pBuffer;
-      }
-      else
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  if ( !sRc )
-  {
-    INC_REAL_READ_COUNT;
-    if ( !sRc )
-    {
-      lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V2;
-      sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
-    } /* endif */
-
-    // Read the record in to the buffer space
-    // Mark the next buffer for future allocations
-    if ( !sRc )
-    {
-      DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
-      sRc = UtlRead( pBT->fp,
-                     (PVOID)&pBuffer->contents,
-                     BTREE_REC_SIZE_V2, &usNumBytesRead, FALSE);
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-      /****************************************************************/
-      /* The following check added by XQG                             */
-      /* (Sometimes UtlRead terminates with sRc = 0 and usNumBytes = 0*/
-      /*  if the database is locked and although we are NOT at the    */
-      /*  end of the file!)                                           */
-      /****************************************************************/
-      if ( !sRc && !usNumBytesRead )
-      {
-        if ( usNumber < pBT->usNextFreeRecord )
-        {
-          // this is rather an error condition than an end-of-file condition!
-          if ( pBT->usOpenFlags & ASD_SHARED )
-          {
-            sRc = BTREE_IN_USE;
-          }
-          else
-          {
-            sRc = BTREE_READ_ERROR;
-          } /* endif */
-        } /* endif */
-      } /* endif */
-    } /* endif */
-
-    if ( !sRc )
-    {
-       pBuffer->usRecordNumber = usNumber;
-//     pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
-       *ppReadBuffer = pBuffer;
-       if ( !usNumBytesRead )
-       {
-         /*************************************************************/
-         /* we are at the end of the file                             */
-         /*************************************************************/
-         if ( fNewRec )                // new record mode ???
-         {
-           memset (&pBuffer->contents, 0, sizeof(BTREERECORD_V2));
-           // init this record
-           pHeader = &(pBuffer->contents.header);
-           pHeader->usOccupied = 0;
-           pHeader->usNum = usNumber;
-           pHeader->usFilled = sizeof(BTREEHEADER );
-           pHeader->usLastFilled = BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER );
-//         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
-
-           sRc = QDAMWRecordToDisk_V2(pBTIda, pBuffer);
-           if (! sRc )
-           {
-             if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
-             {
-               // this condition should NEVER occur for shared resources
-               // as write is only allowed if the database has been
-               // previously locked
-               ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 2, DB_GROUP, "" );
- #ifdef _DEBUG
-               WinMessageBox( HWND_DESKTOP,
-                              (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                              "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/2\nPlease save info required to reproduce this condition.",
-                              "Gotcha!", 9999, MB_ERROR );
- #endif
-             } /* endif */
-             sRc = QDAMWriteHeader( pBTIda );
-           } /* endif */
-//         pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
-         }
-         else
-         {
-           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
-#ifdef _DEBUG
-           WinMessageBox( HWND_DESKTOP,
-                          (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                          "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\n",
-                          "Internal Error", 9998, MB_ERROR );
-#endif
-           sRc = BTREE_READ_ERROR;
-         } /* endif */
-       } /* endif */
-    } /* endif */
-  } /* endif */
-
-  // For shared databases, check if database has been changed since last access
-  // in case of changes force a BTREE_IN_USE return code thus triggering a retry
-  // on one the outer calling levels
-  if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-  {
-      LONG  lUpdCount;                 // buffer for new value of update counter
-
-     /**********************************************************************/
-     /* Get current database update count                                  */
-     /**********************************************************************/
-     sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
-
-     if ( !sRc )
-     {
-        if ( lUpdCount != pBT->alUpdCtr[0] )
-        {
-           sRc = BTREE_INVALIDATED;
-        } /* endif */
-     } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* Free record buffer in case of errors so record will be re-read   */
-  /* during retry operations                                          */
-  /********************************************************************/
-  if ( sRc )
-  {
-    if ( (pLEntry != NULL) && (pLEntry->pBuffer != NULL) )
-    {
-      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-      (pBT->usNumberOfAllocatedBuffers)--;
-    } /* endif */
-  } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-  #endif
-  return sRc;
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID; 
 }
 
 
@@ -2925,62 +2736,10 @@ SHORT QDAMWRecordToDisk_V2
    PBTREE     pBTIda,                     // pointer to btree structure
    PBTREEBUFFER_V2  pBuffer               // pointer to buffer to write
 )
-{
-  SHORT sRc = 0;                          // return code
-  
-  LONG  lOffset;                          // offset in file
-  ULONG ulNewOffset;                      // new file pointer position
-  USHORT usBytesWritten;                  // number of bytes written
-  PBTREEGLOB  pBT = pBTIda->pBTree;
-
-  INC_REAL_WRITE_COUNT;
-
-  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
-
-//QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
-
-  if ( !sRc )
-  {
-    lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V2;
-
-    sRc = UtlChgFilePtr( pBT->fp, lOffset, FILE_BEGIN, &ulNewOffset, FALSE);
-  } /* endif */
-
-  if ( ! sRc )
-  {
-    sRc = UtlWrite( pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V2, &usBytesWritten, FALSE );
-
-    // check if disk is full
-    if ( ! sRc )
-    {
-       if ( usBytesWritten == BTREE_REC_SIZE_V2 )
-       {
-          pBuffer->fNeedToWrite = FALSE;
-       }
-       else
-       {
-          sRc = BTREE_DISK_FULL;
-          pBT->fCorrupted = TRUE;                     // indicate corruption
-       } /* endif */
-    }
-    else
-    {
-       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-       pBT->fCorrupted = TRUE;                     // indicate corruption
-    } /* endif */
-  }
-  else
-  {
-    sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-    pBT->fCorrupted = TRUE;                        // indicate corruption
-  } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-  return sRc;
+{  
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID;
 }
 
 
@@ -3094,164 +2853,9 @@ SHORT  QDAMReadRecord_V2
    BOOL    fNewRec
 )
 {
-  USHORT   i;
-  SHORT    sRc = 0;                  // return code
-  BOOL     fMemOK = FALSE;
-  PBTREEGLOB    pBT = pBTIda->pBTree;
-  PLOOKUPENTRY_V2  pLEntry;
-  PACCESSCTRTABLEENTRY  pACTEntry;
-
-  DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
-
-  *ppReadBuffer = NULL;
-  INC_READ_COUNT;
-
-  /********************************************************************/
-  /* If Lookup-Table is too small allocate additional memory for it   */
-  /********************************************************************/
-  if ( usNumber >= MAX_NUMBER_OF_LOOKUP_ENTRIES )
-  {
-    /* There is no room for this record number in the lookup table */
-    sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
-  }
-  else if ( !pBT->LookupTable_V2 || !pBT->AccessCtrTable )
-  {
-    sRc = BTREE_LOOKUPTABLE_NULL;
-  }
-  else
-  {
-    if ( usNumber >= pBT->usNumberOfLookupEntries )
-    {
-      /* The lookup-table entry for the record to read doesn't exist */
-      /* Reallocate memory for LookupTable and AccessCounterTable */
-      fMemOK = UtlAlloc( (PVOID *)&pBT->LookupTable_V2,
-              (LONG) pBT->usNumberOfLookupEntries * sizeof(LOOKUPENTRY_V2),
-              (LONG) (usNumber + 10) * sizeof(LOOKUPENTRY_V2), NOMSG );
-      if ( fMemOK==TRUE )
-      {
-        fMemOK = UtlAlloc( (PVOID *)&pBT->AccessCtrTable,
-                (LONG) pBT->usNumberOfLookupEntries * sizeof(ACCESSCTRTABLEENTRY),
-                (LONG) (usNumber + 10) * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-        if ( fMemOK==TRUE )
-        {
-          pBT->usNumberOfLookupEntries = usNumber + 10;
-        }
-        else
-        {
-          sRc = BTREE_NO_ROOM;
-        } /* endif */
-      }
-      else
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  if ( !sRc )
-  {
-    /******************************************************************/
-    /* If record is in memory set ppReadBuffer                        */
-    /* else call QDAMReadRecordFromDisk to read it into memory        */
-    /******************************************************************/
-    pLEntry = pBT->LookupTable_V2 + usNumber;
-
-    if ( pLEntry->pBuffer )
-    {
-      /* Safety-Check: is rec.number = number of rec. to read ? */
-      if ( (pLEntry->pBuffer)->usRecordNumber == usNumber )
-      {
-        /* Record is already in memory */
-        *ppReadBuffer = pLEntry->pBuffer;
-      }
-      else
-      {
-        /* This should never occur ! */
-        sRc = BTREE_LOOKUPTABLE_CORRUPTED;
-      } /* endif */
-    }
-    else
-    {
-      /* Record isn't in memory -> read it from disk */
-      sRc =  QDAMReadRecordFromDisk_V2( pBTIda, usNumber, ppReadBuffer, fNewRec );
-      pACTEntry=pBT->AccessCtrTable + usNumber;
-      pACTEntry->ulAccessCounter = 0L;
-    } /* endif */
-  } /* endif */
-
-  /****************************************************************************/
-  /* If #calls of QDAMReadRecord is greater than MAX_READREC_CALLS:           */
-  /*   write unlocked records with access counter < MAX_READREC_CALLS to disk */
-  /*   (if fNeedToWrite is set) and free the allocated memory                 */
-  /*   set #calls of QDAMReadRecord = 0                                       */
-  /* else increment #calls of QDAMReadRecord                                  */
-  /****************************************************************************/
-  if ( !sRc )
-  {
-    if ( pBT->ulReadRecCalls >= MAX_READREC_CALLS )
-    {
-      for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
-      {
-        pLEntry = pBT->LookupTable_V2 + i;
-        pACTEntry = pBT->AccessCtrTable + i;
-        if ( pLEntry->pBuffer && !((pLEntry->pBuffer)->fLocked) && (i!=usNumber)
-             && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
-        {
-            /* write buffer and free allocated space */
-            if ( (pLEntry->pBuffer)->fNeedToWrite )
-            {
-              if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
-              {
-                // this condition should NEVER occur for shared resources
-                // as write is only allowed if the database has been
-                // previously locked
-                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
-              #ifdef _DEBUG
-                WinMessageBox( HWND_DESKTOP,
-                   (HWND)UtlQueryULong( QL_TWBCLIENT ),
-                   "Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.",
-                   "Gotcha!", 9999, MB_ERROR );
-              #endif
-              } /* endif */
-              sRc = QDAMWRecordToDisk_V2(pBTIda, pLEntry->pBuffer);
-            } /* endif */
-            if ( !sRc )
-            {
-              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L , NOMSG );
-              pBT->usNumberOfAllocatedBuffers--;
-            } /* endif */
-        } /* endif */
-
-        if ( pACTEntry->ulAccessCounter<MAX_READREC_CALLS )
-        {
-          pACTEntry->ulAccessCounter = 0L;
-        }
-        else
-        {
-          pACTEntry->ulAccessCounter -= MAX_READREC_CALLS;
-        } /* endif */
-      } /* endfor */
-      pBT->ulReadRecCalls = 0L;
-    }
-    else
-    {
-      pBT->ulReadRecCalls++;
-    } /* endif */
-  } /* endif */
-
-  if ( !sRc )
-  {
-    /* Increase the access counter for the record just read by  ACCESSBONUSPOINTS */
-    pACTEntry=pBT->AccessCtrTable + usNumber;
-    pACTEntry->ulAccessCounter += ACCESSBONUSPOINTS;
-  } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-  return ( sRc );
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID; 
 }
 
 SHORT  QDAMReadRecord_V3
@@ -3377,51 +2981,9 @@ SHORT QDAMWriteRecord_V2
    PBTREEBUFFER_V2 pBuffer
 )
 {
-   SHORT  sRc = 0;                               // return code
-   PBTREEGLOB  pBT = pBTIda->pBTree;
-  LogMessage(FATAL, "called commented out function QDAMWriteRecord_V2");
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
-
-   INC_WRITE_COUNT;
-
-   /********************************************************************/
-   /* write header with corruption flag -- if not yet done             */
-   /********************************************************************/
-   if ( pBT->fWriteHeaderPending )
-   {
-     sRc = QDAMWriteHeader( pBTIda );
-     pBT->fWriteHeaderPending = FALSE;
-   } /* endif */
-
-   //  if guard flag is on write it to disk
-   //  else set only the flag
-   if ( !sRc )
-   {
-     if ( !pBT->fGuard )
-     {
-        pBuffer->fNeedToWrite = TRUE;
-     }
-     else
-     {
-        sRc = QDAMWRecordToDisk_V2(pBTIda, pBuffer);
-     } /* endif */
-   } /* endif */
-
-
-   // For shared databases only: set internal update flag, the
-   // update counter will be written once the file lock is removed
-   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-   {
-     pBT->fUpdated = TRUE;;
-   } /* endif */
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, "" );
-   
-   return sRc;
+   LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID;
 }
 
 
@@ -4201,15 +3763,9 @@ SHORT QDAMCheckForUpdates
           }
           else
           {
-            PBTREEINDEX_V2  pIndexBuffer;             // temp ptr to index buffers
-
-            while ( pBT->pIndexBuffer_V2 != NULL )
-            {
-              pIndexBuffer = pBT->pIndexBuffer_V2;
-              pBT->pIndexBuffer_V2 = pIndexBuffer->pNext;
-
-              UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
-            } /* endwhile */
+            LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+            throw;
+            return BTREE_INVALID; 
           } /* endif */
           pBT->usIndexBuffer = 0;      // no buffers in linked list anymore
         } /* endif */
@@ -4241,18 +3797,9 @@ SHORT QDAMCheckForUpdates
         {
           if ( !sRc && pBT->LookupTable_V2 )
           {
-            USHORT i;
-            PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
-
-            for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
-            {
-              if ( pLEntry->pBuffer )
-              {
-                UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-              } /* endif */
-              pLEntry++;
-            } /* endfor */
-            pBT->usNumberOfAllocatedBuffers = 0;
+            LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+            throw;
+            return BTREE_INVALID; 
           } /* endif */
 
         } /* endif */
@@ -4302,92 +3849,7 @@ SHORT QDAMPhysLock
 )
 {
   LogMessage2(FATAL,__func__,  ":: called commented out function QDAMPhysLock");
-#ifdef TEMPORARY_COMMENTED
-  SHORT    sRc = 0;                    // return code
-  PBTREEGLOB  pBT = pBTIda->pBTree;
-  FILELOCK  Lock;                      // range to be locked or unlocked
 
-  if ( pfLocked != NULL ) *pfLocked = FALSE;  // set initial value
-  Lock.lOffset = 0L;                   // start at begin of file
-  Lock.lRange  = 0x7FFFFFFF;
-
-  if ( fLock )
-  {
-    if ( !pBTIda->fPhysLock )
-    {
-       SHORT sRetries = MAX_RETRY_COUNT;
-
-       // lock update counter file
-       do
-       {
-         sRc = UtlFileLocks( pBT->fpDummy, (PFILELOCK)NULL, &Lock, FALSE );
-         if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-         if ( sRc == BTREE_IN_USE )
-         {
-           UtlWait( MAX_WAIT_TIME );
-           sRetries--;
-         } /* endif */
-       }
-       while( (sRc == BTREE_IN_USE) && (sRetries > 0));
-
-       // lock database file (here we do not use a retry loop as the database
-       // file should not be locked if the update counter file was not locked)
-       if ( sRc == NO_ERROR )
-       {
-         sRc = UtlFileLocks( pBT->fp, (PFILELOCK)NULL, &Lock, FALSE );
-         if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-         // unlock update counter file in case of errors
-         if ( sRc != NO_ERROR )
-         {
-           UtlFileLocks( pBT->fpDummy, &Lock, (PFILELOCK)NULL, FALSE );
-         } /* endif */
-       } /* endif */
-
-       if ( sRc == NO_ERROR )
-       {
-         pBTIda->fPhysLock = TRUE;
-         if ( pfLocked != NULL ) *pfLocked = TRUE;
-
-         // ensure we work with up-to-date data
-         sRc = QDAMCheckForUpdates( pBTIda );
-       } /* endif */
-    } /* endif */
-  }
-  else
-  {
-     // Set update counter in case of database updates
-    if ( pBT->fUpdated )
-    {
-      sRc = QDAMDictFlushLocal( pBTIda );
-      if ( sRc == NO_ERROR )
-      {
-        sRc = QDAMWriteHeader( pBTIda );
-      } /* endif */
-      QDAMIncrUpdCounter( pBTIda, 0, NULL );
-      pBT->fUpdated = FALSE;
-    } /* endif */
-
-    // unlock database file
-    sRc = UtlFileLocks( pBT->fp, &Lock, (PFILELOCK)NULL, FALSE );
-
-    // unlock update counter file
-    if ( sRc == NO_ERROR )
-    {
-      UtlFileLocks( pBT->fpDummy, &Lock, (PFILELOCK)NULL, FALSE );
-      pBTIda->fPhysLock = FALSE;
-    } /* endif */
-  } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMPHYSLOCK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-//    sRc = BTREE_IN_USE;
-  } /* endif */
-
-  return( sRc ) ;
-  #endif 
   return 0;
 }
 
@@ -7522,72 +6984,9 @@ SHORT QDAMFindRecord_V2
     PBTREEBUFFER_V2 * ppRecord
 )
 {
-  SHORT         sResult;
-  SHORT         sLow;                              // Far left
-  SHORT         sHigh;                             // Far right
-  SHORT         sMid = 0;                          // Middle
-  RECPARAM      recData;                           // data structure
-  PUSHORT       pKey2;                             // pointer to search key
-  SHORT         sRc = 0;                           // return code
-  PBTREEGLOB    pBT = pBTIda->pBTree;
-
-  LogMessage2(FATAL, __func__, "called commented out function QDAMFindRecord_V2 ::sRc = QDAMReadRecord_V2( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );");
-#ifdef TEMPORARY_COMMENTED
-  memset(&recData, 0, sizeof(recData));
-  sRc = QDAMReadRecord_V2( pBTIda, pBT->usFirstNode, ppRecord, FALSE  );
-  while ( !sRc && !IS_LEAF( *ppRecord ))
-  {
-    BTREELOCKRECORD( *ppRecord );
-
-    sLow = 0;                                    // start here
-    sHigh = (SHORT) OCCUPIED( *ppRecord) -1 ;    // counting starts at zero
-
-
-    while ( !sRc && (sLow <= sHigh) )
-    {
-      sMid = (sLow + sHigh)/2;
-      pKey2 = QDAMGetszKey_V2( *ppRecord, sMid, pBT->usVersion );
-      if ( pKey2 == NULL )
-      {
-        sRc = BTREE_CORRUPTED;
-      }
-      else
-      {
-        sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
-        if ( sResult < 0 )
-        {
-          sHigh = sMid - 1;                        // Go left
-        }
-        else
-        {
-          sLow = sMid + 1;                         // Go right
-        } /* endif */
-      } /* endif */
-    } /* endwhile */
-
-    /******************************************************************/
-    /* it is the lower one due the construction of the BTREE          */
-    /*  -- according to the while loop it must be the sHIGH value     */
-    /* if sHigh < 0 we should use the first one                      */
-    /******************************************************************/
-    if ( !sRc )
-    {
-      if ( sHigh == -1 )
-      {
-        sHigh = 0;
-      } /* endif */
-      recData = QDAMGetrecData_V2( *ppRecord, sHigh, pBT->usVersion );
-    } /* endif */
-
-    BTREEUNLOCKRECORD( *ppRecord );                        // unlock previous record.
-
-    if ( !sRc )
-    {
-      sRc = QDAMReadRecord_V2( pBTIda, recData.usNum, ppRecord, FALSE  );
-    } /* endif */
-  } /* endwhile */
-  #endif
-  return( sRc );
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID; 
 }
 
 
@@ -7998,15 +7397,9 @@ SHORT  QDAMDictOpenLocal
                 } /* endif */
                 else
                 {
-                  UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V2), NOMSG );
-                  if ( pBT->LookupTable_V2 )
-                  {
-                    pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-                  }
-                  else
-                  {
-                    sRc = BTREE_NO_ROOM;
-                  } /* endif */
+                  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+                  throw;
+                  return BTREE_INVALID; 
                 } /* endif */
              } /* endif */
 
@@ -8214,38 +7607,9 @@ PSZ_W QDAMGetszKey_V2
    USHORT  usVersion                   // version of database
 )
 {
-   PBYTE    pData, pEndOfRec;
-   PUSHORT  pusOffset;
-   usVersion;
-
-   // get max pointer value
-
-   pEndOfRec = (PBYTE)&(pRecord->contents) + BTREE_REC_SIZE_V2;
-
-   // use record number of passed entry , read in record and pass
-   // back pointer
-   pusOffset = (PUSHORT) pRecord->contents.uchData;
-   pusOffset += i;                     // point to key
-   if ( (PBYTE)pusOffset > pEndOfRec )
-   {
-     // offset pointer is out of range
-     pData = NULL;
-     ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
-   }
-   else
-   {
-     pData = pRecord->contents.uchData + *pusOffset;
-     pData += sizeof(USHORT ) + sizeof(RECPARAM); // get pointer to data
-     
-     if ( pData > pEndOfRec )
-     {
-       // data pointer is out of range
-       pData = NULL;
-       ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
-     } /* endif */
-   } /* endif */
-
-   return ( (PSZ_W)pData );
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return L""; 
 }
 
 
@@ -8310,311 +7674,9 @@ SHORT QDAMLocateKey_V2
    USHORT  searchSubType                  // search subtype for hyphenation
 )
 {
-  SHORT  sLow;                             // low value
-  SHORT  sHigh;                            // high value
-  SHORT  sResult;
-  SHORT  sMid = 0;                         //
-  SHORT  sRc = 0;                          // return value
-  PCHAR_W  pKey2;                            // pointer to key string
-  PCHAR_W  pHyphen;                            // pointer to key string
-  SHORT    sCheckVariants=0;
-  BOOL   fFound = FALSE;
-  PBTREEGLOB    pBT = pBTIda->pBTree;
-  CHAR_W  szKey[512];
-  SHORT   sKeyLen = 512 ;
-
-  LogMessage2(FATAL,__func__,"::QDAMLocateKey_V2 are not implemented and not supposed to be used");
-#ifdef TEMPORARY_COMMENTED
-  *psKeyPos = -1;                         // key not found
-  if ( pRecord )
-  {
-    BTREELOCKRECORD( pRecord );
-    sHigh = (SHORT) OCCUPIED( pRecord) -1 ;      // counting starts at zero
-    sLow = 0;                                    // start here
-
-    wcsncpy( szKey, pKey, sKeyLen ) ;
-
-    szKey[sKeyLen-1] = NULL ;
-    pHyphen = wcschr(szKey, L'-') ;
-    if ( ( pHyphen ) &&
-         ( searchSubType == FEXACT_EQUIV ) ) { // special hyphenation lookup
-       sCheckVariants = 3 ;             // 3 variations when term contains hyphen
-    }  else {
-       sCheckVariants = 1 ;
-    }
-    while( sCheckVariants > 0 && !fFound ) {
-
-      while ( !fFound && sLow <= sHigh )
-      {
-         sMid = (sLow + sHigh)/2;
-         pKey2 = QDAMGetszKey_V2( pRecord, sMid, pBT->usVersion );
-  
-         if ( pKey2 )
-         {
-            sResult = (*pBT->compare)(pBTIda, szKey, pKey2);
-            if ( sResult < 0 )
-            {
-              sHigh = sMid - 1;                        // Go left
-            }
-            else if (sResult > 0)
-            {
-              sLow = sMid+1;                           // Go right
-            }
-            else
-            {
-               fFound = TRUE;
-               // if exact match is required we have to do a strcmp
-               // to ensure it and probably check the previous or the
-               // next one because our insertion is case insensitive
-  
-               /*********************************************************/
-               /* checking will be done in any case to return the best  */
-               /* matching substring                                    */
-               /*********************************************************/
-               if ( pBT->fTransMem )
-               {
-                 if (*((PULONG)szKey) == *((PULONG)pKey2))
-                 {
-                    *psKeyPos = sMid;
-                 }
-                 else
-                 {
-                    // try with previous
-                    if ( sMid > sLow )
-                    {
-                      pKey2 = QDAMGetszKey_V2( pRecord, (SHORT)(sMid-1), pBT->usVersion );
-                      if ( pKey2 == NULL )
-                      {
-                        sRc = BTREE_CORRUPTED;
-                      }
-                      else if ( *((PULONG)szKey) == *((PULONG)pKey2) )
-                      {
-                        *psKeyPos = sMid-1 ;
-                      } /* endif */
-                    } /* endif */
-                    //  still not found
-                    if ( !sRc && *psKeyPos == -1 && sMid < sHigh )
-                    {
-                      pKey2 = QDAMGetszKey_V2(  pRecord, (SHORT)(sMid+1), pBT->usVersion );
-                      if ( pKey2 == NULL )
-                      {
-                        sRc = BTREE_CORRUPTED;
-                      }
-                      else if ( *((PULONG)szKey) == *((PULONG)pKey2) )
-                      {
-                            *psKeyPos = sMid+1 ;
-                      } /* endif */
-                    } /* endif */
-                 } /* endif */
-               }
-               else
-               {
-                 /*******************************************************/
-                 /* if dealing with exacts we have to do some more      */
-                 /* explicit checking, else we have to find first pos.  */
-                 /* substring match...                                  */
-                 /*******************************************************/
-                 enum KEYMATCH
-                 {
-                   EXACT_KEY,            // keys are exactly the same
-                   FIRSTCHARCASEDIFF_KEY,// case of first char of keys is different
-                   CASEDIFF_KEY,         // case of keys is different
-                   PUNCTDIFF_KEY,        // punctuation of keys differs
-                   NOMATCH_KEY           // keys do not match at all
-                 } BestKeyMatch = NOMATCH_KEY; // match level of best key so far
-                 SHORT sBestKey = -1;    // best key found so far
-  
-                 /*****************************************************/
-                 /* go back as long as the keys are the same ...      */
-                 /*****************************************************/
-  
-                 /* DAW  If sMid == sLow and keys still the same, then may need to look at previous entry */
-                 /*      For example, if "Submit" is first entry of this record, and "submit" is last     */
-                 /*      entry of previous record, and looking for "submit".                              */
-  
-                 while ( sMid > sLow )
-                 {
-                   pKey2 = QDAMGetszKey_V2( pRecord, (SHORT)(sMid-1), pBT->usVersion );
-  
-                   if ( pKey2 == NULL )
-                   {
-                     sRc = BTREE_CORRUPTED;
-                     break;
-                   }
-                   else if ( (*pBT->compare)(pBTIda, szKey, pKey2) == 0 )
-                   {
-                     sMid --;
-                   }
-                   else
-                   {
-                     break;
-                   } /* endif */
-                 } /* endwhile */
-  
-                 *psKeyPos = sMid;      // set key position
-  
-                 /*****************************************************/
-                 /* go forward as long as the keys are the same  ..   */
-                 /* and no matching sentence found                    */
-                 /*****************************************************/
-                 if ( (searchType == FEXACT) ||
-                      (searchType == FEQUIV) )
-                 {
-                   *psKeyPos = -1;       // reset key position for exact search
-                                         // and equivalent search
-                 } /* endif */
-  
-                 while ( sMid <= sHigh )
-                 {
-                   pKey2 = QDAMGetszKey_V2( pRecord, sMid, pBT->usVersion );
-                   if ( pKey2 == NULL )
-                   {
-                     sRc = BTREE_CORRUPTED;
-                     break;
-                   }
-                   else if ( (*pBT->compare)(pBTIda, szKey, pKey2) == 0 )
-                   {
-                     if ( searchType == FEQUIV)
-                     {
-                       PBTREEGLOB    pBT = pBTIda->pBTree;
-                       PBYTE  pMap = pBT->chCaseMap; 
-                       PBYTE  pbKey1 = (PBYTE)szKey;
-                       PBYTE  pbKey2 = (PBYTE)pKey2;
-
-                       if ( UTF16strcmp( szKey, pKey2 ) == 0 )
-                       {
-                         // the match will not get better anymore ...
-                         *psKeyPos = sMid;
-                         break;
-                       }
-                       else if ( (pMap[*pbKey1] == pMap[*pbKey2]) && (UTF16strcmp( szKey+1, pKey2+1 ) == 0 ) )
-                       {
-                         // case of first character does not match
-                         // so remember match if we have no better match yet and
-                         // look for better ones...
-                         if ( BestKeyMatch > FIRSTCHARCASEDIFF_KEY )
-                         {
-                           BestKeyMatch = FIRSTCHARCASEDIFF_KEY;
-                           sBestKey = sMid;
-                         } /* endif */
-                       }
-                       else if ( QDAMCaseCompare( pBTIda, szKey, pKey2, FALSE ) == 0 )
-                       {
-                         // match but case of characters differ
-                         // so remember match if we have no better match yet and
-                         // look for better ones...
-                         if ( BestKeyMatch > CASEDIFF_KEY )
-                         {
-                           BestKeyMatch = CASEDIFF_KEY;
-                           sBestKey = sMid;
-                         } /* endif */
-                       }
-                       else if ( QDAMCaseCompare( pBTIda, szKey, pKey2, TRUE ) == 0 )
-                       {
-                         // match but punctuation differs
-                         // so remember match if we have no other yet and
-                         // look for better ones...
-                         if ( BestKeyMatch == NOMATCH_KEY )
-                         {
-                           BestKeyMatch = PUNCTDIFF_KEY;
-                           sBestKey = sMid;
-                         } /* endif */
-                       } /* endif */
-                       sMid++;           // continue with next key
-                     }
-                     else if (UTF16strcmp( szKey, pKey2 ))
-                     {
-                       // show similar terms as one in document edidtor
-                       if ( searchSubType == FEXACT_EQUIV ) {
-                          if ( QDAMCaseCompare( pBTIda, szKey, pKey2, TRUE ) == 0 )
-                          {
-                            // match but punctuation differs
-                            // so remember match if we have no other yet and
-                            // look for better ones...
-                            if ( BestKeyMatch == NOMATCH_KEY )
-                            {
-                              BestKeyMatch = PUNCTDIFF_KEY;
-                              sBestKey = sMid;
-                            } /* endif */
-                          } /* endif */
-                       }
-                       sMid ++;
-                     }
-                     else
-                     {
-                       *psKeyPos = sMid;
-                       break;
-                     } /* endif */
-                   }
-                   else
-                   {
-                     break;
-                   } /* endif */
-                 } /* endwhile */
-  
-                 // use best matching key if no other was found
-                 if ( *psKeyPos == -1 )
-                 {
-                   *psKeyPos = sBestKey;
-                 } /* endif */
-               } /* endif */
-  
-               /*********************************************************/
-               /* if we are checking only for substrings and didn't     */
-               /* find a match yet, we will set the prev. found substrin*/
-               /*********************************************************/
-               if ( (*psKeyPos == -1) && (searchType == FSUBSTR)  )
-               {
-                  *psKeyPos = sMid;
-               } /* endif */
-               *psNearPos = *psKeyPos;
-            } /* endif */
-         }
-         else
-         {
-            fFound = TRUE;
-            sRc = BTREE_CORRUPTED;                // tree is corrupted
-         } /* endif */
-      } /* endwhile */
-      if ( !fFound )
-      {
-        *psNearPos = sLow < ((SHORT)OCCUPIED(pRecord)-1) ? sLow : ((SHORT)OCCUPIED(pRecord)-1);// set nearest pos
-      } /* endif */
-
-      --sCheckVariants ;
-      if ( ( ! fFound  ) &&                      // No match yet and term with hyphen
-           ( pHyphen ) ) {
-         sHigh = (SHORT) OCCUPIED( pRecord) -1 ; // counting restarts at zero
-         sLow = 0;                               // start here
-         if ( sCheckVariants == 2 ) {            // 1st hyphen variant
-         LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 92 wcsncpy( szKey, pKey, sKeyLen ) ;     // Replace hyphen with blank ");
-#ifdef TEMPORARY_COMMENTED 
-           wcsncpy( szKey, pKey, sKeyLen ) ;     // Replace hyphen with blank 
-          #endif
-           szKey[sKeyLen-1] = NULL ;
-           *pHyphen = NULL ;
-         } else
-         if ( sCheckVariants == 1 ) {            // 2nd hyphen variant
-         LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 93 wcsncpy( szKey, pKey, sKeyLen ) ;     // Remove hyphen and concatenate words ");
-#ifdef TEMPORARY_COMMENTED
-           wcsncpy( szKey, pKey, sKeyLen ) ;     // Remove hyphen and concatenate words 
-          #endif
-           szKey[sKeyLen-1] = NULL ;
-           memmove( pHyphen, pHyphen+1, (wcslen(pHyphen+1)+1)*sizeof(WCHAR) ) ;
-         } else {
-            sCheckVariants = 0 ;
-         }
-      } 
-    }
-    BTREEUNLOCKRECORD( pRecord );
-  } /* endif */
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMLOCATEKEY_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-  #endif
-  return sRc;
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID; 
 }
 
 
@@ -8627,19 +7689,9 @@ SHORT QDAMInsertKey_V2
    RECPARAM   recData                  // position/offset for data
 )
 {
-  SHORT i = 0;
-  PBTREEBUFFER_V2 pTempRec;
-  PCHAR_W   pCompKey = NULL;           // key to be compared with
-  PCHAR_W   pOldKey;                   // old key at first position
-  PCHAR_W   pNewKey;                   // new key at first position
-  BOOL fFound = FALSE;
-  SHORT  sKeyFound;                    // key found
-  SHORT  sNearKey;                     // key found
-  SHORT  sRc = 0;                      // return code
-
-  LogMessage2(FATAL,__func__, "::called commented out function QDAMInsertKey_V2");
-
-  return sRc;
+  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+  throw;
+  return BTREE_INVALID; 
 }
 
 
@@ -8706,8 +7758,7 @@ SHORT QDAMDictInsertLocal
    if ( pBT->fCorrupted )
    {
       sRc = BTREE_CORRUPTED;
-   } /* endif */
-   if ( !sRc && !pBT->fOpen )
+   } else if(!pBT->fOpen )
    {
      sRc = BTREE_READONLY;
    } /* endif */
@@ -8720,59 +7771,58 @@ SHORT QDAMDictInsertLocal
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
 
-   if ( pBT->bRecSizeVersion == BTREE_V3 )
-   {
-      PBTREEBUFFER_V3  pNode = NULL;
-
-      if ( !sRc )
-      {
-        usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
-
-        if ( (usKeyLen == 0) ||
-             ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
-             (ulLen == 0) )
-        {
-          sRc = BTREE_DATA_RANGE;
-        }
-        else
-        {
-          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
-          
-          QDAMDictUpdStatus ( pBTIda );
-          sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
-
-        } /* endif */
-      } /* endif */
-
-      if ( !sRc )
-      {
-          BTREELOCKRECORD( pNode );
-          sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
-          if ( !sRc )
-          {
-            recData.ulLen = ulLen;
-            sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
-          } /* endif */
-
-          BTREEUNLOCKRECORD( pNode );
-          /****************************************************************/
-          /* change time to indicate modifications on dictionary...       */
-          /****************************************************************/
-          pBT->lTime ++;
-      }
-   }
-   else
+   if( pBT->bRecSizeVersion != BTREE_V3 )
    {
       LogMessage(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
+      throw
       sRc = BTREE_NOT_SUPPORTED;
-   } /* endif */
+   } /* endif */ 
+   
+  PBTREEBUFFER_V3  pNode = NULL;
+  if ( !sRc )
+  {
+    usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
 
-   if ( sRc )
-   {
-     ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
+    if ( (usKeyLen == 0) ||
+          ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
+          (ulLen == 0) )
+    {
+      sRc = BTREE_DATA_RANGE;
+    }
+    else
+    {
+      memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
+      
+      QDAMDictUpdStatus ( pBTIda );
+      sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
 
-   return sRc;
+    } /* endif */
+  } /* endif */
+
+  if ( !sRc )
+  {
+      BTREELOCKRECORD( pNode );
+      sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
+      if ( !sRc )
+      {
+        recData.ulLen = ulLen;
+        sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
+      } /* endif */
+
+      BTREEUNLOCKRECORD( pNode );
+      /****************************************************************/
+      /* change time to indicate modifications on dictionary...       */
+      /****************************************************************/
+      pBT->lTime ++;
+  }
+      
+
+  if ( sRc )
+  {
+    ERREVENT2( QDAMDICTINSERTLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
+  } /* endif */
+
+  return sRc;
 }
 
 
@@ -8840,8 +7890,7 @@ SHORT QDAMDictUpdSignLocal
   if ( pBT->fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
-  } /* endif */
-  if ( !sRc && !pBT->fOpen )
+  } else if ( !pBT->fOpen )
   {
     sRc = BTREE_READONLY;
   }
@@ -8856,6 +7905,7 @@ SHORT QDAMDictUpdSignLocal
   if ( pBT->bRecSizeVersion != BTREE_V3)
   {
       LogMessage(FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
+      throw;
       sRc = BTREE_INVALID;
   }
 
@@ -9371,7 +8421,6 @@ SHORT QDAMLocSubstr_V3
 //                    endif
 //                    return Rc
 //------------------------------------------------------------------------------
-
 SHORT QDAMDictSubStrLocal
 (
    PBTREE pBTIda,                      // pointer to btree struct
@@ -9392,136 +8441,77 @@ SHORT QDAMDictSubStrLocal
 
    if ( !sRc )
    {
-     if ( pBT->bRecSizeVersion == BTREE_V3 )
+     if ( pBT->bRecSizeVersion != BTREE_V3 )
      {
-       PBTREEBUFFER_V3 pRecord = NULL;
-       SHORT sRetries = MAX_RETRY_COUNT;
-       ULONG ulKeyLen;
-
-       do
-       {
-          ulKeyLen = *pulLength;
-          /*******************************************************************/
-          /* For shared databases: discard all in-memory pages if database   */
-          /* has been changed since last access                              */
-          /*******************************************************************/
-          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-          {
-            sRc = QDAMCheckForUpdates( pBTIda );
-          } /* endif */
-
-          if ( !sRc )
-          {
-             UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-             /* Locate the Leaf node that contains the appropriate key */
-             sRc = QDAMFindRecord_V3( pBTIda, pKey, &pRecord );
-          } /* endif */
-          if ( !sRc )
-          {
-             sRc = QDAMLocSubstr_V3( pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
-
-             /*****************************************************************/
-             /* if substring not found try it again in the next record, we may*/
-             /* have missed a matching substring due to the construction of   */
-             /* the dictionary.                                               */
-             /* This only could happen if the best matching key is the last   */
-             /* one in the current record.                                    */
-             /* Example: look for term starting with 'pig' and 'pigskin' is   */
-             /*          the first entry in a record.                         */
-             /*          Due to the construction 'pig' will be looked for in  */
-             /*          the previous record, since it is '<' than 'pigskin'  */
-             /*****************************************************************/
-             if ( (sRc == BTREE_NOT_FOUND) &&
-                  ((SHORT) OCCUPIED( pRecord ) == pBTIda->sCurrentIndex))
-             {
-               if ( NEXT(pRecord)  )
-               {
-                 sRc = QDAMReadRecord_V3( pBTIda, NEXT( pRecord ), &pRecord, FALSE  );
-                 if ( !sRc )
-                 {
-                    ulKeyLen = *pulLength;
-                    sRc = QDAMLocSubstr_V3(pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
-                 } /* endif */
-               } /* endif */
-             } /* endif */
-          } /* endif */
-
-         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
-         {
-           UtlWait( MAX_WAIT_TIME );
-           sRetries--;
-         } /* endif */
-       }
-       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-              (sRetries > 0));
-       *pulLength = ulKeyLen;
-     }
-     else
-     {
-       PBTREEBUFFER_V2 pRecord = NULL;
-       SHORT sRetries = MAX_RETRY_COUNT;
-       ULONG ulKeyLen;
-
-       do
-       {
-          ulKeyLen = *pulLength;
-          /*******************************************************************/
-          /* For shared databases: discard all in-memory pages if database   */
-          /* has been changed since last access                              */
-          /*******************************************************************/
-          if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-          {
-            sRc = QDAMCheckForUpdates( pBTIda );
-          } /* endif */
-
-          if ( !sRc )
-          {
-             UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-             /* Locate the Leaf node that contains the appropriate key */
-             sRc = QDAMFindRecord_V2( pBTIda, pKey, &pRecord );
-          } /* endif */
-          if ( !sRc )
-          {
-            LogMessage(ERROR,"TEMPORARY COMMENTED QDAMLocSubstr_V2");
-             //sRc = QDAMLocSubstr_V2( pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
-
-             /*****************************************************************/
-             /* if substring not found try it again in the next record, we may*/
-             /* have missed a matching substring due to the construction of   */
-             /* the dictionary.                                               */
-             /* This only could happen if the best matching key is the last   */
-             /* one in the current record.                                    */
-             /* Example: look for term starting with 'pig' and 'pigskin' is   */
-             /*          the first entry in a record.                         */
-             /*          Due to the construction 'pig' will be looked for in  */
-             /*          the previous record, since it is '<' than 'pigskin'  */
-             /*****************************************************************/
-             if ( (sRc == BTREE_NOT_FOUND) &&
-                  ((SHORT) OCCUPIED( pRecord ) == pBTIda->sCurrentIndex))
-             {
-               if ( NEXT(pRecord)  )
-               {
-                 sRc = QDAMReadRecord_V2( pBTIda, NEXT( pRecord ), &pRecord, FALSE  );
-                 if ( !sRc )
-                 {
-                    ulKeyLen = *pulLength;
-                    LogMessage(ERROR,"TEMPORARY COMMENTED QDAMLocSubstr_V2");
-                    //sRc = QDAMLocSubstr_V2(pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
-                 } /* endif */
-               } /* endif */
-             } /* endif */
-          } /* endif */
-
-         if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
-         {
-           UtlWait( MAX_WAIT_TIME );
-           sRetries--;
-         } /* endif */
-       }
-       while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-              (sRetries > 0));
-       *pulLength = ulKeyLen;
+        LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+        throw;
+        return BTREE_INVALID; 
      } /* endif */
+     
+     
+      PBTREEBUFFER_V3 pRecord = NULL;
+      SHORT sRetries = MAX_RETRY_COUNT;
+      ULONG ulKeyLen;
+
+      do
+      {
+        ulKeyLen = *pulLength;
+        /*******************************************************************/
+        /* For shared databases: discard all in-memory pages if database   */
+        /* has been changed since last access                              */
+        /*******************************************************************/
+        if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
+        {
+          sRc = QDAMCheckForUpdates( pBTIda );
+        } /* endif */
+
+        if ( !sRc )
+        {
+            UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
+            /* Locate the Leaf node that contains the appropriate key */
+            sRc = QDAMFindRecord_V3( pBTIda, pKey, &pRecord );
+        } /* endif */
+        if ( !sRc )
+        {
+            sRc = QDAMLocSubstr_V3( pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+
+            /*****************************************************************/
+            /* if substring not found try it again in the next record, we may*/
+            /* have missed a matching substring due to the construction of   */
+            /* the dictionary.                                               */
+            /* This only could happen if the best matching key is the last   */
+            /* one in the current record.                                    */
+            /* Example: look for term starting with 'pig' and 'pigskin' is   */
+            /*          the first entry in a record.                         */
+            /*          Due to the construction 'pig' will be looked for in  */
+            /*          the previous record, since it is '<' than 'pigskin'  */
+            /*****************************************************************/
+            if ( (sRc == BTREE_NOT_FOUND) &&
+                ((SHORT) OCCUPIED( pRecord ) == pBTIda->sCurrentIndex))
+            {
+              if ( NEXT(pRecord)  )
+              {
+                sRc = QDAMReadRecord_V3( pBTIda, NEXT( pRecord ), &pRecord, FALSE  );
+                if ( !sRc )
+                {
+                  ulKeyLen = *pulLength;
+                  sRc = QDAMLocSubstr_V3(pBTIda, pRecord, pKey, pchBuffer, &ulKeyLen, pchUserData, pulUserLen );
+                } /* endif */
+              } /* endif */
+            } /* endif */
+        } /* endif */
+
+        if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
+        {
+          UtlWait( MAX_WAIT_TIME );
+          sRetries--;
+        } /* endif */
+      }
+      while( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+            (sRetries > 0));
+      *pulLength = ulKeyLen;
+    
+     
    } /* endif */
 
 
@@ -9934,118 +8924,62 @@ SHORT QDAMDictNextLocal
              sRc = QDAMCheckForUpdates( pBTIda );
            } /* endif */
 
-           if ( pBT->bRecSizeVersion == BTREE_V3 )
-           {
-              if ( !sRc )
-              {
-                if ( !pBTIda->usCurrentRecord )
-                {
-                  /****************************************************************/
-                  /* try a substring call first to check if an invalidate might   */
-                  /* be the reason                                                */
-                  /****************************************************************/
-                  if ( pBTIda->chHeadTerm[0] && (pBTIda->sCurrentIndex == RESET_VALUE) )
-                  {
-                    ULONG ulKeyLen = *pulKeyLen;
-                    ULONG ulUserLen = *pulUserLen;
-                    sRc = QDAMDictSubStrLocal( pBTIda, pBTIda->chHeadTerm,
-                                                (PBYTE) pKeyData, &ulKeyLen,
-                                                pUserData, &ulUserLen );
-                  } /* endif */
-                } /* endif */
-                while ( !sRc )
-                {
-                  sRc = QDAMNext_V3( pBTIda, &recBTree,&recKey, &recData);
-                  if ( !sRc )
-                  {
-                      ULONG ulLocalKeyLen = ulKeyLen;
-                      sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulLocalKeyLen );
-                      if ( ulLocalKeyLen )
-                      {
-                        if ( (UTF16strcmp( pKeyData, szLOCKEDTERMSKEYW ) != 0 ) ||
-                              ( strcmp((PSZ)pKeyData, szLOCKEDTERMSKEY) != 0 ) )
-                        {
-                          /********************************************************/
-                          /* found a valid record ...                             */
-                          /********************************************************/
-                          ulKeyLen = ulLocalKeyLen;
-                          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKeyData, ulKeyLen );
-                          break;                   // exit while loop
-                        } /* endif */
-                      }
-                      else
-                      {
-                          break;                   // exit while loop
-                      } /* endif */
-                  } /* endif */
-                } /* endif */
-              } /* endif */
-
-
-              if ( !sRc )
-              {
-                  sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
-              } /* endif */
+           if ( pBT->bRecSizeVersion != BTREE_V3 )
+           {             
+             LogMessage2(FATAL,__func__,":: BTREE_V2 is not supported!");
+             throw;
            }
-           else
-           {
-              if ( !sRc )
+            if ( !sRc )
+            {
+              if ( !pBTIda->usCurrentRecord )
               {
-                if ( !pBTIda->usCurrentRecord )
+                /****************************************************************/
+                /* try a substring call first to check if an invalidate might   */
+                /* be the reason                                                */
+                /****************************************************************/
+                if ( pBTIda->chHeadTerm[0] && (pBTIda->sCurrentIndex == RESET_VALUE) )
                 {
-                  /****************************************************************/
-                  /* try a substring call first to check if an invalidate might   */
-                  /* be the reason                                                */
-                  /****************************************************************/
-                  if ( pBTIda->chHeadTerm[0] && (pBTIda->sCurrentIndex == RESET_VALUE) )
-                  {
-                    ULONG ulKeyLen = *pulKeyLen;
-                    ULONG ulUserLen = *pulUserLen;
-                    LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMDictSubStrLocal");
-                    //sRc = QDAMDictSubStrLocal( pBTIda, pBTIda->chHeadTerm,
-                    //                            (PBYTE) pKeyData, &ulKeyLen,
-                    //                            pUserData, &ulUserLen );
-                  } /* endif */
+                  ULONG ulKeyLen = *pulKeyLen;
+                  ULONG ulUserLen = *pulUserLen;
+                  sRc = QDAMDictSubStrLocal( pBTIda, pBTIda->chHeadTerm,
+                                              (PBYTE) pKeyData, &ulKeyLen,
+                                              pUserData, &ulUserLen );
                 } /* endif */
-                while ( !sRc )
+              } /* endif */
+              while ( !sRc )
+              {
+                sRc = QDAMNext_V3( pBTIda, &recBTree,&recKey, &recData);
+                if ( !sRc )
                 {
-                  LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMNext_V2");
-                  //sRc = QDAMNext_V2( pBTIda, &recBTree,&recKey, &recData);
-                  if ( !sRc )
-                  {
-                      ULONG ulLocalKeyLen = ulKeyLen;
-                      LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMGetszKeyParam_V2");
-                      //sRc = QDAMGetszKeyParam_V2( pBTIda, recKey, pKeyData, &ulLocalKeyLen );
-                      if ( ulLocalKeyLen )
+                    ULONG ulLocalKeyLen = ulKeyLen;
+                    sRc = QDAMGetszKeyParam_V3( pBTIda, recKey, pKeyData, &ulLocalKeyLen );
+                    if ( ulLocalKeyLen )
+                    {
+                      if ( (UTF16strcmp( pKeyData, szLOCKEDTERMSKEYW ) != 0 ) ||
+                            ( strcmp((PSZ)pKeyData, szLOCKEDTERMSKEY) != 0 ) )
                       {
-                        if ( (UTF16strcmp( pKeyData, szLOCKEDTERMSKEYW ) != 0 ) ||
-                              ( strcmp((PSZ)pKeyData, szLOCKEDTERMSKEY) != 0 ) )
-                        {
-                          /********************************************************/
-                          /* found a valid record ...                             */
-                          /********************************************************/
-                          ulKeyLen = ulLocalKeyLen;
-                          memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKeyData, ulKeyLen );
-                          break;                   // exit while loop
-                        } /* endif */
-                      }
-                      else
-                      {
-                          break;                   // exit while loop
+                        /********************************************************/
+                        /* found a valid record ...                             */
+                        /********************************************************/
+                        ulKeyLen = ulLocalKeyLen;
+                        memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKeyData, ulKeyLen );
+                        break;                   // exit while loop
                       } /* endif */
-                  } /* endif */
+                    }
+                    else
+                    {
+                        break;                   // exit while loop
+                    } /* endif */
                 } /* endif */
               } /* endif */
+            } /* endif */
 
 
-              if ( !sRc )
-              {
-                LogMessage(ERROR, "TEMPORARY_COMMENTED QDAMGetszData_V2");
-                  //sRc =  QDAMGetszData_V2( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
-              } /* endif */
-           } /* endif */
-
-
+            if ( !sRc )
+            {
+                sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
+            } /* endif */
+           
          if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )
          {
            UtlWait( MAX_WAIT_TIME );
@@ -10237,7 +9171,7 @@ SHORT QDAMDictFirstLocal
    } /* endif */
    
    if ( pBT->bRecSizeVersion != BTREE_V3 ){
-     LogMessage(FATAL,"QDAMDictFirstLocal:: QDAMFirst_V2 is not supported");
+     LogMessage2(FATAL,__func__, ":: QDAMFirst_V2 is not supported");
      sRc = BTREE_INVALID;
    }
 
@@ -10274,8 +9208,7 @@ SHORT QDAMDictFirstLocal
 
            if ( !sRc )
            {
-              sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );
-             
+              sRc =  QDAMGetszData_V3( pBTIda, recData, pUserData, pulUserLen, DATA_NODE );             
            } /* endif */
 
          if ( (sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED) )

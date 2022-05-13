@@ -1235,9 +1235,9 @@ int OtmMemoryServiceWorker::search
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
-    LogMessage(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMANSI");
+    LogMessage(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF");
     // use default markup table if none given
-    strcpy( pData->szMarkup, "OTMANSI" );
+    strcpy( pData->szMarkup, "OTMXUXLF" );
   } /* end */
   if ( pData->iNumOfProposals > 20 )
   {
@@ -1645,10 +1645,11 @@ int OtmMemoryServiceWorker::updateEntry
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
   { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szTarget ), sizeof( pData->szTarget ) / sizeof( pData->szTarget[0] ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },  
+
   { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( pData->lSegmentNum ), 0 },
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDocName ), sizeof( pData->szDocName ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },
   { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szType ), sizeof( pData->szType ) },
   { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szAuthor ), sizeof( pData->szAuthor ) },
   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szMarkup ), sizeof( pData->szMarkup ) },
@@ -1703,11 +1704,12 @@ int OtmMemoryServiceWorker::updateEntry
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    wchar_t errMsg[] = L"Error: Missing markup table";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
-    delete pData;
-    return( restbed::BAD_REQUEST );
+    strcpy( pData->szMarkup, "OTMXUXLF");
+    //iRC = ERROR_INPUT_PARMS_INVALID;
+    //wchar_t errMsg[] = L"Error: Missing markup table";
+    //buildErrorReturn( iRC, errMsg, strOutputParms );
+    //delete pData;
+    //return( restbed::BAD_REQUEST );
   } /* end */
 
   if(loggingThreshold >=0){
@@ -1735,20 +1737,8 @@ int OtmMemoryServiceWorker::updateEntry
   EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );
   EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pProp->szTargetLanguage );
   pProp->eType = this->getMemProposalType( pData->szType );
-  strcpy( pProp->szTargetAuthor, pData->szAuthor );
-  if ( pData->szMarkup[0] == 0 )
-  {
-    // use default
-    strcpy( pProp->szMarkup, "OTMANSI" );
-  }
-  else if ( strcasecmp( pData->szMarkup, "translate5" ) == 0 )
-  {
-    strcpy( pProp->szMarkup, "OTMXUXLF" );
-  }
-  else
-  {
-    strcpy( pProp->szMarkup, pData->szMarkup );
-  }
+  strcpy( pProp->szTargetAuthor, pData->szAuthor ); 
+  strcpy( pProp->szMarkup, pData->szMarkup );  
   wcscpy( pProp->szContext, pData->szContext );
   LONG lTime = 0;
   if ( pData->szDateTime[0] != 0 )
@@ -1905,12 +1895,6 @@ int OtmMemoryServiceWorker::deleteEntry
   if ( pData->szMarkup[0] == 0 || strcasecmp( pData->szMarkup, "translate5" ) == 0)
   {
     strcpy(pData->szMarkup, "OTMXUXLF");
-    //strcpy( pProp->szMarkup, "OTMANSI" );
-    //iRC = ERROR_INPUT_PARMS_INVALID;
-    //wchar_t errMsg[] = L"Error: Missing markup table";
-    //buildErrorReturn( iRC, errMsg, strOutputParms );
-    //delete pData;
-    //return( restbed::BAD_REQUEST );
   } /* end */
 
   if(loggingThreshold >=0){
@@ -2055,6 +2039,8 @@ int OtmMemoryServiceWorker::deleteMem
 
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( restbed::INTERNAL_SERVER_ERROR );
+  }else{
+    strOutputParms = "{\"" + strMemory + "\": \"deleted\" }";
   }
 
   LogMessage2(INFO,"OtmMemoryServiceWorker::deleteMem::success, memName = ", strMemory.c_str());

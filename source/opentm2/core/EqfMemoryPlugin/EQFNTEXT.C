@@ -345,8 +345,7 @@ USHORT TmtXExtract
 
           if ( usRc == NO_ERROR )
           {
-            usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );
-            
+            usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );            
           }
           /****************************************************************/
           /* setup new starting point (do this even in the case we are    */
