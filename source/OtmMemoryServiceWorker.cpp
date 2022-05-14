@@ -255,6 +255,20 @@ int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
   return( -1 );
 }
 
+/*! \brief Checks if there is opened memory in import process
+  \returns index if import process for any memory is going on, -1 if no
+  */
+int OtmMemoryServiceWorker::GetMemImportInProcess(){
+  for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
+  {
+    if(vMemoryList[i].eImportStatus == IMPORT_RUNNING_STATUS)
+      LogMessage3(INFO, __func__,":: memory in import process, name = ", vMemoryList[i].szName );
+      return i;
+  } /* endfor */
+  return -1;
+
+}
+
 /*! \brief find a free slot in our list of active memories, add a new entry if none found
   \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
 */

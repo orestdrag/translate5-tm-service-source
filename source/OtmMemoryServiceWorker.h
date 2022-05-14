@@ -111,6 +111,10 @@ public:
   (
   );
 
+  /*! \brief Checks if there is opened memory in import process
+  \returns index if import process for any memory is going on, -1 if no
+  */
+  int GetMemImportInProcess();
 
   /*! \brief Saves all open and modified memories
   \returns http return code0 if successful or an error code in case of failures

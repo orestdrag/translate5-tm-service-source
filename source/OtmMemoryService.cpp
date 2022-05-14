@@ -189,7 +189,10 @@ void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session 
   session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
 }
 
-
+bool IsMemImportInProcess(){
+  int memInImportProcess = pMemService->GetMemImportInProcess();
+  return memInImportProcess >= 0;
+}
 
 void shutdownService_method_handler( const shared_ptr< Session > session )
 {
@@ -209,7 +212,12 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
     //session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
   }
-  sleep(1);
+
+  //wait till all import processes would end
+  while(IsMemImportInProcess()){
+    sleep(1000);
+  }
+  
   StopOtmMemoryService();
 }
 
@@ -540,7 +548,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     // handler for resource URL w memory name/import
     auto tagReplacement = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/tagreplacement", szServiceName );
+    snprintf( szValue, 150, "/%s_service/tagreplacement", szServiceName );
     tagReplacement->set_path( szValue );
     tagReplacement->set_method_handler( "POST", postTagReplacement_method_handler );
   
@@ -588,13 +596,13 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     getStatus->set_path( szValue );
     getStatus->set_method_handler( "GET", getStatus_method_handler );
 
-    // handler for resource URL w memory name/status
+    // handler for resource URL service/shutdown
     auto shutdownService = make_shared< Resource >();
     snprintf( szValue, 150, "/%s_service/shutdown", szServiceName );
     shutdownService->set_path( szValue );
     shutdownService->set_method_handler( "GET", shutdownService_method_handler );
 
-    // handler for resource URL w memory name/status
+    // handler for resource service/save all tms
     auto saveTms = make_shared< Resource >();
     snprintf( szValue, 150, "/%s_service/savetms", szServiceName );
     saveTms->set_path( szValue );
