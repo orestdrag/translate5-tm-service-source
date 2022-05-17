@@ -7443,7 +7443,7 @@ SHORT  QDAMDictOpenLocal
         pBT->fWriteHeaderPending = TRUE;         // postpone write until change
      } /* endif */
 
-
+    #ifdef TEMPORARY_COMMENTED
      // get the corruption flag but still go ahead - nec. for Organize
      // ignore the corruption flag for shared resources (here we allow
      // open of our database more than once)
@@ -7466,7 +7466,7 @@ SHORT  QDAMDictOpenLocal
           } /* endif */
         } /* endif */
      } /* endif */
-
+     #endif //TEMPORARY_COMMENTED
      ASDLOG();
    }
    else
@@ -7496,6 +7496,7 @@ SHORT  QDAMDictOpenLocal
 
   if ( sRc )
   {
+    LogMessage3(ERROR, __func__,":: sRc", toStr(sRc));
     ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 

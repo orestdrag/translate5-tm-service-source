@@ -198,9 +198,10 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
 {
   const auto request = session->get_request();
   int iRC;
+  string strResponseBody;
+  
   LogMessage(TRANSACTION, "called shutdownService_method_handler::");
   {
-    string strResponseBody;
     if( request->has_query_parameter("dontsave") ){
       strResponseBody = "{\n    'responce': 'shuting down service without saving tms'\n}";
     }else{
@@ -210,15 +211,18 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
 
     //int iRC = pMemService->shutdownService( strResponseBody );
     //session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-    session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
+    //session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
   }
 
   //wait till all import processes would end
-  while(IsMemImportInProcess()){
+  int i = 0;
+  while(IsMemImportInProcess() && i<600){
     sleep(1000);
+    i++;
   }
   
   StopOtmMemoryService();
+  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
 }
 
 // replace plus signs in string with blanks
@@ -629,7 +633,6 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 
     LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
   }
-
   return( TRUE );
 }
 

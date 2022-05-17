@@ -262,11 +262,12 @@ int OtmMemoryServiceWorker::GetMemImportInProcess(){
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
   {
     if(vMemoryList[i].eImportStatus == IMPORT_RUNNING_STATUS)
+    {
       LogMessage3(INFO, __func__,":: memory in import process, name = ", vMemoryList[i].szName );
       return i;
+    }
   } /* endfor */
   return -1;
-
 }
 
 /*! \brief find a free slot in our list of active memories, add a new entry if none found
@@ -1744,8 +1745,13 @@ int OtmMemoryServiceWorker::updateEntry
   // prepare the proposal data
   PMEMPROPOSAL pProp = new ( MEMPROPOSAL );
   memset( pProp, 0, sizeof( *pProp ) );
-  wcscpy( pProp->szSource, pData->szSource );
-  wcscpy( pProp->szTarget, pData->szTarget );
+  int rc = 0;
+  auto replacedInput = replaceString( pData->szSource , pData->szTarget, L"", &rc );
+  //wcscpy( pProp->szSource, pData->szSource );
+  //wcscpy( pProp->szTarget, pData->szTarget );
+  wcscpy( pProp->szSource, replacedInput[0].c_str());
+  wcscpy( pProp->szTarget, replacedInput[1].c_str());
+
   pProp->lSegmentNum = pData->lSegmentNum;
   strcpy( pProp->szDocName, pData->szDocName );
   EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );

@@ -2590,10 +2590,10 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         PTMXTUV pSourceTuv = NULL;
 
         // change markup table to XLIFF when segment data contains TMX inline tags
-        if ( this->fWithTMXTags )
-        {
+        //if ( this->fWithTMXTags )
+        //{
           strcpy( CurElement.szTMMarkup, "OTMXUXLF" );
-        } /* endif */
+        //} /* endif */
         // find <tuv> containing the source data
         iCurrent = 0;
         PTMXTUV pCurrentTuv = pTuvArray;
