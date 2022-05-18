@@ -2047,6 +2047,7 @@ int OtmMemoryServiceWorker::deleteMem
   iRC = EqfDeleteMem( this->hSession, (PSZ)strMemory.c_str() );
   if ( iRC == ERROR_MEMORY_NOTFOUND )
   {
+    strOutputParms = "{\"" + strMemory + "\": \"not found\" }";
     return( iRC = restbed::NOT_FOUND );
   }
   else if ( iRC != 0 )
