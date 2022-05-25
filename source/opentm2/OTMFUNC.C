@@ -1168,11 +1168,9 @@ USHORT EqfGetOpenTM2Lang
   char*         pszOpenTM2Lang
 )
 {
-  USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
-
                                        // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
+  USHORT usRC = FctValidateSession( hSession, &pData );
 
   if ( pData )
   {

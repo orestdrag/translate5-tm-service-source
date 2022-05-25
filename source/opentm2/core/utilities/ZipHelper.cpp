@@ -4,7 +4,7 @@
 
 int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
     if(pZip){
-        LogMessage3(ERROR,__func__,"::adding to zip file ", fName);
+        LogMessage3(INFO,__func__,"::adding to zip file ", fName);
     }else{
         LogMessage3(ERROR,__func__,":: can't add to zip file ", fName);
     }
@@ -19,7 +19,7 @@ int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
 ZIP*  ZipHelper::ZipOpen   ( const char* fName , char mode){
     struct zip_t * zip = zip_open(fName, ZIP_DEFAULT_COMPRESSION_LEVEL, mode); 
     if(zip){
-        LogMessage3(ERROR,__func__,":: Opened zip file ", fName);
+        LogMessage3(INFO,__func__,":: Opened zip file ", fName);
     }else{
         LogMessage3(ERROR,__func__,":: can't open zip file ", fName);
     }
@@ -28,7 +28,7 @@ ZIP*  ZipHelper::ZipOpen   ( const char* fName , char mode){
 
 int  ZipHelper::ZipClose  ( ZIP* pZip ){
     if(pZip){
-        LogMessage2(ERROR,__func__,"::closing zip file ");
+        LogMessage2(INFO,__func__,"::closing zip file ");
     }else{
         LogMessage2(ERROR,__func__,":: can't close zip file , ptr = nullptr");
     }

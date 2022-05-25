@@ -453,7 +453,7 @@ std::vector<std::string> FilesystemHelper::GetFilesList(std::string&& directory)
         return {};
     }
 
-    LogMessage5(ERROR,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
+    LogMessage5(INFO,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
     return files;
 }
 

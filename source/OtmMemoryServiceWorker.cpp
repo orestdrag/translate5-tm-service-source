@@ -1795,18 +1795,23 @@ int OtmMemoryServiceWorker::updateEntry
   std::string str_src = EncodingHelper::convertToUTF8(pData->szSource );
   std::string str_trg = EncodingHelper::convertToUTF8(pData->szTarget );
 
-  pJsonFactory->startJSON( strOutputParms );
+  std::wstring strOutputParmsW;
+  pJsonFactory->startJSONW( strOutputParmsW );
   pJsonFactory->addParmToJSON( strOutputParms, "sourceLang", pData->szIsoSourceLang );
   pJsonFactory->addParmToJSON( strOutputParms, "targetLang", pData->szIsoTargetLang );
-  pJsonFactory->addParmToJSON( strOutputParms, "source", str_src.c_str());
-  pJsonFactory->addParmToJSON( strOutputParms, "target", str_trg.c_str() );
+
+  pJsonFactory->addParmToJSONW( strOutputParmsW, L"source", pData->szSource );
+  pJsonFactory->addParmToJSONW( strOutputParmsW, L"target", pData->szTarget );
+  strOutputParms += "\n" + EncodingHelper::convertToUTF8(strOutputParmsW.c_str());
+
+  
   pJsonFactory->addParmToJSON( strOutputParms, "documentName", pData->szDocName );
   pJsonFactory->addParmToJSON( strOutputParms, "segmentNumber", pData->lSegmentNum );
   pJsonFactory->addParmToJSON( strOutputParms, "markupTable", pData->szMarkup );
   pJsonFactory->addParmToJSON( strOutputParms, "timeStamp", pData->szDateTime );
   pJsonFactory->addParmToJSON( strOutputParms, "author", pData->szAuthor );
   pJsonFactory->terminateJSON( strOutputParms );
-  //strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
+  strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
 
   iRC = restbed::OK;
   delete pProp;
@@ -2066,7 +2071,6 @@ int OtmMemoryServiceWorker::deleteMem
 
   LogMessage2(INFO,"OtmMemoryServiceWorker::deleteMem::success, memName = ", strMemory.c_str());
   iRC = restbed::OK;
-
 
   return( iRC );
 }
@@ -2382,7 +2386,6 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
   if(fSize == 0){
 
   }else{
-
     unsigned char* pData = new unsigned char[fSize];
     FilesystemHelper::ReadFile(file, pData, fSize, bytesRead);
     FilesystemHelper::CloseFile(file);

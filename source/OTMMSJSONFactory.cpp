@@ -278,7 +278,7 @@ JSONFactory* JSONFactory::getInstance()
       else if ( str[iPos] == (char)0xA0 )
       {
         // escape the non breaking space
-        if ( iStart < iPos ) newString.append( str.substr( iStart, iPos - iStart ) );
+        if ( iStart < iPos ) newString.append( str.substr( iStart, iPos - iStart - 1 ) );
         newString.append( "\\u00A0" );
         iStart = iPos + 1;
       }
