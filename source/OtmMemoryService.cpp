@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <map>
 #include <linux/limits.h>
+#include <xercesc/util/PlatformUtils.hpp>
 //#include <restbed>
 #include "OTMMSJSONFactory.h"
 #include "OtmMemoryService.h"
@@ -220,7 +221,7 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
     sleep(1000);
     i++;
   }
-  
+  xercesc::XMLPlatformUtils::Terminate();
   StopOtmMemoryService();
   session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" } } );
 }
@@ -346,10 +347,11 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
                                                 EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
                                                 EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
 
-    int index = 0;
+    
     wstr = L"{\n ";
-    for(auto& res: result){
-      wstr += L"\'" + std::to_wstring(++index) + L"\' :\'" + res + L"\',\n ";
+    std::wstring segmentLocations[] = {L"source", L"target", L"request"};
+    for(int index = 0; index < result.size(); index++){
+      wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
     }
     wstr += L"\n};";
     string strResponseBody =  EncodingHelper::convertToUTF8(wstr);

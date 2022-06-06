@@ -715,15 +715,6 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
   // parse the XML file containing the language properties
   if ( !usRC )
   {
-    try {
-        XMLPlatformUtils::Initialize();
-    }
-    catch (const XMLException& toCatch) {
-        toCatch;
-
-        //return( ERROR_NOT_READY );
-    }
-
     SAXParser* parser = new SAXParser();      // Create a SAX parser object
 
     // create an instance of our handler
@@ -755,7 +746,6 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
 
       usRC = ERROR_READ_FAULT;
     }
-    //XMLPlatformUtils::Terminate();
   } /* endif */
 
 

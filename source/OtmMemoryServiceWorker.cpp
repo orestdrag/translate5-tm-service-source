@@ -165,6 +165,15 @@ int OtmMemoryServiceWorker::verifyAPISession
 
   if ( this->iLastRC != 0 ) {
     LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , toStr( this->iLastRC ).c_str());
+  }else{
+      try {
+          xercesc::XMLPlatformUtils::Initialize();
+      }
+      catch (const xercesc::XMLException& toCatch) {
+          toCatch;
+          LogMessage2(ERROR,__func__, ":: cant init Xercesc");
+          return( ERROR_NOT_READY );
+      }
   }
   
   return( this->iLastRC );
@@ -1831,8 +1840,7 @@ int OtmMemoryServiceWorker::deleteEntry
   std::string strMemory,
   std::string strInputParms,
   std::string &strOutputParms
-)
-{
+){
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -2176,22 +2184,6 @@ int OtmMemoryServiceWorker::getMem
 }
 
 
-/*! \brief shut down the service
-\param strOutParms on return filled with the output parameters in JSON format
-\returns http return code
-*/
-//int OtmMemoryServiceWorker::shutdownService
-//(
-//  std::string &strOutputParms
-//)
-//{
-//  int iRC = verifyAPISession();  
-//  int httpRC = this->saveAllTmOnDisk( strOutputParms );
-//  
-//  return httpRC;
-//}
-
-
 /*! \brief get the status of a memory
 \param strMemory name of memory
 \param strOutParms on return filled with the output parameters in JSON format
@@ -2279,13 +2271,11 @@ MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
 std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
   std::vector<std::wstring> response;
   *rc = 0;
-  try {
-        xercesc::XMLPlatformUtils::Initialize();
+  try {        
         *rc = verifyAPISession();
         if(*rc == 0){
           response = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::move(src_data), std::move(trg_data), std::move(req_data) );
         }
-        xercesc::XMLPlatformUtils::Terminate();
     }
     //catch (const XMLException& toCatch) {
       catch(...){
@@ -2350,9 +2340,9 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
     int i = 0;
     sTempPath += "OTM";
     std::string checkName = sTempPath;
-    while(i<1000){
+    while( i < 1000 ){
       checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
-      auto files = FilesystemHelper::FindFiles(checkName);
+      auto files = FilesystemHelper::FindFiles( checkName );
       
       if(files.size() == 0){// we can use this name
         LogMessage2(INFO, "OtmMemoryServiceWorker::buildTempFileName::Temp file's Name found :", checkName.c_str());

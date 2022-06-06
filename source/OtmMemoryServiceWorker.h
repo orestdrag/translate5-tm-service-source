@@ -205,12 +205,6 @@ public:
   */
   void importDone( char *pszMemory, int iRC, char *pszError );
 
-  /*! \brief shut down the service
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  //int shutdownService( std::string &strOutputParms );
-
   std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc);
 
 private:

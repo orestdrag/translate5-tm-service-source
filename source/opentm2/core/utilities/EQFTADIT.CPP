@@ -219,20 +219,6 @@ BOOL DITALoadReplacementList
 
   if ( fOK )
   {
-    try 
-    {
-      XMLPlatformUtils::Initialize();
-    }
-    catch (const XMLException& toCatch) 
-    {
-      toCatch;
-
-      return( FALSE );
-    }
-  } /* endif */
-
-  if ( fOK )
-  {
     SAXParser *parser = new SAXParser();      // Create a SAX parser object
     ReplListParseHandler *handler = new ReplListParseHandler( pList );
 
