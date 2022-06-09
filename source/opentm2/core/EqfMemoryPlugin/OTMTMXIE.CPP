@@ -426,24 +426,6 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
     if(tag.tagLocation == REQUEST_SEGMENT){
       x = tag.generated_x;
       i = tag.generated_i;
-      //x = tag.original_x;
-      //i = tag.original_i;
-      /*// don't need that - > we don't need replacing bpt with bx in request 
-      switch(tag.generated_tagType){
-        case BPT_ELEMENT:
-          tagType = BX_ELEMENT;
-          break;
-        case EPT_ELEMENT:
-          tagType = EX_ELEMENT;
-          break;
-        case PH_ELEMENT:
-          tagType = X_ELEMENT;
-          break;
-        default:
-          tagType = tag.original_tagType;
-          LogMessage4(WARNING, __func__,"::replacing tag element is not valid(should be BPT,EPT or PH), tagElement = \'", TmxIDToName[tagType].c_str(),"\'");
-          break;
-      }//*/
     }else{   
       //find corresponding tag in requests tag
       //try to find matching tag
@@ -464,7 +446,6 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
                   && tagType != EX_ELEMENT;        
       }else{
         //tag not found -> maybe should try to find matching tag in the same or paralel segment? 
-
         //generate new id        
         LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");    
         x = ++ iHighestRequestsOriginalId;
@@ -498,16 +479,6 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
     if(tag.generated_i > 0){
       res += " i=\""+toStr(tag.generated_i)+"\"";
     }
-    
-    // at import all replacing tags could be only BPT
-    //fClosedTag = true;
-    /* tag.generated_tagType == BPT_ELEMENT || 
-                 tag.generated_tagType == EPT_ELEMENT ||
-                 tag.generated_tagType ==  PH_ELEMENT ||
-                 tag.generated_tagType ==  BX_ELEMENT ||
-                 tag.generated_tagType ==  EX_ELEMENT ||
-                 tag.generated_tagType ==   X_ELEMENT ;//*/
-
   }
 
   //tag that has slash at the end looks like this: <tag />
@@ -660,6 +631,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
       // mark binded tag as already used in target
       matchingSourceTag->fTagAlreadyUsedInTarget = true;
       tag.fTagAlreadyUsedInTarget = true;
+      
       tag.generated_x = matchingSourceTag->generated_x;
       tag.generated_i = matchingSourceTag->generated_i;
       //tag.generated_tagType = matchingSourceTag->generated_tagType;
@@ -689,18 +661,26 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
           break;
         }
         
-        auto matchingTargetTag = std::find_if(targetTagList.begin(), targetTagList.end(),
-                                  [&tag, matchingTagOriginalType](TagInfo& i) { return i.original_tagType == matchingTagOriginalType
-                                                          &&  i.fPairedTagClosed == false
+        ELEMENTID matchingTagGeneratedType = BPT_ELEMENT;
+        if(tag.generated_tagType == BPT_ELEMENT){
+          matchingTagGeneratedType = EPT_ELEMENT;
+        }
+
+
+        auto matchingTargetTag = std::find_if(targetTagList.rbegin(), targetTagList.rend(),
+                                  [&tag, matchingTagOriginalType, matchingTagGeneratedType](TagInfo& t) { 
+                                                                                return t.original_tagType == matchingTagOriginalType
+                                                                                    && t.generated_tagType == matchingTagGeneratedType
+                                                                                    && t.original_i == tag.original_i
+                                                                                    && t.fPairedTagClosed == false
                                                           ;
                                   });
       
         
-        if(matchingTargetTag != targetTagList.end()){
+        if(matchingTargetTag != targetTagList.rend()){
           // mark matching tag as which have completed pair
           matchingTargetTag->fPairedTagClosed = true;
-          matchingTargetTag->fTagAlreadyUsedInTarget = true;
-          tag.fTagAlreadyUsedInTarget = true;
+          tag.fPairedTagClosed = true;
           tag.generated_i =  matchingTargetTag->generated_i;
           tag.generated_x = -matchingTargetTag->generated_x;
         }else{        
@@ -1801,16 +1781,7 @@ BOOL FindName( PNAMETABLE pTable, const char *pszName, char *pszValue, int iBufS
 //
 TMXParseHandler::TMXParseHandler()
 {
-#ifdef _DEBUG
-  //hfLog = fopen( "C:\\SAXTEST.LOG", "a" );
-  //if ( hfLog )
-  //{
-  //  fprintf( hfLog, "**** SAXTEST ****\n" );
-  //} /* endif */
   hfLog = NULLHANDLE;
-#else
-  hfLog = NULLHANDLE;
-#endif 
 
   // allocate buffer areas
   pBuf = (PBUFFERAREAS)malloc( sizeof(BUFFERAREAS) );
