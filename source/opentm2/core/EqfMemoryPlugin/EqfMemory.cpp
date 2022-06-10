@@ -726,8 +726,8 @@ int EqfMemory::searchProposal
         auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetOut->stMatchTable[i].szSource, 
                                                                                      pTmGetOut->stMatchTable[i].szTarget, 
                                                                                      szRequestedString); 
-        wcscpy(pTmGetOut->stMatchTable[i].szSource, result[1].c_str());
-        wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[2].c_str());
+        wcscpy(pTmGetOut->stMatchTable[i].szSource, result[0].c_str());
+        wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[1].c_str());
 
         //correct match rate for exact match based on whitespace difference
         int wsDiff = 0;
