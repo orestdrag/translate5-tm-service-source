@@ -1,0 +1,553 @@
+{
+	"info": {
+		"_postman_id": "9182b955-fc2a-472f-81ca-a454d16d0e7f",
+		"name": "T5TMS-84- tag replacement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \"name\": \"t84\",    \"sourceLang\": \"bg-BG\"}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/t84/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"t84",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IMPORT",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tmxData\": \"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHRteCB2ZXJzaW9uPSIxLjQiPgogIDxoZWFkZXIgY3JlYXRpb250b29sPSJTREwgTGFuZ3VhZ2UgUGxhdGZvcm0iIGNyZWF0aW9udG9vbHZlcnNpb249IjguMCIgby10bWY9IlNETCBUTTggRm9ybWF0IiBkYXRhdHlwZT0ieG1sIiBzZWd0eXBlPSJzZW50ZW5jZSIgYWRtaW5sYW5nPSJlbi1HQiIgc3JjbGFuZz0iYmctQkciIGNyZWF0aW9uZGF0ZT0iMjAxNTA4MjFUMDkyNjE0WiIgY3JlYXRpb25pZD0idGVzdCIvPgogIDxib2R5PgoJPHR1IGNyZWF0aW9uZGF0ZT0iMjAxODAyMTZUMTU1MTA1WiIgY3JlYXRpb25pZD0iREVTS1RPUC1SNTlCT0tCXFBDMiIgY2hhbmdlZGF0ZT0iMjAxODAyMTZUMTU1MTA4WiIgY2hhbmdlaWQ9IkRFU0tUT1AtUjU5Qk9LQlxQQzIiIGxhc3R1c2FnZWRhdGU9IjIwMTgwMjE2VDE2MTMwNVoiIHVzYWdlY291bnQ9IjEiPgogICAgICA8dHV2IHhtbDpsYW5nPSJiZy1CRyI+CiAgICAgICAgPHNlZz5TZWxlY3QgdGhlIDxoaT5uZXQ8cGgvPndvcmsgPGc+QkxLMzYwPC9nPiB0YWcgPC9oaT48L3NlZz4KICAgICAgPC90dXY+CiAgICAgIDx0dXYgeG1sOmxhbmc9ImVuLUdCIj4KICAgICAgICA8c2VnPlNlbGVjdCB0aGUgPGhpPm5ldDxwaC8+d29yayA8Zz5CTEszNjA8L2c+IHRhZyAuPC9oaT48L3NlZz4KICAgICAgPC90dXY+CiAgICA8L3R1PgogIDwvYm9keT4KPC90bXg+Cg==\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/t84/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"t84",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EXPORT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4040/t5memory/t84",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"t84"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy_search_issue_84",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"sourceLang\":\"bg-BG\",\"targetLang\":\"en-GB\",\"source\":\"Select the <g>net<ph/>work <g>BLK360</g> tag </g>\" }"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/t84/fuzzysearch/?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"t84",
+						"fuzzysearch",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory/t84/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory",
+						"t84",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> in the <bpt x=\\\"3\\\" i=\\\"2\\\"/>Wi-Fi<ept x=\\\"4\\\" i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt x=\\\"5\\\" i=\\\"3\\\"/>WLAN<ept x=\\\"2\\\" i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"6\\\" i=\\\"4\\\"/>BLK360-35xxxxx<ept x=\\\"4\\\" i=\\\"2\\\"/> zum Aufbau einer Verbindung auswählen.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_fuzzy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> in the <bpt x=\\\"3\\\" i=\\\"2\\\"/>Wi-Fi<ept x=\\\"4\\\" i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt x=\\\"5\\\" i=\\\"3\\\"/>WLAN<ept x=\\\"2\\\" i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"6\\\" i=\\\"4\\\"/>BLK360-35xxxxx<ept x=\\\"4\\\" i=\\\"2\\\"/> zum Aufbau einer Verbindung auswählen.\",\n    \"req\":\"Select the network <g id=\\\"11\\\">BLK360-35xxxxx<\\/g> in the <g id=\\\"33\\\">Wi-Fi<\\/g> settings to be connected.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_g",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the <hi>net<ph/>work <g>BLK360</g> tag </hi>\",\n    \"trg\":\"Select the <hi>net<ph/>work <g>BLK360</g> tag </hi>\",\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_g Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the <hi>net<ph/>work <g>BLK360</hi> tag </g>\",\n    \"trg\":\"Select the <hi>net<ph/>work <g>BLK360</g> tag </hi>\",\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_bpt",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"src\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"3\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\",\n \"trg\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"3\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_bpt_NoAttr",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"src\" :\"Select the <bpt/>net<ph/>work <bpt/>BLK360<ept/> tag <ept/>\",\n \"trg\" :\"Select the <bpt/>net<ph/>work <bpt/>BLK360<ept/> tag <ept/>\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_bpt_not_in_order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"src\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"3\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\",\n \"trg\" :\"Select the <bpt x=\\\"3\\\" i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"1\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_import_bpt_not_in_order Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"src\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"3\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\",\n \"trg\" :\"Select the <ept i=\\\"1\\\"/>net<ph x=\\\"2\\\"/>work <bpt x=\\\"1\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <bpt x=\\\"3\\\" i=\\\"1\\\"/>\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_fuzzy_g",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n     \"src\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>network <bpt x=\\\"2\\\" i=\\\"2\\\"/>BLK360<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\",\n     \"trg\" :\"Select the <bpt x=\\\"1\\\" i=\\\"1\\\"/>network <bpt x=\\\"2\\\" i=\\\"2\\\"/>35xxxxx<ept i=\\\"2\\\"/> tag <ept i=\\\"1\\\"/>\",\n     \"req\" :\"Select the <g>network <g>35xxxxx</g> tag </g>\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_fuzzy_import_bpt",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"111\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept i=\\\"1\\\"/> in the <bpt x=\\\"333\\\" i=\\\"2\\\"/>Wi-Fi<ept i=\\\"2\\\"/> settings to<ph x=\\\"6\\\"/> be connected.\",\n    \"trg\":\"In den <bpt x=\\\"333\\\" i=\\\"1\\\"/>WLAN<ept i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"111\\\" i=\\\"2\\\"/>BLK360-35xxxxx<ept i=\\\"2\\\"/> zum Aufbau<ph x=\\\"6\\\"/> einer Verbindung auswählen.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_fuzzy_import_bpt Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "In den <bpt x=\\\"333\\\" i=\\\"1\\\"/>WLAN<ept i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"111\\\" i=\\\"2\\\"/>BLK360-35xxxxx<ept i=\\\"2\\\"/> zum Aufbau<ph x=\\\"6\\\"/> einer Verbindung auswählen."
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Issue_84",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> in the <bpt x=\\\"3\\\" i=\\\"2\\\"/>Wi-Fi<ept x=\\\"4\\\" i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt x=\\\"5\\\" i=\\\"3\\\"/>WLAN<ept x=\\\"2\\\" i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"6\\\" i=\\\"4\\\"/>BLK360-35xxxxx<ept x=\\\"4\\\" i=\\\"2\\\"/> zum Aufbau einer Verbindung auswählen.\",\n    \"req\":\"Select the network <g id=\\\"11\\\">BLK360-35xxxxx<\\/g> in the <g id=\\\"33\\\">Wi-Fi<\\/g> settings to be connected.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Issue_84 Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> in the <bpt x=\\\"3\\\" i=\\\"2\\\"/>Wi-Fi<ept x=\\\"4\\\" i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt x=\\\"3\\\" i=\\\"2\\\"/>WLAN<ept x=\\\"2\\\" i=\\\"2\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> zum Aufbau einer Verbindung auswählen.\",\n    \"req\":\"Select the network <g id=\\\"1\\\">BLK360-35xxxxx<\\/g> in the <g id=\\\"3\\\">Wi-Fi<\\/g> settings to be connected.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Issue_84 Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> in the <bpt x=\\\"3\\\" i=\\\"2\\\"/>Wi-Fi<ept x=\\\"4\\\" i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt x=\\\"3\\\" i=\\\"2\\\"/>WLAN<ept x=\\\"4\\\" i=\\\"2\\\"/>-Einstellungen das Netzwerk <bpt x=\\\"1\\\" i=\\\"1\\\"/>BLK360-35xxxxx<ept x=\\\"2\\\" i=\\\"1\\\"/> zum Aufbau einer Verbindung auswählen.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Issue_84_import",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt i=\\\"1\\\" type=\\\"6377\\\" x=\\\"48\\\"/>BLK360-35xxxxx<ept i=\\\"1\\\"/> in the <bpt i=\\\"2\\\" type=\\\"6378\\\" x=\\\"50\\\"/>Wi-Fi<ept i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt i=\\\"1\\\" type=\\\"6381\\\" x=\\\"50\\\"/>WLAN<ept i=\\\"1\\\"/>-Einstellungen das Netzwerk <bpt i=\\\"2\\\" type=\\\"6382\\\" x=\\\"48\\\"/>BLK360-35xxxxx<ept i=\\\"2\\\"/> zum Aufbau einer Verbindung auswählen.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TagReplacement_Issue_84_import_fixed",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"src\":\"Select the network <bpt i=\\\"1\\\" type=\\\"6377\\\" x=\\\"48\\\"/>BLK360-35xxxxx<ept i=\\\"1\\\"/> in the <bpt i=\\\"2\\\" type=\\\"6378\\\" x=\\\"50\\\"/>Wi-Fi<ept i=\\\"2\\\"/> settings to be connected.\",\n    \"trg\":\"In den <bpt i=\\\"2\\\" type=\\\"6381\\\" x=\\\"50\\\"/>WLAN<ept i=\\\"2\\\"/>-Einstellungen das Netzwerk <bpt i=\\\"1\\\" type=\\\"6382\\\" x=\\\"48\\\"/>BLK360-35xxxxx<ept i=\\\"1\\\"/> zum Aufbau einer Verbindung auswählen.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:4040/t5memory_service/tagreplacement",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"t5memory_service",
+						"tagreplacement"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

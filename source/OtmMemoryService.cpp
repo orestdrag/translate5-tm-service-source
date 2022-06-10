@@ -641,19 +641,15 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 BOOL StartOtmMemoryService(const signal_handler& sh)
 {
     ServiceThread(sh);
-
     return(TRUE);
 }
 
 void StopOtmMemoryService()
 {
   service.stop();
-
   pMemService->closeAll();
-
   //close log file
   LogStop();
-
 	return;
 }
 
