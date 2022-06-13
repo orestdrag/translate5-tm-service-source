@@ -217,7 +217,7 @@ int OtmMemoryServiceWorker::buildErrorReturn
   strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
   //LogMessage(ERROR, strUTF16);
-  LogMessage(ERROR, strErrorReturn.c_str());
+  LogMessage3(ERROR, strErrorReturn.c_str(), ", ErrorCode = ", toStr(iRC));
 	return(0);
 }
 
@@ -1805,13 +1805,13 @@ int OtmMemoryServiceWorker::updateEntry
   std::string str_trg = EncodingHelper::convertToUTF8(pData->szTarget );
 
   std::wstring strOutputParmsW;
-  pJsonFactory->startJSONW( strOutputParmsW );
+  pJsonFactory->startJSON( strOutputParms );
   pJsonFactory->addParmToJSON( strOutputParms, "sourceLang", pData->szIsoSourceLang );
   pJsonFactory->addParmToJSON( strOutputParms, "targetLang", pData->szIsoTargetLang );
 
   pJsonFactory->addParmToJSONW( strOutputParmsW, L"source", pData->szSource );
   pJsonFactory->addParmToJSONW( strOutputParmsW, L"target", pData->szTarget );
-  strOutputParms += "\n" + EncodingHelper::convertToUTF8(strOutputParmsW.c_str());
+  strOutputParms += ",\n" + EncodingHelper::convertToUTF8(strOutputParmsW.c_str());// +", ";
 
   
   pJsonFactory->addParmToJSON( strOutputParms, "documentName", pData->szDocName );
@@ -1820,7 +1820,7 @@ int OtmMemoryServiceWorker::updateEntry
   pJsonFactory->addParmToJSON( strOutputParms, "timeStamp", pData->szDateTime );
   pJsonFactory->addParmToJSON( strOutputParms, "author", pData->szAuthor );
   pJsonFactory->terminateJSON( strOutputParms );
-  strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
+  //strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
 
   iRC = restbed::OK;
   delete pProp;

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.2.21")
+SET(APP_VERSION  "0.2.22")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")

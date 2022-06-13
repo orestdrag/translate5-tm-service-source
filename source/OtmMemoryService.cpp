@@ -380,7 +380,7 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
     int iTransActIndex = AddToTransActLog( POST_FUZZYSEARCH_TRANSACTID, strTM.c_str() );
 
     string strInData = string( body.begin(), body.end() );
-    string strResponseBody;
+    string strResponseBody = "{}";
     LogMessage5(TRANSACTION,  "Memory name=", strTM.c_str() ,"\nInput:\n-----\n",strInData.c_str(),"\n----" );
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );

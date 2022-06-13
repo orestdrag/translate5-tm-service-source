@@ -1808,8 +1808,8 @@ USHORT NTMAddNameToTable
         /* insert name and id to table and sort table                */
         /*************************************************************/
         *pusID = (USHORT)pstTMTable->ulMaxEntries + 1;
-        strcpy( pstTMTableEntries[pstTMTable->ulMaxEntries].szName,
-                pszName );
+        strncpy( pstTMTableEntries[pstTMTable->ulMaxEntries].szName,
+                pszName, MAX_LANG_LENGTH-1 );
         pstTMTableEntries[pstTMTable->ulMaxEntries].usId = *pusID;
         pstTMTable->ulMaxEntries++;
         qsort( pstTMTableEntries,

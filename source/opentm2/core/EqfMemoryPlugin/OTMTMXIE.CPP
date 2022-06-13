@@ -496,6 +496,13 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
   return EncodingHelper::convertToUTF16(res.c_str());
 }
 
+bool is_number(std::u16string s)
+{
+    std::u16string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
 TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attributes, bool saveTagToTagList )
 {  
   TagInfo tag;  
@@ -520,17 +527,25 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
     if( attributes!=nullptr ){
       // id value could be stored in id attribute or x attribute
       if( char16_t* _id = (char16_t*) attributes->getValue("id") ){
-        tag.original_x = std::stoi( EncodingHelper::toChar(_id) );
-      }else if(char16_t* _id = (char16_t*) attributes->getValue("x")){
-        tag.original_x = std::stoi( EncodingHelper::toChar(_id) );
+        if( is_number(_id) ){
+          tag.original_x = std::stoi( EncodingHelper::toChar(_id) );
+        }
+      }else if(char16_t* _id = (char16_t*) attributes->getValue("x") ){
+        if( is_number(_id) ) {
+          tag.original_x = std::stoi( EncodingHelper::toChar(_id) );
+        }
       }      
        
       if(tag.generated_tagType == BPT_ELEMENT || tag.generated_tagType == EPT_ELEMENT ){ //add i attribute
         // id value could be stored in id attribute or x attribute
         if( char16_t* _i = (char16_t*) attributes->getValue("i") ){
-          tag.original_i = std::stoi(EncodingHelper::toChar(_i));       
+          if( is_number(_i) ) {
+            tag.original_i = std::stoi(EncodingHelper::toChar(_i));   
+          }    
         }else if(char16_t* _i = (char16_t*) attributes->getValue("rid")){
-          tag.original_i = std::stoi(EncodingHelper::toChar(_i));
+          if( is_number(_i) ) {
+            tag.original_i = std::stoi(EncodingHelper::toChar(_i));
+          }
         }  
       }
     }
