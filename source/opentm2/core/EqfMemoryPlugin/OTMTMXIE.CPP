@@ -524,7 +524,7 @@ void TagReplacer::LogTag(TagInfo & tag){
   logMsg += ">\n generated tag =  <" + TmxIDToName[tag.generated_tagType] + 
           " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
           "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
-          " tagLocation = " + TagLocIDToStr[tag.tagLocation];
+          "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
   LogMessage(INFO, logMsg.c_str());
   
   //LogMessage10(INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
@@ -2344,6 +2344,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             tagReplacer.activeSegment = SOURCE_SEGMENT;
 
             if(fOkLang){
+              LogMessage5(DEBUG, __func__, ":: _szLang = ", _szLang, "; pBuf->szMemSourceLang = ", pBuf->szMemSourceLang);
               if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) {
                 tagReplacer.activeSegment = TARGET_SEGMENT;
               }
