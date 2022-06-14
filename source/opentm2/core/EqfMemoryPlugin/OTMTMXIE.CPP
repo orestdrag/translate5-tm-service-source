@@ -195,13 +195,6 @@ extern "C"
 
 #define ERROR_BAD_FORMAT 136464
 
-enum ACTIVE_SEGMENT{
-  SOURCE_SEGMENT  = 0,
-  TARGET_SEGMENT  = 1, 
-  REQUEST_SEGMENT = 2 //from fuzzy search request
-};
-typedef ACTIVE_SEGMENT TagLocation;
-
 // IDs of TMX elelements
 typedef enum
 {
@@ -306,6 +299,21 @@ std::map<ELEMENTID, const std::string> TmxIDToName = {
      { UNKNOWN_ELEMENT,       ""          }
 };
 
+enum ACTIVE_SEGMENT{
+  SOURCE_SEGMENT  = 0,
+  TARGET_SEGMENT  = 1, 
+  REQUEST_SEGMENT = 2 //from fuzzy search request
+};
+
+
+typedef ACTIVE_SEGMENT TagLocation;
+
+std::map<ACTIVE_SEGMENT, const std::string> TagLocIDToStr = {
+     { SOURCE_SEGMENT,   "SOURCE_SEGMENT"  },
+     { TARGET_SEGMENT,   "TARGET_SEGMENT"  },
+     { REQUEST_SEGMENT,  "REQUEST_SEGMENT" }
+};
+
 char16_t* str16cpy(char16_t* destination, const char16_t* source)
 {
     char16_t* temp = destination;
@@ -392,6 +400,7 @@ class TagReplacer{
   TagInfo GenerateReplacingTag(ELEMENTID tagType, AttributeList* attributes, bool saveTagToTagList = true);
   std::wstring PrintTag(TagInfo& tag);
   void reset();
+  void static LogTag(TagInfo& tag);
 
   TagReplacer(){
     sourceTagList.reserve(50);
@@ -501,6 +510,28 @@ bool is_number(std::u16string s)
     std::u16string::const_iterator it = s.begin();
     while (it != s.end() && std::isdigit(*it)) ++it;
     return !s.empty() && it == s.end();
+}
+
+
+void TagReplacer::LogTag(TagInfo & tag){
+  bool isClosingTag = tag.generated_tagType == EPT_ELEMENT && tag.original_tagType != EPT_ELEMENT && tag.original_tagType != BX_ELEMENT;
+  std::string logMsg = "LogTag::\n original tag = <";
+  if(isClosingTag)
+    logMsg +="/";
+  logMsg += TmxIDToName[tag.original_tagType] + " x = \"" + toStr(tag.original_x) + "\" i = \"" + toStr(tag.original_i) +"\"";
+  if(!isClosingTag)
+    logMsg +="/";
+  logMsg += ">\n generated tag =  <" + TmxIDToName[tag.generated_tagType] + 
+          " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
+          "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
+          " tagLocation = " + TagLocIDToStr[tag.tagLocation];
+  LogMessage(INFO, logMsg.c_str());
+  
+  //LogMessage10(INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
+  //        "/>\n    tagHasClosingTag = \"", toStr(tag.fPairedTagClosed).c_str(), "\" tagWasAlreadyUsedInTarget = \"", toStr(tag.fTagAlreadyUsedInTarget).c_str());
+  //LogMessage9(INFO, " tagLocation = ", TagLocIDToStr[tag.tagLocation].c_str(),"\n generated tag =  <", TmxIDToName[tag.generated_tagType].c_str(), 
+  //        " x=\"", toStr(tag.generated_x).c_str(), "\" i = \"",toStr(tag.generated_i).c_str(), "\" />");
+
 }
 
 TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attributes, bool saveTagToTagList )
@@ -713,6 +744,10 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
     }
   }
 
+  if(CheckLogLevel(INFO)){
+    LogMessage(INFO, "Generated tag logging:");
+    LogTag(tag);
+  }
   return tag;
 }
 
@@ -1588,11 +1623,8 @@ USHORT CTMXExportImport::ImportNext
 USHORT CTMXExportImport::EndImport()
 {
   USHORT usRC = 0;
-
   delete m_parser;                     // Delete the parser itself
-
   delete m_handler;                    // delete the handler  
-
   // remove temporary file
   if ( this->m_TempFile[0] != EOS )
   {
@@ -1903,6 +1935,17 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
     res.push_back(trg_res);
   }
   
+  if(CheckLogLevel(INFO)){
+    LogMessage2(INFO, __func__, ":: source tags: ");
+    for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
+      TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
+    }
+    LogMessage2(INFO, __func__, ":: target tags: ");
+    for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
+      TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
+    }
+
+  }
   delete parser;
   delete handler;
 
@@ -1988,6 +2031,22 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   res.push_back(trg_res);
   res.push_back(req_res);
   
+  if(CheckLogLevel(INFO)){
+    LogMessage2(INFO, __func__, ":: request tags: ");
+    for(int i = 0; i < handler->tagReplacer.requestTagList.size(); i++){
+      TagReplacer::LogTag(handler->tagReplacer.requestTagList[i]);
+    }
+    LogMessage2(INFO, __func__, ":: source tags: ");
+    for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
+      TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
+    }
+    LogMessage2(INFO, __func__, ":: target tags: ");
+    for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
+      TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
+    }
+
+  }
+
   delete parser;
   delete handler;
 
@@ -2539,6 +2598,20 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       {
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
+        if(CheckLogLevel(INFO)){              
+          LogMessage2(INFO, __func__, "::parsed end of TU_ELEMENT::request tags: ");
+          for(int i = 0; i < tagReplacer.requestTagList.size(); i++){
+            TagReplacer::LogTag(tagReplacer.requestTagList[i]);
+          }
+          LogMessage2(INFO, __func__, "::parsed end of TU_ELEMENT:::: source tags: ");
+          for(int i = 0; i < tagReplacer.sourceTagList.size(); i++){
+            TagReplacer::LogTag(tagReplacer.sourceTagList[i]);
+          }
+          LogMessage2(INFO, __func__, "::parsed end of TU_ELEMENT:::: target tags: ");
+          for(int i = 0; i < tagReplacer.targetTagList.size(); i++){
+            TagReplacer::LogTag(tagReplacer.targetTagList[i]);
+          }
+        }
 
         // change markup table to XLIFF when segment data contains TMX inline tags
         //if ( this->fWithTMXTags )
@@ -2835,8 +2908,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           LogMessage10(INFO,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
               "\'  ->  fSkipped inclosed tag pair = ", toStr(inclosingTagsSkipped),";\n Generated tags first = \'",
               EncodingHelper::convertToUTF8(begPairTag).c_str(), "\'\nlast tag =\'", EncodingHelper::convertToUTF8(endPairTag.c_str()), "\'\n");     
-        } 
+        }
       }
+      
       break;  
     }
 
