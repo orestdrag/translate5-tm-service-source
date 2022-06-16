@@ -344,8 +344,9 @@ USHORT TokenizeW
         wchar_t chTemp2 = pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength];
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = 0;
         str = EncodingHelper::convertToUTF8(pszStartOfSegment + vTermList[i].iStartOffset);
-        LogMessage7(DEVELOP, __func__, "::Term ",toStr(i).c_str()," Start=",toStr(vTermList[i].iStartOffset).c_str(),", Length=",toStr(vTermList[i].iLength).c_str());
-        LogMessage5(DEVELOP, __func__,":: Term=\"",str.c_str(),"\", Flags=",  strFlags.c_str() );
+        std::string msg = std::string(__func__) + "::Term " +toStr(i) + " Start=" + toStr(vTermList[i].iStartOffset) + ", Length=" + toStr(vTermList[i].iLength)
+          + " Term=\"" + str + "\", Flags=" + strFlags;
+        LogMessage(DEVELOP, msg.c_str());
       
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
       }
@@ -377,7 +378,7 @@ USHORT TokenizeW
         }
         else
         {
-          USHORT usPos = (USHORT)(vSentenceList[j].iStartOffset + iStartOffs + i);
+          USHORT usPos = (USHORT)(vSentenceList[j].iStartOffset + iStartOffs);
           usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList, pulTermListSize, &ulTermBufUsed, 
                                             pszStartOfSegment + iStartOffs, 
                                             (USHORT)iLen, usPos, vTermList[i].iTermType, usListType );
@@ -722,7 +723,7 @@ USHORT MorphTokenizeW
       usRC = TokenizeW( pLCB->pvLangCB, pszInData, &ulBufferSize, ppTermList, usListType );
 
 #ifdef LOG_TOKENIZE
-      if ( usRC == MORPH_OK )
+      if ( usRC == MORPH_OK && CheckLogLevel(DEVELOP) )
       {
         if ( usListType == MORPH_FLAG_OFFSLIST )
         {
@@ -742,12 +743,12 @@ USHORT MorphTokenizeW
         {
           PSHORT psData = (PSHORT)*ppTermList;
           SHORT sStart, sLen;
-          do
-          {
-            sLen   = *psData++;
-            sStart = *psData++;
-            LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
-          } while ( (sStart != 0) || (sLen != 0) );
+            do
+            {
+              sLen   = *psData++;
+              sStart = *psData++;
+              LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+            } while ( (sStart != 0) || (sLen != 0) );
         } /* endif */
       }
       else
@@ -778,7 +779,6 @@ USHORT MorphTokenizeW
     MessageBox( HWND_DESKTOP, szMsg, "Info", MB_OK );
   }
 #endif
-
 
   return( usRC );
 
@@ -1302,11 +1302,10 @@ USHORT MorphAddTermToList2W
     {
       case MORPH_OFFSLIST :
         *((PUSHORT)(pList + ulByteUsedInList)) = usLength;
-        *pulUsed += 1;//sizeof(USHORT)/ sizeof(CHAR_W);
         ulByteUsedInList += sizeof(USHORT);
 
         *((PUSHORT)(pList + ulByteUsedInList)) = usOffs;
-        //*pulUsed += 1;//sizeof(USHORT)/sizeof(CHAR_W);
+        *pulUsed += 1;
         ulByteUsedInList += sizeof(USHORT);
         break;
 

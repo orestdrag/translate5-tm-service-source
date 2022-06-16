@@ -1925,9 +1925,6 @@ BOOL DITASpecialProcessingRequired
 {
   BOOL fDitaProcessing = ( (stricmp( pszMemMarkup , "IBMIDDOC" ) == 0) &&
                            (stricmp( pszDocMarkup, "IBMDITA" ) == 0) );
-
-  mode;                                          // currently not used
-
   return( fDitaProcessing );
 } /* end of DITASpecialProcessingRequired */
 
@@ -3015,7 +3012,6 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   LOGPRINTF2( INFO, "FuzzyTest for record ", toStr(ulKeyNum).c_str() );
 
-  pusGetMaxVotes;
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
 

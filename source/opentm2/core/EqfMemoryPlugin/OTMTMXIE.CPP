@@ -4006,8 +4006,6 @@ USHORT CheckOutputName( PCONVERTERDATA pData, PSZ pszInMemory, PSZ pszOutMemory 
 {
   USHORT      usRC = NO_ERROR;         // function return code
 
-  pData;
-
   if ( *pszOutMemory == EOS )
   {
     PSZ pszExtension;
@@ -4035,8 +4033,6 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
   USHORT      usRC = NO_ERROR;         // function return code
   HDIR hdir;
   static WIN32_FIND_DATA FindData;    // find data structure
-
-  pData;                               // suppress 'unreferenced formal parameter' warning
 
   LogMessage2(ERROR,__func__, "::TEMPORARY COMMENTED CheckExistence  whole function");
 #ifdef TEMPORARY_COMMENTED

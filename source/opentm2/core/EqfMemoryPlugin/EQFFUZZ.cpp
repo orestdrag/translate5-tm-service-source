@@ -1746,7 +1746,6 @@ BOOL EQFBCountDiff
    /* MODIFIED DELETED is changed to MODIFIED                        */
    /* MODIFIED INSERTED is changed to MODIFIED MODIFIED              */
    /******************************************************************/
-   usDiff = 0;
    pTestToken = (PFUZZYTOK)pvFuzzyTok;               //resulting pointers
    pToken = (PFUZZYTOK)pvFuzzyTok;                   //current pointers
    usPrevType = MARK_EQUAL;
