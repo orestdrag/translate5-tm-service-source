@@ -554,8 +554,8 @@ typedef struct _ACTSEGLOGENH
 {
   ULONG    ulEyeCatcher;              // record start identicator is always ACTSEGLOG_EYECATCHER
   ULONG    ulCheckSum;                // checksum over the remaining part of the record 
-  ULONG    ulRecordLen;               // overall record length
-  ULONG    ulSegLen;                  // length of the segment source text (in bytes), the segment source text is stored right behind the fixed part
+  LONG     lRecordLen;               // overall record length
+  LONG     lSegLen;                  // length of the segment source text (in bytes), the segment source text is stored right behind the fixed part
                                       // of the record
   ULONG    ulPropSourceLen;           // length of proposal document name (in bytes), the doc name is stored behind the fixed part and the source text
   ULONG    ulPropSourceSegNum;        // segment number of proposal 
@@ -593,8 +593,8 @@ typedef struct _ACTSEGLOGENH2
 {
   ULONG    ulEyeCatcher;              // record start identicator is always ACTSEGLOG2_EYECATCHER
   ULONG    ulCheckSum;                // checksum over the remaining part of the record 
-  ULONG    ulRecordLen;               // overall record length
-  ULONG    ulSegLen;                  // length of the segment source text (in bytes), the segment source text is stored right behind the fixed part
+  LONG    lRecordLen;               // overall record length
+  LONG    lSegLen;                  // length of the segment source text (in bytes), the segment source text is stored right behind the fixed part
                                       // of the record
   ULONG    ulPropSourceLen;           // length of proposal document name (in bytes), the doc name is stored behind the fixed part and the source text
   ULONG    ulPropSourceSegNum;        // segment number of proposal 

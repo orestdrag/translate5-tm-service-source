@@ -1155,7 +1155,7 @@ typedef struct _TMX_CLB
 //complete entry id tm data file
 typedef struct _TMX_RECORD
 {
-  ULONG   ulRecordLen;
+  LONG   lRecordLen;
   USHORT  usSourceRecord;
   USHORT  usFirstTargetRecord;
 } TMX_RECORD, * PTMX_RECORD;
@@ -1170,7 +1170,7 @@ typedef struct _TMX_OLD_RECORD
 //structure of the source segment
 typedef struct _TMX_SOURCE_RECORD
 {
-  ULONG   ulRecordLen;
+  LONG   lRecordLen;
   USHORT  usSource;
 } TMX_SOURCE_RECORD, * PTMX_SOURCE_RECORD;
 
@@ -1184,7 +1184,7 @@ typedef struct _TMX_OLD_SOURCE_RECORD
 //structure of the target segment
 typedef struct _TMX_TARGET_RECORD
 {
-  ULONG   ulRecordLen;
+  LONG   lRecordLen;
   USHORT  usSourceTagTable;
   USHORT  usTargetTagTable;
   USHORT  usTarget;
@@ -1265,7 +1265,7 @@ typedef struct _TMX_OLD_TARGET_CLB
 //tag table structure for both source and target
 typedef struct _TMX_TAGTABLE_RECORD
 {
-  ULONG   ulRecordLen;
+  LONG   lRecordLen;
   USHORT  usTagTableId;
   USHORT  usFirstTagEntry;
 } TMX_TAGTABLE_RECORD, * PTMX_TAGTABLE_RECORD;
@@ -1286,7 +1286,7 @@ typedef struct _TMX_TAGENTRY
 } TMX_TAGENTRY, * PTMX_TAGENTRY;
 
 // macros to access certain TM records fields
-  #define RECLEN(pRec) pRec->ulRecordLen
+  #define RECLEN(pRec) pRec->lRecordLen
 
 
 #define NTMVOTES(l)     ((BYTE)(((ULONG)(l) >> 24) & 0xFF))

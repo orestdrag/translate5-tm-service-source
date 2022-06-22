@@ -2066,7 +2066,7 @@ USHORT ComparePutData
   PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
   PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
   PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
-  ULONG ulLen = 0;                        //length indicator
+  LONG lLen = 0;                        //length indicator
   USHORT usNormLen = 0;                    //length of normalized string
   PSZ_W pString = NULL;                  //pointer to character string
   PSZ_W pNormString = NULL;              //pointer to character string
@@ -2127,22 +2127,22 @@ USHORT ComparePutData
       pByte = NTRecPos((PBYTE)(pTmRecord+1), REC_SRCSTRING);
 
       //calculate length of source string
-      ulLen = (RECLEN(pTMXSourceRecord) - sizeof( TMX_SOURCE_RECORD ));
+      lLen = (RECLEN(pTMXSourceRecord) - sizeof( TMX_SOURCE_RECORD ));
       //copy and compare source string
       memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
-      ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
+      lLen = EQFCompress2Unicode( pString, pByte, lLen );
       fStringEqual = ! UTF16strcmp( pString, pSentence->pNormString );
 
       if ( fStringEqual )
       {
         BOOL fNewerTargetExists = FALSE;
-        ULONG   ulLeftTgtLen;          // remaining target length
+        LONG   lLeftTgtLen;          // remaining target length
 
         NTASSERTLEN(RECLEN(pTmRecord), pTmRecord->usFirstTargetRecord, 4712)
 
         // get length of target block to work with
         //source strings equal - position at first target record
-        ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+        lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
         pStartTarget = NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
@@ -2158,7 +2158,7 @@ USHORT ComparePutData
         TMLoopAndDelTargetClb(pTmRecord, pTmPut, pSentence, usPutLang, usPutFile, &fNewerTargetExists );
 
         // recalc since record may have changed during delete above!
-        ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+        lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
         pStartTarget = NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
@@ -2170,13 +2170,14 @@ USHORT ComparePutData
         {
           //source strings are identical so loop through target records
           // and add new entry
-          while ( fOK && ulLeftTgtLen && (RECLEN(pTMXTargetRecord) != 0) && !fStop )
+          while ( fOK && (lLeftTgtLen > 0)  && (lLeftTgtLen >= RECLEN(pTMXTargetRecord)) 
+                && (RECLEN(pTMXTargetRecord) > 0) && !fStop )
           { 
             // check for valid target length
-            NTASSERTLEN(ulLeftTgtLen, RECLEN(pTMXTargetRecord), 4713);
+            NTASSERTLEN(lLeftTgtLen, RECLEN(pTMXTargetRecord), 4713);
             
             // update target length
-            ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+            lLeftTgtLen -= RECLEN(pTMXTargetRecord);
 
             // next check the target language and target tag info
             // position at first target control block and to source tag info
@@ -2190,9 +2191,9 @@ USHORT ComparePutData
             {
               // check if target string and target tag record are identical
               pByte = NTRecPos(pStartTarget, REC_TGTSTRING);
-              ulLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
-              ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
-              pString[ulLen] = EOS;
+              lLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
+              lLen = EQFCompress2Unicode( pString, pByte, lLen );
+              pString[lLen] = EOS;
 
               pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_TGTTAGTABLE);
 
@@ -3274,8 +3275,8 @@ USHORT TMLoopAndDelTargetClb
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block
   PTMX_TAGTABLE_RECORD 	pTMXSrcTTable = NULL; //ptr to source tag info
-  ULONG        			ulLeftClbLen;
-  ULONG        			ulLeftTgtLen;
+  LONG        			lLeftClbLen;
+  LONG        			lLeftTgtLen;
   BOOL         			fTgtRemoved = FALSE;
   PTMX_TARGET_RECORD  	pTMXTgtRec = NULL;
   BOOL         			fDel = FALSE;
@@ -3284,15 +3285,15 @@ USHORT TMLoopAndDelTargetClb
   *pfNewerTargetExists = FALSE;
 
   // loop until either end of record or one occ. found&deleted
-  ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+  lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
   //source strings equal, position at first target record
   pTMXTgtRec = (PTMX_TARGET_RECORD)NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
 
-  while ( ulLeftTgtLen && (RECLEN(pTMXTgtRec) != 0) && !fDel )
+  while ( ( lLeftTgtLen >= RECLEN(pTMXTgtRec) )  && (RECLEN(pTMXTgtRec) != 0) && !fDel )
   {
-	NTASSERTLEN(ulLeftTgtLen, RECLEN(pTMXTgtRec), 4713);
-	ulLeftTgtLen -= RECLEN(pTMXTgtRec);
+	NTASSERTLEN(lLeftTgtLen, RECLEN(pTMXTgtRec), 4713);
+	lLeftTgtLen -= RECLEN(pTMXTgtRec);
 
 	// pos at source tag info
 	pTMXSrcTTable = (PTMX_TAGTABLE_RECORD)NTRecPos((PBYTE)pTMXTgtRec,
@@ -3302,9 +3303,9 @@ USHORT TMLoopAndDelTargetClb
 		  RECLEN(pTMXSrcTTable)) == 0) )
 	{
 		pClb = (PTMX_TARGET_CLB)NTRecPos((PBYTE)pTMXTgtRec, REC_CLB);
-		ulLeftClbLen = RECLEN(pTMXTgtRec) - pTMXTgtRec->usClb;
+		lLeftClbLen = RECLEN(pTMXTgtRec) - pTMXTgtRec->usClb;
 
-		while ( ulLeftClbLen && !fDel )
+		while ( ( lLeftClbLen > 0 ) && !fDel )
 		{
 			if ( (pClb->usLangId == usPutLang) &&
 			     (pClb->ulSegmId == pTmPut->ulSourceSegmentId) &&
@@ -3313,7 +3314,7 @@ USHORT TMLoopAndDelTargetClb
 				// as the segment is putted with a new value
 				if ( (pClb->lTime < pTmPut->lTime) || !pTmPut->lTime )
 				{
-				  ulLeftClbLen -= TARGETCLBLEN(pClb);
+				  lLeftClbLen -= TARGETCLBLEN(pClb);
 				  // loop over all CLBs of this target record and remove
 				  // any CLB for the current segment
 				  fTgtRemoved = TMDelTargetClb( pTmRecord, pTMXTgtRec, pClb);
@@ -3321,14 +3322,14 @@ USHORT TMLoopAndDelTargetClb
 				}
 				else
 				{  // existing match is newer, continue with next one
-				  ulLeftClbLen -= TARGETCLBLEN(pClb);
+				  lLeftClbLen -= TARGETCLBLEN(pClb);
           *pfNewerTargetExists = TRUE;
 				  pClb = NEXTTARGETCLB(pClb);
 				} /* endif */
 			}
 			else
 			{ 	// no match, try next one
-			  ulLeftClbLen -= TARGETCLBLEN(pClb);
+			  lLeftClbLen -= TARGETCLBLEN(pClb);
 			  pClb = NEXTTARGETCLB(pClb);
 			} /* endif */
 		} /* endwhile */

@@ -170,7 +170,7 @@ void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData );
 
 
 
-USHORT FillMatchTable( PTMX_CLB, PSZ_W, PULONG, PTMX_TARGET_RECORD,
+USHORT FillMatchTable( PTMX_CLB, PSZ_W, PLONG, PTMX_TARGET_RECORD,
                 PTMX_TARGET_CLB,
                 PTMX_MATCH_TABLE_W, PUSHORT, BOOL, PUSHORT, PUSHORT, PUSHORT,
                 ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT );
@@ -1203,7 +1203,7 @@ USHORT ExactTest
     if ( fStringEqual )
     {
       USHORT  usTgtNum = 0;            // init target number
-      ULONG   ulLeftTgtLen;            // remaining target length
+      LONG    lLeftTgtLen;            // remaining target length
       USHORT  usGetLang;               // id of target language
       USHORT  usGetFile;               // id of target file
       USHORT  usAlternateGetFile;      // alternate ID of target file
@@ -1257,7 +1257,7 @@ USHORT ExactTest
 
       assert( RECLEN(pTmRecord) >= pTmRecord->usFirstTargetRecord );
 
-      ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+      lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
       //position at first target record
       pByte = (PBYTE)(pTmRecord+1);
@@ -1266,7 +1266,8 @@ USHORT ExactTest
       pStartTarget = (PBYTE)pTMXTargetRecord;
 
       //source strings are identical so loop through target records
-      while ( (usRc == NO_ERROR) && (ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0)) )
+      while ( (usRc == NO_ERROR) && //(ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0)) )
+                              ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) && ( RECLEN(pTMXTargetRecord) > 0))
       {
         BOOL fTestCLB = TRUE;
         BOOL fMatchingDocName = FALSE;
@@ -1278,9 +1279,9 @@ USHORT ExactTest
         /**************************************************************/
         usTgtNum++;            //  target number
 
-        assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
+        //assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
 
-        ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+        lLeftTgtLen -= RECLEN(pTMXTargetRecord);
 
         //next check the target language
         //position at target control block
@@ -1315,9 +1316,10 @@ USHORT ExactTest
           pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           //compare tag table records
-          fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
-                                 RECLEN(pTMXSourceTagTable) ) == 0;
-          if ( !fStringEqual )
+          fStringEqual = true; // tag table should be always equal in t5memory
+          //fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
+          //                       RECLEN(pTMXSourceTagTable) ) == 0;
+          //if ( !fStringEqual )
           {
             /**********************************************************/
             /* if tagging record is unequal than we have some         */
@@ -1337,9 +1339,9 @@ USHORT ExactTest
 //              USHORT  ulLenTmp;
 //              usLenTmp = (USHORT)(RECLEN(pTMXSourceRecord) -
 //                                  sizeof(TMX_SOURCE_RECORD));
-              ULONG ulLenTmp = ulLen;       // len of pString in # of w's
+              LONG lLenTmp = ulLen;       // len of pString in # of w's
               fOK = AddTagsToStringW( pString,
-                                      &ulLenTmp,     // in # of w's
+                                      &lLenTmp,     // in # of w's
                                      pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
@@ -1381,7 +1383,7 @@ USHORT ExactTest
 
             // loop over CLBs and look for best matching entry
             {
-              ULONG ulLeftClbLen;      // left CLB entries in CLB list
+              LONG lLeftClbLen;      // left CLB entries in CLB list
               PTMX_TARGET_CLB pClb;    // pointer for CLB list processing
               #define SEG_DOC_AND_CONTEXT_MATCH   8
               #define DOC_AND_CONTEXT_MATCH   7
@@ -1395,10 +1397,11 @@ USHORT ExactTest
 
               // loop over all target CLBs
               pClb = pTMXTargetClb;
-              ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+              lLeftClbLen = RECLEN(pTMXTargetRecord) -
                              pTMXTargetRecord->usClb;
-              while ( ulLeftClbLen && (sCurMatch < SAME_SEG_AND_DOC_MATCH) )
+              while ( ( lLeftClbLen > 0 ) && (sCurMatch < SAME_SEG_AND_DOC_MATCH) )
               {
+                LogMessage5(TRANSACTION,__func__,":: lLeftClbLen = ", toStr(lLeftClbLen).c_str(), "; sCurMatch = ", toStr(sCurMatch).c_str());
                 USHORT usTranslationFlag = pClb->bTranslationFlag;
                 USHORT usCurContextRanking = 0;       // context ranking of this match
                 BOOL fIgnoreProposal = FALSE;
@@ -1614,8 +1617,8 @@ USHORT ExactTest
                 // continue with next target CLB
                 if ( sCurMatch < SAME_SEG_AND_DOC_MATCH )
                 {
-                  ulLeftClbLen -= TARGETCLBLEN(pClb);
-                  if (ulLeftClbLen)
+                  lLeftClbLen -= TARGETCLBLEN(pClb);
+                  if (lLeftClbLen > 0)
                   {
                     usTgtNum++;
                     pClb = NEXTTARGETCLB(pClb);
@@ -1684,11 +1687,11 @@ USHORT ExactTest
             /**********************************************************/
             if ( usMatchLevel >= 100 )
             {
-              ULONG ulSourceLen = ulLen;
+              LONG lSourceLen = ulLen;
 
               // use CLB translation flag is ustargetTranslationFlag is not set
               if ( usTargetTranslationFlag == (USHORT)-1 ) usTargetTranslationFlag = pTMXTargetClb->bTranslationFlag;
-              FillMatchTable( pTmClb, pString, &ulSourceLen, pTMXTargetRecord,
+              FillMatchTable( pTmClb, pString, &lSourceLen, pTMXTargetRecord,
                               pTMXTargetClb,
                               pstMatchTable, &usMatchLevel, TRUE,
                               pusMatchEntries, &pSentence->usActVote,
@@ -1961,7 +1964,7 @@ BOOL DITASpecialProcessingRequired
 
 USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                    PSZ_W pSourceString,         //pointer to normalized source string
-                   PULONG pulSourceLen,        //length of source string
+                   PLONG plSourceLen,        //length of source string
                    PTMX_TARGET_RECORD pTMXTargetRecord, //pointer to tm target
                    PTMX_TARGET_CLB pTMXTargetClb,    //ptr to target control block
                    PTMX_MATCH_TABLE_W pstMatchTable, //getout match table struct
@@ -1982,8 +1985,8 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   PBYTE  pByte;                              //position pointer
   BOOL   fOK;                                //success indicator
   USHORT usRc = NO_ERROR;                    //return code
-  ULONG  ulTargetLen;                        //length indicator
-  ULONG  ulLen;                              //length indicator
+  LONG  lTargetLen;                          //length indicator
+  LONG  ulLen;                               //length indicator
   PSZ_W pString = NULL;                      //pointer to temp string
   USHORT usCurrentEntry;                     //counter
   BOOL fFound = FALSE;                       //indicates if correct pos found
@@ -1998,8 +2001,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   FILE *hfLog = NULL;
 #endif
   SHORT sLangID = 0;
-
-  pusMaxVotes;
 
   // force fTag flag if proposal with inline tagging is requested
   if ( pGetIn->ulParm & GET_ALWAYS_WITH_TAGS )
@@ -2036,7 +2037,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
 
       pSubstProp->pTagsPropSource = (PTMX_TAGTABLE_RECORD)pByte;
       usRc = (AddTagsToStringW( pSourceString,
-                              pulSourceLen,      // in # of w's
+                              plSourceLen,      // in # of w's
                              (PTMX_TAGTABLE_RECORD)pByte,
                              pSubstProp->szPropSource )) ? usRc : BTREE_CORRUPTED;
       if ( usRc == NO_ERROR )
@@ -2048,18 +2049,18 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         pByte += pTMXTargetRecord->usTarget;
 
         //calculate length of target string
-        ulTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
+        lTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
 
         if ( UtlAlloc( (PVOID *) &pTarget, 0L, (LONG)MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG))
         {
-          ulTargetLen = EQFCompress2Unicode(pTarget, pByte, ulTargetLen);
+          lTargetLen = EQFCompress2Unicode(pTarget, pByte, lTargetLen);
           //position at target tag record
           pByte = (PBYTE)pTMXTargetRecord;
           pByte += pTMXTargetRecord->usTargetTagTable;
 
           pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
           usRc = (AddTagsToStringW( pTarget,
-                                    &ulTargetLen,     // in # of w's
+                                    &lTargetLen,     // in # of w's
                                     (PTMX_TAGTABLE_RECORD)pByte,
                                     pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;
           UtlAlloc( (PVOID *) &pTarget, 0L, 0L, NOMSG );
@@ -2246,7 +2247,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
   /********************************************************************/
   /* if src of prop is empty ( i.e. only inline tagging), add tagging */
   /********************************************************************/
-  if (*pulSourceLen == 0 )
+  if (*plSourceLen <= 0 )
   {
     fTag = TRUE;
   } /* endif */
@@ -2364,9 +2365,11 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
           /**************************************************************/
           /* do a substitution of the tags...                           */
           /**************************************************************/
-          *pulSourceLen = UTF16strlenCHAR( pSubstProp->szPropSource );
-          memcpy( pstMatchTable->szSource, pSubstProp->szPropSource,
-                  *pulSourceLen * sizeof(CHAR_W));
+          *plSourceLen = UTF16strlenCHAR( pSubstProp->szPropSource );
+          if( *plSourceLen ) {
+            memcpy( pstMatchTable->szSource, pSubstProp->szPropSource,
+                  *plSourceLen * sizeof(CHAR_W));
+          }
         }
         else
         {
@@ -2375,7 +2378,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
             /************************************************************/
             /* add tags to source string                                */
             /************************************************************/
-            fOK = AddTagsToStringW( pSourceString, pulSourceLen,
+            fOK = AddTagsToStringW( pSourceString, plSourceLen,
                                    (PTMX_TAGTABLE_RECORD)pByte,
                                    pstMatchTable->szSource );
             if ( !fOK )
@@ -2386,7 +2389,9 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
           else
           {
             //else copy normalized propsource string
-            memcpy( pstMatchTable->szSource, pSourceString, *pulSourceLen * sizeof(CHAR_W));
+            if(*plSourceLen > 0 ){
+              memcpy( pstMatchTable->szSource, pSourceString, *plSourceLen * sizeof(CHAR_W));
+            }
           } /* endif */
         } /* endif */
 
@@ -2397,10 +2402,10 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
           pByte += pTMXTargetRecord->usTarget;
 
           //calculate length of target string
-          ulTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
+          lTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
 
           //copy target string for later compare function
-          ulTargetLen = EQFCompress2Unicode( pString, pByte, ulTargetLen );
+          lTargetLen = EQFCompress2Unicode( pString, pByte, lTargetLen );
           // now ulTargetLen is # of w's
           //position at target tag record
           pByte = (PBYTE)pTMXTargetRecord;
@@ -2412,15 +2417,15 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
             /* do a substitution of the replaced target string and        */
             /* adjust match level                                         */
             /**************************************************************/
-            ulTargetLen = UTF16strlenCHAR( pSubstProp->szPropTarget );
+            lTargetLen = UTF16strlenCHAR( pSubstProp->szPropTarget );
             memcpy( pstMatchTable->szTarget, pSubstProp->szPropTarget,
-                    ulTargetLen * sizeof(CHAR_W));
+                    lTargetLen * sizeof(CHAR_W));
 
             ulLen = UTF16strlenCHAR(pSubstProp->szSource);
-            *pulSourceLen = UTF16strlenCHAR(pSubstProp->szPropSource);
-            if (*pulSourceLen > ulLen )
+            *plSourceLen = UTF16strlenCHAR(pSubstProp->szPropSource);
+            if (*plSourceLen > ulLen )
             {
-              ulLen = *pulSourceLen;
+              ulLen = *plSourceLen;
             } /* endif */
 
             {
@@ -2466,7 +2471,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
             if ( fTag )
             {
               //add tags to target string if flag set to true
-              fOK = AddTagsToStringW( pString, &ulTargetLen,
+              fOK = AddTagsToStringW( pString, &lTargetLen,
                                      (PTMX_TAGTABLE_RECORD)pByte,
                                      pstMatchTable->szTarget );
               if ( !fOK )
@@ -2477,7 +2482,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
             else
             {
               //else copy normalized target string
-              memcpy( pstMatchTable->szTarget, pString, ulTargetLen * sizeof(CHAR_W));
+              memcpy( pstMatchTable->szTarget, pString, lTargetLen * sizeof(CHAR_W));
             } /* endif */
           } /* endif */
 
@@ -2629,7 +2634,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
 // ----------------------------------------------------------------------------+
 
 BOOL AddTagsToStringW( PSZ_W pInString,            //character string
-                  PULONG pulInStringLen,       //length of pInString in # of w's
+                  PLONG plInStringLen,       //length of pInString in # of w's
                   PTMX_TAGTABLE_RECORD pTMXTagTable,  //ptr to tag table record
                   PSZ_W pOutString )                    //output string
 {
@@ -2640,7 +2645,7 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
   ULONG  ulEnd = 0;                    //end length for for loop
   USHORT usTagRecordPos = 0;           //current length processed in tag record
   BOOL fNoTagsLeft = FALSE;            //indication of existence of tags
-  ULONG  ulInputStringLen = *pulInStringLen;
+  ULONG  ulInputStringLen = *plInStringLen;
   PSZ_W  pOutStart = pOutString;       // anchar start pointers
   PSZ_W  pInStart  = pInString;        //
   BOOL   fOK = TRUE;
@@ -2650,7 +2655,7 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
 
 
 
-  fOK = (*pulInStringLen < MAX_SEGMENT_SIZE );
+  fOK = (*plInStringLen < MAX_SEGMENT_SIZE );
 
   if ( fOK && ( RECLEN(pTMXTagTable) > sizeof(TMX_TAGTABLE_RECORD)) )
   {
@@ -2728,19 +2733,19 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
             {
               // something went wrong: two tag entries for the same offset
               fOK = FALSE;
-              memcpy( pOutStart, pInStart, *pulInStringLen * sizeof(CHAR_W));
+              memcpy( pOutStart, pInStart, *plInStringLen * sizeof(CHAR_W));
               fNoTagsLeft = TRUE;
-              pInString = pInStart + *pulInStringLen;
-              ulEnd = *pulInStringLen +  ulTagLen;
+              pInString = pInStart + *plInStringLen;
+              ulEnd = *plInStringLen +  ulTagLen;
             }
             else if ( pTagEntry->usOffset < ulEnd  )
             {
               // tag data seems to be corrupted, ignore the tags
               fOK = FALSE;
-              memcpy( pOutStart, pInStart, *pulInStringLen * sizeof(CHAR_W));
+              memcpy( pOutStart, pInStart, *plInStringLen * sizeof(CHAR_W));
               fNoTagsLeft = TRUE;
-              pInString = pInStart + *pulInStringLen;
-              ulEnd = *pulInStringLen +  ulTagLen;
+              pInString = pInStart + *plInStringLen;
+              ulEnd = *plInStringLen +  ulTagLen;
             }
             else
             {
@@ -2751,17 +2756,17 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
           {
             fNoTagsLeft = TRUE;
             //new end criterium for for loop, in this case end of string
-            ulEnd = *pulInStringLen +  ulTagLen;
+            ulEnd = *plInStringLen +  ulTagLen;
           } /* endif */
         }
         else
         {
           // something got corrupted -- ignore the tags ...
           fOK = FALSE;
-          memcpy( pOutStart, pInStart, *pulInStringLen * sizeof(CHAR_W) );
+          memcpy( pOutStart, pInStart, *plInStringLen * sizeof(CHAR_W) );
           fNoTagsLeft = TRUE;
-          pInString = pInStart + *pulInStringLen;
-          ulEnd = *pulInStringLen +  ulTagLen;
+          pInString = pInStart + *plInStringLen;
+          ulEnd = *plInStringLen +  ulTagLen;
         } /* endif */
       } /* endif */
 
@@ -2782,10 +2787,10 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
   else
   {
     //there are no tags so copy character string
-    if ( *pulInStringLen < MAX_SEGMENT_SIZE )
+    if ( *plInStringLen < MAX_SEGMENT_SIZE )
     {
-      memcpy( pOutString, pInString, *pulInStringLen * sizeof(CHAR_W));
-      pOutString[*pulInStringLen] = EOS;
+      memcpy( pOutString, pInString, *plInStringLen * sizeof(CHAR_W));
+      pOutString[*plInStringLen] = EOS;
     }
     else
     {
@@ -3081,7 +3086,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       USHORT  usTargetId;              // target language id
       BOOL    fTagTableEqual;          // TRUE if TagTable of prop == current
       USHORT  usTagThreshold;          // set dependent of fTagTableEqual
-      ULONG   ulTempSrcLen;            // temp. source length
+      LONG    lTempSrcLen;            // temp. source length
 
       //get id of target tag table in the get structure
       if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTagTable,
@@ -3117,7 +3122,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
       LOGPRINTF2( INFO, "FuzzyTest: Checking targets, ulLeftTgtLen = ", toStr(ulLeftTgtLen).c_str() );
-      while ( ulLeftTgtLen && (RECLEN(pTMXTargetRecord) != 0) )
+      while ( ( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) ) && (ulLeftTgtLen > 0) && (RECLEN(pTMXTargetRecord) != 0) )
       {
         BOOL fTestCLB = TRUE;
         USHORT usModifiedTranslationFlag = 0;
@@ -3127,7 +3132,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         /**************************************************************/
         usTgtNum ++;            // we are dealing with next target
 
-        assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
+        //assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
 
         ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
 
@@ -3238,14 +3243,14 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
             if ( fOK )
             {
-              ULONG  ulLenTmp = ulSourceLen;
+              LONG  lLenTmp = ulSourceLen;
               PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
               //position at source tag table record
               pByte = pStartTarget;
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
               pByte += pTMXTargetRecord->usSourceTagTable;
               pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-              fOK = AddTagsToStringW( pString, &ulLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+              fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
                 usRc = BTREE_CORRUPTED;
@@ -3316,9 +3321,9 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                 if ( fOK )
                 {
                   //calculate length of source string
-                  ULONG  ulLenTmp = ulSourceLen;
+                  LONG  lLenTmp = ulSourceLen;
                   fOK = AddTagsToStringW( pString,
-                                          &ulLenTmp,      // in # of w's
+                                          &lLenTmp,      // in # of w's
                                          pTMXSourceTagTable, pSentence->pPropString );
                   if ( !fOK )
                   {
@@ -3400,8 +3405,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         		{ // P018279!
     			   usFuzzy -= 1;
 		        }
-            ulTempSrcLen = ulSourceLen;
-            FillMatchTable( pTmClb, pString, &ulTempSrcLen, pTMXTargetRecord,
+            lTempSrcLen = ulSourceLen;
+            FillMatchTable( pTmClb, pString, &lTempSrcLen, pTMXTargetRecord,
                             pTMXTargetClb,
                             pstMatchTable, &usFuzzy, fTagTableEqual,
                             pusMatchesFound, pusTmMaxVotes, pusOverlaps,

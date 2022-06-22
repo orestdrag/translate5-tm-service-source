@@ -411,9 +411,9 @@ USHORT ExtractRecordV6
   PTMX_SOURCE_RECORD pTMXSourceRecord; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord; //ptr to target record
   PTMX_TARGET_CLB    pTargetClb;       //ptr to target CLB
-  ULONG       ulLeftClbLen = 0;        // remaining length of CLB area
+  LONG       lLeftClbLen = 0;        // remaining length of CLB area
   PBYTE pByte;                         //position ptr
-  ULONG ulSourceLen = 0;              //length of source string
+  LONG lSourceLen = 0;              //length of source string
   USHORT usTarget;                     //nr of target records in tm record
   PSZ_W pSourceString = NULL;          //pointer to source string
   PBYTE pSource;                       //position ptr
@@ -433,12 +433,12 @@ USHORT ExtractRecordV6
     if ( ( RECLEN(pTmRecord) != 0) &&
          (pTmRecord->usFirstTargetRecord < RECLEN(pTmRecord)) )
     {
-      ULONG   ulLeftTgtLen;            // remaining target length
+      LONG   lLeftTgtLen;            // remaining target length
       /****************************************************************/
       /* get length of target block to work with                      */
       /****************************************************************/
       assert( RECLEN(pTmRecord) >= pTmRecord->usFirstTargetRecord );
-      ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+      lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
       //extract source string
       //position at beginning of source structure in tm record
       pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
@@ -448,16 +448,16 @@ USHORT ExtractRecordV6
       pSource += pTMXSourceRecord->usSource;
 
       //calculate length of source string
-      ulSourceLen = (RECLEN(pTMXSourceRecord) -
+      lSourceLen = (RECLEN(pTMXSourceRecord) -
                             sizeof(TMX_SOURCE_RECORD) );
 
       //copy source string for fill matchtable
-      if ( ulSourceLen < MAX_SEGMENT_SIZE * sizeof(WCHAR) )
+      if ( lSourceLen < MAX_SEGMENT_SIZE * sizeof(WCHAR) )
       {
-        ulSourceLen = EQFCompress2Unicode( pSourceString, pSource, ulSourceLen );
-        if ( ulSourceLen < MAX_SEGMENT_SIZE ) {
+        lSourceLen = EQFCompress2Unicode( pSourceString, pSource, lSourceLen );
+        if ( lSourceLen < MAX_SEGMENT_SIZE && lSourceLen >=0 ) {
 ////      memcpy( pSourceString, pSource, ulSourceLen );
-          pSourceString[ulSourceLen] = EOS;
+          pSourceString[lSourceLen] = EOS;
         } 
         else
         {
@@ -485,39 +485,39 @@ USHORT ExtractRecordV6
         }
         else
         {
-          ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+          lLeftClbLen = RECLEN(pTMXTargetRecord) -
                          pTMXTargetRecord->usClb;
-          ulLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
+          lLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
         } /* endif */
         usTarget = 1;           //initialize counter
 
         //loop until correct target is found
-        while ( (usTarget < pTmExtIn->usNextTarget) && ulLeftTgtLen && !usRc )
+        while ( (usTarget < pTmExtIn->usNextTarget) && (lLeftTgtLen > 0) && !usRc )
         {
           // position to first target CLB
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
           pTargetClb = (PTMX_TARGET_CLB)(pByte + pTMXTargetRecord->usClb);
-          ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+          lLeftClbLen = RECLEN(pTMXTargetRecord) -
                          pTMXTargetRecord->usClb;
 
           // subtract size of current CLB
-          if ( ulLeftClbLen >= TARGETCLBLEN(pTargetClb) )
+          if ( lLeftClbLen >= TARGETCLBLEN(pTargetClb) )
           {
-            ulLeftClbLen -= TARGETCLBLEN(pTargetClb); 
+            lLeftClbLen -= TARGETCLBLEN(pTargetClb); 
           }
           else
           {
             // database is corrupted
-            ulLeftClbLen = 0;
+            lLeftClbLen = 0;
             usRc = BTREE_NOT_FOUND;
           } /* endif */ 
 
           // loop over all target CLBs
-          while ( (usTarget < pTmExtIn->usNextTarget) && ulLeftClbLen )
+          while ( (usTarget < pTmExtIn->usNextTarget) && ( lLeftClbLen > 0 ) )
           {
             usTarget++;
             pTargetClb = NEXTTARGETCLB(pTargetClb);
-            ulLeftClbLen -= TARGETCLBLEN(pTargetClb);
+            lLeftClbLen -= TARGETCLBLEN(pTargetClb);
           } /* endwhile */
 
           // continue with next target if no match yet
@@ -526,28 +526,28 @@ USHORT ExtractRecordV6
             // position at next target
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
             //move pointer to end of target
-            if (ulLeftTgtLen >= RECLEN(pTMXTargetRecord))
+            if (lLeftTgtLen >= RECLEN(pTMXTargetRecord))
             {
-              ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+              lLeftTgtLen -= RECLEN(pTMXTargetRecord);
             }
             else
             {
-              ulLeftTgtLen = 0;
+              lLeftTgtLen = 0;
             } /* endif */
             pByte += RECLEN(pTMXTargetRecord);
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
             pTargetClb = (PTMX_TARGET_CLB)(pByte + pTMXTargetRecord->usClb);
-            ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+            lLeftClbLen = RECLEN(pTMXTargetRecord) -
                            pTMXTargetRecord->usClb;
             // subtract size of current CLB
-            if ( ulLeftClbLen >= TARGETCLBLEN(pTargetClb) )
+            if ( lLeftClbLen >= TARGETCLBLEN(pTargetClb) )
             {
-              ulLeftClbLen -= TARGETCLBLEN(pTargetClb); 
+              lLeftClbLen -= TARGETCLBLEN(pTargetClb); 
             }
             else
             {
               // database is corrupted
-              ulLeftClbLen = 0;
+              lLeftClbLen = 0;
               usRc = BTREE_NOT_FOUND;
             } /* endif */ 
             usTarget++;
@@ -560,31 +560,31 @@ USHORT ExtractRecordV6
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
           //if target record exists
-          if ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) )
+          if ( ( lLeftTgtLen > 0) && ( RECLEN(pTMXTargetRecord) != 0) )
           {
             //fill out the put structure as output of the extract function
             usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
                                      pTargetClb,
-                                     pSourceString, &ulSourceLen,
+                                     pSourceString, &lSourceLen,
                                      &pTmExtOut->stTmExt );
             if ( ! usRc )
             {
               //check for another target
-              if (ulLeftTgtLen >= RECLEN(pTMXTargetRecord))
+              if (lLeftTgtLen >= RECLEN(pTMXTargetRecord))
               {
-                ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+                lLeftTgtLen -= RECLEN(pTMXTargetRecord);
               }
               else
               {
-                ulLeftTgtLen = 0;
+                lLeftTgtLen = 0;
               } /* endif */
               pByte += RECLEN(pTMXTargetRecord);
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
               //if target exists
-              if ( ((RECLEN(pTMXTargetRecord) != 0) && ulLeftTgtLen)
+              if ( ((RECLEN(pTMXTargetRecord) > 0) && (lLeftTgtLen > 0 ) )
                           ||
-                    (ulLeftClbLen != 0) )
+                    (lLeftClbLen > 0) )
               {
                 //increase target count and leave tm record key number as before
                 pTmExtOut->ulTmKey = pTmExtIn->ulTmKey;
@@ -663,7 +663,7 @@ USHORT FillExtStructure
   PTMX_TARGET_RECORD pTMXTargetRecord, //ptr to tm target
   PTMX_TARGET_CLB    pTargetClb,       // ptr to current target CLB
   PSZ_W pSourceString,                 //ptr to source string
-  PULONG pulSourceLen,                //length of source string
+  PLONG plSourceLen,                   //length of source string
   PTMX_EXT_W pstExt                    //extout ext struct
 )
 {
@@ -672,7 +672,7 @@ USHORT FillExtStructure
   PBYTE pByte;                               //position pointer
   BOOL fOK;                                  //success indicator
   USHORT usRc = NO_ERROR;                    //return code
-  ULONG  ulTargetLen = 0;                    //length indicator
+  LONG  lTargetLen = 0;                      //length indicator
   PSZ_W pTargetString = NULL;                //pointer to target string
 
   //allocate pString
@@ -691,14 +691,14 @@ USHORT FillExtStructure
     //add tags to source string if there are any
     if ( RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD) )
     {
-      fOK = AddTagsToStringW( pSourceString, pulSourceLen,
+      fOK = AddTagsToStringW( pSourceString, plSourceLen,
                              (PTMX_TAGTABLE_RECORD)pByte, pstExt->szSource );
     }
-    else
+    else if(*plSourceLen > 0)
     {
       //else copy string
-      memcpy( pstExt->szSource, pSourceString, *pulSourceLen * sizeof(CHAR_W) );
-      pstExt->szSource[*pulSourceLen] = EOS;
+      memcpy( pstExt->szSource, pSourceString, *plSourceLen * sizeof(CHAR_W) );
+      pstExt->szSource[*plSourceLen] = EOS;
     } /* endif */
 
     if ( fOK )
@@ -708,8 +708,8 @@ USHORT FillExtStructure
       pByte += pTMXTargetRecord->usTarget;
 
       //calculate length of target string
-      ulTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
-      fOK = ( ulTargetLen < MAX_SEGMENT_SIZE * sizeof(WCHAR) );
+      lTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
+      fOK = ( lTargetLen < MAX_SEGMENT_SIZE * sizeof(WCHAR) );
     } /* endif */
 
     // GQ 2008/06/18 Check if target string data is valid
@@ -726,9 +726,10 @@ USHORT FillExtStructure
     if ( fOK )
     {
       //copy target string
-        ulTargetLen = EQFCompress2Unicode( pTargetString, pByte, ulTargetLen );
-        if ( ulTargetLen < MAX_SEGMENT_SIZE ) {
-           pTargetString[ulTargetLen] = EOS;
+        lTargetLen = EQFCompress2Unicode( pTargetString, pByte, lTargetLen );
+        if ( lTargetLen < MAX_SEGMENT_SIZE ){
+          if( lTargetLen >= 0 )
+            pTargetString[lTargetLen] = EOS;
         } else {
            fOK = FALSE; // invalid string length
         }
@@ -746,14 +747,16 @@ USHORT FillExtStructure
       //add tags to target string if flag set to true
       if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
       {
-        AddTagsToStringW( pTargetString, &ulTargetLen,
+        AddTagsToStringW( pTargetString, &lTargetLen,
                          (PTMX_TAGTABLE_RECORD)pByte, pstExt->szTarget );
       }
       else
       {
         //else copy string
-        memcpy( pstExt->szTarget, pTargetString, ulTargetLen * sizeof(CHAR_W));
-        pstExt->szTarget[ulTargetLen] = EOS;
+        if(lTargetLen >= 0){
+          memcpy( pstExt->szTarget, pTargetString, lTargetLen * sizeof(CHAR_W));
+          pstExt->szTarget[lTargetLen] = EOS;
+        }
       } /* endif */
 
       //position at target control block

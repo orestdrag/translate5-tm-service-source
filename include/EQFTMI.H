@@ -1298,7 +1298,7 @@ USHORT ExactTest( PTMX_CLB, PTMX_RECORD, PTMX_GET_W, PTMX_SENTENCE,
                   PTMX_MATCH_TABLE_W, PUSHORT, ULONG );
 
 BOOL AddTagsToString( PSZ, PULONG, PTMX_TAGTABLE_RECORD, PSZ );
-BOOL AddTagsToStringW( PSZ_W, PULONG, PTMX_TAGTABLE_RECORD, PSZ_W );
+BOOL AddTagsToStringW( PSZ_W, PLONG, PTMX_TAGTABLE_RECORD, PSZ_W );
 
 INT CompCount( const void *, const void * );
 INT CompCountVotes( const void *, const void * );
@@ -1312,7 +1312,7 @@ USHORT GetFuzzyMatch( PTMX_CLB, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W, P
 extern "C" USHORT TmtXExtract( PTMX_CLB, PTMX_EXT_IN_W, PTMX_EXT_OUT_W );
 USHORT FillExtStructure( PTMX_CLB, PTMX_TARGET_RECORD,
                          PTMX_TARGET_CLB,
-                         PSZ_W, PULONG, PTMX_EXT_W );
+                         PSZ_W, PLONG, PTMX_EXT_W );
 
 // TM segment update prototypes
 USHORT TmtXUpdSeg

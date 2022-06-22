@@ -257,6 +257,12 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
         return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     }
     PUCHAR p = &(pFb->data[offset]);
+    //
+    if(CheckLogLevel(DEVELOP)){
+        std::string msg = std::string(__func__) + ":: fName = " + fName + "; buff size = " + toStr(buffSize) + "; data.size = " + toStr(pFb->data.size()) + "; offset = "+ toStr(offset) + ";";
+        LogMessage(DEVELOP, msg.c_str());
+    }
+    //
     memcpy(buff, p, buffSize);
     bytesRead = buffSize;
     LogMessage6(INFO, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
@@ -530,24 +536,24 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
 
-        LogMessage6(INFO,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
+        LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
-        LogMessage4(INFO, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
+        LogMessage4(DEBUG, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
 
-        LogMessage6(INFO,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
+        LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());
 
         #ifndef TEMPORARY_HARDCODED
-        {
+        if(CheckLogLevel(DEBUG)){
             std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\n";
             for (auto it = getFileBufferInstance()->begin(); it != getFileBufferInstance()->end(); ++it)
             {
                 filesInBuf += it->first + '\n';
             }
-            LogMessage(INFO, filesInBuf.c_str());
+            LogMessage(DEBUG, filesInBuf.c_str());
         }
 
         #endif 
@@ -572,7 +578,7 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
 
             pFb = &(*getFileBufferInstance())[fName]; 
             if(offset <= fSize){       
-                LogMessage4(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", 
+                LogMessage4(DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", 
                     toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str());
                 pFb->offset = offset;
             }else{
@@ -580,7 +586,7 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
                         toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str(), " because it's bigger than size:", toStr(fSize).c_str());
             }
         }else{
-            LogMessage2(INFO, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
+            LogMessage2(DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
         }
     }else{
         LogMessage(ERROR, "FilesystemHelper::SetOffsetInFilebuffer -> file pointer is null");
