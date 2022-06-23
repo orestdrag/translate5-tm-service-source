@@ -72,6 +72,8 @@ typedef struct _TRANSACTLOG
 } TRANSACTLOG;
 
 static TRANSACTLOG *pTransActLog = NULL;
+constexpr int RequestAdditionalLogLevel = DEBUG;
+constexpr int RequestTransactionLogLevel = TRANSACTION;
 
 inline std::string ToString(TRANSACTID id)
 {
@@ -90,9 +92,6 @@ inline std::string ToString(TRANSACTID id)
     auto   it  = IdEnumToStringsMap.find(id);
     return it == IdEnumToStringsMap.end() ? "Out of range" : it->second;    
 }
-
-int AddToTransActLog( TRANSACTID Id, const char *pszMemory );
-int TransActDone( int iTransActIndex );
 
 void ServiceThread(const signal_handler& sh)
 {
@@ -113,17 +112,14 @@ void delete_method_handler( const shared_ptr< Session > session )
   std::string strType = request->get_header( "Content-Type", "" );
   string strTM = request->get_path_parameter( "id", "" );
   restoreBlanks( strTM );
-  int iTransActIndex = AddToTransActLog( DELETE_MEMORY_TRANSACTID, strTM.c_str() );
 
-  LogMessage6(TRANSACTION,"==== processing DELETE request, content type=",strType.c_str(),"; content length=", toStr(content_length).c_str(), "; mem=", strTM.c_str() );
+  LogMessage2(RequestTransactionLogLevel, "processing DELETE MEMORY request, mem = ", strTM.c_str() );
 
   string strResponseBody;
   int rc = pMemService->deleteMem( strTM, strResponseBody );
   session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
 
-  TransActDone( iTransActIndex );
-
-  LogMessage4(TRANSACTION,"==== processing DELETE request...Done, , RC=",toStr(rc).c_str(),"; strResponseBody=", strResponseBody.c_str() );
+  LogMessage4(RequestAdditionalLogLevel,"DELETE MEMORY request::Done, , RC=",toStr(rc).c_str(),"; strResponseBody=", strResponseBody.c_str() );
 }
 
 void get_memory_method_handler( const shared_ptr< Session > session )
@@ -133,34 +129,25 @@ void get_memory_method_handler( const shared_ptr< Session > session )
   std::string strAccept = request->get_header( "Accept", "" );
   string strTM = request->get_path_parameter( "id", "" );
   restoreBlanks( strTM );
-  int iTransActIndex = AddToTransActLog( GET_MEMORY_TRANSACTID, strTM.c_str() );
 
-  LogMessage4(TRANSACTION,"get_memory_method_handler::==== processing GET memory request, Accept = ", strAccept.c_str(), "; mem = ", strTM.c_str());
+  LogMessage5(RequestTransactionLogLevel, "processing EXPORT MEMORY request, Accept = \"", strAccept.c_str(), "\"; mem = \"", strTM.c_str(), "\"");
 
   restbed::Bytes vMemData;
   int rc = pMemService->getMem( strTM, strAccept, vMemData );
   
   session->close( rc, vMemData, { { "Content-Length", ::to_string( vMemData.size() ) },{ "Content-Type", strAccept.c_str() },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-  TransActDone( iTransActIndex );
-  LogMessage2(TRANSACTION,"get_memory_method_handler::==== processing GET memory request..Done, RC = ", toStr(rc).c_str());
+  LogMessage2(RequestAdditionalLogLevel,"EXPORT memory request::Done, RC = ", toStr(rc).c_str());
 }
 
 void get_method_handler(const shared_ptr< Session > session)
 {
 	const auto request = session->get_request();
 
-	size_t content_length = request->get_header("Content-Length", 0);
-	std::string strType = request->get_header("Content-Type", "");
-  {
-    char buffer [250];
-    sprintf(buffer, "==== processing GET request, content type=\"%s\", content length=%ld====\n", strType.c_str(), content_length);
-    LogMessage(TRANSACTION, buffer);
-  }
-
+  LogMessage(RequestTransactionLogLevel, "processing GET LIST OF MEMORIES request");
   std::string strResponseBody = "Sample text";
   int ret = pMemService->list( strResponseBody );
   session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-  LogMessage2(TRANSACTION, "get_method_handler done, strResponceBody: ", strResponseBody.c_str());
+  LogMessage4(RequestAdditionalLogLevel, "GET LIST OF MEMORIES done, strResponceBody: \"", strResponseBody.c_str(), "\" RC = ", toStr(OK).c_str());
 }
 
 void getStatus_method_handler( const shared_ptr< Session > session )
@@ -169,21 +156,20 @@ void getStatus_method_handler( const shared_ptr< Session > session )
 
   string strTM = request->get_path_parameter( "id", "" );
   restoreBlanks( strTM );
-  int iTransActIndex = AddToTransActLog( GET_STATUS_TRANSACTID, strTM.c_str() );
 
-  LogMessage3(TRANSACTION, "getStatus_method_handler::==== processing GET Status request mem=\"",strTM.c_str() ,"\"====\n");
+  LogMessage3(RequestTransactionLogLevel, "processing GET MEM STATUS request, mem=\"",strTM.c_str() ,"\"");
 
   string strResponseBody;
   int iRC = pMemService->getStatus( strTM, strResponseBody );
   session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-  TransActDone( iTransActIndex );
+  
 }
 
 
 void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session )
 {
   const auto request = session->get_request();
-  LogMessage(TRANSACTION, "called saveAllOpenedTMService_method_handler::");
+  LogMessage(RequestTransactionLogLevel, "processing saveAllOpenedTMService_method_handler");
 
   string strResponseBody;
   int iRC = pMemService->saveAllTmOnDisk( strResponseBody );
@@ -200,12 +186,13 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
   const auto request = session->get_request();
   int iRC;
   string strResponseBody;
-  
-  LogMessage(TRANSACTION, "called shutdownService_method_handler::");
+   
   {
     if( request->has_query_parameter("dontsave") ){
+     LogMessage(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned off");
       strResponseBody = "{\n    'responce': 'shuting down service without saving tms'\n}";
     }else{
+      LogMessage(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned on");
       saveAllOpenedTMService_method_handler(session);
       //iRC = pMemService->saveAllTmOnDisk( strResponseBody );
     }
@@ -246,25 +233,24 @@ void postImport_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing POST mem/import request, content type=\"", strType.c_str(),"\", content length=", toStr(content_length).c_str());
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
-    LogMessage2(TRANSACTION, __func__, ":: data fetched");
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
-    int iTransActIndex = AddToTransActLog( POST_IMPORT_TRANSACTID, strTM.c_str() );
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    LogMessage3(TRANSACTION, "\n===================\n    Memory name = ", strTM.c_str(), //"\n    Input = ", strInData.c_str(), 
-    "\n==================\n");
+    if(CheckLogLevel(RequestTransactionLogLevel)){
+      std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
+      LogMessage6(RequestTransactionLogLevel, "processing MEM IMPORT request, Memory name = \"", strTM.c_str(), "\"\n Input(truncated) = \n\"", truncatedInput.c_str(), 
+      "\"\n content length = ", toStr(body.size()).c_str());
+    }
 
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     
-    TransActDone( iTransActIndex );
-    LogMessage5(TRANSACTION, "...Done, RC=", toStr(rc).c_str(),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
+    LogMessage5(RequestAdditionalLogLevel, "MEM IMPORT::Done, RC=", toStr(rc).c_str(),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
   } );
 }
 
@@ -274,21 +260,20 @@ void post_method_handler( const shared_ptr< Session > session )
 
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
-  LogMessage3(TRANSACTION, "==== processing POST request, content type=\"%s\", content length=%ld====\n", strType.c_str(), toStr(content_length).c_str() );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
-    int iTransActIndex = AddToTransActLog( POST_CREATEMEM_TRANSACTID, "" );
     string strInData = string( body.begin(), body.end() );
-    LogMessage2(TRANSACTION, "Input: ", strInData.c_str() );
+    LogMessage4(RequestTransactionLogLevel, "processing CREATE MEM request,",
+             //" content type, content type=\"", strType.c_str(),"\" content length = ", toStr(content_length).c_str(), 
+            " Input: \"", strInData.c_str(), "\"" );
     string strResponseBody;
     
     int rc = pMemService->createMemory( strInData, strResponseBody );
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     
-    TransActDone( iTransActIndex );
-    LogMessage4(TRANSACTION, "post_method_handler done, RC=", toStr(rc).c_str(),"; Output: ", strResponseBody.c_str());
+    LogMessage4(RequestAdditionalLogLevel, "CREATE MEM::done, RC=", toStr(rc).c_str(),"; Output: ", strResponseBody.c_str());
   } );
 }
 
@@ -299,7 +284,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing tag replacement request, content type=\"",strType.c_str(),"\", content length=", toStr( content_length ).c_str() );
+  LogMessage4(RequestAdditionalLogLevel, "processing TAG REPLACEMENT request, content type=\"",strType.c_str(),"\", content length=", toStr( content_length ).c_str() );
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
@@ -327,7 +312,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
         rc = factory->parseJSONGetNext( parseHandle, name, value );
         if ( rc == 0 )
         {      
-          LogMessage5(DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
+          LogMessage5(RequestAdditionalLogLevel, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
           if ( strcasecmp( name.c_str(), "src" ) == 0 )
           {
             strSrcData = value;
@@ -359,7 +344,7 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
       { "Content-Type", "application/json" },
       { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-    LogMessage5(TRANSACTION,  "...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
+    LogMessage5(RequestAdditionalLogLevel,  "Tag replacement::done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   });
 }
 
@@ -370,22 +355,18 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION, "==== processing POST mem/fuzzysearch request, content type=\"",strType.c_str(),"\", content length=", toStr( content_length ).c_str() );
-
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
-    int iTransActIndex = AddToTransActLog( POST_FUZZYSEARCH_TRANSACTID, strTM.c_str() );
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody = "{}";
-    LogMessage5(TRANSACTION,  "Memory name=", strTM.c_str() ,"\nInput:\n-----\n",strInData.c_str(),"\n----" );
+    LogMessage5(RequestTransactionLogLevel, "processing FUZZY SEARCH request Memory name = \"", strTM.c_str() ,"\"\nInput:\n-----\n\"",strInData.c_str(),"\"\n----" );
     int rc = pMemService->search( strTM, strInData, strResponseBody );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-    TransActDone( iTransActIndex );
-    LogMessage5(TRANSACTION,  "...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
+    LogMessage5(RequestAdditionalLogLevel,  "FUZZY SEARCH::Done! RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   } );
 }
 
@@ -396,24 +377,20 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::starting,  content type = ", strType.c_str(), ";  content length= = ", toStr(content_length).c_str());
-
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
-    int iTransActIndex = AddToTransActLog( POST_CONCORDANCE_TRANSACTID, strTM.c_str() );
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
-    LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler:: Memory name = ", strTM.c_str(), "; Input: ", strInData.c_str());
-
+    LogMessage6(RequestTransactionLogLevel, "processing CONCORDANCE SEARCH request ", "Memory name = \"", strTM.c_str() ,"\"\nInput:\n-----\n\"",strInData.c_str(),"\"\n----" );
+    
     int rc = pMemService->concordanceSearch( strTM, strInData, strResponseBody );
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
-    TransActDone( iTransActIndex );
-    LogMessage4(TRANSACTION,"postConcordanceSearch_method_handler::Done! RC = ", toStr(rc).c_str(), "; Output = ", strResponseBody.c_str());
+    LogMessage4(RequestAdditionalLogLevel,"CONCORDANCE SEARCH::Done! RC = ", toStr(rc).c_str(), "; Output = ", strResponseBody.c_str());
   } );
 }
 
@@ -424,26 +401,21 @@ void postEntry_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage5(TRANSACTION, "==== processing POST mem/entry request, content type=\"",
-        strType.c_str(),"\", content length=",toStr(content_length).c_str(),"; ====\n" );
-
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
-    int iTransActIndex = AddToTransActLog( POST_UPDATEENTRY_TRANSACTID, strTM.c_str() );
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
 
-    LogMessage5(TRANSACTION, "Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
+    LogMessage5(RequestTransactionLogLevel, "processing ENTRY UPDATE request, Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
     int rc = pMemService->updateEntry( strTM, strInData, strResponseBody );
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     
-    TransActDone( iTransActIndex );
-    LogMessage7(TRANSACTION,"postEntry_method_handler::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
+    LogMessage7(RequestAdditionalLogLevel,"ENTRY UPDATE::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );
 }
 
@@ -455,32 +427,27 @@ void postEntryDelete_method_handler( const shared_ptr< Session > session )
   size_t content_length = request->get_header( "Content-Length", 0 );
   std::string strType = request->get_header( "Content-Type", "" );
 
-  LogMessage5(TRANSACTION, "==== processing POST entry DELETE request, content type=\"",
-        strType.c_str(),"\", content length=",toStr(content_length).c_str(),"; ====\n" );
-
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
     const auto request = session->get_request();
     string strTM = request->get_path_parameter( "id", "" );
     restoreBlanks( strTM );
-    int iTransActIndex = AddToTransActLog( POST_DELETEENTRY_TRANSACTID, strTM.c_str() );
 
     string strInData = string( body.begin(), body.end() );
     string strResponseBody;
 
-    LogMessage6(TRANSACTION,__func__, "Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
+    LogMessage5(RequestTransactionLogLevel, "processing ENTRY DELETE request, Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
     int rc = pMemService->deleteEntry( strTM, strInData, strResponseBody );
     
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
     
-    TransActDone( iTransActIndex );
-    LogMessage8(TRANSACTION,__func__, "::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
+    LogMessage7(RequestAdditionalLogLevel, "ENTRY DELETE ::Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );
 }
 
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
-  LogMessage(TRANSACTION, "Try prepare otm memory service");
+  LogMessage(TRANSACTION, "Trying to prepare otm memory service");
   pMemService = OtmMemoryServiceWorker::getInstance();
   if ( pMemService == NULL )
   {
@@ -519,7 +486,7 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
             uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
             uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, "33"));
         }else{
-          LogMessage2(ERROR, "can't open t5memory.conf, path = ", path.c_str());
+          LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
         }
     }
     
@@ -533,9 +500,9 @@ BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
     //From here we have logging in file turned on
     DesuppressLoggingInFile();
 
-    LogMessage8(INFO, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", toStr(uiPort).c_str(), "; Worker threads = ", toStr(uiWorkerThreads).c_str(),
+    LogMessage8(TRANSACTION, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", toStr(uiPort).c_str(), "; Worker threads = ", toStr(uiWorkerThreads).c_str(),
             "; timeout = ", toStr(uiTimeOut).c_str());
-    LogMessage6(INFO,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
+    LogMessage6(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
                           "; triples_threshold = ", toStr(uiThreshold));
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
@@ -658,69 +625,6 @@ void SetLogFile( FILE *hfLog )
   if ( pMemService != NULL ) pMemService->setLogFile( hfLog );
 }
 
-// add a transaction to our transaction log
-int AddToTransActLog( TRANSACTID Id, const char *pszMemory )
-{
-  // return when no transaction log array exists
-  if ( pTransActLog == NULL ) return( -1 );
-
-  // find a free slot in the transaction log array
-  int i = 0;
-  int iOldestEntry = -1;
-  while ( (i < NUM_OF_TRANSACTENTRIES) && (pTransActLog[i].Id != UNUSED_TRANSACTID) ) i++;
-
-  // if none found look for oldest completed transaction
-  if ( i >= NUM_OF_TRANSACTENTRIES )
-  {
-    i = 0;
-    time_t lOldestTime = 0;
-    while ( i < NUM_OF_TRANSACTENTRIES ) 
-    {
-      if ( pTransActLog[i].lStopTimeStamp != 0 ) // transaction completed?
-      {
-        if ( ( lOldestTime == 0 ) || ( lOldestTime > pTransActLog[i].lStopTimeStamp) )
-        {
-          lOldestTime = pTransActLog[i].lStopTimeStamp;
-          iOldestEntry = i;
-        }
-      }
-      i++;
-    }
-    i = iOldestEntry;
-  }
-
-  // return if no entry in transaction log is available
-  if ( ( i >= NUM_OF_TRANSACTENTRIES ) && ( iOldestEntry == -1 ) ) return( -1 );
-
-  // fill fields of found entry
-  TRANSACTLOG *pEntry = pTransActLog + i;
-  memset( pEntry, 0, sizeof( TRANSACTLOG ) );
-  pEntry->Id = Id;
-  time( &( pEntry->lStartTimeStamp ) );
-  strcpy( pEntry->szMemory, pszMemory );
-  std::string message = "Transaction " + ToString(Id) + " started at " + to_string(pEntry->lStartTimeStamp) + " timestamp with pszMemory = " + pszMemory;
-  LogMessage(TRANSACTION, message.c_str());
-  return( i );
-}
-
-// mark a transaction as completed
-int TransActDone( int iTransActIndex )
-{
-  // return when no transaction log array exists
-  if ( pTransActLog == NULL ) return( 0 );
-
-  // return when no valid index is given
-  if ( ( iTransActIndex < 0 ) || ( iTransActIndex >= NUM_OF_TRANSACTENTRIES ) ) return( 0 );
-
-  // set transaction stop time
-  pTransActLog[iTransActIndex].lStopTimeStamp = 0;
-  time( &(pTransActLog[iTransActIndex].lStopTimeStamp) );
-  std::string message = "Transaction " + ToString(pTransActLog[iTransActIndex].Id) + " finished at " + std::to_string(pTransActLog[iTransActIndex].lStartTimeStamp) + " timestamp iTransActIndex = " + to_string(iTransActIndex);
-  LogMessage(TRANSACTION, message.c_str());
-  return( 0 );
-}
-
-
 // convert time to a string
 void MakeDateTimeString( time_t lTime, char chDateDelim, char chDateTimeDelim, char chTimeDelim, char *pszDateTime )
 {
@@ -753,88 +657,6 @@ void MakeDateTimeString( time_t lTime, char chDateDelim, char chDateTimeDelim, c
   *pszDateTime = 0;
 }
 
-// write a timestamp to the log file
-std::string WriteTimeStamp( const char *pszPrefix, time_t lTime, FILE *hfLog )
-{
-  char szDateTime[20];
-  MakeDateTimeString( lTime, '/', ' ', ':', szDateTime );
-  return std::string(szDateTime);
-  //fwrite( pszPrefix, 1, strlen( pszPrefix ), hfLog );
-  //fwrite( szDateTime, 1, strlen( szDateTime ), hfLog );
-}
-
-// write a transaction log entry to a log file
-void WriteTransActLogEntry( TRANSACTLOG *pEntry, FILE *hfLog )
-{
-  std::string pszFunction = "UNKNOWN";
-  switch ( pEntry->Id )
-  {
-    case UNUSED_TRANSACTID: return; break;
-    case GET_LISTMEM_TRANSACTID: pszFunction = "GET-LISTMEM"; break;
-    case POST_CREATEMEM_TRANSACTID: pszFunction = "POST-CREATEMEM"; break;
-    case POST_IMPORT_TRANSACTID: pszFunction = "POST-IMPORTMEM"; break;
-    case POST_FUZZYSEARCH_TRANSACTID: pszFunction = "POST-FUZZYSEARCH"; break;
-    case POST_CONCORDANCE_TRANSACTID: pszFunction = "POST-CONCORDANCE"; break;
-    case POST_UPDATEENTRY_TRANSACTID: pszFunction = "POST-UPDATEENTRY"; break;
-    case DELETE_MEMORY_TRANSACTID: pszFunction = "DELETE-MEM"; break;
-    case GET_MEMORY_TRANSACTID: pszFunction = "GET-MEMORY"; break;
-    case GET_STATUS_TRANSACTID: pszFunction = "GET-STATUS"; break;
-    default: break;
-  }
-
-  pszFunction += WriteTimeStamp( "(\tStart=", pEntry->lStartTimeStamp, hfLog );
-  if ( pEntry->lStopTimeStamp != 0 )
-  {
-    //fwrite( " ", 1, 1, hfLog );
-    pszFunction += WriteTimeStamp( ";\tStop=", pEntry->lStopTimeStamp, hfLog );
-  }
-
-  if ( pEntry->szMemory[0] != 0 )
-  {
-    fprintf( hfLog, " Mem=%s", pEntry->szMemory );
-  }
-  LogMessage2(TRANSACTION, pszFunction.c_str(), "\t)\n");
-}
-
-// compare time stamps of two transaction log entries
-int TransActLogCompare( const void * pElem1, const void * pElem2 )
-{
-  int iIndex1 = *( (int *)pElem1 );
-  int iIndex2 = *( (int *)pElem2 );
-  return( pTransActLog[iIndex1].lStartTimeStamp - pTransActLog[iIndex2].lStartTimeStamp );
-}
-
-// write transaction log to a file
-void WriteTransActLog( FILE *hfLog )
-{
-  // make sorted array for the access to the transaction log 
-  int aiSortedArray[NUM_OF_TRANSACTENTRIES];
-  for ( int i = 0; i < NUM_OF_TRANSACTENTRIES; i++ ) aiSortedArray[i] = i;
-  qsort( (void *)aiSortedArray, (size_t)NUM_OF_TRANSACTENTRIES, (size_t)sizeof(int), TransActLogCompare );
-
-  // list all incomplete transactions
-  fputs( "Incomplete transactions:\n", hfLog );
-  for ( int i = 0; i < NUM_OF_TRANSACTENTRIES; i++ )
-  {
-    TRANSACTLOG *pEntry = pTransActLog + aiSortedArray[i];
-    if ( (pEntry->Id != UNUSED_TRANSACTID) && (pEntry->lStopTimeStamp == 0) )
-    {
-      WriteTransActLogEntry( pEntry, hfLog );
-    }
-  }
-
-  // list all completed transactions
-  fputs( "\nRecently completed transactions:\n", hfLog );
-  for ( int i = 0; i < NUM_OF_TRANSACTENTRIES; i++ )
-  {
-    TRANSACTLOG *pEntry = pTransActLog + aiSortedArray[i];
-    if ( ( pEntry->Id != UNUSED_TRANSACTID ) && ( pEntry->lStopTimeStamp != 0 ) )
-    {
-      WriteTransActLogEntry( pEntry, hfLog );
-    }
-  }
-}
-
 // write crash log
 void WriteCrashLog( char *pszLogDir )
 {
@@ -849,7 +671,7 @@ void WriteCrashLog( char *pszLogDir )
   if ( hfLog )
   {
     fprintf( hfLog, "OtmMemoryService terminated abnormally (unhandled exception)\n\n" );
-    WriteTransActLog( hfLog );
+    
     fclose( hfLog );
   }
 }

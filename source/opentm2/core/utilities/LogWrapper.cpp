@@ -94,7 +94,8 @@ int writeLog(std::string& message, int logLevel){
 
         if( fileLoggingSuppressed == false){
             #ifdef LOGERRORSINOTHERFILE
-                if(logLevel >= ERROR){
+                if(logLevel >= ERROR  // ONLY IMPORTANT ISSUES SHOULD BE LOGGED HERE
+                        && logLevelTreshold < ERROR){ // AND ONLY IF REGULAR LOG THRESHOLD IS LESS THAN ERROR, TO AVOID DUBLICATES
                     getLogErrorFile() << message;
                     //logErrorF << message ; 
                     //logErrorF.flush();
@@ -206,7 +207,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
 
     logMessage += ": [" + getTimeStr() + "] :: " + message; 
 
-    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 256){
+    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
         logMessage.resize(256);
         logMessage += ". . . ";
     }

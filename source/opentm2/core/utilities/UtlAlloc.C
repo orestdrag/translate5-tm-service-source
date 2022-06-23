@@ -170,8 +170,8 @@ USHORT UtlIntFree
     /* display error message - someone killed us...                   */
     /******************************************************************/
     //usRC = ERROR_INTERNAL;
-    LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
-      toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
+    //LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
+    //  toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
     //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
   /******************************************************************/
