@@ -20,6 +20,7 @@
 #include <xercesc/sax/HandlerBase.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
+#include <string>
 
 //#pragma pack( pop )
 
@@ -200,11 +201,8 @@ LanguageFactory::~LanguageFactory(void)
 */
 LanguageFactory* LanguageFactory::getInstance()
 {
-	if ( pInstance == NULL )
-	{
-		pInstance = new LanguageFactory();
-	}
-	return pInstance;
+	static LanguageFactory factory;
+	return &factory;
 }
 
 /* \brief Checks if the given language is a valid target language
@@ -768,12 +766,10 @@ LangParseHandler::~LangParseHandler()
 
 void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
 {
-    attributes;
     std::u16string u16name((char16_t*)name);
     CurID = GetElementID( u16name );
     vELementStack.push_back( CurID );
     szDataW[0] = 0;
-    std::string sName = EncodingHelper::convertToUTF8(u16name);
     
     switch ( CurID )
     {
@@ -783,8 +779,11 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
         break;
       case UNKNOWN_ELEMENT:
       default:
-        //LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
-        //    EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", toStr(CurID).c_str() , "; skipping...");
+        if(CheckLogLevel(DEVELOP)){    
+          std::string sName = EncodingHelper::convertToUTF8(u16name);
+          LogMessage5(WARNING, "LangParseHandler::startElement::unknown_element found: ", 
+            EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", toStr(CurID).c_str() , "; skipping...");
+        }
         break;
     } /*endswitch */
 }
@@ -794,11 +793,8 @@ void LangParseHandler::endElement(const XMLCh* const name )
   CurID = vELementStack.back();
   vELementStack.pop_back();
 
-  name;
-
   // convert collected data to ASCII
-  std::u16string u16Data((char16_t*) this->szDataW);
-  std::string sData = EncodingHelper::convertToUTF8(u16Data);
+  std::string sData = EncodingHelper::convertToUTF8(this->szDataW);
 
   switch ( CurID )
   {
@@ -844,20 +840,28 @@ void LangParseHandler::endElement(const XMLCh* const name )
       break;
     case UNKNOWN_ELEMENT:
     default:
+      if(CheckLogLevel(DEVELOP)){
+        LogMessage3(WARNING,__func__,":: UNKNOWN_ELEMENT FOUND: ", sData.c_str());
+      }
       break;
   } /*endswitch */
 }
 
 void LangParseHandler::characters(const XMLCh* const chars, const XMLSize_t length)
 {
-  PSZ_W pszChars = (PSZ_W)chars;
+  auto wstr = EncodingHelper::toWChar(std::u16string((char16_t*)chars).c_str());
 
   // add data to current data buffer 
   int iCurLen = wcslen( szDataW );
-  if ( (iCurLen + length + 1) < (sizeof(szData)/sizeof(CHAR_W)))
+  if ( (iCurLen + wstr.size() + 1) < (sizeof(szData)/sizeof(szData[0])))
   {
-    wcsncpy( szDataW + iCurLen, pszChars, length );
-    szDataW[iCurLen+length] = 0;
+    wcsncpy( szDataW + iCurLen, wstr.c_str(), wstr.size() );
+    szDataW[iCurLen+wstr.size()] = 0;
+  }else{
+    if(CheckLogLevel(DEVELOP)){
+      auto str = EncodingHelper::convertToUTF8(wstr.c_str());
+      LogMessage3(ERROR, __func__ , ":: (iCurLen + length + 1) >= (sizeof(szData)/sizeof(szData[0])), characters = ", str.c_str());
+    }
   } /* endif */
 }
 
@@ -878,14 +882,20 @@ void LangParseHandler::error(const SAXParseException& exception)
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
-    sprintf( this->szErrorText, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+    sprintf( this->szErrorText, "Error: %s at column %ld in line %ld", message, col, line );
     LogMessage2(ERROR, "LangParseHandler::error:: ", this->szErrorText);
     XMLString::release( &message );
 }
 
 void LangParseHandler::warning(const SAXParseException& exception)
 {
-  exception;
+    char* message = XMLString::transcode(exception.getMessage());
+    long line = (long)exception.getLineNumber();
+    long col = (long)exception.getColumnNumber();
+    this->fError = TRUE;
+    sprintf( this->szErrorText, "Warning: %s at column %ld in line %ld", message, col, line );
+    LogMessage2(WARNING, "LangParseHandler::warning:: ", this->szErrorText);
+    XMLString::release( &message );
 }
 
 
