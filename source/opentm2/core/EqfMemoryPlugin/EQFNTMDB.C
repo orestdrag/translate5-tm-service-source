@@ -1372,7 +1372,6 @@ VOID QDAMSetrecData_V3
    PCHAR   pData = NULL;
    PCHAR   pEndOfRec;
    PUSHORT  pusOffset;
-   usVersion;
 
    // get max pointer value
    pEndOfRec = (PCHAR)&(pRecord->contents) + BTREE_REC_SIZE_V3;
@@ -1854,7 +1853,7 @@ SHORT QDAMDictExactLocal
                  }
                  else if ( *pulLength < recData.ulLen )
                  {
-                   LogMessage4(ERROR, "BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
+                   LogMessage5(ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;
                  }

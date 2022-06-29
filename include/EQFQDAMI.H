@@ -114,12 +114,6 @@ typedef enum _SEARCHTYPE
     USHORT  usOffset;        // record offset
     ULONG   ulLen;           // record length
   }  RECPARAM, * PRECPARAM;
-  typedef struct _RECPARAMOLD
-  {
-    USHORT  usNum;           // record number
-    USHORT  usOffset;        // record offset
-    SHORT  sLen;             // record length
-  }  RECPARAMOLD, * PRECPARAMOLD;
 
 typedef struct _STENCODEBITS
 {
@@ -369,7 +363,7 @@ typedef struct _BTREEHEADRECORD
   EQF_BOOL  fOpen;                                // open flag/corruption flag
   USHORT    usFirstNode;                          // first node record
   USHORT    usFirstLeaf;                          // first leaf record
-   RECPARAMOLD  DataRecList[ MAX_LIST ];          // last used data records
+  RECPARAM  DataRecList[ MAX_LIST ];          // last used data records
   EQF_BOOL  fTerse;                               // tersing requested
   BYTE      chCollate[COLLATE_SIZE];              // collating sequence to use
   BYTE      chCaseMap[COLLATE_SIZE];              // case mapping to be used

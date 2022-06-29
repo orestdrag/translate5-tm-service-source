@@ -122,13 +122,7 @@
     ULONG   ulLen;           // record length
   }  RECPARAM, * PRECPARAM;
 
-  typedef struct _RECPARAMOLD
-  {
-    USHORT  usNum;           // record number
-    USHORT  usOffset;        // record offset
-    SHORT  sLen;             // record length
-  }  RECPARAMOLD, * PRECPARAMOLD;
-
+ 
 /*****************************************************************************/
 /* BTREEHEADRECORD is the record at the start of a B-tree file.  It is used  */
 /* to confirm that the file is a valid one; it holds  database wide          */
@@ -150,7 +144,7 @@ typedef struct _BTREEHEADRECORD
   EQF_BOOL  fOpen;                                // open flag/corruption flag
   USHORT    usFirstNode;                          // first node record
   USHORT    usFirstLeaf;                          // first leaf record
-   RECPARAMOLD  DataRecList[ MAX_LIST ];          // last used data records
+  RECPARAM  DataRecList[ MAX_LIST ];          // last used data records
   EQF_BOOL  fTerse;                               // tersing requested
   BYTE      chCollate[COLLATE_SIZE];              // collating sequence to use
   BYTE      chCaseMap[COLLATE_SIZE];              // case mapping to be used
@@ -1268,14 +1262,13 @@ SHORT QDAMAllocTempAreas
   // DataRecList in header is in old format (RECPARAMOLD),
   // so convert in-memory copy of list (in the RECPARAM format) to
   // the old format
-  LogMessage(INFO, "TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
+  //LogMessage2(INFO,__func__, "::TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
   {
-    int i;
-    for ( i = 0; i < MAX_LIST; i++ )
+    for (int i = 0; i < MAX_LIST; i++ )
     {
       HeadRecord.DataRecList[i].usOffset = pBT->DataRecList[i].usOffset;
       HeadRecord.DataRecList[i].usNum    = pBT->DataRecList[i].usNum;
-      HeadRecord.DataRecList[i].sLen     = (SHORT)pBT->DataRecList[i].ulLen;
+      HeadRecord.DataRecList[i].ulLen     = (SHORT)pBT->DataRecList[i].ulLen;
     } /* endfor */
   }
   HeadRecord.fTerse = (EQF_BOOL) pBT->fTerse;
@@ -2673,18 +2666,6 @@ SHORT QDAMWriteRecord_V3
 //                        set BTREE_READ_ERROR
 //                      endif
 //------------------------------------------------------------------------------
-SHORT QDAMReadRecordFromDisk_V2
-(
-   PBTREE         pBTIda,
-   USHORT         usNumber,
-   PBTREEBUFFER_V2 * ppReadBuffer,
-   BOOL           fNewRec              // allow new records flag
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID; 
-}
 
 
 //------------------------------------------------------------------------------
@@ -2731,16 +2712,6 @@ SHORT QDAMReadRecordFromDisk_V2
 //                    endif
 //                    return sRc;
 //------------------------------------------------------------------------------
-SHORT QDAMWRecordToDisk_V2
-(
-   PBTREE     pBTIda,                     // pointer to btree structure
-   PBTREEBUFFER_V2  pBuffer               // pointer to buffer to write
-)
-{  
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID;
-}
 
 
 //------------------------------------------------------------------------------
@@ -2845,18 +2816,6 @@ SHORT QDAMWRecordToDisk_V2
 //
 //     return sRc
 //------------------------------------------------------------------------------
-SHORT  QDAMReadRecord_V2
-(
-   PBTREE  pBTIda,
-   USHORT  usNumber,
-   PBTREEBUFFER_V2 * ppReadBuffer,
-   BOOL    fNewRec
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID; 
-}
 
 SHORT  QDAMReadRecord_V3
 (
@@ -2975,16 +2934,6 @@ SHORT QDAMAllocKeyRecords
 //                    endif
 //                    return sRc
 //------------------------------------------------------------------------------
-SHORT QDAMWriteRecord_V2
-(
-   PBTREE       pBTIda,
-   PBTREEBUFFER_V2 pBuffer
-)
-{
-   LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID;
-}
 
 
 //------------------------------------------------------------------------------
@@ -3709,13 +3658,12 @@ SHORT QDAMCheckForUpdates
           pBT->usFirstDataBuffer  = header.usFirstDataBuffer;
           // DataRecList in header is in old format (RECPARAMOLD),
           // so convert it to the new format (RECPARAM)
-          {
-            int i;
-            for ( i = 0; i < MAX_LIST; i++ )
+          {            
+            for (int i = 0; i < MAX_LIST; i++ )
             {
               pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
               pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
-              pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].sLen;
+              pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].ulLen;
             } /* endfor */
           }
           memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
@@ -3955,7 +3903,7 @@ RECPARAM  QDAMGetrecData_V3
    memcpy( &recData,         (PRECPARAM)  pData,    sizeof( RECPARAM ));
    memcpy( &recData.usNum,   (PUSHORT)    pData,    sizeof( USHORT )  );
    memcpy( &recData.usOffset,(PUSHORT)   (pData+2), sizeof( USHORT )  );
-   memcpy( &recData.ulLen,   (PULONG)    (pData+4), sizeof( PULONG )  );
+   //memcpy( &recData.ulLen,   (PULONG)    (pData+4), sizeof( PULONG )  );
    memcpy( &recData.ulLen,   (PULONG)    (pData+8), sizeof( PULONG )  );
    
    return ( recData );
@@ -5955,205 +5903,6 @@ SHORT QDAMUnTerseData
 //                    endif
 //
 //------------------------------------------------------------------------------
-SHORT QDAMGetszData_V2
-(
-   PBTREE    pBTIda,
-   RECPARAM  recDataParam,
-   PBYTE     pData,
-   PULONG    pulDataLen,
-   CHAR      chType                             // type of record key/data
-)
-{
-   SHORT sRc = 0;
-   PBTREEBUFFER_V2 pRecord;                         // pointer to record
-   PBTREEHEADER pHeader;                         // pointer to header
-   PCHAR        pTempData = NULL;                // pointer to data pointer
-   PCHAR        pStartData = (PCHAR)pData;       // pointer to data pointer
-   ULONG        ulLen = 0;                       // length of string
-   ULONG        ulTerseLen = 0;                  // length of tersed string
-   BOOL         fTerse = FALSE;                  // entry tersed??
-   PUSHORT      pusOffset = NULL;                // pointer to offset
-   ULONG        ulFitLen;                        // free to be filled length
-   USHORT       usNum;                           // record number
-   ULONG        ulLZSSLen;
-   PBTREEGLOB   pBT = pBTIda->pBTree;
-   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
-
-   USHORT       usLenFieldSize;                            // size of record length field
-
-   // get size of record length field   
-   usLenFieldSize = sizeof(ULONG);
-   
-
-   recDataParam.usNum = recDataParam.usNum + pBT->usFirstDataBuffer;
-   // get record and copy data
-   sRc = QDAMReadRecord_V2( pBTIda, recDataParam.usNum, &pRecord, FALSE  );
-   if ( !sRc )
-   {
-      BTREELOCKRECORD( pRecord );
-      fRecLocked = TRUE;
-      if ( TYPE( pRecord ) != chType )
-      {
-         sRc = BTREE_CORRUPTED;
-         ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 1, DB_GROUP, "" );
-      }
-      else
-      {
-         pusOffset = (PUSHORT) pRecord->contents.uchData;
-         pusOffset += recDataParam.usOffset;        // point to key
-         pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-         if ( *pusOffset > pBT->usBtreeRecSize )
-         {
-           sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, "" );
-         }
-         else
-         {           
-             ulLen = *((PULONG)pTempData);
-             if ( ulLen & QDAM_TERSE_FLAGL )
-              {
-                fTerse = TRUE;
-                ulLen &= ~QDAM_TERSE_FLAGL;
-                ulLZSSLen = ulLen;         // length of compressed record ....
-              } /* endif */
-           pTempData += sizeof(ULONG ); // get pointer to data
-#ifdef _DEBUG
-           {
-             CHAR szTemp[8];
-             sprintf( szTemp, "%ld", ulLen );
-             INFOEVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, recDataParam.usNum,
-                         DB_GROUP, szTemp );
-           }
-#endif
-           pHeader = &(pRecord->contents.header);
-         } /* endif */
-
-         /*************************************************************/
-         /* check if it is a valid length                             */
-         /*************************************************************/
-         if ( !sRc && (ulLen == 0) )
-         {
-           sRc = BTREE_CORRUPTED;
-           ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
-         } /* endif */
-       } /* endif */
-
-       if ( !sRc )
-       {
-         if ( *pulDataLen == 0 || !pData )
-         {
-            // give back only length
-            if ( fTerse )
-            {
-              // first field contains real length
-              *pulDataLen = LENGTHOFDATA(pBT,pTempData);
-            }
-            else
-            {
-               *pulDataLen = ulLen;    // give back only length
-            } /* endif */
-         }
-         else if ( *pulDataLen >= ulLen )
-         {
-            ulFitLen = pBT->usBtreeRecSize - sizeof(BTREEHEADER) - *pusOffset;
-            ulFitLen = ulLen < ulFitLen - usLenFieldSize ?  ulLen : ulFitLen - usLenFieldSize ;
-
-            if ( fTerse )
-            {
-               memcpy(pData,pTempData+usLenFieldSize,ulFitLen-usLenFieldSize);
-               ulTerseLen = LENGTHOFDATA(pBT,pTempData);
-               /**********************************************************/
-               /* adjust pointers                                        */
-               /**********************************************************/
-               ulLen -= ulFitLen;
-               pData += (ulFitLen - usLenFieldSize);
-            }
-            else
-            {
-               memcpy( pData, pTempData, ulFitLen );
-               *pulDataLen = ulLen;
-               /**********************************************************/
-               /* adjust pointers                                        */
-               /**********************************************************/
-               ulLen -= ulFitLen;
-               pData += ulFitLen;
-            } /* endif */
-
-
-            /**********************************************************/
-            /* copy as long as still data are available               */
-            /**********************************************************/
-            while ( !sRc && ulLen )
-            {
-               usNum = NEXT( pRecord );
-               BTREEUNLOCKRECORD( pRecord );
-               fRecLocked = FALSE;
-               if ( usNum )
-               {
-                  sRc = QDAMReadRecord_V2( pBTIda, usNum, &pRecord, FALSE  );
-                  if ( !sRc && TYPE( pRecord ) != DATA_NEXTNODE )
-                  {
-                    sRc = BTREE_CORRUPTED;
-                    ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 3, DB_GROUP, "" );
-                  } /* endif */
-                  if ( !sRc  )
-                  {
-                     BTREELOCKRECORD( pRecord );
-                     fRecLocked = TRUE;
-                     pusOffset = (PUSHORT) pRecord->contents.uchData;
-                     pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-
-                     ulFitLen =  LENGTHOFDATA( pBT, pTempData );
-                     ulFitLen =  ulLen < ulFitLen ? ulLen : ulFitLen ;
-                     pTempData += usLenFieldSize;      // get pointer to data
-
-                     memcpy( pData, pTempData, ulFitLen );
-                     ulLen -= ulFitLen;
-                     pData += ulFitLen;
-                  } /* endif */
-               }
-               else
-               {
-                 sRc = BTREE_CORRUPTED;
-                 ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 4, DB_GROUP, "" );
-               } /* endif */
-            } /* endwhile */
-            if ( !sRc && fTerse )
-            {
-              switch ( pBT->fTerse )
-              {
-                case  BTREE_TERSE_HUFFMAN :
-                  {
-                    sRc = QDAMUnTerseData( pBTIda, (PUCHAR)pStartData, ulTerseLen,
-                                           pulDataLen );
-                  }
-                  break;
-                default :
-                  sRc = BTREE_CORRUPTED;
-                  ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 5, DB_GROUP, "" );
-                  break;
-              } /* endswitch */
-            } /* endif */
-         }
-         else
-         {
-            sRc = BTREE_BUFFER_SMALL;
-         } /* endif */
-
-      } /* endif */
-      if ( fRecLocked )
-      {
-        BTREEUNLOCKRECORD( pRecord );
-      } /* endif */
-   } /* endif */
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMGETSZDATA_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-
-   return sRc;
-}
 SHORT QDAMGetszData_V3
 (
    PBTREE    pBTIda,
@@ -6898,27 +6647,7 @@ SHORT QDAMInsertKey_V3
 //                    copy it data description structure for return
 //
 //------------------------------------------------------------------------------
-RECPARAM  QDAMGetrecData_V2
-(
-   PBTREEBUFFER_V2  pRecord,
-   SHORT         sMid,                           // key number
-   USHORT        usVersion                       // version of database
-)
-{
-   PCHAR   pData = NULL;
-   RECPARAM      recData;               // data description structure
-   PUSHORT  pusOffset;
 
-   // use record number of passed entry , read in record and pass
-   // back pointer
-   pusOffset = (PUSHORT) pRecord->contents.uchData;
-   pusOffset += sMid;                            // point to key
-   pData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-   pData += sizeof(USHORT );                    // get pointer to datarec
-   memcpy( &recData, (PRECPARAM) pData, sizeof(RECPARAM ) );
-   
-   return ( recData );
-}
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6977,17 +6706,7 @@ RECPARAM  QDAMGetrecData_V2
 //                        read record
 //                    endwhile
 //------------------------------------------------------------------------------
-SHORT QDAMFindRecord_V2
-(
-    PBTREE   pBTIda,
-    PTMWCHAR  pKey,
-    PBTREEBUFFER_V2 * ppRecord
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID; 
-}
+
 
 
 SHORT QDAMKeyCompareNonUnicode
@@ -7062,6 +6781,7 @@ USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg )
 {
   return UtlSetFHandStateHwnd( hf, fsState, fMsg, (HWND)NULL );
 }
+
 USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
 {
    USHORT usRetCode = 0;               // function return code
@@ -7157,8 +6877,6 @@ SHORT  QDAMDictOpenLocal
    BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
    BOOL    fTransMem = FALSE;          // Transl. Memory...
    SHORT   sRc1;
-
-   sNumberOfBuffers;
    /*******************************************************************/
    /* allocate global area first ...                                  */
    /*******************************************************************/
@@ -7320,12 +7038,11 @@ SHORT  QDAMDictOpenLocal
              // DataRecList in header is in old format (RECPARAMOLD),
              // so convert it to the new format (RECPARAM)
              {
-               int i;
-               for ( i = 0; i < MAX_LIST; i++ )
+               for (int i = 0; i < MAX_LIST; i++ )
                {
                  pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
                  pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
-                 pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].sLen;
+                 pBT->DataRecList[i].ulLen    = header.DataRecList[i].ulLen;
                } /* endfor */
              }
              memcpy( pBT->chEntryEncode,header.chEntryEncode,ENTRYENCODE_LEN );
@@ -7559,20 +7276,6 @@ SHORT  QDAMDictOpenLocal
 //                    return record parameters
 //
 //------------------------------------------------------------------------------
-SHORT  QDAMAddToBuffer_V2
-(
-   PBTREE  pBTIda,                     // pointer to btree struct
-   PBYTE   pData,                      // pointer to data
-   ULONG   ulDataLen,                  // length of data to be filled in
-   PRECPARAM  precReturn               // pointer to return code
-)
-{
-   SHORT sRc = 0;                      // success indicator
-
-   LogMessage2(FATAL, __func__, "called commented out function QDAMAddToBuffer_V2");
-
-   return sRc;
-}
 
 
 
@@ -7601,17 +7304,7 @@ SHORT  QDAMAddToBuffer_V2
 //                    pass it back
 //
 //------------------------------------------------------------------------------
-PSZ_W QDAMGetszKey_V2
-(
-   PBTREEBUFFER_V2  pRecord,              // active record
-   USHORT  i,                          // get data term
-   USHORT  usVersion                   // version of database
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return L""; 
-}
+
 
 
 //------------------------------------------------------------------------------
@@ -7664,36 +7357,7 @@ PSZ_W QDAMGetszKey_V2
 //                      unlock record
 //                    endif
 //------------------------------------------------------------------------------
-SHORT QDAMLocateKey_V2
-(
-   PBTREE pBTIda,                         // pointer to btree structure
-   PBTREEBUFFER_V2 pRecord,               // record to be dealt with
-   PTMWCHAR pKey,                          // key to be searched
-   PSHORT  psKeyPos,                      // located key
-   SEARCHTYPE  searchType,                // search type
-   PSHORT  psNearPos,                     // near position
-   USHORT  searchSubType                  // search subtype for hyphenation
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID; 
-}
 
-
-SHORT QDAMInsertKey_V2
-(
-   PBTREE       pBTIda,
-   PBTREEBUFFER_V2 pRecord,               // record where key is to be inserted
-   PTMWCHAR      pKey,
-   RECPARAM   recKey,                  // position/offset for key
-   RECPARAM   recData                  // position/offset for data
-)
-{
-  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
-  throw;
-  return BTREE_INVALID; 
-}
 
 
 //------------------------------------------------------------------------------
@@ -7775,7 +7439,7 @@ SHORT QDAMDictInsertLocal
    if( pBT->bRecSizeVersion != BTREE_V3 )
    {
       LogMessage(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
-      throw
+      throw;
       sRc = BTREE_NOT_SUPPORTED;
    } /* endif */ 
    
@@ -8343,7 +8007,8 @@ SHORT QDAMLocSubstr_V3
             }
             else
             {
-               ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, "" );
+               //ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, "" );
+               LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 4");
                sRc = BTREE_BUFFER_SMALL;
             } /* endif */
          } /* endif */
