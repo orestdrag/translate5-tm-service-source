@@ -212,15 +212,15 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
   {
-    LogMessage2(INFO, "==EQFExportMem==, Options = ", toStr(lOptions).c_str());
+    LogMessage2(DEBUG, "==EQFExportMem==, Options = ", toStr(lOptions).c_str());
     if(pszMemName){
-      LogMessage2(INFO,"EqfExportMem:: Memory = ", pszMemName);
+      LogMessage2(DEBUG,"EqfExportMem:: Memory = ", pszMemName);
     }else{
       LogMessage(ERROR,"EqfExportMem:: Memory = NULL");
     }
 
     if(pszOutFile){
-      LogMessage2(INFO,"EqfExportMem:: Output File = ", pszOutFile);
+      LogMessage2(DEBUG,"EqfExportMem:: Output File = ", pszOutFile);
     }else{
       LogMessage(ERROR,"EqfExportMem:: Output File = NULL");
     }
@@ -251,7 +251,7 @@ USHORT EqfExportMem
     if(usRC){
       LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", toStr(usRC).c_str() );
     }else{ 
-      LogMessage(INFO,"end of function EqfExportMem::success ");
+      LogMessage(DEBUG,"end of function EqfExportMem::success ");
     }
   }
   return( usRC );
@@ -1055,7 +1055,7 @@ USHORT EqfUpdateMem
 
   if ( pData )
   {
-    LogMessage5( INFO, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
+    LogMessage5( DEBUG, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
   }else{
     LogMessage2( ERROR,__func__,"::pData is nullptr");
   } /* endif */
@@ -1066,7 +1066,7 @@ USHORT EqfUpdateMem
     usRC =  MemoryFactory::getInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
-  auto logLevel = usRC? ERROR : INFO;
+  auto logLevel = usRC? ERROR : DEBUG;
   LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
 
   return( usRC );

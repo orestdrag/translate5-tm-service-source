@@ -1803,7 +1803,7 @@ USHORT MemFuncPrepExport
   PPROCESSCOMMAREA pCommArea = NULL;   // ptr to commmunication area
 
   if(pszMemName && pszOutFile){
-    LogMessage6(INFO,"called MemFuncPrepExport memName = ", pszMemName, "; pszOutFile = ", pszOutFile, "; options = ", toStr(lOptions).c_str());
+    LogMessage6(DEBUG,"called MemFuncPrepExport memName = ", pszMemName, "; pszOutFile = ", pszOutFile, "; options = ", toStr(lOptions).c_str());
   }else{
     LogMessage2(ERROR,"called MemFuncPrepExport memName or output file path is NULL; options = ", toStr(lOptions).c_str());
   }
@@ -1814,7 +1814,6 @@ USHORT MemFuncPrepExport
   fOK = UtlAllocHwnd( (PVOID *)&pCommArea, 0L,
                      (LONG)sizeof(PROCESSCOMMAREA),
                      ERROR_STORAGE, HWND_FUNCIF );
-
 
   // allocate storage for the MEM_EXPORT_IDA
   if ( fOK )
@@ -1888,7 +1887,7 @@ USHORT MemFuncPrepExport
   {    
     pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
     if(pIDA->hFile){
-      LogMessage2(INFO,"MemFuncPrepExport:: opened output file, fName = ", pIDA->ControlsIda.szPathContent);
+      LogMessage2(DEBUG,"MemFuncPrepExport:: opened output file, fName = ", pIDA->ControlsIda.szPathContent);
     }else{
       LogMessage2(ERROR,"Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent);
       fOK = false;
@@ -2044,11 +2043,8 @@ USHORT MemFuncExportProcess
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PPROCESSCOMMAREA pCommArea;          // ptr to commmunication area
-  PMEM_EXPORT_IDA  pIDA;               // pointer to instance area
-
-  pCommArea = (PPROCESSCOMMAREA)pData->pvMemExportCommArea;
-  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
+  PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)pData->pvMemExportCommArea;  // ptr to commmunication area
+  PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
    switch ( pIDA->NextTask )
   {

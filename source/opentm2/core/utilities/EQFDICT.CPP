@@ -3903,7 +3903,6 @@ RECPARAM  QDAMGetrecData_V3
    memcpy( &recData,         (PRECPARAM)  pData,    sizeof( RECPARAM ));
    memcpy( &recData.usNum,   (PUSHORT)    pData,    sizeof( USHORT )  );
    memcpy( &recData.usOffset,(PUSHORT)   (pData+2), sizeof( USHORT )  );
-   //memcpy( &recData.ulLen,   (PULONG)    (pData+4), sizeof( PULONG )  );
    memcpy( &recData.ulLen,   (PULONG)    (pData+8), sizeof( PULONG )  );
    
    return ( recData );
@@ -4402,13 +4401,13 @@ SHORT  QDAMAddToBuffer_V3
    /* Enlarge pTempRecord area if it is not large enough to contain   */
    /* the data for this record                                        */
    /*******************************************************************/
-#ifdef _DEBUG
+  if(CheckLogLevel(DEBUG))
    {
-     CHAR szTemp[8];
-     sprintf( szTemp, "%ld", ulDataLen );
-     INFOEVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 4711, DB_GROUP, szTemp );
+    LogMessage3(DEBUG,__func__,":: data len = ", toStr(ulDataLen).c_str());
+     //CHAR szTemp[8];
+     //sprintf( szTemp, "%ld", ulDataLen );
+     //INFOEVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 4711, DB_GROUP, szTemp );
    }
-#endif
    if ( (ulDataLen + sizeof(ULONG)) > pBT->ulTempRecSize )
    {
      if ( UtlAlloc( (PVOID *)&(pBT->pTempRecord), pBT->ulTempRecSize, ulDataLen + sizeof(ULONG), NOMSG ) )
@@ -4422,8 +4421,6 @@ SHORT  QDAMAddToBuffer_V3
    } /* endif */
   
   usLenFieldSize = sizeof(ULONG);
- 
-
    pRecParam = pBT->DataRecList;
    /*******************************************************************/
    /* determine type of compression....                               */
@@ -5857,6 +5854,7 @@ SHORT QDAMUnTerseData
      }
      else
      {
+      LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 1");
       sRc = BTREE_BUFFER_SMALL;
      } /* endif */
    } /* endif */
@@ -6090,6 +6088,7 @@ SHORT QDAMGetszData_V3
          }
          else
          {
+            LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 3");
             sRc = BTREE_BUFFER_SMALL;
          } /* endif */
 
@@ -7470,6 +7469,9 @@ SHORT QDAMDictInsertLocal
       sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
       if ( !sRc )
       {
+        if(ulLen > TMX_REC_SIZE){
+          LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
+        }
         recData.ulLen = ulLen;
         sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
       } /* endif */
@@ -8930,9 +8932,7 @@ USHORT EQFNTMOrganizeIndex
 
   if ( !sRc )
   {
-    //LogMessage(WARNING, "TEMPORARY HARDCODED ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4 => = MAX_INDEX_LEN * sizeof(LONG) * 2");
     ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
-    //ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 2;
     if ( !UtlAlloc( (PVOID *)&pbData, 0, ulDataBufSize, ERROR_STORAGE ) ) 
     {
       sRc = ERROR_NOT_ENOUGH_MEMORY;

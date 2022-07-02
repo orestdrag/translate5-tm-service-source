@@ -265,7 +265,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     //
     memcpy(buff, p, buffSize);
     bytesRead = buffSize;
-    LogMessage6(INFO, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
+    LogMessage6(DEBUG, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
     return 0;
 }
 

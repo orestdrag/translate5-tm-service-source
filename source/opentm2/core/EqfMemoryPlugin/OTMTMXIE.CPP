@@ -2599,7 +2599,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       {
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
-        if(CheckLogLevel(INFO)){              
+        if(CheckLogLevel(DEBUG)){              
           LogMessage2(INFO, __func__, "::parsed end of TU_ELEMENT::request tags: ");
           for(int i = 0; i < tagReplacer.requestTagList.size(); i++){
             TagReplacer::LogTag(tagReplacer.requestTagList[i]);
@@ -2625,7 +2625,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         while ( (iCurrent < iCurTuv) && (pSourceTuv == NULL) )
         {
           if ( strcasecmp( pCurrentTuv->szLang, pBuf->szMemSourceLang ) == 0 )
-          {
+          { 
             pSourceTuv = pCurrentTuv;
           }
           else

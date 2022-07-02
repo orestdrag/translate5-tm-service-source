@@ -1533,7 +1533,8 @@ USHORT UpdateTmIndex
                 usIndexEntries--;
               }
               //only update index file if index record is not too large
-              if ( usIndexEntries < (MAX_INDEX_LEN - 1))
+              if ( (usIndexEntries < (MAX_INDEX_LEN - 1)) 
+                    && ((ulLen + sizeof( TMX_INDEX_ENTRY )) <= TMX_REC_SIZE) )
               {
                 //position pointer at beginning of index record
                 pIndex = (PBYTE)pIndexRecord;
@@ -1731,27 +1732,6 @@ USHORT DetermineTmRecord
               ulLen = pIndexRecord->usRecordLen;
               usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
-#ifdef _DEBUG
-{
-  if ( fSidLog )
-  {
-    FILE *stream;
-    stream = fopen( "\\SIDS.LOG","a" );
-        pIndexEntry = &pIndexRecord->stIndexEntry;
-    fprintf(stream, "Number Entries: %d\n ", usMaxEntries );
-    for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
-    {
-      if (j % 10 == 0)
-      {
-        fprintf(stream,"\n");
-      } /* endif */
-      fprintf( stream, "%ul ", NTMKEY(*pIndexEntry) );
-    } /* endfor */
-    fclose( stream );
-  } /* endif */
-}
-#endif
-
               pIndexEntry = &pIndexRecord->stIndexEntry;
               pulSids = pulSidStart;
               usPos = 0;
@@ -1813,32 +1793,16 @@ USHORT DetermineTmRecord
     } /* endif */
   } /* endif */
 
-#ifdef _DEBUG
-{
-  if ( fSidLog )
-  {
-    FILE *stream;
-    stream = fopen( "\\SIDS.LOG","a" );
-    fprintf(stream, "\nMatching Sids: \n ");
+  if(CheckLogLevel(DEBUG)){
+    std::string msg = __func__ + std::string(":: Matching Sids: ");
+    pIndexEntry = &pIndexRecord->stIndexEntry;
     while ( *pulSidStart )
     {
-      fprintf( stream, "%ul ", *pulSidStart );
+      msg +=  std::to_string(*pulSidStart) + "; ";
       pulSidStart++;
-    } /* endwhile */
-    fclose( stream );
-  } /* endif */
-}
-#endif
-      if(CheckLogLevel(DEBUG)){
-        std::string msg = __func__ + std::string(":: Matching Sids: ");
-        pIndexEntry = &pIndexRecord->stIndexEntry;
-        while ( *pulSidStart )
-        {
-          msg +=  std::to_string(*pulSidStart) + "; ";
-          pulSidStart++;
-        } 
-        LogMessage(DEBUG, msg.c_str());
-      }
+    } 
+    LogMessage(DEBUG, msg.c_str());
+  }
 
   UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG );
 
