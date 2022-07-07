@@ -1729,11 +1729,6 @@ int OtmMemoryServiceWorker::updateEntry
   if ( pData->szMarkup[0] == 0 )
   {
     strcpy( pData->szMarkup, "OTMXUXLF");
-    //iRC = ERROR_INPUT_PARMS_INVALID;
-    //wchar_t errMsg[] = L"Error: Missing markup table";
-    //buildErrorReturn( iRC, errMsg, strOutputParms );
-    //delete pData;
-    //return( restbed::BAD_REQUEST );
   } /* end */
 
   if(loggingThreshold >=0){
@@ -1758,9 +1753,15 @@ int OtmMemoryServiceWorker::updateEntry
   auto replacedInput = replaceString( pData->szSource , pData->szTarget, L"", &rc );
   //wcscpy( pProp->szSource, pData->szSource );
   //wcscpy( pProp->szTarget, pData->szTarget );
-  wcscpy( pProp->szSource, replacedInput[0].c_str());
-  wcscpy( pProp->szTarget, replacedInput[1].c_str());
-
+  if(!rc){
+    wcscpy( pProp->szSource, replacedInput[0].c_str());
+    wcscpy( pProp->szTarget, replacedInput[1].c_str());
+  }else{
+    strOutputParms = "Error in xml in source or target!";
+    return rc;
+    //wcscpy( pProp->szSource, pData->szSource);
+    //wcscpy( pProp->szTarget, pData->szTarget);
+  }
   pProp->lSegmentNum = pData->lSegmentNum;
   strcpy( pProp->szDocName, pData->szDocName );
   EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pProp->szSourceLanguage );
@@ -2279,7 +2280,7 @@ std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& s
     }
     //catch (const XMLException& toCatch) {
       catch(...){
-        *rc = 500;
+        *rc = 400;
         //return( ERROR_NOT_READY );
     }
   return response;

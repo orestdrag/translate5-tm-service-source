@@ -2134,7 +2134,7 @@ USHORT ComparePutData
         {
           //source strings are identical so loop through target records
           // and add new entry
-          while ( fOK && (lLeftTgtLen > 0)  && (lLeftTgtLen >= RECLEN(pTMXTargetRecord)) 
+          while ( fOK && (lLeftTgtLen > 0)  && (lLeftTgtLen <= RECLEN(pTMXTargetRecord)) 
                 && (RECLEN(pTMXTargetRecord) > 0) && !fStop )
           { 
             // check for valid target length
@@ -3254,7 +3254,7 @@ USHORT TMLoopAndDelTargetClb
   //source strings equal, position at first target record
   pTMXTgtRec = (PTMX_TARGET_RECORD)NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
 
-  while ( ( lLeftTgtLen >= RECLEN(pTMXTgtRec) )  && (RECLEN(pTMXTgtRec) != 0) && !fDel )
+  while ( ( lLeftTgtLen <= RECLEN(pTMXTgtRec) )  && (RECLEN(pTMXTgtRec) != 0) && !fDel )
   {
 	NTASSERTLEN(lLeftTgtLen, RECLEN(pTMXTgtRec), 4713);
 	lLeftTgtLen -= RECLEN(pTMXTgtRec);

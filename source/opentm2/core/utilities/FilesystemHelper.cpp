@@ -194,7 +194,9 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     system(command.c_str());
     
     if(int errCode = system(command.c_str()) ){
-        LogMessage4(ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
+        if(CheckLogLevel(DEBUG)){
+            LogMessage4(ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
+        }
         return errCode;
     }else{
         LogMessage3(DEBUG, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
@@ -253,7 +255,9 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     }
 
     if(pFb->data.size()< offset + buffSize){
-        LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
+        if(CheckLogLevel(DEBUG)){
+            LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
+        }
         return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     }
     PUCHAR p = &(pFb->data[offset]);

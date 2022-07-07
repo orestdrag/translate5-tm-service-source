@@ -1924,7 +1924,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define MAX_USERID              15     // max. length of LAN user ID
 #define MAX_LANGUAGE_PROPERTIES 200    // max. length of language properties
 #define MAX_EDIT_LINE_LENGTH    66    // max. length of a line
-#define MAX_SEGMENT_SIZE        2048  // maximum segment size
+#define MAX_SEGMENT_SIZE        4096  // maximum segment size
 #define MAX_TERM_LEN            255   // maximum length of a single term
 #define NUM_OF_DICTS            10    // number of dictionaries per folder
 #define MAX_FINDCHANGE_LEN      80    // max length of find/change buffer

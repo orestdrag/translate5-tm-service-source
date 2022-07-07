@@ -678,6 +678,13 @@ USHORT TokenizeSourceEx2
     PSZ_W  pSrc = pSentence->pInputString;
     PSZ_W  pTgt = pSentence->pInputString;
     CHAR_W c;
+    if(CheckLogLevel(DEBUG)){
+      std::string src = EncodingHelper::convertToUTF8(pSrc);
+      LogMessage3(TRANSACTION, __func__, ":: src = ", src.c_str());
+      
+      std::string trg = EncodingHelper::convertToUTF8(pTgt);
+      LogMessage2(TRANSACTION, "\n:: trg = ", trg.c_str());
+    }
 
     while ( (c = *pSrc++) != NULC )
     {

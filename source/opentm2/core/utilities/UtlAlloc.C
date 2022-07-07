@@ -125,9 +125,7 @@ PVOID UtlIntAlloc
   USHORT usMessageNo                   // message number for error calls
 )
 {
-  PBYTE  pStorage;                     // pointer to allocated storage
-
-    pStorage = (PBYTE) malloc( ulLength + 2 * sizeof(ULONG) );
+  PBYTE pStorage = (PBYTE) malloc( ulLength + 2 * sizeof(ULONG) );
 
   /********************************************************************/
   /* preset head and trailer as anchor for kamikaze persons....       */
