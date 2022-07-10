@@ -96,39 +96,8 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetC
 
 USHORT UtlGetDriveList( BYTE *szList)
 {
-    BYTE   bDrive;                     // currently logged drive
-    WORD   wReturn;                    // return value from GetDriveType
-    register int i;
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 66 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    for (i=0, wReturn=0; i<26;i++)
-    {
-      CHAR szRoot[4] = "C:\\";
-      szRoot[0] = (CHAR)('A' + i);
-      wReturn = (WORD)GetDriveType( szRoot );
-      switch ( wReturn )
-      {
-        case DRIVE_REMOVABLE :
-        case DRIVE_FIXED   :
-        case DRIVE_REMOTE  :
-        case DRIVE_CDROM   :
-        case DRIVE_RAMDISK :
-          *szList++ = (BYTE) ('A' + i);
-          break;
-
-        case DRIVE_UNKNOWN :
-        case DRIVE_NO_ROOT_DIR :
-        default:
-          break;
-      } /* endswitch */
-    } /* endfor */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-    *szList = '\0';
-
-    bDrive = UtlQCurDisk();
-    return( (USHORT) (bDrive - 'A' + 1));   // set index relative to 0
+  LogMessage2(ERROR,__func__, ":: called commented function");
+  return( 0 );   // set index relative to 0
 }
 
 //+----------------------------------------------------------------------------+
@@ -158,43 +127,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
 
   pSource = pTarget = pszList;         // start at begin of drive list
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 67 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  while ( *pSource != NULC )           // while not end of list ....
-  {
-    sDriveType = UtlDriveType( *pSource );
-    switch ( sDriveType )
-    {
-      case DRIVE_FIXED  :              // check if fixed disk is shared
-        /**************************************************************/
-        /* Note: Under Windows fixed disks are always treated as      */
-        /*       shared drives as the UtlIsDriveShared function does  */
-        /*       not work under Win95 anymore (the functions          */
-        /*       WNetGetDirectoryType always returns a not-supported  */
-        /*       return code) and so there is no way to distinguish   */
-        /*       local disks from shared local disks                  */
-        /**************************************************************/
-//      if ( UtlIsDriveShared( *pSource ) )
-//      {
-          *pTarget++ = *pSource++;     // leave shared drives in list
-//      }
-//      else
-//      {
-//        *pSource++;                  // ignore drive
-//      } /* endif */
-        break;
-
-      case DRIVE_REMOTE :
-        *pTarget++ = *pSource++;       // leave drive in list
-        break;
-
-      default :
-        pSource++;                     // ignore drive
-        break;
-    } /* endswitch */
-  } /* endwhile */
-  *pTarget = NULC;                     // terminate new drive list
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  LogMessage2(ERROR,__func__, ":: called commented function");
 
   return( usRC );
 } /* end of function UtlGetLANDriveList */

@@ -1271,42 +1271,11 @@ USHORT UtlDeleteHwnd
 )
 {
    USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-
-  	 HANDLE hMutexSem = NULL;
-     ulReserved;
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 46 GETMUTEX(hMutexSem);");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-	 // keep other process from doing property related stuff..
-	 GETMUTEX(hMutexSem);
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-     UtlSetFileMode(pszFName, FILE_NORMAL, 0L, FALSE);
-	 {
-
-	   do {
-		  DosError(0);
-      FilesystemHelper::CloseFileBuffer(std::string(pszFName)); 
-		  if ( DeleteFile( pszFName ) == 0 )
-		  {
-			  usRetCode = (USHORT)GetLastError();
-		  } /* endif */
-
-		  DosError(1);
-		  if ( fMsg && usRetCode )
-		  {
-			 usMBCode = MB_CANCEL;
-       LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() , "; fName = ", pszFName );
-		  } /* endif */
-	   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 47 RELEASEMUTEX(hMutexSem);");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      // release Mutex
-      RELEASEMUTEX(hMutexSem);
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-    }
+   FilesystemHelper::CloseFileBuffer(std::string(pszFName)); 
+   if ( DeleteFile( pszFName ) == 0 )
+   {
+     usRetCode = (USHORT)GetLastError();
+   } /* endif */
    return( usRetCode );
 }
 
@@ -1378,34 +1347,8 @@ USHORT UtlMkDirHwnd
    HWND     hwndParent
 )
 {
-   USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-
-   ulReserved;
-   if ( !UtlDirExist( pszDirName  ) )
-   {
-     do {
-        DosError(0);
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 48 if ( CreateDirectory( pszDirName, NULL ) == 0 ) {  usRetCode = (USHORT)GetLastError(); } /* endif */");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-        if ( CreateDirectory( pszDirName, NULL ) == 0 )
-        {
-          usRetCode = (USHORT)GetLastError();
-        } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-        DosError(1);
-        if ( fMsg && usRetCode )
-        {
-           usMBCode = MB_CANCEL;
-           LogMessage5(ERROR, __func__,  ":: rc = ", toStr(usRetCode).c_str() , "; dirName ", pszDirName );
-        } /* endif */
-     } while ( fMsg &&
-               usRetCode &&
-               (usMBCode == MBID_RETRY) ); /* enddo */
-   } /* endif */
-   return( usRetCode );
+  LogMessage2(ERROR,__func__, ":: commented function");
+  return 0;
 }
 
 //+----------------------------------------------------------------------------+
@@ -1847,63 +1790,10 @@ USHORT UtlFindNextHwnd
 
    cbBuf;
    do {
-      DosError(0);
-
-      // get file attribute flags active for this search handle
-      usAttr = UtlAttrOfSearchHandle( hdir );
-
-#ifdef WIN32
-      // look for files until the correct file type has been found
-      // or no more files are available
-      do
-      {
-        if ( FindNextFile( hdir, pffb ) == 0 )
-        {
-          usRetCode = (USHORT)GetLastError();
-          if ( usRetCode == ERROR_FILE_NOT_FOUND ) usRetCode = ERROR_NO_MORE_FILES;
-        }
-        else
-        {
-         fFound = (ISDIRATTR(usAttr) & ISDIRATTR(pffb->dwFileAttributes)) ||
-                  (ISFILEATTR(usAttr) & !ISDIRATTR(pffb->dwFileAttributes));
-         if ( fFound)
-         {
-           // check if 8.3 name is available
-           if ( pffb->cAlternateFileName[0] == EOS )
-           {
-             // exactly check for TRUE as UtlIsLongName returns 2 for
-             // short but mixed case file names
-             if ( (UtlIsLongFileName( pffb->cFileName ) == TRUE) &&
-                  (strcmp(pffb->cFileName,"..") != 0) )
-             {
-               fFound = FALSE; // ignore file with long name
-             } /* endif */
-           } /* endif */
-         } /* endif */
-        } /* endif */
-      }
-      while ( (usRetCode == NO_ERROR) && !fFound );
-
-      if ( usRetCode == NO_ERROR )
-      {
-         // use normal file name if no alternate file name (8.3) is given
-         if ( pffb->cAlternateFileName[0] == EOS )
-         {
-            strcpy( pffb->cAlternateFileName, pffb->cFileName );
-         } /* endif */
-      } /* endif */
-      usSearch = ( usRetCode ) ? 0 : 1;
-      DosError(1);
-      if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
-      {
-         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
-      } /* endif */
-#else
-      FindNextFile(hdir, pffb);
-
-#endif //WIN32
-
-
+    DosError(0);
+    // get file attribute flags active for this search handle
+    usAttr = UtlAttrOfSearchHandle( hdir );
+    FindNextFile(hdir, pffb);
    } while ( fMsg &&
              usRetCode &&
              (usRetCode != ERROR_NO_MORE_FILES) &&
@@ -2073,25 +1963,6 @@ USHORT UtlSetFileModeHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-   ulReserved;
-   do {
-      DosError(0);
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 54 if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 ) { usRetCode = (USHORT)GetLastError(); }");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      if ( SetFileAttributes( pszFile, (DWORD)usMode ) == 0 )
-      {
-        usRetCode = (USHORT)GetLastError();
-      } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-      DosError(1);
-      if ( fMsg && usRetCode )
-      {
-         usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__,":: rc = ", toStr(usRetCode).c_str() );
-      } /* endif */
-   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
 }
 
@@ -2666,70 +2537,8 @@ USHORT UtlQPathInfoHwnd
    HWND     hwndParent
 )
 {
-   USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-   PFILESTATUS pstFileSt;              // file status buffer
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 60 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   ulReserved;
-   do {
-      DosError(0);
-      /****************************************************************/
-      /* currently ONLY usInfoLevel 1 function (file info) supported*/
-      /****************************************************************/
-      memset( pInfoBuf, 0, cbInfoBuf );
-      if ( usInfoLevel != 1 )
-      {
-        usRetCode = ERROR_API_NOT_SUPPORTED;
-      }
-      else
-      {
-        // there is no PathInfo call under Win32 so we use
-        // FindFirstFile to get the file information without
-        // opening the file
-        static WIN32_FIND_DATA FileInfo;
-        HANDLE hDir = INVALID_HANDLE_VALUE;
-
-        hDir = FindFirstFile( pszPath, &FileInfo );
-        if ( hDir != INVALID_HANDLE_VALUE )
-        {
-          // copy file information to target structure
-          pstFileSt = (PFILESTATUS) pInfoBuf;
-          FileTimeToDosDateTime( &FileInfo.ftLastAccessTime,
-                                 (LPWORD)&pstFileSt->fdateLastAccess,
-                                 (LPWORD)&pstFileSt->ftimeLastAccess );
-          FileTimeToDosDateTime( &FileInfo.ftCreationTime,
-                                 (LPWORD)&pstFileSt->fdateCreation,
-                                 (LPWORD)&pstFileSt->ftimeCreation );
-          FileTimeToDosDateTime( &FileInfo.ftLastWriteTime,
-                                 (LPWORD)&pstFileSt->fdateLastWrite,
-                                 (LPWORD)&pstFileSt->ftimeLastWrite );
-          pstFileSt->cbFile      = FileInfo.nFileSizeLow;
-          pstFileSt->cbFileAlloc = FileInfo.nFileSizeLow;
-          pstFileSt->attrFile    = (USHORT)FileInfo.dwFileAttributes;
-
-          // close file find handle
-          FindClose( hDir );
-        }
-        else
-        {
-          //usRetCode = (USHORT)GetLastError();
-          if ( usRetCode == ERROR_NO_MORE_FILES )
-          {
-            usRetCode = ERROR_FILE_NOT_FOUND;
-          } /* endif */
-        } /* endif */
-      } /* endif */
-
-      DosError(1);
-      if ( fMsg && usRetCode )
-      {
-         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 0, NULL, DOS_ERROR, hwndParent );
-      } /* endif */
-   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-   return( usRetCode );
+  LogMessage2(ERROR,__func__, ":: called commented function");
+  return( usRetCode );
 }
 
 //+----------------------------------------------------------------------------+
@@ -2787,97 +2596,9 @@ USHORT UtlFindFirstLongHwnd
    HWND     hwndParent
 )
 {
-   USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-   HDIR   hdirNew;                     // new directory handle
-   static WIN32_FIND_DATA FindData;    // find data structure
-   memset( pffb, 0, sizeof(LONGFILEFIND) );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 61 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   do
-   {
-      DosError(0);
-       if ( !(usAttr & FILE_ATTRIBUTE_DIRECTORY) )
-       {
-         usAttr |= FILE_ATTRIBUTE_NORMAL;
-       } /* endif */
-       hdirNew = FindFirstFile( pszFSpec, &FindData );
-       if ( hdirNew == INVALID_HANDLE_VALUE )
-       {
-         //usRetCode = (USHORT)GetLastError();
-       }
-       else
-       {
-          // look for files until the correct file type has been found
-         // or no more files are available
-         if ( !(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-         {
-           FindData.dwFileAttributes |= FILE_ATTRIBUTE_NORMAL;
-         } /* endif */
-         while ( (usRetCode == NO_ERROR) &&
-                 !(FindData.dwFileAttributes & usAttr) )
-         {
-            if ( FindNextFile( hdirNew, &FindData ) == 0 )
-            {
-              //usRetCode = (USHORT)GetLastError();
-              if ( usRetCode == ERROR_FILE_NOT_FOUND )
-                usRetCode = ERROR_NO_MORE_FILES;
-            }
-            else if ( !(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-            {
-              FindData.dwFileAttributes |= FILE_ATTRIBUTE_NORMAL;
-            } /* endif */
-         } /* endwhile */
-
-         if ( usRetCode == NO_ERROR )
-         {
-           FileTimeToDosDateTime( &FindData.ftLastAccessTime,
-                                  (LPWORD)&pffb->fdateLastAccess,
-                                  (LPWORD)&pffb->ftimeLastAccess );
-           FileTimeToDosDateTime( &FindData.ftCreationTime,
-                                  (LPWORD)&pffb->fdateCreation,
-                                  (LPWORD)&pffb->ftimeCreation );
-           FileTimeToDosDateTime( &FindData.ftLastWriteTime,
-                                  (LPWORD)&pffb->fdateLastWrite,
-                                  (LPWORD)&pffb->ftimeLastWrite );
-           pffb->cbFile = FindData.nFileSizeLow;
-           pffb->attrFile = FindData.dwFileAttributes;
-           strcpy( pffb->achName, FindData.cFileName );
-
-           // add file search handle and attributes in our list of open
-           // file search handles
-           UtlAddSearchHandle( hdirNew, usAttr );
-         }
-         else
-         {
-           // close file handle as it will not be used anymore
-            FindClose( hdirNew );
-            hdirNew = HDIR_CREATE;   // init again
-
-         } /* endif */
-       } /* endif */
-
-      DosError(1);
-      if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) &&
-           (usRetCode != ERROR_FILE_NOT_FOUND))
-      {
-         usMBCode = LogMessage7(ERROR, __func__,  usRetCode, 0, 1, &pszFSpec, DOS_ERROR, hwndParent );
-         /*************************************************************/
-         /* change the drive if necessary ...                         */
-         /*************************************************************/
-         if ( usMBCode == MBID_RETRY && usRetCode == ERROR_DISK_CHANGE)
-         {
-           UtlSetDrive( *pszFSpec);
-         } /* endif */
-      } /* endif */
-   } while ( fMsg &&
-             usRetCode &&
-             (usRetCode != ERROR_NO_MORE_FILES) &&
-             (usRetCode != ERROR_FILE_NOT_FOUND) &&
-             (usMBCode == MBID_RETRY) ); /* enddo */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-   *phdir = hdirNew;
-   return( usRetCode );
+  memset( pffb, 0, sizeof(LONGFILEFIND) );
+  LogMessage2(ERROR,__func__, ":: called commented function");
+  return( 0 );
 }
 
 /**********************************************************************/
@@ -2886,27 +2607,8 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 61 full func
 /**********************************************************************/
 CHAR UtlGetDriveFromHandle( HFILE hf )
 {
-  CHAR chDrive = EOS;
-  // look for handle in our handle/drive array
-  int i = 0;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 62 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  while ( i < MAX_OPEN_FILES )
-  {
-    if ( DriveHandles[i].hf  == hf )
-    {
-        // use drive letter and leave loop
-        chDrive = DriveHandles[i].chDrive;
-        break;
-    }
-    else
-    {
-      i++;
-    } /* endif */
-  } /* endwhile */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-  return( chDrive );
+  LogMessage2(FATAL,__func__, ":: called commented function");
+  return EOS;
 } /* end of function UtlGetDriveFromHandle */
 
 // get file attribute flags active for a specific search handle

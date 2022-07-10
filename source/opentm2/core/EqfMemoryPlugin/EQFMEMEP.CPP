@@ -236,10 +236,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     // Dismiss the slider window if it had been created
     if ( hwndErrMsg != HWND_FUNCIF )
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 6 EqfRemoveObject( TWBFORCE, hWnd );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      EqfRemoveObject( TWBFORCE, hWnd );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
     } /* endif */
   }
   else if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
@@ -250,11 +247,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 6 EqfRemoveO
   {
     // Move process-ID which is stored in usRc into the
     // mp1 and issue a message WM_EQF_MEMEXPORT_PROCESS
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 7 WinPostMsg( hWnd, WM_EQF_PROCESSTASK,    MP1FROMSHORT( MEM_EXPORT_TASK ), NULL);");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
-                MP1FROMSHORT( MEM_EXPORT_TASK ), NULL);
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
   } /* endif */
   return( usRC );
 } /* end of function EQFMemExportStart */
@@ -351,11 +344,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          UtlDispatch();
 
          //--- Post the next WM_EQF_MEMEXPORT_PROCESS
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 8 WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_EXPORT_TASK ), NULL );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-         WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
-                     MP1FROMSHORT( MEM_EXPORT_TASK ), NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -373,25 +362,9 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 8 WinPostMsg
        pCommArea->usComplete = 100;
        if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
        {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 9 WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-         WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
-#endif// TO_BE_REPLACED_WITH_LINUX_CODE
+
        } /* endif */
 
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 4 if ( pExportIDA->ulSegmentCounter == 0 )");
-#ifdef TEMPORARY_COMMENTED
-       if ( pExportIDA->ulSegmentCounter == 0 )
-       {
-         // Delete the exported file because it is empty
-         // and issue error message
-         UtlDelete ( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
-         LogMessage7(ERROR, __func__,  ERROR_MEM_EXPORT_NOSEGMENTS, 
-                       &(pReplString[0]), EQF_WARNING, pExportIDA->hwndErrMsg );
-         fOk=FALSE;
-       }
-       else
-       #endif 
        if ( !pExportIDA->pszNameList )
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
@@ -409,11 +382,6 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 9 WinSendMsg
        }
        else
        {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 10 WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_EXPORT ), NULL );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-         WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
-                     MP1FROMSHORT( MEM_END_EXPORT ), NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
        } /* endif */
        break;
     //--------------------------------------------------------------------
@@ -437,11 +405,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 10 WinPostMs
      }
      else
      {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 11 WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_EXPORT ), NULL );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-       WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
-                   MP1FROMSHORT( MEM_END_EXPORT ), NULL );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
      } /* endif */
      break;
   } /* end switch */
@@ -776,18 +740,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMs
 
   if ( pExportIDA->pszNameList && pExportIDA->pszActiveName[0] )
   {
-    HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);    
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 13 // GQTODO update process window title bar and outfile static");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    // GQTODO update process window title bar and outfile static
-    LOADSTRING( NULLHANDLE, hResMod, MEM_EPLINE2, pCommArea->szBuffer );
-    sprintf( pCommArea->szText, "%s %s", pCommArea->szBuffer, pExportIDA->ControlsIda.szPathContent );
-    LOADSTRING( NULLHANDLE, hResMod, MEM_EPTITLE, pCommArea->szBuffer );
-    sprintf( pCommArea->szTitle, "%s %s", pCommArea->szBuffer, pExportIDA->szMemName );
-
     // restart TM export
-    WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_START_EXPORT ), 0L );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   else
   {
@@ -1893,33 +1846,6 @@ USHORT MemFuncPrepExport
       fOK = false;
     }
 
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 5 USHORT      usDosRc;              // Return code from Dos functions");
-#ifdef TEMPORARY_COMMENTED
-    USHORT      usDosRc;              // Return code from Dos functions
-    USHORT      usAction;             // Action for DosOpen
-    usDosRc = UtlOpenHwnd
-      ( pIDA->ControlsIda.szPathContent, // file Name
-        &(pIDA->hFile),          // file Handle (Out)
-        &usAction,                // action taken
-        0L,                       // file size
-        FILE_NORMAL,              // normal attributes
-        FILE_TRUNCATE |           // open an existing file and
-        FILE_CREATE,              // truncate it or create it
-                                  // if it does not exist
-        (USHORT)(OPEN_ACCESS_WRITEONLY |   // deny Write to others but
-        OPEN_SHARE_DENYWRITE  |    // allow write to me
-        OPEN_FLAGS_WRITE_THROUGH), // write through system buffer
-        0L,                        // Reserved
-        TRUE,                         // display no error message
-        HWND_FUNCIF );
-       
-    if ( usDosRc )  //--- error from open
-    {
-       //--- Reset file handle to NULL and set fOk to FALSE
-       pIDA->hFile = NULLHANDLE;
-       fOK = FALSE;
-    }/* endif */
-     #endif
   } /* endif */
 
   // prepare memory Export
@@ -1978,26 +1904,6 @@ USHORT MemFuncPrepExport
       pIDA->usExpMode = MEM_SGMLFORMAT_ASCII;
     } /* endif */
 
-
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 6 // build object name   sprintf( ObjName, \"MEMEXP: %s\", pIDA->szMemName );");
-#ifdef TEMPORARY_COMMENTED
-    // build object name
-    sprintf( ObjName, "MEMEXP: %s", pIDA->szMemName );
-    sRC = QUERYSYMBOL( ObjName );
-    if ( sRC == -1 )
-    {
-       // TM is not in use ==> lock this TM
-       SETSYMBOL( ObjName );
-    }
-    else
-    {
-      PSZ pTemp = pIDA->szMemName;
-
-      LogMessage7(ERROR, __func__,  ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
-                    1, &pTemp);
-      fOK = FALSE;
-    } /* endif */
-    #endif
   } /* endif */
 
   // cleanup

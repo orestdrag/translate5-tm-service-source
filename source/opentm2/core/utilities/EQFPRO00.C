@@ -131,22 +131,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
-
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED name comparing in LoadPropFile");
-      #ifdef TEMPORARY_COMMENTED
-      if( strcasecmp( pszName, prophead.szName)
-       //|| strcasecmp( pszPath + 2, prophead.szPath + 2)   // ignore drive !!!
-       )
-       {
-        *pIda->pErrorInfo = ErrProp_InvalidFile;
-        break;
-      }
-      #endif
-
-      #ifdef IGNORE_TEMPORARY_HARDCODED
-        LogMessage2(WARNING, "TEMPORARY_HARDCODED before GetPropSize to change it to Prop_mem, prophead.usClass before = ", toStr(prophead.usClass).c_str());
-        prophead.usClass = PROP_CLASS_MEMORY;
-      #endif
+      
       if( (size = sizeprop = GetPropSize( prophead.usClass)) == 0)
       {
         *pIda->pErrorInfo = ErrProp_InvalidClass;
@@ -425,7 +410,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
    }
    else
    {
-     LogMessage(WARNING,"if(true) hardcoded in OpenProperties");
+     if(CheckLogLevel(DEBUG)) LogMessage(WARNING,"if(true) hardcoded in OpenProperties");
      if (true ||  UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -502,7 +487,7 @@ SHORT CloseProperties(
        break;
      }
      
-     LogMessage(WARNING, "if(true) hardcoded in CloseProperties");
+     if(CheckLogLevel(DEBUG))  LogMessage(WARNING, "if(true) hardcoded in CloseProperties");
      if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -663,7 +648,7 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
-    //LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
+    //if(CheckLogLevel(DEBUG))  LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
     if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
     {
       PPROP_IDA     pIda;           // Points to instance area
@@ -747,7 +732,7 @@ SHORT GetPropSize( USHORT usClass)
       case PROP_CLASS_MEMORY :
       case PROP_CLASS_MEMORYDB :
       case PROP_CLASS_MEMORY_LASTUSED :
-        LogMessage(WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
+        if(CheckLogLevel(DEBUG)) LogMessage(WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
          if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
          {
            usSize = 2048; // MEM_PROP_SIZE;

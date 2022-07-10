@@ -619,6 +619,7 @@ BOOL UtlEvent
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
+    //if(CheckLogLevel(DEBUG)) \
       LogMessage7(ERROR, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str());\
       //UtlEvent( ERROR_EVENT, id, class, rc )
   #else
@@ -627,6 +628,7 @@ BOOL UtlEvent
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
+    //if(CheckLogLevel(DEBUG)) \
       LogMessage11(ERROR, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
   #else
@@ -635,6 +637,7 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT( id, class, rc ) \
+    if(CheckLogLevel(DEVELOP)) \
     LogMessage7(INFO, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( INFO_EVENT, id, class, rc )
   #else
@@ -643,6 +646,7 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT2( id, class, rc, gr, str ) \
+      if(CheckLogLevel(DEVELOP)) \
       LogMessage11(INFO, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str(), "; str = ", str, "; gr = ", toStr(gr).c_str());\
       //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
   #else
@@ -655,7 +659,8 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-    LogMessage7(DEBUG, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
+    if(CheckLogLevel(DEVELOP)) \
+    LogMessage7(DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
   #else
     #define DEBUGEVENT( id, class, rc )
@@ -663,7 +668,8 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT2( id, class, rc, gr, str ) \
-    LogMessage11(DEBUG, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), \
+    if(CheckLogLevel(DEVELOP)) \
+      LogMessage11(DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), \
       "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
   #else
@@ -3344,10 +3350,6 @@ USHORT TmtXClose
   UtlAlloc( (PVOID *) &(pTmClb->pLangGroups), 0L, 0L, NOMSG );
 
   UtlAlloc( (PVOID *) &(pTmClb->psLangIdToGroupTable), 0L, 0L, NOMSG );
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 84 NTMDestroyLongNameTable( pTmClb );");
-#ifdef TEMPORARY_COMMENTED
-  NTMDestroyLongNameTable( pTmClb );
-#endif
 
   // free new structures allocated by sub functions
   if ( pTmClb->pvTempMatchList )      UtlAlloc( (PVOID *) &(pTmClb->pvTempMatchList), 0L, 0L, NOMSG );
@@ -8964,92 +8966,6 @@ USHORT EQFNTMOrganizeIndex
     sRc = QDAMDictFirstLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
   } /* endif */
 
-  LogMessage2(ERROR,__func__, "::TEMPORARY_COMMENTED in EQFNTMOrganizeIndex:: .xmi file creation");
-#ifdef TEMPORARY_COMMENTED
-  // setup name for new index file
-  if ( !sRc )
-  {
-    PSZ pszExt;
-
-    strcpy( szNewIndex, pbTree->szFileName );
-    pszExt = strrchr( szNewIndex, DOT );
-    if ( pszExt )
-    {
-      strcpy( pszExt, ".XMI" );
-    }
-    else
-    {
-      strcat( pszExt, ".XMI" );
-    } /* endif */
-  } /* endif */
-
-  // create new index file
-  if ( !sRc )
-  {
-    NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
-
-    memset( &NtmVitalInfo, 0, sizeof(NtmVitalInfo) );
-
-    NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = ulStartKey;
-    sRc = QDAMDictCreateLocal( szNewIndex, 20, (PCHAR)pbData, usSigLen,
-                                NULL, NULL, NULL, &pBtreeOut, &NtmVitalInfo );
-    if ( !sRc )
-    {
-      fNewIndexCreated = TRUE;
-    } /* endif */
-  } /* endif */
-
-  // write all data from existing index to new index file
-  if ( !sRc )
-  {
-    ULONG ulDataLen = ulDataBufSize; 
-    ULONG ulKeyLen  = sizeof(ULONG) + 1; // ulKeyBufSize;
-    
-    sRc = QDAMDictFirstLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
-
-    while ( !sRc )
-    {
-      sRc = QDAMDictInsertLocal( pBtreeOut, (PCHAR_W)&ulKey, pbData, ulDataLen );
-
-      if ( !sRc )
-      {
-        ulDataLen = ulDataBufSize; 
-        ulKeyLen  = sizeof(ULONG) + 1; // ulKeyBufSize;
-
-        sRc = QDAMDictNextLocal( pbTree, (PCHAR_W)&ulKey, &ulKeyLen, pbData, &ulDataLen );
-      } /* endif */
-    } /*endwhile */
-
-    if ( sRc == BTREE_EOF_REACHED )
-    {
-      sRc = 0;
-    } /* endif */
-  } /* endif */
-
-  // close dictionaries
-  if ( !sRc ) QDAMDictCloseLocal( pbTree );
-  if ( fNewIndexCreated )QDAMDictCloseLocal( pBtreeOut );
-
-  // replace index file with newly created one or discard new index file in case of errors
-  if ( !sRc )
-  {
-    CHAR szOldIndex[MAX_LONGPATH];
-
-    // replace old index file
-    strcpy( szOldIndex, pbTree->szFileName );
-    UtlDelete( szOldIndex, 0L, NOMSG );
-    UtlMove( szNewIndex, szOldIndex, 0L, NOMSG );
-
-    // re-open new index file 
-    UtlAlloc( ppBTIda, 0, 0, NOMSG );
-    sRc = EQFNTMOpen( szOldIndex, usOpenFlags, ppBTIda );
-  }
-  else if ( fNewIndexCreated )
-  {
-    // discard new index file (if created)
-    UtlDelete( szNewIndex, 0L, NOMSG );
-  } /* endif */
-  #endif
   // cleanup
   if ( pchKeyBuffer ) UtlAlloc( (PVOID *)&pchKeyBuffer, 0, 0, NOMSG );
   if ( pbData ) UtlAlloc( (PVOID *)&pbData, 0, 0, NOMSG );

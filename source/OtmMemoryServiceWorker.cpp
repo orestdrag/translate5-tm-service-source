@@ -457,9 +457,11 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
 
     path = memFolder;
     path += pszMemory;
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
-    requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+    if(FilesystemHelper::FileExists(std::string(path + ".TMD"))){
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+    }
   } 
 
   // cleanup the memory list (close memories not used for a longer time)
@@ -1040,41 +1042,46 @@ int OtmMemoryServiceWorker::createMemory
     }
   }
 
-  if ( iRC != 0 )
+  if(iRC == ERROR_MEM_NAME_EXISTS){
+    strOutputParms = "{\"" + strName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
+    LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(iRC).c_str()," iRC = restbed::ERROR_MEM_NAME_EXISTS");
+    return iRC;
+  }else if ( iRC != 0 )
   {
     char szError[PATH_MAX];
     unsigned short usRC = 0;
     EqfGetLastError( this->hSession, &usRC, szError, sizeof( szError ) );
-    buildErrorReturn( iRC, szError, strOutputParms );
+    //buildErrorReturn( iRC, szError, strOutputParms );
 
+    strOutputParms = "{\"" + strName + "\": \"" ;
     switch ( usRC )
     {
       case ERROR_MEM_NAME_INVALID:
         iRC = restbed::CONFLICT;
+        strOutputParms += "CONFLICT";
         LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::CONFLICT");
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
         iRC = restbed::BAD_REQUEST;
+        strOutputParms += "BAD_REQUEST";
         LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::BAD_REQUEST");
         break;
       default:
         iRC = restbed::INTERNAL_SERVER_ERROR;
+        strOutputParms += "INTERNAL_SERVER_ERROR";
         LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::INTERNAL_SERVER_ERROR");
         break;
     }
+    strOutputParms +="\"}";
     return( iRC );
+  }else{
+    factory->startJSON( strOutputParms );
+    factory->addParmToJSON( strOutputParms, "name", strName );
+    factory->terminateJSON( strOutputParms );
+    return( restbed::OK );
   }
-
-  factory->startJSON( strOutputParms );
-
-// TODO investigate how much do we need this
-  //EncodingHelper::convertASCIIToUTF8( strName );
-
-  factory->addParmToJSON( strOutputParms, "name", strName );
-  factory->terminateJSON( strOutputParms );
-  return( restbed::OK );
 }
 
 /* write a single proposal to a JSON string

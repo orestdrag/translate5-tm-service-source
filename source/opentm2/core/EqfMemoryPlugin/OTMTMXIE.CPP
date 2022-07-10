@@ -456,7 +456,9 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
       }else{
         //tag not found -> maybe should try to find matching tag in the same or paralel segment? 
         //generate new id        
-        LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");    
+        if(CheckLogLevel(DEBUG)){
+          LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");    
+        }
         x = ++ iHighestRequestsOriginalId;
 
         //if it's BPT_ELEMENT or EPT_ELEMENT -> generate new I 

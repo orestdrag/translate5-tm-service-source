@@ -827,6 +827,10 @@
 //             eight alphanumeric characters. Do not include a file
 //             extension.
 
+
+#define ERROR_MEM_NAME_EXISTS                            7272
+
+
 #define ERROR_SOURCE_LANG_DATA                              73
 //* Define statement owner: DOE, LEE
 // Text:       The '%1' language data in file '%2' is incorrect or damaged.

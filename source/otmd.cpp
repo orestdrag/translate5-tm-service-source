@@ -9,9 +9,9 @@
 #include "cmake/git_version.h"
 
 void handle_interrupt_sig(int sig) {
-    LogMessage(INFO, "Received interrupt signal\n");
+    LogMessage(TRANSACTION, "Received interrupt signal\n");
     StopOtmMemoryService();
-    LogMessage(INFO, "Stopped t5memory\n");
+    LogMessage(TRANSACTION, "Stopped t5memory\n");
 }
 
 void service_worker() {
@@ -37,9 +37,9 @@ void service_worker() {
 
 
 int main() {
-    LogMessage(INFO, "Worker thread starting");
+    LogMessage(TRANSACTION, "Worker thread starting");
     std::thread worker(service_worker);
     worker.join();
-    LogMessage(INFO, "Worker thread finished");
+    LogMessage(TRANSACTION, "Worker thread finished");
 }
 

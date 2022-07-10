@@ -220,162 +220,20 @@ USHORT PluginManagerImpl::loadPluginDlls(const char* pszPluginDir)
   //return usRC;
 
 	std::string strFileSpec(pszPluginDir);
-	BOOL fMoreFiles = TRUE;
-	HANDLE hDir = HDIR_CREATE;
-	WIN32_FIND_DATA ffb;
-
-  BOOL fLogHasBeenOpened = FALSE;
-  
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 75 // check the depths of the cycle  if (IsDepthOvered( pszPluginDir )) // util");
-#ifdef TEMPORARY_COMMENTED
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 76");
-#ifdef TEMPORARY_COMMENTED
-#ifdef _DEBUG
-  if ( !this->Log.isOpen() )
-  {
-    this->Log.open( "PluginManager" );
-      fLogHasBeenOpened = TRUE;
-  } /* end */     
-  this->Log.writef( "Loading plugin DLLs from directory %s...", pszPluginDir );
-#endif
-#endif //TEMPORARY_COMMENTED
-
-  // check the depths of the cycle
-  if (IsDepthOvered( pszPluginDir )) // util
-  {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 77");
-#ifdef TEMPORARY_COMMENTED
-      this->Log.writef( "...skipping directory, max. nesting level reached" );
-      if ( fLogHasBeenOpened ) this->Log.close();
-#endif
-      return usRC;
-  }
-#endif
 
 	// allow calling the registerPlugin()-method
 	bRegisterAllowed = true;
   
   strFileSpec += "libEqfMemoryPlugin.so";
 
-    // Modify end
-    USHORT usSubRC = loadPluginDll(strFileSpec.c_str());  // add return value for P402974
-    // Add for P402974 start
-    if (PluginManager::ePluginExpired == usSubRC)
-    {
-    //TEMPORARY_COMMENTED
-      // expired is the highest authority
-    //              this->Log.writef("Error:   DLL %s is expired.", strDll.c_str());
-      usRC = usSubRC;
-    }
-    else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
-    {
-      // else is other error and skip already registered error
-      usRC = usSubRC;
-    }
-
-#ifdef TEMPORARY_COMMENTED_LOGS
- this->Log.writef( "   running FindFirst for %s...", strFileSpec.c_str() );
-#endif //TEMPORARY_COMMENTED
-  
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 23 hDir = FindFirstFile( strFileSpec.c_str(), &ffb );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
-
-  if ( hDir != INVALID_HANDLE_VALUE )
+  // Modify end
+  USHORT usSubRC = loadPluginDll(strFileSpec.c_str());  // add return value for P402974
+  // Add for P402974 start
+  if (usSubRC && (PluginManager::eAlreadyRegistered != usSubRC))
   {
-    fMoreFiles = TRUE;
-	  while ( fMoreFiles )
-	  {
-		  std::string strDll(pszPluginDir);
-		  strDll += '\\';
-		  strDll += ffb.cFileName;
-          // Modify for P403115 start
-          if (DllNameCheck(strDll.c_str()))
-          {
-//TEMPORARY_COMMENTED
-//              this->Log.writef( "   found DLL %s", strDll.c_str() );
-          }
-          else
-          {
-//TEMPORARY_COMMENTED
-//              this->Log.writef("Error:   DLL %s is not valid, skip", strDll.c_str());
-              //fMoreFiles= FindNextFile(hDir, &ffb);
-              continue;
-          }
-          // Modify end
-		  USHORT usSubRC = loadPluginDll(strDll.c_str());  // add return value for P402974
-          // Add for P402974 start
-          if (PluginManager::ePluginExpired == usSubRC)
-          {
-//TEMPORARY_COMMENTED
-              // expired is the highest authority
-//              this->Log.writef("Error:   DLL %s is expired.", strDll.c_str());
-              usRC = usSubRC;
-          }
-          else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
-          {
-              // else is other error and skip already registered error
-              usRC = usSubRC;
-          }
-          // Add end
-		  //fMoreFiles= FindNextFile( hDir, &ffb );
-	  } /* endwhile */
-    //FindClose( hDir );
+    usRC = usSubRC;
   }
-  else
-  {
-    int iRC = 0;//GetLastError();
-//TEMPORARY_COMMENTED
-//    this->Log.writef( "   FindFirstFile failed with rc=%ld", iRC );
-  } /* endif */     
-#endif
-
-	// now search all subdirectories
-	strFileSpec = pszPluginDir;
-	strFileSpec += "/*";
-	//hDir = FindFirstFile( strFileSpec.c_str(), &ffb );
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 24 if ( hDir != INVALID_HANDLE_VALUE )");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  if ( hDir != INVALID_HANDLE_VALUE )
-  {
-    fMoreFiles = TRUE;
-
-	  while ( fMoreFiles )
-	  {
-      if ( (ffb.cFileName[0] != '.') && (ffb.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-		  {
-			  std::string strSubdir(pszPluginDir);
-			  strSubdir += '\\';
-			  strSubdir += ffb.cFileName;
-			  USHORT usSubRC = loadPluginDlls( strSubdir.c_str() ); // Modify for P402974
-              // Add for P402974 start
-              if (PluginManager::ePluginExpired == usSubRC)
-              {
-//TEMPORARY_COMMENTED
-                  // expired is the highest authority
-//                  this->Log.writef("Error:   DLL %s is expired.", strSubdir.c_str());
-                  usRC = usSubRC;
-              }
-              else if (usSubRC && (PluginManager::ePluginExpired != usRC) && (PluginManager::eAlreadyRegistered != usSubRC))
-              {
-                  // else is other error and skip already registered error
-                  usRC = usSubRC;
-              }
-              // Add end
-		  }
-		  //fMoreFiles= FindNextFile( hDir, &ffb );
-	  }
-    //FindClose( hDir );
-  } /* endif */     
-#endif
-//TEMPORARY_COMMENTED
-//  this->Log.write( "   ...Done" );
-
-	// disallow calling the registerPlugin()-method
-	bRegisterAllowed = false;
-	
-//TEMPORARY_COMMENTED
-//  if ( fLogHasBeenOpened ) this->Log.close();
+	bRegisterAllowed = false;	
 
   return usRC;     // Add for P402974
 }
@@ -397,42 +255,10 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
         }
     }
 
-    #ifdef TO_BE_REMOVED
-    
-    void *handle = dlopen("libEqfMemoryPlugin.so", RTLD_LAZY);
-    if (!handle) {
-        fprintf(stderr, "%s\n", dlerror());
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
-#ifdef TEMPORARY_COMMENTED
-        return PluginManager::eNotEnoughMemory;
-#endif //TEMPORARY_COMMENTED
-    }
-
-    dlerror();
-
-    unsigned short (*pFunc)();
-    pFunc = (unsigned short (*)())dlsym(handle, "registerPlugins");
-    char *error = dlerror();
-    if (error != NULL) {
-        fprintf(stderr, "%s\n", error);
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
-#ifdef TEMPORARY_COMMENTED
-        this->Log.write( "   Could not resolve address of function \"registerPlugins()\"" );
-        dlclose(handle);
-        return PluginManager::eNotEnoughMemory;
-#endif //TEMPORARY_COMMENTED
-    }
-
-  #endif//TO_BE_REMOVED
-
-
     // prepare our loaded DLL entry
     //iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size(); vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL]
     vLoadedPluginDLLs.push_back( LoadedPluginDLL() );
     LoadedPluginDLL& rNewPluginDll = vLoadedPluginDLLs.back();
-    #ifdef TO_BE_REMOVED
-    rNewPluginDll.hMod = handle;
-    #endif
     
     // Add for P402792 start
     memset(rNewPluginDll.strDll, 0x00,
@@ -446,89 +272,12 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = x");
 
     if (usRC) {
         // if register dll error, just remove the dll from the group
-LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", toStr(usRC).c_str());
-
-        // FOR P403268 begin
-        // if it's already in pluginSet, also erase it
-        // vLoadedPluginDLLs.pop_back();
-        //LoadedPluginDLL lpdll = vLoadedPluginDLLs.back();
-        //OtmPlugin *pToDel = lpdll.vPluginList.back();
-
-        //if(pToDel != NULL)
-        //  pluginSet->erase(pToDel);
-
-        //vLoadedPluginDLLs.pop_back();
-        // FOR P403268 end
-
-      #ifdef TO_BE_REMOVED
-        dlclose(handle);
-        #endif
+        LogMessage5(ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", toStr(usRC).c_str());
     }
 
     // reset active plugin DLL entry
     iCurrentlyLoadedPluginDLL = -1;
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 25 HMODULE hMod = LoadLibrary(pszName);");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    // Add end
-	//HMODULE hMod = LoadLibrary(pszName);
-    //SetErrorMode(0);
-    this->Log.writef( "   Loading plugin %s", pszName );
-
-	if (hMod != 0)
-	{
-    //this->Log.writef( "   Plugin %s successfully loaded", pszName );
-		PLUGINPROC pFunc = (PLUGINPROC) GetProcAddress(hMod, "registerPlugins");
-		if (pFunc != 0)
-		{
-      //this->Log.write( "   Address of function \"registerPlugins()\" successfully resolved" );
-
-      // prepare our loaded DLL entry
-      vLoadedPluginDLLs.push_back( LoadedPluginDLL() );
-      iCurrentlyLoadedPluginDLL = vLoadedPluginDLLs.size() - 1;
-      vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].hMod = hMod;
-      // Add for P402792 start
-      memset(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, 0x00, sizeof(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll));
-      strcpy(vLoadedPluginDLLs[iCurrentlyLoadedPluginDLL].strDll, pszName);
-      // Add end
-
-      // call plugin registration entry point
-      usRC = pFunc();     // Add return value for P402974
-      // Add for P403115 start
-      if (usRC)
-      {
-          // if register dll error, just remove the dll from the group
-          this->Log.writef( "Error: register plugin %s failed %d.", pszName, usRC);
-         
-		  // FOR P403268 beigin
-		  // if it's already in pluginSet, also erase it
-		  // vLoadedPluginDLLs.pop_back();
-		  LoadedPluginDLL lpdll = vLoadedPluginDLLs.back();
-		  OtmPlugin *pToDel = lpdll.vPluginList.back();
-		  if(pToDel != NULL)
-			  pluginSet->erase(pToDel);
-		  vLoadedPluginDLLs.pop_back();
-		  // FOR P403268 end
-
-          FreeLibrary(hMod);
-      }
-      // Add end
-
-      // reset active plugin DLL entry
-      iCurrentlyLoadedPluginDLL = -1;
-		}
-		else
-		{
-      this->Log.write( "   Could not resolve address of function \"registerPlugins()\"" );
-			FreeLibrary(hMod);
-		}
-	}
-	else
-	{
-    this->Log.writef( "   Plugin DLL %s failed to load", pszName );
-	}
-#endif
-
+    
     return usRC;     // Add for P402974
 }
 

@@ -379,10 +379,6 @@ USHORT CreateSystemProperties(const char* pszPath)
     
     strcpy(pSysProps->PropHead.szName, SYSTEM_PROPERTIES_NAME);
     
-    LogMessage4(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 103 sprintf(pSysProps->PropHead.szPath, \"",PATH,"\", PATH);");
-#ifdef TEMPORARY_COMMENTED
-    sprintf(pSysProps->PropHead.szPath, "%s", PATH);
-    #endif
     pSysProps->PropHead.usClass = PROP_CLASS_SYSTEM;
     pSysProps->PropHead.chType  = PROP_TYPE_INSTANCE;
     
@@ -897,14 +893,7 @@ USHORT CreateDictProperties
     /******************************************************************/
     /* Fill in property heading area                                  */
     /******************************************************************/
-    if ( !usRC )
-    {
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 110 /* Fill in property heading area                                  */");
-#ifdef TEMPORARY_COMMENTED
-      SETPROPHEAD( pPropDict->PropHead, DICT_PROPERTIES_NAME,
-                   PROP_CLASS_DICTLIST );
-                   #endif
-    } /* endif */
+
 
     /******************************************************************/
     /* Fill properties with default values                            */
@@ -921,20 +910,6 @@ USHORT CreateDictProperties
       pPropDict->Swp.fs |= EQF_SWP_MINIMIZE;
 #endif
     } /* endif */
-
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 119 /* Write properties and free data area                            */");
-#ifdef TEMPORARY_COMMENTED
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      WritePropFile( chPrimaryDrive, DICT_PROPERTIES_NAME, pPropDict,
-                     sizeof( PROPDICTLIST ) );
-      free( pPropDict );
-    } /* endif */
-#endif //TEMPORARY_COMMENTED
-
    return( usRC );
 
 } /* end of function CreateDictProperties */
@@ -973,13 +948,6 @@ USHORT CreateEditProperties
                cyBorder,               // height of horizontal border
                cyProposals,            // height of TM/dict proposals windows
                cyProposalsClient;      // height of client window of proposals
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 39");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-#ifndef _WINDOWS
-    HVPS       hvps;                   // presentation space
-    SHORT      sCx;
-#endif
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     SHORT      sCy;               // character cell size
 
     /******************************************************************/
@@ -999,46 +967,13 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 39");
     /******************************************************************/
     /* Fill in property heading area                                  */
     /******************************************************************/
-    if ( !usRC )
-    {
-       LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 120 /* Fill in property heading area                                  */");
-#ifdef TEMPORARY_COMMENTED
-      SETPROPHEAD( pPropEdit->PropHead, EDITOR_PROPERTIES_NAME,
-                   PROP_CLASS_EDITOR );
-                   #endif
-    } /* endif */
+    if ( !usRC )   {    } /* endif */
 
     /******************************************************************/
     /* Fill properties with default values                            */
     /******************************************************************/
     if ( !usRC )
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40 /* Fill properties with default values                            */");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      cyTitleBar = WinQuerySysValue( HWND_DESKTOP, SV_CYTITLEBAR );
-      cyMenu = WinQuerySysValue( HWND_DESKTOP, SV_CYMENU );
-      cyHorzSlider = WinQuerySysValue( HWND_DESKTOP, SV_CYHSCROLL );
-      cyBorder = WinQuerySysValue( HWND_DESKTOP, SV_CYBORDER );
-
-#ifndef _WINDOWS
-      /* get default character cell size by creating a dummy present. space */
-      VioCreatePS (&hvps, 1, 1, 0, 3, (HVPS) NULL);
-      VioGetDeviceCellSize (&sCy, &sCx, hvps);
-      VioDestroyPS (hvps);
-#else
-      {
-        TEXTMETRIC   txmtr;
-        HDC          hdc;
-
-        hdc = GetDC( NULL );  /* get device context from screen */
-        SelectObject( hdc, GetStockObject( OEM_FIXED_FONT ) );
-        GetTextMetrics( hdc, &txmtr );
-        ReleaseDC( NULL, hdc );
-        sCy = (SHORT)txmtr.tmHeight;
-      }
-#endif
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
       /* calculate approx. value for size of TM and dict proposals */
       cyProposals = (cyDesktop - 2L * cyTitleBar - cyMenu) / 4L;
       cyProposalsClient = cyProposals - cyTitleBar - cyHorzSlider - 2L*cyBorder;
@@ -1063,61 +998,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 40 /* Fill p
       RECTL_YTOP(pstEQFGen->rclEditorTgt)       = cyDesktop;
 #endif
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 41 pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |   FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_MENU;");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-#ifdef _WINDOWS
-      pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL;
-#else
-      pstEQFGen->flEditTgtStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_MENU;
-#endif
-      RECTL_XLEFT(pstEQFGen->rclEditorSrc)      = cxDesktop / 10L;
-      RECTL_XRIGHT(pstEQFGen->rclEditorSrc)     = (cxDesktop * 9L) / 10L;
-      RECTL_YBOTTOM(pstEQFGen->rclEditorSrc)    = (cyDesktop * 60L) / 100L;
-      RECTL_YTOP(pstEQFGen->rclEditorSrc)       = (cyDesktop * 75L) / 100L;
-      pstEQFGen->flEditSrcStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL;
-      RECTL_XLEFT(pstEQFGen->rclSource)         = cxDesktop / 10L;
-      RECTL_XRIGHT(pstEQFGen->rclSource)        = (cxDesktop * 9L) / 10L;
-      RECTL_YBOTTOM(pstEQFGen->rclSource)       = (cyDesktop * 25L) / 100L;
-      RECTL_YTOP(pstEQFGen->rclSource)          = (cyDesktop * 40L) / 100L;
-      pstEQFGen->flSrcStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL;
-      RECTL_XLEFT(pstEQFGen->rclDictionary)     = 0L;
-      RECTL_XRIGHT(pstEQFGen->rclDictionary)    = cxDesktop;
-      RECTL_YBOTTOM(pstEQFGen->rclDictionary)   = 0L;
-      RECTL_YTOP(pstEQFGen->rclDictionary)      = cyProposals - 1L;
-      pstEQFGen->flDictStyle = FCF_TITLEBAR | FCF_SIZEBORDER  | FCF_SYSMENU |
-                               FCF_VERTSCROLL;
-      RECTL_XLEFT(pstEQFGen->rclProposals)      = 0L;
-      RECTL_XRIGHT(pstEQFGen->rclProposals)     = cxDesktop;
-      RECTL_YBOTTOM(pstEQFGen->rclProposals)    = cyProposals;
-      RECTL_YTOP(pstEQFGen->rclProposals)       = 2L * cyProposals - 1L;
-      pstEQFGen->flPropStyle = FCF_TITLEBAR | FCF_SIZEBORDER  | FCF_SYSMENU |
-                               FCF_VERTSCROLL  | FCF_HORZSCROLL;
-#ifdef _WINDOWS
-      pstEQFGen->flEditOtherStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL;
-#else
-      pstEQFGen->flEditOtherStyle = FCF_TITLEBAR | FCF_SIZEBORDER | FCF_SYSMENU |
-                                  FCF_VERTSCROLL  | FCF_HORZSCROLL | FCF_MENU;
-#endif
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
     } /* endif */
-
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 121 /* Write properties and free data area                            */");
-#ifdef TEMPORARY_COMMENTED
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      WritePropFile( chPrimaryDrive, EDITOR_PROPERTIES_NAME, pPropEdit,
-                     sizeof( PROPEDIT ) );
-      free( pPropEdit );
-    } /* endif */
-#endif //TEMPORARY_COMMENTED
 
    return( usRC );
 } /* end of function CreateEditProperties */
@@ -1612,14 +1493,7 @@ VOID DeleteDictCacheFiles( CHAR chPrimaryDrive, USHORT usPathId )
 BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile )
 {
    CHAR     szPath[MAX_EQF_PATH];      // buffer for path name
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44 FILEFINDBUF ResultBuf;              // DOS file find struct");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-#ifndef _WINDOWS
-   FILEFINDBUF3 ResultBuf;              // DOS file find struct
-#else
-   FILEFINDBUF ResultBuf;              // DOS file find struct
-#endif
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
    DOSVALUE usCount = 1L;
    HDIR     hDirHandle = HDIR_CREATE;  // DosFind routine handle
    USHORT   usDosRC;                   // return code of Dos... alias Utl...
@@ -1628,19 +1502,6 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 44 FILEFINDB
    strcat( szPath, BACKSLASH_STR );
    strcat( szPath, pszFile );
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 45 usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY, &ResultBuf, sizeof( ResultBuf),  &usCount, FIL_STANDARD );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-#ifndef _WINDOWS
-   usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY,
-                           &ResultBuf, sizeof( ResultBuf),
-                           &usCount, FIL_STANDARD );
-#else
-   usDosRC = DosFindFirst( szPath, &hDirHandle, FILE_NORMAL | FILE_DIRECTORY,
-                           &ResultBuf, sizeof( ResultBuf),
-                           &usCount, 0L );
-#endif
-   DosFindClose( hDirHandle );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
 
    return( usDosRC == 0 );
 } /* endof UtlPropFileExist */

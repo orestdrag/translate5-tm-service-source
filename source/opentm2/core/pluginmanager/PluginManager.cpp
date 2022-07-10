@@ -125,28 +125,6 @@ int PluginManager::ValidationCheck(char * strParam)
             bHasMemory = true;
         }
     }
-
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 173 #ifdef TEMPORARY_COMMENTED    if (!bHasMemory)");
-#ifdef TEMPORARY_COMMENTED
-    if (!bHasMemory)
-    {
-        nRC |= PLUGIN_MISS_MEMORY;
-        StrcatName(STR_MEMORY_PLUGIN, COMMA_STR, strParam);
-    }
-
-    if (!bHasMarkup)
-    {
-        nRC |= PLUGIN_MISS_MARKUP;
-        StrcatName(STR_MARKUP_PLUGIN, COMMA_STR, strParam);
-    }
-
-    if (!bHasDict)
-    {
-        nRC |= PLUGIN_MISS_DICT;
-        StrcatName(STR_DICT_PLUGIN, COMMA_STR, strParam);
-    }
-#endif //TEMPORARY_COMMENTED
-
     return nRC;
 }
 

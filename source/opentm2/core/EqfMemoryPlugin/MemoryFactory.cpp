@@ -104,12 +104,15 @@ int MemoryFactory::getMemoryInfo
   int iRC = 0;
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage2(INFO," MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
-
+  if(CheckLogLevel(DEBUG)){
+    LogMessage2(INFO," MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
+  }
   OtmPlugin * pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
-    LogMessage(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
+    if(CheckLogLevel(DEBUG)){
+      LogMessage(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
+    }
     return OtmMemoryPlugin::eUnknownPlugin;
   } /* endif */
 
@@ -131,12 +134,16 @@ int MemoryFactory::getMemoryInfo
   }
   if ( iRC != 0 )
   {
-    LogMessage6(INFO," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
+    if(CheckLogLevel(DEBUG)){
+      LogMessage6(ERROR," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
         pluginSelected->getName(),", the return code is ", toStr(this->iLastError).c_str() );
+    }
   }
   else
   {
-    LogMessage(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
+    if(CheckLogLevel(DEBUG)){
+      LogMessage(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
+    }
   } /* end */     
 
   return( iRC );
@@ -373,8 +380,6 @@ int MemoryFactory::deleteMemory(
       strcpy( this->szMemObjName, plugin->getName() );
       strcat( this->szMemObjName,  ":" ); 
 		  strcat( this->szMemObjName, pszMemoryName );
-      LogMessage2(WARNING,__func__,"::TEMPORARY_COMMENTED call EqfSend2AllHandlers");
-      //EqfSend2AllHandlers( WM_EQFN_DELETED, MP1FROMSHORT(clsMEMORYDB), MP2FROMP(this->szMemObjName) );
 	  }
   }
   else
@@ -931,7 +936,7 @@ OtmPlugin *MemoryFactory::findPlugin
     {
       this->iLastError = ERROR_PLUGINNOTAVAILABLE;
       this->strLastError = "Error: selected plugin " + std::string( pszPluginName ) + " is not available";
-      LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+      if(CheckLogLevel(DEBUG))  LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
     } /* endif */       
   } /* endif */     
 
@@ -953,7 +958,7 @@ OtmPlugin *MemoryFactory::findPlugin
       {
         this->iLastError = ERROR_PLUGINNOTAVAILABLE;
         this->strLastError = "Error: selected plugin " + strPlugin + " is not available";
-        LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+        //if(CheckLogLevel(DEBUG)) LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
       } /* endif */       
     }
     else

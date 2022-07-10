@@ -70,51 +70,37 @@ BOOL MemCreatePath( PSZ pszString )
 //Returncode type:   USHORT              error code or 0 if success
 //------------------------------------------------------------------------------
 
-__declspec(dllexport)
 USHORT MemFuncDeleteMem( PSZ pszMemName )
 {
-   BOOL            fOK = TRUE;         // return value
-   USHORT          usRC = NO_ERROR;    // function return code
+  BOOL            fOK = TRUE;         // return value
+  USHORT          usRC = NO_ERROR;    // function return code
 
-   // check if a TM has been specified
-   if ( fOK )
-   {
-     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-     {
-       fOK = FALSE;
-        LogMessage(ERROR, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
-     } /* endif */
-   } /* endif */
+  // check if a TM has been specified
+  if ( (pszMemName == NULL) || (*pszMemName == EOS) )
+  {
+    usRC = ERROR_MEMORY_NOTFOUND;
+    LogMessage(DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
+  } /* endif */
 
+  OtmMemoryPlugin::MEMORYINFO Info;
+  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  // check if there is a TM with the given name
+  if ( usRC == NO_ERROR )
+  {
+      // check if memory existed
+      usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, &Info );
+      if (usRC != 0)
+      {
+        usRC = ERROR_MEMORY_NOTFOUND;              
+        LogMessage4(DEBUG, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
+      }
+  }
 
-   OtmMemoryPlugin::MEMORYINFO Info;
-   MemoryFactory *pFactory = MemoryFactory::getInstance();
-   // check if there is a TM with the given name
-   if ( fOK )
-   {
-       // check if memory existed
-        usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, &Info );
-        if (usRC != 0)
-        {
-          fOK = FALSE;                
-          LogMessage4(ERROR, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
-        }
-   }
+  // Delete the TM
+  if ( usRC == NO_ERROR )
+  {
+    usRC = pFactory->deleteMemory( NULL,pszMemName);
+  }
 
-   // Delete the TM
-   if ( fOK )
-   {
-     int iRC = pFactory->deleteMemory( NULL,pszMemName);
-     fOK = (iRC==0)?TRUE:FALSE;
-   }
-
-   /*******************************************************************/
-   /* Cleanup                                                         */
-   /*******************************************************************/
-   if ( !fOK )
-   {
-     usRC = UtlQueryUShort( QS_LASTERRORMSGID );
-   }
-
-   return( usRC );
+  return( usRC );
 } /* end of function MemFuncDeleteMem  */

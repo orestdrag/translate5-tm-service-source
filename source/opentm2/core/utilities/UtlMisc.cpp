@@ -287,65 +287,7 @@ USHORT UtlGetLANUserID
 )
 {
   USHORT usRC = LANUID_NO_LAN;         // function return code
-  static BOOL notfirst = FALSE;   /* the first time Windows for Workgroups gives a bogus value */
-
-  LogMessage2(ERROR,__func__, "::called TEMPORARY_COMMENTED whole UtlGetLANUserID");
-#ifdef TEMPORARY_COMMENTED
-  usMsgHandling;
-  // Preset the user priviliges and the LAN userid
-  *pusUserPriv = USER_USER;
-  if ( pszLANUserID != NULL )
-  {
-    strcpy( pszLANUserID, "" );
-  } /* endif */
-
-  // Handle multi net driver
-  if ( UtlMNetDetect() )          /* deal with windows for workgroups multinet */
-  {
-    if ( UtlNetworkEnumAll() )
-    {
-      if (primary != 0 )
-        UtlSetNextTarget(primary);
-      else
-        UtlSetNextTarget(hinstMNet[0]);
-    }
-  } /* end of Multinet detect code */
-
-  /********************************************************************/
-  /* Get LAN user ID from NETWORK entry of SYSTEM.INI                 */
-  /********************************************************************/
-  if ( pszLANUserID != NULL )
-  {
-    DWORD iUserIDLen = MAX_USERID;
-    int iRC;
-    static char szUser[80];
-
-    iUserIDLen = sizeof(szUser) - 1;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 70 if ( GetUserName( szUser, &iUserIDLen ) )");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    if ( GetUserName( szUser, &iUserIDLen ) )
-    {
-      strncpy( pszLANUserID, szUser, MAX_USERID - 1 );
-      pszLANUserID[MAX_USERID-1] = EOS;
-      iRC = WN_SUCCESS;
-    }
-    else
-    {
-      iRC = GetLastError();
-    } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-    if ( iRC != WN_SUCCESS )
-    {
-      pszLANUserID[0] = NULC;
-    }
-    else
-    {
-      usRC = NO_ERROR;
-    } /* endif */
-  } /* endif */
-  #endif 
-
+  LogMessage2(FATAL,__func__, "::called commented function");
   return( usRC );
 }
 
@@ -377,41 +319,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 70 if ( GetU
 //+----------------------------------------------------------------------------+
 VOID UtlDispatch( VOID )
 {
-   USHORT usMsg = MAX_DISPATCH_MSGS; // message to be processed
-   HWND hwndClient =  (HWND) UtlQueryULong( QL_TWBCLIENT );
-   MSG msg;                      // message queue structure
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 69 full function");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   while ( usMsg && PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
-   {
-     if ( msg.message == WM_QUIT)
-     {
-        return;                       // do not dispatch WM_QUIT, leave it to
-                                      // the main message loop in EQFSTART
-     } /* endif */
-
-     if ( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
-     {
-       if ( UtlIsDialogMsg( &msg ) )
-       {
-         /***************************************************************/
-         /* nothing to do message has been dispatched within            */
-         /* UtlIsDialogMsg function                                     */
-         /***************************************************************/
-       }
-       else
-       {
-         if (!hwndClient || !TranslateMDISysAccel(hwndClient, &msg) )
-         {
-           TranslateMessage( &msg );
-           DispatchMessage( &msg );
-         } /* endif */
-       } /* endif */
-     } /* endif */
-     usMsg--;
-   } /* endwhile */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  LogMessage2(ERROR,__func__, ":: called commented function");
 }
 
 
@@ -648,46 +556,15 @@ BOOL UtlInitUtils( HAB hab )
      UtiVar[usId].sDriveType[i] = -1;
    } /* endfor */
 
-
    // Load or create event list
    {
-     char szLogFile[MAX_EQF_PATH];
-     ulong ulLength;
-
-     // Setup event log file name
-     auto otmDir = filesystem_get_otm_dir();
-     sprintf(szLogFile, "%s/%s", otmDir.c_str(), EVENTLOGFILENAME);
-
      // Load event log file
      pEventTable = NULL;
-     if ( UtlAlloc( (PVOID *)&pEventTable, 0L,
-                    (LONG)sizeof(EVENTTABLE), NOMSG ) )
-     {
-       ulLength = sizeof(EVENTTABLE);
-       if ( !UtlLoadFileL( szLogFile, (PVOID *)&pEventTable, &ulLength,
-                          FALSE, FALSE )
-                          ||
-             (memcmp( pEventTable->szMagicWord, EVENTMAGICWORD, 4 ) != 0) )
-       {
-         // event log not loaded or old format event table, create an empty one
-         memset( pEventTable, 0, sizeof(EVENTTABLE) );
-         memcpy( pEventTable->szMagicWord, EVENTMAGICWORD, 4 );
-         pEventTable->sVersion = EVENTTABLEVERSION;
-         pEventTable->sFirstEvent = -1; // number of first event in list
-         pEventTable->sLastEvent  = -1; // number of last event in list
-         pEventTable->sListSize = MAX_EVENT2_ENTRIES;
-       } /* endif */
-     } /* endif */
+     
    }
-
-   // Init Object Handler and Property handler for FUNCCALL runmode
-   LogMessage(WARNING, "if(true) hardcoded in UtlInitUtils");
-   if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
-   {
-     fOK = ObjHandlerInitForBatch();
-     if ( fOK ) 
-      fOK = PropHandlerInitForBatch();
-   } /* endif */
+   fOK = ObjHandlerInitForBatch();
+   if ( fOK ) 
+    fOK = PropHandlerInitForBatch();
 
    // Add exit procedure for this DLL
    return( fOK );

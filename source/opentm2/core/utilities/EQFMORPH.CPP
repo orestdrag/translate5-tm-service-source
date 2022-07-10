@@ -976,37 +976,6 @@ USHORT MorphGetLanguageID
     } /* endif */
   } /* endif */
 
-  /********************************************************************/
-  /* Load stem form chache files                                      */
-  /********************************************************************/
-  if ( (usRC == MORPH_OK) && (sID < 0))
-  {
-    /******************************************************************/
-    /* build name of stem form cache file                             */
-    /******************************************************************/
-    UtlMakeEQFPath( pLCB->szBuffer, NULC, DIC_PATH, NULL );
-    strcat( pLCB->szBuffer, BACKSLASH_STR );
-    strcat(pLCB->szBuffer, pszLanguage);
-    strcat( pLCB->szBuffer, EXT_OF_STEMCACHE );
-
-    /******************************************************************/
-    /* read term cache from disk                                      */
-    /******************************************************************/
-    MorphHashRead( pLCB->HashCache, pLCB->szBuffer, TRUE );
-
-    /******************************************************************/
-    /* build name of 'do not lookup' hash table                       */
-    /******************************************************************/
-    UtlMakeEQFPath( pLCB->szBuffer, NULC, DIC_PATH, NULL );
-    strcat( pLCB->szBuffer, BACKSLASH_STR );
-    strcat(pLCB->szBuffer, pLCB->szLanguage);
-    strcat( pLCB->szBuffer, EXT_OF_NOLOOKUP );
-
-    /******************************************************************/
-    /* read term cache from disk                                      */
-    /******************************************************************/
-    MorphHashRead( pLCB->HashNoLookup, pLCB->szBuffer, FALSE );
-  } /* endif */
 
   /********************************************************************/
   /* Add language to active languages                                 */

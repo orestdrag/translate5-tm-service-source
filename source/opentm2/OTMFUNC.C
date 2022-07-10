@@ -310,7 +310,7 @@ USHORT EqfDeleteMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
-  LogMessage2(INFO, "==EQFDeleteMem==::memName = ", pszMemName);
+  LogMessage2(DEBUG, "==EQFDeleteMem==::memName = ", pszMemName);
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
@@ -326,7 +326,7 @@ USHORT EqfDeleteMem
 
   if ( !usRC )
   {
-      SetSharingFlag( EQF_REFR_MEMLIST );
+    SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
   LogMessage4(INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
@@ -420,10 +420,7 @@ USHORT EqfStartSession
       UtlSetString( QST_COMMEMDIR,    pPropSys->szDirComMem );
       UtlSetString( QST_COMPROPDIR,   pPropSys->szDirComProp );
       UtlSetString( QST_COMDICTDIR,   pPropSys->szDirComDict );
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );");
-#ifdef TEMPORARY_COMMENTED
-      UtlSetString( QST_SYSTEMDIR,    pPropSys->PropHead.szPath + 3 );
-      #endif
+ 
       UtlSetString( QST_DIRSEGNOMATCHDIR, "SNOMATCH" );
       UtlSetString( QST_MTLOGPATH,    "MTLOG" );
       UtlSetString( QST_DIRSEGMTDIR, "MT" );
@@ -693,35 +690,7 @@ USHORT FctValidateSession
 
 void SetSharingFlag(ULONG ulRefreshFlag)
 {
-    HANDLE        hMapObject = NULL;
-  LogMessage4(ERROR,__func__,"::TO_BE_REPLACED_WITH_LINUX_CODE in SetSharingFlag(ULONG ulRefreshFlag = ", toStr(ulRefreshFlag).c_str(), " )" );
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    hMapObject = OpenFileMapping (FILE_MAP_WRITE, FALSE, EQFNDDE_SHFLAG );
-    if(!hMapObject)
-    {
-        hMapObject = CreateFileMapping(
-                                      (HANDLE)0xFFFFFFFF,   // use page file
-                                      NULL,                 // no security attrib
-                                      PAGE_READWRITE,       // read/write access
-                                      0,                    // size: high 32bits
-                                      sizeof(ULONG),        // size: low 32bit
-                                      EQFNDDE_SHFLAG );     // name of file mapping
-    }
-    if ( hMapObject == NULL )
-    {
-        usRC = ERROR_STORAGE;
-    }
-    if ( hMapObject )
-    {
-        ULONG *ulActFlag = (ULONG *)MapViewOfFile (hMapObject,
-                                  FILE_MAP_WRITE,
-                                  0,
-                                  0,
-                                  0);
-        *ulActFlag |= ulRefreshFlag;
-        UnmapViewOfFile(ulActFlag);
-    }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+
 }
 
 // OtmMemoryService

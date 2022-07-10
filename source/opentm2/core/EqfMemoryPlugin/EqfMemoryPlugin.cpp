@@ -1018,28 +1018,11 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     // fill properties file
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
-    
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 20 strncpy( pProp->stPropHead.szPath, strPathName.c_str(), sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));");
-#ifdef TEMPORARY_COMMENTED
-    strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
-             sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
-    #endif 
 
     char * fname = UtlGetFnameFromPath(  strPathName.c_str() );
     Utlstrccpy( pProp->stPropHead.szName, fname, DOT );
     strcpy(pProp->stTMSignature.szName, pProp->stPropHead.szName);
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 21    UtlSplitFnameFromPath( pProp->stPropHead.szPath );");
-#ifdef TEMPORARY_COMMENTED
-    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
-    #endif
-
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 22 strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);");
-#ifdef TEMPORARY_COMMENTED
-    //in case of overflow. change these strcpy to strncpy
-    strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
-    #endif
 
     strncpy( pProp->stTMSignature.szDescription, 
              pszDescription, 
@@ -1058,7 +1041,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     this->makePropName( strPathName, strPropName );
 
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    LogMessage4(WARNING, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
+    LogMessage4(INFO, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
     fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );

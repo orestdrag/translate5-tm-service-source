@@ -148,8 +148,8 @@ LONG                lOptions                 // type of new Translation Memory
     if ( pFactory->exists( NULL, pszMemName ) )
     {
       PSZ pszParam = (PSZ)pszMemName;
-      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_INVALID::", pszParam);
-      usRC = ERROR_MEM_NAME_INVALID;
+      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_EXISTS:: probably TM with this name already exists: ", pszParam);
+      usRC = ERROR_MEM_NAME_EXISTS;
     }
   } /* endif */
 
@@ -198,17 +198,17 @@ LONG                lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      LogMessage(INFO, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin...");
-      LogMessage(FATAL, "MemFuncCreateMem():: we don't support LAN");
-      //strcpy( szPlugin, "EqfSharedOnLanMemoryPlugin" );
+      LogMessage(INFO, "MemFuncCreateMem():: ");
+      LogMessage(FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
+      iRC = 2;
     }
     else
     {
-      LogMessage(INFO, "MemFuncCreateMem():: use the default memory plugin");
+      LogMessage(DEBUG, "MemFuncCreateMem():: use the default memory plugin");
       strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
     }
 
-    LogMessage(INFO, "MemFuncCreateMem():: create the memory");    
+    LogMessage(DEBUG, "MemFuncCreateMem():: create the memory");    
     pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, &iRC );
     if ( pMemory == NULL )
     {
@@ -221,23 +221,7 @@ LONG                lOptions                 // type of new Translation Memory
   if ( fOK )
   {
     char szObjName[MAX_LONGFILESPEC];
-
-     pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
-
-      // notify creation success
-
-  LogMessage2(WARNING, __func__,"::TEMPORARY_COMMENTED in MemFuncCreateMem():: notify creation success with win api");
-#ifdef TEMPORARY_COMMENTED
-      HWND hwnd = FindWindow( TWBMAIN ,NULL);
-      if(hwnd != NULL)
-      {
-        COPYDATASTRUCT cds;
-        cds.dwData = 1;
-        cds.cbData = sizeof( szObjName );
-        cds.lpData =  szObjName;
-        SendMessage(hwnd,WM_COPYDATA, MP1FROMCHAR(chToDrive),(LPARAM)(LPVOID)&cds);
-      }
-#endif
+    pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
   } 
 
   //--- Tm is created. Close it. 
@@ -248,8 +232,9 @@ LONG                lOptions                 // type of new Translation Memory
     pMemory = NULL;
   }
   
-  usRC = (fOK ? 0 : 1);
-
+  if(usRC == 0){
+    usRC = (!fOK);
+  }
   LogMessage2(INFO, "MemFuncCreateMem() done, usRC = ", toStr(usRC).c_str());
   return( usRC );
 } /* end of function MemFuncCreateMem */

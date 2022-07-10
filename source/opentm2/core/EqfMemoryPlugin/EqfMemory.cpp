@@ -20,6 +20,7 @@ Copyright Notice:
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/EncodingHelper.h"
 #include "../../core/utilities/PropertyWrapper.H"
+#include "../../core/utilities/FilesystemHelper.h"
 #include "OtmProposal.h"
 #include "EqfMemory.h"
 
@@ -270,15 +271,10 @@ unsigned long EqfMemory::getFileSize()
     PBTREE pDataTree = (PBTREE)this->pTmClb->pstTmBtree;
     PBTREE pIndexTree = (PBTREE)this->pTmClb->pstInBtree;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 14 unsigned long ulDataSize = GetFileSize( pDataTree->pBTree->fp, NULL );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    unsigned long ulDataSize = GetFileSize( pDataTree->pBTree->fp, NULL );
-    if ( ulDataSize == INVALID_FILE_SIZE ) ulDataSize = 0;
-    unsigned long ulIndexSize = GetFileSize( pIndexTree->pBTree->fp, NULL );
-    if ( ulIndexSize == INVALID_FILE_SIZE ) ulIndexSize = 0;
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pDataTree->pBTree->fp );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pIndexTree->pBTree->fp );
 
     ulFileSize = ulDataSize + ulIndexSize;
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   return( ulFileSize );
 }

@@ -246,7 +246,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     FileBuffer* pFb = NULL;
 
     if(getFileBufferInstance()->find(fName) == getFileBufferInstance()->end()){
-        LogMessage2(DEBUG,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
+        LogMessage2(DEVELOP,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
     pFb = &(*getFileBufferInstance())[fName];
@@ -255,7 +255,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     }
 
     if(pFb->data.size()< offset + buffSize){
-        if(CheckLogLevel(DEBUG)){
+        if(CheckLogLevel(DEVELOP)){
             LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
         }
         return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
@@ -631,8 +631,9 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
     
     int size = FilesystemHelper::GetFileSize(fp);
     if(size < LoPart){
-        LogMessage2(WARNING, "SetFilePointer::File is smaller than requested position -> writing, fname = ", 
-            FilesystemHelper::GetFileName(fp).c_str());
+        if(CheckLogLevel(DEBUG))
+            LogMessage2(WARNING, "SetFilePointer::File is smaller than requested position -> writing, fname = ", 
+                FilesystemHelper::GetFileName(fp).c_str());
         TruncateFileForBytes(fp, LoPart);
     }
 
