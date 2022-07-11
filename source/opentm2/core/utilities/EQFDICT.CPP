@@ -7471,7 +7471,7 @@ SHORT QDAMDictInsertLocal
       sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
       if ( !sRc )
       {
-        if(ulLen > TMX_REC_SIZE){
+        if(ulLen > TMX_REC_SIZE && CheckLogLevel(INFO)){
           LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
         }
         recData.ulLen = ulLen;

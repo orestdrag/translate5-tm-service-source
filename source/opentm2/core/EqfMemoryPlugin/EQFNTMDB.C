@@ -1125,7 +1125,7 @@ VOID QDAMCopyDataTo_V3
    if ( usDataOffs)
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
-       if(usLastPos < usLen){
+       if(usLastPos < usLen && CheckLogLevel(INFO)){
         LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       ULONG ulLen = *(PULONG) pOldData;
@@ -1138,7 +1138,7 @@ VOID QDAMCopyDataTo_V3
 
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
-      if(usLastPos < usLen){
+      if(usLastPos < usLen && CheckLogLevel(INFO)){
         LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       //assert( (usLastPos >= usLen) );
@@ -1605,7 +1605,7 @@ SHORT QDAMDictUpdateLocal
                   sRc = QDAMAddToBuffer_V3( pBTIda, pUserData, ulLen, &recData );
                   if ( !sRc )
                   {
-                    if(ulLen > TMX_REC_SIZE){
+                    if(ulLen > TMX_REC_SIZE && CheckLogLevel(INFO)){
                       LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
                     }
                     recData.ulLen = ulLen;
@@ -1856,7 +1856,9 @@ SHORT QDAMDictExactLocal
                  }
                  else if ( *pulLength < recData.ulLen )
                  {
-                   LogMessage5(ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
+                    if(CheckLogLevel(DEBUG)){
+                      LogMessage5(ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
+                    }
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;
                  }

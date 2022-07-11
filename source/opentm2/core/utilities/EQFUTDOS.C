@@ -2538,7 +2538,7 @@ USHORT UtlQPathInfoHwnd
 )
 {
   LogMessage2(ERROR,__func__, ":: called commented function");
-  return( usRetCode );
+  return( 0 );
 }
 
 //+----------------------------------------------------------------------------+

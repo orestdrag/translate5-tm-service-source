@@ -2259,7 +2259,9 @@ USHORT ComparePutData
                       RECLEN(pTmRecord) += lNewClbLen;
                       RECLEN(pTMXTargetRecord) += lNewClbLen;
                     }else{
-                      LogMessage5(FATAL, __func__,"memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
+                      if(CheckLogLevel(DEBUG)){
+                        LogMessage5(FATAL, __func__,"::memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
+                      }
                     }
                   } /* endif */
 

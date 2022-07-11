@@ -990,7 +990,7 @@ USHORT EqfSearchMem
     usRC =  MemoryFactory::getInstance()->APISearchMem( lHandle, pszSearchString, pszStartPosition, pProposal, lSearchTime, lOptions );
   } /* endif */
 
-  if ( usRC)
+  if ( usRC && usRC != ENDREACHED_RC)//
   {
     LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
   }else{
