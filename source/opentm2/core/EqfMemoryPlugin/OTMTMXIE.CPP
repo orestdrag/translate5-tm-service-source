@@ -635,7 +635,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
       if(tag.original_tagType == EPT_ELEMENT ){
         tagTypeToFind = BPT_ELEMENT;
       }else if(tag.original_tagType == EX_ELEMENT){
-        tagTypeToFind = EPT_ELEMENT;
+        tagTypeToFind = BX_ELEMENT;
 
       }else //if()// we have closing tag like </hi> ,that don't have attributes, so we should find
                   // the same original opening tag, that was not closed yet(don't find matching closing tag)
