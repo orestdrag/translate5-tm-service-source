@@ -305,7 +305,7 @@ int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
   UsedMemory = calculateOccupiedRAM() + memoryRequested;
   #endif
 
-  LogMessage6(TRANSACTION, __func__,":: ", toStr(UsedMemory).c_str(), " bytes is used from ", toStr(AllowedMemory).c_str(), " allowed");
+  LogMessage6(DEBUG, __func__,":: ", toStr(UsedMemory).c_str(), " bytes is used from ", toStr(AllowedMemory).c_str(), " allowed");
 
   // add a new entry when the maximum list size has not been reached yet
   //if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
@@ -467,7 +467,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
 
-  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
 
   // find a free slot in the memory list
   iIndex = getFreeSlot(requiredMemory);

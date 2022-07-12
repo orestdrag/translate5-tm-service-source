@@ -937,7 +937,9 @@ std::string FilesystemHelper::GetHomeDir(){
     
     //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
-        LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", HOMEdir);
+        if(CheckLogLevel(DEVELOP)){
+            LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", HOMEdir);
+        }
         properties_init();
         res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
     }
@@ -947,7 +949,7 @@ std::string FilesystemHelper::GetHomeDir(){
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;
     int ret = stat(dir.c_str(), &st);
-    LogMessage6(DEBUG, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),")::stat():: ret = ", toStr(ret).c_str());
+    LogMessage6(DEVELOP, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),")::stat():: ret = ", toStr(ret).c_str());
     if (ret){
         ret = mkdir(dir.c_str(), rights);
         LogMessage6(INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),") was created, ret = ", toStr(ret).c_str());

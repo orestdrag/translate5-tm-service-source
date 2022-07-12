@@ -10,7 +10,7 @@
 #include <cstring>
 
 std::string logFilename;
-int logLevelTreshold;
+int logLevelTreshold = DEBUG;
 //bool fileLoggingSuppressed = false;
 bool fileLoggingSuppressed = true;
 
@@ -322,7 +322,7 @@ char* toStr(int i){
 
 int SetLogLevel(int level){
     if(level <= FATAL && level>=DEVELOP){
-        LogMessage2(WARNING, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
+        LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;
         return level;
     }else{

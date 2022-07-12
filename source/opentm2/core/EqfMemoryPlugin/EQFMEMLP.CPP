@@ -2165,21 +2165,21 @@ USHORT MemFuncImportProcess
               LONG lCurTime = 0;  
 
               time( &lCurTime );
-              LogMessage9(TRANSACTION, __func__ , "::Memory import ended at     : ", asctime( localtime( &lCurTime )),
-                            "\n\tNumber of segments imported : ", toStr(pLoadData->ulSegmentCounter).c_str() ,
-                           "\n\tNumber of invalid segments  : ", toStr(pLoadData->ulInvSegmentCounter).c_str(), 
-                           "\n\tNumber of OTMUTF8 segments  : ", toStr(pLoadData->ulResetSegmentCounter).c_str() );
+              std::string logMessage = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
+                                      "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
+                                    "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 
+                                    "\n\tNumber of OTMUTF8 segments  : " + toStr(pLoadData->ulResetSegmentCounter) + "\n\t";
             
               if ( lImportStartTime )
               {
                 LONG lDiff = lCurTime - lImportStartTime;
                 char buff[256];
-                sprintf( buff, "Overall import time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
+                sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                         (lDiff - (lDiff / 3600 * 3600)) / 60,
                         (lDiff - (lDiff / 3600 * 3600)) % 60 );
-                LogMessage9(TRANSACTION, __func__ , "Memory update time ",toStr(lMemAccessTime).c_str()," [ms]\nFile read time     ",
-                    toStr(lFileReadTime).c_str(), " [ms]\nOther times        ",toStr(lOtherTime).c_str(), " [ms]\n Overall import time is " , buff);
+                logMessage += buff;
               }
+              LogMessage(TRANSACTION, logMessage.c_str());
               
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
