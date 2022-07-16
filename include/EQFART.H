@@ -117,21 +117,6 @@
 */
 //+----------------------------------------------------------------------------+
 
-#ifdef _WINDOWS
-  HWND FAR PASCAL ArtRegister(HANDLE hInstance,
-                              HWND   hwndParent,
-                              long   lForFutureUse1,
-                              LPSTR  lpszDefDir,
-                              long   lForFutureUse2);
-#else
+
   #define ART_DLL       "ART"
   #define ART_REGISTER  "ARTREGISTER"
-
-#ifdef TEMPORARY_COMMENTED
-  APIRET ArtRegister(HAB  hAB,
-                     HWND hwndOwnerFrame,
-                     PSZ  pszProductID,
-                     PSZ  pszDefDir,
-                     long lForFutureUse);
-#endif
-#endif

@@ -63,27 +63,6 @@ void GetElapsedTime( LONG64 *plTime )
   clock_gettime(CLOCK_MONOTONIC, &now);
   *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
   LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 38  whole function");
-#ifdef TEMPORARY_COMMENTED
-  LARGE_INTEGER liCurrent;
-
-  QueryPerformanceCounter( &liCurrent );
-
-  if ( liFrequency.QuadPart == 0)
-  {
-    QueryPerformanceFrequency( &liFrequency );
-  } /* endif */
-
-  if ( liLast.QuadPart != 0 )
-  {
-    if ( liFrequency.QuadPart != 0 )
-    {
-      LONGLONG ldwDiff = liCurrent.QuadPart - liLast.QuadPart;
-      DWORD dwTime = (DWORD)((ldwDiff * 1000000) / liFrequency.QuadPart);
-      *plTime = *plTime + dwTime;
-    }
-  } /* endif */
-  liLast.QuadPart = liCurrent.QuadPart;
-  #endif
 } /* end of function GetElapsedTime */
 
 //#endif
@@ -2092,6 +2071,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         /* call tag substitution function (if we are not dealing with */
         /* an exact match) ...                                        */
         /**************************************************************/
+        #ifdef TEMPORARY_COMMENTED
         if ( ( usRc == NO_ERROR ) && (*pusMatchLevel < EQUAL_EQUAL) )
         {
           BOOL fPreprocessed = FALSE;
@@ -2237,6 +2217,7 @@ LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
           if ( pMatchSource ) NTMFreeSentenceStructure( pMatchSource );
           if ( pMatchTarget ) NTMFreeSentenceStructure( pMatchTarget );
         } /* endif */
+      #endif
       } /* endif */
     } /* endif */
   }
@@ -2951,6 +2932,41 @@ USHORT GetFuzzyMatch
 }
 
 
+
+
+std::wstring removeTagsFromString(std::wstring input){
+
+  bool fTagOpened = false;
+  wchar_t* pIn  = &input[0];
+  wchar_t* pOutStart = pIn;
+  wchar_t* pOut = pOutStart;
+
+  while( *pIn != L'\0'){
+    switch (*pIn)
+    {
+    case L'<':
+      fTagOpened = true;
+      break;
+    case L'>':
+      fTagOpened = false;
+      break;
+    
+    default:
+      if(fTagOpened == false){
+        *pOut = *pIn;
+        pOut++;
+      }
+      break;
+    }
+    
+    pIn++;
+  }
+
+  *pOut = L'\0';
+  return std::wstring(pOutStart);
+}
+
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -3257,32 +3273,15 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */              
             } /* endif */
 
+            auto propNormString = removeTagsFromString(pSentence->pPropString);
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
-//                                        pSentence->pNormString,
+                                        //pSentence->pNormString,
                                         pSentence->pInputString,
 //                                        pString,
                                         pSentence->pPropString,
+                                        //(wchar_t*)propNormString.c_str(),
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP,0);
-
-            // RJ: P018279 etc: NO, must be active!
-            // GQ: the following code has been disabled as the fuzziness
-            // now includes any inline tagging
-            LogMessage3(INFO,__func__, ":: disable -3% fuzzy in case tag table are different usFuzzy = ", toStr(usFuzzy).c_str());// for "pSentence->pInputString);
-            #ifdef TEMPORARY_COMMENTED
-            if (!fTagTableEqual  && )
-            {
-              if ( usFuzzy > 3 )
-              {
-                usFuzzy -= 3;
-              }
-              else
-              {
-                usFuzzy = 0;
-              } /* endif */
-                //usFuzzy = std::min( (USHORT)99, usFuzzy );
-            } /* endif */
-            #endif
 
             /**********************************************************/
             /* additional comparison if normalized strings are equal  */

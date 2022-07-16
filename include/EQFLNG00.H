@@ -48,42 +48,6 @@ static SHORT sLngDetailsView[12] =  { LNG_LANGUAGE_IND, LNG_ASCIICP_IND, LNG_ANS
 
 CHAR  ColHdr[ 12 ][80] = { "Language", "ASCII CP", "ANSI CP", "Codepage name", "ISO name", "ICU name", "Language group", "Source language", "Target language", "MorphSupport", "Spellcheck", "" };
 
-#ifdef TEMPORARY_COMMENTED
-//declare table for colum listbox
-static CLBCOLDATA ColLngTable[] =
-{ { ColHdr[0], 20,   TEXT_DATA, DT_LEFT },   //
-  { ColHdr[1], 10,   TEXT_DATA, DT_CENTER },
-  { ColHdr[2], 10,   TEXT_DATA, DT_CENTER },
-  { ColHdr[3], 16,   TEXT_DATA, DT_LEFT },
-  { ColHdr[4], 10,   TEXT_DATA, DT_LEFT },
-  { ColHdr[5], 10,   TEXT_DATA, DT_LEFT },
-  { ColHdr[6], 20,   TEXT_DATA, DT_LEFT },
-  { ColHdr[7], 14,   TEXT_DATA, DT_CENTER },
-  { ColHdr[8], 14,   TEXT_DATA, DT_CENTER },
-  { ColHdr[9], 14,   TEXT_DATA, DT_CENTER },
-  { ColHdr[10], 14,   TEXT_DATA, DT_CENTER },
-  { NULL,      0,    TEXT_DATA, 0       }};
-#endif
-
-#ifdef TEMPORARY_COMMENTED
-static CLBCTLDATA LngCLBData =
-{  sizeof(CLBCTLDATA),                 // size of structure
-   11,                                 // we have 10 data columns
-   1,                                  // one character space between columns
-   SYSCLR_WINDOWSTATICTEXT,            // paint title in color of static text
-   SYSCLR_WINDOW,                      // background is normal window background
-   SYSCLR_WINDOWTEXT,                  // paint item in color of window text
-   SYSCLR_WINDOW,                      // background is normal window background
-   '\x15',                             // use X15 character as data seperator
-   sLngView,                           // set current (= last used) view list
-   sLngView,                           // set default view list
-   sLngDetailsView,                    // set user set details view list
-   sLngView,                           // set view list for 'name' view option
-   sLngView,                           // set sort criteria list
-   ColLngTable };                      // set address of column definition table
-#endif
-
-
 struct _lnginst_check
 {
    USHORT  usStorageSize;                      //Size of storage

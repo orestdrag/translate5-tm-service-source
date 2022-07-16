@@ -736,7 +736,9 @@ USHORT MorphTokenizeW
             psData += 2;
             sLen   = *psData++;
             sStart = *psData++;
-            LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
+            if(CheckLogLevel(DEVELOP)){
+              LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
+            }
           } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
         }
         else if ( usListType == MORPH_OFFSLIST )
@@ -747,7 +749,9 @@ USHORT MorphTokenizeW
             {
               sLen   = *psData++;
               sStart = *psData++;
-              LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+              if(CheckLogLevel(DEVELOP)){
+                LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+              }
             } while ( (sStart != 0) || (sLen != 0) );
         } /* endif */
       }

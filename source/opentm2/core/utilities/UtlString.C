@@ -902,10 +902,9 @@ void BidiConvertFETo06
 // Reverse direction (from Unicode to 864)
 void BidiConvert06ToFE(LPWSTR lpWideCharStr, int Length) //lpWideCharStr is a Zero terminated buffer.
 {
-  int i = 0;
-  for ( i=0; i<Length; i++)
+  LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
+  for (int i=0; i<Length; i++)
   {
-    LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
 #ifdef TEMPORARY_COMMENTED
     if ( (lpWideCharStr[i] >= 0x0621) && (lpWideCharStr[i] <= 0x064A ) )
         lpWideCharStr[i] = (CHAR_W)(Tab06ToFE [ (lpWideCharStr[i] - 0x0621) ] );

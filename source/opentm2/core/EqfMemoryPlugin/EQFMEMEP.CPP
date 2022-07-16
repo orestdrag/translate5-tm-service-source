@@ -1722,20 +1722,6 @@ USHORT MemFuncExportMem
   else
   {
     LogMessage(FATAL,"TEMPORARY_COMMENTED in MemFuncExportMem:: called without COMPLETE_IN_ONE_CALL_OPT option and is not implemented\tested yet");
-    #ifndef TEMPORARY_COMMENTED
-    // prepare a new import or continue current one
-    if ( pData->fComplete )              // has last run been completed
-    {
-      // prepare a new analysis run
-      pData->usProgress = 0;
-      usRC = MemFuncPrepExport( pData, pszMemName, pszOutFile, lOptions );
-    }
-    else
-    {
-      // continue current analysis process
-      usRC = MemFuncExportProcess( pData );
-    } /* endif */
-    #endif
   }
   return( usRC );
 } /* end of function MemFuncExportMem */

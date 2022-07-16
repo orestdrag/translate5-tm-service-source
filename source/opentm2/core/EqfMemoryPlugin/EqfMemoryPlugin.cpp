@@ -520,29 +520,7 @@ int EqfMemoryPlugin::renameMemory(
     PPROP_NTM pstMemProp = NULL;
     ULONG ulRead = 0;
     if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
-    {
-      
-      LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 17 // adjust name in property header");
-#ifdef TEMPORARY_COMMENTED
-         // adjust name in property header
-      strcpy( pstMemProp->stPropHead.szName, szShortName );
-      strcat( pstMemProp->stPropHead.szName, EXT_OF_TMPROP );
-
-      // adjust long name
-      if ( strcmp( pszNewName, szShortName ) != 0 )
-      {
-        strcpy( pstMemProp->szLongName, pszNewName );
-      }
-      else
-      {
-        pstMemProp->szLongName[0] = EOS;
-      } /* endif */
-
-
-      // adjust fully qualified TM name
-      strcpy( pstMemProp->szFullMemName, pMemInfo->szFullPath );
-      #endif 
-
+    {      
       // update name in signature structure
       strcpy( pstMemProp->stTMSignature.szName, szShortName );
 
@@ -1076,31 +1054,18 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
 #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
-    #endif 
-
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 24 Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );");
-#ifdef TEMPORARY_COMMENTED
     Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
-    #endif 
-
+ 
     strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 25     UtlSplitFnameFromPath( pProp->stPropHead.szPath );");
-#ifdef TEMPORARY_COMMENTED
+
     UtlSplitFnameFromPath( pProp->stPropHead.szPath );
-    #endif
     //in case of overflow. change these strcpy to strncpy
-     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 26 strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1); strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);");
-#ifdef TEMPORARY_COMMENTED
     strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
     strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
-    #endif
     strncpy( pProp->stTMSignature.szDescription, pOldProp->stTMSignature.szDescription, 
              sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
     strncpy( pProp->stTMSignature.szSourceLanguage, pOldProp->stTMSignature.szSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
-
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 27 strcpy( pProp->stTMSignature.szUserid, pOldProp->stTMSignature.szUserid );");
-#ifdef TEMPORARY_COMMENTED
     strcpy( pProp->stTMSignature.szUserid, pOldProp->stTMSignature.szUserid );
     #endif
 

@@ -21,101 +21,6 @@
 #include "LogWrapper.h"
 
 
-#ifdef EQFBFUZZ_LOG
-
-static FILE *LogOpen()
-{
-  FILE *hfLog;
-  CHAR szLogFile[MAX_EQF_PATH]; 
-
-  UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-  strcat( szLogFile, "\\EQFBFUZZ.LOG" );
-  hfLog = fopen( szLogFile,"a+" );
-  return( hfLog );
-}
-
-static void LogClose( FILE *hfLog )
-{
-  if ( hfLog )
-  {
-    fclose( hfLog );
-  } /* endif */
-}
-
-void WriteLogString( FILE *hf, PSZ_W pszString )
-{
-  static CHAR_W szBuffer[1024];
-  PSZ_W pszTemp = szBuffer;
-  
-  while ( *pszString)
-  {
-    if ( *pszString == L'\r' )
-    {
-      wcscpy( pszTemp, L"<cr>" );
-      pszTemp += 4;
-      pszString++;
-    }
-    else if ( *pszString == L'\n' )
-    {
-      wcscpy( pszTemp, L"<lf>" );
-      pszTemp += 4;
-      pszString++;
-    }
-    else
-    {
-      *pszTemp++ = *pszString++;
-    } /* endif */
-  } /*endwhile */;
-  *pszTemp = 0;
-  fprintf( hf, "%S\n", szBuffer );
-}
-
-void LogToken( FILE *hfLog, PFUZZYTOK pToken )
-{
-  CHAR_W chTemp;
-  SHORT sLen = (SHORT)(pToken->usStop  - pToken->usStart + 1);
-  PSZ_W pszEnd = pToken->pData + sLen;
-  chTemp = *pszEnd;
-  *pszEnd = 0;
-  fprintf( hfLog, "H=%10.10lu L=%3d Conn=%s Type=%-4s, Token=\"%S\"\n", pToken->ulHash, sLen, pToken->fConnected ? "Y" : "N", 
-    (pToken->sType == TEXT_TOKEN) ? "Text" : "Tag", pToken->pData );
-  *pszEnd = chTemp;
-}
-
-void LogReplEntry( FILE *hfLog, PREPLLIST pEntry )
-{
-  CHAR_W chTempSource, chTempTarget;
-  int iLenSource, iLenTarget;
-
-  iLenSource = pEntry->pSrcTok->usStop - pEntry->pSrcTok->usStart + 1;
-  iLenTarget = pEntry->pTgtTok->usStop - pEntry->pTgtTok->usStart + 1;
-  chTempSource = pEntry->pSrcTok->pData[iLenSource];
-  chTempTarget = pEntry->pTgtTok->pData[iLenTarget];
-  pEntry->pSrcTok->pData[iLenSource] = 0;
-  pEntry->pTgtTok->pData[iLenTarget] = 0;
-  fprintf( hfLog, "\"%S\" <=> \"%S\"\n", pEntry->pSrcTok->pData, pEntry->pTgtTok->pData ); 
-  pEntry->pSrcTok->pData[iLenSource] = chTempSource;
-  pEntry->pTgtTok->pData[iLenTarget] = chTempTarget;
-}
-
-void LogTokenList( PFUZZYTOK pToken, PSZ pszTitle )
-{
-  FILE *hfLog = LogOpen();
-  if ( hfLog )
-  {
-    fprintf( hfLog, "%s\nTokens:\n", pszTitle );
-
-    while ( pToken->usStop )
-    {
-      LogToken( hfLog, pToken++ );
-    } /*endwhile */
-
-    LogClose( hfLog );
-  } /* endif */
-}
-
-#endif
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1800,6 +1705,40 @@ BOOL EQFBCountDiff
 } /* end of function EQFBCountDiff */
 
 
+/*
+std::wstring removeTagsFromString(std::wstring input){
+
+  bool fTagOpened = false;
+  wchar_t* pIn  = &input[0];
+  wchar_t* pOutStart = pIn;
+  wchar_t* pOut = pOutStart;
+
+  while( *pIn != L'\0'){
+    switch (*pIn)
+    {
+    case L'<':
+      fTagOpened = true;
+      break;
+    case L'>':
+      fTagOpened = false;
+      break;
+    
+    default:
+      if(fTagOpened == false){
+        *pOut = *pIn;
+        pOut++;
+      }
+      break;
+    }
+    
+    pIn++;
+  }
+
+  *pOut = L'\0';
+  return std::wstring(pOutStart);
+}//*/
+
+
 /**********************************************************************/
 /* find the differences in two strings (w/o cleanup if consecutives   */
 /* delete and inserts)                                                */
@@ -1830,20 +1769,26 @@ EQFBFindDiffEx
   /* prepare tokens for String1 and string 2                        */
   /******************************************************************/
   LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for first string: ");
+  //std::wstring ws1 = removeTagsFromString(pString1);
   fOK = PrepareTokens( //pDoc,
                        pTagTable,
                        pInBuf,
                        pTokBuf,
-                       pString1, sLanguageId, &pTokenList1, ulOemCP );
+                       //(wchar_t*)ws1.c_str(), 
+                       pString1,
+                       sLanguageId, &pTokenList1, ulOemCP );
   if ( fOK )
   {
 
     LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for second string: ");
+    //std::wstring ws2 = removeTagsFromString(pString2);
     fOK = PrepareTokens( // pDoc,
                          pTagTable,
                          pInBuf,
                          pTokBuf,
-                         pString2, sLanguageId, &pTokenList2, ulOemCP );
+                         //(wchar_t*)ws2.c_str(), 
+                         pString2,
+                         sLanguageId, &pTokenList2, ulOemCP );
   } /* endif */
   if (fOK )
   {
@@ -2193,14 +2138,7 @@ FindMiddleSnake
       memset( psForward, -1, sDelta * sizeof(SHORT));
       memset( psBackward, -1, sDelta * sizeof(SHORT));
       sDelta = sLenStr2 - sLenStr1;
-      if ( sDelta & 0x01 )
-      {
-        fDeltaIsOdd = TRUE;
-      }
-      else
-      {
-        fDeltaIsOdd = FALSE;
-      } /* endif */
+      fDeltaIsOdd = sDelta & 0x01 ;
 
       sD = -1;
       psForward [1+sLag] = 0;
@@ -2608,8 +2546,11 @@ LCS
       //TODO - verify , because this is changed from original algorhythm 
       while ( (sI <= MidSnake.sU) && (sJ <= MidSnake.sV)  )
       {
-        (LCSStringA.pTokenList + sI)->sType = MARK_EQUAL;
-        (LCSStringB.pTokenList + sJ)->sType = MARK_EQUAL;
+        if((LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
+        ){
+          LCSStringA.pTokenList[sI].sType = MARK_EQUAL;
+          LCSStringB.pTokenList[sJ].sType = MARK_EQUAL;
+        }
         sJ++;
         sI++;
       } /* endwhile */
