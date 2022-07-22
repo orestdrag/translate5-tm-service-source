@@ -116,8 +116,12 @@ void delete_method_handler( const shared_ptr< Session > session )
   LogMessage2(RequestTransactionLogLevel, "processing DELETE MEMORY request, mem = ", strTM.c_str() );
 
   string strResponseBody;
+  //int rc = 200;
   int rc = pMemService->deleteMem( strTM, strResponseBody );
-  session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+
+  char version[20];
+  properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+  session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
 
   LogMessage4(RequestAdditionalLogLevel,"DELETE MEMORY request::Done, , RC=",toStr(rc).c_str(),"; strResponseBody=", strResponseBody.c_str() );
 }
@@ -135,7 +139,9 @@ void get_memory_method_handler( const shared_ptr< Session > session )
   restbed::Bytes vMemData;
   int rc = pMemService->getMem( strTM, strAccept, vMemData );
   
-  session->close( rc, vMemData, { { "Content-Length", ::to_string( vMemData.size() ) },{ "Content-Type", strAccept.c_str() },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+  char version[20];
+  properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+  session->close( rc, vMemData, { { "Content-Length", ::to_string( vMemData.size() ) },{ "Content-Type", strAccept.c_str() },{ szVersionID, version } } );
   LogMessage2(RequestAdditionalLogLevel,"EXPORT memory request::Done, RC = ", toStr(rc).c_str());
 }
 
@@ -146,7 +152,10 @@ void get_method_handler(const shared_ptr< Session > session)
   LogMessage(RequestTransactionLogLevel, "processing GET LIST OF MEMORIES request");
   std::string strResponseBody = "Sample text";
   int ret = pMemService->list( strResponseBody );
-  session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+
+  char version[20];
+  properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+  session->close( OK, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
   LogMessage4(RequestAdditionalLogLevel, "GET LIST OF MEMORIES done, strResponceBody: \"", strResponseBody.c_str(), "\" RC = ", toStr(OK).c_str());
 }
 
@@ -161,9 +170,12 @@ void getStatus_method_handler( const shared_ptr< Session > session )
 
   string strResponseBody;
   int iRC = pMemService->getStatus( strTM, strResponseBody );
-  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+
+  char version[20];
+  properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, version } } );
   
-}
+} 
 
 
 void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session )
@@ -173,7 +185,10 @@ void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session 
 
   string strResponseBody;
   int iRC = pMemService->saveAllTmOnDisk( strResponseBody );
-  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+
+  char version[20];
+  properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+  session->close( iRC, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" }, { szVersionID, version } } );
 }
 
 bool IsMemImportInProcess(){
@@ -248,7 +263,9 @@ void postImport_method_handler( const shared_ptr< Session > session )
 
     int rc = pMemService->import( strTM, strInData, strResponseBody );
     
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     
     LogMessage5(RequestAdditionalLogLevel, "MEM IMPORT::Done, RC=", toStr(rc).c_str(),", Output:\n-----\n", strResponseBody.c_str() ,"\n-----\n====\n");
   } );
@@ -271,7 +288,9 @@ void post_method_handler( const shared_ptr< Session > session )
     
     int rc = pMemService->createMemory( strInData, strResponseBody );
     
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     
     LogMessage4(RequestAdditionalLogLevel, "CREATE MEM::done, RC=", toStr(rc).c_str(),"; Output: ", strResponseBody.c_str());
   } );
@@ -341,9 +360,12 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
     wstr += L"\n};";
     string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
 
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
       { "Content-Type", "application/json" },
-      { szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+      { szVersionID, version } } );
     LogMessage5(RequestAdditionalLogLevel,  "Tag replacement::done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   });
 }
@@ -365,7 +387,10 @@ void postFuzzySearch_method_handler( const shared_ptr< Session > session )
     string strResponseBody = "{}";
     LogMessage5(RequestTransactionLogLevel, "processing FUZZY SEARCH request Memory name = \"", strTM.c_str() ,"\"\nInput:\n-----\n\"",strInData.c_str(),"\"\n----" );
     int rc = pMemService->search( strTM, strInData, strResponseBody );
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     LogMessage5(RequestAdditionalLogLevel,  "FUZZY SEARCH::Done! RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str() ,"\n----\n====\n");
   } );
 }
@@ -389,7 +414,9 @@ void postConcordanceSearch_method_handler( const shared_ptr< Session > session )
     
     int rc = pMemService->concordanceSearch( strTM, strInData, strResponseBody );
     
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     LogMessage4(RequestAdditionalLogLevel,"CONCORDANCE SEARCH::Done! RC = ", toStr(rc).c_str(), "; Output = ", strResponseBody.c_str());
   } );
 }
@@ -413,7 +440,9 @@ void postEntry_method_handler( const shared_ptr< Session > session )
     LogMessage5(RequestTransactionLogLevel, "processing ENTRY UPDATE request, Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
     int rc = pMemService->updateEntry( strTM, strInData, strResponseBody );
     
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     
     LogMessage7(RequestAdditionalLogLevel,"ENTRY UPDATE::...Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );
@@ -439,7 +468,9 @@ void postEntryDelete_method_handler( const shared_ptr< Session > session )
     LogMessage5(RequestTransactionLogLevel, "processing ENTRY DELETE request, Memory name=\"",strTM.c_str(),"\"\nInput:\n-----\n", strInData.c_str(),"\n----\n" );
     int rc = pMemService->deleteEntry( strTM, strInData, strResponseBody );
     
-    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, STR_DRIVER_LEVEL_NUMBER } } );
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },{ "Content-Type", "application/json" },{ szVersionID, version } } );
     
     LogMessage7(RequestAdditionalLogLevel, "ENTRY DELETE ::Done, RC=",toStr(rc).c_str(),"\nOutput:\n-----\n", strResponseBody.c_str(),"\n----\nFor TM \'",strTM.c_str(),"\'====\n");
   } );

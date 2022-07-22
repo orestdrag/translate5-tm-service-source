@@ -1993,6 +1993,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define KEY_LANG_FILE_PATH "LANG_FILE_PATH"
 #define KEY_DEBUG_KEYS_SEPARATE_FILES "WRITE_KEYS_IN_SEPARATE_FILES"
 
+#define KEY_APP_VERSION "APP_VERSION"
 //end def
 
 #if defined(_TLEX)

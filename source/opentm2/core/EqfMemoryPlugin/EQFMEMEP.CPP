@@ -1700,29 +1700,22 @@ USHORT MemFuncExportMem
 {
   USHORT      usRC = NO_ERROR;         // function return code
 
-  // when running in COMPLETE_IN_ONE_CALL_OPT mode we use our own data area to be independent of other API calls running in parallel
-  if ( lOptions & COMPLETE_IN_ONE_CALL_OPT )
-  {
-    PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
-    memset( pPrivateData, 0, sizeof( FCTDATA ) );
-    pPrivateData->fComplete = TRUE;
-    pPrivateData->usProgress = 0;
+  PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
+  memset( pPrivateData, 0, sizeof( FCTDATA ) );
+  pPrivateData->fComplete = TRUE;
+  pPrivateData->usProgress = 0;
 
-    usRC = MemFuncPrepExport( pPrivateData, pszMemName, pszOutFile, lOptions );
-    if ( usRC == 0 )
-    {
-      while ( !pPrivateData->fComplete )
-      {
-        usRC = MemFuncExportProcess( pPrivateData );
-      }
-    }
-    LogMessage2(INFO,"MemFuncExportMem finished, RC = ", toStr(usRC).c_str());
-    free( pPrivateData );
-  }
-  else
+  usRC = MemFuncPrepExport( pPrivateData, pszMemName, pszOutFile, lOptions );
+  if ( usRC == 0 )
   {
-    LogMessage(FATAL,"TEMPORARY_COMMENTED in MemFuncExportMem:: called without COMPLETE_IN_ONE_CALL_OPT option and is not implemented\tested yet");
+    while ( !pPrivateData->fComplete )
+    {
+      usRC = MemFuncExportProcess( pPrivateData );
+    }
   }
+  LogMessage2(INFO,"MemFuncExportMem finished, RC = ", toStr(usRC).c_str());
+  free( pPrivateData );
+  
   return( usRC );
 } /* end of function MemFuncExportMem */
 

@@ -7,6 +7,8 @@
 #include <thread>
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "cmake/git_version.h"
+#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "EQF.H"
 
 void handle_interrupt_sig(int sig) {
     LogMessage(TRANSACTION, "Received interrupt signal\n");
@@ -26,6 +28,7 @@ void service_worker() {
     LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
 
     LogMessage2(TRANSACTION, "Version: ", appVersion);
+    properties_set_str_anyway(KEY_APP_VERSION, appVersion);
     LogMessage(TRANSACTION, "Initialized t5memory");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
     res = StartOtmMemoryService(sh);

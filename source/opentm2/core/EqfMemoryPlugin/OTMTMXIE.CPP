@@ -385,9 +385,10 @@ class TagReplacer{
   std::vector<TagInfo> targetTagList;
   std::vector<TagInfo> requestTagList;
   ACTIVE_SEGMENT activeSegment = SOURCE_SEGMENT;
-  int      iHighestPTI = 0;               // increments with each opening pair tags
-  int      iHighestId  = 0;               // increments with each tag
-  bool fFuzzyRequest = false;             // if re are dealing with import or fuzzy request
+  int      iHighestPTI  = 0;               // increments with each opening pair tags
+  int      iHighestPTId = 500;             // increments with pair tag
+  int      iHighestPHId = 100;             // increments with ph tag
+  bool fFuzzyRequest = false;              // if re are dealing with import or fuzzy request
 
   //to track id and i attributes in request and then generate new values for tags in srt and trg that is not matching
   int iHighestRequestsOriginalI  = 0;
@@ -413,7 +414,8 @@ class TagReplacer{
 
 void TagReplacer::reset(){
   fFuzzyRequest = false;
-  iHighestId = 0;
+  iHighestPTId = 500;
+  iHighestPHId = 100;
   iHighestPTI = 0;
   sourceTagList.clear();
   targetTagList.clear();
@@ -575,7 +577,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
           if( is_number(_i) ) {
             tag.original_i = std::stoi(EncodingHelper::toChar(_i));   
           }    
-        }else if(char16_t* _i = (char16_t*) attributes->getValue("rid")){
+        }else if( char16_t* _i = (char16_t*) attributes->getValue("rid")){
           if( is_number(_i) ) {
             tag.original_i = std::stoi(EncodingHelper::toChar(_i));
           }
@@ -627,7 +629,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
         tag.generated_x = - matchingPairTag->generated_x;
       }else{
         tag.generated_i = ++iHighestPTI;
-        tag.generated_x = ++iHighestId;
+        tag.generated_x = ++iHighestPTId;
         tag.fPairedTagClosed = false; 
       }
     }else if (tag.generated_tagType == EPT_ELEMENT){
@@ -647,6 +649,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
                                   [&tag, tagTypeToFind](TagInfo& t) { return t.fPairedTagClosed == false
                                                           &&  t.generated_tagType == BPT_ELEMENT
                                                           &&  t.original_tagType == tagTypeToFind
+                                                          &&  t.original_i == tag.original_i
                                                           ;
                                   });
       if(matchingPairTag != activeTagList->rend()){
@@ -656,11 +659,11 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
           tag.generated_x = - matchingPairTag->generated_x;     
       }else{
         tag.generated_i = ++iHighestPTI;
-        tag.generated_x = - (++iHighestId);
+        tag.generated_x = - (++iHighestPTId);
         tag.fPairedTagClosed = false;
       }
     }else{//ph tag
-      tag.generated_x = (++iHighestId);
+      tag.generated_x = (++iHighestPHId);
       tag.fPairedTagClosed = true;
     }
     
@@ -737,7 +740,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
         }else{        
           //generate new id and i
           tag.generated_i = ++iHighestPTI;
-          tag.generated_x = ++iHighestId;
+          tag.generated_x = ++iHighestPTId;
           if(tag.original_tagType == EPT_ELEMENT){
             tag.generated_x = -tag.generated_x;
           }
@@ -2000,7 +2003,8 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
   handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
-  handler->tagReplacer.iHighestId = 0;
+  handler->tagReplacer.iHighestPTId = 500;
+  handler->tagReplacer.iHighestPHId = 100;
   handler->tagReplacer.iHighestPTI = 0;
 
   parser->parse(src_buff);

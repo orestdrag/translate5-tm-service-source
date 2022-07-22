@@ -1,9 +1,6 @@
 // Copyright (c) 2012-2019, International Business Machines
 // Corporation and others.  All rights reserved.
 //
-#define STR_DRIVER_LEVEL           "Version 1.6.1"
-
-#define STR_DRIVER_LEVEL_NUMBER    "1.6.1"
 #define STR_COPYRIGHT  "Copyright (c) 2012-2019, International Business Machines Corporation and others.  All rights reserved."
 
 // current version in numnerical format

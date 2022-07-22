@@ -853,7 +853,7 @@ VOID MakeHashValue
 
   while ( ((c = *pData++) != NULC) && (usRandomIndex < usMaxRandom))
   {
-    if ( isalnum((BYTE)c ) )
+    //if ( isalnum((BYTE)c ) )
     {
       ulHashVal += pulRandom[usRandomIndex++] * c;
     } /* endif */

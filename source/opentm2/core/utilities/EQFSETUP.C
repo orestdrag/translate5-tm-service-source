@@ -142,10 +142,13 @@ int init_properties(){
         return rc;
     }
 
-    properties_add_str(KEY_Vers, STR_DRIVER_LEVEL);
+    char version[20];
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+
+    properties_add_str(KEY_Vers, version);
     properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
     properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
-    properties_add_str("CurVersion", STR_DRIVER_LEVEL_NUMBER);
+    properties_add_str("CurVersion", version);
     return 0;
 
 }
@@ -170,157 +173,6 @@ int SetupMAT() {
     return 0;
 }
 #endif // __linux__
-
-#ifdef _WIN32
-__declspec(dllexport)
-USHORT SetupMAT
-(
-  HAB  hab,                            // main process anchor block handle
-  CHAR chPrimaryDrive,                 // primary MAT drive
-  PSZ  pszSecondaryDrives,             // list of secondary MAT drives
-  CHAR chLanDrive                      // LAN drive letter
-)
-{
-   PCHAR   pchSecondaryDrive;          // ptr drive letter of secondary drives
-   USHORT  usRC = 0;                   // function return code
-   HKEY hKeySoftware = NULL;
-
-   hab;
-
-   /*******************************************************************/
-   /* to be downward compatible                                       */
-   /*******************************************************************/
-   chPrimaryDrive = (char)toupper(chPrimaryDrive);
-   if ( !chLanDrive )
-   {
-     chLanDrive = chPrimaryDrive;
-   } /* endif */
-
-#ifdef TO_BE_REMOVED
-   /*******************************************************************/
-   /* Get size of desktop window                                      */
-   /*******************************************************************/
-   cxDesktop = WinQuerySysValue( HWND_DESKTOP, SV_CXSCREEN );
-   cyDesktop = WinQuerySysValue( HWND_DESKTOP, SV_CYSCREEN );
-   cxDesktopDiv20 = cxDesktop / 20L;
-   cyDesktopDiv20 = cyDesktop / 20L;
-#endif //TO_BE_REMOVED
-
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 38 if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-   if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &hKeySoftware ) == ERROR_SUCCESS )
-   {
-     HKEY hSubKey = NULL;
-     int iSuccess = RegOpenKeyEx( hKeySoftware, APPL_Name, 0, KEY_ALL_ACCESS, &hSubKey );
-     if ( iSuccess != ERROR_SUCCESS )
-     {
-       DWORD dwDisp = 0;
-       iSuccess = RegCreateKeyEx( hKeySoftware, APPL_Name, 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hSubKey, &dwDisp );
-     } /* endif */       
-
-     if( iSuccess == ERROR_SUCCESS )
-     {
-       RegSetValueEx( hSubKey, KEY_Vers, 0, REG_SZ, (LPBYTE)STR_DRIVER_LEVEL, strlen(STR_DRIVER_LEVEL )+ 1);
-       sprintf( chTempPath, "%c:", chPrimaryDrive );
-       RegSetValueEx( hSubKey, KEY_Drive, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       sprintf( chTempPath, "%c:", chPrimaryDrive );
-       RegSetValueEx( hSubKey, KEY_LanDrive, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       strcpy( chTempPath, PATH );
-       RegSetValueEx( hSubKey, KEY_Path, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       strcpy( chTempPath, DEFAULT_SYSTEM_LANGUAGE );
-       RegSetValueEx( hSubKey, KEY_SYSLANGUAGE, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, PROPDIR, SYSTEM_PROPERTIES_NAME );
-       RegSetValueEx( hSubKey, KEY_SysProp, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, MSGDIR, MSGFILE );
-       RegSetValueEx( hSubKey, KEY_MsgFile, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-       sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, MSGDIR, HLPFILE );
-       RegSetValueEx( hSubKey, KEY_HlpFile, 0, REG_SZ, (LPBYTE)chTempPath , strlen(chTempPath )+ 1);
-
-       RegCloseKey(hSubKey);
-     } /* endif */        
-
-     RegCloseKey( hKeySoftware );
-   } /* endif */     
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-   /****************************************************************/
-   /* Create directories on primary MAT drive                      */
-   /****************************************************************/
-
-   SetupCreateDir( chPrimaryDrive, NULL, SYSTEM_PATH );
-   if ( !usRC )
-   {
-      SetupCreateDir( chPrimaryDrive, NULL, PROPERTY_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, LIST_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, MEM_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, MSG_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, TABLE_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, DIC_PATH );
-      SetupCreateDir( chPrimaryDrive, NULL, PRT_PATH );
-   }
-
-   /****************************************************************/
-   /* Create directories on secondary drives                       */
-   /****************************************************************/
-   pchSecondaryDrive = pszSecondaryDrives;
-   while ( *pchSecondaryDrive != NULC )
-   {
-      SetupCreateDir( *pchSecondaryDrive, NULL, SYSTEM_PATH );
-      SetupCreateDir( *pchSecondaryDrive, NULL, LIST_PATH );
-      SetupCreateDir( *pchSecondaryDrive, NULL, MEM_PATH );
-      SetupCreateDir( *pchSecondaryDrive, NULL, TABLE_PATH );
-      SetupCreateDir( *pchSecondaryDrive, NULL, DIC_PATH );
-      pchSecondaryDrive++;
-   } /* endwhile */
-
-   /****************************************************************/
-   /* Build property files                                         */
-   /****************************************************************/
-   if (!UtlPropFileExist (chPrimaryDrive, SYSTEM_PROPERTIES_NAME))
-   {
-     CreateSystemProperties( chPrimaryDrive, pszSecondaryDrives, chLanDrive );
-   }                                                /* $KIT0890 A4 */
-   else
-   {
-     UpdateSystemProperties ( chPrimaryDrive, chLanDrive );
-   } /* endif */
-   if (!UtlPropFileExist (chPrimaryDrive, DEFAULT_FOLDERLIST_NAME))
-   {
-     CreateFolderListProperties( chPrimaryDrive );
-   } /* endif */
-#if defined(STANDARDEDIT)
-   if (!UtlPropFileExist (chPrimaryDrive, EDITOR_PROPERTIES_NAME))
-   {
-     CreateEditProperties( chPrimaryDrive );
-   } /* endif */
-#endif
-   if (!UtlPropFileExist (chPrimaryDrive, DICT_PROPERTIES_NAME))
-   {
-     CreateDictProperties( chPrimaryDrive );
-   } /* endif */
-   if (!UtlPropFileExist (chPrimaryDrive, IMEX_PROPERTIES_NAME))
-   {
-     CreateImexProperties( chPrimaryDrive );
-   } /* endif */
-
-   /****************************************************************/
-   /* Delete dictionary cache files                                */
-   /****************************************************************/
-   DeleteDictCacheFiles( chPrimaryDrive, DIC_PATH );
-
-   // update properties of sample folder
-   sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, PROPDIR, "SHOWM000.F00" );
-   UpdateFolderProp( chTempPath, chPrimaryDrive );
-   sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, PROPDIR, "SHOWM000.MEM" );
-   UpdateTMProp( chTempPath, chPrimaryDrive );
-   sprintf( chTempPath, "%c:\\%s\\%s\\%s", chPrimaryDrive, PATH, PROPDIR, "SHOWDICT.PRO" );
-   UpdateDictProp( chTempPath, chPrimaryDrive);
-   sprintf( chTempPath, "%c:\\%s\\%s\\%s\\%s", chPrimaryDrive, PATH, "SHOWM000.F00", PROPDIR, "SHOWMEHT.000" );
-   UpdateDocumentProp( chTempPath, chPrimaryDrive);
-
-   return( usRC );
-} /* end of function SetupMat */
-#endif //_WIN32
 
 //+----------------------------------------------------------------------------+
 //|Function name:     CreateSystemProperties                                   |

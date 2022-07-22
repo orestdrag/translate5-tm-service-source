@@ -523,7 +523,9 @@ BOOL UtlInitUtils( HAB hab )
    short i;
 
    // set version info in registry
-   WriteStringToRegistry( "OpenTM2", "CurVersion", STR_DRIVER_LEVEL_NUMBER );
+   char version[20];
+   properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+   WriteStringToRegistry( "OpenTM2", "CurVersion", version );
 
    //--- get profile information --- 
    int retCode = properties_get_int_or_default("iDate", iTemp, MDY_DATE_FORMAT);

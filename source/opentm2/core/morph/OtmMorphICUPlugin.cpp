@@ -9,11 +9,13 @@
 #include "OtmMorphICU.h"
 #include "PluginManager.h"
 
+#include "../../../cmake/git_version.h"
+
 // the static plugin infos
 static char *pszPluginName = "OtmMorphICUPlugin";
 static char *pszShortDescription = "MorphICUPlugin";
 static char *pszLongDescription	= "This is the standard morphology functionality implementation using ICU";
-static char *pszVersion = STR_DRIVER_LEVEL_NUMBER;
+static const char *pszVersion = appVersion;
 static char *pszSupplier = "International Business Machines Corporation";
 
 //OtmMorphICUPlugin* OtmMorphICUPlugin::instance = nullptr;
