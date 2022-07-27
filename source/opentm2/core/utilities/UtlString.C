@@ -429,93 +429,12 @@ PSZ Unicode2ASCII( PSZ_W pszUni, PSZ pszASCII, ULONG ulCP )
     {
 		if (!usCP)
 		{
-		  usCP = (USHORT)GetLangOEMCP(NULL);
+		  usCP = 1;
 		}
-
-    // always use 932 when 943 is specified
-    if ( usCP == 943 ) usCP = 932;
-
-		// do special handling for Arabic to get rid of shaping to allow for conversion
-		// back to 864
-		switch ( usCP )
-		{
-		  case 864:
-			UtlAlloc( (PVOID *) &pTemp, 0L, MAX_SEGMENT_SIZE * sizeof(CHAR_W), ERROR_STORAGE );
-
-			if (pTemp)
-			{
-			  CHAR_W c;
-			  PSZ_W  p = pTemp;
-
-			  UTF16strcpy( pTemp, pszUni );
-
-        LogMessage2(FATAL,__func__, ":: TEMPORARY_COMMENTED in called function Unicode2ASCII, because of basic TMWCHAR data type migration");
-#ifdef TEMPORARY_COMMENTED
-			  BidiConvert06ToFE(pTemp, UTF16strlenCHAR(pTemp)+1);
-        #endif
-			  //shapeUnicode(pTemp,UTF16strlenCHAR(pTemp)+1);
-			  // convert the LTR&RTL markers to codepoints in the standard 864 page,
-			  // so that our WideCharToMultiByte can handle it...
-
-			  while ((c = *p++) != NULC)
-			  {
-				switch (c)
-				{
-				  case 0x200E:      // Left-to-Right marker
-					*(p-1) = 0x009B;// Unicode character converted from CP864 (0x9B)
-					break;
-				  case 0x200F:      // Right-to-Left marker
-					*(p-1) = 0x009C;// Unicode character converted from CP864 (0x9C)
-					break;
-				}
-			  }
-			  WideCharToMultiByte( usCP, 0, //(LPCWSTR)
-                  pTemp, -1,
+		
+		WideCharToMultiByte( usCP, 0, pszUni, -1,
 								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
-			}
-			break;
-		  case 867:
-		  case 862:
-			// convert the LRM&RLM markers to codepoints in the standard 862 page,
-			// so that our WideCharToMultiByte can handle it...
-			UtlAlloc( (PVOID *) &pTemp, 0L, MAX_SEGMENT_SIZE * sizeof(CHAR_W), ERROR_STORAGE );
 
-			if (pTemp)
-			{
-			  CHAR_W c;
-			  PSZ_W  p = pTemp;
-			  UTF16strcpy(p, pszUni);
-			  while ((c = *p++) != NULC)
-			  {
-				switch (c)
-				{
-				  case 0x200E:      // Left-to-Right marker
-					*(p-1) = 0x00E1;// Unicode character converted from CP862 (0xA0)
-					break;
-				  case 0x200F:      // Right-to-Left marker
-					*(p-1) = 0x00ED;// Unicode character converted from CP862 (0xA1)
-					break;
-				}
-			  }
-
-			  usCP = 862;     // we have to use CP862 since Windows only supports this
-			  WideCharToMultiByte( usCP, 0, pTemp, -1,
-								   pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-			  UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
-			}
-			break;
-          case 850:
-            // Change the replacement character from '?' to '%'
-            // '?' causes false breaks.
-            WideCharToMultiByte( usCP, 0, pszUni, -1,
-                                 pszASCII, MAX_SEGMENT_SIZE, "%", NULL );
-            break;
-		  default:
-			WideCharToMultiByte( usCP, 0, pszUni, -1,
-								 pszASCII, MAX_SEGMENT_SIZE, NULL, NULL );
-			break;
-		}
     } /* endif */
   }
   else if (pszASCII)
@@ -541,120 +460,25 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 {
 	static CHAR_W szUniTemp[ MAX_SEGMENT_SIZE ];
 	ULONG ulOutPut = 0;
-	USHORT usCP = (USHORT) ulCP;
+	USHORT usCP = 1;
 	LONG lRc = 0;
-
-	if (!usCP)
-	{
-		ulCP = (USHORT)GetLangOEMCP(NULL);
-		usCP = (USHORT)ulCP;
-	}
 
 	if ( pszUni && pszASCII )
 	{
 		PSZ_W pTemp = NULL;
 		USHORT usCP = (USHORT) ulCP;
 
-		// always use 932 when 943 is specified
-		if ( usCP == 943 ) usCP = 932;
-
-		// do special handling for Arabic to get rid of shaping to allow for conversion
 		// back to 864
 		*pszASCII = 0;
 		if (ulLen)
 		{
-			switch ( usCP )
-			{
-				case 864:
-					UtlAlloc( (PVOID *) &pTemp, 0L, (ulLen+1) * sizeof(CHAR_W), ERROR_STORAGE );
-					if (pTemp)
-					{
-						CHAR_W c;
-						PSZ_W  p = pTemp;
-            LogMessage2(FATAL,__func__, ":: TEMPORARY_COMMENTED in called function Unicode2ASCIIBufEx, because of basic TMWCHAR data type migration");
-#ifdef TEMPORARY_COMMENTED
-						UTF16strncpy( pTemp, pszUni, ulLen );
-						BidiConvert06ToFE(pTemp, ulLen);
-            #endif
-						//shapeUnicode( pTemp,ulLen);
-						// convert the LTR&RTL markers to codepoints in the standard 864 page,
-						// so that our WideCharToMultiByte can handle it...
+      ulOutPut = WideCharToMultiByte( usCP, 0, pszUni, ulLen,
+                      pszASCII, lBufLen, NULL, NULL );
 
-						while ((c = *p++) != NULC)
-						{
-							switch (c)
-							{
-								case 0x200E:      // Left-to-Right marker
-									*(p-1) = 0x009B;// Unicode character converted from CP864 (0x9B)
-									break;
-								case 0x200F:      // Right-to-Left marker
-									*(p-1) = 0x009C;// Unicode character converted from CP864 (0x9C)
-									break;
-							}
-						}
-
-						ulOutPut = WideCharToMultiByte( usCP, 0, (LPWSTR)pTemp, ulLen,
-														pszASCII, lBufLen, NULL, NULL );
-						if (!ulOutPut )
-						{
-							//lRc = GetLastError();
-						}
-
-						UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
-					}
-					break;
-				case 867:
-				case 862:
-					// convert the LRM&RLM markers to codepoints in the standard 862 page,
-					// so that our WideCharToMultiByte can handle it...
-					UtlAlloc( (PVOID *) &pTemp, 0L, (ulLen+1) * sizeof(CHAR_W), ERROR_STORAGE );
-
-					if (pTemp)
-					{
-						CHAR_W c;
-						PSZ_W  p = pTemp;
-						UTF16strncpy(p, pszUni, ulLen);
-
-						while ((c = *p++)!= NULC)
-						{
-							switch (c)
-							{
-								case 0x200E:      // Left-to-Right marker
-									*(p-1) = 0x00E1;// Unicode character converted from CP862 (0xA0)
-									break;
-								case 0x200F:      // Right-to-Left marker
-									*(p-1) = 0x00ED;// Unicode character converted from CP862 (0xA1)
-									break;
-							}
-						}
-						usCP = 862;     // we have to use CP862 since Windows only supports this
-
-						ulOutPut = WideCharToMultiByte( usCP, 0, pTemp, ulLen,
-														pszASCII, lBufLen, NULL, NULL );
-						if (!ulOutPut )
-						{
-							//lRc = GetLastError();
-						}
-
-						UtlAlloc( (PVOID *) &pTemp, 0L, 0L, NOMSG );
-					}
-					break;
-				case 850:
-		            // Change the replacement character from '?' to '%'
-		            // '?' causes false breaks.
-				    ulOutPut = WideCharToMultiByte( usCP, 0, pszUni, ulLen,
-		                                            pszASCII, lBufLen, "%", NULL );
-		            break;
-				default:
-					ulOutPut = WideCharToMultiByte( usCP, 0, pszUni, ulLen,
-													pszASCII, lBufLen, NULL, NULL );
-
-					if (!ulOutPut )
-					{
-						//lRc = GetLastError();
-					}
-					break;
-			} /* endswitch */
+      if (!ulOutPut )
+      {
+        //lRc = GetLastError();
+      }
 		} /* endif ulLen */
 	}
 	else if (pszASCII)
@@ -706,94 +530,14 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
   {
     if (!ulTempCP)
     {
-       ulTempCP = GetLangOEMCP(NULL);
+       ulTempCP = 1;
     }
-
-    // always use 932 when 943 is specified
-    if ( ulTempCP == 943 ) ulTempCP = 932;
-
 
     *pszUni = EOS;
     if (ulLen)
     {
 LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,   pszASCII, ulLen,  pszUni, ulLen );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-      ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
-                                    pszASCII, ulLen,
-                                    pszUni, ulLen );
-      if (!ulOutPut)
-      {
-        lRc = GetLastError();
-        if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP) )
-        {// the last byte in the buffer may be half of a DBCS char...
-         // so try again with one byte less..
-            ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
-                                            pszASCII, ulLen-1, pszUni, ulLen-1 );
-            if (!ulOutPut)
-            { // the last byte was not the reason, so just go on
-				lRc = GetLastError();
-				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszASCII,
-				                                 ulLen, pszUni, ulLen );
-				lRc = GetLastError();
-		    }
-		    else
-		    {
-				lRc = 0;
-				if (plBytesLeft)
-				{
-					*plBytesLeft = 1;
-			    }
-		    }
-	    }
-      }
-      else
-      {
-        switch ( ulTempCP )
-        {
-		    case 864:
-			// do special handling for Arabic to allow shaping in even for 864 stuff
-			{
-			  PSZ_W p = pszUni;
-			  CHAR_W c;
 
-			  while ((c = *p++) != NULC)
-			  {
-				switch (c)
-				{
-				  case 0x009B:      // Left-to-Right marker
-					*(p-1) = 0x200E;// Unicode character converted from CP864 (0x9B)
-					break;
-				  case 0x009C:      // Right-to-Left marker
-					*(p-1) = 0x200F;// Unicode character converted from CP864 (0x9C)
-					break;
-				}
-			  }
-			  BidiConvertFETo06(pszUni, ulLen);
-			}
-			break;
-		  case 862:
-		  case 867:
-			{
-			  // Convert RLM&LRM characters correctly to UNICODE
-			  PSZ_W p = pszUni;
-			  CHAR_W c;
-			  while ((c = *p++)!= NULC)
-			  {
-				switch (c)
-				{
-				  case 0x00E1:    //0xA0:      // Left-to-Right marker
-					*(p-1) = 0x200E;
-					break;
-				  case 0x00ED:    //0xA1:      // Right-to-Left marker
-					*(p-1) = 0x200F;
-					break;
-				}
-			  }
-			}
-			break;
-          } /* endswitch */
-	    }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
      }
   }
   else if (pszUni)
@@ -919,17 +663,14 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
 {
   static CHAR_W szUniTemp[ MAX_SEGMENT_SIZE ];
   ULONG ulOutPut = 0;
-  USHORT usAnsiCP = (USHORT) ulAnsiCP;
+  USHORT usAnsiCP = 1;
   LONG   lRc = 0;
 
   if (plRc)
   {
 	  *plRc = 0;
   }
-  if (!usAnsiCP)
-  {
-     usAnsiCP = (USHORT)GetLangAnsiCP(NULL);
-  }
+
   if ( pszUni && pszAnsi )
   {
 	// do special handling for Arabic to get rid of shaping to allow for conversion
@@ -938,9 +679,6 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
 	*pszAnsi = EOS;
 	if (ulLen)
 	{
-    // always use 932 when 943 is specified
-    if ( usAnsiCP == 943 ) usAnsiCP = 932;
-
 		ulOutPut = WideCharToMultiByte( usAnsiCP, 0, (LPWSTR)pszUni, ulLen,
 											pszAnsi, lBufLen, NULL, NULL );
 		if (plRc && !ulOutPut)
@@ -973,69 +711,14 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
                               ULONG ulAnsiCP, PLONG plRc, PLONG plBytesLeft, PSZ pszTemp)
 {
   ULONG  ulOutPut = 0;
-  ULONG  ulTempCP = ulAnsiCP;
+  ULONG  ulTempCP = 1;
   LONG   lRc = 0;
 
-  if (plRc)
-  {
-  	  *plRc = 0;
-  }
   if ( pszAnsi && pszUni )
   {
-    if (!ulTempCP)
-    {
-       ulTempCP = GetLangAnsiCP(NULL);
-    }
 
-    // always use 932 when 943 is specified
-    if ( ulTempCP == 943 ) ulTempCP = 932;
+LogMessage2(WARNING,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
 
-LogMessage2(DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-    if (ulLen)
-    {
-		*pszUni = EOS;
-		ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
-                                    pszAnsi, ulLen,
-                                    pszUni, ulLen );
-        if (!ulOutPut)
-        {
-          //lRc = GetLastError();
-          if ((lRc == ERROR_NO_UNICODE_TRANSLATION) && IsDBCS_CP(ulTempCP))
-          {// the last byte in the buffer may be half of a DBCS char...
-           // so try again with one byte less..
-              ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,
-                                            pszAnsi, ulLen-1, pszUni, ulLen-1 );
-              if (!ulOutPut)
-              { // the last byte was not the reason, so just go on
-  				//lRc = GetLastError();
-				ulOutPut = MultiByteToWideChar( ulTempCP, 0L, pszAnsi,
-				                                 ulLen, pszUni, ulLen );
-				lRc = GetLastError();
-              }
-              else
-              {
-				lRc = 0;
-				if (plBytesLeft)
-				{
-					*plBytesLeft = 1;
-			    }
-              }
-           }
-        }
-
-		if (plRc && !ulOutPut)
-		{
-		  *(plRc) = lRc;
-		}
-		if (pszTemp && lRc)
-		{
-		   sprintf(pszTemp, "%d", lRc);
-// UtlError-call moved to UtlString2.c
-//			UtlError( ERROR_DATA_CONVERSION, MB_CANCEL, 1, &pszTemp, EQF_ERROR );
-		}
-     }
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
   }
   else if (pszUni)
   {
@@ -1051,24 +734,16 @@ LogMessage2(DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut 
 PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
 {
   // it is assumed, that pszAnsi is large enough to hold the converted string
-  USHORT   usCP = (USHORT) ulAnsiCP;
+  USHORT   usCP = 1;
   int      iRC = 0;
   if ( pszUni && pszAnsi )
   {
 	if (*pszUni == EOS)
 	{
 		*pszAnsi = EOS;
-    }
-    else
-    {
-		if (!usCP)
-		{
-		  usCP = (USHORT)GetLangAnsiCP(NULL);
-		}
-
-    // always use 932 when 943 is specified
-    if ( usCP == 943 ) usCP = 932;
-
+  }
+  else
+  {
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
     LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
@@ -1136,11 +811,7 @@ USHORT UtlQueryCharTableLang
   PSZ         pszLanguage
 )
 {
-  ULONG    ulCP = 0L;
-
-  ulCP = GetLangOEMCP(pszLanguage);
-  return(UtlQueryCharTableEx(TableID, ppTable, (USHORT)ulCP));
-
+  return(UtlQueryCharTableEx(TableID, ppTable, (USHORT)1));
 } /* end of function UtlQueryCharTableLang */
 
 
@@ -1528,7 +1199,11 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceD
     } /* endif */
   } /* endif */
 
-  if( whitespaceDiff ) *whitespaceDiff = wspaceDiff; 
+  if( whitespaceDiff ){ 
+    while( *pD1++ ){ wspaceDiff++; }
+    while( *pD2++ ){ wspaceDiff++; }
+    *whitespaceDiff = wspaceDiff;
+  } 
   
   return lRc;
 }

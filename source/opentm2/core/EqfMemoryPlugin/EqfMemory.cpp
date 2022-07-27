@@ -467,10 +467,7 @@ int EqfMemory::setSequentialAccessKey
   char *pszKey
 )
 {
-  int iRC = 0;
-
-  iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &(this->ulNextKey), &(this->usNextTarget) );
-  
+  int iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &(this->ulNextKey), &(this->usNextTarget) );
   return( iRC );
 }
 
@@ -725,10 +722,13 @@ int EqfMemory::searchProposal
         wcscpy(pTmGetOut->stMatchTable[i].szSource, result[0].c_str());
         wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[1].c_str());
 
-        //correct match rate for exact match based on whitespace difference
-        int wsDiff = 0;
-        if( UtlCompIgnWhiteSpaceW(szRequestedString, pTmGetOut->stMatchTable[i].szSource, 0, &wsDiff) == 0 ){
+        
+        if( pTmGetOut->stMatchTable[i].usMatchLevel >= 100){
+          //correct match rate for exact match based on whitespace difference
+          int wsDiff = 0;
+          UtlCompIgnWhiteSpaceW(szRequestedString, pTmGetOut->stMatchTable[i].szSource, 0, &wsDiff);
           pTmGetOut->stMatchTable[i].usMatchLevel -= wsDiff;
+          
         }
 
         this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );

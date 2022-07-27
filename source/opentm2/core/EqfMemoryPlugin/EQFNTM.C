@@ -743,9 +743,7 @@ C_TmReplaceHwnd( HTM      htm,            //(in)  TM handle
   USHORT usRc;
   PTMX_PUT_IN_W  pstPutInW;
   PTMX_PUT_OUT_W pstPutOutW;
-  ULONG   ulCP = 0L;
-
-  ulCP = GetLangOEMCP( NULL);
+  ULONG   ulCP = 1L;
 
   UtlAlloc( (PVOID *) &pstPutInW,  0L, sizeof( TMX_PUT_IN_W ), NOMSG );
   UtlAlloc( (PVOID *) &pstPutOutW, 0L, sizeof( TMX_PUT_OUT_W ), NOMSG );

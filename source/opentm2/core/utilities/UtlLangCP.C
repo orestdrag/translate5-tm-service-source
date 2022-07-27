@@ -38,21 +38,13 @@ BOOL UtlIsLanguageSupported
   HWND   hwndErrMsg
 )
 {
+  LogMessage2(WARNING,__func__, ":: called function that probably should be refactored");
   CHAR_W szUnicode[10];
   int    iRC = 0;
   BOOL   fOK = TRUE;
 
   // get OEM codepage for given language
-  ULONG ulCP = GetLangOEMCP( pszLanguage );
-
-  fMsg;
-  hwndErrMsg;
-
-  // special handling for CP 943
-  if ( ulCP == 943 )
-  {
-    ulCP = 932;
-  } /* endif */
+  ULONG ulCP = 1;
 
   // convert our test string to UTF16
   iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
@@ -60,7 +52,8 @@ BOOL UtlIsLanguageSupported
   if ( iRC == 0 )
   {
     //iRC = GetLastError();
-    fOK = (iRC != ERROR_INVALID_PARAMETER);
+    //fOK = (iRC != ERROR_INVALID_PARAMETER);
+    fOK = false;
   } /* endif */
 
   // error handling moved to caller functions

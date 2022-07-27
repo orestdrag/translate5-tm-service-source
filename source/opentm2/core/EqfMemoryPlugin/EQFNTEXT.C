@@ -104,9 +104,7 @@ USHORT TmtXExtract
   ULONG ulStartKey;                    //start tm key
   ULONG ulNextKey;                     //last tm key
   BOOL  fSpecialMode = FALSE;          //special mode flag
-  ULONG   ulOemCP = 0L;
-
-  ulOemCP = GetLangOEMCP(NULL);
+  ULONG   ulOemCP = 1L;
 
   //allocate 32K for tm record
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) (2 * TMX_REC_SIZE), NOMSG );

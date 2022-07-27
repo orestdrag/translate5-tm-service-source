@@ -36,11 +36,7 @@ public:
 typedef struct _LANGUAGEINFO
 {
   char szName[128];                    // language name used in Opentm2
-  long lAsciiCP;                       // ASCII codepage for the language
-  long lAnsiCP;                        // Ansi codepage for the language
-  char szIsoCPName[40];                // ISO name of the codepage
   char szIsoID[40];                    // ISO ID for the language
-  char szIcuID[40];                    // ICU/BCP47 ID for the language
   bool fisPreferred;                   // TRUE = this is the preferred language if several languages use the same ISO/BCP47 ID
   char szAddInfo[256];                 // additional language information or comments
   bool isSourceLanguage;               // TRUE = language can be used as a source language    
@@ -108,55 +104,7 @@ int getOpenTM2NameFromISO
   std::string& strLanguage
 );
 
-/* \brief Get the ICU language identifier for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \param pszICU buffer for the language ICU identifier
-   \returns 0 when successful or an error code
-*/
-int getICUName
-(
-  const char *pszLanguage,
-  char *pszICU
-);
-int getICUName
-(
-  std::string& strLanguage,
-  std::string& strICU
-);
 
-/* \brief Get the OpenTM2 language name for a ICU language identifier
-   \param pszICU ICU language identifier
-   \param pszLanguage buffer for OpenTM2 language name
-   \returns 0 when successful or an error code
-*/
-int getOpenTM2NameFromICU
-(
-  const char *pszICU,
-  char *pszLanguage
-);
-int getOpenTM2NameFromICU
-(
-  std::string& strICU,
-  std::string& strLanguage
-);
-
-/* \brief Get the OEM (ASCII) codepage for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \returns OEM codepage for the given language or 0 in case of errors
-*/
-unsigned long getOEMCP
-(
-  const char *pszLanguage
-);
-
-/* \brief Get the Windows (ANSI) codepage for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \returns Windows codepage for the given language or 0 in case of errors
-*/
-unsigned long getAnsiCP
-(
-  const char *pszLanguage
-);
 
 
 /* \brief Checks if the given language is a valid target language
@@ -218,15 +166,7 @@ int findISO
 (
   const char *pszLanguage
 );
-/* \brief Find the entry for the specified ICU language ID
-   \param pszICU ICU language ID 
-   \returns -1 when not found or index into language table
-*/
 
-int findICU
-(
-  const char *pszICU
-);
 
 /* \brief Compare two ISO language names, ignoring an country specific suffix when required
    \param pszISO1 first ISO language name

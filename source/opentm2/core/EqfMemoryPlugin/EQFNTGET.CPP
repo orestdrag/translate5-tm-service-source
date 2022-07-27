@@ -476,7 +476,7 @@ USHORT TmtXGet
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    ULONG ulSrcCP = GetLangOEMCP( pTmGetIn->stTmGet.szSourceLanguage);
+    ULONG ulSrcCP = 1;
     usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
@@ -2003,7 +2003,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
       /****************************************************************/
       /* add current tagging to source and translation of proposal    */
       /****************************************************************/
-      ulSrcOemCP = GetLangOEMCP( pGetIn->szSourceLanguage);
+      ulSrcOemCP = 1;
       strcpy( pSubstProp->szSourceTagTable, pGetIn->szTagTable );
       strcpy( pSubstProp->szSourceLanguage, pGetIn->szSourceLanguage);
       strcpy( pSubstProp->szTargetLanguage, pGetIn->szTargetLanguage );
@@ -2056,7 +2056,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                             &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
                             (USHORT)TAGTABLE_KEY,
                             pSubstProp->szPropTagTable, NULL );
-          ulTgtOemCP = GetLangOEMCP( pSubstProp->szTargetLanguage);
+          ulTgtOemCP = 1;
           // replace any 0xA0 in language name to 0xFF
           // (0xA0 is 0xFF after processing by OemToAnsi)
           REPLACE_A0_BY_FF( pSubstProp->szTargetLanguage );
@@ -2067,157 +2067,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                             pSubstProp->szTargetLanguage, NULL );
         } /* endif */
 
-        /**************************************************************/
-        /* call tag substitution function (if we are not dealing with */
-        /* an exact match) ...                                        */
-        /**************************************************************/
-        #ifdef TEMPORARY_COMMENTED
-        if ( ( usRc == NO_ERROR ) && (*pusMatchLevel < EQUAL_EQUAL) )
-        {
-          BOOL fPreprocessed = FALSE;
-          PTMX_SENTENCE pMatchSource = NULL;
-          PTMX_SENTENCE pMatchTarget = NULL;
-          BOOL fSpecialProcessing = FALSE;
-          BOOL fSkipPostprocessing = FALSE;
-
-          if ( UtlQueryUShort( QS_SGMLDITAPROCESSING ) )
-          {
-            fSpecialProcessing = DITASpecialProcessingRequired( pSubstProp->szSourceTagTable, 
-                                                                pSubstProp->szPropTagTable, DITAPREPAREPROPOSAL );
-          } /* endif */
-
-
-          if ( fSpecialProcessing )
-          {
-#ifdef SGMLDITA_LOGGING
-            CHAR szLogFile[MAX_EQF_PATH];
-            UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-            UtlMkDir( szLogFile, 0L, FALSE );
-            strcat( szLogFile, "\\SGMLDITA.LOG" );
-            if ( !UtlFileExist( szLogFile ) )
-            {
-              hfLog = fopen( szLogFile, "wb" );
-              if ( hfLog )
-              {
-                fwrite( "\xFF\xFE", 2, 1, hfLog );            // write out BOM
-                fclose( hfLog );
-              } /* endif */
-            } /* endif */
-            hfLog = fopen( szLogFile, "ab" );
-#endif
-
-#ifdef SGMLDITA_LOGGING
-            if ( hfLog )
-            {
-              fwprintf( hfLog, L"\r\n*** Doc=%S, Seg=%lu, preparing IBMIDDOC segment\r\n", pGetIn->szLongName, pGetIn->ulSegmentId );
-              NTMLogSegData( hfLog, L"  <Segment>%s</Segment>\r\n", pGetIn->szSource );
-              fwprintf( hfLog, L"before preparation\r\n" );
-              NTMLogSegData( hfLog, L"  <PropSource>%s</PropSource>\r\n", pSubstProp->szPropSource );
-              NTMLogSegData( hfLog, L"  <PropTarget>%s</PropTarget>\r\n", pSubstProp->szPropTarget );
-            } /* endif */
-#endif
-            if(CheckLogLevel(DEVELOP)){
-              //auto str_doc = EncodingHelper::convertToUTF8(pGetIn->szLongName);
-              auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
-              auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
-              LogMessage5(DEVELOP, __func__,"::Doc = ", pGetIn->szLongName, "; preparing IBMIDDOC segment, Seg = ", toStr(pGetIn->ulSegmentId).c_str());
-              LogMessage6(DEVELOP,__func__,"::before preparation\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
-            }
-
-
-LogMessage2(FATAL,__func__, "::TEMPORARY_COMMENTED DITAPreprocessProposals");
-#ifdef TEMPORARY_COMMENTED
-            fPreprocessed = DITAPreprocessProposals( pSubstProp->szPropSource, pSubstProp->szPropTarget, pGetIn->pvReplacementList );
-#endif
-            // if proposal has been preprocessed, the tag tagle records have to be rebuild
-            if ( fPreprocessed )
-            {
-              USHORT usRC = 0;
-              CHAR szTagTablePath[MAX_EQF_PATH];
-              ULONG ulSrcCP = GetLangOEMCP( pSubstProp->szSourceLanguage );
-              ULONG ulTgtCP = GetLangOEMCP( pSubstProp->szTargetLanguage );
-
-              usRC = NTMAllocSentenceStructure( &pMatchSource );
-              if ( !usRC ) NTMAllocSentenceStructure( &pMatchTarget );
-              if ( !usRC ) UTF16strcpy( pMatchSource->pInputString, pSubstProp->szPropSource  );
-
-              UtlMakeEQFPath( szTagTablePath, NULC, TABLE_PATH, NULL );
-              strcat( szTagTablePath, BACKSLASH_STR );
-              strcat( szTagTablePath, pSubstProp->szPropTagTable );
-              strcat( szTagTablePath, EXT_OF_FORMAT );
-
-
-              if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchSource, szTagTablePath, pSubstProp->szSourceLanguage, TM_MAJ_VERSION, ulSrcCP, CREATEPROTTABLE_NOTRANSLVAR );
-              if ( !usRC ) pSubstProp->pTagsPropSource = pMatchSource->pTagRecord;
-              if ( !usRC ) UTF16strcpy( pMatchTarget->pInputString, pSubstProp->szPropTarget );
-              if ( !usRC ) usRC = TokenizeSourceEx2( NULL, pMatchTarget, szTagTablePath, pSubstProp->szTargetLanguage, TM_MAJ_VERSION, ulTgtCP, CREATEPROTTABLE_NOTRANSLVAR  );
-              if ( !usRC ) pSubstProp->pTagsPropTarget = pMatchTarget->pTagRecord;
-
-              if ( fPreprocessed == 2 )     // 2 = TMO replacements have been done
-              {
-                // recompute fuzziness and skip postprocessing if we have an exact match
-                USHORT usFuzzy = 0;
-                BOOL fFuzzyOK;
-                fFuzzyOK = TMFuzzynessEx( pGetIn->szTagTable, pSubstProp->szPropSource, pSubstProp->szSource,
-                                             sLangID, &usFuzzy, ulSrcOemCP , 0 );
-                if ( usFuzzy == 100 )
-                {
-                  fSkipPostprocessing = TRUE;
-                } /* endif */
-
-              } /* endif */
-            } /* endif */
-
-            if(CheckLogLevel(DEVELOP)){
-              if(fPreprocessed){
-                auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
-                auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
-                LogMessage6(DEVELOP,__func__,"::after preparation\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
-              }else{
-                LogMessage2(DEVELOP, __func__,"::no preprocessing has been performed");
-              }
-            }
-          } /* endif */
-
-    		  fSubstAll =  NTMTagSubst( pSubstProp, ulSrcOemCP, ulTgtOemCP );
-
-          if(CheckLogLevel(DEVELOP)){
-              auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
-              auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
-              LogMessage6(DEVELOP,__func__,"::all inline tagging replaced by generic inline tag replacement\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
-              
-          }
-          if ( !fSubstAll && fSpecialProcessing ) 
-          { 
-            if ( !fSkipPostprocessing )
-            {
-LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED DITAProcessProposal");
-#ifdef TEMPORARY_COMMENTED
-              fSubstAll = DITAProcessProposal( pGetIn->szSource, pSubstProp->szPropSource, 
-                                              pSubstProp->szPropTarget, pSubstProp->szPropTagTable, ulSrcOemCP  );
-#endif
-            } /* endif */
-            if ( !fSubstAll && fPreprocessed )
-            {
-              // segment has been modified by preprocessing, so force a re-computation of the fuzziness
-              fSubstAll = TRUE;
-            } /* endif */
-
-            if(CheckLogLevel(DEVELOP)){
-              if(fSubstAll){
-                auto str_src = EncodingHelper::convertToUTF8(pSubstProp->szPropSource );
-                auto str_trg = EncodingHelper::convertToUTF8(pSubstProp->szPropTarget );
-                LogMessage6(DEVELOP,__func__,"::after post processing\n<PropSource>", str_src.c_str(), "</PropSource>\n<PropTarget>",str_trg.c_str(),"</PropTarget>");
-              }else{
-                LogMessage2(DEVELOP, __func__,"::no post processing has been performed");
-              }
-            }
-          } /* endif */
-
-          if ( pMatchSource ) NTMFreeSentenceStructure( pMatchSource );
-          if ( pMatchTarget ) NTMFreeSentenceStructure( pMatchTarget );
-        } /* endif */
-      #endif
       } /* endif */
     } /* endif */
   }
@@ -3028,7 +2877,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   if (!pGetIn->ulSrcOemCP)
   {
-    pGetIn->ulSrcOemCP = GetLangOEMCP( pGetIn->szSourceLanguage);
+    pGetIn->ulSrcOemCP = 1;
   }
 
   LOGPRINTF2( INFO, "FuzzyTest for record ", toStr(ulKeyNum).c_str() );

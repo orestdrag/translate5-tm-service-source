@@ -1756,8 +1756,8 @@ USHORT MemFuncPrepExport
 
  if (fOK)
  {
-     pIDA->ulOemCP = GetLangOEMCP(NULL);
-     pIDA->ulAnsiCP = GetLangAnsiCP(NULL);
+     pIDA->ulOemCP = 1; 
+     pIDA->ulAnsiCP = 1; 
      pIDA->pProposal = new OtmProposal;
  }else{
      LogMessage(ERROR,"ERROR in MemFuncPrepExport::Error in beginning of function, during memory allocations");

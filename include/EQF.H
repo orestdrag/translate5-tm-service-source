@@ -4277,8 +4277,6 @@ USHORT UtlQueryCharTableForDocConv
 #define  ALL_SOURCE_LANGUAGES  8  // Identifier for source and target languages
 #define  ALL_TARGET_LANGUAGES  9  // including languages marked as disabled
 USHORT  UtlFillTableLB( HWND, USHORT );     // get languages
-extern "C" ULONG GetLangOEMCP(PSZ pTargetLang);
-extern "C" ULONG GetLangAnsiCP( PSZ pLanguage);
 
 USHORT SetSystemLanguage( PSZ pLanguage );
 PSZ    GetSystemLanguage( );

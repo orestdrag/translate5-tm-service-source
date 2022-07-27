@@ -33,6 +33,7 @@ XERCES_CPP_NAMESPACE_USE
 
 // currently hard-coded language information table
 LanguageFactory::LANGUAGEINFO DefaultLangTable[] = {
+  #ifdef to_be_removed
   // Name                ASCII  ANSI   ISO CP          ISO          BCP47  pref.  additional info
   { "Afrikaans",          850,  1252,  "ISO-8859-1",  "af-ZA",        "?", FALSE, "-ZA = South Africa ", TRUE, TRUE },
   { "Arabic",             864,  1256,  "ISO-8859-6",  "ar-EG",        "?", FALSE, "-EG = Egypt ", TRUE, TRUE },
@@ -88,6 +89,8 @@ LanguageFactory::LANGUAGEINFO DefaultLangTable[] = {
   { "Turkish",           857,  1254,  "ISO-8859-9",   "tr-TR",        "?", FALSE, "", TRUE, TRUE },
   { "Ukrainian",        1252,  1252,  "ISO-8859-5",   "uk-UA",        "?", FALSE, "", TRUE, TRUE },
   { "",                    0,     0,  "",             "",              "", FALSE, "", FALSE, FALSE } };
+  #endif
+  { "", "", "",  "", FALSE, "", FALSE, FALSE } };
 
 //
 // class for our SAX handler which parses the XML file containing the language settings
@@ -120,8 +123,8 @@ public:
 
 private:
   // IDs of XML elelements
-  typedef enum { LANGUAGES_ELEMENT, LANGUAGE_ELEMENT, NAME_ELEMENT, CPASCII_ELEMENT, CPANSI_ELEMENT, CPNAME_ELEMENT,
-                 ISO_ELEMENT, ICU_ELEMENT, PREFERRED_ELEMENT, GROUP_ELEMENT, ISSOURCELANGUAGE_ELEMENT, ISTARGETLANGUAGE_ELEMENT,
+  typedef enum { LANGUAGES_ELEMENT, LANGUAGE_ELEMENT, NAME_ELEMENT, 
+                 ISO_ELEMENT, PREFERRED_ELEMENT, GROUP_ELEMENT, ISSOURCELANGUAGE_ELEMENT, ISTARGETLANGUAGE_ELEMENT,
                  COMMENTS_ELEMENT, UNKNOWN_ELEMENT
                } ELEMENTID;
 
@@ -161,7 +164,7 @@ LanguageFactory::LanguageFactory(void)
   char szFile[256];
   properties_get_str(KEY_OTM_DIR, szFile, 255);
   strcat(szFile, "/TABLE/languages.xml");
-  properties_get_str_or_default(KEY_LANG_FILE_PATH, szFile, 255, szFile);
+
   int iRC = loadLanguageList( szFile );
   
   if ( iRC != 0  || pvLanguageList->size() == 0)
@@ -383,126 +386,8 @@ int LanguageFactory::getOpenTM2NameFromISO
   return( 0 );
 }
 
-/* \brief Get the ICU language identifier for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \param pszICU buffer for the language ICU identifier
-   \returns 0 when successful or an error code
-*/
-int LanguageFactory::getICUName
-(
-  const char *pszLanguage,
-  char *pszICU
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( pszLanguage );
-  if ( i < 0 )
-  {
-    return( ERROR_LANGUAGENOTFOUND );
-  }
-
-  strcpy( pszICU, (*pvLanguageList)[i].szIcuID );
-
-  return( 0 );
-}
-
-int LanguageFactory::getICUName
-(
-  std::string& strLanguage,
-  std::string& strICU
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( strLanguage.c_str() );
-  if ( i < 0 )
-  {
-    return( ERROR_LANGUAGENOTFOUND );
-  }
-
-  strICU = (*pvLanguageList)[i].szIcuID;
-
-  return( 0 );
-}
 
 
-/* \brief Get the OpenTM2 language name for a ICU language identifier
-   \param pszICU ICU language identifier
-   \param pszLanguage buffer for OpenTM2 language name
-   \returns 0 when successful or an error code
-*/
-int LanguageFactory::getOpenTM2NameFromICU
-(
-  const char *pszICU,
-  char *pszLanguage
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findICU( pszICU );
-  if ( i < 0 )
-  {
-    return( ERROR_LANGUAGENOTFOUND );
-  }
-
-  strcpy( pszLanguage, (*pvLanguageList)[i].szName );
-
-  return( 0 );
-}
-
-int LanguageFactory::getOpenTM2NameFromICU
-(
-  std::string& strICU,
-  std::string& strLanguage
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findICU( strICU.c_str() );
-  if ( i < 0 )
-  {
-    return( ERROR_LANGUAGENOTFOUND );
-  }
-
-  strLanguage = (*pvLanguageList)[i].szName;
-
-  return( 0 );
-}
-
-/* \brief Get the OEM (ASCII) codepage for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \returns OEM codepage for the given language or 0 in case of errors
-*/
-unsigned long LanguageFactory::getOEMCP
-(
-  const char *pszLanguage
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( pszLanguage );
-  if ( i < 0 ) return( 0 );
-
-  return( (*pvLanguageList)[i].lAsciiCP );
-}
-
-/* \brief Get the Windows (ANSI) codepage for a OpenTM2 language name
-   \param pszLanguage OpenTM2 language name
-   \returns Windows codepage for the given language or 0 in case of errors
-*/
-unsigned long LanguageFactory::getAnsiCP
-(
-  const char *pszLanguage
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( pszLanguage );
-  if ( i < 0 ) return( 0 );
-
-  return( (*pvLanguageList)[i].lAnsiCP );
-}
 
 /* \brief Checks if the given language name is contained in our language list
    \param pszLanguage OpenTM2 language name
@@ -672,39 +557,6 @@ int LanguageFactory::findISO
   return( iFound );
 }
 
-/* \brief Find the entry for the specified ICU language ID 
-   \param pszICU ICU language ID 
-   \returns -1 when not found or index into language table
-*/
-
-int LanguageFactory::findICU
-(
-  const char *pszICU
-)
-{
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-  int iFound = -1;
-  int i = 0;
-  int iMax = pvLanguageList->size();
-  while( i < iMax )
-  {
-    if ( strcmp( pszICU, (*pvLanguageList)[i].szIcuID ) == 0 )
-    {
-      if ( (*pvLanguageList)[i].fisPreferred )
-      {
-        return( i );
-      }
-      else
-      {
-        iFound = i;
-      }
-    }
-    i++;
-  }
-
-  return( iFound );
-}
-
 
 unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
 {
@@ -807,21 +659,9 @@ void LangParseHandler::endElement(const XMLCh* const name )
       break;
     case NAME_ELEMENT:
       strncpy( this->CurElement.szName, sData.c_str(), sizeof(this->CurElement.szName) );
-      break;
-    case CPASCII_ELEMENT:
-      this->CurElement.lAsciiCP = atol( sData.c_str() );
-      break;
-    case CPANSI_ELEMENT:
-      this->CurElement.lAnsiCP = atol( sData.c_str() );
-      break;
-    case CPNAME_ELEMENT:
-      strncpy( this->CurElement.szIsoCPName, sData.c_str() , sizeof(this->CurElement.szIsoCPName) );
-      break;
+      break;    
     case ISO_ELEMENT:
       strncpy( this->CurElement.szIsoID, sData.c_str() , sizeof(this->CurElement.szIsoID) );
-      break;
-    case ICU_ELEMENT:
-      strncpy( this->CurElement.szIcuID, sData.c_str(), sizeof(this->CurElement.szIcuID) );
       break;
     case PREFERRED_ELEMENT:
       this->CurElement.fisPreferred = (strcasecmp( sData.c_str(), "yes" ) == 0);
@@ -908,11 +748,7 @@ static XMLNAMETOID XmlNameToID[] =
 { { u"languages",  LANGUAGES_ELEMENT },
   { u"language",   LANGUAGE_ELEMENT }, 
   { u"name",       NAME_ELEMENT }, 
-  { u"cpASCII",    CPASCII_ELEMENT }, 
-  { u"cpANSI",     CPANSI_ELEMENT }, 
-  { u"cpName",     CPNAME_ELEMENT },
   { u"iso",        ISO_ELEMENT }, 
-  { u"icu",        ICU_ELEMENT }, 
   { u"preferred",  PREFERRED_ELEMENT }, 
   { u"group",      GROUP_ELEMENT }, 
   { u"isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 

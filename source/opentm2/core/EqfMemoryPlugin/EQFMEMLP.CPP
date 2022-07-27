@@ -289,15 +289,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       strcpy( pLIDA->szMatchIDPrefix, pDialogIDA->szMatchIDPrefix );
       wcscpy( pLIDA->szMatchIDPrefixW, pDialogIDA->szMatchIDPrefixW );
 
-      if ( pDialogIDA->ulOemCP )
-        pLIDA->ulOemCP = pDialogIDA->ulOemCP;
-      else
-        pLIDA->ulOemCP = GetLangOEMCP(NULL);
-
-      if ( pDialogIDA->ulAnsiCP )
-        pLIDA->ulAnsiCP = pDialogIDA->ulAnsiCP;
-      else
-        pLIDA->ulAnsiCP = GetLangAnsiCP(NULL);
+      pLIDA->ulAnsiCP = pLIDA->ulOemCP = 1;
 
       // read the file size of the file to be imported and store it in IDA
       usDosRc = UtlGetFileSize( pLIDA->hFile, &(pLIDA->ulTotalSize), FALSE );
@@ -1828,8 +1820,8 @@ USHORT MemFuncPrepImport
    fOK = UtlAllocHwnd( (PVOID *)&pLoadIDA, 0L, (LONG)sizeof(MEM_LOAD_DLG_IDA), ERROR_STORAGE, HWND_FUNCIF );
     if ( fOK )
     {  // use def.target lang. from system preferences of TM
-          pLoadIDA->ulOemCP = GetLangOEMCP(NULL);
-          pLoadIDA->ulAnsiCP = GetLangAnsiCP(NULL);
+          pLoadIDA->ulOemCP = 1;
+          pLoadIDA->ulAnsiCP = 1;
     }else if(!fOkFailHandled){
       fOkFailHandled = true;
       LogMessage(ERROR,"MemFuncPrepImport:: memory allocation fails");

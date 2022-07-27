@@ -626,7 +626,7 @@ USHORT TokenizeSource
    USHORT usVersion                     // version of TM
 )
 {
-  ULONG ulSrcCP = GetLangOEMCP( pSourceLang);
+  ULONG ulSrcCP = 1;
   return( TokenizeSourceEx( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP ) );
 }
 

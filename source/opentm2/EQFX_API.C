@@ -148,18 +148,15 @@ USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
     // do the actual counting
     if ( usRC == NO_ERROR )
     {
-      ULONG  ulOEMCP = 0L;
-
       *pulResult = 0L;
       *pulMarkUp = 0L;
 
-      ulOEMCP = GetLangOEMCP(pszLang);
       usRC = EQFBWordCntPerSeg(
                        (PLOADEDTABLE)pVoidTable,
                        pTokBuf,
                        pszSeg,
                        sLangID,
-                       pulResult, pulMarkUp, ulOEMCP);
+                       pulResult, pulMarkUp, 1);
     } /* endif */
 
     // cleanup

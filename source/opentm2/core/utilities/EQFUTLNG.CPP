@@ -14,6 +14,8 @@
 #include <EQFSETUP.H>             // specific defines for Language properties
 
 #include "LanguageFactory.H"
+#include "../utilities/EncodingHelper.h"
+#include "../utilities/LogWrapper.h"
 
 
 /*
@@ -262,41 +264,6 @@ BOOL UtlQuerySysLangFile
   return( fOK && fFound );
 } /* end of function TWBQuerySysLangFile */
 
-
-////////////////////////////////////////////////////////////////
-// Get Codepage appropriate for given language ( not OS-dependent!)
-///////////////////////////////////////////////////////////////////
-ULONG GetLangAnsiCP
-(
- PSZ pLanguage
-)
-{
-  ULONG   ulCP = 0L;
-  LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-
-  if (pLanguage)
-  {
-    ulCP = pLangFactory->getAnsiCP( pLanguage );
-    ulCP = ADJUSTCP( ulCP );
-  }
-
-  if ( !ulCP)
-  {
-    PPROPSYSTEM pPropSys= NULL;
-    PSZ         pSystemPrefLang = NULL;
-
-    pPropSys = GetSystemPropPtr();
-    ulCP = pLangFactory->getAnsiCP( pPropSys->szSystemPrefLang );
-    ulCP = ADJUSTCP( ulCP );
-  }
-
-  if (!ulCP)
-  {
-    ulCP = (ULONG)GetCodePage( ANSI_CP );
-  }
-  return(ulCP);
-}
-
 // same as GetLangxxxCP but returns unadjusted codepage
 ULONG GetOrgLangCP
 (
@@ -304,27 +271,10 @@ ULONG GetOrgLangCP
  BOOL  fASCII
 )
 {
-  ULONG   ulCP = 0L;
-  LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-
-  if (pLanguage)
-  {
-    ulCP = fASCII ? pLangFactory->getOEMCP( pLanguage ) : pLangFactory->getAnsiCP( pLanguage );
+  if(CheckLogLevel(INFO)){
+      LogMessage2(WARNING, __func__, "::called commented out function that would return 0");
   }
-
-  if ( !ulCP)
-  {
-    PPROPSYSTEM pPropSys= NULL;
-
-    pPropSys = GetSystemPropPtr();
-    ulCP = fASCII ? pLangFactory->getOEMCP( pPropSys->szSystemPrefLang ) : pLangFactory->getAnsiCP( pPropSys->szSystemPrefLang );
-  }
-
-  if (!ulCP)
-  {
-    ulCP = (ULONG)GetCodePage( fASCII ? OEM_CP : ANSI_CP );
-  }
-  return(ulCP);
+  return 1;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -357,156 +307,6 @@ static char* strupr(char *str)
     return str;
 }
 
-static ULONG InternalGetLangOEMCP
-(
- PSZ pszLanguage
-)
-{
-  BOOL        fFound = FALSE;                    // true if language found in cache
-  CHAR        szUprLanguage[MAX_LANG_LENGTH];    // uppercased language name
-  szUprLanguage[0] = '\0';
-  int         i = 0;                             // index for language cache table
-  ULONG       ulCP = 0L;                         // evaluated OEM codepage
-  int         iCachePos = -1;                    // position of language within cache, -1 = not in cache
-
-  // first check our static buffers (in most cases only two languages are needed
-  if ( szChachedLang1[0] && (strcmp( szChachedLang1, pszLanguage) == 0 ) )
-  {
-    return( ulCachedCP1 );
-  }
-  else if ( szChachedLang2[0] && (strcmp( szChachedLang2, pszLanguage) == 0 ) )
-  {
-    return( ulCachedCP2 );
-  } /* endif */
-
-  // check if language is already in our cache
-  strcpy( szUprLanguage, pszLanguage );
-  strupr( szUprLanguage );
-  while ( (i < iLangCacheUsed) && !fFound )
-  {
-    if ( strcmp( szUprLanguage, LangCache[i].szLanguage ) == 0 )
-    {
-      iCachePos = i;
-      fFound = TRUE;
-      ulCP = LangCache[i].ulCodePage;
-    }
-    else
-    {
-      i++;
-    } /* endif */
-  } /*endwhile */
-
-  // if not contained in cache, get codepage from the language factory
-  if ( !fFound )
-  {
-    LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-    ulCP = pLangFactory->getOEMCP( pszLanguage );
-
-    if ( ulCP != 0 )
-    {
-      int iAddPos = -1;
-
-      ulCP = ADJUSTCP( ulCP );
-
-      // add to cache if codepage has been retrieved
-      if ( ulCP )
-      {
-        if ( iLangCacheUsed < MAX_LANGCACHE)
-        {
-          // use free slot
-          iCachePos = iAddPos = iLangCacheUsed;
-          iLangCacheUsed++;
-        }
-        else
-        {
-          int j = 0;
-
-          // find latest used slot
-          iAddPos = 0;
-          for( j = 0; j < iLangCacheUsed; j++ )
-          {
-            if ( LangCache[j].uiCounter < LangCache[iAddPos].uiCounter)
-            {
-              iAddPos = j;
-            } /* endif */
-          } /* endfor */
-        } /* endif */
-
-        // add at found slot
-        strcpy( LangCache[iAddPos].szLanguage, szUprLanguage );
-        LangCache[iAddPos].ulCodePage = ulCP;
-        iCachePos = iAddPos;
-
-        // fill static buffers as well
-        if ( !szChachedLang1[0]  )
-        {
-          strcpy( szChachedLang1, pszLanguage );
-          ulCachedCP1 = ulCP;
-        }
-        else if ( !szChachedLang2[0]  )
-        {
-          strcpy( szChachedLang2, pszLanguage );
-          ulCachedCP2 = ulCP;
-        } /* endif */
-
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  // update cache update counter
-  if ( iCachePos >= 0 )
-  {
-    uiLangCacheCounter++;
-    if ( !uiLangCacheCounter )
-    {
-      // overflow in language cache counter, restart at 1
-      int j= 0;
-      for ( j= 0; j < iLangCacheUsed; j++ )
-      {
-        LangCache[j].uiCounter = 0;
-      } /* endfor */
-      uiLangCacheCounter = 1;
-    } /* endif */
-    LangCache[iCachePos].uiCounter = uiLangCacheCounter;
-  } /* endif */
-
-  return( ulCP );
-} /* end of function InternalGetLangOEMCP */
-
-ULONG GetLangOEMCP
-(
- PSZ pLanguage
-)
-{
-  ULONG  ulCP = 0L;
-  if (pLanguage)
-  {
-    ulCP = InternalGetLangOEMCP( pLanguage );
-  }
-
-  if (!ulCP)
-  {
-    PPROPSYSTEM pPropSys= NULL;
-    PSZ         pSystemPrefLang = NULL;
-
-    pPropSys = GetSystemPropPtr();
-    pSystemPrefLang = &pPropSys->szSystemPrefLang[0];         // must be filled!!
-    if(pPropSys)
-    {
-      ulCP = pPropSys->ulSystemPrefCP;
-    
-    }
-    if (!ulCP)
-    {
-      pPropSys->ulSystemPrefCP = ulCP = InternalGetLangOEMCP( pSystemPrefLang );
-    }
-  }
-  if (!ulCP)
-  {
-    ulCP = (ULONG)GetCodePage( OEM_CP );
-  }
-  return(ulCP);
-}
 
 
 // Get the currently set codepage.

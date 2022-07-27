@@ -899,7 +899,7 @@ private:
   PLOADEDTABLE pRTFTable;
   PTOKENENTRY pTokBuf;
   int iTokBufSize;
-  ULONG ulCP;
+  //ULONG ulCP;
 
   void fillSegmentInfo( PTMXTUV pSource, PTMXTUV pTarget, PMEMEXPIMPSEG pSegment );
 
@@ -1862,8 +1862,6 @@ TMXParseHandler::TMXParseHandler()
   pTuvArray = NULL;
   iCurTuv = 0;
   iTuvArraySize = 0;
-
-  ulCP = GetLangOEMCP( NULL );
 
   tagReplacer.sourceTagList.reserve(50);
   tagReplacer.targetTagList.reserve(50);
@@ -3987,19 +3985,11 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
     WriteStringToMemory( pData, L"<Codepage>" );
     if ( pData->MemInfo.lOutMode & ANSI_OPT )
     {
-      CHAR_W szCP[14];
-      ULONG ulCP = GetLangAnsiCP( NULL );
-      LogMessage(ERROR,"TEMPORARY COMMENTED WriteMemHeader");
-      //swprintf( szCP, L"ANSI=&lu", ulCP );
-      WriteStringToMemory( pData, szCP );
+      WriteStringToMemory( pData, L"1" );
     }
     else if ( pData->MemInfo.lOutMode & ASCII_OPT )
     {
-      CHAR_W szCP[14];
-      ULONG ulCP = GetLangOEMCP( NULL );
-      LogMessage(ERROR,"TEMPORARY COMMENTED WriteMemHeader 2");
-      //swprintf( szCP, L"ASCII=&lu", ulCP );
-      WriteStringToMemory( pData, szCP );
+      WriteStringToMemory( pData, L"1" );
     }
     else
     {
