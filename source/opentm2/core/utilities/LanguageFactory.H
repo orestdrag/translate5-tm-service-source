@@ -38,7 +38,7 @@ typedef struct _LANGUAGEINFO
   char szName[128];                    // language name used in Opentm2
   char szIsoID[40];                    // ISO ID for the language
   bool fisPreferred;                   // TRUE = this is the preferred language if several languages use the same ISO/BCP47 ID
-  char szAddInfo[256];                 // additional language information or comments
+  //char szAddInfo[256];                 // additional language information or comments
   bool isSourceLanguage;               // TRUE = language can be used as a source language    
   bool isTargetLanguage;               // TRUE = language can be used as a target language    
   char szLangGroup[128];               // language group of the language (will be used as language in the memory lookup)

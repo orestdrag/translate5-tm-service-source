@@ -90,7 +90,8 @@ LanguageFactory::LANGUAGEINFO DefaultLangTable[] = {
   { "Ukrainian",        1252,  1252,  "ISO-8859-5",   "uk-UA",        "?", FALSE, "", TRUE, TRUE },
   { "",                    0,     0,  "",             "",              "", FALSE, "", FALSE, FALSE } };
   #endif
-  { "", "", "",  "", FALSE, "", FALSE, FALSE } };
+  //{ "", "", "",  "", FALSE, "", FALSE, FALSE } 
+  };
 
 //
 // class for our SAX handler which parses the XML file containing the language settings
@@ -676,7 +677,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
       this->CurElement.isTargetLanguage = (strcasecmp( sData.c_str(), "yes" ) == 0);
       break;
     case COMMENTS_ELEMENT:
-      strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
+      //strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
       break;
     case UNKNOWN_ELEMENT:
     default:
