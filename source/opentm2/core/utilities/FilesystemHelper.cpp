@@ -369,42 +369,6 @@ int FilesystemHelper::CloseFileBuffer(const std::string& path){
     return FILEHELPER_NO_ERROR;
 }
 
-#ifdef __USING_FILESYSTEM
-FILE* FilesystemHelper::FindFirstFile(const std::string& name){
-    auto files = FindFiles(name);
-    if(files.empty())
-        return NULL;
-    auto path = files[0].path().generic_string();
-    return OpenFile(path, "wb");
-}
-
-std::vector<fs::directory_entry> FilesystemHelper::FindFiles(const std::string& name){
-    const std::string fixedName = FixPath(name);
-    const std::string dirPath = parseDirectory(name);
-    std::string fileName = parseFilename(name);
-    
-    int pos = fileName.rfind('*');
-    bool exactMatch = pos == std::string::npos;
-
-    if(!exactMatch)
-        fileName = fileName.substr(pos+1);
-
-    std::vector< fs::directory_entry> files;
-    for (const auto & file : fs::directory_iterator(dirPath)){
-        if(exactMatch){
-            if(file.path().generic_string().compare(fileName) == 0){
-                files.push_back(file);
-            }
-        }else{
-            if( file.path().generic_string().find(fileName) != std::string::npos ){
-                files.push_back(file);
-            }
-        }
-    }
-
-    return files;
-}
-#endif
 
 
 

@@ -271,7 +271,7 @@ USHORT EqfCreateMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
-  {
+  if(CheckLogLevel(DEBUG)){
     char buff[255];
     sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d",
               pszMemName, pszDescription, pszSourceLanguage, lOptions);

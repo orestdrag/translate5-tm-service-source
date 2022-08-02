@@ -10,7 +10,7 @@
 
 #include "win_types.h"
 #include "EQF.H"
-
+#include <atomic>
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS
 {
@@ -73,7 +73,7 @@ typedef struct _FCTDATA
   SHORT       sLastFunction;           // last function performed
 
   // area for session data
-  BOOL        fComplete;               // current process is complete flag
+  std::atomic<bool>        fComplete;               // current process is complete flag
   CHAR        szEqfResFile[MAX_EQF_PATH];// name of resource file
   CHAR        szSystemPropPath[MAX_EQF_PATH]; // system properties path
   CHAR        szMsgFile[MAX_EQF_PATH]; // message file for error messages

@@ -10,6 +10,8 @@
 #define INCL_EQF_ASD              // dictionary access functions (Asd...)
 #define INCL_EQF_DAM              // low level dict. access functions (Nlp/Dam)
 #define INCL_EQF_TM               // general Transl. Memory functions
+
+#include <atomic>
 #include <EQF.H>                  // General Translation Manager include file
 #include "LogWrapper.h"
 #include "FilesystemWrapper.h"
@@ -811,7 +813,7 @@ typedef struct _QDAMDICT
    PBTREEGLOB   pBTree;                           // pointer to global struct
    ULONG        ulNum;
    USHORT       usNextHandle;
-   USHORT       usOpenCount;                      // number of accesses...
+   std::atomic<int> usOpenCount;                      // number of accesses...
    USHORT       usOpenRC;
    CHAR         chDictName[ MAX_EQF_PATH ];
    BOOL         fDictLock;                        // is dictionary locked
@@ -2025,7 +2027,7 @@ QDAMAddDict
   SHORT  sRc = 0;
   PQDAMDICT  pQDict;
 
-  while ( QDAMDict[usI].usOpenCount )
+  while ( QDAMDict[usI].usOpenCount > 0)
   {
     usI++;
   } /* endwhile */
@@ -2178,12 +2180,12 @@ QDAMRemoveDict
   /********************************************************************/
   /* we closed one dictionary..                                       */
   /********************************************************************/
-  if ( pQDict->usOpenCount )
+  if ( pQDict->usOpenCount > 1)
   {
     pQDict->usOpenCount --;
   } /* endif */
 
-  if ( ! pQDict->usOpenCount  )
+  if ( ! pQDict->usOpenCount <= 0)
   {
     memset( pQDict, 0, sizeof( QDAMDICT ));
   } /* endif */

@@ -5,6 +5,8 @@
 #ifndef _EQFQDAMI_H_
 #define _EQFQDAMI_H_
 
+#include <atomic>
+
 #define BTREE_REC_SIZE_V2  (4096)          // record size V2
 #define BTREE_REC_SIZE_V3 (16384)          // record size V3
 
@@ -330,17 +332,6 @@ typedef struct _BTREEIDA
    CHAR         szFileName[MAX_LONGPATH];         // fully qualified name of file
  } BTREE, * PBTREE, ** PPBTREE;
 
-typedef struct _QDAMDICT
-{
-   PBTREEGLOB   pBTree;                           // pointer to global struct
-   ULONG        ulNum;
-   USHORT       usNextHandle;
-   USHORT       usOpenCount;                      // number of accesses...
-   USHORT       usOpenRC;
-   CHAR         chDictName[ MAX_EQF_PATH ];
-   BOOL         fDictLock;                        // is dictionary locked
-   PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
-} QDAMDICT, *PQDAMDICT;
 
 /*****************************************************************************/
 /* BTREEHEADRECORD is the record at the start of a B-tree file.  It is used  */
@@ -439,18 +430,6 @@ typedef struct _TMVITALINFO
 // unlock a (previously locked) record
 #define  BTREEUNLOCKRECORD(x)  ((x)->fLocked=FALSE)
 
-/**********************************************************************/
-/* Structure used in DAM to QDAM functions                            */
-/**********************************************************************/
-typedef struct _DAM2QDAM
-{
-   PBTREE pDamBTree;
-   ULONG  ulNum;
-   USHORT usNextHandle;
-   USHORT usOpenCount;
-   USHORT usOpenRC;
-   CHAR   chDictName[ MAX_EQF_PATH ];
-} DAM2QDAM, *PDAM2QDAM;
 
 //+----------------------------------------------------------------------------+
 // External function
