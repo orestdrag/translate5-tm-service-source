@@ -816,7 +816,7 @@ PFUZZYTOK SplitTokens
   return (pstCurrent);
 } /* end of function SplitTokens */
 
-//+----------------------------------------------------------------------------+
+//+----------------------------------------------------------------------------+ 
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
 //|Function name:     MakeHashValues                                           |
@@ -1376,11 +1376,11 @@ TransferSource
     {
       /****************************************************************/
       /* if c is within edit sequence use the modified character for  */
-      /* it                                                           */
+      /* it                                                           */ 
       /****************************************************************/
       usI = 0;
       while ( ((d = chSourceString[usI]) != NULC) && (d != c) )
-      {
+      { 
         usI++;
       } /* endwhile */
 

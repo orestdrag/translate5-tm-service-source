@@ -476,6 +476,85 @@ void postEntryDelete_method_handler( const shared_ptr< Session > session )
   } );
 }
 
+bool PrepareProxygenService( char *pszService, unsigned *puiPort ){
+  LogMessage(TRANSACTION, "Trying to prepare otm memory service");
+  pMemService = OtmMemoryServiceWorker::getInstance();
+  if ( pMemService == NULL )
+  {
+    return FALSE;
+  } /* endif */
+
+  {
+    char szServiceName[100] = "t5memory";
+    char szOtmDirPath[255] ="";
+    unsigned int uiPort = 8080;
+    unsigned int uiWorkerThreads = 1;
+    unsigned int uiTimeOut = 3600;
+    unsigned int uiLogLevel = 2;
+    unsigned int uiAllowedRAM = 1500; // MB
+    unsigned int uiThreshold = 33;
+
+    /* get configuration settings */
+    {
+        string defOtmDirPath, path = filesystem_get_home_dir();
+        defOtmDirPath = path + "/.t5memory/";
+        path = defOtmDirPath + "t5memory.conf";
+        strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
+
+        config conf(path);
+        int res = conf.parse();
+
+        if (!res) {
+            strncpy(szServiceName,
+                conf.get_value("name", "t5memory").c_str(), 100);
+            strncpy(szOtmDirPath,
+                conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
+            uiPort = std::stoi(conf.get_value("port", "8080"));
+            uiWorkerThreads = std::stoi(conf.get_value("threads", "10"));
+            uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
+            uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
+            uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
+            uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, "33"));
+        }else{
+          LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
+        }
+    }
+    
+    properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
+    properties_set_int_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
+    properties_set_int_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
+    std::string memDir = szOtmDirPath;
+    memDir += "/MEM/";
+    properties_add_str(KEY_MEM_DIR, memDir.c_str());
+
+    //From here we have logging in file turned on
+    DesuppressLoggingInFile();
+
+    LogMessage8(TRANSACTION, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", toStr(uiPort).c_str(), "; Worker threads = ", toStr(uiWorkerThreads).c_str(),
+            "; timeout = ", toStr(uiTimeOut).c_str());
+    LogMessage6(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
+                          "; triples_threshold = ", toStr(uiThreshold));
+    SetLogLevel(uiLogLevel);
+    // set caller's service name and port fields
+    strcpy( pszService, szServiceName );
+    *puiPort = uiPort;
+
+    char szValue[150];
+
+    // handler for resource URL w/o memory name
+    auto resource = make_shared< Resource >();
+    snprintf( szValue, 150, "/%s", szServiceName );
+    resource->set_path( szValue );
+    resource->set_method_handler( "GET", get_method_handler );
+
+    service.publish( resource );
+
+    LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
+  }
+  return( TRUE );
+
+}
+
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
   LogMessage(TRANSACTION, "Trying to prepare otm memory service");
