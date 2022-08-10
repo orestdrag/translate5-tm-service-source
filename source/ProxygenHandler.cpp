@@ -8,6 +8,7 @@
 
 #include "ProxygenHandler.h"
 
+//#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
 
@@ -58,3 +59,4 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
   delete this;
 }
 } // namespace ProxygenService
+//#endif

@@ -15,6 +15,8 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/GFlags.h>
 #include <folly/portability/Unistd.h>
+
+//#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/HTTPServer.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
 
@@ -84,12 +86,54 @@ int main_test(int argc, char* argv[]) {
   options.receiveSessionWindowSize = 10 * (1 << 20);
   options.h2cEnabled = true;
 
-  //HTTPServer server(std::move(options));
-  //server.bind(IPs);
+  HTTPServer server(std::move(options));
+  server.bind(IPs);
 
   // Start HTTPServer mainloop in a separate thread
-  //std::thread t([&]() { server.start(); });
+  std::thread t([&]() { server.start(); });
 
-  //t.join();
+  t.join();
+  return 0;
+}
+//#endif
+
+
+
+int echo_main(int argc, char* argv[]) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+
+  std::vector<HTTPServer::IPConfig> IPs = {
+      {SocketAddress(FLAGS_ip, FLAGS_http_port, true), Protocol::HTTP},
+      {SocketAddress(FLAGS_ip, FLAGS_spdy_port, true), Protocol::SPDY},
+      {SocketAddress(FLAGS_ip, FLAGS_h2_port, true), Protocol::HTTP2},
+  };
+
+  if (FLAGS_threads <= 0) {
+    FLAGS_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    CHECK(FLAGS_threads > 0);
+  }
+
+  HTTPServerOptions options;
+  options.threads = static_cast<size_t>(FLAGS_threads);
+  options.idleTimeout = std::chrono::milliseconds(60000);
+  options.shutdownOn = {SIGINT, SIGTERM};
+  options.enableContentCompression = false;
+  options.handlerFactories =
+      RequestHandlerChain().addThen<ProxygenHandlerFactory>().build();
+  // Increase the default flow control to 1MB/10MB
+  options.initialReceiveWindow = uint32_t(1 << 20);
+  options.receiveStreamWindowSize = uint32_t(1 << 20);
+  options.receiveSessionWindowSize = 10 * (1 << 20);
+  options.h2cEnabled = true;
+
+  HTTPServer server(std::move(options));
+  server.bind(IPs);
+
+  // Start HTTPServer mainloop in a separate thread
+  std::thread t([&]() { server.start(); });
+
+  t.join();
   return 0;
 }

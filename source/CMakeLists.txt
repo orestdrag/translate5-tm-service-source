@@ -19,9 +19,12 @@ project(T5MEMORY VERSION ${APP_VERSION})
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address log_path=asan_log_file.$pid -fsanitize-recover=address")
 
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}") # -pthread")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}") # -pthread")
-set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}") # -pthread")
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}") # -pthread")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}") # -pthread")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}") # -pthread")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread")
+set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
@@ -56,6 +59,8 @@ set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 
 #set(PROXYGEN_INCLUDE_LIBRARIES   "${ROOT}/Packages/proxygen/include")
 
+
+
 include(./cmake/CheckGit.cmake)
 CheckGitSetup()
 
@@ -73,7 +78,7 @@ set(CMAKE_PREFIX_PATH
 #    "${PROXYGEN_DEPS_LIBRARIES}/cmake/proxygen"
 )
 
-set(CMAKE_PREFIX_PATH 
+#set(CMAKE_PREFIX_PATH 
 #    #"${PROXYGEN_DEPS_LIBRARIES}/cmake/unofficial-sodium"    
 
 #    "${PROXYGEN_DEPS_LIBRARIES}/cmake/mapped_sodium"  
@@ -87,7 +92,7 @@ set(CMAKE_PREFIX_PATH
   #  "${ROOT}/Packages/proxygen/proxygen/_build/"
  # "${ROOT}/Packages/proxygen/proxygen/_build/lib/cmake/proxygen"
 
-)
+#)
 
 #set( ZSTD_INCLUDE_DIR "${PROXYGEN_INCLUDE_LIBRARIES}")
 #set ( FOLLY_INCLUDE_DIR "${PROXYGEN_INCLUDE_LIBRARIES}")
@@ -99,8 +104,8 @@ set(T5MEMORY_Source_Files
     OTMMSJSONFactory.cpp
     otmd.cpp
     config.cpp
-    #ProxygenServer.cpp
-    #ProxygenHandler.cpp 
+    ProxygenServer.cpp
+    ProxygenHandler.cpp 
 )
 
 link_directories(${RESTBED_LIBRARIES})
@@ -114,15 +119,20 @@ add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 set(CMAKE_CXX_STANDARD 17)
 target_compile_features(T5MEMORY PRIVATE cxx_std_17)
 
+
+set(PROXYGEN_INCLUDE_DIR   "${CMAKE_SOURCE_DIR}/proxygen")
 target_include_directories(T5MEMORY PRIVATE
+    ${PROXYGEN_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
     ${RESTBED_INCLUDE_DIR}
     #${PROXYGEN_ROOT}
     #${ZSTD_INCLUDE_DIR}
     #${PROXYGEN_DEPS_INCLUDE_DIR}
-    ${PROXYGEN_INCLUDE_DIR}
+    #${PROXYGEN_DEPS_LIBRARIES}
 )
+
+message(STATUS " TRANSLATE5:  PROXYGEN_INCLUDE_DIR  is ${PROXYGEN_INCLUDE_DIR}")
 
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 #find_package(Threads REQUIRED)
@@ -133,6 +143,13 @@ endif()
 
 #find_package(Boost REQUIRED)
 
+set(CMAKE_PREFIX_PATH 
+#"${CMAKE_BINARY_DIR}/proxygen/proxygen/_build/deps/folly"
+#"${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/lib/cmake/folly"
+"${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build"
+"${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/lib/cmake/mapped_sodium"
+#                      "${CMAKE_CURRENT_SOURCE_DIR}/../../folly/"
+)
 
 #find_package(proxygen REQUIRED)
 find_package(gflags REQUIRED)
@@ -158,13 +175,17 @@ add_subdirectory(proxygen/proxygen/_build/deps/fmt)
 #install( EXPORT FMT)
 target_link_libraries(T5MEMORY PRIVATE fmt  )
 add_subdirectory(proxygen/proxygen/_build/deps/folly)
-#add_subdirectory(proxygen/proxygen/_build/deps/wangle/wangle)
-#add_subdirectory(proxygen/proxygen/_build/deps/fizz/fizz)
+add_subdirectory(proxygen/proxygen/_build/deps/fizz/fizz)
+add_subdirectory(proxygen/proxygen/_build/deps/googletest)
+add_subdirectory(proxygen/proxygen/_build/deps/wangle/wangle)
 
 target_link_libraries(T5MEMORY PRIVATE
     OTMFUNC
     librestbed.a
     
+    #Folly::folly
+    folly
+    #proxygen
     git_version
     #libfolly.a
 #)
@@ -181,6 +202,7 @@ target_link_libraries(T5MEMORY PRIVATE
     libdouble-conversion.a
     #sodium
 
+    sodium.a
     gflags
     crypto
     #Boost
@@ -195,7 +217,7 @@ target_link_libraries(T5MEMORY PRIVATE
     Boost::regex
     Boost::system
     Boost::thread
-    libsodium.a
+    #libsodium.a
     libunwind.a
     liblzma.a
     libevent.a
@@ -309,8 +331,12 @@ target_link_libraries(T5MEMORY PRIVATE
 )
  
 
-
+add_subdirectory(proxygen)
 add_subdirectory(opentm2)
+target_link_libraries(T5MEMORY PRIVATE
+    proxygen
+    proxygenhttpserver
+)
 #add_subdirectory(zip)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)

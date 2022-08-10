@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/Memory.h>
+//#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/RequestHandler.h>
 
 namespace proxygen {
@@ -43,3 +44,4 @@ class ProxygenHandler : public proxygen::RequestHandler {
 };
 
 } // namespace ProxygenService
+//#endif
