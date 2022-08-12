@@ -95,7 +95,6 @@ int main_test(int argc, char* argv[]) {
   t.join();
   return 0;
 }
-//#endif
 
 
 
@@ -137,3 +136,5 @@ int echo_main(int argc, char* argv[]) {
   t.join();
   return 0;
 }
+
+//#endif

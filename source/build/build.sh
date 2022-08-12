@@ -17,7 +17,7 @@ do_install() {
 do_clean() {
   echo "Cleaning..."
   for file in *; do
-    if [ "$file" != "build.sh" ]; then
+    if [ "$file" != "build.sh"  AND "$file" != "vs_build.sh"]; then
       rm -rf $file
     fi
   done
@@ -33,14 +33,20 @@ do_main() {
   if [ "$1" = "clean" ]; then
     do_clean
   elif [ "$1" = "install" ]; then
+	do_build
     do_install
   elif [ "$1" = "package" ]; then
+	do_build
     do_package
   elif [ "$1" = "rebuild" ]; then
     do_clean
-    do_package
+    do_build
+    #do_package
+  elif [ "$1" = "build"   ]; then
+	do_build
   else
-    do_package
+	do_build
+    #do_package
   fi
 }
 
