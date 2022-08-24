@@ -8,7 +8,7 @@
 #include <string>
 #include <cstring>
 #include "OTMMSJSONFactory.h"
-#include "opentm2/core/utilities/OSWrapper.h"
+#include <opentm2/core/utilities/OSWrapper.h>
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 

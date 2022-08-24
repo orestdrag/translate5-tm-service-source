@@ -229,7 +229,7 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
 }
 
 // replace plus signs in string with blanks
-void restoreBlanks( std::string &strInOut )
+/*void restoreBlanks( std::string &strInOut )
 {
   int iLen = strInOut.length();
   for ( int i = 0; i < iLen; i++ )
@@ -239,7 +239,7 @@ void restoreBlanks( std::string &strInOut )
       strInOut[i] = ' ';
     }
   }
-}
+}//*/
 
 void postImport_method_handler( const shared_ptr< Session > session )
 {
@@ -297,6 +297,8 @@ void post_method_handler( const shared_ptr< Session > session )
 }
 
 
+
+
 void postTagReplacement_method_handler( const shared_ptr< Session > session )
 {
   const auto request = session->get_request();
@@ -307,62 +309,11 @@ void postTagReplacement_method_handler( const shared_ptr< Session > session )
 
   session->fetch( content_length, []( const shared_ptr< Session >& session, const Bytes& body )
   {
-    int rc = 0;
-    string strSrcData, strTrgData, strReqData;
-    string strInData = string( body.begin(), body.end() );
-    strSrcData.reserve( strInData.size() + 1 );
-    strTrgData.reserve( strInData.size() + 1 );
-    strReqData.reserve( strInData.size() + 1 );   
-    wstring wstr;
-
-    JSONFactory *factory = JSONFactory::getInstance();
-    void *parseHandle = factory->parseJSONStart( strInData, &rc );
-    if ( parseHandle == NULL )
-    {
-      wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
-      wstr = errMsg;
-      //buildErrorReturn( iRC, errMsg, strOutputParms );
-      return( restbed::BAD_REQUEST );
-    }else{ 
-      std::string name;
-      std::string value;
-      while ( rc == 0 )
-      {
-        rc = factory->parseJSONGetNext( parseHandle, name, value );
-        if ( rc == 0 )
-        {      
-          LogMessage5(RequestAdditionalLogLevel, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
-          if ( strcasecmp( name.c_str(), "src" ) == 0 )
-          {
-            strSrcData = value;
-          }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
-            strTrgData = value;
-          }else if( strcasecmp (name.c_str(), "req") == 0 ){
-            strReqData = value;          
-          }else{
-            LogMessage5(WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
-          }
-        }
-      } /* endwhile */
-      factory->parseJSONStop( parseHandle );
-    }
-    
-    auto result =  pMemService->replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
-                                                EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
-                                                EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
-
-    
-    wstr = L"{\n ";
-    std::wstring segmentLocations[] = {L"source", L"target", L"request"};
-    for(int index = 0; index < result.size(); index++){
-      wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
-    }
-    wstr += L"\n};";
-    string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
-
     char version[20];
     properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
-
+    string strInData = string( body.begin(), body.end() );
+    int rc = 0;
+    std::string strResponseBody = pMemService->tagReplacement(strInData, rc );
     session->close( rc, strResponseBody, { { "Content-Length", ::to_string( strResponseBody.length() ) },
       { "Content-Type", "application/json" },
       { szVersionID, version } } );

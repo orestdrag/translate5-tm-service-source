@@ -20,8 +20,9 @@
 
 #include <string>
 #include <cstring>
-#include "OtmMemoryServiceWorker.h"
 
+#ifdef TO_BE_REMOVED
+#include "OtmMemoryServiceWorker.h"
 wchar_t szLine[8096];                // buffer for script lines
 wchar_t szCommand[8096];             // buffer for current command
 char szScriptFile[1024];             // name of script file
@@ -207,3 +208,5 @@ int main( int argc, char *argv[], char *envp[] )
 
   return( 0 );
 } /* end of main */
+
+#endif //TO_BE_REMOVED

@@ -25,7 +25,7 @@ do_clean() {
 
 do_build() {
   echo "Building..."
-  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../source
   make -j${CORES}
 }
 

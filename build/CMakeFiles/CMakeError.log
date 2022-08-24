@@ -1,0 +1,179 @@
+Determining if the strtod_l exist failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a73ff/fast && /usr/bin/make -f CMakeFiles/cmTC_a73ff.dir/build.make CMakeFiles/cmTC_a73ff.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a73ff.dir/CheckSymbolExists.c.o
+/bin/x86_64-linux-gnu-gcc-9   -pthread    -o CMakeFiles/cmTC_a73ff.dir/CheckSymbolExists.c.o   -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘strtod_l’ undeclared (first use in this function); did you mean ‘strtoull’?
+    8 |   return ((int*)(&strtod_l))[argc];
+      |                   ^~~~~~~~
+      |                   strtoull
+/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+make[1]: *** [CMakeFiles/cmTC_a73ff.dir/build.make:66: CMakeFiles/cmTC_a73ff.dir/CheckSymbolExists.c.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_a73ff/fast] Error 2
+
+
+File /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdlib.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strtod_l
+  return ((int*)(&strtod_l))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Performing C++ SOURCE FILE Test FOLLY_STDLIB_LIBCXX failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_cea98/fast && /usr/bin/make -f CMakeFiles/cmTC_cea98.dir/build.make CMakeFiles/cmTC_cea98.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cea98.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9  -D_GNU_SOURCE  -pthread -DFOLLY_STDLIB_LIBCXX  -std=gnu++1z   -std=gnu++17 -o CMakeFiles/cmTC_cea98.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_cea98
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cea98.dir/link.txt --verbose=1
+/bin/x86_64-linux-gnu-g++-9    -pthread -DFOLLY_STDLIB_LIBCXX  -std=gnu++1z    CMakeFiles/cmTC_cea98.dir/src.cxx.o  -o cmTC_cea98  -ldl 
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x24): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_cea98.dir/build.make:87: cmTC_cea98] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_cea98/fast] Error 2
+
+
+Source file was:
+
+  #include <type_traits>
+  #if _LIBCPP_VERSION
+  int main() {}
+  #endif
+Performing C++ SOURCE FILE Test FOLLY_STDLIB_LIBCXX_GE_9 failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_2e8d0/fast && /usr/bin/make -f CMakeFiles/cmTC_2e8d0.dir/build.make CMakeFiles/cmTC_2e8d0.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_2e8d0.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9  -D_GNU_SOURCE  -pthread -DFOLLY_STDLIB_LIBCXX_GE_9  -std=gnu++1z   -std=gnu++17 -o CMakeFiles/cmTC_2e8d0.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_2e8d0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e8d0.dir/link.txt --verbose=1
+/bin/x86_64-linux-gnu-g++-9    -pthread -DFOLLY_STDLIB_LIBCXX_GE_9  -std=gnu++1z    CMakeFiles/cmTC_2e8d0.dir/src.cxx.o  -o cmTC_2e8d0  -ldl 
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x24): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_2e8d0.dir/build.make:87: cmTC_2e8d0] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_2e8d0/fast] Error 2
+
+
+Source file was:
+
+  #include <type_traits>
+  #if _LIBCPP_VERSION >= 9000
+  int main() {}
+  #endif
+Performing C++ SOURCE FILE Test FOLLY_STDLIB_LIBCPP failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9ea59/fast && /usr/bin/make -f CMakeFiles/cmTC_9ea59.dir/build.make CMakeFiles/cmTC_9ea59.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_9ea59.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9  -D_GNU_SOURCE  -pthread -DFOLLY_STDLIB_LIBCPP  -std=gnu++1z   -std=gnu++17 -o CMakeFiles/cmTC_9ea59.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_9ea59
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9ea59.dir/link.txt --verbose=1
+/bin/x86_64-linux-gnu-g++-9    -pthread -DFOLLY_STDLIB_LIBCPP  -std=gnu++1z    CMakeFiles/cmTC_9ea59.dir/src.cxx.o  -o cmTC_9ea59  -ldl 
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x24): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9ea59.dir/build.make:87: cmTC_9ea59] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_9ea59/fast] Error 2
+
+
+Source file was:
+
+  #include <type_traits>
+  #if _CPPLIB_VER
+  int main() {}
+  #endif
+Performing C++ SOURCE FILE Test COMPILER_HAS_UNKNOWN_WARNING_OPTION failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_27c32/fast && /usr/bin/make -f CMakeFiles/cmTC_27c32.dir/build.make CMakeFiles/cmTC_27c32.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_27c32.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9    -pthread -DCOMPILER_HAS_UNKNOWN_WARNING_OPTION  -std=gnu++1z   -Werror=unknown-warning-option -std=gnu++17 -o CMakeFiles/cmTC_27c32.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+cc1plus: error: '-Werror=unknown-warning-option': no option -Wunknown-warning-option
+make[1]: *** [CMakeFiles/cmTC_27c32.dir/build.make:66: CMakeFiles/cmTC_27c32.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_27c32/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_HAS_W_NULLABILITY_COMPLETENESS failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7dac2/fast && /usr/bin/make -f CMakeFiles/cmTC_7dac2.dir/build.make CMakeFiles/cmTC_7dac2.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7dac2.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9    -pthread -DCOMPILER_HAS_W_NULLABILITY_COMPLETENESS  -std=gnu++1z   -Wnullability-completeness -std=gnu++17 -o CMakeFiles/cmTC_7dac2.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+x86_64-linux-gnu-g++-9: error: unrecognized command line option '-Wnullability-completeness'
+make[1]: *** [CMakeFiles/cmTC_7dac2.dir/build.make:66: CMakeFiles/cmTC_7dac2.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_7dac2/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_HAS_W_INCONSISTENT_MISSING_OVERRIDE failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d0633/fast && /usr/bin/make -f CMakeFiles/cmTC_d0633.dir/build.make CMakeFiles/cmTC_d0633.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d0633.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9    -pthread -DCOMPILER_HAS_W_INCONSISTENT_MISSING_OVERRIDE  -std=gnu++1z   -Winconsistent-missing-override -std=gnu++17 -o CMakeFiles/cmTC_d0633.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+x86_64-linux-gnu-g++-9: error: unrecognized command line option '-Winconsistent-missing-override'
+make[1]: *** [CMakeFiles/cmTC_d0633.dir/build.make:66: CMakeFiles/cmTC_d0633.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_d0633/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_HAS_F_COROUTINES failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f6f96/fast && /usr/bin/make -f CMakeFiles/cmTC_f6f96.dir/build.make CMakeFiles/cmTC_f6f96.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f6f96.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9    -pthread -DCOMPILER_HAS_F_COROUTINES  -std=gnu++1z   -fcoroutines -std=gnu++17 -o CMakeFiles/cmTC_f6f96.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+x86_64-linux-gnu-g++-9: error: unrecognized command line option '-fcoroutines'
+make[1]: *** [CMakeFiles/cmTC_f6f96.dir/build.make:66: CMakeFiles/cmTC_f6f96.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_f6f96/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_HAS_W_DEPRECATED_REGISTER failed with the following output:
+Change Dir: /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_cc57e/fast && /usr/bin/make -f CMakeFiles/cmTC_cc57e.dir/build.make CMakeFiles/cmTC_cc57e.dir/build
+make[1]: Entering directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cc57e.dir/src.cxx.o
+/bin/x86_64-linux-gnu-g++-9    -pthread -DCOMPILER_HAS_W_DEPRECATED_REGISTER   -Wdeprecated-register -std=c++17 -o CMakeFiles/cmTC_cc57e.dir/src.cxx.o -c /home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp/src.cxx
+x86_64-linux-gnu-g++-9: error: unrecognized command line option '-Wdeprecated-register'; did you mean '-Wdeprecated-copy-dtor'?
+make[1]: *** [CMakeFiles/cmTC_cc57e.dir/build.make:66: CMakeFiles/cmTC_cc57e.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/or/workspace/translate5/translate5-tm-service-source/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_cc57e/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }

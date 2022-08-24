@@ -49,12 +49,10 @@ OtmMemoryServiceWorker* OtmMemoryServiceWorker::instance = 0;
 */
 OtmMemoryServiceWorker* OtmMemoryServiceWorker::getInstance()
 {
-	if (instance == 0)
-	{
-		instance = new OtmMemoryServiceWorker();
-    instance->hSession = 0;
-  }
-	return instance;
+  static OtmMemoryServiceWorker _instance;
+
+  //instance->hSession = 0;
+	return &_instance;
 }
 
 /*! \brief OtmMemoryServiceWorker constructor
@@ -720,7 +718,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
 int OtmMemoryServiceWorker::import
 (
   std::string  strMemory,
-  std::string &strInputParms,
+  std::string strInputParms,
   std::string &strOutputParms
 )
 {
@@ -1183,6 +1181,67 @@ int OtmMemoryServiceWorker::addProposalsToJSONString
   pJsonFactory->addArrayEndToJSONW( strJSON  );
   
   return( 0 );
+}
+
+
+
+std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& rc){
+  rc = 0;
+  std::string strSrcData, strTrgData, strReqData;
+ 
+  strSrcData.reserve( strInData.size() + 1 );
+  strTrgData.reserve( strInData.size() + 1 );
+  strReqData.reserve( strInData.size() + 1 );   
+  std::wstring wstr;
+
+  JSONFactory *factory = JSONFactory::getInstance();
+  void *parseHandle = factory->parseJSONStart( strInData, &rc );
+  if ( parseHandle == NULL )
+  {
+    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+    wstr = errMsg;
+    //buildErrorReturn( iRC, errMsg, strOutputParms );
+    rc = restbed::BAD_REQUEST;
+    return "";
+  }else{ 
+    std::string name;
+    std::string value;
+    while ( rc == 0 )
+    {
+      rc = factory->parseJSONGetNext( parseHandle, name, value );
+      if ( rc == 0 )
+      {      
+        LogMessage5(DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
+        if ( strcasecmp( name.c_str(), "src" ) == 0 )
+        {
+          strSrcData = value;
+        }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
+          strTrgData = value;
+        }else if( strcasecmp (name.c_str(), "req") == 0 ){
+          strReqData = value;          
+        }else{
+          LogMessage5(WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+        }
+      }
+    } /* endwhile */
+    factory->parseJSONStop( parseHandle );
+  }
+  
+  auto result =  replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
+                                              EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
+                                              EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
+
+  
+  wstr = L"{\n ";
+  std::wstring segmentLocations[] = {L"source", L"target", L"request"};
+  for(int index = 0; index < result.size(); index++){
+    wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
+  }
+  wstr += L"\n};";
+  std::string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
+  
+  return strResponseBody;
+
 }
 
 /*! \brief Search for matching proposals

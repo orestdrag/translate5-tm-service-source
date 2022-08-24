@@ -63,7 +63,7 @@ public:
   int import
   (
     std::string  strMemory,
-    std::string &strInputParms,
+    std::string strInputParms,
     std::string &strOutputParms
   );
 
@@ -79,6 +79,9 @@ public:
     std::string strInputParms,
     std::string &strOutputParms
   );
+
+
+  std::string tagReplacement(std::string strInData, int& rc);
 
   /*! \brief Do a concordance search for the given search string
   \param strMemory name of memory
@@ -416,7 +419,7 @@ private:
 
 /*! \brief OpenTM2 API session handle
 */
-	HSESSION hSession;
+	HSESSION hSession = 0;
 
 /*! \brief Last return code
 */

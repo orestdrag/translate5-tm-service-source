@@ -1,4 +1,4 @@
-#include "OtmMemoryService.h"
+#include "RestAPI/OtmMemoryService.h"
 
 #include <iostream>
 #include <csignal>
@@ -38,11 +38,12 @@ void service_worker() {
     }
 }
 
-
+int main_test();
 int main() {
     LogMessage(TRANSACTION, "Worker thread starting");
-    std::thread worker(service_worker);
-    worker.join();
+    main_test();
+    //std::thread worker(service_worker);
+    //worker.join();
     LogMessage(TRANSACTION, "Worker thread finished");
 }
 

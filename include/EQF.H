@@ -1982,6 +1982,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 //linux defines
 #define KEY_OTM_DIR "OTM_dir"
 #define KEY_MEM_DIR "MEM_dir"
+#define KEY_SERVICE_URL "KEY_SERVICE_URL"
 #define KEY_HOME_DIR "HOME_dir"
 #define KEY_ALLOWED_RAM "AllowedRAM_MB"
 #define KEY_TEMP_DIR "TEMP_dir"
