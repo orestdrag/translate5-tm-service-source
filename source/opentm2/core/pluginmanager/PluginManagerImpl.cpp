@@ -9,7 +9,7 @@
 #include <algorithm> 
 #include <string>
 #include <dlfcn.h>
-#include <gnu/lib-names.h>
+//#include <gnu/lib-names.h>
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
