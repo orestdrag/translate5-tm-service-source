@@ -532,7 +532,7 @@ BOOL UtlInitUtils( HAB hab )
    UtiVar[usId].usDateFormat = iTemp;
 
    retCode = properties_get_str_or_default("iTime", chTemp, 2, "/");
-   UtiVar[usId].usDateFormat = (ushort)strlen(chTemp);
+   UtiVar[usId].usDateFormat = (unsigned short)strlen(chTemp);
    UtiVar[usId].chDateSeperator = chTemp[0];
 
    retCode = properties_get_int_or_default("iTime", iTemp, S_12_HOURS_TIME_FORMAT);

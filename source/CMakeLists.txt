@@ -51,7 +51,7 @@ if(TARGET Threads::Threads)
 endif()
 
 #find_package(Boost REQUIRED)
-find_package(ICU 67.1 COMPONENTS uc i18n REQUIRED)
+find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
 
 set(CMAKE_PREFIX_PATH 
   "${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build"
