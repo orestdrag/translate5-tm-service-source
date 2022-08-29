@@ -565,7 +565,7 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
 int FilesystemHelper::TruncateFileForBytes(HFILE ptr, int numOfBytes){
     LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", toStr(numOfBytes).c_str());
     off_t lDistance = numOfBytes;
-    int retCode = ftruncate(ptr->_fileno, lDistance);
+    int retCode = ftruncate(fileno(ptr), lDistance);
     return retCode;
 }
 
@@ -604,7 +604,7 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
     res = fseek(fp, LoPart, whence);   
 
     if(res >= 0){
-        fp->_offset = LoPart;
+        //fp->_offset = LoPart;
         LARGE_INTEGER li ;
         li.QuadPart = res ; //It will move High & Low Order bits.
         ret = li.LowPart ;
