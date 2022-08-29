@@ -519,7 +519,7 @@ BOOL UtlInitUtils( HAB hab )
    bool fOK = TRUE;
    char chTemp[2];
    int iTemp;
-   ushort  usId = UtlGetTask();
+   unsigned short  usId = UtlGetTask();
    short i;
 
    // set version info in registry
