@@ -37,7 +37,7 @@
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 using namespace std;
-using namespace restbed;
+//using namespace restbed;
 
 
 const char szVersionID[] = "X-OpenTM2-Version";

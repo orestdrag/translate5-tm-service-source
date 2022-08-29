@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.3.1")
+SET(APP_VERSION  "0.3.2")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -42,9 +42,9 @@ message(STATUS "T5MEMORY CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 message(STATUS "T5MEMORY ROOT is ${ROOT}")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
-set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
-set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
-set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
+#set(RESTBED_PATH        "${ROOT}/Packages/restbed/distribution")
+#set(RESTBED_INCLUDE_DIR "${RESTBED_PATH}/include")
+#set(RESTBED_LIBRARIES   "${RESTBED_PATH}/library")
 set(CMAKE_SOURCE_DIR    "${ROOT}/source")
 
 
@@ -59,7 +59,7 @@ include("${ROOT}/source/cmake/CheckGit.cmake")
 CheckGitSetup()
 set(T5MEMORY_SOURCE_ROOT "${ROOT}/source")
 set(T5MEMORY_Source_Files
-    "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryService.cpp"
+    #"${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryService.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OTMMSJSONFactory.cpp"
     "${T5MEMORY_SOURCE_ROOT}/otmd.cpp"
@@ -81,13 +81,13 @@ target_include_directories(T5MEMORY PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
-    ${RESTBED_INCLUDE_DIR}
+    #${RESTBED_INCLUDE_DIR}
     "${ROOT}/include"
 )
 
-message(STATUS " TRANSLATE5:  PROXYGEN_INCLUDE_DIR  is ${CMAKE_SOURCE_DIR}/proxygen")
+#message(STATUS " TRANSLATE5:  PROXYGEN_INCLUDE_DIR  is ${CMAKE_SOURCE_DIR}/proxygen")
 
-message(STATUS " TRANSLATE5:  PROXYGEN_INCLUDE_DIR  is ${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/include")
+#message(STATUS " TRANSLATE5:  PROXYGEN_INCLUDE_DIR  is ${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/include")
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 #find_package(Threads REQUIRED)
 find_package(Threads)
@@ -115,7 +115,6 @@ find_package(Boost 1.58 REQUIRED
 )
 
 set(PROXYGEN_PREFIX_PATH "${ROOT}/source/proxygen")
-set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
 set(PROXYGEN_DEPENDENCIES_PREFIX_PATH "${ROOT}/source/proxygen/proxygen/_build/deps")
 target_link_libraries(T5MEMORY PRIVATE lzma)
 set(FMT_INSTALL ON)
@@ -128,23 +127,22 @@ add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/wangle/wangle")
 
 add_subdirectory("${PROXYGEN_PREFIX_PATH}")
 
-
+set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
 add_subdirectory("${OPENTM2_FOLDER}")
 
 target_link_libraries(T5MEMORY PRIVATE
   OTMFUNC
-  librestbed.a
+  #librestbed.a
   git_version
-
-  #libfolly.a 
-  #libproxygen.a
-  #libproxygenhttpserver.a 
-  
-  
   proxygen
   proxygenhttpserver
 )
  
+#add missing libs here (probably?) 
+#target_link_libraries(T5MEMORY PUBLIC
+#  proxygen
+#  proxygenhttpserver
+#)
 
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
@@ -156,7 +154,9 @@ install(TARGETS T5MEMORY DESTINATION bin)
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_${APP_VERSION})
+#set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_DEBUG)
 set(PNAME t5memory_${APP_VERSION})
 set(CPACK_PACKAGE_NAME                    ${PNAME})
 #set(CPACK_PACKAGE_VENDOR                  "Translate 5")

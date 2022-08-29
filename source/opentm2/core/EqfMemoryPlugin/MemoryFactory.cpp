@@ -336,7 +336,7 @@ int MemoryFactory::deleteMemory(
   }
   std::string strError;
   int iRC = deleteMemory(pszPluginName,pszMemoryName, strError);
-  LogMessage2(INFO,"deleteMemory::strError = ", strError.c_str());
+  LogMessage2(iRC == OtmMemoryPlugin::eSuccess ? INFO: ERROR,"deleteMemory::strError = ", strError.c_str());
   return iRC;
 }
 

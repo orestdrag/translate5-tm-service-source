@@ -12,14 +12,14 @@
 
 void handle_interrupt_sig(int sig) {
     LogMessage(TRANSACTION, "Received interrupt signal\n");
-    StopOtmMemoryService();
+    //StopOtmMemoryService();
     LogMessage(TRANSACTION, "Stopped t5memory\n");
 }
 
 void service_worker() {
     char szServiceName[80];
     unsigned int uiPort = 0;
-    int res = PrepareOtmMemoryService(szServiceName, &uiPort);
+    int res = 1;//PrepareOtmMemoryService(szServiceName, &uiPort);
     if (!res) {
         LogMessage(FATAL,"Failed to initialize t5memory");
         std::exit(EXIT_FAILURE);
@@ -31,7 +31,7 @@ void service_worker() {
     properties_set_str_anyway(KEY_APP_VERSION, appVersion);
     LogMessage(TRANSACTION, "Initialized t5memory");
     signal_handler sh = { SIGINT, handle_interrupt_sig };
-    res = StartOtmMemoryService(sh);
+    //res = StartOtmMemoryService(sh);
     if (!res) {
         LogMessage(FATAL,"Failed to start t5memory");
         std::exit(EXIT_FAILURE);

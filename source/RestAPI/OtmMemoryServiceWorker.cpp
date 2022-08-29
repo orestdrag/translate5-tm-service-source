@@ -18,7 +18,7 @@
 #include <cstring>
 #include <strings.h>
 #include <linux/limits.h>
-#include <restbed>
+//#include <restbed>
 #include "OtmMemoryServiceWorker.h"
 #include "OTMMSJSONFactory.h"
 #include "OTMFUNC.H"
@@ -37,12 +37,20 @@
 
 #include <xercesc/util/PlatformUtils.hpp>
 
+enum statusCodes {
+  OK = 200, 
+  INTERNAL_SERVER_ERROR = 500, 
+  PROCESSING = 102, 
+  NOT_FOUND = 404,
+  BAD_REQUEST = 400,
+  CONFLICT = 409,
+  CREATED = 201,
+  NOT_ACCEPTABLE = 406
+
+};
 
 // import memory process
 void importMemoryProcess( void *pvData );
-
-/** Initialize the static instance variable */
-OtmMemoryServiceWorker* OtmMemoryServiceWorker::instance = 0;
 
 /*! \brief This static method returns a pointer to the OtmMemoryService object.
 	The first call of the method creates the OtmMemoryService instance.
@@ -405,17 +413,17 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
       case OPEN_STATUS:
         *plHandle = this->vMemoryList[iIndex].lHandle;
         time( &( this->vMemoryList[iIndex].tLastAccessTime ) );
-        return( restbed::OK );
+        return( OK );
         break;
       case IMPORT_RUNNING_STATUS:
         wcsncpy( pszError, L"TM is busy, import is running", iErrorBufSize );
         *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( restbed::PROCESSING );
+        return( PROCESSING );
         break;
       case IMPORT_FAILED_STATUS:
         wcsncpy( pszError, L"TM import failed, memory may be not usable", iErrorBufSize );
         *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( restbed::INTERNAL_SERVER_ERROR );
+        return( INTERNAL_SERVER_ERROR );
         break;
       case AVAILABLE_STATUS:
         {
@@ -426,7 +434,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
           {
             unsigned short usRC = 0;
             EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
-            return( restbed::INTERNAL_SERVER_ERROR );
+            return( INTERNAL_SERVER_ERROR );
           } /* endif */
           this->vMemoryList[iIndex].lHandle = lHandle;
           strcpy( this->vMemoryList[iIndex].szName, pszMemory );
@@ -435,13 +443,13 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
           //if ( this->vMemoryList[iIndex].pszError != NULL ) free( this->vMemoryList[iIndex].pszError );
           //this->vMemoryList[iIndex].pszError = NULL;
           *plHandle = lHandle;
-          return( restbed::OK );
+          return( OK );
         }
         break;
       default:
         wcsncpy( pszError, L"TM is in undefined state", iErrorBufSize );
         //*piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( restbed::INTERNAL_SERVER_ERROR );
+        return( INTERNAL_SERVER_ERROR );
         break;
     }
   } /* endif */
@@ -474,7 +482,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   if ( iIndex == -1 )
   {
     wcscpy( pszError, L"Error: too many open translation memory databases" );
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // open the memory
@@ -484,7 +492,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   {
     unsigned short usRC = 0;
     EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // add opened memory to the memory list
@@ -496,7 +504,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   this->vMemoryList[iIndex].pszError = NULL;
   *plHandle = lHandle;
 
-  return( restbed::OK );
+  return( OK );
 }
 
 /*! \brief convert a long time value into the UTC date/time format
@@ -728,20 +736,20 @@ int OtmMemoryServiceWorker::import
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
   {
-    return( restbed::NOT_FOUND );
+    return( NOT_FOUND );
   }
 
   // find the memory to our memory list
@@ -796,7 +804,7 @@ int OtmMemoryServiceWorker::import
     {
       wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Error: too many open translation memory databases";
       buildErrorReturn( iRC, errMsg, strOutputParms );
-      return( restbed::INTERNAL_SERVER_ERROR );
+      return( INTERNAL_SERVER_ERROR );
     } /* endif */
 
     this->vMemoryList[iIndex].lHandle = 0;
@@ -820,7 +828,7 @@ int OtmMemoryServiceWorker::import
     this->vMemoryList[iIndex].eStatus = lastStatus;
     this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
 
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   std::string name;
@@ -857,7 +865,7 @@ int OtmMemoryServiceWorker::import
     this->vMemoryList[iIndex].eStatus = lastStatus;
     this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
 
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   // setup temp file name for TMX file 
@@ -872,7 +880,7 @@ int OtmMemoryServiceWorker::import
     this->vMemoryList[iIndex].lHandle = lHandle;
     this->vMemoryList[iIndex].eStatus = lastStatus;
     this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   }
 
   LogMessage2(INFO, "OtmMemoryServiceWorker::import::+   Temp TMX File is ", szTempFile);
@@ -889,7 +897,7 @@ int OtmMemoryServiceWorker::import
     this->vMemoryList[iIndex].lHandle = lHandle;
     this->vMemoryList[iIndex].eStatus = lastStatus;
     this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   }
   
   //success in parsing request data-> close mem if needed
@@ -908,7 +916,7 @@ int OtmMemoryServiceWorker::import
   std::thread worker_thread(importMemoryProcess, pData);
   worker_thread.detach();
 
-  return( restbed::CREATED );
+  return( CREATED );
 }
 
 /*! \brief Create a new memory
@@ -939,7 +947,7 @@ int OtmMemoryServiceWorker::createMemory
   {
     wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   std::string name;
@@ -979,13 +987,13 @@ int OtmMemoryServiceWorker::createMemory
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
     buildErrorReturn( iRC, L"Error: Missing memory name input parameter", strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( strSourceLang.empty() )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
     buildErrorReturn( iRC, L"Error: Missing source language input parameter", strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   // convert the ISO source language to a OpenTM2 source language name
@@ -998,7 +1006,7 @@ int OtmMemoryServiceWorker::createMemory
     iRC = ERROR_INPUT_PARMS_INVALID;
     swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(strSourceLang.c_str()).c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
 
@@ -1020,7 +1028,7 @@ int OtmMemoryServiceWorker::createMemory
     {
       wchar_t errMsg[] = L"Could not create file name for temporary data";
       buildErrorReturn( -1, errMsg, strOutputParms );
-      return( restbed::INTERNAL_SERVER_ERROR );
+      return( INTERNAL_SERVER_ERROR );
     }
 
     LogMessage2(INFO, "+   Temp binary file is ", szTempFile );
@@ -1031,7 +1039,7 @@ int OtmMemoryServiceWorker::createMemory
     if ( iRC != 0 )
     {
       buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
-      return( restbed::INTERNAL_SERVER_ERROR );
+      return( INTERNAL_SERVER_ERROR );
     }
 
     iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
@@ -1042,7 +1050,7 @@ int OtmMemoryServiceWorker::createMemory
 
   if(iRC == ERROR_MEM_NAME_EXISTS){
     strOutputParms = "{\"" + strName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
-    LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(iRC).c_str()," iRC = restbed::ERROR_MEM_NAME_EXISTS");
+    LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(iRC).c_str()," iRC = ERROR_MEM_NAME_EXISTS");
     return iRC;
   }else if ( iRC != 0 )
   {
@@ -1055,21 +1063,21 @@ int OtmMemoryServiceWorker::createMemory
     switch ( usRC )
     {
       case ERROR_MEM_NAME_INVALID:
-        iRC = restbed::CONFLICT;
+        iRC = CONFLICT;
         strOutputParms += "CONFLICT";
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::CONFLICT");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = CONFLICT");
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
-        iRC = restbed::BAD_REQUEST;
+        iRC = BAD_REQUEST;
         strOutputParms += "BAD_REQUEST";
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::BAD_REQUEST");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = BAD_REQUEST");
         break;
       default:
-        iRC = restbed::INTERNAL_SERVER_ERROR;
+        iRC = INTERNAL_SERVER_ERROR;
         strOutputParms += "INTERNAL_SERVER_ERROR";
-        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = restbed::INTERNAL_SERVER_ERROR");
+        LogMessage3(ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = INTERNAL_SERVER_ERROR");
         break;
     }
     strOutputParms +="\"}";
@@ -1078,7 +1086,7 @@ int OtmMemoryServiceWorker::createMemory
     factory->startJSON( strOutputParms );
     factory->addParmToJSON( strOutputParms, "name", strName );
     factory->terminateJSON( strOutputParms );
-    return( restbed::OK );
+    return( OK );
   }
 }
 
@@ -1201,7 +1209,7 @@ std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& r
     wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
     wstr = errMsg;
     //buildErrorReturn( iRC, errMsg, strOutputParms );
-    rc = restbed::BAD_REQUEST;
+    rc = BAD_REQUEST;
     return "";
   }else{ 
     std::string name;
@@ -1261,7 +1269,7 @@ int OtmMemoryServiceWorker::search
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1269,7 +1277,7 @@ int OtmMemoryServiceWorker::search
   {
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
     // parse input parameters
@@ -1296,7 +1304,7 @@ int OtmMemoryServiceWorker::search
     wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   if ( pData->szSource[0] == 0 )
@@ -1305,7 +1313,7 @@ int OtmMemoryServiceWorker::search
     wchar_t errMsg[] = L"Error: Missing source text input parameter";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoSourceLang[0] == 0 )
   {
@@ -1313,7 +1321,7 @@ int OtmMemoryServiceWorker::search
     wchar_t errMsg[] = L"Error: Missing source language input parameter";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoTargetLang[0] == 0 )
   {
@@ -1321,7 +1329,7 @@ int OtmMemoryServiceWorker::search
     wchar_t errMsg[] = L"Error: Missing target language input parameter";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
@@ -1335,7 +1343,7 @@ int OtmMemoryServiceWorker::search
     wchar_t errMsg[] = L"Error: Too many proposals requested, the maximum value is 20";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->iNumOfProposals == 0 )
   {
@@ -1349,7 +1357,7 @@ int OtmMemoryServiceWorker::search
   // get the handle of the memory 
   long lHandle = 0;
   int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
-  if ( httpRC != restbed::OK )
+  if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pData;
@@ -1388,14 +1396,14 @@ int OtmMemoryServiceWorker::search
 
     factory->terminateJSONW( strOutputParmsW );
     strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
-    iRC = restbed::OK;
+    iRC = OK;
   }
   else
   {
     unsigned short usRC = 0;
     EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
     buildErrorReturn( usRC, pData->szError, strOutputParms );
-    iRC = restbed::INTERNAL_SERVER_ERROR;
+    iRC = INTERNAL_SERVER_ERROR;
   } /* endif */
 
   if ( pSearchKey ) delete pSearchKey;
@@ -1423,7 +1431,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1431,7 +1439,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   // parse input parameters
@@ -1457,7 +1465,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Parsing of input parameters failed";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   if ( pData->szSearchString[0] == 0 )
@@ -1466,7 +1474,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Missing search string";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->iNumOfProposals > 20 )
   {
@@ -1474,7 +1482,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Too many proposals requested, the maximum value is 20";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->iNumOfProposals == 0 )
   {
@@ -1488,7 +1496,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     // get the handle of the memory 
   long lHandle = 0;
   int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
-  if ( httpRC != restbed::OK )
+  if ( httpRC != OK )
   {
     std::wstring wstr = L"OtmMemoryServiceWorker::concordanceSearch::";
     wstr += pData->szError;
@@ -1564,14 +1572,14 @@ int OtmMemoryServiceWorker::concordanceSearch
     factory->addParmToJSONW( strOutputParmsW, L"ErrorMsg", L"\0");
     factory->terminateJSONW( strOutputParmsW );
     strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW );
-    iRC = restbed::OK;
+    iRC = OK;
   }
   else
   {
     unsigned short usRC = 0;
     EqfGetLastErrorW( this->hSession, &usRC, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ) );
     buildErrorReturn( usRC, pData->szError, strOutputParms );
-    iRC = restbed::INTERNAL_SERVER_ERROR;
+    iRC = INTERNAL_SERVER_ERROR;
   } /* endif */
 
   //if ( pFoundProposals ) delete pFoundProposals;
@@ -1612,7 +1620,7 @@ int OtmMemoryServiceWorker::saveAllTmOnDisk( std::string &strOutputParms ){
   
   FilesystemHelper::FlushAllBuffers(&files);
   strOutputParms = "{\n   \'saved files\': \'" + files + "\' \n}";
-  return restbed::OK;
+  return OK;
 }
 
 /*! \brief Set the log file handle
@@ -1648,14 +1656,14 @@ int OtmMemoryServiceWorker::list
   };
 
   if ( iRC != 0 )
-    buildError(restbed::BAD_REQUEST);
+    buildError(BAD_REQUEST);
   
   // get buffer size required for the list of TMs
   LONG lBufferSize = 0;
   iRC = EqfListMem( this->hSession, NULL, &lBufferSize );
 
   if ( iRC != 0 )
-    return buildError(restbed::INTERNAL_SERVER_ERROR, true);
+    return buildError(INTERNAL_SERVER_ERROR, true);
 
   // get the list of TMs
   PSZ pszBuffer = new char[lBufferSize];
@@ -1665,7 +1673,7 @@ int OtmMemoryServiceWorker::list
   if ( iRC != 0 )
   {
     delete pszBuffer;
-    return buildError(restbed::INTERNAL_SERVER_ERROR, true);
+    return buildError(INTERNAL_SERVER_ERROR, true);
   } /* endif */
 
   // add all TMs to reponse area
@@ -1688,8 +1696,8 @@ int OtmMemoryServiceWorker::list
 
   jsonSS << "]}";
   strOutputParms = jsonSS.str();
-  LogMessage3(INFO, "OtmMemoryServiceWorker::list()::strOutputParams = ", strOutputParms.c_str(), "; iRC = restbed::OK");
-  iRC = restbed::OK;
+  LogMessage3(INFO, "OtmMemoryServiceWorker::list()::strOutputParams = ", strOutputParms.c_str(), "; iRC = OK");
+  iRC = OK;
   return iRC;
 }
 
@@ -1711,14 +1719,14 @@ int OtmMemoryServiceWorker::updateEntry
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1757,7 +1765,7 @@ int OtmMemoryServiceWorker::updateEntry
     wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   if ( pData->szSource[0] == 0 )
@@ -1766,7 +1774,7 @@ int OtmMemoryServiceWorker::updateEntry
     wchar_t errMsg[] = L"Error: Missing source text";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szTarget[0] == 0 )
   {
@@ -1774,7 +1782,7 @@ int OtmMemoryServiceWorker::updateEntry
     wchar_t errMsg[] = L"Error: Missing target text";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoSourceLang[0] == 0 )
   {
@@ -1782,7 +1790,7 @@ int OtmMemoryServiceWorker::updateEntry
     wchar_t errMsg[] = L"Error: Missing source language";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoTargetLang[0] == 0 )
   {
@@ -1790,7 +1798,7 @@ int OtmMemoryServiceWorker::updateEntry
     wchar_t errMsg[] = L"Error: Missing target language";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
@@ -1805,7 +1813,7 @@ int OtmMemoryServiceWorker::updateEntry
     // get the handle of the memory 
   long lHandle = 0;
   int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
-  if ( httpRC != restbed::OK )
+  if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pData;
@@ -1863,7 +1871,7 @@ int OtmMemoryServiceWorker::updateEntry
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pProp;
     delete pData;
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // return the entry data
@@ -1889,7 +1897,7 @@ int OtmMemoryServiceWorker::updateEntry
   pJsonFactory->terminateJSON( strOutputParms );
   //strOutputParms = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
 
-  iRC = restbed::OK;
+  iRC = OK;
   delete pProp;
   delete pData;
 
@@ -1912,14 +1920,14 @@ int OtmMemoryServiceWorker::deleteEntry
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   if ( strMemory.empty() )
   {
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1957,7 +1965,7 @@ int OtmMemoryServiceWorker::deleteEntry
     wchar_t errMsg[] = L"Error: Parsing of input parameters failed";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
 
   if ( pData->szSource[0] == 0 )
@@ -1966,7 +1974,7 @@ int OtmMemoryServiceWorker::deleteEntry
     wchar_t errMsg[] = L"Error: Missing source text";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szTarget[0] == 0 )
   {
@@ -1974,7 +1982,7 @@ int OtmMemoryServiceWorker::deleteEntry
     wchar_t errMsg[] = L"Error: Missing target text";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoSourceLang[0] == 0 )
   {
@@ -1982,7 +1990,7 @@ int OtmMemoryServiceWorker::deleteEntry
     wchar_t errMsg[] = L"Error: Missing source language";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szIsoTargetLang[0] == 0 )
   {
@@ -1990,7 +1998,7 @@ int OtmMemoryServiceWorker::deleteEntry
     wchar_t errMsg[] = L"Error: Missing target language";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     delete pData;
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* end */
   if ( pData->szMarkup[0] == 0 || strcasecmp( pData->szMarkup, "translate5" ) == 0)
   {
@@ -2005,7 +2013,7 @@ int OtmMemoryServiceWorker::deleteEntry
     // get the handle of the memory 
   long lHandle = 0;
   int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
-  if ( httpRC != restbed::OK )
+  if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pData;
@@ -2056,7 +2064,7 @@ int OtmMemoryServiceWorker::deleteEntry
     buildErrorReturn( iRC, pData->szError, strOutputParms );
     delete pProp;
     delete pData;
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // return the entry data
@@ -2075,7 +2083,7 @@ int OtmMemoryServiceWorker::deleteEntry
   pJsonFactory->addParmToJSON( strOutputParms, "author", pData->szAuthor );
   pJsonFactory->terminateJSON( strOutputParms );
 
-  iRC = restbed::OK;
+  iRC = OK;
   delete pProp;
   delete pData;
 
@@ -2100,7 +2108,7 @@ int OtmMemoryServiceWorker::deleteMem
     LogMessage6(ERROR,"OtmMemoryServiceWorker::deleteMem::verifyAPISession fails:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
       strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -2110,7 +2118,7 @@ int OtmMemoryServiceWorker::deleteMem
       strOutputParms.c_str(), "; szLastError = ", "Missing name of memory");
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
@@ -2128,7 +2136,7 @@ int OtmMemoryServiceWorker::deleteMem
   if ( iRC == ERROR_MEMORY_NOTFOUND )
   {
     strOutputParms = "{\"" + strMemory + "\": \"not found\" }";
-    return( iRC = restbed::NOT_FOUND );
+    return( iRC = NOT_FOUND );
   }
   else if ( iRC != 0 )
   {
@@ -2139,13 +2147,13 @@ int OtmMemoryServiceWorker::deleteMem
       strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
 
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   }else{
     strOutputParms = "{\"" + strMemory + "\": \"deleted\" }";
   }
 
   LogMessage2(INFO,"OtmMemoryServiceWorker::deleteMem::success, memName = ", strMemory.c_str());
-  iRC = restbed::OK;
+  iRC = OK;
 
   return( iRC );
 }
@@ -2160,7 +2168,8 @@ int OtmMemoryServiceWorker::getMem
 (
   std::string strMemory,
   std::string strType,
-  restbed::Bytes &vMemData
+  //restbed::Bytes &vMemData
+  std::vector<unsigned char> &vMemData
 )
 {
   LogMessage4(INFO,"OtmMemoryServiceWorker::getMem::=== getMem request, memory = ", strMemory.c_str(), "; format = ", strType.c_str());
@@ -2168,14 +2177,14 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     LogMessage(INFO,"OtmMemoryServiceWorker::getMem::Error: no valid API session" );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
     LogMessage(ERROR,"OtmMemoryServiceWorker::getMem::Error: no memory name specified" );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   // close memory if it is open
@@ -2190,7 +2199,7 @@ int OtmMemoryServiceWorker::getMem
   if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
   {
     LogMessage2(ERROR,"OtmMemoryServiceWorker::getMem::Error: memory does not exist, memName = ", strMemory.c_str() );
-    return( restbed::NOT_FOUND );
+    return( NOT_FOUND );
   }
 
   // get a temporary file name for the memory package file or TMX file
@@ -2199,7 +2208,7 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     LogMessage(ERROR,"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" );
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   }
 
   // export the memory in internal format
@@ -2212,7 +2221,7 @@ int OtmMemoryServiceWorker::getMem
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMem failed with rc=", toStr(iRC).c_str(), ", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
-      return( restbed::INTERNAL_SERVER_ERROR );
+      return( INTERNAL_SERVER_ERROR );
     }
   }
   else if ( strType.compare( "application/zip" ) == 0 )
@@ -2224,13 +2233,13 @@ int OtmMemoryServiceWorker::getMem
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       LogMessage4(ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMemInInternalFormat failed with rc=",toStr(iRC).c_str(),", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
-      return( restbed::INTERNAL_SERVER_ERROR );
+      return( INTERNAL_SERVER_ERROR );
     }
   }
   else
   {
     LogMessage3(ERROR,"OtmMemoryServiceWorker::getMem:: Error: the type ", strType.c_str()," is not supported" );
-    return( restbed::NOT_ACCEPTABLE );
+    return( NOT_ACCEPTABLE );
   }
 
   // fill the vMemData vector with the content of zTempFile
@@ -2244,10 +2253,10 @@ int OtmMemoryServiceWorker::getMem
   if ( iRC != 0 )
   {
     LogMessage2(ERROR, "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = ", szTempFile );
-    return( restbed::INTERNAL_SERVER_ERROR );
+    return( INTERNAL_SERVER_ERROR );
   }
 
-  return( restbed::OK );
+  return( OK );
 }
 
 
@@ -2266,7 +2275,7 @@ int OtmMemoryServiceWorker::getStatus
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -2274,7 +2283,7 @@ int OtmMemoryServiceWorker::getStatus
   {
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( restbed::BAD_REQUEST );
+    return( BAD_REQUEST );
   } /* endif */
 
   JSONFactory *factory = JSONFactory::getInstance();
@@ -2299,19 +2308,19 @@ int OtmMemoryServiceWorker::getStatus
       factory->addParmToJSON( strOutputParms, "ErrorMsg", this->vMemoryList[iIndex].pszError );
     }
     factory->terminateJSON( strOutputParms );
-    return( restbed::OK );
+    return( OK );
   } /* endif */
 
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
   {
-    return( restbed::NOT_FOUND );
+    return( NOT_FOUND );
   }
 
   factory->startJSON( strOutputParms );
   factory->addParmToJSON( strOutputParms, "tmxImportStatus", "available" );
   factory->terminateJSON( strOutputParms );
-  return( restbed::OK );
+  return( OK );
 }
 
 MemProposalType OtmMemoryServiceWorker::getMemProposalType( char *pszType )
@@ -2507,7 +2516,7 @@ it is up to the caller to free this area using free()
 \param strError string receiving any error message text
 \returns 0 is sucessfull or a return code
 */
-int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData )
+int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, std::vector<unsigned char>  &vFileData )
 {
   int iRC = 0;
 

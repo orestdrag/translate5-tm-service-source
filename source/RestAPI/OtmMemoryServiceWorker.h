@@ -15,7 +15,6 @@
 #include <codecvt>
 #include <string>
 #include <vector>
-#include <restbed>
 #include "OTMFUNC.H"
 
 /*! \brief constant defining the maximum number of opened memories
@@ -188,7 +187,7 @@ public:
   (
     std::string strMemory,
     std::string strType,
-    restbed::Bytes &vMemData
+    std::vector<unsigned char> &vMemData
   );
 
   /*! \brief get the status of a memory
@@ -385,7 +384,7 @@ private:
   \param strError string receiving any error message text
   \returns 0 is sucessfull or a return code
   */
-  int loadFileIntoByteVector( char *pszFile, restbed::Bytes &vFileData );
+  int loadFileIntoByteVector( char *pszFile, std::vector<unsigned char>  &vFileData );
 
   /*! \brief States of a memory
   */
@@ -413,9 +412,6 @@ private:
 */
   std::vector<OPENEDMEMORY> vMemoryList;
 
-/*! \brief Pointer to the instance of the OtmMemoryService object (singleton).
-*/
-	static OtmMemoryServiceWorker* instance;
 
 /*! \brief OpenTM2 API session handle
 */
@@ -431,7 +427,7 @@ private:
 
   /*! \brief log file handle 
   */
-  FILE *hfLog;
+  FILE *hfLog = nullptr;
 
 
 
