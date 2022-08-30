@@ -589,11 +589,9 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
       if(body_ == nullptr){
         body_ = std::move(body);
       }else{
-        //body_.append(body->begin(), body->end());
-        body_->appendToChain(std::move(body));
-        //body_->insertAfterThisOne(std::move(body));
-        //body_->
-        //body_->appendTo(req_data);
+        //body_->appendToChain(std::move(body));
+        //deprecated call of previous line, to compile with docker
+        body_->prependChain(std::move(body));
       }
       break; 
     }

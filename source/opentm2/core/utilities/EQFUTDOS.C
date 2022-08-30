@@ -1429,7 +1429,6 @@ USHORT UtlMoveHwnd
    USHORT usRetCode = NO_ERROR;        // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
-   ulReserved;
    UtlSetFileMode(pszSrc, FILE_NORMAL, 0L, FALSE);
    
    do {
