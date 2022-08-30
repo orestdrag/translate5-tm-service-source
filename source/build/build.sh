@@ -25,8 +25,9 @@ do_clean() {
 
 do_build() {
   echo "Building..."
-  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
-  make -j${CORES}
+  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} VERBOSE=1 -j1 ..
+  #make -j${CORES}
+  make VERBOSE=1 -j1
 }
 
 do_main() {

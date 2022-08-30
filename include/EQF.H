@@ -6363,7 +6363,7 @@ typedef struct _TERMLENOFFS
 /**********************************************************************/
 #ifdef _DEBUG
 
-#define LOG( s )              Log( s )
+//#define LOG( s )              Log( s )
 #define LOGSTRING( f, s )     LogString( f, s )
 #define LOGSHORT( f, i )      LogShort( f, i )
 #define LOG2SHORT( f, i, j )  Log2Short( f, i, j )
