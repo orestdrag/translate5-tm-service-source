@@ -13,9 +13,21 @@ message(STATUS "T5MEMORY ROOT is ${ROOT}")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(CMAKE_SOURCE_DIR    "${ROOT}/source")
 
-set(folly_DIR "${ROOT}/source/proxygen/proxygen/_build/deps/lib/cmake/folly")
-set(wangle_DIR "${ROOT}/source/proxygen/proxygen/_build/deps/lib/cmake/wangle")
-set(Fizz_DIR "${ROOT}/source/proxygen/proxygen/_build/deps/lib/cmake/fizz")
+set (proxygen_DIR "/opt/local/lib/cmake/proxygen")
+set (fmt_DIR "/opt/local/lib/cmake/fmt")
+set (Fizz_DIR "/opt/local/lib/cmake/fizz")
+set (folly_DIR "/opt/local/lib/cmake/folly")
+set (wangle_DIR "/opt/local/lib/cmake/wangle")
+set (zstd_DIR "/opt/local/lib/cmake/zstd")
+set (glog_DIR "/opt/local/lib/cmake/glog")
+set (gflags_DIR "/opt/local/lib/cmake/gflags")
+set (mvfst_DIR "/opt/local/lib/cmake/mvfst")
+set(Sodium_DIR "${ROOT}/cmake/sodium")
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBSODIUM libsodium)
+
+set (Boost_INCLUDE_DIR "/opt/local/include")
 
 include("${ROOT}/source/cmake/CheckGit.cmake")
 CheckGitSetup()
@@ -33,8 +45,10 @@ link_directories(${RESTBED_LIBRARIES})
 
 add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
-set(CMAKE_CXX_STANDARD 17)
-target_compile_features(T5MEMORY PRIVATE cxx_std_17)
+#set(CMAKE_CXX_STANDARD 17)
+#target_compile_features(T5MEMORY PRIVATE cxx_std_17)
+set(CMAKE_CXX_STANDARD 14)
+target_compile_features(T5MEMORY PRIVATE cxx_std_14)
 
 target_include_directories(T5MEMORY PRIVATE
     "${CMAKE_SOURCE_DIR}/proxygen"
@@ -42,59 +56,55 @@ target_include_directories(T5MEMORY PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
+    "/opt/local/include"
     "${ROOT}/include"
 )
 
 find_package(Threads)
+find_package(OpenSSL REQUIRED)
+find_package(proxygen REQUIRED)
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
 
-#find_package(Boost REQUIRED)
 find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
-
-set(CMAKE_PREFIX_PATH 
-  "${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build"
-  "${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/lib/cmake/mapped_sodium"
-)
-
-
-set(PROXYGEN_PREFIX_PATH "${ROOT}/source/proxygen")
-set(PROXYGEN_DEPENDENCIES_PREFIX_PATH "${ROOT}/source/proxygen/proxygen/_build/deps")
-target_link_libraries(T5MEMORY PRIVATE lzma)
-set(FMT_INSTALL ON)
-add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/fmt")
-target_link_libraries(T5MEMORY PRIVATE fmt  )
-add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/folly")
-add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/fizz/fizz")
-add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/googletest")
-add_subdirectory("${PROXYGEN_DEPENDENCIES_PREFIX_PATH}/wangle/wangle")
-
-add_subdirectory("${PROXYGEN_PREFIX_PATH}")
 
 set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
 add_subdirectory("${OPENTM2_FOLDER}")
 
+
+
+set(LIBS_DIRECTORY "/opt/local/lib")
+set(SHARED_LIBS_DIR "/lib")
+
+link_directories(${LIBS_DIRECTORY} 
+				${SHARED_LIBS_DIR})
+
+find_package(folly REQUIRED)
+find_package(gflags REQUIRED)
+find_package(proxygen REQUIRED)
+
+
 target_link_libraries(T5MEMORY PRIVATE
   OTMFUNC
   git_version
-  proxygen
-  proxygenhttpserver
+  Folly::folly
+  fizz::fizz
+  proxygen::proxygen
+  proxygen::proxygenhttpserver 
+  wangle::wangle
+  Boost::boost
+  Boost::iostreams
+  ssl
+  crypto
+  "${LIBS_DIRECTORY}/libzstd.a"
 )
- 
-#add missing libs here (probably?) 
-#target_link_libraries(T5MEMORY PUBLIC
-#  proxygen
-#  proxygenhttpserver
-#)
-
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 
 configure_file("${ROOT}/source/OtmMemoryServiceConfig.h.in" "${ROOT}/source/OtmMemoryServiceConfig.h"  @ONLY)
 
 install(TARGETS T5MEMORY DESTINATION bin)
-
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
