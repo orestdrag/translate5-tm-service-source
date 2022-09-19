@@ -110,8 +110,8 @@ install(TARGETS T5MEMORY DESTINATION bin)
 include(InstallRequiredSystemLibraries)
 
 #next lines sets name of binaries as t5memory_DEBUG or t5memory_version(liket5memory_0_3_5)
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_${APP_VERSION})
-#set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_DEBUG)
+#set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_${APP_VERSION})
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_DEBUG)
 
 set(PNAME t5memory_${APP_VERSION})
 set(CPACK_PACKAGE_NAME                    ${PNAME})
