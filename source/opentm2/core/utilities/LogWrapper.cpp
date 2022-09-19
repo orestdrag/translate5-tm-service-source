@@ -108,6 +108,10 @@ int writeLog(std::string& message, int logLevel){
             //}
             //logF << message; 
             getLogFile() << message;
+            if(logLevelTreshold < INFO){
+                getLogFile().flush();
+                getLogErrorFile().flush();
+            }
             //logF.flush();
             //logF.close();
         }

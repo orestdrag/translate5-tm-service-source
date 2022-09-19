@@ -393,7 +393,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     char szValue[150];
 
     LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
-        szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB");
+        szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
 
@@ -401,10 +401,13 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       {SocketAddress("localhost", uiPort, true), Protocol::HTTP}
     };
 
+    LogMessage2(DEBUG, __func__,":: creating  server...");
     HTTPServer server(std::move(options));
+    LogMessage2(DEBUG, __func__,":: server created, binding IPs...");
     server.bind(IPs);
 
     // Start HTTPServer mainloop in a separate thread
+    LogMessage2(DEBUG, __func__,":: IPs binded, creating thread IPs...");
     std::thread t([&]() { server.start(); });
     LogMessage2(INFO, __func__,":: joining thread...");
     t.join();

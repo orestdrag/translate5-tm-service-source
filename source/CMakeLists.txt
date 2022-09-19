@@ -3,9 +3,14 @@ cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION  "0.3.5")
 project(T5MEMORY VERSION ${APP_VERSION})
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread")
-set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+
+
 
 message(STATUS "T5MEMORY CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
