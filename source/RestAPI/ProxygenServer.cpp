@@ -406,7 +406,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     // Start HTTPServer mainloop in a separate thread
     std::thread t([&]() { server.start(); });
-
+    LogMessage2(INFO, __func__,":: joining thread...");
     t.join();
     return 0;
   }

@@ -17,7 +17,7 @@ do_install() {
 do_clean() {
   echo "Cleaning..."
   for file in *; do
-    if [ "$file" != "build.sh"]; then
+    if [ "$file" != "build.sh" ]; then
       rm -rf $file
     fi
   done

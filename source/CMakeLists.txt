@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.3.4")
+SET(APP_VERSION  "0.3.5")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -13,6 +13,7 @@ message(STATUS "T5MEMORY ROOT is ${ROOT}")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(CMAKE_SOURCE_DIR    "${ROOT}/source")
 
+#set (proxygen_DIR "/opt/local/lib/cmake/proxygen")
 set (proxygen_DIR "/opt/local/lib/cmake/proxygen")
 set (fmt_DIR "/opt/local/lib/cmake/fmt")
 set (Fizz_DIR "/opt/local/lib/cmake/fizz")
