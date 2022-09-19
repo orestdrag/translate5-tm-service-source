@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.3.3")
+SET(APP_VERSION  "0.3.4")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -109,8 +109,10 @@ install(TARGETS T5MEMORY DESTINATION bin)
 # Configure CPack
 include(InstallRequiredSystemLibraries)
 
+#next lines sets name of binaries as t5memory_DEBUG or t5memory_version(liket5memory_0_3_5)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_${APP_VERSION})
 #set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME t5memory_DEBUG)
+
 set(PNAME t5memory_${APP_VERSION})
 set(CPACK_PACKAGE_NAME                    ${PNAME})
 #set(CPACK_PACKAGE_VENDOR                  "Translate 5")
