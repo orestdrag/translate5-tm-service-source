@@ -201,7 +201,11 @@ int SetupMAT() {
 //|                   endif;                                                   |
 //|                   write properties and free data area;                     |
 //+----------------------------------------------------------------------------+
-#ifdef __linux__
+PPROPSYSTEM GetSystemPropInstance(){
+  static PROPSYSTEM _instance;
+  return &_instance;
+}
+
 USHORT CreateSystemProperties(const char* pszPath)
 {
     PPROPSYSTEM  pSysPropsOld = 0;     // buffer for old system properties
@@ -213,7 +217,7 @@ USHORT CreateSystemProperties(const char* pszPath)
     /******************************************************************/
     /* Allocate area for new system properties                        */
     /******************************************************************/
-    pSysProps = (PPROPSYSTEM)malloc(sizeof(PROPSYSTEM));
+    pSysProps = GetSystemPropInstance();
     if ( pSysProps )
     {
         memset(pSysProps, NULC, sizeof(PROPSYSTEM));
@@ -286,16 +290,9 @@ USHORT CreateSystemProperties(const char* pszPath)
     pszEditor = EDITOR_PROPERTIES_NAME;
     pszTemp = strchr( pszEditor, '.' );
     strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    
-    WritePropFile( pszPath, pSysProps, sizeof( PROPSYSTEM) );
-    free( pSysProps );
-    
+
     return (usRC);
 }
-#endif // __linux__
 
 #ifdef _WIN32
 USHORT CreateSystemProperties
@@ -503,22 +500,7 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
     } /* endif */
 #endif
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 104 /* Write properties and free data area                            */");
-#ifdef TEMPORARY_COMMENTED
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( pSysProps )
-    {
-      WritePropFile( chPrimaryDrive, SYSTEM_PROPERTIES_NAME, pSysProps,
-                     sizeof( PROPSYSTEM) );
-      free( pSysProps );
-    }
-    else
-    {
-      usRc = 1;
-    } /* endif */
-#endif //TEMPORARY_COMMENTED
+
 
     return ( usRc );
 } /* end of function UpdateSystemProperties */
@@ -597,19 +579,6 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 106 *pPropFll->s
 #endif
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 107 /* Write properties and free data area                            */");
-#ifdef TEMPORARY_COMMENTED
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      WritePropFile( chPrimaryDrive, DEFAULT_FOLDERLIST_NAME, pPropFll,
-                     sizeof( PROPFOLDERLIST) );
-      free( pPropFll );
-    } /* endif */
-#endif //TEMPORARY_COMMENTED
-
    return( usRC );
 
 } /* end of function CreateFolderListProperties */
@@ -682,18 +651,7 @@ USHORT CreateImexProperties
       sprintf( pPropImex->szSavedDlgFExpoNPath, "\\%s\\", SNOMATCHDIR );
     } /* endif */
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 109 /* Write properties and free data area                            */");
-#ifdef TEMPORARY_COMMENTED
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      WritePropFile( chPrimaryDrive, IMEX_PROPERTIES_NAME, pPropImex,
-                     sizeof( PROPIMEX) );
-      free( pPropImex );
-    } /* endif */
-#endif //TEMPORARY_COMMENTED
+
 
    return( usRC );
 
@@ -951,71 +909,6 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43 usRC = (U
   return( usRC );
 } /* end of function DeletePropFile */
 
-//+----------------------------------------------------------------------------+
-//|Function name:     WritePropFile                                            |
-//|Internal function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function call:     WritePropFile( CHAR chDrive, PSZ pszName, PVOID  pProp,  |
-//|                                  USHORT usSize )                           |
-//+----------------------------------------------------------------------------+
-//|Description:       Delete the specified property file.                      |
-//+----------------------------------------------------------------------------+
-//|Input parameter:   CHAR   chDrive              drive of property file       |
-//|                   PSZ    pszName              name of property file        |
-//|                   PVOID  pProp                ptr to property data         |
-//|                   USHORT usSize               size of property data        |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT                                                   |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       0  = function completed successfully                     |
-//|                   !0 = error code of called Dos functions                  |
-//+----------------------------------------------------------------------------+
-//|Samples:           WritePropFile( 'C', "EQFSYS.PRP", pSysProp,              |
-//|                                  sizeof(*pSysProp) );                      |
-//+----------------------------------------------------------------------------+
-//|Function flow:     call BuildPath to build property path;                   |
-//|                   add property name to path;                               |
-//|                   open the property file;                                  |
-//|                   write properties to disk;                                |
-//|                   close property file;                                     |
-//|                   return return code to caller;                            |
-//+----------------------------------------------------------------------------+
-
-#ifdef __linux__
-USHORT WritePropFile(const char* szPath, PVOID pProp, USHORT usSize)
-{
-    USHORT  usRC = NO_ERROR;             // function return code
-    USHORT tempRC = FilesystemHelper::CreateFilebuffer( SYSTEM_PROPERTIES_NAME );
-    auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
-    if ( pData == NULL )
-    {
-        LogMessage2(ERROR, "WritePropFile(), filebuffer not created and not found: ", szPath);
-        usRC = ERROR_PATH_NOT_FOUND;
-    }else{
-        PUCHAR pPropData = (PUCHAR) pProp;
-        pData->resize(usSize+2);
-        std::copy(&pPropData[0], &pPropData[usSize], std::back_inserter(*pData));
-    } 
-
-    return( usRC );
-}
-
-USHORT ReadPropFile(const char* szPath, PVOID *pProp, USHORT usSize)
-{
-  USHORT  usRC = NO_ERROR;             // function return code
-
-  auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
-  if ( pData == NULL || pData->size() < usSize)
-  {
-      LogMessage2(ERROR, "ReadPropFile(), filebuffer not found: ", szPath);
-      usRC = ERROR_PATH_NOT_FOUND;
-  }else{
-      memcpy((PVOID)*pProp,(const PVOID)(*pData)[0], usSize);
-  } 
-  return ( usRC );
-
-}
-#endif //__linux__
 
 //+----------------------------------------------------------------------------+
 //|Function name:     BuildPath                                                |

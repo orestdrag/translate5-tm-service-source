@@ -39,5 +39,5 @@ RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication no/g' /etc/ssh/sshd
 
 CMD ["/usr/sbin/sshd", "-D"]
 
-EXPOSE 4040 2222 22 4044
+EXPOSE 4040 2222 22 4044 4000
 

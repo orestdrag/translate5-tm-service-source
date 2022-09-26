@@ -205,6 +205,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
 /*!
      Read in system properties
 */
+PPROPSYSTEM GetSystemPropInstance();
 USHORT GetSysProp( PPROP_IDA pIda)
 {
     PPROPHND      hprop;               //
@@ -223,11 +224,8 @@ USHORT GetSysProp( PPROP_IDA pIda)
       LogMessage2(INFO, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
       
       size = sizeof( PROPSYSTEM);
-      auto pData = FilesystemHelper::GetFilebufferData( SYSTEM_PROPERTIES_NAME );
-      if( !pData  || pData->size() == 0){
-          break;
-      }
-
+      auto pData = GetSystemPropInstance();    
+      
       UtlAlloc( (PVOID *)&pcntl, 0L, (LONG)(size + sizeof( *pcntl)), ERROR_STORAGE );      
       if( !pcntl){ 
           break;
@@ -235,11 +233,11 @@ USHORT GetSysProp( PPROP_IDA pIda)
 
       memset( pcntl, NULC, sizeof( *pcntl));
       pcntl->pHead = (PPROPHEAD)(pcntl+1);
-      usrc = ReadPropFile( SYSTEM_PROPERTIES_NAME, (PVOID*)(pcntl->pHead), size);
-      
-      if( usrc ){
-        break;
+      if( !pcntl){ 
+          break;
       }
+      memcpy(pcntl->pHead, pData, size);
+    
       error = FALSE;
     } while( fTrueFalse /*TRUE & FALSE*/);
 

@@ -81,9 +81,6 @@ typedef enum _UPDPROPTYPE
 static USHORT DeletePropFile( CHAR chDrive, PSZ pszName );
 static USHORT SetupCreateDir( CHAR chDrive, PSZ pFolder, USHORT usPathID );
        VOID   BuildPath( PSZ pszBuffer, CHAR chEqfDrive, PSZ pszFolder, USHORT usPathID );
-extern "C" USHORT WritePropFile ( const char* pszName, PVOID pProp, USHORT usSize );
-extern "C" USHORT ReadPropFile ( const char* pszName, PVOID *pProp, USHORT usSize );
-
 static VOID             DeleteFiles( PSZ, USHORT );
 static USHORT           ErrorMessage( USHORT, PSZ, USHORT );
 static BOOL             FileExists ( PSZ );
