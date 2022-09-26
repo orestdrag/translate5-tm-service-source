@@ -11,6 +11,7 @@ set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
 #set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 
 
+set(CMAKE_BUILD_TYPE Debug)
 
 message(STATUS "T5MEMORY CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
