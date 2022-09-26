@@ -28,7 +28,7 @@ set (zstd_DIR "/opt/local/lib/cmake/zstd")
 set (glog_DIR "/opt/local/lib/cmake/glog")
 set (gflags_DIR "/opt/local/lib/cmake/gflags")
 set (mvfst_DIR "/opt/local/lib/cmake/mvfst")
-set(Sodium_DIR "${ROOT}/cmake/sodium")
+set(Sodium_DIR "/opt/local/lib/cmake/sodium")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSODIUM libsodium)

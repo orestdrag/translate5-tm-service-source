@@ -11,23 +11,22 @@ do_package() {
 
 do_install() {
   echo "Installing..."
+  cd _build
   make install -j${CORES}
 }
 
 do_clean() {
   echo "Cleaning..."
-  for file in *; do
-    if [ "$file" != "build.sh" ]; then
-      rm -rf $file
-    fi
-  done
+  rm -rf _build
 }
 
 do_build() {
   echo "Building..."
+  mkdir _build
+  cd _build
   #cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} VERBOSE=1 -j1 ..
   #make VERBOSE=1 -j1
-  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../source
   make -j${CORES}
 }
 
