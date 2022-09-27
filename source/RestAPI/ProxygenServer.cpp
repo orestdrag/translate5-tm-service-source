@@ -32,81 +32,7 @@ using folly::SocketAddress;
 
 using Protocol = HTTPServer::Protocol;
 
-/*
-  // handler for resource URL w/o memory name
-    auto resource = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s", szServiceName );
-    resource->set_path( szValue );
-    resource->set_method_handler( "GET", get_method_handler );
-    resource->set_method_handler( "POST", post_method_handler );
 
-    // handler for resource URL w memory name/import
-    auto tagReplacement = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s_service/tagreplacement", szServiceName );
-    tagReplacement->set_path( szValue );
-    tagReplacement->set_method_handler( "POST", postTagReplacement_method_handler );
-  
-
-    // handler for resource URL w memory name/import
-    auto memImport = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/import", szServiceName );
-    memImport->set_path( szValue );
-    memImport->set_method_handler( "POST", postImport_method_handler );
-
-    // handler for resource URL w memory name/fuzzysearch
-    auto fuzzysearch = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/fuzzysearch", szServiceName );
-    fuzzysearch->set_path( szValue );
-    fuzzysearch->set_method_handler( "POST", postFuzzySearch_method_handler );
-
-    // handler for resource URL w memory name/concordancesearch
-    auto concordancesearch = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/concordancesearch", szServiceName );
-    concordancesearch->set_path( szValue );
-    concordancesearch->set_method_handler( "POST", postConcordanceSearch_method_handler );
-
-    // handler for resource URL w memory name/entry
-    auto postEntry = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/entry", szServiceName );
-    postEntry->set_path( szValue );
-    postEntry->set_method_handler( "POST", postEntry_method_handler );
-
-    // handler for resource URL w memory name/entry
-    auto postEntryDelete = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/entrydelete", szServiceName );
-    postEntryDelete->set_path( szValue );
-    postEntryDelete->set_method_handler( "POST", postEntryDelete_method_handler );
-
-    // handler for resource URL w memory name
-    auto memname = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}", szServiceName );
-    memname->set_path( szValue );
-    memname->set_method_handler( "DELETE", delete_method_handler );
-    memname->set_method_handler( "GET", get_memory_method_handler );
-
-    // handler for resource URL w memory name/status
-    auto getStatus = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s/{id: .+}/status", szServiceName );
-    getStatus->set_path( szValue );
-    getStatus->set_method_handler( "GET", getStatus_method_handler );
-
-    // handler for resource URL service/shutdown
-    auto shutdownService = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s_service/shutdown", szServiceName );
-    shutdownService->set_path( szValue );
-    shutdownService->set_method_handler( "GET", shutdownService_method_handler );
-
-    // handler for resource service/save all tms-    auto saveTms = make_shared< Resource >();
-    snprintf( szValue, 150, "/%s_service/savetms", szServiceName );
-    saveTms->set_path( szValue );
-    saveTms->set_method_handler( "GET", saveAllOpenedTMService_method_handler );
-
-    pSettings = make_shared< Settings >();
-    pSettings->set_port( (uint16_t)uiPort );
-    pSettings->set_worker_limit( uiWorkerThreads );
-    pSettings->set_default_header( "Connection", "close" );
-    pSettings->set_connection_timeout( std::chrono::seconds( uiTimeOut ) );
-    //*/
 
 // replace plus signs in string with blanks
 void restoreBlanks( std::string &strInOut )
@@ -398,7 +324,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
 
     std::vector<HTTPServer::IPConfig> IPs = {
-      {SocketAddress("localhost", uiPort, true), Protocol::HTTP}
+      //{SocketAddress("localhost", uiPort, true), Protocol::HTTP}
+      {SocketAddress("127.0.0.1", uiPort, true), Protocol::HTTP}
     };
 
     LogMessage2(DEBUG, __func__,":: creating  server...");
