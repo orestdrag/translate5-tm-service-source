@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <thread>
+#include <unistd.h>
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "cmake/git_version.h"
 #include "opentm2/core/utilities/PropertyWrapper.H"
@@ -40,12 +41,18 @@ void service_worker() {
 
 int main_test();
 int main() {
-    LogMessage(TRANSACTION, "Worker thread starting");
-    std::thread worker(main_test);
-    worker.join();
-    //main_test();
-    //std::thread worker(service_worker);
-    //worker.join();
-    LogMessage(TRANSACTION, "Worker thread finished");
+    bool docker_entrypoint = getpid() == 1;
+    if(docker_entrypoint){
+        LogMessage(TRANSACTION, "it's docker entrypoint - go to infinite loop");
+        while(1){
+            sleep(1000);
+        };
+        LogMessage(TRANSACTION, "shutting down");
+    }else{
+        LogMessage(TRANSACTION, "Worker thread starting");
+        std::thread worker(main_test);
+        worker.join();
+        LogMessage(TRANSACTION, "Worker thread finished");
+    }
 }
 
