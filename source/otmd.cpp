@@ -42,7 +42,7 @@ void service_worker() {
 int main_test();
 int main() {
     bool docker_entrypoint = getpid() == 1;
-    if(docker_entrypoint){
+    if( false && docker_entrypoint ){
         LogMessage(TRANSACTION, "it's docker entrypoint - go to infinite loop");
         while(1){
             sleep(1000);
