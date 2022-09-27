@@ -41,7 +41,9 @@ void service_worker() {
 int main_test();
 int main() {
     LogMessage(TRANSACTION, "Worker thread starting");
-    main_test();
+    std::thread worker(main_test);
+    worker.join();
+    //main_test();
     //std::thread worker(service_worker);
     //worker.join();
     LogMessage(TRANSACTION, "Worker thread finished");

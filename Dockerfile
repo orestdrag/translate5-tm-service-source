@@ -18,13 +18,13 @@ COPY build.sh /home/build.sh
 COPY docker/lib /opt/local/lib
 COPY docker/workdir /root/.t5memory
 
-RUN rm -R /home/_build/
-RUN cd /home && ./build.sh
+#RUN rm -R /home/_build/
+RUN cd /home && /home/build.sh
 RUN cp /home/_build/t5memory_DEBUG  /root/t5memory_DEBUG
 #RUN rm -R /home/*
 
-#ENTRYPOINT /root/t5memory_DEBUG
-ENTRYPOINT /home/_build/t5memory_DEBUG
+ENTRYPOINT /root/t5memory_DEBUG
+#ENTRYPOINT /home/_build/t5memory_DEBUG
 
 # configure SSH for communication with Visual Studio 
 #RUN mkdir -p /var/run/sshd
