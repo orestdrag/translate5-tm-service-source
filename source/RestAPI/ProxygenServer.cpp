@@ -409,7 +409,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     // Start HTTPServer mainloop in a separate thread
     LogMessage2(DEBUG, __func__,":: IPs binded, creating server thread...");
     std::thread t([&]() { server.start(); });
-    LogMessage2(INFO, __func__,":: joining thread...");
+    LogMessage2(INFO, __func__,":: joining thread... setup is done -> waiting for requests...");
     t.join();
     return 0;
   }
