@@ -14,6 +14,8 @@
 //#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/HTTPServer.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
 
 #include "ProxygenHandler.h"
 #include "ProxygenStats.h"
@@ -217,30 +219,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }
-    //if( urlMemName.empty() )
-    //if(         urlMemName.empty() && urlCommand.emtpy() && method == "GET"){// LIST_OF_MEMORIES
-    //  requestHandler->command = ProxygenHandler::COMMAND::LIST_OF_MEMORIES;
-    //}else if(   urlMemName.empty()   && urlCommand.emty() && method == "POST"){// CREATE_MEM 
-   // }else if( (!urlMemName.empty()) && urlCommand.empty() && method == "POST"){// CREATE_MEM 
-    //}
-
-
-    //std::string urlService = url.substr(urlSeparator);
-    
-
-
-   //if (u) {
-      // Recreate the URL by just changing the query string
-    //}
-
-
-    //if( strcmp(message, "t5memory_proxygen") == 0 ){
-    // if( message->fields_.data_.request.url_ == "t5memory_proxygen"){
-      
-      //auto statusMessage = message->getStatusMessage();
-
-      return requestHandler;
-    //}
+    return requestHandler;
   }
 
   static int startService(int argc, char* argv[]){
@@ -322,15 +301,61 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
+    
+    LogMessage(TRANSACTION, ":: creating address data structure");
+    folly::SocketAddress addr;
+    ifaddrs* addresses = nullptr; 
+    getifaddrs(&addresses);
+    ifaddrs* pAddr = addresses; 
+    int s, family = pAddr->ifa_addr->sa_family;
+    
+    while(pAddr != nullptr 
+    && !( family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
+    ){
+      pAddr = pAddr->ifa_next;
+      family = pAddr->ifa_addr->sa_family;
+    }
+    
+    char host[NI_MAXHOST];
+   
+    if (pAddr != nullptr && pAddr->ifa_addr != nullptr && pAddr->ifa_addr->sa_data != nullptr && pAddr->ifa_addr->sa_family == AF_INET ) {
+      s = getnameinfo(pAddr->ifa_addr,
+              sizeof(struct sockaddr_in) ,
+              host, NI_MAXHOST,
+              NULL, 0, NI_NUMERICHOST);
+      if (s != 0) {
+        pAddr = nullptr;
+      }
+    }else{
+      pAddr = nullptr;
+    }
 
+    if(pAddr == nullptr){
+      addr = SocketAddress("127.0.0.1", uiPort, true);
+    }else{
+      
+      //char c_addr[15];
+      //strncpy(c_addr, pAddr->ifa_addr->sa_data, 14);
+      //c_addr[14] = '\0';
+      addr.setFromIpPort(host, uiPort);
+    }
+    if(addresses != nullptr){
+      freeifaddrs(addresses);
+    }
+
+    //addr.setFromLocalPort(uiPort);
+    //auto socket = SockerAddress("192.168.0.1",uiPort, true);
+    
     std::vector<HTTPServer::IPConfig> IPs = {
+      {addr,  Protocol::HTTP}
       //{SocketAddress("localhost", uiPort, true), Protocol::HTTP}
-      {SocketAddress("127.0.0.1", uiPort, true), Protocol::HTTP}
+      //{SocketAddress("127.0.0.1", uiPort, true), Protocol::HTTP}
+      //{SocketAddress("", uiPort, true), Protocol::HTTP}
     };
 
     LogMessage2(DEBUG, __func__,":: creating  server...");
     HTTPServer server(std::move(options));
-    LogMessage2(DEBUG, __func__,":: server created, binding IPs...");
+    LogMessage3(DEBUG, __func__,":: server created, binding IPs: ", addr.getAddressStr().c_str());
     server.bind(IPs);
 
     // Start HTTPServer mainloop in a separate thread
