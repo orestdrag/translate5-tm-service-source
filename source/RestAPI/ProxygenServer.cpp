@@ -108,8 +108,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       return  new ProxygenHandler(stats_.get());;
     }
 
-    std::transform(url.begin(), url.end(), url.begin(),
-    [](unsigned char c){ return std::tolower(c); });
+    //std::transform(url.begin(), url.end(), url.begin(),
+    //[](unsigned char c){ return std::tolower(c); });
 
     if(url[0] == '/'){
       url = url.substr(1, url.size() - 1);
@@ -177,9 +177,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         if(methodStr == "POST"){
           requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM;
           //check if it's in internal format; 
-          if(false /*internalFormatHeader*/ ){
-            requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM_INTERNAL_FORMAT;
-          }     
+           
         }else if(methodStr == "GET"){
           requestHandler->command = ProxygenHandler::COMMAND::EXPORT_MEM;
           //check if it's in internal format; 
@@ -244,6 +242,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     unsigned int uiLogLevel = 2;
     unsigned int uiAllowedRAM = 1500; // MB
     unsigned int uiThreshold = 33;
+    bool fLocalHostOnly = false;
 
     /* get configuration settings */
     {
@@ -269,6 +268,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
             uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
             uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, "33"));
+            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, "0")) == 1;
         }else{
           LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
         }
@@ -288,8 +288,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     LogMessage8(TRANSACTION, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", 
         toStr(uiPort).c_str(), "; Worker threads = ", toStr(iWorkerThreads).c_str(),
             "; timeout = ", toStr(uiTimeOut).c_str());
-    LogMessage6(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
-                          "; triples_threshold = ", toStr(uiThreshold));
+    LogMessage8(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
+                          "; triples_threshold = ", toStr(uiThreshold), "; localhost_only = ", toStr(fLocalHostOnly));
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     //strcpy( pszService, szServiceName );
@@ -304,33 +304,35 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     
     LogMessage(TRANSACTION, ":: creating address data structure");
     folly::SocketAddress addr;
-    ifaddrs* addresses = nullptr; 
-    getifaddrs(&addresses);
-    ifaddrs* pAddr = addresses; 
-    int s, family = pAddr->ifa_addr->sa_family;
-    
-    while(pAddr != nullptr 
-    && !( family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
-    ){
-      pAddr = pAddr->ifa_next;
-      family = pAddr->ifa_addr->sa_family;
-    }
-    
+    ifaddrs* addresses = nullptr, *pAddr = nullptr; 
     char host[NI_MAXHOST];
-   
-    if (pAddr != nullptr && pAddr->ifa_addr != nullptr && pAddr->ifa_addr->sa_data != nullptr && pAddr->ifa_addr->sa_family == AF_INET ) {
-      s = getnameinfo(pAddr->ifa_addr,
-              sizeof(struct sockaddr_in) ,
-              host, NI_MAXHOST,
-              NULL, 0, NI_NUMERICHOST);
-      if (s != 0) {
+
+    if(fLocalHostOnly == false){
+      getifaddrs(&addresses);
+      int s, family = pAddr->ifa_addr->sa_family;
+      
+      while(pAddr != nullptr 
+      && !( family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
+      ){
+        pAddr = pAddr->ifa_next;
+        family = pAddr->ifa_addr->sa_family;
+      }
+      
+    
+      if (pAddr != nullptr && pAddr->ifa_addr != nullptr && pAddr->ifa_addr->sa_data != nullptr && pAddr->ifa_addr->sa_family == AF_INET ) {
+        s = getnameinfo(pAddr->ifa_addr,
+                sizeof(struct sockaddr_in) ,
+                host, NI_MAXHOST,
+                NULL, 0, NI_NUMERICHOST);
+        if (s != 0) {
+          pAddr = nullptr;
+        }
+      }else{
         pAddr = nullptr;
       }
-    }else{
-      pAddr = nullptr;
     }
 
-    if(pAddr == nullptr){
+    if(fLocalHostOnly || pAddr == nullptr){
       addr = SocketAddress("127.0.0.1", uiPort, true);
     }else{
       

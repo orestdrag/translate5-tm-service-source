@@ -1975,36 +1975,7 @@ USHORT MemFuncExportProcess
 
 USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn, PSZ_W pszSegmentOut )
 {
-#ifdef FORCE_CRLF_IN_MEMORY_OUTPUT
-  PSZ_W pszSource = pszSegmentIn;
-  PSZ_W pszTarget = pszSegmentOut;
-
-  pExportIDA;
-
-  while( *pszSource )
-  {
-    if ( *pszSource == L'\r' )
-    {
-      // ignore carriage return
-      pszSource++;
-    }
-    else if ( *pszSource == L'\n' )
-    {
-      // convert to CRLF
-      pszSource++;
-      *pszTarget++ = L'\r';
-      *pszTarget++ = L'\n';
-    }
-    else
-    {
-      // copy as-is
-      *pszTarget++ = *pszSource++;
-    } /* endif */
-  } /* endwhile */
-  *pszTarget = 0;
-#else
   wcscpy( pszSegmentOut, pszSegmentIn );
-#endif
   return( MEM_PROCESS_OK );
 }
 

@@ -1985,6 +1985,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define KEY_SERVICE_URL "KEY_SERVICE_URL"
 #define KEY_HOME_DIR "HOME_dir"
 #define KEY_ALLOWED_RAM "AllowedRAM_MB"
+#define KEY_LOCALHOST_ONLY "localhost_only"
 #define KEY_TEMP_DIR "TEMP_dir"
 #define KEY_TRIPLES_THRESHOLD "TriplesThreshold"
 //5MB reserved for service

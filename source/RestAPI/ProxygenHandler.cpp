@@ -33,7 +33,7 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::CREATE_MEM, "CREATE_MEM" },
         { ProxygenHandler::COMMAND::DELETE_MEM, "DELETE_MEM" },
         { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
-        { ProxygenHandler::COMMAND::IMPORT_MEM_INTERNAL_FORMAT, "IMPORT_MEM_INTERNAL_FORMAT" },
+        //{ ProxygenHandler::COMMAND::IMPORT_MEM_INTERNAL_FORMAT, "IMPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::EXPORT_MEM, "EXPORT_MEM" },
         { ProxygenHandler::COMMAND::EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::STATUS_MEM, "STATUS_MEM" },
@@ -74,17 +74,12 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 
   if(this->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
 
-    //ResponseBuilder builder(downstream_);
-    
-    //std::string strResponseBody;
-    //int iRC = 400;
-    //std::string responseText = "WRONG_REQUEST";
-
     switch(this->command){
       case COMMAND::STATUS_MEM:
       {
         iRC = pMemService->getStatus( memName, strResponseBody );
         responseText = "OK";
+        iRC = 200;
         //builder->status(iRC, "OK");
         //builder->header("Content-Type", "application/json");
         builder->body(strResponseBody);
@@ -103,31 +98,22 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::TAGREPLACEMENTTEST:
       {
         std::string str;
+        iRC = 200;
         pMemService->tagReplacement(str, iRC);
         //builder->status(400, "WRONG REQUEST");
         break;
       }
       case COMMAND::EXPORT_MEM:
-      {
-        iRC = pMemService->getMem( memName, "application/xml",  vMemData);
-        builder->body(std::string(vMemData.begin(), vMemData.end()));
-        responseText = "OK";
-        //builder->status(400, "WRONG REQUEST");
-        break;
-      }
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
-        
-        //if(requestAcceptHeader == "application/xml"){
-          
-        //}else if(requestAcceptHeader == "application/json"){
-
-        //}else{
-
-        //}
+        iRC = pMemService->getMem( memName, requestAcceptHeader,  vMemData);
+        builder->body(std::string(vMemData.begin(), vMemData.end()));
+        responseText = "OK";
+        iRC = 200;
         //builder->status(400, "WRONG REQUEST");
         break;
       }
+      
       case COMMAND::DELETE_MEM:
       {
         iRC = pMemService->deleteMem( memName, strResponseBody );
@@ -138,6 +124,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       {
         iRC = pMemService->saveAllTmOnDisk( strResponseBody );
         responseText = "OK";
+        iRC = 200;
         //builder->status(400, "WRONG REQUEST");
         break;
       }
@@ -198,12 +185,9 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   
   
   switch(this->command){
-    case COMMAND::CREATE_MEM:{
-      iRC = pMemService->createMemory( (char*) req_data, strResponseBody );
-      break;
-    }
+    case COMMAND::CREATE_MEM:
     case COMMAND::IMPORT_MEM:
-    case COMMAND::IMPORT_MEM_INTERNAL_FORMAT:
+    //case COMMAND::IMPORT_MEM_INTERNAL_FORMAT:
     {
       if(body_ == nullptr){
         body_ = std::move(body);
@@ -252,10 +236,14 @@ void ProxygenHandler::onEOM() noexcept {
     {
       body_->coalesce();
       iRC = pMemService->import( memName, (char*) body_->data(), strResponseBody );
-    }else if(command == COMMAND::IMPORT_MEM_INTERNAL_FORMAT)
-    {
-      iRC = pMemService->import( memName, (char*) body_->data(), strResponseBody );
+    //}else if(command == COMMAND::IMPORT_MEM_INTERNAL_FORMAT)
+    //{
+    //  iRC = pMemService->import( memName, (char*) body_->data(), strResponseBody );
+    }else if(command == COMMAND::CREATE_MEM){    
+      body_->coalesce();  
+      iRC = pMemService->createMemory( (char*) body_->data(), strResponseBody );
     }
+    
     builder->status(iRC, responseText);
     if (FLAGS_request_number) {
       builder->header("Request-Number",

@@ -60,7 +60,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
     UPDATE_ENTRY,
     TAGREPLACEMENTTEST,
     IMPORT_MEM,
-    IMPORT_MEM_INTERNAL_FORMAT
+    //IMPORT_MEM_INTERNAL_FORMAT
   };
 
   COMMAND command;

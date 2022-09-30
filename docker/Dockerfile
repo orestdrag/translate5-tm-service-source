@@ -10,12 +10,12 @@ RUN cd /home && git checkout changing_http_lib_proxygen
 
 RUN cp -r /home/docker/lib/cmake/sodium /opt/local/lib/cmake/sodium
 RUN cp -r /home/docker/workdir /root/.t5memory
-COPY workdir/t5memory.conf /root/.t5memory/
+#COPY workdir/t5memory.conf /root/.t5memory/
 
 RUN cd /home && /home/build.sh
 RUN cp /home/_build/t5memory_DEBUG  /root/t5memory_DEBUG
 
-EXPOSE 8080
+EXPOSE 4040 8080
 
 WORKDIR /root
 
