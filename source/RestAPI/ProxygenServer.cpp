@@ -236,7 +236,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     char szServiceName[100] = "t5memory";
     char szOtmDirPath[255] ="";
-    unsigned int uiPort = 8080;
+    unsigned int uiPort = 4040;
     int iWorkerThreads = 0;
     unsigned int uiTimeOut = 60000;
     unsigned int uiLogLevel = 2;
@@ -262,7 +262,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
             strncpy(szOtmDirPath,
                 conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
-            uiPort = std::stoi(conf.get_value("port", "8080"));
+            uiPort = std::stoi(conf.get_value("port", "4040"));
             iWorkerThreads = std::stoi(conf.get_value("threads", "0"));
             uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
             uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
@@ -357,7 +357,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     LogMessage2(DEBUG, __func__,":: creating  server...");
     HTTPServer server(std::move(options));
-    LogMessage3(DEBUG, __func__,":: server created, binding IPs: ", addr.getAddressStr().c_str());
+    LogMessage5(TRANSACTION, __func__,":: server created, binding IPs: ", addr.getAddressStr().c_str(), ":", toStr(uiPort));
     server.bind(IPs);
 
     // Start HTTPServer mainloop in a separate thread
