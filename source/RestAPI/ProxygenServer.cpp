@@ -25,6 +25,7 @@
 #include "../opentm2/core/utilities/LogWrapper.h"
 #include "../opentm2/core/utilities/PropertyWrapper.H"
 #include "../opentm2/core/utilities/FilesystemWrapper.h"
+#include "../cmake/git_version.h"
 #include "config.h"
 
 using namespace ProxygenService;
