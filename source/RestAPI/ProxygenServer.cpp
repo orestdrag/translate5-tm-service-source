@@ -290,6 +290,10 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             "; timeout = ", toStr(uiTimeOut).c_str());
     LogMessage8(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
                           "; triples_threshold = ", toStr(uiThreshold), "; localhost_only = ", toStr(fLocalHostOnly));
+    LogMessage2(TRANSACTION,"BUILD DATE: ", buildDate);
+    LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
+    LogMessage2(TRANSACTION, "Version: ", appVersion);
+
     SetLogLevel(uiLogLevel);
     // set caller's service name and port fields
     //strcpy( pszService, szServiceName );
