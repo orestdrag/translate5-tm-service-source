@@ -289,7 +289,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
     #endif //SIMPLE_FILE_LOGGING_ENABLED
 
     logMessage += message;
-    if(CheckLogLevel(DEBUG_) == FALSE && logMessage.size()> 4000){
+    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
         logMessage.resize(1000);
         logMessage += ". . . ";
     }
@@ -394,11 +394,11 @@ int DesuppressLoggingInFile(){
 
 int SetLogLevel(int level){
     if(level <= FATAL && level>=DEVELOP){
-        LogMessage2(INFO_, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
+        LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;
         return level;
     }else{
-        LogMessage3(ERROR_,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
+        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
         return -1;
     }
 }
