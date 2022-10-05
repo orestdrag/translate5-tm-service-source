@@ -1,4 +1,7 @@
 #include "LogWrapper.h"
+#include <istream>
+#include <sstream>
+#include <streambuf>
 #include <string>
 #include <fstream>
 #include <ctime>
@@ -9,14 +12,21 @@
 #include <thread>
 #include <cstring>
 
+#include <glog/logging.h>
+
 std::string logFilename;
 int logLevelTreshold = DEBUG;
 //bool fileLoggingSuppressed = false;
 bool fileLoggingSuppressed = true;
 
+bool fFilterLogs = false; // during init should be set to false to print init messages
+// then could be set to true to filter(to not print) messages about successfull requests
+
 #define THREAD_ID_WRITE_TO_LOGS 1
 #define CONSOLE_LOGGING 1
 #define LOGERRORSINOTHERFILE 1
+#define GLOG_ENABLED 1
+//#define SIMPLE_FILE_LOGGING_ENABLED 1
 
 std::string getDateStr(){
     // current date/time based on current system
@@ -71,26 +81,31 @@ static std::ofstream& getLogErrorFile() {
     return logErrorF;
 }
 
-int writeLog(std::string& message, int logLevel){
+static std::stringstream& getLogBuffer(){
+    static std::stringstream logBuff;
+    return logBuff;
 
-    //static std::ofstream logErrorF, logF;
+}
+
+
+int writeLog(std::string& message, int logLevel){
+    #ifdef SIMPLE_FILE_LOGGING_ENABLED
     #ifdef THREAD_ID_WRITE_TO_LOGS
         message += " [thread id = " + std::to_string(_getpid());
         message += "]";
     #endif
-    
-    if(fileLoggingSuppressed){
-        message += ", (file logging suppressed)";
-    }
-    message += '\n';
 
     //write log to file
     {
+        if(fileLoggingSuppressed){
+            message += ", (file logging suppressed)";
+        }
+        //message += '\n';
         std::lock_guard<std::mutex> logGuard(logMutex); 
 
         #ifdef CONSOLE_LOGGING
-            std::cout << message;
-        #endif
+           std::cout << message;
+        #endif //CONSOLE_LOGGING
 
         if( fileLoggingSuppressed == false){
             #ifdef LOGERRORSINOTHERFILE
@@ -101,12 +116,8 @@ int writeLog(std::string& message, int logLevel){
                     //logErrorF.flush();
                     //logErrorF.close();
                 }
-            #endif
-
-            //if(!logF.is_open()){
-            //    logF.open(logFilename, std::ios_base::app); // append instead of overwrite
-            //}
-            //logF << message; 
+            #endif//LOGERRORSINOTHERFILE
+ 
             getLogFile() << message;
             if(logLevelTreshold < INFO){
                 getLogFile().flush();
@@ -116,6 +127,54 @@ int writeLog(std::string& message, int logLevel){
             //logF.close();
         }
     }
+    #endif //SIMPLE_FILE_LOGGING_ENABLED
+    
+    #ifdef GLOG_ENABLED
+        if(!VLOG_IS_ON(2) && fFilterLogs){
+            if(logLevel < ERROR){
+                if( VLOG_IS_ON(1) ){
+                    AddToLogBuffer(message + "\n");
+                }
+            }else{
+                message = FlushLogBuffer() //+ "\n" 
+                        + message;
+                LOG(ERROR) << message;
+            }
+        }else{
+            switch(logLevel){
+                case DEVELOP:{
+                    VLOG(2) << message;                    
+                    break;
+                }
+                case DEBUG:{
+                    VLOG(1) << message;
+                    break;
+                }
+                case INFO:{
+                    LOG(INFO) << message;
+                    break;
+                }
+                case WARNING:{
+                    LOG(WARNING) << message;
+                    break;
+                }
+                case ERROR:{
+                    LOG(ERROR) << message;
+                    break;
+                }
+                case FATAL:{
+                    //LOG(FATAL) << message;
+                    LOG(DFATAL) << message;
+                    break;
+                }
+                case TRANSACTION:{
+                    LOG(INFO) << message;
+                    break;
+                }
+            }
+        }
+    #endif//GLOG_ENABLED
+
     return 0;
 }
 int suppressLoggingInFile(){
@@ -138,9 +197,26 @@ int desuppressLogging(int prevTreshold){
     return logLevelTreshold = prevTreshold;
 }
 
+int ResetLogBuffer(){
+    getLogBuffer().clear();
+}
+
+int SetLogBuffer(std::string logMsg){
+    ResetLogBuffer();
+    getLogBuffer() << logMsg << std::endl;
+}
+
+int AddToLogBuffer(std::string logMsg){
+    getLogBuffer() << logMsg;// << std::endl;
+}
+
+std::string FlushLogBuffer(){
+    auto str = getLogBuffer().str();
+    ResetLogBuffer();
+    return str;
+}
 
 int initLog(){
-    
     int prevState = suppressLogging();
     suppressLoggingInFile();
 
@@ -151,11 +227,6 @@ int initLog(){
     if(!FilesystemHelper::DirExists(logFilename)){
         initLogMsg += "Log directory created\n";
         FilesystemHelper::CreateDir(logFilename, 0700);
-    }
-    auto logFiles = FilesystemHelper::FindFiles(logFilename + "/*.log");
-    if(logFiles.size()>20){
-        
-        //remove files;
     }
 
     logFilename += "/" + generateLogFileName();
@@ -171,52 +242,63 @@ int initLog(){
 
 
 int LogMessageStr(int LogLevel, const std::string& message){
-    if(LogLevel<logLevelTreshold){
+    if(LogLevel < logLevelTreshold && !VLOG_IS_ON(2)){
         return LOG_SMALLER_THAN_TRESHOLD;
     }
+
+    //#ifdef SIMPLE_FILE_LOGGING_ENABLED
     if(logFilename.empty()){
         if(fileLoggingSuppressed == false){
-            if( initLog() != 0)
+            if( initLog() != 0){
                 return LOG_FAIL_INIT;
+            }
         }
     }
+    //#endif //SIMPLE_FILE_LOGGING_ENABLED
 
     std::string logMessage;
     switch (LogLevel)
     {
     case FATAL:
-        logMessage = "[FATAL]  ";
+        logMessage = "[FATAL]  :";
         break;
     case ERROR:
-        logMessage = "[ERROR]  ";
+        logMessage = "[ERROR]  :";
         break;
     case WARNING:
-        logMessage = "[WARNING]";
+        logMessage = "[WARNING]:";
         break;
     case DEBUG:
-        logMessage = "[DEBUG]  ";
+        logMessage = "[DEBUG]  :";
         break;
     case INFO:
-        logMessage = "[INFO]   ";
+        logMessage = "[INFO]   :";
         break;
     case DEVELOP:
-        logMessage = "[DEVELOP]";
+        logMessage = "[DEVELOP]:";
         break;
     case TRANSACTION:
-        logMessage = "[TRANSACTION]";
+        logMessage = "[TRANSACTION] ";
         break;
     default:
         break;
     }    
 
-    logMessage += ": [" + getTimeStr() + "] :: " + message; 
+    #ifdef SIMPLE_FILE_LOGGING_ENABLED
+    logMessage += " [" + getTimeStr() + "] :: "; 
+    #endif //SIMPLE_FILE_LOGGING_ENABLED
 
-    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
-        logMessage.resize(256);
+    logMessage += message;
+    if(CheckLogLevel(DEBUG_) == FALSE && logMessage.size()> 4000){
+        logMessage.resize(1000);
         logMessage += ". . . ";
     }
 
     return writeLog(logMessage, LogLevel);
+}
+
+void SetLogFilter(bool filterOn){
+    fFilterLogs = filterOn;
 }
 
 int LogMessage(int LogLevel, std::string&& message){
@@ -310,27 +392,13 @@ int DesuppressLoggingInFile(){
     return 0;
 }
 
-/*
-char* toStr(int i){
-    //int size = snprintf(NULL, 0, "%d", i);
-    //char* buffer = new char[size+1];
-    //snprintf(buffer, sizeof(size+1), "%d", i);
-    std::string str = std::to_string(i);
-    int len = str.size();
-    char* buffer = new char[len+1];
-    std::strcpy(buffer, str.c_str());
-    buffer[len] = '\0';
-    return buffer;
-}
-//*/
-
 int SetLogLevel(int level){
     if(level <= FATAL && level>=DEVELOP){
-        LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
+        LogMessage2(INFO_, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;
         return level;
     }else{
-        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
+        LogMessage3(ERROR_,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
         return -1;
     }
 }

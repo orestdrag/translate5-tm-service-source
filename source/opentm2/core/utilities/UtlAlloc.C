@@ -213,7 +213,8 @@ USHORT UtlGetTask ( void )
       UtiVar[currTask].usTask = usTask;
       memcpy(&UtiVar[currTask].SegTable, &SegTable,
              sizeof(SEGTABLE) * MAX_MEM_TABLES );
-      LogMessage4(INFO, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
+      if(VLOG_IS_ON(1))
+        LogMessage4(DEBUG, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
       break;
     } /* endif */
   } /* endfor */

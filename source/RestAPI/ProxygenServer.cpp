@@ -14,6 +14,7 @@
 //#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/HTTPServer.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
+#include <sstream>
 #include <sys/types.h>
 #include <ifaddrs.h>
 
@@ -27,6 +28,7 @@
 #include "../opentm2/core/utilities/FilesystemWrapper.h"
 #include "../cmake/git_version.h"
 #include "config.h"
+#include "OtmMemoryServiceWorker.h"
 
 using namespace ProxygenService;
 using namespace proxygen;
@@ -82,8 +84,9 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
 class ProxygenHandlerFactory : public RequestHandlerFactory {
  public:
   void onServerStart(folly::EventBase* /*evb*/) noexcept override {
-    stats_.reset(new ProxygenStats);
-
+      stats_.reset(new ProxygenStats);
+      
+      SetLogFilter(true);
     }
 
   void onServerStop() noexcept override {
@@ -99,12 +102,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto queryString   = message->getQueryString () ;
     auto headers = message->getHeaders();
     auto queryParams = message->getQueryParams();
-    //message->get
-    //ParseURL parseUrl(url);
-    //auto query = parseUrl.query();
-    //auto host = parseUrl.host(); 
-    // No need to strictly verify the URL when reparsing it
-    //auto u = ParseURL::parseURL(url, /*strict=*/false);
     if(url.size() <= 1){
       return  new ProxygenHandler(stats_.get());;
     }
@@ -133,6 +130,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     requestHandler->command = ProxygenHandler::COMMAND::UNKNOWN_COMMAND;
 
     url = url.substr(urlSeparator + 1);
+    
     std::string urlMemName, urlCommand;
     if( urlService == additionalServiceName ){
       if( url.size() ){
@@ -221,10 +219,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     return requestHandler;
   }
 
-  static int startService(int argc, char* argv[]){
-    // gflags::ParseCommandLineFlags(&argc, &argv, true);
-    google::InitGoogleLogging(argv[0]);
-    google::InstallFailureSignalHandler();
+  static int startService(){
     
     // Increase the default flow control to 10MB/100MB
     uint32_t initialReceiveWindow = uint32_t(1 << 20) * 10;
@@ -285,20 +280,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     //From here we have logging in file turned on
     DesuppressLoggingInFile();
-
-    LogMessage8(TRANSACTION, "PrepareOtmMemoryService::parsed service name = ", szServiceName, "; port = ", 
-        toStr(uiPort).c_str(), "; Worker threads = ", toStr(iWorkerThreads).c_str(),
-            "; timeout = ", toStr(uiTimeOut).c_str());
-    LogMessage8(TRANSACTION,"PrepareOtmMemoryService:: otm dir = ", szOtmDirPath, "; logLevel = ", toStr(uiLogLevel).c_str(), 
-                          "; triples_threshold = ", toStr(uiThreshold), "; localhost_only = ", toStr(fLocalHostOnly));
-    LogMessage2(TRANSACTION,"BUILD DATE: ", buildDate);
-    LogMessage2(TRANSACTION, "GIT COMMINT INFO: ", gitHash);
-    LogMessage2(TRANSACTION, "Version: ", appVersion);
-
     SetLogLevel(uiLogLevel);
-    // set caller's service name and port fields
-    //strcpy( pszService, szServiceName );
-    //*puiPort = uiPort;
 
     char szValue[150];
 
@@ -338,37 +320,42 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     }
 
     if(fLocalHostOnly || pAddr == nullptr){
-      addr = SocketAddress("127.0.0.1", uiPort, true);
-    }else{
-      
-      //char c_addr[15];
-      //strncpy(c_addr, pAddr->ifa_addr->sa_data, 14);
-      //c_addr[14] = '\0';
-      addr.setFromIpPort(host, uiPort);
+      strcpy(host, "127.0.0.1");
     }
+    addr.setFromIpPort(host, uiPort);
     if(addresses != nullptr){
       freeifaddrs(addresses);
     }
-
-    //addr.setFromLocalPort(uiPort);
-    //auto socket = SockerAddress("192.168.0.1",uiPort, true);
     
     std::vector<HTTPServer::IPConfig> IPs = {
       {addr,  Protocol::HTTP}
-      //{SocketAddress("localhost", uiPort, true), Protocol::HTTP}
-      //{SocketAddress("127.0.0.1", uiPort, true), Protocol::HTTP}
-      //{SocketAddress("", uiPort, true), Protocol::HTTP}
     };
+     
 
-    LogMessage2(DEBUG, __func__,":: creating  server...");
     HTTPServer server(std::move(options));
-    LogMessage5(TRANSACTION, __func__,":: server created, binding IPs: ", addr.getAddressStr().c_str(), ":", toStr(uiPort));
     server.bind(IPs);
 
     // Start HTTPServer mainloop in a separate thread
-    LogMessage2(DEBUG, __func__,":: IPs binded, creating server thread...");
     std::thread t([&]() { server.start(); });
-    LogMessage2(INFO, __func__,":: joining thread... setup is done -> waiting for requests...");
+    OtmMemoryServiceWorker::getInstance()->init();
+    
+    std::stringstream initMsg;
+    initMsg << "Service details:\n  Service name = " << szServiceName;
+    initMsg << "\n  Address :" << host << ":" << toStr(uiPort); 
+    initMsg << "\n  Build date: " << buildDate;
+    initMsg << "\n  Git commit info: " << gitHash;
+    initMsg << "\n  Version: " << appVersion;
+    initMsg << "\n  Workdir: " << szOtmDirPath;
+    initMsg << "\n  Worker threads: " << toStr(iWorkerThreads);
+    initMsg << "\n  Timeout: " << toStr(uiTimeOut);
+    initMsg << "\n  Log level: " << toStr(uiLogLevel);
+    initMsg << "\n  Triples threshold: " << toStr(uiThreshold);
+    initMsg << "\n  Localhost only: " << toStr(fLocalHostOnly);   
+    initMsg << "\n\n\n\
+                |==================================================================|\n\
+                |-------------Setup is done -> waiting for requests...-------------|\n\
+                |==================================================================|\n";
+    LogMessage3(TRANSACTION, __func__, ":: ", initMsg.str().c_str());
     t.join();
     return 0;
   }
@@ -376,19 +363,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
   folly::ThreadLocalPtr<ProxygenStats> stats_;
 };
 
-
-
-int main_test() {
-  int argc = 1;
-  char *str1 = "main_test";
-  char *str2 = "1990";
-
-  char* argv[2];
-  argv[0] = str1;
-  argv[1] = str2;
-  ProxygenHandlerFactory::startService(argc, argv);
-  return 0;
+int proxygen_server_init(){
+  return ProxygenHandlerFactory::startService();
 }
 
-
-//#endif

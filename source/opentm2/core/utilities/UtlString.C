@@ -716,9 +716,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 
   if ( pszAnsi && pszUni )
   {
-
-LogMessage2(WARNING,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
-
+    LogMessage2(WARNING,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
   }
   else if (pszUni)
   {

@@ -340,7 +340,7 @@ int Properties::read_all_data_from_file() {
 
     fs.open(filename_str, std::ios::binary | std::ios::in);
     if (!fs.is_open() || fs.eof()){
-        if(CheckLogLevel(DEVELOP)) 
+        if(CheckLogLevel(DEVELOP) && VLOG_IS_ON(1)) 
             LogMessage2(WARNING, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND, path = ", filename_str.c_str() );
         return PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND;
     }
@@ -357,7 +357,7 @@ int Properties::read_all_data_from_file() {
     fs.open(filename_int, std::ios::binary | std::ios::in);
 
     if (!fs.is_open() || fs.eof()){
-        LogMessage2(DEVELOP, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND, path = ", filename_int.c_str() );
+        if(VLOG_IS_ON(2))
         return PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND;
     }
 
@@ -379,14 +379,14 @@ int Properties::write_all_data_to_file() {
     if(!fWriteToFile)
     #endif
     {
-        if(CheckLogLevel(DEVELOP))
-            LogMessage(INFO, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
+        if( VLOG_IS_ON(1) )
+            LogMessage(DEBUG, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
         return PROPERTY_WRITING_TURNED_OFF;
     }
 
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ios::trunc);
     if (!fs.is_open()){
-        LogMessage(ERROR, "Properties::write_all_data_to_file()::PROPERTY_ERROR_FILE_CANT_OPEN");
+        if( VLOG_IS_ON(1) )
         return PROPERTY_ERROR_FILE_CANT_OPEN;
     }
 

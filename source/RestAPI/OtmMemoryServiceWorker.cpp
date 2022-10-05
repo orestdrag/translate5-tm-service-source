@@ -153,6 +153,9 @@ typedef struct _LOOKUPINMEMORYDATA
 
 
 
+int OtmMemoryServiceWorker::init(){
+  return verifyAPISession();
+}
 
   /*! \brief Verify OpenTM2 API session
     \returns 0 if successful or an error code in case of failures

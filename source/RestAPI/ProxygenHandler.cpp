@@ -24,8 +24,7 @@ DEFINE_bool(request_number,
 
 namespace ProxygenService {
 
-ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
-}
+ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {}
 
 const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
@@ -33,7 +32,6 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::CREATE_MEM, "CREATE_MEM" },
         { ProxygenHandler::COMMAND::DELETE_MEM, "DELETE_MEM" },
         { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
-        //{ ProxygenHandler::COMMAND::IMPORT_MEM_INTERNAL_FORMAT, "IMPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::EXPORT_MEM, "EXPORT_MEM" },
         { ProxygenHandler::COMMAND::EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::STATUS_MEM, "STATUS_MEM" },
@@ -80,8 +78,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         iRC = pMemService->getStatus( memName, strResponseBody );
         responseText = "OK";
         iRC = 200;
-        //builder->status(iRC, "OK");
-        //builder->header("Content-Type", "application/json");
         builder->body(strResponseBody);
         break;
       }
@@ -92,7 +88,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         builder->body(strResponseBody);
         responseText = "OK";
         iRC = 200;
-        //builder->status(200, "OK");
         break;
       }
       case COMMAND::TAGREPLACEMENTTEST:
@@ -100,7 +95,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         std::string str;
         iRC = 200;
         pMemService->tagReplacement(str, iRC);
-        //builder->status(400, "WRONG REQUEST");
         break;
       }
       case COMMAND::EXPORT_MEM:
@@ -110,14 +104,12 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         builder->body(std::string(vMemData.begin(), vMemData.end()));
         responseText = "OK";
         iRC = 200;
-        //builder->status(400, "WRONG REQUEST");
         break;
       }
       
       case COMMAND::DELETE_MEM:
       {
         iRC = pMemService->deleteMem( memName, strResponseBody );
-        //builder->status(400, "WRONG REQUEST");
         break;
       }
       case COMMAND::SAVE_ALL_TM_ON_DISK:
@@ -125,7 +117,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         iRC = pMemService->saveAllTmOnDisk( strResponseBody );
         responseText = "OK";
         iRC = 200;
-        //builder->status(400, "WRONG REQUEST");
         break;
       }
       case COMMAND::SHUTDOWN:
@@ -136,9 +127,9 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
           LogStop();
 
           //TO DO:STOP SERVER HERE 
-        //break; 
-        //iRC = pMemService->shutdownService();
-        //builder->status(400, "WRONG REQUEST");
+          //break; 
+          //iRC = pMemService->shutdownService();
+          //builder->status(400, "WRONG REQUEST");
         break;
       }
       default:
@@ -162,88 +153,74 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     builder->header("t5memory-version", version);   
     builder->header("Content-Type", "application/json");
 
-    LogMessage5(DEBUG, __func__, ":: command = ", 
-              CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
+    //LogMessage5(DEBUG, __func__, ":: command = ", 
+    //          CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
 
-    //builder->send();
-    builder->sendWithEOM();//builder->send();
+    SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
+    if(memName.empty() == false){
+      AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
+    }
+
+    builder->sendWithEOM();
   }
 }
 
 void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
- 
-  //std::string strInputBodyData;//( body-> );
-  auto req_data = body->data();
-  
-  if(CheckLogLevel(DEBUG)){
-    //std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
-    //LogMessage8(RequestTransactionLogLevel, "processing ",""," request, Memory name = \"", strTM.c_str(), "\"\n Input(truncated) = \n\"", truncatedInput.c_str(), 
-    //"\"\n content length = ", toStr(body->size()).c_str());
+  if(body_ == nullptr){
+    body_ = std::move(body);
+  }else{
+    //body_->appendToChain(std::move(body));
+    //deprecated call of previous line, to compile with docker
+    body_->prependChain(std::move(body));
   }
-
-  
-  
-  
-  switch(this->command){
-    case COMMAND::CREATE_MEM:
-    case COMMAND::IMPORT_MEM:
-    //case COMMAND::IMPORT_MEM_INTERNAL_FORMAT:
-    {
-      if(body_ == nullptr){
-        body_ = std::move(body);
-      }else{
-        //body_->appendToChain(std::move(body));
-        //deprecated call of previous line, to compile with docker
-        body_->prependChain(std::move(body));
-      }
-      break; 
-    }
-    case COMMAND::FUZZY:
-    {
-      iRC =pMemService->search( memName, (char*) req_data, strResponseBody );
-      break;
-    }
-    case COMMAND::CONCORDANCE:
-    {
-      iRC = pMemService->concordanceSearch( memName, (char*) req_data, strResponseBody );
-      break;
-    }
-    case COMMAND::UPDATE_ENTRY:
-    {
-      iRC = pMemService->updateEntry( memName, (char*) req_data,  strResponseBody );
-      break;
-    }
-    case COMMAND::DELETE_ENTRY:
-    {
-      iRC = pMemService->deleteEntry( memName, (char*) req_data,  strResponseBody );
-      break;
-    }
-    default:
-    {
-      iRC = 400;
-      break;
-    }
-  }
-
-  
-  //ResponseBuilder(downstream_).body(std::move(body)).send();
 }
 
 void ProxygenHandler::onEOM() noexcept {
   //ResponseBuilder builder(downstream_);
+  
   if(command >= COMMAND::START_COMMANDS_WITH_BODY){
-    if(command == COMMAND::IMPORT_MEM ) 
-    {
-      body_->coalesce();
-      iRC = pMemService->import( memName, (char*) body_->data(), strResponseBody );
-    //}else if(command == COMMAND::IMPORT_MEM_INTERNAL_FORMAT)
-    //{
-    //  iRC = pMemService->import( memName, (char*) body_->data(), strResponseBody );
-    }else if(command == COMMAND::CREATE_MEM){    
-      body_->coalesce();  
-      iRC = pMemService->createMemory( (char*) body_->data(), strResponseBody );
-    }
+    body_->coalesce();  
+    std::string strInData = (char*) body_->data(); 
     
+    std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
+    AddToLogBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+
+    switch(this->command){
+      case COMMAND::CREATE_MEM:
+      {
+        iRC = pMemService->import( memName, strInData, strResponseBody );
+      }
+      case COMMAND::IMPORT_MEM:
+      {
+        iRC = pMemService->createMemory( strInData, strResponseBody );
+        break; 
+      }
+      case COMMAND::FUZZY:
+      {
+        iRC = pMemService->search( memName, strInData, strResponseBody );
+        break;
+      }
+      case COMMAND::CONCORDANCE:
+      {
+        iRC = pMemService->concordanceSearch( memName, strInData, strResponseBody );
+        break;
+      }
+      case COMMAND::UPDATE_ENTRY:
+      {
+        iRC = pMemService->updateEntry( memName, strInData,  strResponseBody );
+        break;
+      }
+      case COMMAND::DELETE_ENTRY:
+      {
+        iRC = pMemService->deleteEntry( memName, strInData,  strResponseBody );
+        break;
+      }
+      default:
+      {
+        iRC = 400;
+        break;
+      }
+    }
     builder->status(iRC, responseText);
     if (FLAGS_request_number) {
       builder->header("Request-Number",
@@ -261,8 +238,9 @@ void ProxygenHandler::onEOM() noexcept {
     } else{
       builder->header("Content-Type", "application/json");
     }
-    LogMessage5(DEBUG, __func__, ":: command = ", 
-                CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
+    
+    //LogMessage5(DEBUG, __func__, ":: command = ", 
+    //            CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
     if(strResponseBody.size())
       builder->body(strResponseBody);
     //builder->send();
@@ -275,6 +253,7 @@ void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
 }
 
 void ProxygenHandler::requestComplete() noexcept {
+  //ResetLogBuffer();
   delete this;
 }
 

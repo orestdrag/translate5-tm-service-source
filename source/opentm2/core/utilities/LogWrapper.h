@@ -3,10 +3,13 @@
 
 #include <string>
 
+//#include <glog/logging.h>
+
 #define toStr(i) std::to_string(i)
 
 extern "C"{
-    
+
+  #define VLOG_IS_ON(verboselevel)  1  
 #define LOG_DEBUG true
 
     enum LOGLEVEL{
@@ -57,6 +60,13 @@ extern "C"{
     //int SuppressLoggingInFile();
     int DesuppressLoggingInFile();
     int LogStop();
+
+    int ResetLogBuffer();
+    int SetLogBuffer(std::string logMsg);
+    int AddToLogBuffer(std::string logMsg);
+    void SetLogFilter(bool fFilterOn);
+    std::string FlushLogBuffer();
+
 }
 
 #endif //_LOG_WRAPPER_H_

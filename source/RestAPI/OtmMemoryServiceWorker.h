@@ -53,6 +53,8 @@ public:
 	static OtmMemoryServiceWorker* getInstance();
 
 	
+  int init();
+
   /*! \brief Import a memory from a TMX file
   \param strMemory name of memory
   \param strInputParms input parameters in JSON format

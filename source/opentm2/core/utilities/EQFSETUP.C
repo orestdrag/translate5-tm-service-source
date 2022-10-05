@@ -132,10 +132,6 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 //|                   create new property files;                               |
 //+----------------------------------------------------------------------------+
 
-#ifdef __linux__
-
-
-
 int init_properties(){
   if (int rc = properties_init()) {
         LogMessage2(FATAL,"Error in init_properties::Failed to initialize property file", toStr(rc).c_str());
@@ -172,7 +168,7 @@ int SetupMAT() {
     //properties_deinit();
     return 0;
 }
-#endif // __linux__
+
 
 //+----------------------------------------------------------------------------+
 //|Function name:     CreateSystemProperties                                   |
@@ -294,141 +290,6 @@ USHORT CreateSystemProperties(const char* pszPath)
     return (usRC);
 }
 
-#ifdef _WIN32
-USHORT CreateSystemProperties
-(
-  CHAR chPrimaryDrive,                 // MAT primary drive
-  PSZ  pszSecondaryDrives,             // MAT secondary drives
-  CHAR chLanDrive                      // MAT LAN drive
-)
-{
-    PPROPSYSTEM  pSysPropsOld = 0;     // buffer for ol system properties
-    PPROPSYSTEM  pSysProps = 0;        // buffer for new system properties
-    PSZ          pszEditor = 0;        // ptr for editor name processing
-    PSZ          pszTemp = 0;          // general purpose pointer
-    USHORT       usRC = 0;             // function return code
-
-	chLanDrive;
-
-    /******************************************************************/
-    /* Allocate area for new system properties                        */
-    /******************************************************************/
-    pSysProps    = (PPROPSYSTEM) malloc( sizeof( PROPSYSTEM) );
-    if ( pSysProps )
-    {
-      memset( pSysProps, NULC, sizeof( PROPSYSTEM) );
-    }
-    else
-    {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
-    } /* endif */
-
-    /******************************************************************/
-    /* Fill in property heading area                                  */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      SETPROPHEAD( pSysProps->PropHead, SYSTEM_PROPERTIES_NAME,
-                   PROP_CLASS_SYSTEM );
-    } /* endif */
-
-
-    /******************************************************************/
-    /* Fill rest of properties with default values                    */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      sprintf( pSysProps->szPrimaryDrive, "%c:", chPrimaryDrive );
-      sprintf( pSysProps->szLanDrive, "%c:", chPrimaryDrive );
-      sprintf( pSysProps->szDriveList, "%c%s", chPrimaryDrive, pszSecondaryDrives );
-      strcpy( pSysProps->szPropertyPath,    PROPDIR );
-      strcpy( pSysProps->szProgramPath,     WINDIR );
-      strcpy( pSysProps->szDicPath,         DICTDIR );
-      strcpy( pSysProps->szMemPath,         MEMDIR );
-      strcpy( pSysProps->szTablePath,       TABLEDIR );
-      strcpy( pSysProps->szCtrlPath,        CTRLDIR );
-      strcpy( pSysProps->szDllPath,         DLLDIR );
-      strcpy( pSysProps->szListPath,        LISTDIR );
-      strcpy( pSysProps->szMsgPath,         MSGDIR );
-      strcpy( pSysProps->szPrtPath,         PRTDIR );
-      strcpy( pSysProps->szExportPath,      EXPORTDIR );
-      strcpy( pSysProps->szBackupPath,      BACKUPDIR );
-      strcpy( pSysProps->szDirSourceDoc,    SOURCEDIR );
-      strcpy( pSysProps->szDirSegSourceDoc, SEGSOURCEDIR );
-      strcpy( pSysProps->szDirTargetDoc,    TARGETDIR );
-      strcpy( pSysProps->szDirSegTargetDoc, SEGTARGETDIR );
-      strcpy( pSysProps->szDirImport,       IMPORTDIR );
-      strcpy( pSysProps->szDirComMem,       COMMEMDIR );
-      strcpy( pSysProps->szDirComDict,      COMDICTDIR );
-      strcpy( pSysProps->szDirComProp,      COMPROPDIR );
-      strcpy( pSysProps->szWinPath,         WINDIR );
-      sprintf( pSysProps->RestartFolderLists, "\x15%c:\\%s\\%s",
-               chPrimaryDrive, PATH, DEFAULT_FOLDERLIST_NAME );
-      sprintf( pSysProps->FocusObject, "%c:\\%s\\%s",
-               chPrimaryDrive, PATH, DEFAULT_FOLDERLIST_NAME );
-      sprintf( pSysProps->RestartMemory, "\x15%s", MEMORY_PROPERTIES_NAME );
-      sprintf( pSysProps->RestartDicts, "\x15%c:\\%s\\%s",
-               chPrimaryDrive, PATH, DICT_PROPERTIES_NAME );
-      pSysProps->fUseIELikeListWindows = TRUE;
-      strcpy( pSysProps->szPluginPath,      PLUGINDIR );
-    } /* endif */
-
-    /******************************************************************/
-    /* Set intial restore size to 4/5 of desktop size and center      */
-    /* window inside desktop window                                   */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      pSysProps->Swp.x  = (SHORT) (cxDesktop / 5L / 2L);
-      pSysProps->Swp.y  = (SHORT) (cyDesktop / 5L / 2L);
-      pSysProps->Swp.cx = (SHORT) (cxDesktop * 4L / 5L);
-      pSysProps->Swp.cy = (SHORT) (cyDesktop * 4L / 5L);
-      pSysProps->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
-                          EQF_SWP_SHOW | EQF_SWP_MAXIMIZE;
-      pSysProps->SwpDef = pSysProps->Swp;
-    } /* endif */
-
-    /******************************************************************/
-    /* Add editor information                                         */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      pszEditor = EDITOR_PROPERTIES_NAME;
-      pszTemp = strchr( pszEditor, '.' );
-      strncpy( pSysProps->szDefaultEditor, pszEditor, pszTemp - pszEditor );
-    } /* endif */
-
-    /******************************************************************/
-    /* Try to read old system properties                              */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      pSysPropsOld = InstReadSysProps();
-    } /* endif */
-
-    /******************************************************************/
-    /* Save some of the values from the old properties to the new ones*/
-    /******************************************************************/
-    if ( !usRC && pSysPropsOld )
-    {
-       strcpy( pSysProps->szServerList, pSysPropsOld->szServerList );
-
-       free( pSysPropsOld );           // free storage used for old properties
-    } /* endif */
-
-    /******************************************************************/
-    /* Write properties and free data area                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      WritePropFile( chPrimaryDrive, SYSTEM_PROPERTIES_NAME, pSysProps,
-                     sizeof( PROPSYSTEM) );
-      free( pSysProps );
-    } /* endif */
-
-    return( usRC );
-} /* end of function CreateSystemProperties */
-#endif //_WIN32
 
 /* $KIT0890 A59 */
 //+----------------------------------------------------------------------------+
