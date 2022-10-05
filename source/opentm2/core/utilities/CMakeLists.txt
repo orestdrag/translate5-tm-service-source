@@ -40,6 +40,8 @@ set(Util_Source_Files
     ZipHelper.cpp 
 )
 
+set_source_files_properties(${Util_Source_Files} PROPERTIES LANGUAGE CXX )
+
 add_library(Util ${Util_Source_Files})
 
 set_target_properties(Util PROPERTIES POSITION_INDEPENDENT_CODE ON)

@@ -33,6 +33,8 @@ set(EqfMemoryPlugin_Source_Files
     ${OPENTM2_DIR}/EQFX_API.C
 )
 
+set_source_files_properties(${EqfMemoryPlugin_Source_Files} PROPERTIES LANGUAGE CXX )
+
 include(GNUInstallDirs)
 
 add_library(EqfMemoryPlugin ${EqfMemoryPlugin_Source_Files})

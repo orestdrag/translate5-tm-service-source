@@ -8,6 +8,8 @@ set(Morph_Source_Files MorphFactory.cpp
         SpellFactory.cpp
         )
 
+set_source_files_properties(${Morph_Source_Files} PROPERTIES LANGUAGE CXX )
+
 add_library(Morph ${Morph_Source_Files})
 
 target_include_directories(Morph PRIVATE

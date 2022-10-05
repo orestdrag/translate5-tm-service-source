@@ -7,6 +7,8 @@ set(TAGTABLE_SOURCE_FILES
     MarkupPluginMapper.cpp
 )
 
+set_source_files_properties(${TAGTABLE_SOURCE_FILES} PROPERTIES LANGUAGE CXX )
+
 add_library(Tagtable ${TAGTABLE_SOURCE_FILES})
 
 set_target_properties(Tagtable PROPERTIES POSITION_INDEPENDENT_CODE ON)

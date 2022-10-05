@@ -7,6 +7,8 @@ set(PlgMng_Source_Files PluginManager.cpp
         )
 
 
+set_source_files_properties(${PlgMng_Source_Files} PROPERTIES LANGUAGE CXX )
+
 add_library(PluginManager ${PlgMng_Source_Files})
 
 set_target_properties(PluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
