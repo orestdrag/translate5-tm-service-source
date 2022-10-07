@@ -284,12 +284,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     char szValue[150];
 
-    LogMessage7(TRANSACTION,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
+    LogMessage7(DEBUG,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
         szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
     
-    LogMessage(TRANSACTION, ":: creating address data structure");
+    LogMessage(DEBUG, ":: creating address data structure");
     folly::SocketAddress addr;
     ifaddrs* addresses = nullptr, *pAddr = nullptr; 
     char host[NI_MAXHOST];
@@ -341,16 +341,17 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     
     std::stringstream initMsg;
     initMsg << "Service details:\n  Service name = " << szServiceName;
-    initMsg << "\n  Address :" << host << ":" << toStr(uiPort); 
+    initMsg << "\n  Address :" << host << ":" << uiPort; 
     initMsg << "\n  Build date: " << buildDate;
     initMsg << "\n  Git commit info: " << gitHash;
     initMsg << "\n  Version: " << appVersion;
     initMsg << "\n  Workdir: " << szOtmDirPath;
-    initMsg << "\n  Worker threads: " << toStr(iWorkerThreads);
-    initMsg << "\n  Timeout: " << toStr(uiTimeOut);
-    initMsg << "\n  Log level: " << toStr(uiLogLevel);
-    initMsg << "\n  Triples threshold: " << toStr(uiThreshold);
-    initMsg << "\n  Localhost only: " << toStr(fLocalHostOnly);   
+    initMsg << "\n  Worker threads: " << iWorkerThreads;
+    initMsg << "\n  Timeout: " << uiTimeOut;
+    initMsg << "\n  Log level: " << uiLogLevel;
+    initMsg << "\n  Triples threshold: " << uiThreshold;
+    initMsg << "\n  Localhost only: " << fLocalHostOnly; 
+    initMsg << "\n  Allowed ram = " << uiAllowedRAM << " MB";  
     initMsg << "\n\n\n\
                 |==================================================================|\n\
                 |-------------Setup is done -> waiting for requests...-------------|\n\

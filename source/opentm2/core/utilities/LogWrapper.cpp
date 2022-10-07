@@ -12,7 +12,6 @@
 #include <thread>
 #include <cstring>
 
-#include <glog/logging.h>
 
 std::string logFilename;
 int logLevelTreshold = DEBUG;
@@ -136,18 +135,25 @@ int writeLog(std::string& message, int logLevel){
                     AddToLogBuffer(message + "\n");
                 }
             }else{
-                message = FlushLogBuffer() //+ "\n" 
-                        + message;
-                LOG(ERROR) << message;
+                if(logLevel == TRANSACTION){
+                    LOG(INFO) << message;
+                }
+                else{                
+                    message = FlushLogBuffer() //+ "\n" 
+                            + message;
+                    LOG(ERROR) << message;
+                }
             }
         }else{
             switch(logLevel){
                 case DEVELOP:{
-                    VLOG(2) << message;                    
+                    LOG(INFO) << message;
+                    //VLOG(2) << message;                    
                     break;
                 }
                 case DEBUG:{
-                    VLOG(1) << message;
+                    LOG(INFO) << message;
+                    //VLOG(1) << message;
                     break;
                 }
                 case INFO:{
@@ -207,6 +213,8 @@ int SetLogBuffer(std::string logMsg){
 }
 
 int AddToLogBuffer(std::string logMsg){
+    //LOG(INFO) << logMsg;
+    //LOG_DEBUG_MSG << logMsg;
     getLogBuffer() << logMsg;// << std::endl;
 }
 
@@ -242,9 +250,13 @@ int initLog(){
 
 
 int LogMessageStr(int LogLevel, const std::string& message){
-    if(LogLevel < logLevelTreshold && !VLOG_IS_ON(2)){
+    if(     LogLevel < logLevelTreshold
+        || (LogLevel <= DEBUG &&   !VLOG_IS_ON(1))
+        || (LogLevel == DEVELOP && !VLOG_IS_ON(2))
+        ) {
         return LOG_SMALLER_THAN_TRESHOLD;
     }
+
 
     //#ifdef SIMPLE_FILE_LOGGING_ENABLED
     if(logFilename.empty()){
@@ -393,6 +405,10 @@ int DesuppressLoggingInFile(){
 }
 
 int SetLogLevel(int level){
+    LogMessage2(DEBUG, __func__,":: Setting internal log level was disabled, use commandline\
+     flags for verbose level \'--v=[0..2]\' or \'--minloglevel=[0..3]\' instead");
+    logLevelTreshold = DEVELOP;
+    /*
     if(level <= FATAL && level>=DEVELOP){
         LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;
@@ -400,9 +416,13 @@ int SetLogLevel(int level){
     }else{
         LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
         return -1;
-    }
+    }//*/
 }
 
 bool CheckLogLevel(int level){
+    if(level <= DEBUG && !VLOG_IS_ON(1))
+        return false;
+    if(level == DEVELOP && !VLOG_IS_ON(2))
+        return false;
     return level >= logLevelTreshold;
 }

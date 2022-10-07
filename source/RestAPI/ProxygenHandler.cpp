@@ -68,7 +68,10 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   }
 
   stats_->recordRequest();
-  
+  SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
+    if(memName.empty() == false){
+      AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
+  }
 
   if(this->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
 
@@ -156,10 +159,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     //LogMessage5(DEBUG, __func__, ":: command = ", 
     //          CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
 
-    SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
-    if(memName.empty() == false){
-      AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
-    }
 
     builder->sendWithEOM();
   }

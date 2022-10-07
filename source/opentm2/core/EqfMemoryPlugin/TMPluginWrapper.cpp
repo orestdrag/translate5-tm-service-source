@@ -721,7 +721,7 @@ USHORT TokenizeSourceEx2
   }
   else
   {
-    LogMessage(DEVELOP, "TokenizeSourceEx2");
+    //LOG_DEVELOP_MSG << "TokenizeSourceEx2";
     pTagRecord = pSentence->pTagRecord;
     pTermTokens = pSentence->pTermTokens;
     pTagEntry = (PBYTE)pTagRecord;

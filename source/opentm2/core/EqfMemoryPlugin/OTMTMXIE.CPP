@@ -530,6 +530,7 @@ void TagReplacer::LogTag(TagInfo & tag){
           "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
           "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
   LogMessage(DEVELOP, logMsg.c_str());
+  //LOG_DEVELOP_MSG << logMsg;
   
   //LogMessage10(INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
   //        "/>\n    tagHasClosingTag = \"", toStr(tag.fPairedTagClosed).c_str(), "\" tagWasAlreadyUsedInTarget = \"", toStr(tag.fTagAlreadyUsedInTarget).c_str());
@@ -2313,7 +2314,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
                         (iMin       *         60L) +
                         (iHour      *       3600L) +
                         ((iDaysSince1970) * 86400L);
-                LogMessage(DEVELOP, "Do we need to corect for OS/2 format?");
+                //LOG_DEVELOP_MSG << "Do we need to corect for OS/2 format?";
                 lTime -= 10800L;                  // correction for OS/2 format: - 3 hours
               } /* endif */
             } /* endif */

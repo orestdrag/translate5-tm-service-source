@@ -168,9 +168,9 @@ int OtmMemoryServiceWorker::verifyAPISession
     return( 0 );
   }
 
-  LogMessage(INFO, "Initializing API Session");
+  LogMessage(DEBUG, "Initializing API Session");
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  LogMessage2(INFO, "[verifyAPISession] EqfStartSession ret: " , toStr(this->iLastRC).c_str());
+  LogMessage2(DEBUG, "[verifyAPISession] EqfStartSession ret: " , toStr(this->iLastRC).c_str());
 
   if ( this->iLastRC != 0 ) {
     LogMessage2(ERROR, "OpenTM2 API session could not be started, the return code is" , toStr( this->iLastRC ).c_str());

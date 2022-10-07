@@ -346,7 +346,7 @@ USHORT TokenizeW
         str = EncodingHelper::convertToUTF8(pszStartOfSegment + vTermList[i].iStartOffset);
         std::string msg = std::string(__func__) + "::Term " +toStr(i) + " Start=" + toStr(vTermList[i].iStartOffset) + ", Length=" + toStr(vTermList[i].iLength)
           + " Term=\"" + str + "\", Flags=" + strFlags;
-        LogMessage(DEVELOP, msg.c_str());
+        LogMessage(DEVELOP, msg.c_str());//LOG_DEVELOP_MSG << msg;
       
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
       }

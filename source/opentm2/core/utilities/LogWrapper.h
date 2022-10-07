@@ -2,14 +2,36 @@
 #define _LOG_WRAPPER_H_
 
 #include <string>
-
-//#include <glog/logging.h>
+#include <glog/logging.h>
 
 #define toStr(i) std::to_string(i)
 
+//#define LogDebug if(VLOG_IS_ON(1))\
+//                    LogMessage(DEBUG,
+
+//#define LogDebug(verboselevel)                                \
+//  __extension__  \
+//  ({ static google::int32* vlocal__ = &google::kLogSiteUninitialized;           \
+//     google::int32 verbose_level__ = (verboselevel);                    \
+//     (*vlocal__ >= verbose_level__) &&                          \
+//     ((vlocal__ != &google::kLogSiteUninitialized) ||                   \
+//      (google::InitVLOG3__(&vlocal__, &FLAGS_v,                         \
+//                   __FILE__, verbose_level__))); })
+
+#define LOG_DEBUG_MSG if(VLOG_IS_ON(1))      LOG(INFO) <<" [DEBUG] in "<< __func__<<": "
+
+//#define LOG_DEVELOP_MSG if(VLOG_IS_ON(2))      LOG(INFO) <<" [DEVELOP] in "<< __func__<<": "
+
+
+//#define LOG_DEBUG_MSG()    LOG(INFO)<<"[DEBUG]: "
+//#define LOG_DEBUG_MSG LOG(INFO)
+
+#define LOG_INFO_MSG LOG(INFO) <<" [INFO] in "<< __func__<<": "
+
+
 extern "C"{
 
-  #define VLOG_IS_ON(verboselevel)  1  
+  //#define VLOG_IS_ON(verboselevel)  1  
 #define LOG_DEBUG true
 
     enum LOGLEVEL{

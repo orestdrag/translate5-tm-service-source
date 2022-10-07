@@ -221,7 +221,7 @@ USHORT GetSysProp( PPROP_IDA pIda)
     memset( hprop, NULC, sizeof( *hprop));
 
     do {
-      LogMessage2(INFO, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
+      LogMessage2(DEBUG, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
       
       size = sizeof( PROPSYSTEM);
       auto pData = GetSystemPropInstance();    

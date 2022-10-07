@@ -540,9 +540,8 @@ USHORT EqfStartSession
     }
 #endif
 
-    LogMessage(INFO, "==EQFSTARTSESSION==\n" );
+  LogMessage(DEBUG, "==EQFSTARTSESSION==\n  Starting plugins...\n" );
 
-  LogMessage(INFO,  "   Starting plugins...\n" );
 
   // initialie plugins
   if ( usRC == NO_ERROR )
