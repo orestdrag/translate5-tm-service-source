@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+
 #include <folly/Memory.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/GFlags.h>
@@ -30,6 +31,16 @@
 #include "config.h"
 #include "OtmMemoryServiceWorker.h"
 
+DECLARE_string(servicename);
+DECLARE_bool(useconfigfile);
+DECLARE_int32(port);
+DECLARE_bool(localhostonly);
+DECLARE_int32(triplesthreshold);
+DECLARE_int32(timeout);
+DECLARE_int32(servicethreads);
+DECLARE_int32(allowedram);
+DECLARE_int32(t5loglevel);
+
 using namespace ProxygenService;
 using namespace proxygen;
 
@@ -37,6 +48,8 @@ using folly::SocketAddress;
 
 using Protocol = HTTPServer::Protocol;
 
+
+#define USE_CONFIG_FILE 1
 
 
 // replace plus signs in string with blanks
@@ -240,35 +253,67 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     unsigned int uiThreshold = 33;
     bool fLocalHostOnly = false;
 
-    /* get configuration settings */
-    {
-        std::string defOtmDirPath, path = filesystem_get_home_dir();
-        defOtmDirPath = path + "/.t5memory/";
-        path = defOtmDirPath + "t5memory.conf";
-        strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
+    std::string defOtmDirPath, path = filesystem_get_home_dir();
 
+    defOtmDirPath = path + "/.t5memory/";    
+    strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
+
+    if(FLAGS_servicename.empty() == false){
+      strncpy(szServiceName, FLAGS_servicename.c_str(), 100);
+    }
+
+    if(FLAGS_port){
+        uiPort = FLAGS_port;
+    }
+
+    if(FLAGS_timeout >= 0){
+        uiTimeOut = FLAGS_timeout;
+    }
+    if(FLAGS_triplesthreshold >= 0){
+        uiThreshold = FLAGS_triplesthreshold;
+    }
+    if(FLAGS_localhostonly >= 0){
+        fLocalHostOnly = FLAGS_localhostonly;
+    }
+
+    if(FLAGS_servicethreads > 0){
+        iWorkerThreads = FLAGS_servicethreads;
+    }
+
+    if(FLAGS_allowedram >= 0){
+        uiAllowedRAM = FLAGS_allowedram;
+    }
+    if(FLAGS_t5loglevel >= 0){
+        uiLogLevel = FLAGS_t5loglevel;
+    }
+
+    #ifdef USE_CONFIG_FILE
+    /* get configuration settings */
+    if(FLAGS_useconfigfile){
+        path = defOtmDirPath + "t5memory.conf";
         config conf(path);
         int res = conf.parse();
 
         if (!res) {
             strncpy(szServiceName,
-                conf.get_value("name", "t5memory").c_str(), 100);
+                conf.get_value("name", szServiceName).c_str(), 100);
             serviceName = szServiceName;
             additionalServiceName = serviceName+"_service";
 
             strncpy(szOtmDirPath,
                 conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
-            uiPort = std::stoi(conf.get_value("port", "4040"));
-            iWorkerThreads = std::stoi(conf.get_value("threads", "0"));
-            uiTimeOut = std::stoi(conf.get_value("timeout", "3600"));
-            uiLogLevel = std::stoi(conf.get_value("logLevel","2"));
-            uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,"500"));
-            uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, "33"));
-            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, "0")) == 1;
+            uiPort = std::stoi(conf.get_value("port", toStr(uiPort)));
+            iWorkerThreads = std::stoi(conf.get_value("threads", toStr(iWorkerThreads)));
+            uiTimeOut = std::stoi(conf.get_value("timeout", toStr(uiTimeOut)));
+            uiLogLevel = std::stoi(conf.get_value("logLevel",toStr(uiLogLevel)));
+            uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,toStr(uiAllowedRAM)));
+            uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, toStr(uiAllowedRAM)));
+            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly))) == 1;
         }else{
           LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
         }
     }
+    #endif
 
     properties_set_str_anyway(KEY_SERVICE_URL, szServiceName);
     properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
@@ -283,6 +328,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     SetLogLevel(uiLogLevel);
 
     char szValue[150];
+
 
     LogMessage7(DEBUG,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
         szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
