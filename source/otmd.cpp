@@ -16,22 +16,13 @@ static bool ValidatePort(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(port, 4080, "What port to listen on");
+FOLLY_GFLAGS_DEFINE_int32(port, 4080, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
-/*
-static bool ValidateLocalhostonly(const char* flagname, int32_t value) {
-   if (value == 0 || value == 1)   // value is ok
-     return true;
-   printf("Invalid value for --%s: %d, use only 0 or 1\n", flagname, (int)value);
-   return false;
-}//*/
+FOLLY_GFLAGS_DEFINE_bool(localhostonly, false, "Should we use localhost or external address for service");
 
-DEFINE_bool(localhostonly, false, "Should we use localhost or external address for service");
-//DEFINE_int32(localhostonly, 0, "Should we use localhost or external address for service");
-//DEFINE_validator(localhostonly, &ValidateLocalhostonly);
 
-DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
+FOLLY_GFLAGS_DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
 
 static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 100)   // value is ok
@@ -40,7 +31,7 @@ static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(triplesthreshold, 33, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
+FOLLY_GFLAGS_DEFINE_int32(triplesthreshold, 33, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
@@ -51,7 +42,7 @@ static bool ValidateTimeout(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(timeout, 3600, "Sets timeout for service request handling");
+FOLLY_GFLAGS_DEFINE_int32(timeout, 3600, "Sets timeout for service request handling");
 DEFINE_validator(timeout, &ValidateTimeout);
 
 
@@ -62,7 +53,7 @@ static bool ValidateThreads(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
+FOLLY_GFLAGS_DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
 DEFINE_validator(servicethreads, &ValidateThreads);
 
 
@@ -73,7 +64,7 @@ static bool ValidateRAM(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(allowedram, 500, "Sets amought RAM(in MB) allowed for service to use");
+FOLLY_GFLAGS_DEFINE_int32(allowedram, 500, "Sets amought RAM(in MB) allowed for service to use");
 DEFINE_validator(allowedram, &ValidateRAM);
 
 static bool ValidateLOGlevel(const char* flagname, int32_t value) {
@@ -83,11 +74,11 @@ static bool ValidateLOGlevel(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(t5loglevel, 0, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)[disabled]");
+FOLLY_GFLAGS_DEFINE_int32(t5loglevel, 0, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)[disabled]");
 DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
 
-DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
+FOLLY_GFLAGS_DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
 
 //#include <glog/logging.h>
 #include <execinfo.h>
