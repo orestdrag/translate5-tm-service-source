@@ -45,6 +45,6 @@ set_source_files_properties(${Util_Source_Files} PROPERTIES LANGUAGE CXX )
 add_library(Util ${Util_Source_Files})
 
 set_target_properties(Util PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-target_include_directories(Util PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    
+target_include_directories(Util PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} "/opt/local/include")
 target_link_libraries(Util PRIVATE libxerces-c-3.2.so EqfMemoryPlugin Morph zip ) #Util_zip)

@@ -2,7 +2,10 @@
 #define _LOG_WRAPPER_H_
 
 #include <string>
+
 #include <glog/logging.h>
+//#include <folly//logging.h>
+//#include <folly/logging/LogWriter.h>
 
 #define toStr(i) std::to_string(i)
 
