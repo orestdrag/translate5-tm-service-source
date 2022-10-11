@@ -146,18 +146,22 @@ void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
+   #ifdef GLOGGING_ENABLED
     if(FLAGS_log_dir.empty()){
 
 //        FLAGS_log_dir = "/home/or/.t5memory/LOG/";
         FLAGS_log_dir = "/root/.t5memory/LOG/";
     }
     FLAGS_colorlogtostderr = true;
+    #endif
     //FLAGS_alsologtostderr = true;
     //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     //gflags::ParseCommandLineFlags(&argc, &argv, false);
+    #ifdef GLOGGING_ENABLED
     google::InitGoogleLogging(argv[0]);//, &CustomPrefix);
+    #endif
 
     //int logLevel = 1/0;
     //WLogMessage(logLevel, "fail");

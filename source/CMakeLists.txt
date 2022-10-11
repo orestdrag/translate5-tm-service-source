@@ -74,7 +74,7 @@ target_include_directories(T5MEMORY PRIVATE
 find_package(Threads)
 find_package(OpenSSL REQUIRED)
 find_package(proxygen REQUIRED)
-find_package(glog REQUIRED)
+#find_package(glog REQUIRED)
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
