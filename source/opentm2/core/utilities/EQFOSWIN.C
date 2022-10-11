@@ -144,7 +144,7 @@ ULONG GetCodePage( USHORT usType )
 {
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
-  if(VLOG_IS_ON(1))
+  if(V_IS_ON(1))
     LogMessage2(INFO, "GetCodePage::usType = ", toStr(usType).c_str());
 
   switch ( usType )

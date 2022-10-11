@@ -76,7 +76,7 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
         || (strcasestr(cpath, ".TMD") )
         //|| (strcasestr(cpath, ".MEM") )
     ){
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
                         cpath, ", useFilebuffer before = ", toStr(useBuffer).c_str());
         }
@@ -94,7 +94,7 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
        LogMessage6(ERROR, "MoveFile:: cannot move ", fixedOldPath.c_str()," to ", fixedNewPath.c_str(), ", error = ", strerror(errno));
        return errno;
     }else{
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage4(INFO,"MoveFile:: file moved from ", fixedOldPath.c_str()," to ", fixedNewPath.c_str());
         }
     }
@@ -106,7 +106,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     fixedPath = FixPath(fixedPath);
     long fileSize = 0;
     FileBuffer* pFb = NULL;
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage6(DEBUG, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", toStr(useBuffer).c_str());
     }
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
@@ -118,7 +118,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         }
 
         if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
-            //if(VLOG_IS_ON(1)){
+            //if(V_IS_ON(1)){
                 LogMessage2(WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
             //}
             pFb = &(*getFileBufferInstance())[fixedPath];
@@ -128,21 +128,21 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
                 
-                if(VLOG_IS_ON(1)){
+                if(V_IS_ON(1)){
                     LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
                 }
                 int readed = fread(&pFb->data[0], fileSize, 1, ptr);
-                if(VLOG_IS_ON(1)){
+                if(V_IS_ON(1)){
                     LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",toStr(fileSize).c_str(),
                             "), fname = ", fixedPath.c_str(), "; readed = ", toStr(readed).c_str());
                 }
             }else{
-                if(VLOG_IS_ON(1)){
+                if(V_IS_ON(1)){
                     LogMessage2(INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath.c_str());
                 }
                 pFb->data.resize(16384);
             }
-            if(VLOG_IS_ON(1)){
+            if(V_IS_ON(1)){
                 LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", toStr(pFb->data.size()).c_str());
             }
             //pFb->status = FileBufferStatus::OPEN;
@@ -151,7 +151,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         pFb->offset = 0;
     }
 
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage8(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", toStr((long int)ptr).c_str(),
              "size = ", toStr(fileSize).c_str());
     }
@@ -187,7 +187,7 @@ int FilesystemHelper::DeleteFile(const std::string& path){
         LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         return errCode;
     }else{
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage3(DEBUG, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
         }
         return FILEHELPER_NO_ERROR;
@@ -200,7 +200,7 @@ bool FilesystemHelper::FileExists(std::string&& path){
     fixedPath = FixPath(fixedPath);
     struct stat buffer;   
     bool exists = (stat (fixedPath.c_str(), &buffer) == 0); 
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage5(INFO, __func__, ":: file \'", fixedPath.c_str(),"\' returned ", toStr(exists));
     }
     return exists;
@@ -216,12 +216,12 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     system(command.c_str());
     
     if(int errCode = system(command.c_str()) ){
-        if(CheckLogLevel(DEBUG) && VLOG_IS_ON(1)){
+        if(CheckLogLevel(DEBUG) && V_IS_ON(1)){
             LogMessage4(ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         }
         return errCode;
     }else{
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage3(DEBUG, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
         }
         return FILEHELPER_NO_ERROR;
@@ -248,7 +248,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
 
         pFb->status |= MODIFIED;
         if(offset + buffSize > pFb->data.size()){
-            if(VLOG_IS_ON(1)){
+            if(V_IS_ON(1)){
                 LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", toStr(pFb->data.size()).c_str(),
                     " to ", toStr(offset+buffSize).c_str());
             }
@@ -262,7 +262,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         LogMessage2(ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
         return -1;
     }
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", toStr(buffSize).c_str()," bytes written to buffer for ", fName.c_str());
     }
     return 0;
@@ -274,7 +274,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     FileBuffer* pFb = NULL;
 
     if(getFileBufferInstance()->find(fName) == getFileBufferInstance()->end()){
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage2(DEVELOP,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
         }
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
@@ -292,7 +292,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     }
     PUCHAR p = &(pFb->data[offset]);
     //
-    if(VLOG_IS_ON(1) && CheckLogLevel(DEVELOP)){
+    if(V_IS_ON(1) && CheckLogLevel(DEVELOP)){
         std::string msg = std::string(__func__) + ":: fName = " + fName + "; buff size = " + toStr(buffSize) + "; data.size = " + toStr(pFb->data.size()) + "; offset = "+ toStr(offset) + ";";
         LogMessage(DEVELOP, msg.c_str());
         //LOG_DEVELOP_MSG << msg;
@@ -300,7 +300,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     //
     memcpy(buff, p, buffSize);
     bytesRead = buffSize;
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage6(DEBUG, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
     }
     return 0;
@@ -316,7 +316,7 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
         (*pFBs)[fName].status &= ~MODIFIED;// reset modified flag
         //pFBs->erase(fName);
     }else{
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
         }
     }
@@ -330,7 +330,7 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
         pFb = &(*pFBs)[fName];
 
         if(pFb->status & FileBufferStatus::MODIFIED){
-            if(VLOG_IS_ON(1)){
+            if(V_IS_ON(1)){
                 LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
             }
             PUCHAR bufStart = &pFb->data[0];
@@ -340,7 +340,7 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
             WriteToFile(ptr, bufStart, size);
             fclose(ptr);
         }else{
-            if(VLOG_IS_ON(1)){
+            if(V_IS_ON(1)){
                 LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
             }
         }
@@ -386,12 +386,12 @@ int FilesystemHelper::FlushAllBuffers(std::string * modifiedFiles){
 }
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
-    if(VLOG_IS_ON(1)){
+    if(V_IS_ON(1)){
         LogMessage(DEBUG, "called FilesystemHelper::CloseFile()");
     }
     if(ptr){
         std::string fName = GetFileName(ptr);
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", toStr((long int) ptr).c_str() , "), fName = ", fName.c_str() );
         }
         fclose(ptr);
@@ -469,7 +469,7 @@ std::vector<std::string> FilesystemHelper::GetFilesList(std::string&& directory)
         LogMessage3(ERROR,__func__,":: can't open dir, path = ", directory.c_str());
         return {};
     }
-    if(VLOG_IS_ON(1)){    
+    if(V_IS_ON(1)){    
         LogMessage5(INFO,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
     }
 return files;
@@ -547,14 +547,14 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
 
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());
         }
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
-        if(VLOG_IS_ON(1)){
+        if(V_IS_ON(1)){
             LogMessage4(DEBUG, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
 
             LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
@@ -567,7 +567,7 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
             {
                 filesInBuf += it->first + '\n';
             }
-            if(VLOG_IS_ON(1)){
+            if(V_IS_ON(1)){
                 LogMessage(DEBUG, filesInBuf.c_str());
             }
         }
