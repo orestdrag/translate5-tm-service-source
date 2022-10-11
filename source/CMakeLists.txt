@@ -30,6 +30,8 @@ set (glog_DIR "/opt/local/lib/cmake/glog")
 set (gflags_DIR "/opt/local/lib/cmake/gflags")
 set (mvfst_DIR "/opt/local/lib/cmake/mvfst")
 set(Sodium_DIR "/opt/local/lib/cmake/sodium")
+#set(Sodium_DIR "/opt/local/lib/cmake/sodium")
+
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSODIUM libsodium)
@@ -47,6 +49,8 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenServer.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenHandler.cpp"
 )
+
+#list(APPEND CMAKE_PREFIX_PATH "/home/rip/Qt/5.12.1/gcc_64")
 
 link_directories(${RESTBED_LIBRARIES})
 
@@ -70,6 +74,7 @@ target_include_directories(T5MEMORY PRIVATE
 find_package(Threads)
 find_package(OpenSSL REQUIRED)
 find_package(proxygen REQUIRED)
+find_package(glog REQUIRED)
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
