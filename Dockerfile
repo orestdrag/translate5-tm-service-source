@@ -5,7 +5,11 @@ FROM sptrakesh/proxygen  as T5MEMORY
 RUN apk update
 RUN apk search -v
 
-RUN apk add xerces-c-dev icu-dev libc-dev gcc glib-dev libffi-dev build-base libressl-dev libsodium-dev zstd-dev gdb  rsync zip openssh openssh-server openrc #boost-dev musl-dev  clang
+RUN apk add xerces-c-dev icu-dev libc-dev gcc glib-dev libffi-dev \
+		build-base libressl-dev libsodium-dev zstd-dev gdb \ 
+		rsync zip openssh openssh-server openrc \
+		#boost-dev musl-dev  clang \ 
+		libexecinfo-dev libexecinfo 
 
 #RUN cd /home && git clone https://github.com/translate5/translate5-tm-service-source.git source
 #RUN cd /home/source && git checkout changing_http_lib_proxygen
