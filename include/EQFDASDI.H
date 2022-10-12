@@ -810,7 +810,7 @@ BOOL BuildLine
    PUSHORT  pusDataLen                // length of data area
    /*BOOL     fIsDBCS1[]   */             // ptr to DBCS flag array
 );
-__declspec(dllexport)
+
 BOOL FillMLE
 (
    HWND      hwndMLE,                  // handle of MLE
@@ -823,7 +823,7 @@ BOOL FillMLE
    // BOOL      fisDBCS1[]                // DBCS character flag array
 );
 
-__declspec(dllexport)
+
 BOOL SetFixedPitchMLEFont
 (
    HWND      hwndMLE,                  // handle of MLE

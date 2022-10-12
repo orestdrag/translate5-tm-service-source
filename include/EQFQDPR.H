@@ -127,4 +127,4 @@
 /**********************************************************************/
 /*                        function prototypes                         */
 /**********************************************************************/
-__declspec(dllexport) USHORT QDPRDictionaryPrint( PSZ );
+ USHORT QDPRDictionaryPrint( PSZ );

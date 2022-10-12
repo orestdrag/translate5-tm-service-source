@@ -12,7 +12,7 @@
 #include "OtmDictionary.h"
 
 /*! \brief Abstract base-class for plugins handling dictionaries */
-class __declspec(dllexport) OtmDictionaryPlugin: public OtmPlugin
+class  OtmDictionaryPlugin: public OtmPlugin
 {
 
 public:

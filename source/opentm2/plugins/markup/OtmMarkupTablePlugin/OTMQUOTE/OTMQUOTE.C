@@ -118,7 +118,7 @@ static MRIPARSMARKUPINFO MarkupInfo[20] = { { "", { 0, 0, 0 }  } };
 //| SideEffects:                                                               |
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2
 (
    PSZ pTagTable,
@@ -183,7 +183,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW
 (
    PSZ pTagTable,
@@ -229,7 +229,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW
 //| SideEffects:                                                               |
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW
 (
    PSZ pTagTable,
@@ -275,7 +275,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW
 //| SideEffects:                                                               |
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW
 (
    PSZ pTagTable,
@@ -424,7 +424,7 @@ int MriCountQuotes( PSZ_W pszString, CHAR_W chQuote, BOOL fEscapeChars )
 }
 
 // check segment content before it is saved
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFCHECKSEGEXW
 (
    PSZ_W pszPrevSrc,                     // previous source segment

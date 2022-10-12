@@ -56,17 +56,17 @@ typedef struct _GMOPTIONFILE
 } GMOPTIONFILE, *PGMOPTIONFILE;
 
 // loads a global memory option XML file into memory
-__declspec(dllexport)
+
 BOOL GlobMemLoadOptionFile( PSZ pszFileName, PVOID *ppvCTIDList );
 
 // free all resource asscociated with a loaded global memory XML file
-__declspec(dllexport)
+
 BOOL GlobMemFreeOptionFile( PVOID *ppvCTIDList );
 
 // saves a global memory option file to disk
-__declspec(dllexport)
+
 BOOL GlobMemSaveOptionFile( PSZ pszFileName, PVOID pvLoadedOptionFile );
 
 // get option for a proposal
-__declspec(dllexport)
+
 GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData );

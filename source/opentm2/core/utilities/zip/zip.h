@@ -21,7 +21,7 @@
 #else
 #ifdef _WIN32
 #ifdef ZIP_BUILD_SHARED
-#define ZIP_EXPORT __declspec(dllexport)
+#define ZIP_EXPORT 
 #else
 #define ZIP_EXPORT __declspec(dllimport)
 #endif

@@ -42,7 +42,7 @@ extern "C"
 */
 
 
-__declspec(dllexport)
+
 void InitTMPluginWrapper()
 {
   // access plugin manager

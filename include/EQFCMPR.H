@@ -32,7 +32,7 @@ typedef struct bit_mem
 
 BOOL        fUtlHuffmanCompress (PUCHAR pucDataArea, ULONG  ulInputLength,
                                  PULONG pulOutputLength);
-__declspec(dllexport)
+
 BOOL        fUtlHuffmanExpand (PUCHAR pucDataArea, ULONG ulMaxOutputLength,
                                PULONG pulOutputLength);
 BOOL        fUtlLZSSCompress (PUCHAR pucDataArea, ULONG ulInputLength,

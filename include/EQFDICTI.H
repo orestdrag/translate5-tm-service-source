@@ -498,13 +498,13 @@ INT_PTR CALLBACK DICTPROP_GENERAL_DLGPROC
 
 INT_PTR CALLBACK SETENTRYSTRUCTDLG ( HWND, WINMSG, WPARAM, LPARAM );
 INT_PTR CALLBACK DICMODELDLGPROC ( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
+
 INT_PTR CALLBACK PCH_DLGPROC ( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
+
 INT_PTR CALLBACK DICT1PASSWORDDLG ( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
+
 INT_PTR CALLBACK DICT2PASSWORDDLG ( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport)
+
 VOID DicFillEntryLB( HWND, PDICCREATEIDA, USHORT );
 static VOID DeleteDriveIcons( HWND, PSZ );
 
@@ -738,7 +738,7 @@ BOOL DicGetCheckPassword               // compute a password value or check
 );
 
 BOOL DicLoadFieldNames( PPROPDICTIONARY );
-__declspec(dllexport) BOOL DorgInit( HWND, PDORGIDA );
+ BOOL DorgInit( HWND, PDORGIDA );
 
-__declspec(dllexport) VOID   DictionaryOpen( HWND, PSZ, PDICTIONARYIDA );
-__declspec(dllexport) BOOL   DictionaryNew( HWND, PDICTPARMS );
+ VOID   DictionaryOpen( HWND, PSZ, PDICTIONARYIDA );
+ BOOL   DictionaryNew( HWND, PDICTPARMS );

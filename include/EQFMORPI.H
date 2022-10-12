@@ -184,9 +184,9 @@ typedef union _LISTTERM
 //+----------------------------------------------------------------------------+
 //|  Prototypes for internal functions of the morphologic functions module     |
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT MorphGetLCB( SHORT sLanguageID, PLCB *ppLCB );
+ USHORT MorphGetLCB( SHORT sLanguageID, PLCB *ppLCB );
 USHORT MorphRefreshDicts( PLCB pLCB, USHORT usDictType );
-__declspec(dllexport) USHORT MorphCheck4Refresh( PLCB pLCB );
+ USHORT MorphCheck4Refresh( PLCB pLCB );
 
 
 //+----------------------------------------------------------------------------+

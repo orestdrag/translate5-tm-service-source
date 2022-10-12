@@ -25,7 +25,7 @@ class OtmSegment;
 class OtmDocumentProperties;
 
 /*! \brief Abstract base-class for document objects */
-class __declspec(dllexport) OtmDocument
+class  OtmDocument
 {
 
 public:

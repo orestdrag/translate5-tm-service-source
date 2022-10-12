@@ -512,7 +512,7 @@ USHORT LstInsertListNames
 );
 
 
-__declspec(dllexport) BOOL List2DictInterface
+ BOOL List2DictInterface
 (
   HWND hwndCaller,
   PTERM *ppTermList,

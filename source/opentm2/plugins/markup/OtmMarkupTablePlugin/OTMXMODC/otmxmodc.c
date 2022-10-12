@@ -142,7 +142,7 @@ extern   short   sTPVersion ;               /* From USRCALLS.C  */
 *                                      that no further processing should be done
 *
 *******************************************************************************/
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
                    PSZ       pTagTable,
                    PSZ       pEdit,
@@ -291,7 +291,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
 *       Post-segmentation, including access to progress window.               
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
                     PSZ    pTagTable,
                     PSZ    pEdit,
@@ -382,7 +382,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 *                               FALSE: an error occured during processing
 *
 *******************************************************************************/
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
                      PSZ         pTagTable,
                      PSZ         pEdit,
@@ -458,7 +458,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
 *                                     FALSE: an error occured during processing
 *
 *******************************************************************************/
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
                       PSZ    pTagTable,
                       PSZ    pEdit,
@@ -1396,7 +1396,7 @@ BOOL FindSTargetType( char *InFile )
 *               EQF_BOOL      // 0=Successful
 *******************************************************************************/
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFQUERYEXITINFO(PSZ pszTagTable, // name of the markup table, e.g. "IBMHTM32"
                         USHORT usMode,   // type of information being queried
                         PSZ pszBuffer,   // buffer area receiving the information returned by the exit

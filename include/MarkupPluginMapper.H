@@ -16,15 +16,15 @@
 #include "../source/opentm2/core/pluginmanager/OtmMarkupPlugin.h"
 
 // find a markup table object by markup table name
-__declspec(dllexport)
+
  OtmMarkup *GetMarkupObject( char *pszMarkup, char *pszPlugin );
 
 // find a markup table plugin object by plugin name
-__declspec(dllexport)
+
  OtmMarkupPlugin *GetMarkupPluginObject( char *pszPlugin );
 
 // get the markup table plugin providing a specific markup table 
-__declspec(dllexport)
+
 OtmMarkupPlugin *GetMarkupPlugin( char *pszMarkupName );
 
 #endif

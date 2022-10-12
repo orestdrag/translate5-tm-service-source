@@ -57,11 +57,11 @@ extern "C"
 /*****************************************************************************
  * function prototypes of exported functions                                 *
  *****************************************************************************/
-__declspec(dllexport)
+
 VOID PluginManagerMenuProps();
-__declspec(dllexport)
+
 VOID PluginManagerAutoProps();
-__declspec(dllexport)
+
 VOID AutoVerUpProps(BOOL bFromMenu);
 int PluginManagerGUIStart();
 

@@ -73,11 +73,11 @@ typedef struct tagMDIDIALOGINFO {
 // function declarations
 
 BOOL NEAR CreateMDIDialogChildren( HWND, LPSTR, int, HFONT, WORD, WORD ) ;
-__declspec(dllexport)
+
 BOOL FAR PASCAL RegisterMDIDialog( HINSTANCE ) ;
-__declspec(dllexport)
+
 /*HWND FAR PASCAL CreateMDIDialogParam( HINSTANCE, LPCSTR, HWND, FARPROC,
                                       LPARAM, BOOL, HICON ) ;
 */
-__declspec(dllexport)
+
 LRESULT FAR PASCAL MDIDialogProc( HWND, UINT, WPARAM, LPARAM ) ;

@@ -361,7 +361,7 @@ typedef enum
 /**********************************************************************/
 /* Event recording function (do not call directly, use macros instead)*/
 /**********************************************************************/
-__declspec(dllexport)
+
 BOOL UtlEvent
 (
   SHORT sEventType,                    // type of the event
@@ -369,7 +369,7 @@ BOOL UtlEvent
   SHORT sEventClass,                   // the event class
   SHORT sEventRC                       // the event return code or error code
 );
-__declspec(dllexport)
+
 BOOL UtlEvent2
 (
   SHORT sEventType,                    // type of the event
@@ -380,7 +380,7 @@ BOOL UtlEvent2
   PSZ   pszAddData                     // additional data for event (string)
 );
 
-__declspec(dllexport)
+
 BOOL UtlAddEventGroup
 (
   SHORT sGroup                       // the event group

@@ -39,7 +39,7 @@ typedef struct _FOLDERLIST
 /* Export window proc */
 MRESULT APIENTRY FolderListHandlerWP( HWND, WINMSG, WPARAM, LPARAM);
 MRESULT APIENTRY FolderListWP( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport)
+
 VOID    FllLoadFolderNames( HWND hlbox, PSZ pszBuffer );
 PSZ     QuerySelFolderName( PLISTCOMMAREA, BOOL );
 USHORT  MakeDriveButtons( HWND hwnd, PSZ pCurDrvLst);
@@ -59,4 +59,4 @@ typedef struct _FLLDUMPIDA
 #endif
 
 //   End of EQFFLL00.H
-//ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½

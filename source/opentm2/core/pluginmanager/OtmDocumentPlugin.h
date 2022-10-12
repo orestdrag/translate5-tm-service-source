@@ -12,7 +12,7 @@
 #include "OtmDocument.h"
 
 /*! \brief Abstract base-class for plugins handling documents */
-class __declspec(dllexport) OtmDocumentPlugin: public OtmPlugin
+class  OtmDocumentPlugin: public OtmPlugin
 {
 
 public:

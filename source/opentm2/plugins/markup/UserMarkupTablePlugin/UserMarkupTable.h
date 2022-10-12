@@ -29,7 +29,7 @@ typedef struct _MARKUPINFO
 /*! \brief Class for the markup table implementation for USER markup tables
 */
 
-class __declspec(dllexport) UserMarkupTable: public OtmMarkup 
+class  UserMarkupTable: public OtmMarkup 
 {
   private:
 

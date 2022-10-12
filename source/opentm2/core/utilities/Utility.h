@@ -73,7 +73,7 @@ typedef struct _UTIVARS                // structure for static variables of UTI
 } UTIVARS;
 
 #ifdef STATIC_OWNER
-__declspec(dllexport)
+
 UTIVARS UtiVar[ MAX_TASK + 1 ] =       // static variables of module UTI
 {
  {
@@ -98,9 +98,9 @@ UTIVARS UtiVar[ MAX_TASK + 1 ] =       // static variables of module UTI
 },
 };
 
-__declspec(dllexport)
+
 UCHAR  chEQFLower[ 257 ];       // lower case table
-__declspec(dllexport)
+
 UCHAR  chEQFUpper[ 257 ];       // upper case table
 
 #else

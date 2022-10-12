@@ -131,24 +131,24 @@ typedef struct _MD_METADATA
 } MD_METADATA, *PMD_METADATA;
 
 
-__declspec(dllexport)
+
 PMD_ELEMENT_HDR MDGetFirstElement( PMD_METADATA pData );
 
-__declspec(dllexport)
+
 PMD_ELEMENT_HDR MDGetNextElement( PMD_ELEMENT_HDR pElement );
 
 // Create an empty metadata area
-__declspec(dllexport)
+
 BOOL MDCreateMetaData( PMD_METADATA *ppData );
 
 // Find first metadata element of the given type
-__declspec(dllexport)
+
 PMD_ELEMENT_HDR MDFindElementByType( PMD_METADATA pData, MD_TYPE Type );
 
 // Add a metadata element to a metadata area
-__declspec(dllexport)
+
 BOOL MDAddElement( PMD_METADATA *ppData, PMD_ELEMENT_HDR pElement );
 
 // Release a metadata area
-__declspec(dllexport)
+
 BOOL MDFreeMetaData( PMD_METADATA *ppData );

@@ -47,18 +47,18 @@ typedef struct _FOLDERIDA
 
 
 /* Export window proc */
-__declspec(dllexport)SHORT   DeleteDir( PSZ Path, PSZ Name, BOOL forceflg);
-__declspec(dllexport)SHORT   DeleteFolder( PSZ objname, HWND hwndParent, PUSHORT pusYesToAllMode );
-__declspec(dllexport)SHORT   CreateFolder( HWND hwnd, PBOOL pfMustNotClose, PSZ pszObjName);
+SHORT   DeleteDir( PSZ Path, PSZ Name, BOOL forceflg);
+SHORT   DeleteFolder( PSZ objname, HWND hwndParent, PUSHORT pusYesToAllMode );
+SHORT   CreateFolder( HWND hwnd, PBOOL pfMustNotClose, PSZ pszObjName);
 
 // subfolder stuff
-__declspec(dllexport)SHORT   FolCreateSubFolder( PSZ pszParentFolder );
-__declspec(dllexport)INT_PTR CALLBACK SUBFOLDERDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) SHORT FolSubFolderProperties( PSZ pszObjName );
+SHORT   FolCreateSubFolder( PSZ pszParentFolder );
+INT_PTR CALLBACK SUBFOLDERDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
+ SHORT FolSubFolderProperties( PSZ pszObjName );
 
 // reside in EQFFOL01.H
-__declspec(dllexport) INT_PTR CALLBACK NEWFOLDERDLG( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) INT_PTR CALLBACK FOLDERPROPSDLG( HWND, WINMSG, WPARAM, LPARAM);
+ INT_PTR CALLBACK NEWFOLDERDLG( HWND, WINMSG, WPARAM, LPARAM);
+ INT_PTR CALLBACK FOLDERPROPSDLG( HWND, WINMSG, WPARAM, LPARAM);
 
 //--- shortcut for enabling/disabling dialog controls
 #define ENABLE( hwnd, id, flag ) WinEnableWindow( WinWindowFromID( hwnd, id ), \
@@ -549,15 +549,15 @@ MRESULT FolNewControl( HWND, SHORT, SHORT );
 MRESULT FolNewCommand( HWND, SHORT, SHORT );
 
 USHORT FolExpSetEnableState ( HWND, BOOL );
-__declspec(dllexport) VOID FolderImport( HWND, PSZ );
-__declspec(dllexport) HWND GetFolderImportHandle();
+ VOID FolderImport( HWND, PSZ );
+ HWND GetFolderImportHandle();
 VOID   DeleteExportedFolder( VOID );
 INT_PTR CALLBACK FOLIMPORTWP( HWND, WINMSG, WPARAM, LPARAM );
 BOOL FolImpBuildObjList ( PSZ, PSZ, PSZ *, PULONG );
 BOOL FolImpBuildObject( PSZ, PSZ, PSZ, ULONG, PSZ );
 VOID FolMakeImportPath ( PSZ, CHAR, USHORT, PSZ );
-__declspec(dllexport) VOID FolderExport( HWND hwnd, PSZ pSelFolderName, PSZ pszObjList );
-__declspec(dllexport) HWND GetFolderExportHandle();
+ VOID FolderExport( HWND hwnd, PSZ pSelFolderName, PSZ pszObjList );
+ HWND GetFolderExportHandle();
 
 BOOL FolderPropertySheetLoad( HWND hwndDlg, PFOLPROPIDA pFolIda);
 MRESULT FolderPropsPropertySheetNotification( HWND hwndDlg, WPARAM , LPARAM );
@@ -591,19 +591,19 @@ BOOL FolExpAddDict
 VOID FolImpInfoPrintDetails ( PFOLIMPIDA  pIda, HWND hwndDlg );
 
 PSZ  FolGetSourceLng( PFOLPROPIDA pIda, PSZ pszDictName );
-__declspec(dllexport) USHORT FolUpdLangFromMemory
+ USHORT FolUpdLangFromMemory
 (
   HPROP            hFolProp,           // folder properties handle
   BOOL             fMsg                // do-message-handling flag
 );
-__declspec(dllexport) USHORT FolUpdLangFromMemoryHwnd
+ USHORT FolUpdLangFromMemoryHwnd
 (
   HPROP            hFolProp,           // folder properties handle
   BOOL             fMsg,               // do-message-handling flag
   HWND             hwnd                // owner handle for error messages
 );
 
-__declspec(dllexport) INT_PTR CALLBACK FOLLANGDLGPROC
+ INT_PTR CALLBACK FOLLANGDLGPROC
 (
   HWND hwndDlg,
   WINMSG msg,
@@ -611,24 +611,24 @@ __declspec(dllexport) INT_PTR CALLBACK FOLLANGDLGPROC
   LPARAM mp2
 );
 
-__declspec(dllexport) VOID FolSetDefaultPos( EQF_PSWP );
+ VOID FolSetDefaultPos( EQF_PSWP );
 
 
-__declspec(dllexport) BOOL FolGlobFindChange
+ BOOL FolGlobFindChange
 (
   PSZ              pszFolObjName,      // folder object name
   BOOL             fFromFolderList,    // TRUE = called from folder list
   BOOL             fMultipleObjs       // TRUE = called with a list of folder object names
 );
 
-__declspec(dllexport) BOOL FolFuzzySearch
+ BOOL FolFuzzySearch
 (
   PSZ              pszFolObjName,      // folder object name
   BOOL             fFromFolderList,    // TRUE = called from folder list
   BOOL             fMultipleObjs       // TRUE = called with a list of folder object names
 );
 
-__declspec(dllexport) BOOL FolSpellcheck
+ BOOL FolSpellcheck
 (
   PSZ              pszFolObjName,      // folder object name
   BOOL             fFromFolderList,    // TRUE = called from folder list
@@ -636,10 +636,10 @@ __declspec(dllexport) BOOL FolSpellcheck
 );
 
 
-__declspec(dllexport) USHORT FolBatchFolderCreate( HWND, PDDEFOLCRT );
-__declspec(dllexport) USHORT FolBatchFolderExport( HWND, PDDEFOLEXP );
-__declspec(dllexport) USHORT FolBatchFolderImport( HWND, PDDEFOLIMP );
-__declspec(dllexport) USHORT FolBatchFolderDelete( PDDEFOLDEL );
+ USHORT FolBatchFolderCreate( HWND, PDDEFOLCRT );
+ USHORT FolBatchFolderExport( HWND, PDDEFOLEXP );
+ USHORT FolBatchFolderImport( HWND, PDDEFOLIMP );
+ USHORT FolBatchFolderDelete( PDDEFOLDEL );
 
 USHORT FolMergeHistoryLog
 (
@@ -670,8 +670,8 @@ INT_PTR CALLBACK FOLIMPDOCDLGPROC( HWND, WINMSG, WPARAM, LPARAM );
 
 #endif
 
-__declspec(dllexport) BOOL FolRenameFolder( PSZ pszOldAndNewName, BOOL fMsg );
-__declspec(dllexport) BOOL FolCorrectPropHead( PSZ pszPropName, CHAR chNewDrive, PSZ pszNewPath, PSZ pszNewName, HWND hwnd );
+ BOOL FolRenameFolder( PSZ pszOldAndNewName, BOOL fMsg );
+ BOOL FolCorrectPropHead( PSZ pszPropName, CHAR chNewDrive, PSZ pszNewPath, PSZ pszNewName, HWND hwnd );
 
 
 // folder export/import formats
@@ -682,14 +682,14 @@ __declspec(dllexport) BOOL FolCorrectPropHead( PSZ pszPropName, CHAR chNewDrive,
 
 void FolFillFolderFormatCombobox( HWND hwnd, int id, USHORT usFormat );
 
-__declspec(dllexport) USHORT FolIntRemoveDocs
+ USHORT FolIntRemoveDocs
 (
   PSZ         pszFolObjName,           // folder object name
   PSZ         pszListFile,             // name of list file 
   int         *piNumOfDocs,            // callers buffer for the number of removed documents
   HWND        hwndErrMsg
 );
-__declspec(dllexport) USHORT FolIntRestoreDocs
+ USHORT FolIntRestoreDocs
 (
   PSZ         pszFolObjName,           // folder object name
   int         *piNumOfDocs,            // callers buffer for the number of restored documents

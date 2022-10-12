@@ -53,7 +53,7 @@ typedef struct _DOCEXPVALOPTIONS
 
 // document export in validation format functions
 
-__declspec(dllexport)
+
 int DocExpValInit
 (
   PDOCEXPVALOPTIONS pOptions,                    // document options
@@ -64,20 +64,20 @@ int DocExpValInit
   HWND        hwndParent                         // parent window handle (used as parent window for error messages)
 );
 
-__declspec(dllexport)
+
 int DocExpValTerminate
 (
   LONG        lHandle                            // val format export handle
 );
 
-__declspec(dllexport)
+
 int DocExpValProcess
 (
   LONG        lHandle,                            // val format export handle
   PSZ         pszDocObjName                       // object name of document being exported
 );
 
-__declspec(dllexport)
+
 int DocExpValPreScan
 (
   LONG        lHandle,                            // val format export handle

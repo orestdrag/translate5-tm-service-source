@@ -1187,39 +1187,39 @@ typedef struct _DICTTIME
   #endif
 #endif
 
-__declspec(dllexport)
+
  SHORT QDAMDictOpenLocal   ( PSZ, SHORT, USHORT, PPBTREE );
-__declspec(dllexport)
+
  SHORT QDAMDictCreateLocal ( PSZ, SHORT, PCHAR, USHORT, PCHAR,
                              PCHAR, PCHAR, PBTREE * , PNTMVITALINFO );
-__declspec(dllexport)
+
  SHORT QDAMDictCloseLocal  ( PBTREE );
-__declspec(dllexport)
+
  SHORT QDAMDictSignLocal   ( PBTREE, PCHAR, PUSHORT  );
-__declspec(dllexport)
+
  SHORT QDAMDictUpdSignLocal( PBTREE, PCHAR, ULONG  );
-__declspec(dllexport)
+
  SHORT QDAMDictSubStrLocal ( PBTREE, PTMWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
-__declspec(dllexport)
+
  SHORT QDAMDictEquivLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
-__declspec(dllexport)
+
  SHORT QDAMDictExactLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG, USHORT );
-__declspec(dllexport)
+
  SHORT QDAMDictNextLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
-__declspec(dllexport)
+
  SHORT QDAMDictPrevLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
-__declspec(dllexport)
+
  SHORT QDAMDictCurrentLocal( PBTREE, PBYTE, PULONG,  PBYTE, PULONG  );
-__declspec(dllexport)
+
  SHORT QDAMDictInsertLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
-__declspec(dllexport)
+
  SHORT QDAMDictUpdateLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
  SHORT QDAMDictDeleteLocal ( PBTREE, PTMWCHAR );
  SHORT QDAMDictFlushLocal  ( PBTREE );
  SHORT QDAMDictCopyLocal   ( PBTREE, PBTREE );
- __declspec(dllexport)
+ 
  SHORT QDAMDictNumEntriesLocal ( PBTREE, PULONG );
-__declspec(dllexport)
+
  SHORT QDAMDictFirstLocal ( PBTREE, PTMWCHAR, PULONG, PBYTE, PULONG );
 
 
@@ -1230,7 +1230,7 @@ __declspec(dllexport)
  SHORT QDAMFindChild_V3 ( PBTREE, PTMWCHAR, USHORT, PBTREEBUFFER_V3 * );
  SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PTMWCHAR, PSHORT, SEARCHTYPE, PSHORT);
  SHORT QDAMFreeRecord_V3 ( PBTREE, PBTREEBUFFER_V3, RECTYPE );
-__declspec(dllexport)
+
  SHORT QDAMWriteHeader ( PBTREE );
  SHORT QDAMWriteRecord_V3(PBTREE, PBTREEBUFFER_V3);
  SHORT QDAMChangeKey_V3(PBTREE, USHORT, PTMWCHAR, PTMWCHAR );
@@ -1248,7 +1248,7 @@ __declspec(dllexport)
  BOOL  QDAMDeleteKey_V3( PBTREE, PBTREEBUFFER_V3, PCHAR);
  SHORT QDAMDestroy ( PBTREE );
  SHORT QDAMKeyCompare ( PVOID, PVOID, PVOID );
- __declspec(dllexport)
+ 
  SHORT QDAMKeyCompareNonUnicode ( PVOID, PVOID, PVOID );
  SHORT QDAMFirst_V3( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
  SHORT QDAMNext_V3( PBTREE, PRECPARAM,  PRECPARAM,PRECPARAM );
@@ -1281,7 +1281,7 @@ __declspec(dllexport)
  SHORT  QDAMLocSubstr_V3( PBTREE, PBTREEBUFFER_V3, PTMWCHAR, PBYTE, PULONG, PBYTE, PULONG );
 
 
-__declspec(dllexport)
+
  SHORT  QDAMCheckDict( PUSHORT, PBTREE );
  SHORT  QDAMAddDict( PUSHORT, PBTREE );
  USHORT QDAMRemoveDict( PBTREE );
@@ -1299,7 +1299,7 @@ __declspec(dllexport)
 
  USHORT RenameOrganize( PUSHORT pszDictPath, CHAR chPrimDrive, USHORT usCloseRc );
 
- __declspec(dllexport)
+ 
  USHORT DamBTreeRc ( SHORT sRc );
 
  /*********************************************************************/
@@ -1307,21 +1307,21 @@ __declspec(dllexport)
  /*********************************************************************/
 #define DAMLINK _loadds far pascal
 
-__declspec(dllexport)
+
 void DAMLINK NlpLockEntryW ( USHORT, PSZ_W, BOOL, PUSHORT );
-__declspec(dllexport)
+
 void DAMLINK NlpLockDict ( USHORT, BOOL, PUSHORT );
-__declspec(dllexport)
+
 void DAMLINK NlpRetBTree ( USHORT, PVOID * , PLONG );
-__declspec(dllexport)
+
 void DAMLINK NlpCloseOrganize( USHORT, PSZ, CHAR, PUSHORT, USHORT );
-__declspec(dllexport)
+
 void DAMLINK NlpDictUpdTime( USHORT, PLONG, PUSHORT );
-__declspec(dllexport)
+
 void DAMLINK NlpTermListW ( USHORT, USHORT, PSZ_W, USHORT, USHORT,
                                       PSZ_W, USHORT, PUSHORT );
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpBegAsd( USHORT,                 /* in  - max. files allowed  */
              USHORT,                 /* in  - max. indexes / base */
@@ -1330,7 +1330,7 @@ void DAMLINK
              PUSHORT,                /* out - user handle         */
              PUSHORT);               /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpEndAsd( USHORT,                 /* in  - user handle         */
              PUSHORT);               /* out - return code         */
@@ -1344,7 +1344,7 @@ void DAMLINK
              PUSHORT,               /* out - length of user area */
              PUSHORT);              /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpBuildAsd(PUCHAR,               /* in  - dictionary name     */
               USHORT,               /* in  - dictionary type     */
@@ -1365,13 +1365,13 @@ void DAMLINK
               PUSHORT,              /* out - dictionary handle   */
               PUSHORT);             /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpCloseAsd(USHORT,               /* in  - dictionary handle   */
               USHORT,               /* in  - user handle         */
               PUSHORT);             /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpAssocAsd(PUSHORT,              /* in  - dictionary handles  */
               USHORT,               /* in  - user handle         */
@@ -1403,7 +1403,7 @@ void DAMLINK
                   PUCHAR,           /* in  - user-defined data   */
                   PUSHORT);         /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpRenumberAsd(USHORT,            /* in  - dictionary handle   */
                  USHORT,            /* in  - user area handle    */
@@ -1418,7 +1418,7 @@ void DAMLINK
                   PUSHORT,          /* out - result of compare   */
                   PUSHORT);         /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpFndBeginAsdW(PSZ_W,            /* in  - desired substring   */
                  USHORT,            /* in  - dictionary handle   */
@@ -1429,7 +1429,7 @@ void DAMLINK
                  PUSHORT,           /* out - dictionary of match */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpFndEquivAsdW(PSZ_W,            /* in  - desired term        */
                  USHORT,            /* in  - dictionary handle   */
@@ -1440,7 +1440,7 @@ void DAMLINK
                  PUSHORT,           /* out - dictionary of match */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpFndMatchAsdW(PSZ_W,            /* in  - desired term        */
                  USHORT,            /* in  - dictionary handle   */
@@ -1452,7 +1452,7 @@ void DAMLINK
                  PUSHORT,           /* out - return code         */
                  USHORT);           /* in  - search subtype      */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpFndNumberAsdW(ULONG,            /* in  - desired term number */
                   USHORT,           /* in  - dictionary handle   */
@@ -1463,7 +1463,7 @@ void DAMLINK
                   PUSHORT,          /* out - dictionary of match */
                   PUSHORT);         /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpNxtTermAsdW(USHORT,             /* in  - dictionary handle   */
                 USHORT,             /* in  - user handle         */
@@ -1472,7 +1472,7 @@ void DAMLINK
                 PULONG,             /* out - entry data length   */
                 PUSHORT,            /* out - dictionary of match */
                 PUSHORT);           /* out - return code         */
-__declspec(dllexport)
+
 void DAMLINK
 NlpNxtTermAsd
 (
@@ -1485,7 +1485,7 @@ NlpNxtTermAsd
    PUSHORT pusRc
 );             // needed for organize of old dicts
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpPrvTermAsdW(USHORT,             /* in  - dictionary handle   */
                 USHORT,             /* in  - user handle         */
@@ -1495,7 +1495,7 @@ void DAMLINK
                 PUSHORT,            /* out - dictionary of match */
                 PUSHORT);           /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpInsEntryAsdW(PSZ_W,            /* in  - term for new entry  */
                  PBYTE,            /* in  - data for term entry */
@@ -1505,7 +1505,7 @@ void DAMLINK
                  PULONG,            /* out - inserted term's #   */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpUpdEntryAsdW(PSZ_W ,            /* in  - term to update      */
                  PBYTE ,            /* in  - data for term entry */
@@ -1515,14 +1515,14 @@ void DAMLINK
                  PULONG,            /* out - updated term number */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpDelEntryAsdW(PSZ_W,            /* in  - term to be deleted  */
                  USHORT,            /* in  - dictionary handle   */
                  USHORT,            /* in  - user handle         */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpRetEntryAsdW(USHORT,            /* in  - dictionary handle   */
                  USHORT,            /* in  - user handle         */
@@ -1533,7 +1533,7 @@ void DAMLINK
                  PUSHORT,           /* out - dictionary of term  */
                  PUSHORT);          /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
 NlpRetEntryAsd
 (
@@ -1566,7 +1566,7 @@ void DAMLINK
                 PULONG,             /* out - length of list      */
                 PUSHORT);           /* out - return code         */
 
-__declspec(dllexport)
+
 void DAMLINK
   NlpResynchAsd(USHORT,             /* in  - dictionary handle   */
                 USHORT,             /* in  - user handle         */
@@ -1591,7 +1591,7 @@ void DAMLINK
 // Returncodes:       0   keys are equal
 //                    <> keys are unequal
 //+----------------------------------------------------------------------------+
-__declspec(dllexport)
+
 SHORT NTMKeyCompare
 (
     PVOID  pBTIda,                     // pointer to tree structure
@@ -1618,7 +1618,7 @@ SHORT NTMKeyCompare
 
   #define SETDATALENGTH( pBT, pData, ulLen )   *((PULONG)(pData)) = ulLen; 
 
-__declspec(dllexport)
+
 SHORT QDAMPhysLock
 (
    PBTREE         pBTIda,
@@ -1631,7 +1631,7 @@ SHORT QDAMCheckForUpdates
    PBTREE         pBTIda
 );
 
-__declspec(dllexport)
+
 SHORT QDAMIncrUpdCounter
 (
    PBTREE     pBTIda,                  // pointer to btree structure
@@ -1639,7 +1639,7 @@ SHORT QDAMIncrUpdCounter
    PLONG      plNewValue               // ptr to buffer for new counte value
 );
 
-__declspec(dllexport)
+
 SHORT QDAMGetUpdCounter
 (
    PBTREE     pBTIda,                  // pointer to btree structure
@@ -1648,7 +1648,7 @@ SHORT QDAMGetUpdCounter
    SHORT      sNumCounters             // number of requested update counters
 );
 
-__declspec(dllexport)
+
 SHORT QDAMUpdateLockRec
 (
    PBTREE     pBTIda,                  // pointer to btree structure
@@ -1664,7 +1664,7 @@ SHORT QDAMDosRC2BtreeRC
   USHORT usOpenFlags                   // open flags of database
 );
 
-__declspec(dllexport)
+
 USHORT QDamWildCardList
 (
   USHORT,             // in  - user handle
@@ -1702,13 +1702,13 @@ ULONG QDAMComputeCheckSum_V3 (PBTREEBUFFER_V3 pRecord );
 BOOL QDAMCheckCheckSum_V3( PBTREEBUFFER_V3 pRecord, SHORT sLocation );
 
 // get nect dictionary of an association list
-__declspec(dllexport)
+
 USHORT DAMGetNextDict
 (
                  USHORT             /* in  - dictionary handle   */
 );
 
-__declspec(dllexport)
+
 PBTREE DamGetBTreeFromDamRec(USHORT usIndex);
 
 

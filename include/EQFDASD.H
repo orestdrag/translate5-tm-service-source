@@ -273,7 +273,7 @@ typedef enum _TERMTYPE
 //+----------------------------------------------------------------------------+
 //  LupBegin            Begin/Initialize Lookup Service Functions
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT LupBegin
+ USHORT LupBegin
 (
    HUCB    hUCB,                       // Asd services user control block
    HDCB    hDCB,                       // Asd services dictioanry control block
@@ -290,7 +290,7 @@ __declspec(dllexport) USHORT LupBegin
 #define LUP_MODALDLG_MODE 0x00000002L
 #define LUP_WPCONTROLS    0x00000004L
 
-__declspec(dllexport) USHORT LupBegin2
+ USHORT LupBegin2
 (
    HUCB    hUCB,                       // Asd services user control block
    HDCB    hDCB,                       // Asd services dictioanry control block
@@ -306,7 +306,7 @@ __declspec(dllexport) USHORT LupBegin2
 //+----------------------------------------------------------------------------+
 //  LupEnd              Terminate Lookup Service Functions
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT LupEnd
+ USHORT LupEnd
 (
    HLUPCB hLUPCB                       // Lookup services control block
 );
@@ -314,7 +314,7 @@ __declspec(dllexport) USHORT LupEnd
 //+----------------------------------------------------------------------------+
 //  LupActivate         Activate the lookup dialog
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT LupActivate
+ USHORT LupActivate
 (
    HLUPCB hLUPCB                       // Lookup services control block
 );
@@ -322,12 +322,12 @@ __declspec(dllexport) USHORT LupActivate
 //+----------------------------------------------------------------------------+
 //  LupLookup           Look up a term and display it in the display dialog
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT LupLookup
+ USHORT LupLookup
 (
    HLUPCB   hLUPCB,                    // Lookup services control block
    PCHAR_W  pucTerm                    // term being looked-up
 );
-__declspec(dllexport) USHORT LupLookup2
+ USHORT LupLookup2
 (
    HLUPCB   hLUPCB,                    // Lookup services control block
    PCHAR_W  pucTerm,                   // term being looked-up
@@ -337,24 +337,24 @@ __declspec(dllexport) USHORT LupLookup2
 //+----------------------------------------------------------------------------+
 //  LupEdit             Edit a term
 //+----------------------------------------------------------------------------+
-__declspec(dllexport) USHORT LupEdit
+ USHORT LupEdit
 (
    HLUPCB   hLUPCB,                    // Lookup services control block
    PCHAR_W   pucTerm                   // term being looked-up
 );
-__declspec(dllexport) USHORT LupEdit2
+ USHORT LupEdit2
 (
    HLUPCB   hLUPCB,                    // Lookup services control block
    PCHAR_W  pucTerm,                   // term being looked-up
    HWND     hwnd                       // parent handle for dialog box
 );
 
-__declspec(dllexport) HWND LupGetLookupHandle
+ HWND LupGetLookupHandle
 (
    HLUPCB   hLUPCB                     // Lookup services control block
 );
 
-__declspec(dllexport) USHORT LupGetDispHandles
+ USHORT LupGetDispHandles
 (
    HLUPCB   hLUPCB,                    // Lookup services control block
    PHWND    *phwndDisp

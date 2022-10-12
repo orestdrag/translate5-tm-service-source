@@ -13,7 +13,7 @@
 
 /*! \brief Abstract base-class for plugins handling spell check
 */
-class __declspec(dllexport) OtmSpellPlugin: public OtmPlugin
+class  OtmSpellPlugin: public OtmPlugin
 {
 public:
 

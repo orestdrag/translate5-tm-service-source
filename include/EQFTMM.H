@@ -263,7 +263,7 @@ VOID    BackToQuery( PTMMIDA, HWND );
 VOID    NextPrevious( PTMMIDA, HWND, BOOL, BOOL );
 BOOL    GetAndStrip( PTBSEGMENT *, PSZ_W *, PTBDOCUMENT, ULONG );
 BOOL    TmmStartHandler ( HAB, PSZ, PFNWP );
-__declspec(dllexport)
+
 MRESULT APIENTRY TMMWNDPROC( HWND, WINMSG, WPARAM, LPARAM );
 MRESULT APIENTRY TMMVISWNDPROC( HWND, WINMSG, WPARAM, LPARAM );
 MRESULT APIENTRY TMMSTATUSBARWNDPROC( HWND, WINMSG, WPARAM, LPARAM );
@@ -312,16 +312,16 @@ BOOL    WildCompareW( PSZ_W, PSZ_W );
 
 BOOL    GetTmProp2Ida( PTMIDA );
 
-__declspec(dllexport) BOOL    StartTMFunct( HWND, PTMIDA );
+ BOOL    StartTMFunct( HWND, PTMIDA );
 VOID    UtlSetString( SHORT sID, PSZ pszString );
 VOID    SetupDateDlg( HWND, PTMIDA );
 VOID    SetupQueryDlg( HWND, PTMIDA );
 BOOL    QueryDateSetting( HWND, PTMIDA );
 BOOL    QueryDocSetting( HWND, PTMIDA );
-__declspec(dllexport) BOOL    QueryTMEntry( PTMIDA );
+ BOOL    QueryTMEntry( PTMIDA );
 BOOL    GetAndCompareSegment( PTMIDA, OtmProposal &prop );
-__declspec(dllexport) VOID    FreeTMIda( PTMIDA );
-__declspec(dllexport) VOID    FreeTMIdaForSave( PTMIDA );
+ VOID    FreeTMIda( PTMIDA );
+ VOID    FreeTMIdaForSave( PTMIDA );
 VOID    FreeListPSZ( PTMIDA );
 VOID    CutCR_LF( PSZ_W, BOOL, ULONG );
 VOID    AsterixCR_LF( PSZ_W );
@@ -330,7 +330,7 @@ VOID    SetTransDate( PSZ, LONG );
 VOID  PASCAL FAR TMCleanUp( USHORT );
 
 MRESULT EXPENTRY TMPASSWORDDLG( HWND, WINMSG, WPARAM, LPARAM );
-__declspec(dllexport) INT_PTR CALLBACK TMQUERYDLG( HWND, WINMSG, WPARAM, LPARAM );
+ INT_PTR CALLBACK TMQUERYDLG( HWND, WINMSG, WPARAM, LPARAM );
 INT_PTR CALLBACK TMSPECDATEDLG( HWND, WINMSG, WPARAM, LPARAM );
 INT_PTR CALLBACK TMSPECDOCDLG( HWND, WINMSG, WPARAM, LPARAM );
 MRESULT EXPENTRY EDITENTRYDLG( HWND, WINMSG, WPARAM, LPARAM );
@@ -346,25 +346,25 @@ BOOL TMMGetListFromTM
   PTMIDA      pTMIda,                  // ptr ot TMM Ida
   TMMTABLE    Table                    // ID of table
 );
-__declspec(dllexport) SHORT TMMFindInTable
+ SHORT TMMFindInTable
 (
   PTMIDA      pTMIda,                  // ptr ot TMM Ida
   PSZ         pszName,                 // name being looked up
   TMMTABLE    Table                    // ID of table
 );
-__declspec(dllexport) BOOL TMMGetNameForInd
+ BOOL TMMGetNameForInd
 (
   PTMIDA      pTMIda,                  // ptr ot TMM Ida
   SHORT       sIndex,                  // index of name
   PSZ         pszName,                 // buffer for name
   TMMTABLE    Table                    // ID of table
 );
-__declspec(dllexport) VOID TMMCorrectLFCount
+ VOID TMMCorrectLFCount
 (
   PSZ_W         pszString,               // points to string to be processed
   SHORT       sLFCount                 // number of LFs at end of data required
 );
-__declspec(dllexport) LONG TMMCountLFAtEnd
+ LONG TMMCountLFAtEnd
 (
   PSZ_W         pszString                // points to string to be processed
 );

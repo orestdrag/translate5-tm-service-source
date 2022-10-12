@@ -64,7 +64,7 @@ typedef struct _FOLIMPEXPXLIFF
 //
 // XLIFFIMPORT
 //
-__declspec(dllexport) 
+ 
 int XLIFFIMPORT
 (
   CHAR             chDrive,            // drive letter of drive containing the folder
@@ -77,7 +77,7 @@ int XLIFFIMPORT
 //
 // XLIFFEXPORT
 //
-__declspec(dllexport) 
+ 
 int XLIFFEXPORT
 (
   PSZ              pszSegTargetFile,   // fully qualified name of segmented target file
@@ -90,7 +90,7 @@ int XLIFFEXPORT
 // FOLXLIFFEXPORT
 //
 extern "C" 
-__declspec(dllexport) 
+ 
 int FOLXLIFFIMPORT
 (
   PFOLIMPEXPXLIFF  pData                // pointer to XLIFF folder import/export data area
@@ -100,7 +100,7 @@ int FOLXLIFFIMPORT
 // FOLXLIFFEXPORT
 //
 extern "C" 
-__declspec(dllexport) 
+ 
 int FOLXLIFFEXPORT
 (
   PFOLIMPEXPXLIFF  pData                // pointer to XLIFF folder import/export data area
@@ -110,7 +110,7 @@ int FOLXLIFFEXPORT
 // FOLXLIFFCHECKFILE
 //
 extern "C" 
-__declspec(dllexport) 
+ 
 int FOLXLIFFCHECKFILE
 (
   PSZ              pszFile,            // fully qualified name of file being checked

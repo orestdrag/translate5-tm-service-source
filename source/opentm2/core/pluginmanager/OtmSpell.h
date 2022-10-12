@@ -20,7 +20,7 @@ using namespace std;
 typedef vector<string> STRINGLIST;
 
 /*! \brief Abstract base-class for spell check objects */
-class __declspec(dllexport) OtmSpell
+class  OtmSpell
 {
 public:
 

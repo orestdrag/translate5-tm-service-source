@@ -85,7 +85,7 @@ extern   short   sTPVersion ;               /* From USRCALLS.C  */
 /*
   Pre-segmentation, including access to progress window.
 */
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
           PSZ    pTagTable,
           PSZ    pEdit,
@@ -221,7 +221,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
 /*
   Post-segmentation, including access to progress window.
 */
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
                     PSZ    pTagTable,
                     PSZ    pEdit,
@@ -255,7 +255,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 /*
    Pre-unsegmentation, including access to progress window.
 */
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
                      PSZ    pTagTable,
                      PSZ    pEdit,
@@ -274,7 +274,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
 /*
    Post-unsegmentation, including access to progress window.
 */
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
                       PSZ    pTagTable,
                       PSZ    pEdit,
@@ -372,7 +372,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
 
 
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFQUERYEXITINFO(PSZ pszTagTable,  // name of the markup table, e.g. "OTMHTM32"
                         USHORT usMode,   // type of information being queried
                         PSZ pszBuffer,      // buffer area receiving the information returned by the exit

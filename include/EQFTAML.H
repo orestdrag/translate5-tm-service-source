@@ -2,20 +2,20 @@
 	Copyright (c) 1990-2017, International Business Machines Corporation and others. All rights reserved.
 */
 
-__declspec(dllexport)
+
 int TAMatchListInit
 (
   PTAINPUT    pTAIn
 );
 
 
-__declspec(dllexport)
+
 int TAMatchListTerminate
 (
   PTAINPUT    pTAIn
 );
 
-__declspec(dllexport)
+
 int TAMatchListProcess
 (
   PTAINPUT    pTAIn,
@@ -25,7 +25,7 @@ int TAMatchListProcess
   USHORT      usFuzzyness
 );
 
-__declspec(dllexport)
+
 int TABalanceList
 (
   PSZ         pszFolder,                         // folder object name

@@ -171,7 +171,7 @@ extern   short   sTPVersion ;               /* From USRCALLS.C  */
 *
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPRESEG2(
                                 PSZ        pTagTable,
                                 PSZ        pEdit,
@@ -299,7 +299,7 @@ EQF_BOOL __cdecl EQFPRESEG2(
 *              is not changed!
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTSEGW(
                                PSZ    pTagTable,
                                PSZ    pEdit,
@@ -367,7 +367,7 @@ EQF_BOOL __cdecl EQFPOSTSEGW(
 *
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPREUNSEGW(
                                 PSZ    pTagTable,
                                 PSZ    pEdit,
@@ -413,7 +413,7 @@ EQF_BOOL __cdecl EQFPREUNSEGW(
 *
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFPOSTUNSEGW(
                                  PSZ    pTagTable,
                                  PSZ    pEdit,
@@ -490,7 +490,7 @@ EQF_BOOL __cdecl EQFPOSTUNSEGW(
 
 
 
-__declspec(dllexport)
+
 USHORT __cdecl EQFQUERYEXITINFO(
                                    PSZ pszTagTable,  // name of the markup table, e.g. "OTMHTM32"
                                    USHORT usMode,   // type of information being queried
@@ -527,7 +527,7 @@ USHORT __cdecl EQFQUERYEXITINFO(
 *               FALSE - Text failed the check, so text should not be saved. 
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl EQFCHECKSEGEXW(
                                      PSZ_W     pszPrevSrc,
                                      PSZ_W     pszSrc,
@@ -600,7 +600,7 @@ BOOL ConvertWordToXml( char *in, char *out, char *TempFile, char *ErrText, USHOR
           *usFileFormat = FILE_FORMAT_XML ;
        if ( ! strncmp( szIn, "PK", 5 ) ) 
           *usFileFormat = FILE_FORMAT_ZIP ;
-       if ( ! strncmp( szIn, "ÐÏà¡±", 6 ) ) 
+       if ( ! strncmp( szIn, "ï¿½ï¿½à¡±", 6 ) ) 
           *usFileFormat = FILE_FORMAT_WORD ;
        if ( ! strncmp( szIn, "{\\rtf1\\", 7 ) ) {
           strcat( ErrText, "\nWord files using RTF cannot be handled by this markup table.\nUse EQFMSWRD instead." ) ;

@@ -1116,7 +1116,7 @@ bool OtmMarkupTablePlugin::stopPlugin( bool fForce  )
 /*! 	\brief registers the plugin
 */
 extern "C" {
-__declspec(dllexport)
+
 USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;

@@ -19,7 +19,7 @@
 #define PB_SETPOS           WM_USER+2
 #define PB_SETCOLOR         WM_USER+3
 
-__declspec(dllexport)
+
 BOOL RegisterProgressControl( HINSTANCE hInstance);
 //BOOL    PASCAL   RegisterProgressControl( HAB hInstance);
 

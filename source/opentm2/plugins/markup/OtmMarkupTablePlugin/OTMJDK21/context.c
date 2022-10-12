@@ -44,7 +44,7 @@ WCHAR     sz_TWBCTX[10] = L"</TWBCTX>" ;
 *       Return:
 *               EQF_BOOL      // 0=Successful
 *******************************************************************************/
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFGETSEGCONTEXT
 (
   PSZ_W  pszCurSeg,  // ptr to text of current segment (UTF16)
@@ -105,7 +105,7 @@ USHORT __cdecl /*APIENTRY*/ EQFGETSEGCONTEXT
 }
 
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFCOMPARECONTEXT
 (
   PSZ_W   pszSegContext, // ptr to context of active segment (UTF16)
@@ -121,7 +121,7 @@ USHORT __cdecl /*APIENTRY*/ EQFCOMPARECONTEXT
 }
 
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFFORMATCONTEXT
 (
   PSZ_W  pszContext,      // ptr to buffer with context string (UTF16)
@@ -135,7 +135,7 @@ USHORT __cdecl /*APIENTRY*/ EQFFORMATCONTEXT
 
 
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFUPDATECONTEXT
 (
   PSZ_W       pszCurSeg,               // ptr to text of current segment (UTF16)

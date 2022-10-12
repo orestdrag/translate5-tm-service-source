@@ -297,7 +297,7 @@ typedef struct _MTLISTPROP
 } MTLISTPROP, * PMTLISTPROP;
 
 
-__declspec(dllexport) MRESULT MTListHandlerCallBack
+ MRESULT MTListHandlerCallBack
 (
   PHANDLERCOMMAREA pCommArea,
   HWND             hwnd,
@@ -380,4 +380,4 @@ BOOL FillMTPass ( PMTPASS pMTPass, PMTJOBPROP pProp, PSZ pszMTObject );
 BOOL MTStatusString( LONG lStatus, PSZ pszStatus, PSZ pszBuffer );
 
 //   End of EQFMT00.H
-//ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½

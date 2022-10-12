@@ -29,7 +29,7 @@ extern "C" {
 #include "OtmMemory.h"
 
 /*! \brief Abstract base-class for translation memory objects */
-class __declspec(dllexport) OtmSharedMemory : public OtmMemory
+class  OtmSharedMemory : public OtmMemory
 {
 
 public:

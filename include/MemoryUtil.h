@@ -6,7 +6,7 @@
 /* functions located in TmPluginWrapper */
 
 /* Open a memory */
-__declspec(dllexport)
+
 OtmMemory *OpenMemory
 (
   char *pszPluginName,
@@ -15,7 +15,7 @@ OtmMemory *OpenMemory
   int *piErrorCode
 );
 
-__declspec(dllexport)
+
 int ListMemories
 (
 	OtmMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
@@ -23,7 +23,7 @@ int ListMemories
 	BOOL fWithDetails
 );
 
-__declspec(dllexport)
+
 int CloseMemory
 (
   OtmMemory *pMemory

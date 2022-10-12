@@ -775,13 +775,13 @@ typedef struct _TAGIMPORT
 } TAGIMPORT, *PTAGIMPORT;
 
 // external interface to build tag tables from scratch
-__declspec(dllexport)
+
 BOOL TagImpAllocTagImport( PTAGIMPORT *ppTagImport );
-__declspec(dllexport)
+
 BOOL TagImpFreeTagImport( PTAGIMPORT pTagImport );
-__declspec(dllexport)
+
 BOOL TagImpAddTag( PTAGIMPORT pTagImport, PTERMENTRY pNewTag );
-__declspec(dllexport)
+
 BOOL TagImpAddAttr( PTAGIMPORT pTagImport, PATTRENTRY pNewAttr );
-__declspec(dllexport)
+
 BOOL TagImpBuildtagTable( PTAGIMPORT pTagImport, PTAGTABLE *ppTagTable );

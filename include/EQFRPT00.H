@@ -680,9 +680,9 @@ BOOL RptSumOut2
 BOOL RPTPrepareMemoryMatchCount(BOOL, PRPT);
 
 BOOL RptOutputToHTMLFile (PRPT pRpt, HFILE hFile, BOOL fView );
-__declspec(dllexport)
+
 BOOL RptOutputToHTMLControlOpen( PRPT pRPT );
-__declspec(dllexport)
+
 VOID RptOutputToHTMLControlClose( PRPT pRPT );
 VOID RptTestApi();
 

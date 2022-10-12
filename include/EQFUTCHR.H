@@ -8,7 +8,7 @@
 /* the character code is used as index into the table                 */
 /* a value of 1 means that the character is a text character          */
 /**********************************************************************/
-__declspec(dllexport)
+
 UCHAR chIsText[256] =
 //          0    1    2    3    4    5    6    7    8    9
 {/*  0 */   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,

@@ -199,23 +199,23 @@ typedef enum
   QLDB_FOURTH_LEVEL
 } QLDB_LEVEL_NO;                                // Level numbers
 
-__declspec(dllexport) USHORT QLDBAddSubtree( PVOID, USHORT, PSZ_W * );
-__declspec(dllexport) USHORT QLDBCreateTree( USHORT [], PSZ_W *, PVOID * );
-__declspec(dllexport) USHORT QLDBCurrNode( PVOID, PSZ_W *, USHORT * );
-__declspec(dllexport) USHORT QLDBCurrTemplate( PVOID, PSZ_W * );
+ USHORT QLDBAddSubtree( PVOID, USHORT, PSZ_W * );
+ USHORT QLDBCreateTree( USHORT [], PSZ_W *, PVOID * );
+ USHORT QLDBCurrNode( PVOID, PSZ_W *, USHORT * );
+ USHORT QLDBCurrTemplate( PVOID, PSZ_W * );
 USHORT QLDBDestroySubtree( PVOID * );
-__declspec(dllexport) USHORT QLDBDestroyTree( PVOID * );
+ USHORT QLDBDestroyTree( PVOID * );
 USHORT QLDBFlattenTree( PVOID * );
 USHORT QLDBJoinSameNodes( PVOID );
 USHORT QLDBMoveToNode( PVOID, USHORT, PSZ_W *, USHORT * );
-__declspec(dllexport) USHORT QLDBNextNode( PVOID, PSZ_W *, USHORT * );
-__declspec(dllexport) USHORT QLDBNextTemplate( PVOID, PSZ_W *, USHORT * );
+ USHORT QLDBNextNode( PVOID, PSZ_W *, USHORT * );
+ USHORT QLDBNextTemplate( PVOID, PSZ_W *, USHORT * );
 USHORT QLDBPrevNode( PVOID, PSZ_W *, USHORT * );
 USHORT QLDBPrevTemplate( PVOID, PSZ_W *, USHORT * );
-__declspec(dllexport) USHORT QLDBRecordToTree( USHORT [], PSZ_W, ULONG, PVOID * );
-__declspec(dllexport) USHORT QLDBResetTreePositions( PVOID );
-__declspec(dllexport) USHORT QLDBTreeToRecord( PVOID, PSZ_W *, ULONG * );
-__declspec(dllexport) USHORT QLDBTreeToRecordNonUnicode( PVOID, PSZ *, ULONG * );
+ USHORT QLDBRecordToTree( USHORT [], PSZ_W, ULONG, PVOID * );
+ USHORT QLDBResetTreePositions( PVOID );
+ USHORT QLDBTreeToRecord( PVOID, PSZ_W *, ULONG * );
+ USHORT QLDBTreeToRecordNonUnicode( PVOID, PSZ *, ULONG * );
 USHORT QLDBUpdateCurNodeData( PVOID, USHORT, PSZ_W, PSZ_W * );
-__declspec(dllexport) USHORT QLDBFillFieldTables( PPROPDICTIONARY, PUSHORT, PUSHORT );
+ USHORT QLDBFillFieldTables( PPROPDICTIONARY, PUSHORT, PUSHORT );
 USHORT QLDBUpdateCurrTemplate( PVOID, PSZ_W * );

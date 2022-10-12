@@ -354,10 +354,10 @@ USHORT CntFuncPrepCount
   LONG        lOptions,                // options for word count
   PSZ         pszOutFile               // name of output file
 );
-__declspec(dllexport) USHORT CntFuncCountProcess
+ USHORT CntFuncCountProcess
 (
   PFCTDATA    pData                    // ptr to function call interface data
 );
 
-__declspec(dllexport) USHORT   CntWriteToFile( PCNTIDA, HWND, USHORT );
+ USHORT   CntWriteToFile( PCNTIDA, HWND, USHORT );
 

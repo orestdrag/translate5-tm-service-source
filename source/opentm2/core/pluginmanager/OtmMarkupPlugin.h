@@ -8,7 +8,7 @@
 
 /*! \brief Abstract base-class for plugins handling markup tables
 */
-class __declspec(dllexport) OtmMarkupPlugin: public OtmPlugin
+class  OtmMarkupPlugin: public OtmPlugin
 {
 
 public:

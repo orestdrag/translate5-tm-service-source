@@ -130,7 +130,7 @@ typedef USHORT (*PFN_LANGGETLEMMA) ( PVOID pCB );
 /**********************************************************************/
 /* Function prototypes                                                */
 /**********************************************************************/
-__declspec(dllexport)
+
 USHORT MorphGetLanguageID
 (
   PSZ     pszLanguage,                 // name of language
@@ -138,7 +138,7 @@ USHORT MorphGetLanguageID
                                        //    language ID
 );
 
-__declspec(dllexport)
+
 USHORT MorphGetLanguageIDByPlugin
 (
  PSZ     pszSpellPlugin,               // name of the spell plug-in
@@ -148,7 +148,7 @@ USHORT MorphGetLanguageIDByPlugin
  //    language ID
  );
 
-__declspec(dllexport)
+
 USHORT MorphGetStemForm
 (
    SHORT    sLanguageID,               // language ID
@@ -160,7 +160,7 @@ USHORT MorphGetStemForm
 );
 
 
-__declspec(dllexport)
+
 USHORT MorphGetPOSInfo
 (
    SHORT    sLanguageID,               // language ID
@@ -170,7 +170,7 @@ USHORT MorphGetPOSInfo
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphTokenize
 (
    SHORT    sLanguageID,              // language ID
@@ -181,7 +181,7 @@ USHORT MorphTokenize
    USHORT   usListType                 // type of requested term list
 );
 
-__declspec(dllexport)
+
 USHORT MorphTokenizeW
 (
    SHORT    sLanguageID,               // language ID
@@ -199,7 +199,7 @@ USHORT MorphTokenizeW
 #define ADDENDA_DICT  2                // dictionary type: addenda dictionary
 #define ABBREV_SYSTEM_DICT   3         // dictionary type: system abbreviation dict.
 
-__declspec(dllexport)
+
 USHORT MorphListDict
 (
    SHORT    sLanguageID,              // language ID
@@ -210,7 +210,7 @@ USHORT MorphListDict
    USHORT   usListType                 // type of requested term list
 );
 
-__declspec(dllexport)
+
 USHORT MorphWordRecognition
 (
    SHORT    sLanguageID,               // language ID
@@ -231,7 +231,7 @@ USHORT MorphWordRecognition
    USHORT   eqfMWTMode            // Multi Word Termns
 );
 
-__declspec(dllexport)
+
 USHORT MorphWordRecognitionW
 (
    SHORT    sLanguageID,               // language ID
@@ -254,10 +254,10 @@ USHORT MorphWordRecognitionW
 
 
 
-__declspec(dllexport)
+
 USHORT MorphTerminate( VOID );
 
-__declspec(dllexport)
+
 USHORT MorphVerify
 (
    SHORT    sLanguageID,               // language ID
@@ -270,7 +270,7 @@ USHORT MorphVerify
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphSpellAid
 (
    SHORT    sLanguageID,               // language ID
@@ -281,7 +281,7 @@ USHORT MorphSpellAid
    ULONG     ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphAddToAddenda
 (
    SHORT    sLanguageID,               // language ID
@@ -289,7 +289,7 @@ USHORT MorphAddToAddenda
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphAddToAbbrev
 (
    SHORT    sLanguageID,               // language ID
@@ -297,7 +297,7 @@ USHORT MorphAddToAbbrev
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphAddTermToList
 (
   PSZ      *ppList,                    // ptr to term list pointer
@@ -310,7 +310,7 @@ USHORT MorphAddTermToList
   USHORT   usListType                  // type of list MORPH_ZTERMLIST or
 );
 
-__declspec(dllexport)
+
 USHORT MorphAddTermToList2
 (
   PSZ      *ppList,                    // ptr to term list pointer
@@ -323,7 +323,7 @@ USHORT MorphAddTermToList2
   USHORT   usListType                  // type of list MORPH_ZTERMLIST or
 );
 
-__declspec(dllexport)
+
 USHORT MorphAddTermToList2W
 (
   PSZ_W    *ppList,                    // ptr to term list pointer
@@ -336,7 +336,7 @@ USHORT MorphAddTermToList2W
   USHORT   usListType                  // type of list MORPH_ZTERMLIST or
 );
 
-__declspec(dllexport)
+
 USHORT MorphCopyTermListASCII2Unicode
 (
   PSZ      pList,                      // ptr to ASCII termlist
@@ -348,7 +348,7 @@ USHORT MorphCopyTermListASCII2Unicode
   ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphCopyTermListUnicode2ASCII
 (
   PSZ_W    pListW,                      // inputptr to unicode termlist
@@ -360,7 +360,7 @@ USHORT MorphCopyTermListUnicode2ASCII
   ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphCopyStringListASCII2Unicode
 (
   PUCHAR   pList,                    // ptr to ASCII termlist
@@ -371,7 +371,7 @@ USHORT MorphCopyStringListASCII2Unicode
   ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphCopyStringListUnicode2ASCII
 (
   PSZ_W    pList,                    // ptr to ASCII termlist
@@ -385,7 +385,7 @@ USHORT MorphCopyStringListUnicode2ASCII
 
 
 
-__declspec(dllexport)
+
 USHORT MorphExtractKeywords
 (
    SHORT    sLanguageID,               // language ID
@@ -398,7 +398,7 @@ USHORT MorphExtractKeywords
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphCompIsolation
 (
    SHORT    sLanguageID,               // language ID
@@ -409,20 +409,20 @@ USHORT MorphCompIsolation
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphFreeLanguageID
 (
   SHORT    sLanguageID                 // language ID being freed
 );
 
-__declspec(dllexport)
+
 BOOL MorphCheckLanguage
 (
   PSZ     pszLanguage,                 // name of language
   PSHORT  psLanguageID                 // variable receiving the language ID
 );
 
-__declspec(dllexport)
+
 BOOL MorphCheckLanguageByPlugin
 (
  PSZ     pszSpellPlugin,              // name of the spell check plugin
@@ -431,7 +431,7 @@ BOOL MorphCheckLanguageByPlugin
  PSHORT  psLanguageID                 // variable receiving the language ID
  );
 
-__declspec(dllexport)
+
 USHORT MorphMultStemForm
 (
    SHORT    sLanguageID,               // language ID
@@ -441,7 +441,7 @@ USHORT MorphMultStemForm
    ULONG    ulOemCP
 );
 
-__declspec(dllexport)
+
 USHORT MorphBuildDict
 (
    SHORT    sLanguageID,               // language ID
@@ -455,7 +455,7 @@ USHORT MorphBuildDict
                                        //      MORPH_ZTERMLIST
 );
 
-__declspec(dllexport)
+
 USHORT MorphGetLanguageString
 (
   SHORT   sLanguageID,                 // language id
@@ -470,13 +470,13 @@ USHORT MorphGetLanguageString
 #define MORPH_BIDI_A_LANGTYPE     8
 #define MORPH_BIDI_H_LANGTYPE    16
 
-__declspec(dllexport)
+
 SHORT MorphGetLanguageType
 (
   PSZ              pszLanguage         // language to be checked
 );
 
-__declspec(dllexport)
+
 USHORT MorphFreeTermList
 (
   PVOID       pTermList,               // term list pointer
@@ -484,7 +484,7 @@ USHORT MorphFreeTermList
 );
 
 
-__declspec(dllexport)
+
 USHORT MorphThreadEnds
 (
    SHORT    sLanguageID                // language ID

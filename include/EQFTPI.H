@@ -556,7 +556,7 @@ typedef enum _COLOUR
 #else
 //   extern TEXTTYPETABLE DefTextTypeTable[MAXCOLOUR];
 #endif
-__declspec(dllexport)
+
 TEXTTYPETABLE* get_DefTextTypeTable();
 
 //+----------------------------------------------------------------------------+
@@ -567,7 +567,7 @@ TEXTTYPETABLE* get_DefTextTypeTable();
 #else
 //  extern TEXTTYPETABLE TextTypeTable[MAXCOLOUR];
 #endif
-__declspec(dllexport)
+
 TEXTTYPETABLE* get_TextTypeTable();
 
 //+----------------------------------------------------------------------------+
@@ -746,7 +746,7 @@ typedef struct _TPEXECUTE
 /***********************************/
 /* No ifdef BIDI here in purpose.. because the function is exported in .DEF file */
 
-__declspec(dllexport)
+
 VOID  EQFBBidiLRSwap ( BOOL );            // used in OS/2 and Win
 FUNCTIONTABLE  EQFBBidiRedoLRSwap ( USHORT   usFunction );
 VOID  EQFBBidiSysScrnCurPos ( PTBDOCUMENT, LONG, LONG );
@@ -755,90 +755,90 @@ VOID  EQFBPrepareBidi ( PTBDOCUMENT );
 BOOL  EQFBCheckBidiPart ( PTBDOCUMENT, PSZ_W, ULONG, ULONG,
                           COLOUR, BYTE, ULONG );
 
-__declspec(dllexport)
+
 VOID  ReAllocArabicStruct( PTBDOCUMENT );
 
 /*********************************************************************
  * Public Functions                                                  *
  *********************************************************************/
 BOOL  EQFBFuncCharIn(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncHotPopUp( PTBDOCUMENT );
-__declspec(dllexport)
+
 void  EQFBFuncNothing(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncCaps(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncCharacter(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncLeft(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncRight(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncUp(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncDown(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncStartLine(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncStartSeg(PTBDOCUMENT);
 void  EQFBFuncExactStartSeg(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncEndLine(PTBDOCUMENT);
 void  EQFBFuncDoEndLine(PTBDOCUMENT, BOOL);
-__declspec(dllexport)
+
 void  EQFBFuncEndSeg(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncTab(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncBacktab(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncNextWord(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncPrevWord(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncDeleteChar(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncBackspace(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncTruncate(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncTruncSeg ( PTBDOCUMENT);    //  Truncate segment at cursor pos
-__declspec(dllexport)
+
 void  EQFBFuncNextLine(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncInsertLine(PTBDOCUMENT);
 // Add for R012027 start
-__declspec(dllexport)
+
 void  EQFBFuncInsertChar(PTBDOCUMENT);
 // Add end
-__declspec(dllexport)
+
 void  EQFBFuncDeleteLine(PTBDOCUMENT);
 void  EQFBFuncRepeatLine(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncSplitLine(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncJoinLine(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncBottomDoc(PTBDOCUMENT);
 void  EQFBFuncScrollUp(PTBDOCUMENT,BOOL);
-__declspec(dllexport)
+
 void  EQFBCursorScrollUp(PTBDOCUMENT);
 void  EQFBFuncScrollDown(PTBDOCUMENT,BOOL);
-__declspec(dllexport)
+
 void  EQFBCursorScrollDown(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncScrollLeft(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncScrollRight(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncPageUp(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncPageDown(PTBDOCUMENT);
 PTBDOCUMENT  EQFBFuncQuit(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncDoQuit(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncSave(PTBDOCUMENT);
 
 void  EQFBFuncLeftRTF(PTBDOCUMENT);
@@ -847,285 +847,285 @@ VOID  EQFBReplaceSelRTF( PTBDOCUMENT, PSZ_W );
 VOID  DrawFormatChars(PTBDOCUMENT pDoc);
 
 void  EQFBFuncFile(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncDoFile(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncNextDoc(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncPrevDoc(PTBDOCUMENT);
 void  EQFBFuncCmdToggle(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncInsToggle(PTBDOCUMENT);
 void  EQFBFuncHelp(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncUndo(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncRedo(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncEscape(PTBDOCUMENT);
-__declspec(dllexport)
+
 VOID  EQFBFuncDispOrg ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToHide ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToProt ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToUnprot ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToShrink ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToCompact ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToShorten ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncChangeToWYSIWYG ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncDispAllExactProps( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncLRM( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncRLM( PTBDOCUMENT );
 VOID EQFBFuncRButtonDn( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncFind ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncCFind ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncOpen ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncKeys ( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncEntry( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncFonts( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncLineWrap( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncMarginAct( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncToggleLineWrap( PTBDOCUMENT );
 VOID  EQFBFuncRMargin( PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID  EQFBFuncFontSize( PTBDOCUMENT );
 void  EQFBUpdateChangedSeg(PTBDOCUMENT);                 // update changed seg
 VOID  EQFBActivateSegm(PTBDOCUMENT, ULONG);              // activate current seg
 VOID  EQFBSetFindData ( PSZ_W );
-__declspec(dllexport)
+
 PFINDDATA  EQFBGetFindData ( );
-__declspec(dllexport)
+
 USHORT EQFBCurrentState( PTBDOCUMENT);
 
-__declspec(dllexport)
+
 void  EQFBFuncMarkBlock(PTBDOCUMENT);
 void  EQFBFuncSegMarkBlock(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkLeftCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkRightCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkUpCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkDownCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkStartCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkEndCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkSegStartCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkSegEndCUA(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkClear(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkDelete(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkCopy(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkMove(PTBDOCUMENT);
-__declspec(dllexport)
+
 void  EQFBFuncMarkFind(PTBDOCUMENT);
 void  EQFBFuncMarkCheck(PTBDOCUMENT);
-__declspec(dllexport)
+
 VOID  EQFBFuncMarkSegment (PTBDOCUMENT);
-__declspec(dllexport)
+
 VOID  EQFBFuncPasteFromClip ( PTBDOCUMENT  pDoc );       // paste from clipboard
-__declspec(dllexport)
+
 VOID  EQFBFuncCopyToClip ( PTBDOCUMENT  pDoc );          // copy to clipboard
-__declspec(dllexport)
+
 VOID  EQFBFuncCutToClip ( PTBDOCUMENT  pDoc) ;           // cut to clipboard
 VOID  EQFBFuncFindLast(PTBDOCUMENT);
-__declspec(dllexport)
+
 BOOL  EQFBFuncStart(  PSZ, PSZ, PSTEQFGEN, BOOL, PTBDOCUMENT ); // start editor
 VOID  EQFBFuncActDoc ( PTBDOCUMENT );
-__declspec(dllexport)
+
 BOOL  ActTransEnv( PTBDOCUMENT );
 USHORT EQFBTenvStart ( PTBDOCUMENT, PSZ, PSTEQFGEN );
 
-__declspec(dllexport)
+
 VOID  EQFBFuncOpenTRNote(PTBDOCUMENT pDoc);           // open TRNote doc
-__declspec(dllexport)
+
 VOID  EQFBFuncTOCGoto(PTBDOCUMENT pDoc);              // invoke table of contents
-__declspec(dllexport)
+
 VOID  EQFBFuncSpellSeg(PTBDOCUMENT );                  //spellcheck segment
-__declspec(dllexport)
+
 VOID  EQFBFuncSpellFile(PTBDOCUMENT );                  //spellcheck file
-__declspec(dllexport)
+
 VOID  EQFBFuncWordMark(PTBDOCUMENT );                   //mark word
-__declspec(dllexport)
+
 VOID  EQFBFuncWordDel(PTBDOCUMENT );                    //delete word
 VOID  EQFBFuncResetMarkInSeg(PTBDOCUMENT);
 BOOL  EQFBFuncDelSel ( PTBDOCUMENT );
 BOOL  EQFBDBCS2ND ( PTBDOCUMENT, BOOL);                // move cursor from 2nd
                                                        // DBCS byte
-__declspec(dllexport)
+
 VOID  EQFBFuncDelTilTag (PTBDOCUMENT );                //delete til next tag
-__declspec(dllexport)
+
 VOID  EQFBEmpty (PTBDOCUMENT );                       //delete til next tag
 BOOL  EQFBOnTRNote(PTBDOCUMENT);               // update TRNote wnd if on TRNOTE
-__declspec(dllexport)
+
 VOID  EQFBFuncPropMarkCopy(PTBDOCUMENT);
-__declspec(dllexport)
+
 VOID  EQFBFuncSpellAuto(PTBDOCUMENT );           //turn autospellcheck on/off
-__declspec(dllexport)
+
 VOID  EQFBFuncNextMisspelled(PTBDOCUMENT);                 //goto next misspelled word
-__declspec(dllexport)
+
 VOID  EQFBFuncGoUpdSegment(PTBDOCUMENT);       // goto next updated segment
 
-__declspec(dllexport)
+
 VOID  EQFBFuncVisibleSpace(PTBDOCUMENT);
 
 VOID EQFBTrans ( PTBDOCUMENT, USHORT ) ;       // send last seg to TM
                                                // activate next one
-__declspec(dllexport)
+
 VOID EQFBTSeg ( PTBDOCUMENT          ) ;       // translate segment
-__declspec(dllexport)
+
 VOID EQFBTUnTrans ( PTBDOCUMENT      ) ;       // untranslate a segment
-__declspec(dllexport)
+
 BOOL EQFBSaveSeg( PTBDOCUMENT );               // save current segment to tm
-__declspec(dllexport)
+
 VOID EQFBTSegNext ( PTBDOCUMENT      ) ;       // translate next segment
-__declspec(dllexport)
+
 VOID EQFBTSegNextExact ( PTBDOCUMENT ) ;       // translate next segment with EXACT matches
-__declspec(dllexport)
+
 VOID EQFBTSegNextFuzzy ( PTBDOCUMENT ) ;       // translate next segment with FUZZY matches
-__declspec(dllexport)
+
 VOID EQFBTSegNextNone ( PTBDOCUMENT  ) ;       // translate next segment with NO matches
-__declspec(dllexport)
+
 VOID EQFBTSegNextMT ( PTBDOCUMENT  ) ;         // translate next segment with MT matches
-__declspec(dllexport)
+
 VOID EQFBTSegNextGlobal ( PTBDOCUMENT  ) ;     // translate next segment with GLOBAL MEMORY matches
-__declspec(dllexport)
+
 VOID EQFBMark    ( PTBDOCUMENT       ) ;       // mark the active segment
-__declspec(dllexport)
+
 VOID EQFBClearMark( PTBDOCUMENT      ) ;       // clear the marked segment
-__declspec(dllexport)
+
 VOID EQFBFindMark ( PTBDOCUMENT      ) ;       // find the marked segment
-__declspec(dllexport)
+
 VOID EQFBActProp ( PTBDOCUMENT       ) ;       // activate transl. memory
-__declspec(dllexport)
+
 VOID EQFBPropUp  ( PTBDOCUMENT       ) ;       // proposal up
-__declspec(dllexport)
+
 VOID EQFBPropDown( PTBDOCUMENT       ) ;       // proposal down
-__declspec(dllexport)
+
 VOID EQFBDictPrefixUp( PTBDOCUMENT ) ;         // dictionary prefix up
-__declspec(dllexport)
+
 VOID EQFBDictPrefixDown( PTBDOCUMENT ) ;       // dictionary prefix down
-__declspec(dllexport)
+
 VOID EQFBActDict ( PTBDOCUMENT       ) ;       // activate dictionary window
-__declspec(dllexport)
+
 VOID EQFBDictUp  ( PTBDOCUMENT       ) ;       // dictionary up
-__declspec(dllexport)
+
 VOID EQFBDictDown( PTBDOCUMENT       ) ;       // dictionary down
-__declspec(dllexport)
+
 VOID EQFBGetDictMatch( PTBDOCUMENT   ) ;       // insert dictionary match
-__declspec(dllexport)
+
 VOID EQFBGetPropMatch( PTBDOCUMENT   ) ;       // insert proposal   match
-__declspec(dllexport)
+
 VOID EQFBGotoActSegment( PTBDOCUMENT );        // goto active segment
-__declspec(dllexport)
+
 VOID EQFBDictLook( PTBDOCUMENT );              // activate dictionary lookup
-__declspec(dllexport)
+
 VOID EQFBJoinSeg ( PTBDOCUMENT          ) ;    // join segments
-__declspec(dllexport)
+
 VOID EQFBSplitSeg ( PTBDOCUMENT         ) ;    // split prev. joined segments
-__declspec(dllexport)
+
 VOID EQFBAutoTranslate( PTBDOCUMENT );         // automatic translation (main)
 VOID EQFBFuncAutoTrans( PTBDOCUMENT );         // automatic translation (doing)
 VOID EQFBFuncAutoStop( PTBDOCUMENT );          // stop automatic translation
-__declspec(dllexport)
+
 VOID EQFBSetPostEdit( PTBDOCUMENT );           // post editing mode
 BOOL EQFBTempPostEdit( PTBDOCUMENT );          // temporary post edit mode
 
-__declspec(dllexport)
+
 VOID EQFBCommand (PTBDOCUMENT);                // exec. the sel. function
-__declspec(dllexport)
+
 VOID EQFBSettings(PTBDOCUMENT);                // invoke the settings dialog ..
-__declspec(dllexport)
+
 VOID EQFBGotoLine(PTBDOCUMENT);                // invoke the GotoLine dialog ..
-__declspec(dllexport)
+
 VOID EQFBGotoSegment(PTBDOCUMENT);             // invoke the Goto segment dialog ..
-__declspec(dllexport)
+
 VOID EQFBQueryLine(PTBDOCUMENT);               // find the current cursor pos.
 BOOL EQFBFindLine( PTBDOCUMENT, ULONG  );      // find the specified line
-__declspec(dllexport)
+
 VOID EQFBDocPrint( PTBDOCUMENT );              // print a document
-__declspec(dllexport)
+
 VOID EQFBFuncMarkNextWord ( PTBDOCUMENT pDoc);
-__declspec(dllexport)
+
 VOID EQFBFuncMarkPrevWord ( PTBDOCUMENT pDoc);
-__declspec(dllexport)
+
 VOID EQFBFindScratch(PTBDOCUMENT pDoc);        //find next seg. from scratch
-__declspec(dllexport)
+
 VOID EQFBFindCopy(PTBDOCUMENT pDoc);           //find next seg. prop.copied
-__declspec(dllexport)
+
 VOID EQFBFindCpyTyped(PTBDOCUMENT pDoc);         //find next seg.copied&typed in
 
-__declspec(dllexport)
+
 VOID EQFBExpandSeg(PTBDOCUMENT pDoc);
-__declspec(dllexport)
+
 VOID EQFBCompressSeg(PTBDOCUMENT pDoc);
 
-__declspec(dllexport)
+
 VOID EQFBActTrans( PTBDOCUMENT       ) ;      // activate translation window
 VOID EQFBProfInit(PTBDOCUMENT);               // invoke profile initials..
-__declspec(dllexport)
+
 VOID EQFBFuncDispSrcProp(PTBDOCUMENT);        // activate source of prop wnd
-__declspec(dllexport)
+
 VOID EQFBFuncDispSegProp(PTBDOCUMENT);        // activate segment properties window
-__declspec(dllexport)
+
 VOID EQFBFuncEditTerm(PTBDOCUMENT);           // edit selected term
-__declspec(dllexport)
+
 VOID EQFBAddAbbrev(PTBDOCUMENT);              // add abbreviation to morph dict
-__declspec(dllexport)
+
 VOID EQFBAddAbbrevFunc(PTBDOCUMENT, SHORT);   // add abbreviation to spec. language
 VOID EQFBEditAbbrev(PTBDOCUMENT);             // edit abbreviation dictionary
-__declspec(dllexport)
+
 VOID EQFBEditAddenda(PTBDOCUMENT);            // edit addenda dictionary
 
-__declspec(dllexport)
+
 VOID EQFBFuncShowTrans(PTBDOCUMENT);             // show transl. in test wnd
 
-__declspec(dllexport)
+
 VOID EQFBFileInsertSOSI(PTBDOCUMENT pDoc);    //insert SOSI in all xlated segs
-__declspec(dllexport)
+
 VOID EQFBFileDeleteSOSI(PTBDOCUMENT pDoc);       //delete SOSI in all xlated segs
-__declspec(dllexport)
+
 VOID EQFBSegInsertSOSI(PTBDOCUMENT pDoc);     //insert SOSI in active segment
-__declspec(dllexport)
+
 VOID EQFBSegDeleteSOSI(PTBDOCUMENT pDoc);        //delete SOSI in active segment
 
-__declspec(dllexport)
+
 VOID EQFBAddFuzzyMatch(PTBDOCUMENT pDoc);       //display fuzzy + exact match
 
 SHORT EQFBPosGotoSeg(PTBDOCUMENT,ULONG,PSZ_W,SHORT);//find pos of word in
                                                     //segment
 VOID EQFBWordPos (PTBDOCUMENT,PUSHORT,PUSHORT);     //find sStart & sEnd of
                                                //current word
-__declspec(dllexport)
+
 VOID EQFBScreenCursor( PTBDOCUMENT);           // set cursor and slider
 void EQFBScreenSegment (  PTBDOCUMENT, LONG, PTBROWOFFSET, ULONG );
 
-__declspec(dllexport)
+
 USHORT EQFBCharType( PTBDOCUMENT, PTBSEGMENT, USHORT );        // in EQFBFILE.C
 VOID EQFBNormSeg( PTBDOCUMENT, PSZ_W, PSZ_W );                 // in EQFBFILE.C
 BOOL EQFBCheckNoneTag ( PTBDOCUMENT, PSZ_W );                // in EQFBFILE.c
@@ -1134,29 +1134,29 @@ BOOL EQFBDiffTag ( PTBDOCUMENT, ULONG, USHORT);            // in EQFBFIle.c
 BOOL EQFBDiffProtectTag ( PTBDOCUMENT, ULONG, USHORT);     // in EQFBFIle.c
 VOID EQFBCheckEndOfSeg(PTBDOCUMENT,PTBSEGMENT,USHORT);     // in EQFBUtl.c
 
-__declspec(dllexport)
+
 BOOL EQFBDocWndCreate ( PTBDOCUMENT ,        // pointer to document structure
                         PLOADSTRUCT ) ;      // pointer to load structure
 SHORT EQFBDocInsert( PLOADSTRUCT );         // insert a new document
 SHORT EQFBDocLoad( PLOADSTRUCT );           // load a new document
-__declspec(dllexport)
+
 void  EQFBFuncClose( PSTEQFGEN );
 VOID   EQFBLineNum( PTBDOCUMENT   );         // determine number of lines in doc
 
-__declspec(dllexport)
+
 VOID EQFBVScroll( PTBDOCUMENT, USHORT, USHORT); // vertical scroll
-__declspec(dllexport)
+
 VOID EQFBHScroll( PTBDOCUMENT, USHORT, USHORT); // horizontal scroll
 
  SHORT  EQFBLineUp(PTBDOCUMENT);
  SHORT  EQFBLineDown(PTBDOCUMENT);
 
  void EQFBScreenSize(PTBDOCUMENT);                       /* See EQFBScreen.c */
-__declspec(dllexport)
+
  void EQFBScreenData(PTBDOCUMENT);
  void EQFBScreenCmd(PTBDOCUMENT);
 
-__declspec(dllexport)
+
  void EQFBScreenCursorType(PTBDOCUMENT);
 
  PTBDOCUMENT EQFBDocDelete(PTBDOCUMENT);
@@ -1164,11 +1164,11 @@ __declspec(dllexport)
  int  EQFBDocName(char *newname);
 
  USHORT EQFBFilePrint( PTBDOCUMENT pDoc);                          // EQFBFILE.C
- __declspec(dllexport)
+ 
  SHORT  EQFBReadProfile( VOID );                                   // EQFBFILE.C
- __declspec(dllexport)
+ 
  SHORT  EQFBWriteProfile( PTBDOCUMENT );                                  // EQFBFILE.C
-__declspec(dllexport)
+
  BOOL   EQFBFileExists( PSZ pszFile );                             // EQFBFILE.C
 
  void EQFBWorkClear(PTBDOCUMENT);                        /* See EQFBWORK.C */
@@ -1178,7 +1178,7 @@ __declspec(dllexport)
  void EQFBWorkLeft(PTBDOCUMENT pDoc, USHORT usPosition, USHORT usCount);
  BOOL EQFBStillInActSeg( PTBDOCUMENT pDoc );
 
- __declspec(dllexport)
+ 
 VOID EQFBScrnLinesFromSeg                            // convert segs into lines
                     ( PTBDOCUMENT  pDoc,              // ptr to doc ida
                       LONG         lStartRow,         // starting row
@@ -1189,45 +1189,45 @@ VOID EQFBScrnLinesFromSeg                            // convert segs into lines
                     ( PTBDOCUMENT  pDoc,              // pointer to doc ida
                       LONG         lStartRow );       // starting row
 
-__declspec(dllexport)
+
  VOID EQFBPhysCursorFromSeg ( PTBDOCUMENT  pDoc);     // pointer to doc ida
 
  LONG EQFBCurSegFromCursor ( PTBDOCUMENT  pDoc);     // get cursor pos from seg
 
-__declspec(dllexport)
+
  void EQFBWorkSegIn ( PTBDOCUMENT pDoc  );            // move working seg in
-__declspec(dllexport)
+
  void EQFBWorkSegOut( PTBDOCUMENT pDoc  );            // move working seg out
 
  VOID EQFBWorkSegCheck ( PTBDOCUMENT pDoc );          // check work line change
 
-__declspec(dllexport)
+
  VOID EQFBCompSeg ( PTBSEGMENT  pTBSeg );             // (re)compute segment
 
-__declspec(dllexport)
+
  VOID   EQFBValidatePositions( PRECTL, USHORT );      // validate sizes in edit.
 
-__declspec(dllexport)
+
  PTBSEGMENT EQFBGetPrevVisSeg ( PTBDOCUMENT pDoc,     // find prev 'real' segm.
                                 PULONG pulSegNum);
-__declspec(dllexport)
+
 VOID EQFBGetDefCellSize ( PVIOFONTCELLSIZE,
                           PCHAR );                      // get default size&font
  void EQFBQuit (HWND hwnd);
 
- __declspec(dllexport)
+ 
 void  EQFBFuncReImportDoc(PTBDOCUMENT);
 
 
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQF_XSTART(  PSZ, PSZ, PSZ, PSTEQFGEN);   // start editor
 #ifdef __cplusplus
 extern "C"
 #endif
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQF_XSTOP( PSZ, PSTEQFGEN, EQF_BOOL );    // end editor
 
 void  EQFBSysScrnUpdate ( PTBDOCUMENT pDoc,              // allow screen update
@@ -1237,27 +1237,27 @@ VOID EQFBSysDispRestOfLine (PTBDOCUMENT); // displ rest of line ida
 
  VOID EQFBFuncPad(PTBDOCUMENT  pDoc, LONG lPos);
 VOID ActivateMTLog( PSZ pDocName, PSZ pszTagTable );
-//ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»
-//º EQF Translation Browser - header file of dialogs                           º
-//ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»
+//ï¿½ EQF Translation Browser - header file of dialogs                           ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
 SHORT EQFBCmdFind(PTBDOCUMENT, PFINDDATA);
 SHORT EQFBCmdChange( PTBDOCUMENT, PFINDDATA );
-__declspec(dllexport) VOID EQFBChangeStyle ( PTBDOCUMENT, USHORT);     // selected style
+ VOID EQFBChangeStyle ( PTBDOCUMENT, USHORT);     // selected style
 #define TPRO_MAPKEY 0
 #define ITM_MAPKEY 1
-__declspec(dllexport) BOOL EQFBMapKey ( WINMSG, WPARAM, LPARAM, PUSHORT, PUCHAR , USHORT );
+ BOOL EQFBMapKey ( WINMSG, WPARAM, LPARAM, PUSHORT, PUCHAR , USHORT );
 BOOL EQFBConvKey ( WPARAM, PUCHAR, PUCHAR );
-__declspec(dllexport) BOOL EQFBKeyName ( PSZ pszBuffer, UCHAR ucCode, UCHAR ucState );
+ BOOL EQFBKeyName ( PSZ pszBuffer, UCHAR ucCode, UCHAR ucState );
 void EQFBKeyNameW(wchar_t * pwszKeyName, UCHAR ucCode, UCHAR ucState);    // Add for R012027
 VOID EQFBLoadResource (VOID);
 VOID EQFBSetKeyName ( HMENU hwndMenu, SHORT sItem, FUNCTION Function );
 BOOL EQFBBuildKeyTable ( PKEYPROFTABLE pKeyList );
-__declspec(dllexport) VOID EQFBBuildITMKeyTable ( PKEYPROFTABLE pKeyList, USHORT usLast );
-__declspec(dllexport) VOID EQFBAdaptKeyTable ( PKEYPROFTABLE pKeyList, PTBDOCUMENT pDoc );
+ VOID EQFBBuildITMKeyTable ( PKEYPROFTABLE pKeyList, USHORT usLast );
+ VOID EQFBAdaptKeyTable ( PKEYPROFTABLE pKeyList, PTBDOCUMENT pDoc );
 VOID EQFBExecuteKey ( PTBDOCUMENT, PKEYPROFTABLE );
 
 BOOL EQFBUtlSpell ( PSTEQFGEN );                 // check avail. of spell check
-__declspec(dllexport) BOOL EQFBCheckSpellLang ( PSZ pszLang );        // check avail. of spell check
+ BOOL EQFBCheckSpellLang ( PSZ pszLang );        // check avail. of spell check
 BOOL EQFBCheckTags ( PTBDOCUMENT );              // check for equal tags..
 BOOL EQFBDoTagCheck( PTBDOCUMENT );              // check for same tags ..
 VOID EQFBFuncDoLineWrap ( PTBDOCUMENT pDoc );              // do line wrap
@@ -1270,10 +1270,10 @@ BOOL TACheckColumnPos ( PSZ_W         pData,          // ptr to data
 #define DELETE_SOSI 1                            // delete SHIFTIN SHIFTOUT
 #define INSERT_SOSI 2                            // insert SHIFTIN SHIFTOUT
 
-__declspec(dllexport) BOOL EQFBConvertSOSI ( PTBDOCUMENT, PTBSEGMENT , USHORT );
-__declspec(dllexport) BOOL EQFBUtlConvertSOSI( PSZ_W, PULONG, PSZ_W, USHORT, ULONG );
+ BOOL EQFBConvertSOSI ( PTBDOCUMENT, PTBSEGMENT , USHORT );
+ BOOL EQFBUtlConvertSOSI( PSZ_W, PULONG, PSZ_W, USHORT, ULONG );
 
-__declspec(dllexport) VOID EQFBDocPosOnScreen ( PLOADSTRUCT );
+ VOID EQFBDocPosOnScreen ( PLOADSTRUCT );
 
 /**********************************************************************/
 /* defines used in display                                            */
@@ -1283,7 +1283,7 @@ __declspec(dllexport) VOID EQFBDocPosOnScreen ( PLOADSTRUCT );
 #define DISP_SEGMENT_START  4
 #define DISP_NOREORDER          8
 
-__declspec(dllexport)  void EQFBSysInit(PTBDOCUMENT);
+  void EQFBSysInit(PTBDOCUMENT);
  void EQFBSysExit(PTBDOCUMENT);
  void EQFBSysScrnText(PTBDOCUMENT, ULONG, ULONG, PSZ_W, ULONG, COLOUR, BYTE, PSZ_W, PULONG );
  VOID EQFBSysScrnTextRTF ( PTBDOCUMENT, USHORT, USHORT, PSZ_W, USHORT, CHARFORMAT2 *, BYTE );
@@ -1298,7 +1298,7 @@ __declspec(dllexport)  void EQFBSysInit(PTBDOCUMENT);
  void EQFBSysScrnCurPos(PTBDOCUMENT, LONG, LONG);
  VOID EQFBSysScrnCurPosRTF( PTBDOCUMENT, LONG , LONG );
  void EQFBSysScrnCurShape(PTBDOCUMENT, CURSOR);
-__declspec(dllexport)
+
  VOID EQFBSysFilename( PSZ pszNewName, PSZ pszName);
 
  BOOL EQFBSendNextSource( PTBDOCUMENT, PULONG, BOOL, USHORT);
@@ -1306,14 +1306,14 @@ __declspec(dllexport)
  VOID EQFBDoNextTwo( PTBDOCUMENT, PULONG, USHORT );  // send next two segments
  VOID EQFBDocIsTranslated( PTBDOCUMENT ); // handling for document is xlat
  PTBSEGMENT EQFBFindNextSource( PTBDOCUMENT, PULONG, USHORT, PBOOL, BOOL, PVOID *);
-__declspec(dllexport)
+
  VOID SetScrollbar( PTBDOCUMENT );
  MRESULT EQFBFindClose( HWND, WPARAM, LPARAM );
-__declspec(dllexport)
+
  MRESULT EQFBFindCloseModeless( HWND, WPARAM, LPARAM );
  MRESULT EQFBCFindClose( HWND, WPARAM, LPARAM );
  VOID EQFBCFind( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
  VOID EQFBCFindTerminate( PTBDOCUMENT pDoc );
 
  ULONG  EQFBQueryActLine(PTBDOCUMENT, ULONG, USHORT);
@@ -1360,23 +1360,23 @@ PTBDOCUMENT EQFBRemoveDoc ( PTBDOCUMENT  pDoc );
 
 //   extern  VIOFONTCELLSIZE vioFontSize[MAX_DIF_DOC];    // default font sizes
 #endif
-__declspec(dllexport)
+
 FILE* get_hMTLog();
-__declspec(dllexport)
+
 void set_hMTLog(FILE* hMTLogNew );
-__declspec(dllexport)
+
 EQFBBLOCK* get_EQFBBlockMark();
-__declspec(dllexport)
+
 USEROPT* get_EQFBUserOpt();
-__declspec(dllexport)
+
 OPENDATA* get_OpenData();
-__declspec(dllexport)
+
 USHORT* get_usRightMargin();
-__declspec(dllexport)
+
 PPROPSYSTEM get_pSysProp();
-__declspec(dllexport)
+
 void set_pSysProp(PPROPSYSTEM pNewSysProp);
-__declspec(dllexport)
+
 VIOFONTCELLSIZE* get_vioFontSize();
 #endif
 
@@ -1546,7 +1546,7 @@ typedef struct _FONTCOLIDA
 // data area for key assignment dialog
 typedef struct _KEYSDATA
 {
-   HWND            hwndFrame;          // the windowïs original frame window
+   HWND            hwndFrame;          // the windowï¿½s original frame window
    PKEYPROFTABLE   pKeyList;           // key assignments
    PFUNCTIONTABLE  pFuncList;          // function list
    PRESKEYTABLE    pResKeys;           // list with reserved keys
@@ -1819,7 +1819,7 @@ FUNCTIONTABLE FuncTab[] = {
 #else
 //   extern FUNCTIONTABLE FuncTab[];
 #endif
-__declspec(dllexport)
+
 FUNCTIONTABLE* get_FuncTab();
 
 //+----------------------------------------------------------------------------+
@@ -1991,7 +1991,7 @@ KEYPROFTABLE DefKeyTable[LAST_FUNC+1]=
 //   extern KEYPROFTABLE DefKeyTable[LAST_FUNC+1];
 #endif
 
-__declspec(dllexport)
+
 KEYPROFTABLE* get_DefKeyTable();
 
 #if defined(INIT_TABLES)
@@ -2001,7 +2001,7 @@ KEYPROFTABLE* get_DefKeyTable();
 //  extern KEYPROFTABLE KeyTable[LAST_FUNC+1];
 #endif
 
-__declspec(dllexport)
+
 KEYPROFTABLE* get_KeyTable();
 
 //+----------------------------------------------------------------------------+
@@ -2171,7 +2171,7 @@ RESKEYTABLE ResKeyTab[]=
 //   extern RESKEYTABLE ResKeyTab[];
 #endif
 
-__declspec(dllexport)
+
 RESKEYTABLE* get_ResKeyTab();
 
 /*-------------------------------------------------------------------*/
@@ -2216,14 +2216,14 @@ RESKEYTABLE* get_ResKeyTab();
 
 VOID PASCAL FAR TPCleanUp( USHORT );
 
-__declspec(dllexport) BOOL EQFBKeyState ( USHORT, PUCHAR, PUCHAR );
+ BOOL EQFBKeyState ( USHORT, PUCHAR, PUCHAR );
 
 #if defined(INIT_TABLES)
   CHAR aszFontFacesGlobal[MAX_DIF_DOC][LF_FACESIZE];       // facenames for windows
 #else
 //  extern CHAR aszFontFacesGlobal[MAX_DIF_DOC][LF_FACESIZE];       // facenames for windows
 #endif
-__declspec(dllexport) CHAR* get_aszFontFacesGlobal();
+ CHAR* get_aszFontFacesGlobal();
 /**********************************************************************/
 /* define stubs for BIDI if not available...                          */
 /**********************************************************************/
@@ -2276,8 +2276,8 @@ __declspec(dllexport) CHAR* get_aszFontFacesGlobal();
     }                                         \
   }
 
-//  #define POSTEDITSEGBOUND_SEGDATA "¯"
-  #define POSTEDITSEGBOUND_SEGDATA '¯'
+//  #define POSTEDITSEGBOUND_SEGDATA "ï¿½"
+  #define POSTEDITSEGBOUND_SEGDATA 'ï¿½'
   #define POSTEDITSEGBOUND_SEGDATA_GREEK1 '\x0f'
   #define POSTEDITSEGBOUND_SEGDATA_GREEK2 '\x15'
   #define POSTEDITSEGBOUND_SEGDATA_DBCS   '\xA4'
@@ -2389,7 +2389,7 @@ USHORT EQFBGetHLType( PTBSEGMENT pSeg, SHORT sSegOffs);
   #else
 //    extern CHARFORMAT2 aszFontExtSpecs[MAXEXTTYPE];
   #endif
-	__declspec(dllexport)
+	
 	CHARFORMAT2* get_aszFontExtSpecs();
 
 /**********************************************************************/
@@ -2457,7 +2457,7 @@ typedef struct _EXTCOLOREX
     extern EXTCOLOREX aszDef1FontExtSpecs[MAXEXTTYPE];
     extern EXTCOLOR aszTextTypeColorTable[MAXCOLOUR];
   #endif
-__declspec(dllexport)
+
   PSZ_W EQFBSegColRTF ( CHARFORMAT2 *, PTBSEGMENT, USHORT,
                        USHORT, DISPSTYLE, BOOL, PDISPFILERTF );
   VOID EQFBSegColRTFInit( CHARFORMAT2 *, USHORT);
@@ -2479,45 +2479,45 @@ VOID EQFBUpdateSegStyleRTF( PTBDOCUMENT pDoc, USHORT usSegNum, PTBSEGMENT pSeg )
 VOID EQFBGetSegFromCaretRTF( PTBDOCUMENT pDoc, PTBROWOFFSET pTBCursor, ULONG ulCaret );
 
 void EQFBWndProc_CommandRTF( HWND, WPARAM, LPARAM );
-__declspec(dllexport)
+
 VOID EQFBTransRTF ( PTBDOCUMENT pDoc, USHORT usCond );
 VOID EQFBDoNextTwoRTF( PTBDOCUMENT pDoc, PULONG  pulSegNum, USHORT usCond );
-__declspec(dllexport)
+
 VOID EQFBSetWorkSegRTF( PTBDOCUMENT pDoc, ULONG ulSegNum, PSZ_W pData );
 VOID EQFBUpdateTBCursor( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 BOOL EQFBFuncRTFStart ( PSZ, PSZ, PSTEQFGEN, BOOL, PTBDOCUMENT );
-__declspec(dllexport)
+
 VOID EQFBActivateSegmRTF ( PTBDOCUMENT pDoc, ULONG  ulSegNum );
-__declspec(dllexport)
+
 VOID EQFBTransRTF ( PTBDOCUMENT pDoc, USHORT usCond );
-__declspec(dllexport)
+
 USHORT EQFBNextUnprotected ( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, PUSHORT pusOffs );
 
-__declspec(dllexport)
+
 VOID EQFBSetJoinedSegRTF( PTBDOCUMENT pDoc, ULONG ulSegNum );
-__declspec(dllexport)
+
 VOID EQFBSetJoinStartSegRTF( PTBDOCUMENT pDoc, ULONG ulSegNum );
-__declspec(dllexport)
+
 VOID EQFBSetSplitStartSegRTF( PTBDOCUMENT pDoc, ULONG ulSegNum );
-__declspec(dllexport)
+
 VOID EQFBSetSplittedSegRTF( PTBDOCUMENT pDoc, ULONG ulSegNum );
-__declspec(dllexport)
+
 VOID EQFBSetPostEditRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBDisplayFileNewRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBUndoRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBRedoRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBFuncEndLineRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBFuncStartLineRTF( PTBDOCUMENT pDoc );
-__declspec(dllexport)
+
 VOID EQFBGetSelBlockRTF( PTBDOCUMENT pDoc );
 VOID EQFBSetWYSIWYGType( PTBDOCUMENT pDoc, PSZ pTagTable );
-__declspec(dllexport)
+
 MRESULT EQFBFuncRTFFunc( PTBDOCUMENT pDoc, USHORT usFunc,
                          HWND hwnd, WPARAM mp1, LPARAM mp2 );
 

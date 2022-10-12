@@ -18,7 +18,7 @@
 //
 #include "win_types.h"
 
-class __declspec(dllexport) CXmlWriter
+class  CXmlWriter
 {
 public:
 	CXmlWriter();

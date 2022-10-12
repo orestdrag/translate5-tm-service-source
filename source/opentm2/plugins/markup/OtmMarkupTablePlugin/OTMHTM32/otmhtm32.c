@@ -72,7 +72,7 @@
 #define  HTMLDOC_START_STYLE_STRING   L"<STYLE"
 #define  HTMLDOC_END_STYLE_STRING     L"</STYLE"
 #define  HTMLDOC_STYLE_CONT_STRING    L"</STYLE><STYLE ID=TWB>"
-#define  HTMLDOC_SCRIPT_CONT_STRING1  L"µ<XSCRCONT:"
+#define  HTMLDOC_SCRIPT_CONT_STRING1  L"ï¿½<XSCRCONT:"
 #define  HTMLDOC_SCRIPT_CONT_STRING2  L"{TWBSCR}<XSCRCONT:"
 #define  HTMLDOC_SCRIPT_CONT_STRING3  L"<XSCRCONT:{TWBSCR}"
 #define  HTMLDOC_SCRIPT_CONT_END      L"{TWBSCR}"
@@ -197,7 +197,7 @@ BOOL ShowError( wchar_t *Title, wchar_t *Message, BOOL bOKCancel );
 /*                                                                          */
 /****************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
                       PSZ      pTagTable,
                       PSZ      pEdit,
@@ -438,7 +438,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
 }
 
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
                        PSZ pTagTable,
                        PSZ       pEdit,
@@ -585,7 +585,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 
 }
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW  (PSZ      pTagTable,
                        PSZ       pEdit,
                        PSZ       pProgPath,
@@ -604,7 +604,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW  (PSZ      pTagTable,
 
 }
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
                         PSZ      pTagTable,
                         PSZ      pEdit,
@@ -797,7 +797,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
 *               EQF_BOOL
 *******************************************************************************/
 
-__declspec(dllexport)
+
 EQF_BOOL __cdecl /*APIENTRY*/ EQFSHOW(
                    LONG     lInfo,
                    HWND     hwndParent)
@@ -873,7 +873,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFSHOW(
 *               EQF_BOOL      // 0=Successful
 *******************************************************************************/
 
-__declspec(dllexport)
+
 USHORT __cdecl /*APIENTRY*/ EQFQUERYEXITINFO(
                         PSZ pszTagTable, // name of the markup table, e.g. "OTMHTM32"
                         USHORT usMode,   // type of information being queried

@@ -67,7 +67,7 @@ BOOL CompareSpecCharW(const wchar_t * wstrCharStr1, const wchar_t * wstrCharStr2
 void RemoveSpecCharFromVecW(const wchar_t * wstrTarChar);
 void QueryInsSpecCharW(UCHAR uCode, UCHAR ucState, PSPECCHARW pSepcChar);
 int AddToSpecCharVec(UCHAR ucCode, UCHAR ucState, EQF_BOOL fChange, BYTE bEditor, wchar_t * wstrDispChar);
-__declspec(dllexport)
+
 SPECCHARKEYVEC* GetSpecCharKeyVec();
 void RemoveKeyFromItem(wchar_t * wstrItem);
 SPECCHARKEY* QuerySpecChar(wchar_t * wstrItem);

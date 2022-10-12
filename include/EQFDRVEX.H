@@ -26,15 +26,15 @@ MRESULT          TWBConnectClose ( HWND, WPARAM, LPARAM );
 /*****************************************************************************
  * function prototypes of exported functions                                 *
  *****************************************************************************/
-__declspec(dllexport)
+
 VOID             TWBSetFontCharacteristics( VOID );
-__declspec(dllexport)
+
 VOID             TWBDrives( HWND, HMODULE, BOOL );
-__declspec(dllexport)
+
 BOOL             TWBCheckExpirationDate( PSZ, PSZ );
-__declspec(dllexport)
+
 VOID             TWBConnect( HWND, HMODULE, USHORT );
-__declspec(dllexport)
+
 VOID             TWBSystemProps();
 
 

@@ -14,5 +14,5 @@
 //+----------------------------------------------------------------------------+
 //+----------------------------------------------------------------------------+
 
-__declspec(dllexport) INT_PTR CALLBACK  WORDCOUNTDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
-__declspec(dllexport) MRESULT WCntListCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM);
+ INT_PTR CALLBACK  WORDCOUNTDLGPROC( HWND, WINMSG, WPARAM, LPARAM);
+ MRESULT WCntListCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM);

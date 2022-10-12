@@ -12,7 +12,7 @@ typedef enum _DITAPROCESSINGMODES
   DITAPREPAREPROPOSAL
 } DITAPROCESSINGMODES;
 
-__declspec(dllexport)
+
 BOOL DITASpecialProcessingRequired
 (
   PSZ         pszDocMarkup,                      // markup of document
@@ -21,7 +21,7 @@ BOOL DITASpecialProcessingRequired
 );
 
 
-__declspec(dllexport)
+
 BOOL DITAPreprocessProposals
 (
   PSZ_W       pszSource,                         // source of memory proposal
@@ -29,7 +29,7 @@ BOOL DITAPreprocessProposals
   PVOID       pvReplaceList                      // replacement list pointer or NULL
 );
 
-__declspec(dllexport)
+
 BOOL DITAProcessProposal
 (
   PSZ_W       pszDocSource,                      // source of document segment
@@ -39,14 +39,14 @@ BOOL DITAProcessProposal
   ULONG       ulOemCP                            // OEM CP for proposal source
 );
 
-__declspec(dllexport)
+
 BOOL DITALoadReplacementList
 (
   PSZ         pszReplaceList,                    // fully qualified replacement list name
   PVOID       *ppvReplaceList                    // ptr to callers replacement list pointer
 );
 
-__declspec(dllexport)
+
 BOOL DITAFreeReplacementList
 (
   PVOID       *ppvReplaceList                    // ptr to callers replacement list pointer

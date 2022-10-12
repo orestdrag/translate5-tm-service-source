@@ -12,7 +12,7 @@
 
 /*! \brief Abstract base-class for markup table objects
 */
-class __declspec(dllexport) OtmMarkup
+class  OtmMarkup
 {
 
 public:

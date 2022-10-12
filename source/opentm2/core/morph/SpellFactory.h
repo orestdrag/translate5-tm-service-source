@@ -17,7 +17,7 @@
 
 /*! \brief   This class provides factory methods for spell check objects 
 */
-class __declspec(dllexport) SpellFactory
+class  SpellFactory
 {
 public:
 
