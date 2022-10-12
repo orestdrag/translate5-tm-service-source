@@ -1715,7 +1715,7 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
 }
 
 extern "C" {
-  __declspec(dllexport)
+  
   unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
   {
     strcpy( pPluginInfo->szName, pszPluginName );

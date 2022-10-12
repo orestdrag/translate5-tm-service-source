@@ -956,6 +956,7 @@ class CTMXExportImport
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 extern "C" 
+
 USHORT EXTMEMEXPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
@@ -971,6 +972,7 @@ USHORT EXTMEMEXPORTSTART
 } /* end of function EXTMEMEXPORTSTART */
 
 extern "C" 
+
 USHORT EXTMEMEXPORTPROCESS
 ( 
   LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
@@ -988,6 +990,7 @@ USHORT EXTMEMEXPORTPROCESS
 //
 // This function is called once at the end of the memory export
 extern "C" 
+
 USHORT EXTMEMEXPORTEND
 ( 
   LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
@@ -1001,6 +1004,7 @@ USHORT EXTMEMEXPORTEND
 } /* end of function EXTMEMEXPORTEND */
 
 extern "C" 
+ USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
@@ -1015,6 +1019,7 @@ extern "C"
 } /* end of function EXTMEMIMPORTSTART */
 
 extern "C" 
+ USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
@@ -1028,6 +1033,7 @@ extern "C"
 } /* end of function EXTMEMIMPORTPROCESS */
 
 extern "C" 
+ USHORT  EXTMEMIMPORTEND
 ( 
   LONG             lHandle                  // Import/import handle as set by ExtMemImportStart function
 )
@@ -1042,6 +1048,7 @@ extern "C"
 } /* end of function EXTMEMIMPORTEND */
 
 extern "C" 
+ USHORT EXTMEMIMPORTGETLASTERROR
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PSZ              pszErrorBuffer,          // pointer to buffer for the error text

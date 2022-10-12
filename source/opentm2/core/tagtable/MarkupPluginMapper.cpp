@@ -53,7 +53,7 @@ typedef struct _MARKUPENTRY
    and markup table objects is created
 	
 	*/
-__declspec(dllexport)
+
 void InitMarkupPluginMapper()
 {
   OtmMarkupPlugin* curPlugin = NULL;
@@ -82,7 +82,7 @@ void InitMarkupPluginMapper()
 */
 
 // find a markup table object by markup table name
-__declspec(dllexport)
+
  OtmMarkup *GetMarkupObject( char *pszMarkup, char *pszPlugin )
 {
   OtmMarkup *pMarkup = NULL;
@@ -105,7 +105,7 @@ __declspec(dllexport)
 }
 
 // find a markup table plugin object by plugin name
-__declspec(dllexport)
+
  OtmMarkupPlugin *GetMarkupPluginObject( char *pszPlugin )
 {
   OtmMarkup *pMarkup = NULL;
@@ -123,7 +123,7 @@ __declspec(dllexport)
 }
 
 // get the markup table plugin providing a specific markup table 
-__declspec(dllexport)
+
 OtmMarkupPlugin *GetMarkupPlugin( char *pszMarkupName )
 {
   // loop through all markup table plugins 
@@ -138,7 +138,7 @@ OtmMarkupPlugin *GetMarkupPlugin( char *pszMarkupName )
   }
   return( NULL );
 }
-__declspec(dllexport)
+
 BOOL isMarkupDeletable( char *pszMarkup, char *pszPlugin )
 {
   OtmMarkup *markup = GetMarkupObject( pszMarkup, pszPlugin );
@@ -150,7 +150,7 @@ BOOL isMarkupDeletable( char *pszMarkup, char *pszPlugin )
 }
 
 
-__declspec(dllexport)
+
 BOOL isMarkupImportable( char *pszMarkup, char *pszPlugin )
 {
   OtmMarkup *markup = GetMarkupObject( pszMarkup, pszPlugin );
@@ -162,7 +162,7 @@ BOOL isMarkupImportable( char *pszMarkup, char *pszPlugin )
 }
 
 
-__declspec(dllexport)
+
 BOOL isMarkupExportable( char *pszMarkup, char *pszPlugin )
 {
   OtmMarkup *markup = GetMarkupObject( pszMarkup, pszPlugin );
@@ -174,7 +174,7 @@ BOOL isMarkupExportable( char *pszMarkup, char *pszPlugin )
 }
 
 
-__declspec(dllexport)
+
 BOOL isMarkupProtected( char *pszMarkup, char *pszPlugin )
 {
   OtmMarkup *markup = GetMarkupObject( pszMarkup, pszPlugin );
@@ -188,7 +188,7 @@ BOOL isMarkupProtected( char *pszMarkup, char *pszPlugin )
 
 
 // make CLB list box item for a markup table
-__declspec(dllexport)
+
 BOOL TagMakeListItem( PSZ pszMarkup, PSZ pszPlugin, PSZ pszBuffer, int iBufSize )
 {
   OtmMarkupPlugin *curPlugin = NULL ;
@@ -274,7 +274,7 @@ BOOL MUMakeCLBListItem( OtmMarkupPlugin *plugin, OtmMarkup *markup, char *pszBuf
 }
 
 // get the file name of the markup table file
-__declspec(dllexport)
+
 BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize )
 {
    strncpy( pszBuffer, pszMarkup, iBufSize ) ;
@@ -291,7 +291,7 @@ BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer
 
 
 // get the path of the markup table file
-__declspec(dllexport)
+
 BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize )
 {
   strncpy( pszBuffer, pszMarkup, iBufSize ) ;
@@ -316,7 +316,7 @@ BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer
 
 
 // get the file name of the markup table user exit
-__declspec(dllexport)
+
 BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize )
 {
   *pszBuffer = '\0' ;
@@ -329,7 +329,7 @@ BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, i
 }
 
 // get the name of the markup table plugin responsible for the given markup
-__declspec(dllexport)
+
 BOOL MUGetMarkupTablePlugin( char *pszMarkup, char *pszBuffer, int iBufSize )
 {
    *pszBuffer = '\0' ;
@@ -346,7 +346,7 @@ BOOL MUGetMarkupTablePlugin( char *pszMarkup, char *pszBuffer, int iBufSize )
 
 
 // update the files of a markup table
-__declspec(dllexport)
+
 BOOL MUUpdateMarkupTableFiles( 
        char   *pszMarkupTableName,
        char   *pszPluginName,
@@ -391,7 +391,7 @@ BOOL MUUpdateMarkupTableFiles(
 
 
 // delete a markup table 
-__declspec(dllexport)
+
 BOOL MUDeleteMarkupTable( 
        char   *pszMarkupName,
        char   *pszPluginName
