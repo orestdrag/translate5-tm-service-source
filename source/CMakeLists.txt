@@ -13,6 +13,8 @@ set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
 
 set(CMAKE_BUILD_TYPE Debug)
 
+include(GNUInstallDirs)
+
 message(STATUS "T5MEMORY CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 message(STATUS "T5MEMORY ROOT is ${ROOT}")
@@ -41,6 +43,14 @@ set (Boost_INCLUDE_DIR "/opt/local/include")
 include("${ROOT}/source/cmake/CheckGit.cmake")
 CheckGitSetup()
 set(T5MEMORY_SOURCE_ROOT "${ROOT}/source")
+set(CORE_DIR "opentm2/core")
+
+
+set(OPENTM2_MRI_DIR     "${ROOT}/mri")
+set(ZLIB_INCLUDE_DIR    "${ROOT}/Packages/zlib")
+set(MINIZIP_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}/contrib/minizip")
+
+
 set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OTMMSJSONFactory.cpp"
@@ -48,11 +58,98 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/config.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenServer.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenHandler.cpp"
+
+
+    "${T5MEMORY_SOURCE_ROOT}/opentm2/EQFX_API.cpp"
+    "${T5MEMORY_SOURCE_ROOT}/opentm2/OTMFUNC.cpp"
+
+    #pluginmanager
+    "${CORE_DIR}/pluginmanager/PluginManager.cpp"
+    "${CORE_DIR}/pluginmanager/PluginManagerImpl.cpp"
+#tagtable
+    "${CORE_DIR}/tagtable/EQFTOKEN.cpp"
+    "${CORE_DIR}/tagtable/MarkupPluginMapper.cpp"
+#morph
+    "${CORE_DIR}/morph/MorphFactory.cpp"
+    "${CORE_DIR}/morph/OtmMorphICU.cpp"
+    "${CORE_DIR}/morph/OtmMorphICUPlugin.cpp" 
+    "${CORE_DIR}/morph/SpellFactory.cpp"
+
+#Util_Source_Files
+    "${CORE_DIR}/utilities/LanguageFactory.cpp"
+    "${CORE_DIR}/utilities/LogWriter.cpp"
+    "${CORE_DIR}/utilities/OtmProposal.cpp"
+    "${CORE_DIR}/utilities/UtlAlloc.cpp"
+    "${CORE_DIR}/utilities/UtlMATVal.cpp"
+    "${CORE_DIR}/utilities/UtlMisc.cpp"
+    "${CORE_DIR}/utilities/UtlString.cpp"
+    "${CORE_DIR}/utilities/EQFUTERR.cpp"
+    "${CORE_DIR}/utilities/EQFPRO00.cpp"
+    "${CORE_DIR}/utilities/EQFUTFIL.cpp"
+    "${CORE_DIR}/utilities/EQFUTDOS.cpp"
+    "${CORE_DIR}/utilities/EQFOBJ00.cpp"
+    "${CORE_DIR}/utilities/EQFUTLNG.cpp"
+    "${CORE_DIR}/utilities/EQFOSWIN.cpp"
+    "${CORE_DIR}/utilities/EQFHASH.cpp"
+    "${CORE_DIR}/utilities/Property.cpp"
+    "${CORE_DIR}/utilities/EncodingHelper.cpp"
+    "${CORE_DIR}/utilities/FilesystemHelper.cpp"
+    "${CORE_DIR}/utilities/FilesystemWrapper.cpp"
+    "${CORE_DIR}/utilities/LogWrapper.cpp"
+    "${CORE_DIR}/utilities/ThreadingWrapper.cpp"
+    "${CORE_DIR}/utilities/OSWrapper.cpp"
+    "${CORE_DIR}/utilities/EQFSETUP.cpp"
+    "${CORE_DIR}/utilities/UtlLangCP.cpp"
+    "${CORE_DIR}/utilities/UtlRegistry.cpp"
+    "${CORE_DIR}/utilities/EQFDICT.cpp"
+    "${CORE_DIR}/utilities/EqfPluginWrapper.cpp"
+    "${CORE_DIR}/utilities/EQFPRO00.cpp"
+    "${CORE_DIR}/utilities/EQFMORPW.cpp"
+    "${CORE_DIR}/utilities/EQFMORPH.cpp"
+    "${CORE_DIR}/utilities/OTMGLOBM.cpp"
+    "${CORE_DIR}/utilities/EQFTADIT.cpp"
+    "${CORE_DIR}/utilities/EQFMORPH.cpp"
+    "${CORE_DIR}/utilities/ZipHelper.cpp" 
+
+    #document
+    "${CORE_DIR}/document/DocumentPluginMapper.cpp"
+    "${CORE_DIR}/document/CXMLWRITER.cpp"
+    "${CORE_DIR}/document/InitPlugins.cpp"
+    "${CORE_DIR}/document/EQFTATAG.cpp"
+    "${CORE_DIR}/document/EQFMAIN.cpp"
+
+    #EqfMemoryPlugin
+    "${CORE_DIR}/EqfMemoryPlugin/EqfMemory.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EqfMemoryPlugin.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTCR.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTEXT.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTPUT.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTUTL.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTMDB.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTM.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTOP.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMUT.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTUTL.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/OTMTMXIE.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTDEL.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFNTGET.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFFUZZ.cpp"
+
+    #from MEMORY folder
+    "${CORE_DIR}/EqfMemoryPlugin/TMPluginWrapper.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/MemoryFactory.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMEP.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/EQFMEM00.cpp"
+    "${CORE_DIR}/EqfMemoryPlugin/GenericTagReplace.cpp"
 )
 
 #list(APPEND CMAKE_PREFIX_PATH "/home/rip/Qt/5.12.1/gcc_64")
 
-link_directories(${RESTBED_LIBRARIES})
+#link_directories(${RESTBED_LIBRARIES})
+
+set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )
 
 add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
@@ -62,13 +159,19 @@ set(CMAKE_CXX_STANDARD 14)
 target_compile_features(T5MEMORY PRIVATE cxx_std_14)
 
 target_include_directories(T5MEMORY PRIVATE
-    "${CMAKE_SOURCE_DIR}/proxygen"
-    "${CMAKE_SOURCE_DIR}/proxygen/proxygen/_build/deps/include"
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENTM2_INCLUDE_DIR}
     "/opt/local/include"
     "${ROOT}/include"
+    ${OPENTM2_INCLUDE_DIR}
+    ${OPENTM2_MRI_DIR}
+    
+    "${CORE_DIR}/utilities"
+    "${CORE_DIR}/pluginmanager"
+    "${CORE_DIR}/tagtable"
+    "${CORE_DIR}/morph"
+    "${CORE_DIR}/EqfMemoryPlugin"
 )
 
 find_package(Threads)
@@ -82,7 +185,7 @@ endif()
 find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
 
 set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
-add_subdirectory("${OPENTM2_FOLDER}")
+#add_subdirectory("${OPENTM2_FOLDER}/core")
 
 
 
@@ -97,8 +200,11 @@ find_package(gflags REQUIRED)
 find_package(proxygen REQUIRED)
 
 
+add_subdirectory(opentm2/core/utilities/zip)
+
 target_link_libraries(T5MEMORY PRIVATE
-  OTMFUNC
+  #OTMFUNC
+  #t5core
   git_version
   Folly::folly
   fizz::fizz
@@ -110,13 +216,17 @@ target_link_libraries(T5MEMORY PRIVATE
   ssl
   crypto
   "${LIBS_DIRECTORY}/libzstd.a"
+  libxerces-c-3.2.so  zip   ICU::uc ICU::i18n 
 )
+
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 
 configure_file("${ROOT}/source/OtmMemoryServiceConfig.h.in" "${ROOT}/source/OtmMemoryServiceConfig.h"  @ONLY)
 
 install(TARGETS T5MEMORY DESTINATION bin)
+
+find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
 
 # Configure CPack
 include(InstallRequiredSystemLibraries)
