@@ -6,16 +6,16 @@
 
 #define toStr(i) std::to_string(i)
 
-//#define GLOGGING_ENABLED 1
+#define GLOGGING_ENABLED
 
 #ifdef GLOGGING_ENABLED
-#include <glog/logging.h>
+    #include <glog/logging.h>
 
-#define LOG_DEBUG_MSG if(V_IS_ON(1))      LOG(INFO) <<" [DEBUG] in "<< __func__<<": "
-#define LOG_INFO_MSG LOG(INFO) <<" [INFO] in "<< __func__<<": "
-#define V_IS_ON(x) V_IS_ON(x)
+    #define LOG_DEBUG_MSG if(V_IS_ON(1))      LOG(INFO) <<" [DEBUG] in "<< __func__<<": "
+    #define LOG_INFO_MSG LOG(INFO) <<" [INFO] in "<< __func__<<": "
+    #define V_IS_ON(x) VLOG_IS_ON(x)
 #else 
-#define V_IS_ON(x) true
+    #define V_IS_ON(x) true
 #endif //GLOGGING_ENABLED
 
 

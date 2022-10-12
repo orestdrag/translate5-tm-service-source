@@ -8,6 +8,14 @@
 #include <thread>
 #include <unistd.h>
 #include <folly/portability/GFlags.h>
+#include <execinfo.h>
+
+#include "RestAPI/OtmMemoryService.h"
+#include "opentm2/core/utilities/LogWrapper.h"
+#include "cmake/git_version.h"
+#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "EQF.H"
+
 
 static bool ValidatePort(const char* flagname, int32_t value) {
    if (value > 0 && value < 32768)   // value is ok
@@ -79,15 +87,6 @@ DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
 
 FOLLY_GFLAGS_DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
-
-//#include <glog/logging.h>
-#include <execinfo.h>
-#include "RestAPI/OtmMemoryService.h"
-#include "opentm2/core/utilities/LogWrapper.h"
-#include "cmake/git_version.h"
-#include "opentm2/core/utilities/PropertyWrapper.H"
-#include "EQF.H"
-
 
 void handle_interrupt_sig(int sig) {
     LogMessage(TRANSACTION, "Received interrupt signal\n");
