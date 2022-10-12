@@ -1290,7 +1290,6 @@ VOID CloseFile
   \param pszDestPath fully qualified name of the destination directory
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
 LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole function");
@@ -1322,7 +1321,6 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole functi
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
 LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole function");
@@ -1359,7 +1357,6 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole functi
   \param pszPackage fully qualified name of the ZIP package being created
   \returns 0 in any case
 */
-__declspec(dllexport)
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 {
   char szCurFile[MAX_PATH];
@@ -1385,7 +1382,6 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 /*! \brief delete all files and directories located in a specific directory
   \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
 */
-__declspec(dllexport)
 void UtlDeleteAllFiles( const char *pszDirectory )
 {
  char szFileFound[MAX_PATH];

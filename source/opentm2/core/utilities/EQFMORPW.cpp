@@ -16,7 +16,7 @@
 //|Entry Points:                                                               |
 //|                                                                            |
 //|  MorphWordRecognition    - Detect words for dictionary lookup              |
-//|                                                                           |
+//|                                                                            |
 //|+-- status ("H"=Header,"D"=Design,"C"=Code,"T"=Test, " "=complete,          |
 //|            "Q"=Quick-and-dirty )                                           |
 //+----------------------------------------------------------------------------+

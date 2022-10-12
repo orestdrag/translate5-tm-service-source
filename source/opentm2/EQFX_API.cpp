@@ -93,7 +93,6 @@ ERRTYPE         ErrorType;                      // error classes
 CHAR            szMsgFile[CCHMAXPATH] = "c:\\eqf\\msg\\eqf.msg"; // def. msg file
 CHAR_W          szMsgBuf[EQF_MSGBUF_SIZE];      // buffer for message
 
-__declspec(dllexport)
 USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
 (
   PSZ_W          pszSeg,               // ptr to Segment

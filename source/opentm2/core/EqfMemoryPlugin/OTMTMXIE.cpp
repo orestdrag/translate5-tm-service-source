@@ -956,7 +956,6 @@ class CTMXExportImport
 //|                                                                            |
 //+----------------------------------------------------------------------------+
 extern "C" 
-__declspec(dllexport)
 USHORT EXTMEMEXPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
@@ -972,7 +971,6 @@ USHORT EXTMEMEXPORTSTART
 } /* end of function EXTMEMEXPORTSTART */
 
 extern "C" 
-__declspec(dllexport)
 USHORT EXTMEMEXPORTPROCESS
 ( 
   LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
@@ -990,7 +988,6 @@ USHORT EXTMEMEXPORTPROCESS
 //
 // This function is called once at the end of the memory export
 extern "C" 
-__declspec(dllexport)
 USHORT EXTMEMEXPORTEND
 ( 
   LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
@@ -1004,7 +1001,6 @@ USHORT EXTMEMEXPORTEND
 } /* end of function EXTMEMEXPORTEND */
 
 extern "C" 
-__declspec(dllexport) USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
@@ -1019,7 +1015,6 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTSTART
 } /* end of function EXTMEMIMPORTSTART */
 
 extern "C" 
-__declspec(dllexport) USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
@@ -1033,7 +1028,6 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTPROCESS
 } /* end of function EXTMEMIMPORTPROCESS */
 
 extern "C" 
-__declspec(dllexport) USHORT  EXTMEMIMPORTEND
 ( 
   LONG             lHandle                  // Import/import handle as set by ExtMemImportStart function
 )
@@ -1048,7 +1042,6 @@ __declspec(dllexport) USHORT  EXTMEMIMPORTEND
 } /* end of function EXTMEMIMPORTEND */
 
 extern "C" 
-__declspec(dllexport) USHORT EXTMEMIMPORTGETLASTERROR
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PSZ              pszErrorBuffer,          // pointer to buffer for the error text
