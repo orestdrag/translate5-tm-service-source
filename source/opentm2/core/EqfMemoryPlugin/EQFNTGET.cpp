@@ -291,7 +291,7 @@ USHORT NTMCompareContext
 
 
 //typedef USHORT (APIENTRY *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
-typedef USHORT (__cdecl *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
+typedef USHORT ( *PFNCOMPCONTEXT)( PSZ_W, PSZ_W, PUSHORT );
 
 VOID SetAvailFlags( PTMX_GET_OUT_W pTmGetOut, USHORT usMatchesFound)
 {

@@ -60,26 +60,21 @@
 XERCES_CPP_NAMESPACE_USE
 
 
-#ifndef CPPTEST
-extern "C"
-{
-#endif
-  //#pragma pack( push, TM2StructPacking, 1 )
 
-  #define INCL_EQF_TM               // general Transl. Memory functions
-  #define INCL_EQF_ANALYSIS         // analysis functions
-  #define INCL_EQF_TAGTABLE         // tagtable defines and functions
-  #define INCL_EQF_MORPH            // morphologic functions
-  #include "EQF.H"                  // General .H for EQF
-  #include "EQFMEMIE.H"
-  #include "EQFSERNO.H"
-  #include "OTMFUNC.H"
-  #include "TMXNames.h"
+//#pragma pack( push, TM2StructPacking, 1 )
 
-  //#pragma pack( pop, TM2StructPacking )
-#ifndef CPPTEST
-}
-#endif
+#define INCL_EQF_TM               // general Transl. Memory functions
+#define INCL_EQF_ANALYSIS         // analysis functions
+#define INCL_EQF_TAGTABLE         // tagtable defines and functions
+#define INCL_EQF_MORPH            // morphologic functions
+#include "EQF.H"                  // General .H for EQF
+#include "EQFMEMIE.H"
+#include "EQFSERNO.H"
+#include "OTMFUNC.H"
+#include "TMXNames.h"
+
+//#pragma pack( pop, TM2StructPacking )
+
 
 #include "CXMLWRITER.H"
 #include "LanguageFactory.H"
@@ -955,8 +950,6 @@ class CTMXExportImport
 //| Interface functions called by TranslationManager                           |
 //|                                                                            |
 //+----------------------------------------------------------------------------+
-extern "C" 
-
 USHORT EXTMEMEXPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
@@ -970,8 +963,6 @@ USHORT EXTMEMEXPORTSTART
   *plHandle = (LONG)pTMXExport;
   return( usRC );
 } /* end of function EXTMEMEXPORTSTART */
-
-extern "C" 
 
 USHORT EXTMEMEXPORTPROCESS
 ( 
@@ -989,8 +980,6 @@ USHORT EXTMEMEXPORTPROCESS
 // EXTMEMEXPORTEND
 //
 // This function is called once at the end of the memory export
-extern "C" 
-
 USHORT EXTMEMEXPORTEND
 ( 
   LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
@@ -1003,8 +992,7 @@ USHORT EXTMEMEXPORTEND
   return( usRC );
 } /* end of function EXTMEMEXPORTEND */
 
-extern "C" 
- USHORT  EXTMEMIMPORTSTART
+USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
@@ -1018,8 +1006,7 @@ extern "C"
   return( usRC );
 } /* end of function EXTMEMIMPORTSTART */
 
-extern "C" 
- USHORT  EXTMEMIMPORTPROCESS
+USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
@@ -1032,8 +1019,7 @@ extern "C"
   return( usRC );
 } /* end of function EXTMEMIMPORTPROCESS */
 
-extern "C" 
- USHORT  EXTMEMIMPORTEND
+USHORT  EXTMEMIMPORTEND
 ( 
   LONG             lHandle                  // Import/import handle as set by ExtMemImportStart function
 )
@@ -1047,8 +1033,7 @@ extern "C"
   return( usRC );
 } /* end of function EXTMEMIMPORTEND */
 
-extern "C" 
- USHORT EXTMEMIMPORTGETLASTERROR
+USHORT EXTMEMIMPORTGETLASTERROR
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PSZ              pszErrorBuffer,          // pointer to buffer for the error text

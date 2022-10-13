@@ -20,19 +20,12 @@ using namespace std;
 
 #define PLUGIN_PATH_MAX_DEPTH          2
 
-#ifndef CPPTEST
-extern "C"
-{
-#endif
-	#include "EQF.H"
-#ifndef CPPTEST
-}
-#endif
+#include "EQF.H"
 
 /*! \typedef PLUGINPROC
 	Prototype for the registerPlugins() function
 */
-typedef unsigned short (/*__cdecl*/ *PLUGINPROC) ();   // Modify for P402974
+typedef unsigned short (/**/ *PLUGINPROC) ();   // Modify for P402974
 
 // Add for P403115 start
 BOOL DllNameCheck(const char * strName);

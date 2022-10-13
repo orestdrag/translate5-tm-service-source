@@ -8,18 +8,12 @@
 #ifndef _OTMDOCUMENT_H_
 #define _OTMDOCUMENT_H_
 
-#ifndef CPPTEST
-extern "C" {
-#endif
 #include "EQF.H"
 #include "OTMAPI.H"
 #include "EQFTAG.H"
 #include "EQFTP.H"
 #include "EQFTPI.H"
 #include "EQFHLOG.H"
-#ifndef CPPTEST
-}
-#endif
 
 class OtmSegment;
 class OtmDocumentProperties;

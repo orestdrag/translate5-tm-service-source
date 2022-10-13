@@ -16,10 +16,9 @@
 #include "../pluginmanager/OtmMemory.h"
 #include "../utilities/LogWriter.h"
 #include "../utilities/LogWrapper.h"
-extern "C"
-{
+
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions
-}
+
 
 class MemoryFactory
 /*! \brief   This class provides factory methods for OtmMemory objects 

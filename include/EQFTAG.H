@@ -355,21 +355,21 @@ BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID );
 VOID EQFTagTokenize(PSZ, TAGTABLE *, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT);
 
 
-extern "C" BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
-extern "C" BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
+BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
+BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
 
 
 /**********************************************************************/
 /* Load a tag table or access a loaded tag table                      */
 /**********************************************************************/
-extern "C" USHORT TALoadTagTable                  // loads/accesses a tag table
+USHORT TALoadTagTable                  // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
   PLOADEDTABLE     *ppTagTable,        // address of caller's tag table pointer
   BOOL             fInternal,          // internal-table flag
   BOOL             fMsg                // show-error-messages flag
 );
-extern "C" USHORT TALoadTagTableHwnd              // loads/accesses a tag table
+USHORT TALoadTagTableHwnd              // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
   PLOADEDTABLE     *ppTagTable,        // address of caller's tag table pointer
@@ -402,7 +402,7 @@ extern "C" USHORT TALoadTagTableHwnd              // loads/accesses a tag table
 // Load query exit info function (if any)
 #define TALOADQUERYEXITINFOFUNC 0x00000080L
 
-extern "C" USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
+USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
   PLOADEDTABLE     *ppTagTable,        // address of caller's tag table pointer
@@ -416,7 +416,7 @@ extern "C" USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 /**********************************************************************/
 /* Free a tag table logically                                         */
 /**********************************************************************/
-extern "C" USHORT TAFreeTagTable                  // frees a tag table
+USHORT TAFreeTagTable                  // frees a tag table
 (
   PLOADEDTABLE     pTagTable           // tag table pointer returned by TALoadTagTable
 );
@@ -425,12 +425,12 @@ extern "C" USHORT TAFreeTagTable                  // frees a tag table
 /* Invalidate a loaded tag table ==> indicate that the tag table      */
 /* has to be reloaded if another user wants to access the tag table   */
 /**********************************************************************/
-extern "C" USHORT TAInvalidateTagTable
+USHORT TAInvalidateTagTable
 (
   PSZ  pszTableName
 );
 
-extern "C" {
+
 // load user exit not tried yet and user exit is avialable
 USHORT TALoadExitIfAvailable( PLOADEDTABLE pTable );
 // load user exit protect function if not tried yet and user exit is avialable
@@ -464,5 +464,5 @@ BOOL TALoadExternalMarkupTableList
   PSZ         *ppListArea,             // caller's list area pointer
   BOOL        fMsg                     // TRUE = show error messages
 );
-};
+
 #endif

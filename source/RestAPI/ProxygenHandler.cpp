@@ -152,7 +152,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     });
 
     char version[20];
-    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "unknown");
     builder->header("t5memory-version", version);   
     builder->header("Content-Type", "application/json");
 
@@ -187,11 +187,11 @@ void ProxygenHandler::onEOM() noexcept {
     switch(this->command){
       case COMMAND::CREATE_MEM:
       {
-        iRC = pMemService->import( memName, strInData, strResponseBody );
+        iRC = pMemService->createMemory( strInData, strResponseBody );
       }
       case COMMAND::IMPORT_MEM:
       {
-        iRC = pMemService->createMemory( strInData, strResponseBody );
+        iRC = pMemService->import( memName, strInData, strResponseBody );
         break; 
       }
       case COMMAND::FUZZY:

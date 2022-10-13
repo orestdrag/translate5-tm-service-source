@@ -15,15 +15,9 @@
 *
 
 */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 /* this should be called by EQFPOSTUNSEG2 */
     BOOL PostUnseg(PSZ in, PSZ style);
-#ifdef __cplusplus
-}
-#endif
+
 
 
 

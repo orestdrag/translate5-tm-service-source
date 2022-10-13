@@ -5,7 +5,4 @@
 //|      Corporation and others. All rights reserved                           |
 //+----------------------------------------------------------------------------+
 // initialize the Plugin-Manager and load the available plugins
-#ifdef __cplusplus
-extern "C"
-#endif
-	USHORT InitializePlugins( char *szPluginPath );
+USHORT InitializePlugins( char *szPluginPath );

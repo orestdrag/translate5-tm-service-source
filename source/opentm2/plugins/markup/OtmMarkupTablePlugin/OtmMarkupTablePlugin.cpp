@@ -1115,7 +1115,6 @@ bool OtmMarkupTablePlugin::stopPlugin( bool fForce  )
 /* -------------------------------------------------------------- */
 /*! 	\brief registers the plugin
 */
-extern "C" {
 
 USHORT registerPlugins()
 {
@@ -1125,8 +1124,6 @@ USHORT registerPlugins()
 	eRc = manager->registerPlugin((OtmPlugin*) plugin);
     USHORT usRC = (USHORT) eRc;
     return usRC;
-}
-
 }
 
 

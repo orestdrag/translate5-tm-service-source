@@ -15,20 +15,14 @@
 #include "../pluginmanager/OtmMarkupPlugin.h"
 #include "../utilities/LogWrapper.h"
 
-#ifndef CPPTEST
-extern "C"
-{
-#endif
-  #define INCL_EQF_TAGTABLE         // tag table and format functions
 
-  //#pragma pack( push, TM2StructPacking, 1 )
-  #include "EQF.H"                  // General .H for EQF
-  #include "EQFTAG00.H"             // markup table info
-  //#pragma pack( pop, TM2StructPacking )
+#define INCL_EQF_TAGTABLE         // tag table and format functions
 
-#ifndef CPPTEST
-}
-#endif
+//#pragma pack( push, TM2StructPacking, 1 )
+#include "EQF.H"                  // General .H for EQF
+#include "EQFTAG00.H"             // markup table info
+//#pragma pack( pop, TM2StructPacking )
+
 
 // internal functions
 BOOL MUMakeCLBListItem( OtmMarkupPlugin *plugin, OtmMarkup *markup, char *pszBuffer, int iBufSize );

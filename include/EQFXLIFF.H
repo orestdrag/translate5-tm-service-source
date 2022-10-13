@@ -86,30 +86,15 @@ int XLIFFEXPORT
   PSZ              pszDocShortName     // document short name = name of file in XLIFF directory of folder
 );
 
-//
-// FOLXLIFFEXPORT
-//
-extern "C" 
- 
 int FOLXLIFFIMPORT
 (
   PFOLIMPEXPXLIFF  pData                // pointer to XLIFF folder import/export data area
 );
 
-//
-// FOLXLIFFEXPORT
-//
-extern "C" 
- 
 int FOLXLIFFEXPORT
 (
   PFOLIMPEXPXLIFF  pData                // pointer to XLIFF folder import/export data area
 );
-
-//
-// FOLXLIFFCHECKFILE
-//
-extern "C" 
  
 int FOLXLIFFCHECKFILE
 (

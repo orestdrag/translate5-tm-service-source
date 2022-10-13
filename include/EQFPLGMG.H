@@ -3,10 +3,7 @@
 					and type definitions used by the EQFDRVEX.C module.
 	Copyright (c) 1999-2016, International Business Machines Corporation and others. All rights reserved.
 */
-#ifndef CPPTEST
-extern "C"
-{
-#endif
+
 
 //#pragma pack(push, TM2StructPacking, 1)
 #include "EQF.ID"                 // general EQF ids
@@ -14,9 +11,6 @@ extern "C"
 #include "EQFSTART.ID"
 
 //#pragma pack(pop, TM2StructPacking)
-#ifndef CPPTEST
-}
-#endif
 
 #include "../source/opentm2/core/pluginmanager/PluginManager.h"
 #include "../source/opentm2/core/pluginmanager/PlgMgXmlParser.h"

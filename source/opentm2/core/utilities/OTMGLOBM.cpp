@@ -36,10 +36,7 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-#ifndef CPPTEST
-extern "C"
-{
-#endif
+
   //#pragma pack( push, TM2StructPacking, 1 )
 
   #define INCL_EQF_TP               // public translation processor functions
@@ -55,9 +52,6 @@ extern "C"
   #include <OTMGLOBMEM.H>           // Global memory defines and prototypes
 
   //#pragma pack( pop, TM2StructPacking )
-#ifndef CPPTEST
-}
-#endif
 
 #ifdef _DEBUG
   #define SGMLDITA_LOGGING

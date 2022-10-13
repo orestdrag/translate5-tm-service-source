@@ -4,7 +4,9 @@
 
 #if !defined(_OtmDictionaryIF_H_)
 
+
 #define _OtmDictionaryIF_H_
+#include <LogWrapper.h>
 
 //-----------------------------------------------------------------------------
 //  AsdBegin            Begin/Initialize ASD services (NlpBegAsd+NlpBegService)
@@ -204,7 +206,9 @@
    PULONG   pulTermNumber,             // term number
    PULONG   pulDataLength,             // entry data length
    PHDCB    phDCB                      // dictionary of match
-);
+){
+   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+}
 //-----------------------------------------------------------------------------
 //   AsdFndNumber     - Asd interface for NlpFndNumberAsd
 //----------------------------------------------------------------------------
@@ -303,7 +307,9 @@
    PLONG    plSize,                    // actual size of buffer
    PUSHORT  pusTerms,                  // number of terms in buffer
    BOOL     fTermInStemForm            // TRUE = term is in stem form already
-);
+){
+   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+}
 
 //-----------------------------------------------------------------------------
 //  AsdDelete         - Delete a dictionary (dictionary must be closed!)
@@ -927,7 +933,10 @@
  ULONG GetCPFromDCB
 (
   HDCB     hDCB
-);
+){
+
+   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+}
 
  BOOL DicRenameDict( PSZ pszOldAndNewName, BOOL fMsg );
  VOID DicBatchImp( HWND, PVOID );

@@ -29,7 +29,7 @@
 
 
 
-extern void __cdecl openFileToPosition(char *file,long filePos,FILE **fp)
+extern void  openFileToPosition(char *file,long filePos,FILE **fp)
 {
 
    *fp = fopen (file,"rb");
@@ -45,7 +45,7 @@ extern void __cdecl openFileToPosition(char *file,long filePos,FILE **fp)
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl StrUpr( _TCHAR * Str )
+extern _TCHAR *  StrUpr( _TCHAR * Str )
 {
 _TCHAR *cptr;
 
@@ -65,7 +65,7 @@ _TCHAR *cptr;
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl StrnUpr( _TCHAR * Str, short starting, short numBytes )
+extern _TCHAR *  StrnUpr( _TCHAR * Str, short starting, short numBytes )
 {
 _TCHAR *cptr;
 
@@ -87,7 +87,7 @@ _TCHAR *cptr;
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl cleanString( _TCHAR * tempString )
+extern _TCHAR *  cleanString( _TCHAR * tempString )
 {
   int htTranPos;
   int htTextPos;
@@ -123,7 +123,7 @@ extern _TCHAR * __cdecl cleanString( _TCHAR * tempString )
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl deleteSubString( _TCHAR * string1, _TCHAR * string2 )
+extern _TCHAR *  deleteSubString( _TCHAR * string1, _TCHAR * string2 )
 {
    int i,j;
    int lengthSubString=0;
@@ -188,7 +188,7 @@ extern _TCHAR * __cdecl deleteSubString( _TCHAR * string1, _TCHAR * string2 )
 /*                                                                          */
 /****************************************************************************/
 
-extern int __cdecl strloc( _TCHAR * string1, _TCHAR * string2 )
+extern int  strloc( _TCHAR * string1, _TCHAR * string2 )
 {
   int length1, length2;
   int i, j;
@@ -247,7 +247,7 @@ extern int __cdecl strloc( _TCHAR * string1, _TCHAR * string2 )
 /*                                                                          */
 /****************************************************************************/
 
-extern int __cdecl strlocnext( _TCHAR * string1, _TCHAR * string2, int next )
+extern int  strlocnext( _TCHAR * string1, _TCHAR * string2, int next )
 {
   int length1, length2;
   int i, j;
@@ -306,7 +306,7 @@ extern int __cdecl strlocnext( _TCHAR * string1, _TCHAR * string2, int next )
 /*                                                                          */
 /****************************************************************************/
 
-extern int __cdecl strnextnonblank( _TCHAR * string1, int next )
+extern int  strnextnonblank( _TCHAR * string1, int next )
 {
   int length1;
   int i;
@@ -348,7 +348,7 @@ extern int __cdecl strnextnonblank( _TCHAR * string1, int next )
 /*                                                                          */
 /****************************************************************************/
 
-extern int __cdecl strloclast( _TCHAR * string1, _TCHAR * string2 )
+extern int  strloclast( _TCHAR * string1, _TCHAR * string2 )
 {
   int length1, length2;
   int i, j;
@@ -408,7 +408,7 @@ extern int __cdecl strloclast( _TCHAR * string1, _TCHAR * string2 )
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl strsub( _TCHAR * string1, int subStart, int subLength )
+extern _TCHAR *  strsub( _TCHAR * string1, int subStart, int subLength )
 {
     _TCHAR subString[STRING_SIZE];
     int length1;
@@ -441,7 +441,7 @@ extern _TCHAR * __cdecl strsub( _TCHAR * string1, int subStart, int subLength )
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl strdel(_TCHAR * string1, int delStart, int delLength )
+extern _TCHAR *  strdel(_TCHAR * string1, int delStart, int delLength )
 {
   _TCHAR delString[STRING_SIZE];
   int length1;
@@ -480,7 +480,7 @@ extern _TCHAR * __cdecl strdel(_TCHAR * string1, int delStart, int delLength )
 /*                                                                          */
 /****************************************************************************/
 
-extern _TCHAR * __cdecl strins( _TCHAR * string1, _TCHAR * string2, int insIndex )
+extern _TCHAR *  strins( _TCHAR * string1, _TCHAR * string2, int insIndex )
 {
   _TCHAR insString[STRING_SIZE];
   int length1;
@@ -519,7 +519,7 @@ extern _TCHAR * __cdecl strins( _TCHAR * string1, _TCHAR * string2, int insIndex
 /*                                                                          */
 /****************************************************************************/
 
-extern void __cdecl strCOPY( _TCHAR * string1, _TCHAR * string2 )
+extern void  strCOPY( _TCHAR * string1, _TCHAR * string2 )
 {
   int i;
   int length2;
@@ -541,7 +541,7 @@ extern void __cdecl strCOPY( _TCHAR * string1, _TCHAR * string2 )
 /*                                                                          */
 /****************************************************************************/
 
-extern short __cdecl searchAndReplaceString(_TCHAR *buffer,_TCHAR *search_str,_TCHAR *replace_str,short maxLen){
+extern short  searchAndReplaceString(_TCHAR *buffer,_TCHAR *search_str,_TCHAR *replace_str,short maxLen){
 _TCHAR *tmpBuf = NULL;
 _TCHAR *tmpSearchStr = NULL;
 _TCHAR *cptr;
@@ -578,7 +578,7 @@ short offs,bufOffs = 0;
 /*                                                                          */
 /****************************************************************************/
 
-extern long __cdecl copyPartialFile (char *srcFile, FILE **sfp,
+extern long  copyPartialFile (char *srcFile, FILE **sfp,
                       char *tmpFile, FILE **tfp,
                       long startPos, long numBytes,
                       short newFile)
@@ -632,7 +632,7 @@ long fPos = -1;
 /*                                                                          */
 /****************************************************************************/
 
-extern long  __cdecl StrSearchFile (FILE  **fp,         /* open file pointer                          */
+extern long   StrSearchFile (FILE  **fp,         /* open file pointer                          */
                                     _TCHAR  *str,         /* string to look for                         */
                                     long  startPos,     /* The starting position > endPos if backward */
                                     long  endPos,       /* The ending position < startPos if backward */
@@ -751,7 +751,7 @@ extern long  __cdecl StrSearchFile (FILE  **fp,         /* open file pointer    
 /* Returns:   None.                                                          */
 /*                                                                           */
 /*****************************************************************************/
-extern void __cdecl CreateTempFileName( PSZ pName, PSZ pAltName ) 
+extern void  CreateTempFileName( PSZ pName, PSZ pAltName ) 
 {
    FILE   *fTemp ;
    struct stat statBuf;
@@ -812,7 +812,7 @@ extern void __cdecl CreateTempFileName( PSZ pName, PSZ pAltName )
 /* Returns:   None.                                                          */
 /*                                                                           */
 /*****************************************************************************/
-extern void __cdecl CreateTempFileName2( PSZ pName, PSZ pBase, PSZ pAltExt, 
+extern void  CreateTempFileName2( PSZ pName, PSZ pBase, PSZ pAltExt, 
                                          USHORT Folder ) 
 {
    FILE   *fTemp ;
@@ -870,7 +870,7 @@ extern void __cdecl CreateTempFileName2( PSZ pName, PSZ pBase, PSZ pAltExt,
 /*            0  = Convert failed.                                           */
 /*                                                                           */
 /*****************************************************************************/
-extern int __cdecl ConvertImport( PSZ pInput, PSZ  pOutput, USHORT usConvertType  )
+extern int  ConvertImport( PSZ pInput, PSZ  pOutput, USHORT usConvertType  )
 {
    USHORT  usRC ;
    int     iReturn = 0 ;                    /* Default for failed conversion */
@@ -956,7 +956,7 @@ extern int __cdecl ConvertImport( PSZ pInput, PSZ  pOutput, USHORT usConvertType
 /*            0  = Convert failed.                                           */
 /*                                                                           */
 /*****************************************************************************/
-extern int __cdecl ConvertExport( PSZ pReplace,  USHORT usConvertType  )
+extern int  ConvertExport( PSZ pReplace,  USHORT usConvertType  )
 {
 
    char    szTempFile[256];
@@ -1050,7 +1050,7 @@ extern int __cdecl ConvertExport( PSZ pReplace,  USHORT usConvertType  )
 /* Returns:  None.                                                           */
 /*                                                                           */
 /*****************************************************************************/
-extern void __cdecl PrepDocLanguageInfo( PSZ FilePath )
+extern void  PrepDocLanguageInfo( PSZ FilePath )
 {
 
    char         szTempPath[512];
@@ -1150,7 +1150,7 @@ extern void __cdecl PrepDocLanguageInfo( PSZ FilePath )
 /*                                                                           */
 /*****************************************************************************/
 
-extern int __cdecl IsDBCS( UCHAR c )
+extern int  IsDBCS( UCHAR c )
 {
   int i;
   BOOL bDBCSLeadByte = FALSE ;
@@ -1189,7 +1189,7 @@ extern int __cdecl IsDBCS( UCHAR c )
 /*                                                                           */
 /*****************************************************************************/
 
-extern void __cdecl QueryExportFiles(char *szMarkup, char *szExportList, USHORT usBufLen, BOOL bRecursive ) {
+extern void  QueryExportFiles(char *szMarkup, char *szExportList, USHORT usBufLen, BOOL bRecursive ) {
 
 //       Markup       Prereq markups           Unique Files (default \OTM\TABLE\)
 
@@ -1291,7 +1291,7 @@ extern void __cdecl QueryExportFiles(char *szMarkup, char *szExportList, USHORT 
 /*                                                                           */
 /*****************************************************************************/
 
-extern int __cdecl StripNewline( char *szText, char *szNewLine ) {
+extern int  StripNewline( char *szText, char *szNewLine ) {
 
    int i ;
    int iRC = FALSE ; 
@@ -1327,7 +1327,7 @@ extern int __cdecl StripNewline( char *szText, char *szNewLine ) {
 /*                                                                           */
 /*****************************************************************************/
 
-extern void __cdecl GetOTMTablePath( char * szBase, char * szOTM ) {
+extern void  GetOTMTablePath( char * szBase, char * szOTM ) {
 
    char  *ptr ;
 
@@ -1353,7 +1353,7 @@ extern void __cdecl GetOTMTablePath( char * szBase, char * szOTM ) {
 /*                                                                           */
 /*****************************************************************************/
 
-extern void __cdecl GetOTMDllPath( char * szBase, char * szOTM ) {
+extern void  GetOTMDllPath( char * szBase, char * szOTM ) {
 
    char  *ptr ;
 

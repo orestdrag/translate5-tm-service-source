@@ -116,9 +116,6 @@ protected:
 	char* pluginName;
 };
 
-
-extern "C" {
-
 /*! \relates OtmPlugin
 	Initialization-function for the plugin-DLL, will be called directly
 	after the DLL has been loaded.\n
@@ -126,7 +123,7 @@ extern "C" {
 	plugin.
 */
 USHORT registerPlugins();   // add return value for P402974
-}
+
 
 /*! Structure for plugin infomation
 */
@@ -144,7 +141,6 @@ typedef struct _OTMPLUGININFO
 } OTMPLUGININFO, *POTMPLUGININFO;
 
 
-extern "C" {
 /*! \relates OtmPlugin
 	Retrieve static information about the plugin contained in this plugin DLL w/o the need to actually create a plugin object
   \param pPluginInfo points to a OTMPLUGINFO structure which receives the plugin information
@@ -152,7 +148,5 @@ extern "C" {
 */
 unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo );
 
-
-}
 
 #endif // #ifndef _OTMPLUGIN_H_

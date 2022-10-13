@@ -31,7 +31,7 @@
 #define  MAXLEN   4096
 #define  QFLEN    41       /* Maximum length of tmpString:40 characters, ":QFX N=123456 S=1 X=2000000500060005565B." */
 
-extern BOOL __cdecl resequence_TM2(char *fileName)
+extern BOOL  resequence_TM2(char *fileName)
 {
 
    FILE  *sourceFile_ptr = NULL;

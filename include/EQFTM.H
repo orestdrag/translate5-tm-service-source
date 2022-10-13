@@ -1319,7 +1319,7 @@ typedef struct _TMX_MATCHENTRY
 //#pragma pack(show)      
 //#pragma pack(push, 8)
 //#pragma pack(8)
-extern "C"{
+
 typedef struct _TMX_SENTENCE
 {
   PSZ_W pInputString;
@@ -1337,7 +1337,7 @@ typedef struct _TMX_SENTENCE
   PSZ_W pPropString;                   // proposal string (with tagging)
   PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
 } TMX_SENTENCE, * PTMX_SENTENCE;
-};
+
 
 //#pragma pack(pop)
 //#pragma pack()
@@ -1927,12 +1927,12 @@ USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 /**********************************************************************/
 /* TmCreate                                                           */
 /**********************************************************************/
-extern "C" USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
+USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
 
 /**********************************************************************/
 /* TmOpen                                                             */
 /**********************************************************************/
-extern "C" USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
+USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
                    //                   TM_REMOTE
                    //                   TM_LOCAL_REMOTE
         USHORT,    //(in)  message handling parameter
@@ -1943,7 +1943,6 @@ extern "C" USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM
 /**********************************************************************/
 /* TmClose                                                            */
 /**********************************************************************/
-extern "C"
 USHORT
 TmClose( HTM,        //(in) TM handle returned from open
          PSZ,        //(in) full TM name x:\eqf\mem\mem.mem
@@ -2083,12 +2082,12 @@ USHORT NTMWriteLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMDestroyLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMCreateLangGroupTable( PTMX_CLB pTmClb );
 USHORT NTMAddLangGroup( PTMX_CLB pTmClb, PSZ pszLang, USHORT sLangID );
-extern "C" USHORT NTMOrganizeIndexFile
+USHORT NTMOrganizeIndexFile
 (
   PTMX_CLB pTmClb               // ptr to control block,
 );
 
-extern "C" USHORT NTMOrganizeIndexFile1
+USHORT NTMOrganizeIndexFile1
 (
   PTMX_CLB pTmClb               // ptr to control block,
 );
@@ -2128,7 +2127,7 @@ USHORT TmUpdSegHwnd
   HWND        hwnd                       //(in)  handle for error messages
 );
 
-extern "C" USHORT TmUpdSegW
+USHORT TmUpdSegW
 (
   HTM         htm,                       //(in)  TM handle
   PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
@@ -2173,7 +2172,7 @@ BOOL MTTMMergeStart
   PLISTCOMMAREA pCommArea,
   PMT_TMMERGE pTMMerge
 );
-extern "C" BOOL MemCreatePath( PSZ pszString );
+BOOL MemCreatePath( PSZ pszString );
 
 
 // Unicode additions
@@ -2240,9 +2239,6 @@ BOOL TMFuzzynessEx
   PUSHORT     pusWords                 // number of words in segment
 );
 
-
-
-extern "C"{ 
 USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
 USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
 USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
@@ -2302,6 +2298,5 @@ USHORT NTMGetMatchLevel
   SHORT            *psMatchState,      // pointer to caller's match state field
   LONG             lOptions            // options to be used by the function
 );
-};
 
 #endif 

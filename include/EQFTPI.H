@@ -1219,16 +1219,9 @@ VOID EQFBGetDefCellSize ( PVIOFONTCELLSIZE,
 void  EQFBFuncReImportDoc(PTBDOCUMENT);
 
 
-#ifdef __cplusplus
-extern "C"
-#endif
+EQF_BOOL  /*APIENTRY*/ EQF_XSTART(  PSZ, PSZ, PSZ, PSTEQFGEN);   // start editor
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQF_XSTART(  PSZ, PSZ, PSZ, PSTEQFGEN);   // start editor
-#ifdef __cplusplus
-extern "C"
-#endif
-
-EQF_BOOL __cdecl /*APIENTRY*/ EQF_XSTOP( PSZ, PSTEQFGEN, EQF_BOOL );    // end editor
+EQF_BOOL  /*APIENTRY*/ EQF_XSTOP( PSZ, PSTEQFGEN, EQF_BOOL );    // end editor
 
 void  EQFBSysScrnUpdate ( PTBDOCUMENT pDoc,              // allow screen update
                           BOOL        fUpdate);

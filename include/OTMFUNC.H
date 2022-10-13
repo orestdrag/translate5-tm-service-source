@@ -35,9 +35,6 @@
   #include "EQFPAPI.H"
 #endif 
 
-#ifdef __cplusplus
-  extern "C" {
-#endif
 
 typedef LONG HSESSION;
 typedef HSESSION *PHSESSION;
@@ -2773,8 +2770,5 @@ USHORT EqfDisconnectSharedMem
   PSZ         pszMemName
 );
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

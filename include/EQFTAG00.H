@@ -165,9 +165,9 @@ typedef enum { MUFILL_NAMES, MUFILL_CLBITEMS } MUFILLTYPES;
  BOOL isMarkupProtected( char *pszMarkup, char *pszPlugin );
  BOOL TagMakeListItem( PSZ pszMarkup, PSZ pszPlugin, PSZ pszBuffer, int iBufSize );
  BOOL MULoadMarkupTableFile( char *pszMarkup, char *pszPlugin, PVOID *ppLoadedTable, BOOL fErrorHandling );
-extern "C"  BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
+ BOOL MUGetMarkupTableFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
  BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
-extern "C"  BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
+ BOOL MUGetUserExitFileName( char *pszMarkup, char *pszPlugin, char *pszBuffer, int iBufSize );
  BOOL MUUpdateMarkupTableFiles( char *pszMarkup, char *pszPlugin, char *pszShortDescription, char *pszLongDescription, char *pszVersion, char *pszTableFile, char *pszUserExitFile, char *pszMarkupFiles );
  BOOL MUDeleteMarkupTable( char *pszMarkup, char *pszPlugin );
 

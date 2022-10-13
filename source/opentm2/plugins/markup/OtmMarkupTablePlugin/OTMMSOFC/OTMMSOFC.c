@@ -172,7 +172,7 @@ extern   short   sTPVersion ;               /* From USRCALLS.C  */
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl EQFPRESEG2(
+EQF_BOOL  EQFPRESEG2(
                                 PSZ        pTagTable,
                                 PSZ        pEdit,
                                 PSZ        pProgPath,
@@ -300,7 +300,7 @@ EQF_BOOL __cdecl EQFPRESEG2(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl EQFPOSTSEGW(
+EQF_BOOL  EQFPOSTSEGW(
                                PSZ    pTagTable,
                                PSZ    pEdit,
                                PSZ    pProgPath,
@@ -368,7 +368,7 @@ EQF_BOOL __cdecl EQFPOSTSEGW(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl EQFPREUNSEGW(
+EQF_BOOL  EQFPREUNSEGW(
                                 PSZ    pTagTable,
                                 PSZ    pEdit,
                                 PSZ    pProgPath,
@@ -414,7 +414,7 @@ EQF_BOOL __cdecl EQFPREUNSEGW(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl EQFPOSTUNSEGW(
+EQF_BOOL  EQFPOSTUNSEGW(
                                  PSZ    pTagTable,
                                  PSZ    pEdit,
                                  PSZ    pProgPath,
@@ -491,7 +491,7 @@ EQF_BOOL __cdecl EQFPOSTUNSEGW(
 
 
 
-USHORT __cdecl EQFQUERYEXITINFO(
+USHORT  EQFQUERYEXITINFO(
                                    PSZ pszTagTable,  // name of the markup table, e.g. "OTMHTM32"
                                    USHORT usMode,   // type of information being queried
                                    PSZ pszBuffer,      // buffer area receiving the information returned by the exit
@@ -528,7 +528,7 @@ USHORT __cdecl EQFQUERYEXITINFO(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl EQFCHECKSEGEXW(
+EQF_BOOL  EQFCHECKSEGEXW(
                                      PSZ_W     pszPrevSrc,
                                      PSZ_W     pszSrc,
                                      PSZ_W     pszTgt,

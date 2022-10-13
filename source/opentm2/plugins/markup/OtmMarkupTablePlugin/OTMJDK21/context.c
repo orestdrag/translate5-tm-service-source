@@ -45,7 +45,7 @@ WCHAR     sz_TWBCTX[10] = L"</TWBCTX>" ;
 *               EQF_BOOL      // 0=Successful
 *******************************************************************************/
 
-USHORT __cdecl /*APIENTRY*/ EQFGETSEGCONTEXT
+USHORT  /*APIENTRY*/ EQFGETSEGCONTEXT
 (
   PSZ_W  pszCurSeg,  // ptr to text of current segment (UTF16)
   PSZ_W  pszPrevSeg, // ptr to text of previous segment (UTF16), NULL if none
@@ -106,7 +106,7 @@ USHORT __cdecl /*APIENTRY*/ EQFGETSEGCONTEXT
 
 
 
-USHORT __cdecl /*APIENTRY*/ EQFCOMPARECONTEXT
+USHORT  /*APIENTRY*/ EQFCOMPARECONTEXT
 (
   PSZ_W   pszSegContext, // ptr to context of active segment (UTF16)
   PSZ_W   pszTMContext,  // ptr to context of segment from TMem (UTF16)
@@ -122,7 +122,7 @@ USHORT __cdecl /*APIENTRY*/ EQFCOMPARECONTEXT
 
 
 
-USHORT __cdecl /*APIENTRY*/ EQFFORMATCONTEXT
+USHORT  /*APIENTRY*/ EQFFORMATCONTEXT
 (
   PSZ_W  pszContext,      // ptr to buffer with context string (UTF16)
   PSZ_W  pszDisplayString // ptr to buffer for formatted context (UTF16)
@@ -136,7 +136,7 @@ USHORT __cdecl /*APIENTRY*/ EQFFORMATCONTEXT
 
 
 
-USHORT __cdecl /*APIENTRY*/ EQFUPDATECONTEXT
+USHORT  /*APIENTRY*/ EQFUPDATECONTEXT
 (
   PSZ_W       pszCurSeg,               // ptr to text of current segment (UTF16)
   PSZ_W       pszContext               // ptr to buffer for context string (UTF16)

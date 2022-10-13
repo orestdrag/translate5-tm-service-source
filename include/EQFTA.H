@@ -68,7 +68,7 @@ TATAG TADummyTag [] = { { ":qfa n=%lu.", ":eqfa." },     // attribute
 extern  TATAG TADummyTag [];
 #endif
 
-extern "C"{
+
 BOOL EQFUnSeg( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT); // remove segmenting tags
 BOOL EQFUnSeg2( PSZ, PSZ, PTATAG, PBOOL, PSZ, USHORT, PSZ); // remove segmenting tags
 VOID EQFNoiseFiltering(PSZ, PEXCLUSIONLIST, PTOKENENTRY);
@@ -219,7 +219,7 @@ void TAFillWSList
 );
 
 
-extern "C" BOOL TAAdjustWhiteSpace
+BOOL TAAdjustWhiteSpace
 (
   PSZ_W       pszSourceSeg,            // ptr to source segment data
   PSZ_W       pszTargetSeg,            // ptr to target segment
@@ -256,5 +256,5 @@ VOID  TATATag2Unicode
   PTATAG_W  pTATagW
 );
 
-}
+
 

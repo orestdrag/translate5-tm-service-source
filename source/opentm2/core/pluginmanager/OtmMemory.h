@@ -8,17 +8,11 @@
 #ifndef _OTMMEMORY_H_
 #define _OTMMEMORY_H_
 
-#ifndef CPPTEST
-extern "C" {
-#endif
 #define INCL_EQF_TAGTABLE         // tag table and format functions
 #define INCL_EQF_TP
 #define INCL_EQF_TM
 #define INCL_EQF_DAM
 #include "EQF.H"
-#ifndef CPPTEST
-}
-#endif
 
 #include "vector"
 #include "OtmProposal.h"

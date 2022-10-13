@@ -47,13 +47,8 @@
 // GQ:- inital put
 // 
 // 
-extern "C"
-{
-  BOOL XSLCONVERT( PSZ pszXMLFile, PSZ pszXSLStyleSheet, PSZ pszOutFile, BOOL fMsg, HWND hwndErrMsg );
+BOOL XSLCONVERT( PSZ pszXMLFile, PSZ pszXSLStyleSheet, PSZ pszOutFile, BOOL fMsg, HWND hwndErrMsg );
 
-
-
-}
 
 #define XSLT_CONVERSION_PROC "XSLCONVERT"
 #define XSLT_CONVPROC_PTR(name) BOOL (*name)( PSZ pszXMLFile, PSZ pszXSLStyleSheet, PSZ pszOutFile, BOOL fMsg, HWND hwndErrMsg );

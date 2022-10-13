@@ -37,29 +37,24 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-#ifndef CPPTEST
-extern "C"
-{
-#endif
-  //#pragma pack( push, TM2StructPacking, 1 )
 
-  #define INCL_EQF_TP               // public translation processor functions
-  #define INCL_EQF_EDITORAPI        // editor API
-  #define INCL_EQF_TAGTABLE         // tagtable defines and functions
-  #define INCL_EQF_ANALYSIS         // analysis functions
-  #define INCL_EQF_TM               // general Transl. Memory functions
-  #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
-  #define INCL_EQF_DLGUTILS         // dialog utilities
-  #define INCL_EQF_MORPH
-  #define INCL_EQF_DAM
-  #include "EQF.H"                  // General .H for EQF
-  #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
-  #include "EQFMEMIE.H"
+//#pragma pack( push, TM2StructPacking, 1 )
 
-  //#pragma pack( pop, TM2StructPacking )
-#ifndef CPPTEST
-}
-#endif
+#define INCL_EQF_TP               // public translation processor functions
+#define INCL_EQF_EDITORAPI        // editor API
+#define INCL_EQF_TAGTABLE         // tagtable defines and functions
+#define INCL_EQF_ANALYSIS         // analysis functions
+#define INCL_EQF_TM               // general Transl. Memory functions
+#define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
+#define INCL_EQF_DLGUTILS         // dialog utilities
+#define INCL_EQF_MORPH
+#define INCL_EQF_DAM
+#include "EQF.H"                  // General .H for EQF
+#include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
+#include "EQFMEMIE.H"
+
+//#pragma pack( pop, TM2StructPacking )
+
 
 #ifdef _DEBUG
   #define SGMLDITA_LOGGING

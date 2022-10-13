@@ -94,7 +94,7 @@ CHAR            szMsgFile[CCHMAXPATH] = "c:\\eqf\\msg\\eqf.msg"; // def. msg fil
 CHAR_W          szMsgBuf[EQF_MSGBUF_SIZE];      // buffer for message
 
 
-USHORT __cdecl /*APIENTRY*/ EQFWORDCNTPERSEGW
+USHORT  /*APIENTRY*/ EQFWORDCNTPERSEGW
 (
   PSZ_W          pszSeg,               // ptr to Segment
   PSZ            pszLang,              // ptr to Language of Segment

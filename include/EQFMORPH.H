@@ -2,7 +2,8 @@
 	Description:    Include file for the Morphological Functions Module          
 	Copyright (c) 1990-2016, International Business Machines Corporation and others. All rights reserved.
 */
-
+#ifndef _EQFMORPH_H_
+#define _EQFMORPH_H_
 /**********************************************************************/
 /* Return codes of Morph... functions                                 */
 /**********************************************************************/
@@ -93,6 +94,10 @@
 #define MORPH_LARGE_ZTERMLIST_LEN 32000L         // max block size of larger ZTERM lists
 
 #include "win_types.h"
+
+#include "LogWrapper.h"
+
+//#define LOG_UNIMPLEMENTED_FUNCTION LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
 
 /**********************************************************************/
 /* Structure to access MORPH_FLAG_OFFSLIST type term lists            */
@@ -462,7 +467,6 @@ USHORT MorphGetLanguageString
   PSZ     pszLanguage                  // name of language
 );
 
-
 // defines for function MorphGetLanguageType:
 #define MORPH_UNDEFINED_LANGTYPE  0
 #define MORPH_DBCS_LANGTYPE       1
@@ -505,3 +509,4 @@ typedef enum
 }  EQFMWTMODE ;
 
 
+#endif //_EQFMORPH_H_

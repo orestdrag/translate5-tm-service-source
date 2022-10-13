@@ -1344,8 +1344,6 @@ bool UserMarkupTablePlugin::stopPlugin( bool fForce  )
 /* -------------------------------------------------------------- */
 /*! 	\brief registers the plugin
 */
-extern "C" {
-
 USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
@@ -1355,11 +1353,6 @@ USHORT registerPlugins()
     USHORT usRC = (USHORT) eRc;
     return usRC;
 }
-
-}
-
-
-
 
 /* -------------------------------------------------------------- */
 /*   GetControlNode                                               */

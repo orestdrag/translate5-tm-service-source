@@ -85,7 +85,7 @@
 #define  HTMLDOC_END_DOCTYPE_STRING   L">"
 #define  HTMLDOC_JSON_START           L"<twbj--"
 #define  HTMLDOC_JSON_END             L"--twbj>"
-extern char * __cdecl getTemporaryFileName(char *nameBuf,short nameBufSize);
+extern char *  getTemporaryFileName(char *nameBuf,short nameBufSize);
 
 #ifndef _UNICODE
     #define TWBCNV_EOF                       '\x1A'
@@ -198,7 +198,7 @@ BOOL ShowError( wchar_t *Title, wchar_t *Message, BOOL bOKCancel );
 /****************************************************************************/
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
+EQF_BOOL  /*APIENTRY*/ EQFPRESEG2(
                       PSZ      pTagTable,
                       PSZ      pEdit,
                       PSZ      pProgPath,
@@ -439,7 +439,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
 
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
+EQF_BOOL  /*APIENTRY*/ EQFPOSTSEGW(
                        PSZ pTagTable,
                        PSZ       pEdit,
                        PSZ       pProgPath,
@@ -586,7 +586,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 }
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW  (PSZ      pTagTable,
+EQF_BOOL  /*APIENTRY*/ EQFPREUNSEGW  (PSZ      pTagTable,
                        PSZ       pEdit,
                        PSZ       pProgPath,
                        PSZ       pSegTarget,
@@ -605,7 +605,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW  (PSZ      pTagTable,
 }
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
+EQF_BOOL  /*APIENTRY*/ EQFPOSTUNSEGW(
                         PSZ      pTagTable,
                         PSZ      pEdit,
                         PSZ      pProgPath,
@@ -798,7 +798,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFSHOW(
+EQF_BOOL  /*APIENTRY*/ EQFSHOW(
                    LONG     lInfo,
                    HWND     hwndParent)
 {
@@ -874,7 +874,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFSHOW(
 *******************************************************************************/
 
 
-USHORT __cdecl /*APIENTRY*/ EQFQUERYEXITINFO(
+USHORT  /*APIENTRY*/ EQFQUERYEXITINFO(
                         PSZ pszTagTable, // name of the markup table, e.g. "OTMHTM32"
                         USHORT usMode,   // type of information being queried
                         PSZ pszBuffer,   // buffer area receiving the information returned by the exit
@@ -1877,7 +1877,7 @@ BOOL ShowError( wchar_t *Title, wchar_t *Message, BOOL bOKCancel )
 /*                                                                         */
 /* Returns:  new temporary file, otherwise NULL.                           */
 /***************************************************************************/
-extern char * __cdecl getTemporaryFileName(char *nameBuf,short nameBufSize)
+extern char *  getTemporaryFileName(char *nameBuf,short nameBufSize)
 {
 char *tempFile;
 

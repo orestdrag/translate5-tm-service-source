@@ -19,14 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>                
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "otmapi.h"
-#ifdef __cplusplus
-}
-#endif
 
 
 HINSTANCE    hiOTMAPI = NULL ;
@@ -37,9 +30,9 @@ HINSTANCE    hiOTMAPI = NULL ;
 /*                                                                          */
 /* Set status slider.                                                       */
 /****************************************************************************/
-VOID __cdecl /*APIENTRY*/ EQFSETSLIDER (HWND hSlider, USHORT fsFlags) {
+VOID  /*APIENTRY*/ EQFSETSLIDER (HWND hSlider, USHORT fsFlags) {
     
-    typedef VOID (__cdecl /*APIENTRY*/ /*__stdcall*/ *EQFSETSLIDER) ( HWND hSlider, USHORT fsFlags);
+    typedef VOID ( /*APIENTRY*/ /*__stdcall*/ *EQFSETSLIDER) ( HWND hSlider, USHORT fsFlags);
     static EQFSETSLIDER EQFSETSLIDER_addr;
 
     if ( EQFSETSLIDER_addr!=NULL) {
@@ -65,10 +58,10 @@ VOID __cdecl /*APIENTRY*/ EQFSETSLIDER (HWND hSlider, USHORT fsFlags) {
 /*                                                                          */
 /* Convert between TM/2 internal (short) and external (long) file names.    */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFCONVERTFILENAMES ( PSZ pszFolder, PSZ pszLongFileName, PSZ pszShortFileName ) {
+USHORT  /*APIENTRY*/ EQFCONVERTFILENAMES ( PSZ pszFolder, PSZ pszLongFileName, PSZ pszShortFileName ) {
     USHORT   rc=1;
 
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFCONVERTFILENAMES) ( PSZ pszFolder,PSZ pszLongFileName,PSZ pszShortFileName);
+    typedef USHORT ( /*APIENTRY*/ *EQFCONVERTFILENAMES) ( PSZ pszFolder,PSZ pszLongFileName,PSZ pszShortFileName);
     static EQFCONVERTFILENAMES EQFCONVERTFILENAMES_addr;
 
     if ( EQFCONVERTFILENAMES_addr!=NULL)
@@ -93,10 +86,10 @@ USHORT __cdecl /*APIENTRY*/ EQFCONVERTFILENAMES ( PSZ pszFolder, PSZ pszLongFile
 /*                                                                          */
 /* Convert the contents of a file into a different code page.               */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFFILECONVERSIONEX ( PSZ pInput, PSZ pOutput, PSZ szDocLanguage, USHORT usConvertType ) {
+USHORT  /*APIENTRY*/ EQFFILECONVERSIONEX ( PSZ pInput, PSZ pOutput, PSZ szDocLanguage, USHORT usConvertType ) {
     USHORT   rc=1 ;
 
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFFILECONVERSIONEX) ( PSZ pInput, PSZ pOutput, PSZ szDocLanguage, USHORT usConvertType ) ;
+    typedef USHORT ( /*APIENTRY*/ *EQFFILECONVERSIONEX) ( PSZ pInput, PSZ pOutput, PSZ szDocLanguage, USHORT usConvertType ) ;
     static EQFFILECONVERSIONEX EQFFILECONVERSIONEX_addr;
 
     if (EQFFILECONVERSIONEX_addr) 
@@ -120,9 +113,9 @@ USHORT __cdecl /*APIENTRY*/ EQFFILECONVERSIONEX ( PSZ pInput, PSZ pOutput, PSZ s
 /*                                                                          */
 /* Get source language of document.                                         */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFGETSOURCELANG ( PSZ pszFolder, PSZ pszFileName, PSZ pszSrcLang ) {
+USHORT  /*APIENTRY*/ EQFGETSOURCELANG ( PSZ pszFolder, PSZ pszFileName, PSZ pszSrcLang ) {
     USHORT   rc=1 ;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETSOURCELANG) ( PSZ pszFolder, PSZ pszFileName, PSZ pszSrcLang ) ;
+    typedef USHORT ( /*APIENTRY*/ *EQFGETSOURCELANG) ( PSZ pszFolder, PSZ pszFileName, PSZ pszSrcLang ) ;
     static EQFGETSOURCELANG EQFGETSOURCELANG_addr;
 
     if (EQFGETSOURCELANG_addr) 
@@ -147,9 +140,9 @@ USHORT __cdecl /*APIENTRY*/ EQFGETSOURCELANG ( PSZ pszFolder, PSZ pszFileName, P
 /*                                                                          */
 /* Get target language of document.                                         */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFGETTARGETLANG ( PSZ pszFolder, PSZ pszFileName, PSZ pszTgtLang ) {
+USHORT  /*APIENTRY*/ EQFGETTARGETLANG ( PSZ pszFolder, PSZ pszFileName, PSZ pszTgtLang ) {
     USHORT   rc=1;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETTARGETLANG) ( PSZ pszFolder, PSZ pszFileName, PSZ pszTgtLang ) ;
+    typedef USHORT ( /*APIENTRY*/ *EQFGETTARGETLANG) ( PSZ pszFolder, PSZ pszFileName, PSZ pszTgtLang ) ;
     static EQFGETTARGETLANG EQFGETTARGETLANG_addr;
 
     if (EQFGETTARGETLANG_addr) 
@@ -173,9 +166,9 @@ USHORT __cdecl /*APIENTRY*/ EQFGETTARGETLANG ( PSZ pszFolder, PSZ pszFileName, P
 /*                                                                          */
 /* Get next segment.                                                        */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFGETNEXTSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR swTemp, PUSHORT usBufSize) {
+USHORT  /*APIENTRY*/ EQFGETNEXTSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR swTemp, PUSHORT usBufSize) {
 	USHORT   rc=1;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETNEXTSEG) (LONG lInfo, PUSHORT ulSegNum, PCHAR swTemp, PUSHORT usBufSize);
+    typedef USHORT ( /*APIENTRY*/ *EQFGETNEXTSEG) (LONG lInfo, PUSHORT ulSegNum, PCHAR swTemp, PUSHORT usBufSize);
     static EQFGETNEXTSEG EQFGETNEXTSEG_addr;
 
     if ( EQFGETNEXTSEG_addr!=NULL) 
@@ -200,9 +193,9 @@ USHORT __cdecl /*APIENTRY*/ EQFGETNEXTSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR 
 /*                                                                          */
 /* Get next segment.                                                        */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFGETNEXTSEGW( LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize) {
+USHORT  /*APIENTRY*/ EQFGETNEXTSEGW( LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize) {
 	USHORT   rc=1;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETNEXTSEGW) (LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize);
+    typedef USHORT ( /*APIENTRY*/ *EQFGETNEXTSEGW) (LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize);
     static EQFGETNEXTSEGW EQFGETNEXTSEGW_addr;
 
     if ( EQFGETNEXTSEGW_addr!=NULL) 
@@ -227,9 +220,9 @@ USHORT __cdecl /*APIENTRY*/ EQFGETNEXTSEGW( LONG lInfo, PULONG ulSegNum, PCHAR_W
 /*                                                                          */
 /* Get previous segment.                                                    */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ EQFGETPREVSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR swTemp, PUSHORT usBufSize) {
+USHORT  /*APIENTRY*/ EQFGETPREVSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR swTemp, PUSHORT usBufSize) {
 	USHORT   rc=1;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETPREVSEG) (LONG lInfo, PUSHORT ulSegNum, PCHAR swTemp, PUSHORT usBufSize);
+    typedef USHORT ( /*APIENTRY*/ *EQFGETPREVSEG) (LONG lInfo, PUSHORT ulSegNum, PCHAR swTemp, PUSHORT usBufSize);
     static EQFGETPREVSEG EQFGETPREVSEG_addr;
 
     if ( EQFGETPREVSEG_addr!=NULL) 
@@ -254,9 +247,9 @@ USHORT __cdecl /*APIENTRY*/ EQFGETPREVSEG( LONG lInfo, PUSHORT ulSegNum,  PCHAR 
 /*                                                                          */
 /* Get next segment.                                                        */
 /****************************************************************************/
-USHORT __cdecl /*APIENTRY*/ __cdecl /*APIENTRY*/ EQFGETPREVSEGW( LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize) {
+USHORT  /*APIENTRY*/  /*APIENTRY*/ EQFGETPREVSEGW( LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize) {
 	USHORT   rc=1;
-    typedef USHORT (__cdecl /*APIENTRY*/ *EQFGETPREVSEGW) (LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize);
+    typedef USHORT ( /*APIENTRY*/ *EQFGETPREVSEGW) (LONG lInfo, PULONG ulSegNum, PCHAR_W swTemp, PUSHORT usBufSize);
     static EQFGETPREVSEGW EQFGETPREVSEGW_addr;
 
     if ( EQFGETPREVSEGW_addr!=NULL) 

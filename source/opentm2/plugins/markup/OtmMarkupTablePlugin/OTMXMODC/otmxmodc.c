@@ -143,7 +143,7 @@ extern   short   sTPVersion ;               /* From USRCALLS.C  */
 *
 *******************************************************************************/
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
+EQF_BOOL  /*APIENTRY*/ EQFPRESEG2(
                    PSZ       pTagTable,
                    PSZ       pEdit,
                    PSZ       pProgPath,
@@ -292,7 +292,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2(
 *******************************************************************************/
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
+EQF_BOOL  /*APIENTRY*/ EQFPOSTSEGW(
                     PSZ    pTagTable,
                     PSZ    pEdit,
                     PSZ    pProgPath,
@@ -310,7 +310,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 
     PSZ     ModuleName = "OTMXML.DLL" ;
     PSZ     ProcName = "EQFPOSTSEGW";
-	typedef EQF_BOOL (* __cdecl /*APIENTRY*/ XMLPOSTSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PSZ, PTATAG_W, HWND, PEQF_BOOL ) ;
+	typedef EQF_BOOL (*  /*APIENTRY*/ XMLPOSTSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PSZ, PTATAG_W, HWND, PEQF_BOOL ) ;
 	XMLPOSTSEG_DCL  XMLPOSTSEG_addr;
     int     rc ;
 
@@ -383,7 +383,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW(
 *
 *******************************************************************************/
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
+EQF_BOOL  /*APIENTRY*/ EQFPREUNSEGW(
                      PSZ         pTagTable,
                      PSZ         pEdit,
                      PSZ         pProgPath,
@@ -402,7 +402,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
 
    PSZ     ModuleName = "OTMXML" ;
    PSZ     ProcName = "EQFPREUNSEGW";
-   typedef EQF_BOOL (* __cdecl /*APIENTRY*/ XMLPREUNSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PSZ, PTATAG_W, PEQF_BOOL, PEQF_BOOL ) ;
+   typedef EQF_BOOL (*  /*APIENTRY*/ XMLPREUNSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PSZ, PTATAG_W, PEQF_BOOL, PEQF_BOOL ) ;
    XMLPREUNSEG_DCL  XMLPREUNSEG_addr;
    USHORT  rc ;
 
@@ -459,7 +459,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW(
 *
 *******************************************************************************/
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
+EQF_BOOL  /*APIENTRY*/ EQFPOSTUNSEGW(
                       PSZ    pTagTable,
                       PSZ    pEdit,
                       PSZ    pProgPath,
@@ -482,7 +482,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW(
     HINSTANCE  hInst_DLL;
     USHORT     rc ;
 
-	typedef EQF_BOOL (* __cdecl /*APIENTRY*/ XMLPOSTUNSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PTATAG, PEQF_BOOL ) ;
+	typedef EQF_BOOL (*  /*APIENTRY*/ XMLPOSTUNSEG_DCL)( PSZ, PSZ, PSZ, PSZ, PTATAG, PEQF_BOOL ) ;
 	XMLPOSTUNSEG_DCL  XMLPOSTUNSEG_addr;
 // ============================================================
 
@@ -1397,7 +1397,7 @@ BOOL FindSTargetType( char *InFile )
 *******************************************************************************/
 
 
-USHORT __cdecl /*APIENTRY*/ EQFQUERYEXITINFO(PSZ pszTagTable, // name of the markup table, e.g. "IBMHTM32"
+USHORT  /*APIENTRY*/ EQFQUERYEXITINFO(PSZ pszTagTable, // name of the markup table, e.g. "IBMHTM32"
                         USHORT usMode,   // type of information being queried
                         PSZ pszBuffer,   // buffer area receiving the information returned by the exit
                         USHORT usBufLen  // length of buffer area

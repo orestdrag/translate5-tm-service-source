@@ -2163,9 +2163,9 @@ USHORT TASoSiProtectTable
 }
 
 
-typedef EQF_BOOL (//__cdecl /*APIENTRY*/ 
+typedef EQF_BOOL (// /*APIENTRY*/ 
 *PFNSTARTSTOPEXIT) ( PSZ, PSTARTSTOP *);
-typedef EQF_BOOL (//__cdecl /*APIENTRY*/ 
+typedef EQF_BOOL (// /*APIENTRY*/ 
 *PFNSTARTSTOPEXITW) ( PSZ_W, PSTARTSTOP *);
 
 //------------------------------------------------------------------------------

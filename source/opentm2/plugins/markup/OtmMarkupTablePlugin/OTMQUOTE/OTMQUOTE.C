@@ -48,10 +48,8 @@
 
 #include "eqfparse.h"                  // headers used
 
-#ifdef __cplusplus
-extern "C"
-#endif
-extern void   __cdecl  GetOTMTablePath( char * basename, char * OTMname ) ;
+
+extern void     GetOTMTablePath( char * basename, char * OTMname ) ;
 
 #define INBUF_SIZE         8192        // size of input buffer
 
@@ -119,7 +117,7 @@ static MRIPARSMARKUPINFO MarkupInfo[20] = { { "", { 0, 0, 0 }  } };
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2
+EQF_BOOL  /*APIENTRY*/ EQFPRESEG2
 (
    PSZ pTagTable,
    PSZ pEdit,                    // name of editor dll
@@ -184,7 +182,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPRESEG2
 //+----------------------------------------------------------------------------+
 
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW
+EQF_BOOL  /*APIENTRY*/ EQFPOSTSEGW
 (
    PSZ pTagTable,
    PSZ pEdit,                    // name of editor dll
@@ -230,7 +228,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTSEGW
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW
+EQF_BOOL  /*APIENTRY*/ EQFPREUNSEGW
 (
    PSZ pTagTable,
    PSZ pEdit,                    // name of editor dll
@@ -276,7 +274,7 @@ EQF_BOOL __cdecl /*APIENTRY*/ EQFPREUNSEGW
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFPOSTUNSEGW
+EQF_BOOL  /*APIENTRY*/ EQFPOSTUNSEGW
 (
    PSZ pTagTable,
    PSZ pEdit,                    // name of editor dll
@@ -425,7 +423,7 @@ int MriCountQuotes( PSZ_W pszString, CHAR_W chQuote, BOOL fEscapeChars )
 
 // check segment content before it is saved
 
-EQF_BOOL __cdecl /*APIENTRY*/ EQFCHECKSEGEXW
+EQF_BOOL  /*APIENTRY*/ EQFCHECKSEGEXW
 (
    PSZ_W pszPrevSrc,                     // previous source segment
    PSZ_W pszSrc,                         // current source segment

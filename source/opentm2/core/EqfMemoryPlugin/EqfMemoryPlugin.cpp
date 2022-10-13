@@ -928,8 +928,7 @@ bool EqfMemoryPlugin::stopPlugin( bool fForce  )
   return( true );
 }
 
-extern "C" {
-__attribute__((visibility("default")))
+//__attribute__((visibility("default")))
 USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
@@ -940,7 +939,7 @@ USHORT registerPlugins()
   USHORT usRC = (USHORT) eRc;
   return usRC;
 }
-}
+
 //#endif
 
 /*! \brief Build the path name for a memory
@@ -1714,18 +1713,15 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
   return( 0 );
 }
 
-extern "C" {
-  
-  unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
-  {
-    strcpy( pPluginInfo->szName, pszPluginName );
-    strcpy( pPluginInfo->szShortDescription, pszShortDescription );
-    strcpy( pPluginInfo->szLongDescription, pszLongDescription );
-    strcpy( pPluginInfo->szVersion, pszVersion );
-    strcpy( pPluginInfo->szSupplier, pszSupplier );
-    pPluginInfo->eType = OtmPlugin::eTranslationMemoryType;
-    strcpy( pPluginInfo->szDependencies, "" );
-    pPluginInfo->iMinOpenTM2Version = -1;
-    return( 0 );
-  }
+unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
+{
+  strcpy( pPluginInfo->szName, pszPluginName );
+  strcpy( pPluginInfo->szShortDescription, pszShortDescription );
+  strcpy( pPluginInfo->szLongDescription, pszLongDescription );
+  strcpy( pPluginInfo->szVersion, pszVersion );
+  strcpy( pPluginInfo->szSupplier, pszSupplier );
+  pPluginInfo->eType = OtmPlugin::eTranslationMemoryType;
+  strcpy( pPluginInfo->szDependencies, "" );
+  pPluginInfo->iMinOpenTM2Version = -1;
+  return( 0 );
 }

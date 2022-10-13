@@ -33,10 +33,6 @@ void InitDocumentPluginMapper()
 #endif
 }
 
-#ifndef CPPTEST
-extern "C" {
-#endif
-
 USHORT EQFBCharType(PTBDOCUMENT pDoc, PTBSEGMENT pSeg, USHORT usOffs)
 {
 	return theDocument->CPP_EQFBCharType(pDoc, pSeg, usOffs);
@@ -201,7 +197,3 @@ BOOL EQFBGetHexNumberW(PSZ_W pszNumber, PUSHORT pusValue)
 {
 	return theDocument->CPP_EQFBGetHexNumberW(pszNumber, pusValue);
 }
-
-#ifndef CPPTEST
-}
-#endif
