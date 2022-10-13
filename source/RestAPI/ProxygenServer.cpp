@@ -129,12 +129,15 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto urlSeparator = url.find("/");
 
     if( urlSeparator == -1 ){
-      return  new ProxygenHandler(stats_.get());
+      urlSeparator = url.size() - 1;
+      //return  new ProxygenHandler(stats_.get());
     }
 
     std::string urlService = url.substr(0, urlSeparator);
    
     if(urlService != serviceName && urlService != additionalServiceName ){
+      LogMessage8(ERROR, __func__, ":: Wrong url \'", urlService.c_str(), "\', should be \'", 
+          serviceName.c_str(),"\' or \'", additionalServiceName.c_str(),"\'");
       return new ProxygenHandler(stats_.get());
     }
 
@@ -296,9 +299,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
         if (!res) {
             strncpy(szServiceName,
-                conf.get_value("name", szServiceName).c_str(), 100);
-            serviceName = szServiceName;
-            additionalServiceName = serviceName+"_service";
+                conf.get_value("name", szServiceName).c_str(), 100);            
 
             strncpy(szOtmDirPath,
                 conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
@@ -342,13 +343,13 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     if(fLocalHostOnly == false){
       getifaddrs(&addresses);
-      int s, family = pAddr->ifa_addr->sa_family;
+      int s;//, family = pAddr->ifa_addr->sa_family;
       
       while(pAddr != nullptr 
-      && !( family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
+      && !( pAddr->ifa_addr->sa_family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
       ){
         pAddr = pAddr->ifa_next;
-        family = pAddr->ifa_addr->sa_family;
+        //family = pAddr->ifa_addr->sa_family;
       }
       
     
@@ -403,6 +404,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
                 |-------------Setup is done -> waiting for requests...-------------|\n\
                 |==================================================================|\n";
     LogMessage3(TRANSACTION, __func__, ":: ", initMsg.str().c_str());
+    serviceName = szServiceName;
+    additionalServiceName = serviceName+"_service";
+
     t.join();
     return 0;
   }

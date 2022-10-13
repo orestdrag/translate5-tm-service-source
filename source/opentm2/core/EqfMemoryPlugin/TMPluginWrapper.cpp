@@ -24,10 +24,8 @@ Copyright Notice:
 // EQF.H is included by otmmemory.h
 // #include <eqf.h>                  // General Translation Manager include file EQF:H 
 
-extern "C"
-{
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions
-}
+
 
 #include "vector"
 #include <wctype.h>
@@ -428,7 +426,7 @@ BOOL EQFBMarkModDelIns
     USHORT      usLenStr2
 );
 
-
+#ifdef DUPLICATED_WRAPPER_CODE
 /**********************************************************************/
 /* find the differences in two strings (w/o cleanup if consecutives   */
 /* delete and inserts)                                                */
@@ -528,6 +526,8 @@ EQFBFindDiffEx
   UtlAlloc( (PVOID *)&pTokenList2, 0L, 0L, NOMSG );
   return( fOK );
 } /* end of function EQFBFindDiffEx */
+#endif //DUPLICATED_WRAPPER_CODE
+
 
 static
 BOOL CheckForAlloc( PTMX_SENTENCE pSentence, PTMX_TERM_TOKEN * ppTermTokens, USHORT usEntries );
@@ -970,6 +970,8 @@ USHORT TokenizeSourceEx2
   return ( usRc );
 }
 
+
+#ifdef DUPLICATED_WRAPPER_CODE
 USHORT MorphAddTermToList2W
 (
   PSZ_W    *ppList,                    // ptr to term list pointer
@@ -1207,6 +1209,7 @@ USHORT MorphAddTermToList2W
   return( usRC );
 
 } /* end of function MorphAddTermToList2W */
+#endif //DUPLICATED_WRAPPER_CODE
 
 USHORT NTMTokenizeW
 (

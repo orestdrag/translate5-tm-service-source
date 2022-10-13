@@ -29,6 +29,7 @@
 #include "OtmDictionaryIF.H"
 #include <EQFMORPI.H>                  // private header file of module
 #include <EQFCHTBL.H>                  // character tables
+#include "LogWrapper.h"
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -194,12 +195,15 @@ USHORT MorphWordRecognition
        LONG lOrgBufferASCII = *pusOrgBufferSize;
        LONG lDictBufferASCII = *pusDictBufferSize;
        LONG lDictBufferUsed;
-       usRC =  MorphCopyStringListUnicode2ASCII( pOrgTermListW, ulOrgBufferSize, ppOrgTermList,
-                                                 &lOrgBufferASCII, &lDictBufferUsed, ulOemCP);
+       LOG_UNIMPLEMENTED_FUNCTION;
+       //usRC =  MorphCopyStringListUnicode2ASCII( pOrgTermListW, ulOrgBufferSize, ppOrgTermList,
+       //                                          &lOrgBufferASCII, &lDictBufferUsed, ulOemCP);
+       
        if (!usRC )
        {
-         usRC =  MorphCopyStringListUnicode2ASCII( pDictTermListW, ulDictBufferSize, ppDictTermList,
-                                                   &lDictBufferASCII, &lDictBufferUsed, ulOemCP);
+        LOG_UNIMPLEMENTED_FUNCTION;
+       //  usRC =  MorphCopyStringListUnicode2ASCII( pDictTermListW, ulDictBufferSize, ppDictTermList,
+       //                                            &lDictBufferASCII, &lDictBufferUsed, ulOemCP);
        }
        if ( !usRC )
        {
@@ -343,8 +347,10 @@ USHORT MorphWordRecognitionW
   /********************************************************************/
   if ( usRC == MORPH_OK )
   {
-    MorphGetLanguageString( sLanguageID, chLang );
-    fDBCSLang = (MorphGetLanguageType( chLang ) == MORPH_DBCS_LANGTYPE);
+    LOG_UNIMPLEMENTED_FUNCTION;
+//    MorphGetLanguageString( sLanguageID, chLang );
+    LOG_UNIMPLEMENTED_FUNCTION
+    //fDBCSLang = (MorphGetLanguageType( chLang ) == MORPH_DBCS_LANGTYPE);
     if ( UtlQueryCharTable( IS_TEXT_TABLE, &pucIsText ) != NO_ERROR )
     {
       usRC = MORPH_FUNC_FAILED;
@@ -514,8 +520,11 @@ USHORT MorphWordRecognitionW
          /*************************************************************/
          /* get stem form of term                                     */
          /*************************************************************/
+         LogMessage4(FATAL, __FILE__, ":", toStr(__LINE__).c_str() ,": called unimplemented function, MorphGetStemForm");
+         #ifdef NOT_IMPLEMENTED_FUNCTION
          usRC = MorphGetStemForm( sLanguageID, pucTerm,
                                   &usStemListSize, &pStemList, ulOemCP );
+        #endif
   if ( ( usRC == MORPH_NOT_FOUND ) &&
        ( wcschr(pucTerm,'-') ) ) {
      WCHAR szTemp[500] ;
@@ -524,15 +533,21 @@ USHORT MorphWordRecognitionW
      pChar = wcschr(szTemp,'-');
      *pChar = NULL ;
 
+    LogMessage4(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+         #ifdef NOT_IMPLEMENTED_FUNCTION
      usRC = MorphGetStemForm( sLanguageID, szTemp,
                               &usStemListSize, &pStemList, ulOemCP );
+      #endif
      if ( usRC == MORPH_NOT_FOUND ) {
         wcscpy( szTemp, pucTerm ) ;
         pChar = wcschr(szTemp,'-');
         memcpy( pChar, pChar+1, (wcslen(pChar+1)+1)*sizeof(WCHAR)) ;
 
+  LogMessage4(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+         #ifdef NOT_IMPLEMENTED_FUNCTION
         usRC = MorphGetStemForm( sLanguageID, szTemp,
                                  &usStemListSize, &pStemList, ulOemCP );
+        #endif
      }
   }
 
@@ -647,7 +662,8 @@ USHORT MorphWordRecognitionW
            pulPOSInfo = &ulPOSInfo;
            *pulPOSInfo = 0;
 
-           usRC = MorphGetPOSInfo( sLanguageID, pucTerm, pulPOSInfo, ulOemCP );
+            LOG_UNIMPLEMENTED_FUNCTION;
+           //usRC = MorphGetPOSInfo( sLanguageID, pucTerm, pulPOSInfo, ulOemCP );
 
           // preselection
           //
@@ -817,9 +833,11 @@ USHORT MorphWordRecognitionW
         } // end if fInclNotFoundTerms
 
         /*************************************************************/
-
+LogMessage4(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+         #ifdef NOT_IMPLEMENTED_FUNCTION
         usRC = MorphGetStemForm( sLanguageID, pucTerm,
                                  &usStemListSize, &pStemList, ulOemCP );
+                                 #endif
 
         /**************************************************************/
         /* get MWTs for current term                                  */
