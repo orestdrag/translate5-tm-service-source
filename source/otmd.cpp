@@ -1,6 +1,7 @@
 
 //#define GLOG_NO_ABBREVIATED_SEVERITIES
 
+
 #include <iostream>
 #include <csignal>
 #include <cstdlib>
@@ -8,6 +9,10 @@
 #include <thread>
 #include <unistd.h>
 #include <folly/portability/GFlags.h>
+
+#ifndef DEFINE_validator 
+//#include <gflags/gflags.h>
+#endif
 #include <execinfo.h>
 
 #include "RestAPI/OtmMemoryService.h"
@@ -16,6 +21,23 @@
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
 
+#ifndef DEFINE_validator 
+#define DEFINE_validator(x, y) 
+#endif 
+
+
+#ifndef FOLLY_GFLAGS_DEFINE_int32 
+#define FOLLY_GFLAGS_DEFINE_int32(x, y, z) DEFINE_int32(x, y, z)
+#endif 
+
+
+#ifndef FOLLY_GFLAGS_DEFINE_string 
+#define FOLLY_GFLAGS_DEFINE_string(x, y, z) DEFINE_string(x, y, z)
+#endif 
+
+#ifndef FOLLY_GFLAGS_DEFINE_bool 
+#define FOLLY_GFLAGS_DEFINE_bool(x, y, z) DEFINE_bool(x, y, z)
+#endif 
 
 static bool ValidatePort(const char* flagname, int32_t value) {
    if (value > 0 && value < 32768)   // value is ok
@@ -24,13 +46,13 @@ static bool ValidatePort(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(port, 4080, "What port to listen on");
+DEFINE_int32(port, 4080, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
-FOLLY_GFLAGS_DEFINE_bool(localhostonly, false, "Should we use localhost or external address for service");
+DEFINE_bool(localhostonly, false, "Should we use localhost or external address for service");
 
 
-FOLLY_GFLAGS_DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
+DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
 
 static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 100)   // value is ok
@@ -39,7 +61,7 @@ static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(triplesthreshold, 33, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
+DEFINE_int32(triplesthreshold, 33, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
@@ -50,7 +72,7 @@ static bool ValidateTimeout(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(timeout, 3600, "Sets timeout for service request handling");
+DEFINE_int32(timeout, 3600, "Sets timeout for service request handling");
 DEFINE_validator(timeout, &ValidateTimeout);
 
 
@@ -61,7 +83,7 @@ static bool ValidateThreads(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
+DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
 DEFINE_validator(servicethreads, &ValidateThreads);
 
 
@@ -72,7 +94,7 @@ static bool ValidateRAM(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(allowedram, 500, "Sets amought RAM(in MB) allowed for service to use");
+DEFINE_int32(allowedram, 500, "Sets amought RAM(in MB) allowed for service to use");
 DEFINE_validator(allowedram, &ValidateRAM);
 
 static bool ValidateLOGlevel(const char* flagname, int32_t value) {
@@ -82,11 +104,11 @@ static bool ValidateLOGlevel(const char* flagname, int32_t value) {
    return false;
 }
 
-FOLLY_GFLAGS_DEFINE_int32(t5loglevel, 0, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)[disabled]");
+DEFINE_int32(t5loglevel, 0, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)[disabled]");
 DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
 
-FOLLY_GFLAGS_DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
+DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
 
 void handle_interrupt_sig(int sig) {
     LogMessage(TRANSACTION, "Received interrupt signal\n");
@@ -134,9 +156,14 @@ void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
 }
 //*/
 
+//using namespace gflags;
+using namespace google;
+//using namespace GFLAGS_NAMESPACE;
+
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
    #ifdef GLOGGING_ENABLED
+    FLAGS_log_dir = "/home/or/.t5memory/LOG/";
     if(FLAGS_log_dir.empty()){
         FLAGS_log_dir = "/root/.t5memory/LOG/";
     }
@@ -145,7 +172,7 @@ int main(int argc, char* argv[]) {
     //FLAGS_alsologtostderr = true;
     //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
+    google::ParseCommandLineFlags(&argc, &argv, true);
     //gflags::ParseCommandLineFlags(&argc, &argv, false);
     #ifdef GLOGGING_ENABLED
     google::InitGoogleLogging(argv[0]);//, &CustomPrefix);

@@ -21,7 +21,6 @@ message(STATUS "T5MEMORY ROOT is ${ROOT}")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(CMAKE_SOURCE_DIR    "${ROOT}/source")
 
-#set (proxygen_DIR "/opt/local/lib/cmake/proxygen")
 set (proxygen_DIR "/opt/local/lib/cmake/proxygen")
 set (fmt_DIR "/opt/local/lib/cmake/fmt")
 set (Fizz_DIR "/opt/local/lib/cmake/fizz")
@@ -32,7 +31,6 @@ set (glog_DIR "/opt/local/lib/cmake/glog")
 set (gflags_DIR "/opt/local/lib/cmake/gflags")
 set (mvfst_DIR "/opt/local/lib/cmake/mvfst")
 set(Sodium_DIR "/opt/local/lib/cmake/sodium")
-#set(Sodium_DIR "/opt/local/lib/cmake/sodium")
 
 
 find_package(PkgConfig REQUIRED)
@@ -47,9 +45,6 @@ set(CORE_DIR "opentm2/core")
 
 
 set(OPENTM2_MRI_DIR     "${ROOT}/mri")
-set(ZLIB_INCLUDE_DIR    "${ROOT}/Packages/zlib")
-set(MINIZIP_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}/contrib/minizip")
-
 
 set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"
@@ -145,16 +140,10 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/EqfMemoryPlugin/GenericTagReplace.cpp"
 )
 
-#list(APPEND CMAKE_PREFIX_PATH "/home/rip/Qt/5.12.1/gcc_64")
-
-#link_directories(${RESTBED_LIBRARIES})
-
 set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )
 
 add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
-#set(CMAKE_CXX_STANDARD 17)
-#target_compile_features(T5MEMORY PRIVATE cxx_std_17)
 set(CMAKE_CXX_STANDARD 14)
 target_compile_features(T5MEMORY PRIVATE cxx_std_14)
 
@@ -178,6 +167,7 @@ find_package(Threads)
 find_package(OpenSSL REQUIRED)
 find_package(proxygen REQUIRED)
 #find_package(glog REQUIRED)
+
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
@@ -186,8 +176,6 @@ find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
 
 set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
 #add_subdirectory("${OPENTM2_FOLDER}/core")
-
-
 
 set(LIBS_DIRECTORY "/opt/local/lib")
 set(SHARED_LIBS_DIR "/lib")
@@ -198,7 +186,6 @@ link_directories(${LIBS_DIRECTORY}
 find_package(folly REQUIRED)
 find_package(gflags REQUIRED)
 find_package(proxygen REQUIRED)
-
 
 add_subdirectory(opentm2/core/utilities/zip)
 
@@ -213,9 +200,10 @@ target_link_libraries(T5MEMORY PRIVATE
   wangle::wangle
   Boost::boost
   Boost::iostreams
+  gflags
   ssl
   crypto
-  "${LIBS_DIRECTORY}/libzstd.a"
+  #"${LIBS_DIRECTORY}/libzstd.a"
   libxerces-c-3.2.so  zip   ICU::uc ICU::i18n 
 )
 

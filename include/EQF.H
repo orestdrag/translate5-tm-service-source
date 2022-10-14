@@ -6376,7 +6376,7 @@ void WriteLog( PSZ pszString );
 void LogSysInfo( VOID );
 #else
 
-#define LOG( s )
+//#define LOG( s )
 #define LOGSTRING( f, s )
 #define LOGSHORT( f, i )
 #define LOG2SHORT( f, i, j )

@@ -3,10 +3,9 @@
 
 #include <string>
 
-
+//#define GLOGGING_ENABLED 
 #define toStr(i) std::to_string(i)
 
-#define GLOGGING_ENABLED
 
 #ifdef GLOGGING_ENABLED
     #include <glog/logging.h>

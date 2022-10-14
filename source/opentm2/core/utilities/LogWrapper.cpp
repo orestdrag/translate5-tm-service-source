@@ -128,9 +128,9 @@ int writeLog(std::string& message, int logLevel){
     #endif //SIMPLE_FILE_LOGGING_ENABLED
     
     #ifdef GLOGGING_ENABLED
-        if(!V_IS_ON(2) && fFilterLogs){
+        if(!VLOG_IS_ON(2) && fFilterLogs){
             if(logLevel < ERROR){
-                if( V_IS_ON(1) ){
+                if( VLOG_IS_ON(1) ){
                     AddToLogBuffer(message + "\n");
                 }
             }else{
@@ -420,9 +420,9 @@ int SetLogLevel(int level){
 
 bool CheckLogLevel(int level){
     #ifdef GLOGGING_ENABLED
-    if(level <= DEBUG && !V_IS_ON(1))
+    if(level <= DEBUG && !VLOG_IS_ON(1))
         return false;
-    if(level == DEVELOP && !V_IS_ON(2))
+    if(level == DEVELOP && !VLOG_IS_ON(2))
         return false;
     #endif //GLOGGING_ENABLED
     return level >= logLevelTreshold;
