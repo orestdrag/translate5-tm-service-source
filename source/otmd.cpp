@@ -15,28 +15,16 @@
 #endif
 #include <execinfo.h>
 
-#include "RestAPI/OtmMemoryService.h"
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "cmake/git_version.h"
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
 
+
+
+#ifdef GFLAGS_ENABLED
 #ifndef DEFINE_validator 
 #define DEFINE_validator(x, y) 
-#endif 
-
-
-#ifndef FOLLY_GFLAGS_DEFINE_int32 
-#define FOLLY_GFLAGS_DEFINE_int32(x, y, z) DEFINE_int32(x, y, z)
-#endif 
-
-
-#ifndef FOLLY_GFLAGS_DEFINE_string 
-#define FOLLY_GFLAGS_DEFINE_string(x, y, z) DEFINE_string(x, y, z)
-#endif 
-
-#ifndef FOLLY_GFLAGS_DEFINE_bool 
-#define FOLLY_GFLAGS_DEFINE_bool(x, y, z) DEFINE_bool(x, y, z)
 #endif 
 
 static bool ValidatePort(const char* flagname, int32_t value) {
@@ -116,6 +104,8 @@ void handle_interrupt_sig(int sig) {
     LogMessage(TRANSACTION, "Stopped t5memory\n");
 }
 
+#endif //GFLAGS_ENABLED
+
 void FailureWriter(const char* data, int size){
     LogMessage(FATAL, data);
     void *array[10];
@@ -163,29 +153,32 @@ using namespace google;
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
    #ifdef GLOGGING_ENABLED
-    FLAGS_log_dir = "/home/or/.t5memory/LOG/";
-    if(FLAGS_log_dir.empty()){
-        FLAGS_log_dir = "/root/.t5memory/LOG/";
-    }
-    FLAGS_colorlogtostderr = true;
-    #endif
-    //FLAGS_alsologtostderr = true;
-    //google::InstallFailureSignalHandler();
+   FLAGS_log_dir = "/home/or/.t5memory/LOG/";
+   if(FLAGS_log_dir.empty()){
+       FLAGS_log_dir = "/root/.t5memory/LOG/";
+   }
+   FLAGS_colorlogtostderr = true;
+   #endif
+   #ifdef GFLAGS_ENABLED
+   //FLAGS_alsologtostderr = true;
+   //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
-    google::ParseCommandLineFlags(&argc, &argv, true);
-    //gflags::ParseCommandLineFlags(&argc, &argv, false);
-    #ifdef GLOGGING_ENABLED
-    google::InitGoogleLogging(argv[0]);//, &CustomPrefix);
-    #endif
+   google::ParseCommandLineFlags(&argc, &argv, true);
+   //gflags::ParseCommandLineFlags(&argc, &argv, false);
+   #endif//GFLAGS_ENABLED
 
-    //int logLevel = 1/0;
-    //WLogMessage(logLevel, "fail");
-    //LOG_DEBUG_MSG() << "SOME_DEBUG_MSG";
-    
-    LogMessage(TRANSACTION, "Worker thread starting");
-    std::thread worker(proxygen_server_init);
-    worker.join();
-    LogMessage(TRANSACTION, "Worker thread finished");
+   #ifdef GLOGGING_ENABLED
+   google::InitGoogleLogging(argv[0]);//, &CustomPrefix);
+   #endif
+
+   //int logLevel = 1/0;
+   //WLogMessage(logLevel, "fail");
+   //LOG_DEBUG_MSG() << "SOME_DEBUG_MSG";
+   
+   LogMessage(TRANSACTION, "Worker thread starting");
+   std::thread worker(proxygen_server_init);
+   worker.join();
+   LogMessage(TRANSACTION, "Worker thread finished");
     
 }
 
