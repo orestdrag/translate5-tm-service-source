@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.3.8")
+SET(APP_VERSION  "0.3.9")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -190,8 +190,6 @@ find_package(proxygen REQUIRED)
 add_subdirectory(opentm2/core/utilities/zip)
 
 target_link_libraries(T5MEMORY PRIVATE
-  #OTMFUNC
-  #t5core
   git_version
   Folly::folly
   fizz::fizz
@@ -203,7 +201,6 @@ target_link_libraries(T5MEMORY PRIVATE
   gflags
   ssl
   crypto
-  #"${LIBS_DIRECTORY}/libzstd.a"
   libxerces-c-3.2.so  zip   ICU::uc ICU::i18n 
 )
 

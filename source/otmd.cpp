@@ -20,8 +20,6 @@
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
 
-
-
 #ifdef GFLAGS_ENABLED
 #ifndef DEFINE_validator 
 #define DEFINE_validator(x, y) 
@@ -178,7 +176,6 @@ int main(int argc, char* argv[]) {
    LogMessage(TRANSACTION, "Worker thread starting");
    std::thread worker(proxygen_server_init);
    worker.join();
-   LogMessage(TRANSACTION, "Worker thread finished");
-    
+   LogMessage(TRANSACTION, "Worker thread finished");    
 }
 

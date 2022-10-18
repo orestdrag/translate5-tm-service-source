@@ -4,7 +4,7 @@
 #include <string>
 
 #define GFLAGS_ENABLED
-//#define GLOGGING_ENABLED 
+#define GLOGGING_ENABLED 
 #define toStr(i) std::to_string(i)
 
 

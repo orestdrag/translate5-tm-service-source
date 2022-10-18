@@ -157,7 +157,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           urlCommand = url.substr(0, urlSeparator);
         }
       }
-
     }else{
       if( url.size() ){
         urlSeparator = url.find("/");
@@ -267,28 +266,28 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     }
 
     if(FLAGS_port){
-        uiPort = FLAGS_port;
+      uiPort = FLAGS_port;
     }
 
     if(FLAGS_timeout >= 0){
-        uiTimeOut = FLAGS_timeout;
+      uiTimeOut = FLAGS_timeout;
     }
     if(FLAGS_triplesthreshold >= 0){
-        uiThreshold = FLAGS_triplesthreshold;
+      uiThreshold = FLAGS_triplesthreshold;
     }
     if(FLAGS_localhostonly >= 0){
-        fLocalHostOnly = FLAGS_localhostonly;
+      fLocalHostOnly = FLAGS_localhostonly;
     }
 
     if(FLAGS_servicethreads > 0){
-        iWorkerThreads = FLAGS_servicethreads;
+      iWorkerThreads = FLAGS_servicethreads;
     }
 
     if(FLAGS_allowedram >= 0){
-        uiAllowedRAM = FLAGS_allowedram;
+      uiAllowedRAM = FLAGS_allowedram;
     }
     if(FLAGS_t5loglevel >= 0){
-        uiLogLevel = FLAGS_t5loglevel;
+      uiLogLevel = FLAGS_t5loglevel;
     }
     #else 
       #ifndef USE_CONFIG_FILE
@@ -353,7 +352,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       int s;//, family = pAddr->ifa_addr->sa_family;
       
       while(pAddr != nullptr 
-      && !( pAddr->ifa_addr->sa_family == AF_INET && !(strcmp(pAddr->ifa_name, "eth0") && strcmp(pAddr->ifa_name, "enp0s3") ) )
+          && !( pAddr->ifa_addr->sa_family == AF_INET 
+          && !(strcmp(pAddr->ifa_name, "eth0") 
+            && strcmp(pAddr->ifa_name, "enp0s3") ) )
       ){
         pAddr = pAddr->ifa_next;
         //family = pAddr->ifa_addr->sa_family;
