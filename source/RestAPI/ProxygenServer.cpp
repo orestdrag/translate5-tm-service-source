@@ -242,7 +242,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     uint32_t receiveSessionWindowSize = 10 * (1 << 20) * 10;
 
 
-    LogMessage(TRANSACTION, "Trying to prepare t5memory");
+    LogMessage1(TRANSACTION, "Trying to prepare t5memory");
     auto pMemService = OtmMemoryServiceWorker::getInstance();
 
     char szServiceName[100] = "t5memory";
@@ -342,7 +342,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
     
-    LogMessage(DEBUG, ":: creating address data structure");
+    LogMessage1(DEBUG, ":: creating address data structure");
     folly::SocketAddress addr;
     ifaddrs* addresses = nullptr, *pAddr = nullptr; 
     char host[NI_MAXHOST];

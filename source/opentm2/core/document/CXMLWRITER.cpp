@@ -419,7 +419,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text )
     int iLen = wcslen( text );
     WriteRaw( text, iLen );
   }else{
-    LogMessage(ERROR,"CXmlWriter::WriteRaw, text is NULL");
+    LogMessage1(ERROR,"CXmlWriter::WriteRaw, text is NULL");
   }
 }
 

@@ -312,7 +312,7 @@ void SetLogFilter(bool filterOn){
     fFilterLogs = filterOn;
 }
 
-int LogMessage(int LogLevel, std::string&& message){
+int LogMessage1(int LogLevel, std::string&& message){
     return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message));
 }
 

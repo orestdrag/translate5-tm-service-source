@@ -408,7 +408,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
    }
    else
    {
-     if(CheckLogLevel(DEBUG)) LogMessage(WARNING,"if(true) hardcoded in OpenProperties");
+     if(CheckLogLevel(DEBUG)) LogMessage1(WARNING,"if(true) hardcoded in OpenProperties");
      if (true ||  UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -485,7 +485,7 @@ SHORT CloseProperties(
        break;
      }
      
-     if(CheckLogLevel(DEBUG))  LogMessage(WARNING, "if(true) hardcoded in CloseProperties");
+     if(CheckLogLevel(DEBUG))  LogMessage1(WARNING, "if(true) hardcoded in CloseProperties");
      if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -537,7 +537,7 @@ SHORT CloseProperties(
      }
      else
      {
-       LogMessage(WARNING,"TEMPORARY_COMMENTED in Close Properties, SHORT1FROMMR");
+       LogMessage1(WARNING,"TEMPORARY_COMMENTED in Close Properties, SHORT1FROMMR");
 #if TEMPORARY_COMMENTED
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_CLOSEPROPERTIES,
                                                  MP1FROMSHORT(0),
@@ -646,7 +646,7 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
-    //if(CheckLogLevel(DEBUG))  LogMessage(WARNING, "if(true) hardcoded in GetSystemPropPtr");
+    //if(CheckLogLevel(DEBUG))  LogMessage1(WARNING, "if(true) hardcoded in GetSystemPropPtr");
     if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
     {
       PPROP_IDA     pIda;           // Points to instance area
@@ -730,7 +730,7 @@ SHORT GetPropSize( USHORT usClass)
       case PROP_CLASS_MEMORY :
       case PROP_CLASS_MEMORYDB :
       case PROP_CLASS_MEMORY_LASTUSED :
-        if(CheckLogLevel(DEBUG)) LogMessage(WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
+        if(CheckLogLevel(DEBUG)) LogMessage1(WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
          if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
          {
            usSize = 2048; // MEM_PROP_SIZE;
@@ -804,7 +804,7 @@ HPROP EqfQuerySystemPropHnd( void )
 {
   HPROP hprop;
 
-  LogMessage(WARNING, "hardcoded if(true) in EqfQuerySystemPropHnd");
+  LogMessage1(WARNING, "hardcoded if(true) in EqfQuerySystemPropHnd");
   if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
   {
     PPROP_IDA pIda = pPropBatchIda;
@@ -812,7 +812,7 @@ HPROP EqfQuerySystemPropHnd( void )
       hprop = pIda->hSystem;
     }else{
       hprop = NULL;
-      LogMessage(ERROR,"pId and pPropBatchIda are NULL");
+      LogMessage1(ERROR,"pId and pPropBatchIda are NULL");
     }
   }
   else

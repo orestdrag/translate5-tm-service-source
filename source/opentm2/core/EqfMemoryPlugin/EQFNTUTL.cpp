@@ -1326,7 +1326,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTM
      // Get new table
      if ( !usRc )
      {
-       LogMessage(ERROR,"TEMPORARY COMMENTED NTMReadLongNameTable"); 
+       LogMessage1(ERROR,"TEMPORARY COMMENTED NTMReadLongNameTable"); 
        //usRc = NTMReadLongNameTable( pTmClb );
      } /* endif */
    } /* endif */

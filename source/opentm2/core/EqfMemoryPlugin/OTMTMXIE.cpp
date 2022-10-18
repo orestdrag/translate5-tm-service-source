@@ -524,7 +524,7 @@ void TagReplacer::LogTag(TagInfo & tag){
           " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
           "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
           "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
-  LogMessage(DEVELOP, logMsg.c_str());
+  LogMessage1(DEVELOP, logMsg.c_str());
   //LOG_DEVELOP_MSG << logMsg;
   
   //LogMessage10(INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
@@ -749,7 +749,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   }
 
   if(CheckLogLevel(DEBUG)){
-    LogMessage(DEBUG, "Generated tag logging:");
+    LogMessage1(DEBUG, "Generated tag logging:");
     LogTag(tag);
   }
   return tag;
@@ -3633,12 +3633,12 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
       WriteMemHeader( pData );
     } /* endif */
     pData->lSegCounter++;
-     LogMessage(WARNING, "TEMPORARY_COMMENTED");
+     LogMessage1(WARNING, "TEMPORARY_COMMENTED");
     //swprintf( pData->szBufferW, L"<Segment>%10.10ld\r\n", pData->lSegCounter );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"<Control>\r\n" );
     
-     LogMessage(ERROR, "TEMPORARY_COMMENTED WRITEEXPSEGMENT");
+     LogMessage1(ERROR, "TEMPORARY_COMMENTED WRITEEXPSEGMENT");
     /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
       pSegment->lSegNum, X15_STRW, pSegment->usTranslationFlag, X15_STRW,
       pSegment->lTime, X15_STRW, pSegment->szSourceLang, X15_STRW, 
@@ -4089,7 +4089,7 @@ USHORT GetSourceLang( PCONVERTERDATA pData, PSZ pszSourceLanguage )
       fgets( (PSZ)pData->szLine, sizeof(pData->szLine), pData->hInFile );
 
       // retrieve source language
-      LogMessage(ERROR, "TEMPORARY_COMMENTED GetSourceLangW");
+      LogMessage1(ERROR, "TEMPORARY_COMMENTED GetSourceLangW");
       //strcpy( pszSourceLanguage, UtlParseX15( (PSZ)pData->szLine, 3 ) );
 
       fWaitingForControlRecord = FALSE;
@@ -4767,7 +4767,7 @@ USHORT GetLine( PCONVERTERDATA pData, PSZ_W pszLine, int iSize, BOOL fUnicode, P
       usRC = 0;
     } /* endif */
 
-    LogMessage(ERROR,"TEMPORARY COMMENTED GetLine");
+    LogMessage1(ERROR,"TEMPORARY COMMENTED GetLine");
     //MultiByteToWideChar( pData->ulInputCP, 0, szAsciiLine, -1, pszLine, iSize-1 );
   } /* endif */
 

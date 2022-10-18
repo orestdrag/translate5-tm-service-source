@@ -97,25 +97,23 @@ DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
 
 void handle_interrupt_sig(int sig) {
-    LogMessage(TRANSACTION, "Received interrupt signal\n");
+    LogMessage1(TRANSACTION, "Received interrupt signal\n");
     //StopOtmMemoryService();
-    LogMessage(TRANSACTION, "Stopped t5memory\n");
+    LogMessage1(TRANSACTION, "Stopped t5memory\n");
 }
 
 #endif //GFLAGS_ENABLED
 
 void FailureWriter(const char* data, int size){
-    LogMessage(FATAL, data);
+    LogMessage1(FATAL, data);
     void *array[10];
-    size_t sz;
 
     // get void*'s for all entries on the stack
-    sz = backtrace(array, 10);
+    size_t sz = backtrace(array, 10);
     std::string backtraceStr;
     for(int i = 0; i < sz && array[i] != 0; i++){
         backtraceStr += (char*) array[i];
         backtraceStr += '\n';
-
     }
     LogMessage2(FATAL, ":backtrace:\n",  backtraceStr.c_str());
 
@@ -170,12 +168,12 @@ int main(int argc, char* argv[]) {
    #endif
 
    //int logLevel = 1/0;
-   //WLogMessage(logLevel, "fail");
+   //WLogMessage1(logLevel, "fail");
    //LOG_DEBUG_MSG() << "SOME_DEBUG_MSG";
    
-   LogMessage(TRANSACTION, "Worker thread starting");
+   LogMessage1(TRANSACTION, "Worker thread starting");
    std::thread worker(proxygen_server_init);
    worker.join();
-   LogMessage(TRANSACTION, "Worker thread finished");    
+   LogMessage1(TRANSACTION, "Worker thread finished");    
 }
 

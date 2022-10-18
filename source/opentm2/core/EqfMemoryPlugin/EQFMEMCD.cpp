@@ -110,7 +110,7 @@ LONG                lOptions                 // type of new Translation Memory
     char buff[255];
     sprintf(buff, "MemFuncCreateMem( pszMemName = %s, pszDescription = %s, pszSourceLanguage = %s )",
           pszMemName, pszDescription, pszSourceLanguage);
-    LogMessage(DEBUG, buff);
+    LogMessage1(DEBUG, buff);
   }
   // check required parameters
   if ( usRC == NO_ERROR )
@@ -198,21 +198,21 @@ LONG                lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      LogMessage(INFO, "MemFuncCreateMem():: ");
-      LogMessage(FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
+      LogMessage1(INFO, "MemFuncCreateMem():: ");
+      LogMessage1(FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
       iRC = 2;
     }
     else
     {
-      LogMessage(DEBUG, "MemFuncCreateMem():: use the default memory plugin");
+      LogMessage1(DEBUG, "MemFuncCreateMem():: use the default memory plugin");
       strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
     }
 
-    LogMessage(DEBUG, "MemFuncCreateMem():: create the memory");    
+    LogMessage1(DEBUG, "MemFuncCreateMem():: create the memory");    
     pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, &iRC );
     if ( pMemory == NULL )
     {
-      LogMessage(ERROR, "MemFuncCreateMem()::pMemory == NULL");
+      LogMessage1(ERROR, "MemFuncCreateMem()::pMemory == NULL");
       fOK = FALSE;
     } 
   } 
@@ -227,7 +227,7 @@ LONG                lOptions                 // type of new Translation Memory
   //--- Tm is created. Close it. 
   if ( pMemory != NULL )
   {
-    LogMessage(INFO, "MemFuncCreateMem()::Tm is created. Close it");
+    LogMessage1(INFO, "MemFuncCreateMem()::Tm is created. Close it");
     pFactory->closeMemory( pMemory );
     pMemory = NULL;
   }

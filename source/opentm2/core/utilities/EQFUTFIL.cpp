@@ -1165,7 +1165,7 @@ BOOL IsDBCSLeadByteEx(
   UINT CodePage,
   BYTE TestChar
 ){
-  LogMessage(WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
+  LogMessage1(WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
   if(TestChar & 128){
     return true;
   }

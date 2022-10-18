@@ -368,7 +368,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        if ( !pExportIDA->pszNameList )
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
-         LogMessage(INFO,"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED");
+         LogMessage1(INFO,"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED");
          //LogMessage7(ERROR, __func__,  MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
@@ -1760,7 +1760,7 @@ USHORT MemFuncPrepExport
      pIDA->ulAnsiCP = 1; 
      pIDA->pProposal = new OtmProposal;
  }else{
-     LogMessage(ERROR,"ERROR in MemFuncPrepExport::Error in beginning of function, during memory allocations");
+     LogMessage1(ERROR,"ERROR in MemFuncPrepExport::Error in beginning of function, during memory allocations");
  }
   // check if a TM has been specified
    if ( fOK )
@@ -1941,7 +1941,7 @@ USHORT MemFuncExportProcess
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
-        LogMessage(INFO,"MemFuncExportProcess::EQFMemExportStart success");
+        LogMessage1(INFO,"MemFuncExportProcess::EQFMemExportStart success");
       } /* endif */
       break;
 
@@ -1953,7 +1953,7 @@ USHORT MemFuncExportProcess
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
-        LogMessage(INFO,"MemFuncExportProcess::EQFMemExportProcess success");
+        LogMessage1(INFO,"MemFuncExportProcess::EQFMemExportProcess success");
       } /* endif */
       break;
 
@@ -1963,7 +1963,7 @@ USHORT MemFuncExportProcess
       if(usRC){
         LogMessage2(ERROR,"Error in MemFuncExportProcess::MEM_END_EXPORT, RC = ", toStr(usRC).c_str());
       }else{
-        LogMessage(INFO,"MemFuncExportProcess::MEM_END_EXPORT success");
+        LogMessage1(INFO,"MemFuncExportProcess::MEM_END_EXPORT success");
       }
       pData->fComplete = TRUE;
       break;

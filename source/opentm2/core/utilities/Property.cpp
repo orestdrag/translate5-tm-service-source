@@ -122,7 +122,7 @@ int properties_set_value(const char *key, int value) {
 int Properties::init() {
     //LOG_DEVELOP_MSG << "Properties::init()";
     
-    LogMessage(DEVELOP, "Properties::init()");
+    LogMessage1(DEVELOP, "Properties::init()");
     //errCode here can be not NO_ERROR, because properties files path not setuped yet, so it couldn't save data yet
     int errCode = init_home_dir_prop();
 
@@ -166,7 +166,7 @@ int Properties::init() {
 }
 
 void Properties::deinit() {
-    LogMessage(INFO, "Properties::deinit()");
+    LogMessage1(INFO, "Properties::deinit()");
     //dataStr.clear();
     //dataInt.clear();
     fs.close();
@@ -177,12 +177,12 @@ int Properties::init_home_dir_prop(){
     if (!_home_dir || !strlen(_home_dir)){         
         struct passwd *pswd = getpwuid(getuid());        
         if (!pswd){
-            LogMessage(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD");
+            LogMessage1(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD");
             return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
         }
         _home_dir = pswd->pw_dir;
         if (!strlen(_home_dir)){
-            LogMessage(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR");
+            LogMessage1(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR");
             return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
         }
     }
@@ -353,7 +353,7 @@ int Properties::exist_string(const std::string& key){
 
 int Properties::create_properties_file(){
 //    LOG_DEVELOP_MSG << "Properties::create_properties_file()";
-    LogMessage(DEVELOP, "Properties::create_properties_file()");
+    LogMessage1(DEVELOP, "Properties::create_properties_file()");
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ofstream::trunc);
     fs.close();
     fs.open(filename_int, std::ios::binary | std::ios::out | std::ofstream::trunc);
@@ -363,7 +363,7 @@ int Properties::create_properties_file(){
 
 int Properties::read_all_data_from_file() {
 //    LOG_DEVELOP_MSG << "Properties::read_all_data_from_file()";
-    LogMessage(DEVELOP, "Properties::read_all_data_from_file()");
+    LogMessage1(DEVELOP, "Properties::read_all_data_from_file()");
     std::string line;
     std::string::size_type n;
     const char delim = '=';
@@ -410,7 +410,7 @@ int Properties::write_all_data_to_file() {
     #endif
     {
         if( V_IS_ON(1) ){
-            LogMessage(DEBUG, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
+            LogMessage1(DEBUG, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
         }
         return PROPERTY_WRITING_TURNED_OFF;
     }

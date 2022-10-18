@@ -1824,7 +1824,7 @@ USHORT MemFuncPrepImport
           pLoadIDA->ulAnsiCP = 1;
     }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(ERROR,"MemFuncPrepImport:: memory allocation fails");
+      LogMessage1(ERROR,"MemFuncPrepImport:: memory allocation fails");
     }
 
    // check if a TM has been specified
@@ -1838,7 +1838,7 @@ USHORT MemFuncPrepImport
      } /* endif */
    }else if(!fOkFailHandled){ 
       fOkFailHandled = true;
-      LogMessage(ERROR,"MemFuncPrepImport:: check if a TM has been specified fails");
+      LogMessage1(ERROR,"MemFuncPrepImport:: check if a TM has been specified fails");
    }/* endif */
    // set options for import
    if ( fOK )
@@ -1896,14 +1896,14 @@ USHORT MemFuncPrepImport
      pLoadIDA->fCreateMatchID = MADPrepareMatchSegIDPrefix( pszTM_ID, pszStoreID, pLoadIDA->szMatchIDPrefix );
 
      if ( pLoadIDA->fCreateMatchID  ) {
-        LogMessage(INFO,"pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented");
+        LogMessage1(INFO,"pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented");
         //MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
         //EncodingHelper::MultiByteToWideChar(CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
      }
 
    }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(ERROR,"MemFuncPrepImport::set options for import fails");
+     LogMessage1(ERROR,"MemFuncPrepImport::set options for import fails");
    } /* endif */
 
    /*******************************************************************/
@@ -1923,7 +1923,7 @@ USHORT MemFuncPrepImport
      } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(ERROR,"MemFuncPrepImport::prepare segment match ID prefix fails");
+     LogMessage1(ERROR,"MemFuncPrepImport::prepare segment match ID prefix fails");
   } /* endif */
 
    /*******************************************************************/
@@ -1941,7 +1941,7 @@ USHORT MemFuncPrepImport
      } /* end */        
   }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(ERROR,"MemFuncPrepImport::Check if there is a TM with the given name fails");
+      LogMessage1(ERROR,"MemFuncPrepImport::Check if there is a TM with the given name fails");
   } /* endif */
 
    /*******************************************************************/
@@ -1957,7 +1957,7 @@ USHORT MemFuncPrepImport
      } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(ERROR,"MemFuncPrepImport::Open the TM fails");
+     LogMessage1(ERROR,"MemFuncPrepImport::Open the TM fails");
   } /* endif */
 
    /*******************************************************************/
@@ -1992,7 +1992,7 @@ USHORT MemFuncPrepImport
      //}/* endif */
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(ERROR,"MemFuncPrepImport::Check if input file exists fails");
+      LogMessage1(ERROR,"MemFuncPrepImport::Check if input file exists fails");
    } /* endif */
 
    /*******************************************************************/
@@ -2005,7 +2005,7 @@ USHORT MemFuncPrepImport
      pData->pvMemLoadIda = (PVOID)pLoadIDA;
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(ERROR,"MemFuncPrepImport::Open the input file  fails");
+      LogMessage1(ERROR,"MemFuncPrepImport::Open the input file  fails");
    } /* endif */
 
    /*******************************************************************/
@@ -2013,7 +2013,7 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( !fOK )
    {
-      LogMessage(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
+      LogMessage1(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
       if ( pLoadIDA )
       {
          if ( pLoadIDA->pMem )
@@ -2039,7 +2039,7 @@ USHORT MemFuncPrepImport
    else if(!fOkFailHandled)
    {
      fOkFailHandled = true;
-     LogMessage(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
+     LogMessage1(ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
      usRC = UtlQueryUShort( QS_LASTERRORMSGID );
    } /* endif */
    return( usRC );
@@ -2171,7 +2171,7 @@ USHORT MemFuncImportProcess
                         (lDiff - (lDiff / 3600 * 3600)) % 60 );
                 logMessage += buff;
               }
-              LogMessage(TRANSACTION, logMessage.c_str());
+              LogMessage1(TRANSACTION, logMessage.c_str());
               
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );

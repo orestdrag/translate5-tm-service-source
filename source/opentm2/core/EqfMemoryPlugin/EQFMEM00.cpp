@@ -79,7 +79,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
     usRC = ERROR_MEMORY_NOTFOUND;
-    LogMessage(DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
+    LogMessage1(DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
   } /* endif */
 
   OtmMemoryPlugin::MEMORYINFO Info;

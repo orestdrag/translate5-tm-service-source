@@ -111,7 +111,7 @@ int MemoryFactory::getMemoryInfo
   if ( pluginSelected == NULL ) 
   {
     if(CheckLogLevel(DEBUG)){
-      LogMessage(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
+      LogMessage1(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
     }
     return OtmMemoryPlugin::eUnknownPlugin;
   } /* endif */
@@ -142,7 +142,7 @@ int MemoryFactory::getMemoryInfo
   else
   {
     if(CheckLogLevel(DEBUG)){
-      LogMessage(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
+      LogMessage1(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
     }
   } /* end */     
 
@@ -271,12 +271,12 @@ int MemoryFactory::closeMemory
   int iRC = 0;
 
   if ( pMemory == NULL  ){
-    LogMessage(ERROR,"MemoryFactory::closeMemory, pMemory is NULL");
+    LogMessage1(ERROR,"MemoryFactory::closeMemory, pMemory is NULL");
     return( -1 );
   }
   OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
   if ( pPlugin == NULL  ){
-     LogMessage(ERROR,"MemoryFactory::closeMemory, pPlugin is NULL");
+     LogMessage1(ERROR,"MemoryFactory::closeMemory, pPlugin is NULL");
      return( -2 );
   }
 
@@ -328,7 +328,7 @@ int MemoryFactory::deleteMemory(
 )
 {
   if(pszPluginName == NULL){
-    LogMessage(ERROR,"MemoryFactory::deleteMemory::pszPluginName = NULL");
+    LogMessage1(ERROR,"MemoryFactory::deleteMemory::pszPluginName = NULL");
   }else if(pszMemoryName == NULL){
     LogMessage3(ERROR,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = NULL");
   }else{

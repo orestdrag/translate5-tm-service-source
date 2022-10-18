@@ -1697,7 +1697,7 @@ SHORT QDAMReadRecordFromDisk_V3
          else
          {
            ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
-           LogMessage(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
+           LogMessage1(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
            sRc = BTREE_READ_ERROR;
          } /* endif */
        } /* endif */
@@ -1945,7 +1945,7 @@ SHORT  QDAMReadRecord_V3
                 // as write is only allowed if the database has been
                 // previously locked
                 ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
-                LogMessage(ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
+                LogMessage1(ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
 
               } /* endif */
               sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
@@ -2609,7 +2609,7 @@ SHORT QDAMWriteRecord_V3
    //  else set only the flag
    if ( !sRc )
    {
-    // LogMessage(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
+    // LogMessage1(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
      if ( !pBT->fGuard && false)
      {
         pBuffer->fNeedToWrite = TRUE;
@@ -3082,7 +3082,7 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     if ( !fTransMem )
     {
-      LogMessage(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
+      LogMessage1(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
       sRc = BTREE_INVALID;
     }
     else
@@ -3141,7 +3141,7 @@ SHORT QDAMDictCreateLocal
     }
     else
     {
-      LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
     } /* endif */
 
     pBT->usNumberOfAllocatedBuffers = 0;
@@ -3179,7 +3179,7 @@ SHORT QDAMDictCreateLocal
       }
       else
       {
-        LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+        LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
       } /* endif */
 
       if (! sRc )
@@ -3212,7 +3212,7 @@ SHORT QDAMDictCreateLocal
         }
         else
         {
-          LogMessage(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+          LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
         } /* endif */
       } /* endif */
     } /* endif */
@@ -5473,7 +5473,7 @@ SHORT QDAMSplitNode_V3
   SHORT sRc = 0;                       // success indicator
 
 
-  //LogMessage(FATAL, "called commented out function QDAMSplitNode_V3");
+  //LogMessage1(FATAL, "called commented out function QDAMSplitNode_V3");
   //#ifdef TEMPORARY_COMMENTED
   memset( &recKey, 0, sizeof( recKey ) );
   memset( &recData,  0, sizeof( recData ) );
@@ -7441,7 +7441,7 @@ SHORT QDAMDictInsertLocal
 
    if( pBT->bRecSizeVersion != BTREE_V3 )
    {
-      LogMessage(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
+      LogMessage1(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
       throw;
       sRc = BTREE_NOT_SUPPORTED;
    } /* endif */ 
@@ -7575,7 +7575,7 @@ SHORT QDAMDictUpdSignLocal
 
   if ( pBT->bRecSizeVersion != BTREE_V3)
   {
-      LogMessage(FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
+      LogMessage1(FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
       throw;
       sRc = BTREE_INVALID;
   }
@@ -7587,7 +7587,7 @@ SHORT QDAMDictUpdSignLocal
   {
     if ( ulDataLen < ulLen )
     {
-       //LogMessage(WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
+       //LogMessage1(WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
        //ulLen = ulDataLen;
        LogMessage4(ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", toStr(ulDataLen).c_str(), ", ulLen = ", toStr(ulLen).c_str());
        sRc = BTREE_USERDATA;
@@ -8954,7 +8954,7 @@ USHORT EQFNTMOrganizeIndex
   // get user data (signature record)
   if ( !sRc )
   {
-    //LogMessage(WARNING, "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
+    //LogMessage1(WARNING, "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
     usSigLen = (USHORT)ulDataBufSize;
     sRc = QDAMDictSignLocal( pbTree, (PCHAR)pbData, &usSigLen );
   } /* endif */

@@ -146,7 +146,7 @@ USHORT EqfImportMem
   LogMessage2(INFO, "==EQFImportMem== Memory: ", pszMemName);
   
   if(!pData){
-    LogMessage(WARNING, "EqfImportMem::pData is NULL");
+    LogMessage1(WARNING, "EqfImportMem::pData is NULL");
   }
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
@@ -167,7 +167,7 @@ USHORT EqfImportMem
   // call TM import
   if ( usRC == NO_ERROR )
   {
-    LogMessage(INFO, "EqfImportMem:: call TM import");
+    LogMessage1(INFO, "EqfImportMem:: call TM import");
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
       pData->sLastFunction = FCT_EQFIMPORTMEM;
     usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions );
@@ -216,13 +216,13 @@ USHORT EqfExportMem
     if(pszMemName){
       LogMessage2(DEBUG,"EqfExportMem:: Memory = ", pszMemName);
     }else{
-      LogMessage(ERROR,"EqfExportMem:: Memory = NULL");
+      LogMessage1(ERROR,"EqfExportMem:: Memory = NULL");
     }
 
     if(pszOutFile){
       LogMessage2(DEBUG,"EqfExportMem:: Output File = ", pszOutFile);
     }else{
-      LogMessage(ERROR,"EqfExportMem:: Output File = NULL");
+      LogMessage1(ERROR,"EqfExportMem:: Output File = NULL");
     }
   } /* endif */
 
@@ -251,7 +251,7 @@ USHORT EqfExportMem
     if(usRC){
       LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", toStr(usRC).c_str() );
     }else{ 
-      LogMessage(DEBUG,"end of function EqfExportMem::success ");
+      LogMessage1(DEBUG,"end of function EqfExportMem::success ");
     }
   }
   return( usRC );
@@ -275,7 +275,7 @@ USHORT EqfCreateMem
     char buff[255];
     sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d",
               pszMemName, pszDescription, pszSourceLanguage, lOptions);
-    LogMessage(INFO, buff);
+    LogMessage1(INFO, buff);
   }
 
   // validate session handle
@@ -344,7 +344,7 @@ USHORT EqfStartSession
   PFCTDATA    pData = NULL;            // ptr to function data area
 
     if (SetupMAT())
-        LogMessage(ERROR, "Failed to setup property files");
+        LogMessage1(ERROR, "Failed to setup property files");
 
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );
@@ -357,7 +357,7 @@ USHORT EqfStartSession
   }
   else
   {
-    LogMessage(ERROR, "EqfStartSession():: Not enought memory for pData"  );
+    LogMessage1(ERROR, "EqfStartSession():: Not enought memory for pData"  );
 
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
@@ -387,7 +387,7 @@ USHORT EqfStartSession
 
     if ( !fContinue )
     {
-      LogMessage(ERROR, "EqfStartSession():: fContinue is false");
+      LogMessage1(ERROR, "EqfStartSession():: fContinue is false");
       usRC = 1;
     } /* endif */
   } /* endif */
@@ -499,7 +499,7 @@ USHORT EqfStartSession
     }
     else
     {
-      LogMessage(ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
+      LogMessage1(ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
       // access to system properties failed
       usRC = ERROR_READ_SYSTEMPROPERTIES;
     } /* endif */
@@ -540,7 +540,7 @@ USHORT EqfStartSession
     }
 #endif
 
-  LogMessage(DEBUG, "==EQFSTARTSESSION==\n  Starting plugins...\n" );
+  LogMessage1(DEBUG, "==EQFSTARTSESSION==\n  Starting plugins...\n" );
 
 
   // initialie plugins
@@ -572,18 +572,18 @@ USHORT EqfStartSession
         }
         else
         {
-            LogMessage(ERROR, "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED");
+            LogMessage1(ERROR, "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED");
             usRC = ERROR_PLUGIN_EXPIRED;
         }
         // Add end
   }
 
-  LogMessage( INFO,"   ...Plugins have been started\n" );
+  LogMessage1( INFO,"   ...Plugins have been started\n" );
     {
       char szBuf[10];
       int i = 0;
       //UtlLogStart( "TMSession" );
-      LogMessage(INFO, "TMSession");
+      LogMessage1(INFO, "TMSession");
       i = _getpid();
       sprintf( szBuf, "%ld", i );
       //UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
@@ -670,12 +670,12 @@ USHORT FctValidateSession
   // test magic word and checksum
   if ( pData == NULL )
   {
-    LogMessage(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL");
+    LogMessage1(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   else if ( pData->lMagicWord != FCTDATA_IDENTIFIER )
   {
-    LogMessage(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
+    LogMessage1(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   
@@ -847,7 +847,7 @@ USHORT EqfOpenMem
   {
     LogMessage4(INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", toStr(lOptions).c_str());
   }else{
-    LogMessage(ERROR, "Error in EqfOpenMem:: pData == NULL");
+    LogMessage1(ERROR, "Error in EqfOpenMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -931,7 +931,7 @@ USHORT EqfQueryMem
   {
     LogMessage4(INFO,"EqfQueryMem:: handle = ", toStr(lHandle).c_str(), "; options = ", toStr(lOptions).c_str());
   }else{
-    LogMessage(ERROR,"ERROR in EqfQueryMem:: pData is null");
+    LogMessage1(ERROR,"ERROR in EqfQueryMem:: pData is null");
   } /* endif */
 
   // call the memory factory to process the request
@@ -980,7 +980,7 @@ USHORT EqfSearchMem
   {
     LogMessage8(INFO, "EqfSearchMem::Handle", toStr(lHandle).c_str(),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", toStr(lOptions).c_str());
   }else{
-    LogMessage(ERROR, "Error in EqfSearchMem:: pData == NULL");
+    LogMessage1(ERROR, "Error in EqfSearchMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -993,7 +993,7 @@ USHORT EqfSearchMem
   {
     LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
   }else{
-    LogMessage(INFO, "Success in EqfSearchMem" );
+    LogMessage1(INFO, "Success in EqfSearchMem" );
   }
 
   return( usRC );

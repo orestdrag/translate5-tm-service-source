@@ -220,7 +220,7 @@ USHORT CreateSystemProperties(const char* pszPath)
     }
     else
     {
-        LogMessage(ERROR, "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY");
+        LogMessage1(ERROR, "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY");
         usRC = ERROR_NOT_ENOUGH_MEMORY;
         return usRC;
     }

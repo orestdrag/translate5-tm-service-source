@@ -1768,7 +1768,7 @@ EQFBFindDiffEx
   /******************************************************************/
   /* prepare tokens for String1 and string 2                        */
   /******************************************************************/
-  LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for first string: ");
+  LogMessage1(DEBUG,"EQFBFindDiffEx::Preparing tokens for first string: ");
   //std::wstring ws1 = removeTagsFromString(pString1);
   fOK = PrepareTokens( //pDoc,
                        pTagTable,
@@ -1780,7 +1780,7 @@ EQFBFindDiffEx
   if ( fOK )
   {
 
-    LogMessage(DEBUG,"EQFBFindDiffEx::Preparing tokens for second string: ");
+    LogMessage1(DEBUG,"EQFBFindDiffEx::Preparing tokens for second string: ");
     //std::wstring ws2 = removeTagsFromString(pString2);
     fOK = PrepareTokens( // pDoc,
                          pTagTable,

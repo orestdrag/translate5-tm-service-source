@@ -228,7 +228,7 @@ int EqfMemoryPlugin::closeMemory(
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
     this->fillInfoStructure( (PSZ)pszName, pMemInfo );
   }else{
-    LogMessage(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
+    LogMessage1(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
   }
 
   delete( pMemory );  
@@ -425,19 +425,19 @@ int EqfMemoryPlugin::importFromMemoryFiles
   if(CheckLogLevel(DEBUG)){
     char buff[360];
     sprintf(buff,"EqfMemoryPlugin::importFromMemoryFiles(pszMemoryName=%s,pFileList=%s, iOptions=%d, ppPrivateData=%s)", pszMemoryName,pFileList, iOptions, ppPrivateData);
-    LogMessage(DEBUG, buff);
+    LogMessage1(DEBUG, buff);
   }
   int iRC = OtmMemoryPlugin::eSuccess;
 
-  LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles check the type of method call");
+  LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles check the type of method call");
   if ( *ppPrivateData == NULL )
   {
-    LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is an inital call to import a memory using its data files");
+    LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is an inital call to import a memory using its data files");
     iRC = this->importFromMemFilesInitialize( pszMemoryName, pFileList, iOptions, ppPrivateData );
   }
   else
   {
-    LogMessage(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is a continuation call");
+    LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is a continuation call");
     iRC = this->importFromMemFilesContinueProcessing( ppPrivateData );
   } /* endif */     
 
@@ -797,7 +797,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 )
 {
   if(pInfo==0 || pszPropName==0){
-    LogMessage(ERROR, "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0");
+    LogMessage1(ERROR, "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0");
     return false;
   }
 

@@ -174,7 +174,7 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
 
         return filename;
     }else{
-        LogMessage(ERROR,"FilesystemHelper::GetFileName:: file ptr is null");
+        LogMessage1(ERROR,"FilesystemHelper::GetFileName:: file ptr is null");
         return "";
     }
 }
@@ -294,7 +294,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     //
     if(V_IS_ON(1) && CheckLogLevel(DEVELOP)){
         std::string msg = std::string(__func__) + ":: fName = " + fName + "; buff size = " + toStr(buffSize) + "; data.size = " + toStr(pFb->data.size()) + "; offset = "+ toStr(offset) + ";";
-        LogMessage(DEVELOP, msg.c_str());
+        LogMessage1(DEVELOP, msg.c_str());
         //LOG_DEVELOP_MSG << msg;
     }
     //
@@ -331,7 +331,7 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
 
         if(pFb->status & FileBufferStatus::MODIFIED){
             if(V_IS_ON(1)){
-                LogMessage(INFO, "WriteBuffToFile:: writing files from buffer");
+                LogMessage1(INFO, "WriteBuffToFile:: writing files from buffer");
             }
             PUCHAR bufStart = &pFb->data[0];
             int size = pFb->data.size();
@@ -387,7 +387,7 @@ int FilesystemHelper::FlushAllBuffers(std::string * modifiedFiles){
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
     if(V_IS_ON(1)){
-        LogMessage(DEBUG, "called FilesystemHelper::CloseFile()");
+        LogMessage1(DEBUG, "called FilesystemHelper::CloseFile()");
     }
     if(ptr){
         std::string fName = GetFileName(ptr);
@@ -439,14 +439,14 @@ FILE* FilesystemHelper::FindNextFile(){
     LogMessage2(FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
 #ifdef TEMPORARY_COMMENTED
     if(selFiles.empty()){
-        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
+        LogMessage1(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
     }
 
     curSelFile++;
     if(curSelFile >= selFiles.size()){    
-        LogMessage(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
+        LogMessage1(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
         __last_error_code == FILEHELPER_END_FILELIST;
         return NULL;
     }
@@ -532,7 +532,7 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     if(CheckLogLevel(DEBUG)){
         std::string msg = "FilesystemHelper::WriteToFile" + " buff = " + buff;
         msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + path;
-        LogMessage(DEBUG, msg.c_str());
+        LogMessage1(DEBUG, msg.c_str());
     }//*/
     return __last_error_code = errCode;
 }
@@ -568,7 +568,7 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
                 filesInBuf += it->first + '\n';
             }
             if(V_IS_ON(1)){
-                LogMessage(DEBUG, filesInBuf.c_str());
+                LogMessage1(DEBUG, filesInBuf.c_str());
             }
         }
 
@@ -605,7 +605,7 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
             LogMessage2(DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
         }
     }else{
-        LogMessage(ERROR, "FilesystemHelper::SetOffsetInFilebuffer -> file pointer is null");
+        LogMessage1(ERROR, "FilesystemHelper::SetOffsetInFilebuffer -> file pointer is null");
     }
 }
 
@@ -635,10 +635,10 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
     else if(OffSet == FILE_END)
         whence = SEEK_END ;
     else
-        LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+        LogMessage1(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
 
     if(OffSet != FILE_BEGIN){           
-        LogMessage(WARNING, "SetFilePointerEx::FILE_CURRENT/FILE_END not implemented/tested");
+        LogMessage1(WARNING, "SetFilePointerEx::FILE_CURRENT/FILE_END not implemented/tested");
     }
     
     int size = FilesystemHelper::GetFileSize(fp);
@@ -702,12 +702,12 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
         oldSize = GetFileSize(ptr);
     }
     if(ptr == NULL){
-        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{ 
         writenBytes *= fwrite(buff, buffsize, 1, ptr);
         if ( writenBytes <=0 ){
-            LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
+            LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
             __last_error_code = errCode = ERROR_WRITE_FAULT;
         }
     }
@@ -715,7 +715,7 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
         std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + "void";
         msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
         msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
-        LogMessage(DEBUG, msg.c_str());
+        LogMessage1(DEBUG, msg.c_str());
     }
     //CloseFile(ptr);
     //return __last_error_code = errCode;
@@ -731,12 +731,12 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
         oldSize = GetFileSize(ptr);
     }
     if(ptr == NULL){
-        LogMessage(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{ 
         writenBytes *= fwrite(buff, buffsize, 1, ptr);
         if ( writenBytes <=0 ){
-            LogMessage(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
+            LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
             __last_error_code = errCode = ERROR_WRITE_FAULT;
         }
     }
@@ -744,7 +744,7 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsi
         std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + buff;
         msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
         msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
-        LogMessage(DEBUG, msg.c_str());
+        LogMessage1(DEBUG, msg.c_str());
     }
     //CloseFile(ptr);
     //return __last_error_code = errCode;
@@ -785,7 +785,7 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff,
 int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
-        LogMessage(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage1(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
@@ -804,7 +804,7 @@ int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
-        LogMessage(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage1(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
@@ -826,7 +826,7 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
     int offset = startingPosition;
     FileBuffer* pFb = NULL;
     if(!ptr){
-        LogMessage(ERROR, "FilesystemHelper::ReadFile File pointer is null");
+        LogMessage1(ERROR, "FilesystemHelper::ReadFile File pointer is null");
         return __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }
     std::string fName = GetFileName(ptr);
@@ -842,7 +842,7 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
             pFb->offset += bytesRead; 
             LogMessage6(DEBUG, "FilesystemHelper::ReadFileBuff:: success, fName = ", fName.c_str(), "; offset = ", toStr(offset), "; bytesRead = ", toStr(bytesRead));
         }else{ 
-            LogMessage(ERROR, "FilesystemHelper::ReadFileBuff:: requested file position not exists");
+            LogMessage1(ERROR, "FilesystemHelper::ReadFileBuff:: requested file position not exists");
             __last_error_code = errCode = FILEHELPER_ERROR_READING_OUT_OF_RANGE;
         }
 
@@ -921,7 +921,7 @@ int FilesystemHelper::GetLastError(){
 }
 
 int FilesystemHelper::ResetLastError(){
-    LogMessage(INFO, "FilesystemHelper::ResetLastError()");
+    LogMessage1(INFO, "FilesystemHelper::ResetLastError()");
     __last_error_code = FILEHELPER_NO_ERROR;
     return 0;
 }

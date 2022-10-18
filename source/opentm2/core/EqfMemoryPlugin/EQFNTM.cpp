@@ -449,7 +449,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     pstOpenIn->stTmOpen.szServer[0] = EOS;
     if ( usLocation != TM_LOCAL )
     {
-      LogMessage(FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
+      LogMessage1(FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
       fOk = false;
     }
 
@@ -1193,7 +1193,7 @@ NTMFillCreateInStruct( HTM             hModel,
       /************************************************************/
       /* TM is a shared one, use "shared" index name              */
       /************************************************************/
-      LogMessage(FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
+      LogMessage1(FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
       CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
     }
     else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )

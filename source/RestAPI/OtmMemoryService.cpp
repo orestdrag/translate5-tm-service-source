@@ -149,7 +149,7 @@ void get_method_handler(const shared_ptr< Session > session)
 {
 	const auto request = session->get_request();
 
-  LogMessage(RequestTransactionLogLevel, "processing GET LIST OF MEMORIES request");
+  LogMessage1(RequestTransactionLogLevel, "processing GET LIST OF MEMORIES request");
   std::string strResponseBody = "Sample text";
   int ret = pMemService->list( strResponseBody );
 
@@ -181,7 +181,7 @@ void getStatus_method_handler( const shared_ptr< Session > session )
 void saveAllOpenedTMService_method_handler( const shared_ptr< Session > session )
 {
   const auto request = session->get_request();
-  LogMessage(RequestTransactionLogLevel, "processing saveAllOpenedTMService_method_handler");
+  LogMessage1(RequestTransactionLogLevel, "processing saveAllOpenedTMService_method_handler");
 
   string strResponseBody;
   int iRC = pMemService->saveAllTmOnDisk( strResponseBody );
@@ -204,10 +204,10 @@ void shutdownService_method_handler( const shared_ptr< Session > session )
    
   {
     if( request->has_query_parameter("dontsave") ){
-     LogMessage(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned off");
+     LogMessage1(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned off");
       strResponseBody = "{\n    'responce': 'shuting down service without saving tms'\n}";
     }else{
-      LogMessage(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned on");
+      LogMessage1(RequestTransactionLogLevel, "called shutdownService_method_handler with saving turned on");
       saveAllOpenedTMService_method_handler(session);
       //iRC = pMemService->saveAllTmOnDisk( strResponseBody );
     }
@@ -428,7 +428,7 @@ void postEntryDelete_method_handler( const shared_ptr< Session > session )
 }
 
 bool PrepareProxygenService( char *pszService, unsigned *puiPort ){
-  LogMessage(TRANSACTION, "Trying to prepare otm memory service");
+  LogMessage1(TRANSACTION, "Trying to prepare otm memory service");
   pMemService = OtmMemoryServiceWorker::getInstance();
   if ( pMemService == NULL )
   {
@@ -508,7 +508,7 @@ bool PrepareProxygenService( char *pszService, unsigned *puiPort ){
 
 BOOL PrepareOtmMemoryService( char *pszService, unsigned *puiPort )
 {
-  LogMessage(TRANSACTION, "Trying to prepare otm memory service");
+  LogMessage1(TRANSACTION, "Trying to prepare otm memory service");
   pMemService = OtmMemoryServiceWorker::getInstance();
   if ( pMemService == NULL )
   {

@@ -2187,11 +2187,11 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole functi
  )
  {
    if(*hMod){
-     LogMessage(INFO,"DosFreeModule::closing hMod");
+     LogMessage1(INFO,"DosFreeModule::closing hMod");
      dlclose(*hMod);
      *hMod = NULL;
    }else{
-     LogMessage(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
+     LogMessage1(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
    }
 LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE

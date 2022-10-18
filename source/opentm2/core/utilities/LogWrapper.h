@@ -42,7 +42,7 @@ enum LOGCODES{
 int SetLogLevel(int level);
 bool CheckLogLevel(int level);
 
-int LogMessage(int LogLevel, std::string&& message);
+int LogMessage1(int LogLevel, std::string&& message);
 int LogMessage2(int LogLevel, std::string&& message1, std::string&& message2);
 int LogMessage3(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3);
 int LogMessage4(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,

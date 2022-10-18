@@ -121,21 +121,21 @@ int WideCharToMultiByte(
     }
 
 void GetSystemTime(LPSYSTEMTIME lpSystemTime){
-    LogMessage(FATAL, "Called not implemented function::GetSystemTime");
+    LogMessage1(FATAL, "Called not implemented function::GetSystemTime");
 }
 
 BOOL SystemTimeToFileTime(
     const SYSTEMTIME *lpSystemTime,
     LPFILETIME       lpFileTime
 ){
-    LogMessage(FATAL, "Called not implemented function::SystemTimeToFileTime");
+    LogMessage1(FATAL, "Called not implemented function::SystemTimeToFileTime");
 }
 
 BOOL FileTimeToSystemTime(
         const FILETIME *lpFileTime,
         LPSYSTEMTIME   lpSystemTime
     ){
-        LogMessage(FATAL, "Called not implemented function::FileTimeToSystemTime");
+        LogMessage1(FATAL, "Called not implemented function::FileTimeToSystemTime");
     }
 
 
@@ -144,7 +144,7 @@ HANDLE OpenMutex(
   BOOL bInheritHandle,    // inherit flag
   LPCTSTR lpName          // pointer to mutex-object name
 ){
-    LogMessage(FATAL, "Called not implemented function::OpenMutex");
+    LogMessage1(FATAL, "Called not implemented function::OpenMutex");
     return NULL;
 }
 
@@ -153,7 +153,7 @@ DWORD WaitForSingleObject(
   HANDLE hHandle,
   DWORD  dwMilliseconds
 ){
-    LogMessage(FATAL, "Called not implemented function::WaitForSingleObject");
+    LogMessage1(FATAL, "Called not implemented function::WaitForSingleObject");
     return 0;
 }
 
@@ -162,21 +162,21 @@ HANDLE CreateMutex(
         BOOL                  bInitialOwner,
         LPCSTR                lpName
     ){
-        LogMessage(FATAL, "Called not implemented function::CreateMutex");
+        LogMessage1(FATAL, "Called not implemented function::CreateMutex");
         return NULL;
     }
 
 BOOL ReleaseMutex(
   HANDLE hMutex
 ){
-    LogMessage(FATAL, "Called not implemented function::ReleaseMutex");
+    LogMessage1(FATAL, "Called not implemented function::ReleaseMutex");
     return true;
 }
 
 BOOL FindClose(
   HANDLE hFindFile
 ){
-    LogMessage(FATAL, "Called not implemented function::FindClose");
+    LogMessage1(FATAL, "Called not implemented function::FindClose");
 }
 
 

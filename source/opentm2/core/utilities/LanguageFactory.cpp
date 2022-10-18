@@ -159,7 +159,7 @@ LanguageFactory::LanguageFactory(void)
   std::vector<LANGUAGEINFO> *pvLanguageList  = new std::vector<LANGUAGEINFO>;
   this->pvoidLanguageList = (void *)pvLanguageList;
 
-  LogMessage(INFO, "Logging of language name and language properties related information. Starting LanguageFactory" );
+  LogMessage1(INFO, "Logging of language name and language properties related information. Starting LanguageFactory" );
 
   // try to load the external language list
   char szFile[256];
@@ -520,7 +520,7 @@ int LanguageFactory::findISO
   int iBestMatch = -1;
 
   if(iMax<=0){
-    LogMessage(ERROR,"LanguageFactory::findISO():: language list size is 0");
+    LogMessage1(ERROR,"LanguageFactory::findISO():: language list size is 0");
     return (iFound);
   }
 

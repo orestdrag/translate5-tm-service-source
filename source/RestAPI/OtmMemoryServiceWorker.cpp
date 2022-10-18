@@ -168,7 +168,7 @@ int OtmMemoryServiceWorker::verifyAPISession
     return( 0 );
   }
 
-  LogMessage(DEBUG, "Initializing API Session");
+  LogMessage1(DEBUG, "Initializing API Session");
   this->iLastRC = EqfStartSession( &(this->hSession) );
   LogMessage2(DEBUG, "[verifyAPISession] EqfStartSession ret: " , toStr(this->iLastRC).c_str());
 
@@ -225,7 +225,7 @@ int OtmMemoryServiceWorker::buildErrorReturn
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
   strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
-  //LogMessage(ERROR, strUTF16);
+  //LogMessage1(ERROR, strUTF16);
   LogMessage3(ERROR, strErrorReturn.c_str(), ", ErrorCode = ", toStr(iRC));
 	return(0);
 }
@@ -260,7 +260,7 @@ int OtmMemoryServiceWorker::buildErrorReturn
 int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
 {
   if(this->vMemoryList.size()==0){
-    LogMessage(WARNING,"findMemoryInList:: vMemoryList.size == 0");
+    LogMessage1(WARNING,"findMemoryInList:: vMemoryList.size == 0");
   }
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
@@ -1018,12 +1018,12 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( strData.empty() )
   {
-    LogMessage(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()");
+    LogMessage1(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()");
     iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), 0, (PSZ)szOtmSourceLang, 0 );
   }
   else
   {
-     LogMessage(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ");
+     LogMessage1(INFO, "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ");
     // setup temp file name for ZIP package file 
     char szTempFile[PATH_MAX];
     iRC = buildTempFileName( szTempFile );
@@ -1336,7 +1336,7 @@ int OtmMemoryServiceWorker::search
   } /* end */
   if ( pData->szMarkup[0] == 0 )
   {
-    LogMessage(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF");
+    LogMessage1(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF");
     // use default markup table if none given
     strcpy( pData->szMarkup, "OTMXUXLF" );
   } /* end */
@@ -2179,14 +2179,14 @@ int OtmMemoryServiceWorker::getMem
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
-    LogMessage(INFO,"OtmMemoryServiceWorker::getMem::Error: no valid API session" );
+    LogMessage1(INFO,"OtmMemoryServiceWorker::getMem::Error: no valid API session" );
     return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    LogMessage(ERROR,"OtmMemoryServiceWorker::getMem::Error: no memory name specified" );
+    LogMessage1(ERROR,"OtmMemoryServiceWorker::getMem::Error: no memory name specified" );
     return( BAD_REQUEST );
   } /* endif */
 
@@ -2210,7 +2210,7 @@ int OtmMemoryServiceWorker::getMem
   iRC = buildTempFileName( szTempFile );
   if ( iRC != 0 )
   {
-    LogMessage(ERROR,"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" );
+    LogMessage1(ERROR,"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" );
     return( INTERNAL_SERVER_ERROR );
   }
 
@@ -2431,7 +2431,7 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
       i++;
     }
     if( i >= 1000){
-      LogMessage(ERROR, "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them");
+      LogMessage1(ERROR, "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them");
     }
 
   }

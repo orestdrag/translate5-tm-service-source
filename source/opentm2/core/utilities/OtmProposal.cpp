@@ -196,7 +196,7 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   size_t len = wcslen(pszBuffer);
   if(len >= OTMPROPOSAL_MAXSEGLEN){
-    LogMessage(FATAL,"OtmProposal::setSource:: pszBuffer is too big");
+    LogMessage1(FATAL,"OtmProposal::setSource:: pszBuffer is too big");
     len = OTMPROPOSAL_MAXSEGLEN; 
     pszBuffer[len] = L'\0';
   }
@@ -242,7 +242,7 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
 
   //memccpy(pData->szTarget, pszBuffer, L'\0', len * sizeof(wchar_t));
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    LogMessage(FATAL,"OtmProposal::setTarget:: pszBuffer is too big");
+    LogMessage1(FATAL,"OtmProposal::setTarget:: pszBuffer is too big");
     pszBuffer[OTMPROPOSAL_MAXSEGLEN-1] = L'\0';
   }
   //wcscpy(pData->szTarget, pszBuffer);

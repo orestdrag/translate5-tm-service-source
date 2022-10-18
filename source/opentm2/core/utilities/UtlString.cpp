@@ -588,7 +588,7 @@ PTMWCHAR UTF16strncpy(PTMWCHAR pusTarget, PTMWCHAR pusSource, LONG lLen)
 
 int UTF16stricmp(PTMWCHAR pusTarget, PTMWCHAR pusSource)
 {
-  //LogMessage(FATAL, "UTF16stricmp is not implemented");
+  //LogMessage1(FATAL, "UTF16stricmp is not implemented");
   //return -1;
   return wcscasecmp( pusTarget, pusSource );
   

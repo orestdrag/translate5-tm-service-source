@@ -366,7 +366,7 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-      //LogMessage(ERROR,"TEMPORARY_COMMENTED");
+      //LogMessage1(ERROR,"TEMPORARY_COMMENTED");
       TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
@@ -466,7 +466,7 @@ VOID HashSentence
   //build tuples of the term hashes
   if ( usCount >= 3 )
   {
-    LogMessage(DEBUG,"HashSentence:: Building Votes");
+    LogMessage1(DEBUG,"HashSentence:: Building Votes");
     BuildVotes( pSentence );
   } /* endif */
 }
@@ -1693,7 +1693,7 @@ USHORT DetermineTmRecord
           } /* endif */
           msg +=  std::to_string(NTMKEY(*pIndexEntry)) + "; " ;
         } /* endfor */
-        LogMessage(DEBUG, msg.c_str());
+        LogMessage1(DEBUG, msg.c_str());
       }
 
       pIndexEntry = &pIndexRecord->stIndexEntry;
@@ -1801,7 +1801,7 @@ USHORT DetermineTmRecord
       msg +=  std::to_string(*pulSidStart) + "; ";
       pulSidStart++;
     } 
-    LogMessage(DEBUG, msg.c_str());
+    LogMessage1(DEBUG, msg.c_str());
   }
 
   UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG );

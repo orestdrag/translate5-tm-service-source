@@ -105,7 +105,7 @@ void GetElapsedTime( LONG64 *plTime )
 #else
   #define LOGOPEN( a )
   #define LOGCLOSE()
-  #define LOGPRINTF0( level) LogMessage(level, __func__); 
+  #define LOGPRINTF0( level) LogMessage1(level, __func__); 
   #define LOGPRINTF1( level, v1 ) LogMessage2(level, __func__, v1); 
   #define LOGPRINTF2( level, v1, v2 ) LogMessage3(level, __func__, v1, v2); 
   #define LOGPRINTF3( level, v1, v2, v3 ) LogMessage4(level, __func__, v1, v2, v3); 
@@ -1762,7 +1762,7 @@ USHORT ExactTest
 
     NTMMarkCRLF( pszSegData, szSegBuf );
     iLen = swprintf( szLineBuf, pszForm, szSegBuf );
-    LogMessage(INFO,""):
+    LogMessage1(INFO,""):
     //fwrite( szLineBuf, 2, iLen, hfLog ); 
   }
 

@@ -284,17 +284,17 @@ BOOL MoveFile(
                 return true;
             }if(dwMoveMethod == FILE_BEGIN){
                 
-                //LogMessage(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
+                //LogMessage1(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
                 res = lseek(*((int*)hFile), largeIntToInt(liDistanceToMove), SEEK_SET);
             }else if(dwMoveMethod == FILE_CURRENT){
                 //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_CUR);
-                LogMessage(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
+                LogMessage1(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
             }else if(dwMoveMethod == FILE_END){
                 //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_END);
-                LogMessage(ERROR, "SetFilePointerEx::FILE_END not implemented");
+                LogMessage1(ERROR, "SetFilePointerEx::FILE_END not implemented");
             }else{
 
-                LogMessage(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+                LogMessage1(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
             }
             if(lpNewFilePointer && res >= 0){
                 *lpNewFilePointer = intToLargeInt(res);
