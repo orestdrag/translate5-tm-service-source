@@ -10,17 +10,10 @@ RUN mkdir /home/libs && git clone https://github.com/facebook/proxygen.git /home
 RUN echo "Subproject commit 7401af7ee2db6d014730da9c46643926f0901d02" > /home/libs/build/deps/github_hashes/facebookincubator/fizz-rev.txt
 RUN cd /home/libs/proxygen/ && ./build.sh && ./install.sh
 
-
 #setup libs to use with t5memory
 RUN mkdir -p /opt/local/lib/cmake/proxygen/
 RUN cp -R /home/libs/proxygen/_build/* /opt/local/ && cp -R /home/libs/proxygen/_build/deps/* /opt/local/ && cp /usr/lib/x86_64-linux-gnu/libsodium.a /opt/local/lib/libsodium.a 
 
-
 #cleanup 
-# RUN rm -R /opt/local/deps && rm -R /home/libs 
-#add sodium
-#cp -R /home/t5memory/translate5-tm-service-source/docker/lib/* /opt/local/lib/ 
-
-
-
+RUN rm -R /opt/local/deps && rm -R /home/libs 
 

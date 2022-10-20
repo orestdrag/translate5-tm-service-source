@@ -8,7 +8,7 @@ RUN cd /home/translate5-tm-service-source && git checkout changing_http_lib_prox
 #add sodium
 RUN cp -R /home/translate5-tm-service-source/docker/lib/* /opt/local/lib/ 
 
-RUN  cd /home/translate5-tm-service-source && ./build.sh
+RUN cd /home/translate5-tm-service-source && ./build.sh
 
 RUN cp /home/translate5-tm-service-source/_build/t5memory_DEBUG  /root/t5memory_DEBUG
 
@@ -16,3 +16,5 @@ ENTRYPOINT /root/t5memory_DEBUG
 
 EXPOSE 4040 2222 22 4044 4000
 
+#cleanup
+RUN rm -R /home/
