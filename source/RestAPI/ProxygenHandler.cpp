@@ -188,6 +188,7 @@ void ProxygenHandler::onEOM() noexcept {
       case COMMAND::CREATE_MEM:
       {
         iRC = pMemService->createMemory( strInData, strResponseBody );
+        break;
       }
       case COMMAND::IMPORT_MEM:
       {
