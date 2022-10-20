@@ -12,8 +12,9 @@ RUN cd /home/translate5-tm-service-source && ./build.sh
 
 RUN cp /home/translate5-tm-service-source/_build/t5memory_DEBUG  /root/t5memory_DEBUG
 
-ENTRYPOINT /root/t5memory_DEBUG
+WORKDIR /root
 
+ENTRYPOINT [ "/root/t5memory_DEBUG", "---port=8080", "---alsologtostderr=1", "--v=0" ]
 EXPOSE 4040 2222 22 4044 4000
 
 #cleanup
