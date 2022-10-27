@@ -260,7 +260,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     defOtmDirPath = path + "/.t5memory/";    
     strncpy(szOtmDirPath, defOtmDirPath.c_str(), 254);
 
-    #ifdef GFLAGS_ENABLED
+    //#ifdef GFLAGS_ENABLED
     if(FLAGS_servicename.empty() == false){
       strncpy(szServiceName, FLAGS_servicename.c_str(), 100);
     }
@@ -289,12 +289,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     if(FLAGS_t5loglevel >= 0){
       uiLogLevel = FLAGS_t5loglevel;
     }
-    #else 
-      #ifndef USE_CONFIG_FILE
-        #define USE_CONFIG_FILE
-      #endif 
-      #define FLAGS_useconfigfile true
-    #endif //GFLAGS_ENABLED
+    //#else 
+    //  #ifndef USE_CONFIG_FILE
+    //    #define USE_CONFIG_FILE
+    //  #endif 
+    //  #define FLAGS_useconfigfile true
+    //#endif //GFLAGS_ENABLED
 
     #ifdef USE_CONFIG_FILE
     /* get configuration settings */

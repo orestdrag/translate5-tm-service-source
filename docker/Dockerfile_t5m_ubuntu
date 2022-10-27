@@ -4,14 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y git libxerces-c-dev libicu-dev libc-dev gcc libglib2.0-dev libffi-dev build-essential libsodium-dev libzstd-dev gdb rsync zip openssh-server cmake libboost-all-dev libdouble-conversion-dev libssl-dev libgoogle-glog-dev gperf -y
 
-COPY --from=translate5/proxygen:latest /home/lib /home/
+COPY --from=translate5/proxygen:latest / /
 RUN cd /home/ &&  git clone https://github.com/translate5/translate5-tm-service-source.git 
 RUN cd /home/translate5-tm-service-source && git checkout changing_http_lib_proxygen
 
 #add sodium
 #setup libs to use with t5memory
 RUN mkdir -p /opt/local/lib/ && cp /usr/lib/x86_64-linux-gnu/libsodium.a /opt/local/lib/libsodium.a 
-RUN cp -R /home/translate5-tm-service-source/docker/lib/* /home/libs/proxygen/_build/deps/lib/
+RUN mkdir -p /home/libs/proxygen/_build/deps/lib/ && cp -R /home/translate5-tm-service-source/docker/lib/* /home/libs/proxygen/_build/deps/lib/
 
 RUN cd /home/translate5-tm-service-source && ./build.sh
 

@@ -20,10 +20,10 @@
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
 
-#ifdef GFLAGS_ENABLED
+//#ifdef GFLAGS_ENABLED
 #ifndef DEFINE_validator 
 #define DEFINE_validator(x, y) 
-#endif 
+//#endif 
 
 static bool ValidatePort(const char* flagname, int32_t value) {
    if (value > 0 && value < 32768)   // value is ok
@@ -102,7 +102,7 @@ void handle_interrupt_sig(int sig) {
     LogMessage1(TRANSACTION, "Stopped t5memory\n");
 }
 
-#endif //GFLAGS_ENABLED
+//#endif //GFLAGS_ENABLED
 
 void FailureWriter(const char* data, int size){
     LogMessage1(FATAL, data);
@@ -148,24 +148,24 @@ using namespace google;
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
-   #ifdef GLOGGING_ENABLED
+   //#ifdef GLOGGING_ENABLED
    FLAGS_log_dir = "/home/or/.t5memory/LOG/";
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }
    FLAGS_colorlogtostderr = true;
-   #endif
-   #ifdef GFLAGS_ENABLED
+   //#endif
+   //#ifdef GFLAGS_ENABLED
    //FLAGS_alsologtostderr = true;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
    //gflags::ParseCommandLineFlags(&argc, &argv, false);
-   #endif//GFLAGS_ENABLED
+   //#endif//GFLAGS_ENABLED
 
-   #ifdef GLOGGING_ENABLED
+   //#ifdef GLOGGING_ENABLED
    google::InitGoogleLogging(argv[0]);//, &CustomPrefix);
-   #endif
+   //#endif
 
    //int logLevel = 1/0;
    //WLogMessage1(logLevel, "fail");
