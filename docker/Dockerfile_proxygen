@@ -8,12 +8,9 @@ RUN mkdir /home/libs && git clone https://github.com/facebook/proxygen.git /home
 
 #next line - fixed fizz build after commits in fizz-main 18 Oct 2022 
 RUN echo "Subproject commit 7401af7ee2db6d014730da9c46643926f0901d02" > /home/libs/build/deps/github_hashes/facebookincubator/fizz-rev.txt
-RUN cd /home/libs/proxygen/ && ./build.sh && ./install.sh
+RUN cd /home/libs/proxygen/ && ./build.sh --no-tests -j 1 && ./install.sh
 
-#setup libs to use with t5memory
-RUN mkdir -p /opt/local/lib/cmake/proxygen/
-RUN cp -R /home/libs/proxygen/_build/* /opt/local/ && cp -R /home/libs/proxygen/_build/deps/* /opt/local/ && cp /usr/lib/x86_64-linux-gnu/libsodium.a /opt/local/lib/libsodium.a 
-
-#cleanup 
-# RUN rm -R /opt/local/deps && rm -R /home/libs 
+#cleanup repo 
+RUN cd /home/libs/ && find . -type f \! \( -name '*.h' -or -name '*.cmake' -or -name '*.hpp' -or -name '*.txt' -or -name 'proxygen_*' -or  -name '*.a' -or -name '*so' -or -name '*.so*' \) -delete
+RUN cd /home/libs/proxygen/_build && find .  -type f \! \( -wholename './lib*' -or -wholename './bin*'  -or -wholename '*include*' -or -wholename './deps/bin*' -or -wholename './deps/lib*'  \)  -delete
 
