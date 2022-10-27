@@ -10,9 +10,6 @@
 #include <unistd.h>
 #include <folly/portability/GFlags.h>
 
-#ifndef DEFINE_validator 
-//#include <gflags/gflags.h>
-#endif
 #include <execinfo.h>
 
 #include "opentm2/core/utilities/LogWrapper.h"
@@ -20,10 +17,7 @@
 #include "opentm2/core/utilities/PropertyWrapper.H"
 #include "EQF.H"
 
-//#ifdef GFLAGS_ENABLED
-#ifndef DEFINE_validator 
-#define DEFINE_validator(x, y) 
-//#endif 
+
 
 static bool ValidatePort(const char* flagname, int32_t value) {
    if (value > 0 && value < 32768)   // value is ok
@@ -101,8 +95,6 @@ void handle_interrupt_sig(int sig) {
     //StopOtmMemoryService();
     LogMessage1(TRANSACTION, "Stopped t5memory\n");
 }
-
-//#endif //GFLAGS_ENABLED
 
 void FailureWriter(const char* data, int size){
     LogMessage1(FATAL, data);
