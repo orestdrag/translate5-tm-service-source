@@ -1,4 +1,5 @@
-FROM proxygen_ubuntu
+#FROM proxygen_ubuntu
+FROM proxygen_ubuntu_cleaned
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -18,4 +19,4 @@ ENTRYPOINT [ "/root/t5memory_DEBUG", "---port=8080", "---alsologtostderr=1", "--
 EXPOSE 4040 2222 22 4044 4000
 
 #cleanup
-RUN rm -R /home/
+RUN rm -R /home/ 

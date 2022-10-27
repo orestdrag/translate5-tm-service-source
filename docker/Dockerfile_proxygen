@@ -15,5 +15,5 @@ RUN mkdir -p /opt/local/lib/cmake/proxygen/
 RUN cp -R /home/libs/proxygen/_build/* /opt/local/ && cp -R /home/libs/proxygen/_build/deps/* /opt/local/ && cp /usr/lib/x86_64-linux-gnu/libsodium.a /opt/local/lib/libsodium.a 
 
 #cleanup 
-RUN rm -R /opt/local/deps && rm -R /home/libs 
+# RUN rm -R /opt/local/deps && rm -R /home/libs 
 
