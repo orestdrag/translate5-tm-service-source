@@ -862,7 +862,12 @@ long FnGetFileSize(std::string&& filename)
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);
     int logLevel = rc ==0? DEBUG : ERROR;
-    LogMessage6(logLevel, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str()," , rc = ", toStr(rc).c_str() );
+    if(rc == 0){
+        LogMessage4(DEBUG, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str() );
+    }else{
+        LogMessage6(ERROR, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str()," , errno = ", strerror(errno) );
+    }
+
     return rc == 0 ? stat_buf.st_size : -1;
 }
 

@@ -357,6 +357,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             && strcmp(pAddr->ifa_name, "enp0s3") ) )
       ){
         pAddr = pAddr->ifa_next;
+        if(V_IS_ON(2)){
+          LogMessage3(DEBUG, __func__,":: checking addr name: ", pAddr->ifa_name );
+        }
         //family = pAddr->ifa_addr->sa_family;
       }
       

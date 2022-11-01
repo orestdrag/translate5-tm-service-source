@@ -991,7 +991,11 @@ USHORT EqfSearchMem
 
   if ( usRC && usRC != ENDREACHED_RC)//
   {
-    LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
+    if(usRC == TIMEOUT_RC){
+      LogMessage2(INFO, "Timeout reached in EqfSearchMem for ", EncodingHelper::convertToUTF8(pszSearchString).c_str() );
+    }else{
+      LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
+    }
   }else{
     LogMessage1(INFO, "Success in EqfSearchMem" );
   }

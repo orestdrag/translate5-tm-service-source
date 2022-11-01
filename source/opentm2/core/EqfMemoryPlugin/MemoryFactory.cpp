@@ -328,7 +328,8 @@ int MemoryFactory::deleteMemory(
 )
 {
   if(pszPluginName == NULL){
-    LogMessage1(ERROR,"MemoryFactory::deleteMemory::pszPluginName = NULL");
+    if(V_IS_ON(1))
+      LogMessage1(INFO,"MemoryFactory::deleteMemory::pszPluginName = NULL");
   }else if(pszMemoryName == NULL){
     LogMessage3(ERROR,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = NULL");
   }else{
@@ -1485,7 +1486,8 @@ USHORT MemoryFactory::APISearchMem
       copyOtmProposalToMemProposal( pOtmProposal , pProposal );
     }
     else
-    {
+    { 
+      //add check if we have at least one result before stop because of timeout 
       if ( lSearchTime != 0 )
       {
         LONG lElapsedMillis = 0;
