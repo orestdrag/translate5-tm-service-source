@@ -1477,12 +1477,13 @@ USHORT MemoryFactory::APISearchMem
   if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSearchString );
   if ( lOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSearchString );
 
-
+  bool fOneOrMoreIsFound = false; 
   while ( !fFound && ( iRC == 0 ) )
   {
     fFound = searchInProposal( pOtmProposal, m_szSearchString, lOptions );
     if ( fFound )
     {
+      fOneOrMoreIsFound = true;
       copyOtmProposalToMemProposal( pOtmProposal , pProposal );
     }
     else
@@ -1501,7 +1502,7 @@ USHORT MemoryFactory::APISearchMem
         {
           lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
         } /* endif */
-        if ( lElapsedMillis > lSearchTime )
+        if ( lElapsedMillis > lSearchTime  && fOneOrMoreIsFound )
         {
           iRC = TIMEOUT_RC;
         }

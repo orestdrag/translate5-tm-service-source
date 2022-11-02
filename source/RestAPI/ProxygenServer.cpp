@@ -315,7 +315,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             uiLogLevel = std::stoi(conf.get_value("logLevel",toStr(uiLogLevel)));
             uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,toStr(uiAllowedRAM)));
             uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, toStr(uiAllowedRAM)));
-            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly))) == 1;
+            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly)));
         }else{
           LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
         }
@@ -350,6 +350,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     if(fLocalHostOnly == false){
       getifaddrs(&addresses);
       int s;//, family = pAddr->ifa_addr->sa_family;
+      pAddr = addresses;
       
       while(pAddr != nullptr 
           && !( pAddr->ifa_addr->sa_family == AF_INET 

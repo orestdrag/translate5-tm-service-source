@@ -1,26 +1,47 @@
-FROM sptrakesh/proxygen  as T5MEMORY
+FROM ubuntu:20.04 as builder
 
-RUN apk update
-RUN apk search -v
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apk add xerces-c-dev icu-dev libc-dev gcc glib-dev libffi-dev \
-		build-base libressl-dev libsodium-dev zstd-dev gdb \ 
-		rsync zip openssh openssh-server openrc \
-		libexecinfo-dev libexecinfo  zlib-dev
+COPY --from=translate5/proxygen:latest / /
 
-COPY source /home/source
-COPY mri /home/mri
-COPY include /home/include
-COPY .git /home/.git
-COPY build.sh /home/build.sh
+RUN apt update && apt install -y git libxerces-c-dev libicu-dev libc-dev gcc libglib2.0-dev libffi-dev build-essential  \
+    libsodium-dev libzstd-dev gdb rsync zip openssh-server cmake libboost-all-dev libdouble-conversion-dev libssl-dev libgoogle-glog-dev gperf -y
 
-COPY docker/lib /opt/local/lib
-COPY docker/workdir /root/.t5memory
+#online build 
+	#RUN cd /home/ &&  git clone https://github.com/translate5/translate5-tm-service-source.git
+	#RUN cd /home/translate5-tm-service-source && git checkout changing_http_lib_proxygen
+#or local build
+	RUN mkdir /home/translate5-tm-service-source
+	COPY source /home/translate5-tm-service-source/source
+	COPY mri /home/translate5-tm-service-source/mri
+	COPY include /home/translate5-tm-service-source/include
+	COPY .git /home/translate5-tm-service-source/.git
+	COPY build.sh /home/translate5-tm-service-source/build.sh
+	COPY docker /home/translate5-tm-service-source/docker
+	
+#
 
-RUN cd /home && /home/build.sh
-RUN cp /home/_build/t5memory_DEBUG  /root/t5memory_DEBUG
 
-ENTRYPOINT /root/t5memory_DEBUG
+#add sodium
+#setup libs to use with t5memory
+RUN mkdir -p /opt/local/lib/ && cp /usr/lib/x86_64-linux-gnu/libsodium.a /opt/local/lib/libsodium.a
+RUN mkdir -p /home/libs/proxygen/_build/deps/lib/ && cp -R /home/translate5-tm-service-source/docker/lib/* /home/libs/proxygen/_build/deps/lib/
 
-EXPOSE 4040 2222 22 4044 4000
+RUN cd /home/translate5-tm-service-source && ./build.sh
 
+
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && apt install -y libgflags-dev libssl-dev libxerces-c-dev libsodium-dev libzstd-dev  \
+    libgoogle-glog-dev libdouble-conversion-dev libboost-all-dev
+
+COPY --from=builder /home/translate5-tm-service-source/_build/t5memory_DEBUG  /root/t5memory_DEBUG
+RUN mkdir /root/.t5memory
+COPY --from=builder /home/translate5-tm-service-source/docker/workdir/* /root/.t5memory/
+
+WORKDIR /root
+
+ENTRYPOINT [ "/root/t5memory_DEBUG", "--port=8080", "--alsologtostderr=1", "--v=2" ]
+EXPOSE 8080
