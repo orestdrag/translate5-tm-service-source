@@ -26,8 +26,8 @@ RUN apt update && apt install -y libgflags-dev libssl-dev libxerces-c-dev libsod
     libgoogle-glog-dev libdouble-conversion-dev libboost-all-dev
 
 COPY --from=builder /home/translate5-tm-service-source/_build/t5memory_DEBUG  /root/t5memory_DEBUG
-RUN mkdir /root/.t5memory
-COPY --from=builder /home/translate5-tm-service-source/docker/workdir/* /root/.t5memory/
+RUN mkdir -p /root/.t5memory/MEM
+COPY --from=builder /home/translate5-tm-service-source/docker/workdir/ /root/.t5memory/ 
 
 WORKDIR /root
 
