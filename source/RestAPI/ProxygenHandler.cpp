@@ -68,9 +68,10 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   }
 
   stats_->recordRequest();
+  SetLogInfo(this->command);
   SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
-    if(memName.empty() == false){
-      AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
+  if(memName.empty() == false){
+    AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
   }
 
   if(this->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
@@ -165,25 +166,33 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 }
 
 void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
+  //ss_body << (char* ) body->data();
   if(body_ == nullptr){
     body_ = std::move(body);
   }else{
-    //body_->appendToChain(std::move(body));
-    //deprecated call of previous line, to compile with docker
-    body_->prependChain(std::move(body));
+    body_->appendToChain(std::move(body));
   }
 }
 
-void ProxygenHandler::onEOM() noexcept {
-  //ResponseBuilder builder(downstream_);
-  
+void ProxygenHandler::onEOM() noexcept {  
   if(command >= COMMAND::START_COMMANDS_WITH_BODY){
+
+    std::string strInData; 
+    //strInData = ss_body.str();
+
     body_->coalesce();  
-    std::string strInData = (char*) body_->data(); 
-    
+    strInData = (char*) body_->data(); 
+
+    //fix garbage in json 
+    size_t json_end = strInData.find("}");
+    if(json_end > 0 && json_end != std::string::npos){
+      //strInData[json_end + 1] = '\0';
+      strInData = strInData.substr(0, json_end + 1);
+    }
+
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
     AddToLogBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-
+    
     switch(this->command){
       case COMMAND::CREATE_MEM:
       {

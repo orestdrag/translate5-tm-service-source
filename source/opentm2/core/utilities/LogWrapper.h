@@ -74,6 +74,7 @@ int LogStop();
 int ResetLogBuffer();
 int SetLogBuffer(std::string logMsg);
 int AddToLogBuffer(std::string logMsg);
+int SetLogInfo(int RequestType);
 void SetLogFilter(bool fFilterOn);
 std::string FlushLogBuffer();
 

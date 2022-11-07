@@ -13,6 +13,7 @@
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
 #include <map>
+#include <string>
 #include "OtmMemoryServiceWorker.h"
 
 namespace proxygen {
@@ -42,7 +43,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
 
   void onError(proxygen::ProxygenError err) noexcept override;
 
-  enum class COMMAND {
+  enum COMMAND {
     UNKNOWN_COMMAND,
     LIST_OF_MEMORIES,
     SAVE_ALL_TM_ON_DISK,
@@ -78,7 +79,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
   ProxygenStats* const stats_{nullptr};
 
   std::unique_ptr<folly::IOBuf> body_;
-
+  std::stringstream ss_body;
 };
 
 } // namespace ProxygenService

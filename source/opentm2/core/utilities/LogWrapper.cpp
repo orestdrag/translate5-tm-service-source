@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 #include <cstring>
+#include <RestAPI/ProxygenHandler.h>
 
 
 std::string logFilename;
@@ -210,6 +211,12 @@ int SetLogBuffer(std::string logMsg){
     ResetLogBuffer();
     getLogBuffer() << logMsg << std::endl;
 }
+
+static int requestType;
+int SetLogInfo(int RequestType){
+    requestType = RequestType;
+}
+
 
 int AddToLogBuffer(std::string logMsg){
     //LOG(INFO) << logMsg;
