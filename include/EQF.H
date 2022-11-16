@@ -1987,6 +1987,9 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define KEY_LOCALHOST_ONLY "localhost_only"
 #define KEY_TEMP_DIR "TEMP_dir"
 #define KEY_TRIPLES_THRESHOLD "TriplesThreshold"
+#define KEY_NUM_OF_THREADS "KEY_NUM_OF_THREADS"
+#define KEY_TIMEOUT_SETTINGS "KEY_TIMEOUT_SETTINGS"
+#define KEY_RUN_DATE "KEY_RUN_DATE" 
 //5MB reserved for service
 #define MEMORY_RESERVED_FOR_SERVICE 5000000
 //#define KEY_PLUGIN_DIR "PLUGIN_dir"

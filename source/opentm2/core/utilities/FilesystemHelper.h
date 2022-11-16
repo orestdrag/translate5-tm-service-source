@@ -30,10 +30,12 @@ struct FileBuffer{
 
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
 
-PFileBufferMap getFileBufferInstance();
 
 class FilesystemHelper{
 public:
+    static std::string parseFilename(const std::string path);
+    static std::string parseDirectory(const std::string path);
+    static PFileBufferMap getFileBufferInstance();
     static std::string FixPath(std::string& path);
 
     static FILE* CreateFile(const std::string& path, const std::string& mode);

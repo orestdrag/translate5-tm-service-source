@@ -36,6 +36,8 @@
 #include <utility>
 
 #include <xercesc/util/PlatformUtils.hpp>
+#include "../cmake/git_version.h"
+#include "opentm2/core/utilities/ThreadingWrapper.h"
 
 enum statusCodes {
   OK = 200, 
@@ -1194,6 +1196,102 @@ int OtmMemoryServiceWorker::addProposalsToJSONString
   return( 0 );
 }
 
+template<typename T>
+void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparator){
+  ss << "\"" << key << "\" : ";
+
+  //if (std::is_same<T, int>::value)
+  if(std::is_arithmetic<T>::value) // if it's number - skip quotes
+  {
+    ss << value;
+  }else{
+    ss << "\"" << value << "\"";
+  }
+  
+  if(fAddSeparator)
+    ss << ",";
+
+  ss << "\n";
+}
+
+
+int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput){
+  int iRC = verifyAPISession();
+  if ( iRC != 0 )
+  {
+    buildErrorReturn( iRC, this->szLastError, strOutput );
+    return( BAD_REQUEST );
+  } /* endif */
+  std::stringstream ssOutput;
+
+  //open json
+  ssOutput << "{\n";
+
+  //the list of currently opened TMs (those loaded into the memory)
+  //for every loaded TM: The memory it allocates
+  { 
+
+    auto fbs = FilesystemHelper::getFileBufferInstance();
+    size_t total = 0, fSize;
+    std::string fName;
+
+    ssOutput << "[\n";
+    for (auto it = fbs->cbegin(); it != fbs->cend(); )
+    {
+        //fSize = it->second.data.size();
+        fSize = it->second.data.capacity();
+        fName = FilesystemHelper::parseFilename(it->first);
+        
+        ssOutput << "{ ";
+        AddToJson(ssOutput, "name", fName, true );
+        AddToJson(ssOutput, "size", fSize, false );
+        ssOutput << " }";
+
+        total += fSize;
+        it++;
+        if( it != fbs->cend()){
+            ssOutput << ",\n";
+        }
+    }   
+
+    ssOutput << "\n ],\n"; //\"totalSize\" : \"" << total << "\"";
+    AddToJson(ssOutput, "totalSize", total, true );
+  }
+
+  //in addition the memory that is used by the service by other means
+  // it's better to use system calls
+
+  //the currently configured max usable memory
+  int availableRam = 0, threshold = 0, workerThreads = 0, timeout = 0;
+  char buff[255];
+  //properties_get_str(KEY_OTM_DIR, szOtmDirPath);
+  properties_get_int(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
+  properties_get_int(KEY_TRIPLES_THRESHOLD, threshold);
+  properties_get_int(KEY_NUM_OF_THREADS, workerThreads);
+  properties_get_int(KEY_TIMEOUT_SETTINGS, timeout);
+  properties_get_str(KEY_RUN_DATE, buff,254);
+
+
+  AddToJson(ssOutput, "Run date", buff, true );
+  AddToJson(ssOutput, "Build date", buildDate, true );
+  AddToJson(ssOutput, "Git commit info", gitHash, true );
+  AddToJson(ssOutput, "Version", appVersion, true );
+  AddToJson(ssOutput, "Worker threads", workerThreads, true );
+  AddToJson(ssOutput, "Timeout(ms)", timeout, true );
+  
+  //AddToJson(ssOutput, "Log level(internal)", GetLogLevel(), true );
+  //AddToJson(ssOutput, "CPU used by process", getCurrentCPUUsageByProcess(), true);
+  //AddToJson(ssOutput, "VirtualMem used by process(in KB)", getVirtualMemUsageKBValue(), true);
+  
+  AddToJson(ssOutput, "RAM limit(MB)", availableRam, false );
+
+  //close json
+  ssOutput << "\n};";
+
+  strOutput = ssOutput.str();
+  iRC = 200;
+  return iRC;
+}
 
 
 std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& rc){
@@ -1248,11 +1346,10 @@ std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& r
   for(int index = 0; index < result.size(); index++){
     wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
   }
-  wstr += L"\n};";
+  wstr += L"\n}";
   std::string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
   
   return strResponseBody;
-
 }
 
 /*! \brief Search for matching proposals
@@ -1318,6 +1415,7 @@ int OtmMemoryServiceWorker::search
     delete pData;
     return( BAD_REQUEST );
   } /* end */
+
   if ( pData->szIsoSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -1326,6 +1424,7 @@ int OtmMemoryServiceWorker::search
     delete pData;
     return( BAD_REQUEST );
   } /* end */
+  
   if ( pData->szIsoTargetLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -1334,12 +1433,14 @@ int OtmMemoryServiceWorker::search
     delete pData;
     return( BAD_REQUEST );
   } /* end */
+  
   if ( pData->szMarkup[0] == 0 )
   {
     LogMessage1(INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF");
     // use default markup table if none given
     strcpy( pData->szMarkup, "OTMXUXLF" );
   } /* end */
+  
   if ( pData->iNumOfProposals > 20 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
@@ -1348,6 +1449,7 @@ int OtmMemoryServiceWorker::search
     delete pData;
     return( BAD_REQUEST );
   } /* end */
+
   if ( pData->iNumOfProposals == 0 )
   {
     pData->iNumOfProposals = 5;
@@ -1479,6 +1581,7 @@ int OtmMemoryServiceWorker::concordanceSearch
     delete pData;
     return( BAD_REQUEST );
   } /* end */
+
   if ( pData->iNumOfProposals > 20 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;

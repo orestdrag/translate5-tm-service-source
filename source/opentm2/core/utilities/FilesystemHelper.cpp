@@ -22,18 +22,18 @@
 
 int __last_error_code = 0;
 
-PFileBufferMap getFileBufferInstance(){
+PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     static FileBufferMap map;
     return &map;
 }
 
-std::string parseDirectory(const std::string path){
+std::string FilesystemHelper::parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
     if (found!=std::string::npos)
         return path.substr(0,found);
     return path;
 }
-std::string parseFilename(const std::string path){
+std::string FilesystemHelper::parseFilename(const std::string path){
     std::size_t found = path.rfind('/');
 
     if (found!=std::string::npos)
@@ -910,12 +910,13 @@ size_t FilesystemHelper::GetFilebufferSize(const std::string& path){
     return size;
 }
 
-size_t FilesystemHelper::GetTotalFilebuffersSize(){
+size_t FilesystemHelper::GetTotalFilebuffersSize() {
     auto fbs = getFileBufferInstance();
     size_t total = 0;
     for (auto it = fbs->cbegin(); it != fbs->cend(); it++)
     {
-        total += it->second.data.size();
+        //total += it->second.data.size();
+        total += it->second.data.capacity();
     }
     LogMessage3(INFO,__func__,":: total size = ", toStr(total).c_str());
     return total;

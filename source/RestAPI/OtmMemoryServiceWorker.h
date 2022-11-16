@@ -81,6 +81,7 @@ public:
     std::string &strOutputParms
   );
 
+  int resourcesInfo(std::string& strOutput);
 
   std::string tagReplacement(std::string strInData, int& rc);
 

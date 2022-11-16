@@ -203,13 +203,20 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }else{
-      if ( urlService == additionalServiceName && urlCommand ==  "shutdown" ){//for calls %serviceName%_service
+      std::transform(urlCommand.begin(), urlCommand.end(), urlCommand.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+      if ( urlService == additionalServiceName ){//for calls %serviceName%_service
         if( methodStr == "GET"){
-          requestHandler->command = ProxygenHandler::COMMAND::SHUTDOWN;
-        }else if( methodStr == "POST" && urlCommand ==  "tagreplacement"){
-          requestHandler->command = ProxygenHandler::COMMAND::TAGREPLACEMENTTEST;
+          if(urlCommand ==  "shutdown"){
+            requestHandler->command = ProxygenHandler::COMMAND::SHUTDOWN;
+          }else if(urlCommand == "resources"){
+            requestHandler->command = ProxygenHandler::COMMAND::RESOURCE_INFO;
+          }
+        }else if( methodStr == "POST"){
+          if(urlCommand == "tagreplacement"){
+           requestHandler->command = ProxygenHandler::COMMAND::TAGREPLACEMENTTEST;
+          }
         }
-
       }
       if(!urlMemName.empty()){//for command memName should always exists
         if(methodStr == "POST"){
@@ -326,6 +333,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
     properties_set_int_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
     properties_set_int_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
+    properties_set_int_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
+    properties_set_int_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
+
     std::string memDir = szOtmDirPath;
     memDir += "/MEM/";
     properties_add_str(KEY_MEM_DIR, memDir.c_str());
@@ -398,10 +408,14 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     std::thread t([&]() { server.start(); });
     OtmMemoryServiceWorker::getInstance()->init();
     
+    std::string runDate = getTimeStr();
+    properties_set_str_anyway(KEY_RUN_DATE, runDate.c_str());
+
     std::stringstream initMsg;
     initMsg << "Service details:\n  Service name = " << szServiceName;
     initMsg << "\n  Address :" << host << ":" << uiPort; 
     initMsg << "\n  Build date: " << buildDate;
+    initMsg << "\n  Run date: " << runDate;
     initMsg << "\n  Git commit info: " << gitHash;
     initMsg << "\n  Version: " << appVersion;
     initMsg << "\n  Workdir: " << szOtmDirPath;

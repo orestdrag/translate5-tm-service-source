@@ -40,6 +40,8 @@ enum LOGCODES{
 };
 
 int SetLogLevel(int level);
+int GetLogLevel();
+std::string getTimeStr();
 bool CheckLogLevel(int level);
 
 int LogMessage1(int LogLevel, std::string&& message);

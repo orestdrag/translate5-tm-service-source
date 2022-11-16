@@ -35,6 +35,7 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::EXPORT_MEM, "EXPORT_MEM" },
         { ProxygenHandler::COMMAND::EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::STATUS_MEM, "STATUS_MEM" },
+        { ProxygenHandler::COMMAND::RESOURCE_INFO, "RESOURCE_INFO" },
         { ProxygenHandler::COMMAND::FUZZY, "FUZZY" },
         { ProxygenHandler::COMMAND::CONCORDANCE, "CONCORDANCE" },
         { ProxygenHandler::COMMAND::DELETE_ENTRY, "DELETE_ENTRY" },
@@ -99,6 +100,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         std::string str;
         iRC = 200;
         pMemService->tagReplacement(str, iRC);
+        builder->body(str);
         break;
       }
       case COMMAND::EXPORT_MEM:
@@ -114,6 +116,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::DELETE_MEM:
       {
         iRC = pMemService->deleteMem( memName, strResponseBody );
+        builder->body(strResponseBody);
         break;
       }
       case COMMAND::SAVE_ALL_TM_ON_DISK:
@@ -121,6 +124,13 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         iRC = pMemService->saveAllTmOnDisk( strResponseBody );
         responseText = "OK";
         iRC = 200;
+        break;
+      }
+      case COMMAND::RESOURCE_INFO:{
+        iRC = pMemService->resourcesInfo(strResponseBody);
+        builder->body(strResponseBody);
+        responseText = "OK"; 
+        //iRC = 200;
         break;
       }
       case COMMAND::SHUTDOWN:
@@ -160,7 +170,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     //LogMessage5(DEBUG, __func__, ":: command = ", 
     //          CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
 
-
+    
     builder->sendWithEOM();
   }
 }

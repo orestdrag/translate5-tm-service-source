@@ -52,6 +52,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
     EXPORT_MEM,
     EXPORT_MEM_INTERNAL_FORMAT,
     STATUS_MEM,
+    RESOURCE_INFO,
 
     START_COMMANDS_WITH_BODY,
     CREATE_MEM = START_COMMANDS_WITH_BODY, 
