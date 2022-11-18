@@ -798,7 +798,7 @@
         <comments>English(Caribbean)</comments>
     </language>
     <language>
-        <name>English(U.K.)</name>
+        <name>English(UK)</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -808,7 +808,7 @@
         <group>English</group>
         <isSourceLanguage>yes</isSourceLanguage>
         <isTargetLanguage>yes</isTargetLanguage>
-        <comments>English(U.K.)</comments>
+        <comments>English(UK)</comments>
     </language>
     <language>
         <name>English(Ireland)</name>
@@ -3892,4 +3892,3 @@
         <comments>Zulu(SouthAfrica)</comments>
     </language>
 </languages>
-
