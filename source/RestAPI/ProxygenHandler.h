@@ -15,6 +15,7 @@
 #include <map>
 #include <string>
 #include "OtmMemoryServiceWorker.h"
+#include "ProxygenStats.h"
 
 namespace proxygen {
 class ResponseHandler;
@@ -22,7 +23,7 @@ class ResponseHandler;
 
 namespace ProxygenService {
 
-class ProxygenStats;
+//class ProxygenStats;
 
 class ProxygenHandler : public proxygen::RequestHandler {
  public:

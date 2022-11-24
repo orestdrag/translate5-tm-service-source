@@ -1703,7 +1703,7 @@ USHORT MemFuncExportMem
   PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
   memset( pPrivateData, 0, sizeof( FCTDATA ) );
   pPrivateData->fComplete = TRUE;
-  pPrivateData->usProgress = 0;
+  pPrivateData->usExportProgress = 0;
 
   usRC = MemFuncPrepExport( pPrivateData, pszMemName, pszOutFile, lOptions );
   if ( usRC == 0 )
@@ -1968,7 +1968,7 @@ USHORT MemFuncExportProcess
       pData->fComplete = TRUE;
       break;
   } /* endswitch */
-  pData->usProgress = pCommArea->usComplete;
+  pData->usExportProgress = pCommArea->usComplete;
   return( usRC );
 
 } /* end of function MemFuncExportProcess */

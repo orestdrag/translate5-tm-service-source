@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 #include "OTMFUNC.H"
+#include "ProxygenStats.h"
+//#include "EQFFUNCI.H"
 
 /*! \brief constant defining the maximum number of opened memories
 */
@@ -32,6 +34,7 @@ class OtmMemoryServiceWorker
 */
 
 {
+  std::string printTime(time_t time);
 public:
 
 
@@ -81,7 +84,7 @@ public:
     std::string &strOutputParms
   );
 
-  int resourcesInfo(std::string& strOutput);
+  int resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats);
 
   std::string tagReplacement(std::string strInData, int& rc);
 
@@ -408,6 +411,9 @@ private:
     long lHandle;                   // memory handle     
     MEMORY_STATUS eStatus;          // status of the memory
     MEMORY_STATUS eImportStatus;    // status of the current/last memory import
+    //std::atomic<double> dImportProcess; 
+    //ushort * pusImportPersent = nullptr;
+    ImportStatusDetails* importDetails = nullptr;
     char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
   } OPENEDMEMORY, *POPENEDMEMORY;
 

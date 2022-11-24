@@ -1,6 +1,7 @@
 /*! EQFFUNCI.H      internal header file for non-DDE batch functions
 	Copyright (c) 1999-2016, International Business Machines Corporation and others. All rights reserved.
 */
+#pragma once 
 
 #define FCTDATA_IDENTIFIER 0x1998A04FL
 #define FCTSEGFILE_IDENTIFIER 0x2002F3ABL
@@ -11,6 +12,8 @@
 #include "win_types.h"
 #include "EQF.H"
 #include <atomic>
+#include <string>
+#include "../source/opentm2/core/utilities/LogWrapper.h">
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS
 {
@@ -128,7 +131,8 @@ typedef struct _FCTDATA
   PFCTSEGFILE pSegFile;
 
   // current progress of some nonDDE functions
-  USHORT      usProgress;
+  //USHORT      usProgress;
+  USHORT      usExportProgress;
 
   // area used by SimpleMatchLevel
   PVOID       pvGetSimpleMatchLevelData;
@@ -144,7 +148,7 @@ typedef struct _FCTDATA
   PVOID       pvFilterNoMatchFile;    // for pointer to filter nomatch file IDA
   PVOID       pvAddMatchSegID;        // for pointer to add match segment ID data area
   PVOID       pvUnused3;              // for future use
-
+  ImportStatusDetails*     pImportData;
 
 } FCTDATA, *PFCTDATA;
 
@@ -210,7 +214,8 @@ USHORT MemFuncImportMem
   PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
   PSZ         pszUnused1,              // not in use, for future enhancements
   PSZ         pszUnused2,              // not in use, for future enhancements
-  LONG        lOptions                 // options for Translation Memory import
+  LONG        lOptions,                 // options for Translation Memory import
+  ImportStatusDetails*     pImportData
 );
 
 

@@ -14,6 +14,7 @@
 
 #include "win_types.h"
 #include "EQF.H"
+//#include "EQFFUNCI.H"
 /*
 #ifndef _EQF_H_INCLUDED
   typedef long LONG;
@@ -949,7 +950,8 @@ USHORT EqfImportMem
                                        // @Markup Table Handling: CANCEL_UNKNOWN_MARKUP_OPT(default), SKIP_UNKNOWN_MARKUP_OPT, GENERIC_UNKNOWN_MARKUP_OPT
 									                     // @Other: {CLEANRTF_OPT,IGNORE_OPT}
                                        
-  PSZ         errorBuff
+  PSZ         errorBuff,
+  ImportStatusDetails*     pImportData
 );
 
 /*! \brief Import a Translation Memory (extended version)

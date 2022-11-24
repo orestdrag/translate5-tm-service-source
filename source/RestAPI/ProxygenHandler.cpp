@@ -68,7 +68,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     }
   }
 
-  stats_->recordRequest();
+  stats_->recordRequest(this->command);
   SetLogInfo(this->command);
   SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
   if(memName.empty() == false){
@@ -127,7 +127,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         break;
       }
       case COMMAND::RESOURCE_INFO:{
-        iRC = pMemService->resourcesInfo(strResponseBody);
+        iRC = pMemService->resourcesInfo(strResponseBody, *stats_ );
         builder->body(strResponseBody);
         responseText = "OK"; 
         //iRC = 200;
@@ -172,6 +172,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 
     
     builder->sendWithEOM();
+    ResetLogBuffer();
   }
 }
 
@@ -194,7 +195,7 @@ void ProxygenHandler::onEOM() noexcept {
     strInData = (char*) body_->data(); 
 
     //fix garbage in json 
-    size_t json_end = strInData.find("}");
+    size_t json_end = strInData.find(" }");
     if(json_end > 0 && json_end != std::string::npos){
       //strInData[json_end + 1] = '\0';
       strInData = strInData.substr(0, json_end + 1);

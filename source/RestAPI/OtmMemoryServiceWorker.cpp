@@ -104,6 +104,9 @@ typedef struct _IMPORTMEMORYDATA
   char szMemory[260];
   char szInFile[260];
   char szError[512];
+  //ushort * pusImportPersent = nullptr;
+  ImportStatusDetails* importDetails = nullptr;
+  //OtmMemoryServiceWorker::POPENEDMEMORY pMem = nullptr;
 } IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
@@ -714,6 +717,10 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   this->vMemoryList[iIndex].tLastAccessTime = 0;
   this->vMemoryList[iIndex].szName[0] = 0;
   if ( this->vMemoryList[iIndex].pszError ) delete[]  this->vMemoryList[iIndex].pszError ;
+  if( this->vMemoryList[iIndex].importDetails != nullptr){
+    delete this->vMemoryList[iIndex].importDetails;
+    this->vMemoryList[iIndex].importDetails = nullptr;
+  }
   this->vMemoryList[iIndex].pszError = NULL;
 
   // close the memory
@@ -776,6 +783,7 @@ int OtmMemoryServiceWorker::import
       this->vMemoryList[iIndex].lHandle = 0;
       this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
       this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+      //this->vMemoryList[iIndex].dImportProcess = 0;
     }
   }
   else
@@ -815,6 +823,7 @@ int OtmMemoryServiceWorker::import
     this->vMemoryList[iIndex].lHandle = 0;
     this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
     this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+    //this->vMemoryList[iIndex].dImportProcess = 0;
     strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
   }
   LogMessage4(TRANSACTION, __func__, "status for ", strMemory.c_str() , " was changed to import");
@@ -914,6 +923,13 @@ int OtmMemoryServiceWorker::import
   PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
   strcpy( pData->szInFile, szTempFile );
   strcpy( pData->szMemory, strMemory.c_str() );
+
+  if(this->vMemoryList[iIndex].importDetails == nullptr){
+    this->vMemoryList[iIndex].importDetails = new ImportStatusDetails;
+  }
+  
+  pData->importDetails = this->vMemoryList[iIndex].importDetails;
+  pData->importDetails->reset();
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
 
@@ -1215,7 +1231,7 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 }
 
 
-int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput){
+int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats){
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -1254,8 +1270,8 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput){
         }
     }   
 
-    ssOutput << "\n ],\n"; //\"totalSize\" : \"" << total << "\"";
-    AddToJson(ssOutput, "totalSize", total, true );
+    ssOutput << "\n ],\n"; 
+    AddToJson(ssOutput, "totalOccupiedByFilebuffersRAM", total, true );
   }
 
   //in addition the memory that is used by the service by other means
@@ -1270,7 +1286,8 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput){
   properties_get_int(KEY_NUM_OF_THREADS, workerThreads);
   properties_get_int(KEY_TIMEOUT_SETTINGS, timeout);
   properties_get_str(KEY_RUN_DATE, buff,254);
-
+  double vm_usage, resident_set;
+  mem_usage(vm_usage, resident_set); 
 
   AddToJson(ssOutput, "Run date", buff, true );
   AddToJson(ssOutput, "Build date", buildDate, true );
@@ -1278,6 +1295,29 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput){
   AddToJson(ssOutput, "Version", appVersion, true );
   AddToJson(ssOutput, "Worker threads", workerThreads, true );
   AddToJson(ssOutput, "Timeout(ms)", timeout, true );
+  
+  AddToJson(ssOutput, "Resident set", resident_set, true );
+  AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
+  {
+    ssOutput << "[\n";
+    AddToJson(ssOutput, "RequestCount", stats.getRequestCount(), true );
+    AddToJson(ssOutput, "CreateMemRequestCount", stats.getCreateMemRequestCount(), true );
+    AddToJson(ssOutput, "DeleteMemRequestCount", stats.getDeleteMemRequestCount(), true );
+    AddToJson(ssOutput, "ImportMemRequestCount", stats.getImportMemRequestCount(), true );
+    AddToJson(ssOutput, "ExportMemRequestCount", stats.getExportMemRequestCount(), true );
+    AddToJson(ssOutput, "StatusMemRequestCount", stats.getStatusMemRequestCount(), true );
+    AddToJson(ssOutput, "FuzzyRequestCount", stats.getFuzzyRequestCount(), true );
+    AddToJson(ssOutput, "ConcordanceRequestCount", stats.getConcordanceRequestCount(), true );
+    AddToJson(ssOutput, "UpdateEntryRequestCount", stats.getUpdateEntryRequestCount(), true );
+    AddToJson(ssOutput, "DeleteEntryRequestCount", stats.getDeleteEntryRequestCount(), true );
+    AddToJson(ssOutput, "SaveAllTmsRequestCount", stats.getSaveAllTmsRequestCount(), true );
+    AddToJson(ssOutput, "ListOfMemoriesRequestCount", stats.getListOfMemoriesRequestCount(), true );
+    AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
+    AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
+    AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
+    ssOutput << "\n ],\n"; 
+  }
+
   
   //AddToJson(ssOutput, "Log level(internal)", GetLogLevel(), true );
   //AddToJson(ssOutput, "CPU used by process", getCurrentCPUUsageByProcess(), true);
@@ -2366,6 +2406,15 @@ int OtmMemoryServiceWorker::getMem
 }
 
 
+std::string OtmMemoryServiceWorker::printTime(time_t time){
+  char buff[255];
+  LONG lTimeStamp = (LONG) time;
+  lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+  this->convertTimeToUTC( lTimeStamp, buff );
+  //std::string res =  asctime(gmtime(&time));
+  return buff;
+}
+
 /*! \brief get the status of a memory
 \param strMemory name of memory
 \param strOutParms on return filled with the output parameters in JSON format
@@ -2409,6 +2458,13 @@ int OtmMemoryServiceWorker::getStatus
     // return the status of the memory
     factory->startJSON( strOutputParms );
     factory->addParmToJSON( strOutputParms, "tmxImportStatus", pszStatus );
+    if(this->vMemoryList[iIndex].importDetails != nullptr){
+      factory->addParmToJSON( strOutputParms, "importProgress", vMemoryList[iIndex].importDetails->usProgress );
+      factory->addParmToJSON( strOutputParms, "importTime", vMemoryList[iIndex].importDetails->importTimestamp );
+      factory->addParmToJSON( strOutputParms, "segmentsImported", vMemoryList[iIndex].importDetails->segmentsImported );
+      factory->addParmToJSON( strOutputParms, "invalidSegments", vMemoryList[iIndex].importDetails->invalidSegments );
+    }
+    factory->addParmToJSON( strOutputParms, "lastAccessTime", printTime(vMemoryList[iIndex].tLastAccessTime) );
     if ( ( this->vMemoryList[iIndex].eImportStatus == IMPORT_FAILED_STATUS ) && ( this->vMemoryList[iIndex].pszError != NULL ) )
     {
       factory->addParmToJSON( strOutputParms, "ErrorMsg", this->vMemoryList[iIndex].pszError );
@@ -2483,7 +2539,7 @@ void OtmMemoryServiceWorker::importDone( char *pszMemory, int iRC, char *pszErro
       vMemoryList[iIndex].eImportStatus = IMPORT_FAILED_STATUS;
       vMemoryList[iIndex].pszError = new char[strlen( pszError ) + 1];
       strcpy( vMemoryList[iIndex].pszError, pszError );
-      LogMessage4(ERROR, "OtmMemoryServiceWorker::importDone:: memName = ", pszMemory,", import failed: ", pszError);
+      LogMessage6(ERROR, "OtmMemoryServiceWorker::importDone:: memName = ", pszMemory,", import failed: ", pszError, " import details = ", vMemoryList[iIndex].importDetails->toString().c_str());
     }
   }else{
     LogMessage3(ERROR, "OtmMemoryServiceWorker::importDone:: memName = ", pszMemory, " not found ");
@@ -2662,7 +2718,7 @@ void importMemoryProcess( void *pvData )
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
   // call the OpenTM2 API function
   pData->szError[0] = 0;
-  int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);
+  int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError, pData->importDetails);
 
   // handle any error
   if ( iRC != 0 )

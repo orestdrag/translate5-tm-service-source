@@ -139,6 +139,10 @@ int Properties::init() {
     std::string mem_dir = otm_dir+ "/MEM/";
     set_value(KEY_MEM_DIR, mem_dir);
     
+    if (FilesystemHelper::CreateDir(mem_dir)){
+        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, mem_dir: ", mem_dir.c_str());
+        return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
+    }
     /*
     std::string plugin_dir = otm_dir + "/PLUGINS/";
     if(FilesystemHelper::CreateDir(plugin_dir)){

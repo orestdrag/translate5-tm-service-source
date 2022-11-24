@@ -270,55 +270,7 @@ BOOL MoveFile(
     return FilesystemHelper::MoveFile(lpExistingFileName, lpNewFileName);
 }
 
-/*
-    BOOL SetFilePointerEx(
-        HANDLE hFile,                    
-        LARGE_INTEGER liDistanceToMove,  
-        PLARGE_INTEGER lpNewFilePointer, 
-        DWORD dwMoveMethod               
-        ){
-            LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 147");
-#ifdef TEMPORARY_COMMENTED
-            int res = 0;
-            if(liDistanceToMove.QuadPart == 0){
-                return true;
-            }if(dwMoveMethod == FILE_BEGIN){
-                
-                //LogMessage1(ERROR, "SetFilePointerEx::FILE_BEGIN not implemented");
-                res = lseek(*((int*)hFile), largeIntToInt(liDistanceToMove), SEEK_SET);
-            }else if(dwMoveMethod == FILE_CURRENT){
-                //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_CUR);
-                LogMessage1(ERROR, "SetFilePointerEx::FILE_CURRENT not implemented");
-            }else if(dwMoveMethod == FILE_END){
-                //res = lseek(hFile, largeIntToInt(liDistanceToMove), SEEK_END);
-                LogMessage1(ERROR, "SetFilePointerEx::FILE_END not implemented");
-            }else{
 
-                LogMessage1(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
-            }
-            if(lpNewFilePointer && res >= 0){
-                *lpNewFilePointer = intToLargeInt(res);
-            }
-            return res >=0;
-            #else
-            LONG a, *b, c;
-            int h = GetFileId((HFILE) hd);
-            a = (LONG)liDistanceToMove.QuadPart;
-            if(lpNewFilePointer){
-                c = lpNewFilePointer->QuadPart;
-                b = &c;
-            }else{
-                b = NULL;
-            }
-            return SetFilePointer( hFile, a, b, dwMoveMethod  );
-
-            if(lpNewFilePointer)
-                lpNewFilePointer->QuadPart = *b;
-            #endif
-        }
-//*/
-
-//*
 BOOL SetFilePointerEx(
         HFILE hFile,                    
         LARGE_INTEGER liDistanceToMove,  
@@ -345,7 +297,7 @@ BOOL SetFilePointerEx(
                 lpNewFilePointer->QuadPart = *b;
             return false;
         }
-//*/
+
 
         void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext){
             std::string str(src);

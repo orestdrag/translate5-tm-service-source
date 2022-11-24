@@ -226,7 +226,7 @@ int EqfMemoryPlugin::closeMemory(
     this->makePropName( pathName, strPropName );
     const char* pszName = strrchr( (char*)strPropName.c_str(), '/' );
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
-    this->fillInfoStructure( (PSZ)pszName, pMemInfo );
+    this->fillInfoStructure( (PSZ)pszName, pMemInfo );  
   }else{
     LogMessage1(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
   }
@@ -757,15 +757,25 @@ void EqfMemoryPlugin::refreshMemoryList()
   // clear the old vector
   m_MemInfoVector.clear();
 
+  
+  char mem_dir[MAX_EQF_PATH];
   {
     //prepare path for searching
-    char otm_dir[MAX_EQF_PATH];
-    properties_get_str(KEY_OTM_DIR, otm_dir, MAX_EQF_PATH);
-    properties_get_str_or_default(KEY_MEM_DIR, this->szBuffer,  MAX_EQF_PATH, otm_dir);
+    properties_get_str(KEY_MEM_DIR, mem_dir, MAX_EQF_PATH);
+    strncpy(this->szBuffer, mem_dir, MAX_EQF_PATH );
     sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
   }
 
   auto files = FilesystemHelper::FindFiles(this->szBuffer);
+  int errcode = 0;
+  if(FilesystemHelper::GetLastError() == FilesystemHelper::FILEHELPER_ERROR_CANT_OPEN_DIR){
+      errcode = FilesystemHelper::CreateDir(mem_dir);
+      if( FilesystemHelper::GetLastError() != FilesystemHelper::FILEHELPER_NO_ERROR ){
+        LogMessage3(FATAL, __func__,":: error with filesystem helper, errcode = ", toStr(errcode).c_str());
+        throw;
+      }
+  }  
+
   for(auto file: files){
     addToList(file);
   }

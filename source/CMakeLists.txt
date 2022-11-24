@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.3.12")
+SET(APP_VERSION  "0.3.13")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -35,7 +35,7 @@ set (zstd_DIR "${lib_cmake_DIR}/zstd")
 set (glog_DIR "${lib_cmake_DIR}/glog")
 set (gflags_DIR "${lib_cmake_DIR}/gflags")
 set (mvfst_DIR "${lib_cmake_DIR}/mvfst")
-set(Sodium_DIR "${lib_cmake_DIR}/sodium")
+set (Sodium_DIR "${lib_cmake_DIR}/sodium")
 
 
 find_package(PkgConfig REQUIRED)
@@ -58,7 +58,7 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/config.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenServer.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenHandler.cpp"
-
+    "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenStats.cpp"
 
     "${T5MEMORY_SOURCE_ROOT}/opentm2/EQFX_API.cpp"
     "${T5MEMORY_SOURCE_ROOT}/opentm2/OTMFUNC.cpp"

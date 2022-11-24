@@ -1746,7 +1746,8 @@ USHORT MemFuncImportMem
   PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
   PSZ         pszUnused1,              // not in use, for future enhancements
   PSZ         pszUnused2,              // not in use, for future enhancements
-  LONG        lOptions                 // options for Translation Memory import
+  LONG        lOptions,                 // options for Translation Memory import
+  ImportStatusDetails*     pImportData
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1757,7 +1758,7 @@ USHORT MemFuncImportMem
     PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
     memset( pPrivateData, 0, sizeof( FCTDATA ) );
     pPrivateData->fComplete = TRUE;
-    pPrivateData->usProgress = 0;
+    pPrivateData->pImportData = pImportData;
     usRC = MemFuncPrepImport( pPrivateData, pszMemName, pszInFile, pszTM_ID, pszStoreID, pszUnused1, pszUnused2, lOptions );
     if ( usRC == 0 )
     {
@@ -1779,7 +1780,8 @@ USHORT MemFuncImportMem
     if ( pData->fComplete )              // has last run been completed
     {
       // prepare a new analysis run
-      pData->usProgress = 0;
+//      *(pData->pusProgress) = 0;
+      pData->pImportData->usProgress = 0;
       usRC = MemFuncPrepImport( pData, pszMemName, pszInFile, pszTM_ID, pszStoreID, pszUnused1, pszUnused2, lOptions );
     }
     else
@@ -2065,7 +2067,7 @@ USHORT MemFuncImportProcess
   {
     case MEM_START_IMPORT:
        LogMessage2(INFO, __func__, "::MEM_START_IMPORT");
-       pData->usProgress = 0;
+       pData->pImportData->usProgress = 0;
        pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
 
        if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF ) )
@@ -2087,18 +2089,20 @@ USHORT MemFuncImportProcess
     case MEM_IMPORT_TASK:
       {
         
-        LogMessage3(INFO, __func__, "::MEM_IMPORT_TASK, progress = " , toStr(pData->usProgress).c_str());
+        LogMessage3(INFO, __func__, "::MEM_IMPORT_TASK, progress = " , toStr( pData->pImportData->usProgress ).c_str());
         USHORT usRc = MemLoadProcess( pLoadData );
         switch ( usRc )
         {
           case MEM_PROCESS_OK:
             {
-              pData->usProgress  = (USHORT) pLoadData->lProgress;
+              pData->pImportData->usProgress   = (USHORT) pLoadData->lProgress;
+              pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
+              pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
             }
             usPhase = MEM_IMPORT_TASK;
             break;
           case MEM_PROCESS_END:
-            pData->usProgress = 100;
+             pData->pImportData->usProgress = 100;
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
             if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
             if ( pLoadData->pMem )
@@ -2169,8 +2173,14 @@ USHORT MemFuncImportProcess
                 sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                         (lDiff - (lDiff / 3600 * 3600)) / 60,
                         (lDiff - (lDiff / 3600 * 3600)) % 60 );
+                        
+                pData->pImportData->importTimestamp = buff;
+
                 logMessage += buff;
               }
+              
+              pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
+              pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
               LogMessage1(TRANSACTION, logMessage.c_str());
               
 
@@ -2179,7 +2189,7 @@ USHORT MemFuncImportProcess
          UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
-       pData->usProgress = 100;
+       pData->pImportData->usProgress = 100;
        break;
  } /* endswitch */
 

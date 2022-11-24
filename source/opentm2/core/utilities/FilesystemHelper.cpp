@@ -482,6 +482,7 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
     std::string fixedPath = name;
     fixedPath = FixPath(fixedPath);
     const std::string dirPath = parseDirectory(fixedPath);
+
     std::string fileName = parseFilename(fixedPath);
     
     int pos = fileName.rfind('*');
@@ -506,6 +507,7 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
                 }
             }
         }
+        __last_error_code = FILEHELPER_NO_ERROR;
         closedir (dir);
     } else {      
         LogMessage3(ERROR, "FilesystemHelper::FindFiles:: dir = ",dirPath.c_str() , "; can't open directory");

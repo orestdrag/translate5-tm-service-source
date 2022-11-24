@@ -48,6 +48,28 @@
 #ifndef _EQF_H_INCLUDED
 #define _EQF_H_INCLUDED
 
+#include "../source/opentm2/core/utilities/LogWrapper.h"
+#include <atomic>
+struct ImportStatusDetails{
+  std::atomic_short usProgress{0};
+  std::atomic_int segmentsImported{-1};
+  std::atomic_int invalidSegments{-1};
+  std::string importTimestamp;
+  
+  void reset(){
+    usProgress = 0;
+    segmentsImported = -1;
+    invalidSegments = -1;
+    importTimestamp = "not finished";    
+  }
+  std::string toString(){
+    std::string res;
+    res = "progress = " + toStr(usProgress) + "; segmentsImported = " + toStr(segmentsImported) + "; invalidSegments = " + toStr(invalidSegments) + "; time = " + importTimestamp;
+    return res;
+  }
+};
+
+
 /**********************************************************************/
 /* add support for MFC compiling via predefined                       */
 /**********************************************************************/

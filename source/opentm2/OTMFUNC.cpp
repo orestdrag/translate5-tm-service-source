@@ -133,7 +133,8 @@ USHORT EqfImportMem
   PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
   LONG        lOptions,                 // options for Translation Memory import
-  PSZ         errorBuff
+  PSZ         errorBuff,
+  ImportStatusDetails*     pImportData
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -170,7 +171,7 @@ USHORT EqfImportMem
     LogMessage1(INFO, "EqfImportMem:: call TM import");
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
       pData->sLastFunction = FCT_EQFIMPORTMEM;
-    usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions );
+    usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions, pImportData );
     strcpy(errorBuff, pData->szError);
   } /* endif */
 
@@ -239,6 +240,10 @@ USHORT EqfExportMem
   if ( usRC == NO_ERROR )
   {
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
+    if(pData->pImportData == nullptr){
+      pData->pImportData  = new ImportStatusDetails;
+      pData->pImportData->reset();
+    }
     usRC = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );
   } /* endif */
 

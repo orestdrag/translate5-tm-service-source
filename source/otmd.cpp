@@ -41,7 +41,7 @@ static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(triplesthreshold, 33, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
+DEFINE_int32(triplesthreshold, 5, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 

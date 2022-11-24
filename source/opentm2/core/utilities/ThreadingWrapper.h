@@ -7,5 +7,7 @@ const int INFINITE = -2;
 int _getpid();
 double getCurrentCPUUsageByProcess();
 int getVirtualMemUsageKBValue();
+void mem_usage(double& vm_usage, double& resident_set);
+
 
 #endif
