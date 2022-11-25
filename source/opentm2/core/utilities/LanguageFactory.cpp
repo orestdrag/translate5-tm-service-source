@@ -181,6 +181,7 @@ LanguageFactory::LanguageFactory(void)
       pInfo++;
     }
     LogMessage3(ERROR, "Built-in language list contains ", toStr(pvLanguageList->size()).c_str()," entries" );
+    throw;
   }
   else
   {

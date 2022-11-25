@@ -17,6 +17,7 @@
 #include "EQFTAI.H"               // Private include file for Text Analysis
 #include "../utilities/LogWrapper.h"
 #include "../utilities/PropertyWrapper.H"
+#include "../utilities/FilesystemHelper.h"
 
 /**********************************************************************/
 /* Static array of loaded tag tables                                  */
@@ -208,7 +209,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       }
       else
       {
-        LogMessage2(DEBUG,"TEMPORARY HARDCODED table name for ", pszTableName);
+        //LogMessage2(DEBUG,"TEMPORARY HARDCODED table name for ", pszTableName);
         properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );
@@ -219,13 +220,23 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       /******************************************************************/
       /* Load tag table file into memory                                */
       /******************************************************************/
-      if ( !UtlLoadFileHwnd( szTagTableFileName, (PVOID *)&pTagTable,
-                        &ulBytesRead, FALSE, fMsg, hwnd ) )
+      std::string filename(szTagTableFileName);
+
+      if(FilesystemHelper::FilebufferExists(filename) == false && 
+        FilesystemHelper::ReadFileToFileBufferAndKeepInRam(filename) != FilesystemHelper::FILEHELPER_NO_ERROR)
+      //if ( !UtlLoadFileHwnd( szTagTableFileName, (PVOID *)&pTagTable,
+      //                  &ulBytesRead, FALSE, fMsg, hwnd ) )
       {
          usRC = ERROR_READ_FAULT;        // indicate tag table read error
+         LogMessage3(FATAL, __func__,":: can't load tag table file: ", szTagTableFileName);
+         throw;
       }
       else
       {
+        auto pData = FilesystemHelper::GetFilebufferData(filename);
+        //memcpy(pTagTable, pData, pData->size());
+        pTagTable = (PTAGTABLE) &((*pData)[0]);
+        ulBytesRead = pData->size();
         /****************************************************************/
         /* Fill/Initialize data area for loaded tag table               */
         /****************************************************************/

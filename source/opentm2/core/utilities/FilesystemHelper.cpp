@@ -206,6 +206,24 @@ bool FilesystemHelper::FileExists(std::string&& path){
     return exists;
 }
 
+bool FilesystemHelper::FilebufferExists(const std::string& path){
+    auto pfb = getFileBufferInstance();
+    bool res = pfb->find(path) != pfb->end();
+    return res;
+}
+
+int FilesystemHelper::ReadFileToFileBufferAndKeepInRam(const std::string& path){
+   if(FilebufferExists(path)){
+        return FILEHELPER_WARNING_FILEBUFFER_EXISTS;
+   }
+
+   auto file = OpenFile(path, "r", true);
+   if(file == nullptr){
+     return FILEHELPER_ERROR_NO_FILES_FOUND;
+   }
+   fclose(file);
+   return FILEHELPER_NO_ERROR;
+}
 
 int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     std::string fixedPath = path;
@@ -548,7 +566,6 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
     std::string fName = GetFileName(ptr);
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
-
         if(V_IS_ON(1)){
             LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());

@@ -24,7 +24,7 @@ struct FileBuffer{
     int status ;//FILEBUFFERSTATUS
     std::vector<UCHAR> data;
     long offset = 0;
-    //FILE* file = NULL;
+    FILE* file = NULL;
     
 } ;
 
@@ -88,6 +88,9 @@ public:
 
     static std::vector<UCHAR>* GetFilebufferData(std::string name);
     static int CreateFilebuffer(std::string name);
+
+    static bool FilebufferExists(const std::string& path);
+    static int ReadFileToFileBufferAndKeepInRam(const std::string& path);
 
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);

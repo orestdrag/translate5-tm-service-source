@@ -131,17 +131,26 @@ int Properties::init() {
     
     std::string otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
 
-    if (FilesystemHelper::CreateDir(otm_dir)){
-        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
+    if (FilesystemHelper::DirExists(otm_dir) == false && FilesystemHelper::CreateDir(otm_dir)){
+        LogMessage2(FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
+        throw;
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
     }
     set_value(KEY_OTM_DIR, otm_dir);
     std::string mem_dir = otm_dir+ "/MEM/";
     set_value(KEY_MEM_DIR, mem_dir);
-    
-    if (FilesystemHelper::CreateDir(mem_dir)){
-        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, mem_dir: ", mem_dir.c_str());
+        
+    if (FilesystemHelper::DirExists(mem_dir) == false && FilesystemHelper::CreateDir(mem_dir)){
+        LogMessage2(FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, mem_dir: ", mem_dir.c_str());
+        throw;
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
+        
+    }
+
+    std::string table_dir = otm_dir + "/TABLE/";
+    if(FilesystemHelper::DirExists(table_dir) == false){
+        LogMessage3(FATAL, __func__,":: TABLE DIRECTORY IS NOT FOUND UNDER PATH: ", table_dir.c_str());
+        throw;
     }
     /*
     std::string plugin_dir = otm_dir + "/PLUGINS/";

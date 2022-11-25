@@ -195,10 +195,10 @@ void ProxygenHandler::onEOM() noexcept {
     strInData = (char*) body_->data(); 
 
     //fix garbage in json 
-    size_t json_end = strInData.find(" }");
+    size_t json_end = strInData.find(" }") ;
     if(json_end > 0 && json_end != std::string::npos){
       //strInData[json_end + 1] = '\0';
-      strInData = strInData.substr(0, json_end + 1);
+      strInData = strInData.substr(0, json_end + 2);
     }
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
