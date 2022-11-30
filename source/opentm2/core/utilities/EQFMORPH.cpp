@@ -723,41 +723,44 @@ USHORT MorphTokenizeW
       usRC = TokenizeW( pLCB->pvLangCB, pszInData, &ulBufferSize, ppTermList, usListType );
 
 #ifdef LOG_TOKENIZE
-      if ( usRC == MORPH_OK && CheckLogLevel(DEVELOP) )
+      
+      if ( usRC == MORPH_OK  )
       {
-        if ( usListType == MORPH_FLAG_OFFSLIST )
-        {
-          PSHORT psData = (PSHORT)*ppTermList;
-          SHORT sStart, sLen;
-          LONG lFlag;
-          do
+        if(CheckLogLevel(DEVELOP)){
+          if ( usListType == MORPH_FLAG_OFFSLIST )
           {
-            lFlag  = *(PLONG)psData;
-            psData += 2;
-            sLen   = *psData++;
-            sStart = *psData++;
-            if(CheckLogLevel(DEVELOP)){
-              LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
-            }
-          } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
-        }
-        else if ( usListType == MORPH_OFFSLIST )
-        {
-          PSHORT psData = (PSHORT)*ppTermList;
-          SHORT sStart, sLen;
+            PSHORT psData = (PSHORT)*ppTermList;
+            SHORT sStart, sLen;
+            LONG lFlag;
             do
             {
+              lFlag  = *(PLONG)psData;
+              psData += 2;
               sLen   = *psData++;
               sStart = *psData++;
               if(CheckLogLevel(DEVELOP)){
-                LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+                LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
               }
-            } while ( (sStart != 0) || (sLen != 0) );
-        } /* endif */
+            } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
+          }
+          else if ( usListType == MORPH_OFFSLIST )
+          {
+            PSHORT psData = (PSHORT)*ppTermList;
+            SHORT sStart, sLen;
+              do
+              {
+                sLen   = *psData++;
+                sStart = *psData++;
+                if(CheckLogLevel(DEVELOP)){
+                  LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+                }
+              } while ( (sStart != 0) || (sLen != 0) );
+          } /* endif */
+        }
       }
       else
       {
-        LogMessage3(DEVELOP, __func__, ":: TokenizeW failed with rc=", toStr(usRC).c_str() );
+        LogMessage3(ERROR, __func__, ":: TokenizeW failed with rc=", toStr(usRC).c_str() );
       } /* endif */
       
 #endif
