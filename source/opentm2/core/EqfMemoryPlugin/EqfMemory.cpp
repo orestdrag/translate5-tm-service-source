@@ -1227,6 +1227,8 @@ int EqfMemory::MatchToOtmProposal
   this->SetProposalKey( pMatch->ulKey, pMatch->usTargetNum, pProposal );
   pProposal->setContextRanking( (int)pMatch->usContextRanking );
   pProposal->setMemoryIndex( pMatch->usDBIndex );
+  pProposal->setWords( pMatch->iWords );
+  pProposal->setDiffs( pMatch->iDiffs );
 
   switch ( pMatch->usMatchLevel )
   {

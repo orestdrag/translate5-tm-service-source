@@ -23,7 +23,6 @@ class ResponseHandler;
 
 namespace ProxygenService {
 
-//class ProxygenStats;
 
 class ProxygenHandler : public proxygen::RequestHandler {
  public:
@@ -81,7 +80,8 @@ class ProxygenHandler : public proxygen::RequestHandler {
   ProxygenStats* const stats_{nullptr};
 
   std::unique_ptr<folly::IOBuf> body_;
-  std::stringstream ss_body;
+
+  void sendResponse()noexcept;
 };
 
 } // namespace ProxygenService

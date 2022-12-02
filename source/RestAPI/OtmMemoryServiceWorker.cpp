@@ -711,7 +711,13 @@ bool OtmMemoryServiceWorker::getValue( char *pszString, int iLen, int *piResult 
 int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
 {
   LONG lHandle = this->vMemoryList[iIndex].lHandle;
-
+  int i=0;
+  while(vMemoryList[iIndex].eStatus == IMPORT_RUNNING_STATUS){
+    sleep(1);
+    if(i++ % 10 == 0){
+      LogMessage6(WARNING, __func__,":: waiting for closing memory with name = \'",vMemoryList[iIndex].szName, "\', for ", toStr(i).c_str(), " seconds" );
+    }
+  }
   // remove the memory from the list
   this->vMemoryList[iIndex].lHandle = 0;
   this->vMemoryList[iIndex].tLastAccessTime = 0;
@@ -1169,6 +1175,8 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyWords", pProp->iWords );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyDiffs", pProp->iDiffs );
 
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"markupTable", pData->szSource );
@@ -1753,6 +1761,19 @@ int OtmMemoryServiceWorker::closeAll
   return( 0 );
 }
 
+
+/*! \brief shutdown the service
+  \returns http return code
+  */
+  int OtmMemoryServiceWorker::shutdownService(){
+    std::thread([]() 
+        {
+           sleep(3);
+           exit(0);
+        }).detach();
+    return 200;
+  }
+
 /*! \brief Saves all open and modified memories
   \returns http return code0 if successful or an error code in case of failures
   */
@@ -2314,7 +2335,6 @@ int OtmMemoryServiceWorker::getMem
 (
   std::string strMemory,
   std::string strType,
-  //restbed::Bytes &vMemData
   std::vector<unsigned char> &vMemData
 )
 {

@@ -226,11 +226,31 @@ public:
      \returns proposal fuzziness
    */
   int getFuzziness();
-  	
+
   /* \brief set the proposal fuzziness
      \param lFuzzinessTime new fuzziness of proposal
    */
   void setFuzziness( long iFuzziness );
+
+  /* \brief get proposal diffs count from fuzzy calculations
+    \returns proposal diffs count from fuzzy calculations
+  */
+  int getDiffs();
+
+  /* \brief set the proposal diffs count from fuzzy calculations
+     \param iDiffs new diffs count from fuzzy calculations of proposal
+   */
+  void setDiffs( long iDiffs );
+
+    /* \brief get proposal words count during fuzzy calculations
+     \returns proposal fuzziness
+   */
+  int getWords();
+
+  /* \brief set the proposal words count during fuzzy calculations
+     \param iWords new words count during fuzzy calculations of proposal
+   */
+  void setWords( long iWords );
 
   /* \brief get markup table name (format)
      \param pszBuffer Pointer to buffer receiving the name of the markup table name

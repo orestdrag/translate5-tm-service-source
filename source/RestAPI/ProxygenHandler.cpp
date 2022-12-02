@@ -15,6 +15,9 @@
 
 #include "ProxygenStats.h"
 #include "OtmMemoryServiceWorker.h"
+#include <atomic>
+
+std::atomic_bool fWriteRequestsAllowed;
 
 using namespace proxygen;
 
@@ -22,9 +25,12 @@ DEFINE_bool(request_number,
             true,
             "Include request sequence number in response");
 
+
 namespace ProxygenService {
 
-ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {}
+ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
+  fWriteRequestsAllowed = true;
+}
 
 const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
@@ -81,68 +87,66 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::STATUS_MEM:
       {
         iRC = pMemService->getStatus( memName, strResponseBody );
-        responseText = "OK";
         iRC = 200;
-        builder->body(strResponseBody);
         break;
       }
         
       case COMMAND::LIST_OF_MEMORIES:
       {
         int ret = pMemService->list( strResponseBody );
-        builder->body(strResponseBody);
-        responseText = "OK";
         iRC = 200;
         break;
       }
       case COMMAND::TAGREPLACEMENTTEST:
       {
-        std::string str;
         iRC = 200;
-        pMemService->tagReplacement(str, iRC);
-        builder->body(str);
+        pMemService->tagReplacement(strResponseBody, iRC);
         break;
       }
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
         iRC = pMemService->getMem( memName, requestAcceptHeader,  vMemData);
-        builder->body(std::string(vMemData.begin(), vMemData.end()));
-        responseText = "OK";
+        strResponseBody = std::string(vMemData.begin(), vMemData.end());
         iRC = 200;
         break;
       }
       
       case COMMAND::DELETE_MEM:
       {
+        if(fWriteRequestsAllowed == false){
+          iRC = 423;
+          break;
+        }
         iRC = pMemService->deleteMem( memName, strResponseBody );
-        builder->body(strResponseBody);
         break;
       }
       case COMMAND::SAVE_ALL_TM_ON_DISK:
       {
         iRC = pMemService->saveAllTmOnDisk( strResponseBody );
-        responseText = "OK";
         iRC = 200;
         break;
       }
       case COMMAND::RESOURCE_INFO:{
         iRC = pMemService->resourcesInfo(strResponseBody, *stats_ );
-        builder->body(strResponseBody);
-        responseText = "OK"; 
-        //iRC = 200;
+        iRC = 200;
         break;
       }
       case COMMAND::SHUTDOWN:
-      {
-          iRC = pMemService->saveAllTmOnDisk( strResponseBody );
-          pMemService->closeAll();
-          //close log file
-          LogStop();
+      { 
+          fWriteRequestsAllowed = false;
+          
 
-          //TO DO:STOP SERVER HERE 
-          //break; 
-          //iRC = pMemService->shutdownService();
+          iRC = pMemService->saveAllTmOnDisk( strResponseBody );
+          
+          //close log file
+          if(iRC == 200){
+            pMemService->closeAll();
+            LogStop();          
+            iRC = pMemService->shutdownService();
+          }else{
+            fWriteRequestsAllowed = true;
+          }
           //builder->status(400, "WRONG REQUEST");
         break;
       }
@@ -152,27 +156,8 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         break;
       }
     }
-    
-    builder->status(iRC, responseText);
-    if (FLAGS_request_number) {
-      builder->header("Request-Number",
-                    folly::to<std::string>(stats_->getRequestCount()));
-    }
-    req->getHeaders().forEach([&](std::string& name, std::string& value) {
-      builder->header(folly::to<std::string>("x-proxygen-", name), value);
-    });
 
-    char version[20];
-    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "unknown");
-    builder->header("t5memory-version", version);   
-    builder->header("Content-Type", "application/json");
-
-    //LogMessage5(DEBUG, __func__, ":: command = ", 
-    //          CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
-
-    
-    builder->sendWithEOM();
-    ResetLogBuffer();
+    sendResponse();
   }
 }
 
@@ -207,11 +192,19 @@ void ProxygenHandler::onEOM() noexcept {
     switch(this->command){
       case COMMAND::CREATE_MEM:
       {
+        if(fWriteRequestsAllowed == false){
+          iRC = 423;
+          break;
+        }
         iRC = pMemService->createMemory( strInData, strResponseBody );
         break;
       }
       case COMMAND::IMPORT_MEM:
       {
+        if(fWriteRequestsAllowed == false){
+          iRC = 423;
+          break;
+        }
         iRC = pMemService->import( memName, strInData, strResponseBody );
         break; 
       }
@@ -227,11 +220,18 @@ void ProxygenHandler::onEOM() noexcept {
       }
       case COMMAND::UPDATE_ENTRY:
       {
+        if(fWriteRequestsAllowed == false){
+          break;
+        }
         iRC = pMemService->updateEntry( memName, strInData,  strResponseBody );
         break;
       }
       case COMMAND::DELETE_ENTRY:
       {
+        if(fWriteRequestsAllowed == false){
+          iRC = 423;
+          break;
+        }
         iRC = pMemService->deleteEntry( memName, strInData,  strResponseBody );
         break;
       }
@@ -240,12 +240,50 @@ void ProxygenHandler::onEOM() noexcept {
         iRC = 400;
         break;
       }
+    }    
+    
+    sendResponse();
+  }
+}
+
+void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
+  // handler doesn't support upgrades
+}
+
+void ProxygenHandler::requestComplete() noexcept {
+  //ResetLogBuffer();
+  delete this;
+}
+
+void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
+  delete this;
+}
+
+void ProxygenHandler::sendResponse()noexcept{
+    switch(iRC){
+      case 200:
+      {
+        responseText = "OK";
+        break;
+      }
+      case 423:
+      {
+        responseText = "WRITE REQUESTS ARE NOT ALLOWED";
+        break;
+      }
+      //case 400:
+      default:
+      {
+        responseText = "WRONG REQUEST";
+        break;
+      }
     }
     builder->status(iRC, responseText);
     if (FLAGS_request_number) {
       builder->header("Request-Number",
                     folly::to<std::string>(stats_->getRequestCount()));
     }
+    
     //req->getHeaders().forEach([&](std::string& name, std::string& value) {
     //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
     //});
@@ -264,21 +302,13 @@ void ProxygenHandler::onEOM() noexcept {
     if(strResponseBody.size())
       builder->body(strResponseBody);
     //builder->send();
+
+
     builder->sendWithEOM();
-  }
+    ResetLogBuffer();
+
 }
 
-void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
-  // handler doesn't support upgrades
-}
 
-void ProxygenHandler::requestComplete() noexcept {
-  //ResetLogBuffer();
-  delete this;
-}
-
-void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
-  delete this;
-}
 } // namespace ProxygenService
 //#endif

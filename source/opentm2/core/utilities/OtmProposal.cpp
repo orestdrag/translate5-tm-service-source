@@ -72,7 +72,7 @@ typedef struct _OTMPROPOSALDATA
 
 	/*! \brief Fuzziness of the proposal. */
   int iFuzziness;                 
-
+  int iDiffs, iWords;
 	/*! \brief Markup table (format) of the proposal. */
   //std::string strMarkup;
   char szMarkup[OTMPROPOSAL_MAXNAMELEN];
@@ -505,6 +505,46 @@ void OtmProposal::setFuzziness( long iFuzzinessIn )
   pData->fFilled = 1;
 }
 
+
+ /* \brief get proposal diffs count from fuzzy calculations
+     \returns proposal diffs count from fuzzy calculations
+   */
+  int OtmProposal::getDiffs(){
+    if ( this->pvProposalData == NULL ) return( 0 );
+    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+    return( pData->iDiffs );
+
+  }
+
+  /* \brief set the proposal diffs count from fuzzy calculations
+     \param iDiffs new diffs count from fuzzy calculations of proposal
+   */
+  void OtmProposal::setDiffs( long iDiffs ){
+    if ( this->pvProposalData == NULL ) return;
+    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+    pData->iDiffs = iDiffs;
+
+  }
+
+    /* \brief get proposal words count during fuzzy calculations
+     \returns proposal fuzziness
+   */
+  int OtmProposal::getWords(){
+    if ( this->pvProposalData == NULL ) return( 0 );
+    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+    return( pData->iWords );
+
+  }
+
+  /* \brief set the proposal words count during fuzzy calculations
+     \param iWords new words count during fuzzy calculations of proposal
+   */
+  void OtmProposal::setWords( long iWords ){
+    if ( this->pvProposalData == NULL ) return;
+    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+    pData->iWords = iWords;
+
+  }
 
 /* \brief get markup table name (format)
     \param pszBuffer Pointer to buffer receiving the name of the markup table name

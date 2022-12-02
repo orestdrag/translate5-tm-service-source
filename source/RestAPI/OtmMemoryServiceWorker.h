@@ -112,6 +112,11 @@ public:
     std::string &strOutputParms
   );
 
+/*! \brief shutdown the service
+  \returns http return code
+  */
+  int shutdownService();
+
   /*! \brief Close all open memories
   \returns http return code0 if successful or an error code in case of failures
   */
@@ -125,7 +130,7 @@ public:
   int GetMemImportInProcess();
 
   /*! \brief Saves all open and modified memories
-  \returns http return code0 if successful or an error code in case of failures
+  \returns http return code if successful or an error code in case of failures
   */
   int saveAllTmOnDisk( std::string &strOutputParms );
 

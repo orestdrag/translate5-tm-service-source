@@ -1610,6 +1610,8 @@ typedef struct _TMX_MATCH_TABLE_W
   CHAR    szTargetAuthor[MAX_USERID];   //author name of target
   TIME_L  lTargetTime;                  //time stamp of target
   USHORT  usMatchLevel;                 //similarity of the source
+  int iWords;
+  int iDiffs;
   USHORT  usOverlaps;                   //temp field - nr of overlapping triples
   CHAR    szTagTable[MAX_FNAME];        //tag table name of source
   ULONG   ulKey;                        // key of match
@@ -2236,7 +2238,8 @@ BOOL TMFuzzynessEx
   SHORT sLanguageId,                   // language id to be used
   PUSHORT     pusFuzzy,                 // fuzzyness
   ULONG       ulOemCP,
-  PUSHORT     pusWords                 // number of words in segment
+  PUSHORT     pusWords,                // number of words in segment
+  PUSHORT     pusDiffs                 // number of diffs in segment
 );
 
 USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );

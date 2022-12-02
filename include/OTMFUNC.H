@@ -2619,7 +2619,13 @@ typedef struct _MEMPROPOSAL
   long    lTargetTime;
 
 	/*! \brief Fuzziness of the proposal. */
-  int iFuzziness;                 
+  int iFuzziness;    
+
+  /*! \brief Words parsed in fuzzy calculations of the proposal. */
+  int iWords = -1;
+
+  /*! \brief Diffs in fuzzy calculations of the proposal. */
+  int iDiffs = -1;                 
 
 	/*! \brief Markup table (format) of the proposal. */
   char szMarkup[MEMPROPOSAL_MAXNAMELEN];

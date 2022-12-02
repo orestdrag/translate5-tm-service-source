@@ -152,7 +152,7 @@ void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData );
 USHORT FillMatchTable( PTMX_CLB, PSZ_W, PLONG, PTMX_TARGET_RECORD,
                 PTMX_TARGET_CLB,
                 PTMX_MATCH_TABLE_W, PUSHORT, BOOL, PUSHORT, PUSHORT, PUSHORT,
-                ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT );
+                ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT, int, int);
 
 /**********************************************************************/
 /* Prototypes for Static functions...                                 */
@@ -1676,7 +1676,7 @@ USHORT ExactTest
                               pusMatchEntries, &pSentence->usActVote,
                               &pSentence->usActVote,
                               ulKeyNum, usTgtNum,
-                              pGetIn,  pSentence->pTagRecord, usTargetTranslationFlag, usContextRanking );
+                              pGetIn,  pSentence->pTagRecord, usTargetTranslationFlag, usContextRanking, -1, -1 );
             }
             else
             {
@@ -1823,9 +1823,10 @@ BOOL TMFuzzynessEx
   PSZ_W pszSource,                     // original string
   PSZ_W pszMatch,                      // found match
   SHORT sLanguageId,                   // language id to be used
-  PUSHORT     pusFuzzy,                 // fuzzyness
+  PUSHORT     pusFuzzy,                // fuzzyness
   ULONG       ulOemCP,
-  PUSHORT     pusWords                 // number of words in segment
+  PUSHORT     pusWords,                // number of words in segment
+  PUSHORT     pusDiffs                 // number of diffs in segment
 )
 {
   BOOL  fOK;
@@ -1833,8 +1834,6 @@ BOOL TMFuzzynessEx
   PFUZZYTOK    pFuzzyTok = NULL;       // returned token list
   PSZ          pInBuf = NULL;          // buffer for EQFBFindDiffEx function
   PSZ          pTokBuf = NULL;         // buffer for EQFBFindDiffEx function
-  USHORT       usDiff = 0;             // number of differences
-  USHORT       usWords = 0;            // number of words/tokens
   PLOADEDTABLE pTable = NULL;          // ptr to loaded tag table
 
 
@@ -1844,10 +1843,14 @@ BOOL TMFuzzynessEx
     if ( (*pszSource == EOS) && (*pszMatch == EOS) )
     {
       *pusFuzzy = 100;
+      *pusDiffs = 0;
+      *pusWords = 0;
     }
     else
     {
       *pusFuzzy = 0;
+      *pusDiffs = 0;
+      *pusWords = 0;
     } /* endif */
     return( TRUE );
   } /*   endif */
@@ -1874,7 +1877,7 @@ BOOL TMFuzzynessEx
 
   if ( fOK )
   {
-    EQFBCountDiff( pFuzzyTok, &usWords, &usDiff );
+    EQFBCountDiff( pFuzzyTok, pusWords, pusDiffs );
   } /* endif */
 
   // free allocated buffers and lists
@@ -1884,16 +1887,15 @@ BOOL TMFuzzynessEx
   if ( pTokBuf )   UtlAlloc( (PVOID *)&pTokBuf, 0L, 0L, NOMSG );
   if ( pTable )    TAFreeTagTable( pTable );
 
-  if(usWords > usDiff){
-    *pusFuzzy = (usWords != 0) ? ((usWords - usDiff) * 100 / usWords) : 100;
+  if(*pusWords > *pusDiffs){
+    *pusFuzzy = (*pusWords != 0) ? ((*pusWords - *pusDiffs) * 100 / *pusWords) : 100;
     LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100;\n Words = ", 
-            toStr(usWords).c_str(), ";\n Diff  = ", toStr(usDiff).c_str(),";\n Fuzzy = ", toStr(*pusFuzzy).c_str(), ";\n");
+            toStr(*pusWords).c_str(), ";\n Diff  = ", toStr(*pusDiffs).c_str(),";\n Fuzzy = ", toStr(*pusFuzzy).c_str(), ";\n");
   }else{
     *pusFuzzy = 0;
     LogMessage7(INFO,"TMFuzzynessEx::\n Fuzzy: Words <= Diff:\n Words = ", 
-            toStr(usWords).c_str(), ";\n Diff  = ", toStr(usDiff).c_str(),";\n Fuzzy = ", toStr(*pusFuzzy).c_str(), ";\n");
+            toStr(*pusWords).c_str(), ";\n Diff  = ", toStr(*pusDiffs).c_str(),";\n Fuzzy = ", toStr(*pusFuzzy).c_str(), ";\n");
   }
-  if ( pusWords ) *pusWords = usWords; 
   return fOK;
 } /* end of function TMFuzzyness */
 
@@ -1957,7 +1959,8 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                    PTMX_GET_W pGetIn,           // input structure
                    PTMX_TAGTABLE_RECORD pTagRecord,
                    USHORT usTranslationFlag,
-                   USHORT usContextRanking )
+                   USHORT usContextRanking,
+                   int iWords, int iDiffs )
 {
   PSZ    pSrcFileName = pGetIn->szFileName;  // source file name
   PSZ    pSrcLongName = pGetIn->szLongName;  // long source file name
@@ -2260,12 +2263,12 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
 
             {
               BOOL fEqual;
-              USHORT usFuzzy = 0;
+              USHORT usFuzzy = 0, usWords = 0, usDiffs = 0;
               BOOL fFuzzynessOK;
 
 /*Q!*/        fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
                                           pSubstProp->szPropSource, pSubstProp->szSource,
-                                          sLangID, &usFuzzy, ulSrcOemCP, 0 );
+                                          sLangID, &usFuzzy, ulSrcOemCP, &usWords, &usDiffs );
 
               if ( pGetIn->ulParm & GET_RESPECTCRLF )
               {
@@ -2355,6 +2358,8 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
             pstMatchTable->lTargetTime = pTMXTargetClb->lTime;
             //fill in match percentage
             pstMatchTable->usMatchLevel = *pusMatchLevel;
+            pstMatchTable->iWords = iWords;
+            pstMatchTable->iDiffs = iDiffs;
             //fill in nr of overlapping triples
             pstMatchTable->usOverlaps = *pusOverlaps;
             pstMatchTable->usContextRanking = usContextRanking;
@@ -2868,7 +2873,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   BOOL fOK = TRUE;                     //success indicator
   ULONG ulSourceLen = 0;              //length of normalized source string
   USHORT usRc = NO_ERROR;              //return code
-  USHORT usFuzzy = 0;                  //fuzzy match value
+  USHORT usFuzzy = 0, usWords = 0, usDiffs = 0;  //fuzzy match value
   BOOL   fStringEqual;                 // strings are equal ???
   BOOL   fNormStringEqual;             // normalized strings are equal ???
   BOOL   fRespectCRLFStringEqual = 0L;
@@ -3130,7 +3135,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                                         pSentence->pPropString,
                                         //(wchar_t*)propNormString.c_str(),
                                         sLangID, &usFuzzy,
-                                        pGetIn->ulSrcOemCP,0);
+                                        pGetIn->ulSrcOemCP, &usWords, &usDiffs);
 
             /**********************************************************/
             /* additional comparison if normalized strings are equal  */
@@ -3259,7 +3264,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                             pstMatchTable, &usFuzzy, fTagTableEqual,
                             pusMatchesFound, pusTmMaxVotes, pusOverlaps,
                             ulKeyNum, usTgtNum,
-                            pGetIn, pSentence->pTagRecord, usModifiedTranslationFlag, 0 );
+                            pGetIn, pSentence->pTagRecord, usModifiedTranslationFlag, 0, usWords, usDiffs );
           } /* endif */
         } /* endif */
         //position at next target

@@ -2002,6 +2002,8 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pOtmProposal->getAuthor( pProposal->szTargetAuthor, sizeof(pProposal->szTargetAuthor) );
   pProposal->lTargetTime = pOtmProposal->getUpdateTime();
   pProposal->iFuzziness  = pOtmProposal->getFuzziness();
+  pProposal->iDiffs = pOtmProposal->getDiffs();
+  pProposal->iWords = pOtmProposal->getWords();
   pOtmProposal->getMarkup( pProposal->szMarkup, sizeof(pProposal->szMarkup) );
   pOtmProposal->getContext( pProposal->szContext, sizeof(pProposal->szContext)/sizeof(CHAR_W) );
   pOtmProposal->getAddInfo( pProposal->szAddInfo, sizeof(pProposal->szAddInfo)/sizeof(CHAR_W) );
