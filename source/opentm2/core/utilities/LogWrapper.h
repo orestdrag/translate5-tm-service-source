@@ -75,10 +75,12 @@ int LogStop();
 
 int ResetLogBuffer();
 int SetLogBuffer(std::string logMsg);
+int SetBodyBuffer(std::string logMsg);
 int AddToLogBuffer(std::string logMsg);
 int SetLogInfo(int RequestType);
 void SetLogFilter(bool fFilterOn);
 std::string FlushLogBuffer();
+std::string FlushBodyBuffer();
 
 #define LOG_UNIMPLEMENTED_FUNCTION LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function in ", __func__);
 

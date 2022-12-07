@@ -83,6 +83,11 @@ static std::ofstream& getLogErrorFile() {
 static std::stringstream& getLogBuffer(){
     static std::stringstream logBuff;
     return logBuff;
+}
+
+static std::stringstream& getBodyBuffer(){
+    static std::stringstream logBuff;
+    return logBuff;
 
 }
 
@@ -139,8 +144,8 @@ int writeLog(std::string& message, int logLevel){
                     LOG(INFO) << message;
                 }
                 else{                
-                    message = FlushLogBuffer() //+ "\n" 
-                            + message;
+                    message = FlushLogBuffer() + "\n" 
+                            + message + "\n" + FlushBodyBuffer();
                     LOG(ERROR) << message;
                 }
             }
@@ -204,7 +209,8 @@ int desuppressLogging(int prevTreshold){
 }
 
 int ResetLogBuffer(){
-    getLogBuffer().clear();
+    getLogBuffer().str("");
+    getBodyBuffer().str("");
 }
 
 int SetLogBuffer(std::string logMsg){
@@ -219,14 +225,23 @@ int SetLogInfo(int RequestType){
 
 
 int AddToLogBuffer(std::string logMsg){
-    //LOG(INFO) << logMsg;
-    //LOG_DEBUG_MSG << logMsg;
-    getLogBuffer() << logMsg;// << std::endl;
+    getLogBuffer() << logMsg;
+}
+
+
+int SetBodyBuffer(std::string logMsg){
+    getBodyBuffer().str(logMsg);
 }
 
 std::string FlushLogBuffer(){
     auto str = getLogBuffer().str();
-    ResetLogBuffer();
+    getLogBuffer().str("");
+    return str;
+}
+
+std::string FlushBodyBuffer(){
+    auto str = getBodyBuffer().str();
+    getBodyBuffer().str("");
     return str;
 }
 
@@ -308,8 +323,8 @@ int LogMessageStr(int LogLevel, const std::string& message){
 
     logMessage += message;
     if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
-        logMessage.resize(1000);
-        logMessage += ". . . ";
+        logMessage.resize(3000);
+        logMessage += ". . . (truncated) ";
     }
 
     return writeLog(logMessage, LogLevel);

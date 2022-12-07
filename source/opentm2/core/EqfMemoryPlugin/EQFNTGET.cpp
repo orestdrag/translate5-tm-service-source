@@ -1380,7 +1380,7 @@ USHORT ExactTest
                              pTMXTargetRecord->usClb;
               while ( ( lLeftClbLen > 0 ) && (sCurMatch < SAME_SEG_AND_DOC_MATCH) )
               {
-                LogMessage5(TRANSACTION,__func__,":: lLeftClbLen = ", toStr(lLeftClbLen).c_str(), "; sCurMatch = ", toStr(sCurMatch).c_str());
+                LogMessage5(DEBUG,__func__,":: lLeftClbLen = ", toStr(lLeftClbLen).c_str(), "; sCurMatch = ", toStr(sCurMatch).c_str());
                 USHORT usTranslationFlag = pClb->bTranslationFlag;
                 USHORT usCurContextRanking = 0;       // context ranking of this match
                 BOOL fIgnoreProposal = FALSE;

@@ -14,11 +14,12 @@
 #include "LogWrapper.h"
 #include "EQF.H"
 #include <map>
-
+#include <filesystem>
 #include <errno.h>
 
 
 #include <filesystem>
+#include <folly/portability/GFlags.h>
 
 int __last_error_code = 0;
 
@@ -89,8 +90,35 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
     std::string fixedOldPath = FixPath(oldPath);
     std::string fixedNewPath = FixPath(newPath);
     errno = 0;
+    bool fOk = true;
+    //fOk = rename(fixedOldPath.c_str(), fixedNewPath.c_str()) != -1;
+    //Copy file instead
+    if(FileExists(newPath.c_str())){
+        LogMessage4(ERROR, __func__, ":: trg file \'", newPath.c_str(), "\' already exists!");
+        return FILE_EXISTS;
+    }
+    if(FileExists(oldPath.c_str()) == false){
+        LogMessage4(ERROR, __func__, ":: src file \'", oldPath.c_str(), "\' is missing!");
+        return FILE_NOT_EXISTS;
+    }
+    std::ifstream ifs(oldPath, std::ios::in | std::ios::binary);   
+    std::ofstream ofs(newPath, std::ios::out | std::ios::binary);
+    if(!ofs)
+    {
+        LogMessage4(ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
+        return FILEHELPER_ERROR_CANT_OPEN_DIR;
+    } 
+    if(!ifs)
+    {
+        LogMessage5(ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
+        return FILEHELPER_ERROR_CANT_OPEN_DIR;;
+    } 
+    ofs << ifs.rdbuf();
+    //delete prev file
+    DeleteFile(oldPath);
+    //remove(oldPath);
     
-   if(rename(fixedOldPath.c_str(), fixedNewPath.c_str()) == -1){
+    if(!fOk){
        LogMessage6(ERROR, "MoveFile:: cannot move ", fixedOldPath.c_str()," to ", fixedNewPath.c_str(), ", error = ", strerror(errno));
        return errno;
     }else{
@@ -179,9 +207,14 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
     }
 }
 
-
+DECLARE_bool(forbiddeletefiles);
 int FilesystemHelper::DeleteFile(const std::string& path){
+    if(FLAGS_forbiddeletefiles){
+        LogMessage3(WARNING, __func__,":: file deletion is forbidden, service tried to delete this file: ", path.c_str());
+        return FILEHELPER_NO_ERROR;
+    }
     std::string fixedPath = path;
+
     fixedPath = FixPath(fixedPath);
     if(int errCode = remove(path.c_str())){
         LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());

@@ -187,7 +187,7 @@ void ProxygenHandler::onEOM() noexcept {
     }
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
-    AddToLogBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+    SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
     
     switch(this->command){
       case COMMAND::CREATE_MEM:
@@ -262,6 +262,7 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
 void ProxygenHandler::sendResponse()noexcept{
     switch(iRC){
       case 200:
+      case 201:
       {
         responseText = "OK";
         break;
@@ -304,8 +305,8 @@ void ProxygenHandler::sendResponse()noexcept{
     //builder->send();
 
 
-    builder->sendWithEOM();
     ResetLogBuffer();
+    builder->sendWithEOM();
 
 }
 

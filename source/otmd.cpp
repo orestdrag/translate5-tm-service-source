@@ -90,6 +90,9 @@ DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
 DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
 
+
+DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including temporary and tm)");
+
 void handle_interrupt_sig(int sig) {
     LogMessage1(TRANSACTION, "Received interrupt signal\n");
     //StopOtmMemoryService();
