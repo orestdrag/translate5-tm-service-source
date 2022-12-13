@@ -8,8 +8,8 @@
 	
 	Hint for adding languages to t5memory:
 	- all languages that are available in LEK_languages table of translate5 must be available in languages.xml as well
-	- important connection for the tmx import and for mapping with translate5 is the rfc5646 value from LEK_languages in translate5, that should match the <iso></iso> value in languages.xml
-	- the value of <name></name> in languages.xml must be unique
+	- important connection for the tmx import and for mapping with translate5 is the rfc5646 value from LEK_languages in translate5, that should match the ~% value in languages.xml
+	- the value of <name>af</name> in languages.xml must be unique
 	- the main language (like "en") should always be set to <preferred>yes</preferred>, all sub-languages (e. g. "en-GB") to <preferred>no</preferred>
 	- <isSourceLanguage>yes</isSourceLanguage> should always be "yes"
 	- <isTargetLanguage>yes</isTargetLanguage> should always be "yes"
@@ -17,7 +17,7 @@
  -->
 <languages>
     <language>
-        <name>Afrikaans</name>
+        <name>af</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -30,7 +30,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Afrikaans(SouthAfrica)</name>
+        <name>af-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -43,33 +43,33 @@
         <comments>Afrikaans(SouthAfrica)</comments>
     </language>
     <language>
-    <name>Amharic</name>
-	<cpASCII>850</cpASCII>
-	<cpANSI>1252</cpANSI>
-	<cpName>ISO-8859-1</cpName>
-	<iso>am</iso>
-	<icu>am</icu>
-	<preferred>yes</preferred>
-	<group>Amharic</group>
-	<isSourceLanguage>yes</isSourceLanguage>
-	<isTargetLanguage>yes</isTargetLanguage>
-	<comments></comments>
-  </language>
+		<name>am</name>
+		<cpASCII>850</cpASCII>
+		<cpANSI>1252</cpANSI>
+		<cpName>ISO-8859-1</cpName>
+		<iso>am</iso>
+		<icu>am</icu>
+		<preferred>yes</preferred>
+		<group>Amharic</group>
+		<isSourceLanguage>yes</isSourceLanguage>
+		<isTargetLanguage>yes</isTargetLanguage>
+		<comments></comments>
+	  </language>
       <language>
-    <name>Amharic(Ahtiopia)</name>
-	<cpASCII>850</cpASCII>
-	<cpANSI>1252</cpANSI>
-	<cpName>ISO-8859-1</cpName>
-	<iso>am-ET</iso>
-	<icu>am-ET</icu>
-	<preferred>no</preferred>
-	<group>Amharic</group>
-	<isSourceLanguage>yes</isSourceLanguage>
-	<isTargetLanguage>yes</isTargetLanguage>
-	<comments>Amharic(Ahtiopia)</comments>
-  </language>
+		<name>am-ET</name>
+		<cpASCII>850</cpASCII>
+		<cpANSI>1252</cpANSI>
+		<cpName>ISO-8859-1</cpName>
+		<iso>am-ET</iso>
+		<icu>am-ET</icu>
+		<preferred>no</preferred>
+		<group>Amharic</group>
+		<isSourceLanguage>yes</isSourceLanguage>
+		<isTargetLanguage>yes</isTargetLanguage>
+		<comments>Amharic(Ahtiopia)</comments>
+	  </language>
     <language>
-        <name>Arabic</name>
+        <name>ar</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -82,7 +82,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Arabic(UnitedArabEmirates)</name>
+        <name>ar-AE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -95,7 +95,7 @@
         <comments>Arabic(UnitedArabEmirates)</comments>
     </language>
     <language>
-        <name>Arabic(Bahrain)</name>
+        <name>ar-BH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -108,7 +108,7 @@
         <comments>Arabic(Bahrain)</comments>
     </language>
     <language>
-        <name>Arabic(Algeria)</name>
+        <name>ar-DZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -121,7 +121,7 @@
         <comments>Arabic(Algeria)</comments>
     </language>
     <language>
-        <name>Arabic(Egypt)</name>
+        <name>ar-EG</name>
         <cpASCII>864</cpASCII>
         <cpANSI>1256</cpANSI>
         <cpName>ISO-8859-6</cpName>
@@ -134,7 +134,7 @@
         <comments>Arabic(Egypt)</comments>
     </language>
     <language>
-        <name>Arabic(Iraq)</name>
+        <name>ar-IQ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -147,7 +147,7 @@
         <comments>Arabic(Iraq)</comments>
     </language>
     <language>
-        <name>Arabic(Jordan)</name>
+        <name>ar-JO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -160,7 +160,7 @@
         <comments>Arabic(Jordan)</comments>
     </language>
     <language>
-        <name>Arabic(Kuwait)</name>
+        <name>ar-KW</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -173,7 +173,7 @@
         <comments>Arabic(Kuwait)</comments>
     </language>
     <language>
-        <name>Arabic(Lebanon)</name>
+        <name>ar-LB</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -186,7 +186,7 @@
         <comments>Arabic(Lebanon)</comments>
     </language>
     <language>
-        <name>Arabic(Libya)</name>
+        <name>ar-LY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -199,7 +199,7 @@
         <comments>Arabic(Libya)</comments>
     </language>
     <language>
-        <name>Arabic(Morocco)</name>
+        <name>ar-MA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -212,7 +212,7 @@
         <comments>Arabic(Morocco)</comments>
     </language>
     <language>
-        <name>Arabic(Oman)</name>
+        <name>ar-OM</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -225,7 +225,7 @@
         <comments>Arabic(Oman)</comments>
     </language>
     <language>
-        <name>Arabic(Qatar)</name>
+        <name>ar-QA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -238,7 +238,7 @@
         <comments>Arabic(Qatar)</comments>
     </language>
     <language>
-        <name>Arabic(SaudiArabia)</name>
+        <name>ar-SA</name>
         <cpASCII>864</cpASCII>
         <cpANSI>1256</cpANSI>
         <cpName>ISO-8859-6</cpName>
@@ -251,7 +251,7 @@
         <comments>Arabic(SaudiArabia)</comments>
     </language>
     <language>
-        <name>Arabic(Syria)</name>
+        <name>ar-SY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -264,7 +264,7 @@
         <comments>Arabic(Syria)</comments>
     </language>
     <language>
-        <name>Arabic(Tunisia)</name>
+        <name>ar-TN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -277,7 +277,7 @@
         <comments>Arabic(Tunisia)</comments>
     </language>
     <language>
-        <name>Arabic(Yemen)</name>
+        <name>ar-YE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -290,7 +290,7 @@
         <comments>Arabic(Yemen)</comments>
     </language>
     <language>
-        <name>Azerbaijani</name>
+        <name>az</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -303,7 +303,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Azerbaijani(Latin)</name>
+        <name>az-AZ</name>
         <cpASCII>857</cpASCII>
         <cpANSI>1254</cpANSI>
         <cpName>ISO-8859-9</cpName>
@@ -316,7 +316,7 @@
         <comments>Azerbaijani(Latin)</comments>
     </language>
     <language>
-        <name>Azerbaijani(Cyrillic)</name>
+        <name>az-Cyrl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -329,7 +329,7 @@
         <comments>Azerbaijani(Cyrillic)</comments>
     </language>
     <language>
-        <name>Azerbaijani(Cyrillic)(Azerbaijan)</name>
+        <name>az-Cyrl-AZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -342,7 +342,7 @@
         <comments>Azerbaijani(Cyrillic)(Azerbaijan)</comments>
     </language>
     <language>
-        <name>Azerbaijani(Latin)(Azerbaijan)</name>
+        <name>az-Latn-AZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -356,7 +356,7 @@
     </language>
     
         <language>
-        <name>Belarusian</name>
+        <name>be</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -369,7 +369,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Belarusian(Belarus)</name>
+        <name>be-BY</name>
         <cpASCII>1251</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -382,7 +382,7 @@
         <comments>Belarusian(Belarus)</comments>
     </language>
     <language>
-        <name>Bulgarian</name>
+        <name>bg</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -395,7 +395,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Bulgarian(Bulgaria)</name>
+        <name>bg-BG</name>
         <cpASCII>28595</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -408,7 +408,7 @@
         <comments>Bulgarian(Bulgaria)</comments>
     </language>
     <language>
-        <name>Bengalese</name>
+        <name>bn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -421,7 +421,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tibetan</name>
+        <name>bo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -434,7 +434,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Bosnian</name>
+        <name>bs</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -447,7 +447,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Bosnian(Bosnia)</name>
+        <name>bs-BA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -460,7 +460,7 @@
         <comments>Bosnian(Bosnia)</comments>
     </language>
     <language>
-        <name>Bosnian(LatinBosnia)</name>
+        <name>bs-Latn-BA</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-3166-2</cpName>
@@ -473,7 +473,7 @@
         <comments>Bosnian(LatinBosnia)</comments>
     </language>
     <language>
-        <name>Catalan</name>
+        <name>ca</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -486,7 +486,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Catalan(Spain)</name>
+        <name>ca-ES</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -499,7 +499,7 @@
         <comments>Catalan(Spain)</comments>
     </language>
     <language>
-        <name>Cebuano</name>
+        <name>ceb</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -512,7 +512,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Corsic</name>
+        <name>co</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -525,7 +525,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Czech</name>
+        <name>cs</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -538,7 +538,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Czech(Czechoslowakia)</name>
+        <name>cs-CZ</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -551,7 +551,7 @@
         <comments>Czech(Czechoslowakia)</comments>
     </language>
     <language>
-        <name>Welsh</name>
+        <name>cy</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -564,7 +564,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Welsh(UK)</name>
+        <name>cy-GB</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-14</cpName>
@@ -577,7 +577,7 @@
         <comments>Welsh(UK)</comments>
     </language>
     <language>
-        <name>Danish</name>
+        <name>da</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -590,7 +590,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Danish(Danmark)</name>
+        <name>da-DK</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -603,7 +603,7 @@
         <comments>Danish(Danmark)</comments>
     </language>
     <language>
-        <name>German</name>
+        <name>de</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -616,7 +616,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>German(Austria)</name>
+        <name>de-AT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -629,7 +629,7 @@
         <comments>German(Austria)</comments>
     </language>
     <language>
-        <name>German(Swiss)</name>
+        <name>de-CH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -642,7 +642,7 @@
         <comments>German(Swiss)</comments>
     </language>
     <language>
-        <name>German(Germany)</name>
+        <name>de-DE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -655,7 +655,7 @@
         <comments>German(Germany)</comments>
     </language>
     <language>
-        <name>German(Liechtenstein)</name>
+        <name>de-LI</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -668,7 +668,7 @@
         <comments>German(Liechtenstein)</comments>
     </language>
     <language>
-        <name>German(Luxembourg)</name>
+        <name>de-LU</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -681,7 +681,7 @@
         <comments>German(Luxembourg)</comments>
     </language>
     <language>
-        <name>Dhivehi</name>
+        <name>dv</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -694,7 +694,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Dhivehi(Maldives)</name>
+        <name>dv-MV</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -707,7 +707,7 @@
         <comments>Dhivehi(Maldives)</comments>
     </language>
     <language>
-        <name>Greek</name>
+        <name>el</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -720,7 +720,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Greek(Greece)</name>
+        <name>el-GR</name>
         <cpASCII>869</cpASCII>
         <cpANSI>1253</cpANSI>
         <cpName>ISO-8859-7</cpName>
@@ -733,7 +733,7 @@
         <comments>Greek(Greece)</comments>
     </language>
     <language>
-        <name>English</name>
+        <name>en</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -746,7 +746,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>English(Australia)</name>
+        <name>en-AU</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -759,7 +759,7 @@
         <comments>English(Australia)</comments>
     </language>
     <language>
-        <name>English(Belize)</name>
+        <name>en-BZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -772,7 +772,7 @@
         <comments>English(Belize)</comments>
     </language>
     <language>
-        <name>English(Canada)</name>
+        <name>en-CA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -785,7 +785,7 @@
         <comments>English(Canada)</comments>
     </language>
     <language>
-        <name>English(Caribbean)</name>
+        <name>en-CB</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -798,7 +798,7 @@
         <comments>English(Caribbean)</comments>
     </language>
     <language>
-        <name>English(UK)</name>
+        <name>en-GB</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -811,7 +811,7 @@
         <comments>English(UK)</comments>
     </language>
     <language>
-        <name>English(Ireland)</name>
+        <name>en-IE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -824,7 +824,7 @@
         <comments>English(Ireland)</comments>
     </language>
     <language>
-        <name>English(Jamaica)</name>
+        <name>en-JM</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -837,7 +837,7 @@
         <comments>English(Jamaica)</comments>
     </language>
     <language>
-        <name>English(NewZealand)</name>
+        <name>en-NZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -850,7 +850,7 @@
         <comments>English(NewZealand)</comments>
     </language>
     <language>
-        <name>English(Philippines)</name>
+        <name>en-PH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -863,7 +863,7 @@
         <comments>English(Philippines)</comments>
     </language>
     <language>
-        <name>English(TrinidadandTobago)</name>
+        <name>en-TT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -876,7 +876,7 @@
         <comments>English(TrinidadandTobago)</comments>
     </language>
     <language>
-        <name>English(U.S.)</name>
+        <name>en-US</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -889,7 +889,7 @@
         <comments>English(U.S.)</comments>
     </language>
     <language>
-        <name>English(SouthAfrica)</name>
+        <name>en-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -902,7 +902,7 @@
         <comments>English(SouthAfrica)</comments>
     </language>
     <language>
-        <name>English(Zimbabwe)</name>
+        <name>en-ZW</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -915,7 +915,7 @@
         <comments>English(Zimbabwe)</comments>
     </language>
     <language>
-        <name>Esperanto</name>
+        <name>eo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -928,7 +928,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Spanish</name>
+        <name>es</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -941,7 +941,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Spanish(LatinAmericaAndCaribian)</name>
+        <name>es-419</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -954,7 +954,7 @@
         <comments>Spanish(LatinAmericaAndCaribian)</comments>
     </language>
     <language>
-        <name>Spanish(Argentina)</name>
+        <name>es-AR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -967,7 +967,7 @@
         <comments>Spanish(Argentina)</comments>
     </language>
     <language>
-        <name>Spanish(Bolivia)</name>
+        <name>es-BO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -980,7 +980,7 @@
         <comments>Spanish(Bolivia)</comments>
     </language>
     <language>
-        <name>Spanish(Chile)</name>
+        <name>es-CL</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -993,7 +993,7 @@
         <comments>Spanish(Chile)</comments>
     </language>
     <language>
-        <name>Spanish(Colombia)</name>
+        <name>es-CO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1006,7 +1006,7 @@
         <comments>Spanish(Colombia)</comments>
     </language>
     <language>
-        <name>Spanish(CostaRica)</name>
+        <name>es-CR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1019,7 +1019,7 @@
         <comments>Spanish(CostaRica)</comments>
     </language>
     <language>
-        <name>Spanish(DominicanRepublic)</name>
+        <name>es-DO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1032,7 +1032,7 @@
         <comments>Spanish(DominicanRepublic)</comments>
     </language>
     <language>
-        <name>Spanish(Ecuador)</name>
+        <name>es-EC</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1045,7 +1045,7 @@
         <comments>Spanish(Ecuador)</comments>
     </language>
     <language>
-        <name>Spanish(Spain)</name>
+        <name>es-ES</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1058,7 +1058,7 @@
         <comments>Spanish(Spain)</comments>
     </language>
     <language>
-        <name>Spanish(Guatemala)</name>
+        <name>es-GT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1071,7 +1071,7 @@
         <comments>Spanish(Guatemala)</comments>
     </language>
     <language>
-        <name>Spanish(Honduras)</name>
+        <name>es-HN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1084,7 +1084,7 @@
         <comments>Spanish(Honduras)</comments>
     </language>
     <language>
-        <name>Spanish(Mexico)</name>
+        <name>es-MX</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1097,7 +1097,7 @@
         <comments>Spanish(Mexico)</comments>
     </language>
     <language>
-        <name>Spanish(Nicaragua)</name>
+        <name>es-NI</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1110,7 +1110,7 @@
         <comments>Spanish(Nicaragua)</comments>
     </language>
     <language>
-        <name>Spanish(Panama)</name>
+        <name>es-PA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1123,7 +1123,7 @@
         <comments>Spanish(Panama)</comments>
     </language>
     <language>
-        <name>Spanish(Peru)</name>
+        <name>es-PE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1136,7 +1136,7 @@
         <comments>Spanish(Peru)</comments>
     </language>
     <language>
-        <name>Spanish(PuertoRico)</name>
+        <name>es-PR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1149,7 +1149,7 @@
         <comments>Spanish(PuertoRico)</comments>
     </language>
     <language>
-        <name>Spanish(Paraguay)</name>
+        <name>es-PY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1162,7 +1162,7 @@
         <comments>Spanish(Paraguay)</comments>
     </language>
     <language>
-        <name>Spanish(ElSalvador)</name>
+        <name>es-SV</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1175,7 +1175,7 @@
         <comments>Spanish(ElSalvador)</comments>
     </language>
     <language>
-        <name>Spanish(US)</name>
+        <name>es-US</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1188,7 +1188,7 @@
         <comments>Spanish(US)</comments>
     </language>
     <language>
-        <name>Spanish(Uruguay)</name>
+        <name>es-UY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1201,7 +1201,7 @@
         <comments>Spanish(Uruguay)</comments>
     </language>
     <language>
-        <name>Spanish(Venezuela)</name>
+        <name>es-VE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1214,7 +1214,7 @@
         <comments>Spanish(Venezuela)</comments>
     </language>
     <language>
-        <name>Estonian</name>
+        <name>et</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1227,7 +1227,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Estonian(Estonia)</name>
+        <name>et-EE</name>
         <cpASCII>28603</cpASCII>
         <cpANSI>1257</cpANSI>
         <cpName>ISO-8859-4</cpName>
@@ -1240,7 +1240,7 @@
         <comments>Estonian(Estonia)</comments>
     </language>
     <language>
-        <name>Basque</name>
+        <name>eu</name>
         <cpASCII>1252</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -1253,7 +1253,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Basque(Spain)</name>
+        <name>eu-ES</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1266,7 +1266,7 @@
         <comments>Basque(Spain)</comments>
     </language>
     <language>
-        <name>Persian(Farsi)</name>
+        <name>fa</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1279,7 +1279,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Persian(Iran)</name>
+        <name>fa-IR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1292,7 +1292,7 @@
         <comments>Persian(Iran)</comments>
     </language>
     <language>
-        <name>Finnish</name>
+        <name>fi</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1305,7 +1305,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Finnish(Finland)</name>
+        <name>fi-FI</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1318,7 +1318,7 @@
         <comments>Finnish(Finland)</comments>
     </language>
     <language>
-        <name>Phillipino</name>
+        <name>fil</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1331,7 +1331,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Fidschi</name>
+        <name>fj</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1344,7 +1344,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Faroese</name>
+        <name>fo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1357,7 +1357,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Faroese(FaroeIslands)</name>
+        <name>fo-FO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1370,7 +1370,7 @@
         <comments>Faroese(FaroeIslands)</comments>
     </language>
     <language>
-        <name>French</name>
+        <name>fr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1383,7 +1383,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>French(Belgium)</name>
+        <name>fr-BE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1396,7 +1396,7 @@
         <comments>French(Belgium)</comments>
     </language>
     <language>
-        <name>French(Canadian)</name>
+        <name>fr-CA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1409,7 +1409,7 @@
         <comments>French(Canadian)</comments>
     </language>
     <language>
-        <name>French(Swiss)</name>
+        <name>fr-CH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1422,7 +1422,7 @@
         <comments>French(Swiss)</comments>
     </language>
     <language>
-        <name>French(France)</name>
+        <name>fr-FR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1435,7 +1435,7 @@
         <comments>French(France)</comments>
     </language>
     <language>
-        <name>French(Luxembourg)</name>
+        <name>fr-LU</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1448,7 +1448,7 @@
         <comments>French(Luxembourg)</comments>
     </language>
     <language>
-        <name>French(Monaco)</name>
+        <name>fr-MC</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1461,7 +1461,7 @@
         <comments>French(Monaco)</comments>
     </language>
     <language>
-        <name>Irish</name>
+        <name>ga</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1474,7 +1474,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Irish(Ireland)</name>
+        <name>ga-IE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1487,7 +1487,7 @@
         <comments>Irish(Ireland)</comments>
     </language>
     <language>
-        <name>Scotish</name>
+        <name>gd</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1500,7 +1500,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Galician</name>
+        <name>gl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1513,7 +1513,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Galician(Spain)</name>
+        <name>gl-ES</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1526,7 +1526,7 @@
         <comments>Galician(Spain)</comments>
     </language>
     <language>
-        <name>Gujarati</name>
+        <name>gu</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1539,7 +1539,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Gujarati(India)</name>
+        <name>gu-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1552,7 +1552,7 @@
         <comments>Gujarati(India)</comments>
     </language>
     <language>
-        <name>Hebrew</name>
+        <name>he</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1565,7 +1565,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Hebrew</name>
+        <name>he-IL</name>
         <cpASCII>862</cpASCII>
         <cpANSI>1255</cpANSI>
         <cpName>ISO-8859-8</cpName>
@@ -1578,7 +1578,7 @@
         <comments>Hebrew</comments>
     </language>
     <language>
-        <name>Hindi</name>
+        <name>hi</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1591,7 +1591,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Hindi</name>
+        <name>hi-IN</name>
         <cpASCII>468</cpASCII>
         <cpANSI>1255</cpANSI>
         <cpName>ISO-8859-8</cpName>
@@ -1604,7 +1604,7 @@
         <comments>Hindi</comments>
     </language>
     <language>
-        <name>Hmong</name>
+        <name>hmn</name>
         <cpASCII>468</cpASCII>
         <cpANSI>1255</cpANSI>
         <cpName>ISO-8859-8</cpName>
@@ -1617,7 +1617,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Croatian</name>
+        <name>hr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1630,7 +1630,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Croatian(BosniaandHerzegovina)</name>
+        <name>hr-BA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1643,7 +1643,7 @@
         <comments>Croatian(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>Croatian(Croatia)</name>
+        <name>hr-HR</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -1656,7 +1656,7 @@
         <comments>Croatian(Croatia)</comments>
     </language>
     <language>
-        <name>Haitian</name>
+        <name>ht</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1669,7 +1669,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Hungarian</name>
+        <name>hu</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1682,7 +1682,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Hungarian</name>
+        <name>hu-HU</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -1695,7 +1695,7 @@
         <comments>Hungarian</comments>
     </language>
     <language>
-        <name>Armenian</name>
+        <name>hy</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1708,7 +1708,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Armenian(Armenia)</name>
+        <name>hy-AM</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1721,7 +1721,7 @@
         <comments>Armenian(Armenia)</comments>
     </language>
     <language>
-        <name>Indonesian</name>
+        <name>id</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1734,7 +1734,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Indonesian</name>
+        <name>id-ID</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1747,7 +1747,7 @@
         <comments>Indonesian</comments>
     </language>
     <language>
-        <name>Igbo</name>
+        <name>ig</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1760,7 +1760,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Icelandic</name>
+        <name>is</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1773,7 +1773,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Icelandic</name>
+        <name>is-IS</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1786,7 +1786,7 @@
         <comments>Icelandic</comments>
     </language>
     <language>
-        <name>Italian</name>
+        <name>it</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1799,7 +1799,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Italian(Swiss)</name>
+        <name>it-CH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1812,7 +1812,7 @@
         <comments>Italian(Swiss)</comments>
     </language>
     <language>
-        <name>Italian(Italy)</name>
+        <name>it-IT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1825,7 +1825,7 @@
         <comments>Italian(Italy)</comments>
     </language>
     <language>
-        <name>Japanese</name>
+        <name>ja</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1838,7 +1838,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Japanese</name>
+        <name>ja-JP</name>
         <cpASCII>943</cpASCII>
         <cpANSI>943</cpANSI>
         <cpName>Shift_JIS</cpName>
@@ -1851,7 +1851,7 @@
         <comments>Japanese</comments>
     </language>
     <language>
-        <name>Georgian</name>
+        <name>ka</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1864,7 +1864,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Georgian(Georgia)</name>
+        <name>ka-GE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1877,7 +1877,7 @@
         <comments>Georgian(Georgia)</comments>
     </language>
     <language>
-        <name>Kazakh</name>
+        <name>kk</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1890,7 +1890,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Kazakh</name>
+        <name>kk-KZ</name>
         <cpASCII>65001</cpASCII>
         <cpANSI>65001</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -1903,7 +1903,7 @@
         <comments>Kazakh</comments>
     </language>
     <language>
-        <name>Khmer</name>
+        <name>km</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1916,7 +1916,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Kannada</name>
+        <name>kn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1929,7 +1929,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Kannada(India)</name>
+        <name>kn-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1942,7 +1942,7 @@
         <comments>Kannada(India)</comments>
     </language>
     <language>
-        <name>Korean</name>
+        <name>ko</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1955,7 +1955,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Korean(Korea)</name>
+        <name>ko-KR</name>
         <cpASCII>949</cpASCII>
         <cpANSI>949</cpANSI>
         <cpName>euc-kr</cpName>
@@ -1968,7 +1968,7 @@
         <comments>Korean(Korea)</comments>
     </language>
     <language>
-        <name>Konkani</name>
+        <name>kok</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1981,7 +1981,7 @@
         <comments>Konkani</comments>
     </language>
     <language>
-        <name>Konkani(India)</name>
+        <name>kok-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -1994,7 +1994,7 @@
         <comments>Konkani(India)</comments>
     </language>
     <language>
-        <name>Kurdish</name>
+        <name>ku</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2007,7 +2007,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Kyrgyz</name>
+        <name>ky</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2020,7 +2020,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Kyrgyz(Kyrgyzstan)</name>
+        <name>ky-KG</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2033,7 +2033,7 @@
         <comments>Kyrgyz(Kyrgyzstan)</comments>
     </language>
     <language>
-        <name>Latin</name>
+        <name>la</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2046,7 +2046,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Luxembourgish</name>
+        <name>lb</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2059,7 +2059,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Lao</name>
+        <name>lo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2072,7 +2072,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Lithuanian</name>
+        <name>lt</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2085,7 +2085,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Lithuanian(Lithuania)</name>
+        <name>lt-LT</name>
         <cpASCII>28603</cpASCII>
         <cpANSI>1257</cpANSI>
         <cpName>ISO-8859-4</cpName>
@@ -2098,7 +2098,7 @@
         <comments>Lithuanian(Lithuania)</comments>
     </language>
     <language>
-        <name>Latvian</name>
+        <name>lv</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2111,7 +2111,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Latvian(Latvia)</name>
+        <name>lv-LV</name>
         <cpASCII>28603</cpASCII>
         <cpANSI>1257</cpANSI>
         <cpName>ISO-8859-4</cpName>
@@ -2124,7 +2124,7 @@
         <comments>Latvian(Latvia)</comments>
     </language>
     <language>
-        <name>Madagassian</name>
+        <name>mg</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2137,7 +2137,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Māori</name>
+        <name>mi</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2150,7 +2150,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Māori(NewZealand)</name>
+        <name>mi-NZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2163,7 +2163,7 @@
         <comments>Māori(NewZealand)</comments>
     </language>
     <language>
-        <name>Macedonian</name>
+        <name>mk</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2176,7 +2176,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Macedonian(Macedonia)</name>
+        <name>mk-MK</name>
         <cpASCII>855</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -2189,7 +2189,7 @@
         <comments>Macedonian(Macedonia)</comments>
     </language>
     <language>
-        <name>Malayalam</name>
+        <name>ml</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2202,7 +2202,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Mongolian</name>
+        <name>mn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2215,7 +2215,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Mongolian(Mongolia)</name>
+        <name>mn-MN</name>
         <cpASCII>866</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -2228,7 +2228,7 @@
         <comments>Mongolian(Mongolia)</comments>
     </language>
     <language>
-        <name>Moldavian</name>
+        <name>mo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2241,7 +2241,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Marathi</name>
+        <name>mr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2254,7 +2254,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Marathi(India)</name>
+        <name>mr-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2267,7 +2267,7 @@
         <comments>Marathi(India)</comments>
     </language>
     <language>
-        <name>Malaysian</name>
+        <name>ms</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2280,7 +2280,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Malaysian(Brunei)</name>
+        <name>ms-BN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2293,7 +2293,7 @@
         <comments>Malaysian(Brunei)</comments>
     </language>
     <language>
-        <name>Malay(Malaysia)</name>
+        <name>ms-MY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2306,7 +2306,7 @@
         <comments>Malay(Malaysia)</comments>
     </language>
     <language>
-        <name>Maltese</name>
+        <name>mt</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2319,7 +2319,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Maltese(Malta)</name>
+        <name>mt-MT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2332,7 +2332,7 @@
         <comments>Maltese(Malta)</comments>
     </language>
     <language>
-        <name>HmongDaw</name>
+        <name>mww</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2345,7 +2345,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Myanmar</name>
+        <name>my</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2358,7 +2358,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Norwegian(Bokmal)</name>
+        <name>nb</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2371,7 +2371,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Norwegian(Bokmal)(Norway)</name>
+        <name>nb-NO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2384,7 +2384,7 @@
         <comments>Norwegian(Bokmal)(Norway)</comments>
     </language>
     <language>
-        <name>Norwegian</name>
+        <name>no</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2397,7 +2397,7 @@
         <comments>Norwegian</comments>
     </language>
     <language>
-        <name>Nepali</name>
+        <name>ne</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2410,7 +2410,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Dutch</name>
+        <name>nl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2423,7 +2423,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Dutch(Belgium)</name>
+        <name>nl-BE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2436,7 +2436,7 @@
         <comments>Dutch(Belgium)</comments>
     </language>
     <language>
-        <name>Dutch(Netherlands)</name>
+        <name>nl-NL</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2449,7 +2449,7 @@
         <comments>Dutch(Netherlands)</comments>
     </language>
     <language>
-        <name>Norwegian(Nynorsk)</name>
+        <name>nn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2462,7 +2462,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Norwegian(Nynorsk)(Norway)</name>
+        <name>nn-NO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2475,7 +2475,7 @@
         <comments>Norwegian(Nynorsk)(Norway)</comments>
     </language>
     <language>
-        <name>North-Sotho</name>
+        <name>ns</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2488,7 +2488,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>North-Sotho(SouthAfrica)</name>
+        <name>ns-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2501,7 +2501,7 @@
         <comments>North-Sotho(SouthAfrica)</comments>
     </language>
     <language>
-        <name>Nyanja</name>
+        <name>ny</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2514,7 +2514,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Odia</name>
+        <name>or</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2527,7 +2527,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>QueretaroOtomi</name>
+        <name>otq</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2540,7 +2540,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Panjabi</name>
+        <name>pa</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2553,7 +2553,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Punjabi(India)</name>
+        <name>pa-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2566,7 +2566,7 @@
         <comments>Punjabi(India)</comments>
     </language>
     <language>
-        <name>Polish</name>
+        <name>pl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2579,7 +2579,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Polish</name>
+        <name>pl-PL</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -2592,7 +2592,7 @@
         <comments>Polish</comments>
     </language>
     <language>
-        <name>Dari</name>
+        <name>prs</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2605,7 +2605,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Paschtu</name>
+        <name>ps</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2618,7 +2618,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Paschtu(Afghanistan)</name>
+        <name>ps-AR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2631,7 +2631,7 @@
         <comments>Paschtu(Afghanistan)</comments>
     </language>
     <language>
-        <name>Portuguese</name>
+        <name>pt</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2644,7 +2644,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Portuguese(Brazil)</name>
+        <name>pt-BR</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2657,7 +2657,7 @@
         <comments>Portuguese(Brazil)</comments>
     </language>
     <language>
-        <name>Portuguese(Portugal)</name>
+        <name>pt-PT</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2670,7 +2670,7 @@
         <comments>Portuguese(Portugal)</comments>
     </language>
     <language>
-        <name>Quechua</name>
+        <name>qu</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2683,7 +2683,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Quechua(Bolivia)</name>
+        <name>qu-BO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2696,7 +2696,7 @@
         <comments>Quechua(Bolivia)</comments>
     </language>
     <language>
-        <name>Quechua(Ecuador)</name>
+        <name>qu-EC</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2709,7 +2709,7 @@
         <comments>Quechua(Ecuador)</comments>
     </language>
     <language>
-        <name>Quechua(Peru)</name>
+        <name>qu-PE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2722,7 +2722,7 @@
         <comments>Quechua(Peru)</comments>
     </language>
     <language>
-        <name>Rumantsch</name>
+        <name>rm-CH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2735,7 +2735,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Romanian</name>
+        <name>ro</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2748,7 +2748,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Romanian(Romania)</name>
+        <name>ro-RO</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -2761,7 +2761,7 @@
         <comments>Romanian(Romania)</comments>
     </language>
     <language>
-        <name>Russian</name>
+        <name>ru</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2774,7 +2774,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Russian(Russia)</name>
+        <name>ru-RU</name>
         <cpASCII>866</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -2787,7 +2787,7 @@
         <comments>Russian(Russia)</comments>
     </language>
     <language>
-        <name>Kinyarwanda</name>
+        <name>rw</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2800,7 +2800,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Sanskrit</name>
+        <name>sa</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2813,7 +2813,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Sanskrit(India)</name>
+        <name>sa-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2826,7 +2826,7 @@
         <comments>Sanskrit(India)</comments>
     </language>
     <language>
-        <name>Sindhi</name>
+        <name>sd</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2839,7 +2839,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Sami</name>
+        <name>se</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2852,7 +2852,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Sami(Finland)</name>
+        <name>se-FI</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2865,7 +2865,7 @@
         <comments>Sami(Finland)</comments>
     </language>
     <language>
-        <name>Sami(Norway)</name>
+        <name>se-NO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2878,7 +2878,7 @@
         <comments>Sami(Norway)</comments>
     </language>
     <language>
-        <name>Sami(Sweden)</name>
+        <name>se-SE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2891,7 +2891,7 @@
         <comments>Sami(Sweden)</comments>
     </language>
     <language>
-        <name>Singhalesic</name>
+        <name>si</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2904,7 +2904,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Slovak</name>
+        <name>sk</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2917,7 +2917,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Slovak(Slovakia)</name>
+        <name>sk-SK</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -2930,7 +2930,7 @@
         <comments>Slovak(Slovakia)</comments>
     </language>
     <language>
-        <name>Slovene</name>
+        <name>sl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2943,7 +2943,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Slovene(Slovenia)</name>
+        <name>sl-SI</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-2</cpName>
@@ -2956,7 +2956,7 @@
         <comments>Slovene(Slovenia)</comments>
     </language>
     <language>
-        <name>Samoan</name>
+        <name>sm</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2969,7 +2969,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Shona</name>
+        <name>sn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2982,7 +2982,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Somali</name>
+        <name>so</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -2995,7 +2995,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Somali(Somalia)</name>
+        <name>so-so</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3008,7 +3008,7 @@
         <comments>Somali(Somalia)</comments>
     </language>
     <language>
-        <name>Albanian</name>
+        <name>sq</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3021,7 +3021,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Albanian(Albania)</name>
+        <name>sq-AL</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3034,7 +3034,7 @@
         <comments>Albanian(Albania)</comments>
     </language>
     <language>
-        <name>Serbian(Latin)</name>
+        <name>sr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3047,7 +3047,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Serbian(Latin)(BosniaandHerzegovina)</name>
+        <name>sr-BA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3060,7 +3060,7 @@
         <comments>Serbian(Latin)(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>Serbian(Cyrillic)</name>
+        <name>Sr-Cyrl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3073,7 +3073,7 @@
         <comments>Serbian(Cyrillic)</comments>
     </language>
     <language>
-        <name>Serbian(Cyrillic)(BosniaandHerzegovina)</name>
+        <name>sr-Cyrl-BA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3086,7 +3086,7 @@
         <comments>Serbian(Cyrillic)(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>Serbian(Cyrillic)(Serbia)</name>
+        <name>sr-Cyrl-RS</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3099,7 +3099,7 @@
         <comments>Serbian(Cyrillic)(Serbia)</comments>
     </language>
     <language>
-        <name>Serbian(Cyrillic)(SerbiaandMontenegro)</name>
+        <name>sr-Cyrl-SP</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3112,7 +3112,7 @@
         <comments>Serbian(Cyrillic)(SerbiaandMontenegro)</comments>
     </language>
     <language>
-        <name>Serbian(Latin)(Montenegrin)</name>
+        <name>sr-Latn-ME</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-3166-2</cpName>
@@ -3125,7 +3125,7 @@
         <comments>Serbian(Latin)(Montenegrin)</comments>
     </language>
     <language>
-        <name>Serbian(Latin)</name>
+        <name>sr-Latn-SP</name>
         <cpASCII>852</cpASCII>
         <cpANSI>1250</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -3138,7 +3138,7 @@
         <comments>Serbian(Latin)</comments>
     </language>
     <language>
-        <name>Serbian(Latin)(Serbia)</name>
+        <name>sr-RS</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3151,7 +3151,7 @@
         <comments>Serbian(Latin)(Serbia)</comments>
     </language>
     <language>
-        <name>Serbian(Montenegrin)</name>
+        <name>sr-SP</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3164,7 +3164,7 @@
         <comments>Serbian(Montenegrin)</comments>
     </language>
     <language>
-        <name>Sesotho</name>
+        <name>st</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3177,7 +3177,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Swedish</name>
+        <name>sv</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3190,7 +3190,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Swedish(Finland)</name>
+        <name>sv-FI</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3203,7 +3203,7 @@
         <comments>Swedish(Finland)</comments>
     </language>
     <language>
-        <name>Swedish(Sweden)</name>
+        <name>sv-SE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3216,7 +3216,7 @@
         <comments>Swedish(Sweden)</comments>
     </language>
     <language>
-        <name>Swahili</name>
+        <name>sw</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3229,7 +3229,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Swahili(Kenya)</name>
+        <name>sw-KE</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3242,7 +3242,7 @@
         <comments>Swahili(Kenya)</comments>
     </language>
     <language>
-        <name>Syrian</name>
+        <name>syr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3255,7 +3255,7 @@
         <comments>Syrian</comments>
     </language>
     <language>
-        <name>Syrian(Syria)</name>
+        <name>syr-SY</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3268,7 +3268,7 @@
         <comments>Syrian(Syria)</comments>
     </language>
     <language>
-        <name>Tamil</name>
+        <name>ta</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3281,7 +3281,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tamil(India)</name>
+        <name>ta-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3294,7 +3294,7 @@
         <comments>Tamil(India)</comments>
     </language>
     <language>
-        <name>Telugu</name>
+        <name>te</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3307,7 +3307,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Telugu(India)</name>
+        <name>te-IN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3320,7 +3320,7 @@
         <comments>Telugu(India)</comments>
     </language>
     <language>
-        <name>Tajik</name>
+        <name>tg</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3333,7 +3333,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Thai</name>
+        <name>th</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3346,7 +3346,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Thai</name>
+        <name>th-TH</name>
         <cpASCII>874</cpASCII>
         <cpANSI>874</cpANSI>
         <cpName>ISO-8859-11</cpName>
@@ -3359,7 +3359,7 @@
         <comments>Thai</comments>
     </language>
     <language>
-        <name>Turkmen</name>
+        <name>tk</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3372,7 +3372,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tagalog</name>
+        <name>tl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3385,7 +3385,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tagalog</name>
+        <name>tl-PH</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3398,7 +3398,7 @@
         <comments>Tagalog</comments>
     </language>
     <language>
-        <name>Klingon</name>
+        <name>tlh-Latn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3411,7 +3411,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Klingon(plqaD)</name>
+        <name>tlh-Piqd</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3424,7 +3424,7 @@
         <comments>Klingon(plqaD)</comments>
     </language>
     <language>
-        <name>Tswana</name>
+        <name>tn</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3437,7 +3437,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tswana(SouthAfrica)</name>
+        <name>tn-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3450,7 +3450,7 @@
         <comments>Tswana(SouthAfrica)</comments>
     </language>
     <language>
-        <name>Tongan</name>
+        <name>to</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3463,7 +3463,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Turkish</name>
+        <name>tr</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3476,7 +3476,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Turkish</name>
+        <name>tr-TR</name>
         <cpASCII>857</cpASCII>
         <cpANSI>1254</cpANSI>
         <cpName>ISO-8859-9</cpName>
@@ -3489,7 +3489,7 @@
         <comments>Turkish</comments>
     </language>
     <language>
-        <name>Tsonga</name>
+        <name>ts</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3502,7 +3502,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tatar</name>
+        <name>tt</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3515,7 +3515,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Tatar(Russia)</name>
+        <name>tt-RU</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3528,7 +3528,7 @@
         <comments>Tatar(Russia)</comments>
     </language>
     <language>
-        <name>Tahitian</name>
+        <name>ty</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3541,7 +3541,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Uiguric</name>
+        <name>ug</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3554,7 +3554,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Ukrainian</name>
+        <name>uk</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3567,7 +3567,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Ukrainian(Ukrainia)</name>
+        <name>uk-UA</name>
         <cpASCII>1251</cpASCII>
         <cpANSI>1251</cpANSI>
         <cpName>ISO-8859-5</cpName>
@@ -3580,7 +3580,7 @@
         <comments>Ukrainian(Ukrainia)</comments>
     </language>
     <language>
-        <name>Urdu</name>
+        <name>ur</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3593,7 +3593,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Urdu(Pakistan)</name>
+        <name>ur-PK</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3606,7 +3606,7 @@
         <comments>Urdu(Pakistan)</comments>
     </language>
     <language>
-        <name>Uzbek(Latin)</name>
+        <name>uz</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3619,7 +3619,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Uzbek(Cyrillic)</name>
+        <name>uz-Cyrl</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3632,7 +3632,7 @@
         <comments>Uzbek(Cyrillic)</comments>
     </language>
     <language>
-        <name>Uzbek(Cyrillic)(Uzbekistan)</name>
+        <name>uz-Cyrl-UZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3645,7 +3645,7 @@
         <comments>Uzbek(Cyrillic)(Uzbekistan)</comments>
     </language>
     <language>
-        <name>Uzbek(Latin)(Uzbekistan)</name>
+        <name>uz-UZ</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3658,7 +3658,7 @@
         <comments>Uzbek(Latin)(Uzbekistan)</comments>
     </language>
     <language>
-        <name>Vietnamese</name>
+        <name>vi</name>
         <cpASCII>1258</cpASCII>
         <cpANSI>1258</cpANSI>
         <cpName>cp1258</cpName>
@@ -3671,7 +3671,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Vietnamese(Vietnam)</name>
+        <name>vi-VN</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3684,7 +3684,7 @@
         <comments>Vietnamese(Vietnam)</comments>
     </language>
     <language>
-        <name>Xhosa</name>
+        <name>xh</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3697,7 +3697,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Xhosa(SouthAfrica)</name>
+        <name>xh-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3710,7 +3710,7 @@
         <comments>Xhosa(SouthAfrica)</comments>
     </language>
     <language>
-        <name>Jiddish</name>
+        <name>yi</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3723,7 +3723,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Yoruba</name>
+        <name>yo</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3736,7 +3736,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>YucatecMaya</name>
+        <name>yua</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3749,7 +3749,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Cantonese</name>
+        <name>yue</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3762,7 +3762,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Chinese</name>
+        <name>zh</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3775,7 +3775,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Chinese(simplified)</name>
+        <name>zh-Hans</name>
         <cpASCII>936</cpASCII>
         <cpANSI>936</cpANSI>
         <cpName>gb2312</cpName>
@@ -3788,7 +3788,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Chinese(traditional)</name>
+        <name>zh-Hant</name>
         <cpASCII>936</cpASCII>
         <cpANSI>936</cpANSI>
         <cpName>gb2312</cpName>
@@ -3801,7 +3801,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Chinese(China)</name>
+        <name>zh-CN</name>
         <cpASCII>936</cpASCII>
         <cpANSI>936</cpANSI>
         <cpName>gb2312</cpName>
@@ -3814,7 +3814,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Chinese(HongKong)</name>
+        <name>zh-HK</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3827,7 +3827,7 @@
         <comments>Chinese(HongKong)</comments>
     </language>
     <language>
-        <name>Chinese(Macao)</name>
+        <name>zh-MO</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3840,7 +3840,7 @@
         <comments>Chinese(Macao)</comments>
     </language>
     <language>
-        <name>Chinese(Singapore)</name>
+        <name>zh-SG</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3853,7 +3853,7 @@
         <comments>Chinese(Singapore)</comments>
     </language>
     <language>
-        <name>Chinese(Taiwan)</name>
+        <name>zh-TW</name>
         <cpASCII>950</cpASCII>
         <cpANSI>950</cpANSI>
         <cpName>big5</cpName>
@@ -3866,7 +3866,7 @@
         <comments>Chinese(Taiwan)</comments>
     </language>
     <language>
-        <name>Zulu</name>
+        <name>zu</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
@@ -3879,7 +3879,7 @@
         <comments></comments>
     </language>
     <language>
-        <name>Zulu(SouthAfrica)</name>
+        <name>zu-ZA</name>
         <cpASCII>850</cpASCII>
         <cpANSI>1252</cpANSI>
         <cpName>ISO-8859-1</cpName>
