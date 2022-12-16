@@ -1104,14 +1104,16 @@ USHORT AddToTm
       usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
       if ( usRc == NO_ERROR )
       {
+        USHORT usSrcLang = 0; 
+        usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
                        pNormString,  // ptr to target normalized string
                        usNormLen,    // length of target normalized string
                        pTmRecord,    // filled tm record returned
-                       pTargetClb );
-
+                       pTargetClb, usSrcLang );
+        
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
         usRc = EQFNTMInsert( pTmClb->pstTmBtree, //ptr to tm structure
@@ -1172,7 +1174,8 @@ VOID FillTmRecord
   PSZ_W pNormString,                 // ptr to target normalized string
   USHORT usNormLen,                  // length of target normalized string
   PTMX_RECORD pTmRecord,             // filled tm record returned
-  PTMX_TARGET_CLB pTargetClb         // ptr to target control block
+  PTMX_TARGET_CLB pTargetClb,        // ptr to target control block
+  USHORT usSrcLangId
 )
 {
   PTMX_SOURCE_RECORD pTMXSourceRecord;      //ptr to start of source structure
@@ -1190,6 +1193,7 @@ VOID FillTmRecord
 //  memcpy( pTMXSourceRecord+1, pSentence->pNormString, pSentence->usNormLen *sizeof(CHAR_W));
 //@@@
   ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
+  pTMXSourceRecord->usLangId = usSrcLangId;
   //size of source record
   RECLEN(pTMXSourceRecord) = sizeof( TMX_SOURCE_RECORD ) + ulSrcNormLen;
 
@@ -1300,7 +1304,7 @@ USHORT FillClb
   PTMX_PUT_W pTmPut                 // ptr to put input structure
 )
 {
-  USHORT  usLang;
+  USHORT  usTrgLang,usSrcLang;
   USHORT  usFile = 0;
   USHORT  usAuthor = 0;                 // ids
   USHORT  usRc = NO_ERROR;             // returned value
@@ -1313,7 +1317,12 @@ USHORT FillClb
   REPLACE_A0_BY_FF( pTmPut->szTargetLanguage );
 
   //get id of target language, call
-  usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usLang );
+  usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTrgLang );
+
+  //if ( !usRc )
+  //{
+  //  usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+  //} /* endif */
 
   //get id of file name, call
   if ( !usRc )
@@ -1329,7 +1338,8 @@ USHORT FillClb
 
   if ( !usRc )
   {
-    pTargetClb->usLangId = usLang;
+    pTargetClb->usLangId = usTrgLang;
+    //pTargetClb->usSrcLangId = usSrcLang;
     pTargetClb->bTranslationFlag = (BYTE)pTmPut->usTranslationFlag;
     //if a time is given take it else use current time
     if ( pTmPut->lTime )
@@ -2259,8 +2269,8 @@ USHORT ComparePutData
                       RECLEN(pTmRecord) += lNewClbLen;
                       RECLEN(pTMXTargetRecord) += lNewClbLen;
                     }else{
-                      if(CheckLogLevel(DEBUG)){
-                        LogMessage5(FATAL, __func__,"::memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
+                      if(CheckLogLevel(DEVELOP)){
+                        LogMessage5(ERROR, __func__,"::memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
                       }
                     }
                   } /* endif */

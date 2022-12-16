@@ -21,6 +21,7 @@
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
 #include <string>
+#include <algorithm>
 
 //#pragma pack( pop )
 
@@ -30,68 +31,6 @@ XERCES_CPP_NAMESPACE_USE
 #include "../utilities/LogWriter.h"
 #include "LanguageFactory.H"
 
-
-// currently hard-coded language information table
-LanguageFactory::LANGUAGEINFO DefaultLangTable[] = {
-  #ifdef to_be_removed
-  // Name                ASCII  ANSI   ISO CP          ISO          BCP47  pref.  additional info
-  { "Afrikaans",          850,  1252,  "ISO-8859-1",  "af-ZA",        "?", FALSE, "-ZA = South Africa ", TRUE, TRUE },
-  { "Arabic",             864,  1256,  "ISO-8859-6",  "ar-EG",        "?", FALSE, "-EG = Egypt ", TRUE, TRUE },
-  { "Belarusian",         866,  1251,  "ISO-8859-5",  "be-BY",        "?", FALSE, "", TRUE, TRUE },
-  { "Bulgarian",          915,  1251,  "ISO-8859-5",  "bg-BG",        "?", FALSE, "", TRUE, TRUE },
-  { "Catalan",              0,  1252,  "ISO-8859-1",  "ca-ES",        "?", FALSE, "", TRUE, TRUE },
-  { "Chinese(simpl.)",    936,   936,  "gb2312",      "zh-CHS",       "?", FALSE, "", TRUE, TRUE },
-  { "Chinese(trad.)",     950,   950,  "big5",        "zh-CHT",       "?", FALSE, "", TRUE, TRUE },
-  { "Croatian",           852,  1250,  "ISO-8859-2",  "hr-HR",        "?", FALSE, "", TRUE, TRUE },
-  { "Czech",              852,  1250,  "ISO-8859-2",  "cs-CZ",        "?", FALSE, "", TRUE, TRUE },
-  { "Danish",             850,  1252,  "ISO-8859-1",  "da-DK",        "?", FALSE, "", TRUE, TRUE },
-  { "Dutch(permissive)",  850,  1252,  "ISO-8859-1",  "nl-NL",        "?", FALSE, "", TRUE, TRUE },
-  { "Dutch(restrictive)", 850,  1252,  "ISO-8859-1",  "nl-NL",        "?", TRUE,  "", TRUE, TRUE },
-  { "English(U.K.)",      437,  1252,  "ISO-8859-1",  "en-GB",        "?", FALSE, "", TRUE, TRUE },
-  { "English(U.S.)",      437,  1252,  "ISO-8859-1",  "en-US",        "?", FALSE, "", TRUE, TRUE },
-  { "Estonian",           775,  1257,  "ISO-8859-4",  "et-EE",        "?", FALSE, "", TRUE, TRUE },
-  { "Finnish",            850,  1252,  "ISO-8859-1",  "fi-FI",        "?", FALSE, "", TRUE, TRUE },
-  { "French(Canadian)",   850,  1252,  "ISO-8859-1",  "fr-CA",        "?", FALSE, "", TRUE, TRUE },
-  { "French(national)",   850,  1252,  "ISO-8859-1",  "fr-FR",        "?", FALSE, "", TRUE, TRUE },
-  { "German(DPAnat)",     850,  1252,  "ISO-8859-1",  "de-DE",        "?", FALSE, "", TRUE, TRUE },
-  { "German(reform)",     850,  1252,  "ISO-8859-1",  "de-DE",        "?", TRUE,  "", TRUE, TRUE },
-  { "German(Swiss)",      850,  1252,  "ISO-8859-1",  "de-CH",        "?", FALSE, "", TRUE, TRUE },
-  { "Greek",              869,  1253,  "ISO-8859-7",  "el-GR",        "?", FALSE, "", TRUE, TRUE },
-  { "Hebrew",             867,  1255,  "ISO-8859-8",  "he-IL",        "?", FALSE, "", TRUE, TRUE },
-  { "Hungarian",          852,  1250,  "ISO-8859-2",  "hu-HU",        "?", FALSE, "", TRUE, TRUE },
-  { "Icelandic",          850,  1252,  "ISO-8859-1",  "is-IS",        "?", FALSE, "", TRUE, TRUE },
-  { "Indonesian",         850,  1252,  "ISO-8859-1",  "id-ID",        "?", FALSE, "", TRUE, TRUE },
-  { "Italian",            850,  1252,  "ISO-8859-1",  "it-IT",        "?", FALSE, "", TRUE, TRUE },
-  { "Japanese",           932,  932,  "Shift_JIS",    "ja-JP",        "?", FALSE, "", TRUE, TRUE },
-  { "Kazakh",            1251,  1251,  "ISO-8859-5",  "kk-KZ",        "?", FALSE, "", TRUE, TRUE },
-  { "Korean",             949,  949,  "euc-kr",       "ko-KR",        "?", FALSE, "", TRUE, TRUE },
-  { "Latvian",            775,  1257,  "ISO-8859-4",  "lv-LV",        "?", FALSE, "", TRUE, TRUE },
-  { "Lithuanian",         775,  1257,  "ISO-8859-4",  "lt-LT",        "?", FALSE, "", TRUE, TRUE },
-  { "Macedonian",         855,  1251,  "ISO-8859-5",  "mk-MK",        "?", FALSE, "", TRUE, TRUE },
-  { "Malay",             1252,  1252,  "ISO-8859-1",  "ms-MY",        "?", FALSE, "", TRUE, TRUE },
-  { "Mongolian",         1251,  1251,  "ISO-8859-5",  "mn-MN",        "?", FALSE, "", TRUE, TRUE },
-  { "Norwegian(Bokm�l)", 850,  1252,  "ISO-8859-1",   "nb-NO",        "?", TRUE,  "", TRUE, TRUE },
-  { "Norwegian(Nynorsk)",850,  1252,  "ISO-8859-1",   "nn-NO",        "?", FALSE, "", TRUE, TRUE },
-  { "Polish",            852,  1250,  "ISO-8859-2",   "pl-PL",        "?", FALSE, "", TRUE, TRUE },
-  { "Portuguese(Br.New)",850,  1252,  "ISO-8859-1",   "pt-BR",        "?", TRUE,  "", TRUE, TRUE },
-  { "Portuguese(Brazil)",850,  1252,  "ISO-8859-1",   "pt-BR",        "?", FALSE, "", TRUE, TRUE },
-  { "Portuguese(nat.)",  850,  1252,  "ISO-8859-1",   "pt-PT",        "?", FALSE, "", TRUE, TRUE },
-  { "Portuguese(nt.New)",850,  1252,  "ISO-8859-1",   "pt-PT",        "?", TRUE,  "", TRUE, TRUE },
-  { "Romanian",          852,  1250,  "ISO-8859-2",   "ro-RO",        "?", FALSE, "", TRUE, TRUE },
-  { "Russian",           866,  1251,  "ISO-8859-5",   "ru-RU",        "?", FALSE, "", TRUE, TRUE },
-  { "Serbian (Cyrillic)",855,  1251,  "ISO-8859-5",   "Cy-sr-SP",     "?", FALSE, "", TRUE, TRUE },
-  { "Serbian (Latin)",   852,  1250,  "ISO-8859-5",   "Lt-sr-SP",     "?", FALSE, "", TRUE, TRUE },
-  { "Slovakian",         852,  1250,  "ISO-8859-2",   "sk-SK",        "?", FALSE, "", TRUE, TRUE },
-  { "Slovene",           852,  1250,  "ISO-8859-2",   "sl-SI",        "?", FALSE, "", TRUE, TRUE },
-  { "Spanish",           850,  1252,  "ISO-8859-1",   "es-ES",        "?", FALSE, "", TRUE, TRUE },
-  { "Swedish",           850,  1252,  "ISO-8859-1",   "sv-SE",        "?", FALSE, "", TRUE, TRUE },
-  { "Thai",              874,   874,  "ISO-8859-11",  "th-TH",        "?", FALSE, "ANSI-CP = TIS-620 ??? ", TRUE, TRUE },
-  { "Turkish",           857,  1254,  "ISO-8859-9",   "tr-TR",        "?", FALSE, "", TRUE, TRUE },
-  { "Ukrainian",        1252,  1252,  "ISO-8859-5",   "uk-UA",        "?", FALSE, "", TRUE, TRUE },
-  { "",                    0,     0,  "",             "",              "", FALSE, "", FALSE, FALSE } };
-  #endif
-  //{ "", "", "",  "", FALSE, "", FALSE, FALSE } 
-  };
 
 //
 // class for our SAX handler which parses the XML file containing the language settings
@@ -125,7 +64,7 @@ public:
 private:
   // IDs of XML elelements
   typedef enum { LANGUAGES_ELEMENT, LANGUAGE_ELEMENT, NAME_ELEMENT, 
-                 ISO_ELEMENT, PREFERRED_ELEMENT, GROUP_ELEMENT, ISSOURCELANGUAGE_ELEMENT, ISTARGETLANGUAGE_ELEMENT,
+                 ISO_ELEMENT, PREFERRED_ELEMENT, GROUP_ELEMENT,
                  COMMENTS_ELEMENT, UNKNOWN_ELEMENT
                } ELEMENTID;
 
@@ -148,17 +87,9 @@ private:
   ELEMENTID GetElementID( const std::u16string& u16name );
 };
 
-
-
-/*! \brief the language factory instance	 */
-LanguageFactory* LanguageFactory::pInstance = NULL;
-
 /*! \brief constructor	 */
 LanguageFactory::LanguageFactory(void)
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList  = new std::vector<LANGUAGEINFO>;
-  this->pvoidLanguageList = (void *)pvLanguageList;
-
   LogMessage1(INFO, "Logging of language name and language properties related information. Starting LanguageFactory" );
 
   // try to load the external language list
@@ -168,24 +99,16 @@ LanguageFactory::LanguageFactory(void)
 
   int iRC = loadLanguageList( szFile );
   
-  if ( iRC != 0  || pvLanguageList->size() == 0)
+  if ( iRC != 0  || vLanguageList.size() == 0)
   {
     LogMessage5(ERROR, "Load of external language list file \""
       , szFile, " failed with error code ",toStr(iRC).c_str(),", switching to built-in language list" );
-    // load failed, used built-in list instead
-    PLANGUAGEINFO pInfo = DefaultLangTable;
-    pvLanguageList->clear();
-    while( pInfo->szName[0] != '\0' )
-    {
-      pvLanguageList->push_back( *pInfo );
-      pInfo++;
-    }
-    LogMessage3(ERROR, "Built-in language list contains ", toStr(pvLanguageList->size()).c_str()," entries" );
+    vLanguageList.clear();
     throw;
   }
   else
   {
-    LogMessage5(INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", toStr(pvLanguageList->size()).c_str()," entries" );
+    LogMessage5(INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", toStr(vLanguageList.size()).c_str()," entries" );
   }
 }
 
@@ -219,15 +142,8 @@ bool LanguageFactory::isSourceLanguage
   const char *pszLanguage
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( pszLanguage );
-  if ( i < 0 )
-  {
-    return( FALSE );
-  }
-
-  return( (*pvLanguageList)[i].isSourceLanguage );
+  return true;
+  //return this->findLanguage( pszLanguage ) >= 0;
 }
 
 /* \brief Checks if the given language is a valid target language
@@ -239,15 +155,8 @@ bool LanguageFactory::isTargetLanguage
   const char *pszLanguage
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findLanguage( pszLanguage );
-  if ( i < 0 )
-  {
-    return( FALSE );
-  }
-
-  return( (*pvLanguageList)[i].isTargetLanguage );
+  return true;
+  //return this->findLanguage( pszLanguage ) >= 0;
 }
 
 /*! \brief Provide a list of all available languages
@@ -266,20 +175,19 @@ int LanguageFactory::listLanguages(
 )
 {
   int iLanguages = 0;
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
   int i = 0;
-  int iMax = pvLanguageList->size();
+  int iMax = vLanguageList.size();
   while( i < iMax )
   {
     bool fAddLanguage = FALSE;
     switch( eType )
     {
       case SOURCE_LANGUAGE_TYPE:
-        fAddLanguage = (*pvLanguageList)[i].isSourceLanguage;
+        fAddLanguage = true;//vLanguageList[i].isSourceLanguage;
         break;
 
       case TARGET_LANGUAGE_TYPE:
-        fAddLanguage = (*pvLanguageList)[i].isTargetLanguage;
+        fAddLanguage = true;//vLanguageList[i].isTargetLanguage;
         break;
 
       case ALL_LANGUAGES_TYPE:
@@ -290,7 +198,7 @@ int LanguageFactory::listLanguages(
 
     if ( fAddLanguage )
     {
-      pfnCallBack( pvData, (*pvLanguageList)[i].szName, fWithDetails ? &((*pvLanguageList)[i]) : NULL );
+      pfnCallBack( pvData, vLanguageList[i].szName, fWithDetails ? &(vLanguageList[i]) : NULL );
       iLanguages++;
     }
     i++;
@@ -310,8 +218,6 @@ int LanguageFactory::getISOName
   char *pszISO
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
   int i = this->findLanguage( pszLanguage );
   if ( i < 0 )
   {
@@ -319,7 +225,7 @@ int LanguageFactory::getISOName
     return( ERROR_LANGUAGENOTFOUND );
   }
 
-  strcpy( pszISO, (*pvLanguageList)[i].szIsoID );
+  strcpy( pszISO, vLanguageList[i].szName );
 
   return( 0 );
 }
@@ -330,8 +236,6 @@ int LanguageFactory::getISOName
   std::string& strISO
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
   int i = this->findLanguage( strLanguage.c_str() );
   if ( i < 0 )
   {
@@ -339,9 +243,24 @@ int LanguageFactory::getISOName
     return( ERROR_LANGUAGENOTFOUND );
   }
 
-  strISO = (*pvLanguageList)[i].szIsoID;
+  strISO = vLanguageList[i].szName;
 
   return( 0 );
+}
+
+
+std::vector<std::string> LanguageFactory::getListOfLanguagesFromTheSameFamily(PSZ lang){
+  std::vector<std::string> res;
+  int i = 0, iMax = vLanguageList.size();
+  while( i < iMax )
+  {
+    if ( compareISO( lang, vLanguageList[i].szName) == 0 )
+    {
+      res.push_back(vLanguageList[i].szName);
+    }
+    i++;
+  } /* endwhile */
+  return res;
 }
 
 /* \brief Get the OpenTM2 language name for an ISO language identifier
@@ -352,19 +271,23 @@ int LanguageFactory::getISOName
 int LanguageFactory::getOpenTM2NameFromISO
 (
   const char *pszISO,
-  char *pszLanguage
+  char *pszLanguage, 
+  bool* pfPrefered
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findISO( pszISO );
+  bool fPrefered = false;
+  int i = this->findISO( pszISO, fPrefered);
   if ( i < 0 )
   {
     LogMessage2(ERROR, "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = ", pszISO);
     return( ERROR_LANGUAGENOTFOUND );
   }
 
-  strcpy( pszLanguage, (*pvLanguageList)[i].szName );
+  if(pfPrefered != nullptr){
+    *pfPrefered = fPrefered;
+  }
+
+  strcpy( pszLanguage, vLanguageList[i].szName );
 
   return( 0 );
 }
@@ -375,15 +298,14 @@ int LanguageFactory::getOpenTM2NameFromISO
   std::string& strLanguage
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
-  int i = this->findISO( strISO.c_str() );
+  bool fPrefered;
+  int i = this->findISO( strISO.c_str(), fPrefered );
   if ( i < 0 )
   {
     return( ERROR_LANGUAGENOTFOUND );
   }
 
-  strLanguage = (*pvLanguageList)[i].szName;
+  strLanguage = vLanguageList[i].szName;
 
   return( 0 );
 }
@@ -402,12 +324,10 @@ bool LanguageFactory::isValidLanguage
   bool fAdjustLangName
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
   int i = this->findLanguage( pszLanguage );
   if ( (i >= 0) && fAdjustLangName )
   {
-    strcpy( pszLanguage, (*pvLanguageList)[i].szName );
+    strcpy( pszLanguage, vLanguageList[i].szName );
   } /* endif */
 
   return( i >= 0 );
@@ -424,16 +344,56 @@ bool LanguageFactory::getLanguageInfo
   PLANGUAGEINFO pInfo
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-
   int i = this->findLanguage( pszLanguage );
   if ( i < 0 ) return( FALSE );
 
-  memcpy( pInfo, &((*pvLanguageList)[i]), sizeof(LANGUAGEINFO) );
+  memcpy( pInfo, &(vLanguageList[i]), sizeof(LANGUAGEINFO) );
 
   return( TRUE );
 }
 
+
+int LanguageFactory::findIfPreferedLanguage
+(
+  const char *pszLanguage
+)
+{
+  int i = 0;
+  int mid, st = 0, end = vpPreferedLanguageList.size() -1;
+  while ( st <= end)  //binary search since languages was sorted
+  {  
+      mid = ( st + end ) / 2;   
+      int cmp = strcasecmp(vpPreferedLanguageList[mid]->szName, pszLanguage);
+      if (cmp == 0)  
+        return vpPreferedLanguageList[mid] - &vLanguageList[0];
+      else if ( cmp < 0)  
+          st = mid + 1; 
+      else if ( cmp > 0 )  
+          end = mid - 1; 
+  }  
+  return -1;  
+}
+
+int LanguageFactory::findPreferedLangForThisLang
+(
+  const char *pszLanguage
+)
+{
+  int i = 0;
+  int mid, st = 0, end = vpPreferedLanguageList.size() -1;
+  while ( st <= end)  //binary search since languages was sorted
+  {  
+      mid = ( st + end ) / 2;   
+      int cmp = compareISO(vpPreferedLanguageList[mid]->szName, pszLanguage);
+      if (cmp == 0)  
+        return vpPreferedLanguageList[mid] - &vLanguageList[0];
+      else if ( cmp < 0)  
+          st = mid + 1; 
+      else if ( cmp > 0 )  
+          end = mid - 1; 
+  }  
+  return -1;  
+}
 
 /* \brief Find the entry for the specified OpenTM2 language name 
    \param pszLanguage OpenTM2 language name
@@ -444,18 +404,37 @@ int LanguageFactory::findLanguage
   const char *pszLanguage
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
   int i = 0;
-  int iMax = pvLanguageList->size();
-  while( i < iMax )
-  {
-    if ( strcasecmp( pszLanguage, (*pvLanguageList)[i].szName ) == 0 )
-    {
-      return( i );
-    }
-    i++;
-  }
+  int mid, st = 0, end = vLanguageList.size() -1;
+  while ( st <= end)  //binary search since languages was sorted
+  {  
+      mid = ( st + end ) / 2;   
+      int cmp = strcasecmp(vLanguageList[mid].szName, pszLanguage);
+      if (cmp == 0)  
+        return mid;
+      else if ( cmp < 0)  
+          st = mid + 1; 
+      else if ( cmp > 0 )  
+          end = mid - 1; 
+  }  
 
+  //LANGUAGEINFO* elem = (LANGUAGEINFO*) std::bsearch( &langInf,
+  //              vLanguageList.data(),
+  //              vLanguageList.size(),
+  //              sizeof(LANGUAGEINFO),
+  //              compareLanguageInfo);
+  //int iMax = vLanguageList.size();
+  //while( i < iMax )
+  //{
+  //  if ( strcasecmp( pszLanguage, vLanguageList[i].szName ) == 0 )
+  //  {
+  //    return( i );
+  //  }
+  //  i++;
+  //}
+  //if(elem != nullptr){
+  //  return vLanguageList.data() - elem;
+  //}
   return( -1 );
 }
 
@@ -510,35 +489,36 @@ int LanguageFactory::compareISO
 */
 int LanguageFactory::findISO
 (
-  const char *pszISO
+  const char *pszISO,bool &fPrefered
 )
 {
-  std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-  int iFound = -1;
-  int i = 0;
-  int iMax = pvLanguageList->size();
-  int iPreferred = -1;
-  int iBestMatch = -1;
-
+  //int iFound = -1;
+  //int i = 0;
+  //int iMax = vLanguageList.size();
+  //int iPreferred = findPreferedLanguage(pszISO);//-1;
+  //int iBestMatch = findLanguage(pszISO);
+  /*
   if(iMax<=0){
     LogMessage1(ERROR,"LanguageFactory::findISO():: language list size is 0");
     return (iFound);
   }
-
+  
+  
   while( i < iMax )
   {
-    if ( compareISO( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
+    if ( compareISO( pszISO, vLanguageList[i].szName ) == 0 )
     {
-      if ( strcasecmp( pszISO, (*pvLanguageList)[i].szIsoID ) == 0 )
+      if ( strcasecmp( pszISO, vLanguageList[i].szName ) == 0 )
       {
         // perfect match, return if this is the preferred language
-        if ( (*pvLanguageList)[i].fisPreferred )
+        if ( vLanguageList[i].fisPreferred )
         {
+          fPrefered = true;
           return( i );
         }
         iBestMatch = i;
       }
-      if ( (*pvLanguageList)[i].fisPreferred )
+      if ( vLanguageList[i].fisPreferred )
       {
         iPreferred = i;
       }
@@ -546,17 +526,21 @@ int LanguageFactory::findISO
     }
     i++;
   } /* endwhile */
+  int iBestMatch = findIfPreferedLanguage(pszISO);
+  fPrefered = true;
 
-  if ( iBestMatch != -1 )
-  {
-    iFound = iBestMatch;
+  if( iBestMatch == -1 ){
+    fPrefered = false;
+    iBestMatch = findLanguage(pszISO);
   }
-  else if ( iPreferred != -1 )
-  {
-    iFound = iPreferred ;
+  
+  if( iBestMatch == -1 ){
+    iBestMatch = findPreferedLangForThisLang(pszISO);
   }
-  LogMessage4(INFO, "LanguageFactory::findISO()::size of lang list = ", toStr(iMax).c_str(), "; iFound = ", toStr(iFound).c_str());
-  return( iFound );
+
+  LogMessage4(DEVELOP, "LanguageFactory::findISO()::fPrefered = ", toStr(fPrefered).c_str(), "; iBestMatch = ", toStr(iBestMatch).c_str());
+  
+  return( iBestMatch );
 }
 
 
@@ -581,8 +565,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     parser->setLoadExternalDTD( false );
     parser->setValidationScheme( SAXParser::Val_Never );
     parser->setExitOnFirstFatalError( false );
-    std::vector<LANGUAGEINFO> *pvLanguageList = (std::vector<LANGUAGEINFO> *)this->pvoidLanguageList;
-    handler->SetLangList( pvLanguageList );
+    handler->SetLangList( &vLanguageList );
 
     try
     {
@@ -598,6 +581,35 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
 
       usRC = ERROR_READ_FAULT;
     }
+    /*
+    if( usRC == 0 ){
+      LogMessage2(INFO, __func__, ":: languages was read from file, sorting...");
+      std::sort(vLanguageList.begin(), vLanguageList.end(), [&]( LANGUAGEINFO& a, LANGUAGEINFO& b) {
+            LogMessage2(INFO, "a.szName = ", a.szName);
+            LogMessage2(INFO, "b.szName = ", b.szName);
+            return  strcmp(a.szName, b.szName);
+        } );    
+    }
+    //*/
+    //*
+    if( usRC == 0 ){
+      LogMessage2(INFO, __func__, ":: languages was read from file, sorting...");
+      std::qsort(&vLanguageList[0], vLanguageList.size(), sizeof(LANGUAGEINFO), compareLanguageInfo);    
+      usRC = false == std::is_sorted(vLanguageList.begin(), vLanguageList.end(), 
+          []( LANGUAGEINFO a, LANGUAGEINFO b) {//values should be unique
+            return  strcmp(a.szName, b.szName) < 0;
+          } ) ;
+    }
+
+    if( usRC == 0){
+      for(LANGUAGEINFO& lang : vLanguageList ){
+        if(lang.fisPreferred){
+          vpPreferedLanguageList.push_back(&lang);
+        }
+      }
+    }
+    
+    //*/
   } /* endif */
 
 
@@ -628,9 +640,19 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
     switch ( CurID )
     {
       case LANGUAGE_ELEMENT:
+      {
         // reset element info
         memset( &(CurElement), 0, sizeof(CurElement) );
         break;
+      }
+      case NAME_ELEMENT:
+      case PREFERRED_ELEMENT:
+      case GROUP_ELEMENT:
+      case COMMENTS_ELEMENT:
+      case LANGUAGES_ELEMENT:
+      {
+        break;
+      }
       case UNKNOWN_ELEMENT:
       default:
         if(CheckLogLevel(DEVELOP)){    
@@ -649,7 +671,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
 
   // convert collected data to ASCII
   std::string sData = EncodingHelper::convertToUTF8(this->szDataW);
-
+  
   switch ( CurID )
   {
     case LANGUAGE_ELEMENT:
@@ -660,10 +682,10 @@ void LangParseHandler::endElement(const XMLCh* const name )
       }
       break;
     case NAME_ELEMENT:
+      if(this->CurElement.szName[0] != '\0'){
+        LogMessage5(WARNING, __func__, "::name element was parsed for the second time, first :", this->CurElement.szName, "; second = ", sData.c_str());
+      }
       strncpy( this->CurElement.szName, sData.c_str(), sizeof(this->CurElement.szName) );
-      break;    
-    case ISO_ELEMENT:
-      strncpy( this->CurElement.szIsoID, sData.c_str() , sizeof(this->CurElement.szIsoID) );
       break;
     case PREFERRED_ELEMENT:
       this->CurElement.fisPreferred = (strcasecmp( sData.c_str(), "yes" ) == 0);
@@ -671,20 +693,19 @@ void LangParseHandler::endElement(const XMLCh* const name )
     case GROUP_ELEMENT:
       strncpy( this->CurElement.szLangGroup, sData.c_str(), sizeof(this->CurElement.szLangGroup) );
       break;
-    case ISSOURCELANGUAGE_ELEMENT:
-      this->CurElement.isSourceLanguage = (strcasecmp( sData.c_str(), "yes" ) == 0);
-      break;
-    case ISTARGETLANGUAGE_ELEMENT:
-      this->CurElement.isTargetLanguage = (strcasecmp( sData.c_str(), "yes" ) == 0);
-      break;
     case COMMENTS_ELEMENT:
-      //strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
+      if(this->CurElement.szAddInfo[0] != '\0'){
+        LogMessage5(WARNING, __func__, "::comments element was parsed for the second time, first :", this->CurElement.szAddInfo, "; second = ", sData.c_str());
+      }
+      strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
+      break;
+    case LANGUAGES_ELEMENT:
       break;
     case UNKNOWN_ELEMENT:
     default:
-      if(CheckLogLevel(DEVELOP)){
+      //if(CheckLogLevel(DEVELOP)){
         LogMessage3(WARNING,__func__,":: UNKNOWN_ELEMENT FOUND: ", sData.c_str());
-      }
+      //}
       break;
   } /*endswitch */
 }
@@ -750,11 +771,8 @@ static XMLNAMETOID XmlNameToID[] =
 { { u"languages",  LANGUAGES_ELEMENT },
   { u"language",   LANGUAGE_ELEMENT }, 
   { u"name",       NAME_ELEMENT }, 
-  { u"iso",        ISO_ELEMENT }, 
   { u"preferred",  PREFERRED_ELEMENT }, 
   { u"group",      GROUP_ELEMENT }, 
-  { u"isSourceLanguage", ISSOURCELANGUAGE_ELEMENT }, 
-  { u"isTargetLanguage", ISTARGETLANGUAGE_ELEMENT },
   { u"comments",   COMMENTS_ELEMENT }, 
   { u"",           UNKNOWN_ELEMENT } };
 

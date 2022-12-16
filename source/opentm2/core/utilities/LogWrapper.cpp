@@ -252,16 +252,16 @@ int initLog(){
     std::string initLogMsg;
     //TODO: manage files clean-up if there more file
     logFilename = FilesystemHelper::GetOtmDir();
-    logFilename += "/LOG";
+    logFilename += "LOG";
     if(!FilesystemHelper::DirExists(logFilename)){
-        initLogMsg += "Log directory created\n";
+        initLogMsg += "Log directory created, path = " + logFilename;
         FilesystemHelper::CreateDir(logFilename, 0700);
     }
 
-    logFilename += "/" + generateLogFileName();
+    //logFilename += "/" + generateLogFileName();
     
-    initLogMsg += "Log file created, name: ";
-    initLogMsg += logFilename + ", time: " + getTimeStr();
+    //initLogMsg += "Log file created, name: ";
+    //initLogMsg += logFilename + ", time: " + getTimeStr();
     
     desuppressLogging(prevState);
     desuppressLoggingInFile();
@@ -279,7 +279,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
     }
 
 
-    //#ifdef SIMPLE_FILE_LOGGING_ENABLED
+    #ifdef SIMPLE_FILE_LOGGING_ENABLED
     if(logFilename.empty()){
         if(fileLoggingSuppressed == false){
             if( initLog() != 0){
@@ -287,7 +287,7 @@ int LogMessageStr(int LogLevel, const std::string& message){
             }
         }
     }
-    //#endif //SIMPLE_FILE_LOGGING_ENABLED
+    #endif //SIMPLE_FILE_LOGGING_ENABLED
 
     std::string logMessage;
     switch (LogLevel)

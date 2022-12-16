@@ -27,6 +27,7 @@
 #include "../opentm2/core/utilities/LogWrapper.h"
 #include "../opentm2/core/utilities/PropertyWrapper.H"
 #include "../opentm2/core/utilities/FilesystemWrapper.h"
+#include "../opentm2/core/utilities/LanguageFactory.H"
 #include "../cmake/git_version.h"
 #include "config.h"
 #include "OtmMemoryServiceWorker.h"
@@ -411,6 +412,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     std::string runDate = getTimeStr();
     properties_set_str_anyway(KEY_RUN_DATE, runDate.c_str());
 
+    //read languages.xml
+    LanguageFactory *pLangFactory = LanguageFactory::getInstance();
     std::stringstream initMsg;
     initMsg << "Service details:\n  Service name = " << szServiceName;
     initMsg << "\n  Address :" << host << ":" << uiPort; 
@@ -432,7 +435,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     LogMessage3(TRANSACTION, __func__, ":: ", initMsg.str().c_str());
     serviceName = szServiceName;
     additionalServiceName = serviceName+"_service";
-
+    
     t.join();
     return 0;
   }

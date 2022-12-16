@@ -596,7 +596,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       } /* endif */
    } /* endif */
 
-
    time( &lImportStartTime );
    LogMessage5(DEBUG,__func__, "************ Memory Import Log *********************\n Memory import started at   : ", 
         asctime( localtime( &lImportStartTime ) ), "\nMemory name                : ", pLIDA->szMemName    );

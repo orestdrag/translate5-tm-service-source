@@ -162,11 +162,12 @@ public:
   	 \returns Number of characters copied to pszBuffer including the terminating null character
    */
   int getSourceLanguage( char *pszBuffer, int iBufSize );
-  	
+  int getOriginalSourceLanguage( char* pszBuffer, int iBufSize );
   /* \brief set the proposal source language
      \param pszBuffer Pointer to buffer containing the proposal source language
    */
   void setSourceLanguage( char *pszBuffer );
+  void setOriginalSourceLanguage( char* pszBuffer);
 
   /* \brief get proposal target language
      \param pszBuffer Pointer to buffer receiving the proposal target language
@@ -336,6 +337,8 @@ public:
    */
   bool isEmpty();
 
+  bool isSourceLangIsPrefered();
+  void setIsSourceLangIsPrefered(bool fPref);
   /* \brief check if source and target of proposal is equal
    */
   bool isSourceAndTargetEqual();

@@ -2637,6 +2637,12 @@ typedef struct _MEMPROPOSAL
   /*! \brief Additional information of the proposal */
   //std::wstring strAddInfo; 
   wchar_t szAddInfo[MEMPROPOSAL_MAXSEGLEN+1];
+  
+  /*! \brief is source lang is marked as prefered in languages.xml */
+  bool fIsoSourceLangIsPrefered = false;
+  /*! \brief is target lang is marked as prefered in languages.xml */
+  bool fIsoTargetLangIsPrefered = false;
+
 } MEMPROPOSAL, *PMEMPROPOSAL;
 
 /*! \brief Lookup a segment in the memory
@@ -2735,8 +2741,11 @@ USHORT EqfGetOpenTM2Lang
 (
   HSESSION    hSession,
   PSZ         pszISOLang,
-  PSZ         pszOpenTM2Lang
+  PSZ         pszOpenTM2Lang, 
+  bool*       pfPrefered = nullptr
 );
+
+std::vector<std::string> GetListOfLanguagesFromFamily(PSZ pszIsoLang);
 
 /*! \brief Get the ISO language identifier for a OpenTM2 language name
 \param hSession the session handle returned by the EqfStartSession call

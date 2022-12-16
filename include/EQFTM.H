@@ -1172,14 +1172,8 @@ typedef struct _TMX_SOURCE_RECORD
 {
   LONG   lRecordLen;
   USHORT  usSource;
+  USHORT usLangId;
 } TMX_SOURCE_RECORD, * PTMX_SOURCE_RECORD;
-
-//structure of the source segment
-typedef struct _TMX_OLD_SOURCE_RECORD
-{
-  USHORT  usRecordLen;
-  USHORT  usSource;
-} TMX_OLD_SOURCE_RECORD, * PTMX_OLD_SOURCE_RECORD;
 
 //structure of the target segment
 typedef struct _TMX_TARGET_RECORD
@@ -1191,22 +1185,14 @@ typedef struct _TMX_TARGET_RECORD
   USHORT  usClb;
 } TMX_TARGET_RECORD, * PTMX_TARGET_RECORD;
 
-//structure of the target segment
-typedef struct _TMX_OLD_TARGET_RECORD
-{
-  USHORT  usRecordLen;
-  USHORT  usSourceTagTable;
-  USHORT  usTargetTagTable;
-  USHORT  usTarget;
-  USHORT  usClb;
-} TMX_OLD_TARGET_RECORD, * PTMX_OLD_TARGET_RECORD;
 
 //control block structure in target record
 typedef struct _TMX_TARGET_CLB
 {
   BYTE    bMultiple;
+  USHORT  usSrcLangId;
   USHORT  usLangId;
-   BYTE    bTranslationFlag;
+  BYTE    bTranslationFlag;
   TIME_L  lTime;
   USHORT  usFileId;
   ULONG   ulSegmId;   // changed from USHORT
@@ -1562,6 +1548,8 @@ typedef struct _TMX_GET_W
   ULONG       ulTgtOemCP;
   PVOID       pvReplacementList;                 // ptr to a SGML-DITA replacement list or NULL
   PVOID       pvGMOptList;                       // ptr to a global memory option list or NULL
+  bool fSourceLangIsPrefered;
+  bool fTargetLangIsPrefered;
 } TMX_GET_W, * PTMX_GET_W;
 
 typedef struct _TMX_GET_IN
@@ -1606,6 +1594,7 @@ typedef struct _TMX_MATCH_TABLE_W
   ULONG   ulSegmentId;                  //segment number from analysis
   CHAR_W  szTarget[MAX_SEGMENT_SIZE];   //target sentence with tags
   CHAR    szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
+  CHAR    szOriginalSrcLanguage[MAX_LANG_LENGTH]; //language of src of translation
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   CHAR    szTargetAuthor[MAX_USERID];   //author name of target
   TIME_L  lTargetTime;                  //time stamp of target
@@ -1700,6 +1689,7 @@ typedef struct _TMX_EXT_W
 {
   CHAR_W    szSource[MAX_SEGMENT_SIZE];        //source sentence
   CHAR_W    szTarget[MAX_SEGMENT_SIZE];        //target sentence
+  CHAR      szOriginalSourceLanguage[MAX_LANG_LENGTH]; //language name of the source
   CHAR      szTagTable[MAX_FNAME];             //tag table name
   CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
   CHAR      szAuthorName[MAX_USERID];          //author name of target

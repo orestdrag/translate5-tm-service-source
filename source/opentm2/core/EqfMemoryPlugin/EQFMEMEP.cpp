@@ -1046,7 +1046,9 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
 
          pExportIDA->pstSegment->lSegNum = pExportIDA->pProposal->getSegmentNum();
          pExportIDA->pstSegment->lTime = pExportIDA->pProposal->getUpdateTime();
-         pExportIDA->pMem->getSourceLanguage( pExportIDA->pstSegment->szSourceLang, sizeof(pExportIDA->pstSegment->szSourceLang) );
+         //pExportIDA->pMem->getSourceLanguage( pExportIDA->pstSegment->szSourceLang, sizeof(pExportIDA->pstSegment->szSourceLang) );
+         pExportIDA->pProposal->getOriginalSourceLanguage( pExportIDA->pstSegment->szSourceLang, sizeof(pExportIDA->pstSegment->szSourceLang) );
+         
          pExportIDA->pProposal->getTargetLanguage( pExportIDA->pstSegment->szTargetLang, sizeof(pExportIDA->pstSegment->szTargetLang) );
          pExportIDA->pProposal->getAuthor( pExportIDA->pstSegment->szAuthor, sizeof(pExportIDA->pstSegment->szAuthor) );
          pExportIDA->pProposal->getMarkup( pExportIDA->pstSegment->szFormat, sizeof(pExportIDA->pstSegment->szFormat) );

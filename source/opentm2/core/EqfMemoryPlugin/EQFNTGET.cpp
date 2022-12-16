@@ -152,7 +152,7 @@ void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData );
 USHORT FillMatchTable( PTMX_CLB, PSZ_W, PLONG, PTMX_TARGET_RECORD,
                 PTMX_TARGET_CLB,
                 PTMX_MATCH_TABLE_W, PUSHORT, BOOL, PUSHORT, PUSHORT, PUSHORT,
-                ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT, int, int);
+                ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT, int, int, USHORT);
 
 /**********************************************************************/
 /* Prototypes for Static functions...                                 */
@@ -1676,7 +1676,7 @@ USHORT ExactTest
                               pusMatchEntries, &pSentence->usActVote,
                               &pSentence->usActVote,
                               ulKeyNum, usTgtNum,
-                              pGetIn,  pSentence->pTagRecord, usTargetTranslationFlag, usContextRanking, -1, -1 );
+                              pGetIn,  pSentence->pTagRecord, usTargetTranslationFlag, usContextRanking, -1, -1, pTMXSourceRecord->usLangId );
             }
             else
             {
@@ -1960,7 +1960,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                    PTMX_TAGTABLE_RECORD pTagRecord,
                    USHORT usTranslationFlag,
                    USHORT usContextRanking,
-                   int iWords, int iDiffs )
+                   int iWords, int iDiffs, USHORT usSrcLangId )
 {
   PSZ    pSrcFileName = pGetIn->szFileName;  // source file name
   PSZ    pSrcLongName = pGetIn->szLongName;  // long source file name
@@ -2068,6 +2068,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
                             (USHORT)LANG_KEY,
                             pSubstProp->szTargetLanguage, NULL );
+          //NTMGetNameFromID( pTmClb, &usSrcLangId,
+          //                    (USHORT)LANG_KEY,
+          //                    pSubstProp->szOriginalSrcLanguage, NULL );
         } /* endif */
 
       } /* endif */
@@ -2346,10 +2349,14 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                                 pstMatchTable->szTagTable, NULL );
             }
 
-            //fill in the target language
+            //fill in the target and original src language
             NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
                               (USHORT)LANG_KEY,
                               pstMatchTable->szTargetLanguage, NULL );
+
+            NTMGetNameFromID( pTmClb, &usSrcLangId,
+                              (USHORT)LANG_KEY,
+                              pstMatchTable->szOriginalSrcLanguage, NULL );
             //fill in the segment id
             pstMatchTable->ulSegmentId = pTMXTargetClb->ulSegmId;
             //state whether machine translation
@@ -2889,7 +2896,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-
+  
+  
   if ( !fOK )
   {
     usRc = ERROR_NOT_ENOUGH_MEMORY;
@@ -2898,7 +2906,17 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   {
     //position at beginning of source structure in tm record
     pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
-
+    if(pGetIn->fSourceLangIsPrefered == false){
+      char recordSrcLang[MAX_LANG_LENGTH];
+      NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId,
+                              (USHORT)LANG_KEY,
+                              recordSrcLang, NULL );
+      if(strcasecmp(recordSrcLang, pGetIn->szSourceLanguage)){
+        LogMessage6(WARNING,__func__,":: source langs is different in record(", recordSrcLang, ") and request (", pGetIn->szSourceLanguage, ")");
+        return SOURCE_LANG_DIFFERENT;
+      }
+    }
+    
     //move pointer to corresponding position
     pSource = (PBYTE)(pTmRecord+1);
     pSource += pTMXSourceRecord->usSource;
@@ -3012,11 +3030,24 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         pTMXTargetClb = (PTMX_TARGET_CLB)pByte;
 
         //compare target language group IDs
-        if ( pTmClb->psLangIdToGroupTable[pTMXTargetClb->usLangId] != pTmClb->psLangIdToGroupTable[usTargetId] )
-        {
-          LOGPRINTF1( INFO,"FuzzyTest: Wrong target language!" );
-          fTestCLB = FALSE;
-        } 
+        if(pGetIn->fTargetLangIsPrefered){
+          if ( pTmClb->psLangIdToGroupTable[pTMXTargetClb->usLangId] != pTmClb->psLangIdToGroupTable[usTargetId] )
+          {
+            LOGPRINTF1( INFO,"FuzzyTest: Wrong target language!" );
+            fTestCLB = FALSE;
+          } 
+        } else {
+          char recordTrgLang[MAX_LANG_LENGTH];
+          NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
+                                  (USHORT)LANG_KEY,
+                                  recordTrgLang, NULL );
+          if(strcasecmp(recordTrgLang, pGetIn->szTargetLanguage)){
+            LogMessage6(WARNING,__func__,":: target langs is different in record(", recordTrgLang, ") and request (", pGetIn->szTargetLanguage, ")");
+            //return SOURCE_LANG_DIFFERENT;
+            fTestCLB = FALSE;
+          }
+        }
+        
 
         // check for comments when requested
         if ( pGetIn->ulParm & GET_IGNORE_COMMENT )
@@ -3264,7 +3295,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                             pstMatchTable, &usFuzzy, fTagTableEqual,
                             pusMatchesFound, pusTmMaxVotes, pusOverlaps,
                             ulKeyNum, usTgtNum,
-                            pGetIn, pSentence->pTagRecord, usModifiedTranslationFlag, 0, usWords, usDiffs );
+                            pGetIn, pSentence->pTagRecord, usModifiedTranslationFlag, 0, usWords, usDiffs, pTMXSourceRecord->usLangId );
           } /* endif */
         } /* endif */
         //position at next target

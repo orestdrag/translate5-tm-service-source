@@ -1541,7 +1541,8 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
 
   char *pszErrorTextBuffer = (char *)malloc(8096);
   if ( pszErrorTextBuffer == NULL ) return( iRC );
-
+  pszErrorTextBuffer[0] = '\0';
+  
   pReplAddr[0] = pszMemName;
 
   switch ( iRC )

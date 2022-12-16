@@ -10,3885 +10,1797 @@
 	- all languages that are available in LEK_languages table of translate5 must be available in languages.xml as well
 	- important connection for the tmx import and for mapping with translate5 is the rfc5646 value from LEK_languages in translate5, that should match the ~% value in languages.xml
 	- the value of <name>af</name> in languages.xml must be unique
-	- the main language (like "en") should always be set to <preferred>yes</preferred>, all sub-languages (e. g. "en-GB") to <preferred>no</preferred>
-	- <isSourceLanguage>yes</isSourceLanguage> should always be "yes"
-	- <isTargetLanguage>yes</isTargetLanguage> should always be "yes"
+	- the main language (like "en") should always be set to <preferred>yes</preferred>, all sub-languages (e. g. "en-GB") to <preferred>no</preferred>  
 	- <comment></comment> must contain the exact same string as <name></name>
+    - document was updated in t5memory v0.4.0
  -->
 <languages>
     <language>
         <name>af</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>af</iso>
-        <icu>af</icu>
         <preferred>yes</preferred>
         <group>Afrikaans</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
-        <comments></comments>
+		<comments></comments>
     </language>
     <language>
-        <name>af-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>af-ZA</iso>
-        <icu>af-ZA</icu>
+        <name>af-ZA</name>  
         <preferred>no</preferred>
-        <group>Afrikaans</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Afrikaans</group>  
         <comments>Afrikaans(SouthAfrica)</comments>
     </language>
     <language>
-		<name>am</name>
-		<cpASCII>850</cpASCII>
-		<cpANSI>1252</cpANSI>
-		<cpName>ISO-8859-1</cpName>
-		<iso>am</iso>
-		<icu>am</icu>
+		<name>am</name>  
 		<preferred>yes</preferred>
-		<group>Amharic</group>
-		<isSourceLanguage>yes</isSourceLanguage>
-		<isTargetLanguage>yes</isTargetLanguage>
+		<group>Amharic</group>  
 		<comments></comments>
 	  </language>
-      <language>
-		<name>am-ET</name>
-		<cpASCII>850</cpASCII>
-		<cpANSI>1252</cpANSI>
-		<cpName>ISO-8859-1</cpName>
-		<iso>am-ET</iso>
-		<icu>am-ET</icu>
+    <language>
+		<name>am-ET</name>  
 		<preferred>no</preferred>
-		<group>Amharic</group>
-		<isSourceLanguage>yes</isSourceLanguage>
-		<isTargetLanguage>yes</isTargetLanguage>
+		<group>Amharic</group>  
 		<comments>Amharic(Ahtiopia)</comments>
 	  </language>
     <language>
-        <name>ar</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar</iso>
-        <icu>ar</icu>
+        <name>ar</name>  
         <preferred>yes</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ar-AE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-AE</iso>
-        <icu>ar-AE</icu>
+        <name>ar-AE</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(UnitedArabEmirates)</comments>
     </language>
     <language>
-        <name>ar-BH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-BH</iso>
-        <icu>ar-BH</icu>
+        <name>ar-BH</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Bahrain)</comments>
     </language>
     <language>
-        <name>ar-DZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-DZ</iso>
-        <icu>ar-DZ</icu>
+        <name>ar-DZ</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Algeria)</comments>
     </language>
     <language>
-        <name>ar-EG</name>
-        <cpASCII>864</cpASCII>
-        <cpANSI>1256</cpANSI>
-        <cpName>ISO-8859-6</cpName>
-        <iso>ar-EG</iso>
-        <icu>ar-EG</icu>
+        <name>ar-EG</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Egypt)</comments>
     </language>
     <language>
-        <name>ar-IQ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-IQ</iso>
-        <icu>ar-IQ</icu>
+        <name>ar-IQ</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Iraq)</comments>
     </language>
     <language>
-        <name>ar-JO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-JO</iso>
-        <icu>ar-JO</icu>
+        <name>ar-JO</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Jordan)</comments>
     </language>
     <language>
-        <name>ar-KW</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-KW</iso>
-        <icu>ar-KW</icu>
+        <name>ar-KW</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Kuwait)</comments>
     </language>
     <language>
-        <name>ar-LB</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-LB</iso>
-        <icu>ar-LB</icu>
+        <name>ar-LB</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Lebanon)</comments>
     </language>
     <language>
-        <name>ar-LY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-LY</iso>
-        <icu>ar-LY</icu>
+        <name>ar-LY</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Libya)</comments>
     </language>
     <language>
-        <name>ar-MA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-MA</iso>
-        <icu>ar-MA</icu>
+        <name>ar-MA</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Morocco)</comments>
     </language>
     <language>
-        <name>ar-OM</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-OM</iso>
-        <icu>ar-OM</icu>
+        <name>ar-OM</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Oman)</comments>
     </language>
     <language>
-        <name>ar-QA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-QA</iso>
-        <icu>ar-QA</icu>
+        <name>ar-QA</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Qatar)</comments>
     </language>
     <language>
-        <name>ar-SA</name>
-        <cpASCII>864</cpASCII>
-        <cpANSI>1256</cpANSI>
-        <cpName>ISO-8859-6</cpName>
-        <iso>ar-SA</iso>
-        <icu>ar-SA</icu>
+        <name>ar-SA</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(SaudiArabia)</comments>
     </language>
     <language>
-        <name>ar-SY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-SY</iso>
-        <icu>ar-SY</icu>
+        <name>ar-SY</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Syria)</comments>
     </language>
     <language>
-        <name>ar-TN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-TN</iso>
-        <icu>ar-TN</icu>
+        <name>ar-TN</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Tunisia)</comments>
     </language>
     <language>
-        <name>ar-YE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ar-YE</iso>
-        <icu>ar-YE</icu>
+        <name>ar-YE</name>  
         <preferred>no</preferred>
-        <group>Arabic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Arabic</group>  
         <comments>Arabic(Yemen)</comments>
     </language>
     <language>
-        <name>az</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>az</iso>
-        <icu>az</icu>
+        <name>az</name>  
         <preferred>yes</preferred>
-        <group>Azerbaijani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Azerbaijani</group>  
         <comments></comments>
     </language>
     <language>
-        <name>az-AZ</name>
-        <cpASCII>857</cpASCII>
-        <cpANSI>1254</cpANSI>
-        <cpName>ISO-8859-9</cpName>
-        <iso>az-AZ</iso>
-        <icu>az-AZ</icu>
+        <name>az-AZ</name>  
         <preferred>no</preferred>
-        <group>Azerbaijani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Azerbaijani</group>  
         <comments>Azerbaijani(Latin)</comments>
     </language>
     <language>
-        <name>az-Cyrl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>az-Cyrl</iso>
-        <icu>az-Cyrl</icu>
+        <name>az-Cyrl</name>  
         <preferred>no</preferred>
-        <group>Azerbaijani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Azerbaijani</group>  
         <comments>Azerbaijani(Cyrillic)</comments>
     </language>
     <language>
-        <name>az-Cyrl-AZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>az-Cyrl-AZ</iso>
-        <icu>az-Cyrl-AZ</icu>
+        <name>az-Cyrl-AZ</name>  
         <preferred>no</preferred>
-        <group>Azerbaijani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Azerbaijani</group>  
         <comments>Azerbaijani(Cyrillic)(Azerbaijan)</comments>
     </language>
     <language>
-        <name>az-Latn-AZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>az-Latn-AZ</iso>
-        <icu>az-Latn-AZ</icu>
+        <name>az-Latn-AZ</name>  
         <preferred>no</preferred>
-        <group>Azerbaijani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Azerbaijani</group>  
         <comments>Azerbaijani(Latin)(Azerbaijan)</comments>
     </language>
-    
-        <language>
-        <name>be</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>be</iso>
-        <icu>be</icu>
+    <language>
+        <name>be</name>  
         <preferred>yes</preferred>
-        <group>Belarusian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Belarusian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>be-BY</name>
-        <cpASCII>1251</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>be-BY</iso>
-        <icu>be-BY</icu>
+        <name>be-BY</name>  
         <preferred>no</preferred>
-        <group>Belarusian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Belarusian</group>  
         <comments>Belarusian(Belarus)</comments>
     </language>
     <language>
-        <name>bg</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>bg</iso>
-        <icu>bg</icu>
+        <name>bg</name>  
         <preferred>yes</preferred>
-        <group>Bulgarian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bulgarian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>bg-BG</name>
-        <cpASCII>28595</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>bg-BG</iso>
-        <icu>bg-BG</icu>
+        <name>bg-BG</name>  
         <preferred>no</preferred>
-        <group>Bulgarian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bulgarian</group>  
         <comments>Bulgarian(Bulgaria)</comments>
     </language>
     <language>
-        <name>bn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>bn</iso>
-        <icu>bn</icu>
+        <name>bn</name>  
         <preferred>yes</preferred>
-        <group>Bengalese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bengalese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>bo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>bo</iso>
-        <icu>bo</icu>
+        <name>bo</name>  
         <preferred>yes</preferred>
-        <group>Tibetan</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tibetan</group>  
         <comments></comments>
     </language>
     <language>
-        <name>bs</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>bs</iso>
-        <icu>bs</icu>
+        <name>bs</name>  
         <preferred>yes</preferred>
-        <group>Bosnian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bosnian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>bs-BA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>bs-BA</iso>
-        <icu>bs-BA</icu>
+        <name>bs-BA</name>  
         <preferred>no</preferred>
-        <group>Bosnian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bosnian</group>  
         <comments>Bosnian(Bosnia)</comments>
     </language>
     <language>
-        <name>bs-Latn-BA</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-3166-2</cpName>
-        <iso>bs-Latn-BA</iso>
-        <icu>bs-Latn-BA</icu>
+        <name>bs-Latn-BA</name>  
         <preferred>no</preferred>
-        <group>Bosnian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Bosnian</group>  
         <comments>Bosnian(LatinBosnia)</comments>
     </language>
     <language>
-        <name>ca</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ca</iso>
-        <icu>ca</icu>
+        <name>ca</name>  
         <preferred>yes</preferred>
-        <group>Catalan</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Catalan</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ca-ES</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ca-ES</iso>
-        <icu>ca-ES</icu>
+        <name>ca-ES</name>  
         <preferred>no</preferred>
-        <group>Catalan</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Catalan</group>  
         <comments>Catalan(Spain)</comments>
     </language>
     <language>
-        <name>ceb</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ceb</iso>
-        <icu>ceb</icu>
+        <name>ceb</name>  
         <preferred>yes</preferred>
-        <group>Cebuano</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Cebuano</group>  
         <comments></comments>
     </language>
     <language>
-        <name>co</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>co</iso>
-        <icu>co</icu>
+        <name>co</name>  
         <preferred>yes</preferred>
-        <group>Corsic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Corsic</group>  
         <comments></comments>
     </language>
     <language>
-        <name>cs</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>cs</iso>
-        <icu>cs</icu>
+        <name>cs</name>  
         <preferred>yes</preferred>
-        <group>Czech</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Czech</group>  
         <comments></comments>
     </language>
     <language>
-        <name>cs-CZ</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>cs-CZ</iso>
-        <icu>cs-CZ</icu>
+        <name>cs-CZ</name>  
         <preferred>no</preferred>
-        <group>Czech</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Czech</group>  
         <comments>Czech(Czechoslowakia)</comments>
     </language>
     <language>
-        <name>cy</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>cy</iso>
-        <icu>cy</icu>
+        <name>cy</name>  
         <preferred>yes</preferred>
-        <group>Welsh</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Welsh</group>  
         <comments></comments>
     </language>
     <language>
-        <name>cy-GB</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-14</cpName>
-        <iso>cy-GB</iso>
-        <icu>cy-GB</icu>
+        <name>cy-GB</name>  
         <preferred>no</preferred>
-        <group>Welsh</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Welsh</group>  
         <comments>Welsh(UK)</comments>
     </language>
     <language>
-        <name>da</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>da</iso>
-        <icu>da</icu>
+        <name>da</name>  
         <preferred>yes</preferred>
-        <group>Danish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Danish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>da-DK</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>da-DK</iso>
-        <icu>da-DK</icu>
+        <name>da-DK</name>  
         <preferred>no</preferred>
-        <group>Danish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Danish</group>  
         <comments>Danish(Danmark)</comments>
     </language>
     <language>
-        <name>de</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de</iso>
-        <icu>de</icu>
+        <name>de</name>  
         <preferred>yes</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments></comments>
     </language>
     <language>
-        <name>de-AT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de-AT</iso>
-        <icu>de-AT</icu>
+        <name>de-AT</name>  
         <preferred>no</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments>German(Austria)</comments>
     </language>
     <language>
-        <name>de-CH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de-CH</iso>
-        <icu>de-CH</icu>
+        <name>de-CH</name>  
         <preferred>no</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments>German(Swiss)</comments>
     </language>
     <language>
-        <name>de-DE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de-DE</iso>
-        <icu>de-DE</icu>
+        <name>de-DE</name>  
         <preferred>no</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments>German(Germany)</comments>
     </language>
     <language>
-        <name>de-LI</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de-LI</iso>
-        <icu>de-LI</icu>
+        <name>de-LI</name>  
         <preferred>no</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments>German(Liechtenstein)</comments>
     </language>
     <language>
-        <name>de-LU</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>de-LU</iso>
-        <icu>de-LU</icu>
+        <name>de-LU</name>  
         <preferred>no</preferred>
-        <group>German</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>German</group>  
         <comments>German(Luxembourg)</comments>
     </language>
     <language>
-        <name>dv</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>dv</iso>
-        <icu>dv</icu>
+        <name>dv</name>  
         <preferred>yes</preferred>
-        <group>Dhivehi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dhivehi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>dv-MV</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>dv-MV</iso>
-        <icu>dv-MV</icu>
+        <name>dv-MV</name>  
         <preferred>no</preferred>
-        <group>Dhivehi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dhivehi</group>  
         <comments>Dhivehi(Maldives)</comments>
     </language>
     <language>
-        <name>el</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>el</iso>
-        <icu>el</icu>
+        <name>el</name>  
         <preferred>yes</preferred>
-        <group>Greek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Greek</group>  
         <comments></comments>
     </language>
     <language>
-        <name>el-GR</name>
-        <cpASCII>869</cpASCII>
-        <cpANSI>1253</cpANSI>
-        <cpName>ISO-8859-7</cpName>
-        <iso>el-GR</iso>
-        <icu>el-GR</icu>
+        <name>el-GR</name>  
         <preferred>no</preferred>
-        <group>Greek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Greek</group>  
         <comments>Greek(Greece)</comments>
     </language>
     <language>
-        <name>en</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en</iso>
-        <icu>en</icu>
+        <name>en</name>  
         <preferred>yes</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments></comments>
     </language>
     <language>
-        <name>en-AU</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-AU</iso>
-        <icu>en-AU</icu>
+        <name>en-AU</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Australia)</comments>
     </language>
     <language>
-        <name>en-BZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-BZ</iso>
-        <icu>en-BZ</icu>
+        <name>en-BZ</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Belize)</comments>
     </language>
     <language>
-        <name>en-CA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-CA</iso>
-        <icu>en-CA</icu>
+        <name>en-CA</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Canada)</comments>
     </language>
     <language>
-        <name>en-CB</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-CB</iso>
-        <icu>en-CB</icu>
+        <name>en-CB</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Caribbean)</comments>
     </language>
     <language>
-        <name>en-GB</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-GB</iso>
-        <icu>en-GB</icu>
+        <name>en-GB</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(UK)</comments>
     </language>
     <language>
-        <name>en-IE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-IE</iso>
-        <icu>en-IE</icu>
+        <name>en-IE</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Ireland)</comments>
     </language>
     <language>
-        <name>en-JM</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-JM</iso>
-        <icu>en-JM</icu>
+        <name>en-JM</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Jamaica)</comments>
     </language>
     <language>
-        <name>en-NZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-NZ</iso>
-        <icu>en-NZ</icu>
+        <name>en-NZ</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(NewZealand)</comments>
     </language>
     <language>
-        <name>en-PH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-PH</iso>
-        <icu>en-PH</icu>
+        <name>en-PH</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Philippines)</comments>
     </language>
     <language>
-        <name>en-TT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-TT</iso>
-        <icu>en-TT</icu>
+        <name>en-TT</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(TrinidadandTobago)</comments>
     </language>
     <language>
-        <name>en-US</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-US</iso>
-        <icu>en-US</icu>
+        <name>en-US</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(U.S.)</comments>
     </language>
     <language>
-        <name>en-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-ZA</iso>
-        <icu>en-ZA</icu>
+        <name>en-ZA</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(SouthAfrica)</comments>
     </language>
     <language>
-        <name>en-ZW</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>en-ZW</iso>
-        <icu>en-ZW</icu>
+        <name>en-ZW</name>  
         <preferred>no</preferred>
-        <group>English</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>English</group>  
         <comments>English(Zimbabwe)</comments>
     </language>
     <language>
-        <name>eo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>eo</iso>
-        <icu>eo</icu>
+        <name>eo</name>  
         <preferred>yes</preferred>
-        <group>Esperanto</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Esperanto</group>  
         <comments></comments>
     </language>
     <language>
-        <name>es</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es</iso>
-        <icu>es</icu>
+        <name>es</name>  
         <preferred>yes</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>es-419</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-419</iso>
-        <icu>es-419</icu>
+        <name>es-419</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(LatinAmericaAndCaribian)</comments>
     </language>
     <language>
-        <name>es-AR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-AR</iso>
-        <icu>es-AR</icu>
+        <name>es-AR</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Argentina)</comments>
     </language>
     <language>
-        <name>es-BO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-BO</iso>
-        <icu>es-BO</icu>
+        <name>es-BO</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Bolivia)</comments>
     </language>
     <language>
-        <name>es-CL</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-CL</iso>
-        <icu>es-CL</icu>
+        <name>es-CL</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Chile)</comments>
     </language>
     <language>
-        <name>es-CO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-CO</iso>
-        <icu>es-CO</icu>
+        <name>es-CO</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Colombia)</comments>
     </language>
     <language>
-        <name>es-CR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-CR</iso>
-        <icu>es-CR</icu>
+        <name>es-CR</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(CostaRica)</comments>
     </language>
     <language>
-        <name>es-DO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-DO</iso>
-        <icu>es-DO</icu>
+        <name>es-DO</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(DominicanRepublic)</comments>
     </language>
     <language>
-        <name>es-EC</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-EC</iso>
-        <icu>es-EC</icu>
+        <name>es-EC</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Ecuador)</comments>
     </language>
     <language>
-        <name>es-ES</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-ES</iso>
-        <icu>es-ES</icu>
+        <name>es-ES</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Spain)</comments>
     </language>
     <language>
-        <name>es-GT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-GT</iso>
-        <icu>es-GT</icu>
+        <name>es-GT</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Guatemala)</comments>
     </language>
     <language>
-        <name>es-HN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-HN</iso>
-        <icu>es-HN</icu>
+        <name>es-HN</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Honduras)</comments>
     </language>
     <language>
-        <name>es-MX</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-MX</iso>
-        <icu>es-MX</icu>
+        <name>es-MX</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Mexico)</comments>
     </language>
     <language>
-        <name>es-NI</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-NI</iso>
-        <icu>es-NI</icu>
+        <name>es-NI</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Nicaragua)</comments>
     </language>
     <language>
-        <name>es-PA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-PA</iso>
-        <icu>es-PA</icu>
+        <name>es-PA</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Panama)</comments>
     </language>
     <language>
-        <name>es-PE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-PE</iso>
-        <icu>es-PE</icu>
+        <name>es-PE</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Peru)</comments>
     </language>
     <language>
-        <name>es-PR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-PR</iso>
-        <icu>es-PR</icu>
+        <name>es-PR</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(PuertoRico)</comments>
     </language>
     <language>
-        <name>es-PY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-PY</iso>
-        <icu>es-PY</icu>
+        <name>es-PY</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Paraguay)</comments>
     </language>
     <language>
-        <name>es-SV</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-SV</iso>
-        <icu>es-SV</icu>
+        <name>es-SV</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(ElSalvador)</comments>
     </language>
     <language>
-        <name>es-US</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-US</iso>
-        <icu>es-US</icu>
+        <name>es-US</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(US)</comments>
     </language>
     <language>
-        <name>es-UY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-UY</iso>
-        <icu>es-UY</icu>
+        <name>es-UY</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Uruguay)</comments>
     </language>
     <language>
-        <name>es-VE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>es-VE</iso>
-        <icu>es-VE</icu>
+        <name>es-VE</name>  
         <preferred>no</preferred>
-        <group>Spanish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Spanish</group>  
         <comments>Spanish(Venezuela)</comments>
     </language>
     <language>
-        <name>et</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>et</iso>
-        <icu>et</icu>
+        <name>et</name>  
         <preferred>yes</preferred>
-        <group>Estonian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Estonian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>et-EE</name>
-        <cpASCII>28603</cpASCII>
-        <cpANSI>1257</cpANSI>
-        <cpName>ISO-8859-4</cpName>
-        <iso>et-EE</iso>
-        <icu>et-EE</icu>
+        <name>et-EE</name>  
         <preferred>no</preferred>
-        <group>Estonian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Estonian</group>  
         <comments>Estonian(Estonia)</comments>
     </language>
     <language>
-        <name>eu</name>
-        <cpASCII>1252</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>eu</iso>
-        <icu>eu</icu>
+        <name>eu</name>  
         <preferred>yes</preferred>
-        <group>Basque</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Basque</group>  
         <comments></comments>
     </language>
     <language>
-        <name>eu-ES</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>eu-ES</iso>
-        <icu>eu-ES</icu>
+        <name>eu-ES</name>  
         <preferred>no</preferred>
-        <group>Basque</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Basque</group>  
         <comments>Basque(Spain)</comments>
     </language>
     <language>
-        <name>fa</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fa</iso>
-        <icu>fa</icu>
+        <name>fa</name>  
         <preferred>yes</preferred>
-        <group>Persian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Persian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fa-IR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fa-IR</iso>
-        <icu>fa-IR</icu>
+        <name>fa-IR</name>  
         <preferred>no</preferred>
-        <group>Persian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Persian</group>  
         <comments>Persian(Iran)</comments>
     </language>
     <language>
-        <name>fi</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fi</iso>
-        <icu>fi</icu>
+        <name>fi</name>  
         <preferred>yes</preferred>
-        <group>Finnish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Finnish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fi-FI</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fi-FI</iso>
-        <icu>fi-FI</icu>
+        <name>fi-FI</name>  
         <preferred>no</preferred>
-        <group>Finnish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Finnish</group>  
         <comments>Finnish(Finland)</comments>
     </language>
     <language>
-        <name>fil</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fil</iso>
-        <icu>fil</icu>
+        <name>fil</name>  
         <preferred>yes</preferred>
-        <group>Phillipino</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Phillipino</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fj</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fj</iso>
-        <icu>fj</icu>
+        <name>fj</name>  
         <preferred>yes</preferred>
-        <group>Fidschi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Fidschi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fo</iso>
-        <icu>fo</icu>
+        <name>fo</name>  
         <preferred>yes</preferred>
-        <group>Faroese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Faroese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fo-FO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fo-FO</iso>
-        <icu>fo-FO</icu>
+        <name>fo-FO</name>  
         <preferred>no</preferred>
-        <group>Faroese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Faroese</group>  
         <comments>Faroese(FaroeIslands)</comments>
     </language>
     <language>
-        <name>fr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr</iso>
-        <icu>fr</icu>
+        <name>fr</name>  
         <preferred>yes</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments></comments>
     </language>
     <language>
-        <name>fr-BE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-BE</iso>
-        <icu>fr-BE</icu>
+        <name>fr-BE</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(Belgium)</comments>
     </language>
     <language>
-        <name>fr-CA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-CA</iso>
-        <icu>fr-CA</icu>
+        <name>fr-CA</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(Canadian)</comments>
     </language>
     <language>
-        <name>fr-CH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-CH</iso>
-        <icu>fr-CH</icu>
+        <name>fr-CH</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(Swiss)</comments>
     </language>
     <language>
-        <name>fr-FR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-FR</iso>
-        <icu>fr-FR</icu>
+        <name>fr-FR</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(France)</comments>
     </language>
     <language>
-        <name>fr-LU</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-LU</iso>
-        <icu>fr-LU</icu>
+        <name>fr-LU</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(Luxembourg)</comments>
     </language>
     <language>
-        <name>fr-MC</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>fr-MC</iso>
-        <icu>fr-MC</icu>
+        <name>fr-MC</name>  
         <preferred>no</preferred>
-        <group>French</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>French</group>  
         <comments>French(Monaco)</comments>
     </language>
     <language>
-        <name>ga</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ga</iso>
-        <icu>ga</icu>
+        <name>ga</name>  
         <preferred>yes</preferred>
-        <group>Irish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Irish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ga-IE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ga-IE</iso>
-        <icu>ga-IE</icu>
+        <name>ga-IE</name>  
         <preferred>no</preferred>
-        <group>Irish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Irish</group>  
         <comments>Irish(Ireland)</comments>
     </language>
     <language>
-        <name>gd</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>gd</iso>
-        <icu>gd</icu>
+        <name>gd</name>  
         <preferred>yes</preferred>
-        <group>Scotish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Scotish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>gl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>gl</iso>
-        <icu>gl</icu>
+        <name>gl</name>  
         <preferred>yes</preferred>
-        <group>Galician</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Galician</group>  
         <comments></comments>
     </language>
     <language>
-        <name>gl-ES</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>gl-ES</iso>
-        <icu>gl-ES</icu>
+        <name>gl-ES</name>  
         <preferred>no</preferred>
-        <group>Galician</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Galician</group>  
         <comments>Galician(Spain)</comments>
     </language>
     <language>
-        <name>gu</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>gu</iso>
-        <icu>gu</icu>
+        <name>gu</name>  
         <preferred>yes</preferred>
-        <group>Gujarati</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Gujarati</group>  
         <comments></comments>
     </language>
     <language>
-        <name>gu-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>gu-IN</iso>
-        <icu>gu-IN</icu>
+        <name>gu-IN</name>  
         <preferred>no</preferred>
-        <group>Gujarati</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Gujarati</group>  
         <comments>Gujarati(India)</comments>
     </language>
     <language>
-        <name>he</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>he</iso>
-        <icu>he</icu>
+        <name>he</name>  
         <preferred>yes</preferred>
-        <group>Hebrew</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hebrew</group>  
         <comments></comments>
     </language>
     <language>
-        <name>he-IL</name>
-        <cpASCII>862</cpASCII>
-        <cpANSI>1255</cpANSI>
-        <cpName>ISO-8859-8</cpName>
-        <iso>he-IL</iso>
-        <icu>he-IL</icu>
+        <name>he-IL</name>  
         <preferred>no</preferred>
-        <group>Hebrew</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hebrew</group>  
         <comments>Hebrew</comments>
     </language>
     <language>
-        <name>hi</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hi</iso>
-        <icu>hi</icu>
+        <name>hi</name>  
         <preferred>yes</preferred>
-        <group>Hindi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hindi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hi-IN</name>
-        <cpASCII>468</cpASCII>
-        <cpANSI>1255</cpANSI>
-        <cpName>ISO-8859-8</cpName>
-        <iso>hi-IN</iso>
-        <icu>hi-IN</icu>
+        <name>hi-IN</name>  
         <preferred>no</preferred>
-        <group>Hindi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hindi</group>  
         <comments>Hindi</comments>
     </language>
     <language>
-        <name>hmn</name>
-        <cpASCII>468</cpASCII>
-        <cpANSI>1255</cpANSI>
-        <cpName>ISO-8859-8</cpName>
-        <iso>hmn</iso>
-        <icu>hmn</icu>
+        <name>hmn</name>  
         <preferred>yes</preferred>
-        <group>Hmong</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hmong</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hr</iso>
-        <icu>hr</icu>
+        <name>hr</name>  
         <preferred>yes</preferred>
-        <group>Croatian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Croatian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hr-BA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hr-BA</iso>
-        <icu>hr-BA</icu>
+        <name>hr-BA</name>  
         <preferred>no</preferred>
-        <group>Croatian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Croatian</group>  
         <comments>Croatian(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>hr-HR</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>hr-HR</iso>
-        <icu>hr-HR</icu>
+        <name>hr-HR</name>  
         <preferred>no</preferred>
-        <group>Croatian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Croatian</group>  
         <comments>Croatian(Croatia)</comments>
     </language>
     <language>
-        <name>ht</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ht</iso>
-        <icu>ht</icu>
+        <name>ht</name>  
         <preferred>yes</preferred>
-        <group>Haitian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Haitian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hu</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hu</iso>
-        <icu>hu</icu>
+        <name>hu</name>  
         <preferred>yes</preferred>
-        <group>Hungarian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hungarian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hu-HU</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>hu-HU</iso>
-        <icu>hu-HU</icu>
+        <name>hu-HU</name>  
         <preferred>no</preferred>
-        <group>Hungarian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Hungarian</group>  
         <comments>Hungarian</comments>
     </language>
     <language>
-        <name>hy</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hy</iso>
-        <icu>hy</icu>
+        <name>hy</name>  
         <preferred>yes</preferred>
-        <group>Armenian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Armenian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>hy-AM</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>hy-AM</iso>
-        <icu>hy-AM</icu>
+        <name>hy-AM</name>  
         <preferred>no</preferred>
-        <group>Armenian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Armenian</group>  
         <comments>Armenian(Armenia)</comments>
     </language>
     <language>
-        <name>id</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>id</iso>
-        <icu>id</icu>
+        <name>id</name>  
         <preferred>yes</preferred>
-        <group>Indonesian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Indonesian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>id-ID</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>id-ID</iso>
-        <icu>id-ID</icu>
+        <name>id-ID</name>  
         <preferred>no</preferred>
-        <group>Indonesian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Indonesian</group>  
         <comments>Indonesian</comments>
     </language>
     <language>
-        <name>ig</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ig</iso>
-        <icu>ig</icu>
+        <name>ig</name>  
         <preferred>yes</preferred>
-        <group>Igbo</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Igbo</group>  
         <comments></comments>
     </language>
     <language>
-        <name>is</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>is</iso>
-        <icu>is</icu>
+        <name>is</name>  
         <preferred>yes</preferred>
-        <group>Icelandic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Icelandic</group>  
         <comments></comments>
     </language>
     <language>
-        <name>is-IS</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>is-IS</iso>
-        <icu>is-IS</icu>
+        <name>is-IS</name>  
         <preferred>no</preferred>
-        <group>Icelandic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Icelandic</group>  
         <comments>Icelandic</comments>
     </language>
     <language>
-        <name>it</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>it</iso>
-        <icu>it</icu>
+        <name>it</name>  
         <preferred>yes</preferred>
-        <group>Italian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Italian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>it-CH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>it-CH</iso>
-        <icu>it-CH</icu>
+        <name>it-CH</name>  
         <preferred>no</preferred>
-        <group>Italian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Italian</group>  
         <comments>Italian(Swiss)</comments>
     </language>
     <language>
-        <name>it-IT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>it-IT</iso>
-        <icu>it-IT</icu>
+        <name>it-IT</name>  
         <preferred>no</preferred>
-        <group>Italian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Italian</group>  
         <comments>Italian(Italy)</comments>
     </language>
     <language>
-        <name>ja</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ja</iso>
-        <icu>ja</icu>
+        <name>ja</name>  
         <preferred>yes</preferred>
-        <group>Japanese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Japanese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ja-JP</name>
-        <cpASCII>943</cpASCII>
-        <cpANSI>943</cpANSI>
-        <cpName>Shift_JIS</cpName>
-        <iso>ja-JP</iso>
-        <icu>ja-JP</icu>
+        <name>ja-JP</name>  
         <preferred>no</preferred>
-        <group>Japanese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Japanese</group>  
         <comments>Japanese</comments>
     </language>
     <language>
-        <name>ka</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ka</iso>
-        <icu>ka</icu>
+        <name>ka</name>  
         <preferred>yes</preferred>
-        <group>Georgian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Georgian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ka-GE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ka-GE</iso>
-        <icu>ka-GE</icu>
+        <name>ka-GE</name>  
         <preferred>no</preferred>
-        <group>Georgian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Georgian</group>  
         <comments>Georgian(Georgia)</comments>
     </language>
     <language>
-        <name>kk</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>kk</iso>
-        <icu>kk</icu>
+        <name>kk</name>  
         <preferred>yes</preferred>
-        <group>Kazakh</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kazakh</group>  
         <comments></comments>
     </language>
     <language>
-        <name>kk-KZ</name>
-        <cpASCII>65001</cpASCII>
-        <cpANSI>65001</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>kk-KZ</iso>
-        <icu>kk-KZ</icu>
+        <name>kk-KZ</name>  
         <preferred>no</preferred>
-        <group>Kazakh</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kazakh</group>  
         <comments>Kazakh</comments>
     </language>
     <language>
-        <name>km</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>km</iso>
-        <icu>km</icu>
+        <name>km</name>  
         <preferred>yes</preferred>
-        <group>Khmer</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Khmer</group>  
         <comments></comments>
     </language>
     <language>
-        <name>kn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>kn</iso>
-        <icu>kn</icu>
+        <name>kn</name>  
         <preferred>yes</preferred>
-        <group>Kannada</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kannada</group>  
         <comments></comments>
     </language>
     <language>
-        <name>kn-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>kn-IN</iso>
-        <icu>kn-IN</icu>
+        <name>kn-IN</name>  
         <preferred>no</preferred>
-        <group>Kannada</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kannada</group>  
         <comments>Kannada(India)</comments>
     </language>
     <language>
-        <name>ko</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ko</iso>
-        <icu>ko</icu>
+        <name>ko</name>  
         <preferred>yes</preferred>
-        <group>Korean</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Korean</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ko-KR</name>
-        <cpASCII>949</cpASCII>
-        <cpANSI>949</cpANSI>
-        <cpName>euc-kr</cpName>
-        <iso>ko-KR</iso>
-        <icu>ko-KR</icu>
+        <name>ko-KR</name>  
         <preferred>no</preferred>
-        <group>Korean</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Korean</group>  
         <comments>Korean(Korea)</comments>
     </language>
     <language>
-        <name>kok</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>kok</iso>
-        <icu>kok</icu>
+        <name>kok</name>  
         <preferred>no</preferred>
-        <group>Konkani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Konkani</group>  
         <comments>Konkani</comments>
     </language>
     <language>
-        <name>kok-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>kok-IN</iso>
-        <icu>kok-IN</icu>
+        <name>kok-IN</name>  
         <preferred>no</preferred>
-        <group>Konkani</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Konkani</group>  
         <comments>Konkani(India)</comments>
     </language>
     <language>
-        <name>ku</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ku</iso>
-        <icu>ku</icu>
+        <name>ku</name>  
         <preferred>yes</preferred>
-        <group>Kurdish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kurdish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ky</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ky</iso>
-        <icu>ky</icu>
+        <name>ky</name>  
         <preferred>yes</preferred>
-        <group>Kyrgyz</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kyrgyz</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ky-KG</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ky-KG</iso>
-        <icu>ky-KG</icu>
+        <name>ky-KG</name>  
         <preferred>no</preferred>
-        <group>Kyrgyz</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kyrgyz</group>  
         <comments>Kyrgyz(Kyrgyzstan)</comments>
     </language>
     <language>
-        <name>la</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>la</iso>
-        <icu>la</icu>
+        <name>la</name>  
         <preferred>yes</preferred>
-        <group>Latin</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Latin</group>  
         <comments></comments>
     </language>
     <language>
-        <name>lb</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>lb</iso>
-        <icu>lb</icu>
+        <name>lb</name>  
         <preferred>yes</preferred>
-        <group>Luxembourgish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Luxembourgish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>lo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>lo</iso>
-        <icu>lo</icu>
+        <name>lo</name>  
         <preferred>yes</preferred>
-        <group>Lao</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Lao</group>  
         <comments></comments>
     </language>
     <language>
-        <name>lt</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>lt</iso>
-        <icu>lt</icu>
+        <name>lt</name>  
         <preferred>yes</preferred>
-        <group>Lithuanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Lithuanian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>lt-LT</name>
-        <cpASCII>28603</cpASCII>
-        <cpANSI>1257</cpANSI>
-        <cpName>ISO-8859-4</cpName>
-        <iso>lt-LT</iso>
-        <icu>lt-LT</icu>
+        <name>lt-LT</name>  
         <preferred>no</preferred>
-        <group>Lithuanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Lithuanian</group>  
         <comments>Lithuanian(Lithuania)</comments>
     </language>
     <language>
-        <name>lv</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>lv</iso>
-        <icu>lv</icu>
+        <name>lv</name>  
         <preferred>yes</preferred>
-        <group>Latvian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Latvian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>lv-LV</name>
-        <cpASCII>28603</cpASCII>
-        <cpANSI>1257</cpANSI>
-        <cpName>ISO-8859-4</cpName>
-        <iso>lv-LV</iso>
-        <icu>lv-LV</icu>
+        <name>lv-LV</name>  
         <preferred>no</preferred>
-        <group>Latvian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Latvian</group>  
         <comments>Latvian(Latvia)</comments>
     </language>
     <language>
-        <name>mg</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mg</iso>
-        <icu>mg</icu>
+        <name>mg</name>  
         <preferred>yes</preferred>
-        <group>Madagassian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Madagassian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mi</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mi</iso>
-        <icu>mi</icu>
+        <name>mi</name>  
         <preferred>yes</preferred>
-        <group>Māori</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Māori</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mi-NZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mi-NZ</iso>
-        <icu>mi-NZ</icu>
+        <name>mi-NZ</name>  
         <preferred>no</preferred>
-        <group>Māori</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Māori</group>  
         <comments>Māori(NewZealand)</comments>
     </language>
     <language>
-        <name>mk</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mk</iso>
-        <icu>mk</icu>
+        <name>mk</name>  
         <preferred>yes</preferred>
-        <group>Macedonian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Macedonian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mk-MK</name>
-        <cpASCII>855</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>mk-MK</iso>
-        <icu>mk-MK</icu>
+        <name>mk-MK</name>  
         <preferred>no</preferred>
-        <group>Macedonian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Macedonian</group>  
         <comments>Macedonian(Macedonia)</comments>
     </language>
     <language>
-        <name>ml</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ml</iso>
-        <icu>ml</icu>
+        <name>ml</name>  
         <preferred>yes</preferred>
-        <group>Malayalam</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Malayalam</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mn</iso>
-        <icu>mn</icu>
+        <name>mn</name>  
         <preferred>yes</preferred>
-        <group>Mongolian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Mongolian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mn-MN</name>
-        <cpASCII>866</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>mn-MN</iso>
-        <icu>mn-MN</icu>
+        <name>mn-MN</name>  
         <preferred>no</preferred>
-        <group>Mongolian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Mongolian</group>  
         <comments>Mongolian(Mongolia)</comments>
     </language>
     <language>
-        <name>mo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mo</iso>
-        <icu>mo</icu>
+        <name>mo</name>  
         <preferred>yes</preferred>
-        <group>Moldavian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Moldavian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mr</iso>
-        <icu>mr</icu>
+        <name>mr</name>  
         <preferred>yes</preferred>
-        <group>Marathi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Marathi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mr-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mr-IN</iso>
-        <icu>mr-IN</icu>
+        <name>mr-IN</name>  
         <preferred>no</preferred>
-        <group>Marathi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Marathi</group>  
         <comments>Marathi(India)</comments>
     </language>
     <language>
-        <name>ms</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ms</iso>
-        <icu>ms</icu>
+        <name>ms</name>  
         <preferred>yes</preferred>
-        <group>Malay</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Malay</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ms-BN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ms-BN</iso>
-        <icu>ms-BN</icu>
+        <name>ms-BN</name>  
         <preferred>no</preferred>
-        <group>Malay</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Malay</group>  
         <comments>Malaysian(Brunei)</comments>
     </language>
     <language>
-        <name>ms-MY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ms-MY</iso>
-        <icu>ms-MY</icu>
+        <name>ms-MY</name>  
         <preferred>no</preferred>
-        <group>Malay</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Malay</group>  
         <comments>Malay(Malaysia)</comments>
     </language>
     <language>
-        <name>mt</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mt</iso>
-        <icu>mt</icu>
+        <name>mt</name>  
         <preferred>yes</preferred>
-        <group>Maltese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Maltese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>mt-MT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mt-MT</iso>
-        <icu>mt-MT</icu>
+        <name>mt-MT</name>  
         <preferred>no</preferred>
-        <group>Maltese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Maltese</group>  
         <comments>Maltese(Malta)</comments>
     </language>
     <language>
-        <name>mww</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>mww</iso>
-        <icu>mww</icu>
+        <name>mww</name>  
         <preferred>yes</preferred>
-        <group>HmongDaw</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>HmongDaw</group>  
         <comments></comments>
     </language>
     <language>
-        <name>my</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>my</iso>
-        <icu>my</icu>
+        <name>my</name>  
         <preferred>yes</preferred>
-        <group>Myanmar</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Myanmar</group>  
         <comments></comments>
     </language>
     <language>
-        <name>nb</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nb</iso>
-        <icu>nb</icu>
+        <name>nb</name>  
         <preferred>yes</preferred>
-        <group>Norwegian(Bokmal)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Norwegian(Bokmal)</group>  
         <comments></comments>
     </language>
     <language>
-        <name>nb-NO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nb-NO</iso>
-        <icu>nb-NO</icu>
+        <name>nb-NO</name>  
         <preferred>no</preferred>
-        <group>Norwegian(Bokmal)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Norwegian(Bokmal)</group>  
         <comments>Norwegian(Bokmal)(Norway)</comments>
     </language>
     <language>
-        <name>no</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>no</iso>
-        <icu>no</icu>
+        <name>no</name>  
         <preferred>no</preferred>
-        <group>Norwegian(Bokmal)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Norwegian(Bokmal)</group>  
         <comments>Norwegian</comments>
     </language>
     <language>
-        <name>ne</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ne</iso>
-        <icu>ne</icu>
+        <name>ne</name>  
         <preferred>yes</preferred>
-        <group>Nepali</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Nepali</group>  
         <comments></comments>
     </language>
     <language>
-        <name>nl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nl</iso>
-        <icu>nl</icu>
+        <name>nl</name>  
         <preferred>yes</preferred>
-        <group>Dutch</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dutch</group>  
         <comments></comments>
     </language>
     <language>
-        <name>nl-BE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nl-BE</iso>
-        <icu>nl-BE</icu>
+        <name>nl-BE</name>  
         <preferred>no</preferred>
-        <group>Dutch</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dutch</group>  
         <comments>Dutch(Belgium)</comments>
     </language>
     <language>
-        <name>nl-NL</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nl-NL</iso>
-        <icu>nl-NL</icu>
+        <name>nl-NL</name>  
         <preferred>no</preferred>
-        <group>Dutch</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dutch</group>  
         <comments>Dutch(Netherlands)</comments>
     </language>
     <language>
-        <name>nn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nn</iso>
-        <icu>nn</icu>
+        <name>nn</name>  
         <preferred>yes</preferred>
-        <group>Norwegian(Nynorsk)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Norwegian(Nynorsk)</group>  
         <comments></comments>
     </language>
     <language>
-        <name>nn-NO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>nn-NO</iso>
-        <icu>nn-NO</icu>
+        <name>nn-NO</name>  
         <preferred>no</preferred>
-        <group>Norwegian(Nynorsk)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Norwegian(Nynorsk)</group>  
         <comments>Norwegian(Nynorsk)(Norway)</comments>
     </language>
     <language>
-        <name>ns</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ns</iso>
-        <icu>ns</icu>
+        <name>ns</name>  
         <preferred>yes</preferred>
-        <group>North-Sotho</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>North-Sotho</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ns-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ns-ZA</iso>
-        <icu>ns-ZA</icu>
+        <name>ns-ZA</name>  
         <preferred>no</preferred>
-        <group>North-Sotho</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>North-Sotho</group>  
         <comments>North-Sotho(SouthAfrica)</comments>
     </language>
     <language>
-        <name>ny</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ny</iso>
-        <icu>ny</icu>
+        <name>ny</name>  
         <preferred>yes</preferred>
-        <group>Nyanja</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Nyanja</group>  
         <comments></comments>
     </language>
     <language>
-        <name>or</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>or</iso>
-        <icu>or</icu>
+        <name>or</name>  
         <preferred>yes</preferred>
-        <group>Odia</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Odia</group>  
         <comments></comments>
     </language>
     <language>
-        <name>otq</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>otq</iso>
-        <icu>otq</icu>
+        <name>otq</name>  
         <preferred>yes</preferred>
-        <group>QueretaroOtomi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>QueretaroOtomi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>pa</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pa</iso>
-        <icu>pa</icu>
+        <name>pa</name>  
         <preferred>yes</preferred>
-        <group>Panjabi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Panjabi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>pa-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pa-IN</iso>
-        <icu>pa-IN</icu>
+        <name>pa-IN</name>  
         <preferred>no</preferred>
-        <group>Panjabi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Panjabi</group>  
         <comments>Punjabi(India)</comments>
     </language>
     <language>
-        <name>pl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pl</iso>
-        <icu>pl</icu>
+        <name>pl</name>  
         <preferred>yes</preferred>
-        <group>Polish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Polish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>pl-PL</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>pl-PL</iso>
-        <icu>pl-PL</icu>
+        <name>pl-PL</name>  
         <preferred>no</preferred>
-        <group>Polish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Polish</group>  
         <comments>Polish</comments>
     </language>
     <language>
-        <name>prs</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>prs</iso>
-        <icu>prs</icu>
+        <name>prs</name>  
         <preferred>yes</preferred>
-        <group>Dari</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Dari</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ps</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ps</iso>
-        <icu>ps</icu>
+        <name>ps</name>  
         <preferred>yes</preferred>
-        <group>Paschtu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Paschtu</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ps-AR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ps-AR</iso>
-        <icu>ps-AR</icu>
+        <name>ps-AR</name>  
         <preferred>no</preferred>
-        <group>Paschtu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Paschtu</group>  
         <comments>Paschtu(Afghanistan)</comments>
     </language>
     <language>
-        <name>pt</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pt</iso>
-        <icu>pt</icu>
+        <name>pt</name>  
         <preferred>yes</preferred>
-        <group>Portuguese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Portuguese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>pt-BR</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pt-BR</iso>
-        <icu>pt-BR</icu>
+        <name>pt-BR</name>  
         <preferred>no</preferred>
-        <group>Portuguese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Portuguese</group>  
         <comments>Portuguese(Brazil)</comments>
     </language>
     <language>
-        <name>pt-PT</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>pt-PT</iso>
-        <icu>pt-PT</icu>
+        <name>pt-PT</name>  
         <preferred>no</preferred>
-        <group>Portuguese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Portuguese</group>  
         <comments>Portuguese(Portugal)</comments>
     </language>
     <language>
-        <name>qu</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>qu</iso>
-        <icu>qu</icu>
+        <name>qu</name>  
         <preferred>yes</preferred>
-        <group>Quechua</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Quechua</group>  
         <comments></comments>
     </language>
     <language>
-        <name>qu-BO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>qu-BO</iso>
-        <icu>qu-BO</icu>
+        <name>qu-BO</name>  
         <preferred>no</preferred>
-        <group>Quechua</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Quechua</group>  
         <comments>Quechua(Bolivia)</comments>
     </language>
     <language>
-        <name>qu-EC</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>qu-EC</iso>
-        <icu>qu-EC</icu>
+        <name>qu-EC</name>  
         <preferred>no</preferred>
-        <group>Quechua</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Quechua</group>  
         <comments>Quechua(Ecuador)</comments>
     </language>
     <language>
-        <name>qu-PE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>qu-PE</iso>
-        <icu>qu-PE</icu>
+        <name>qu-PE</name>  
         <preferred>no</preferred>
-        <group>Quechua</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Quechua</group>  
         <comments>Quechua(Peru)</comments>
     </language>
     <language>
-        <name>rm-CH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>rm-CH</iso>
-        <icu>rm-CH</icu>
+        <name>rm-CH</name>  
         <preferred>yes</preferred>
-        <group>Rumantsch</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Rumantsch</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ro</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ro</iso>
-        <icu>ro</icu>
+        <name>ro</name>  
         <preferred>yes</preferred>
-        <group>Romanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Romanian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ro-RO</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>ro-RO</iso>
-        <icu>ro-RO</icu>
+        <name>ro-RO</name>  
         <preferred>no</preferred>
-        <group>Romanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Romanian</group>  
         <comments>Romanian(Romania)</comments>
     </language>
     <language>
-        <name>ru</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ru</iso>
-        <icu>ru</icu>
+        <name>ru</name>  
         <preferred>yes</preferred>
-        <group>Russian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Russian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ru-RU</name>
-        <cpASCII>866</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>ru-RU</iso>
-        <icu>ru-RU</icu>
+        <name>ru-RU</name>  
         <preferred>no</preferred>
-        <group>Russian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Russian</group>  
         <comments>Russian(Russia)</comments>
     </language>
     <language>
-        <name>rw</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>rw</iso>
-        <icu>rw</icu>
+        <name>rw</name>  
         <preferred>yes</preferred>
-        <group>Kinyarwanda</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Kinyarwanda</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sa</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sa</iso>
-        <icu>sa</icu>
+        <name>sa</name>  
         <preferred>yes</preferred>
-        <group>Sanskrit</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sanskrit</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sa-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sa-IN</iso>
-        <icu>sa-IN</icu>
+        <name>sa-IN</name>  
         <preferred>no</preferred>
-        <group>Sanskrit</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sanskrit</group>  
         <comments>Sanskrit(India)</comments>
     </language>
     <language>
-        <name>sd</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sd</iso>
-        <icu>sd</icu>
+        <name>sd</name>  
         <preferred>yes</preferred>
-        <group>Sindhi</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sindhi</group>  
         <comments></comments>
     </language>
     <language>
-        <name>se</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>se</iso>
-        <icu>se</icu>
+        <name>se</name>  
         <preferred>yes</preferred>
-        <group>Sami</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sami</group>  
         <comments></comments>
     </language>
     <language>
-        <name>se-FI</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>se-FI</iso>
-        <icu>se-FI</icu>
+        <name>se-FI</name>  
         <preferred>no</preferred>
-        <group>Sami</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sami</group>  
         <comments>Sami(Finland)</comments>
     </language>
     <language>
-        <name>se-NO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>se-NO</iso>
-        <icu>se-NO</icu>
+        <name>se-NO</name>  
         <preferred>no</preferred>
-        <group>Sami</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sami</group>  
         <comments>Sami(Norway)</comments>
     </language>
     <language>
-        <name>se-SE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>se-SE</iso>
-        <icu>se-SE</icu>
+        <name>se-SE</name>  
         <preferred>no</preferred>
-        <group>Sami</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sami</group>  
         <comments>Sami(Sweden)</comments>
     </language>
     <language>
-        <name>si</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>si</iso>
-        <icu>si</icu>
+        <name>si</name>  
         <preferred>yes</preferred>
-        <group>Singhalesic</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Singhalesic</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sk</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sk</iso>
-        <icu>sk</icu>
+        <name>sk</name>  
         <preferred>yes</preferred>
-        <group>Slovak</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Slovak</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sk-SK</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>sk-SK</iso>
-        <icu>sk-SK</icu>
+        <name>sk-SK</name>  
         <preferred>no</preferred>
-        <group>Slovak</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Slovak</group>  
         <comments>Slovak(Slovakia)</comments>
     </language>
     <language>
-        <name>sl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sl</iso>
-        <icu>sl</icu>
+        <name>sl</name>  
         <preferred>yes</preferred>
-        <group>Slovene</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Slovene</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sl-SI</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-2</cpName>
-        <iso>sl-SI</iso>
-        <icu>sl-SI</icu>
+        <name>sl-SI</name>  
         <preferred>no</preferred>
-        <group>Slovene</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Slovene</group>  
         <comments>Slovene(Slovenia)</comments>
     </language>
     <language>
-        <name>sm</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sm</iso>
-        <icu>sm</icu>
+        <name>sm</name>  
         <preferred>yes</preferred>
-        <group>Samoan</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Samoan</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sn</iso>
-        <icu>sn</icu>
+        <name>sn</name>  
         <preferred>yes</preferred>
-        <group>Shona</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Shona</group>  
         <comments></comments>
     </language>
     <language>
-        <name>so</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>so</iso>
-        <icu>so</icu>
+        <name>so</name>  
         <preferred>yes</preferred>
-        <group>Somali</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Somali</group>  
         <comments></comments>
     </language>
     <language>
-        <name>so-so</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>so-so</iso>
-        <icu>so-so</icu>
+        <name>so-so</name>  
         <preferred>no</preferred>
-        <group>Somali</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Somali</group>  
         <comments>Somali(Somalia)</comments>
     </language>
     <language>
-        <name>sq</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sq</iso>
-        <icu>sq</icu>
+        <name>sq</name>  
         <preferred>yes</preferred>
-        <group>Albanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Albanian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sq-AL</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sq-AL</iso>
-        <icu>sq-AL</icu>
+        <name>sq-AL</name>  
         <preferred>no</preferred>
-        <group>Albanian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Albanian</group>  
         <comments>Albanian(Albania)</comments>
     </language>
     <language>
-        <name>sr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr</iso>
-        <icu>sr</icu>
+        <name>sr</name>  
         <preferred>yes</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sr-BA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-BA</iso>
-        <icu>sr-BA</icu>
+        <name>sr-BA</name>  
         <preferred>no</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments>Serbian(Latin)(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>Sr-Cyrl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>Sr-Cyrl</iso>
-        <icu>Sr-Cyrl</icu>
+        <name>Sr-Cyrl</name>  
         <preferred>no</preferred>
-        <group>Serbian(Cyrillic)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Cyrillic)</group>  
         <comments>Serbian(Cyrillic)</comments>
     </language>
     <language>
-        <name>sr-Cyrl-BA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-Cyrl-BA</iso>
-        <icu>sr-Cyrl-BA</icu>
+        <name>sr-Cyrl-BA</name>  
         <preferred>no</preferred>
-        <group>Serbian(Cyrillic)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Cyrillic)</group>  
         <comments>Serbian(Cyrillic)(BosniaandHerzegovina)</comments>
     </language>
     <language>
-        <name>sr-Cyrl-RS</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-Cyrl-RS</iso>
-        <icu>sr-Cyrl-RS</icu>
+        <name>sr-Cyrl-RS</name>  
         <preferred>no</preferred>
-        <group>Serbian(Cyrillic)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Cyrillic)</group>  
         <comments>Serbian(Cyrillic)(Serbia)</comments>
     </language>
     <language>
-        <name>sr-Cyrl-SP</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-Cyrl-SP</iso>
-        <icu>sr-Cyrl-SP</icu>
+        <name>sr-Cyrl-SP</name>  
         <preferred>no</preferred>
-        <group>Serbian(Cyrillic)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Cyrillic)</group>  
         <comments>Serbian(Cyrillic)(SerbiaandMontenegro)</comments>
     </language>
     <language>
-        <name>sr-Latn-ME</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-3166-2</cpName>
-        <iso>sr-Latn-ME</iso>
-        <icu>sr-Latn-ME</icu>
+        <name>sr-Latn-ME</name>  
         <preferred>no</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments>Serbian(Latin)(Montenegrin)</comments>
     </language>
     <language>
-        <name>sr-Latn-SP</name>
-        <cpASCII>852</cpASCII>
-        <cpANSI>1250</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>sr-Latn-SP</iso>
-        <icu>sr-Latn-SP</icu>
+        <name>sr-Latn-SP</name>  
         <preferred>no</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments>Serbian(Latin)</comments>
     </language>
     <language>
-        <name>sr-RS</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-RS</iso>
-        <icu>sr-RS</icu>
+        <name>sr-RS</name>  
         <preferred>no</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments>Serbian(Latin)(Serbia)</comments>
     </language>
     <language>
-        <name>sr-SP</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sr-SP</iso>
-        <icu>sr-SP</icu>
+        <name>sr-SP</name>  
         <preferred>no</preferred>
-        <group>Serbian(Latin)</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Serbian(Latin)</group>  
         <comments>Serbian(Montenegrin)</comments>
     </language>
     <language>
-        <name>st</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>st</iso>
-        <icu>st</icu>
+        <name>st</name>  
         <preferred>yes</preferred>
-        <group>Sesotho</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Sesotho</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sv</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sv</iso>
-        <icu>sv</icu>
+        <name>sv</name>  
         <preferred>yes</preferred>
-        <group>Swedish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Swedish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sv-FI</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sv-FI</iso>
-        <icu>sv-FI</icu>
+        <name>sv-FI</name>  
         <preferred>no</preferred>
-        <group>Swedish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Swedish</group>  
         <comments>Swedish(Finland)</comments>
     </language>
     <language>
-        <name>sv-SE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sv-SE</iso>
-        <icu>sv-SE</icu>
+        <name>sv-SE</name>  
         <preferred>no</preferred>
-        <group>Swedish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Swedish</group>  
         <comments>Swedish(Sweden)</comments>
     </language>
     <language>
-        <name>sw</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sw</iso>
-        <icu>sw</icu>
+        <name>sw</name>  
         <preferred>yes</preferred>
-        <group>Swahili</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Swahili</group>  
         <comments></comments>
     </language>
     <language>
-        <name>sw-KE</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>sw-KE</iso>
-        <icu>sw-KE</icu>
+        <name>sw-KE</name>  
         <preferred>no</preferred>
-        <group>Swahili</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Swahili</group>  
         <comments>Swahili(Kenya)</comments>
     </language>
     <language>
-        <name>syr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>syr</iso>
-        <icu>syr</icu>
+        <name>syr</name>  
         <preferred>no</preferred>
-        <group>Syrian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Syrian</group>  
         <comments>Syrian</comments>
     </language>
     <language>
-        <name>syr-SY</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>syr-SY</iso>
-        <icu>syr-SY</icu>
+        <name>syr-SY</name>  
         <preferred>no</preferred>
-        <group>Syrian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Syrian</group>  
         <comments>Syrian(Syria)</comments>
     </language>
     <language>
-        <name>ta</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ta</iso>
-        <icu>ta</icu>
+        <name>ta</name>  
         <preferred>yes</preferred>
-        <group>Tamil</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tamil</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ta-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ta-IN</iso>
-        <icu>ta-IN</icu>
+        <name>ta-IN</name>  
         <preferred>no</preferred>
-        <group>Tamil</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tamil</group>  
         <comments>Tamil(India)</comments>
     </language>
     <language>
-        <name>te</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>te</iso>
-        <icu>te</icu>
+        <name>te</name>  
         <preferred>yes</preferred>
-        <group>Telugu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Telugu</group>  
         <comments></comments>
     </language>
     <language>
-        <name>te-IN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>te-IN</iso>
-        <icu>te-IN</icu>
+        <name>te-IN</name>  
         <preferred>no</preferred>
-        <group>Telugu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Telugu</group>  
         <comments>Telugu(India)</comments>
     </language>
     <language>
-        <name>tg</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tg</iso>
-        <icu>tg</icu>
+        <name>tg</name>  
         <preferred>yes</preferred>
-        <group>Tajik</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tajik</group>  
         <comments></comments>
     </language>
     <language>
-        <name>th</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>th</iso>
-        <icu>th</icu>
+        <name>th</name>  
         <preferred>yes</preferred>
-        <group>Thai</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Thai</group>  
         <comments></comments>
     </language>
     <language>
-        <name>th-TH</name>
-        <cpASCII>874</cpASCII>
-        <cpANSI>874</cpANSI>
-        <cpName>ISO-8859-11</cpName>
-        <iso>th-TH</iso>
-        <icu>th-TH</icu>
+        <name>th-TH</name>  
         <preferred>no</preferred>
-        <group>Thai</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Thai</group>  
         <comments>Thai</comments>
     </language>
     <language>
-        <name>tk</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tk</iso>
-        <icu>tk</icu>
+        <name>tk</name>  
         <preferred>yes</preferred>
-        <group>Turkmen</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Turkmen</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tl</iso>
-        <icu>tl</icu>
+        <name>tl</name>  
         <preferred>yes</preferred>
-        <group>Tagalog</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tagalog</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tl-PH</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tl-PH</iso>
-        <icu>tl-PH</icu>
+        <name>tl-PH</name>  
         <preferred>no</preferred>
-        <group>Tagalog</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tagalog</group>  
         <comments>Tagalog</comments>
     </language>
     <language>
-        <name>tlh-Latn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tlh-Latn</iso>
-        <icu>tlh-Latn</icu>
+        <name>tlh-Latn</name>  
         <preferred>yes</preferred>
-        <group>Klingon</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Klingon</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tlh-Piqd</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tlh-Piqd</iso>
-        <icu>tlh-Piqd</icu>
+        <name>tlh-Piqd</name>  
         <preferred>no</preferred>
-        <group>Klingon</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Klingon</group>  
         <comments>Klingon(plqaD)</comments>
     </language>
     <language>
-        <name>tn</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tn</iso>
-        <icu>tn</icu>
+        <name>tn</name>  
         <preferred>yes</preferred>
-        <group>Tswana</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tswana</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tn-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tn-ZA</iso>
-        <icu>tn-ZA</icu>
+        <name>tn-ZA</name>  
         <preferred>no</preferred>
-        <group>Tswana</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tswana</group>  
         <comments>Tswana(SouthAfrica)</comments>
     </language>
     <language>
-        <name>to</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>to</iso>
-        <icu>to</icu>
+        <name>to</name>  
         <preferred>yes</preferred>
-        <group>Tongan</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tongan</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tr</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tr</iso>
-        <icu>tr</icu>
+        <name>tr</name>  
         <preferred>yes</preferred>
-        <group>Turkish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Turkish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tr-TR</name>
-        <cpASCII>857</cpASCII>
-        <cpANSI>1254</cpANSI>
-        <cpName>ISO-8859-9</cpName>
-        <iso>tr-TR</iso>
-        <icu>tr-TR</icu>
+        <name>tr-TR</name>  
         <preferred>no</preferred>
-        <group>Turkish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Turkish</group>  
         <comments>Turkish</comments>
     </language>
     <language>
-        <name>ts</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ts</iso>
-        <icu>ts</icu>
+        <name>ts</name>  
         <preferred>yes</preferred>
-        <group>Tsonga</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tsonga</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tt</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tt</iso>
-        <icu>tt</icu>
+        <name>tt</name>  
         <preferred>yes</preferred>
-        <group>Tatar</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tatar</group>  
         <comments></comments>
     </language>
     <language>
-        <name>tt-RU</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>tt-RU</iso>
-        <icu>tt-RU</icu>
+        <name>tt-RU</name>  
         <preferred>no</preferred>
-        <group>Tatar</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tatar</group>  
         <comments>Tatar(Russia)</comments>
     </language>
     <language>
-        <name>ty</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ty</iso>
-        <icu>ty</icu>
+        <name>ty</name>  
         <preferred>yes</preferred>
-        <group>Tahitian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Tahitian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ug</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ug</iso>
-        <icu>ug</icu>
+        <name>ug</name>  
         <preferred>yes</preferred>
-        <group>Uiguric</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Uiguric</group>  
         <comments></comments>
     </language>
     <language>
-        <name>uk</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>uk</iso>
-        <icu>uk</icu>
+        <name>uk</name>  
         <preferred>yes</preferred>
-        <group>Ukrainian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Ukrainian</group>  
         <comments></comments>
     </language>
     <language>
-        <name>uk-UA</name>
-        <cpASCII>1251</cpASCII>
-        <cpANSI>1251</cpANSI>
-        <cpName>ISO-8859-5</cpName>
-        <iso>uk-UA</iso>
-        <icu>uk-UA</icu>
+        <name>uk-UA</name>  
         <preferred>no</preferred>
-        <group>Ukrainian</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Ukrainian</group>  
         <comments>Ukrainian(Ukrainia)</comments>
     </language>
     <language>
-        <name>ur</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ur</iso>
-        <icu>ur</icu>
+        <name>ur</name>  
         <preferred>yes</preferred>
-        <group>Urdu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Urdu</group>  
         <comments></comments>
     </language>
     <language>
-        <name>ur-PK</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>ur-PK</iso>
-        <icu>ur-PK</icu>
+        <name>ur-PK</name>  
         <preferred>no</preferred>
-        <group>Urdu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Urdu</group>  
         <comments>Urdu(Pakistan)</comments>
     </language>
     <language>
-        <name>uz</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>uz</iso>
-        <icu>uz</icu>
+        <name>uz</name>  
         <preferred>yes</preferred>
-        <group>Uzbek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Uzbek</group>  
         <comments></comments>
     </language>
     <language>
-        <name>uz-Cyrl</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>uz-Cyrl</iso>
-        <icu>Uz-Cyrl</icu>
+        <name>uz-Cyrl</name>  
         <preferred>no</preferred>
-        <group>Uzbek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Uzbek</group>  
         <comments>Uzbek(Cyrillic)</comments>
     </language>
     <language>
-        <name>uz-Cyrl-UZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>uz-Cyrl-UZ</iso>
-        <icu>uz-Cyrl-UZ</icu>
+        <name>uz-Cyrl-UZ</name>  
         <preferred>no</preferred>
-        <group>Uzbek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Uzbek</group>  
         <comments>Uzbek(Cyrillic)(Uzbekistan)</comments>
     </language>
     <language>
-        <name>uz-UZ</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>uz-UZ</iso>
-        <icu>uz-UZ</icu>
+        <name>uz-UZ</name>  
         <preferred>no</preferred>
-        <group>Uzbek</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Uzbek</group>  
         <comments>Uzbek(Latin)(Uzbekistan)</comments>
     </language>
     <language>
-        <name>vi</name>
-        <cpASCII>1258</cpASCII>
-        <cpANSI>1258</cpANSI>
-        <cpName>cp1258</cpName>
-        <iso>vi</iso>
-        <icu>vi</icu>
+        <name>vi</name>  
         <preferred>yes</preferred>
-        <group>Vietnamese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Vietnamese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>vi-VN</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>vi-VN</iso>
-        <icu>vi-VN</icu>
+        <name>vi-VN</name>  
         <preferred>no</preferred>
-        <group>Vietnamese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Vietnamese</group>  
         <comments>Vietnamese(Vietnam)</comments>
     </language>
     <language>
-        <name>xh</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>xh</iso>
-        <icu>xh</icu>
+        <name>xh</name>  
         <preferred>yes</preferred>
-        <group>Xhosa</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Xhosa</group>  
         <comments></comments>
     </language>
     <language>
-        <name>xh-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>xh-ZA</iso>
-        <icu>xh-ZA</icu>
+        <name>xh-ZA</name>  
         <preferred>no</preferred>
-        <group>Xhosa</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Xhosa</group>  
         <comments>Xhosa(SouthAfrica)</comments>
     </language>
     <language>
-        <name>yi</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>yi</iso>
-        <icu>yi</icu>
+        <name>yi</name>  
         <preferred>yes</preferred>
-        <group>Jiddish</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Jiddish</group>  
         <comments></comments>
     </language>
     <language>
-        <name>yo</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>yo</iso>
-        <icu>yo</icu>
+        <name>yo</name>  
         <preferred>yes</preferred>
-        <group>Yoruba</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Yoruba</group>  
         <comments></comments>
     </language>
     <language>
-        <name>yua</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>yua</iso>
-        <icu>yua</icu>
+        <name>yua</name>  
         <preferred>yes</preferred>
-        <group>YucatecMaya</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>YucatecMaya</group>  
         <comments></comments>
     </language>
     <language>
-        <name>yue</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>yue</iso>
-        <icu>yue</icu>
+        <name>yue</name>  
         <preferred>yes</preferred>
-        <group>Cantonese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Cantonese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zh</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zh</iso>
-        <icu>zh</icu>
+        <name>zh</name>  
         <preferred>yes</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zh-Hans</name>
-        <cpASCII>936</cpASCII>
-        <cpANSI>936</cpANSI>
-        <cpName>gb2312</cpName>
-        <iso>zh-Hans</iso>
-        <icu>Zh-CHS</icu>
+        <name>zh-Hans</name>  
         <preferred>yes</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zh-Hant</name>
-        <cpASCII>936</cpASCII>
-        <cpANSI>936</cpANSI>
-        <cpName>gb2312</cpName>
-        <iso>zh-Hant</iso>
-        <icu>Zh-CHS</icu>
+        <name>zh-Hant</name>  
         <preferred>yes</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zh-CN</name>
-        <cpASCII>936</cpASCII>
-        <cpANSI>936</cpANSI>
-        <cpName>gb2312</cpName>
-        <iso>zh-CN</iso>
-        <icu>Zh-CHS</icu>
+        <name>zh-CN</name>  
         <preferred>yes</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zh-HK</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zh-HK</iso>
-        <icu>zh-HK</icu>
+        <name>zh-HK</name>  
         <preferred>no</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments>Chinese(HongKong)</comments>
     </language>
     <language>
-        <name>zh-MO</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zh-MO</iso>
-        <icu>zh-MO</icu>
+        <name>zh-MO</name>  
         <preferred>no</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments>Chinese(Macao)</comments>
     </language>
     <language>
-        <name>zh-SG</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zh-SG</iso>
-        <icu>zh-SG</icu>
+        <name>zh-SG</name>  
         <preferred>no</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments>Chinese(Singapore)</comments>
     </language>
     <language>
-        <name>zh-TW</name>
-        <cpASCII>950</cpASCII>
-        <cpANSI>950</cpANSI>
-        <cpName>big5</cpName>
-        <iso>zh-TW</iso>
-        <icu>Zh-CHT</icu>
+        <name>zh-TW</name>  
         <preferred>no</preferred>
-        <group>Chinese</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Chinese</group>  
         <comments>Chinese(Taiwan)</comments>
     </language>
     <language>
-        <name>zu</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zu</iso>
-        <icu>zu</icu>
+        <name>zu</name>  
         <preferred>yes</preferred>
-        <group>Zulu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Zulu</group>  
         <comments></comments>
     </language>
     <language>
-        <name>zu-ZA</name>
-        <cpASCII>850</cpASCII>
-        <cpANSI>1252</cpANSI>
-        <cpName>ISO-8859-1</cpName>
-        <iso>zu-ZA</iso>
-        <icu>zu-ZA</icu>
+        <name>zu-ZA</name>  
         <preferred>no</preferred>
-        <group>Zulu</group>
-        <isSourceLanguage>yes</isSourceLanguage>
-        <isTargetLanguage>yes</isTargetLanguage>
+        <group>Zulu</group>  
         <comments>Zulu(SouthAfrica)</comments>
     </language>
 </languages>

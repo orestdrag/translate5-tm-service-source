@@ -333,5 +333,6 @@ BOOL GetLanguageGroup( PSZ pszLanguage, PSZ pszGroup )
 
   fOK = pLangFactory->getLanguageInfo( pszLanguage, &LangInfo );
   if ( fOK ) strcpy( pszGroup, LangInfo.szLangGroup );
+  //if ( fOK ) strcpy( pszGroup, LangInfo.szName );
   return( fOK );
 }

@@ -2467,7 +2467,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModul
    /********************************************************************/
    /* call DosInsMessage to substitute data => they are all in ANSI    */
    /********************************************************************/
-   LogMessage3(FATAL,__func__,":: msg = ", pchBuf);
+   LogMessage3(ERROR,__func__,":: msg = ", pchBuf);
    //DosInsMessage( ppMsgSubst, usVCount, &chMsg[0], ulMsgLen,
    //               pchBuf, cbBuf, pcbMsg );
 

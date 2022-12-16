@@ -101,19 +101,22 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
         LogMessage4(ERROR, __func__, ":: src file \'", oldPath.c_str(), "\' is missing!");
         return FILE_NOT_EXISTS;
     }
-    std::ifstream ifs(oldPath, std::ios::in | std::ios::binary);   
-    std::ofstream ofs(newPath, std::ios::out | std::ios::binary);
-    if(!ofs)
+    
     {
-        LogMessage4(ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
-        return FILEHELPER_ERROR_CANT_OPEN_DIR;
-    } 
-    if(!ifs)
-    {
-        LogMessage5(ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
-        return FILEHELPER_ERROR_CANT_OPEN_DIR;;
-    } 
-    ofs << ifs.rdbuf();
+        std::ifstream ifs(oldPath, std::ios::in | std::ios::binary);   
+        std::ofstream ofs(newPath, std::ios::out | std::ios::binary);
+        if(!ofs)
+        {
+            LogMessage4(ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
+            return FILEHELPER_ERROR_CANT_OPEN_DIR;
+        } 
+        if(!ifs)
+        {
+            LogMessage5(ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
+            return FILEHELPER_ERROR_CANT_OPEN_DIR;;
+        } 
+        ofs << ifs.rdbuf();
+    }
     //delete prev file
     DeleteFile(oldPath);
     //remove(oldPath);

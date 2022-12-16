@@ -1026,7 +1026,8 @@ int OtmMemoryServiceWorker::createMemory
   // convert the ISO source language to a OpenTM2 source language name
   char szOtmSourceLang[40];
   szOtmSourceLang[0] = 0;//terminate to avoid garbage
-  EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang );
+  bool fPrefered = false;
+  EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang, &fPrefered );
  
   if ( szOtmSourceLang[0] == 0 )
   {
@@ -1498,10 +1499,7 @@ int OtmMemoryServiceWorker::search
     return( BAD_REQUEST );
   } /* end */
 
-  if ( pData->iNumOfProposals == 0 )
-  {
-    pData->iNumOfProposals = 5;
-  }
+  
   if(loggingThreshold >= 0){
     LogMessage2(WARNING,"OtmMemoryServiceWorker::search::set new threshold for logging", toStr(loggingThreshold).c_str());
     SetLogLevel(loggingThreshold);
@@ -1519,20 +1517,52 @@ int OtmMemoryServiceWorker::search
 
   // prepare the memory lookup
   PMEMPROPOSAL pSearchKey = new (MEMPROPOSAL);
-  PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[pData->iNumOfProposals] );
   memset( pSearchKey, 0, sizeof( *pSearchKey ) );
-  memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * pData->iNumOfProposals );
   wcscpy( pSearchKey->szSource, pData->szSource );
   strcpy( pSearchKey->szDocName, pData->szDocName );
   pSearchKey->lSegmentNum = pData->lSegmentNum;
-  EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pSearchKey->szSourceLanguage );
-  EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pSearchKey->szTargetLanguage );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoSourceLang, pSearchKey->szSourceLanguage, &pSearchKey->fIsoSourceLangIsPrefered );
+  EqfGetOpenTM2Lang( this->hSession, pData->szIsoTargetLang, pSearchKey->szTargetLanguage, &pSearchKey->fIsoTargetLangIsPrefered );
   strcpy( pSearchKey->szMarkup, pData->szMarkup );
   wcscpy( pSearchKey->szContext, pData->szContext );
 
+  std::vector<std::string> sourceLangs;
+  if(pSearchKey->fIsoSourceLangIsPrefered){
+    sourceLangs = GetListOfLanguagesFromFamily(pData->szIsoSourceLang);
+  }
+  
+  if(sourceLangs.empty()){
+    sourceLangs.push_back(pSearchKey->szSourceLanguage);
+  }
+
+  if ( pData->iNumOfProposals == 0 )
+  {
+    pData->iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
+    //pData->iNumOfProposals = 5;
+  }
+
+  PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[pData->iNumOfProposals] );
+  memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * pData->iNumOfProposals );
   // do the lookup and handle the results
-  int iNumOfProposals = pData->iNumOfProposals;
-  iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+  int ProposalSpacesLeft = pData->iNumOfProposals;
+  int iNumOfProposals;
+  int i = 0;
+  //for(int i = 0; i < sourceLangs.size() && iRC == 0; i++){
+    iNumOfProposals = ProposalSpacesLeft;
+    strcpy(pSearchKey->szSourceLanguage, sourceLangs[i].c_str());
+    int j = pData->iNumOfProposals - ProposalSpacesLeft;
+    iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, &pFoundProposals[j], GET_EXACT );
+    ProposalSpacesLeft -= iNumOfProposals;
+    if(ProposalSpacesLeft <= 0 ){
+      LogMessage8(WARNING, __func__, ":: not all list of lang was checked before allocated proposals space reached end, allocated ", toStr(pData->iNumOfProposals), 
+        ", proposal spaces, checked ", toStr(i).c_str(), " of ", toStr(sourceLangs.size()), " languages ");
+      //break;
+    }
+    if(iRC != 0){
+      LogMessage5(WARNING, __func__,":: fuzzy search of mem returned error, rc = ", toStr(iRC).c_str(),"; sourceLange = ", sourceLangs[i].c_str() );
+    }
+  //}
+  iNumOfProposals = pData->iNumOfProposals - ProposalSpacesLeft;
   
   if ( iRC == 0 )
   {

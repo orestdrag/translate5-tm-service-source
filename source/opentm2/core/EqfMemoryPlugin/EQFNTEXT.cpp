@@ -565,6 +565,8 @@ USHORT ExtractRecordV6
                                      pTargetClb,
                                      pSourceString, &lSourceLen,
                                      &pTmExtOut->stTmExt );
+            NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+                        pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
             if ( ! usRc )
             {
               //check for another target
@@ -785,6 +787,7 @@ USHORT FillExtStructure
       //fill in the target language
       NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
                         pstExt->szTargetLanguage, NULL );
+      
 
       //fill in the segment id
       pstExt->ulSourceSegmentId = pTMXTargetClb->ulSegmId;

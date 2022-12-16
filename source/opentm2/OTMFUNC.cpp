@@ -1131,6 +1131,10 @@ USHORT EqfListMem
   return( usRC );
 }
 
+std::vector<std::string> GetListOfLanguagesFromFamily(PSZ pszIsoLang){
+  return LanguageFactory::getInstance()->getListOfLanguagesFromTheSameFamily( pszIsoLang );
+}
+
 // OtmMemoryService
 /*! \brief Get the OpenTM2 language name for a ISO language identifier
 \param hSession the session handle returned by the EqfStartSession call
@@ -1142,7 +1146,8 @@ USHORT EqfGetOpenTM2Lang
 (
   HSESSION         hSession,
   char*         pszISOLang,
-  char*         pszOpenTM2Lang
+  char*         pszOpenTM2Lang,
+  bool*       pfPrefered
 )
 {
   PFCTDATA    pData = NULL;            // ptr to function data area
@@ -1173,7 +1178,7 @@ USHORT EqfGetOpenTM2Lang
   if ( usRC == NO_ERROR )
   {
     LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-    pLangFactory->getOpenTM2NameFromISO( pszISOLang, pszOpenTM2Lang );
+    pLangFactory->getOpenTM2NameFromISO( pszISOLang, pszOpenTM2Lang, pfPrefered );
   } /* endif */
 
   if ( pData )

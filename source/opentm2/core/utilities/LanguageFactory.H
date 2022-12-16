@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-
+#include <map>
 
 class LanguageFactory
 /*! \brief   This class provides a language name related utility factory 
@@ -36,14 +36,16 @@ public:
 typedef struct _LANGUAGEINFO
 {
   char szName[128];                    // language name used in Opentm2
-  char szIsoID[40];                    // ISO ID for the language
-  bool fisPreferred;                   // TRUE = this is the preferred language if several languages use the same ISO/BCP47 ID
-  //char szAddInfo[256];                 // additional language information or comments
-  bool isSourceLanguage;               // TRUE = language can be used as a source language    
-  bool isTargetLanguage;               // TRUE = language can be used as a target language    
   char szLangGroup[128];               // language group of the language (will be used as language in the memory lookup)
+  char szAddInfo[255];                 // additional language information or comments
+  bool fisPreferred;                   // TRUE = this is the preferred language
 } LANGUAGEINFO, *PLANGUAGEINFO;
 
+  static int compareLanguageInfo(const void * p1, const void * p2 ) {
+            LANGUAGEINFO* a = (LANGUAGEINFO*)p1;
+            LANGUAGEINFO* b = (LANGUAGEINFO*)p2; 
+            return  strcmp(a->szName, b->szName);
+  } 
   /*! \brief type of requested languages used by listLanguages method
   */
   typedef enum _LANGUAGETYPE { SOURCE_LANGUAGE_TYPE, TARGET_LANGUAGE_TYPE, ALL_LANGUAGES_TYPE } LANGUAGETYPE;
@@ -88,6 +90,9 @@ int getISOName
   std::string& strISO
 );
 
+
+std::vector<std::string> getListOfLanguagesFromTheSameFamily(PSZ lang);
+
 /* \brief Get the OpenTM2 language name for an ISO language identifier
    \param pszISO language ISO identifier
    \param pszLanguage buffer for OpenTM2 language name
@@ -96,7 +101,8 @@ int getISOName
 int getOpenTM2NameFromISO
 (
   const char *pszISO,
-  char *pszLanguage
+  char *pszLanguage,
+  bool* pfPrefered = nullptr
 );
 int getOpenTM2NameFromISO
 (
@@ -146,9 +152,6 @@ bool getLanguageInfo
   const char *pszLanguage,
   PLANGUAGEINFO pInfo
 );
-
-private:
-
   /* \brief Find the entry for the specified OpenTM2 language name 
    \param pszLanguage OpenTM2 language name
    \returns -1 when not found or index into language table
@@ -158,13 +161,28 @@ int findLanguage
   const char *pszLanguage
 );
 
+//check list of prefered languages for exact match
+int findIfPreferedLanguage
+(
+  const char *pszLanguage
+);
+
+//check prefered lang from the same family, for en-US this would be en etc.
+int findPreferedLangForThisLang
+(
+  const char *pszLanguage
+);
+private:
+
+
 /* \brief Find the entry for the specified ISO language ID 
    \param pszISO ISO language ID 
    \returns -1 when not found or index into language table
 */
 int findISO
 (
-  const char *pszLanguage
+  const char *pszLanguage,
+  bool &fPrefered
 );
 
 
@@ -185,7 +203,9 @@ int compareISO
 
   /*! \brief Pointer to the loaded language information list
 */
-  void *pvoidLanguageList;
+  std::vector<LANGUAGEINFO> vLanguageList;
+  std::vector<LANGUAGEINFO*> vpPreferedLanguageList;
+  //std::map<std::string, LANGUAGEINFO> vLanguageMap;
 
   unsigned short loadLanguageList
   ( 

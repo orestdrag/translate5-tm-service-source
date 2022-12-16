@@ -52,6 +52,7 @@ typedef struct _OTMPROPOSALDATA
 	/*! \brief source language. */
   //std::string strSourceLanguage;
 	char szSourceLanguage[OTMPROPOSAL_MAXNAMELEN];
+  char szOriginalSourceLanguage[OTMPROPOSAL_MAXNAMELEN];
 
 	/*! \brief target language. */
   //std::string strTargetLanguage;
@@ -96,6 +97,8 @@ typedef struct _OTMPROPOSALDATA
 
   /*! \brief list of replacement values */
   long pvReplacementList;
+
+  bool fSourceLangIsPrefered;
 
 } OTMPROPOSALDATA, *POTMPROPOSALDATA;
 
@@ -358,6 +361,13 @@ int OtmProposal::getSourceLanguage( char *pszBuffer, int iBufSize )
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   return( CopyToBuffer( pData->szSourceLanguage, pszBuffer, iBufSize ) );
 }
+
+int OtmProposal::getOriginalSourceLanguage( char *pszBuffer, int iBufSize )
+{
+  if ( this->pvProposalData == NULL ) return( 0 );
+  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  return( CopyToBuffer( pData->szOriginalSourceLanguage, pszBuffer, iBufSize ) );
+}
   	
 /* \brief set the proposal source language
     \param pszBuffer Pointer to buffer containing the proposal source language
@@ -367,6 +377,14 @@ void OtmProposal::setSourceLanguage( char *pszBuffer )
   if ( this->pvProposalData == NULL ) return;
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   strncpy( pData->szSourceLanguage, pszBuffer, sizeof(pData->szSourceLanguage)-1 );
+  pData->fFilled = 1;
+}
+  
+void OtmProposal::setOriginalSourceLanguage( char *pszBuffer )
+{
+  if ( this->pvProposalData == NULL ) return;
+  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  strncpy( pData->szOriginalSourceLanguage, pszBuffer, sizeof(pData->szOriginalSourceLanguage)-1 );
   pData->fFilled = 1;
 }
 
@@ -715,6 +733,20 @@ bool OtmProposal::isEmpty()
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   return( !pData->fFilled );
 }
+
+
+bool OtmProposal::isSourceLangIsPrefered(){
+  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  return( pData->fSourceLangIsPrefered );
+}
+
+void OtmProposal::setIsSourceLangIsPrefered(bool fPref){
+  if ( this->pvProposalData == NULL ) return;
+  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
+  pData->fSourceLangIsPrefered = fPref;
+
+}
+
 
 /* \brief check if source and target of proposal is equal
   */

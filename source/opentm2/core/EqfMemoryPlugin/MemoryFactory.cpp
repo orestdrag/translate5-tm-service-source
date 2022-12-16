@@ -1939,7 +1939,9 @@ void MemoryFactory::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmPro
   pOtmProposal->setDocShortName( pProposal->szDocShortName );
   pOtmProposal->setSegmentNum( pProposal->lSegmentNum );
   pOtmProposal->setSourceLanguage( pProposal->szSourceLanguage );
+  pOtmProposal->setIsSourceLangIsPrefered( pProposal->fIsoSourceLangIsPrefered);
   pOtmProposal->setTargetLanguage( pProposal->szTargetLanguage );
+
   switch( pProposal->eType )
   {
     case MANUAL_PROPTYPE: pOtmProposal->setType( OtmProposal::eptManual ); break;
@@ -1980,7 +1982,9 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pOtmProposal->getDocName( pProposal->szDocName, sizeof(pProposal->szDocName) );
   pOtmProposal->getDocShortName( pProposal->szDocShortName, sizeof(pProposal->szDocShortName) );
   pProposal->lSegmentNum = pOtmProposal->getSegmentNum();
-  pOtmProposal->getSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );
+
+  pOtmProposal->getOriginalSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );
+  //pOtmProposal->getSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );
   pOtmProposal->getTargetLanguage( pProposal->szTargetLanguage, sizeof(pProposal->szTargetLanguage) );
   switch( pOtmProposal->getType() )
   {

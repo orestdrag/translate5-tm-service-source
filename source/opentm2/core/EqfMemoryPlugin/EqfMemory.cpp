@@ -27,6 +27,7 @@ Copyright Notice:
 #include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFQDAMI.H>             // Private header file of QDAM 
 #include "EQFRDICS.H"             // remote dictionary functions
+#include "LanguageFactory.H"
 
 // activate the folllowing define to activate logging
 //#define EQFMEMORYLOGGING
@@ -1193,6 +1194,7 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setType( FlagToProposalType( pExtOut->stTmExt.usTranslationFlag ) );
   Proposal.setUpdateTime( pExtOut->stTmExt.lTargetTime );
   Proposal.setContextRanking( 0 );
+  Proposal.setOriginalSourceLanguage( pExtOut->stTmExt.szOriginalSourceLanguage );
 
   return( iRC );
 }
@@ -1229,7 +1231,8 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setMemoryIndex( pMatch->usDBIndex );
   pProposal->setWords( pMatch->iWords );
   pProposal->setDiffs( pMatch->iDiffs );
-
+  pProposal->setOriginalSourceLanguage( pMatch->szOriginalSrcLanguage );
+  
   switch ( pMatch->usMatchLevel )
   {
     case 102: 
@@ -1324,7 +1327,8 @@ int EqfMemory::OtmProposalToGetIn
   pGetIn->stTmGet.usMatchThreshold = threshold;
   pGetIn->stTmGet.ulSegmentId = Proposal.getSegmentNum();
   pGetIn->stTmGet.pvReplacementList = (PVOID)Proposal.getReplacementList();
-
+  pGetIn->stTmGet.fSourceLangIsPrefered= Proposal.isSourceLangIsPrefered();
+  pGetIn->stTmGet.fTargetLangIsPrefered = LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->stTmGet.szTargetLanguage ) >= 0;
   return( iRC );
 }
 

@@ -198,7 +198,6 @@ LONG                lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      LogMessage1(INFO, "MemFuncCreateMem():: ");
       LogMessage1(FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
       iRC = 2;
     }

@@ -703,26 +703,6 @@ EQFNTMInsert
     ERREVENT( EQFNTMINSERT_LOC, INTFUNCFAILED_EVENT, sRc );
   } /* endif */
 
-  
-  #ifdef TEMPORARY_HARDCODED_SEPARATE_KEYS
-  int fWriteEachKeyInSeparateFiles = 0;
-  properties_get_int_or_default(KEY_DEBUG_KEYS_SEPARATE_FILES,fWriteEachKeyInSeparateFiles, 0);
-  if(fWriteEachKeyInSeparateFiles){    
-    //write data in empty file for debugging
-    PBTREE pbt = (PBTREE)pBTIda;
-    char path[255];
-    strcpy(path, pbt->szFileName);
-    strcat(path,"_data/");
-    CreateDir(path);
-    strcat(path, "key_");    
-    strcat(path, toStr(*pulKey).c_str());
-    FILE* filePtr = fopen(path, "wb+");
-    fwrite(pData, ulLen, 1, filePtr);
-    fclose(filePtr);
-  }
-  
-  #endif
-
   return sRc;
 } /* end of function EQFNTMInsert */
 
@@ -1126,7 +1106,7 @@ VOID QDAMCopyDataTo_V3
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
        if(usLastPos < usLen && CheckLogLevel(INFO)){
-        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+        LogMessage4(ERROR, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       ULONG ulLen = *(PULONG) pOldData;
       if ( ulLen & QDAM_TERSE_FLAGL)

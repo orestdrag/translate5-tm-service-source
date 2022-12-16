@@ -852,6 +852,7 @@ private:
     MEMEXPIMPSEG SegmentData;         // buffer for segment data
     CHAR     szDescription[1024];     // buffer for memory descripion
     CHAR     szMemSourceLang[50];     // buffer for memory source language
+    CHAR     szMemSourceIsoLang[50];
     CHAR     szErrorMessage[1024];    // buffer for error message text
     CHAR_W   szNote[MAX_SEGMENT_SIZE];// buffer for note text
     CHAR_W   szNoteStyle[100];        // buffer for note style
@@ -862,6 +863,7 @@ private:
     //for enclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> enclosing tags skipping should be ignored
     bool        fSegmentStartsWithBPTTag;
 
+    bool        fUseMajorLanguage;
   } BUFFERAREAS, *PBUFFERAREAS;
 
   PBUFFERAREAS pBuf; 
@@ -871,6 +873,7 @@ private:
   {
     CHAR_W   szText[DATABUFFERSIZE];  // buffer for TUV text
     CHAR     szLang[50];              // buffer for TUV language (converted to Tmgr language name) or original language in case of fInvalidLang
+    CHAR     szIsoLang[10];
     BOOL     fInvalidChars;           // TRUE = contains invalid characters 
     BOOL     fInlineTags;             // TRUE = contains inline tagging
     BOOL     fInvalidLang;            // TRUE = the language of the TUV is invalid
@@ -1344,10 +1347,10 @@ USHORT CTMXExportImport::WriteTUV
   m_xw.WriteAttributeString( "xml:lang", szTMXLang ); 
 
   // add original Tmgr language as property
-  m_xw.WriteStartElement( "prop" );
-  m_xw.WriteAttributeString( "type", LANGUAGE_PROP );
-  m_xw.WriteString( pszLanguage ); 
-  m_xw.WriteEndElement(); // prop
+  //m_xw.WriteStartElement( "prop" );
+  //m_xw.WriteAttributeString( "type", LANGUAGE_PROP );
+  //m_xw.WriteString( pszLanguage ); 
+  //m_xw.WriteEndElement(); // prop
 
   // write segment data and mask inline tags
   m_xw.WriteStartElement( "seg" );
@@ -1504,7 +1507,7 @@ USHORT CTMXExportImport::StartImport
           // save target memory source language
           CHAR szMemSourceLanguage[50]; 
           strcpy( szMemSourceLanguage, pMemInfo->szSourceLang );
-
+          
           // get description and source language of imported memory
           m_handler->GetDescription( pMemInfo->szDescription, sizeof(pMemInfo->szDescription) );
           m_handler->GetSourceLanguage( pMemInfo->szSourceLang, sizeof(pMemInfo->szSourceLang)  );
@@ -1512,7 +1515,7 @@ USHORT CTMXExportImport::StartImport
           // always use source language of target memory
           if ( szMemSourceLanguage[0] != EOS)
           {
-            m_handler->SetSourceLanguage( szMemSourceLanguage );
+            m_handler->SetSourceLanguage( szMemSourceLanguage );            
           } /* endif */
         } /* endif */
       } /* endif */
@@ -2219,6 +2222,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               else
               {
                 TMXLanguage2TMLanguage( "", pszValue, pBuf->szMemSourceLang );
+                strncpy(pBuf->szMemSourceIsoLang, pszValue, 9);
+                pBuf->szMemSourceIsoLang[9] = 0;
                 if ( stricmp( pBuf->szMemSourceLang, OTHERLANGUAGES ) == 0 )
                 {
                   pBuf->szMemSourceLang[0] = 0; 
@@ -2625,7 +2630,17 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         PTMXTUV pCurrentTuv = pTuvArray;
         while ( (iCurrent < iCurTuv) && (pSourceTuv == NULL) )
         {
-          if ( strcasecmp( pCurrentTuv->szLang, pBuf->szMemSourceLang ) == 0 )
+          bool isSourceTuv = false;
+          if ( pBuf->fUseMajorLanguage ){
+            short len1 = strlen(pCurrentTuv->szLang);
+            short len2 = strlen(pBuf->szMemSourceLang);
+            len1 = std::min(len1, len2);
+            isSourceTuv = strncasecmp(pCurrentTuv->szLang, pBuf->szMemSourceLang,len1) == 0;
+
+          }else{
+            isSourceTuv = strcasecmp( pCurrentTuv->szLang, pBuf->szMemSourceLang ) == 0 ;
+          }
+          if ( isSourceTuv )
           { 
             pSourceTuv = pCurrentTuv;
           }
@@ -2796,8 +2811,8 @@ void TMXParseHandler::endElement(const XMLCh* const name )
    
         // GQ 2016/01/22 Allow empty data areas in order to allow conversion of memories with empty target segments
         // if ( pBuf->szData[0] == 0 ) fTuvValid = FALSE;          // no data for <tuv>
-        if ( CurElement.szTMLanguage[0] == 0 )
-        {
+        //if ( CurElement.szTMLanguage[0] == 0 )
+        //{
           // no Tmgr language available, check TMX language  
           if ( CurElement.szTMXLanguage[0] == 0 )
           {
@@ -2808,17 +2823,18 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           {
             // convert TMX language to Tmgr language name
             LanguageFactory *pLangFactory = LanguageFactory::getInstance();
+            
             if ( pLangFactory->getOpenTM2NameFromISO( CurElement.szTMXLanguage, pBuf->szLang ) != 0 )
             {
              fTuvLangInvalid = TRUE;          // language not supported
             } /* endif */
           } /* endif */
-        }
-        else
-        {
+        //}
+        //else
+        //{
           // use Tmgr language name
-          strcpy( pBuf->szLang, CurElement.szTMLanguage );
-        } /* endif */
+        //  strcpy( pBuf->szLang, CurElement.szTMLanguage );
+        //} /* endif */
         
         // enlarge array if necessary
         if ( fTuvValid && (iCurTuv >= iTuvArraySize) )
@@ -2850,6 +2866,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
             // remember specified ISO language
             strcpy( pTuvData->szLang, CurElement.szTMXLanguage );
           } /* endif */
+          strcpy( pTuvArray->szIsoLang, CurElement.szTMXLanguage );
 
           iCurTuv++;
         } /* endif */
@@ -2960,12 +2977,13 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   // for prop elements we have to set the data in the parent element (i.e. after the element has been removed from the stack)
   if ( CurrentID == PROP_ELEMENT )
   {
-    if ( CurrentProp == TMLANGUAGE_PROP )
-    {
-      memset( CurElement.szTMLanguage, 0, sizeof(CurElement.szTMLanguage) );
-      strncpy( CurElement.szTMLanguage, pBuf->szProp, sizeof(CurElement.szTMLanguage) - 1 );
-    }
-    else if ( CurrentProp == TMMARKUP_PROP )
+    //if ( CurrentProp == TMLANGUAGE_PROP )
+    //{
+    //  memset( CurElement.szTMLanguage, 0, sizeof(CurElement.szTMLanguage) );
+    //  strncpy( CurElement.szTMLanguage, pBuf->szProp, sizeof(CurElement.szTMLanguage) - 1 );
+    //}
+    //else 
+    if ( CurrentProp == TMMARKUP_PROP )
     {
       memset( CurElement.szTMMarkup, 0, sizeof(CurElement.szTMMarkup) );
       strncpy( CurElement.szTMMarkup, pBuf->szProp, sizeof(CurElement.szTMMarkup) - 1 );
@@ -3304,6 +3322,7 @@ void TMXParseHandler::SetSourceLanguage( char *pszSourceLang)
   if ( pBuf )
   {
     strcpy( pBuf->szMemSourceLang, pszSourceLang);
+    pBuf->fUseMajorLanguage = (LanguageFactory::getInstance()->findIfPreferedLanguage(pszSourceLang) != -1 );
   } /* endif */
 } /* end of method TMXParseHandler::SetSourceLanguage */
 
