@@ -335,6 +335,12 @@ typedef struct _EXTFOLPROP
 #define SEARCH_CASEINSENSITIVE_OPT 0x00080000L
 #define SEARCH_WHITESPACETOLERANT_OPT 0x00100000L
 
+
+#define SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT 0x00200000L
+#define SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT 0x00400000L
+#define SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT 0x00800000L
+#define SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT 0x01000000L
+
 // return when all activitiy has been completed (instead of iterative processing)
 #define COMPLETE_IN_ONE_CALL_OPT 0x01000000
 
@@ -2681,6 +2687,8 @@ USHORT EqfSearchMem
   HSESSION    hSession,                
   LONG        lHandle,                 
   CHAR_W      *pszSearchString,
+  const char* pszSrcLang, 
+  const char* pszTrgLang,
   PSZ         pszStartPosition,
   PMEMPROPOSAL pProposal,
   LONG        lSearchTime,

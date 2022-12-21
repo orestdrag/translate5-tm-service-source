@@ -682,6 +682,8 @@ int removeMemoryFromList(const char* pszName);
   (
     LONG        lHandle,                 
     wchar_t     *pszSearchString,
+    const char* pszSrcLang, 
+    const char* pszTrgLang,
     const char*         pszStartPosition,
     PMEMPROPOSAL pProposal,
     LONG        lSearchTime,

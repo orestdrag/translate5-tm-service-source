@@ -38,6 +38,7 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include "../cmake/git_version.h"
 #include "opentm2/core/utilities/ThreadingWrapper.h"
+#include "opentm2/core/utilities/LanguageFactory.H"
 
 enum statusCodes {
   OK = 200, 
@@ -1527,18 +1528,18 @@ int OtmMemoryServiceWorker::search
   wcscpy( pSearchKey->szContext, pData->szContext );
 
   std::vector<std::string> sourceLangs;
-  if(pSearchKey->fIsoSourceLangIsPrefered){
-    sourceLangs = GetListOfLanguagesFromFamily(pData->szIsoSourceLang);
-  }
+  //if(pSearchKey->fIsoSourceLangIsPrefered){
+  //  sourceLangs = GetListOfLanguagesFromFamily(pData->szIsoSourceLang);
+  //}
   
-  if(sourceLangs.empty()){
+  //if(sourceLangs.empty()){
     sourceLangs.push_back(pSearchKey->szSourceLanguage);
-  }
+  //}
 
   if ( pData->iNumOfProposals == 0 )
   {
-    pData->iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
-    //pData->iNumOfProposals = 5;
+    //pData->iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
+    pData->iNumOfProposals = 5;
   }
 
   PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[pData->iNumOfProposals] );
@@ -1635,6 +1636,8 @@ int OtmMemoryServiceWorker::concordanceSearch
   { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSearchString ), sizeof( pData->szSearchString ) / sizeof( pData->szSearchString[0] ) },
   { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchMode ), sizeof( pData->szSearchMode ) },
   { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchPos ), sizeof( pData->szSearchPos ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },
   { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
   { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( pData->iSearchTime ), 0 },
@@ -1705,16 +1708,49 @@ int OtmMemoryServiceWorker::concordanceSearch
   } /* endif */
   lOptions |= SEARCH_CASEINSENSITIVE_OPT;
 
+
+  {
+    bool fOk = false;
+    if( strlen( pData->szIsoSourceLang) ){
+      LanguageFactory::LANGUAGEINFO srcLangInfo;
+      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoSourceLang, &srcLangInfo );
+      if(fOk){
+        if(srcLangInfo.fisPreferred){
+          lOptions |= SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT;
+        }else{
+          lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
+        }
+      }else{
+        LogMessage3(WARNING,__func__,":: src lang could not be found: ", pData->szIsoSourceLang);
+      }
+    }
+    if( strlen( pData->szIsoTargetLang) ){
+      LanguageFactory::LANGUAGEINFO trgLangInfo;
+      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoTargetLang, &trgLangInfo );
+      if(fOk){
+        if(trgLangInfo.fisPreferred){
+          lOptions |= SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT;
+        }else{
+          lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
+        }
+      }else{
+        LogMessage3(WARNING,__func__,":: target lang could not be found: ", pData->szIsoTargetLang);
+      }
+    }
+  }
+
+
   PMEMPROPOSAL pProposal = new( MEMPROPOSAL );
   std::wstring strProposals;
-
+  
   // loop until end reached or enough proposals have been found
   int iFoundProposals = 0;
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
   do
   {
     memset( pProposal, 0, sizeof( *pProposal ) );
-    iRC = EqfSearchMem( this->hSession, lHandle, pData->szSearchString, pData->szSearchPos, pProposal, iActualSearchTime, lOptions );
+    iRC = EqfSearchMem( this->hSession, lHandle, pData->szSearchString, pData->szIsoSourceLang, pData->szIsoTargetLang,
+      pData->szSearchPos, pProposal, iActualSearchTime, lOptions );
     iActualSearchTime = pData->iSearchTime;
     if ( iRC == 0 )
     {

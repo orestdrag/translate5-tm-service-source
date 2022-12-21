@@ -142,6 +142,12 @@ bool isValidLanguage
   bool fAdjustLangName
 );
 
+bool isTheSameLangGroup
+(
+  const char* lang1,
+  const char* lang2
+);
+
 /* \brief Get all information available for the given language
    \param pszLanguage OpenTM2 language name
    \param pInfo a pointer to a LANGUAGEINFO buffer

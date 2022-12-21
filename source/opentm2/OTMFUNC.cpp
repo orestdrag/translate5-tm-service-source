@@ -969,6 +969,8 @@ USHORT EqfSearchMem
   HSESSION    hSession,
   LONG        lHandle,
   CHAR_W      *pszSearchString,
+  const char* pszSrcLang, 
+  const char* pszTrgLang,
   PSZ         pszStartPosition,
   PMEMPROPOSAL pProposal,
   LONG        lSearchTime,
@@ -991,7 +993,7 @@ USHORT EqfSearchMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APISearchMem( lHandle, pszSearchString, pszStartPosition, pProposal, lSearchTime, lOptions );
+    usRC =  MemoryFactory::getInstance()->APISearchMem( lHandle, pszSearchString, pszSrcLang, pszTrgLang, pszStartPosition, pProposal, lSearchTime, lOptions );
   } /* endif */
 
   if ( usRC && usRC != ENDREACHED_RC)//

@@ -33,6 +33,7 @@ Copyright Notice:
 #include "FilesystemHelper.h"
 #include "PropertyWrapper.H"
 #include "ZipHelper.h"
+#include "LanguageFactory.H"
 
 #include "vector"
 #include <string>
@@ -1419,6 +1420,8 @@ USHORT MemoryFactory::APISearchMem
 (
   LONG        lHandle,                 
   wchar_t  *pszSearchString,
+  const char* pszSrcLang, 
+  const char* pszTrgLang,
   const char*         pszStartPosition,
   PMEMPROPOSAL pProposal,
   LONG        lSearchTime,
@@ -1481,6 +1484,33 @@ USHORT MemoryFactory::APISearchMem
   while ( !fFound && ( iRC == 0 ) )
   {
     fFound = searchInProposal( pOtmProposal, m_szSearchString, lOptions );
+     //check langs
+     if( fFound ) 
+     { // filter by src lang
+      if (lOptions & SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT)
+      {
+        char lang[50];
+        pOtmProposal->getSourceLanguage(lang, 50);
+        fFound = strcasecmp(lang, pszSrcLang ) == 0;
+      }else if(lOptions & SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT){
+        char lang[50];
+        pOtmProposal->getSourceLanguage(lang, 50);
+        fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, pszSrcLang);
+      }
+    }
+    if ( fFound )
+    {
+      if (lOptions & SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT)
+      {
+        char lang[50];
+        pOtmProposal->getTargetLanguage(lang, 50);
+        fFound = strcasecmp(lang, pszTrgLang ) == 0;
+      }else if(lOptions & SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT){
+        char lang[50];
+        pOtmProposal->getTargetLanguage(lang, 50);
+        fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, pszTrgLang);
+      }
+    }
     if ( fFound )
     {
       fOneOrMoreIsFound = true;

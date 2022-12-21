@@ -333,6 +333,22 @@ bool LanguageFactory::isValidLanguage
   return( i >= 0 );
 }
 
+bool LanguageFactory::isTheSameLangGroup(
+  const char* lang1,
+  const char* lang2
+)
+{
+  LANGUAGEINFO lang1info, lang2info;
+  if( getLanguageInfo(lang1, &lang1info) == false )
+  {
+    LogMessage3(WARNING,__func__, ":: can't found lang1info for ", lang1);
+  }
+  if( getLanguageInfo(lang2, &lang2info) == false )
+  {
+    LogMessage3(WARNING,__func__, ":: can't found lang1info for ", lang2);
+  }
+  return  strcmp(lang1info.szLangGroup, lang2info.szLangGroup) == 0;
+}
 /* \brief Get all information available for the given language
    \param pszLanguage OpenTM2 language name
    \param pInfo a pointer to a LANGUAGEINFO buffer
