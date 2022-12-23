@@ -31,6 +31,7 @@ include/build/CMakeFiles/CMakeOutput.log
 include/build/CMakeFiles/3.16.3/CMakeSystem.cmake
 source/.cache/
 _build/
+build/
 source/obj/main.o
 source/obj/main.d
 source/obj/OtmMemoryServiceTester.d

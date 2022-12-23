@@ -1105,8 +1105,8 @@ VOID QDAMCopyDataTo_V3
    if ( usDataOffs)
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
-       if(usLastPos < usLen && CheckLogLevel(INFO)){
-        LogMessage4(ERROR, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+       if(usLastPos < usLen && CheckLogLevel(DEBUG)){
+        LogMessage4(ERROR, "QDAMCopyDataTo_V3::DEBUG 1 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       ULONG ulLen = *(PULONG) pOldData;
       if ( ulLen & QDAM_TERSE_FLAGL)
@@ -1118,8 +1118,8 @@ VOID QDAMCopyDataTo_V3
 
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
-      if(usLastPos < usLen && CheckLogLevel(INFO)){
-        LogMessage4(FATAL, "QDAMCopyDataTo_V3:: Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+      if(usLastPos < usLen && CheckLogLevel(DEBUG)){
+        LogMessage4(FATAL, "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       //assert( (usLastPos >= usLen) );
 

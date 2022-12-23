@@ -434,23 +434,6 @@ int LanguageFactory::findLanguage
           end = mid - 1; 
   }  
 
-  //LANGUAGEINFO* elem = (LANGUAGEINFO*) std::bsearch( &langInf,
-  //              vLanguageList.data(),
-  //              vLanguageList.size(),
-  //              sizeof(LANGUAGEINFO),
-  //              compareLanguageInfo);
-  //int iMax = vLanguageList.size();
-  //while( i < iMax )
-  //{
-  //  if ( strcasecmp( pszLanguage, vLanguageList[i].szName ) == 0 )
-  //  {
-  //    return( i );
-  //  }
-  //  i++;
-  //}
-  //if(elem != nullptr){
-  //  return vLanguageList.data() - elem;
-  //}
   return( -1 );
 }
 
@@ -508,40 +491,6 @@ int LanguageFactory::findISO
   const char *pszISO,bool &fPrefered
 )
 {
-  //int iFound = -1;
-  //int i = 0;
-  //int iMax = vLanguageList.size();
-  //int iPreferred = findPreferedLanguage(pszISO);//-1;
-  //int iBestMatch = findLanguage(pszISO);
-  /*
-  if(iMax<=0){
-    LogMessage1(ERROR,"LanguageFactory::findISO():: language list size is 0");
-    return (iFound);
-  }
-  
-  
-  while( i < iMax )
-  {
-    if ( compareISO( pszISO, vLanguageList[i].szName ) == 0 )
-    {
-      if ( strcasecmp( pszISO, vLanguageList[i].szName ) == 0 )
-      {
-        // perfect match, return if this is the preferred language
-        if ( vLanguageList[i].fisPreferred )
-        {
-          fPrefered = true;
-          return( i );
-        }
-        iBestMatch = i;
-      }
-      if ( vLanguageList[i].fisPreferred )
-      {
-        iPreferred = i;
-      }
-      iFound = i;
-    }
-    i++;
-  } /* endwhile */
   int iBestMatch = findIfPreferedLanguage(pszISO);
   fPrefered = true;
 
@@ -597,17 +546,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
 
       usRC = ERROR_READ_FAULT;
     }
-    /*
-    if( usRC == 0 ){
-      LogMessage2(INFO, __func__, ":: languages was read from file, sorting...");
-      std::sort(vLanguageList.begin(), vLanguageList.end(), [&]( LANGUAGEINFO& a, LANGUAGEINFO& b) {
-            LogMessage2(INFO, "a.szName = ", a.szName);
-            LogMessage2(INFO, "b.szName = ", b.szName);
-            return  strcmp(a.szName, b.szName);
-        } );    
-    }
-    //*/
-    //*
+    
     if( usRC == 0 ){
       LogMessage2(INFO, __func__, ":: languages was read from file, sorting...");
       std::qsort(&vLanguageList[0], vLanguageList.size(), sizeof(LANGUAGEINFO), compareLanguageInfo);    
@@ -624,8 +563,6 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
         }
       }
     }
-    
-    //*/
   } /* endif */
 
 

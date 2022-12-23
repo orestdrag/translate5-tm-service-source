@@ -218,7 +218,8 @@ int FilesystemHelper::DeleteFile(const std::string& path){
     }
     std::string fixedPath = path;
 
-    fixedPath = FixPath(fixedPath);
+    fixedPath = "\'" + FixPath(fixedPath) + "\'";
+
     if(int errCode = remove(path.c_str())){
         LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         return errCode;
