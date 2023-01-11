@@ -187,7 +187,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     {
       LogMessage6(ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", 
           toStr(this->iLastError).c_str());
-      handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
+      //handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
       if ( htm != 0 ) 
         TmClose( htm, NULL,  FALSE,  NULL );
     } /* end */       

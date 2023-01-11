@@ -5153,6 +5153,7 @@ MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 
 #define HPROP PVOID
 
+#define MAX_NUM_DICTS      1900        // max. number of dict concurrently open
 
 // define property classes
 // if changes are required to this definition change modules which

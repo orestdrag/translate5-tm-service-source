@@ -111,19 +111,11 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
                             return (*lpNumberOfBytesWritten > 0);
                         }
 
-
-    //BOOL DeleteFile(LPCTSTR lpFileName){
-    //    return false;
-    //}
-
     bool DeleteFile(char const* sFileName){
         int res = FilesystemHelper::DeleteFile(sFileName);
         return res == 0;
     }
 
-    //BOOL CloseFile(LPCTSTR lpFileName){
-    //    return false;
-    //}
     BOOL CloseFile(HFILE* lpFileName){
         if(lpFileName){
             return FilesystemHelper::CloseFile(*lpFileName) == FilesystemHelper::FILEHELPER_NO_ERROR;
@@ -186,70 +178,6 @@ int largeIntToInt(LARGE_INTEGER li) {
 #define __NR__llseek            140
 #endif
 
-/*
-DWORD SetFilePointer(HANDLE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
-{
-    DWORD ret = 0 ;
-
-    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", LoPart, ", direction is ", OffSet);
-    //loff_t res ; //It is also LONGLONG variable.
-    LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
-
-    unsigned int whence = 0 ;
-    
-    if(OffSet == FILE_BEGIN)
-        whence = SEEK_SET ;
-    if(OffSet == FILE_CURRENT)
-        whence = SEEK_CUR ;
-    if(OffSet == FILE_END)
-        whence = SEEK_END ;
-
-    if(HiPart == NULL)
-        *HiPart = 0 ;
-
-    ret = syscall(__NR__llseek, fp, *HiPart, LoPart, &res, whence) ; //syscall2
-
-    int k = errno ;
-    if( ret == 0 )
-    {
-        LARGE_INTEGER li ;
-        li.QuadPart = res ; //It will move High & Low Order bits.
-        ret = li.LowPart ;
-
-        if(*HiPart != 0) //If High Order is not NULL
-        {
-            *HiPart = li.HighPart ;
-        }
-    }else{
-        ret = -1 ;
-
-        switch(errno){
-            case EBADF : 
-                LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
-                //FilesystemHelper::GetFileName(fp).c_str()
-                ) ;
-            break ;
-            case EFAULT : 
-                 LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
-                 //FilesystemHelper::GetFileName(fp).c_str() 
-                 ) ;
-                break ;
-            case EINVAL : 
-                 LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
-                 //FilesystemHelper::GetFileName(fp).c_str() 
-                 ) ;
-                break ;
-            default:
-                 LogMessage2(ERROR," default, fname = ", "" 
-                 //FilesystemHelper::GetFileName(fp).c_str() 
-                 );
-        }
-
-    }
-
-    return ret ;
-}
-//*/
 
 DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 {

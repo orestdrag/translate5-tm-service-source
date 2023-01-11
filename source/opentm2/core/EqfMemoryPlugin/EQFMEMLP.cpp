@@ -2157,31 +2157,31 @@ USHORT MemFuncImportProcess
            pLoadData->pFormatTable = NULL;
          } /* endif */
               
-              LONG lCurTime = 0;  
-
-              time( &lCurTime );
-              std::string logMessage = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
-                                      "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
-                                    "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 
-                                    "\n\tNumber of OTMUTF8 segments  : " + toStr(pLoadData->ulResetSegmentCounter) + "\n\t";
-            
-              if ( lImportStartTime )
-              {
-                LONG lDiff = lCurTime - lImportStartTime;
-                char buff[256];
-                sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
-                        (lDiff - (lDiff / 3600 * 3600)) / 60,
-                        (lDiff - (lDiff / 3600 * 3600)) % 60 );
-                        
-                pData->pImportData->importTimestamp = buff;
-
-                logMessage += buff;
-              }
-              
-              pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
-              pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
-              LogMessage1(TRANSACTION, logMessage.c_str());
-              
+        {
+          LONG lCurTime = 0;  
+          time( &lCurTime );
+                  
+          if ( lImportStartTime )
+          {
+            LONG lDiff = lCurTime - lImportStartTime;
+            char buff[256];
+            sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
+                    (lDiff - (lDiff / 3600 * 3600)) / 60,
+                    (lDiff - (lDiff / 3600 * 3600)) % 60 );
+                    
+            pData->pImportData->importTimestamp = buff;
+          }
+          
+          pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
+          pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
+          if(CheckLogLevel(DEBUG)){
+            std::string logMessage = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
+                                  "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
+                                "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 
+                                "\n\tNumber of OTMUTF8 segments  : " + toStr(pLoadData->ulResetSegmentCounter) + "\n\t" + pData->pImportData->importTimestamp;
+            LogMessage1(TRANSACTION, logMessage.c_str());
+          }
+        }
 
          UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
          if ( pLoadData->pProposal != NULL ) delete(pLoadData->pProposal);

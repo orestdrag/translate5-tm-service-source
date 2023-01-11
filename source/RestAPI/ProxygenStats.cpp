@@ -2,8 +2,8 @@
 #include "ProxygenStats.h"
 #include "ProxygenHandler.h"
 namespace ProxygenService{
-void ProxygenStats::recordRequest(int command) {
-    ++reqCount_;
+int ProxygenStats::recordRequest(int command) {
+    
     switch(command){
       case ProxygenHandler::COMMAND::CREATE_MEM: 
       {
@@ -75,5 +75,6 @@ void ProxygenStats::recordRequest(int command) {
         break;
       }
     }
+    return reqCount_++;
   }
 }

@@ -107,7 +107,6 @@ typedef enum
   DIC_SOURCELANG_IND
 } DIC_ITEMINDX;
 
-#define MAX_NUM_DICTS      99          // max. number of dict concurrently open
 
 #define MAXI_SIZE    0x0003FFFF       // maximum size of dictionary data buffer
 #define MAX_USER     20               // max number of user-defined entry fields

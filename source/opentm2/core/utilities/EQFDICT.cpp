@@ -65,7 +65,7 @@
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
 #define NUMBER_OF_BUFFERS  20          // 20 // number of buffers to be used
-#define MAX_NUM_DICTS      99          // max. number of dict concurrently open
+
 
 // Value for chVersion in older databses (intitial version)
 #define BTREE_V0 0x00
@@ -584,7 +584,7 @@ typedef enum
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
 #define NUMBER_OF_BUFFERS  20          // 20 // number of buffers to be used
-#define MAX_NUM_DICTS      99          // max. number of dict concurrently open
+
 
 #define RESET_VALUE       -3
 
@@ -813,10 +813,10 @@ typedef struct _QDAMDICT
    PBTREEGLOB   pBTree;                           // pointer to global struct
    ULONG        ulNum;
    USHORT       usNextHandle;
-   std::atomic<int> usOpenCount;                      // number of accesses...
    USHORT       usOpenRC;
    CHAR         chDictName[ MAX_EQF_PATH ];
    BOOL         fDictLock;                        // is dictionary locked
+   std::atomic<int> usOpenCount;                  // number of accesses...
    PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
 } QDAMDICT, *PQDAMDICT;
 
@@ -2045,6 +2045,7 @@ QDAMAddDict
   }
   else
   {
+    LogMessage4(FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
     sRc = BTREE_MAX_DICTS;
   } /* endif */
 
@@ -5858,7 +5859,7 @@ SHORT QDAMUnTerseData
      }
      else
      {
-      LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 1");
+      LogMessage2(ERROR,__func__,":: BufferTooSmall 1");
       sRc = BTREE_BUFFER_SMALL;
      } /* endif */
    } /* endif */
@@ -6092,7 +6093,7 @@ SHORT QDAMGetszData_V3
          }
          else
          {
-            LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 3");
+            LogMessage2(ERROR,__func__,":: BufferTooSmall 3");
             sRc = BTREE_BUFFER_SMALL;
          } /* endif */
 
@@ -7473,7 +7474,7 @@ SHORT QDAMDictInsertLocal
       sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
       if ( !sRc )
       {
-        if(ulLen > TMX_REC_SIZE && CheckLogLevel(INFO)){
+        if(ulLen > TMX_REC_SIZE && CheckLogLevel(DEBUG)){
           LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
         }
         recData.ulLen = ulLen;
@@ -7866,6 +7867,7 @@ QDAMCheckDict
 
   if ( usI >= MAX_NUM_DICTS - 1 )
   {
+    LogMessage4(FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
     sRc = BTREE_MAX_DICTS;
   } /* endif */
 
@@ -8014,7 +8016,7 @@ SHORT QDAMLocSubstr_V3
             else
             {
                //ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, "" );
-               LogMessage2(TRANSACTION,__func__,":: BufferTooSmall 4");
+               LogMessage2(ERROR,__func__,":: BufferTooSmall 4");
                sRc = BTREE_BUFFER_SMALL;
             } /* endif */
          } /* endif */

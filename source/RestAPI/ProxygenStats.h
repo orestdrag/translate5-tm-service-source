@@ -18,12 +18,9 @@ class ProxygenStats {
   virtual ~ProxygenStats() {
   }
 
-  // NOTE: We make the following methods `virtual` so that we can
-  //       mock them using Gmock for our C++ unit-tests. ProxygenStats
-  //       is an external dependency to handler and we should be
-  //       able to mock it.
+  ///input- command id, output - requests id
 
-  virtual void recordRequest(int command) ;
+  virtual int recordRequest(int command) ;
 
   virtual uint64_t getRequestCount() {
     return reqCount_;

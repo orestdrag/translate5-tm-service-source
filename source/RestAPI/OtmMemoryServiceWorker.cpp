@@ -481,9 +481,9 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
 
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
-
-  LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
-
+  if(VLOG_IS_ON(1)){
+    LogMessage7(TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+  }
   // find a free slot in the memory list
   iIndex = getFreeSlot(requiredMemory);
 
@@ -813,9 +813,10 @@ int OtmMemoryServiceWorker::import
 
     // cleanup the memory list (close memories not used for a longer time)
     size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
-    LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
-        toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
-
+    if(VLOG_IS_ON(1)){
+      LogMessage7(TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
+          toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+    }
     // find a free slot in the memory list
     iIndex = getFreeSlot(requiredMemory);
 
@@ -833,7 +834,7 @@ int OtmMemoryServiceWorker::import
     //this->vMemoryList[iIndex].dImportProcess = 0;
     strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
   }
-  LogMessage4(TRANSACTION, __func__, "status for ", strMemory.c_str() , " was changed to import");
+  LogMessage4(DEBUG, __func__, "status for ", strMemory.c_str() , " was changed to import");
   // extract TMX data
   std::string strTmxData;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
@@ -1172,8 +1173,8 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"author", pData->szSource );
 
-  convertTimeToUTC( pProp->lTargetTime, pData->szDocName );
-  MultiByteToWideChar( CP_OEMCP, 0, pData->szDocName, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  convertTimeToUTC( pProp->lTargetTime, pData->szDateTime );
+  MultiByteToWideChar( CP_OEMCP, 0, pData->szDateTime, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
   pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
 
   pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );

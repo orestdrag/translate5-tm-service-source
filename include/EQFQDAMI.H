@@ -26,7 +26,6 @@
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
 #define NUMBER_OF_BUFFERS  20          // 20 // number of buffers to be used
-#define MAX_NUM_DICTS      99          // max. number of dict concurrently open
 
 #define RESET_VALUE       -3
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.1")
+SET(APP_VERSION  "0.4.2")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")

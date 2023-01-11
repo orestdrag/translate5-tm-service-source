@@ -266,7 +266,7 @@ int initLog(){
     desuppressLogging(prevState);
     desuppressLoggingInFile();
 
-    return writeLog(initLogMsg, TRANSACTION);
+    return writeLog(initLogMsg, DEBUG);
 }
 
 

@@ -35,20 +35,20 @@ ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
 const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
         { ProxygenHandler::COMMAND::LIST_OF_MEMORIES, "LIST_OF_MEMORIES" },
-        { ProxygenHandler::COMMAND::CREATE_MEM, "CREATE_MEM" },
+        { ProxygenHandler::COMMAND::SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
+        { ProxygenHandler::COMMAND::SHUTDOWN, "SHUTDOWN" },
         { ProxygenHandler::COMMAND::DELETE_MEM, "DELETE_MEM" },
-        { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
         { ProxygenHandler::COMMAND::EXPORT_MEM, "EXPORT_MEM" },
         { ProxygenHandler::COMMAND::EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
         { ProxygenHandler::COMMAND::STATUS_MEM, "STATUS_MEM" },
         { ProxygenHandler::COMMAND::RESOURCE_INFO, "RESOURCE_INFO" },
+        { ProxygenHandler::COMMAND::CREATE_MEM, "CREATE_MEM" },
         { ProxygenHandler::COMMAND::FUZZY, "FUZZY" },
         { ProxygenHandler::COMMAND::CONCORDANCE, "CONCORDANCE" },
         { ProxygenHandler::COMMAND::DELETE_ENTRY, "DELETE_ENTRY" },
         { ProxygenHandler::COMMAND::UPDATE_ENTRY, "UPDATE_ENTRY" },
         { ProxygenHandler::COMMAND::TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
-        { ProxygenHandler::COMMAND::SHUTDOWN, "SHUTDOWN" },
-        { ProxygenHandler::COMMAND::SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" }
+        { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" }
     };
 
 
@@ -74,9 +74,13 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     }
   }
 
-  stats_->recordRequest(this->command);
+  int id = stats_->recordRequest(this->command);
   SetLogInfo(this->command);
-  SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request");
+  if(CommandToStringsMap.find(this->command) == CommandToStringsMap.end()){
+    SetLogBuffer(std::string("Error during ") + toStr(this->command) + " request, id = " + toStr(id));
+  }else{
+    SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request, id = " + toStr(id));
+  }
   if(memName.empty() == false){
     AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
   }
@@ -135,8 +139,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::SHUTDOWN:
       { 
           fWriteRequestsAllowed = false;
-          
-
           iRC = pMemService->saveAllTmOnDisk( strResponseBody );
           
           //close log file
