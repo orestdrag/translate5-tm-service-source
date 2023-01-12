@@ -145,12 +145,15 @@ LONG                lOptions                 // type of new Translation Memory
   // check if TM exists already
   if ( usRC == NO_ERROR )
   {
+    int logLevel = suppressLogging();
     if ( pFactory->exists( NULL, pszMemName ) )
     {
+      desuppressLogging(logLevel);
       PSZ pszParam = (PSZ)pszMemName;
-      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_EXISTS:: probably TM with this name already exists: ", pszParam);
+      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: ", pszParam);
       usRC = ERROR_MEM_NAME_EXISTS;
     }
+    desuppressLogging(logLevel);
   } /* endif */
 
 

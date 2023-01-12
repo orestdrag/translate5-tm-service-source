@@ -997,7 +997,9 @@ OtmPlugin *MemoryFactory::findPlugin
       {
         this->iLastError = ERROR_MEMORY_NOTFOUND;//ERROR_PLUGINNOTAVAILABLE
         this->strLastError = "Translation Memory "+std::string(pszMemoryName)+" was not found.";//"Error: no memory plugin for memory " + std::string(pszMemoryName) + " found or memory does not exist";
-        LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+        //if(VLOG_IS_ON(1)){
+          LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+        //}
       } /* endif */       
     } /* endif */       
   }

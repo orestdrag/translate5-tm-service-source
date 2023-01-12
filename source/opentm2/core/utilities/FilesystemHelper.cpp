@@ -267,8 +267,7 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     fixedPath = FixPath(fixedPath);
     //if(int errCode = remove(path.c_str())){
     std::string command = "rm -r ";
-    command += fixedPath;
-    system(command.c_str());
+    command += '\'' + fixedPath + '\'';
     
     if(int errCode = system(command.c_str()) ){
         if(CheckLogLevel(DEBUG) && V_IS_ON(1)){

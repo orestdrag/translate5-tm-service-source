@@ -257,11 +257,6 @@ int initLog(){
         initLogMsg += "Log directory created, path = " + logFilename;
         FilesystemHelper::CreateDir(logFilename, 0700);
     }
-
-    //logFilename += "/" + generateLogFileName();
-    
-    //initLogMsg += "Log file created, name: ";
-    //initLogMsg += logFilename + ", time: " + getTimeStr();
     
     desuppressLogging(prevState);
     desuppressLoggingInFile();
@@ -438,6 +433,11 @@ int SetLogLevel(int level){
         LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
         return -1;
     }//*/
+}
+
+
+int GetLogLevel(){
+    return logLevelTreshold;
 }
 
 bool CheckLogLevel(int level){

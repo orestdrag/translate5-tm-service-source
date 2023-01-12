@@ -71,6 +71,8 @@ int LogMessage11(int LogLevel, std::string&& message1, std::string&& message2, s
 
 //int SuppressLoggingInFile();
 int DesuppressLoggingInFile();
+int suppressLogging();
+int desuppressLogging(int prevTreshold);
 int LogStop();
 
 int ResetLogBuffer();
