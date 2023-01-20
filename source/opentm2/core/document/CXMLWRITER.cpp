@@ -451,7 +451,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       else
       {
         std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
-        //str = str.substr(0, iLFPos);
+        str = str.substr(0, iLFPos);
         int iBytes = str.size();
 
         if(m_hf){
@@ -466,11 +466,12 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
     {      
       if ( Encoding == UTF16 )
       {
-        fwrite( L"\r\n", sizeof(WCHAR), 2, m_hf );
+        //fwrite( L"\r\n", sizeof(WCHAR), 2, m_hf );
+        fwrite( L"\n", sizeof(WCHAR), 1, m_hf );
       }
       else
       {
-        fwrite( "\r\n", 1, 2, m_hf );
+        fwrite( "\n", sizeof(char), 1, m_hf );
       } /* endif */
       iLFPos++;
       if ( iLen ) iLen--;

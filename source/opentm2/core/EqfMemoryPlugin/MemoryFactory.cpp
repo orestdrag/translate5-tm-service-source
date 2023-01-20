@@ -423,11 +423,6 @@ BOOL MemoryFactory::exists(
       } /* endif */         
       delete( pInfo );
     }
-    else if ( plugin->getType() == OtmMemoryPlugin::eSharedTranslationMemoryType )
-    {
-      fExists = ((OtmSharedMemoryPlugin *)plugin)->isMemoryOwnedByPlugin((char *)strMemoryName.c_str());
-    }
-
   } /* endif */
   return( fExists );
 }

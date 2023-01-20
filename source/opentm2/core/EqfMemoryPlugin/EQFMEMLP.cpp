@@ -252,6 +252,10 @@ static USHORT  MemLoadStart( PVOID *ppIda,
    // and names from the dialog IDA and store them in the MEM_LOAD_IDA.
    // Then open the tagtable and get its Size. If an error occurred
    // set fOK to FALSE and issue the appropriate message.
+   if(pDialogIDA->pMem == nullptr){
+    fOK = false;
+   }
+   
    if ( fOK )
    {
       // Move values from dialog IDA to load IDA
@@ -485,7 +489,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      //** GQ TODO: cleanup of resources in case of failures
    } /* endif */
 
-
+ 
    // special handling for import in XLIFF MT format
    if ( fOK && ((pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT)) )
    {
@@ -589,7 +593,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
          *ppIda = NULL;
-
+ 
          // Dismiss the slider window if it had been created
 //WINAPI
          //EqfRemoveObject( TWBFORCE, hWnd );
@@ -1935,7 +1939,7 @@ USHORT MemFuncPrepImport
      int iRC = 0;
      MemoryFactory *pFactory = MemoryFactory::getInstance();
      pLoadIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
-     if ( iRC != 0 )
+     if ( iRC != 0 || pLoadIDA->pMem == nullptr )
      {
 	     fOK = FALSE;
        pFactory->showLastError( NULL, pszMemName, pLoadIDA->pMem, (HWND)HWND_FUNCIF );
@@ -2094,7 +2098,7 @@ USHORT MemFuncImportProcess
         {
           case MEM_PROCESS_OK:
             {
-              pData->pImportData->usProgress   = (USHORT) pLoadData->lProgress;
+              pData->pImportData->usProgress   = pLoadData->lProgress;
               pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
               pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
             }

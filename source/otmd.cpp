@@ -144,7 +144,6 @@ using namespace google;
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
    //#ifdef GLOGGING_ENABLED
-   FLAGS_log_dir = "/home/or/.t5memory/LOG/";
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }

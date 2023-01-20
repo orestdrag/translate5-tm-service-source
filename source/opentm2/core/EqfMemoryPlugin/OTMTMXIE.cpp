@@ -2811,30 +2811,23 @@ void TMXParseHandler::endElement(const XMLCh* const name )
    
         // GQ 2016/01/22 Allow empty data areas in order to allow conversion of memories with empty target segments
         // if ( pBuf->szData[0] == 0 ) fTuvValid = FALSE;          // no data for <tuv>
-        //if ( CurElement.szTMLanguage[0] == 0 )
-        //{
-          // no Tmgr language available, check TMX language  
-          if ( CurElement.szTMXLanguage[0] == 0 )
+        
+        // no Tmgr language available, check TMX language  
+        if ( CurElement.szTMXLanguage[0] == 0 )
+        {
+          // no languag info at all, <tuv> is invalid
+          fTuvValid = FALSE;
+        }
+        else
+        {
+          // convert TMX language to Tmgr language name
+          LanguageFactory *pLangFactory = LanguageFactory::getInstance();
+          
+          if ( pLangFactory->getOpenTM2NameFromISO( CurElement.szTMXLanguage, pBuf->szLang ) != 0 )
           {
-            // no languag info at all, <tuv> is invalid
-            fTuvValid = FALSE;
-          }
-          else
-          {
-            // convert TMX language to Tmgr language name
-            LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-            
-            if ( pLangFactory->getOpenTM2NameFromISO( CurElement.szTMXLanguage, pBuf->szLang ) != 0 )
-            {
-             fTuvLangInvalid = TRUE;          // language not supported
-            } /* endif */
+            fTuvLangInvalid = TRUE;          // language not supported
           } /* endif */
-        //}
-        //else
-        //{
-          // use Tmgr language name
-        //  strcpy( pBuf->szLang, CurElement.szTMLanguage );
-        //} /* endif */
+        } /* endif */
         
         // enlarge array if necessary
         if ( fTuvValid && (iCurTuv >= iTuvArraySize) )
