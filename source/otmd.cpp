@@ -46,9 +46,9 @@ DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
 static bool ValidateTimeout(const char* flagname, int32_t value) {
-   if (value >= 0 && value <= 10000)   // value is ok
+   if (value >= 0 && value <= 1200000)   // value is ok
      return true;
-   printf("Invalid value for --%s: %d, should be [0...10000]\n", flagname, (int)value);
+   printf("Invalid value for --%s: %d, should be [0...1200000]\n", flagname, (int)value);
    return false;
 }
 
