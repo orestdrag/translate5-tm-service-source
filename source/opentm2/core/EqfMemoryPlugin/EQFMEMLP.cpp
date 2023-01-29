@@ -466,15 +466,11 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        // check if memory source lanuage matchs source language of imported file
        if ( pLIDA->pstMemInfo->szSourceLang[0] && (strcmp( pLIDA->pstMemInfo->szSourceLang, szMemSourceLang ) != 0) )
        {
-         USHORT usMBCode;
-
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         usMBCode = LogMessage5(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0], "; szMemSourceLang = ", pReplAddr[1]);
-         if ( usMBCode == MBID_CANCEL )
-         {
-           fOK = FALSE;
-         } /* endif */
+         LogMessage5(ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0], "; szMemSourceLang = ", pReplAddr[1]);
+
+          fOK = FALSE;
        } /* endif */
 
        // update memory description with description of imported memory
@@ -2178,7 +2174,7 @@ USHORT MemFuncImportProcess
           
           pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
           pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
-          if(CheckLogLevel(DEBUG)){
+          if(VLOG_IS_ON(1)){
             std::string logMessage = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
                                   "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
                                 "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 

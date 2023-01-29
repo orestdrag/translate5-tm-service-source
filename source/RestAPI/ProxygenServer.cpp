@@ -116,6 +116,13 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto queryString   = message->getQueryString () ;
     auto headers = message->getHeaders();
     auto queryParams = message->getQueryParams();
+
+    if(VLOG_IS_ON(1)){
+      std::string msg = "SERVER RECEIVED REQUEST:";
+      msg += "\n\t URL: " + url;
+
+      LogMessage1(TRANSACTION, msg.c_str());
+    }
     if(url.size() <= 1){
       return  new ProxygenHandler(stats_.get());;
     }
@@ -130,7 +137,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto urlSeparator = url.find("/");
 
     if( urlSeparator == -1 ){
-      urlSeparator = url.size() - 1;
+      urlSeparator = url.size();
       //return  new ProxygenHandler(stats_.get());
     }
 
@@ -401,7 +408,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       {addr,  Protocol::HTTP}
     };
      
-
+    LogMessage5(INFO, __func__, ":: binding to socket, ",addr.getAddressStr(), "; port = ", toStr(addr.getPort()).c_str());
     HTTPServer server(std::move(options));
     server.bind(IPs);
 

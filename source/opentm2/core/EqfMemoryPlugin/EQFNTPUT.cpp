@@ -831,7 +831,7 @@ USHORT TokenizeTarget
 //  USHORT    usI;                     // offset
   USHORT    usFilled = 0;              // counter
   USHORT    usRc = NO_ERROR;           // returned value
-  USHORT    usTagEntryLen;             // length indicator
+  int    iTagEntryLen;             // length indicator
   PTMX_TAGTABLE_RECORD pTagRecord;     // ptr to tag record structure
 //   CHAR      szString[MAX_EQF_PATH];    // character string
   PSTARTSTOP pStartStop = NULL;        // ptr to start/stop table
@@ -941,17 +941,22 @@ USHORT TokenizeTarget
               else
               {
                 // add tag data
-                usTagEntryLen = sizeof(TMX_TAGENTRY) +
+                iTagEntryLen = sizeof(TMX_TAGENTRY) +
                                 (pEntry->usStop - pEntry->usStart + 1)*sizeof(CHAR_W);
                 if ( ((LONG)*pulTagAlloc - (LONG)(pTagEntry - (PBYTE)pTagRecord))
-                                                       <= (LONG)usTagEntryLen )
+                                                       <= (LONG)iTagEntryLen )
                 {
                   //remember offset of pTagEntry
                   usFilled = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
 
+                  LONG addedSpace = TOK_SIZE;//how many 4k pages we need for new alloc
+                  while(((LONG)*pulTagAlloc + addedSpace - (LONG)(pTagEntry - (PBYTE)pTagRecord)) 
+                                                       <= (LONG)iTagEntryLen ){
+                                                        addedSpace += TOK_SIZE;
+                                                       }
                   //allocate another 4k for pTagRecord
                   fOK = UtlAlloc( (PVOID *) &pTagRecord, *pulTagAlloc,
-                                  *pulTagAlloc + (LONG)TOK_SIZE, NOMSG );
+                                  *pulTagAlloc + addedSpace, NOMSG );
                   if ( fOK )
                   {
                     *pulTagAlloc += (LONG)TOK_SIZE;
@@ -973,7 +978,7 @@ USHORT TokenizeTarget
                   memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
                           pString + pEntry->usStart,
                           ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
-                  pTagEntry += usTagEntryLen;
+                  pTagEntry += iTagEntryLen;
                 } /* endif */
               } /* endif */
             } /* end default */

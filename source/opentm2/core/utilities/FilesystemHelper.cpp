@@ -777,37 +777,6 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
     return writenBytes;
 }
 
-/*
-int FilesystemHelper::WriteToFile(FILE*& ptr, const char* buff, const int buffsize){
-    int errCode = FILEHELPER_NO_ERROR;
-    int writenBytes = buffsize;
-    int oldSize = 0;
-    if(CheckLogLevel(DEBUG)){
-        oldSize = GetFileSize(ptr);
-    }
-    if(ptr == NULL){
-        LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
-        __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
-    }else{ 
-        writenBytes *= fwrite(buff, buffsize, 1, ptr);
-        if ( writenBytes <=0 ){
-            LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
-            __last_error_code = errCode = ERROR_WRITE_FAULT;
-        }
-    }
-     if(CheckLogLevel(DEBUG)){
-        std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + buff;
-        msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
-        msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
-        LogMessage1(DEBUG, msg.c_str());
-    }
-    //CloseFile(ptr);
-    //return __last_error_code = errCode;
-    return writenBytes;
-}
-//*/
-
-
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
     int err = 0, size = 0;
     err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos);
@@ -1034,7 +1003,6 @@ bool FilesystemHelper::DirExists(const std::string& path){
 
     bool bExists = false;
     DIR *pDir = opendir (path.c_str());
-
     if (pDir != NULL)
     {
         bExists = true;    
@@ -1043,7 +1011,5 @@ bool FilesystemHelper::DirExists(const std::string& path){
     }else{
         LogMessage3(INFO, "FilesystemHelper::DirExists(", path.c_str(),") not exists");
     }
-
     return bExists;
-
 }

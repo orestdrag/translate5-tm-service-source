@@ -15,7 +15,7 @@
 
 
 std::string logFilename;
-int logLevelTreshold = DEBUG;
+int logLevelTreshold = DEVELOP;
 //bool fileLoggingSuppressed = false;
 bool fileLoggingSuppressed = true;
 
@@ -93,47 +93,6 @@ static std::stringstream& getBodyBuffer(){
 
 
 int writeLog(std::string& message, int logLevel){
-    #ifdef SIMPLE_FILE_LOGGING_ENABLED
-    #ifdef THREAD_ID_WRITE_TO_LOGS
-        message += " [thread id = " + std::to_string(_getpid());
-        message += "]";
-    #endif
-
-    //write log to file
-    {
-        if(fileLoggingSuppressed){
-            message += ", (file logging suppressed)";
-        }
-        //message += '\n';
-        std::lock_guard<std::mutex> logGuard(logMutex); 
-
-        #ifdef CONSOLE_LOGGING
-           std::cout << message;
-        #endif //CONSOLE_LOGGING
-
-        if( fileLoggingSuppressed == false){
-            #ifdef LOGERRORSINOTHERFILE
-                if(logLevel >= ERROR  // ONLY IMPORTANT ISSUES SHOULD BE LOGGED HERE
-                        && logLevelTreshold < ERROR){ // AND ONLY IF REGULAR LOG THRESHOLD IS LESS THAN ERROR, TO AVOID DUBLICATES
-                    getLogErrorFile() << message;
-                    //logErrorF << message ; 
-                    //logErrorF.flush();
-                    //logErrorF.close();
-                }
-            #endif//LOGERRORSINOTHERFILE
- 
-            getLogFile() << message;
-            if(logLevelTreshold < INFO){
-                getLogFile().flush();
-                getLogErrorFile().flush();
-            }
-            //logF.flush();
-            //logF.close();
-        }
-    }
-    #endif //SIMPLE_FILE_LOGGING_ENABLED
-    
-    //#ifdef GLOGGING_ENABLED
         if(!VLOG_IS_ON(2) && fFilterLogs){
             if(logLevel < ERROR){
                 if( VLOG_IS_ON(1) ){
@@ -184,8 +143,6 @@ int writeLog(std::string& message, int logLevel){
                 }
             }
         }
-    //#endif//GLOG_ENABLED
-
     return 0;
 }
 int suppressLoggingInFile(){
@@ -273,17 +230,6 @@ int LogMessageStr(int LogLevel, const std::string& message){
         return LOG_SMALLER_THAN_TRESHOLD;
     }
 
-
-    #ifdef SIMPLE_FILE_LOGGING_ENABLED
-    if(logFilename.empty()){
-        if(fileLoggingSuppressed == false){
-            if( initLog() != 0){
-                return LOG_FAIL_INIT;
-            }
-        }
-    }
-    #endif //SIMPLE_FILE_LOGGING_ENABLED
-
     std::string logMessage;
     switch (LogLevel)
     {
@@ -311,10 +257,6 @@ int LogMessageStr(int LogLevel, const std::string& message){
     default:
         break;
     }    
-
-    #ifdef SIMPLE_FILE_LOGGING_ENABLED
-    logMessage += " [" + getTimeStr() + "] :: "; 
-    #endif //SIMPLE_FILE_LOGGING_ENABLED
 
     logMessage += message;
     if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
@@ -421,10 +363,10 @@ int DesuppressLoggingInFile(){
 }
 
 int SetLogLevel(int level){
-    LogMessage2(DEBUG, __func__,":: Setting internal log level was disabled, use commandline\
-     flags for verbose level \'--v=[0..2]\' or \'--minloglevel=[0..3]\' instead");
-    logLevelTreshold = DEVELOP;
-    /*
+    //LogMessage2(DEBUG, __func__,":: Setting internal log level was disabled, use commandline\
+    // flags for verbose level \'--v=[0..2]\' or \'--minloglevel=[0..3]\' instead");
+    //logLevelTreshold = INFO;//DEVELOP;
+    //*
     if(level <= FATAL && level>=DEVELOP){
         LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
         logLevelTreshold = level;

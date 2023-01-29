@@ -302,7 +302,7 @@ int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
   size_t UsedMemory = 0;
   int AllowedMemoryMB;
   properties_get_int(KEY_ALLOWED_RAM, AllowedMemoryMB);
-  size_t AllowedMemory = AllowedMemoryMB * 1000000;
+  size_t AllowedMemory = (size_t)AllowedMemoryMB * 1000000;
 
   #ifdef CALCULATE_ONLY_MEM_FILES
   std::string path; 

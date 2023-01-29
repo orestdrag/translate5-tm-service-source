@@ -46,13 +46,13 @@ DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
 static bool ValidateTimeout(const char* flagname, int32_t value) {
-   if (value >= 0 && value <= 1200000)   // value is ok
+   if (value >= 0 && value <= 3600000)   // value is ok
      return true;
-   printf("Invalid value for --%s: %d, should be [0...1200000]\n", flagname, (int)value);
+   printf("Invalid value for --%s: %d, should be [0...3600000]\n", flagname, (int)value);
    return false;
 }
 
-DEFINE_int32(timeout, 3600, "Sets timeout for service request handling");
+DEFINE_int32(timeout, 180000, "Sets timeout for service request handling");
 DEFINE_validator(timeout, &ValidateTimeout);
 
 
