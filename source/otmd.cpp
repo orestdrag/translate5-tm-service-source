@@ -142,9 +142,11 @@ void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
 using namespace google;
 //using namespace GFLAGS_NAMESPACE;
 
+
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
    //#ifdef GLOGGING_ENABLED
+   //FLAGS_log_dir = "/or/.t5memory/LOG/";
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }
@@ -157,14 +159,12 @@ int main(int argc, char* argv[]) {
    //FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
-   
-   FLAGS_v=1;
-
+   //FLAGS_v=1;
    //#endif
    //#ifdef GFLAGS_ENABLED
    //FLAGS_alsologtostderr = true;
-   FLAGS_logtostderr = true;
-   FLAGS_t5loglevel = 0;
+   //FLAGS_logtostderr = true;
+   //FLAGS_t5loglevel = 0;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
@@ -172,76 +172,9 @@ int main(int argc, char* argv[]) {
    //#endif//GFLAGS_ENABLED
 
    //#ifdef GLOGGING_ENABLED
-   google::InitGoogleLogging(argv[0]);//, &CustomPrefix);
-   //T5LOG(T5INFO)<< initLogMsg;
-   //#endif
-   //for(int i=0; i<1;i++){
-      //FLAGS_v = i;
-   //   T5LOG(T5TRANSACTION) << "\n\n\n v = " << FLAGS_v;
-   /*
-   T5Logger::GetInstance()->SetLogLevel(0);
-   T5Logger::GetInstance()->SetLogFilter(0);
-   T5Logger::GetInstance()->SetLogBuffer("This is 1 log buffer");
-   T5Logger::GetInstance()->SetBodyBuffer("This is 1 body buffer");
+   google::InitGoogleLogging(argv[0]);//, &CustomPrefix); 
    
-   T5LOG(T5DEVELOP) << "test_test_DEVELOP1";
-   T5LOG(T5DEBUG) << "test_test_DEBUG1";
-   T5LOG(T5INFO) << "test_test_info1";
-   T5LOG(T5WARNING) << "test_test_warning1";
-   T5LOG(T5ERROR) << "test_test_error1";
-   T5LOG(T5FATAL) << "test_test_T5FATAL1";
-   T5LOG(T5TRANSACTION) << "test_test_transaction2";
-
-   T5Logger::GetInstance()->SetLogLevel(3);
-   T5Logger::GetInstance()->SetLogFilter(0);
-   T5Logger::GetInstance()->SetLogBuffer("This is 2 log buffer");
-   T5Logger::GetInstance()->SetBodyBuffer("This is 2 body buffer");
-   
-   T5LOG(T5DEVELOP) << "test_test_DEVELOP2";
-   T5LOG(T5DEBUG) << "test_test_DEBUG2";
-   T5LOG(T5INFO) << "test_test_info2";
-   T5LOG(T5WARNING) << "test_test_warning2";
-   T5LOG(T5ERROR) << "test_test_error2";
-   T5LOG(T5FATAL) << "test_test_T5FATAL2";
-   T5LOG(T5TRANSACTION) << "test_test_transaction2";
-   //*/
-   T5Logger::GetInstance()->SetLogLevel(0);
-   T5Logger::GetInstance()->SetLogFilter(1);
-   T5Logger::GetInstance()->SetLogBuffer("This is 3 log buffer");
-   T5Logger::GetInstance()->SetBodyBuffer("This is 3 body buffer");
-   
-   T5LOG(T5DEVELOP) << "test_test_DEVELOP3";
-   T5LOG(T5DEBUG) << "test_test_DEBUG3";
-   T5LOG(T5INFO) << "test_test_info3";
-   T5LOG(T5WARNING) << "test_test_warning3";
-   T5LOG(T5ERROR) << "test_test_error3";
-   T5LOG(T5FATAL) << "test_test_T5FATAL3";
-   T5LOG(T5TRANSACTION) << "test_test_transaction3";
-
-
-
-   T5Logger::GetInstance()->SetLogLevel(2);
-   T5Logger::GetInstance()->SetLogFilter(1);
-   T5Logger::GetInstance()->SetLogBuffer("This is 4 log buffer");
-   T5Logger::GetInstance()->SetBodyBuffer("This is 4 body buffer");
-   
-   T5LOG(T5DEVELOP) << "test_test_DEVELOP4";
-   T5LOG(T5DEBUG) << "test_test_DEBUG4";
-   T5LOG(T5INFO) << "test_test_info4";
-   T5LOG(T5WARNING) << "test_test_warning4";
-   T5LOG(T5ERROR) << "test_test_error4";
-   T5LOG(T5FATAL) << "test_test_T5FATAL4";
-   T5LOG(T5TRANSACTION) << "test_test_transaction4";
-//}
-
-   //int logLevel = 1/0;
-   //WLogMessage(logLevel, "fail");
-   //LOG_DEBUG_MSG() << "SOME_DEBUG_MSG";
-   
-   T5LOG(T5TRANSACTION) <<"Worker thread starting";
-   
-   
-   
+   T5LOG(T5TRANSACTION) <<"Worker thread starting";   
    std::thread worker(proxygen_server_init);
    worker.join();
    T5LOG(T5TRANSACTION) << "Worker thread finished";    

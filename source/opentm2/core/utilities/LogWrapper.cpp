@@ -1,7 +1,5 @@
 #include "LogWrapper.h"
 
-
-
 std::string getTimeStr(){
     // current date/time based on current system
     time_t now = time(0);
@@ -14,28 +12,15 @@ std::string getTimeStr(){
     return sTime;
 }
 
-
 T5Logger* T5Logger::GetInstance(){
     static T5Logger _instance;
     return &_instance;
 }
 
-//*
-//std::ostringstream& T5Logger::__getLogBuffer(){
-    //static std::ostringstream __logBuff;
-    //return __logBuff;
-//}
-std::ostream& T5Logger::__getLogBuffer(){
-    //static std::ostringstream __logBuff;
-    //return __logBuff;
-    return T5Logger::GetInstance()->__googleBuff->stream();
+std::ostringstream& T5Logger::__getLogBuffer(){
+    static std::ostringstream __logBuff;
+    return __logBuff;
 }
-/*
-std::ostringstream& T5Logger::getLogBuffer(){
-    //__getLogBuffer() <<"\t{lb}: ";
-    auto str = __getLogBuffer().str();
-    return __getLogBuffer();
-}//*/
 
 std::ostringstream& T5Logger::__getBodyBuffer(){
     static std::ostringstream __logBuff;
@@ -62,11 +47,8 @@ int T5Logger::desuppressLogging(int prevTreshold){
     return logLevelTreshold = prevTreshold;
 }
 
-
-
 int T5Logger::ResetLogBuffer(){
-    //__getLogBuffer().str("");
-    __getLogBuffer().flush();
+    __getLogBuffer().str("");
     __getBodyBuffer().str("");
     return 0;
 }
@@ -82,12 +64,10 @@ int T5Logger::SetLogInfo(int RequestType){
     return 0;
 }
 
-
 int T5Logger::AddToLogBuffer(std::string logMsg){
     __getLogBuffer() << logMsg;
     return 0;
 }
-
 
 int T5Logger::SetBodyBuffer(std::string logMsg){
     __getBodyBuffer().str(logMsg);
@@ -96,10 +76,8 @@ int T5Logger::SetBodyBuffer(std::string logMsg){
 }
 
 std::string T5Logger::FlushLogBuffer(){
-    std::ostringstream text;
-    text << __getLogBuffer().rdbuf();
-    auto str = text.str();
-    __getLogBuffer().flush();
+    auto str = __getLogBuffer().str();
+    __getLogBuffer().str("");
     return str;
 }
 
@@ -119,7 +97,6 @@ int T5Logger::SetLogLevel(int level){
         return -1;
     }
 }
-
 
 int T5Logger::GetLogLevel(){
     return logLevelTreshold;
@@ -148,23 +125,6 @@ std::string T5Logger::FlushBuffers(int severity){
     return "";
 }
 
-std::ostream& getBuffForLog(int severity){
-    if(T5Logger::GetInstance()->logLevelTreshold > severity)     
-        return T5Logger::GetInstance()->nullStream;
-    if( !T5Logger::GetInstance()->GetInstance()->fFilterLogs || VLOG_IS_ON(2) || severity>=T5ERROR ){
-        if(severity == T5DEVELOP)       return _T5_LOG_T5DEVELOP;
-        else if(severity == T5DEBUG)    return _T5_LOG_T5DEBUG;
-        else if(severity == T5INFO)     return _T5_LOG_T5INFO;
-        else if(severity == T5WARNING)  return _T5_LOG_T5WARNING;
-        else if(severity == T5ERROR)    return _T5_LOG_T5ERROR;
-        else if(severity == T5FATAL)    return _T5_LOG_T5DEVELOP;
-        else                            return _T5_LOG_T5TRANSACTION;
-    }   
-    if( !VLOG_IS_ON(1) )
-        return T5Logger::GetInstance()->nullStream;
-    return  T5Logger::GetInstance()->__getLogBuffer();
-}
-
 int getBuffIdForLog(int severity){
     if(T5Logger::GetInstance()->logLevelTreshold > severity)     
         return -1; //NullStream
@@ -177,6 +137,7 @@ int getBuffIdForLog(int severity){
 }
 
 
+// code after this line should be deleted and replaced in calls with T5LOG
 int LogMessageStr(int LogLevel, std::string message){ 
                     switch(LogLevel){
                         case T5TRANSACTION:
