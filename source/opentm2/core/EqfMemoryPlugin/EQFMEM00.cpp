@@ -79,7 +79,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
     usRC = ERROR_MEMORY_NOTFOUND;
-    LogMessage1(DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
+    LogMessage( T5DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
   } /* endif */
 
   OtmMemoryPlugin::MEMORYINFO Info;
@@ -92,7 +92,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
       if (usRC != 0)
       {
         usRC = ERROR_MEMORY_NOTFOUND;              
-        LogMessage4(DEBUG, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
+        LogMessage( T5DEBUG, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
       }
   }
 

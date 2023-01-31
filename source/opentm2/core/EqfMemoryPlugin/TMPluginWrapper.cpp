@@ -575,12 +575,12 @@ USHORT TokenizeSourceEx2
     PSZ_W  pSrc = pSentence->pInputString;
     PSZ_W  pTgt = pSentence->pInputString;
     CHAR_W c;
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       std::string src = EncodingHelper::convertToUTF8(pSrc);
-      LogMessage3(DEBUG, __func__, ":: src = ", src.c_str());
+      LogMessage( T5DEBUG, __func__, ":: src = ", src.c_str());
       
       std::string trg = EncodingHelper::convertToUTF8(pTgt);
-      LogMessage2(DEBUG, "\n:: trg = ", trg.c_str());
+      LogMessage( T5DEBUG, "\n:: trg = ", trg.c_str());
     }
 
     while ( (c = *pSrc++) != NULC )

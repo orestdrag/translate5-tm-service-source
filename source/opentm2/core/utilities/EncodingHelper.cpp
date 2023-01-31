@@ -102,7 +102,7 @@ std::string EncodingHelper::convertToUTF8( const std::u16string& strUTF16String 
 */
 void EncodingHelper::convertUTF8ToASCII( std::string& strText )
 {
-  //LogMessage2(WARNING,"EncodingHelper::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
+  //LogMessage( T5WARNING,"EncodingHelper::convertUTF8ToASCII( std::string& strText ) is not implemented, strText = ", strText.c_str());
   int iUTF16Len;
   int iASCIILen;
   int iUTF8Len = (int)strText.length() + 1;

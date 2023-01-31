@@ -1091,7 +1091,7 @@ VOID QDAMCopyDataTo_V3
 
    if ( usVersion < NTM_VERSION2 )
    {
-     LogMessage3(FATAL,__func__, ":: btree version is not supported, version = ", toStr(usVersion).c_str());
+     LogMessage(T5FATAL,__func__, ":: btree version is not supported, version = ", toStr(usVersion).c_str());
      BTREE_NOT_SUPPORTED;
    }
    
@@ -1105,8 +1105,8 @@ VOID QDAMCopyDataTo_V3
    if ( usDataOffs)
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
-       if(usLastPos < usLen && CheckLogLevel(DEBUG)){
-        LogMessage4(ERROR, "QDAMCopyDataTo_V3::DEBUG 1 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+       if(usLastPos < usLen && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+        LogMessage(T5ERROR, "QDAMCopyDataTo_V3::DEBUG 1 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       ULONG ulLen = *(PULONG) pOldData;
       if ( ulLen & QDAM_TERSE_FLAGL)
@@ -1118,8 +1118,8 @@ VOID QDAMCopyDataTo_V3
 
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
-      if(usLastPos < usLen && CheckLogLevel(DEBUG)){
-        LogMessage4(FATAL, "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+      if(usLastPos < usLen && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+        LogMessage(T5FATAL, "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
       }
       //assert( (usLastPos >= usLen) );
 
@@ -1375,7 +1375,7 @@ VOID QDAMSetrecData_V3
      {
        // data pointer is out of range
        pData = NULL;
-       LogMessage2(FATAL,__func__,":: pData > 16kBt, it's out of range of record");
+       LogMessage(T5FATAL,__func__,":: pData > 16kBt, it's out of range of record");
        ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      }
      else
@@ -1585,8 +1585,8 @@ SHORT QDAMDictUpdateLocal
                   sRc = QDAMAddToBuffer_V3( pBTIda, pUserData, ulLen, &recData );
                   if ( !sRc )
                   {
-                    if(ulLen > TMX_REC_SIZE && CheckLogLevel(DEBUG)){
-                      LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
+                    if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+                      LogMessage(T5ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
                     }
                     recData.ulLen = ulLen;
                     QDAMSetrecData_V3( pRecord, i, recData, pBT->usVersion );
@@ -1622,7 +1622,7 @@ SHORT QDAMDictUpdateLocal
    }
    else
    {
-     LogMessage2(FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
+     LogMessage(T5FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
      throw;
      sRc = BTREE_NOT_SUPPORTED;
    } /* endif */
@@ -1783,10 +1783,10 @@ SHORT QDAMDictExactLocal
 
   if ( pBT->fCorrupted )
   {
-    LogMessage2(FATAL, __func__,":: BTREE_CORRUPTED");
+    LogMessage(T5FATAL, __func__,":: BTREE_CORRUPTED");
      sRc = BTREE_CORRUPTED;
   }else if(pBT->bRecSizeVersion != BTREE_V3){
-    LogMessage2(FATAL, __func__,":: not supported btree version");
+    LogMessage(T5FATAL, __func__,":: not supported btree version");
     sRc = BTREE_NOT_SUPPORTED;
 
   } else
@@ -1836,8 +1836,8 @@ SHORT QDAMDictExactLocal
                  }
                  else if ( *pulLength < recData.ulLen )
                  {
-                    if(CheckLogLevel(DEBUG)){
-                      LogMessage5(ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
+                    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+                      LogMessage(T5ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
                     }
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;

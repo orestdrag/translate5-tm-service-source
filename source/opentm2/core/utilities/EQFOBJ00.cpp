@@ -90,7 +90,7 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -186,7 +186,7 @@ SHORT ObjQuerySymbol( PSZ pszSymbol )
   }
   else
   {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31 sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(), WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31 sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(), WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
                       WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );

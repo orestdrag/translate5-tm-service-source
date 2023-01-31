@@ -75,14 +75,14 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   }
 
   int id = stats_->recordRequest(this->command);
-  SetLogInfo(this->command);
+  T5Logger::GetInstance()->SetLogInfo(this->command);
   if(CommandToStringsMap.find(this->command) == CommandToStringsMap.end()){
-    SetLogBuffer(std::string("Error during ") + toStr(this->command) + " request, id = " + toStr(id));
+    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + toStr(this->command) + " request, id = " + toStr(id));
   }else{
-    SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request, id = " + toStr(id));
+    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(this->command)->second + " request, id = " + toStr(id));
   }
   if(memName.empty() == false){
-    AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
+    T5Logger::GetInstance()->AddToLogBuffer(std::string(", for memory \"") + memName + "\"");
   }
 
   if(this->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
@@ -144,7 +144,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
           //close log file
           if(iRC == 200){
             pMemService->closeAll();
-            LogStop();          
+            T5Logger::GetInstance()->LogStop();          
             iRC = pMemService->shutdownService();
           }else{
             fWriteRequestsAllowed = true;
@@ -189,7 +189,7 @@ void ProxygenHandler::onEOM() noexcept {
     }
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
-    SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+    T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
     
     switch(this->command){
       case COMMAND::CREATE_MEM:
@@ -300,14 +300,14 @@ void ProxygenHandler::sendResponse()noexcept{
       builder->header("Content-Type", "application/json");
     }
     
-    //LogMessage5(DEBUG, __func__, ":: command = ", 
+    //LogMessage( T5DEBUG, __func__, ":: command = ", 
     //            CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
     if(strResponseBody.size())
       builder->body(strResponseBody);
     //builder->send();
 
 
-    ResetLogBuffer();
+    T5Logger::GetInstance()->ResetLogBuffer();
     builder->sendWithEOM();
 
 }

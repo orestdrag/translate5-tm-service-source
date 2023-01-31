@@ -271,8 +271,8 @@ ULONG GetOrgLangCP
  BOOL  fASCII
 )
 {
-  if(CheckLogLevel(INFO)){
-      LogMessage2(WARNING, __func__, "::called commented out function that would return 0");
+  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
+      LogMessage( T5WARNING, __func__, "::called commented out function that would return 0");
   }
   return 1;
 }

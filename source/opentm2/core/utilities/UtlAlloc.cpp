@@ -114,7 +114,7 @@ BOOL UtlAllocHwnd
   usMessageNo;
   if ( !fOK && (usMessageNo != NOMSG ))
   {
-    LogMessage3(ERROR, __func__, "::rc = ", toStr(usMessageNo).c_str() );
+    LogMessage(T5ERROR, __func__, "::rc = ", toStr(usMessageNo).c_str() );
   } /* endif */
   return( fOK );
 } /* end of UtlAllocHwnd */
@@ -140,7 +140,7 @@ PVOID UtlIntAlloc
   }
   else 
   {
-    LogMessage3(FATAL, __func__,"::Cant allocate memory size = ", toStr(ulLength));
+    LogMessage(T5FATAL, __func__,"::Cant allocate memory size = ", toStr(ulLength));
   } /* endif */
   return( pStorage );
 }
@@ -168,7 +168,7 @@ USHORT UtlIntFree
     /* display error message - someone killed us...                   */
     /******************************************************************/
     //usRC = ERROR_INTERNAL;
-    //LogMessage5(FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
+    //LogMessage(T5FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
     //  toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
     //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
@@ -193,7 +193,7 @@ USHORT UtlGetTask ( void )
   {
     if ( UtiVar[currTask].usTask == usTask )
     {
-      LogMessage2(DEVELOP, "UtlGetTask()::Task found, id = ", toStr(usTask).c_str());
+      LogMessage( T5DEVELOP, "UtlGetTask()::Task found, id = ", toStr(usTask).c_str());
       break;
     }
     else if ( UtiVar[currTask].usTask == 0 )
@@ -213,8 +213,8 @@ USHORT UtlGetTask ( void )
       UtiVar[currTask].usTask = usTask;
       memcpy(&UtiVar[currTask].SegTable, &SegTable,
              sizeof(SEGTABLE) * MAX_MEM_TABLES );
-      if(V_IS_ON(1))
-        LogMessage4(DEBUG, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
+      if(VLOG_IS_ON(1))
+        LogMessage( T5DEBUG, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
       break;
     } /* endif */
   } /* endfor */

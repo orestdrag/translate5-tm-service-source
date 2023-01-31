@@ -105,7 +105,7 @@ static BOOL         fIELookAndFeel = FALSE;
 BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
                              PSZ pEqfResFile )
 {
-    LogMessage7(DEBUG, "TwbGetCheckProfileData( pEqfSystemMsgFile= ", pEqfSystemMsgFile, ", pEqfSystemPropPath= ",  pEqfSystemPropPath,
+    LogMessage( T5DEBUG, "TwbGetCheckProfileData( pEqfSystemMsgFile= ", pEqfSystemMsgFile, ", pEqfSystemPropPath= ",  pEqfSystemPropPath,
                              ", pEqfResFile = ", pEqfResFile,")" );
     CHAR   szDrive[MAX_DRIVE];         // buffer for drive list
     CHAR   szLanDrive[MAX_DRIVE];      // buffer for lan drive list

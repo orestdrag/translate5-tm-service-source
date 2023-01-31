@@ -2294,7 +2294,7 @@ USHORT TACreateProtectTableWEx
     }
     else
     {
-      LogMessage1(DEBUG, "TEMPORARY_HARDCODED in TACreateProtectTableWEx if ( false &sa& pvUserExit )");
+      LogMessage( T5DEBUG, "TEMPORARY_HARDCODED in TACreateProtectTableWEx if ( false &sa& pvUserExit )");
       /******************************************************************/
       /* Create start/stop table using tokenizer                        */
       /******************************************************************/

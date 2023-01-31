@@ -228,7 +228,7 @@ USHORT MorphInit
 		pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
 		if (NULL == pLangCB->m_MorphInstance)
 		{
-      LogMessage2(WARNING,__func__, ":: pLangCB->m_MorphInstance == NULL");
+      LogMessage( T5WARNING,__func__, ":: pLangCB->m_MorphInstance == NULL");
 			usRC = MORPH_NO_MEMORY;
 		}
 
@@ -276,9 +276,9 @@ USHORT TokenizeW
   }
 
 #ifdef LOG_TOKENIZEW
-        if(CheckLogLevel(DEVELOP)){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
           auto str = EncodingHelper::convertToUTF8(pszInData);
-          LogMessage4(DEVELOP, __func__,  "::Input string is >>>",str.c_str() , "<<<");
+          LogMessage( T5DEVELOP, __func__,  "::Input string is >>>",str.c_str() , "<<<");
         }
 #endif
 
@@ -291,18 +291,18 @@ USHORT TokenizeW
   }
 
 #ifdef LOG_TOKENIZEW
-  if(CheckLogLevel(DEVELOP)){
-    LogMessage2(DEVELOP, __func__, "---------------results from tokenizeBySentence----------------" );
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+    LogMessage( T5DEVELOP, __func__, "---------------results from tokenizeBySentence----------------" );
     for (size_t j = 0; j < vSentenceList.size(); j++)
     {
       PSZ_W pszStartOfSegment = pszInData + vSentenceList[j].iStartOffset;
       wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
       pszStartOfSegment[vSentenceList[j].iLength] = 0;
       auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
-      LogMessage6(DEVELOP, __func__, "::Segment ",toStr(j).c_str()," >>>",str.c_str(),"<<<" );
+      LogMessage( T5DEVELOP, __func__, "::Segment ",toStr(j).c_str()," >>>",str.c_str(),"<<<" );
       pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
     }
-    LogMessage2(DEVELOP, __func__, "--------------------------------------------------------------" );
+    LogMessage( T5DEVELOP, __func__, "--------------------------------------------------------------" );
   }
 #endif
 
@@ -325,9 +325,9 @@ USHORT TokenizeW
     pszStartOfSegment[vSentenceList[j].iLength] = 0;
     int tRet = tMorphInstance->tokenizeByTerm( pszStartOfSegment, vTermList );
 #ifdef LOG_TOKENIZEW
-    if(CheckLogLevel(DEVELOP)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
       auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
-      LogMessage4(DEVELOP, __func__, "::---------tokenizeByTerm of string >>>",str.c_str() ,"<<<---------" );
+      LogMessage( T5DEVELOP, __func__, "::---------tokenizeByTerm of string >>>",str.c_str() ,"<<<---------" );
       for( size_t i = 0; i < vTermList.size(); i++ )
       {
         std::string strFlags = "";
@@ -346,11 +346,11 @@ USHORT TokenizeW
         str = EncodingHelper::convertToUTF8(pszStartOfSegment + vTermList[i].iStartOffset);
         std::string msg = std::string(__func__) + "::Term " +toStr(i) + " Start=" + toStr(vTermList[i].iStartOffset) + ", Length=" + toStr(vTermList[i].iLength)
           + " Term=\"" + str + "\", Flags=" + strFlags;
-        LogMessage1(DEVELOP, msg.c_str());//LOG_DEVELOP_MSG << msg;
+        LogMessage( T5DEVELOP, msg.c_str());//LOG_DEVELOP_MSG << msg;
       
         pszStartOfSegment[vTermList[i].iStartOffset+vTermList[i].iLength] = chTemp2;
       }
-      LogMessage2(DEVELOP, __func__, "::--------------------------------------------------------------" );
+      LogMessage( T5DEVELOP, __func__, "::--------------------------------------------------------------" );
     }
 #endif
     pszStartOfSegment[vSentenceList[j].iLength] = chTemp;
@@ -443,7 +443,7 @@ USHORT Terminate
 	/********************************************************************/
 	UtlAlloc( (PVOID *) &pLangCB, 0L, 0L, NOMSG );
 
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED in Terminate::  SpellFactory::close();MorphFactory::close();");
+  LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED in Terminate::  SpellFactory::close();MorphFactory::close();");
 #ifdef TEMPORARY_COMMENTED 
 	SpellFactory::close();
 	MorphFactory::close();
@@ -714,9 +714,9 @@ USHORT MorphTokenizeW
     if ( *pszInData != EOS )
     {
 #ifdef LOG_TOKENIZE
-        if(CheckLogLevel(DEVELOP)){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
           auto str = EncodingHelper::convertToUTF8(pszInData);
-          LogMessage4(DEVELOP, __func__, "::Tokenizing \"",str.c_str(),"\""  );
+          LogMessage( T5DEVELOP, __func__, "::Tokenizing \"",str.c_str(),"\""  );
         }
 #endif
 
@@ -726,7 +726,7 @@ USHORT MorphTokenizeW
       
       if ( usRC == MORPH_OK  )
       {
-        if(CheckLogLevel(DEVELOP)){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
           if ( usListType == MORPH_FLAG_OFFSLIST )
           {
             PSHORT psData = (PSHORT)*ppTermList;
@@ -738,8 +738,8 @@ USHORT MorphTokenizeW
               psData += 2;
               sLen   = *psData++;
               sStart = *psData++;
-              if(CheckLogLevel(DEVELOP)){
-                LogMessage7(DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
+              if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+                LogMessage( T5DEVELOP, __func__, "::  Start=",toStr(sStart).c_str()," Len=",toStr(sLen).c_str(), " Flag=", std::to_string(lFlag).c_str() );
               }
             } while ( (sStart != 0) || (sLen != 0) || (lFlag != 0) );
           }
@@ -751,8 +751,8 @@ USHORT MorphTokenizeW
               {
                 sLen   = *psData++;
                 sStart = *psData++;
-                if(CheckLogLevel(DEVELOP)){
-                  LogMessage5(DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
+                if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+                  LogMessage( T5DEVELOP, __func__, "::Start=",toStr(sStart).c_str(), ", Len=", toStr(sLen).c_str());
                 }
               } while ( (sStart != 0) || (sLen != 0) );
           } /* endif */
@@ -760,7 +760,7 @@ USHORT MorphTokenizeW
       }
       else
       {
-        LogMessage3(ERROR, __func__, ":: TokenizeW failed with rc=", toStr(usRC).c_str() );
+        LogMessage(T5ERROR, __func__, ":: TokenizeW failed with rc=", toStr(usRC).c_str() );
       } /* endif */
       
 #endif

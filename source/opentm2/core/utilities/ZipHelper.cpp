@@ -4,9 +4,9 @@
 
 int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
     if(pZip){
-        LogMessage3(INFO,__func__,"::adding to zip file ", fName);
+        LogMessage( T5INFO,__func__,"::adding to zip file ", fName);
     }else{
-        LogMessage3(ERROR,__func__,":: can't add to zip file ", fName);
+        LogMessage(T5ERROR,__func__,":: can't add to zip file ", fName);
     }
     zip_entry_open(pZip, UtlGetFnameFromPath(fName));
     {
@@ -19,18 +19,18 @@ int  ZipHelper::ZipAdd    ( ZIP * pZip, const char* fName ){
 ZIP*  ZipHelper::ZipOpen   ( const char* fName , char mode){
     struct zip_t * zip = zip_open(fName, ZIP_DEFAULT_COMPRESSION_LEVEL, mode); 
     if(zip){
-        LogMessage3(INFO,__func__,":: Opened zip file ", fName);
+        LogMessage( T5INFO,__func__,":: Opened zip file ", fName);
     }else{
-        LogMessage3(ERROR,__func__,":: can't open zip file ", fName);
+        LogMessage(T5ERROR,__func__,":: can't open zip file ", fName);
     }
     return zip;
 }
 
 int  ZipHelper::ZipClose  ( ZIP* pZip ){
     if(pZip){
-        LogMessage2(INFO,__func__,"::closing zip file ");
+        LogMessage( T5INFO,__func__,"::closing zip file ");
     }else{
-        LogMessage2(ERROR,__func__,":: can't close zip file , ptr = nullptr");
+        LogMessage(T5ERROR,__func__,":: can't close zip file , ptr = nullptr");
     }
     zip_close(pZip);
     return 0;
@@ -38,7 +38,7 @@ int  ZipHelper::ZipClose  ( ZIP* pZip ){
 
 int on_extract_entry(const char *filename, void *arg) {
     int n = *(int *)arg;
-    LogMessage3(INFO,__func__,"::Extracted: ", filename);//," ("," of ", toStr(n),")\n" );
+    LogMessage( T5INFO,__func__,"::Extracted: ", filename);//," ("," of ", toStr(n),")\n" );
     return 0;
 }
 

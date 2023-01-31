@@ -419,7 +419,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text )
     int iLen = wcslen( text );
     WriteRaw( text, iLen );
   }else{
-    LogMessage1(ERROR,"CXmlWriter::WriteRaw, text is NULL");
+    LogMessage(T5ERROR,"CXmlWriter::WriteRaw, text is NULL");
   }
 }
 
@@ -511,7 +511,7 @@ void CXmlWriter::WriteStartAttribute( const WCHAR *prefix, const WCHAR *localnam
   }
   else
   {
-    LogMessage3(WARNING,__func__,":: wrong context! for attribute ", EncodingHelper::convertToUTF8(localname).c_str());
+    LogMessage( T5WARNING,__func__,":: wrong context! for attribute ", EncodingHelper::convertToUTF8(localname).c_str());
     // wrong context!
   } /* endif */
 }
@@ -533,7 +533,7 @@ void CXmlWriter::WriteEndAttribute()
   }
   else
   {
-    LogMessage2(WARNING,__func__,":: wrong context!");
+    LogMessage( T5WARNING,__func__,":: wrong context!");
     // wrong context!
   } /* endif */
 }

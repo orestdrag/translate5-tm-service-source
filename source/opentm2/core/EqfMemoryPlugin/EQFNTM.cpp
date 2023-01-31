@@ -328,7 +328,7 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   if ( !fOk )
   {
-    LogMessage2(ERROR, __func__, "::TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
+    LogMessage(T5ERROR, __func__, "::TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
 #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif
@@ -449,7 +449,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     pstOpenIn->stTmOpen.szServer[0] = EOS;
     if ( usLocation != TM_LOCAL )
     {
-      LogMessage1(FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
+      LogMessage(T5FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
       fOk = false;
     }
 
@@ -508,7 +508,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
           /**************************************************************/
           fOk           = FALSE;
           usMsgHandling = FALSE;
-          LogMessage4(ERROR,"Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = ", szMemFullPath,", usRC = ", toStr(usRc).c_str());
+          LogMessage(T5ERROR,"Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = ", szMemFullPath,", usRC = ", toStr(usRc).c_str());
           DEBUGEVENT( TMOPEN_LOC, STATE_EVENT, 1 );
         } /* endif */
       } /* endif */
@@ -899,7 +899,7 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
           /************************************************************/
           /* convert source string                                    */
           /************************************************************/
-          LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED in C_TmGetW::NTMConvertCRLFW");
+          LogMessage(T5FATAL,__func__,"TEMPORARY_COMMENTED in C_TmGetW::NTMConvertCRLFW");
 #ifdef TEMPORARY_COMMENTED
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szSource,
                           pszTempString,
@@ -987,7 +987,7 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );");
+  LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );");
 #ifdef TEMPORARY_COMMENTED
   usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );
   #endif
@@ -998,7 +998,7 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 
   if ( usMsgHandling && usRc )
   {
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 45 usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );");
+    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 45 usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );");
 #ifdef TEMPORARY_COMMENTED
     usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );
     #endif
@@ -1193,7 +1193,7 @@ NTMFillCreateInStruct( HTM             hModel,
       /************************************************************/
       /* TM is a shared one, use "shared" index name              */
       /************************************************************/
-      LogMessage1(FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
+      LogMessage(T5FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
       CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
     }
     else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )

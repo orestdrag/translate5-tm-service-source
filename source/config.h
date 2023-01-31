@@ -14,8 +14,8 @@ public:
         if(exists){
             return data.at(key);
         }else{ 
-            if(V_IS_ON(1))
-               LogMessage8(WARNING, __func__,":: key \'", key.c_str() ,"\'not found in file \'", filename.c_str(), "\', used default value instead def=\'", def.c_str(),"\'");
+            if(VLOG_IS_ON(1))
+               LogMessage( T5WARNING, __func__,":: key \'", key.c_str() ,"\'not found in file \'", filename.c_str(), "\', used default value instead def=\'", def.c_str(),"\'");
             return def;
         } 
     }

@@ -453,8 +453,8 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
       }else{
         //tag not found -> maybe should try to find matching tag in the same or paralel segment? 
         //generate new id        
-        if(CheckLogLevel(DEBUG)){
-          LogMessage2(ERROR, __func__,":: not found matching tag in request tag list");    
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+          LogMessage(T5ERROR, __func__,":: not found matching tag in request tag list");    
         }
         x = ++ iHighestRequestsOriginalId;
 
@@ -500,7 +500,7 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
   if(!fClosingTag && fClosedTag)
     res += '/';
   res += ">";
-  LogMessage3(DEBUG, __func__, ":: generated tag = ", res.c_str());
+  LogMessage( T5DEBUG, __func__, ":: generated tag = ", res.c_str());
   return EncodingHelper::convertToUTF16(res.c_str());
 }
 
@@ -524,12 +524,12 @@ void TagReplacer::LogTag(TagInfo & tag){
           " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
           "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
           "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
-  LogMessage1(DEVELOP, logMsg.c_str());
+  LogMessage( T5DEVELOP, logMsg.c_str());
   //LOG_DEVELOP_MSG << logMsg;
   
-  //LogMessage10(INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
+  //LogMessage( T5INFO, "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
   //        "/>\n    tagHasClosingTag = \"", toStr(tag.fPairedTagClosed).c_str(), "\" tagWasAlreadyUsedInTarget = \"", toStr(tag.fTagAlreadyUsedInTarget).c_str());
-  //LogMessage9(INFO, " tagLocation = ", TagLocIDToStr[tag.tagLocation].c_str(),"\n generated tag =  <", TmxIDToName[tag.generated_tagType].c_str(), 
+  //LogMessage( T5INFO, " tagLocation = ", TagLocIDToStr[tag.tagLocation].c_str(),"\n generated tag =  <", TmxIDToName[tag.generated_tagType].c_str(), 
   //        " x=\"", toStr(tag.generated_x).c_str(), "\" i = \"",toStr(tag.generated_i).c_str(), "\" />");
 
 }
@@ -550,7 +550,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
     tag.generated_tagType = PH_ELEMENT;
   }else{
     tag.generated_tagType = UNKNOWN_ELEMENT;
-      LogMessage5(ERROR,__func__,":: wrong tag used, only bpt, ept and ph tags allowed, tag=", toStr(tagType).c_str(), 
+      LogMessage(T5ERROR,__func__,":: wrong tag used, only bpt, ept and ph tags allowed, tag=", toStr(tagType).c_str(), 
             ",\n 0<=tag<=9 or tag>=30 -> tmx tags, 20<=tag<=29 -> standalone tags, 10<=tag<=19 -> pair tags, tagName = ", TmxIDToName[tagType].c_str());
   }  
 
@@ -669,8 +669,8 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   }else // if(activeSegment == TARGET_SEGMENT)
   {//generate new attributes or find matching 
     //try to find matching tag in source
-    if(sourceTagList.empty() && V_IS_ON(1)){
-      LogMessage2(ERROR, __func__,":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml");
+    if(sourceTagList.empty() && VLOG_IS_ON(1)){
+      LogMessage(T5ERROR, __func__,":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml");
     }
     std::vector<TagInfo>::iterator matchingSourceTag = std::find_if(sourceTagList.begin(), sourceTagList.end(),
                                   [&tag](TagInfo& i) { return i.fTagAlreadyUsedInTarget == false 
@@ -748,8 +748,8 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
     }
   }
 
-  if(CheckLogLevel(DEBUG)){
-    LogMessage1(DEBUG, "Generated tag logging:");
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    LogMessage(T5DEBUG, "Generated tag logging:");
     LogTag(tag);
   }
   return tag;
@@ -1336,7 +1336,7 @@ USHORT CTMXExportImport::WriteTUV
 {
   CHAR szTMXLang[20];                  // buffer for TMX language
 
-  LogMessage4(DEVELOP, "WriteTUV:: lang = ", pszLanguage, "; markup = ", pszMarkup);
+  LogMessage( T5DEVELOP, "WriteTUV:: lang = ", pszLanguage, "; markup = ", pszMarkup);
   // get TMX language name
   szTMXLang[0] = EOS;
   LanguageFactory *pLangFactory = LanguageFactory::getInstance();
@@ -1701,7 +1701,7 @@ USHORT CTMXExportImport::PreProcessInFile
     if ( !usRC  ){
       fseek(hIn, 0, SEEK_END);
       long fsize = ftell(hIn);
-      LogMessage5(DEBUG,__func__," Allocating filebuffer with ", toStr(fsize).c_str()," bytes for ", pszInFile);
+      LogMessage( T5DEBUG,__func__," Allocating filebuffer with ", toStr(fsize).c_str()," bytes for ", pszInFile);
       fseek(hIn, 0, SEEK_SET);  /* same as rewind(f); */
 
       buff = new BYTE[fsize+1];
@@ -1887,7 +1887,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
   parser->setLoadExternalDTD( false );
   parser->setValidationScheme( SAXParser::Val_Never );
   parser->setExitOnFirstFatalError( false );
-  LogMessage4(DEBUG,__func__,":: parsing str = \'", src.c_str(), "\'");
+  LogMessage( T5DEBUG,__func__,":: parsing str = \'", src.c_str(), "\'");
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
 
@@ -1895,16 +1895,16 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
   if(parser->getErrorCount()){
     char buff[512];
     handler->GetErrorText(buff, sizeof(buff));
-    LogMessage3(ERROR, __func__,":: error during parsing src : ", buff);
+    LogMessage(T5ERROR, __func__,":: error during parsing src : ", buff);
   }
   std::wstring src_res = handler->GetParsedData();  
   res.push_back(src_res);
 
   std::string trg;
   if(w_trg.empty() ){
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
-      LogMessage6(DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
+      LogMessage( T5DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
             res_src_s.c_str(),"\'\n");
     }
   }else{    
@@ -1916,26 +1916,26 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
     if(parser->getErrorCount()){
       char buff[512];
       handler->GetErrorText(buff, sizeof(buff));
-      LogMessage3(ERROR, __func__,":: error during parsing trg : ", buff);
+      LogMessage(T5ERROR, __func__,":: error during parsing trg : ", buff);
     }
 
     std::wstring trg_res = handler->GetParsedData();    
 
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
       std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
-      LogMessage10(DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
+      LogMessage( T5DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
               res_src_s.c_str(),"\'\n target: \'", trg.c_str(), "\'\n replaced with:\n\'", res_trg_s.c_str(),"\'\n");
     }
     res.push_back(trg_res);
   }
   
-  if(CheckLogLevel(DEVELOP)){
-    LogMessage2(DEVELOP, __func__, ":: source tags: ");
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+    LogMessage( T5DEVELOP, __func__, ":: source tags: ");
     for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
       TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
     }
-    LogMessage2(DEVELOP, __func__, ":: target tags: ");
+    LogMessage( T5DEVELOP, __func__, ":: target tags: ");
     for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
       TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
     }
@@ -1971,7 +1971,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   parser->setExitOnFirstFatalError( false );
 
   std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_request) + std::string("</TMXSentence>");
-  LogMessage4(DEBUG,__func__,":: parsing request str = \'", req.c_str(), "\'");
+  LogMessage( T5DEBUG,__func__,":: parsing request str = \'", req.c_str(), "\'");
   xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
                                       "req_buff (in memory)");
 
@@ -1979,14 +1979,14 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   if(parser->getErrorCount()){
     char buff[512];
     handler->GetErrorText(buff, sizeof(buff));
-    LogMessage3(ERROR, __func__,":: error during parsing req : ", buff);
+    LogMessage(T5ERROR, __func__,":: error during parsing req : ", buff);
   }
 
   std::wstring req_res = handler->GetParsedData();
   
   // do tag replacement for source and target 
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
-  LogMessage4(DEBUG,__func__,":: parsing str = \'", src.c_str(), "\'");
+  LogMessage( T5DEBUG,__func__,":: parsing str = \'", src.c_str(), "\'");
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
   handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
@@ -1998,7 +1998,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   if(parser->getErrorCount()){
     char buff[512];
     handler->GetErrorText(buff, sizeof(buff));
-    LogMessage3(ERROR, __func__,":: error during parsing src : ", buff);
+    LogMessage(T5ERROR, __func__,":: error during parsing src : ", buff);
   }
   std::wstring src_res = handler->GetParsedData();
   
@@ -2011,15 +2011,15 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   if(parser->getErrorCount()){
     char buff[512];
     handler->GetErrorText(buff, sizeof(buff));
-    LogMessage3(ERROR, __func__,":: error during parsing trg : ", buff);
+    LogMessage(T5ERROR, __func__,":: error during parsing trg : ", buff);
   }
 
   std::wstring trg_res = handler->GetParsedData();    
 
-  if(CheckLogLevel(DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
     std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
-    LogMessage10(DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
+    LogMessage( T5DEBUG,__func__,":: original source = \n\'", src.c_str(), "\'\n replaced with:\n\'", 
             res_src_s.c_str(),"\'\n target: \'", trg.c_str(), "\'\n replaced with:\n\'", res_trg_s.c_str(),"\'\n");
   }
   
@@ -2027,16 +2027,16 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   res.push_back(trg_res);
   res.push_back(req_res);
   
-  if(CheckLogLevel(DEBUG)){
-    LogMessage2(DEBUG, __func__, ":: request tags: ");
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    LogMessage( T5DEBUG, __func__, ":: request tags: ");
     for(int i = 0; i < handler->tagReplacer.requestTagList.size(); i++){
       TagReplacer::LogTag(handler->tagReplacer.requestTagList[i]);
     }
-    LogMessage2(DEBUG, __func__, ":: source tags: ");
+    LogMessage( T5DEBUG, __func__, ":: source tags: ");
     for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
       TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
     }
-    LogMessage2(DEBUG, __func__, ":: target tags: ");
+    LogMessage( T5DEBUG, __func__, ":: target tags: ");
     for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
       TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
     }
@@ -2064,7 +2064,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
     char* pszName = (char*) sName.c_str();
     int iAttribs = attributes.getLength(); 
 
-    LogMessage2(DEVELOP, "StartElement: ", pszName);
+    LogMessage( T5DEVELOP, "StartElement: ", pszName);
 
     Push( &CurElement );
 
@@ -2342,12 +2342,12 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             tagReplacer.activeSegment = SOURCE_SEGMENT;
 
             if(fOkLang){
-              LogMessage5(DEBUG, __func__, ":: _szLang = ", _szLang, "; pBuf->szMemSourceLang = ", pBuf->szMemSourceLang);
+              LogMessage( T5DEBUG, __func__, ":: _szLang = ", _szLang, "; pBuf->szMemSourceLang = ", pBuf->szMemSourceLang);
               if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) {
                 tagReplacer.activeSegment = TARGET_SEGMENT;
               }
             }else{
-              LogMessage2(ERROR,__func__,":: language is not supported");
+              LogMessage(T5ERROR,__func__,":: language is not supported");
             }
 
             XMLString::release( &pszValue );
@@ -2390,8 +2390,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           auto tag = tagReplacer.GenerateReplacingTag(CurElement.ID , &attributes); 
           std::wstring replacingTag = tagReplacer.PrintTag(tag);
           if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
-            if(CheckLogLevel(DEBUG)){
-              LogMessage5(DEBUG,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
+            if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+              LogMessage( T5DEBUG,__func__,":: parsed standalone tag \'<", sName.c_str(),">\' , replaced with ",EncodingHelper::convertToUTF8(replacingTag).c_str());
             }
             wcscat(pBuf->szData, replacingTag.c_str());
             fCatchData = false;
@@ -2412,8 +2412,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         fCatchData = false;
         CurElement.fInsideTagging = true;
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){         
-          if(CheckLogLevel(DEBUG)){       
-            LogMessage5(DEBUG,__func__,":: parsed bpt tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){       
+            LogMessage( T5DEBUG,__func__,":: parsed bpt tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           }
           wcscat(pBuf->szData, replacingTag.c_str());
         }
@@ -2430,12 +2430,12 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         std::wstring replacedTag = tagReplacer.PrintTag(tag);
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){
-          if(CheckLogLevel(DEBUG)){           
-            LogMessage7(DEBUG,__func__,":: parsed \'", pszName,"\' tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacedTag).c_str());
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){           
+            LogMessage( T5DEBUG,__func__,":: parsed \'", pszName,"\' tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacedTag).c_str());
           }
           wcscat(pBuf->szData, replacedTag.c_str());            
         }else{
-          LogMessage3(WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacedTag).c_str());
+          LogMessage( T5WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacedTag).c_str());
         }
         break;
       }
@@ -2448,12 +2448,12 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){  
-          if(CheckLogLevel(DEBUG)){   
-            LogMessage5(DEBUG,__func__,":: parsed pair tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){   
+            LogMessage( T5DEBUG,__func__,":: parsed pair tag \'<", sName.c_str(),">\' , replaced with ", EncodingHelper::convertToUTF8(replacingTag).c_str());
           }
           wcscat(pBuf->szData, replacingTag.c_str());
         }else{
-          LogMessage3(WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacingTag).c_str());
+          LogMessage( T5WARNING,__func__,":: buffer size overflow for ", EncodingHelper::convertToUTF8(replacingTag).c_str());
         }
         break;
       }
@@ -2465,7 +2465,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       default:
         break;
     } /*endswitch */
-    if(CheckLogLevel(DEVELOP)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
       for( int i = 0; i < iAttribs; i++ )
       {
         u16name = (char16_t*)attributes.getName( i );
@@ -2473,7 +2473,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         u16name = (char16_t*)attributes.getValue( i );
         std::string sVal = EncodingHelper::convertToUTF8(u16name);
-        LogMessage6(DEVELOP, "Parsed atribute : ", toStr(i).c_str(), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
+        LogMessage( T5DEVELOP, "Parsed atribute : ", toStr(i).c_str(), ", Name = ", sName.c_str(), ", Value = ", sVal.c_str());
       } /* endfor */
     }
 }
@@ -2582,7 +2582,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   std::string sName = EncodingHelper::convertToUTF8(u16name);
   char* pszName = (char*) sName.c_str();
 
-  LogMessage2(DEBUG, "endElement: ", pszName);
+  LogMessage( T5DEBUG, "endElement: ", pszName);
   ELEMENTID CurrentID = CurElement.ID;
   PROPID    CurrentProp = CurElement.PropID;
 
@@ -2605,16 +2605,16 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       {
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
-        if(CheckLogLevel(DEBUG)){              
-          LogMessage2(DEBUG, __func__, "::parsed end of TU_ELEMENT::request tags: ");
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){              
+          LogMessage( T5DEBUG, __func__, "::parsed end of TU_ELEMENT::request tags: ");
           for(int i = 0; i < tagReplacer.requestTagList.size(); i++){
             TagReplacer::LogTag(tagReplacer.requestTagList[i]);
           }
-          LogMessage2(DEBUG, __func__, "::parsed end of TU_ELEMENT:::: source tags: ");
+          LogMessage( T5DEBUG, __func__, "::parsed end of TU_ELEMENT:::: source tags: ");
           for(int i = 0; i < tagReplacer.sourceTagList.size(); i++){
             TagReplacer::LogTag(tagReplacer.sourceTagList[i]);
           }
-          LogMessage2(DEBUG, __func__, "::parsed end of TU_ELEMENT:::: target tags: ");
+          LogMessage( T5DEBUG, __func__, "::parsed end of TU_ELEMENT:::: target tags: ");
           for(int i = 0; i < tagReplacer.targetTagList.size(); i++){
             TagReplacer::LogTag(tagReplacer.targetTagList[i]);
           }
@@ -2736,7 +2736,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
               } /* endif */
 
               if(pBuf->SegmentData.fValid == FALSE){
-                LogMessage3(INFO, __func__,":: invalid segment, reason = ", pBuf->SegmentData.szReason);
+                LogMessage( T5INFO, __func__,":: invalid segment, reason = ", pBuf->SegmentData.szReason);
               }
               // add segment to memory (if fValid set) or count as skipped segment
               if ( pfnInsertSegment != NULL )
@@ -2915,9 +2915,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
             }
           }  
         }
-        if(CheckLogLevel(DEBUG)){      
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){      
           result = EncodingHelper::convertToUTF8(pBuf->szData);
-          LogMessage10(DEBUG,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
+          LogMessage( T5DEBUG,__func__,":: parsed end of TMX sentence, result = \'", result.c_str() , 
               "\'  ->  fSkipped inclosed tag pair = ", toStr(inclosingTagsSkipped),";\n Generated tags first = \'",
               EncodingHelper::convertToUTF8(begPairTag).c_str(), "\'\nlast tag =\'", EncodingHelper::convertToUTF8(endPairTag.c_str()), "\'\n");     
         }
@@ -2935,7 +2935,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     case BX_ELEMENT:   
     case EX_ELEMENT:
     {
-      LogMessage4(DEBUG,__func__,":: parsed end of tag \'",sName.c_str() ,"\'");
+      LogMessage( T5DEBUG,__func__,":: parsed end of tag \'",sName.c_str() ,"\'");
       fCatchData = true;
       CurElement.fInsideTagging = false;
       CurElement.fInlineTagging = true;
@@ -2951,10 +2951,10 @@ void TMXParseHandler::endElement(const XMLCh* const name )
 
       int iCurLen = wcslen(pBuf->szData);
       if((iCurLen + replactingTagStr.size()) < DATABUFFERSIZE){            
-          LogMessage5(DEBUG,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", "calculate i");
+          LogMessage( T5DEBUG,__func__,":: parsed end pair tag \'</", sName.c_str(),">\' , replaced with <ept i=\'", "calculate i");
           wcscat(pBuf->szData, replactingTagStr.c_str());    
         }else{
-          LogMessage4(ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because no space left in buffer");         
+          LogMessage(T5ERROR,__func__,":: parsed end of pair tag \'",sName.c_str() ,"\' replacing failed because no space left in buffer");         
         }  
       break;
     }
@@ -3106,7 +3106,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     this->fTMXTagStarted = FALSE;
   } /* endif */
 
-  LogMessage4(DEVELOP, "TMXParseHandler::characters ", toStr(length).c_str() ," characters; ", c_chars );
+  LogMessage( T5DEVELOP, "TMXParseHandler::characters ", toStr(length).c_str() ," characters; ", c_chars );
 
   if ( (CurElement.ID == PROP_ELEMENT) && (CurElement.PropID != UNKNOWN_PROP) )
   {
@@ -3645,12 +3645,12 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
       WriteMemHeader( pData );
     } /* endif */
     pData->lSegCounter++;
-     LogMessage1(WARNING, "TEMPORARY_COMMENTED");
+     LogMessage( T5WARNING, "TEMPORARY_COMMENTED");
     //swprintf( pData->szBufferW, L"<Segment>%10.10ld\r\n", pData->lSegCounter );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"<Control>\r\n" );
     
-     LogMessage1(ERROR, "TEMPORARY_COMMENTED WRITEEXPSEGMENT");
+     LogMessage(T5ERROR, "TEMPORARY_COMMENTED WRITEEXPSEGMENT");
     /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
       pSegment->lSegNum, X15_STRW, pSegment->usTranslationFlag, X15_STRW,
       pSegment->lTime, X15_STRW, pSegment->szSourceLang, X15_STRW, 
@@ -4039,7 +4039,7 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
   HDIR hdir;
   static WIN32_FIND_DATA FindData;    // find data structure
 
-  LogMessage2(ERROR,__func__, "::TEMPORARY COMMENTED CheckExistence  whole function");
+  LogMessage(T5ERROR,__func__, "::TEMPORARY COMMENTED CheckExistence  whole function");
 #ifdef TEMPORARY_COMMENTED
   hdir = FindFirstFile( pszInMemory, &FindData );
   if ( hdir == INVALID_HANDLE_VALUE )
@@ -4101,7 +4101,7 @@ USHORT GetSourceLang( PCONVERTERDATA pData, PSZ pszSourceLanguage )
       fgets( (PSZ)pData->szLine, sizeof(pData->szLine), pData->hInFile );
 
       // retrieve source language
-      LogMessage1(ERROR, "TEMPORARY_COMMENTED GetSourceLangW");
+      LogMessage(T5ERROR, "TEMPORARY_COMMENTED GetSourceLangW");
       //strcpy( pszSourceLanguage, UtlParseX15( (PSZ)pData->szLine, 3 ) );
 
       fWaitingForControlRecord = FALSE;
@@ -4779,7 +4779,7 @@ USHORT GetLine( PCONVERTERDATA pData, PSZ_W pszLine, int iSize, BOOL fUnicode, P
       usRC = 0;
     } /* endif */
 
-    LogMessage1(ERROR,"TEMPORARY COMMENTED GetLine");
+    LogMessage(T5ERROR,"TEMPORARY COMMENTED GetLine");
     //MultiByteToWideChar( pData->ulInputCP, 0, szAsciiLine, -1, pszLine, iSize-1 );
   } /* endif */
 

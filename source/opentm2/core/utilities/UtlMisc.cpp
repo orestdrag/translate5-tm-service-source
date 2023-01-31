@@ -287,7 +287,7 @@ USHORT UtlGetLANUserID
 )
 {
   USHORT usRC = LANUID_NO_LAN;         // function return code
-  LogMessage2(FATAL,__func__, "::called commented function");
+  LogMessage(T5FATAL,__func__, "::called commented function");
   return( usRC );
 }
 
@@ -319,7 +319,7 @@ USHORT UtlGetLANUserID
 //+----------------------------------------------------------------------------+
 VOID UtlDispatch( VOID )
 {
-  LogMessage2(ERROR,__func__, ":: called commented function");
+  LogMessage(T5ERROR,__func__, ":: called commented function");
 }
 
 
@@ -456,7 +456,7 @@ USHORT UtlFindAndShowConversionError
       PSZ  pszParms[3];
       CHAR szRC[10], szCP[10], szCharacter[20];
       int iCh = (UCHAR)*pszBuffer;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 74 usRC = (USHORT)GetLastError();");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 74 usRC = (USHORT)GetLastError();");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
       usRC = (USHORT)GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE

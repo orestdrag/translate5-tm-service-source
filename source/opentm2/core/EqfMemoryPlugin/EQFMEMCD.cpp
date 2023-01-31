@@ -110,7 +110,7 @@ LONG                lOptions                 // type of new Translation Memory
     char buff[255];
     sprintf(buff, "MemFuncCreateMem( pszMemName = %s, pszDescription = %s, pszSourceLanguage = %s )",
           pszMemName, pszDescription, pszSourceLanguage);
-    LogMessage1(DEBUG, buff);
+    LogMessage( T5DEBUG, buff);
   }
   // check required parameters
   if ( usRC == NO_ERROR )
@@ -118,7 +118,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
     {
       usRC = TMT_MANDCMDLINE;
-      LogMessage2(ERROR, __func__, "::MemFuncCreateMem()::TMT_MANDCMDLINE");
+      LogMessage(T5ERROR, __func__, "::MemFuncCreateMem()::TMT_MANDCMDLINE");
     } /* endif */
   } /* endif */
 
@@ -126,7 +126,7 @@ LONG                lOptions                 // type of new Translation Memory
   {
     if ( (pszSourceLanguage == NULL) || (*pszSourceLanguage == EOS) )
     {
-      LogMessage2(ERROR,__func__,  "::MemFuncCreateMem()::ERROR_NO_SOURCELANG");
+      LogMessage(T5ERROR,__func__,  "::MemFuncCreateMem()::ERROR_NO_SOURCELANG");
       usRC = ERROR_NO_SOURCELANG;
     } /* endif */
   } /* endif */
@@ -137,7 +137,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( !UtlCheckLongName( (PSZ) pszMemName ))
     {
       pszParm = (PSZ) pszMemName;
-      LogMessage3(ERROR, __func__,   "::ERROR_INV_LONGNAME::",pszParm);
+      LogMessage(T5ERROR, __func__,   "::ERROR_INV_LONGNAME::",pszParm);
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
@@ -145,15 +145,15 @@ LONG                lOptions                 // type of new Translation Memory
   // check if TM exists already
   if ( usRC == NO_ERROR )
   {
-    int logLevel = suppressLogging();
+    int logLevel = T5Logger::GetInstance()->suppressLogging();
     if ( pFactory->exists( NULL, pszMemName ) )
     {
-      desuppressLogging(logLevel);
+      T5Logger::GetInstance()->desuppressLogging(logLevel);
       PSZ pszParam = (PSZ)pszMemName;
-      LogMessage3(ERROR, __func__,  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: ", pszParam);
+      LogMessage(T5ERROR, __func__,  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: ", pszParam);
       usRC = ERROR_MEM_NAME_EXISTS;
     }
-    desuppressLogging(logLevel);
+    T5Logger::GetInstance()->desuppressLogging(logLevel);
   } /* endif */
 
 
@@ -164,7 +164,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( MorphGetLanguageID( (PSZ)pszSourceLanguage, &sID ) != MORPH_OK )
     {
       usRC = ERROR_PROPERTY_LANG_DATA;
-      //LogMessage7(ERROR, __func__,  ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
+      //LogMessage( T5ERROR, __func__,  ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,
       //              &((PSZ)pszSourceLanguage) );
     } /* endif */
   } /* endif */
@@ -183,7 +183,7 @@ LONG                lOptions                 // type of new Translation Memory
     }
     else
     {
-      LogMessage2(FATAL,__func__,  "MemFuncCreateMem supports only local_opt, rc = WRONG_OPTIONS_RC");
+      LogMessage(T5FATAL,__func__,  "MemFuncCreateMem supports only local_opt, rc = WRONG_OPTIONS_RC");
       usRC = WRONG_OPTIONS_RC;
     } /* endif */
   } /* endif */
@@ -201,20 +201,20 @@ LONG                lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      LogMessage1(FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
+      LogMessage(T5FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
       iRC = 2;
     }
     else
     {
-      LogMessage1(DEBUG, "MemFuncCreateMem():: use the default memory plugin");
+      LogMessage( T5DEBUG, "MemFuncCreateMem():: use the default memory plugin");
       strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
     }
 
-    LogMessage1(DEBUG, "MemFuncCreateMem():: create the memory");    
+    LogMessage( T5DEBUG, "MemFuncCreateMem():: create the memory");    
     pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage, &iRC );
     if ( pMemory == NULL )
     {
-      LogMessage1(ERROR, "MemFuncCreateMem()::pMemory == NULL");
+      LogMessage(T5ERROR, "MemFuncCreateMem()::pMemory == NULL");
       fOK = FALSE;
     } 
   } 
@@ -229,7 +229,7 @@ LONG                lOptions                 // type of new Translation Memory
   //--- Tm is created. Close it. 
   if ( pMemory != NULL )
   {
-    LogMessage1(INFO, "MemFuncCreateMem()::Tm is created. Close it");
+    LogMessage( T5INFO, "MemFuncCreateMem()::Tm is created. Close it");
     pFactory->closeMemory( pMemory );
     pMemory = NULL;
   }
@@ -237,7 +237,7 @@ LONG                lOptions                 // type of new Translation Memory
   if(usRC == 0){
     usRC = (!fOK);
   }
-  LogMessage2(INFO, "MemFuncCreateMem() done, usRC = ", toStr(usRC).c_str());
+  LogMessage( T5INFO, "MemFuncCreateMem() done, usRC = ", toStr(usRC).c_str());
   return( usRC );
 } /* end of function MemFuncCreateMem */
 

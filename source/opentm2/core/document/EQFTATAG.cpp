@@ -87,7 +87,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   {
     if ( fMsg )
     {
-      LogMessage7(ERROR, __func__,  "ERROR_INTERNAL", "MB_CANCEL", "0", "", "INTERNAL_ERROR", "hwnd" );
+      LogMessage( T5ERROR, __func__,  "ERROR_INTERNAL", "MB_CANCEL", "0", "", "INTERNAL_ERROR", "hwnd" );
     } /* endif */
     usRC = ERROR_INVALID_PARAMETER;
   } /* endif */
@@ -97,7 +97,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   /********************************************************************/
   if ( usRC == NO_ERROR )
   {
-    //LogMessage2(WARNING,__func__,"::TEMPORARY COMMENTED in TALoadTagTableExHwnd:: set user exit load flag if one of the exit functions is to be loaded");
+    //LogMessage( T5WARNING,__func__,"::TEMPORARY COMMENTED in TALoadTagTableExHwnd:: set user exit load flag if one of the exit functions is to be loaded");
 #ifdef TEMPORARY_COMMENTED
     // set user exit load flag if one of the exit functions is to be loaded
     if ( ulFlags & TALOADPROTTABLEFUNC )
@@ -209,7 +209,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       }
       else
       {
-        //LogMessage2(DEBUG,"TEMPORARY HARDCODED table name for ", pszTableName);
+        //LogMessage( T5DEBUG,"TEMPORARY HARDCODED table name for ", pszTableName);
         properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );
@@ -228,7 +228,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       //                  &ulBytesRead, FALSE, fMsg, hwnd ) )
       {
          usRC = ERROR_READ_FAULT;        // indicate tag table read error
-         LogMessage3(FATAL, __func__,":: can't load tag table file: ", szTagTableFileName);
+         LogMessage(T5FATAL, __func__,":: can't load tag table file: ", szTagTableFileName);
          throw;
       }
       else

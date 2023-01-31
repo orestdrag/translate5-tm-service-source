@@ -80,8 +80,8 @@ int properties_get_int_or_default(const char* key, int& value, const int default
     if(res != PROPERTY_NO_ERRORS){
         value = defaultValue;
         properties_add_int(key, defaultValue);
-        if(V_IS_ON(1)){
-            LogMessage4(DEVELOP, "Key ", key , " not saved yet -> saving default value : ", toStr(defaultValue).c_str());
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEVELOP, "Key ", key , " not saved yet -> saving default value : ", toStr(defaultValue).c_str());
         }
         return PROPERTY_USED_DEFAULT_VALUE;
     }
@@ -96,8 +96,8 @@ int properties_get_str_or_default(const char* key, char *buff, int buffSize, con
             strncpy(buff, defaultValue, buffSize);
         }
         properties_add_str(key, defaultValue);
-        if(V_IS_ON(2)){
-            LogMessage4(DEVELOP, "Key ", key , " not saved yet -> saving default value : ", defaultValue);
+        if(VLOG_IS_ON(2)){
+            LogMessage( T5DEVELOP, "Key ", key , " not saved yet -> saving default value : ", defaultValue);
         }
         return PROPERTY_USED_DEFAULT_VALUE;
     }
@@ -122,7 +122,7 @@ int properties_set_value(const char *key, int value) {
 int Properties::init() {
     //LOG_DEVELOP_MSG << "Properties::init()";
     
-    LogMessage1(DEVELOP, "Properties::init()");
+    LogMessage( T5DEVELOP, "Properties::init()");
     //errCode here can be not NO_ERROR, because properties files path not setuped yet, so it couldn't save data yet
     int errCode = init_home_dir_prop();
 
@@ -132,7 +132,7 @@ int Properties::init() {
     std::string otm_dir = home_dir + "/." + OTMMEMORYSERVICE;
 
     if (FilesystemHelper::DirExists(otm_dir) == false && FilesystemHelper::CreateDir(otm_dir)){
-        LogMessage2(FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
+        LogMessage(T5FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, otm_dir: ", otm_dir.c_str());
         throw;
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
     }
@@ -141,7 +141,7 @@ int Properties::init() {
     set_value(KEY_MEM_DIR, mem_dir);
         
     if (FilesystemHelper::DirExists(mem_dir) == false && FilesystemHelper::CreateDir(mem_dir)){
-        LogMessage2(FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, mem_dir: ", mem_dir.c_str());
+        LogMessage(T5FATAL, "PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY, mem_dir: ", mem_dir.c_str());
         throw;
         return PROPERTY_ERROR_FILE_CANT_CREATE_OTM_DIRECTORY;
         
@@ -149,13 +149,13 @@ int Properties::init() {
 
     std::string table_dir = otm_dir + "/TABLE/";
     if(FilesystemHelper::DirExists(table_dir) == false){
-        LogMessage3(FATAL, __func__,":: TABLE DIRECTORY IS NOT FOUND UNDER PATH: ", table_dir.c_str());
+        LogMessage(T5FATAL, __func__,":: TABLE DIRECTORY IS NOT FOUND UNDER PATH: ", table_dir.c_str());
         throw;
     }
     /*
     std::string plugin_dir = otm_dir + "/PLUGINS/";
     if(FilesystemHelper::CreateDir(plugin_dir)){
-        LogMessage2(ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR, plugin_dir: ", plugin_dir.c_str());
+        LogMessage(T5ERROR, "PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR, plugin_dir: ", plugin_dir.c_str());
         return PROPERTY_ERROR_FILE_CANT_CREATE_PLUGIN_DIR;
     }
     set_anyway(KEY_PLUGIN_DIR, plugin_dir);
@@ -164,22 +164,22 @@ int Properties::init() {
     filename_str = otm_dir + "/" + "Properties_str";
     filename_int = otm_dir +"/" + "Properties_int";
     if (read_all_data_from_file() == PROPERTY_ERROR_FILE_CANT_OPEN){
-        if(V_IS_ON(1)){
-            LogMessage5(INFO, "PROPERTY_ERROR_FILE_CANT_OPEN, filename_int: ", 
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5INFO, "PROPERTY_ERROR_FILE_CANT_OPEN, filename_int: ", 
             filename_int.c_str(), "; filename_str: ", filename_str.c_str(), ", try creating new");
         }
         if( errCode = create_properties_file()){
-            LogMessage2(ERROR, "Failed to create properties file, errCode = ", std::to_string(errCode).c_str());
+            LogMessage(T5ERROR, "Failed to create properties file, errCode = ", std::to_string(errCode).c_str());
         }
     }
-    if(V_IS_ON(2)){
-        LogMessage4(DEVELOP, "Properties::init done, filename_str = ",filename_str.c_str(), ", filename_int = ", filename_int.c_str() );
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::init done, filename_str = ",filename_str.c_str(), ", filename_int = ", filename_int.c_str() );
     }
     return PROPERTY_NO_ERRORS;
 }
 
 void Properties::deinit() {
-    LogMessage1(INFO, "Properties::deinit()");
+    LogMessage( T5INFO, "Properties::deinit()");
     //dataStr.clear();
     //dataInt.clear();
     fs.close();
@@ -190,62 +190,62 @@ int Properties::init_home_dir_prop(){
     if (!_home_dir || !strlen(_home_dir)){         
         struct passwd *pswd = getpwuid(getuid());        
         if (!pswd){
-            LogMessage1(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD");
+            LogMessage(T5ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD");
             return PROPERTY_ERROR_FILE_CANT_GET_USER_PSWD;
         }
         _home_dir = pswd->pw_dir;
         if (!strlen(_home_dir)){
-            LogMessage1(ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR");
+            LogMessage(T5ERROR, "Properties::init_home_dir_prop()::PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR");
             return PROPERTY_ERROR_FILE_CANT_GET_HOME_DIR;
         }
     }
-    if(V_IS_ON(2)){
-        LogMessage2(DEVELOP, "Properties::init_home_dir_prop() done, home_dir_path = ", _home_dir);
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::init_home_dir_prop() done, home_dir_path = ", _home_dir);
     }
     return set_anyway(KEY_HOME_DIR, _home_dir);
 }
 
 int Properties::add_key(const std::string& key, const std::string& value) {
     if (exist_string(key) == PROPERTY_NO_ERRORS){
-        if(V_IS_ON(2)){
-            LogMessage5(DEVELOP, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", value.c_str(),").  Key already exists");
+        if(VLOG_IS_ON(2)){
+            LogMessage( T5DEVELOP, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", value.c_str(),").  Key already exists");
         }
         return PROPERTY_ERROR_STR_KEY_ALREADY_EXISTS;
     }
     dataStr.insert({ key, value });
-    if(V_IS_ON(2)){
-        LogMessage5(DEVELOP, "Properties::add_key(",key.c_str(),", ", value.c_str(),") added successfully");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::add_key(",key.c_str(),", ", value.c_str(),") added successfully");
     }
     if (int writeDataReturn = update_strData_in_file(key))
         return writeDataReturn;
-    if(V_IS_ON(2)){
-        LogMessage5(DEVELOP, "Properties::add_key(",key.c_str(),", ", value.c_str(),") writed to file successfully");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::add_key(",key.c_str(),", ", value.c_str(),") writed to file successfully");
     }
     return PROPERTY_NO_ERRORS;
 }
 
 int Properties::add_key(const std::string& key, const int value) {
     if (exist_int(key) == PROPERTY_NO_ERRORS){
-        if(V_IS_ON(2)){
-            LogMessage5(DEVELOP, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", std::to_string(value).c_str(),").  Key already exists");
+        if(VLOG_IS_ON(2)){
+            LogMessage( T5DEVELOP, "Can't add key in Propertiest::addkey( Key :", key.c_str(), " with value: ", std::to_string(value).c_str(),").  Key already exists");
         }
         return PROPERTY_ERROR_INT_KEY_ALREADY_EXISTS;
     }
 
     dataInt.insert({ key, value });
-    if(V_IS_ON(2)){
-        LogMessage5(DEVELOP, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") added successfully");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") added successfully");
     }
     if (int writeDataReturn = update_strData_in_file(key)){
-        if(V_IS_ON(1)){
-            LogMessage6(INFO, "Properties::add_key(",key.c_str(),", ", 
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5INFO, "Properties::add_key(",key.c_str(),", ", 
                 std::to_string(value).c_str(),")::writeDataReturn() has error message:", 
                 std::to_string(writeDataReturn).c_str());
         }
         return writeDataReturn;
     }
-    if(V_IS_ON(2)){
-        LogMessage5(DEVELOP, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") writed to file successfully");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::add_key(",key.c_str(),", ", std::to_string(value).c_str(),") writed to file successfully");
     }
     return PROPERTY_NO_ERRORS;
 }
@@ -256,11 +256,11 @@ int Properties::set_value(const std::string& key, const std::string& value) {
     }
 
     dataStr[key] = value;
-    if(V_IS_ON(2)){
-        LogMessage5(DEVELOP, "Properties::set_value(",key.c_str(),", ", value.c_str(),") added successfully");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::set_value(",key.c_str(),", ", value.c_str(),") added successfully");
     }
     int writeDataReturn = update_strData_in_file(key);
-    LogMessage6(DEVELOP, "Properties::set_value(",key.c_str(),", ", value.c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
+    LogMessage( T5DEVELOP, "Properties::set_value(",key.c_str(),", ", value.c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
     return writeDataReturn;
 }
 
@@ -285,36 +285,36 @@ int Properties::set_value(const std::string& key, const int value) {
     }
 
     dataInt[key] = value;
-    LogMessage5(DEVELOP, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was added ");
+    LogMessage( T5DEVELOP, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was added ");
     int writeDataReturn = update_intData_in_file(key);
-    LogMessage6(DEVELOP, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
+    LogMessage( T5DEVELOP, "Properties::set_value(",key.c_str(),", ", toStr(value).c_str(),") was writed to file with ret code = ", toStr(writeDataReturn).c_str());
     return writeDataReturn;
 }
 
 int Properties::get_value(const std::string& key, std::string& value){
     if(int existRet = exist_string(key)){
-        LogMessage3(DEBUG, "Properties::get_value(", key.c_str(), ") not exists");
+        LogMessage( T5DEBUG, "Properties::get_value(", key.c_str(), ") not exists");
         return existRet;
     }
     value = dataStr.at(key);
-    LogMessage5(DEVELOP, "Properties::get_value(",key.c_str(),") = ", value.c_str(),";");
+    LogMessage( T5DEVELOP, "Properties::get_value(",key.c_str(),") = ", value.c_str(),";");
     return PROPERTY_NO_ERRORS;    
 }
 
 int Properties::get_value(const std::string& key, int& value){
     if(int existRet = exist_int(key)){
-        LogMessage3(DEVELOP, "Properties::get_value(", key.c_str(), ") not exists");
+        LogMessage( T5DEVELOP, "Properties::get_value(", key.c_str(), ") not exists");
         return existRet;
     }
     
     value = dataInt.at(key);
-    LogMessage5(DEVELOP, "Properties::get_value(",key.c_str(),", ", toStr(value).c_str(),")");
+    LogMessage( T5DEVELOP, "Properties::get_value(",key.c_str(),", ", toStr(value).c_str(),")");
     return PROPERTY_NO_ERRORS;    
 }
 
 bool Properties::set_write_to_file(const bool writeToFile){
     
-    LogMessage2(DEBUG, "set write to properties file ", std::to_string(writeToFile).c_str());
+    LogMessage( T5DEBUG, "set write to properties file ", std::to_string(writeToFile).c_str());
     fWriteToFile = writeToFile;
     if(fWriteToFile){
         write_all_data_to_file();
@@ -366,7 +366,7 @@ int Properties::exist_string(const std::string& key){
 
 int Properties::create_properties_file(){
 //    LOG_DEVELOP_MSG << "Properties::create_properties_file()";
-    LogMessage1(DEVELOP, "Properties::create_properties_file()");
+    LogMessage( T5DEVELOP, "Properties::create_properties_file()");
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ofstream::trunc);
     fs.close();
     fs.open(filename_int, std::ios::binary | std::ios::out | std::ofstream::trunc);
@@ -376,15 +376,15 @@ int Properties::create_properties_file(){
 
 int Properties::read_all_data_from_file() {
 //    LOG_DEVELOP_MSG << "Properties::read_all_data_from_file()";
-    LogMessage1(DEVELOP, "Properties::read_all_data_from_file()");
+    LogMessage( T5DEVELOP, "Properties::read_all_data_from_file()");
     std::string line;
     std::string::size_type n;
     const char delim = '=';
 
     fs.open(filename_str, std::ios::binary | std::ios::in);
     if (!fs.is_open() || fs.eof()){
-        if(CheckLogLevel(DEVELOP) && V_IS_ON(1)) 
-            LogMessage2(WARNING, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND, path = ", filename_str.c_str() );
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP) && VLOG_IS_ON(1)) 
+            LogMessage( T5WARNING, "Properties::read_all_data_from_file()::PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND, path = ", filename_str.c_str() );
         return PROPERTY_ERROR_FILE_STRINGPROPERTIES_NOT_FOUND;
     }
     //dataStr.clear();
@@ -400,7 +400,7 @@ int Properties::read_all_data_from_file() {
     fs.open(filename_int, std::ios::binary | std::ios::in);
 
     if (!fs.is_open() || fs.eof()){
-        if(V_IS_ON(2))
+        if(VLOG_IS_ON(2))
         return PROPERTY_ERROR_FILE_INTPROPERTIES_NOT_FOUND;
     }
 
@@ -422,15 +422,15 @@ int Properties::write_all_data_to_file() {
     if(!fWriteToFile)
     #endif
     {
-        if( V_IS_ON(1) ){
-            LogMessage1(DEBUG, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
+        if( VLOG_IS_ON(1) ){
+            LogMessage( T5DEBUG, "Properties::write_all_data_to_file()::PROPERTY_WRITING_TURNED_OFF");
         }
         return PROPERTY_WRITING_TURNED_OFF;
     }
 
     fs.open(filename_str, std::ios::binary | std::ios::out | std::ios::trunc);
     if (!fs.is_open()){
-        //if( V_IS_ON(1) )
+        //if( VLOG_IS_ON(1) )
         return PROPERTY_ERROR_FILE_CANT_OPEN;
     }
 
@@ -461,8 +461,8 @@ int Properties::update_intData_from_file(const std::string& key){
         }
     }
 
-    if(V_IS_ON(2)){
-       LogMessage3(DEVELOP, "Properties::update_intData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
+    if(VLOG_IS_ON(2)){
+       LogMessage( T5DEVELOP, "Properties::update_intData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
     }
     return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
@@ -480,24 +480,24 @@ int Properties::update_strData_from_file(const std::string& key){
             return PROPERTY_NO_ERRORS;
         }
     }
-    if(V_IS_ON(2)){
-        LogMessage3(DEVELOP, "Properties::update_strData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::update_strData_from_file( ", key.c_str(), " )::PROPERTY_ERROR_FILE_KEY_NOT_FOUND");
     }
     return PROPERTY_ERROR_FILE_KEY_NOT_FOUND;
 }
 
 int Properties::update_intData_in_file(const std::string& key){
     //TODO rewrite to update only needed data in file
-    if(V_IS_ON(2)){
-        LogMessage3(DEVELOP, "Properties::update_intData_in_file( ", key.c_str(), " )");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::update_intData_in_file( ", key.c_str(), " )");
     }
     read_all_data_from_file();
     return write_all_data_to_file();
 }
     
 int Properties::update_strData_in_file(const std::string& key){
-    if(V_IS_ON(2)){
-        LogMessage3(DEVELOP, "Properties::update_strData_in_file( ", key.c_str(), " )");
+    if(VLOG_IS_ON(2)){
+        LogMessage( T5DEVELOP, "Properties::update_strData_in_file( ", key.c_str(), " )");
     }
     read_all_data_from_file();
     return write_all_data_to_file();

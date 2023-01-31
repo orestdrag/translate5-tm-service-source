@@ -303,15 +303,15 @@ int EqfMemory::putProposal
 
   this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
 
-  if(CheckLogLevel(INFO)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
     std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
-    LogMessage2(INFO,"EqfMemory::putProposal, source = ", source.c_str());
+    LogMessage( T5INFO,"EqfMemory::putProposal, source = ", source.c_str());
   }
 
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
 
   if ( iRC != 0 ){
-      LogMessage2(ERROR, "EqfMemory::putProposal result = ", toStr(iRC).c_str());   
+      LogMessage(T5ERROR, "EqfMemory::putProposal result = ", toStr(iRC).c_str());   
       //handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
   }
 
@@ -692,15 +692,15 @@ int EqfMemory::searchProposal
   this->pTmGetIn->stTmGet.ulParm = ulOptions;
   this->pTmGetIn->stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
 
-  if(CheckLogLevel(DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     auto str = EncodingHelper::convertToUTF8(this->pTmGetIn->stTmGet.szSource);
-    LogMessage2(DEBUG,"EqfMemory::searchProposal::*** method: searchProposal, looking for ",  str.c_str());
+    LogMessage( T5DEBUG,"EqfMemory::searchProposal::*** method: searchProposal, looking for ",  str.c_str());
   } 
   iRC = (int)TmGetW ( this->htm,  NULL,  this->pTmGetIn,  this->pTmGetOut, FALSE );
 
   if ( iRC == 0 )
   {
-    LogMessage3(DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",toStr(this->pTmGetOut->usNumMatchesFound).c_str()," proposals"   );
+    LogMessage( T5DEBUG,"EqfMemory::searchProposal::   lookup complete, found ",toStr(this->pTmGetOut->usNumMatchesFound).c_str()," proposals"   );
     wchar_t szRequestedString[2049];
     SearchKey.getSource( szRequestedString, sizeof(szRequestedString) );
 
@@ -712,9 +712,9 @@ int EqfMemory::searchProposal
       }
       else
       {
-        if(CheckLogLevel(DEBUG)){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
           auto strSource = EncodingHelper::convertToUTF8(pTmGetOut->stMatchTable[i].szSource );
-          LogMessage6(DEBUG,"EqfMemory::searchProposal::   proposal ",toStr(i).c_str(),": match=",toStr(pTmGetOut->stMatchTable[i].usMatchLevel).c_str(),", source=", strSource.c_str() );
+          LogMessage( T5DEBUG,"EqfMemory::searchProposal::   proposal ",toStr(i).c_str(),": match=",toStr(pTmGetOut->stMatchTable[i].usMatchLevel).c_str(),", source=", strSource.c_str() );
         }
         //replace tags for proposal
         auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetOut->stMatchTable[i].szSource, 
@@ -738,7 +738,7 @@ int EqfMemory::searchProposal
   }
   else
   {
-    LogMessage2(DEBUG,"EqfMemory::searchProposal::  lookup failed, rc=", toStr(iRC).c_str() );
+    LogMessage( T5DEBUG,"EqfMemory::searchProposal::  lookup failed, rc=", toStr(iRC).c_str() );
   } /* end */     
 
   if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmGetIn->stTmGet.szTagTable );
@@ -817,7 +817,7 @@ C_TmDeleteSegmentW(HTM            htm,
   }else if ( usRc ){
     if(usMsgHandling)
       usRc = MemRcHandling( usRc, szMemPath, &htm, NULL );
-    LogMessage3(ERROR,__func__, ":: returned error code, rc = ", toStr(usRc));
+    LogMessage(T5ERROR,__func__, ":: returned error code, rc = ", toStr(usRc));
   }
 
   return usRc;
@@ -910,7 +910,7 @@ unsigned long EqfMemory::getProposalNum()
 
   ULONG ulStartKey = 0;
   ULONG ulNextKey = 0;
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);");
 #ifdef TEMPORARY_COMMENTED
   EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
 #endif //TEMPORARY_COMMENTED

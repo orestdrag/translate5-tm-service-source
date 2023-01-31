@@ -71,14 +71,14 @@ std::string FilesystemHelper::FixPath(std::string& path){
 
 FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& mode){
     const char* cpath = path.c_str();
-    //LogMessage2(WARNING,"TEMPORARY HARDCODED useBuffer= true in FilesystemHelper::CreateFile, fName = ", cpath);
+    //LogMessage( T5WARNING,"TEMPORARY HARDCODED useBuffer= true in FilesystemHelper::CreateFile, fName = ", cpath);
     bool useBuffer = false ;//true; //false;
     if(    (strcasestr(cpath, ".TMI") )
         || (strcasestr(cpath, ".TMD") )
         //|| (strcasestr(cpath, ".MEM") )
     ){
-        if(V_IS_ON(1)){
-            LogMessage4(INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
                         cpath, ", useFilebuffer before = ", toStr(useBuffer).c_str());
         }
         useBuffer = true;
@@ -94,11 +94,11 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
     //fOk = rename(fixedOldPath.c_str(), fixedNewPath.c_str()) != -1;
     //Copy file instead
     if(FileExists(newPath.c_str())){
-        LogMessage4(ERROR, __func__, ":: trg file \'", newPath.c_str(), "\' already exists!");
+        LogMessage(T5ERROR, __func__, ":: trg file \'", newPath.c_str(), "\' already exists!");
         return FILE_EXISTS;
     }
     if(FileExists(oldPath.c_str()) == false){
-        LogMessage4(ERROR, __func__, ":: src file \'", oldPath.c_str(), "\' is missing!");
+        LogMessage(T5ERROR, __func__, ":: src file \'", oldPath.c_str(), "\' is missing!");
         return FILE_NOT_EXISTS;
     }
     
@@ -107,12 +107,12 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
         std::ofstream ofs(newPath, std::ios::out | std::ios::binary);
         if(!ofs)
         {
-            LogMessage4(ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
+            LogMessage(T5ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
             return FILEHELPER_ERROR_CANT_OPEN_DIR;
         } 
         if(!ifs)
         {
-            LogMessage5(ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
+            LogMessage(T5ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
             return FILEHELPER_ERROR_CANT_OPEN_DIR;;
         } 
         ofs << ifs.rdbuf();
@@ -122,11 +122,11 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
     //remove(oldPath);
     
     if(!fOk){
-       LogMessage6(ERROR, "MoveFile:: cannot move ", fixedOldPath.c_str()," to ", fixedNewPath.c_str(), ", error = ", strerror(errno));
+       LogMessage(T5ERROR, "MoveFile:: cannot move ", fixedOldPath.c_str()," to ", fixedNewPath.c_str(), ", error = ", strerror(errno));
        return errno;
     }else{
-        if(V_IS_ON(1)){
-            LogMessage4(INFO,"MoveFile:: file moved from ", fixedOldPath.c_str()," to ", fixedNewPath.c_str());
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5INFO,"MoveFile:: file moved from ", fixedOldPath.c_str()," to ", fixedNewPath.c_str());
         }
     }
     return 0;
@@ -137,20 +137,20 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
     fixedPath = FixPath(fixedPath);
     long fileSize = 0;
     FileBuffer* pFb = NULL;
-    if(V_IS_ON(1)){
-        LogMessage6(DEBUG, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", toStr(useBuffer).c_str());
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5DEBUG, "FilesystemHelper::OpenFile, path =", path.c_str(), ", mode = ", mode.c_str(), ", useBuffer = ", toStr(useBuffer).c_str());
     }
     FILE *ptr = fopen(fixedPath.c_str(), mode.c_str());
     if(!ptr){
-        LogMessage2(ERROR, "FilesystemHelper::OpenFile:: can't open file ", path.c_str());
+        LogMessage(T5ERROR, "FilesystemHelper::OpenFile:: can't open file ", path.c_str());
     }else if(useBuffer){
         if(!FindFiles(fixedPath).empty()){
             fileSize = GetFileSize(ptr);//GetFileSize(fixedPath);
         }
 
         if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
-            //if(V_IS_ON(1)){
-                LogMessage2(WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
+            //if(VLOG_IS_ON(1)){
+                LogMessage( T5WARNING, "OpenFile::Filebuffer wasn't created, it's already exists for ", fixedPath.c_str());
             //}
             pFb = &(*getFileBufferInstance())[fixedPath];
             pFb->offset = 0;
@@ -159,22 +159,22 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
                 
-                if(V_IS_ON(1)){
-                    LogMessage4(INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
+                if(VLOG_IS_ON(1)){
+                    LogMessage( T5INFO, "OpenFile:: file size >0  -> Filebuffer resized to filesize(",toStr(fileSize).c_str(),"), fname = ", fixedPath.c_str());
                 }
                 int readed = fread(&pFb->data[0], fileSize, 1, ptr);
-                if(V_IS_ON(1)){
-                    LogMessage6(INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",toStr(fileSize).c_str(),
+                if(VLOG_IS_ON(1)){
+                    LogMessage( T5INFO, "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = ",toStr(fileSize).c_str(),
                             "), fname = ", fixedPath.c_str(), "; readed = ", toStr(readed).c_str());
                 }
             }else{
-                if(V_IS_ON(1)){
-                    LogMessage2(INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath.c_str());
+                if(VLOG_IS_ON(1)){
+                    LogMessage( T5INFO, "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = ", fixedPath.c_str());
                 }
                 pFb->data.resize(16384);
             }
-            if(V_IS_ON(1)){
-                LogMessage4(INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", toStr(pFb->data.size()).c_str());
+            if(VLOG_IS_ON(1)){
+                LogMessage( T5INFO, "OpenFile::Filebuffer created for file ", fixedPath.c_str(), " with size = ", toStr(pFb->data.size()).c_str());
             }
             //pFb->status = FileBufferStatus::OPEN;
         }
@@ -182,8 +182,8 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         pFb->offset = 0;
     }
 
-    if(V_IS_ON(1)){
-        LogMessage8(DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", toStr((long int)ptr).c_str(),
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5DEBUG, "FilesystemHelper::OpenFile():: path = ", fixedPath.c_str(), "; mode = ", mode.c_str(), "; ptr = ", toStr((long int)ptr).c_str(),
              "size = ", toStr(fileSize).c_str());
     }
     if(ptr == NULL){
@@ -205,7 +205,7 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
 
         return filename;
     }else{
-        LogMessage1(ERROR,"FilesystemHelper::GetFileName:: file ptr is null");
+        LogMessage(T5ERROR,"FilesystemHelper::GetFileName:: file ptr is null");
         return "";
     }
 }
@@ -213,7 +213,7 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
 DECLARE_bool(forbiddeletefiles);
 int FilesystemHelper::DeleteFile(const std::string& path){
     if(FLAGS_forbiddeletefiles){
-        LogMessage3(WARNING, __func__,":: file deletion is forbidden, service tried to delete this file: ", path.c_str());
+        LogMessage( T5WARNING, __func__,":: file deletion is forbidden, service tried to delete this file: ", path.c_str());
         return FILEHELPER_NO_ERROR;
     }
     std::string fixedPath = path;
@@ -221,11 +221,11 @@ int FilesystemHelper::DeleteFile(const std::string& path){
     fixedPath = "\'" + FixPath(fixedPath) + "\'";
 
     if(int errCode = remove(path.c_str())){
-        LogMessage4(ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
+        LogMessage(T5ERROR, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         return errCode;
     }else{
-        if(V_IS_ON(1)){
-            LogMessage3(DEBUG, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEBUG, "FilesystemHelper::DeleteFile(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
         }
         return FILEHELPER_NO_ERROR;
     }
@@ -237,8 +237,8 @@ bool FilesystemHelper::FileExists(std::string&& path){
     fixedPath = FixPath(fixedPath);
     struct stat buffer;   
     bool exists = (stat (fixedPath.c_str(), &buffer) == 0); 
-    if(V_IS_ON(1)){
-        LogMessage5(INFO, __func__, ":: file \'", fixedPath.c_str(),"\' returned ", toStr(exists));
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5INFO, __func__, ":: file \'", fixedPath.c_str(),"\' returned ", toStr(exists));
     }
     return exists;
 }
@@ -270,13 +270,13 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     command += '\'' + fixedPath + '\'';
     
     if(int errCode = system(command.c_str()) ){
-        if(CheckLogLevel(DEBUG) && V_IS_ON(1)){
-            LogMessage4(ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) && VLOG_IS_ON(1)){
+            LogMessage(T5ERROR, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") ERROR res = ", toStr(errCode).c_str());
         }
         return errCode;
     }else{
-        if(V_IS_ON(1)){
-            LogMessage3(DEBUG, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEBUG, "FilesystemHelper::RemoveDirWithFiles(",fixedPath.c_str() , ") res = FILEHELPER_NO_ERROR");
         }
         return FILEHELPER_NO_ERROR;
     }
@@ -302,8 +302,8 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
 
         pFb->status |= MODIFIED;
         if(offset + buffSize > pFb->data.size()){
-            if(V_IS_ON(1)){
-                LogMessage6(DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", toStr(pFb->data.size()).c_str(),
+            if(VLOG_IS_ON(1)){
+                LogMessage( T5DEBUG, "FilesystemHelper::WriteToBuffer::Resizing file ", fName.c_str()," from ", toStr(pFb->data.size()).c_str(),
                     " to ", toStr(offset+buffSize).c_str());
             }
             pFb->data.resize(offset + buffSize);
@@ -313,11 +313,11 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         memcpy(pStPos, buff, buffSize);
         pFb->offset += buffSize;
     }else{
-        LogMessage2(ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
+        LogMessage(T5ERROR, "FilesystemHelper::WriteToBuffer:: can't find buffer for file ", fName.c_str());
         return -1;
     }
-    if(V_IS_ON(1)){
-        LogMessage4(DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", toStr(buffSize).c_str()," bytes written to buffer for ", fName.c_str());
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5DEBUG, "FilesystemHelper::WriteToBuffer:: success, ", toStr(buffSize).c_str()," bytes written to buffer for ", fName.c_str());
     }
     return 0;
 }
@@ -328,8 +328,8 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     FileBuffer* pFb = NULL;
 
     if(getFileBufferInstance()->find(fName) == getFileBufferInstance()->end()){
-        if(V_IS_ON(1)){
-            LogMessage2(DEVELOP,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEVELOP,"ReadBuffer:: file not found in buffers, fName = ", fName.c_str());
         }
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
@@ -339,23 +339,23 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
     }
 
     if(pFb->data.size()< offset + buffSize){
-        if(CheckLogLevel(DEVELOP)){
-            LogMessage2(ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+            LogMessage(T5ERROR,"ReadBuffer:: Trying to read not existing bytes from buffer, fName = ", fName.c_str());
         }
         return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     }
     PUCHAR p = &(pFb->data[offset]);
     //
-    if(V_IS_ON(1) && CheckLogLevel(DEVELOP)){
+    if(VLOG_IS_ON(1) && T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
         std::string msg = std::string(__func__) + ":: fName = " + fName + "; buff size = " + toStr(buffSize) + "; data.size = " + toStr(pFb->data.size()) + "; offset = "+ toStr(offset) + ";";
-        LogMessage1(DEVELOP, msg.c_str());
+        LogMessage( T5DEVELOP, msg.c_str());
         //LOG_DEVELOP_MSG << msg;
     }
     //
     memcpy(buff, p, buffSize);
     bytesRead = buffSize;
-    if(V_IS_ON(1)){
-        LogMessage6(DEBUG, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5DEBUG, "ReadBuffer::", toStr(buffSize).c_str()," bytes read from buffer to ", fName.c_str(), " starting from ", toStr(offset).c_str() );
     }
     return 0;
 }
@@ -364,14 +364,14 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
     auto pFBs = getFileBufferInstance();
     if(pFBs->find(fName)!= pFBs->end()){
         WriteBuffToFile(fName);
-        //LogMessage2(ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
+        //LogMessage(T5ERROR, "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
         //(*getFileBufferInstance())[fName].file = nullptr;
         //(*getFileBufferInstance())[fName].offset = 0;
         (*pFBs)[fName].status &= ~MODIFIED;// reset modified flag
         //pFBs->erase(fName);
     }else{
-        if(V_IS_ON(1)){
-            LogMessage2(INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5INFO,"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = ", fName.c_str());
         }
     }
     return 0;
@@ -384,8 +384,8 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
         pFb = &(*pFBs)[fName];
 
         if(pFb->status & FileBufferStatus::MODIFIED){
-            if(V_IS_ON(1)){
-                LogMessage1(INFO, "WriteBuffToFile:: writing files from buffer");
+            if(VLOG_IS_ON(1)){
+                LogMessage( T5INFO, "WriteBuffToFile:: writing files from buffer");
             }
             PUCHAR bufStart = &pFb->data[0];
             int size = pFb->data.size();
@@ -394,12 +394,12 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
             WriteToFile(ptr, bufStart, size);
             fclose(ptr);
         }else{
-            if(V_IS_ON(1)){
-                LogMessage2(INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
+            if(VLOG_IS_ON(1)){
+                LogMessage( T5INFO,"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = ", fName.c_str());
             }
         }
     }else{
-        LogMessage2(ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
+        LogMessage(T5ERROR,"WriteBuffToFile:: buffer not found, fName = ", fName.c_str());
     }    
     return 0;
 }
@@ -440,13 +440,13 @@ int FilesystemHelper::FlushAllBuffers(std::string * modifiedFiles){
 }
 
 int FilesystemHelper::CloseFile(FILE*& ptr){
-    if(V_IS_ON(1)){
-        LogMessage1(DEBUG, "called FilesystemHelper::CloseFile()");
+    if(VLOG_IS_ON(1)){
+        LogMessage( T5DEBUG, "called FilesystemHelper::CloseFile()");
     }
     if(ptr){
         std::string fName = GetFileName(ptr);
-        if(V_IS_ON(1)){
-            LogMessage4(DEBUG, "FilesystemHelper::CloseFile(", toStr((long int) ptr).c_str() , "), fName = ", fName.c_str() );
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEBUG, "FilesystemHelper::CloseFile(", toStr((long int) ptr).c_str() , "), fName = ", fName.c_str() );
         }
         fclose(ptr);
         FlushBufferIntoFile(fName);
@@ -472,12 +472,12 @@ int FilesystemHelper::CloseFileBuffer(const std::string& path){
 //std::vector<std::string> selFiles;
 int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
-    LogMessage3(FATAL,__func__, ":: called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
+    LogMessage(T5FATAL,__func__, ":: called not implemented function FilesystemHelper::FindFirstFile(), fName = ", name.c_str());
 #ifdef TEMPORARY_COMMENTED
     auto files = FindFiles(name);
     if(selFiles.empty()){
 
-        LogMessage3(INFO, "FilesystemHelper::FindFiles(",name.c_str() , ") - files not found");
+        LogMessage( T5INFO, "FilesystemHelper::FindFiles(",name.c_str() , ") - files not found");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
     }
@@ -490,17 +490,17 @@ FILE* FilesystemHelper::FindFirstFile(const std::string& name){
 }
 
 FILE* FilesystemHelper::FindNextFile(){
-    LogMessage2(FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
+    LogMessage(T5FATAL, __func__, ":: called not implemented function FilesystemHelper::FindNextFile()");
 #ifdef TEMPORARY_COMMENTED
     if(selFiles.empty()){
-        LogMessage1(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
+        LogMessage( T5INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_ERROR_NO_FILES_FOUND");
         __last_error_code == FILEHELPER_ERROR_NO_FILES_FOUND;
         return NULL;
     }
 
     curSelFile++;
     if(curSelFile >= selFiles.size()){    
-        LogMessage1(INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
+        LogMessage( T5INFO, "FilesystemHelper::FindNextFile()::FILEHELPER_END_FILELIST");    
         __last_error_code == FILEHELPER_END_FILELIST;
         return NULL;
     }
@@ -520,11 +520,11 @@ std::vector<std::string> FilesystemHelper::GetFilesList(std::string&& directory)
         }
         closedir (dir);
     } else {
-        LogMessage3(ERROR,__func__,":: can't open dir, path = ", directory.c_str());
+        LogMessage(T5ERROR,__func__,":: can't open dir, path = ", directory.c_str());
         return {};
     }
-    if(V_IS_ON(1)){    
-        LogMessage5(INFO,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
+    if(VLOG_IS_ON(1)){    
+        LogMessage( T5INFO,__func__,":: returned ",toStr(files.size())," files,  path = ", directory.c_str());
     }
 return files;
 }
@@ -564,7 +564,7 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
         __last_error_code = FILEHELPER_NO_ERROR;
         closedir (dir);
     } else {      
-        LogMessage3(ERROR, "FilesystemHelper::FindFiles:: dir = ",dirPath.c_str() , "; can't open directory");
+        LogMessage(T5ERROR, "FilesystemHelper::FindFiles:: dir = ",dirPath.c_str() , "; can't open directory");
         __last_error_code = FILEHELPER_ERROR_CANT_OPEN_DIR;
     }
 
@@ -577,7 +577,7 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
     fixedPath = FixPath(fixedPath);
     FILE *ptr = OpenFile(fixedPath, "wb");
     int oldSize = 0;
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         oldSize = GetFileSize(ptr);
     }
     int errCode = WriteToFile(ptr, buff, buffsize);
@@ -585,10 +585,10 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
         CloseFile(ptr);
     //}
     /*
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         std::string msg = "FilesystemHelper::WriteToFile" + " buff = " + buff;
         msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + path;
-        LogMessage1(DEBUG, msg.c_str());
+        LogMessage( T5DEBUG, msg.c_str());
     }//*/
     return __last_error_code = errCode;
 }
@@ -602,28 +602,28 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
     std::string fName = GetFileName(ptr);
 
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
-        if(V_IS_ON(1)){
-            LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to filebuffer ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());
         }
         WriteToBuffer(ptr, buff, buffSize, startingPosition);
         iBytesWritten = buffSize;
     }else{
-        if(V_IS_ON(1)){
-            LogMessage4(DEBUG, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
+        if(VLOG_IS_ON(1)){
+            LogMessage( T5DEBUG, "File is not opened in filebuffers-> writting to file, fName = ", fName.c_str(), ", fId = ", toStr((long)ptr).c_str());
 
-            LogMessage6(DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
+            LogMessage( T5DEBUG,"Writing ", toStr(buffSize).c_str(), " bytes to file ", fName.c_str(),
             " starting from position ", toStr(startingPosition).c_str());
         }
         #ifndef TEMPORARY_HARDCODED
-        if(CheckLogLevel(DEBUG)){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
             std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\n";
             for (auto it = getFileBufferInstance()->begin(); it != getFileBufferInstance()->end(); ++it)
             {
                 filesInBuf += it->first + '\n';
             }
-            if(V_IS_ON(1)){
-                LogMessage1(DEBUG, filesInBuf.c_str());
+            if(VLOG_IS_ON(1)){
+                LogMessage( T5DEBUG, filesInBuf.c_str());
             }
         }
 
@@ -649,24 +649,24 @@ int FilesystemHelper::SetOffsetInFilebuffer(FILE* ptr,int offset){
 
             pFb = &(*getFileBufferInstance())[fName]; 
             if(offset <= fSize){       
-                LogMessage4(DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", 
+                LogMessage( T5DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> changing offset from ", 
                     toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str());
                 pFb->offset = offset;
             }else{
-                LogMessage6(WARNING, "FilesystemHelper::SetOffsetInFilebuffer -> can't change offset from ", 
+                LogMessage( T5WARNING, "FilesystemHelper::SetOffsetInFilebuffer -> can't change offset from ", 
                         toStr(pFb->offset).c_str(), " to ", toStr(offset).c_str(), " because it's bigger than size:", toStr(fSize).c_str());
             }
         }else{
-            LogMessage2(DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
+            LogMessage( T5DEBUG, "FilesystemHelper::SetOffsetInFilebuffer -> filebuffer not found, fName = ", fName.c_str());
         }
     }else{
-        LogMessage1(ERROR, "FilesystemHelper::SetOffsetInFilebuffer -> file pointer is null");
+        LogMessage(T5ERROR, "FilesystemHelper::SetOffsetInFilebuffer -> file pointer is null");
     }
 }
 
 
 int FilesystemHelper::TruncateFileForBytes(HFILE ptr, int numOfBytes){
-    LogMessage4(INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", toStr(numOfBytes).c_str());
+    LogMessage( T5INFO, "Try to truncate file ", FilesystemHelper::GetFileName(ptr).c_str(), " for ", toStr(numOfBytes).c_str());
     off_t lDistance = numOfBytes;
     int retCode = ftruncate(fileno(ptr), lDistance);
     return retCode;
@@ -676,7 +676,7 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
 {
     DWORD ret = 0 ;
 
-    LogMessage6(INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ",
+    LogMessage( T5INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ",
              toStr(LoPart).c_str(), ", direction is ", toStr(OffSet).c_str());
     //loff_t res ; //It is also LONGLONG variable.
     LONGLONG res ; //It is also LONGLONG variable. LONG is long :)
@@ -690,16 +690,16 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
     else if(OffSet == FILE_END)
         whence = SEEK_END ;
     else
-        LogMessage1(FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
+        LogMessage(T5FATAL, "SetFilePointerEx::WRONG dwMoveMethod");
 
     if(OffSet != FILE_BEGIN){           
-        LogMessage1(WARNING, "SetFilePointerEx::FILE_CURRENT/FILE_END not implemented/tested");
+        LogMessage( T5WARNING, "SetFilePointerEx::FILE_CURRENT/FILE_END not implemented/tested");
     }
     
     int size = FilesystemHelper::GetFileSize(fp);
     if(size < LoPart){
-        if(CheckLogLevel(DEBUG))
-            LogMessage2(WARNING, "SetFilePointer::File is smaller than requested position -> writing, fname = ", 
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
+            LogMessage( T5WARNING, "SetFilePointer::File is smaller than requested position -> writing, fname = ", 
                 FilesystemHelper::GetFileName(fp).c_str());
         TruncateFileForBytes(fp, LoPart);
     }
@@ -718,28 +718,28 @@ short FilesystemHelper::SetFileCursor(HFILE fp,long LoPart,long& HiPart,short Of
         int k = errno ;
         switch(errno){
         case EBADF : 
-            LogMessage2(ERROR, "fd is not an open file descriptor. fname = ", ""
+            LogMessage(T5ERROR, "fd is not an open file descriptor. fname = ", ""
             //FilesystemHelper::GetFileName(fp).c_str()
             ) ;
             break ;
         case EFAULT : 
-            LogMessage2(ERROR,"Problem with copying results to user space, fname =  ", ""
+            LogMessage(T5ERROR,"Problem with copying results to user space, fname =  ", ""
             //FilesystemHelper::GetFileName(fp).c_str() 
             ) ;
             break ;
         case EINVAL : 
-            LogMessage2(ERROR,"cw whence is invalid, fname = ", ""
+            LogMessage(T5ERROR,"cw whence is invalid, fname = ", ""
             //FilesystemHelper::GetFileName(fp).c_str() 
             ) ;
             break ;
         default:
-            LogMessage2(ERROR," default, fname = ", "" 
+            LogMessage(T5ERROR," default, fname = ", "" 
             //FilesystemHelper::GetFileName(fp).c_str() 
             );
         }
 
     }
-    LogMessage2(INFO,"SetFilePointer success, file = ", FilesystemHelper::GetFileName(fp).c_str());
+    LogMessage( T5INFO,"SetFilePointer success, file = ", FilesystemHelper::GetFileName(fp).c_str());
     return ret ;
 }
 
@@ -753,24 +753,24 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
     int errCode = FILEHELPER_NO_ERROR;
     int writenBytes = buffsize;
     int oldSize = 0;
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         oldSize = GetFileSize(ptr);
     }
     if(ptr == NULL){
-        LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage(T5ERROR,"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL");
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{ 
         writenBytes *= fwrite(buff, buffsize, 1, ptr);
         if ( writenBytes <=0 ){
-            LogMessage1(ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
+            LogMessage(T5ERROR,"FilesystemHelper::WriteToFile():: ERROR_WRITE_FAULT");
             __last_error_code = errCode = ERROR_WRITE_FAULT;
         }
     }
-    if(CheckLogLevel(DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         std::string msg = "FilesystemHelper::WriteToFile(" + std::to_string((long int) ptr) + ") buff = " + "void";
         msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + GetFileName(ptr);
         msg += ", file size = " + std::to_string(GetFileSize(ptr)) +", oldSize = " + std::to_string(oldSize);
-        LogMessage1(DEBUG, msg.c_str());
+        LogMessage( T5DEBUG, msg.c_str());
     }
     //CloseFile(ptr);
     //return __last_error_code = errCode;
@@ -781,7 +781,7 @@ int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& 
     int err = 0, size = 0;
     err = ReadBuffer(ptr, buff, buffSize, bytesRead, startingPos);
     if(err == FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED){
-        LogMessage2(INFO, "File not found in buffers -> reading from disk, fName = ", GetFileName(ptr).c_str());
+        LogMessage( T5INFO, "File not found in buffers -> reading from disk, fName = ", GetFileName(ptr).c_str());
 
         if((size = GetFileSize(ptr)) < startingPos+buffSize){
             err = FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
@@ -809,15 +809,15 @@ int FilesystemHelper::ReadFile(const std::string& path, char* buff,
 int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
-        LogMessage1(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage(T5ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
         if(!bytesRead){
-            LogMessage2(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str());
+            LogMessage( T5WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str());
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
-            LogMessage4(DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str(), "; data = ", buff);
+            LogMessage( T5DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str(), "; data = ", buff);
         }
     }
     return __last_error_code = errCode;
@@ -828,17 +828,17 @@ int FilesystemHelper::ReadFile(FILE*& ptr, char* buff, const int buffSize, int& 
 int FilesystemHelper::ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead){
     int errCode = FILEHELPER_NO_ERROR;
     if(!ptr){
-        LogMessage1(ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
+        LogMessage(T5ERROR,"FilesystemHelper::ReadFile():: FILEHELPER_FILE_PTR_IS_NULL");
         errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }else{
         bytesRead = fread(buff, buffSize, 1, ptr);
         if(!bytesRead){
-            LogMessage4(WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str(), 
+            LogMessage( T5WARNING, "FilesystemHelper::ReadFile():: bytes not readed from ", toStr((long int)ptr).c_str(), 
                     ", path = ", GetFileName(ptr).c_str());
             errCode = FILEHELPER_ERROR_FILE_NOT_READ;
         }else{
             bytesRead = buffSize;
-            LogMessage2(DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str()/*, "; data = ", (char*)buff*/);
+            LogMessage( T5DEBUG, "FilesystemHelper::ReadFile():: readed ", toStr(bytesRead).c_str()/*, "; data = ", (char*)buff*/);
         }
     }
     return __last_error_code = errCode;
@@ -850,28 +850,28 @@ int FilesystemHelper::ReadFileBuff(FILE*& ptr, void* buff, const int buffSize, i
     int offset = startingPosition;
     FileBuffer* pFb = NULL;
     if(!ptr){
-        LogMessage1(ERROR, "FilesystemHelper::ReadFile File pointer is null");
+        LogMessage(T5ERROR, "FilesystemHelper::ReadFile File pointer is null");
         return __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;
     }
     std::string fName = GetFileName(ptr);
     if(getFileBufferInstance()->find(fName) != getFileBufferInstance()->end()){
         pFb = &(*getFileBufferInstance())[fName];
         if(offset < 0){
-            LogMessage4(DEBUG, "FilesystemHelper::ReadFileBuff::  offset[", toStr(offset),"] is less than 0 ->  using pFb->offset", toStr(pFb->offset));
+            LogMessage( T5DEBUG, "FilesystemHelper::ReadFileBuff::  offset[", toStr(offset),"] is less than 0 ->  using pFb->offset", toStr(pFb->offset));
             offset = pFb->offset; 
         }
         if(offset + buffSize <= pFb->data.size()){
             memcpy(buff, &(pFb->data[offset]), buffSize);
             bytesRead = buffSize;
             pFb->offset += bytesRead; 
-            LogMessage6(DEBUG, "FilesystemHelper::ReadFileBuff:: success, fName = ", fName.c_str(), "; offset = ", toStr(offset), "; bytesRead = ", toStr(bytesRead));
+            LogMessage( T5DEBUG, "FilesystemHelper::ReadFileBuff:: success, fName = ", fName.c_str(), "; offset = ", toStr(offset), "; bytesRead = ", toStr(bytesRead));
         }else{ 
-            LogMessage1(ERROR, "FilesystemHelper::ReadFileBuff:: requested file position not exists");
+            LogMessage(T5ERROR, "FilesystemHelper::ReadFileBuff:: requested file position not exists");
             __last_error_code = errCode = FILEHELPER_ERROR_READING_OUT_OF_RANGE;
         }
 
     }else{
-        LogMessage2(DEBUG, "FilesystemHelper::ReadFileBuff, file buff not found-> using reading directly from file, fName = ", fName.c_str());
+        LogMessage( T5DEBUG, "FilesystemHelper::ReadFileBuff, file buff not found-> using reading directly from file, fName = ", fName.c_str());
         errCode = ReadFile(ptr, buff, buffSize, bytesRead);
     }
     return errCode;
@@ -885,11 +885,11 @@ long FnGetFileSize(std::string&& filename)
 {
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);
-    int logLevel = rc ==0? DEBUG : ERROR;
+    int logLevel = rc ==0? T5DEBUG : T5ERROR;
     if(rc == 0){
-        LogMessage4(DEBUG, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str() );
+        LogMessage( T5DEBUG, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str() );
     }else{
-        LogMessage6(ERROR, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str()," , errno = ", strerror(errno) );
+        LogMessage(T5ERROR, "FnGetFileSize:: for ", filename.c_str(), " is ", toStr(stat_buf.st_size).c_str()," , errno = ", strerror(errno) );
     }
 
     return rc == 0 ? stat_buf.st_size : -1;
@@ -919,18 +919,18 @@ size_t FilesystemHelper::GetFileSize(FILE*& ptr){
     fseek(ptr, 0L, pos);
     
     std::string fName = GetFileName(ptr);
-    LogMessage6(DEBUG, "FilesystemHelper::GetFileSize(", toStr((long int)ptr).c_str(), ") = ", toStr(size).c_str(),", fName = ",fName.c_str());
+    LogMessage( T5DEBUG, "FilesystemHelper::GetFileSize(", toStr((long int)ptr).c_str(), ") = ", toStr(size).c_str(),", fName = ",fName.c_str());
     return size;
 }
 
 size_t FilesystemHelper::GetFilebufferSize(const std::string& path){
     auto fbs = getFileBufferInstance();
     if(fbs->find(path) == fbs->end()){
-        LogMessage3(INFO,__func__,":: Requested filebuffer not found, path = ", path.c_str());
+        LogMessage( T5INFO,__func__,":: Requested filebuffer not found, path = ", path.c_str());
         return 0;
     }
     auto size = (*fbs)[path].data.size();
-    LogMessage5(INFO,__func__,":: path = ", path.c_str(), "; size = ", toStr(size).c_str());
+    LogMessage( T5INFO,__func__,":: path = ", path.c_str(), "; size = ", toStr(size).c_str());
     return size;
 }
 
@@ -942,7 +942,7 @@ size_t FilesystemHelper::GetTotalFilebuffersSize() {
         //total += it->second.data.size();
         total += it->second.data.capacity();
     }
-    LogMessage3(INFO,__func__,":: total size = ", toStr(total).c_str());
+    LogMessage( T5INFO,__func__,":: total size = ", toStr(total).c_str());
     return total;
 }
 
@@ -951,7 +951,7 @@ int FilesystemHelper::GetLastError(){
 }
 
 int FilesystemHelper::ResetLastError(){
-    LogMessage1(INFO, "FilesystemHelper::ResetLastError()");
+    LogMessage( T5INFO, "FilesystemHelper::ResetLastError()");
     __last_error_code = FILEHELPER_NO_ERROR;
     return 0;
 }
@@ -964,7 +964,7 @@ std::string FilesystemHelper::GetOtmDir(){
     
     //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
-        LogMessage4(WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", OTMdir);
+        LogMessage( T5WARNING, "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", OTMdir);
         properties_init();
         res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
     }
@@ -979,8 +979,8 @@ std::string FilesystemHelper::GetHomeDir(){
     
     //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
     if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
-        if(CheckLogLevel(DEVELOP)){
-            LogMessage4(WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", HOMEdir);
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+            LogMessage( T5WARNING, "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = ", toStr(res).c_str(), ", OTMdir = ", HOMEdir);
         }
         properties_init();
         res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
@@ -991,10 +991,10 @@ std::string FilesystemHelper::GetHomeDir(){
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;
     int ret = stat(dir.c_str(), &st);
-    LogMessage6(DEVELOP, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),")::stat():: ret = ", toStr(ret).c_str());
+    LogMessage( T5DEVELOP, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),")::stat():: ret = ", toStr(ret).c_str());
     if (ret){
         ret = mkdir(dir.c_str(), rights);
-        LogMessage6(INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),") was created, ret = ", toStr(ret).c_str());
+        LogMessage( T5INFO, "FilesystemHelper::CreateDir(", dir.c_str(),"; rights = ", toStr(rights).c_str(),") was created, ret = ", toStr(ret).c_str());
     }
     return ret;
 }
@@ -1007,9 +1007,9 @@ bool FilesystemHelper::DirExists(const std::string& path){
     {
         bExists = true;    
         (void) closedir (pDir);
-        LogMessage3(DEBUG, "FilesystemHelper::DirExists(", path.c_str(),") exists");
+        LogMessage( T5DEBUG, "FilesystemHelper::DirExists(", path.c_str(),") exists");
     }else{
-        LogMessage3(INFO, "FilesystemHelper::DirExists(", path.c_str(),") not exists");
+        LogMessage( T5INFO, "FilesystemHelper::DirExists(", path.c_str(),") not exists");
     }
     return bExists;
 }

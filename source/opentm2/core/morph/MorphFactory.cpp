@@ -167,7 +167,7 @@ int MorphFactory::getLanguageList(
 bool MorphFactory::isSupported(const char* pszName )
 {
   if((int)pvPluginList->size() == 0){
-	LogMessage1(WARNING, "MorphFactory::isSupported :: pvPluginList size == 0");
+	LogMessage( T5WARNING, "MorphFactory::isSupported :: pvPluginList size == 0");
 	return true;//temporary
   }
 

@@ -113,7 +113,7 @@ void mem_usage(double& vm_usage, double& resident_set) {
    std::stringstream buffer;
    buffer << stat_stream.rdbuf();
    std::string msg = buffer.str();
-   LogMessage3(WARNING, __func__, ":: ", msg.c_str());
+   LogMessage( T5WARNING, __func__, ":: ", msg.c_str());
    stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
    >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
    >> utime >> stime >> cutime >> cstime >> priority >> nice

@@ -185,7 +185,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
     }
     else
     {
-      LogMessage6(ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", 
+      LogMessage(T5ERROR,"EqfMemoryPlugin::openMemory:: TmOpen fails, fName = ", pInfo->szFullPath, "; error = ", this->strLastError.c_str(),"; iLastError = ", 
           toStr(this->iLastError).c_str());
       //handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
       if ( htm != 0 ) 
@@ -228,7 +228,7 @@ int EqfMemoryPlugin::closeMemory(
     pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
     this->fillInfoStructure( (PSZ)pszName, pMemInfo );  
   }else{
-    LogMessage1(ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
+    LogMessage(T5ERROR, "EqfMemoryPlugin::closeMemory pMemInfo == NULL");
   }
 
   delete( pMemory );  
@@ -422,22 +422,22 @@ int EqfMemoryPlugin::importFromMemoryFiles
   PVOID *ppPrivateData
 )
 {
-  if(CheckLogLevel(DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     char buff[360];
     sprintf(buff,"EqfMemoryPlugin::importFromMemoryFiles(pszMemoryName=%s,pFileList=%s, iOptions=%d, ppPrivateData=%s)", pszMemoryName,pFileList, iOptions, ppPrivateData);
-    LogMessage1(DEBUG, buff);
+    LogMessage( T5DEBUG, buff);
   }
   int iRC = OtmMemoryPlugin::eSuccess;
 
-  LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles check the type of method call");
+  LogMessage( T5DEBUG, "EqfMemoryPlugin::importFromMemoryFiles check the type of method call");
   if ( *ppPrivateData == NULL )
   {
-    LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is an inital call to import a memory using its data files");
+    LogMessage( T5DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is an inital call to import a memory using its data files");
     iRC = this->importFromMemFilesInitialize( pszMemoryName, pFileList, iOptions, ppPrivateData );
   }
   else
   {
-    LogMessage1(DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is a continuation call");
+    LogMessage( T5DEBUG, "EqfMemoryPlugin::importFromMemoryFiles this is a continuation call");
     iRC = this->importFromMemFilesContinueProcessing( ppPrivateData );
   } /* endif */     
 
@@ -464,7 +464,7 @@ int EqfMemoryPlugin::renameMemory(
     BOOL fIsNew = FALSE;
     char szShortName[MAX_FILESPEC];
     
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 16 ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew )");
+    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 16 ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew )");
 #ifdef TEMPORARY_COMMENTED
     ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
     #endif
@@ -560,7 +560,7 @@ int EqfMemoryPlugin::deleteMemory(
   if ( (pMemInfo != NULL) && (pMemInfo->szFullPath[0] != EOS) )
   {
     // delete the property file
-    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete property file: ", pMemInfo->szFullPath );
+    LogMessage( T5DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete property file: ", pMemInfo->szFullPath );
 
     UtlDelete( pMemInfo->szFullPath, 0L, FALSE );
 
@@ -568,12 +568,12 @@ int EqfMemoryPlugin::deleteMemory(
     strcpy( szPath, pMemInfo->szFullPath );
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
     // delete index file
-    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete index file: ", szPath );
+    LogMessage( T5DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete index file: ", szPath );
     UtlDelete( szPath, 0L, FALSE );
     
     // delete data file
     strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
-    LogMessage2(DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );    
+    LogMessage( T5DEBUG,"EqfMemoryPlugin::deleteMemory:: try to delete data file: ", szPath );    
     UtlDelete( szPath, 0L, FALSE );
 
     // remove memory infor from our memory info vector
@@ -581,7 +581,7 @@ int EqfMemoryPlugin::deleteMemory(
   }
   else
   {
-    LogMessage2(ERROR,"EqfMemoryPlugin::deleteMemory:: OtmMemoryPlugin::eMemoryNotFound name = ", pszName );
+    LogMessage(T5ERROR,"EqfMemoryPlugin::deleteMemory:: OtmMemoryPlugin::eMemoryNotFound name = ", pszName );
     iRC = OtmMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
@@ -661,7 +661,7 @@ OtmMemory* EqfMemoryPlugin::createTempMemory(
 
   bMsgHandling;
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 18 // use old temporary memory create code  usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 18 // use old temporary memory create code  usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );");
 #ifdef TEMPORARY_COMMENTED
   // use old temporary memory create code
   usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );
@@ -691,7 +691,7 @@ void EqfMemoryPlugin::closeTempMemory(
   // close the memory
   this->closeMemory( pMemory );
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 19 // use old temporary memory delete code  TMDeleteTempMem( (PSZ)strName.c_str() );");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 19 // use old temporary memory delete code  TMDeleteTempMem( (PSZ)strName.c_str() );");
 #ifdef TEMPORARY_COMMENTED
   // use old temporary memory delete code
   TMDeleteTempMem( (PSZ)strName.c_str() );
@@ -771,7 +771,7 @@ void EqfMemoryPlugin::refreshMemoryList()
   if(FilesystemHelper::GetLastError() == FilesystemHelper::FILEHELPER_ERROR_CANT_OPEN_DIR){
       errcode = FilesystemHelper::CreateDir(mem_dir);
       if( FilesystemHelper::GetLastError() != FilesystemHelper::FILEHELPER_NO_ERROR ){
-        LogMessage3(FATAL, __func__,":: error with filesystem helper, errcode = ", toStr(errcode).c_str());
+        LogMessage(T5FATAL, __func__,":: error with filesystem helper, errcode = ", toStr(errcode).c_str());
         throw;
       }
   }  
@@ -807,7 +807,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 )
 {
   if(pInfo==0 || pszPropName==0){
-    LogMessage1(ERROR, "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0");
+    LogMessage(T5ERROR, "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0");
     return false;
   }
 
@@ -824,7 +824,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
     char path[MAX_EQF_PATH];
     errCode = properties_get_str(KEY_MEM_DIR, path, MAX_EQF_PATH);
     if(errCode){
-      LogMessage2(ERROR, "EqfMemoryPlugin::fillInfoStructure():: errCode = ", toStr(errCode).c_str());
+      LogMessage(T5ERROR, "EqfMemoryPlugin::fillInfoStructure():: errCode = ", toStr(errCode).c_str());
       return errCode;
     }
     if(strlen(path) && path[strlen(path)-1] != '/')
@@ -859,7 +859,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   auto pData = FilesystemHelper::GetFilebufferData(mem_path);
   
   if(pData == NULL || pData->size()<sizeof(PROP_NTM)){
-    LogMessage3(ERROR, __func__,":: pData == NULL || pData->size()<sizeof(PROP_NTM) for ", mem_path.c_str());
+    LogMessage(T5ERROR, __func__,":: pData == NULL || pData->size()<sizeof(PROP_NTM) for ", mem_path.c_str());
     return -1;
   }
 
@@ -1028,7 +1028,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     this->makePropName( strPathName, strPropName );
 
     //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    LogMessage4(INFO, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
+    LogMessage( T5INFO, "createMemoryProperties called for file ", strPropName.c_str(), " with fsize = ", toStr(usPropSize).c_str());    
     fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
 
     UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
@@ -1059,7 +1059,7 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
     pProp->stPropHead.chType = PROP_TYPE_NEW;
 
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 23 strncpy( pProp->stPropHead.szPath, strPathName.c_str(),  sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));");
+    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 23 strncpy( pProp->stPropHead.szPath, strPathName.c_str(),  sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));");
 #ifdef TEMPORARY_COMMENTED
     strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
              sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
@@ -1465,7 +1465,7 @@ int EqfMemoryPlugin::importFromMemFilesEndProcessing
     if ( pData->pInputMemory != NULL ) 
     {
       HTM htm = pData->pInputMemory->getHTM();
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 29 TmClose( htm, NULL,  FALSE,  NULL );");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 29 TmClose( htm, NULL,  FALSE,  NULL );");
 #ifdef TEMPORARY_COMMENTED
       TmClose( htm, NULL,  FALSE,  NULL );
 #endif //TEMPORARY_COMMENTED
@@ -1671,7 +1671,7 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
        char szError[20];
        sprintf( szError, "%ld", iRC );
        pReplAddr[1] = szError;
-       LogMessage3(ERROR, __func__, ":: error ", toStr(iRC));
+       LogMessage(T5ERROR, __func__, ":: error ", toStr(iRC));
        UtlGetMsgTxt( ERROR_MEM_UNDEFINED, pszErrorTextBuffer, 2, pReplAddr );
      }
  }

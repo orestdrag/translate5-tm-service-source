@@ -100,7 +100,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
   void onServerStart(folly::EventBase* /*evb*/) noexcept override {
       stats_.reset(new ProxygenStats);
       
-      SetLogFilter(true);
+      T5Logger::GetInstance()->SetLogFilter(true);
     }
 
   void onServerStop() noexcept override {
@@ -121,7 +121,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       std::string msg = "SERVER RECEIVED REQUEST:";
       msg += "\n\t URL: " + url;
 
-      LogMessage1(TRANSACTION, msg.c_str());
+      LogMessage( T5TRANSACTION, msg.c_str());
     }
     if(url.size() <= 1){
       return  new ProxygenHandler(stats_.get());;
@@ -144,7 +144,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     std::string urlService = url.substr(0, urlSeparator);
    
     if(urlService != serviceName && urlService != additionalServiceName ){
-      LogMessage8(ERROR, __func__, ":: Wrong url \'", urlService.c_str(), "\', should be \'", 
+      LogMessage( T5ERROR, __func__, ":: Wrong url \'", urlService.c_str(), "\', should be \'", 
           serviceName.c_str(),"\' or \'", additionalServiceName.c_str(),"\'");
       return new ProxygenHandler(stats_.get());
     }
@@ -257,7 +257,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     uint32_t receiveSessionWindowSize = 10 * (1 << 20) * 10;
 
 
-    LogMessage1(TRANSACTION, "Trying to prepare t5memory");
+    LogMessage( T5TRANSACTION, "Trying to prepare t5memory");
     auto pMemService = OtmMemoryServiceWorker::getInstance();
 
     char szServiceName[100] = "t5memory";
@@ -332,7 +332,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, toStr(uiAllowedRAM)));
             fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly)));
         }else{
-          LogMessage3(ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
+          LogMessage(T5ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
         }
     }
     #endif
@@ -349,18 +349,18 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     properties_add_str(KEY_MEM_DIR, memDir.c_str());
 
     //From here we have logging in file turned on
-    DesuppressLoggingInFile();
-    SetLogLevel(uiLogLevel);
+    T5Logger::GetInstance()->DesuppressLoggingInFile();
+    T5Logger::GetInstance()->SetLogLevel(uiLogLevel);
 
     char szValue[150];
 
 
-    LogMessage7(DEBUG,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
+    LogMessage( T5DEBUG,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
         szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
     
-    LogMessage1(DEBUG, ":: creating address data structure");
+    LogMessage( T5DEBUG, ":: creating address data structure");
     folly::SocketAddress addr;
     ifaddrs* addresses = nullptr, *pAddr = nullptr; 
     char host[NI_MAXHOST];
@@ -376,8 +376,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             && strcmp(pAddr->ifa_name, "enp0s3") ) )
       ){
         pAddr = pAddr->ifa_next;
-        if(V_IS_ON(2)){
-          LogMessage3(DEBUG, __func__,":: checking addr name: ", pAddr->ifa_name );
+        if(VLOG_IS_ON(2)){
+          LogMessage( T5DEBUG, __func__,":: checking addr name: ", pAddr->ifa_name );
         }
         //family = pAddr->ifa_addr->sa_family;
       }
@@ -408,7 +408,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       {addr,  Protocol::HTTP}
     };
      
-    LogMessage5(INFO, __func__, ":: binding to socket, ",addr.getAddressStr(), "; port = ", toStr(addr.getPort()).c_str());
+    LogMessage( T5INFO, __func__, ":: binding to socket, ",addr.getAddressStr(), "; port = ", toStr(addr.getPort()).c_str());
     HTTPServer server(std::move(options));
     server.bind(IPs);
 
@@ -439,7 +439,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
                 |==================================================================|\n\
                 |-------------Setup is done -> waiting for requests...-------------|\n\
                 |==================================================================|\n";
-    LogMessage3(TRANSACTION, __func__, ":: ", initMsg.str().c_str());
+    LogMessage( T5TRANSACTION, __func__, ":: ", initMsg.str().c_str());
     serviceName = szServiceName;
     additionalServiceName = serviceName+"_service";
     

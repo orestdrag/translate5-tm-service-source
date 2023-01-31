@@ -1,43 +1,6 @@
 #include "LogWrapper.h"
-#include <istream>
-#include <sstream>
-#include <streambuf>
-#include <string>
-#include <fstream>
-#include <ctime>
-#include "FilesystemHelper.h"
-#include <iostream>
-#include "ThreadingWrapper.h"
-#include <mutex>
-#include <thread>
-#include <cstring>
-#include <RestAPI/ProxygenHandler.h>
 
 
-std::string logFilename;
-int logLevelTreshold = DEVELOP;
-//bool fileLoggingSuppressed = false;
-bool fileLoggingSuppressed = true;
-
-bool fFilterLogs = false; // during init should be set to false to print init messages
-// then could be set to true to filter(to not print) messages about successfull requests
-
-#define THREAD_ID_WRITE_TO_LOGS 1
-#define CONSOLE_LOGGING 1
-#define LOGERRORSINOTHERFILE 1
-//#define SIMPLE_FILE_LOGGING_ENABLED 1
-
-std::string getDateStr(){
-    // current date/time based on current system
-   time_t now = time(0);
-   
-   // convert now to string form
-   std::string sDate = ctime(&now);
-   int nLinePos = sDate.find('\n');
-    if(nLinePos != std::string::npos)
-        sDate[nLinePos] = ' ';
-   return sDate;
-}
 
 std::string getTimeStr(){
     // current date/time based on current system
@@ -51,343 +14,256 @@ std::string getTimeStr(){
     return sTime;
 }
 
-std::string generateLogFileName(){
-    // current date/time based on current system
-   time_t now = time(0);
-   
-   // convert now to string form
-   std::string fName = "Log_" + getDateStr() + ".log";
-   return fName;
+
+T5Logger* T5Logger::GetInstance(){
+    static T5Logger _instance;
+    return &_instance;
 }
 
+//*
+//std::ostringstream& T5Logger::__getLogBuffer(){
+    //static std::ostringstream __logBuff;
+    //return __logBuff;
+//}
+std::ostream& T5Logger::__getLogBuffer(){
+    //static std::ostringstream __logBuff;
+    //return __logBuff;
+    return T5Logger::GetInstance()->__googleBuff->stream();
+}
+/*
+std::ostringstream& T5Logger::getLogBuffer(){
+    //__getLogBuffer() <<"\t{lb}: ";
+    auto str = __getLogBuffer().str();
+    return __getLogBuffer();
+}//*/
 
-
-std::mutex logMutex;   
-
-static std::ofstream& getLogFile() {
-    static std::ofstream logF;
-    if(!logF.is_open()){
-        logF.open(logFilename, std::ios_base::app); // append instead of overwrite
-    }
-    return logF;
+std::ostringstream& T5Logger::__getBodyBuffer(){
+    static std::ostringstream __logBuff;
+    return __logBuff;
 }
 
-static std::ofstream& getLogErrorFile() {
-    static std::ofstream logErrorF;
-    if(!logErrorF.is_open()){
-        logErrorF.open(logFilename+"_IMPORTANT", std::ios_base::app); // append instead of overwrite
-    }
-    return logErrorF;
-}
-
-static std::stringstream& getLogBuffer(){
-    static std::stringstream logBuff;
-    return logBuff;
-}
-
-static std::stringstream& getBodyBuffer(){
-    static std::stringstream logBuff;
-    return logBuff;
-
-}
-
-
-int writeLog(std::string& message, int logLevel){
-        if(!VLOG_IS_ON(2) && fFilterLogs){
-            if(logLevel < ERROR){
-                if( VLOG_IS_ON(1) ){
-                    AddToLogBuffer(message + "\n");
-                }
-            }else{
-                if(logLevel == TRANSACTION){
-                    LOG(INFO) << message;
-                }
-                else{                
-                    message = FlushLogBuffer() + "\n" 
-                            + message + "\n" + FlushBodyBuffer();
-                    LOG(ERROR) << message;
-                }
-            }
-        }else{
-            switch(logLevel){
-                case DEVELOP:{
-                    LOG(INFO) << message;
-                    //VLOG(2) << message;                    
-                    break;
-                }
-                case DEBUG:{
-                    LOG(INFO) << message;
-                    //VLOG(1) << message;
-                    break;
-                }
-                case INFO:{
-                    LOG(INFO) << message;
-                    break;
-                }
-                case WARNING:{
-                    LOG(WARNING) << message;
-                    break;
-                }
-                case ERROR:{
-                    LOG(ERROR) << message;
-                    break;
-                }
-                case FATAL:{
-                    //LOG(FATAL) << message;
-                    LOG(DFATAL) << message;
-                    break;
-                }
-                case TRANSACTION:{
-                    LOG(INFO) << message;
-                    break;
-                }
-            }
-        }
-    return 0;
-}
-int suppressLoggingInFile(){
-    fileLoggingSuppressed = true;
+int T5Logger::LogStop(){
+    //T5LOG(TRANSACTION) << " called LogStop -> closing log files";
     return 0;
 }
 
-int desuppressLoggingInFile(){
-    fileLoggingSuppressed = false;
+int T5Logger::DesuppressLoggingInFile(){
+    //desuppressLoggingInFile();
+    //initLog();
     return 0;
 }
 
-int suppressLogging(){
+int T5Logger::suppressLogging(){
     int prevTreshold = logLevelTreshold;
-    logLevelTreshold = FATAL + 1;
+    logLevelTreshold = T5FATAL + 1;
     return prevTreshold;
 }
-
-int desuppressLogging(int prevTreshold){
+int T5Logger::desuppressLogging(int prevTreshold){
     return logLevelTreshold = prevTreshold;
 }
 
-int ResetLogBuffer(){
-    getLogBuffer().str("");
-    getBodyBuffer().str("");
+
+
+int T5Logger::ResetLogBuffer(){
+    //__getLogBuffer().str("");
+    __getLogBuffer().flush();
+    __getBodyBuffer().str("");
+    return 0;
 }
 
-int SetLogBuffer(std::string logMsg){
+int T5Logger::SetLogBuffer(std::string logMsg){
     ResetLogBuffer();
-    getLogBuffer() << logMsg << std::endl;
+    __getLogBuffer() << logMsg << std::endl;
+    return 0;
 }
 
-static int requestType;
-int SetLogInfo(int RequestType){
+int T5Logger::SetLogInfo(int RequestType){
     requestType = RequestType;
-}
-
-
-int AddToLogBuffer(std::string logMsg){
-    getLogBuffer() << logMsg;
-}
-
-
-int SetBodyBuffer(std::string logMsg){
-    getBodyBuffer().str(logMsg);
-}
-
-std::string FlushLogBuffer(){
-    auto str = getLogBuffer().str();
-    getLogBuffer().str("");
-    return str;
-}
-
-std::string FlushBodyBuffer(){
-    auto str = getBodyBuffer().str();
-    getBodyBuffer().str("");
-    return str;
-}
-
-int initLog(){
-    int prevState = suppressLogging();
-    suppressLoggingInFile();
-
-    std::string initLogMsg;
-    //TODO: manage files clean-up if there more file
-    logFilename = FilesystemHelper::GetOtmDir();
-    logFilename += "LOG";
-    if(!FilesystemHelper::DirExists(logFilename)){
-        initLogMsg += "Log directory created, path = " + logFilename;
-        FilesystemHelper::CreateDir(logFilename, 0700);
-    }
-    
-    desuppressLogging(prevState);
-    desuppressLoggingInFile();
-
-    return writeLog(initLogMsg, DEBUG);
-}
-
-
-int LogMessageStr(int LogLevel, const std::string& message){
-    if(     LogLevel < logLevelTreshold
-        || (LogLevel <= DEBUG &&   !V_IS_ON(1))
-        || (LogLevel == DEVELOP && !V_IS_ON(2))
-        ) {
-        return LOG_SMALLER_THAN_TRESHOLD;
-    }
-
-    std::string logMessage;
-    switch (LogLevel)
-    {
-    case FATAL:
-        logMessage = "[FATAL]  :";
-        break;
-    case ERROR:
-        logMessage = "[ERROR]  :";
-        break;
-    case WARNING:
-        logMessage = "[WARNING]:";
-        break;
-    case DEBUG:
-        logMessage = "[DEBUG]  :";
-        break;
-    case INFO:
-        logMessage = "[INFO]   :";
-        break;
-    case DEVELOP:
-        logMessage = "[DEVELOP]:";
-        break;
-    case TRANSACTION:
-        logMessage = "[TRANSACTION] ";
-        break;
-    default:
-        break;
-    }    
-
-    logMessage += message;
-    if(CheckLogLevel(DEBUG) == FALSE && logMessage.size()> 4000){
-        logMessage.resize(3000);
-        logMessage += ". . . (truncated) ";
-    }
-
-    return writeLog(logMessage, LogLevel);
-}
-
-void SetLogFilter(bool filterOn){
-    fFilterLogs = filterOn;
-}
-
-int LogMessage1(int LogLevel, std::string&& message){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message));
-}
-
-int LogMessage2(int LogLevel, std::string&& message1, std::string&& message2){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2));
-}
-
-int LogMessage3(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3));
-}
-
-int LogMessage4(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4));
-}
-int LogMessage5(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5){
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5));
-}
-
-int LogMessage6(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6));
-}
-
-int LogMessage7(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6) + (message7));
-}
-
-int LogMessage8(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6) + (message7) + (message8));
-}
-
-int LogMessage9(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
-                        std::string&& message9){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6) + (message7) + (message8)
-                            + (message9));
-}
-
-int LogMessage10(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
-                        std::string&& message9, std::string&& message10){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6) + (message7) + (message8)
-                            + (message9) + (message10));
-}
-
-
-int LogMessage11(int LogLevel, std::string&& message1, std::string&& message2, std::string&& message3,
-                    std::string&& message4, std::string&& message5, std::string&& message6, std::string&& message7, std::string&& message8,
-                        std::string&& message9, std::string&& message10, std::string&& message11){
-    
-    return LogLevel>=logLevelTreshold && LogMessageStr(LogLevel, (message1) + (message2) + (message3)
-                            + (message4) + (message5) + (message6) + (message7) + (message8)
-                            + (message9) + (message10) + (message11));
-}
-
-
-int LogStop(){
-    LogMessage2(TRANSACTION, __func__, " called LogStop -> closing log files");
-    {
-        std::lock_guard<std::mutex> logGuard(logMutex); 
-        if(getLogFile().is_open())
-            getLogFile().close();
-        if(getLogErrorFile().is_open())
-            getLogErrorFile().close();
-    }    
     return 0;
 }
 
-int DesuppressLoggingInFile(){
-    //desuppressLoggingInFile();
-    initLog();
+
+int T5Logger::AddToLogBuffer(std::string logMsg){
+    __getLogBuffer() << logMsg;
     return 0;
 }
 
-int SetLogLevel(int level){
-    //LogMessage2(DEBUG, __func__,":: Setting internal log level was disabled, use commandline\
-    // flags for verbose level \'--v=[0..2]\' or \'--minloglevel=[0..3]\' instead");
-    //logLevelTreshold = INFO;//DEVELOP;
-    //*
-    if(level <= FATAL && level>=DEVELOP){
-        LogMessage2(INFO, "SetLogLevel::Log level treshold was set to ",toStr(level).c_str());
+
+int T5Logger::SetBodyBuffer(std::string logMsg){
+    __getBodyBuffer().str(logMsg);
+    auto str = __getBodyBuffer().str();
+    return 0;
+}
+
+std::string T5Logger::FlushLogBuffer(){
+    std::ostringstream text;
+    text << __getLogBuffer().rdbuf();
+    auto str = text.str();
+    __getLogBuffer().flush();
+    return str;
+}
+
+std::string T5Logger::FlushBodyBuffer(){
+    auto str = __getBodyBuffer().str();
+    __getBodyBuffer().str("");
+    return str;
+}
+
+int T5Logger::SetLogLevel(int level){
+    if(level <= T5FATAL && level>= T5DEVELOP){
+        T5LOG(T5INFO) << "SetLogLevel::Log level treshold was set to " << level;
         logLevelTreshold = level;
         return level;
     }else{
-        LogMessage3(ERROR,"SetLogLevel::Can't set log level ", toStr(level).c_str(), ", level must be between 0 and 5");
+        T5LOG(T5ERROR) << "SetLogLevel::Can't set log level " << level << ", level must be between 0 and 5";
         return -1;
-    }//*/
+    }
 }
 
 
-int GetLogLevel(){
+int T5Logger::GetLogLevel(){
     return logLevelTreshold;
 }
-
-bool CheckLogLevel(int level){
-    //#ifdef GLOGGING_ENABLED
-    if(level <= DEBUG && !VLOG_IS_ON(1))
+bool T5Logger::CheckLogLevel(int level){
+    if(level <= T5DEBUG && !VLOG_IS_ON(1))
         return false;
-    if(level == DEVELOP && !VLOG_IS_ON(2))
+    if(level == T5DEVELOP && !VLOG_IS_ON(2))
         return false;
-    //#endif //GLOGGING_ENABLED
     return level >= logLevelTreshold;
 }
+
+void T5Logger::SetLogFilter(bool filterOn){
+    fFilterLogs = filterOn;
+}
+
+std::string T5Logger::FlushBuffers(int severity){
+    if(severity >= T5ERROR){
+        auto LogBuffer = T5Logger::GetInstance()->FlushLogBuffer();
+        auto BodyBuffer = T5Logger::GetInstance()->FlushBodyBuffer();
+        if(BodyBuffer.size() > 3000) BodyBuffer = BodyBuffer.substr(0, 3000);
+        if(LogBuffer.size() > 3000) LogBuffer = LogBuffer.substr(0, 3000);
+        if(LogBuffer.empty()) return BodyBuffer;
+        return BodyBuffer + "\n\tlb: { " + LogBuffer + "}\n";
+    }
+    return "";
+}
+
+std::ostream& getBuffForLog(int severity){
+    if(T5Logger::GetInstance()->logLevelTreshold > severity)     
+        return T5Logger::GetInstance()->nullStream;
+    if( !T5Logger::GetInstance()->GetInstance()->fFilterLogs || VLOG_IS_ON(2) || severity>=T5ERROR ){
+        if(severity == T5DEVELOP)       return _T5_LOG_T5DEVELOP;
+        else if(severity == T5DEBUG)    return _T5_LOG_T5DEBUG;
+        else if(severity == T5INFO)     return _T5_LOG_T5INFO;
+        else if(severity == T5WARNING)  return _T5_LOG_T5WARNING;
+        else if(severity == T5ERROR)    return _T5_LOG_T5ERROR;
+        else if(severity == T5FATAL)    return _T5_LOG_T5DEVELOP;
+        else                            return _T5_LOG_T5TRANSACTION;
+    }   
+    if( !VLOG_IS_ON(1) )
+        return T5Logger::GetInstance()->nullStream;
+    return  T5Logger::GetInstance()->__getLogBuffer();
+}
+
+int getBuffIdForLog(int severity){
+    if(T5Logger::GetInstance()->logLevelTreshold > severity)     
+        return -1; //NullStream
+    if( !T5Logger::GetInstance()->GetInstance()->fFilterLogs || VLOG_IS_ON(2) || severity >= T5ERROR ){
+        return severity;
+    }   
+    if( VLOG_IS_ON(1) )
+        return -2; //T5Logger::GetInstance()->__getLogBuffer(); 
+    return  -1; //NullStream
+}
+
+
+int LogMessageStr(int LogLevel, std::string message){ 
+                    switch(LogLevel){
+                        case T5TRANSACTION:
+                            T5LOG(T5TRANSACTION) << message;
+                        break;
+                        case T5FATAL:
+                            T5LOG(T5FATAL) << message;
+                        break;
+                        case T5ERROR:
+                            T5LOG(T5ERROR) << message;
+                        break;
+                        case T5WARNING:
+                            T5LOG(T5WARNING) << message;
+                        break;
+                        case T5INFO:
+                            T5LOG(T5INFO) << message;
+                        break;
+                        case T5DEBUG:
+                            T5LOG(T5DEBUG) << message;
+                        break;
+                        case T5DEVELOP:
+                            T5LOG(T5DEVELOP) << message;
+                        break;
+                        default:
+                        break;
+                    }
+                    return 0; 
+        }
+
+
+int LogMessage(int LogLevel, std::string message1){ 
+                    LogMessageStr(LogLevel, message1);
+                    return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2){ 
+                    LogMessageStr(LogLevel, message1 + message2);
+                    return 0; }
+
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3);
+                    return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4  );  
+                        return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 );  
+                        return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6  );  
+                    return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6, std::string message7){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6 + message7 );                        
+                        return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8){ 
+                    LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6 + message7 
+                        + message8);
+                        return 0; }
+
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
+                    std::string message9){ 
+                        LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6 + message7 
+                        + message8 + message9);
+                        return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
+                    std::string message9, std::string message10) { 
+                        LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6 + message7 
+                        + message8 + message9 + message10);
+                        return 0; }
+int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
+                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
+                    std::string message9, std::string message10, std::string message11) { 
+                        LogMessageStr(LogLevel, message1 + message2 + message3
+                        + message4 + message5 + message6 + message7 
+                        + message8 + message9 + message10 + message11);
+                        return 0;
+                     }
+

@@ -144,15 +144,15 @@ USHORT EqfImportMem
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
   
-  LogMessage2(INFO, "==EQFImportMem== Memory: ", pszMemName);
+  LogMessage( T5INFO, "==EQFImportMem== Memory: ", pszMemName);
   
   if(!pData){
-    LogMessage1(WARNING, "EqfImportMem::pData is NULL");
+    LogMessage( T5WARNING, "EqfImportMem::pData is NULL");
   }
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
   {
-    LogMessage4(INFO, "InFile = ", pszInFile, ", Options = ", toStr(lOptions).c_str() );
+    LogMessage( T5INFO, "InFile = ", pszInFile, ", Options = ", toStr(lOptions).c_str() );
   } /* endif */
 
 
@@ -168,7 +168,7 @@ USHORT EqfImportMem
   // call TM import
   if ( usRC == NO_ERROR )
   {
-    LogMessage1(INFO, "EqfImportMem:: call TM import");
+    LogMessage( T5INFO, "EqfImportMem:: call TM import");
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
       pData->sLastFunction = FCT_EQFIMPORTMEM;
     usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions, pImportData );
@@ -189,7 +189,7 @@ USHORT EqfImportMem
   }
 
   if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) 
-    LogMessage2(INFO, "EqfImportMem:: RC=", toStr(usRC).c_str() );
+    LogMessage( T5INFO, "EqfImportMem:: RC=", toStr(usRC).c_str() );
 
   return( usRC );
 } /* end of function EqfImportMem */
@@ -213,17 +213,17 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
   {
-    LogMessage2(DEBUG, "==EQFExportMem==, Options = ", toStr(lOptions).c_str());
+    LogMessage( T5DEBUG, "==EQFExportMem==, Options = ", toStr(lOptions).c_str());
     if(pszMemName){
-      LogMessage2(DEBUG,"EqfExportMem:: Memory = ", pszMemName);
+      LogMessage( T5DEBUG,"EqfExportMem:: Memory = ", pszMemName);
     }else{
-      LogMessage1(ERROR,"EqfExportMem:: Memory = NULL");
+      LogMessage(T5ERROR,"EqfExportMem:: Memory = NULL");
     }
 
     if(pszOutFile){
-      LogMessage2(DEBUG,"EqfExportMem:: Output File = ", pszOutFile);
+      LogMessage( T5DEBUG,"EqfExportMem:: Output File = ", pszOutFile);
     }else{
-      LogMessage1(ERROR,"EqfExportMem:: Output File = NULL");
+      LogMessage(T5ERROR,"EqfExportMem:: Output File = NULL");
     }
   } /* endif */
 
@@ -254,9 +254,9 @@ USHORT EqfExportMem
 
   if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ){
     if(usRC){
-      LogMessage2(ERROR , "end of function EqfExportMem with error code::  RC = ", toStr(usRC).c_str() );
+      LogMessage(T5ERROR , "end of function EqfExportMem with error code::  RC = ", toStr(usRC).c_str() );
     }else{ 
-      LogMessage1(DEBUG,"end of function EqfExportMem::success ");
+      LogMessage( T5DEBUG,"end of function EqfExportMem::success ");
     }
   }
   return( usRC );
@@ -276,11 +276,11 @@ USHORT EqfCreateMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
-  if(CheckLogLevel(DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     char buff[255];
     sprintf(buff, "EqfCreateMem( Memory = %s; Description = %s; Sourcelanguage = %s; Options = %d",
               pszMemName, pszDescription, pszSourceLanguage, lOptions);
-    LogMessage1(INFO, buff);
+    LogMessage( T5INFO, buff);
   }
 
   // validate session handle
@@ -299,7 +299,7 @@ USHORT EqfCreateMem
       SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-  LogMessage2(INFO, "EqfCreateMem() done ::RC=", toStr(usRC).c_str());
+  LogMessage( T5INFO, "EqfCreateMem() done ::RC=", toStr(usRC).c_str());
 
   return( usRC );
 } /* end of function EqfCreateMem */
@@ -315,7 +315,7 @@ USHORT EqfDeleteMem
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
-  LogMessage2(DEBUG, "==EQFDeleteMem==::memName = ", pszMemName);
+  LogMessage( T5DEBUG, "==EQFDeleteMem==::memName = ", pszMemName);
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
@@ -326,7 +326,7 @@ USHORT EqfDeleteMem
     usRC = MemFuncDeleteMem( pszMemName );
     pData->fComplete = TRUE;   // one-shot function are always complete
   }else{
-    LogMessage4(ERROR, "Error in EQFDeleteMem::FctValidateSession:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
+    LogMessage(T5ERROR, "Error in EQFDeleteMem::FctValidateSession:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
   } /* endif */
 
   if ( !usRC )
@@ -334,7 +334,7 @@ USHORT EqfDeleteMem
     SetSharingFlag( EQF_REFR_MEMLIST );
   }
 
-  LogMessage4(INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
+  LogMessage( T5INFO, "End of EQFDeleteMem:: MemName = ", pszMemName, "; RC = ", toStr(usRC).c_str());
 
   return( usRC );
 } /* end of function EqfDeleteMem */
@@ -349,7 +349,7 @@ USHORT EqfStartSession
   PFCTDATA    pData = NULL;            // ptr to function data area
 
     if (SetupMAT())
-        LogMessage1(ERROR, "Failed to setup property files");
+        LogMessage(T5ERROR, "Failed to setup property files");
 
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );
@@ -362,7 +362,7 @@ USHORT EqfStartSession
   }
   else
   {
-    LogMessage1(ERROR, "EqfStartSession():: Not enought memory for pData"  );
+    LogMessage(T5ERROR, "EqfStartSession():: Not enought memory for pData"  );
 
     usRC = ERROR_NOT_ENOUGH_MEMORY;
   } /* endif */
@@ -392,7 +392,7 @@ USHORT EqfStartSession
 
     if ( !fContinue )
     {
-      LogMessage1(ERROR, "EqfStartSession():: fContinue is false");
+      LogMessage(T5ERROR, "EqfStartSession():: fContinue is false");
       usRC = 1;
     } /* endif */
   } /* endif */
@@ -504,7 +504,7 @@ USHORT EqfStartSession
     }
     else
     {
-      LogMessage1(ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
+      LogMessage(T5ERROR, "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES");
       // access to system properties failed
       usRC = ERROR_READ_SYSTEMPROPERTIES;
     } /* endif */
@@ -545,7 +545,7 @@ USHORT EqfStartSession
     }
 #endif
 
-  LogMessage1(DEBUG, "==EQFSTARTSESSION==\n  Starting plugins...\n" );
+  LogMessage( T5DEBUG, "==EQFSTARTSESSION==\n  Starting plugins...\n" );
 
 
   // initialie plugins
@@ -577,22 +577,22 @@ USHORT EqfStartSession
         }
         else
         {
-            LogMessage1(ERROR, "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED");
+            LogMessage(T5ERROR, "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED");
             usRC = ERROR_PLUGIN_EXPIRED;
         }
         // Add end
   }
 
-  LogMessage1( INFO,"   ...Plugins have been started\n" );
+  LogMessage( T5INFO,"   ...Plugins have been started\n" );
     {
       char szBuf[10];
       int i = 0;
       //UtlLogStart( "TMSession" );
-      LogMessage1(INFO, "TMSession");
+      LogMessage( T5INFO, "TMSession");
       i = _getpid();
       sprintf( szBuf, "%ld", i );
       //UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
-      LogMessage2(INFO,"EqfStartSession: Process ID is ", szBuf);
+      LogMessage( T5INFO,"EqfStartSession: Process ID is ", szBuf);
     }
     *phSession = (LONG)pData;
   }
@@ -601,7 +601,7 @@ USHORT EqfStartSession
     *phSession = NULLHANDLE;
   } /* endif */
 
-  LogMessage2(INFO, "  RC=", toStr(usRC).c_str() );
+  LogMessage( T5INFO, "  RC=", toStr(usRC).c_str() );
 
   return( usRC );
 } /* end of function EqfStartSession */
@@ -675,12 +675,12 @@ USHORT FctValidateSession
   // test magic word and checksum
   if ( pData == NULL )
   {
-    LogMessage1(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL");
+    LogMessage(T5ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   else if ( pData->lMagicWord != FCTDATA_IDENTIFIER )
   {
-    LogMessage1(ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
+    LogMessage(T5ERROR,"FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ");
     usRC = ERROR_INVALID_SESSION_HANDLE;
   }
   
@@ -688,7 +688,7 @@ USHORT FctValidateSession
   {
      *ppData = pData;
   } /* endif */
-  LogMessage2(DEBUG, "FctValidateSession() usRC = ", toStr(usRC).c_str());
+  LogMessage( T5DEBUG, "FctValidateSession() usRC = ", toStr(usRC).c_str());
   return( usRC );
 } /* end of function FctValidateSession */
 
@@ -718,7 +718,7 @@ USHORT EqfMemoryExists
     if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
     {
       usRC = TA_MANDFOLDER;
-      LogMessage4(ERROR, __func__, ":: rc = ", toStr(usRC).c_str(), " EQF_ERROR" );
+      LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRC).c_str(), " EQF_ERROR" );
     }
     else
     {    
@@ -850,9 +850,9 @@ USHORT EqfOpenMem
 
   if ( pData )
   {
-    LogMessage4(INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", toStr(lOptions).c_str());
+    LogMessage( T5INFO,"==EqfOpenMem==, Memory = ", pszMemoryName, "; lOptions = ", toStr(lOptions).c_str());
   }else{
-    LogMessage1(ERROR, "Error in EqfOpenMem:: pData == NULL");
+    LogMessage(T5ERROR, "Error in EqfOpenMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -860,10 +860,10 @@ USHORT EqfOpenMem
   {
     usRC = MemoryFactory::getInstance()->APIOpenMem( pszMemoryName, plHandle, lOptions );
   }else{
-    LogMessage2(ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", toStr(usRC).c_str());
+    LogMessage(T5ERROR,"EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = ", toStr(usRC).c_str());
   } /* endif */
 
-  LogMessage2(INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", toStr(usRC).c_str());
+  LogMessage( T5INFO,"EqfOpenMem finished::EqfOpenMem::RC = ", toStr(usRC).c_str());
   
   return( usRC );
 }
@@ -934,9 +934,9 @@ USHORT EqfQueryMem
 
   if ( pData )
   {
-    LogMessage4(INFO,"EqfQueryMem:: handle = ", toStr(lHandle).c_str(), "; options = ", toStr(lOptions).c_str());
+    LogMessage( T5INFO,"EqfQueryMem:: handle = ", toStr(lHandle).c_str(), "; options = ", toStr(lOptions).c_str());
   }else{
-    LogMessage1(ERROR,"ERROR in EqfQueryMem:: pData is null");
+    LogMessage(T5ERROR,"ERROR in EqfQueryMem:: pData is null");
   } /* endif */
 
   // call the memory factory to process the request
@@ -945,8 +945,8 @@ USHORT EqfQueryMem
     usRC =  MemoryFactory::getInstance()->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
   } /* endif */
 
-  LOGLEVEL logLevel = usRC? ERROR : INFO;
-  LogMessage2(logLevel,"End of EqfQueryMem, RC = ", toStr(usRC).c_str());
+  LOGLEVEL logLevel = usRC? T5ERROR : T5INFO;
+  LogMessage(logLevel,"End of EqfQueryMem, RC = ", toStr(usRC).c_str());
 
   return( usRC );
 }
@@ -985,9 +985,9 @@ USHORT EqfSearchMem
 
   if ( pData )
   {
-    LogMessage8(INFO, "EqfSearchMem::Handle", toStr(lHandle).c_str(),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", toStr(lOptions).c_str());
+    LogMessage( T5INFO, "EqfSearchMem::Handle", toStr(lHandle).c_str(),"; SearchString = ", EncodingHelper::convertToUTF8(pszSearchString).c_str(), "; StartPosition = ", pszStartPosition,"; Options = ", toStr(lOptions).c_str());
   }else{
-    LogMessage1(ERROR, "Error in EqfSearchMem:: pData == NULL");
+    LogMessage(T5ERROR, "Error in EqfSearchMem:: pData == NULL");
   } /* endif */
 
   // call the memory factory to process the request
@@ -999,12 +999,12 @@ USHORT EqfSearchMem
   if ( usRC && usRC != ENDREACHED_RC)//
   {
     if(usRC == TIMEOUT_RC){
-      LogMessage2(INFO, "Timeout reached in EqfSearchMem for ", EncodingHelper::convertToUTF8(pszSearchString).c_str() );
+      LogMessage( T5INFO, "Timeout reached in EqfSearchMem for ", EncodingHelper::convertToUTF8(pszSearchString).c_str() );
     }else{
-      LogMessage2(ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
+      LogMessage(T5ERROR, "Error in EqfSearchMem::  RC=", toStr(usRC).c_str() );
     }
   }else{
-    LogMessage1(INFO, "Success in EqfSearchMem" );
+    LogMessage( T5INFO, "Success in EqfSearchMem" );
   }
 
   return( usRC );
@@ -1034,9 +1034,9 @@ USHORT EqfUpdateMem
 
   if ( pData )
   {
-    LogMessage5( DEBUG, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
+    LogMessage( T5DEBUG, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
   }else{
-    LogMessage2( ERROR,__func__,"::pData is nullptr");
+    LogMessage( T5ERROR,__func__,"::pData is nullptr");
   } /* endif */
 
   // call the memory factory to process the request
@@ -1045,8 +1045,8 @@ USHORT EqfUpdateMem
     usRC =  MemoryFactory::getInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
-  auto logLevel = usRC? ERROR : DEBUG;
-  LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
+  auto logLevel = usRC? T5ERROR : T5DEBUG;
+  LogMessage(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
 
   return( usRC );
 }
@@ -1075,9 +1075,9 @@ USHORT EqfUpdateDeleteMem
   USHORT usRC = FctValidateSession( hSession, &pData ); 
   if ( pData )
   {
-    LogMessage5( INFO, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
+    LogMessage( T5INFO, __func__, ":: Handle = ", toStr(lHandle).c_str(), "; Options = ", toStr(lOptions).c_str() );
   }else{
-    LogMessage2( ERROR,__func__,"::pData is nullptr");
+    LogMessage( T5ERROR,__func__,"::pData is nullptr");
   } /* endif */
 
   // call the memory factory to process the request
@@ -1086,8 +1086,8 @@ USHORT EqfUpdateDeleteMem
     usRC = MemoryFactory::getInstance()->APIUpdateDeleteMem( lHandle, pProposalToDelete, lOptions , errorStr);
   } /* endif */
 
-  auto logLevel = usRC && usRC != 6020 ? ERROR : INFO;
-  LogMessage3(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
+  auto logLevel = usRC && usRC != 6020 ? T5ERROR : T5INFO;
+  LogMessage(logLevel, __func__, ":: RC = ",toStr(usRC).c_str());
 
   return( usRC );
 }
@@ -1158,21 +1158,21 @@ USHORT EqfGetOpenTM2Lang
 
   if ( pData )
   {
-    LogMessage3(INFO, "==EqfGetOpenTM2Lang== :: ", "ISOLang = ", pszISOLang);
+    LogMessage( T5INFO, "==EqfGetOpenTM2Lang== :: ", "ISOLang = ", pszISOLang);
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
   {
     char*  pszParm = "pointer to ISO language id";
     usRC = DDE_MANDPARAMISSING;
-    LogMessage2(ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL), pszParam =" , pszParm);
+    LogMessage(T5ERROR,"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL), pszParam =" , pszParm);
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     char* pszParm = "buffer for OpenTM2 language name";
     usRC = DDE_MANDPARAMISSING;
-    LogMessage2(ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL), pszParam = ", pszParm);
+    LogMessage(T5ERROR, "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL), pszParam = ", pszParm);
   } /* endif */
 
 
@@ -1185,7 +1185,7 @@ USHORT EqfGetOpenTM2Lang
 
   if ( pData )
   {
-    LogMessage6(INFO, "EqfGetOpenTM2Lang()::pData != NULL, RC=", toStr(usRC).c_str(),"; pszISOLang = ",pszISOLang,"; pszOpenTM2Lang = ", pszOpenTM2Lang);
+    LogMessage( T5INFO, "EqfGetOpenTM2Lang()::pData != NULL, RC=", toStr(usRC).c_str(),"; pszISOLang = ",pszISOLang,"; pszOpenTM2Lang = ", pszOpenTM2Lang);
   }
 
   return( usRC );
@@ -1220,14 +1220,14 @@ USHORT EqfGetIsoLang
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "pointer to OpenTM2 language name";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING ::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING ::", pszParm);
     usRC = DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "buffer for ISO language id";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING :: ", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING :: ", pszParm);
     usRC = DDE_MANDPARAMISSING;
   } /* endif */
 

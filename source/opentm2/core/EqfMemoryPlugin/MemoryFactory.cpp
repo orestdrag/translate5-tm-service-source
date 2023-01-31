@@ -75,7 +75,7 @@ OtmMemory *MemoryFactory::openMemory
 {
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage2(INFO, "MemoryFactory::openMemory, pszMemoryName = ", pszMemoryName);
+  LogMessage( T5INFO, "MemoryFactory::openMemory, pszMemoryName = ", pszMemoryName);
 
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
@@ -83,7 +83,7 @@ OtmMemory *MemoryFactory::openMemory
   OtmMemory *pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
   if ( pMemory == NULL ){
         *piErrorCode = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-        LogMessage4(ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", toStr(this->iLastError).c_str() );
+        LogMessage(T5ERROR, "MemoryFactory::openMemory, Open of local memory ", strMemoryName.c_str() ," failed, the return code is ", toStr(this->iLastError).c_str() );
   }    
 
   return( pMemory );
@@ -105,14 +105,14 @@ int MemoryFactory::getMemoryInfo
   int iRC = 0;
   this->strLastError = "";
   this->iLastError = 0;
-  if(CheckLogLevel(DEBUG)){
-    LogMessage2(INFO," MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    LogMessage( T5INFO," MemoryFactory::getMemoryInfo:: Get info for memory ", pszMemoryName);
   }
   OtmPlugin * pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
   if ( pluginSelected == NULL ) 
   {
-    if(CheckLogLevel(DEBUG)){
-      LogMessage1(ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      LogMessage(T5ERROR," MemoryFactory::getMemoryInfo::  Could not identify plugin processing the memory" );
     }
     return OtmMemoryPlugin::eUnknownPlugin;
   } /* endif */
@@ -130,20 +130,20 @@ int MemoryFactory::getMemoryInfo
   }
   else
   {
-    LogMessage2(FATAL," MemoryFactory::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = ",pszPluginName);
+    LogMessage(T5FATAL," MemoryFactory::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = ",pszPluginName);
     return OtmMemoryPlugin::eNotSupportedMemoryType;
   }
   if ( iRC != 0 )
   {
-    if(CheckLogLevel(DEBUG)){
-      LogMessage6(ERROR," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      LogMessage(T5ERROR," MemoryFactory::getMemoryInfo  Could not retrieve information for local memory ", strMemoryName.c_str(), " using plugin ", 
         pluginSelected->getName(),", the return code is ", toStr(this->iLastError).c_str() );
     }
   }
   else
   {
-    if(CheckLogLevel(DEBUG)){
-      LogMessage1(INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      LogMessage( T5INFO," MemoryFactory::getMemoryInfo  info retrieval was successful" );
     }
   } /* end */     
 
@@ -194,14 +194,14 @@ OtmMemory *MemoryFactory::createMemory
   int *piErrorCode
 )
 {  
-  LogMessage6(DEBUG,"MemoryFactory::createMemory::pszMemoryName = ",pszMemoryName, ", pszSourceLanguage = ", pszSourceLanguage,
+  LogMessage( T5DEBUG,"MemoryFactory::createMemory::pszMemoryName = ",pszMemoryName, ", pszSourceLanguage = ", pszSourceLanguage,
       ", pszDescription = ", pszDescription) ;
   
   OtmMemory *pMemory = NULL;
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage3(INFO, __func__,"::Create memory ", pszMemoryName);
+  LogMessage( T5INFO, __func__,"::Create memory ", pszMemoryName);
 
   if ( piErrorCode != NULL ) 
       *piErrorCode = 0;
@@ -211,17 +211,17 @@ OtmMemory *MemoryFactory::createMemory
   pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
   if ( pMemory == NULL ){
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-     LogMessage2(ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
+     LogMessage(T5ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
   }
 
   if ( pMemory == NULL)
   {
-    LogMessage3(ERROR, __func__, "::Create failed, with message ", this->strLastError.c_str());
+    LogMessage(T5ERROR, __func__, "::Create failed, with message ", this->strLastError.c_str());
     if ( piErrorCode != NULL ) 
         *piErrorCode = this->iLastError;
   }
   else{
-    LogMessage2(INFO, __func__, "::Create successful ");
+    LogMessage( T5INFO, __func__, "::Create successful ");
   }
   return( pMemory );
 }
@@ -272,12 +272,12 @@ int MemoryFactory::closeMemory
   int iRC = 0;
 
   if ( pMemory == NULL  ){
-    LogMessage1(ERROR,"MemoryFactory::closeMemory, pMemory is NULL");
+    LogMessage(T5ERROR,"MemoryFactory::closeMemory, pMemory is NULL");
     return( -1 );
   }
   OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
   if ( pPlugin == NULL  ){
-     LogMessage1(ERROR,"MemoryFactory::closeMemory, pPlugin is NULL");
+     LogMessage(T5ERROR,"MemoryFactory::closeMemory, pPlugin is NULL");
      return( -2 );
   }
 
@@ -329,16 +329,16 @@ int MemoryFactory::deleteMemory(
 )
 {
   if(pszPluginName == NULL){
-    if(V_IS_ON(1))
-      LogMessage1(INFO,"MemoryFactory::deleteMemory::pszPluginName = NULL");
+    if(VLOG_IS_ON(1))
+      LogMessage( T5INFO,"MemoryFactory::deleteMemory::pszPluginName = NULL");
   }else if(pszMemoryName == NULL){
-    LogMessage3(ERROR,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = NULL");
+    LogMessage(T5ERROR,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = NULL");
   }else{
-    LogMessage4(INFO,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = ", pszMemoryName);
+    LogMessage( T5INFO,"MemoryFactory::deleteMemory::pszPluginName = ", pszPluginName,"; pszMemoryName = ", pszMemoryName);
   }
   std::string strError;
   int iRC = deleteMemory(pszPluginName,pszMemoryName, strError);
-  LogMessage2(iRC == OtmMemoryPlugin::eSuccess ? INFO: ERROR,"deleteMemory::strError = ", strError.c_str());
+  LogMessage(iRC == OtmMemoryPlugin::eSuccess ? T5INFO: T5ERROR,"deleteMemory::strError = ", strError.c_str());
   return iRC;
 }
 
@@ -372,7 +372,7 @@ int MemoryFactory::deleteMemory(
     }
     else
     {
-      LogMessage4(FATAL,"MemoryFactory::deleteMemory:: shared memory plugins not supported, memory: ", strMemoryName.c_str()," plugin: ", pszPluginName);
+      LogMessage(T5FATAL,"MemoryFactory::deleteMemory:: shared memory plugins not supported, memory: ", strMemoryName.c_str()," plugin: ", pszPluginName);
       iRC = OtmMemoryPlugin::eNotSupportedMemoryType;
     }
 
@@ -510,7 +510,7 @@ void MemoryFactory::showLastError(
 
  // show error message
   char* pszParm = (char*)this->strLastError.c_str();
-  LogMessage5(ERROR,__func__,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", toStr(this->iLastError).c_str());
+  LogMessage(T5ERROR,__func__,"ERROR in MemoryFactory::showLastError:: ", pszParm, "; iLastError = ", toStr(this->iLastError).c_str());
 }
 
 std::string& MemoryFactory::getLastError( OtmMemory *pMemory, int& iLastError, std::string& strError)
@@ -933,7 +933,7 @@ OtmPlugin *MemoryFactory::findPlugin
     {
       this->iLastError = ERROR_PLUGINNOTAVAILABLE;
       this->strLastError = "Error: selected plugin " + std::string( pszPluginName ) + " is not available";
-      if(CheckLogLevel(DEBUG))  LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+      if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))  LogMessage(T5ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
     } /* endif */       
   } /* endif */     
 
@@ -955,7 +955,7 @@ OtmPlugin *MemoryFactory::findPlugin
       {
         this->iLastError = ERROR_PLUGINNOTAVAILABLE;
         this->strLastError = "Error: selected plugin " + strPlugin + " is not available";
-        //if(CheckLogLevel(DEBUG)) LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+        //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) LogMessage(T5ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
       } /* endif */       
     }
     else
@@ -993,7 +993,7 @@ OtmPlugin *MemoryFactory::findPlugin
         this->iLastError = ERROR_MEMORY_NOTFOUND;//ERROR_PLUGINNOTAVAILABLE
         this->strLastError = "Translation Memory "+std::string(pszMemoryName)+" was not found.";//"Error: no memory plugin for memory " + std::string(pszMemoryName) + " found or memory does not exist";
         //if(VLOG_IS_ON(1)){
-          LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+          LogMessage(T5ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
         //}
       } /* endif */       
     } /* endif */       
@@ -1002,7 +1002,7 @@ OtmPlugin *MemoryFactory::findPlugin
   {
     this->iLastError = ERROR_MISSINGPARAMETER;
     this->strLastError = "Error: Missing memory name";
-    LogMessage2(ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
+    LogMessage(T5ERROR, "MemoryFactory::findPlugin()::", this->strLastError.c_str());
   } /* endif */     
 
   return( plugin );
@@ -1020,7 +1020,7 @@ int MemoryFactory::getMemoryName
 )
 {
  if ( (pszMemoryName == NULL) || (*pszMemoryName == '\0') ){
-    LogMessage2(ERROR, "MemoryFactory::getMemoryName()::(pszMemoryName == NULL) || (*pszMemoryName == '\0'), pszMemoryName = ", pszMemoryName);
+    LogMessage(T5ERROR, "MemoryFactory::getMemoryName()::(pszMemoryName == NULL) || (*pszMemoryName == '\0'), pszMemoryName = ", pszMemoryName);
     return( -1 );
  }
  const char *pszColon  = strchr( pszMemoryName, ':' );
@@ -1121,13 +1121,13 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
 
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
-    LogMessage2(ERROR, __func__,  "::TA_MANDTM::if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS))");
+    LogMessage(T5ERROR, __func__,  "::TA_MANDTM::if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS))");
     return( TA_MANDTM );
   } /* endif */
 
   if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
   {
-    LogMessage2(ERROR, __func__,  "::FUNC_MANDINFILE::  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )");
+    LogMessage(T5ERROR, __func__,  "::FUNC_MANDINFILE::  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )");
     return( FUNC_MANDINFILE );
   } /* endif */
 
@@ -1155,7 +1155,7 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
       }
       std::string targetFName = memDir + pszMemoryName + GetFileExtention(file);
       if(FilesystemHelper::FileExists(targetFName.c_str())){
-         LogMessage3(ERROR, __func__,":: file exists, fName = ", targetFName.c_str());
+         LogMessage(T5ERROR, __func__,":: file exists, fName = ", targetFName.c_str());
          iRC = -1;
          break;
       }
@@ -1173,17 +1173,17 @@ USHORT MemoryFactory::APIImportMemInInternalFormat
       
       std::string memFilePath = memDir + pszMemoryName + EXT_OF_MEM;
       if(FilesystemHelper::FileExists(memFilePath.c_str())){
-        LogMessage3(INFO, __func__,":: memory added to list, mem name = ", pszMemoryName);
+        LogMessage( T5INFO, __func__,":: memory added to list, mem name = ", pszMemoryName);
         EqfMemoryPlugin::GetInstance()->addMemoryToList(pszMemoryName);
       }else{
-        LogMessage3(ERROR, __func__,":: memory not added to list, mem path = ", memFilePath.c_str());
+        LogMessage(T5ERROR, __func__,":: memory not added to list, mem path = ", memFilePath.c_str());
       }
     }
   }
 
   
   // delete any files left over and remove the directory
-  if(CheckLogLevel(DEBUG) == false){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){
     FilesystemHelper::RemoveDirWithFiles( szTempDir );
   }
 
@@ -1206,20 +1206,20 @@ USHORT MemoryFactory::APIExportMemInInternalFormat
   PSZ pszMemName = (PSZ) pszMemoryName;
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
-    LogMessage2(ERROR, __func__,  "::TA_MANDTM::");
+    LogMessage(T5ERROR, __func__,  "::TA_MANDTM::");
     return( TA_MANDTM );
   } /* endif */
 
   if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
   {
-    LogMessage2(ERROR, __func__,  "::FUNC_MANDINFILE::");
+    LogMessage(T5ERROR, __func__,  "::FUNC_MANDINFILE::");
     return( FUNC_MANDINFILE );
   } /* endif */
 
   // check if memory exists
   if ( !this->exists( NULL, pszMemName ) )
   {
-    LogMessage3(ERROR, __func__,  "::ERROR_MEMORY_NOTFOUND::", (pszMemName));
+    LogMessage(T5ERROR, __func__,  "::ERROR_MEMORY_NOTFOUND::", (pszMemName));
     return( ERROR_MEMORY_NOTFOUND );
   } /* endif */
 
@@ -1274,14 +1274,14 @@ USHORT MemoryFactory::APIOpenMem
   PSZ pszMemName = (PSZ)pszMemoryName;
   if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
   {
-    LogMessage2(ERROR, __func__,  "::TA_MANDTM");
+    LogMessage(T5ERROR, __func__,  "::TA_MANDTM");
     return( TA_MANDTM );
   } /* endif */
 
   if ( plHandle == NULL )
   {
     char* pszParm = "pointer to memory handle";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
@@ -1325,7 +1325,7 @@ USHORT MemoryFactory::APICloseMem
   OtmMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
-    LogMessage2(ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL )");
+    LogMessage(T5ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL )");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -1358,14 +1358,14 @@ USHORT MemoryFactory::APIQueryMem
   if ( pSearchKey == NULL )
   {
     char* pszParm = "pointer to search key";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pProposals == NULL )
   {
     char* pszParm = "pointer to proposal array";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
@@ -1373,7 +1373,7 @@ USHORT MemoryFactory::APIQueryMem
 
   if ( pMem == NULL )
   {
-    LogMessage2(ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE");
+    LogMessage(T5ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -1433,28 +1433,28 @@ USHORT MemoryFactory::APISearchMem
   if ( (pszSearchString == NULL) || (*pszSearchString  == EOS)  )
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::Search string";
-    LogMessage3(ERROR, __func__, " DDE_MANDPARAMISSING", pszParm);
+    LogMessage(T5ERROR, __func__, " DDE_MANDPARAMISSING", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pszStartPosition == NULL ) 
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::pointer to start position";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
   if ( pProposal == NULL )
   {
     char* pszParm = "Error in MemoryFactory::APISearchMem::Error in ::pointer to proposal";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
   OtmMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
-    LogMessage2(ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE::");
+    LogMessage(T5ERROR, __func__,  "::FUNC_INVALID_MEMORY_HANDLE::");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
@@ -1579,7 +1579,7 @@ USHORT MemoryFactory::APIUpdateMem
   if ( ( pNewProposal == NULL ) )
   {
     char* pszParm = "pointer to proposal";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 
@@ -1618,7 +1618,7 @@ USHORT MemoryFactory::APIUpdateDeleteMem
   if ( ( pProposalToDelete == NULL ) )
   {
     char* pszParm = "pointer to proposal";
-    LogMessage3(ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
+    LogMessage(T5ERROR, __func__, ":: DDE_MANDPARAMISSING::", pszParm);
     return DDE_MANDPARAMISSING;
   } /* endif */
 

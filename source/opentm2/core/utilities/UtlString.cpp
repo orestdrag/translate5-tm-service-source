@@ -207,7 +207,7 @@ UtlLower
   PSZ  pData                           // pointer to data
 )
 {
-  LogMessage2(FATAL,__func__,":: Called not implemented func");
+  LogMessage(T5FATAL,__func__,":: Called not implemented func");
   PSZ  pTempData = pData;              // get pointer to data
   BYTE c;                              // active byte
 
@@ -227,7 +227,7 @@ UtlLowerW
 )
 {
     //CharLowerW(pData);
-LogMessage2(FATAL,__func__,":: Called not implemented func");
+LogMessage(T5FATAL,__func__,":: Called not implemented func");
   return pData;
 } /* end of function UtlLower */
 
@@ -253,7 +253,7 @@ UtlUpper
   PSZ  pData                           // pointer to data
 )
 {
-  LogMessage2(FATAL,__func__,":: Called not implemented func");
+  LogMessage(T5FATAL,__func__,":: Called not implemented func");
   PSZ  pTempData = pData;              // get pointer to data
   BYTE c;                              // active byte
 
@@ -280,7 +280,7 @@ PSZ_W UTF16strcpy( PSZ_W pszTarget, PSZ_W pszSource )
 
 PSZ_W UTF16strccpy( PSZ_W pszTarget, PSZ_W pszSource, CHAR_W chStop )
 {
-  LogMessage2(FATAL,__func__,":: Called not implemented func");
+  LogMessage(T5FATAL,__func__,":: Called not implemented func");
   PSZ_W pusTarget = pszTarget;
   PSZ_W pusSource = pszSource;
 
@@ -394,7 +394,7 @@ int UTF16strlenBYTE( PTMWCHAR pszString )
 
 PSZ_W UTF16strrev( PSZ_W pszString )
 {
-  LogMessage2(FATAL,__func__,":: Called not implemented func");
+  LogMessage(T5FATAL,__func__,":: Called not implemented func");
   ULONG ulLen = UTF16strlenCHAR( pszString );
   USHORT usPos = 0;
   ULONG  ulMid = ulLen/2;
@@ -536,7 +536,7 @@ ULONG ASCII2UnicodeBufEx( PSZ pszASCII, PSZ_W pszUni, ULONG ulLen, ULONG ulCP,
     *pszUni = EOS;
     if (ulLen)
     {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,   pszASCII, ulLen,  pszUni, ulLen );");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS,   pszASCII, ulLen,  pszUni, ulLen );");
 
      }
   }
@@ -588,7 +588,7 @@ PTMWCHAR UTF16strncpy(PTMWCHAR pusTarget, PTMWCHAR pusSource, LONG lLen)
 
 int UTF16stricmp(PTMWCHAR pusTarget, PTMWCHAR pusSource)
 {
-  //LogMessage1(FATAL, "UTF16stricmp is not implemented");
+  //LogMessage(T5FATAL, "UTF16stricmp is not implemented");
   //return -1;
   return wcscasecmp( pusTarget, pusSource );
   
@@ -646,7 +646,7 @@ void BidiConvertFETo06
 // Reverse direction (from Unicode to 864)
 void BidiConvert06ToFE(LPWSTR lpWideCharStr, int Length) //lpWideCharStr is a Zero terminated buffer.
 {
-  LogMessage2(FATAL,__func__,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
+  LogMessage(T5FATAL,__func__,"TEMPORARY_COMMENTED in called function BidiConvert06ToFE, because of basic TMWCHAR data type migration");
   for (int i=0; i<Length; i++)
   {
 #ifdef TEMPORARY_COMMENTED
@@ -683,7 +683,7 @@ ULONG UtlDirectUnicode2AnsiBufInternal( PSZ_W pszUni, PSZ pszAnsi, ULONG ulLen, 
 											pszAnsi, lBufLen, NULL, NULL );
 		if (plRc && !ulOutPut)
 		{
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 76 lRc = GetLastError();");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 76 lRc = GetLastError();");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
 			lRc = GetLastError();
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -716,7 +716,7 @@ ULONG UtlDirectAnsi2UnicodeBufInternal( PSZ pszAnsi, PSZ_W pszUni, ULONG ulLen,
 
   if ( pszAnsi && pszUni )
   {
-    LogMessage2(WARNING,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
+    LogMessage( T5WARNING,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 77 ulOutPut = MultiByteToWideChar( ulTempCP, MB_ERR_INVALID_CHARS, pszAnsi, ulLen,  pszUni, ulLen );");
   }
   else if (pszUni)
   {
@@ -744,7 +744,7 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
   {
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-    LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
+    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
 #ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
 
@@ -855,7 +855,7 @@ USHORT UtlQueryCharTableEx
           case 862  : pTable = chAnsiToPC862; break;
           case 813  : pTable = chAnsiToPC813; break;
           case 737  :
-LogMessage2(DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869)) { // fix for sev1 Greek: Win NT problem (01/09/23)");
+LogMessage( T5DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869)) { // fix for sev1 Greek: Win NT problem (01/09/23)");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869))
             { // fix for sev1 Greek: Win NT problem (01/09/23)
@@ -920,7 +920,7 @@ LogMessage2(DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78 if ( (Get
           case 862  : pTable = chAnsiToPC862;  pInvTable = chPC862ToAnsi; break;
           case 813  : pTable = chAnsiToPC813;  pInvTable = chPC813ToAnsi; break;
           case 737  :
-LogMessage2(DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) ) { // fix for sev1 Greek: Win NT problem (01/09/23)");
+LogMessage( T5DEBUG,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79 if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) ) { // fix for sev1 Greek: Win NT problem (01/09/23)");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
             if ( (GetOEMCP() == 869) && (GetKBCodePage() == 869) )
             { // fix for sev1 Greek: Win NT problem (01/09/23)

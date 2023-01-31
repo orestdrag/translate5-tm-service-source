@@ -29,11 +29,11 @@ int GetLocaleInfo(
                 break;
 
             default:
-                LogMessage3(ERROR, "GetLocaleInfo():: LOCALE_USER_DEFAULT :: LCType {", toStr(LCType).c_str(), "} is not implemented");
+                LogMessage(T5ERROR, "GetLocaleInfo():: LOCALE_USER_DEFAULT :: LCType {", toStr(LCType).c_str(), "} is not implemented");
                 break;
             }
         }else{
-            LogMessage3(ERROR, "GetLocaleInfo():: Locale {", toStr(Locale).c_str(), "} is not implemented");
+            LogMessage(T5ERROR, "GetLocaleInfo():: Locale {", toStr(Locale).c_str(), "} is not implemented");
         }    
         return -1;
     }
@@ -121,21 +121,21 @@ int WideCharToMultiByte(
     }
 
 void GetSystemTime(LPSYSTEMTIME lpSystemTime){
-    LogMessage1(FATAL, "Called not implemented function::GetSystemTime");
+    LogMessage(T5FATAL, "Called not implemented function::GetSystemTime");
 }
 
 BOOL SystemTimeToFileTime(
     const SYSTEMTIME *lpSystemTime,
     LPFILETIME       lpFileTime
 ){
-    LogMessage1(FATAL, "Called not implemented function::SystemTimeToFileTime");
+    LogMessage(T5FATAL, "Called not implemented function::SystemTimeToFileTime");
 }
 
 BOOL FileTimeToSystemTime(
         const FILETIME *lpFileTime,
         LPSYSTEMTIME   lpSystemTime
     ){
-        LogMessage1(FATAL, "Called not implemented function::FileTimeToSystemTime");
+        LogMessage(T5FATAL, "Called not implemented function::FileTimeToSystemTime");
     }
 
 
@@ -144,7 +144,7 @@ HANDLE OpenMutex(
   BOOL bInheritHandle,    // inherit flag
   LPCTSTR lpName          // pointer to mutex-object name
 ){
-    LogMessage1(FATAL, "Called not implemented function::OpenMutex");
+    LogMessage(T5FATAL, "Called not implemented function::OpenMutex");
     return NULL;
 }
 
@@ -153,7 +153,7 @@ DWORD WaitForSingleObject(
   HANDLE hHandle,
   DWORD  dwMilliseconds
 ){
-    LogMessage1(FATAL, "Called not implemented function::WaitForSingleObject");
+    LogMessage(T5FATAL, "Called not implemented function::WaitForSingleObject");
     return 0;
 }
 
@@ -162,21 +162,21 @@ HANDLE CreateMutex(
         BOOL                  bInitialOwner,
         LPCSTR                lpName
     ){
-        LogMessage1(FATAL, "Called not implemented function::CreateMutex");
+        LogMessage(T5FATAL, "Called not implemented function::CreateMutex");
         return NULL;
     }
 
 BOOL ReleaseMutex(
   HANDLE hMutex
 ){
-    LogMessage1(FATAL, "Called not implemented function::ReleaseMutex");
+    LogMessage(T5FATAL, "Called not implemented function::ReleaseMutex");
     return true;
 }
 
 BOOL FindClose(
   HANDLE hFindFile
 ){
-    LogMessage1(FATAL, "Called not implemented function::FindClose");
+    LogMessage(T5FATAL, "Called not implemented function::FindClose");
 }
 
 

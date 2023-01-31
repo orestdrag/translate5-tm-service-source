@@ -8,10 +8,10 @@ int config::parse() {
     std::fstream file(filename);
     if (!file) {
         //std::cerr << "Failed to open config file\n";
-        LogMessage3(ERROR, __func__,":: Failed to open config file ", filename.c_str());
+        LogMessage(T5ERROR, __func__,":: Failed to open config file ", filename.c_str());
         return -1;
     }
-    LogMessage3(INFO, __func__,":: Success in opening config file ", filename.c_str());
+    LogMessage( T5INFO, __func__,":: Success in opening config file ", filename.c_str());
     std::string line;
     std::string::size_type n;
     const char delim = '=';

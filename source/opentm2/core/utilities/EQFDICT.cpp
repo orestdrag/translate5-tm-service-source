@@ -621,8 +621,8 @@ BOOL UtlEvent
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
-    //if(CheckLogLevel(DEBUG)) \
-      LogMessage7(ERROR, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str());\
+    //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
+      LogMessage( T5ERROR, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str());\
       //UtlEvent( ERROR_EVENT, id, class, rc )
   #else
     #define ERREVENT( id, class, rc )
@@ -630,8 +630,8 @@ BOOL UtlEvent
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
-    //if(CheckLogLevel(DEBUG)) \
-      LogMessage11(ERROR, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
+    //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
+      LogMessage( T5ERROR, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
   #else
     #define ERREVENT2( id, class, rc, gr, str )
@@ -639,8 +639,8 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT( id, class, rc ) \
-    if(CheckLogLevel(DEVELOP)) \
-    LogMessage7(INFO, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+    LogMessage( T5INFO, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( INFO_EVENT, id, class, rc )
   #else
     #define INFOEVENT( id, class, rc )
@@ -648,8 +648,8 @@ BOOL UtlEvent
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT2( id, class, rc, gr, str ) \
-      if(CheckLogLevel(DEVELOP)) \
-      LogMessage11(INFO, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str(), "; str = ", str, "; gr = ", toStr(gr).c_str());\
+      if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+      LogMessage( T5INFO, __func__, ":: id = ", toStr(id).c_str(), "; class = ", toStr(class).c_str(), "; rc = ", toStr(rc).c_str(), "; str = ", str, "; gr = ", toStr(gr).c_str());\
       //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
   #else
     #define INFOEVENT2( id, class, rc, gr, str )
@@ -661,8 +661,8 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-    if(CheckLogLevel(DEVELOP)) \
-    LogMessage7(DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+    LogMessage( T5DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), "; rc = ", toStr(rc));\
       //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
   #else
     #define DEBUGEVENT( id, class, rc )
@@ -670,8 +670,8 @@ BOOL UtlEvent
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT2( id, class, rc, gr, str ) \
-    if(CheckLogLevel(DEVELOP)) \
-      LogMessage11(DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+      LogMessage( T5DEVELOP, __func__, ":: id = ", toStr(id), "; class = ", toStr(class), \
       "; rc = ", toStr(rc), "; str = ", str, "; gr = ", toStr(gr));\
       //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
   #else
@@ -1270,7 +1270,7 @@ SHORT QDAMAllocTempAreas
   // DataRecList in header is in old format (RECPARAMOLD),
   // so convert in-memory copy of list (in the RECPARAM format) to
   // the old format
-  //LogMessage2(INFO,__func__, "::TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
+  //LogMessage( T5INFO,__func__, "::TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
   {
     for (int i = 0; i < MAX_LIST; i++ )
     {
@@ -1697,7 +1697,7 @@ SHORT QDAMReadRecordFromDisk_V3
          else
          {
            ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
-           LogMessage1(ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
+           LogMessage(T5ERROR, "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error");
            sRc = BTREE_READ_ERROR;
          } /* endif */
        } /* endif */
@@ -1945,7 +1945,7 @@ SHORT  QDAMReadRecord_V3
                 // as write is only allowed if the database has been
                 // previously locked
                 ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
-                LogMessage1(ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
+                LogMessage(T5ERROR, "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.");
 
               } /* endif */
               sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
@@ -2045,7 +2045,7 @@ QDAMAddDict
   }
   else
   {
-    LogMessage4(FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
+    LogMessage(T5FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
     sRc = BTREE_MAX_DICTS;
   } /* endif */
 
@@ -2266,7 +2266,7 @@ SHORT QDAMDictFlushLocal
     }
     else
     {
-      LogMessage2(FATAL,__func__, ":: BTREE_NOT_SUPPORTED");
+      LogMessage(T5FATAL,__func__, ":: BTREE_NOT_SUPPORTED");
       sRc = BTREE_NOT_SUPPORTED;
     } /* endif */
   } /* endif */
@@ -2439,7 +2439,7 @@ SHORT QDAMDictCloseLocal
        }
        else
        {
-          LogMessage2(FATAL,__func__, ":: BTREE_V2 is not supported");
+          LogMessage(T5FATAL,__func__, ":: BTREE_V2 is not supported");
           sRc = BTREE_INVALID;   
        } /* endif */
 
@@ -2610,7 +2610,7 @@ SHORT QDAMWriteRecord_V3
    //  else set only the flag
    if ( !sRc )
    {
-    // LogMessage1(WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
+    // LogMessage( T5WARNING,"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
      if ( !pBT->fGuard && false)
      {
         pBuffer->fNeedToWrite = TRUE;
@@ -2906,7 +2906,7 @@ SHORT QDAMAllocKeyRecords
    }
    else
    {
-      LogMessage2(FATAL,__func__, "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
+      LogMessage(T5FATAL,__func__, "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
       throw;
    } /* endif */
    return sRc;
@@ -3054,7 +3054,7 @@ SHORT QDAMDictCreateLocal
     
     if(!pBT->fp){
       sRc = -1;
-      LogMessage2(ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
+      LogMessage(T5ERROR, "QDAMDictCreateLocal::Can't create file ", pName);
     }
   } /* endif */
 
@@ -3083,7 +3083,7 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     if ( !fTransMem )
     {
-      LogMessage1(FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
+      LogMessage(T5FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
       sRc = BTREE_INVALID;
     }
     else
@@ -3142,7 +3142,7 @@ SHORT QDAMDictCreateLocal
     }
     else
     {
-      LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
     } /* endif */
 
     pBT->usNumberOfAllocatedBuffers = 0;
@@ -3180,7 +3180,7 @@ SHORT QDAMDictCreateLocal
       }
       else
       {
-        LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+        LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
       } /* endif */
 
       if (! sRc )
@@ -3213,7 +3213,7 @@ SHORT QDAMDictCreateLocal
         }
         else
         {
-          LogMessage1(FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+          LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
         } /* endif */
       } /* endif */
     } /* endif */
@@ -3716,7 +3716,7 @@ SHORT QDAMCheckForUpdates
           }
           else
           {
-            LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+            LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
             throw;
             return BTREE_INVALID; 
           } /* endif */
@@ -3750,7 +3750,7 @@ SHORT QDAMCheckForUpdates
         {
           if ( !sRc && pBT->LookupTable_V2 )
           {
-            LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+            LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
             throw;
             return BTREE_INVALID; 
           } /* endif */
@@ -3801,7 +3801,7 @@ SHORT QDAMPhysLock
    PBOOL          pfLocked
 )
 {
-  LogMessage2(FATAL,__func__,  ":: called commented out function QDAMPhysLock");
+  LogMessage(T5FATAL,__func__,  ":: called commented out function QDAMPhysLock");
 
   return 0;
 }
@@ -3868,7 +3868,7 @@ PTMWCHAR QDAMGetszKey_V3
    if ( (PBYTE)pusOffset > pEndOfRec )
    {
      // offset pointer is out of range
-     LogMessage6(ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", toStr((long int)pusOffset).c_str(), 
+     LogMessage(T5ERROR, "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = ", toStr((long int)pusOffset).c_str(), 
           "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str(), "\npusOffset - pEndOfRec = ", toStr((long int) ((PBYTE)pusOffset - pEndOfRec)).c_str());
      //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
    }
@@ -3878,7 +3878,7 @@ PTMWCHAR QDAMGetszKey_V3
      if ( pData > pEndOfRec )
      {
        // data pointer is out of range
-       LogMessage4(ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", toStr((long int)pusOffset).c_str(),
+       LogMessage(T5ERROR, "QDAMGetszKey_V3:: data pointer is out of range , pusOffset = ", toStr((long int)pusOffset).c_str(),
              "; pEndOfRec = ", toStr((long int)pEndOfRec).c_str());
        pData = nullptr;
        //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
@@ -4406,9 +4406,9 @@ SHORT  QDAMAddToBuffer_V3
    /* Enlarge pTempRecord area if it is not large enough to contain   */
    /* the data for this record                                        */
    /*******************************************************************/
-  if(CheckLogLevel(DEBUG))
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
    {
-    LogMessage3(DEBUG,__func__,":: data len = ", toStr(ulDataLen).c_str());
+    LogMessage( T5DEBUG,__func__,":: data len = ", toStr(ulDataLen).c_str());
      //CHAR szTemp[8];
      //sprintf( szTemp, "%ld", ulDataLen );
      //INFOEVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 4711, DB_GROUP, szTemp );
@@ -4482,7 +4482,7 @@ SHORT  QDAMAddToBuffer_V3
             if ( TYPE( pRecord ) != chNodeType )
             {
                sRc = BTREE_CORRUPTED;
-               LogMessage2(ERROR,__func__, ":: ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, "" );, BTREE_CORRUPTED   TYPE( pRecord ) != chNodeType");
+               LogMessage(T5ERROR,__func__, ":: ERREVENT2( QDAMADDTOBUFFER_LOC, STATE_EVENT, 1, DB_GROUP, "" );, BTREE_CORRUPTED   TYPE( pRecord ) != chNodeType");
             }
             else
             {
@@ -5474,7 +5474,7 @@ SHORT QDAMSplitNode_V3
   SHORT sRc = 0;                       // success indicator
 
 
-  //LogMessage1(FATAL, "called commented out function QDAMSplitNode_V3");
+  //LogMessage(T5FATAL, "called commented out function QDAMSplitNode_V3");
   //#ifdef TEMPORARY_COMMENTED
   memset( &recKey, 0, sizeof( recKey ) );
   memset( &recData,  0, sizeof( recData ) );
@@ -5859,7 +5859,7 @@ SHORT QDAMUnTerseData
      }
      else
      {
-      LogMessage2(ERROR,__func__,":: BufferTooSmall 1");
+      LogMessage(T5ERROR,__func__,":: BufferTooSmall 1");
       sRc = BTREE_BUFFER_SMALL;
      } /* endif */
    } /* endif */
@@ -6093,7 +6093,7 @@ SHORT QDAMGetszData_V3
          }
          else
          {
-            LogMessage2(ERROR,__func__,":: BufferTooSmall 3");
+            LogMessage(T5ERROR,__func__,":: BufferTooSmall 3");
             sRc = BTREE_BUFFER_SMALL;
          } /* endif */
 
@@ -6554,7 +6554,7 @@ SHORT QDAMInsertKey_V3
       // insert reference
       if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
       {
-        LogMessage2(ERROR, __func__, ":: TEMPORARY_COMMENTED in QDAMInsertKey_V3 :: Unicode2ASCII( pKey, chHeadTerm, 0L );");
+        LogMessage(T5ERROR, __func__, ":: TEMPORARY_COMMENTED in QDAMInsertKey_V3 :: Unicode2ASCII( pKey, chHeadTerm, 0L );");
 #ifdef TEMPORARY_COMMENTED
          Unicode2ASCII( pKey, chHeadTerm, 0L );
          #endif 
@@ -6797,7 +6797,7 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
+         LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -7118,7 +7118,7 @@ SHORT  QDAMDictOpenLocal
                 } /* endif */
                 else
                 {
-                  LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+                  LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
                   throw;
                   return BTREE_INVALID; 
                 } /* endif */
@@ -7140,7 +7140,7 @@ SHORT  QDAMDictOpenLocal
         }
         else
         {
-          LogMessage3(ERROR,"Can't understand file ", pName, ". File has illegal structure!");
+          LogMessage(T5ERROR,"Can't understand file ", pName, ". File has illegal structure!");
            sRc = BTREE_ILLEGAL_FILE;
         } /* endif */
      }
@@ -7217,7 +7217,7 @@ SHORT  QDAMDictOpenLocal
 
   if ( sRc )
   {
-    LogMessage3(ERROR, __func__,":: sRc", toStr(sRc));
+    LogMessage(T5ERROR, __func__,":: sRc", toStr(sRc));
     ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
 
@@ -7442,7 +7442,7 @@ SHORT QDAMDictInsertLocal
 
    if( pBT->bRecSizeVersion != BTREE_V3 )
    {
-      LogMessage1(FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
+      LogMessage(T5FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
       throw;
       sRc = BTREE_NOT_SUPPORTED;
    } /* endif */ 
@@ -7474,8 +7474,8 @@ SHORT QDAMDictInsertLocal
       sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
       if ( !sRc )
       {
-        if(ulLen > TMX_REC_SIZE && CheckLogLevel(DEBUG)){
-          LogMessage3(ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
+        if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+          LogMessage(T5ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
         }
         recData.ulLen = ulLen;
         sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
@@ -7576,7 +7576,7 @@ SHORT QDAMDictUpdSignLocal
 
   if ( pBT->bRecSizeVersion != BTREE_V3)
   {
-      LogMessage1(FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
+      LogMessage(T5FATAL,"QDAMDictUpdSignLocal:: pBT->bRecSizeVersion != BTREE_V3, it's not supported");
       throw;
       sRc = BTREE_INVALID;
   }
@@ -7588,9 +7588,9 @@ SHORT QDAMDictUpdSignLocal
   {
     if ( ulDataLen < ulLen )
     {
-       //LogMessage1(WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
+       //LogMessage( T5WARNING,"TEMPORARY_HARDCODED:: QDAMDictUpdSignLocal ulDataLen < ulLen => ulLen = ulDataLen");
        //ulLen = ulDataLen;
-       LogMessage4(ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", toStr(ulDataLen).c_str(), ", ulLen = ", toStr(ulLen).c_str());
+       LogMessage(T5ERROR,"QDAMDictUpdSignLocal ulDataLen < ulLen, ulDataLen = ", toStr(ulDataLen).c_str(), ", ulLen = ", toStr(ulLen).c_str());
        sRc = BTREE_USERDATA;
     }
     else
@@ -7649,7 +7649,7 @@ SHORT QDAMDictUpdSignLocal
     } /* endif */
     if ( ! sRc )
     {
-      LogMessage3(INFO, "QDAMDictUpdSignLocal :: filled first ", toStr(writingPosition).c_str(), " bytes in file ");
+      LogMessage( T5INFO, "QDAMDictUpdSignLocal :: filled first ", toStr(writingPosition).c_str(), " bytes in file ");
       // fill rest up with zeros
       int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
       char* buff = new char[leftToFill];
@@ -7669,7 +7669,7 @@ SHORT QDAMDictUpdSignLocal
 
    if ( sRc )
    {
-     LogMessage2(ERROR, "QDAMDictUpdSignLocal:: sRc = ", toStr(sRc).c_str());
+     LogMessage(T5ERROR, "QDAMDictUpdSignLocal:: sRc = ", toStr(sRc).c_str());
      ERREVENT2( QDAMUPDSIGNLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
    } 
 
@@ -7867,7 +7867,7 @@ QDAMCheckDict
 
   if ( usI >= MAX_NUM_DICTS - 1 )
   {
-    LogMessage4(FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
+    LogMessage(T5FATAL,__func__,":: can't open more than ", toStr(MAX_NUM_DICTS).c_str()," dictionary files at the same time");
     sRc = BTREE_MAX_DICTS;
   } /* endif */
 
@@ -8016,7 +8016,7 @@ SHORT QDAMLocSubstr_V3
             else
             {
                //ERREVENT2( QDAMLOCSUBSTR_LOC, STATE_EVENT, 2, DB_GROUP, "" );
-               LogMessage2(ERROR,__func__,":: BufferTooSmall 4");
+               LogMessage(T5ERROR,__func__,":: BufferTooSmall 4");
                sRc = BTREE_BUFFER_SMALL;
             } /* endif */
          } /* endif */
@@ -8117,7 +8117,7 @@ SHORT QDAMDictSubStrLocal
    {
      if ( pBT->bRecSizeVersion != BTREE_V3 )
      {
-        LogMessage2(FATAL, __func__,":: V2 is not implemented;");
+        LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
         throw;
         return BTREE_INVALID; 
      } /* endif */
@@ -8600,7 +8600,7 @@ SHORT QDAMDictNextLocal
 
            if ( pBT->bRecSizeVersion != BTREE_V3 )
            {             
-             LogMessage2(FATAL,__func__,":: BTREE_V2 is not supported!");
+             LogMessage(T5FATAL,__func__,":: BTREE_V2 is not supported!");
              throw;
            }
             if ( !sRc )
@@ -8845,7 +8845,7 @@ SHORT QDAMDictFirstLocal
    } /* endif */
    
    if ( pBT->bRecSizeVersion != BTREE_V3 ){
-     LogMessage2(FATAL,__func__, ":: QDAMFirst_V2 is not supported");
+     LogMessage(T5FATAL,__func__, ":: QDAMFirst_V2 is not supported");
      sRc = BTREE_INVALID;
    }
 
@@ -8956,7 +8956,7 @@ USHORT EQFNTMOrganizeIndex
   // get user data (signature record)
   if ( !sRc )
   {
-    //LogMessage1(WARNING, "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
+    //LogMessage( T5WARNING, "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
     usSigLen = (USHORT)ulDataBufSize;
     sRc = QDAMDictSignLocal( pbTree, (PCHAR)pbData, &usSigLen );
   } /* endif */

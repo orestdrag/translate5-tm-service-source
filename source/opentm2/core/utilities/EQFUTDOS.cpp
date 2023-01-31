@@ -360,7 +360,7 @@ USHORT UtlRemoveSearchHandle( HDIR hdir );
 /**********************************************************************/
 
   #include "errno.h"                   // error number defines
-  #include "EQFSTART.MRI"              // hard coded fatal-msg.
+  #include "EQFSTART.MRI"              // hard coded T5FATAL-msg.
   #undef MAX_PATH
 
 extern ERRDATA ErrData[];              // error structure
@@ -669,7 +669,7 @@ USHORT UtlOpenHwnd                                                        /*@3BC
       } /* endif */
       if ( fMsg && usRetCode )
       {
-         usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; fName = ", pszFname );
+         usMBCode = LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; fName = ", pszFname );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -774,7 +774,7 @@ USHORT UtlCloseHwnd
         if ( fMsg && usRetCode )
         {
            usMBCode = MB_CANCEL;
-           LogMessage3(ERROR, __func__,":: rc = " , toStr(usRetCode).c_str());
+           LogMessage(T5ERROR, __func__,":: rc = " , toStr(usRetCode).c_str());
         } /* endif */
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
@@ -916,11 +916,11 @@ USHORT UtlReadHwnd
           PSZ    pszDrive;
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(),"; pszDrive = ",pszDrive);
+          usMBCode = LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(),"; pszDrive = ",pszDrive);
         }
         else
         {
-           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
+           usMBCode = LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1058,7 +1058,7 @@ USHORT UtlWriteHwnd
         sprintf(proclnk, "/proc/self/fd/%d", fno);
         int r = readlink(proclnk, filename, MAXSIZE-1);
         filename[r] = '\0';
-        LogMessage4(ERROR, "UtlWriteHwnd:: can't write file, path = ", filename, ", usRetCode = ", toStr(usRetCode).c_str());
+        LogMessage(T5ERROR, "UtlWriteHwnd:: can't write file, path = ", filename, ", usRetCode = ", toStr(usRetCode).c_str());
 
       } /* endif */
 
@@ -1085,11 +1085,11 @@ USHORT UtlWriteHwnd
         {
           szWork[1] = EOS;
           pszDrive = szWork;
-          usMBCode = LogMessage5(ERROR, __func__,  ":: rc = ", toStr(usRetCode).c_str(), "; pszDrive = ", pszDrive);
+          usMBCode = LogMessage(T5ERROR, __func__,  ":: rc = ", toStr(usRetCode).c_str(), "; pszDrive = ", pszDrive);
         }
         else
         {
-           usMBCode = LogMessage3(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
+           usMBCode = LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() );
         } /* endif */
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
@@ -1347,7 +1347,7 @@ USHORT UtlMkDirHwnd
    HWND     hwndParent
 )
 {
-  LogMessage2(ERROR,__func__, ":: commented function");
+  LogMessage(T5ERROR,__func__, ":: commented function");
   return 0;
 }
 
@@ -1440,7 +1440,7 @@ USHORT UtlMoveHwnd
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; pszSrc = ", pszSrc );
+         LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str(), "; pszSrc = ", pszSrc );
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    return( usRetCode );
@@ -1601,7 +1601,7 @@ USHORT UtlFindFirstHwnd
                   (ISFILEATTR(usAttr) & !ISDIRATTR(pffb->dwFileAttributes));
          if ( fFound)
          {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49 if ( (UtlIsLongFileName( pffb->cFileName ) == TRUE) && (strcmp(pffb->cFileName,\"..\") != 0) )");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49 if ( (UtlIsLongFileName( pffb->cFileName ) == TRUE) && (strcmp(pffb->cFileName,\"..\") != 0) )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // check if 8.3 name is available
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1616,7 +1616,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 49 if ( (Utl
            } /* endif */
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
          } /* endif */
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50 while ( (usRetCode == NO_ERROR) && !fFound )");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50 while ( (usRetCode == NO_ERROR) && !fFound )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
          while ( (usRetCode == NO_ERROR) && !fFound )
          {
@@ -1651,7 +1651,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 50 while ( (
          if ( usRetCode == NO_ERROR )
          {
            usSearch = 1;
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51 // use normal file name if no alternate file name (8.3) is given if ( pffb->cAlternateFileName[0] == EOS )");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51 // use normal file name if no alternate file name (8.3) is given if ( pffb->cAlternateFileName[0] == EOS )");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // use normal file name if no alternate file name (8.3) is given
            if ( pffb->cAlternateFileName[0] == EOS )
@@ -1667,7 +1667,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 51 // use no
          }
          else
          {
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52 // close file handle as it will not be used anymore FindClose( hdirNew );");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52 // close file handle as it will not be used anymore FindClose( hdirNew );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
            // close file handle as it will not be used anymore
             FindClose( hdirNew );
@@ -1680,7 +1680,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 52 // close 
       if ( fMsg && usRetCode && (usRetCode != ERROR_NO_MORE_FILES) )
       {
          usMBCode = MB_CANCEL;
-         LogMessage5(ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() , "; pszFSecCompl = ",pszFSpecCompl);
+         LogMessage(T5ERROR, __func__, ":: rc = ", toStr(usRetCode).c_str() , "; pszFSecCompl = ",pszFSpecCompl);
          /*************************************************************/
          /* change the drive if necessary ...                         */
          /*************************************************************/
@@ -1867,7 +1867,7 @@ USHORT UtlFindCloseHwnd
 {
    USHORT usRetCode = NO_ERROR;        // function return code
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53 if ( FindClose( hdir ) == 0 ) { usRetCode = (USHORT)GetLastError();  } /* endif */");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53 if ( FindClose( hdir ) == 0 ) { usRetCode = (USHORT)GetLastError();  } /* endif */");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    fMsg; hwndParent;
    if ( FindClose( hdir ) == 0 )
@@ -2006,7 +2006,7 @@ USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
       if ( fMsg && usRetCode )
       {
          usMBCode = MB_CANCEL;
-         LogMessage3(ERROR, __func__, ":: rc = ",  toStr(usRetCode).c_str());
+         LogMessage(T5ERROR, __func__, ":: rc = ",  toStr(usRetCode).c_str());
       } /* endif */
    } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
 
@@ -2040,7 +2040,7 @@ BOOL UtlSetDrive
   CHAR szRootDir[5] = "A:\\";
   szRootDir[0] = szNewDrive;
 
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetCurrentDirectory( szRootDir ) == 0 ) { fFlag = FALSE; }");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetCurrentDirectory( szRootDir ) == 0 ) { fFlag = FALSE; }");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   if ( SetCurrentDirectory( szRootDir ) == 0 )
   {
@@ -2111,7 +2111,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetC
    *ppfnProcAddr = (PFN)dlsym(hMod, pszProcName);
    if (!*ppfnProcAddr )
    {
-     LogMessage2(ERROR, "DosGetProcAddr:: can't find function ", pszProcName);
+     LogMessage(T5ERROR, "DosGetProcAddr:: can't find function ", pszProcName);
 
    } /* endif */
    return usRc;
@@ -2134,7 +2134,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetC
  {
    USHORT usRc = 0;                     // success indicator
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135 whole function");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135 whole function");
 #ifdef TEMPORARY_COMMENTED
    *phMod = GetModuleHandle( pszModName );
    if (!*phMod )
@@ -2162,7 +2162,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 135 whole functi
  {
    USHORT  usRc = 0;                    // success indicator
 
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole function");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole function");
 #ifdef TEMPORARY_COMMENTED
    if ( !GetModuleFileName( hMod, pchBuf, cbBuf ) )
    {
@@ -2187,13 +2187,13 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 136 whole functi
  )
  {
    if(*hMod){
-     LogMessage1(INFO,"DosFreeModule::closing hMod");
+     LogMessage( T5INFO,"DosFreeModule::closing hMod");
      dlclose(*hMod);
      *hMod = NULL;
    }else{
-     LogMessage1(ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
+     LogMessage(T5ERROR,"DosFreeModule::can't close hMod, hMod==NULL");
    }
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
    FreeModule( hMod );
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -2467,7 +2467,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModul
    /********************************************************************/
    /* call DosInsMessage to substitute data => they are all in ANSI    */
    /********************************************************************/
-   LogMessage3(ERROR,__func__,":: msg = ", pchBuf);
+   LogMessage(T5ERROR,__func__,":: msg = ", pchBuf);
    //DosInsMessage( ppMsgSubst, usVCount, &chMsg[0], ulMsgLen,
    //               pchBuf, cbBuf, pcbMsg );
 
@@ -2536,7 +2536,7 @@ USHORT UtlQPathInfoHwnd
    HWND     hwndParent
 )
 {
-  LogMessage2(ERROR,__func__, ":: called commented function");
+  LogMessage(T5ERROR,__func__, ":: called commented function");
   return( 0 );
 }
 
@@ -2596,7 +2596,7 @@ USHORT UtlFindFirstLongHwnd
 )
 {
   memset( pffb, 0, sizeof(LONGFILEFIND) );
-  LogMessage2(ERROR,__func__, ":: called commented function");
+  LogMessage(T5ERROR,__func__, ":: called commented function");
   return( 0 );
 }
 
@@ -2606,7 +2606,7 @@ USHORT UtlFindFirstLongHwnd
 /**********************************************************************/
 CHAR UtlGetDriveFromHandle( HFILE hf )
 {
-  LogMessage2(FATAL,__func__, ":: called commented function");
+  LogMessage(T5FATAL,__func__, ":: called commented function");
   return EOS;
 } /* end of function UtlGetDriveFromHandle */
 

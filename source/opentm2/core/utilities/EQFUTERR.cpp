@@ -375,7 +375,7 @@ USHORT UtlErrorHwnd
    char buff[255];
    sprintf(buff, "UtlErrorHwnd(sErrorNumber=%d, usMsgType=%d, usNoOfParams=%d, pParamTable=%s, ErrorType=%d )", sErrorNumber, usMsgType,
                   usNoOfParms, pParmTable, ErrorType);
-   LogMessage1(ERROR,buff);
+   LogMessage(T5ERROR,buff);
 }
 
 //------------------------------------------------------------------------------

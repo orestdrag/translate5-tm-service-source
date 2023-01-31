@@ -207,7 +207,7 @@
    PULONG   pulDataLength,             // entry data length
    PHDCB    phDCB                      // dictionary of match
 ){
-   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+   LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
 }
 //-----------------------------------------------------------------------------
 //   AsdFndNumber     - Asd interface for NlpFndNumberAsd
@@ -308,7 +308,7 @@
    PUSHORT  pusTerms,                  // number of terms in buffer
    BOOL     fTermInStemForm            // TRUE = term is in stem form already
 ){
-   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+   LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
 }
 
 //-----------------------------------------------------------------------------
@@ -935,7 +935,7 @@
   HDCB     hDCB
 ){
 
-   LogMessage5(FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
+   LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
 }
 
  BOOL DicRenameDict( PSZ pszOldAndNewName, BOOL fMsg );

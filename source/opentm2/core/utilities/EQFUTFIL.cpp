@@ -56,7 +56,7 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
-LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 ) { szCurDir[0] = EOS; }");
+LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 ) { szCurDir[0] = EOS; }");
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
@@ -96,7 +96,7 @@ LogMessage2(ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetC
 
 USHORT UtlGetDriveList( BYTE *szList)
 {
-  LogMessage2(ERROR,__func__, ":: called commented function");
+  LogMessage(T5ERROR,__func__, ":: called commented function");
   return( 0 );   // set index relative to 0
 }
 
@@ -127,7 +127,7 @@ USHORT UtlGetLANDriveList( PBYTE pszList )
 
   pSource = pTarget = pszList;         // start at begin of drive list
 
-  LogMessage2(ERROR,__func__, ":: called commented function");
+  LogMessage(T5ERROR,__func__, ":: called commented function");
 
   return( usRC );
 } /* end of function UtlGetLANDriveList */
@@ -281,7 +281,7 @@ BOOL UtlLoadFileHwnd
       }
       else
       {
-        LogMessage7(WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", toStr(usDosRc).c_str(), ", ulSize: ", toStr(ulSize).c_str(), "-> fOK=false now");
+        LogMessage( T5WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", toStr(usDosRc).c_str(), ", ulSize: ", toStr(ulSize).c_str(), "-> fOK=false now");
         fOK = FALSE;
       } /* endif */
     } /* endif */
@@ -316,7 +316,7 @@ BOOL UtlLoadFileHwnd
     {                                         // set msg btn depending on Contin.
        usMsgButton = (USHORT)(( fContinue ) ? MB_OKCANCEL : MB_CANCEL);
        // Message text:   Table or file %1 could not be accessed.
-       usDosRc = LogMessage3(ERROR, __func__,  "::ERROR_TA_ACC_FILE:: fName = ",pszFilename);
+       usDosRc = LogMessage(T5ERROR, __func__,  "::ERROR_TA_ACC_FILE:: fName = ",pszFilename);
 
        fOK = fContinue && ( usDosRc == MBID_OK );
     } /* endif */
@@ -622,7 +622,7 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
 //           if ( fMsg )                                           /*KIT1274*/
 //           {                                                     /*KIT1274*/
 //             pszErrParm = pszFile;                               /*KIT1274*/
-//             LogMessage7(ERROR, __func__,  ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
+//             LogMessage( T5ERROR, __func__,  ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
 //                           &pszErrParm, EQF_ERROR,               /*KIT1274*/
 //                           hwndParent );                         /*KIT1274*/
 //           } /* endif */                                         /*KIT1274*/
@@ -1018,7 +1018,7 @@ USHORT UtlBufCloseHwnd
       if ( fMsg )
       {
         pszErrParm = pBufCB->szFileName,
-        LogMessage5(ERROR, __func__,  "; rc = ", toStr(usRC).c_str(), "; ", pszErrParm );
+        LogMessage(T5ERROR, __func__,  "; rc = ", toStr(usRC).c_str(), "; ", pszErrParm );
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1165,7 +1165,7 @@ BOOL IsDBCSLeadByteEx(
   UINT CodePage,
   BYTE TestChar
 ){
-  LogMessage1(WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
+  LogMessage( T5WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
   if(TestChar & 128){
     return true;
   }
@@ -1293,7 +1293,7 @@ VOID CloseFile
 
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole function");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole function");
 #ifdef TEMPORARY_COMMENTED
 //TODO: fix issues with zip/unzip library
 
@@ -1325,7 +1325,7 @@ LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole functi
 
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
-LogMessage2(ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole function");
+LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole function");
 #ifdef TEMPORARY_COMMENTED
   HZIP hz; 
   HANDLE hDir;
@@ -1392,7 +1392,7 @@ void UtlDeleteAllFiles( const char *pszDirectory )
  WIN32_FIND_DATA info;
  HANDLE hp; 
  sprintf( szFileFound, "%s/*.*", pszDirectory );
-LogMessage3(ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles full function, pszDir = ", pszDirectory);
+LogMessage(T5ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles full function, pszDir = ", pszDirectory);
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
  hp = FindFirstFile( szFileFound, &info );
  do
