@@ -482,7 +482,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
   if(VLOG_IS_ON(1)){
-    LogMessage( T5TRANSACTION,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+    LogMessage( T5INFO,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
   }
   // find a free slot in the memory list
   iIndex = getFreeSlot(requiredMemory);
@@ -814,7 +814,7 @@ int OtmMemoryServiceWorker::import
     // cleanup the memory list (close memories not used for a longer time)
     size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
     if(VLOG_IS_ON(1)){
-      LogMessage( T5TRANSACTION,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
+      LogMessage( T5INFO,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
           toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
     }
     //requiredMemory = 0;

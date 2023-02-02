@@ -1,4 +1,7 @@
 #include "LogWrapper.h"
+#include <execinfo.h>
+//#include <stacktrace>
+
 
 std::string getTimeStr(){
     // current date/time based on current system
@@ -25,6 +28,27 @@ std::ostringstream& T5Logger::__getLogBuffer(){
 std::ostringstream& T5Logger::__getBodyBuffer(){
     static std::ostringstream __logBuff;
     return __logBuff;
+}
+
+std::string getBackTrace(){
+    void *array[50];
+    char **strings;
+    int size, i;
+
+    size = backtrace (array, 50);
+    strings = backtrace_symbols (array, size);
+    std::string res;
+    if (strings != NULL)
+    {
+        //printf ("Obtained %d stack frames.\n", size);
+        for (i = 0; i < size; i++){
+            res += strings[i];
+            res += '::';
+        //printf ("%s\n", strings[i]);
+        }
+        free (strings);
+    }
+    return res;
 }
 
 int T5Logger::LogStop(){

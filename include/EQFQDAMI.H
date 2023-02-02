@@ -224,10 +224,6 @@ typedef struct _BTREEINDEX_V3
 typedef SHORT _PFN_QDAMCOMPARE( PVOID, PVOID, PVOID );
 typedef _PFN_QDAMCOMPARE *PFN_QDAMCOMPARE;
 
-///* Maximum size (entries) of the lookup table (it is a USHORT).
-#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x0FFF0
-/* Initial size (entries) of the lookup table */
-#define MIN_NUMBER_OF_LOOKUP_ENTRIES 32
 /* Every MAX_READREC_CALLS calls to QDAMReadRecord unlocked records with
    access counter < MAX_READREC_CALLS will be written to disk and memory
    will be freed.
@@ -304,7 +300,6 @@ typedef struct _BTREEGLOB
    USHORT       usNumberOfLookupEntries;    // Number of allocated lookup-table-entries
    USHORT       usNumberOfAllocatedBuffers; // Number of allocated buffers
    ULONG        ulReadRecCalls;             // Number of calls to QDAMReadRecord
-   PLOOKUPENTRY_V2 LookupTable_V2;                // Pointer to lookup-table
    PLOOKUPENTRY_V3 LookupTable_V3;                // Pointer to lookup-table
    PACCESSCTRTABLEENTRY AccessCtrTable;     // Pointer to access-counter-table
    USHORT       usBtreeRecSize;                   // size of BTREE records

@@ -85,7 +85,7 @@ static bool ValidateLOGlevel(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(t5loglevel, 0, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)");
+DEFINE_int32(t5loglevel, T5INFO, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)");
 DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
 
@@ -159,12 +159,11 @@ int main(int argc, char* argv[]) {
    //FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
-   //FLAGS_v=1;
+   //FLAGS_v=2;
    //#endif
    //#ifdef GFLAGS_ENABLED
    //FLAGS_alsologtostderr = true;
-   //FLAGS_logtostderr = true;
-   //FLAGS_t5loglevel = 0;
+   //FLAGS_t5loglevel = T5DEBUG;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);

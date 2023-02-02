@@ -894,7 +894,7 @@ USHORT UtlReadHwnd
       DosError(0);
 
       {
-        ULONG lRead;
+        unsigned long lRead;
         if ( ReadFile( hf, pBuf, cbBuf, &lRead, NULL ) == 0 )
         {
           //usRetCode = (USHORT)GetLastError();
@@ -1040,7 +1040,7 @@ USHORT UtlWriteHwnd
    PSZ    pszDrive;
    CHAR   szWork[2];
 
-   ULONG ulBytesWritten = 0;
+   unsigned long ulBytesWritten = 0;
 
    ULONG  ulTotBytesWritten = 0;
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.9")
+SET(APP_VERSION  "0.4.10")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -173,6 +173,8 @@ find_package(OpenSSL REQUIRED)
 find_package(proxygen REQUIRED)
 #find_package(glog REQUIRED)
 
+target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
+
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
@@ -206,7 +208,7 @@ target_link_libraries(T5MEMORY PRIVATE
   gflags
   ssl
   crypto
-  libxerces-c-3.2.so  zip   ICU::uc ICU::i18n 
+  libxerces-c-3.2.so  zip   ICU::uc ICU::i18n dl
 )
 
 

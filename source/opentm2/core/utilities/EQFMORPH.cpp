@@ -1401,7 +1401,7 @@ PMORPHHASH MorphHashCreate
   /********************************************************************/
   if ( fOK )
   {
-    pMorphHash->ulMaxElements = min( ulMaxElements,
+    pMorphHash->ulMaxElements = min((unsigned long) ulMaxElements,
                                      (MAX_SEG_SIZE / sizeof(HASHENTRY)) );
     pMorphHash->ulElements  = 0;
   } /* endif */

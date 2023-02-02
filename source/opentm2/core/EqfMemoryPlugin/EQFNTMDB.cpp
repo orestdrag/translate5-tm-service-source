@@ -1786,9 +1786,8 @@ SHORT QDAMDictExactLocal
     LogMessage(T5FATAL, __func__,":: BTREE_CORRUPTED");
      sRc = BTREE_CORRUPTED;
   }else if(pBT->bRecSizeVersion != BTREE_V3){
-    LogMessage(T5FATAL, __func__,":: not supported btree version");
+    T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
     sRc = BTREE_NOT_SUPPORTED;
-
   } else
   {    
        PBTREEBUFFER_V3 pRecord = NULL;

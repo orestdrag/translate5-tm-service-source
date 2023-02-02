@@ -726,7 +726,6 @@ typedef struct _BTREEGLOB
    USHORT       usNumberOfLookupEntries;    // Number of allocated lookup-table-entries
    USHORT       usNumberOfAllocatedBuffers; // Number of allocated buffers
    ULONG        ulReadRecCalls;             // Number of calls to QDAMReadRecord
-   PLOOKUPENTRY_V2 LookupTable_V2;                // Pointer to lookup-table
    PLOOKUPENTRY_V3 LookupTable_V3;                // Pointer to lookup-table
    PACCESSCTRTABLEENTRY AccessCtrTable;     // Pointer to access-counter-table
    USHORT       usBtreeRecSize;                   // size of BTREE records
@@ -824,7 +823,8 @@ static BTREEHEADRECORD header; // Static buffer for database header record
 
 
 ///* Maximum size (entries) of the lookup table (it is a USHORT).
-#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x0FFF0
+#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x0FFFF
+//#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x00FF
 /* Initial size (entries) of the lookup table */
 #define MIN_NUMBER_OF_LOOKUP_ENTRIES 32
 
@@ -2266,7 +2266,7 @@ SHORT QDAMDictFlushLocal
     }
     else
     {
-      LogMessage(T5FATAL,__func__, ":: BTREE_NOT_SUPPORTED");
+      T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
       sRc = BTREE_NOT_SUPPORTED;
     } /* endif */
   } /* endif */
@@ -2402,25 +2402,8 @@ SHORT QDAMDictCloseLocal
        }
        else
        {
-        if ( pBT->LookupTable_V2 )
-        {
-          USHORT i;
-          PLOOKUPENTRY_V2 pLEntry = pBT->LookupTable_V2;
-
-          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
-          {
-            if ( pLEntry->pBuffer )
-            {
-              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-            } /* endif */
-            pLEntry++;
-          } /* endfor */
-
-          UtlAlloc( (PVOID *)&pBT->LookupTable_V2, 0L, 0L, NOMSG );
-          UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
-          pBT->usNumberOfLookupEntries = 0;
-          pBT->usNumberOfAllocatedBuffers = 0;
-        } /* endif */
+        T5LOG(T5FATAL) << "Version btree2 is not supported";
+        sRc = BTREE_INVALID;
        } /* endif */
 
        /*****************************************************************/
@@ -3748,14 +3731,9 @@ SHORT QDAMCheckForUpdates
         }
         else
         {
-          if ( !sRc && pBT->LookupTable_V2 )
-          {
-            LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
-            throw;
+            T5LOG(T5FATAL) << ":: V2 is not implemented;";
             return BTREE_INVALID; 
           } /* endif */
-
-        } /* endif */
         /****************************************************************/
         /* Invalidate current record and current index                  */
         /****************************************************************/
@@ -6012,7 +5990,7 @@ SHORT QDAMGetszData_V3
          else if ( *pulDataLen >= ulLen )
          {
             ulFitLen = pBT->usBtreeRecSize - sizeof(BTREEHEADER) - *pusOffset;
-            ulFitLen = ulLen < ulFitLen - usLenFieldSize ?  ulLen : ulFitLen - usLenFieldSize ;
+            ulFitLen = ulLen < (ulFitLen - usLenFieldSize) ?  ulLen : (ulFitLen - usLenFieldSize) ;
 
             if ( fTerse )
             {
@@ -7442,8 +7420,7 @@ SHORT QDAMDictInsertLocal
 
    if( pBT->bRecSizeVersion != BTREE_V3 )
    {
-      LogMessage(T5FATAL, "QDAMDictInsertLocal::BTREEBUFFER_V2 is not implemented");
-      throw;
+      T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
       sRc = BTREE_NOT_SUPPORTED;
    } /* endif */ 
    
