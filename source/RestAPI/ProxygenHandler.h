@@ -62,6 +62,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
     UPDATE_ENTRY,
     TAGREPLACEMENTTEST,
     IMPORT_MEM,
+    CLONE_TM_LOCALY,
     //IMPORT_MEM_INTERNAL_FORMAT
   };
 

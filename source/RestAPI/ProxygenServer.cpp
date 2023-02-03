@@ -238,6 +238,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->command = ProxygenHandler::COMMAND::DELETE_ENTRY;
           }else if(urlCommand ==  "import"){ // update 
             requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM;
+          }else if(urlCommand == "clone"){
+            requestHandler->command = ProxygenHandler::COMMAND::CLONE_TM_LOCALY;
           }
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 

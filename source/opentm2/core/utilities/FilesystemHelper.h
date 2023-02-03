@@ -40,6 +40,7 @@ public:
 
     static FILE* CreateFile(const std::string& path, const std::string& mode);
     static int MoveFile(std::string oldPath, std::string newPath);
+    static int  CloneFile(std::string srcPath,std::string dstPath);
     
     static int CreateDir(const std::string& path, int rights = 0700);
     static bool DirExists(const std::string& path);

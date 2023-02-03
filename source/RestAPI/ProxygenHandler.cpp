@@ -237,6 +237,14 @@ void ProxygenHandler::onEOM() noexcept {
         iRC = pMemService->deleteEntry( memName, strInData,  strResponseBody );
         break;
       }
+      case COMMAND::CLONE_TM_LOCALY:{
+        if(fWriteRequestsAllowed == false){
+          iRC = 423;
+          break;
+        }
+        iRC = pMemService->cloneTMLocaly(memName, strInData, strResponseBody);
+        break;
+      }
       default:
       {
         iRC = 400;

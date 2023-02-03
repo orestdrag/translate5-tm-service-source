@@ -71,6 +71,10 @@ class ProxygenStats {
     return otherRequestCount_;
   }
 
+  virtual uint64_t getCloneLocalyCount(){
+    return cloneLocalyCount_;
+  }
+
  private:
   atomic_uint64_t reqCount_{0};
 
@@ -89,6 +93,7 @@ class ProxygenStats {
   atomic_uint64_t saveAllTmsReqCount_{0};
   atomic_uint64_t getListOfMemoriesReqCount_{0};
   atomic_uint64_t resourcesReqCount_{0};
+  atomic_uint64_t cloneLocalyCount_{0};
 
   atomic_uint64_t otherRequestCount_{0};
   atomic_uint64_t unrecognizedRequestCount_{0};

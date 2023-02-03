@@ -71,6 +71,13 @@ public:
     std::string &strOutputParms
   );
 
+  int cloneTMLocaly
+  (
+    std::string  strMemory,
+    std::string strInputParms,
+    std::string &strOutputParms
+  );
+
   /*! \brief Search for matching proposals 
   \param strMemory name of memory
   \param strInputParms input parameters in JSON format

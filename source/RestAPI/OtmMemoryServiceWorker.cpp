@@ -39,6 +39,10 @@
 #include "../cmake/git_version.h"
 #include "opentm2/core/utilities/ThreadingWrapper.h"
 #include "opentm2/core/utilities/LanguageFactory.H"
+#include "EqfMemoryPlugin.h"
+
+#include "opentm2/core/utilities/Stopwatch.hpp"
+
 
 enum statusCodes {
   OK = 200, 
@@ -713,7 +717,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
 {
   LONG lHandle = this->vMemoryList[iIndex].lHandle;
   int i=0;
-  while(vMemoryList[iIndex].eStatus == IMPORT_RUNNING_STATUS){
+  while(vMemoryList[iIndex].eStatus == IMPORT_RUNNING_STATUS || vMemoryList[iIndex].eImportStatus == IMPORT_RUNNING_STATUS ){
     sleep(1);
     if(i++ % 10 == 0){
       LogMessage( T5WARNING, __func__,":: waiting for closing memory with name = \'",vMemoryList[iIndex].szName, "\', for ", toStr(i).c_str(), " seconds" );
@@ -736,6 +740,180 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   return( 0 );
 } 
 
+
+
+int OtmMemoryServiceWorker::cloneTMLocaly
+(
+  std::string  strMemory,
+  std::string strInputParms,
+  std::string &strOutputParms
+)
+{
+  int iRC = 0;
+  START_WATCH
+  
+  // parse json data
+  JSONFactory *factory = JSONFactory::getInstance();
+  void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
+  std::string newName, name, value;
+  while ( iRC == 0 )
+  {
+    iRC = factory->parseJSONGetNext( parseHandle, name, value );
+    if ( iRC == 0 ){
+      if( strcasecmp (name.c_str(), "newName") == 0 ){
+         newName = value;          
+      }else{
+          T5LOG(T5WARNING) << "::JSON parsed unused data: name = " << name << "; value = " << value;
+      }
+    }
+  }
+  if(iRC == 2002){
+    iRC = 0;
+  }
+  if(!iRC && newName.empty()){
+    strOutputParms = "\'newName\' parameter was not provided or was empty";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+
+  std::string srcTmdPath, srcMemPath, srcTmiPath, dstTmdPath, dstTmiPath, dstMemPath;
+  char memDir[255];
+  if(!iRC){
+    iRC = properties_get_str(KEY_MEM_DIR, memDir, 254);
+    if(iRC){
+      strOutputParms = "can't read MEM_DIR path from properties";
+      T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+      iRC = 500;
+    }
+  }
+  if(!iRC){
+    srcTmdPath = memDir + strMemory + ".TMD";
+    srcTmiPath = memDir + strMemory + ".TMI";
+    srcMemPath = memDir + strMemory + ".MEM";
+    dstTmdPath = memDir + newName + ".TMD";
+    dstTmiPath = memDir + newName + ".TMI";
+    dstMemPath = memDir + newName + ".MEM";
+  }
+
+  // check mem if exists
+  if(!iRC && FilesystemHelper::FileExists(srcMemPath.c_str()) == false){
+    strOutputParms = "\'srcMemPath\' = " + srcMemPath + " not found";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && FilesystemHelper::FileExists(srcTmdPath.c_str()) == false){
+    strOutputParms = "\'srcTmdPath\' = " +  srcTmdPath + " not found";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && FilesystemHelper::FileExists(srcTmiPath.c_str()) == false){
+    strOutputParms = "\'srcTmiPath\' = " +  srcTmiPath + " not found";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+
+  // check mem if is not in import state
+  int iIndex = -1;
+  LONG lHandle = 0;
+  BOOL fClose = false;
+  MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+  MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+
+  if(!iRC){
+    iIndex = this->findMemoryInList( strMemory.c_str() );
+    if(iIndex == -1){
+    // tm is probably not opened, buf files presence was checked before, so it should be "AVAILABLE" status
+    //  strOutputParms = "\'newName\' " + strMemory +" was not found in memory list";
+    //  T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    //  iRC = 500;
+    }else{
+      // close the memory - if open
+      if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+      {
+        fClose = true;
+        lHandle =          this->vMemoryList[iIndex].lHandle; 
+        lastStatus =       this->vMemoryList[iIndex].eStatus;
+        lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+
+        this->vMemoryList[iIndex].lHandle = 0;
+        this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+        this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+        //this->vMemoryList[iIndex].dImportProcess = 0;
+        if(lHandle){
+          EqfCloseMem( this->hSession, lHandle, 0 );
+        }
+      }else if(this->vMemoryList[iIndex].eStatus != AVAILABLE_STATUS ){
+         strOutputParms = "\'newName\' parameter was not found in memory list";
+         T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+         iRC = 500;
+      }
+    }
+  }
+  
+  // check if new name is available(is not occupied)
+  if(!iRC && FilesystemHelper::FileExists(dstMemPath.c_str()) == true){
+    strOutputParms = "\'dstMemPath\' = " +  dstMemPath + " already exists";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && FilesystemHelper::FileExists(dstTmdPath.c_str()) == true){
+    strOutputParms = "\'dstTmdPath\' = " +  dstTmdPath + " already exists";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && FilesystemHelper::FileExists(dstTmiPath.c_str()) == true){
+    strOutputParms = "\'dstTmiPath\' = " +  dstTmiPath + " already exists";
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  // clone .mem .tmi and .tmd files 
+  if(!iRC && (iRC = FilesystemHelper::CloneFile(srcMemPath, dstMemPath))){
+    strOutputParms = "Can't clone file, iRC = " + toStr(iRC)  + "; \'srcMemPath\' = " + srcMemPath + "; \'dstMemPath\' = " +  dstMemPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 501;
+  }
+  if(!iRC && (iRC = FilesystemHelper::CloneFile(srcTmdPath, dstTmdPath))){
+    strOutputParms = "Can't clone file, iRC = " + toStr(iRC)  + "; \'srcTmdPath\' = " + srcTmdPath + "; \'dstTmdPath\' = " +  dstTmdPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 501;
+  }
+  if(!iRC && (iRC = FilesystemHelper::CloneFile(srcTmiPath, dstTmiPath))){
+    strOutputParms = "Can't clone file, iRC = " + toStr(iRC)  + "; \'srcTmiPath\' = " + srcTmiPath + "; \'dstTmiPath\' = " +  dstTmiPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 501;
+  }
+
+  //if there was error- delete files
+  if(iRC == 501){
+    if(FilesystemHelper::FileExists(dstTmiPath.c_str())) FilesystemHelper::DeleteFile(dstTmiPath.c_str());
+    if(FilesystemHelper::FileExists(dstTmdPath.c_str())) FilesystemHelper::DeleteFile(dstTmdPath.c_str());
+    if(FilesystemHelper::FileExists(dstMemPath.c_str())) FilesystemHelper::DeleteFile(dstMemPath.c_str());
+    iRC = 500;
+  }
+  if(!iRC){
+    EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
+  }
+  if(iIndex != -1 )
+  {
+    fClose = true;
+    lHandle =          this->vMemoryList[iIndex].lHandle; 
+    lastStatus =       this->vMemoryList[iIndex].eStatus;
+    lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+
+    this->vMemoryList[iIndex].lHandle = 0;
+    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+    this->vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
+    //this->vMemoryList[iIndex].dImportProcess = 0;
+  }
+
+  if(iRC == 0 ){
+    strOutputParms = newName + " was cloned successfully";
+    iRC = 200;
+  }
+  STOP_WATCH
+  //PRINT_WATCH
+  return iRC;
+}
 /*! \brief Import a memory from a TMX file
 \param strMemory name of memory
 \param strInputParms input parameters in JSON format
@@ -1326,6 +1504,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     AddToJson(ssOutput, "ListOfMemoriesRequestCount", stats.getListOfMemoriesRequestCount(), true );
     AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
     AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
+    AddToJson(ssOutput, "CloneTmLocalyRequestCount", stats.getCloneLocalyCount(), true);
     AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
     ssOutput << "\n ],\n"; 
   }

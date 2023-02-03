@@ -86,6 +86,23 @@ FILE* FilesystemHelper::CreateFile(const std::string& path, const std::string& m
     return OpenFile(path, mode, useBuffer);
 }
 
+int FilesystemHelper::CloneFile(std::string srcPath, std::string dstPath){
+    std::ifstream ifs(srcPath, std::ios::in | std::ios::binary);   
+    std::ofstream ofs(dstPath, std::ios::out | std::ios::binary);
+    if(!ofs)
+    {
+        LogMessage(T5ERROR, __func__, "::can't open src file \'", srcPath.c_str(), "\' ");
+        return FILEHELPER_ERROR_CANT_OPEN_DIR;
+    } 
+    if(!ifs)
+    {
+        LogMessage(T5ERROR, __func__, "::can't open trg file \'", dstPath.c_str(), "\'  to move ", srcPath.c_str());
+        return FILEHELPER_ERROR_CANT_OPEN_DIR;;
+    } 
+    ofs << ifs.rdbuf();
+    return 0;
+}
+
 int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
     std::string fixedOldPath = FixPath(oldPath);
     std::string fixedNewPath = FixPath(newPath);
@@ -101,22 +118,7 @@ int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
         LogMessage(T5ERROR, __func__, ":: src file \'", oldPath.c_str(), "\' is missing!");
         return FILE_NOT_EXISTS;
     }
-    
-    {
-        std::ifstream ifs(oldPath, std::ios::in | std::ios::binary);   
-        std::ofstream ofs(newPath, std::ios::out | std::ios::binary);
-        if(!ofs)
-        {
-            LogMessage(T5ERROR, __func__, "::can't open src file \'", oldPath.c_str(), "\' ");
-            return FILEHELPER_ERROR_CANT_OPEN_DIR;
-        } 
-        if(!ifs)
-        {
-            LogMessage(T5ERROR, __func__, "::can't open trg file \'", newPath.c_str(), "\'  to move ", oldPath.c_str());
-            return FILEHELPER_ERROR_CANT_OPEN_DIR;;
-        } 
-        ofs << ifs.rdbuf();
-    }
+    CloneFile(oldPath, newPath);
     //delete prev file
     DeleteFile(oldPath);
     //remove(oldPath);
