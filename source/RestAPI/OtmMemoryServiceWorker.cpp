@@ -814,10 +814,10 @@ int OtmMemoryServiceWorker::cloneTMLocaly
 
   // check mem if is not in import state
   int iIndex = -1;
-  LONG lHandle = 0;
-  BOOL fClose = false;
-  MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
-  MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+  //LONG lHandle = 0;
+  //BOOL fClose = false;
+  //MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+  //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
 
   if(!iRC){
     iIndex = this->findMemoryInList( strMemory.c_str() );
@@ -828,22 +828,18 @@ int OtmMemoryServiceWorker::cloneTMLocaly
     //  iRC = 500;
     }else{
       // close the memory - if open
-      if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+      if(this->vMemoryList[iIndex].eImportStatus == IMPORT_RUNNING_STATUS){
+           strOutputParms = "src tm \'" + strMemory +"\' is in import status. Repeat request later.";
+          T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+         iRC = 500;
+      }else if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
       {
-        fClose = true;
-        lHandle =          this->vMemoryList[iIndex].lHandle; 
-        lastStatus =       this->vMemoryList[iIndex].eStatus;
-        lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
-
-        this->vMemoryList[iIndex].lHandle = 0;
-        this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-        this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-        //this->vMemoryList[iIndex].dImportProcess = 0;
-        if(lHandle){
-          EqfCloseMem( this->hSession, lHandle, 0 );
+        if(this->vMemoryList[iIndex].lHandle){
+          //EqfCloseMem( this->hSession, this->vMemoryList[iIndex].lHandle, 0 );
+          //this->vMemoryList[iIndex].lHandle = 0;
         }
       }else if(this->vMemoryList[iIndex].eStatus != AVAILABLE_STATUS ){
-         strOutputParms = "\'newName\' parameter was not found in memory list";
+         strOutputParms = "src tm \'" + strMemory +"\' is not available nor opened";
          T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
          iRC = 500;
       }
@@ -866,6 +862,24 @@ int OtmMemoryServiceWorker::cloneTMLocaly
     T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
     iRC = 500;
   }
+
+  //flush filebuffers before clonning
+  if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmdPath))){
+    strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmdPath\' = " + srcTmdPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmiPath))){
+    strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmiPath\' = " + srcTmiPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+  if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcMemPath))){
+    strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcMemPath\' = " + srcMemPath;
+    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+    iRC = 500;
+  }
+
   // clone .mem .tmi and .tmd files 
   if(!iRC && (iRC = FilesystemHelper::CloneFile(srcMemPath, dstMemPath))){
     strOutputParms = "Can't clone file, iRC = " + toStr(iRC)  + "; \'srcMemPath\' = " + srcMemPath + "; \'dstMemPath\' = " +  dstMemPath;
@@ -893,16 +907,16 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   if(!iRC){
     EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
   }
-  if(iIndex != -1 )
+  if( iIndex != -1 )
   {
-    fClose = true;
-    lHandle =          this->vMemoryList[iIndex].lHandle; 
-    lastStatus =       this->vMemoryList[iIndex].eStatus;
-    lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+    //fClose = true;
+    //lHandle =          this->vMemoryList[iIndex].lHandle; 
+    //lastStatus =       this->vMemoryList[iIndex].eStatus;
+    //lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
 
-    this->vMemoryList[iIndex].lHandle = 0;
-    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-    this->vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
+    //this->vMemoryList[iIndex].lHandle = 0;
+    //this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+    //this->vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
     //this->vMemoryList[iIndex].dImportProcess = 0;
   }
 
@@ -912,6 +926,8 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   }
   STOP_WATCH
   //PRINT_WATCH
+
+  strOutputParms = "{\n\t\"msg\": \"" + strOutputParms + "\"\n}"; 
   return iRC;
 }
 /*! \brief Import a memory from a TMX file

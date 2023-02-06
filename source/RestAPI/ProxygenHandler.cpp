@@ -48,7 +48,8 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::DELETE_ENTRY, "DELETE_ENTRY" },
         { ProxygenHandler::COMMAND::UPDATE_ENTRY, "UPDATE_ENTRY" },
         { ProxygenHandler::COMMAND::TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
-        { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" }
+        { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
+        { ProxygenHandler::COMMAND::CLONE_TM_LOCALY, "CLONE_MEM"}
     };
 
 
@@ -140,7 +141,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       { 
           fWriteRequestsAllowed = false;
           iRC = pMemService->saveAllTmOnDisk( strResponseBody );
-          
+          //check tms is in import status
           //close log file
           if(iRC == 200){
             pMemService->closeAll();
