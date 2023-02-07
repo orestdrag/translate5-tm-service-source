@@ -864,15 +864,19 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   }
 
   //flush filebuffers before clonning
-  if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmdPath))){
-    strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmdPath\' = " + srcTmdPath;
-    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
-    iRC = 500;
+  if(FilesystemHelper::FilebufferExists(srcTmdPath)){
+    if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmdPath))){
+      strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmdPath\' = " + srcTmdPath;
+      T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+      iRC = 500;
+    }
   }
-  if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmiPath))){
-    strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmiPath\' = " + srcTmiPath;
-    T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
-    iRC = 500;
+  if(FilesystemHelper::FilebufferExists(srcTmiPath)){
+    if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcTmiPath))){
+      strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcTmiPath\' = " + srcTmiPath;
+      T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+      iRC = 500;
+    }
   }
   /*
   if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcMemPath))){
