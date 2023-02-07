@@ -2029,9 +2029,18 @@ int OtmMemoryServiceWorker::closeAll
   \returns http return code
   */
   int OtmMemoryServiceWorker::shutdownService(){
-    std::thread([]() 
+    std::thread([this]() 
         {
            sleep(3);
+           int j= 3;
+           while(int i = GetMemImportInProcess() != -1){
+            if( ++j % 15 == 0){
+              T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
+            }
+            T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  i = "<< i; 
+            
+            sleep(1);
+           }
            exit(0);
         }).detach();
     return 200;

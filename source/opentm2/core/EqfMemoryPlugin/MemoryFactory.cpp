@@ -1325,7 +1325,7 @@ USHORT MemoryFactory::APICloseMem
   OtmMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
-    LogMessage(T5ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL )");
+    if(VLOG_IS_ON(1))  LogMessage(T5ERROR, __func__, "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL ): tried to close TM that was already closed");
     return( FUNC_INVALID_MEMORY_HANDLE );
   } /* endif */
 
