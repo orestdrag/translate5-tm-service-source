@@ -7096,7 +7096,7 @@ SHORT  QDAMDictOpenLocal
                 } /* endif */
                 else
                 {
-                  LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
+                  T5LOG(T5FATAL) << ":: V2 is not implemented;";
                   throw;
                   return BTREE_INVALID; 
                 } /* endif */

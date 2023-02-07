@@ -585,7 +585,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pReplAddr[1] = pLIDA->szMemName;
          LogMessage(T5ERROR, __func__,  "::ERROR_MEM_LOAD_INITFAILED::", pReplAddr[0] );
 
-         if ( pLIDA->pProposal != NULL ) free(pLIDA->pProposal);
+         if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
 
          UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
          *ppIda = NULL;
@@ -594,11 +594,11 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 //WINAPI
          //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
-   } /* endif */
-
-   time( &lImportStartTime );
-   LogMessage( T5DEBUG,__func__, "************ Memory Import Log *********************\n Memory import started at   : ", 
-        asctime( localtime( &lImportStartTime ) ), "\nMemory name                : ", pLIDA->szMemName    );
+   }else{
+    time( &lImportStartTime );
+    T5LOG(T5DEBUG)  << "************ Memory Import Log *********************\n Memory import started at   : "<<
+          asctime( localtime( &lImportStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
+   } /* endif */   
 
    return ((USHORT)fOK);
 } /* end of function MemLoadStart */

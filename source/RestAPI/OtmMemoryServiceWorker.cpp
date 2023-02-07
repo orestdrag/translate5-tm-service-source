@@ -874,11 +874,12 @@ int OtmMemoryServiceWorker::cloneTMLocaly
     T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
     iRC = 500;
   }
+  /*
   if(!iRC && (iRC = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcMemPath))){
     strOutputParms = "Can't flush src filebuffer, iRC = " + toStr(iRC)  + "; \'srcMemPath\' = " + srcMemPath;
     T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
     iRC = 500;
-  }
+  }//*/
 
   // clone .mem .tmi and .tmd files 
   if(!iRC && (iRC = FilesystemHelper::CloneFile(srcMemPath, dstMemPath))){
@@ -1462,7 +1463,8 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     {
         //fSize = it->second.data.size();
         fSize = it->second.data.capacity();
-        fName = FilesystemHelper::parseFilename(it->first);
+        fName = it->first;
+        //fName = FilesystemHelper::parseFilename(it->first);
         
         ssOutput << "{ ";
         AddToJson(ssOutput, "name", fName, true );
