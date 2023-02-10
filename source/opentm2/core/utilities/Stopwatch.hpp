@@ -40,7 +40,7 @@ namespace stopwatch{
             const auto ms_count = (ns_count /1000000) + up;
         }
         std::string print(){
-            return "{" + std::to_string(elapsed()) + "} ms;";
+            return /*"{" + */ std::to_string(elapsed()) + /*"}*/" ms\"";
         }
         ~Stopwatch(){
             T5LOG(T5INFO) << "stopwatch, method  = " << methodName << "; time = " << print();

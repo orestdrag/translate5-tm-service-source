@@ -1196,11 +1196,15 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceD
       lRc = -1;
     } /* endif */
   } /* endif */
-
+  
   if( whitespaceDiff ){ 
-    while( *pD1++ ){ wspaceDiff++; }
-    while( *pD2++ ){ wspaceDiff++; }
-    *whitespaceDiff = wspaceDiff;
+    if(lRc){
+      *whitespaceDiff= 0;
+    }else{
+      while( *pD1++ ){ wspaceDiff++; }
+      while( *pD2++ ){ wspaceDiff++; }
+      *whitespaceDiff = wspaceDiff;
+    }
   } 
   
   return lRc;

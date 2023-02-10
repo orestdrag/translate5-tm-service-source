@@ -929,10 +929,13 @@ int OtmMemoryServiceWorker::cloneTMLocaly
     strOutputParms = newName + " was cloned successfully";
     iRC = 200;
   }
+
+  strOutputParms = "{\n\t\"msg\": \"" + strOutputParms + "\",\n\t\"time\": \"" + watch.print()+ "\n}"; 
+
+
   STOP_WATCH
   //PRINT_WATCH
 
-  strOutputParms = "{\n\t\"msg\": \"" + strOutputParms + "\"\n}"; 
   return iRC;
 }
 /*! \brief Import a memory from a TMX file
