@@ -51,6 +51,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
     DELETE_MEM,
     EXPORT_MEM,
     EXPORT_MEM_INTERNAL_FORMAT,
+    REORGANIZE_MEM,
     STATUS_MEM,
     RESOURCE_INFO,
 

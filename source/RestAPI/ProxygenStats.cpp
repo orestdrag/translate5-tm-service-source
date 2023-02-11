@@ -31,6 +31,11 @@ int ProxygenStats::recordRequest(int command) {
         statusMemReqCount_++;
         break;
       }
+      case ProxygenHandler::COMMAND::REORGANIZE_MEM:
+      {
+        reorganizeMemRequestCount_++;
+        break;
+      }
       case ProxygenHandler::COMMAND::FUZZY: 
       {        
         fuzzyReqCount_++;

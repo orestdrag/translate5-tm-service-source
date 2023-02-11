@@ -26,6 +26,10 @@ class ProxygenStats {
     return reqCount_;
   }
   
+  virtual uint64_t  getReorganizeRequestCount(){
+    return reorganizeMemRequestCount_;
+  }
+
   virtual uint64_t getCreateMemRequestCount() {
     return createMemReqCount_;
   }
@@ -94,6 +98,7 @@ class ProxygenStats {
   atomic_uint64_t getListOfMemoriesReqCount_{0};
   atomic_uint64_t resourcesReqCount_{0};
   atomic_uint64_t cloneLocalyCount_{0};
+  atomic_uint64_t reorganizeMemRequestCount_{0};
 
   atomic_uint64_t otherRequestCount_{0};
   atomic_uint64_t unrecognizedRequestCount_{0};

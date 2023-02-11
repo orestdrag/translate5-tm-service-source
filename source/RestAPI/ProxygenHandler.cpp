@@ -49,6 +49,7 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::UPDATE_ENTRY, "UPDATE_ENTRY" },
         { ProxygenHandler::COMMAND::TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
+        { ProxygenHandler::COMMAND::REORGANIZE_MEM, "REORGANIZE_MEM" },
         { ProxygenHandler::COMMAND::CLONE_TM_LOCALY, "CLONE_MEM"}
     };
 
@@ -114,6 +115,14 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         iRC = pMemService->getMem( memName, requestAcceptHeader,  vMemData);
         strResponseBody = std::string(vMemData.begin(), vMemData.end());
         iRC = 200;
+        break;
+      }
+
+      case COMMAND::REORGANIZE_MEM:
+      {
+        iRC = 500;
+        strResponseBody = "{\n\t\"msg\": \"endpoint is not implemented\"\n}";
+        //iRC = pMemService->reorganizeMem( memName, strResponseBody);
         break;
       }
       

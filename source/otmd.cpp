@@ -11,7 +11,8 @@
 #include <folly/portability/GFlags.h>
 
 #include <execinfo.h>
-
+#include <csignal>
+#include "RestAPI/OtmMemoryServiceWorker.h"
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/FilesystemHelper.h"
 #include "cmake/git_version.h"
@@ -97,7 +98,8 @@ DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including t
 void handle_interrupt_sig(int sig) {
     T5LOG( T5TRANSACTION) << "Received interrupt signal\n";
     //StopOtmMemoryService();
-    T5LOG( T5TRANSACTION) << "Stopped t5memory\n";
+    T5LOG( T5TRANSACTION) << "Stopping t5memory\n";
+
 }
 
 void FailureWriter(const char* data, int size){
@@ -116,6 +118,19 @@ void FailureWriter(const char* data, int size){
     // print out all the frames to stderr
     //fprintf(stderr, "Error: signal %d:\n", sig);
     backtrace_symbols_fd(array, size, STDERR_FILENO);
+}
+
+
+namespace
+{
+  volatile std::sig_atomic_t gSignalStatus;
+}
+ 
+void signal_handler(int signal)
+{
+  gSignalStatus = signal;
+  T5LOG(T5TRANSACTION) << " Received signal "<< signal<< "; Shutting down :";
+  OtmMemoryServiceWorker::getInstance()->shutdownService(signal);
 }
 
 /*
@@ -145,8 +160,11 @@ using namespace google;
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
+   std::signal(SIGINT, signal_handler);
+   std::signal(SIGABRT, signal_handler);
+   std::signal(SIGKILL, signal_handler);
    //#ifdef GLOGGING_ENABLED
-   //FLAGS_log_dir = "/or/.t5memory/LOG/";
+   FLAGS_log_dir = "/or/.t5memory/LOG/";
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }
@@ -156,7 +174,7 @@ int main(int argc, char* argv[]) {
    //     FilesystemHelper::CreateDir(FLAGS_log_dir, 0700);
    //}
    FLAGS_colorlogtostderr = true;
-   //FLAGS_logtostderr = true;
+   FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
    //FLAGS_v=2;
@@ -176,6 +194,8 @@ int main(int argc, char* argv[]) {
    T5LOG(T5TRANSACTION) <<"Worker thread starting";   
    std::thread worker(proxygen_server_init);
    worker.join();
+   OtmMemoryServiceWorker::getInstance()->shutdownService(SHUTDOWN_CALLED_FROM_MAIN);
+   while(OtmMemoryServiceWorker::getInstance()->fServiceIsRunning == true);
    T5LOG(T5TRANSACTION) << "Worker thread finished";    
 }
 

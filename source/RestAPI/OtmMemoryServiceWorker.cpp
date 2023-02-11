@@ -1520,6 +1520,8 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     AddToJson(ssOutput, "DeleteMemRequestCount", stats.getDeleteMemRequestCount(), true );
     AddToJson(ssOutput, "ImportMemRequestCount", stats.getImportMemRequestCount(), true );
     AddToJson(ssOutput, "ExportMemRequestCount", stats.getExportMemRequestCount(), true );
+    AddToJson(ssOutput, "CloneTmLocalyRequestCount", stats.getCloneLocalyCount(), true);
+    AddToJson(ssOutput, "ReorganizeRequestCount", stats.getReorganizeRequestCount(), true);
     AddToJson(ssOutput, "StatusMemRequestCount", stats.getStatusMemRequestCount(), true );
     AddToJson(ssOutput, "FuzzyRequestCount", stats.getFuzzyRequestCount(), true );
     AddToJson(ssOutput, "ConcordanceRequestCount", stats.getConcordanceRequestCount(), true );
@@ -1529,7 +1531,6 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     AddToJson(ssOutput, "ListOfMemoriesRequestCount", stats.getListOfMemoriesRequestCount(), true );
     AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
     AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
-    AddToJson(ssOutput, "CloneTmLocalyRequestCount", stats.getCloneLocalyCount(), true);
     AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
     ssOutput << "\n ],\n"; 
   }
@@ -2037,8 +2038,9 @@ int OtmMemoryServiceWorker::closeAll
 /*! \brief shutdown the service
   \returns http return code
   */
-  int OtmMemoryServiceWorker::shutdownService(){
-    std::thread([this]() 
+  int OtmMemoryServiceWorker::shutdownService(int sig){    
+    this->fServiceIsRunning = true;
+    std::thread([this, sig]() 
         {
            sleep(3);
            int j= 3;
@@ -2050,7 +2052,11 @@ int OtmMemoryServiceWorker::closeAll
             
             sleep(1);
            }
-           exit(0);
+
+           this->fServiceIsRunning = false;
+           if(sig != SHUTDOWN_CALLED_FROM_MAIN){
+            exit(sig);
+           }
         }).detach();
     return 200;
   }

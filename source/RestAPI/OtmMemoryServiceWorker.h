@@ -27,7 +27,7 @@
   When a memory has not been used for the given time it is automatically closed
 */
 #define OTMMEMSERVICE_MEMORY_TIMEOUT 300
-
+#define SHUTDOWN_CALLED_FROM_MAIN -2
 class OtmMemoryServiceWorker
 /*! \brief   This class provides translation memory related services
 
@@ -57,6 +57,9 @@ public:
 
 	
   int init();
+
+
+  std::atomic_bool fServiceIsRunning{0};
 
   /*! \brief Import a memory from a TMX file
   \param strMemory name of memory
@@ -122,7 +125,7 @@ public:
 /*! \brief shutdown the service
   \returns http return code
   */
-  int shutdownService();
+  int shutdownService(int sig = 0);
 
   /*! \brief Close all open memories
   \returns http return code0 if successful or an error code in case of failures
