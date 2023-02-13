@@ -33,6 +33,7 @@
 #include "OtmMemoryServiceWorker.h"
 
 DECLARE_string(servicename);
+DECLARE_string(t5_ip);
 DECLARE_bool(useconfigfile);
 DECLARE_int32(port);
 DECLARE_bool(localhostonly);
@@ -121,7 +122,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       std::string msg = "SERVER RECEIVED REQUEST:";
       msg += "\n\t URL: " + url;
 
-      LogMessage( T5TRANSACTION, msg.c_str());
+      T5LOG(T5TRANSACTION)  << msg;
     }
     if(url.size() <= 1){
       return  new ProxygenHandler(stats_.get());;
@@ -144,8 +145,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     std::string urlService = url.substr(0, urlSeparator);
    
     if(urlService != serviceName && urlService != additionalServiceName ){
-      LogMessage( T5ERROR, __func__, ":: Wrong url \'", urlService.c_str(), "\', should be \'", 
-          serviceName.c_str(),"\' or \'", additionalServiceName.c_str(),"\'");
+      T5LOG(T5ERROR) <<":: Wrong url \'" << urlService << "\', should be \'"<<
+          serviceName << "\' or \'" << additionalServiceName <<"\'";
       return new ProxygenHandler(stats_.get());
     }
 
@@ -261,7 +262,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     uint32_t receiveSessionWindowSize = 10 * (1 << 20) * 10;
 
 
-    LogMessage( T5TRANSACTION, "Trying to prepare t5memory");
+    T5LOG( T5TRANSACTION)  << "Trying to prepare t5memory";
     auto pMemService = OtmMemoryServiceWorker::getInstance();
 
     char szServiceName[100] = "t5memory";
@@ -294,10 +295,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     if(FLAGS_triplesthreshold >= 0){
       uiThreshold = FLAGS_triplesthreshold;
     }
-    if(FLAGS_localhostonly >= 0){
-      fLocalHostOnly = FLAGS_localhostonly;
-    }
-
     if(FLAGS_servicethreads > 0){
       iWorkerThreads = FLAGS_servicethreads;
     }
@@ -336,7 +333,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, toStr(uiAllowedRAM)));
             fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly)));
         }else{
-          LogMessage(T5ERROR, __func__, ":: can't open t5memory.conf, path = ", path.c_str());
+          T5LOG(T5ERROR)<<  ":: can't open t5memory.conf, path = " <<  path;
         }
     }
     #endif
@@ -357,62 +354,29 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     T5Logger::GetInstance()->SetLogLevel(uiLogLevel);
 
     char szValue[150];
+    std::string host;
 
 
-    LogMessage( T5DEBUG,"PrepareOtmMemoryService:: done, port/path = :", toStr(uiPort).c_str(),"/", 
-        szServiceName,"; Allowed ram = ", toStr(uiAllowedRAM).c_str()," MB\n Setting up proxygen http options...");
+    T5LOG(T5DEBUG)<<"PrepareOtmMemoryService:: done, port/path = :" << uiPort <<"/" << szServiceName <<
+      "; Allowed ram = " << uiAllowedRAM <<" MB\n Setting up proxygen http options...";
 
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
     
-    LogMessage( T5DEBUG, ":: creating address data structure");
+    T5LOG( T5DEBUG) << ":: creating address data structure";
     folly::SocketAddress addr;
-    ifaddrs* addresses = nullptr, *pAddr = nullptr; 
-    char host[NI_MAXHOST];
-
-    if(fLocalHostOnly == false){
-      getifaddrs(&addresses);
-      int s;//, family = pAddr->ifa_addr->sa_family;
-      pAddr = addresses;
-      
-      while(pAddr != nullptr 
-          && !( pAddr->ifa_addr->sa_family == AF_INET 
-          && !(strcmp(pAddr->ifa_name, "eth0") 
-            && strcmp(pAddr->ifa_name, "enp0s3") ) )
-      ){
-        pAddr = pAddr->ifa_next;
-        if(VLOG_IS_ON(2)){
-          LogMessage( T5DEBUG, __func__,":: checking addr name: ", pAddr->ifa_name );
-        }
-        //family = pAddr->ifa_addr->sa_family;
-      }
-      
-    
-      if (pAddr != nullptr && pAddr->ifa_addr != nullptr && pAddr->ifa_addr->sa_data != nullptr && pAddr->ifa_addr->sa_family == AF_INET ) {
-        s = getnameinfo(pAddr->ifa_addr,
-                sizeof(struct sockaddr_in) ,
-                host, NI_MAXHOST,
-                NULL, 0, NI_NUMERICHOST);
-        if (s != 0) {
-          pAddr = nullptr;
-        }
-      }else{
-        pAddr = nullptr;
-      }
-    }
-
-    if(fLocalHostOnly || pAddr == nullptr){
-      strcpy(host, "127.0.0.1");
-    }
-    addr.setFromIpPort(host, uiPort);
-    if(addresses != nullptr){
-      freeifaddrs(addresses);
+    if(FLAGS_t5_ip.empty()){
+      addr.setFromLocalPort(uiPort);
+      host = "any";
+    }else{
+      host = FLAGS_t5_ip;
+      addr.setFromIpPort(host, uiPort);
     }
     
     std::vector<HTTPServer::IPConfig> IPs = {
       {addr,  Protocol::HTTP}
     };
      
-    LogMessage( T5INFO, __func__, ":: binding to socket, ",addr.getAddressStr(), "; port = ", toStr(addr.getPort()).c_str());
+    T5LOG(T5INFO) <<  ":: binding to socket, " << addr.getAddressStr() << "; port = " <<addr.getPort();
     HTTPServer server(std::move(options));
     server.bind(IPs);
 
@@ -425,27 +389,31 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     //read languages.xml
     LanguageFactory *pLangFactory = LanguageFactory::getInstance();
-    std::stringstream initMsg;
-    initMsg << "Service details:\n  Service name = " << szServiceName;
-    initMsg << "\n  Address :" << host << ":" << uiPort; 
-    initMsg << "\n  Build date: " << buildDate;
-    initMsg << "\n  Run date: " << runDate;
-    initMsg << "\n  Git commit info: " << gitHash;
-    initMsg << "\n  Version: " << appVersion;
-    initMsg << "\n  Workdir: " << szOtmDirPath;
-    initMsg << "\n  Worker threads: " << iWorkerThreads;
-    initMsg << "\n  Timeout: " << uiTimeOut;
-    initMsg << "\n  Log level: " << uiLogLevel;
-    initMsg << "\n  Triples threshold: " << uiThreshold;
-    initMsg << "\n  Localhost only: " << fLocalHostOnly; 
-    initMsg << "\n  Allowed ram = " << uiAllowedRAM << " MB";  
-    initMsg << "\n\n\n\
-                |==================================================================|\n\
-                |-------------Setup is done -> waiting for requests...-------------|\n\
-                |==================================================================|\n";
-    LogMessage( T5TRANSACTION, __func__, ":: ", initMsg.str().c_str());
+
     serviceName = szServiceName;
     additionalServiceName = serviceName+"_service";
+
+    if( true /*printIninMsg*/){
+      T5LOG(T5TRANSACTION) << "Service details:\n  Service name = " << szServiceName <<
+      "\n  Additional service name: "<< additionalServiceName <<
+      "\n  Address :" << host << ":" << uiPort << 
+      "\n  Build date: " << buildDate <<
+      "\n  Run date: " << runDate <<
+      "\n  Git commit info: " << gitHash <<
+      "\n  Version: " << appVersion <<
+      "\n  Workdir: " << szOtmDirPath <<
+      "\n  Worker threads: " << iWorkerThreads <<
+      "\n  Timeout: " << uiTimeOut <<
+      "\n  Log level: " << uiLogLevel <<
+      "\n  Triples threshold: " << uiThreshold <<
+      "\n  Localhost only: " << fLocalHostOnly << 
+      "\n  Allowed ram = " << uiAllowedRAM << " MB" <<
+      "\n\n\n\
+                  |==================================================================|\n\
+                  |-------------Setup is done -> waiting for requests...-------------|\n\
+                  |==================================================================|\n";
+      
+    }
     
     t.join();
     return 0;

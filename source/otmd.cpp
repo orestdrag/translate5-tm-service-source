@@ -31,7 +31,7 @@ static bool ValidatePort(const char* flagname, int32_t value) {
 DEFINE_int32(port, 4080, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
-DEFINE_bool(localhostonly, false, "Should we use localhost or external address for service");
+DEFINE_string(t5_ip, "", "which ip to use in t5memory(default is any). Should be in format '1.1.1.1'");
 
 
 DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
