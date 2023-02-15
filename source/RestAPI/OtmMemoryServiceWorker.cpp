@@ -1445,6 +1445,24 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 }
 
 
+template<typename T>
+void AddObjToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparator){
+  ss << "{ \"" << key << "\" : ";
+
+  //if (std::is_same<T, int>::value)
+  if(std::is_arithmetic<T>::value) // if it's number - skip quotes
+  {
+    ss << value;
+  }else{
+    ss << "\"" << value << "\"";
+  }
+  ss << " }";
+  if(fAddSeparator)
+    ss << ",";
+
+  ss << "\n";
+}
+
 int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats){
   int iRC = verifyAPISession();
   if ( iRC != 0 )
@@ -1465,7 +1483,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     size_t total = 0, fSize;
     std::string fName;
 
-    ssOutput << "[\n";
+    ssOutput << "\"filebuffers\": [\n";
     for (auto it = fbs->cbegin(); it != fbs->cend(); )
     {
         //fSize = it->second.data.size();
@@ -1514,7 +1532,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
   AddToJson(ssOutput, "Resident set", resident_set, true );
   AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
   {
-    ssOutput << "[\n";
+    ssOutput << "\"Requests\": {\n";
     AddToJson(ssOutput, "RequestCount", stats.getRequestCount(), true );
     AddToJson(ssOutput, "CreateMemRequestCount", stats.getCreateMemRequestCount(), true );
     AddToJson(ssOutput, "DeleteMemRequestCount", stats.getDeleteMemRequestCount(), true );
@@ -1532,7 +1550,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
     AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
     AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
     AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
-    ssOutput << "\n ],\n"; 
+    ssOutput << "\n },\n"; 
   }
 
   
@@ -1543,7 +1561,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
   AddToJson(ssOutput, "RAM limit(MB)", availableRam, false );
 
   //close json
-  ssOutput << "\n};";
+  ssOutput << "\n}";
 
   strOutput = ssOutput.str();
   iRC = 200;

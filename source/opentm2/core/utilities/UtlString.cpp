@@ -744,7 +744,7 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
   {
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED code in UtlDirectUnicode2Ansi");
+    LOG_TEMPORARY_COMMENTED;
 #ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
 

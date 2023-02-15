@@ -160,6 +160,7 @@ using namespace google;
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
+   setlocale(LC_ALL, "");
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);
    std::signal(SIGKILL, signal_handler);

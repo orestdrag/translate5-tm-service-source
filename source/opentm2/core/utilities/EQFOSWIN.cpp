@@ -24,6 +24,12 @@ USHORT dbcscp = 0;
 VOID
 EQFAnsiToOem( PSZ pIn, PSZ pOut )
 {
+  if ( pIn != pOut )
+  {
+    strcpy( pOut, pIn );
+  } /* endif */
+  LOG_TEMPORARY_COMMENTED;
+  /*
   USHORT usInCP, usOutCP;
 
   usInCP = (USHORT) GetCodePage( ANSI_CP );
@@ -41,7 +47,7 @@ EQFAnsiToOem( PSZ pIn, PSZ pOut )
     {
       strcpy( pOut, pIn );
     } /* endif */
-  } /* endif */
+  //} /* endif */
 }
 
 #define NO_ERROR 0
@@ -53,6 +59,12 @@ EQFAnsiToOem( PSZ pIn, PSZ pOut )
 VOID
 EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
 {
+  if ( pIn != pOut )
+  {
+    strcpy( pOut, pIn );
+  } /* endif */
+  LOG_TEMPORARY_COMMENTED;
+  /*
   USHORT usRc;
   PUCHAR pTable;
 
@@ -72,7 +84,7 @@ EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
   {
     // standard conversion
   }
-
+//*/
 }
 
 
@@ -84,6 +96,13 @@ EQFCPAnsiToOem( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
 VOID
 EQFOemToAnsi( PSZ pIn, PSZ pOut )
 {
+  // copy data without conversion
+    if ( pIn != pOut )
+    {
+      strcpy( pOut, pIn );
+    } /* endif */
+  LOG_TEMPORARY_COMMENTED;
+  #ifdef TEMPORARY_COMMENTED  
   USHORT usInCP, usOutCP;
 
   usInCP = (USHORT) GetCodePage( OEM_CP );
@@ -102,6 +121,7 @@ EQFOemToAnsi( PSZ pIn, PSZ pOut )
       strcpy( pOut, pIn );
     } /* endif */
   } /* endif */
+  #endif
 }
 
 /**********************************************************************/
@@ -111,6 +131,13 @@ EQFOemToAnsi( PSZ pIn, PSZ pOut )
 VOID
 EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
 {
+  if ( pIn != pOut )
+  {
+    strcpy( pOut, pIn );
+  } /* endif */
+  LOG_TEMPORARY_COMMENTED;
+
+  /*
   USHORT usRc;
   PUCHAR pTable;
   usOutCP;
@@ -133,6 +160,7 @@ EQFCPOemToAnsi( USHORT usInCP, PSZ pIn, USHORT usOutCP, PSZ pOut )
     //OemToAnsi( pIn, pOut );
     EQFOemToAnsi( pIn, pOut );
   }
+  //*/
 }
 
 

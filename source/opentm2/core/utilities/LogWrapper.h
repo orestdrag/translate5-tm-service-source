@@ -96,8 +96,10 @@ public:
 std::string getTimeStr();
 int getBuffIdForLog(int severity);
 
+#define GET_STACKTRACE_EXPL boost::stacktrace::stacktrace()
 //#define GET_STACKTRACE boost::stacktrace::stacktrace()
 #define GET_STACKTRACE ""
+
 
 #define FLUSHLOGBUFFERS T5Logger::GetInstance()->FlushBuffers(T5ERROR)
 //#define FLUSHLOGBUFFERS ""
@@ -118,7 +120,10 @@ int getBuffIdForLog(int severity);
 #define T5LOG(severity)   T5LOG_FROM_ID(getBuffIdForLog(severity), severity) << \
             "::[" << #severity << "]::" << __func__ << ": " 
 
-#define LOG_UNIMPLEMENTED_FUNCTION T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called unimplemented function in "  << __func__;
+#define LOG_UNIMPLEMENTED_FUNCTION T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called unimplemented function in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL;
+
+#define LOG_TEMPORARY_COMMENTED T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " 
+
 
 // code after this line should be deleted and replaced in calls with T5LOG
 int LogMessage(int LogLevel, std::string message1);
@@ -144,5 +149,6 @@ int LogMessage(int LogLevel, std::string message1, std::string message2, std::st
 int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
                 std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
                     std::string message9, std::string message10, std::string message11) ;
+
 
 #endif //_LOG_WRAPPER_H_

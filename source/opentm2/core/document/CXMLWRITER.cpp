@@ -141,6 +141,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+#include <uchar.h>
 //#include <windows.h>
 
 #include "CXMLWRITER.H"
@@ -815,13 +816,165 @@ BOOL CXmlWriter::GetContentFlag( void )
   return( fElementContent );
 }
 
+bool is_utf8_multibyte_code_unit(char c) {
+  return ((unsigned char)c) >= 0x80;
+}
+
+static size_t code_to_utf8(unsigned char *const buffer, const unsigned int code)
+{
+    if (code <= 0x7F) {
+        buffer[0] = code;
+        return 1;
+    }
+    if (code <= 0x7FF) {
+        buffer[0] = 0xC0 | (code >> 6);            /* 110xxxxx */
+        buffer[1] = 0x80 | (code & 0x3F);          /* 10xxxxxx */
+        return 2;
+    }
+    if (code <= 0xFFFF) {
+        buffer[0] = 0xE0 | (code >> 12);           /* 1110xxxx */
+        buffer[1] = 0x80 | ((code >> 6) & 0x3F);   /* 10xxxxxx */
+        buffer[2] = 0x80 | (code & 0x3F);          /* 10xxxxxx */
+        return 3;
+    }
+    if (code <= 0x10FFFF) {
+        buffer[0] = 0xF0 | (code >> 18);           /* 11110xxx */
+        buffer[1] = 0x80 | ((code >> 12) & 0x3F);  /* 10xxxxxx */
+        buffer[2] = 0x80 | ((code >> 6) & 0x3F);   /* 10xxxxxx */
+        buffer[3] = 0x80 | (code & 0x3F);          /* 10xxxxxx */
+        return 4;
+    }
+    return 0;
+}
+
+wchar_t utf_to_code(unsigned char* bytes, size_t& size){
+    wchar_t res = 0;
+    //if(bytes[0] & 128 == 0){
+    if(bytes[0] < 128){
+      size = 1;
+      res = bytes[0] & 0x7F;
+    //}else if(bytes[0] & 224 == 192){/* 110xxxxx */
+    }else if(bytes[0] < 224){
+      size = 2;
+      //res = bytes[0]  + bytes[1]*8;
+      //res = (bytes[0] & 0x1F) << 5;
+      //res = res << 1;
+      
+      //res += (bytes[1] & 0x3F);
+      res = bytes[1];
+    //}else if(bytes[0] & 240 == 224){/* 1110xxxx */
+    }else if(bytes[0] < 240){
+      size = 3;
+      //res += (bytes[0] & 0x07) << 12;
+      //res += (bytes[1] & 0x3f) << 6;
+      //res += (bytes[2] & 0x3f);
+    //}else if(bytes[0] & 248 == 240){/* 11110xxx */
+    }else if(bytes[0] < 248){
+      size = 4;
+      //res += (bytes[0] & 0x03) << 18;
+      //res += (bytes[1] & 0x3f) << 12;
+      //res += (bytes[2] & 0x3f) << 6;
+      //res += (bytes[3] & 0x3f);
+    }else{
+      T5LOG(T5ERROR) << "Wrong utf8 code "<< bytes[0];
+      size = 1;
+      //return bytes[0] & 0x7F;
+    }
+    //for(int i =0;i<size; i++){
+    //  res += bytes[size-i-1] << 8*i;
+    //}
+    return res;
+}
+
+wchar_t utf8_to_code(unsigned char* bytes, size_t size){
+  wchar_t res =0;
+  //reverse list
+  unsigned char* tmp = new unsigned char[size];
+  for(int i=0;i<size;i++){
+    tmp[size-i-1] = bytes[i];
+  }
+  for(int i=0;i<size;i++){
+    //res += bytes[i] << (i*6) & 0x3F;
+    //res += (bytes[i]  << (i*6));
+    res += (tmp[i]  << (i*6));
+  }
+  delete[] tmp;
+  return res;
+}
+
+
 // convert given string to Unicode, dynamically allocate buffer for Unicode string 
 void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
 {  
-  std::wstring wstr = EncodingHelper::convertToUTF16(pAnsiText);
-  int iUnicodeLen = (wstr.size()+1) * sizeof(WCHAR);//sizeof(WCHAR) * strlen(pAnsiText) + 10;
-  WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen );
+  T5LOG(T5TRANSACTION) << "pAnsiText = " <<pAnsiText;
+  if(!strncmp("Kit_", pAnsiText, 4)){
+    T5LOG(T5WARNING)<< "now would crash "<< pAnsiText;
+  }
+  std::string str(pAnsiText);
+  memcpy(&str[0], pAnsiText, str.size());
+  //char8_t* pc = (char8_t*)pAnsiText;
+  
+  std::wstring wstr = EncodingHelper::convertToUTF16(str);
+  //int iUnicodeLen = (wstr.size()+1) * sizeof(WCHAR);//sizeof(WCHAR) * strlen(pAnsiText) + 10;
+  size_t iUnicodeLen = str.size()+1;
+  WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen* sizeof(WCHAR) );
+  memset(pBuffer, 0, sizeof(WCHAR) * iUnicodeLen);
+  //wcsncpy(pBuffer, wstr.c_str(), size);
+  //char* psymb = (char*) pBuffer;
+  //for(int i = 0, j = 0; i < iUnicodeLen ; i++){
+    /*
+    *psymb = str[i];
+    if(is_utf8_multibyte_code_unit(str[i])){
+      //copy up to 4 bytes      
+      psymb++;
+    }else{
+      //if(psymb == (char*)&pBuffer[j]){
+      //  *psymb = str[i];
+      //}
+      //j++;
+      psymb = (char*)&pBuffer[++j];
+      
+    }//*/
+  //}
+  T5LOG(T5TRANSACTION) << str;
+  /*
+  for(int i=0, j=0; i<iUnicodeLen-1; j++ ){
+    psymb = (char*) &pBuffer[j];
+    *psymb = str[i];
+    while( i<iUnicodeLen-1 && is_utf8_multibyte_code_unit(str[++i])){
+      *psymb = str[i];
+      psymb ++;
+    }
+    /*do{
+      *psymb = str[i];
+      psymb++;
+    }while(is_utf8_multibyte_code_unit(str[i++]))
+    //*/
+  //}
+
+  /*
+  unsigned char uc_buff[4];
+  for(int i=0, j=0; i<iUnicodeLen-1; j++){
+    int k=0;
+    while(i<iUnicodeLen-1 && k<4 && is_utf8_multibyte_code_unit(str[i])){
+      uc_buff[k++] = str[i++];
+    }
+    if(k==0){ 
+      psymb = (char*) &pBuffer[j];
+      *psymb = str[i++];
+    }
+    else{ 
+      pBuffer[j] = utf8_to_code(uc_buff, k);
+    }
+  }//*/
+  /*
+  for(int i=0, j=0; i<iUnicodeLen-1; j++){
+    size_t bytesFilled = 0;
+    pBuffer[j] = utf_to_code((unsigned char*)pAnsiText + i, bytesFilled);
+    i+=bytesFilled;
+  }//*/
+  //auto str32 = EncodingHelper::convertToUTF32(str);
   wcscpy(pBuffer, wstr.c_str());
-  pBuffer[wstr.size()] = 0;
+  //pBuffer[wstr.size()] = 0;
   *ppUnicodeText = pBuffer;
 }

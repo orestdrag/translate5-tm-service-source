@@ -845,7 +845,6 @@ private:
   typedef struct _BUFFERAREAS
   {
     CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
-    CHAR     szProp[DATABUFFERSIZE];  // buffer for collected prop values
     CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
@@ -2170,7 +2169,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             } /* endif */
           } /* endif */
         } /* endfor */
-        pBuf->szProp[0] = 0;                 // reset data buffer
         pBuf->szPropW[0] = 0;                 // reset data buffer
         break;
 
@@ -2978,18 +2976,32 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     //else 
     if ( CurrentProp == TMMARKUP_PROP )
     {
-      memset( CurElement.szTMMarkup, 0, sizeof(CurElement.szTMMarkup) );
-      strncpy( CurElement.szTMMarkup, pBuf->szProp, sizeof(CurElement.szTMMarkup) - 1 );
+      std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
+      int size = std::min(buff.size(), sizeof(CurElement.szTMMarkup) - 1);
+      memset( CurElement.szTMMarkup, 0, size + 1 );
+      memcpy(CurElement.szTMMarkup, buff.c_str(), size);
+      //strncpy( CurElement.szTMMarkup, buff.c_str(), size);
     }
     else if ( CurrentProp == TMDOCNAME_PROP )
     {
-      memset( pBuf->szDocument, 0, sizeof(pBuf->szDocument) );
-      strncpy( pBuf->szDocument, pBuf->szProp, sizeof(pBuf->szDocument) - 1 );
+      std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
+      int size = std::min(buff.size(), sizeof(pBuf->szDocument) - 1);
+      memset( pBuf->szDocument, 0, size+1 );
+      unsigned char s;
+      memcpy( pBuf->szDocument, buff.c_str(), size);
+      for(int i=0;i< size;i++){ 
+        s = (unsigned char) buff.c_str()[i];
+        s = (unsigned char) pBuf->szDocument[i];
+      }
+      //strncpy( pBuf->szDocument, buff.c_str(), size );
     }
     else if ( CurrentProp == TMDESCRIPTION_PROP )
     {
-      memset( pBuf->szDescription, 0, sizeof(pBuf->szDescription) );
-      strncpy( pBuf->szDescription, pBuf->szProp, sizeof(pBuf->szDescription) - 1 );
+      std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
+      int size = std::min(buff.size(), sizeof(pBuf->szDescription) - 1);
+      memset( pBuf->szDescription, 0, size+1 );
+      memcpy( pBuf->szDescription, buff.c_str(), size);
+      //strncpy( pBuf->szDescription, buff.c_str(), size);
     }
     else if ( CurrentProp == MACHINEFLAG_PROP )
     {
@@ -2997,11 +3009,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     }
     else if ( CurrentProp == TRANSLATIONFLAG_PROP )
     {
-      if ( pBuf->szProp[0] == '1' )
+      if ( pBuf->szPropW[0] == L'1' )
       {
         usTranslationFlag = TRANSLFLAG_MACHINE;
       }
-      else if ( pBuf->szProp[0] == '2' )
+      else if ( pBuf->szPropW[0] == L'2' )
       {
         usTranslationFlag = TRANSLFLAG_GLOBMEM;
       } /* end */         
@@ -3072,7 +3084,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     }
     else if ( CurrentProp == TMWORDS_PROP )
     {
-      pBuf->ulWords = atol( pBuf->szProp );
+      pBuf->ulWords = std::wcstol( pBuf->szPropW, nullptr, 10 );
     }
     else if ( CurrentProp == TMMATCHSEGID_PROP )
     {
@@ -3080,7 +3092,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     }
     else if ( CurrentProp == SEG_PROP )
     {
-      CurElement.lSegNum = atol( pBuf->szProp );
+      CurElement.lSegNum = std::wcstoull( pBuf->szPropW,  nullptr, 10 );
     } /* endif */
   } /* endif */
 }
@@ -3093,6 +3105,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
   char* c_chars = (char*) sChars.c_str();
   wchar_t* w_chars = (wchar_t*) wChars.c_str();
   int iLength = length;
+  int iwLength = wChars.length();
 
   if ( this->fTMXTagStarted )
   {
@@ -3111,15 +3124,16 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
   if ( (CurElement.ID == PROP_ELEMENT) && (CurElement.PropID != UNKNOWN_PROP) )
   {
     // append data in prop value buffer
-    int iCurLength = wcslen( pBuf->szPropW );
-    int iFree = (sizeof(pBuf->szPropW) / sizeof(CHAR_W)) - iCurLength - 1;
-    if ( iLength > iFree ) 
-      iLength = iFree;
-
-    wcsncpy( pBuf->szPropW + iCurLength, w_chars, iLength );
-    strncpy( pBuf->szProp  + iCurLength, c_chars, iLength );
-    pBuf->szPropW[iCurLength+iLength] = 0;
-    pBuf->szProp [iCurLength+iLength] = 0;
+    int iwCurLength = wcslen( pBuf->szPropW );
+    int iwFree = (sizeof(pBuf->szPropW) / sizeof(CHAR_W)) - iwCurLength - 1;
+    if ( iwLength > iwFree ) 
+      iwLength = iwFree;
+    
+    if(!strncmp("Kit_", c_chars, 4)){
+      T5LOG(T5WARNING)<< "now would crash";
+    }
+    wcsncpy( pBuf->szPropW + iwCurLength, w_chars, iwLength );
+    pBuf->szPropW[iwCurLength+iwLength] = 0;
   }
   else if ( fCatchData && (CurElement.ID == INVCHAR_ELEMENT) )
   {
