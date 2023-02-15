@@ -172,16 +172,16 @@ UtlLowUpInit()
   /*   with string functions                                          */
   /********************************************************************/
   chEQFLower[ 256 ] = chEQFUpper[ 256 ] = EOS;
-  LOG_TEMPORARY_COMMENTED;
+  LOG_TEMPORARY_COMMENTED_W_INFO("use the ANSILOW function");
   // use the ANSILOW function
   /*
-  EQFLOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
+  EQFLOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
   //AnsiUpper( (PSZ)&(chEQFUpper[1]) );
-  LOG_TEMPORARY_COMMENTED << "EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM  ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
+  LOG_TEMPORARY_COMMENTED_W_INFO ("EQFLOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM  ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
 
-  EQFLOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
+  EQFLOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
   //AnsiLower( (PSZ)&(chEQFLower[1]) );
-  LOG_TEMPORARY_COMMENTED << "EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM  ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
+  LOG_TEMPORARY_COMMENTED_W_INFO ("EQFLOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM  ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
   //*/
   return;
 } /* end of function UtlLowUpInit */
@@ -745,7 +745,8 @@ PSZ UtlDirectUnicode2Ansi( PSZ_W pszUni, PSZ pszAnsi, ULONG ulAnsiCP )
   {
 		iRC = WideCharToMultiByte( usCP, 0, (LPWSTR)pszUni, -1,
 								 pszAnsi, MAX_SEGMENT_SIZE, NULL, NULL );
-    LOG_TEMPORARY_COMMENTED;
+    
+  LOG_TEMPORARY_COMMENTED_W_INFO("// possible: ERROR_INSUFFICIENT_BUFFER /ERROR_INVALID_FLAGS / ERROR_INVALID_PARAMETER");
 #ifdef TEMPORARY_COMMENTED
 		if ( iRC == 0) iRC = GetLastError();
 

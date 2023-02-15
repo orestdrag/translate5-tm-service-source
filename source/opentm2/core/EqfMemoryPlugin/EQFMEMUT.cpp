@@ -199,7 +199,7 @@ USHORT MemRcHandlingHwnd
 #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
-     LOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI( szLongName );
+     LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI( szLongName );
 
      pReplAddr[0] = szLongName;
    }
@@ -211,7 +211,7 @@ USHORT MemRcHandlingHwnd
 #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
-     LOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ";//OEMTOANSI( szLongName );
+     LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ";//OEMTOANSI( szLongName );
      pReplAddr[0] = szLongName;
    }
    else

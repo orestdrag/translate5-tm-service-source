@@ -122,7 +122,8 @@ int getBuffIdForLog(int severity);
 
 #define LOG_UNIMPLEMENTED_FUNCTION T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called unimplemented function in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL;
 
-#define LOG_TEMPORARY_COMMENTED T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " 
+//#define LOG_TEMPORARY_COMMENTED T5LOG(T5INFO) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " 
+#define LOG_TEMPORARY_COMMENTED_W_INFO(info) if( VLOG_IS_ON(2) && T5Logger::GetInstance()->CheckLogLevel(T5INFO)) T5LOG(T5ERROR) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " << info ;
 
 
 // code after this line should be deleted and replaced in calls with T5LOG
