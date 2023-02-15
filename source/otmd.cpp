@@ -17,6 +17,7 @@
 #include "opentm2/core/utilities/FilesystemHelper.h"
 #include "cmake/git_version.h"
 #include "opentm2/core/utilities/PropertyWrapper.H"
+#include "opentm2/core/utilities/EncodingHelper.h"
 #include "EQF.H"
 
 
@@ -165,7 +166,6 @@ int main(int argc, char* argv[]) {
    std::signal(SIGABRT, signal_handler);
    std::signal(SIGKILL, signal_handler);
    //#ifdef GLOGGING_ENABLED
-   FLAGS_log_dir = "/or/.t5memory/LOG/";
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }

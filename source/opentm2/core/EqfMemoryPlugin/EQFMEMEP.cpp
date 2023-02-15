@@ -354,7 +354,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        //--- "No segments have been exported to %1." otherwise
        //--- issue a message "Memory Database Export successfully completed."
        CloseFile( &(pExportIDA->hFile) );
-       OEMTOANSI( pExportIDA->szMemName );
+       LOG_TEMPORARY_COMMENTED <<  "OEMTOANSI"; //OEMTOANSI ( pExportIDA->szMemName );
        pReplString[0] = pExportIDA->ControlsIda.szPathContent;
        pReplString[1] = pExportIDA->szMemName;
 
@@ -373,7 +373,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
        } /* endif */
-       ANSITOOEM( pExportIDA->szMemName );
+       LOG_TEMPORARY_COMMENTED << "ANSITOOEM";  //ANSITOOEM ( pExportIDA->szMemName );
 
        //--- Issue message WM_EQF_MEMEXPORT_END
        if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
@@ -389,13 +389,13 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      //--- Close the exported file
      //--- Issue a message "Memory Database Export abnormally terminated."
      LogMessage(T5ERROR,"Error in EQFMemExportProcess::switch MemExportProcess rc = ", toStr(usRC).c_str(), "; ERROR_MEM_EXPORT_TERMINATED");
-     OEMTOANSI( pExportIDA->szMemName );
+     LOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
      CloseFile( &(pExportIDA->hFile) );
      UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
      LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_TERMINATED::", (pReplString[0]));
-     ANSITOOEM( pExportIDA->szMemName );
+     LOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM ( pExportIDA->szMemName );
      fOk=FALSE;
 
      //--- Issue message WM_EQF_MEMEXPORT_END
@@ -509,7 +509,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
      //--- Close the exported file
      //--- Issue a message:Export of memory database %1 to file %2 was
      //---                 forced before completion.
-     OEMTOANSI( pExportIDA->szMemName );
+     LOG_TEMPORARY_COMMENTED << "OEMTOANSI";  //OEMTOANSI ( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
      if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
@@ -521,7 +521,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
      {
        UtlError( ERROR_MEM_EXPORT_TERM_FORCED, MB_CANCEL, 2, &(pReplString[0]), EQF_WARNING );
      } /* endif */
-     ANSITOOEM( pExportIDA->szMemName );
+     LOG_TEMPORARY_COMMENTED << "ANSITOOEM";  //ANSITOOEM ( pExportIDA->szMemName );
   } /* endif */
 
   //--- Close MemoryDb and input file. Return codes are for testing purposes only
@@ -924,11 +924,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       {
         //--- Issue the error message :"Initialization of export from
         //--- translation memory %1 into file %2 failed."
-        OEMTOANSI( pExportIDA->szMemName );
+        LOG_TEMPORARY_COMMENTED << "OEMTOANSI";  //OEMTOANSI ( pExportIDA->szMemName );
         pReplAddr[0] = pExportIDA->szMemName;
         pReplAddr[1] = pExportIDA->ControlsIda.szPathContent;
         LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_INITFAILED::",pReplAddr[0] );
-        ANSITOOEM( pExportIDA->szMemName );
+        LOG_TEMPORARY_COMMENTED << "ANSITOOEM";  //ANSITOOEM ( pExportIDA->szMemName );
       } /* endif */
     } /* endif */
    } /* endif */
@@ -1053,7 +1053,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getAuthor( pExportIDA->pstSegment->szAuthor, sizeof(pExportIDA->pstSegment->szAuthor) );
          pExportIDA->pProposal->getMarkup( pExportIDA->pstSegment->szFormat, sizeof(pExportIDA->pstSegment->szFormat) );
          pExportIDA->pProposal->getDocName( pExportIDA->pstSegment->szDocument, sizeof(pExportIDA->pstSegment->szDocument) );
-         OEMTOANSI( pExportIDA->pstSegment->szDocument );
+         LOG_TEMPORARY_COMMENTED << "OEMTOANSI";  //OEMTOANSI ( pExportIDA->pstSegment->szDocument );
       
          pExportIDA->pProposal->getSource( pExportIDA->pstSegment->szSource, sizeof(pExportIDA->pstSegment->szSource) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );

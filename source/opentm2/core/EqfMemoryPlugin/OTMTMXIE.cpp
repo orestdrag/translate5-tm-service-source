@@ -3128,10 +3128,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     int iwFree = (sizeof(pBuf->szPropW) / sizeof(CHAR_W)) - iwCurLength - 1;
     if ( iwLength > iwFree ) 
       iwLength = iwFree;
-    
-    if(!strncmp("Kit_", c_chars, 4)){
-      T5LOG(T5WARNING)<< "now would crash";
-    }
+
     wcsncpy( pBuf->szPropW + iwCurLength, w_chars, iwLength );
     pBuf->szPropW[iwCurLength+iwLength] = 0;
   }

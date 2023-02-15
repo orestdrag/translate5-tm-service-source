@@ -172,16 +172,17 @@ UtlLowUpInit()
   /*   with string functions                                          */
   /********************************************************************/
   chEQFLower[ 256 ] = chEQFUpper[ 256 ] = EOS;
-
+  LOG_TEMPORARY_COMMENTED;
   // use the ANSILOW function
-  EQFOemToAnsi( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
+  /*
+  EQFLOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
   //AnsiUpper( (PSZ)&(chEQFUpper[1]) );
-  EQFAnsiToOem( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
+  LOG_TEMPORARY_COMMENTED << "EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM  ( (PSZ)&(chEQFUpper[1]), (PSZ)&(chEQFUpper[1]) );
 
-  EQFOemToAnsi( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
+  EQFLOG_TEMPORARY_COMMENTED << "OEMTOANSI"; //OEMTOANSI ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
   //AnsiLower( (PSZ)&(chEQFLower[1]) );
-  EQFAnsiToOem( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
-
+  LOG_TEMPORARY_COMMENTED << "EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM "; //EQFLOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM  ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
+  //*/
   return;
 } /* end of function UtlLowUpInit */
 

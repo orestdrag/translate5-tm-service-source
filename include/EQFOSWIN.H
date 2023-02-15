@@ -977,7 +977,7 @@ SHORT LBSetItemTextW( HWND hwnd, SHORT index, PSZ_W pText );
 /**********************************************************************/
 /* ANSI to OEM and vice versa conversion under DBCS environment       */
 /**********************************************************************/
-VOID AnsiToOem850Buff( PSZ, PSZ, USHORT );
+//VOID AnsiToOem850Buff( PSZ, PSZ, USHORT );
 VOID Oem850ToAnsiBuff( PSZ, PSZ, USHORT );
 
 /**********************************************************************/

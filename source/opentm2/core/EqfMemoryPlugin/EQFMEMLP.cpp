@@ -1012,7 +1012,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
                 if ( pLIDA->fDisplayNotReplacedMessage )                /*@47A*/
                 {                                                       /*@47A*/
                   //--- display replace confirmation message            /*@47A*/
-                  OEMTOANSI( pLIDA->szMemName );
+                  LOG_TEMPORARY_COMMENTED << "OEMTOANSI";  //OEMTOANSI ( pLIDA->szMemName );
                   pReplAddr[0] = pLIDA->szMemName;                      /*@47A*/
                   if ( pLIDA->fBatch )
                   {
@@ -1024,7 +1024,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  ) //pointer to the load IDA
                                           MB_YESNOCANCEL | MB_DEFBUTTON2,/*@47C*/
                                           1, &pReplAddr[0], EQF_QUERY ); /*@47C*/
                   } /* endif */
-                  ANSITOOEM( pLIDA->szMemName );
+                  LOG_TEMPORARY_COMMENTED << "ANSITOOEM"; //ANSITOOEM ( pLIDA->szMemName );
                                                                         /*@47A*/
                   switch ( usResponse )                                 /*@47A*/
                   {                                                     /*@47A*/
