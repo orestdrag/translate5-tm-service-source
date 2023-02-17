@@ -32,7 +32,7 @@ static bool ValidatePort(const char* flagname, int32_t value) {
 DEFINE_int32(port, 4080, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
-DEFINE_string(t5_ip, "", "which ip to use in t5memory(default is any). Should be in format '1.1.1.1'");
+DEFINE_string(t5_ip, "", "Which ip to use in t5memory(default is any). Should be in format '1.1.1.1', default is to listen to all available ip");
 
 
 DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
