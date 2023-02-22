@@ -2011,7 +2011,6 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pProposal->lSegmentNum = pOtmProposal->getSegmentNum();
 
   pOtmProposal->getOriginalSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );
-  //pOtmProposal->getSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );
   pOtmProposal->getTargetLanguage( pProposal->szTargetLanguage, sizeof(pProposal->szTargetLanguage) );
   switch( pOtmProposal->getType() )
   {

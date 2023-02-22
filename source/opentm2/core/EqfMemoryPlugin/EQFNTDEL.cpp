@@ -68,7 +68,6 @@ USHORT TmtXDelSegm
   CHAR szString[MAX_EQF_PATH];         // character string
   PULONG pulSids = NULL;               // ptr to sentence ids
   PULONG pulSidStart = NULL;           // ptr to sentence ids
-  BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
 
   //allocate pSentence
@@ -132,18 +131,8 @@ USHORT TmtXDelSegm
                            pTmClb->stTmSign.bMajorVersion );
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
-    if ( usRc == NO_ERROR )
-    {
-      if ( pTmClb )
-      {
-        usRc = NTMGetIDFromName( pTmClb, pTmDelIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
-      }
-      else
-      {
-        pSentence->pTagRecord->usTagTableId = 0;
-      } /* endif */
-    }
-  } /* endif */
+    pSentence->pTagRecord->usTagTableId = 0;
+  }
 
 
   // update TM databse
@@ -152,30 +141,6 @@ USHORT TmtXDelSegm
     //set pNormString to beginning of string
     pSentence->pNormString = pSentence->pNormStringStart;
     HashSentence( pSentence, pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
-  } /* endif */
-
-  // lock TM database
-  if ( !usRc && pTmClb->fShared )
-  {
-    // use only two retries as locking already uses a wait loop...
-    SHORT sRetries = 2;
-    do
-    {
-      usRc = NTMLockTM( pTmClb, TRUE, &fLocked );
-      if ( usRc == BTREE_IN_USE )
-      {
-        UtlWait( MAX_WAIT_TIME );
-        sRetries--;
-      } /* endif */
-    }
-    while( (usRc == BTREE_IN_USE) && (sRetries > 0));
-  } /* endif */
-
-
-  // Update internal buffers if database has been modified by other users
-  if ( !usRc && pTmClb->fShared )
-  {
-    usRc = NTMCheckForUpdates( pTmClb );
   } /* endif */
 
 
@@ -241,13 +206,6 @@ USHORT TmtXDelSegm
       usRc = SEG_NOT_FOUND;
     } /* endif */
   } /* endif */
-
-  // unlock TM database if database has been locked
-  if ( fLocked )
-  {
-    NTMLockTM( pTmClb, FALSE, &fLocked );
-  } /* endif */
-
 
   //release memory
   UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );

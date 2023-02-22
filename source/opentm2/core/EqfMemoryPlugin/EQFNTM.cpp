@@ -121,7 +121,7 @@ C_TmExtractHwndW
     HWND         hwnd );            //(in)  handle for error messages
 
 USHORT
-C_TmGetW(HTM            htm,             //(in)  TM handle
+TmGetW(HTM            htm,             //(in)  TM handle
        PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
        PTMX_GET_OUT_W pstGetOut,       //(out) pointer to get output structure
@@ -843,7 +843,7 @@ C_TmReplaceHwndW( HTM       htm,            //(in)  TM handle
 
 
 USHORT
-C_TmGetW(HTM            htm,             //(in)  TM handle
+TmGetW(HTM            htm,             //(in)  TM handle
        PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
        PTMX_GET_OUT_W pstGetOut,       //(out) pointer to get output structure
@@ -899,7 +899,7 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
           /************************************************************/
           /* convert source string                                    */
           /************************************************************/
-          LogMessage(T5FATAL,__func__,"TEMPORARY_COMMENTED in C_TmGetW::NTMConvertCRLFW");
+          LogMessage(T5FATAL,__func__,"TEMPORARY_COMMENTED in TmGetW::NTMConvertCRLFW");
 #ifdef TEMPORARY_COMMENTED
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szSource,
                           pszTempString,
@@ -941,22 +941,6 @@ C_TmGetW(HTM            htm,             //(in)  TM handle
 
   return usRc;
 } /* End of function TmGet */
-
-USHORT
-TmGetW (HTM            htm,           //(in)  TM handle
-       PSZ            pszMemPath,    //(in)  full TM name x:\eqf\mem\mem.tmd
-       PTMX_GET_IN_W  pstGetIn,      //(in)  pointer to get input structure
-       PTMX_GET_OUT_W pstGetOut,     //(out) pointer to get output structure
-       USHORT         usMsgHandling )//(in)  message handling parameter
-                                     //      TRUE:  display error message
-                                     //      FALSE: display no error message
-{
-	return C_TmGetW(htm,
-       pszMemPath,
-       pstGetIn,
-       pstGetOut,
-       usMsgHandling );
-}
 
 
 USHORT

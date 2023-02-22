@@ -776,68 +776,6 @@ int EqfMemory::updateProposal
 }
 
 
-//------------------------------------------------------------------------------
-// External function
-//------------------------------------------------------------------------------
-// Function name:     TmDeleteSegment
-//------------------------------------------------------------------------------
-// Function call:     USHORT
-//                    TmDeleteSegment( HTM           htm,
-//                                     PSZ           szMemPath,
-//                                     PTMX_PUT_IN   pDelIn,
-//                                     PTMX_PUT_OUT  pDelOut,
-//                                     USHORT        usMsgHandling )
-//------------------------------------------------------------------------------
-// Description:       Deletes a segment in a TM
-//------------------------------------------------------------------------------
-// Parameters:        htm           - (in)  TM handle
-//                    szMemPath     - (in)  full TM name x:\eqf\mem\mem.tmd
-//                    pDelIn        - (in)  pointer to delete input structure
-//                    pDelOut       - (in)  pointer to delete output structure
-//                    usMsgHandling - (in)  message handling parameter
-//                                          TRUE:  display error message
-//                                          FALSE: display no error message
-//------------------------------------------------------------------------------
-USHORT
-C_TmDeleteSegmentW(HTM            htm,
-                 PSZ            szMemPath,
-                 PTMX_PUT_IN_W  pDelInW,
-                 PTMX_PUT_OUT_W pDelOutW,
-                 USHORT         usMsgHandling )
-{
-  pDelInW->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  pDelInW->stPrefixIn.usTmCommand   = TMC_DELETE;
-
-  USHORT usRc = TmtXDelSegm ( (PTMX_CLB)htm, pDelInW, pDelOutW );
-  /********************************************************************/
-  /* Perform appropriate error handling if requested and required     */
-  /********************************************************************/
-  if(usRc == 6020){//seg not found
-    
-  }else if ( usRc ){
-    if(usMsgHandling)
-      usRc = MemRcHandling( usRc, szMemPath, &htm, NULL );
-    LogMessage(T5ERROR,__func__, ":: returned error code, rc = ", toStr(usRc));
-  }
-
-  return usRc;
-}
-
-USHORT
-TmDeleteSegmentW(HTM            htm,
-                 PSZ            szMemPath,
-                 PTMX_PUT_IN_W  pDelInW,
-                 PTMX_PUT_OUT_W pDelOutW,
-                 USHORT         usMsgHandling )
-{
-	return C_TmDeleteSegmentW(htm,
-                 szMemPath,
-                 pDelInW,
-                 pDelOutW,
-                 usMsgHandling );
-}
-
-
 /*! \brief Delete a specific proposal from the memory
 
     \param Proposal reference to a OtmProposal object
@@ -856,9 +794,12 @@ int EqfMemory::deleteProposal
     this->pTmPutOut = new (TMX_PUT_OUT_W);
   memset( this->pTmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
   int iRC = this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
+  
+  this->pTmPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
+  this->pTmPutIn->stPrefixIn.usTmCommand   = TMC_DELETE;
 
 	if ( !iRC ) 
-    iRC = TmDeleteSegmentW( this->htm,  NULL, this->pTmPutIn, this->pTmPutOut, FALSE );
+    iRC = TmtXDelSegm ( (PTMX_CLB)htm, this->pTmPutIn, this->pTmPutOut );
 
   if ( iRC != 0  
       && iRC != 6020) // seg not found 

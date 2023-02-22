@@ -54,12 +54,16 @@ struct ImportStatusDetails{
   std::atomic_short usProgress{0};
   std::atomic_int segmentsImported{-1};
   std::atomic_int invalidSegments{-1};
+  std::atomic_int invalidSymbolErrors{-1};
   std::string importTimestamp;
+  std::stringstream importMsg;
   
   void reset(){
+    importMsg.str("");
     usProgress = 0;
     segmentsImported = -1;
     invalidSegments = -1;
+    invalidSymbolErrors = -1;
     importTimestamp = "not finished";    
   }
   std::string toString(){

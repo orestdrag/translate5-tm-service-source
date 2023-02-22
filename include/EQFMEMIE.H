@@ -16,6 +16,7 @@
 #ifndef EQFMEMIE_H_INCLUDED
 #define EQFMEMIE_H_INCLUDED
 
+class ImportStatusDetails;
 
 //#include "EQFOSWIN.H"
 typedef char* PSZ;
@@ -142,7 +143,8 @@ USHORT /**/ EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
-  PMEMEXPIMPINFO   pMemInfo           // pointer to structure receiving general information for the imported memory
+  PMEMEXPIMPINFO   pMemInfo,           // pointer to structure receiving general information for the imported memory
+  ImportStatusDetails*     pImportData = nullptr
 );
 
 //
@@ -155,8 +157,8 @@ USHORT /**/ EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
-  LONG             lMemHandle,               // memory handle (has to be passed to pfnInsertSegment function)
-  PLONG            lProgress           // pointer to callers progress indicator
+  LONG             lMemHandle,              // memory handle (has to be passed to pfnInsertSegment function)
+  ImportStatusDetails*     pImportData
 );
 
 //

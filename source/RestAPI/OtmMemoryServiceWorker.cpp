@@ -2788,6 +2788,8 @@ int OtmMemoryServiceWorker::getStatus
       factory->addParmToJSON( strOutputParms, "importTime", vMemoryList[iIndex].importDetails->importTimestamp );
       factory->addParmToJSON( strOutputParms, "segmentsImported", vMemoryList[iIndex].importDetails->segmentsImported );
       factory->addParmToJSON( strOutputParms, "invalidSegments", vMemoryList[iIndex].importDetails->invalidSegments );
+      factory->addParmToJSON( strOutputParms, "invalidSymbolErrors", vMemoryList[iIndex].importDetails->invalidSymbolErrors );
+      factory->addParmToJSON( strOutputParms, "importErrorMsg", vMemoryList[iIndex].importDetails->importMsg.str() );
     }
     factory->addParmToJSON( strOutputParms, "lastAccessTime", printTime(vMemoryList[iIndex].tLastAccessTime) );
     if ( ( this->vMemoryList[iIndex].eImportStatus == IMPORT_FAILED_STATUS ) && ( this->vMemoryList[iIndex].pszError != NULL ) )

@@ -5,6 +5,7 @@
 
 #include "EQFMEMIE.H"
 
+class ImportStatusDetails;
 class EqfPluginWrapper{
 public:
     static void init();
@@ -14,8 +15,8 @@ public:
     static USHORT MemExportProcess   (LONG plHandle, PMEMEXPIMPSEG pSeg);
     static USHORT MemExportEnd       (LONG plHandle );
 
-    static USHORT MemImportStart     (PLONG plHandle, char*  pszInFile, PMEMEXPIMPINFO pMemInfo );
-    static USHORT MemImportProcess   (LONG plHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLONG lProgress );
+    static USHORT MemImportStart     (PLONG plHandle, char*  pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails*     pImportData   );
+    static USHORT MemImportProcess   (LONG plHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, ImportStatusDetails*     pImportData );
     static USHORT MemImportEnd       (LONG plHandle );
 };
 #endif

@@ -541,6 +541,8 @@ typedef struct _MEM_LOAD_IDA
  PTOKENENTRY  pTokenEntryWork;                // A work pointer to token entries
  ULONG        ulSegmentCounter;               // Segment counter of progress window
  ULONG        ulInvSegmentCounter;            // Invalid Segment counter
+ ULONG        ulProgress;
+ ULONG        ulInvSymbolsErrors;
  ULONG        ulResetSegmentCounter;          // Segments using generic markup when not valid
  CHAR         szSegmentID[SEGMENT_CLUSTER_LENGTH +
                           SEGMENT_NUMBER_LENGTH + 2]; // Segment identification
@@ -598,13 +600,7 @@ typedef struct _MEM_LOAD_IDA
  //HMODULE       hmodMemExtImport;                 // handle of external import module/DLL
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
- 
- #ifdef TO_BE_REMOVED
- PFN_EXTMEMIMPORTSTART   pfnMemImpStart;         // function handling start of import
- PFN_EXTMEMIMPORTPROCESS pfnMemImpProcess;       // function handling import of a segment
- PFN_EXTMEMIMPORTEND     pfnMemImpEnd;           // function handling end of export
- #endif //TO_BE_REMOVED
- 
+
  LONG          lExternalImportHandle;            // handle of external memory import functions
 
  BOOL         fMTReceiveCounting;         // TRUE = count received words and write counts to folder properties

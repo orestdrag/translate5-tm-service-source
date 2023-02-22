@@ -22,12 +22,12 @@ USHORT EqfPluginWrapper::MemExportEnd       (LONG plHandle  ){
     return EXTMEMEXPORTEND(plHandle);
 }
 
-USHORT EqfPluginWrapper::MemImportStart     (PLONG plHandle,  PSZ pszInFile, PMEMEXPIMPINFO pMemInfo ){
-    return EXTMEMIMPORTSTART(plHandle, pszInFile, pMemInfo);
+USHORT EqfPluginWrapper::MemImportStart     (PLONG plHandle,  PSZ pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails*     pImportData  ){
+    return EXTMEMIMPORTSTART(plHandle, pszInFile, pMemInfo, pImportData);
 }
 
-USHORT EqfPluginWrapper::MemImportProcess   (LONG plHandle,  PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLONG lProgress ){
-    return EXTMEMIMPORTPROCESS(plHandle, pfnInsertSegment, lMemHandle, lProgress);
+USHORT EqfPluginWrapper::MemImportProcess   (LONG plHandle,  PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG pMemHandle, ImportStatusDetails*     pImportData ){
+    return EXTMEMIMPORTPROCESS(plHandle, pfnInsertSegment, pMemHandle, pImportData);
 }
 
 USHORT EqfPluginWrapper::MemImportEnd       (LONG plHandle ){

@@ -231,9 +231,13 @@ USHORT MemFuncPrepImport
   LONG        lOptions                 // options for Translation Memory import
 );
 
+class ImportStatusDetails;
+
 USHORT MemFuncImportProcess
 (
-  PFCTDATA    pData                    // function I/F session data
+  PFCTDATA    pData,                    // function I/F session data
+  ImportStatusDetails*     pImportData
+
 );
 
 USHORT FolFuncCreateFolder

@@ -771,6 +771,7 @@ public:
 
   // setter functions for import info
   void SetMemInfo( PMEMEXPIMPINFO m_pMemInfo ); 
+  void SetImportData(ImportStatusDetails * _pImportDetails) { pImportDetails = _pImportDetails;}
   void SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLOADEDTABLE pTable, PTOKENENTRY pTokBuf, int iTokBufSize ); 
   void SetSourceLanguage( char *pszSourceLang );
 
@@ -782,6 +783,7 @@ public:
   void GetErrorText( char *pszTextBuffer, int iBufSize );
   std::wstring GetParsedData() const;
   bool fReplaceWithTagsWithoutAttributes;
+  size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }
 
   // -----------------------------------------------------------------------
   //  Handlers for the SAX DocumentHandler interface
@@ -805,6 +807,7 @@ public:
   TagReplacer tagReplacer;
 
 private:
+  ImportStatusDetails* pImportDetails = nullptr;
   ELEMENTID GetElementID( PSZ pszName );
   void Push( PTMXELEMENT pElement );
   void Pop( PTMXELEMENT pElement );
@@ -821,7 +824,7 @@ private:
   // mem import interface data
   PMEMEXPIMPINFO m_pMemInfo;
   PFN_MEMINSERTSEGMENT pfnInsertSegment;
-  LONG lMemHandle;
+  LONG  lMemHandle;
 
   // processing flags
   BOOL fSource;                        // TRUE = source data collected  
@@ -838,7 +841,7 @@ private:
   LONG  lTime;                         // segment date/time
   USHORT usTranslationFlag;            // type of translation flag
   int   iNumOfTu;
-
+  size_t _invalidCharacterErrorCount{0};
   // buffers
   #define DATABUFFERSIZE 4098
 
@@ -905,6 +908,7 @@ private:
 
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
+class ImportStatusDetails;
 //+----------------------------------------------------------------------------+
 //| Our TMX import export class                                                |
 //|                                                                            |
@@ -920,8 +924,8 @@ class CTMXExportImport
     USHORT WriteSegment( PMEMEXPIMPSEG pSegment  );
     USHORT WriteEnd();
     // import methods
-    USHORT StartImport( const char *pszInFile, PMEMEXPIMPINFO pMemInfo ); 
-    USHORT ImportNext( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, LONG *plProgress ); 
+    USHORT StartImport( const char *pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails* pImportStatusDetails ); 
+    USHORT ImportNext( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG pMemHandle, ImportStatusDetails*     pImportData  ); 
     USHORT EndImport(); 
     USHORT getLastError( PSZ pszErrorBuffer, int iBufferLength );
 
@@ -998,26 +1002,28 @@ USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
   PSZ              pszInFile,          // fully qualified file name for the memory being imported
-  PMEMEXPIMPINFO   pMemInfo            // pointer to structure receiving general information for the imported memory
+  PMEMEXPIMPINFO   pMemInfo,            // pointer to structure receiving general information for the imported memory
+  ImportStatusDetails*     pImportData
 )
 {
   CTMXExportImport *pTMXExport = new CTMXExportImport;
-  USHORT usRC = pTMXExport->StartImport( pszInFile, pMemInfo ); 
+  USHORT usRC = pTMXExport->StartImport( pszInFile, pMemInfo, pImportData ); 
   *plHandle = (LONG)pTMXExport;
 
   return( usRC );
 } /* end of function EXTMEMIMPORTSTART */
 
+class MEM_LOAD_IDA;
 USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function
   PFN_MEMINSERTSEGMENT pfnInsertSegment,    // callback function to insert segments into the memory
-  LONG             lMemHandle,              // memory handle (has to be passed to pfnInsertSegment function)
-  PLONG            plProgress               // caller's progress indicator
+  LONG              pMemHandle,               // memory handle (has to be passed to pfnInsertSegment function)
+  ImportStatusDetails*     pImportData
 )
 {
   CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  USHORT usRC = pTMXExport->ImportNext( pfnInsertSegment, lMemHandle, plProgress ); 
+  USHORT usRC = pTMXExport->ImportNext( pfnInsertSegment, pMemHandle,    pImportData ); 
   return( usRC );
 } /* end of function EXTMEMIMPORTPROCESS */
 
@@ -1411,7 +1417,8 @@ USHORT CTMXExportImport::WriteEnd()
 USHORT CTMXExportImport::StartImport
 ( 
   const char *pszInFile, 
-  PMEMEXPIMPINFO pMemInfo 
+  PMEMEXPIMPINFO pMemInfo,
+  ImportStatusDetails* pImportDetails
 )
 {
   USHORT usRC = 0;
@@ -1454,6 +1461,7 @@ USHORT CTMXExportImport::StartImport
 
       // create an instance of our handler
       m_handler = new TMXParseHandler();
+      m_handler->SetImportData(pImportDetails);
 
       // pass memory info to handler
       m_handler->SetMemInfo( m_pMemInfo ); 
@@ -1544,8 +1552,8 @@ USHORT CTMXExportImport::StartImport
 USHORT CTMXExportImport::ImportNext
 ( 
   PFN_MEMINSERTSEGMENT pfnInsertSegment, 
-  LONG lMemHandle, 
-  LONG *plProgress 
+  LONG MemHandle,
+  ImportStatusDetails*     pImportData
 )
 {
   USHORT usRC = 0;
@@ -1553,34 +1561,39 @@ USHORT CTMXExportImport::ImportNext
   BOOL fContinue  = TRUE;
   int errorCode = 0;
   int errorCount = 0;
-
-  m_handler->SetMemInterface( pfnInsertSegment, lMemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
-    
+  m_handler->SetMemInterface( pfnInsertSegment, MemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && !m_parser->getErrorCount() && iIteration )
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration )
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
       } /*endwhile */
 
-      errorCount = m_parser->getErrorCount();
+      errorCount = m_parser->getErrorCount() - m_handler->getInvalidCharacterErrorCount();
 
-      // compute current progress
-      if ( !errorCount && fContinue )
-      {
-        int iPos = (int)m_parser->getSrcOffset();
+      if(pImportData != nullptr){
+        pImportData->invalidSymbolErrors = m_handler->getInvalidCharacterErrorCount();
 
-        INT64 iComplete = (INT64)iPos;
-        INT64 iTotal = (INT64)m_iSourceSize;
-        INT64 iRatio = (INT64)(iComplete * 100.0 / iTotal);
-        *plProgress = (USHORT)iRatio;
+        // compute current progress
+        if ( !errorCount && fContinue )
+        {
+          int iPos = (int)m_parser->getSrcOffset();
 
-      } /* endif */
-
+          INT64 iComplete = (INT64)iPos;
+          INT64 iTotal = (INT64)m_iSourceSize;
+          pImportData->usProgress = (USHORT)(iComplete * 100.0 / iTotal);
+        } /* endif */
+      }
       if ( m_handler->ErrorOccured() )
       {
-        m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
+        char buff[1024];
+        m_handler->GetErrorText( buff, sizeof(buff) );
+        size_t occupied = strlen(m_pMemInfo->szError);
+        size_t buffLen = strlen(buff);
+        strncat(m_pMemInfo->szError, buff, std::min(sizeof(m_pMemInfo->szError) - occupied - 1, buffLen));
+
+        //m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
         m_pMemInfo->fError = TRUE;
       } /* endif */
 
@@ -2989,10 +3002,6 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       memset( pBuf->szDocument, 0, size+1 );
       unsigned char s;
       memcpy( pBuf->szDocument, buff.c_str(), size);
-      for(int i=0;i< size;i++){ 
-        s = (unsigned char) buff.c_str()[i];
-        s = (unsigned char) pBuf->szDocument[i];
-      }
       //strncpy( pBuf->szDocument, buff.c_str(), size );
     }
     else if ( CurrentProp == TMDESCRIPTION_PROP )
@@ -3166,9 +3175,24 @@ void TMXParseHandler::fatalError(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
-    if ( hfLog ) fprintf( hfLog, "Fatal Error: %s at column %ld in line %ld\n", message, col, line );
-    this->fError = TRUE;
-    sprintf( this->pBuf->szErrorMessage, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+    if(strncmp(message,"invalid character", std::min(strlen(message), strlen("invalid character")))){
+      this->fError = TRUE;
+      
+      T5LOG(T5ERROR) <<  "Fatal Error: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
+      sprintf( this->pBuf->szErrorMessage, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+      if(pImportDetails){
+        pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << "; \n";
+      }
+    }else{
+      if(pImportDetails){
+        pImportDetails->importMsg << "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"; \n";
+      }
+      
+      T5LOG(T5WARNING) <<  "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
+      resetErrors(); 
+      _invalidCharacterErrorCount++;
+    }
+    
     XMLString::release( &message );
 }
 
@@ -3177,9 +3201,12 @@ void TMXParseHandler::error(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
-    if ( hfLog ) fprintf( hfLog, "Error: %s at column %ld in line %ld\n", message, col, line  );
     this->fError = TRUE;
-    sprintf( this->pBuf->szErrorMessage, "Fatal Error: %s at column %ld in line %ld", message, col, line );
+    sprintf( this->pBuf->szErrorMessage, "Error: %s at column %ld in line %ld", message, col, line );
+    if(pImportDetails){
+      pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << "; \n";
+    }
+    T5LOG(T5ERROR) << ": "<< this->pBuf->szErrorMessage;
     XMLString::release( &message );
 }
 
@@ -3188,7 +3215,10 @@ void TMXParseHandler::warning(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
-    if ( hfLog ) fprintf( hfLog, "Warning: %s at column %ld in line %ld\n", message, col, line  );
+    T5LOG(T5WARNING) << "Warning: "<< message << " at column "<< col << " in line " << line << "\n";
+    if(pImportDetails){
+        pImportDetails->importMsg <<  "Warning: "<< message << " at column "<< col << " in line " << line << "; \n";
+    }
     XMLString::release( &message );
 }
 
@@ -3827,7 +3857,7 @@ USHORT TMXTOEXP
 
   while ( !usRC )
   {
-    usRC = EXTMEMIMPORTPROCESS( lHandle, WRITEEXPSEGMENT, (LONG)pData, &lProgress );
+    usRC = EXTMEMIMPORTPROCESS( lHandle, WRITEEXPSEGMENT, (LONG)pData, nullptr );
   } /*endwhile */
   if ( usRC == MEM_IMPORT_COMPLETE )
   {
