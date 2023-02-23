@@ -182,6 +182,18 @@ OtmMemory *createMemory
   int *piErrorCode
 );
 
+OtmMemory* createMemory
+(
+  char *pszPluginName,
+  char *pszMemoryName,
+  char *pszDescription,
+  char *pszSourceLanguage,
+  char chDrive,
+  char *pszOwner,
+  bool bInvisible,
+  int *piErrorCode
+);
+
 /* \brief List all available memories from all installed memory plugins
    \param pfnCallBack callback function to be called for each memory found
 	 \param pvData caller's data pointetr, is passed to callback function

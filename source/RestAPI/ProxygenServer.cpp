@@ -241,12 +241,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM;
           }else if(urlCommand == "clone"){
             requestHandler->command = ProxygenHandler::COMMAND::CLONE_TM_LOCALY;
-          }else if(urlCommand == "reorganize"){
-            requestHandler->command = ProxygenHandler::COMMAND::REORGANIZE_MEM;
           }
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 
             requestHandler->command = ProxygenHandler::COMMAND::STATUS_MEM;
+          }else if(urlCommand == "reorganize"){
+            requestHandler->command = ProxygenHandler::COMMAND::REORGANIZE_MEM;
           }
         }
       }

@@ -262,6 +262,52 @@ USHORT EqfExportMem
   return( usRC );
 } /* end of function EqfExportMem */
 
+
+
+
+// organize a Translation Memory
+USHORT EqfOrganizeMem
+(
+  HSESSION    hSession,                // Eqf session handle
+  PSZ         pszMemName               // name of Translation Memory
+)
+{
+  USHORT      usRC = NO_ERROR;         // function return code
+  PFCTDATA    pData = NULL;            // ptr to function data area
+
+  LOGWRITE1( "==EQFOrganizeMem==\n" );
+
+  // validate session handle
+  usRC = FctValidateSession( hSession, &pData );
+
+  // check sequence of calls
+  if ( usRC == NO_ERROR )
+  {
+    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
+    {
+      usRC = LASTTASK_INCOMPLETE_RC;
+    } /* endif */
+  } /* endif */
+
+  // call TM organize
+  if ( usRC == NO_ERROR )
+  {
+    pData->sLastFunction = FCT_EQFORGANIZEMEM;
+    usRC = MemFuncOrganizeMem( pData, pszMemName );
+  } /* endif */
+
+  if ( (usRC == NO_ERROR) && !pData->fComplete )
+  {
+    usRC = CONTINUE_RC;
+  } /* endif */
+
+  LOGWRITE2( "  RC=%u\n", usRC );
+
+  return( usRC );
+} /* end of function EqfOrganizeMem */
+
+
+
 // OtmMemoryService
 // create a new Translation Memory
 USHORT EqfCreateMem

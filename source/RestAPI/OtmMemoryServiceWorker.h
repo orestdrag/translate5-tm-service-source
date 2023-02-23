@@ -198,6 +198,13 @@ public:
     std::string &strOutputParms
   );
 
+
+  int reorganizeMem
+  (
+    std::string strMemory,
+    std::string &strOutputParms
+  );
+
   /*! \brief get the data of a memory in binary form or TMX form
   \param strMemory name of memory
   \param strType type of the requested memory data

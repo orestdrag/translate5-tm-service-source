@@ -2562,6 +2562,75 @@ int OtmMemoryServiceWorker::deleteEntry
   return( iRC );
 }
 
+int OtmMemoryServiceWorker::reorganizeMem
+(
+  std::string strMemory,
+  std::string &strOutputParms
+)
+{
+  int iRC = verifyAPISession();
+  if ( iRC != 0 )
+  {
+    T5LOG(T5ERROR) << "verifyAPISession fails:: iRC = " << iRC << "; strOutputParams = "<<
+      strOutputParms << "; szLastError = " << EncodingHelper::convertToUTF8(this->szLastError);
+    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemory.empty() )
+  {
+    T5LOG(T5ERROR) <<" error:: iRC = "<< iRC << "; strOutputParams = "<<
+      strOutputParms << "; szLastError = "<< "Missing name of memory";
+    wchar_t errMsg[] = L"Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+
+  // close memory if it is open
+  int iIndex = this->findMemoryInList( (char *)strMemory.c_str() );
+  if ( iIndex != -1 )
+  {
+    // close the memory and remove it from our list
+    removeFromMemoryList( iIndex );
+  } /* endif */
+
+  // reorganize the memory
+  if ( !iRC )
+  {
+    do
+    {
+      iRC = EqfOrganizeMem( this->hSession, (PSZ)strMemory.c_str()  );
+    } while ( iRC == CONTINUE_RC );
+  } /* endif */
+  
+  if ( iRC == ERROR_MEMORY_NOTFOUND )
+  {
+    strOutputParms = "{\"" + strMemory + "\": \"not found\" }";
+    return( iRC = NOT_FOUND );
+  }
+  else if ( iRC != 0 )
+  {
+    unsigned short usRC = 0;
+    EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    
+    T5LOG(T5ERROR) << "fails:: iRC = " << iRC << "; strOutputParams = " << strOutputParms << "; szLastError = " <<
+         EncodingHelper::convertToUTF8(this->szLastError);
+
+    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    return( INTERNAL_SERVER_ERROR );
+  }else{
+    strOutputParms = "{\"" + strMemory + "\": \"reorganized\" }";
+  }
+
+  T5LOG(T5INFO) << "::success, memName = " << strMemory;
+  iRC = OK;
+
+  return( iRC );
+
+}
+
 
 /*! \brief delete a memory
 \param strMemory name of memory

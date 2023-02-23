@@ -121,8 +121,8 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::REORGANIZE_MEM:
       {
         iRC = 500;
-        strResponseBody = "{\n\t\"msg\": \"endpoint is not implemented\"\n}";
-        //iRC = pMemService->reorganizeMem( memName, strResponseBody);
+        //strResponseBody = "{\n\t\"msg\": \"endpoint is not implemented\"\n}";
+        iRC = pMemService->reorganizeMem( memName, strResponseBody);
         break;
       }
       

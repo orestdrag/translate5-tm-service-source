@@ -172,6 +172,99 @@ OtmMemory *MemoryFactory::createMemory
   return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, NULL, false, piErrorCode ) );
 }
 
+
+/* \brief Create a memory 
+   \param pszPlugin plugin-name or NULL if not available or memory object name is used
+   \param pszMemoryName name of the memory being created or
+    memory object name (pluginname + colon + memory name)
+   \param pszDescription description of the memory
+   \param pszSourceLanguage source language of the memory
+   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
+   \param pszOwner owner of the newly created memory
+   \param bInvisible don't display memory in memory loist window when true, 
+   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
+   \returns pointer to created memory object 
+*/
+OtmMemory *MemoryFactory::createMemory
+(
+  char *pszPluginName,
+  char *pszMemoryName,
+  char *pszDescription,
+  char *pszSourceLanguage,
+  char chDrive,
+  char *pszOwner,
+  bool bInvisible,
+  int *piErrorCode
+)
+{
+  OtmMemory *pMemory = NULL;
+  OtmPlugin *pluginSelected = NULL;
+  this->strLastError = "";
+  this->iLastError = 0;
+  this->Log.writef( "Create memory %s", pszMemoryName );
+
+  if ( piErrorCode != NULL ) *piErrorCode = 0;
+
+  pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
+  if ( pluginSelected == NULL ) 
+  {
+    // use first available memory plugin for the new memory
+    pluginSelected = (*pluginList)[0];
+	// reset the iLastError
+	// because the flag can be set in findPlugin if not plug exist
+	this->iLastError = 0;
+  } /* endif */
+
+  if ( pluginSelected == NULL )
+  {
+    this->iLastError = *piErrorCode = ERROR_PLUGINNOTAVAILABLE;
+    this->strLastError = "No memory plugin available for the creation of the memory";
+    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    return( NULL );
+  } /* endif */       
+
+  // use the plugin to create the memory
+  std::string strMemoryName;
+  this->getMemoryName( pszMemoryName, strMemoryName );
+  if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
+  {
+    pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+    if ( pMemory == NULL ) this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+  }
+  else   if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
+  {
+    pMemory = ((OtmSharedMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, chDrive, NULL, NULL );
+    if ( pMemory == NULL )
+    {
+      this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+    }
+    else if ( (pszOwner != NULL) && (*pszOwner != EOS) ) 
+    {
+      ((OtmSharedMemoryPlugin *)pluginSelected)->setOwner( (char *)strMemoryName.c_str(), pszOwner );
+    }
+  }
+
+  if ( pMemory == NULL)
+  {
+    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
+  }
+  else if ( !bInvisible )
+  {
+    // send created notifcation
+    PSZ pszObjName = NULL;
+    UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
+    strcpy( pszObjName, pluginSelected->getName() );
+    strcat( pszObjName, ":" );
+    strcat( pszObjName, pszMemoryName );
+    EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
+    if ( pszObjName != NULL ) UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
+    this->Log.write( "   Create successful" );
+  } /* endif */     
+
+  return( pMemory );
+}
+
 /* \brief Create a memory 
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
    \param pszMemoryName name of the memory being created or
