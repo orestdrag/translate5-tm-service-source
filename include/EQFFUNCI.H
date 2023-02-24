@@ -443,11 +443,11 @@ USHORT MemFuncDeleteMem
 USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory );
 
 // organize a Translation Memory
-USHORT MemFuncOrganizeMem
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName               // Translation Memory being deleted
-);
+//USHORT MemFuncOrganizeMem
+//(
+//  PFCTDATA    pData,                   // function I/F session data
+//  PSZ         pszMemName               // Translation Memory being deleted
+//);
 
 USHORT FolFuncImportFolder
 (

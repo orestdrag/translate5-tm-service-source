@@ -263,6 +263,16 @@ USHORT EqfExportMem
 } /* end of function EqfExportMem */
 
 
+// Prepare the organize of a TM in function call mode
+USHORT MemFuncPrepOrganize
+(
+  PFCTDATA    pData,                   // function I/F session data
+  PSZ         pszMemName               // Translation Memory being deleted
+);
+USHORT MemFuncOrganizeProcess
+(
+  PFCTDATA    pData                    // function I/F session data
+);
 
 
 // organize a Translation Memory
@@ -279,27 +289,38 @@ USHORT EqfOrganizeMem
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
-
+  do{
   // check sequence of calls
-  if ( usRC == NO_ERROR )
-  {
-    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
+    if ( usRC == NO_ERROR )
     {
-      usRC = LASTTASK_INCOMPLETE_RC;
+      if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
+      {
+        T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
+        usRC = LASTTASK_INCOMPLETE_RC;
+      } /* endif */
     } /* endif */
-  } /* endif */
 
-  // call TM organize
-  if ( usRC == NO_ERROR )
-  {
-    pData->sLastFunction = FCT_EQFORGANIZEMEM;
-    usRC = MemFuncOrganizeMem( pData, pszMemName );
-  } /* endif */
-
-  if ( (usRC == NO_ERROR) && !pData->fComplete )
-  {
-    usRC = CONTINUE_RC;
-  } /* endif */
+    // call TM organize
+    if ( usRC == NO_ERROR )
+    {
+      pData->sLastFunction = FCT_EQFORGANIZEMEM;
+      if ( pData->fComplete )              // has last run been completed
+      {
+        // prepare a new analysis run
+        usRC = MemFuncPrepOrganize( pData, pszMemName );
+      }
+      else
+      {        
+        // continue current organize process
+        usRC = MemFuncOrganizeProcess( pData );
+      } /* endif */
+      //usRC = MemFuncOrganizeMem( pData, pszMemName );
+    } /* endif */
+  }while((usRC == NO_ERROR) && !pData->fComplete  );
+  //if ( (usRC == NO_ERROR) && !pData->fComplete )
+  //{
+  //  usRC = CONTINUE_RC;
+  //} /* endif */
 
   LOGWRITE2( "  RC=%u\n", usRC );
 

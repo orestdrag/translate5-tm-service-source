@@ -1198,6 +1198,70 @@ const char* GetFileExtention(std::string file){
     return &file[0];
   }
 }
+
+
+/*! \brief Replace a memory with the data from another memory
+  This method bevaves like deleting the replace memory and renaming the
+  replaceWith memory to the name of the replace memory without the overhead of the
+  actual delete and rename operations
+  \param pszPluginName name of plugin of the memory
+  \param pszReplace name of the memory being replaced
+  \param pszReplaceWith name of the memory replacing the pszReplace memory
+	returns 0 if successful or error return code
+*/
+int MemoryFactory::replaceMemory
+(
+  char *pszPluginName,
+  char *pszReplace,
+  char *pszReplaceWith
+)
+{
+  int iRC = OtmMemoryPlugin::eSuccess;
+
+  OtmPlugin *plugin = this->findPlugin( pszPluginName, pszReplace );
+
+  if ( plugin != NULL )
+  {
+    // use the given plugin to replace the memory, when not supported try the delete-and-rename approach
+    if ( plugin->getType() == OtmMemoryPlugin::eTranslationMemoryType )
+    {
+      iRC = ((OtmMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
+      if ( iRC == OtmMemoryPlugin::eNotSupported )
+      {
+        iRC = ((OtmMemoryPlugin *)plugin)->deleteMemory( pszReplace );
+        if ( iRC == 0 ) iRC = ((OtmMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
+      }
+      if ( iRC != 0 ) ((OtmMemoryPlugin *)plugin)->getLastError(this->strLastError);
+    }
+    else if ( plugin->getType() == OtmMemoryPlugin::eSharedTranslationMemoryType )
+    {
+      /*
+      iRC = ((OtmSharedMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
+      if ( iRC == OtmMemoryPlugin::eNotSupported )
+      {
+        iRC = ((OtmSharedMemoryPlugin *)plugin)->deleteMemory( pszReplace );
+        if ( iRC == 0 ) iRC = ((OtmSharedMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
+      }
+      if ( iRC != 0 ) ((OtmSharedMemoryPlugin *)plugin)->getLastError(this->strLastError);//*/
+    }
+
+    // broadcast deleted memory name for replaceWith memory
+    if ( iRC == OtmMemoryPlugin::eSuccess )
+    {
+      strcpy( this->szMemObjName, plugin->getName() );
+      strcat( this->szMemObjName,  ":" ); 
+		  strcat( this->szMemObjName, pszReplaceWith );
+      //EqfSend2AllHandlers( WM_EQFN_DELETED, MP1FROMSHORT(clsMEMORYDB), MP2FROMP(this->szMemObjName) );
+	  }
+  }
+  else
+  {
+    iRC = OtmMemoryPlugin::eMemoryNotFound;
+  } /* endif */
+  return( iRC );
+}
+
+
 /*! \brief process the API call: EqfImportMemInInternalFormat and import a memory using the internal memory files
   \param pszMemory name of the memory being imported
   \param pszMemoryPackage name of a ZIP archive containing the memory files

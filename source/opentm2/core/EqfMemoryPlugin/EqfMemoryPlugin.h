@@ -363,7 +363,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
   \param pszIndexFileName pointer to a buffer for the memory index file name
 	\returns 0 when successful
 */
-int makeIndexFileName( char *pszMemPath, char *pszIndexFileName );
+int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile = false );
 
 /*! \brief make Index filename from memory data file name
   \param strMemPath reference to a string containing the memory data file name

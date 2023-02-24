@@ -1149,19 +1149,14 @@ int EqfMemoryPlugin::addToList( char *pszPropName )
   \param pszIndexFileName pointer to a buffer for the memory index file name
 	\returns 0 when successful
 */
-int EqfMemoryPlugin::makeIndexFileName( char *pszMemPath, char *pszIndexFileName )
+int EqfMemoryPlugin::makeIndexFileName( char *pszMemPath, char *pszIndexFileName , bool fTmdFile)
 {
   char *pszExt = NULL;
   strcpy( pszIndexFileName, pszMemPath );
   pszExt = strrchr( pszIndexFileName, DOT );
-  if ( strcmp( pszExt, EXT_OF_TMDATA ) == 0 )
-  {
-    strcpy( pszExt, EXT_OF_TMINDEX );
-  }
-  else
-  {
-    strcpy( pszExt, EXT_OF_SHARED_MEMINDEX );
-  } /* endif */
+  if ( fTmdFile ) strcpy( pszExt, EXT_OF_TMDATA );
+  else  strcpy( pszExt, EXT_OF_TMINDEX );
+  
   return( 0 );
 }
 
@@ -1174,14 +1169,7 @@ int EqfMemoryPlugin::makeIndexFileName( std::string &strMemPath, std::string &st
 {
   size_t ExtPos = strMemPath.find_last_of( '.' );
   strIndexFileName =strMemPath.substr( 0, ExtPos );
-  if ( strMemPath.compare( ExtPos, std::string::npos, EXT_OF_TMDATA ) == 0 )
-  {
-    strIndexFileName.append( EXT_OF_TMINDEX );
-  }
-  else
-  {
-    strIndexFileName.append( EXT_OF_SHARED_MEMINDEX );
-  } /* endif */
+  strIndexFileName.append( EXT_OF_TMINDEX );
   return( 0 );
 }
 
@@ -1524,6 +1512,8 @@ int EqfMemoryPlugin::removeMemoryFromList(const char* pszName)
     return 0;
 }
 
+
+
 /*! \brief Handle a return code from the memory functions and create the approbriate error message text for it
     \param iRC return code from memory function
     \param pszMemName long memory name
@@ -1718,11 +1708,19 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
   UtlDelete( szTarget, 0L, FALSE );
   UtlMove( szSource, szTarget, 0L, FALSE );
 
+   // delete and move index file
+  this->makeIndexFileName( pInfoReplaceWith->szFullPath, szSource, true );
+  this->makeIndexFileName( pInfoReplace->szFullPath, szTarget, true );
+  UtlDelete( szTarget, 0L, FALSE );
+  UtlMove( szSource, szTarget, 0L, FALSE );
+
+  int loglevel = T5Logger::GetInstance()->suppressLogging();
   // delete all remaining files using the normal memory delete
   deleteMemory( pszReplaceWith );
-
+  T5Logger::GetInstance()->desuppressLogging(loglevel);
   return( 0 );
 }
+
 
 unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
 {
