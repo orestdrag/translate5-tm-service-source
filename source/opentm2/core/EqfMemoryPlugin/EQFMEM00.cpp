@@ -258,8 +258,11 @@ USHORT EQFMemOrganizeStart
       strcat( pRIDA->szTempMemName, pRIDA->szMemName );
 
       // delete any memory left over from a previous organize call
-      pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
-
+      {
+        auto ll = T5Logger::GetInstance()->suppressLogging();
+        pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
+        T5Logger::GetInstance()->desuppressLogging(ll);
+      }
       if ( MemInfo.szFullPath[0] != '\0' )
       {
         pRIDA->pMemTemp = pFactory->createMemory( pRIDA->szPluginName,
@@ -722,25 +725,6 @@ USHORT MemFuncPrepOrganize
          pRIDA->fBatch = TRUE;
          pRIDA->hwndErrMsg = HWND_FUNCIF;
          pRIDA->NextTask = MEM_START_ORGANIZE;
-
-         // build object name
-          /*
-         sprintf( szMemPath, "MEMORG: %s", pszMemName );
-         strcpy( pCommArea->szObjName, szMemPath );
-        
-         sRC = QUERYSYMBOL( szMemPath );
-         if ( sRC == -1 )
-         {
-            // TM is not in use ==> lock this TM
-            SETSYMBOL( szMemPath );
-         }
-         else
-         {
-           PSZ pTemp = pszMemName;
-           UtlErrorHwnd( ERROR_MEM_NOT_ACCESSIBLE, MB_CANCEL,
-                         1, &pTemp, EQF_ERROR, HWND_FUNCIF );
-           fOK = FALSE;
-         }//*/
 
          if ( !fOK )
          {

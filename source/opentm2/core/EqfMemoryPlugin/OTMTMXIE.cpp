@@ -3451,36 +3451,6 @@ void TMXParseHandler::GetErrorText( char *pszTextBuffer, int iBufSize )
   } /* endif */
 }
 
-// remove RTFtags from string
-//USHORT TMXParseHandler::RemoveRTFTags( PSZ_W pszString )
-//{
-//  USHORT usRC = 0;
-//  PSTARTSTOP pStartStop = NULL;
-//  PSZ_W  pszOut = pszString;
-//
-//  usRC = TACreateProtectTableW( pszString, pRTFTable, 0, (PTOKENENTRY)this->pTokBuf, iTokBufSize, 
-//                                &pStartStop, pRTFTable->pfnProtTable, pRTFTable->pfnProtTableW, 
-//                                ulCP );
-//  if ( !usRC )
-//  {
-//      PSTARTSTOP pEntry = pStartStop;
-//      while ( (pEntry->usStart != 0) || (pEntry->usStop != 0)  || (pEntry->usType != 0) )
-//      {
-//        if ( pEntry->usType == UNPROTECTED_CHAR )
-//        {
-//          for( int i = pEntry->usStart; i <= pEntry->usStop; i++ )
-//          {
-//            *pszOut++ = pszString[i];;
-//          } /* endfor */
-//        } /* endif */
-//        pEntry++;
-//      } /* endwhile */
-//      *pszOut = 0;
-//  } /* endif */
-//  UtlAlloc( (PVOID *)&pStartStop, 0L, 0L, NOMSG );
-//
-//  return( usRC );
-//} /* end of function RemoveRTFTags */
 USHORT TMXParseHandler::RemoveRTFTags( PSZ_W pszString, BOOL fTagsInCurlyBracesOnly  )
 {
   USHORT usRC = 0;
