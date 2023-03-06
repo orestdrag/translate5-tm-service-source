@@ -126,30 +126,4 @@ int getBuffIdForLog(int severity);
 #define LOG_TEMPORARY_COMMENTED_W_INFO(info) if( VLOG_IS_ON(2) && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) T5LOG(T5ERROR) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " << info ;
 
 
-// code after this line should be deleted and replaced in calls with T5LOG
-int LogMessage(int LogLevel, std::string message1);
-int LogMessage(int LogLevel, std::string message1, std::string message2);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6, std::string message7);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8);
-
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
-                    std::string message9);
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
-                    std::string message9, std::string message10) ;
-int LogMessage(int LogLevel, std::string message1, std::string message2, std::string message3,
-                std::string message4, std::string message5, std::string message6, std::string message7, std::string message8,
-                    std::string message9, std::string message10, std::string message11) ;
-
-
 #endif //_LOG_WRAPPER_H_

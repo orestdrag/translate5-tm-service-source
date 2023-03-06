@@ -1177,7 +1177,7 @@ NTMFillCreateInStruct( HTM             hModel,
       /************************************************************/
       /* TM is a shared one, use "shared" index name              */
       /************************************************************/
-      LogMessage(T5FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
+      T5LOG(T5FATAL) << "NTMFillCreateInStruct::Lan based shared mem not supported!";
       CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
     }
     else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )

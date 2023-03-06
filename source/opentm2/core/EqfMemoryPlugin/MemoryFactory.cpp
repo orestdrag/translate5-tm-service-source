@@ -289,14 +289,14 @@ OtmMemory *MemoryFactory::createMemory
   int *piErrorCode
 )
 {  
-  LogMessage( T5DEBUG,"MemoryFactory::createMemory::pszMemoryName = ",pszMemoryName, ", pszSourceLanguage = ", pszSourceLanguage,
-      ", pszDescription = ", pszDescription) ;
+  T5LOG( T5DEBUG) <<"MemoryFactory::createMemory::pszMemoryName = " << pszMemoryName << ", pszSourceLanguage = "<< pszSourceLanguage<<
+      ", pszDescription = " << pszDescription ;
   
   OtmMemory *pMemory = NULL;
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  LogMessage( T5INFO, __func__,"::Create memory ", pszMemoryName);
+  T5LOG( T5INFO) << "::Create memory " << pszMemoryName;
 
   if ( piErrorCode != NULL ) 
       *piErrorCode = 0;
@@ -306,17 +306,17 @@ OtmMemory *MemoryFactory::createMemory
   pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
   if ( pMemory == NULL ){
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-     LogMessage(T5ERROR, "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = ",this->strLastError.c_str());
+     T5LOG(T5ERROR) << "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " << this->strLastError;
   }
 
   if ( pMemory == NULL)
   {
-    LogMessage(T5ERROR, __func__, "::Create failed, with message ", this->strLastError.c_str());
+    T5LOG(T5ERROR) <<  "::Create failed, with message " << this->strLastError;
     if ( piErrorCode != NULL ) 
         *piErrorCode = this->iLastError;
   }
   else{
-    LogMessage( T5INFO, __func__, "::Create successful ");
+    T5LOG( T5INFO) <<  "::Create successful ";
   }
   return( pMemory );
 }

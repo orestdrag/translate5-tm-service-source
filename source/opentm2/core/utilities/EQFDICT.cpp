@@ -2429,7 +2429,7 @@ SHORT QDAMDictCloseLocal
        }
        else
        {
-          LogMessage(T5FATAL,__func__, ":: BTREE_V2 is not supported");
+          T5LOG(T5FATAL) <<  ":: BTREE_V2 is not supported";
           sRc = BTREE_INVALID;   
        } /* endif */
 
@@ -2896,7 +2896,7 @@ SHORT QDAMAllocKeyRecords
    }
    else
    {
-      LogMessage(T5FATAL,__func__, "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
+      T5LOG(T5FATAL) <<  "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported";
       throw;
    } /* endif */
    return sRc;
@@ -3073,7 +3073,7 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     if ( !fTransMem )
     {
-      LogMessage(T5FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
+      T5LOG(T5FATAL) << "QDAMDictCreateLocal::tried to create not TransMem, it's not supported";
       sRc = BTREE_INVALID;
     }
     else
@@ -3132,7 +3132,7 @@ SHORT QDAMDictCreateLocal
     }
     else
     {
-      LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      T5LOG(T5FATAL) << "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported";
     } /* endif */
 
     pBT->usNumberOfAllocatedBuffers = 0;
@@ -3170,7 +3170,7 @@ SHORT QDAMDictCreateLocal
       }
       else
       {
-        LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+        T5LOG(T5FATAL) <<  "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported";
       } /* endif */
 
       if (! sRc )
@@ -3203,7 +3203,7 @@ SHORT QDAMDictCreateLocal
         }
         else
         {
-          LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+          T5LOG(T5FATAL) <<  "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported";
         } /* endif */
       } /* endif */
     } /* endif */
@@ -3706,7 +3706,7 @@ SHORT QDAMCheckForUpdates
           }
           else
           {
-            LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
+            T5LOG(T5FATAL) << ":: V2 is not implemented;";
             throw;
             return BTREE_INVALID; 
           } /* endif */
@@ -6538,7 +6538,7 @@ SHORT QDAMInsertKey_V3
       // insert reference
       if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
       {
-        LogMessage(T5ERROR, __func__, ":: TEMPORARY_COMMENTED in QDAMInsertKey_V3 :: Unicode2ASCII( pKey, chHeadTerm, 0L );");
+        T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED in QDAMInsertKey_V3 :: Unicode2ASCII( pKey, chHeadTerm, 0L );";
 #ifdef TEMPORARY_COMMENTED
          Unicode2ASCII( pKey, chHeadTerm, 0L );
          #endif 

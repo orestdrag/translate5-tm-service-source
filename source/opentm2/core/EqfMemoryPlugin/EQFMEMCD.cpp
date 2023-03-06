@@ -197,12 +197,12 @@ LONG                lOptions                 // type of new Translation Memory
     // select the correct memory plugin
     if ( lOptions == SHARED_OPT )
     {
-      LogMessage(T5FATAL, "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN");
+      T5LOG(T5FATAL) <<  "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN";
       iRC = 2;
     }
     else
     {
-      LogMessage( T5DEBUG, "MemFuncCreateMem():: use the default memory plugin");
+      T5LOG( T5DEBUG) << "MemFuncCreateMem():: use the default memory plugin";
       strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
     }
 
