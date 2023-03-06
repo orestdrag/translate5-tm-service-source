@@ -195,7 +195,7 @@ USHORT MemRcHandlingHwnd
      Utlstrccpy( szMemName,
                  UtlGetFnameFromPath( pszMemPath ),
                  DOT );
-      LogMessage(T5ERROR,__func__, "::TEMPORARY_COMMENTED ObjShortToLongName");
+      T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED ObjShortToLongName";
 #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
@@ -207,7 +207,7 @@ USHORT MemRcHandlingHwnd
    {
      Utlstrccpy( szMemName, pszMemPath, DOT );
      
-     LogMessage(T5ERROR,__func__, "::TEMPORARY_COMMENTED ObjShortToLongName");
+     T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED ObjShortToLongName";
 #ifdef TEMPORARY_COMMENTED
      ObjShortToLongName( szMemName, szLongName, TM_OBJECT );
      #endif
@@ -238,7 +238,7 @@ USHORT MemRcHandlingHwnd
    case BTREE_ACCESS_ERROR:
      // Issue message: Memory database %1 is currently not accessible for
      //                the function which is requested
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_NOT_ACCESSIBLE::",pReplAddr[0] );
+     T5LOG(T5ERROR) <<   "::ERROR_MEM_NOT_ACCESSIBLE::" << pReplAddr[0] ;
      break;
 
    //---------------------------------------------------------------------
@@ -251,7 +251,7 @@ USHORT MemRcHandlingHwnd
        memcpy( chString, pszMemPath, 2 );
        chString[2] = NULC;
        pReplAddr[0] = chString;
-       LogMessage(T5ERROR, __func__,  "::ERROR_EQF_DRIVE_NOT_ACCESSIBLE::", pReplAddr[0] );
+       T5LOG(T5ERROR) <<  "::ERROR_EQF_DRIVE_NOT_ACCESSIBLE::" <<  pReplAddr[0] ;
      }
      else
      {
@@ -265,14 +265,14 @@ USHORT MemRcHandlingHwnd
    case BTREE_NO_ROOM:
    case BTREE_NO_BUFFER:
      // Issue the message: Short on system storage.
-     LogMessage(T5ERROR, __func__, ":: ERROR_STORAGE::" );
+     T5LOG(T5ERROR) <<  ":: ERROR_STORAGE::" ;
      break;
 
    //---------------------------------------------------------------------
 
    case ERROR_VERSION_NOT_SUPPORTED:
      // Issue the message: Need new Translationmanager version
-     LogMessage(T5ERROR, __func__, ":: ERROR_MEM_VERSION_NOT_SUPPORTED:: ",pReplAddr[0] );
+     T5LOG(T5ERROR) <<  ":: ERROR_MEM_VERSION_NOT_SUPPORTED:: " << pReplAddr[0] ;
      break;
 
 
@@ -304,7 +304,8 @@ USHORT MemRcHandlingHwnd
        // Issue the message: "The translation memory %1 is corrupted/backlevel"
        //                    "\n Do you want to start the organize process of"
        //                    "the translation memory %1 now ?"
-       Response = LogMessage(T5ERROR, __func__,"::",  toStr(usErrorMessage).c_str(), "; ", pReplAddr[0] );
+       //Response = T5LOG(T5ERROR) <<"::" << usErrorMessage << "; " << pReplAddr[0] ;
+       T5LOG(T5ERROR) <<"::" << usErrorMessage << "; " << pReplAddr[0] ;
        if ( Response == MBID_YES )   //--- user wants to organize TM now
        {
          // Close the open TM and set TM handle to NULL
@@ -332,13 +333,13 @@ USHORT MemRcHandlingHwnd
      else
      {
        // Issue message for corrupted TM
-       LogMessage(T5ERROR, __func__,":: ERROR_RENUMBER::", *pReplAddr );
+       T5LOG(T5ERROR) << ":: ERROR_RENUMBER::" << *pReplAddr ;
      } /* endif */
      break;
    //---------------------------------------------------------------------
    case DISK_FULL:
      // Issue the message: "The disk on which memory database %1 is located is full"
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_DISK_FULL::",pReplAddr[0] );
+     T5LOG(T5ERROR) <<  "::ERROR_MEM_DISK_FULL::" << pReplAddr[0];
      break;
    case BTREE_DISK_FULL:
    case BTREE_WRITE_ERROR   :
@@ -346,33 +347,33 @@ USHORT MemRcHandlingHwnd
      memcpy( chString, pszMemPath, 2 );
      chString[2] = NULC;
      pReplAddr[0] = chString;
-     LogMessage(T5ERROR, __func__,  "::ERROR_DISK_FULL_MSG::",pReplAddr[0] );
+     T5LOG(T5ERROR) << "::ERROR_DISK_FULL_MSG::" << pReplAddr[0];
      break;
    //---------------------------------------------------------------------
    case DB_FULL:
    case BTREE_LOOKUPTABLE_TOO_SMALL:
      // Issue the message: "Memory database %1 is full"
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_DB_FULL::", 
-               pReplAddr[0] );
+     T5LOG(T5ERROR) <<   "::ERROR_MEM_DB_FULL::", 
+               pReplAddr[0] ;
      break;
    //--------------------------------------------------------------------
    case ERROR_OLD_PROPERTY_FILE:
-     LogMessage(T5ERROR, __func__,  "::ITM_TM_NEEDS_ORGANIZE::",  pReplAddr[0] );
+     T5LOG(T5ERROR) <<   "::ITM_TM_NEEDS_ORGANIZE::" <<  pReplAddr[0] ;
      break;
    //---------------------------------------------------------------------
    case FILE_ALREADY_EXISTS:
      // Issue the message: The name  %1  is invalid or a memory database with this name
      //                    exists already or a flat file with this name exists alredy.
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_NAME_INVALID::", 
-               pReplAddr[0] );
+     T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_INVALID::" <<
+               pReplAddr[0] ;
      break;
    //---------------------------------------------------------------------
    case NOT_REPLACED_OLD_SEGMENT:
      // Issue the message: In the translation memory %1 a function requested to replace
      //                    a segment but the corresponding segment alredy in the translation memory
      //                    is more recent. The replace is refused.
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_NOT_REPLACED::", 
-               pReplAddr[0] );
+     T5LOG(T5ERROR) <<   "::ERROR_MEM_NOT_REPLACED::" <<
+               pReplAddr[0] ;
      break;
    //---------------------------------------------------------------------
    case TM_FILE_SCREWED_UP:
@@ -380,8 +381,8 @@ USHORT MemRcHandlingHwnd
    case BTREE_ILLEGAL_FILE:
      // Issue the message: The translation memory %1 is seriously damaged. It can not
      //                    be recovered.
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_DESTROYED::",
-               pReplAddr[0] );
+     T5LOG(T5ERROR) <<  "::ERROR_MEM_DESTROYED::",
+               pReplAddr[0] ;
      break;
    //---------------------------------------------------------------------
    case TM_FILE_NOT_FOUND:
@@ -391,8 +392,8 @@ USHORT MemRcHandlingHwnd
      if ( pszMemPath != NULL )
      {
        //--- issue an error message else
-       LogMessage(T5ERROR, __func__,  "::ERROR_TM_FILE_NOT_FOUND::", 
-                 pReplAddr[0] );
+       T5LOG(T5ERROR) <<  "::ERROR_TM_FILE_NOT_FOUND::", 
+                 pReplAddr[0] ;
 
        //--- if local TM
        if ( pszServer )
@@ -429,8 +430,8 @@ USHORT MemRcHandlingHwnd
 
      if ( pszMemPath != NULL )
      {
-       LogMessage(T5ERROR, __func__,  "::ERROR_TM_OPENED_EXCLUSIVELY::", 
-                 pReplAddr[0] );
+       T5LOG(T5ERROR) <<   "::ERROR_TM_OPENED_EXCLUSIVELY::"<<
+                 pReplAddr[0] ;
      } /* endif */
      else
      {
@@ -443,8 +444,8 @@ USHORT MemRcHandlingHwnd
      // issue undefined error message
      if ( pszMemPath != NULL )
      {
-       LogMessage(T5ERROR, __func__,  "::ERROR_TM_OPENED_SHARED::", 
-                 pReplAddr[0] );
+       T5LOG(T5ERROR) <<   "::ERROR_TM_OPENED_SHARED::" << 
+                 pReplAddr[0] ;
      } /* endif */
      else
      {
@@ -461,8 +462,8 @@ USHORT MemRcHandlingHwnd
      // issue undefined error message
      if ( pszMemPath != NULL )
      {
-       LogMessage(T5ERROR, __func__,  "::ERROR_PROP_EXIST::", 
-                 pReplAddr[0] );
+       T5LOG(T5ERROR) <<  "::ERROR_PROP_EXIST::"<< 
+                 pReplAddr[0] ;
      } /* endif */
      else
      {
@@ -475,8 +476,8 @@ USHORT MemRcHandlingHwnd
      // issue undefined error message
      if ( pszMemPath != NULL )
      {
-       LogMessage(T5ERROR, __func__,  "::ERROR_PROP_WRITE::", 
-                 pReplAddr[0] );
+       T5LOG(T5ERROR) <<   "::ERROR_PROP_WRITE::"<< 
+                 pReplAddr[0] ;
      } /* endif */
      else
      {
@@ -489,8 +490,8 @@ USHORT MemRcHandlingHwnd
      // issue undefined error message                                /*@1170A*/
      if ( pszMemPath != NULL )                                       /*@1170A*/
      {                                                               /*@1170A*/
-       LogMessage(T5ERROR, __func__,  "::ERROR_OPEN_TM_PROPERTIES::",              /*@1170A*/
-                 pszMemPath );                         /*@1170A*/
+       T5LOG(T5ERROR) <<  "::ERROR_OPEN_TM_PROPERTIES::" <<              /*@1170A*/
+                 pszMemPath ;                         /*@1170A*/
      } /* endif */                                                   /*@1170A*/
      else                                                            /*@1170A*/
      {                                                               /*@1170A*/
@@ -512,27 +513,27 @@ USHORT MemRcHandlingHwnd
    case BTREE_NETWORK_ACCESS_DENIED:
      // Issue message: Access to %1 failed                             /*@S6A*/
      memcpy( chString, pszMemPath, 1 );                                /*@S6A*/
-     LogMessage(T5ERROR, __func__,  "::ERROR_ACCESS_DENIED_MSG::",                   /*@S6A*/
-               pReplAddr[0] );                             /*@S6A*/
+     T5LOG(T5ERROR) <<  "::ERROR_ACCESS_DENIED_MSG::" <<                   /*@S6A*/
+               pReplAddr[0] ;                             /*@S6A*/
      break;                                                            /*@S6A*/
    //---------------------------------------------------------------------
    case SEGMENT_BUFFER_FULL :                                        /*@1108A*/
    case BTREE_BUFFER_SMALL:
      // Issue message: The segment is too large.                     /*@1108A*/
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_SEGMENT_TOO_LARGE::"             /*@1108A*/
-                );                                    /*@1108A*/
+     T5LOG(T5ERROR) <<  "::ERROR_MEM_SEGMENT_TOO_LARGE::"             /*@1108A*/
+                ;                                    /*@1108A*/
      break;                                                          /*@1108A*/
    //---------------------------------------------------------------------
    case ERROR_INTERNAL :                                             /*@1116A*/
      // Issue message: An internal error or program error occurred.  /*@1116A*/
-     LogMessage(T5ERROR, __func__,  "ERROR_INTERNAL"); /*@1116A*/
+     T5LOG(T5ERROR) <<   "ERROR_INTERNAL"; /*@1116A*/
      break;                                                          /*@1116A*/
    //---------------------------------------------------------------------
    case ERROR_INTERNAL_PARM :                                        /*@1116A*/
      // Issue message: An internal error or program error occurred   /*@1116A*/
      // in file  xxx.xx (line xxx). pReplAddr[0] contains name & line/*@1116A*/
-     LogMessage(T5ERROR, __func__,  "::ERROR_INTERNAL_PARM::", pReplAddr[0]     /*@1116A*/
-               );                                          /*@1116A*/
+     T5LOG(T5ERROR) << "::ERROR_INTERNAL_PARM::"<< pReplAddr[0]     /*@1116A*/
+               ;                                          /*@1116A*/
      break;                                                          /*@1116A*/
    //---------------------------------------------------------------------
    case BTREE_DUPLICATE_KEY :
@@ -551,7 +552,7 @@ USHORT MemRcHandlingHwnd
    case BTREE_NO_EXCLUSIVE  :
    case BTREE_OPEN_FAILED   :
      // Pass on error to generic error handling module
-     LogMessage(T5ERROR, __func__,  "::rc = ", toStr(usMemRc).c_str(),"; ", pReplAddr[0] );
+     T5LOG(T5ERROR) <<  "::rc = " << usMemRc << "; " << pReplAddr[0] ;
      break;
    case ERROR_TA_ACC_TAGTABLE:
      if ( pszServer )
@@ -562,10 +563,10 @@ USHORT MemRcHandlingHwnd
      {
        pReplAddr[0] = "";
      } /* endif */
-     LogMessage(T5ERROR, __func__,  "::rc = ", toStr(usMemRc).c_str(),"; ", pReplAddr[0]  );
+     T5LOG(T5ERROR) <<  "::rc = " << usMemRc << "; ", pReplAddr[0]  ;
      break;
    case  BTREE_IN_USE:
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_NOT_ACCESSIBLE::", pReplAddr[0] );
+     T5LOG(T5ERROR) <<   "::ERROR_MEM_NOT_ACCESSIBLE::" << pReplAddr[0] ;
      break;
    //---------------------------------------------------------------------
    default:
@@ -604,20 +605,20 @@ VOID MemRcHandlingErrorUndefinedHwnd( USHORT usMemRc,        // Error code
   /********************************************************************/
   if ( (usMemRc >= ERR_MORPH_BASE) && (usMemRc <= ERR_MORPH_END)  )
   {
-    LogMessage(T5ERROR, __func__,  
-      ":: if ( (usMemRc >= ERR_MORPH_BASE) && (usMemRc <= ERR_MORPH_END)  )::usMemRc::",
-      toStr(usMemRc).c_str(),"; ",  pReplAddr[0] );
+    T5LOG(T5ERROR) <<  
+      ":: if ( (usMemRc >= ERR_MORPH_BASE) && (usMemRc <= ERR_MORPH_END)  )::usMemRc::"<<
+      usMemRc << "; "<<  pReplAddr[0];
   }
   else
   if ( (usMemRc >= ERR_BTREE_BASE) && (usMemRc <= ERR_BTREE_END)  )
   {
-    LogMessage(T5ERROR, __func__,  
-      "::if ( (usMemRc >= ERR_BTREE_BASE) && (usMemRc <= ERR_BTREE_END)  )::usMemRc::",
-      toStr(usMemRc).c_str(),"; ",  pReplAddr[0] );
+    T5LOG(T5ERROR) <<  
+      "::if ( (usMemRc >= ERR_BTREE_BASE) && (usMemRc <= ERR_BTREE_END)  )::usMemRc::"
+      << usMemRc << "; " <<  pReplAddr[0] ;
   }
   else
   {
-    LogMessage(T5ERROR, __func__,  "::ERROR_MEM_UNDEFINED::", pReplAddr[0] );
+    T5LOG(T5ERROR) <<   "::ERROR_MEM_UNDEFINED::"<< pReplAddr[0] ;
   } /* endif */
 } /* end of function MemRcHandlingErrorUndefined */
 
@@ -868,7 +869,7 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
       ULONG ulDataLen = sizeof(pData->bData);
       ULONG ulKeyLen  = sizeof(pData->szKey) / sizeof(CHAR_W);
 
-      LogMessage(T5ERROR,__func__, "TEMPORARY_COMMENTED QDAMDictNextLocal");
+      T5LOG(T5ERROR) <<  "TEMPORARY_COMMENTED QDAMDictNextLocal";
 #ifdef TEMPORARY_COMMENTED
       sRc = QDAMDictNextLocal( pbTree, pData->szKey, &ulKeyLen, pData->bData, &ulDataLen );
       #endif
@@ -985,14 +986,7 @@ USHORT MemConvertMem( PSZ pszFullMemName )
       if ( !usRC )
       {
         Utlstrccpy ( szIndexName, pszFullMemName, DOT );
-        if ( strcmp( strrchr( pszFullMemName, '.'), EXT_OF_SHARED_MEM ) == 0 )
-        {
-          strcat( szIndexName, EXT_OF_SHARED_MEMINDEX );
-        }
-        else
-        {
-          strcat( szIndexName, EXT_OF_TMINDEX );
-        } /* endif */
+        strcat( szIndexName, EXT_OF_TMINDEX );
 
         if ( hfLog )
         {

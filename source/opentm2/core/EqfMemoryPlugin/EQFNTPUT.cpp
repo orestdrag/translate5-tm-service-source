@@ -280,7 +280,7 @@ USHORT TmtXReplace
     {
       usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
       if(usRc){
-        LogMessage( T5WARNING, __func__, ":: NTMGetIDFromName( tagtable ) returned ", toStr(usRc));
+        T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
       }
     }
     
@@ -366,7 +366,6 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-      //LogMessage(T5ERROR,"TEMPORARY_COMMENTED");
       TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
@@ -436,7 +435,7 @@ VOID HashSentence
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset);
-      LogMessage( T5DEBUG,"HashSentence:: pNormOffset = \"", str.c_str(), "\"; len = ", toStr(pTermTokens->usLength).c_str(),"; hash = ", toStr(pTermTokens->usHash).c_str());
+      T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
     }
     //max nr of hashes built
     usCount++;
@@ -460,13 +459,13 @@ VOID HashSentence
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
-    LogMessage( T5DEBUG,"HashSentence:: inputString =\"", str.c_str(), "\"; count = ", toStr(usCount).c_str() );
+    T5LOG( T5DEBUG) <<"HashSentence:: inputString =\"" << str << "\"; count = " << usCount;
   }
   
   //build tuples of the term hashes
   if ( usCount >= 3 )
   {
-    LogMessage( T5DEBUG,"HashSentence:: Building Votes");
+    T5LOG( T5DEBUG) <<"HashSentence:: Building Votes";
     BuildVotes( pSentence );
   } /* endif */
 }
@@ -969,9 +968,9 @@ USHORT TokenizeTarget
                     //set new position of pTagEntry
                     pTagEntry = ((PBYTE)pTagRecord) + usFilled;
                   }else{
-                    LogMessage(T5ERROR, __func__, "::ERROR: Segment not saved. It was tried to allocate ",toStr(*pulTagAlloc + addedSpace).c_str(),
-                      " bytes to save the tags of the segment, but this was still not enough. Since this should never happen, we did not try to allocate even more bytes and did not save the segment. This was the segment, that was not saved: ",
-                      EncodingHelper::convertToUTF8(pString).c_str());
+                    T5LOG(T5ERROR) <<  "::ERROR: Segment not saved. It was tried to allocate " << *pulTagAlloc + addedSpace <<
+                      " bytes to save the tags of the segment, but this was still not enough. Since this should never happen, we did not try to allocate even more bytes and did not save the segment. This was the segment, that was not saved: "
+                      << EncodingHelper::convertToUTF8(pString);
                   }
 
                 } /* endif */
@@ -1719,7 +1718,7 @@ USHORT DetermineTmRecord
           } /* endif */
           msg +=  std::to_string(NTMKEY(*pIndexEntry)) + "; " ;
         } /* endfor */
-        LogMessage( T5DEBUG, msg.c_str());
+        T5LOG( T5DEBUG) << msg;
       }
 
       pIndexEntry = &pIndexRecord->stIndexEntry;
@@ -1827,7 +1826,7 @@ USHORT DetermineTmRecord
       msg +=  std::to_string(*pulSidStart) + "; ";
       pulSidStart++;
     } 
-    LogMessage( T5DEBUG, msg.c_str());
+    T5LOG( T5DEBUG) << msg;
   }
 
   UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG );
@@ -2286,7 +2285,7 @@ USHORT ComparePutData
                       RECLEN(pTMXTargetRecord) += lNewClbLen;
                     }else{
                       if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-                        LogMessage(T5ERROR, __func__,"::memmove size is less or equal to 0, size = ", toStr(size), "; lNewClbLen = ", toStr(lNewClbLen));
+                        T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen;
                       }
                     }
                   } /* endif */
@@ -3261,8 +3260,8 @@ USHORT TMLoopAndDelTargetClb
 {
 
   static int call_n = 0;
-  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
-    LogMessage( T5INFO, __func__,":: call n = ", toStr(++call_n).c_str(),"; Sentence = ", EncodingHelper::convertToUTF8(pSentence->pInputString).c_str() );
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    T5LOG( T5INFO) << ":: call n = " << (++call_n) << "; Sentence = " << EncodingHelper::convertToUTF8(pSentence->pInputString);
   }
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block

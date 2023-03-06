@@ -14,14 +14,14 @@ std::string filesystem_get_home_dir() {
 }
 
 int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
-    LogMessage( T5WARNING,"TEMPORARY HARDCODED useBuffer= true in filesystem_open_file, fname = ", path);
+    T5LOG( T5WARNING) <<"TEMPORARY HARDCODED useBuffer= true in filesystem_open_file, fname = " << path;
     bool useBuffer = true;//false;
     if(    (strcasestr(path, ".TMI") )
         || (strcasestr(path, ".TMD") )
         //|| (strcasestr(path, ".MEM") )
     ){
-        LogMessage( T5INFO, "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = ", 
-                        path, ", useFilebuffer before = ", toStr(useBuffer).c_str());
+        T5LOG( T5INFO) << "filesystem_open_file::Openning data file(with ext. .TMI, .TMD, .MEM => forcing to use filebuffers, fName = "<< 
+                        path<< ", useFilebuffer before = " <<useBuffer;
         useBuffer = true;
     }
     ptr = FilesystemHelper::OpenFile(path, mode, useBuffer);
@@ -181,8 +181,8 @@ int largeIntToInt(LARGE_INTEGER li) {
 
 DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet)
 {
-    LogMessage( T5INFO, "SetFilePointer for file ", FilesystemHelper::GetFileName((HFILE)fp).c_str(), "; offset is ", toStr(LoPart).c_str(), 
-            ", direction is ", toStr(OffSet).c_str());
+    T5LOG( T5INFO) << "SetFilePointer for file " << FilesystemHelper::GetFileName((HFILE)fp) << "; offset is " << LoPart << 
+            ", direction is " << OffSet;
     LONG hipart;
     int ret = FilesystemHelper::SetFileCursor(fp, LoPart, hipart, OffSet);
     if(HiPart)
@@ -194,7 +194,7 @@ BOOL MoveFile(
   LPCTSTR lpExistingFileName, 
   LPCTSTR lpNewFileName       
 ){
-    LogMessage( T5INFO,"MoveFile:: moving file from ", lpExistingFileName, " to ", lpNewFileName);
+    T5LOG( T5INFO) <<"MoveFile:: moving file from ", lpExistingFileName, " to ", lpNewFileName;
     return FilesystemHelper::MoveFile(lpExistingFileName, lpNewFileName);
 }
 
@@ -208,7 +208,7 @@ BOOL SetFilePointerEx(
             if(liDistanceToMove.QuadPart == 0){
                 return true;
             }
-            LogMessage(T5FATAL, "calling not implemented function SetFilePointerEx for file ", FilesystemHelper::GetFileName(hFile).c_str());
+            T5LOG(T5FATAL) << "calling not implemented function SetFilePointerEx for file " << FilesystemHelper::GetFileName(hFile);
             //int h = GetFileId( hFile);
             //PVOID ph = &h;
             LONG a, *b, c;
@@ -240,14 +240,14 @@ BOOL SetFilePointerEx(
         int GetFileId(HFILE ptr){
             int fno = fileno(ptr);
             //sprintf(proclnk, "/proc/self/fd/%d", fno);
-            LogMessage( T5INFO, "GetFileId(", toStr((long int) ptr).c_str(),") = ", toStr(fno).c_str(), ", fname = ", FilesystemHelper::GetFileName(ptr).c_str());
+            T5LOG( T5INFO) << "GetFileId(" << (long int) ptr << ") = " << fno << ", fname = " << FilesystemHelper::GetFileName(ptr);
             return fno;
         }
 
 
         int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes){
-            LogMessage( T5INFO, "SkipBytesFromBeginningInFile, file = ", FilesystemHelper::GetFileName(ptr).c_str(),
-                        "; bytes = ", toStr(numOfBytes).c_str());
+            T5LOG( T5INFO) << "SkipBytesFromBeginningInFile, file = " << FilesystemHelper::GetFileName(ptr) <<
+                        "; bytes = " << numOfBytes;
             int err = 0;
             if(ptr == NULL){
                 return -1;

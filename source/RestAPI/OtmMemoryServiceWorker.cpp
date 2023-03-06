@@ -178,19 +178,19 @@ int OtmMemoryServiceWorker::verifyAPISession
     return( 0 );
   }
 
-  LogMessage( T5DEBUG, "Initializing API Session");
+  T5LOG( T5DEBUG) << "Initializing API Session";
   this->iLastRC = EqfStartSession( &(this->hSession) );
-  LogMessage( T5DEBUG, "[verifyAPISession] EqfStartSession ret: " , toStr(this->iLastRC).c_str());
+  T5LOG( T5DEBUG) << "[verifyAPISession] EqfStartSession ret: "  << this->iLastRC;
 
   if ( this->iLastRC != 0 ) {
-    LogMessage(T5ERROR, "OpenTM2 API session could not be started, the return code is" , toStr( this->iLastRC ).c_str());
+    T5LOG(T5ERROR) << "OpenTM2 API session could not be started, the return code is" <<  this->iLastRC ;
   }else{
       try {
           xercesc::XMLPlatformUtils::Initialize();
       }
       catch (const xercesc::XMLException& toCatch) {
           toCatch;
-          LogMessage(T5ERROR,__func__, ":: cant init Xercesc");
+          T5LOG(T5ERROR) << ":: cant init Xercesc";
           return( ERROR_NOT_READY );
       }
   }
@@ -235,8 +235,8 @@ int OtmMemoryServiceWorker::buildErrorReturn
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
   strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
-  //LogMessage(T5ERROR, strUTF16);
-  LogMessage(T5ERROR, strErrorReturn.c_str(), ", ErrorCode = ", toStr(iRC));
+  //T5LOG(T5ERROR) << strUTF16);
+  T5LOG(T5ERROR) << strErrorReturn << ", ErrorCode = " << iRC;
 	return(0);
 }
 
@@ -270,7 +270,7 @@ int OtmMemoryServiceWorker::buildErrorReturn
 int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
 {
   if(this->vMemoryList.size()==0){
-    LogMessage( T5WARNING,"findMemoryInList:: vMemoryList.size == 0");
+    T5LOG( T5WARNING) <<"findMemoryInList:: vMemoryList.size == 0";
   }
   // 
   for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
@@ -291,7 +291,7 @@ int OtmMemoryServiceWorker::GetMemImportInProcess(){
   {
     if(vMemoryList[i].eImportStatus == IMPORT_RUNNING_STATUS)
     {
-      LogMessage( T5INFO, __func__,":: memory in import process, name = ", vMemoryList[i].szName );
+      T5LOG( T5INFO) << ":: memory in import process, name = " << vMemoryList[i].szName ;
       return i;
     }
   } /* endfor */
@@ -324,7 +324,7 @@ int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
   UsedMemory = calculateOccupiedRAM() + memoryRequested;
   #endif
 
-  LogMessage( T5DEBUG, __func__,":: ", toStr(UsedMemory).c_str(), " bytes is used from ", toStr(AllowedMemory).c_str(), " allowed");
+  T5LOG( T5DEBUG) << ":: " << UsedMemory << " bytes is used from " << AllowedMemory << " allowed";
 
   // add a new entry when the maximum list size has not been reached yet
   //if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
@@ -369,7 +369,7 @@ size_t OtmMemoryServiceWorker::calculateOccupiedRAM(){
   UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
   #endif
 
-  LogMessage( T5INFO, __func__,":: calculated occupied ram = ", toStr(UsedMemory/1000000).c_str(), " MB");
+  T5LOG( T5INFO) << ":: calculated occupied ram = " << UsedMemory/1000000 << " MB";
   return UsedMemory;
 }
 
@@ -399,7 +399,7 @@ size_t OtmMemoryServiceWorker::cleanupMemoryList(size_t memoryRequested)
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    LogMessage( T5INFO, __func__,":: removing memory  \'", vMemoryList[it->second].szName, "\' that wasns\'t used for ", toStr(curTime - vMemoryList[it->second].tLastAccessTime).c_str(), " seconds" );
+    T5LOG( T5INFO) << ":: removing memory  \'"<< vMemoryList[it->second].szName << "\' that wasns\'t used for " << (curTime - vMemoryList[it->second].tLastAccessTime) <<  " seconds" ;
     removeFromMemoryList(it->second);
     memoryNeed = memoryRequested + calculateOccupiedRAM();
   }
@@ -486,7 +486,7 @@ int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wc
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
   if(VLOG_IS_ON(1)){
-    LogMessage( T5INFO,__func__,":: memory: ", pszMemory, "; required RAM:", toStr(requiredMemory).c_str(),"; allowed RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+    T5LOG( T5INFO) << ":: memory: " << pszMemory << "; required RAM:" << requiredMemory << "; allowed RAM left after opening mem: " << memLeftAfterOpening;
   }
   // find a free slot in the memory list
   iIndex = getFreeSlot(requiredMemory);
@@ -720,7 +720,7 @@ int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
   while(vMemoryList[iIndex].eStatus == IMPORT_RUNNING_STATUS || vMemoryList[iIndex].eImportStatus == IMPORT_RUNNING_STATUS ){
     sleep(1);
     if(i++ % 10 == 0){
-      LogMessage( T5WARNING, __func__,":: waiting for closing memory with name = \'",vMemoryList[iIndex].szName, "\', for ", toStr(i).c_str(), " seconds" );
+      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << vMemoryList[iIndex].szName << "\', for " << i << " seconds";
     }
   }
   // remove the memory from the list
@@ -952,7 +952,7 @@ int OtmMemoryServiceWorker::import
 )
 {
   //EncodingHelper::convertUTF8ToASCII( strMemory );
-  LogMessage( T5INFO, "+POST ", strMemory.c_str(),"/import\n");
+  T5LOG( T5INFO) << "+POST " << strMemory << "/import\n";
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -1016,8 +1016,8 @@ int OtmMemoryServiceWorker::import
     // cleanup the memory list (close memories not used for a longer time)
     size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
     if(VLOG_IS_ON(1)){
-      LogMessage( T5INFO,__func__,":: memory: ", strMemory.c_str(), "; required RAM:", 
-          toStr(requiredMemory).c_str(),"; RAM left after opening mem: ", toStr(memLeftAfterOpening).c_str());
+      T5LOG( T5INFO) << ":: memory: " << strMemory << "; required RAM:" 
+          << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
     }
     //requiredMemory = 0;
     // find a free slot in the memory list
@@ -1037,7 +1037,7 @@ int OtmMemoryServiceWorker::import
     //this->vMemoryList[iIndex].dImportProcess = 0;
     strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
   }
-  LogMessage( T5DEBUG, __func__, "status for ", strMemory.c_str() , " was changed to import");
+  T5LOG( T5DEBUG) <<  "status for " << strMemory << " was changed to import";
   // extract TMX data
   std::string strTmxData;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
@@ -1063,20 +1063,20 @@ int OtmMemoryServiceWorker::import
     iRC = factory->parseJSONGetNext( parseHandle, name, value );
     if ( iRC == 0 )
     {
-      //LogMessage( T5INFO, "parsed json name = ", name.c_str(), "; value = ", value.c_str());
+      //T5LOG( T5INFO) << "parsed json name = ", name.c_str(), "; value = ", value.c_str());
       if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
       {
         strTmxData = value;
         //break;
       }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
         loggingThreshold = std::stoi(value);
-        LogMessage( T5WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
+        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
         T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
       }else{
-        LogMessage( T5WARNING, "JSON parsed unexpected name, ", name.c_str());
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
       }
     }else if(iRC != 2002){// iRC != INFO_ENDOFPARAMETERLISTREACHED
-        LogMessage(T5ERROR, "failed to parse JSON \"", strInputParms.c_str(), "\", iRC = ", toStr(iRC).c_str());
+        T5LOG(T5ERROR) << "failed to parse JSON \"" << strInputParms <<"\", iRC = " << iRC;
     }
   } /* endwhile */
   factory->parseJSONStop( parseHandle );
@@ -1108,7 +1108,7 @@ int OtmMemoryServiceWorker::import
     return( INTERNAL_SERVER_ERROR );
   }
 
-  LogMessage( T5INFO, "OtmMemoryServiceWorker::import::+   Temp TMX File is ", szTempFile);
+  T5LOG( T5INFO) << "OtmMemoryServiceWorker::import::+   Temp TMX File is " << szTempFile;
 
   // decode TMX data and write it to temp file
   std::string strError;
@@ -1192,10 +1192,10 @@ int OtmMemoryServiceWorker::createMemory
       if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {
         strData = value;
-        LogMessage( T5DEBUG, "JSON parsed name = ", name.c_str(), "; size = ", toStr(strData.size()));
+        T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; size = " << strData.size();
       }
       else{
-        LogMessage( T5DEBUG, "JSON parsed name = ", name.c_str(), "; value = ",value.c_str());
+        T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; value = " << value;
         if ( strcasecmp( name.c_str(), "name" ) == 0 )
         {
           strName = value;
@@ -1205,10 +1205,10 @@ int OtmMemoryServiceWorker::createMemory
           strSourceLang = value;
         }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
           int loggingThreshold = std::stoi(value);
-          LogMessage( T5WARNING,"OtmMemoryServiceWorker::import::set new threshold for logging", toStr(loggingThreshold).c_str());
+          T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" <<loggingThreshold ;
           T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
         }else{
-          LogMessage( T5WARNING, "JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+          T5LOG( T5WARNING) << "JSON parsed unused data: name = " << name << "; value = " << value;
         }
       }
     }
@@ -1248,12 +1248,12 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( strData.empty() )
   {
-    LogMessage( T5INFO, "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()");
+    T5LOG( T5INFO) << "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()";
     iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), 0, (PSZ)szOtmSourceLang, 0 );
   }
   else
   {
-     LogMessage( T5INFO, "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ");
+     T5LOG( T5INFO) << "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
     char szTempFile[PATH_MAX];
     iRC = buildTempFileName( szTempFile );
@@ -1264,7 +1264,7 @@ int OtmMemoryServiceWorker::createMemory
       return( INTERNAL_SERVER_ERROR );
     }
 
-    LogMessage( T5INFO, "+   Temp binary file is ", szTempFile );
+    T5LOG( T5INFO) << "+   Temp binary file is " << szTempFile ;
 
     // decode binary data and write it to temp file
     std::string strError;
@@ -1283,7 +1283,7 @@ int OtmMemoryServiceWorker::createMemory
 
   if(iRC == ERROR_MEM_NAME_EXISTS){
     strOutputParms = "{\"" + strName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
-    LogMessage(T5ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(iRC).c_str()," iRC = ERROR_MEM_NAME_EXISTS");
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << iRC << " iRC = ERROR_MEM_NAME_EXISTS";
     return iRC;
   }else if ( iRC != 0 )
   {
@@ -1298,19 +1298,19 @@ int OtmMemoryServiceWorker::createMemory
       case ERROR_MEM_NAME_INVALID:
         iRC = CONFLICT;
         strOutputParms += "CONFLICT";
-        LogMessage(T5ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = CONFLICT");
+        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << usRC << " iRC = CONFLICT";
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
         iRC = BAD_REQUEST;
         strOutputParms += "BAD_REQUEST";
-        LogMessage(T5ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = BAD_REQUEST");
+        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " <<  usRC << " iRC = BAD_REQUEST";
         break;
       default:
         iRC = INTERNAL_SERVER_ERROR;
         strOutputParms += "INTERNAL_SERVER_ERROR";
-        LogMessage(T5ERROR, "OtmMemoryServiceWorker::createMemo()::usRC = ", toStr(usRC).c_str()," iRC = INTERNAL_SERVER_ERROR");
+        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << usRC << " iRC = INTERNAL_SERVER_ERROR";
         break;
     }
     strOutputParms +="\"}";
@@ -1595,7 +1595,7 @@ std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& r
       rc = factory->parseJSONGetNext( parseHandle, name, value );
       if ( rc == 0 )
       {      
-        LogMessage( T5DEBUG, __func__,"::JSON parsed src = ", name.c_str(), "; size = ", toStr(strSrcData.size()));
+        T5LOG( T5DEBUG) << "::JSON parsed src = " << name << "; size = " << strSrcData.size();
         if ( strcasecmp( name.c_str(), "src" ) == 0 )
         {
           strSrcData = value;
@@ -1604,7 +1604,7 @@ std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& r
         }else if( strcasecmp (name.c_str(), "req") == 0 ){
           strReqData = value;          
         }else{
-          LogMessage( T5WARNING,__func__, "::JSON parsed unused data: name = ", name.c_str(), "; value = ",value.c_str());
+          T5LOG( T5WARNING) <<  "::JSON parsed unused data: name = " <<  name << "; value = " << value;
         }
       }
     } /* endwhile */
@@ -1711,7 +1711,7 @@ int OtmMemoryServiceWorker::search
   
   if ( pData->szMarkup[0] == 0 )
   {
-    LogMessage( T5INFO,"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF");
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF";
     // use default markup table if none given
     strcpy( pData->szMarkup, "OTMXUXLF" );
   } /* end */
@@ -1727,7 +1727,7 @@ int OtmMemoryServiceWorker::search
 
   
   if(loggingThreshold >= 0){
-    LogMessage( T5WARNING,"OtmMemoryServiceWorker::search::set new threshold for logging", toStr(loggingThreshold).c_str());
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::search::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
 
@@ -1780,12 +1780,12 @@ int OtmMemoryServiceWorker::search
     iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, &pFoundProposals[j], GET_EXACT );
     ProposalSpacesLeft -= iNumOfProposals;
     if(ProposalSpacesLeft <= 0 ){
-      LogMessage( T5WARNING, __func__, ":: not all list of lang was checked before allocated proposals space reached end, allocated ", toStr(pData->iNumOfProposals), 
-        ", proposal spaces, checked ", toStr(i).c_str(), " of ", toStr(sourceLangs.size()), " languages ");
+      T5LOG( T5WARNING) <<  ":: not all list of lang was checked before allocated proposals space reached end, allocated " << pData->iNumOfProposals << 
+        ", proposal spaces, checked " << i << " of " << sourceLangs.size() << " languages ";
       //break;
     }
     if(iRC != 0){
-      LogMessage( T5WARNING, __func__,":: fuzzy search of mem returned error, rc = ", toStr(iRC).c_str(),"; sourceLange = ", sourceLangs[i].c_str() );
+      T5LOG( T5WARNING) << ":: fuzzy search of mem returned error, rc = " << iRC << "; sourceLange = "<< sourceLangs[i] ;
     }
   //}
   iNumOfProposals = pData->iNumOfProposals - ProposalSpacesLeft;
@@ -1902,7 +1902,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   }
 
   if(loggingThreshold >= 0){
-    LogMessage( T5WARNING,"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging", toStr(loggingThreshold).c_str());
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
     // get the handle of the memory 
@@ -1946,7 +1946,7 @@ int OtmMemoryServiceWorker::concordanceSearch
           lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
         }
       }else{
-        LogMessage( T5WARNING,__func__,":: src lang could not be found: ", pData->szIsoSourceLang);
+        T5LOG( T5WARNING) << ":: src lang could not be found: " << pData->szIsoSourceLang;
       }
     }
     if( strlen( pData->szIsoTargetLang) ){
@@ -1959,7 +1959,7 @@ int OtmMemoryServiceWorker::concordanceSearch
           lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
         }
       }else{
-        LogMessage( T5WARNING,__func__,":: target lang could not be found: ", pData->szIsoTargetLang);
+        T5LOG( T5WARNING) << ":: target lang could not be found: " << pData->szIsoTargetLang;
       }
     }
   }
@@ -2168,7 +2168,7 @@ int OtmMemoryServiceWorker::list
 
   jsonSS << "]}";
   strOutputParms = jsonSS.str();
-  LogMessage( T5INFO, "OtmMemoryServiceWorker::list()::strOutputParams = ", strOutputParms.c_str(), "; iRC = OK");
+  T5LOG( T5INFO) << "OtmMemoryServiceWorker::list()::strOutputParams = " << strOutputParms << "; iRC = OK";
   iRC = OK;
   return iRC;
 }
@@ -2278,7 +2278,7 @@ int OtmMemoryServiceWorker::updateEntry
   } /* end */
 
   if(loggingThreshold >=0){
-    LogMessage( T5WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", toStr(loggingThreshold).c_str());
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::updateEntry::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
   }
 
@@ -2478,7 +2478,7 @@ int OtmMemoryServiceWorker::deleteEntry
   } /* end */
 
   if(loggingThreshold >=0){
-    LogMessage( T5WARNING,"OtmMemoryServiceWorker::updateEntry::set new threshold for logging", toStr(loggingThreshold).c_str());
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::updateEntry::set new threshold for logging" <<loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
   }
 
@@ -2646,8 +2646,8 @@ int OtmMemoryServiceWorker::deleteMem
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::deleteMem::verifyAPISession fails:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
-      strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem::verifyAPISession fails:: iRC = " << iRC << "; strOutputParams = "<< 
+      strOutputParms <<  "; szLastError = " << EncodingHelper::convertToUTF8(this->szLastError);
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( BAD_REQUEST );
   } /* endif */
@@ -2655,8 +2655,8 @@ int OtmMemoryServiceWorker::deleteMem
   //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::deleteMem error:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
-      strOutputParms.c_str(), "; szLastError = ", "Missing name of memory");
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem error:: iRC = " << iRC << "; strOutputParams = " << 
+      strOutputParms << "; szLastError = ", "Missing name of memory";
     wchar_t errMsg[] = L"Missing name of memory";
     buildErrorReturn( iRC, errMsg, strOutputParms );
     return( BAD_REQUEST );
@@ -2684,8 +2684,8 @@ int OtmMemoryServiceWorker::deleteMem
     unsigned short usRC = 0;
     EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: iRC = ", toStr(iRC).c_str(), "; strOutputParams = ", 
-      strOutputParms.c_str(), "; szLastError = ", EncodingHelper::convertToUTF8(this->szLastError).c_str());
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: iRC = " << iRC << "; strOutputParams = " << 
+      strOutputParms <<  "; szLastError = " << EncodingHelper::convertToUTF8(this->szLastError) ;
 
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( INTERNAL_SERVER_ERROR );
@@ -2693,7 +2693,7 @@ int OtmMemoryServiceWorker::deleteMem
     strOutputParms = "{\"" + strMemory + "\": \"deleted\" }";
   }
 
-  LogMessage( T5INFO,"OtmMemoryServiceWorker::deleteMem::success, memName = ", strMemory.c_str());
+  T5LOG( T5INFO) <<"OtmMemoryServiceWorker::deleteMem::success, memName = " << strMemory;
   iRC = OK;
 
   return( iRC );
@@ -2712,18 +2712,18 @@ int OtmMemoryServiceWorker::getMem
   std::vector<unsigned char> &vMemData
 )
 {
-  LogMessage( T5INFO,"OtmMemoryServiceWorker::getMem::=== getMem request, memory = ", strMemory.c_str(), "; format = ", strType.c_str());
+  T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem::=== getMem request, memory = " << strMemory << "; format = " << strType;
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
-    LogMessage( T5INFO,"OtmMemoryServiceWorker::getMem::Error: no valid API session" );
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem::Error: no valid API session" ;
     return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
   if ( strMemory.empty() )
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem::Error: no memory name specified" );
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem::Error: no memory name specified" ;
     return( BAD_REQUEST );
   } /* endif */
 
@@ -2738,7 +2738,7 @@ int OtmMemoryServiceWorker::getMem
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem::Error: memory does not exist, memName = ", strMemory.c_str() );
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem::Error: memory does not exist, memName = " << strMemory;
     return( NOT_FOUND );
   }
 
@@ -2747,38 +2747,38 @@ int OtmMemoryServiceWorker::getMem
   iRC = buildTempFileName( szTempFile );
   if ( iRC != 0 )
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" );
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" ;
     return( INTERNAL_SERVER_ERROR );
   }
 
   // export the memory in internal format
   if ( strType.compare( "application/xml" ) == 0 )
   {
-    LogMessage( T5INFO,"OtmMemoryServiceWorker::getMem:: mem = ", strMemory.c_str(),"; supported type found application/xml, tempFile = ", szTempFile);
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = " <<  strMemory << "; supported type found application/xml, tempFile = " << szTempFile;
     iRC = EqfExportMem( this->hSession, (PSZ)strMemory.c_str(), szTempFile, TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMem failed with rc=", toStr(iRC).c_str(), ", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
+      T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem:: Error: EqfExportMem failed with rc=" << iRC << ", error message is " <<  EncodingHelper::convertToUTF8( this->szLastError);
       return( INTERNAL_SERVER_ERROR );
     }
   }
   else if ( strType.compare( "application/zip" ) == 0 )
   {
-    LogMessage( T5INFO,"OtmMemoryServiceWorker::getMem:: mem = ", strMemory.c_str(),"; supported type found application/zip(NOT TESTED YET), tempFile = ", szTempFile);
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
     iRC = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), szTempFile, 0 );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
       EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem:: Error: EqfExportMemInInternalFormat failed with rc=",toStr(iRC).c_str(),", error message is ", EncodingHelper::convertToUTF8( this->szLastError).c_str() );
+      T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<iRC << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
       return( INTERNAL_SERVER_ERROR );
     }
   }
   else
   {
-    LogMessage(T5ERROR,"OtmMemoryServiceWorker::getMem:: Error: the type ", strType.c_str()," is not supported" );
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem:: Error: the type " << strType << " is not supported" ;
     return( NOT_ACCEPTABLE );
   }
 
@@ -2792,7 +2792,7 @@ int OtmMemoryServiceWorker::getMem
   
   if ( iRC != 0 )
   {
-    LogMessage(T5ERROR, "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = ", szTempFile );
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = " <<  szTempFile ;
     return( INTERNAL_SERVER_ERROR );
   }
 
@@ -2928,17 +2928,17 @@ void OtmMemoryServiceWorker::importDone( char *pszMemory, int iRC, char *pszErro
     if ( iRC == 0 )
     {
       vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS;
-      LogMessage( T5INFO,"OtmMemoryServiceWorker::importDone:: success, memName = ", pszMemory);
+      T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << pszMemory;
     }
     else
     {
       vMemoryList[iIndex].eImportStatus = IMPORT_FAILED_STATUS;
       vMemoryList[iIndex].pszError = new char[strlen( pszError ) + 1];
       strcpy( vMemoryList[iIndex].pszError, pszError );
-      LogMessage(T5ERROR, "OtmMemoryServiceWorker::importDone:: memName = ", pszMemory,", import failed: ", pszError, " import details = ", vMemoryList[iIndex].importDetails->toString().c_str());
+      T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << pszMemory <<", import failed: " << pszError << " import details = " << vMemoryList[iIndex].importDetails->toString() ;
     }
   }else{
-    LogMessage(T5ERROR, "OtmMemoryServiceWorker::importDone:: memName = ", pszMemory, " not found ");
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << pszMemory << " not found ";
   }
 }
 
@@ -2979,14 +2979,14 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
       auto files = FilesystemHelper::FindFiles( checkName );
       
       if(files.size() == 0){// we can use this name
-        LogMessage( T5INFO, "OtmMemoryServiceWorker::buildTempFileName::Temp file's Name found :", checkName.c_str());
+        T5LOG( T5INFO) << "OtmMemoryServiceWorker::buildTempFileName::Temp file's Name found :" << checkName ;
         strcpy(pszTempFile, checkName.c_str());
         break;
       }
       i++;
     }
     if( i >= 1000){
-      LogMessage(T5ERROR, "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them");
+      T5LOG(T5ERROR) << "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them";
     }
 
   }
@@ -3023,7 +3023,7 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
         {
           iRC = GetLastError();
           strError = "encoding of BASE64 data failed";
-          LogMessage(T5ERROR, "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
+          T5LOG(T5ERROR) << "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = " << iRC;
           return( iRC );
         }
     }
@@ -3054,7 +3054,7 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   {
     iRC = GetLastError();
     strError = "decoding of BASE64 data failed";
-    LogMessage(T5ERROR, "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = ", toStr(iRC).c_str());
+    T5LOG(T5ERROR) << "decodeBase64ToFile()::decoding of BASE64 data failed, iRC = " << iRC ;
     return( iRC );
   }
 
@@ -3121,7 +3121,7 @@ void importMemoryProcess( void *pvData )
   {
     unsigned short usRC = 0;
     //EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
-    LogMessage(T5ERROR,"importMemoryProcess:: error = ", pData->szError);
+    T5LOG(T5ERROR) <<"importMemoryProcess:: error = ", pData->szError;
   }
 
   // update memory status

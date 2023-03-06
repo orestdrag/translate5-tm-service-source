@@ -48,7 +48,7 @@ public:
 	static MemoryFactory* getInstance();
 
   MemoryFactory(){
-    LogMessage( T5DEBUG, __func__,"::Ctor of MemoryFactory");
+    T5LOG( T5DEBUG) << "::Ctor of MemoryFactory";
     pluginList = NULL;
     pSharedMemPluginList = NULL;
     pHandleToMemoryList = new std::vector<OtmMemory *>;

@@ -28,7 +28,7 @@ ULONG GetCodePage( USHORT usType )
   CHAR   cp[10];
   ULONG  ulReturnCP = 0L;
   if(VLOG_IS_ON(1))
-    LogMessage( T5DEBUG, "GetCodePage::usType = ", toStr(usType).c_str());
+    T5LOG( T5DEBUG) << "GetCodePage::usType = " <<usType;
 
   switch ( usType )
   {

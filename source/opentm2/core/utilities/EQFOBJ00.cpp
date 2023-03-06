@@ -90,7 +90,7 @@ USHORT Send2AllHandlers( WINMSG msg, WPARAM mp1, LPARAM mp2)
 USHORT Send2AllObjects( USHORT cls, WINMSG msg, WPARAM mp1, LPARAM mp2)
 {
     POBJM_IDA     pIda;                // Points to instance data area
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);");
+T5LOG(T5ERROR) <<  ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 28 pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     pIda = ACCESSWNDIDA( hObjMan[UtlGetTask()], POBJM_IDA);
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
@@ -186,7 +186,7 @@ SHORT ObjQuerySymbol( PSZ pszSymbol )
   }
   else
   {
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31 sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(), WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );");
+T5LOG(T5ERROR) <<  ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 31 sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(), WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     sRC = (SHORT) WinSendMsg( EqfQueryObjectManager(),
                       WM_EQF_QUERYSYMBOL, NULL, MP2FROMP(pszSymbol) );
@@ -412,7 +412,6 @@ USHORT CreateMemFile
   PSZ         pszOrgName = pszName; // original start of long name
   USHORT      usRC = NO_ERROR;         // function return code
   OBJLONGTOSHORTSTATE  ObjState = OBJ_IS_NEW;  // local copy of caller's object state buffer
-  ULONG   ulCP =  GetCodePage( OEM_CP );       // use CP of installed OS
 
   // ignore any leading blanks
   while ( *pszOrgName == ' ' ) pszOrgName++;
@@ -429,7 +428,6 @@ USHORT CreateMemFile
   // look for objects having the same short name
   if ( usRC == NO_ERROR )
   {
-    USHORT usDosRC = NO_ERROR;         // return code of called DOS functions
     BOOL   fOK;
     HANDLE hMutexSem = NULL;
 

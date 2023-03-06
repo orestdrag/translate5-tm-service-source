@@ -56,7 +56,7 @@ BYTE UtlQCurDisk()
     static CHAR szCurDir[MAX_PATH+100];
 
     DosError(0);
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 ) { szCurDir[0] = EOS; }");
+T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 ) { szCurDir[0] = EOS; }";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     if ( GetCurrentDirectory( sizeof(szCurDir), szCurDir ) == 0 )
     {
@@ -96,7 +96,7 @@ LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 65 if ( Get
 
 USHORT UtlGetDriveList( BYTE *szList)
 {
-  LogMessage(T5ERROR,__func__, ":: called commented function");
+  LOG_UNIMPLEMENTED_FUNCTION;
   return( 0 );   // set index relative to 0
 }
 
@@ -119,17 +119,9 @@ USHORT UtlGetDriveList( BYTE *szList)
 
 USHORT UtlGetLANDriveList( PBYTE pszList )
 {
-  PBYTE pSource, pTarget;              // pointer for drive list processing
-  SHORT sDriveType;                    // type of currently tested drive
-  USHORT usRC;
-
-  usRC = UtlGetDriveList( pszList);    // get all available drives
-
-  pSource = pTarget = pszList;         // start at begin of drive list
-
-  LogMessage(T5ERROR,__func__, ":: called commented function");
-
-  return( usRC );
+  
+  LOG_UNIMPLEMENTED_FUNCTION;
+  return( 0 );
 } /* end of function UtlGetLANDriveList */
 
 
@@ -281,7 +273,7 @@ BOOL UtlLoadFileHwnd
       }
       else
       {
-        LogMessage( T5WARNING,"UtlLoadFileHwnd(path=", pszFilename,"):: usDosRc: ", toStr(usDosRc).c_str(), ", ulSize: ", toStr(ulSize).c_str(), "-> fOK=false now");
+        T5LOG(T5WARNING) <<"UtlLoadFileHwnd(path=" << pszFilename <<"):: usDosRc: " << usDosRc << ", ulSize: " << ulSize << "-> fOK=false now";
         fOK = FALSE;
       } /* endif */
     } /* endif */
@@ -316,7 +308,8 @@ BOOL UtlLoadFileHwnd
     {                                         // set msg btn depending on Contin.
        usMsgButton = (USHORT)(( fContinue ) ? MB_OKCANCEL : MB_CANCEL);
        // Message text:   Table or file %1 could not be accessed.
-       usDosRc = LogMessage(T5ERROR, __func__,  "::ERROR_TA_ACC_FILE:: fName = ",pszFilename);
+       //usDosRc = 
+       T5LOG(T5ERROR) <<  "::ERROR_TA_ACC_FILE:: fName = " << pszFilename;
 
        fOK = fContinue && ( usDosRc == MBID_OK );
     } /* endif */
@@ -622,7 +615,7 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
 //           if ( fMsg )                                           /*KIT1274*/
 //           {                                                     /*KIT1274*/
 //             pszErrParm = pszFile;                               /*KIT1274*/
-//             LogMessage( T5ERROR, __func__,  ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
+//             T5LOG( T5ERROR) <<   ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
 //                           &pszErrParm, EQF_ERROR,               /*KIT1274*/
 //                           hwndParent );                         /*KIT1274*/
 //           } /* endif */                                         /*KIT1274*/
@@ -1018,7 +1011,7 @@ USHORT UtlBufCloseHwnd
       if ( fMsg )
       {
         pszErrParm = pBufCB->szFileName,
-        LogMessage(T5ERROR, __func__,  "; rc = ", toStr(usRC).c_str(), "; ", pszErrParm );
+        T5LOG(T5ERROR) <<   "; rc = " << usRC << "; " << pszErrParm ;
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1165,7 +1158,7 @@ BOOL IsDBCSLeadByteEx(
   UINT CodePage,
   BYTE TestChar
 ){
-  LogMessage( T5WARNING, "called IsDBCSLeadByteEx, not sure if implementation fit");
+  T5LOG( T5WARNING) << "called IsDBCSLeadByteEx, not sure if implementation fit";
   if(TestChar & 128){
     return true;
   }
@@ -1293,26 +1286,7 @@ VOID CloseFile
 
 int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
 {
-LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole function");
-#ifdef TEMPORARY_COMMENTED
-//TODO: fix issues with zip/unzip library
-
-  HZIP hz;
-
-  hz = OpenZip( pszPackage, 0 );
-  SetUnzipBaseDir( hz, pszDestPath );
-  
-  ZIPENTRY ze; 
-  GetZipItem( hz, -1, &ze ); 
-  int numitems=ze.index;
-  for (int zi=0; zi<numitems; zi++)
-  { 
-    GetZipItem( hz, zi, &ze );
-    UnzipItem( hz, zi, ze.name );
-  }
-  CloseZip(hz);
-#endif //TEMPORARY_COMMENTED
-
+  LOG_UNIMPLEMENTED_FUNCTION;
   return( 0 );
 }
 
@@ -1325,32 +1299,7 @@ LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 139 whole funct
 
 int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
 {
-LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 140 whole function");
-#ifdef TEMPORARY_COMMENTED
-  HZIP hz; 
-  HANDLE hDir;
-  WIN32_FIND_DATA FindData;
-  char szSearchPath[MAX_PATH];
-
-  hz = CreateZip( pszPackage, 0 );
-  sprintf( szSearchPath, "%s\\*.*", pszSourcePath );
-
-  hDir = FindFirstFile( szSearchPath, &FindData );
-  if ( hDir != INVALID_HANDLE_VALUE )
-  {
-    do
-    {
-      if ( !(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
-      {
-        sprintf( szSearchPath, "%s\\%s", pszSourcePath, FindData.cFileName );
-        ZipAdd( hz, FindData.cFileName, szSearchPath );
-      } /* endif */
-    } while ( FindNextFile( hDir, &FindData  ) );
-    FindClose( hDir );
-  }
-
-  CloseZip( hz );
-#endif //TEMPORARY_COMMENTED
+  LOG_UNIMPLEMENTED_FUNCTION;
   return( 0 );
 }
 
@@ -1388,29 +1337,5 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
 
 void UtlDeleteAllFiles( const char *pszDirectory )
 {
- char szFileFound[MAX_PATH];
- WIN32_FIND_DATA info;
- HANDLE hp; 
- sprintf( szFileFound, "%s/*.*", pszDirectory );
-LogMessage(T5ERROR,__func__, "::TO_BE_REPLACED_WITH_LINUX_CODE in UtlDeleteAllFiles full function, pszDir = ", pszDirectory);
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
- hp = FindFirstFile( szFileFound, &info );
- do
- {
-    if ( !((strcmp( info.cFileName, ".") == 0 ) || (strcmp( info.cFileName, ".." ) == 0 )))
-    {
-      sprintf( szFileFound, "%s\\%s", pszDirectory, info.cFileName );
-      if(( info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
-      {
-        UtlDeleteAllFiles( szFileFound );
-        RemoveDirectory( szFileFound );
-      }
-      else
-      {
-        DeleteFile( szFileFound );
-      }
-    }
-  } while ( FindNextFile( hp, &info ) ); 
- FindClose( hp );
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
+  LOG_UNIMPLEMENTED_FUNCTION;
 }

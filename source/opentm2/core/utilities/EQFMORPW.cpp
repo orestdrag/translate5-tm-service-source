@@ -520,7 +520,7 @@ USHORT MorphWordRecognitionW
          /*************************************************************/
          /* get stem form of term                                     */
          /*************************************************************/
-         LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str() ,": called unimplemented function, MorphGetStemForm");
+         T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
          #ifdef NOT_IMPLEMENTED_FUNCTION
          usRC = MorphGetStemForm( sLanguageID, pucTerm,
                                   &usStemListSize, &pStemList, ulOemCP );
@@ -533,7 +533,7 @@ USHORT MorphWordRecognitionW
      pChar = wcschr(szTemp,'-');
      *pChar = NULL ;
 
-    LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+    T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
          #ifdef NOT_IMPLEMENTED_FUNCTION
      usRC = MorphGetStemForm( sLanguageID, szTemp,
                               &usStemListSize, &pStemList, ulOemCP );
@@ -543,7 +543,7 @@ USHORT MorphWordRecognitionW
         pChar = wcschr(szTemp,'-');
         memcpy( pChar, pChar+1, (wcslen(pChar+1)+1)*sizeof(WCHAR)) ;
 
-  LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+  T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
          #ifdef NOT_IMPLEMENTED_FUNCTION
         usRC = MorphGetStemForm( sLanguageID, szTemp,
                                  &usStemListSize, &pStemList, ulOemCP );
@@ -833,7 +833,7 @@ USHORT MorphWordRecognitionW
         } // end if fInclNotFoundTerms
 
         /*************************************************************/
-LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function, MorphGetStemForm");
+T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
          #ifdef NOT_IMPLEMENTED_FUNCTION
         usRC = MorphGetStemForm( sLanguageID, pucTerm,
                                  &usStemListSize, &pStemList, ulOemCP );

@@ -1959,7 +1959,7 @@ NTMFindTagPair
             pTempTokData[pTempTok->usStop+1] = 0;  
             pSubstProp->szPropSource[pCurPairPropTok->usStop+1] = 0;
 
-            LogMessage(T5FATAL,"TEMPORARY_COMMENTED in NTMFindTagPair::UtlCompIgnWhiteSpaceW");
+            T5LOG(T5FATAL) << "TEMPORARY_COMMENTED in NTMFindTagPair::UtlCompIgnWhiteSpaceW";
             #ifdef TEMPORARY_COMMENTED
             fFound = (UtlCompIgnWhiteSpaceW( pTempData, pPairData, 0 ) == 0 );
             #endif

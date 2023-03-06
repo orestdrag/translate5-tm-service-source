@@ -469,7 +469,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        {
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         LogMessage(T5ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::",pReplAddr[0], "; szMemSourceLang = ", pReplAddr[1]);
+         T5LOG(T5ERROR)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::" << pReplAddr[0] <<  "; szMemSourceLang = " <<  pReplAddr[1];
 
           fOK = FALSE;
        } /* endif */
@@ -537,11 +537,12 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         usMBCode = LogMessage(T5ERROR, __func__,  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] );
-         if ( usMBCode == MBID_CANCEL )
-         {
+         //usMBCode = T5LOG(T5ERROR) <<   "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] );
+         T5LOG(T5ERROR)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] ;
+         //if ( usMBCode == MBID_CANCEL )
+         //{
            fOK = FALSE;
-         } /* endif */
+         //} /* endif */
        } /* endif */
 
        // update memory description with description of imported memory
@@ -584,7 +585,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          // file %1 into translation memory %2 failed."
          pReplAddr[0] = pLIDA->szFilePath;
          pReplAddr[1] = pLIDA->szMemName;
-         LogMessage(T5ERROR, __func__,  "::ERROR_MEM_LOAD_INITFAILED::", pReplAddr[0] );
+         T5LOG(T5ERROR) <<  "::ERROR_MEM_LOAD_INITFAILED::" << pReplAddr[0] ;
 
          if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
 
@@ -697,7 +698,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
      if ( pLIDA->pstMemInfo->fError )  
      {
        PSZ pszMsg = pLIDA->pstMemInfo->szError;
-       LogMessage(T5ERROR, __func__,  "::ERROR_MEMIMP_ERROR::MEM_SEG_SYN_ERR::", pszMsg );
+       T5LOG(T5ERROR) <<  "::ERROR_MEMIMP_ERROR::MEM_SEG_SYN_ERR::" <<  pszMsg ;
        usRc = MEM_SEG_SYN_ERR;
      } /* endif */
 
@@ -817,7 +818,7 @@ static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
         pReplAddr[0] = pLIDA->szFilePath;
         pReplAddr[1] = pLIDA->szSegmentID;
         CloseFile( &(pLIDA->hFile));
-        LogMessage(T5ERROR, __func__,  "::ERROR_MEM_INVALID_SGML::",  *pReplAddr);
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_INVALID_SGML::" <<  *pReplAddr;
         usRc = MEM_FILE_SYN_ERR;
      } /* endif */
 
@@ -1396,7 +1397,7 @@ USHORT MemFuncPrepImport
           pLoadIDA->ulAnsiCP = 1;
     }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(T5ERROR,"MemFuncPrepImport:: memory allocation fails");
+      T5LOG(T5ERROR) << "MemFuncPrepImport:: memory allocation fails";
     }
 
    // check if a TM has been specified
@@ -1406,11 +1407,11 @@ USHORT MemFuncPrepImport
      {
        fOK = FALSE;
        usRC = TMT_MANDCMDLINE;
-       LogMessage(T5ERROR, __func__,  "::TMT_MANDCMDLINE");
+       T5LOG(T5ERROR) <<  "::TMT_MANDCMDLINE";
      } /* endif */
    }else if(!fOkFailHandled){ 
       fOkFailHandled = true;
-      LogMessage(T5ERROR,"MemFuncPrepImport:: check if a TM has been specified fails");
+      T5LOG(T5ERROR) << "MemFuncPrepImport:: check if a TM has been specified fails";
    }/* endif */
    // set options for import
    if ( fOK )
@@ -1468,14 +1469,14 @@ USHORT MemFuncPrepImport
      pLoadIDA->fCreateMatchID = MADPrepareMatchSegIDPrefix( pszTM_ID, pszStoreID, pLoadIDA->szMatchIDPrefix );
 
      if ( pLoadIDA->fCreateMatchID  ) {
-        LogMessage( T5INFO,"pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented");
+        T5LOG( T5INFO) << "pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented";
         //MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
         //EncodingHelper::MultiByteToWideChar(CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
      }
 
    }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(T5ERROR,"MemFuncPrepImport::set options for import fails");
+     T5LOG(T5ERROR) << "MemFuncPrepImport::set options for import fails";
    } /* endif */
 
    /*******************************************************************/
@@ -1487,15 +1488,15 @@ USHORT MemFuncPrepImport
      MemoryFactory *pFactory = MemoryFactory::getInstance();
      if ( !pFactory->exists( NULL, pszMemName ) )
      {
-       LogMessage(T5ERROR, "Mem file not found:: ", pszMemName);
+       T5LOG(T5ERROR) << "Mem file not found:: " << pszMemName;
 	     fOK = FALSE;
        pszParm = pszMemName;
        usRC = ERROR_MEMORY_NOTFOUND;
-       LogMessage(T5ERROR, __func__,  "::ERROR_MEMORY_NOTFOUND::", pszParm);
+       T5LOG(T5ERROR) <<  "::ERROR_MEMORY_NOTFOUND::" << pszParm;
      } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(T5ERROR,"MemFuncPrepImport::prepare segment match ID prefix fails");
+     T5LOG(T5ERROR) << "MemFuncPrepImport::prepare segment match ID prefix fails";
   } /* endif */
 
    /*******************************************************************/
@@ -1513,7 +1514,7 @@ USHORT MemFuncPrepImport
      } /* end */        
   }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(T5ERROR,"MemFuncPrepImport::Check if there is a TM with the given name fails");
+      T5LOG(T5ERROR) << "MemFuncPrepImport::Check if there is a TM with the given name fails";
   } /* endif */
 
    /*******************************************************************/
@@ -1524,12 +1525,12 @@ USHORT MemFuncPrepImport
      if ( !UtlFileExist( pszInFile ) )
      {
        pszParm = pszInFile;
-       LogMessage(T5ERROR, __func__,  "::FILE_NOT_EXISTS::",pszParm);
+       T5LOG(T5ERROR) <<  "::FILE_NOT_EXISTS::" << pszParm;
        fOK = FALSE;
      } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
-     LogMessage(T5ERROR,"MemFuncPrepImport::Open the TM fails");
+     T5LOG(T5ERROR) << "MemFuncPrepImport::Open the TM fails";
   } /* endif */
 
    /*******************************************************************/
@@ -1564,7 +1565,7 @@ USHORT MemFuncPrepImport
      //}/* endif */
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(T5ERROR,"MemFuncPrepImport::Check if input file exists fails");
+      T5LOG(T5ERROR) << "MemFuncPrepImport::Check if input file exists fails";
    } /* endif */
 
    /*******************************************************************/
@@ -1577,7 +1578,7 @@ USHORT MemFuncPrepImport
      pData->pvMemLoadIda = (PVOID)pLoadIDA;
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
-      LogMessage(T5ERROR,"MemFuncPrepImport::Open the input file  fails");
+      T5LOG(T5ERROR) << "MemFuncPrepImport::Open the input file  fails" ;
    } /* endif */
 
    /*******************************************************************/
@@ -1585,7 +1586,7 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( !fOK )
    {
-      LogMessage(T5ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
+      T5LOG(T5ERROR) << "MemFuncPrepImport::fOk in false, making Cleanup";
       if ( pLoadIDA )
       {
          if ( pLoadIDA->pMem )
@@ -1611,7 +1612,7 @@ USHORT MemFuncPrepImport
    else if(!fOkFailHandled)
    {
      fOkFailHandled = true;
-     LogMessage(T5ERROR,"MemFuncPrepImport::fOk in false, making Cleanup");
+     T5LOG(T5ERROR) << "MemFuncPrepImport::fOk in false, making Cleanup";
      usRC = UtlQueryUShort( QS_LASTERRORMSGID );
    } /* endif */
    return( usRC );
@@ -1637,7 +1638,7 @@ USHORT MemFuncImportProcess
   switch ( usPhase )
   {
     case MEM_START_IMPORT:
-       LogMessage( T5INFO, __func__, "::MEM_START_IMPORT");
+       T5LOG( T5INFO) << "::MEM_START_IMPORT";
        pData->pImportData->usProgress = 0;
        pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
 
@@ -1660,7 +1661,7 @@ USHORT MemFuncImportProcess
     case MEM_IMPORT_TASK:
       {
         
-        LogMessage( T5INFO, __func__, "::MEM_IMPORT_TASK, progress = " , toStr( pData->pImportData->usProgress ).c_str());
+        T5LOG( T5INFO) << "::MEM_IMPORT_TASK, progress = " <<  pData->pImportData->usProgress;
         USHORT usRc = MemLoadProcess( pLoadData, pImportData );
         switch ( usRc )
         {
@@ -1747,11 +1748,11 @@ USHORT MemFuncImportProcess
           pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
           pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
           if(VLOG_IS_ON(1)){
-            std::string LogMessage = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
+            std::string logMsg = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
                                   "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
                                 "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 
                                 "\n\tNumber of OTMUTF8 segments  : " + toStr(pLoadData->ulResetSegmentCounter) + "\n\t" + pData->pImportData->importTimestamp;
-            T5LOG( T5TRANSACTION) << LogMessage;
+            T5LOG( T5TRANSACTION) << logMsg;
           }
         }
 
@@ -1905,7 +1906,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
           if ( ulBytesRead && !pLIDA->fEOF )
           {
              BYTE bTest = (BYTE)pConvBuffer[ulBytesRead-1];
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )");
+T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
              if ( IsDBCSLeadByteEx( pLIDA->ulOemCP, bTest ) )
              {
@@ -2036,7 +2037,7 @@ USHORT MemHandleCodePageValue
 		      {
 				    usRc = NO_VALID_ASCIIANSIFORMAT;
 		        pMsgError[0] = L"SGML ANSI";
-            LogMessage(T5ERROR, __func__,"::NO_VALID_ASCIIANSIFORMAT::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
+            T5LOG(T5ERROR) << "::NO_VALID_ASCIIANSIFORMAT::" << EncodingHelper::convertToUTF8(pMsgError[0]);
 		      }
 		      else // usImpMode == SGMLFORMAT_ASCII
 		      { 
@@ -2048,7 +2049,7 @@ USHORT MemHandleCodePageValue
             {
 		          pMsgError[1] = L"SGML ASCII";
 				      pMsgError[0] = pszCodePage;
-              LogMessage(T5ERROR, __func__, ":: WARNING_DIMP_FORMAT_SGML ASCII::",    EncodingHelper::convertToUTF8(pMsgError[0]).c_str() );
+              T5LOG(T5ERROR) << ":: WARNING_DIMP_FORMAT_SGML ASCII::"<<    EncodingHelper::convertToUTF8(pMsgError[0]);
               usRc = WARNING_DIMP_FORMAT;
 			      } /* endif */
 
@@ -2066,7 +2067,7 @@ USHORT MemHandleCodePageValue
           {
 			       usRc = NO_VALID_ASCIIANSICP;
              pMsgError[0] = pszCodePage + 5;
-             LogMessage(T5ERROR, __func__,"::rc = ", toStr(usRc).c_str(), ":: ", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
+             T5LOG(T5ERROR) << "::rc = " << usRc << ":: " << EncodingHelper::convertToUTF8(pMsgError[0]);
 		      } /* endif */
 		    }
 
@@ -2087,7 +2088,7 @@ USHORT MemHandleCodePageValue
 		     {
 				  usRc = NO_VALID_ASCIIANSIFORMAT;
 				  pMsgError[0] = L"SGML ASCII";
-          LogMessage(T5ERROR, __func__,"::NO_VALID_ASCIIANSIFORMAT::SGML ASCII");
+          T5LOG(T5ERROR) << "::NO_VALID_ASCIIANSIFORMAT::SGML ASCII";
 		    }
 		    else
 		    {
@@ -2099,7 +2100,8 @@ USHORT MemHandleCodePageValue
 			    {
 		        pMsgError[1] = L"SGML ANSI";
 				    pMsgError[0] = pszCodePage;
-            usRc = LogMessage(T5ERROR, __func__, ":: WARNING_DIMP_FORMAT::SGML ANSI");
+            T5LOG(T5ERROR) <<  ":: WARNING_DIMP_FORMAT::SGML ANSI";
+            //usRc = T5LOG(T5ERROR) <<  ":: WARNING_DIMP_FORMAT::SGML ANSI";
 			    } /* endif */
 
 			    if (usRc == MBID_OK)
@@ -2116,7 +2118,7 @@ USHORT MemHandleCodePageValue
          {
 			     usRc = NO_VALID_ASCIIANSICP;
            pMsgError[0] = pszCodePage + 6;
-           LogMessage(T5ERROR, __func__, ":: ",toStr(usRc).c_str(), "::", EncodingHelper::convertToUTF8(pMsgError[0]).c_str());
+           T5LOG(T5ERROR) <<  ":: " << usRc << "::" << EncodingHelper::convertToUTF8(pMsgError[0]);
 		     } /* endif */
   		 } /* endif */
 
@@ -2133,13 +2135,13 @@ USHORT MemHandleCodePageValue
 		   if ( usImpMode != pLIDA->usImpMode )
 		   {
 		     usRc = ERROR_DIMP_UTF16WRONG;
-		     LogMessage(T5ERROR, __func__, "::rc = ERROR_DIMP_UTF16WRONG = ", toStr(usRc).c_str() );
+		     T5LOG(T5ERROR) << "::rc = ERROR_DIMP_UTF16WRONG = " << usRc;
 		   } /* endif */
 	   }
 	   else
 	   {  // error - this should not occur...
 		   usRc = ERROR_MEM_INVALID_SGML;
-		   LogMessage(T5ERROR, __func__, "::rc =  ERROR_MEM_INVALID_SGML" );
+		   T5LOG(T5ERROR) <<  "::rc =  ERROR_MEM_INVALID_SGML" ;
 	   } /* endif */
   } /* endif */
 

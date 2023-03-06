@@ -318,7 +318,7 @@ void ProxygenHandler::sendResponse()noexcept{
       builder->header("Content-Type", "application/json");
     }
     
-    //LogMessage( T5DEBUG, __func__, ":: command = ", 
+    //T5LOG( T5DEBUG) <<  ":: command = ", 
     //            CommandToStringsMap.find(this->command)->second, ", memName = ", memName.c_str());
     if(strResponseBody.size())
       builder->body(strResponseBody);

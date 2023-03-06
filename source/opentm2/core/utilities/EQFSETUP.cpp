@@ -134,7 +134,7 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 
 int init_properties(){
   if (int rc = properties_init()) {
-        LogMessage(T5FATAL,"Error in init_properties::Failed to initialize property file", toStr(rc).c_str());
+        T5LOG(T5FATAL) << "Error in init_properties::Failed to initialize property file" << rc;
         return rc;
     }
 
@@ -220,7 +220,7 @@ USHORT CreateSystemProperties(const char* pszPath)
     }
     else
     {
-        LogMessage(T5ERROR, "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY");
+        T5LOG(T5ERROR) << "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY";
         usRC = ERROR_NOT_ENOUGH_MEMORY;
         return usRC;
     }
@@ -412,7 +412,7 @@ USHORT CreateFolderListProperties
     /******************************************************************/
     if ( !usRC )
     {
-      LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 105 SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME, PROP_CLASS_FOLDERLIST );");
+      T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 105 SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME, PROP_CLASS_FOLDERLIST );";
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME,
                    PROP_CLASS_FOLDERLIST );
@@ -434,7 +434,7 @@ USHORT CreateFolderListProperties
 #ifdef _PTM
       pPropFll->Swp.fs |= EQF_SWP_MINIMIZE;
 #endif
-LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 106 *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];");
+T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 106 *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];";
 #ifdef TEMPORARY_COMMENTED
       *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
 #endif
@@ -492,7 +492,7 @@ USHORT CreateImexProperties
     /******************************************************************/
     if ( !usRC )
     { 
-      LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 108 SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );");
+      T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 108 SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );";
 #ifdef TEMPORARY_COMMENTED
       SETPROPHEAD( pPropImex->PropHead, IMEX_PROPERTIES_NAME, PROP_CLASS_IMEX );
       #endif
@@ -712,7 +712,7 @@ USHORT SetupCreateDir
   USHORT   usRC = NO_ERROR;            // function return code
 
   BuildPath( szPath, chDrive, pszFolder, usPathID );
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42 SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX ); if ( !CreateDirectory( szPath, NULL ) )");
+T5LOG(T5ERROR) <<  ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42 SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX ); if ( !CreateDirectory( szPath, NULL ) )";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
   if ( !CreateDirectory( szPath, NULL ) )
@@ -763,7 +763,7 @@ USHORT DeletePropFile
   BuildPath( szPath, chDrive, NULL, PROPERTY_PATH );
   strcat( szPath, BACKSLASH_STR );
   strcat( szPath, pszName );
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43 usRC = (USHORT)DosDelete( szPath, 0L );");
+T5LOG(T5ERROR) <<  ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 43 usRC = (USHORT)DosDelete( szPath, 0L );";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
   usRC = (USHORT)DosDelete( szPath, 0L );
 #endif TO_BE_REPLACED_WITH_LINUX_CODE
@@ -1166,7 +1166,7 @@ USHORT UpdateFolderProp
    /*******************************************************************/
    if ( !usRC )
    {
-     LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 122 /* copy EQF drive into properties                                  */");
+     T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 122 /* copy EQF drive into properties                                  */";
 #ifdef TEMPORARY_COMMENTED
      pFolProp->PropHead.szPath[0] = chDrive;
      #endif
@@ -1254,7 +1254,7 @@ USHORT UpdateDocumentProp
                       &usBytesRead, FALSE );
    }
 
-   LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 123 /* copy EQF drive into properties                                  */");
+   T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 123 /* copy EQF drive into properties                                  */";
 #ifdef TEMPORARY_COMMENTED
    /*******************************************************************/
    /* copy EQF drive into properties                                  */
@@ -1351,7 +1351,7 @@ USHORT UpdateDictProp
       pDictProp->szDictPath[0] = chDrive;
       pDictProp->szIndexPath[0] = chDrive;
       
-     LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 124 /* copy EQF drive into properties                                  */");
+     T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 124 /* copy EQF drive into properties                                  */";
 #ifdef TEMPORARY_COMMENTED
       pDictProp->PropHead.szPath[0] = chDrive;
       #endif
@@ -1447,7 +1447,7 @@ USHORT UpdateTMProp
       pNTMProp = (PPROP_NTM) pTMProp;
       if ( strcmp( pNTMProp->szNTMMarker, NTM_MARKER) == 0 )
       {
-     LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 125 /* copy EQF drive into properties                                  */" );
+     T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 125 /* copy EQF drive into properties                                  */" ;
 #ifdef TEMPORARY_COMMENTED
         pNTMProp->stPropHead.szPath[0] = chDrive;
         pNTMProp->szFullMemName[0] = chDrive;
@@ -1456,7 +1456,7 @@ USHORT UpdateTMProp
       else
       {
         
-     LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 126 pTMProp->stPropHead.szPath[0] = chDrive;");
+     T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 126 pTMProp->stPropHead.szPath[0] = chDrive;";
 #ifdef TEMPORARY_COMMENTED
         pTMProp->stPropHead.szPath[0] = chDrive;
         #endif

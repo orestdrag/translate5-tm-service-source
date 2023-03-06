@@ -368,8 +368,8 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        if ( !pExportIDA->pszNameList )
        {
          pReplString[2] = strcpy(szNumber, std::to_string( pExportIDA->ulSegmentCounter ).c_str());
-         LogMessage( T5INFO,"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED");
-         //LogMessage( T5ERROR, __func__,  MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
+         T5LOG( T5INFO) <<"EQFMemExportProcess::MESSAGE_MEM_EXPORT_COMPLETED";
+         //T5LOG( T5ERROR) <<"   MESSAGE_MEM_EXPORT_COMPLETED, MB_OK, 3,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
        } /* endif */
@@ -388,13 +388,13 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
     default:
      //--- Close the exported file
      //--- Issue a message "Memory Database Export abnormally terminated."
-     LogMessage(T5ERROR,"Error in EQFMemExportProcess::switch MemExportProcess rc = ", toStr(usRC).c_str(), "; ERROR_MEM_EXPORT_TERMINATED");
+     T5LOG(T5ERROR) "Error in EQFMemExportProcess::switch MemExportProcess rc = " << usRC << "; ERROR_MEM_EXPORT_TERMINATED";
      LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
      CloseFile( &(pExportIDA->hFile) );
      UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
-     LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_TERMINATED::", (pReplString[0]));
+     T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_TERMINATED::" << pReplString[0];
      LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM ( pExportIDA->szMemName );
      fOk=FALSE;
 
@@ -545,7 +545,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   /********************************************************************/
   if ( pExportIDA->pDDEMemExp != NULL )
   {
-LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL, MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );");
+T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL, MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );";
 #ifdef TO_BE_REPLACED_WITH_LINUX_CODE
     WinPostMsg( pExportIDA->pDDEMemExp->hwndOwner, WM_EQF_DDE_ANSWER, NULL,
                 MP2FROMP(&pExportIDA->pDDEMemExp->DDEReturn) );
@@ -750,7 +750,7 @@ LogMessage(T5ERROR,__func__, ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostM
     if ( (hwndErrMsg == HWND_FUNCIF) && pExportIDA->fDataCorrupted )
     {
       PSZ pszParm = "ANSI/ASCII";
-      LogMessage(T5ERROR, __func__,"::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm);
+      T5LOG(T5ERROR) << "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm;
       usRC = ERROR_MEM_EXPORT_DATACORRUPT;
     } /* endif */
 
@@ -863,7 +863,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
        if ( !usRc ) usRc = DosGetProcAddr( pExportIDA->hmodMemExtExport, "EXTMEMEXPORTEND", 
                                            (PFN*)(&(pExportIDA->pfnMemExpEnd)));
      }else{
-       LogMessage(T5ERROR, "MemExportStart:: can't load module ", libPath);
+       T5LOG(T5ERROR) << "MemExportStart:: can't load module " << libPath;
      } /* endif */
      #endif
 
@@ -892,8 +892,8 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
        pExportIDA->pstMemInfo->fNoCRLF = (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF);
        
        
-       LogMessage( T5INFO,"MemExportStart::calling external function, mem name = ", pExportIDA->pstMemInfo->szName,"; source lang = ", pExportIDA->pstMemInfo->szSourceLang,
-            "; markup = ", pExportIDA->pstMemInfo->szFormat);
+       T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
+            "; markup = " << pExportIDA->pstMemInfo->szFormat;
 
        #ifdef TO_REPLACE
        usRc = pExportIDA->pfnMemExpStart( &(pExportIDA->lExternalExportHandle),  
@@ -927,7 +927,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
         LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI");  //OEMTOANSI ( pExportIDA->szMemName );
         pReplAddr[0] = pExportIDA->szMemName;
         pReplAddr[1] = pExportIDA->ControlsIda.szPathContent;
-        LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_INITFAILED::",pReplAddr[0] );
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_INITFAILED::" << pReplAddr[0] ;
         LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM");  //ANSITOOEM ( pExportIDA->szMemName );
       } /* endif */
     } /* endif */
@@ -1524,7 +1524,7 @@ USHORT MemExportWrite
                 {
                   PSZ pszParm = "ANSI";
                   USHORT usMBCode = MBID_CANCEL;
-                  LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm);
+                  T5LOG(T5ERROR) <<   "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm;
                   if ( usMBCode == MBID_CANCEL )
                   {
                     usRc = MEM_WRITE_ERR;
@@ -1564,7 +1564,7 @@ USHORT MemExportWrite
             {
                PSZ pszParm = "ASCII";
                USHORT usMBCode = MBID_CANCEL;
-                LogMessage(T5ERROR, __func__,  "::ERROR_MEM_EXPORT_DATACORRUPT::", pszParm );
+                T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm ;
                if ( usMBCode == MBID_CANCEL )
                {
                  usRc = MEM_WRITE_ERR;
@@ -1617,7 +1617,7 @@ USHORT MemExportWrite
            szDrive[2] = NULC;
            pReplString[0] = szDrive;
            CloseFile( &(pExportIDA->hFile) );
-           LogMessage(T5ERROR, __func__,"::ERROR_WRITING::",  (pReplString[0]));
+           T5LOG(T5ERROR) << "::ERROR_WRITING::"  << pReplString[0];
            usRc = MEM_WRITE_ERR;
         }
         else
@@ -1665,7 +1665,7 @@ USHORT MemExportWrite
           szDrive[2] = NULC;
           pReplString[0] = szDrive;
           CloseFile( &(pExportIDA->hFile) );
-          LogMessage(T5ERROR, __func__,  "::ERROR_WRITING::",(pReplString[0]) );
+          T5LOG(T5ERROR) <<  "::ERROR_WRITING::" << pReplString[0];
           usRc = MEM_WRITE_ERR;
        }
        else
@@ -1715,7 +1715,7 @@ USHORT MemFuncExportMem
       usRC = MemFuncExportProcess( pPrivateData );
     }
   }
-  LogMessage( T5INFO,"MemFuncExportMem finished, RC = ", toStr(usRC).c_str());
+  T5LOG( T5INFO) <<"MemFuncExportMem finished, RC = " << usRC;
   free( pPrivateData );
   
   return( usRC );
@@ -1737,9 +1737,9 @@ USHORT MemFuncPrepExport
   PPROCESSCOMMAREA pCommArea = NULL;   // ptr to commmunication area
 
   if(pszMemName && pszOutFile){
-    LogMessage( T5DEBUG,"called MemFuncPrepExport memName = ", pszMemName, "; pszOutFile = ", pszOutFile, "; options = ", toStr(lOptions).c_str());
+    T5LOG( T5DEBUG) << "called MemFuncPrepExport memName = " << pszMemName << "; pszOutFile = " << pszOutFile << "; options = " <<lOptions;
   }else{
-    LogMessage(T5ERROR,"called MemFuncPrepExport memName or output file path is NULL; options = ", toStr(lOptions).c_str());
+    T5LOG(T5ERROR) << "called MemFuncPrepExport memName or output file path is NULL; options = "<<lOptions;
   }
 
   UtlSetUShort( QS_LASTERRORMSGID, NO_ERROR );
@@ -1762,7 +1762,7 @@ USHORT MemFuncPrepExport
      pIDA->ulAnsiCP = 1; 
      pIDA->pProposal = new OtmProposal;
  }else{
-     LogMessage(T5ERROR,"ERROR in MemFuncPrepExport::Error in beginning of function, during memory allocations");
+     T5LOG(T5ERROR) << "ERROR in MemFuncPrepExport::Error in beginning of function, during memory allocations";
  }
   // check if a TM has been specified
    if ( fOK )
@@ -1770,7 +1770,7 @@ USHORT MemFuncPrepExport
      if ( (pszMemName == NULL) || (*pszMemName == EOS) )
      {
        fOK = FALSE;
-       LogMessage(T5ERROR,__func__, "::ERROR in MemFuncPrepExport::(pszMemName == NULL) || (*pszMemName == EOS); TM was not specified");
+       T5LOG(T5ERROR) << "::ERROR in MemFuncPrepExport::(pszMemName == NULL) || (*pszMemName == EOS); TM was not specified";
      }
      else
      {
@@ -1786,7 +1786,7 @@ USHORT MemFuncPrepExport
      pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      if ( pIDA->pMem == NULL )
      {
-       LogMessage(T5ERROR,"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = ", pszMemName),
+       T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,
        pFactory->showLastError( NULL, pszMemName, NULL, HWND_FUNCIF );
        fOK = FALSE;
      }
@@ -1798,7 +1798,7 @@ USHORT MemFuncPrepExport
   {
     if ( (pszOutFile == NULL) || (*pszOutFile == EOS) )
     {
-      LogMessage(T5ERROR,__func__, "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME");
+      T5LOG(T5ERROR) << "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME";
       fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -1811,7 +1811,7 @@ USHORT MemFuncPrepExport
          !(lOptions & OVERWRITE_OPT) )
     {
       pszParm = pIDA->ControlsIda.szPathContent;
-      LogMessage(T5ERROR,__func__, ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = ", pIDA->ControlsIda.szPathContent , "; pszParam = ", pszParm);
+      T5LOG(T5ERROR) << ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = " << pIDA->ControlsIda.szPathContent << "; pszParam = " << pszParm;
       fOK = FALSE;
     } /* endif */
   } /* endif */
@@ -1821,9 +1821,9 @@ USHORT MemFuncPrepExport
   {    
     pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
     if(pIDA->hFile){
-      LogMessage( T5DEBUG,"MemFuncPrepExport:: opened output file, fName = ", pIDA->ControlsIda.szPathContent);
+      T5LOG( T5DEBUG) << "MemFuncPrepExport:: opened output file, fName = " << pIDA->ControlsIda.szPathContent;
     }else{
-      LogMessage(T5ERROR,"Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent);
+      T5LOG(T5ERROR) << "Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent;
       fOK = false;
     }
 
@@ -1845,24 +1845,24 @@ USHORT MemFuncPrepExport
 
     if ( lOptions & UTF16_OPT )
     {
-      LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE; fNAME = ", pszMemName);
+      T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE;
     }
     else if ( lOptions & ANSI_OPT )
     {
-      LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ANSI; fNAME = ", pszMemName);
+      T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ANSI; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_ANSI;
     }
     else if ( lOptions & TMX_UTF8_OPT )
     {
       if ( lOptions & TMX_NOCRLF_OPT )
       {
-        LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8_NOCRLF; fNAME = ", pszMemName);
+        T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8_NOCRLF; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_UTF8_NOCRLF;
       }
       else
       {
-        LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8; fNAME = ", pszMemName);
+        T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_UTF8;
       } /* endif */         
     }
@@ -1870,18 +1870,18 @@ USHORT MemFuncPrepExport
     {
       if ( lOptions & TMX_NOCRLF_OPT )
       {
-        LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_NOCRLF; fNAME = ", pszMemName);
+        T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_NOCRLF; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_NOCRLF;
       }
       else
       {
-        LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX; fNAME = ", pszMemName);
+        T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX;
       } /* endif */         
     }
     else
     {
-      LogMessage( T5DEBUG,"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ASCII; fNAME = ", pszMemName);
+      T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ASCII; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_ASCII;
     } /* endif */
 
@@ -1893,13 +1893,13 @@ USHORT MemFuncPrepExport
     pData->fComplete = FALSE;
     pCommArea->pUserIDA = pIDA;
     pData->pvMemExportCommArea = pCommArea;
-    LogMessage( T5INFO, "Success in MemFuncPrepExport:: memName = ",pszMemName );
+    T5LOG( T5INFO) <<  "Success in MemFuncPrepExport:: memName = " << pszMemName ;
   }
   else
   {
      pData->fComplete = TRUE;
      usRC =  UtlGetDDEErrorCode( HWND_FUNCIF );
-     LogMessage(T5ERROR,"error in the end of MemFuncPrepExport:: rc = ", toStr(usRC).c_str());
+     T5LOG(T5ERROR) << "error in the end of MemFuncPrepExport:: rc = " << usRC;
      if ( pIDA )
      {
         if ( pIDA->pMem != NULL)
@@ -1939,11 +1939,11 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportStart( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
-        LogMessage(T5ERROR,"Error in MemFuncExportProcess::EQFMemExportStart, RC = ", toStr(usRC).c_str());
+        T5LOG(T5ERROR) << "Error in MemFuncExportProcess::EQFMemExportStart, RC = " << usRC;
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
-        LogMessage( T5INFO,"MemFuncExportProcess::EQFMemExportStart success");
+        T5LOG( T5INFO) << "MemFuncExportProcess::EQFMemExportStart success";
       } /* endif */
       break;
 
@@ -1951,11 +1951,11 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportProcess( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
-        LogMessage(T5ERROR,"Error in MemFuncExportProcess::EQFMemExportProcess, RC = ", toStr(usRC).c_str());
+        T5LOG(T5ERROR) << "Error in MemFuncExportProcess::EQFMemExportProcess, RC = " << usRC;
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
         pData->fComplete = TRUE;
       }else{
-        LogMessage( T5INFO,"MemFuncExportProcess::EQFMemExportProcess success");
+        T5LOG( T5INFO) << "MemFuncExportProcess::EQFMemExportProcess success";
       } /* endif */
       break;
 
@@ -1963,9 +1963,9 @@ USHORT MemFuncExportProcess
       usRC = EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
       
       if(usRC){
-        LogMessage(T5ERROR,"Error in MemFuncExportProcess::MEM_END_EXPORT, RC = ", toStr(usRC).c_str());
+        T5LOG(T5ERROR) <<"Error in MemFuncExportProcess::MEM_END_EXPORT, RC = " << usRC;
       }else{
-        LogMessage( T5INFO,"MemFuncExportProcess::MEM_END_EXPORT success");
+        T5LOG( T5INFO) << "MemFuncExportProcess::MEM_END_EXPORT success";
       }
       pData->fComplete = TRUE;
       break;

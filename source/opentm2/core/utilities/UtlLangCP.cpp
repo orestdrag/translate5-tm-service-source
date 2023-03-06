@@ -38,7 +38,7 @@ BOOL UtlIsLanguageSupported
   HWND   hwndErrMsg
 )
 {
-  LogMessage( T5WARNING,__func__, ":: called function that probably should be refactored");
+  T5LOG( T5WARNING) <<  ":: called function that probably should be refactored";
   CHAR_W szUnicode[10];
   int    iRC = 0;
   BOOL   fOK = TRUE;

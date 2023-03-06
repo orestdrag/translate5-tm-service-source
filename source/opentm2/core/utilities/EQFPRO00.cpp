@@ -127,7 +127,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       }
       usrc = UtlRead( hf, &prophead, sizeof( prophead), &sizread, 0);
       if( usrc || (sizread != sizeof( prophead))){
-        LogMessage(T5ERROR, "LoadPropFile, couldn't read file: ", fname, ", bytes read: ", toStr(sizread).c_str());
+        T5LOG(T5ERROR) << "LoadPropFile, couldn't read file: " << fname <<  ", bytes read: " <<sizread;
         *pIda->pErrorInfo = Err_ReadFile;
         break;
       }
@@ -149,7 +149,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
       usrc = UtlRead( hf, pcntl->pHead+1, size, &sizread, 0);
       if( usrc || (sizread != size))
       {
-        LogMessage(T5ERROR,"UtlRead:: usrc = ",toStr(usrc).c_str(), "; sizread = ", toStr(sizread).c_str(), ", size = ", toStr(size).c_str());
+        T5LOG(T5ERROR) << "UtlRead:: usrc = "<<usrc << "; sizread = " << sizread << ", size = " << size;
         // for folder property files it is O.K. to read less than
         // size bytes
         if ( (prophead.usClass == PROP_CLASS_FOLDER) &&
@@ -172,7 +172,7 @@ PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath, USHORT usAcc)
         }
         else
         {
-          LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED :: Err_ReadFile // files created in linux don't have that filler to fit 2k");
+          T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED :: Err_ReadFile // files created in linux don't have that filler to fit 2k";
           // files created in linux don't have that filler to fit 2k
 #ifdef TEMPORARY_COMMENTED
           *pIda->pErrorInfo = Err_ReadFile;
@@ -221,7 +221,7 @@ USHORT GetSysProp( PPROP_IDA pIda)
     memset( hprop, NULC, sizeof( *hprop));
 
     do {
-      LogMessage( T5DEBUG, "GetSysProp::path = ", pIda->IdaHead.pszObjName);
+      T5LOG( T5DEBUG) << "GetSysProp::path = " << pIda->IdaHead.pszObjName;
       
       size = sizeof( PROPSYSTEM);
       auto pData = GetSystemPropInstance();    
@@ -366,7 +366,7 @@ VOID NotifyAll( HPROP hprop)
     if ( UtlQueryUShort( QS_RUNMODE ) != FUNCCALL_RUNMODE )
     {
       ph = (PPROPHEAD)(((PPROPHND)hprop)->pCntl->pHead);
-      LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 98 strcat( strcat( strcpy( name, ph->szPath), \"\\\"), ph->szName);");
+      T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 98 strcat( strcat( strcpy( name, ph->szPath), \"\\\"), ph->szName);";
 #ifdef TEMPORARY_COMMENTED
       strcat( strcat( strcpy( name, ph->szPath), "\\"), ph->szName);
       #endif
@@ -408,7 +408,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
    }
    else
    {
-     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) LogMessage( T5WARNING,"if(true) hardcoded in OpenProperties");
+     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) T5LOG( T5WARNING) <<"if(true) hardcoded in OpenProperties";
      if (true ||  UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -443,7 +443,7 @@ HPROP OpenProperties( PSZ pszObjName, PSZ pszPath, USHORT usAccess,
      }
      else
      {
-       LogMessage(T5ERROR,__func__, "::TEMPORARY_COMMENTED call EqfCallPropertyHandler ");
+       T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED call EqfCallPropertyHandler ";
 #ifdef TEMPORARY_COMMENTED
      hprop = (HPROP)EqfCallPropertyHandler( WM_EQF_OPENPROPERTIES,
                                             MP1FROMSHORT(0),
@@ -485,7 +485,7 @@ SHORT CloseProperties(
        break;
      }
      
-     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))  LogMessage( T5WARNING, "if(true) hardcoded in CloseProperties");
+     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))  T5LOG( T5WARNING) << "if(true) hardcoded in CloseProperties";
      if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
      {
         PPROP_IDA     pIda;           // Points to instance area
@@ -537,7 +537,7 @@ SHORT CloseProperties(
      }
      else
      {
-       LogMessage( T5WARNING,"TEMPORARY_COMMENTED in Close Properties, SHORT1FROMMR");
+       T5LOG( T5WARNING) <<"TEMPORARY_COMMENTED in Close Properties, SHORT1FROMMR";
 #if TEMPORARY_COMMENTED
        rc = SHORT1FROMMR(EqfCallPropertyHandler( WM_EQF_CLOSEPROPERTIES,
                                                  MP1FROMSHORT(0),
@@ -617,7 +617,7 @@ SHORT SaveProperties(
      }
      else
      {
-LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 100 rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES, MP1FROMSHORT(0), MP2FROMP(&PropMsg) ) );");
+T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 100 rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES, MP1FROMSHORT(0), MP2FROMP(&PropMsg) ) );";
 #ifdef TEMPORARY_COMMENTED
        rc = SHORT1FROMMR( EqfCallPropertyHandler( WM_EQF_SAVEPROPERTIES,
                                            MP1FROMSHORT(0),
@@ -646,7 +646,7 @@ PVOID MakePropPtrFromHwnd( HWND hObject)
 PPROPSYSTEM GetSystemPropPtr( VOID )
 {
     HPROP hSysProp;
-    //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))  LogMessage( T5WARNING, "if(true) hardcoded in GetSystemPropPtr");
+    //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))  T5LOG( T5WARNING) << "if(true) hardcoded in GetSystemPropPtr");
     if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
     {
       PPROP_IDA     pIda;           // Points to instance area
@@ -658,7 +658,7 @@ PPROPSYSTEM GetSystemPropPtr( VOID )
     {
       hSysProp = EqfQuerySystemPropHnd();
       
-      LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 101 assert( hSysProp != NULL );");
+      T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 101 assert( hSysProp != NULL );";
 #ifdef TEMPORARY_COMMENTED
       assert( hSysProp != NULL );
       #endif
@@ -730,7 +730,7 @@ SHORT GetPropSize( USHORT usClass)
       case PROP_CLASS_MEMORY :
       case PROP_CLASS_MEMORYDB :
       case PROP_CLASS_MEMORY_LASTUSED :
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) LogMessage( T5WARNING, "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY");
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) T5LOG( T5WARNING) << "if(true) hardcoded in GetPropSize::PROP_CLASS_MEMORY";
          if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
          {
            usSize = 2048; // MEM_PROP_SIZE;
@@ -804,7 +804,7 @@ HPROP EqfQuerySystemPropHnd( void )
 {
   HPROP hprop;
 
-  LogMessage( T5WARNING, "hardcoded if(true) in EqfQuerySystemPropHnd");
+  T5LOG( T5WARNING) << "hardcoded if(true) in EqfQuerySystemPropHnd";
   if (true || UtlQueryUShort( QS_RUNMODE ) == FUNCCALL_RUNMODE )
   {
     PPROP_IDA pIda = pPropBatchIda;
@@ -812,7 +812,7 @@ HPROP EqfQuerySystemPropHnd( void )
       hprop = pIda->hSystem;
     }else{
       hprop = NULL;
-      LogMessage(T5ERROR,"pId and pPropBatchIda are NULL");
+      T5LOG(T5ERROR) << "pId and pPropBatchIda are NULL";
     }
   }
   else

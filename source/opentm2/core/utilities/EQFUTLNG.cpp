@@ -272,7 +272,7 @@ ULONG GetOrgLangCP
 )
 {
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
-      LogMessage( T5WARNING, __func__, "::called commented out function that would return 0");
+      T5LOG( T5WARNING) <<  "::called commented out function that would return 0";
   }
   return 1;
 }

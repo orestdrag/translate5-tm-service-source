@@ -265,7 +265,7 @@ USHORT PluginManagerImpl::loadPluginDll(const char* pszName)
 
     if (usRC) {
         // if register dll error, just remove the dll from the group
-        LogMessage(T5ERROR,__func__, ":: Error: register plugin ", pszName, " failed ", toStr(usRC).c_str());
+        T5LOG(T5ERROR) <<  ":: Error: register plugin " << pszName << " failed " << usRC;
     }
 
     // reset active plugin DLL entry

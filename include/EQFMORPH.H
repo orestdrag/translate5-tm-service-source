@@ -97,7 +97,6 @@
 
 #include "LogWrapper.h"
 
-//#define LOG_UNIMPLEMENTED_FUNCTION LogMessage(T5FATAL, __FILE__, ":", toStr(__LINE__).c_str(),": called unimplemented function ", __func__);
 
 /**********************************************************************/
 /* Structure to access MORPH_FLAG_OFFSLIST type term lists            */

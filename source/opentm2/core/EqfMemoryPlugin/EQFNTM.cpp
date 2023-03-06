@@ -328,7 +328,7 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   if ( !fOk )
   {
-    LogMessage(T5ERROR, __func__, "::TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd");
+    T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd";
 #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif
@@ -449,7 +449,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     pstOpenIn->stTmOpen.szServer[0] = EOS;
     if ( usLocation != TM_LOCAL )
     {
-      LogMessage(T5FATAL, "NOT LOCAL TM IS NOT SUPPORTED");
+      T5LOG(T5FATAL) << "NOT LOCAL TM IS NOT SUPPORTED";
       fOk = false;
     }
 
@@ -508,7 +508,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
           /**************************************************************/
           fOk           = FALSE;
           usMsgHandling = FALSE;
-          LogMessage(T5ERROR,"Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = ", szMemFullPath,", usRC = ", toStr(usRc).c_str());
+          T5LOG(T5ERROR) << "Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = " <<  szMemFullPath << ", usRC = " << usRc;
           DEBUGEVENT( TMOPEN_LOC, STATE_EVENT, 1 );
         } /* endif */
       } /* endif */
@@ -899,7 +899,7 @@ TmGetW(HTM            htm,             //(in)  TM handle
           /************************************************************/
           /* convert source string                                    */
           /************************************************************/
-          LogMessage(T5FATAL,__func__,"TEMPORARY_COMMENTED in TmGetW::NTMConvertCRLFW");
+          T5LOG(T5FATAL) <<"TEMPORARY_COMMENTED in TmGetW::NTMConvertCRLFW";
 #ifdef TEMPORARY_COMMENTED
           NTMConvertCRLFW( pstGetOut->stMatchTable[usI].szSource,
                           pszTempString,
@@ -971,7 +971,7 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );");
+  T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );";
 #ifdef TEMPORARY_COMMENTED
   usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );
   #endif
@@ -982,7 +982,7 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 
   if ( usMsgHandling && usRc )
   {
-    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 45 usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );");
+    T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 45 usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );";
 #ifdef TEMPORARY_COMMENTED
     usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );
     #endif

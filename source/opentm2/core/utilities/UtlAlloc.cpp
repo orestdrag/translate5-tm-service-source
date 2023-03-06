@@ -114,7 +114,7 @@ BOOL UtlAllocHwnd
   usMessageNo;
   if ( !fOK && (usMessageNo != NOMSG ))
   {
-    LogMessage(T5ERROR, __func__, "::rc = ", toStr(usMessageNo).c_str() );
+    T5LOG(T5ERROR) << "::rc = " << usMessageNo;
   } /* endif */
   return( fOK );
 } /* end of UtlAllocHwnd */
@@ -140,7 +140,7 @@ PVOID UtlIntAlloc
   }
   else 
   {
-    LogMessage(T5FATAL, __func__,"::Cant allocate memory size = ", toStr(ulLength));
+    T5LOG(T5FATAL) << "::Cant allocate memory size = " << ulLength;
   } /* endif */
   return( pStorage );
 }
@@ -168,8 +168,8 @@ USHORT UtlIntFree
     /* display error message - someone killed us...                   */
     /******************************************************************/
     //usRC = ERROR_INTERNAL;
-    //LogMessage(T5FATAL, __func__,":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = ", 
-    //  toStr(ulActLength).c_str(), "; ulActLength2 = ", toStr(ulActLength2).c_str());
+    //T5LOG(T5FATAL) << ":: someone tried to play KAMIKAZE with our memory ulActLength != ulActLength2, ulActLength = "<<
+    //  ulActLength << "; ulActLength2 = " << ulActLength2;
     //UtlError( ERROR_INTERNAL, MB_CANCEL, 0, NULL, INTERNAL_ERROR );
   }
   /******************************************************************/
@@ -193,7 +193,7 @@ USHORT UtlGetTask ( void )
   {
     if ( UtiVar[currTask].usTask == usTask )
     {
-      LogMessage( T5DEVELOP, "UtlGetTask()::Task found, id = ", toStr(usTask).c_str());
+      T5LOG( T5DEVELOP) << "UtlGetTask()::Task found, id = " << usTask ;
       break;
     }
     else if ( UtiVar[currTask].usTask == 0 )
@@ -214,7 +214,7 @@ USHORT UtlGetTask ( void )
       memcpy(&UtiVar[currTask].SegTable, &SegTable,
              sizeof(SEGTABLE) * MAX_MEM_TABLES );
       if(VLOG_IS_ON(1))
-        LogMessage( T5DEBUG, "UtlGetTask():: allocated segtable, usTask = ",toStr(usTask).c_str(), ", currTask = ", toStr(currTask).c_str());
+        T5LOG( T5DEBUG) << "UtlGetTask():: allocated segtable, usTask = " << usTask << ", currTask = " << currTask;
       break;
     } /* endif */
   } /* endfor */

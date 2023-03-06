@@ -1106,7 +1106,8 @@ VOID QDAMCopyDataTo_V3
    {
       pOldData = pRecord->contents.uchData + usDataOffs;
        if(usLastPos < usLen && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-        LogMessage(T5ERROR, "QDAMCopyDataTo_V3::DEBUG 1 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+        T5LOG(T5ERROR) << "QDAMCopyDataTo_V3::DEBUG 1 Assetrion fails : usLastPos >= usLen, usLastPos = " << usLastPos 
+          << ", usLen = " << usLen;
       }
       ULONG ulLen = *(PULONG) pOldData;
       if ( ulLen & QDAM_TERSE_FLAGL)
@@ -1119,7 +1120,8 @@ VOID QDAMCopyDataTo_V3
       usLen = usLen + usLenFieldSize;       // add size of length indication
 
       if(usLastPos < usLen && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-        LogMessage(T5FATAL, "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = ", toStr(usLastPos).c_str(), ", usLen = ", toStr(usLen).c_str() );
+        T5LOG(T5FATAL) << "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = " << usLastPos 
+              << ", usLen = " << usLen;
       }
       //assert( (usLastPos >= usLen) );
 
@@ -1375,7 +1377,7 @@ VOID QDAMSetrecData_V3
      {
        // data pointer is out of range
        pData = NULL;
-       LogMessage(T5FATAL,__func__,":: pData > 16kBt, it's out of range of record");
+       T5LOG(T5FATAL) << ":: pData > 16kBt, it's out of range of record";
        ERREVENT2( QDAMSETRECDATA_LOC, INTFUNCFAILED_EVENT, 2, DB_GROUP, "" );
      }
      else
@@ -1586,7 +1588,7 @@ SHORT QDAMDictUpdateLocal
                   if ( !sRc )
                   {
                     if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-                      LogMessage(T5ERROR, __func__, ":: tried to set bigget ulLen than rec size, ulLen = ", toStr(ulLen).c_str());
+                      T5LOG(T5ERROR) << ":: tried to set bigget ulLen than rec size, ulLen = " << ulLen;
                     }
                     recData.ulLen = ulLen;
                     QDAMSetrecData_V3( pRecord, i, recData, pBT->usVersion );
@@ -1622,7 +1624,7 @@ SHORT QDAMDictUpdateLocal
    }
    else
    {
-     LogMessage(T5FATAL, __func__, "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ");
+     T5LOG(T5FATAL) << "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ";
      throw;
      sRc = BTREE_NOT_SUPPORTED;
    } /* endif */
@@ -1783,7 +1785,7 @@ SHORT QDAMDictExactLocal
 
   if ( pBT->fCorrupted )
   {
-    LogMessage(T5FATAL, __func__,":: BTREE_CORRUPTED");
+    T5LOG(T5FATAL) << ":: BTREE_CORRUPTED";
      sRc = BTREE_CORRUPTED;
   }else if(pBT->bRecSizeVersion != BTREE_V3){
     T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
@@ -1836,7 +1838,7 @@ SHORT QDAMDictExactLocal
                  else if ( *pulLength < recData.ulLen )
                  {
                     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-                      LogMessage(T5ERROR, __func__, "::BTREE_BUFFER_SMALL, pulLength = ", toStr(*pulLength).c_str(), "; recData.ulLen = ", toStr(recData.ulLen).c_str());
+                      T5LOG(T5ERROR) << "::BTREE_BUFFER_SMALL, pulLength = " << *pulLength << "; recData.ulLen = " << recData.ulLen;
                     }
                     *pulLength = recData.ulLen;
                     sRc = BTREE_BUFFER_SMALL;

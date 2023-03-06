@@ -130,7 +130,7 @@ void UtlSetUShort( short sID, unsigned short usValue )
    {
       UtiVar[UtlGetTask()].usQueryArea[sID] = usValue;
    }else{
-      LogMessage( T5WARNING,"UtlSetUShort(", toStr(sID).c_str(), ", ", toStr(usValue).c_str(),") trying to set invalida value");
+      T5LOG( T5WARNING) <<"UtlSetUShort(" << sID << ", " << usValue <<") trying to set invalida value";
    } /* endif */
 }
 

@@ -1227,7 +1227,7 @@ USHORT NTMCheckForUpdates
  USHORT usRc = 0;                      // function return code
  static LONG   alNewUpdCounter[MAX_UPD_COUNTERS]; // buffer for new update counters
 
-LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );");
+T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );";
 #ifdef TEMPORARY_COMMENTED
  // Get new update counter values
  usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );
@@ -1326,7 +1326,7 @@ LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNT
      // Get new table
      if ( !usRc )
      {
-       LogMessage(T5ERROR,"TEMPORARY COMMENTED NTMReadLongNameTable"); 
+       T5LOG(T5ERROR) << "TEMPORARY COMMENTED NTMReadLongNameTable"; 
        //usRc = NTMReadLongNameTable( pTmClb );
      } /* endif */
    } /* endif */
@@ -1539,7 +1539,7 @@ USHORT NTMReadLongNameTable
           memcpy( pNewArea,
                   (PBYTE)pTmClb->pLongNames->pszBuffer + sizeof(TERSEHEADER),
                   ulLen - sizeof(TERSEHEADER) );
-          LogMessage(T5ERROR,__func__, "::TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand");
+          T5LOG(T5ERROR) << "::TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand";
 #ifdef TEMPORARY_COMMENTED
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )
@@ -1975,7 +1975,7 @@ USHORT NTMLoadNameTable
         memcpy( pNewArea, *ppTMTable + sizeof(TERSEHEADER),
                 *pulSize - sizeof(TERSEHEADER) );
        
-        LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 51 in NTMLoadNameTable");
+        T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 51 in NTMLoadNameTable";
 #ifdef TEMPORARY_COMMENTED
         if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                               &ulNewLen ) )

@@ -15,7 +15,7 @@ public:
             return data.at(key);
         }else{ 
             if(VLOG_IS_ON(1))
-               LogMessage( T5WARNING, __func__,":: key \'", key.c_str() ,"\'not found in file \'", filename.c_str(), "\', used default value instead def=\'", def.c_str(),"\'");
+               T5LOG( T5WARNING) << ":: key \'" << key << "\'not found in file \'" << filename << "\', used default value instead def=\'" << def <<"\'";
             return def;
         } 
     }

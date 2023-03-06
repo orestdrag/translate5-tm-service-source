@@ -366,7 +366,7 @@ USHORT TmtXCreate
     UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
-    LogMessage(T5ERROR,__func__, ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );");
+    T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );";
 #ifdef TEMPORARY_COMMENTED
     NTMDestroyLongNameTable( pTmClb );
     #endif

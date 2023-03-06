@@ -871,7 +871,7 @@ VOID MakeHashValue
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     auto str = EncodingHelper::convertToUTF8(pDataStart);
-    LogMessage( T5DEBUG,"MakeHashValue:: data = \'",str.c_str(),"\' ; hash = ", toStr(ulHashVal).c_str());
+    T5LOG( T5DEBUG) << "MakeHashValue:: data = \'" << str << "\' ; hash = " << ulHashVal;
   }
   return;
 } /* end of function MakeHashValue */
@@ -1768,7 +1768,7 @@ EQFBFindDiffEx
   /******************************************************************/
   /* prepare tokens for String1 and string 2                        */
   /******************************************************************/
-  LogMessage( T5DEBUG,"EQFBFindDiffEx::Preparing tokens for first string: ");
+  T5LOG( T5DEBUG) <<"EQFBFindDiffEx::Preparing tokens for first string: ";
   //std::wstring ws1 = removeTagsFromString(pString1);
   fOK = PrepareTokens( //pDoc,
                        pTagTable,
@@ -1780,7 +1780,7 @@ EQFBFindDiffEx
   if ( fOK )
   {
 
-    LogMessage( T5DEBUG,"EQFBFindDiffEx::Preparing tokens for second string: ");
+    T5LOG( T5DEBUG) <<"EQFBFindDiffEx::Preparing tokens for second string: ";
     //std::wstring ws2 = removeTagsFromString(pString2);
     fOK = PrepareTokens( // pDoc,
                          pTagTable,

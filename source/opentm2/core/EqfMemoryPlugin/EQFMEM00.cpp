@@ -80,7 +80,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
     usRC = ERROR_MEMORY_NOTFOUND;
-    LogMessage( T5DEBUG, "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ");
+    T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
   } /* endif */
 
   OtmMemoryPlugin::MEMORYINFO Info;
@@ -93,7 +93,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
       if (usRC != 0)
       {
         usRC = ERROR_MEMORY_NOTFOUND;              
-        LogMessage( T5DEBUG, "Error in MemFuncDeleteMem::check if memory existed error:: memName =  ", pszMemName, " not found; usRC = ", toStr(usRC).c_str());
+        T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::check if memory existed error:: memName =  " << pszMemName << " not found; usRC = " << usRC;
       }
   }
 
@@ -195,7 +195,7 @@ USHORT MemFuncOrganizeMem
 //                                                MP2FROMHWND(hwnd) )
 
 bool EqfRemoveObject(auto flg, auto hwnd){
-  T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION"; 
+  LOG_UNIMPLEMENTED_FUNCTION; 
   return true;
 }
 

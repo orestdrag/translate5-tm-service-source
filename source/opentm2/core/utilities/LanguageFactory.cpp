@@ -90,7 +90,7 @@ private:
 /*! \brief constructor	 */
 LanguageFactory::LanguageFactory(void)
 {
-  LogMessage( T5INFO, "Logging of language name and language properties related information. Starting LanguageFactory" );
+  T5LOG( T5INFO) << "Logging of language name and language properties related information. Starting LanguageFactory";
 
   // try to load the external language list
   char szFile[256];
@@ -101,14 +101,14 @@ LanguageFactory::LanguageFactory(void)
   
   if ( iRC != 0  || vLanguageList.size() == 0)
   {
-    LogMessage(T5ERROR, "Load of external language list file \""
-      , szFile, " failed with error code ",toStr(iRC).c_str(),", switching to built-in language list" );
+    T5LOG(T5ERROR) << "Load of external language list file \""
+      << szFile << " failed with error code " << iRC << ", switching to built-in language list" ;
     vLanguageList.clear();
     throw;
   }
   else
   {
-    LogMessage( T5INFO, "Load of external language list file \"", szFile, "\" successfull, the list contains ", toStr(vLanguageList.size()).c_str()," entries" );
+    T5LOG( T5INFO) << "Load of external language list file \"" << szFile << "\" successfull, the list contains " << vLanguageList.size() << " entries" ;
   }
 }
 
@@ -279,7 +279,7 @@ int LanguageFactory::getOpenTM2NameFromISO
   int i = this->findISO( pszISO, fPrefered);
   if ( i < 0 )
   {
-    LogMessage(T5ERROR, "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = ", pszISO);
+    T5LOG(T5ERROR) << "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = " << pszISO;
     return( ERROR_LANGUAGENOTFOUND );
   }
 
@@ -341,11 +341,11 @@ bool LanguageFactory::isTheSameLangGroup(
   LANGUAGEINFO lang1info, lang2info;
   if( getLanguageInfo(lang1, &lang1info) == false )
   {
-    LogMessage( T5WARNING,__func__, ":: can't found lang1info for ", lang1);
+    T5LOG( T5WARNING) << ":: can't found lang1info for " << lang1;
   }
   if( getLanguageInfo(lang2, &lang2info) == false )
   {
-    LogMessage( T5WARNING,__func__, ":: can't found lang1info for ", lang2);
+    T5LOG( T5WARNING) << ":: can't found lang1info for " << lang2;
   }
   return  strcmp(lang1info.szLangGroup, lang2info.szLangGroup) == 0;
 }
@@ -503,7 +503,7 @@ int LanguageFactory::findISO
     iBestMatch = findPreferedLangForThisLang(pszISO);
   }
 
-  LogMessage( T5DEVELOP, "LanguageFactory::findISO()::fPrefered = ", toStr(fPrefered).c_str(), "; iBestMatch = ", toStr(iBestMatch).c_str());
+  T5LOG( T5DEVELOP) << "LanguageFactory::findISO()::fPrefered = " << fPrefered << "; iBestMatch = " << iBestMatch;
   
   return( iBestMatch );
 }
@@ -548,7 +548,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     }
     
     if( usRC == 0 ){
-      LogMessage( T5INFO, __func__, ":: languages was read from file, sorting...");
+      T5LOG( T5INFO) <<  ":: languages was read from file, sorting...";
       std::qsort(&vLanguageList[0], vLanguageList.size(), sizeof(LANGUAGEINFO), compareLanguageInfo);    
       usRC = false == std::is_sorted(vLanguageList.begin(), vLanguageList.end(), 
           []( LANGUAGEINFO a, LANGUAGEINFO b) {//values should be unique
@@ -610,8 +610,8 @@ void LangParseHandler::startElement(const XMLCh* const name, AttributeList& attr
       default:
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){    
           std::string sName = EncodingHelper::convertToUTF8(u16name);
-          LogMessage( T5WARNING, "LangParseHandler::startElement::unknown_element found: ", 
-            EncodingHelper::convertToUTF8(u16name).c_str(), "; id = ", toStr(CurID).c_str() , "; skipping...");
+          T5LOG( T5WARNING) << "LangParseHandler::startElement::unknown_element found: "<< 
+            EncodingHelper::convertToUTF8(u16name) << "; id = " << CurID << "; skipping...";
         }
         break;
     } /*endswitch */
@@ -636,7 +636,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
       break;
     case NAME_ELEMENT:
       if(this->CurElement.szName[0] != '\0'){
-        LogMessage( T5WARNING, __func__, "::name element was parsed for the second time, first :", this->CurElement.szName, "; second = ", sData.c_str());
+        T5LOG( T5WARNING) <<  "::name element was parsed for the second time, first :" << this->CurElement.szName << "; second = " << sData;
       }
       strncpy( this->CurElement.szName, sData.c_str(), sizeof(this->CurElement.szName) );
       break;
@@ -648,7 +648,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
       break;
     case COMMENTS_ELEMENT:
       if(this->CurElement.szAddInfo[0] != '\0'){
-        LogMessage( T5WARNING, __func__, "::comments element was parsed for the second time, first :", this->CurElement.szAddInfo, "; second = ", sData.c_str());
+        T5LOG( T5WARNING) <<  "::comments element was parsed for the second time, first :" << this->CurElement.szAddInfo << "; second = " << sData;
       }
       strncpy( this->CurElement.szAddInfo, sData.c_str(), sizeof(this->CurElement.szAddInfo) );
       break;
@@ -657,7 +657,7 @@ void LangParseHandler::endElement(const XMLCh* const name )
     case UNKNOWN_ELEMENT:
     default:
       //if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-        LogMessage( T5WARNING,__func__,":: UNKNOWN_ELEMENT FOUND: ", sData.c_str());
+        T5LOG( T5WARNING) << ":: UNKNOWN_ELEMENT FOUND: " << sData;
       //}
       break;
   } /*endswitch */
@@ -676,7 +676,7 @@ void LangParseHandler::characters(const XMLCh* const chars, const XMLSize_t leng
   }else{
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
       auto str = EncodingHelper::convertToUTF8(wstr.c_str());
-      LogMessage(T5ERROR, __func__ , ":: (iCurLen + length + 1) >= (sizeof(szData)/sizeof(szData[0])), characters = ", str.c_str());
+      T5LOG(T5ERROR) <<  ":: (iCurLen + length + 1) >= (sizeof(szData)/sizeof(szData[0])), characters = " <<  str;
     }
   } /* endif */
 }
@@ -688,7 +688,7 @@ void LangParseHandler::fatalError(const SAXParseException& exception)
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
     sprintf( this->szErrorText, "Fatal Error: %s at column %ld in line %ld", message, col, line );
-    LogMessage(T5ERROR, "LangParseHandler::fatalError:: ", this->szErrorText);
+    T5LOG(T5ERROR) << "LangParseHandler::fatalError:: " << this->szErrorText;
     XMLString::release( &message );
 }
 
@@ -699,7 +699,7 @@ void LangParseHandler::error(const SAXParseException& exception)
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
     sprintf( this->szErrorText, "Error: %s at column %ld in line %ld", message, col, line );
-    LogMessage(T5ERROR, "LangParseHandler::error:: ", this->szErrorText);
+    T5LOG(T5ERROR) << "LangParseHandler::error:: " << this->szErrorText;
     XMLString::release( &message );
 }
 
@@ -710,7 +710,7 @@ void LangParseHandler::warning(const SAXParseException& exception)
     long col = (long)exception.getColumnNumber();
     this->fError = TRUE;
     sprintf( this->szErrorText, "Warning: %s at column %ld in line %ld", message, col, line );
-    LogMessage( T5WARNING, "LangParseHandler::warning:: ", this->szErrorText);
+    T5LOG( T5WARNING) << "LangParseHandler::warning:: " << this->szErrorText;
     XMLString::release( &message );
 }
 
