@@ -1108,7 +1108,7 @@ typedef struct _TMX_CLB
   BYTE     bCompact[MAX_COMPACT_SIZE-1];
   BYTE     bCompactChanged;
   LONG     alUpdCounter[MAX_UPD_COUNTERS];
-  BOOL     fShared;
+  //BOOL     fShared;
   PTMX_LONGNAME_TABLE pLongNames;
   PTMX_TABLE pLangGroups;              //  table containing language group names
   PSHORT     psLangIdToGroupTable;     // language ID to group ID table
@@ -1954,10 +1954,10 @@ TmReplace( HTM,           //(in)  TM handle
                           //      TRUE:  display error message
                           //      FALSE: display no error message
 USHORT
-TmReplaceW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
+TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
 
 USHORT
-TmReplaceHwnd( HTM,           //(in)  TM handle
+TmReplace( HTM,           //(in)  TM handle
            PSZ,           //(in)  full TM name x:\eqf\mem\mem.mem
            PTMX_PUT_IN,   //(in)  pointer to put input structure
            PTMX_PUT_OUT,  //(out) pointer to put output structure
@@ -1967,7 +1967,7 @@ TmReplaceHwnd( HTM,           //(in)  TM handle
            HWND );                     //(in) handle for error messages
 
 USHORT
-TmReplaceHwndW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT, HWND );
+TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT, HWND );
 
 /**********************************************************************/
 /* TmGet                                                              */

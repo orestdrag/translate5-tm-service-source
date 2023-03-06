@@ -81,25 +81,6 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
                                    //     TRUE:  display error message
                                    //     FALSE: display no error message
          HWND       hwnd );         //(in) handle for error messages
-USHORT
-C_TmReplaceHwnd( HTM,           //(in)  TM handle
-           PSZ,           //(in)  full TM name x:\eqf\mem\mem.mem
-           PTMX_PUT_IN,   //(in)  pointer to put input structure
-           PTMX_PUT_OUT,  //(out) pointer to put output structure
-           USHORT,        //(in)  message handling parameter
-                          //      TRUE:  display error message
-                          //      FALSE: display no error message
-           HWND );                     //(in) handle for error messages
-
-USHORT
-C_TmReplaceHwndW( HTM       htm,            //(in)  TM handle
-           PSZ            szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN_W  pstPutIn,       //(in)  pointer to put input structure
-           PTMX_PUT_OUT_W pstPutOut,      //(out) pointer to put output structure
-           USHORT         usMsgHandling,  //(in)  message handling parameter
-                                          //      TRUE:  display error message
-                                          //      FALSE: display no error message
-           HWND           hwnd );          //(in)  handle for error messages
 
 USHORT
 C_TmExtractHwnd( HTM,
@@ -176,22 +157,7 @@ NTMGetThresholdFromProperties( PSZ,
 // utility to get the property file extension
 char *GetPropFileExtension( char *pszMemPath )
 {
-  char *pszExt = strrchr( pszMemPath, '.' );
-  if ( pszExt != NULL )
-  {
-    if ( strcmp( pszExt, EXT_OF_SHARED_MEM ) == 0 )
-    {
-      return( LANSHARED_MEM_PROP );
-    }
-    else
-    {
-      return( EXT_OF_MEM );
-    }
-  }
-  else
-  {
-    return( EXT_OF_MEM );
-  }
+  return( EXT_OF_MEM );
 }
 
 //------------------------------------------------------------------------------
@@ -222,24 +188,9 @@ char *GetPropFileExtension( char *pszMemPath )
 //                                           TRUE:  display error message
 //                                           FALSE: display no error message
 //------------------------------------------------------------------------------
+
 USHORT
 TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
-          HTM         *htm,            //(out) TM handle
-          HTM         hModel,          //(in)  model handle
-          PSZ         pszServer,       //(in)  server name or empty string
-          PSZ         pszUserID,       //(in)  LAN USERID or empty string
-          PSZ         pszSourceLang,   //(in)  source language or empty string
-          PSZ         pszDescription,  //(in)  TM description or empty string
-          USHORT      usMsgHandling,   //(in)  message handling parameter
-                                       //      TRUE:  display error message
-                                       //      FALSE: display no error message
-          HWND        hwnd )           //(in)  handle for error messages
-{
-	return C_TmCreate(pszPathMem, htm, hModel, pszServer, pszUserID, pszSourceLang, pszDescription,
-							usMsgHandling, hwnd);
-}
-USHORT
-C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
           HTM         *htm,            //(out) TM handle
           HTM         hModel,          //(in)  model handle
           PSZ         pszServer,       //(in)  server name or empty string
@@ -372,30 +323,9 @@ C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
 //                                           TRUE:  display error message
 //                                           FALSE: display no error message
 //------------------------------------------------------------------------------
-USHORT
-TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
-        HTM        *phtm,              //(out) TM handle
-        USHORT     usAccess,           //(in)  access mode: NON_EXCLUSIVE
-                                       //                   EXCLUSIVE
-                                       //                   FOR_ORGANIZE
-        USHORT     usLocation,         //(in)  location:    TM_LOCAL
-                                       //                   TM_REMOTE
-                                       //                   TM_LOCAL_REMOTE
-        USHORT     usMsgHandling,      //(in)  message handling parameter
-                                       //      TRUE:  display error message
-                                       //      FALSE: display no error message
-        HWND       hwnd )              //(in)  handle for error messages
-{
-	return C_TmOpen(szMemFullPath,
-        phtm,
-        usAccess,
-        usLocation,
-        usMsgHandling,
-        hwnd );
-}
 
 USHORT
-C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
+TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
         HTM        *phtm,              //(out) TM handle
         USHORT     usAccess,           //(in)  access mode: NON_EXCLUSIVE
                                        //                   EXCLUSIVE
@@ -618,16 +548,6 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
                                    //     FALSE: display no error message
          HWND       hwnd )         //(in) handle for error messages
 {
-	return C_TmClose(htm, szMemPath, usMsgHandling, hwnd);
-}
-USHORT
-C_TmClose( HTM        htm,               //(in) TM handle returned from open
-         PSZ        szMemPath,         //(in) full TM name x:\eqf\mem\mem.tmd
-         USHORT     usMsgHandling,     //(in) message handling parameter
-                                   //     TRUE:  display error message
-                                   //     FALSE: display no error message
-         HWND       hwnd )         //(in) handle for error messages
-{
   USHORT            usRc;               //function return code
   PTMX_CLOSE_IN     pstCloseIn  = NULL; //close input structure
   PTMX_CLOSE_OUT    pstCloseOut = NULL; //close output structure
@@ -705,141 +625,6 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   return usRc;
 } /* end of function TmClose */
 
-
-USHORT
-C_TmReplaceW( HTM           htm,            //(in)  TM handle
-           PSZ            szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN_W  pstPutInW,      //(in)  pointer to put input structure
-           PTMX_PUT_OUT_W pstPutOutW,     //(out) pointer to put output structure
-           USHORT         usMsgHandling ) //(in)  message handling parameter
-                                          //      TRUE:  display error message
-                                          //      FALSE: display no error message
-{
-  return( C_TmReplaceHwndW( htm, szMemPath, pstPutInW, pstPutOutW, usMsgHandling,
-                         NULLHANDLE ) );
-} /* end of function TmReplace */
-USHORT
-TmReplaceW( HTM           htm,            //(in)  TM handle
-           PSZ            szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN_W  pstPutInW,      //(in)  pointer to put input structure
-           PTMX_PUT_OUT_W pstPutOutW,     //(out) pointer to put output structure
-           USHORT         usMsgHandling ) //(in)  message handling parameter
-                                          //      TRUE:  display error message
-                                          //      FALSE: display no error message
-{
-  return( C_TmReplaceW( htm, szMemPath, pstPutInW, pstPutOutW, usMsgHandling ) );
-} /* end of function TmReplace */
-
-USHORT
-C_TmReplaceHwnd( HTM      htm,            //(in)  TM handle
-           PSZ          szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN  pstPutIn,       //(in)  pointer to put input structure
-           PTMX_PUT_OUT pstPutOut,      //(out) pointer to put output structure
-           USHORT       usMsgHandling,  //(in)  message handling parameter
-                                        //      TRUE:  display error message
-                                        //      FALSE: display no error message
-           HWND         hwnd )          //(in)  handle for error messages
-{
-  USHORT usRc;
-  PTMX_PUT_IN_W  pstPutInW;
-  PTMX_PUT_OUT_W pstPutOutW;
-  ULONG   ulCP = 1L;
-
-  UtlAlloc( (PVOID *) &pstPutInW,  0L, sizeof( TMX_PUT_IN_W ), NOMSG );
-  UtlAlloc( (PVOID *) &pstPutOutW, 0L, sizeof( TMX_PUT_OUT_W ), NOMSG );
-
-  // copy structures
-  TMX_PUT_IN_ASCII2Unicode( pstPutIn, pstPutInW, ulCP );
-
-
-  usRc = TmReplaceHwndW( htm, szMemPath,  pstPutInW, pstPutOutW, usMsgHandling, hwnd );
-  // copy output structures back
-  TMX_PUT_OUT_Unicode2ASCII( pstPutOutW, pstPutOut );
-
-  UtlAlloc( (PVOID *) &pstPutInW,  0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pstPutOutW, 0L, 0L, NOMSG );
-
-  return usRc;
-}
-
-USHORT
-TmReplaceHwndW( HTM       htm,            //(in)  TM handle
-           PSZ            szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN_W  pstPutIn,       //(in)  pointer to put input structure
-           PTMX_PUT_OUT_W pstPutOut,      //(out) pointer to put output structure
-           USHORT         usMsgHandling,  //(in)  message handling parameter
-                                          //      TRUE:  display error message
-                                          //      FALSE: display no error message
-           HWND           hwnd )          //(in)  handle for error messages
-{
-	return C_TmReplaceHwndW(htm,
-           szMemPath,
-           pstPutIn,
-           pstPutOut,
-           usMsgHandling,
-           hwnd );
-}
-USHORT
-C_TmReplaceHwndW( HTM       htm,            //(in)  TM handle
-           PSZ            szMemPath,      //(in)  full TM name x:\eqf\mem\mem
-           PTMX_PUT_IN_W  pstPutIn,       //(in)  pointer to put input structure
-           PTMX_PUT_OUT_W pstPutOut,      //(out) pointer to put output structure
-           USHORT         usMsgHandling,  //(in)  message handling parameter
-                                          //      TRUE:  display error message
-                                          //      FALSE: display no error message
-           HWND           hwnd )          //(in)  handle for error messages
-{
-  USHORT     usRc;                       //function return code
-  USHORT     usQRc;                      //rc from EqfSend2Handler
-  SERVERNAME szServer;                   //local var for server name
-
-  DEBUGEVENT( TMREPLACE_LOC, FUNCENTRY_EVENT, 0 );
-
-  /********************************************************************/
-  /* fill the TMX_PUT_IN prefix structure                             */
-  /* stPrefixIn.usLengthInput                                         */
-  /* stPrefixIn.usTmCommand                                           */
-  /* the TMX_PUT_IN structure must not be filled it is provided       */
-  /* by the caller                                                    */
-  /********************************************************************/
-  pstPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  pstPutIn->stPrefixIn.usTmCommand   = TMC_REPLACE;
-
-  /********************************************************************/
-  /* call TmtXReplace                                                 */
-  /********************************************************************/
-  usRc = TmtXReplace ( (PTMX_CLB)htm, pstPutIn, pstPutOut );
-
-  /********************************************************************/
-  /* if an error occured call MemRcHandling in dependency of          */
-  /* the message flag to display error message                        */
-  /********************************************************************/
-  if ( usMsgHandling && usRc )
-  {
-    /**************************************************************/
-    /* get either server of TM for the error message or pass on   */
-    /* the tagtable name (depending on usRc)                      */
-    /**************************************************************/
-    if ( usRc == ERROR_TA_ACC_TAGTABLE )
-    {
-      CHAR szTagTable[MAX_EQF_PATH];
-      strcpy(szTagTable, pstPutIn->stTmPut.szTagTable);
-      strcat( szTagTable, EXT_OF_FORMAT );
-      usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, szTagTable, hwnd );
-    }
-    else
-    {
-     usRc = MemRcHandlingHwnd( usRc, szMemPath, &htm, NULL, hwnd );
-    } /* endif */
-  } /* endif */
-
-  if ( usRc != NO_ERROR )
-  {
-    ERREVENT( TMREPLACE_LOC, ERROR_EVENT, usRc );
-  } /* endif */
-
-  return usRc;
-} /* End of function TmReplace */
 
 
 USHORT
@@ -1113,15 +898,7 @@ NTMFillCreateInStruct( HTM             hModel,
         /* for a temporary TM used  by TM organize or the extension   */
         /* of a shared TM                                             */
         /**************************************************************/
-        if ( strcmp( strrchr( pszPathMem, '.'), EXT_OF_SHARED_MEM ) == 0 )
-        {
-          /************************************************************/
-          /* TM is a shared one, use "shared" index name              */
-          /************************************************************/
-          Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-          strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_SHARED_MEMINDEX );
-        }
-        else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
+        if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
         {
           /************************************************************/
           /* TM is no temporaray TM, use "normal" index name          */
@@ -1172,15 +949,7 @@ NTMFillCreateInStruct( HTM             hModel,
     /* check if the extension of the passed TM name is a extension*/
     /* for a temporary TM used  by TM organize                    */
     /**************************************************************/
-    if ( strcmp( strrchr( pszPathMem, '.'), EXT_OF_SHARED_MEM ) == 0 )
-    {
-      /************************************************************/
-      /* TM is a shared one, use "shared" index name              */
-      /************************************************************/
-      LogMessage(T5FATAL, "NTMFillCreateInStruct::Lan based shared mem not supported!");
-      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_SHARED_MEMINDEX);
-    }
-    else if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
+    if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
     {
       /************************************************************/
       /* TM is no temporaray TM, use "normal" index name          */

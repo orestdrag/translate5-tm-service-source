@@ -17,7 +17,7 @@
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
 #include "win_types.h"
-
+#include <malloc.h>
 
 //#include <EQFQDAMI.H>             // Private QDAM defines
 //#include <eqfcmpr.h>              // defines for compression/expand...
@@ -67,20 +67,6 @@
 #define NUMBER_OF_BUFFERS  20          // 20 // number of buffers to be used
 
 
-// Value for chVersion in older databses (intitial version)
-#define BTREE_V0 0x00
-
-// Value for chVersion in second BTREE version
-// Note: In this version the usNextFreeRecord field was introduced. As the
-//       part of the header record containing this field was not initialized
-//       in the older version the contents of the field has to be ignored if
-//       chVersion is BTREE_V0.
-#define BTREE_V1 0x01
-
-// Value for chVersion in BTREE version 2
-// Note: In this version the 32k length limit of data records was eliminated
-#define BTREE_V2 0x02
-
 // Value for chVersion in BTREE version 3
 // Note: In this version the record size has been changed to 16k
 #define BTREE_V3 0x03
@@ -92,22 +78,6 @@
 /* magic cookie stored at the beginning.  This is as follows          */
 /* This value might be changed to include version identifications...  */
 /**********************************************************************/
-//#define BTREE_VERSION       0   // moved to EQFQDAM.h
-//#define BTREE_VERSION2      2   // moved to EQFQDAM.h
-//#define BTREE_VERSION3      3   // moved to EQFQDAM.h
-#define BTREE_HEADER_VALUE_V0 "EQF "
-#define BTREE_HEADER_VALUE_V1 "EQF"
-#define BTREE_HEADER_VALUE_V2 "EQF"
-#define BTREE_HEADER_VALUE_V3 "EQF"
-
-
-//#define NTM_VERSION         1
-#define BTREE_HEADER_VALUE_TM1 "NTM"
-// BTREE databases of version NTM_VERSION2 support data records with
-// a size of more than 32k, the length field at the begin of the
-// data record is of type ULONG instead of USHORT
-#define NTM_VERSION2       2
-#define BTREE_HEADER_VALUE_TM2 "NTM"
 
 #define NTM_VERSION3       3
 #define BTREE_HEADER_VALUE_TM3 "NTM"
@@ -695,7 +665,7 @@ typedef struct _BTREEGLOB
    USHORT       usFirstNode;                      // file pointer of record
    USHORT       usFirstLeaf;                      // file pointer of record
 
-   PBTREEINDEX_V2  pIndexBuffer_V2;               // Pointer to index records
+   //PBTREEINDEX_V2  pIndexBuffer_V2;               // Pointer to index records
    PBTREEINDEX_V3  pIndexBuffer_V3;               // Pointer to index records
    USHORT       usIndexBuffer;                    // number of index buffers
    PFN_QDAMCOMPARE compare;                       // Comparison function
@@ -725,7 +695,7 @@ typedef struct _BTREEGLOB
    USHORT       usVersion;                        // version identification...
    CHAR         chEQF[7];                         // The type of file
    BYTE         bVersion;                         // version flag
-   BOOL         fTransMem;                        // translation memory???
+   //BOOL         fTransMem;                        // translation memory???
    USHORT       usOpenFlags;                      // settings used for open
    LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
    HFILE        fpDummy;                          // dummy/lock semaphore file handle
@@ -736,7 +706,7 @@ typedef struct _BTREEGLOB
    PLOOKUPENTRY_V3 LookupTable_V3;                // Pointer to lookup-table
    PACCESSCTRTABLEENTRY AccessCtrTable;     // Pointer to access-counter-table
    USHORT       usBtreeRecSize;                   // size of BTREE records
-   BYTE         bRecSizeVersion;                  // record size version flag
+   //BYTE         bRecSizeVersion; // should always be BTREE_V3                  // record size version flag
 } BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 
 
@@ -1299,16 +1269,16 @@ SHORT QDAMAllocTempAreas
   /* field is valid by assigning BTREE_V1 to the bVersion field.      */
   /********************************************************************/
   HeadRecord.usNextFreeRecord = pBT->usNextFreeRecord;
-  HeadRecord.Flags.bVersion         = BTREE_V1;
+  //HeadRecord.Flags.bVersion         = BTREE_V1;
 
-  if ( pBT->bRecSizeVersion == BTREE_V3 )
+  //if ( pBT->bRecSizeVersion == BTREE_V3 )
   {
     HeadRecord.Flags.f16kRec  = TRUE;
   }
-  else
-  {
-    HeadRecord.Flags.f16kRec  = FALSE;
-  } /* endif */
+  //else
+  //{
+  //  HeadRecord.Flags.f16kRec  = FALSE;
+  //} /* endif */
 
   if ( ! sRc )
   {
@@ -2254,29 +2224,21 @@ SHORT QDAMDictFlushLocal
   }
   else
   {
-    if ( pBT->bRecSizeVersion == BTREE_V3 )
+    if ( pBT->LookupTable_V3 != NULL  )
     {
-      if ( pBT->LookupTable_V3 != NULL  )
+      BOOL fRecordWritten = FALSE;
+      PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+      for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
       {
-        BOOL fRecordWritten = FALSE;
-        PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
-        for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
+        if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
         {
-          if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
-          {
-            sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
-            fRecordWritten = TRUE;
-          } /* endif */
-          pLEntry++;
-        } /* endfor */
-      } /* endif */
-    }
-    else
-    {
-      T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
-      sRc = BTREE_NOT_SUPPORTED;
+          sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
+          fRecordWritten = TRUE;
+        } /* endif */
+        pLEntry++;
+      } /* endfor */
     } /* endif */
-  } /* endif */
+  }
 
   if ( sRc )
   {
@@ -2384,54 +2346,41 @@ SHORT QDAMDictCloseLocal
      /*******************************************************************/
      if ( pBT  )
      {
-       /* free allocated space for lookup-table and buffers */
-       if ( pBT->bRecSizeVersion == BTREE_V3)
-       {
-        if ( pBT->LookupTable_V3 )
+      /* free allocated space for lookup-table and buffers */   
+      if ( pBT->LookupTable_V3 )
+      {
+        USHORT i;
+        PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+
+        for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
         {
-          USHORT i;
-          PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
-
-          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+          if ( pLEntry->pBuffer )
           {
-            if ( pLEntry->pBuffer )
-            {
-              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-            } /* endif */
-            pLEntry++;
-          } /* endfor */
+            UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+          } /* endif */
+          pLEntry++;
+        } /* endfor */
 
-          UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
-          UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
-          pBT->usNumberOfLookupEntries = 0;
-          pBT->usNumberOfAllocatedBuffers = 0;
-        } /* endif */
-       }
-       else
-       {
-        T5LOG(T5FATAL) << "Version btree2 is not supported";
-        sRc = BTREE_INVALID;
-       } /* endif */
+        UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
+        pBT->usNumberOfLookupEntries = 0;
+        pBT->usNumberOfAllocatedBuffers = 0;
+      } /* endif */
+       
+       
 
        /*****************************************************************/
        /* free index buffer list                                        */
        /*****************************************************************/
-       if ( pBT->bRecSizeVersion == BTREE_V3)
-       {
-         PBTREEINDEX_V3 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
-         pIndexBuffer = pBT->pIndexBuffer_V3;
-         while ( pIndexBuffer  )
-         {
-           pTempIndexBuffer = pIndexBuffer->pNext;
-           UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
-           pIndexBuffer = pTempIndexBuffer;
-         } /* endwhile */
-       }
-       else
-       {
-          LogMessage(T5FATAL,__func__, ":: BTREE_V2 is not supported");
-          sRc = BTREE_INVALID;   
-       } /* endif */
+        PBTREEINDEX_V3 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
+        pIndexBuffer = pBT->pIndexBuffer_V3;
+        while ( pIndexBuffer  )
+        {
+          pTempIndexBuffer = pIndexBuffer->pNext;
+          UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
+          pIndexBuffer = pTempIndexBuffer;
+        } /* endwhile */
+       
 
        UtlAlloc( (PVOID *)&pBT->pTempKey, 0L, 0L, NOMSG );
        UtlAlloc( (PVOID *)&pBT->pTempRecord, 0L, 0L, NOMSG );
@@ -2864,7 +2813,7 @@ SHORT QDAMAllocKeyRecords
    PBTREEHEADER  pHeader;
    PBTREEGLOB    pBT = pBTIda->pBTree;
 
-   if ( pBT->bRecSizeVersion == BTREE_V3 )
+   //if ( pBT->bRecSizeVersion == BTREE_V3 )
    {
       PBTREEBUFFER_V3  pRecord;
       while ( usNum-- && !sRc )
@@ -2894,11 +2843,7 @@ SHORT QDAMAllocKeyRecords
           } /* endif */
       } /* endwhile */
    }
-   else
-   {
-      LogMessage(T5FATAL,__func__, "::QDAMDictCreateLocal::pBT->bRecSizeVersion != BTREE_V3 tried to create not TransMem, it's not supported");
-      throw;
-   } /* endif */
+  
    return sRc;
 }
 
@@ -3026,7 +2971,6 @@ SHORT QDAMDictCreateLocal
   SHORT sRc = 0;                       // return code
   USHORT  usAction;                    // used in open of file
   PBTREEGLOB pBT;                      // set work pointer to passed pointer
-  BOOL   fTransMem = (pNTMVitalInfo != NULL);   // translation memory
     
   /********************************************************************/
   /* allocate global area first ...                                   */
@@ -3065,24 +3009,18 @@ SHORT QDAMDictCreateLocal
     pBT->usFirstDataBuffer = 0;  // first data buffer
     pBT->fOpen  = TRUE;                          // open flag set
     strcpy(pBT->chFileName, pName);              // copy file name into struct
-    pBT->fTransMem = fTransMem;
     pBT->fpDummy = NULLHANDLE;
 
     /******************************************************************/
     /* do settings depending if we are dealing with a dict or a tm..  */
     /******************************************************************/
-    if ( !fTransMem )
     {
-      LogMessage(T5FATAL, "QDAMDictCreateLocal::tried to create not TransMem, it's not supported");
-      sRc = BTREE_INVALID;
-    }
-    else
-    {
-      pBT->bVersion = BTREE_V2;
-      pBT->bRecSizeVersion = BTREE_V3;
+      //pBT->bVersion = BTREE_V2;
+      //pBT->bRecSizeVersion = BTREE_V3;
       pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
       pBT->usVersion = NTM_VERSION3;// changed from NTM_VERSION2
-      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
+      //strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
+      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM3);
       if ( pTermTable )
       {
          memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
@@ -3107,36 +3045,31 @@ SHORT QDAMDictCreateLocal
 
     /* Allocate space for LookupTable */
     pBT->usNumberOfLookupEntries = 0;
-    if ( pBT->bRecSizeVersion == BTREE_V3 )
-    {
-      UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+    UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
 
-      if ( pBT->LookupTable_V3 )
+    if ( pBT->LookupTable_V3 )
+    {
+      /* Allocate space for AccessCtrTable */
+      UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+      if ( !pBT->AccessCtrTable )
       {
-        /* Allocate space for AccessCtrTable */
-        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-        if ( !pBT->AccessCtrTable )
-        {
-          UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
-          sRc = BTREE_NO_ROOM;
-        }
-        else
-        {
-          pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-        } /* endif */
+        UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
+        sRc = BTREE_NO_ROOM;
       }
       else
       {
-        sRc = BTREE_NO_ROOM;
+        pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
       } /* endif */
     }
     else
     {
-      LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+      sRc = BTREE_NO_ROOM;
     } /* endif */
+  
 
     pBT->usNumberOfAllocatedBuffers = 0;
-
+  }
+    
     if ( !sRc )
     {
       sRc =  QDAMAllocTempAreas( pBTIda );
@@ -3148,30 +3081,25 @@ SHORT QDAMDictCreateLocal
       /* in order to initialize the area of the first record we       */
       /* write an empty record buffer to the file before writing the  */
       /* header                                                       */
-      /****************************************************************/
-      if ( pBT->bRecSizeVersion == BTREE_V3 )
-      {        
-          int iBytesWritten;        
-          PBTREEBUFFER_V3 pbuffer;
-          UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
-          if ( ! pbuffer )
-          {
-            sRc = BTREE_NO_ROOM;
-          } /* endif */
-          else
-          {
-            //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-            FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
-
-            UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
-
-            sRc = QDAMWriteHeader( pBTIda );
-          } /* endif */
-      }
+      /****************************************************************/             
+      int iBytesWritten;         
+      PBTREEBUFFER_V3 pbuffer;
+      UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
+      if ( ! pbuffer )
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
       else
       {
-        LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+        //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+        FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
+
+        UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
+
+        sRc = QDAMWriteHeader( pBTIda );
       } /* endif */
+    }
+      
 
       if (! sRc )
       {
@@ -3182,34 +3110,28 @@ SHORT QDAMDictCreateLocal
       {
         /*******************************************************************/
         /* Write out an empty root node                                    */
-        /*******************************************************************/
-        if ( pBT->bRecSizeVersion == BTREE_V3 )
+        /*******************************************************************/       
+        PBTREEBUFFER_V3 pRecord;
+        sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
+        if ( !sRc )
         {
-          PBTREEBUFFER_V3 pRecord;
-          sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
-          if ( !sRc )
-          {
+          TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
             TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
-            sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
-          } /* endif */
-          if ( !sRc )
-          {
-            sRc = QDAMAllocKeyRecords( pBTIda, 1 );
-            if (! sRc )
-            {
-                pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
-            } /* endif */
-          } /* endif */
-        }
-        else
-        {
-          LogMessage(T5FATAL, "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported");
+          TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
+          sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
         } /* endif */
+        if ( !sRc )
+        {
+          sRc = QDAMAllocKeyRecords( pBTIda, 1 );
+          if (! sRc )
+          {
+              pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
+          } /* endif */
+        } /* endif */        
       } /* endif */
-    } /* endif */
-  }
-  else
-  {
+        
+  
+  if(sRc){
     switch ( sRc )
     {
       case  ERROR_INVALID_DRIVE:
@@ -3309,17 +3231,17 @@ USHORT TmtXClose
   if ( pTmClb->bCompactChanged )
   {
     SHORT sRetries = MAX_RETRY_COUNT;
-    do
+    //do
     {
       usRc = EQFNTMUpdate( pTmClb->pstTmBtree, COMPACT_KEY,
                            pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
-      if ( pTmClb->fShared && (usRc == BTREE_IN_USE) )
-      {
-        UtlWait( MAX_WAIT_TIME );
-        sRetries--;
-      } /* endif */
+      //if ( pTmClb->fShared && (usRc == BTREE_IN_USE) )
+      //{
+      //  UtlWait( MAX_WAIT_TIME );
+      //  sRetries--;
+      //} /* endif */
     }
-    while( pTmClb->fShared && (usRc == BTREE_IN_USE) && (sRetries > 0));
+    //while( pTmClb->fShared && (usRc == BTREE_IN_USE) && (sRetries > 0));
   } /* endif */
 
   //close index file regardless of errors
@@ -3666,11 +3588,11 @@ SHORT QDAMCheckForUpdates
           memcpy( pBT->chEntryEncode, header.chEntryEncode, ENTRYENCODE_LEN );
 
           // Get value for next free record
-          if ( header.Flags.bVersion == BTREE_V1 )
-          {
-            pBT->usNextFreeRecord = header.usNextFreeRecord;
-          }
-          else
+          //if ( header.Flags.bVersion == BTREE_V1 )
+          //{
+          //  pBT->usNextFreeRecord = header.usNextFreeRecord;
+          //}
+          //else
           {
             USHORT     usNextFreeRecord;
             ULONG      ulTemp;
@@ -3692,24 +3614,14 @@ SHORT QDAMCheckForUpdates
         /****************************************************************/
         if ( !sRc )
         {
-          if ( pBT->bRecSizeVersion == BTREE_V3 )
+          PBTREEINDEX_V3  pIndexBuffer;             // temp ptr to index buffers
+          while ( pBT->pIndexBuffer_V3 != NULL )
           {
-            PBTREEINDEX_V3  pIndexBuffer;             // temp ptr to index buffers
-
-            while ( pBT->pIndexBuffer_V3 != NULL )
-            {
-              pIndexBuffer = pBT->pIndexBuffer_V3;
-              pBT->pIndexBuffer_V3 = pIndexBuffer->pNext;
-
-              UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
-            } /* endwhile */
-          }
-          else
-          {
-            LogMessage(T5FATAL, __func__,":: V2 is not implemented;");
-            throw;
-            return BTREE_INVALID; 
-          } /* endif */
+            pIndexBuffer = pBT->pIndexBuffer_V3;
+            pBT->pIndexBuffer_V3 = pIndexBuffer->pNext;
+            UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
+          } /* endwhile */
+          
           pBT->usIndexBuffer = 0;      // no buffers in linked list anymore
         } /* endif */
 
@@ -3717,30 +3629,25 @@ SHORT QDAMCheckForUpdates
         /* Invalidate all data buffers                                  */
         /****************************************************************/
         /* Free allocated space for buffers */
-        if ( pBT->bRecSizeVersion == BTREE_V3 )
+       
+        if ( !sRc && pBT->LookupTable_V3 )
         {
-          if ( !sRc && pBT->LookupTable_V3 )
+          USHORT i;
+          PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+
+          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
           {
-            USHORT i;
-            PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
-
-            for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+            if ( pLEntry->pBuffer )
             {
-              if ( pLEntry->pBuffer )
-              {
-                UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-              } /* endif */
-              pLEntry++;
-            } /* endfor */
-            pBT->usNumberOfAllocatedBuffers = 0;
-          } /* endif */
+              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+            } /* endif */
+            pLEntry++;
+          } /* endfor */
+          pBT->usNumberOfAllocatedBuffers = 0;
+        } /* endif */
 
-        }
-        else
-        {
-            T5LOG(T5FATAL) << ":: V2 is not implemented;";
-            return BTREE_INVALID; 
-          } /* endif */
+        
+        
         /****************************************************************/
         /* Invalidate current record and current index                  */
         /****************************************************************/
@@ -4787,7 +4694,6 @@ SHORT QDAMLocateKey_V3
              /* checking will be done in any case to return the best  */
              /* matching substring                                    */
              /*********************************************************/
-             if ( pBT->fTransMem )
              {
                if (*((PULONG)pKey) == *((PULONG)pKey2))
                {
@@ -4823,124 +4729,7 @@ SHORT QDAMLocateKey_V3
                   } /* endif */
                } /* endif */
              }
-             else
-             {
-               /*******************************************************/
-               /* if dealing with exacts we have to do some more      */
-               /* explicit checking, else we have to find first pos.  */
-               /* substring match...                                  */
-               /*******************************************************/
-               enum KEYMATCH
-               {
-                 EXACT_KEY,            // keys are exactly the same
-                 CASEDIFF_KEY,         // case of keys is different
-                 PUNCTDIFF_KEY,        // punctuation of keys differs
-                 NOMATCH_KEY           // keys do not match at all
-               } BestKeyMatch = NOMATCH_KEY; // match level of best key so far
-               SHORT sBestKey = -1;    // best key found so far
-
-               /*****************************************************/
-               /* go back as long as the keys are the same ...      */
-               /*****************************************************/
-
-               while ( sMid > sLow )
-               {
-                 pKey2 = QDAMGetszKey_V3( pRecord, (SHORT)(sMid-1), pBT->usVersion );
-                 if ( pKey2 == NULL )
-                 {
-                   sRc = BTREE_CORRUPTED;
-                   break;
-                 }
-                 else if ( (*pBT->compare)(pBTIda, pKey, pKey2) == 0 )
-                 {
-                   sMid --;
-                 }
-                 else
-                 {
-                   break;
-                 } /* endif */
-               } /* endwhile */
-
-               *psKeyPos = sMid;      // set key position
-
-               /*****************************************************/
-               /* go forward as long as the keys are the same  ..   */
-               /* and no matching sentence found                    */
-               /*****************************************************/
-               if ( (searchType == FEXACT) ||
-                    (searchType == FEQUIV) )
-               {
-                 *psKeyPos = -1;       // reset key position for exact search
-                                       // and equivalent search
-               } /* endif */
-
-               while ( sMid <= sHigh )
-               {
-                 pKey2 = QDAMGetszKey_V3( pRecord, sMid, pBT->usVersion );
-                 if ( pKey2 == NULL )
-                 {
-                   sRc = BTREE_CORRUPTED;
-                   break;
-                 }
-                 else if ( (*pBT->compare)(pBTIda, pKey, pKey2) == 0 )
-                 {
-                   if ( searchType == FEQUIV)
-                   {
-                     if ( UTF16strcmp( pKey, pKey2 ) == 0 )
-                     {
-                       // the match will not get better anymore ...
-                       *psKeyPos = sMid;
-                       break;
-                     }
-                     else 
-                     if ( QDAMCaseCompare( pBTIda, pKey, pKey2, FALSE ) == 0 )
-                     {
-                       // match but case of characters differ
-                       // so remember match if we have no better match yet and
-                       // look for better ones...
-                       if ( BestKeyMatch > CASEDIFF_KEY )
-                       {
-                         BestKeyMatch = CASEDIFF_KEY;
-                         sBestKey = sMid;
-                       } /* endif */
-                     }
-                     else if ( QDAMCaseCompare( pBTIda, pKey, pKey2, TRUE ) == 0 )
-                     {
-                       // match but punctuation differs
-                       // so remember match if we have no other yet and
-                       // look for better ones...
-                       if ( BestKeyMatch == NOMATCH_KEY )
-                       {
-                         BestKeyMatch = PUNCTDIFF_KEY;
-                         sBestKey = sMid;
-                       } /* endif */
-                     } /* endif */
-                     sMid++;           // continue with next key
-                   }
-                   else if (UTF16strcmp( pKey, pKey2 ))
-                   {
-                     sMid ++;
-                   }
-                   //#endif
-                   else
-                   {
-                     *psKeyPos = sMid;
-                     break;
-                   } /* endif */
-                 }
-                 else
-                 {
-                   break;
-                 } /* endif */
-               } /* endwhile */
-
-               // use best matching key if no other was found
-               if ( *psKeyPos == -1 )
-               {
-                 *psKeyPos = sBestKey;
-               } /* endif */
-             } /* endif */
-
+            
              /*********************************************************/
              /* if we are checking only for substrings and didn't     */
              /* find a match yet, we will set the prev. found substrin*/
@@ -5142,14 +4931,7 @@ SHORT QDAMFindParent_V3
   }
   else
   {
-    if ( pBT->fTransMem )
-    {
-      memcpy( chKey, pKey, sizeof(ULONG));
-    }
-    else
-    {
-      UTF16strcpy( chKey, pKey );
-    } /* endif */
+    memcpy( chKey, pKey, sizeof(ULONG));      
   } /* endif */
 
   sRc = QDAMReadRecord_V3( pBTIda, pBT->usFirstNode, &pTempRec, FALSE  );
@@ -6535,16 +6317,7 @@ SHORT QDAMInsertKey_V3
       usLastPos = pRecord->contents.header.usLastFilled;
       usLastPos = usLastPos - usDataRec;
       pData = pRecord->contents.uchData + usLastPos;
-      // insert reference
-      if ( !pBT->fTransMem && pBT->usVersion == BTREE_VERSION)
-      {
-        LogMessage(T5ERROR, __func__, ":: TEMPORARY_COMMENTED in QDAMInsertKey_V3 :: Unicode2ASCII( pKey, chHeadTerm, 0L );");
-#ifdef TEMPORARY_COMMENTED
-         Unicode2ASCII( pKey, chHeadTerm, 0L );
-         #endif 
-         usKeyLen = (USHORT)(strlen(chHeadTerm)+1);
-         pKey = (PTMWCHAR)&chHeadTerm[0];
-      }
+
       *(PTMWCHAR) pData = usKeyLen;
       {
         PBYTE pTarget;
@@ -6913,42 +6686,29 @@ SHORT  QDAMDictOpenLocal
      {
         memcpy( pBT->chEQF, header.chEQF, sizeof(pBT->chEQF));
         pBT->bVersion = header.Flags.bVersion;
-        if ( header.Flags.f16kRec )
-        {
-          pBT->bRecSizeVersion = BTREE_V3;
-        }
-        else
-        {
-          pBT->bRecSizeVersion = BTREE_V2;
-        } /* endif */
+        //if ( header.Flags.f16kRec )
+        //{
+    //      pBT->bRecSizeVersion = BTREE_V3;
+        //}
+        //else
+        //{
+        //  pBT->bRecSizeVersion = BTREE_V2;
+        //} /* endif */
 
         /**************************************************************/
         /* support either old or new format or TM...                  */
         /**************************************************************/
 
-        if ( (strncmp( header.chEQF, BTREE_HEADER_VALUE_V3,
-                      sizeof(BTREE_HEADER_VALUE_V3) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V2,
-                      sizeof(BTREE_HEADER_VALUE_V2) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V0,
-                      sizeof(BTREE_HEADER_VALUE_V0) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_V1,
-                      sizeof(BTREE_HEADER_VALUE_V1) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM2,
-                      sizeof(BTREE_HEADER_VALUE_TM2) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM1,
-                      sizeof(BTREE_HEADER_VALUE_TM1) ) == 0) ||
-             (strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3,
-                      sizeof(BTREE_HEADER_VALUE_TM3) ) == 0) )
+        if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3,
+                      sizeof(BTREE_HEADER_VALUE_TM3) ) == 0 )
         {
           /************************************************************/
           /* check if we are dealing with a TM...                     */
           /* (Check only first 3 characters of BTREE identifier to    */
           /*  ignore the version number)                              */
           /************************************************************/
-          if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM1, 3 ) == 0 )
+          if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3, 3 ) == 0 )
           {
-            fTransMem = TRUE;
             pBT->usVersion = (USHORT) header.chEQF[3];
             pBT->compare =  NTMKeyCompare;
           }
@@ -6961,28 +6721,9 @@ SHORT  QDAMDictOpenLocal
             /* the same as NTM_VERSION2 ( has also length field         */
             /* ULONG at begin to support data recs > 32 k      )        */
             /************************************************************/
-            if ( header.chEQF[3] == BTREE_VERSION3 )
-            {
-              pBT->usVersion = BTREE_VERSION3;
-            }
-            else
-            if ( header.chEQF[3] == BTREE_VERSION2 )
-            {
-                pBT->usVersion = BTREE_VERSION2;
-                header.fOpen = TRUE;  // force sRc = BTREE_CORRUPTED in ln 946
-            }
-            else
-            {
-                pBT->usVersion = 0;
-                pBT->compare =  QDAMKeyCompareNonUnicode;
-
-                /******************************************************/
-                /* we do not support version 0 any more -> force a    */
-                /* reorganize                                         */
-                /******************************************************/
-                header.fOpen = TRUE;  // force sRc = BTREE_CORRUPTED in ln 946
- //               sRc = BTREE_CORRUPTED;
-            } /* endif */
+            //if ( header.chEQF[3] == BTREE_VERSION3 )
+            pBT->usVersion = BTREE_VERSION3;
+            
           } /* endif */
           UtlTime( &(pBT->lTime) );                             // set open time
           pBTIda->sCurrentIndex = 0;
@@ -6992,23 +6733,11 @@ SHORT  QDAMDictOpenLocal
           pBT->usFreeKeyBuffer = header.usFreeKeyBuffer;
           pBT->usFreeDataBuffer = header.usFreeDataBuffer;
           pBT->usFirstDataBuffer = header.usFirstDataBuffer;  //  data buffer
-          pBT->fTransMem = fTransMem;
           pBT->fpDummy = NULLHANDLE;
-          if ( pBT->bRecSizeVersion == BTREE_V3 )
-          {
-            pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
-          }
-          else
-          {
-            pBT->usBtreeRecSize = BTREE_REC_SIZE_V2;
-          } /* endif */
+          pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
+          
 
           // load usNextFreeRecord either from header record of from file info
-          if ( pBT->bVersion == BTREE_V1 )
-          {
-              pBT->usNextFreeRecord = header.usNextFreeRecord;
-          }
-          else
           {
             ULONG ulTemp;
             sRc1 = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
@@ -7041,41 +6770,10 @@ SHORT  QDAMDictOpenLocal
              } /* endif */
 
              memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
-             /*********************************************************/
-             /* check if something is in collating sequence - this is */
-             /* mandatory for the dictionary processing -             */
-             /* use the character A as checking point                 */
-             /* if nothing in there, we will use the default collating*/
-             /* sequence - in addition we will put it in the          */
-             /*********************************************************/
-             if ( (! pBT->fTransMem) && (pBT->chCollate[65] == 0) )
-             {
-               memcpy( pBT->chCollate, chDefCollate, COLLATE_SIZE );
-             } /* endif */
-
+             
              memcpy( pBT->chCaseMap, header.chCaseMap, COLLATE_SIZE );
-             if ( (!pBT->fTransMem) && (pBT->chCaseMap[65] == 0) )
-             {
-               /****************************************************************/
-               /* fill in the characters and use the UtlLower function ...     */
-               /****************************************************************/
-               PUCHAR pTable;
-               UCHAR  chTemp;
-               pTable = pBT->chCaseMap;
-               for ( i=0;i < COLLATE_SIZE; i++ )
-               {
-                  *pTable++ = (UCHAR) i;
-               } /* endfor */
-               chTemp = pBT->chCaseMap[ COLLATE_SIZE - 1];
-               pBT->chCaseMap[ COLLATE_SIZE - 1] = EOS;
-               pTable = pBT->chCaseMap;
-               pTable++;
-               UtlLower( (PSZ)pTable );
-               pBT->chCaseMap[ COLLATE_SIZE - 1] = chTemp;
-             } /* endif */
-
+             
              ASDLOG();
-
 
              /* Allocate space for AccessCtrTable */
              pBT->usNumberOfLookupEntries = 0;
@@ -7088,23 +6786,14 @@ SHORT  QDAMDictOpenLocal
              /* Allocate space for LookupTable */
              if ( !sRc )
              {
-                if ( pBT->bRecSizeVersion == BTREE_V3 )
+                UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+                if ( pBT->LookupTable_V3 )
                 {
-                  UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
-                  if ( pBT->LookupTable_V3 )
-                  {
-                    pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-                  }
-                  else
-                  {
-                    sRc = BTREE_NO_ROOM;
-                  } /* endif */
-                } /* endif */
+                  pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+                }
                 else
                 {
-                  T5LOG(T5FATAL) << ":: V2 is not implemented;";
-                  throw;
-                  return BTREE_INVALID; 
+                  sRc = BTREE_NO_ROOM;
                 } /* endif */
              } /* endif */
 
@@ -7423,17 +7112,11 @@ SHORT QDAMDictInsertLocal
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
-
-   if( pBT->bRecSizeVersion != BTREE_V3 )
-   {
-      T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
-      sRc = BTREE_NOT_SUPPORTED;
-   } /* endif */ 
    
   PBTREEBUFFER_V3  pNode = NULL;
   if ( !sRc )
   {
-    usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : UTF16strlenBYTE( pKey ));
+    usKeyLen = (USHORT) sizeof(ULONG);
 
     if ( (usKeyLen == 0) ||
           ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
@@ -8827,16 +8510,8 @@ SHORT QDAMDictFirstLocal
           }
           if ( !sRc && ulKeyLen )
             {
-              if ( pBT->fTransMem )
-              {
-                ULONG ul = 0l;
-                memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );
-              }
-              else
-              {
-                pBTIda->chHeadTerm[0] = EOS;
-              } /* endif */
-            
+              ULONG ul = 0l;
+              memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );              
           } /* endif */
 
            if ( !sRc )

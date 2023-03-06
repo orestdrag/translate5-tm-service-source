@@ -98,33 +98,6 @@ USHORT PluginManager::loadPluginDlls(const char* pszPluginDir)
 int PluginManager::ValidationCheck(char * strParam)
 {
     int nRC = NO_ERROR;
-
-    // at least a memory plugin, a dictionary plugin and the markup table plugins
-    bool bHasMemory = false;
-    bool bHasDict   = false;
-    bool bHasMarkup = false;
-
-    for (int iInx = 0; iInx < instance->getPluginCount(); iInx++)
-    {
-        OtmPlugin * otmPlugin = instance->getPlugin(iInx);
-        OtmPlugin::ePluginType typePlugin = otmPlugin->getType();
-        if (typePlugin == OtmPlugin::eTranslationMemoryType)
-        {
-            bHasMemory = true;
-        }
-        else if (typePlugin == OtmPlugin::eMarkupType)
-        {
-            bHasMarkup = true;
-        }
-        else if (typePlugin == OtmPlugin::eDictionaryType)
-        {
-            bHasDict = true;
-        }
-        else if (typePlugin == OtmPlugin::eSharedTranslationMemoryType)
-        {
-            bHasMemory = true;
-        }
-    }
     return nRC;
 }
 
