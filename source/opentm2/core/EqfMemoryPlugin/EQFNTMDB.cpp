@@ -1088,14 +1088,8 @@ VOID QDAMCopyDataTo_V3
    USHORT   usDataOffs;                // data offset
    PUCHAR   pOldData;                  // pointer to data
    USHORT   usLenFieldSize;            // size of data length field
-
-   if ( usVersion < NTM_VERSION2 )
-   {
-     LogMessage(T5FATAL,__func__, ":: btree version is not supported, version = ", toStr(usVersion).c_str());
-     BTREE_NOT_SUPPORTED;
-   }
    
-   usLenFieldSize = sizeof(ULONG);
+   usLenFieldSize = (USHORT) sizeof(ULONG);
 
    pusOldOffset = (PUSHORT) pRecord->contents.uchData;
    pusNewOffset = (PUSHORT) pNew->contents.uchData;
