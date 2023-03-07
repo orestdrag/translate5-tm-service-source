@@ -196,8 +196,13 @@ std::wstring EncodingHelper::toWChar(std::u16string u16str){
 }
 
 
+//std::locale loc(
+//      std::locale(),
+//      new std::codecvt_utf16<wchar_t, 0x10FFFF, std::consume_header>);
+
 std::string EncodingHelper::toChar(std::u16string u16str){
-  auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
+  auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t,  0x10FFFF,std::consume_header>, char16_t>{}.to_bytes(u16str);
+  //auto u8str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16str);
   return u8str;
 }
 

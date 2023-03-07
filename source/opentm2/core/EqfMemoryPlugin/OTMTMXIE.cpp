@@ -1686,7 +1686,6 @@ USHORT CTMXExportImport::PreProcessInFile
   if ( !usRC )
   {
     BOOL fUTF16 = FALSE;
-    PBYTE pCurPos = m_bBuffer;
 
     // check file encoding
     fread( m_bBuffer, 1, 2, hIn );
@@ -1716,7 +1715,8 @@ USHORT CTMXExportImport::PreProcessInFile
       T5LOG( T5DEBUG) << " Allocating filebuffer with " <<fsize <<" bytes for " << pszInFile;
       fseek(hIn, 0, SEEK_SET);  /* same as rewind(f); */
 
-      buff = new BYTE[fsize+1];
+      buff = new BYTE[fsize+2];
+      buff[fsize] = buff[fsize+1] = 0;
       fread(buff, fsize, 1, hIn);
       len = fsize;
     }
@@ -1731,8 +1731,10 @@ USHORT CTMXExportImport::PreProcessInFile
     }
         
     if(fUTF16){      //convert utf16 to utf8
-      auto data = EncodingHelper::toChar((char16_t*) buff);
-      
+      //auto data = EncodingHelper::toChar((char16_t*) pCurPos);
+      auto u16str = std::u16string ((char16_t*) buff);
+      auto data = EncodingHelper::toChar(u16str);
+
       if (data.find("UTF-16") != std::string::npos)
         data.replace(data.find("UTF-16"), 6, "UTF-8");
       
