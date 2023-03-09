@@ -30,20 +30,12 @@ Copyright Notice:
 #include "LanguageFactory.H"
 
 // activate the folllowing define to activate logging
-//#define EQFMEMORYLOGGING
-
 /*! \brief Prototypes of helper functions */
 static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
 EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
 {
-
-#ifdef EQFMEMORYLOGGING
-  strcpy( this->szName, "EQFMEMORY-" );
-  strcat( this->szName, pszName );
-  this->Log.open( this->szName );
-#endif
 
   this->htm = htmIn;
   this->pMemoryPlugin = pPlugin;
@@ -76,9 +68,6 @@ EqfMemory::~EqfMemory()
   if ( this->pTmGetIn != NULL )  delete  this->pTmGetIn ;
   if ( this->pTmGetOut != NULL ) delete  this->pTmGetOut;
 
-#ifdef EQFMEMORYLOGGING
-  this->Log.close();
-#endif
 
 }
 

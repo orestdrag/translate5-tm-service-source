@@ -212,8 +212,7 @@ USHORT EXPTOTMX
   LONG             lOutMode,            // output mode UTF16/UTF8
   PLONG            plSegs,              // number of written (=valid) segments
   PSZ              pszMsgBuffer,        // buffer for error messages
-  PLONG            plInvalidSegs,       // number of skipped segments
-  FILE             *hfLog               // handle of log file or NULL if no logging of invalid segments is to be done
+  PLONG            plInvalidSegs       // number of skipped segments
 );
 
 

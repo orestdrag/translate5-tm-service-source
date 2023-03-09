@@ -7,7 +7,6 @@
 	Corporation and others. All rights reserved
 */
 
-//  #define STARTUP2_LOGGING  
 
   #undef _WINDLL
 

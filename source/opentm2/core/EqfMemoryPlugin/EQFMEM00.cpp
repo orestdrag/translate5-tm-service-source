@@ -201,6 +201,8 @@ bool EqfRemoveObject(auto flg, auto hwnd){
 
 // ================ Handle the message WM_EQF_MEMORGANIZE_START =======================
 
+time_t lOrganizeStartTime;
+
 USHORT EQFMemOrganizeStart
 (
   PPROCESSCOMMAREA  pCommArea,
@@ -221,19 +223,13 @@ USHORT EQFMemOrganizeStart
 
 #ifdef ORGANIZE_LOGGING
   {
-    FILE *hfLog = NULL;
-    CHAR szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    strcat( szLogFile, "\\MEMORG.LOG" );
-    hfLog = fopen( szLogFile, "a" );
-    if ( hfLog )
+    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
       time( &lOrganizeStartTime );
-      fprintf( hfLog, "************ Memory Organize Log *********************\n"  );
-      fprintf( hfLog, "Memory organize started at : %s", asctime( localtime( &lOrganizeStartTime ) ) );
-      fprintf( hfLog, "Memory name                : %s\n", pRIDA->szMemName );
-      fclose( hfLog );
+      T5LOG(T5INFO) <<  "************ Memory Organize Log *********************\n"  
+        <<  "\nMemory organize started at : " 
+        //<< asctime( localtime( &lOrganizeStartTime ) 
+        << "\nMemory name                :  "<< pRIDA->szMemName ;
     } /* endif */
   }
 #endif
@@ -625,26 +621,19 @@ VOID EQFMemOrganizeEnd
 
 #ifdef ORGANIZE_LOGGING
   {
-    FILE *hfLog = NULL;
-    CHAR szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    strcat( szLogFile, "\\MEMORG.LOG" );
-    hfLog = fopen( szLogFile, "a" );
-    if ( hfLog )
+    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
       LONG lCurTime = 0;  
 
       time( &lCurTime );
-      fprintf( hfLog, "Memory organize ended at   : %s", asctime( localtime( &lCurTime ) ) );
+      T5LOG(T5INFO) << "Memory organize ended at   : " << asctime( localtime( &lCurTime ) ) ;
       if ( lOrganizeStartTime )
       {
         LONG lDiff = lCurTime - lOrganizeStartTime;
-        fprintf( hfLog, "Overall organize time is %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
-                (lDiff - (lDiff / 3600 * 3600)) / 60,
-                (lDiff - (lDiff / 3600 * 3600)) % 60 );
+        T5LOG(T5INFO) << "Overall organize time is "<<lDiff / 3600<<":" 
+              << (lDiff - (lDiff / 3600 * 3600)) / 60 <<":" << (lDiff - (lDiff / 3600 * 3600)) % 60  <<"\n";         
+                
       }
-      fclose( hfLog );
     } /* endif */
   }
 #endif

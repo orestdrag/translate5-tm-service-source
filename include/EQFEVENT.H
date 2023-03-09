@@ -4,9 +4,9 @@
 
 #ifndef EVENTLOG
   #ifndef _DEBUG
-    #define NO_DEBUGEVENTS
-    #define NO_ERREVENTS
-    #define NO_INFOEVENTS
+    //#define NO_DEBUGEVENTS
+    //#define NO_ERREVENTS
+    //#define NO_INFOEVENTS
   #endif
 #endif
 
@@ -313,28 +313,28 @@ typedef enum
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
-      UtlEvent( ERROR_EVENT, id, class, rc )
+      T5LOG(T5ERROR) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
   #else
     #define ERREVENT( id, class, rc )
   #endif
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
+     ERREVENT(id, class,rc) <<"; gr = " << gr <<"; str = "  << str
   #else
     #define ERREVENT2( id, class, rc, gr, str )
   #endif
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT( id, class, rc ) \
-      UtlEvent( INFO_EVENT, id, class, rc )
+      T5LOG(T5INFO) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
   #else
     #define INFOEVENT( id, class, rc )
   #endif
 
   #ifndef NO_INFOEVENTS
     #define INFOEVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
+      INFOEVENT(id, class, rc) <<"; gr = " << gr <<"; str = "  << str 
   #else
     #define INFOEVENT2( id, class, rc, gr, str )
   #endif
@@ -345,44 +345,15 @@ typedef enum
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-      UtlEvent( EQFDEBUG_EVENT, id, class, rc )
+      T5LOG(T5ERROR) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
   #else
     #define DEBUGEVENT( id, class, rc )
   #endif
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT2( id, class, rc, gr, str ) \
-      UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
+     DEBUGEVENT(id, class, rc) <<"; gr = " << gr <<"; str = "  << str 
   #else
     #define DEBUGEVENT2( id, class, rc, gr, str )
   #endif
 #endif
-
-/**********************************************************************/
-/* Event recording function (do not call directly, use macros instead)*/
-/**********************************************************************/
-
-BOOL UtlEvent
-(
-  SHORT sEventType,                    // type of the event
-  SHORT sEventID,                      // the event identifier
-  SHORT sEventClass,                   // the event class
-  SHORT sEventRC                       // the event return code or error code
-);
-
-BOOL UtlEvent2
-(
-  SHORT sEventType,                    // type of the event
-  SHORT sEventID,                      // the event identifier
-  SHORT sEventClass,                   // the event class
-  SHORT sEventRC,                      // the event return code or error code
-  SHORT sGroup,                        // the event group
-  PSZ   pszAddData                     // additional data for event (string)
-);
-
-
-BOOL UtlAddEventGroup
-(
-  SHORT sGroup                       // the event group
-);
-

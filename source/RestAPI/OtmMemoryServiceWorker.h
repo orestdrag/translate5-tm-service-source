@@ -144,14 +144,6 @@ public:
   */
   int saveAllTmOnDisk( std::string &strOutputParms );
 
-  /*! \brief Set the log file handle
-  \param hfLog log file handle or NULL to stop logging
-  */
-  void setLogFile
-  (
-    FILE *hfLog
-  );
-
   /*! \brief List all available TMs
   \param strOutParms on return filled with the output parameters in JSON format
   \returns http return code
@@ -455,12 +447,6 @@ private:
 /*! \brief Buffer for last error message
 */
   wchar_t szLastError[4000];
-
-  /*! \brief log file handle 
-  */
-  FILE *hfLog = nullptr;
-
-
 
 };
 

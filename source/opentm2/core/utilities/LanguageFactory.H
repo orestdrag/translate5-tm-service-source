@@ -218,8 +218,6 @@ int compareISO
     const char *pszInFile
   );
 
-  /*! \brief Pointer to active log writer or NULL if none is active */
-  void *pvLogWriter;
 };
 
 

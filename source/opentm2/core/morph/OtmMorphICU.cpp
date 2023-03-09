@@ -98,9 +98,7 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
 	}
 
 #ifdef TOKENIZELOG 
-  LogWriter Log;
-  Log.open( "MORPHICUTOKENIZE" );
-  Log.writef( "tokenizeByTerm, input is \"%S\"", pText );
+  T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pText <<"\"";
 #endif
 
     std::u16string vSection_u16 = EncodingHelper::toUtf16(pText);
@@ -116,12 +114,11 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
     }
 
 #ifdef TOKENIZELOG 
-  Log.write( "results:" );
+  T5LOG(T5DEBUG) << "results:" ;
   for (auto it = begin (vResult); it != end (vResult); ++it) 
   {
-    Log.writef( "   Offset=%3ld Len=%3ld Flag=%ld", it->iStartOffset, it->iLength, it->iTermType  );
+    T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset <<" Len="<<it->iLength<<" Flag=" << it->iTermType  ;
   }
-  Log.close();
 #endif
 	return OtmMorph::SUCCESS_RETURN;
 }
@@ -191,23 +188,19 @@ int OtmMorphICU::tokenizeByTerm( const char* pszSection, STRINGLIST& vResult )
 	}
 
 #ifdef TOKENIZELOG 
-  LogWriter Log;
-  Log.open( "MORPHICUTOKENIZE" );
-  Log.writef( "tokenizeByTerm, input is \"%s\"", pszSection );
+  T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pszSection <<"\"";
 #endif
 
 	pWordBoundary->setText(UnicodeString(pszSection));
 	getResultFromIterator(pWordBoundary, vResult);
 
 #ifdef TOKENIZELOG 
-  Log.write( "results:" );
+  T5LOG(T5DEBUG) << "results:" ;
   for (auto it = begin (vResult); it != end (vResult); ++it) 
   {
-    Log.writef( "\"%s\"", it->c_str() );
+    T5LOG(T5DEBUG) << "\"" << it->c_str()<< "\"";
   }
-  Log.close();
 #endif
-
   return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -387,9 +380,7 @@ int OtmMorphICU::tokenizeBySentence( const char* vSection, STRINGLIST& vResult )
     }
 
 #ifdef TOKENIZELOG 
-  LogWriter Log;
-  Log.open( "MORPHICUTOKENIZE" );
-  Log.writef( "tokenizeBySentence, input is \"%s\"", vSection );
+  T5LOG(T5DEBUG) << "tokenizeBySentence, input is \""<< vSection << "\"";
 #endif
 
     pSentenceBoundary->setText(UnicodeString(vSection));
@@ -398,12 +389,11 @@ int OtmMorphICU::tokenizeBySentence( const char* vSection, STRINGLIST& vResult )
     getResultFromIterator(pSentenceBoundary, vResult, TRUE);
 
 #ifdef TOKENIZELOG 
-  Log.write( "results:" );
+  T5LOG(T5DEBUG) << "results:";
   for (auto it = begin (vResult); it != end (vResult); ++it) 
   {
-    Log.writef( "\"%s\"", it->c_str() );
+    T5LOG(T5DEBUG) << "\""<<it->c_str()<<"\"" ;
   }
-  Log.close();
 #endif
 
     return OtmMorph::SUCCESS_RETURN;
@@ -422,9 +412,7 @@ int OtmMorphICU::tokenizeBySentence( const wchar_t* vSection, TERMLIST& vResult 
     }
 
 #ifdef TOKENIZELOG 
-  LogWriter Log;
-  Log.open( "MORPHICUTOKENIZE" );
-  Log.writef( "tokenizeBySentence, input is \"%S\"", vSection );
+  T5LOG(T5DEBUG) << "tokenizeBySentence, input is \""<<vSection<<"\"";
 #endif
     std::u16string vSection_u16 = EncodingHelper::toUtf16(vSection);
     UnicodeString text(vSection_u16.c_str());
@@ -434,12 +422,11 @@ int OtmMorphICU::tokenizeBySentence( const wchar_t* vSection, TERMLIST& vResult 
     getResultFromIterator(pSentenceBoundary, vResult, TRUE);
 
 #ifdef TOKENIZELOG 
-  Log.write( "results:" );
+  T5LOG(T5DEBUG) << "results:" ;
   for (auto it = begin (vResult); it != end (vResult); ++it) 
   {
-    Log.writef( "   Offset=%3ld Len=%3ld Flag=%ld", it->iStartOffset, it->iLength, it->iTermType  );
+    T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset<<" Len="<<it->iLength<<" Flag="<<it->iTermType  ;
   }
-  Log.close();
 #endif
 
     return OtmMorph::SUCCESS_RETURN;
@@ -593,9 +580,7 @@ void OtmMorphICU::setupSentenceBoundary(UErrorCode &tStatus) {
      */
     if (!(pSentenceBoundary = loadFromRules())) {
 #ifdef TOKENIZELOG
-  LogWriter Log;
-  Log.open( "MORPHICUSETUP" );
-  Log.writef( "Using default sentence segmentation rules." );
+  T5LOG(T5DEBUG) << "Using default sentence segmentation rules." ;
 #endif
 //        pSentenceBoundary = BreakIterator::createSentenceInstance(Locale::getUS(), tStatus);
         pSentenceBoundary = BreakIterator::createSentenceInstance(Locale::getJapanese(), tStatus);

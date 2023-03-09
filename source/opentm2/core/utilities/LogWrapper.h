@@ -5,6 +5,25 @@
 #include <glog/logging.h>
 #define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
 #include <boost/stacktrace.hpp>
+
+#define _DEBUG_LOGS
+
+#ifdef _DEBUG_LOGS
+  #define TOKENIZELOG
+  #define SPELLFACTORY_LOGGING
+  #define ORGANIZE_LOGGING
+  #define MEASURETIME
+  #define SGMLDITA_LOGGING
+  #define INLINE_TAG_REPL_LOGGING
+  #define _NTGET_LOG
+  #define MATCHLEVEL_LOGGING
+  #define MATCHLIST_LOG
+  #define IMPORT_LOGGING
+  #define EQFMEMORYLOGGING
+  #define TEMPORARY_COMMENTED_LOGS
+  #define MARKUPTABLE_LOGGING
+#endif
+
 /*
 namespace boost { namespace stacktrace {
 

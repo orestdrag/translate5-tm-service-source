@@ -27,8 +27,6 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-
-#include "../utilities/LogWriter.h"
 #include "LanguageFactory.H"
 
 
@@ -115,13 +113,7 @@ LanguageFactory::LanguageFactory(void)
 /*! \brief destructor	 */
 LanguageFactory::~LanguageFactory(void)
 {
-  if ( pvLogWriter != NULL )
-  {
-    LogWriter *pLogWriter = (LogWriter *)pvLogWriter;
-    pLogWriter->write( "Stopping LanguageFactory" );
-    pLogWriter->close();
-    delete pLogWriter;
-  }
+  T5LOG(T5DEBUG) <<  "Stopping LanguageFactory" ;
 }
 
 /*! \brief This static method returns a pointer to the LanguageFactory object.

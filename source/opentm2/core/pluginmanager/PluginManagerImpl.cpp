@@ -55,7 +55,7 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 			if (!name.empty())
       {
 #ifdef TEMPORARY_COMMENTED_LOGS
-        this->Log.writef( "   Registering plugin %s", name.c_str() );
+        T5LOG(T5DEBUG) << "   Registering plugin " << name;
 #endif //TEMPORARY_COMMENTED
 
         // insert plugin into list of active plugins
@@ -68,7 +68,7 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 						eRc = PluginManager::eAlreadyRegistered;
 
 #ifdef TEMPORARY_COMMENTED_LOGS
-                        this->Log.writef( "Error:   The plugin %s is already registered.", name.c_str() ); // Add for 403115
+  T5LOG(T5DEBUG) << "Error:   The plugin "<< name <<" is already registered."; // Add for 403115
 #endif // TEMPORARY_COMMENTED
 					}
 				}
@@ -107,7 +107,7 @@ PluginManager::eRegRc PluginManagerImpl::registerPlugin(OtmPlugin* plugin)
 	}
 
 #ifdef TEMPORARY_COMMENTED_LOGS
-    this->Log.writef( "   Registering plugin %d", eRc );
+    T5LOG(T5DEBUG) << "   Registering plugin " << eRc ;
 #endif //TEMPORARY_COMMENTED
 
 	return eRc;

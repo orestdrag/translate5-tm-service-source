@@ -14,11 +14,6 @@
 
 */
 
-#ifdef _DEBUG
-  // activate define to enable markup table plugin logging
-  //#define MARKUPTABLE_LOGGING
-#endif
-
 
 //#include "windows.h"
 #include "core/pluginmanager/PluginManager.h"
@@ -96,7 +91,6 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
     char      szNode[512] ;
     char      szContent[512] ;
     char      szErrMsg[MAX_FILELIST] ;
-    BOOL      bLogOpen = FALSE ;
 
   pszFileList = NULL;
   pszLongDescription = NULL;
@@ -129,14 +123,8 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
   if ( pszPathEnd != NULL ) {
       *pszPathEnd = '\0';
   } 
-
-  bLogOpen;
 #ifdef MARKUPTABLE_LOGGING
-  if ( !this->Log.isOpen() ) {
-    this->Log.open( PluginLogFile );
-    bLogOpen = TRUE;
-  } /* end */     
-  this->Log.writef( "Loading OTM markup table plugin..." );
+  T5LOG(T5DEBUG) << "Loading OTM markup table plugin..." ;
 #endif
 
   strcpy( szTemp, szBasePath ) ;
@@ -253,9 +241,9 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
                  if ( stricmp( szContent, szXml_NONE ) ) {
                     SaveValue( &(ptrMarkupInfo->pszFileList), szContent ) ;
                     if ( ! CheckFilesExist( szContent, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( szErrMsg );
-#endif
+                     #ifdef MARKUPTABLE_LOGGING
+                       T5LOG(T5DEBUG) << szErrMsg ;
+                       #endif
                     }
                  }
               }
@@ -265,9 +253,9 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
               } 
               if ( ! strcmp( szNode, szXml_Name ) ) {
                  SaveValue( &(ptrMarkupInfo->pszName), szContent ) ;
-#ifdef MARKUPTABLE_LOGGING
-                 this->Log.writef( "   Loading:  %s",szContent );
-#endif
+                 #ifdef MARKUPTABLE_LOGGING
+                 T5LOG(T5DEBUG) << "   Loading:  " <<szContent ;
+                 #endif
                  continue;
               } 
               if ( ! strcmp( szNode, szXml_ShortDescription ) ) {
@@ -278,9 +266,9 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
                  sprintf( szTemp, "%s\\%s", pszTableDirectory, szContent ) ;
                  SaveValue( &(ptrMarkupInfo->pszTable), szTemp ) ;
                  if ( ! CheckFilesExist( szTemp, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( szErrMsg );
-#endif
+                  #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEBUG) << szErrMsg ;
+                    #endif
                  }
                  continue;
               } 
@@ -289,9 +277,9 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
                     sprintf( szTemp, "%s\\%s", pszUserExitDirectory, szContent ) ;
                     SaveValue( &(ptrMarkupInfo->pszUserExit), szTemp ) ;
                     if ( ! CheckFilesExist( szTemp, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( szErrMsg );
-#endif
+                     #ifdef MARKUPTABLE_LOGGING
+                       T5LOG(T5DEBUG) << szErrMsg ;
+                       #endif
                     }
                  }
                  continue;
@@ -309,12 +297,9 @@ OtmMarkupTablePlugin::OtmMarkupTablePlugin()
 
 
   PerformPendingUpdates( pszUserExitPath ) ;
-
-
-#ifdef MARKUPTABLE_LOGGING
-  this->Log.write( "Load completed." );
-  if ( bLogOpen ) this->Log.close();
-#endif
+  #ifdef MARKUPTABLE_LOGGING
+  T5LOG(T5DEBUG) << "Load completed." ;
+  #endif
 }
 
 
@@ -691,15 +676,9 @@ const int OtmMarkupTablePlugin::updateFiles(
      strupr( szTableDirFileName ) ;
      strupr( szUserExitFileName ) ;
      strupr( szUserExitDirFileName ) ;
-
-
 #ifdef MARKUPTABLE_LOGGING
-     if ( !this->Log.isOpen() ) {
-       this->Log.open( PluginLogFile );
-       bLogOpen = TRUE;
-     }      
-     this->Log.writef( "Updating markup table...  %s",szMarkupName ) ;
-#endif
+     T5LOG(T5DEBUG) << "Updating markup table...  " <<szMarkupName  ;
+     #endif
      
      /* ------------------------------------------------------------------- */
      /*  Get markup table object.  If it does not exist, then this is a     */
@@ -713,9 +692,9 @@ const int OtmMarkupTablePlugin::updateFiles(
            markup = new OtmMarkupTable( ptrMarkupInfo, szBasePath );
            MarkupObjectList[iMarkupCount++] = markup ;
            MarkupObjectList[iMarkupCount] = NULL ;
-#ifdef MARKUPTABLE_LOGGING
-           this->Log.writef( "  Adding new....... %d  %s",iMarkupCount-1,szMarkupName);
-#endif
+           #ifdef MARKUPTABLE_LOGGING
+           T5LOG(T5DEBUG) << "  Adding new....... "<< iMarkupCount-1<<"  " <<szMarkupName;
+           #endif
         }
      } 
 
@@ -743,14 +722,13 @@ const int OtmMarkupTablePlugin::updateFiles(
         /*  Log that this markup table is being updated.                       */
         /* ------------------------------------------------------------------- */
 #ifdef MARKUPTABLE_LOGGING
-        if ( pszShortDescription   this->Log.writef( "  SDs:    [%s]",pszShortDescription);
-        if ( pszLongDescription )  this->Log.writef( "  LDs:    [%s]",pszLongDescription);
-        if ( pszVersion )          this->Log.writef( "  Ver:    [%s]",pszVersion);
-        if ( pszTableFileName )    this->Log.writef( "  TBL:    [%s]",pszTableFileName);
-        if ( pszUserExitFileName ) this->Log.writef( "  DLL:    [%s]",pszUserExitFileName);
-        if ( pszFileList )         this->Log.writef( "  List:   [%s]",pszFileList);
-#endif
-
+        if ( pszShortDescription ) T5LOG(T5DEBUG) << "  SDs:    " << pszShortDescription;
+        if ( pszLongDescription )  T5LOG(T5DEBUG) << "  LDs:    " <<pszLongDescription;
+        if ( pszVersion )          T5LOG(T5DEBUG) << "  Ver:    "<<pszVersion;
+        if ( pszTableFileName )    T5LOG(T5DEBUG) << "  TBL:    "<<pszTableFileName;
+        if ( pszUserExitFileName ) T5LOG(T5DEBUG) << "  DLL:    "<<pszUserExitFileName;
+        if ( pszFileList )         T5LOG(T5DEBUG) << "  List:   "<<pszFileList;
+#endif 
         /* ------------------------------------------------------------------- */
         /*  Update any new or more recent markup table files.                  */
         /* ------------------------------------------------------------------- */
@@ -774,9 +752,9 @@ const int OtmMarkupTablePlugin::updateFiles(
                     bUpdateMarkup = TRUE ; 
                  } else {
                     iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "  Copy file failed: %s -> %s",pszTableFileName,szTemp);
-#endif
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEBUG) << "  Copy file failed: "<<pszTableFileName<<" -> " <<szTemp;
+                 #endif
                  }
               }
            }
@@ -800,9 +778,9 @@ const int OtmMarkupTablePlugin::updateFiles(
                  } else {
                     if ( ! bNewMarkup ) {
                        iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( "  Copy file failed: %s -> %s",pszUserExitFileName,szTemp);
-#endif
+                       #ifdef MARKUPTABLE_LOGGING
+                       T5LOG(T5DEBUG) << "  Copy file failed: "<<pszUserExitFileName<<" -> " << szTemp;
+                    #endif
                     }
                  }
               }
@@ -823,9 +801,9 @@ const int OtmMarkupTablePlugin::updateFiles(
               } else {
                  if ( ! bNewMarkup ) {
                     iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "  Copy file failed: %s -> %s",pszFileList,szTemp);
-#endif
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEBUG) << "  Copy file failed: "<<pszFileList<<" -> " << szTemp;
+                 #endif
                  }
               }
            }
@@ -904,8 +882,8 @@ const int OtmMarkupTablePlugin::updateFiles(
                           if ( ! strcmp( szNode, szXml_Name ) ) {
                              if ( ! stricmp( szContent, szMarkupName ) ) {
                                 bUpdateMarkup = TRUE ;
-#ifdef MARKUPTABLE_LOGGING
-                                this->Log.writef( "   Updating:  %s",szContent );
+                                #ifdef MARKUPTABLE_LOGGING
+                                T5LOG(T5DEBUG) << "   Updating:  " <<szContent ;
 #endif
                              }
                           } else
@@ -969,9 +947,9 @@ const int OtmMarkupTablePlugin::updateFiles(
                  fputs( szOutLine, fOutControl ) ;
               }
            } else {
-#ifdef MARKUPTABLE_LOGGING
-              this->Log.write( "  Update failed for control file." );
-#endif
+            #ifdef MARKUPTABLE_LOGGING
+              T5LOG(T5DEBUG) << "  Update failed for control file." ;
+             #endif
               iReturn = UPDATE_MARKUP_ERROR ;
            }
            if ( fInControl ) 
@@ -981,23 +959,17 @@ const int OtmMarkupTablePlugin::updateFiles(
            if ( bFileChanged ) {
               if ( UtlCopy( szNewFile, szOldFile, 1, 0L, TRUE ) ) {
                  iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                 this->Log.write( "Copy failed for control file." );
-#endif
+                 #ifdef MARKUPTABLE_LOGGING
+                 T5LOG(T5DEBUG) << "Copy failed for control file." ;
+                 #endif
               }
            }
            UtlDelete( szNewFile, 0L, FALSE ) ;
-
-#ifdef MARKUPTABLE_LOGGING
-           this->Log.write( "Update completed." );
-#endif
+           #ifdef MARKUPTABLE_LOGGING
+           T5LOG(T5DEBUG) << "Update completed." ;
+           #endif
         }
      } 
-
-#ifdef MARKUPTABLE_LOGGING
-     if ( bLogOpen ) this->Log.close();
-#endif
-
      return( iReturn ) ;
   }
 
@@ -1068,20 +1040,10 @@ bool OtmMarkupTablePlugin::stopPlugin( bool fForce  )
   {
     return( false );
   }
-
-  // TODO: terminate active objects, cleanup, free allocated resources
-
-
-
-  bLogOpen = FALSE ;
 #ifdef MARKUPTABLE_LOGGING
-  if ( !this->Log.isOpen() ) {
-    this->Log.open( PluginLogFile );
-    bLogOpen = TRUE;
-  } /* end */     
-  this->Log.writef( "Stopping OTM markup table plugin..." );
+  // TODO: terminate active objects, cleanup, free allocated resources  
+  T5LOG(T5DEBUG) << "Stopping OTM markup table plugin..." ;
 #endif
-
   if ( pszName )  free(pszName) ;
   if ( pszShortName )  free(pszShortName) ;
   if ( pszShortDescription )  free(pszShortDescription);
@@ -1099,8 +1061,7 @@ bool OtmMarkupTablePlugin::stopPlugin( bool fForce  )
   }
 
 #ifdef MARKUPTABLE_LOGGING
-  this->Log.write( "Stop completed." );
-  if ( bLogOpen ) this->Log.close();
+  T5LOG(T5DEBUG) << "Stop completed." ;
 #endif
 
   // de-register plugin

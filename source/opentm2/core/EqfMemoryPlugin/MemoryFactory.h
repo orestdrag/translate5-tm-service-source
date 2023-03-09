@@ -14,7 +14,6 @@
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmSharedMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
-#include "../utilities/LogWriter.h"
 #include "../utilities/LogWrapper.h"
 
 #include <OTMFUNC.H>               // header file of OpenTM2 API functions
@@ -912,10 +911,6 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
  /*! \brief error text for last error occured
 */
  std::string strLastError;
-
-/*! \brief LogWriter object for logging
-*/
- LogWriter Log;
 
 /*! \brief buffer for memory object names
 */

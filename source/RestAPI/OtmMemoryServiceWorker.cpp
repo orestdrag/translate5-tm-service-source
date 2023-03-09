@@ -74,7 +74,6 @@ OtmMemoryServiceWorker* OtmMemoryServiceWorker::getInstance()
 */
 OtmMemoryServiceWorker::OtmMemoryServiceWorker()
 {
-  hfLog = NULL;
 }
 
 
@@ -2095,16 +2094,6 @@ int OtmMemoryServiceWorker::saveAllTmOnDisk( std::string &strOutputParms ){
   return OK;
 }
 
-/*! \brief Set the log file handle
-\param hfLog log file handle or NULL to stop logging
-*/
-void OtmMemoryServiceWorker::setLogFile
-(
-  FILE *hfLogIn
-)
-{
-  this->hfLog = hfLogIn;
-}
 
 /*! \brief List all available TMs
 \param strOutParms on return filled with the output parameters in JSON format
@@ -3083,7 +3072,7 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, std::vector<u
   if ( hFile == NULL )
   {
     iRC = GetLastError();
-    if ( hfLog ) fprintf( hfLog, "   Error: open of file %s failed with rc=%d\n", pszFile, iRC );
+    T5LOG(T5ERROR) <<"   Error: open of file "<< pszFile << " failed with rc=" << iRC << "\n";
     return( iRC );
   }
 
@@ -3099,7 +3088,7 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, std::vector<u
   {
     CloseFile( &hFile );
     iRC = GetLastError();
-    if ( hfLog ) fprintf( hfLog, "   Error: reading of %ld bytes from file %s failed with rc=%ld\n", dwFileSize, pszFile, iRC );
+    T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< pszFile <<" failed with rc=" << iRC << "\n";
     return( iRC );
   }
 

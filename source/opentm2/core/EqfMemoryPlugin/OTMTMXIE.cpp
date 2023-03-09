@@ -892,7 +892,6 @@ private:
   PTMXELEMENT pStack;
 
   bool            fSawErrors;
-  FILE *hfLog;
   BOOL      fInvalidChars;             // TRUE = current TUV contains invalid characters 
   BOOL      fInlineTags;               // TRUE = current TUV contains inline tagging
 
@@ -1839,9 +1838,7 @@ BOOL FindName( PNAMETABLE pTable, const char *pszName, char *pszValue, int iBufS
 //
 TMXParseHandler::TMXParseHandler()
 {
-  hfLog = NULLHANDLE;
-
-  // allocate buffer areas
+   // allocate buffer areas
   pBuf = (PBUFFERAREAS)malloc( sizeof(BUFFERAREAS) );
   if ( pBuf ) memset( pBuf, 0, sizeof(BUFFERAREAS) );
   fError = FALSE;
@@ -1874,7 +1871,6 @@ TMXParseHandler::TMXParseHandler()
 
 TMXParseHandler::~TMXParseHandler()
 {
-  if ( hfLog )  fclose( hfLog );
   if ( pStack ) free( pStack );
   if ( pBuf )   free( pBuf );
   if ( pTuvArray ) free( pTuvArray );
@@ -3579,7 +3575,6 @@ typedef struct _CONVERTERDATA
   LONG             lSegCounter;                  // valid segment counter
   LONG             lSkippedSegsCounter;          // invalid segment counter
   CHAR             szLogFile[MAX_LONGFILESPEC];  // buffer for log file name
-  FILE             *hfLog;                       // log file handle
 
   //-- data for input memory processing --
   CHAR        szInSpec[MAX_LONGFILESPEC];        // input memory specification of user
@@ -3694,11 +3689,9 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
   }
   else
   {
-    if ( pData->hfLog )
+    //if ( pData->hfLog )
     {
-      fwprintf( pData->hfLog, L"\r\nSegment %ld skipped, reason = %S\r\n", pSegment->lSegNum, pSegment->szReason );
-      fwprintf( pData->hfLog, L"Source=%s\r\n", pSegment->szSource );
-
+      T5LOG(T5INFO) <<"Segment "<< pSegment->lSegNum <<" skipped, reason = " << pSegment->szReason   <<"\nSource=" << pSegment->szSource;
     } /* endif */
     pData->lSkippedSegsCounter++;
   } /* endif */
@@ -3813,11 +3806,11 @@ USHORT TMXTOEXP
     {
       Utlstrccpy( pData->szLogFile, pszInMem, '.' );
       strcat( pData->szLogFile, ".LOG" );
-      pData->hfLog = fopen( pData->szLogFile, "wb" );
-      if ( pData->hfLog )
+      //pData->hfLog = fopen( pData->szLogFile, "wb" );
+      //if ( pData->hfLog )
       {
-        fwrite( "\xFF\xFE", 2, 1, pData->hfLog );
-        fwprintf( pData->hfLog, L"*** Skipped segments log ****\r\n\r\n" );
+        //fwrite( "\xFF\xFE", 2, 1, pData->hfLog );
+        T5LOG(T5INFO) <<"*** Skipped segments log ****\r\n\r\n" ;
       } /* endif */
     } /* endif */
   } /* endif */
@@ -3838,9 +3831,9 @@ USHORT TMXTOEXP
   else if ( lHandle && (pszErrorMsgBuffer != NULL) )
   {
     EXTMEMIMPORTGETLASTERROR( lHandle, pszErrorMsgBuffer, iErrorMsgBufferSize );
-    if ( pData->hfLog )
+    //if ( pData->hfLog )
     {
-      fprintf( pData->hfLog, "Error %u while converting memory from TMX to EXP, the error msg is \"%s\"\n", usRC, pszErrorMsgBuffer );
+      T5LOG(T5INFO) <<"Error "<< usRC <<" while converting memory from TMX to EXP, the error msg is \" << pszErrorMsgBuffer ";
     } /* endif */
 
   } /* endif */
@@ -3856,10 +3849,6 @@ USHORT TMXTOEXP
     {
       WriteMemFooter( pData );
       fclose( pData->hfOut );
-    } /* endif */
-    if ( pData->hfLog )
-    {
-      fclose( pData->hfLog );
     } /* endif */
     if ( pData->MemInfo.pszMarkupList != NULL  ) UtlAlloc( (PVOID *)&(pData->MemInfo.pszMarkupList), 0, 0, NOMSG );
     UtlAlloc( (PVOID *)&pData, 0, 0, NOMSG );
@@ -3877,9 +3866,8 @@ USHORT EXPTOTMX
   LONG             lOutMode,            // output mode UTF16/UTF8
   PLONG            plSegs,              // number of written (=valid) segments
   PSZ              pszMsgBuffer,        // buffer for error messages
-  PLONG            plInvalidSegs,       // number of skipped segments
-  FILE             *hfLog               // handle of log file or NULL if no logging of invalid segments is to be done
-)
+  PLONG            plInvalidSegs       // number of skipped segments
+  )
 {
   USHORT           usRC = 0;           // function return code
   LONG             lHandle = 0;        // import handle
@@ -3901,7 +3889,6 @@ USHORT EXPTOTMX
     // prepare output memory
   if ( usRC == NO_ERROR) 
   {
-    pData->hfLog = hfLog;
     pData->MemInfo.fUTF16 = (lOutMode & TMX_UTF16_OPT) != 0;
     pData->MemInfo.fNoCRLF = (lOutMode & TMX_NOCRLF_OPT) != 0;
     WideCharToMultiByte( CP_ACP, 0, pData->szDescription, -1, pData->MemInfo.szDescription, sizeof(pData->MemInfo.szDescription), NULL, NULL );
@@ -4561,12 +4548,10 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
     {
       sprintf( pData->szErrorText, "The segment beginning in line %ld is invalid, the reason is \"%s\".", iStartLine, pszError );
 
-      if ( pData->hfLog != NULL )
+      //if ( pData->hfLog != NULL )
       {
-        fwprintf( pData->hfLog, L"The segment beginning in line %ld is invalid, the reason is \"%S\".\r\n", iStartLine, pszError );
-        fwprintf( pData->hfLog, L"Segment data:\r\n" );
-        fwrite( pData->szSegBuffer, sizeof(CHAR_W), pData->iSegBufferUsed, pData->hfLog );
-        fwprintf( pData->hfLog, L"\r\n" );
+        T5LOG(T5INFO) <<"The segment beginning in line "<< iStartLine <<" is invalid, the reason is \""<< pszError 
+            <<"\".\nSegment data:" <<pData->szSegBuffer;
       } /* endif */
     }
     else

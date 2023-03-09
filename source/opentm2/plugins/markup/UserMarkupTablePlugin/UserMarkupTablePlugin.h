@@ -184,8 +184,6 @@ private:
 
   // base path of the plugin DLL
   char szBasePath[1024];
-
-  LogWriter Log;
 };
 
 

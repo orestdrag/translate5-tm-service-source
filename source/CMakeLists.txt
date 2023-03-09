@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.29")
+SET(APP_VERSION  "0.4.30")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -77,7 +77,7 @@ set(T5MEMORY_Source_Files
 
 #Util_Source_Files
     "${CORE_DIR}/utilities/LanguageFactory.cpp"
-    "${CORE_DIR}/utilities/LogWriter.cpp"
+    #"${CORE_DIR}/utilities/LogWriter.cpp"
     "${CORE_DIR}/utilities/OtmProposal.cpp"
     "${CORE_DIR}/utilities/UtlAlloc.cpp"
     "${CORE_DIR}/utilities/UtlMATVal.cpp"

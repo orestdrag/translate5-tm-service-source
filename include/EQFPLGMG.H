@@ -89,7 +89,6 @@ typedef struct _DOWNLOADPARAM
 static CPlgMgXmlParser * gplginParse;
 static COtmHttps * gOtmHttps = NULL;
 static HWND ghwndDlg;
-static LogWriter glogPlgMgr;
 static BOOL gbLogOpened;
 static char gstrConfigPath[MAX_PATH];
 static HANDLE ghChkVerThread;

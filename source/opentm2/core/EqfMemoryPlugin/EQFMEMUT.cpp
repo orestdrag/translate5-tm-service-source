@@ -827,7 +827,7 @@ typedef struct _CONVERSIONAREA
 } CONVERSIONAREA, *PCONVERSIONAREA;
 
 // convert single memory file
-USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
+USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile  )
 {
   PCONVERSIONAREA pData = NULL;
   SHORT sRc = 0;
@@ -897,7 +897,7 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile, FILE *hfLog  )
 
       if ( UtlFileExist( pData->szBackupName ) )
       {
-        if ( hfLog ) printf( "backup file %s exist already, ", pData->szBackupName );
+        T5LOG(T5INFO) << "backup file " << pData->szBackupName <<"exist already, ";
         sRc = BTREE_ILLEGAL_FILE;
       }
       else
@@ -924,23 +924,9 @@ USHORT MemConvertMem( PSZ pszFullMemName )
   PPROP_NTM      pProp = NULL;
   USHORT         usBytesRead = 0;
   USHORT         usRC = 0;
-  FILE           *hfLog = NULL;
 
-  // open log file
-  {
-    CHAR szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    UtlMkMultDir( szLogFile, FALSE );
-    strcat( szLogFile, "\\MEMCONV.LOG" );
-
-    hfLog = fopen( szLogFile, "a" );
-    if ( hfLog )
-    {
-      fprintf( hfLog, "=================================================================\n" );
-      fprintf( hfLog, "converting memory file %s...\n", pszFullMemName  );
-    } /* endif */
-  }
+  T5LOG(T5INFO) << "=================================================================\n" << "converting memory file " << pszFullMemName  ;
+   
 
   // create backup directory
   UtlMakeEQFPath( szBackupName, NULC, SYSTEM_PATH, NULL );
@@ -963,23 +949,23 @@ USHORT MemConvertMem( PSZ pszFullMemName )
   {
     if ( pProp->stTMSignature.bMajorVersion == TM_MAJ_VERSION_6 )
     {
-      if ( hfLog )
+      //if ( hfLog )
       {
-        fprintf( hfLog, "   converting memory base file %s... ", pszFullMemName );
+        T5LOG(T5INFO) << "   converting memory base file " << pszFullMemName ;
       } /* endif */
-      usRC = MemConvertMemFile( pszFullMemName, TRUE, hfLog );
+      usRC = MemConvertMemFile( pszFullMemName, TRUE );
       if ( usRC )
       {
-        if ( hfLog )
+        //if ( hfLog )
         {
-          fprintf( hfLog, "   ... conversion failed with RC=%u\n", usRC );
+          T5LOG(T5INFO) << "   ... conversion failed with RC=" << usRC ;
         } /* endif */
       }
       else
       {
-        if ( hfLog )
+        //if ( hfLog )
         {
-          fprintf( hfLog, "   ... done\n" );
+          T5LOG(T5INFO) << "   ... done" ;
         } /* endif */
       } /* endif */
 
@@ -988,23 +974,23 @@ USHORT MemConvertMem( PSZ pszFullMemName )
         Utlstrccpy ( szIndexName, pszFullMemName, DOT );
         strcat( szIndexName, EXT_OF_TMINDEX );
 
-        if ( hfLog )
+        //if ( hfLog )
         {
-          fprintf( hfLog, "   converting memory index file %s... ", szIndexName );
+          T5LOG(T5INFO) << "   converting memory index file " << szIndexName ;
         } /* endif */
-        usRC = MemConvertMemFile( szIndexName, FALSE, hfLog );
+        usRC = MemConvertMemFile( szIndexName, FALSE );
         if ( usRC )
         {
-          if ( hfLog )
+          //if ( hfLog )
           {
-            fprintf( hfLog, "   ... conversion failed with RC=%u\n", usRC );
+            T5LOG(T5INFO) << "   ... conversion failed with RC=" <<  usRC ;
           } /* endif */
         }
         else
         {
-          if ( hfLog )
+          //if ( hfLog )
           {
-            fprintf( hfLog, "   ... done\n" );
+            T5LOG(T5INFO) << "   ... done";
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1015,18 +1001,19 @@ USHORT MemConvertMem( PSZ pszFullMemName )
 
         if ( UtlFileExist(szBackupName) )
         {
-          if ( hfLog )
+          //if ( hfLog )
           {
-            fprintf( hfLog, "backup of property file %s exists already as %s, no backup performed\n", szPropName, szBackupName );
+            T5LOG(T5INFO) << "backup of property file "<<szPropName<<" exists already as "<< 
+                szBackupName << ", no backup performed";
           } /* endif */
         }
         else
         {
           UtlMove( szPropName, szBackupName, 0L, FALSE );
           UtlWriteFile( szPropName, usBytesRead, pProp, FALSE );
-          if ( hfLog )
+          //if ( hfLog )
           {
-            fprintf( hfLog, "updated property file, conversion complete\n" );
+            T5LOG(T5INFO) << "updated property file, conversion complete" ;
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1035,15 +1022,13 @@ USHORT MemConvertMem( PSZ pszFullMemName )
     else if ( pProp->stTMSignature.bMajorVersion == TM_MAJ_VERSION_7 )
     {
       usRC = MEM_CONVERTMEM_ALREADYNEWFORMAT;
-      if ( hfLog )
+      //if ( hfLog )
       {
-        fprintf( hfLog, "   no conversion required, Properties indicate Version 7 memory\n"  );
+        T5LOG(T5INFO) << "   no conversion required, Properties indicate Version 7 memory"  ;
       } /* endif */
     } /* endif */
     UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
   } /* endif */
-
-  if ( hfLog ) fclose (hfLog );
 
   return( usRC  );
 }

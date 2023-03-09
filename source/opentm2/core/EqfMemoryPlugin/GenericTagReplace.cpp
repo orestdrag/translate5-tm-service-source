@@ -57,9 +57,6 @@ NTMFuzzyReplace
   PSZ_W     pTrans,                    // translation string
   PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
   PREPLLIST pReplaceList               // list of tokens to be replaced
-#ifdef INLINE_TAG_REPL_LOGGING
-  , FILE *hfLog
-#endif
 );
 
 #ifdef ACTIVATE_NTMGenericDelete 
@@ -75,16 +72,7 @@ NTMGenericDelete
 );
 #endif
 
-#ifdef INLINE_TAG_REPL_LOGGING
-static BOOL NTMCheckTagPairs
-(
-  PTMX_SUBSTPROP pSubstProp,
-  PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
-  PREPLLIST pReplaceList,               // list of tokens to be replaced
-  BOOL      fRespectLFs,
-  FILE      *hfLog
-);
-#else
+
 static BOOL NTMCheckTagPairs
 (
   PTMX_SUBSTPROP pSubstProp,
@@ -92,7 +80,7 @@ static BOOL NTMCheckTagPairs
   PREPLLIST pReplaceList,              // list of tokens to be replaced
   BOOL      fRespectLFs
 );
-#endif
+
 
 static PTMX_REPLTAGPAIR
 NTMFindTagPair
@@ -129,7 +117,57 @@ NTMSplitAndAddTokens ( PTMX_SUBSTPROP,
 
 BOOL NTMAlignTags( PFUZZYTOK pTokSource, PFUZZYTOK pTokTarget, PREPLLIST *ppReplaceList );
 
+// helper function for token logging
+#ifdef INLINE_TAG_REPL_LOGGING
 
+void NTMListToken
+( 
+  PSZ          pszToken,
+  PFUZZYTOK    pToken 
+)
+{
+  std::string type;
+  int len = pToken->usStop - pToken->usStart + 1;
+  CHAR_W chTemp = pToken->pData[len];
+  pToken->pData[len] = 0;
+  if ( pToken->sType == -1 )
+  {
+    type = "Text";
+  }
+  else if ( pToken->sType == -7 )
+  {
+    type = "Tag";
+  }
+  else 
+  {
+    type = std::to_string( pToken->sType );    
+  } /* endif */
+  T5LOG(T5INFO) << pszToken <<" : Hash="<<pToken->ulHash<<"  Length="<< len<<"  Type="<<type<<" Connected="<<pToken->fConnected<<" Data=\"" << pToken->pData << "\"";
+  pToken->pData[len] = chTemp;
+} /* end of function NTMListToken */
+
+void NTMListTokens
+(  
+  PSZ          pszName,
+  PFUZZYTOK    pToken 
+)
+{
+  int i = 1;
+  T5LOG(T5INFO) << "\r\n"<<pszName <<" token list\r\n"; 
+  while ( pToken->ulHash )
+  {
+    std::string tokenName = "Token " + i;
+    NTMListToken( (char*) tokenName.c_str() , pToken ); 
+    pToken++; i++;
+  } /*endwhile */
+} /* end of function NTMListTokens */
+
+#endif
+
+
+#ifdef INLINE_TAG_REPL_LOGGING
+void NTMMarkCRLF( PSZ_W pszSource, PSZ_W pszTarget );
+#endif
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -179,7 +217,6 @@ BOOL     NTMTagSubst
   SHORT     sTgtLangID = 0;
   PSZ_W     pInBuf;
 #ifdef INLINE_TAG_REPL_LOGGING
-  FILE      *hfLog = NULL;
   static CHAR_W szSegBuf[4096];
 #endif
 
@@ -191,24 +228,18 @@ BOOL     NTMTagSubst
   fOK = ( pInBuf && pTokBuf ) ;
 
 #ifdef INLINE_TAG_REPL_LOGGING
+  if ( T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) )
   {
-    CHAR szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-    strcat( szLogFile, "\\INLINETAGREPL.LOG" );
-    hfLog = fopen( szLogFile, "a" );
-    if ( hfLog )
-    {
-      fprintf( hfLog, "*** NTMTagSubst ***\n" );
-      NTMMarkCRLF( pSubstProp->szSource, szSegBuf );
-      fprintf( hfLog, "<Segment>%S</Segment>\n", szSegBuf );
-      NTMMarkCRLF( pSubstProp->szPropSource, szSegBuf );
-      fprintf( hfLog, "<PropSource>%S</PropSource>\n", szSegBuf );
-      NTMMarkCRLF( pSubstProp->szPropTarget, szSegBuf );
-      fprintf( hfLog, "<PropTarget>%S</PropTarget>\n", szSegBuf );
-    } /* endif */
-  }
-#endif
+    T5LOG(T5DEBUG) << "*** NTMTagSubst ***\n" ;
+    NTMMarkCRLF( pSubstProp->szSource, szSegBuf );
+    T5LOG(T5DEBUG) << "<Segment>"<< szSegBuf << "</Segment>\n";
+    NTMMarkCRLF( pSubstProp->szPropSource, szSegBuf );
+    T5LOG(T5DEBUG) << "<PropSource>"<<szSegBuf<<"</PropSource>\n";
+    NTMMarkCRLF( pSubstProp->szPropTarget, szSegBuf );
+    T5LOG(T5DEBUG) << "<PropTarget>"<<szSegBuf<<"</PropTarget>\n";
+  } /* endif */
+  #endif
+  
 
   /******************************************************************/
   /* prepare token structure                                        */
@@ -230,9 +261,11 @@ BOOL     NTMTagSubst
                             (PFUZZYTOK *)&pSubstProp->pTokSource,
                             &pSubstProp->usTokenSource,
                             pSubstProp->pTagsSource, sSrcLangID, ulSrcOemCP );
-#ifdef INLINE_TAG_REPL_LOGGING
-    if ( fOK ) NTMListTokens( hfLog, "Source", (PFUZZYTOK)pSubstProp->pTokSource );
-#endif
+  #ifdef INLINE_TAG_REPL_LOGGING
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
+    if ( fOK ) NTMListTokens(  "Source", (PFUZZYTOK)pSubstProp->pTokSource );
+  #endif
+
   } /* endif */
 
   if ( fOK )
@@ -242,7 +275,7 @@ BOOL     NTMTagSubst
                             &pSubstProp->usTokenPropSource,
                             pSubstProp->pTagsPropSource, sSrcLangID, ulSrcOemCP );
 #ifdef INLINE_TAG_REPL_LOGGING
-    if ( fOK ) NTMListTokens( hfLog, "PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
+    if ( fOK ) NTMListTokens( "PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
 #endif
   } /* endif */
 
@@ -253,7 +286,7 @@ BOOL     NTMTagSubst
                             &pSubstProp->usTokenPropTarget,
                             pSubstProp->pTagsPropTarget, sTgtLangID, ulTgtOemCP );
 #ifdef INLINE_TAG_REPL_LOGGING
-    if ( fOK ) NTMListTokens( hfLog, "PropTarget", (PFUZZYTOK)pSubstProp->pTokPropTarget );
+    if ( fOK ) NTMListTokens( "PropTarget", (PFUZZYTOK)pSubstProp->pTokPropTarget );
 #endif
   } /* endif */
 
@@ -306,8 +339,8 @@ BOOL     NTMTagSubst
       pTempList++;
     } /* endfor */
   #ifdef INLINE_TAG_REPL_LOGGING
-      NTMListTokens( hfLog, "Connected PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
-      NTMListTokens( hfLog, "Connected PropTarget", (PFUZZYTOK)pSubstProp->pTokPropTarget );
+      NTMListTokens( "Connected PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
+      NTMListTokens( "Connected PropTarget", (PFUZZYTOK)pSubstProp->pTokPropTarget );
   #endif
 
     /******************************************************************/
@@ -356,9 +389,9 @@ BOOL     NTMTagSubst
       pTempList++;
     } /* endfor */
   #ifdef INLINE_TAG_REPL_LOGGING
-      if ( hfLog ) fprintf( hfLog, "after FuzzyLCSReplList on source and proposal source\n" );
-      NTMListTokens( hfLog, "Connected Source", (PFUZZYTOK)pSubstProp->pTokSource );
-      NTMListTokens( hfLog, "Connected PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
+      T5LOG(T5DEBUG) << "after FuzzyLCSReplList on source and proposal source" ;
+      NTMListTokens( "Connected Source", (PFUZZYTOK)pSubstProp->pTokSource );
+      NTMListTokens(  "Connected PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
   #endif
 
   } /* endif */
@@ -368,9 +401,7 @@ BOOL     NTMTagSubst
   /********************************************************************/
   if ( fOK && pReplaceSourceList )
   {
-#ifdef INLINE_TAG_REPL_LOGGING
-    if ( hfLog ) fprintf( hfLog, "replace source list exists\n" );
-#endif
+    T5LOG(T5DEBUG) << "replace source list exists\n" ;
 
     /*************************************************************/
     /* insert a dummy token at the beginning of the pReplaceSourcList */
@@ -385,14 +416,9 @@ BOOL     NTMTagSubst
                                   pSubstProp->szPropSource,
                                   pSubstProp->szPropTarget,
                                   pReplaceSourceList, pReplaceList
-#ifdef INLINE_TAG_REPL_LOGGING
-                                  , hfLog
-#endif
                                   );
 
-#ifdef INLINE_TAG_REPL_LOGGING
-    if ( hfLog ) fprintf( hfLog, "After NTMFuzzyReplace: fReplaced = %s\n", ( fReplaced ) ? "True" : "False" );
-#endif
+     T5LOG(T5DEBUG) << "After NTMFuzzyReplace: fReplaced = " <<  fReplaced  ;
 
 #ifdef ACTIVATE_NTMGenericDelete 
   fDelete    = NTMGenericDelete ( pSubstProp, pSubstProp->szSource,
@@ -406,36 +432,32 @@ BOOL     NTMTagSubst
       /****************************************************************/
       /* check whether all tags can be replaced                       */
       /****************************************************************/
-#ifdef INLINE_TAG_REPL_LOGGING
-      if (NTMCheckTagPairs(pSubstProp, pReplaceSourceList, pReplaceList, fRespectLFs, hfLog ))
-#else
+
       if (NTMCheckTagPairs(pSubstProp, pReplaceSourceList, pReplaceList, fRespectLFs ))
-#endif
       {
         /**************************************************************/
         /* replace all tags possible                                  */
         /**************************************************************/
         fReplaced = NTMReplaceTags(pSubstProp, fRespectLFs );
-#ifdef INLINE_TAG_REPL_LOGGING
-        if ( hfLog ) 
+        #ifdef INLINE_TAG_REPL_LOGGING
+        if ( T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) 
         {
-          fprintf( hfLog, "After NTMReplaceTags: fReplaced = %s\n", ( fReplaced ) ? "True" : "False" );
+          T5LOG(T5DEBUG) << "After NTMReplaceTags: fReplaced = " << ( ( fReplaced ) ? "True" : "False" );
           if ( fReplaced )
           {
             NTMMarkCRLF( pSubstProp->szPropSource, szSegBuf );
-            fprintf( hfLog, "<New PropSource>%S</PropSource>\n", szSegBuf );
+            T5LOG(T5DEBUG) << "<New PropSource>"<<szSegBuf<<"</PropSource>\n";
             NTMMarkCRLF( pSubstProp->szPropTarget, szSegBuf );
-            fprintf( hfLog, "<New PropTarget>%S</PropTarget>\n", szSegBuf );
+            T5LOG(T5DEBUG) << "<New PropTarget>"<<szSegBuf<<"</PropTarget>\n";
           } /* endif */
         }
-#endif
+        #endif
       }
       else
       {
         fReplaced = FALSE;
-#ifdef INLINE_TAG_REPL_LOGGING
-        if ( hfLog ) fprintf( hfLog, "After NTMCheckTagPairs: fReplaced = %s\n", ( fReplaced ) ? "True" : "False" );
-#endif
+        T5LOG(T5DEBUG) << "After NTMCheckTagPairs: fReplaced = " <<  fReplaced  ;
+
       } /* endif */
     } /* endif */
   } /* endif */
@@ -642,11 +664,6 @@ BOOL     NTMTagSubst
     UtlAlloc((PVOID *) &pReplaceList, 0L, 0L, NOMSG);
   if (pReplaceSourceList )
     UtlAlloc((PVOID *) &pReplaceSourceList, 0L, 0L, NOMSG);
-
-#ifdef INLINE_TAG_REPL_LOGGING
-  if ( hfLog ) fclose( hfLog );
-#endif
-
   return (fReplaced);
 
 }
@@ -1145,9 +1162,6 @@ NTMFuzzyReplace
   PSZ_W     pTrans,                    // translation string
   PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
   PREPLLIST pReplaceList               // list of tokens to be replaced
-#ifdef INLINE_TAG_REPL_LOGGING
-  , FILE *hfLog
-#endif
 )
 {
   PFUZZYTOK  pSrcTok;                  // source token
@@ -1166,10 +1180,7 @@ NTMFuzzyReplace
   pProp;
   ulTgtLen = UTF16strlenCHAR( pTrans );
 
-#ifdef INLINE_TAG_REPL_LOGGING
-      if ( hfLog ) fprintf( hfLog, "NTMFuzzyReplace\n" );
-#endif
-
+  T5LOG(T5DEBUG) << "NTMFuzzyReplace\n" ;
   pSubstProp->pTagPairs = (PTMX_REPLTAGPAIR) (pSubstProp->chBuffer);
   /********************************************************************/
   /* replace found tokens in translation with original ones....       */
@@ -1180,12 +1191,9 @@ NTMFuzzyReplace
     pPropTok   = pReplPropSrc->pSrcTok;
 
 #ifdef INLINE_TAG_REPL_LOGGING
-      if ( hfLog )
-      {
-        fprintf( hfLog, "Testing token\n" );
-      } /* endif */
-      NTMListToken( hfLog, "SourceToken", pReplPropSrc->pSrcTok ); 
-      NTMListToken( hfLog, "TargetToken", pReplPropSrc->pTgtTok ); 
+      T5LOG(T5DEBUG) << "Testing token";
+      NTMListToken( "SourceToken", pReplPropSrc->pSrcTok ); 
+      NTMListToken( "TargetToken", pReplPropSrc->pTgtTok ); 
 #endif
 
     /******************************************************************/
@@ -1487,12 +1495,7 @@ NTMCheckTagPairs
   PTMX_SUBSTPROP pSubstProp,
   PREPLLIST pReplaceSourceList,         // list of same tokens in source and prop
   PREPLLIST pReplaceList,              // toklist to be replaced in prop src+tgt
-#ifdef INLINE_TAG_REPL_LOGGING
-  BOOL      fRespectLFs,
-  FILE      *hfLog                     // log file handle
-#else
   BOOL      fRespectLFs
-#endif
 )
 {
   BOOL                fAllReplace = TRUE;
@@ -1541,27 +1544,23 @@ NTMCheckTagPairs
   } /* endwhile */
 
 #ifdef INLINE_TAG_REPL_LOGGING
-  if ( hfLog )
-  { 
     PREPLLIST           pRepl = pReplaceSourceList;
-    fprintf( hfLog, "Replace source list\n" );
+    T5LOG(T5DEBUG) << "Replace source list" ;
     while ( pRepl->pSrcTok)
     {
-      NTMListToken( hfLog, "SourceToken", pRepl->pSrcTok );
-      NTMListToken( hfLog, "TargetToken", pRepl->pTgtTok );
+      NTMListToken(  "SourceToken", pRepl->pSrcTok );
+      NTMListToken(  "TargetToken", pRepl->pTgtTok );
       pRepl++;
     } /*endwhile */
 
-    fprintf( hfLog, "Replace list\n" );
+    T5LOG(T5DEBUG) << "Replace list" ;
     pRepl = pReplaceList;
     while ( pRepl->pSrcTok)
     {
-      NTMListToken( hfLog, "SourceToken", pRepl->pSrcTok );
-      NTMListToken( hfLog, "TargetToken", pRepl->pTgtTok );
+      NTMListToken(  "SourceToken", pRepl->pSrcTok );
+      NTMListToken(  "TargetToken", pRepl->pTgtTok );
       pRepl++;
     } /*endwhile */
-
-  } /* endif */
 #endif
 
   /********************************************************************/
@@ -1587,11 +1586,9 @@ NTMCheckTagPairs
         {
           fAllReplace = FALSE;
 #ifdef INLINE_TAG_REPL_LOGGING
-          if ( hfLog )
-          { 
-            fprintf( hfLog, "No tag pair found for\n" );
-            NTMListToken( hfLog, "Temp token", pTempTok );
-          } /* endif */
+          
+            T5LOG(T5DEBUG) << "No tag pair found for" ;
+            NTMListToken( "Temp token", pTempTok );
 #endif
         } /* endif */
       }
@@ -1630,11 +1627,9 @@ NTMCheckTagPairs
         if (pCurTagPair == NULL )
         {
 #ifdef INLINE_TAG_REPL_LOGGING
-          if ( hfLog )
-          { 
-            fprintf( hfLog, "No tag pair found in target\n" );
-            NTMListToken( hfLog, "Temp token", pTempTok );
-          } /* endif */
+          
+            T5LOG(T5DEBUG) << "No tag pair found in target\n" ;
+            NTMListToken( "Temp token", pTempTok );
 #endif
           fAllReplace = FALSE;
         } /* endif */

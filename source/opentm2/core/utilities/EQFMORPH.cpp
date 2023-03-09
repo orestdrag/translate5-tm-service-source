@@ -24,7 +24,6 @@
 
 #include "../morph/SpellFactory.h"
 #include "../morph/MorphFactory.h"
-//#include "../utilities/LogWriter.h"
 #include "../utilities/LogWrapper.h"
 #include "../utilities/EncodingHelper.h"
 #include "../utilities/ThreadingWrapper.h"

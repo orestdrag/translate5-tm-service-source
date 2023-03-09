@@ -14,7 +14,6 @@
 #include "../pluginmanager/PluginManager.h"
 #include "OtmMorphPlugin.h"
 #include "OtmMorph.h"
-#include "../utilities/LogWriter.h"
 
 /*! \brief   This class provides factory methods for morphology objects 
 */
@@ -89,11 +88,6 @@ public:
 
 	/*! \brief the list of morphology plug-in	 */
 	vector<OtmMorphPlugin *> *pvPluginList;
-
-	/*! \brief LogWriter object for logging
-	*/
-	LogWriter Log;
-
 };
 
 #endif

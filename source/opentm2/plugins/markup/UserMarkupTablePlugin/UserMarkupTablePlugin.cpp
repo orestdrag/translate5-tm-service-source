@@ -14,17 +14,13 @@
 
 */
 
-#ifdef _DEBUG
-  // activate define to enable markup table plugin logging
-  //#define MARKUPTABLE_LOGGING
-#endif
 
 
 #include "windows.h"
 #include "core\pluginmanager\PluginManager.h"
 #include "core\pluginmanager\OtmMarkupPlugin.h"
 #include "UserMarkupTablePlugin.h"
-
+#include "core/utilities/LogWrapper.h"
 #include "eqftag.h"             // tag table functions
 
 // required to retrieve the DLL path
@@ -158,15 +154,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
   if ( pszPathEnd != NULL ) {
       *pszPathEnd = '\0';
   } 
-
 #ifdef MARKUPTABLE_LOGGING
-  if ( !this->Log.isOpen() ) {
-    this->Log.open( PluginLogFile );
-    bLogOpen = TRUE;
-  } /* end */     
-  this->Log.writef( "Loading User markup table plugin..." );
+  T5LOG(T5DEVELOP) <<  "Loading User markup table plugin..." ;
 #endif
-
   strcpy( szTemp, szBasePath ) ;
   strcat( szTemp, "\\" ) ;
   strcat( szTemp, PluginControlFile ) ;
@@ -262,9 +252,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                  SaveValue( &pszTablePath, szTemp ) ;
                  if ( ! UtlDirExist( pszTablePath ) ) {
                     UtlMkDir( pszTablePath, 0, FALSE ) ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "Create:  %s",pszTablePath );
-#endif
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEVELOP) << "Create:  " << pszTablePath ;
+                  #endif
                  }
                  continue;
               } 
@@ -276,8 +266,8 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                  SaveValue( &pszUserExitPath, szTemp ) ;
                  if ( ! UtlDirExist( pszUserExitPath ) ) {
                     UtlMkDir( pszUserExitPath, 0, FALSE ) ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "Create:  %s",pszUserExitPath );
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEVELOP) <<  "Create:  " << pszUserExitPath ;
 #endif
                  }
                  continue;
@@ -303,10 +293,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                  if ( stricmp( szContent, szXml_NONE ) ) {
                     SaveValue( &(ptrMarkupInfo->pszFileList), szContent ) ;
                     if ( ! CheckFilesExist( szContent, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( szErrMsg );
-#endif
-                    }
+                     #ifdef MARKUPTABLE_LOGGING
+                        T5LOG(T5DEVELOP) <<  szErrMsg ;
+#endif                    }
                  }
               }
               if ( ! strcmp( szNode, szXml_LongDescription ) ) {
@@ -315,9 +304,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
               } 
               if ( ! strcmp( szNode, szXml_Name ) ) {
                  SaveValue( &(ptrMarkupInfo->pszName), szContent ) ;
-#ifdef MARKUPTABLE_LOGGING
-                 this->Log.writef( "   Loading:  %s",szContent );
-#endif
+                 #ifdef MARKUPTABLE_LOGGING
+                 T5LOG(T5DEVELOP) <<  "   Loading:  " << szContent ;
+                 #endif
                  continue;
               } 
               if ( ! strcmp( szNode, szXml_ShortDescription ) ) {
@@ -328,9 +317,10 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                  sprintf( szTemp, "%s\\%s", pszTableDirectory, szContent ) ;
                  SaveValue( &(ptrMarkupInfo->pszTable), szTemp ) ;
                  if ( ! CheckFilesExist( szTemp, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( szErrMsg );
-#endif
+                    
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEVELOP) << szErrMsg ;
+                    #endif
                  }
                  continue;
               } 
@@ -339,9 +329,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                     sprintf( szTemp, "%s\\%s", pszUserExitDirectory, szContent ) ;
                     SaveValue( &(ptrMarkupInfo->pszUserExit), szTemp ) ;
                     if ( ! CheckFilesExist( szTemp, szBasePath, szErrMsg ) ) {
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( szErrMsg );
-#endif
+                       #ifdef MARKUPTABLE_LOGGING
+                       T5LOG(T5DEVELOP) <<  szErrMsg ;
+                       #endif
                     }
                  }
                  continue;
@@ -357,13 +347,9 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
   if ( fControl ) 
      fclose( fControl ) ;
 
-
   PerformPendingUpdates( pszUserExitPath ) ;
-
-
 #ifdef MARKUPTABLE_LOGGING
-  this->Log.write( "Load completed." );
-  if ( bLogOpen ) this->Log.close();
+  T5LOG(T5DEVELOP) <<  "Load completed." ;
 #endif
 }
 
@@ -744,13 +730,8 @@ const int UserMarkupTablePlugin::updateFiles(
      ConvertAnsi2UTF8( szTableDirFileName, NULL, sizeof(szTableDirFileName) ) ;
      ConvertAnsi2UTF8( szUserExitDirFileName, NULL, sizeof(szUserExitDirFileName) ) ;
 
-
 #ifdef MARKUPTABLE_LOGGING
-     if ( !this->Log.isOpen() ) {
-       this->Log.open( PluginLogFile );
-       bLogOpen = TRUE;
-     }      
-     this->Log.writef( "Updating markup table...  %s",szMarkupName ) ;
+     T5LOG(T5DEVELOP) <<  "Updating markup table...  " <<szMarkupName ;
 #endif
      
      /* ------------------------------------------------------------------- */
@@ -765,9 +746,9 @@ const int UserMarkupTablePlugin::updateFiles(
            markup = new UserMarkupTable( ptrMarkupInfo, szBasePath );
            MarkupObjectList[iMarkupCount++] = markup ;
            MarkupObjectList[iMarkupCount] = NULL ;
-#ifdef MARKUPTABLE_LOGGING
-           this->Log.writef( "  Adding new....... %d  %s",iMarkupCount-1,szMarkupName);
-#endif
+           #ifdef MARKUPTABLE_LOGGING
+           T5LOG(T5DEBUG) << "  Adding new....... "<< iMarkupCount-1 <<"   " << szMarkupName;
+           #endif
         }
      } 
 
@@ -794,15 +775,14 @@ const int UserMarkupTablePlugin::updateFiles(
         /* ------------------------------------------------------------------- */
         /*  Log that this markup table is being updated.                       */
         /* ------------------------------------------------------------------- */
-#ifdef MARKUPTABLE_LOGGING
-        if ( pszShortDescription   this->Log.writef( "  SDs:    [%s]",pszShortDescription);
-        if ( pszLongDescription )  this->Log.writef( "  LDs:    [%s]",pszLongDescription);
-        if ( pszVersion )          this->Log.writef( "  Ver:    [%s]",pszVersion);
-        if ( pszTableFileName )    this->Log.writef( "  TBL:    [%s]",pszTableFileName);
-        if ( pszUserExitFileName ) this->Log.writef( "  DLL:    [%s]",pszUserExitFileName);
-        if ( pszFileList )         this->Log.writef( "  List:   [%s]",pszFileList);
+        #ifdef MARKUPTABLE_LOGGING
+        if ( pszShortDescription   T5LOG(T5DEBUG) << "  SDs:    " <<pszShortDescription;
+        if ( pszLongDescription )  T5LOG(T5DEBUG) << "  LDs:    " <<pszLongDescription;
+        if ( pszVersion )          T5LOG(T5DEBUG) << "  Ver:    " <<pszVersion;
+        if ( pszTableFileName )    T5LOG(T5DEBUG) << "  TBL:    " <<pszTableFileName;
+        if ( pszUserExitFileName ) T5LOG(T5DEBUG) << "  DLL:    " <<pszUserExitFileName;
+        if ( pszFileList )         T5LOG(T5DEBUG) << "  List:   " <<pszFileList;
 #endif
-
         /* ------------------------------------------------------------------- */
         /*  Update any new or more recent markup table files.                  */
         /* ------------------------------------------------------------------- */
@@ -826,9 +806,9 @@ const int UserMarkupTablePlugin::updateFiles(
                     bUpdateMarkup = TRUE ; 
                  } else {
                     iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "  Copy file failed: %s -> %s",pszTableFileName,szTemp);
-#endif
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEBUG) << "  Copy file failed: "<<pszTableFileName<<" -> "<<szTemp;
+                     #endif
                  }
               }
            }
@@ -852,9 +832,9 @@ const int UserMarkupTablePlugin::updateFiles(
                  } else {
                     if ( ! bNewMarkup ) {
                        iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                       this->Log.writef( "  Copy file failed: %s -> %s",pszUserExitFileName,szTemp);
-#endif
+                       #ifdef MARKUPTABLE_LOGGING
+                       T5LOG(T5DEBUG) << "  Copy file failed: "<<pszUserExitFileName<<" -> " << szTemp;
+                       #endif
                     }
                  }
               }
@@ -875,8 +855,8 @@ const int UserMarkupTablePlugin::updateFiles(
               } else {
                  if ( ! bNewMarkup ) {
                     iReturn = UPDATE_MARKUP_ERROR ;
-#ifdef MARKUPTABLE_LOGGING
-                    this->Log.writef( "  Copy file failed: %s -> %s",pszFileList,szTemp);
+                    #ifdef MARKUPTABLE_LOGGING
+                    T5LOG(T5DEBUG) <<  "  Copy file failed: "<< pszFileList << " -> "<<szTemp;
 #endif
                  }
               }
@@ -898,13 +878,14 @@ const int UserMarkupTablePlugin::updateFiles(
                                            szLongDescription, szVersion, 
                                            szTableFileName, szUserExitFileName,
                                            szFileList, szBasePath, bNewMarkup ) ;
-#ifdef MARKUPTABLE_LOGGING
+           
+           #ifdef MARKUPTABLE_LOGGING
            if ( iReturn == UPATE_MARKUP_OK ) {
-              this->Log.write( "  Update control file failed: %s",szMarkupName );
+              T5LOG(T5DEBUG) << "  Update control file failed: " << szMarkupName;
            } else {
-              this->Log.write( "  Update control file OK: %s",szMarkupName );
+              T5LOG(T5DEBUG) <<  "  Update control file OK: " << szMarkupName ;
            }
-#endif
+           #endif
 
 //           strcpy( szOldFile, szBasePath ) ;
 //           strcat( szOldFile, "\\" ) ;
@@ -965,7 +946,7 @@ const int UserMarkupTablePlugin::updateFiles(
 //                             if ( ! stricmp( szContent, szMarkupName ) ) {
 //                                bUpdateMarkup = TRUE ;
 //#ifdef MARKUPTABLE_LOGGING
-//                                this->Log.writef( "   Updating:  %s",szContent );
+//                                T5LOG(T5DEVELOP) <<  "   Updating:  %s" <<szContent ;
 //#endif
 //                             }
 //                          } else
@@ -1029,8 +1010,8 @@ const int UserMarkupTablePlugin::updateFiles(
 //                 fputs( szOutLine, fOutControl ) ;
 //              }
 //           } else {
-//#ifdef MARKUPTABLE_LOGGING
-//              this->Log.write( "  Update failed for control file." );
+//   #ifdef MARKUPTABLE_LOGGING
+//              T5LOG(T5DEVELOP) << ( "  Update failed for control file." );
 //#endif
 //              iReturn = UPDATE_MARKUP_ERROR ;
 //           }
@@ -1042,21 +1023,18 @@ const int UserMarkupTablePlugin::updateFiles(
 //              if ( UtlCopy( szNewFile, szOldFile, 1, 0L, TRUE ) ) {
 //                 iReturn = UPDATE_MARKUP_ERROR ;
 //#ifdef MARKUPTABLE_LOGGING
-//                 this->Log.write( "Copy failed for control file." );
+//                T5LOG(T5DEVELOP) << ( "Copy failed for control file." );
 //#endif
 //              }
 //           }
 //           UtlDelete( szNewFile, 0L, FALSE ) ;
-
 #ifdef MARKUPTABLE_LOGGING
-           this->Log.write( "Update completed." );
-#endif
+           T5LOG(T5DEVELOP) << ( "Update completed." );
+           #endif
         }
      } 
 
-#ifdef MARKUPTABLE_LOGGING
-     if ( bLogOpen ) this->Log.close();
-#endif
+
 
      return( iReturn ) ;
   }
@@ -1151,12 +1129,6 @@ const bool UserMarkupTablePlugin::deleteMarkup(
 //fprintf(fdaw,"Deleting....%s\n",szMarkupName);
 //fclose(fdaw);
 
-#ifdef MARKUPTABLE_LOGGING
-     if ( !this->Log.isOpen() ) {
-       this->Log.open( PluginLogFile );
-       bLogOpen = TRUE;
-     }      
-#endif
      
      /* ------------------------------------------------------------------- */
      /*  Get markup table object.  If it does not exist, then there is      */
@@ -1164,10 +1136,9 @@ const bool UserMarkupTablePlugin::deleteMarkup(
      /* ------------------------------------------------------------------- */
      OtmMarkup *markup = getMarkup( szMarkupName );
      if ( markup != NULL ) {
-#ifdef MARKUPTABLE_LOGGING
-        this->Log.writef( "Deleting markup table...  %s",szMarkupName ) ;
+      #ifdef MARKUPTABLE_LOGGING
+        T5LOG(T5DEVELOP) <<  "Deleting markup table...  " << szMarkupName  ;
 #endif
-
         /* ------------------------------------------------------------------- */
         /*  Update the markup table object with this new information.          */
         /* ------------------------------------------------------------------- */
@@ -1247,9 +1218,9 @@ const bool UserMarkupTablePlugin::deleteMarkup(
                  fputs( szOutLine, fOutControl ) ;
            }
         } else {
-#ifdef MARKUPTABLE_LOGGING
-           this->Log.write( "  Update failed for control file." );
-#endif
+         #ifdef MARKUPTABLE_LOGGING
+           T5LOG(T5DEVELOP) <<  "  Update failed for control file." ;
+         #endif
            bReturn = false ;
         }
         if ( fInControl ) 
@@ -1259,22 +1230,15 @@ const bool UserMarkupTablePlugin::deleteMarkup(
         if ( bFileChanged ) {
            if ( UtlCopy( szNewFile, szOldFile, 1, 0L, TRUE ) ) {
               bReturn = false ;
-#ifdef MARKUPTABLE_LOGGING
-              this->Log.write( "Copy failed for control file." );
-#endif
+              T5LOG(T5DEVELOP) << ( "Copy failed for control file." );
            }
            UtlDelete( szNewFile, 0L, FALSE ) ;
         }
-
 #ifdef MARKUPTABLE_LOGGING
-        this->Log.write( "Delete completed." );
+        T5LOG(T5DEVELOP) << ( "Delete completed." );
 #endif
         bReturn = true ;
      } 
-
-#ifdef MARKUPTABLE_LOGGING
-     if ( bLogOpen ) this->Log.close();
-#endif
 
      return( bReturn ) ;
 }
@@ -1299,16 +1263,8 @@ bool UserMarkupTablePlugin::stopPlugin( bool fForce  )
   }
 
   // TODO: terminate active objects, cleanup, free allocated resources
-
-
-
-  bLogOpen = FALSE ;
-#ifdef MARKUPTABLE_LOGGING
-  if ( !this->Log.isOpen() ) {
-    this->Log.open( PluginLogFile );
-    bLogOpen = TRUE;
-  } /* end */     
-  this->Log.writef( "Stopping User markup table plugin..." );
+    #ifdef MARKUPTABLE_LOGGING
+  T5LOG(T5DEVELOP) << "Stopping User markup table plugin...";
 #endif
 
   if ( pszName )  free(pszName) ;
@@ -1326,10 +1282,8 @@ bool UserMarkupTablePlugin::stopPlugin( bool fForce  )
   for( int i=0 ; i<iMarkupCount && MarkupObjectList[i] ; ++i ) {
      delete MarkupObjectList[i] ;
   }
-
 #ifdef MARKUPTABLE_LOGGING
-  this->Log.write( "Stop completed." );
-  if ( bLogOpen ) this->Log.close();
+  T5LOG(T5DEVELOP) << ( "Stop completed." );
 #endif
 
   // de-register plugin

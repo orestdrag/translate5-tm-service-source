@@ -34,17 +34,6 @@
 #include "../utilities/EncodingHelper.h"
 //#include "EQFTM.H"
 
-#ifdef _DEBUG
-  //#define MEASURETIME
-  //#define SGMLDITA_LOGGING
-  //#define INLINE_TAG_REPL_LOGGING
-  //#define _NTGET_LOG
-  //#define MATCHLEVEL_LOGGING
-
-  // write found matches to log file
-  //#define MATCHLIST_LOG
-#endif
-
 // import logging 
 //#ifdef MEASURETIME
 
@@ -69,12 +58,6 @@ void GetElapsedTime( LONG64 *plTime )
 
 #define ACTIVATE_NTMGenericDelete 
 
-#ifdef _DEBUG
-#else
-  #define LOGOPEN( a )
-  #define LOGCLOSE()  
-  
-#endif
 
 #ifdef MEASURETIME
   void LogWritePerfTime( FILE *hLog, PLARGE_INTEGER pliStart, PLARGE_INTEGER pliEnd, char *pszText );
@@ -102,7 +85,7 @@ void GetElapsedTime( LONG64 *plTime )
   }
 #endif
 
-void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData );
+void NTMLogSegData( PSZ_W pszForm, PSZ_W pszSegData );
 
 
 
@@ -155,9 +138,6 @@ NTMFuzzyReplace
   PSZ_W     pTrans,                    // translation string
   PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
   PREPLLIST pReplaceList               // list of tokens to be replaced
-#ifdef INLINE_TAG_REPL_LOGGING
-  , FILE *hfLog
-#endif
 );
 
 #ifdef ACTIVATE_NTMGenericDelete 
@@ -170,30 +150,17 @@ NTMGenericDelete
   PSZ_W     pTrans,                    // translation string
   PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
   PREPLLIST pReplaceList               // list of tokens to be replaced
-#ifdef INLINE_TAG_REPL_LOGGING
-  , FILE *hfLog
-#endif
 );
 #endif
 
-#ifdef INLINE_TAG_REPL_LOGGING
 static BOOL NTMCheckTagPairs
 (
   PTMX_SUBSTPROP pSubstProp,
   PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
   PREPLLIST pReplaceList,               // list of tokens to be replaced
-  BOOL      fRespectLFs,
-  FILE      *hfLog
-);
-#else
-static BOOL NTMCheckTagPairs
-(
-  PTMX_SUBSTPROP pSubstProp,
-  PREPLLIST pReplPropSrc,              // list of same tokens in source and prop
-  PREPLLIST pReplaceList,              // list of tokens to be replaced
   BOOL      fRespectLFs
 );
-#endif
+
 
 static PTMX_REPLTAGPAIR
 NTMFindTagPair
@@ -308,12 +275,7 @@ static BOOL NTMCheckAndDeleteTagPairs
   PTMX_SUBSTPROP pSubstProp,
   PREPLLIST pReplaceSourceList,         // list of same tokens in source and prop
   PREPLLIST pReplaceList,              // toklist to be replaced in prop src+tgt
-#ifdef INLINE_TAG_REPL_LOGGING
-  BOOL      fRespectLFs,
-  FILE      *hfLog                     // log file handle
-#else
   BOOL      fRespectLFs
-#endif
 );
 
 //+----------------------------------------------------------------------------+
@@ -369,9 +331,6 @@ USHORT TmtXGet
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string
   szString[0] = '\0';
-#ifdef MATCHLIST_LOG
-  FILE *hfMatchListLog = NULL;
-#endif
 
   ULONG ulStrippedParm = pTmGetIn->stTmGet.ulParm &
     ~(GET_RESPECTCRLF | GET_IGNORE_PATH | GET_NO_GENERICREPLACE | GET_ALWAYS_WITH_TAGS | GET_IGNORE_COMMENT);
@@ -382,21 +341,6 @@ USHORT TmtXGet
   GetElapsedTime( &lDummy );
 #endif
 
-#ifdef MATCHLEVEL_LOGGING
-  FILE *hfLog = NULL;
-#endif
-
-#ifdef _NTGET_LOG
-  {
-    char szLogFile[MAX_EQF_PATH];
-
-    UtlMakeEQFPath ( szLogFile, NULC, LOG_PATH, NULL );
-    UtlMkDir( szLogFile, 0L, FALSE );
-    strcat( szLogFile, "\\TMTXGET.LOG" );
-    
-    LOGOPEN( szLogFile );
-  }
-#endif
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){    
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
@@ -670,8 +614,6 @@ USHORT TmtXGet
   pTmGetOut->stPrefixOut.usTmtXRc = usRc;
 
   if ( usRc ) ERREVENT2( TMTXGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-
-  LOGCLOSE();
 
   // release access to any tag table loaded for segment markup
   // (may have been loaded for context handling)
@@ -1711,15 +1653,15 @@ USHORT ExactTest
   }
 
 
-  void NTMLogSegData( FILE *hfLog, PSZ_W pszForm, PSZ_W pszSegData )
+  void NTMLogSegData( PSZ_W pszForm, PSZ_W pszSegData )
   {
     static CHAR_W szSegBuf[4096];
     static CHAR_W szLineBuf[4096];
     int iLen;
 
     NTMMarkCRLF( pszSegData, szSegBuf );
-    iLen = swprintf( szLineBuf, pszForm, szSegBuf );
-    T5LOG( T5INFO) <<"";
+    //iLen = swprintf( szLineBuf, pszForm, szSegBuf );
+    T5LOG( T5INFO) << "; szLineBuf = " << szLineBuf << "; pszForm" <<  pszForm <<"; pszForm = " << szSegBuf ;
     //fwrite( szLineBuf, 2, iLen, hfLog ); 
   }
 
@@ -1935,10 +1877,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   ULONG          ulSrcOemCP = 0L;
   ULONG          ulTgtOemCP = 0L;
   MemoryFactory *pFactory = MemoryFactory::getInstance();
-
-#ifdef SGMLDITA_LOGGING
-  FILE *hfLog = NULL;
-#endif
   SHORT sLangID = 0;
 
   // force fTag flag if proposal with inline tagging is requested
@@ -2251,11 +2189,8 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               {
                 *pusMatchLevel = (usTranslationFlag  == TRANSLFLAG_MACHINE) ? 99 : 100;
               } /* endif */
-#ifdef SGMLDITA_LOGGING
-              if ( hfLog )
-              {
-                fwprintf( hfLog, L"new match level is %u, fuzziness is %u\r\n", *pusMatchLevel, usFuzzy );
-              } /* endif */
+#ifdef SGMLDITA_LOGGING    
+            T5LOG(T5INFO) << "new match level is "<< *pusMatchLevel <<", fuzziness is " << usFuzzy ;
 #endif
             }
           }
@@ -2396,10 +2331,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   {
     ERREVENT2( FILLMATCHTABLE_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
-
-#ifdef SGMLDITA_LOGGING
-  if ( hfLog ) fclose( hfLog );
-#endif
 
   /********************************************************************/
   /* free any allocated resource                                      */

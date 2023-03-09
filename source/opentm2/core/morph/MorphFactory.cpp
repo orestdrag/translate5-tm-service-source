@@ -44,10 +44,8 @@ MorphFactory* MorphFactory::getInstance()
 	{
 		pMorphInstance = new MorphFactory();
 		pMorphInstance->refreshPluginList();
-#ifdef _DEBUG
-		pMorphInstance->Log.open("MorphFactory");
-#endif
-		pMorphInstance->Log.writef("Get instance of MorphFactory!\n");
+
+		T5LOG(T5DEVELOP) << "Get instance of MorphFactory!";
 	}
 	return pMorphInstance;
 }
@@ -55,7 +53,7 @@ MorphFactory* MorphFactory::getInstance()
 /*! \brief refresh the morphology plug-in list */
 void MorphFactory::refreshPluginList()
 {
-	Log.writef("Refresh plugin list\n");
+	T5LOG(T5DEVELOP) << "Refresh plugin list";
 	if (NULL != pvPluginList)
 	{
 		for (int i = 0; i < (int)pvPluginList->size(); i++)
@@ -63,7 +61,7 @@ void MorphFactory::refreshPluginList()
 			delete pvPluginList->at(i);
 		}
 		delete pvPluginList;
-		Log.writef("Delete plugin list\n");
+		T5LOG(T5DEBUG) <<"Delete plugin list";
 	}
 
 	// access plugin manager
@@ -82,7 +80,7 @@ void MorphFactory::refreshPluginList()
 
 OtmMorphPlugin* MorphFactory::getPlugin( const char* pszPluginName )
 {
-	Log.writef("MorphFactory::getPlugin(): First, get plug-in %s\n", pszPluginName);
+	T5LOG(T5DEVELOP) << "MorphFactory::getPlugin(): First, get plug-in " << pszPluginName;
 
 	if(NULL != pszPluginName)
 	{
@@ -90,7 +88,7 @@ OtmMorphPlugin* MorphFactory::getPlugin( const char* pszPluginName )
 		{
 			if (0 == strcmp(pszPluginName, pvPluginList->at(i)->getName()))
 			{
-				Log.writef("MorphFactory::getPlugin(): Success, get plug-in %s at %d \n", pszPluginName, i);
+				T5LOG(T5DEVELOP) <<"MorphFactory::getPlugin(): Success, get plug-in "<< pszPluginName<< " at " << i;
 				return pvPluginList->at(i);
 			}
 		}
@@ -98,11 +96,11 @@ OtmMorphPlugin* MorphFactory::getPlugin( const char* pszPluginName )
 
 	if (0 < pvPluginList->size())
 	{
-		Log.writef("MorphFactory::getPlugin(): Success, get the similar plug-in of %s at 0 \n", pszPluginName);
+		T5LOG(T5DEVELOP) <<"MorphFactory::getPlugin(): Success, get the similar plug-in of " << pszPluginName<< " at 0 ";
 		return pvPluginList->at(0);
 	}
 
-	Log.writef("MorphFactory::getPlugin(): Error occured when getting plug-in %s\n", pszPluginName);
+	T5LOG(T5ERROR) <<"MorphFactory::getPlugin(): Error occured when getting plug-in" << pszPluginName;
 	return NULL;
 }
 
@@ -130,7 +128,7 @@ int MorphFactory::getLanguageList(
 {
 	if (NULL == pszPluginName || (strcmp(pszPluginName, "") == 0))
 	{
-		Log.writef("get all the languages supported by the MorphFactory class!\n");
+		T5LOG(T5DEBUG) <<"get all the languages supported by the MorphFactory class!";
 		set<string> setLanguageList;
 		for (int i = 0; i < (int)pvPluginList->size(); i++)
 		{
@@ -176,12 +174,12 @@ bool MorphFactory::isSupported(const char* pszName )
 	  OtmMorphPlugin* pOtmMorphPlugin = pvPluginList->at(i);
   	if ( pOtmMorphPlugin->isSupported( pszName ) )
     {
-	  Log.writef("MorphFactory::isSupported(): The language %s is supported", pszName);
+	  T5LOG(T5DEBUG) <<"MorphFactory::isSupported(): The language "<<pszName<<" is supported";
       return( TRUE );
     }
   }
 
-  Log.writef("MorphFactory::isSupported(): The language %s is not supported", pszName);
+  T5LOG(T5DEBUG) <<"MorphFactory::isSupported(): The language "<<pszName<<" is not supported";
 	return FALSE;
 }
 
@@ -193,15 +191,15 @@ bool MorphFactory::isSupported(const char* pszName )
 */
 int MorphFactory::getMorphInfo(const char* pszName, OtmMorphPlugin::PMORPHINFO pInfo, const char* pszPluginName)
 {
-	Log.writef("MorphFactory::getMorphInfo(): First, get morphology info of %s plug-in.\n", pszPluginName);
+	T5LOG(T5DEBUG) <<"MorphFactory::getMorphInfo(): First, get morphology info of "<<pszPluginName<<" plug-in.";
 	OtmMorphPlugin* pOtmMorphPlugin = getPlugin(pszPluginName);
 	if (NULL != pOtmMorphPlugin)
 	{
-		Log.writef("MorphFactory::getMorphInfo(): Success, get morphology info of %s plug-in.\n", pszPluginName);
+		T5LOG(T5DEBUG) <<"MorphFactory::getMorphInfo(): Success, get morphology info of "<<pszPluginName<<" plug-in.";
 		return pOtmMorphPlugin->getMorphInfo(pszName, pInfo);
 	}
 
-	Log.writef("MorphFactory::getMorphInfo(): Error, get morphology info of %s plug-in failed.\n", pszPluginName);
+	T5LOG(T5DEBUG) <<"MorphFactory::getMorphInfo(): Error, get morphology info of "<<pszPluginName<<" plug-in failed.";
 	return OtmMorph::ERROR_PARAMETAR;
 }
 
@@ -214,16 +212,5 @@ void MorphFactory::close()
 		delete pMorphInstance;
 		pMorphInstance = NULL;
 	}
-}
-
-// check if morphologic support is is availabe for the given language
-BOOL isMorphSupportAvailable( PSZ pszLanguage )
-{
-  MorphFactory* pMorphFactoryInstance = MorphFactory::getInstance();
-	if (pMorphFactoryInstance != NULL )
-	{
-    return ( pMorphFactoryInstance->isSupported( pszLanguage ) );
-  } 
-  return( FALSE );
 }
 

@@ -10,7 +10,6 @@
 
 #include <set>
 #include <vector>
-#include "../utilities/LogWriter.h"
 
 class OtmPlugin;
 class PluginListener;
@@ -182,10 +181,6 @@ std::vector<PluginListener *> m_vPluginListener;
 
 /*! \function checked whether the path of the plugin has overed the max alled depth */
 BOOL IsDepthOvered(const char * strPath);
-
-#ifdef TEMPORARY_COMMENTED
-LogWriter Log;
-#endif
 
 /*! \brief search for a sub menu with the givem name (used recursively) */
 HMENU findSubMenu( HMENU hMenu, const char *pszSubMenu );

@@ -53,9 +53,6 @@ XERCES_CPP_NAMESPACE_USE
 
   //#pragma pack( pop, TM2StructPacking )
 
-#ifdef _DEBUG
-  #define SGMLDITA_LOGGING
-#endif
 
 //
 // class for our SAX handler

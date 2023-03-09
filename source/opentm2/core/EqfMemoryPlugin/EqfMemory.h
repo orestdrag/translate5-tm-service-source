@@ -8,7 +8,6 @@
 #ifndef _EqfMemory_h_
 #define _EqfMemory_h_
 
-#include "../utilities/LogWriter.h"
 #include <string>
 #include "../pluginmanager/OtmMemory.h"
 #include "OtmProposal.h"
@@ -386,7 +385,6 @@ private:
   char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;
 	int iLastError;
-  LogWriter Log;                                 // log object (only used when logging is active)
   void *pvGlobalMemoryOptions;                   // pointert to global memory options to be used for global memory proposals
 
 /*! \brief Fill OtmProposal from TMX_GET_OUT_W structure

@@ -203,7 +203,7 @@ OtmMemory *MemoryFactory::createMemory
   OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  this->Log.writef( "Create memory %s", pszMemoryName );
+  T5LOG(T5DEBUG) << "Create memory " << pszMemoryName ;
 
   if ( piErrorCode != NULL ) *piErrorCode = 0;
 
@@ -221,7 +221,7 @@ OtmMemory *MemoryFactory::createMemory
   {
     this->iLastError = *piErrorCode = ERROR_PLUGINNOTAVAILABLE;
     this->strLastError = "No memory plugin available for the creation of the memory";
-    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    T5LOG(T5DEBUG) << "   Create failed, with message \""<< this->strLastError <<"\"";
     return( NULL );
   } /* endif */       
 
@@ -248,7 +248,7 @@ OtmMemory *MemoryFactory::createMemory
 
   if ( pMemory == NULL)
   {
-    this->Log.writef( "   Create failed, with message \"%s\"", this->strLastError.c_str() );
+    T5LOG(T5DEBUG) << "   Create failed, with message \""<< this->strLastError << "\"";
     if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
   }
   else if ( !bInvisible )
@@ -261,7 +261,7 @@ OtmMemory *MemoryFactory::createMemory
     strcat( pszObjName, pszMemoryName );
     EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
     if ( pszObjName != NULL ) UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
-    this->Log.write( "   Create successful" );
+    T5LOG(T5DEBUG) << "   Create successful" ;
   } /* endif */     
 
   return( pMemory );

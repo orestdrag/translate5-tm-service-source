@@ -4,18 +4,14 @@
 	Copyright (C) 1990-2015, International Business Machines
 	Corporation and others. All rights reserved
 */
-
+#include "../utilities/LogWrapper.h"
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmSpellPlugin.h"
 #include "../pluginmanager/OtmSpell.h"
 #include "SpellFactory.h"
+#include "win_types.h"
 
 
-#ifdef _DEBUG
-  // activate define to enable spell logging
-  //#define SPELLFACTORYLOGGING
-
-#endif
 /*! \brief the SpellFactory instance	 */
 SpellFactory* SpellFactory::pSpellFactoryInstance = NULL;
 
@@ -50,8 +46,7 @@ SpellFactory* SpellFactory::getInstance()
 		pSpellFactoryInstance->refreshPluginList();
 
 #ifdef SPELLFACTORY_LOGGING
-		pSpellFactoryInstance->objLog.open("SpellFactory");
-		pSpellFactoryInstance->objLog.writef("Get instance of SpellFactory!\n");
+		T5LOG(T5DEBUG) <<"Get instance of SpellFactory!";
 #endif
 	}
 	return pSpellFactoryInstance;
@@ -61,7 +56,7 @@ void SpellFactory::refreshPluginList()
 {
 
 #ifdef SPELLFACTORY_LOGGING
-	objLog.writef("Refresh plugin list\n");
+	T5LOG(T5DEBUG) <<"Refresh plugin list";
 #endif
 	if (NULL != pvPluginList)
 	{
@@ -71,7 +66,7 @@ void SpellFactory::refreshPluginList()
 		}
 		delete pvPluginList;
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("Delete plugin list\n");
+		T5LOG(T5DEBUG) <<"Delete plugin list";
 #endif
 	}
 
@@ -103,7 +98,7 @@ int SpellFactory::getLanguageList(
 	if (NULL == vPluginName || (strcmp(vPluginName, "") == 0))
 	{
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("get all the langauges supported by the spellfactory class!\n");
+		T5LOG(T5DEBUG) <<"get all the langauges supported by the spellfactory class!";
 #endif
 		set<string> tLanguageList;
 		for (int i = 0; i < (int)pvPluginList->size(); i++)
@@ -141,7 +136,7 @@ int SpellFactory::getLanguageList(
 OtmSpellPlugin* SpellFactory::getPlugin( const char* pszPluginName )
 {
 #ifdef SPELLFACTORY_LOGGING
-	objLog.writef("get plug-in %s\n", pszPluginName);
+	T5LOG(T5DEBUG) <<"get plug-in " << pszPluginName;
 #endif
 	if(pSpellFactoryInstance == NULL)
 	{
@@ -164,7 +159,7 @@ OtmSpellPlugin* SpellFactory::getPlugin( const char* pszPluginName )
 	}
 
 #ifdef SPELLFACTORY_LOGGING
-	objLog.writef("get plug-in %s\n", pszPluginName);
+	T5LOG(T5DEBUG) <<"get plug-in " << pszPluginName;
 #endif
 	return NULL;
 }
@@ -179,7 +174,7 @@ OtmSpell* SpellFactory::getSpellChecker(const char* pszName, const char* pszPlug
 	if ( (pszPluginName == NULL) || (strcmp( pszPluginName, "" ) == 0) )
 	{
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("searching spell checker for language %s\n", pszName );
+		T5LOG(T5DEBUG) <<"searching spell checker for language " << pszName ;
 #endif
 		for (int i = 0; i < (int)pvPluginList->size(); i++)
 		{
@@ -191,13 +186,13 @@ OtmSpell* SpellFactory::getSpellChecker(const char* pszName, const char* pszPlug
 			}
 		}
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("no spell checker found for language %s\n", pszName );
+		T5LOG(T5DEBUG) <<"no spell checker found for language " << pszName ;
 #endif
 	}
 	else
 	{
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("get spell checker of %s and %s \n", pszName, pszPluginName);
+		T5LOG(T5DEBUG) <<"get spell checker of "<<pszName<<" and " << pszPluginName;
 #endif
 		OtmSpellPlugin* pSpellPlugin = getPlugin(pszPluginName);
 		if (NULL != pSpellPlugin)
@@ -205,7 +200,7 @@ OtmSpell* SpellFactory::getSpellChecker(const char* pszName, const char* pszPlug
 			return pSpellPlugin->openSpell(pszName);
 		}
 #ifdef SPELLFACTORY_LOGGING
-		objLog.writef("get spell checker of %s and %s failed\n", pszName, pszPluginName);
+		T5LOG(T5DEBUG) <<"get spell checker of "<< pszName << " and "<< pszPluginName<< " failed" ;
 #endif
 	}
 
@@ -224,14 +219,14 @@ bool SpellFactory::isSupported(const char* pszName )
   	if ( pSpellPlugin->isSupported( pszName ) )
     {
 #ifdef SPELLFACTORY_LOGGING
-	  objLog.writef("SpellFactory::isSupported(): The language %s is supported", pszName);
+	  T5LOG(T5DEBUG) <<"SpellFactory::isSupported(): The language "<<pszName<<" is supported";
 #endif
       return( TRUE );
     }
   }
 
 #ifdef SPELLFACTORY_LOGGING
-  objLog.writef("SpellFactory::isSupported(): The language %s is not supported", pszName);
+  T5LOG(T5DEBUG) <<"SpellFactory::isSupported(): The language "<<pszName<<" is not supported" ;
 #endif
 	return FALSE;
 }
@@ -245,7 +240,7 @@ bool SpellFactory::isSupported(const char* pszName )
 int SpellFactory::getSpellInfo( const char* pszPluginName, const char* pszName, OtmSpellPlugin::PSPELLINFO pInfo )
 {
 #ifdef SPELLFACTORY_LOGGING
-	objLog.writef("get spell info of %s and %s \n", pszName, pszPluginName);
+	T5LOG(T5DEBUG) <<"get spell info of "<<pszName<<" and "<< pszPluginName;
 #endif
 	OtmSpellPlugin* tSpellPlugin = getPlugin(pszPluginName);
 	if (NULL != tSpellPlugin)
@@ -254,7 +249,7 @@ int SpellFactory::getSpellInfo( const char* pszPluginName, const char* pszName, 
 	}
 
 #ifdef SPELLFACTORY_LOGGING
-	objLog.writef("get spell info of %s and %s failed\n", pszName, pszPluginName);
+	T5LOG(T5DEBUG) <<"get spell info of "<<pszName<<" and "<<pszPluginName<<" failed";
 #endif
 	return OtmSpell::ERROR_PARAMETAR;
 }
@@ -268,19 +263,6 @@ void SpellFactory::close()
 		delete pSpellFactoryInstance;
 		pSpellFactoryInstance = NULL;
 	}
-#ifdef SPELLFACTORY_LOGGING
-	objLog.close();
-#endif
-}
 
-// check if a spellchecker is availabe for the given language
-BOOL isSpellCheckerAvailable( PSZ pszLanguage )
-{
-  SpellFactory* pSpellFactoryInstance = SpellFactory::getInstance();
-	if (pSpellFactoryInstance != NULL )
-	{
-    return ( pSpellFactoryInstance->isSupported( pszLanguage ) );
-  } 
-  return( FALSE );
 }
 

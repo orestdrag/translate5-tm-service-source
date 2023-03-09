@@ -57,11 +57,6 @@
 #include "../utilities/EqfPluginWrapper.h"
 #include <cwctype>
 
-// define for memory import logging (remove to disable logging)
-#ifdef _DEBUG
-  #define IMPORT_LOGGING
-#endif
-
 #define INCL_EQF_ANALYSIS         // analysis functions
 #define INCL_EQF_TM               // general Transl. Memory functions
 #define INCL_EQF_TMREMOTE         // remote Transl. Memory functions (U-Code)
@@ -130,7 +125,6 @@ USHORT MemHandleCodePageValue
 
 
 // import logging 
-//#ifdef IMPORT_LOGGING
   static LONG lImportStartTime = 0;
   static LONG64 lMemAccessTime = 0;
   static LONG64 lFileReadTime = 0;
@@ -494,20 +488,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      fOK = UtlAlloc( (PVOID *)&pLIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE );
      if ( fOK ) fOK = UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE );
 
-     // prepare segment logging
-     if ( fOK )
-     {
-       UtlMakeEQFPath( pLIDA->szSegLog, NULC, LOG_PATH, NULL );
-       UtlMkDir( pLIDA->szSegLog, 0, FALSE );
-       strcat( pLIDA->szSegLog, "\\MEMIMPORT.LOG" );
-#ifdef _DEBUG
-       pLIDA->hSegLog = fopen( pLIDA->szSegLog, "wb" );
-#endif
-       if ( pLIDA->hSegLog )
-       {
-         fwrite( UNICODEFILEPREFIX, 1, 2, pLIDA->hSegLog );
-       } /* endif */
-     } /* endif */
 
      // call start entry point
      if ( fOK )
@@ -2206,21 +2186,22 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
   else
   {
     pLIDA->ulInvSegmentCounter++;      // increase invalid segment counter 
-
+    #ifdef IMPORT_LOGGING
     // write segment to log file
-    if ( pLIDA->hSegLog != NULL )
+    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
-      fwprintf( pLIDA->hSegLog, L"Segment %ld not imported\r\n",  pSegment->lSegNum );
-      fwprintf( pLIDA->hSegLog, L"Reason         = %S\r\n",  pSegment->szReason );
-      fwprintf( pLIDA->hSegLog, L"Document       = %S\r\n",  pSegment->szDocument );
-      fwprintf( pLIDA->hSegLog, L"SourceLanguage = %S\r\n",  pSegment->szSourceLang );
-      fwprintf( pLIDA->hSegLog, L"TargetLanguage = %S\r\n",  pSegment->szTargetLang );
-      fwprintf( pLIDA->hSegLog, L"Markup         = %S\r\n",  pSegment->szFormat );
-      fwprintf( pLIDA->hSegLog, L"Source         = \r\n");
-      fwprintf( pLIDA->hSegLog, L"%s\r\n", pSegment->szSource );
-      fwprintf( pLIDA->hSegLog, L"Target         = \r\n");
-      fwprintf( pLIDA->hSegLog, L"%s\r\n\r\n", pSegment->szTarget );
+      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNum <<" not imported\r\n";
+      T5LOG(T5DEBUG) <<"Reason         = \r\n",  pSegment->szReason ;
+      T5LOG(T5DEBUG) <<"Document       = \r\n",  pSegment->szDocument ;
+      T5LOG(T5DEBUG) <<"SourceLanguage = \r\n",  pSegment->szSourceLang ;
+      T5LOG(T5DEBUG) <<"TargetLanguage = \r\n",  pSegment->szTargetLang ;
+      T5LOG(T5DEBUG) <<"Markup         = \r\n",  pSegment->szFormat ;
+      T5LOG(T5DEBUG) <<"Source         = \r\n";
+      T5LOG(T5DEBUG) <<"\r\n", pSegment->szSource ;
+      T5LOG(T5DEBUG) <<"Target         = \r\n";
+      T5LOG(T5DEBUG) <<"\r\n\r\n", pSegment->szTarget ;
     } /* endif */
+    #endif
   } /* endif */
 
   return( usRC );

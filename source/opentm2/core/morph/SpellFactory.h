@@ -13,7 +13,6 @@
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmSpellPlugin.h"
 #include "../pluginmanager/OtmSpell.h"
-#include "../utilities/LogWriter.h"
 
 /*! \brief   This class provides factory methods for spell check objects 
 */
@@ -89,11 +88,6 @@ public:
 
 	/*! \brief a vector of OtmSpellPlugin objects	 */
 	vector<OtmSpellPlugin *> *pvPluginList;
-
-	/*! \brief LogWriter object for logging
-	*/
-	LogWriter objLog;
-
 };
 
 #endif

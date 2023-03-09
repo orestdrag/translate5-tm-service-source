@@ -137,8 +137,6 @@ private:
 
 
 #ifdef SGMLDITA_LOGGING
-          FILE *hfLog = NULL;
-          CHAR szLogFile[MAX_EQF_PATH];
           static CHAR_W szSegBuf[4096];
           static CHAR_W szLineBuf[4096];
 #endif

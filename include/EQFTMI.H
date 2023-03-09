@@ -609,8 +609,6 @@ typedef struct _MEM_LOAD_IDA
  ULONG        ulMTReceivedSegs[3];        // received segments per category
  LONG         lProgress;                  // progress indicator of external import methods
  BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
- FILE         *hSegLog;                   // handle of segment log file
- CHAR         szSegLog[MAX_EQF_PATH];     // name of segment log file
  BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
  BOOL          fCreateMatchID;            // create match segment IDs
  CHAR          szMatchIDPrefix[256];      // prefix to be used for the match segment ID
