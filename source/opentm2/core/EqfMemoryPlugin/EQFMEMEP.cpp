@@ -1053,7 +1053,6 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getAuthor( pExportIDA->pstSegment->szAuthor, sizeof(pExportIDA->pstSegment->szAuthor) );
          pExportIDA->pProposal->getMarkup( pExportIDA->pstSegment->szFormat, sizeof(pExportIDA->pstSegment->szFormat) );
          pExportIDA->pProposal->getDocName( pExportIDA->pstSegment->szDocument, sizeof(pExportIDA->pstSegment->szDocument) );
-         LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI");  //OEMTOANSI ( pExportIDA->pstSegment->szDocument );
       
          pExportIDA->pProposal->getSource( pExportIDA->pstSegment->szSource, sizeof(pExportIDA->pstSegment->szSource) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );

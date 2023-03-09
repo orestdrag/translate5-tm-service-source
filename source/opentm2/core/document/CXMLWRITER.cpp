@@ -451,8 +451,7 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
       }
       else
       {
-        std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text) );
-        str = str.substr(0, iLFPos);
+        std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text).substr(0,iLFPos) );
         int iBytes = str.size();
 
         if(m_hf){
