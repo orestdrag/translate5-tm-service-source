@@ -29,7 +29,7 @@ public:
 		eSpellType,				/*!< plugin handles spell checking*/
 		eMorphType,				/*!< plugin handles morphologic functionality*/
 		eUndefinedType,			/*!< type of plugin is undefined */
-		eSharedTranslationMemoryType, 	/*!< plugin handling shared translation-memory objects */
+		//eSharedTranslationMemoryType, 	/*!< plugin handling shared translation-memory objects */
 		eToolType, 	        /*!< plugin providing tools */
 	};
 

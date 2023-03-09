@@ -118,7 +118,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   BOOL fReserved = FALSE;
 
   // build memory path and reserve a short name
-  this->makeMemoryPath( pszName, strMemPath, TRUE, &fReserved );
+  this->makeMemoryPath( pszName, strMemPath, &fReserved );
 
   // use old memory create code
   TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  (PSZ)pszSourceLang,  (PSZ)pszDescription,  usMsgHandling,  hwnd );
@@ -581,14 +581,7 @@ int EqfMemoryPlugin::clearMemory(
     char szIndexPath[MAX_LONGFILESPEC];
     strcpy( szIndexPath, pMemInfo->szFullPath );
     char *pszExt = strrchr( szIndexPath, DOT );
-    if ( strcmp( pszExt, EXT_OF_TMDATA ) == 0 )
-    {
-      strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
-    }
-    else
-    {
-      strcpy( strrchr( szIndexPath, DOT ), EXT_OF_SHARED_MEMINDEX );
-    } /* endif */
+    strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
     UtlDelete( szIndexPath, 0L, FALSE );
 
     // use TmtXCreate to create new data and index file
@@ -933,7 +926,7 @@ USHORT registerPlugins()
 	\param string receiving the memory path name
 	\returns TRUE when successful 
 */
-BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathName, BOOL fReserve, PBOOL pfReserved )
+BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved )
 {
   BOOL fOK = FALSE;
   OBJLONGTOSHORTSTATE ObjState;

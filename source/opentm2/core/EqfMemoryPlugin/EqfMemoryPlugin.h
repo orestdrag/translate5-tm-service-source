@@ -300,7 +300,7 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
 
 private:
 
-  BOOL makeMemoryPath( const char* pszName, std::string &strPathName, BOOL fReserve = FALSE, PBOOL pfReserved = NULL );
+  BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
   void refreshMemoryList();
   OtmMemoryPlugin::PMEMORYINFO findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);

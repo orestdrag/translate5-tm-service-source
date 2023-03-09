@@ -12,7 +12,6 @@
 #include <vector>
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmSharedMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
 #include "../utilities/LogWrapper.h"
 
@@ -49,7 +48,6 @@ public:
   MemoryFactory(){
     T5LOG( T5DEBUG) << "::Ctor of MemoryFactory";
     pluginList = NULL;
-    pSharedMemPluginList = NULL;
     pHandleToMemoryList = new std::vector<OtmMemory *>;
     refreshPluginList();    
   }
@@ -214,8 +212,7 @@ int listMemories
 */
 int getMemoryPlugins
 (
-	std::vector<OtmMemoryPlugin *>&vMemPluginList,
-	std::vector<OtmSharedMemoryPlugin *>&vSharedMemPluginList
+	std::vector<OtmMemoryPlugin *>&vMemPluginList
 );
 
 /*! \brief Provide the names of shared memories available for a given user
@@ -310,36 +307,10 @@ BOOL isSharedMemory(
   OtmMemory *pMemory
 );
 
-/*! \brief Check if memory is a shared/synchronized memory
-  \param pszMemory Name of the memory
-  \param pPlugin adress of a variable receiving the pointer to the plugin of the memory
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL isSharedMemory(
-  char *pszMemory,
-  OtmSharedMemoryPlugin **ppPlugin = NULL
-);
-
-/*! \brief Check if memory is a shared/synchronized memory
-  \param strMemory Name of the memory
-  \param pPlugin adress of a variable receiving the pointer to the plugin of the memory
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL isSharedMemory(
-  std::string &strMemory,
-  OtmSharedMemoryPlugin **ppPlugin = NULL
-);
-
 /*! \brief Get name of default memory plugin
 	\returns pointer to name of default memory plugin
 */
 const char *getDefaultMemoryPlugin();
-
-/*! \brief Get name of default shared memory plugin
-	\returns pointer to name of default shared memory plugin
-*/
-const char *getDefaultSharedMemoryPlugin();
-
 
 /*! \brief Show error message for the last error
   \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -430,20 +401,6 @@ void insertProposalData(
 */
 bool isAutoSubstCandidate(
   std::vector<OtmProposal *> &Proposals
-);
-
-/*! \brief Create the shared part of a memory
-  \param hwndOwner owner handle for dialog windows
-  \param pszPluginName name of the memory plugin
-  \param pszMemoryName name of the memory
-  \param pLocalMemory pointer to local version of the created memory
-  \returns pointer to shared memory object or NULL in case of errors
-*/
-OtmMemory *createSharedMemory(
-  HWND hwndOwner,
-  char *pszPluginName,
-  char *pszMemoryName,
-  OtmMemory *pLocalMemory
 );
 
 
@@ -774,12 +731,6 @@ int getMemoryName
   std::string &strMemoryName
 );
 
-/* \brief Get a pointer to the shared memory plugin with the give name
-   \param pszPlugin plugin name
-   \returns pointer to the plugin
-*/
-OtmSharedMemoryPlugin *getSharedMemoryPlugin( char *pszPlugin ); 
-
 
 /* \brief Refresh internal list of memory plugins 
 */
@@ -899,10 +850,6 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 /*! \brief Pointer to the list of installed memory plugins
 */
  std::vector<OtmMemoryPlugin *> *pluginList;
-
-/*! \brief Pointer to the list of installed plugins for shared memories
-*/
-  std::vector<OtmSharedMemoryPlugin *> *pSharedMemPluginList;
 
  /*! \brief error code of last error occured
 */

@@ -49,21 +49,10 @@
 /* magic cookie stored at the beginning.  This is as follows          */
 /* This value might be changed to include version identifications...  */
 /**********************************************************************/
-//#define BTREE_VERSION       0   // moved to EQFQDAM.h
-//#define BTREE_VERSION2      2   // moved to EQFQDAM.h
-//#define BTREE_VERSION3      3   // moved to EQFQDAM.h
-#define BTREE_HEADER_VALUE_V0 "EQF "
-#define BTREE_HEADER_VALUE_V1 "EQF"
-#define BTREE_HEADER_VALUE_V2 "EQF"
-#define BTREE_HEADER_VALUE_V3 "EQF"
 
-//#define NTM_VERSION         1
-#define BTREE_HEADER_VALUE_TM1 "NTM"
 // BTREE databases of version NTM_VERSION2 support data records with
 // a size of more than 32k, the length field at the begin of the
 // data record is of type ULONG instead of USHORT
-#define NTM_VERSION2       2
-#define BTREE_HEADER_VALUE_TM2 "NTM"
 
 #define NTM_VERSION3       3
 #define BTREE_HEADER_VALUE_TM3 "NTM"
@@ -1229,7 +1218,7 @@ typedef struct _DICTTIME
  SHORT QDAMWriteRecord_V3(PBTREE, PBTREEBUFFER_V3);
  SHORT QDAMChangeKey_V3(PBTREE, USHORT, PTMWCHAR, PTMWCHAR );
  SHORT QDAMNewRecord_V3( PBTREE, PBTREEBUFFER_V3 *, RECTYPE );
- SHORT QDAMReadRecord_V3 ( PBTREE, USHORT, PBTREEBUFFER_V3 *, BOOL );
+ SHORT QDAMReadRecord_V3 ( PBTREE, int , PBTREEBUFFER_V3 *, BOOL );
  SHORT QDAMReadRecordFromDisk_V3( PBTREE, USHORT, PBTREEBUFFER_V3 *, BOOL );
  SHORT QDAMAddToBuffer_V3(PBTREE, PBYTE, ULONG, PRECPARAM);
  SHORT QDAMDeleteDataFromBuffer ( PBTREE, RECPARAM );

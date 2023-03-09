@@ -296,8 +296,18 @@ int EqfMemory::putProposal
     std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
+  /********************************************************************/
+  /* fill the TMX_PUT_IN prefix structure                             */
+  /* stPrefixIn.usLengthInput                                         */
+  /* stPrefixIn.usTmCommand                                           */
+  /* the TMX_PUT_IN structure must not be filled it is provided       */
+  /* by the caller                                                    */
+  /********************************************************************/
+  this->pTmPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
+  this->pTmPutIn->stPrefixIn.usTmCommand   = TMC_REPLACE;
 
-  iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
+  //iRC = (int)TmReplace( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
+  iRC = TmtXReplace ( (PTMX_CLB)htm, pTmPutIn, pTmPutOut );
 
   if ( iRC != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
