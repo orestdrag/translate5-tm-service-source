@@ -444,12 +444,6 @@ USHORT NTMGetIDFromNameEx
                                    (PBYTE)pTmClb->pLongNames->pszBuffer,
                                    pTmClb->pLongNames->ulBufUsed );
             } /* endif */
-
-            if ( (usRc == NO_ERROR) && pTmClb->fShared )
-            {
-              usRc = EQFNTMIncrUpdCounter( pTmClb->pstTmBtree, LONGNAMES_UPD_COUNTER,
-                                           &(pTmClb->alUpdCounter[LONGNAMES_UPD_COUNTER]) );
-            } /* endif */
           } /* endif */
         } /* endif */
       }

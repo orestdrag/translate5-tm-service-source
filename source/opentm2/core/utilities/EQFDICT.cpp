@@ -3014,34 +3014,32 @@ SHORT QDAMDictCreateLocal
     /******************************************************************/
     /* do settings depending if we are dealing with a dict or a tm..  */
     /******************************************************************/
+    //pBT->bVersion = BTREE_V2;
+    //pBT->bRecSizeVersion = BTREE_V3;
+    pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
+    pBT->usVersion = NTM_VERSION3;// changed from NTM_VERSION2
+    //strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
+    strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM3);
+    if ( pTermTable )
     {
-      //pBT->bVersion = BTREE_V2;
-      //pBT->bRecSizeVersion = BTREE_V3;
-      pBT->usBtreeRecSize = BTREE_REC_SIZE_V3;
-      pBT->usVersion = NTM_VERSION3;// changed from NTM_VERSION2
-      //strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM2);
-      strcpy(pBT->chEQF,BTREE_HEADER_VALUE_TM3);
-      if ( pTermTable )
-      {
-         memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
-         QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // initialise for compression
-         pBT->fTerse = TRUE;
-      }
-      else
-      {
-         pBT->fTerse = FALSE;
-      } /* endif */
-      /******************************************************************/
-      /* use the free collating sequence buffer to store our vital info */
-      /* Its taken care, that the structure will not jeopardize the     */
-      /* header...                                                      */
-      /******************************************************************/
-      memcpy( pBT->chCollate, pNTMVitalInfo, sizeof(NTMVITALINFO));
-      /******************************************************************/
-      /* new key compare routine ....                                   */
-      /******************************************************************/
-      pBT->compare = NTMKeyCompare;
+        memcpy( pBT->chEntryEncode, pTermTable, ENTRYENCODE_LEN );
+        QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // initialise for compression
+        pBT->fTerse = TRUE;
+    }
+    else
+    {
+        pBT->fTerse = FALSE;
     } /* endif */
+    /******************************************************************/
+    /* use the free collating sequence buffer to store our vital info */
+    /* Its taken care, that the structure will not jeopardize the     */
+    /* header...                                                      */
+    /******************************************************************/
+    memcpy( pBT->chCollate, pNTMVitalInfo, sizeof(NTMVITALINFO));
+    /******************************************************************/
+    /* new key compare routine ....                                   */
+    /******************************************************************/
+    pBT->compare = NTMKeyCompare;
 
     /* Allocate space for LookupTable */
     pBT->usNumberOfLookupEntries = 0;
@@ -3065,95 +3063,84 @@ SHORT QDAMDictCreateLocal
     {
       sRc = BTREE_NO_ROOM;
     } /* endif */
-  
-
     pBT->usNumberOfAllocatedBuffers = 0;
   }
-    
-    if ( !sRc )
+  
+  if ( !sRc )
+  {
+    sRc =  QDAMAllocTempAreas( pBTIda );
+  } /* endif */
+
+  if (! sRc )
+  {
+    /****************************************************************/
+    /* in order to initialize the area of the first record we       */
+    /* write an empty record buffer to the file before writing the  */
+    /* header                                                       */
+    /****************************************************************/             
+    int iBytesWritten;         
+    PBTREEBUFFER_V3 pbuffer;
+    UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
+    if ( ! pbuffer )
     {
-      sRc =  QDAMAllocTempAreas( pBTIda );
+      sRc = BTREE_NO_ROOM;
     } /* endif */
-
-    if (! sRc )
+    else
     {
-      /****************************************************************/
-      /* in order to initialize the area of the first record we       */
-      /* write an empty record buffer to the file before writing the  */
-      /* header                                                       */
-      /****************************************************************/             
-      int iBytesWritten;         
-      PBTREEBUFFER_V3 pbuffer;
-      UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
-      if ( ! pbuffer )
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-      else
-      {
-        //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-        FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
+      //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+      FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
 
-        UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
+      UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
-        sRc = QDAMWriteHeader( pBTIda );
-      } /* endif */
-    }
-      
-
-      if (! sRc )
-      {
-        sRc = QDAMDictUpdSignLocal(pBTIda, pUserData, usLen );
-      } /* endif */
-
-      if ( !sRc )
-      {
-        /*******************************************************************/
-        /* Write out an empty root node                                    */
-        /*******************************************************************/
-        if ( pBT->bRecSizeVersion == BTREE_V3 )
-        {
-          PBTREEBUFFER_V3 pRecord;
-          sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
-          if ( !sRc )
-          {
-            TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
-            sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
-          } /* endif */
-          if ( !sRc )
-          {
-            sRc = QDAMAllocKeyRecords( pBTIda, 1 );
-            if (! sRc )
-            {
-                pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
-            } /* endif */
-          } /* endif */
-        }
-        else
-        {
-          T5LOG(T5FATAL) <<  "QDAMDictCreateLocal::pBT->bRecSizeVersion == BTREE_V3 tried to create not TransMem, it's not supported";
-        } /* endif */
-      } /* endif */
+      sRc = QDAMWriteHeader( pBTIda );
     } /* endif */
   }
-  else
+      
+
+  if (! sRc )
   {
-    switch ( sRc )
-    {
-      case  ERROR_INVALID_DRIVE:
-        sRc = BTREE_INVALID_DRIVE;
-        break;
-      case  ERROR_OPEN_FAILED :
-        sRc = BTREE_OPEN_FAILED;
-        break;
-      case  ERROR_NETWORK_ACCESS_DENIED:
-        sRc = BTREE_NETWORK_ACCESS_DENIED;
-        break;
-      default :
-        sRc = BTREE_OPEN_ERROR;
-        break;
-    } /* endswitch */
+    sRc = QDAMDictUpdSignLocal(pBTIda, pUserData, usLen );
   } /* endif */
+
+  if ( !sRc )
+  {
+    /*******************************************************************/
+    /* Write out an empty root node                                    */
+    /*******************************************************************/
+    PBTREEBUFFER_V3 pRecord;
+    sRc = QDAMReadRecord_V3(pBTIda, pBT->usFirstNode, &pRecord, TRUE );
+    if ( !sRc )
+    {
+      TYPE(pRecord) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
+      sRc = QDAMWriteRecord_V3(pBTIda,pRecord);
+    } /* endif */
+    if ( !sRc )
+    {
+      sRc = QDAMAllocKeyRecords( pBTIda, 1 );
+      
+    } /* endif */
+    if (! sRc )
+    {
+      pBT->usFirstDataBuffer = pBT->usNextFreeRecord;
+    } /* endif */
+  } /* endif */
+  
+  switch ( sRc )
+  {
+    case  ERROR_INVALID_DRIVE:
+      sRc = BTREE_INVALID_DRIVE;
+      break;
+    case  ERROR_OPEN_FAILED :
+      sRc = BTREE_OPEN_FAILED;
+      break;
+    case  ERROR_NETWORK_ACCESS_DENIED:
+      sRc = BTREE_NETWORK_ACCESS_DENIED;
+      break;
+    case 0: break;
+    default :
+      sRc = BTREE_OPEN_ERROR;
+      break;
+  } /* endswitch */
 
   if ( !sRc )
   {
@@ -3237,17 +3224,8 @@ USHORT TmtXClose
   if ( pTmClb->bCompactChanged )
   {
     SHORT sRetries = MAX_RETRY_COUNT;
-    //do
-    {
-      usRc = EQFNTMUpdate( pTmClb->pstTmBtree, COMPACT_KEY,
-                           pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
-      //if ( pTmClb->fShared && (usRc == BTREE_IN_USE) )
-      //{
-      //  UtlWait( MAX_WAIT_TIME );
-      //  sRetries--;
-      //} /* endif */
-    }
-    //while( pTmClb->fShared && (usRc == BTREE_IN_USE) && (sRetries > 0));
+    usRc = EQFNTMUpdate( pTmClb->pstTmBtree, COMPACT_KEY,
+                        pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
   } /* endif */
 
   //close index file regardless of errors
@@ -6250,7 +6228,7 @@ SHORT QDAMInsertKey_V3
      else
      {
        i = (SHORT) OCCUPIED(pRecord);
-       usKeyLen = (USHORT)((pBT->fTransMem) ? sizeof(ULONG) : (UTF16strlenBYTE(pKey) + sizeof(TMWCHAR)));
+       usKeyLen = sizeof(ULONG);
 
        usDataRec = usKeyLen + sizeof(USHORT) + sizeof(RECPARAM);
        

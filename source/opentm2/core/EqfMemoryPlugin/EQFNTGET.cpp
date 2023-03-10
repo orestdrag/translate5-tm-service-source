@@ -400,14 +400,8 @@ USHORT TmtXGet
   if ( !usRc )
   {
     SHORT sRetries = MAX_RETRY_COUNT;
-    //do
     {
       usRc = NO_ERROR;                 // reset return code
-      // Update internal buffers if database has been modified by other users
-      //if ( !usRc && pTmClb->fShared )
-      //{
-      //  usRc = NTMCheckForUpdates( pTmClb );
-      //} /* endif */
 
       if ( !usRc )
       {
@@ -509,14 +503,7 @@ USHORT TmtXGet
             } /* endif */
           } /* endif */
       } /* endif */
-
-      //if ( pTmClb->fShared && (usRc == BTREE_IN_USE) )
-      //{
-      //  UtlWait( MAX_WAIT_TIME );
-      //  sRetries--;
-      //} /* endif */
     }
-    //while( pTmClb->fShared && (usRc == BTREE_IN_USE) && (sRetries > 0)); /* enddo */
   } /* endif */
 
   // store indication if more matches are available
