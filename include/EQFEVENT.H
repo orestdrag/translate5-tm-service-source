@@ -313,14 +313,14 @@ typedef enum
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
-      T5LOG(T5ERROR) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
+      if(rc) T5LOG(T5ERROR) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
   #else
     #define ERREVENT( id, class, rc )
   #endif
 
   #ifndef NO_ERREVENTS
     #define ERREVENT2( id, class, rc, gr, str ) \
-     ERREVENT(id, class,rc) <<"; gr = " << gr <<"; str = "  << str
+     if(rc) ERREVENT(id, class,rc) <<"; gr = " << gr <<"; str = "  << str
   #else
     #define ERREVENT2( id, class, rc, gr, str )
   #endif
@@ -345,7 +345,7 @@ typedef enum
 
   #ifndef NO_DEBUGEVENTS
     #define DEBUGEVENT( id, class, rc ) \
-      T5LOG(T5ERROR) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
+      T5LOG(T5DEBUG) << "id = " <<  id << "; class = " << class <<  "; rc = " <<rc 
   #else
     #define DEBUGEVENT( id, class, rc )
   #endif

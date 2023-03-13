@@ -12,7 +12,7 @@
   #define TOKENIZELOG
   #define SPELLFACTORY_LOGGING
   #define ORGANIZE_LOGGING
-  #define MEASURETIME
+  //#define MEASURETIME
   #define SGMLDITA_LOGGING
   #define INLINE_TAG_REPL_LOGGING
   #define _NTGET_LOG
@@ -112,6 +112,7 @@ public:
     std::string FlushBuffers(int severity);
 };
 
+static void GetElapsedTime( long long *plTime );
 std::string getTimeStr();
 int getBuffIdForLog(int severity);
 
