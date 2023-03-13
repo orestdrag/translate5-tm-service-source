@@ -555,7 +555,7 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
   USHORT            usQRc;              //rc from EqfSend2Handler
   SERVERNAME        szServer;           //local var for server name
 
-  ERREVENT( TMCLOSE_LOC, ERROR_EVENT, 0 );
+  //ERREVENT( TMCLOSE_LOC, ERROR_EVENT, 0 );
 
   /********************************************************************/
   /* initialze function return code                                   */

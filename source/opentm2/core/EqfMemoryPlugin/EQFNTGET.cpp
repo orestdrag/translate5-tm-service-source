@@ -44,16 +44,6 @@ static int QueryPerformanceFrequency(LARGE_INTEGER* li){
   return 0;
 }
 
-
-void GetElapsedTime( LONG64 *plTime )
-{
-  
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
-  T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 38  whole function";
-} /* end of function GetElapsedTime */
-
 //#endif
 
 #define ACTIVATE_NTMGenericDelete 

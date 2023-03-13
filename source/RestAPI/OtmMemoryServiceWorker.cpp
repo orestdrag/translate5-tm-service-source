@@ -2840,6 +2840,7 @@ int OtmMemoryServiceWorker::getStatus
     }
     // return the status of the memory
     factory->startJSON( strOutputParms );
+    factory->addParmToJSON( strOutputParms, "status", "open" );
     factory->addParmToJSON( strOutputParms, "tmxImportStatus", pszStatus );
     if(this->vMemoryList[iIndex].importDetails != nullptr){
       factory->addParmToJSON( strOutputParms, "importProgress", vMemoryList[iIndex].importDetails->usProgress );
@@ -2861,11 +2862,14 @@ int OtmMemoryServiceWorker::getStatus
   // check if memory exists
   if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
   {
+    factory->startJSON( strOutputParms );
+    factory->addParmToJSON( strOutputParms, "status", "not found" );
+    factory->terminateJSON( strOutputParms );
     return( NOT_FOUND );
   }
 
   factory->startJSON( strOutputParms );
-  factory->addParmToJSON( strOutputParms, "tmxImportStatus", "available" );
+  factory->addParmToJSON( strOutputParms, "status", "available" );
   factory->terminateJSON( strOutputParms );
   return( OK );
 }

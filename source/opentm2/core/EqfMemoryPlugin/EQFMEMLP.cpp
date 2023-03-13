@@ -108,12 +108,12 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 );
 
 
-static void GetElapsedTime( LONG64 *plTime )
+static void GetElapsedTime( long long *plTime )
 {
-  
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  *plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
+  if(plTime) *plTime = 0;
+  //struct timespec now;
+  //clock_gettime(CLOCK_MONOTONIC, &now);
+  //*plTime =  now.tv_sec + now.tv_nsec / 1000000000.0;
 }
 
 USHORT MemHandleCodePageValue
@@ -129,8 +129,6 @@ USHORT MemHandleCodePageValue
   static LONG64 lMemAccessTime = 0;
   static LONG64 lFileReadTime = 0;
   static LONG64 lOtherTime = 0;
-
-static void GetElapsedTime( LONG64 *plTime );
 
 //#endif
 
@@ -463,9 +461,9 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        {
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         T5LOG(T5ERROR)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::" << pReplAddr[0] <<  "; szMemSourceLang = " <<  pReplAddr[1];
+         T5LOG(T5INFO)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::" << pReplAddr[0] <<  "; szMemSourceLang = " <<  pReplAddr[1];
 
-          fOK = FALSE;
+          //fOK = FALSE;
        } /* endif */
 
        // update memory description with description of imported memory
@@ -518,10 +516,10 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
          //usMBCode = T5LOG(T5ERROR) <<   "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] );
-         T5LOG(T5ERROR)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] ;
+         T5LOG(T5INFO)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] ;
          //if ( usMBCode == MBID_CANCEL )
          //{
-           fOK = FALSE;
+         //  fOK = FALSE;
          //} /* endif */
        } /* endif */
 

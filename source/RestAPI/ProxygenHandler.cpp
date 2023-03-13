@@ -93,7 +93,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::STATUS_MEM:
       {
         iRC = pMemService->getStatus( memName, strResponseBody );
-        iRC = 200;
         break;
       }
         
