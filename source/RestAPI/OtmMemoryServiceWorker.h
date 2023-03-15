@@ -15,13 +15,11 @@
 #include <codecvt>
 #include <string>
 #include <vector>
-#include "OTMFUNC.H"
 #include "ProxygenStats.h"
 //#include "EQFFUNCI.H"
+#include "tm.h"
 
-/*! \brief constant defining the maximum number of opened memories
-*/
-#define OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES 40
+
 
 /*! \brief constant defining the timeout for memories (in number of seconds)
   When a memory has not been used for the given time it is automatically closed
@@ -130,9 +128,7 @@ public:
   /*! \brief Close all open memories
   \returns http return code0 if successful or an error code in case of failures
   */
-  int closeAll
-  (
-  );
+  int closeAll ( );
 
   /*! \brief Checks if there is opened memory in import process
   \returns index if import process for any memory is going on, -1 if no
@@ -265,39 +261,6 @@ private:
     std::string &strErrorReturn
   );
 
-
-  /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
-    \param pszMemory name of the memory
-    \param plHandle buffer for the memory handle
-    \param pszError buffer for an error message text in case of failures
-    \param iErrorBufSize size of the error text buffer in number of characters
-    \param piReturnCode pointer to a buffer for the OpenTM2 error code
-    \returns OK if successful or an HTTP error code in case of failures
-  */
-  int getMemoryHandle( char *pszMemory, long *plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode );
-
-  /*! \brief find a memory in our list of active memories
-    \param pszMemory name of the memory
-    \returns index in the memory table if successful, -1 if memory is not contained in the list
-  */
-  int findMemoryInList( const char *pszMemory );
-
-  /*! \brief find a free slot in our list of active memories, add a new entry if none found
-    \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
-  */
-  int getFreeSlot(size_t memoryRequested);
-
-  /*! \brief close any memories which haven't been used for a long time
-    \returns 0
-  */
-  size_t cleanupMemoryList(size_t memoryRequested);
-
-  /*! \brief calcuate total amount of RAM occupied by opened memory files
-    \returns 0
-  */
-  size_t calculateOccupiedRAM();
-
-
   /*! \brief convert a long time value into the UTC date/time format
     \param lTime long time value
     \param pszDateTime buffer receiving the converted date time
@@ -334,11 +297,6 @@ private:
   */
   int convertDateTimeStringToLong( char *pszDateTime, long *plTime );
   
-  /*! \brief close a memory and remove it from the open list
-      \param iIndex index of memory in the open list
-      \returns 0 
-  */
-  int removeFromMemoryList( int iIndex );
 
   /*! \brief build a unique name for of a temporary file 
   \param pszTempFile buffer reiceiving the temporary file name
@@ -405,35 +363,6 @@ private:
   \returns 0 is sucessfull or a return code
   */
   int loadFileIntoByteVector( char *pszFile, std::vector<unsigned char>  &vFileData );
-
-  /*! \brief States of a memory
-  */
-  typedef enum 
-  {
-    OPEN_STATUS,            // memory is available and open
-    AVAILABLE_STATUS,       // memory has been imported but is not open yet
-    IMPORT_RUNNING_STATUS,  // memory import is running
-    IMPORT_FAILED_STATUS    // memory import failed
-  } MEMORY_STATUS;
-
-  /*! \brief Info structure for an open translation memory
-  */
-	typedef struct _OPENEDMEMORY
-  {
-    char szName[260];               // name of the memory
-    time_t tLastAccessTime;         // last time memory has been used
-    long lHandle;                   // memory handle     
-    MEMORY_STATUS eStatus;          // status of the memory
-    MEMORY_STATUS eImportStatus;    // status of the current/last memory import
-    //std::atomic<double> dImportProcess; 
-    //ushort * pusImportPersent = nullptr;
-    ImportStatusDetails* importDetails = nullptr;
-    char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
-  } OPENEDMEMORY, *POPENEDMEMORY;
-
-/*! \brief Pointer to the list of opened memories
-*/
-  std::vector<OPENEDMEMORY> vMemoryList;
 
 
 /*! \brief OpenTM2 API session handle
