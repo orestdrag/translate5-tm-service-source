@@ -136,12 +136,13 @@ set(T5MEMORY_Source_Files
 
     #from MEMORY folder
     "${CORE_DIR}/EqfMemoryPlugin/TMPluginWrapper.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/MemoryFactory.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMEP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEM00.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/GenericTagReplace.cpp"
+
+    "${CORE_DIR}/tm.cpp"
 )
 
 set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )
