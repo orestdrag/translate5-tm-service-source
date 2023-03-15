@@ -49,29 +49,6 @@
 #define _EQF_H_INCLUDED
 
 #include "../source/opentm2/core/utilities/LogWrapper.h"
-#include <atomic>
-struct ImportStatusDetails{
-  std::atomic_short usProgress{0};
-  std::atomic_int segmentsImported{-1};
-  std::atomic_int invalidSegments{-1};
-  std::atomic_int invalidSymbolErrors{-1};
-  std::string importTimestamp;
-  std::stringstream importMsg;
-  
-  void reset(){
-    importMsg.str("");
-    usProgress = 0;
-    segmentsImported = -1;
-    invalidSegments = -1;
-    invalidSymbolErrors = -1;
-    importTimestamp = "not finished";    
-  }
-  std::string toString(){
-    std::string res;
-    res = "progress = " + toStr(usProgress) + "; segmentsImported = " + toStr(segmentsImported) + "; invalidSegments = " + toStr(invalidSegments) + "; time = " + importTimestamp;
-    return res;
-  }
-};
 
 
 /**********************************************************************/
@@ -2016,8 +1993,6 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define KEY_NUM_OF_THREADS "KEY_NUM_OF_THREADS"
 #define KEY_TIMEOUT_SETTINGS "KEY_TIMEOUT_SETTINGS"
 #define KEY_RUN_DATE "KEY_RUN_DATE" 
-//5MB reserved for service
-#define MEMORY_RESERVED_FOR_SERVICE 5000000
 //#define KEY_PLUGIN_DIR "PLUGIN_dir"
 #define KEY_DEFAULT_DIR "DEFAULT_dir"
 #define KEY_LANG_FILE_PATH "LANG_FILE_PATH"
@@ -2058,34 +2033,12 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define EQFMTTRANS                "EQFMTTRANS"   // translate passed segment
 #define EQFMTCLOSE                "EQFMTCLOSE"   // close MT subsystem
 #define QDPR_PROP_FILENAME        "EQFQDPR.PRP"  // QDPR property file
-#define EXT_FOLDER_MAIN           ".F00"
-#define EXT_OF_SUBFOLDER          ".F01"
 #define EXT_DOCUMENT              ".*"
-#define EXT_OF_DIC                ".ASD"       // Extention of dictionaries
-#define EXT_OF_EXTERNAL_DIC       ".ASX"       // Ext. of external dict. format
-#define EXT_OF_ABBREV_DICT        ".ABR"       // extension of abbreviation dict
 #define EXT_OF_MEM                ".MEM"       // Extention of memory properties
 #define EXT_OF_FORMAT             ".TBL"       // Extention of format tables
-#define EXT_OF_FORMATSETTINGS     ".CHR"       // Extention of format table setting files
 #define EXT_OF_INTTABLE           ".IBL"       // Extention of internal tables
 #define EXT_OF_EXTERNAL_FORMAT    ".TBX"       // Ext. of external format tables
-#define EXT_OF_EXCLUSION          ".NOI"       // Extention of word lists
-#define EXT_OF_NEWTERMS_LIST      ".NTL"       // Extention of new terms list
-#define EXT_OF_FOUNDTERMS_LIST    ".FTL"       // Extention of found terms list
-#define LPEX_MACROEXT             ".LXL"       // Extension of LPEX macros
-#define EXT_OF_EDITOR             ".EDI"       // Extention of editor properties
-#define EXT_OF_DICTPROP           ".PRO"       // Ext. of dict properties
-#define EXT_OF_DICTINDEX          ".ASI"       // Ext. of dict index
-#define EXT_TMP_DICTPROP          ".TPR"       // Ext. of temp dict prop
-#define EXT_TMP_DICTPROP_COPY     ".TPC"       // Ext. of temp dict prop copy
-#define EXT_TMP_DICTINDEX         ".TAI"       // Ext. of temp dict index
-#define EXT_TMP_DICTINDEX_COPY    ".TIC"       // Ext. of temp dict index copy
-#define EXT_TMP_DIC_COPY          ".TSC"       // Ext. of temp dict copy
-#define EXT_TMP_DIC               ".TAS"       // Ext. of temp dict
-#define EXT_OF_DLL                ".DLL"       // Extention of DLLs
-#define QDPR_FORMAT_EXT           ".FRM"       // extension of a QDPR format file
-#define  MEM_EXPORT_PATTERN_EXT   ".EXP"       // Default extension for an
-                                               // exported memory database
+
 #define EXT_OF_TMDATA             ".TMD"       // Ext. of TM data file
 #define EXT_OF_TMINDEX            ".TMI"       // Ext. of TM index file
 #define EXT_OF_TEMP_MEM           ".MET"       // Temporary translation memory (For Organize)
@@ -6336,7 +6289,7 @@ typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHOR
 /* General Transl. Memory functions                                   */
 /**********************************************************************/
 #if defined(INCL_EQF_TM)
-  #include <EQFTM.H>
+  #include <tm.h>
 #endif
 
 /**********************************************************************/

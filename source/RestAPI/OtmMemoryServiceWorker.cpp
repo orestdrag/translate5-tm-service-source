@@ -21,9 +21,8 @@
 //#include <restbed>
 #include "OtmMemoryServiceWorker.h"
 #include "OTMMSJSONFactory.h"
-#include "OTMFUNC.H"
+#include "tm.h"
 #include "EQFMSG.H"
-#include "EQFTM.H"
 #include "win_types.h"
 #include "opentm2/core/utilities/FilesystemWrapper.h"
 #include "opentm2/core/utilities/LogWrapper.h"
@@ -44,17 +43,7 @@
 #include "opentm2/core/utilities/Stopwatch.hpp"
 
 
-enum statusCodes {
-  OK = 200, 
-  INTERNAL_SERVER_ERROR = 500, 
-  PROCESSING = 102, 
-  NOT_FOUND = 404,
-  BAD_REQUEST = 400,
-  CONFLICT = 409,
-  CREATED = 201,
-  NOT_ACCEPTABLE = 406
 
-};
 
 // import memory process
 void importMemoryProcess( void *pvData );
@@ -184,6 +173,7 @@ int OtmMemoryServiceWorker::verifyAPISession
   if ( this->iLastRC != 0 ) {
     T5LOG(T5ERROR) << "OpenTM2 API session could not be started, the return code is" <<  this->iLastRC ;
   }else{
+      TMManager::GetInstance()->hSession = hSession;
       try {
           xercesc::XMLPlatformUtils::Initialize();
       }
@@ -261,263 +251,6 @@ int OtmMemoryServiceWorker::buildErrorReturn
 
 
 
-
-/*! \brief find a memory in our list of active memories
-  \param pszMemory name of the memory
-  \returns index in the memory table if successful, -1 if memory is not contained in the list
-*/
-int OtmMemoryServiceWorker::findMemoryInList( const char *pszMemory )
-{
-  if(this->vMemoryList.size()==0){
-    T5LOG( T5WARNING) <<"findMemoryInList:: vMemoryList.size == 0";
-  }
-  // 
-  for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
-  {
-    if ( strcasecmp( this->vMemoryList[i].szName, pszMemory ) == 0 )
-    {
-      return( i );
-    } /* endif */
-  } /* endfor */
-  return( -1 );
-}
-
-/*! \brief Checks if there is opened memory in import process
-  \returns index if import process for any memory is going on, -1 if no
-  */
-int OtmMemoryServiceWorker::GetMemImportInProcess(){
-  for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
-  {
-    if(vMemoryList[i].eImportStatus == IMPORT_RUNNING_STATUS)
-    {
-      T5LOG( T5INFO) << ":: memory in import process, name = " << vMemoryList[i].szName ;
-      return i;
-    }
-  } /* endfor */
-  return -1;
-}
-
-/*! \brief find a free slot in our list of active memories, add a new entry if none found
-  \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
-*/
-int OtmMemoryServiceWorker::getFreeSlot(size_t memoryRequested)
-{
-  size_t UsedMemory = 0;
-  int AllowedMemoryMB;
-  properties_get_int(KEY_ALLOWED_RAM, AllowedMemoryMB);
-  size_t AllowedMemory = (size_t)AllowedMemoryMB * 1000000;
-
-  #ifdef CALCULATE_ONLY_MEM_FILES
-  std::string path; 
-  char memFolder[260];
-  properties_get_str(KEY_MEM_DIR, memFolder, 260);
-
-  for(int i = 0; i < vMemoryList.size() ;i++){
-    path = memFolder;
-    path += this->vMemoryList[i].szName;
-    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
-    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
-    UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
-  }
-  #else
-  UsedMemory = calculateOccupiedRAM() + memoryRequested;
-  #endif
-
-  T5LOG( T5DEBUG) << ":: " << UsedMemory << " bytes is used from " << AllowedMemory << " allowed";
-
-  // add a new entry when the maximum list size has not been reached yet
-  //if ( this->vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
-  if( UsedMemory < AllowedMemory)
-  {
-    // first look for a free slot in the existing list
-    for( int i = 0; i < (int)this->vMemoryList.size(); i++ )
-    {
-      if ( this->vMemoryList[i].szName[0] == 0 )
-      {
-        return( i );
-      } /* endif */
-    } /* endfor */
-    
-    OtmMemoryServiceWorker::OPENEDMEMORY NewEntry;
-    memset( &NewEntry, 0, sizeof(NewEntry) );
-    this->vMemoryList.push_back( NewEntry );
-    return( this->vMemoryList.size() - 1 );
-  } /* endif */  
-
-  return( -1 );
-}
-
-
-size_t OtmMemoryServiceWorker::calculateOccupiedRAM(){
-  char memFolder[260];
-  size_t UsedMemory = 0;
-  #ifdef CALCULATE_ONLY_MEM_FILES
-  properties_get_str(KEY_MEM_DIR, memFolder, 260);
-  std::string path;
-  for(int i = 0; i < vMemoryList.size() ;i++){
-    if(this->vMemoryList[i].szName != 0){
-      path = memFolder;
-      path += this->vMemoryList[i].szName;
-      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
-      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
-      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
-    }
-  }
-  #else
-  UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
-  UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
-  #endif
-
-  T5LOG( T5INFO) << ":: calculated occupied ram = " << UsedMemory/1000000 << " MB";
-  return UsedMemory;
-}
-
-
-/*! \brief close any memories which haven't been used for a long time
-  \returns 0
-*/
-size_t OtmMemoryServiceWorker::cleanupMemoryList(size_t memoryRequested)
-{  
-  int AllowedMBMemory = 500;
-  properties_get_int(KEY_ALLOWED_RAM, AllowedMBMemory);
-  size_t AllowedMemory = AllowedMBMemory * 1000000;    
-  size_t memoryNeed = memoryRequested + calculateOccupiedRAM();
-
-  if(memoryNeed < AllowedMemory){
-    return( AllowedMemory - memoryNeed );
-  }
-
-  time_t curTime;
-  time( &curTime );
-  std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
-  for( int i = 0; i < (int)this->vMemoryList.size() ; i++ ){
-    if ( vMemoryList[i].szName[0] != 0 )
-    {
-      openedMemoriesSortedByLastAccess.insert({vMemoryList[i].tLastAccessTime, i});
-    }
-  }
-
-  for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    T5LOG( T5INFO) << ":: removing memory  \'"<< vMemoryList[it->second].szName << "\' that wasns\'t used for " << (curTime - vMemoryList[it->second].tLastAccessTime) <<  " seconds" ;
-    removeFromMemoryList(it->second);
-    memoryNeed = memoryRequested + calculateOccupiedRAM();
-  }
-
-  return( AllowedMemory - memoryNeed );
-}
-
-/*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
-\param pszMemory name of the memory
-\param plHandle buffer for the memory handle
-\param pszError buffer for an error message text in case of failures
-\param iErrorBufSize size of the error text buffer in number of characters
-\param piReturnCode pointer to a buffer for the OpenTM2 error code
-\returns OK if successful or an HTTP error code in case of failures
-*/
-int OtmMemoryServiceWorker::getMemoryHandle( char *pszMemory, PLONG plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode )
-{
-  *piErrorCode = 0;
-  int iIndex = findMemoryInList( pszMemory );
-  if ( iIndex != -1 )
-  {
-    switch ( this->vMemoryList[iIndex].eStatus )
-    {
-      case OPEN_STATUS:
-        *plHandle = this->vMemoryList[iIndex].lHandle;
-        time( &( this->vMemoryList[iIndex].tLastAccessTime ) );
-        return( OK );
-        break;
-      case IMPORT_RUNNING_STATUS:
-        wcsncpy( pszError, L"TM is busy, import is running", iErrorBufSize );
-        *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( PROCESSING );
-        break;
-      case IMPORT_FAILED_STATUS:
-        wcsncpy( pszError, L"TM import failed, memory may be not usable", iErrorBufSize );
-        *piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( INTERNAL_SERVER_ERROR );
-        break;
-      case AVAILABLE_STATUS:
-        {
-          // open the memory
-          LONG lHandle = 0;
-          *piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
-          if ( *piErrorCode != 0 )
-          {
-            unsigned short usRC = 0;
-            EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
-            return( INTERNAL_SERVER_ERROR );
-          } /* endif */
-          this->vMemoryList[iIndex].lHandle = lHandle;
-          strcpy( this->vMemoryList[iIndex].szName, pszMemory );
-          time( &( this->vMemoryList[iIndex].tLastAccessTime ) );
-          this->vMemoryList[iIndex].eStatus = OPEN_STATUS;
-          //if ( this->vMemoryList[iIndex].pszError != NULL ) free( this->vMemoryList[iIndex].pszError );
-          //this->vMemoryList[iIndex].pszError = NULL;
-          *plHandle = lHandle;
-          return( OK );
-        }
-        break;
-      default:
-        wcsncpy( pszError, L"TM is in undefined state", iErrorBufSize );
-        //*piErrorCode = ERROR_MEM_NOT_ACCESSIBLE;
-        return( INTERNAL_SERVER_ERROR );
-        break;
-    }
-  } /* endif */
-
-
-  size_t requiredMemory = 0;
-  {
-    char memFolder[260];
-    properties_get_str(KEY_MEM_DIR, memFolder, 260);
-    std::string path;
-
-    path = memFolder;
-    path += pszMemory;
-    if(FilesystemHelper::FileExists(std::string(path + ".TMD"))){
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
-      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
-    }
-  } 
-
-  // cleanup the memory list (close memories not used for a longer time)
-  size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
-  if(VLOG_IS_ON(1)){
-    T5LOG( T5INFO) << ":: memory: " << pszMemory << "; required RAM:" << requiredMemory << "; allowed RAM left after opening mem: " << memLeftAfterOpening;
-  }
-  // find a free slot in the memory list
-  iIndex = getFreeSlot(requiredMemory);
-
-  // handle "too many open memories" condition
-  if ( iIndex == -1 )
-  {
-    wcscpy( pszError, L"Error: too many open translation memory databases" );
-    return( INTERNAL_SERVER_ERROR );
-  } /* endif */
-
-  // open the memory
-  LONG lHandle = 0;
-  *piErrorCode = EqfOpenMem( this->hSession, pszMemory, &lHandle, 0 );
-  if ( *piErrorCode != 0 )
-  {
-    unsigned short usRC = 0;
-    EqfGetLastErrorW( this->hSession, &usRC, pszError, (unsigned short)iErrorBufSize );
-    return( INTERNAL_SERVER_ERROR );
-  } /* endif */
-
-  // add opened memory to the memory list
-  this->vMemoryList[iIndex].lHandle = lHandle;
-  strcpy( this->vMemoryList[iIndex].szName, pszMemory );
-  time( &(this->vMemoryList[iIndex].tLastAccessTime) );
-  this->vMemoryList[iIndex].eStatus = OPEN_STATUS;
-  this->vMemoryList[iIndex].eImportStatus = OPEN_STATUS;
-  this->vMemoryList[iIndex].pszError = NULL;
-  *plHandle = lHandle;
-
-  return( OK );
-}
 
 /*! \brief convert a long time value into the UTC date/time format
     \param lTime long time value
@@ -708,38 +441,6 @@ bool OtmMemoryServiceWorker::getValue( char *pszString, int iLen, int *piResult 
   return( fOK );
 } 
 
-/*! \brief close a memory and remove it from the open list
-    \param iIndex index of memory in the open list
-  \returns 0 
-*/
-int OtmMemoryServiceWorker::removeFromMemoryList( int iIndex )
-{
-  LONG lHandle = this->vMemoryList[iIndex].lHandle;
-  int i=0;
-  while(vMemoryList[iIndex].eStatus == IMPORT_RUNNING_STATUS || vMemoryList[iIndex].eImportStatus == IMPORT_RUNNING_STATUS ){
-    sleep(1);
-    if(i++ % 10 == 0){
-      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << vMemoryList[iIndex].szName << "\', for " << i << " seconds";
-    }
-  }
-  // remove the memory from the list
-  this->vMemoryList[iIndex].lHandle = 0;
-  this->vMemoryList[iIndex].tLastAccessTime = 0;
-  this->vMemoryList[iIndex].szName[0] = 0;
-  if ( this->vMemoryList[iIndex].pszError ) delete[]  this->vMemoryList[iIndex].pszError ;
-  if( this->vMemoryList[iIndex].importDetails != nullptr){
-    delete this->vMemoryList[iIndex].importDetails;
-    this->vMemoryList[iIndex].importDetails = nullptr;
-  }
-  this->vMemoryList[iIndex].pszError = NULL;
-
-  // close the memory
-  EqfCloseMem( this->hSession, lHandle, 0 );
-
-  return( 0 );
-} 
-
-
 
 int OtmMemoryServiceWorker::cloneTMLocaly
 (
@@ -812,32 +513,35 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   }
 
   // check mem if is not in import state
-  int iIndex = -1;
+  OPENEDMEMORY * pMem = nullptr;
+  
   //LONG lHandle = 0;
   //BOOL fClose = false;
   //MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
   //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
 
   if(!iRC){
-    iIndex = this->findMemoryInList( strMemory.c_str() );
-    if(iIndex == -1){
+    pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  
+    
+    if(pMem == nullptr){
     // tm is probably not opened, buf files presence was checked before, so it should be "AVAILABLE" status
     //  strOutputParms = "\'newName\' " + strMemory +" was not found in memory list";
     //  T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
     //  iRC = 500;
     }else{
       // close the memory - if open
-      if(this->vMemoryList[iIndex].eImportStatus == IMPORT_RUNNING_STATUS){
+      if(pMem->eImportStatus == IMPORT_RUNNING_STATUS){
            strOutputParms = "src tm \'" + strMemory +"\' is in import status. Repeat request later.";
           T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
          iRC = 500;
-      }else if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+      }else if ( pMem->eStatus == OPEN_STATUS )
       {
-        if(this->vMemoryList[iIndex].lHandle){
-          //EqfCloseMem( this->hSession, this->vMemoryList[iIndex].lHandle, 0 );
-          //this->vMemoryList[iIndex].lHandle = 0;
+        if(pMem->lHandle){
+          //EqfCloseMem( this->hSession, pMem->lHandle, 0 );
+          //pMem->lHandle = 0;
         }
-      }else if(this->vMemoryList[iIndex].eStatus != AVAILABLE_STATUS ){
+      }else if(pMem->eStatus != AVAILABLE_STATUS ){
          strOutputParms = "src tm \'" + strMemory +"\' is not available nor opened";
          T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
          iRC = 500;
@@ -911,17 +615,17 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   if(!iRC){
     EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
   }
-  if( iIndex != -1 )
+  if( pMem != nullptr )
   {
     //fClose = true;
-    //lHandle =          this->vMemoryList[iIndex].lHandle; 
-    //lastStatus =       this->vMemoryList[iIndex].eStatus;
-    //lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+    //lHandle =          pMem->lHandle; 
+    //lastStatus =       pMem->eStatus;
+    //lastImportStatus = pMem->eImportStatus;
 
-    //this->vMemoryList[iIndex].lHandle = 0;
-    //this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-    //this->vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
-    //this->vMemoryList[iIndex].dImportProcess = 0;
+    //pMem->lHandle = 0;
+    //pMem->eStatus = AVAILABLE_STATUS;
+    //pMem->eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
+    //pMem->dImportProcess = 0;
   }
 
   if(iRC == 0 ){
@@ -973,25 +677,25 @@ int OtmMemoryServiceWorker::import
   }
 
   // find the memory to our memory list
-  int iIndex = this->findMemoryInList( strMemory.c_str() );
+  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   LONG lHandle = 0;
   BOOL fClose = false;
   MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
   MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
-  if ( iIndex != -1 )
+  if ( pMem != nullptr )
   {
     // close the memory - when open
-    if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+    if ( pMem->eStatus == OPEN_STATUS )
     {
       fClose = true;
-      lHandle =          this->vMemoryList[iIndex].lHandle; //
-      lastStatus =       this->vMemoryList[iIndex].eStatus;
-      lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+      lHandle =          pMem->lHandle; //
+      lastStatus =       pMem->eStatus;
+      lastImportStatus = pMem->eImportStatus;
 
-      this->vMemoryList[iIndex].lHandle = 0;
-      this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-      this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-      //this->vMemoryList[iIndex].dImportProcess = 0;
+      pMem->lHandle = 0;
+      pMem->eStatus = AVAILABLE_STATUS;
+      pMem->eImportStatus = IMPORT_RUNNING_STATUS;
+      //pMem->dImportProcess = 0;
     }
   }
   else
@@ -1013,28 +717,28 @@ int OtmMemoryServiceWorker::import
     //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
 
     // cleanup the memory list (close memories not used for a longer time)
-    size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
+    size_t memLeftAfterOpening = TMManager::GetInstance()->cleanupMemoryList(requiredMemory);
     if(VLOG_IS_ON(1)){
       T5LOG( T5INFO) << ":: memory: " << strMemory << "; required RAM:" 
           << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
     }
     //requiredMemory = 0;
     // find a free slot in the memory list
-    iIndex = getFreeSlot(requiredMemory);
+    POPENEDMEMORY pMem = TMManager::GetInstance()->getFreeSlotPointer(requiredMemory);
 
     // handle "too many open memories" condition
-    if ( iIndex == -1 )
+    if ( pMem == nullptr )
     {
       wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Error: too many open translation memory databases";
       buildErrorReturn( iRC, errMsg, strOutputParms );
       return( INTERNAL_SERVER_ERROR );
     } /* endif */
 
-    this->vMemoryList[iIndex].lHandle = 0;
-    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
-    this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
-    //this->vMemoryList[iIndex].dImportProcess = 0;
-    strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
+    pMem->lHandle = 0;
+    pMem->eStatus = AVAILABLE_STATUS;
+    pMem->eImportStatus = IMPORT_RUNNING_STATUS;
+    //pMem->dImportProcess = 0;
+    strcpy( pMem->szName, strMemory.c_str() );
   }
   T5LOG( T5DEBUG) <<  "status for " << strMemory << " was changed to import";
   // extract TMX data
@@ -1048,9 +752,9 @@ int OtmMemoryServiceWorker::import
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Missing or incorrect JSON data in request body";
     buildErrorReturn( iRC, errMsg, strOutputParms );
         
-    this->vMemoryList[iIndex].lHandle = lHandle;
-    this->vMemoryList[iIndex].eStatus = lastStatus;
-    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
 
     return( BAD_REQUEST );
   } /* end */
@@ -1085,9 +789,9 @@ int OtmMemoryServiceWorker::import
     buildErrorReturn( iRC, errMsg, strOutputParms );
   
     //restore status
-    this->vMemoryList[iIndex].lHandle = lHandle;
-    this->vMemoryList[iIndex].eStatus = lastStatus;
-    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
 
     return( BAD_REQUEST );
   } /* endif */
@@ -1101,9 +805,9 @@ int OtmMemoryServiceWorker::import
     buildErrorReturn( -1, errMsg, strOutputParms );
     
     //restore status
-    this->vMemoryList[iIndex].lHandle = lHandle;
-    this->vMemoryList[iIndex].eStatus = lastStatus;
-    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
     return( INTERNAL_SERVER_ERROR );
   }
 
@@ -1118,9 +822,9 @@ int OtmMemoryServiceWorker::import
     buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
     
     //restore status
-    this->vMemoryList[iIndex].lHandle = lHandle;
-    this->vMemoryList[iIndex].eStatus = lastStatus;
-    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
     return( INTERNAL_SERVER_ERROR );
   }
   
@@ -1134,11 +838,11 @@ int OtmMemoryServiceWorker::import
   strcpy( pData->szInFile, szTempFile );
   strcpy( pData->szMemory, strMemory.c_str() );
 
-  if(this->vMemoryList[iIndex].importDetails == nullptr){
-    this->vMemoryList[iIndex].importDetails = new ImportStatusDetails;
+  if(pMem->importDetails == nullptr){
+    pMem->importDetails = new ImportStatusDetails;
   }
   
-  pData->importDetails = this->vMemoryList[iIndex].importDetails;
+  pData->importDetails = pMem->importDetails;
   pData->importDetails->reset();
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
@@ -1247,8 +951,8 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( strData.empty() )
   {
-    T5LOG( T5INFO) << "int OtmMemoryServiceWorker::createMemory():: strData is empty -> EqfCreateMem()";
-    iRC = (int)EqfCreateMem( this->hSession, (PSZ)strName.c_str(), 0, (PSZ)szOtmSourceLang, 0 );
+    iRC = MemFuncCreateMem( strName.c_str(), nullptr, szOtmSourceLang, 0);
+    //pData->fComplete = TRUE;   // one-shot function are always complete
   }
   else
   {
@@ -1273,8 +977,7 @@ int OtmMemoryServiceWorker::createMemory
       buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
       return( INTERNAL_SERVER_ERROR );
     }
-
-    iRC = (int)EqfImportMemInInternalFormat( this->hSession, (PSZ)strName.c_str(), szTempFile, 0 );
+    iRC = TMManager::GetInstance()->APIImportMemInInternalFormat( strName.c_str(), szTempFile, 0 );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
         DeleteFile( szTempFile );
     }
@@ -1732,7 +1435,7 @@ int OtmMemoryServiceWorker::search
 
   // get the handle of the memory 
   long lHandle = 0;
-  int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
   if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
@@ -1906,7 +1609,7 @@ int OtmMemoryServiceWorker::concordanceSearch
   }
     // get the handle of the memory 
   long lHandle = 0;
-  int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
   if ( httpRC != OK )
   {
     std::wstring wstr = L"OtmMemoryServiceWorker::concordanceSearch::";
@@ -2034,22 +1737,6 @@ int OtmMemoryServiceWorker::concordanceSearch
 }
 
 
-/*! \brief Close all open memories
-\returns http return code0 if successful or an error code in case of failures
-*/
-int OtmMemoryServiceWorker::closeAll
-(
-)
-{
-  for ( int i = 0; i < ( int )this->vMemoryList.size(); i++ )
-  {
-    if ( this->vMemoryList[i].szName[0] != 0 )
-    {
-      removeFromMemoryList( i );
-    }
-  } /* endfor */
-  return( 0 );
-}
 
 
 /*! \brief shutdown the service
@@ -2061,7 +1748,7 @@ int OtmMemoryServiceWorker::closeAll
         {
            sleep(3);
            int j= 3;
-           while(int i = GetMemImportInProcess() != -1){
+           while(int i = TMManager::GetInstance()->GetMemImportInProcess() != -1){
             if( ++j % 15 == 0){
               T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
             }
@@ -2094,6 +1781,14 @@ int OtmMemoryServiceWorker::saveAllTmOnDisk( std::string &strOutputParms ){
   return OK;
 }
 
+
+/*! \brief Saves all open and modified memories
+  \returns http return code0 if successful or an error code in case of failures
+  */
+int OtmMemoryServiceWorker::closeAll(){
+  int rc = TMManager::GetInstance()->closeAll();
+  return rc;
+}
 
 /*! \brief List all available TMs
 \param strOutParms on return filled with the output parameters in JSON format
@@ -2273,7 +1968,7 @@ int OtmMemoryServiceWorker::updateEntry
 
     // get the handle of the memory 
   long lHandle = 0;
-  int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
   if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
@@ -2473,7 +2168,7 @@ int OtmMemoryServiceWorker::deleteEntry
 
     // get the handle of the memory 
   long lHandle = 0;
-  int httpRC = this->getMemoryHandle( (char *)strMemory.c_str(), &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  int httpRC =  TMManager::GetInstance()->getMemoryHandle( strMemory,  &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
   if ( httpRC != OK )
   {
     buildErrorReturn( iRC, pData->szError, strOutputParms );
@@ -2515,7 +2210,8 @@ int OtmMemoryServiceWorker::deleteEntry
   std::string errorStr;
   errorStr.reserve(1000);
   // update the memory delete entry
-  iRC = EqfUpdateDeleteMem( this->hSession, lHandle, pProp, 0,  &errorStr[0]);
+  TMManager::GetInstance()->APIUpdateDeleteMem( lHandle, pProp, 0 , &errorStr[0]);
+  //iRC = EqfUpdateDeleteMem( this->hSession, lHandle, pProp, 0,  &errorStr[0]);
   if ( iRC != 0 )
   {
     unsigned short usRC = 0;
@@ -2578,11 +2274,11 @@ int OtmMemoryServiceWorker::reorganizeMem
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
 
   // close memory if it is open
-  int iIndex = this->findMemoryInList( (char *)strMemory.c_str() );
-  if ( iIndex != -1 )
+  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
-    removeFromMemoryList( iIndex );
+    TMManager::GetInstance()->removeFromMemoryList( pMem );
   } /* endif */
 
   // reorganize the memory
@@ -2654,11 +2350,11 @@ int OtmMemoryServiceWorker::deleteMem
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
 
   // close memory if it is open
-  int iIndex = this->findMemoryInList( (char *)strMemory.c_str() );
-  if ( iIndex != -1 )
+  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
-    removeFromMemoryList( iIndex );
+    TMManager::GetInstance()->removeFromMemoryList( pMem );
   } /* endif */
 
   // delete the memory
@@ -2717,11 +2413,11 @@ int OtmMemoryServiceWorker::getMem
   } /* endif */
 
   // close memory if it is open
-  int iIndex = this->findMemoryInList( (char *)strMemory.c_str() );
-  if ( iIndex != -1 )
+  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
-    removeFromMemoryList( iIndex );
+    TMManager::GetInstance()->removeFromMemoryList( pMem );
   } /* endif */
 
   // check if memory exists
@@ -2827,12 +2523,13 @@ int OtmMemoryServiceWorker::getStatus
   JSONFactory *factory = JSONFactory::getInstance();
 
   // check if memory is contained in our list
-  int iIndex = this->findMemoryInList( (char *)strMemory.c_str() );
-  if ( iIndex != -1 )
+  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  
+  if ( pMem != nullptr )
   {
     // set status value
     std::string pszStatus = "";
-    switch ( this->vMemoryList[iIndex].eImportStatus )
+    switch ( pMem->eImportStatus )
     {
       case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
       case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
@@ -2842,18 +2539,18 @@ int OtmMemoryServiceWorker::getStatus
     factory->startJSON( strOutputParms );
     factory->addParmToJSON( strOutputParms, "status", "open" );
     factory->addParmToJSON( strOutputParms, "tmxImportStatus", pszStatus );
-    if(this->vMemoryList[iIndex].importDetails != nullptr){
-      factory->addParmToJSON( strOutputParms, "importProgress", vMemoryList[iIndex].importDetails->usProgress );
-      factory->addParmToJSON( strOutputParms, "importTime", vMemoryList[iIndex].importDetails->importTimestamp );
-      factory->addParmToJSON( strOutputParms, "segmentsImported", vMemoryList[iIndex].importDetails->segmentsImported );
-      factory->addParmToJSON( strOutputParms, "invalidSegments", vMemoryList[iIndex].importDetails->invalidSegments );
-      factory->addParmToJSON( strOutputParms, "invalidSymbolErrors", vMemoryList[iIndex].importDetails->invalidSymbolErrors );
-      factory->addParmToJSON( strOutputParms, "importErrorMsg", vMemoryList[iIndex].importDetails->importMsg.str() );
+    if(pMem->importDetails != nullptr){
+      factory->addParmToJSON( strOutputParms, "importProgress", pMem->importDetails->usProgress );
+      factory->addParmToJSON( strOutputParms, "importTime", pMem->importDetails->importTimestamp );
+      factory->addParmToJSON( strOutputParms, "segmentsImported", pMem->importDetails->segmentsImported );
+      factory->addParmToJSON( strOutputParms, "invalidSegments", pMem->importDetails->invalidSegments );
+      factory->addParmToJSON( strOutputParms, "invalidSymbolErrors", pMem->importDetails->invalidSymbolErrors );
+      factory->addParmToJSON( strOutputParms, "importErrorMsg", pMem->importDetails->importMsg.str() );
     }
-    factory->addParmToJSON( strOutputParms, "lastAccessTime", printTime(vMemoryList[iIndex].tLastAccessTime) );
-    if ( ( this->vMemoryList[iIndex].eImportStatus == IMPORT_FAILED_STATUS ) && ( this->vMemoryList[iIndex].pszError != NULL ) )
+    factory->addParmToJSON( strOutputParms, "lastAccessTime", printTime(pMem->tLastAccessTime) );
+    if ( ( pMem->eImportStatus == IMPORT_FAILED_STATUS ) && ( pMem->pszError != NULL ) )
     {
-      factory->addParmToJSON( strOutputParms, "ErrorMsg", this->vMemoryList[iIndex].pszError );
+      factory->addParmToJSON( strOutputParms, "ErrorMsg", pMem->pszError );
     }
     factory->terminateJSON( strOutputParms );
     return( OK );
@@ -2912,28 +2609,6 @@ std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& s
   return response;
 }
 
-// update memory status
-void OtmMemoryServiceWorker::importDone( char *pszMemory, int iRC, char *pszError )
-{
-  int iIndex = this->findMemoryInList( pszMemory );
-  if ( iIndex != -1 )
-  {
-    if ( iRC == 0 )
-    {
-      vMemoryList[iIndex].eImportStatus = AVAILABLE_STATUS;
-      T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << pszMemory;
-    }
-    else
-    {
-      vMemoryList[iIndex].eImportStatus = IMPORT_FAILED_STATUS;
-      vMemoryList[iIndex].pszError = new char[strlen( pszError ) + 1];
-      strcpy( vMemoryList[iIndex].pszError, pszError );
-      T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << pszMemory <<", import failed: " << pszError << " import details = " << vMemoryList[iIndex].importDetails->toString() ;
-    }
-  }else{
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << pszMemory << " not found ";
-  }
-}
 
 /*! \brief build a unique name for of a temporary file
 \param pszTempFile buffer reiceiving the temporary file name
@@ -3118,8 +2793,9 @@ void importMemoryProcess( void *pvData )
   }
 
   // update memory status
-  pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
-
+  //pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
+  TMManager::GetInstance()->importDone( std::string(pData->szMemory),iRC, pData->szError );
+ 
   // cleanup
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
     DeleteFile( pData->szInFile );
