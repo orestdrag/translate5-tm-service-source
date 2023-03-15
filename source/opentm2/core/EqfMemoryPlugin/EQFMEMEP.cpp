@@ -556,7 +556,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
     if ( *pExportIDA->pszActiveName )
     {
       BOOL fStartExport = FALSE;
-      MemoryFactory *pFactory = MemoryFactory::getInstance();
+      TMManager *pFactory = TMManager::GetInstance();
 
       do
       {
@@ -565,16 +565,9 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
         // build outfile name and get overwrite permission for existing files
         UtlSplitFnameFromPath( pExportIDA->ControlsIda.szPathContent );
         strcat( pExportIDA->ControlsIda.szPathContent, BACKSLASH_STR );
-        strcat( pExportIDA->ControlsIda.szPathContent, pExportIDA->szMemName );
-        if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
-             (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
-        {
-          strcat( pExportIDA->ControlsIda.szPathContent, ".TMX" );
-        }
-        else
-        {
-          strcat( pExportIDA->ControlsIda.szPathContent, MEM_EXPORT_PATTERN_EXT );
-        } /* endif */
+        strcat( pExportIDA->ControlsIda.szPathContent, pExportIDA->szMemName );        
+        strcat( pExportIDA->ControlsIda.szPathContent, ".TMX" );
+        
 
         if ( UtlFileExist( pExportIDA->ControlsIda.szPathContent ) )
         {

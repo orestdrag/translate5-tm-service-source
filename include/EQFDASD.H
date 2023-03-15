@@ -214,7 +214,6 @@ typedef enum _TERMTYPE
 
 #define ASD_GUARDED  0x01              // Open dictionary in guarded mode
 #define ASD_LOCKED   0x10              // Open dictionary and lock it
-#define ASD_SHARED   0x20              // Open in shared mode
 #define ASD_FORCE_WRITE   0x40         // force imm.write of any changed record
 #define ASD_NOINDEX  0x80              // Do not process index dictionary
                                        // Caution: this define should be used

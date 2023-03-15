@@ -660,7 +660,7 @@ EQFNTMInsert
         /* force update of header (only from time to time to avoid    */
         /* too much performance degration)...                         */
         /**************************************************************/
-        if ( (ulKey & 0x020) || (pBT->usOpenFlags & ASD_SHARED) )
+        if ( (ulKey & 0x020) )
         {
           sRc = QDAMWriteHeader( (PBTREE)pBTIda );
           pBT->fUpdated = TRUE;
@@ -1524,18 +1524,6 @@ SHORT QDAMDictUpdateLocal
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */
 
-   /*******************************************************************/
-   /* For shared databases: lock complete file                        */
-   /*                                                                 */
-   /* Note: this will also update our internal buffers and the        */
-   /*       header record. No need to call QDamCheckForUpdates here.  */
-   /*******************************************************************/
-   if ( !sRc && (pBT->usOpenFlags & ASD_SHARED) )
-   {
-     sRc = QDAMPhysLock( pBTIda, TRUE, &fLocked );
-   } /* endif */
-
-   if ( pBT->bRecSizeVersion == BTREE_V3 )
    {
       PBTREEBUFFER_V3  pRecord = NULL;        // pointer to record
       if ( !sRc )
@@ -1616,12 +1604,7 @@ SHORT QDAMDictUpdateLocal
         } /* endif */
     } /* endif */
    }
-   else
-   {
-     T5LOG(T5FATAL) << "::TEMPORARY_COMMENTED::QDAMDictUpdateLocal:: BTREE_V2 is not supported ";
-     throw;
-     sRc = BTREE_NOT_SUPPORTED;
-   } /* endif */
+  
 
    /*******************************************************************/
    /* For shared databases: unlock complete file                      */
@@ -1781,11 +1764,7 @@ SHORT QDAMDictExactLocal
   {
     T5LOG(T5FATAL) << ":: BTREE_CORRUPTED";
      sRc = BTREE_CORRUPTED;
-  }else if(pBT->bRecSizeVersion != BTREE_V3){
-    T5LOG(T5ERROR) << GET_NAME(BTREE_NOT_SUPPORTED);
-    sRc = BTREE_NOT_SUPPORTED;
-  } else
-  {    
+  }else {    
        PBTREEBUFFER_V3 pRecord = NULL;
        SHORT sRetries = MAX_RETRY_COUNT;
        do
@@ -1794,11 +1773,6 @@ SHORT QDAMDictExactLocal
           /* For shared databases: discard all in-memory pages if database   */
           /* has been changed since last access                              */
           /*******************************************************************/
-         if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-         {
-            sRc = QDAMCheckForUpdates( pBTIda );
-          } /* endif */
-
           if ( !sRc )
           {
              /* Locate the Leaf node that contains the appropriate key */
