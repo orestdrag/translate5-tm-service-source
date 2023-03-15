@@ -2085,12 +2085,6 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define EXT_OF_DLL                ".DLL"       // Extention of DLLs
 #define QDPR_FORMAT_EXT           ".FRM"       // extension of a QDPR format file
 #define  MEM_EXPORT_PATTERN_EXT   ".EXP"       // Default extension for an
-#define EXT_OF_SHARED_DIC         ".RAD"       // Extention of shared dict
-#define EXT_OF_SHARED_DICTINDEX   ".RAI"       // Ext. of shared dict index
-#define EXT_OF_SHARED_DICTPROP    ".RPR"       // Ext. of shared dict properties
-#define EXT_OF_SHARED_MEM         ".RMD"       // Extention of shared TM
-#define EXT_OF_SHARED_MEMINDEX    ".RMI"       // Ext. of shared TM index
-#define EXT_OF_SHARED_MEMPROP     ".RMP"       // Ext. of shared TM properties
                                                // exported memory database
 #define EXT_OF_TMDATA             ".TMD"       // Ext. of TM data file
 #define EXT_OF_TMINDEX            ".TMI"       // Ext. of TM index file

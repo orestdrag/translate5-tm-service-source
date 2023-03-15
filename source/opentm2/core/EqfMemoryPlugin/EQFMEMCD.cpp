@@ -71,7 +71,6 @@ typedef struct _TMX_CREATE_IDA
   CHAR   szSourceLang[MAX_LANG_LENGTH];    //language name
   CHAR   szPlugin[MAX_LONGFILESPEC];       // name of selected plugin
   std::vector<OtmMemoryPlugin *> vMemoryPlugins; // list of available memory plugins
-  std::vector<OtmSharedMemoryPlugin *> vSharedMemoryPlugins; // list of available memory plugins for shared memories
   CHAR   szUserid[MAX_USERID];             //LAN Userid of TM: if local '\0'
   OtmPlugin *pSelectedPlugin;              // pointer to selected plugin
   CHAR   szDriveList[MAX_DRIVELIST];       // list of drives to be displayed 
@@ -194,17 +193,7 @@ LONG                lOptions                 // type of new Translation Memory
     int iRC;
     char szPlugin[256];
 
-    // select the correct memory plugin
-    if ( lOptions == SHARED_OPT )
-    {
-      T5LOG(T5FATAL) <<  "MemFuncCreateMem():: using this interface we can only use the LAN-based shared memory plugin... we don't support LAN";
-      iRC = 2;
-    }
-    else
-    {
-      T5LOG( T5DEBUG) << "MemFuncCreateMem():: use the default memory plugin";
-      strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );
-    }
+    strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );    
 
     T5LOG( T5DEBUG) << "MemFuncCreateMem():: create the memory" ;    
     pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );

@@ -23,7 +23,6 @@ Copyright Notice:
 #include "../pluginmanager/PluginManager.h"
 #include "../pluginmanager/OtmMemoryPlugin.h"
 #include "../pluginmanager/OtmMemory.h"
-#include "../pluginmanager/OtmSharedMemory.h"
 #include "../utilities/OSWrapper.h"
 #include "EqfMemoryPlugin.h"
 #include "MemoryUtil.h"
@@ -159,28 +158,6 @@ int MemoryFactory::getMemoryInfo
     memory object name (pluginname + colon + memory name)
    \param pszDescription description of the memory
    \param pszSourceLanguage source language of the memory
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-OtmMemory *MemoryFactory::createMemory
-(
-  const char *pszPluginName,
-  const char *pszMemoryName,
-  const char *pszDescription,
-  const char *pszSourceLanguage,
-  int *piErrorCode
-)
-{
-  return( this->createMemory( pszPluginName, pszMemoryName, pszDescription, pszSourceLanguage, NULL, false, piErrorCode ) );
-}
-
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
    \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
    \param pszOwner owner of the newly created memory
    \param bInvisible don't display memory in memory loist window when true, 
@@ -227,24 +204,9 @@ OtmMemory *MemoryFactory::createMemory
 
   // use the plugin to create the memory
   std::string strMemoryName;
-  this->getMemoryName( pszMemoryName, strMemoryName );
-  if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
-  {
-    pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
-    if ( pMemory == NULL ) this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-  }
-  else   if ( pluginSelected->getType() == OtmPlugin::eSharedTranslationMemoryType )
-  {
-    pMemory = ((OtmSharedMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, chDrive, NULL, NULL );
-    if ( pMemory == NULL )
-    {
-      this->iLastError = ((OtmSharedMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-    }
-    else if ( (pszOwner != NULL) && (*pszOwner != EOS) ) 
-    {
-      ((OtmSharedMemoryPlugin *)pluginSelected)->setOwner( (char *)strMemoryName.c_str(), pszOwner );
-    }
-  }
+  this->getMemoryName( pszMemoryName, strMemoryName );  
+  pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+  if ( pMemory == NULL ) this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
 
   if ( pMemory == NULL)
   {
@@ -289,34 +251,27 @@ OtmMemory *MemoryFactory::createMemory
   int *piErrorCode
 )
 {  
-  T5LOG( T5DEBUG) <<"MemoryFactory::createMemory::pszMemoryName = " << pszMemoryName << ", pszSourceLanguage = "<< pszSourceLanguage<<
+  T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
       ", pszDescription = " << pszDescription ;
-  
-  OtmMemory *pMemory = NULL;
-  OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
-  T5LOG( T5INFO) << "::Create memory " << pszMemoryName;
 
-  if ( piErrorCode != NULL ) 
+  if ( piErrorCode != nullptr ) 
       *piErrorCode = 0;
 
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
-  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
-  if ( pMemory == NULL ){
-     this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-     T5LOG(T5ERROR) << "MemoryFactory::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " << this->strLastError;
-  }
+  OtmMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
 
   if ( pMemory == NULL)
   {
-    T5LOG(T5ERROR) <<  "::Create failed, with message " << this->strLastError;
-    if ( piErrorCode != NULL ) 
+    this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
+    T5LOG(T5ERROR) <<  "::Create failed, with message \'" << this->strLastError << "\'; iLastError = " << this->iLastError;
+    if ( piErrorCode != nullptr ) 
         *piErrorCode = this->iLastError;
   }
   else{
-    T5LOG( T5INFO) <<  "::Create successful ";
+    T5LOG( T5INFO) <<  "::Create successful for " << strMemoryName;
   }
   return( pMemory );
 }
@@ -344,13 +299,11 @@ int MemoryFactory::listMemories
     iMemories += pluginCurrent->listMemories( pfnCallBack, pvData, fWithDetails );
   } /* endfor */      
 
-  for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
-  {
-    OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
-
-    iMemories += pluginCurrent->listMemories( pfnCallBack, pvData, fWithDetails );
-  } /* endfor */      
-
+  //for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
+  //{
+  //  OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
+  //  iMemories += pluginCurrent->listMemories( pfnCallBack, pvData, fWithDetails );
+  //} /* endfor */      
 
   return( iMemories );
 }
@@ -384,22 +337,7 @@ int MemoryFactory::closeMemory
   pMemory->getName( pszObjName + strlen(pszObjName), MAX_LONGFILESPEC );
 
   // close the memory
-  if ( pPlugin->getType() == OtmMemoryPlugin::eSharedTranslationMemoryType )
-  {
-    OtmSharedMemoryPlugin *pSharedPlugin = (OtmSharedMemoryPlugin *)pPlugin;
-    OtmSharedMemory *pSharedMem = (OtmSharedMemory *)pMemory;
-    OtmMemory *pLocalMemory = pSharedMem->getLocalMemory();
-    OtmMemoryPlugin *pLocalPlugin = (OtmMemoryPlugin *)pSharedMem->getLocalPlugin();
-    iRC = pSharedPlugin->closeMemory( pMemory );
-    if ( (pLocalMemory != NULL) && (pLocalPlugin != NULL) )
-    {
-      pLocalPlugin->closeMemory( pLocalMemory );
-    }
-  }
-  else
-  {
-    iRC = pPlugin->closeMemory( pMemory );
-  }
+  iRC = pPlugin->closeMemory( pMemory );
 
   // send a properties changed msg to memory handler
   EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pszObjName ));
@@ -532,54 +470,7 @@ BOOL MemoryFactory::isSharedMemory
   OtmMemory *pMemory
 )
 {
-  if( pMemory == NULL ) return( FALSE );
-
-  OtmPlugin *pPlugin = (OtmPlugin *)pMemory->getPlugin();
-
-  if( pPlugin == NULL ) return( FALSE );
-
-  OtmPlugin::ePluginType type = pPlugin->getType();
-  return( ( type == OtmMemoryPlugin::eSharedTranslationMemoryType ) ? TRUE : FALSE );
-}
-
-/*! \brief Check if memory is a shared/synchronized memory
-  \param pszMemory Name of the memory
-  \param pPlugin adress of a variable receiving the pointer to the plugin of the memory
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL MemoryFactory::isSharedMemory
-(
-  char *pszMemory,
-  OtmSharedMemoryPlugin **ppPlugin
-)
-{
-  BOOL isShared = FALSE;
-
-  // loop over all plugins for shared memories and test if memory is controlled by this plugin
-  for ( std::size_t i = 0; (i < pSharedMemPluginList->size()) && !isShared; i++ )
-  {
-    OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
-
-    if ( pluginCurrent->isMemoryOwnedByPlugin( pszMemory ) )
-    {
-      isShared = TRUE;
-      if ( ppPlugin != NULL ) *ppPlugin = pluginCurrent; 
-    }
-  } /* endfor */       
-  return( isShared );
-}
-
-/*! \brief Check if memory is a shared/synchronized memory
-  \param strMemory Name of the memory
-  \param pPlugin adress of a variable receiving the pointer to the plugin of the memory
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL MemoryFactory::isSharedMemory(
-  std::string &strMemory,
-  OtmSharedMemoryPlugin **ppPlugin
-)
-{
-  return( this->isSharedMemory( (char *)strMemory.c_str(), ppPlugin ) );
+  return( FALSE );
 }
 
 /*! \brief Show error message for the last error
@@ -853,15 +744,6 @@ const char * MemoryFactory::getDefaultMemoryPlugin(
   return( this->szDefaultMemoryPlugin );
 }
 
-/*! \brief Get name of default shared memory plugin
-	\returns pointer to name of default shared memory plugin
-*/
-const char *MemoryFactory::getDefaultSharedMemoryPlugin(
-)
-{
-  return( this->szDefaultSharedMemoryPlugin );
-}
-
 
 /*! \brief Get the object name for the memory
   \param pMemory pointer to the memory object
@@ -881,12 +763,6 @@ int MemoryFactory::getObjectName( OtmMemory *pMemory, char *pszObjName, int iBuf
   } /* endif */     
 
   pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
-  if ( (pPlugin->getType() == OtmPlugin::eSharedTranslationMemoryType) && ((OtmSharedMemoryPlugin *)pPlugin)->isLocalMemoryUsed() )
-  {
-    OtmSharedMemory *pSharedMem = (OtmSharedMemory *)pMemory;
-    pPlugin = (OtmMemoryPlugin *)pSharedMem->getLocalPlugin();
-  } /* endif */     
-
   if ( pPlugin == NULL )
   {
       this->iLastError = ERROR_PLUGINNOTAVAILABLE;
@@ -986,19 +862,7 @@ OtmPlugin *MemoryFactory::getPlugin
         return ( pluginCurrent );
       } /* endif */         
     } /* endfor */       
-  } /* endif */     
-
-  if ( (pszPluginName != NULL) && (*pszPluginName != '\0') )
-  {
-    for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
-    {
-      OtmPlugin *pluginCurrent = (OtmPlugin *)(*pSharedMemPluginList)[i];
-      if ( strcmp( pluginCurrent->getName(), pszPluginName ) == 0 )
-      {
-        return ( pluginCurrent );
-      } /* endif */         
-    } /* endfor */       
-  } /* endif */     
+  } /* endif */       
 
   return( NULL );
 }
@@ -1070,20 +934,6 @@ OtmPlugin *MemoryFactory::findPlugin
         } /* endif */         
       } /* endfor */       
       delete( pInfo );
-
-      // try shared memory plugins
-      if ( plugin == NULL )
-      {
-        for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
-        {
-          OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
-          if ( pluginCurrent->isMemoryOwnedByPlugin((PSZ) pszMemoryName ) )
-          {
-            plugin = (OtmPlugin *)pluginCurrent;
-            break;
-          } /* endif */         
-        } /* endfor */       
-      }
 
       if ( plugin == NULL )
       {
@@ -1164,33 +1014,6 @@ void MemoryFactory::refreshPluginList()
   {
 	  strcpy( this->szDefaultMemoryPlugin, (*pluginList)[0]->getName() );
   }
-
-  this->szDefaultSharedMemoryPlugin [0] = '\0';
-  OtmSharedMemoryPlugin *curSharedPlugin = NULL;
-  pSharedMemPluginList = new std::vector<OtmSharedMemoryPlugin *>;
-  i = 0;
-  do
-  {
-    i++;
-    curSharedPlugin = (OtmSharedMemoryPlugin*) thePluginManager->getPlugin(OtmPlugin::eSharedTranslationMemoryType, i );
-    if ( curSharedPlugin != NULL ) 
-    {
-      pSharedMemPluginList->push_back( curSharedPlugin );
-      if ( strcasecmp( curSharedPlugin->getName(), DEFAULTSHAREDMEMORYPLUGIN ) == 0 )
-      {
-		    // P403634 
-        //strcpy( this->szDefaultMemoryPlugin, curSharedPlugin->getName() );
-		    strcpy( this->szDefaultSharedMemoryPlugin, curSharedPlugin->getName() );
-
-      }
-    }
-  }  while ( curSharedPlugin != NULL ); /* end */     
-
-  // if default plugin is not available use first plugin as default
-  if ( (this->szDefaultSharedMemoryPlugin[0] == '\0') && (pSharedMemPluginList->size() != 0) )
-  {
-    strcpy( this->szDefaultSharedMemoryPlugin, (*pSharedMemPluginList)[0]->getName() );
-  }
 }
 
 const char* GetFileExtention(std::string file){
@@ -1235,17 +1058,6 @@ int MemoryFactory::replaceMemory
         if ( iRC == 0 ) iRC = ((OtmMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
       }
       if ( iRC != 0 ) ((OtmMemoryPlugin *)plugin)->getLastError(this->strLastError);
-    }
-    else if ( plugin->getType() == OtmMemoryPlugin::eSharedTranslationMemoryType )
-    {
-      /*
-      iRC = ((OtmSharedMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
-      if ( iRC == OtmMemoryPlugin::eNotSupported )
-      {
-        iRC = ((OtmSharedMemoryPlugin *)plugin)->deleteMemory( pszReplace );
-        if ( iRC == 0 ) iRC = ((OtmSharedMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
-      }
-      if ( iRC != 0 ) ((OtmSharedMemoryPlugin *)plugin)->getLastError(this->strLastError);//*/
     }
 
     // broadcast deleted memory name for replaceWith memory
@@ -1862,12 +1674,6 @@ USHORT MemoryFactory::APIListMem
 
     //pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
     pluginCurrent->listMemories( AddMemToList, (void *)&Data, TRUE );
-  } /* endfor */
-
-  for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
-  {
-    OtmSharedMemoryPlugin *pluginCurrent = ( *pSharedMemPluginList )[i];
-    pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
   } /* endfor */
 
   return( 0 );
