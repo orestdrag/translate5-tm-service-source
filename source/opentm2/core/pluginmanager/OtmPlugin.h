@@ -26,7 +26,6 @@ public:
 		eDictionaryType,		/*!< plugin handles dictionary objects */
 		eMarkupType,			/*!< plugin handles markup objects */
 		eDocumentType,			/*!< plugin handles documents */
-		eSpellType,				/*!< plugin handles spell checking*/
 		eMorphType,				/*!< plugin handles morphologic functionality*/
 		eUndefinedType,			/*!< type of plugin is undefined */
 		//eSharedTranslationMemoryType, 	/*!< plugin handling shared translation-memory objects */
