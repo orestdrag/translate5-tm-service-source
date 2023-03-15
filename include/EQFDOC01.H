@@ -93,6 +93,8 @@ typedef struct _EXTRAPAGES
 #define GET_EXTRA_IDA( pExtra ) (pExtra->pIda)
 #define GET_EXTRA_FILENAME( pExtra ) (pExtra->szFileName)
 
+#include "IDA.H"
+
 typedef struct _DOCIMPIDA                   //instance area for dialog
 {                                           //procedure FImpoDlgProc
    IDA_HEAD  IdaHead;                       //common IDA header

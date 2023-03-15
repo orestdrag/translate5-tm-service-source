@@ -25,6 +25,7 @@
 #undef __STRICT_ANSI__
 #endif
 
+#include "tm.h"
 
 #include "win_types.h"
 #include "LogWrapper.h"
@@ -70,7 +71,6 @@ XERCES_CPP_NAMESPACE_USE
 #include "EQF.H"                  // General .H for EQF
 #include "EQFMEMIE.H"
 #include "EQFSERNO.H"
-#include "OTMFUNC.H"
 #include "TMXNames.h"
 
 //#pragma pack( pop, TM2StructPacking )
@@ -907,7 +907,6 @@ private:
 
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
-class ImportStatusDetails;
 //+----------------------------------------------------------------------------+
 //| Our TMX import export class                                                |
 //|                                                                            |
@@ -1012,7 +1011,6 @@ USHORT  EXTMEMIMPORTSTART
   return( usRC );
 } /* end of function EXTMEMIMPORTSTART */
 
-class MEM_LOAD_IDA;
 USHORT  EXTMEMIMPORTPROCESS
 ( 
   LONG             lHandle,                 // Export/import handle as set by ExtMemImportStart function

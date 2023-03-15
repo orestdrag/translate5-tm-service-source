@@ -228,6 +228,8 @@ PROPDICTIONARY SgmlProp = { {"","", 0, 0},  //PropHead
    extern PROPDICTIONARY SgmlProp;
 #endif
 
+#include "IDA.H"
+
 typedef struct _DIMPIDA
 {
  HWND         hwnd;                       // process window handle

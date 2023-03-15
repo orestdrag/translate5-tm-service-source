@@ -9,8 +9,7 @@
 #define _EqfMemory_h_
 
 #include <string>
-#include "../pluginmanager/OtmMemory.h"
-#include "OtmProposal.h"
+#include "tm.h"
 #include "EqfMemoryPlugin.h"
 #include "win_types.h"
 

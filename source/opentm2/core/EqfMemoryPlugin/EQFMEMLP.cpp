@@ -68,17 +68,13 @@
 
 #include "../utilities/FilesystemWrapper.h"
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
 #include "../utilities/EncodingHelper.h"
-#include "MemoryFactory.h"
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include "EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
-#include "OTMFUNC.H"              // public defines for function call interface
 #include <time.h>                 // C library for time functions
 #include "EQFHLOG.H"              // for word count category limits
 #include <EQFQDAM.H>              // Low level TM access functions
@@ -138,6 +134,53 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
                WINMSG,       // Message ID
                WPARAM,       // Message parameter 1
                LPARAM );     // Message parameter 2
+
+
+#include "IDA.H"
+
+typedef struct _MEM_LOAD_DLG_IDA
+{
+ CHAR         szMemName[MAX_LONGFILESPEC];// TM name to import to
+ CHAR         szShortMemName[MAX_FILESPEC];// TM name to import to
+ CHAR         szMemPath[2048];            // TM path + name to import to
+ CHAR         szFilePath[2048];           // File to be imported path + name
+ HFILE        hFile;                      // Handle of file to be imported
+ PMEM_IDA     pIDA;                       // pointer to the memory database IDA
+ BOOL         fAscii;                     // TRUE = ASCII else internal format
+ CHAR         szName[MAX_FNAME];          // file to be imp. name without ext
+ CHAR         szExt[MAX_FEXT];            // file to be imp. ext. with leading dot
+ CHAR         szString[2048];             // string buffer
+ CHAR         szDummy[_MAX_DIR];          // string buffer
+ BOOL         fDisabled;                  // Dialog disable flag
+ CONTROLSIDA  ControlsIda;                //ida of controls utility
+ HPROP        hPropLast;                  // Last used properties handle
+ PMEM_LAST_USED pPropLast;                // Pointer to the last used properties
+ BOOL         fBatch;                     // TRUE = we are in batch mode
+ HWND         hwndErrMsg;                 // parent handle for error messages
+ PDDEMEMIMP   pDDEMemImp;                 // ptr to batch memory import data
+ HWND         hwndNotify;                 // send notification about completion
+ OBJNAME      szObjName;                  // name of object to be finished
+ USHORT       usImpMode;                  // mode for import
+ BOOL         fMerge;                     // TRUE = TM is being merged
+ PSZ          pszList;                    // list of selected import files or NULL
+ BOOL         fSkipInvalidSegments;       // TRUE = skip invalid segments during import
+ ULONG        ulOemCP;                    // CP of system preferences lang.
+ ULONG        ulAnsiCP;                   // CP of system preferences lang.
+ BOOL         fIgnoreEqualSegments;       // TRUE = ignore segments with identical source and target string
+ BOOL         fAdjustTrailingWhitespace;  // TRUE = adjust trailing whitespace of target string
+ BOOL         fMTReceiveCounting;         // TRUE = count received words and write counts to folder properties
+ OBJNAME      szFolObjName;               // object name of folder (only set with fMTReceiveCounting = TRUE)
+ HWND         hwndToCombo;                // handle of "to memory" combo box
+ BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
+ BOOL         fImpModeSet;                // TRUE = imp mode has been set by the impot file check logic
+ OtmMemory    *pMem;                      // pointer to memory being imported
+ OtmProposal  *pProposal;                 // buffer for proposal data
+ BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
+ BOOL          fCreateMatchID;            // create match segment IDs
+ CHAR          szMatchIDPrefix[256];      // prefix to be used for the match segment ID
+ CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
+}MEM_LOAD_DLG_IDA, * PMEM_LOAD_DLG_IDA;
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |

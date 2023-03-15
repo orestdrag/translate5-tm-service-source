@@ -117,6 +117,8 @@
 
 #define BUFFERSIZE         4000            // Length of the text buffer
 
+#include "IDA.H"
+
 typedef struct _TAGEXPORT
 {
    IDA_HEAD      IdaHead;                      // common header of instance area

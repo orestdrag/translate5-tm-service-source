@@ -8,7 +8,7 @@
 #ifndef _ANALYSISMEMLOOKUPDATA_H_
 #define _ANALYSISMEMLOOKUPDATA_H_
 
-#include <core/pluginmanager/OtmMemory.h>
+#include "tm.h"
 #include <vector>
 #include <string>
 

@@ -15,10 +15,8 @@
 
 #include "EQFFUNCI.H"
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
 #include "LogWrapper.h"
-#include "MemoryFactory.h"
+#include "tm.h"
 #include "MemoryUtil.h"
 
 // EQF.H is included by otmmemory.h
@@ -31,7 +29,6 @@
 
 BOOL EQFTMMaintain( PSZ );
 
-#include <EQFTMI.H>               // Private header file of Translation Memory
 
 // new function to replace CREATE_PATH task message
 BOOL MemCreatePath( PSZ pszString )

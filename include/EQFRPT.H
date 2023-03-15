@@ -2,10 +2,7 @@
 	Description: Public include file for Counting Report handler
 	Copyright (c) 1990-2016, International Business Machines Corporation and others. All rights reserved.
 */
-
-#ifndef _OTMFUNC_H_INCLUDED
-	#include "OTMFUNC.H"
-#endif
+	#include "tm.h"
 
 
 typedef LONG HSESSION;

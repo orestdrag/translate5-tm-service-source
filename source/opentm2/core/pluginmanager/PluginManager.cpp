@@ -5,7 +5,7 @@
 
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
-#include "OTMFUNC.H"
+#include "tm.h"
 #include "../utilities/LogWrapper.h"
 /*! \mainpage PluginManager and plugins for OpenTM2
 	\par Copyright Notice:

@@ -21,10 +21,9 @@ Copyright Notice:
 #include "../../core/utilities/EncodingHelper.h"
 #include "../../core/utilities/PropertyWrapper.H"
 #include "../../core/utilities/FilesystemHelper.h"
-#include "OtmProposal.h"
+
 #include "EqfMemory.h"
 
-#include <EQFTMI.H>               // Private header file of Translation Memory
 #include <EQFQDAMI.H>             // Private header file of QDAM 
 #include "EQFRDICS.H"             // remote dictionary functions
 #include "LanguageFactory.H"

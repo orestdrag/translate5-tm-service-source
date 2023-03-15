@@ -5,7 +5,8 @@
 
 #include "EQFMEMIE.H"
 
-class ImportStatusDetails;
+#include "tm.h"
+
 class EqfPluginWrapper{
 public:
     static void init();

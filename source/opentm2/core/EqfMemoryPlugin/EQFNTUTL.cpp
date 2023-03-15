@@ -48,7 +48,7 @@
 // #include <time.h>
 #include <string.h>
 
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 #include "LogWrapper.h"
 #include "OSWrapper.h"

@@ -20,7 +20,7 @@
 #include <EQF.H>                  // General Translation Manager include file
 
 #include "EQFDDE.H"               // Batch mode definitions
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFQDAMI.H>
 #include "LogWrapper.h"
 

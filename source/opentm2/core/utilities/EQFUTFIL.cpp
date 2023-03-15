@@ -23,7 +23,7 @@
 #endif //TEMPORARY_COMMENTED
 
 #include "EQFUTPRI.H"                  // private utility header file
-#include "OTMFUNC.H"
+#include "tm.h"
 #include "FilesystemHelper.h"
 #include "LogWrapper.h"
 #include "ZipHelper.h"
