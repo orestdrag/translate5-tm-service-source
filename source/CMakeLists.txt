@@ -72,7 +72,7 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/morph/MorphFactory.cpp"
     "${CORE_DIR}/morph/OtmMorphICU.cpp"
     "${CORE_DIR}/morph/OtmMorphICUPlugin.cpp" 
-    "${CORE_DIR}/morph/SpellFactory.cpp"
+    #"${CORE_DIR}/morph/SpellFactory.cpp"
 
 #Util_Source_Files
     "${CORE_DIR}/utilities/LanguageFactory.cpp"

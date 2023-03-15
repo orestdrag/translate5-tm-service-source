@@ -6596,8 +6596,6 @@ void UtlSaveLastUsedString( HWND hwndDlg, int iID, char *pszName, int iMaxNumOfS
 
 void UtlLoadLastUsedStrings( HWND hwndDlg, int iID, char  *pszName );
 
-BOOL UtlAddMenuItem( const char *pszMenuName, const char *pszMenuItem, int iMenuItemID, BOOL isSubMenu );
-
 BOOL UtlDeleteMenuItem( const char *pszMenuName, int iMenuItemID );
 
 // Input/output data for the UtlColorChooser dialog
