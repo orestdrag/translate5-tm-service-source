@@ -174,6 +174,15 @@ find_package(proxygen REQUIRED)
 
 target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 
+
+#target_compile_options(${PROJECT_NAME} PRIVATE
+#  -Wall -Wextra -Wpedantic -Werror
+#    -Wno
+#    -w
+#)
+#suppress warnings
+add_definitions(-w)
+
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
 endif()
