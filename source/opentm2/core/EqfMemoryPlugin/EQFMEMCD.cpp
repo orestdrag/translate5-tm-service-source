@@ -53,9 +53,11 @@
 #include "EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
 #include <EQFQDAM.H>            // Low level TM access functions
+#include "EqfMemoryPlugin.h"
 
 // the name of the default memory plugin
 #define DEFAULT_MEMORY_PLUGIN "EqfMemoryPlugin" 
+
 
 /**********************************************************************/
 /* IDA structure for TM Create Dialog                                 */
@@ -97,10 +99,8 @@ LONG                lOptions                 // type of new Translation Memory
 {
   USHORT      usRC = NO_ERROR;         // function return code
   char*       pszParm;                 // pointer for error parameters
-  char        szEmpty[2];
   TMManager *pFactory = TMManager::GetInstance();
 
-  szEmpty[0] = EOS;
   {
     T5LOG(T5DEBUG) << "MemFuncCreateMem( pszMemName = "<<pszMemName <<", pszDescription = "<<pszDescription<<", pszSourceLanguage = "<<pszSourceLanguage<<" )";
   }
@@ -156,29 +156,9 @@ LONG                lOptions                 // type of new Translation Memory
     if ( MorphGetLanguageID( (PSZ)pszSourceLanguage, &sID ) != MORPH_OK )
     {
       usRC = ERROR_PROPERTY_LANG_DATA;
-      //T5LOG( T5ERROR) <<"  ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,  &((PSZ)pszSourceLanguage) "";
+      T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
     } /* endif */
   } /* endif */
-
-
-  // Check specified options
-  if ( usRC == NO_ERROR)
-  {
-    if ( lOptions == 0L )
-    {
-      lOptions = LOCAL_OPT;
-    }
-    else if ( lOptions == LOCAL_OPT )
-    {
-      // O.K. option is valid
-    }
-    else
-    {
-      T5LOG(T5FATAL) <<   "MemFuncCreateMem supports only local_opt, rc = WRONG_OPTIONS_RC";
-      usRC = WRONG_OPTIONS_RC;
-    } /* endif */
-  } /* endif */
-
 
   // create memory database
   BOOL fOK = (usRC==NO_ERROR);
@@ -191,12 +171,22 @@ LONG                lOptions                 // type of new Translation Memory
     strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );    
 
     T5LOG( T5DEBUG) << "MemFuncCreateMem():: create the memory" ;    
-    pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
-    if ( pMemory == NULL )
-    {
-      T5LOG(T5ERROR) << "MemFuncCreateMem()::pMemory == NULL" ;
+    //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
+    //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
+    //  ", pszDescription = " << pszDescription ;
+    EqfMemoryPlugin::GetInstance()->strLastError = "";
+    EqfMemoryPlugin::GetInstance()->iLastError = 0;
+
+    pMemory = EqfMemoryPlugin::GetInstance()->createMemory( pszMemName , pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+    if ( pMemory == NULL ){
+      iRC = EqfMemoryPlugin::GetInstance()->getLastError( EqfMemoryPlugin::GetInstance()->strLastError );
+      T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  iRC;
+      //T5LOG(T5ERROR) << "MemFuncCreateMem()::pMemory == NULL" ;
       fOK = FALSE;
-    } 
+    }
+    else{
+      T5LOG( T5INFO) << "::Create successful ";
+    }
   } 
 
   // get memory object name
