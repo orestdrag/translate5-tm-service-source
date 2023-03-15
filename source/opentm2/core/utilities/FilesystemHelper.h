@@ -33,6 +33,7 @@ typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
 
 class FilesystemHelper{
 public:
+    static bool checkFileName(const std::string& path);
     static std::string parseFilename(const std::string path);
     static std::string parseDirectory(const std::string path);
     static PFileBufferMap getFileBufferInstance();

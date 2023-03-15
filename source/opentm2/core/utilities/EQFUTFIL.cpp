@@ -1166,62 +1166,6 @@ BOOL IsDBCSLeadByteEx(
 }
 #define isdbcs1ex(usCP, c)  ((IsDBCSLeadByteEx( usCP, (BYTE) c )) ? DBCS_1ST : SBCS )
 
-//+----------------------------------------------------------------------------+
-//|External function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     UtlCheckLongName        Check syntax of long names       |
-//+----------------------------------------------------------------------------+
-//|Function call:     UtlCheckLongName( PSZ pszName )                          |
-//+----------------------------------------------------------------------------+
-//|Description:       Checks the length and the characters of the given long   |
-//|                   name (invalid characters are backslash, question mark and|
-//|                   asterisk).                                               |
-//+----------------------------------------------------------------------------+
-//|Input parameter:   PSZ      pszName    pointer to name being checked        |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   BOOL                                                     |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       TRUE   name is valid                                     |
-//|                   FALSE  name is invalid                                   |
-//+----------------------------------------------------------------------------+
-BOOL UtlCheckLongName( PSZ pszName )
-{
-   BOOL    fOK  = TRUE;                // function return code
-   PPROPSYSTEM pPropSys= NULL;
-
-   // check length of name
-   if ( strlen(pszName) >= MAX_LONGFILESPEC )
-   {
-     fOK = FALSE;                    // name is too long
-   } /* endif */
-
-   // check for invalid characters in the given name
-   if ( fOK )
-   {
-     pPropSys = GetSystemPropPtr();
-     while ( pPropSys && fOK && (*pszName != EOS) )
-     {
-       if ( IsDBCS_CP(pPropSys->ulSystemPrefCP) &&
-            (isdbcs1ex((USHORT)pPropSys->ulSystemPrefCP, *pszName ) == DBCS_1ST) &&
-            (pszName[1] != EOS) )
-       {
-         pszName++;                    // skip both bytes of DBCS character
-         pszName++;
-       }
-//     if ( (*pszName == '\\') || (*pszName == '?') || (*pszName == '*') )
-       if ( strchr("\\?*<>:|/", *pszName ) ) 
-       {
-         fOK = FALSE;                  // invalid character in name
-       }
-       else
-       {
-         pszName++;                    // continue with next character
-       } /* endif */
-     } /* endwhile */
-   } /* endif */
-
-   return ( fOK );
-} /* end of UtlCheckLongName */
 
 
 //+----------------------------------------------------------------------------+

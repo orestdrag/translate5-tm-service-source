@@ -126,7 +126,7 @@ LONG                lOptions                 // type of new Translation Memory
   // Check memory name syntax
   if ( usRC == NO_ERROR )
   { 
-    if ( !UtlCheckLongName( (PSZ) pszMemName ))
+    if ( !FilesystemHelper::checkFileName( pszMemName ))
     {
       pszParm = (PSZ) pszMemName;
       T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << pszParm;
