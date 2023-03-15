@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
-#include "OtmFunc.h" 
+#include "tm.h" 
 
 int TestMemoryCalls( HSESSION hSession );
 int TestLangCalls( HSESSION hSession );

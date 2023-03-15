@@ -14,17 +14,13 @@ Copyright Notice:
   #define INCL_EQF_TM               // general Transl. Memory functions
   #define INCL_EQF_TP              // editor functions
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
+#include "tm.h"
 #include "../utilities/LogWrapper.h"
 #include "../utilities/EncodingHelper.h"
-#include "MemoryFactory.h"
 #include "EQFMORPI.H"
 
 // EQF.H is included by otmmemory.h
 // #include <eqf.h>                  // General Translation Manager include file EQF:H 
-
-#include <OTMFUNC.H>               // header file of OpenTM2 API functions
 
 
 #include "vector"
@@ -74,7 +70,7 @@ USHORT FillMemoryListBox
     // Stop list box enabeling
     //ENABLEUPDATEHWND_FALSE( (HWND)mp1 );
 
-    // GQ 2014/05/12: Use MemoryFactory to get the list of memories (old code has been commented out and left as reference in case of problems)
+    // GQ 2014/05/12: Use TMManager to get the list of memories (old code has been commented out and left as reference in case of problems)
 
     // old code start
     //if ( fOK )
@@ -104,7 +100,7 @@ USHORT FillMemoryListBox
     //  } /* endif */
     // old code end
 
-      //MemoryFactory *pFactory = MemoryFactory::getInstance();
+      //TMManager *pFactory = TMManager::GetInstance();
       //pFactory->listMemories( AddMemToListBox, (PVOID)mp1, FALSE );
       
 

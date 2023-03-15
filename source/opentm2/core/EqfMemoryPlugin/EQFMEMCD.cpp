@@ -38,9 +38,7 @@
 #define INCL_EQF_DLGUTILS         // dialog utilities
 
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
-#include "MemoryFactory.h"
+#include "tm.h"
 #include "EQFMORPH.H"
 #include "LogWrapper.h"
 
@@ -52,11 +50,9 @@
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
-#include <EQFTMI.H>               // Private header file of Translation Memory
 #include "EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
 #include <EQFQDAM.H>            // Low level TM access functions
-#include <OTMFUNC.H>              // function call I/F
 
 // the name of the default memory plugin
 #define DEFAULT_MEMORY_PLUGIN "EqfMemoryPlugin" 

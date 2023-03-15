@@ -2,9 +2,7 @@
 	Copyright (c) 1990-2015, International Business Machines Corporation and others. All rights reserved.
 */
 
-#include "OtmProposal.h"
-#include "../source/opentm2/core/pluginmanager/OtmMemory.h"
-#include "../source/opentm2/core/memory/MemoryFactory.h"
+#include "tm.h"
 #include "vector"
 
 

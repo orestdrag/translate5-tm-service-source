@@ -15,7 +15,7 @@
 #include "EQFSHAPE.H"
 #include "EQFUTCHR.H"
 #include "Utility.h"
-#include "OTMFUNC.H"
+#include "tm.h"
 #include "win_types.h"
 #include "LogWrapper.h"
 #include "OSWrapper.h"

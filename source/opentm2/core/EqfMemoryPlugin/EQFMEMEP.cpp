@@ -48,19 +48,14 @@
 #include "../utilities/FilesystemHelper.h"
 #include "../utilities/EqfPluginWrapper.h"
 #include "../pluginmanager/PluginManager.h"
-#include "../pluginmanager/OtmMemoryPlugin.h"
-#include "../pluginmanager/OtmMemory.h"
-#include "MemoryFactory.h"
 //#include "MemoryUtil.h"
 
 #include "EQF.H"
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
-#include <EQFTMI.H>               // Private header file of Translation Memory
 #include "EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
-#include "OTMFUNC.H"              // public defines for function call interface
 
 #include "EQFFUNCI.H"             // private defines for function call interface
 #include "LogWrapper.h"
@@ -73,6 +68,7 @@
 // activate this define to enable the export of context and addinfo data
 #define EXPORT_CONTEXT_AND_ADDINFO
 
+#include "IDA.H"
 typedef struct _MEM_EXPORT_IDA
 {
  CHAR         szMemName[MAX_LONGFILESPEC];// Memory database name without extension

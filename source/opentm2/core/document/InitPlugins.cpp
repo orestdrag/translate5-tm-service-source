@@ -8,7 +8,7 @@
 #include "../pluginmanager/OtmPlugin.h"
 #include "../pluginmanager/PluginManager.h"
 #include "InitPlugins.h"
-#include "OTMFUNC.H"
+#include "tm.h"
 
 // initialize the Plugin-Manager and load the available plugins
 USHORT InitializePlugins( char *szPluginPath )

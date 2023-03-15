@@ -9,7 +9,7 @@
 #include "PropertyWrapper.H"
 #include "EqfMemoryPlugin.h"
 #include "EqfMemory.h"
-#include "EQFTMI.H"
+#include "tm.h"
 #include "EQFSETUP.H"
 #include "FilesystemHelper.h"
 #include "LogWrapper.h"

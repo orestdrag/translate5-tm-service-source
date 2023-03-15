@@ -15,7 +15,7 @@
 #include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
 #include "./LogWrapper.h"
 #include "./PropertyWrapper.H"

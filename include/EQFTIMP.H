@@ -686,6 +686,8 @@ typedef enum _IMEXTASK
    END_IMPORT
 } IMEXTASK;
 
+#include "IDA.H"
+
 typedef struct _TAGIMPORT
 {
    IDA_HEAD      IdaHead;                 // common header of instance area

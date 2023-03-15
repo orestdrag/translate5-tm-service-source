@@ -301,7 +301,7 @@
 #include "EQF.H"                       // includes our .h file
 #include "EQFUTPRI.H"                  // private utility header file
 #include "win_types.h"
-#include "OTMFUNC.H"
+#include "tm.h"
 
 #include <dlfcn.h>
 //#include <gnu/lib-names.h>

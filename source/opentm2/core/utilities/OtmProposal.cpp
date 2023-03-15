@@ -7,7 +7,7 @@
 
 #include "../pluginmanager/PluginManager.h"
 #include "LogWrapper.h"
-#include "OtmProposal.h"
+#include "tm.h"
 #include <cstring>
 
 /*! \brief Data class for the transport of memory proposals

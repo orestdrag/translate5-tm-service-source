@@ -11,7 +11,7 @@
 #define INCL_EQF_EDITORAPI        // editor API
 #include "EQF.H"                  // General .H for EQF
 #include "EQFPRO00.H"             // Property Handler defines
-#include "OTMFUNC.H"
+#include "tm.h"
 
 #include <pthread.h>
 #include "LogWrapper.h"

@@ -20,7 +20,7 @@
 #include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging

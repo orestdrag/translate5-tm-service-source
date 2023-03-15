@@ -131,6 +131,8 @@
 /**********************************************************************/
 /* Definition of export dialog IDA                                    */
 /**********************************************************************/
+#include "IDA.H"
+
 typedef struct _LSTEXPIDA
 {
   USHORT usListType;                   // type of list beeing processed

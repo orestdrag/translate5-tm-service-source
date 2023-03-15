@@ -8,7 +8,7 @@
 #ifndef _EDITORMEMLOOKUPDATA_H_
 #define _EDITORMEMLOOKUPDATA_H_
 
-#include <core/pluginmanager/OtmMemory.h>
+#include "tm.h"
 #include <vector>
 #include <string>
 

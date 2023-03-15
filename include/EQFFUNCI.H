@@ -11,9 +11,10 @@
 
 #include "win_types.h"
 #include "EQF.H"
+#include "tm.h"
 #include <atomic>
 #include <string>
-#include "../source/opentm2/core/utilities/LogWrapper.h">
+#include "../source/opentm2/core/utilities/LogWrapper.h"
 // the identifier for our functions
 typedef enum _FCTFUNCTIONS
 {
@@ -231,7 +232,6 @@ USHORT MemFuncPrepImport
   LONG        lOptions                 // options for Translation Memory import
 );
 
-class ImportStatusDetails;
 
 USHORT MemFuncImportProcess
 (

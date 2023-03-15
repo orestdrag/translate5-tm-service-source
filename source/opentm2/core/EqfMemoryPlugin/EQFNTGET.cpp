@@ -18,21 +18,18 @@
 #include <EQF.H>                  // General Translation Manager include file
 
 #define INCL_EQFMEM_DLGIDAS
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
 #include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
 #include <OTMGLOBMEM.H>         // Global Memory defines
-#include "OtmProposal.h"
 #include "OtmMarkup.h"
 #include "MarkupPluginMapper.H"
-#include "MemoryFactory.h"
 #include <map>
 #include "../utilities/LogWrapper.h"
 #include "../utilities/PropertyWrapper.H"
 #include "../utilities/EncodingHelper.h"
-//#include "EQFTM.H"
 
 // import logging 
 //#ifdef MEASURETIME
@@ -1854,7 +1851,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
   PTMX_MATCH_TABLE_W pstMatchTableStart = pstMatchTable; //point to start of match table
   ULONG          ulSrcOemCP = 0L;
   ULONG          ulTgtOemCP = 0L;
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
   SHORT sLangID = 0;
 
   // force fTag flag if proposal with inline tagging is requested

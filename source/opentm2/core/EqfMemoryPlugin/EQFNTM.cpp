@@ -38,7 +38,7 @@
 #include "LogWrapper.h"
 #include <EQFSETUP.H>             // Directory name defines and other
 #include "EQFDDE.H"               // Batch mode definitions
-#include <EQFTMI.H>               // Private header file of Translation Memory
+#include <tm.h>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 #include "FilesystemWrapper.h"
 #include "PropertyWrapper.H"

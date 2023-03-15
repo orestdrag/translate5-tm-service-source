@@ -14,7 +14,7 @@
 
 #include <EQFMORPI.H>                  // private header file of module
 #include <EQFCHTBL.H>                  // character tables
-#include "OTMFUNC.H"            // function call interface public defines
+#include "tm.h"            // function call interface public defines
 #include "EQFFUNCI.H"           // function call interface private defines
 
 #include <ctype.h>

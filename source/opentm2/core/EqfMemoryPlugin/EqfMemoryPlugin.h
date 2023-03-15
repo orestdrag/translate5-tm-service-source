@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../pluginmanager/OtmMemoryPlugin.h"
+#include "tm.h"
 
 class OtmMemory;
 

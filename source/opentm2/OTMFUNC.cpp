@@ -5,28 +5,25 @@
 #include <time.h>
 #define INCL_EQF_FOLDER                // folder functions
 #define INCL_EQF_ANALYSIS              // analysis functions
-#define INCL_EQF_DLGUTILS              // dialog utilities (for EQFTMI.H!)
+#define INCL_EQF_DLGUTILS              // dialog utilities (for tm.h!)
 #define INCL_EQF_TM                    // general Transl. Memory functions
 #define DLLIMPORTRESMOD              // resource module handle imported from DLL
 
 #include "EQF.H"
 #include "EQFTOPS.H"
-#include "OTMFUNC.H"
+#include "tm.h"
 #include "EQFFUNCI.H"
 #include "EQFSTART.H"                  // for TwbGetCheckProfileData
 #include "core/utilities/FilesystemWrapper.h"
 #include "core/utilities/FilesystemHelper.h"
 
 #define INCL_EQFMEM_DLGIDAS            // include dialog IDA definitions
-
-#include <EQFTMI.H>                    // Private header file of Translation Memory
 #include "EQFSETUP.H"                  // directory names
 #include "EQFRPT.H"
 #include "EQFSERNO.H"
 
 #include "core/document/InitPlugins.h"
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138
-#include "core/EqfMemoryPlugin/MemoryFactory.h"
 #include "core/utilities/LanguageFactory.H"
 #include "core/utilities/PropertyWrapper.H"
 #include "core/utilities/LogWrapper.h"
