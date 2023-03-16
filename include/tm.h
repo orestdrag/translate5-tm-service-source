@@ -4671,7 +4671,7 @@ public:
 	) = 0;
 
 /*! \brief type of callback function for ListMemories method */
-typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, POPENEDMEMORY pInfo  );
+typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMORY *  pInfo  );
 
   /*! \brief Provide a list of all available memories
   \param pfnCallBack callback function to be called for each memory
@@ -4693,7 +4693,7 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, POPENEDMEMO
 */
 	virtual int getMemoryInfo(
 		const char* pszName,
-    POPENEDMEMORY pInfo
+    std::shared_ptr<OPENEDMEMORY>  pInfo
 	) = 0;
 
 /*! \brief provides a list of the memory data files
@@ -4856,7 +4856,7 @@ virtual int importFromMemoryFiles
 class TMManager{
     /*! \brief Pointer to the list of opened memories
     */
-    std::vector<OPENEDMEMORY> vMemoryList;
+    //std::vector<OPENEDMEMORY> vMemoryList;
 
 
 public:
@@ -4874,7 +4874,7 @@ public:
       \param pMem - pointer to mem
       \returns 0 
     */
-    int removeFromMemoryList( POPENEDMEMORY pMem );
+    int removeFromMemoryList( std::shared_ptr<OPENEDMEMORY>  pMem );
 
     /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
         \param pszMemory name of the memory
@@ -4896,7 +4896,7 @@ public:
         \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
     */
     int getFreeSlot(size_t memoryRequested);
-    POPENEDMEMORY getFreeSlotPointer(size_t memoryRequested);
+    std::shared_ptr<OPENEDMEMORY>  getFreeSlotPointer(size_t memoryRequested);
 
     /*! \brief close any memories which haven't been used for a long time
         \returns 0
@@ -4908,7 +4908,7 @@ public:
     */
     size_t calculateOccupiedRAM();
 
-    POPENEDMEMORY findOpenedMemory( const std::string& memName);
+    std::shared_ptr<OPENEDMEMORY>  findOpenedMemory( const std::string& memName);
 
     int GetMemImportInProcess();
     void importDone(const std::string& memName, int iRC, char *pszError );
@@ -4976,7 +4976,7 @@ int getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
- OPENEDMEMORY pInfo
+ std::shared_ptr<OPENEDMEMORY>  pInfo
 );
 
 

@@ -99,7 +99,7 @@ typedef struct _IMPORTMEMORYDATA
   char szError[512];
   //ushort * pusImportPersent = nullptr;
   ImportStatusDetails* importDetails = nullptr;
-  //OtmMemoryServiceWorker::POPENEDMEMORY pMem = nullptr;
+  //OtmMemoryServiceWorker::std::shared_ptr<OPENEDMEMORY>  pMem = nullptr;
 } IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
@@ -513,7 +513,7 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   }
 
   // check mem if is not in import state
-  OPENEDMEMORY * pMem = nullptr;
+  std::shared_ptr<OPENEDMEMORY>  pMem; 
   
   //LONG lHandle = 0;
   //BOOL fClose = false;
@@ -677,7 +677,7 @@ int OtmMemoryServiceWorker::import
   }
 
   // find the memory to our memory list
-  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   LONG lHandle = 0;
   BOOL fClose = false;
   MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
@@ -724,7 +724,7 @@ int OtmMemoryServiceWorker::import
     }
     //requiredMemory = 0;
     // find a free slot in the memory list
-    POPENEDMEMORY pMem = TMManager::GetInstance()->getFreeSlotPointer(requiredMemory);
+    std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->getFreeSlotPointer(requiredMemory);
 
     // handle "too many open memories" condition
     if ( pMem == nullptr )
@@ -2270,7 +2270,7 @@ int OtmMemoryServiceWorker::reorganizeMem
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
 
   // close memory if it is open
-  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
@@ -2346,7 +2346,7 @@ int OtmMemoryServiceWorker::deleteMem
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
 
   // close memory if it is open
-  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
@@ -2409,7 +2409,7 @@ int OtmMemoryServiceWorker::getMem
   } /* endif */
 
   // close memory if it is open
-  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   if ( pMem != nullptr )
   {
     // close the memory and remove it from our list
@@ -2519,7 +2519,7 @@ int OtmMemoryServiceWorker::getStatus
   JSONFactory *factory = JSONFactory::getInstance();
 
   // check if memory is contained in our list
-  OPENEDMEMORY * pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
+  std::shared_ptr<OPENEDMEMORY>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemory);
   
   if ( pMem != nullptr )
   {

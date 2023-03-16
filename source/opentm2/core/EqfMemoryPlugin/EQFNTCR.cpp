@@ -258,6 +258,8 @@ USHORT TmtXCreate
     UtlTime( &(pTmClb->stTmSign.lTime) );
     strcpy( pTmClb->stTmSign.szSourceLanguage,
             pTmCreateIn->stTmCreate.szSourceLanguage );
+
+    //TODO - replace version with current t5memory version
     pTmClb->stTmSign.bMajorVersion = TM_MAJ_VERSION;
     pTmClb->stTmSign.bMinorVersion = TM_MIN_VERSION;
     strcpy( pTmClb->stTmSign.szDescription,

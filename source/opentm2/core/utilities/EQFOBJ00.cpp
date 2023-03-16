@@ -427,12 +427,13 @@ USHORT CreateMemFile
     BOOL   fOK;
     HANDLE hMutexSem = NULL;
     
-  // look for objects having the same short name
-  //GETMUTEX(hMutexSem);
-  if(FilesystemHelper::FindFiles(szFullMemPath).empty()){
-    ObjState = OBJ_IS_NEW;
-  }else{
-    ObjState = OBJ_EXISTS_ALREADY;
+    // look for objects having the same short name
+    //GETMUTEX(hMutexSem);
+    if(FilesystemHelper::FindFiles(szFullMemPath).empty()){
+      ObjState = OBJ_IS_NEW;
+    }else{
+      ObjState = OBJ_EXISTS_ALREADY;
+    }
   }
 
   // find a unique name if document is not contained in the folder
