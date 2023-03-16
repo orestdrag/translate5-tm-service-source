@@ -81,38 +81,17 @@ USHORT TmtXOpen
     if ( pTmOpenIn->stTmOpen.usAccess == READONLYACCESS )
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
-      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
-      {
-        pTmClb->usAccessMode = ASD_GUARDED | ASD_SHARED | ASD_READONLY;
-        pTmClb->fShared = TRUE;
-      }
-      else
-      {
-        pTmClb->usAccessMode = ASD_GUARDED | ASD_READONLY;
-      } /* endif */
+      pTmClb->usAccessMode = ASD_GUARDED | ASD_READONLY;
     }
     else if ( pTmOpenIn->stTmOpen.usAccess != NONEXCLUSIVE )
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
       pTmClb->usAccessMode = ASD_GUARDED | ASD_LOCKED;
-      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
-      {
-        // avoid error if open flag in header of shared TMs is set
-        pTmClb->usAccessMode |= ASD_NOOPENCHECK;
-      } /* endif */
     }
     else
     {
       PSZ pszExt = strrchr( pTmOpenIn->stTmOpen.szDataName, DOT );
-      if ( (pszExt != NULL) && (strcasecmp( pszExt, EXT_OF_SHARED_MEM) == 0) )
-      {
-        pTmClb->usAccessMode = ASD_GUARDED | ASD_SHARED;
-        pTmClb->fShared = TRUE;
-      }
-      else
-      {
-        pTmClb->usAccessMode = ASD_GUARDED;
-      } /* endif */
+      pTmClb->usAccessMode = ASD_GUARDED;      
     } /* endif */
     if ( pTmOpenIn->stTmOpen.usAccess == FOR_ORGANIZE )
     {

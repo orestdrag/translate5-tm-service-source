@@ -456,7 +456,7 @@ typedef struct _DDEMEMCRT
   CHAR szName[MAX_LONGFILESPEC];           // TM name
   CHAR szDescr[MAX_MEM_DESCRIPTION];       // TM description
   CHAR chToDrive;                          // target drive of folder
-  BOOL fShared;                            // TRUE = shared TM
+  //BOOL fShared;                            // TRUE = shared TM
   CHAR szFormat[MAX_FILESPEC];             // name of markup/format table
   LANGUAGE     szSourceLang;               // source language
   LANGUAGE     szTargetLang;               // target language

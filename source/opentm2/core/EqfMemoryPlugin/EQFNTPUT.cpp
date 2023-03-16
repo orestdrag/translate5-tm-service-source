@@ -2674,29 +2674,6 @@ USHORT TmtXUpdSeg
     ulRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
-  // lock TM database
-  if ( !usRc && pTmClb->fShared )
-  {
-    // use only two retries as locking already uses a wait loop...
-    SHORT sRetries = 2;
-    do
-    {
-      usRc = NTMLockTM( pTmClb, TRUE, &fLocked );
-      if ( usRc == BTREE_IN_USE )
-      {
-        UtlWait( MAX_WAIT_TIME );
-        sRetries--;
-      } /* endif */
-    }
-    while( (usRc == BTREE_IN_USE) && (sRetries > 0));
-  } /* endif */
-
-  // Update internal buffers if database has been modified by other users
-  if ( !usRc && pTmClb->fShared )
-  {
-    usRc = NTMCheckForUpdates( pTmClb );
-  } /* endif */
-
   // get TM record being modified and update the record
   if ( !usRc )
   {
