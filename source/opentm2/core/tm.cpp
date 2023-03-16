@@ -523,14 +523,14 @@ OtmMemory *TMManager::openMemory
 /* \brief Get information from an existing memory
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
    \param pszMemoryName name of the memory or memory object name (pluginname + colon + memory name)
-   \param pInfo pointer to caller MemoryInfo structure
+   \param pInfo pointer to caller OPENEDMEMORY structure
    \returns 0 when successful or error code
 */
 int TMManager::getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
-  OtmMemoryPlugin::PMEMORYINFO pInfo
+  POPENEDMEMORY pInfo
 )
 {
   int iRC = 0;
@@ -809,7 +809,7 @@ BOOL TMManager::exists(
 {
   BOOL fExists = FALSE;
 
-  OtmMemoryPlugin::MEMORYINFO *pInfo = new(OtmMemoryPlugin::MEMORYINFO);
+  OPENEDMEMORY *pInfo = new(OPENEDMEMORY);
   if (pszMemoryName && EqfMemoryPlugin::GetInstance()->getMemoryInfo( pszMemoryName, pInfo ) == 0 )
   {
     fExists = TRUE;
@@ -1266,7 +1266,7 @@ OtmPlugin *TMManager::findPlugin
     }
     else
     { 
-      OtmMemoryPlugin::MEMORYINFO *pInfo = new(OtmMemoryPlugin::MEMORYINFO);
+     OPENEDMEMORY *pInfo = new(OPENEDMEMORY);
 
       // find plugin by querying memory info from all available plugins
       for ( std::size_t i = 0; i < pluginList->size(); i++ )
@@ -1969,7 +1969,7 @@ typedef struct _APILISTMEMDATA
 } APILISTMEMDATA, *PAPILISTMEMDATA;
 
 // callback function to add memory names to a list or update the length of the list
-int AddMemToList( void *pvData, char *pszName, OtmMemoryPlugin::PMEMORYINFO pInfo )
+int AddMemToList( void *pvData, char *pszName,POPENEDMEMORY pInfo )
 {
   PAPILISTMEMDATA pData = ( PAPILISTMEMDATA )pvData;
   LONG lNameLen = strlen( pszName );

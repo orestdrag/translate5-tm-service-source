@@ -419,25 +419,22 @@ USHORT CreateMemFile
   // setup search path and path of full object name depending on object type
   if ( usRC == NO_ERROR )
   {
-        properties_get_str(KEY_MEM_DIR, szFullMemPath, MAX_EQF_PATH);
-        strcat( szFullMemPath, BACKSLASH_STR );
-        strcat( szFullMemPath, pszOrgName );
-        strcat( szFullMemPath, ".MEM" );
-  }
+    properties_get_str(KEY_MEM_DIR, szFullMemPath, MAX_EQF_PATH);
+    strcat( szFullMemPath, BACKSLASH_STR );
+    strcat( szFullMemPath, pszOrgName );
+    strcat( szFullMemPath, ".MEM" );
 
-  // look for objects having the same short name
-  if ( usRC == NO_ERROR )
-  {
     BOOL   fOK;
     HANDLE hMutexSem = NULL;
-
-    //GETMUTEX(hMutexSem);
-    if(FilesystemHelper::FindFiles(szFullMemPath).empty()){
-      ObjState = OBJ_IS_NEW;
-    }else{
-      ObjState = OBJ_EXISTS_ALREADY;
-    }
+    
+  // look for objects having the same short name
+  //GETMUTEX(hMutexSem);
+  if(FilesystemHelper::FindFiles(szFullMemPath).empty()){
+    ObjState = OBJ_IS_NEW;
+  }else{
+    ObjState = OBJ_EXISTS_ALREADY;
   }
+
   // find a unique name if document is not contained in the folder
   if ( (usRC == NO_ERROR) && (ObjState == OBJ_IS_NEW)  )
   {
@@ -449,8 +446,6 @@ USHORT CreateMemFile
       strcpy( pProp->stPropHead.szName, UtlGetFnameFromPath(szFullMemPath));
       strcat( pProp->stPropHead.szName, "$_RESERVED");
       UtlWriteFile( szFullMemPath, sizeof(PROP_NTM ), (PVOID)pProp, FALSE );
-      //UtlWriteFile( szFullMemPath, strlen(szFullMemPath), (PVOID)szFullMemPath, FALSE );
-      //WritePropFile(szFullMemPath, (PVOID)pProp, sizeof(PROP_NTM ));
       
       UtlAlloc( (PVOID *) &pProp, 0L, 0L, NOMSG );
     } /* endif */
