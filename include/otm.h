@@ -15,6 +15,7 @@
 #define ENTRYDECODE_LEN    32          // length of decoding array
 #define MAX_UPD_CTR        10          // max number of update counters
 
+#define MAX_LONGPATH           260     // max length of fully qualified path
 
 
 
@@ -63,11 +64,11 @@ typedef struct _BTREEHEADRECORD
    unsigned char f16kRec      : 1;                // TRUE = BTREE uses 16k Recs (V3 record size)
   } Flags;
 
-  EQF_BOOL  fOpen;                                // open flag/corruption flag
+  bool  fOpen;                                // open flag/corruption flag
   USHORT    usFirstNode;                          // first node record
   USHORT    usFirstLeaf;                          // first leaf record
   RECPARAM  DataRecList[ MAX_LIST ];          // last used data records
-  EQF_BOOL  fTerse;                               // tersing requested
+  bool  fTerse;                               // tersing requested
   BYTE      chCollate[COLLATE_SIZE];              // collating sequence to use
   BYTE      chCaseMap[COLLATE_SIZE];              // case mapping to be used
   BYTE      chEntryEncode[ ENTRYENCODE_LEN ];     // significant characters
@@ -140,6 +141,7 @@ typedef struct _ACCESSCOUNTERTABLEENTRY
 } ACCESSCTRTABLEENTRY, * PACCESSCTRTABLEENTRY;
 
 
+typedef LHANDLE HTM;
 typedef struct _BTREEGLOB
 {
    HFILE        fp;                               // index file handle
@@ -190,6 +192,11 @@ typedef struct _BTREEGLOB
    BYTE         bRecSizeVersion;                  // record size version flag
 } BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 
+
+
+#define MAX_SERVER_NAME         15     // max. length of a server name
+#define MAX_USERID              15     // max. length of LAN user ID
+
 typedef struct _BTREEIDA
 {
    HTM          htm;                              // handle in remote case
@@ -198,9 +205,9 @@ typedef struct _BTREEIDA
    USHORT       usCurrentRecord;                  // current sequence record
    PBTREEGLOB   pBTree;                           // pointer to global struct
    USHORT       usDictNum;                        // index in global structure
-   CHAR_W       chHeadTerm[HEADTERM_SIZE];        // last active head term
+   wchar_t       chHeadTerm[HEADTERM_SIZE];        // last active head term
    BOOL         fLock;                            // head term is locked
-   CHAR_W       chLockedTerm[HEADTERM_SIZE];      // locked term if any
+   wchar_t       chLockedTerm[HEADTERM_SIZE];      // locked term if any
    CHAR         chServer[ MAX_SERVER_NAME + 1];   // server name
    struct       _BTREEIDA  *  pBTreeRemote;       // pointer to remote BTREE
    CHAR         szUserId [MAX_USERID];            // logged on userid
@@ -208,6 +215,161 @@ typedef struct _BTREEIDA
    CHAR         szFileName[MAX_LONGPATH];         // fully qualified name of file
  } BTREE, * PBTREE, ** PPBTREE;
 
+
+
+
+// Values for update counter indices
+#define RESERVED_UPD_COUNTER     0
+#define COMPACTAREA_UPD_COUNTER  1
+#define AUTHORS_UPD_COUNTER      2
+#define FILENAMES_UPD_COUNTER    3
+#define LANGUAGES_UPD_COUNTER    4
+#define TAGTABLES_UPD_COUNTER    5
+#define LONGNAMES_UPD_COUNTER    6
+#define MAX_UPD_COUNTERS        20
+
+
+#define MAX_LANG_LENGTH         20     // length of the name of a language
+
+//table entry structure
+typedef struct _TMX_TABLE_ENTRY
+{
+  CHAR   szName[MAX_LANG_LENGTH];
+  USHORT usId;
+} TMX_TABLE_ENTRY, * PTMX_TABLE_ENTRY;
+// name table structure (TM version 5 and up)
+typedef struct _TMX_TABLE
+{
+  ULONG  ulAllocSize;
+  ULONG  ulMaxEntries;
+  TMX_TABLE_ENTRY stTmTableEntry;
+} TMX_TABLE, * PTMX_TABLE;
+
+//signature structure
+
+#define MAX_MEM_DESCRIPTION     41     // length of a memory description field
+#define _TMX_SIGN_SZ_NAME 128
+//#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
+
+#define MAX_COMPACT_SIZE    3217   // 256
+
+typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lotus
+
+typedef struct _TMX_SIGN
+{
+  TIME_L lTime;  
+  BYTE bMajorVersion;
+  BYTE bMinorVersion;
+  CHAR szName[_TMX_SIGN_SZ_NAME];
+  CHAR szSourceLanguage[MAX_LANG_LENGTH];
+  CHAR szDescription[MAX_MEM_DESCRIPTION];
+
+} TMX_SIGN, * PTMX_SIGN;
+
+
+typedef char *PSZ;
+
+// table entry structure for long document name table
+typedef struct _TMX_LONGNAME_TABLE_ENTRY
+{
+  PSZ    pszLongName;                  // ptr to long name in buffer area
+  USHORT usId;                         // ID for long name
+} TMX_LONGNAME_TABLE_ENTRY, * PTMX_LONGNAME_TABLE_ENTRY;
+
+
+//table structure for long document table
+typedef struct _TMX_LONGNAME_TABLE
+{
+  PSZ    pszBuffer;                              // buffer for names and IDs
+  ULONG  ulBufUsed;                              // number of bytes used in buffer
+  ULONG  ulBufSize;                              // size of buffer in bytes
+  ULONG  ulTableSize;                            // table size (# entries)
+  ULONG  ulEntries;                              // number of entries in table
+  TMX_LONGNAME_TABLE_ENTRY stTableEntry[1];      // dyn. array of table entries
+} TMX_LONGNAMETABLE, * PTMX_LONGNAME_TABLE;
+
+
+
+//TM control block structure
+struct TMX_CLB
+{
+  PBTREE pstTmBtree;
+  PBTREE pstInBtree;
+  PTMX_TABLE pLanguages;
+  PTMX_TABLE pFileNames;
+  PTMX_TABLE pAuthors;
+  PTMX_TABLE pTagTables;
+  USHORT usAccessMode;
+  USHORT usThreshold;
+  TMX_SIGN stTmSign;
+  BYTE     bCompact[MAX_COMPACT_SIZE-1];
+  BYTE     bCompactChanged;
+  LONG     alUpdCounter[MAX_UPD_COUNTERS];
+  //BOOL     fShared;
+  PTMX_LONGNAME_TABLE pLongNames;
+  PTMX_TABLE pLangGroups;              //  table containing language group names
+  PSHORT     psLangIdToGroupTable;     // language ID to group ID table
+  LONG       lLangIdToGroupTableSize; // size of table (alloc size)
+  LONG       lLangIdToGroupTableUsed; // size of table (bytes in use)
+  PVOID      pTagTable;               // tag table loaded for segment markup (TBLOADEDTABLE)
+
+  // copy of long name table sorted ignoring the case of the file names
+  // Note: only the stTableEntry array is filled in this area, for all other
+  //       information use the entries in the pLongNames structure
+  PTMX_LONGNAME_TABLE pLongNamesCaseIgnore;
+
+  // fields for work area pointers of various subfunctions which are allocated
+  // only once for performance reasons
+  PVOID      pvTempMatchList;        // matchlist of FillMatchEntry function
+  PVOID      pvIndexRecord;          // index record area of FillMatchEntry function
+  PVOID      pvTmRecord;             // buffer for memory record used by GetFuzzy and GetExact
+  ULONG      ulRecBufSize;           // current size of pvTMRecord;
+  PVOID      pvNotUsed[10];          // room for additional pointers and size values
+
+  // fields for time measurements and logging
+  BOOL       fTimeLogging;           // TRUE = Time logging is active
+  LONG64     lAllocTime;             // time for memory allocation
+  LONG64     lTokenizeTime;          // time for tokenization
+  LONG64     lGetExactTime;          // time for GetExact
+  LONG64     lOtherTime;             // time for other activities
+  LONG64     lGetFuzzyTime;          // time for GetFuzzy
+  LONG64     lFuzzyOtherTime;        // other time spent in GetFuzzy
+  LONG64     lFuzzyTestTime;         // FuzzyTest time spent in GetFuzzy
+  LONG64     lFuzzyGetTime;          // NTMGet time spent in GetFuzzy
+  LONG64     lFuzzyFillMatchEntry;   // FillMatchEntry time spent in GetFuzzy
+  LONG64     lFillMatchAllocTime;    // FillMatchEntry: allocation time
+  LONG64     lFillMatchOtherTime;    // FillMatchEntry: other times
+  LONG64     lFillMatchReadTime;     // FillMatchEntry: read index DB time
+  LONG64     lFillMatchFillTime;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchCleanupTime;  // FillMatchEntry: cleanup match list time
+  LONG64     lFillMatchFill1Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill2Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill3Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill4Time;     // FillMatchEntry: fill match list time
+  LONG64     lNotUsed[7];           // room for more counters
+};
+
+typedef TMX_CLB* PTMX_CLB;
+
+//prefix for each output structures
+typedef struct _TMX_PREFIX_OUT
+{
+  USHORT usLengthOutput;               //length of complete output structure
+  USHORT usTmtXRc;                     //function returncode
+} TMX_PREFIX_OUT, * PTMX_PREFIX_OUT, XOUT, * PXOUT;
+
+typedef struct _TMX_CREATE_OUT
+{
+  TMX_PREFIX_OUT  stPrefixOut;
+  PTMX_CLB pstTmClb;
+} TMX_CREATE_OUT, * PTMX_CREATE_OUT;
+
+
+typedef struct _TMX_OPEN_OUT
+{
+  TMX_PREFIX_OUT stPrefixOut;
+  PTMX_CLB pstTmClb;
+} TMX_OPEN_OUT, * PTMX_OPEN_OUT;
 
 
 struct ImportStatusDetails{
@@ -243,6 +405,40 @@ struct ImportStatusDetails{
     IMPORT_RUNNING_STATUS,  // memory import is running
     IMPORT_FAILED_STATUS    // memory import failed
   } MEMORY_STATUS;
+
+//#define _PROPHEAD_SZNAME 13
+//#define _PROPHEAD_SZNAME MAX_FILESPEC
+
+#define _PROPHEAD_SZNAME 144
+//#define _PROPHEAD_SZPATH MAX_PATH144
+
+// Structure of properties heading area
+typedef struct _PROPHEAD
+{
+   USHORT usClass;              // Class name ID of properties
+   char chType;                 // Indicator to type of properties
+   //char dummy;                  // T=Template, I=Instance, N=New
+   char szName[_PROPHEAD_SZNAME];    // Path to properties
+} PROPHEAD, *PPROPHEAD;
+
+
+/**********************************************************************/
+/* Marker for NTM in new TM properties                                */
+/**********************************************************************/
+#define NTM_MARKER "#@@NTM01@@#"
+
+/**********************************************************************/
+/* TM property structure                                              */
+/**********************************************************************/
+typedef struct _PROP_NTM
+{
+  PROPHEAD stPropHead;
+  TMX_SIGN stTMSignature;
+  CHAR     szNTMMarker[sizeof(NTM_MARKER)];
+  USHORT   usThreshold;
+
+} PROP_NTM, *PPROP_NTM;
+
 
 /*! \brief Info structure for an open translation memory
 */

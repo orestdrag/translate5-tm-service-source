@@ -3,6 +3,8 @@
 	Copyright (c) 1990-2012, International Business Machines Corporation and others. All rights reserved.
 */
 
+#include "otm.h"
+
 USHORT QDAMDeleteFile ( SERVERNAME, PSZ );
 /**********************************************************************/
 /* NTM prototypes                                                     */
@@ -41,7 +43,7 @@ EQFNTMCreate
    PCHAR  pUserData,                   // user data
    USHORT usLen,                       // length of user data
    ULONG  ulStartKey,                  // first key to start automatic insert...
-   PVOID  * ppBTIda                    // pointer to structure
+   PBTREE  * ppBTIda                    // pointer to structure
 );
 
 //+----------------------------------------------------------------------------+
@@ -73,7 +75,7 @@ SHORT  EQFNTMOpen
 (
   PSZ   pName,                        // name of the file
   USHORT usOpenFlags,                 // Read Only or Read/Write
-  PVOID  * ppBTIda                    // pointer to BTREE structure
+  PBTREE  * ppBTIda                    // pointer to BTREE structure
 );
 
 //+----------------------------------------------------------------------------+
@@ -99,7 +101,7 @@ SHORT  EQFNTMOpen
 
 SHORT EQFNTMClose
 (
-  PVOID * ppBTIda
+  PBTREE * ppBTIda
 );
 
 //+----------------------------------------------------------------------------+
@@ -134,7 +136,7 @@ SHORT EQFNTMClose
 
 SHORT EQFNTMUpdSign
 (
-   PVOID  pBTIda,                      // pointer to btree structure
+   PBTREE  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    USHORT usLen                        // length of user data
 );
@@ -180,7 +182,7 @@ SHORT EQFNTMSign
 
 SHORT EQFNTMSign1
 (
-   PVOID  pBTIda,                      // pointer to btree structure
+   PBTREE  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    PUSHORT pusLen                      // length of user data
 );
@@ -188,7 +190,7 @@ SHORT EQFNTMSign1
 SHORT
 EQFNTMInsert
 (
-  PVOID   pBTIda,           // pointer to binary tree struct
+  PBTREE   pBTIda,           // pointer to binary tree struct
   PULONG  pulKey,           // pointer to key
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data
@@ -220,7 +222,7 @@ EQFNTMInsert
 SHORT
 EQFNTMInsert
 (
-  PVOID   pBTIda,           // pointer to binary tree struct
+  PBTREE   pBTIda,           // pointer to binary tree struct
   PULONG  pulKey,           // pointer to key
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data
@@ -251,7 +253,7 @@ EQFNTMInsert
 SHORT
 EQFNTMUpdate
 (
-  PVOID   pBTIda,           // pointer to binary tree struct
+  PBTREE   pBTIda,           // pointer to binary tree struct
   ULONG   ulKey,            // key value
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data
@@ -278,7 +280,7 @@ EQFNTMUpdate
 SHORT
 EQFNTMGet
 (
-   PVOID  pBTIda,                      // pointer to btree struct
+   PBTREE  pBTIda,                      // pointer to btree struct
    ULONG  ulKey,                       // key to be searched for
    PCHAR  pchBuffer,                   // space for user data
    PULONG  pulLength                   // in/out length of returned user data
@@ -307,7 +309,7 @@ EQFNTMGet
 SHORT
 EQFNTMGetNextNumber
 (
-   PVOID  pBTIda,                      // pointer to btree struct
+   PBTREE  pBTIda,                      // pointer to btree struct
    PULONG pulStartKey,                 // return start key number
    PULONG pulNextKey                   // return next key data
 );
@@ -348,7 +350,7 @@ VOID  QDAMInit( VOID );
 //+----------------------------------------------------------------------------+
 SHORT EQFNTMPhysLock
 (
-   PVOID          pBTIda,
+   PBTREE          pBTIda,
    BOOL           fLock,
    PBOOL          pfLocked
 );
@@ -383,7 +385,7 @@ SHORT EQFNTMPhysLock
 //+----------------------------------------------------------------------------+
 SHORT EQFNTMIncrUpdCounter
 (
-   PVOID      pBTIda,                  // pointer to btree structure
+   PBTREE      pBTIda,                  // pointer to btree structure
    SHORT      sIndex,                  // index of update counter
    PLONG                         plNewValue                                               // ptr to buffer for new counte value
 );
@@ -407,7 +409,7 @@ SHORT EQFNTMIncrUpdCounter
 //+----------------------------------------------------------------------------+
 SHORT EQFNTMGetUpdCounter
 (
-   PVOID      pBTIda,                   // pointer to btree structure
+   PBTREE      pBTIda,                   // pointer to btree structure
    PLONG      plUpdCount,               // ptr to buffer for update counter
    SHORT      sIndex,                   // index of requested update counter
    SHORT      sNumCounters              // number of counters requested
@@ -427,7 +429,7 @@ SHORT EQFNTMGetUpdCounter
 // function to organize index file
 USHORT EQFNTMOrganizeIndex
 (
-   PVOID          *ppBTIda,            // ptr to BTREE being organized
+   PBTREE          *ppBTIda,            // ptr to BTREE being organized
    USHORT         usOpenFlags,         // open flags to be used for index file
    ULONG          ulStartKey           // first key to start automatic insert...
 );

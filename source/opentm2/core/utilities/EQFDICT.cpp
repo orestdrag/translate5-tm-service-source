@@ -5463,7 +5463,7 @@ SHORT QDAMDictSignLocal
 
 SHORT EQFNTMSign1
 (
-   PVOID  pBTIda,                      // pointer to btree structure
+   PBTREE  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    PUSHORT pusLen                      // length of user data
 )
@@ -8050,7 +8050,7 @@ SHORT QDAMDictFirstLocal
 //
 USHORT EQFNTMOrganizeIndex
 (
-   PVOID          *ppBTIda,            // ptr to BTREE being organized
+   PBTREE          *ppBTIda,            // ptr to BTREE being organized
    USHORT         usOpenFlags,         // open flags to be used for index file
    ULONG          ulStartKey           // first key to start automatic insert...
 )
