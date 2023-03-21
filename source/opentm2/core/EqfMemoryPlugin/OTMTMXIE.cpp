@@ -1483,7 +1483,7 @@ USHORT CTMXExportImport::StartImport
       if (!m_parser->parseFirst( this->m_TempFile, m_SaxToken))
       {
           //XERCES_STD_QUALIFIER cerr << "scanFirst() failed\n" << XERCES_STD_QUALIFIER endl;
-          usRC = ERROR_READ_FAULT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_FAULT);
       }
       else
       {
@@ -1504,7 +1504,7 @@ USHORT CTMXExportImport::StartImport
         if ( !fContinue && !m_handler->IsHeaderDone() )
         {
           m_parser->parseReset(m_SaxToken);
-          usRC = ERROR_BAD_FORMAT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_BAD_FORMAT);
         } /* endif */
 
         // get description and source language of memory
@@ -1529,7 +1529,7 @@ USHORT CTMXExportImport::StartImport
     catch (const OutOfMemoryException& )
     {
 //        XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     }
     catch (const XMLException& toCatch)
     {
@@ -1539,7 +1539,7 @@ USHORT CTMXExportImport::StartImport
         //     << "Exception message is: \n"
         //     << StrX(toCatch.getMessage())
         //     << "\n" << XERCES_STD_QUALIFIER endl;
-        usRC = ERROR_READ_FAULT;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_FAULT);
     }
 
   } /* endif */
@@ -1601,11 +1601,11 @@ USHORT CTMXExportImport::ImportNext
         m_parser->parseReset(m_SaxToken);
         if ( errorCount )
         {
-          usRC = ERROR_MEMIMP_ERROR;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEMIMP_ERROR);
         }
         else
         {
-          usRC = MEM_IMPORT_COMPLETE;
+          LOG_AND_SET_RC(usRC, T5INFO, MEM_IMPORT_COMPLETE);
         }
       } /* endif */
     }
@@ -1668,7 +1668,7 @@ USHORT CTMXExportImport::PreProcessInFile
   hIn = fopen( pszInFile, "rb" );
   if ( hIn == NULL )
   {
-    usRC = ERROR_FILE_NOT_FOUND;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_FILE_NOT_FOUND);
   } /* endif */
 
   if ( !usRC )
@@ -1676,7 +1676,7 @@ USHORT CTMXExportImport::PreProcessInFile
     hOut = fopen( pszOutFile, "wb" );
     if ( hOut == NULL )
     {
-      usRC = ERROR_FILE_NOT_FOUND;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_FILE_NOT_FOUND);
     } /* endif */
   } /* endif */
 
@@ -3726,7 +3726,7 @@ USHORT TMXTOEXP
 
   if ( !UtlAlloc( (PVOID *)&pData, 0, sizeof(CONVERTERDATA), ERROR_STORAGE  ) )
   {
-    usRC = ERROR_STORAGE;      
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_STORAGE);      
   } /* endif */
 
   if ( !usRC )
@@ -3756,7 +3756,7 @@ USHORT TMXTOEXP
         // allocate buffer for markup table list
         if ( !UtlAlloc( (PVOID *)&(pData->MemInfo.pszMarkupList), 0, iLen + 10, ERROR_STORAGE  ) )
         {
-          usRC = ERROR_STORAGE;      
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_STORAGE);      
         } /* endif */
 
         // setup markup table list
@@ -3795,7 +3795,7 @@ USHORT TMXTOEXP
     pData->hfOut = fopen( pszOutMem, "wb" );
     if ( pData->hfOut == NULL )
     {
-      usRC = ERROR_WRITE_FAULT;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_WRITE_FAULT);
     }
     else
     {
@@ -3877,7 +3877,7 @@ USHORT EXPTOTMX
 
   if ( !UtlAlloc( (PVOID *)&pData, 0, sizeof(CONVERTERDATA), ERROR_STORAGE  ) )
   {
-    usRC = ERROR_STORAGE;      
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_STORAGE);      
   } /* endif */
 
   // check existence of input file
@@ -4044,7 +4044,7 @@ USHORT CheckExistence( PCONVERTERDATA pData, PSZ pszInMemory )
   hdir = FindFirstFile( pszInMemory, &FindData );
   if ( hdir == INVALID_HANDLE_VALUE )
   {
-     usRC = ERROR_FILE_NOT_FOUND;
+     LOG_AND_SET_RC(usRC, T5INFO, ERROR_FILE_NOT_FOUND);
      sprintf( pData->szErrorText, "Input memory %s could not be opened", pszInMemory );
   }
   else
@@ -4127,7 +4127,7 @@ USHORT GetEncodingEx( PCONVERTERDATA pData, PSZ pszInMemory, PSZ pszInMode, PSZ 
   pData->hInFile = fopen( pData->szInMemory, "rb" );
   if ( pData->hInFile == NULL )
   {
-     usRC = ERROR_FILE_NOT_FOUND;
+     LOG_AND_SET_RC(usRC, T5INFO, ERROR_FILE_NOT_FOUND);
      // ShowError( pData, "Error: Input memory %s could not be opened", pszInMemory );
   } /* endif */
 
@@ -4146,7 +4146,7 @@ USHORT GetEncodingEx( PCONVERTERDATA pData, PSZ pszInMemory, PSZ pszInMode, PSZ 
       if ( _wcsnicmp( pszTemp, L"<ntmmemorydb>", 13 ) != 0 )
       {
         sprintf( pData->szErrorText, "The format of the file %s is not supported", pData->szInMemory );
-        usRC = ERROR_INVALID_DATA;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
       } /* endif */
 
       // read ahead up to first control entry
@@ -4189,7 +4189,7 @@ USHORT GetEncodingEx( PCONVERTERDATA pData, PSZ pszInMemory, PSZ pszInMode, PSZ 
       else
       {
         sprintf( pData->szErrorText, "The file %s is no memory in valid EXP format", pData->szInMemory );
-        usRC = ERROR_INVALID_DATA;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -4339,13 +4339,13 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
         if ( fEOF )
         {
           // incomplete segment data
-          usRC = ERROR_INVALID_SEGMENT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
           pszError = "Incomplete segment control string";
         }
         else if ( _wcsnicmp( pData->szLine, L"</control>", 10 ) == 0 )
         {
           // missing control string
-          usRC = ERROR_INVALID_SEGMENT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
           pszError = "Missing control string";
         }
         else
@@ -4384,7 +4384,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           if ( _wcsnicmp( pData->szLine, L"</control>", 10 ) != 0 )
           {
             // missing end control string
-            usRC = ERROR_INVALID_SEGMENT;
+            LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
             pszError = "Missing end control tag";
           }
 
@@ -4408,7 +4408,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           AddLineToSegBuffer( pData );
           if (_wcsnicmp( pData->szLine, L"</segment>", 10 ) == 0 ) 
           {
-            usRC = ERROR_INVALID_SEGMENT;
+            LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
             pszError = "Missing </source> tag";
           }
           else
@@ -4427,7 +4427,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
         if ( !usRC && !fEnd )
         {
           // incomplete segment data
-          usRC = ERROR_INVALID_SEGMENT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
           pszError = "Missing </source> tag";
         } /* endif */
       }
@@ -4448,7 +4448,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           AddLineToSegBuffer( pData );
           if (_wcsnicmp( pData->szLine, L"</segment>", 10 ) == 0 ) 
           {
-            usRC = ERROR_INVALID_SEGMENT;
+            LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
             pszError = "Missing </target> tag";
           }
           else
@@ -4467,7 +4467,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
         if ( !usRC && !fEnd )
         {
           // incomplete segment data
-          usRC = ERROR_INVALID_SEGMENT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
           pszError = "Missing </target> tag";
         } /* endif */
       } 
@@ -4488,7 +4488,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
           AddLineToSegBuffer( pData );
           if (_wcsnicmp( pData->szLine, L"</segment>", 10 ) == 0 ) 
           {
-            usRC = ERROR_INVALID_SEGMENT;
+            LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
             pszError = "Missing </adddata> tag";
           }
           else
@@ -4507,7 +4507,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
         if ( !usRC && !fEnd )
         {
           // incomplete segment data
-          usRC = ERROR_INVALID_SEGMENT;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
           pszError = "Missing </adddata> tag";
         } /* endif */
       } /* endif */
@@ -4525,22 +4525,22 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
       if ( !fControlString )
       {
         pszError = "Missing <control>...</control> section";
-        usRC = ERROR_INVALID_SEGMENT;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
       }
       else if ( iSourceLen >= MAX_SEGMENT_SIZE )
       {
         pszError = "Segment source text is too long";
-        usRC = ERROR_INVALID_SEGMENT;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
       }
       else if (iTargetLen >= MAX_SEGMENT_SIZE )
       {
         pszError = "Segment target text is too long";
-        usRC = ERROR_INVALID_SEGMENT;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
       }
       else if ( iSourceLen == 0 )
       {
         pszError = "No segment source text found";
-        usRC = ERROR_INVALID_SEGMENT;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SEGMENT);
       } /* endif */
     } /* endif */
 
@@ -4689,7 +4689,7 @@ USHORT ReadLineW
   }
   else
   {
-      usRC = BTREE_EOF_REACHED;
+      LOG_AND_SET_RC(usRC, T5INFO, BTREE_EOF_REACHED);
   } /* endif */
 
   return( usRC );
@@ -4743,7 +4743,7 @@ USHORT ReadLine
   }
   else
   {
-      usRC = BTREE_EOF_REACHED;
+      LOG_AND_SET_RC(usRC, T5INFO, BTREE_EOF_REACHED);
   } /* endif */
 
   return( usRC );

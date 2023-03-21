@@ -294,7 +294,7 @@ USHORT PutItAway( PPROPCNTL pcntl)
     usrc = UtlWrite( hf, pcntl->pHead, pcntl->usFsize, &sizwrite, 0);
 
     if( !usrc && (sizwrite != pcntl->usFsize))
-      usrc = Err_WriteFile;
+      LOG_AND_SET_RC(usrc, T5INFO, Err_WriteFile);
     UtlClose( hf, 0);
     return( usrc);
 }

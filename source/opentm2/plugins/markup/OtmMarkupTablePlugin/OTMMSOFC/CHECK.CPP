@@ -94,7 +94,7 @@ BOOL CheckXmlText( WCHAR * PrevSourceSegment, WCHAR * CurSourceSegment,
     /* using common properties, in which case the surrounding <~+:>        */
     /* tags are not required.                                              */
     /*---------------------------------------------------------------------*/
-    usRC = EQFRC_OK ;
+    LOG_AND_SET_RC(usRC, T5INFO, EQFRC_OK) ;
     ulTempSegNum = ulSegNum ;
     ptrChar = NULL ;
     while( ( usRC == EQFRC_OK ) &&

@@ -246,7 +246,7 @@ USHORT TmtXCreate
   } /* endif */
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {

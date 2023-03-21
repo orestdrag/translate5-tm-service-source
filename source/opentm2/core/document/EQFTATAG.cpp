@@ -89,7 +89,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     {
       T5LOG( T5ERROR) <<  "ERROR_INTERNAL MB_CANCEL 0 INTERNAL_ERROR hwnd" ;
     } /* endif */
-    usRC = ERROR_INVALID_PARAMETER;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_PARAMETER);
   } /* endif */
 
   /********************************************************************/
@@ -227,7 +227,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       //if ( !UtlLoadFileHwnd( szTagTableFileName, (PVOID *)&pTagTable,
       //                  &ulBytesRead, FALSE, fMsg, hwnd ) )
       {
-         usRC = ERROR_READ_FAULT;        // indicate tag table read error
+         LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_FAULT);        // indicate tag table read error
          T5LOG(T5FATAL) << ":: can't load tag table file: " <<  szTagTableFileName;
          throw;
       }
@@ -343,7 +343,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     {
       pTable->fCompareContextLoadFailed = TRUE;
     } /* endif */
-    usRC = NO_ERROR;  // reset error condition to allow continuation
+    LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);  // reset error condition to allow continuation
   } /* endif */
 
   /********************************************************************/
@@ -364,7 +364,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     {
       pTable->fCompareContextLoadFailed = TRUE;
     } /* endif */
-    usRC = NO_ERROR;  // reset error condition to allow continuation
+    LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);  // reset error condition to allow continuation
   } /* endif */
 
   /********************************************************************/
@@ -385,7 +385,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     {
       pTable->fGetSegContextLoadFailed = TRUE;
     } /* endif */
-    usRC = NO_ERROR;  // reset error condition to allow continuation
+    LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);  // reset error condition to allow continuation
   } /* endif */
 
 
@@ -407,7 +407,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
     {
       pTable->fQueryExitInfoLoadFailed = TRUE;
     } /* endif */
-    usRC = NO_ERROR;  // reset error condition to allow continuation
+    LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);  // reset error condition to allow continuation
   } /* endif */
 
 
@@ -500,7 +500,7 @@ USHORT TAFreeTagTable
   if ( (pTagTable < TALoadedTables[ usTaskId ] ) ||
        (pTagTable >= (TALoadedTables[ usTaskId ] + sTablesInUse[ usTaskId ])) )
   {
-    usRC = ERROR_INVALID_DATA;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
   } /* endif */
 
   /********************************************************************/

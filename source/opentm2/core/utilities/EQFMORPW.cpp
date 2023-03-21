@@ -323,7 +323,7 @@ USHORT MorphWordRecognitionW
        (ppOrgTermList == NULL)    ||
        ((*ppOrgTermList == NULL) && (*pulOrgBufferSize != 0) ) )
   {
-    usRC = MORPH_INV_PARMS;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_PARMS);
   } /* endif */
 
   /********************************************************************/
@@ -353,7 +353,7 @@ USHORT MorphWordRecognitionW
     //fDBCSLang = (MorphGetLanguageType( chLang ) == MORPH_DBCS_LANGTYPE);
     if ( UtlQueryCharTable( IS_TEXT_TABLE, &pucIsText ) != NO_ERROR )
     {
-      usRC = MORPH_FUNC_FAILED;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_FUNC_FAILED);
     } /* endif */
   } /* endif */
 
@@ -371,7 +371,7 @@ USHORT MorphWordRecognitionW
                     (LONG)ulNormSegSize * sizeof(CHAR_W),
                     NOMSG ) )
     {
-       usRC = MORPH_NO_MEMORY;        // set short on memory RC
+       LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);        // set short on memory RC
     }
     else if ( fDBCSLang )
     {
@@ -450,7 +450,7 @@ USHORT MorphWordRecognitionW
     if ( !UtlAlloc( (PVOID *)&pucRedSeg, 0L,
                     max, NOMSG ) )
     {
-       usRC = MORPH_NO_MEMORY;        // set short on memory RC
+       LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);        // set short on memory RC
     }
     else
     {
@@ -485,7 +485,7 @@ USHORT MorphWordRecognitionW
                     (LONG)ulStemSegSize*sizeof(CHAR_W),
                     NOMSG ) )
     {
-       usRC = MORPH_NO_MEMORY;          // set short on memory RC
+       LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);          // set short on memory RC
     } /* endif */
 
     /******************************************************************/
@@ -497,7 +497,7 @@ USHORT MorphWordRecognitionW
                     (LONG)usListLen*sizeof(CHAR_W),
                     NOMSG ) )
     {
-       usRC = MORPH_NO_MEMORY;          // set short on memory RC
+       LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);          // set short on memory RC
     } /* endif */
 
     if ( usRC == MORPH_OK )
@@ -580,7 +580,7 @@ USHORT MorphWordRecognitionW
            pTermInStemSeg->OffsLen.usOffs   = (USHORT)ulStemSegUsed;
            pTermInStemSeg->OffsLen.usLength = usTermLength;
            ulStemSegUsed += usTermLength;       // # of w's
-           usRC = MORPH_OK;            // reset return code
+           LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);            // reset return code
          } /* endif */
 
          /*************************************************************/
@@ -796,11 +796,11 @@ USHORT MorphWordRecognitionW
 
                   if ( usRC == LX_RC_OK_ASD )
                   {
-                    usRC = MORPH_OK;
+                    LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);
                   }
                   else
                   {
-                    usRC = MORPH_NOT_FOUND;
+                    LOG_AND_SET_RC(usRC, T5INFO, MORPH_NOT_FOUND);
                   } /* endif */
                 }
 
@@ -858,11 +858,11 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
                                TRUE );                     // term is already in stem form
           if ( usRC == LX_RC_OK_ASD )
           {
-            usRC = MORPH_OK;
+            LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);
           }
           else if ( usRC == LX_WRD_NT_FND_ASD )
           {
-            usRC = MORPH_NOT_FOUND;
+            LOG_AND_SET_RC(usRC, T5INFO, MORPH_NOT_FOUND);
           }
           else
           {
@@ -870,7 +870,7 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
             {
               *pusOrgRC = usRC;
             } /* endif */
-            usRC = MORPH_ASD_ERROR;
+            LOG_AND_SET_RC(usRC, T5INFO, MORPH_ASD_ERROR);
           } /* endif */
         } /* endif */
 
@@ -905,7 +905,7 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
             } /* endif */
           } /* endif */
 
-          usRC = MORPH_OK;              // ... set RC to OK
+          LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);              // ... set RC to OK
           pTerm++;                     // skip this term
           pTermInStemSeg++;
         }
@@ -1058,11 +1058,11 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
                                   TRUE );                     // term is already in stem form
              if ( usRC == LX_RC_OK_ASD )
              {
-               usRC = MORPH_OK;
+               LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);
              }
              else if ( usRC == LX_WRD_NT_FND_ASD )
              {
-               usRC = MORPH_NOT_FOUND;
+               LOG_AND_SET_RC(usRC, T5INFO, MORPH_NOT_FOUND);
              }
              else
              {
@@ -1070,7 +1070,7 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
                {
                  *pusOrgRC = usRC;
                } /* endif */
-               usRC = MORPH_ASD_ERROR;
+               LOG_AND_SET_RC(usRC, T5INFO, MORPH_ASD_ERROR);
              } /* endif */
 
              /**************************************************************/
@@ -1295,7 +1295,7 @@ T5LOG(T5FATAL) << ":: called unimplemented function, MorphGetStemForm";
               }
               else
               {
-                usRC = MORPH_OK;              // ... set RC to OK
+                LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);              // ... set RC to OK
                 pTerm++;                     // skip this term
                 pTermInStemSeg++;
 

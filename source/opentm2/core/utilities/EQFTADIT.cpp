@@ -351,7 +351,7 @@ USHORT DITAMakeStartStopTable( PSZ_W pszSource, PLOADEDTABLE pTable, PSTARTSTOP 
     *plSize = lOldSize = sizeof(TOKENENTRY) * 1000;
     if ( !UtlAlloc( ppTokenList, 0L, lOldSize, NOMSG ) )
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -490,7 +490,7 @@ BOOL DITARemoveTagging( PSZ_W pszSourceIn, PSZ_W pszSourceOut, PSZ_W pszTargetIn
                                  FALSE, NULLHANDLE );
     if ( usRC )
     {
-      usRC = ERROR_TA_ACC_TAGTABLE;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_TA_ACC_TAGTABLE);
     } /* endif */
   } /* endif */
 

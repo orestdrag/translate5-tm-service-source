@@ -110,7 +110,7 @@ USHORT TmtXDelSegm
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -176,7 +176,7 @@ USHORT TmtXDelSegm
             }
             else
             {
-              usRc = ERROR_NOT_ENOUGH_MEMORY;
+              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
 
@@ -203,7 +203,7 @@ USHORT TmtXDelSegm
     }
     else
     {
-      usRc = SEG_NOT_FOUND;
+      LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
     } /* endif */
   } /* endif */
 
@@ -321,7 +321,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -519,7 +519,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
 
     if ( !fStop )
     {
-      usRc = SEG_NOT_FOUND;
+      LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
     } /* endif */
   } /* endif */
 

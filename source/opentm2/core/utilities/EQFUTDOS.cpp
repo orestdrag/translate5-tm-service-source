@@ -2084,11 +2084,11 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetCurrentDire
    pszFailName; cbFileName;
    DosError(0);                         // avoid error popup...
   
-   usRc = NO_ERROR;
+   LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
    hmod = dlopen(pszModName, RTLD_LAZY);
    if (!hmod) {
        fprintf(stderr, "%s\n", dlerror());
-       usRc = -1; //TODO proper error code
+       LOG_AND_SET_RC(usRc, T5INFO, -1); //TODO proper error code
        *phMod = (HMODULE) NULL;
    }
    dlerror();
@@ -2144,7 +2144,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 135 whole function";
    *phMod = GetModuleHandle( pszModName );
    if (!*phMod )
    {
-     usRc = ERROR_MOD_NOT_FOUND ;
+     LOG_AND_SET_RC(usRc, T5INFO, ERROR_MOD_NOT_FOUND) ;
    } /* endif */
 #endif
 
@@ -2171,7 +2171,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 136 whole function";
 #ifdef TEMPORARY_COMMENTED
    if ( !GetModuleFileName( hMod, pchBuf, cbBuf ) )
    {
-     usRc = ERROR_INVALID_NAME;
+     LOG_AND_SET_RC(usRc, T5INFO, ERROR_INVALID_NAME);
    } /* endif */
 #endif
 
@@ -2247,7 +2247,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );
    /********************************************************************/
    if ( usVCount > 9 )
    {
-     usRC = ERROR_MR_INV_IVCOUNT;
+     LOG_AND_SET_RC(usRC, T5INFO, ERROR_MR_INV_IVCOUNT);
    }
    else if ( usVCount == 0 )
    {
@@ -2265,7 +2265,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );
        pchBuf[cbBuf-1] = EOS;
        *pcbMsg = cbBuf;
 
-       usRC = ERROR_MR_MSG_TOO_LONG;
+       LOG_AND_SET_RC(usRC, T5INFO, ERROR_MR_MSG_TOO_LONG);
      } /* endif */
    }
    else
@@ -2294,7 +2294,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 59 FreeModule( hMod );
                // check if length problem
                if ( ulOutLen == cbBuf )
                {
-                 usRC = ERROR_MR_MSG_TOO_LONG;
+                 LOG_AND_SET_RC(usRC, T5INFO, ERROR_MR_MSG_TOO_LONG);
                } /* endif */
              }
              else

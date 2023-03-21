@@ -79,7 +79,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
   // check if a TM has been specified
   if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
-    usRC = ERROR_MEMORY_NOTFOUND;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEMORY_NOTFOUND);
     T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
   } /* endif */
 
@@ -92,7 +92,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
       usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, &Info );
       if (usRC != 0)
       {
-        usRC = ERROR_MEMORY_NOTFOUND;              
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEMORY_NOTFOUND);              
         T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::check if memory existed error:: memName =  " << pszMemName << " not found; usRC = " << usRC;
       }
   }
@@ -183,7 +183,7 @@ USHORT MemFuncOrganizeMem
 
    if ( usTmRc1 || usTmRc2 )
    {
-     usRc = FALSE;
+     LOG_AND_SET_RC(usRc, T5INFO, FALSE);
    } /* endif */
 
  return usRc;
@@ -272,7 +272,7 @@ USHORT EQFMemOrganizeStart
 
       if ( (iRC != 0) || (pRIDA->pMemTemp == NULL ) )
       {
-        usRc = FALSE;
+        LOG_AND_SET_RC(usRc, T5INFO, FALSE);
         pRIDA->fMsg = FALSE;
         pFactory->showLastError( pRIDA->szPluginName, pRIDA->szTempMemName, NULL, pRIDA->hwndErrMsg );
       } /* endif */

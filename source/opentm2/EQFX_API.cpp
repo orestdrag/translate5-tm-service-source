@@ -107,11 +107,11 @@ USHORT  /*APIENTRY*/ EQFWORDCNTPERSEGW
 
   if(*pszSeg && *pszLang && *pszFormat && pulResult && pulMarkUp)
   {
-    usRC = NO_ERROR;
+    LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);
   }
   else
   {
-    usRC = ERROR_INVALID_DATA;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
   }/* end if */
 
   if ( usRC == NO_ERROR )
@@ -127,7 +127,7 @@ USHORT  /*APIENTRY*/ EQFWORDCNTPERSEGW
       BOOL fOK = UtlAlloc((PVOID *)&pTokBuf, 0L, (LONG)TOK_BUFFER_SIZE, NOMSG );
       if (!fOK )
       {
-        usRC = ERROR_INVALID_DATA;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
       } /* endif */
     } /* endif */
 

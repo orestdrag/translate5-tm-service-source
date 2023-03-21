@@ -221,7 +221,7 @@ USHORT CreateSystemProperties(const char* pszPath)
     else
     {
         T5LOG(T5ERROR) << "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY";
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         return usRC;
     }
 
@@ -404,7 +404,7 @@ USHORT CreateFolderListProperties
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
     /******************************************************************/
@@ -483,7 +483,7 @@ USHORT CreateImexProperties
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
 
@@ -558,7 +558,7 @@ USHORT CreateDictProperties
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
     /******************************************************************/
@@ -632,7 +632,7 @@ USHORT CreateEditProperties
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
     /******************************************************************/
@@ -723,7 +723,7 @@ T5LOG(T5ERROR) <<  ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 42 SetErrorMode( SEM_
 #endif //TO_BE_REPLACED_WITH_LINUX_CODE
   if ( usRC <= 5 )                     // directory exists already
   {
-     usRC = 0;
+     LOG_AND_SET_RC(usRC, T5INFO, 0);
   } /* endif */
   return( usRC );
 } /* end of function SetupCreateDir */
@@ -1147,7 +1147,7 @@ USHORT UpdateFolderProp
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
    } /* endif */
 
@@ -1184,7 +1184,7 @@ USHORT UpdateFolderProp
                       FALSE );
      if( !usRC && (usPropFileSize != usSizeWritten) )
      {
-       usRC = ERROR_WRITE_FAULT;
+       LOG_AND_SET_RC(usRC, T5INFO, ERROR_WRITE_FAULT);
      } /* endif */
    } /* endif */
 
@@ -1240,7 +1240,7 @@ USHORT UpdateDocumentProp
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
    } /* endif */
 
@@ -1274,7 +1274,7 @@ USHORT UpdateDocumentProp
                       FALSE );
      if( !usRC && (usPropFileSize != usSizeWritten) )
      {
-       usRC = ERROR_WRITE_FAULT;
+       LOG_AND_SET_RC(usRC, T5INFO, ERROR_WRITE_FAULT);
      } /* endif */
    } /* endif */
 
@@ -1329,7 +1329,7 @@ USHORT UpdateDictProp
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
    } /* endif */
 
@@ -1367,7 +1367,7 @@ USHORT UpdateDictProp
                       &usSizeWritten, FALSE);
      if( !usRC && (usPropFileSize != usSizeWritten) )
      {
-       usRC = ERROR_WRITE_FAULT;
+       LOG_AND_SET_RC(usRC, T5INFO, ERROR_WRITE_FAULT);
      } /* endif */
    } /* endif */
 
@@ -1424,7 +1424,7 @@ USHORT UpdateTMProp
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
    } /* endif */
 
@@ -1481,7 +1481,7 @@ USHORT UpdateTMProp
                       FALSE );
      if( !usRC && (usPropFileSize != usSizeWritten) )
      {
-       usRC = ERROR_WRITE_FAULT;
+       LOG_AND_SET_RC(usRC, T5INFO, ERROR_WRITE_FAULT);
      } /* endif */
    }  /* endif */
 

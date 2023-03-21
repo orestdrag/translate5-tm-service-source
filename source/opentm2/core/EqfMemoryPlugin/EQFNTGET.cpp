@@ -392,7 +392,7 @@ USHORT TmtXGet
     SHORT sRetries = MAX_RETRY_COUNT;
     do
     {
-      usRc = NO_ERROR;                 // reset return code
+      LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);                 // reset return code
       // Update internal buffers if database has been modified by other users
       if ( !usRc && pTmClb->fShared )
       {
@@ -713,7 +713,7 @@ USHORT GetExactMatch
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -743,7 +743,7 @@ USHORT GetExactMatch
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
         if ( usRc == NO_ERROR )
@@ -1033,7 +1033,7 @@ USHORT ExactTest
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1213,7 +1213,7 @@ USHORT ExactTest
                                      pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               }
               else
               {
@@ -1884,7 +1884,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
 
     if ( !fOK )
     {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     }
     else
     {
@@ -1934,7 +1934,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         }
         else
         {
-          usRc = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         }
         if ( usRc == NO_ERROR )
         {
@@ -2075,7 +2075,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
 
       if ( !fOK )
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       }
       else
       {
@@ -2104,7 +2104,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                                    pstMatchTable->szSource );
             if ( !fOK )
             {
-              usRc = BTREE_CORRUPTED;
+              LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
             } /* endif */
           }
           else
@@ -2194,7 +2194,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                                      pstMatchTable->szTarget );
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */
             }
             else
@@ -2566,7 +2566,7 @@ USHORT GetFuzzyMatch
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2607,7 +2607,7 @@ USHORT GetFuzzyMatch
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 #ifdef MEASURETIME
@@ -2778,7 +2778,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -3032,7 +3032,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */              
             } /* endif */
 
@@ -3089,7 +3089,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                                          pTMXSourceTagTable, pSentence->pPropString );
                   if ( !fOK )
                   {
-                    usRc = BTREE_CORRUPTED;
+                    LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
                   }
                   else
                   {
@@ -3285,7 +3285,7 @@ USHORT FillMatchEntry
   }
   else
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 #ifdef MEASURETIME
@@ -3469,7 +3469,7 @@ USHORT FillMatchEntry
   //an error
   if ( usRc == BTREE_NOT_FOUND )
   {
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
   } /* endif */
 
 #ifdef MEASURETIME

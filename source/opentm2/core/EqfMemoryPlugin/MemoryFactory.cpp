@@ -1709,7 +1709,7 @@ USHORT MemoryFactory::APISearchMem
   } /* endif */
   else if ( iRC == OtmMemory::INFO_ENDREACHED )
   {
-    usRC = ENDREACHED_RC;
+    LOG_AND_SET_RC(usRC, T5INFO, ENDREACHED_RC);
   }
   else
   {

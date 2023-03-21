@@ -420,7 +420,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   /* initialize function return code                                  */
   /********************************************************************/
-  usRc = ERROR_NOT_ENOUGH_MEMORY;
+  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 
   /********************************************************************/
   /* initialize TM handle                                             */
@@ -439,7 +439,7 @@ C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     /******************************************************************/
     /* set usRc to NO_ERROR                                           */
     /******************************************************************/
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
 
     /******************************************************************/
     /* assign memory to pointer pstOpenOut                           */
@@ -640,7 +640,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
   /********************************************************************/
   /* initialze function return code                                   */
   /********************************************************************/
-  usRc = ERROR_NOT_ENOUGH_MEMORY;
+  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 
   /********************************************************************/
   /* do processing only when a valid TM handle is passed              */
@@ -694,7 +694,7 @@ C_TmClose( HTM        htm,               //(in) TM handle returned from open
     /* no valid TM handle was passed (handle is NULL)                 */
     /* handle this as no error                                        */
     /******************************************************************/
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
   } /* endif */
 
   if ( usRc != NO_ERROR )
@@ -920,7 +920,7 @@ TmGetW(HTM            htm,             //(in)  TM handle
       }
       else
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1060,7 +1060,7 @@ NTMFillCreateInStruct( HTM             hModel,
     /******************************************************************/
     /* initialize rc                                                  */
     /******************************************************************/
-     usRc = ERROR_NOT_ENOUGH_MEMORY;
+     LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 
     /******************************************************************/
     /* allocate storage for TMX_INFO_IN and TMX_INFO_OUT              */

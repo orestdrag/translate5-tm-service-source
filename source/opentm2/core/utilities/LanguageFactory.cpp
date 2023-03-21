@@ -530,13 +530,13 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
     }
     catch (const OutOfMemoryException& )
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     }
     catch (const XMLException& toCatch)
     {
       toCatch;
 
-      usRC = ERROR_READ_FAULT;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_FAULT);
     }
     
     if( usRC == 0 ){

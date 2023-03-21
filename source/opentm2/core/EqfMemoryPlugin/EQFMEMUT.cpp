@@ -1021,7 +1021,7 @@ USHORT MemConvertMem( PSZ pszFullMemName )
     }
     else if ( pProp->stTMSignature.bMajorVersion == TM_MAJ_VERSION_7 )
     {
-      usRC = MEM_CONVERTMEM_ALREADYNEWFORMAT;
+      LOG_AND_SET_RC(usRC, T5INFO, MEM_CONVERTMEM_ALREADYNEWFORMAT);
       //if ( hfLog )
       {
         T5LOG(T5INFO) << "   no conversion required, Properties indicate Version 7 memory"  ;

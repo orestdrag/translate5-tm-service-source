@@ -751,7 +751,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
     {
       PSZ pszParm = "ANSI/ASCII";
       T5LOG(T5ERROR) << "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm;
-      usRC = ERROR_MEM_EXPORT_DATACORRUPT;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEM_EXPORT_DATACORRUPT);
     } /* endif */
 
     if ( pExportIDA->pProposal != NULL ) delete(pExportIDA->pProposal); 
@@ -842,11 +842,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
      // allocate memory and segment data area
      if ( !UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE ) )
      {
-       usRc = ERROR_NOT_ENOUGH_MEMORY;
+       LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
      }
      else if ( !UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE ) )
      {
-       usRc = ERROR_NOT_ENOUGH_MEMORY;
+       LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
      } /* endif */
 
      // load external memory export module
@@ -1017,7 +1017,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
        if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
             (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
        {
-         usRc = MEM_PROCESS_END;
+         LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
        }
        else
        {
@@ -1067,10 +1067,10 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          switch ( usRc )
          {
            case 0 :
-             usRc = MEM_PROCESS_OK;
+             LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_OK);
              break;
            default:
-              usRc = MEM_WRITE_ERR;
+              LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
               break;
          } /*endswitch */
        }
@@ -1084,7 +1084,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
    {
        //--- An unrecoverable memory DB error occurred
        MemoryFactory *pFactory = MemoryFactory::getInstance();
-       usRc = MEM_DB_ERROR;
+       LOG_AND_SET_RC(usRc, T5INFO, MEM_DB_ERROR);
        pFactory->showLastError( pExportIDA->szPlugin, pExportIDA->szMemName, pExportIDA->pMem, pExportIDA->hwndErrMsg );
        if ( pExportIDA->fBatch )
        {
@@ -1264,7 +1264,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
        usRc = MemExportWrite( pExportIDA, pszWorkArea );
        if ( usRc == MEM_PROCESS_OK )
        {
-            usRc = MEM_PROCESS_END;
+            LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
        } /* endif */
      } /* endif */
    } /* endif */
@@ -1526,7 +1526,7 @@ USHORT MemExportWrite
                   T5LOG(T5ERROR) <<   "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm;
                   if ( usMBCode == MBID_CANCEL )
                   {
-                    usRc = MEM_WRITE_ERR;
+                    LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
                   } /* endif */
                 } /* endif */
                 pExportIDA->fDataCorrupted = TRUE;
@@ -1566,7 +1566,7 @@ USHORT MemExportWrite
                 T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_DATACORRUPT::" << pszParm ;
                if ( usMBCode == MBID_CANCEL )
                {
-                 usRc = MEM_WRITE_ERR;
+                 LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
                } /* endif */
              } /* endif */
              pExportIDA->fDataCorrupted = TRUE;
@@ -1617,7 +1617,7 @@ USHORT MemExportWrite
            pReplString[0] = szDrive;
            CloseFile( &(pExportIDA->hFile) );
            T5LOG(T5ERROR) << "::ERROR_WRITING::"  << pReplString[0];
-           usRc = MEM_WRITE_ERR;
+           LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
         }
         else
         {
@@ -1639,7 +1639,7 @@ USHORT MemExportWrite
       else
       {
         //--- an error during the writing occurred
-        usRc = MEM_WRITE_ERR;
+        LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
       } /* endif */
    } /* endelse */
 
@@ -1665,7 +1665,7 @@ USHORT MemExportWrite
           pReplString[0] = szDrive;
           CloseFile( &(pExportIDA->hFile) );
           T5LOG(T5ERROR) <<  "::ERROR_WRITING::" << pReplString[0];
-          usRc = MEM_WRITE_ERR;
+          LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
        }
        else
        {
@@ -1678,7 +1678,7 @@ USHORT MemExportWrite
      }
      else
      {
-        usRc = MEM_WRITE_ERR;
+        LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
      } /* endif */
    } /* endif */
 

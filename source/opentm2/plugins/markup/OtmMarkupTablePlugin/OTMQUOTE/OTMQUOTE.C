@@ -787,7 +787,7 @@ USHORT ParseQuotedFile
    }
    else
    {
-     usRC = ERROR_STORAGE;
+     LOG_AND_SET_RC(usRC, T5INFO, ERROR_STORAGE);
    } /* endif */
 
    memset( &Flags, 0, sizeof(Flags) );

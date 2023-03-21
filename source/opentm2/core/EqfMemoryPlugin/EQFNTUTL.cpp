@@ -326,7 +326,7 @@ USHORT NTMGetIDFromNameEx
               }
               else
               {
-                usRc = ERROR_NOT_ENOUGH_MEMORY;
+                LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
               } /* endif */
 
               // enlarge case ignore table as well
@@ -335,7 +335,7 @@ USHORT NTMGetIDFromNameEx
                 if ( !UtlAlloc( (PVOID *)&pTmClb->pLongNamesCaseIgnore,
                                 ulOldSize, ulNewSize, NOMSG ) )
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 } /* endif */
               } /* endif */
             } /* endif */
@@ -375,7 +375,7 @@ USHORT NTMGetIDFromNameEx
                 }
                 else
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 } /* endif */
               } /* endif */
             } /* endif */
@@ -535,7 +535,7 @@ USHORT NTMGetIDFromNameEx
     else  //--- pTmClb is NULL pointer or pszName is empty
     {
       //--- wrong function paramters
-      usRc = ERROR_INTERNAL;
+      LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
     } /* endif */
   } /* endif */
 
@@ -689,7 +689,7 @@ NTMGetNameFromID( PTMX_CLB pTmClb,      //input
           /* the ID was not found in the table                        */
           /* set usRc and reset pszName                               */
           /************************************************************/
-          usRc = ID_NOT_FOUND;
+          LOG_AND_SET_RC(usRc, T5INFO, ID_NOT_FOUND);
           pszName[0] = EOS;
         } /* endif */
       } /* endif */
@@ -698,7 +698,7 @@ NTMGetNameFromID( PTMX_CLB pTmClb,      //input
   else  //--- pTmClb is NULL pointer
   {
     //--- wrong function paramters
-    usRc = ERROR_INTERNAL;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
   } /* endif */
 
   return usRc;
@@ -773,7 +773,7 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
           /* the ID was not found in the table                        */
           /* set usRc and reset pszName                               */
           /************************************************************/
-          usRc = ID_NOT_FOUND;
+          LOG_AND_SET_RC(usRc, T5INFO, ID_NOT_FOUND);
           pszFoundName = NULL;
         } /* endif */
       } /* endif */
@@ -782,7 +782,7 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
   else  //--- pTmClb is NULL pointer
   {
     //--- wrong function paramters
-    usRc = ERROR_INTERNAL;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
   } /* endif */
 
   return( pszFoundName );
@@ -918,7 +918,7 @@ NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
       break;
     //-----------------------------------------------------------------------
     default :
-      usRc = ERROR_INTERNAL;
+      LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
       *ppstTMTable        = NULL;
       *ppstTMTableEntries = NULL;
       break;
@@ -993,7 +993,7 @@ NTMOpenProperties( HPROP   * phProp,    //(out) property handle
                                   pszSysPath,
                                   PROP_ACCESS_READ, &ErrorInfo)) == NULL)
   {
-    usRc = TM_PROPERTIES_NOT_OPENED;
+    LOG_AND_SET_RC(usRc, T5INFO, TM_PROPERTIES_NOT_OPENED);
   } /* endif */
 
   /********************************************************************/
@@ -1007,7 +1007,7 @@ NTMOpenProperties( HPROP   * phProp,    //(out) property handle
       /****************************************************************/
       /* error set access mode                                        */
       /****************************************************************/
-      usRc = TM_PROPERTIES_NOT_OPENED;
+      LOG_AND_SET_RC(usRc, T5INFO, TM_PROPERTIES_NOT_OPENED);
     } /* endif */
   } /* endif */
 
@@ -1018,7 +1018,7 @@ NTMOpenProperties( HPROP   * phProp,    //(out) property handle
   {
     if( (*ppProp = MakePropPtrFromHnd( *phProp ))== NULL )
     {
-      usRc = TM_PROPERTIES_NOT_OPENED;
+      LOG_AND_SET_RC(usRc, T5INFO, TM_PROPERTIES_NOT_OPENED);
     } /* endif */
   } /* endif */
 
@@ -1113,7 +1113,7 @@ NTMCheckPropFile( PSZ    pszPropName,
         /* marker for new TM not found in the properties,             */
         /* this is an old TM property file, set usRc                  */
         /**************************************************************/
-        usRc = ERROR_OLD_PROPERTY_FILE;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_OLD_PROPERTY_FILE);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1376,7 +1376,7 @@ USHORT NTMCreateLongNameTable
   }
   else
   {
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // allocate initial long name pointer array for case ignore search
@@ -1390,7 +1390,7 @@ USHORT NTMCreateLongNameTable
   }
   else
   {
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // allocate initial long name buffer area
@@ -1404,7 +1404,7 @@ USHORT NTMCreateLongNameTable
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -1502,7 +1502,7 @@ USHORT NTMReadLongNameTable
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
 
@@ -1528,7 +1528,7 @@ USHORT NTMReadLongNameTable
         if ( !UtlAlloc( (PVOID *)&pNewArea, 0L,
                         (LONG)pTerseHeader->usDataSize, NOMSG ) )
         {
-          usRC = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
 
         // unterse data
@@ -1544,7 +1544,7 @@ USHORT NTMReadLongNameTable
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )
           {
-            usRC = ERROR_NOT_ENOUGH_MEMORY; // expand failed most likely to
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
                                             // memory shortage
           } /* endif */
           #endif
@@ -1602,7 +1602,7 @@ USHORT NTMReadLongNameTable
         }
         else
         {
-          usRC = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
 
         // enlarge pointer array for case ignore search as well
@@ -1615,7 +1615,7 @@ USHORT NTMReadLongNameTable
           }
           else
           {
-            usRC = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1797,7 +1797,7 @@ USHORT NTMAddNameToTable
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1834,7 +1834,7 @@ USHORT NTMAddNameToTable
   else  //--- pTmClb is NULL pointer or pszName is empty
   {
     //--- wrong function paramters
-    usRc = ERROR_INTERNAL;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
   } /* endif */
 
   if ( usRc == ERROR_TABLE_FULL )
@@ -1939,7 +1939,7 @@ USHORT NTMLoadNameTable
   {
     if ( !UtlAlloc( (PVOID *)ppTMTable, 0L, *pulSize, NOMSG ))
     {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -1964,7 +1964,7 @@ USHORT NTMLoadNameTable
       if ( !UtlAlloc( (PVOID *)&pNewArea, 0L,
                       (LONG)pTerseHeader->usDataSize, NOMSG ) )
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
 
       // unterse data
@@ -1980,7 +1980,7 @@ USHORT NTMLoadNameTable
         if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                               &ulNewLen ) )
         {
-          usRc = ERROR_NOT_ENOUGH_MEMORY; // expand failed most likely to
+          LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
                                           // memory shortage
         } /* endif */
         #endif
@@ -2080,7 +2080,7 @@ USHORT NTMAddLangGroup
       }
       else
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -2110,7 +2110,7 @@ USHORT NTMCreateLangGroupTable
   }
   else
   {
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // allocate language-ID-to-group-ID-table
@@ -2127,7 +2127,7 @@ USHORT NTMCreateLangGroupTable
     }
     else
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 

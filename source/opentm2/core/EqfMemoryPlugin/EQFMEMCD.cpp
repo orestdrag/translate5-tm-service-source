@@ -114,7 +114,7 @@ LONG                lOptions                 // type of new Translation Memory
   {
     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
     {
-      usRC = TMT_MANDCMDLINE;
+      LOG_AND_SET_RC(usRC, T5INFO, TMT_MANDCMDLINE);
       T5LOG(T5ERROR) "::MemFuncCreateMem()::TMT_MANDCMDLINE";
     } /* endif */
   } /* endif */
@@ -124,7 +124,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( (pszSourceLanguage == NULL) || (*pszSourceLanguage == EOS) )
     {
       T5LOG(T5ERROR) << "::MemFuncCreateMem()::ERROR_NO_SOURCELANG";
-      usRC = ERROR_NO_SOURCELANG;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NO_SOURCELANG);
     } /* endif */
   } /* endif */
 
@@ -135,7 +135,7 @@ LONG                lOptions                 // type of new Translation Memory
     {
       pszParm = (PSZ) pszMemName;
       T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << pszParm;
-      usRC = ERROR_MEM_NAME_INVALID;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEM_NAME_INVALID);
     } /* endif */
   } /* endif */
 
@@ -148,7 +148,7 @@ LONG                lOptions                 // type of new Translation Memory
       T5Logger::GetInstance()->desuppressLogging(logLevel);
       PSZ pszParam = (PSZ)pszMemName;
       T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << pszParam;
-      usRC = ERROR_MEM_NAME_EXISTS;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_MEM_NAME_EXISTS);
     }
     T5Logger::GetInstance()->desuppressLogging(logLevel);
   } /* endif */
@@ -160,7 +160,7 @@ LONG                lOptions                 // type of new Translation Memory
     SHORT sID = 0;    
     if ( MorphGetLanguageID( (PSZ)pszSourceLanguage, &sID ) != MORPH_OK )
     {
-      usRC = ERROR_PROPERTY_LANG_DATA;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_PROPERTY_LANG_DATA);
       //T5LOG( T5ERROR) <<"  ERROR_PROPERTY_LANG_DATA, MB_CANCEL, 1,  &((PSZ)pszSourceLanguage) "";
     } /* endif */
   } /* endif */
@@ -180,7 +180,7 @@ LONG                lOptions                 // type of new Translation Memory
     else
     {
       T5LOG(T5FATAL) <<   "MemFuncCreateMem supports only local_opt, rc = WRONG_OPTIONS_RC";
-      usRC = WRONG_OPTIONS_RC;
+      LOG_AND_SET_RC(usRC, T5INFO, WRONG_OPTIONS_RC);
     } /* endif */
   } /* endif */
 

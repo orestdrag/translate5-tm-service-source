@@ -113,7 +113,7 @@ USHORT TmtXExtract
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -122,7 +122,7 @@ USHORT TmtXExtract
 
     do
     {
-      usRc = NO_ERROR;                 // reset return code
+      LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);                 // reset return code
 
       // Update internal buffers if database has been modified by other users
       if ( !usRc && pTmClb->fShared )
@@ -190,7 +190,7 @@ USHORT TmtXExtract
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           default :
-            usRc = BTREE_INVALID;
+            LOG_AND_SET_RC(usRc, T5INFO, BTREE_INVALID);
             break;
         } /* endswitch */
 
@@ -313,7 +313,7 @@ USHORT TmtXExtract
         /******************************************************************/
         /* return one matching entry (if any available)                   */
         /******************************************************************/
-        usRc = BTREE_NOT_FOUND;
+        LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
         while ( (pTmExtIn->ulTmKey < ulNextKey) && (usRc == BTREE_NOT_FOUND) )
         {
           ulLen = ulRecBufSize;
@@ -337,7 +337,7 @@ USHORT TmtXExtract
             }
             else
             {
-              usRc = ERROR_NOT_ENOUGH_MEMORY;
+              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
 
@@ -357,7 +357,7 @@ USHORT TmtXExtract
               pTmExtIn->usNextTarget = 1;
               pTmExtOut->ulTmKey = pTmExtIn->ulTmKey;
               pTmExtOut->usNextTarget = pTmExtIn->usNextTarget;
-              //usRc = BTREE_NOT_FOUND;     // reset error condition
+              //LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND;     // reset error condition
               } /* endif */
           } /* endif */
         } /* endwhile */
@@ -368,7 +368,7 @@ USHORT TmtXExtract
         if ( (usRc == BTREE_NOT_FOUND) &&  (pTmExtIn->ulTmKey == ulNextKey) )
         {
           //arrived at last tm record
-          usRc = BTREE_EOF_REACHED;
+          LOG_AND_SET_RC(usRc, T5INFO, BTREE_EOF_REACHED);
         } /* endif */
       } /* endif */
 
@@ -390,7 +390,7 @@ USHORT TmtXExtract
   // in organize mode only: change any error code (except BTREE_EOF_REACHED) to BTREE_CORRUPTED
   if ( (usRc != NO_ERROR ) && (usRc != BTREE_EOF_REACHED) && ((pTmClb->usAccessMode & ASD_ORGANIZE) != 0) )
   {
-    usRc = BTREE_CORRUPTED;
+    LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
   } /* endif */
 
   return( usRc );
@@ -421,7 +421,7 @@ USHORT ExtractRecordV6
 
   if ( !pSourceString )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 
@@ -459,12 +459,12 @@ USHORT ExtractRecordV6
         } 
         else
         {
-           usRc = BTREE_CORRUPTED;
+           LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
         }
       }
       else
       {
-        usRc = BTREE_CORRUPTED;
+        LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
       } /* endif */
 
       if ( !usRc )
@@ -479,7 +479,7 @@ USHORT ExtractRecordV6
         if ( pTMXTargetRecord->usClb >= RECLEN(pTMXTargetRecord) )
         {
           // target record is corrupted, continue with next TM record
-          usRc = BTREE_CORRUPTED;
+          LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
         }
         else
         {
@@ -507,7 +507,7 @@ USHORT ExtractRecordV6
           {
             // database is corrupted
             lLeftClbLen = 0;
-            usRc = BTREE_NOT_FOUND;
+            LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
           } /* endif */ 
 
           // loop over all target CLBs
@@ -546,7 +546,7 @@ USHORT ExtractRecordV6
             {
               // database is corrupted
               lLeftClbLen = 0;
-              usRc = BTREE_NOT_FOUND;
+              LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
             } /* endif */ 
             usTarget++;
           } /* endif */
@@ -601,20 +601,20 @@ USHORT ExtractRecordV6
           else
           {
             //no more target so get next tm record and initialize target count
-            usRc = BTREE_NOT_FOUND;
+            LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
           } /* endif */
         }
         else
         {
           //no more target so get next tm record and initialize target count
-          usRc = BTREE_NOT_FOUND;
+          LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
         } /* endif */
       } /* endif */
     }
     else
     {
       //if record is empty, get next tm record and initialize target count
-      usRc = BTREE_NOT_FOUND;
+      LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
     } /* endif */
 
   }
@@ -680,7 +680,7 @@ USHORT FillExtStructure
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -810,8 +810,12 @@ USHORT FillExtStructure
         NtmGetAddData( pTMXTargetClb, ADDDATA_ADDINFO_ID, pstExt->szAddInfo, sizeof(pstExt->szAddInfo) / sizeof(CHAR_W) );
       } /* endif */
     } /* endif */
+    if(fOK){
+      LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
+    }else{
+      LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
 
-    usRc = fOK ? NO_ERROR : BTREE_CORRUPTED;
+    }
   } /* endif */
 
   //release memory

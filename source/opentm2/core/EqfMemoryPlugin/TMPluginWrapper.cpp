@@ -614,7 +614,7 @@ USHORT TokenizeSourceEx2
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -644,7 +644,7 @@ USHORT TokenizeSourceEx2
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
-        usRc = ERROR_TA_ACC_TAGTABLE;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
         if ( usAction == MEMIMP_MRKUP_ACTION_RESET ) {
            CHAR  *ptrMarkup ;
            ptrMarkup = strstr( pTagTableName, szString ) ;
@@ -656,11 +656,11 @@ USHORT TokenizeSourceEx2
                                            TALOADCOMPCONTEXTFUNC,
                                            FALSE, NULLHANDLE );
               if ( usRc )
-                 usRc = ERROR_TA_ACC_TAGTABLE;
+                 LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
            } 
         } else
         if ( usAction == MEMIMP_MRKUP_ACTION_SKIP ) {
-           usRc = SEG_SKIPPED_BAD_MARKUP ;
+           LOG_AND_SET_RC(usRc, T5INFO, SEG_SKIPPED_BAD_MARKUP);
         }
       } /* endif */
 
@@ -739,7 +739,7 @@ USHORT TokenizeSourceEx2
                 fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                 if ( !fOK )
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -753,7 +753,7 @@ USHORT TokenizeSourceEx2
                           fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                           if ( !fOK )
                           {
-                            usRc = ERROR_NOT_ENOUGH_MEMORY;
+                            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                           }
                           else
                           {
@@ -812,7 +812,7 @@ USHORT TokenizeSourceEx2
 
                 if ( !fOK )
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -847,7 +847,7 @@ USHORT TokenizeSourceEx2
       fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
       if ( !fOK )
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       }
 
       //set total tag record length
@@ -905,7 +905,7 @@ USHORT NTMMorphTokenizeW
        (ppTermList == NULL)    ||
        ((*ppTermList == NULL) && (*pulBufferSize != 0) ) )
   {
-    usRC = MORPH_INV_PARMS;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_PARMS);
   } /* endif */
 
 ///********************************************************************/

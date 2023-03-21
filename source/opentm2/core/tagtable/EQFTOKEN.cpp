@@ -2097,7 +2097,7 @@ USHORT TASoSiProtectTable
     LONG size = (usCountSOSI * sizeof(STARTSTOP)) > MIN_ALLOC ? (usCountSOSI * sizeof(STARTSTOP)) : MIN_ALLOC;
     if ( !UtlAlloc( (PVOID *)&pCurrent, 0L, size,  NOMSG ))
     {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
 
@@ -2264,7 +2264,7 @@ USHORT TACreateProtectTableWEx
        (usTokBufferSize == 0)  ||
        (ppStartStop == NULL) )
   {
-    usRC = ERROR_INVALID_DATA;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
   } /* endif */
 
   /********************************************************************/
@@ -2277,7 +2277,7 @@ USHORT TACreateProtectTableWEx
       pfnUserExitW = (PFNSTARTSTOPEXITW) pvUserExitW;
       if ( !pfnUserExitW( pszSegment, &pStartStop ) )
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     }
     else  if ( false && pvUserExit )
@@ -2289,7 +2289,7 @@ USHORT TACreateProtectTableWEx
       Unicode2ASCII( pszSegment, &chAsciiSeg[0], ulCP);
       if ( !pfnUserExit( &chAsciiSeg[0], &pStartStop ) )
       {
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     }
     else
@@ -2383,7 +2383,7 @@ USHORT TACreateProtectTableWEx
                        (LONG) (ulTableAlloc * sizeof(STARTSTOP)),
                        NOMSG ))
         {
-          usRC = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
         ulTableUsed = 0;
       } /* endif */
@@ -2431,7 +2431,7 @@ USHORT TACreateProtectTableWEx
 				lAttrSize = MAX_ATTR_TOKENS * sizeof(TOKENENTRY);
 				if (!UtlAlloc((PVOID *) &pAttrTokBuffer, 0L, lAttrSize, NOMSG) )
 				{
-				   usRC = ERROR_NOT_ENOUGH_MEMORY;
+				   LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 				} /* endif */
 			  } /* endif */
 			  if ( usRC == NO_ERROR)
@@ -2810,7 +2810,7 @@ USHORT TAGotoNextStartStopEntry
         if ( !UtlAlloc( (PVOID *)&pNewStartStop, lOldLen,
                                   lNewLen, NOMSG ))
         {
-          usRC = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
         else
         {
@@ -2882,7 +2882,11 @@ USHORT  TAProtectedPartsInQuotedText
                         pusColPos,
                         pAttrTokBuffer,
                         (USHORT)lAttrSize );
-        usRC = ( pRest == NULL ) ? NO_ERROR : EQFRS_AREA_TOO_SMALL;
+        if(pRest == nullptr){
+          LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);
+        }else{
+          LOG_AND_SET_RC(usRC, T5INFO, EQFRS_AREA_TOO_SMALL);
+        }
       } /* endif */
 
       if ( usRC == NO_ERROR )
