@@ -46,7 +46,6 @@
 static HWND hwndDlgs[MAX_DIALOGS];			// array for handles of modeless dialogs
 static SHORT  sRegisteredDlgs = 0;			// number of registered dialogs
 static FILE   *hFFSTFile = NULL;       // UtlAlloc log file
-PEVENTTABLE pEventTable;        // ptr to event logging table
 
 //static FARPROC lpfnOldButtonProc = NULL;// ptr to original button proc
 LONG FAR PASCAL EqfHelpButtonProc     (HWND, UINT, WPARAM, LPARAM);
@@ -558,12 +557,7 @@ BOOL UtlInitUtils( HAB hab )
      UtiVar[usId].sDriveType[i] = -1;
    } /* endfor */
 
-   // Load or create event list
-   {
-     // Load event log file
-     pEventTable = NULL;
-     
-   }
+   
    fOK = ObjHandlerInitForBatch();
    if ( fOK ) 
     fOK = PropHandlerInitForBatch();
