@@ -30,9 +30,7 @@
 
 #include "win_types.h"
 
-//static PEVENTTABLE pEventTable;        // ptr to event logging table
 static SHORT  asLogGroups[30] = { -1 };// list of active debug log groups
-extern PEVENTTABLE pEventTable;        // ptr to event logging table
 
 //default variable used in error messages (will be changed to "" later on)
 #define UTLERR_DEFVAR        "\nERROR: VARIABLE NOT SUPPLIED\n"

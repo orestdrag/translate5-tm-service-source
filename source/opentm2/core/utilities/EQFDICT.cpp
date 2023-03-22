@@ -162,35 +162,6 @@ typedef struct _BTREEHEADRECORD
 } BTREEHEADRECORD, PBTREEHEADRECORD ;
 
 
-/**********************************************************************/
-/* Defines the header of the event list either as a structure or as   */
-/* a enumeration                                                      */
-/**********************************************************************/
-#ifdef STRING_EVENT_IDS
-   #define EVENTLISTSTART( type, var ) \
-     EVENTSTRING var[] = {
-#else
-   #define EVENTLISTSTART( type, var) typedef enum type {
-#endif
-
-#ifdef STRING_EVENT_IDS
-   #define EVENTLISTEND( type, dummy ) { #dummy, 32000 } };
-#else
-   #define EVENTLISTEND( type, dummy ) dummy = 32000} type;
-#endif
-
-
-/**********************************************************************/
-/* Macro to either define the event ID as a numeric value or to       */
-/* use the event ID as a string (used by EVENTLOG program).           */
-/**********************************************************************/
-#ifdef STRING_EVENT_IDS
-   #define EVENTDEF( id, num ) { #id, num },
-#else
-   #define EVENTDEF( id, num ) id = num,
-#endif
-
-
 typedef enum _RECTYPE
 {
   DATAREC,                 // record contains data
@@ -269,129 +240,6 @@ static  USHORT us8BitNibble[16] = { 0,       // 00000000 00000000
                                     32640 }; // 01111111 10000000
 
 
-
-
-
-/**********************************************************************/
-/* List of event locations (only use macro EVENTDEF for entries in        */
-/* this list)                                                         */
-/**********************************************************************/
-EVENTLISTSTART( _EVENTLOC, EventLocations )
-EVENTDEF( UTLERROR_LOC,              1 )
-EVENTDEF( TWBSTART_LOC,              2 )
-EVENTDEF( TWBSHUTDOWN_LOC,           3 )
-EVENTDEF( QDAMUPDATELOCKREC_LOC,     4 )
-EVENTDEF( QDAMGETUPDCOUNTER_LOC,     5 )
-EVENTDEF( QDAMINCRUPDCOUNTER_LOC,    6 )
-EVENTDEF( QDAMCHECKFORUPDATES_LOC,   7 )
-EVENTDEF( QDAMPHYSLOCK_LOC,          8 )
-EVENTDEF( QDAMRECORDTODISK_LOC,      9 )
-EVENTDEF( QDAMDICTCREATELOCAL_LOC,   10 )
-EVENTDEF( QDAMREADRECORD_LOC,        12 )
-EVENTDEF( QDAMWRITEHEADER_LOC,       13 )
-EVENTDEF( QDAMDICTOPENLOCAL_LOC,     14 )
-EVENTDEF( QDAMDICTCLOSELOCAL_LOC,    15 )
-EVENTDEF( QDAMDICTEXACTLOCAL_LOC,    16 )
-EVENTDEF( QDAMDICTSUBSTRLOCAL_LOC,   17 )
-EVENTDEF( QDAMDICTEQUIVLOCAL_LOC,    18 )
-EVENTDEF( QDAMDICTFIRSTLOCAL_LOC,    19 )
-EVENTDEF( QDAMDICTNEXTLOCAL_LOC,     20 )
-EVENTDEF( QDAMDICTPREVLOCAL_LOC,     21 )
-EVENTDEF( QDAMDICTCURRENTLOCAL_LOC,  22 )
-EVENTDEF( QDAMNEXT_LOC,              23 )
-EVENTDEF( QDAMFIRST_LOC,             24 )
-EVENTDEF( QDAMGETSZKEYPARAM_LOC,     25 )
-EVENTDEF( QDAMGETSZDATA_LOC,         26 )
-EVENTDEF( QDAMLOCATEKEY_LOC,         27 )
-EVENTDEF( QDAMVALIDATEINDEX_LOC,     28 )
-EVENTDEF( NLPBACKWARDLIST_LOC,       29  )
-EVENTDEF( NLPFORWARDDLIST_LOC,       30 )
-EVENTDEF( NLPTERMLIST_LOC,           31 )
-EVENTDEF( NLPLOCKENTRY_LOC,          32 )
-EVENTDEF( NLPDELENTRYASD_LOC,        33 )
-EVENTDEF( NLPUPDENTRYASD_LOC,        34 )
-EVENTDEF( NLPINSENTRYASD_LOC,        35 )
-EVENTDEF( NLPPRVTERMASD_LOC,         36 )
-EVENTDEF( NLPNXTTERMASD_LOC,         37 )
-EVENTDEF( NLPFNDNUMBERASD_LOC,       38 )
-EVENTDEF( NLPRETENTRYASD_LOC,        39 )
-EVENTDEF( NLPFNDMATCHASD_LOC,        40 )
-EVENTDEF( NLPFNDEQUIVASD_LOC,        41 )
-EVENTDEF( NLPFNDBEGINASD_LOC,        42 )
-EVENTDEF( QDAMOPENASD_LOC,           43 )
-EVENTDEF( QDAMWRITERECORD_LOC,       44 )
-EVENTDEF( QDAMNEWRECORD_LOC,         45 )
-EVENTDEF( QDAMFREERECORD_LOC,        46 )
-EVENTDEF( QDAMUPDSIGNLOCAL_LOC,      47 )
-EVENTDEF( QDAMDICTFLUSHLOCAL_LOC,    48 )
-EVENTDEF( QDAMSPLITNODE_LOC,         49 )
-EVENTDEF( QDAMINSERTKEY_LOC,         50 )
-EVENTDEF( QDAMDICTINSERTLOCAL_LOC,   51 )
-EVENTDEF( QDAMCHANGEKEY_LOC,         52 )
-EVENTDEF( QDAMADDTOBUFFER_LOC,       53 )
-EVENTDEF( QDAMDELETEDATAFROMBUFFER_LOC, 54 )
-EVENTDEF( QDAMDICTUPDATELOCAL_LOC,   55 )
-EVENTDEF( QDAMDICTCOPYLOCAL_LOC,     56 )
-EVENTDEF( QDAMREDUCENODE_LOC,        57 )
-EVENTDEF( QDAMDICTDELETELOCAL_LOC,   58 )
-EVENTDEF( QDAMREADRECORDFROMDISK_LOC,59 )
-EVENTDEF( EQFNTMUPDATE_LOC,          60 )
-EVENTDEF( EQFNTMINSERT_LOC,          61 )
-EVENTDEF( EQFNTMGET_LOC,             62 )
-EVENTDEF( EQFNTMPHYSLOCK_LOC,        63 )
-EVENTDEF( TMTXREPLACE_LOC,           64 )
-EVENTDEF( TOKENIZESOURCE_LOC,        65 )
-EVENTDEF( TOKENIZETARGET_LOC,        66 )
-EVENTDEF( ADDTOTM_LOC,               67 )
-EVENTDEF( FILLCLB_LOC,               68 )
-EVENTDEF( DETERMINETMRECORD_LOC,     69 )
-EVENTDEF( UPDATETMRECORD_LOC,        70 )
-EVENTDEF( COMPAREPUTDATA_LOC,        71 )
-EVENTDEF( ADDTMTARGET_LOC,           72 )
-EVENTDEF( REPLACETMTARGET_LOC,       73 )
-EVENTDEF( TMTXGET_LOC,               74 )
-EVENTDEF( GETEXACTMATCH_LOC,         75 )
-EVENTDEF( EXACTTEST_LOC,             76 )
-EVENTDEF( FILLMATCHTABLE_LOC,        77 )
-EVENTDEF( GETFUZZYMATCH_LOC,         78 )
-EVENTDEF( FUZZYTEST_LOC,             79 )
-EVENTDEF( FILLMATCHENTRY_LOC,        80 )
-EVENTDEF( NTMREADWRITESEGMENT_LOC,   81 )
-EVENTDEF( NTMLOCKTM_LOC,             82 )
-EVENTDEF( NTMCHECKFORUPDATES_LOC,    83 )
-EVENTDEF( TMOPEN_LOC,                84 )
-EVENTDEF( TMCLOSE_LOC,               85 )
-EVENTDEF( TMREPLACE_LOC,             86 )
-EVENTDEF( TMGET_LOC,                 87 )
-EVENTDEF( TMTXOPEN_LOC,              88 )
-EVENTDEF( EQFNTMOPEN_LOC,            89 )
-EVENTDEF( EQFNTMCLOSE_LOC,           90 )
-EVENTDEF( EQFNTMSIGN_LOC,            91 )
-EVENTDEF( UTILSEXIT_LOC,             92 )
-EVENTDEF( QDAMLOCSUBSTR_LOC,         93 )
-EVENTDEF( QDAMGETSZKEY_LOC,          94 )
-EVENTDEF( QDAMCHECKCHECKSUM_LOC,     95 )
-EVENTDEF( QDAMFINDRECORD_LOC,        96 )
-EVENTDEF( QDAMSETRECDATA_LOC,        97 )
-EVENTDEF( EQFDA_LOC,                 98 )
-EVENTDEF( DICTCLEANUP_LOC,           99 )
-EVENTDEF( EQFDACLOSE_LOC,           100 )
-EVENTDEF( ASDOPEN_LOC,              101 )
-EVENTDEF( ASDCLOSE_LOC,             102 )
-EVENTDEF( ASDTRANSLATE_LOC,         103 )
-EVENTDEF( TMUPDSEG_LOC,             104 )
-EVENTDEF( DOCEXPCOMMAND_LOC,        105 )
-EVENTDEF( DOCUMENTUNLOAD_LOC,       106 )
-EVENTDEF( UNLOADDOCUMENT_LOC,       107 )
-EVENTDEF( EQFUNSEGREVMARK_LOC,      108 )
-EVENTDEF( UNSEGMENT_LOC,            109 )
-EVENTDEF( ASDLISTINDEX_LOC,         110 )
-EVENTDEF( NTMGETIDFROMNAME_LOC,     111 )
-EVENTDEF( TWBEXCEPTION_LOC,         112 )
-EVENTLISTEND( TEVENTLOC, DUMMY_LOC )
-
-
-
 /**********************************************************************/
 /* defines for the tersing to be used....                             */
 /**********************************************************************/
@@ -411,19 +259,6 @@ typedef enum _SEARCHTYPE
 } SEARCHTYPE;
 
 
-/**********************************************************************/
-/* Group/Area of events                                               */
-/**********************************************************************/
-EVENTLISTSTART( _EVENTGROUP, EventGroups )
-EVENTDEF( NONE_GROUP,           0 )
-EVENTDEF( TM_GROUP,             1 )
-EVENTDEF( DICT_GROUP,           2 )
-EVENTDEF( ANALYSIS_GROUP,       3 )
-EVENTDEF( MORPH_GROUP,          4 )
-EVENTDEF( DOC_GROUP,            5 )
-EVENTDEF( GENERAL_GROUP,        6 )
-EVENTDEF( DB_GROUP,             7 )
-EVENTLISTEND( TEVENTGROUP, DUMMY_GROUP )
 
 #define  MINFREEKEYS        3
 // minimum keys to be in a record - otherwise try to reduce the node
@@ -435,22 +270,7 @@ EVENTLISTEND( TEVENTGROUP, DUMMY_GROUP )
 // unlock a (previously locked) record
 #define  BTREEUNLOCKRECORD(x)  ((x)->fLocked=FALSE)
 
-/**********************************************************************/
-/* List of event classes                                              */
-/**********************************************************************/
-EVENTLISTSTART( _EVENTCLASS, EventClasses )
-EVENTDEF( NA_EVENT,             1 )
-EVENTDEF( FUNCENTRY_EVENT,      2 )
-EVENTDEF( REFRESH_EVENT,        5 )
-EVENTDEF( INTFUNCFAILED_EVENT,  6 )
-EVENTDEF( MSGBOX_EVENT,         7 )
-EVENTDEF( INVOPERATION_EVENT,   8 )
-EVENTDEF( READ_EVENT,           9 )
-EVENTDEF( WAIT_EVENT,           10 )
-EVENTDEF( STATE_EVENT,          11 )
-EVENTDEF( FUNCEXIT_EVENT,       12 )
-EVENTDEF( CHECKSUM_EVENT,       13 )
-EVENTLISTEND( TEVENTCLASS, DUMMY_CLASS )
+
 
 /*****************************************************************************/
 /* Used to determine amount of padding required for the Btree record so      */
@@ -557,20 +377,6 @@ typedef struct _ACCESSCOUNTERTABLEENTRY
 } ACCESSCTRTABLEENTRY, * PACCESSCTRTABLEENTRY;
 
 
-/**********************************************************************/
-/* Event types                                                        */
-/**********************************************************************/
-#ifndef STRING_EVENT_IDS
-typedef enum
-{
-  ERROR_EVENT,                         // event is caused by an error condition
-  INFO_EVENT,                          // informational events (e.g. status events)
-  EQFDEBUG_EVENT                       // only logged when debug version is build
-} EVENTTYPE;
-#endif
-
-
-
 #define MAX_LIST           20          // number of recently used records
 #define MIN_SIZE          128          // minimum free space requested in entry
 #define MAXWASTESIZE      512          // max size  to be wasted due to updates
@@ -596,95 +402,7 @@ typedef enum
 // max number of retries for resources currently in use
 #define MAX_RETRY_COUNT    30
 
-
-/**********************************************************************/
-/* Event macros                                                       */
-/**********************************************************************/
-BOOL UtlEvent2
-(
-  SHORT sEventType,                    // type of the event
-  SHORT sEventID,                      // the event identifier
-  SHORT sEventClass,                   // the event class
-  SHORT sEventRC,                      // the event return code or error code
-  SHORT sGroup,                        // the event group
-  PSZ   pszAddData                     // additional data for event (string)
-);
-
-BOOL UtlEvent
-(
-  SHORT sEventType,                    // type of the event
-  SHORT sEventID,                      // the event identifier
-  SHORT sEventClass,                   // the event class
-  SHORT sEventRC                       // the event return code or error code
-);
-
-#define NO_ERREVENTS 
-#define NO_INFOEVENTS 
-#define NO_DEBUGEVENTS 
-
-
-#ifndef STRING_EVENT_IDS
-  #ifndef NO_ERREVENTS
-    #define ERREVENT( id, class, rc ) \
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
-      T5LOG( T5ERROR) << ":: id = " << id << "(" << GETNAME(id) << "); class = " <<  class << "(" << GETNAME(class) \
-          <<"); rc = " <<  rc ;
-  #else
-    #define ERREVENT( id, class, rc )
-  #endif
-
-  #ifndef NO_ERREVENTS
-    #define ERREVENT2( id, class, rc, gr, str ) \
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
-      T5LOG( T5ERROR) << ":: id = " << id << "(" << GETNAME(id) << "); class = " <<  class << "(" << GETNAME(class) \
-          <<"); rc = " <<  rc <<" (" <<GETNAME(rc) << "); str = " << str << "; gr = " << gr << "(" << GETNAME(gr) << ")"; 
-      //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
-  #else
-    #define ERREVENT2( id, class, rc, gr, str )
-  #endif
-
-  #ifndef NO_INFOEVENTS
-    #define INFOEVENT( id, class, rc ) \
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
-    T5LOG( T5INFO) << ":: id = " << id << "; class = " <<  class << "; rc = " <<  rc ;
-      //UtlEvent( INFO_EVENT, id, class, rc )
-  #else
-    #define INFOEVENT( id, class, rc )
-  #endif
-
-  #ifndef NO_INFOEVENTS
-    #define INFOEVENT2( id, class, rc, gr, str ) \
-      if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
-      T5LOG( T5INFO) << ":: id = " << id << "(" << GETNAME(id) << "); class = " <<  class << "(" << GETNAME(class) \
-          <<"); rc = " <<  rc <<" (" <<GETNAME(rc) << "); str = " << str << "; gr = " << gr << "(" << GETNAME(gr) << ")"; 
-      //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
-  #else
-    #define INFOEVENT2( id, class, rc, gr, str )
-  #endif
-
-  #ifndef _DEBUG
-    //#define NO_DEBUGEVENTS
-  #endif
-
-  #ifndef NO_DEBUGEVENTS
-    #define DEBUGEVENT( id, class, rc ) \
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
-    T5LOG( T5DEVELOP)<< ":: id = " << (id) << "; class = " << class << "; rc = " <<rc;\
-      //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
-  #else
-    #define DEBUGEVENT( id, class, rc )
-  #endif
-
-  #ifndef NO_DEBUGEVENTS
-    #define DEBUGEVENT2( id, class, rc, gr, str ) \
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
-      T5LOG( T5DEVELOP) <<  ":: id = "<< id <<  "; class = " << class << \
-      "; rc = "<<rc<< "; str = "<< str<< "; gr = "<<gr;\
-      //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
-  #else
-    #define DEBUGEVENT2( id, class, rc, gr, str )
-  #endif
-#endif
+#include "EQFEVENT.H"
 
 
 typedef struct _BTREEGLOB

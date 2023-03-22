@@ -145,5 +145,5 @@ int getBuffIdForLog(int severity);
 //#define LOG_TEMPORARY_COMMENTED T5LOG(T5INFO) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " 
 #define LOG_TEMPORARY_COMMENTED_W_INFO(info) if( VLOG_IS_ON(2) && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) T5LOG(T5ERROR) <<__FILE__ << ":" << __LINE__ << ": called temporary commented code in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL << "; " << info ;
 
-#define LOG_AND_SET_RC(rcVar, logLevel, rc) rcVar = rc; T5LOG(logLevel) << "rc was set to " <<#rc << "(" << rc <<")"; 
+#define LOG_AND_SET_RC(rcVar, logLevel, rc)  T5LOG(logLevel) << "rc was set to " <<#rc << "(" << rc <<"), prev state = " <<rc; rcVar = rc;
 #endif //_LOG_WRAPPER_H_
