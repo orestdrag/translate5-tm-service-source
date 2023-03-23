@@ -1459,7 +1459,7 @@ typedef struct _TMX_PUT
   CHAR      szAuthorName[MAX_USERID];          //author name of target
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  //LONG_FN   szLongName;                        // name of source file (long name or EOS)
   USHORT    usSourceSegmentId;                 //seg. num. of source sentence from analysis
   CHAR      szTagTable[MAX_FNAME];             //tag table name
   TIME_L    lTime;                             //time stamp
@@ -1475,7 +1475,7 @@ typedef struct _TMX_PUT_W
   CHAR      szAuthorName[MAX_USERID];          //author name of target
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  //LONG_FN   szLongName;                        // name of source file (long name or EOS)
   ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
   CHAR      szTagTable[MAX_FNAME];             //tag table name
   TIME_L    lTime;                             //time stamp
@@ -1534,7 +1534,7 @@ typedef struct _TMX_GET_W
   CHAR        szTagTable[MAX_FNAME];             //tag table name of source
   CHAR        szSourceLanguage[MAX_LANG_LENGTH]; //language of source
   CHAR        szFileName[MAX_FILESPEC];          //file name the source comes from
-  LONG_FN     szLongName;                        // name of source file (long name or EOS)
+  //LONG_FN     szLongName;                        // name of source file (long name or EOS)
   ULONG       ulSegmentId;                       //segment number from analysis
   CHAR        szAuthorName[MAX_USERID];          //author name
   CHAR        szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
@@ -1590,7 +1590,7 @@ typedef struct _TMX_MATCH_TABLE_W
 {
   CHAR_W  szSource[MAX_SEGMENT_SIZE];   //source sentence with tags
   CHAR    szFileName[MAX_FILESPEC];     //file name where the source comes from.
-  LONG_FN szLongName;                   // name of source file (long name or EOS)
+  //LONG_FN szLongName;                   // name of source file (long name or EOS)
   ULONG   ulSegmentId;                  //segment number from analysis
   CHAR_W  szTarget[MAX_SEGMENT_SIZE];   //target sentence with tags
   CHAR    szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
@@ -1695,7 +1695,7 @@ typedef struct _TMX_EXT_W
   CHAR      szAuthorName[MAX_USERID];          //author name of target
   USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  //LONG_FN   szLongName;                        // name of source file (long name or EOS)
   ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
   TIME_L    lTargetTime;                       //time stamp of target
   CHAR_W    szContext[MAX_SEGMENT_SIZE];       //segment context
@@ -2267,7 +2267,7 @@ BOOL NTMTagSubst                     // generic inline tagging for TM
   ULONG          ulTgtOemCP
 );
 
-BOOL NTMDocMatch( PSZ pszShort1, PSZ pszLong1, PSZ pszShort2, PSZ pszLong2 );
+BOOL NTMDocMatch( PSZ pszLong1,  PSZ pszLong2 );
 
 // utility to allocate pSentence and associated memory areas
 USHORT NTMAllocSentenceStructure( PTMX_SENTENCE  *ppSentence );

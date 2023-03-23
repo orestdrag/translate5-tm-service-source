@@ -1748,7 +1748,6 @@ USHORT MemoryFactory::APIUpdateMem
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
   
-  strcpy(pNewProposal->szDocShortName , pNewProposal->szDocName);
   copyMemProposalToOtmProposal( pNewProposal, pOtmProposal );
 
   USHORT usRC = (USHORT)pMem->putProposal( *pOtmProposal );
@@ -1789,7 +1788,7 @@ USHORT MemoryFactory::APIUpdateDeleteMem
   } /* endif */
   
   OtmProposal *pOtmProposal = new ( OtmProposal );
-  strcpy(pProposalToDelete->szDocShortName , pProposalToDelete->szDocName);
+  //strcpy(pProposalToDelete->szDocShortName , pProposalToDelete->szDocName);
   copyMemProposalToOtmProposal( pProposalToDelete, pOtmProposal );
 
   USHORT usRC = (USHORT)pMem->deleteProposal( *pOtmProposal );
@@ -2122,7 +2121,7 @@ void MemoryFactory::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmPro
   pOtmProposal->setSource( pProposal->szSource );
   pOtmProposal->setTarget( pProposal->szTarget );
   pOtmProposal->setDocName( pProposal->szDocName );
-  pOtmProposal->setDocShortName( pProposal->szDocShortName );
+  //pOtmProposal->setDocShortName( pProposal->szDocShortName );
   pOtmProposal->setSegmentNum( pProposal->lSegmentNum );
   pOtmProposal->setSourceLanguage( pProposal->szSourceLanguage );
   pOtmProposal->setIsSourceLangIsPrefered( pProposal->fIsoSourceLangIsPrefered);
@@ -2166,7 +2165,7 @@ void MemoryFactory::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PME
   pOtmProposal->getSource( pProposal->szSource, sizeof(pProposal->szSource)/sizeof(CHAR_W) );
   pOtmProposal->getTarget( pProposal->szTarget, sizeof(pProposal->szTarget)/sizeof(CHAR_W) );
   pOtmProposal->getDocName( pProposal->szDocName, sizeof(pProposal->szDocName) );
-  pOtmProposal->getDocShortName( pProposal->szDocShortName, sizeof(pProposal->szDocShortName) );
+  //pOtmProposal->getDocShortName( pProposal->szDocShortName, sizeof(pProposal->szDocShortName) );
   pProposal->lSegmentNum = pOtmProposal->getSegmentNum();
 
   pOtmProposal->getOriginalSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );

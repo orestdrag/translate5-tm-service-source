@@ -174,11 +174,11 @@ int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 USHORT
 NTMGetIDFromName( PTMX_CLB pTmClb,   // input
                   PSZ      pszName,    // input
-                  PSZ      pszLongName, // input, long name (only for FILE_KEY)
+                  //PSZ      pszLongName, // input, long name (only for FILE_KEY)
                   USHORT   usTableType,   //input
                   PUSHORT  pusID       )  //output
 {
-  return( NTMGetIDFromNameEx( pTmClb, pszName, pszLongName, usTableType,
+  return( NTMGetIDFromNameEx( pTmClb, pszName, usTableType,
                               pusID, 0L, NULL ) );
 
 } /* end of function NTMGetIDFromName */
@@ -195,7 +195,7 @@ USHORT NTMGetIDFromNameEx
 ( 
   PTMX_CLB    pTmClb,                  // input, memory control block pointer 
   PSZ         pszName,                 // input, name being looked up
-  PSZ         pszLongName,             // input, long name (only for FILE_KEY)
+  //PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
   PUSHORT     pusID,                   // output, ID for name being looked up
   LONG        lOptions,                // input, additional options
@@ -219,13 +219,14 @@ USHORT NTMGetIDFromNameEx
   } /* endif */
   if ( pusAlternativeID )  *pusAlternativeID = NTMGETID_NOTFOUND_ID;
 
-  if ( pszName[0] != EOS)
+  if ( pszName[0] != EOS /*|| (usTableType == FILE_KEY && pszLongName && pszLongName[0] != EOS)*/)
   {
     //--- if input parameters OK
     if ( pTmClb && pszName[0] != EOS )
     {
       //--- capitalize input string
-      strupr( pszName );
+      if(usTableType != FILE_KEY)
+        strupr( pszName );
 
       /******************************************************************/
       /* get pointer to table and table entries in dependency of the    */
@@ -239,19 +240,19 @@ USHORT NTMGetIDFromNameEx
       /* If we are looking for documents and a long document name is  */
       /* available ...                                                */
       /****************************************************************/
-
+      //#ifdef LONGNAME_TO_BE_REMOVED
       // skip any leading backslash (added by bug in ITM code ...)
-      if ( pszLongName != NULL )
-      {
-        if ( *pszLongName == BACKSLASH ) pszLongName++;
-      } /* endif */
+      //if ( pszLongName != NULL )
+      //{
+      //  if ( *pszLongName == BACKSLASH ) pszLongName++;
+      //} /* endif */
 
-      fLongName = (usTableType == FILE_KEY) &&
-                   (pszLongName != NULL) &&
-                   (pszLongName[0] != EOS) &&
-                   (strcmp( pszLongName, pszName ) != 0);
+      //fLongName = (usTableType == FILE_KEY) &&
+      //             (pszLongName != NULL) &&
+      //             (pszLongName[0] != EOS) &&
+      //             (strcmp( pszLongName, pszName ) != 0);
 
-      if ( (usRc == NO_ERROR) && fLongName )
+      if ( (usTableType == FILE_KEY) && (usRc == NO_ERROR) )
       {
         /**************************************************************/
         /* ... check first against our long name table                */
@@ -260,7 +261,7 @@ USHORT NTMGetIDFromNameEx
         TMX_LONGNAME_TABLE_ENTRY SearchEntry;    // entry being searched
 
         // prepare search entry
-        SearchEntry.pszLongName = pszLongName;
+        SearchEntry.pszLongName = pszName;
 
         // do the actual search
         pEntry = (PTMX_LONGNAME_TABLE_ENTRY)bsearch( &SearchEntry,
@@ -287,7 +288,7 @@ USHORT NTMGetIDFromNameEx
         }
         else if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
         {
-          ULONG   ulNameLen = strlen(pszLongName) + 1;
+          ULONG   ulNameLen = strlen(pszName) + 1;
           ULONG   ulAddLen = ulNameLen + sizeof(USHORT);
 
 
@@ -400,7 +401,7 @@ USHORT NTMGetIDFromNameEx
               pEntry->usId = *pusID;
 
               // add long name to buffer and table
-              strcpy( pszTarget, pszLongName );
+              strcpy( pszTarget, pszName );
               pEntry->pszLongName = pszTarget;
               pszTarget += ulNameLen;
 
@@ -438,7 +439,7 @@ USHORT NTMGetIDFromNameEx
             // update TM record for long names
             if ( usRc == NO_ERROR )
             {
-              DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 2, TM_GROUP, pszLongName );
+              DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 2, TM_GROUP, pszName );
 
               usRc = EQFNTMUpdate( pTmClb->pstTmBtree, LONGNAME_KEY,
                                    (PBYTE)pTmClb->pLongNames->pszBuffer,
@@ -454,6 +455,7 @@ USHORT NTMGetIDFromNameEx
         } /* endif */
       }
       else
+      //#endif// LONGNAME_TO_BE_REMOVED
       {
         if ( usRc == NO_ERROR  )
         {
@@ -490,6 +492,7 @@ USHORT NTMGetIDFromNameEx
         } /* endif */
       } /* endif */
 
+      #ifdef TO_BE_REMOVED
       // file name table only:
       // look for given short name in long name table if not found yet or
       // an alternative file ID is requested
@@ -531,6 +534,7 @@ USHORT NTMGetIDFromNameEx
           } /* endif */
         }
       } /* endif */
+      #endif
     }
     else  //--- pTmClb is NULL pointer or pszName is empty
     {
@@ -616,83 +620,106 @@ USHORT
 NTMGetNameFromID( PTMX_CLB pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType,   //input
-                  PSZ      pszName,       //output
-                  PSZ      pszLongName )  //output, long name (only for FILE_KEY)
-
+                  PSZ      pszName       //output
+                  //PSZ      pszLongName   //output, long name (only for FILE_KEY)
+)
 {
   USHORT           usRc = NO_ERROR;
   BOOL             fFound = FALSE;
   PTMX_TABLE_ENTRY pstTMTableEntries = NULL; //ptr to first table entry
   PTMX_TABLE       pstTMTable = NULL;        //ptr to table structure
-
-
-  if ( pszLongName != NULL )
-  {
-    pszLongName[0] = EOS;
-  } /* endif */
+  PTMX_LONGNAME_TABLE_ENTRY pstLongTMTableEntries = NULL;
+  PTMX_LONGNAME_TABLE  pstLONGTMTable = NULL;        //ptr to table structure
 
   //--- if input parameters OK
   if ( pTmClb )
   {
-    /******************************************************************/
-    /* get pointer to table and table entries in dependency of the    */
-    /* table type                                                     */
-    /******************************************************************/
-    usRc = NTMGetPointersToTable( pTmClb,
-                                  usTableType,
-                                  &pstTMTable,
-                                  &pstTMTableEntries );
-    /****************************************************************/
-    /* search ID in passed table usTableTye and get name of ID      */
-    /****************************************************************/
-    if ( usRc == NO_ERROR )
-    {
-      if ( *pusID == OVERFLOW_ID )
-      {
-        strcpy( pszName, OVERFLOW_NAME );
-        fFound = TRUE;
-      }
-      else
-      {
-        ULONG ulI;
-        for ( ulI = 0; ulI < pstTMTable->ulMaxEntries && !fFound; ulI++ )
+    if(usTableType == FILE_KEY){
+      /**************************************************************/
+      /* ... check first against our long name table                */
+      /**************************************************************/
+      if ( usRc == NO_ERROR )
+      {                                                 
+        for (ULONG ulI = 0; ulI < pTmClb->pLongNames->ulEntries && !fFound; ulI++ )
         {
-          if ( *pusID == pstTMTableEntries[ulI].usId )
+          if ( strcmp( pszName, pTmClb->pLongNames->stTableEntry[ulI].pszLongName ) )
           {
             fFound = TRUE;
-            strcpy( pszName, pstTMTableEntries[ulI].szName );
+            strcpy( pszName, pTmClb->pLongNames->stTableEntry[ulI].pszLongName );
           } /* endif */
         } /* endfor */
-        /**************************************************************/
-        /* Get any long document name for this ID                     */
-        /**************************************************************/
-        if ( fFound && (usTableType == FILE_KEY) && (pszLongName != NULL) )
+      }/* endif */
+      #ifdef TEMPORARY_COMMENTED
+      usRc = NTMGetPointersToTable( pTmClb,
+                                    usTableType,
+                                    &pstLONGTMTable,
+                                    &pstLongTMTableEntries );
+      /****************************************************************/
+      /* search ID in passed table usTableTye and get name of ID      */
+      /****************************************************************/
+      if ( usRc == NO_ERROR )
+      {
+        if ( *pusID == OVERFLOW_ID )
         {
-          BOOL fLongFound = FALSE;
-          for ( ulI = 0;
-                ulI < pTmClb->pLongNames->ulEntries && !fLongFound;
-                ulI++ )
+          strcpy( pszName, OVERFLOW_NAME );
+          fFound = TRUE;
+        }
+        else
+        {
+          ULONG ulI;
+          for ( ulI = 0; ulI < pstTMTable->ulMaxEntries && !fFound; ulI++ )
           {
-            if ( *pusID == pTmClb->pLongNames->stTableEntry[ulI].usId )
+            if ( *pusID == pstLongTMTableEntries[ulI].usId )
             {
-              fLongFound = TRUE;
-              strcpy( pszLongName,
-                      pTmClb->pLongNames->stTableEntry[ulI].pszLongName );
+              fFound = TRUE;
+              strcpy( pszName, pstLongTMTableEntries[ulI].pszLongName );
             } /* endif */
           } /* endfor */
         } /* endif */
-
-
-        if ( !fFound )
+      } /* endif */
+      #endif
+    }else{
+      /******************************************************************/
+      /* get pointer to table and table entries in dependency of the    */
+      /* table type                                                     */
+      /******************************************************************/
+      usRc = NTMGetPointersToTable( pTmClb,
+                                    usTableType,
+                                    &pstTMTable,
+                                    &pstTMTableEntries );
+      /****************************************************************/
+      /* search ID in passed table usTableTye and get name of ID      */
+      /****************************************************************/
+      if ( usRc == NO_ERROR )
+      {
+        if ( *pusID == OVERFLOW_ID )
         {
-          /************************************************************/
-          /* the ID was not found in the table                        */
-          /* set usRc and reset pszName                               */
-          /************************************************************/
-          LOG_AND_SET_RC(usRc, T5INFO, ID_NOT_FOUND);
-          pszName[0] = EOS;
+          strcpy( pszName, OVERFLOW_NAME );
+          fFound = TRUE;
+        }
+        else
+        {
+          ULONG ulI;
+          for ( ulI = 0; ulI < pstTMTable->ulMaxEntries && !fFound; ulI++ )
+          {
+            if ( *pusID == pstTMTableEntries[ulI].usId )
+            {
+              fFound = TRUE;
+              strcpy( pszName, pstTMTableEntries[ulI].szName );
+            } /* endif */
+          } /* endfor */
         } /* endif */
       } /* endif */
+    }
+
+    if ( !fFound )
+    {
+      /************************************************************/
+      /* the ID was not found in the table                        */
+      /* set usRc and reset pszName                               */
+      /************************************************************/
+      LOG_AND_SET_RC(usRc, T5INFO, ID_NOT_FOUND);
+      pszName[0] = EOS;
     } /* endif */
   }
   else  //--- pTmClb is NULL pointer
@@ -2061,7 +2088,7 @@ USHORT NTMAddLangGroup
   // get ID of group name
   if ( (usRC == NO_ERROR) && (sGroupID == 0) )
   {
-    usRC = NTMGetIDFromName( pTmClb, szLangGroup, NULL, LANGGROUP_KEY, (PUSHORT)&sGroupID );
+    usRC = NTMGetIDFromName( pTmClb, szLangGroup, LANGGROUP_KEY, (PUSHORT)&sGroupID );
   } /* endif */
 
   // enlarge language-ID-to-group-ID table if necessary
@@ -2318,9 +2345,9 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     *pusData++ = usNewLength;
     pusData += 2;
     pszNewData[usNewLength] = 0;
-    //wcscpy( (PSZ_W)pusData, pszNewData);
-    memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
-    pusData += usNewLength * 2;
+    wcscpy( (PSZ_W)pusData, pszNewData);
+    //memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
+    pusData += usNewLength * sizeof(wchar_t);
     *pusData = ADDDATA_ENDOFDATA_ID;
     pCLB->usAddDataLen = (usNewLength + 3) * sizeof(wchar_t);
   } /* endif */     

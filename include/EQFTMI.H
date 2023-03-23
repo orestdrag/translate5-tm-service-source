@@ -184,17 +184,17 @@
   // replace any 0xA0 in language name to 0xFF
   // (0xA0 is 0xFF after processing by OemToAnsi)
   #define REPLACE_A0_BY_FF( p ) \
-  {                          \
-    PBYTE pbTemp = (PBYTE)p; \
-    while ( *pbTemp )        \
-    {                        \
-      if ( *pbTemp == 0xA0 ) \
-      {                      \
-        *pbTemp = 0xFF;      \
-      }                      \
-      pbTemp++;              \
-    }                        \
-  }
+  //{                          \
+  //  PBYTE pbTemp = (PBYTE)p; \
+  //  while ( *pbTemp )        \
+  //  {                        \
+  //    if ( *pbTemp == 0xA0 ) \
+  //    {                      \
+  //      *pbTemp = 0xFF;      \
+  //    }                      \
+  //    pbTemp++;              \
+  //  }                        \
+  //}
 
 #include "EQFTAG.H"
 /*---------------------------------------------------------------------*\
@@ -1216,7 +1216,7 @@ USHORT NTMGetIDFromNameEx
 (
   PTMX_CLB    pTmClb,                  // input, memory control block pointer
   PSZ         pszName,                 // input, name being looked up
-  PSZ         pszLongName,             // input, long name (only for FILE_KEY)
+  //PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
   PUSHORT     pusID,                   // output, ID for name being looked up
   LONG        lOptions,                // input, additional options
@@ -1229,8 +1229,8 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
 
 
 
-USHORT NTMGetIDFromName( PTMX_CLB, PSZ, PSZ, USHORT, PUSHORT );
-USHORT NTMGetNameFromID( PTMX_CLB, PUSHORT, USHORT, PSZ, PSZ );
+USHORT NTMGetIDFromName( PTMX_CLB, PSZ, /*PSZ,*/ USHORT, PUSHORT );
+USHORT NTMGetNameFromID( PTMX_CLB, PUSHORT, USHORT, PSZ/*, PSZ */);
 USHORT TmtXReplace( PTMX_CLB, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 USHORT TmtXGet( PTMX_CLB, PTMX_GET_IN_W, PTMX_GET_OUT_W );
 USHORT TmtXCreate( PTMX_CREATE_IN, PTMX_CREATE_OUT );

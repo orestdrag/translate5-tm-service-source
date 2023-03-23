@@ -1290,7 +1290,6 @@ VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstPutIn, PTMX_PUT_IN_W pstPutInW, U
   strcpy( pstTmPutW->szAuthorName, pstTmPut->szAuthorName );
   pstTmPutW->usTranslationFlag = pstTmPut->usTranslationFlag;
   strcpy( pstTmPutW->szFileName, pstTmPut->szFileName );
-  strcpy( pstTmPutW->szLongName, pstTmPut->szLongName );
   pstTmPutW->ulSourceSegmentId = pstTmPut->usSourceSegmentId;
   strcpy( pstTmPutW->szTagTable, pstTmPut->szTagTable );
   pstTmPutW->lTime = pstTmPut->lTime;

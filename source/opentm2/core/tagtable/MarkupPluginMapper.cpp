@@ -85,8 +85,8 @@ void InitMarkupPluginMapper()
   for( int i = 0; i < (int)pluginList->size(); i++) {
      OtmMarkupPlugin* curPlugin = (*pluginList)[i];
      if ( ( pszPlugin == NULL ) || 
-          ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
-          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) 
+          ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) /*||
+          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) )*/ ) 
      { 
         pMarkup = curPlugin->getMarkup( pszMarkup );
         if ( pMarkup != NULL ) 
@@ -107,8 +107,8 @@ void InitMarkupPluginMapper()
   // loop through all markup table plugins 
   for( int i = 0; i < (int)pluginList->size(); i++) {
      OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-     if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
-          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) 
+     if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) /*||
+          ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) )*/ ) 
      { 
         return( curPlugin );
      }
@@ -202,8 +202,8 @@ BOOL TagMakeListItem( PSZ pszMarkup, PSZ pszPlugin, PSZ pszBuffer, int iBufSize 
      if ( pPlugin ) {
         for( i = 0; i < (int)pluginList->size(); i++) {
            curPlugin = (*pluginList)[i];
-           if ( ( ! strcasecmp( curPlugin->getName(), pPlugin ) ) ||
-                ( ! strcasecmp( curPlugin->getShortName(), pPlugin ) ) ) { 
+           if ( ( ! strcasecmp( curPlugin->getName(), pPlugin ) ) /*||
+                ( ! strcasecmp( curPlugin->getShortName(), pPlugin ) )*/ ) { 
               break;
            }
         }
@@ -252,7 +252,7 @@ BOOL MUMakeCLBListItem( OtmMarkupPlugin *plugin, OtmMarkup *markup, char *pszBuf
 
   // plugin name 
   if ( plugin != NULL ) {
-     strncpy( pszBuffer+iUsed, plugin->getShortName(), iBufSize-iUsed ) ;
+     strncpy( pszBuffer+iUsed, plugin->getName(), iBufSize-iUsed ) ;
      *(pszBuffer+iBufSize-1) = '\0' ;
      iUsed = strlen(pszBuffer) ;
      strcpy( pszBuffer + iUsed++, X15_STR );
@@ -294,8 +294,8 @@ BOOL MUGetMarkupTableFilePath( char *pszMarkup, char *pszPlugin, char *pszBuffer
   if ( pszPlugin != NULL ) {
      for( int i = 0; i < (int)pluginList->size(); i++) {
         OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-        if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) ||
-             ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) ) ) { 
+        if ( ( ! strcasecmp( curPlugin->getName(), pszPlugin ) ) /*||
+             ( ! strcasecmp( curPlugin->getShortName(), pszPlugin ) )*/ ) { 
            strncpy( pszBuffer, curPlugin->getTablePath(), iBufSize ) ;
            pszBuffer[iBufSize-strlen(pszMarkup)-6] = NULL ;
            strcat( pszBuffer, "\\" ) ;
@@ -361,8 +361,9 @@ BOOL MUUpdateMarkupTableFiles(
      // loop through all markup table plugins 
      for( int i = 0 ; i < (int)pluginList->size() ; i++ ) {
         OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-        if ( ( ! strcmp( curPlugin->getName(), pszPluginName ) ) ||
-             ( ! strcmp( curPlugin->getShortName(), pszPluginName ) ) ) {
+        if ( ( ! strcmp( curPlugin->getName(), pszPluginName ) ) 
+          // || ( ! strcmp( curPlugin->getShortName(), pszPluginName ) )
+           ) {
            int iReturn = curPlugin->updateFiles( pszMarkupTableName,
                          pszShortDescription, pszLongDescription, 
                          pszMarkupTableVersion, pszTableFileName,
@@ -400,8 +401,9 @@ BOOL MUDeleteMarkupTable(
         OtmMarkupPlugin* curPlugin = (*pluginList)[i];
         OtmMarkup* pMarkup = curPlugin->getMarkup( pszMarkupName );
         if ( ( ( ( pszPluginName ) &&
-                 ( ( ! strcmp( curPlugin->getName(), pszPluginName ) ) ||
-                   ( ! strcmp( curPlugin->getShortName(), pszPluginName ) ) ) )  ||
+                 ( ( ! strcmp( curPlugin->getName(), pszPluginName ) ) //||
+                   //( ! strcmp( curPlugin->getShortName(), pszPluginName ) ) 
+                   ) )  ||
                ( pszPluginName == NULL ) ) &&
              ( pMarkup != NULL ) ) {
            if ( pMarkup->isDeletable() ) {

@@ -42,10 +42,6 @@ typedef struct _OTMPROPOSALDATA
 	//std::string strDocName;
 	char szDocName[OTMPROPOSAL_MAXNAMELEN];
 
-	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
-	//std::string strDocShortName;
-	char szDocShortName[OTMPROPOSAL_MAXNAMELEN];
-
 	/*! \brief Segment number within the document from which the proposal comes from. */
   long lSegmentNum;                  
 
@@ -295,31 +291,6 @@ void OtmProposal::setDocName( char *pszBuffer )
   strncpy( pData->szDocName, pszBuffer, sizeof(pData->szDocName)-1 );
   pData->fFilled = 1;
 }
-  	
-/* \brief get proposal document short name
-    \param pszBuffer Pointer to buffer receiving the document short name
-    \param iBufSize Size of the buffer in number of characters
-  	\returns Number of characters copied to pszBuffer including the terminating null character
-  */
-int OtmProposal::getDocShortName( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szDocShortName, pszBuffer, iBufSize ) );
-}
-
-  	
-/* \brief set the proposal document short name
-    \param pszBuffer Pointer to buffer containing the document short short name
-  */
-void OtmProposal::setDocShortName( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szDocShortName, pszBuffer, sizeof(pData->szDocShortName)-1 );
-  pData->fFilled = 1;
-}
-
 
 /* \brief get proposal segment number
   \returns proposal segment number

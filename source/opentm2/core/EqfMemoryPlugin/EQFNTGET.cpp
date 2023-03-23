@@ -374,7 +374,7 @@ USHORT TmtXGet
     {
       if ( pTmClb )
       {
-        usRc = NTMGetIDFromName( pTmClb, pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+        usRc = NTMGetIDFromName( pTmClb, pTmGetIn->stTmGet.szTagTable,  (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
       }
       else
       {
@@ -627,11 +627,11 @@ USHORT TmtXGet
       PTMX_MATCH_TABLE_W pMatch = &(pTmGetOut->stMatchTable[i]);
       T5LOG( T5DEVELOP) << "TmtXGet:: Match "<< i << " , MatchLevel = "<< pMatch->usMatchLevel<< 
           " , MFlag = " << pMatch->usTranslationFlag << " ,  segment = " << pMatch->ulSegmentId;
-      if(pMatch->szLongName[0] != '0') {
+      //if(pMatch->szLongName[0] != '0') {
         T5LOG( T5DEVELOP)<<"TmtXGet:: origin = "<<pMatch->szFileName;
-      }else{
-        T5LOG( T5DEVELOP)<<"TmtXGet:: origin = "<<pMatch->szLongName;
-      }
+      //}else{
+      //  T5LOG( T5DEVELOP)<<"TmtXGet:: origin = "<<pMatch->szLongName;
+      //}
 
       auto strSource = EncodingHelper::convertToUTF8(pMatch->szSource);
       auto strTarget = EncodingHelper::convertToUTF8(pMatch->szTarget);
@@ -1083,8 +1083,7 @@ USHORT ExactTest
       REPLACE_A0_BY_FF( pGetIn->szTargetLanguage );
 
       //get id of target language in the getin structure
-      if (NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage,
-                              NULL,
+      if (NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage,                              
                               (USHORT)LANG_KEY, &usGetLang,
                               0, NULL ))
       {
@@ -1093,7 +1092,6 @@ USHORT ExactTest
 
       //get file name id of file name in the getin structure
       if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szFileName,
-                               pGetIn->szLongName,
                                (USHORT)FILE_KEY, &usGetFile,
                                0,
                                &usAlternateGetFile ))
@@ -1104,18 +1102,14 @@ USHORT ExactTest
       if ( pGetIn->ulParm & GET_IGNORE_PATH )
       {
         // get pointer to document name without path 
-        if ( pGetIn->szLongName[0] != EOS )
+        //if ( pGetIn->szFileName[0] != EOS )
         {
-          pszDocName = UtlGetFnameFromPath( pGetIn->szLongName );
+          pszDocName = UtlGetFnameFromPath( pGetIn->szFileName );
           if ( pszDocName == NULL )
           {
-            pszDocName = pGetIn->szLongName;
+            pszDocName = pGetIn->szFileName;
           } /* endif */             
-        }
-        else
-        {
-          pszDocName = pGetIn->szFileName;
-        } /* endif */           
+        }         
       } /* endif */           
 
 
@@ -1851,8 +1845,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
                    USHORT usContextRanking,
                    int iWords, int iDiffs, USHORT usSrcLangId )
 {
+  //PSZ    pSrcFileName = pGetIn->szFileName;  // source file name
   PSZ    pSrcFileName = pGetIn->szFileName;  // source file name
-  PSZ    pSrcLongName = pGetIn->szLongName;  // long source file name
+  //PSZ    pSrcLongName = pGetIn->szLongName;  // long source file name
   PBYTE  pByte;                              //position pointer
   BOOL   fOK;                                //success indicator
   USHORT usRc = NO_ERROR;                    //return code
@@ -1943,7 +1938,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           NTMGetNameFromID( pTmClb,
                             &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
                             (USHORT)TAGTABLE_KEY,
-                            pSubstProp->szPropTagTable, NULL );
+                            pSubstProp->szPropTagTable );
           ulTgtOemCP = 1;
           // replace any 0xA0 in language name to 0xFF
           // (0xA0 is 0xFF after processing by OemToAnsi)
@@ -1952,7 +1947,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           //fill in the target language
           NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
                             (USHORT)LANG_KEY,
-                            pSubstProp->szTargetLanguage, NULL );
+                            pSubstProp->szTargetLanguage );
           //NTMGetNameFromID( pTmClb, &usSrcLangId,
           //                    (USHORT)LANG_KEY,
           //                    pSubstProp->szOriginalSrcLanguage, NULL );
@@ -1995,10 +1990,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
       else if ( iMatchSortKey == iNewMatchSortKey )
       {
         CHAR szTgtFileName[ MAX_FILESPEC ];                  // target file name
-        static CHAR szTgtLongName[ MAX_LONGFILESPEC ];       // long target file name
 
         //fill in the target file name
-        NTMGetNameFromID( pTmClb, &pTMXTargetClb->usFileId, (USHORT)FILE_KEY, szTgtFileName, szTgtLongName );
+        NTMGetNameFromID( pTmClb, &pTMXTargetClb->usFileId, (USHORT)FILE_KEY, szTgtFileName );
 
         /****************************************************************/
         /* as the matching levels are the same determine the most recent*/
@@ -2006,15 +2000,15 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         /* higher priority                                              */
         /****************************************************************/
         
-        if ( NTMDocMatch( szTgtFileName, szTgtLongName, pSrcFileName, pSrcLongName ) )
+        if ( NTMDocMatch( szTgtFileName, pSrcFileName ) )
         {
           /**************************************************************/
           /* if compared match is from same file, check the update time */
           /* because now we deal with two matches from same source doc. */
           /**************************************************************/
           if ( (pstMatchTable->lTargetTime > pTMXTargetClb->lTime) &&
-               NTMDocMatch( pstMatchTable->szFileName, pstMatchTable->szLongName,
-                            pSrcFileName, pSrcLongName ) )
+               NTMDocMatch( pstMatchTable->szFileName,
+                            pSrcFileName ) )
           {
             pstMatchTable++;
             usCurrentEntry++;
@@ -2035,7 +2029,7 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           /* otherwise put in our match, it's coming from same source   */
           /* document                                                   */
           /**************************************************************/
-          if ( NTMDocMatch( pstMatchTable->szFileName, pstMatchTable->szLongName, pSrcFileName, pSrcLongName ) )
+          if ( NTMDocMatch( pstMatchTable->szFileName, pSrcFileName ) )
           {
             // match from match table is from same document, so skip to next position
             pstMatchTable++;
@@ -2215,12 +2209,13 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
             //fill in the target file name
             NTMGetNameFromID( pTmClb, &pTMXTargetClb->usFileId,
                               (USHORT)FILE_KEY,
-                              pstMatchTable->szFileName,
-                              pstMatchTable->szLongName );
+                              pstMatchTable->szFileName
+                              //pstMatchTable->szLongName 
+                              );
             //fill in the target author - don't care about author name....
             NTMGetNameFromID( pTmClb, &pTMXTargetClb->usAuthorId,
                               (USHORT)AUTHOR_KEY,
-                              pstMatchTable->szTargetAuthor, NULL );
+                              pstMatchTable->szTargetAuthor );
 
             //fill in the markup table
             {
@@ -2228,17 +2223,17 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               NTMGetNameFromID( pTmClb,
                                 &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
                                 (USHORT)TAGTABLE_KEY,
-                                pstMatchTable->szTagTable, NULL );
+                                pstMatchTable->szTagTable );
             }
 
             //fill in the target and original src language
             NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
                               (USHORT)LANG_KEY,
-                              pstMatchTable->szTargetLanguage, NULL );
+                              pstMatchTable->szTargetLanguage );
 
             NTMGetNameFromID( pTmClb, &usSrcLangId,
                               (USHORT)LANG_KEY,
-                              pstMatchTable->szOriginalSrcLanguage, NULL );
+                              pstMatchTable->szOriginalSrcLanguage );
             //fill in the segment id
             pstMatchTable->ulSegmentId = pTMXTargetClb->ulSegmId;
             //state whether machine translation
@@ -2285,8 +2280,8 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               if ((iMatchSortKeyTemp <  iMatchSortKey) ||
                   ((iMatchSortKeyTemp == iMatchSortKey) &&
                    (pstMatchTableTemp->lTargetTime  <   pstMatchTable->lTargetTime) &&
-                    NTMDocMatch( pstMatchTable->szFileName, pstMatchTable->szLongName,
-                                 pstMatchTableTemp->szFileName, pstMatchTableTemp->szLongName)) )
+                    NTMDocMatch( pstMatchTable->szFileName, 
+                                 pstMatchTableTemp->szFileName)) )
               {
                 // interchange entries pstMatchTable moved on position pstMatchTableTemp
                 TMX_MATCH_TABLE_W stMatchEntry;
@@ -2788,7 +2783,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       char recordSrcLang[MAX_LANG_LENGTH];
       NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId,
                               (USHORT)LANG_KEY,
-                              recordSrcLang, NULL );
+                              recordSrcLang );
       if(strcasecmp(recordSrcLang, pGetIn->szSourceLanguage)){
         T5LOG( T5WARNING) <<":: source langs is different in record(" << recordSrcLang << ") and request (" << pGetIn->szSourceLanguage << ")";
         return SOURCE_LANG_DIFFERENT;
@@ -2855,8 +2850,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       LONG    lTempSrcLen;            // temp. source length
 
       //get id of target tag table in the get structure
-      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTagTable,
-                             NULL,
+      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTagTable,                             
                              (USHORT)TAGTABLE_KEY, &usTagId,
                              NTMGETID_NOUPDATE_OPT, NULL ))
       {
@@ -2870,8 +2864,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
         //get id of target language in the get structure
 
       // we have to update the memory language table to keep the language group table up-to-date...
-//      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTargetId, NTMGETID_NOUPDATE_OPT, NULL ))
-      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTargetId, 0, NULL ))
+//      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage, (USHORT)LANG_KEY, &usTargetId, NTMGETID_NOUPDATE_OPT, NULL ))
+      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage, (USHORT)LANG_KEY, &usTargetId, 0, NULL ))
       {
         usTargetId = 1;  // set default..
       } /* endif */
@@ -2918,7 +2912,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
           char recordTrgLang[MAX_LANG_LENGTH];
           NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
                                   (USHORT)LANG_KEY,
-                                  recordTrgLang, NULL );
+                                  recordTrgLang );
           if(strcasecmp(recordTrgLang, pGetIn->szTargetLanguage)){
             T5LOG( T5WARNING) <<":: target langs is different in record(" << recordTrgLang << ") and request (" << pGetIn->szTargetLanguage<< ")";
             //return SOURCE_LANG_DIFFERENT;
@@ -2985,7 +2979,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                 // get markup name firstly, also with cache
                 char szMarkup[MAX_FNAME];
                 memset(szMarkup,0,sizeof(szMarkup));
-                NTMGetNameFromID( pTmClb, &(pTMXTargetTagTable->usTagTableId), (USHORT)TAGTABLE_KEY,szMarkup, NULL );
+                NTMGetNameFromID( pTmClb, &(pTMXTargetTagTable->usTagTableId), (USHORT)TAGTABLE_KEY,szMarkup );
                   
                 std::string familyNameTgt = GetAndCacheFamilyName(szMarkup);
                 if( !familyNameTgt.empty() && familyNameIn==familyNameTgt)

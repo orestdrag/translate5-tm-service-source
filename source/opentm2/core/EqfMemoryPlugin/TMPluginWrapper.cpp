@@ -368,25 +368,14 @@ BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID )
 //+----------------------------------------------------------------------------+
 BOOL NTMDocMatch
 (
-  PSZ pszDoc1ShortName,                // ptr to short name of 1st doc
-  PSZ pszDoc1LongName,                 // ptr to long name of 1st doc
-  PSZ pszDoc2ShortName,                // ptr to short name of 2nd doc
-  PSZ pszDoc2LongName                  // ptr to long name of 2nd doc
+  PSZ pszDoc1Name,                // ptr to short name of 1st doc
+  PSZ pszDoc2Name                 // ptr to name of 2nd doc
 )
 {
   BOOL fMatch = FALSE;                 // function return code
-
-  // check if we can compare the long names
-  if ( (pszDoc1LongName != NULL) && (pszDoc1LongName[0] != EOS) &&
-       (pszDoc2LongName != NULL) && (pszDoc2LongName[0] != EOS) )
-  {
-    // base the match on the long names
-    fMatch = (strcmp( pszDoc1LongName, pszDoc2LongName ) == 0 );
-  }
-  else
   {
     // use the short names for the match
-    fMatch = (strcmp( pszDoc1ShortName, pszDoc2ShortName ) == 0 );
+    fMatch = (strcmp( pszDoc1Name, pszDoc2Name ) == 0 );
   } /* endif */
   return( fMatch );
 } /* end of function NTMDocMatch */

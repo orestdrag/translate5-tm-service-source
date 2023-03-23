@@ -1171,7 +1171,8 @@ NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the
      {
        char szString[MAX_FILESPEC];
        Unicode2ASCII( pszStringW, szString, pLIDA->ulOemCP );
-       pLIDA->pProposal->setDocShortName( szString );
+       //pLIDA->pProposal->setDocShortName( szString );
+       pLIDA->pProposal->setDocName( szString );
      } /* endif */
    } /* endif */
 
@@ -2156,9 +2157,6 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     } /* endswitch */
     pLIDA->pProposal->setUpdateTime( pSegment->lTime );
     pLIDA->pProposal->setAuthor( pSegment->szAuthor );
-    char szShortName[MAX_FILESPEC];
-    UtlLongToShortName( pSegment->szDocument, szShortName );
-    pLIDA->pProposal->setDocShortName( szShortName );
     pLIDA->pProposal->setDocName( pSegment->szDocument );
 
     pLIDA->pProposal->setSource( pSegment->szSource );

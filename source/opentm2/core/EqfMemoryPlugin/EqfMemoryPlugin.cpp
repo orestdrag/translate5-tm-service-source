@@ -445,13 +445,6 @@ int EqfMemoryPlugin::renameMemory(
   {
     // get new short name for memory
     BOOL fIsNew = FALSE;
-    char szShortName[MAX_FILESPEC];
-    
-    T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 16 ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew )";
-#ifdef TEMPORARY_COMMENTED
-    ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
-    #endif
-
     if ( !fIsNew ) return( OtmMemory::ERROR_MEMORYEXISTS );
 
     // get memory property file name
@@ -466,8 +459,9 @@ int EqfMemoryPlugin::renameMemory(
     char *pszExt = strrchr( szIndexPath, DOT );
     strcpy( szNewPath, pMemInfo->szFullPath );
     UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
+    strcat( szNewPath, "/" );
+    //strcat( szNewPath, szShortName );
+    strcat( szNewPath, pszNewName );
     strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
     strcat( szNewPath, EXT_OF_TMINDEX );
     
@@ -476,8 +470,8 @@ int EqfMemoryPlugin::renameMemory(
     // rename data file
     strcpy( szNewPath, pMemInfo->szFullPath );
     UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
+    strcat( szNewPath, "/" );
+    strcat( szNewPath, pszNewName );
     strcat( szNewPath, EXT_OF_TMDATA );
     rename( pMemInfo->szFullPath, szNewPath ) ;
 
@@ -487,8 +481,8 @@ int EqfMemoryPlugin::renameMemory(
     // rename the property file
     strcpy( szNewPath, strPropName.c_str() ); 
     UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
+    strcat( szNewPath, "/" );
+    strcat( szNewPath, pszNewName );
     strcat( szNewPath, EXT_OF_MEM  );
     rename( strPropName.c_str(), szNewPath ) ;
 
@@ -498,7 +492,7 @@ int EqfMemoryPlugin::renameMemory(
     if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
     {      
       // update name in signature structure
-      strcpy( pstMemProp->stTMSignature.szName, szShortName );
+      strcpy( pstMemProp->stTMSignature.szName, pszNewName );
 
       // re-write property file
       UtlWriteFileL( szNewPath, ulRead, pstMemProp, FALSE );

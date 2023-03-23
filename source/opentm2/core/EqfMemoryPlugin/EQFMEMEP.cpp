@@ -1293,7 +1293,6 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
       CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
       CHAR      szAuthorName[MAX_USERID];          //author name of target
       CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-      LONG_FN   szLongName;                        // name of source file (long name or EOS)
       CHAR      szTagTable[MAX_FNAME];             //tag table name
      
      /*****************************************************************/
@@ -1318,8 +1317,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
      pExportIDA->pProposal->getSourceLanguage( szSourceLanguage, sizeof(szSourceLanguage) );
      pExportIDA->pProposal->getTargetLanguage( szTargetLanguage, sizeof(szTargetLanguage) );
      pExportIDA->pProposal->getAuthor( szAuthorName, sizeof(szAuthorName) );
-     pExportIDA->pProposal->getDocShortName( szFileName, sizeof(szFileName) );
-     pExportIDA->pProposal->getDocName( szLongName, sizeof(szLongName) );
+     pExportIDA->pProposal->getDocName( szFileName, sizeof(szFileName) );
      pExportIDA->pProposal->getMarkup( szTagTable, sizeof(szTagTable) );
      sprintf( pExportIDA->szConvArea,
               "%s%06lu%s%c%s%016lu%s%s%s%s%s%s%s%s%s%s%s%s%s",
@@ -1359,7 +1357,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
               X15_STR,
               szFileName,
               X15_STR,
-              szLongName,
+              szFileName,
               MEM_CONTROL_END_TAG );
      ASCII2Unicode( pExportIDA->szConvArea, pExportIDA->szWorkArea, pExportIDA->ulOemCP );
      usRc = MemExportWrite( pExportIDA, pExportIDA->szWorkArea );

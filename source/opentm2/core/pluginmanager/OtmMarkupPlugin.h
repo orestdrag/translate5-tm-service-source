@@ -28,8 +28,6 @@ public:
 
 	virtual const char* getName() = 0;
 
-	virtual const char* getShortName() = 0;
-
 	virtual const char* getShortDescription() = 0;
 
 	virtual const char* getLongDescription() = 0;

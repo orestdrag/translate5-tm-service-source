@@ -225,24 +225,6 @@ public:
     int iSize
   );
 
-  /*! \brief Get number of different document short names used in the memory
-  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
-*/
-  	int getNumOfDocumentShortNames();
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  	int getDocumentShortName
-    (
-      int iPos,
-      char *pszBuffer,
-      int iSize
-    );
-
 /*! \brief Get number of different languages used in the memory
   	\returns number of languages used by the memory proposals or 0 if no language information can be provided
 */

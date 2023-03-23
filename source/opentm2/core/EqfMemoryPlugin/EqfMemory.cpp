@@ -923,55 +923,6 @@ int EqfMemory::getDocumentName
   } /* end */     
 }
 
-  /*! \brief Get number of different document short names used in the memory
-  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
-*/
-int EqfMemory::getNumOfDocumentShortNames()
-{
-  if ( this->pTmClb != NULL )
-  {
-    return( (int)(this->pTmClb->pFileNames->ulMaxEntries) );
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentShortNames()-1]
-    \param iPos position of document short name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-int EqfMemory::getDocumentShortName
-(
-  int iPos,
-  char *pszBuffer,
-  int iSize
-)
-{
-  if ( this->pTmClb != NULL )
-  {
-    if ( (iPos >= 0) && (iPos < (int)(this->pTmClb->pFileNames->ulMaxEntries)) )
-    {
-      PTMX_TABLE_ENTRY pEntry = &(this->pTmClb->pFileNames->stTmTableEntry);
-      pEntry += iPos;
-      return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
-    }
-    else
-    {
-      return( 0 );
-    } /* end */     
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-
-
 /*! \brief Get number of different languages used in the memory
   	\returns number of languages used by the memory proposals or 0 if no language information can be provided
 */
@@ -1118,8 +1069,8 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setSourceLanguage( this->pTmClb->stTmSign.szSourceLanguage);
   Proposal.setAddInfo( pExtOut->stTmExt.szAddInfo );
   Proposal.setContext( pExtOut->stTmExt.szContext );
-  Proposal.setDocName( pExtOut->stTmExt.szLongName );
-  Proposal.setDocShortName( pExtOut->stTmExt.szFileName );
+  Proposal.setDocName( pExtOut->stTmExt.szFileName );
+  //Proposal.setDocShortName( pExtOut->stTmExt.szFileName );
   Proposal.setSegmentNum( pExtOut->stTmExt.ulSourceSegmentId );
   Proposal.setType( FlagToProposalType( pExtOut->stTmExt.usTranslationFlag ) );
   Proposal.setUpdateTime( pExtOut->stTmExt.lTargetTime );
@@ -1151,8 +1102,8 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setSourceLanguage( this->pTmClb->stTmSign.szSourceLanguage);
   pProposal->setAddInfo( pMatch->szAddInfo );
   pProposal->setContext( pMatch->szContext );
-  pProposal->setDocName( pMatch->szLongName );
-  pProposal->setDocShortName( pMatch->szFileName );
+  pProposal->setDocName( pMatch->szFileName );
+  //pProposal->setDocShortName( pMatch->szFileName );
   pProposal->setSegmentNum( pMatch->ulSegmentId );
   pProposal->setType( FlagToProposalType( pMatch->usTranslationFlag ) );
   pProposal->setUpdateTime( pMatch->lTargetTime );
@@ -1211,8 +1162,7 @@ int EqfMemory::OtmProposalToPutIn
   Proposal.getTargetLanguage( pPutIn->stTmPut.szTargetLanguage, sizeof(pPutIn->stTmPut.szTargetLanguage)  );
   Proposal.getAddInfo( pPutIn->stTmPut.szAddInfo, sizeof(pPutIn->stTmPut.szAddInfo)  );
   Proposal.getContext( pPutIn->stTmPut.szContext, sizeof(pPutIn->stTmPut.szContext)  );
-  Proposal.getDocName( pPutIn->stTmPut.szLongName, sizeof(pPutIn->stTmPut.szLongName)  );
-  Proposal.getDocShortName( pPutIn->stTmPut.szFileName, sizeof(pPutIn->stTmPut.szFileName)  );
+  Proposal.getDocName( pPutIn->stTmPut.szFileName, sizeof(pPutIn->stTmPut.szFileName)  );
   pPutIn->stTmPut.ulSourceSegmentId = Proposal.getSegmentNum();
   switch ( Proposal.getType() )
   {
@@ -1248,8 +1198,9 @@ int EqfMemory::OtmProposalToGetIn
   Proposal.getTargetLanguage( pGetIn->stTmGet.szTargetLanguage, sizeof(pGetIn->stTmGet.szTargetLanguage)  );
   Proposal.getAddInfo( pGetIn->stTmGet.szAddInfo, sizeof(pGetIn->stTmGet.szAddInfo)  );
   Proposal.getContext( pGetIn->stTmGet.szContext, sizeof(pGetIn->stTmGet.szContext)  );
-  Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
-  Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
+  //Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
+  Proposal.getDocName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
+  //Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
   
   //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
   int threshold = TM_DEFAULT_THRESHOLD;

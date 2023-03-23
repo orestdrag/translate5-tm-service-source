@@ -60,7 +60,6 @@ void ShowProposals( int iNumProposals, PMEMPROPOSAL pProposal )
     printf( "    Source       = %S\n", pProposal->szSource );
     printf( "    Target       = %S\n", pProposal->szTarget );
     printf( "    DocName      = %s\n", pProposal->szDocName );
-    printf( "    DocShortName = %s\n", pProposal->szDocShortName );
     printf( "    SourceLang   = %s\n", pProposal->szSourceLanguage );
     printf( "    TargetLang   = %s\n", pProposal->szTargetLanguage );
     char *pszType = "";

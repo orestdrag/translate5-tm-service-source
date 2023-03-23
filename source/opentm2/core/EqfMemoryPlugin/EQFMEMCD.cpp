@@ -78,7 +78,7 @@ typedef struct _TMX_CREATE_IDA
   CHAR   szLastDriveList[MAX_DRIVELIST];   // list of currently displayed drives
 
   CHAR   szMemPath[MAX_EQF_PATH];          //D:\EQF\MEM\, TM path
-  CHAR   szMemShortName[MAX_LONGFILESPEC]; // TM short name
+// CHAR   szMemShortName[MAX_LONGFILESPEC]; // TM short name
 //CHAR   szMemPathMemName[MAX_EQF_PATH];   //D:\EQF\MEM\TESTTM concat of szMemPath,szMemName
   CHAR   szFullMemName[MAX_EQF_PATH];      //D:\EQF\MEM\TESTTM.TMD
   CHAR   szMemPropPath[MAX_EQF_PATH];      //D:\EQF

@@ -278,7 +278,7 @@ USHORT TmtXReplace
     pSentence->pTagRecord->usTagTableId = 0;
     if ( pTmClb )  /* 4-13-15 */
     {
-      usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+      usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
       if(usRc){
         T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
       }
@@ -361,7 +361,7 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTargetLanguage, pTmPutIn->stTmPut.szTargetLanguage );
       pstDelIn->stTmPut.usTranslationFlag = pTmPutIn->stTmPut.usTranslationFlag;
       strcpy(pstDelIn->stTmPut.szFileName, pTmPutIn->stTmPut.szFileName );
-      strcpy(pstDelIn->stTmPut.szLongName, pTmPutIn->stTmPut.szLongName );
+      //strcpy(pstDelIn->stTmPut.szLongName, pTmPutIn->stTmPut.szLongName );
       pstDelIn->stTmPut.ulSourceSegmentId = pTmPutIn->stTmPut.ulSourceSegmentId;
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
@@ -854,8 +854,7 @@ USHORT TokenizeTarget
     pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
 
     //get id of tag table, call
-    usRc = NTMGetIDFromName( pClb, pTagTableName,
-                             NULL,
+    usRc = NTMGetIDFromName( pClb, pTagTableName,                             
                              (USHORT)TAGTABLE_KEY,
                              &pTagRecord->usTagTableId  );
     if ( !usRc )
@@ -1120,7 +1119,7 @@ USHORT AddToTm
       if ( usRc == NO_ERROR )
       {
         USHORT usSrcLang = 0; 
-        usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+        usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, (USHORT)LANG_KEY, &usSrcLang );
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
@@ -1332,23 +1331,23 @@ USHORT FillClb
   REPLACE_A0_BY_FF( pTmPut->szTargetLanguage );
 
   //get id of target language, call
-  usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTrgLang );
+  usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, (USHORT)LANG_KEY, &usTrgLang );
 
   //if ( !usRc )
   //{
-  //  usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+  //  usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, (USHORT)LANG_KEY, &usSrcLang );
   //} /* endif */
 
   //get id of file name, call
   if ( !usRc )
   {
-    usRc = NTMGetIDFromName( pTmClb, pTmPut->szFileName, pTmPut->szLongName, (USHORT)FILE_KEY, &usFile );
+    usRc = NTMGetIDFromName( pTmClb, pTmPut->szFileName, (USHORT)FILE_KEY, &usFile );
   } /* endif */
 
   //get id of target author
   if ( !usRc )
   {
-    usRc = NTMGetIDFromName( pTmClb, pTmPut->szAuthorName, NULL, (USHORT)AUTHOR_KEY, &usAuthor );
+    usRc = NTMGetIDFromName( pTmClb, pTmPut->szAuthorName, (USHORT)AUTHOR_KEY, &usAuthor );
   } /* endif */
 
   if ( !usRc )
@@ -2099,16 +2098,16 @@ USHORT ComparePutData
 
     //get id of target language in the put structure
     if (NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage,
-                          NULL, (USHORT)LANG_KEY, &usPutLang ))
+                          (USHORT)LANG_KEY, &usPutLang ))
     {
       usPutLang = 1;
     } /* endif */
 
     NTMGetIDFromName( pTmClb, pTmPut->szAuthorName, 			// get author ID
-                      NULL, (USHORT)AUTHOR_KEY, &usAuthorId );
+                      (USHORT)AUTHOR_KEY, &usAuthorId );
 
     usRc = NTMGetIDFromName( pTmClb, pTmPut->szFileName,		 // get file id
-                             pTmPut->szLongName, (USHORT)FILE_KEY, &usPutFile );
+                             (USHORT)FILE_KEY, &usPutFile );
     if ( !usRc )
     {
       //position at beginning of source structure in tm record
@@ -2279,15 +2278,15 @@ USHORT ComparePutData
                   {
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
                     LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord); 
-                    if( size> 0 ){
-                      memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
-                      RECLEN(pTmRecord) += lNewClbLen;
-                      RECLEN(pTMXTargetRecord) += lNewClbLen;
-                    }else{
-                      if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-                        T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen;
-                      }
+                    
+                    if(size < 0 /* && T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)*/)
+                    {
+                      T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen;
                     }
+                    memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
+                    RECLEN(pTmRecord) += lNewClbLen;
+                    RECLEN(pTMXTargetRecord) += lNewClbLen;
+                    
                   } /* endif */
 
                   // fill-in new target CLB
@@ -2806,7 +2805,6 @@ USHORT TmtXUpdSeg
 
                 // get ID for new tag table
                 usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable,
-                                         NULL,
                                          (USHORT)TAGTABLE_KEY,
                                          &usNewId );
 
@@ -2841,7 +2839,6 @@ USHORT TmtXUpdSeg
 
                 // set target language
                 usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTargetLanguage,
-                                         NULL,
                                          (USHORT)LANG_KEY,
                                          &pTargetClb->usLangId );
               } /* endif */

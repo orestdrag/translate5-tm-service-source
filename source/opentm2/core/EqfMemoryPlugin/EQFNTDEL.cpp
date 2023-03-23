@@ -380,7 +380,6 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
 
         //get id of target language in the put structure
         usRc = NTMGetIDFromName( pTmClb, pTmDel->szTargetLanguage,
-                                 NULL,
                                  (USHORT)LANG_KEY, &usId );
         //compare target language ids
         //if ( (pClb->usLangId == usId) && !usRc )
@@ -449,8 +448,8 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                   pClb = (PTMX_TARGET_CLB)pByte;
 
                   //get id of filename in the put structure
-                  usRc = NTMGetIDFromName( pTmClb, pTmDel->szFileName,
-                                           pTmDel->szLongName,
+                  usRc = NTMGetIDFromName( pTmClb,
+                                           pTmDel->szFileName,                                           
                                            (USHORT)FILE_KEY, &usId );
                   if ( !usRc )
                   {

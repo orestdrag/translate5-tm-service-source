@@ -41,7 +41,6 @@ static  char *szXml_none                  = "none" ;
 static  char *szXml_Plugin                = "plugin" ;
 static  char *szXml_Protected             = "protected" ;
 static  char *szXml_ShortDescription      = "shortDescription" ;
-static  char *szXml_ShortName             = "shortName" ;
 static  char *szXml_Supplier              = "supplier" ;
 static  char *szXml_Table                 = "table" ;
 static  char *szXml_TableDirectory        = "tableDirectory" ;
@@ -127,7 +126,6 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
   pszLongDescription = NULL;
   pszName=NULL;
   pszShortDescription = NULL;
-  pszShortName=NULL;
   pszSupplier = NULL;
   pszTableDirectory = NULL;
   pszTablePath = NULL;
@@ -236,10 +234,10 @@ UserMarkupTablePlugin::UserMarkupTablePlugin()
                  SaveValue( &pszShortDescription, szContent ) ;
                  continue;
               } 
-              if ( ! strcmp( szNode, szXml_ShortName ) ) {
-                 SaveValue( &pszShortName, szContent ) ;
-                 continue;
-              } 
+              //if ( ! strcmp( szNode, szXml_ShortName ) ) {
+              //   SaveValue( &pszShortName, szContent ) ;
+              //   continue;
+              //} 
               if ( ! strcmp( szNode, szXml_Supplier ) ) {
                  SaveValue( &pszSupplier, szContent ) ;
                  continue;
@@ -372,13 +370,6 @@ const char* UserMarkupTablePlugin::getName()
 	return pszName;
 }
 
-/* -------------------------------------------------------------- */
-/*   getShortName.                                                */
-/* -------------------------------------------------------------- */
-const char* UserMarkupTablePlugin::getShortName()
-{
-	return pszShortName;
-}
 
 /* -------------------------------------------------------------- */
 /*   getShortDescription.                                         */
@@ -1268,7 +1259,6 @@ bool UserMarkupTablePlugin::stopPlugin( bool fForce  )
 #endif
 
   if ( pszName )  free(pszName) ;
-  if ( pszShortName )  free(pszShortName) ;
   if ( pszShortDescription )  free(pszShortDescription);
   if ( pszLongDescription )  free(pszLongDescription);
   if ( pszVersion )  free(pszVersion) ;

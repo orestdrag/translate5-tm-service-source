@@ -39,9 +39,6 @@ public:
 */
 	virtual const char* getShortDescription();
 
-/*! \brief Returns a short plugin name        
-*/
-	virtual const char* getShortName();
 
 /*! \brief Returns a verbose plugin description
 */
@@ -168,7 +165,6 @@ private:
     char *pszLongDescription;
 	char *pszName;
 	char *pszShortDescription;
-	char *pszShortName;
 	char *pszSupplier;
 	char *pszTableDirectory;
 	char *pszTablePath;

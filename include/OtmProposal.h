@@ -133,18 +133,6 @@ public:
      \param pszBuffer Pointer to buffer containing the document name
    */
   void setDocName( char *pszBuffer );
-  	
-  /* \brief get proposal document short name
-     \param pszBuffer Pointer to buffer receiving the document short name
-     \param iBufSize Size of the buffer in number of characters
-  	 \returns Number of characters copied to pszBuffer including the terminating null character
-   */
-  int getDocShortName( char *pszBuffer, int iBufSize );
-  	
-  /* \brief set the proposal document short name
-     \param pszBuffer Pointer to buffer containing the document short short name
-   */
-  void setDocShortName( char *pszBuffer );
 
   /* \brief get proposal segment number
    	\returns proposal segment number

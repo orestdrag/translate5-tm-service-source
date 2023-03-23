@@ -1345,7 +1345,7 @@ int OtmMemoryServiceWorker::addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
   pJsonFactory->addParmToJSONW( strJSON, L"id", EncodingHelper::convertToUTF16(pProp->szId).c_str());
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", EncodingHelper::convertToUTF16(pProp->szDocName).c_str() );
-  pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", EncodingHelper::convertToUTF16(pProp->szDocShortName).c_str() );
+  //pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", EncodingHelper::convertToUTF16(pProp->szDocShortName).c_str() );
   EqfGetIsoLang( this->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
   EqfGetIsoLang( this->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );

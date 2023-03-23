@@ -566,7 +566,7 @@ USHORT ExtractRecordV6
                                      pSourceString, &lSourceLen,
                                      &pTmExtOut->stTmExt );
             NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
-                        pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
+                        pTmExtOut->stTmExt.szOriginalSourceLanguage );
             if ( ! usRc )
             {
               //check for another target
@@ -742,7 +742,7 @@ USHORT FillExtStructure
       //fill in the tag table name
       NTMGetNameFromID( pTmClb, &pTMXTagTableRecord->usTagTableId,
                         (USHORT)TAGTABLE_KEY,
-                        pstExt->szTagTable, NULL );
+                        pstExt->szTagTable );
 
       //add tags to target string if flag set to true
       if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
@@ -767,13 +767,13 @@ USHORT FillExtStructure
       if ( pTmClb->usAccessMode & ASD_ORGANIZE )
       {
         strcpy( pstExt->szFileName, OVERFLOW_NAME );
-        pstExt->szLongName[0] = EOS;
+        //pstExt->szLongName[0] = EOS;
         strcpy( pstExt->szAuthorName, OVERFLOW_NAME );
       } /* endif */
 
       //fill in the target file name
       NTMGetNameFromID( pTmClb, &pTMXTargetClb->usFileId, (USHORT)FILE_KEY,
-                        pstExt->szFileName, pstExt->szLongName );
+                        pstExt->szFileName );
       //use overflow name if no document name available
       if ( pstExt->szFileName[0] == EOS )
       {
@@ -782,11 +782,11 @@ USHORT FillExtStructure
 
       //fill in the target author
       NTMGetNameFromID( pTmClb, &pTMXTargetClb->usAuthorId, (USHORT)AUTHOR_KEY,
-                        pstExt->szAuthorName, NULL );
+                        pstExt->szAuthorName );
 
       //fill in the target language
       NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
-                        pstExt->szTargetLanguage, NULL );
+                        pstExt->szTargetLanguage );
       
 
       //fill in the segment id

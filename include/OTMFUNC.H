@@ -2598,11 +2598,7 @@ typedef struct _MEMPROPOSAL
 
 	/*! \brief Name of document from which the proposal comes from. */
 	char szDocName[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
-	//std::string strDocShortName;
-	char szDocShortName[MEMPROPOSAL_MAXNAMELEN];
-
+  
 	/*! \brief Segment number within the document from which the proposal comes from. */
   long lSegmentNum;                  
 
