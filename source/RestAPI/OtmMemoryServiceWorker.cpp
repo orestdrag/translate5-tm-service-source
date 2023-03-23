@@ -531,14 +531,14 @@ int OtmMemoryServiceWorker::convertTimeToUTC( LONG lTime, char *pszDateTime )
   if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
 
   pTimeDate = gmtime( (time_t *)&lTime );
-  if ( pTimeDate->tm_isdst == 1 )
+  if ( pTimeDate && pTimeDate->tm_isdst == 1 )
   {
     // correct summertime offset
     lTime -= 3600; 
     pTimeDate = gmtime( (time_t *)&lTime );
     
   }
-  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
+  if ( pTimeDate && (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
   {
     sprintf( pszDateTime, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
              pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,

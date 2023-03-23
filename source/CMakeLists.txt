@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.34")
+SET(APP_VERSION  "0.4.35")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -151,6 +151,8 @@ add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
 set(CMAKE_CXX_STANDARD 14)
 target_compile_features(T5MEMORY PRIVATE cxx_std_14)
+
+add_definitions(-w)
 
 target_include_directories(T5MEMORY PRIVATE
     ${CMAKE_SOURCE_DIR}

@@ -2253,6 +2253,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szMTMetrics[0] = 0;
         pBuf->szMatchSegID[0] = 0;
         pBuf->ulWords = 0;
+        lTime = 0;
         
         tagReplacer.reset();
 
