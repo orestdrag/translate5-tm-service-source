@@ -45,11 +45,7 @@
 #define INC_REAL_READ_COUNT
 #define INC_REAL_WRITE_COUNT
 
-
-#define BTREE_REC_SIZE_V2  (4096)          // record size V2
 #define BTREE_REC_SIZE_V3 (16384)          // record size V3
-
-#define BTREE_BUFFER_V2   (BTREE_REC_SIZE_V2 + 10*sizeof(USHORT)) // buffer size
 #define BTREE_BUFFER_V3   (BTREE_REC_SIZE_V3 + 10*sizeof(USHORT)) // buffer size
 
 #define MAX_LIST           20          // number of recently used records
@@ -253,7 +249,6 @@ EVENTDEF( TWBSHUTDOWN_LOC,           3 )
 EVENTDEF( QDAMUPDATELOCKREC_LOC,     4 )
 EVENTDEF( QDAMGETUPDCOUNTER_LOC,     5 )
 EVENTDEF( QDAMINCRUPDCOUNTER_LOC,    6 )
-EVENTDEF( QDAMCHECKFORUPDATES_LOC,   7 )
 EVENTDEF( QDAMPHYSLOCK_LOC,          8 )
 EVENTDEF( QDAMRECORDTODISK_LOC,      9 )
 EVENTDEF( QDAMDICTCREATELOCAL_LOC,   10 )
@@ -452,34 +447,10 @@ typedef struct _BTREERECORD_V3
   UCHAR        uchData[ FREE_SIZE_V3 ] ;              // free size to be used
 } BTREERECORD_V3, *PBTREERECORD_V3, **PPBTREERECORD_V3;
 
-#define FREE_SIZE_V2  (BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER))
-typedef struct _BTREERECORD_V2
-{
-  BTREEHEADER  header;                             // 16 bytes header
-  UCHAR        uchData[ FREE_SIZE_V2 ] ;              // free size to be used
-} BTREERECORD_V2, *PBTREERECORD_V2, **PPBTREERECORD_V2;
-
-
-
 /*****************************************************************************/
 /* BTREEBUFFER  is the format of the buffers when read in to the buffer      */
 /* cache.  It maps a record number and its properties to its contents        */
 /*****************************************************************************/
-typedef struct _BTREEBUFFER_V2
-{
-  USHORT usRecordNumber;                           // index of rec in buffer
-  BOOL   fLocked;                                  // Is the record locked ?
-  BOOL   fNeedToWrite;                             // Commit before reuse
-  SHORT  sUsed;                                    // buffer used count
-  ULONG  ulCheckSum;                               // CheckSum of contents data
-  BTREERECORD_V2 contents;                         // data from disk
-} BTREEBUFFER_V2, * PBTREEBUFFER_V2;
-
-typedef struct _BTREEINDEX_V2
-{
-  struct _BTREEINDEX_V2  * pNext;                    // point to next index buffer
-  BTREEBUFFER_V2  btreeBuffer;                       // data from disk
-} BTREEINDEX_V2, * PBTREEINDEX_V2;
 
 typedef struct _BTREEBUFFER_V3
 {
@@ -508,12 +479,6 @@ typedef struct _BTREEINDEX_V3
 
 typedef SHORT _PFN_QDAMCOMPARE( PVOID, PVOID, PVOID );
 typedef _PFN_QDAMCOMPARE *PFN_QDAMCOMPARE;
-
-
-typedef struct _LOOKUPENTRY_V2
-{
-  PBTREEBUFFER_V2 pBuffer; // Pointer to BTREEBUFFER
-} LOOKUPENTRY_V2, * PLOOKUPENTRY_V2;
 
 typedef struct _LOOKUPENTRY_V3
 {
@@ -665,7 +630,6 @@ typedef struct _BTREEGLOB
    USHORT       usFirstNode;                      // file pointer of record
    USHORT       usFirstLeaf;                      // file pointer of record
 
-   //PBTREEINDEX_V2  pIndexBuffer_V2;               // Pointer to index records
    PBTREEINDEX_V3  pIndexBuffer_V3;               // Pointer to index records
    USHORT       usIndexBuffer;                    // number of index buffers
    PFN_QDAMCOMPARE compare;                       // Comparison function
@@ -688,7 +652,6 @@ typedef struct _BTREEGLOB
    USHORT       usFreeKeyBuffer;                  // index of buffer to use
    USHORT       usFreeDataBuffer;                 // first data buffer chain
    USHORT       usFirstDataBuffer;                // first data buffer
-   BTREEBUFFER_V2  BTreeTempBuffer_V2;            // temporary 4k buffer
    BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
    BOOL         fWriteHeaderPending;              // write of header pending
    LONG         lTime;                            // time of last update/open
@@ -1347,17 +1310,7 @@ SHORT QDAMDosRC2BtreeRC
       sRc = BTREE_NETWORK_ACCESS_DENIED;
       break;
     case ERROR_ACCESS_DENIED:
-      if ( usOpenFlags & ASD_SHARED )
-      {
-        // map ACCESS_DENIED to IN_USE for shared databases as
-        // a locked local file returns ERROR_ACCESS_DENIED rather than
-        // ERROR_SHARING_VIOLATION
-        sRc = BTREE_IN_USE;
-      }
-      else
-      {
-        sRc = BTREE_ACCESS_ERROR;
-      } /* endif */
+      sRc = BTREE_ACCESS_ERROR;
       break;
     case ERROR_DRIVE_LOCKED:
     case ERROR_INVALID_ACCESS:
@@ -1916,15 +1869,6 @@ SHORT  QDAMReadRecord_V3
             /* write buffer and free allocated space */
             if ( (pLEntry->pBuffer)->fNeedToWrite )
             {
-              if ( (pBT->usOpenFlags & ASD_SHARED) && !pBTIda->fPhysLock )
-              {
-                // this condition should NEVER occur for shared resources
-                // as write is only allowed if the database has been
-                // previously locked
-                ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 1, DB_GROUP, "" );
-                T5LOG(T5ERROR) << "Gotcha!Insecure write to dictionary/TM detected!\nLoc=READRECORDFROMDISK/1\nPlease save info required to reproduce this condition.";
-
-              } /* endif */
               sRc = QDAMWRecordToDisk_V3(pBTIda, pLEntry->pBuffer);
             } /* endif */
             if ( !sRc )
@@ -2320,14 +2264,9 @@ SHORT QDAMDictCloseLocal
      if ( !sRc && pBT->fOpen && ! pBT->fCorrupted )
      {
         pBT->fOpen = FALSE;
-
-        // Only for non-shared databases:
         // re-write header record
-        if ( !(pBT->usOpenFlags & ASD_SHARED) || !(pBT->usOpenFlags & ASD_LOCKED & ASD_GUARDED) )
-        {
-          if ( sRc == NO_ERROR ) 
-            sRc = QDAMWriteHeader( pBTIda );
-        } /* endif */
+        if ( sRc == NO_ERROR ) 
+          sRc = QDAMWriteHeader( pBTIda );
      } /* endif */
      
      filesystem_flush_buffers_ptr(pBT->fp);
@@ -3468,189 +3407,6 @@ SHORT QDAMIncrUpdCounter
 }
 
 
-//------------------------------------------------------------------------------
-// Internal function
-//------------------------------------------------------------------------------
-// Function name:     QDAMCheckForUpdates    Check is database has been changed
-//------------------------------------------------------------------------------
-// Function call:     QDAMCheckForUpdates( PBTREE );
-//
-//------------------------------------------------------------------------------
-// Description:       Check if the QDAm database has been modified since the
-//                    last read or write operation. If a modification is
-//                    detected all internal buffers are cleared thus forcing
-//                    read of data from disk.
-//                    Only shared databases are handled this way. For all
-//                    other databases this function is a NOP
-//------------------------------------------------------------------------------
-// Parameters:        PBTREE             The database to be checked for updates
-//
-//------------------------------------------------------------------------------
-// Returncode type:   SHORT
-//------------------------------------------------------------------------------
-SHORT QDAMCheckForUpdates
-(
-   PBTREE         pBTIda
-)
-{
-  SHORT    sRc = 0;                             // return code
-  PBTREEGLOB  pBT = pBTIda->pBTree;
-
-
-  if ( pBT->usOpenFlags & ASD_SHARED )
-  {
-      LONG  lUpdCount;                 // buffer for new value of update counter
-
-     /**********************************************************************/
-     /* Get current database update count                                  */
-     /**********************************************************************/
-     sRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
-
-     if ( !sRc )
-     {
-      if ( lUpdCount != pBT->alUpdCtr[0] )
-      {
-        USHORT usNumBytesRead;          // Buffer fornumber of bytes read
-        ULONG  ulNewOffset;             // new offset in file
-
-        INFOEVENT2( QDAMCHECKFORUPDATES_LOC, REFRESH_EVENT, 0, DB_GROUP, "" );
-
-        /**********************************************************************/
-        /* Get current header record                                          */
-        /**********************************************************************/
-        sRc = UtlChgFilePtr( pBT->fp, 0L, FILE_BEGIN, &ulNewOffset, FALSE);
-        if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-        if ( sRc == NO_ERROR )
-        {
-           SHORT sRetries = 0; // MAX_RETRY_COUNT;
-
-           do
-           {
-             sRc = UtlRead( pBT->fp, (PVOID)&header,
-                           sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
-             if ( sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-             if (sRc == BTREE_IN_USE )
-             {
-//             UtlWait( MAX_WAIT_TIME );
-               sRetries--;
-             } /* endif */
-           } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
-        } /* endif */
-
-        /****************************************************************/
-        /* Use new update count as time of last update                   */
-        /****************************************************************/
-        if ( !sRc )
-        {
-          pBT->alUpdCtr[0] = lUpdCount;
-        } /* endif */
-
-        /****************************************************************/
-        /* Refresh internal info with data from header record           */
-        /****************************************************************/
-        if ( !sRc )
-        {
-          pBT->usFirstNode        = header.usFirstNode;
-          pBT->usFirstLeaf        = header.usFirstLeaf;
-          pBT->usFreeKeyBuffer    = header.usFreeKeyBuffer;
-          pBT->usFreeDataBuffer   = header.usFreeDataBuffer;
-          pBT->usFirstDataBuffer  = header.usFirstDataBuffer;
-          // DataRecList in header is in old format (RECPARAMOLD),
-          // so convert it to the new format (RECPARAM)
-          {            
-            for (int i = 0; i < MAX_LIST; i++ )
-            {
-              pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
-              pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
-              pBT->DataRecList[i].ulLen    = (ULONG)header.DataRecList[i].ulLen;
-            } /* endfor */
-          }
-          memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
-          memcpy( pBT->chCaseMap, header.chCaseMap, COLLATE_SIZE );
-          memcpy( pBT->chEntryEncode, header.chEntryEncode, ENTRYENCODE_LEN );
-
-          // Get value for next free record
-          //if ( header.Flags.bVersion == BTREE_V1 )
-          //{
-          //  pBT->usNextFreeRecord = header.usNextFreeRecord;
-          //}
-          //else
-          {
-            USHORT     usNextFreeRecord;
-            ULONG      ulTemp;
-            sRc = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
-            if ( !sRc )
-            {
-              usNextFreeRecord = (USHORT)(ulTemp/pBT->usBtreeRecSize);
-              if ( usNextFreeRecord != pBT->usNextFreeRecord )
-              {
-                INFOEVENT2( QDAMCHECKFORUPDATES_LOC, STATE_EVENT, 1, DB_GROUP, "" );
-              } /* endif */
-              pBT->usNextFreeRecord = usNextFreeRecord;
-            } /* endif */
-          } /* endif */
-        } /* endif */
-
-        /****************************************************************/
-        /* Free all index pages                                         */
-        /****************************************************************/
-        if ( !sRc )
-        {
-          PBTREEINDEX_V3  pIndexBuffer;             // temp ptr to index buffers
-          while ( pBT->pIndexBuffer_V3 != NULL )
-          {
-            pIndexBuffer = pBT->pIndexBuffer_V3;
-            pBT->pIndexBuffer_V3 = pIndexBuffer->pNext;
-            UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0l, NOMSG );
-          } /* endwhile */
-          
-          pBT->usIndexBuffer = 0;      // no buffers in linked list anymore
-        } /* endif */
-
-        /****************************************************************/
-        /* Invalidate all data buffers                                  */
-        /****************************************************************/
-        /* Free allocated space for buffers */
-       
-        if ( !sRc && pBT->LookupTable_V3 )
-        {
-          USHORT i;
-          PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
-
-          for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
-          {
-            if ( pLEntry->pBuffer )
-            {
-              UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-            } /* endif */
-            pLEntry++;
-          } /* endfor */
-          pBT->usNumberOfAllocatedBuffers = 0;
-        } /* endif */
-
-        
-        
-        /****************************************************************/
-        /* Invalidate current record and current index                  */
-        /****************************************************************/
-        if ( !sRc )
-        {
-          pBTIda->sCurrentIndex = RESET_VALUE;
-          pBTIda->usCurrentRecord = 0;
-        } /* endif */
-      } /* endif */
-     } /* endif */
-  } /* endif */
-
-  if ( sRc != 0 )
-  {
-    ERREVENT2( QDAMCHECKFORUPDATES_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-  return( sRc ) ;
-}
 
 
 //------------------------------------------------------------------------------
@@ -6633,11 +6389,7 @@ SHORT  QDAMDictOpenLocal
    {
       pBTIda->pBTree = pBT;
 
-      if ( usOpenFlags & ASD_SHARED )
-      {
-         usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE;
-      }
-      else if ( fWrite )
+      if ( fWrite )
       {
          usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE;
       }
@@ -7766,15 +7518,6 @@ SHORT QDAMDictSubStrLocal
       do
       {
         ulKeyLen = *pulLength;
-        /*******************************************************************/
-        /* For shared databases: discard all in-memory pages if database   */
-        /* has been changed since last access                              */
-        /*******************************************************************/
-        if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-        {
-          sRc = QDAMCheckForUpdates( pBTIda );
-        } /* endif */
-
         if ( !sRc )
         {
             UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
@@ -8120,23 +7863,8 @@ SHORT QDAMGetszKeyParam_V3
      {
        sRc = BTREE_CORRUPTED;
        ERREVENT2( QDAMGETSZKEYPARAM_LOC, STATE_EVENT, 1, DB_GROUP, "" );
-       if ( pBT->usOpenFlags & ASD_SHARED )
-       {
-         LONG  lUpdCount;
-         SHORT sTempRc = QDAMGetUpdCounter( pBTIda, &lUpdCount, 0, 1 );
-         if ( !sTempRc )
-         {
-           if ( lUpdCount != pBT->alUpdCtr[0] )
-           {
-             // Corruption has ben caused by an update of the database from another user
-             // switch to BTREE_IN_USE error code to allow retry of the current operation
-             INFOEVENT2( QDAMGETSZKEYPARAM_LOC, REFRESH_EVENT, sRc, DB_GROUP, "" );
-             sRc = BTREE_IN_USE;
-           } /* endif */
-         } /* endif */
-       } /* endif */
-     } /* endif */
-   } /* endif */
+     }       
+    } /* endif */
 
    if ( sRc )
    {
@@ -8224,16 +7952,6 @@ SHORT QDAMDictNextLocal
        do
        {
            ulKeyLen = *pulKeyLen;
-
-           /*******************************************************************/
-           /* For shared databases: discard all in-memory pages if database   */
-           /* has been changed since last access                              */
-           /*******************************************************************/
-           if ( (!sRc || (sRc == BTREE_IN_USE)) && (pBT->usOpenFlags & ASD_SHARED) )
-           {
-             sRc = QDAMCheckForUpdates( pBTIda );
-           } /* endif */
-
             if ( !sRc )
             {
               if ( !pBTIda->usCurrentRecord )

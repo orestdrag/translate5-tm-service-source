@@ -7,10 +7,7 @@
 
 #include <atomic>
 
-#define BTREE_REC_SIZE_V2  (4096)          // record size V2
 #define BTREE_REC_SIZE_V3 (16384)          // record size V3
-
-#define BTREE_BUFFER_V2   (BTREE_REC_SIZE_V2 + 10*sizeof(USHORT)) // buffer size
 #define BTREE_BUFFER_V3   (BTREE_REC_SIZE_V3 + 10*sizeof(USHORT)) // buffer size
 
 #define MAX_LIST           20          // number of recently used records
@@ -159,35 +156,10 @@ typedef struct _BTREERECORD_V3
   UCHAR        uchData[ FREE_SIZE_V3 ] ;              // free size to be used
 } BTREERECORD_V3, *PBTREERECORD_V3, **PPBTREERECORD_V3;
 
-#define FREE_SIZE_V2  (BTREE_REC_SIZE_V2 - sizeof(BTREEHEADER))
-typedef struct _BTREERECORD_V2
-{
-  BTREEHEADER  header;                             // 16 bytes header
-  UCHAR        uchData[ FREE_SIZE_V2 ] ;              // free size to be used
-} BTREERECORD_V2, *PBTREERECORD_V2, **PPBTREERECORD_V2;
-
-
-
 /*****************************************************************************/
 /* BTREEBUFFER  is the format of the buffers when read in to the buffer      */
 /* cache.  It maps a record number and its properties to its contents        */
 /*****************************************************************************/
-typedef struct _BTREEBUFFER_V2
-{
-  USHORT usRecordNumber;                           // index of rec in buffer
-  BOOL   fLocked;                                  // Is the record locked ?
-  BOOL   fNeedToWrite;                             // Commit before reuse
-  SHORT  sUsed;                                    // buffer used count
-  ULONG  ulCheckSum;                               // CheckSum of contents data
-  BTREERECORD_V2 contents;                         // data from disk
-} BTREEBUFFER_V2, * PBTREEBUFFER_V2;
-
-typedef struct _BTREEINDEX_V2
-{
-  struct _BTREEINDEX_V2  * pNext;                    // point to next index buffer
-  BTREEBUFFER_V2  btreeBuffer;                       // data from disk
-} BTREEINDEX_V2, * PBTREEINDEX_V2;
-
 typedef struct _BTREEBUFFER_V3
 {
   USHORT usRecordNumber;                           // index of rec in buffer
@@ -227,10 +199,6 @@ typedef _PFN_QDAMCOMPARE *PFN_QDAMCOMPARE;
 //  #define ACCESSBONUSPOINTS 100L
 //#endif
 
-typedef struct _LOOKUPENTRY_V2
-{
-  PBTREEBUFFER_V2 pBuffer; // Pointer to BTREEBUFFER
-} LOOKUPENTRY_V2, * PLOOKUPENTRY_V2;
 
 typedef struct _LOOKUPENTRY_V3
 {
@@ -251,7 +219,6 @@ typedef struct _BTREEGLOB
    USHORT       usFirstNode;                      // file pointer of record
    USHORT       usFirstLeaf;                      // file pointer of record
 
-   PBTREEINDEX_V2  pIndexBuffer_V2;               // Pointer to index records
    PBTREEINDEX_V3  pIndexBuffer_V3;               // Pointer to index records
    USHORT       usIndexBuffer;                    // number of index buffers
    PFN_QDAMCOMPARE compare;                       // Comparison function
@@ -274,7 +241,6 @@ typedef struct _BTREEGLOB
    USHORT       usFreeKeyBuffer;                  // index of buffer to use
    USHORT       usFreeDataBuffer;                 // first data buffer chain
    USHORT       usFirstDataBuffer;                // first data buffer
-   BTREEBUFFER_V2  BTreeTempBuffer_V2;            // temporary 4k buffer
    BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
    BOOL         fWriteHeaderPending;              // write of header pending
    LONG         lTime;                            // time of last update/open
@@ -1607,11 +1573,6 @@ SHORT QDAMPhysLock
    PBTREE         pBTIda,
    BOOL           fLock,
    PBOOL          pfLocked
-);
-
-SHORT QDAMCheckForUpdates
-(
-   PBTREE         pBTIda
 );
 
 
