@@ -58,7 +58,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   builder = new ResponseBuilder(downstream_);
   auto methodStr = req->getMethodString ();
   auto method = req->getMethod ();
-  auto url = req->getURL () ;
+  reqUrl = req->getURL () ;
   auto path = req->getPath () ;
   auto queryString   = req->getQueryString () ;
   auto headers = req->getHeaders();
@@ -199,7 +199,7 @@ void ProxygenHandler::onEOM() noexcept {
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
     T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-    
+    RequestData *pRequest = nullptr;
     switch(this->command){
       case COMMAND::CREATE_MEM:
       {
@@ -207,7 +207,11 @@ void ProxygenHandler::onEOM() noexcept {
           iRC = 423;
           break;
         }
-        iRC = pMemService->createMemory( strInData, strResponseBody );
+        pRequest = new CreateMemRequestData(strInData);
+        pRequest->strUrl = reqUrl;
+        pRequest->run();
+        strResponseBody = pRequest->outputMessage;
+        iRC = pRequest->_rest_rc_;
         break;
       }
       case COMMAND::IMPORT_MEM:

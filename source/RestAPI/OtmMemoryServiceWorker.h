@@ -101,17 +101,6 @@ public:
     std::string &strOutputParms
   );
 
-  /*! \brief Create a new memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int createMemory
-  (
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
 /*! \brief shutdown the service
   \returns http return code
   */

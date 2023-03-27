@@ -25,6 +25,7 @@ namespace ProxygenService {
 
 
 class ProxygenHandler : public proxygen::RequestHandler {
+std::string reqUrl;
  public:
  
   explicit ProxygenHandler(ProxygenStats* stats);
