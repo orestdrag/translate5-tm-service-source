@@ -320,46 +320,6 @@ USHORT EqfOrganizeMem
 } /* end of function EqfOrganizeMem */
 
 
-
-// OtmMemoryService
-// create a new Translation Memory
-USHORT EqfCreateMem
-(
-  HSESSION      hSession,                // Eqf session handle
-  const char*   pszMemName,              // name of new Translation Memory
-  const char*   pszDescription,          // description for new Translation Memory or NULL
-  const char*   pszSourceLanguage,       // Translation Memory source language
-  LONG          lOptions                 // type of new Translation Memory
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    T5LOG( T5INFO) << "EqfCreateMem( Memory = "<< pszMemName << "; Description = " << pszDescription <<"; Sourcelanguage = "<< pszSourceLanguage <<"; Options = "<< lOptions;
-  }
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  // call TM create function
-  if ( usRC == NO_ERROR )
-  {
-    usRC = MemFuncCreateMem( pszMemName, pszDescription, 
-                             pszSourceLanguage, lOptions );
-    pData->fComplete = TRUE;   // one-shot function are always complete
-  } /* endif */
-
-  if ( !usRC )
-  {
-      SetSharingFlag( EQF_REFR_MEMLIST );
-  }
-
-  T5LOG( T5INFO) << "EqfCreateMem() done ::RC=" << usRC ;
-
-  return( usRC );
-} /* end of function EqfCreateMem */
-
 // OtmMemoryService
 // delete a Translation Memory
 USHORT EqfDeleteMem
@@ -794,50 +754,6 @@ USHORT EqfMemoryExists
   return( usRC );
 } /* end of function EqfMemoryExists */
 
-// OtmMemoryService
-/*! \brief Import a memory using the internal memory files
-  \param hSession the session handle returned by the EqfStartSession call
-  \param pszMemory name of the memory being imported
-  \param pszMemoryPackage name of a ZIP archive containing the memory files
-  \param lOptions options for searching fuzzy segments
-         - OVERWRITE_OPT overwrite any existing memory with the given name
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfImportMemInInternalFormat
-(
-  HSESSION    hSession, 
-  PSZ         pszMemoryName,
-  PSZ         pszMemoryPackage,
-  LONG        lOptions 
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  if ( pData )
-  {
-    LOGWRITE1( "==EqfImportMemInInternalFormat==\n" );
-    LOGPARMSTRING( "Memory", pszMemoryName );
-    LOGPARMSTRING( "Package", pszMemoryPackage );
-    LOGPARMOPTION( "Options", lOptions );
-  } /* endif */
-
-  // call the memory factory to process the request
-  if ( usRC == NO_ERROR )
-  {
-    usRC = MemoryFactory::getInstance()->APIImportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
-  } /* endif */
-
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
-
-  return( usRC );
-}
 
 // OtmMemoryService
 /*! \brief Export a memory to a ZIP package
@@ -1107,45 +1023,6 @@ USHORT EqfUpdateMem
   return( usRC );
 }
 
-
-// OtmMemoryService
-/*! \brief Delete a segment in the memory
-  \param hSession the session handle returned by the EqfStartSession call
-  \param lHandle handle of a previously opened memory
-  \param pProposalToDelete pointer to an MemProposal structure containing the segment data
-  \param lOptions processing options 
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfUpdateDeleteMem
-(
-  HSESSION    hSession,
-  LONG        lHandle, 
-  PMEMPROPOSAL pProposalToDelete,
-  LONG        lOptions,
-  char*       errorStr
-)
-{         
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  // validate session handle
-  USHORT usRC = FctValidateSession( hSession, &pData ); 
-  if ( pData )
-  {
-    T5LOG( T5INFO) << ":: Handle = " << lHandle << "; Options = " << lOptions;
-  }else{
-    T5LOG( T5ERROR) << "::pData is nullptr";
-  } /* endif */
-
-  // call the memory factory to process the request
-  if ( usRC == NO_ERROR )
-  {
-    usRC = MemoryFactory::getInstance()->APIUpdateDeleteMem( lHandle, pProposalToDelete, lOptions , errorStr);
-  } /* endif */
-
-  if(usRC && usRC != 6020 ) T5LOG(T5ERROR)  ":: RC = " << usRC;
-
-  return( usRC );
-}
 
 // OtmMemoryService
 /*! \brief List the name of all memories
