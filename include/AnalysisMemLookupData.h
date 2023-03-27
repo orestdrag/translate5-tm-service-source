@@ -20,8 +20,6 @@ typedef struct _ANALYSISMEMLOOKUPDATA
   wchar_t szSegmentBuffer[MAX_SEGMENT_SIZE+1];    // buffer for segment data
   char szNameBuffer[MAX_LONGFILESPEC];           // buffer for document names and other
   OtmProposal      SearchKey;                    // search key for memory lookup
-  std::vector<OtmMemory *> InputMemoryDBs;       // list of input memory databases
-  std::vector<OtmMemory *> ROMemoryDBs;          // list of read only memory databases
   std::vector<OtmProposal *> FoundProposals;     // list of found proposals
   std::vector<OtmProposal *> BestProposals;      // list of best proposals
   std::vector<OtmMemory *> SearchMemoryDBs;      // dynamically created list of search memory databases

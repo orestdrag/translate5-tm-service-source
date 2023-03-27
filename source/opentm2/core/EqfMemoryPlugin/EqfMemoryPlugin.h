@@ -13,6 +13,8 @@
 #include <memory>
 #include "tm.h"
 
+#include "requestdata.h"
+
 class OtmMemory;
 
 class EqfMemoryPlugin: public OtmMemoryPlugin
@@ -68,6 +70,8 @@ public:
 		HWND hwnd
 	);
 	
+  void createMemory(CreateMemRequestData& request);
+
 /*! \brief Open an existing translation memory
   \param pszName name of the existing memory
 	\param bMsgHandling true/false: display errors or not

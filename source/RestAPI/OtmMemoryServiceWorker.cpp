@@ -42,6 +42,7 @@
 
 #include "opentm2/core/utilities/Stopwatch.hpp"
 #include "EQFMORPH.H"
+#include "requestdata.h"
 
 
 
@@ -865,96 +866,45 @@ int OtmMemoryServiceWorker::createMemory
   std::string &strOutputParms
 )
 {
-  int iRC = verifyAPISession();
+  int iRC = 0;
+  //int iRC = verifyAPISession();
+
+  JSONFactory *factory = JSONFactory::getInstance();
+
   if ( iRC != 0 )
   {
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( iRC );
   } /* endif */
 
-  // parse input parameters
-  std::string strData, strName, strSourceLang, strDescription;
-  JSONFactory *factory = JSONFactory::getInstance();
-  void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
-  if ( parseHandle == NULL )
-  {
-    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
-    return( BAD_REQUEST );
-  } /* end */
-
-  std::string name;
-  std::string value;
-  while ( iRC == 0 )
-  {
-    iRC = factory->parseJSONGetNext( parseHandle, name, value );
-    if ( iRC == 0 )
-    {      
-      if ( strcasecmp( name.c_str(), "data" ) == 0 )
-      {
-        strData = value;
-        T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; size = " << strData.size();
-      }
-      else{
-        T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; value = " << value;
-        if ( strcasecmp( name.c_str(), "name" ) == 0 )
-        {
-          strName = value;
-        }
-        else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
-        {
-          strSourceLang = value;
-        }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
-          int loggingThreshold = std::stoi(value);
-          T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" <<loggingThreshold ;
-          T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
-        }else{
-          T5LOG( T5WARNING) << "JSON parsed unused data: name = " << name << "; value = " << value;
-        }
-      }
-    }
-  } /* endwhile */
-  factory->parseJSONStop( parseHandle );
-
-  if ( strName.empty() )
-  {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing memory name input parameter", strOutputParms );
-    return( BAD_REQUEST );
-  } /* end */
-  if ( strSourceLang.empty() )
-  {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( iRC, L"Error: Missing source language input parameter", strOutputParms );
-    return( BAD_REQUEST );
-  } /* end */
+  CreateMemRequestData requestData(strInputParms);
 
   // convert the ISO source language to a OpenTM2 source language name
   char szOtmSourceLang[40];
   szOtmSourceLang[0] = 0;//terminate to avoid garbage
   bool fPrefered = false;
-  EqfGetOpenTM2Lang( this->hSession, (PSZ)strSourceLang.c_str(), szOtmSourceLang, &fPrefered );
+  EqfGetOpenTM2Lang( this->hSession, (PSZ)requestData.strSrcLang.c_str(), szOtmSourceLang, &fPrefered );
  
   if ( szOtmSourceLang[0] == 0 )
   {
     iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(strSourceLang.c_str()).c_str() );
+    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(requestData.strSrcLang.c_str()).c_str() );
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( BAD_REQUEST );
   } /* end */
 
-  if ( strData.empty() )
+  if ( requestData.strBody.empty() ) // create empty tm
   {
     USHORT      usRC = NO_ERROR;         // function return code
     TMManager *pFactory = TMManager::GetInstance();
-    T5LOG(T5DEBUG) << "( MemName = "<<strName <<", pszDescription = "<<strDescription<<", pszSourceLanguage = "<<strSourceLang<<" )";
+    T5LOG(T5DEBUG) << "( MemName = "<<requestData.strMemName <<", pszDescription = "<<requestData.strMemDescription<<", pszSourceLanguage = "<<requestData.strSrcLang<<" )";
 
     // Check memory name syntax
     if ( usRC == NO_ERROR )
     { 
-      if ( !FilesystemHelper::checkFileName( strName ))
+      if ( !FilesystemHelper::checkFileName( requestData.strMemName ))
       {
-        T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << strName;
+        T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << requestData.strMemName;
         usRC = ERROR_MEM_NAME_INVALID;
       } /* endif */
     } /* endif */
@@ -963,10 +913,10 @@ int OtmMemoryServiceWorker::createMemory
     if ( usRC == NO_ERROR )
     {
       int logLevel = T5Logger::GetInstance()->suppressLogging();
-      if ( pFactory->exists( NULL, (PSZ)strName.c_str() ) )
+      if ( pFactory->exists( NULL, (PSZ)requestData.strMemName.c_str() ) )
       {
         T5Logger::GetInstance()->desuppressLogging(logLevel);
-        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strName;
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << requestData.strMemName;
         usRC = ERROR_MEM_NAME_EXISTS;
       }
       T5Logger::GetInstance()->desuppressLogging(logLevel);
@@ -977,7 +927,7 @@ int OtmMemoryServiceWorker::createMemory
     if ( usRC == NO_ERROR )
     {
       SHORT sID = 0;    
-      if ( MorphGetLanguageID( (PSZ)strSourceLang.c_str(), &sID ) != MORPH_OK )
+      if ( MorphGetLanguageID( (PSZ)requestData.strSrcLang.c_str(), &sID ) != MORPH_OK )
       {
         usRC = ERROR_PROPERTY_LANG_DATA;
         T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
@@ -986,47 +936,9 @@ int OtmMemoryServiceWorker::createMemory
 
     // create memory database
     BOOL fOK = (usRC==NO_ERROR);
-    OtmMemory     *pMemory  = NULL; 
-
-    if (fOK)
-    {
-      T5LOG( T5DEBUG) << ":: create the memory" ;    
-      //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
-      //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
-      //  ", pszDescription = " << pszDescription ;
-      EqfMemoryPlugin::GetInstance()->strLastError = "";
-      EqfMemoryPlugin::GetInstance()->iLastError = 0;
-
-      pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (PSZ)strName.c_str() , (PSZ)strSourceLang.c_str(), (PSZ)strDescription.c_str(), FALSE, NULLHANDLE );
-      if ( pMemory == NULL ){
-        usRC = EqfMemoryPlugin::GetInstance()->getLastError( EqfMemoryPlugin::GetInstance()->strLastError );
-        T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  usRC;
-        fOK = FALSE;
-      }
-      else{
-        T5LOG( T5INFO) << "::Create successful ";
-      }
-    } 
-
-    // get memory object name
-    if ( fOK )
-    {
-      char szObjName[MAX_LONGFILESPEC];
-      pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
-    } 
-
-    //--- Tm is created. Close it. 
-    if ( pMemory != NULL )
-    {
-      T5LOG( T5INFO ) << "::Tm is created. Close it";
-      pFactory->closeMemory( pMemory );
-      pMemory = NULL;
-    }
-    
-    if(usRC == 0){
-      usRC = (!fOK);
-    }
-    T5LOG( T5INFO) << " done, usRC = " << usRC;
+    if (fOK){
+      EqfMemoryPlugin::GetInstance()->createMemory( requestData);
+    }     
     //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
     //pData->fComplete = TRUE;   // one-shot function are always complete
   }
@@ -1047,30 +959,31 @@ int OtmMemoryServiceWorker::createMemory
 
     // decode binary data and write it to temp file
     std::string strError;
-    iRC = decodeBase64ToFile( strData.c_str(), szTempFile, strError );
+    iRC = decodeBase64ToFile( requestData.strBody.c_str(), szTempFile, strError );
     if ( iRC != 0 )
     {
       buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
       return( INTERNAL_SERVER_ERROR );
     }
-    iRC = TMManager::GetInstance()->APIImportMemInInternalFormat( strName.c_str(), szTempFile, 0 );
+    iRC = TMManager::GetInstance()->APIImportMemInInternalFormat( requestData.strMemName.c_str(), szTempFile, 0 );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
         DeleteFile( szTempFile );
     }
   }
 
   if(iRC == ERROR_MEM_NAME_EXISTS){
-    strOutputParms = "{\"" + strName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
+    strOutputParms = "{\"" + requestData.strMemName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
     T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << iRC << " iRC = ERROR_MEM_NAME_EXISTS";
     return iRC;
   }else if ( iRC != 0 )
   {
+    
     char szError[PATH_MAX];
     unsigned short usRC = 0;
     EqfGetLastError( this->hSession, &usRC, szError, sizeof( szError ) );
     //buildErrorReturn( iRC, szError, strOutputParms );
 
-    strOutputParms = "{\"" + strName + "\": \"" ;
+    strOutputParms = "{\"" + requestData.strMemName + "\": \"" ;
     switch ( usRC )
     {
       case ERROR_MEM_NAME_INVALID:
@@ -1095,7 +1008,7 @@ int OtmMemoryServiceWorker::createMemory
     return( iRC );
   }else{
     factory->startJSON( strOutputParms );
-    factory->addParmToJSON( strOutputParms, "name", strName );
+    factory->addParmToJSON( strOutputParms, "name", requestData.strMemName );
     factory->terminateJSON( strOutputParms );
     return( OK );
   }

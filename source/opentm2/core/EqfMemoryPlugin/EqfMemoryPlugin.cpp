@@ -95,6 +95,50 @@ int EqfMemoryPlugin::getListOfSupportedDrives( char *pszDriveListBuffer )
   return( 0 );
 };
 
+
+
+
+void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
+  bool fOK = true;
+  T5LOG( T5DEBUG) << ":: create the memory" ;    
+  //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
+  //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
+  //  ", pszDescription = " << pszDescription ;
+  strLastError = "";
+  iLastError = 0;
+
+  auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str(), false, nullptr );
+  //pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (PSZ)requestData.strMemName.c_str() , (PSZ)requestData.strSrcLang.c_str(), (PSZ)requestData.strMemDescription.c_str(), FALSE, NULLHANDLE );
+  if ( pMemory == NULL ){
+  //if ( request.memory.expired() ){ 
+    request._rc_ = getLastError( strLastError );
+    T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  request._rc_;
+    fOK = FALSE;
+  }
+  else{
+    T5LOG( T5INFO) << "::Create successful ";
+  }
+  // get memory object name
+  if ( fOK )
+  {
+    char szObjName[MAX_LONGFILESPEC];
+    TMManager::GetInstance()->getObjectName( pMemory, szObjName, sizeof(szObjName) );
+  } 
+
+  //--- Tm is created. Close it. 
+  if ( pMemory != NULL )
+  {
+    T5LOG( T5INFO ) << "::Tm is created. Close it";
+    TMManager::GetInstance()->closeMemory( pMemory );
+    pMemory = NULL;
+  }
+  
+  if(request._rc_  == 0){
+    request._rc_  = (!fOK);
+  }
+  T5LOG( T5INFO) << " done, usRC = " << request._rc_ ;
+}
+
 /*! \brief Create a new translation memory
   \param pszName name of the new memory
 	\param pszSourceLang source language
