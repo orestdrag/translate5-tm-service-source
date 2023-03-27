@@ -866,89 +866,66 @@ int OtmMemoryServiceWorker::createMemory
   std::string &strOutputParms
 )
 {
-  int iRC = 0;
-  //int iRC = verifyAPISession();
-
   JSONFactory *factory = JSONFactory::getInstance();
-
-  if ( iRC != 0 )
+  CreateMemRequestData requestData(strInputParms);  
+  requestData._rc_ = verifyAPISession();
+  if ( requestData._rc_ != 0 )
   {
-    buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( iRC );
+    buildErrorReturn( requestData._rc_, this->szLastError, strOutputParms );
+    return( requestData._rc_ );
   } /* endif */
 
-  CreateMemRequestData requestData(strInputParms);
-
-  // convert the ISO source language to a OpenTM2 source language name
-  char szOtmSourceLang[40];
-  szOtmSourceLang[0] = 0;//terminate to avoid garbage
-  bool fPrefered = false;
-  EqfGetOpenTM2Lang( this->hSession, (PSZ)requestData.strSrcLang.c_str(), szOtmSourceLang, &fPrefered );
- 
-  if ( szOtmSourceLang[0] == 0 )
+  if ( requestData.strMemB64EncodedData.empty() ) // create empty tm
   {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    swprintf( this->szLastError, 200, L"Error: Could not convert language %ls to OpenTM2 language name", EncodingHelper::convertToUTF16(requestData.strSrcLang.c_str()).c_str() );
-    buildErrorReturn( iRC, this->szLastError, strOutputParms );
-    return( BAD_REQUEST );
-  } /* end */
-
-  if ( requestData.strBody.empty() ) // create empty tm
-  {
-    USHORT      usRC = NO_ERROR;         // function return code
-    TMManager *pFactory = TMManager::GetInstance();
     T5LOG(T5DEBUG) << "( MemName = "<<requestData.strMemName <<", pszDescription = "<<requestData.strMemDescription<<", pszSourceLanguage = "<<requestData.strSrcLang<<" )";
 
     // Check memory name syntax
-    if ( usRC == NO_ERROR )
+    if ( requestData._rc_ == NO_ERROR )
     { 
       if ( !FilesystemHelper::checkFileName( requestData.strMemName ))
       {
         T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << requestData.strMemName;
-        usRC = ERROR_MEM_NAME_INVALID;
+        requestData._rc_ = ERROR_MEM_NAME_INVALID;
       } /* endif */
     } /* endif */
 
     // check if TM exists already
-    if ( usRC == NO_ERROR )
+    if ( requestData._rc_ == NO_ERROR )
     {
       int logLevel = T5Logger::GetInstance()->suppressLogging();
-      if ( pFactory->exists( NULL, (PSZ)requestData.strMemName.c_str() ) )
+      if ( TMManager::GetInstance()->exists( NULL, (PSZ)requestData.strMemName.c_str() ) )
       {
         T5Logger::GetInstance()->desuppressLogging(logLevel);
         T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << requestData.strMemName;
-        usRC = ERROR_MEM_NAME_EXISTS;
+        requestData._rc_ = ERROR_MEM_NAME_EXISTS;
       }
       T5Logger::GetInstance()->desuppressLogging(logLevel);
     } /* endif */
 
 
     // check if source language is valid
-    if ( usRC == NO_ERROR )
+    if ( requestData._rc_ == NO_ERROR )
     {
       SHORT sID = 0;    
       if ( MorphGetLanguageID( (PSZ)requestData.strSrcLang.c_str(), &sID ) != MORPH_OK )
       {
-        usRC = ERROR_PROPERTY_LANG_DATA;
+        requestData._rc_ = ERROR_PROPERTY_LANG_DATA;
         T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
       } /* endif */
     } /* endif */
 
     // create memory database
-    BOOL fOK = (usRC==NO_ERROR);
-    if (fOK){
+    if (requestData._rc_==NO_ERROR){
       EqfMemoryPlugin::GetInstance()->createMemory( requestData);
     }     
-    //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
-    //pData->fComplete = TRUE;   // one-shot function are always complete
   }
   else
   {
      T5LOG( T5INFO) << "int OtmMemoryServiceWorker::createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
     char szTempFile[PATH_MAX];
-    iRC = buildTempFileName( szTempFile );
-    if ( iRC != 0 )
+    requestData._rc_ = buildTempFileName( szTempFile );
+    if ( requestData._rc_ != 0 )
     {
       wchar_t errMsg[] = L"Could not create file name for temporary data";
       buildErrorReturn( -1, errMsg, strOutputParms );
@@ -959,23 +936,23 @@ int OtmMemoryServiceWorker::createMemory
 
     // decode binary data and write it to temp file
     std::string strError;
-    iRC = decodeBase64ToFile( requestData.strBody.c_str(), szTempFile, strError );
-    if ( iRC != 0 )
+    requestData._rc_ = decodeBase64ToFile( requestData.strMemB64EncodedData.c_str(), szTempFile, strError );
+    if ( requestData._rc_ != 0 )
     {
-      buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
+      buildErrorReturn( requestData._rc_, (char *)strError.c_str(), strOutputParms );
       return( INTERNAL_SERVER_ERROR );
     }
-    iRC = TMManager::GetInstance()->APIImportMemInInternalFormat( requestData.strMemName.c_str(), szTempFile, 0 );
+    requestData._rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( requestData.strMemName.c_str(), szTempFile, 0 );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
         DeleteFile( szTempFile );
     }
   }
 
-  if(iRC == ERROR_MEM_NAME_EXISTS){
+  if(requestData._rc_ == ERROR_MEM_NAME_EXISTS){
     strOutputParms = "{\"" + requestData.strMemName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << iRC << " iRC = ERROR_MEM_NAME_EXISTS";
-    return iRC;
-  }else if ( iRC != 0 )
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << requestData._rc_ << " iRC = ERROR_MEM_NAME_EXISTS";
+    return requestData._rc_;
+  }else if ( requestData._rc_ != 0 )
   {
     
     char szError[PATH_MAX];
@@ -987,25 +964,25 @@ int OtmMemoryServiceWorker::createMemory
     switch ( usRC )
     {
       case ERROR_MEM_NAME_INVALID:
-        iRC = CONFLICT;
+        requestData._rest_rc_ = CONFLICT;
         strOutputParms += "CONFLICT";
-        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << usRC << " iRC = CONFLICT";
+        T5LOG(T5ERROR) << "::usRC = " << usRC << " iRC = CONFLICT";
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
-        iRC = BAD_REQUEST;
+        requestData._rest_rc_ = BAD_REQUEST;
         strOutputParms += "BAD_REQUEST";
-        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " <<  usRC << " iRC = BAD_REQUEST";
+        T5LOG(T5ERROR) << "::usRC = " <<  usRC << " iRC = BAD_REQUEST";
         break;
       default:
-        iRC = INTERNAL_SERVER_ERROR;
+        requestData._rest_rc_ = INTERNAL_SERVER_ERROR;
         strOutputParms += "INTERNAL_SERVER_ERROR";
-        T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << usRC << " iRC = INTERNAL_SERVER_ERROR";
+        T5LOG(T5ERROR) << "::usRC = " << usRC << " iRC = INTERNAL_SERVER_ERROR";
         break;
     }
     strOutputParms +="\"}";
-    return( iRC );
+    return( requestData._rest_rc_ );
   }else{
     factory->startJSON( strOutputParms );
     factory->addParmToJSON( strOutputParms, "name", requestData.strMemName );

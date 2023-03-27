@@ -19,8 +19,8 @@ class RequestData{
 protected:
     //RequestData(); // json was parsed in sub class
 public:
+    bool fValid = false;
     std::string strMemName;
-    std::string strSrcLang;
 
     //requests field
     std::string strUrl;
@@ -33,9 +33,11 @@ public:
     int _rc_; 
     int _rest_rc_;
     //timestamp
-    //RequestData(std::string json);
-    std::weak_ptr <OtmMemory> memory;
 
+
+    RequestData(std::string json, std::string memName): strBody(json), strMemName(memName) {}
+    virtual ~RequestData() = default;
+    std::weak_ptr <OtmMemory> memory;
 
     int buildErrorReturn
     (
@@ -49,16 +51,84 @@ public:
         char *pszErrorMsg
     );
 
+protected:
+    virtual int parseJSON() = 0;
+    virtual int checkData() = 0;
 };
 
 
 class CreateMemRequestData: public RequestData{
+    protected:
+    int parseJSON() override ;
+    int checkData() override ;
     public:
+    std::string strSrcLang;
     std::string strMemDescription;
     std::string strMemB64EncodedData; // for import in internal format
     
-    CreateMemRequestData(std::string json);
+    CreateMemRequestData(std::string json): RequestData(json, ""){
+        parseJSON();
+        checkData();
+    }
     
+};
+
+class StatusMemRequestData: public RequestData{
+    public:
+    StatusMemRequestData(std::string memName): RequestData("", memName){
+        parseJSON();
+        checkData();
+    }
+};
+
+class DeleteMemRequestData: public RequestData{
+    public:
+    DeleteMemRequestData(std::string memName): RequestData("", memName){
+        parseJSON();
+        checkData();
+    }
+};
+
+
+class ConcordanceSearchRequestData: public RequestData{
+    private:
+
+    public:
+    ConcordanceSearchRequestData(std::string json, std::string memName): RequestData(json, memName) {
+        parseJSON();
+        checkData();
+    }
+};
+
+
+class FuzzySearchRequestData: public RequestData{
+    private:
+    
+    public:
+    FuzzySearchRequestData(std::string json, std::string memName): RequestData(json, memName) {
+        parseJSON();
+        checkData();
+    }
+};
+
+class DeleteEntryRequestData: public RequestData{
+    private:
+    
+    public:
+    DeleteEntryRequestData(std::string json, std::string memName): RequestData(json, memName) {
+        parseJSON();
+        checkData();
+    }
+};
+
+class UpdateEntryRequestData: public RequestData{
+    private:
+  
+    public:
+    UpdateEntryRequestData(std::string json, std::string memName): RequestData(json, memName) {
+        parseJSON();
+        checkData();
+    }
 };
 
 

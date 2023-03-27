@@ -137,6 +137,9 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
     request._rc_  = (!fOK);
   }
   T5LOG( T5INFO) << " done, usRC = " << request._rc_ ;
+
+  //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+  //pData->fComplete = TRUE;   // one-shot function are always complete
 }
 
 /*! \brief Create a new translation memory
