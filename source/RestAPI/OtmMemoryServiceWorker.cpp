@@ -41,7 +41,7 @@
 #include "EqfMemoryPlugin.h"
 
 #include "opentm2/core/utilities/Stopwatch.hpp"
-
+#include "EQFMORPH.H"
 
 
 
@@ -873,9 +873,7 @@ int OtmMemoryServiceWorker::createMemory
   } /* endif */
 
   // parse input parameters
-  std::string strData;
-  std::string strName;
-  std::string strSourceLang;
+  std::string strData, strName, strSourceLang, strDescription;
   JSONFactory *factory = JSONFactory::getInstance();
   void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
   if ( parseHandle == NULL )
@@ -947,7 +945,89 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( strData.empty() )
   {
-    iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+    USHORT      usRC = NO_ERROR;         // function return code
+    TMManager *pFactory = TMManager::GetInstance();
+    T5LOG(T5DEBUG) << "( MemName = "<<strName <<", pszDescription = "<<strDescription<<", pszSourceLanguage = "<<strSourceLang<<" )";
+
+    // Check memory name syntax
+    if ( usRC == NO_ERROR )
+    { 
+      if ( !FilesystemHelper::checkFileName( strName ))
+      {
+        T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << strName;
+        usRC = ERROR_MEM_NAME_INVALID;
+      } /* endif */
+    } /* endif */
+
+    // check if TM exists already
+    if ( usRC == NO_ERROR )
+    {
+      int logLevel = T5Logger::GetInstance()->suppressLogging();
+      if ( pFactory->exists( NULL, (PSZ)strName.c_str() ) )
+      {
+        T5Logger::GetInstance()->desuppressLogging(logLevel);
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strName;
+        usRC = ERROR_MEM_NAME_EXISTS;
+      }
+      T5Logger::GetInstance()->desuppressLogging(logLevel);
+    } /* endif */
+
+
+    // check if source language is valid
+    if ( usRC == NO_ERROR )
+    {
+      SHORT sID = 0;    
+      if ( MorphGetLanguageID( (PSZ)strSourceLang.c_str(), &sID ) != MORPH_OK )
+      {
+        usRC = ERROR_PROPERTY_LANG_DATA;
+        T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
+      } /* endif */
+    } /* endif */
+
+    // create memory database
+    BOOL fOK = (usRC==NO_ERROR);
+    OtmMemory     *pMemory  = NULL; 
+
+    if (fOK)
+    {
+      T5LOG( T5DEBUG) << ":: create the memory" ;    
+      //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
+      //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
+      //  ", pszDescription = " << pszDescription ;
+      EqfMemoryPlugin::GetInstance()->strLastError = "";
+      EqfMemoryPlugin::GetInstance()->iLastError = 0;
+
+      pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (PSZ)strName.c_str() , (PSZ)strSourceLang.c_str(), (PSZ)strDescription.c_str(), FALSE, NULLHANDLE );
+      if ( pMemory == NULL ){
+        usRC = EqfMemoryPlugin::GetInstance()->getLastError( EqfMemoryPlugin::GetInstance()->strLastError );
+        T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  usRC;
+        fOK = FALSE;
+      }
+      else{
+        T5LOG( T5INFO) << "::Create successful ";
+      }
+    } 
+
+    // get memory object name
+    if ( fOK )
+    {
+      char szObjName[MAX_LONGFILESPEC];
+      pFactory->getObjectName( pMemory, szObjName, sizeof(szObjName) );
+    } 
+
+    //--- Tm is created. Close it. 
+    if ( pMemory != NULL )
+    {
+      T5LOG( T5INFO ) << "::Tm is created. Close it";
+      pFactory->closeMemory( pMemory );
+      pMemory = NULL;
+    }
+    
+    if(usRC == 0){
+      usRC = (!fOK);
+    }
+    T5LOG( T5INFO) << " done, usRC = " << usRC;
+    //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
     //pData->fComplete = TRUE;   // one-shot function are always complete
   }
   else
