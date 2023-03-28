@@ -945,10 +945,6 @@ int OtmMemoryServiceWorker::createMemory
     return( BAD_REQUEST );
   } /* end */
 
-
-  // either create an empty memory or build the memory using binary input data
-  //EncodingHelper::convertUTF8ToASCII( strName );
-
   if ( strData.empty() )
   {
     iRC = MemFuncCreateMem( strName.c_str(), nullptr, szOtmSourceLang, 0);
