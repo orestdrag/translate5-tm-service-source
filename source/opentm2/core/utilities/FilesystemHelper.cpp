@@ -42,6 +42,57 @@ std::string FilesystemHelper::parseFilename(const std::string path){
     return path;
 }
 
+
+//+----------------------------------------------------------------------------+
+//|External function                                                           |
+//+----------------------------------------------------------------------------+
+//|Function name:     checkFileName           Check syntax of long names       |
+//+----------------------------------------------------------------------------+
+//|Function call:     checkFileName   ( const std::string& filename  )         |
+//+----------------------------------------------------------------------------+
+//|Description:       Checks the length and the characters of the given long   |
+//|                   name (invalid characters are backslash, question mark and|
+//|                   asterisk).                                               |
+//+----------------------------------------------------------------------------+
+//|Input parameter:   PSZ      pszName    pointer to name being checked        |
+//+----------------------------------------------------------------------------+
+//|Returncode type:   BOOL                                                     |
+//+----------------------------------------------------------------------------+
+//|Returncodes:       TRUE   name is valid                                     |
+//|                   FALSE  name is invalid                                   |
+//+----------------------------------------------------------------------------+
+bool FilesystemHelper::checkFileName( const std::string& filename )
+{
+   BOOL    fOK  = TRUE;                // function return code
+   PPROPSYSTEM pPropSys= NULL;
+
+   // check length of name
+   if ( filename.empty() || filename.size() >= MAX_LONGFILESPEC )
+   {
+     fOK = FALSE;                    // name is too long
+   } /* endif */
+
+   // check for invalid characters in the given name
+   if ( fOK )
+   {
+     pPropSys = GetSystemPropPtr();
+     char* pszName = (PSZ) &filename[0];
+     while ( pPropSys && fOK && (*pszName != EOS) )
+     {     
+       if ( strchr("\\?*<>:|/", *pszName ) ) 
+       {
+         fOK = FALSE;                  // invalid character in name
+       }
+       else
+       {
+         pszName++;                    // continue with next character
+       } /* endif */
+     } /* endwhile */
+   } /* endif */
+
+   return ( fOK );
+} /* end of FilesystemHelper::checkFilename */
+
 std::string FilesystemHelper::FixPath(std::string& path){
     std::string ret;
     //

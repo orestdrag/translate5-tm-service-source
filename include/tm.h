@@ -1,7 +1,6 @@
 #ifndef _tm_h_included_
 #define _tm_h_included_
 
-
 #include <vector>
 #include <atomic>
 #include <string>
@@ -15,7 +14,8 @@
 #define INCL_EQF_DAM
 #include "EQF.H"
 
-#include "vector"
+#include "FilesystemHelper.h"
+#include "LogWrapper.h"
 
 /*! \brief Data class for the transport of memory proposals
  *
