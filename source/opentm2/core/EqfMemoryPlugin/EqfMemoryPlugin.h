@@ -298,6 +298,10 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
     */
     int replaceMemory( const char* pszReplace, const char* pszReplaceWith );
 
+    
+	int iLastError;
+	std::string strLastError;
+
 private:
 
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
@@ -352,8 +356,6 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	std::string version;
 	std::string supplier;
 	std::string descrType;
-	std::string strLastError;
-	int iLastError;
   std::vector< std::shared_ptr<MEMORYINFO> > m_MemInfoVector;
   char szBuffer[4000];                         // general purpose buffer area
   char szSupportedDrives[27]; // list of supported drives

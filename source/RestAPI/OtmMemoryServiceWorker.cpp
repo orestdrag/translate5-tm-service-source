@@ -947,7 +947,7 @@ int OtmMemoryServiceWorker::createMemory
 
   if ( strData.empty() )
   {
-    iRC = MemFuncCreateMem( strName.c_str(), nullptr, szOtmSourceLang, 0);
+    iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
     //pData->fComplete = TRUE;   // one-shot function are always complete
   }
   else

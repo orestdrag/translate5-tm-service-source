@@ -539,38 +539,21 @@ int TMManager::getMemoryInfo
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     T5LOG( T5INFO) <<" TMManager::getMemoryInfo:: Get info for memory " << pszMemoryName;
   }
-  OtmPlugin * pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
-  if ( pluginSelected == NULL ) 
-  {
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      T5LOG(T5ERROR) <<" TMManager::getMemoryInfo::  Could not identify plugin processing the memory";
-    }
-    return OtmMemoryPlugin::eUnknownPlugin;
-  } /* endif */
 
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
 
-  // use the plugin to get the memory info
-  if ( pluginSelected->getType() == OtmPlugin::eTranslationMemoryType )
-  {
-    iRC = ((OtmMemoryPlugin *)pluginSelected)->getMemoryInfo( (char *)strMemoryName.c_str(), pInfo );
-    if ( iRC != 0 ) {
-      iRC = this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
-    }
+  iRC = EqfMemoryPlugin::GetInstance()->getMemoryInfo( (char *)strMemoryName.c_str(), pInfo );
+  if ( iRC != 0 ) {
+    iRC = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
   }
-  else
-  {
-    T5LOG(T5FATAL) << " TMManager::getMemoryInfo:: not supported plugin type(only Translation Memory Type is supported, pluginName = "
-        << pszPluginName;
-    return OtmMemoryPlugin::eNotSupportedMemoryType;
-  }
+  
   if ( iRC != 0 )
   {
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       T5LOG(T5ERROR) << " TMManager::getMemoryInfo  Could not retrieve information for local memory "
           << strMemoryName << " using plugin " <<  
-        pluginSelected->getName() << ", the return code is " << this->iLastError;
+        EqfMemoryPlugin::GetInstance()->getName() << ", the return code is " << this->iLastError;
     }
   }
   else
@@ -609,39 +592,20 @@ OtmMemory *TMManager::createMemory
 )
 {
   OtmMemory *pMemory = NULL;
-  OtmPlugin *pluginSelected = NULL;
   this->strLastError = "";
   this->iLastError = 0;
   T5LOG(T5DEBUG) << "Create memory " << pszMemoryName ;
 
-  if ( piErrorCode != NULL ) *piErrorCode = 0;
-
-  pluginSelected = this->findPlugin( pszPluginName, pszMemoryName );
-  if ( pluginSelected == NULL ) 
-  {
-    // use first available memory plugin for the new memory
-    pluginSelected = (*pluginList)[0];
-	// reset the iLastError
-	// because the flag can be set in findPlugin if not plug exist
-	this->iLastError = 0;
-  } /* endif */
-
-  if ( pluginSelected == NULL )
-  {
-    this->iLastError = *piErrorCode = ERROR_PLUGINNOTAVAILABLE;
-    this->strLastError = "No memory plugin available for the creation of the memory";
-    T5LOG(T5DEBUG) << "   Create failed, with message \""<< this->strLastError <<"\"";
-    return( NULL );
-  } /* endif */       
+  if ( piErrorCode != NULL ) *piErrorCode = 0;   
 
   // use the plugin to create the memory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );  
-  pMemory = ((OtmMemoryPlugin *)pluginSelected)->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
-  if ( pMemory == NULL ) this->iLastError = ((OtmMemoryPlugin *)pluginSelected)->getLastError( this->strLastError );
+  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
 
   if ( pMemory == NULL)
   {
+    this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
     T5LOG(T5DEBUG) << "   Create failed, with message \""<< this->strLastError << "\"";
     if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
   }
@@ -650,7 +614,7 @@ OtmMemory *TMManager::createMemory
     // send created notifcation
     PSZ pszObjName = NULL;
     UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
-    strcpy( pszObjName, pluginSelected->getName() );
+    strcpy( pszObjName, EqfMemoryPlugin::GetInstance()->getName() );
     strcat( pszObjName, ":" );
     strcat( pszObjName, pszMemoryName );
     EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
@@ -688,7 +652,6 @@ OtmMemory *TMManager::createMemory
   this->strLastError = "";
   this->iLastError = 0;
 
-
   if ( piErrorCode != nullptr ) 
       *piErrorCode = 0;
 
@@ -697,13 +660,9 @@ OtmMemory *TMManager::createMemory
   OtmMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
   if ( pMemory == NULL ){
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-     T5LOG(T5ERROR) << "TMManager::createMemory()::pluginSelected->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  strLastError;
-  }
-
-  if ( pMemory == NULL)
-  {
-    T5LOG(T5ERROR) <<  "::Create failed, with message " << strLastError;
-    if ( piErrorCode != NULL ) 
+     T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  strLastError;
+     
+     if ( piErrorCode != NULL ) 
         *piErrorCode = this->iLastError;
   }
   else{
@@ -727,20 +686,7 @@ int TMManager::listMemories
 )
 {
   int iMemories = 0;
-
-  for ( std::size_t i = 0; i < pluginList->size(); i++ )
-  {
-    OtmMemoryPlugin *pluginCurrent = (*pluginList)[i];
-
-    iMemories += pluginCurrent->listMemories( pfnCallBack, pvData, fWithDetails );
-  } /* endfor */      
-
-  //for ( std::size_t i = 0; i < pSharedMemPluginList->size(); i++ )
-  //{
-  //  OtmSharedMemoryPlugin *pluginCurrent = (*pSharedMemPluginList)[i];
-  //  iMemories += pluginCurrent->listMemories( pfnCallBack, pvData, fWithDetails );
-  //} /* endfor */      
-
+  iMemories += EqfMemoryPlugin::GetInstance()->listMemories( pfnCallBack, pvData, fWithDetails );     
   return( iMemories );
 }
 
@@ -759,21 +705,16 @@ int TMManager::closeMemory
     T5LOG(T5ERROR) <<"TMManager::closeMemory, pMemory is NULL";
     return( -1 );
   }
-  OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
-  if ( pPlugin == NULL  ){
-     T5LOG(T5ERROR) <<"TMManager::closeMemory, pPlugin is NULL";
-     return( -2 );
-  }
-
+  
   // build memory object name
   char* pszObjName = NULL;
   UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
-  strcpy( pszObjName, pPlugin->getName() );
+  strcpy( pszObjName, EqfMemoryPlugin::GetInstance()->getName() );
   strcat( pszObjName, ":" );
   pMemory->getName( pszObjName + strlen(pszObjName), MAX_LONGFILESPEC );
 
   // close the memory
-  iRC = pPlugin->closeMemory( pMemory );
+  iRC = EqfMemoryPlugin::GetInstance()->closeMemory( pMemory );
 
   // send a properties changed msg to memory handler
   EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pszObjName ));
@@ -835,16 +776,8 @@ int TMManager::deleteMemory(
     this->getMemoryName( pszMemoryName, strMemoryName );
 
     // use the given plugin to delete local memory
-    if ( plugin->getType() == OtmMemoryPlugin::eTranslationMemoryType )
-    {
-      iRC = ((OtmMemoryPlugin *)plugin)->deleteMemory( (char *)strMemoryName.c_str());
-      if ( iRC != 0 ) ((OtmMemoryPlugin *)plugin)->getLastError(strError);
-    }
-    else
-    {
-      T5LOG(T5FATAL) << "TMManager::deleteMemory:: shared memory plugins not supported, memory: " << strMemoryName << " plugin: " << pszPluginName;
-      iRC = OtmMemoryPlugin::eNotSupportedMemoryType;
-    }
+    iRC = EqfMemoryPlugin::GetInstance()->deleteMemory( (char *)strMemoryName.c_str());
+    if ( iRC != 0 ) EqfMemoryPlugin::GetInstance()->getLastError(strError);
 
     // broadcast deleted memory name
     if ( iRC == OtmMemoryPlugin::eSuccess )
@@ -876,37 +809,13 @@ BOOL TMManager::exists(
 {
   BOOL fExists = FALSE;
 
-  OtmPlugin *plugin = this->findPlugin( pszPluginName, pszMemoryName );
-
-  if ( plugin != NULL )
+  OtmMemoryPlugin::MEMORYINFO *pInfo = new(OtmMemoryPlugin::MEMORYINFO);
+  if (pszMemoryName && EqfMemoryPlugin::GetInstance()->getMemoryInfo( pszMemoryName, pInfo ) == 0 )
   {
-    std::string strMemoryName;
-    this->getMemoryName( pszMemoryName, strMemoryName );
-
-    // get memory info using found plugin
-    if ( plugin->getType() == OtmMemoryPlugin::eTranslationMemoryType )
-    {
-      OtmMemoryPlugin::MEMORYINFO *pInfo = new(OtmMemoryPlugin::MEMORYINFO);
-      if ( ((OtmMemoryPlugin *)plugin)->getMemoryInfo( (char *)strMemoryName.c_str(), pInfo ) == 0 )
-      {
-        fExists = TRUE;
-      } /* endif */         
-      delete( pInfo );
-    }
-  } /* endif */
+    fExists = TRUE;
+  } /* endif */         
+  delete( pInfo );
   return( fExists );
-}
-
-/*! \brief Check if memory is a shared/synchronized memory
-  \param pMemory pointer to memory object
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL TMManager::isSharedMemory
-( 
-  OtmMemory *pMemory
-)
-{
-  return( FALSE );
 }
 
 /*! \brief Show error message for the last error
