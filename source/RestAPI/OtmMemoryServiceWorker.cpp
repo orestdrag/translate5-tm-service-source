@@ -38,7 +38,6 @@
 #include "../cmake/git_version.h"
 #include "opentm2/core/utilities/ThreadingWrapper.h"
 #include "opentm2/core/utilities/LanguageFactory.H"
-#include "EqfMemoryPlugin.h"
 
 #include "opentm2/core/utilities/Stopwatch.hpp"
 #include "EQFMORPH.H"

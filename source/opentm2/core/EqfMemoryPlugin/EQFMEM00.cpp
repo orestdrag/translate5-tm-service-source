@@ -17,7 +17,6 @@
 #include "../pluginmanager/PluginManager.h"
 #include "LogWrapper.h"
 #include "tm.h"
-#include "MemoryUtil.h"
 
 // EQF.H is included by otmmemory.h
 // #include <EQF.H>                  // General Translation Manager include file EQF:H 
@@ -238,7 +237,7 @@ USHORT EQFMemOrganizeStart
       int iRC = 0;
       std::shared_ptr<OPENEDMEMORY> MemInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
       OtmPlugin *pAnyPlugin = (OtmPlugin *)pRIDA->pMem->getPlugin();
-      OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pAnyPlugin;
+      EqfMemoryPlugin *pPlugin = (EqfMemoryPlugin *)pAnyPlugin;
       pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );
       pRIDA->pMem->getDescription( pRIDA->szBuffer, sizeof(pRIDA->szBuffer) );
       pPlugin->getMemoryInfo( pRIDA->szMemName, MemInfo );
@@ -428,7 +427,7 @@ VOID EQFMemOrganizeProcess
            T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
         } /* endif */
       }
-      else if ( iRC == OtmMemory::ERROR_ENTRYISCORRUPTED )
+      else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
       {
         pCommArea->usComplete = (USHORT)iProgress;
         pRIDA->ulInvSegmentCounter++;
@@ -438,7 +437,7 @@ VOID EQFMemOrganizeProcess
            T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
         } /* endif */
       }
-      else if ( iRC == OtmMemory::INFO_ENDREACHED )
+      else if ( iRC == EqfMemory::INFO_ENDREACHED )
       {
         TMManager *pFactory = TMManager::GetInstance();
 
@@ -651,7 +650,7 @@ USHORT MemFuncPrepOrganize
   BOOL        fOK = TRUE;              // internal O.K. flag
   PSZ         pszParm;                 // error parameter pointer
   CHAR        szMemPath[MAX_EQF_PATH];
-  OtmMemory *pMem = NULL;       // TM handle
+  EqfMemory *pMem = NULL;       // TM handle
   SHORT       sRC;                     // value used for symbol checking..
   TMManager *pFactory = TMManager::GetInstance();
 

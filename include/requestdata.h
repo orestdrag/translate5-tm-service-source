@@ -38,7 +38,7 @@ public:
 
     RequestData(const std::string& json, const std::string& memName): strBody(json), strMemName(memName) {}
     virtual ~RequestData() = default;
-    //std::weak_ptr <OtmMemory> memory;
+    //std::weak_ptr <EqfMemory> memory;
 
     int buildErrorReturn(int iRC, wchar_t *pszErrorMsg);
 

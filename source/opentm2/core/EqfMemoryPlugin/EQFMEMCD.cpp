@@ -53,7 +53,7 @@
 #include "EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
 #include <EQFQDAM.H>            // Low level TM access functions
-#include "EqfMemoryPlugin.h"
+#include "tm.h"
 
 // the name of the default memory plugin
 #define DEFAULT_MEMORY_PLUGIN "EqfMemoryPlugin" 
@@ -68,7 +68,7 @@ typedef struct _TMX_CREATE_IDA
   CHAR   szMemName[MAX_LONGFILESPEC];      // TM name as entered by user
   CHAR   szSourceLang[MAX_LANG_LENGTH];    //language name
   CHAR   szPlugin[MAX_LONGFILESPEC];       // name of selected plugin
-  std::vector<OtmMemoryPlugin *> vMemoryPlugins; // list of available memory plugins
+  std::vector<EqfMemoryPlugin *> vMemoryPlugins; // list of available memory plugins
   CHAR   szUserid[MAX_USERID];             //LAN Userid of TM: if local '\0'
   OtmPlugin *pSelectedPlugin;              // pointer to selected plugin
   CHAR   szDriveList[MAX_DRIVELIST];       // list of drives to be displayed 
