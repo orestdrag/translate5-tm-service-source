@@ -22,7 +22,7 @@
 #define INCL_EQF_MORPH            // morphologic functions
 #endif
 
-#include "../morph/SpellFactory.h"
+//#include "../morph/SpellFactory.h"
 #include "../morph/MorphFactory.h"
 #include "../utilities/LogWrapper.h"
 #include "../utilities/EncodingHelper.h"
@@ -46,7 +46,7 @@
 /**********************************************************************/
 typedef struct _LANGCB
 {
-	OtmSpell* m_SpellInstance;
+	//OtmSpell* m_SpellInstance;
 	OtmMorph* m_MorphInstance;
 	CHAR     szLanguage[MAX_LONGFILESPEC]; // name of language
 	CHAR     szSpellPlugin[MAX_LONGFILESPEC]; // name of spell plugin
@@ -543,6 +543,8 @@ USHORT BuildDict
   }
   else
   {
+    T5LOG(T5FATAL) << "Removed OTM Spell code reached!";
+    #ifdef TEMPORARY_COMMENTED
 	  OtmSpell* tSpellInstance = tPLangCB->m_SpellInstance;
 	  if (NULL == tSpellInstance)
 	  {
@@ -573,6 +575,7 @@ USHORT BuildDict
 
 	  if( true != tSpellInstance->writeTermToFile(usDictType))
 		  usRC = MORPH_FUNC_FAILED;
+    #endif
   }
 
 	return usRC;
@@ -918,11 +921,11 @@ USHORT MorphGetLanguageID
     pLCB->usCodePage = 850;
     pLCB->fCompSep = FALSE;
 
-    SpellFactory* tSpellFactoryInstance = SpellFactory::getInstance();
-    if (NULL == tSpellFactoryInstance)
-    {
-      usRC = MORPH_NO_MEMORY;
-    }
+    //SpellFactory* tSpellFactoryInstance = SpellFactory::getInstance();
+    //if (NULL == tSpellFactoryInstance)
+    //{
+    //  usRC = MORPH_NO_MEMORY;
+    //}
     MorphFactory* tMorphFactoryInstance =  MorphFactory::getInstance();
     if (NULL == tMorphFactoryInstance)
     {

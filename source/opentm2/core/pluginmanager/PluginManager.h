@@ -9,7 +9,6 @@
 #define _PLUGINMANAGER_H_
 
 #include "OtmPlugin.h"
-#include "OtmToolPlugin.h"
 #include "PluginListener.h"
 
 // Add for P403138 start
@@ -145,22 +144,6 @@ public:
 */
   bool removePluginListener( PluginListener *pListener );
   
-/*! \brief Add a menu item to the OpenTM2 actionbar
-	\param pToolPlugin pointer to the tool plugin processing the menu item
-	\param pszMenuName name of the menu which is receiving the new menu item
-	\param pszMenuItem name of the new menu item
-	\param iCommandID command to be passed to tool plugin when the user selects the new menu item
-	\returns TRUE when the menu item has been added successfully
-*/
-  bool addMenuItem( OtmToolPlugin *pToolPlugin, char *pszMenuName, char *pszMenuItem, int iCommandID );
-
-/*! \brief Add a sub menu item to the OpenTM2 actionbar
-	\param pToolPlugin pointer to the tool plugin processing the menu item
-	\param pszMenuName name of the menu which is receiving the new sub menu
-	\param pszSubMenu name of the new sub menu
-	\returns TRUE when the sub menu has been added successfully
-*/
-  bool addSubMenu( OtmToolPlugin *pToolPlugin, char *pszMenuName, char *pszSubMenu );
 
 /*! \brief Activate all tool plugins. This method is called by the workbench once the main window has been created
 */
