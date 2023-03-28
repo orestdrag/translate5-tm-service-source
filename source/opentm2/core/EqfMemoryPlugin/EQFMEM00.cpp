@@ -36,7 +36,7 @@ BOOL MemCreatePath( PSZ pszString )
   USHORT          usRc;
 
   OtmMemoryPlugin::PMEMORYINFO pInfo = new( OtmMemoryPlugin::MEMORYINFO );
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
 
   usRc = (USHORT)-1;
   if(pInfo != NULL && pFactory!= NULL)
@@ -81,7 +81,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
   } /* endif */
 
   OtmMemoryPlugin::MEMORYINFO Info;
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
   // check if there is a TM with the given name
   if ( usRC == NO_ERROR )
   {
@@ -162,7 +162,7 @@ USHORT MemFuncOrganizeMem
    USHORT    usTmRc1 = FALSE;        // Tm return code
    USHORT    usTmRc2 = FALSE;        // Tm return code
    USHORT    usRc = TRUE;            // Function return code
-   MemoryFactory *pFactory = MemoryFactory::getInstance();
+   TMManager *pFactory = TMManager::GetInstance();
 
    if ( pRIDA->pMem != NULL )
    {
@@ -211,7 +211,7 @@ USHORT EQFMemOrganizeStart
     PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the dialog IDA
     USHORT            usRc = TRUE;    // Return code
     PSZ               pReplAddr[4];   // Pointer to an address list of replacement strings
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
+    TMManager *pFactory = TMManager::GetInstance();
 
     // Address the organize IDA
     pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
@@ -341,7 +341,7 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
                    USHORT            usMsgHandling )  //message handling flag
 {
   USHORT  usURc = NO_ERROR ;   //function returncode
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
 
   usMsgHandling;
 
@@ -443,7 +443,7 @@ VOID EQFMemOrganizeProcess
       }
       else if ( iRC == OtmMemory::INFO_ENDREACHED )
       {
-        MemoryFactory *pFactory = MemoryFactory::getInstance();
+        TMManager *pFactory = TMManager::GetInstance();
 
         pRIDA->pMemTemp->rebuildIndex();
 
@@ -536,7 +536,7 @@ VOID EQFMemOrganizeProcess
         CloseTmAndTempTm( pRIDA );
 
           // Delete the temporary translation memory
-        MemoryFactory *pFactory = MemoryFactory::getInstance();
+        TMManager *pFactory = TMManager::GetInstance();
         pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
 
         // Issue message WM_EQF_MEMORGANIZE_END
@@ -589,7 +589,7 @@ VOID EQFMemOrganizeEnd
       CloseTmAndTempTm( pRIDA );
 
       // Delete the temporary translation memory
-      MemoryFactory *pFactory = MemoryFactory::getInstance();
+      TMManager *pFactory = TMManager::GetInstance();
       pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
     }
     else
@@ -656,7 +656,7 @@ USHORT MemFuncPrepOrganize
   CHAR        szMemPath[MAX_EQF_PATH];
   OtmMemory *pMem = NULL;       // TM handle
   SHORT       sRC;                     // value used for symbol checking..
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
 
    // check if a TM has been specified
    if ( fOK )

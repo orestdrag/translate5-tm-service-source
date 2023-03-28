@@ -215,7 +215,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     //--- Return codes are for testing purposes only
     if ( pExportIDA->pMem != NULL)
     {
-      MemoryFactory *pFactory = MemoryFactory::getInstance();
+      TMManager *pFactory = TMManager::GetInstance();
       pFactory->closeMemory( pExportIDA->pMem );
       pExportIDA->pMem = NULL;
     } /* endif */
@@ -523,7 +523,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   //--- Close MemoryDb and input file. Return codes are for testing purposes only
   if ( pExportIDA->pMem != NULL)
   {
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
+    TMManager *pFactory = TMManager::GetInstance();
     pFactory->closeMemory( pExportIDA->pMem );
     pExportIDA->pMem = NULL;
   } /* endif */
@@ -690,7 +690,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
     pExportIDA->ulSegmentCounter = 0L;
     pExportIDA->hFile = NULLHANDLE;
 
-    MemoryFactory *pFactory = MemoryFactory::getInstance();
+    TMManager *pFactory = TMManager::GetInstance();
     pExportIDA->pMem = pFactory->openMemory( pExportIDA->szPlugin, pExportIDA->szMemName, EXCLUSIVE, &iRC );
     if ( pExportIDA->pMem == NULL )
     {
@@ -713,7 +713,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
         fOK = FALSE;
         if ( pExportIDA->pMem != NULL)
         {
-          MemoryFactory *pFactory = MemoryFactory::getInstance();
+          TMManager *pFactory = TMManager::GetInstance();
           pFactory->closeMemory( pExportIDA->pMem );
           pExportIDA->pMem = NULL;
         } /* endif */
@@ -1072,7 +1072,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
    else  //--- An error occured in the extract call.
    {
        //--- An unrecoverable memory DB error occurred
-       MemoryFactory *pFactory = MemoryFactory::getInstance();
+       TMManager *pFactory = TMManager::GetInstance();
        usRc = MEM_DB_ERROR;
        pFactory->showLastError( pExportIDA->szPlugin, pExportIDA->szMemName, pExportIDA->pMem, pExportIDA->hwndErrMsg );
        if ( pExportIDA->fBatch )
@@ -1770,7 +1770,7 @@ USHORT MemFuncPrepExport
   if ( fOK )
   {
      int iRC = 0;
-     MemoryFactory *pFactory = MemoryFactory::getInstance();
+     TMManager *pFactory = TMManager::GetInstance();
      pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      if ( pIDA->pMem == NULL )
      {
@@ -1892,7 +1892,7 @@ USHORT MemFuncPrepExport
      {
         if ( pIDA->pMem != NULL)
         {
-          MemoryFactory *pFactory = MemoryFactory::getInstance();
+          TMManager *pFactory = TMManager::GetInstance();
           pFactory->closeMemory( pIDA->pMem );
           pIDA->pMem = NULL;
         } /* endif */

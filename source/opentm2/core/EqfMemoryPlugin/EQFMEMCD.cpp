@@ -98,7 +98,7 @@ LONG                lOptions                 // type of new Translation Memory
   USHORT      usRC = NO_ERROR;         // function return code
   char*       pszParm;                 // pointer for error parameters
   char        szEmpty[2];
-  MemoryFactory *pFactory = MemoryFactory::getInstance();
+  TMManager *pFactory = TMManager::GetInstance();
 
   szEmpty[0] = EOS;
   {

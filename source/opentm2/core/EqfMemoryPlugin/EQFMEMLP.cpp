@@ -1506,7 +1506,7 @@ USHORT MemFuncPrepImport
    if ( fOK )
    {
      strcpy( pLoadIDA->szMemName, pszMemName );
-     MemoryFactory *pFactory = MemoryFactory::getInstance();
+     TMManager *pFactory = TMManager::GetInstance();
      if ( !pFactory->exists( NULL, pszMemName ) )
      {
        T5LOG(T5ERROR) << "Mem file not found:: " << pszMemName;
@@ -1526,7 +1526,7 @@ USHORT MemFuncPrepImport
    if ( fOK )
    {
      int iRC = 0;
-     MemoryFactory *pFactory = MemoryFactory::getInstance();
+     TMManager *pFactory = TMManager::GetInstance();
      pLoadIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      if ( iRC != 0 || pLoadIDA->pMem == nullptr )
      {
@@ -1612,7 +1612,7 @@ USHORT MemFuncPrepImport
       {
          if ( pLoadIDA->pMem )
          {
-           MemoryFactory *pFactory = MemoryFactory::getInstance();
+           TMManager *pFactory = TMManager::GetInstance();
            pFactory->closeMemory( pLoadIDA->pMem );
            pLoadIDA->pMem = NULL;
          } /* endif */
@@ -1665,7 +1665,7 @@ USHORT MemFuncImportProcess
 
        if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF, pImportData ) )
        {
-         MemoryFactory *pFactory = MemoryFactory::getInstance();
+         TMManager *pFactory = TMManager::GetInstance();
          pFactory->closeMemory( pDialogIDA->pMem );
          if ( pDialogIDA->hFile ) CloseFile( &(pDialogIDA->hFile));
          pData->usMemLoadRC = UtlQueryUShort( QS_LASTERRORMSGID );
@@ -1703,7 +1703,7 @@ USHORT MemFuncImportProcess
               // organize index file of imported memory
               pLoadData->pMem->rebuildIndex();
 
-              MemoryFactory *pFactory = MemoryFactory::getInstance();
+              TMManager *pFactory = TMManager::GetInstance();
               pFactory->closeMemory( pLoadData->pMem);
               pLoadData->pMem = NULL;
             } /* endif */
@@ -1739,7 +1739,7 @@ USHORT MemFuncImportProcess
 
          if ( pLoadData->pMem )
          {
-           MemoryFactory *pFactory = MemoryFactory::getInstance();
+           TMManager *pFactory = TMManager::GetInstance();
            pFactory->closeMemory( pLoadData->pMem);
            pLoadData->pMem = NULLHANDLE;
          } /* endif */

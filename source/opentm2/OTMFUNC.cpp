@@ -787,7 +787,7 @@ USHORT EqfExportMemInInternalFormat
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC = MemoryFactory::getInstance()->APIExportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
+    usRC = TMManager::GetInstance()->APIExportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
   } /* endif */
 
   if ( pData )
@@ -830,7 +830,7 @@ USHORT EqfOpenMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC = MemoryFactory::getInstance()->APIOpenMem( pszMemoryName, plHandle, lOptions );
+    usRC = TMManager::GetInstance()->APIOpenMem( pszMemoryName, plHandle, lOptions );
   }else{
     T5LOG(T5ERROR) << "EqfOpenMem error in FctValidateSession::EqfOpenMem::RC = " << usRC;
   } /* endif */
@@ -870,7 +870,7 @@ USHORT EqfCloseMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APICloseMem( lHandle, lOptions );
+    usRC =  TMManager::GetInstance()->APICloseMem( lHandle, lOptions );
   } /* endif */
 
   if ( pData )
@@ -914,7 +914,7 @@ USHORT EqfQueryMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
+    usRC =  TMManager::GetInstance()->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
   } /* endif */
 
   if(usRC)  T5LOG(T5ERROR) << "End of EqfQueryMem, RC = " <<usRC ;
@@ -966,7 +966,7 @@ USHORT EqfSearchMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APISearchMem( lHandle, pszSearchString, pszSrcLang, pszTrgLang, pszStartPosition, pProposal, lSearchTime, lOptions );
+    usRC =  TMManager::GetInstance()->APISearchMem( lHandle, pszSearchString, pszSrcLang, pszTrgLang, pszStartPosition, pProposal, lSearchTime, lOptions );
   } /* endif */
 
   if ( usRC && usRC != ENDREACHED_RC)//
@@ -1015,7 +1015,7 @@ USHORT EqfUpdateMem
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
+    usRC =  TMManager::GetInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
   if(usRC)  T5LOG(T5ERROR) ":: RC = " << usRC;
@@ -1054,7 +1054,7 @@ USHORT EqfListMem
     // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  MemoryFactory::getInstance()->APIListMem( pszBuffer, plLength );
+    usRC =  TMManager::GetInstance()->APIListMem( pszBuffer, plLength );
   } /* endif */
 
   if ( pData )
