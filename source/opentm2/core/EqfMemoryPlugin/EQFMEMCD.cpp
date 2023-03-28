@@ -98,20 +98,14 @@ LONG                lOptions                 // type of new Translation Memory
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  char*       pszParm;                 // pointer for error parameters
   TMManager *pFactory = TMManager::GetInstance();
-
-  {
-    T5LOG(T5DEBUG) << "MemFuncCreateMem( pszMemName = "<<pszMemName <<", pszDescription = "<<pszDescription<<", pszSourceLanguage = "<<pszSourceLanguage<<" )";
-  }
+  T5LOG(T5DEBUG) << "MemFuncCreateMem( pszMemName = "<<pszMemName <<", pszDescription = "<<pszDescription<<", pszSourceLanguage = "<<pszSourceLanguage<<" )";
+  
   // check required parameters
-  if ( usRC == NO_ERROR )
+  if ( (pszMemName == NULL) || (*pszMemName == EOS) )
   {
-    if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-    {
-      usRC = TMT_MANDCMDLINE;
-      T5LOG(T5ERROR) "::MemFuncCreateMem()::TMT_MANDCMDLINE";
-    } /* endif */
+    usRC = TMT_MANDCMDLINE;
+    T5LOG(T5ERROR) "::MemFuncCreateMem()::TMT_MANDCMDLINE";
   } /* endif */
 
   if ( usRC == NO_ERROR )
@@ -128,8 +122,7 @@ LONG                lOptions                 // type of new Translation Memory
   { 
     if ( !FilesystemHelper::checkFileName( pszMemName ))
     {
-      pszParm = (PSZ) pszMemName;
-      T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << pszParm;
+      T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << pszMemName;
       usRC = ERROR_MEM_NAME_INVALID;
     } /* endif */
   } /* endif */
@@ -141,8 +134,7 @@ LONG                lOptions                 // type of new Translation Memory
     if ( pFactory->exists( NULL, pszMemName ) )
     {
       T5Logger::GetInstance()->desuppressLogging(logLevel);
-      PSZ pszParam = (PSZ)pszMemName;
-      T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << pszParam;
+      T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << pszMemName;
       usRC = ERROR_MEM_NAME_EXISTS;
     }
     T5Logger::GetInstance()->desuppressLogging(logLevel);
@@ -166,11 +158,6 @@ LONG                lOptions                 // type of new Translation Memory
 
   if (fOK)
   {
-    int iRC;
-    char szPlugin[256];
-
-    strcpy( szPlugin, pFactory->getDefaultMemoryPlugin() );    
-
     T5LOG( T5DEBUG) << "MemFuncCreateMem():: create the memory" ;    
     //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
     //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
@@ -180,9 +167,8 @@ LONG                lOptions                 // type of new Translation Memory
 
     pMemory = EqfMemoryPlugin::GetInstance()->createMemory( pszMemName , pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
     if ( pMemory == NULL ){
-      iRC = EqfMemoryPlugin::GetInstance()->getLastError( EqfMemoryPlugin::GetInstance()->strLastError );
-      T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  iRC;
-      //T5LOG(T5ERROR) << "MemFuncCreateMem()::pMemory == NULL" ;
+      usRC = EqfMemoryPlugin::GetInstance()->getLastError( EqfMemoryPlugin::GetInstance()->strLastError );
+      T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  usRC;
       fOK = FALSE;
     }
     else{

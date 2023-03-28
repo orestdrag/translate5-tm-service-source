@@ -165,7 +165,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   std::string strMemPath;
 
   // find memory in our list
-  OtmMemoryPlugin::PMEMORYINFO pInfo = this->findMemory( (PSZ)pszName );
+ POPENEDMEMORY pInfo = this->findMemory( (PSZ)pszName );
   if ( pInfo != NULL )
   {
     // use old memory open code
@@ -218,7 +218,7 @@ int EqfMemoryPlugin::closeMemory(
   // refresh memory info
   std::string strMemName;
   pMem->getName( strMemName );
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (char *)strMemName.c_str() );
+ POPENEDMEMORY pMemInfo = this->findMemory( (char *)strMemName.c_str() );
   if ( pMemInfo != NULL )
   {
     std::string strPropName;
@@ -253,7 +253,7 @@ int EqfMemoryPlugin::listMemories(
 
   for ( std::size_t i = 0; i < m_MemInfoVector.size(); i++ )
   {
-    PMEMORYINFO pInfo = (m_MemInfoVector[i]).get();
+    POPENEDMEMORY pInfo = (m_MemInfoVector[i]).get();
 
     pfnCallBack( pvData, pInfo->szName, fWithDetails ? pInfo : NULL );
   } /* end */     
@@ -267,19 +267,19 @@ int EqfMemoryPlugin::listMemories(
 */
 int EqfMemoryPlugin::getMemoryInfo(
 	const char* pszName,
-  OtmMemoryPlugin::PMEMORYINFO pInfo
+ POPENEDMEMORY pInfo
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
+ POPENEDMEMORY pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo != NULL )
   {
-    memcpy( pInfo, pMemInfo, sizeof(OtmMemoryPlugin::MEMORYINFO) );
+    memcpy( pInfo, pMemInfo, sizeof(OPENEDMEMORY) );
   }
   else
   {
     iRC = OtmMemoryPlugin::eMemoryNotFound;
-    memset( pInfo, 0, sizeof(OtmMemoryPlugin::MEMORYINFO) );
+    memset( pInfo, 0, sizeof(OPENEDMEMORY) );
   } /* endif */
   return( iRC );
 }
@@ -294,7 +294,7 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     if(pszName==NULL || pszDesc==NULL)
         return 0;
 
-    OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
+   POPENEDMEMORY pMemInfo = this->findMemory( (PSZ)pszName );
     if ( pMemInfo == NULL )
     {
       // no memory found
@@ -362,7 +362,7 @@ int EqfMemoryPlugin::getMemoryFiles
   int iRC = OtmMemoryPlugin::eSuccess;
   *pFileListBuffer = '\0';
 
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
+ POPENEDMEMORY pMemInfo = this->findMemory( (PSZ)pszName );
 
   if ( pMemInfo != NULL )
   {
@@ -440,7 +440,7 @@ int EqfMemoryPlugin::renameMemory(
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszOldName );
+ POPENEDMEMORY pMemInfo = this->findMemory( (PSZ)pszOldName );
   if ( pMemInfo != NULL )
   {
     // get new short name for memory
@@ -526,7 +526,7 @@ int EqfMemoryPlugin::deleteMemory(
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = NULL;
+ POPENEDMEMORY pMemInfo = NULL;
 
   // get the memory info index int the vector and use it to get memory info
   int idx = this->findMemoryIndex(pszName);
@@ -572,7 +572,7 @@ int EqfMemoryPlugin::clearMemory(
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( (PSZ)pszName );
+ POPENEDMEMORY pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo != NULL )
   {
     // delete data and index file
@@ -709,7 +709,7 @@ void EqfMemoryPlugin::refreshMemoryList()
   //if ( this->pMemList != NULL )
   //{
   //    // delete all the elements in vector
-  //    for (std::vector<PMEMORYINFO>::iterator iter = this->pMemList->begin();
+  //    for (std::vector<POPENEDMEMORY>::iterator iter = this->pMemList->begin();
   //        iter != this->pMemList->end();
   //        iter++
   //        )
@@ -772,7 +772,7 @@ int tryStrCpy(char* dest, const char* src, const char* def){
 BOOL EqfMemoryPlugin::fillInfoStructure
 (
    char *pszPropName,
-   PMEMORYINFO pInfo
+   POPENEDMEMORY pInfo
 )
 {
   if(pInfo==0 || pszPropName==0){
@@ -782,7 +782,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
   PROP_NTM prop;
 
-  memset( pInfo, 0, sizeof(MEMORYINFO) );
+  memset( pInfo, 0, sizeof(OPENEDMEMORY) );
 
   // init it, if not meet some condition ,it will be set to false
   pInfo->fEnabled = TRUE;
@@ -852,9 +852,9 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
 /*! \brief Find memory in our memory list and return pointer to memory info 
   \param pszName name of the memory  
-	\returns PMEMORYINFO pInfo pointer to memory info or NULL in case of errors
+	\returns POPENEDMEMORY pInfo pointer to memory info or NULL in case of errors
 */
-OtmMemoryPlugin::PMEMORYINFO EqfMemoryPlugin::findMemory
+POPENEDMEMORY EqfMemoryPlugin::findMemory
 (
    const char *pszName
 )
@@ -875,7 +875,7 @@ int EqfMemoryPlugin::findMemoryIndex
 {
     for ( int i = 0; i < (int)m_MemInfoVector.size(); i++ )
     {
-        OtmMemoryPlugin::PMEMORYINFO pInfo = (m_MemInfoVector[i]).get();
+       POPENEDMEMORY pInfo = (m_MemInfoVector[i]).get();
         if ( strcasecmp( pszName, pInfo->szName) == 0 )
         {
             return i;
@@ -1095,7 +1095,7 @@ int EqfMemoryPlugin::addToList( std::string &strPathName )
 */
 int EqfMemoryPlugin::addToList( char *pszPropName )
 {
-  PMEMORYINFO pInfo = new( MEMORYINFO );
+  POPENEDMEMORY pInfo = new( OPENEDMEMORY );
   if(pInfo != 0)
   {
     // find the property name when pszPropName is fully qualified
@@ -1103,7 +1103,7 @@ int EqfMemoryPlugin::addToList( char *pszPropName )
     pszName = (pszName == NULL) ? pszPropName : pszName + 1;
     if ( this->fillInfoStructure( (PSZ)pszName, pInfo ) )
     {
-      m_MemInfoVector.push_back( std::shared_ptr<MEMORYINFO>(pInfo) );
+      m_MemInfoVector.push_back( std::shared_ptr<OPENEDMEMORY>(pInfo) );
     }
     else
     {
@@ -1178,7 +1178,7 @@ int EqfMemoryPlugin::importFromMemFilesInitialize
 )
 {
   int iRC = OtmMemoryPlugin::eSuccess;
-  OtmMemoryPlugin::PMEMORYINFO pMemInfo = this->findMemory( pszMemoryName );
+ POPENEDMEMORY pMemInfo = this->findMemory( pszMemoryName );
   std::string strPropFile = "";
   std::string strDataFile = "";
   std::string strIndexFile = "";
@@ -1649,7 +1649,7 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
 */
 int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszReplaceWith )
 {
-  OtmMemoryPlugin::PMEMORYINFO pInfoReplace = this->findMemory( pszReplace );
+ POPENEDMEMORY pInfoReplace = this->findMemory( pszReplace );
   
   if ( pszReplace == NULL )
   {
@@ -1657,7 +1657,7 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
     return( ERROR_MEMORY_NOTFOUND );
   }
 
-  OtmMemoryPlugin::PMEMORYINFO pInfoReplaceWith = this->findMemory( pszReplaceWith );
+ POPENEDMEMORY pInfoReplaceWith = this->findMemory( pszReplaceWith );
   if ( pszReplaceWith == NULL )
   {
     handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplaceWith, NULL, NULL, this->strLastError, this->iLastError );

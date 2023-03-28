@@ -4558,55 +4558,7 @@ enum statusCodes {
 
 };
 
-
-struct ImportStatusDetails{
-  std::atomic_short usProgress{0};
-  std::atomic_int segmentsImported{-1};
-  std::atomic_int invalidSegments{-1};
-  std::atomic_int invalidSymbolErrors{-1};
-  std::string importTimestamp;
-  std::stringstream importMsg;
-  
-  void reset(){
-    importMsg.str("");
-    usProgress = 0;
-    segmentsImported = -1;
-    invalidSegments = -1;
-    invalidSymbolErrors = -1;
-    importTimestamp = "not finished";    
-  }
-  std::string toString(){
-    std::string res;
-    res = "progress = " + std::to_string(usProgress) + "; segmentsImported = " + std::to_string(segmentsImported) + "; invalidSegments = " + std::to_string(invalidSegments) + "; time = " + importTimestamp;
-    return res;
-  }
-};
-
-
-  /*! \brief States of a memory
-  */
-  typedef enum 
-  {
-    OPEN_STATUS,            // memory is available and open
-    AVAILABLE_STATUS,       // memory has been imported but is not open yet
-    IMPORT_RUNNING_STATUS,  // memory import is running
-    IMPORT_FAILED_STATUS    // memory import failed
-  } MEMORY_STATUS;
-
-/*! \brief Info structure for an open translation memory
-*/
-typedef struct _OPENEDMEMORY
-{
-char szName[260];               // name of the memory
-time_t tLastAccessTime;         // last time memory has been used
-long lHandle;                   // memory handle     
-MEMORY_STATUS eStatus;          // status of the memory
-MEMORY_STATUS eImportStatus;    // status of the current/last memory import
-//std::atomic<double> dImportProcess; 
-//ushort * pusImportPersent = nullptr;
-ImportStatusDetails* importDetails = nullptr;
-char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
-} OPENEDMEMORY, *POPENEDMEMORY;
+#include "otm.h"
 
 
 #include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
@@ -4718,25 +4670,8 @@ public:
 		OtmMemory *pMemory			  
 	) = 0;
 
-
-  /*! \brief structure for memory information */
-  typedef struct _MEMORYINFO
-  {
-    char szPlugin[256];                          // name of the plugin controlling this memory
-    char szName[256];                            // name of the memory
-    char szDescription[256];                     // description of the memory
-    char szFullPath[256];                        // full path to memory file(s) (if applicable only)
-    char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
-    char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
-    char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
-    char szOwner[256];                           // ID of the memory owner
-    char szDescrMemoryType[256];                 // descriptive name of the memory type
-    unsigned long ulSize;                        // size of the memory  
-    BOOL fEnabled;                               // memory-is-enabled flag  
-  } MEMORYINFO, *PMEMORYINFO;
-
 /*! \brief type of callback function for ListMemories method */
-typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, PMEMORYINFO pInfo  );
+typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, POPENEDMEMORY pInfo  );
 
   /*! \brief Provide a list of all available memories
   \param pfnCallBack callback function to be called for each memory
@@ -4758,7 +4693,7 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, PMEMORYINFO
 */
 	virtual int getMemoryInfo(
 		const char* pszName,
-    PMEMORYINFO pInfo
+    POPENEDMEMORY pInfo
 	) = 0;
 
 /*! \brief provides a list of the memory data files
@@ -5041,7 +4976,7 @@ int getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
-  OtmMemoryPlugin::PMEMORYINFO pInfo
+ OPENEDMEMORY pInfo
 );
 
 

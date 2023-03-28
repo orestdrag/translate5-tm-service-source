@@ -125,7 +125,7 @@ public:
 */
 	int getMemoryInfo(
 		const char* pszName,
-    PMEMORYINFO pInfo
+    POPENEDMEMORY pInfo
 	);
 
 /*! \brief set description of a memory
@@ -306,7 +306,7 @@ private:
 
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
   void refreshMemoryList();
-  OtmMemoryPlugin::PMEMORYINFO findMemory( const char *pszName );
+ POPENEDMEMORY findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);
 /*! \brief Create memory properties
   \param pszName long name of the memory
@@ -348,7 +348,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	\param pInfo pointer to memory info structure
 	\returns TRUE when successful, FALSE in case of errors
 */
-  BOOL fillInfoStructure( char *pszPropName, PMEMORYINFO pInfo );
+  BOOL fillInfoStructure( char *pszPropName, POPENEDMEMORY pInfo );
 
 	std::string name;
 	std::string shortDesc;
@@ -356,7 +356,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	std::string version;
 	std::string supplier;
 	std::string descrType;
-  std::vector< std::shared_ptr<MEMORYINFO> > m_MemInfoVector;
+  std::vector< std::shared_ptr<OPENEDMEMORY> > m_MemInfoVector;
   char szBuffer[4000];                         // general purpose buffer area
   char szSupportedDrives[27]; // list of supported drives
 

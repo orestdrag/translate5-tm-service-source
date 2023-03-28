@@ -35,7 +35,7 @@ BOOL MemCreatePath( PSZ pszString )
 {
   USHORT          usRc;
 
-  OtmMemoryPlugin::PMEMORYINFO pInfo = new( OtmMemoryPlugin::MEMORYINFO );
+ POPENEDMEMORY pInfo = new( OPENEDMEMORY );
   TMManager *pFactory = TMManager::GetInstance();
 
   usRc = (USHORT)-1;
@@ -80,7 +80,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
     T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
   } /* endif */
 
-  OtmMemoryPlugin::MEMORYINFO Info;
+ OPENEDMEMORY Info;
   TMManager *pFactory = TMManager::GetInstance();
   // check if there is a TM with the given name
   if ( usRC == NO_ERROR )
@@ -236,7 +236,7 @@ USHORT EQFMemOrganizeStart
     if ( usRc )
     {
       int iRC = 0;
-      OtmMemoryPlugin::MEMORYINFO MemInfo;
+     OPENEDMEMORY MemInfo;
       OtmPlugin *pAnyPlugin = (OtmPlugin *)pRIDA->pMem->getPlugin();
       if ( pAnyPlugin->getType() == OtmPlugin::eTranslationMemoryType )
       {
