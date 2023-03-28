@@ -440,43 +440,6 @@ typedef struct _PROP_NTM
 } PROP_NTM, *PPROP_NTM;
 
 
-/*! \brief Info structure for an open translation memory
-*/
-typedef struct _OPENEDMEMORY
-{
-//char szName[260];               // name of the memory
-time_t tLastAccessTime;         // last time memory has been used
-long lHandle;                   // memory handle     
-MEMORY_STATUS eStatus;          // status of the memory
-MEMORY_STATUS eImportStatus;    // status of the current/last memory import
-//std::atomic<double> dImportProcess; 
-//ushort * pusImportPersent = nullptr;
-ImportStatusDetails* importDetails = nullptr;
-char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
-//FileBuffer
-PBTREEGLOB dataBTree;
-PBTREEGLOB indexBTree;
-PPROP_NTM memoryProperties;
-
-
-  /*! \brief structure for memory information */
-//  typedef struct _MEMORYINFO
-//  {
-    char szPlugin[256];                          // name of the plugin controlling this memory
-    char szName[256];                            // name of the memory
-    char szDescription[256];                     // description of the memory
-    char szFullPath[256];                        // full path to memory file(s) (if applicable only)
-    char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
-    char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
-    char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
-    char szOwner[256];                           // ID of the memory owner
-    char szDescrMemoryType[256];                 // descriptive name of the memory type
-    unsigned long ulSize;                        // size of the memory  
-    BOOL fEnabled;                               // memory-is-enabled flag  
-//  } MEMORYINFO, *PMEMORYINFO;
-
-
-} OPENEDMEMORY ;
 
 
 

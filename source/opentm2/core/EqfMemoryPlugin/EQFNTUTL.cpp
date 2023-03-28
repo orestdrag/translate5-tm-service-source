@@ -2149,7 +2149,7 @@ USHORT NTMCreateLangGroupTable
 //
 // compact/organize the index part of a memory
 //
-USHORT NTMOrganizeIndexFile1
+USHORT NTMOrganizeIndexFile
 (
   PTMX_CLB pTmClb               // ptr to control block,
 )

@@ -34,7 +34,7 @@ BOOL MemCreatePath( PSZ pszString )
 {
   USHORT          usRc;
 
- std::shared_ptr<OPENEDMEMORY>  pInfo = std::make_shared<OPENEDMEMORY> ( OPENEDMEMORY() );
+ std::shared_ptr<EqfMemory>  pInfo = std::make_shared<EqfMemory> ( EqfMemory() );
   TMManager *pFactory = TMManager::GetInstance();
 
   usRc = (USHORT)-1;
@@ -79,7 +79,7 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
     T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
   } /* endif */
 
-  std::shared_ptr<OPENEDMEMORY> Info;
+  std::shared_ptr<EqfMemory> Info;
   TMManager *pFactory = TMManager::GetInstance();
   // check if there is a TM with the given name
   if ( usRC == NO_ERROR )
@@ -235,7 +235,7 @@ USHORT EQFMemOrganizeStart
     if ( usRc )
     {
       int iRC = 0;
-      std::shared_ptr<OPENEDMEMORY> MemInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
+      std::shared_ptr<EqfMemory> MemInfo = std::make_shared<EqfMemory>(EqfMemory());
       OtmPlugin *pAnyPlugin = (OtmPlugin *)pRIDA->pMem->getPlugin();
       EqfMemoryPlugin *pPlugin = (EqfMemoryPlugin *)pAnyPlugin;
       pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );

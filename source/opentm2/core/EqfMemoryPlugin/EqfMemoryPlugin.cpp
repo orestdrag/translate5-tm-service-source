@@ -195,7 +195,7 @@ EqfMemory* EqfMemoryPlugin::openMemory(
   std::string strMemPath;
 
   // find memory in our list
- std::shared_ptr<OPENEDMEMORY>  pInfo = this->findMemory( (PSZ)pszName );
+ std::shared_ptr<EqfMemory>  pInfo = this->findMemory( (PSZ)pszName );
   if ( pInfo != NULL )
   {
     // use old memory open code
@@ -248,7 +248,7 @@ int EqfMemoryPlugin::closeMemory(
   // refresh memory info
   std::string strMemName;
   pMem->getName( strMemName );
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (char *)strMemName.c_str() );
+ std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (char *)strMemName.c_str() );
   if ( pMemInfo.get() != NULL )
   {
     std::string strPropName;
@@ -283,9 +283,9 @@ int EqfMemoryPlugin::listMemories(
 
   for ( std::size_t i = 0; i < m_MemInfoVector.size(); i++ )
   {
-    std::shared_ptr<OPENEDMEMORY>  pInfo = m_MemInfoVector[i];
-    //OPENEDMEMORY *  pInfo = (m_MemInfoVector[i]).get();
-    //pfnCallBack( pvData, pInfo.get()->szName, fWithDetails ? pInfo : std::make_shared<OPENEDMEMORY>(nullptr) );
+    std::shared_ptr<EqfMemory>  pInfo = m_MemInfoVector[i];
+    //EqfMemory *  pInfo = (m_MemInfoVector[i]).get();
+    //pfnCallBack( pvData, pInfo.get()->szName, fWithDetails ? pInfo : std::make_shared<EqfMemory>(nullptr) );
     pfnCallBack( pvData, pInfo.get()->szName, fWithDetails ? pInfo.get() : nullptr );
   } /* end */     
   return( m_MemInfoVector.size() );
@@ -298,19 +298,19 @@ int EqfMemoryPlugin::listMemories(
 */
 int EqfMemoryPlugin::getMemoryInfo(
 	const char* pszName,
- std::shared_ptr<OPENEDMEMORY>  pInfo
+ std::shared_ptr<EqfMemory>  pInfo
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
+ std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo.get() != NULL )
   {
-    memcpy( pInfo.get(), pMemInfo.get(), sizeof(OPENEDMEMORY) );
+    memcpy( pInfo.get(), pMemInfo.get(), sizeof(EqfMemory) );
   }
   else
   {
     iRC = EqfMemoryPlugin::eMemoryNotFound;
-    memset( pInfo.get(), 0, sizeof(OPENEDMEMORY) );
+    memset( pInfo.get(), 0, sizeof(EqfMemory) );
   } /* endif */
   return( iRC );
 }
@@ -325,7 +325,7 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     if(pszName==NULL || pszDesc==NULL)
         return 0;
 
-   std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
+   std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
     if ( pMemInfo.get() == NULL )
     {
       // no memory found
@@ -393,7 +393,7 @@ int EqfMemoryPlugin::getMemoryFiles
   int iRC = EqfMemoryPlugin::eSuccess;
   *pFileListBuffer = '\0';
 
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
+ std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
 
   if ( pMemInfo.get() != NULL )
   {
@@ -420,46 +420,6 @@ int EqfMemoryPlugin::getMemoryFiles
   return( iRC );
 }
 
-/*! \brief import a memory using a list of memory data files
-
-    This method imports the binary files of a memory. The files have been created and
-    filled using the getMemoryPart method.
-
-    This method should delete the memory data files at the end of the processing- 
-
-    When the processing of the memory files needs more time, the method
-    should process the task in small units in order to prevent blocking of the
-    calling application. To do this the method should return
-    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
-    a private data area to keep track of the current processing step. The method will
-    be called repetetively until the import has been completed.
-
-   \param pszMemoryName    name of the memory 
-   \param pFileList        pointer to a buffer containing the fully qualified memory data files as a comma separated list
-   \param iOptions         processing options, one or more of the IMPORTFROMMEMFILES_..._OPT values ORed together
-                           
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             EqfMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int EqfMemoryPlugin::importFromMemoryFiles
-(
-  const char *pszMemoryName,
-  const char *pFileList,
-  int  iOptions,
-  PVOID *ppPrivateData
-)
-{
-  LOG_UNIMPLEMENTED_FUNCTION;
-  throw;
-  return( -1 );
-}
-
-
-
 /*! \brief Physically rename a translation memory
   \param pszOldName name of the memory being rename
   \param pszNewName new name for the memory
@@ -471,7 +431,7 @@ int EqfMemoryPlugin::renameMemory(
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszOldName );
+ std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszOldName );
   if ( pMemInfo.get() != NULL )
   {
     // get new short name for memory
@@ -557,7 +517,7 @@ int EqfMemoryPlugin::deleteMemory(
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<OPENEDMEMORY>  pMemInfo;
+ std::shared_ptr<EqfMemory>  pMemInfo;
 
   // get the memory info index int the vector and use it to get memory info
   int idx = this->findMemoryIndex(pszName);
@@ -592,44 +552,6 @@ int EqfMemoryPlugin::deleteMemory(
     iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
-}
-
-
-/*! \brief Create a temporary memory
-  \param pszPrefix prefix to be used for name of the temporary memory
-  \param pszName buffer for the name of the temporary memory
-	\param pszSourceLang source language
-	\param bMsgHandling true/false: display errors or not
-	\param hwnd owner-window needed for modal error-message
-	\returns Pointer to created translation memory or NULL in case of errors
-*/
-EqfMemory* EqfMemoryPlugin::createTempMemory(
-	const char* pszPrefix,			  
-	const char* pszName,			  
-	const char* pszSourceLang,
-	BOOL bMsgHandling,
-	HWND hwnd
-)
-{
-  EqfMemory *pNewMemory = NULL;        // new memory object
-  HTM htm = NULL;                      // memory handle 
-  USHORT usRC = 0;
-
-  bMsgHandling;
-
-T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 18 // use old temporary memory create code  usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );";
-#ifdef TEMPORARY_COMMENTED
-  // use old temporary memory create code
-  usRC = TMCreateTempMem( pszPrefix, pszName, &htm, NULL, pszSourceLang, hwnd );
-#endif //TEMPORARY_COMMENTED
-  
-  // create memory object if create function completed successfully
-  if ( usRC == 0 )
-  {
-    pNewMemory = new EqfMemory( this, htm, (PSZ)pszName );
-  } /* end */     
-
-  return( (EqfMemory *)pNewMemory );
 }
 
 /*! \brief close and delete a temporary memory
@@ -696,7 +618,7 @@ void EqfMemoryPlugin::refreshMemoryList()
   //if ( this->pMemList != NULL )
   //{
   //    // delete all the elements in vector
-  //    for (std::vector<std::shared_ptr<OPENEDMEMORY> >::iterator iter = this->pMemList->begin();
+  //    for (std::vector<std::shared_ptr<EqfMemory> >::iterator iter = this->pMemList->begin();
   //        iter != this->pMemList->end();
   //        iter++
   //        )
@@ -759,7 +681,7 @@ int tryStrCpy(char* dest, const char* src, const char* def){
 BOOL EqfMemoryPlugin::fillInfoStructure
 (
    char *pszPropName,
-   std::shared_ptr<OPENEDMEMORY>  pInfo
+   std::shared_ptr<EqfMemory>  pInfo
 )
 {
   if(pInfo==0 || pszPropName==0){
@@ -769,7 +691,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
   PROP_NTM prop;
 
-  memset( pInfo.get(), 0, sizeof(OPENEDMEMORY) );
+  memset( pInfo.get(), 0, sizeof(EqfMemory) );
 
   // init it, if not meet some condition ,it will be set to false
   pInfo->fEnabled = TRUE;
@@ -839,9 +761,9 @@ BOOL EqfMemoryPlugin::fillInfoStructure
 
 /*! \brief Find memory in our memory list and return pointer to memory info 
   \param pszName name of the memory  
-	\returns std::shared_ptr<OPENEDMEMORY>  pInfo pointer to memory info or NULL in case of errors
+	\returns std::shared_ptr<EqfMemory>  pInfo pointer to memory info or NULL in case of errors
 */
-std::shared_ptr<OPENEDMEMORY>  EqfMemoryPlugin::findMemory
+std::shared_ptr<EqfMemory>  EqfMemoryPlugin::findMemory
 (
    const char *pszName
 )
@@ -862,7 +784,7 @@ int EqfMemoryPlugin::findMemoryIndex
 {
     for ( int i = 0; i < (int)m_MemInfoVector.size(); i++ )
     {
-        OPENEDMEMORY *  pInfo = (m_MemInfoVector[i]).get();
+        EqfMemory *  pInfo = (m_MemInfoVector[i]).get();
         if ( strcasecmp( pszName, pInfo->szName) == 0 )
         {
             return i;
@@ -1025,7 +947,7 @@ int EqfMemoryPlugin::addToList( std::string &strPathName )
 */
 int EqfMemoryPlugin::addToList( char *pszPropName )
 {
- std::shared_ptr<OPENEDMEMORY> pInfo =  std::make_shared<OPENEDMEMORY>( OPENEDMEMORY() );
+ std::shared_ptr<EqfMemory> pInfo =  std::make_shared<EqfMemory>( EqfMemory() );
   if(pInfo.get() != 0)
   {
     // find the property name when pszPropName is fully qualified
@@ -1084,102 +1006,6 @@ typedef struct _MEMIMPORTFROMFILEDATA
   char  szBuffer[1014];                // general purpose buffer
 
 } MEMIMPORTFROMFILEDATA, *PMEMIMPORTFROMFILEDATA;
-
-
-/*! \brief Continue the import of a memory using a list of memory data files
-
-
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             EqfMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int EqfMemoryPlugin::importFromMemFilesContinueProcessing
-(
-  PVOID *ppPrivateData
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
-  int iMemRC = NO_ERROR;
-  PMEMIMPORTFROMFILEDATA pData = (PMEMIMPORTFROMFILEDATA)*ppPrivateData;
-
-  for ( int i = 1; i < 10; i++ )
-  {
-    iMemRC = pData->pInputMemory->getNextProposal( pData->Proposal );
-    if ( iMemRC == NO_ERROR )
-    {
-      pData->pOutputMemory->putProposal( pData->Proposal );
-    }
-    else
-    {
-      break;
-    }
-  } /* endfor */     
-
-  if ( iMemRC == NO_ERROR)
-  {
-    iRC = EqfMemoryPlugin::eRepeat;
-  }
-  else if ( iMemRC == EqfMemory::INFO_ENDREACHED )
-  {
-    this->importFromMemFilesEndProcessing( ppPrivateData );
-    iRC = EqfMemoryPlugin::eSuccess;
-  }
-  else
-  {
-    this->importFromMemFilesEndProcessing( ppPrivateData );
-    iRC = iMemRC;
-  }
-  return( iRC );
-}
-
-  /*! \brief Terminate the import of a memory using a list of memory data files and do a cleanup
-
-
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             any other value is an error code
- */
-int EqfMemoryPlugin::importFromMemFilesEndProcessing
-(
-  PVOID *ppPrivateData
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
-
-  PMEMIMPORTFROMFILEDATA pData = (PMEMIMPORTFROMFILEDATA)*ppPrivateData;
-
-  if ( pData != NULL )
-  {
-    // close memories
-    if ( pData->pOutputMemory != NULL ) this->closeMemory( pData->pOutputMemory );
-
-    if ( pData->pInputMemory != NULL ) 
-    {
-      HTM htm = pData->pInputMemory->getHTM();
-T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 29 TmClose( htm, NULL,  FALSE,  NULL );";
-#ifdef TEMPORARY_COMMENTED
-      TmClose( htm, NULL,  FALSE,  NULL );
-#endif //TEMPORARY_COMMENTED
-
-      delete( pData->pInputMemory );  
-    } /* end */       
-
-    // delete memory data files
-    if ( pData->strPropFile.length() != 0 ) UtlDelete( (PSZ)pData->strPropFile.c_str(), 0L, FALSE );
-    if ( pData->strDataFile.length() != 0 ) UtlDelete( (PSZ)pData->strDataFile.c_str(), 0L, FALSE );
-    if ( pData->strIndexFile.length() != 0 ) UtlDelete( (PSZ)pData->strIndexFile.c_str(), 0L, FALSE );
-
-    // free data area
-    free( pData );
-  } /* end */     
-
-  return( iRC );
-}
 
 
 /* \brief add a new memory information to memory list
@@ -1388,7 +1214,7 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
 */
 int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszReplaceWith )
 {
- std::shared_ptr<OPENEDMEMORY>  pInfoReplace = this->findMemory( pszReplace );
+ std::shared_ptr<EqfMemory>  pInfoReplace = this->findMemory( pszReplace );
   
   if ( pszReplace == NULL )
   {
@@ -1396,7 +1222,7 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
     return( ERROR_MEMORY_NOTFOUND );
   }
 
- std::shared_ptr<OPENEDMEMORY>  pInfoReplaceWith = this->findMemory( pszReplaceWith );
+ std::shared_ptr<EqfMemory>  pInfoReplaceWith = this->findMemory( pszReplaceWith );
   if ( pszReplaceWith == NULL )
   {
     handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplaceWith, NULL, NULL, this->strLastError, this->iLastError );
