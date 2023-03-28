@@ -3674,9 +3674,6 @@ typedef struct _MEM_IDA
 }MEM_IDA, * PMEM_IDA;
 
 
-class OtmMemory;
-class OtmProposal;
-
 //#ifdef _OTMMEMORY_H_
 typedef struct _MEM_LOAD_IDA
 {
@@ -4485,29 +4482,6 @@ BOOL TMDelTargetClbV5
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG usLenChar );
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG usLenComp );
 
-// prototypes and functions for CPP versions of memory base code
-
-#ifdef _OTMMEMORYPLUGIN_H_
-
-/* !brief function handling the GUI mode of the memory import */
-BOOL MemGUIExportMemory
-( 
-  OtmMemory *pMemory, 
-  PLISTCOMMAREA pCommArea,
-  PSZ pszMemName, 
-  PSZ pszNameList,   
-  PMEM_IDA      pIDA,                      // Pointer to the Main Memory data area
-  HWND hwnd
-);
-
-/* !brief function handling the GUI mode of the memory merge */
-BOOL MemGUIMergeMemory( OtmMemory *pMemory, PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
-
-/* !brief function handling the GUI mode of the memory import */
-BOOL MemGUIImportMemory( PLISTCOMMAREA pCommArea, PSZ pszMemName, PMEM_IDA pIDA, HWND hwnd );
-
-
-#endif
 
 
 typedef struct _MEM_ORGANIZE_IDA
@@ -5289,14 +5263,6 @@ int exists(
   const char *pszMemoryName
 );
 
-/*! \brief Check if memory is a shared/synchronized memory
-  \param pMemory pointer to memory object
-	\returns TRUE is memory is shared/synchronized
-*/
-BOOL isSharedMemory(
-  OtmMemory *pMemory
-);
-
 /*! \brief Get name of default memory plugin
 	\returns pointer to name of default memory plugin
 */
@@ -5385,53 +5351,6 @@ void insertProposalData(
   LONG lOptions = 0
 );
 
-/*! \brief Check if first proposal in the list can be used for automatic substitution 
-  \param Proposals reference to a vector containing the proposals
-  \returns true when automatic substitution can be performed otherwise false
-*/
-bool isAutoSubstCandidate(
-  std::vector<OtmProposal *> &Proposals
-);
-
-
-/*! \brief Connect a shared memory
-	\param pszPlugin  name of the shared memory plugin to be used
-  \param hwndOwner owner handle for dialog windows
-  \param pszMemoryName name of the memory
-  \param pvOptions ptr to a vector containing the access options
-  \returns 0 when successful or error return code
-*/
-int connectToMemory(
-  char *pszPlugin,
-  HWND hwndOwner,
-  char *pszMemoryName,
-  std::vector<std::string> *pvOptions
-);
-
-/*! \brief Disconnect a connected memory
-	\param pszPlugin  name of the shared memory plugin to be used
-  \param hwndOwner owner handle for dialog windows and error messages
-  \param pszMemoryName name of the memory
-  \returns 0 when successful or error return code
-*/
-int disconnectMemory(
-  char *pszPlugin,
-  HWND hwndOwner,
-  char *pszMemoryName
-);
-
-/*! \brief get the options required to connect to a sharedmemory
-	\param pszPlugin  name of the shared memory plugin to be used
-  \param hwndOwner owner handle for dialog windows
-  \param pvOptions pointer to a vector receiving the connect options
-  \returns 0 when successful, -1 when user has cancelled the options dialog or an error code
-*/
-  int getConnectOptions(
-    char *pszPlugin,
-    HWND hwndOwner,
-    std::vector<std::string> *pvOptions
-  );
-
 /*! \brief Get the object name for the memory
   \param pMemory pointer to the memory object
   \param pszObjName pointer to a buffer for the object name
@@ -5480,32 +5399,6 @@ int getProposalSortKey(  OtmProposal &Proposal );
 */
 int getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmProposal::eProposalType ProposalType, int iFuzzyness, int iMTDisplayFactor, USHORT usContextRanking, BOOL fEndOfTable, LONG lOptions = 0 );
 
-/* \brief add a new user to a shared memory user list
-   \param pszPlugin  name of the shared memory plugin to be used
-   \param pszMemName   memory name
-   \param pszUserName  user name to add
-   \param strError     return error message with it
-   \returns 0
-*/
-int addSharedMemoryUser( char *pszPlugin, char *pszMemName, char *pszUserName, std::string &strError);
-
-/* \brief delete a user from a shared memory user list
-   \param pszPlugin  name of the shared memory plugin to be used
-   \param pszMemName   memory name
-   \param pszUserName  user name to add
-   \param strError     return error message with it
-   \returns 0
-*/
-int removeSharedMemoryUser( char *pszPlugin, char *pszMemName, char *pszUserName, std::string &strError);
-
-/* \brief list shared memory users
-   \param pszPlugin  name of the shared memory plugin to be used
-   \param pszMemName   memory name
-   \param users        users name returned
-   \param strError     return error message with it
-   \returns 0
-*/
-int listSharedMemoryUsers( char *pszPlugin, char  *pszMemName, std::vector<std::string> &users, std::string &strError);
 
 /*! \brief Create a temporary memory
   \param pszPrefix prefix to be used for name of the temporary memory
