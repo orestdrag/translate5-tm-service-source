@@ -23,7 +23,7 @@
 
 
 #include "EQFUTPRI.H"                  // private utility header file
-#include "EQFUTILS.ID"    // IDs used by dialog utilities
+//#include "EQFUTILS.ID"    // IDs used by dialog utilities
 
 //#define DEF_EVENT_ENUMS
 #include "EQFEVENT.H"                  // event logging functions

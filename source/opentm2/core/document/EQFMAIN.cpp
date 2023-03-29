@@ -19,9 +19,9 @@
 //#include <tchar.h>
 #include "locale.h"
 
-#include "EQFSTART.ID"                 // our PM IDs
+//#include "EQFSTART.ID"                 // our PM IDs
 #include "EQFSTART.H"                  // our stuff
-#include "EQFSTART.MRI"                // for text of emergency messages
+//#include "EQFSTART.MRI"                // for text of emergency messages
 //#include "EQFDRVEX.H"                  // drives dialog
 #include "EQFSETUP.H"                  // directory names
 //#include "EQFPROGR.H"                  // progress indicator defines
@@ -34,7 +34,7 @@
 //#include "EQFMT00.H"
 
 #undef _WPTMIF                         // we don't care about WP I/F
-#include "EQFHELP.ID"                  // help resource IDs
+//#include "EQFHELP.ID"                  // help resource IDs
 //#include "EQFHLP1.H"                   // first part of help tables
 //#include "EQFMSG.HTB"                          // message help table
 

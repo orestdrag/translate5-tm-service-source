@@ -50,7 +50,7 @@
 
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
-#include "EQFMEM.ID" // Translation Memory IDs
+//#include "EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
 #include <EQFQDAM.H>            // Low level TM access functions
 #include "tm.h"
