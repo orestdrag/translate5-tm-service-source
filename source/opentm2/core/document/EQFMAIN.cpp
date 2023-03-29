@@ -22,21 +22,20 @@
 #include "EQFSTART.ID"                 // our PM IDs
 #include "EQFSTART.H"                  // our stuff
 #include "EQFSTART.MRI"                // for text of emergency messages
-#include "EQFDRVEX.H"                  // drives dialog
+//#include "EQFDRVEX.H"                  // drives dialog
 #include "EQFSETUP.H"                  // directory names
-#include "EQFPROGR.H"                  // progress indicator defines
+//#include "EQFPROGR.H"                  // progress indicator defines
 //#include <dde.h>                     // DDE defines
 #include "EQFEVENT.H"                  // event logging facility
-#include "EQFART.H"                    // ART registry functions
-#include "EQFRPT.H"                    // report handler defines
+//#include "EQFRPT.H"                    // report handler defines
 #include "../utilities/PropertyWrapper.H"
 
 // should be removed
-#include "EQFMT00.H"
+//#include "EQFMT00.H"
 
 #undef _WPTMIF                         // we don't care about WP I/F
 #include "EQFHELP.ID"                  // help resource IDs
-#include "EQFHLP1.H"                   // first part of help tables
+//#include "EQFHLP1.H"                   // first part of help tables
 //#include "EQFMSG.HTB"                          // message help table
 
 #include "EQFUTMDI.H"                // MDI Utilities

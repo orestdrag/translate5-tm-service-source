@@ -23,7 +23,7 @@ Copyright Notice:
 #include "../../core/utilities/FilesystemHelper.h"
 
 #include <EQFQDAMI.H>             // Private header file of QDAM 
-#include "EQFRDICS.H"             // remote dictionary functions
+//#include "EQFRDICS.H"             // remote dictionary functions
 #include "LanguageFactory.H"
 
 // activate the folllowing define to activate logging

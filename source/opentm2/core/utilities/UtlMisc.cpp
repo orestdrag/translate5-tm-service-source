@@ -15,7 +15,7 @@
 #include "EQFSETUP.H"
 #include "Utility.h"
 #include "EQFUTMDI.H"               // MDI Utilities
-#include "EQFFOL.H"
+//#include "EQFFOL.H"
 #include "EQFUTILS.ID" // IDs used by dialog utilities
 #include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
