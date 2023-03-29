@@ -229,7 +229,7 @@ EQFNTMCreate
    PCHAR  pUserData,                   // user data
    USHORT usLen,                       // length of user data
    ULONG  ulStartKey,                  // first key to start automatic insert...
-   PVOID  * ppBTIda                    // pointer to structure
+   PBTREE  * ppBTIda                    // pointer to structure
 )
 {
    SHORT sRc = 0;                      // return code
@@ -333,7 +333,7 @@ SHORT  EQFNTMOpen
 (
   PSZ   pName,                        // name of the file
   USHORT usOpenFlags,                 // Read Only or Read/Write
-  PVOID  * ppBTIda                    // pointer to BTREE structure
+  PBTREE  * ppBTIda                    // pointer to BTREE structure
 )
 {
    PBTREE    pBTIda;                   // pointer to BTRee structure
@@ -428,7 +428,7 @@ SHORT  EQFNTMOpen
 
 SHORT EQFNTMClose
 (
-  PVOID * ppBTIda
+  PBTREE * ppBTIda
 )
 {
   SHORT sRc;
@@ -446,7 +446,7 @@ SHORT EQFNTMClose
 
   if ( !sRc )
   {
-    UtlAlloc( ppBTIda, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID*) ppBTIda, 0L, 0L, NOMSG );
   } /* endif */
 
   if ( sRc != NO_ERROR )
@@ -494,7 +494,7 @@ SHORT EQFNTMClose
 
 SHORT EQFNTMUpdSign
 (
-   PVOID  pBTIda,                      // pointer to btree structure
+   PBTREE  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    USHORT usLen                        // length of user data
 )
@@ -536,7 +536,7 @@ SHORT EQFNTMUpdSign
 
 SHORT EQFNTMSign
 (
-   PVOID  pBTIda,                      // pointer to btree structure
+   PBTREE  pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    PUSHORT pusLen                      // length of user data
 )
@@ -602,7 +602,7 @@ SHORT EQFNTMSign
 SHORT
 EQFNTMInsert
 (
-  PVOID   pBTIda,           // pointer to binary tree struct
+  PBTREE   pBTIda,           // pointer to binary tree struct
   PULONG  pulKey,           // pointer to key
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data
@@ -1654,7 +1654,7 @@ SHORT QDAMDictUpdateLocal
 SHORT
 EQFNTMUpdate
 (
-  PVOID   pBTIda,           // pointer to binary tree struct
+  PBTREE   pBTIda,           // pointer to binary tree struct
   ULONG   ulKey,            // key value
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data
@@ -1868,7 +1868,7 @@ SHORT QDAMDictExactLocal
 SHORT
 EQFNTMGet
 (
-   PVOID  pBTIda,                      // pointer to btree struct
+   PBTREE  pBTIda,                      // pointer to btree struct
    ULONG  ulKey,                       // key to be searched for
    PCHAR  pchBuffer,                   // space for user data
    PULONG pulLength                    // in/out length of returned user data
@@ -1939,7 +1939,7 @@ EQFNTMGet
 SHORT
 EQFNTMGetNextNumber
 (
-   PVOID  pBTIda,                      // pointer to btree struct
+   PBTREE  pBTIda,                      // pointer to btree struct
    PULONG pulStartKey,                 // return start key number
    PULONG pulNextKey                   // return next key data
 )
@@ -1972,7 +1972,7 @@ EQFNTMGetNextNumber
 // ----------------------------------------------------------------------------+
 SHORT EQFNTMPhysLock
 (
-   PVOID          pBTIda,
+   PBTREE          pBTIda,
    BOOL           fLock,
    PBOOL          pfLocked
 )
@@ -2030,7 +2030,7 @@ SHORT EQFNTMPhysLock
 // ----------------------------------------------------------------------------+
 SHORT EQFNTMIncrUpdCounter
 (
-   PVOID      pBTIda,                  // pointer to btree structure
+   PBTREE      pBTIda,                  // pointer to btree structure
    SHORT      sIndex,                  // index of update counter
    PLONG                         plNewValue                                               // ptr to buffer for new counte value|
 )

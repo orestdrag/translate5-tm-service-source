@@ -59,7 +59,6 @@
 /**********************************************************************/
 #include "win_types.h"
 
-typedef char *PSZ;
 
 /* Extract high and low order parts of 16 and 32 bit quantity */
 //#define LOBYTE(w)       LOUCHAR(w)

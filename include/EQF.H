@@ -49,7 +49,7 @@
 #define _EQF_H_INCLUDED
 
 #include "../source/opentm2/core/utilities/LogWrapper.h"
-
+#include "otm.h"
 
 /**********************************************************************/
 /* add support for MFC compiling via predefined                       */
@@ -1902,7 +1902,6 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define MAX_FILESPEC           256     // max length of file name + extension
 #define MAX_LONGFILESPEC       256     // max length of long file name + extension
 #define MAX_PATH144            144     // max length of fully qualified path
-#define MAX_LONGPATH           260     // max length of fully qualified path
 #define MAX_FNAME              250     // max length of name part of a file names
 #define MAX_FEXT                 5     // max length of a file name extension
 #define MAX_EQF_PATH           255     // max length of a file in an EQF dir
@@ -1911,15 +1910,11 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define MAX_DRIVE              250     // max size of a drive specification
 #define MAX_VIEW                20     // max. viewable # of columns in a CLB listbox
 #define MAX_DEFINEDCOLUMNS      50     // max. definable # of columns in a CLB listbox
-#define MAX_MEM_DESCRIPTION     41     // length of a memory description field
-#define MAX_LANG_LENGTH         20     // length of the name of a language
 #define MAX_DESCRIPTION         41     // length of description fields
 #define MAX_LONG_DESCRIPTION    300    // long length of description fields
 #define MAX_DICTS               20     // max. number of dictionaries
-#define MAX_SERVER_NAME         15     // max. length of a server name
 #define MAX_SERVER_LIST_SIZE    100    // length of a server list in
                                        // system properties
-#define MAX_USERID              15     // max. length of LAN user ID
 #define MAX_LANGUAGE_PROPERTIES 200    // max. length of language properties
 #define MAX_EDIT_LINE_LENGTH    66    // max. length of a line
 #define MAX_SEGMENT_SIZE        4096  // maximum segment size
@@ -2479,7 +2474,6 @@ typedef ULONG EQFINFO, *PEQFINFO;
 typedef CHAR  OBJNAME[MAX_PATH144+MAX_FILESPEC];
 typedef OBJNAME *POBJNAME;
 typedef CHAR LANGUAGE[MAX_LANG_LENGTH];
-typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lotus
 typedef PUSHORT HUCB, *PHUCB;          // user control block handle
 typedef PUCHAR  HDCB, *PHDCB;          // dictionary control block handle
 typedef PVOID HLUPCB, *PHLUPCB;        // lookup control block handle
@@ -4951,20 +4945,7 @@ typedef enum {
 #define PROP_QUIT               0x00
 #define PROP_FILE               0x10
 
-//#define _PROPHEAD_SZNAME 13
-//#define _PROPHEAD_SZNAME MAX_FILESPEC
 
-#define _PROPHEAD_SZNAME 144
-//#define _PROPHEAD_SZPATH MAX_PATH144
-
-// Structure of properties heading area
-typedef struct _PROPHEAD
-{
-   USHORT usClass;              // Class name ID of properties
-   char chType;                 // Indicator to type of properties
-   //char dummy;                  // T=Template, I=Instance, N=New
-   char szName[_PROPHEAD_SZNAME];    // Path to properties
-} PROPHEAD, *PPROPHEAD;
 
 // list of internal code versions and current code version
 
