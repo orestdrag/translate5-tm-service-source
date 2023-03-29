@@ -248,7 +248,7 @@ struct ImportStatusDetails{
 */
 typedef struct _OPENEDMEMORY
 {
-char szName[260];               // name of the memory
+//char szName[260];               // name of the memory
 time_t tLastAccessTime;         // last time memory has been used
 long lHandle;                   // memory handle     
 MEMORY_STATUS eStatus;          // status of the memory
@@ -280,7 +280,7 @@ PPROP_NTM memoryProperties;
 //  } MEMORYINFO, *PMEMORYINFO;
 
 
-} OPENEDMEMORY, *POPENEDMEMORY;
+} OPENEDMEMORY ;
 
 
 

@@ -5,12 +5,12 @@
 #include "EQF.H"
 #include "FilesystemHelper.h"
 #include "tm.h"
+#include "EqfMemoryPlugin.h"
 
-
-POPENEDMEMORY TMManager::findOpenedMemory(const std::string& memName){
+std::shared_ptr<OPENEDMEMORY>  TMManager::findOpenedMemory(const std::string& memName){
     int index = findMemoryInList(memName);
     if(index != -1)
-        return &vMemoryList[index];
+        return EqfMemoryPlugin::GetInstance()->m_MemInfoVector[index];
     return nullptr;
 }
 
@@ -20,13 +20,13 @@ POPENEDMEMORY TMManager::findOpenedMemory(const std::string& memName){
 */
 int TMManager::findMemoryInList( const std::string& memName )
 {
-  if(vMemoryList.size()==0){
-    T5LOG( T5WARNING) <<"findMemoryInList:: vMemoryList.size == 0";
+  if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size()==0){
+    T5LOG( T5WARNING) <<"findMemoryInList:: EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size == 0";
   }
   // 
-  for( int i = 0; i < (int)vMemoryList.size(); i++ )
+  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if ( strcasecmp( vMemoryList[i].szName, memName.c_str() ) == 0 )
+    if ( strcasecmp( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName, memName.c_str() ) == 0 )
     {
       return( i );
     } /* endif */
@@ -38,11 +38,11 @@ int TMManager::findMemoryInList( const std::string& memName )
   \returns index if import process for any memory is going on, -1 if no
   */
 int TMManager::GetMemImportInProcess(){
-  for( int i = 0; i < (int)vMemoryList.size(); i++ )
+  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if(vMemoryList[i].eImportStatus == IMPORT_RUNNING_STATUS)
+    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->eImportStatus == IMPORT_RUNNING_STATUS)
     {
-      T5LOG( T5INFO) << ":: memory in import process, name = " << vMemoryList[i].szName ;
+      T5LOG( T5INFO) << ":: memory in import process, name = " << EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName ;
       return i;
     }
   } /* endfor */
@@ -64,9 +64,9 @@ int TMManager::getFreeSlot(size_t memoryRequested)
   char memFolder[260];
   properties_get_str(KEY_MEM_DIR, memFolder, 260);
 
-  for(int i = 0; i < vMemoryList.size() ;i++){
+  for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
     path = memFolder;
-    path += vMemoryList[i].szName;
+    path += EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName;
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
@@ -78,29 +78,27 @@ int TMManager::getFreeSlot(size_t memoryRequested)
   T5LOG( T5DEBUG) << ":: " << UsedMemory << " bytes is used from " << AllowedMemory << " allowed";
 
   // add a new entry when the maximum list size has not been reached yet
-  //if ( vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
+  //if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
   if( UsedMemory < AllowedMemory)
   {
     // first look for a free slot in the existing list
-    for( int i = 0; i < (int)vMemoryList.size(); i++ )
+    for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
     {
-      if ( vMemoryList[i].szName[0] == 0 )
+      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] == 0 )
       {
         return( i );
       } /* endif */
     } /* endfor */
     
-    OPENEDMEMORY NewEntry;
-    memset( &NewEntry, 0, sizeof(NewEntry) );
-    vMemoryList.push_back( NewEntry );
-    return( vMemoryList.size() - 1 );
+    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<OPENEDMEMORY>( OPENEDMEMORY()) );
+    return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() - 1 );
   } /* endif */  
 
   return( -1 );
 }
 
 
-POPENEDMEMORY TMManager::getFreeSlotPointer(size_t memoryRequested)
+std::shared_ptr<OPENEDMEMORY>  TMManager::getFreeSlotPointer(size_t memoryRequested)
 {
   size_t UsedMemory = 0;
   int AllowedMemoryMB;
@@ -112,9 +110,9 @@ POPENEDMEMORY TMManager::getFreeSlotPointer(size_t memoryRequested)
   char memFolder[260];
   properties_get_str(KEY_MEM_DIR, memFolder, 260);
 
-  for(int i = 0; i < vMemoryList.size() ;i++){
+  for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
     path = memFolder;
-    path += vMemoryList[i].szName;
+    path += EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName;
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
     UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
@@ -126,22 +124,19 @@ POPENEDMEMORY TMManager::getFreeSlotPointer(size_t memoryRequested)
   T5LOG( T5DEBUG) << ":: " << UsedMemory << " bytes is used from " << AllowedMemory << " allowed";
 
   // add a new entry when the maximum list size has not been reached yet
-  //if ( vMemoryList.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
+  //if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() < OTMMEMSERVICE_MAX_NUMBER_OF_OPEN_MEMORIES )
   if( UsedMemory < AllowedMemory)
   {
     // first look for a free slot in the existing list
-    for( int i = 0; i < (int)vMemoryList.size(); i++ )
+    for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
     {
-      if ( vMemoryList[i].szName[0] == 0 )
+      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] == 0 )
       {
-        return( &vMemoryList[i] );
+        return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i] );
       } /* endif */
     } /* endfor */
-    
-    OPENEDMEMORY NewEntry;
-    memset( &NewEntry, 0, sizeof(NewEntry) );
-    vMemoryList.push_back( NewEntry );
-    return( &vMemoryList[vMemoryList.size() - 1] );
+    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<OPENEDMEMORY> (OPENEDMEMORY()) );
+    return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() - 1] );
   } /* endif */  
 
   return( nullptr );
@@ -154,10 +149,10 @@ size_t TMManager::calculateOccupiedRAM(){
   #ifdef CALCULATE_ONLY_MEM_FILES
   properties_get_str(KEY_MEM_DIR, memFolder, 260);
   std::string path;
-  for(int i = 0; i < vMemoryList.size() ;i++){
-    if(vMemoryList[i].szName != 0){
+  for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
+    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName != 0){
       path = memFolder;
-      path += vMemoryList[i].szName;
+      path += EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName;
       UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
       UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
       UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
@@ -190,15 +185,15 @@ size_t TMManager::cleanupMemoryList(size_t memoryRequested)
   time_t curTime;
   time( &curTime );
   std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
-  for( int i = 0; i < (int)vMemoryList.size() ; i++ ){
-    if ( vMemoryList[i].szName[0] != 0 )
+  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
+    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
     {
-      openedMemoriesSortedByLastAccess.insert({vMemoryList[i].tLastAccessTime, i});
+      openedMemoriesSortedByLastAccess.insert({EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->tLastAccessTime, i});
     }
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    T5LOG( T5INFO) << ":: removing memory  \'"<< vMemoryList[it->second].szName << "\' that wasns\'t used for " << (curTime - vMemoryList[it->second].tLastAccessTime) <<  " seconds" ;
+    T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
     removeFromMemoryList(it->second);
     memoryNeed = memoryRequested + calculateOccupiedRAM();
   }
@@ -217,7 +212,7 @@ size_t TMManager::cleanupMemoryList(size_t memoryRequested)
 int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode )
 {
   *piErrorCode = 0;
-  POPENEDMEMORY pMem = findOpenedMemory( pszMemory );
+  std::shared_ptr<OPENEDMEMORY>  pMem = findOpenedMemory( pszMemory );
   if ( pMem != nullptr )
   {
     switch ( pMem->eStatus )
@@ -323,7 +318,7 @@ int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wc
 // update memory status
 void TMManager::importDone(const std::string& memName, int iRC, char *pszError )
 {
-  POPENEDMEMORY pMem = this->findOpenedMemory( memName );
+  std::shared_ptr<OPENEDMEMORY>  pMem = this->findOpenedMemory( memName );
   if ( pMem != nullptr )
   {
     if ( iRC == 0 )
@@ -350,9 +345,9 @@ void TMManager::importDone(const std::string& memName, int iRC, char *pszError )
 */
 int TMManager::closeAll()
 {
-  for ( int i = 0; i < ( int )vMemoryList.size(); i++ )
+  for ( int i = 0; i < ( int )EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if ( vMemoryList[i].szName[0] != 0 )
+    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
     {
       removeFromMemoryList( i );
     }
@@ -369,25 +364,25 @@ int TMManager::closeAll()
 */
 int TMManager::removeFromMemoryList( int iIndex )
 {
-  POPENEDMEMORY pMem = &vMemoryList[iIndex];
+  std::shared_ptr<OPENEDMEMORY>  pMem = EqfMemoryPlugin::GetInstance()->m_MemInfoVector[iIndex];
   LONG lHandle = pMem->lHandle;
   int i=0;
-  while(pMem->eStatus == IMPORT_RUNNING_STATUS || pMem->eImportStatus == IMPORT_RUNNING_STATUS ){
+  while(pMem.get()->eStatus == IMPORT_RUNNING_STATUS || pMem.get()->eImportStatus == IMPORT_RUNNING_STATUS ){
     sleep(1);
     if(i++ % 10 == 0){
-      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem->szName << "\', for " << i << " seconds";
+      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem.get()->szName << "\', for " << i << " seconds";
     }
   }
   // remove the memory from the list
-  pMem->lHandle = 0;
-  pMem->tLastAccessTime = 0;
-  pMem->szName[0] = 0;
+  pMem.get()->lHandle = 0;
+  pMem.get()->tLastAccessTime = 0;
+  pMem.get()->szName[0] = 0;
   if ( pMem->pszError ) delete[]  pMem->pszError ;
-  if( pMem->importDetails != nullptr){
-    delete pMem->importDetails;
-    pMem->importDetails = nullptr;
+  if( pMem.get()->importDetails != nullptr){
+    delete pMem.get()->importDetails;
+    pMem.get()->importDetails = nullptr;
   }
-  pMem->pszError = NULL;
+  pMem.get()->pszError = NULL;
 
   // close the memory
   EqfCloseMem( this->hSession, lHandle, 0 );
@@ -402,7 +397,7 @@ int TMManager::removeFromMemoryList( int iIndex )
     \param iIndex index of memory in the open list
   \returns 0 
 */
-int TMManager::removeFromMemoryList( POPENEDMEMORY pMem )
+int TMManager::removeFromMemoryList( std::shared_ptr<OPENEDMEMORY>  pMem )
 {
   LONG lHandle = pMem->lHandle;
   int i=0;
@@ -530,7 +525,7 @@ int TMManager::getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
-  POPENEDMEMORY pInfo
+  std::shared_ptr<OPENEDMEMORY>  pInfo
 )
 {
   int iRC = 0;
@@ -809,12 +804,12 @@ BOOL TMManager::exists(
 {
   BOOL fExists = FALSE;
 
-  OPENEDMEMORY *pInfo = new(OPENEDMEMORY);
+  std::shared_ptr<OPENEDMEMORY> pInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
   if (pszMemoryName && EqfMemoryPlugin::GetInstance()->getMemoryInfo( pszMemoryName, pInfo ) == 0 )
   {
     fExists = TRUE;
   } /* endif */         
-  delete( pInfo );
+  //delete( pInfo );
   return( fExists );
 }
 
@@ -1266,7 +1261,7 @@ OtmPlugin *TMManager::findPlugin
     }
     else
     { 
-     OPENEDMEMORY *pInfo = new(OPENEDMEMORY);
+     std::shared_ptr<OPENEDMEMORY> pInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
 
       // find plugin by querying memory info from all available plugins
       for ( std::size_t i = 0; i < pluginList->size(); i++ )
@@ -1278,7 +1273,8 @@ OtmPlugin *TMManager::findPlugin
           break;
         } /* endif */         
       } /* endfor */       
-      delete( pInfo );
+      
+      //delete( pInfo );
 
       if ( plugin == NULL )
       {
@@ -1969,7 +1965,7 @@ typedef struct _APILISTMEMDATA
 } APILISTMEMDATA, *PAPILISTMEMDATA;
 
 // callback function to add memory names to a list or update the length of the list
-int AddMemToList( void *pvData, char *pszName,POPENEDMEMORY pInfo )
+int AddMemToList( void *pvData, char *pszName,std::shared_ptr<OPENEDMEMORY>  pInfo )
 {
   PAPILISTMEMDATA pData = ( PAPILISTMEMDATA )pvData;
   LONG lNameLen = strlen( pszName );
@@ -2018,7 +2014,8 @@ USHORT TMManager::APIListMem
     OtmMemoryPlugin *pluginCurrent = ( *pluginList )[i];
 
     //pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
-    pluginCurrent->listMemories( AddMemToList, (void *)&Data, TRUE );
+    
+    //pluginCurrent->listMemories( AddMemToList, (void *)&Data, TRUE );
   } /* endfor */
 
   return( 0 );

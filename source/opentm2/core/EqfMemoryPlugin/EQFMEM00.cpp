@@ -35,11 +35,11 @@ BOOL MemCreatePath( PSZ pszString )
 {
   USHORT          usRc;
 
- POPENEDMEMORY pInfo = new( OPENEDMEMORY );
+ std::shared_ptr<OPENEDMEMORY>  pInfo = std::make_shared<OPENEDMEMORY> ( OPENEDMEMORY() );
   TMManager *pFactory = TMManager::GetInstance();
 
   usRc = (USHORT)-1;
-  if(pInfo != NULL && pFactory!= NULL)
+  if(pInfo.get() != NULL && pFactory!= NULL)
      usRc = (USHORT)pFactory->getMemoryInfo( NULL, pszString, pInfo );
 
   if (usRc == 0)
@@ -50,8 +50,8 @@ BOOL MemCreatePath( PSZ pszString )
   {
      *pszString = EOS;
   }
-  if(pInfo != NULL)
-      delete pInfo;
+  //if(pInfo.get() != NULL)
+  //    delete pInfo;
 
   return (usRc==0);
 } /* end of function MemCreatePath */
@@ -80,13 +80,13 @@ USHORT MemFuncDeleteMem( PSZ pszMemName )
     T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
   } /* endif */
 
- OPENEDMEMORY Info;
+  std::shared_ptr<OPENEDMEMORY> Info;
   TMManager *pFactory = TMManager::GetInstance();
   // check if there is a TM with the given name
   if ( usRC == NO_ERROR )
   {
       // check if memory existed
-      usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, &Info );
+      usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, Info );
       if (usRC != 0)
       {
         usRC = ERROR_MEMORY_NOTFOUND;              
@@ -236,15 +236,12 @@ USHORT EQFMemOrganizeStart
     if ( usRc )
     {
       int iRC = 0;
-     OPENEDMEMORY MemInfo;
+      std::shared_ptr<OPENEDMEMORY> MemInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
       OtmPlugin *pAnyPlugin = (OtmPlugin *)pRIDA->pMem->getPlugin();
-      if ( pAnyPlugin->getType() == OtmPlugin::eTranslationMemoryType )
-      {
-        OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pAnyPlugin;
-        pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );
-        pRIDA->pMem->getDescription( pRIDA->szBuffer, sizeof(pRIDA->szBuffer) );
-        pPlugin->getMemoryInfo( pRIDA->szMemName, &MemInfo );
-      }
+      OtmMemoryPlugin *pPlugin = (OtmMemoryPlugin *)pAnyPlugin;
+      pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );
+      pRIDA->pMem->getDescription( pRIDA->szBuffer, sizeof(pRIDA->szBuffer) );
+      pPlugin->getMemoryInfo( pRIDA->szMemName, MemInfo );
       
       strcpy( pRIDA->szPluginName, pAnyPlugin->getName() );
       strcpy( pRIDA->szTempMemName, "$Org-" );
@@ -256,10 +253,10 @@ USHORT EQFMemOrganizeStart
         pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
         T5Logger::GetInstance()->desuppressLogging(ll);
       }
-      if ( MemInfo.szFullPath[0] != '\0' )
+      if ( MemInfo.get()->szFullPath[0] != '\0' )
       {
         pRIDA->pMemTemp = pFactory->createMemory( pRIDA->szPluginName,
-             pRIDA->szTempMemName,  pRIDA->szBuffer,  pRIDA->szSourceLanguage, MemInfo.szFullPath[0], NULL, true, &iRC );
+             pRIDA->szTempMemName,  pRIDA->szBuffer,  pRIDA->szSourceLanguage, MemInfo.get()->szFullPath[0], NULL, true, &iRC );
       }
       else
       {

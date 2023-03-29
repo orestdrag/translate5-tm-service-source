@@ -125,7 +125,7 @@ public:
 */
 	int getMemoryInfo(
 		const char* pszName,
-    POPENEDMEMORY pInfo
+    std::shared_ptr<OPENEDMEMORY>  pInfo
 	);
 
 /*! \brief set description of a memory
@@ -302,11 +302,14 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
 	int iLastError;
 	std::string strLastError;
 
+  
+  std::vector< std::shared_ptr<OPENEDMEMORY> > m_MemInfoVector;
+
 private:
 
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
   void refreshMemoryList();
- POPENEDMEMORY findMemory( const char *pszName );
+ std::shared_ptr<OPENEDMEMORY>  findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);
 /*! \brief Create memory properties
   \param pszName long name of the memory
@@ -348,7 +351,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	\param pInfo pointer to memory info structure
 	\returns TRUE when successful, FALSE in case of errors
 */
-  BOOL fillInfoStructure( char *pszPropName, POPENEDMEMORY pInfo );
+  BOOL fillInfoStructure( char *pszPropName, std::shared_ptr<OPENEDMEMORY>  pInfo );
 
 	std::string name;
 	std::string shortDesc;
@@ -356,7 +359,6 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	std::string version;
 	std::string supplier;
 	std::string descrType;
-  std::vector< std::shared_ptr<OPENEDMEMORY> > m_MemInfoVector;
   char szBuffer[4000];                         // general purpose buffer area
   char szSupportedDrives[27]; // list of supported drives
 
