@@ -3650,20 +3650,6 @@ typedef enum _CHARTABLEID
 /**********************************************************************/
 #define WC_EQF_CLBCLASS "EqfCLB"       // window class for CLB
 
-/**********************************************************************/
-/* Error code returned by UtlGetLANUserID function                    */
-/**********************************************************************/
-#define LANUID_NO_LAN            1000
-#define LANUID_REQ_NOT_STARTED   1001
-#define LANUID_USER_NOT_LOG_ON   1002
-#define LANUID_OTHER_ERROR       (-1)
-
-/**********************************************************************/
-/* User types returned by UtlGetLANUserID function                    */
-/**********************************************************************/
-#define USER_GUEST               0
-#define USER_USER                1
-#define USER_ADMIN               2
 
 /**********************************************************************/
 /* Buffer size for UtlGetLANUserID function                           */
@@ -3785,8 +3771,6 @@ typedef ULONG HPRINT, *PHPRINT;
             BOOL fMsg, HWND hwndParent );
     BOOL    UtlIsEqfDrive( CHAR chDrive );
     BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
-    USHORT  UtlGetLANUserID( PSZ pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
-    USHORT  UtlGetLANUserIDW( PSZ_W pszLANUserID, USHORT *pusUserPriv, USHORT usMsgHandling );
     char*     UtlGetFnameFromPath( const char* path);
     PSZ     UtlMakeObjName( PSZ p, PSZ drive, PSZ path, PSZ fname, PSZ ext);
     VOID UtlMakeFNameAndPath( PSZ, PSZ, PSZ );

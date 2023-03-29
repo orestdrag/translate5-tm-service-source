@@ -178,7 +178,6 @@ typedef struct _BTREEGLOB
    USHORT       usVersion;                        // version identification...
    CHAR         chEQF[7];                         // The type of file
    BYTE         bVersion;                         // version flag
-   BOOL         fTransMem;                        // translation memory???
    USHORT       usOpenFlags;                      // settings used for open
    LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
    HFILE        fpDummy;                          // dummy/lock semaphore file handle
@@ -211,7 +210,6 @@ typedef struct _BTREEIDA
    CHAR         chServer[ MAX_SERVER_NAME + 1];   // server name
    struct       _BTREEIDA  *  pBTreeRemote;       // pointer to remote BTREE
    CHAR         szUserId [MAX_USERID];            // logged on userid
-   BOOL         fPhysLock;                        // db has been physically locked
    CHAR         szFileName[MAX_LONGPATH];         // fully qualified name of file
  } BTREE, * PBTREE, ** PPBTREE;
 

@@ -1533,15 +1533,9 @@ SHORT QDAMDictUpdateLocal
           sRc = BTREE_DATA_RANGE;
         }
         else
-        {
-          if ( pBT->fTransMem )
-          {
-            memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG));   // save data
-          }
-          else
-          {
-            UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-          } /* endif */
+        {         
+          memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG));   // save data
+          
           QDAMDictUpdStatus( pBTIda );
           sRc = QDAMFindRecord_V3( pBTIda, pKey, &pRecord );
         } /* endif */
@@ -1790,14 +1784,8 @@ SHORT QDAMDictExactLocal
                  pBTIda->sCurrentIndex = i;
                  pBTIda->usCurrentRecord = RECORDNUM( pRecord );
 
-                 if ( pBT->fTransMem )
-                 {
-                   memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG) );  // save data
-                 }
-                 else
-                 {
-                   UTF16strcpy( pBTIda->chHeadTerm, pKey );          // save current data
-                 } /* endif */
+                 memcpy( pBTIda->chHeadTerm, pKey, sizeof(ULONG) );  // save data
+                 
                  recData = QDAMGetrecData_V3( pRecord, i, pBT->usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )
                  {
