@@ -144,6 +144,7 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/EqfMemoryPlugin/GenericTagReplace.cpp"
 
     "${CORE_DIR}/tm.cpp"
+    "${CORE_DIR}/requestdata.cpp"
 )
 
 set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )

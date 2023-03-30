@@ -18,7 +18,7 @@
 #include "ProxygenStats.h"
 //#include "EQFFUNCI.H"
 #include "tm.h"
-
+#include "requestdata.h"
 
 
 /*! \brief constant defining the timeout for memories (in number of seconds)
@@ -34,14 +34,6 @@ class OtmMemoryServiceWorker
 {
   std::string printTime(time_t time);
 public:
-
-
-/*! \brief Error return codes
-  */
-#define ERROR_INTERNALFUNCTION_FAILED  14001
-#define ERROR_INPUT_PARMS_INVALID      14002
-#define ERROR_TOO_MANY_OPEN_MEMORIES   14003
-#define ERROR_MEMORY_NOT_FOUND         14004
 
   /*! \brief OtmMemoryServiceWorker constructor
   */
