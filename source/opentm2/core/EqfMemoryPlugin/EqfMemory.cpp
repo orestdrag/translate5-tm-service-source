@@ -165,7 +165,7 @@ void EqfMemory::setDescription
 
     // get current signature record
     USHORT usSignLen = sizeof(TMX_SIGN);
-    USHORT usRc = EQFNTMSign1( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, &usSignLen );
+    USHORT usRc = pTmClb->pstTmBtree->EQFNTMSign((PCHAR)pTmSign, &usSignLen );
     fOK = (usRc == NO_ERROR);
 
      // update description field
@@ -181,7 +181,7 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
-       usRc = EQFNTMUpdSign( this->pTmClb->pstTmBtree, (PCHAR)pTmSign, sizeof(TMX_SIGN) );
+       usRc = pTmClb->pstTmBtree->EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
        fOK = (usRc == NO_ERROR);
       } /* endif */
 
@@ -246,8 +246,8 @@ unsigned long EqfMemory::getFileSize()
 
   if ( pTmClb != NULL )
   {
-    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->pBTree->fp );
-    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->pBTree->fp );
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->fp );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->fp );
 
     ulFileSize = ulDataSize + ulIndexSize;
   }
@@ -656,7 +656,7 @@ unsigned long EqfMemory::getProposalNum()
   ULONG ulNextKey = 0;
 T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);";
 #ifdef TEMPORARY_COMMENTED
-  EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
+  pTmClb->pstTmBtree->EQFNTMGetNextNumber( &ulStartKey, &ulNextKey);
 #endif //TEMPORARY_COMMENTED
   return( (int)(ulNextKey - ulStartKey) );
 }

@@ -52,7 +52,7 @@
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 //#include "EQFMEM.ID" // Translation Memory IDs
 // #include <TIME.H>                 // C time functions
-#include <EQFQDAM.H>            // Low level TM access functions
+#include "otm.h" 
 #include "tm.h"
 
 // the name of the default memory plugin

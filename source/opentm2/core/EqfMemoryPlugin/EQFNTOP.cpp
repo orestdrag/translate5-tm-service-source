@@ -107,7 +107,7 @@ USHORT TmtXOpen
       //get signature record and add to control block
       USHORT usLen = sizeof( TMX_SIGN );
 
-      usRc = EQFNTMSign1( pTmClb->pstTmBtree, (PCHAR) &(pTmClb->stTmSign), &usLen );
+      usRc = pTmClb->pstTmBtree->EQFNTMSign((PCHAR) &(pTmClb->stTmSign), &usLen );
 
       if ( usRc == NO_ERROR )
       {
@@ -134,7 +134,7 @@ USHORT TmtXOpen
         {          
           ulLen =  MAX_COMPACT_SIZE-1;
           //get compact area and add to control block
-          USHORT usTempRc = EQFNTMGet( pTmClb->pstTmBtree, COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
+          USHORT usTempRc =  pTmClb->pstTmBtree->EQFNTMGet( COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
 
           // in organize mode allow continue if compact area is corrupted
           if ( (usTempRc != NO_ERROR) && (usTempRc != VERSION_MISMATCH) )

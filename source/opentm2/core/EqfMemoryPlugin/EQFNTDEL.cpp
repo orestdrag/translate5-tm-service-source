@@ -157,7 +157,7 @@ USHORT TmtXDelSegm
         {
           ulKey = *pulSids;
           ulLen = TMX_REC_SIZE;
-          usRc = EQFNTMGet( pTmClb->pstTmBtree,
+          usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                             ulKey,  //tm record key
                             (PCHAR)pTmRecord,   //pointer to tm record data
                             &ulLen );  //length
@@ -169,7 +169,7 @@ USHORT TmtXDelSegm
             {
               ulRecBufSize = ulLen;
 
-              usRc = EQFNTMGet( pTmClb->pstTmBtree,
+              usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                                 ulKey,
                                 (PCHAR)pTmRecord,
                                 &ulLen );
@@ -483,7 +483,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                           /*  by a new translation, we will not remove  */
                           /* the key (only get rid of any target data)  */
                           /**********************************************/
-                          usRc = EQFNTMUpdate( pTmClb->pstTmBtree,
+                          usRc = pTmClb->pstInBtree->EQFNTMUpdate(
                                                *pulKey,
                                                (PBYTE)pTmRecord,
                                                RECLEN(pTmRecord) );
