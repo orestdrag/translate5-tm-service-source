@@ -16,8 +16,7 @@
 #define MAX_UPD_CTR        10          // max number of update counters
 
 #define MAX_LONGPATH           260     // max length of fully qualified path
-
-
+typedef char * PSZ;
 
 typedef struct _RECPARAM
 {
@@ -303,7 +302,6 @@ struct TMX_CLB
   BYTE     bCompact[MAX_COMPACT_SIZE-1];
   BYTE     bCompactChanged;
   LONG     alUpdCounter[MAX_UPD_COUNTERS];
-  //BOOL     fShared;
   PTMX_LONGNAME_TABLE pLongNames;
   PTMX_TABLE pLangGroups;              //  table containing language group names
   PSHORT     psLangIdToGroupTable;     // language ID to group ID table
@@ -322,7 +320,6 @@ struct TMX_CLB
   PVOID      pvIndexRecord;          // index record area of FillMatchEntry function
   PVOID      pvTmRecord;             // buffer for memory record used by GetFuzzy and GetExact
   ULONG      ulRecBufSize;           // current size of pvTMRecord;
-  PVOID      pvNotUsed[10];          // room for additional pointers and size values
 
   // fields for time measurements and logging
   BOOL       fTimeLogging;           // TRUE = Time logging is active
@@ -344,7 +341,7 @@ struct TMX_CLB
   LONG64     lFillMatchFill2Time;     // FillMatchEntry: fill match list time
   LONG64     lFillMatchFill3Time;     // FillMatchEntry: fill match list time
   LONG64     lFillMatchFill4Time;     // FillMatchEntry: fill match list time
-  LONG64     lNotUsed[7];           // room for more counters
+  
 };
 
 typedef TMX_CLB* PTMX_CLB;

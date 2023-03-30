@@ -102,9 +102,38 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
   T5LOG( T5DEBUG) << ":: create the memory" ;    
   strLastError = "";
   iLastError = 0;
+  EqfMemory * pNewMemory = nullptr;
+  HTM htm = NULL;                      // memory handle 
+  std::string strMemPath;
+  BOOL fReserved = FALSE;
 
-  auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str() );
-  if ( pMemory == NULL ){
+  //auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str() );
+  {
+    //lock filesystem
+    
+    // build memory path and reserve a short name
+    this->makeMemoryPath( (PSZ)request.strMemName.c_str(), strMemPath, &fReserved );
+
+    // use old memory create code
+    TmCreate(  (PSZ)strMemPath.c_str(), &htm, (PSZ)request.strSrcLang.c_str(),  (PSZ)request.strMemDescription.c_str() );
+
+
+    // setup memory properties
+    this->createMemoryProperties( (PSZ)request.strMemName.c_str(), strMemPath, (PSZ)request.strMemDescription.c_str(), (PSZ)request.strSrcLang.c_str() );
+    
+    // create memory object if create function completed successfully
+    pNewMemory = new EqfMemory( this, htm, (PSZ)request.strMemName.c_str() );
+
+
+    // add memory info to our internal memory list
+    if ( pNewMemory != nullptr ) this->addToList( strMemPath );
+    
+  }//createMemory code
+  //return( (EqfMemory *)pNewMemory );
+  
+
+  // check mem
+  if ( pNewMemory == NULL ){
     request._rc_ = getLastError( strLastError );
     T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  request._rc_;
   }
@@ -112,15 +141,15 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
     T5LOG( T5INFO) << "::Create successful ";
     // get memory object name
     char szObjName[MAX_LONGFILESPEC];
-    request._rc_ = TMManager::GetInstance()->getObjectName( pMemory, szObjName, sizeof(szObjName) );
+    request._rc_ = TMManager::GetInstance()->getObjectName( pNewMemory, szObjName, sizeof(szObjName) );
   }
  
   //--- Tm is created. Close it. 
-  if ( pMemory != NULL )
+  if ( pNewMemory != NULL )
   {
     T5LOG( T5INFO ) << "::Tm is created. Close it";
-    TMManager::GetInstance()->closeMemory( pMemory );
-    pMemory = NULL;
+    TMManager::GetInstance()->closeMemory( pNewMemory );
+    pNewMemory = NULL;
   }
   T5LOG( T5INFO) << " done, usRC = " << request._rc_ ;
 
@@ -151,7 +180,7 @@ EqfMemory* EqfMemoryPlugin::createMemory(
   this->makeMemoryPath( pszName, strMemPath, &fReserved );
 
   // use old memory create code
-  TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  (PSZ)pszSourceLang,  (PSZ)pszDescription,  0,  NULL );
+  TmCreate(  (PSZ)strMemPath.c_str(), &htm, (PSZ)pszSourceLang,  (PSZ)pszDescription );
 
 
   // setup memory properties
