@@ -156,7 +156,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     url = url.substr(urlSeparator + 1);
     
-    std::string urlMemName, urlCommand;
+    std::string urlMemName;
+    std::string urlCommand;
     if( urlService == additionalServiceName ){
       if( url.size() ){
         urlSeparator = url.find("/");
@@ -173,7 +174,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           urlMemName = url;
         }else{
           urlMemName = url.substr(0, urlSeparator);
-          restoreBlanks(urlMemName);
           url = url.substr(urlSeparator + 1);
 
           if(url.size()){
@@ -187,6 +187,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }
+
+    restoreBlanks(urlMemName);
     requestHandler->memName = urlMemName; 
 
     if( urlCommand.empty() ){
