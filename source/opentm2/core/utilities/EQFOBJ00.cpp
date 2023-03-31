@@ -12,7 +12,7 @@
 #include "EQF.H"                  // General .H for EQF
 #include "EQFOBJ00.H"             // Object manager defines
 #include "EQFSETUP.H"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "win_types.h"
 #include "FilesystemWrapper.h"
 #include "FilesystemHelper.h"
@@ -419,7 +419,7 @@ USHORT CreateMemFile
   // setup search path and path of full object name depending on object type
   if ( usRC == NO_ERROR )
   {
-    properties_get_str(KEY_MEM_DIR, szFullMemPath, MAX_EQF_PATH);
+    Properties::GetInstance()->get_value(KEY_MEM_DIR, szFullMemPath, MAX_EQF_PATH);
     strcat( szFullMemPath, BACKSLASH_STR );
     strcat( szFullMemPath, pszOrgName );
     strcat( szFullMemPath, ".MEM" );

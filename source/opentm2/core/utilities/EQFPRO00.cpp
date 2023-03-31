@@ -15,7 +15,7 @@
 
 #include <pthread.h>
 #include "LogWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "FilesystemHelper.h"
 #include "EQFSETUP.H"
 // activate the following define for property failure logging
@@ -781,7 +781,7 @@ BOOL PropHandlerInitForBatch( void )
   memset( pPropBatchIda, NULC, sizeof( *pPropBatchIda));
   size = sizeof(pPropBatchIda->IdaHead.szObjName);
   pPropBatchIda->IdaHead.pszObjName = pPropBatchIda->IdaHead.szObjName;
-  //properties_get_str(KEY_OTM_DIR, pPropBatchIda->IdaHead.pszObjName, size);
+  //Properties::GetInstance()->get_value(KEY_OTM_DIR, pPropBatchIda->IdaHead.pszObjName, size);
   //strcat(pPropBatchIda->IdaHead.pszObjName, "/EQFSYSW.PRP");
   strcpy(pPropBatchIda->IdaHead.pszObjName, SYSTEM_PROPERTIES_NAME);
 

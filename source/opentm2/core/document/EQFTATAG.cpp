@@ -16,7 +16,7 @@
 
 #include "EQFTAI.H"               // Private include file for Text Analysis
 #include "../utilities/LogWrapper.h"
-#include "../utilities/PropertyWrapper.H"
+#include "../utilities/Property.h"
 #include "../utilities/FilesystemHelper.h"
 
 /**********************************************************************/
@@ -202,7 +202,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       if ( fInternal //|| true
       )
       {
-        properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
+        Properties::GetInstance()->get_value(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );
         strcat( szTagTableFileName, EXT_OF_INTTABLE );
@@ -210,7 +210,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
       else
       {
         //T5LOG( T5DEBUG) <<"TEMPORARY HARDCODED table name for ", pszTableName);
-        properties_get_str(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
+        Properties::GetInstance()->get_value(KEY_OTM_DIR, szTagTableFileName, MAX_EQF_PATH);
         strcat( szTagTableFileName,"/TABLE/");
         strcat( szTagTableFileName, pszTableName );
         strcat( szTagTableFileName, EXT_OF_FORMAT );

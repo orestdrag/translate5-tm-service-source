@@ -52,6 +52,12 @@ protected:
     virtual int execute() = 0;
 };
 
+USHORT
+NTMFillCreateInStruct( const char*,
+                       const char*,
+                       const char*,
+                       PTMX_CREATE_IN
+                       );
 
 class CreateMemRequestData: public RequestData{
     protected:
@@ -61,7 +67,13 @@ class CreateMemRequestData: public RequestData{
 
     int importInInternalFomat();
     int createNewEmptyMemory();
+
+  
     public:
+
+    TMX_CREATE_IN   CreateIn;    //pointer to create input structure
+    TMX_CREATE_OUT  CreateOut;   //pointer to create output structure
+    
     std::string strSrcLang;
     std::string strMemDescription;
     std::string strMemB64EncodedData; // for import in internal format

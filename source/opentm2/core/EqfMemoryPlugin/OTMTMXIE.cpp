@@ -29,7 +29,7 @@
 
 #include "win_types.h"
 #include "LogWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "FilesystemHelper.h"
 #include "OSWrapper.h"
 #include "../../../cmake/git_version.h"
@@ -1432,7 +1432,7 @@ USHORT CTMXExportImport::StartImport
   if ( !usRC )
   {
     // setup tempory file name
-    properties_get_str(KEY_MEM_DIR, this->m_TempFile, sizeof(this->m_TempFile));
+    Properties::GetInstance()->get_value(KEY_MEM_DIR, this->m_TempFile, sizeof(this->m_TempFile));
     //UtlMakeEQFPath( this->m_TempFile, NULC, MEM_PATH, NULL );
     strcat( this->m_TempFile, BACKSLASH_STR );
     if ( strchr( (PSZ)pszInFile, '/' ) == NULL )

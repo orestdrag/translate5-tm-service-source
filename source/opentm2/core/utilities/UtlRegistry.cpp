@@ -7,12 +7,12 @@
 //+----------------------------------------------------------------------------+
 #include "EQF.H"
 #include <string>
-#include "PropertyWrapper.H"
+#include "Property.h"
 
 // get a string from the registry
 BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize, PSZ pszDefault )
 {
-  int res  = properties_get_str_or_default(pszKey, pszBuffer, iBufSize,pszDefault);
+  int res  = Properties::GetInstance()->get_value_or_default(pszKey, pszBuffer, iBufSize,pszDefault);
   return( res );
 } /* end of function GetStringFromRegistry */
 
@@ -20,14 +20,14 @@ BOOL GetStringFromRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszBuffer, int iBufSize
 int GetIntFromRegistry( PSZ pszAppl, PSZ pszKey, int iDefault )
 {  
   int iResult = 0;
-  int res  = properties_get_int_or_default(pszKey, iResult, iDefault);
+  int res  = Properties::GetInstance()->get_value_or_default(pszKey, iResult, iDefault);
   return( iResult );
 } /* end of function GetIntFromRegistry */
 
 // write a string to the registry
 BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 {
-  int res = properties_set_str_anyway(pszKey, pszValue);
+  int res = Properties::GetInstance()->set_anyway(pszKey, pszValue);
   
   return res == PROPERTY_NO_ERRORS;
 } /* end of function WriteStringToRegistry */
@@ -35,7 +35,7 @@ BOOL WriteStringToRegistry( PSZ pszAppl, PSZ pszKey, PSZ pszValue )
 // write a int to the registry
 BOOL WriteIntToRegistry( PSZ pszAppl, PSZ pszKey, int iValue )
 {
-  int res = properties_set_int_anyway(pszKey, iValue);
+  int res = Properties::GetInstance()->set_anyway(pszKey, iValue);
   
   return res == PROPERTY_NO_ERRORS;
 

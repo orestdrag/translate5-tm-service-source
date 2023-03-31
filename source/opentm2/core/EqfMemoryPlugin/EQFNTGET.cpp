@@ -28,7 +28,7 @@
 #include "MarkupPluginMapper.H"
 #include <map>
 #include "../utilities/LogWrapper.h"
-#include "../utilities/PropertyWrapper.H"
+#include "../utilities/Property.h"
 #include "../utilities/EncodingHelper.h"
 
 // import logging 
@@ -350,7 +350,7 @@ USHORT TmtXGet
   if ( !usRc )
   {
     //build tag table path
-    properties_get_str(KEY_OTM_DIR, szString, sizeof(szString));
+    Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, sizeof(szString));
     strcat( szString, "/TABLE/");
     strcat( szString, pTmGetIn->stTmGet.szTagTable ); 
     strcat( szString, EXT_OF_FORMAT );

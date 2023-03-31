@@ -65,7 +65,7 @@
 #ifdef _WINDOWS
   #include <direct.h>
 #endif
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "FilesystemHelper.h"
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
@@ -133,26 +133,19 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 //+----------------------------------------------------------------------------+
 
 int init_properties(){
-  if (int rc = properties_init()) {
-        T5LOG(T5FATAL) << "Error in init_properties::Failed to initialize property file" << rc;
-        return rc;
-    }
-
     char version[20];
-    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
 
-    properties_add_str(KEY_Vers, version);
-    properties_add_str(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    properties_add_str(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
-    properties_add_str("CurVersion", version);
+    Properties::GetInstance()->add_key(KEY_Vers, version);
+    Properties::GetInstance()->add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
+    Properties::GetInstance()->add_key(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
+    Properties::GetInstance()->add_key("CurVersion", version);
     return 0;
 
 }
 
 
 int SetupMAT() {
-    properties_turn_off_saving_in_file(); // we don't have path for file to save till the end of this function
-
     init_properties();
 
     auto homeDir = filesystem_get_home_dir();
@@ -161,11 +154,8 @@ int SetupMAT() {
     std::string otmPath = otmDir +'/' + SYSTEM_PROPERTIES_NAME;
     CreateSystemProperties(otmPath.c_str());
 
-    properties_turn_on_saving_in_file();
-
     if(!homeDir.empty())
-      properties_add_str(KEY_Drive, homeDir.c_str());
-    //properties_deinit();
+      Properties::GetInstance()->add_key(KEY_Drive, homeDir);
     return 0;
 }
 

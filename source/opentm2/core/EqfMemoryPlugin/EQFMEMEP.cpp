@@ -44,7 +44,7 @@
 #define INCL_EQF_DAM
 
 #include "../utilities/FilesystemWrapper.h"
-#include "../utilities/PropertyWrapper.H"
+#include "../utilities/Property.h"
 #include "../utilities/FilesystemHelper.h"
 #include "../utilities/EqfPluginWrapper.h"
 #include "../pluginmanager/PluginManager.h"

@@ -25,7 +25,7 @@
 #include "EQF.H"
 #include "OtmMemoryServiceWorker.h"
 #include "../opentm2/core/utilities/LogWrapper.h"
-#include "../opentm2/core/utilities/PropertyWrapper.H"
+#include "../opentm2/core/utilities/Property.h"
 #include "../opentm2/core/utilities/FilesystemWrapper.h"
 #include "../opentm2/core/utilities/LanguageFactory.H"
 #include "../cmake/git_version.h"
@@ -338,16 +338,16 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     }
     #endif
 
-    properties_set_str_anyway(KEY_SERVICE_URL, szServiceName);
-    properties_set_str_anyway(KEY_OTM_DIR, szOtmDirPath);
-    properties_set_int_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
-    properties_set_int_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
-    properties_set_int_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
-    properties_set_int_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
+    Properties::GetInstance()->set_anyway(KEY_SERVICE_URL, szServiceName);
+    Properties::GetInstance()->set_anyway(KEY_OTM_DIR, szOtmDirPath);
+    Properties::GetInstance()->set_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
+    Properties::GetInstance()->set_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
+    Properties::GetInstance()->set_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
+    Properties::GetInstance()->set_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
 
     std::string memDir = szOtmDirPath;
     memDir += "/MEM/";
-    properties_add_str(KEY_MEM_DIR, memDir.c_str());
+    Properties::GetInstance()->add_key(KEY_MEM_DIR, memDir.c_str());
 
     //From here we have logging in file turned on
     T5Logger::GetInstance()->DesuppressLoggingInFile();
@@ -385,7 +385,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     OtmMemoryServiceWorker::getInstance()->init();
     
     std::string runDate = getTimeStr();
-    properties_set_str_anyway(KEY_RUN_DATE, runDate.c_str());
+    Properties::GetInstance()->set_anyway(KEY_RUN_DATE, runDate);
 
     //read languages.xml
     LanguageFactory *pLangFactory = LanguageFactory::getInstance();

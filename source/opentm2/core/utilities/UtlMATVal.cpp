@@ -7,7 +7,7 @@
 #include "EQF.H"                  // General Translation Manager include file
 #include "Utility.h"
 #include "win_types.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
 #include <stdlib.h>

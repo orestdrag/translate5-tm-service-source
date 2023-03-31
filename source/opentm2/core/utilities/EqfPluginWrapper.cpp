@@ -1,6 +1,6 @@
 #include "EqfPluginWrapper.h"
 #include "EQF.H"
-#include "PropertyWrapper.H"
+#include "Property.h"
 
 void EqfPluginWrapper::init(){
 

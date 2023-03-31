@@ -16,7 +16,7 @@
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/FilesystemHelper.h"
 #include "cmake/git_version.h"
-#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "opentm2/core/utilities/Property.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 #include "EQF.H"
 

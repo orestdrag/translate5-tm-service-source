@@ -1,6 +1,6 @@
 #include "FilesystemHelper.h"
 #include "FilesystemWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "EQF.H"
 #include <fstream>
 #include <cstring>
@@ -22,6 +22,11 @@
 #include <folly/portability/GFlags.h>
 
 int __last_error_code = 0;
+
+std::string FilesystemHelper::_memDir;
+std::string FilesystemHelper::_tableDir;
+std::string FilesystemHelper::_homeDir;
+std::string FilesystemHelper::_otmDir;
 
 PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     static FileBufferMap map;
@@ -98,8 +103,8 @@ std::string FilesystemHelper::FixPath(std::string& path){
     //
     if(path.find('/') == std::string::npos){
         char folderPath[255];
-        properties_get_str(KEY_OTM_DIR, folderPath,255);
-        properties_get_str_or_default(KEY_DEFAULT_DIR, folderPath, 255, folderPath);
+        Properties::GetInstance()->get_value(KEY_OTM_DIR, folderPath,255);
+        Properties::GetInstance()->get_value_or_default(KEY_DEFAULT_DIR, folderPath, 255, folderPath);
         path = std::string(folderPath) + '/' + path;
     }
     //fix back slash 
@@ -978,36 +983,45 @@ int FilesystemHelper::ResetLastError(){
 
 
 std::string FilesystemHelper::GetOtmDir(){
-    const int maxPath = 255;
-    char OTMdir[maxPath];
-    int res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
-    
-    //property OTM_dir must be saved during property_init, if not setup- then there were not property_init_call
-    if(!strlen(OTMdir) || res != PROPERTY_NO_ERRORS){
-        T5LOG( T5WARNING) << "FilesystemHelper::GetOtmDir()::can't access OTM dir->try to init properties.\n res = " <<res << ", OTMdir = " << OTMdir;
-        properties_init();
-        res = properties_get_str(KEY_OTM_DIR, OTMdir, maxPath);
-    }
-
-    return OTMdir;
+    return _otmDir;
 }
-
 std::string FilesystemHelper::GetHomeDir(){
-    int maxPath = 255;
-    char HOMEdir[maxPath];
-    int res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
-    
-    //property HOME_Dir must be saved during property_init, if not setup- then there were not property_init_call
-    if(!strlen(HOMEdir) || res != PROPERTY_NO_ERRORS){
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-            T5LOG( T5WARNING) << "FilesystemHelper::GetHomeDir()::can't access Home dir->try to init properties.\n res = " <<  res << ", OTMdir = " << HOMEdir;
-        }
-        properties_init();
-        res = properties_get_str(KEY_HOME_DIR, HOMEdir, maxPath);
-    }
-    return HOMEdir;
+    return _homeDir;
 }
 
+
+#define HOME_ENV "HOME"
+int FilesystemHelper::init(){
+    char* _home_dir = getenv(HOME_ENV);
+    if (!_home_dir || !strlen(_home_dir)){         
+        struct passwd *pswd = getpwuid(getuid());        
+        if (!pswd){
+            T5LOG(T5ERROR) << "::ERROR_FILE_CANT_GET_USER_PSWD";
+            return FILEHELPER_ERROR_FILE_CANT_GET_USER_PSWD;
+        }
+        _home_dir = pswd->pw_dir;
+        if (!strlen(_home_dir)){
+            T5LOG(T5ERROR) << "::ERROR_FILE_CANT_GET_HOME_DIR";
+            return FILEHELPER_ERROR_FILE_CANT_GET_HOME_DIR;
+        }
+        _homeDir = _home_dir;
+        _otmDir = _homeDir + "/.t5memory/";
+        _memDir = _otmDir +"MEM/";
+        _tableDir = _otmDir +"TABLE/";
+        return 0;
+    }
+    return -1;
+}
+
+std::string FilesystemHelper::GetMemDir(){
+    return _memDir;
+}
+
+std::string FilesystemHelper::GetTableDir(){
+    return _tableDir;
+}
+
+    
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;
     int ret = stat(dir.c_str(), &st);

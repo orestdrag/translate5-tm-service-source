@@ -19,7 +19,7 @@
 //#include "EQFUTILS.ID" // IDs used by dialog utilities
 #include "EQFTA.H"                  // required for TAAdjustWhiteSpace prototype
 
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "win_types.h"
 #include "FilesystemWrapper.h"
 #include "LogWrapper.h"
@@ -513,25 +513,25 @@ BOOL UtlInitUtils( HAB hab )
 
    // set version info in registry
    char version[20];
-   properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+   Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
    WriteStringToRegistry( "OpenTM2", "CurVersion", version );
 
    //--- get profile information --- 
-   int retCode = properties_get_int_or_default("iDate", iTemp, MDY_DATE_FORMAT);
+   int retCode = Properties::GetInstance()->get_value_or_default("iDate", iTemp, MDY_DATE_FORMAT);
    UtiVar[usId].usDateFormat = iTemp;
 
-   retCode = properties_get_str_or_default("iTime", chTemp, 2, "/");
+   retCode = Properties::GetInstance()->get_value_or_default("iTime", chTemp, 2, "/");
    UtiVar[usId].usDateFormat = (unsigned short)strlen(chTemp);
    UtiVar[usId].chDateSeperator = chTemp[0];
 
-   retCode = properties_get_int_or_default("iTime", iTemp, S_12_HOURS_TIME_FORMAT);
+   retCode = Properties::GetInstance()->get_value_or_default("iTime", iTemp, S_12_HOURS_TIME_FORMAT);
    UtiVar[usId].usTimeFormat = iTemp;
-   retCode = properties_get_str_or_default("sTime", chTemp, 2, ":");
+   retCode = Properties::GetInstance()->get_value_or_default("sTime", chTemp, 2, ":");
    UtiVar[usId].chTimeSeperator = chTemp[0];
     
-   retCode = properties_get_str_or_default("s1159", UtiVar[usId].szTime1159, sizeof(UtiVar[usId].szTime1159), "AM");
+   retCode = Properties::GetInstance()->get_value_or_default("s1159", UtiVar[usId].szTime1159, sizeof(UtiVar[usId].szTime1159), "AM");
 
-   retCode = properties_get_str_or_default("s2359", UtiVar[usId].szTime2359, sizeof(UtiVar[usId].szTime2359), "PM");
+   retCode = Properties::GetInstance()->get_value_or_default("s2359", UtiVar[usId].szTime2359, sizeof(UtiVar[usId].szTime2359), "PM");
 
    /**********************************************************************/
    /* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
