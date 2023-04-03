@@ -340,6 +340,9 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     }
 }
 
+int FileBuffer::ReadFromFile(){return -1;}
+int FileBuffer::WriteToFile(){return -1;}
+
 
 /*
 int FilesystemHelper::DeleteFile(FILE*  ptr){
@@ -993,23 +996,23 @@ std::string FilesystemHelper::GetHomeDir(){
 #define HOME_ENV "HOME"
 int FilesystemHelper::init(){
     char* _home_dir = getenv(HOME_ENV);
+    struct passwd *pswd = nullptr;
     if (!_home_dir || !strlen(_home_dir)){         
-        struct passwd *pswd = getpwuid(getuid());        
+        pswd = getpwuid(getuid());        
         if (!pswd){
             T5LOG(T5ERROR) << "::ERROR_FILE_CANT_GET_USER_PSWD";
             return FILEHELPER_ERROR_FILE_CANT_GET_USER_PSWD;
         }
-        _home_dir = pswd->pw_dir;
-        if (!strlen(_home_dir)){
-            T5LOG(T5ERROR) << "::ERROR_FILE_CANT_GET_HOME_DIR";
-            return FILEHELPER_ERROR_FILE_CANT_GET_HOME_DIR;
-        }
-        _homeDir = _home_dir;
-        _otmDir = _homeDir + "/.t5memory/";
-        _memDir = _otmDir +"MEM/";
-        _tableDir = _otmDir +"TABLE/";
-        return 0;
     }
+    if (!strlen(_home_dir)){
+        T5LOG(T5ERROR) << "::ERROR_FILE_CANT_GET_HOME_DIR";
+        return FILEHELPER_ERROR_FILE_CANT_GET_HOME_DIR;
+    }
+    if(pswd) _home_dir = pswd->pw_dir;
+    _homeDir = _home_dir;
+    _otmDir = _homeDir + "/.t5memory/";
+    _memDir = _otmDir +"MEM/";
+    _tableDir = _otmDir +"TABLE/";
     return -1;
 }
 

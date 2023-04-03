@@ -91,22 +91,20 @@ LanguageFactory::LanguageFactory(void)
   T5LOG( T5INFO) << "Logging of language name and language properties related information. Starting LanguageFactory";
 
   // try to load the external language list
-  char szFile[256];
-  Properties::GetInstance()->get_value(KEY_OTM_DIR, szFile, 255);
-  strcat(szFile, "/TABLE/languages.xml");
+  std::string langFile = FilesystemHelper::GetTableDir() + "languages.xml";
 
-  int iRC = loadLanguageList( szFile );
+  int iRC = loadLanguageList( langFile.c_str() );
   
   if ( iRC != 0  || vLanguageList.size() == 0)
   {
     T5LOG(T5ERROR) << "Load of external language list file \""
-      << szFile << " failed with error code " << iRC << ", switching to built-in language list" ;
+      << langFile << " failed with error code " << iRC << ", switching to built-in language list" ;
     vLanguageList.clear();
     throw;
   }
   else
   {
-    T5LOG( T5INFO) << "Load of external language list file \"" << szFile << "\" successfull, the list contains " << vLanguageList.size() << " entries" ;
+    T5LOG( T5INFO) << "Load of external language list file \"" << langFile << "\" successfull, the list contains " << vLanguageList.size() << " entries" ;
   }
 }
 
@@ -508,25 +506,25 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
   // parse the XML file containing the language properties
   if ( !usRC )
   {
-    SAXParser* parser = new SAXParser();      // Create a SAX parser object
+    SAXParser parser;      // Create a SAX parser object
 
     // create an instance of our handler
     LangParseHandler *handler = new LangParseHandler();
 
 
     //  install our SAX handler as the document and error handler.
-    parser->setDocumentHandler( handler );
-    parser->setErrorHandler( handler );
-    parser->setValidationSchemaFullChecking( false );
-    parser->setDoSchema( false );
-    parser->setLoadExternalDTD( false );
-    parser->setValidationScheme( SAXParser::Val_Never );
-    parser->setExitOnFirstFatalError( false );
+    parser.setDocumentHandler( handler );
+    parser.setErrorHandler( handler );
+    parser.setValidationSchemaFullChecking( false );
+    parser.setDoSchema( false );
+    parser.setLoadExternalDTD( false );
+    parser.setValidationScheme( SAXParser::Val_Never );
+    parser.setExitOnFirstFatalError( false );
     handler->SetLangList( &vLanguageList );
 
     try
     {
-      parser->parse( pszLangList );
+      parser.parse( pszLangList );
     }
     catch (const OutOfMemoryException& )
     {
