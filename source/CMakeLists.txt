@@ -55,6 +55,7 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/otmd.cpp"
     "${T5MEMORY_SOURCE_ROOT}/config.cpp"
     "${CORE_DIR}/tm.cpp"
+    "${CORE_DIR}/otm.cpp"
     "${CORE_DIR}/requestdata.cpp"
 #RestAPI
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"

@@ -246,8 +246,8 @@ unsigned long EqfMemory::getFileSize()
 
   if ( pTmClb != NULL )
   {
-    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->fp );
-    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->fp );
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->fb.file );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->fb.file );
 
     ulFileSize = ulDataSize + ulIndexSize;
   }

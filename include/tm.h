@@ -6,6 +6,7 @@
 #include <string>
 #include <time.h>
 #include <sstream>
+#include <map>
 #include <memory>
 #include "win_types.h"
 
@@ -8326,6 +8327,9 @@ int CloseMemory
 
 
 class NewTMManager{
+  typedef std::map <std::string, NewTM> TMMap;
+  TMMap tms;
+
   public:
   enum TMManagerCodes{
     TMM_NO_ERROR = 0,
@@ -8343,7 +8347,6 @@ class NewTMManager{
   }
 
   //functions to work with tm from outside
-  int CreateEmptyTM(CreateMemRequestData& rd);
   int CreateEmptyTM(const std::string& tmName, const std::string& srcLang, const std::string& tmDescr);
   int ImportTMInInternalFormat(const std::string& tmName);
   int DeleteTM(const std::string& tmName);
@@ -8353,20 +8356,12 @@ class NewTMManager{
   //functions to work with loading and unloading tm
   int OpenTM(const std::string& tmName);
   bool TmIsOpened(const std::string& tmName);
+  std::shared_ptr<NewTM> GetOpenedTm(const std::string& tmName);
   int CloseTM(const std::string& tmName);
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
   int GetTMSizeOnDisk(const std::string& tmName);
-  int StatusTM(const std::string& tmName);
-
-  //functions for opened tm
-  int FuzzySearch(const std::string& tmName);
-  int ConcordanceSearch(const std::string& tmName);
-  int UpdateSegment(const std::string& tmName);
-  int DeleteSegment(const std::string& tmName);
-  int ImportTmxIntoTM(const std::string& tmName);
-  int ExportTmxFromTM(const std::string& tmName);
-  int ExportTmInZip(const std::string& tmName);
-  
+  int StatusTM(const std::string& tmName);  
+  std::vector<std::shared_ptr<NewTM>> ListOpenedTms()const;
 
   //functions to set up tm service
   int SetAvailableRam(const size_t availableRam);
