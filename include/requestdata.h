@@ -70,9 +70,6 @@ class CreateMemRequestData: public RequestData{
 
   
     public:
-
-    TMX_CREATE_IN   CreateIn;    //pointer to create input structure
-    TMX_CREATE_OUT  CreateOut;   //pointer to create output structure
     
     std::string strSrcLang;
     std::string strMemDescription;

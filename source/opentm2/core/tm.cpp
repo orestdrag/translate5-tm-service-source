@@ -2352,7 +2352,10 @@ std::string NewTMManager::GetTmiPath(const std::string& memName){
   return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMINDEX;
 }
 
-int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){
+int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){  
+  
+  int logLevel= 0;
+  if(!logErrorIfNotExists) logLevel = T5Logger::GetInstance()->suppressLogging();
   //check tmd file
   int res = TMM_NO_ERROR;
   if(FilesystemHelper::FileExists(GetTmdPath(tmName)) == false){
@@ -2361,8 +2364,9 @@ int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotEx
 
   //check tmi file
   if(FilesystemHelper::FileExists(GetTmiPath(tmName)) == false){
-    res != TMM_TMI_NOT_FOUND;
+    res |= TMM_TMI_NOT_FOUND;
   }
+  if(!logErrorIfNotExists) T5Logger::GetInstance()->desuppressLogging(logLevel);
   return res;
 }
 

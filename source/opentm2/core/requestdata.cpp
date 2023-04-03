@@ -64,10 +64,193 @@ int RequestData::run(){
 
 int CreateMemRequestData::createNewEmptyMemory(){
     // create memory database
-    if (_rc_==NO_ERROR){
-      EqfMemoryPlugin::GetInstance()->createMemory( *this );
-      //NewTMManager::GetInstance()->CreateEmptyTM(*this);
-    }    
+    if (fValid){
+      T5LOG( T5DEBUG) << ":: create the memory" ;    
+      
+      std::string tmiFile = NewTMManager::GetTmiPath(strMemName);
+      std::string tmdFile = NewTMManager::GetTmdPath(strMemName);
+      PTMX_CLB   pTmClb = NULL;            //pointer to control block
+      ULONG ulKey;
+
+      
+      //allocate control block
+      bool fOK = UtlAlloc( (PVOID *) &pTmClb, 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
+
+      //allocate table records
+      if ( fOK )    fOK = AllocTable( &(pTmClb->pLanguages) );
+      if ( fOK )    fOK = AllocTable( &(pTmClb->pAuthors) );
+      if ( fOK )    fOK = AllocTable( &(pTmClb->pTagTables) );
+      if ( fOK )    fOK = AllocTable( &(pTmClb->pFileNames) );
+
+      if ( fOK )
+      {
+        _rc_ = NTMCreateLongNameTable( pTmClb );
+        
+        fOK = (_rc_ == NO_ERROR );
+      } /* endif */
+      if ( !fOK )
+      {
+        _rc_ = ERROR_NOT_ENOUGH_MEMORY;
+      }
+      else
+      {
+        //build name and extension of tm data file
+
+        //fill signature record structure
+        strcpy( pTmClb->stTmSign.szName, strMemName.c_str() );
+        UtlTime( &(pTmClb->stTmSign.lTime) );
+        strcpy( pTmClb->stTmSign.szSourceLanguage,
+                strSrcLang.c_str() );
+
+        //TODO - replace version with current t5memory version
+        pTmClb->stTmSign.bMajorVersion = TM_MAJ_VERSION;
+        pTmClb->stTmSign.bMinorVersion = TM_MIN_VERSION;
+        strcpy( pTmClb->stTmSign.szDescription,
+                strMemDescription.c_str() );
+
+        //call create function for data file
+        //pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
+        
+        _rc_ = EQFNTMCreate( (PSZ)tmdFile.c_str(),
+                            (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
+                            FIRST_KEY, &pTmClb->pstTmBtree );
+      
+        if ( _rc_ == NO_ERROR )
+        {
+          //insert initialized record to tm data file
+          ulKey = AUTHOR_KEY;
+          _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                    (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
+
+          if ( _rc_ == NO_ERROR )
+          {
+            ulKey = FILE_KEY;
+            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                        (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
+          } /* endif */
+
+          if ( _rc_ == NO_ERROR )
+          {
+            ulKey = TAGTABLE_KEY;
+            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                        (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
+          } /* endif */
+
+          if ( _rc_ == NO_ERROR )
+          {
+            ulKey = LANG_KEY;
+            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                    (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
+          } /* endif */
+
+          if ( _rc_ == NO_ERROR )
+          {
+            int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
+            size = MAX_COMPACT_SIZE-1 ;
+            //initialize and insert compact area record
+            memset( pTmClb->bCompact, 0, size );
+
+            ulKey = COMPACT_KEY;
+            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                                pTmClb->bCompact, size);  
+
+          } /* endif */
+
+          // add long document table record
+          if ( _rc_ == NO_ERROR )
+          {
+            ulKey = LONGNAME_KEY;
+            // write long document name buffer area to the database
+            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+                                (PBYTE)pTmClb->pLongNames->pszBuffer,
+                                pTmClb->pLongNames->ulBufUsed );        
+      
+          } /* endif */
+
+          // create language group table
+          if ( _rc_ == NO_ERROR )
+          {
+            _rc_ = NTMCreateLangGroupTable( pTmClb );
+            
+          } /* endif */
+
+          if ( _rc_ == NO_ERROR )
+          {
+            //fill signature record structure
+            strcpy( pTmClb->stTmSign.szName, strMemName.c_str() );
+
+            //HERE .TMI file is created
+            _rc_ = EQFNTMCreate( (PSZ)tmiFile.c_str(),
+                                (PCHAR) &(pTmClb->stTmSign),
+                                sizeof( TMX_SIGN ),
+                                START_KEY, &pTmClb->pstInBtree );
+                                
+          } /* endif */
+
+          if(_rc_ == NO_ERROR){        
+            //filesystem_flush_buffers(pFullName);  
+            //filesystem_flush_buffers(CreateIn.stTmCreate.szIndexName);
+          }/* endif */
+
+        } /* endif */
+
+        if ( _rc_ )
+        {
+          //something went wrong during create or insert so delete data file
+          UtlDelete( (PSZ)tmiFile.c_str(), 0L, FALSE );
+        } /* endif */
+      } /* endif */
+
+      if ( _rc_ )
+      {
+        //free allocated memory
+        UtlAlloc( (PVOID *) &(pTmClb->pLanguages), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
+        T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );";
+    #ifdef TEMPORARY_COMMENTED
+        NTMDestroyLongNameTable( pTmClb );
+        #endif
+        UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
+      } /* endif */
+
+      //set return values
+        // setup memory properties
+        //this->createMemoryProperties( (PSZ)strMemName.c_str(), strMemPath, (PSZ)strMemDescription.c_str(), (PSZ)strSrcLang.c_str() );
+        
+        // create memory object if create function completed successfully
+        //pNewMemory = new EqfMemory( this, htm, (PSZ)strMemName.c_str() );
+        // add memory info to our internal memory list
+        //if ( pNewMemory != nullptr ) this->addToList( strMemPath );
+        
+      }//createMemory code
+      //return( (EqfMemory *)pNewMemory );
+      
+
+      // check mem
+//      if ( pNewMemory == NULL ){
+//        _rc_ = getLastError( strLastError );
+//        T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  _rc_;
+//      }
+//      else{
+        T5LOG( T5INFO) << "::Create successful ";
+        // get memory object name
+//        char szObjName[MAX_LONGFILESPEC];
+//        _rc_ = TMManager::GetInstance()->getObjectName( pNewMemory, szObjName, sizeof(szObjName) );
+//      }
+    
+      //--- Tm is created. Close it. 
+//      if ( pNewMemory != NULL )
+//      {
+//        T5LOG( T5INFO ) << "::Tm is created. Close it";
+//        TMManager::GetInstance()->closeMemory( pNewMemory );
+//        pNewMemory = NULL;
+//      }
+      T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
+
+      //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+      //pData->fComplete = TRUE;   // one-shot function are always complete   
 
 }
 
@@ -147,14 +330,12 @@ int CreateMemRequestData::checkData(){
     // check if TM exists already
     if ( _rc_ == NO_ERROR )
     {
-      int logLevel = T5Logger::GetInstance()->suppressLogging();
-      if ( NewTMManager::GetInstance()->TMExistsOnDisk(strMemName ) != NewTMManager::TMM_TM_NOT_FOUND )
+      int res = NewTMManager::GetInstance()->TMExistsOnDisk(strMemName, false );
+      if ( res != NewTMManager::TMM_TM_NOT_FOUND )
       {
-        T5Logger::GetInstance()->desuppressLogging(logLevel);
-        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName;
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName << "; res = "<< res;
         _rc_ = ERROR_MEM_NAME_EXISTS;
       }
-      T5Logger::GetInstance()->desuppressLogging(logLevel);
     } /* endif */
 
 
@@ -168,17 +349,6 @@ int CreateMemRequestData::checkData(){
         T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
       } /* endif */
     } /* endif */
-
-    if(!_rest_rc_){
-      std::string memPath = FilesystemHelper::GetMemDir() + strMemName + EXT_OF_TMDATA;
-      _rc_ = NTMFillCreateInStruct( memPath.c_str(), //call function to fill TMC_CREATE_IN structure
-                                szOtmSourceLang,
-                                strMemDescription.c_str(),
-                                &CreateIn );
-      if(_rc_){
-         _rest_rc_ = BAD_REQUEST;
-      }
-    }
     fValid = !_rest_rc_ && !_rc_;
     return _rest_rc_;
 }
