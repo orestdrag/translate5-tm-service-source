@@ -63,46 +63,10 @@ int RequestData::run(){
 }
 
 int CreateMemRequestData::createNewEmptyMemory(){
-    T5LOG(T5DEBUG) << "( MemName = "<<strMemName <<", pszDescription = "<<strMemDescription<<", pszSourceLanguage = "<<strSrcLang<<" )";
-
-    // Check memory name syntax
-    if ( _rc_ == NO_ERROR )
-    { 
-      if ( !FilesystemHelper::checkFileName( strMemName ))
-      {
-        T5LOG(T5ERROR) <<   "::ERROR_INV_LONGNAME::" << strMemName;
-        _rc_ = ERROR_MEM_NAME_INVALID;
-      } /* endif */
-    } /* endif */
-
-    // check if TM exists already
-    if ( _rc_ == NO_ERROR )
-    {
-      int logLevel = T5Logger::GetInstance()->suppressLogging();
-      if ( TMManager::GetInstance()->exists( NULL, (PSZ)strMemName.c_str() ) )
-      {
-        T5Logger::GetInstance()->desuppressLogging(logLevel);
-        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName;
-        _rc_ = ERROR_MEM_NAME_EXISTS;
-      }
-      T5Logger::GetInstance()->desuppressLogging(logLevel);
-    } /* endif */
-
-
-    // check if source language is valid
-    if ( _rc_ == NO_ERROR )
-    {
-      SHORT sID = 0;    
-      if ( MorphGetLanguageID( (PSZ)strSrcLang.c_str(), &sID ) != MORPH_OK )
-      {
-        _rc_ = ERROR_PROPERTY_LANG_DATA;
-        T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
-      } /* endif */
-    } /* endif */
-
     // create memory database
     if (_rc_==NO_ERROR){
       EqfMemoryPlugin::GetInstance()->createMemory( *this );
+      //NewTMManager::GetInstance()->CreateEmptyTM(*this);
     }    
 
 }
@@ -168,6 +132,43 @@ int CreateMemRequestData::checkData(){
             return _rest_rc_;
         } /* end */
     }
+
+    T5LOG(T5DEBUG) << "( MemName = "<<strMemName <<", pszDescription = "<<strMemDescription<<", pszSourceLanguage = "<<strSrcLang<<" )";
+    // Check memory name syntax
+    if ( _rc_ == NO_ERROR )
+    { 
+      if ( !FilesystemHelper::checkFileName( strMemName ))
+      {
+        T5LOG(T5ERROR) <<   "::ERROR_INV_NAME::" << strMemName;
+        _rc_ = ERROR_MEM_NAME_INVALID;
+      } /* endif */
+    } /* endif */
+
+    // check if TM exists already
+    if ( _rc_ == NO_ERROR )
+    {
+      int logLevel = T5Logger::GetInstance()->suppressLogging();
+      if ( NewTMManager::GetInstance()->TMExistsOnDisk(strMemName ) != NewTMManager::TMM_TM_NOT_FOUND )
+      {
+        T5Logger::GetInstance()->desuppressLogging(logLevel);
+        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName;
+        _rc_ = ERROR_MEM_NAME_EXISTS;
+      }
+      T5Logger::GetInstance()->desuppressLogging(logLevel);
+    } /* endif */
+
+
+    // check if source language is valid
+    if ( _rc_ == NO_ERROR )
+    {
+      SHORT sID = 0;    
+      if ( MorphGetLanguageID( (PSZ)strSrcLang.c_str(), &sID ) != MORPH_OK )
+      {
+        _rc_ = ERROR_PROPERTY_LANG_DATA;
+        T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
+      } /* endif */
+    } /* endif */
+
     if(!_rest_rc_){
       std::string memPath = FilesystemHelper::GetMemDir() + strMemName + EXT_OF_TMDATA;
       _rc_ = NTMFillCreateInStruct( memPath.c_str(), //call function to fill TMC_CREATE_IN structure

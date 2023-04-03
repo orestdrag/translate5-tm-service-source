@@ -1020,3 +1020,43 @@ int EqfMemory::setGlobalMemoryOptions
   this->pvGlobalMemoryOptions = pvGlobalMemoryOptionsIn;
   return( 0 );
 }
+
+
+
+// NewTM region
+EqfMemory::EqfMemory(const std::string& tmName){
+  tmdFb.fileName = NewTMManager::GetTmdPath(tmName);
+  tmiFb.fileName = NewTMManager::GetTmiPath(tmName);
+}
+
+int EqfMemory::LoadInRAM(){
+  if(tmdFb.file != nullptr){
+    //file is in mem
+    return -1;
+  }
+  if(tmiFb.file != nullptr){
+    //file is in mem
+    return -1;
+  }
+  tmdFb.ReadFromFile();
+  tmiFb.ReadFromFile();
+  
+  return 0;
+}
+
+int EqfMemory::UnloadFromRAM(){
+  if(tmdFb.file == nullptr){
+    //file is in mem
+    return -1;
+  }
+  if(tmiFb.file == nullptr){
+    //file is in mem
+    return -1;
+  }
+  tmdFb.WriteToFile();
+  tmiFb.WriteToFile();
+  
+  return 0;
+}
+
+//end of NewTM region 

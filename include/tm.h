@@ -2571,6 +2571,19 @@ int OtmProposalToGetIn
 */
 int handleError( int iRC, char *pszMemName, char *pszMarkup );
 
+
+/// newTM code 
+public: 
+  EqfMemory(const std::string& tmName);
+  bool IsLoadedInRAM();
+  int LoadInRAM();
+  int UnloadFromRAM();
+  int FlushFilebuffers();
+
+private: 
+  FileBuffer tmdFb; // data filebuffer
+  FileBuffer tmiFb; // index filebuffer
+  
 };
 
 
@@ -8312,14 +8325,25 @@ int CloseMemory
 //end of MemoryUtil.H  
 
 
-class NewTMManager: public TMManager{
+class NewTMManager{
   public:
+  enum TMManagerCodes{
+    TMM_NO_ERROR = 0,
+
+    TMM_TMD_NOT_FOUND = 16,
+    TMM_TMI_NOT_FOUND = 32,
+    TMM_TM_NOT_FOUND = TMM_TMD_NOT_FOUND + TMM_TMI_NOT_FOUND,
+
+
+  };
+
   static NewTMManager* GetInstance(){
     static NewTMManager instance;
     return &instance;
   }
 
   //functions to work with tm from outside
+  int CreateEmptyTM(CreateMemRequestData& rd);
   int CreateEmptyTM(const std::string& tmName, const std::string& srcLang, const std::string& tmDescr);
   int ImportTMInInternalFormat(const std::string& tmName);
   int DeleteTM(const std::string& tmName);
@@ -8330,7 +8354,7 @@ class NewTMManager: public TMManager{
   int OpenTM(const std::string& tmName);
   bool TmIsOpened(const std::string& tmName);
   int CloseTM(const std::string& tmName);
-  int TMExistsOnDisk(const std::string& tmName);
+  int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
   int GetTMSizeOnDisk(const std::string& tmName);
   int StatusTM(const std::string& tmName);
 
@@ -8349,6 +8373,10 @@ class NewTMManager: public TMManager{
   size_t GetAvailableRam()const;
   int FreeRamToFitNewMemory(const size_t expectedRamToOccupyByTm);
 
+
+  //helper functions 
+  static std::string GetTmdPath(const std::string& memName);
+  static std::string GetTmiPath(const std::string& memName);
 }
 
 #endif //_tm_h_included_
