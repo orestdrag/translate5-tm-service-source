@@ -25,6 +25,16 @@ typedef struct _RECPARAM
     ULONG   ulLen;           // record length
 }  RECPARAM, * PRECPARAM;
 
+/**********************************************************************/
+/* typedef used for all vital information on our new approach...      */
+/* NOTE: this structure is limited to COLLATE_SIZE, which is 256      */
+/**********************************************************************/
+typedef struct _TMVITALINFO
+{
+  ULONG   ulStartKey;                  // key to start with
+  ULONG   ulNextKey;                   // currently active key
+} NTMVITALINFO, * PNTMVITALINFO;
+
 
 /*****************************************************************************/
 /* Used to determine amount of padding required for the Btree record so      */
@@ -517,7 +527,17 @@ SHORT EQFNTMGetUpdCounter
  SHORT QDAMDictUpdateLocal ( PTMWCHAR, PBYTE, ULONG );
  
  SHORT QDAMDictExactLocal  ( PTMWCHAR, PBYTE, PULONG, USHORT );
+ SHORT EQFNTMCreate
+(
+   PCHAR  pUserData,                   // user data
+   USHORT usLen,                       // length of user data
+   ULONG  ulStartKey                  // first key to start automatic insert...
+);
 
+
+ SHORT QDAMDictCreateLocal ( /*PSZ,*/ SHORT, PCHAR, USHORT, PCHAR,
+                             PCHAR, PCHAR, //PBTREE * , 
+                             PNTMVITALINFO );
 
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 

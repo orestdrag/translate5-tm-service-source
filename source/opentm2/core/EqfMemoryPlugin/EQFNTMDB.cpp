@@ -223,13 +223,11 @@ UCHAR  ucbEncodeTbl[30]
 //|Function flow:     use standard DictCreateLocal with some modified parts..  |
 // ----------------------------------------------------------------------------+
 SHORT
-EQFNTMCreate
+BTREE::EQFNTMCreate
 (
-   PSZ  pTMName,                       // name of file to be created
    PCHAR  pUserData,                   // user data
    USHORT usLen,                       // length of user data
-   ULONG  ulStartKey,                  // first key to start automatic insert...
-   PBTREE  * ppBTIda                    // pointer to structure
+   ULONG  ulStartKey                  // first key to start automatic insert...
 )
 {
    SHORT sRc = 0;                      // return code
@@ -239,27 +237,27 @@ EQFNTMCreate
    NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = ulStartKey;
 
 
-  UtlAlloc( (PVOID *)&pBTIda, 0L, (LONG) sizeof(BTREE), NOMSG );
-  if ( !pBTIda )
+  //UtlAlloc( (PVOID *)&pBTIda, 0L, (LONG) sizeof(BTREE), NOMSG );
+  //if ( !pBTIda )
   {
-    sRc = BTREE_NO_ROOM;
+  //  sRc = BTREE_NO_ROOM;
   }
-  else
+  //else
   {
-    *ppBTIda = pBTIda;                     // set pointer to base structure
+    //*ppBTIda = pBTIda;                     // set pointer to base structure
 
     /******************************************************************/
     /* move @@@@ line one below and you will get compression active   */
     /******************************************************************/
-    sRc = QDAMDictCreateLocal( pTMName, 20, pUserData, usLen,
+    sRc = QDAMDictCreateLocal( 20, pUserData, usLen,
 //@@@@                        ucbEncodeTbl,
                               NULL,
-                              NULL, NULL, (PPBTREE) ppBTIda,
+                              NULL, NULL,
                               &NtmVitalInfo );
     if ( sRc == BTREE_OPEN_ERROR )
     {
        UtlAlloc( (PVOID *)&(pBTIda), 0L, 0L, NOMSG );
-       UtlAlloc( (PVOID *)ppBTIda, 0L, 0L, NOMSG );
+       //UtlAlloc( (PVOID *)ppBTIda, 0L, 0L, NOMSG );
     } /* endif */
   } /* endif */
 

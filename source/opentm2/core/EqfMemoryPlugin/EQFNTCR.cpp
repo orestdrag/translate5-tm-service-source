@@ -269,9 +269,7 @@ USHORT TmtXCreate
     //call create function for data file
     pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
 
-    usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szDataName,
-                         (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
-                         FIRST_KEY, &pTmClb->pstTmBtree );
+    usRc = pTmClb->pstTmBtree->EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN), FIRST_KEY);
   
     if ( usRc == NO_ERROR )
     {
@@ -340,10 +338,7 @@ USHORT TmtXCreate
         strcpy( pTmClb->stTmSign.szName, pszName );
 
         //HERE .TMI file is created
-        usRc = EQFNTMCreate( pTmCreateIn->stTmCreate.szIndexName,
-                             (PCHAR) &(pTmClb->stTmSign),
-                             sizeof( TMX_SIGN ),
-                             START_KEY, &pTmClb->pstInBtree );
+        usRc = pTmClb->pstInBtree->EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof( TMX_SIGN ), START_KEY);
                              
       } /* endif */
 
