@@ -876,8 +876,9 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
     strncpy( pProp->stTMSignature.szSourceLanguage, pszSourceLanguage, 
              sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
 
-    pProp->stTMSignature.bMajorVersion = TM_MAJ_VERSION;
-    pProp->stTMSignature.bMinorVersion = TM_MIN_VERSION;
+    pProp->stTMSignature.bGlobVersion = T5GLOBVERSION;
+    pProp->stTMSignature.bMajorVersion = T5MAJVERSION;
+    pProp->stTMSignature.bMinorVersion = T5MINVERSION;
     strcpy( pProp->szNTMMarker, NTM_MARKER );
     UtlTime( &pProp->stTMSignature.lTime );
     pProp->usThreshold = TM_DEFAULT_THRESHOLD;

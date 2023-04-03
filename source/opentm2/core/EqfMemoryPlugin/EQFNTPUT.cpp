@@ -69,17 +69,6 @@ USHORT TMLoopAndDelTargetClb
 #define NTMFAST_TOKENIZE 1
 
 #ifdef NTMFAST_TOKENIZE
-USHORT NTMMorphTokenize
-(
-   SHORT    sLanguageID,               // language ID
-   PSZ      pszInData,                 // pointer to input segment
-   PUSHORT  pusBufferSize,             // address of variable containing size of
-                                       //    term list buffer
-   PVOID    *ppTermList,               // address of caller's term list pointer
-   USHORT   usListType,                // type of term list MORPH_ZTERMLIST or
-                                       //    MORPH_OFFSLIST
-   USHORT usVersion                    // version of TM
-);
 
   /********************************************************************/
   /* get the substitute for the isAlNum function                      */
@@ -262,8 +251,7 @@ USHORT TmtXReplace
 
     //tokenize source segment, resulting in norm. string and tag table record
     usRc = TokenizeSource( pTmClb, pSentence, szString,
-                           pTmPutIn->stTmPut.szSourceLanguage,
-                           (USHORT)pTmClb->stTmSign.bMajorVersion );
+                           pTmPutIn->stTmPut.szSourceLanguage);
     
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );
@@ -1131,7 +1119,7 @@ USHORT AddToTm
         
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(//ptr to tm structure
+        usRc = pTmClb->TmBtree.EQFNTMInsert(//ptr to tm structure
                              pulNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
                              RECLEN(pTmRecord) );     //length
@@ -1481,7 +1469,7 @@ USHORT UpdateTmIndex
         ulKey = (*pulVotes) & START_KEY;
         ulLen = TMX_REC_SIZE;
         memset( pIndexRecord, 0, TMX_REC_SIZE );
-        usRc = pTmClb->pstInBtree->EQFNTMGet( ulKey,  //index key
+        usRc = pTmClb->InBtree.EQFNTMGet( ulKey,  //index key
                           (PCHAR)pIndexRecord,   //pointer to index record
                           &ulLen );  //length
 
@@ -1492,18 +1480,18 @@ USHORT UpdateTmIndex
 
           pIndexRecord->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
 
-          usRc = pTmClb->pstInBtree->EQFNTMInsert( &ulKey,
+          usRc = pTmClb->InBtree.EQFNTMInsert( &ulKey,
                                (PBYTE)pIndexRecord,  //pointer to index
                                pIndexRecord->usRecordLen );  //length
 
           // if index DB is full and memory is in exclusive access we try to compact the index file
           if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
           {
-             usRc = EQFNTMOrganizeIndex( &(pTmClb->pstInBtree), pTmClb->usAccessMode, START_KEY );
+             usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
 
              if ( usRc == NO_ERROR )
              {
-               usRc = pTmClb->pstInBtree->EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+               usRc = pTmClb->InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
              } /* endif */
           } /* endif */
 
@@ -1572,18 +1560,18 @@ USHORT UpdateTmIndex
                 //update index record size
                 pIndexRecord->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
 
-                usRc = pTmClb->pstInBtree->EQFNTMUpdate( 
+                usRc = pTmClb->InBtree.EQFNTMUpdate( 
                                     ulKey,
                                     (PBYTE)pIndexRecord,  //pointer to index
                                     pIndexRecord->usRecordLen );  //length
                 // if index DB is full and memory is in exclusive access we try to compact the index file
                 if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
                 {
-                  usRc = EQFNTMOrganizeIndex( &(pTmClb->pstInBtree), pTmClb->usAccessMode, START_KEY );
+                  usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
 
                   if ( usRc == NO_ERROR )
                   {
-                    usRc = pTmClb->pstInBtree->EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
+                    usRc = pTmClb->InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
                   } /* endif */
                 } /* endif */
                 if ( !usRc )
@@ -1694,7 +1682,7 @@ USHORT DetermineTmRecord
     ulKey = (*pulVotes) & START_KEY;
     ulLen = TMX_REC_SIZE;
     memset( pIndexRecord, 0, TMX_REC_SIZE );
-    usRc = pTmClb->pstInBtree->EQFNTMGet( 
+    usRc = pTmClb->InBtree.EQFNTMGet( 
                       ulKey,  //index key
                       (PCHAR)pIndexRecord,   //pointer to index record
                       &ulLen );  //length
@@ -1744,7 +1732,7 @@ USHORT DetermineTmRecord
             ulKey = (*pulVotes) & START_KEY;
             ulLen = TMX_REC_SIZE;
             memset( pIndexRecord, 0, TMX_REC_SIZE );
-            usRc = pTmClb->pstInBtree->EQFNTMGet( 
+            usRc = pTmClb->InBtree.EQFNTMGet( 
                               ulKey,  //index key
                               (PCHAR)pIndexRecord,   //pointer to index record
                               &ulLen );  //length
@@ -1919,7 +1907,7 @@ USHORT UpdateTmRecord
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
         memset( pTmRecord, 0, ulLen );
-        usRc =  pTmClb->pstTmBtree->EQFNTMGet(
+        usRc =  pTmClb->TmBtree.EQFNTMGet(
                           ulKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
@@ -1931,7 +1919,7 @@ USHORT UpdateTmRecord
             ulRecBufSize = ulLen;
             memset( pTmRecord, 0, ulLen );
 
-            usRc =  pTmClb->pstTmBtree->EQFNTMGet(
+            usRc =  pTmClb->TmBtree.EQFNTMGet(
                               ulKey,  //tm record key
                               (PCHAR)pTmRecord,   //pointer to tm record data
                               &ulLen );    //length
@@ -2328,7 +2316,7 @@ USHORT ComparePutData
         // update TM record if required
         if ( fUpdate )
         {
-          usRc = pTmClb->pstInBtree->EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+          usRc = pTmClb->InBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
         if ( !fStop )
@@ -2493,7 +2481,7 @@ USHORT AddTmTarget(
 
 
           //add updated tm record to database
-          usRc = pTmClb->pstInBtree->EQFNTMUpdate(
+          usRc = pTmClb->InBtree.EQFNTMUpdate(
                                *pulKey,
                                (PBYTE)pTmRecord,
                                RECLEN(pTmRecord) );
@@ -2678,7 +2666,7 @@ USHORT TmtXUpdSeg
     usRc = BTREE_NOT_FOUND;
 
     ulLen = TMX_REC_SIZE;
-    usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulUpdKey, (PCHAR)pTmRecord,
+    usRc =  pTmClb->TmBtree.EQFNTMGet( ulUpdKey, (PCHAR)pTmRecord,
                       &ulLen );
 
     if ( usRc == BTREE_BUFFER_SMALL)
@@ -2689,7 +2677,7 @@ USHORT TmtXUpdSeg
         ulRecBufSize = ulLen;
         memset( pTmRecord, 0, ulLen );
 
-        usRc =  pTmClb->pstTmBtree->EQFNTMGet(
+        usRc =  pTmClb->TmBtree.EQFNTMGet(
                           ulUpdKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
@@ -2832,7 +2820,7 @@ USHORT TmtXUpdSeg
               // rewrite TM record
               if ( usRc == NO_ERROR )
               {
-                usRc = pTmClb->pstInBtree->EQFNTMUpdate( ulUpdKey,
+                usRc = pTmClb->InBtree.EQFNTMUpdate( ulUpdKey,
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
             }

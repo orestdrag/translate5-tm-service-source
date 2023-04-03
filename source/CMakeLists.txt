@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
-SET(APP_VERSION  "0.5.0")
+SET(APP_VERSION_GLOBAL 0)
+SET(APP_VERSION_MAJOR 5)
+SET(APP_VERSION_MINOR 0)
+SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -138,6 +141,10 @@ set(T5MEMORY_Source_Files
 )
 
 set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )
+
+add_definitions( -DT5GLOBVERSION=${APP_VERSION_GLOBAL} )
+add_definitions( -DT5MAJVERSION=${APP_VERSION_MAJOR} )
+add_definitions( -DT5MINVERSION=${APP_VERSION_MINOR} )
 
 add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
