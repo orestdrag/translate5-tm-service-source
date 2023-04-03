@@ -983,7 +983,7 @@ OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag )
 */
 int EqfMemory::handleError( int iRC, char *pszMemName, char *pszMarkup )
 {
-  return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, TmBtree.szFileName, this->strLastError, this->iLastError ) );
+  return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, (PSZ)TmBtree.fb.fileName.c_str(), this->strLastError, this->iLastError ) );
 }
 
 /*! \brief Set or clear the pointer to a loaded global memory option file

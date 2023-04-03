@@ -230,38 +230,11 @@ BTREE::EQFNTMCreate
    ULONG  ulStartKey                  // first key to start automatic insert...
 )
 {
-   SHORT sRc = 0;                      // return code
-   PBTREE  pBTIda;
    NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
-
    NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = ulStartKey;
-
-
-  //UtlAlloc( (PVOID *)&pBTIda, 0L, (LONG) sizeof(BTREE), NOMSG );
-  //if ( !pBTIda )
-  {
-  //  sRc = BTREE_NO_ROOM;
-  }
-  //else
-  {
-    //*ppBTIda = pBTIda;                     // set pointer to base structure
-
-    /******************************************************************/
-    /* move @@@@ line one below and you will get compression active   */
-    /******************************************************************/
-    sRc = QDAMDictCreateLocal( 20, pUserData, usLen,
-//@@@@                        ucbEncodeTbl,
-                              NULL,
+  return QDAMDictCreateLocal( 20, pUserData, usLen,
                               NULL, NULL,
                               &NtmVitalInfo );
-    if ( sRc == BTREE_OPEN_ERROR )
-    {
-       UtlAlloc( (PVOID *)&(pBTIda), 0L, 0L, NOMSG );
-       //UtlAlloc( (PVOID *)ppBTIda, 0L, 0L, NOMSG );
-    } /* endif */
-  } /* endif */
-
-  return( sRc );
 } /* end of function EQFNTMCreate */
 
 SHORT
@@ -669,7 +642,7 @@ BTREE::EQFNTMInsert
     RetryCount = MAX_RETRY_COUNT;
     do
     {
-      sRc = QDAMDictInsertLocal( this, (PTMWCHAR) pulKey, pData, ulLen );
+      sRc = QDAMDictInsertLocal( (PWCHAR)pulKey, pData, ulLen );
       if ( sRc == BTREE_IN_USE )
       {
         RetryCount--;

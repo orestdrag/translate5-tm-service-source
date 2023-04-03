@@ -340,9 +340,28 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     }
 }
 
-int FileBuffer::ReadFromFile(){return -1;}
-int FileBuffer::WriteToFile(){return -1;}
+size_t FileBuffer::ReadFromFile(){return -1;}
+size_t FileBuffer::WriteToFile(){return -1;}
 
+size_t FileBuffer::WriteToFilebuffer(const void* buff, size_t buffSize, size_t startingPosition){
+    status |= MODIFIED;
+    if(startingPosition + buffSize > data.size()){
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5DEBUG) << "::Resizing filebuffer "<<fileName<<" from "<<data.size()<<
+                " to " <<offset+buffSize;
+        }
+        data.resize(offset + buffSize);
+        if( offset + buffSize > data.size() ){
+            T5LOG(T5ERROR) << "filebuffer vector resizing in unsuccessfull for " << fileName ;
+            return 0;
+        }
+    }
+
+    void* pStPos = &(data[startingPosition]);
+    memcpy(pStPos, buff, buffSize);
+    offset = startingPosition + buffSize;
+    return buffSize;
+}
 
 /*
 int FilesystemHelper::DeleteFile(FILE*  ptr){
@@ -355,24 +374,11 @@ int FilesystemHelper::DeleteFile(FILE*  ptr){
 
 int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition){
     std::string fName = GetFileName(ptr);
-    FileBuffer* pFb = NULL;
-    int offset = startingPosition;
 
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
-        pFb = &(*getFileBufferInstance())[fName];    
+        FileBuffer* pFb = &(*getFileBufferInstance())[fName];    
 
-        pFb->status |= MODIFIED;
-        if(offset + buffSize > pFb->data.size()){
-            if(VLOG_IS_ON(1)){
-                T5LOG( T5DEBUG) << "FilesystemHelper::WriteToBuffer::Resizing file "<<fName<<" from "<<pFb->data.size()<<
-                    " to " <<offset+buffSize;
-            }
-            pFb->data.resize(offset + buffSize);
-        }
-
-        void* pStPos = &(pFb->data[offset]);
-        memcpy(pStPos, buff, buffSize);
-        pFb->offset += buffSize;
+        pFb->WriteToFilebuffer(buff, buffSize, startingPosition);
     }else{
         T5LOG(T5ERROR) << "FilesystemHelper::WriteToBuffer:: can't find buffer for file " << fName;
         return -1;

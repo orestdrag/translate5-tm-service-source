@@ -164,57 +164,75 @@ typedef LHANDLE HTM;
 
 #define MAX_SERVER_NAME         15     // max. length of a server name
 #define MAX_USERID              15     // max. length of LAN user ID
+#define MAXDATASIZE    0x8000          // maximum data size allowed
 
 typedef struct _BTREEIDA
 {   
   FileBuffer fb;
   //{From BTREEGLOB
-   //HFILE        fp;                               // index file handle
-   //HTM          htm;                              // handle in remote case
 
-   USHORT       usFirstNode;                      // file pointer of record
-   USHORT       usFirstLeaf;                      // file pointer of record
+   USHORT       usFirstNode=0;                    // file pointer of record
+   USHORT       usFirstLeaf=0;                    // file pointer of record
 
-   PBTREEINDEX_V3  pIndexBuffer_V3;               // Pointer to index records
-   USHORT       usIndexBuffer;                    // number of index buffers
-   PFN_QDAMCOMPARE compare;                       // Comparison function
+   PBTREEINDEX_V3  pIndexBuffer_V3 = nullptr;     // Pointer to index records
+   USHORT       usIndexBuffer=0;                  // number of index buffers
+   PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
    USHORT       usNextFreeRecord;                 // Next record to expand to
-   //CHAR         chFileName[144];                  // Name of B-tree file
+   //CHAR         chFileName[144];                // Name of B-tree file
    RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
-   BOOL         fGuard;                           // write every record
-   BOOL         fOpen;                            // open flag
-   BOOL         fCorrupted;                       // mark as corrupted
-   PTMWCHAR      pTempKey;                         // pointer to temp. key
-   PBYTE        pTempRecord;                      // pointer to temp record
-   ULONG        ulTempRecSize;                    // size of temp record area
-   BOOL         fTerse;                           // tersing requested
+   BOOL         fGuard=0;                         // write every record
+   BOOL         fOpen=0;                          // open flag
+   BOOL         fCorrupted=0;                     // mark as corrupted
+   WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
+   BYTE         TempRecord[MAXDATASIZE];          // pointer to temp record
+   ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
+   BOOL         fTerse=0;                         // tersing requested
    BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
    BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
    CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
    BYTE         chDecode[ENTRYDECODE_LEN];        // decoding table
    BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
    BYTE         chCaseMap[COLLATE_SIZE];          // case mapping to be used
-   USHORT       usFreeKeyBuffer;                  // index of buffer to use
-   USHORT       usFreeDataBuffer;                 // first data buffer chain
-   USHORT       usFirstDataBuffer;                // first data buffer
+   USHORT       usFreeKeyBuffer=0;                // index of buffer to use
+   USHORT       usFreeDataBuffer=0;               // first data buffer chain
+   USHORT       usFirstDataBuffer=0;              // first data buffer
    BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
-   BOOL         fWriteHeaderPending;              // write of header pending
-   LONG         lTime;                            // time of last update/open
-   USHORT       usVersion;                        // version identification...
+   BOOL         fWriteHeaderPending=0;            // write of header pending
+   LONG         lTime=0;                          // time of last update/open
+   USHORT       usVersion=0;                      // version identification...
    CHAR         chEQF[7];                         // The type of file
-   BYTE         bVersion;                         // version flag
-   USHORT       usOpenFlags;                      // settings used for open
+   BYTE         bVersion=0;                       // version flag
+   USHORT       usOpenFlags=0;                    // settings used for open
    LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
-   HFILE        fpDummy;                          // dummy/lock semaphore file handle
-   BOOL         fUpdated;                         // database-has-been-modified flag
-   USHORT       usNumberOfLookupEntries;    // Number of allocated lookup-table-entries
-   USHORT       usNumberOfAllocatedBuffers; // Number of allocated buffers
-   ULONG        ulReadRecCalls;             // Number of calls to QDAMReadRecord
-   PLOOKUPENTRY_V3 LookupTable_V3;                // Pointer to lookup-table
-   PACCESSCTRTABLEENTRY AccessCtrTable;     // Pointer to access-counter-table
-   BYTE         bRecSizeVersion;                  // record size version flag
+   HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
+   BOOL         fUpdated=0;                       // database-has-been-modified flag
+   USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
+   USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
+   ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
+   PLOOKUPENTRY_V3 LookupTable_V3=nullptr;        // Pointer to lookup-table
+   PACCESSCTRTABLEENTRY AccessCtrTable=nullptr;   // Pointer to access-counter-table
+   BYTE         bRecSizeVersion=0;                  // record size version flag
   //} //end of PBTREEGLOB
 
+
+  // the following define moved from eqfqdami.h since it must be known in
+  // eqfdorg.c
+  /**********************************************************************/
+  /* To check that we are opening a valid B-tree file, there is a       */
+  /* magic cookie stored at the beginning.  This is as follows          */
+  /* This value might be changed to include version identifications...  */
+  /**********************************************************************/
+  #define BTREE_VERSION3      3
+
+
+
+  HTM          htm=nullptr;                      // handle in remote case
+  SHORT        sCurrentIndex=0;                  // current sequence array
+  USHORT       usCurrentRecord=0;                // current sequence record
+  USHORT       usDictNum=0;                      // index in global structure
+  wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
+  BOOL         fLock=0;                          // head term is locked
+  wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
 
 
 //+----------------------------------------------------------------------------+
@@ -493,29 +511,6 @@ SHORT EQFNTMGetUpdCounter
    SHORT      sNumCounters              // number of counters requested
 );
 
-// the following define moved from eqfqdami.h since it must be known in
-// eqfdorg.c
-/**********************************************************************/
-/* To check that we are opening a valid B-tree file, there is a       */
-/* magic cookie stored at the beginning.  This is as follows          */
-/* This value might be changed to include version identifications...  */
-/**********************************************************************/
-#define BTREE_VERSION       0
-#define BTREE_VERSION2      2
-#define BTREE_VERSION3      3
-
-
-
-  HTM          htm;                              // handle in remote case
-   SHORT        sCurrentIndex;                    // current sequence array
-   USHORT       usCurrentRecord;                  // current sequence record
-   //PBTREEGLOB   pBTree;                           // pointer to global struct
-   USHORT       usDictNum;                        // index in global structure
-   wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
-   BOOL         fLock;                            // head term is locked
-   wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
-   CHAR         szFileName[MAX_LONGPATH];         // fully qualified name of file
-
   
    VOID  QDAMUpdateList_V3( PBTREEBUFFER_V3 );
    
@@ -535,9 +530,11 @@ SHORT EQFNTMGetUpdCounter
 );
 
 
- SHORT QDAMDictCreateLocal ( /*PSZ,*/ SHORT, PCHAR, USHORT, PCHAR,
-                             PCHAR, PCHAR, //PBTREE * , 
+ SHORT QDAMDictCreateLocal ( SHORT, PCHAR, USHORT,
+                             PCHAR, PCHAR, 
                              PNTMVITALINFO );
+                             
+ SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
 
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 
