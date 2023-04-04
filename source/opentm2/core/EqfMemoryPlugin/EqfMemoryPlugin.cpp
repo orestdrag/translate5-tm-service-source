@@ -99,42 +99,28 @@ int EqfMemoryPlugin::getListOfSupportedDrives( char *pszDriveListBuffer )
 
 
 void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
-  bool fOK = true;
   T5LOG( T5DEBUG) << ":: create the memory" ;    
-  //pMemory = pFactory->createMemory( szPlugin, pszMemName, ( pszDescription == NULL ) ? szEmpty : pszDescription, pszSourceLanguage,NULL, false, &iRC );
-  //T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
-  //  ", pszDescription = " << pszDescription ;
   strLastError = "";
   iLastError = 0;
 
-  auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str(), false, nullptr );
-  //pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (PSZ)requestData.strMemName.c_str() , (PSZ)requestData.strSrcLang.c_str(), (PSZ)requestData.strMemDescription.c_str(), FALSE, NULLHANDLE );
+  auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str() );
   if ( pMemory == NULL ){
-  //if ( request.memory.expired() ){ 
     request._rc_ = getLastError( strLastError );
     T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  request._rc_;
-    fOK = FALSE;
   }
   else{
     T5LOG( T5INFO) << "::Create successful ";
-  }
-  // get memory object name
-  if ( fOK )
-  {
+    // get memory object name
     char szObjName[MAX_LONGFILESPEC];
-    TMManager::GetInstance()->getObjectName( pMemory, szObjName, sizeof(szObjName) );
-  } 
-
+    request._rc_ = TMManager::GetInstance()->getObjectName( pMemory, szObjName, sizeof(szObjName) );
+  }
+ 
   //--- Tm is created. Close it. 
   if ( pMemory != NULL )
   {
     T5LOG( T5INFO ) << "::Tm is created. Close it";
     TMManager::GetInstance()->closeMemory( pMemory );
     pMemory = NULL;
-  }
-  
-  if(request._rc_  == 0){
-    request._rc_  = (!fOK);
   }
   T5LOG( T5INFO) << " done, usRC = " << request._rc_ ;
 
@@ -153,22 +139,19 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
 OtmMemory* EqfMemoryPlugin::createMemory(
 	const char* pszName,			  
 	const char* pszSourceLang,
-	const char* pszDescription,
-	BOOL bMsgHandling,
-	HWND hwnd
+	const char* pszDescription
 )
 {
   EqfMemory *pNewMemory = NULL;        // new memory object
   HTM htm = NULL;                      // memory handle 
   std::string strMemPath;
-  USHORT usMsgHandling = (USHORT)bMsgHandling;
   BOOL fReserved = FALSE;
 
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, strMemPath, &fReserved );
 
   // use old memory create code
-  TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  (PSZ)pszSourceLang,  (PSZ)pszDescription,  usMsgHandling,  hwnd );
+  TmCreate(  (PSZ)strMemPath.c_str(), &htm,  NULL, "",  "",  (PSZ)pszSourceLang,  (PSZ)pszDescription,  0,  NULL );
 
 
   // setup memory properties
@@ -611,50 +594,6 @@ int EqfMemoryPlugin::deleteMemory(
   return( iRC );
 }
 
-/*! \brief Clear (i.e. remove all entries) a translation memory
-  \param pszName name of the memory being cleared
-	\returns 0 if successful or error return code
-*/
-int EqfMemoryPlugin::clearMemory(
-	const char* pszName			  
-)
-{
-  int iRC = OtmMemoryPlugin::eSuccess;
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
-  if ( pMemInfo.get() != NULL )
-  {
-    // delete data and index file
-    UtlDelete( pMemInfo.get()->szFullPath, 0L, FALSE );
-
-    char szIndexPath[MAX_LONGFILESPEC];
-    strcpy( szIndexPath, pMemInfo.get()->szFullPath );
-    char *pszExt = strrchr( szIndexPath, DOT );
-    strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
-    UtlDelete( szIndexPath, 0L, FALSE );
-
-    // use TmtXCreate to create new data and index file
-    PTMX_CREATE_IN pTmCreateIn = new (TMX_CREATE_IN);
-    memset( pTmCreateIn, 0, sizeof(TMX_CREATE_IN) );
-
-    strcpy( pTmCreateIn->stTmCreate.szDataName, pMemInfo.get()->szFullPath );
-    strcpy( pTmCreateIn->stTmCreate.szSourceLanguage, pMemInfo.get()->szSourceLanguage );
-    strcpy( pTmCreateIn->stTmCreate.szSourceLanguage, pMemInfo.get()->szSourceLanguage );
-    strcpy( pTmCreateIn->stTmCreate.szDescription, pMemInfo.get()->szDescription );
-
-    PTMX_CREATE_OUT pTmCreateOut = new (TMX_CREATE_OUT);
-    memset( pTmCreateOut, 0, sizeof(TMX_CREATE_OUT) );
-
-    iRC = (int)TmtXCreate( pTmCreateIn, pTmCreateOut );
-
-    free( pTmCreateIn );
-    free( pTmCreateOut );
-  }
-  else
-  {
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
-  } /* endif */
-  return( iRC );
-}
 
 /*! \brief Create a temporary memory
   \param pszPrefix prefix to be used for name of the temporary memory
@@ -1053,63 +992,6 @@ BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &
   return( fOK );
 }
 
-/*! \brief Create memory properties
-  \param pszName long name of the memory
-  \param strPathName memory path name
-	\param pvOldProperties existing property file to be used for the fields of the new properties
-	\returns TRUE when successful, FALSE in case of errors
-*/
-BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &strPathName, void *pvOldProperties )
-{
-  BOOL fOK = TRUE;
-  PPROP_NTM pProp = NULL;
-  PPROP_NTM pOldProp = (PPROP_NTM)pvOldProperties;
-  USHORT usPropSize = get_max( sizeof(PROP_NTM), MEM_PROP_SIZE );
-
-  fOK = UtlAlloc( (void **)&pProp, 0, usPropSize, NOMSG );
-
-  // init memory
-  memset((void*)pProp,0,usPropSize);
-  if ( fOK )
-  {
-    // fill properties file
-    pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
-    pProp->stPropHead.chType = PROP_TYPE_NEW;
-
-    T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 23 strncpy( pProp->stPropHead.szPath, strPathName.c_str(),  sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));";
-#ifdef TEMPORARY_COMMENTED
-    strncpy( pProp->stPropHead.szPath, strPathName.c_str(), 
-             sizeof(pProp->stPropHead.szPath)/sizeof(pProp->stPropHead.szPath[0]));
-    Utlstrccpy( pProp->stPropHead.szName, UtlSplitFnameFromPath( pProp->stPropHead.szPath ), DOT );
- 
-    strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-
-    UtlSplitFnameFromPath( pProp->stPropHead.szPath );
-    //in case of overflow. change these strcpy to strncpy
-    strncpy( pProp->szFullMemName, strPathName.c_str(), sizeof(pProp->szFullMemName)/sizeof(pProp->szFullMemName[0])-1);
-    strncpy( pProp->szLongName, pszName, sizeof(pProp->szLongName)/sizeof(pProp->szLongName[0])-1);
-    strncpy( pProp->stTMSignature.szDescription, pOldProp->stTMSignature.szDescription, 
-             sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
-    strncpy( pProp->stTMSignature.szSourceLanguage, pOldProp->stTMSignature.szSourceLanguage, 
-             sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
-    strcpy( pProp->stTMSignature.szUserid, pOldProp->stTMSignature.szUserid );
-    #endif
-
-    pProp->stTMSignature.bMajorVersion = pOldProp->stTMSignature.bMajorVersion;
-    pProp->stTMSignature.bMinorVersion = pOldProp->stTMSignature.bMinorVersion;
-    strcpy( pProp->szNTMMarker, NTM_MARKER );
-    pProp->stTMSignature.lTime = pOldProp->stTMSignature.lTime;
-    pProp->usThreshold = pOldProp->usThreshold ;
-
-    // write properties to disk
-    std::string strPropName;
-    this->makePropName( strPathName, strPropName );
-    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
-    UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
-  } /* endif */     
-  return( fOK );
-}
-
 /*! \brief Make the fully qualified property file name for a memory
   \param strPathName reference to the memory path name
   \param strPropName reference to the string receiving the property file name
@@ -1203,197 +1085,6 @@ typedef struct _MEMIMPORTFROMFILEDATA
 
 } MEMIMPORTFROMFILEDATA, *PMEMIMPORTFROMFILEDATA;
 
-/*! \brief Initialize the import of a memory using a list of memory data files
-
-
-   \param pszMemoryName    name of the memory 
-   \param pFileList        pointer to a buffer containing the fully qualified memory data files as a comma separated list
-   \param iOptions         processing options, one or more of the IMPORTFROMMEMFILES_..._OPT values ORed together
-                           
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int EqfMemoryPlugin::importFromMemFilesInitialize
-(
-  const char *pszMemoryName,
-  const char *pFileList,
-  int  iOptions,
-  PVOID *ppPrivateData
-)
-{
-  int iRC = OtmMemoryPlugin::eSuccess;
- std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( pszMemoryName );
-  std::string strPropFile = "";
-  std::string strDataFile = "";
-  std::string strIndexFile = "";
-
-  iOptions;
-
-  // extract names of the imported files from the file list
-  {
-     // loop over imported files and extract them
-     std::string strFiles = pFileList;
-     size_t Pos = 0;
-     BOOL fComplete = FALSE;
-     while ( !fComplete )
-     {
-       // extract next file name from list
-       std::string strCurFile;
-       size_t End = strFiles.find_first_of( ',', Pos );
-       if ( End == std::string::npos )
-       {
-         strCurFile = strFiles.substr( Pos, std::string::npos );
-         fComplete = TRUE;
-       }
-       else
-       {
-         strCurFile = strFiles.substr( Pos, End - Pos );
-         Pos = End + 1;
-       } /* endif */     
-
-       // get position of file extention in current file
-       size_t ExtPos = strCurFile.find_last_of( '.' );
-
-       // process current file name
-       if ( strCurFile.compare( ExtPos, std::string::npos, EXT_OF_MEM ) == 0 )
-       {
-          strPropFile = strCurFile;   
-       }
-       else if ( strCurFile.compare( ExtPos, std::string::npos, EXT_OF_TMDATA ) == 0 )
-       {
-          strDataFile = strCurFile;   
-       }
-       else if ( strCurFile.compare( ExtPos, std::string::npos, EXT_OF_TMINDEX ) == 0 )
-       {
-          strIndexFile = strCurFile;   
-       }
-       else
-       {
-         // delete unknown file type
-         UtlDelete( (PSZ)strCurFile.c_str(), 0L, FALSE );
-       } /* endif */
-     } /* endwhile */        
-  }
-
-
-  if ( pMemInfo.get() != NULL )
-  {
-    PMEMIMPORTFROMFILEDATA pData = NULL;
-
-    // this memory exists already and we have to merge the data from the memory data files into
-    // the existing memory, so prepare the merge of the memory
-
-    // allocate and anchor our memory merge data structure
-    pData = new( MEMIMPORTFROMFILEDATA );
-    if ( pData == NULL ) return( OtmMemoryPlugin::eNotEnoughMemory );
-    *ppPrivateData = (PVOID)pData;
-
-    // store memory file names in private data area
-    pData->strPropFile = strPropFile;
-    pData->strDataFile = strDataFile;
-    pData->strIndexFile = strIndexFile;
-
-    // open the target memory
-    pData->pOutputMemory = (EqfMemory *)this->openMemory( pszMemoryName, FALSE, NULLHANDLE, EXCLUSIVE );
-    if ( pData->pOutputMemory == NULL )
-    {
-      return( this->iLastError );
-    } /* end */       
-
-    // open the data file of the imported memory file
-    // use old memory open code
-    HTM htm = 0;
-    // commented temporarily to link the plugin
-    USHORT usRC = TmOpen( (PSZ)strDataFile.c_str(), &htm,  EXCLUSIVE, 0, FALSE,  NULLHANDLE );
-    if ( usRC != 0 )
-    {
-      handleError( (int)usRC, (char *)strDataFile.c_str(), NULL, (char *)strDataFile.c_str(), this->strLastError, this->iLastError );
-
-      // close the target memory which has already been opened 
-      if ( pData->pOutputMemory )
-      {
-        this->closeMemory( pData->pOutputMemory );
-        pData->pOutputMemory = NULL;
-      }
-      
-      return( this->iLastError );      
-    } /* end */   
-
-    pData->pInputMemory = new EqfMemory( this, htm, (PSZ)pszMemoryName  );
-
-    // get first proposal and copy it to output memory
-    int iMemRC = pData->pInputMemory->getFirstProposal( pData->Proposal );
-    if ( iMemRC == NO_ERROR)
-    {
-      pData->pOutputMemory->putProposal( pData->Proposal );
-      iRC = OtmMemoryPlugin::eRepeat;
-    }
-    else if ( (iMemRC == BTREE_EOF_REACHED) || (iMemRC == OtmMemory::INFO_ENDREACHED) )
-    {
-      // nothing more to do
-      this->importFromMemFilesEndProcessing( ppPrivateData );
-    }
-    else
-    {
-      // something failed, report error and go to end processing
-      handleError( iMemRC, (char *)strDataFile.c_str(), NULL, (char *)strDataFile.c_str(), this->strLastError, this->iLastError );
-      iRC = this->iLastError;
-
-      // close the target memory which has already been opened 
-      if ( pData->pOutputMemory )
-      {
-        this->closeMemory( pData->pOutputMemory );
-        pData->pOutputMemory = NULL;
-      }
-    }
-  }
-  else
-  {
-    // this is a new memory, so we can move the files to the approbriate location and create a new property file for it
-     std::string strMemPath;
-
-     // build memory path for the imported memory
-     this->makeMemoryPath( pszMemoryName, strMemPath );
-
-      // process property file
-      {
-        PPROP_NTM pProp = NULL;
-        USHORT usLen = 0;
-        UtlLoadFile( (PSZ)strPropFile.c_str(), (PVOID *)&pProp, &usLen, FALSE, FALSE );
-        if ( pProp != NULL )
-        {
-          // setup new memory properties based on imported memory property file
-          this->createMemoryProperties( pszMemoryName, strMemPath, (void *)pProp );
-
-          // delete imported property file
-          UtlDelete( (PSZ)strPropFile.c_str(), 0L, FALSE );
-
-          // free memory of loaded property file
-          UtlAlloc( (PVOID *)&pProp, 0L, 0L, NOMSG );
-        } /* end */             
-       }
-
-       // process data file
-       {
-         UtlMove( (PSZ)strDataFile.c_str(), (PSZ)strMemPath.c_str(), 0L, FALSE );
-       }
-
-       // process index file
-       {
-         std::string strNewIndexFile;
-         this->makeIndexFileName( strMemPath, strNewIndexFile );
-         UtlMove( (PSZ)strIndexFile.c_str(), (PSZ)strNewIndexFile.c_str(), 0L, FALSE );
-       } /* endif */
-
-       // add memory to our memory list
-       this->addToList( strMemPath );
-  } /* endif */
-  return( iRC );
-}
 
 /*! \brief Continue the import of a memory using a list of memory data files
 

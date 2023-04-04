@@ -50,58 +50,6 @@
 /* prototypes for internal functions                                  */
 /**********************************************************************/
 USHORT
-C_TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
-          HTM         *htm,            //(out) TM handle
-          HTM         hModel,          //(in)  model handle
-          PSZ         pszServer,       //(in)  server name or empty string
-          PSZ         pszUserID,       //(in)  LAN USERID or empty string
-          PSZ         pszSourceLang,   //(in)  source language or empty string
-          PSZ         pszDescription,  //(in)  TM description or empty string
-          USHORT      usMsgHandling,   //(in)  message handling parameter
-                                       //      TRUE:  display error message
-                                       //      FALSE: display no error message
-          HWND        hwnd );           //(in)  handle for error messages
-USHORT
-C_TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
-        HTM        *phtm,              //(out) TM handle
-        USHORT     usAccess,           //(in)  access mode: NON_EXCLUSIVE
-                                       //                   EXCLUSIVE
-                                       //                   FOR_ORGANIZE
-        USHORT     usLocation,         //(in)  location:    TM_LOCAL
-                                       //                   TM_REMOTE
-                                       //                   TM_LOCAL_REMOTE
-        USHORT     usMsgHandling,      //(in)  message handling parameter
-                                       //      TRUE:  display error message
-                                       //      FALSE: display no error message
-        HWND       hwnd );              //(in)  handle for error messages
-USHORT
-C_TmClose( HTM        htm,               //(in) TM handle returned from open
-         PSZ        szMemPath,         //(in) full TM name x:\eqf\mem\mem.tmd
-         USHORT     usMsgHandling,     //(in) message handling parameter
-                                   //     TRUE:  display error message
-                                   //     FALSE: display no error message
-         HWND       hwnd );         //(in) handle for error messages
-
-USHORT
-C_TmExtractHwnd( HTM,
-           PSZ,
-           PTMX_EXT_IN,
-           PTMX_EXT_OUT,
-           USHORT,
-           HWND );                     //(in) handle for error messages
-
-USHORT
-C_TmExtractHwndW
-  ( HTM          htm,              //(in)  TM handle
-    PSZ          szMemPath,        //(in)  full TM name x:\eqf\mem\mem.tmd
-    PTMX_EXT_IN_W  pstExtIn,       //(in)  pointer to extract input structure
-    PTMX_EXT_OUT_W pstExtOut,      //(out) pointer to extract output structure
-    USHORT       usMsgHandling,    //(in)  message handling parameter
-                                   //      TRUE:  display error message
-                                   //      FALSE: display no error message
-    HWND         hwnd );            //(in)  handle for error messages
-
-USHORT
 TmGetW(HTM            htm,             //(in)  TM handle
        PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
@@ -109,34 +57,6 @@ TmGetW(HTM            htm,             //(in)  TM handle
        USHORT         usMsgHandling );  //(in)  message handling parameter
 
 USHORT C_TmInfoHwnd( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT, HWND );
-
-USHORT C_TmUpdSegHwnd
-(
-  HTM         htm,                       //(in)  TM handle
-  PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN pstPutIn,                  //(in)  pointer to put input structure
-  ULONG       ulUpdKey,                  //(in)  key of record being updated
-  USHORT      usUpdTarget,               //(in)  number of target being updated
-  USHORT      usFlags,                   //(in)  flags controlling the updated fields
-  USHORT      usMsgHandling,             //(in)  message handling parameter
-                                         //      TRUE:  display error message
-                                         //      FALSE: display no error message
-  HWND        hwnd                       //(in)  handle for error messages
-);
-
-USHORT C_TmUpdSegHwndW
-(
-  HTM         htm,                       //(in)  TM handle
-  PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN_W pstPutIn,                  //(in)  pointer to put input structure
-  ULONG       ulUpdKey,                  //(in)  key of record being updated
-  USHORT      usUpdTarget,               //(in)  number of target being updated
-  USHORT      usFlags,                   //(in)  flags controlling the updated fields
-  USHORT      usMsgHandling,             //(in)  message handling parameter
-                                         //      TRUE:  display error message
-                                         //      FALSE: display no error message
-  HWND        hwnd                       //(in)  handle for error messages
-);
 
 USHORT
 NTMFillCreateInStruct( HTM,
@@ -279,7 +199,7 @@ TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   if ( !fOk )
   {
-    T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED in C_TmCreate:: MemRcHandlingHwnd";
+    T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED :: MemRcHandlingHwnd";
 #ifdef TEMPORARY_COMMENTED
       usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
       #endif
@@ -438,7 +358,7 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
           /**************************************************************/
           fOk           = FALSE;
           usMsgHandling = FALSE;
-          T5LOG(T5ERROR) << "Error in C_TmOpen:: NTMGetThresholdFromProperties fails, memName = " <<  szMemFullPath << ", usRC = " << usRc;
+          T5LOG(T5ERROR) << "Error in :: NTMGetThresholdFromProperties fails, memName = " <<  szMemFullPath << ", usRC = " << usRc;
           DEBUGEVENT( TMOPEN_LOC, STATE_EVENT, 1 );
         } /* endif */
       } /* endif */

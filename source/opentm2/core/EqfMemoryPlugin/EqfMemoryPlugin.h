@@ -65,9 +65,7 @@ public:
 	OtmMemory* createMemory(
 		const char* pszName,			  
 		const char* pszSourceLang,
-		const char* pszDescription,
-		BOOL bMsgHandling,
-		HWND hwnd
+		const char* pszDescription
 	);
 	
   void createMemory(CreateMemRequestData& request);
@@ -114,13 +112,6 @@ public:
 		const char* pszName			  
 	);
 
-/*! \brief Clear (i.e. remove all entries) a translation memory
-  \param pszName name of the memory being cleared
-	\returns 0 if successful or error return code
-*/
-	int clearMemory(
-		const char* pszName			  
-	);
 
 /*! \brief Get information about a memory
   \param pszName name of the memory
@@ -323,13 +314,7 @@ private:
 	\returns TRUE when successful, FALSE in case of errors
 */
 BOOL createMemoryProperties( const char* pszName, std::string &strPathName, const char*  pszDescription, const char*  pszSourceLanguage );
-/*! \brief Create memory properties
-  \param pszName long name of the memory
-  \param strPathName memory path name
-	\param pvOldProperties existing property file to be used for the fields of the new properties
-	\returns TRUE when successful, FALSE in case of errors
-*/
-BOOL createMemoryProperties( const char*  pszName, std::string &strPathName, void *pvOldProperties );
+
 
 /*! \brief Make the fully qualified property file name for a memory
   \param strPathName reference to the memory path name
@@ -379,28 +364,6 @@ int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile =
 	\returns 0 when successful
 */
 int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
-
-/*! \brief Initialize the import of a memory using a list of memory data files
-
-
-   \param pszMemoryName    name of the memory 
-   \param pFileList        pointer to a buffer containing the fully qualified memory data files as a comma separated list
-   \param iOptions         processing options, one or more of the IMPORTFROMMEMFILES_..._OPT values ORed together
-                           
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int importFromMemFilesInitialize
-(
-  const char *pszMemoryName,
-  const char *pFileList,
-  int  iOptions,
-  PVOID *ppPrivateData
-);
 
   
 /*! \brief Continue the import of a memory using a list of memory data files
