@@ -19,7 +19,7 @@
 #include "LogWrapper.h"
 
 #include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
-//*! \brief Data class for the transport of memory proposals
+/*! \brief Data class for the transport of memory proposals
  *
  * 
  */
@@ -2131,6 +2131,39 @@ public:
 	~EqfMemory();
 
 
+/*! \brief Info structure for an open translation memory
+*/
+  //typedef struct _OPENEDMEMORY
+  //{
+  //char szName[260];               // name of the memory
+  time_t tLastAccessTime;         // last time memory has been used
+  long lHandle;                   // memory handle     
+  MEMORY_STATUS eStatus;          // status of the memory
+  MEMORY_STATUS eImportStatus;    // status of the current/last memory import
+  //std::atomic<double> dImportProcess; 
+  //ushort * pusImportPersent = nullptr;
+  ImportStatusDetails* importDetails = nullptr;
+  char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
+  //FileBuffer
+  PBTREEGLOB dataBTree;
+  PBTREEGLOB indexBTree;
+  PPROP_NTM memoryProperties;
+    /*! \brief structure for memory information */
+  //  typedef struct _MEMORYINFO
+  //  {
+      char szPlugin[256];                          // name of the plugin controlling this memory
+      char szName[256];                            // name of the memory
+      char szDescription[256];                     // description of the memory
+      char szFullPath[256];                        // full path to memory file(s) (if applicable only)
+      char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
+      char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
+      char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
+      char szOwner[256];                           // ID of the memory owner
+      char szDescrMemoryType[256];                 // descriptive name of the memory type
+      unsigned long ulSize;                        // size of the memory  
+      BOOL fEnabled;                               // memory-is-enabled flag  
+  //  } MEMORYINFO, *PMEMORYINFO;
+//} OPENEDMEMORY ;
 
 /*! \brief Error code definition
 */
@@ -2264,19 +2297,7 @@ typedef struct _MEMORYPARTDATA
   char   chPrivateBuffer[1024];        // could be used as private buffer area
 } MEMORYPARTDATA, *PMEMORYPARTDATA;
 
-/*! \brief Provides a part of the memory in binary format
 
-     The binary format is used by the folder export to add the memory
-     in the internal format to the exported folder.
-
-    \param pMemoryPartData pointer to the data area for the extraxt om binary format
-
-  	\returns 0 or error code in case of errors
-*/
-  int getMemoryPart
-  (
-    PMEMORYPARTDATA pData           // points to data area supplied by the caller
-  );
 
 /*! \brief Get a list of memory proposals matching the given search key
 
@@ -2299,19 +2320,6 @@ typedef struct _MEMORYPARTDATA
     std::vector<OtmProposal *> &FoundProposals,
     unsigned long ulOptions
 
-  ); 
-
-/*! \brief Updates some fields of a specific proposal in the memory
-
-    \param Proposal reference to a OtmProposal object containing the data being changed
-    \param usUpdateFlags Flags selecting the update fields
-
-  	\returns 0 or error code in case of errors
-*/
-  int updateProposal
-  (
-    OtmProposal &Proposal,
-    USHORT      usUpdateFlags
   ); 
 
 /*! \brief Delete a specific proposal from the memory
@@ -2354,46 +2362,6 @@ typedef struct _MEMORYPARTDATA
     int iSize
   );
 
-/*! \brief Get number of different document names used in the memory
-  	\returns number of markups used by the memory proposals or 0 if no document name information can be provided
-*/
-  int getNumOfDocumentNames();
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  int getDocumentName
-  (
-    int iPos,
-    char *pszBuffer,
-    int iSize
-  );
-
-  /*! \brief Get number of different document short names used in the memory
-  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
-*/
-  	int getNumOfDocumentShortNames();
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  	int getDocumentShortName
-    (
-      int iPos,
-      char *pszBuffer,
-      int iSize
-    );
-
-/*! \brief Get number of different languages used in the memory
-  	\returns number of languages used by the memory proposals or 0 if no language information can be provided
-*/
-  int getNumOfLanguages();
 
 /*! \brief Get language at position n [n = 0.. GetNumOfLanguages()-1]
     \param iPos position of language
@@ -2520,16 +2488,16 @@ private:
 
   HTM htm;                                       // old fashioned memory handle for this memory
   PTMX_CLB pTmClb;                               // ptr to ctl block struct
-  PTMX_EXT_IN_W  pTmExtIn;                       // ptr to extract input struct
-  PTMX_EXT_OUT_W pTmExtOut;                      // ptr to extract output struct
-  PTMX_PUT_IN_W  pTmPutIn;                       // ptr to TMX_PUT_IN_W structure
-  PTMX_PUT_OUT_W pTmPutOut;                      // ptr to TMX_PUT_OUT_W structure
-  PTMX_GET_IN_W  pTmGetIn;                       // ptr to TMX_PUT_IN_W structure
-  PTMX_GET_OUT_W pTmGetOut;                      // ptr to TMX_PUT_OUT_W structure
+  TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
+  TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
+  TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
+  TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
+  TMX_GET_IN_W  TmGetIn;                       // ptr to TMX_PUT_IN_W structure
+  TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_PUT_OUT_W structure
   ULONG ulNextKey;                       // next TM key for GetFirstProposal/GetNextProposal
   USHORT usNextTarget;                   // next TM target for GetFirstProposal/GetNextProposal
   EqfMemoryPlugin *pMemoryPlugin;                // memory plugin for this memory
-  char szName[MAX_LONGFILESPEC];                 // memory name
+  //char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;
 	int iLastError;
   void *pvGlobalMemoryOptions;                   // pointert to global memory options to be used for global memory proposals
@@ -2940,12 +2908,8 @@ USHORT NTMWriteLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMDestroyLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMCreateLangGroupTable( PTMX_CLB pTmClb );
 USHORT NTMAddLangGroup( PTMX_CLB pTmClb, PSZ pszLang, USHORT sLangID );
-USHORT NTMOrganizeIndexFile
-(
-  PTMX_CLB pTmClb               // ptr to control block,
-);
 
-USHORT NTMOrganizeIndexFile1
+USHORT NTMOrganizeIndexFile
 (
   PTMX_CLB pTmClb               // ptr to control block,
 );
@@ -3142,12 +3106,6 @@ USHORT NTMAllocSentenceStructure( PTMX_SENTENCE  *ppSentence );
 VOID NTMFreeSentenceStructure( PTMX_SENTENCE  pSentence );
 
 void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp );
-
-USHORT  MemOpenProp( HPROP *, PVOID *, PSZ, PSZ, USHORT, BOOL );
-
-USHORT  FillMemoryListBox ( PLISTCOMMAREA, WPARAM, LPARAM );
-
-VOID NTMGetHandlesFromCLB ( HTM, PVOID *, PVOID * );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*! tm.h      Internal header file for Translation Memory functions
@@ -4592,7 +4550,7 @@ public:
 
 
 /*! \brief type of callback function for ListMemories method */
-typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMORY *  pInfo  );
+typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, EqfMemory *  pInfo  );
 
 
 // options for the importFromMemoryFiles method
@@ -4686,7 +4644,7 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 */
 	int getMemoryInfo(
 		const char* pszName,
-    std::shared_ptr<OPENEDMEMORY>  pInfo
+    std::shared_ptr<EqfMemory>  pInfo
 	);
 
 /*! \brief set description of a memory
@@ -4721,38 +4679,7 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
     int  iBufferSize
   );
 
-/*! \brief import a memory using a list of memory data files
 
-    This method imports the binary files of a memory. The files have been created and
-    filled using the getMemoryPart method.
-
-    This method should delete the memory data files at the end of the processing- 
-
-    When the processing of the memory files needs more time, the method
-    should process the task in small units in order to prevent blocking of the
-    calling application. To do this the method should return
-    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
-    a private data area to keep track of the current processing step. The method will
-    be called repetetively until the import has been completed.
-
-   \param pszMemoryName    name of the memory 
-   \param pFileList        pointer to a buffer containing the fully qualified memory data files as a comma separated list
-   \param iOptions         processing options, one or more of the IMPORTFROMMEMFILES_..._OPT values ORed together
-                           
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             EqfMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int importFromMemoryFiles
-(
-  const char *pszMemoryName,
-  const char *pFileListBuffer,
-  int  iOptions,
-  PVOID *ppPrivateData
-);
 
   /*! \brief Physically rename a translation memory
   \param pszOldName name of the memory being rename
@@ -4762,22 +4689,6 @@ int importFromMemoryFiles
   int renameMemory(
 	  const char* pszOldName,
     const char* pszNewName
-  );
-
-  /*! \brief Create a temporary memory
-  \param pszPrefix prefix to be used for name of the temporary memory
-  \param pszName buffer for the name of the temporary memory
-	\param pszSourceLang source language
-	\param bMsgHandling true/false: display errors or not
-	\param hwnd owner-window needed for modal error-message
-	\returns Pointer to created translation memory or NULL in case of errors
-*/
-  EqfMemory* createTempMemory(
-	  const char* pszPrefix,			  
-	  const char* pszName,			  
-	  const char* pszSourceLang,
-	  BOOL bMsgHandling,
-	  HWND hwnd
   );
 
   /*! \brief Close and delete a temporary memory
@@ -4864,13 +4775,13 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
 	std::string strLastError;
 
   
-  std::vector< std::shared_ptr<OPENEDMEMORY> > m_MemInfoVector;
+  std::vector< std::shared_ptr<EqfMemory> > m_MemInfoVector;
 
 private:
 
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
   void refreshMemoryList();
- std::shared_ptr<OPENEDMEMORY>  findMemory( const char *pszName );
+ std::shared_ptr<EqfMemory>  findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);
 /*! \brief Create memory properties
   \param pszName long name of the memory
@@ -4906,7 +4817,7 @@ int makePropName( std::string &strPathName, std::string &strPropName );
 	\param pInfo pointer to memory info structure
 	\returns TRUE when successful, FALSE in case of errors
 */
-  BOOL fillInfoStructure( char *pszPropName, std::shared_ptr<OPENEDMEMORY>  pInfo );
+  BOOL fillInfoStructure( char *pszPropName, std::shared_ptr<EqfMemory>  pInfo );
 
 	std::string name;
 	std::string shortDesc;
@@ -4931,42 +4842,12 @@ int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile =
 */
 int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
 
-  
-/*! \brief Continue the import of a memory using a list of memory data files
-
-
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             EqfMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
- */
-  int importFromMemFilesContinueProcessing
-  (
-    PVOID *ppPrivateData
-  );
-
-  /*! \brief Terminate the import of a memory using a list of memory data files and do a cleanup
-
-
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             any other value is an error code
- */
-  int importFromMemFilesEndProcessing
-  (
-    PVOID *ppPrivateData
-  );
-
 };
 
 class TMManager{
     /*! \brief Pointer to the list of opened memories
     */
-    //std::vector<OPENEDMEMORY> vMemoryList;
+    //std::vector<EqfMemory> vMemoryList;
 
 
 public:
@@ -4984,7 +4865,7 @@ public:
       \param pMem - pointer to mem
       \returns 0 
     */
-    int removeFromMemoryList( std::shared_ptr<OPENEDMEMORY>  pMem );
+    int removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem );
 
     /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
         \param pszMemory name of the memory
@@ -5006,7 +4887,7 @@ public:
         \returns index of the next free slot in the memory table or -1 if there is no free slot and the max number of entries has been reached
     */
     int getFreeSlot(size_t memoryRequested);
-    std::shared_ptr<OPENEDMEMORY>  getFreeSlotPointer(size_t memoryRequested);
+    std::shared_ptr<EqfMemory>  getFreeSlotPointer(size_t memoryRequested);
 
     /*! \brief close any memories which haven't been used for a long time
         \returns 0
@@ -5018,7 +4899,7 @@ public:
     */
     size_t calculateOccupiedRAM();
 
-    std::shared_ptr<OPENEDMEMORY>  findOpenedMemory( const std::string& memName);
+    std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 
     int GetMemImportInProcess();
     void importDone(const std::string& memName, int iRC, char *pszError );
@@ -5086,7 +4967,7 @@ int getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
- std::shared_ptr<OPENEDMEMORY>  pInfo
+ std::shared_ptr<EqfMemory>  pInfo
 );
 
 
@@ -5111,41 +4992,6 @@ int getMemoryFiles
   char *pszPluginNameOut
 );
 
-
-/*! \brief import a memory using a list of memory data files
-
-    This method imports the binary files of a memory. The files have been created and
-    filled using the getMemoryPart method.
-
-    This method should delete the memory data files at the end of the processing- 
-
-    When the processing of the memory files needs more time, the method
-    should process the task in small units in order to prevent blocking of the
-    calling application. To do this the method should return
-    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
-    a private data area to keep track of the current processing step. The method will
-    be called repetetively until the import has been completed.
-
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory or memory object name (pluginname + colon + memory name)
-   \param pFileList        pointer to a buffer containing the fully qualified memory data files as a comma separated list
-   \param iOptions         processing options, one or more of the IMPORTFROMMEMFILES_..._OPT values ORed together
-                           
-   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
-                           PVPOID pointer will be set to NULL on the initial call
-
-  	\returns 0 if OK,
-             EqfMemoryPlugin::eRepeat when the import needs more processing steps
-             any other value is an error code
-*/
-int importFromMemoryFiles
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pFileListBuffer,
-  int  iOptions,
-  PVOID *ppPrivateData
-);
 
 
 /* \brief Create a memory 
@@ -5436,17 +5282,6 @@ int getProposalSortKey(  OtmProposal &Proposal );
 int getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmProposal::eProposalType ProposalType, int iFuzzyness, int iMTDisplayFactor, USHORT usContextRanking, BOOL fEndOfTable, LONG lOptions = 0 );
 
 
-/*! \brief Create a temporary memory
-  \param pszPrefix prefix to be used for name of the temporary memory
-  \param pszName buffer for the name of the temporary memory
-	\param pszSourceLang source language
-	\returns Pointer to created translation memory or NULL in case of errors
-*/
- EqfMemory* createTempMemory(
-	  const char* pszPrefix,			  
-	  const char* pszName,			  
-	  const char* pszSourceLang
-  );
 
   /*! \brief Close and delete a temporary memory
   \param pMemory pointer to memory obhect

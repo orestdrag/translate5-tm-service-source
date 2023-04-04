@@ -39,18 +39,13 @@ EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
   strcpy( this->szName, pszName );
   if ( this->htm != 0 )
   {
-    this->pTmClb = (PTMX_CLB)this->htm;
+    pTmClb = (PTMX_CLB)this->htm;
   }
   else
   {
-    this->pTmClb = NULL;
+    pTmClb = NULL;
   } /* end */     
-  this->pTmExtIn = NULL;
-  this->pTmExtOut = NULL;
-  this->pTmPutIn = NULL;
-  this->pTmPutOut = NULL;
-  this->pTmGetIn = NULL;
-  this->pTmGetOut = NULL;
+
   this->pvGlobalMemoryOptions = NULL;
 
 }
@@ -58,14 +53,12 @@ EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
 
 EqfMemory::~EqfMemory()
 {
-  if ( this->pTmExtIn != NULL )  delete  this->pTmExtIn ;
-  if ( this->pTmExtOut != NULL ) delete  this->pTmExtOut ;
-  if ( this->pTmPutIn != NULL )  delete  this->pTmPutIn ;
-  if ( this->pTmPutOut != NULL ) delete  this->pTmPutOut ;
-  if ( this->pTmGetIn != NULL )  delete  this->pTmGetIn ;
-  if ( this->pTmGetOut != NULL ) delete  this->pTmGetOut;
-
-
+  //if ( this->pTmExtIn != NULL )  delete  this->pTmExtIn ;
+  //if ( &TmExtOut != NULL ) delete  &TmExtOut ;
+  //if ( TmPutIn != NULL )  delete  TmPutIn ;
+  //if ( this->pTmPutOut != NULL ) delete  this->pTmPutOut ;
+  //if ( this->pTmGetIn != NULL )  delete  this->pTmGetIn ;
+  //if ( this->pTmGetOut != NULL ) delete  this->pTmGetOut;
 }
 
 /*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format
@@ -251,15 +244,10 @@ unsigned long EqfMemory::getFileSize()
 {
   ULONG ulFileSize = 0;         // size of TM files
 
-  if ( this->pTmClb != NULL )
+  if ( pTmClb != NULL )
   {
-    EqfMemoryPlugin *pPlugin = (EqfMemoryPlugin *)this->getPlugin();
-
-    PBTREE pDataTree = (PBTREE)this->pTmClb->pstTmBtree;
-    PBTREE pIndexTree = (PBTREE)this->pTmClb->pstInBtree;
-
-    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pDataTree->pBTree->fp );
-    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pIndexTree->pBTree->fp );
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->pBTree->fp );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->pBTree->fp );
 
     ulFileSize = ulDataSize + ulIndexSize;
   }
@@ -281,16 +269,13 @@ int EqfMemory::putProposal
 )
 {
   int iRC = 0;
+  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  if ( this->pTmPutIn == NULL ) this->pTmPutIn = new (TMX_PUT_IN_W);
-  if ( this->pTmPutOut == NULL ) this->pTmPutOut = new (TMX_PUT_OUT_W);
-  memset( this->pTmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-  memset( this->pTmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-
-  this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
+  this->OtmProposalToPutIn( Proposal, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
-    std::string source = EncodingHelper::convertToUTF8(this->pTmPutIn->stTmPut.szSource);
+    std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
   /********************************************************************/
@@ -300,19 +285,19 @@ int EqfMemory::putProposal
   /* the TMX_PUT_IN structure must not be filled it is provided       */
   /* by the caller                                                    */
   /********************************************************************/
-  this->pTmPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  this->pTmPutIn->stPrefixIn.usTmCommand   = TMC_REPLACE;
+  TmPutIn.stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
+  TmPutIn.stPrefixIn.usTmCommand   = TMC_REPLACE;
 
-  //iRC = (int)TmReplace( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
-  iRC = TmtXReplace ( (PTMX_CLB)htm, pTmPutIn, pTmPutOut );
+  //iRC = (int)TmReplace( this->htm,  NULL,  TmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
+  iRC = TmtXReplace ( (PTMX_CLB)htm, &TmPutIn, &TmPutOut );
 
   if ( iRC != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
-      //handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+      //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
   }
 
   if ( ( iRC == 0 ) &&
-       ( this->pTmPutIn->stTmPut.fMarkupChanged ) ) {
+       ( TmPutIn.stTmPut.fMarkupChanged ) ) {
      iRC = SEG_RESET_BAD_MARKUP ;
   }
 
@@ -376,39 +361,36 @@ int EqfMemory::getNextProposal
 )
 {
   int iRC = 0;
-
-  if ( this->pTmExtIn == NULL ) this->pTmExtIn = new (TMX_EXT_IN_W);
-  if ( this->pTmExtOut == NULL ) this->pTmExtOut = new (TMX_EXT_OUT_W);
-  memset( this->pTmExtIn, 0, sizeof(TMX_EXT_IN_W) );
-  memset( this->pTmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
+  memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
+  memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
 
   Proposal.clear();
-  this->pTmExtIn->ulTmKey      = this->ulNextKey;
-  this->pTmExtIn->usNextTarget = this->usNextTarget;
-  this->pTmExtIn->usConvert    = MEM_OUTPUT_ASIS;
+  TmExtIn.ulTmKey      = this->ulNextKey;
+  TmExtIn.usNextTarget = this->usNextTarget;
+  TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
-  iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
+  iRC = (int)TmtXExtract(  pTmClb,  &TmExtIn,  &TmExtOut);
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
   {
-    if ( (piProgress != NULL) && (this->pTmExtOut->ulMaxEntries != 0) )
+    if ( (piProgress != NULL) && (TmExtOut.ulMaxEntries != 0) )
     {
-      *piProgress =  (int)((this->pTmExtIn->ulTmKey - FIRST_KEY) * 100) /  (int)this->pTmExtOut->ulMaxEntries;
+      *piProgress =  (int)(( TmExtIn.ulTmKey - FIRST_KEY) * 100) /  (int)TmExtOut.ulMaxEntries;
     } /* endif */     
   } /* endif */       
 
   if ( iRC == 0 )
   {
-    this->ExtOutToOtmProposal( this->pTmExtOut, Proposal );
+    this->ExtOutToOtmProposal( &TmExtOut, Proposal );
 
     // set current proposal internal key ,which is used in updateProposal
-    this->SetProposalKey( this->pTmExtIn->ulTmKey,this->pTmExtIn->usNextTarget, &Proposal );
+    this->SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget, &Proposal );
   } /* endif */       
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
   {
-    this->ulNextKey = pTmExtOut->ulTmKey;
-    this->usNextTarget = pTmExtOut->usNextTarget;
+    this->ulNextKey = TmExtOut.ulTmKey;
+    this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */       
 
   if ( iRC == 0 )
@@ -421,7 +403,7 @@ int EqfMemory::getNextProposal
   }
   else
   {
-    handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+    handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
     if ( iRC == BTREE_CORRUPTED ) iRC = ERROR_ENTRYISCORRUPTED;
   }
 
@@ -483,175 +465,36 @@ int EqfMemory::getProposal
 {
   int iRC = 0;
 
-  if ( this->pTmExtIn == NULL ) this->pTmExtIn = new (TMX_EXT_IN_W);
-  if ( this->pTmExtOut == NULL ) this->pTmExtOut = new (TMX_EXT_OUT_W);
-  memset( this->pTmExtIn, 0, sizeof(TMX_EXT_IN_W) );
-  memset( this->pTmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
+  memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
+  memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
 
   Proposal.clear();
 
-  iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &(this->pTmExtIn->ulTmKey), &(this->pTmExtIn->usNextTarget) );
-  this->pTmExtIn->usConvert    = MEM_OUTPUT_ASIS;
+  iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &( TmExtIn.ulTmKey), &( TmExtIn.usNextTarget) );
+   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
   if ( iRC == 0 )
   {
-    iRC = (int)TmtXExtract(  this->pTmClb,  this->pTmExtIn,  this->pTmExtOut);
+    iRC = (int)TmtXExtract(  pTmClb,  &TmExtIn,  &TmExtOut);
   } /* endif */     
 
   if ( iRC == 0 )
   {
-    this->ExtOutToOtmProposal( this->pTmExtOut, Proposal );
+    this->ExtOutToOtmProposal( &TmExtOut, Proposal );
 
     // set current proposal internal key ,which is used in updateProposal
-    this->SetProposalKey( this->pTmExtIn->ulTmKey,this->pTmExtIn->usNextTarget, &Proposal );
+    this->SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget, &Proposal );
 
-    this->ulNextKey = pTmExtOut->ulTmKey;
-    this->usNextTarget = pTmExtOut->usNextTarget;
+    this->ulNextKey = TmExtOut.ulTmKey;
+    this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */       
 
-  if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+  if ( iRC != 0 ) handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
 
   return( iRC );
 
 }
 
-
-
-
-/*! \brief Provides a part of the memory in binary format
-
-     The binary format is used by the folder export to add the memory
-     in the internal format to the exported folder.
-
-    \param pMemoryPartData pointer to the data area for the extraxt om binary format
-
-  	\returns 0 or error code in case of errors
-*/
-int EqfMemory::getMemoryPart
-(
-  PMEMORYPARTDATA pData           // points to data area supplied by the caller
-)
-{
-  int iRC = 0;
-
-  // values for the type of currently processed file
-  #define MEMGETPART_PROPID 1
-  #define MEMGETPART_DATAID 2
-  #define MEMGETPART_INDEXID 3
-
-  // prepare our privatefields when this is the first get call for this file
-  if ( pData->fFirstCall )
-  {
-    // reset fields
-    pData->fFileIsComplete = FALSE;
-    pData->ulFilePos = 0;
-    pData->ulRemaining = 0;
-    pData->ulTotalSize = 0;
-
-    // get type of file being extracted
-    PSZ pszExt = strrchr( pData->szFileName, '.' );
-    if ( pszExt == NULL )
-    {
-      iRC = 0;
-    }
-    else if ( strcmp( pszExt, EXT_OF_MEM ) == 0 )
-    {
-      pData->ulState = MEMGETPART_PROPID;
-      USHORT usOpenAction = 0;
-      UtlOpen( pData->szFileName, (PHFILE)pData->pPrivatData, &usOpenAction, 0L, FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READONLY | OPEN_SHARE_DENYWRITE, 0L, FALSE );
-      UtlGetFileSize( (HFILE)*((int *)pData->pPrivatData), &pData->ulTotalSize, FALSE );
-      pData->ulRemaining = pData->ulTotalSize;
-    }
-    else if ( strcmp( pszExt, EXT_OF_TMDATA ) == 0 )
-    {
-      PBTREE pTree = (PBTREE)this->pTmClb->pstTmBtree;
-      pData->ulState = MEMGETPART_DATAID;
-      UtlGetFileSize( pTree->pBTree->fp, &pData->ulTotalSize, FALSE );
-      pData->ulRemaining = pData->ulTotalSize;
-    }
-    else if ( strcmp( pszExt, EXT_OF_TMINDEX ) == 0 )
-    {
-      PBTREE pTree = (PBTREE)this->pTmClb->pstInBtree;
-      pData->ulState = MEMGETPART_INDEXID;
-      UtlGetFileSize( pTree->pBTree->fp, &pData->ulTotalSize, FALSE );
-      pData->ulRemaining = pData->ulTotalSize;
-    }
-    else 
-    {
-      iRC = EqfMemory::ERROR_INVALIDREQUEST;
-    } /* endif */       
-
-    pData->fFirstCall = FALSE;
-  } /* endif */     
-
-
-  // get next part of requested file
-  if ( iRC == 0 )
-  {
-    USHORT usRC = 0;
-    ULONG ulNewPos = 0;
-    PBTREE pTree = NULL;
-
-    switch ( pData->ulState )
-    {
-      case MEMGETPART_PROPID:
-        usRC = UtlChgFilePtr( (HFILE)*((int*)pData->pPrivatData), pData->ulFilePos, FILE_BEGIN, &ulNewPos, FALSE );
-
-        if ( !usRC )                             //no error until now
-        {
-          usRC = UtlReadL( (HFILE)*((int*)pData->pPrivatData), pData->pbBuffer, pData->ulBytesToRead, &(pData->ulBytesRead), FALSE );
-        } /*endif*/
-
-        if ( !usRC )          
-        {
-           pData->ulFilePos = ulNewPos + pData->ulBytesRead;
-           pData->ulRemaining -= pData->ulBytesRead;
-           pData->fFileIsComplete = (pData->ulRemaining == 0);
-           if ( pData->fFileIsComplete  )
-           {
-             UtlClose( (HFILE)*((int*)pData->pPrivatData), FALSE ); 
-           } /* end */              
-        }/*endif*/
-        break;
-
-      case MEMGETPART_DATAID:
-        pTree = (PBTREE)this->pTmClb->pstTmBtree;
-        usRC = UtlChgFilePtr( pTree->pBTree->fp, pData->ulFilePos, FILE_BEGIN, &ulNewPos, FALSE );
-
-        if ( !usRC )                             //no error until now
-        {
-          usRC = UtlReadL( pTree->pBTree->fp, pData->pbBuffer, pData->ulBytesToRead, &(pData->ulBytesRead), FALSE );
-        } /*endif*/
-
-        if ( !usRC )          
-        {
-           pData->ulFilePos = ulNewPos + pData->ulBytesRead;
-           pData->ulRemaining -= pData->ulBytesRead;
-           pData->fFileIsComplete = (pData->ulRemaining == 0);
-        }/*endif*/
-        break;
-
-      case MEMGETPART_INDEXID:
-        pTree = (PBTREE)this->pTmClb->pstInBtree;
-        usRC = UtlChgFilePtr( pTree->pBTree->fp, pData->ulFilePos, FILE_BEGIN, &ulNewPos, FALSE );
-
-        if ( !usRC )                             //no error until now
-        {
-          usRC = UtlReadL( pTree->pBTree->fp, pData->pbBuffer, pData->ulBytesToRead, &(pData->ulBytesRead), FALSE );
-        } /*endif*/
-
-        if ( !usRC )          
-        {
-           pData->ulFilePos = ulNewPos + pData->ulBytesRead;
-           pData->ulRemaining -= pData->ulBytesRead;
-           pData->fFileIsComplete = (pData->ulRemaining == 0);
-        }/*endif*/
-        break;
-    } /* endswitch */       
-  } /* end */     
-
-  return( iRC );
-}
 
 /*! \brief Get a list of memory proposals matching the given search key
 
@@ -677,58 +520,56 @@ int EqfMemory::searchProposal
 {
   int iRC = 0;
 
-  if ( this->pTmGetIn == NULL ) this->pTmGetIn = new (TMX_GET_IN_W);
-  if ( this->pTmGetOut == NULL ) this->pTmGetOut = new (TMX_GET_OUT_W);
-  memset( this->pTmGetIn, 0, sizeof(TMX_GET_IN_W) );
-  memset( this->pTmGetOut, 0, sizeof(TMX_GET_OUT_W) );
+  memset( &TmGetIn, 0, sizeof(TMX_GET_IN_W) );
+  memset( &TmGetOut, 0, sizeof(TMX_GET_OUT_W) );
 
-  this->OtmProposalToGetIn( SearchKey, this->pTmGetIn );
-  this->pTmGetIn->stTmGet.usConvert = MEM_OUTPUT_ASIS;
-  this->pTmGetIn->stTmGet.usRequestedMatches = (USHORT)FoundProposals.size();
-  this->pTmGetIn->stTmGet.ulParm = ulOptions;
-  this->pTmGetIn->stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
+  this->OtmProposalToGetIn( SearchKey, &TmGetIn );
+  TmGetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
+  TmGetIn.stTmGet.usRequestedMatches = (USHORT)FoundProposals.size();
+  TmGetIn.stTmGet.ulParm = ulOptions;
+  TmGetIn.stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    auto str = EncodingHelper::convertToUTF8(this->pTmGetIn->stTmGet.szSource);
+    auto str = EncodingHelper::convertToUTF8(TmGetIn.stTmGet.szSource);
     T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::*** method: searchProposal, looking for " <<  str;
   } 
-  iRC = (int)TmGetW ( this->htm,  NULL,  this->pTmGetIn,  this->pTmGetOut, FALSE );
+  iRC = (int)TmGetW ( this->htm,  NULL,  &TmGetIn,  &TmGetOut, FALSE );
 
   if ( iRC == 0 )
   {
-    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << this->pTmGetOut->usNumMatchesFound << " proposals"   ;
+    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << TmGetOut.usNumMatchesFound << " proposals"   ;
     wchar_t szRequestedString[2049];
     SearchKey.getSource( szRequestedString, sizeof(szRequestedString) );
 
     for ( int i = 0; i < (int)FoundProposals.size(); i++ )
     {
-      if ( i >= this->pTmGetOut->usNumMatchesFound )
+      if ( i >= TmGetOut.usNumMatchesFound )
       {
         FoundProposals[i]->clear();
       }
       else
       {
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-          auto strSource = EncodingHelper::convertToUTF8(pTmGetOut->stMatchTable[i].szSource );
-          T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << pTmGetOut->stMatchTable[i].usMatchLevel << ", source=", strSource;
+          auto strSource = EncodingHelper::convertToUTF8(TmGetOut.stMatchTable[i].szSource );
+          T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << TmGetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
         }
         //replace tags for proposal
-        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetOut->stMatchTable[i].szSource, 
-                                                                                     pTmGetOut->stMatchTable[i].szTarget, 
+        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(TmGetOut.stMatchTable[i].szSource, 
+                                                                                     TmGetOut.stMatchTable[i].szTarget, 
                                                                                      szRequestedString); 
-        wcscpy(pTmGetOut->stMatchTable[i].szSource, result[0].c_str());
-        wcscpy(pTmGetOut->stMatchTable[i].szTarget, result[1].c_str());
+        wcscpy(TmGetOut.stMatchTable[i].szSource, result[0].c_str());
+        wcscpy(TmGetOut.stMatchTable[i].szTarget, result[1].c_str());
 
         
-        if( pTmGetOut->stMatchTable[i].usMatchLevel >= 100){
+        if( TmGetOut.stMatchTable[i].usMatchLevel >= 100){
           //correct match rate for exact match based on whitespace difference
           int wsDiff = 0;
-          UtlCompIgnWhiteSpaceW(szRequestedString, pTmGetOut->stMatchTable[i].szSource, 0, &wsDiff);
-          pTmGetOut->stMatchTable[i].usMatchLevel -= wsDiff;
+          UtlCompIgnWhiteSpaceW(szRequestedString, TmGetOut.stMatchTable[i].szSource, 0, &wsDiff);
+          TmGetOut.stMatchTable[i].usMatchLevel -= wsDiff;
           
         }
 
-        this->MatchToOtmProposal( pTmGetOut->stMatchTable + i, FoundProposals[i] );
+        this->MatchToOtmProposal( TmGetOut.stMatchTable + i, FoundProposals[i] );
       } /* end */         
     } /* end */       
   }
@@ -737,40 +578,10 @@ int EqfMemory::searchProposal
     T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::  lookup failed, rc=" << iRC;
   } /* end */     
 
-  if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmGetIn->stTmGet.szTagTable );
+  if ( iRC != 0 ) handleError( iRC, this->szName, TmGetIn.stTmGet.szTagTable );
 
   return( iRC );
 }
-
-/*! \brief Updates some fields of a specific proposal in the memory
-
-    \param Proposal reference to a OtmProposal object containing the data being changed
-    \param usUpdateFlags Flags selecting the update fields
-
-  	\returns 0 or error code in case of errors
-*/
-int EqfMemory::updateProposal
-(
-  OtmProposal &Proposal,
-  USHORT      usUpdateFlags
-)
-{
-  int iRC = 0;
-  ULONG ulKey = 0;
-  USHORT usTarget = 0;
-
-  if ( this->pTmPutIn == NULL ) this->pTmPutIn = new (TMX_PUT_IN_W);
-  memset( this->pTmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-
-  if ( !iRC ) iRC = this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
-  if ( !iRC ) iRC = this->SplitProposalKeyIntoRecordAndTarget( Proposal, &ulKey, &usTarget );
-  if ( !iRC ) iRC = TmUpdSegW( this->htm,  NULL,  this->pTmPutIn,  ulKey,  usTarget,  usUpdateFlags,  FALSE );
-
-  if ( iRC != 0 ) handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
-
-  return( iRC );
-}
-
 
 /*! \brief Delete a specific proposal from the memory
 
@@ -783,23 +594,19 @@ int EqfMemory::deleteProposal
   OtmProposal &Proposal
 )  
 {
-  if ( this->pTmPutIn == NULL ) 
-    this->pTmPutIn = new (TMX_PUT_IN_W);
-  memset( this->pTmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-  if ( this->pTmPutOut == NULL ) 
-    this->pTmPutOut = new (TMX_PUT_OUT_W);
-  memset( this->pTmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-  int iRC = this->OtmProposalToPutIn( Proposal, this->pTmPutIn );
+  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
+  int iRC = this->OtmProposalToPutIn( Proposal, &TmPutIn );
   
-  this->pTmPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  this->pTmPutIn->stPrefixIn.usTmCommand   = TMC_DELETE;
+  TmPutIn.stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
+  TmPutIn.stPrefixIn.usTmCommand   = TMC_DELETE;
 
 	if ( !iRC ) 
-    iRC = TmtXDelSegm ( (PTMX_CLB)htm, this->pTmPutIn, this->pTmPutOut );
+    iRC = TmtXDelSegm ( (PTMX_CLB)htm, &TmPutIn, &TmPutOut );
 
   if ( iRC != 0  
       && iRC != 6020) // seg not found 
-    handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
+    handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
   
   return( iRC );
 }
@@ -816,7 +623,7 @@ int EqfMemory::rebuildIndex
 {
   int iRC = 0;
 
-  if ( !iRC ) iRC = NTMOrganizeIndexFile1( this->pTmClb );
+  if ( !iRC ) iRC = NTMOrganizeIndexFile( pTmClb );
 
   return( iRC );
 }
@@ -847,9 +654,9 @@ unsigned long EqfMemory::getProposalNum()
 
   ULONG ulStartKey = 0;
   ULONG ulNextKey = 0;
-T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);";
+T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);";
 #ifdef TEMPORARY_COMMENTED
-  EQFNTMGetNextNumber( this->pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
+  EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
 #endif //TEMPORARY_COMMENTED
   return( (int)(ulNextKey - ulStartKey) );
 }
@@ -882,116 +689,6 @@ int EqfMemory::getLastError
 {
   strncpy( pszError, this->strLastError.c_str(), iBufSize );
   return( this->iLastError );
-}
-
-/*! \brief Get number of different document names used in the memory
-  	\returns number of markups used by the memory proposals or 0 if no document name information can be provided
-*/
-int EqfMemory::getNumOfDocumentNames()
-{
-  if ( this->pTmClb != NULL )
-  {
-    return( (int)(this->pTmClb->pLongNames->ulEntries) );
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-int EqfMemory::getDocumentName
-(
-  int iPos,
-  char *pszBuffer,
-  int iSize
-)
-{
-  if ( this->pTmClb != NULL )
-  {
-    if ( (iPos >= 0) && (iPos < (int)(this->pTmClb->pLongNames->ulEntries)) )
-    {
-      return( CopyToBuffer( this->pTmClb->pLongNames->stTableEntry[iPos].pszLongName, pszBuffer, iSize ) );
-    }
-    else
-    {
-      return( 0 );
-    } /* end */     
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-  /*! \brief Get number of different document short names used in the memory
-  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
-*/
-int EqfMemory::getNumOfDocumentShortNames()
-{
-  if ( this->pTmClb != NULL )
-  {
-    return( (int)(this->pTmClb->pFileNames->ulMaxEntries) );
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentShortNames()-1]
-    \param iPos position of document short name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-int EqfMemory::getDocumentShortName
-(
-  int iPos,
-  char *pszBuffer,
-  int iSize
-)
-{
-  if ( this->pTmClb != NULL )
-  {
-    if ( (iPos >= 0) && (iPos < (int)(this->pTmClb->pFileNames->ulMaxEntries)) )
-    {
-      PTMX_TABLE_ENTRY pEntry = &(this->pTmClb->pFileNames->stTmTableEntry);
-      pEntry += iPos;
-      return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
-    }
-    else
-    {
-      return( 0 );
-    } /* end */     
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
-}
-
-
-
-/*! \brief Get number of different languages used in the memory
-  	\returns number of languages used by the memory proposals or 0 if no language information can be provided
-*/
-int EqfMemory::getNumOfLanguages()
-{
-  if ( this->pTmClb != NULL )
-  {
-    return( (int)(this->pTmClb->pLanguages->ulMaxEntries) );
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
 }
 
 /*! \brief Get language at position n [n = 0.. GetNumOfLanguages()-1]
@@ -1122,7 +819,7 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setAuthor( pExtOut->stTmExt.szAuthorName );
   Proposal.setMarkup( pExtOut->stTmExt.szTagTable );
   Proposal.setTargetLanguage( pExtOut->stTmExt.szTargetLanguage );
-  Proposal.setSourceLanguage( this->pTmClb->stTmSign.szSourceLanguage);
+  Proposal.setSourceLanguage( pTmClb->stTmSign.szSourceLanguage);
   Proposal.setAddInfo( pExtOut->stTmExt.szAddInfo );
   Proposal.setContext( pExtOut->stTmExt.szContext );
   Proposal.setDocName( pExtOut->stTmExt.szLongName );
@@ -1155,7 +852,7 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setAuthor( pMatch->szTargetAuthor );
   pProposal->setMarkup( pMatch->szTagTable );
   pProposal->setTargetLanguage( pMatch->szTargetLanguage );
-  pProposal->setSourceLanguage( this->pTmClb->stTmSign.szSourceLanguage);
+  pProposal->setSourceLanguage( pTmClb->stTmSign.szSourceLanguage);
   pProposal->setAddInfo( pMatch->szAddInfo );
   pProposal->setContext( pMatch->szContext );
   pProposal->setDocName( pMatch->szLongName );
@@ -1301,7 +998,7 @@ OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag )
 */
 int EqfMemory::handleError( int iRC, char *pszMemName, char *pszMarkup )
 {
-  PBTREE pDataTree = (PBTREE)this->pTmClb->pstTmBtree;
+  PBTREE pDataTree = pTmClb->pstTmBtree;
 
   return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, pDataTree->szFileName, this->strLastError, this->iLastError ) );
 }

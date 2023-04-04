@@ -6,7 +6,7 @@
 #include "FilesystemHelper.h"
 #include "tm.h"
 
-std::shared_ptr<OPENEDMEMORY>  TMManager::findOpenedMemory(const std::string& memName){
+std::shared_ptr<EqfMemory>  TMManager::findOpenedMemory(const std::string& memName){
     int index = findMemoryInList(memName);
     if(index != -1)
         return EqfMemoryPlugin::GetInstance()->m_MemInfoVector[index];
@@ -89,7 +89,7 @@ int TMManager::getFreeSlot(size_t memoryRequested)
       } /* endif */
     } /* endfor */
     
-    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<OPENEDMEMORY>( OPENEDMEMORY()) );
+    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<EqfMemory>( EqfMemory()) );
     return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() - 1 );
   } /* endif */  
 
@@ -97,7 +97,7 @@ int TMManager::getFreeSlot(size_t memoryRequested)
 }
 
 
-std::shared_ptr<OPENEDMEMORY>  TMManager::getFreeSlotPointer(size_t memoryRequested)
+std::shared_ptr<EqfMemory>  TMManager::getFreeSlotPointer(size_t memoryRequested)
 {
   size_t UsedMemory = 0;
   int AllowedMemoryMB;
@@ -134,7 +134,7 @@ std::shared_ptr<OPENEDMEMORY>  TMManager::getFreeSlotPointer(size_t memoryReques
         return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i] );
       } /* endif */
     } /* endfor */
-    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<OPENEDMEMORY> (OPENEDMEMORY()) );
+    EqfMemoryPlugin::GetInstance()->m_MemInfoVector.push_back( std::make_shared<EqfMemory> (EqfMemory()) );
     return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() - 1] );
   } /* endif */  
 
@@ -211,7 +211,7 @@ size_t TMManager::cleanupMemoryList(size_t memoryRequested)
 int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wchar_t *pszError, int iErrorBufSize, int *piErrorCode )
 {
   *piErrorCode = 0;
-  std::shared_ptr<OPENEDMEMORY>  pMem = findOpenedMemory( pszMemory );
+  std::shared_ptr<EqfMemory>  pMem = findOpenedMemory( pszMemory );
   if ( pMem != nullptr )
   {
     switch ( pMem->eStatus )
@@ -317,7 +317,7 @@ int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wc
 // update memory status
 void TMManager::importDone(const std::string& memName, int iRC, char *pszError )
 {
-  std::shared_ptr<OPENEDMEMORY>  pMem = this->findOpenedMemory( memName );
+  std::shared_ptr<EqfMemory>  pMem = this->findOpenedMemory( memName );
   if ( pMem != nullptr )
   {
     if ( iRC == 0 )
@@ -363,7 +363,7 @@ int TMManager::closeAll()
 */
 int TMManager::removeFromMemoryList( int iIndex )
 {
-  std::shared_ptr<OPENEDMEMORY>  pMem = EqfMemoryPlugin::GetInstance()->m_MemInfoVector[iIndex];
+  std::shared_ptr<EqfMemory>  pMem = EqfMemoryPlugin::GetInstance()->m_MemInfoVector[iIndex];
   LONG lHandle = pMem->lHandle;
   int i=0;
   while(pMem.get()->eStatus == IMPORT_RUNNING_STATUS || pMem.get()->eImportStatus == IMPORT_RUNNING_STATUS ){
@@ -396,7 +396,7 @@ int TMManager::removeFromMemoryList( int iIndex )
     \param iIndex index of memory in the open list
   \returns 0 
 */
-int TMManager::removeFromMemoryList( std::shared_ptr<OPENEDMEMORY>  pMem )
+int TMManager::removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem )
 {
   LONG lHandle = pMem->lHandle;
   int i=0;
@@ -450,7 +450,6 @@ Copyright Notice:
 #include "../pluginmanager/PluginManager.h"
 #include "tm.h"
 #include "../utilities/OSWrapper.h"
-#include "MemoryUtil.h"
 #include "tm.h"
 #include "OptionsDialog.H"
 #include "LogWrapper.h"
@@ -516,14 +515,14 @@ EqfMemory *TMManager::openMemory
 /* \brief Get information from an existing memory
    \param pszPlugin plugin-name or NULL if not available or memory object name is used
    \param pszMemoryName name of the memory or memory object name (pluginname + colon + memory name)
-   \param pInfo pointer to caller OPENEDMEMORY structure
+   \param pInfo pointer to caller EqfMemory structure
    \returns 0 when successful or error code
 */
 int TMManager::getMemoryInfo
 (
   char *pszPluginName,
   char *pszMemoryName,
-  std::shared_ptr<OPENEDMEMORY>  pInfo
+  std::shared_ptr<EqfMemory>  pInfo
 )
 {
   int iRC = 0;
@@ -802,7 +801,7 @@ BOOL TMManager::exists(
 {
   BOOL fExists = FALSE;
 
-  std::shared_ptr<OPENEDMEMORY> pInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
+  std::shared_ptr<EqfMemory> pInfo = std::make_shared<EqfMemory>(EqfMemory());
   if (pszMemoryName && EqfMemoryPlugin::GetInstance()->getMemoryInfo( pszMemoryName, pInfo ) == 0 )
   {
     fExists = TRUE;
@@ -1259,7 +1258,7 @@ OtmPlugin *TMManager::findPlugin
     }
     else
     { 
-     std::shared_ptr<OPENEDMEMORY> pInfo = std::make_shared<OPENEDMEMORY>(OPENEDMEMORY());
+     std::shared_ptr<EqfMemory> pInfo = std::make_shared<EqfMemory>(EqfMemory());
 
       // find plugin by querying memory info from all available plugins
       for ( std::size_t i = 0; i < pluginList->size(); i++ )
@@ -1963,7 +1962,7 @@ typedef struct _APILISTMEMDATA
 } APILISTMEMDATA, *PAPILISTMEMDATA;
 
 // callback function to add memory names to a list or update the length of the list
-int AddMemToList( void *pvData, char *pszName,std::shared_ptr<OPENEDMEMORY>  pInfo )
+int AddMemToList( void *pvData, char *pszName,std::shared_ptr<EqfMemory>  pInfo )
 {
   PAPILISTMEMDATA pData = ( PAPILISTMEMDATA )pvData;
   LONG lNameLen = strlen( pszName );
