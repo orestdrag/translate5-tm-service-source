@@ -360,6 +360,46 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     return 0;
 }
 
+size_t FileBuffer::Flush(){
+    bool fileWasOpened = file != nullptr;
+    size_t writenBytes = 0;
+    if(status & FileBufferStatus::MODIFIED){
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "WriteBuffToFile:: writing files from buffer";
+        }
+        PUCHAR bufStart = &data[0];
+        int size = data.size();
+        if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
+        if(file==nullptr){
+            T5LOG(T5ERROR) <<"Cant open the file " << fileName;
+            return FilesystemHelper::FILEHELPER_FILE_PTR_IS_NULL;
+        }
+
+        int oldSize = 0;
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            oldSize = FilesystemHelper::GetFileSize(file);
+        }
+        writenBytes *= fwrite(bufStart, size, 1, file);
+        if ( writenBytes <=0 ){
+            T5LOG(T5ERROR) <<"::WriteToFile():: ERROR_WRITE_FAULT";
+            return ERROR_WRITE_FAULT;
+        }
+    
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            T5LOG( T5DEBUG) "::WriteToFile("  << (long int) file << ") buff = " << "void" <<
+                ", buffsize = " << size << ", path = " << fileName << ", file size = " <<
+                FilesystemHelper::GetFileSize(file) << ", oldSize = " << oldSize;
+        }
+
+        if(!fileWasOpened) fclose(file);
+    }else{
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) <<"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = " << fileName;
+        }
+    }
+
+}
+
 size_t FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
     if(startingPos < 0){
         startingPos = offset;
@@ -467,22 +507,8 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
     auto pFBs = getFileBufferInstance();
     if(pFBs->find(fName)!= pFBs->end()){
         pFb = &(*pFBs)[fName];
-
-        if(pFb->status & FileBufferStatus::MODIFIED){
-            if(VLOG_IS_ON(1)){
-                T5LOG( T5INFO) << "WriteBuffToFile:: writing files from buffer";
-            }
-            PUCHAR bufStart = &pFb->data[0];
-            int size = pFb->data.size();
-            
-            HFILE ptr = fopen(fName.c_str(),"w+b");
-            WriteToFile(ptr, bufStart, size);
-            fclose(ptr);
-        }else{
-            if(VLOG_IS_ON(1)){
-                T5LOG( T5INFO) <<"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = " << fName;
-            }
-        }
+        return pFb->Flush();
+        
     }else{
         T5LOG(T5ERROR) <<"WriteBuffToFile:: buffer not found, fName = " << fName;
     }    

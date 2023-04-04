@@ -2052,9 +2052,7 @@ public:
   //ushort * pusImportPersent = nullptr;
   ImportStatusDetails* importDetails = nullptr;
   char *pszError;                 // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
-  //FileBuffer
-  PBTREEGLOB dataBTree;
-  PBTREEGLOB indexBTree;
+ 
   PPROP_NTM memoryProperties;
     /*! \brief structure for memory information */
   //  typedef struct _MEMORYINFO

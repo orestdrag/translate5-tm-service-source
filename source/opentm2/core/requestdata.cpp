@@ -163,11 +163,13 @@ int CreateMemRequestData::createNewEmptyMemory(){
             //fill signature record structure
             strcpy( pNewMem->stTmSign.szName, pNewMem->InBtree.fb.fileName.c_str() );
 
-            _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal(&pNewMem->stTmSign, START_KEY );
+            _rc_ = pNewMem->InBtree.QDAMDictCreateLocal(&pNewMem->stTmSign, START_KEY );
                                 
           } /* endif */
 
-          if(_rc_ == NO_ERROR){        
+          if(_rc_ == NO_ERROR){   
+            pNewMem->TmBtree.fb.Flush();
+            pNewMem->InBtree.fb.Flush();     
             //filesystem_flush_buffers(pFullName);  
             //filesystem_flush_buffers(CreateIn.stTmCreate.szIndexName);
           }/* endif */
