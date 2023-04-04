@@ -24,28 +24,28 @@ int RequestData::buildErrorReturn
 {
   std::wstring w_msg;
   json_factory.startJSONW( w_msg );
-  json_factory.addParmToJSONW( w_msg, L"ReturnValue", iRC );
+  json_factory.addParmToJSONW( w_msg, L"ReturnValue", _rc_ );
   json_factory.addParmToJSONW( w_msg, L"ErrorMsg", pszErrorMsg );
   json_factory.terminateJSONW( w_msg );
 
   errorMsg = EncodingHelper::convertToUTF8( w_msg );
   
-  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << iRC;
+  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << _rc_;
   return( 0 );
 }
 
 int RequestData::buildErrorReturn
 (
-  int iRC,
+  int _rc_,
   char *pszErrorMsg
 )
 {
   json_factory.startJSON( errorMsg );
-  json_factory.addParmToJSON( errorMsg, "ReturnValue", iRC );
+  json_factory.addParmToJSON( errorMsg, "ReturnValue", _rc_ );
   json_factory.addParmToJSON( errorMsg, "ErrorMsg", pszErrorMsg );
   json_factory.terminateJSON( errorMsg );
   
-  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << iRC;
+  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << _rc_;
   return( 0 );
 }
 
@@ -224,7 +224,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
 //      }
       T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
 
-      //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+      //_rc_ = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
       //pData->fComplete = TRUE;   // one-shot function are always complete   
 
 }
@@ -232,28 +232,28 @@ int CreateMemRequestData::createNewEmptyMemory(){
 int CreateMemRequestData::importInInternalFomat(){
     T5LOG( T5INFO) << "createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
-    char szTempFile[PATH_MAX];
-    _rc_ = OtmMemoryServiceWorker::getInstance()->buildTempFileName( szTempFile );
-    if ( _rc_ != 0 )
+  
+    std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+    if (strTempFile.empty()  )
     {
         wchar_t errMsg[] = L"Could not create file name for temporary data";
         buildErrorReturn( -1, errMsg );
         return( INTERNAL_SERVER_ERROR );
     }
 
-    T5LOG( T5INFO) << "+   Temp binary file is " << szTempFile ;
+    T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
 
     // decode binary data and write it to temp file
     std::string strError;
-    _rc_ = OtmMemoryServiceWorker::getInstance()->decodeBase64ToFile( strMemB64EncodedData.c_str(), szTempFile, strError );
+    _rc_ = OtmMemoryServiceWorker::getInstance()->decodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
     if ( _rc_ != 0 )
     {
         buildErrorReturn( _rc_, (char *)strError.c_str() );
         return( INTERNAL_SERVER_ERROR );
     }
-    _rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), szTempFile, 0 );
+    _rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), strTempFile.c_str(), 0 );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-        FilesystemHelper::DeleteFile( szTempFile );
+        FilesystemHelper::DeleteFile( strTempFile );
     }
 }
 
@@ -387,7 +387,7 @@ int CreateMemRequestData::execute(){
 
   if(_rc_ == ERROR_MEM_NAME_EXISTS){
     outputMessage = "{\"" + strMemName + "\": \"ERROR_MEM_NAME_EXISTS\" }" ;
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << _rc_ << " iRC = ERROR_MEM_NAME_EXISTS";
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::createMemo()::usRC = " << _rc_ << " _rc_ = ERROR_MEM_NAME_EXISTS";
     return _rc_;
   }else if ( _rc_ != 0 )
   {
@@ -395,7 +395,7 @@ int CreateMemRequestData::execute(){
     char szError[PATH_MAX];
     unsigned short usRC = 0;
     EqfGetLastError( NULL /*this->hSession*/, &usRC, szError, sizeof( szError ) );
-    //buildErrorReturn( iRC, szError, outputMessage );
+    //buildErrorReturn( _rc_, szError, outputMessage );
 
     outputMessage = "{\"" + strMemName + "\": \"" ;
     switch ( usRC )
@@ -403,19 +403,19 @@ int CreateMemRequestData::execute(){
       case ERROR_MEM_NAME_INVALID:
         _rest_rc_ = CONFLICT;
         outputMessage += "CONFLICT";
-        T5LOG(T5ERROR) << "::usRC = " << usRC << " iRC = CONFLICT";
+        T5LOG(T5ERROR) << "::usRC = " << usRC << " _rc_ = CONFLICT";
         break;
       case TMT_MANDCMDLINE:
       case ERROR_NO_SOURCELANG:
       case ERROR_PROPERTY_LANG_DATA:
         _rest_rc_ = BAD_REQUEST;
         outputMessage += "BAD_REQUEST";
-        T5LOG(T5ERROR) << "::usRC = " <<  usRC << " iRC = BAD_REQUEST";
+        T5LOG(T5ERROR) << "::usRC = " <<  usRC << " _rc_ = BAD_REQUEST";
         break;
       default:
         _rest_rc_ = INTERNAL_SERVER_ERROR;
         outputMessage += "INTERNAL_SERVER_ERROR";
-        T5LOG(T5ERROR) << "::usRC = " << usRC << " iRC = INTERNAL_SERVER_ERROR";
+        T5LOG(T5ERROR) << "::usRC = " << usRC << " _rc_ = INTERNAL_SERVER_ERROR";
         break;
     }
     outputMessage +="\"}";
@@ -426,4 +426,154 @@ int CreateMemRequestData::execute(){
     json_factory.terminateJSON( outputMessage );
     return( OK );
   }
+}
+
+
+
+
+int ExportRequestData::checkData(){
+  T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestFormat;
+  //int _rc_ = verifyAPISession();
+  if ( _rc_ != 0 )
+  {
+    T5LOG( T5INFO) <<"::getMem::Error: no valid API session" ;
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    T5LOG(T5ERROR) <<"::getMem::Error: no memory name specified" ;
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // close memory if it is open
+  std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
+  if ( pMem != nullptr )
+  {
+    // close the memory and remove it from our list
+    TMManager::GetInstance()->removeFromMemoryList( pMem );
+  } /* endif */
+
+  // check if memory exists
+  //if ( EqfMemoryExists( this->hSession, (PSZ)strMemName.c_str() ) != 0 )
+  {
+    T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName;
+    return( NOT_FOUND );
+  }  
+}
+
+int ExportRequestData::execute(){
+   // get a temporary file name for the memory package file or TMX file
+  std::string strTempFile = FilesystemHelper::BuildTempFileName();
+  if ( _rc_ != 0 )
+  {
+    T5LOG(T5ERROR) <<"::getMem:: Error: creation of temporary file for memory data failed" ;
+    return( INTERNAL_SERVER_ERROR );
+  }
+  // export the memory in internal format
+  if ( requestFormat.compare( "application/xml" ) == 0 )
+  {
+    T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
+    //_rc_ = EqfExportMem( this->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
+    ExportTmx();
+    if ( _rc_ != 0 )
+    {
+      //unsigned short usRC = 0;
+      //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMem failed with rc=" << _rc_ << ", error message is " <<  EncodingHelper::convertToUTF8( this->szLastError);
+      return( INTERNAL_SERVER_ERROR );
+    }
+  }
+  //else if ( requestFormat.compare( "application/zip" ) == 0 )
+  //{
+    //T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
+    //_rc_ = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), (PSZ)strTempFile.c_str(), 0 );
+    //if ( _rc_ != 0 )
+    //{
+    //  unsigned short usRC = 0;
+    //  EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    //  T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<_rc_ << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
+    //  return( INTERNAL_SERVER_ERROR );
+    //}
+  //}
+  else
+  {
+    T5LOG(T5ERROR) <<"::getMem:: Error: the type " << requestFormat << " is not supported" ;
+    return( NOT_ACCEPTABLE );
+  }
+
+  // fill the vMemData vector with the content of zTempFile
+  std::vector<unsigned char> vMemData;
+  _rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
+  outputMessage = std::string(vMemData.begin(), vMemData.end());
+  //cleanup
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+    FilesystemHelper::DeleteFile( strTempFile );
+  }
+  
+  if ( _rc_ != 0 )
+  {
+    T5LOG(T5ERROR) << "::getMem::  Error: failed to load the temporary file, fName = " <<  strTempFile ;
+    return( INTERNAL_SERVER_ERROR );
+  }
+
+  return( OK );
+
+}
+
+int ExportRequestData::ExportZip(){
+  return -1;
+}
+
+int ExportRequestData::ExportTmx(){
+  /*
+  if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
+  {
+    T5LOG( T5DEBUG) <<  "==EQFExportMem==, Options = " << lOptions;
+    if(pszMemName){
+      T5LOG( T5DEBUG) << "EqfExportMem:: Memory = " << pszMemName;
+    }else{
+      T5LOG(T5ERROR) << "EqfExportMem:: Memory = NULL";
+    }
+
+    if(pszOutFile){
+      T5LOG( T5DEBUG) << "EqfExportMem:: Output File = " << pszOutFile;
+    }else{
+      T5LOG(T5ERROR) << "EqfExportMem:: Output File = NULL";
+    }
+  } 
+
+  // check sequence of calls
+  if ( (usRC == NO_ERROR) && !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) )
+  {
+    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFEXPORTMEM) )
+    {
+      usRC = LASTTASK_INCOMPLETE_RC;
+    } 
+  } 
+
+  // call TM export
+  if ( usRC == NO_ERROR )
+  {
+    if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
+    if(pData->pImportData == nullptr){
+      pData->pImportData  = new ImportStatusDetails;
+      pData->pImportData->reset();
+    }
+    usRC = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );
+  } 
+
+  if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) && (usRC == NO_ERROR) && !pData->fComplete )
+  {
+    usRC = CONTINUE_RC;
+  } 
+
+  if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ){
+    if(usRC){
+      T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << usRC;
+    }else{ 
+      T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
+    }
+  }//*/
+  return 0;
 }

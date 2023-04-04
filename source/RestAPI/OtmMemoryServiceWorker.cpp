@@ -775,9 +775,8 @@ int OtmMemoryServiceWorker::import
   } /* endif */
 
   // setup temp file name for TMX file 
-  char szTempFile[PATH_MAX];
-  iRC = buildTempFileName( szTempFile );
-  if ( iRC != 0  )
+  std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+  if (strTempFile.empty()  )
   {
     wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Could not create file name for temporary data";
     buildErrorReturn( -1, errMsg, strOutputParms );
@@ -789,11 +788,11 @@ int OtmMemoryServiceWorker::import
     return( INTERNAL_SERVER_ERROR );
   }
 
-  T5LOG( T5INFO) << "OtmMemoryServiceWorker::import::+   Temp TMX File is " << szTempFile;
+  T5LOG( T5INFO) << "OtmMemoryServiceWorker::import::+   Temp TMX File is " << strTempFile;
 
   // decode TMX data and write it to temp file
   std::string strError;
-  iRC = decodeBase64ToFile( strTmxData.c_str(), szTempFile, strError ) ;
+  iRC = decodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
   if ( iRC != 0 )
   {
     strError = "OtmMemoryServiceWorker::import::" + strError;
@@ -813,7 +812,7 @@ int OtmMemoryServiceWorker::import
 
   // start the import background process
   PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
-  strcpy( pData->szInFile, szTempFile );
+  strcpy( pData->szInFile, strTempFile.c_str() );
   strcpy( pData->szMemory, strMemory.c_str() );
 
   if(pMem->importDetails == nullptr){
@@ -2235,9 +2234,8 @@ int OtmMemoryServiceWorker::getMem
   }
 
   // get a temporary file name for the memory package file or TMX file
-  char szTempFile[PATH_MAX];
-  iRC = buildTempFileName( szTempFile );
-  if ( iRC != 0 )
+  std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+  if (strTempFile.empty()  )
   {
     T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::getMem:: Error: creation of temporary file for memory data failed" ;
     return( INTERNAL_SERVER_ERROR );
@@ -2246,8 +2244,8 @@ int OtmMemoryServiceWorker::getMem
   // export the memory in internal format
   if ( strType.compare( "application/xml" ) == 0 )
   {
-    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = " <<  strMemory << "; supported type found application/xml, tempFile = " << szTempFile;
-    iRC = EqfExportMem( this->hSession, (PSZ)strMemory.c_str(), szTempFile, TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = " <<  strMemory << "; supported type found application/xml, tempFile = " << strTempFile;
+    iRC = EqfExportMem( this->hSession, (PSZ)strMemory.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
@@ -2258,8 +2256,8 @@ int OtmMemoryServiceWorker::getMem
   }
   else if ( strType.compare( "application/zip" ) == 0 )
   {
-    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
-    iRC = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), szTempFile, 0 );
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << strTempFile;
+    iRC = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), (PSZ)strTempFile.c_str(), 0 );
     if ( iRC != 0 )
     {
       unsigned short usRC = 0;
@@ -2275,16 +2273,16 @@ int OtmMemoryServiceWorker::getMem
   }
 
   // fill the vMemData vector with the content of zTempFile
-  iRC = this->loadFileIntoByteVector( szTempFile, vMemData );
+  iRC = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
 
   //cleanup
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-    DeleteFile( szTempFile );
+    DeleteFile( strTempFile.c_str() );
   }
   
   if ( iRC != 0 )
   {
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = " <<  szTempFile ;
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::getMem::  Error: failed to load the temporary file, fName = " <<  strTempFile ;
     return( INTERNAL_SERVER_ERROR );
   }
 
@@ -2417,56 +2415,6 @@ std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& s
 }
 
 
-/*! \brief build a unique name for of a temporary file
-\param pszTempFile buffer reiceiving the temporary file name
-\returns 0 is sucessfull or a return code
-*/
-int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
-{ 
-  int iRC = 0;
-  std::string sTempPath;
-  // setup temp file name for TMX file 
-  {
-    char szTempPath[PATH_MAX];
-    Properties::GetInstance()->get_value(KEY_OTM_DIR, szTempPath, PATH_MAX);
-    sTempPath = szTempPath;
-    sTempPath += "/TEMP/";
-    iRC = Properties::GetInstance()->get_value_or_default(KEY_TEMP_DIR, szTempPath, PATH_MAX, sTempPath.c_str());
-    sTempPath = szTempPath;
-  }
-
-  if ( iRC != PROPERTY_USED_DEFAULT_VALUE && iRC != PROPERTY_NO_ERRORS )
-  {
-    return iRC;
-  }
-  else
-  {
-    iRC = 0;
-    if(!FilesystemHelper::DirExists(sTempPath)){
-      iRC = FilesystemHelper::CreateDir(sTempPath);
-    }
-
-    int i = 0;
-    sTempPath += "OTM";
-    std::string checkName = sTempPath;
-    while( i < 1000 ){
-      checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
-      auto files = FilesystemHelper::FindFiles( checkName );
-      
-      if(files.size() == 0){// we can use this name
-        T5LOG( T5INFO) << "OtmMemoryServiceWorker::buildTempFileName::Temp file's Name found :" << checkName ;
-        strcpy(pszTempFile, checkName.c_str());
-        break;
-      }
-      i++;
-    }
-    if( i >= 1000){
-      T5LOG(T5ERROR) << "OtmMemoryServiceWorker::buildTempFileName::TO_DO::All temp names is already used - delete some of them";
-    }
-
-  }
-  return( iRC );
-}
 
 /*! \brief read a binary file and encode it using BASE64 encoding
 \param pszFile fully qualified name of file being encoded
@@ -2542,47 +2490,6 @@ int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const c
   return( iRC );
 }
 
-/*! \brief read a binary file into a Byte vector
-\param pszFile fully qualified name of file being read
-\param vFileData vector receiving the file data
-it is up to the caller to free this area using free()
-\param strError string receiving any error message text
-\returns 0 is sucessfull or a return code
-*/
-int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, std::vector<unsigned char>  &vFileData )
-{
-  int iRC = 0;
-
-  // open file
-  HFILE hFile = FilesystemHelper::OpenFile(pszFile, "r", false);//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
-  if ( hFile == NULL )
-  {
-    iRC = GetLastError();
-    T5LOG(T5ERROR) <<"   Error: open of file "<< pszFile << " failed with rc=" << iRC << "\n";
-    return( iRC );
-  }
-
-  // get the size of file
-  DWORD dwFileSize = FilesystemHelper::GetFileSize(hFile);//GetFileSize( hFile, &dwFileSizeHigh );
-
-  // adjust size of Byte vector
-  vFileData.resize( dwFileSize );
-
-  // read file into byte vector
-  DWORD dwBytesRead = 0;
-  if ( !ReadFile( hFile, &vFileData[0], dwFileSize, &dwBytesRead, NULL ) )
-  {
-    CloseFile( &hFile );
-    iRC = GetLastError();
-    T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< pszFile <<" failed with rc=" << iRC << "\n";
-    return( iRC );
-  }
-
-  // close file
-  CloseFile( &hFile );
-
-  return( iRC );
-}
 
 void importMemoryProcess( void* pvData )
 {

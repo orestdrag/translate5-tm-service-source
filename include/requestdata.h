@@ -113,7 +113,22 @@ class UpdateEntryRequestData: public RequestData{
   
     public:
     UpdateEntryRequestData(const std::string& json, const std::string& memName): RequestData(json, memName) {};
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute() override ;
 };
 
+class ExportRequestData: public RequestData{
+    private:
+    int ExportZip();
+    int ExportTmx();
+    std::string requestFormat;//application/xml or application/binary
+    public:
+    ExportRequestData(const std::string& format, const std::string& memName): RequestData("", memName),  requestFormat(format){};
+    int parseJSON() override {return 0;};
+    int checkData() override ;
+    int execute() override ;
+
+};
 
 #endif //_REQUEST_DATA_H_INCLUDED_

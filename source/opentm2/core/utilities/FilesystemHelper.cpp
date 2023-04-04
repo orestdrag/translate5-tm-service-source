@@ -27,6 +27,7 @@ std::string FilesystemHelper::_memDir;
 std::string FilesystemHelper::_tableDir;
 std::string FilesystemHelper::_homeDir;
 std::string FilesystemHelper::_otmDir;
+std::string FilesystemHelper::_tempDir;
 
 PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     static FileBufferMap map;
@@ -47,6 +48,49 @@ std::string FilesystemHelper::parseFilename(const std::string path){
     return path;
 }
 
+
+
+/*! \brief read a binary file into a Byte vector
+\param pszFile fully qualified name of file being read
+\param vFileData vector receiving the file data
+it is up to the caller to free this area using free()
+\param strError string receiving any error message text
+\returns 0 is sucessfull or a return code
+*/
+int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::vector<unsigned char>  &vFileData )
+{
+  int iRC = 0;
+
+  // open file
+  HFILE hFile = FilesystemHelper::OpenFile(strFile.c_str(), "r", false);//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  if ( hFile == NULL )
+  {
+    iRC = GetLastError();
+    T5LOG(T5ERROR) <<"   Error: open of file "<< strFile << " failed with rc=" << iRC << "\n";
+    return( iRC );
+  }
+
+  // get the size of file
+  DWORD dwFileSize = FilesystemHelper::GetFileSize(hFile);//GetFileSize( hFile, &dwFileSizeHigh );
+
+  // adjust size of Byte vector
+  vFileData.resize( dwFileSize );
+
+  // read file into byte vector
+  int iBytesRead = 0;
+  if ( !ReadFile( hFile, &vFileData[0], dwFileSize, iBytesRead, 0 ) )
+  {
+    CloseFile( hFile );
+    iRC = GetLastError();
+    T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< strFile <<" failed with rc=" << iRC << "\n";
+    return( iRC );
+  }
+
+  // close file
+  CloseFile( hFile );
+
+  return( iRC );
+}
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1064,6 +1108,7 @@ int FilesystemHelper::init(){
     _otmDir = _homeDir + "/.t5memory/";
     _memDir = _otmDir +"MEM/";
     _tableDir = _otmDir +"TABLE/";
+    _tempDir = _otmDir +"TEMP/";
     return -1;
 }
 
@@ -1075,6 +1120,37 @@ std::string FilesystemHelper::GetTableDir(){
     return _tableDir;
 }
 
+std::string FilesystemHelper::GetTempDir(){
+    return _tempDir;
+}
+
+std::string FilesystemHelper::BuildTempFileName(){
+    int iRC = 0;
+    std::string sTempPath = GetTempDir();
+    // setup temp file name for TMX file 
+    
+    if(!DirExists(sTempPath) && CreateDir(sTempPath)){
+        T5LOG(T5FATAL) << "Cant create dir for temporary files under path = " << sTempPath;
+        throw;
+    }
+
+    int i = 0;
+    sTempPath += "OTM";
+    std::string checkName = sTempPath;
+    while( i < 10000 ){
+        checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
+        auto files = FindFiles( checkName );
+        
+        if(files.size() == 0){// we can use this name
+            T5LOG( T5INFO) << "::Temp file's Name found :" << checkName ;
+            return checkName;
+        }
+        i++;
+    }
+
+    T5LOG(T5ERROR) << "::TO_DO::All temp names is already used - delete some of them";
+    return( "" );
+}
     
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     struct stat st;

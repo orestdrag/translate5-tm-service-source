@@ -279,12 +279,6 @@ public:
   int convertDateTimeStringToLong( char *pszDateTime, long *plTime );
   
 
-  /*! \brief build a unique name for of a temporary file 
-  \param pszTempFile buffer reiceiving the temporary file name
-  \returns 0 is sucessfull or a return code
-  */
-  int buildTempFileName( char *pszTempFile );
-
 
   /* write proposals to a JSON string
   \param strJSON JSON stirng receiving the proposal data
@@ -335,15 +329,6 @@ public:
   \returns 0 is sucessfull or a return code
   */
   int decodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError );
-
-  /*! \brief read a binary file into a Byte vector
-  \param pszFile fully qualified name of file being read
-  \param vFileData vector receiving the file data
-  it is up to the caller to free this area using free()
-  \param strError string receiving any error message text
-  \returns 0 is sucessfull or a return code
-  */
-  int loadFileIntoByteVector( char *pszFile, std::vector<unsigned char>  &vFileData );
 
 
 /*! \brief OpenTM2 API session handle

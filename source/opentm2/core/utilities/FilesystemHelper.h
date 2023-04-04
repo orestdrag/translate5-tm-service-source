@@ -140,13 +140,18 @@ public:
     static std::string GetHomeDir();
     static std::string GetTableDir();
     static std::string GetMemDir();
+    static std::string GetTempDir();
     static int init();
+    static std::string BuildTempFileName();
+    static int LoadFileIntoByteVector(const std::string& strFile, std::vector<unsigned char>  &vFileData );
 
     private:
     static std::string _memDir;
     static std::string _tableDir;
     static std::string _homeDir;
     static std::string _otmDir;
+    static std::string _tempDir;
+    
     //buffers
     static int WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition);
     static int FlushBufferIntoFile(const std::string& fName);
