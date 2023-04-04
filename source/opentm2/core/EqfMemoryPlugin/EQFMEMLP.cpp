@@ -173,7 +173,7 @@ typedef struct _MEM_LOAD_DLG_IDA
  HWND         hwndToCombo;                // handle of "to memory" combo box
  BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
  BOOL         fImpModeSet;                // TRUE = imp mode has been set by the impot file check logic
- OtmMemory    *pMem;                      // pointer to memory being imported
+ EqfMemory    *pMem;                      // pointer to memory being imported
  OtmProposal  *pProposal;                 // buffer for proposal data
  BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
  BOOL          fCreateMatchID;            // create match segment IDs

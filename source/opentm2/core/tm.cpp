@@ -5,7 +5,6 @@
 #include "EQF.H"
 #include "FilesystemHelper.h"
 #include "tm.h"
-#include "EqfMemoryPlugin.h"
 
 std::shared_ptr<OPENEDMEMORY>  TMManager::findOpenedMemory(const std::string& memName){
     int index = findMemoryInList(memName);
@@ -430,7 +429,7 @@ int TMManager::removeFromMemoryList( std::shared_ptr<OPENEDMEMORY>  pMem )
 
  \brief Memory factory class wrapper 
 
- This class provides static methods for the creation of OtmMemory objects and
+ This class provides static methods for the creation of EqfMemory objects and
  access to standard memory functions
 
 Copyright Notice:
@@ -451,7 +450,6 @@ Copyright Notice:
 #include "../pluginmanager/PluginManager.h"
 #include "tm.h"
 #include "../utilities/OSWrapper.h"
-#include "EqfMemoryPlugin.h"
 #include "MemoryUtil.h"
 #include "tm.h"
 #include "OptionsDialog.H"
@@ -491,7 +489,7 @@ TMManager* TMManager::GetInstance(){
 	 \returns pointer to memory object or NULL in case of errors
 */
 
-OtmMemory *TMManager::openMemory
+EqfMemory *TMManager::openMemory
 (
   char *pszPluginName,
   char *pszMemoryName,
@@ -506,7 +504,7 @@ OtmMemory *TMManager::openMemory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
 
-  OtmMemory *pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
+  EqfMemory *pMemory = EqfMemoryPlugin::GetInstance()->openMemory((char *)strMemoryName.c_str() , FALSE, NULLHANDLE, usOpenFlags );
   if ( pMemory == NULL ){
         *piErrorCode = this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
         T5LOG(T5ERROR) << "TMManager::openMemory, Open of local memory " << strMemoryName << " failed, the return code is " << this->iLastError;
@@ -574,7 +572,7 @@ int TMManager::getMemoryInfo
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
    \returns pointer to created memory object 
 */
-OtmMemory *TMManager::createMemory
+EqfMemory *TMManager::createMemory
 (
   char *pszPluginName,
   char *pszMemoryName,
@@ -586,7 +584,7 @@ OtmMemory *TMManager::createMemory
   int *piErrorCode
 )
 {
-  OtmMemory *pMemory = NULL;
+  EqfMemory *pMemory = NULL;
   this->strLastError = "";
   this->iLastError = 0;
   T5LOG(T5DEBUG) << "Create memory " << pszMemoryName ;
@@ -631,7 +629,7 @@ OtmMemory *TMManager::createMemory
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
    \returns pointer to created memory object 
 */
-OtmMemory *TMManager::createMemory
+EqfMemory *TMManager::createMemory
 (
   const char *pszPluginName,
   const char *pszMemoryName,
@@ -652,7 +650,7 @@ OtmMemory *TMManager::createMemory
 
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
-  OtmMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
+  EqfMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
   if ( pMemory == NULL ){
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
      T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  strLastError;
@@ -675,7 +673,7 @@ OtmMemory *TMManager::createMemory
 */
 int TMManager::listMemories
 (
-	OtmMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
+	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
 	void *pvData,
 	BOOL fWithDetails
 )
@@ -691,7 +689,7 @@ int TMManager::listMemories
 */
 int TMManager::closeMemory
 (
-  OtmMemory *pMemory
+  EqfMemory *pMemory
 )
 {
   int iRC = 0;
@@ -743,7 +741,7 @@ int TMManager::deleteMemory(
   }
   std::string strError;
   int iRC = deleteMemory(pszPluginName,pszMemoryName, strError);
-  if(iRC != OtmMemoryPlugin::eSuccess)
+  if(iRC != EqfMemoryPlugin::eSuccess)
     T5LOG(T5ERROR) <<"deleteMemory::strError = " << strError;
   return iRC;
 }
@@ -761,7 +759,7 @@ int TMManager::deleteMemory(
   std::string &strError
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
 
   OtmPlugin *plugin = this->findPlugin( pszPluginName, pszMemoryName );
 
@@ -775,7 +773,7 @@ int TMManager::deleteMemory(
     if ( iRC != 0 ) EqfMemoryPlugin::GetInstance()->getLastError(strError);
 
     // broadcast deleted memory name
-    if ( iRC == OtmMemoryPlugin::eSuccess )
+    if ( iRC == EqfMemoryPlugin::eSuccess )
     {
       strcpy( this->szMemObjName, plugin->getName() );
       strcat( this->szMemObjName,  ":" ); 
@@ -785,7 +783,7 @@ int TMManager::deleteMemory(
   else
   {
     strError = "Memory Not Found";
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
 }
@@ -823,7 +821,7 @@ BOOL TMManager::exists(
 void TMManager::showLastError(
   char *pszPluginName,
   char *pszMemoryName,
-  OtmMemory *pMemory,
+  EqfMemory *pMemory,
   HWND hwndErrMsg
 )
 {
@@ -840,7 +838,7 @@ void TMManager::showLastError(
   T5LOG(T5ERROR) <<"ERROR in TMManager::showLastError:: " << pszParm <<  "; iLastError = " << this->iLastError;
 }
 
-std::string& TMManager::getLastError( OtmMemory *pMemory, int& iLastError, std::string& strError)
+std::string& TMManager::getLastError( EqfMemory *pMemory, int& iLastError, std::string& strError)
 {
     if ( pMemory != NULL )
         this->iLastError = pMemory->getLastError( this->strLastError );
@@ -1091,9 +1089,9 @@ const char * TMManager::getDefaultMemoryPlugin(
   \param iBufSize size of the object name buffer
   \returns 0 when successful or the error code
 */
-int TMManager::getObjectName( OtmMemory *pMemory, char *pszObjName, int iBufSize )
+int TMManager::getObjectName( EqfMemory *pMemory, char *pszObjName, int iBufSize )
 {
-  OtmMemoryPlugin *pPlugin;
+  EqfMemoryPlugin *pPlugin;
 
   if ( pMemory == NULL )
   {
@@ -1102,7 +1100,7 @@ int TMManager::getObjectName( OtmMemory *pMemory, char *pszObjName, int iBufSize
       return( this->iLastError );
   } /* endif */     
 
-  pPlugin = (OtmMemoryPlugin *)pMemory->getPlugin();
+  pPlugin = (EqfMemoryPlugin *)pMemory->getPlugin();
   if ( pPlugin == NULL )
   {
       this->iLastError = ERROR_PLUGINNOTAVAILABLE;
@@ -1266,7 +1264,7 @@ OtmPlugin *TMManager::findPlugin
       // find plugin by querying memory info from all available plugins
       for ( std::size_t i = 0; i < pluginList->size(); i++ )
       {
-        OtmMemoryPlugin *pluginCurrent = (*pluginList)[i];
+        EqfMemoryPlugin *pluginCurrent = (*pluginList)[i];
         if ( pluginCurrent->getMemoryInfo( (PSZ)pszMemoryName, pInfo ) == 0 )
         {
           plugin = (OtmPlugin *)pluginCurrent;
@@ -1333,13 +1331,13 @@ void TMManager::refreshPluginList()
   PluginManager* thePluginManager = PluginManager::getInstance();
 
   // iterate through all memory plugins and store found plugins in pluginList
-  OtmMemoryPlugin * curPlugin = NULL;
-  pluginList = new std::vector<OtmMemoryPlugin *>;
+  EqfMemoryPlugin * curPlugin = NULL;
+  pluginList = new std::vector<EqfMemoryPlugin *>;
   int i = 0;
   do
   {
     i++;
-    curPlugin = (OtmMemoryPlugin*) thePluginManager->getPlugin(OtmPlugin::eTranslationMemoryType, i );
+    curPlugin = (EqfMemoryPlugin*) thePluginManager->getPlugin(OtmPlugin::eTranslationMemoryType, i );
     if ( curPlugin != NULL ) 
     {
       pluginList->push_back( curPlugin );
@@ -1383,26 +1381,26 @@ int TMManager::replaceMemory
   char *pszReplaceWith
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
 
   OtmPlugin *plugin = this->findPlugin( pszPluginName, pszReplace );
 
   if ( plugin != NULL )
   {
     // use the given plugin to replace the memory, when not supported try the delete-and-rename approach
-    if ( plugin->getType() == OtmMemoryPlugin::eTranslationMemoryType )
+    if ( plugin->getType() == EqfMemoryPlugin::eTranslationMemoryType )
     {
-      iRC = ((OtmMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
-      if ( iRC == OtmMemoryPlugin::eNotSupported )
+      iRC = ((EqfMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
+      if ( iRC == EqfMemoryPlugin::eNotSupported )
       {
-        iRC = ((OtmMemoryPlugin *)plugin)->deleteMemory( pszReplace );
-        if ( iRC == 0 ) iRC = ((OtmMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
+        iRC = ((EqfMemoryPlugin *)plugin)->deleteMemory( pszReplace );
+        if ( iRC == 0 ) iRC = ((EqfMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
       }
-      if ( iRC != 0 ) ((OtmMemoryPlugin *)plugin)->getLastError(this->strLastError);
+      if ( iRC != 0 ) ((EqfMemoryPlugin *)plugin)->getLastError(this->strLastError);
     }
 
     // broadcast deleted memory name for replaceWith memory
-    if ( iRC == OtmMemoryPlugin::eSuccess )
+    if ( iRC == EqfMemoryPlugin::eSuccess )
     {
       strcpy( this->szMemObjName, plugin->getName() );
       strcat( this->szMemObjName,  ":" ); 
@@ -1412,7 +1410,7 @@ int TMManager::replaceMemory
   }
   else
   {
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
 }
@@ -1550,7 +1548,7 @@ USHORT TMManager::APIExportMemInInternalFormat
   char *pszFileList = new char[iFileListBufferSize];
   if( pPlugin->getType() ==  OtmPlugin::eTranslationMemoryType )
   {
-    iRC = ((OtmMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
+    iRC = ((EqfMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
   }
   else
   {
@@ -1599,7 +1597,7 @@ USHORT TMManager::APIOpenMem
   } /* endif */
 
   int iRC = 0;
-  OtmMemory *pMem = this->openMemory( NULL, pszMemName, 0, &iRC );
+  EqfMemory *pMem = this->openMemory( NULL, pszMemName, 0, &iRC );
   if ( pMem == NULL )
   {
     this->showLastError( NULL, pszMemName, NULL, HWND_FUNCIF );
@@ -1635,7 +1633,7 @@ USHORT TMManager::APICloseMem
   LONG        lOptions 
 )
 {
-  OtmMemory *pMem = handleToMemoryObject( lHandle );
+  EqfMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
     if(VLOG_IS_ON(1))  T5LOG(T5ERROR) <<  "::FUNC_INVALID_MEMORY_HANDLE:: if ( pMem == NULL ): tried to close TM that was already closed";
@@ -1682,7 +1680,7 @@ USHORT TMManager::APIQueryMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  OtmMemory *pMem = handleToMemoryObject( lHandle );
+  EqfMemory *pMem = handleToMemoryObject( lHandle );
 
   if ( pMem == NULL )
   {
@@ -1764,7 +1762,7 @@ USHORT TMManager::APISearchMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  OtmMemory *pMem = handleToMemoryObject( lHandle );
+  EqfMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
     T5LOG(T5ERROR) <<   "::FUNC_INVALID_MEMORY_HANDLE:: pMem is null" ;
@@ -1860,7 +1858,7 @@ USHORT TMManager::APISearchMem
     pMem->getSequentialAccessKey( (PSZ)pszStartPosition, 20 );
     usRC = (USHORT)iRC;
   } /* endif */
-  else if ( iRC == OtmMemory::INFO_ENDREACHED )
+  else if ( iRC == EqfMemory::INFO_ENDREACHED )
   {
     usRC = ENDREACHED_RC;
   }
@@ -1895,7 +1893,7 @@ USHORT TMManager::APIUpdateMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  OtmMemory *pMem = handleToMemoryObject( lHandle );
+  EqfMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
     return( INVALIDFILEHANDLE_RC );
@@ -1934,7 +1932,7 @@ USHORT TMManager::APIUpdateDeleteMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  OtmMemory *pMem = handleToMemoryObject( lHandle );
+  EqfMemory *pMem = handleToMemoryObject( lHandle );
 
   if ( pMem == NULL )
   {
@@ -2011,7 +2009,7 @@ USHORT TMManager::APIListMem
 
   for ( std::size_t i = 0; i < pluginList->size(); i++ )
   {
-    OtmMemoryPlugin *pluginCurrent = ( *pluginList )[i];
+    EqfMemoryPlugin *pluginCurrent = ( *pluginList )[i];
 
     //pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
     
@@ -2051,7 +2049,7 @@ LONG TMManager::getCheckSumFromHandle
 */
 LONG TMManager::computeMemoryObjectChecksum
 (
-  OtmMemory *pMemory
+  EqfMemory *pMemory
 )
 {
   // compute checksum based on t3he individual byte values of the memory object pointer
@@ -2075,7 +2073,7 @@ LONG TMManager::computeMemoryObjectChecksum
   \param lHandle handel referring to the memory object
   \returns memory object pointer or NULL if the given handle is invalid
 */
-OtmMemory *TMManager::handleToMemoryObject
+EqfMemory *TMManager::handleToMemoryObject
 (
   LONG lHandle
 )
@@ -2110,7 +2108,7 @@ OtmMemory *TMManager::handleToMemoryObject
 LONG TMManager::createHandle
 (
   LONG        lIndex,
-  OtmMemory   *pMemory
+  EqfMemory   *pMemory
 )
 {
   LONG lCheckSum = computeMemoryObjectChecksum( pMemory );

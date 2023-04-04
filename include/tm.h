@@ -6,6 +6,7 @@
 #include <string>
 #include <time.h>
 #include <sstream>
+#include <memory>
 #include "win_types.h"
 
 #define INCL_EQF_TAGTABLE         // tag table and format functions
@@ -17,7 +18,8 @@
 #include "FilesystemHelper.h"
 #include "LogWrapper.h"
 
-/*! \brief Data class for the transport of memory proposals
+#include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
+//*! \brief Data class for the transport of memory proposals
  *
  * 
  */
@@ -383,406 +385,85 @@ private:
 };
 
 
+#define KEY_DIR_SIZE         4096  // key directory size
+#define TM_PREFIX_SIZE          8  // length of prefix bytes in TMT db
+#define MAX_SEC_LENGTH       30        // max length of secondary key
+#define MAX_LINE_LENGTH      80        // max length of each line in lang file
+#define FN_LENGTH            13        // length of input filename
+#define PRIM_KEY_LENGTH       4        // number of characters in primary key
+#define DATA_IN_SIZE       3900        // buffer size for input
+#define DATA_OUT_SIZE      3900        // buffer size for output
+#define CODEPAGE_SIZE       256        // size of codepage of the language
+#define SEG_MARKER_LENGTH     3        // length of segment marker
+#define MAX_TGT_LENGTH     2047        // max length of each target.
+#define MAX_MATCH_TAB_ENTRIES 5        // number of entries in match table
+#define CREATE_BUFFER_SIZE   40000     // buffer size for create_in
+#define MAX_TM_LIST_NUMBER    500      // max. number of TMs that can be listed
+                                       // by the TMC_GET_SERVER_TM_LIST command
+#define GETPART_BUFFER_SIZE 16384      // read a 16 KB block at a time
+#define MEM_PROP_SIZE    2048          // Global size of all memory database properties
+#define	_MAX_DIR	256
 
-/*! \brief Abstract base-class for translation memory objects */
-class OtmMemory
+typedef CHAR  SHORT_FN  [FN_LENGTH];
+typedef CHAR  BUFFERIN  [DATA_IN_SIZE];
+typedef UCHAR BUFFEROUT  [DATA_OUT_SIZE],
+              ACHPRIMKEY [PRIM_KEY_LENGTH],
+              SZSECKEY   [MAX_SEC_LENGTH + 1];
+
+typedef CHAR  LANG_LINE  [MAX_LINE_LENGTH + 1];
+typedef CHAR  LONG_FN    [MAX_LONGFILESPEC];
+
+typedef struct _TMX_EXT_W
 {
+  CHAR_W    szSource[MAX_SEGMENT_SIZE];        //source sentence
+  CHAR_W    szTarget[MAX_SEGMENT_SIZE];        //target sentence
+  CHAR      szOriginalSourceLanguage[MAX_LANG_LENGTH]; //language name of the source
+  CHAR      szTagTable[MAX_FNAME];             //tag table name
+  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
+  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
+  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
+  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
+  TIME_L    lTargetTime;                       //time stamp of target
+  CHAR_W    szContext[MAX_SEGMENT_SIZE];       //segment context
+  CHAR_W    szAddInfo[MAX_SEGMENT_SIZE];       // additional segment information
+} TMX_EXT_W, * PTMX_EXT_W;
 
-public:
-
-/*! \brief Constructors */
-	OtmMemory() {};
-	
- 
-/*! \brief Destructor */
-	virtual ~OtmMemory() {};
-
-/*! \brief Error code definition
-*/
-  static const int ERROR_NOSHAREDMEMORYPLUGIN = 8001;
-  static const int ERROR_PROPERTYLOADFAILED   = 8002;
-  static const int ERROR_MEMORYOBJECTISNULL   = 8003;
-  static const int ERROR_BUFFERTOOSMALL       = 8004;
-  static const int ERROR_INVALIDOBJNAME       = 8005;
-  static const int ERROR_MEMORYEXISTS         = 8006;
-  static const int ERROR_INVALIDREQUEST       = 8007;
-  static const int INFO_ENDREACHED            = 8008;
-  static const int ERROR_ENTRYISCORRUPTED     = 8009;
-
-/*! \brief Provide a list of memory proposals matching the given search key
-
-    This method uses the search data contained in the search key to find one or more
-    matching proposals in the memory. At least the szSource and the szTargetLang members of the
-    search key have to be filled by the caller.
-    The caller provides a list of OtmProposals which will be filled with the data of the matching 
-    proposals. The number of requested proposals is determined by the number
-    of proposals in the list.
-
-    \param SearchKey proposal containing search string and meta data
-    \param FoundProposals refernce to vector with OtmProposal objects
-    \param ulOptions options for the lookup
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int searchProposal
-  (
-    OtmProposal &SearchKey,
-    std::vector<OtmProposal *> &FoundProposals,
-    unsigned long ulOptions
-
-  ) = 0; 
-
-/*! \brief Get the the first proposal from the memory and prepare sequential access
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-  	\returns 0 or error code in case of errors
-*/
-  virtual int getFirstProposal
-  (
-    OtmProposal &Proposal
-  ) = 0; 
-
-/*! \brief Get the the first proposal from the memory and prepare sequential access
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-    \param piProgress pointer to buffer for progress indicator, this indicator goes from 0 up to 100
-  	\returns 0 or error code in case of errors
-*/
-  virtual int getFirstProposal
-  (
-    OtmProposal &Proposal,
-    int *piProgress
-  ) = 0; 
-
-/*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
-    \param pszKey internal key of the proposal
-    \param Proposal buffer for the returned proposal data
-  	\returns 0 or error code in case of errors
-*/
-  virtual int getProposal
-  (
-    char *pszKey,
-    OtmProposal &Proposal
-  ) = 0; 
-
-/*! \brief Get the next proposal from the memory 
-    \param lHandle the hande returned by GetFirstProposal
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-  	\returns 0 or error code in case of errors
-*/
-  virtual int getNextProposal
-  (
-    OtmProposal &Proposal
-  ) = 0; 
-
-/*! \brief Get the next proposal from the memory 
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-    \param piProgress pointer to buffer for progress indicator, this indicator goes from 0 up to 100
-  	\returns 0 if a proposal was returned, ENDREACHED when the end of the memory has been reached or an error code in case of errors
-*/
-  virtual int getNextProposal
-  (
-    OtmProposal &Proposal,
-    int *piProgress
-  ) = 0; 
-
-  /*! \brief Get the current sequential access key (the key for the next proposal in the memory) 
-    \param pszKeyBuffer pointer to the buffer to store the sequential access key
-    \param iKeyBufferSize size of the key buffer in number of characters
-  	\returns 0 or error code in case of errors
-  */
-  virtual int getSequentialAccessKey
-  (
-    char *pszKeyBuffer,
-    int  iKeyBufferSize
-  ) = 0; 
-
-    
-  /*! \brief Set the current sequential access key to resume the sequential access at the given position
-    \param pszKey a sequential access key previously returned by getSequentialAccessKey
-  	\returns 0 or error code in case of errors
-  */
-  virtual int setSequentialAccessKey
-  (
-    char *pszKey
-  ) = 0; 
-
-/*! \brief Store the supplied proposal in the memory
-    When the proposal aready exists it will be overwritten with the supplied data
-
-    \param pProposal pointer to a OtmProposal object
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int putProposal
-  (
-    OtmProposal &Proposal
-  ) = 0; 
-
-
-  /*! \brief Rebuild internal index after mass updates
-    This method is called after mass updates (e.g. memory import) has beebn performed.
-    The memory can rebuild or optimize its internal index when necessary.
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int rebuildIndex
-  (
-  ) = 0; 
-
-/*! \brief Flags for the update of proposals */
-
-static const int UPDATE_MARKUP   = 0x01;           // update markup/tag table
-static const int UPDATE_MTFLAG   = 0x02;           // update machine translation flag
-static const int UPDATE_TARGLANG = 0x04;           // update target language
-static const int UPDATE_DATE     = 0x08;           // update proposal update time
-
-/*! \brief Updates some fields of a specific proposal in the memory
-
-    \param Proposal reference to a OtmProposal object containing the data being changed
-    \param usUpdateFlags Flags selecting the update fields
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int updateProposal
-  (
-    OtmProposal &Proposal,
-    USHORT      usUpdateFlags
-  ) = 0; 
-
-/*! \brief Delete a specific proposal from the memory
-
-    \param Proposal reference to a OtmProposal object
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int deleteProposal
-  (
-    OtmProposal &Proposal
-  ) = 0; 
-
-
-/*! \brief Data area for the getMemoryPart method */
-typedef struct _MEMORYPARTDATA
+typedef struct _TMX_EXT
 {
-  // fields provided and filled by the caller of the method
-  BOOL   fFirstCall;                   // TRUE = this is the initial call for this memory file, FALSE = a subsequent call
-  char   szFileName[MAX_LONGFILESPEC]; // name of file being processed currently (the file name is from the list of memory data files
-                                       // provided using the getMemoryFiles method
-  PBYTE  pbBuffer;                     // points to the buffer for the provided data
-  ULONG  ulBytesToRead;                // number of bytes to be copied to buffer
-
-  // data fields filled by the getMemoryPart method
-  BOOL   fFileIsComplete;              // TRUE = the data of the current file has been stored in the buffer completely, 
-                                       // FALSE = there is more data coming
-  ULONG  ulBytesRead;                  // length of data stored in the buffer in number of bytes
-
-  // private data fields for the getMemoryPart method (this data is not used by the calling function in any way)
-  ULONG  ulFilePos;                    // could be used for the read position in current file
-  ULONG  ulRemaining;                  // could be used for the number of bytes remaining
-  ULONG  ulTotalSize;                  // could be used for the total size of the current file
-  ULONG  ulState;                      // could be used for current processing state
-  void   *pPrivatData;                 // could be used as anchor for private data areas
-  char   chPrivateBuffer[1024];        // could be used as private buffer area
-} MEMORYPARTDATA, *PMEMORYPARTDATA;
-
-/*! \brief Provides part of a memory data file in binary format
-
-     The binary format is used by the folder export to add the memory
-     in the internal format to the exported folder.
-
-    \param pMemoryPartData pointer to the data area for the extraxt om binary format
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int getMemoryPart
-  (
-    PMEMORYPARTDATA pData           // points to data area supplied by the caller
-  ) = 0;
-
-/*! \brief Get the name of the memory
-    \param pszBuffer pointer to a buffer for the name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to the buffer
-*/
-  virtual int getName
-  (
-    char *pszBuffer,
-    int iSize
-  ) = 0;
-
-/*! \brief Get the name of the memory
-    \param strName reference of a string receiving the memory name
-*/
-  virtual int getName
-  (
-    std::string &strName
-  ) = 0;
+  CHAR      szSource[MAX_SEGMENT_SIZE];        //source sentence
+  CHAR      szTarget[MAX_SEGMENT_SIZE];        //target sentence
+  CHAR      szTagTable[MAX_FNAME];             //tag table name
+  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
+  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
+  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
+  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  USHORT    usSourceSegmentId;                 //seg. num. of source sentence from analysis
+  TIME_L    lTargetTime;                       //time stamp of target
+} TMX_EXT, * PTMX_EXT;
 
 
+typedef struct _TMX_EXT_OUT
+{
+  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
+  TMX_EXT stTmExt;                 //pointer to put structure
+  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
+  ULONG ulTmKey;                   //tm record key
+  USHORT usNextTarget;             //which target record to address next
+  ULONG ulMaxEntries;              //number of entries in tm data file
+} TMX_EXT_OUT, * PTMX_EXT_OUT;
 
-/*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format
-  	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
-*/
-  virtual int getNumOfMarkupNames() = 0;
-
-/*! \brief Get markup name at position n [n = 0.. GetNumOfMarkupNames()-1]
-    \param iPos position of markup table name
-    \param pszBuffer pointer to a buffer for the markup table name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  virtual int getMarkupName
-  (
-    int iPos,
-    char *pszBuffer,
-    int iSize
-  ) = 0;
-
-/*! \brief Get source language of the memory
-    \param pszBuffer pointer to a buffer for the source language name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to the buffer
-*/
-  virtual int getSourceLanguage
-  (
-    char *pszBuffer,
-    int iSize
-  ) = 0;
-
-/*! \brief Get description of the memory
-    \param pszBuffer pointer to a buffer for the description
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to the buffer
-*/
-  virtual int getDescription
-  (
-    char *pszBuffer,
-    int iSize
-  ) = 0;
-
-/*! \brief Set the description of the memory
-    \param pszBuffer pointer to the description text
-*/
-  virtual void setDescription
-  (
-    char *pszBuffer
-  ) = 0;
-
-
-/*! \brief Get plugin responsible for this memory
-  	\returns pointer to memory plugin object
-*/
-  virtual void *getPlugin() = 0;
-
-/*! \brief Get number of proposals in thismemory
-  	\returns number of proposals
-*/
-  virtual unsigned long getProposalNum() = 0;
-
-/*! \brief Get overall file size of this memory
-  	\returns size of memory in number of bytes
-*/
-  virtual unsigned long getFileSize() = 0;
-
-
-
-/*! \brief OtmMemory related return codes
-
-*/
-  static const int ERROR_INTERNALKEY_MISSING = 1001;
-
-/*! \brief Get the error message for the last error occured
-
-    \param strError reference to a string receiving the error mesage text
-  	\returns last error code
-*/
-	virtual int getLastError
-  (
-    std::string &strError
-  ) = 0; 
-/*! \brief Get the error message for the last error occured
-
-    \param pszError pointer to a buffer for the error text
-    \param iBufSize size of error text buffer in number of characters
-  	\returns last error code
-*/
-	virtual int getLastError
-  (
-    char *pszError,
-    int iBufSize
-  ) = 0; 
-
-/*! \brief Get number of different document names used in the memory
-  	\returns number of document used by the memory proposals or 0 if no document name information can be provided
-*/
-  	virtual int getNumOfDocumentNames() = 0;
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  	virtual int getDocumentName
-    (
-      int iPos,
-      char *pszBuffer,
-      int iSize
-    ) = 0;
-
-/*! \brief Get number of different document short names used in the memory
-  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
-*/
-  	virtual int getNumOfDocumentShortNames() = 0;
-
-/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
-    \param iPos position of document name
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  	virtual int getDocumentShortName
-    (
-      int iPos,
-      char *pszBuffer,
-      int iSize
-    ) = 0;
-
-/*! \brief Get number of different languages used in the memory
-  	\returns number of languages used by the memory proposals or 0 if no language information can be provided
-*/
-  	virtual int getNumOfLanguages() = 0;
-
-/*! \brief Get language at position n [n = 0.. GetNumOfLanguages()-1]
-    \param iPos position of language
-    \param pszBuffer pointer to a buffer for the document name
-    \param iSize size of buffer in number of characters
-  	\returns number of characters copied to buffer
-*/
-  	virtual int getLanguage
-    (
-      int iPos,
-      char *pszBuffer,
-      int iSize
-    ) = 0;
-	
-/*! \brief Set or clear the pointer to a loaded global memory option file
-
-    This method sets a pointer to a loaded global memory option file.
-    When set the option file will be used to decide how global memory proposals will be processed.
-
-    \param pvGlobalMemoryOptions pointer to a loaded global memory option file or NULL to clear the current option file pointer
-
-  	\returns 0 or error code in case of errors
-*/
-  virtual int setGlobalMemoryOptions
-  (
-    void *pvGlobalMemoryOptions
-  ) = 0; 
-  
-
-private:
-
-};
+typedef struct _TMX_EXT_OUT_W
+{
+  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
+  TMX_EXT_W      stTmExt;          //pointer to put structure
+  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
+  ULONG ulTmKey;                   //tm record key
+  USHORT usNextTarget;             //which target record to address next
+  ULONG ulMaxEntries;              //number of entries in tm data file
+} TMX_EXT_OUT_W, *PTMX_EXT_OUT_W;
 
 
 /*! \brief memory proposal types */
@@ -1099,24 +780,6 @@ typedef struct _MEMPROPOSAL
 /* The segment marker */
 #define  SEGMARKER       "###"
 
-#define KEY_DIR_SIZE         4096  // key directory size
-#define TM_PREFIX_SIZE          8  // length of prefix bytes in TMT db
-#define MAX_SEC_LENGTH       30        // max length of secondary key
-#define MAX_LINE_LENGTH      80        // max length of each line in lang file
-#define FN_LENGTH            13        // length of input filename
-#define PRIM_KEY_LENGTH       4        // number of characters in primary key
-#define DATA_IN_SIZE       3900        // buffer size for input
-#define DATA_OUT_SIZE      3900        // buffer size for output
-#define CODEPAGE_SIZE       256        // size of codepage of the language
-#define SEG_MARKER_LENGTH     3        // length of segment marker
-#define MAX_TGT_LENGTH     2047        // max length of each target.
-#define MAX_MATCH_TAB_ENTRIES 5        // number of entries in match table
-#define CREATE_BUFFER_SIZE   40000     // buffer size for create_in
-#define MAX_TM_LIST_NUMBER    500      // max. number of TMs that can be listed
-                                       // by the TMC_GET_SERVER_TM_LIST command
-#define GETPART_BUFFER_SIZE 16384      // read a 16 KB block at a time
-#define MEM_PROP_SIZE    2048          // Global size of all memory database properties
-#define	_MAX_DIR	256
 
 /**********************************************************************/
 /* indicatos for old or new TM                                        */
@@ -1146,14 +809,7 @@ typedef struct _MEMPROPOSAL
 
 #include "win_types.h"
 
-typedef CHAR  SHORT_FN  [FN_LENGTH];
-typedef CHAR  BUFFERIN  [DATA_IN_SIZE];
-typedef UCHAR BUFFEROUT  [DATA_OUT_SIZE],
-              ACHPRIMKEY [PRIM_KEY_LENGTH],
-              SZSECKEY   [MAX_SEC_LENGTH + 1];
 
-typedef CHAR  LANG_LINE  [MAX_LINE_LENGTH + 1];
-typedef CHAR  LONG_FN    [MAX_LONGFILESPEC];
 
 typedef BYTE ABGROUP [CODEPAGE_SIZE];
 typedef ABGROUP * PABGROUP;
@@ -2412,57 +2068,8 @@ typedef TMX_EXT_IN TMX_EXT_IN_W, *PTMX_EXT_IN_W;
 /*            The remaining fields are unused.                        */
 /**********************************************************************/
 // structure TMX_EXT_OUT
-typedef struct _TMX_EXT
-{
-  CHAR      szSource[MAX_SEGMENT_SIZE];        //source sentence
-  CHAR      szTarget[MAX_SEGMENT_SIZE];        //target sentence
-  CHAR      szTagTable[MAX_FNAME];             //tag table name
-  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
-  USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
-  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
-  USHORT    usSourceSegmentId;                 //seg. num. of source sentence from analysis
-  TIME_L    lTargetTime;                       //time stamp of target
-} TMX_EXT, * PTMX_EXT;
 
 
-typedef struct _TMX_EXT_W
-{
-  CHAR_W    szSource[MAX_SEGMENT_SIZE];        //source sentence
-  CHAR_W    szTarget[MAX_SEGMENT_SIZE];        //target sentence
-  CHAR      szOriginalSourceLanguage[MAX_LANG_LENGTH]; //language name of the source
-  CHAR      szTagTable[MAX_FNAME];             //tag table name
-  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
-  USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
-  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
-  ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
-  TIME_L    lTargetTime;                       //time stamp of target
-  CHAR_W    szContext[MAX_SEGMENT_SIZE];       //segment context
-  CHAR_W    szAddInfo[MAX_SEGMENT_SIZE];       // additional segment information
-} TMX_EXT_W, * PTMX_EXT_W;
-
-typedef struct _TMX_EXT_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
-  TMX_EXT stTmExt;                 //pointer to put structure
-  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
-  ULONG ulTmKey;                   //tm record key
-  USHORT usNextTarget;             //which target record to address next
-  ULONG ulMaxEntries;              //number of entries in tm data file
-} TMX_EXT_OUT, * PTMX_EXT_OUT;
-
-typedef struct _TMX_EXT_OUT_W
-{
-  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
-  TMX_EXT_W      stTmExt;          //pointer to put structure
-  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
-  ULONG ulTmKey;                   //tm record key
-  USHORT usNextTarget;             //which target record to address next
-  ULONG ulMaxEntries;              //number of entries in tm data file
-} TMX_EXT_OUT_W, *PTMX_EXT_OUT_W;
 
 
 //=======================================================================
@@ -2498,6 +2105,532 @@ typedef struct _TMXDELTM_OUT
 {
   TMX_PREFIX_OUT stPrefixOut;
 } TMX_DELTM_OUT, * PTMX_DELTM_OUT;
+
+class EqfMemoryPlugin;
+
+class EqfMemory
+/*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
+*/
+
+{
+public:
+
+/*! \brief OtmMemory related return codes
+
+*/
+  static const int ERROR_INTERNALKEY_MISSING = 1001;
+
+/*! \brief Constructors
+*/
+	EqfMemory() {};
+
+	EqfMemory( EqfMemoryPlugin *pMemoryPlugin, HTM htm, char *pszName );
+
+/*! \brief Destructor
+*/
+	~EqfMemory();
+
+
+
+/*! \brief Error code definition
+*/
+  static const int ERROR_NOSHAREDMEMORYPLUGIN = 8001;
+  static const int ERROR_PROPERTYLOADFAILED   = 8002;
+  static const int ERROR_MEMORYOBJECTISNULL   = 8003;
+  static const int ERROR_BUFFERTOOSMALL       = 8004;
+  static const int ERROR_INVALIDOBJNAME       = 8005;
+  static const int ERROR_MEMORYEXISTS         = 8006;
+  static const int ERROR_INVALIDREQUEST       = 8007;
+  static const int INFO_ENDREACHED            = 8008;
+  static const int ERROR_ENTRYISCORRUPTED     = 8009;
+
+
+  /*! \brief Flags for the update of proposals */
+
+  static const int UPDATE_MARKUP   = 0x01;           // update markup/tag table
+  static const int UPDATE_MTFLAG   = 0x02;           // update machine translation flag
+  static const int UPDATE_TARGLANG = 0x04;           // update target language
+  static const int UPDATE_DATE     = 0x08;           // update proposal update time
+
+
+/*! \brief Store the supplied proposal in the memory
+    When the proposal aready exists it will be overwritten with the supplied data
+
+    \param pProposal pointer to a OtmProposal object
+
+  	\returns 0 or error code in case of errors
+*/
+  int putProposal
+  (
+    OtmProposal &Proposal
+  ); 
+
+  /*! \brief Get the the first proposal from the memory and prepare sequential access
+    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
+  	\returns handle for usage with GetNextProposal or 0 in case of errors
+*/
+  int getFirstProposal
+  (
+    OtmProposal &Proposal
+  ); 
+
+  /*! \brief Get the the first proposal from the memory and prepare sequential access
+    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
+    \param piProgress pointer to buffer for progress indicator, this indicator goes from 0 up to 100
+  	\returns handle for usage with GetNextProposal or 0 in case of errors
+*/
+  int getFirstProposal
+  (
+    OtmProposal &Proposal,
+    int *piProgress
+  ); 
+
+/*! \brief Get the next proposal from the memory 
+    \param lHandle the hande returned by GetFirstProposal
+    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
+  	\returns 0 or error code in case of errors
+*/
+  int getNextProposal
+  (
+    OtmProposal &Proposal
+  ); 
+
+/*! \brief Get the next proposal from the memory (with progress info) 
+    \param lHandle the hande returned by GetFirstProposal
+    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
+    \param piProgress pointer to buffer for progress indicator, this indicator goes from 0 up to 100
+  	\returns 0 or error code in case of errors
+*/
+  int getNextProposal
+  (
+    OtmProposal &Proposal,
+    int *piProgress
+  ); 
+
+    /*! \brief Get the current sequential access key (the key for the next proposal in the memory) 
+    \param pszKeyBuffer pointer to the buffer to store the sequential access key
+    \param iKeyBufferSize size of the key buffer in number of characters
+  	\returns 0 or error code in case of errors
+  */
+  int getSequentialAccessKey
+  (
+    char *pszKeyBuffer,
+    int  iKeyBufferSize
+  ); 
+
+    
+  /*! \brief Set the current sequential access key to resume the sequential access at the given position
+    \param pszKey a sequential access key previously returned by getSequentialAccessKey
+  	\returns 0 or error code in case of errors
+  */
+  int setSequentialAccessKey
+  (
+    char *pszKey
+  ); 
+
+
+/*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
+    \param pszKey internal key of the proposal
+    \param Proposal buffer for the returned proposal data
+  	\returns 0 or error code in case of errors
+*/
+  int getProposal
+  (
+    char *pszKey,
+    OtmProposal &Proposal
+  ); 
+
+/*! \brief Data area for the getMemoryPart method */
+typedef struct _MEMORYPARTDATA
+{
+  // fields provided and filled by the caller of the method
+  BOOL   fFirstCall;                   // TRUE = this is the initial call for this memory file, FALSE = a subsequent call
+  char   szFileName[MAX_LONGFILESPEC]; // name of file being processed currently (the file name is from the list of memory data files
+                                       // provided using the getMemoryFiles method
+  PBYTE  pbBuffer;                     // points to the buffer for the provided data
+  ULONG  ulBytesToRead;                // number of bytes to be copied to buffer
+
+  // data fields filled by the getMemoryPart method
+  BOOL   fFileIsComplete;              // TRUE = the data of the current file has been stored in the buffer completely, 
+                                       // FALSE = there is more data coming
+  ULONG  ulBytesRead;                  // length of data stored in the buffer in number of bytes
+
+  // private data fields for the getMemoryPart method (this data is not used by the calling function in any way)
+  ULONG  ulFilePos;                    // could be used for the read position in current file
+  ULONG  ulRemaining;                  // could be used for the number of bytes remaining
+  ULONG  ulTotalSize;                  // could be used for the total size of the current file
+  ULONG  ulState;                      // could be used for current processing state
+  void   *pPrivatData;                 // could be used as anchor for private data areas
+  char   chPrivateBuffer[1024];        // could be used as private buffer area
+} MEMORYPARTDATA, *PMEMORYPARTDATA;
+
+/*! \brief Provides a part of the memory in binary format
+
+     The binary format is used by the folder export to add the memory
+     in the internal format to the exported folder.
+
+    \param pMemoryPartData pointer to the data area for the extraxt om binary format
+
+  	\returns 0 or error code in case of errors
+*/
+  int getMemoryPart
+  (
+    PMEMORYPARTDATA pData           // points to data area supplied by the caller
+  );
+
+/*! \brief Get a list of memory proposals matching the given search key
+
+    This method uses the search data contained in the search key to find one or more
+    matching proposals in the memory. At least the szSource and the szTargetLang members of the
+    search key have to be filled by the caller.
+    The caller provides a list of OtmProposals which will be filled with the data of the matching 
+    proposals. The number of requested proposals is determined by the number
+    of proposals in the list.
+
+    \param SearchKey proposal containing search string and meta data
+    \param FoundProposals refernce to vector with OtmProposal objects
+    \param ulOptions options for the lookup
+
+  	\returns 0 or error code in case of errors
+*/
+  int searchProposal
+  (
+    OtmProposal &SearchKey,
+    std::vector<OtmProposal *> &FoundProposals,
+    unsigned long ulOptions
+
+  ); 
+
+/*! \brief Updates some fields of a specific proposal in the memory
+
+    \param Proposal reference to a OtmProposal object containing the data being changed
+    \param usUpdateFlags Flags selecting the update fields
+
+  	\returns 0 or error code in case of errors
+*/
+  int updateProposal
+  (
+    OtmProposal &Proposal,
+    USHORT      usUpdateFlags
+  ); 
+
+/*! \brief Delete a specific proposal from the memory
+
+    \param Proposal reference to a OtmProposal object
+
+  	\returns 0 or error code in case of errors
+*/
+  int deleteProposal
+  (
+    OtmProposal &Proposal
+  ); 
+
+  /*! \brief Rebuild internal index after mass updates
+    This method is called after mass updates (e.g. memory import) has beebn performed.
+    The memory can rebuild or optimize its internal index when necessary.
+
+  	\returns 0 or error code in case of errors
+*/
+  int rebuildIndex
+  (
+  ); 
+
+
+/*! \brief Get number of markups used for the proposals in this memory
+  	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
+*/
+  int getNumOfMarkupNames();
+
+/*! \brief Get markup name at position n [n = 0.. GetNumOfMarkupNames()-1]
+    \param iPos position of markup table name
+    \param pszBuffer pointer to a buffer for the markup table name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to buffer
+*/
+  int getMarkupName
+  (
+    int iPos,
+    char *pszBuffer,
+    int iSize
+  );
+
+/*! \brief Get number of different document names used in the memory
+  	\returns number of markups used by the memory proposals or 0 if no document name information can be provided
+*/
+  int getNumOfDocumentNames();
+
+/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
+    \param iPos position of document name
+    \param pszBuffer pointer to a buffer for the document name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to buffer
+*/
+  int getDocumentName
+  (
+    int iPos,
+    char *pszBuffer,
+    int iSize
+  );
+
+  /*! \brief Get number of different document short names used in the memory
+  	\returns number of document short names used by the memory proposals or 0 if no document short name information can be provided
+*/
+  	int getNumOfDocumentShortNames();
+
+/*! \brief Get document name at position n [n = 0.. GetNumOfDocumentNames()-1]
+    \param iPos position of document name
+    \param pszBuffer pointer to a buffer for the document name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to buffer
+*/
+  	int getDocumentShortName
+    (
+      int iPos,
+      char *pszBuffer,
+      int iSize
+    );
+
+/*! \brief Get number of different languages used in the memory
+  	\returns number of languages used by the memory proposals or 0 if no language information can be provided
+*/
+  int getNumOfLanguages();
+
+/*! \brief Get language at position n [n = 0.. GetNumOfLanguages()-1]
+    \param iPos position of language
+    \param pszBuffer pointer to a buffer for the document name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to buffer
+*/
+  int getLanguage
+  (
+    int iPos,
+    char *pszBuffer,
+    int iSize
+  );
+
+
+
+/*! \brief Get source language of the memory
+    \param pszBuffer pointer to a buffer for the source language name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to the buffer
+*/
+  int getSourceLanguage
+  (
+    char *pszBuffer,
+    int iSize
+  );
+
+/*! \brief Get the name of the memory
+    \param pszBuffer pointer to a buffer for the name
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to the buffer
+*/
+  int getName
+  (
+    char *pszBuffer,
+    int iSize
+  );
+
+  /*! \brief Get the name of the memory
+    \param strName reference of a string receiving the memory name
+*/
+  int getName
+  (
+    std::string &strName
+  );
+
+
+/*! \brief Get description of the memory
+    \param pszBuffer pointer to a buffer for the description
+    \param iSize size of buffer in number of characters
+  	\returns number of characters copied to the buffer
+*/
+  int getDescription
+  (
+    char *pszBuffer,
+    int iSize
+  );
+
+  /*! \brief Set the description of the memory
+    \param pszBuffer pointer to the description text
+  */
+  void setDescription
+  (
+    char *pszBuffer
+  );
+
+/*! \brief Get plugin responsible for this memory
+  	\returns pointer to memory plugin object
+*/
+  void *getPlugin();
+
+/*! \brief Provide the internal memory handle
+  	\returns memory handle
+*/
+  HTM getHTM();
+  
+/*! \brief Get number of proposals in this memory
+  	\returns number of proposals
+*/
+  unsigned long getProposalNum();
+
+/*! \brief Get overall file size of this memory
+  	\returns size of memory in number of bytes
+*/
+  unsigned long getFileSize();
+
+/*! \brief Get the error message for the last error occured
+
+    \param strError reference to a string receiving the error mesage text
+  	\returns last error code
+*/
+	int getLastError
+  (
+    std::string &strError
+  ); 
+/*! \brief Get the error message for the last error occured
+
+    \param pszError pointer to a buffer for the error text
+    \param iBufSize size of error text buffer in number of characters
+  	\returns last error code
+*/
+	int getLastError
+  (
+    char *pszError,
+    int iBufSize
+  ); 
+  
+/*! \brief Set or clear the pointer to a loaded global memory option file
+
+    This method sets a pointer to a loaded global memory option file.
+    When set the option file will be used to decide how global memory proposals will be processed.
+
+    \param pvGlobalMemoryOptions pointer to a loaded global memory option file or NULL to clear the current option file pointer
+
+  	\returns 0 or error code in case of errors
+*/
+  int setGlobalMemoryOptions
+  (
+    void *pvGlobalMemoryOptions
+  ); 
+
+
+private:
+
+  HTM htm;                                       // old fashioned memory handle for this memory
+  PTMX_CLB pTmClb;                               // ptr to ctl block struct
+  PTMX_EXT_IN_W  pTmExtIn;                       // ptr to extract input struct
+  PTMX_EXT_OUT_W pTmExtOut;                      // ptr to extract output struct
+  PTMX_PUT_IN_W  pTmPutIn;                       // ptr to TMX_PUT_IN_W structure
+  PTMX_PUT_OUT_W pTmPutOut;                      // ptr to TMX_PUT_OUT_W structure
+  PTMX_GET_IN_W  pTmGetIn;                       // ptr to TMX_PUT_IN_W structure
+  PTMX_GET_OUT_W pTmGetOut;                      // ptr to TMX_PUT_OUT_W structure
+  ULONG ulNextKey;                       // next TM key for GetFirstProposal/GetNextProposal
+  USHORT usNextTarget;                   // next TM target for GetFirstProposal/GetNextProposal
+  EqfMemoryPlugin *pMemoryPlugin;                // memory plugin for this memory
+  char szName[MAX_LONGFILESPEC];                 // memory name
+	std::string strLastError;
+	int iLastError;
+  void *pvGlobalMemoryOptions;                   // pointert to global memory options to be used for global memory proposals
+
+/*! \brief Fill OtmProposal from TMX_GET_OUT_W structure
+    \param ulKey key of record containing the proposal
+    \param usTargetNum number of target within record 
+    \param Proposal reference to the OtmProposal being filled
+  	\returns 0 or error code in case of errors
+*/
+int SetProposalKey
+(
+  ULONG   ulKey,
+  USHORT  usTargetNum,
+  OtmProposal *pProposal
+);
+
+/*! \brief Split an internal key into record number and target number
+    \param Proposal reference to the OtmProposal 
+    \param pulKey pointer to record number buffer
+    \param pusTargetNum pointer to buffer for number of target within record 
+  	\returns 0 or error code in case of errors
+*/
+int SplitProposalKeyIntoRecordAndTarget
+(
+  OtmProposal &Proposal,
+  ULONG   *pulKey,
+  USHORT  *pusTargetNum
+);
+
+/*! \brief Split an internal key into record number and target number
+    \param pszKey pointer to the internal key of the OtmProposal 
+    \param pulKey pointer to record number buffer
+    \param pusTargetNum pointer to buffer for number of target within record 
+  	\returns 0 or error code in case of errors
+*/
+int SplitProposalKeyIntoRecordAndTarget
+(
+  char    *pszKey,
+  ULONG   *pulKey,
+  USHORT  *pusTargetNum
+);
+
+
+/*! \brief Fill OtmProposal from TMX_GET_OUT_W structure
+    \param pExtOut pointer to the TMX_GET_OUT_W structure
+    \param Proposal reference to the OtmProposal being filled
+  	\returns 0 or error code in case of errors
+*/
+int ExtOutToOtmProposal
+(
+  PTMX_EXT_OUT_W pExtOut,
+  OtmProposal &Proposal
+);
+
+/*! \brief Fill OtmProposal from TMX_MATCH_TABLE_W structure
+    \param pMatch pointer to the TMX_MATCH_TABLE_W structure
+    \param Proposal reference to the OtmProposal being filled
+  	\returns 0 or error code in case of errors
+*/
+int MatchToOtmProposal
+(
+  PTMX_MATCH_TABLE_W pMatch,
+  OtmProposal *pProposal
+);
+
+/*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
+    \param Proposal reference to the OtmProposal containing the data
+    \param pPutIn pointer to the TMX_PUT_IN_W structure
+  	\returns 0 or error code in case of errors
+*/
+int OtmProposalToPutIn
+(
+  OtmProposal &Proposal,
+  PTMX_PUT_IN_W pPutIn
+);
+
+/*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
+    \param Proposal reference to the OtmProposal containing the data
+    \param pGetIn pointer to the TMX_GET_IN_W structure
+  	\returns 0 or error code in case of errors
+*/
+int OtmProposalToGetIn
+(
+  OtmProposal &Proposal,
+  PTMX_GET_IN_W pGetIn
+);
+
+/*! \brief Handle a return code from the memory functions and create 
+    the approbriate error message text for it
+    \param iRC return code from memory function
+    \param pszMemName long memory name
+    \param pszMarkup markup table name
+  	\returns original or modified error return code
+*/
+int handleError( int iRC, char *pszMemName, char *pszMarkup );
+
+};
+
+
+
 
 
 //#define PROP_NTM_SZ_FULL_MEM_NAME_SIZE MAX_EQF_PATH
@@ -3541,7 +3674,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR         szMemPath[2048];                // Full memory database name + path
  CHAR         szFilePath[2048];               // Full file name + path
  BOOL         fControlFound;                  // Indicator whether a CONTROL token was found
- OtmMemory    *pMem;                          // pointer to memory object
+ EqfMemory    *pMem;                          // pointer to memory object
  OtmProposal  *pProposal;                     // buffer for memory proposal data
  CHAR_W       szSegBuffer[MAX_SEGMENT_SIZE+1];// buffer for segment data
  CHAR_W       szSource[MAX_SEGMENT_SIZE+1];   // buffer for segment source data
@@ -3643,7 +3776,7 @@ typedef struct _MEM_MERGE_IDA
  CHAR          szShortNameMergeMem[MAX_FILESPEC];// Short name of TM being merged
  CHAR          szDirMergeMem[MAX_LONGPATH];   // Path of directories fo TM to be merged ( \eqf\import\ )
  CHAR          szExtMergeMem[MAX_FEXT];       // Ext of TM to be merged ( MIP or MEM or ? )
- OtmMemory     *pMergeMem;                     // TM handle of TM to be merged
+ EqfMemory     *pMergeMem;                     // TM handle of TM to be merged
  CHAR          szInvokingHandler[40];         // ??? 40 ???? to be in Gerds stuff. Name of handler which invoked the process
  CHAR          szSystemPath[MAX_EQF_PATH];    // Path to the EQF system
  CHAR          szTemp[MAX_EQF_PATH];          // Temporary path area
@@ -3653,7 +3786,7 @@ typedef struct _MEM_MERGE_IDA
  CHAR          szDriveMem[MAX_DRIVE];         // Drive letter of TM w o : ( h )
  CHAR          szNameMem[MAX_LONGFILESPEC];   // Long name of TM w o ext ( gallus )
  CHAR          szShortNameMem[MAX_FILESPEC];  // Short name of TM w o ext ( gallus )
- OtmMemory     *pOutputMem;                   // TM handle
+ EqfMemory     *pOutputMem;                   // TM handle
  BOOL          fPropExist;                    // Existence of properties 0=No 1=Yes
  BOOL          fPropCreated;                  // Tm properties have been created
  BOOL          fMsg;                          // A message has been issued already
@@ -3705,7 +3838,7 @@ typedef struct _MEM_MERGE_IDA
 typedef struct _MEM_PROP_IDA
 {
  CHAR         szMemName[MAX_LONGFILESPEC];// Memory database name without extension
- OtmMemory    *pMem;                       // Handle of memory database
+ EqfMemory    *pMem;                       // Handle of memory database
  HPROP        hPropMem;                   // Memory database property handle
  PPROP_NTM    pPropMem;                   // pointer to TM properties
  CHAR         szPropName[MAX_FILESPEC];   // buffer for property name
@@ -3714,7 +3847,7 @@ typedef struct _MEM_PROP_IDA
 }MEM_PROP_IDA, * PMEM_PROP_IDA;
 
 
-BOOL EqfMemPropsToHtml( HWND hwndParent, PMEM_IDA  pIDA, OtmMemory *pMem );
+BOOL EqfMemPropsToHtml( HWND hwndParent, PMEM_IDA  pIDA, EqfMemory *pMem );
 
 VOID    EQFMemImportTrojaEnd( PMEM_MERGE_IDA );
 USHORT  CloseMergeTmAndTm( PMEM_MERGE_IDA, BOOL );                   /*@1139A*/
@@ -4358,8 +4491,8 @@ typedef struct _MEM_ORGANIZE_IDA
  CHAR          szPluginName[MAX_LONGFILESPEC]; // name of plugin used for the memory
  CHAR          szPathTempMem[2048];            // Full path of temporary transl. mem.
  OtmProposal   *pProposal;                     // buffer for memory proposal
- OtmMemory     *pMem;                           // Handle of transl. memory
- OtmMemory     *pMemTemp;                       // Handle of tmporary transl. memory
+ EqfMemory     *pMem;                           // Handle of transl. memory
+ EqfMemory     *pMemTemp;                       // Handle of tmporary transl. memory
  BOOL          fMsg;                           // A message has been issued already
  ULONG         ulSegmentCounter;               // Number of segments organized
  ULONG         ulInvSegmentCounter;            // Invalid Segment counter
@@ -4417,44 +4550,29 @@ enum statusCodes {
 
 };
 
-
-
-#include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
-
-/*! \brief Abstract base-class for plugins handling translation memory
+class CreateMemRequestData;
+class EqfMemoryPlugin : public OtmPlugin
+/*! \brief This class implements the standard translation memory plugin (EQF) for OpenTM2.
 */
-class OtmMemoryPlugin: public OtmPlugin
+
 {
-
+  //static EqfMemoryPlugin* _instance;
 public:
-
-/*! \brief Constructor.
+/*! \brief Constructor
 */
-	OtmMemoryPlugin()
-		{pluginType = eTranslationMemoryType;};
-
-/*! \brief Destructor.
+	EqfMemoryPlugin();
+/*! \brief Destructor
 */
-	virtual ~OtmMemoryPlugin()
-		{};
+	~EqfMemoryPlugin();
 
-	virtual bool isUsable()
+  static EqfMemoryPlugin* GetInstance();
+
+  	virtual bool isUsable()
 		{return OtmPlugin::isUsable();};
 
-	virtual const char* getName() = 0;
-
-	virtual const char* getShortDescription() = 0;
-
-	virtual const char* getLongDescription() = 0;
-
-	virtual const char* getVersion() = 0;
-
-	virtual const char* getSupplier() = 0;
-
-	virtual const char* getDescriptiveMemType() = 0;
   
 /*! \enum eRegRc
-	Possible return values of OtmMemory and OtmMemoryPlugin methods
+	Possible return values of EqfMemory and EqfMemoryPlugin methods
 */
 	enum eRc
 	{
@@ -4473,21 +4591,51 @@ public:
 	};
 
 
- 
+/*! \brief type of callback function for ListMemories method */
+typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMORY *  pInfo  );
+
+
+// options for the importFromMemoryFiles method
+static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the import in one call, do not divide the processing into smaller steps
+
+
+/*! \brief Returns the name of the plugin
+*/
+	const char* getName();
+/*! \brief Returns a short plugin-Description
+*/
+	const char* getShortDescription();
+/*! \brief Returns a verbose plugin-Description
+*/
+	const char* getLongDescription();
+/*! \brief Returns the version of the plugin
+*/
+	const char* getVersion();
+/*! \brief Returns the name of the plugin-supplier
+*/
+	const char* getSupplier();
+
+/*! \brief Returns the descriptive type of the memories controlled by this plugin
+*/
+	const char* getDescriptiveMemType();
+
 /*! \brief Create a new translation memory
   \param pszName name of the new memory
 	\param pszSourceLang source language
 	\param pszDescription description of the memory
 	\param bMsgHandling true/false: display errors or not
 	\param hwnd owner-window needed for modal error-message
+  \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
 	\returns Pointer to created translation memory or NULL in case of errors
 */
-	virtual OtmMemory* createMemory(
+	EqfMemory* createMemory(
 		const char* pszName,			  
 		const char* pszSourceLang,
 		const char* pszDescription
-	) = 0;
+	);
 	
+  void createMemory(CreateMemRequestData& request);
+
 /*! \brief Open an existing translation memory
   \param pszName name of the existing memory
 	\param bMsgHandling true/false: display errors or not
@@ -4495,31 +4643,12 @@ public:
   \param usAccessMode, special access mode for memory: FOR_ORGANIZE, EXCLUSIVE, READONLY
 	\returns Pointer to translation memory or NULL in case of errors
 */
-	virtual OtmMemory* openMemory(
+	EqfMemory* openMemory(
 		const char* pszName,			  
 		BOOL bMsgHandling,
 		HWND hwnd,
     unsigned short usAccessMode = 0
-	) = 0;
-
-/*! \brief Physically delete a translation memory
-  \param pszName name of the memory being deleted
-	\returns 0 if successful or error return code
-*/
-	virtual int deleteMemory(
-		const char* pszName			  
-	) = 0;
-
-  /*! \brief Closes a translation memory
-  \param pMemory pointer to a previously opened memory object
-	\returns 0 if successful or error return code
-*/
-	virtual int closeMemory(
-		OtmMemory *pMemory			  
-	) = 0;
-
-/*! \brief type of callback function for ListMemories method */
-typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMORY *  pInfo  );
+	);
 
   /*! \brief Provide a list of all available memories
   \param pfnCallBack callback function to be called for each memory
@@ -4528,23 +4657,48 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMOR
   the pInfo parameter of the callback function is set otherwise it is NULL
 	\returns number of provided memories
 */
-	virtual int listMemories(
-		PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
+	int listMemories(
+		EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
 		void *pvData,
 		BOOL fWithDetails
-	) = 0;
+	);
+
+/*! \brief Close a memory
+  \param pMemory pointer to memory object
+*/
+  int closeMemory(
+	  EqfMemory *pMemory			 
+  );
+
+/*! \brief Physically delete a translation memory
+  \param pszName name of the memory being deleted
+	\returns 0 if successful or error return code
+*/
+	int deleteMemory(
+		const char* pszName			  
+	);
+
 
 /*! \brief Get information about a memory
   \param pszName name of the memory
   \param pInfo pointer to buffer for memory information
 	\returns 0 if successful or error return code
 */
-	virtual int getMemoryInfo(
+	int getMemoryInfo(
 		const char* pszName,
     std::shared_ptr<OPENEDMEMORY>  pInfo
-	) = 0;
+	);
 
-/*! \brief provides a list of the memory data files
+/*! \brief set description of a memory
+  \param pszName name of the memory
+  \param pszDesc description information
+	\returns 0 if successful or error return code
+*/
+    int setDescription(
+        const char* pszName,
+        const char* pszDesc);
+
+  /*! \brief provides a list of the memory data files
 
      This method returns a list of the files which together form the specific memory.
      If there are no real physical files also a dummy name can be and
@@ -4560,15 +4714,12 @@ typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, OPENEDMEMOR
 
   	\returns 0 or error code in case of errors
 */
-  virtual int getMemoryFiles
+  int getMemoryFiles
   (
     const char* pszName,
     char *pFileListBuffer,
     int  iBufferSize
-  ) = 0;
-
-// options for the importFromMemoryFiles method
-static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the import in one call, do not divide the processing into smaller steps
+  );
 
 /*! \brief import a memory using a list of memory data files
 
@@ -4580,7 +4731,7 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
     When the processing of the memory files needs more time, the method
     should process the task in small units in order to prevent blocking of the
     calling application. To do this the method should return
-    OtmMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
+    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
     a private data area to keep track of the current processing step. The method will
     be called repetetively until the import has been completed.
 
@@ -4592,26 +4743,26 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
                            PVPOID pointer will be set to NULL on the initial call
 
   	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
+             EqfMemoryPlugin::eRepeat when the import needs more processing steps
              any other value is an error code
 */
-virtual int importFromMemoryFiles
+int importFromMemoryFiles
 (
   const char *pszMemoryName,
   const char *pFileListBuffer,
   int  iOptions,
   PVOID *ppPrivateData
-) = 0;
+);
 
-/*! \brief Physically rename a translation memory
+  /*! \brief Physically rename a translation memory
   \param pszOldName name of the memory being rename
   \param pszNewName new name for the memory
 	\returns 0 if successful or error return code
 */
-  virtual int renameMemory(
-	  const char* pszOldNae,
+  int renameMemory(
+	  const char* pszOldName,
     const char* pszNewName
-  ) = 0;
+  );
 
   /*! \brief Create a temporary memory
   \param pszPrefix prefix to be used for name of the temporary memory
@@ -4621,20 +4772,20 @@ virtual int importFromMemoryFiles
 	\param hwnd owner-window needed for modal error-message
 	\returns Pointer to created translation memory or NULL in case of errors
 */
-  virtual OtmMemory* createTempMemory(
+  EqfMemory* createTempMemory(
 	  const char* pszPrefix,			  
 	  const char* pszName,			  
 	  const char* pszSourceLang,
 	  BOOL bMsgHandling,
 	  HWND hwnd
-  ) = 0;
+  );
 
-  /*! \brief Closes and deletes a temporary memory
-  \param pMemory pointer to memory object
+  /*! \brief Close and delete a temporary memory
+  \param pMemory pointr to memory object
 */
-  virtual void closeTempMemory(
-	  OtmMemory *pMemory
-  ) = 0;
+  void closeTempMemory(
+	  EqfMemory *pMemory
+  );
 
 
 /*! \brief Get the error message for the last error occured
@@ -4642,22 +4793,22 @@ virtual int importFromMemoryFiles
     \param strError reference to a string receiving the error mesage text
   	\returns last error code
 */
-	virtual int getLastError
+	int getLastError
   (
     std::string &strError
-  ) = 0; 
+  ); 
 /*! \brief Get the error message for the last error occured
 
     \param pszError pointer to a buffer for the error text
     \param iBufSize size of error text buffer in number of characters
   	\returns last error code
 */
-	virtual int getLastError
+	int getLastError
   (
     char *pszError,
     int iBufSize
-  ) = 0; 
-
+  ); 
+  
 
 /*! \brief Stops the plugin. 
 	Terminating-function for the plugin, will be called directly before
@@ -4667,39 +4818,150 @@ virtual int importFromMemoryFiles
   Warning: THIS METHOD SHOULD BE CALLED BY THE PLUGINMANAGER ONLY!
 	\param fForce, TRUE = force stop of the plugin even if functions are active, FALSE = only stop plugin when it is inactive
 	\returns TRUE when successful */
-	virtual bool stopPlugin( bool fForce = false ) = 0;
+	bool stopPlugin( bool fForce = false );
 
+/*! \brief Handle a return code from the memory functions and create the approbriate error message text for it
+    \param iRC return code from memory function
+    \param pszMemName long memory name
+    \param pszMarkup markup table name or NULL if not available
+    \param pszMemPath fully qualified memory path name or NULL if not available
+    \param strLastError reference to string object receiving the message text
+    \param iLastError reference to a integer variable receiving the error code
+  	\returns original or modified error return code
+*/
+static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMemPath, std::string &strLastError, int &iLastError );
+ 
 /*! \brief Returns list of supported drive letters. 
 	The list of drives is used to allow the selection of a drive letter in the memory create indow
 	The drive letters are retunred as a null-terminated string containing the letters of the 
   supported drives. When no drive selection should be possible, an empty string should be returned.\n
 	\param pszDriveListBuffer points to the callers buffer for the list of drive letter characters
 	\returns 0 if successful or error return code */
-	virtual int getListOfSupportedDrives( char *pszDriveListBuffer ) = 0;
+	int getListOfSupportedDrives( char *pszDriveListBuffer );
 
     /* \brief add a new memory information to memory list
        \param pszName memory name
+       \param chToDrive drive letter
        \returns 0 if success
-   */
-    virtual int addMemoryToList( const char* pszName ) = 0;
+    */
+    int addMemoryToList( const char* pszName );
 
     /* \brief remove a memory information from memory list
        \param  pszName memory name
        \returns 0 if success
     */
-    virtual int removeMemoryFromList( const char* pszName ) = 0;
+    int removeMemoryFromList(const char* pszName);
 
- /* \brief Replace the data of one memory with the data of another memory and delete the remains of the second memory
-    \param pszReplace name of the memory whose data is being replaced
-    \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
-   \returns 0 if success
+    /* \brief Replace the data of one memory with the data of another memory and delete the remains of the second memory
+      \param pszReplace name of the memory whose data is being replaced
+      \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
+     \returns 0 if success
+    */
+    int replaceMemory( const char* pszReplace, const char* pszReplaceWith );
+
+    
+	int iLastError;
+	std::string strLastError;
+
+  
+  std::vector< std::shared_ptr<OPENEDMEMORY> > m_MemInfoVector;
+
+private:
+
+  BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
+  void refreshMemoryList();
+ std::shared_ptr<OPENEDMEMORY>  findMemory( const char *pszName );
+  int findMemoryIndex(const char *pszName);
+/*! \brief Create memory properties
+  \param pszName long name of the memory
+  \param strPathName memory path name
+	\param pszDescription memory description
+	\param pszSourceLanguage memory source language
+	\returns TRUE when successful, FALSE in case of errors
 */
- virtual int replaceMemory( const char* pszReplace, const char* pszReplaceWith ) = 0;
+BOOL createMemoryProperties( const char* pszName, std::string &strPathName, const char*  pszDescription, const char*  pszSourceLanguage );
 
+
+/*! \brief Make the fully qualified property file name for a memory
+  \param strPathName reference to the memory path name
+  \param strPropName reference to the string receiving the property file name
+	\returns 0 when successful
+*/
+int makePropName( std::string &strPathName, std::string &strPropName );
+
+/*! \brief Add memory to our internal memory list
+  \param strPathName reference to the memory path name
+	\returns 0 when successful
+*/
+  int addToList( std::string &strPathName );
+
+/*! \brief Add memory to our internal memory lisst
+  \param pszPropname pointer to property file name
+	\returns 0 when successful
+*/
+  int addToList( char *pszPropName );
+
+/*! \brief Fill memory info structure from memory properties
+  \param pszPropName name of the memory property file (w/o path) 
+	\param pInfo pointer to memory info structure
+	\returns TRUE when successful, FALSE in case of errors
+*/
+  BOOL fillInfoStructure( char *pszPropName, std::shared_ptr<OPENEDMEMORY>  pInfo );
+
+	std::string name;
+	std::string shortDesc;
+	std::string longDesc;
+	std::string version;
+	std::string supplier;
+	std::string descrType;
+  char szBuffer[4000];                         // general purpose buffer area
+  char szSupportedDrives[27]; // list of supported drives
+
+/*! \brief make Index filename from memory data file name
+  \param pszMemPath pointer to memory data file name
+  \param pszIndexFileName pointer to a buffer for the memory index file name
+	\returns 0 when successful
+*/
+int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile = false );
+
+/*! \brief make Index filename from memory data file name
+  \param strMemPath reference to a string containing the memory data file name
+  \param strIndexFileName reference to a string receiving the memory index file name
+	\returns 0 when successful
+*/
+int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
+
+  
+/*! \brief Continue the import of a memory using a list of memory data files
+
+
+   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
+                           PVPOID pointer will be set to NULL on the initial call
+
+  	\returns 0 if OK,
+             EqfMemoryPlugin::eRepeat when the import needs more processing steps
+             any other value is an error code
+ */
+  int importFromMemFilesContinueProcessing
+  (
+    PVOID *ppPrivateData
+  );
+
+  /*! \brief Terminate the import of a memory using a list of memory data files and do a cleanup
+
+
+   \param ppPrivateData    the address of a PVOID pointer which can be used to anchor private data. The
+                           PVPOID pointer will be set to NULL on the initial call
+
+  	\returns 0 if OK,
+             any other value is an error code
+ */
+  int importFromMemFilesEndProcessing
+  (
+    PVOID *ppPrivateData
+  );
 
 };
-
-
 
 class TMManager{
     /*! \brief Pointer to the list of opened memories
@@ -4767,7 +5029,7 @@ public:
     int closeAll();
 
 ///MEMORY FACTORY REGION
-    /*! \brief   This class provides factory methods for OtmMemory objects 
+    /*! \brief   This class provides factory methods for EqfMemory objects 
 
 */
 
@@ -4795,7 +5057,7 @@ public:
   TMManager(){
     T5LOG( T5DEBUG) << "::Ctor of TMManager";
     pluginList = NULL;
-    pHandleToMemoryList = new std::vector<OtmMemory *>;
+    pHandleToMemoryList = new std::vector<EqfMemory *>;
     refreshPluginList();    
   }
 
@@ -4806,7 +5068,7 @@ public:
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
    \returns pointer to opened memory object 
 */
-OtmMemory *openMemory
+EqfMemory *openMemory
 (
   char *pszPluginName,
   char *pszMemoryName,
@@ -4860,7 +5122,7 @@ int getMemoryFiles
     When the processing of the memory files needs more time, the method
     should process the task in small units in order to prevent blocking of the
     calling application. To do this the method should return
-    OtmMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
+    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
     a private data area to keep track of the current processing step. The method will
     be called repetetively until the import has been completed.
 
@@ -4873,7 +5135,7 @@ int getMemoryFiles
                            PVPOID pointer will be set to NULL on the initial call
 
   	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
+             EqfMemoryPlugin::eRepeat when the import needs more processing steps
              any other value is an error code
 */
 int importFromMemoryFiles
@@ -4897,7 +5159,7 @@ int importFromMemoryFiles
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
    \returns pointer to created memory object 
 */
-OtmMemory *createMemory
+EqfMemory *createMemory
 (
   const char *pszPluginName,
   const char *pszMemoryName,
@@ -4917,7 +5179,7 @@ OtmMemory *createMemory
    \param piErrorCode pointer to a int varaibel receiving any error code when function fails
    \returns pointer to created memory object 
 */
-OtmMemory *createMemory
+EqfMemory *createMemory
 (
   const char *pszPluginName,
   const char *pszMemoryName,
@@ -4926,7 +5188,7 @@ OtmMemory *createMemory
   int *piErrorCode
 );
 
-OtmMemory* createMemory
+EqfMemory* createMemory
 (
   char *pszPluginName,
   char *pszMemoryName,
@@ -4947,7 +5209,7 @@ OtmMemory* createMemory
 */
 int listMemories
 (
-	OtmMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
+	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
 	void *pvData,
 	BOOL fWithDetails
 );
@@ -4959,7 +5221,7 @@ int listMemories
 */
 int getMemoryPlugins
 (
-	std::vector<OtmMemoryPlugin *>&vMemPluginList
+	std::vector<EqfMemoryPlugin *>&vMemPluginList
 );
 
 /*! \brief Provide the names of shared memories available for a given user
@@ -4984,7 +5246,7 @@ int getMemoryPlugins
 */
 int closeMemory
 (
-  OtmMemory *pMemory
+  EqfMemory *pMemory
 );
 
 /*! \brief Rename a translation memory
@@ -5052,7 +5314,7 @@ const char *getDefaultMemoryPlugin();
 void showLastError(
   char *pszPluginName,
   char *pszMemoryName,
-  OtmMemory *pMemory,
+  EqfMemory *pMemory,
   HWND hwndErrMsg
 );
 
@@ -5063,7 +5325,7 @@ void showLastError(
   \returns the last error string
 */
 std::string& getLastError(
-    OtmMemory *pMemory,
+    EqfMemory *pMemory,
     int& iLastError,
     std::string& strError);
 
@@ -5131,7 +5393,7 @@ void insertProposalData(
   \param iBufSize size of the object name buffer
   \returns 0 when successful or the error code
 */
-int getObjectName( OtmMemory *pMemory, char *pszObjName, int iBufSize );
+int getObjectName( EqfMemory *pMemory, char *pszObjName, int iBufSize );
 
 /*! \brief Get the plugin name and the memory name from a memory object name
   \param pszObjName pointer to the memory object name
@@ -5180,7 +5442,7 @@ int getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmProposal::ePropos
 	\param pszSourceLang source language
 	\returns Pointer to created translation memory or NULL in case of errors
 */
- OtmMemory* createTempMemory(
+ EqfMemory* createTempMemory(
 	  const char* pszPrefix,			  
 	  const char* pszName,			  
 	  const char* pszSourceLang
@@ -5190,7 +5452,7 @@ int getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmProposal::ePropos
   \param pMemory pointer to memory obhect
 */
  void closeTempMemory(
-	  OtmMemory *pMemory
+	  EqfMemory *pMemory
 );
 
 /* \brief add a new memory information to memory list
@@ -5412,7 +5674,7 @@ LONG getCheckSumFromHandle
   \param pMemory pointer to a memory object
   \returns memory object checksum
 */
-LONG computeMemoryObjectChecksum( OtmMemory *pMemory );
+LONG computeMemoryObjectChecksum( EqfMemory *pMemory );
 
 /*! \brief convert a memory object and the index into the memory oject table to a memory handle
   \param lIndex index into the memory object table
@@ -5422,14 +5684,14 @@ LONG computeMemoryObjectChecksum( OtmMemory *pMemory );
 LONG createHandle
 (
   LONG        lIndex,
-  OtmMemory   *pMemory
+  EqfMemory   *pMemory
 );
 
 /*! \brief compute the checksum for a memory object
   \param lHandle handel referring to the memory object
   \returns memory object pointer or NULL if the given handle is invalid
 */
-OtmMemory *handleToMemoryObject
+EqfMemory *handleToMemoryObject
 (
   LONG lHandle
 );
@@ -5503,7 +5765,7 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 /*! \brief Pointer to the list of installed memory plugins
 */
- std::vector<OtmMemoryPlugin *> *pluginList;
+ std::vector<EqfMemoryPlugin *> *pluginList;
 
  /*! \brief error code of last error occured
 */
@@ -5527,7 +5789,7 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 /*! \brief array containing the memory objects referred to by a handle
 */
-std::vector<OtmMemory *> *pHandleToMemoryList;
+std::vector<EqfMemory *> *pHandleToMemoryList;
 
 /*! \brief Buffer for segment text
 */
@@ -8212,5 +8474,38 @@ USHORT EqfDisconnectSharedMem
 
 
 ///end of OTMFUNC region
+
+
+/*! MemoryUtil.H  prototypes and functions for CPP versions of memory base code
+
+	Copyright (c) 1990-2012, International Business Machines Corporation and others. All rights reserved.
+*/
+
+/* functions located in TmPluginWrapper */
+
+/* Open a memory */
+
+EqfMemory *OpenMemory
+(
+  char *pszPluginName,
+  char *pszMemoryName,
+  unsigned short usOpenFlags,
+  int *piErrorCode
+);
+
+
+int ListMemories
+(
+	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
+	void *pvData,
+	BOOL fWithDetails
+);
+
+
+int CloseMemory
+(
+  EqfMemory *pMemory
+);
+//end of MemoryUtil.H  
 
 #endif //_tm_h_included_

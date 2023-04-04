@@ -7,8 +7,6 @@
 
 #include "PluginManager.h"
 #include "PropertyWrapper.H"
-#include "EqfMemoryPlugin.h"
-#include "EqfMemory.h"
 #include "tm.h"
 #include "EQFSETUP.H"
 #include "FilesystemHelper.h"
@@ -18,6 +16,7 @@
 #include "string"
 #include "vector"
 #include <fstream>
+#include "requestdata.h"
 
 // some constant values
 static char *pszPluginName = "EqfMemoryPlugin";
@@ -29,6 +28,7 @@ static char *pszSupplier = "International Business Machines Corporation";
 
 EqfMemoryPlugin::EqfMemoryPlugin()
 {
+    pluginType = eTranslationMemoryType;
     name = pszPluginName;
     shortDesc = pszShortDescription;
     longDesc = pszLongDescription;
@@ -136,7 +136,7 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
 	\param hwnd owner-window needed for modal error-message
 	\returns Pointer to created translation memory or NULL in case of errors
 */
-OtmMemory* EqfMemoryPlugin::createMemory(
+EqfMemory* EqfMemoryPlugin::createMemory(
 	const char* pszName,			  
 	const char* pszSourceLang,
 	const char* pszDescription
@@ -173,7 +173,7 @@ OtmMemory* EqfMemoryPlugin::createMemory(
     UtlDelete( (char *)strPropName.c_str(), 0, FALSE );
   } /* endif */
 
-  return( (OtmMemory *)pNewMemory );
+  return( (EqfMemory *)pNewMemory );
 }
 
 /*! \brief Open an existing translation memory
@@ -183,14 +183,14 @@ OtmMemory* EqfMemoryPlugin::createMemory(
   \param usAccessMode, special access mode for memory: FOR_ORGANIZE, EXCLUSIVE, READONLY
 	\returns Pointer to translation memory or NULL in case of errors
 */
-OtmMemory* EqfMemoryPlugin::openMemory(
+EqfMemory* EqfMemoryPlugin::openMemory(
 	const char* pszName,			 
 	BOOL bMsgHandling,
 	HWND hwnd,
   unsigned short usAccessMode
 )
 {
-  OtmMemory *pMemory = NULL;
+  EqfMemory *pMemory = NULL;
   HTM htm = NULL;                      // memory handle 
   std::string strMemPath;
 
@@ -235,7 +235,7 @@ OtmMemory* EqfMemoryPlugin::openMemory(
   \param pMemory pointer to memory object
 */
 int EqfMemoryPlugin::closeMemory(
-	OtmMemory *pMemory			 
+	EqfMemory *pMemory			 
 )
 {
   if ( pMemory == NULL ) return( -1 );
@@ -275,7 +275,7 @@ int EqfMemoryPlugin::closeMemory(
 	\returns number of provided memories
 */
 int EqfMemoryPlugin::listMemories(
-	OtmMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
+	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
 	void *pvData,
 	BOOL fWithDetails
 )
@@ -301,7 +301,7 @@ int EqfMemoryPlugin::getMemoryInfo(
  std::shared_ptr<OPENEDMEMORY>  pInfo
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
  std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
   if ( pMemInfo.get() != NULL )
   {
@@ -309,7 +309,7 @@ int EqfMemoryPlugin::getMemoryInfo(
   }
   else
   {
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
     memset( pInfo.get(), 0, sizeof(OPENEDMEMORY) );
   } /* endif */
   return( iRC );
@@ -390,7 +390,7 @@ int EqfMemoryPlugin::getMemoryFiles
   int  iBufferSize
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
   *pFileListBuffer = '\0';
 
  std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszName );
@@ -410,12 +410,12 @@ int EqfMemoryPlugin::getMemoryFiles
     }
     else
     {
-      iRC = OtmMemoryPlugin::eBufferTooSmall;
+      iRC = EqfMemoryPlugin::eBufferTooSmall;
     } /* endif */
   }
   else
   {
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
 }
@@ -430,7 +430,7 @@ int EqfMemoryPlugin::getMemoryFiles
     When the processing of the memory files needs more time, the method
     should process the task in small units in order to prevent blocking of the
     calling application. To do this the method should return
-    OtmMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
+    EqfMemoryPugin::eRepeat and should use the pPrivData pointer to anchor
     a private data area to keep track of the current processing step. The method will
     be called repetetively until the import has been completed.
 
@@ -442,7 +442,7 @@ int EqfMemoryPlugin::getMemoryFiles
                            PVPOID pointer will be set to NULL on the initial call
 
   	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
+             EqfMemoryPlugin::eRepeat when the import needs more processing steps
              any other value is an error code
 */
 int EqfMemoryPlugin::importFromMemoryFiles
@@ -470,7 +470,7 @@ int EqfMemoryPlugin::renameMemory(
   const char* pszNewName
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
  std::shared_ptr<OPENEDMEMORY>  pMemInfo = this->findMemory( (PSZ)pszOldName );
   if ( pMemInfo.get() != NULL )
   {
@@ -483,7 +483,7 @@ int EqfMemoryPlugin::renameMemory(
     ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
     #endif
 
-    if ( !fIsNew ) return( OtmMemory::ERROR_MEMORYEXISTS );
+    if ( !fIsNew ) return( EqfMemory::ERROR_MEMORYEXISTS );
 
     // get memory property file name
     std::string strPropName;
@@ -543,7 +543,7 @@ int EqfMemoryPlugin::renameMemory(
   }
   else
   {
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
 }
@@ -556,7 +556,7 @@ int EqfMemoryPlugin::deleteMemory(
 	const char* pszName			  
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
  std::shared_ptr<OPENEDMEMORY>  pMemInfo;
 
   // get the memory info index int the vector and use it to get memory info
@@ -588,8 +588,8 @@ int EqfMemoryPlugin::deleteMemory(
   }
   else
   {
-    T5LOG(T5ERROR) << "EqfMemoryPlugin::deleteMemory:: OtmMemoryPlugin::eMemoryNotFound name = "<< pszName ;
-    iRC = OtmMemoryPlugin::eMemoryNotFound;
+    T5LOG(T5ERROR) << "EqfMemoryPlugin::deleteMemory:: EqfMemoryPlugin::eMemoryNotFound name = "<< pszName ;
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
   } /* endif */
   return( iRC );
 }
@@ -603,7 +603,7 @@ int EqfMemoryPlugin::deleteMemory(
 	\param hwnd owner-window needed for modal error-message
 	\returns Pointer to created translation memory or NULL in case of errors
 */
-OtmMemory* EqfMemoryPlugin::createTempMemory(
+EqfMemory* EqfMemoryPlugin::createTempMemory(
 	const char* pszPrefix,			  
 	const char* pszName,			  
 	const char* pszSourceLang,
@@ -629,14 +629,14 @@ T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 18 // use old temporary m
     pNewMemory = new EqfMemory( this, htm, (PSZ)pszName );
   } /* end */     
 
-  return( (OtmMemory *)pNewMemory );
+  return( (EqfMemory *)pNewMemory );
 }
 
 /*! \brief close and delete a temporary memory
   \param pMemory pointer to memory objject
 */
 void EqfMemoryPlugin::closeTempMemory(
-	OtmMemory *pMemory
+	EqfMemory *pMemory
 )
 {
   std::string strName;
@@ -1093,7 +1093,7 @@ typedef struct _MEMIMPORTFROMFILEDATA
                            PVPOID pointer will be set to NULL on the initial call
 
   	\returns 0 if OK,
-             OtmMemoryPlugin::eRepeat when the import needs more processing steps
+             EqfMemoryPlugin::eRepeat when the import needs more processing steps
              any other value is an error code
 */
 int EqfMemoryPlugin::importFromMemFilesContinueProcessing
@@ -1101,7 +1101,7 @@ int EqfMemoryPlugin::importFromMemFilesContinueProcessing
   PVOID *ppPrivateData
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
   int iMemRC = NO_ERROR;
   PMEMIMPORTFROMFILEDATA pData = (PMEMIMPORTFROMFILEDATA)*ppPrivateData;
 
@@ -1120,12 +1120,12 @@ int EqfMemoryPlugin::importFromMemFilesContinueProcessing
 
   if ( iMemRC == NO_ERROR)
   {
-    iRC = OtmMemoryPlugin::eRepeat;
+    iRC = EqfMemoryPlugin::eRepeat;
   }
-  else if ( iMemRC == OtmMemory::INFO_ENDREACHED )
+  else if ( iMemRC == EqfMemory::INFO_ENDREACHED )
   {
     this->importFromMemFilesEndProcessing( ppPrivateData );
-    iRC = OtmMemoryPlugin::eSuccess;
+    iRC = EqfMemoryPlugin::eSuccess;
   }
   else
   {
@@ -1149,7 +1149,7 @@ int EqfMemoryPlugin::importFromMemFilesEndProcessing
   PVOID *ppPrivateData
 )
 {
-  int iRC = OtmMemoryPlugin::eSuccess;
+  int iRC = EqfMemoryPlugin::eSuccess;
 
   PMEMIMPORTFROMFILEDATA pData = (PMEMIMPORTFROMFILEDATA)*ppPrivateData;
 

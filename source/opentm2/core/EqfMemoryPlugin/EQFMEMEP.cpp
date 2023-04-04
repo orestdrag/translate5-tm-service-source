@@ -121,7 +121,7 @@ typedef struct _MEM_EXPORT_IDA
 
  BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
  CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
- OtmMemory    *pMem;                      // pointer to memory being exported
+ EqfMemory    *pMem;                      // pointer to memory being exported
  OtmProposal  *pProposal;                   // buffer for proposal data
  CHAR_W       szSegmentBuffer[MAX_SEGMENT_SIZE]; // Buffer for segment data
  CHAR_W       szSegmentBuffer2[MAX_SEGMENT_SIZE]; // Buffer for preprocessed segment data
@@ -996,9 +996,9 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
      iTmRC = pExportIDA->pMem->getNextProposal( *(pExportIDA->pProposal), &(pExportIDA->iComplete) );
    } /* endif */
 
-   if ( (iTmRC == NO_ERROR) || iTmRC == OtmMemory::INFO_ENDREACHED )
+   if ( (iTmRC == NO_ERROR) || iTmRC == EqfMemory::INFO_ENDREACHED )
    {
-     if ( iTmRC == OtmMemory::INFO_ENDREACHED )
+     if ( iTmRC == EqfMemory::INFO_ENDREACHED )
      {
        //--- Stop Address has been reached before END_OF_TM
        pExportIDA->fEOF = TRUE;

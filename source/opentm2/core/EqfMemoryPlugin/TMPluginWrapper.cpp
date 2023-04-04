@@ -19,7 +19,7 @@ Copyright Notice:
 #include "../utilities/EncodingHelper.h"
 #include "EQFMORPI.H"
 
-// EQF.H is included by otmmemory.h
+// EQF.H is included by EqfMemory.h
 // #include <eqf.h>                  // General Translation Manager include file EQF:H 
 
 

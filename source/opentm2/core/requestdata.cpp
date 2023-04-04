@@ -6,7 +6,6 @@
 #include "LogWrapper.h"
 #include "EncodingHelper.h"
 #include "EQFMORPH.H"
-#include "EqfMemoryPlugin.h"
 #include "FilesystemHelper.h"
 
 JSONFactory RequestData::json_factory;

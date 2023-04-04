@@ -15,14 +15,12 @@ Copyright Notice:
 #define INCL_EQF_DAM
 //#define INCL_EQF_ANALYSIS         // analysis functions
 //#include <eqf.h>                  // General Translation Manager include file
-
+#include "tm.h"
 #include "../../core/pluginmanager/PluginManager.h"
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/EncodingHelper.h"
 #include "../../core/utilities/PropertyWrapper.H"
 #include "../../core/utilities/FilesystemHelper.h"
-
-#include "EqfMemory.h"
 
 #include <EQFQDAMI.H>             // Private header file of QDAM 
 #include "EQFRDICS.H"             // remote dictionary functions
@@ -580,7 +578,7 @@ int EqfMemory::getMemoryPart
     }
     else 
     {
-      iRC = OtmMemory::ERROR_INVALIDREQUEST;
+      iRC = EqfMemory::ERROR_INVALIDREQUEST;
     } /* endif */       
 
     pData->fFirstCall = FALSE;
@@ -1096,7 +1094,7 @@ int EqfMemory::SplitProposalKeyIntoRecordAndTarget
   }
   else
   {
-    iRC = OtmMemory::ERROR_INTERNALKEY_MISSING;
+    iRC = EqfMemory::ERROR_INTERNALKEY_MISSING;
   } /* end */     
 
   return( iRC );

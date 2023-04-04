@@ -48,7 +48,7 @@ public:
 	/*! \brief get the supplier of the plug-in	 */
 	virtual const char* getSupplier() = 0;
 
-	/*! \enum eRc Possible return values of OtmMemory and OtmMemoryPlugin methods	*/
+	/*! \enum eRc Possible return values of EqfMemory and EqfMemoryPlugin methods	*/
 	enum eRc 
 	{
 		eSuccess = 0,
