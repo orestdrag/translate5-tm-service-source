@@ -16,6 +16,7 @@ class JSONFactory;
 
 class RequestData{
 protected:
+    std::shared_ptr<EqfMemory> mem;
     int requestType = 0;
     static JSONFactory json_factory;
     //RequestData(); // json was parsed in sub class
@@ -122,7 +123,10 @@ class ExportRequestData: public RequestData{
     private:
     int ExportZip();
     int ExportTmx();
+    
     std::string requestFormat;//application/xml or application/binary
+    FCTDATA fctdata;
+    std::string strTempFile;
     public:
     ExportRequestData(const std::string& format, const std::string& memName): RequestData("", memName),  requestFormat(format){};
     int parseJSON() override {return 0;};

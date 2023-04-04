@@ -1916,7 +1916,6 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define MAX_PATH144            144     // max length of fully qualified path
 #define MAX_FNAME              250     // max length of name part of a file names
 #define MAX_FEXT                 5     // max length of a file name extension
-#define MAX_EQF_PATH           255     // max length of a file in an EQF dir
 #define MAX_FOLDERNAME         250     // max length of a folder name
 #define MAX_DRIVELIST           27     // max size of a drive list
 #define MAX_DRIVE              250     // max size of a drive specification
@@ -2465,8 +2464,6 @@ typedef enum {
 } CLASSES;
 
 typedef ULONG EQFINFO, *PEQFINFO;
-typedef CHAR  OBJNAME[MAX_PATH144+MAX_FILESPEC];
-typedef OBJNAME *POBJNAME;
 typedef CHAR LANGUAGE[MAX_LANG_LENGTH];
 typedef PUSHORT HUCB, *PHUCB;          // user control block handle
 typedef PUCHAR  HDCB, *PHDCB;          // dictionary control block handle
@@ -3342,14 +3339,6 @@ typedef enum _ERRTYPE
 /* Enum and structure typedefs                                        */
 /**********************************************************************/
 
-// message buffer to keep info about last message
-#define MSGBUFFERLENGTH   2048         // length of error message buffer
-typedef struct _DDEMSGBUFFER
-{
-  HWND  hwndDDE;                       // handle of DDE window
-  SHORT sErrNumber;                    // error number / return code
-  CHAR  chMsgText[MSGBUFFERLENGTH];    // associated message text
-} DDEMSGBUFFER, *PDDEMSGBUFFER;
 typedef struct _ERRDATA                // global data of UtlError
 {
    HAB  hab;                           // anchor block handle
