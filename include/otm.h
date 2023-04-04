@@ -18,6 +18,8 @@
 #define MAX_LONGPATH           260     // max length of fully qualified path
 typedef char * PSZ;
 
+typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lotus
+
 typedef struct _RECPARAM
 {
     USHORT  usNum;           // record number
@@ -34,6 +36,28 @@ typedef struct _TMVITALINFO
   ULONG   ulStartKey;                  // key to start with
   ULONG   ulNextKey;                   // currently active key
 } NTMVITALINFO, * PNTMVITALINFO;
+
+
+
+#define MAX_MEM_DESCRIPTION     41     // length of a memory description field
+#define _TMX_SIGN_SZ_NAME 128
+//#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
+
+#define MAX_COMPACT_SIZE    3217   // 256
+
+#define MAX_LANG_LENGTH         20     // length of the name of a language
+typedef struct _TMX_SIGN
+{
+  TIME_L lTime=0;
+  BYTE bGlobVersion=0;  
+  BYTE bMajorVersion=0;
+  BYTE bMinorVersion=0;
+  CHAR szName[_TMX_SIGN_SZ_NAME];
+  CHAR szSourceLanguage[MAX_LANG_LENGTH];
+  CHAR szDescription[MAX_MEM_DESCRIPTION];
+
+} TMX_SIGN, * PTMX_SIGN;
+
 
 
 /*****************************************************************************/
@@ -265,11 +289,7 @@ typedef struct _BTREEIDA
 //                    for consistency reasons, the little overhead was used...
 //+----------------------------------------------------------------------------+
 
-SHORT EQFNTMUpdSign
-(
-   PCHAR  pUserData,                   // pointer to user data
-   USHORT usLen                        // length of user data
-);
+
 
 //+----------------------------------------------------------------------------+
 // Internal function
@@ -530,9 +550,7 @@ SHORT EQFNTMGetUpdCounter
 );
 
 
- SHORT QDAMDictCreateLocal ( SHORT, PCHAR, USHORT,
-                             PCHAR, PCHAR, 
-                             PNTMVITALINFO );
+ SHORT QDAMDictCreateLocal ( TMX_SIGN*, ULONG );
                              
  SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
  BOOL   QDAMDictLockStatus ( PWCHAR );
@@ -652,6 +670,18 @@ SHORT  QDAMReadRecord_V3
 
 
  SHORT QDAMAddToBuffer_V3( PBYTE, ULONG, PRECPARAM);
+ SHORT QDAMWriteHeader ();
+
+SHORT QDAMDictUpdSignLocal
+(
+   PTMX_SIGN  pSign                   // pointer to user data
+);
+
+ SHORT QDAMReadRecordFromDisk_V3( USHORT, PBTREEBUFFER_V3 *, BOOL );
+ 
+ SHORT QDAMWRecordToDisk_V3( PBTREEBUFFER_V3 );
+ SHORT QDAMWriteRecord_V3( PBTREEBUFFER_V3  pBuffer);
+ SHORT QDAMAllocKeyRecords(   USHORT usNum);
 
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 
@@ -773,7 +803,6 @@ USHORT EQFNTMOrganizeIndex
 #define MAX_UPD_COUNTERS        20
 
 
-#define MAX_LANG_LENGTH         20     // length of the name of a language
 
 //table entry structure
 typedef struct _TMX_TABLE_ENTRY
@@ -791,25 +820,7 @@ typedef struct _TMX_TABLE
 
 //signature structure
 
-#define MAX_MEM_DESCRIPTION     41     // length of a memory description field
-#define _TMX_SIGN_SZ_NAME 128
-//#define _TMX_SIGN_SZ_NAME MAX_FILESPEC
 
-#define MAX_COMPACT_SIZE    3217   // 256
-
-typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lotus
-
-typedef struct _TMX_SIGN
-{
-  TIME_L lTime;
-  BYTE bGlobVersion;  
-  BYTE bMajorVersion;
-  BYTE bMinorVersion;
-  CHAR szName[_TMX_SIGN_SZ_NAME];
-  CHAR szSourceLanguage[MAX_LANG_LENGTH];
-  CHAR szDescription[MAX_MEM_DESCRIPTION];
-
-} TMX_SIGN, * PTMX_SIGN;
 
 
 typedef char *PSZ;
