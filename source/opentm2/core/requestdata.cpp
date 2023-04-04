@@ -97,35 +97,38 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //call create function for data file
         pNewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
         
-        _rc_ = pNewMem->TmBtree.EQFNTMCreate((PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
-                            FIRST_KEY);
+        NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
+        NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = FIRST_KEY;
+        _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( 20, (PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
+                                  NULL, NULL,
+                                  &NtmVitalInfo );
       
         if ( _rc_ == NO_ERROR )
         {
           //insert initialized record to tm data file
           ulKey = AUTHOR_KEY;
           _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)pNewMem->pAuthors, TMX_TABLE_SIZE );
+                    (PBYTE)&pNewMem->Authors, TMX_TABLE_SIZE );
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = FILE_KEY;
             _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)pNewMem->pFileNames, TMX_TABLE_SIZE );     
+                        (PBYTE)&pNewMem->FileNames, TMX_TABLE_SIZE );     
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = TAGTABLE_KEY;
             _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)pNewMem->pTagTables, TMX_TABLE_SIZE );
+                        (PBYTE)&pNewMem->TagTables, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = LANG_KEY;
             _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)pNewMem->pLanguages, TMX_TABLE_SIZE );
+                    (PBYTE)&pNewMem->Languages, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
@@ -165,9 +168,11 @@ int CreateMemRequestData::createNewEmptyMemory(){
             strcpy( pNewMem->stTmSign.szName, pNewMem->InBtree.fb.fileName.c_str() );
 
             //HERE .TMI file is created
-            _rc_ = pNewMem->InBtree.EQFNTMCreate((PCHAR) &(pNewMem->stTmSign),
-                                sizeof( TMX_SIGN ),
-                                START_KEY );
+            NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
+            NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = START_KEY;
+            _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( 20, (PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
+                                      NULL, NULL,
+                                      &NtmVitalInfo );
                                 
           } /* endif */
 
@@ -188,14 +193,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
       if ( _rc_ )
       {
         //free allocated memory
-        UtlAlloc( (PVOID *) &(pNewMem->pLanguages), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pNewMem->pAuthors), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pNewMem->pTagTables), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pNewMem->pFileNames), 0L, 0L, NOMSG );
-        T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );";
-    #ifdef TEMPORARY_COMMENTED
         NTMDestroyLongNameTable( pNewMem );
-        #endif
         //UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
       } /* endif */
 

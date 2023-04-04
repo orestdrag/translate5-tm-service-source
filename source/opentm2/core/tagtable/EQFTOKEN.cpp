@@ -432,19 +432,19 @@ CHAR fWhiteSpace[256] =
 //------------------------------------------------------------------------------
 BOOL TATagTokenizeW
 (
-   PTMWCHAR       pszInput,            // pointer to input data
+   PWCHAR       pszInput,            // pointer to input data
    PLOADEDTABLE pVoidTable,            // pointer to loaded tag table
    BOOL      fComplete,                // TRUE = no more buffers to follow
-   PTMWCHAR      *ppRest,              // pointer to not processed data in buffer
+   PWCHAR      *ppRest,              // pointer to not processed data in buffer
    PUSHORT   pusColPos,                // column position
    PTOKENENTRY pTokBuf,                // buffer for created tokens
    USHORT      usTokens                // max entries in token buffer
 )
 {
-   PTMWCHAR       pszData;             // pointer for input data processing
-   PTMWCHAR       pszDataStart;        // pointer for end of data block
+   PWCHAR       pszData;             // pointer for input data processing
+   PWCHAR       pszDataStart;        // pointer for end of data block
    PTOKENENTRY pToken;                 // pointer to current token
-   PTMWCHAR       pszEnd;              // pointer to end of data
+   PWCHAR       pszEnd;              // pointer to end of data
    BOOL        fFound = FALSE;         // flag used in setting pRest
    PLOADEDTABLE pTable = (PLOADEDTABLE)pVoidTable;   // pointer to loaded tag table
    TOKSTATUS   TokStatus;              // tokenize status area

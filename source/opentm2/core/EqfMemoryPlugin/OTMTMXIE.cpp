@@ -5318,7 +5318,7 @@ void CopyTextAndProcessMaskedEntitites( PSZ_W pszTarget, PSZ_W pszSource )
 
 
 
-int _wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2){
+int _wcsicmp(const PWCHAR p1, const PWCHAR p2){
   return wcscasecmp(p1, p2);
 }
 
@@ -5327,7 +5327,7 @@ int _stricmp(const char* p1, const char* p2){
 }
 
 
-int wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2){
+int wcsicmp(const PWCHAR p1, const PWCHAR p2){
   return _wcsicmp(p1, p2);
 }
 
@@ -5335,11 +5335,11 @@ int stricmp(const char* p1, const char* p2){
   return _stricmp(p1, p2);
 }
 
-int _wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz){
+int _wcsnicmp(const PWCHAR p1, const PWCHAR p2, const int sz){
   return wcsncasecmp(p1,p2,sz);
 }
 
-int wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz){
+int wcsnicmp(const PWCHAR p1, const PWCHAR p2, const int sz){
   return _wcsnicmp(p1,p2,sz);
 }
 

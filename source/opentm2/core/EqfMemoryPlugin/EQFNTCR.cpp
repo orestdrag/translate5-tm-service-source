@@ -232,12 +232,6 @@ USHORT TmtXCreate
   //allocate control block
   fOK = UtlAlloc( (PVOID *) &pTmClb, 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
 
-  //allocate table records
-  if ( fOK )    fOK = AllocTable( &(pTmClb->pLanguages) );
-  if ( fOK )    fOK = AllocTable( &(pTmClb->pAuthors) );
-  if ( fOK )    fOK = AllocTable( &(pTmClb->pTagTables) );
-  if ( fOK )    fOK = AllocTable( &(pTmClb->pFileNames) );
-
   if ( fOK )
   {
     usRc = NTMCreateLongNameTable( pTmClb );
@@ -277,27 +271,27 @@ USHORT TmtXCreate
       //insert initialized record to tm data file
       ulKey = AUTHOR_KEY;
       usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
-                 (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
+                 (PBYTE)&pTmClb->Authors, TMX_TABLE_SIZE );
 
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
         usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
+                    (PBYTE)&pTmClb->FileNames, TMX_TABLE_SIZE );     
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = TAGTABLE_KEY;
         usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
+                    (PBYTE)&pTmClb->TagTables, TMX_TABLE_SIZE );
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = LANG_KEY;
         usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
-                 (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
+                 (PBYTE)&pTmClb->Languages, TMX_TABLE_SIZE );
       } /* endif */
 
       if ( usRc == NO_ERROR )
@@ -360,14 +354,7 @@ USHORT TmtXCreate
   if ( usRc )
   {
     //free allocated memory
-    UtlAlloc( (PVOID *) &(pTmClb->pLanguages), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
-    T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );";
-#ifdef TEMPORARY_COMMENTED
     NTMDestroyLongNameTable( pTmClb );
-    #endif
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
   } /* endif */
 

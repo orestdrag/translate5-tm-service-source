@@ -519,9 +519,9 @@ SHORT EQFNTMGetUpdCounter
 
  ULONG QDAMGetrecDataLen_V3 ( PBTREEBUFFER_V3, SHORT );
  SHORT QDAMDeleteDataFromBuffer_V3( RECPARAM recParam);
- SHORT QDAMDictUpdateLocal ( PTMWCHAR, PBYTE, ULONG );
+ SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, ULONG );
  
- SHORT QDAMDictExactLocal  ( PTMWCHAR, PBYTE, PULONG, USHORT );
+ SHORT QDAMDictExactLocal  ( PWCHAR, PBYTE, PULONG, USHORT );
  SHORT EQFNTMCreate
 (
    PCHAR  pUserData,                   // user data
@@ -535,6 +535,123 @@ SHORT EQFNTMGetUpdCounter
                              PNTMVITALINFO );
                              
  SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
+ BOOL   QDAMDictLockStatus ( PWCHAR );
+ VOID   QDAMDictUpdStatus ();
+ SHORT QDAMFindRecord_V3( PWCHAR, PBTREEBUFFER_V3 * );
+
+
+//------------------------------------------------------------------------------
+// Internal function
+//------------------------------------------------------------------------------
+// Function name:     QDAMReadRecord   Read record
+//------------------------------------------------------------------------------
+// Function call:     QDAMReadRecord( PBTREE, USHORT, PPBTREERECORD );
+//
+//------------------------------------------------------------------------------
+// Description:       read the requested record either from cache or from disk
+//
+//------------------------------------------------------------------------------
+// Parameters:        PBTREE             The B-tree to read
+//                    USHORT             number of buffer to read
+//                    PPBTREERECORD      The buffer read
+//
+//------------------------------------------------------------------------------
+// Returncode type:   SHORT
+//------------------------------------------------------------------------------
+// Returncodes:       0                 if no error happened
+//                    BTREE_NO_BUFFER   no buffer free
+//                    BTREE_READ_ERROR  read error from disk
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_LOOKUPTABLE_TOO_SMALL file is too big for l.table
+//                    BTREE_LOOKUPTABLE_NULL      ptr to lookup table is NULL
+//                    BTREE_LOOKUPTABLE_CORRUPTED lookup table is corrupted
+//------------------------------------------------------------------------------
+// Side effects:      The read record routine is one of the most performance
+//                    critical routines in the module.
+//
+//------------------------------------------------------------------------------
+// Concept:
+//
+//   AccessCounter  Record       LookupTable       Memory
+//       Table      Number
+//     +-------+                  +-------+
+//         0           0             NULL
+//     +-------+                  +-------+       +--------------------------+
+//        700          1             ptr  +------>  Buffer contains Record 1
+//     +-------+                  +-------+       +--------------------------+
+//         0           2             NULL
+//     +-------+                  +-------+
+//         .                          .
+//         .                          .
+//     +-------+                  +-------+       +--------------------------+
+//        200          i             ptr  +------>  Buffer contains Record i
+//     +-------+                  +-------+       +--------------------------+
+//         .                          .
+//         .                          .
+//     +-------+  pBT->usNumberOf +-------+
+//         0       LookupEntries     NULL
+//     +-------+                  +-------+
+//
+//  The lookup table is a dynamically growing array of ptrs to BTREEBUFFER.
+//  If the entry for record i is NULL record i isn't buffered in memory.
+//  If the rec.num. of the record to read is > pBT->usNumberOfLookupEntries
+//  lookup and access counter table will be resized.
+//
+//  The access counter table is a dynamically growing array of unsigned long.
+//  On every read access of record i the entry for record i is increased by
+//  ACCESSBONUSPOINTS.
+//
+//  From time to time (every MAX_READREC_CALLS calls to QDAMReadRecord)
+//  unlocked records which aren't read very often ( accesscounter <
+//  MAX_READREC_CALLS ) will be written to disk (if fNeedToWrite is set) and
+//  the buffer that contains the record will be freed.
+//
+//------------------------------------------------------------------------------
+// Function flow:
+//
+//     initialize return code (sRc) and pointer to record
+//
+//     if rec.num. >= MAX_NUMBER_OF_LOOKUP_ENTRIES (l.table would exceed 64kB)
+//        or ptr. to lookup- or access-counter-table is NULL
+//         set appropriate return code
+//     else
+//        if rec.num >= number of lookup table entries
+//           resize lookup and access counter table
+//           and set appropriate return code
+//
+//     if no error occured
+//        if record is already in memory
+//          set pointer to it
+//        else
+//          read record from disk (QDAMReadRecordFromDisk)
+//            and set appropriate return code
+//          initialize access counter (set it to 0)
+//        endif
+//
+//     if no error occured
+//        if #calls to QDAMReadRecord >= MAX_READREC_CALLS
+//           write unlocked records with access counter < MAX_READREC_CALLS
+//           to disk (if fNeedToWrite is set) and free allocated buffer
+//           set pBT->ulReadRecCalls to 0
+//        else
+//           increment pBT->ulReadRecCalls
+//
+//     if no error occured
+//        increase access counter of the record read by ACCESSBONUSPOINTS
+//
+//     return sRc
+//------------------------------------------------------------------------------
+
+SHORT  QDAMReadRecord_V3
+(
+   USHORT  usNumber,
+   PBTREEBUFFER_V3 * ppReadBuffer,
+   BOOL    fNewRec
+);
+
+
+ SHORT QDAMAddToBuffer_V3( PBYTE, ULONG, PRECPARAM);
 
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
 
@@ -723,10 +840,10 @@ struct TMX_CLB
 {
   BTREE TmBtree;
   BTREE InBtree;
-  PTMX_TABLE pLanguages;
-  PTMX_TABLE pFileNames;
-  PTMX_TABLE pAuthors;
-  PTMX_TABLE pTagTables;
+  TMX_TABLE Languages;
+  TMX_TABLE FileNames;
+  TMX_TABLE Authors;
+  TMX_TABLE TagTables;
   USHORT usAccessMode;
   USHORT usThreshold;
   TMX_SIGN stTmSign;
@@ -734,7 +851,7 @@ struct TMX_CLB
   BYTE     bCompactChanged;
   LONG     alUpdCounter[MAX_UPD_COUNTERS];
   PTMX_LONGNAME_TABLE pLongNames;
-  PTMX_TABLE pLangGroups;              //  table containing language group names
+  TMX_TABLE LangGroups;              //  table containing language group names
   PSHORT     psLangIdToGroupTable;     // language ID to group ID table
   LONG       lLangIdToGroupTableSize; // size of table (alloc size)
   LONG       lLangIdToGroupTableUsed; // size of table (bytes in use)

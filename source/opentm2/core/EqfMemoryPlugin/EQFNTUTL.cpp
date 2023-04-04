@@ -892,23 +892,23 @@ NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
   {
     //-----------------------------------------------------------------------
     case LANG_KEY :
-      *ppstTMTable = (PTMX_TABLE)pTmClb->pLanguages;
+      *ppstTMTable = (PTMX_TABLE)&pTmClb->Languages;
       break;
     //-----------------------------------------------------------------------
     case FILE_KEY :
-      *ppstTMTable = (PTMX_TABLE)pTmClb->pFileNames;
+      *ppstTMTable = (PTMX_TABLE)&pTmClb->FileNames;
       break;
     //-----------------------------------------------------------------------
     case AUTHOR_KEY :
-      *ppstTMTable = (PTMX_TABLE)pTmClb->pAuthors;
+      *ppstTMTable = (PTMX_TABLE)&pTmClb->Authors;
       break;
     //-----------------------------------------------------------------------
     case TAGTABLE_KEY :
-      *ppstTMTable = (PTMX_TABLE)pTmClb->pTagTables;
+      *ppstTMTable = (PTMX_TABLE)&pTmClb->TagTables;
       break;
     //-----------------------------------------------------------------------
     case LANGGROUP_KEY :
-      *ppstTMTable = (PTMX_TABLE)pTmClb->pLangGroups;
+      *ppstTMTable = (PTMX_TABLE)&pTmClb->LangGroups;
       break;
     //-----------------------------------------------------------------------
     default :
@@ -1249,10 +1249,10 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      ULONG ulLen = 0;
 
      // Free any existing table
-     if ( pTmClb->pAuthors ) UtlAlloc( (PVOID *) &pTmClb->pAuthors, 0L, 0L, NOMSG );
+     //if ( pTmClb->Authors ) UtlAlloc( (PVOID *) &pTmClb->pAuthors, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY, (PBYTE *)&pTmClb->pAuthors, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY, (PBYTE *)&pTmClb->Authors, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1265,10 +1265,10 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      ULONG ulLen = 0;
 
      // Free any existing table
-     if ( pTmClb->pLanguages ) UtlAlloc( (PVOID *) &pTmClb->pLanguages, 0L, 0L, NOMSG );
+     //if ( pTmClb->pLanguages ) UtlAlloc( (PVOID *) &pTmClb->pLanguages, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, LANG_KEY, (PBYTE *)&pTmClb->pLanguages, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, LANG_KEY, (PBYTE *)&pTmClb->Languages, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1281,10 +1281,10 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      ULONG ulLen = 0;
 
      // Free any existing table
-     if ( pTmClb->pTagTables ) UtlAlloc( (PVOID *) &pTmClb->pTagTables, 0L, 0L, NOMSG );
+     //if ( pTmClb->pTagTables ) UtlAlloc( (PVOID *) &pTmClb->pTagTables, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY, (PBYTE *)&pTmClb->pTagTables, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY, (PBYTE *)&pTmClb->TagTables, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1297,10 +1297,10 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      ULONG ulLen = 0;
 
      // Free any existing table
-     if ( pTmClb->pFileNames ) UtlAlloc( (PVOID *) &pTmClb->pFileNames, 0L, 0L, NOMSG );
+     //if ( pTmClb->pFileNames ) UtlAlloc( (PVOID *) &pTmClb->pFileNames, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, FILE_KEY, (PBYTE *)&pTmClb->pFileNames, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, FILE_KEY, (PBYTE *)&pTmClb->FileNames, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1763,28 +1763,28 @@ USHORT NTMAddNameToTable
             {
               //---------------------------------------------------------
               case LANG_KEY :
-                pTmClb->pLanguages = pstTMTable;
-                pstTMTableEntries = &pTmClb->pLanguages->stTmTableEntry;
+                pTmClb->Languages = *pstTMTable;
+                pstTMTableEntries = &pTmClb->Languages.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case FILE_KEY :
-                pTmClb->pFileNames = pstTMTable;
-                pstTMTableEntries = &pTmClb->pFileNames->stTmTableEntry;
+                pTmClb->FileNames = *pstTMTable;
+                pstTMTableEntries = &pTmClb->FileNames.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case AUTHOR_KEY :
-                pTmClb->pAuthors = pstTMTable;
-                pstTMTableEntries = &pTmClb->pAuthors->stTmTableEntry;
+                pTmClb->Authors = *pstTMTable;
+                pstTMTableEntries = &pTmClb->Authors.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case TAGTABLE_KEY :
-                pTmClb->pTagTables = pstTMTable;
-                pstTMTableEntries = &pTmClb->pTagTables->stTmTableEntry;
+                pTmClb->TagTables = *pstTMTable;
+                pstTMTableEntries = &pTmClb->TagTables.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case LANGGROUP_KEY :
-                pTmClb->pLangGroups = pstTMTable;
-                pstTMTableEntries = &pTmClb->pLangGroups->stTmTableEntry;
+                pTmClb->LangGroups = *pstTMTable;
+                pstTMTableEntries = &pTmClb->LangGroups.stTmTableEntry;
                 break;
             } /* end switch */
             pstTMTable->ulAllocSize = ulReallocSize;
@@ -2094,35 +2094,21 @@ USHORT NTMCreateLangGroupTable
 )
 {
   USHORT usRC = NO_ERROR;
+  pTmClb->LangGroups.ulAllocSize = TMX_TABLE_SIZE;
 
-  // create language group table
-  if( UtlAlloc( (PVOID *)&(pTmClb->pLangGroups),
-                0L, (LONG)(TMX_TABLE_SIZE), NOMSG ) )
+  // allocate language-ID-to-group-ID-table
+ 
+  LONG lSize = pTmClb->Languages.ulMaxEntries > 100L ?  pTmClb->Languages.ulMaxEntries : 100L;
+  lSize *= sizeof(SHORT);
+  if( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
+                0L, lSize, NOMSG ) )
   {
-
-    pTmClb->pLangGroups->ulAllocSize = TMX_TABLE_SIZE;
+    pTmClb->lLangIdToGroupTableSize = lSize;
+    pTmClb->lLangIdToGroupTableUsed = 0L;
   }
   else
   {
     usRC = ERROR_NOT_ENOUGH_MEMORY;
-  } /* endif */
-
-  // allocate language-ID-to-group-ID-table
-  if ( usRC == NO_ERROR )
-  {
-
-    LONG lSize = pTmClb->pLanguages->ulMaxEntries > 100L ?  pTmClb->pLanguages->ulMaxEntries : 100L;
-    lSize *= sizeof(SHORT);
-    if( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
-                  0L, lSize, NOMSG ) )
-    {
-      pTmClb->lLangIdToGroupTableSize = lSize;
-      pTmClb->lLangIdToGroupTableUsed = 0L;
-    }
-    else
-    {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
-    } /* endif */
   } /* endif */
 
   // get group IDs for all languages and fill map table
@@ -2130,9 +2116,9 @@ USHORT NTMCreateLangGroupTable
   {
     int i = 0;
     while ( (usRC == NO_ERROR) &&
-            (i < (int)pTmClb->pLanguages->ulMaxEntries) )
+            (i < (int)pTmClb->Languages.ulMaxEntries) )
     {
-      PTMX_TABLE_ENTRY pstEntry = &(pTmClb->pLanguages->stTmTableEntry);
+      PTMX_TABLE_ENTRY pstEntry = &(pTmClb->Languages.stTmTableEntry);
       usRC = NTMAddLangGroup( pTmClb,
                               pstEntry[i].szName,
                               pstEntry[i].usId );

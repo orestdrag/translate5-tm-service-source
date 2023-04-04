@@ -66,14 +66,7 @@ EqfMemory::~EqfMemory()
 */
 int EqfMemory::getNumOfMarkupNames()
 {
-  if ( pTagTables != NULL )
-  {
-    return( (int)(pTagTables->ulMaxEntries) );
-  }
-  else
-  {
-    return( 0 );
-  } /* end */     
+  return( (int)(TagTables.ulMaxEntries) );  
 }
 
 /*! \brief Get markup name at position n [n = 0.. GetNumOfMarkupNames()-1]
@@ -89,18 +82,11 @@ int EqfMemory::getMarkupName
   int iSize
 )
 {
-  if ( pTagTables!= NULL )
+  if ( (iPos >= 0) && (iPos < (int)(TagTables.ulMaxEntries)) )
   {
-    if ( (iPos >= 0) && (iPos < (int)(pTagTables->ulMaxEntries)) )
-    {
-      PTMX_TABLE_ENTRY pEntry = &(pTagTables->stTmTableEntry);
-      pEntry += iPos;
-      return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
-    }
-    else
-    {
-      return( 0 );
-    } /* end */     
+    PTMX_TABLE_ENTRY pEntry = &(TagTables.stTmTableEntry);
+    pEntry += iPos;
+    return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
   }
   else
   {
@@ -119,14 +105,7 @@ int EqfMemory::getSourceLanguage
   int iSize
 )
 {
-  //if ( this->pTmClb != NULL )
-  {
-    return( CopyToBuffer( stTmSign.szSourceLanguage, pszBuffer, iSize ) );
-  }
-  //else
-  {
-    return( 0 );
-  } /* end */     
+  return( CopyToBuffer( stTmSign.szSourceLanguage, pszBuffer, iSize ) );
 }
 
 /*! \brief Get description of the memory
@@ -689,20 +668,13 @@ int EqfMemory::getLanguage
   int iSize
 )
 {
-  //if ( this->pTmClb != NULL )
+  if ( (iPos >= 0) && (iPos < (int)(Languages.ulMaxEntries)) )
   {
-    if ( (iPos >= 0) && (iPos < (int)(pLanguages->ulMaxEntries)) )
-    {
-      PTMX_TABLE_ENTRY pEntry = &(pLanguages->stTmTableEntry);
-      pEntry += iPos;
-      return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
-    }
-    else
-    {
-      return( 0 );
-    } /* end */     
+    PTMX_TABLE_ENTRY pEntry = &(Languages.stTmTableEntry);
+    pEntry += iPos;
+    return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
   }
-  //else
+  else
   {
     return( 0 );
   } /* end */     
