@@ -596,7 +596,7 @@ OtmMemory *TMManager::createMemory
   // use the plugin to create the memory
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );  
-  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
 
   if ( pMemory == NULL)
   {
@@ -652,7 +652,7 @@ OtmMemory *TMManager::createMemory
 
   std::string strMemoryName;
   this->getMemoryName( pszMemoryName, strMemoryName );
-  OtmMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription, FALSE, NULLHANDLE );
+  OtmMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
   if ( pMemory == NULL ){
      this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
      T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  strLastError;

@@ -4485,9 +4485,7 @@ public:
 	virtual OtmMemory* createMemory(
 		const char* pszName,			  
 		const char* pszSourceLang,
-		const char* pszDescription,
-		BOOL bMsgHandling,
-		HWND hwnd
+		const char* pszDescription
 	) = 0;
 	
 /*! \brief Open an existing translation memory
@@ -4509,14 +4507,6 @@ public:
 	\returns 0 if successful or error return code
 */
 	virtual int deleteMemory(
-		const char* pszName			  
-	) = 0;
-
-/*! \brief Clear (i.e. remove all entries) a translation memory
-  \param pszName name of the memory being cleared
-	\returns 0 if successful or error return code
-*/
-	virtual int clearMemory(
 		const char* pszName			  
 	) = 0;
 
@@ -5034,16 +5024,7 @@ int deleteMemory(
   char *pszMemoryName,
   std::string &strError
 );
-/*! \brief Delete all entries contained in a translation memory
-  \param pszPlugin plugin-name or NULL if not available or memory object name is used
-  \param pszMemoryName name of the memory being cleared or
-  memory object name (pluginname + colon + memoryname)
-	\returns 0 if successful or error return code
-*/
-int clearMemory(
-  char *pszPluginName,
-  char *pszMemoryName
-);
+
 
 /*! \brief Check if memory exists
   \param pszPlugin plugin-name or NULL if not available or memory object name is used

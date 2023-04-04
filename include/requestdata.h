@@ -36,7 +36,7 @@ public:
     //timestamp
 
 
-    RequestData(std::string json, std::string memName): strBody(json), strMemName(memName) {}
+    RequestData(const std::string& json, const std::string& memName): strBody(json), strMemName(memName) {}
     virtual ~RequestData() = default;
     //std::weak_ptr <OtmMemory> memory;
 
@@ -66,48 +66,44 @@ class CreateMemRequestData: public RequestData{
     std::string strMemDescription;
     std::string strMemB64EncodedData; // for import in internal format
     
-    CreateMemRequestData(std::string json): RequestData(json, ""){}
+    CreateMemRequestData(const std::string& json): RequestData(json, ""){}
     
 };
 
 class StatusMemRequestData: public RequestData{
     public:
-    StatusMemRequestData(std::string memName): RequestData("", memName){};
+    StatusMemRequestData(const std::string& memName): RequestData("", memName){};
 };
 
 class DeleteMemRequestData: public RequestData{
     public:
-    DeleteMemRequestData(std::string memName): RequestData("", memName){};
+    DeleteMemRequestData(const std::string& memName): RequestData("", memName){};
 };
 
 
 class ConcordanceSearchRequestData: public RequestData{
-    private:
-
     public:
-    ConcordanceSearchRequestData(std::string json, std::string memName): RequestData(json, memName){};
+    ConcordanceSearchRequestData(const std::string& json, const std::string& memName): RequestData(json, memName){};
 };
 
 
-class FuzzySearchRequestData: public RequestData{
-    private:
-    
+class FuzzySearchRequestData: public RequestData{    
     public:
-    FuzzySearchRequestData(std::string json, std::string memName): RequestData(json, memName){};
+    FuzzySearchRequestData(const std::string& json, const std::string& memName): RequestData(json, memName){};
 };
 
 class DeleteEntryRequestData: public RequestData{
     private:
     
     public:
-    DeleteEntryRequestData(std::string json, std::string memName): RequestData(json, memName) {};
+    DeleteEntryRequestData(const std::string& json, const std::string& memName): RequestData(json, memName) {};
 };
 
 class UpdateEntryRequestData: public RequestData{
     private:
   
     public:
-    UpdateEntryRequestData(std::string json, std::string memName): RequestData(json, memName) {};
+    UpdateEntryRequestData(const std::string& json, const std::string& memName): RequestData(json, memName) {};
 };
 
 
