@@ -91,21 +91,7 @@ typedef struct _STENCODEBITS
   USHORT usLen;
   USHORT usVal;
 } STENCODEBITS;
-/**********************************************************************/
-/*  structure for Client/Server access                                */
-/**********************************************************************/
-typedef struct  _QDAMLAN
-{
-   union PREFINOUT
-   {
-     PREFIX_IN  prefin;                           // prefix in of each command
-     PREFIX_OUT prefout;                          // prefix out of each command
-   }          PrefInOut;
-   DICTCMD    DictCmd;                            // dictionary command
-   struct       _BTREEIDA  *  pBTreeRemote;       // pointer to remote BTREE
-   USHORT     usOutLen;                           // length of the output struct
-   CHAR       szUserId [MAX_USERID];              // logged on userid
-} QDAMLAN , * PQDAMLAN;
+
 
 
 
@@ -1054,7 +1040,6 @@ typedef struct _DICTTIME
  PBTREE QDAMFindInstance ( PBTREE, PUSHORT );
  SHORT QDAMFindRecord_V3( PBTREE, PTMWCHAR, PBTREEBUFFER_V3 * );
 
- SHORT QDAMDictCloseOrganizeLocal ( PQDAMLAN pQDAMLan );
  SHORT QDAMDictCloseOrganize ( PPBTREE, PUSHORT, CHAR, USHORT );
 
  USHORT RenameOrganize( PUSHORT pszDictPath, CHAR chPrimDrive, USHORT usCloseRc );

@@ -279,17 +279,6 @@ LONG UtlCompareTime( FTIME *pfTimeFirst, FTIME *pfTimeSecond )
    return( sCompare );
 } /* endof UtlCompareTime */
 
-USHORT UtlGetLANUserID
-(
-  PSZ    pszLANUserID,                 // LAN UserID - returned
-  USHORT *pusUserPriv,                 // User priviliges
-  USHORT usMsgHandling                 // Message handling parameter
-)
-{
-  USHORT usRC = LANUID_NO_LAN;         // function return code
-  T5LOG(T5FATAL) <<  "::called commented function";
-  return( usRC );
-}
 
 
 //+----------------------------------------------------------------------------+

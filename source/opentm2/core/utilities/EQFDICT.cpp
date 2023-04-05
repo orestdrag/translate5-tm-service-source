@@ -539,21 +539,6 @@ typedef enum _DICTCMD
             *((PULONG)(pData)) = ulLen; 
 
 
-/**********************************************************************/
-/*  structure for Client/Server access                                */
-/**********************************************************************/
-typedef struct  _QDAMLAN
-{
-   union PREFINOUT
-   {
-     PREFIX_IN  prefin;                           // prefix in of each command
-     PREFIX_OUT prefout;                          // prefix out of each command
-   }          PrefInOut;
-   DICTCMD    DictCmd;                            // dictionary command
-   struct       _BTREEIDA  *  FRemote;       // pointer to remote BTREE
-   USHORT     usOutLen;                           // length of the output struct
-   CHAR       szUserId [MAX_USERID];              // logged on userid
-} QDAMLAN , * PQDAMLAN;
 
 typedef struct _QDAMDICT
 {
@@ -6178,7 +6163,6 @@ SHORT  QDAMDictOpenLocal
    PBTREE  pBTIda = *ppBTIda;          // set work pointer to passed pointer
    PBTREEGLOB pBT;                     // set work pointer to passed pointer
    BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
-   BOOL    fTransMem = FALSE;          // Transl. Memory...
    SHORT   sRc1;
    /*******************************************************************/
    /* allocate global area first ...                                  */
