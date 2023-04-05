@@ -10,7 +10,7 @@
 #define INCL_EQF_MORPH            // general morph functions
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include <EQF.H>                  // General Translation Manager include file
-#include <EQFLNG00.H>             // specific defines for Language properties
+//#include <EQFLNG00.H>             // specific defines for Language properties
 #include <EQFSETUP.H>             // specific defines for Language properties
 
 #include "LanguageFactory.H"

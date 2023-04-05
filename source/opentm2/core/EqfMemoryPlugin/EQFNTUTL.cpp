@@ -53,7 +53,7 @@
 #include "LogWrapper.h"
 #include "OSWrapper.h"
 
-#include "EQFCMPR.H"
+//#include "EQFCMPR.H"
 /**********************************************************************/
 /* prototypes for internal functions                                  */
 /**********************************************************************/

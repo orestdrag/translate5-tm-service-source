@@ -60,7 +60,6 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenHandler.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/ProxygenStats.cpp"
 
-    "${T5MEMORY_SOURCE_ROOT}/opentm2/EQFX_API.cpp"
     "${T5MEMORY_SOURCE_ROOT}/opentm2/OTMFUNC.cpp"
 
     #pluginmanager
@@ -84,7 +83,7 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/utilities/UtlMisc.cpp"
     "${CORE_DIR}/utilities/UtlString.cpp"
     "${CORE_DIR}/utilities/EQFUTERR.cpp"
-    "${CORE_DIR}/utilities/EQFPRO00.cpp"
+    #"${CORE_DIR}/utilities/EQFPRO00.cpp"
     "${CORE_DIR}/utilities/EQFUTFIL.cpp"
     "${CORE_DIR}/utilities/EQFUTDOS.cpp"
     "${CORE_DIR}/utilities/EQFOBJ00.cpp"

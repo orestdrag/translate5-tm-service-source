@@ -6261,7 +6261,7 @@ typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHOR
 /* Remote Transl. Memory functions (U-Code)                           */
 /**********************************************************************/
 #if defined(INCL_EQF_TMREMOTE)
-  #include <EQFTMREM.H>
+//  #include <EQFTMREM.H>
 #endif
 
 /**********************************************************************/
@@ -6296,7 +6296,7 @@ typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHOR
 /* Dictionary data encoding functions                                 */
 /**********************************************************************/
 #if defined(INCL_EQF_LDB)
-  #include <EQFLDB.H>
+//  #include <EQFLDB.H>
 #endif
 
 /**********************************************************************/
@@ -6310,14 +6310,14 @@ typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHOR
 /* Slider utility functions                                           */
 /**********************************************************************/
 #if defined(INCL_EQF_SLIDER)
-  #include <EQFSLDR.H>
+//  #include <EQFSLDR.H>
 #endif
 
 /**********************************************************************/
 /* Word count functions                                               */
 /**********************************************************************/
 #if defined(INCL_EQF_WCOUNT)
-  #include <EQFWCNT.H>
+//  #include <EQFWCNT.H>
 #endif
 
 /**********************************************************************/
@@ -6332,42 +6332,42 @@ BOOL DicGetCheckPassword( PSZ pszPassword, PULONG pulPassword, BOOL fCheckPasswo
 /* Dictionary filter functions                                        */
 /**********************************************************************/
 #if defined(INCL_EQF_FILT)
-  #include <EQFFILT.H>
+//  #include <EQFFILT.H>
 #endif
 
 /**********************************************************************/
 /* Terminology list functions                                         */
 /**********************************************************************/
 #if defined(INCL_EQF_LIST)
-  #include <EQFLIST.H>
+//  #include <EQFLIST.H>
 #endif
 
 /**********************************************************************/
 /* Print functions                                                    */
 /**********************************************************************/
 #if defined(INCL_EQF_PRINT)
-  #include <EQFQPRU.H>
+//  #include <EQFQPRU.H>
 #endif
 
 /**********************************************************************/
 /* Dialog utilities                                                   */
 /**********************************************************************/
 #if defined(INCL_EQF_DLGUTILS)
-  #include <EQFUTDLG.H>
+//  #include <EQFUTDLG.H>
 #endif
 
 /**********************************************************************/
 /* Dictionary print functions                                         */
 /**********************************************************************/
 #if defined(INCL_EQF_DICTPRINT)
-  #include <EQFQDPR.H>
+//  #include <EQFQDPR.H>
 #endif
 
 /**********************************************************************/
 /* Folder list and document list functions                            */
 /**********************************************************************/
 #if defined(INCL_EQF_FOLDER)
-  #include <EQFFOL.H>
+//  #include <EQFFOL.H>
 #endif
 
 // XLATE markups (markups which can't be handled within this function)

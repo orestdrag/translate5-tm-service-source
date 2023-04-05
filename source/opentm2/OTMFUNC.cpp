@@ -19,7 +19,7 @@
 
 #define INCL_EQFMEM_DLGIDAS            // include dialog IDA definitions
 #include "EQFSETUP.H"                  // directory names
-#include "EQFRPT.H"
+//#include "EQFRPT.H"
 #include "EQFSERNO.H"
 
 #include "core/document/InitPlugins.h"
