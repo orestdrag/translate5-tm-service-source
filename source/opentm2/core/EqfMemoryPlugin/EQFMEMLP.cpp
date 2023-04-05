@@ -73,7 +73,7 @@
 #include "EQFDDE.H"               // Batch mode definitions
 #define INCL_EQFMEM_DLGIDAS       // include dialog IDA definitions
 #include <tm.h>               // Private header file of Translation Memory
-#include "EQFMEM.ID" // Translation Memory IDs
+//#include "EQFMEM.ID" // Translation Memory IDs
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
 #include <time.h>                 // C library for time functions
 #include "EQFHLOG.H"              // for word count category limits

@@ -4,7 +4,9 @@
 
 // allow support for hot-spot conversion within windows...
   //#include <IME.H>
-  #include "EQFB.ID"
+//  #include "EQFB.ID"
+
+
 /**********************************************************************/
 /* General Part (formerly EQFB.H)                                     */
 /**********************************************************************/

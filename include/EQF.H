@@ -240,7 +240,19 @@ typedef PSWP  EQF_PSWP;
 /**********************************************************************/
 /* Include the general ID file                                        */
 /**********************************************************************/
-#include <../mri/EQF.ID>                      // Eqf PM IDs
+//#include <../mri/EQF.ID>                      // Eqf PM IDs
+//mri 
+//--------------------------------------------------------------------------//
+//                                                                          //
+//    2000 - 2499      - IDs for pulldowns and menu items of TWB AAB        //
+//                                                                          //
+//--------------------------------------------------------------------------//
+#define ID_TWBM_AAB             2000
+
+// start ID for menu items added by tool plugins
+#define ID_TWBM_AAB_TOOLPLUGINS ID_TWBM_AAB+340
+#define PID_FILE_MI_ORGANIZE    ID_TWBM_AAB+29
+
 
 // Send a notification message to a dialog
 #define SENDNOTIFICATION( hwnd, id, notification ) \

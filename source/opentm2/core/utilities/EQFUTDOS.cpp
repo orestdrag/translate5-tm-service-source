@@ -360,7 +360,7 @@ USHORT UtlRemoveSearchHandle( HDIR hdir );
 /**********************************************************************/
 
   #include "errno.h"                   // error number defines
-  #include "EQFSTART.MRI"              // hard coded T5FATAL-msg.
+//  #include "EQFSTART.MRI"              // hard coded T5FATAL-msg.
   #undef MAX_PATH
 
 extern ERRDATA ErrData[];              // error structure
