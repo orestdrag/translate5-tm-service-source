@@ -355,6 +355,8 @@ USHORT EqfDeleteMem
   return( usRC );
 } /* end of function EqfDeleteMem */
 
+ USHORT CreateSystemProperties( );
+
 // OtmMemoryService
 USHORT EqfStartSession
 (
@@ -363,9 +365,7 @@ USHORT EqfStartSession
 {
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
-
-    if (SetupMAT())
-        T5LOG(T5ERROR) << "Failed to setup property files";
+  CreateSystemProperties();
 
   // allocate internal data area
   UtlAlloc( (PVOID *)&pData, 0L, sizeof(FCTDATA), NOMSG );
@@ -406,10 +406,10 @@ USHORT EqfStartSession
     UtlInitError( NULLHANDLE, HWND_FUNCIF, (HWND)&(pData->LastMessage),
                   pData->szMsgFile );
 
-    if ( !fContinue )
+    //if ( !fContinue )
     {
-      T5LOG(T5ERROR) << "EqfStartSession():: fContinue is false";
-      usRC = 1;
+    //  T5LOG(T5ERROR) << "EqfStartSession():: fContinue is false";
+    //  usRC = 1;
     } /* endif */
   } /* endif */
 
@@ -530,36 +530,6 @@ USHORT EqfStartSession
   // set caller's session handle
   if ( usRC == NO_ERROR )
   {
-#ifdef DEBUGAPI
-    {
-      FILETIME  ftSysTime;
-      LARGE_INTEGER liTime;
-      LONG lTime = 0;
-
-        iLogLevel = 0;
-
-      
-      GetSystemTimeAsFileTime( &ftSysTime );
-      memcpy( &liTime, &ftSysTime, sizeof(liTime ) );
-
-      UtlMakeEQFPath( szLogFile, NULC, LOG_PATH, NULL );
-      strcat( szLogFile, "\\" );
-      //strcat( szLogFile, EQFAPI_LOGFILE );
-      sprintf( szLogFile + strlen(szLogFile), "OTMFUNC-%I64d-%ld.log", liTime, (LONG)pData );
-
-      hLog = fopen( szLogFile, "a" ); 
-      if ( hLog != NULLHANDLE ) 
-      { 
-        fLog = TRUE;
-        time( &lTime ); 
-        fprintf( hLog, "===== EQFAPI Log Started %s", ctime( &lTime ) ); 
-      } 
-      else
-      {
-        fLog = FALSE;
-      } /* endif */
-    }
-#endif
 
   T5LOG( T5DEBUG) << "==EQFSTARTSESSION==\n  Starting plugins...\n" ;
 
@@ -567,47 +537,27 @@ USHORT EqfStartSession
   // initialie plugins
   if ( usRC == NO_ERROR )
   {
-    char szPluginPath[MAX_EQF_PATH];
-    int errCode = Properties::GetInstance()->get_value_or_default(KEY_OTM_DIR, szPluginPath, MAX_EQF_PATH,"");
+    std::string strPluginPath = FilesystemHelper::GetOtmDir();
 
-		usRC = InitializePlugins( szPluginPath );    // add return value for P402974
-        // Add for P403115;
-        if (usRC != PluginManager::ePluginExpired)
-        {
-            // Add for P403138
-            char strParam[1024];
-            memset(strParam, 0x00, sizeof(strParam));
-
-            PluginManager* thePluginManager = PluginManager::getInstance();
-            if (!thePluginManager->ValidationCheck(strParam))
-            {
-                usRC = NO_ERROR;
-            }
-            else
-            {
-                usRC = ERROR_PLUGIN_INVALID;
-                PSZ pszParam = strParam;
-                UtlError(ERROR_PLUGIN_INVALID, MB_OK , 1, &pszParam, EQF_WARNING);
-            }
-            // Add end
-        }
-        else
-        {
-            T5LOG(T5ERROR) << "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED";
-            usRC = ERROR_PLUGIN_EXPIRED;
-        }
-        // Add end
+		usRC = InitializePlugins( (PSZ)strPluginPath.c_str() );    // add return value for P402974
+    // Add for P403115;
+    if (usRC != PluginManager::ePluginExpired)
+    {
+      PluginManager* thePluginManager = PluginManager::getInstance();
+    }
+    else
+    {
+      T5LOG(T5ERROR) << "EqfSessioStart()::usRC = ERROR_PLUGIN_EXPIRED";
+      usRC = ERROR_PLUGIN_EXPIRED;
+    }
+    // Add end
   }
 
   T5LOG( T5INFO) << "   ...Plugins have been started\n" ;
     {
       char szBuf[10];
-      int i = 0;
-      //UtlLogStart( "TMSession" );
-      T5LOG( T5INFO) << "TMSession";
-      i = _getpid();
+      int i = _getpid();
       sprintf( szBuf, "%ld", i );
-      //UtlLogWriteString( "EqfStartSession: Process ID is %s", szBuf );
       T5LOG( T5INFO) << "EqfStartSession: Process ID is " << szBuf;
     }
     *phSession = (LONG)pData;

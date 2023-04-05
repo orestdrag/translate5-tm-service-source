@@ -132,32 +132,6 @@ USHORT UpdateFolderProp( PSZ   pszFullFileName, CHAR  chDrive );
 //|                   create new property files;                               |
 //+----------------------------------------------------------------------------+
 
-int init_properties(){
-    char version[20];
-    Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
-
-    Properties::GetInstance()->add_key(KEY_Vers, version);
-    Properties::GetInstance()->add_key(KEY_SYSLANGUAGE, DEFAULT_SYSTEM_LANGUAGE);
-    Properties::GetInstance()->add_key(KEY_SysProp, SYSTEM_PROPERTIES_NAME);    
-    Properties::GetInstance()->add_key("CurVersion", version);
-    return 0;
-
-}
-
-
-int SetupMAT() {
-    init_properties();
-
-    auto homeDir = filesystem_get_home_dir();
-      
-    auto otmDir = filesystem_get_otm_dir();    
-    std::string otmPath = otmDir +'/' + SYSTEM_PROPERTIES_NAME;
-    CreateSystemProperties(otmPath.c_str());
-
-    if(!homeDir.empty())
-      Properties::GetInstance()->add_key(KEY_Drive, homeDir);
-    return 0;
-}
 
 
 //+----------------------------------------------------------------------------+
@@ -192,9 +166,8 @@ PPROPSYSTEM GetSystemPropInstance(){
   return &_instance;
 }
 
-USHORT CreateSystemProperties(const char* pszPath)
+USHORT CreateSystemProperties()
 {
-    PPROPSYSTEM  pSysPropsOld = 0;     // buffer for old system properties
     PPROPSYSTEM  pSysProps = 0;        // buffer for new system properties
     PSZ          pszEditor = 0;        // ptr for editor name processing
     PSZ          pszTemp = 0;          // general purpose pointer
@@ -204,16 +177,8 @@ USHORT CreateSystemProperties(const char* pszPath)
     /* Allocate area for new system properties                        */
     /******************************************************************/
     pSysProps = GetSystemPropInstance();
-    if ( pSysProps )
-    {
-        memset(pSysProps, NULC, sizeof(PROPSYSTEM));
-    }
-    else
-    {
-        T5LOG(T5ERROR) << "CreateSystemProperties()::ERROR_NOT_ENOUGH_MEMORY";
-        usRC = ERROR_NOT_ENOUGH_MEMORY;
-        return usRC;
-    }
+    memset(pSysProps, NULC, sizeof(PROPSYSTEM));
+    
 
     /******************************************************************/
     /* Fill in property heading area                                  */
@@ -254,20 +219,7 @@ USHORT CreateSystemProperties(const char* pszPath)
     sprintf( pSysProps->RestartDicts, "%s/%s", PATH, DICT_PROPERTIES_NAME );
     //pSysProps->fUseIELikeListWindows = TRUE;
     strcpy( pSysProps->szPluginPath,      PLUGINDIR );
-    
-
-    /******************************************************************/
-    /* Set intial restore size to 4/5 of desktop size and center      */
-    /* window inside desktop window                                   */
-    /******************************************************************/
- 
-    pSysProps->Swp.x  = (SHORT) (cxDesktop / 5L / 2L);
-    pSysProps->Swp.y  = (SHORT) (cyDesktop / 5L / 2L);
-    pSysProps->Swp.cx = (SHORT) (cxDesktop * 4L / 5L);
-    pSysProps->Swp.cy = (SHORT) (cyDesktop * 4L / 5L);
-    pSysProps->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
-                         EQF_SWP_SHOW | EQF_SWP_MAXIMIZE;
-    pSysProps->SwpDef = pSysProps->Swp;
+  
 
 
     /******************************************************************/
@@ -355,84 +307,6 @@ USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive )
 
     return ( usRc );
 } /* end of function UpdateSystemProperties */
-
-//+----------------------------------------------------------------------------+
-//|Function name:     CreateFolderListProperties                               |
-//|Internal function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function call:     CreateFolderListProperties( CHAR chPrimaryDrive )        |
-//+----------------------------------------------------------------------------+
-//|Description:       Create folder list properties and write the data to disk.|
-//+----------------------------------------------------------------------------+
-//|Input parameter:   CHAR   chPrimaryDrive       MAT primary drive            |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT                                                   |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       0  = function completed successfully                     |
-//|                   !0 = error code of called Dos functions                  |
-//+----------------------------------------------------------------------------+
-//|Function flow:     allocate data area for properties;                       |
-//|                   fill property heading area;                              |
-//|                   fill property data area with default values;             |
-//|                   write properties and free data area;                     |
-//+----------------------------------------------------------------------------+
-USHORT CreateFolderListProperties
-(
-  CHAR chPrimaryDrive                  // MAT primary drive
-)
-{
-    PPROPFOLDERLIST pPropFll;          // ptr to folderlist properties
-    USHORT       usRC = 0;             // function return code
-
-    /******************************************************************/
-    /* Allocate area for new properties                               */
-    /******************************************************************/
-    pPropFll = (PPROPFOLDERLIST)malloc( sizeof( PROPFOLDERLIST));
-    if ( pPropFll )
-    {
-      memset( pPropFll, NULC, sizeof( *pPropFll) );
-    }
-    else
-    {
-      usRC = ERROR_NOT_ENOUGH_MEMORY;
-    } /* endif */
-
-    /******************************************************************/
-    /* Fill in property heading area                                  */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 105 SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME, PROP_CLASS_FOLDERLIST );";
-#ifdef TEMPORARY_COMMENTED
-      SETPROPHEAD( pPropFll->PropHead, DEFAULT_FOLDERLIST_NAME,
-                   PROP_CLASS_FOLDERLIST );
-                   #endif
-    } /* endif */
-
-
-    /******************************************************************/
-    /* Fill properties with default values                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      pPropFll->Swp.x =  (SHORT) (cxDesktopDiv20 * 1);
-      pPropFll->Swp.y  = (SHORT) (cyDesktopDiv20 * 5);
-      pPropFll->Swp.cx = (SHORT) (cxDesktopDiv20 * 7L);
-      pPropFll->Swp.cy = (SHORT) (cyDesktopDiv20 * 8L);
-      pPropFll->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE |
-                         EQF_SWP_ACTIVATE | EQF_SWP_SHOW;
-#ifdef _PTM
-      pPropFll->Swp.fs |= EQF_SWP_MINIMIZE;
-#endif
-T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 106 *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];";
-#ifdef TEMPORARY_COMMENTED
-      *pPropFll->szDriveList = pPropFll->PropHead.szPath[0];
-#endif
-    } /* endif */
-
-   return( usRC );
-
-} /* end of function CreateFolderListProperties */
 
 //+----------------------------------------------------------------------------+
 //|Function name:     CreateImexProperties                                     |
@@ -556,21 +430,7 @@ USHORT CreateDictProperties
     /******************************************************************/
 
 
-    /******************************************************************/
-    /* Fill properties with default values                            */
-    /******************************************************************/
-    if ( !usRC )
-    {
-      pPropDict->Swp.x =  (SHORT) (cxDesktopDiv20 * 8);
-      pPropDict->Swp.y =  (SHORT) (cyDesktopDiv20 * 5);
-      pPropDict->Swp.cx = (SHORT) (cxDesktopDiv20 * 7L);
-      pPropDict->Swp.cy = (SHORT) (cyDesktopDiv20 * 8L);
-      pPropDict->Swp.fs = EQF_SWP_SIZE | EQF_SWP_MOVE | EQF_SWP_ACTIVATE |
-                          EQF_SWP_SHOW;
-#ifdef _PTM
-      pPropDict->Swp.fs |= EQF_SWP_MINIMIZE;
-#endif
-    } /* endif */
+
    return( usRC );
 
 } /* end of function CreateDictProperties */

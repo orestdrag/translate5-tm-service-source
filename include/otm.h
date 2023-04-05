@@ -1086,27 +1086,10 @@ typedef struct _FCTDATA
   DDEMSGBUFFER LastMessage;            // buffer for last error message
   HWND        hwndErrMsg;              // handle for error mesages (HWND_FUNCIF)
 
-  // area used by batch analysis
-  PVOID       pvAnaInputData;          // pointer to analysis input data
-  USHORT      usAnalysisPhase;         // current/next phase of analysis process
-  USHORT      usAnalysisFilePhase;     // current file processing phase
-  USHORT      usAnalysisSegPhase;      // current segment processing phase
-  USHORT      usAnalysisRedCountPhase; // current redundnacy counting phase
-
   // area used by mem import
   PVOID       pvMemLoadIda;            // pointer to analysis input data
   USHORT      usMemLoadPhase;          // current/next phase of TM import
   USHORT      usMemLoadRC;             // return code
-
-  // area used by word count
-  PVOID       pvWordCountData;         // ptr to word count data
-  USHORT      usWordCountPhase;        // current word count phase
-
-  // area used by folder import
-  PVOID       pvFolderImportIda;       // pointer to folder import IDA
-
-  // area used by folder export
-  PVOID       pvFolderExportIda;       // pointer to folder export IDA
 
   // area used by mem organize
   PVOID       pvMemOrganizeCommArea;   // pointer to organize CommArea
@@ -1114,18 +1097,6 @@ typedef struct _FCTDATA
   // area used by mem export
   PVOID       pvMemExportCommArea;
 
-  // area used by dictionary import
-  PVOID       pvDicImportIda;          // pointer to dictionary import IDA
-  USHORT      DicImportNextTask;       // next task for dictionary import
-
-  // area used by dictionary export
-  PVOID       pvDicExportIda;          // pointer to dictionary export IDA
-
-  // area used by document import and export
-  PVOID       pvDocImpExpIda;          // pointer to batch document import/export IDA
-
-  // area used by archive TM
-  PVOID       pvArchTMIda;             // pointer to batch archive TM IDA
   // general use buffer area
   OBJNAME     szObjName;               // buffer for object names
 
@@ -1133,20 +1104,6 @@ typedef struct _FCTDATA
   //USHORT      usProgress;
   USHORT      usExportProgress;
 
-  // area used by SimpleMatchLevel
-  PVOID       pvGetSimpleMatchLevelData;
-
-  // area used by clean memory function
-  PVOID       pvCleanMemory;           // pointer to clean memory IDA
-
-  // area used by process NOMATCH function
-  PVOID       pvProcessNomatch;        // pointer to process NOMATCH IDA
-
-  PVOID       pvExportSegsIda;        // pointer to export segments IDA
-
-  PVOID       pvFilterNoMatchFile;    // for pointer to filter nomatch file IDA
-  PVOID       pvAddMatchSegID;        // for pointer to add match segment ID data area
-  PVOID       pvUnused3;              // for future use
   ImportStatusDetails*     pImportData;
 
 

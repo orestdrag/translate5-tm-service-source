@@ -18,7 +18,7 @@ USHORT InitializePlugins( char *szPluginPath )
 	usRC = thePluginManager->loadPluginDlls(szPluginPath);   // add for P402974
 
 	InitMarkupPluginMapper(); // tagtable
-	InitDocumentPluginMapper(); // document
+	//InitDocumentPluginMapper(); // document
 
     return usRC;
 }

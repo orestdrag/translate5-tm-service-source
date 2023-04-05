@@ -450,13 +450,13 @@ int ExportRequestData::checkData(){
   if(!_rc_)
   {
     int res =  NewTMManager::GetInstance()->TMExistsOnDisk(strMemName, true );
-    if ( res != NewTMManager::TMM_TM_NOT_FOUND )
+    if ( res != NewTMManager::TMM_NO_ERROR )
     {
       T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName<< "; res= " << res;
       return( _rest_rc_ =  NOT_FOUND );
     }
   }
-   
+   fValid = true;
 }
 
 int ExportRequestData::execute(){
