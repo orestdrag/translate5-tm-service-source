@@ -26,18 +26,12 @@
 #define  CV_DDETOPIC   "Batch Mode API"
 #define  CV_DDEITEM    "Batch Mode API"
 
-typedef struct _DDERETURN
-{
-  USHORT  usRc;                        // error code
-  CHAR chMsgBuf[256];                  // message text
-} DDERETURN, *PDDERETURN;
 
 /**********************************************************************/
 /* defines for DDE                                                    */
 /**********************************************************************/
 #define  MAX_MSG_SZ    300                  // max size of text string
 
-#define MAXALLBATCH  50                     // max no of batches possible
 #define MAXBATCH  20                        // max no of batches in 1 task
 #define MAXMAND   10                        // max no of mandatory batches
 #define DELSLASH      '/'                   // delimiter for cmdline strings
@@ -465,20 +459,7 @@ typedef struct _DDEMEMCRT
   HWND hwndErrMsg;                         // HWND to be used for error messages
 } DDEMEMCRT, *PDDEMEMCRT;
 
-/**********************************************************************/
-/* structure which holds info for the task "translation memory export"*/
-/**********************************************************************/
-typedef struct _DDEMEMEXP
-{
-  HWND    hwndOwner;                   // handle of instance window
-  CHAR    szName[MAX_LONGFILESPEC];    // TM name
-  CHAR    szOutFile[CCHMAXPATH+1];     // output file name
-  CHAR    szCurDir[CCHMAXPATH+1];      // current/active directory
-  BOOL    fOverWrite;                  // TRUE = overwrite existing files
-  USHORT usBatchOccurrence[MAXALLBATCH];   // occurency of each spec
-  DDERETURN  DDEReturn;                    // return structure
-  HWND hwndErrMsg;                         // HWND to be used for error messages
-} DDEMEMEXP, *PDDEMEMEXP;
+
 
 /**********************************************************************/
 /* structure which holds info for the task "translation memory import"*/

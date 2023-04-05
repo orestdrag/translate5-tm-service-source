@@ -9,6 +9,8 @@
 #include <map>
 #include <memory>
 #include "win_types.h"
+#include "requestdata.h"
+#include "otm.h"
 
 #define INCL_EQF_TAGTABLE         // tag table and format functions
 #define INCL_EQF_TP
@@ -1235,6 +1237,42 @@ typedef struct _GETDICTPART_IN {
    ULONG        ulBytesToRead;    /* number of bytes to transfer             */
 } GETDICTPART_IN, * PGETDICTPART_IN;
 
+
+#define MAX_DICT_DESCR   40            // max length of a dictionary description
+// Structure of EQF dictionary properties
+typedef struct _PROPDICTIONARY
+{
+   //--- common property part ---
+   PROPHEAD  PropHead;                      // header of properties
+   //--- general dictionary information ---
+   CHAR      szDescription[MAX_DICT_DESCR]; // dictionary description
+   CHAR      szSourceLang[MAX_LANG_LENGTH]; // dictionary source language
+                                            // dictionary target language(s)
+   CHAR      szTargetLang[MAX_TGT_LANG][MAX_LANG_LENGTH];
+   EQF_BOOL  fCopyRight;                    // dictionary-is-copyrighted flag
+   CHAR      szDictPath[MAX_EQF_PATH];      // fully qualified dict file name
+   CHAR      szIndexPath[MAX_EQF_PATH];     // fully qualified index file name
+   //--- dictionary profile ---
+   USHORT    usLength;                      // number of user profile entries
+   USHORT    usUserNameCount;               // number of user created dict names
+   COLFONT   ColFontDictEntry;              // colour/font for dict entry
+   COLFONT   ColFontEntryVal;               // colour/font for dict entry value
+   PROFENTRY ProfEntry[MAX_PROF_ENTRIES];   // user profile entries
+   EQF_BOOL  fProtected;                    // dictionary-is-protected flag
+   ULONG     ulPassWord;
+   CHAR      szServer[MAX_SERVER_NAME];     // Server Name of TM or \0 if TM is local
+   CHAR      szUserid[MAX_USERID];          // LAN Userid of TM: if local '\0'
+   CHAR      chRemPrimDrive;                // LAN primary drive
+   USHORT    usLocation;                    // location of dictionary
+   CHAR      szLongName[MAX_LONGFILESPEC];  // dictionary long (descriptive) name
+   CHAR      szLongDesc[MAX_LONG_DESCRIPTION];  // dictionary long (descriptive) name
+   USHORT    usVersion;                     // Version of dictionary - used for
+                                            // comparison during organize if copyrighted
+   //--- reserved space ---
+   CHAR      chReserve[3402];               // reserve space / filler
+} PROPDICTIONARY, *PPROPDICTIONARY;
+
+
 // ----------------------------------------------------------------------------
 // structures needed for the TMC_PUT_TM_PROPERTIES command which is used to
 // copy a property file for a remote TM to the server (during TM creation
@@ -1309,12 +1347,6 @@ typedef struct _GETDICTPROP_OUT {                 /* outgp                     *
 } GETDICTPROP_OUT, * PGETDICTPROP_OUT;
 
 /* define union to allow combined processing in server code */
-typedef union _GETPROPCOMBINEDOUT
-{
-   GETPROP_OUT       TmPropOut;
-   GETDICTPROP_OUT   DictPropOut;
-} GETPROPCOMBINED_OUT, * PGETPROPCOMBINED_OUT;
-// !!! CHM End
 
 
 // ----------------------------------------------------------------------------
@@ -2484,43 +2516,6 @@ public:
 private:   
 };
 
-
-
-
-
-//#define PROP_NTM_SZ_FULL_MEM_NAME_SIZE MAX_EQF_PATH
-#define PROP_NTM_SZ_FULL_MEM_NAME_SIZE 54
-
-
-// last used values
-typedef struct _MEM_LAST_USED
-{
-  // Do only insert new values at the end of the stucture !!!!!!!!!!
-  PROPHEAD stPropHead;                        // Common header of properties
-  CHAR     szFormat[MAX_FILESPEC];            // Create dialog: last used format table
-  CHAR     szExclusion[MAX_FILESPEC];         // Create dialog: last used exclusion list
-  LANGUAGE szSourceLang;                      // Create dialog: last used source language
-  LANGUAGE szTargetLang;                      // Create dialog: last used target language
-  CHAR     szDrive[MAX_FILESPEC];             // Create dialog: last used local disk drive
-  CHAR     szExpDriveLastUsed[MAX_DRIVE];     // Export dialog: last used drive format: ~x:~
-  CHAR     szExpDirLastUsed[_MAX_DIR];        // Export dialog: last used directory format: ~\xxx\yyy\~
-  // Structure end in Troja 2.1
-  CHAR     szIncludeServer[MAX_SERVER_NAME];  // Include dialog: Last used server ~SSER0545~
-  CHAR     szCreateServer[MAX_SERVER_NAME];   // Create dialog: Last used server ~SSER0545~
-  BOOL     usCreateLocation;                  // Create dialog: Possible values: TM_LOCAL, TM_REMOTE
-  CHAR     szRemoteDrive[MAX_FILESPEC];       // Create dialog: last used remote disk drive
-  // Structure end in Troja 3.0
-  CHAR     szImpPathLastUsed[MAX_PATH144];    // Import dlg: last used path
-                                              // x:\xx
-  // Structure end in Troja 3.c
-  USHORT   usExpMode;                         // last used export mode
-  USHORT   usImpMode;                         // last used import mode
-  CHAR     szImpPathLastUsed2[MAX_LONGPATH];  // Import dlg: last used path (long)
-}MEM_LAST_USED, * PMEM_LAST_USED;
-
-
-
-
 USHORT  TmGetServerDrives( PDRIVES_IN  pDrivesIn,      // Pointer to DRIVES_IN struct
                            PDRIVES_OUT pDrivesOut,     // Pointer to DRIVES_OUT struct
                            USHORT      usMsgHandling );// Message handling parameter
@@ -2782,7 +2777,7 @@ NTMOpenProperties( HPROP *,
                    USHORT,
                    BOOL );
 
-#include "otm.h"
+
 // functions dealing with long document tables
 USHORT NTMCreateLongNameTable( PTMX_CLB pTmClb );
 //USHORT NTMCreateLongNameTable( EqfMemory* pTmClb );
@@ -3223,8 +3218,6 @@ typedef union  _UNIONOUT
    GETPART_OUT   getpartout;
    PUTPROP_OUT   putpropout;
    GETPROP_OUT   getpropout;
-   GETDICTPROP_OUT      GetDictPropOut; // !!! CHM added
-   GETPROPCOMBINED_OUT  GetPropCombinedOut; // !!! CHM added
    ENDORG_OUT    endorgout;
    DELTM_OUT     deltmout;
    DELFILE_OUT   delfileout;
@@ -3293,7 +3286,6 @@ typedef struct _TMT_GLOBALS { /* tmtg */
 #define  PTR_DLG_IDA              0   // Relative position in the extra bytes for dialogs
 #define  TEMP                    40   // Size of temporaty work area
                                       // of WinRegisterClass call.
-#define  TEXT_LINE_LENGTH             40  // Text line length
 #define  TEXT_100_CHAR               100  // string length for temporary strings
 //#define  NUMB_OF_TOKENS             1000  // Number of tokens in the token list
 #define  NUMB_OF_TOKENS             8000  // Number of tokens in the toklist:RJ increase nec.
@@ -3306,11 +3298,8 @@ typedef struct _TMT_GLOBALS { /* tmtg */
 #define  MEM_DBCS                      0  // 0 = No support,    1 = DBCS support
 #define  MEM_LOAD_PATTERN_NAME        "*" // Default names to be shown for load dialog
 #define  MEM_LOAD_PATTERN_EXT        ".*" // Default extension to be shown for load dialog
-#define  MEM_EXPORT_WORK_AREA       6000  // Length of export work area
 #define  EQF_IDENTIFICATION         "EQF" // EQF identification
 #define  CLBCOL_TITLE_STRING        "                   " // Placeholder for of CLBCOL titles
-#define  MEM_EXPORT_OUT_BUFFER      8200  // Output buffer for export
-
 
 
 // *****************  Memory database load **************************
@@ -3438,44 +3427,6 @@ typedef struct _SEG_CTRL_DATA
 }SEG_CTRL_DATA, * PSEG_CTRL_DATA;
 
 
-typedef struct _MEM_PROC_HANDLE
-{
- CHAR   * pDataArea;                   /* Pointer to process data area        */
- USHORT   usMessage;                   /* Termination message for process     */
-}MEM_PROC_HANDLE, * PMEM_PROC_HANDLE;
-
-typedef struct _MEM_IDA
-{
- IDA_HEAD stIdaHead;                     // Standard Ida head
- HWND     hWndListBox;                   // Handle of memory window listbox
- SHORT    sLastUsedViewList[MAX_VIEW];   // last used view list
- SHORT    sDetailsViewList[MAX_VIEW];    // user's details view list'
- SHORT    sSortList[MAX_VIEW];           // user's sort criteria list'
- HWND     hWnd;                          // Handle of memory window
- CHAR     szTemp[4096];                  // Temporary work area
- CHAR     szTempPath[MAX_EQF_PATH];      // Temporary work area for a path
- CHAR     szMemPath[4096];               // Full path to TM starting an operation
- CHAR     szMemName[MAX_LONGFILESPEC];   // (long) TM name
- CHAR     szMemObjName[2*MAX_LONGFILESPEC];   // memory object name ( pluginname + ":" + (long) TM name)
- CHAR     szPluginName[MAX_LONGFILESPEC]; // name of plugin for this memory
- LONG     lTemp;                         // Temporary long field
- CHAR     szMemFullPath[MAX_EQF_PATH];   // Full path to memory database
- CHAR     szSecondaryDrives[MAX_DRIVELIST]; // Drives of secondary installations
- CHAR   * pWorkPointerLoad;                 // A work pointer for the load proc.
-// SHORT    sNumberOfMem;                     // Number of memory databases entries available
-// SHORT    sNumberOfMemUsed;                 // Number of memory databases entries used
- PMEM_PROC_HANDLE  pMemProcHandles;         // pointer to List of proc. handle
- SHORT    sNumberOfProc;                    // Number of process handle entries
- SHORT    sNumberOfProcUsed;                // Number of proc. handle entries used
- SHORT    sRunningProcesses;                // Number of concurrently running processes
- CHAR     szText[TEXT_LINE_LENGTH];         // Containing text
-// CHAR     szMemTopItem[MAX_FNAME +          // In case of refresh contains top item of listbox
-//                       MAX_DESCRIPTION + 5];// the 5 additional char's are for \x15 control characters
-// CHAR     szMemSelectedItem[MAX_FNAME +     // In case of refresh contains selected item of listbox
-//                       MAX_DESCRIPTION + 5];// the 5 additional char's are for \x15 control characters
- CHAR     szProcessTaskWithObject[MAX_FILESPEC]; // A Task has to be processed with this Object
- CHAR     szNAString[TEXT_LINE_LENGTH];     // String to store the "N/A" string
-}MEM_IDA, * PMEM_IDA;
 
 
 //#ifdef _OTMMEMORY_H_
@@ -3579,6 +3530,7 @@ typedef struct _MEM_LOAD_IDA
  ULONG         ulSequenceNumber;          // segment sequence number within current external memory file
 }MEM_LOAD_IDA, * PMEM_LOAD_IDA;
 
+
 typedef struct _MEM_MERGE_IDA
 {
  CHAR          szPathMergeMem[MAX_LONGPATH];  // Full path and name of TM to be merged
@@ -3651,8 +3603,8 @@ typedef struct _MEM_PROP_IDA
 {
  CHAR         szMemName[MAX_LONGFILESPEC];// Memory database name without extension
  EqfMemory    *pMem;                       // Handle of memory database
- HPROP        hPropMem;                   // Memory database property handle
- PPROP_NTM    pPropMem;                   // pointer to TM properties
+ //HPROP        hPropMem;                   // Memory database property handle
+ //PPROP_NTM    pPropMem;                   // pointer to TM properties
  CHAR         szPropName[MAX_FILESPEC];   // buffer for property name
  CHAR         szPropPath[MAX_EQF_PATH];   // buffer for property path
  CHAR         szTempPath[MAX_EQF_PATH];   // buffer for path names
@@ -3715,20 +3667,6 @@ typedef struct _MEM_INCL_DLG_IDA
 
 #endif
 
-// Structure of EQF memory properties
-struct memlst_prop
-{
-   PROPHEAD  PropHead;                   // Common header of properties
-   EQF_SWP   Swp;                        // Window position
-   BYTE   szDriveList[27];               // List of drive letters
-   USHORT usViewFormat;                  // VIEW format
-   SHORT  sLastUsedViewList[MAX_VIEW];   // last used view list
-   SHORT  sDetailsViewList[MAX_VIEW];    // user's details view list'
-   SHORT  sSortList[MAX_VIEW];           // user's sort criteria list'
-   CLBFILTER Filter;                     // currently active column listbox filter
-   SHORT  sLastUsedViewWidth[MAX_VIEW];   // last used view list
-};
-typedef struct memlst_prop PROPMEMORY, *PPROPMEMORY;
 
 typedef struct _SLIDER_DATA
 {

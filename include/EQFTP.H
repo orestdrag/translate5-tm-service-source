@@ -1,7 +1,8 @@
 /*! EQFTP.H       External header file for Translation Processor functions
 	Copyright (c) 1990-2017, International Business Machines Corporation and others. All rights reserved.
 */
-
+#ifndef _EQFTP_H_INCLUDED_
+#define _EQFTP_H_INCLUDED_
 //WINAPI
 //#include <richedit.h>
 /**********************************************************************/
@@ -738,7 +739,6 @@ typedef struct _tbdocument
     PVOID        pBlockMark;     // pointer to marked area
     SHORT        sRMargin;       // value of right margins
     BOOL         fLineWrap;      // line wrap On/Off
-    NEWVIOCURSORINFO vioCurShapes[MAXCURSOR];  // cursor shapes
     USHORT       usTagEnd;       // tag end character
     BOOL         fErrorProcessed;// allocation error processed - no displ. msg
     PSZ          pUndoSeg;       // save prev seg data for undo in parts
@@ -1220,3 +1220,4 @@ typedef struct _MD_PROPOSAL
  BOOL EQFBFindDiff ( PTBDOCUMENT, PSZ_W, PSZ_W, SHORT , PFUZZYTOK * , PUSHORT, PUSHORT, ULONG);
  BOOL EQFBFindWord ( PSZ_W ,SHORT, USHORT, PUSHORT, PUSHORT, ULONG, BOOL );
 
+#endif //_EQFTP_H_INCLUDED_

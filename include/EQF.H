@@ -154,15 +154,7 @@
         #endif
     #endif
 
-    #ifndef _CHAR_W_DEFINED
-      /*
-      typedef wchar_t CHAR_W;
-      typedef wchar_t * PCHAR_W;
-      typedef wchar_t * PSZ_W;
-      //*/
-      typedef TMWCHAR CHAR_W;
-      typedef CHAR_W * PCHAR_W;
-      typedef PCHAR_W  PSZ_W;
+    #ifndef _CHAR_W_DEFINED     
       #define _CHAR_W_DEFINED
     #endif
   #endif
@@ -195,22 +187,6 @@
   //#include <fclsldw.h>                 // include slider stuff...
 #endif
 
-/**********************************************************************/
-/* Type definitions for OS/2 types - the new types are length         */
-/* compatible to the TKT1.3 types. Use these defines in all           */
-/* property file definitions.                                         */
-/**********************************************************************/
-typedef UINT   WINMSG;
-typedef USHORT EQF_BOOL;
-typedef PUSHORT PEQF_BOOL;
-typedef SWP   EQF_SWP;
-typedef PSWP  EQF_PSWP;
-  #define NULLHANDLE 0
-  #define SWP_FLAG(swp) swp.fs
-  #define PSWP_FLAG(pswp) pswp->fs
-  #define APIENTRY16 APIENTRY
-  #define PSZ16 PSZ
-  #define PBOOL16 PBOOL
 
 // define for directory name containing user exit DLLs which should be
 // copied to the WIN directory on start-up
@@ -1908,35 +1884,6 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define DEFAULTBARHEIGHT 27           // default toolbar height ...
 #define SEMICOLON           ';'
 
-/**********************************************************************/
-/* size and length defines                                            */
-/**********************************************************************/
-#define MAX_FILESPEC           256     // max length of file name + extension
-#define MAX_LONGFILESPEC       256     // max length of long file name + extension
-#define MAX_PATH144            144     // max length of fully qualified path
-#define MAX_FNAME              250     // max length of name part of a file names
-#define MAX_FEXT                 5     // max length of a file name extension
-#define MAX_FOLDERNAME         250     // max length of a folder name
-#define MAX_DRIVELIST           27     // max size of a drive list
-#define MAX_DRIVE              250     // max size of a drive specification
-#define MAX_VIEW                20     // max. viewable # of columns in a CLB listbox
-#define MAX_DEFINEDCOLUMNS      50     // max. definable # of columns in a CLB listbox
-#define MAX_DESCRIPTION         41     // length of description fields
-#define MAX_LONG_DESCRIPTION    300    // long length of description fields
-#define MAX_DICTS               20     // max. number of dictionaries
-#define MAX_SERVER_LIST_SIZE    100    // length of a server list in
-                                       // system properties
-#define MAX_LANGUAGE_PROPERTIES 200    // max. length of language properties
-#define MAX_EDIT_LINE_LENGTH    66    // max. length of a line
-#define MAX_SEGMENT_SIZE        4096  // maximum segment size
-#define MAX_TERM_LEN            255   // maximum length of a single term
-#define NUM_OF_DICTS            10    // number of dictionaries per folder
-#define MAX_FINDCHANGE_LEN      80    // max length of find/change buffer
-#define MAX_MOSTUSEDDOCSPERSEG   5    // max number of docs in most used segment
-                                      // area of redundancy log
-#define MAX_SEARCH_HIST         5     // max number of search history
-#define MAX_FILELIST            8096  // max length of non-dde filelist buffer
-#define MAX_DICTPID_VALUES      400   // max. length of dict. PID values
 
 /*********************************************************************/
 /* defines of CLB colum widths                                       */
@@ -2463,8 +2410,6 @@ typedef enum {
    clsFUZZYSEARCH                      // fuzzy search window
 } CLASSES;
 
-typedef ULONG EQFINFO, *PEQFINFO;
-typedef CHAR LANGUAGE[MAX_LANG_LENGTH];
 typedef PUSHORT HUCB, *PHUCB;          // user control block handle
 typedef PUCHAR  HDCB, *PHDCB;          // dictionary control block handle
 typedef PVOID HLUPCB, *PHLUPCB;        // lookup control block handle
@@ -2480,19 +2425,6 @@ typedef struct _CLBFILTER
   CHAR             aszValue[3][40];     // values for conditions
   CHAR             szFiller[108];       // room for enhancements in the future
 } CLBFILTER, *PCLBFILTER;
-
-//--- common part of instance areas ---
-typedef struct _IDA_HEAD
-{
-     PSZ          pszObjName;           // Object name ( old format )
-     PVOID        hProp;                // Handle to object properties
-     HWND         hFrame;               // Frame wnd handle
-     EQF_BOOL     fMustNotClose;        // reject WM_TERMINATE etc. if TRUE
-     OBJNAME      szObjName;            // Object name ( new format )
-} IDA_HEAD, *PIDA_HEAD;
-
-
-
 
 /* area for color and font description                                        */
 typedef struct _COLFONT
@@ -4356,161 +4288,9 @@ typedef MRESULT (*PFN_LISTCALLBACK)( PLISTCOMMAREA, HWND,
                                                 WINMSG, WPARAM, LPARAM );
   MRESULT FolderCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
   MRESULT FolderListCallBack( PLISTCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
-/**********************************************************************/
-/* Defines for the layout of the process window                       */
-/**********************************************************************/
-typedef enum _PROCWINSTYLE
-{
-  PROCWIN_TEXTONLY,                    // Process window contains a single
-                                       // text line (e.g. folder import );
-  PROCWIN_SLIDERONLY,                  // Process window contains a slider
-                                       // control (e.g. folder export)
-  PROCWIN_TEXTSLIDER,                  // Process window contains a text line
-                                       // and a slider control (e.g. tm export)
-  PROCWIN_SLIDERENTRY,                 // Process window contains a slider
-                                       // control and a groupbox containing a
-                                       // text line
-                                       // for the current entry (e.g. dict export)
-  PROCWIN_TEXTSLIDERENTRY,             // Process window contains a text line
-                                       // and a slider control (e.g. tm export)
-                                       // and a groupbox containing a text line
-                                       // for the current entry (e.g. dict export)
-  PROCWIN_TEXTSLIDERLISTBOX,           // Process window contains a text line
-                                       // and a slider control (e.g. tm export)
-                                       // and a two listboxes (e.g. analysis)
-  PROCWIN_BATCH                        // Process window is invisible (for use
-                                       // in batch mode processes)
-} PROCWINSTYLE;
 
-/**********************************************************************/
-/* Structure for the communication between generic process window     */
-/* instance procedure and the process instance callback function      */
-/**********************************************************************/
-typedef struct _PROCESSCOMMAREA
-{
-  /********************************************************************/
-  /* Variables independent of the type of the process window          */
-  /********************************************************************/
-  CHAR             szObjName[1024];    // R/O: object name of process window
-                                       // value is supplied by ProcessInstance
-  PROCWINSTYLE     Style;              // R/W: style of the process window
-                                       // for a description of the styles see
-                                       // PROCWINSTYLE enumeration
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sProcessObjClass;   // R/W: class of process instance window
-                                       // e.g. clsFOLDEREXP
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sProcessWindowID;   // R/W: ID to be used for process
-                                       // instance window; e.g. ID_FOLEXP_WINDOW
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  CHAR             szTitle[1024];      // R/W: title text of list window
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  HPOINTER         hIcon;              // handle of icon for process window
-                                       //   e.g. hiconFOLEXP
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  BOOL             fNoClose;           // R/W: disable-system-menu-close flag
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  BOOL             fDoNotRegisterObject;// R/W: do-not-register-object flag
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-                                       // if this flag is set the generic
-                                       // process window procedure will not
-                                       // register the process window, is it
-                                       // up to the callback function to
-                                       // register it
-  SWP              swpSizePos;         // R/W: size and position of list window
-                                       // MUST be set by callback function
-                                       // during WM_CREATE processing
-  PVOID            pUserIDA;           // R/W: ptr to IDA of callback function
-                                       // use this variable to anchor the IDA
-                                       // of the callback function
-  BOOL             fUserFlag;          // R/W: user flag
-                                       // not used by generic list instance
-  SHORT            asMsgsWanted[20];   // R/W: additional messages to be passed
-                                       // to the callback function, list nust
-                                       // be terminated by a zero value
-  CHAR             szBuffer[1024];     // R/W: buffer for temporary values of
-                                       // the callback function
 
-  /********************************************************************/
-  /* Variables not used for style PROCWIN_SLIDERONLY                  */
-  /********************************************************************/
-  SHORT            sTextID;            // R/W: ID to be used for text line
-                                       // control
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  CHAR             szText[1024];       // R/W: text to be displayed in text
-                                       // line of the the process window
-  CHAR             szText2[1024];      // R/W: text to be displayed in the
-                                       // second text line of the the process window
-
-  /********************************************************************/
-  /* Variables not used for style PROCWIN_TEXTONLY                    */
-  /********************************************************************/
-  SHORT            sSliderID;          // R/W: ID to be used for slider
-                                       // control
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  USHORT           usComplete;         // R/W: current completion rate
-                                       // value must be in the range
-                                       // from 0 to 100
-
-  /********************************************************************/
-  /* Variables only used for style PROCWIN_TEXTSLIDERENTRY            */
-  /********************************************************************/
-  SHORT            sEntryGBID;         // R/W: ID to be used for entry groupbox
-                                       // control
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  CHAR             szGroupBoxTitle[80];// R/W: text to be displayed as label
-                                       // of the groupbox for process windows
-                                       // of style PROCWIN_TEXTSLIDERENTRY
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sEntryID;           // R/W: ID to be used for entry text
-                                       // line control
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  CHAR             szEntry[80];        // R/W: text to be displayed in the
-                                       // entry text line of the the process
-                                       // window
-
-  /********************************************************************/
-  /* Variables only used for style PROCWIN_TEXTSLIDERLISTBOX          */
-  /********************************************************************/
-  HWND             hwndLB1;            // R/O: handle of the first listbox for
-                                       // process windows of type
-                                       // PROCWIN_TEXTSLIDERLISTBOX
-  HWND             hwndLB2;            // R/O: handle of the second listbox for
-                                       // process windows of type
-                                       // PROCWIN_TEXTSLIDERLISTBOX
-  SHORT            sLB1TextID;         // R/W: ID to be used for the label
-                                       // of the first listbox
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sLB2TextID;         // R/W: ID to be used for the label
-                                       // of the second listbox
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sLB1ID;             // R/W: ID to be used for the first
-                                       // listbox
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  SHORT            sLB2ID;             // R/W: ID to be used for the second
-                                       // listbox
-                                       // value MUST be supplied by callback
-                                       // function during WM_CREATE processing
-  CHAR             szLB1Text[80];      // R/W: text to be displayed as label
-                                       // for the first listbox
-  CHAR             szLB2Text[80];      // R/W: text to be displayed as label
-                                       // for the second listbox
-} PROCESSCOMMAREA, *PPROCESSCOMMAREA;
+#include "requestdata.h"
 
 /**********************************************************************/
 /* type definition for process instance callback function             */
@@ -4874,7 +4654,6 @@ MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #define BTREE_LOOKUPTABLE_TOO_SMALL   BTREE_BASE+35  // lookup table is too small, file is too big
 #define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
 
-#define HPROP PVOID
 
 #define MAX_NUM_DICTS      1900        // max. number of dict concurrently open
 
@@ -4932,132 +4711,6 @@ typedef enum {
 #define XSLT_XSLT4C_DLL "EQFXSLIBM.DLL"
 #define XSLT_MSXML_DLL  "EQFXSLMS.DLL"
 
-// Structure of EQF system properties
-typedef struct _PROPSYSTEM
-{
-   //-------------------------- property header --------------------------------
-   PROPHEAD  PropHead;                      // common property header
-   //------------------ drive and path information -----------------------------
-   CHAR szPrimaryDrive[MAX_DRIVE];          // primary TWB drive( e.g. "X:\0")
-   CHAR szDriveList[MAX_DRIVELIST];         // list of EQF drives
-   CHAR szPropertyPath[MAX_FILESPEC];       // directory for properties
-   CHAR szProgramPath[MAX_FILESPEC];        // directory for program files
-   CHAR szDicPath[MAX_FILESPEC];            // directory for dictionaries
-   CHAR szMemPath[MAX_FILESPEC];            // directory for memory data bases
-   CHAR szTablePath[MAX_FILESPEC];          // directory for translation tables
-   CHAR szListPath[MAX_FILESPEC];           // directory for lists
-   CHAR szExportPath[MAX_FILESPEC];         // directory for exported files
-   CHAR szBackupPath[MAX_FILESPEC];         // directory for backup files
-   CHAR szDirSourceDoc[MAX_FILESPEC];       // directory for source documents
-   CHAR szDirSegSourceDoc[MAX_FILESPEC];    // directory for segm. source docs
-   CHAR szDirSegTargetDoc[MAX_FILESPEC];    // directory for segm. target docs
-   CHAR szDirTargetDoc[MAX_FILESPEC];       // directory for target docs
-   CHAR szDirDocWordLists[MAX_FILESPEC];    // directory for document lists
-   CHAR szDllPath[MAX_FILESPEC];            // directory for DLLs
-   CHAR szMsgPath[MAX_FILESPEC];            // directory for msg and help files
-   CHAR szCtrlPath[MAX_FILESPEC];           // directory for control information
-   //----------------------- restart information -------------------------------
-   CHAR RestartFolderLists[ 128];           // list of folderlists for restart
-   CHAR RestartFolders[ 256];               // list of folder for restart
-   EQF_SWP  SwpDef;                         // TWB default window size
-   EQF_SWP  Swp;                            // TWB window position
-   CHAR RestartMemory[ 256];                // list of mem windows for restart
-   CHAR RestartDicts[ 256];                 // list for dict windows for restart
-   OBJNAME FocusObject;                     // object which had the focus
-   CHAR RestartTagTables[ 128];             // list of tag tables for restart
-   CHAR szDefaultEditor[MAX_FILESPEC];      // default editor
-   //---------------------- TM server code values ------------------------------
-   CHAR szServerList[MAX_SERVER_LIST_SIZE]; // list of servers
-   //------------------ drive and path information (2) -------------------------
-   CHAR szDirComMem[MAX_FILESPEC];          // directory for server TMs
-   CHAR szDirComProp[MAX_FILESPEC];         // directory for server TM props
-   CHAR szDirImport[MAX_FILESPEC];          // directory for imported files
-   //----------------------- restart information (2) ---------------------------
-   CHAR RestartLists[ 256];                 // list of list handlers for restart
-   CHAR RestartDocs[ 1000];                 // list of documents for restart
-   //----------------------- new paths and directories -------------------------
-   CHAR szPrtPath[MAX_FILESPEC];            // directory for print formats
-   CHAR szDirComDict[MAX_FILESPEC];         // directory for server Dicts
-   CHAR szWinPath[MAX_FILESPEC];            // directory for Windows DLLs
-   //------------------------- general options ---------------------------------
-   EQF_BOOL  fFolImpNoDocExistsQuery;       // FolImp no query for existing docs
-   EQF_BOOL  fReserveOption01;              // reserve option
-   EQF_BOOL  fReserveOption02;              // reserve option
-   EQF_BOOL  fReserveOption03;              // reserve option
-   EQF_BOOL  fReserveOption04;              // reserve option
-   EQF_BOOL  fReserveOption05;              // reserve option
-   EQF_BOOL  fReserveOption06;              // reserve option
-   EQF_BOOL  fReserveOption07;              // reserve option
-   EQF_BOOL  fReserveOption08;              // reserve option
-   EQF_BOOL  fReserveOption09;              // reserve option
-   EQF_BOOL  fReserveOption10;              // reserve option
-   EQF_BOOL  fReserveOption11;              // reserve option
-   EQF_BOOL  fReserveOption12;              // reserve option
-   EQF_BOOL  fReserveOption13;              // reserve option
-   EQF_BOOL  fReserveOption14;              // reserve option
-   EQF_BOOL  fReserveOption15;              // reserve option
-   EQF_BOOL  fReserveOption16;              // reserve option
-   EQF_BOOL  fReserveOption17;              // reserve option
-   EQF_BOOL  fReserveOption18;              // reserve option
-   EQF_BOOL  fReserveOption19;              // reserve option
-   //---------------------------------------------------------------------------
-   CHAR szEADataPath[MAX_FILESPEC];         // directory for EA data
-   //----------------------------- LAN drive letter ----------------------------
-   CHAR szLanDrive[MAX_DRIVE];    // primary TWB LAN drive( e.g. "X:\0")
-   //-------------------- values in system property dialog ---------------------
-   EQF_BOOL  fNoShutDownConf;               // no shutdown confirmation flag
-   EQF_BOOL  fNoDeleteConf;                 // no delete confirmation flag
-   EQF_BOOL  fSaveAlways;                   // always save workbench during shutdown
-   EQF_BOOL  fUseSymbolicMarkupNames;       // use symbolic markup names flag
-   EQF_BOOL  fNoGenericMarkup;              // suppress generic markup handling
-   CHAR      szWebBrowser[MAX_LONGPATH];    // buffer for web browser name/path
-
-   //---------------------------- TQM stuff --------------------------------------
-   CHAR      szTQMProjectPath[MAX_EQF_PATH];// name of TQM project directory
-   CHAR      szTQMEvalPath[MAX_EQF_PATH];   // name of TQM evalutation profile directory
-   CHAR      szTQMArchivePath[MAX_EQF_PATH];// name of TQM archived projects directory
-   CHAR      szTQMReportPath[MAX_EQF_PATH]; // name of TQM report directory
-   CHAR      szTQMVendorPath[MAX_EQF_PATH]; // name of TQM vendor directory
-
-   //-------------------- more values in system property dialog ---------------------
-   EQF_BOOL  fUseIELikeListWindows;         // use IE like folder list
-
-   // currently active fuzziness levels with two desimal places
-   // (e.g. 50 is stored as 5000)
-   LONG         lSmallFuzzLevel;       // fuzzines level for small segments
-   LONG         lMediumFuzzLevel;      // fuzzines level for medium sized segments
-   LONG         lLargeFuzzLevel;       // fuzzines level for large segments
-
-   // internal code version number, used to special preprocessing if a new
-   // code version is about to be started for the first time (e.g. delete
-   // old stem form cache files if format haas been changed)
-   LONG         lCodeVersion;          // current EQFD/EQFDLL code version
-   CHAR         szSystemPrefLang[MAX_LANG_LENGTH]; // System Preferences LANGUAGE
-   ULONG        ulSystemPrefCP;
-
-   CHAR         RestartMTList[80];    // list of MT job lists to restart (only one!)
-   LONG         lSmallLkupFuzzLevel;       // fuzzines level for small segments(1LONG=3CHAR)
-   LONG         lMediumLkupFuzzLevel;      // fuzzines level for medium sized segments
-   LONG         lLargeLkupFuzzLevel;       // fuzzines level for large segments
-
-   SHORT  		sCalcReportWinX;
-   SHORT        sCalcReportWinY;
-   SHORT        sCalcReportWinCX;
-   SHORT        sCalcReportWinCY;
-   SHORT        sLeftPaneWidth;           // P021036
-
-   EQF_BOOL     fNoSgmlDitaProcessing;// true = disable preprocessing of IDDOC proposals for DITA documents
-   SHORT        sXSLTEngine;          // XSLT engine to be used
-   EQF_BOOL     fEntityProcessing;    // true = perform special processing for IDDOC and DITA entities
-
-   CHAR szPluginPath[MAX_FILESPEC];   // directory for plugins
-
-   USHORT       usMemImpMrkupAction;  // Action for unknown markup: 0=Abort, 1=Skip, 2=Use default
-   USHORT       usHideToolBars;       // Whether to hide TWB and translation environment tool bars
-
-   //----------------------------- filler --------------------------------------
-   CHAR         chReserve[240];       //  reserve space/ fills props to 4K)
-} PROPSYSTEM, *PPROPSYSTEM;
 
 
 // Structure of EQF folderlist properties
@@ -5806,47 +5459,13 @@ typedef struct _PROPDICTLIST
    CHAR      chReserve[2684];          // reserve space/filler (fills props to 4K)
 } PROPDICTLIST, *PPROPDICTLIST;
 
-#define MAX_DICT_DESCR   40            // max length of a dictionary description
-#define MAX_TGT_LANG     10            // max number of target languages
-#define MAX_PROF_ENTRIES 100           // max number of profile entries
 
 // Defines for dictionary location
 #define LOC_LOCAL        0             // dictionary is a local one
 #define LOC_REMOTE       1             // dictionary is remote using EQFTMCOM
 #define LOC_SHARED       2             // dictionary is shared on a LAN drive
 
-// Structure of EQF dictionary properties
-typedef struct _PROPDICTIONARY
-{
-   //--- common property part ---
-   PROPHEAD  PropHead;                      // header of properties
-   //--- general dictionary information ---
-   CHAR      szDescription[MAX_DICT_DESCR]; // dictionary description
-   CHAR      szSourceLang[MAX_LANG_LENGTH]; // dictionary source language
-                                            // dictionary target language(s)
-   CHAR      szTargetLang[MAX_TGT_LANG][MAX_LANG_LENGTH];
-   EQF_BOOL  fCopyRight;                    // dictionary-is-copyrighted flag
-   CHAR      szDictPath[MAX_EQF_PATH];      // fully qualified dict file name
-   CHAR      szIndexPath[MAX_EQF_PATH];     // fully qualified index file name
-   //--- dictionary profile ---
-   USHORT    usLength;                      // number of user profile entries
-   USHORT    usUserNameCount;               // number of user created dict names
-   COLFONT   ColFontDictEntry;              // colour/font for dict entry
-   COLFONT   ColFontEntryVal;               // colour/font for dict entry value
-   PROFENTRY ProfEntry[MAX_PROF_ENTRIES];   // user profile entries
-   EQF_BOOL  fProtected;                    // dictionary-is-protected flag
-   ULONG     ulPassWord;
-   CHAR      szServer[MAX_SERVER_NAME];     // Server Name of TM or \0 if TM is local
-   CHAR      szUserid[MAX_USERID];          // LAN Userid of TM: if local '\0'
-   CHAR      chRemPrimDrive;                // LAN primary drive
-   USHORT    usLocation;                    // location of dictionary
-   CHAR      szLongName[MAX_LONGFILESPEC];  // dictionary long (descriptive) name
-   CHAR      szLongDesc[MAX_LONG_DESCRIPTION];  // dictionary long (descriptive) name
-   USHORT    usVersion;                     // Version of dictionary - used for
-                                            // comparison during organize if copyrighted
-   //--- reserved space ---
-   CHAR      chReserve[3402];               // reserve space / filler
-} PROPDICTIONARY, *PPROPDICTIONARY;
+
 
 // Structure of EQF tag table window properties
 typedef struct _PROPTAGTABLE
@@ -5872,51 +5491,7 @@ typedef struct _PROPTAGTABLE
    CHAR   chReserve[2944];
 } PROPTAGTABLE, *PPROPTAGTABLE;
 
-// Structure of EQF memory properties and IDA of the memcreate dialog
-// and required define statements
-// This part of the include file is maintained by CON
 
-typedef struct _PROPMEMORY
-{
- PROPHEAD     stPropHead;                     // Common header of properties
- // szName must be the first item after the property header
- // Do only insert new values at the end of the stucture !!!!!!!!!!
- CHAR         szName[MAX_FILESPEC];           // Property name of memory database ~TEST.MEM~
- CHAR         szPath[MAX_EQF_PATH];           // Property path of memory database  ~C:\EQF~
- USHORT       usCreate;                       // Work variable: If FALSE the memory database dialog failed
- PFNWP        wProcName;                      // Work variable: Old window procedure of name field
- CHAR         szMemName[MAX_FILESPEC];        // Memory database name without extension  ~TEST~
- CHAR         szMemPath[MAX_EQF_PATH];        // Work variable: path to the memory databases with any disk drive ~T:\EQF\MEM\~
- CHAR         szFullMemName[MAX_EQF_PATH];    // Full name and path to the memory databases
-                                              // with correct drive, name and ext. ~C:\EQF\MEM\TEST.MEM~
- CHAR         szMemDesc[MAX_MEM_DESCRIPTION]; // Description of memory database  ~Test 25 Beschreibung~
- CHAR         szFormat[MAX_FILESPEC];         // Format table name without extension ~GML~
- CHAR         szXTagsListFile[MAX_EQF_PATH];  // Full path + name + ext to format table ~C:\EQF\TABLE\GML.TBL~
- CHAR         szExclusion[MAX_FILESPEC];      // Exclusion list name without extension  ~ENGNOISE~
- CHAR         szXWordsListFile[MAX_EQF_PATH]; // Full path + name + ext to noise list ~C:\EQF\TABLE\ENGNOISE.LST~
- LANGUAGE     szSourceLang;                   // Source language ~English~
- LANGUAGE     szTargetLang;                   // Target language ~German~
- CHAR         szLanguageFile[MAX_EQF_PATH];   // Full path + name + ext to the language file ~C:\EQF\TABLE\SOURCE.LNG~
- CHAR         szFullFtabPath[MAX_EQF_PATH];   // Full path to tag tables and exclusion lists ~C:\EQF\TABLE\~
- CHAR         szTemp[MAX_PATH144];            // Work field to construct a specific path  ~??????????~
- CHAR         szServerDriveList[MAX_DRIVELIST];  // Work variable: List of server drives
- USHORT       usBlockSize;                    // Block size of memory database ~1024 stored in USHORT~
- EQF_BOOL     fDbcs;                          // DBCS indicator TRUE = DBCS, FALSE = SBCS
- CHAR         szPathLastExported[MAX_PATH144];// Full name and path of exported file in ASCII format ~C:\EQFTEST\TEST.EXP~
- CHAR         szEmpty1[4];
- // Structure end in Troja 2.1
- CHAR         szServer[MAX_SERVER_NAME];      // Server Name of TM or \0 if TM is local
- CHAR         szUserid[MAX_USERID];           // LAN Userid of TM: if local '\0'
- TIME_L       tCreate;                        // TM ID which is the creation time stamp
-                                              // TM properties of Troja 2.1 or eaelier have
-                                              // set the ID value to '\0'
- USHORT       usLocation;                     // Work variable: Possible values: TM_LOCAL,
-                                              //  TM_REMOTE, TM_SHARED
- EQF_BOOL     fDeleteDriveIcons;                   // Work variable: Flag for dialog process
- CHAR         szLangProp[MAX_LANGUAGE_PROPERTIES]; // Work variable: Work area to get the language properties
- // Structure end in Troja 3.0
- CHAR         szLANDriveList[MAX_DRIVELIST];  // Work variable: List of LAN drives
-} PROPTRANSLMEM, *PPROPTRANSLMEM;
 
 
 typedef struct _LISTLASTUSED
@@ -5959,29 +5534,6 @@ typedef struct _PROPLIST
    CHAR chReserve[1422];                    // reserve space/filler (fills props to 4K)
 } PROPLIST, *PPROPLIST;
 
-
-/**********************************************************************/
-/* Function declarations for the EQF Property Handler                 */
-/**********************************************************************/
-HPROP   OpenProperties(   PSZ, PSZ, USHORT, PEQFINFO);
-HPROP   CreateProperties( PSZ, PSZ, USHORT, PEQFINFO);
-HPROP   CreatePropertiesEx( PSZ, PSZ, USHORT, PEQFINFO, BOOL );
-SHORT   DeleteProperties( PSZ, PSZ, PEQFINFO);
-SHORT   CloseProperties(  HPROP, USHORT, PEQFINFO);
-SHORT   GetAllProperties( HPROP, PVOID, PEQFINFO);
-SHORT   PutAllProperties( HPROP, PVOID, PEQFINFO);
-SHORT   SaveProperties( HPROP, PEQFINFO);
-PVOID   MakePropPtrFromHnd( HPROP hObject);
-PVOID   MakePropPtrFromHWnd( HWND hObject);
-BOOL    SetPropAccess( HPROP hprop, USHORT flgs);
-VOID    ResetPropAccess( HPROP hprop, USHORT flgs);
-PSZ     MakePropPath( PSZ pbuf, PSZ pd, PSZ pp, PSZ pn, PSZ pe);
-SHORT   GetPropSize( USHORT usClass);
-PPROPSYSTEM GetSystemPropPtr( VOID );
-BOOL    PropHandlerInitForBatch( void );
-BOOL    PropHandlerTerminateForBatch( void );
-HPROP   EqfQuerySystemPropHnd( void );
-USHORT  ReloadSysProp(PPROPSYSTEM);
 
 // other function prototypes
 BOOL DDEIsBatchHwnd( HWND hwndInQuestion );
@@ -6214,7 +5766,7 @@ typedef EQF_BOOL (*PFNCHECKSEGEXEXITW)( PSZ_W, PSZ_W, PSZ_W, PEQF_BOOL, LONG, UL
 typedef EQF_BOOL (*PFNSHOWTRANS)( LONG, HWND );
 typedef EQF_BOOL (*PFNTOCGOTO)( LONG, HWND );
 
-typedef EQF_BOOL (*PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
+
 typedef EQF_BOOL (*PFNFORMATCONTTEXT)( PSZ_W, PSZ_W );
 typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHORT *, SHORT * );
 

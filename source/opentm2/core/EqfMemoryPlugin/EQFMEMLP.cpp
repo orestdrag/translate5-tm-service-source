@@ -136,7 +136,7 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
                LPARAM );     // Message parameter 2
 
 
-#include "IDA.H"
+#include "lowlevelotmdatastructs.h"
 
 typedef struct _MEM_LOAD_DLG_IDA
 {

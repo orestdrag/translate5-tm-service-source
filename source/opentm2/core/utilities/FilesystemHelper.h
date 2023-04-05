@@ -5,7 +5,7 @@
 #include "win_types.h"
 #include <vector>
 #include <map>
-
+#include "Filebuffer.h"
 
 #ifdef _USING_FILESYSTEM_
 #include <filesystem>
@@ -14,28 +14,7 @@
 namespace fs = std::experimental::filesystem;
 #endif
 
-enum  FileBufferStatus{
-        CLOSED = 1,
-        OPEN = 2,
-        MODIFIED = 4,        
-    };
 
-struct FileBuffer{
-    int status ;//FILEBUFFERSTATUS
-    std::vector<UCHAR> data;
-    size_t offset = 0;
-    FILE* file = NULL;
-    std::string fileName;   
-
-    size_t ReadFromFile();
-    size_t WriteToFile(); 
-    size_t Flush();
-    int    SetOffset(size_t newOffset, int fileAnchor);
-
-    size_t Write(const void* buff, size_t buffSize, size_t startingPosition = -1);
-    size_t Read(void* buff, size_t buffSize, size_t startingPosition = -1);
-
-} ;
 
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
 

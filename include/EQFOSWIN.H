@@ -604,9 +604,7 @@ typedef RECTL *PRECTL;
 BOOL    WinQueryWindowRect(HWND hwnd, PRECTL prclDest);
 
 
-/* Macros to make an MPARAM from standard types. */
-/*                                                                    */
-#define MRESULT                    LRESULT
+
 
 /* Frame window styles */
 #define FCF_STANDARD     \
@@ -652,16 +650,8 @@ BOOL    WinQueryWindowRect(HWND hwnd, PRECTL prclDest);
 //typedef LHANDLE   HPS;      /* hps  */
 //typedef HPS FAR *PHPS;
 
-typedef MRESULT (*PFNWP)(HWND, UINT, WPARAM, LPARAM);
 
-/**********************************************************************/
-/* constants                                                          */
-/**********************************************************************/
-/*
- * CCHMAXPATH is the maximum fully qualified path name length including
- * the drive letter, colon, backslashes and terminating NULL.
- */
-#define CCHMAXPATH      260
+
 
 /*
  * CCHMAXPATHCOMP is the maximum individual path component name length
@@ -746,23 +736,7 @@ BOOL IsDBCS_CP(ULONG ulCP);
 //#define  ms_strset        strset
 
 
-/**********************************************************************/
-/* Equivalent to OS/2 SWP structure                                   */
-/* Note: bFiller1 and bFiller2 have been inserted to enlarge the      */
-/*       structure to the size of the OS/2 version (HWND has a        */
-/*       size of 4 bytes under OS/2 and a size of 2 bytes under       */
-/*       Windows)                                                     */
-/**********************************************************************/
-typedef struct _SWP { /* swp */
-    USHORT  fs;
-    SHORT   cy;
-    SHORT   cx;
-    SHORT   y;
-    SHORT   x;
-    HWND    hwndInsertBehind;
-    HWND    hwnd;
-} SWP;
-typedef SWP *PSWP;
+
 
 typedef SIZEL *PSIZEL;
 
@@ -983,10 +957,7 @@ typedef FILELOCK  *PFILELOCK;
 USHORT WPToEQFConv ( PUCHAR pucData, PBYTE  pwzData, USHORT usLen );
 USHORT EQFToWPConv ( PUCHAR pucData, PBYTE  pwzData, USHORT usLen );
 
-/**********************************************************************/
-/* OS/2 PM types directly mapped to Windows types                     */
-/**********************************************************************/
-#define HPOINTER    HICON
+
 
 #define WS_SAVEBITS     0
 #define QWL_STYLE       GWL_STYLE
