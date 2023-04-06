@@ -6,6 +6,7 @@
 #include <string>
 #include <time.h>
 #include <sstream>
+#include <string>
 #include <map>
 #include <memory>
 #include "win_types.h"
@@ -2070,7 +2071,7 @@ public:
 */
 	~EqfMemory();
 
-
+  USHORT OpenX();
 /*! \brief Info structure for an open translation memory
 */
   //typedef struct _OPENEDMEMORY
@@ -4397,6 +4398,8 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 		HWND hwnd,
     unsigned short usAccessMode = 0
 	);
+
+  EqfMemory* openMemoryNew(const std::string& memName);
 
   /*! \brief Provide a list of all available memories
   \param pfnCallBack callback function to be called for each memory

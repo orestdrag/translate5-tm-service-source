@@ -124,8 +124,6 @@ typedef struct _STENCODEBITS
 #define BTREE_V3 0x03
 
 
-#define NTMNEXTKEY( pBT )  ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulNextKey
-#define NTMSTARTKEY( pBT ) ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulStartKey
 
 
 
@@ -275,32 +273,7 @@ typedef struct _DICTCREATE
    BYTE   chVarData;                   // data pointer
 } DICTCREATE, *PDICTCREATE;
 
-//+----------------------------------------------------------------------------+
-// External function
-//+----------------------------------------------------------------------------+
-// Function name:     QDAMDictClose    close the dictionary
-//+----------------------------------------------------------------------------+
-// Function call:     QDAMDictClose( PPBTREE );
-//
-//+----------------------------------------------------------------------------+
-// Description:       Close the file
-//
-//+----------------------------------------------------------------------------+
-// Parameters:        PPBTREE                pointer to btree structure
-//+----------------------------------------------------------------------------+
-// Returncode type:   SHORT
-//+----------------------------------------------------------------------------+
-// Returncodes:       0                 no error happened
-//                    BTREE_INVALID     incorrect pointer
-//                    BTREE_DISK_FULL   disk full condition encountered
-//                    BTREE_WRITE_ERROR write error to disk
-//                    BTREE_CORRUPTED   dictionary is corrupted
-//                    BTREE_CLOSE_ERROR error closing dictionary
-//+----------------------------------------------------------------------------+
-SHORT QDAMDictClose
-(
-   PPBTREE ppBT
-);
+
 
 //+----------------------------------------------------------------------------+
 // External function
@@ -917,12 +890,6 @@ typedef struct _DICTTIME
 #endif
 
 
- SHORT QDAMDictOpenLocal   ( PSZ, SHORT, USHORT, PPBTREE );
-
- SHORT QDAMDictCloseLocal  ( PBTREE );
-
- SHORT QDAMDictSignLocal   ( PBTREE, PCHAR, PUSHORT  );
-
  SHORT QDAMDictEquivLocal  ( PBTREE, PWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
 
  SHORT QDAMDictPrevLocal   ( PBTREE, PWCHAR, PULONG,  PBYTE, PULONG  );
@@ -986,10 +953,8 @@ typedef struct _DICTTIME
 
 
 
- SHORT  QDAMCheckDict( PUSHORT, PBTREE );
  SHORT  QDAMAddDict( PUSHORT, PBTREE );
  USHORT QDAMRemoveDict( PBTREE );
- SHORT  QDAMDictLockDictLocal( PBTREE, BOOL );
  SHORT  QDAMDictLockEntryLocal( PBTREE, PUSHORT, BOOL );
  USHORT QDAMMoveProperties ( PPROPDICTIONARY , PUSHORT );
  PBTREE QDAMFindInstance ( PBTREE, PUSHORT );

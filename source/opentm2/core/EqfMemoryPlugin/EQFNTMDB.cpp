@@ -297,11 +297,9 @@ QDAMCheckDict
 //|                   return Rc                                                |
 // ----------------------------------------------------------------------------+
 
-SHORT  EQFNTMOpen
+SHORT  BTREE::EQFNTMOpen
 (
-  PSZ   pName,                        // name of the file
-  USHORT usOpenFlags,                 // Read Only or Read/Write
-  BTREE  * pBTIda                    // pointer to BTREE structure
+  USHORT usOpenFlags                 // Read Only or Read/Write
 )
 {
    //PBTREE    pBTIda;                   // pointer to BTRee structure
@@ -310,29 +308,29 @@ SHORT  EQFNTMOpen
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
   
 
-   if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
+   //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
    {
-      sRc = BTREE_NO_ROOM;
+   //   sRc = BTREE_NO_ROOM;
    }
-   else
+   //else
    {
      /*****************************************************************/
      /* check if same dictionary is already open else return index    */
      /* of next free slot...                                          */
      /*****************************************************************/
-     sRc = QDAMCheckDict( pName, pBTIda );
+     sRc = QDAMCheckDict( (PSZ)fb.fileName .c_str());
      if ( !sRc )
      {
        /***************************************************************/
        /* check if dictionary is locked                               */
        /***************************************************************/
-       if ( ! pBTIda->usDictNum )
+       if ( ! usDictNum )
        {
          SHORT  RetryCount;                  // retry counter for in-use condition
          RetryCount = MAX_RETRY_COUNT;
          do
          {
-           sRc = QDAMDictOpenLocal( pName, 20, usOpenFlags, &pBTIda );
+           sRc = QDAMDictOpenLocal( 20, usOpenFlags );
            if ( sRc == BTREE_IN_USE )
            {
              RetryCount--;
@@ -343,10 +341,11 @@ SHORT  EQFNTMOpen
                /* re-allocate PBTIDA (has been de-allocated within    */
                /* QDAMDictOpenLocal due to error code)                */
                /*******************************************************/
-               if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
-               {
-                  sRc = BTREE_NO_ROOM;
-               } /* endif */
+               //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
+               //{
+               //   sRc = BTREE_NO_ROOM;
+               //} /* endif */
+               sRc = 1;
              } /* endif */
            } /* endif */
          } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
@@ -405,7 +404,7 @@ SHORT EQFNTMClose
 
   if ( ppBTIda )
   {
-    sRc = QDAMDictCloseLocal( ppBTIda );
+    sRc = ppBTIda->QDAMDictClose( );
   }
   else
   {
@@ -506,7 +505,7 @@ SHORT BTREE::EQFNTMSign
   RetryCount = MAX_RETRY_COUNT;
   do
   {
-    sRc = QDAMDictSignLocal( this, pUserData, pusLen );
+    sRc = QDAMDictSignLocal( pUserData, pusLen );
     if ( sRc == BTREE_IN_USE )
     {
       RetryCount--;
@@ -591,9 +590,8 @@ BTREE::EQFNTMInsert
       /* find next free key and anchor new value in file ...            */
       /******************************************************************/
       ULONG  ulKey;
-      PNTMVITALINFO pvi = (PNTMVITALINFO)(&chCollate[0]);
       //ulKey = *pulKey = ++(pvi->ulNextKey);
-      ulKey = *pulKey = (pvi->ulNextKey)++;
+      ulKey = *pulKey = (chCollate.ulNextKey)++;
       if ( ulKey > 0xFFFFFF )
       {
         sRc = BTREE_NUMBER_RANGE;
@@ -1855,12 +1853,8 @@ BTREE::EQFNTMGetNextNumber
    PULONG pulNextKey                   // return next key data
 )
 {
-  NTMVITALINFO ntmVitalInfo;
-
-  memcpy( &ntmVitalInfo, chCollate,
-          sizeof(NTMVITALINFO));
-  *pulStartKey = ntmVitalInfo.ulStartKey;
-  *pulNextKey  = ntmVitalInfo.ulNextKey;
+  *pulStartKey = chCollate.ulStartKey;
+  *pulNextKey  = chCollate.ulNextKey;
 
   return 0;
 } /* end of function EQFNTMGetNextNumber */

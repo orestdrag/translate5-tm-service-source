@@ -100,12 +100,10 @@ EQFNTMCreate
 //                    BTREE_CORRUPTED   dictionary is corrupted
 //+----------------------------------------------------------------------------+
 
-SHORT  EQFNTMOpen
-(
-  PSZ   pName,                        // name of the file
-  USHORT usOpenFlags,                 // Read Only or Read/Write
-  BTREE  * ppBTIda                    // pointer to BTREE structure
-);
+//SHORT  EQFNTMOpen
+//(
+//  USHORT usOpenFlags,                 // Read Only or Read/Write
+//);
 
 // function to organize index file
 USHORT EQFNTMOrganizeIndex

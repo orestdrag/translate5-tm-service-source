@@ -335,13 +335,13 @@ typedef LHANDLE HTM;
 typedef struct _TMX_TABLE_ENTRY
 {
   CHAR   szName[MAX_LANG_LENGTH];
-  USHORT usId;
+  USHORT usId = 0;
 } TMX_TABLE_ENTRY, * PTMX_TABLE_ENTRY;
 // name table structure (TM version 5 and up)
 typedef struct _TMX_TABLE
 {
-  ULONG  ulAllocSize;
-  ULONG  ulMaxEntries;
+  ULONG  ulAllocSize = 0;
+  ULONG  ulMaxEntries = 0;
   TMX_TABLE_ENTRY stTmTableEntry;
 } TMX_TABLE, * PTMX_TABLE;
 
@@ -399,7 +399,8 @@ typedef struct _BTREEIDA
     BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
     CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
     BYTE         chDecode[ENTRYDECODE_LEN];        // decoding table
-    BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
+    //BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
+    NTMVITALINFO chCollate;
     BYTE         chCaseMap[COLLATE_SIZE];          // case mapping to be used
     USHORT       usFreeKeyBuffer=0;                // index of buffer to use
     USHORT       usFreeDataBuffer=0;               // first data buffer chain
@@ -866,8 +867,55 @@ typedef struct _BTREEIDA
     SHORT QDAMWRecordToDisk_V3( PBTREEBUFFER_V3 );
     SHORT QDAMWriteRecord_V3( PBTREEBUFFER_V3  pBuffer);
     SHORT QDAMAllocKeyRecords(   USHORT usNum);
+    SHORT QDAMDictOpenLocal(
+        SHORT sNumberOfBuffers,             // number of buffers
+        USHORT usOpenFlags                 // Read Only or Read/Write
+    );
+
+    SHORT  EQFNTMOpen( USHORT usOpenFlags);                 // Read Only or Read/Write
+    SHORT QDAMCheckDict( PSZ    pName);                        // name of dictionary
+    
+    SHORT  QDAMDictLockDictLocal( BOOL ); 
+    //SHORT QDAMDictCloseLocal  ();
+    //+----------------------------------------------------------------------------+
+// External function
+//+----------------------------------------------------------------------------+
+// Function name:     QDAMDictClose    close the dictionary
+//+----------------------------------------------------------------------------+
+// Function call:     QDAMDictClose( PPBTREE );
+//
+//+----------------------------------------------------------------------------+
+// Description:       Close the file
+//
+//+----------------------------------------------------------------------------+
+// Parameters:        PPBTREE                pointer to btree structure
+//+----------------------------------------------------------------------------+
+// Returncode type:   SHORT
+//+----------------------------------------------------------------------------+
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_CLOSE_ERROR error closing dictionary
+//+----------------------------------------------------------------------------+
+SHORT QDAMDictClose();
+
+
+SHORT QDAMDictSignLocal
+(
+   PCHAR  pUserData,                   // pointer to user data
+   PUSHORT pusLen                      // length of user data
+);
+
+                    
 
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
+
+
+
+#define NTMNEXTKEY( pBT )  pBT->chCollate.ulNextKey
+#define NTMSTARTKEY( pBT ) pBT->chCollate.ulStartKey
 
 
 //TM control block structure

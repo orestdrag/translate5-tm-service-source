@@ -178,11 +178,11 @@ int main(int argc, char* argv[]) {
    FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
-   //FLAGS_v=2;
+   FLAGS_v=2;
    //#endif
    //#ifdef GFLAGS_ENABLED
-   //FLAGS_alsologtostderr = true;
-   //FLAGS_t5loglevel = T5DEBUG;
+   FLAGS_alsologtostderr = true;
+   FLAGS_t5loglevel = T5DEVELOP;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);

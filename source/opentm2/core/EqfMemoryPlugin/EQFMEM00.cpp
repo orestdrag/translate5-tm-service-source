@@ -293,11 +293,9 @@ USHORT EQFMemOrganizeStart
         /*
         if ( !pRIDA->fMsg )
         {
-          LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( pRIDA->szMemName );
           pReplAddr[0] = pRIDA->szMemName;
           UtlErrorHwnd( ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
                         &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
-          LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM ( pRIDA->szMemName );
         } /* endif */
 
         if ( pRIDA->fBatch )
@@ -470,12 +468,10 @@ VOID EQFMemOrganizeProcess
               CHAR szNumber1[10];    // buffer for character string
               CHAR szNumber2[10];    // buffer for character string
 
-              LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( pRIDA->szMemName );
               pReplAddr[0] = pRIDA->szMemName;
               //pReplAddr[1] = ltoa( pRIDA->ulSegmentCounter, szNumber1, 10 );
               //pReplAddr[2] = ltoa( pRIDA->ulInvSegmentCounter, szNumber2, 10 );
               UtlError( MESSAGE_MEM_ORGANIZE_COMPLETED, MB_OK, /*3*/1, &pReplAddr[0], EQF_INFO );
-              LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM ( pRIDA->szMemName );
             } /* endif */
           }
           else
@@ -574,11 +570,9 @@ VOID EQFMemOrganizeEnd
       // "was forced and is not completed"
       if ( !pRIDA->fBatch )
       {
-        LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( pRIDA->szMemName );
         pReplAddr[0] = pRIDA->szMemName;
         UtlError( ERROR_MEM_ORGANIZE_TERM_FORCED, MB_CANCEL, 1,
                 &pReplAddr[0], EQF_WARNING );
-        LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM ( pRIDA->szMemName );
       } /* endif */
       // -----------------------------------------------------
       // Close the input translation memory and temporary translation memory

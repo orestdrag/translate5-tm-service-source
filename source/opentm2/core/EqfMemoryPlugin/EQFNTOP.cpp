@@ -97,11 +97,10 @@ USHORT TmtXOpen
     {
         pTmClb->usAccessMode |= ASD_ORGANIZE;
     } /* endif */
-
+    pTmClb->TmBtree.fb.fileName = pTmOpenIn->stTmOpen.szDataName;
+    pTmClb->InBtree.fb.fileName = pTmOpenIn->stTmOpen.szIndexName;
     //call open function for data file
-    usRc1 = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName,
-                        (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE),
-                        &pTmClb->TmBtree );
+    usRc1 = pTmClb->TmBtree.EQFNTMOpen((USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE) );
     if ( (usRc1 == NO_ERROR) || (usRc1 == BTREE_CORRUPTED) )
     {
       //get signature record and add to control block
@@ -308,8 +307,7 @@ USHORT TmtXOpen
            (usRc == VERSION_MISMATCH) )
       {
         //call open function for index file
-        USHORT usIndexRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szIndexName,
-                                pTmClb->usAccessMode, &pTmClb->InBtree );
+        USHORT usIndexRc = pTmClb->InBtree.EQFNTMOpen(pTmClb->usAccessMode );
         if ( usIndexRc != NO_ERROR )
         {
           usRc = usIndexRc;
@@ -382,4 +380,301 @@ USHORT TmtXOpen
 
   return( usRc );
 }
+
+
+
+
+USHORT EqfMemory::OpenX()
+{
+  BOOL fOK;                      //success indicator
+  USHORT usRc = NO_ERROR;        //return value
+  USHORT usRc1 = NO_ERROR;       //return value
+  ULONG  ulLen;                  //length indicator
+
+  {
+
+    //TmBtree.fb.fileName = pTmOpenIn->stTmOpen.szDataName;
+    //InBtree.fb.fileName = pTmOpenIn->stTmOpen.szIndexName;
+    //call open function for data file
+    usRc1 = TmBtree.EQFNTMOpen((USHORT)(usAccessMode | ASD_FORCE_WRITE) );
+    if ( (usRc1 == NO_ERROR) || (usRc1 == BTREE_CORRUPTED) )
+    {
+      //get signature record and add to control block
+      USHORT usLen = sizeof( TMX_SIGN );
+
+      usRc = TmBtree.EQFNTMSign((PCHAR) &(stTmSign), &usLen );
+
+      if ( usRc == NO_ERROR )
+      {
+        if ( stTmSign.bGlobVersion > T5GLOBVERSION  || stTmSign.bMajorVersion > T5MAJVERSION )
+        {
+          T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v0."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
+          usRc = ERROR_VERSION_NOT_SUPPORTED;
+        }
+        else if (stTmSign.bGlobVersion < T5GLOBVERSION  || stTmSign.bMajorVersion < T5MAJVERSION )
+        {
+          T5LOG(T5ERROR) << "TM was created in older vertions of t5memory, v"<<stTmSign.bGlobVersion<<"."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
+          usRc = VERSION_MISMATCH;
+        } /* endif */
+      }
+      else if ( usAccessMode & ASD_ORGANIZE )
+      {
+        // allow to continue even if signature record is corrupted
+        usRc = NO_ERROR;
+      } /* endif */
+
+      if ( (usRc == NO_ERROR) || (usRc == VERSION_MISMATCH) )
+      {
+        if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {          
+          ulLen =  MAX_COMPACT_SIZE-1;
+          //get compact area and add to control block
+          USHORT usTempRc =  TmBtree.EQFNTMGet( COMPACT_KEY, (PCHAR)bCompact, &ulLen );
+
+          // in organize mode allow continue if compact area is corrupted
+          if ( (usTempRc != NO_ERROR) && (usTempRc != VERSION_MISMATCH) )
+          {
+            usTempRc = BTREE_CORRUPTED;
+          } /* endif */
+
+          if ( usTempRc == BTREE_CORRUPTED )
+          {
+            memset( bCompact, 0, sizeof(bCompact) );
+          } /* endif */
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+
+
+        //get languages and add to control block
+        if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {
+          DEBUGEVENT( TMTXOPEN_LOC, STATE_EVENT, 2 );
+
+          //call to obtain exact length of record
+          ulLen = 0;
+          USHORT usTempRc = NTMLoadNameTable( this, LANG_KEY,
+                                       (PBYTE *)&Languages, &ulLen );
+
+          if ( usTempRc == BTREE_READ_ERROR ) 
+              usTempRc = BTREE_CORRUPTED;
+          usTempRc = NTMCreateLangGroupTable( this );
+
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+
+        //get file names and add to control block
+        if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {
+          USHORT usTempRc = NTMLoadNameTable( this, FILE_KEY,
+                                       (PBYTE *)&FileNames,
+                                       &ulLen );
+
+          // in organize mode allow continue if file name area is corrupted
+          if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
+          if ( usTempRc == BTREE_CORRUPTED )
+          {
+            FileNames.ulAllocSize = TMX_TABLE_SIZE;
+          } /* endif */
+
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+
+        //get authors and add to control block
+        if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {
+          USHORT usTempRc = NTMLoadNameTable( this, AUTHOR_KEY,
+                                       (PBYTE *)&Authors, &ulLen );
+
+          // in organize mode allow continue if author name area is corrupted
+          if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
+          if ( usTempRc == BTREE_CORRUPTED )
+          {          
+            Authors.ulAllocSize = TMX_TABLE_SIZE;            
+          } /* endif */
+
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+
+        //get tag tables and add to control block
+      if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {
+          USHORT usTempRc = NTMLoadNameTable( this, TAGTABLE_KEY,
+                                       (PBYTE *)&TagTables, &ulLen );
+
+
+          if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
+          if ( usTempRc == BTREE_CORRUPTED )
+          {
+            usTempRc = TM_FILE_SCREWED_UP; // cannot continue if no tag tables
+          } /* endif */
+
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+
+        //get long document name table
+        if ( (usRc == NO_ERROR) ||
+             (usRc == BTREE_CORRUPTED) ||
+             (usRc == VERSION_MISMATCH) )
+        {
+          // error in memory allocations will force end of open!
+          USHORT usTempRc = NTMCreateLongNameTable( this );
+          if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
+
+          // now read any long name table from database, if there is
+          // none (=older TM before TOP97) write our empty one to the
+          // Translation Memory
+          if ( usTempRc == NO_ERROR )
+          {
+            usTempRc = NTMReadLongNameTable( this );
+
+            switch ( usTempRc)
+            {
+              case ERROR_NOT_ENOUGH_MEMORY:
+                // leave return code as is
+                break;
+              case NO_ERROR:
+                // O.K. no problems at all
+                break;
+              case BTREE_NOT_FOUND :
+              T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable( this );";
+#ifdef TEMPORARY_COMMENTED
+                // no long name tabel yet,create one ...
+                usTempRc = NTMWriteLongNameTable( this );
+                #endif
+                break;
+              default:
+                // read of long name table failed, assume TM is corrupted
+                //if ( pTmOpenIn->stTmOpen.usAccess == FOR_ORGANIZE )
+                {
+                } /* endif */
+                usTempRc = BTREE_CORRUPTED;
+                break;
+            } /* endswitch */
+          } /* endif */
+
+          // just for debugging purposes: check if short and long name table have the same numbe rof entries
+          if ( usTempRc == NO_ERROR )
+          {
+            if ( pLongNames->ulEntries != FileNames.ulMaxEntries )
+            {
+              // this is strange...
+              int iSetBreakPointHere = 1;
+            }
+          } /* endif */
+
+          if ( usTempRc != NO_ERROR )
+          {
+            usRc = usTempRc;
+          } /* endif */
+        } /* endif */
+      } /* endif */
+
+      //add threshold to control block
+      usThreshold = 33;//pTmOpenIn->stTmOpen.usThreshold;
+
+
+      if ( (usRc == NO_ERROR) ||
+           (usRc == BTREE_CORRUPTED) ||
+           (usRc == VERSION_MISMATCH) )
+      {
+        //call open function for index file
+        USHORT usIndexRc = InBtree.EQFNTMOpen(usAccessMode );
+        if ( usIndexRc != NO_ERROR )
+        {
+          usRc = usIndexRc;
+        } /* endif */
+      } /* endif */
+
+      if ( usRc == NO_ERROR)
+      {
+        // no error during open of index, use return code of EQFNTMOPEN for
+        // data file
+        usRc = usRc1;
+      }
+      else
+      {
+        // open of index failed or index is corrupted so leave usRc as-is;
+        // data file will be closed in cleanup code below
+      } /* endif */
+    }
+    else
+    {
+      // error during open of data file, use return code of EQFNTMOPEN for
+      // data file
+      usRc = usRc1;
+    } /* endif */
+
+  } /* endif */
+
+  /********************************************************************/
+  /* Ensure that all required data areas have been loaded and the     */
+  /* database files have been opened                                  */
+  /********************************************************************/
+  if ( (usRc == NO_ERROR) ||
+       (usRc == BTREE_CORRUPTED) ||
+       (usRc == VERSION_MISMATCH) )
+  {
+    if ( false //(pLanguages == NULL) ||
+         //(pAuthors   == NULL) ||
+         //(pTagTables == NULL) ||
+         //(pFileNames == NULL) //||
+         //(this.TmBtree == NULL) ||
+         //(this.InBtree == NULL) 
+         )
+    {
+      usRc = TM_FILE_SCREWED_UP;
+    } /* endif */
+  } /* endif */
+
+  if ( (usRc != NO_ERROR) &&
+       (usRc != BTREE_CORRUPTED) &&
+       (usRc != VERSION_MISMATCH) )
+  {
+    EQFNTMClose( &TmBtree );
+    EQFNTMClose( &InBtree );
+
+    NTMDestroyLongNameTable( this );
+    //UtlAlloc( (PVOID *) &this, 0L, 0L, NOMSG );
+  } /* endif */
+
+  //set out values
+  //pTmOpenOut->pstTmClb = pTmClb;
+  //pTmOpenOut->stPrefixOut.usLengthOutput = sizeof( TMX_OPEN_OUT );
+  //pTmOpenOut->stPrefixOut.usTmtXRc = usRc;
+
+  if ( usRc != NO_ERROR )
+  {
+    ERREVENT( TMTXOPEN_LOC, ERROR_EVENT, usRc );
+  } /* endif */
+
+  DEBUGEVENT( TMTXOPEN_LOC, FUNCEXIT_EVENT, 0 );
+
+  return( usRc );
+}
+
 

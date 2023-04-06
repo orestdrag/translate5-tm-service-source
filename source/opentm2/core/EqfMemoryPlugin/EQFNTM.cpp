@@ -224,7 +224,7 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
         /* IMPORTPATH not found                                       */
         /* call function to get threshold valur from the TM properties  */
         /****************************************************************/
-        if ( (usRc = NTMGetThresholdFromProperties
+        if (false && (usRc = NTMGetThresholdFromProperties
                        ( szMemFullPath,
                         &pstOpenIn->stTmOpen.usThreshold,
                         usMsgHandling)) != NO_ERROR )

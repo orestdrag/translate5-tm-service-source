@@ -558,8 +558,8 @@ static BTREEHEADRECORD header; // Static buffer for database header record
 /**********************************************************************/
 
 
-#define NTMNEXTKEY( pBT )  ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulNextKey
-#define NTMSTARTKEY( pBT ) ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulStartKey
+//#define NTMNEXTKEY( pBT )  ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulNextKey
+//#define NTMSTARTKEY( pBT ) ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulStartKey
 
 /**********************************************************************/
 /* 'Magic word' for record containing locked terms                    */
@@ -725,7 +725,7 @@ SHORT QDAMKeyCompare
   CHAR_W  c;
   PBTREE pBTIda = (PBTREE)pvBT;        // pointer to tree structure
   PBTREEGLOB    pBT = pBTIda;
-  PBYTE  pCollate = pBT->chCollate;    // pointer to collating sequence
+  PBYTE  pCollate = nullptr;// (PBYTE)pBT->chCollate;    // pointer to collating sequence
   PSZ_W  pbKey1 = (PSZ_W) pKey1;
   PSZ_W  pbKey2 = (PSZ_W) pKey2;
 
@@ -916,7 +916,7 @@ SHORT NTMKeyCompare
   HeadRecord.fOpen  = fOpen;                    // open flag set
   memcpy( HeadRecord.DataRecList, DataRecList, MAX_LIST*sizeof(HeadRecord.DataRecList[0]) );
   HeadRecord.fTerse = (EQF_BOOL) fTerse;
-  memcpy( HeadRecord.chCollate, chCollate, COLLATE_SIZE );
+  memcpy( HeadRecord.chCollate, &chCollate, sizeof(chCollate) );
   memcpy( HeadRecord.chCaseMap, chCaseMap, COLLATE_SIZE );
   memcpy( HeadRecord.chEntryEncode, chEntryEncode, ENTRYENCODE_LEN );
 
@@ -1672,9 +1672,8 @@ QDAMAddDict
 //                     return success
 //------------------------------------------------------------------------------
 SHORT
-QDAMDictLockDictLocal
+BTREE::QDAMDictLockDictLocal
 (
-  PBTREE  pBTIda,                      // pointer to ida
   BOOL    fLock                        // lock or unlock
 )
 {
@@ -1685,18 +1684,18 @@ QDAMDictLockDictLocal
   /********************************************************************/
   if ( fLock )
   {
-    if ( QDAMDict[ pBTIda->usDictNum ].usOpenCount > 1 )
+    if ( QDAMDict[ usDictNum ].usOpenCount > 1 )
     {
       sRc = BTREE_DICT_LOCKED;
     }
     else
     {
-      QDAMDict[ pBTIda->usDictNum ].fDictLock = fLock;
+      QDAMDict[ usDictNum ].fDictLock = fLock;
     } /* endif */
   }
   else
   {
-    QDAMDict[ pBTIda->usDictNum ].fDictLock = fLock;
+    QDAMDict[ usDictNum ].fDictLock = fLock;
   } /* endif */
 
   return sRc;
@@ -1902,64 +1901,56 @@ SHORT QDAMDictFlushLocal
 //                    endif
 //------------------------------------------------------------------------------
 
-SHORT QDAMDictCloseLocal
-(
-   PBTREE pBTIda
-)
+SHORT BTREE::QDAMDictClose()
 {
    SHORT sRc = 0;                            // error return
-   PBTREEGLOB  pBT = NULL;
 
    /*******************************************************************/
    /* validate passed pointer ...                                     */
    /*******************************************************************/
-   CHECKPBTREE( pBTIda, sRc );
-   if ( !sRc )
-   {
-     pBT = pBTIda;
-   } /* endif */
+   CHECKPBTREE( this, sRc );
   
    /*******************************************************************/
    /* decrement the counter and check if we have to physically close  */
    /* the dictionary                                                  */
    /*******************************************************************/
-   if ( !sRc && ! QDAMRemoveDict( pBTIda ) )
+   if ( !sRc && ! QDAMRemoveDict( this ) )
    {
-      sRc = QDAMDictFlushLocal( pBTIda );
+      sRc = QDAMDictFlushLocal( this );
 
      //  reset open flag in header and force a write to disk
      // open flag will only be set if opened for r/w
-     if ( !sRc && pBT->fOpen && ! pBT->fCorrupted )
+     if ( !sRc && fOpen && ! fCorrupted )
      {
-        pBT->fOpen = FALSE;
+        fOpen = FALSE;
         // re-write header record
         if ( sRc == NO_ERROR ) 
-          sRc = pBTIda->QDAMWriteHeader();
+          sRc = QDAMWriteHeader();
      } /* endif */
      
-     filesystem_flush_buffers_ptr(pBT->fb.file);
-     if ( UtlClose(pBT->fb.file, FALSE) && !sRc )
+     filesystem_flush_buffers_ptr(fb.file);
+     if ( UtlClose(fb.file, FALSE) && !sRc )
      {
         sRc = BTREE_CLOSE_ERROR;
      } /* endif */
 
-     if ( pBT->fpDummy )
+     if ( fpDummy )
      {
-      UtlClose( pBT->fpDummy, FALSE );
+      UtlClose( fpDummy, FALSE );
      } /* endif */
 
      /*******************************************************************/
      /* free the allocated buffers                                      */
      /*******************************************************************/
-     if ( pBT  )
+     //if ( pBT  )
      {
       /* free allocated space for lookup-table and buffers */   
-      if ( pBT->LookupTable_V3 )
+      if ( LookupTable_V3 )
       {
         USHORT i;
-        PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
+        PLOOKUPENTRY_V3 pLEntry = LookupTable_V3;
 
-        for ( i=0; i < pBT->usNumberOfLookupEntries; i++ )
+        for ( i=0; i < usNumberOfLookupEntries; i++ )
         {
           if ( pLEntry->pBuffer )
           {
@@ -1968,10 +1959,10 @@ SHORT QDAMDictCloseLocal
           pLEntry++;
         } /* endfor */
 
-        UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, 0L, NOMSG );
-        pBT->usNumberOfLookupEntries = 0;
-        pBT->usNumberOfAllocatedBuffers = 0;
+        UtlAlloc( (PVOID *)&LookupTable_V3, 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *)&AccessCtrTable, 0L, 0L, NOMSG );
+        usNumberOfLookupEntries = 0;
+        usNumberOfAllocatedBuffers = 0;
       } /* endif */
        
        
@@ -1980,7 +1971,7 @@ SHORT QDAMDictCloseLocal
        /* free index buffer list                                        */
        /*****************************************************************/
         PBTREEINDEX_V3 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
-        pIndexBuffer = pBT->pIndexBuffer_V3;
+        pIndexBuffer = pIndexBuffer_V3;
         while ( pIndexBuffer  )
         {
           pTempIndexBuffer = pIndexBuffer->pNext;
@@ -1988,13 +1979,13 @@ SHORT QDAMDictCloseLocal
           pIndexBuffer = pTempIndexBuffer;
         } /* endwhile */
        
-       UtlAlloc( (PVOID *)&pBTIda,0L, 0L, NOMSG );     // free allocated memory
+       //UtlAlloc( (PVOID *)&pBTIda,0L, 0L, NOMSG );     // free allocated memory
      } /* endif */
      /********************************************************************/
      /* unlock the dictionary                                            */
      /* -- do not take care about return code...                         */
      /********************************************************************/
-     QDAMDictLockDictLocal( pBTIda, FALSE );
+     QDAMDictLockDictLocal( FALSE );
    } /* endif */
 }
 
@@ -2033,28 +2024,6 @@ SHORT QDAMDictCloseLocal
 //                      endif
 //                    endif
 //------------------------------------------------------------------------------
-SHORT QDAMDictClose
-(
-   PPBTREE ppBTIda
-)
-{
-   SHORT sRc = 0;                      // error return
-
-   if ( ! *ppBTIda )
-   {
-     sRc = BTREE_INVALID;
-   }
-   else
-   {
-      sRc = QDAMDictCloseLocal( *ppBTIda );
-      if ( !sRc )
-      {
-        UtlAlloc( (PVOID *)ppBTIda, 0L, 0L, NOMSG );
-      } /* endif */
-   } /* endif */
-
-   return sRc;
-}
 
 
 //------------------------------------------------------------------------------
@@ -2112,7 +2081,7 @@ SHORT QDAMDestroy
      // we need to save the filename as we'll be deleteing the file by name
      //
      strcpy(chName, pBT->fb.fileName.c_str());
-     sRc = QDAMDictClose( &pBT );
+     sRc = pBT->QDAMDictClose( );
      if ( chName[0] )
      {
         UtlDelete( chName, 0L, FALSE);
@@ -2484,7 +2453,7 @@ SHORT BTREE::QDAMDictCreateLocal
     /* Its taken care, that the structure will not jeopardize the     */
     /* header...                                                      */
     /******************************************************************/
-    memcpy( chCollate, &NtmVitalInfo, sizeof(NTMVITALINFO));
+    chCollate = NtmVitalInfo;
     /******************************************************************/
     /* new key compare routine ....                                   */
     /******************************************************************/
@@ -5094,15 +5063,6 @@ SHORT QDAMGetszData_V3
 }
 
 
-
-SHORT QDAMDictSignLocal
-(
-   PBTREE pBTIda,                      // pointer to btree structure
-   PCHAR  pUserData,                   // pointer to user data
-   PUSHORT pusLen                      // length of user data
-);
-
-
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
@@ -5621,55 +5581,6 @@ SHORT QDAMInsertKey_V3
 //------------------------------------------------------------------------------
 
 
-
-SHORT QDAMKeyCompareNonUnicode
-(
-    PVOID pvBT,                        // pointer to tree structure
-    PVOID pKey1,                       // pointer to first key
-    PVOID pKey2                        // pointer to second key
-)
-{
-  SHORT sDiff;
-  BYTE  c;
-  PBTREE pBTIda = (PBTREE)pvBT;        // pointer to tree structure
-  PBTREEGLOB    pBT = pBTIda;
-  PBYTE  pCollate = pBT->chCollate;    // pointer to collating sequence
-  CHAR   chHeadTerm[128];
-  PBYTE  pbKey1;
-  PBYTE  pbKey2 = (PBYTE) pKey2;
-
-  pbKey1 = (PBYTE)Unicode2ASCII( (PSZ_W)pKey1, chHeadTerm, 0L );
-
-
-  while ( (c = *pbKey1) != 0 )
-  {
-    /******************************************************************/
-    /* ignore the following characters during matching: '/', '-', ' ' */
-    /******************************************************************/
-    while ( (c = *pbKey2) == ' ' || fIsPunctuation[c] )
-    {
-      pbKey2++;
-    } /* endwhile */
-    while ( (c = *pbKey1) == ' ' || fIsPunctuation[c] )
-    {
-      pbKey1++;
-    } /* endwhile */
-
-    sDiff = *(pCollate+c) - *(pCollate + *pbKey2);
-    if ( !sDiff && *pbKey1 && *pbKey2 )
-    {
-      pbKey1++;
-      pbKey2++;
-    }
-    else
-    {
-      return ( sDiff );
-    } /* endif */
-  } /* endwhile */
-  return ( *(pCollate + c) - *(pCollate + *pbKey2));
-}
-
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -5771,12 +5682,10 @@ USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd )
 //                    endif
 //                    return Rc
 //------------------------------------------------------------------------------
-SHORT  QDAMDictOpenLocal
+SHORT  BTREE::QDAMDictOpenLocal
 (
-  PSZ   pName,                        // name of the file
   SHORT sNumberOfBuffers,             // number of buffers
-  USHORT usOpenFlags,                 // Read Only or Read/Write
-  PPBTREE  ppBTIda                    // pointer to BTREE structure
+  USHORT usOpenFlags                 // Read Only or Read/Write
 )
 {
    SHORT     i;
@@ -5784,21 +5693,21 @@ SHORT  QDAMDictOpenLocal
    SHORT sRc = 0;                      // return code
    USHORT  usFlags;                    // set the open flags
    USHORT  usAction;                   // return code from UtlOpen
-   USHORT  usNumBytesRead;             // number of bytes read
-   PBTREE  pBTIda = *ppBTIda;          // set work pointer to passed pointer
-   PBTREEGLOB pBT;                     // set work pointer to passed pointer
+   USHORT  usNumBytesRead=0;           // number of bytes read
+   //PBTREE  pBTIda = this;            // set work pointer to passed pointer
+   //PBTREEGLOB pBT;                     // set work pointer to passed pointer
    BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
    SHORT   sRc1;
    /*******************************************************************/
    /* allocate global area first ...                                  */
    /*******************************************************************/
-   if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
+   //if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
    {
-      sRc = BTREE_NO_ROOM;
+   //   sRc = BTREE_NO_ROOM;
    }
-   else
+   //else
    {
-      pBTIda = pBT;
+      //pBTIda = pBT;
 
       if ( fWrite )
       {
@@ -5812,27 +5721,24 @@ SHORT  QDAMDictOpenLocal
       /****************************************************************/
       /* check if immeadiate write of any changed necessary           */
       /****************************************************************/
-      pBT->fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
-      pBT->usOpenFlags = usOpenFlags;
+      fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
+      usOpenFlags = usOpenFlags;
 
       // open the file
-      pBT->fb.file = FilesystemHelper::OpenFile( pName, "r+b", true );
+      fb.ReadFromFile();
    } /* endif */
 
 
    if ( !sRc )
    {
-     // remember file name
-     pBTIda->fb.fileName = pName;
-
      // Read in the data for this index, make sure it is an index file
 
-     sRc = UtlRead( pBT->fb.file, (PVOID)&header,
-                    sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
+     sRc = fb.Read((PVOID)&header, sizeof(BTREEHEADRECORD), 0);
+     //sRc = usNumBytesRead !=sizeof(BTREEHEADRECORD);
      if ( ! sRc )
      {
-        memcpy( pBT->chEQF, header.chEQF, sizeof(pBT->chEQF));
-        pBT->bVersion = header.Flags.bVersion;
+        memcpy( chEQF, header.chEQF, sizeof(chEQF));
+        bVersion = header.Flags.bVersion;
         //if ( header.Flags.f16kRec )
         //{
     //      pBT->bRecSizeVersion = BTREE_V3;
@@ -5856,12 +5762,12 @@ SHORT  QDAMDictOpenLocal
           /************************************************************/
           if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3, 3 ) == 0 )
           {
-            pBT->usVersion = (USHORT) header.chEQF[3];
-            pBT->compare =  NTMKeyCompare;
+            usVersion = (USHORT) header.chEQF[3];
+            compare =  NTMKeyCompare;
           }
           else
           {
-            pBT->compare =  QDAMKeyCompare;
+            compare =  QDAMKeyCompare;
             /************************************************************/
             /* determine version                                        */
             /* for UNICODE dicts: usVersion is BTREE_VERSION2, which is */
@@ -5869,62 +5775,47 @@ SHORT  QDAMDictOpenLocal
             /* ULONG at begin to support data recs > 32 k      )        */
             /************************************************************/
             //if ( header.chEQF[3] == BTREE_VERSION3 )
-            pBT->usVersion = BTREE_VERSION3;
+            usVersion = BTREE_VERSION3;
             
           } /* endif */
-          UtlTime( &(pBT->lTime) );                             // set open time
-          pBTIda->sCurrentIndex = 0;
-          pBT->usFirstNode = header.usFirstNode;
-          pBT->usFirstLeaf = header.usFirstLeaf;
-          pBTIda->usCurrentRecord = 0;
-          pBT->usFreeKeyBuffer = header.usFreeKeyBuffer;
-          pBT->usFreeDataBuffer = header.usFreeDataBuffer;
-          pBT->usFirstDataBuffer = header.usFirstDataBuffer;  //  data buffer
-          pBT->fpDummy = NULLHANDLE;
+          UtlTime( &(lTime) );                             // set open time
+          sCurrentIndex = 0;
+          usFirstNode = header.usFirstNode;
+          usFirstLeaf = header.usFirstLeaf;
+          usCurrentRecord = 0;
+          usFreeKeyBuffer = header.usFreeKeyBuffer;
+          usFreeDataBuffer = header.usFreeDataBuffer;
+          usFirstDataBuffer = header.usFirstDataBuffer;  //  data buffer
+          fpDummy = NULLHANDLE;
           
 
           // load usNextFreeRecord either from header record of from file info
           {
-            ULONG ulTemp;
-            sRc1 = UtlGetFileSize( pBT->fb.file, &ulTemp, FALSE );
-            if (!sRc)
-              sRc = sRc1;
-            pBT->usNextFreeRecord = (USHORT)(ulTemp/BTREE_REC_SIZE_V3);
+            usNextFreeRecord = (USHORT)(fb.data.size()/BTREE_REC_SIZE_V3);
           } /* endif */
           ASDLOG();
 
           if ( !sRc )
           {
-             pBT->fb.fileName =  pName;
+             memcpy(DataRecList, header.DataRecList, MAX_LIST*sizeof(DataRecList[0]));
 
-             // copy prev. allocated free list
-             // DataRecList in header is in old format (RECPARAMOLD),
-             // so convert it to the new format (RECPARAM)
+             memcpy( chEntryEncode,header.chEntryEncode,ENTRYENCODE_LEN );
+             fTerse = header.fTerse;
+             if ( fTerse == BTREE_TERSE_HUFFMAN )
              {
-               for (int i = 0; i < MAX_LIST; i++ )
-               {
-                 pBT->DataRecList[i].usOffset = header.DataRecList[i].usOffset;
-                 pBT->DataRecList[i].usNum    = header.DataRecList[i].usNum;
-                 pBT->DataRecList[i].ulLen    = header.DataRecList[i].ulLen;
-               } /* endfor */
-             }
-             memcpy( pBT->chEntryEncode,header.chEntryEncode,ENTRYENCODE_LEN );
-             pBT->fTerse = header.fTerse;
-             if ( pBT->fTerse == BTREE_TERSE_HUFFMAN )
-             {
-               QDAMTerseInit( pBTIda, pBT->chEntryEncode );   // init compression
+               QDAMTerseInit( this, chEntryEncode );   // init compression
              } /* endif */
 
-             memcpy( pBT->chCollate, header.chCollate, COLLATE_SIZE );
+             memcpy( &chCollate, header.chCollate, /*COLLATE_SIZE*/ sizeof(chCollate) );
              
-             memcpy( pBT->chCaseMap, header.chCaseMap, COLLATE_SIZE );
+             memcpy( chCaseMap, header.chCaseMap, COLLATE_SIZE );
              
              ASDLOG();
 
              /* Allocate space for AccessCtrTable */
-             pBT->usNumberOfLookupEntries = 0;
-             UtlAlloc( (PVOID *)&pBT->AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-             if ( !pBT->AccessCtrTable )
+             usNumberOfLookupEntries = 0;
+             UtlAlloc( (PVOID *)&AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+             if ( !AccessCtrTable )
              {
                sRc = BTREE_NO_ROOM;
              } /* endif */
@@ -5932,10 +5823,10 @@ SHORT  QDAMDictOpenLocal
              /* Allocate space for LookupTable */
              if ( !sRc )
              {
-                UtlAlloc( (PVOID *)&pBT->LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
-                if ( pBT->LookupTable_V3 )
+                UtlAlloc( (PVOID *)&LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+                if ( LookupTable_V3 )
                 {
-                  pBT->usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+                  usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
                 }
                 else
                 {
@@ -5943,7 +5834,7 @@ SHORT  QDAMDictOpenLocal
                 } /* endif */
              } /* endif */
 
-             pBT->usNumberOfAllocatedBuffers = 0;
+             usNumberOfAllocatedBuffers = 0;
 
           } /* endif */
 
@@ -5954,28 +5845,28 @@ SHORT  QDAMDictOpenLocal
         }
         else
         {
-          T5LOG(T5ERROR) <<"Can't understand file " << pName << ". File has illegal structure!";
+          T5LOG(T5ERROR) <<"Can't understand file " << fb.fileName << ". File has illegal structure!";
            sRc = BTREE_ILLEGAL_FILE;
         } /* endif */
      }
      else
      {
-        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, usOpenFlags );
      } /* endif */
      ASDLOG();
 
 
      // close in case of error
-     if ( sRc && pBTIda )
+     if ( sRc  )
      {
-       QDAMDictClose( &pBTIda );
+       QDAMDictClose();
      } /* endif */
      ASDLOG();
 
      if ( !sRc && fWrite && !header.fOpen)
      {
-        pBT->fOpen = TRUE;                       // set open flag
-        pBT->fWriteHeaderPending = TRUE;         // postpone write until change
+        fOpen = TRUE;                       // set open flag
+        fWriteHeaderPending = TRUE;         // postpone write until change
      } /* endif */
 
     #ifdef TEMPORARY_COMMENTED
@@ -6006,26 +5897,26 @@ SHORT  QDAMDictOpenLocal
    }
    else
    {
-    sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, pBT->usOpenFlags );
+    sRc = QDAMDosRC2BtreeRC( sRc, BTREE_OPEN_ERROR, usOpenFlags );
    } /* endif */
 
    /*******************************************************************/
    /* set BTREE pointer in case it was changed or freed               */
    /*******************************************************************/
-   *ppBTIda = pBTIda;
+   //*ppBTIda = pBTIda;
 
    /*******************************************************************/
    /* add the dictionary to the open list ...                         */
    /*******************************************************************/
    if ( !sRc || (sRc == BTREE_CORRUPTED) )
    {
-     QDAMAddDict( pName, pBTIda );
+     QDAMAddDict( (PSZ)fb.fileName.c_str(), this );
      /*****************************************************************/
      /* add the lock if necessary                                     */
      /*****************************************************************/
      if ( usOpenFlags & ASD_LOCKED )
      {
-       QDAMDictLockDictLocal( pBTIda, TRUE );
+       QDAMDictLockDictLocal( TRUE );
      } /* endif */
    } /* endif */
 
@@ -6524,9 +6415,8 @@ SHORT BTREE::QDAMDictUpdSignLocal
 //                    endif
 //------------------------------------------------------------------------------
 
-SHORT QDAMDictSignLocal
+SHORT BTREE::QDAMDictSignLocal
 (
-   PBTREE pBTIda,                      // pointer to btree structure
    PCHAR  pUserData,                   // pointer to user data
    PUSHORT pusLen                      // length of user data
 )
@@ -6535,18 +6425,17 @@ SHORT QDAMDictSignLocal
   USHORT  usNumBytesRead;              // bytes read from disk
   ULONG   ulNewOffset;                 // new offset
   USHORT  usLen;                       // contain length of user record
-  PBTREEGLOB  pBT = pBTIda;
 
-
-  sRc = SkipBytesFromBeginningInFile(pBT->fb.file, USERDATA_START);
-
-  if ( ! sRc )
-  {
-     ASDLOG();
-
-     sRc = UtlRead( pBT->fb.file, (PVOID) &usLen, sizeof(USHORT),
-                    &usNumBytesRead, FALSE );
-     if ( !sRc )
+  //sRc = SkipBytesFromBeginningInFile(pBT->fb.file, USERDATA_START);
+  sRc = fb.Read((PVOID) &usLen, sizeof(USHORT), USERDATA_START);
+  if(sRc){
+    T5LOG(T5ERROR) << "Can't read from file \'"<<fb.fileName<<"\'";
+  }else {
+     ASDLOG();    
+     //sRc = UtlRead( fb.file, (PVOID) &usLen, sizeof(USHORT),
+     //               &usNumBytesRead, FALSE );
+     //if ( !sRc )
+     //if()
      {
         // user requests only length or full data
         if ( ! pUserData  || *pusLen == 0 )
@@ -6562,25 +6451,22 @@ SHORT QDAMDictSignLocal
            else
            {
               // read in data part
-              sRc = UtlRead( pBT->fb.file, pUserData, usLen,
-                             &usNumBytesRead, FALSE );
+              //sRc = UtlRead( pBT->fb.file, pUserData, usLen,
+              //               &usNumBytesRead, FALSE );
+              sRc = fb.Read(pUserData, usLen);
               if ( !sRc )
               {
                  *pusLen = usLen;
               }
               else
               {
-                 sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
+                T5LOG(T5ERROR) << "Can't read pUserData!";
               } /* endif */
            } /* endif */
         } /* endif */
 
         ASDLOG();
      }
-     else
-     {
-        sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
   } /* endif */
   return sRc;
 }
@@ -6618,10 +6504,9 @@ SHORT QDAMDictSignLocal
 //
 //------------------------------------------------------------------------------
 SHORT
-QDAMCheckDict
+BTREE::QDAMCheckDict
 (
-  PSZ    pName,                        // name of dictionary
-  PBTREE pBTIda                        // pointer to ida
+  PSZ    pName                        // name of dictionary
 )
 {
   USHORT  usI = 1;
@@ -6650,9 +6535,9 @@ QDAMCheckDict
         /***************************************************************/
         pQDict = &(QDAMDict[usI]);
         pQDict->usOpenCount++;
-        pQDict->pIdaList[ pQDict->usOpenCount ] = pBTIda;
-        pBTIda = pQDict->pBTree;
-        pBTIda->usDictNum = usI;
+        pQDict->pIdaList[ pQDict->usOpenCount ] = this;
+        //pBTIda = pQDict->pBTree;
+        usDictNum = usI;
       } /* endif */
       break;
     }
@@ -7411,7 +7296,7 @@ USHORT EQFNTMOrganizeIndex
   {
     //T5LOG( T5WARNING) << "TEMPORARY HARDCODED EQFNTMOrganizeIndex:: usSigLen = (USHORT)ulDataBufSize => usSigLen = (SHORT)ulDataBufSize");
     usSigLen = (USHORT)ulDataBufSize;
-    sRc = QDAMDictSignLocal( pbTree, (PCHAR)pbData, &usSigLen );
+    sRc = pbTree->QDAMDictSignLocal( (PCHAR)pbData, &usSigLen );
   } /* endif */
 
   // check if index is empty
