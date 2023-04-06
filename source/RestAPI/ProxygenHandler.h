@@ -25,10 +25,9 @@ namespace ProxygenService {
 
 
 class ProxygenHandler : public proxygen::RequestHandler {
-std::string reqUrl;
-RequestData *pRequest = nullptr;
  public:
-  
+  RequestData *pRequest = nullptr;
+
   explicit ProxygenHandler(ProxygenStats* stats);
   explicit ProxygenHandler(ProxygenStats* stats, std::string memoryName, std::string urlCommand);
 
@@ -45,39 +44,9 @@ RequestData *pRequest = nullptr;
 
   void onError(proxygen::ProxygenError err) noexcept override;
 
-  enum COMMAND {
-    UNKNOWN_COMMAND,
-    LIST_OF_MEMORIES,
-    SAVE_ALL_TM_ON_DISK,
-    SHUTDOWN,    
-    DELETE_MEM,
-    EXPORT_MEM,
-    EXPORT_MEM_INTERNAL_FORMAT,
-    REORGANIZE_MEM,
-    STATUS_MEM,
-    RESOURCE_INFO,
-
-    START_COMMANDS_WITH_BODY,
-    CREATE_MEM = START_COMMANDS_WITH_BODY, 
-    FUZZY,
-    CONCORDANCE,
-    DELETE_ENTRY,
-    UPDATE_ENTRY,
-    TAGREPLACEMENTTEST,
-    IMPORT_MEM,
-    CLONE_TM_LOCALY,
-    //IMPORT_MEM_INTERNAL_FORMAT
-  };
-
-  COMMAND command;
-
-  std::string memName;
   std::string errorStr;
-
-  std::string strResponseBody;
-  std::vector<unsigned char> vMemData;
-  int iRC = 400;
   std::string responseText = "WRONG_REQUEST";
+  
   proxygen::ResponseBuilder* builder = nullptr;
   OtmMemoryServiceWorker* pMemService  = nullptr;
  private:

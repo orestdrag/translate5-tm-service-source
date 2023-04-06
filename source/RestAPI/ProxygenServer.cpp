@@ -147,12 +147,14 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     if(urlService != serviceName && urlService != additionalServiceName ){
       T5LOG(T5ERROR) <<":: Wrong url \'" << urlService << "\', should be \'"<<
           serviceName << "\' or \'" << additionalServiceName <<"\'";
-      return new ProxygenHandler(stats_.get());
+      auto rh = new ProxygenHandler(stats_.get());
+      rh->pRequest = new UnknownRequestData;
+      return rh;
     }
 
     auto requestHandler = new ProxygenHandler(stats_.get());
 
-    requestHandler->command = ProxygenHandler::COMMAND::UNKNOWN_COMMAND;
+    requestHandler->pRequest =  nullptr;
 
     url = url.substr(urlSeparator + 1);
     
@@ -187,28 +189,22 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }
-    requestHandler->memName = urlMemName; 
 
     if( urlCommand.empty() ){
       if( urlMemName.empty()){
         if( methodStr == "GET"){
-          requestHandler->command = ProxygenHandler::COMMAND::LIST_OF_MEMORIES;
+          requestHandler->pRequest = new ListTMRequestData();
         }else if( methodStr == "POST" ){
-          requestHandler->command = ProxygenHandler::COMMAND::CREATE_MEM;
+          requestHandler->pRequest = new CreateMemRequestData();
         }
       }else{// mem name is not empty, but command is empty 
         if(methodStr == "POST"){
-          requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM;
-          //check if it's in internal format; 
-           
+          requestHandler->pRequest = new ImportRequestData();
+          //check if it's in internal format;            
         }else if(methodStr == "GET"){
-          requestHandler->command = ProxygenHandler::COMMAND::EXPORT_MEM;
-          //check if it's in internal format; 
-          if(false /*internalFormatHeader*/ ){
-            requestHandler->command = ProxygenHandler::COMMAND::EXPORT_MEM_INTERNAL_FORMAT;
-          }
+          requestHandler->pRequest = new ExportRequestData();
         }else if(methodStr == "DELETE"){
-          requestHandler->command = ProxygenHandler::COMMAND::DELETE_MEM;
+          requestHandler->pRequest = new DeleteTMRequestData();
         }
       }
     }else{
@@ -217,40 +213,46 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       if ( urlService == additionalServiceName ){//for calls %serviceName%_service
         if( methodStr == "GET"){
           if(urlCommand ==  "shutdown"){
-            requestHandler->command = ProxygenHandler::COMMAND::SHUTDOWN;
+            requestHandler->pRequest = new ShutdownRequestData();
           }else if(urlCommand == "resources"){
-            requestHandler->command = ProxygenHandler::COMMAND::RESOURCE_INFO;
+            requestHandler->pRequest = new ResourceInfoRequestData();
           }
         }else if( methodStr == "POST"){
           if(urlCommand == "tagreplacement"){
-           requestHandler->command = ProxygenHandler::COMMAND::TAGREPLACEMENTTEST;
+            requestHandler->pRequest = new TagRemplacementRequestData();
           }
         }
       }
       if(!urlMemName.empty()){//for command memName should always exists
         if(methodStr == "POST"){
           if(urlCommand == "fuzzysearch"){
-            requestHandler->command = ProxygenHandler::COMMAND::FUZZY;
+            requestHandler->pRequest = new ConcordanceSearchRequestData();
           }else if(urlCommand == "concordancesearch"){
-            requestHandler->command = ProxygenHandler::COMMAND::CONCORDANCE;
+            requestHandler->pRequest = new ConcordanceSearchRequestData();
           }else if(urlCommand ==  "entry"){ // update 
-            requestHandler->command = ProxygenHandler::COMMAND::UPDATE_ENTRY;
+            requestHandler->pRequest = new UpdateEntryRequestData();
           }else if(urlCommand ==  "entrydelete"){  
-            requestHandler->command = ProxygenHandler::COMMAND::DELETE_ENTRY;
+            requestHandler->pRequest = new DeleteEntryRequestData();
           }else if(urlCommand ==  "import"){ // update 
-            requestHandler->command = ProxygenHandler::COMMAND::IMPORT_MEM;
+            requestHandler->pRequest = new ImportRequestData();
           }else if(urlCommand == "clone"){
-            requestHandler->command = ProxygenHandler::COMMAND::CLONE_TM_LOCALY;
+            requestHandler->pRequest = new CloneTMRequestData();
           }
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 
-            requestHandler->command = ProxygenHandler::COMMAND::STATUS_MEM;
+            requestHandler->pRequest = new StatusRequestData();
+
           }else if(urlCommand == "reorganize"){
-            requestHandler->command = ProxygenHandler::COMMAND::REORGANIZE_MEM;
+            requestHandler->pRequest = new ReorganizeRequestData();
           }
         }
       }
     }
+
+    if(!requestHandler->pRequest){
+      requestHandler->pRequest = new UnknownRequestData;
+    }
+    requestHandler->pRequest->strMemName = urlMemName;
     return requestHandler;
   }
 
