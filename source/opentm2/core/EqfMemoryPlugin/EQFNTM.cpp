@@ -59,14 +59,11 @@ TmGetW(HTM            htm,             //(in)  TM handle
 USHORT C_TmInfoHwnd( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT, HWND );
 
 USHORT
-NTMFillCreateInStruct( HTM,
+NTMFillCreateInStruct( PSZ,
                        PSZ,
                        PSZ,
-                       PSZ,
-                       PSZ,
-                       PSZ,
-                       PTMX_CREATE_IN,
-                       USHORT, HWND );
+                       PTMX_CREATE_IN
+                       );
 USHORT
 NTMGetThresholdFromProperties( PSZ,
                                PUSHORT,
@@ -87,13 +84,8 @@ char *GetPropFileExtension( char *pszMemPath )
 //------------------------------------------------------------------------------
 // Function call:     USHORT
 //                    TmCreate( PSZ         pszPathMem,
-//                              HTM         *htm,
-//                              HTM         hModel,
-//                              PSZ         pszServer,
-//                              PSZ         pszUserID,
-//                              PSZ         pszSourceLang,
-//                              PSZ         pszDescription,
-//                              USHORT      usMsgHandling  )
+//                              HTM         *htm
+//                              PSZ         pszSourceLang  )
 //------------------------------------------------------------------------------
 // Description:       TM interface function to create a TM
 //------------------------------------------------------------------------------
@@ -112,18 +104,11 @@ char *GetPropFileExtension( char *pszMemPath )
 USHORT
 TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
           HTM         *htm,            //(out) TM handle
-          HTM         hModel,          //(in)  model handle
-          PSZ         pszServer,       //(in)  server name or empty string
-          PSZ         pszUserID,       //(in)  LAN USERID or empty string
           PSZ         pszSourceLang,   //(in)  source language or empty string
-          PSZ         pszDescription,  //(in)  TM description or empty string
-          USHORT      usMsgHandling,   //(in)  message handling parameter
-                                       //      TRUE:  display error message
-                                       //      FALSE: display no error message
-          HWND        hwnd )           //(in)  handle for error messages
+          PSZ         pszDescription)  //(in)  TM description or empty string         
 {
-  PTMX_CREATE_IN   pstCreateIn = NULL;    //pointer to create input structure
-  PTMX_CREATE_OUT  pstCreateOut = NULL;   //pointer to create output structure
+  PTMX_CREATE_IN   pstCreateIn = nullptr;    //pointer to create input structure
+  PTMX_CREATE_OUT  pstCreateOut = nullptr;   //pointer to create output structure
   BOOL             fOk = TRUE;            //processing flag
   USHORT           usRc = ERROR_NOT_ENOUGH_MEMORY; //function return code
 
@@ -150,15 +135,10 @@ TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
     /******************************************************************/
     /* call function to fill TMC_CREATE_IN structure                  */
     /******************************************************************/
-    usRc = NTMFillCreateInStruct( hModel,
-                                  pszPathMem,
-                                  pszServer,
-                                  pszUserID,
+    usRc = NTMFillCreateInStruct( pszPathMem,
                                   pszSourceLang,
                                   pszDescription,
-                                  pstCreateIn,
-                                  usMsgHandling,
-                                  hwnd );
+                                  pstCreateIn );
     if ( usRc )
     {
       /****************************************************************/
@@ -734,15 +714,10 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 //                    The TM referenced by htm must be open.
 //------------------------------------------------------------------------------
 USHORT
-NTMFillCreateInStruct( HTM             hModel,
-                       PSZ             pszPathMem,
-                       PSZ             pszServer,
-                       PSZ             pszUserID,
+NTMFillCreateInStruct( PSZ             pszPathMem,
                        PSZ             pszSourceLang,
                        PSZ             pszDescription,
-                       PTMX_CREATE_IN  pstCreateIn,
-                       USHORT          usMsgHandling,
-                       HWND            hwnd )
+                       PTMX_CREATE_IN  pstCreateIn)
 {
   USHORT        usRc=NO_ERROR;
   USHORT        fOk;
@@ -756,139 +731,45 @@ NTMFillCreateInStruct( HTM             hModel,
   /********************************************************************/
   pstCreateIn->stPrefixIn.usLengthInput = sizeof( TMX_CREATE_IN );
   pstCreateIn->stPrefixIn.usTmCommand  = TMC_CREATE;
+  /******************************************************************/
+  /* no model handle get data for TMX_CREATE_IN stucture from input */
+  /******************************************************************/
+  /******************************************************************/
+  /* fill the TMX_CREATE_IN structure                               */
+  /* szDataName         - TM path and name X:\EQFD\MEM\MEM.TMD      */
+  /* szIndexName        - TM path and name X:\EQFD\MEM\MEM.TMI      */
+  /* szServer           - server name                               */
+  /* szUserID           - LAN userid                                */
+  /* szSourceLanguage   - source language name                      */
+  /* szDescription      - description text                          */
+  /* usThreshold        - threshold for return of fuzzy matches     */
+  /* bLangTable         - language table                            */
+  /******************************************************************/
+  strcpy( pstCreateIn->stTmCreate.szDataName,       pszPathMem      );
 
-  if ( hModel )
+  /**************************************************************/
+  /* check if the extension of the passed TM name is a extension*/
+  /* for a temporary TM used  by TM organize                    */
+  /**************************************************************/
+  if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
   {
-    /******************************************************************/
-    /* model handle,get data for TMX_CREATE_IN stuc from model handle */
-    /******************************************************************/
-    /******************************************************************/
-    /* initialize rc                                                  */
-    /******************************************************************/
-     usRc = ERROR_NOT_ENOUGH_MEMORY;
-
-    /******************************************************************/
-    /* allocate storage for TMX_INFO_IN and TMX_INFO_OUT              */
-    /******************************************************************/
-    fOk = (USHORT)UtlAlloc( (PVOID *) &pstInfoIn, 0L,
-                    (LONG)( sizeof( TMX_INFO_IN ) +
-                            sizeof( TMX_INFO_OUT ) ),
-                            FALSE );
-    if ( fOk )
-    {
-      /****************************************************************/
-      /* assign memory to pointer pstInfoOut                          */
-      /****************************************************************/
-      pstInfoOut = (PTMX_INFO_OUT)(pstInfoIn + 1);
-
-      /****************************************************************/
-      /* fill prefix of TMX_INFO_IN structure                         */
-      /****************************************************************/
-      pstInfoIn->stPrefixIn.usLengthInput = sizeof(TMX_INFO_IN);
-      pstInfoIn->stPrefixIn.usTmCommand = TMC_INFO;
-
-      /****************************************************************/
-      /* call function to get signature record of TM from model handle*/
-      /****************************************************************/
-      usRc = C_TmInfoHwnd( hModel,
-                         pszPathMem,
-                         TMINFO_SIGNATURE,
-                         pstInfoIn,
-                         pstInfoOut,
-                         usMsgHandling,
-                         hwnd );
-
-      if ( !usRc )
-      {
-        /****************************************************************/
-        /* fill the TMX_CREATE_IN structure from TmInfo ouput           */
-        /* szDataName         - TM path and name X:\EQFD\MEM\MEM.TMD    */
-        /* sIndexName         - TM path and name X:\EQFD\MEM\MEM.TMI    */
-        /* szServer           - server name                             */
-        /* szUserID           - LAN userid                              */
-        /* szSourceLanguage   - source language name                    */
-        /* szDescription      - description text                        */
-        /* usThreshold        - threshold for return of fuzzy matches   */
-        /* bLangTable         - language table                          */
-        /****************************************************************/
-        strcpy( pstCreateIn->stTmCreate.szDataName, pszPathMem );
-
-        /**************************************************************/
-        /* check if the extension of the passed TM name is a extension*/
-        /* for a temporary TM used  by TM organize or the extension   */
-        /* of a shared TM                                             */
-        /**************************************************************/
-        if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
-        {
-          /************************************************************/
-          /* TM is no temporaray TM, use "normal" index name          */
-          /************************************************************/
-          Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-          strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_TMINDEX );
-        }
-        else
-        {
-          /************************************************************/
-          /* TM is a temporary TM, use temporary index name           */
-          /************************************************************/
-          Utlstrccpy ( pstCreateIn->stTmCreate.szIndexName, pszPathMem, DOT );
-          strcat( pstCreateIn->stTmCreate.szIndexName, EXT_OF_TEMP_TMINDEX );
-        } /* endif */
-
-        strcpy( pstCreateIn->stTmCreate.szSourceLanguage,
-                pstInfoOut->stTmSign.szSourceLanguage );
-        strcpy( pstCreateIn->stTmCreate.szDescription,
-                pstInfoOut->stTmSign.szDescription );
-        pstCreateIn->stTmCreate.usThreshold = pstInfoOut->usThreshold;
-      } /* endif */
-      /**************************************************************/
-      /* free TMX_INFO_IN and TMX_INFO_OUT structure                */
-      /**************************************************************/
-      UtlAlloc( (PVOID *) &pstInfoIn, 0L, 0L, NOMSG );
-    } /* endif */
+    /************************************************************/
+    /* TM is no temporaray TM, use "normal" index name          */
+    /************************************************************/
+    CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TMINDEX);
   }
   else
   {
-    /******************************************************************/
-    /* no model handle get data for TMX_CREATE_IN stucture from input */
-    /******************************************************************/
-    /******************************************************************/
-    /* fill the TMX_CREATE_IN structure                               */
-    /* szDataName         - TM path and name X:\EQFD\MEM\MEM.TMD      */
-    /* szIndexName        - TM path and name X:\EQFD\MEM\MEM.TMI      */
-    /* szServer           - server name                               */
-    /* szUserID           - LAN userid                                */
-    /* szSourceLanguage   - source language name                      */
-    /* szDescription      - description text                          */
-    /* usThreshold        - threshold for return of fuzzy matches     */
-    /* bLangTable         - language table                            */
-    /******************************************************************/
-    strcpy( pstCreateIn->stTmCreate.szDataName,       pszPathMem      );
-
-    /**************************************************************/
-    /* check if the extension of the passed TM name is a extension*/
-    /* for a temporary TM used  by TM organize                    */
-    /**************************************************************/
-    if ( !strcmp( strrchr( pszPathMem, '.'), EXT_OF_TMDATA ) )
-    {
-      /************************************************************/
-      /* TM is no temporaray TM, use "normal" index name          */
-      /************************************************************/
-      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TMINDEX);
-    }
-    else
-    {
-      /************************************************************/
-      /* TM is a temporary TM, use temporary index name           */
-      /************************************************************/
-      CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TEMP_TMINDEX);
-    } /* endif */
-
-    strcpy( pstCreateIn->stTmCreate.szSourceLanguage, pszSourceLang   );
-    strcpy( pstCreateIn->stTmCreate.szDescription,    pszDescription  );
-    pstCreateIn->stTmCreate.usThreshold = TM_DEFAULT_THRESHOLD;
+    /************************************************************/
+    /* TM is a temporary TM, use temporary index name           */
+    /************************************************************/
+    CopyFilePathReplaceExt(pstCreateIn->stTmCreate.szIndexName, pszPathMem, EXT_OF_TEMP_TMINDEX);
   } /* endif */
 
+  strcpy( pstCreateIn->stTmCreate.szSourceLanguage, pszSourceLang   );
+  strcpy( pstCreateIn->stTmCreate.szDescription,    pszDescription  );
+  pstCreateIn->stTmCreate.usThreshold = TM_DEFAULT_THRESHOLD;
+  
   return usRc;
 } /* end of function NTMFillCreateInStruct */
 

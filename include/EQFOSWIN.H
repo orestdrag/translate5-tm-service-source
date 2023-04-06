@@ -195,32 +195,7 @@ USHORT DosGetModName(
  */
 USHORT DosError(
         USHORT fEnable);                /* action flag (bit field)            */
-/***   DosInsMessage - Insert variable text strings in message
- *
- *     Inserts variable text string information into the body of a message.
- *     This is useful when messages are loaded before insertion text strings
- *     are known.
- *
- */
-USHORT DosInsMessage(
-        PCHAR * ppchVTable,         /* table of variables to insert   */
-        USHORT usVCount,                /* number of variables            */
-        PSZ pszMsg,                     /* address of input message       */
-        ULONG cbMsg,                   /* length of input message        */
-        PCHAR pchBuf,                   /* data area address to return    */
-                                        /* message to                     */
-        ULONG  cbBuf,                   /* length of data area (returned) */
-        PULONG pcbMsg);                /* length of updated messsage     */
 
-USHORT DosInsMessageW(
-        PCHAR_W * ppchVTable,         /* table of variables to insert   */
-        USHORT usVCount,                  /* number of variables            */
-        PSZ_W pszMsg,                     /* address of input message       */
-        ULONG cbMsg,                     /* length of input message        */
-        PCHAR_W pchBuf,                   /* data area address to return    */
-                                          /* message to                     */
-        ULONG   cbBuf,                     /* length of data area (returned) */
-        PULONG  pcbMsg);                  /* length of updated messsage     */
 
 /***   DosGetMessage - Get message out of text file
  *

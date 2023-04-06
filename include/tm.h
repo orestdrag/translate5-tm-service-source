@@ -2151,29 +2151,16 @@ public:
     /*! \brief structure for memory information */
   //  typedef struct _MEMORYINFO
   //  {
-      char szPlugin[256];                          // name of the plugin controlling this memory
-      char szName[256];                            // name of the memory
-      char szDescription[256];                     // description of the memory
-      char szFullPath[256];                        // full path to memory file(s) (if applicable only)
-      char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
-      char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
-      char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
-      char szOwner[256];                           // ID of the memory owner
-      char szDescrMemoryType[256];                 // descriptive name of the memory type
-      unsigned long ulSize;                        // size of the memory  
-      BOOL fEnabled;                               // memory-is-enabled flag  
+      
   //  } MEMORYINFO, *PMEMORYINFO;
 //} OPENEDMEMORY ;
 
 /*! \brief Error code definition
 */
-  static const int ERROR_NOSHAREDMEMORYPLUGIN = 8001;
-  static const int ERROR_PROPERTYLOADFAILED   = 8002;
   static const int ERROR_MEMORYOBJECTISNULL   = 8003;
   static const int ERROR_BUFFERTOOSMALL       = 8004;
   static const int ERROR_INVALIDOBJNAME       = 8005;
   static const int ERROR_MEMORYEXISTS         = 8006;
-  static const int ERROR_INVALIDREQUEST       = 8007;
   static const int INFO_ENDREACHED            = 8008;
   static const int ERROR_ENTRYISCORRUPTED     = 8009;
 
@@ -2272,30 +2259,6 @@ public:
     char *pszKey,
     OtmProposal &Proposal
   ); 
-
-/*! \brief Data area for the getMemoryPart method */
-typedef struct _MEMORYPARTDATA
-{
-  // fields provided and filled by the caller of the method
-  BOOL   fFirstCall;                   // TRUE = this is the initial call for this memory file, FALSE = a subsequent call
-  char   szFileName[MAX_LONGFILESPEC]; // name of file being processed currently (the file name is from the list of memory data files
-                                       // provided using the getMemoryFiles method
-  PBYTE  pbBuffer;                     // points to the buffer for the provided data
-  ULONG  ulBytesToRead;                // number of bytes to be copied to buffer
-
-  // data fields filled by the getMemoryPart method
-  BOOL   fFileIsComplete;              // TRUE = the data of the current file has been stored in the buffer completely, 
-                                       // FALSE = there is more data coming
-  ULONG  ulBytesRead;                  // length of data stored in the buffer in number of bytes
-
-  // private data fields for the getMemoryPart method (this data is not used by the calling function in any way)
-  ULONG  ulFilePos;                    // could be used for the read position in current file
-  ULONG  ulRemaining;                  // could be used for the number of bytes remaining
-  ULONG  ulTotalSize;                  // could be used for the total size of the current file
-  ULONG  ulState;                      // could be used for current processing state
-  void   *pPrivatData;                 // could be used as anchor for private data areas
-  char   chPrivateBuffer[1024];        // could be used as private buffer area
-} MEMORYPARTDATA, *PMEMORYPARTDATA;
 
 
 
@@ -2502,6 +2465,19 @@ private:
 	int iLastError;
   void *pvGlobalMemoryOptions;                   // pointert to global memory options to be used for global memory proposals
 
+public:
+  char szPlugin[256];                          // name of the plugin controlling this memory
+  char szName[256];                            // name of the memory
+  char szDescription[256];                     // description of the memory
+  char szFullPath[256];                        // full path to memory file(s) (if applicable only)
+  char szFullDataFilePath[256];                // full path to memory file(s) (if applicable only)
+  char szFullIndexFilePath[256];               // full path to memory file(s) (if applicable only)
+  char szSourceLanguage[MAX_LANG_LENGTH+1];    // memory source language
+  char szOwner[256];                           // ID of the memory owner
+  char szDescrMemoryType[256];                 // descriptive name of the memory type
+  unsigned long ulSize;                        // size of the memory  
+  BOOL fEnabled;                               // memory-is-enabled flag  
+private:
 /*! \brief Fill OtmProposal from TMX_GET_OUT_W structure
     \param ulKey key of record containing the proposal
     \param usTargetNum number of target within record 
@@ -2752,7 +2728,7 @@ USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 /**********************************************************************/
 /* TmCreate                                                           */
 /**********************************************************************/
-USHORT TmCreate( PSZ, HTM *, HTM, PSZ, PSZ, PSZ, PSZ, USHORT, HWND );
+USHORT TmCreate( PSZ, HTM *, PSZ, PSZ );
 
 /**********************************************************************/
 /* TmOpen                                                             */
@@ -3391,8 +3367,6 @@ typedef union  _UNIONOUT
 */
 BOOL fTmComInit (VOID);
 
-VOID   QDAMDeleteFileRemote( PDELFILE_IN  pDelFileIn,      // Input structure
-                             PDELFILE_OUT pDelFileOut );   // Output structure
 
 
 typedef struct _TMT_GLOBALS { /* tmtg */
@@ -4919,7 +4893,6 @@ public:
 
 /*! \brief Error code definition
 */
-  static const int ERROR_NOSHAREDMEMORYPLUGIN = 1001;
   static const int ERROR_PLUGINNOTAVAILABLE   = 1002;
   static const int ERROR_MEMORYOBJECTISNULL   = 1003;
   static const int ERROR_BUFFERTOOSMALL       = 1004;

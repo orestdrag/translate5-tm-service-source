@@ -5245,7 +5245,7 @@ SHORT QDAMGetszData_V3
          pusOffset = (PUSHORT) pRecord->contents.uchData;
          pusOffset += recDataParam.usOffset;        // point to key
          pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
-         if ( *pusOffset > pBT->usBtreeRecSize )
+         if ( *pusOffset > BTREE_REC_SIZE_V3 )
          {
            sRc = BTREE_CORRUPTED;
            ERREVENT2( QDAMGETSZDATA_LOC, STATE_EVENT, 2, DB_GROUP, "" );
@@ -5304,7 +5304,7 @@ SHORT QDAMGetszData_V3
          }
          else if ( *pulDataLen >= ulLen )
          {
-            ulFitLen = pBT->usBtreeRecSize - sizeof(BTREEHEADER) - *pusOffset;
+            ulFitLen = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER) - *pusOffset;
             ulFitLen = ulLen < (ulFitLen - usLenFieldSize) ?  ulLen : (ulFitLen - usLenFieldSize) ;
 
             if ( fTerse )
@@ -5414,69 +5414,6 @@ SHORT QDAMDictSignLocal
    PUSHORT pusLen                      // length of user data
 );
 
-//+----------------------------------------------------------------------------+
-//|Internal function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     EQFNTMSign      Read signature record                    |
-//+----------------------------------------------------------------------------+
-//|Function call:     QDAMDictSignLocal( PBTREE, PCHAR, PUSHORT );             |
-//+----------------------------------------------------------------------------+
-//|Description:       Gets the second part of the first record ( user data )   |
-//|                   This is done using the original QDAMDictSignLocal func.  |
-//+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE                 pointer to btree structure        |
-//|                   PCHAR                  pointer to user data              |
-//|                   PUSHORT                length of user data area (input)  |
-//|                                          filled length (output)            |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   SHORT                                                    |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       0                 no error happened                      |
-//|                   BTREE_INVALID     pointer invalid                        |
-//|                   BTREE_USERDATA    user data too long                     |
-//|                   BTREE_NO_BUFFER   no buffer free                         |
-//|                   BTREE_READ_ERROR  read error from disk                   |
-//|                                                                            |
-//+----------------------------------------------------------------------------+
-//|Side effects:      return signature record even if dictionary is corrupted  |
-//+----------------------------------------------------------------------------+
-//|NOTE:              This function could be implemented as MACRO too, but     |
-//|                   for consistency reasons, the little overhead was used... |
-//+----------------------------------------------------------------------------+
-//|Function flow:     call QDAMDictSignLocal ....                              |
-// ----------------------------------------------------------------------------+
-
-SHORT EQFNTMSign1
-(
-   PBTREE  pBTIda,                      // pointer to btree structure
-   PCHAR  pUserData,                   // pointer to user data
-   PUSHORT pusLen                      // length of user data
-)
-{
-  SHORT sRc;                           // function return code
-  SHORT RetryCount;                    // retry counter for in-use condition
-
-  RetryCount = MAX_RETRY_COUNT;
-  do
-  {
-    sRc = QDAMDictSignLocal( (PBTREE) pBTIda, pUserData, pusLen );
-    if ( sRc == BTREE_IN_USE )
-    {
-      RetryCount--;
-      UtlWait( MAX_WAIT_TIME );
-    } /* endif */
-  } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-            (RetryCount > 0) ); /* enddo */
-
-  if ( sRc != NO_ERROR )
-  {
-    ERREVENT( EQFNTMSIGN_LOC, ERROR_EVENT, sRc );
-  } /* endif */
-
-
-  return( sRc );
-
-}
 
 //------------------------------------------------------------------------------
 // Internal function
@@ -6265,13 +6202,13 @@ SHORT  QDAMDictOpenLocal
             sRc1 = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
             if (!sRc)
               sRc = sRc1;
-            pBT->usNextFreeRecord = (USHORT)(ulTemp/pBT->usBtreeRecSize);
+            pBT->usNextFreeRecord = (USHORT)(ulTemp/BTREE_REC_SIZE_V3);
           } /* endif */
           ASDLOG();
 
           if ( !sRc )
           {
-             strcpy(pBT->chFileName, pName);
+             strcpy(pBT->szFileName, pName);
 
              // copy prev. allocated free list
              // DataRecList in header is in old format (RECPARAMOLD),
