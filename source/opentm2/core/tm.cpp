@@ -1879,7 +1879,7 @@ USHORT TMManager::APISearchMem
 */
 USHORT TMManager::APIUpdateMem
 (
-  LONG        lHandle,
+  EqfMemory*        lHandle,
   PMEMPROPOSAL pNewProposal,
   LONG        lOptions
 )
@@ -1892,8 +1892,8 @@ USHORT TMManager::APIUpdateMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  EqfMemory *pMem = handleToMemoryObject( lHandle );
-  if ( pMem == NULL )
+ // EqfMemory *pMem = handleToMemoryObject( lHandle );
+  if ( lHandle == NULL )
   {
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
@@ -1901,7 +1901,7 @@ USHORT TMManager::APIUpdateMem
   strcpy(pNewProposal->szDocShortName , pNewProposal->szDocName);
   copyMemProposalToOtmProposal( pNewProposal, pOtmProposal );
 
-  USHORT usRC = (USHORT)pMem->putProposal( *pOtmProposal );
+  USHORT usRC = (USHORT)lHandle->putProposal( *pOtmProposal );
 
   delete( pOtmProposal );
 

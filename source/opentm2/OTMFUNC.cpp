@@ -944,7 +944,7 @@ USHORT EqfSearchMem
 USHORT EqfUpdateMem
 (
   HSESSION    hSession,
-  LONG        lHandle, 
+  EqfMemory*        lHandle, 
   PMEMPROPOSAL pNewProposal,
   LONG        lOptions
 )

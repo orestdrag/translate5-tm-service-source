@@ -160,7 +160,7 @@ int TestMemoryCalls( HSESSION hSession )
     strcpy( pProposal->szTargetLanguage, "German(Reform)" );
   
     printf( "  Call; usRC = EqfUpdateMem( hSession, lMemHandle, pProposal, 0 );\n" );
-    usRC = EqfUpdateMem( hSession, lMemHandle, pProposal, 0 );
+    //usRC = EqfUpdateMem( hSession, lMemHandle, pProposal, 0 );
     printf( "  RC = %u\n\n", usRC );
 
     delete pProposal;

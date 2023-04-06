@@ -470,102 +470,6 @@ typedef struct _TMX_EXT_OUT_W
 } TMX_EXT_OUT_W, *PTMX_EXT_OUT_W;
 
 
-/*! \brief memory proposal types */
-	enum MemProposalType
-	{
-		UNDEFINED_PROPTYPE,			/*!< proposal type has not been set or is not available */
-		MANUAL_PROPTYPE,	  		/*!< proposal was produced by manual translation */
-		MACHINE_PROPTYPE,	    	/*!< proposal was produced by automatic (machine) translation */
-		GLOBMEMORY_PROPTYPE, 	  /*!< proposal is from global memory  */
-    GLOBMEMORYSTAR_PROPTYPE /*!< proposal is from global memory, to be marked with an asterisk  */
-	};
-
-/*! \brief match type of memory proposals */
-	enum MemProposalMatchType
-	{
-		UNDEFINED_MATCHTYPE,			/*!< match type has not been set or is not available */
-		EXACT_MATCHTYPE,	    		/*!< proposal is an exact match */
-		EXACTEXACT_MATCHTYPE,		/*!< proposal is an exact match, document name and segment number are exact also */
-		EXACTSAMEDOC_MATCHTYPE,	/*!< proposal is an exact match from the same document */
-		FUZZY_MATCHTYPE,	    		/*!< proposal is a fuzzy match */
-		REPLACE_MATCHTYPE 	    	/*!< proposal is a replace match */
-	};
-
-/*! \brief maximum size of segment data */
-#define MEMPROPOSAL_MAXSEGLEN 2048
-
-/*! \brief maximum size of names */
-#define MEMPROPOSAL_MAXNAMELEN 256
-
-
-/*! \brief Structure for sending or receiving memory proposal data
-*/
-typedef struct _MEMPROPOSAL
-{
-  /*! \brief ID of this proposal */
-	char szId[MEMPROPOSAL_MAXNAMELEN];
-
-  /*! \brief Source string of memory proposal  (UTF-16) */
-  wchar_t szSource[MEMPROPOSAL_MAXSEGLEN+1];
-	//std::wstring strSource;
-
-	/*! \brief Target string of memory proposal (UTF-16). */
-  wchar_t szTarget[MEMPROPOSAL_MAXSEGLEN+1];
-
-	/*! \brief Name of document from which the proposal comes from. */
-	char szDocName[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
-	//std::string strDocShortName;
-	char szDocShortName[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Segment number within the document from which the proposal comes from. */
-  long lSegmentNum;                  
-
-	/*! \brief source language. */
-	char szSourceLanguage[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief target language. */
-  char szTargetLanguage[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief origin or type of the proposal. */
-  MemProposalType eType;
-
-	/*! \brief match type of the proposal. */
-  MemProposalMatchType eMatch;
-
-	/*! \brief Author of the proposal. */
-  char szTargetAuthor[MEMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Update time stamp of the proposal. */
-  long    lTargetTime;
-
-	/*! \brief Fuzziness of the proposal. */
-  int iFuzziness;    
-
-  /*! \brief Words parsed in fuzzy calculations of the proposal. */
-  int iWords = -1;
-
-  /*! \brief Diffs in fuzzy calculations of the proposal. */
-  int iDiffs = -1;                 
-
-	/*! \brief Markup table (format) of the proposal. */
-  char szMarkup[MEMPROPOSAL_MAXNAMELEN];
-
-  /*! \brief Context information of the proposal */
-  //std::wstring strContext;  
-  wchar_t szContext[MEMPROPOSAL_MAXSEGLEN+1];
-
-  /*! \brief Additional information of the proposal */
-  //std::wstring strAddInfo; 
-  wchar_t szAddInfo[MEMPROPOSAL_MAXSEGLEN+1];
-  
-  /*! \brief is source lang is marked as prefered in languages.xml */
-  bool fIsoSourceLangIsPrefered = false;
-  /*! \brief is target lang is marked as prefered in languages.xml */
-  bool fIsoTargetLangIsPrefered = false;
-
-} MEMPROPOSAL, *PMEMPROPOSAL;
 
 //#include "../pluginmanager/PluginManager.h"
 
@@ -5212,7 +5116,7 @@ int removeMemoryFromList(const char* pszName);
   */
   USHORT APIUpdateMem
   (
-    LONG        lHandle, 
+    EqfMemory*        lHandle, 
     PMEMPROPOSAL pNewProposal,
     LONG        lOptions
   );
@@ -8021,7 +7925,7 @@ USHORT EqfSearchMem
 USHORT EqfUpdateMem
 (
   HSESSION    hSession,
-  LONG        lHandle, 
+  EqfMemory*   lHandle, 
   PMEMPROPOSAL pNewProposal,
   LONG        lOptions
 );

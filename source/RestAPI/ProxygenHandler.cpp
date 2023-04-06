@@ -113,12 +113,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
-        //pRequest = new ExportRequestData(requestAcceptHeader,pRequest->strMemName);
-        //pRequest->strUrl = reqUrl;
         pRequest->run();
-        //pRequest->_rest_rc_ = pMemService->getMem( pRequest->strMemName, requestAcceptHeader,  vMemData);
-        //pRequest->outputMessage = std::string(vMemData.begin(), vMemData.end());
-        //pRequest->_rest_rc_ = 200;
         break;
       }
 
@@ -231,16 +226,6 @@ void ProxygenHandler::onEOM() noexcept {
         case COMMAND::CONCORDANCE:
         {
           pRequest->_rest_rc_ = pMemService->concordanceSearch( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-          break;
-        }
-        {
-          if(fWriteRequestsAllowed == false){
-            break;
-          }
-          //pRequest = new UpdateEntryRequestData(strInData);
-          //pRequest->strUrl = reqUrl;
-          pRequest->run();
-          //pRequest->_rest_rc_ = pMemService->updateEntry( pRequest->strMemName, strInData,  pRequest->outputMessage );
           break;
         }
         case COMMAND::DELETE_ENTRY:
