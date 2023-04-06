@@ -6298,13 +6298,6 @@ typedef EQF_BOOL (*PFNCHECKSEGTYPE)( PSZ, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG, SHOR
 #endif
 
 /**********************************************************************/
-/* Low level dict. access functions (Nlp/Dam)                         */
-/**********************************************************************/
-#if defined(INCL_EQF_DAM)
-  #include <EQFQDAM.H>
-#endif
-
-/**********************************************************************/
 /* Dictionary data encoding functions                                 */
 /**********************************************************************/
 #if defined(INCL_EQF_LDB)

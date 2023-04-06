@@ -440,7 +440,7 @@ USHORT NTMGetIDFromNameEx
             {
               DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 2, TM_GROUP, pszLongName );
 
-              usRc = EQFNTMUpdate( pTmClb->pstTmBtree, LONGNAME_KEY,
+              usRc = pTmClb->pstInBtree->EQFNTMUpdate( LONGNAME_KEY,
                                    (PBYTE)pTmClb->pLongNames->pszBuffer,
                                    pTmClb->pLongNames->ulBufUsed );
             } /* endif */
@@ -1149,13 +1149,13 @@ USHORT NTMLockTM
  if ( fLock )
  {
    // Lock data file of TM
-   usRc = EQFNTMPhysLock( pTmClb->pstTmBtree, TRUE, &fLockedData );
+   usRc = pTmClb->pstTmBtree->EQFNTMPhysLock( TRUE, &fLockedData );
 
 
    // Lock Index file of TM
    if ( !usRc )
    {
-         usRc = EQFNTMPhysLock( pTmClb->pstInBtree, TRUE, &fLockedIndex  );
+         usRc = pTmClb->pstInBtree->EQFNTMPhysLock( TRUE, &fLockedIndex  );
    } /* endif */
 
    // Set caller's lock flag
@@ -1164,7 +1164,7 @@ USHORT NTMLockTM
    // Unlock data file if lock of index failed
    if ( !fLockedIndex && fLockedData )
    {
-     usRc = EQFNTMPhysLock( pTmClb->pstTmBtree, FALSE, &fLockedData );
+     usRc = pTmClb->pstTmBtree->EQFNTMPhysLock( FALSE, &fLockedData );
    } /* endif */
  }
  else
@@ -1172,22 +1172,22 @@ USHORT NTMLockTM
    // Rewrite compact area if compact area has been changed
    if ( pTmClb->bCompactChanged )
    {
-     usRc = EQFNTMUpdate( pTmClb->pstTmBtree, COMPACT_KEY,
+     usRc = pTmClb->pstInBtree->EQFNTMUpdate( COMPACT_KEY,
                           pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
      if ( !usRc )
      {
        pTmClb->bCompactChanged = FALSE;
 
-       usRc = EQFNTMIncrUpdCounter( pTmClb->pstTmBtree, COMPACTAREA_UPD_COUNTER,
+       usRc = pTmClb->pstTmBtree->EQFNTMIncrUpdCounter( COMPACTAREA_UPD_COUNTER,
                              &(pTmClb->alUpdCounter[COMPACTAREA_UPD_COUNTER]) );
      } /* endif */
    } /* endif */
 
    // Unlock index file of TM
-   usRc = EQFNTMPhysLock( pTmClb->pstInBtree, FALSE, &fLockedIndex );
+   usRc = pTmClb->pstInBtree->EQFNTMPhysLock( FALSE, &fLockedIndex );
 
    // Unlock data file of TM
-   usRc = EQFNTMPhysLock( pTmClb->pstTmBtree, FALSE, &fLockedData  );
+   usRc =  pTmClb->pstTmBtree->EQFNTMPhysLock( FALSE, &fLockedData  );
  } /* endif */
 
  if ( usRc != NO_ERROR )
@@ -1224,7 +1224,7 @@ USHORT NTMCheckForUpdates
 T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );";
 #ifdef TEMPORARY_COMMENTED
  // Get new update counter values
- usRc = EQFNTMGetUpdCounter( pTmClb->pstTmBtree, alNewUpdCounter, 0, MAX_UPD_COUNTERS );
+ usRc = pTmClb->pstTmBtree->EQFNTMGetUpdCounter(  alNewUpdCounter, 0, MAX_UPD_COUNTERS );
 #endif
 
  // Check and update compact area
@@ -1235,7 +1235,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
    {
      ULONG ulLen =  MAX_COMPACT_SIZE-1;
 
-     usRc = EQFNTMGet( pTmClb->pstTmBtree, COMPACT_KEY,
+     usRc =  pTmClb->pstTmBtree->EQFNTMGet( COMPACT_KEY,
                        (PCHAR)pTmClb->bCompact, &ulLen );
    } /* endif */
  } /* endif */
@@ -1482,7 +1482,7 @@ USHORT NTMReadLongNameTable
 
   // call to obtain exact length of record
   ulLen = 0;
-  usRC = EQFNTMGet( pTmClb->pstTmBtree, LONGNAME_KEY, 0, &ulLen );
+  usRC =  pTmClb->pstTmBtree->EQFNTMGet( LONGNAME_KEY, 0, &ulLen );
 
   if ( usRC == NO_ERROR )
   {
@@ -1503,7 +1503,7 @@ USHORT NTMReadLongNameTable
     // read long name table from database
     if ( usRC == NO_ERROR )
     {
-      usRC = EQFNTMGet( pTmClb->pstTmBtree, LONGNAME_KEY,
+      usRC =  pTmClb->pstTmBtree->EQFNTMGet( LONGNAME_KEY,
                         (PCHAR)pTmClb->pLongNames->pszBuffer, &ulLen );
     } /* endif */
 
@@ -1816,7 +1816,7 @@ USHORT NTMAddNameToTable
         {
           if ( usTableType != LANGGROUP_KEY )
           {
-            usRc = EQFNTMUpdate( pTmClb->pstTmBtree,
+            usRc = pTmClb->pstInBtree->EQFNTMUpdate(
                                 (ULONG)usTableType,
                                 (PBYTE)pstTMTable,
                                 pstTMTable->ulAllocSize );
@@ -1899,7 +1899,7 @@ USHORT NTMSaveNameTable
   USHORT      usRc = NO_ERROR;         // function return code
 
   // check which method is to be used for table
-  usRc = EQFNTMUpdate( pTmClb->pstTmBtree, ulTableKey, pTMTable, ulSize );
+  usRc = pTmClb->pstInBtree->EQFNTMUpdate( ulTableKey, pTMTable, ulSize );
 
   // return to caller
   return( usRc );
@@ -1926,7 +1926,7 @@ USHORT NTMLoadNameTable
 
   // call to obtain exact length of record
   *pulSize = 0;
-  usRc = EQFNTMGet( pTmClb->pstTmBtree, ulTableKey, 0, pulSize );
+  usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulTableKey, 0, pulSize );
 
   // allocate table data area
   if ( usRc == NO_ERROR )
@@ -1941,7 +1941,7 @@ USHORT NTMLoadNameTable
   if ( usRc == NO_ERROR )
   {
     ULONG ulLen = *pulSize;
-    usRc = EQFNTMGet( pTmClb->pstTmBtree, ulTableKey, (PCHAR)(*ppTMTable), &ulLen );
+    usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulTableKey, (PCHAR)(*ppTMTable), &ulLen );
   } /* endif */
 
   // handle tersed name tables

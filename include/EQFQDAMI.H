@@ -71,12 +71,6 @@ typedef enum _DICTCMD
   QDAMDICTUPDTIME             // get update status
 } DICTCMD;
 
-typedef enum _RECTYPE
-{
-  DATAREC,                 // record contains data
-  KEYREC,                  // record contains keys
-  ROOTREC                  // record contains root key data
-} RECTYPE;
 
 typedef enum _SEARCHTYPE
 {
@@ -949,8 +943,6 @@ typedef struct _DICTTIME
 
  SHORT QDAMDictEquivLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG,  PBYTE,PULONG );
 
- SHORT QDAMDictExactLocal  ( PBTREE, PTMWCHAR, PBYTE, PULONG, USHORT );
-
  SHORT QDAMDictNextLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
 
  SHORT QDAMDictPrevLocal   ( PBTREE, PTMWCHAR, PULONG,  PBYTE, PULONG  );
@@ -959,7 +951,6 @@ typedef struct _DICTTIME
 
  SHORT QDAMDictInsertLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
 
- SHORT QDAMDictUpdateLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
  SHORT QDAMDictDeleteLocal ( PBTREE, PTMWCHAR );
  SHORT QDAMDictFlushLocal  ( PBTREE );
  SHORT QDAMDictCopyLocal   ( PBTREE, PBTREE );
@@ -975,7 +966,6 @@ typedef struct _DICTTIME
 
  SHORT QDAMFindChild_V3 ( PBTREE, PTMWCHAR, USHORT, PBTREEBUFFER_V3 * );
  SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PTMWCHAR, PSHORT, SEARCHTYPE, PSHORT);
- SHORT QDAMFreeRecord_V3 ( PBTREE, PBTREEBUFFER_V3, RECTYPE );
 
  SHORT QDAMWriteHeader ( PBTREE );
  SHORT QDAMWriteRecord_V3(PBTREE, PBTREEBUFFER_V3);
@@ -1002,8 +992,6 @@ typedef struct _DICTTIME
  SHORT QDAMHeaderFirst ( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
  SHORT QDAMHeaderNext ( PBTREE, PRECPARAM,  PRECPARAM,PRECPARAM );
  SHORT QDAMAllocTempAreas ( PBTREE );
- VOID  QDAMUpdateList_V3( PBTREE, PBTREEBUFFER_V3 );
- VOID  QDAMFreeFromList_V3(PRECPARAM ,PBTREEBUFFER_V3 );
  VOID  QDAMTerseInit ( PBTREE, PUCHAR );
  SHORT QDAMUnTerseData ( PBTREE, PUCHAR, ULONG, PULONG );
  BOOL  QDAMTerseData ( PBTREE, PUCHAR, PULONG, PUCHAR );
@@ -1013,7 +1001,6 @@ typedef struct _DICTTIME
  RECPARAM  QDAMGetrecData_V3 ( PBTREEBUFFER_V3, SHORT, USHORT );
  VOID      QDAMSetrecData_V3 ( PBTREEBUFFER_V3, SHORT, RECPARAM, USHORT );
  RECPARAM  QDAMGetrecKey_V3 ( PBTREEBUFFER_V3, SHORT );
- ULONG QDAMGetrecDataLen_V3 ( PBTREE, PBTREEBUFFER_V3, SHORT );
  VOID  QDAMReArrangeKRec_V3 ( PBTREE, PBTREEBUFFER_V3 );
  VOID  QDAMCopyKeyTo_V3( PBTREEBUFFER_V3, SHORT, PBTREEBUFFER_V3, SHORT, USHORT );
  VOID  QDAMCopyDataTo_V3( PBTREEBUFFER_V3, SHORT, PBTREEBUFFER_V3, SHORT, USHORT );
@@ -1348,14 +1335,7 @@ SHORT NTMKeyCompare
 /* validate the passed BTree pointer                                  */
 /**********************************************************************/
 #define CHECKPBTREE(pBTIda, sRc)                  \
-   if ( !pBTIda )                                 \
-   {                                              \
-     sRc = BTREE_INVALID;                         \
-   }                                              \
-   else                                           \
-   {                                              \
-     sRc = pBTIda->pBTree ? 0 : BTREE_INVALID;    \
-   } /* endif */
+     sRc = pBTIda ? 0 : BTREE_INVALID; 
 
   #define LENGTHOFDATA( pBT, pData ) *((PULONG)(pData)) 
 

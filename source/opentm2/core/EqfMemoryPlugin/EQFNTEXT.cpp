@@ -299,7 +299,7 @@ USHORT TmtXExtract
       /********************************************************************/
       if ( !usRc && !fSpecialMode )
       {
-        EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);
+        pTmClb->pstTmBtree->EQFNTMGetNextNumber(  &ulStartKey, &ulNextKey);
         pTmExtOut->ulMaxEntries = (ulNextKey - ulStartKey);
         /******************************************************************/
         /* return one matching entry (if any available)                   */
@@ -308,7 +308,7 @@ USHORT TmtXExtract
         while ( (pTmExtIn->ulTmKey < ulNextKey) && (usRc == BTREE_NOT_FOUND) )
         {
           ulLen = ulRecBufSize;
-          usRc = EQFNTMGet( pTmClb->pstTmBtree,
+          usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                             pTmExtIn->ulTmKey,
                             (PCHAR)pTmRecord,
                             &ulLen );
@@ -321,7 +321,7 @@ USHORT TmtXExtract
             {
               ulRecBufSize = ulLen;
 
-              usRc = EQFNTMGet( pTmClb->pstTmBtree,
+              usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                                 pTmExtIn->ulTmKey,
                                 (PCHAR)pTmRecord,
                                 &ulLen );

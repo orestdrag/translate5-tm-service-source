@@ -854,7 +854,7 @@ USHORT MemConvertMemFile( PSZ pszMem, BOOL fDataFile  )
 
       memset( &(pData->BtreeOut), 0, sizeof(pData->BtreeOut) );
 
-      memcpy( &NtmVitalInfo, pbTree->pBTree->chCollate, sizeof(NTMVITALINFO));
+      memcpy( &NtmVitalInfo, pbTree->chCollate, sizeof(NTMVITALINFO));
 
       strcpy( pData->szOutFile, pszMem );
       strcat( pData->szOutFile, ".OUT" );

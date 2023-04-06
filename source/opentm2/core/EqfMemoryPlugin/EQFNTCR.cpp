@@ -277,27 +277,27 @@ USHORT TmtXCreate
     {
       //insert initialized record to tm data file
       ulKey = AUTHOR_KEY;
-      usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+      usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                  (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
 
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                     (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = TAGTABLE_KEY;
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                     (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = LANG_KEY;
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                  (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
       } /* endif */
 
@@ -309,7 +309,7 @@ USHORT TmtXCreate
         memset( pTmClb->bCompact, 0, size );
 
         ulKey = COMPACT_KEY;
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                              pTmClb->bCompact, size);  
  
       } /* endif */
@@ -319,7 +319,7 @@ USHORT TmtXCreate
       {
          ulKey = LONGNAME_KEY;
         // write long document name buffer area to the database
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, &ulKey,
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
                             (PBYTE)pTmClb->pLongNames->pszBuffer,
                             pTmClb->pLongNames->ulBufUsed );        
   

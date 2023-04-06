@@ -1131,7 +1131,7 @@ USHORT AddToTm
         
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
-        usRc = EQFNTMInsert( pTmClb->pstTmBtree, //ptr to tm structure
+        usRc = pTmClb->pstTmBtree->EQFNTMInsert(//ptr to tm structure
                              pulNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
                              RECLEN(pTmRecord) );     //length
@@ -1481,8 +1481,7 @@ USHORT UpdateTmIndex
         ulKey = (*pulVotes) & START_KEY;
         ulLen = TMX_REC_SIZE;
         memset( pIndexRecord, 0, TMX_REC_SIZE );
-        usRc = EQFNTMGet( pTmClb->pstInBtree,
-                          ulKey,  //index key
+        usRc = pTmClb->pstInBtree->EQFNTMGet( ulKey,  //index key
                           (PCHAR)pIndexRecord,   //pointer to index record
                           &ulLen );  //length
 
@@ -1493,8 +1492,7 @@ USHORT UpdateTmIndex
 
           pIndexRecord->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
 
-          usRc = EQFNTMInsert( pTmClb->pstInBtree,
-                               &ulKey,
+          usRc = pTmClb->pstInBtree->EQFNTMInsert( &ulKey,
                                (PBYTE)pIndexRecord,  //pointer to index
                                pIndexRecord->usRecordLen );  //length
 
@@ -1505,7 +1503,7 @@ USHORT UpdateTmIndex
 
              if ( usRc == NO_ERROR )
              {
-               usRc = EQFNTMInsert( pTmClb->pstInBtree, &ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+               usRc = pTmClb->pstInBtree->EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
              } /* endif */
           } /* endif */
 
@@ -1574,7 +1572,7 @@ USHORT UpdateTmIndex
                 //update index record size
                 pIndexRecord->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
 
-                usRc = EQFNTMUpdate( pTmClb->pstInBtree,
+                usRc = pTmClb->pstInBtree->EQFNTMUpdate( 
                                     ulKey,
                                     (PBYTE)pIndexRecord,  //pointer to index
                                     pIndexRecord->usRecordLen );  //length
@@ -1585,7 +1583,7 @@ USHORT UpdateTmIndex
 
                   if ( usRc == NO_ERROR )
                   {
-                    usRc = EQFNTMUpdate( pTmClb->pstInBtree, ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
+                    usRc = pTmClb->pstInBtree->EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
                   } /* endif */
                 } /* endif */
                 if ( !usRc )
@@ -1696,7 +1694,7 @@ USHORT DetermineTmRecord
     ulKey = (*pulVotes) & START_KEY;
     ulLen = TMX_REC_SIZE;
     memset( pIndexRecord, 0, TMX_REC_SIZE );
-    usRc = EQFNTMGet( pTmClb->pstInBtree,
+    usRc = pTmClb->pstInBtree->EQFNTMGet( 
                       ulKey,  //index key
                       (PCHAR)pIndexRecord,   //pointer to index record
                       &ulLen );  //length
@@ -1746,7 +1744,7 @@ USHORT DetermineTmRecord
             ulKey = (*pulVotes) & START_KEY;
             ulLen = TMX_REC_SIZE;
             memset( pIndexRecord, 0, TMX_REC_SIZE );
-            usRc = EQFNTMGet( pTmClb->pstInBtree,
+            usRc = pTmClb->pstInBtree->EQFNTMGet( 
                               ulKey,  //index key
                               (PCHAR)pIndexRecord,   //pointer to index record
                               &ulLen );  //length
@@ -1921,7 +1919,7 @@ USHORT UpdateTmRecord
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
         memset( pTmRecord, 0, ulLen );
-        usRc = EQFNTMGet( pTmClb->pstTmBtree,
+        usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                           ulKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
@@ -1933,7 +1931,7 @@ USHORT UpdateTmRecord
             ulRecBufSize = ulLen;
             memset( pTmRecord, 0, ulLen );
 
-            usRc = EQFNTMGet( pTmClb->pstTmBtree,
+            usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                               ulKey,  //tm record key
                               (PCHAR)pTmRecord,   //pointer to tm record data
                               &ulLen );    //length
@@ -2330,7 +2328,7 @@ USHORT ComparePutData
         // update TM record if required
         if ( fUpdate )
         {
-          usRc = EQFNTMUpdate( pTmClb->pstTmBtree, *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+          usRc = pTmClb->pstInBtree->EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
         if ( !fStop )
@@ -2495,7 +2493,7 @@ USHORT AddTmTarget(
 
 
           //add updated tm record to database
-          usRc = EQFNTMUpdate( pTmClb->pstTmBtree,
+          usRc = pTmClb->pstInBtree->EQFNTMUpdate(
                                *pulKey,
                                (PBYTE)pTmRecord,
                                RECLEN(pTmRecord) );
@@ -2680,7 +2678,7 @@ USHORT TmtXUpdSeg
     usRc = BTREE_NOT_FOUND;
 
     ulLen = TMX_REC_SIZE;
-    usRc = EQFNTMGet( pTmClb->pstTmBtree, ulUpdKey, (PCHAR)pTmRecord,
+    usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulUpdKey, (PCHAR)pTmRecord,
                       &ulLen );
 
     if ( usRc == BTREE_BUFFER_SMALL)
@@ -2691,7 +2689,7 @@ USHORT TmtXUpdSeg
         ulRecBufSize = ulLen;
         memset( pTmRecord, 0, ulLen );
 
-        usRc = EQFNTMGet( pTmClb->pstTmBtree,
+        usRc =  pTmClb->pstTmBtree->EQFNTMGet(
                           ulUpdKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
@@ -2834,7 +2832,7 @@ USHORT TmtXUpdSeg
               // rewrite TM record
               if ( usRc == NO_ERROR )
               {
-                usRc = EQFNTMUpdate( pTmClb->pstTmBtree, ulUpdKey,
+                usRc = pTmClb->pstInBtree->EQFNTMUpdate( ulUpdKey,
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
             }

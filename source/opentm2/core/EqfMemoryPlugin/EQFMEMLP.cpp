@@ -77,7 +77,7 @@
 #include <EQFTMTAG.H>             // Translation Memory SGML tags
 #include <time.h>                 // C library for time functions
 #include "EQFHLOG.H"              // for word count category limits
-#include <EQFQDAM.H>              // Low level TM access functions
+#include "otm.h" 
 #include "EQFFUNCI.H"             // private defines for function call interface
 #include "PropertyWrapper.H"
 

@@ -712,7 +712,7 @@ USHORT GetExactMatch
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
         T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record" <<ulKey;
-        usRc = EQFNTMGet( pTmClb->pstTmBtree, ulKey, (PCHAR)pTmRecord, &ulLen );
+        usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
@@ -723,7 +723,7 @@ USHORT GetExactMatch
             pTmClb->pvTmRecord = pTmRecord;
             memset( pTmRecord, 0, ulLen );
 
-            usRc = EQFNTMGet( pTmClb->pstTmBtree, ulKey, (PCHAR)pTmRecord,
+            usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulKey, (PCHAR)pTmRecord,
                               &ulLen );
           }
           else
@@ -2578,7 +2578,7 @@ USHORT GetFuzzyMatch
 
         T5LOG( T5INFO) << "GetFuzzyMatch: EQFNTMGET of record " << pMatchEntry->ulKey;
 
-        usRc = EQFNTMGet( pTmClb->pstTmBtree, pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
+        usRc =  pTmClb->pstTmBtree->EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
@@ -2588,7 +2588,7 @@ USHORT GetFuzzyMatch
             pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
             pTmClb->pvTmRecord = pTmRecord;
             memset( pTmRecord, 0, ulLen );
-            usRc = EQFNTMGet( pTmClb->pstTmBtree, pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
+            usRc =  pTmClb->pstTmBtree->EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
           }
           else
           {
@@ -3288,7 +3288,7 @@ USHORT FillMatchEntry
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchOtherTime) );
 #endif
-      usRc = EQFNTMGet( pTmClb->pstInBtree, ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
+      usRc = pTmClb->pstInBtree->EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchReadTime) );
