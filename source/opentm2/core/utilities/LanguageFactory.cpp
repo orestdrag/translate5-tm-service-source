@@ -7,7 +7,7 @@
 
 #include "EQF.H"                  // General .H for EQF
 #include "LogWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "EncodingHelper.h"
 // the Win32 Xerces build requires the default structure packing...
 //#pragma pack( push )
@@ -92,7 +92,7 @@ LanguageFactory::LanguageFactory(void)
 
   // try to load the external language list
   char szFile[256];
-  properties_get_str(KEY_OTM_DIR, szFile, 255);
+  Properties::GetInstance()->get_value(KEY_OTM_DIR, szFile, 255);
   strcat(szFile, "/TABLE/languages.xml");
 
   int iRC = loadLanguageList( szFile );

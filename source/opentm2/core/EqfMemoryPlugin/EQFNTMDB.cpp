@@ -183,7 +183,7 @@
 #include "EQFEVENT.H"                  // event logging facility
 #include "LogWrapper.h"
 #include "FilesystemWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 
 UCHAR  ucbEncodeTbl[30]
         =  { 00,  06,

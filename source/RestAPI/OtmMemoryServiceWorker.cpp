@@ -29,7 +29,7 @@
 #include <sstream>
 #include "opentm2/core/utilities/EncodingHelper.h"
 
-#include "opentm2/core/utilities/PropertyWrapper.H"
+#include "opentm2/core/utilities/Property.h"
 #include "opentm2/core/utilities/FilesystemHelper.h"
 #include <thread>
 #include <utility>
@@ -457,7 +457,7 @@ int OtmMemoryServiceWorker::cloneTMLocaly
   std::string srcTmdPath, srcMemPath, srcTmiPath, dstTmdPath, dstTmiPath, dstMemPath;
   char memDir[255];
   if(!iRC){
-    iRC = properties_get_str(KEY_MEM_DIR, memDir, 254);
+    iRC = Properties::GetInstance()->get_value(KEY_MEM_DIR, memDir, 254);
     if(iRC){
       strOutputParms = "can't read MEM_DIR path from properties";
       T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
@@ -681,7 +681,7 @@ int OtmMemoryServiceWorker::import
     size_t requiredMemory = 0;
     {
       char memFolder[260];
-      properties_get_str(KEY_MEM_DIR, memFolder, 260);
+      Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
       std::string path;
 
       path = memFolder + strMemory;
@@ -1022,12 +1022,12 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
   //the currently configured max usable memory
   int availableRam = 0, threshold = 0, workerThreads = 0, timeout = 0;
   char buff[255];
-  //properties_get_str(KEY_OTM_DIR, szOtmDirPath);
-  properties_get_int(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
-  properties_get_int(KEY_TRIPLES_THRESHOLD, threshold);
-  properties_get_int(KEY_NUM_OF_THREADS, workerThreads);
-  properties_get_int(KEY_TIMEOUT_SETTINGS, timeout);
-  properties_get_str(KEY_RUN_DATE, buff,254);
+  //Properties::GetInstance()->get_value(KEY_OTM_DIR, szOtmDirPath);
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
+  Properties::GetInstance()->get_value(KEY_TRIPLES_THRESHOLD, threshold);
+  Properties::GetInstance()->get_value(KEY_NUM_OF_THREADS, workerThreads);
+  Properties::GetInstance()->get_value(KEY_TIMEOUT_SETTINGS, timeout);
+  Properties::GetInstance()->get_value(KEY_RUN_DATE, buff,254);
   double vm_usage, resident_set;
   mem_usage(vm_usage, resident_set); 
 
@@ -2428,10 +2428,10 @@ int OtmMemoryServiceWorker::buildTempFileName( char *pszTempFile )
   // setup temp file name for TMX file 
   {
     char szTempPath[PATH_MAX];
-    properties_get_str(KEY_OTM_DIR, szTempPath, PATH_MAX);
+    Properties::GetInstance()->get_value(KEY_OTM_DIR, szTempPath, PATH_MAX);
     sTempPath = szTempPath;
     sTempPath += "/TEMP/";
-    iRC = properties_get_str_or_default(KEY_TEMP_DIR, szTempPath, PATH_MAX, sTempPath.c_str());
+    iRC = Properties::GetInstance()->get_value_or_default(KEY_TEMP_DIR, szTempPath, PATH_MAX, sTempPath.c_str());
     sTempPath = szTempPath;
   }
 

@@ -1,6 +1,6 @@
 #include "tm.h"
 #include "LogWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "EQFMSG.H"
 #include "EQF.H"
 #include "FilesystemHelper.h"
@@ -55,13 +55,13 @@ int TMManager::getFreeSlot(size_t memoryRequested)
 {
   size_t UsedMemory = 0;
   int AllowedMemoryMB;
-  properties_get_int(KEY_ALLOWED_RAM, AllowedMemoryMB);
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMemoryMB);
   size_t AllowedMemory = (size_t)AllowedMemoryMB * 1000000;
 
   #ifdef CALCULATE_ONLY_MEM_FILES
   std::string path; 
   char memFolder[260];
-  properties_get_str(KEY_MEM_DIR, memFolder, 260);
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
 
   for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
     path = memFolder;
@@ -101,13 +101,13 @@ std::shared_ptr<EqfMemory>  TMManager::getFreeSlotPointer(size_t memoryRequested
 {
   size_t UsedMemory = 0;
   int AllowedMemoryMB;
-  properties_get_int(KEY_ALLOWED_RAM, AllowedMemoryMB);
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMemoryMB);
   size_t AllowedMemory = (size_t)AllowedMemoryMB * 1000000;
 
   #ifdef CALCULATE_ONLY_MEM_FILES
   std::string path; 
   char memFolder[260];
-  properties_get_str(KEY_MEM_DIR, memFolder, 260);
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
 
   for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
     path = memFolder;
@@ -146,7 +146,7 @@ size_t TMManager::calculateOccupiedRAM(){
   char memFolder[260];
   size_t UsedMemory = 0;
   #ifdef CALCULATE_ONLY_MEM_FILES
-  properties_get_str(KEY_MEM_DIR, memFolder, 260);
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
   std::string path;
   for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
     if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName != 0){
@@ -173,7 +173,7 @@ size_t TMManager::calculateOccupiedRAM(){
 size_t TMManager::cleanupMemoryList(size_t memoryRequested)
 {  
   int AllowedMBMemory = 500;
-  properties_get_int(KEY_ALLOWED_RAM, AllowedMBMemory);
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
   size_t AllowedMemory = AllowedMBMemory * 1000000;    
   size_t memoryNeed = memoryRequested + calculateOccupiedRAM();
 
@@ -264,7 +264,7 @@ int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wc
   size_t requiredMemory = 0;
   {
     char memFolder[260];
-    properties_get_str(KEY_MEM_DIR, memFolder, 260);
+    Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
     std::string path;
 
     path = memFolder;
@@ -454,7 +454,7 @@ Copyright Notice:
 //#include "OptionsDialog.H"
 #include "LogWrapper.h"
 #include "FilesystemHelper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "ZipHelper.h"
 #include "LanguageFactory.H"
 
@@ -1443,7 +1443,7 @@ USHORT TMManager::APIImportMemInInternalFormat
 
   // make temporary directory for the memory files of the package
   char szTempDir[MAX_PATH];
-  properties_get_str( KEY_OTM_DIR, szTempDir, MAX_PATH);
+  Properties::GetInstance()->get_value( KEY_OTM_DIR, szTempDir, MAX_PATH);
   std::string memDir = szTempDir;
   memDir  +=  "/MEM/";
   strcat( szTempDir, "/TEMP/" );

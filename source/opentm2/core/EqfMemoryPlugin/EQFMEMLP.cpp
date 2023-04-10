@@ -79,7 +79,7 @@
 #include "EQFHLOG.H"              // for word count category limits
 #include "otm.h" 
 #include "EQFFUNCI.H"             // private defines for function call interface
-#include "PropertyWrapper.H"
+#include "Property.h"
 
 #define MEM_START_IMPORT    USER_TASK + 1
 #define MEM_IMPORT_TASK     USER_TASK + 2
@@ -340,7 +340,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       else
       {
         // Create full path to the memory database format table
-        properties_get_str( KEY_OTM_DIR, pLIDA->szFullFtabPath, MAX_EQF_PATH );
+        Properties::GetInstance()->get_value( KEY_OTM_DIR, pLIDA->szFullFtabPath, MAX_EQF_PATH );
         strcat(pLIDA->szFullFtabPath, "/TABLE/");
         strcat(pLIDA->szFullFtabPath, MEM_FORMAT_TABLE);
 

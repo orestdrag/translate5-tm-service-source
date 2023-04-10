@@ -18,7 +18,7 @@
 #include <tm.h>               // Private header file of Translation Memory
 #include <EQFMORPI.H>
 #include "./LogWrapper.h"
-#include "./PropertyWrapper.H"
+#include "./Property.h"
 #include "./EncodingHelper.h"
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -116,7 +116,7 @@ USHORT TmtXDelSegm
   if ( !usRc )
   {
     //build tag table path
-    properties_get_str(KEY_OTM_DIR, szString, MAX_EQF_PATH);
+    Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, MAX_EQF_PATH);
     strcat (szString, "/TABLE/");
     strcat( szString, pTmDelIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );

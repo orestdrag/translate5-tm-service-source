@@ -25,7 +25,7 @@
 #include "core/document/InitPlugins.h"
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138
 #include "core/utilities/LanguageFactory.H"
-#include "core/utilities/PropertyWrapper.H"
+#include "core/utilities/Property.h"
 #include "core/utilities/LogWrapper.h"
 #include "core/utilities/ThreadingWrapper.h"
 #include "core/utilities/EncodingHelper.h"
@@ -568,7 +568,7 @@ USHORT EqfStartSession
   if ( usRC == NO_ERROR )
   {
     char szPluginPath[MAX_EQF_PATH];
-    int errCode = properties_get_str_or_default(KEY_OTM_DIR, szPluginPath, MAX_EQF_PATH,"");
+    int errCode = Properties::GetInstance()->get_value_or_default(KEY_OTM_DIR, szPluginPath, MAX_EQF_PATH,"");
 
 		usRC = InitializePlugins( szPluginPath );    // add return value for P402974
         // Add for P403115;
@@ -740,7 +740,7 @@ USHORT EqfMemoryExists
     {    
       //FilesystemHelper::FileExists(pszMemoryName);
       char fname[MAX_EQF_PATH];
-      properties_get_str(KEY_MEM_DIR, fname, MAX_EQF_PATH);
+      Properties::GetInstance()->get_value(KEY_MEM_DIR, fname, MAX_EQF_PATH);
       strcat(fname, pszMemoryName);
       strcat(fname, ".MEM");
 

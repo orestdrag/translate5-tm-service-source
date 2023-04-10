@@ -21,7 +21,7 @@
 
 #include <wctype.h>
 #include "../utilities/LogWrapper.h"
-#include "../utilities/PropertyWrapper.H"
+#include "../utilities/Property.h"
 #include "../utilities/EncodingHelper.h"
 #include "../utilities/FilesystemHelper.h"
 
@@ -250,7 +250,7 @@ USHORT TmtXReplace
   if ( !usRc )
   {
     //build tag table path
-    properties_get_str(KEY_OTM_DIR, szString, sizeof(szString));
+    Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, sizeof(szString));
     strcat( szString, "/TABLE/");
     strcat( szString, pTmPutIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );

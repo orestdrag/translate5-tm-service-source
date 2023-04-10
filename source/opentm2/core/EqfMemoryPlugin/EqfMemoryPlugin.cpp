@@ -6,7 +6,7 @@
 */
 
 #include "PluginManager.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "tm.h"
 #include "EQFSETUP.H"
 #include "FilesystemHelper.h"
@@ -106,6 +106,7 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
   HTM htm = NULL;                      // memory handle 
   std::string strMemPath;
   BOOL fReserved = FALSE;
+  int usRc = 0;
 
   //auto pMemory = createMemory((PSZ)request.strMemName.c_str(), (PSZ)request.strSrcLang.c_str(), (PSZ)request.strMemDescription.c_str() );
   {
@@ -114,9 +115,8 @@ void EqfMemoryPlugin::createMemory(CreateMemRequestData& request){
     // build memory path and reserve a short name
     this->makeMemoryPath( (PSZ)request.strMemName.c_str(), strMemPath, &fReserved );
 
-    // use old memory create code
-    TmCreate(  (PSZ)strMemPath.c_str(), &htm, (PSZ)request.strSrcLang.c_str(),  (PSZ)request.strMemDescription.c_str() );
-
+    // use old memory create code  
+    usRc = TmtXCreate( &request.CreateIn, &request.CreateOut ); //call U code to pass TM command to server or handle it local   
 
     // setup memory properties
     this->createMemoryProperties( (PSZ)request.strMemName.c_str(), strMemPath, (PSZ)request.strMemDescription.c_str(), (PSZ)request.strSrcLang.c_str() );
@@ -175,13 +175,20 @@ EqfMemory* EqfMemoryPlugin::createMemory(
   HTM htm = NULL;                      // memory handle 
   std::string strMemPath;
   BOOL fReserved = FALSE;
-
+  USHORT usRc = 0;
   // build memory path and reserve a short name
   this->makeMemoryPath( pszName, strMemPath, &fReserved );
-
+  
+  TMX_CREATE_IN   CreateIn;    //pointer to create input structure
+  TMX_CREATE_OUT  CreateOut;   //pointer to create output structure
   // use old memory create code
-  TmCreate(  (PSZ)strMemPath.c_str(), &htm, (PSZ)pszSourceLang,  (PSZ)pszDescription );
-
+  usRc = NTMFillCreateInStruct( strMemPath.c_str(), //call function to fill TMC_CREATE_IN structure
+                                pszSourceLang,
+                                pszDescription,
+                                &CreateIn );
+  usRc = TmtXCreate( &CreateIn, &CreateOut ); //call U code to pass TM command to server or handle it local   
+                              
+  htm = (HTM)CreateOut.pstTmClb;//no error,  return pointer to TM CLB as handle  
 
   // setup memory properties
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
@@ -372,7 +379,7 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     memset(szPathMem, 0, 512);
     
     //UtlMakeEQFPath( szPathMem, NULC, PROPERTY_PATH, NULL );
-    properties_get_str(KEY_MEM_DIR, szPathMem, 512);
+    Properties::GetInstance()->get_value(KEY_MEM_DIR, szPathMem, 512);
     strcat(szPathMem, "/");
     Utlstrccpy( szPathMem+strlen(szPathMem), UtlGetFnameFromPath( pMemInfo.get()->szFullPath ), DOT );
     strcat( szPathMem, EXT_OF_MEM );
@@ -668,7 +675,7 @@ void EqfMemoryPlugin::refreshMemoryList()
   char mem_dir[MAX_EQF_PATH];
   {
     //prepare path for searching
-    properties_get_str(KEY_MEM_DIR, mem_dir, MAX_EQF_PATH);
+    Properties::GetInstance()->get_value(KEY_MEM_DIR, mem_dir, MAX_EQF_PATH);
     strncpy(this->szBuffer, mem_dir, MAX_EQF_PATH );
     sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
   }
@@ -729,7 +736,7 @@ BOOL EqfMemoryPlugin::fillInfoStructure
   int errCode = 0;
   {
     char path[MAX_EQF_PATH];
-    errCode = properties_get_str(KEY_MEM_DIR, path, MAX_EQF_PATH);
+    errCode = Properties::GetInstance()->get_value(KEY_MEM_DIR, path, MAX_EQF_PATH);
     if(errCode){
       T5LOG(T5ERROR) << "EqfMemoryPlugin::fillInfoStructure():: errCode = " << errCode;
       return errCode;
@@ -876,7 +883,7 @@ BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathN
 
   if ( ObjState == OBJ_IS_NEW ){
       char buff[255];
-      properties_get_str(KEY_MEM_DIR, buff, 255);
+      Properties::GetInstance()->get_value(KEY_MEM_DIR, buff, 255);
       strPathName = buff;      
       strPathName += "/" + std::string(pszName) + EXT_OF_TMDATA;
       fOK = true;
@@ -953,7 +960,7 @@ int EqfMemoryPlugin::makePropName( std::string &strPathName, std::string &strPro
   char szFullPropName[MAX_LONGFILESPEC];
 
   UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
-  properties_get_str(KEY_MEM_DIR, szFullPropName, MAX_LONGFILESPEC-1);
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, szFullPropName, MAX_LONGFILESPEC-1);
   strcat( szFullPropName, BACKSLASH_STR );
   Utlstrccpy( szFullPropName + strlen(szFullPropName), UtlGetFnameFromPath( (char *)strPathName.c_str() ), DOT );
   strcat( szFullPropName, EXT_OF_MEM );

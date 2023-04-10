@@ -19,7 +19,7 @@ Copyright Notice:
 #include "../../core/pluginmanager/PluginManager.h"
 #include "../../core/utilities/LogWrapper.h"
 #include "../../core/utilities/EncodingHelper.h"
-#include "../../core/utilities/PropertyWrapper.H"
+#include "../../core/utilities/Property.h"
 #include "../../core/utilities/FilesystemHelper.h"
 
 #include <EQFQDAMI.H>             // Private header file of QDAM 
@@ -957,7 +957,7 @@ int EqfMemory::OtmProposalToGetIn
   
   //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
   int threshold = TM_DEFAULT_THRESHOLD;
-  properties_get_int_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
+  Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
   pGetIn->stTmGet.usMatchThreshold = threshold;
   pGetIn->stTmGet.ulSegmentId = Proposal.getSegmentNum();
   pGetIn->stTmGet.pvReplacementList = (PVOID)Proposal.getReplacementList();

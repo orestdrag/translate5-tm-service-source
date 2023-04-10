@@ -2726,11 +2726,6 @@ USHORT MemFillCBNames( HWND, PSZ, PSZ );
 USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 
 /**********************************************************************/
-/* TmCreate                                                           */
-/**********************************************************************/
-USHORT TmCreate( PSZ, HTM *, PSZ, PSZ );
-
-/**********************************************************************/
 /* TmOpen                                                             */
 /**********************************************************************/
 USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL

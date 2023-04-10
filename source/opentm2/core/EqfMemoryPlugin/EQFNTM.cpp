@@ -41,7 +41,7 @@
 #include <tm.h>               // Private header file of Translation Memory
 #include <EQFEVENT.H>             // Event logging
 #include "FilesystemWrapper.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 
 #ifdef _DEBUG
   //#define SESSIONLOG
@@ -58,12 +58,6 @@ TmGetW(HTM            htm,             //(in)  TM handle
 
 USHORT C_TmInfoHwnd( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT, HWND );
 
-USHORT
-NTMFillCreateInStruct( PSZ,
-                       PSZ,
-                       PSZ,
-                       PTMX_CREATE_IN
-                       );
 USHORT
 NTMGetThresholdFromProperties( PSZ,
                                PUSHORT,
@@ -101,101 +95,6 @@ char *GetPropFileExtension( char *pszMemPath )
 //                                           FALSE: display no error message
 //------------------------------------------------------------------------------
 
-USHORT
-TmCreate( PSZ         pszPathMem,      //(in)  full TM name x:\eqf\mem\mem.tmd
-          HTM         *htm,            //(out) TM handle
-          PSZ         pszSourceLang,   //(in)  source language or empty string
-          PSZ         pszDescription)  //(in)  TM description or empty string         
-{
-  PTMX_CREATE_IN   pstCreateIn = nullptr;    //pointer to create input structure
-  PTMX_CREATE_OUT  pstCreateOut = nullptr;   //pointer to create output structure
-  BOOL             fOk = TRUE;            //processing flag
-  USHORT           usRc = ERROR_NOT_ENOUGH_MEMORY; //function return code
-
-  /********************************************************************/
-  /* initialize TM handle                                             */
-  /********************************************************************/
-  *htm = NULLHANDLE;
-
-  /********************************************************************/
-  /* allocate storage for TMX_CREATE_IN and TMX_CREATE_OUT            */
-  /********************************************************************/
-  fOk = UtlAlloc( (PVOID *) &pstCreateIn, 0L,
-                  (LONG)( sizeof( TMX_CREATE_IN ) +
-                          sizeof( TMX_CREATE_OUT ) ),
-                  FALSE );
-
-  if ( fOk )
-  {
-    /******************************************************************/
-    /* assign memory to pointer pstCreateOut                          */
-    /******************************************************************/
-    pstCreateOut = (PTMX_CREATE_OUT)(pstCreateIn + 1);
-
-    /******************************************************************/
-    /* call function to fill TMC_CREATE_IN structure                  */
-    /******************************************************************/
-    usRc = NTMFillCreateInStruct( pszPathMem,
-                                  pszSourceLang,
-                                  pszDescription,
-                                  pstCreateIn );
-    if ( usRc )
-    {
-      /****************************************************************/
-      /* error from NTMFillCreateInStruct                             */
-      /* stop further processing                                      */
-      /****************************************************************/
-      fOk = FALSE;
-    } /* endif */
-
-    if ( fOk )
-    {
-      /****************************************************************/
-      /* call U code to pass TM command to server or handle it local  */
-      /****************************************************************/
-      
-      usRc = TmtXCreate( pstCreateIn, pstCreateOut );      
-
-      if ( !usRc )
-      {
-        /**************************************************************/
-        /* no error,  return pointer to TM CLB as handle              */
-        /**************************************************************/
-        *htm = (HTM)pstCreateOut->pstTmClb;
-      }
-      else
-      {
-        /**************************************************************/
-        /* error stop further processing                              */
-        /**************************************************************/
-        fOk = FALSE;
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* if an error occured call MemRcHandling in dependency  of the     */
-  /* mesage flag to display an error message                          */
-  /********************************************************************/
-  if ( !fOk )
-  {
-    T5LOG(T5ERROR) <<  "::TEMPORARY_COMMENTED :: MemRcHandlingHwnd";
-#ifdef TEMPORARY_COMMENTED
-      usRc = MemRcHandlingHwnd( usRc, pszPathMem, htm, pszServer, hwnd );
-      #endif
-  } /* endif */
-
-  /********************************************************************/
-  /* if memory for TMX_CREATE_IN and TMX_CREATE_OUT was allocated     */
-  /* free the memory                                                  */
-  /********************************************************************/
-  if ( pstCreateIn )
-  {
-    UtlAlloc( (PVOID *) &pstCreateIn, 0L, 0L, NOMSG );
-  } /* endif */
-
-  return usRc;
-} /* End of function TmCreate */
 
 //------------------------------------------------------------------------------
 // External function
@@ -714,15 +613,12 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 //                    The TM referenced by htm must be open.
 //------------------------------------------------------------------------------
 USHORT
-NTMFillCreateInStruct( PSZ             pszPathMem,
-                       PSZ             pszSourceLang,
-                       PSZ             pszDescription,
+NTMFillCreateInStruct( const char*     pszPathMem,
+                       const char*     pszSourceLang,
+                       const char*     pszDescription,
                        PTMX_CREATE_IN  pstCreateIn)
 {
   USHORT        usRc=NO_ERROR;
-  USHORT        fOk;
-  PTMX_INFO_IN  pstInfoIn;
-  PTMX_INFO_OUT pstInfoOut;
 
   /********************************************************************/
   /* fill prefix of the TMX_CREATE_IN                                 */
@@ -819,7 +715,7 @@ NTMGetThresholdFromProperties
   /* NTMOpenProperties and therefore OpenProperties needs only the    */
   /* system path and the TM property name with ext                    */
   /********************************************************************/
-  properties_get_str(KEY_MEM_DIR, szSysPath, MAX_EQF_PATH);
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, szSysPath, MAX_EQF_PATH);
 
   /********************************************************************/
   /* open the properties of the TM                                    */

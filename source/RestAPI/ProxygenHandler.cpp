@@ -11,7 +11,7 @@
 //#ifdef TEMPORARY_COMMENTED
 #include <proxygen/httpserver/RequestHandler.h>
 #include "../opentm2/core/utilities/LogWrapper.h"
-#include "../opentm2/core/utilities/PropertyWrapper.H"
+#include "../opentm2/core/utilities/Property.h"
 
 #include "ProxygenStats.h"
 #include "OtmMemoryServiceWorker.h"
@@ -313,7 +313,7 @@ void ProxygenHandler::sendResponse()noexcept{
     //});
 
     char version[20];
-    properties_get_str_or_default(KEY_APP_VERSION, version, 20, "");
+    Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
     builder->header("t5memory-version", version);  
     if(command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT){
       builder->header("Content-Type", "application/zip");

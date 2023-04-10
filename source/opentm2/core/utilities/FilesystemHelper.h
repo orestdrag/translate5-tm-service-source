@@ -117,17 +117,27 @@ public:
 
         FILEHELPER_ERROR_CANT_OPEN_DIR,
 
+        FILEHELPER_ERROR_FILE_CANT_CREATE_FILE,
+        FILEHELPER_ERROR_FILE_CANT_GET_HOME_DIR,
+        FILEHELPER_ERROR_FILE_CANT_GET_USER_PSWD,
+
         FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED,
         FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED,
-        FILEHELPER_WARNING_FILEBUFFER_EXISTS
+        FILEHELPER_WARNING_FILEBUFFER_EXISTS,        
 
     };
 
     static std::string GetOtmDir();
     static std::string GetHomeDir();
+    static std::string GetTableDir();
+    static std::string GetMemDir();
+    static int init();
 
     private:
-
+    static std::string _memDir;
+    static std::string _tableDir;
+    static std::string _homeDir;
+    static std::string _otmDir;
     //buffers
     static int WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition);
     static int FlushBufferIntoFile(const std::string& fName);

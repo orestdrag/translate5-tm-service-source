@@ -13,7 +13,7 @@
 #include "PluginManager.h"
 #include "PluginManagerImpl.h"
 #include "OtmPlugin.h"
-#include "PropertyWrapper.H"
+#include "Property.h"
 #include "../utilities/LogWrapper.h"
 
 using namespace std;

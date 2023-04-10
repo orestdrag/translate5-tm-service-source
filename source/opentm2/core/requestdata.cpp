@@ -150,9 +150,11 @@ int CreateMemRequestData::checkData(){
         _rest_rc_= BAD_REQUEST ;
         return _rest_rc_;
     } /* end */
+
+    // convert the ISO source language to a OpenTM2 source language name
+    char szOtmSourceLang[40];
     if(!_rest_rc_ ){
-        // convert the ISO source language to a OpenTM2 source language name
-        char szOtmSourceLang[40];
+        
         szOtmSourceLang[0] = 0;//terminate to avoid garbage
         bool fPrefered = false;
         EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strSrcLang.c_str(), szOtmSourceLang, &fPrefered );
@@ -166,7 +168,17 @@ int CreateMemRequestData::checkData(){
             return _rest_rc_;
         } /* end */
     }
-    fValid = !_rest_rc_;
+    if(!_rest_rc_){
+      std::string memPath = FilesystemHelper::GetMemDir() + strMemName + EXT_OF_TMDATA;
+      _rc_ = NTMFillCreateInStruct( memPath.c_str(), //call function to fill TMC_CREATE_IN structure
+                                szOtmSourceLang,
+                                strMemDescription.c_str(),
+                                &CreateIn );
+      if(_rc_){
+         _rest_rc_ = BAD_REQUEST;
+      }
+    }
+    fValid = !_rest_rc_ && !_rc_;
     return _rest_rc_;
 }
 

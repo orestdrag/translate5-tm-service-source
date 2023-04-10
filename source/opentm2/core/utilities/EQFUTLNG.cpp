@@ -16,7 +16,7 @@
 #include "LanguageFactory.H"
 #include "../utilities/EncodingHelper.h"
 #include "../utilities/LogWrapper.h"
-
+#include "../utilities/Property.h"
 
 /*
  ** UtlQuerySysLangFile

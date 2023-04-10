@@ -1988,25 +1988,7 @@ USHORT    ObjBroadcast( WINMSG msg, SHORT sClass, PSZ pszObjName );
 #define LOGOS_ENGINE     "LOGOS"
 #define MTEngine_NA      "n/a"
 #define DEFAULT_SYSTEM_LANGUAGE "English(U.S.)"            // default user language
-//linux defines
-#define KEY_OTM_DIR "OTM_dir"
-#define KEY_MEM_DIR "MEM_dir"
-#define KEY_SERVICE_URL "KEY_SERVICE_URL"
-#define KEY_HOME_DIR "HOME_dir"
-#define KEY_ALLOWED_RAM "AllowedRAM_MB"
-#define KEY_LOCALHOST_ONLY "localhost_only"
-#define KEY_TEMP_DIR "TEMP_dir"
-#define KEY_TRIPLES_THRESHOLD "TriplesThreshold"
-#define KEY_NUM_OF_THREADS "KEY_NUM_OF_THREADS"
-#define KEY_TIMEOUT_SETTINGS "KEY_TIMEOUT_SETTINGS"
-#define KEY_RUN_DATE "KEY_RUN_DATE" 
-//#define KEY_PLUGIN_DIR "PLUGIN_dir"
-#define KEY_DEFAULT_DIR "DEFAULT_dir"
-#define KEY_LANG_FILE_PATH "LANG_FILE_PATH"
-#define KEY_DEBUG_KEYS_SEPARATE_FILES "WRITE_KEYS_IN_SEPARATE_FILES"
 
-#define KEY_APP_VERSION "APP_VERSION"
-//end def
 
 #if defined(_TLEX)
   #define SYSLANGFILE      "PANELL.LNG"
