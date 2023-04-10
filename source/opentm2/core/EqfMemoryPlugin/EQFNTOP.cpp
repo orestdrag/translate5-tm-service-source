@@ -673,7 +673,6 @@ USHORT EqfMemory::OpenX()
   } /* endif */
 
   DEBUGEVENT( TMTXOPEN_LOC, FUNCEXIT_EVENT, 0 );
-
   return( usRc );
 }
 

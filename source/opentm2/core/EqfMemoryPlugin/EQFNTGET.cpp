@@ -393,7 +393,7 @@ USHORT TmtXGet
       if ( !usRc )
       {
           pSentence->pNormString = pSentence->pNormStringStart;
-          HashSentence( pSentence, pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+          HashSentence( pSentence );
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lOtherTime) );

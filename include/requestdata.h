@@ -37,6 +37,7 @@ class JSONFactory;
 
 class RequestData{
 protected:
+    std::shared_ptr<int> memRef;
     int loggingThreshold = -1;
     std::shared_ptr<EqfMemory> mem;
     int requestType = 0;
@@ -275,7 +276,7 @@ protected:
     
     LOOKUPINMEMORYDATA Data;
     MEMPROPOSAL Prop;
-    EqfMemory* lHandle = 0;
+    //EqfMemory* lHandle = 0;
   };
 
 class ExportRequestData: public RequestData{
@@ -292,8 +293,8 @@ class ExportRequestData: public RequestData{
     std::string strTempFile;
     public:
 
-    std::string requestFormat;//application/xml or application/binary
-    ExportRequestData(const std::string& format, const std::string& memName): RequestData(EXPORT_MEM, "", memName),  requestFormat(format){};
+    //std::string requestFormat;//application/xml or application/binary
+    ExportRequestData(const std::string& format, const std::string& memName): RequestData(EXPORT_MEM, "", memName){ requestAcceptHeader = format;};
     ExportRequestData(): RequestData(EXPORT_MEM){};
 protected:
     int parseJSON() override {return 0;}

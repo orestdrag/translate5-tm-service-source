@@ -262,7 +262,7 @@ USHORT TmtXReplace
   if ( !usRc )
   {
     pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    HashSentence( pSentence );
     pSentence->pTagRecord->usTagTableId = 0;
     if ( pTmClb )  /* 4-13-15 */
     {
@@ -406,9 +406,7 @@ USHORT TmtXReplace
 //------------------------------------------------------------------------------
 VOID HashSentence
 (
-  PTMX_SENTENCE pSentence,          // pointer to sentence structure
-  USHORT usMajVersion,              // major version of TM (req. for hash method)
-  USHORT usMinVersion               // minor version of TM (req. for hash method)
+  PTMX_SENTENCE pSentence         // pointer to sentence structure
 )
 {
   PSZ_W  pNormOffset;               // pointer to start of normalized string
@@ -420,7 +418,7 @@ VOID HashSentence
   while ( pTermTokens->usLength )
   {
     pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
-    pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
+    pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset);
       T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
@@ -479,7 +477,7 @@ VOID HashSentence
 //------------------------------------------------------------------------------
 
 // HashtTupelW for memory version 7.1 and above
-USHORT HashTupelW71
+USHORT HashTupelW
 (
   PSZ_W  pToken,                       // passed token
   USHORT usLen                        // length of tupel
@@ -510,57 +508,6 @@ USHORT HashTupelW71
   return (usHash);
 } /* end of function HashTupel */
 
-// HashtTupelW for memory versions up to and including 7.0
-USHORT HashTupelW70
-(
-  PSZ_W  pToken,                       // passed token
-  USHORT usLen                         // length of tupel
-)
-{
-  USHORT usHash = 0;                   // hash value
-  CHAR_W chHash[MAX_RANDOM];           // string to be hashed
-  UCHAR   c;                           // active character
-
-  usLen = get_min(usLen, MAX_RANDOM - 1);
-
-  // get a copy of the token to be normalized and hashed
-  memcpy(chHash, pToken, usLen * sizeof(CHAR_W));
-  chHash[usLen] = EOS;
-
-  pToken = UtlLowerW( chHash );
-
-    // new approach to distinguish non-alphabetic characters
-  while ( (c = (UCHAR)*pToken++) != NULC )
-  {
-    if ( isalpha(c) )
-    {
-      usHash = (usHash * 131) + c-'a';
-    }
-    else
-    {
-      usHash = (usHash * 131) + c;
-    } /* endif */
-  } /* endwhile */
-
-  //ensure that usHash isn't zero
-  if ( usHash == 0 )
-  {
-    usHash = 1;
-  } /* endif */
-  return (usHash);
-} /* end of function HashTupelW70 */
-
-// HashtTupelW 
-USHORT HashTupelW
-(
-  PSZ_W  pToken,                       // passed token
-  USHORT usLen,                        // length of tupel
-  USHORT usMajVersion,                 // major version of TM 
-  USHORT usMinVersion                  // minor version of TM 
-)
-{
-    return( HashTupelW71( pToken, usLen ) );
-}
 
 //------------------------------------------------------------------------------
 // Internal function                                                            

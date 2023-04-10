@@ -2,6 +2,7 @@
 #define _LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_
 
 #include <atomic>
+#include <memory>
 #include "win_types.h"
 
 
@@ -1679,7 +1680,8 @@ typedef struct _FCTDATA
 (
   PSZ         pszMemname,              // name of Translation Memory
   PSZ         pszOutFile,              // fully qualified name of output file
-  LONG        lOptions                 // options for Translation Memory export
+  LONG        lOptions,                // options for Translation Memory export
+  std::shared_ptr<EqfMemory> _mem
 );
 } FCTDATA, *PFCTDATA;
 

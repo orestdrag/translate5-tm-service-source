@@ -1952,13 +1952,20 @@ typedef struct _TMXDELTM_OUT
 } TMX_DELTM_OUT, * PTMX_DELTM_OUT;
 
 class EqfMemoryPlugin;
+class Dummy{};
+
 
 class EqfMemory : public TMX_CLB
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
 */
 
 {
+  
 public:
+  //std::shared_ptr<EqfMemory> readOnlyPtr;
+  //std::shared_ptr<EqfMemory> writePtr;
+  std::shared_ptr<int> readOnlyCnt;
+  std::shared_ptr<int> writeCnt;
 
 /*! \brief OtmMemory related return codes
 
@@ -1967,7 +1974,12 @@ public:
 
 /*! \brief Constructors
 */
-	EqfMemory() {};
+	EqfMemory()  {
+    //readOnlyPtr = std::make_shared<EqfMemory>(*this);
+    //writePtr(std::make_shared<EqfMemory>(*this));
+    readOnlyCnt = std::make_shared<int>(0);
+    writeCnt = std::make_shared<int>(0);
+  };
 
 	EqfMemory( EqfMemoryPlugin *pMemoryPlugin, HTM htm, char *pszName );
 
@@ -3987,10 +3999,10 @@ USHORT TmtXClose( PTMX_CLB, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 //tm put prototypes
 BOOL AllocTable( PTMX_TABLE* );
-VOID HashSentence( PTMX_SENTENCE, USHORT usMajVersion, USHORT usMinVersion );
+VOID HashSentence( PTMX_SENTENCE );
 VOID HashSentenceV5( PTMX_SENTENCE_V5, USHORT );
 USHORT HashTupel( PBYTE, USHORT, USHORT );
-USHORT HashTupelW( PSZ_W, USHORT, USHORT, USHORT );
+USHORT HashTupelW( PSZ_W, USHORT );
 static VOID BuildVotes( PTMX_SENTENCE );
 static VOID Vote( PTMX_TERM_TOKEN, PTMX_SENTENCE, USHORT );
 static VOID BuildVotesV5( PTMX_SENTENCE_V5 );
@@ -4542,12 +4554,31 @@ int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
 };
 
 class TMManager{
+
+  public:
     /*! \brief Pointer to the list of opened memories
     */
     //std::vector<EqfMemory> vMemoryList;
+  typedef std::map <std::string, std::shared_ptr<EqfMemory>> TMMap;
+  TMMap tms;
+
+  enum TMManagerCodes{
+    TMM_NO_ERROR = 0,
+
+    TMM_TMD_NOT_FOUND = 16,
+    TMM_TMI_NOT_FOUND = 32,
+    TMM_TM_NOT_FOUND = TMM_TMD_NOT_FOUND + TMM_TMI_NOT_FOUND,
 
 
-public:
+  };
+
+  bool IsMemoryLoaded(const std::string& strMemName);
+
+  int AddMem(const std::shared_ptr<EqfMemory> NewMem);
+  int OpenTM(const std::string& strMemName);
+  int CloseTM(const std::string& strMemName);
+  std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
+  std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
 
     /*! \brief OpenTM2 API session handle
     */
