@@ -116,7 +116,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         pRequest->run();
         break;
       }
-
       case COMMAND::REORGANIZE_MEM:
       {
         pRequest->_rest_rc_ = 500;
@@ -182,13 +181,15 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
 }
 
 void ProxygenHandler::onEOM() noexcept {  
-  if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY){
-    if(!pRequest){
+  if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
+  {
+  if(!pRequest){
 
-    }else{ 
+  }else{ 
+    if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
+    {
       body_->coalesce();      
       pRequest->strBody = (char*) body_->data(); 
-
       //fix garbage in json 
       size_t json_end = pRequest->strBody.find("\n}") ;
       if(json_end > 0 && json_end != std::string::npos){
@@ -197,62 +198,66 @@ void ProxygenHandler::onEOM() noexcept {
 
       std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
       T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-      switch(pRequest->command){
-
-        case COMMAND::UPDATE_ENTRY:
-        case COMMAND::CREATE_MEM:
-        {
-          if(fWriteRequestsAllowed == false){
-            pRequest->_rest_rc_ = 423;
-            break;
-          }
-          pRequest->run();
-          break;
-        }
-        case COMMAND::IMPORT_MEM:
-        {
-          if(fWriteRequestsAllowed == false){
-            pRequest->_rest_rc_ = 423;
-            break;
-          }
-          pRequest->_rest_rc_ = pMemService->import( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-          break; 
-        }
-        case COMMAND::FUZZY:
-        {
-          pRequest->_rest_rc_ = pMemService->search( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-          break;
-        }
-        case COMMAND::CONCORDANCE:
-        {
-          pRequest->_rest_rc_ = pMemService->concordanceSearch( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-          break;
-        }
-        case COMMAND::DELETE_ENTRY:
-        {
-          if(fWriteRequestsAllowed == false){
-            pRequest->_rest_rc_ = 423;
-            break;
-          }
-          pRequest->_rest_rc_ = pMemService->deleteEntry( pRequest->strMemName, pRequest->strBody,  pRequest->outputMessage );
-          break;
-        }
-        case COMMAND::CLONE_TM_LOCALY:{
-          if(fWriteRequestsAllowed == false){
-            pRequest->_rest_rc_ = 423;
-            break;
-          }
-          pRequest->_rest_rc_ = pMemService->cloneTMLocaly(pRequest->strMemName, pRequest->strBody, pRequest->outputMessage);
-          break;
-        }
-        default:
-        {
-          pRequest->_rest_rc_ = 400;
-          break;
-        }
-      }    
     }
-    sendResponse();
+    
+
+    switch(pRequest->command){
+
+      case COMMAND::UPDATE_ENTRY:
+      case COMMAND::CREATE_MEM:
+      case COMMAND::CONCORDANCE:
+      case COMMAND::FUZZY:
+      {
+        if(fWriteRequestsAllowed == false){
+          pRequest->_rest_rc_ = 423;
+          break;
+        }
+        pRequest->run();
+        break;
+      }
+      case COMMAND::IMPORT_MEM:
+      {
+        if(fWriteRequestsAllowed == false){
+          pRequest->_rest_rc_ = 423;
+          break;
+        }
+        pRequest->_rest_rc_ = pMemService->import( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
+        break; 
+      }
+      //case COMMAND::FUZZY:
+      //{
+        //pRequest->_rest_rc_ = pMemService->search( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
+      //  break;
+      //}
+      //{
+      //  pRequest->_rest_rc_ = pMemService->concordanceSearch( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
+      //  break;
+      //}
+      case COMMAND::DELETE_ENTRY:
+      {
+        if(fWriteRequestsAllowed == false){
+          pRequest->_rest_rc_ = 423;
+          break;
+        }
+        pRequest->_rest_rc_ = pMemService->deleteEntry( pRequest->strMemName, pRequest->strBody,  pRequest->outputMessage );
+        break;
+      }
+      case COMMAND::CLONE_TM_LOCALY:{
+        if(fWriteRequestsAllowed == false){
+          pRequest->_rest_rc_ = 423;
+          break;
+        }
+        pRequest->_rest_rc_ = pMemService->cloneTMLocaly(pRequest->strMemName, pRequest->strBody, pRequest->outputMessage);
+        break;
+      }
+      default:
+      {
+        pRequest->_rest_rc_ = 400;
+        break;
+      }
+    }    
+  }
+  sendResponse();
   }
 }
 
