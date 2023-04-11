@@ -2104,10 +2104,10 @@ SHORT BTREE::QDAMWriteRecord_V3
    /********************************************************************/
    /* write header with corruption flag -- if not yet done             */
    /********************************************************************/
-   if ( fWriteHeaderPending )
+   //if ( fWriteHeaderPending )
    {
      sRc = QDAMWriteHeader();
-     fWriteHeaderPending = FALSE;
+   //  fWriteHeaderPending = FALSE;
    } /* endif */
 
    //  if guard flag is on write it to disk

@@ -391,7 +391,7 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
 size_t FileBuffer::ReadFromFile(){           
     originalFileSize = FilesystemHelper::GetFileSize(fileName);
     int readed = 0;
-    if( originalFileSize > 0 ){
+    if( originalFileSize > 0  && originalFileSize != -1){
         data.resize(originalFileSize);
         
         if(VLOG_IS_ON(1)){
@@ -457,7 +457,7 @@ size_t FileBuffer::Flush(){
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
             oldSize = FilesystemHelper::GetFileSize(file);
         }
-        writenBytes *= fwrite(bufStart, size, 1, file);
+        writenBytes = fwrite(bufStart, size, 1, file) * size;
         if ( writenBytes <=0 ){
             T5LOG(T5ERROR) <<"::WriteToFile():: ERROR_WRITE_FAULT";
             return ERROR_WRITE_FAULT;

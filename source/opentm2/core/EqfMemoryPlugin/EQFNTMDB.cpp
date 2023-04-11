@@ -413,7 +413,7 @@ SHORT EQFNTMClose
 
   if ( !sRc )
   {
-    UtlAlloc( (PVOID*) ppBTIda, 0L, 0L, NOMSG );
+    //UtlAlloc( (PVOID*) ppBTIda, 0L, 0L, NOMSG );
   } /* endif */
 
   if ( sRc != NO_ERROR )

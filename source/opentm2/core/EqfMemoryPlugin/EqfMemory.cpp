@@ -84,7 +84,7 @@ int EqfMemory::getMarkupName
 {
   if ( (iPos >= 0) && (iPos < (int)(TagTables.ulMaxEntries)) )
   {
-    PTMX_TABLE_ENTRY pEntry = &(TagTables.stTmTableEntry);
+    PTMX_TABLE_ENTRY pEntry = TagTables.stTmTableEntry;
     pEntry += iPos;
     return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
   }
@@ -273,6 +273,9 @@ int EqfMemory::putProposal
   if ( iRC != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
       //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+  }else{
+    TmBtree.fb.Flush();
+    InBtree.fb.Flush();
   }
 
   if ( ( iRC == 0 ) &&
@@ -670,7 +673,7 @@ int EqfMemory::getLanguage
 {
   if ( (iPos >= 0) && (iPos < (int)(Languages.ulMaxEntries)) )
   {
-    PTMX_TABLE_ENTRY pEntry = &(Languages.stTmTableEntry);
+    PTMX_TABLE_ENTRY pEntry = Languages.stTmTableEntry;
     pEntry += iPos;
     return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
   }

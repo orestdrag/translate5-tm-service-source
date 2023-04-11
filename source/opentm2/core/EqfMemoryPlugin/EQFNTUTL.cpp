@@ -923,7 +923,7 @@ NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
     /******************************************************************/
     /* get pointer to table entries                                   */
     /******************************************************************/
-    *ppstTMTableEntries = &((*ppstTMTable)->stTmTableEntry);
+    *ppstTMTableEntries = &((*ppstTMTable)->stTmTableEntry[0]);
   } /* endif */
 
   return usRc;
@@ -1743,6 +1743,7 @@ USHORT NTMAddNameToTable
       /* If not reallocate the table and check that the table      */
       /* will not exceed the maximum size of a QDAM record (32K)   */
       /*************************************************************/
+      #ifdef TEMPORARY_COMMENTED
       ulNewSize = (ULONG)sizeof(TMX_TABLE) +
                   (pstTMTable->ulMaxEntries * (ULONG)sizeof(TMX_TABLE_ENTRY) );
       if ( ulNewSize >= pstTMTable->ulAllocSize )
@@ -1764,37 +1765,43 @@ USHORT NTMAddNameToTable
               //---------------------------------------------------------
               case LANG_KEY :
                 pTmClb->Languages = *pstTMTable;
-                pstTMTableEntries = &pTmClb->Languages.stTmTableEntry;
+                pstTMTableEntries = pTmClb->Languages.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case FILE_KEY :
                 pTmClb->FileNames = *pstTMTable;
-                pstTMTableEntries = &pTmClb->FileNames.stTmTableEntry;
+                pstTMTableEntries = pTmClb->FileNames.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case AUTHOR_KEY :
                 pTmClb->Authors = *pstTMTable;
-                pstTMTableEntries = &pTmClb->Authors.stTmTableEntry;
+                pstTMTableEntries = pTmClb->Authors.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case TAGTABLE_KEY :
                 pTmClb->TagTables = *pstTMTable;
-                pstTMTableEntries = &pTmClb->TagTables.stTmTableEntry;
+                pstTMTableEntries = pTmClb->TagTables.stTmTableEntry;
                 break;
               //---------------------------------------------------------
               case LANGGROUP_KEY :
                 pTmClb->LangGroups = *pstTMTable;
-                pstTMTableEntries = &pTmClb->LangGroups.stTmTableEntry;
+                pstTMTableEntries = pTmClb->LangGroups.stTmTableEntry;
                 break;
             } /* end switch */
-            pstTMTable->ulAllocSize = ulReallocSize;
+            //pstTMTable->ulAllocSize = ulReallocSize;
           }
           else
           {
             usRc = ERROR_NOT_ENOUGH_MEMORY;
           } /* endif */
         } /* endif */
+        
       } /* endif */
+      #endif
+      if( (pstTMTable->ulMaxEntries+1) * sizeof(pstTMTableEntries[0]) + sizeof(ULONG) > BTREE_REC_SIZE_V3){
+        T5LOG(T5ERROR) << ":: cannot increase table size, it reached it's limit ;"<< pstTMTable->ulMaxEntries;
+        usRc = ERROR_NOT_ENOUGH_MEMORY;
+      }
 
       if ( usRc == NO_ERROR )
       {
@@ -1816,10 +1823,12 @@ USHORT NTMAddNameToTable
         {
           if ( usTableType != LANGGROUP_KEY )
           {
-            usRc = pTmClb->InBtree.EQFNTMUpdate(
+            usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                 (ULONG)usTableType,
                                 (PBYTE)pstTMTable,
-                                pstTMTable->ulAllocSize );
+                                //pstTMTable->ulAllocSize 
+                                BTREE_REC_SIZE_V3
+                                );
           } /* endif */
         } /* endif */
       } /* endif */
@@ -2094,7 +2103,7 @@ USHORT NTMCreateLangGroupTable
 )
 {
   USHORT usRC = NO_ERROR;
-  pTmClb->LangGroups.ulAllocSize = TMX_TABLE_SIZE;
+  //pTmClb->LangGroups.ulAllocSize = TMX_TABLE_SIZE;
 
   // allocate language-ID-to-group-ID-table
  
@@ -2118,7 +2127,7 @@ USHORT NTMCreateLangGroupTable
     while ( (usRC == NO_ERROR) &&
             (i < (int)pTmClb->Languages.ulMaxEntries) )
     {
-      PTMX_TABLE_ENTRY pstEntry = &(pTmClb->Languages.stTmTableEntry);
+      PTMX_TABLE_ENTRY pstEntry = pTmClb->Languages.stTmTableEntry;
       usRC = NTMAddLangGroup( pTmClb,
                               pstEntry[i].szName,
                               pstEntry[i].usId );
