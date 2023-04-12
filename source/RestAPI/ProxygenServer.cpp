@@ -226,7 +226,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       if(!urlMemName.empty()){//for command memName should always exists
         if(methodStr == "POST"){
           if(urlCommand == "fuzzysearch"){
-            requestHandler->pRequest = new ConcordanceSearchRequestData();
+            requestHandler->pRequest = new FuzzySearchRequestData();
           }else if(urlCommand == "concordancesearch"){
             requestHandler->pRequest = new ConcordanceSearchRequestData();
           }else if(urlCommand ==  "entry"){ // update 

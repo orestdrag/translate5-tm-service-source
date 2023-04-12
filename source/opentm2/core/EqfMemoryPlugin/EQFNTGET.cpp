@@ -308,7 +308,7 @@ static BOOL NTMCheckAndDeleteTagPairs
 // ----------------------------------------------------------------------------+
 USHORT TmtXGet
 (
-  PTMX_CLB pTmClb,         //ptr to ctl block struct
+  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_GET_IN_W pTmGetIn,    //ptr to input struct
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )

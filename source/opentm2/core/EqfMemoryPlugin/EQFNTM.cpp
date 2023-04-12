@@ -50,7 +50,7 @@
 /* prototypes for internal functions                                  */
 /**********************************************************************/
 USHORT
-TmGetW(HTM            htm,             //(in)  TM handle
+TmGetW(EqfMemory*     htm,             //(in)  TM handle
        PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
        PTMX_GET_OUT_W pstGetOut,       //(out) pointer to get output structure
@@ -427,7 +427,7 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
 
 
 USHORT
-TmGetW(HTM            htm,             //(in)  TM handle
+TmGetW(EqfMemory*            htm,             //(in)  TM handle
        PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
        PTMX_GET_OUT_W pstGetOut,       //(out) pointer to get output structure
@@ -457,8 +457,7 @@ TmGetW(HTM            htm,             //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  PTMX_CLB ptmx = (PTMX_CLB)htm;
-  usRc = TmtXGet( ptmx, pstGetIn, pstGetOut );
+  usRc = TmtXGet( htm, pstGetIn, pstGetOut );
 
   if ( (usRc == NO_ERROR) && pstGetOut->usNumMatchesFound )
   {
@@ -507,15 +506,6 @@ TmGetW(HTM            htm,             //(in)  TM handle
         usRc = ERROR_NOT_ENOUGH_MEMORY;
       } /* endif */
     } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* if an error occured call MemRcHandling in dependency of          */
-  /* the message flag to display error message                        */
-  /********************************************************************/
-  if ( usMsgHandling && usRc )
-  {
-    usRc = MemRcHandling( usRc, szMemPath, &htm, NULL );
   } /* endif */
 
   if ( usRc != NO_ERROR )

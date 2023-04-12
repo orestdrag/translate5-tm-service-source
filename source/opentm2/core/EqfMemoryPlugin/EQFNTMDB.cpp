@@ -577,7 +577,7 @@ BTREE::EQFNTMInsert
    } /* endif */
    if ( !sRc && !fOpen )
    {
-     sRc = BTREE_READONLY;
+   //  sRc = BTREE_READONLY;
    } /* endif */
   /********************************************************************/
   /* if user wants that we find an appropriate key, we have to do so..*/
@@ -1441,7 +1441,7 @@ SHORT BTREE::QDAMDictUpdateLocal
 
    if ( !sRc && !fOpen )
    {
-     sRc = BTREE_READONLY;
+   //  sRc = BTREE_READONLY;
    } /* endif */
 
    /*******************************************************************/
