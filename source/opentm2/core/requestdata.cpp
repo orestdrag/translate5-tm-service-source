@@ -1170,15 +1170,6 @@ int FuzzySearchRequestData::execute(){
   strcpy( pSearchKey->szMarkup, Data.szMarkup );
   wcscpy( pSearchKey->szContext, Data.szContext );
 
-  std::vector<std::string> sourceLangs;
-  //if(pSearchKey->fIsoSourceLangIsPrefered){
-  //  sourceLangs = GetListOfLanguagesFromFamily(Data.szIsoSourceLang);
-  //}
-  
-  //if(sourceLangs.empty()){
-    sourceLangs.push_back(pSearchKey->szSourceLanguage);
-  //}
-
   if ( Data.iNumOfProposals == 0 )
   {
     //Data.iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
@@ -1189,24 +1180,17 @@ int FuzzySearchRequestData::execute(){
   memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
   // do the lookup and handle the results
   int ProposalSpacesLeft = Data.iNumOfProposals;
-  int iNumOfProposals;
-  int i = 0;
-  //for(int i = 0; i < sourceLangs.size() && _rc_ == 0; i++){
-    iNumOfProposals = ProposalSpacesLeft;
-    strcpy(pSearchKey->szSourceLanguage, sourceLangs[i].c_str());
-    int j = Data.iNumOfProposals - ProposalSpacesLeft;
-    _rc_ = EqfQueryMem( OtmMemoryServiceWorker::getInstance()->hSession, mem.get(), pSearchKey, &iNumOfProposals, &pFoundProposals[j], GET_EXACT );
-    ProposalSpacesLeft -= iNumOfProposals;
-    if(ProposalSpacesLeft <= 0 ){
-      T5LOG( T5WARNING) <<  ":: not all list of lang was checked before allocated proposals space reached end, allocated " << Data.iNumOfProposals << 
-        ", proposal spaces, checked " << i << " of " << sourceLangs.size() << " languages ";
-      //break;
-    }
-    if(_rc_ != 0){
-      T5LOG( T5WARNING) << ":: fuzzy search of mem returned error, rc = " << _rc_ << "; sourceLange = "<< sourceLangs[i] ;
-    }
-  //}
-  iNumOfProposals = Data.iNumOfProposals - ProposalSpacesLeft;
+  int iNumOfProposals = 0; 
+
+  // call the memory factory to process the request
+  if ( _rc_ == NO_ERROR )
+  {
+    _rc_ =  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+  } /* endif */
+
+  if(_rc_ != 0){
+    T5LOG( T5WARNING) << ":: fuzzy search of mem returned error, rc = " << _rc_ ;
+  }
   
   if ( _rc_ == 0 )
   {

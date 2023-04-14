@@ -259,13 +259,9 @@ int EqfMemory::putProposal
   }
   /********************************************************************/
   /* fill the TMX_PUT_IN prefix structure                             */
-  /* stPrefixIn.usLengthInput                                         */
-  /* stPrefixIn.usTmCommand                                           */
   /* the TMX_PUT_IN structure must not be filled it is provided       */
   /* by the caller                                                    */
   /********************************************************************/
-  TmPutIn.stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  TmPutIn.stPrefixIn.usTmCommand   = TMC_REPLACE;
 
   //iRC = (int)TmReplace( this->htm,  NULL,  TmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
   iRC = TmtXReplace ( this, &TmPutIn, &TmPutOut );
@@ -580,8 +576,6 @@ int EqfMemory::deleteProposal
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
   int iRC = this->OtmProposalToPutIn( Proposal, &TmPutIn );
   
-  TmPutIn.stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
-  TmPutIn.stPrefixIn.usTmCommand   = TMC_DELETE;
 
 	if ( !iRC ) 
     iRC = TmtXDelSegm ( (PTMX_CLB)htm, &TmPutIn, &TmPutOut );

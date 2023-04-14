@@ -186,8 +186,6 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     {
       /****************************************************************/
       /* fill the TMX_OPEN_IN structure                               */
-      /* stPrefixIn.usLengthInput                                     */
-      /* stPrefixIn.usTmCommand                                       */
       /* stTmOpen.szDataName                                          */
       /* stTmOpen.szIndexName                                         */
       /* stTmOpen.szServer                                            */
@@ -195,8 +193,6 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
       /* stTmOpen.usAccess                                            */
       /* stTmOpen.usThreshold                                         */
       /****************************************************************/
-      pstOpenIn->stPrefixIn.usLengthInput = sizeof( TMX_OPEN_IN );
-      pstOpenIn->stPrefixIn.usTmCommand = TMC_OPEN;
       strcpy( pstOpenIn->stTmOpen.szDataName, szMemFullPath );
       Utlstrccpy( pstOpenIn->stTmOpen.szIndexName, szMemFullPath, DOT );
 
@@ -381,15 +377,6 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
       pstCloseOut = (PTMX_CLOSE_OUT)(pstCloseIn + 1);
 
       /****************************************************************/
-      /* fill the TMX_CLOSE_IN structure                              */
-      /* stPrefixIn.usLengthInput                                     */
-      /* stPrefixIn.usTmCommand                                       */
-      /* stTmClb                                                      */
-      /****************************************************************/
-      pstCloseIn->stPrefixIn.usLengthInput = sizeof( TMX_CLOSE_IN );
-      pstCloseIn->stPrefixIn.usTmCommand   = TMC_CLOSE;
-
-      /****************************************************************/
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
       usRc = TmtXClose ( (PTMX_CLB)htm, pstCloseIn, pstCloseOut );
@@ -446,13 +433,9 @@ TmGetW(EqfMemory*            htm,             //(in)  TM handle
 
   /********************************************************************/
   /* fill the TMX_GET_IN structure                                    */
-  /* stPrefixIn.usLengthInput                                         */
-  /* stPrefixIn.usTmCommand                                           */
   /* the TMX_GET_IN structure must not be filled it is provided       */
   /* by the caller                                                    */
   /********************************************************************/
-  pstGetIn->stPrefixIn.usLengthInput = sizeof( TMX_GET_IN_W );
-  pstGetIn->stPrefixIn.usTmCommand   = TMC_GET;
 
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
@@ -535,11 +518,7 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
 
   /********************************************************************/
   /* fill the TMX_INFO_IN structure                                   */
-  /* stPrefixIn.usLengthInput                                         */
-  /* stPrefixIn.usTmCommand                                           */
   /********************************************************************/
-  pstInfoIn->stPrefixIn.usLengthInput = sizeof( TMX_INFO_IN );
-  pstInfoIn->stPrefixIn.usTmCommand   = TMC_INFO;
   pstInfoIn->usInfoLevel = usInfoLevel;
 
   /********************************************************************/
@@ -638,36 +617,3 @@ NTMGetThresholdFromProperties
   return usRc;
 } /* end of function NTMGetThresholdFromProperties */
 
-
-
-VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstPutIn, PTMX_PUT_IN_W pstPutInW, ULONG cp )
-{
-  PTMX_PUT   pstTmPut = &pstPutIn->stTmPut;
-  PTMX_PUT_W pstTmPutW= &pstPutInW->stTmPut;
-
-  ASCII2Unicode( pstTmPut->szSource, pstTmPutW->szSource, cp );
-  ASCII2Unicode( pstTmPut->szTarget, pstTmPutW->szTarget, cp );
-
-  strcpy( pstTmPutW->szSourceLanguage, pstTmPut->szSourceLanguage );
-  strcpy( pstTmPutW->szTargetLanguage, pstTmPut->szTargetLanguage );
-  strcpy( pstTmPutW->szAuthorName, pstTmPut->szAuthorName );
-  pstTmPutW->usTranslationFlag = pstTmPut->usTranslationFlag;
-  strcpy( pstTmPutW->szFileName, pstTmPut->szFileName );
-  strcpy( pstTmPutW->szLongName, pstTmPut->szLongName );
-  pstTmPutW->ulSourceSegmentId = pstTmPut->usSourceSegmentId;
-  strcpy( pstTmPutW->szTagTable, pstTmPut->szTagTable );
-  pstTmPutW->lTime = pstTmPut->lTime;
-
-  memcpy( &pstPutInW->stPrefixIn, &pstPutIn->stPrefixIn, sizeof( TMX_PREFIX_IN ));
-}
-
-
-VOID  TMX_PUT_OUT_ASCII2Unicode( PTMX_PUT_OUT pstPutOut, PTMX_PUT_OUT_W pstPutOutW )
-{
-  memcpy( &pstPutOutW->stPrefixOut, &pstPutOut->stPrefixOut, sizeof( TMX_PREFIX_OUT ));
-}
-
-VOID  TMX_PUT_OUT_Unicode2ASCII( PTMX_PUT_OUT_W pstPutOutW, PTMX_PUT_OUT pstPutOut )
-{
-  memcpy( &pstPutOut->stPrefixOut, &pstPutOutW->stPrefixOut, sizeof( TMX_PREFIX_OUT ));
-}

@@ -850,18 +850,9 @@ USHORT EqfQueryMem
   LONG        lOptions     
 )
 {
-  PFCTDATA    pData = NULL;            // ptr to function data area
-  // validate session handle
-  USHORT usRC = FctValidateSession( hSession, &pData );
-
-  // call the memory factory to process the request
-  if ( usRC == NO_ERROR )
-  {
-    usRC =  TMManager::GetInstance()->APIQueryMem( pMem, pSearchKey, piNumOfProposals, pProposals, lOptions );
-  } /* endif */
-
+  USHORT usRC = 0;
   if(usRC)  T5LOG(T5ERROR) << "End of EqfQueryMem, RC = " <<usRC ;
-  else      T5LOG(T5INFO) << "End of EqfQueryMem, RC = " <<usRC;;
+  else      T5LOG(T5INFO) << "End of EqfQueryMem, RC = " <<usRC;
   
 
   return( usRC );
