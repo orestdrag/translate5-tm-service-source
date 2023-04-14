@@ -8347,7 +8347,7 @@ class NewTMManager{
   int CreateEmptyTM(const std::string& tmName, const std::string& srcLang, const std::string& tmDescr);
   int ImportTMInInternalFormat(const std::string& tmName);
   int DeleteTM(const std::string& tmName);
-  int CloneTMLocaly(const std::string& srcTmName, dstTmName);
+  int CloneTMLocaly(const std::string& srcTmName, const std::string& dstTmName);
   int ReorganizeTM(const std::string& tmName);
 
   //functions to work with loading and unloading tm
@@ -8377,6 +8377,6 @@ class NewTMManager{
   //helper functions 
   static std::string GetTmdPath(const std::string& memName);
   static std::string GetTmiPath(const std::string& memName);
-}
+};
 
 #endif //_tm_h_included_

@@ -255,6 +255,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
   }
 
   static int startService(){
+    FilesystemHelper::init();
     
     // Increase the default flow control to 10MB/100MB
     uint32_t initialReceiveWindow = uint32_t(1 << 20) * 10;
@@ -305,49 +306,15 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     if(FLAGS_t5loglevel >= 0){
       uiLogLevel = FLAGS_t5loglevel;
     }
-    //#else 
-    //  #ifndef USE_CONFIG_FILE
-    //    #define USE_CONFIG_FILE
-    //  #endif 
-    //  #define FLAGS_useconfigfile true
-    //#endif //GFLAGS_ENABLED
-
-    #ifdef USE_CONFIG_FILE
-    /* get configuration settings */
-    if(FLAGS_useconfigfile){
-        path = defOtmDirPath + "t5memory.conf";
-        config conf(path);
-        int res = conf.parse();
-
-        if (!res) {
-            strncpy(szServiceName,
-                conf.get_value("name", szServiceName).c_str(), 100);            
-
-            strncpy(szOtmDirPath,
-                conf.get_value("otmdir", defOtmDirPath.c_str()).c_str(), 254);    
-            uiPort = std::stoi(conf.get_value("port", toStr(uiPort)));
-            iWorkerThreads = std::stoi(conf.get_value("threads", toStr(iWorkerThreads)));
-            uiTimeOut = std::stoi(conf.get_value("timeout", toStr(uiTimeOut)));
-            uiLogLevel = std::stoi(conf.get_value("logLevel",toStr(uiLogLevel)));
-            uiAllowedRAM = std::stoi(conf.get_value(KEY_ALLOWED_RAM,toStr(uiAllowedRAM)));
-            uiThreshold = std::stoi(conf.get_value(KEY_TRIPLES_THRESHOLD, toStr(uiAllowedRAM)));
-            fLocalHostOnly = std::stoi(conf.get_value(KEY_LOCALHOST_ONLY, toStr(fLocalHostOnly)));
-        }else{
-          T5LOG(T5ERROR)<<  ":: can't open t5memory.conf, path = " <<  path;
-        }
-    }
-    #endif
 
     Properties::GetInstance()->set_anyway(KEY_SERVICE_URL, szServiceName);
-    Properties::GetInstance()->set_anyway(KEY_OTM_DIR, szOtmDirPath);
+    Properties::GetInstance()->set_anyway(KEY_OTM_DIR, FilesystemHelper::GetOtmDir().c_str());
     Properties::GetInstance()->set_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
     Properties::GetInstance()->set_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
     Properties::GetInstance()->set_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
     Properties::GetInstance()->set_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
 
-    std::string memDir = szOtmDirPath;
-    memDir += "/MEM/";
-    Properties::GetInstance()->add_key(KEY_MEM_DIR, memDir.c_str());
+   Properties::GetInstance()->add_key(KEY_MEM_DIR, FilesystemHelper::GetMemDir().c_str());
 
     //From here we have logging in file turned on
     T5Logger::GetInstance()->DesuppressLoggingInFile();

@@ -851,7 +851,7 @@ class NewTM{
   public:
   NewTM();
   NewTM(const std::string& tmName);
-}
+};
 
 
 
