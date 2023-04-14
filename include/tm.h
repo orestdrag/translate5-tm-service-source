@@ -8311,4 +8311,44 @@ int CloseMemory
 );
 //end of MemoryUtil.H  
 
+
+class NewTMManager: public TMManager{
+  public:
+  static NewTMManager* GetInstance(){
+    static NewTMManager instance;
+    return &instance;
+  }
+
+  //functions to work with tm from outside
+  int CreateEmptyTM(const std::string& tmName, const std::string& srcLang, const std::string& tmDescr);
+  int ImportTMInInternalFormat(const std::string& tmName);
+  int DeleteTM(const std::string& tmName);
+  int CloneTMLocaly(const std::string& srcTmName, dstTmName);
+  int ReorganizeTM(const std::string& tmName);
+
+  //functions to work with loading and unloading tm
+  int OpenTM(const std::string& tmName);
+  bool TmIsOpened(const std::string& tmName);
+  int CloseTM(const std::string& tmName);
+  int TMExistsOnDisk(const std::string& tmName);
+  int GetTMSizeOnDisk(const std::string& tmName);
+  int StatusTM(const std::string& tmName);
+
+  //functions for opened tm
+  int FuzzySearch(const std::string& tmName);
+  int ConcordanceSearch(const std::string& tmName);
+  int UpdateSegment(const std::string& tmName);
+  int DeleteSegment(const std::string& tmName);
+  int ImportTmxIntoTM(const std::string& tmName);
+  int ExportTmxFromTM(const std::string& tmName);
+  int ExportTmInZip(const std::string& tmName);
+  
+
+  //functions to set up tm service
+  int SetAvailableRam(const size_t availableRam);
+  size_t GetAvailableRam()const;
+  int FreeRamToFitNewMemory(const size_t expectedRamToOccupyByTm);
+
+}
+
 #endif //_tm_h_included_
