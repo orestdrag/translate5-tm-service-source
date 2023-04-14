@@ -2109,7 +2109,7 @@ typedef struct _TMXDELTM_OUT
 
 class EqfMemoryPlugin;
 
-class EqfMemory
+class EqfMemory : public TMX_CLB
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
 */
 
@@ -2402,11 +2402,6 @@ public:
 */
   HTM getHTM();
   
-/*! \brief Get number of proposals in this memory
-  	\returns number of proposals
-*/
-  unsigned long getProposalNum();
-
 /*! \brief Get overall file size of this memory
   	\returns size of memory in number of bytes
 */
@@ -2448,10 +2443,10 @@ public:
   ); 
 
 
-private:
+//private:
 
   HTM htm;                                       // old fashioned memory handle for this memory
-  PTMX_CLB pTmClb;                               // ptr to ctl block struct
+  //PTMX_CLB pTmClb;                               // ptr to ctl block struct
   TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
   TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
   TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
@@ -2581,10 +2576,7 @@ public:
   int UnloadFromRAM();
   int FlushFilebuffers();
 
-private: 
-  FileBuffer tmdFb; // data filebuffer
-  FileBuffer tmiFb; // index filebuffer
-  
+private:   
 };
 
 
@@ -2888,6 +2880,7 @@ NTMOpenProperties( HPROP *,
 #include "otm.h"
 // functions dealing with long document tables
 USHORT NTMCreateLongNameTable( PTMX_CLB pTmClb );
+//USHORT NTMCreateLongNameTable( EqfMemory* pTmClb );
 USHORT NTMReadLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMWriteLongNameTable( PTMX_CLB pTmClb );
 USHORT NTMDestroyLongNameTable( PTMX_CLB pTmClb );
@@ -2999,9 +2992,6 @@ VOID  TMX_EXT_OUT_Unicode2ASCII( PTMX_EXT_OUT_W pstExtOutW, PTMX_EXT_OUT pstExtO
 
 VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstDelIn, PTMX_PUT_IN_W pstDelInW, ULONG ulCP );
 VOID  TMX_PUT_OUT_Unicode2ASCII( PTMX_PUT_OUT_W pstDelOutW, PTMX_PUT_OUT pstDelOut );
-
-// function to convert the memory to the new format
-USHORT MemConvertMem( PSZ pszFullMemName );
 
 // return codes of function MemConvertMem
 

@@ -33,17 +33,17 @@ OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
 EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
 {
-
   this->htm = htmIn;
   this->pMemoryPlugin = pPlugin;
   strcpy( this->szName, pszName );
+  //pTmClb = (PTMX_CLB)this;
   if ( this->htm != 0 )
   {
-    pTmClb = (PTMX_CLB)this->htm;
+    //pTmClb = (PTMX_CLB)this->htm;
   }
   else
   {
-    pTmClb = NULL;
+    //pTmClb = NULL;
   } /* end */     
 
   this->pvGlobalMemoryOptions = NULL;
@@ -66,9 +66,9 @@ EqfMemory::~EqfMemory()
 */
 int EqfMemory::getNumOfMarkupNames()
 {
-  if ( this->pTmClb != NULL )
+  if ( pTagTables != NULL )
   {
-    return( (int)(this->pTmClb->pTagTables->ulMaxEntries) );
+    return( (int)(pTagTables->ulMaxEntries) );
   }
   else
   {
@@ -89,11 +89,11 @@ int EqfMemory::getMarkupName
   int iSize
 )
 {
-  if ( this->pTmClb != NULL )
+  if ( pTagTables!= NULL )
   {
-    if ( (iPos >= 0) && (iPos < (int)(this->pTmClb->pTagTables->ulMaxEntries)) )
+    if ( (iPos >= 0) && (iPos < (int)(pTagTables->ulMaxEntries)) )
     {
-      PTMX_TABLE_ENTRY pEntry = &(this->pTmClb->pTagTables->stTmTableEntry);
+      PTMX_TABLE_ENTRY pEntry = &(pTagTables->stTmTableEntry);
       pEntry += iPos;
       return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
     }
@@ -119,11 +119,11 @@ int EqfMemory::getSourceLanguage
   int iSize
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( this->pTmClb != NULL )
   {
-    return( CopyToBuffer( pTmClb->stTmSign.szSourceLanguage, pszBuffer, iSize ) );
+    return( CopyToBuffer( stTmSign.szSourceLanguage, pszBuffer, iSize ) );
   }
-  else
+  //else
   {
     return( 0 );
   } /* end */     
@@ -140,11 +140,11 @@ int EqfMemory::getDescription
   int iSize
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( this->pTmClb != NULL )
   {
-    return( CopyToBuffer( pTmClb->stTmSign.szDescription, pszBuffer, iSize ) );
+    return( CopyToBuffer(stTmSign.szDescription, pszBuffer, iSize ) );
   }
-  else
+  //else
   {
     return( 0 );
   } /* endif */     
@@ -158,14 +158,14 @@ void EqfMemory::setDescription
   char *pszBuffer
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( )
   {
     BOOL fOK = TRUE;
     PTMX_SIGN pTmSign = new(TMX_SIGN);
 
     // get current signature record
     USHORT usSignLen = sizeof(TMX_SIGN);
-    USHORT usRc = pTmClb->pstTmBtree->EQFNTMSign((PCHAR)pTmSign, &usSignLen );
+    USHORT usRc = pstTmBtree->EQFNTMSign((PCHAR)pTmSign, &usSignLen );
     fOK = (usRc == NO_ERROR);
 
      // update description field
@@ -181,7 +181,7 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
-       usRc = pTmClb->pstTmBtree->EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
+       usRc = pstTmBtree->EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
        fOK = (usRc == NO_ERROR);
       } /* endif */
 
@@ -206,11 +206,11 @@ int EqfMemory::getName
   int iSize
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( this->pTmClb != NULL )
   {
     return( CopyToBuffer( this->szName, pszBuffer, iSize ) );
   }
-  else
+  //else
   {
     return( 0 );
   } /* endif */     
@@ -224,12 +224,12 @@ int EqfMemory::getName
   std::string &strName
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( this->pTmClb != NULL )
   {
     strName = this->szName;
     return( 0 );
   }
-  else
+  //else
   {
     strName = "";
     return( -1 );
@@ -244,10 +244,10 @@ unsigned long EqfMemory::getFileSize()
 {
   ULONG ulFileSize = 0;         // size of TM files
 
-  if ( pTmClb != NULL )
+  //if ( pTmClb != NULL )
   {
-    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pTmClb->pstTmBtree->fb.file );
-    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pTmClb->pstInBtree->fb.file );
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pstTmBtree->fb.file );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pstInBtree->fb.file );
 
     ulFileSize = ulDataSize + ulIndexSize;
   }
@@ -369,7 +369,7 @@ int EqfMemory::getNextProposal
   TmExtIn.usNextTarget = this->usNextTarget;
   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
-  iRC = (int)TmtXExtract(  pTmClb,  &TmExtIn,  &TmExtOut);
+  iRC = (int)TmtXExtract(  this,  &TmExtIn,  &TmExtOut);
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
   {
@@ -475,7 +475,7 @@ int EqfMemory::getProposal
 
   if ( iRC == 0 )
   {
-    iRC = (int)TmtXExtract(  pTmClb,  &TmExtIn,  &TmExtOut);
+    iRC = (int)TmtXExtract(  this,  &TmExtIn,  &TmExtOut);
   } /* endif */     
 
   if ( iRC == 0 )
@@ -623,7 +623,7 @@ int EqfMemory::rebuildIndex
 {
   int iRC = 0;
 
-  if ( !iRC ) iRC = NTMOrganizeIndexFile( pTmClb );
+  if ( !iRC ) iRC = NTMOrganizeIndexFile( this );
 
   return( iRC );
 }
@@ -645,21 +645,6 @@ HTM EqfMemory::getHTM()
   return( this->htm );
 }
 
-/*! \brief Get number of proposals in thismemory
-  	\returns number of proposals
-*/
-unsigned long EqfMemory::getProposalNum()
-{
-  if ( this->pTmClb == NULL ) return( 0 );
-
-  ULONG ulStartKey = 0;
-  ULONG ulNextKey = 0;
-T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 15  EQFNTMGetNextNumber( pTmClb->pstTmBtree, &ulStartKey, &ulNextKey);";
-#ifdef TEMPORARY_COMMENTED
-  pTmClb->pstTmBtree->EQFNTMGetNextNumber( &ulStartKey, &ulNextKey);
-#endif //TEMPORARY_COMMENTED
-  return( (int)(ulNextKey - ulStartKey) );
-}
 
 /*! \brief Get the error message for the last error occured
 
@@ -704,11 +689,11 @@ int EqfMemory::getLanguage
   int iSize
 )
 {
-  if ( this->pTmClb != NULL )
+  //if ( this->pTmClb != NULL )
   {
-    if ( (iPos >= 0) && (iPos < (int)(this->pTmClb->pLanguages->ulMaxEntries)) )
+    if ( (iPos >= 0) && (iPos < (int)(pLanguages->ulMaxEntries)) )
     {
-      PTMX_TABLE_ENTRY pEntry = &(this->pTmClb->pLanguages->stTmTableEntry);
+      PTMX_TABLE_ENTRY pEntry = &(pLanguages->stTmTableEntry);
       pEntry += iPos;
       return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
     }
@@ -717,7 +702,7 @@ int EqfMemory::getLanguage
       return( 0 );
     } /* end */     
   }
-  else
+  //else
   {
     return( 0 );
   } /* end */     
@@ -819,7 +804,7 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setAuthor( pExtOut->stTmExt.szAuthorName );
   Proposal.setMarkup( pExtOut->stTmExt.szTagTable );
   Proposal.setTargetLanguage( pExtOut->stTmExt.szTargetLanguage );
-  Proposal.setSourceLanguage( pTmClb->stTmSign.szSourceLanguage);
+  Proposal.setSourceLanguage( stTmSign.szSourceLanguage);
   Proposal.setAddInfo( pExtOut->stTmExt.szAddInfo );
   Proposal.setContext( pExtOut->stTmExt.szContext );
   Proposal.setDocName( pExtOut->stTmExt.szLongName );
@@ -852,7 +837,7 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setAuthor( pMatch->szTargetAuthor );
   pProposal->setMarkup( pMatch->szTagTable );
   pProposal->setTargetLanguage( pMatch->szTargetLanguage );
-  pProposal->setSourceLanguage( pTmClb->stTmSign.szSourceLanguage);
+  pProposal->setSourceLanguage( stTmSign.szSourceLanguage);
   pProposal->setAddInfo( pMatch->szAddInfo );
   pProposal->setContext( pMatch->szContext );
   pProposal->setDocName( pMatch->szLongName );
@@ -998,7 +983,7 @@ OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag )
 */
 int EqfMemory::handleError( int iRC, char *pszMemName, char *pszMarkup )
 {
-  PBTREE pDataTree = pTmClb->pstTmBtree;
+  PBTREE pDataTree = pstTmBtree;
 
   return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, pDataTree->szFileName, this->strLastError, this->iLastError ) );
 }
@@ -1025,36 +1010,36 @@ int EqfMemory::setGlobalMemoryOptions
 
 // NewTM region
 EqfMemory::EqfMemory(const std::string& tmName){
-  tmdFb.fileName = NewTMManager::GetTmdPath(tmName);
-  tmiFb.fileName = NewTMManager::GetTmiPath(tmName);
+  pstTmBtree->fb.fileName = NewTMManager::GetTmdPath(tmName);
+  pstInBtree->fb.fileName = NewTMManager::GetTmiPath(tmName);
 }
 
 int EqfMemory::LoadInRAM(){
-  if(tmdFb.file != nullptr){
+  if(pstTmBtree->fb.file != nullptr){
     //file is in mem
     return -1;
   }
-  if(tmiFb.file != nullptr){
+  if(pstInBtree->fb.file != nullptr){
     //file is in mem
     return -1;
   }
-  tmdFb.ReadFromFile();
-  tmiFb.ReadFromFile();
+  pstTmBtree->fb.ReadFromFile();
+  pstInBtree->fb.ReadFromFile();
   
   return 0;
 }
 
 int EqfMemory::UnloadFromRAM(){
-  if(tmdFb.file == nullptr){
+  if(pstTmBtree->fb.file == nullptr){
     //file is in mem
     return -1;
   }
-  if(tmiFb.file == nullptr){
+  if(pstInBtree->fb.file == nullptr){
     //file is in mem
     return -1;
   }
-  tmdFb.WriteToFile();
-  tmiFb.WriteToFile();
+  pstTmBtree->fb.WriteToFile();
+  pstInBtree->fb.WriteToFile();
   
   return 0;
 }

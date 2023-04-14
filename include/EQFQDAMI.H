@@ -125,16 +125,6 @@ typedef struct _STENCODEBITS
 #define BTREE_V3 0x03
 
 
-/**********************************************************************/
-/* typedef used for all vital information on our new approach...      */
-/* NOTE: this structure is limited to COLLATE_SIZE, which is 256      */
-/**********************************************************************/
-typedef struct _TMVITALINFO
-{
-  ULONG   ulStartKey;                  // key to start with
-  ULONG   ulNextKey;                   // currently active key
-} NTMVITALINFO, * PNTMVITALINFO;
-
 #define NTMNEXTKEY( pBT )  ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulNextKey
 #define NTMSTARTKEY( pBT ) ((PNTMVITALINFO)(&pBT->chCollate[0]))->ulStartKey
 
@@ -929,9 +919,6 @@ typedef struct _DICTTIME
 
 
  SHORT QDAMDictOpenLocal   ( PSZ, SHORT, USHORT, PPBTREE );
-
- SHORT QDAMDictCreateLocal ( PSZ, SHORT, PCHAR, USHORT, PCHAR,
-                             PCHAR, PCHAR, PBTREE * , PNTMVITALINFO );
 
  SHORT QDAMDictCloseLocal  ( PBTREE );
 

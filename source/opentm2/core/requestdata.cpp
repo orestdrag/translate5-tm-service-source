@@ -1,6 +1,6 @@
 #include "requestdata.h"
 #include "tm.h"
-
+#include "otm.h"
 #include "../../RestAPI/OTMMSJSONFactory.h"
 #include "../../RestAPI/OtmMemoryServiceWorker.h"
 #include "LogWrapper.h"
@@ -66,28 +66,13 @@ int CreateMemRequestData::createNewEmptyMemory(){
     // create memory database
     if (fValid){
       T5LOG( T5DEBUG) << ":: create the memory" ;    
-      
-      std::string tmiFile = NewTMManager::GetTmiPath(strMemName);
-      std::string tmdFile = NewTMManager::GetTmdPath(strMemName);
-      PTMX_CLB   pTmClb = NULL;            //pointer to control block
+      EqfMemory* pNewMem = new EqfMemory(strMemName);
       ULONG ulKey;
+      bool fOK = true;
 
+      _rc_ = NTMCreateLongNameTable( pNewMem );
       
-      //allocate control block
-      bool fOK = UtlAlloc( (PVOID *) &pTmClb, 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
-
-      //allocate table records
-      if ( fOK )    fOK = AllocTable( &(pTmClb->pLanguages) );
-      if ( fOK )    fOK = AllocTable( &(pTmClb->pAuthors) );
-      if ( fOK )    fOK = AllocTable( &(pTmClb->pTagTables) );
-      if ( fOK )    fOK = AllocTable( &(pTmClb->pFileNames) );
-
-      if ( fOK )
-      {
-        _rc_ = NTMCreateLongNameTable( pTmClb );
-        
-        fOK = (_rc_ == NO_ERROR );
-      } /* endif */
+      fOK = (_rc_ == NO_ERROR );
       if ( !fOK )
       {
         _rc_ = ERROR_NOT_ENOUGH_MEMORY;
@@ -97,50 +82,49 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //build name and extension of tm data file
 
         //fill signature record structure
-        strcpy( pTmClb->stTmSign.szName, strMemName.c_str() );
-        UtlTime( &(pTmClb->stTmSign.lTime) );
-        strcpy( pTmClb->stTmSign.szSourceLanguage,
+        strcpy( pNewMem->stTmSign.szName, strMemName.c_str() );
+        UtlTime( &(pNewMem->stTmSign.lTime) );
+        strcpy( pNewMem->stTmSign.szSourceLanguage,
                 strSrcLang.c_str() );
 
         //TODO - replace version with current t5memory version
-        pTmClb->stTmSign.bMajorVersion = TM_MAJ_VERSION;
-        pTmClb->stTmSign.bMinorVersion = TM_MIN_VERSION;
-        strcpy( pTmClb->stTmSign.szDescription,
+        pNewMem->stTmSign.bMajorVersion = TM_MAJ_VERSION;
+        pNewMem->stTmSign.bMinorVersion = TM_MIN_VERSION;
+        strcpy( pNewMem->stTmSign.szDescription,
                 strMemDescription.c_str() );
 
         //call create function for data file
-        //pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
+        pNewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
         
-        _rc_ = EQFNTMCreate( (PSZ)tmdFile.c_str(),
-                            (PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN),
-                            FIRST_KEY, &pTmClb->pstTmBtree );
+        _rc_ = pNewMem->pstTmBtree->EQFNTMCreate((PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
+                            FIRST_KEY);
       
         if ( _rc_ == NO_ERROR )
         {
           //insert initialized record to tm data file
           ulKey = AUTHOR_KEY;
-          _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                    (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
+          _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                    (PBYTE)pNewMem->pAuthors, TMX_TABLE_SIZE );
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = FILE_KEY;
-            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                        (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
+            _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                        (PBYTE)pNewMem->pFileNames, TMX_TABLE_SIZE );     
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = TAGTABLE_KEY;
-            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                        (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
+            _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                        (PBYTE)pNewMem->pTagTables, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = LANG_KEY;
-            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                    (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
+            _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                    (PBYTE)pNewMem->pLanguages, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
@@ -148,11 +132,11 @@ int CreateMemRequestData::createNewEmptyMemory(){
             int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
             size = MAX_COMPACT_SIZE-1 ;
             //initialize and insert compact area record
-            memset( pTmClb->bCompact, 0, size );
+            memset( pNewMem->bCompact, 0, size );
 
             ulKey = COMPACT_KEY;
-            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                                pTmClb->bCompact, size);  
+            _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                                pNewMem->bCompact, size);  
 
           } /* endif */
 
@@ -161,29 +145,28 @@ int CreateMemRequestData::createNewEmptyMemory(){
           {
             ulKey = LONGNAME_KEY;
             // write long document name buffer area to the database
-            _rc_ = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
-                                (PBYTE)pTmClb->pLongNames->pszBuffer,
-                                pTmClb->pLongNames->ulBufUsed );        
+            _rc_ = pNewMem->pstTmBtree->EQFNTMInsert(&ulKey,
+                                (PBYTE)pNewMem->pLongNames->pszBuffer,
+                                pNewMem->pLongNames->ulBufUsed );        
       
           } /* endif */
 
           // create language group table
           if ( _rc_ == NO_ERROR )
           {
-            _rc_ = NTMCreateLangGroupTable( pTmClb );
+            _rc_ = NTMCreateLangGroupTable( pNewMem );
             
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             //fill signature record structure
-            strcpy( pTmClb->stTmSign.szName, strMemName.c_str() );
+            strcpy( pNewMem->stTmSign.szName, strMemName.c_str() );
 
             //HERE .TMI file is created
-            _rc_ = EQFNTMCreate( (PSZ)tmiFile.c_str(),
-                                (PCHAR) &(pTmClb->stTmSign),
+            _rc_ = pNewMem->pstInBtree->EQFNTMCreate((PCHAR) &(pNewMem->stTmSign),
                                 sizeof( TMX_SIGN ),
-                                START_KEY, &pTmClb->pstInBtree );
+                                START_KEY );
                                 
           } /* endif */
 
@@ -197,22 +180,22 @@ int CreateMemRequestData::createNewEmptyMemory(){
         if ( _rc_ )
         {
           //something went wrong during create or insert so delete data file
-          UtlDelete( (PSZ)tmiFile.c_str(), 0L, FALSE );
+          UtlDelete( (PSZ)pNewMem->pstInBtree->fb.fileName.c_str(), 0L, FALSE );
         } /* endif */
       } /* endif */
 
       if ( _rc_ )
       {
         //free allocated memory
-        UtlAlloc( (PVOID *) &(pTmClb->pLanguages), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pNewMem->pLanguages), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pNewMem->pAuthors), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pNewMem->pTagTables), 0L, 0L, NOMSG );
+        UtlAlloc( (PVOID *) &(pNewMem->pFileNames), 0L, 0L, NOMSG );
         T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 37 NTMDestroyLongNameTable( pTmClb );";
     #ifdef TEMPORARY_COMMENTED
-        NTMDestroyLongNameTable( pTmClb );
+        NTMDestroyLongNameTable( pNewMem );
         #endif
-        UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
+        //UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
       } /* endif */
 
       //set return values
