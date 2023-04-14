@@ -1028,7 +1028,7 @@ SHORT QDAMAllocTempAreas
 
   if ( ! sRc )
   {
-    FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
+    FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
 
       // check if disk is full
       if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
@@ -1136,7 +1136,7 @@ SHORT QDAMWRecordToDisk_V3
 
   if ( ! sRc )
   {
-    sRc = FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
+    sRc = FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
     // check if disk is full
     if ( ! sRc )
     {
@@ -1355,7 +1355,7 @@ SHORT QDAMReadRecordFromDisk_V3
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
 
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
-      resRead = FilesystemHelper::ReadFile(pBT->fp, (PVOID)&pBuffer->contents,
+      resRead = FilesystemHelper::ReadFile(pBT->fb.file, (PVOID)&pBuffer->contents,
                      BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
 
       
@@ -2052,8 +2052,8 @@ SHORT QDAMDictCloseLocal
           sRc = QDAMWriteHeader( pBTIda );
      } /* endif */
      
-     filesystem_flush_buffers_ptr(pBT->fp);
-     if ( UtlClose(pBT->fp, FALSE) && !sRc )
+     filesystem_flush_buffers_ptr(pBT->fb.file);
+     if ( UtlClose(pBT->fb.file, FALSE) && !sRc )
      {
         sRc = BTREE_CLOSE_ERROR;
      } /* endif */
@@ -2702,10 +2702,10 @@ SHORT QDAMDictCreateLocal
   {
     pBTIda = pBT;          // anchor pointer
     // Try to create the index file
-    pBT->fp = FilesystemHelper::OpenFile(pName, "w+b", true);
-    //sRc = filesystem_open_file(pName, pBT->fp, "w+b");
+    pBT->fb.file = FilesystemHelper::OpenFile(pName, "w+b", true);
+    //sRc = filesystem_open_file(pName, pBT->fb.file, "w+b");
     
-    if(!pBT->fp){
+    if(!pBT->fb.file){
       sRc = -1;
       T5LOG(T5ERROR) << "QDAMDictCreateLocal::Can't create file ", pName;
     }
@@ -2805,8 +2805,8 @@ SHORT QDAMDictCreateLocal
     } /* endif */
     else
     {
-      //UtlWrite( pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-      FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
+      //UtlWrite( pBT->fb.file, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
+      FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
 
       UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
 
@@ -6120,7 +6120,7 @@ SHORT  QDAMDictOpenLocal
       pBT->usOpenFlags = usOpenFlags;
 
       // open the file
-      pBT->fp = FilesystemHelper::OpenFile( pName, "r+b", true );
+      pBT->fb.file = FilesystemHelper::OpenFile( pName, "r+b", true );
    } /* endif */
 
 
@@ -6131,7 +6131,7 @@ SHORT  QDAMDictOpenLocal
 
      // Read in the data for this index, make sure it is an index file
 
-     sRc = UtlRead( pBT->fp, (PVOID)&header,
+     sRc = UtlRead( pBT->fb.file, (PVOID)&header,
                     sizeof(BTREEHEADRECORD), &usNumBytesRead, FALSE);
      if ( ! sRc )
      {
@@ -6190,7 +6190,7 @@ SHORT  QDAMDictOpenLocal
           // load usNextFreeRecord either from header record of from file info
           {
             ULONG ulTemp;
-            sRc1 = UtlGetFileSize( pBT->fp, &ulTemp, FALSE );
+            sRc1 = UtlGetFileSize( pBT->fb.file, &ulTemp, FALSE );
             if (!sRc)
               sRc = sRc1;
             pBT->usNextFreeRecord = (USHORT)(ulTemp/BTREE_REC_SIZE_V3);
@@ -6302,7 +6302,7 @@ SHORT  QDAMDictOpenLocal
         /**************************************************************/
         if ( fWrite  )
         {
-          i  = UtlSetFHandState( pBT->fp, OPEN_ACCESS_READONLY, FALSE );
+          i  = UtlSetFHandState( pBT->fb.file, OPEN_ACCESS_READONLY, FALSE );
 
           if ( i )               // handle could not be set read/only
           {
@@ -6686,7 +6686,7 @@ SHORT QDAMDictUpdSignLocal
   {
      // let 2K at beginning as space
      writingPosition = (LONG) USERDATA_START;
-     sRc = UtlChgFilePtr( pBT->fp, writingPosition, FILE_BEGIN,
+     sRc = UtlChgFilePtr( pBT->fb.file, writingPosition, FILE_BEGIN,
                            &ulNewOffset, FALSE);     
   } 
 
@@ -6715,9 +6715,9 @@ SHORT QDAMDictUpdSignLocal
        /*************************************************************/
        {
          USHORT usDataLen = (USHORT)ulDataLen;
-         FilesystemHelper::WriteToFileBuff(pBT->fp, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
 
-         //sRc = UtlWrite( pBT->fp, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
+         //sRc = UtlWrite( pBT->fb.file, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
          ulDataLen = usDataLen;
          writingPosition += iBytesWritten;
        }
@@ -6739,7 +6739,7 @@ SHORT QDAMDictUpdSignLocal
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
-         FilesystemHelper::WriteToFileBuff(pBT->fp, pUserData, ulDataLen, iBytesWritten, writingPosition);
+         FilesystemHelper::WriteToFileBuff(pBT->fb.file, pUserData, ulDataLen, iBytesWritten, writingPosition);
           
           writingPosition += iBytesWritten;
           // check if disk is full
@@ -6763,7 +6763,7 @@ SHORT QDAMDictUpdSignLocal
       int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
       char* buff = new char[leftToFill];
       memset(buff, 0, leftToFill);
-      FilesystemHelper::WriteToFileBuff(pBT->fp, buff, leftToFill, iBytesWritten, writingPosition);
+      FilesystemHelper::WriteToFileBuff(pBT->fb.file, buff, leftToFill, iBytesWritten, writingPosition);
       writingPosition += iBytesWritten;
       delete[] buff;
 
@@ -6850,13 +6850,13 @@ SHORT QDAMDictSignLocal
   PBTREEGLOB  pBT = pBTIda;
 
 
-  sRc = SkipBytesFromBeginningInFile(pBT->fp, USERDATA_START);
+  sRc = SkipBytesFromBeginningInFile(pBT->fb.file, USERDATA_START);
 
   if ( ! sRc )
   {
      ASDLOG();
 
-     sRc = UtlRead( pBT->fp, (PVOID) &usLen, sizeof(USHORT),
+     sRc = UtlRead( pBT->fb.file, (PVOID) &usLen, sizeof(USHORT),
                     &usNumBytesRead, FALSE );
      if ( !sRc )
      {
@@ -6874,7 +6874,7 @@ SHORT QDAMDictSignLocal
            else
            {
               // read in data part
-              sRc = UtlRead( pBT->fp, pUserData, usLen,
+              sRc = UtlRead( pBT->fb.file, pUserData, usLen,
                              &usNumBytesRead, FALSE );
               if ( !sRc )
               {
