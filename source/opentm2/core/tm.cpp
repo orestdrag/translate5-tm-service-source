@@ -2342,3 +2342,88 @@ void TMManager::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPRO
   pOtmProposal->getContext( pProposal->szContext, sizeof(pProposal->szContext)/sizeof(CHAR_W) );
   pOtmProposal->getAddInfo( pProposal->szAddInfo, sizeof(pProposal->szAddInfo)/sizeof(CHAR_W) );
 }
+
+
+std::string NewTMManager::GetTmdPath(const std::string& memName){
+  return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMDATA;
+}
+
+std::string NewTMManager::GetTmiPath(const std::string& memName){
+  return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMINDEX;
+}
+
+int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){
+  //check tmd file
+  int res = TMM_NO_ERROR;
+  if(FilesystemHelper::FileExists(GetTmdPath(tmName)) == false){
+    res |= TMM_TMD_NOT_FOUND;
+  }
+
+  //check tmi file
+  if(FilesystemHelper::FileExists(GetTmiPath(tmName)) == false){
+    res != TMM_TMI_NOT_FOUND;
+  }
+  return res;
+}
+
+int NewTMManager::CreateEmptyTM(CreateMemRequestData& rd){
+   T5LOG( T5DEBUG) << ":: create the memory" ;    
+  strLastError = "";
+  iLastError = 0;
+  EqfMemory * pNewMemory = nullptr;
+  HTM htm = NULL;                      // memory handle 
+  std::string strMemPath;
+  BOOL fReserved = FALSE;
+  int usRc = 0;
+
+  //auto pMemory = createMemory((PSZ)rd.strMemName.c_str(), (PSZ)rd.strSrcLang.c_str(), (PSZ)rd.strMemDescription.c_str() );
+  {
+    //lock filesystem
+    
+    // build memory path and reserve a short name
+    this->makeMemoryPath( (PSZ)rd.strMemName.c_str(), strMemPath, &fReserved );
+
+    // use old memory create code  
+    usRc = TmtXCreate( &rd.CreateIn, &rd.CreateOut ); //call U code to pass TM command to server or handle it local   
+
+    // setup memory properties
+    this->createMemoryProperties( (PSZ)rd.strMemName.c_str(), strMemPath, (PSZ)rd.strMemDescription.c_str(), (PSZ)rd.strSrcLang.c_str() );
+    
+    // create memory object if create function completed successfully
+    pNewMemory = new EqfMemory( this, htm, (PSZ)rd.strMemName.c_str() );
+
+
+    // add memory info to our internal memory list
+    if ( pNewMemory != nullptr ) this->addToList( strMemPath );
+    
+  }//createMemory code
+  //return( (EqfMemory *)pNewMemory );
+  
+
+  // check mem
+  if ( pNewMemory == NULL ){
+    rd._rc_ = getLastError( strLastError );
+    T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  rd._rc_;
+  }
+  else{
+    T5LOG( T5INFO) << "::Create successful ";
+    // get memory object name
+    char szObjName[MAX_LONGFILESPEC];
+    rd._rc_ = TMManager::GetInstance()->getObjectName( pNewMemory, szObjName, sizeof(szObjName) );
+  }
+ 
+  //--- Tm is created. Close it. 
+  if ( pNewMemory != NULL )
+  {
+    T5LOG( T5INFO ) << "::Tm is created. Close it";
+    TMManager::GetInstance()->closeMemory( pNewMemory );
+    pNewMemory = NULL;
+  }
+  T5LOG( T5INFO) << " done, usRC = " << rd._rc_ ;
+
+  //iRC = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+  //pData->fComplete = TRUE;   // one-shot function are always complete
+}
+
+
+

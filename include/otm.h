@@ -847,6 +847,12 @@ typedef struct _PROP_NTM
 } PROP_NTM, *PPROP_NTM;
 
 
+class NewTM{
+  public:
+  NewTM();
+  NewTM(const std::string& tmName);
+}
+
 
 
 

@@ -25,7 +25,10 @@ struct FileBuffer{
     std::vector<UCHAR> data;
     long offset = 0;
     FILE* file = NULL;
-    
+    std::string fileName;   
+
+    int ReadFromFile();
+    int WriteToFile(); 
 } ;
 
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
