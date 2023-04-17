@@ -51,7 +51,6 @@
 
 #define MIN_SIZE          128          // minimum free space requested in entry
 #define MAXWASTESIZE      512          // max size  to be wasted due to updates
-#define MAXDATASIZE    0x8000          // maximum data size allowed
 #define MAX_LOCKREC_SIZE 4000          // max size for locked terms record
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
@@ -390,7 +389,6 @@ typedef enum
 #define MAX_LIST           20          // number of recently used records
 #define MIN_SIZE          128          // minimum free space requested in entry
 #define MAXWASTESIZE      512          // max size  to be wasted due to updates
-#define MAXDATASIZE    0x8000          // maximum data size allowed
 #define MAX_LOCKREC_SIZE 4000          // max size for locked terms record
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
@@ -875,71 +873,6 @@ SHORT NTMKeyCompare
 //------------------------------------------------------------------------------
 // Internal function
 //------------------------------------------------------------------------------
-// Function name:     QDAMAllocTempAreas    Allocate Temp Areas
-//------------------------------------------------------------------------------
-// Function call:     QDAMAllocTempAreas( PBTREE );
-//
-//------------------------------------------------------------------------------
-// Description:       Allocate temp areas if necessary for key and data
-//
-//------------------------------------------------------------------------------
-// Parameters:        PBTREE                 pointer to btree structure
-//------------------------------------------------------------------------------
-// Returncode type:   SHORT
-//------------------------------------------------------------------------------
-// Returncodes:       0                 if no error happened
-//                    BTREE_NO_ROOM     not enough memory
-//------------------------------------------------------------------------------
-// Function flow:     if no temp areas exist
-//                      if no temp area for key exists
-//                        allocate it
-//                      endif
-//                      if no temp record exists
-//                        allocate it
-//                      endif
-//                      if not both areas allocated then
-//                        set Rc to BTREE_NO_ROOM
-//                      endif
-//                    endif
-//                    return Rc
-//------------------------------------------------------------------------------
-
-SHORT QDAMAllocTempAreas
-(
-   PBTREE  pBTIda
-)
-{
-   SHORT  sRc = 0;                     // return code
-   PBTREEGLOB    pBT = pBTIda;
-
-
-   if ( !pBT->pTempKey || !pBT->pTempRecord )
-   {
-      if ( ! pBT->pTempKey)
-      {
-         UtlAlloc( (PVOID *)&pBT->pTempKey, 0L, (LONG) HEADTERM_SIZE, NOMSG );
-      } /* endif */
-      if ( ! pBT->pTempRecord )
-      {
-         UtlAlloc( (PVOID *)&pBT->pTempRecord, 0L, (LONG) MAXDATASIZE, NOMSG );
-         if ( pBT->pTempRecord )
-         {
-           pBT->ulTempRecSize = MAXDATASIZE;
-         } /* endif */
-      } /* endif */
-      if ( !(pBT->pTempRecord && pBT->pTempKey) )
-      {
-         sRc = BTREE_NO_ROOM;
-      } /* endif */
-   } /* endif */
-
-   return ( sRc );
-}
-
-
-//------------------------------------------------------------------------------
-// Internal function
-//------------------------------------------------------------------------------
 // Function name:     QDAMWriteHeader       Write initial header
 //------------------------------------------------------------------------------
 // Function call:     QDAMWriteHeader( PBTREE );
@@ -972,15 +905,11 @@ SHORT QDAMAllocTempAreas
 ){
   SHORT  sRc=0;
   BTREEHEADRECORD HeadRecord;          // header record
-  int iBytesWritten;               // number of bytes written
-  ULONG  ulNewOffset;                  // new offset in file
   PBTREEGLOB  pBT = pBTIda;
 
   DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
-
   // Write the initial record (describing the index) out to disk
-
   memset( &HeadRecord, '\0', sizeof(BTREEHEADRECORD));
   memcpy(HeadRecord.chEQF,pBT->chEQF, sizeof(pBT->chEQF));
   HeadRecord.usFirstNode = pBT->usFirstNode;
@@ -989,18 +918,7 @@ SHORT QDAMAllocTempAreas
   HeadRecord.usFreeDataBuffer = pBT->usFreeDataBuffer;
   HeadRecord.usFirstDataBuffer = pBT->usFirstDataBuffer;  // first data buffer
   HeadRecord.fOpen  = (EQF_BOOL)pBT->fOpen;                    // open flag set
-  // DataRecList in header is in old format (RECPARAMOLD),
-  // so convert in-memory copy of list (in the RECPARAM format) to
-  // the old format
-  //T5LOG( T5INFO) << "::TODO: upgrade eadRecord.DataRecList from RECPARAMOLD to RECPARAM");
-  {
-    for (int i = 0; i < MAX_LIST; i++ )
-    {
-      HeadRecord.DataRecList[i].usOffset = pBT->DataRecList[i].usOffset;
-      HeadRecord.DataRecList[i].usNum    = pBT->DataRecList[i].usNum;
-      HeadRecord.DataRecList[i].ulLen     = (SHORT)pBT->DataRecList[i].ulLen;
-    } /* endfor */
-  }
+  memcpy( HeadRecord.DataRecList, pBT->DataRecList, MAX_LIST*sizeof(HeadRecord.DataRecList[0]) );
   HeadRecord.fTerse = (EQF_BOOL) pBT->fTerse;
   memcpy( HeadRecord.chCollate, pBT->chCollate, COLLATE_SIZE );
   memcpy( HeadRecord.chCaseMap, pBT->chCaseMap, COLLATE_SIZE );
@@ -1011,27 +929,14 @@ SHORT QDAMAllocTempAreas
   /* field is valid by assigning BTREE_V1 to the bVersion field.      */
   /********************************************************************/
   HeadRecord.usNextFreeRecord = pBT->usNextFreeRecord;
-  //HeadRecord.Flags.bVersion         = BTREE_V1;
-
-  //if ( pBT->bRecSizeVersion == BTREE_V3 )
+  HeadRecord.Flags.f16kRec  = TRUE;
+  
+  ;
+    // check if disk is full
+  if ( pBT->fb.WriteToFilebuffer((PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), FILE_BEGIN) != sizeof(BTREEHEADRECORD)  )
   {
-    HeadRecord.Flags.f16kRec  = TRUE;
+    sRc = BTREE_DISK_FULL;
   }
-  //else
-  //{
-  //  HeadRecord.Flags.f16kRec  = FALSE;
-  //} /* endif */
-
-  if ( ! sRc )
-  {
-    FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), iBytesWritten, FILE_BEGIN);
-
-      // check if disk is full
-      if ( iBytesWritten != sizeof(BTREEHEADRECORD)  )
-      {
-        sRc = BTREE_DISK_FULL;
-      }
-  } /* endif */
 
   if ( sRc == NO_ERROR )
   {
@@ -2099,9 +2004,6 @@ SHORT QDAMDictCloseLocal
           pIndexBuffer = pTempIndexBuffer;
         } /* endwhile */
        
-
-       UtlAlloc( (PVOID *)&pBT->pTempKey, 0L, 0L, NOMSG );
-       UtlAlloc( (PVOID *)&pBT->pTempRecord, 0L, 0L, NOMSG );
        UtlAlloc( (PVOID *)&pBTIda,0L, 0L, NOMSG );     // free allocated memory
      } /* endif */
      /********************************************************************/
@@ -2208,26 +2110,25 @@ SHORT QDAMDictClose
 
 SHORT QDAMDestroy
 (
-   PBTREE  pBTIda                   // pointer to generic structure
+   PBTREE  pBT                   // pointer to generic structure
 )
 {
    SHORT sRc = 0;                   // return code
 
    CHAR  chName[ MAX_EQF_PATH ];    // file name
-   PBTREEGLOB  pBT = pBTIda;
 
    if ( !pBT )
    {
      sRc = BTREE_INVALID;
    }
-   else if (* (pBT->szFileName) )
+   else if (!pBT->fb.fileName.empty() )
    {
      //
      // QDAMDictClose frees up all of the memory associated with a B-tree,
      // we need to save the filename as we'll be deleteing the file by name
      //
-     strcpy(chName, pBT->szFileName);
-     sRc = QDAMDictClose( &pBTIda );
+     strcpy(chName, pBT->fb.fileName.c_str());
+     sRc = QDAMDictClose( &pBT );
      if ( chName[0] )
      {
         UtlDelete( chName, 0L, FALSE);
@@ -2670,14 +2571,11 @@ SHORT QDAMAllocKeyRecords
 
 SHORT BTREE::QDAMDictCreateLocal
 (
-   //PSZ    pName,                       // name of file
    SHORT  sNumberOfKey,                // number of key buffers
    PCHAR  pUserData,                   // user data
    USHORT usLen,                       // length of user data
-   PCHAR  pTermTable,                  // term encoding sequence
    PCHAR  pCollating,                  // collating sequence
    PCHAR  pCaseMap,                    // case map string
-   //PBTREE * ppBTIda,                   // pointer to btree structure
    PNTMVITALINFO pNTMVitalInfo         // translation memory
 )
 {
@@ -2685,30 +2583,16 @@ SHORT BTREE::QDAMDictCreateLocal
   SHORT sRc = 0;                       // return code
   USHORT  usAction;                    // used in open of file
     
-  /********************************************************************/
-  /* allocate global area first ...                                   */
-  /********************************************************************/
-  //if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
-  //{
-  //   sRc = BTREE_NO_ROOM;
-  //}
-  //else
-  {
     // Try to create the index file
-    fb.file = FilesystemHelper::OpenFile(fb.fileName, "w+b", true);
-    //sRc = filesystem_open_file(pName, fb.file, "w+b");
-    
-    if(!fb.file){
-      sRc = -1;
-      T5LOG(T5ERROR) << "QDAMDictCreateLocal::Can't create file ", fb.fileName;
-    }
-  } /* endif */
+  fb.file = fopen(fb.fileName.c_str(), "w+b");
+  
+  if(!fb.file){
+    sRc = -1;
+    T5LOG(T5ERROR) << "QDAMDictCreateLocal::Can't create file " << fb.fileName;
+  }
 
   if ( !sRc )
   {
-    // remember file name
-    strcpy( szFileName, fb.fileName.c_str() );
-
     // set initial structure heading
     UtlTime( &(lTime) );                                     // set open time
     sCurrentIndex = 0;
@@ -2720,27 +2604,14 @@ SHORT BTREE::QDAMDictCreateLocal
     usFreeDataBuffer = 0;
     usFirstDataBuffer = 0;  // first data buffer
     fOpen  = TRUE;                          // open flag set
-    strcpy(szFileName, fb.fileName.c_str());              // copy file name into struct
     fpDummy = NULLHANDLE;
 
     /******************************************************************/
     /* do settings depending if we are dealing with a dict or a tm..  */
     /******************************************************************/
-    //bVersion = BTREE_V2;
-    //bRecSizeVersion = BTREE_V3;
     usVersion = NTM_VERSION3;// changed from NTM_VERSION2
-    //strcpy(chEQF,BTREE_HEADER_VALUE_TM2);
     strcpy(chEQF,BTREE_HEADER_VALUE_TM3);
-    if ( pTermTable )
-    {
-        memcpy( chEntryEncode, pTermTable, ENTRYENCODE_LEN );
-        QDAMTerseInit( this, chEntryEncode );   // initialise for compression
-        fTerse = TRUE;
-    }
-    else
-    {
-        fTerse = FALSE;
-    } /* endif */
+    fTerse = FALSE;
     /******************************************************************/
     /* use the free collating sequence buffer to store our vital info */
     /* Its taken care, that the structure will not jeopardize the     */
@@ -2776,11 +2647,7 @@ SHORT BTREE::QDAMDictCreateLocal
     } /* endif */
     usNumberOfAllocatedBuffers = 0;
   }
-  
-  if ( !sRc )
-  {
-    sRc =  QDAMAllocTempAreas( this );
-  } /* endif */
+
 
   if (! sRc )
   {
@@ -2789,22 +2656,11 @@ SHORT BTREE::QDAMDictCreateLocal
     /* write an empty record buffer to the file before writing the  */
     /* header                                                       */
     /****************************************************************/             
-    int iBytesWritten;         
-    PBTREEBUFFER_V3 pbuffer;
-    UtlAlloc( (PVOID *)&pbuffer, 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
-    if ( ! pbuffer )
-    {
-      sRc = BTREE_NO_ROOM;
-    } /* endif */
-    else
-    {
-      //UtlWrite( fb.file, (PVOID)pbuffer, BTREE_REC_SIZE_V3, &usBytesWritten, FALSE );
-      FilesystemHelper::WriteToFileBuff(fb.file, (PVOID)pbuffer, BTREE_REC_SIZE_V3, iBytesWritten, 0);
-
-      UtlAlloc( (PVOID *)&pbuffer, 0L, 0L , NOMSG );
-
-      sRc = QDAMWriteHeader( this );
-    } /* endif */
+    int iBytesWritten = 0;         
+    BTREEBUFFER_V3 pbuffer;
+    memset((PVOID) &pbuffer, 0, BTREE_REC_SIZE_V3);
+    iBytesWritten = fb.WriteToFilebuffer((PVOID)&pbuffer,BTREE_REC_SIZE_V3, 0);
+    sRc = QDAMWriteHeader( this );
   }
       
 
@@ -3817,7 +3673,7 @@ SHORT  QDAMAddToBuffer_V3
    }
    if ( (ulDataLen + sizeof(ULONG)) > pBT->ulTempRecSize )
    {
-     if ( UtlAlloc( (PVOID *)&(pBT->pTempRecord), pBT->ulTempRecSize, ulDataLen + sizeof(ULONG), NOMSG ) )
+     if ( UtlAlloc( (PVOID *)&(pBT->TempRecord), pBT->ulTempRecSize, ulDataLen + sizeof(ULONG), NOMSG ) )
      {
        pBT->ulTempRecSize = ulDataLen + sizeof(ULONG);
      }
@@ -3835,7 +3691,7 @@ SHORT  QDAMAddToBuffer_V3
    switch ( pBT->fTerse )
    {
      case  BTREE_TERSE_HUFFMAN :
-       fTerse = QDAMTerseData( pBTIda, pData, &ulDataLen, pBT->pTempRecord );
+       fTerse = QDAMTerseData( pBTIda, pData, &ulDataLen, pBT->TempRecord );
        break;
      default :
        fTerse = FALSE;
@@ -3848,7 +3704,7 @@ SHORT  QDAMAddToBuffer_V3
    // copy them if not yet done.....
    if ( !fTerse )
    {
-      memcpy( pBT->pTempRecord, pData, ulDataLen );
+      memcpy( pBT->TempRecord, pData, ulDataLen );
    } /* endif */
 
    if ( !sRc && (ulDataLen <= BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER)) )
@@ -3895,7 +3751,7 @@ SHORT  QDAMAddToBuffer_V3
                // insert reference               
               *(PULONG) pData = ulDataLen;
                
-               memcpy( pData+usLenFieldSize, pBT->pTempRecord, ulDataLen );
+               memcpy( pData+usLenFieldSize, pBT->TempRecord, ulDataLen );
 
                // set address of key data at next free offset
                pusOffset = (PUSHORT) pRecord->contents.uchData;
@@ -3973,7 +3829,7 @@ SHORT  QDAMAddToBuffer_V3
       {
          TYPE( pRecord ) = chNodeType;     // indicate that it is a data node
          BTREELOCKRECORD( pRecord );
-         pRecData = (PCHAR)(pBT->pTempRecord + ulDataLen);
+         pRecData = (PCHAR)(pBT->TempRecord + ulDataLen);
          ulFullDataLen = ulDataLen;         // store original data len
          while ( !sRc && ulDataLen + pRecord->contents.header.usFilled  >= (BTREE_REC_SIZE_V3 - (usLenFieldSize + sizeof(SHORT))))
          {
@@ -5051,9 +4907,9 @@ SHORT QDAMUnTerseData
 
    // try to uncompress the passed string ( use pTempData as temporary space)
 
-   if ( pBT->pTempRecord )
+   //if ( pBT->TempRecord )
    {
-     pTempData = pBT->pTempRecord;
+     pTempData = pBT->TempRecord;
 
      while ( ulLen )
      {
@@ -5131,7 +4987,7 @@ SHORT QDAMUnTerseData
    {
      if ( *pulLen >= ulDataLen )
      {
-       memcpy( pInData, pBT->pTempRecord, *pulLen );
+       memcpy( pInData, pBT->TempRecord, *pulLen );
        *pulLen = ulDataLen;
      }
      else
@@ -6119,7 +5975,7 @@ SHORT  QDAMDictOpenLocal
    if ( !sRc )
    {
      // remember file name
-     strcpy( pBTIda->szFileName, pName );
+     pBTIda->fb.fileName = pName;
 
      // Read in the data for this index, make sure it is an index file
 
@@ -6191,7 +6047,7 @@ SHORT  QDAMDictOpenLocal
 
           if ( !sRc )
           {
-             strcpy(pBT->szFileName, pName);
+             pBT->fb.fileName =  pName;
 
              // copy prev. allocated free list
              // DataRecList in header is in old format (RECPARAMOLD),
@@ -6246,11 +6102,6 @@ SHORT  QDAMDictOpenLocal
           if ( !sRc )
           {
             ASDLOG();
-
-            if ( !sRc )
-            {
-              sRc =  QDAMAllocTempAreas( pBTIda );
-            } /* endif */
           } /* endif */
         }
         else
@@ -6519,9 +6370,8 @@ SHORT  QDAMDictOpenLocal
 //                    return Rc
 //
 //------------------------------------------------------------------------------
-SHORT QDAMDictInsertLocal
+SHORT BTREE::QDAMDictInsertLocal
 (
-  PBTREE  pBTIda,           // pointer to binary tree struct
   PTMWCHAR pKey,             // pointer to key data
   PBYTE   pData,            // pointer to user data
   ULONG   ulLen             // length of user data in bytes
@@ -6531,18 +6381,16 @@ SHORT QDAMDictInsertLocal
    RECPARAM   recData;                       // offset/node of data storage
    RECPARAM   recKey;                        // offset/node of key storage
    USHORT     usKeyLen;                      // length of the key
-   BOOL       fLocked = FALSE;               // file-has-been-locked flag
-   PBTREEGLOB    pBT = pBTIda;
 
    memset( &recKey, 0, sizeof( recKey ) );
    memset( &recData,  0, sizeof( recData ) );
    DEBUGEVENT2( QDAMDICTINSERTLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
 
-   if ( pBT->fCorrupted )
+   if ( fCorrupted )
    {
       sRc = BTREE_CORRUPTED;
-   } else if(!pBT->fOpen )
+   } else if(!fOpen )
    {
      sRc = BTREE_READONLY;
    } /* endif */
@@ -6550,7 +6398,7 @@ SHORT QDAMDictInsertLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   if ( !sRc && QDAMDictLockStatus( pBTIda, pKey ) )
+   if ( !sRc && QDAMDictLockStatus( this, pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */ 
@@ -6568,10 +6416,10 @@ SHORT QDAMDictInsertLocal
     }
     else
     {
-      memcpy( (PBYTE)pBTIda->chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
+      memcpy( (PBYTE)chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
       
-      QDAMDictUpdStatus ( pBTIda );
-      sRc = QDAMFindRecord_V3( pBTIda, pKey, &pNode );
+      QDAMDictUpdStatus ( this );
+      sRc = QDAMFindRecord_V3( this, pKey, &pNode );
 
     } /* endif */
   } /* endif */
@@ -6579,21 +6427,21 @@ SHORT QDAMDictInsertLocal
   if ( !sRc )
   {
       BTREELOCKRECORD( pNode );
-      sRc = QDAMAddToBuffer_V3( pBTIda, pData, ulLen, &recData );
+      sRc = QDAMAddToBuffer_V3( this, pData, ulLen, &recData );
       if ( !sRc )
       {
         if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
           T5LOG(T5ERROR) <<  ":: tried to set bigget ulLen than rec size, ulLen = " << ulLen;
         }
         recData.ulLen = ulLen;
-        sRc = QDAMInsertKey_V3 (pBTIda, pNode, pKey, recKey, recData);
+        sRc = QDAMInsertKey_V3 (this, pNode, pKey, recKey, recData);
       } /* endif */
 
       BTREEUNLOCKRECORD( pNode );
       /****************************************************************/
       /* change time to indicate modifications on dictionary...       */
       /****************************************************************/
-      pBT->lTime ++;
+      lTime ++;
   }
       
 

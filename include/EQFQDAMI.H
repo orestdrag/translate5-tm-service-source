@@ -9,7 +9,6 @@
 
 #define MIN_SIZE          128          // minimum free space requested in entry
 #define MAXWASTESIZE      512          // max size  to be wasted due to updates
-#define MAXDATASIZE    0x8000          // maximum data size allowed
 #define MAX_LOCKREC_SIZE 4000          // max size for locked terms record
 #define USERDATA_START   2046          // start of user data
 #define INDEX_BUFFERS      20          // index buffers
@@ -936,8 +935,6 @@ typedef struct _DICTTIME
 
  SHORT QDAMDictCurrentLocal( PBTREE, PBYTE, PULONG,  PBYTE, PULONG  );
 
- SHORT QDAMDictInsertLocal ( PBTREE, PTMWCHAR, PBYTE, ULONG );
-
  SHORT QDAMDictDeleteLocal ( PBTREE, PTMWCHAR );
  SHORT QDAMDictFlushLocal  ( PBTREE );
  SHORT QDAMDictCopyLocal   ( PBTREE, PBTREE );
@@ -978,7 +975,6 @@ typedef struct _DICTTIME
  SHORT QDAMPrev_V3( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
  SHORT QDAMHeaderFirst ( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
  SHORT QDAMHeaderNext ( PBTREE, PRECPARAM,  PRECPARAM,PRECPARAM );
- SHORT QDAMAllocTempAreas ( PBTREE );
  VOID  QDAMTerseInit ( PBTREE, PUCHAR );
  SHORT QDAMUnTerseData ( PBTREE, PUCHAR, ULONG, PULONG );
  BOOL  QDAMTerseData ( PBTREE, PUCHAR, PULONG, PUCHAR );

@@ -82,7 +82,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //build name and extension of tm data file
 
         //fill signature record structure
-        strcpy( pNewMem->stTmSign.szName, strMemName.c_str() );
+        strcpy( pNewMem->stTmSign.szName, pNewMem->TmBtree.fb.fileName.c_str() );
         UtlTime( &(pNewMem->stTmSign.lTime) );
         strcpy( pNewMem->stTmSign.szSourceLanguage,
                 strSrcLang.c_str() );
@@ -162,7 +162,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
           if ( _rc_ == NO_ERROR )
           {
             //fill signature record structure
-            strcpy( pNewMem->stTmSign.szName, strMemName.c_str() );
+            strcpy( pNewMem->stTmSign.szName, pNewMem->InBtree.fb.fileName.c_str() );
 
             //HERE .TMI file is created
             _rc_ = pNewMem->InBtree.EQFNTMCreate((PCHAR) &(pNewMem->stTmSign),

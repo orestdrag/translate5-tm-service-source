@@ -23,12 +23,15 @@ enum  FileBufferStatus{
 struct FileBuffer{
     int status ;//FILEBUFFERSTATUS
     std::vector<UCHAR> data;
-    long offset = 0;
+    size_t offset = 0;
     FILE* file = NULL;
     std::string fileName;   
 
-    int ReadFromFile();
-    int WriteToFile(); 
+    size_t ReadFromFile();
+    size_t WriteToFile(); 
+
+    size_t WriteToFilebuffer(const void* buff, size_t buffSize, size_t startingPosition);
+
 } ;
 
 typedef std::map <std::string, FileBuffer> FileBufferMap, *PFileBufferMap;
