@@ -2934,17 +2934,17 @@ USHORT TmtXClose
   if ( pTmClb->bCompactChanged )
   {
     SHORT sRetries = MAX_RETRY_COUNT;
-    usRc = pTmClb->pstTmBtree->EQFNTMUpdate( COMPACT_KEY,
+    usRc = pTmClb->TmBtree.EQFNTMUpdate( COMPACT_KEY,
                         pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
   } /* endif */
 
   //close index file regardless of errors
-  usRc1 = EQFNTMClose( &pTmClb->pstInBtree );
+  usRc1 = EQFNTMClose( &pTmClb->InBtree );
   if ( !usRc )
     usRc = usRc1;
 
   //close data file
-  usRc1 = EQFNTMClose( &pTmClb->pstTmBtree );
+  usRc1 = EQFNTMClose( &pTmClb->TmBtree );
   if ( !usRc )
     usRc = usRc1;
 
@@ -7954,13 +7954,13 @@ SHORT QDAMDictFirstLocal
 //
 USHORT EQFNTMOrganizeIndex
 (
-   PBTREE          *ppBTIda,            // ptr to BTREE being organized
+   BTREE          *pbTree,            // ptr to BTREE being organized
    USHORT         usOpenFlags,         // open flags to be used for index file
    ULONG          ulStartKey           // first key to start automatic insert...
 )
 {
   SHORT          sRc = 0;              // function return code
-  PBTREE         pbTree = (PBTREE)(*ppBTIda);
+  //PBTREE         pbTree = (PBTREE)(*ppBTIda);
   PCHAR_W        pchKeyBuffer = NULL;  // buffer for record keys
   ULONG          ulKeyBufSize = 0;     // current size of key buffer (number of characters)
   PBYTE          pbData = NULL;        // buffer for record data

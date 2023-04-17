@@ -365,7 +365,7 @@ USHORT TmtXGet
     //tokenize source segment, resuting in normalized string and
     //tag table record
     ULONG ulSrcCP = 1;
-    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
+    usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage/*, (USHORT)pTmClb->stTmSign.bMajorVersion*/);
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -712,7 +712,7 @@ USHORT GetExactMatch
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
         T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record" <<ulKey;
-        usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
+        usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
@@ -723,7 +723,7 @@ USHORT GetExactMatch
             pTmClb->pvTmRecord = pTmRecord;
             memset( pTmRecord, 0, ulLen );
 
-            usRc =  pTmClb->pstTmBtree->EQFNTMGet( ulKey, (PCHAR)pTmRecord,
+            usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord,
                               &ulLen );
           }
           else
@@ -2578,7 +2578,7 @@ USHORT GetFuzzyMatch
 
         T5LOG( T5INFO) << "GetFuzzyMatch: EQFNTMGET of record " << pMatchEntry->ulKey;
 
-        usRc =  pTmClb->pstTmBtree->EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
+        usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
@@ -2588,7 +2588,7 @@ USHORT GetFuzzyMatch
             pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
             pTmClb->pvTmRecord = pTmRecord;
             memset( pTmRecord, 0, ulLen );
-            usRc =  pTmClb->pstTmBtree->EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
+            usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
           }
           else
           {
@@ -3288,7 +3288,7 @@ USHORT FillMatchEntry
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchOtherTime) );
 #endif
-      usRc = pTmClb->pstInBtree->EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
+      usRc = pTmClb->InBtree.EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchReadTime) );

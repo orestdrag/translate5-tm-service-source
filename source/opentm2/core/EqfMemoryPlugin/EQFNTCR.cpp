@@ -260,8 +260,9 @@ USHORT TmtXCreate
             pTmCreateIn->stTmCreate.szSourceLanguage );
 
     //TODO - replace version with current t5memory version
-    pTmClb->stTmSign.bMajorVersion = TM_MAJ_VERSION;
-    pTmClb->stTmSign.bMinorVersion = TM_MIN_VERSION;
+    pTmClb->stTmSign.bGlobVersion = T5GLOBVERSION;
+    pTmClb->stTmSign.bMajorVersion = T5MAJVERSION;
+    pTmClb->stTmSign.bMinorVersion = T5MINVERSION;
     strcpy( pTmClb->stTmSign.szDescription,
             pTmCreateIn->stTmCreate.szDescription );
 
@@ -269,33 +270,33 @@ USHORT TmtXCreate
     //call create function for data file
     pTmClb->usAccessMode = ASD_LOCKED;         // new TMs are always in exclusive access...
 
-    usRc = pTmClb->pstTmBtree->EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN), FIRST_KEY);
+    usRc = pTmClb->TmBtree.EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof(TMX_SIGN), FIRST_KEY);
   
     if ( usRc == NO_ERROR )
     {
       //insert initialized record to tm data file
       ulKey = AUTHOR_KEY;
-      usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+      usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                  (PBYTE)pTmClb->pAuthors, TMX_TABLE_SIZE );
 
       if ( usRc == NO_ERROR )
       {
         ulKey = FILE_KEY;
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+        usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                     (PBYTE)pTmClb->pFileNames, TMX_TABLE_SIZE );     
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = TAGTABLE_KEY;
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+        usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                     (PBYTE)pTmClb->pTagTables, TMX_TABLE_SIZE );
       } /* endif */
 
       if ( usRc == NO_ERROR )
       {
         ulKey = LANG_KEY;
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+        usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                  (PBYTE)pTmClb->pLanguages, TMX_TABLE_SIZE );
       } /* endif */
 
@@ -307,7 +308,7 @@ USHORT TmtXCreate
         memset( pTmClb->bCompact, 0, size );
 
         ulKey = COMPACT_KEY;
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+        usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                              pTmClb->bCompact, size);  
  
       } /* endif */
@@ -317,7 +318,7 @@ USHORT TmtXCreate
       {
          ulKey = LONGNAME_KEY;
         // write long document name buffer area to the database
-        usRc = pTmClb->pstTmBtree->EQFNTMInsert(&ulKey,
+        usRc = pTmClb->TmBtree.EQFNTMInsert(&ulKey,
                             (PBYTE)pTmClb->pLongNames->pszBuffer,
                             pTmClb->pLongNames->ulBufUsed );        
   
@@ -338,7 +339,7 @@ USHORT TmtXCreate
         strcpy( pTmClb->stTmSign.szName, pszName );
 
         //HERE .TMI file is created
-        usRc = pTmClb->pstInBtree->EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof( TMX_SIGN ), START_KEY);
+        usRc = pTmClb->InBtree.EQFNTMCreate((PCHAR) &(pTmClb->stTmSign), sizeof( TMX_SIGN ), START_KEY);
                              
       } /* endif */
 

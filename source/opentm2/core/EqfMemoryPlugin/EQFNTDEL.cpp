@@ -127,8 +127,7 @@ USHORT TmtXDelSegm
     UTF16strcpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource );
     //tokenize source segment, resuting in normalized string and tag table record
     usRc = TokenizeSource( pTmClb, pSentence, szString,
-                           pTmDelIn->stTmPut.szSourceLanguage,
-                           pTmClb->stTmSign.bMajorVersion );
+                           pTmDelIn->stTmPut.szSourceLanguage);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     pSentence->pTagRecord->usTagTableId = 0;
@@ -157,7 +156,7 @@ USHORT TmtXDelSegm
         {
           ulKey = *pulSids;
           ulLen = TMX_REC_SIZE;
-          usRc =  pTmClb->pstTmBtree->EQFNTMGet(
+          usRc =  pTmClb->TmBtree.EQFNTMGet(
                             ulKey,  //tm record key
                             (PCHAR)pTmRecord,   //pointer to tm record data
                             &ulLen );  //length
@@ -169,7 +168,7 @@ USHORT TmtXDelSegm
             {
               ulRecBufSize = ulLen;
 
-              usRc =  pTmClb->pstTmBtree->EQFNTMGet(
+              usRc =  pTmClb->TmBtree.EQFNTMGet(
                                 ulKey,
                                 (PCHAR)pTmRecord,
                                 &ulLen );
@@ -483,7 +482,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
                           /*  by a new translation, we will not remove  */
                           /* the key (only get rid of any target data)  */
                           /**********************************************/
-                          usRc = pTmClb->pstInBtree->EQFNTMUpdate(
+                          usRc = pTmClb->InBtree.EQFNTMUpdate(
                                                *pulKey,
                                                (PBYTE)pTmRecord,
                                                RECLEN(pTmRecord) );

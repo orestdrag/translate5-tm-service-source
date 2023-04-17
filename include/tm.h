@@ -1445,99 +1445,6 @@ typedef struct _TM_HEADER { /* tmh */
 #define TMX_TABLE_SIZE      512
 #define MAX_INDEX_LEN       8150 //  2048
 
-/**********************************************************************/
-/* The version number is stored in the signature record of the TMs    */
-/*                                                                    */
-/* TM_MAJ_VERSION and TM_MIN_VERSION is always the current version    */
-/* used to create new TMs                                             */
-/*                                                                    */
-/* A change of the major version always forces an organize of the     */
-/* TM. If the major version of a TM is larger than the TM_MAJ_VERSION */
-/* used during compile of the DLLs the TM cannot be opened (even not  */
-/* for organize). A message will be displayed which will tell the     */
-/* user to get a new version of TranslationManager to work with the   */
-/* TM.                                                                */
-/*                                                                    */
-/* Version | Description                 | Special Handling for TMs   */
-/* Maj Min |                             |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  1   0  | Base version of TMs         | use old hash and tokenize  */
-/*         |                             | functions                  */
-/* --------+-----------------------------+----------------------------*/
-/*  2   0  | This version uses new hash  |                            */
-/*         | and tokenize functions to   |                            */
-/*         | overcome the problems with  |                            */
-/*         | non-alphabetic characters in|                            */
-/*         | terms and not-recognized    |                            */
-/*         | attribute strings           |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  3   0  | - This version number is set|                            */
-/*         |   automatically when a      |                            */
-/*         |   version 2 TM has tersed   |                            */
-/*         |   name tables (because the  |                            */
-/*         |   table exceeds the 32k QDAM|                            */
-/*         |   barrier for data records) |                            */
-/*         | - the version number has    |                            */
-/*         |   been splitted into a byte |                            */
-/*         |   for the major version and |                            */
-/*         |   a byte for the minor      |                            */
-/*         |   version                   |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  4   0  | - removed multiple flag     |                            */
-/*         | - use protect table exit    |                            */
-/*         |   for tag recognition       |                            */
-/*         | - use least-edit string     |                            */
-/*         |   for fuzzy match ranking   |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  5   0  | - allow name tables with    |                            */
-/*         |   a size of more than 32kB  |                            */
-/*         |   (organize of TM required) |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  6   0  | - allow text in unicode     |                            */
-/*         |   a size of more than 32kB  |                            */
-/*         |   (organize of TM required) |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  7   0  | - OpenTM2 Memory Plugin     |                            */
-/*         |   driven memory             |                            */
-/* --------+-----------------------------+----------------------------*/
-/*  7   1  | - New HashTupel method for  |                            */
-/*         |   the handling of words with|                            */
-/*         |   more than 20 characters   |                            */
-/*         |   (organize of TM required  |                            */
-/*         |   to activate new method,   |                            */
-/*         |   w/o organize old method is|                            */
-/*         |   being used)               |                            */
-/* --------+-----------------------------+----------------------------*/
-/* Current version: 7.0                                               */
-/**********************************************************************/
-#define TM_VERSION_1        1
-#define TM_VERSION_2        2
-#define TM_MAJ_VERSION_2    2
-#define TM_MAJ_VERSION_3    3
-#define TM_MAJ_VERSION_4    4
-#define TM_MAJ_VERSION_5    5
-#define TM_MAJ_VERSION_6    6
-#define TM_MAJ_VERSION_7    7
-
-#define TMMIN_VERSION_0     0
-#define TMMIN_VERSION_1     1
-
-#define TM_MAJ_VERSION      8
-#define TM_MIN_VERSION      1
-
-
-//#ifdef TM_LARGENAMETABLES
-//  #define TM_MAJ_VERSION      5
-//  #define TM_MIN_VERSION      0
-//#elif defined(TOP98_MULTFLAG)
-//  #define TM_MAJ_VERSION      4
-//  #define TM_MIN_VERSION      0
-//#else
-//  #define TM_MAJ_VERSION      2
-//  #define TM_MIN_VERSION      0
-//#endif
-
-
 
 
 
@@ -3037,33 +2944,9 @@ BOOL TMFuzzynessEx
   PUSHORT     pusDiffs                 // number of diffs in segment
 );
 
-USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
-USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
-USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
-USHORT TokenizeSourceEx2Ref(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   TMX_SENTENCE& rSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP,                      // OEM CP of source language     
-   int iMode                            // mode to be passed to create protect table function
-);
+USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ );
 
-USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT, USHORT);
-
-USHORT NTMTokenize
-(
-  PVOID    pvLangCB,                   // IN : ptr to language control block
-  PSZ      pszInData,                  // IN : ptr to data being tokenized
-  PUSHORT  pusTermListSize,            // IN/OUT:  address of variable
-                                       //    containing size of term list buffer
-  PVOID    *ppTermList,                // IN/OUT: address of term list pointer
-  USHORT   usListType,                 // IN: type of term list MORPH_ZTERMLIST,
-                                       //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
-                                       //    or MORPH_FLAG_ZTERMLIST
-   USHORT usVersion                    // version of TM
-);
+USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT);
 
 BOOL NTMTagSubst                     // generic inline tagging for TM
 (
@@ -4263,8 +4146,6 @@ USHORT TmtXClose( PTMX_CLB, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 //tm put prototypes
 BOOL AllocTable( PTMX_TABLE* );
-USHORT TokenizeSourceV5( PTMX_CLB, PTMX_SENTENCE_V5, PSZ, PSZ, USHORT );
-USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
 VOID HashSentence( PTMX_SENTENCE, USHORT usMajVersion, USHORT usMinVersion );
 VOID HashSentenceV5( PTMX_SENTENCE_V5, USHORT );
 USHORT HashTupel( PBYTE, USHORT, USHORT );

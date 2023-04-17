@@ -564,7 +564,7 @@ SHORT EQFNTMGetUpdCounter
 //                    BTREE_CLOSE_ERROR error closing dictionary
 //+----------------------------------------------------------------------------+
 
-SHORT EQFNTMClose(PPBTREE);
+SHORT EQFNTMClose(PBTREE);
 
   
 /**********************************************************************/
@@ -637,13 +637,13 @@ SHORT  EQFNTMOpen
 (
   PSZ   pName,                        // name of the file
   USHORT usOpenFlags,                 // Read Only or Read/Write
-  PBTREE  * ppBTIda                    // pointer to BTREE structure
+  BTREE  * ppBTIda                    // pointer to BTREE structure
 );
 
 // function to organize index file
 USHORT EQFNTMOrganizeIndex
 (
-  PPBTREE,
+   PBTREE,
    USHORT         usOpenFlags,         // open flags to be used for index file
    ULONG          ulStartKey           // first key to start automatic insert...
 );
@@ -687,7 +687,8 @@ typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lo
 
 typedef struct _TMX_SIGN
 {
-  TIME_L lTime;  
+  TIME_L lTime;
+  BYTE bGlobVersion;  
   BYTE bMajorVersion;
   BYTE bMinorVersion;
   CHAR szName[_TMX_SIGN_SZ_NAME];
@@ -723,8 +724,8 @@ typedef struct _TMX_LONGNAME_TABLE
 //TM control block structure
 struct TMX_CLB
 {
-  PBTREE pstTmBtree;
-  PBTREE pstInBtree;
+  BTREE TmBtree;
+  BTREE InBtree;
   PTMX_TABLE pLanguages;
   PTMX_TABLE pFileNames;
   PTMX_TABLE pAuthors;

@@ -101,22 +101,24 @@ USHORT TmtXOpen
     //call open function for data file
     usRc1 = EQFNTMOpen( pTmOpenIn->stTmOpen.szDataName,
                         (USHORT)(pTmClb->usAccessMode | ASD_FORCE_WRITE),
-                        &pTmClb->pstTmBtree );
+                        &pTmClb->TmBtree );
     if ( (usRc1 == NO_ERROR) || (usRc1 == BTREE_CORRUPTED) )
     {
       //get signature record and add to control block
       USHORT usLen = sizeof( TMX_SIGN );
 
-      usRc = pTmClb->pstTmBtree->EQFNTMSign((PCHAR) &(pTmClb->stTmSign), &usLen );
+      usRc = pTmClb->TmBtree.EQFNTMSign((PCHAR) &(pTmClb->stTmSign), &usLen );
 
       if ( usRc == NO_ERROR )
       {
-        if ( pTmClb->stTmSign.bMajorVersion > TM_MAJ_VERSION )
+        if ( pTmClb->stTmSign.bGlobVersion > T5GLOBVERSION  || pTmClb->stTmSign.bMajorVersion > T5MAJVERSION )
         {
+          T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v0."<<pTmClb->stTmSign.bMajorVersion<<"."<<pTmClb->stTmSign.bMinorVersion;
           usRc = ERROR_VERSION_NOT_SUPPORTED;
         }
-        else if ( pTmClb->stTmSign.bMajorVersion < TM_MAJ_VERSION )
+        else if (pTmClb->stTmSign.bGlobVersion < T5GLOBVERSION  || pTmClb->stTmSign.bMajorVersion < T5MAJVERSION )
         {
+          T5LOG(T5ERROR) << "TM was created in older vertions of t5memory, v"<<pTmClb->stTmSign.bGlobVersion<<"."<<pTmClb->stTmSign.bMajorVersion<<"."<<pTmClb->stTmSign.bMinorVersion;
           usRc = VERSION_MISMATCH;
         } /* endif */
       }
@@ -134,7 +136,7 @@ USHORT TmtXOpen
         {          
           ulLen =  MAX_COMPACT_SIZE-1;
           //get compact area and add to control block
-          USHORT usTempRc =  pTmClb->pstTmBtree->EQFNTMGet( COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
+          USHORT usTempRc =  pTmClb->TmBtree.EQFNTMGet( COMPACT_KEY, (PCHAR)pTmClb->bCompact, &ulLen );
 
           // in organize mode allow continue if compact area is corrupted
           if ( (usTempRc != NO_ERROR) && (usTempRc != VERSION_MISMATCH) )
@@ -330,7 +332,7 @@ USHORT TmtXOpen
       {
         //call open function for index file
         USHORT usIndexRc = EQFNTMOpen( pTmOpenIn->stTmOpen.szIndexName,
-                                pTmClb->usAccessMode, &pTmClb->pstInBtree );
+                                pTmClb->usAccessMode, &pTmClb->InBtree );
         if ( usIndexRc != NO_ERROR )
         {
           usRc = usIndexRc;
@@ -369,9 +371,10 @@ USHORT TmtXOpen
     if ( (pTmClb->pLanguages == NULL) ||
          (pTmClb->pAuthors   == NULL) ||
          (pTmClb->pTagTables == NULL) ||
-         (pTmClb->pFileNames == NULL) ||
-         (pTmClb->pstTmBtree == NULL) ||
-         (pTmClb->pstInBtree == NULL) )
+         (pTmClb->pFileNames == NULL) //||
+         //(pTmClb.TmBtree == NULL) ||
+         //(pTmClb.InBtree == NULL) 
+         )
     {
       usRc = TM_FILE_SCREWED_UP;
     } /* endif */
@@ -387,10 +390,10 @@ USHORT TmtXOpen
     UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
 
-    if ( pTmClb->pstTmBtree != NULL ) 
-        EQFNTMClose( &pTmClb->pstTmBtree );
-    if ( pTmClb->pstInBtree != NULL ) 
-        EQFNTMClose( &pTmClb->pstInBtree );
+    //if ( pTmClb.TmBtree != NULL ) 
+        EQFNTMClose( &pTmClb->TmBtree );
+    //if ( pTmClb.InBtree != NULL ) 
+        EQFNTMClose( &pTmClb->InBtree );
 
     NTMDestroyLongNameTable( pTmClb );
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );

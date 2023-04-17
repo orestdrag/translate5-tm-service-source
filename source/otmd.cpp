@@ -192,7 +192,7 @@ int main(int argc, char* argv[]) {
    //#ifdef GLOGGING_ENABLED
    google::InitGoogleLogging(argv[0]);//, &CustomPrefix); 
    
-   T5LOG(T5TRANSACTION) <<"Worker thread starting";   
+   T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION;   
    std::thread worker(proxygen_server_init);
    worker.join();
    OtmMemoryServiceWorker::getInstance()->shutdownService(SHUTDOWN_CALLED_FROM_MAIN);

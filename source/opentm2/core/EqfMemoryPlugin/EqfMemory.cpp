@@ -165,7 +165,7 @@ void EqfMemory::setDescription
 
     // get current signature record
     USHORT usSignLen = sizeof(TMX_SIGN);
-    USHORT usRc = pstTmBtree->EQFNTMSign((PCHAR)pTmSign, &usSignLen );
+    USHORT usRc = TmBtree.EQFNTMSign((PCHAR)pTmSign, &usSignLen );
     fOK = (usRc == NO_ERROR);
 
      // update description field
@@ -181,7 +181,7 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
-       usRc = pstTmBtree->EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
+       usRc = TmBtree.EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
        fOK = (usRc == NO_ERROR);
       } /* endif */
 
@@ -246,8 +246,8 @@ unsigned long EqfMemory::getFileSize()
 
   //if ( pTmClb != NULL )
   {
-    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( pstTmBtree->fb.file );
-    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( pstInBtree->fb.file );
+    unsigned long ulDataSize  = FilesystemHelper::GetFileSize( TmBtree.fb.file );
+    unsigned long ulIndexSize = FilesystemHelper::GetFileSize( InBtree.fb.file );
 
     ulFileSize = ulDataSize + ulIndexSize;
   }
@@ -983,9 +983,7 @@ OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag )
 */
 int EqfMemory::handleError( int iRC, char *pszMemName, char *pszMarkup )
 {
-  PBTREE pDataTree = pstTmBtree;
-
-  return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, pDataTree->szFileName, this->strLastError, this->iLastError ) );
+  return( EqfMemoryPlugin::handleError( iRC, pszMemName, pszMarkup, TmBtree.szFileName, this->strLastError, this->iLastError ) );
 }
 
 /*! \brief Set or clear the pointer to a loaded global memory option file
@@ -1010,36 +1008,36 @@ int EqfMemory::setGlobalMemoryOptions
 
 // NewTM region
 EqfMemory::EqfMemory(const std::string& tmName){
-  pstTmBtree->fb.fileName = NewTMManager::GetTmdPath(tmName);
-  pstInBtree->fb.fileName = NewTMManager::GetTmiPath(tmName);
+  TmBtree.fb.fileName = NewTMManager::GetTmdPath(tmName);
+  InBtree.fb.fileName = NewTMManager::GetTmiPath(tmName);
 }
 
 int EqfMemory::LoadInRAM(){
-  if(pstTmBtree->fb.file != nullptr){
+  if(TmBtree.fb.file != nullptr){
     //file is in mem
     return -1;
   }
-  if(pstInBtree->fb.file != nullptr){
+  if(InBtree.fb.file != nullptr){
     //file is in mem
     return -1;
   }
-  pstTmBtree->fb.ReadFromFile();
-  pstInBtree->fb.ReadFromFile();
+  TmBtree.fb.ReadFromFile();
+  InBtree.fb.ReadFromFile();
   
   return 0;
 }
 
 int EqfMemory::UnloadFromRAM(){
-  if(pstTmBtree->fb.file == nullptr){
+  if(TmBtree.fb.file == nullptr){
     //file is in mem
     return -1;
   }
-  if(pstInBtree->fb.file == nullptr){
+  if(InBtree.fb.file == nullptr){
     //file is in mem
     return -1;
   }
-  pstTmBtree->fb.WriteToFile();
-  pstInBtree->fb.WriteToFile();
+  TmBtree.fb.WriteToFile();
+  InBtree.fb.WriteToFile();
   
   return 0;
 }

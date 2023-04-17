@@ -331,10 +331,10 @@ SHORT  EQFNTMOpen
 (
   PSZ   pName,                        // name of the file
   USHORT usOpenFlags,                 // Read Only or Read/Write
-  PBTREE  * ppBTIda                    // pointer to BTREE structure
+  BTREE  * pBTIda                    // pointer to BTREE structure
 )
 {
-   PBTREE    pBTIda;                   // pointer to BTRee structure
+   //PBTREE    pBTIda;                   // pointer to BTRee structure
    SHORT     sRc = 0;                  // return code
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
@@ -389,7 +389,7 @@ SHORT  EQFNTMOpen
      } /* endif */
    } /* endif */
 
-   *ppBTIda = pBTIda;                               // set base pointer
+   //*ppBTIda = pBTIda;                               // set base pointer
 
    if ( sRc != NO_ERROR )
    {
@@ -426,16 +426,16 @@ SHORT  EQFNTMOpen
 
 SHORT EQFNTMClose
 (
-  PBTREE * ppBTIda
+  BTREE * ppBTIda
 )
 {
   SHORT sRc;
 
   DEBUGEVENT( EQFNTMCLOSE_LOC, FUNCENTRY_EVENT, 0 );
 
-  if ( *ppBTIda )
+  if ( ppBTIda )
   {
-    sRc = QDAMDictCloseLocal( (PBTREE) *ppBTIda );
+    sRc = QDAMDictCloseLocal( ppBTIda );
   }
   else
   {

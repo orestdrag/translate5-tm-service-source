@@ -422,36 +422,7 @@ USHORT TokenizeSource
    PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
    PTMX_SENTENCE pSentence,             // pointer to sentence structure
    PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion                     // version of TM
-)
-{
-  ULONG ulSrcCP = 1;
-  return( TokenizeSourceEx( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP ) );
-}
-
-USHORT TokenizeSourceEx
-(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   PTMX_SENTENCE pSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP                       // OEM CP of source language     
-)
-{
-    return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
-}
-
-USHORT TokenizeSourceEx2
-(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   PTMX_SENTENCE pSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP,                      // OEM CP of source language     
-   int iMode                            // mode to be passed to create protect table function
+   PSZ pSourceLang                      // source language
 )
 {
   PVOID     pTokenList = NULL;         // ptr to token table
@@ -576,7 +547,7 @@ USHORT TokenizeSourceEx2
                                    (PTOKENENTRY)pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
-                                   pTable->pfnProtTableW, ulSrcCP, iMode);
+                                   pTable->pfnProtTableW, 1, 0);
 
 
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
@@ -601,7 +572,7 @@ USHORT TokenizeSourceEx2
                                       (PTOKENENTRY)pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
-                                       pTable->pfnProtTableW, ulSrcCP, iMode );
+                                       pTable->pfnProtTableW, 1, 0 );
         } /* endif */
 
       } /* endwhile */
@@ -632,7 +603,7 @@ USHORT TokenizeSourceEx2
               usRc = NTMMorphTokenizeW( usLangId,
                                        pSentence->pInputString + pEntry->usStart,
                                        &ulListSize, (PVOID *)&pTermList,
-                                       MORPH_FLAG_OFFSLIST, usVersion );
+                                       MORPH_FLAG_OFFSLIST );
 
               pSentence->pInputString[pEntry->usStop+1] = chTemp;
 
@@ -774,15 +745,13 @@ USHORT TokenizeSourceEx2
 
 USHORT NTMTokenizeW
 (
-  PVOID    pvLangCB,                   // IN : ptr to language control block
   PSZ_W    pszInData,                  // IN : ptr to data being tokenized
   PULONG   pulTermListSize,            // IN/OUT:  address of variable
                                        //    containing size of term list buffer
   PVOID    *ppTermList,                // IN/OUT: address of term list pointer
-  USHORT   usListType,                 // IN: type of term list MORPH_ZTERMLIST,
+  USHORT   usListType                 // IN: type of term list MORPH_ZTERMLIST,
                                        //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
                                        //    or MORPH_FLAG_ZTERMLIST
-   USHORT usVersion                    // version of TM
 );
 
 USHORT NTMMorphTokenizeW
@@ -792,9 +761,8 @@ USHORT NTMMorphTokenizeW
    PULONG   pulBufferSize,             // address of variable containing size of
                                        //    term list buffer
    PVOID    *ppTermList,               // address of caller's term list pointer
-   USHORT   usListType,                // type of term list MORPH_ZTERMLIST or
+   USHORT   usListType                // type of term list MORPH_ZTERMLIST or
                                        //    MORPH_OFFSLIST
-   USHORT usVersion                    // version of TM
 )
 {
   USHORT    usRC = MORPH_OK;           // function return code
@@ -827,12 +795,11 @@ USHORT NTMMorphTokenizeW
   {
     if ( *pszInData != EOS )
     {
-      usRC = NTMTokenizeW( NULL,
-                          pszInData,
+      usRC = NTMTokenizeW(pszInData,
                           pulBufferSize,
                           ppTermList,
-                          usListType,
-                          usVersion );
+                          usListType
+                          );
     }
     else
     {
@@ -853,15 +820,13 @@ USHORT NTMMorphTokenizeW
 
 USHORT NTMTokenizeW
 (
-  PVOID    pvLangCB,                   // IN : ptr to language control block
   PSZ_W    pszInData,                  // IN : ptr to data being tokenized
   PULONG   pulTermListSize,            // IN/OUT:  address of variable
                                        //    containing size of term list buffer
   PVOID    *ppTermList,                // IN/OUT: address of term list pointer
-  USHORT   usListType,                 // IN: type of term list MORPH_ZTERMLIST,
+  USHORT   usListType                 // IN: type of term list MORPH_ZTERMLIST,
                                        //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
                                        //    or MORPH_FLAG_ZTERMLIST
-   USHORT usVersion                    // version of TM
 )
 {
   USHORT     usReturn = 0;             // returncode
