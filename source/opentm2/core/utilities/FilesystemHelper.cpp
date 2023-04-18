@@ -338,7 +338,7 @@ int FilesystemHelper::DeleteFile(const std::string& path){
 }
 
 
-bool FilesystemHelper::FileExists(std::string&& path){
+bool FilesystemHelper::FileExists(const std::string& path){
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
     struct stat buffer;   
@@ -388,7 +388,13 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     }
 }
 
-size_t FileBuffer::ReadFromFile(){           
+int FileBuffer::ReadFromFile(){           
+    if(fileName.empty()){
+        return FilesystemHelper::FILEHELPER_ERROR_WRONG_FILENAME;
+    }
+    if(FilesystemHelper::FileExists(fileName) == false){
+        return FilesystemHelper::FILEHELPER_ERROR_NO_FILES_FOUND;
+    }
     originalFileSize = FilesystemHelper::GetFileSize(fileName);
     int readed = 0;
     if( originalFileSize > 0  && originalFileSize != -1){
@@ -415,11 +421,9 @@ size_t FileBuffer::ReadFromFile(){
         }
         data.resize(16384);
     }
-
+    return 0;
 }
-size_t FileBuffer::WriteToFile(){
-
-}
+//int FileBuffer::WriteToFile(){}
 
 int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     if(fileAnchor != FILE_BEGIN){
@@ -438,7 +442,7 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     return 0;
 }
 
-size_t FileBuffer::Flush(){
+int FileBuffer::Flush(){
     bool fileWasOpened = file != nullptr;
     size_t writenBytes = 0;
     if(status & FileBufferStatus::MODIFIED){
@@ -475,10 +479,10 @@ size_t FileBuffer::Flush(){
             T5LOG( T5INFO) <<"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = " << fileName;
         }
     }
-
+    return 0;
 }
 
-size_t FileBuffer::Read(void* buff, size_t buffSize){
+int FileBuffer::Read(void* buff, size_t buffSize){
     if(data.size()< offset + buffSize){
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
             T5LOG(T5ERROR) << "ReadBuffer:: Trying to read not existing bytes from buffer, fName = " << fileName;
@@ -494,13 +498,13 @@ size_t FileBuffer::Read(void* buff, size_t buffSize){
     return 0;
 }
 
-size_t FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
+int FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
     offset = startingPos;
     return Read(buff, buffSize);
 }
 
 
-size_t FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition){
+int FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition){
     status |= MODIFIED;
     if(startingPosition + buffSize > data.size()){
         if(VLOG_IS_ON(1)){
@@ -510,14 +514,14 @@ size_t FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosit
         data.resize(offset + buffSize);
         if( offset + buffSize > data.size() ){
             T5LOG(T5ERROR) << "filebuffer vector resizing in unsuccessfull for " << fileName ;
-            return 0;
+            return FilesystemHelper::FILEHELPER_ERROR_DATA_SIZE_BIGGER_THAN_RECORD_SIZE;
         }
     }
 
     void* pStPos = &(data[startingPosition]);
     memcpy(pStPos, buff, buffSize);
     offset = startingPosition + buffSize;
-    return buffSize;
+    return 0 ;
 }
 
 /*
@@ -538,7 +542,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
         pFb->Write(buff, buffSize, startingPosition);
     }else{
         T5LOG(T5ERROR) << "FilesystemHelper::WriteToBuffer:: can't find buffer for file " << fName;
-        return -1;
+        return FilesystemHelper::FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
     if(VLOG_IS_ON(1)){
         T5LOG( T5DEBUG) << "FilesystemHelper::WriteToBuffer:: success, " << buffSize <<" bytes written to buffer for " << fName;
