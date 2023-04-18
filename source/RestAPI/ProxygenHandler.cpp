@@ -111,9 +111,14 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
-        iRC = pMemService->getMem( memName, requestAcceptHeader,  vMemData);
-        strResponseBody = std::string(vMemData.begin(), vMemData.end());
-        iRC = 200;
+        pRequest = new ExportRequestData(memName, requestAcceptHeader);
+        pRequest->strUrl = reqUrl;
+        pRequest->run();
+        strResponseBody = pRequest->outputMessage;
+        iRC = pRequest->_rest_rc_;
+        //iRC = pMemService->getMem( memName, requestAcceptHeader,  vMemData);
+        //strResponseBody = std::string(vMemData.begin(), vMemData.end());
+        //iRC = 200;
         break;
       }
 
@@ -199,7 +204,7 @@ void ProxygenHandler::onEOM() noexcept {
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
     T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-    RequestData *pRequest = nullptr;
+    
     switch(this->command){
       case COMMAND::CREATE_MEM:
       {
