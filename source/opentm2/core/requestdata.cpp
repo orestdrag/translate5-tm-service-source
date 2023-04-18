@@ -437,38 +437,35 @@ int ExportRequestData::checkData(){
   if ( _rc_ != 0 )
   {
     T5LOG( T5INFO) <<"::getMem::Error: no valid API session" ;
-    return( BAD_REQUEST );
+    return(_rest_rc_ =  BAD_REQUEST );
   } /* endif */
 
   if ( strMemName.empty() )
   {
     T5LOG(T5ERROR) <<"::getMem::Error: no memory name specified" ;
-    return( BAD_REQUEST );
+    return( _rest_rc_ = BAD_REQUEST );
   } /* endif */
 
-  // close memory if it is open
-  std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  if ( pMem != nullptr )
-  {
-    // close the memory and remove it from our list
-    TMManager::GetInstance()->removeFromMemoryList( pMem );
-  } /* endif */
 
-  // check if memory exists
-  //if ( EqfMemoryExists( this->hSession, (PSZ)strMemName.c_str() ) != 0 )
+  if(!_rc_)
   {
-    T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName;
-    return( NOT_FOUND );
-  }  
+    int res =  NewTMManager::GetInstance()->TMExistsOnDisk(strMemName, true );
+    if ( res != NewTMManager::TMM_TM_NOT_FOUND )
+    {
+      T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName<< "; res= " << res;
+      return( _rest_rc_ =  NOT_FOUND );
+    }
+  }
+   
 }
 
 int ExportRequestData::execute(){
-   // get a temporary file name for the memory package file or TMX file
-  std::string strTempFile = FilesystemHelper::BuildTempFileName();
+  // get a temporary file name for the memory package file or TMX file
+  strTempFile = FilesystemHelper::BuildTempFileName();
   if ( _rc_ != 0 )
   {
     T5LOG(T5ERROR) <<"::getMem:: Error: creation of temporary file for memory data failed" ;
-    return( INTERNAL_SERVER_ERROR );
+    return( _rest_rc_ = INTERNAL_SERVER_ERROR );
   }
   // export the memory in internal format
   if ( requestFormat.compare( "application/xml" ) == 0 )
@@ -481,7 +478,7 @@ int ExportRequestData::execute(){
       //unsigned short usRC = 0;
       //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMem failed with rc=" << _rc_ << ", error message is " <<  EncodingHelper::convertToUTF8( this->szLastError);
-      return( INTERNAL_SERVER_ERROR );
+      return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
   //else if ( requestFormat.compare( "application/zip" ) == 0 )
@@ -526,54 +523,30 @@ int ExportRequestData::ExportZip(){
 }
 
 int ExportRequestData::ExportTmx(){
-  /*
-  if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFEXPORTMEM) || (lOptions & COMPLETE_IN_ONE_CALL_OPT)) )
-  {
-    T5LOG( T5DEBUG) <<  "==EQFExportMem==, Options = " << lOptions;
-    if(pszMemName){
-      T5LOG( T5DEBUG) << "EqfExportMem:: Memory = " << pszMemName;
-    }else{
-      T5LOG(T5ERROR) << "EqfExportMem:: Memory = NULL";
-    }
-
-    if(pszOutFile){
-      T5LOG( T5DEBUG) << "EqfExportMem:: Output File = " << pszOutFile;
-    }else{
-      T5LOG(T5ERROR) << "EqfExportMem:: Output File = NULL";
-    }
-  } 
-
-  // check sequence of calls
-  if ( (usRC == NO_ERROR) && !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) )
-  {
-    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFEXPORTMEM) )
-    {
-      usRC = LASTTASK_INCOMPLETE_RC;
-    } 
-  } 
-
+  
+  //mem
   // call TM export
-  if ( usRC == NO_ERROR )
+  if ( _rc_ == NO_ERROR )
   {
-    if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
-    if(pData->pImportData == nullptr){
-      pData->pImportData  = new ImportStatusDetails;
-      pData->pImportData->reset();
-    }
-    usRC = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );
+    //if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
+    //_rc_ = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );    
+    memset( &fctdata, 0, sizeof( FCTDATA ) );
+    fctdata.fComplete = TRUE;
+    fctdata.usExportProgress = 0;
+    _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), COMPLETE_IN_ONE_CALL_OPT );
   } 
 
-  if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) && (usRC == NO_ERROR) && !pData->fComplete )
+  if ( _rc_ == 0 )
   {
-    usRC = CONTINUE_RC;
-  } 
-
-  if ( pData && (pData->fComplete || ( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ){
-    if(usRC){
-      T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << usRC;
-    }else{ 
-      T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
+    while ( !fctdata.fComplete )
+    {
+      _rc_ = fctdata.MemFuncExportProcess(  );
     }
-  }//*/
+  }
+  if(_rc_){
+    T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << _rc_;
+  }else{ 
+    T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
+  }
   return 0;
 }

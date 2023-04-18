@@ -113,11 +113,7 @@ typedef struct _MEM_EXPORT_IDA
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
 
- #ifdef TO_BE_REMOVED
- PFN_EXTMEMEXPORTSTART   pfnMemExpStart;         // function handling start of export
- PFN_EXTMEMEXPORTPROCESS pfnMemExpProcess;       // function handling export of a segment
- PFN_EXTMEMEXPORTEND     pfnMemExpEnd;           // function handling end of export
- #endif
+
 
  BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
  CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
@@ -140,17 +136,8 @@ USHORT  MemExportWriteFile( PMEM_EXPORT_IDA pExportIDA );
 USHORT  MemExportWrite(     PMEM_EXPORT_IDA pExportIDA, PSZ_W  pszToWrite );
 USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn, PSZ_W pszSegmentOut );
 
-USHORT MemFuncPrepExport
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemname,              // name of Translation Memory
-  PSZ         pszOutFile,              // fully qualified name of output file
-  LONG        lOptions                 // options for Translation Memory export
-);
-USHORT MemFuncExportProcess
-(
-  PFCTDATA    pData                    // function I/F session data
-);
+
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1689,7 +1676,7 @@ USHORT MemFuncExportMem
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-
+  /*
   PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
   memset( pPrivateData, 0, sizeof( FCTDATA ) );
   pPrivateData->fComplete = TRUE;
@@ -1705,14 +1692,14 @@ USHORT MemFuncExportMem
   }
   T5LOG( T5INFO) <<"MemFuncExportMem finished, RC = " << usRC;
   free( pPrivateData );
-  
+  //*/
   return( usRC );
 } /* end of function MemFuncExportMem */
 
 // prepare the function I/F TM import
-USHORT MemFuncPrepExport
+USHORT FCTDATA::MemFuncPrepExport
 (
-  PFCTDATA    pData,                   // function I/F session data
+  //PFCTDATA    pData,                   // function I/F session data
   PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszOutFile,              // fully qualified name of output file
   LONG        lOptions                 // options for Translation Memory export
@@ -1878,14 +1865,14 @@ USHORT MemFuncPrepExport
   // cleanup
   if ( fOK )
   {
-    pData->fComplete = FALSE;
+    this->fComplete = FALSE;
     pCommArea->pUserIDA = pIDA;
-    pData->pvMemExportCommArea = pCommArea;
+    this->pvMemExportCommArea = pCommArea;
     T5LOG( T5INFO) <<  "Success in MemFuncPrepExport:: memName = " << pszMemName ;
   }
   else
   {
-     pData->fComplete = TRUE;
+     this->fComplete = TRUE;
      usRC =  UtlGetDDEErrorCode( HWND_FUNCIF );
      T5LOG(T5ERROR) << "error in the end of MemFuncPrepExport:: rc = " << usRC;
      if ( pIDA )
@@ -1905,20 +1892,17 @@ USHORT MemFuncPrepExport
      } /* endif */
      if ( pCommArea) UtlAlloc( (PVOID *) &pCommArea, 0L, 0L, NOMSG );
 
-     pData->fComplete = TRUE;
+     this->fComplete = TRUE;
    } /* endif */
 
   return( usRC );
 } /* end of function MemFuncPrepExport */
 
 // prepare the function I/F TM import
-USHORT MemFuncExportProcess
-(
-  PFCTDATA    pData                    // function I/F session data
-)
+USHORT FCTDATA::MemFuncExportProcess()
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)pData->pvMemExportCommArea;  // ptr to commmunication area
+  PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)this->pvMemExportCommArea;  // ptr to commmunication area
   PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
    switch ( pIDA->NextTask )
@@ -1929,7 +1913,7 @@ USHORT MemFuncExportProcess
       {
         T5LOG(T5ERROR) << "Error in MemFuncExportProcess::EQFMemExportStart, RC = " << usRC;
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
-        pData->fComplete = TRUE;
+        this->fComplete = TRUE;
       }else{
         T5LOG( T5INFO) << "MemFuncExportProcess::EQFMemExportStart success";
       } /* endif */
@@ -1941,7 +1925,7 @@ USHORT MemFuncExportProcess
       {
         T5LOG(T5ERROR) << "Error in MemFuncExportProcess::EQFMemExportProcess, RC = " << usRC;
         EQFMemExportEnd( pCommArea, HWND_FUNCIF, 0L );
-        pData->fComplete = TRUE;
+        this->fComplete = TRUE;
       }else{
         T5LOG( T5INFO) << "MemFuncExportProcess::EQFMemExportProcess success";
       } /* endif */
@@ -1955,10 +1939,10 @@ USHORT MemFuncExportProcess
       }else{
         T5LOG( T5INFO) << "MemFuncExportProcess::MEM_END_EXPORT success";
       }
-      pData->fComplete = TRUE;
+      this->fComplete = TRUE;
       break;
   } /* endswitch */
-  pData->usExportProgress = pCommArea->usComplete;
+  this->usExportProgress = pCommArea->usComplete;
   return( usRC );
 
 } /* end of function MemFuncExportProcess */
