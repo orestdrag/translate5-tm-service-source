@@ -230,7 +230,7 @@ USHORT TmtXCreate
   USHORT     usRc = NO_ERROR;          //return value
 
   //allocate control block
-  fOK = UtlAlloc( (PVOID *) &pTmClb, 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
+  fOK = UtlAlloc( (PVOID *) &pTmClb, 0L, (LONG)sizeof( EqfMemory ), NOMSG );
 
   if ( fOK )
   {
@@ -321,7 +321,7 @@ USHORT TmtXCreate
       // create language group table
       if ( usRc == NO_ERROR )
       {
-        usRc = NTMCreateLangGroupTable( pTmClb );
+        usRc = pTmClb->NTMCreateLangGroupTable();
         
       } /* endif */
 
@@ -354,7 +354,7 @@ USHORT TmtXCreate
   if ( usRc )
   {
     //free allocated memory
-    NTMDestroyLongNameTable( pTmClb );
+    pTmClb->NTMDestroyLongNameTable();
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
   } /* endif */
 

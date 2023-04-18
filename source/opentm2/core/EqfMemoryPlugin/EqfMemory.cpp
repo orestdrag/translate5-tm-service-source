@@ -599,7 +599,7 @@ int EqfMemory::rebuildIndex
 {
   int iRC = 0;
 
-  if ( !iRC ) iRC = NTMOrganizeIndexFile( this );
+  if ( !iRC ) iRC = NTMOrganizeIndexFile();
 
   return( iRC );
 }

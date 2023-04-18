@@ -82,7 +82,7 @@ typedef PSWP  EQF_PSWP;
 // max length of a format/markup table name
 #define EQF_FORMATLEN 13
 
-
+class EqfMemory;
 
 typedef ULONG EQFINFO, *PEQFINFO;
 
@@ -270,7 +270,7 @@ typedef struct _BTREEBUFFER_V3
 {
   USHORT usRecordNumber;                           // index of rec in buffer
   BOOL   fLocked;                                  // Is the record locked ?
-  BOOL   fNeedToWrite;                             // Commit before reuse
+  //BOOL   fNeedToWrite;                             // Commit before reuse
   SHORT  sUsed;                                    // buffer used count
   ULONG  ulCheckSum;                               // CheckSum of contents data
   BTREERECORD_V3 contents;                            // data from disk
@@ -425,7 +425,6 @@ typedef struct _BTREEIDA
     USHORT       usOpenFlags=0;                    // settings used for open
     LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
     HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
-    BOOL         fUpdated=0;                       // database-has-been-modified flag
     USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
     USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
     ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
@@ -453,7 +452,14 @@ typedef struct _BTREEIDA
     wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
     BOOL         fLock=0;                          // head term is locked
     wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
-
+    //QDAM part
+    //PBTREEGLOB   pBTree;                           // pointer to global struct
+    ULONG        ulNum;
+    //CHAR         chDictName[ MAX_EQF_PATH ];
+    BOOL         fDictLock;                        // is dictionary locked
+    //std::atomic<int> usOpenCount;                  // number of accesses...
+    //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
+    //End of qdam part
 
     //+----------------------------------------------------------------------------+
     // Internal function
@@ -919,9 +925,44 @@ SHORT QDAMDictSignLocal
    PUSHORT pusLen                      // length of user data
 );
 
-                    
+//+----------------------------------------------------------------------------+
+// Internal function
+//+----------------------------------------------------------------------------+
+// Function name:     EQFNTMClose  close the TM file
+//+----------------------------------------------------------------------------+
+// Function call:     EQFNTMClose( PPBTREE );
+//+----------------------------------------------------------------------------+
+// Description:       Close the file
+//+----------------------------------------------------------------------------+
+// Parameters:        PPBTREE                pointer to btree structure
+//+----------------------------------------------------------------------------+
+// Returncode type:   SHORT
+//+----------------------------------------------------------------------------+
+// Returncodes:       0                 no error happened
+//                    BTREE_INVALID     incorrect pointer
+//                    BTREE_DISK_FULL   disk full condition encountered
+//                    BTREE_WRITE_ERROR write error to disk
+//                    BTREE_CORRUPTED   dictionary is corrupted
+//                    BTREE_CLOSE_ERROR error closing dictionary
+//+----------------------------------------------------------------------------+
 
- } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB ;
+SHORT EQFNTMClose();
+
+SHORT QDAMNewRecord_V3
+(
+   PBTREEBUFFER_V3  * ppRecord,
+   RECTYPE         recType          // data or key record
+);
+
+SHORT QDAMInsertKey_V3
+(
+   PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
+   PWCHAR     pKey,
+   RECPARAM   recKey,                  // position/offset for key
+   RECPARAM   recData                  // position/offset for data
+);   
+
+ } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB , QDAMDICT, *PQDAMDICT;;
 
 
 

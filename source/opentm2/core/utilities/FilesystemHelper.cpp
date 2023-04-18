@@ -62,7 +62,7 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
   int iRC = 0;
 
   // open file
-  HFILE hFile = FilesystemHelper::OpenFile(strFile.c_str(), "r", false);//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+  HFILE hFile =fopen(strFile.c_str(), "r") ;//CreateFile( pszFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
   if ( hFile == NULL )
   {
     iRC = GetLastError();
@@ -77,17 +77,16 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
   vFileData.resize( dwFileSize );
 
   // read file into byte vector
-  int iBytesRead = 0;
-  if ( !ReadFile( hFile, &vFileData[0], dwFileSize, iBytesRead, 0 ) )
+  if ( !fread(  &vFileData[0],dwFileSize,1, hFile ) )
   {
-    CloseFile( hFile );
+    fclose( hFile );
     iRC = GetLastError();
     T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< strFile <<" failed with rc=" << iRC << "\n";
     return( iRC );
   }
 
   // close file
-  CloseFile( hFile );
+  fclose( hFile );
 
   return( iRC );
 }
@@ -1082,9 +1081,10 @@ size_t FilesystemHelper::GetFileSize(FILE*& ptr){
     fseek(ptr, 0L, SEEK_END);
     int size = ftell(ptr);
     fseek(ptr, 0L, pos);
-    
-    std::string fName = GetFileName(ptr);
-    T5LOG( T5DEBUG) << "FilesystemHelper::GetFileSize("<<(long int)ptr<< ") = "<<size<<", fName = "<<fName;
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+        std::string fName = GetFileName(ptr);
+        T5LOG( T5DEBUG) << "FilesystemHelper::GetFileSize("<<(long int)ptr<< ") = "<<size<<", fName = "<<fName;
+    }
     return size;
 }
 

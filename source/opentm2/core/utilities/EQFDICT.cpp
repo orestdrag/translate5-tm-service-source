@@ -531,17 +531,6 @@ typedef enum _DICTCMD
 
 
 
-typedef struct _QDAMDICT
-{
-   PBTREEGLOB   pBTree;                           // pointer to global struct
-   ULONG        ulNum;
-   USHORT       usNextHandle;
-   USHORT       usOpenRC;
-   CHAR         chDictName[ MAX_EQF_PATH ];
-   BOOL         fDictLock;                        // is dictionary locked
-   std::atomic<int> usOpenCount;                  // number of accesses...
-   PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
-} QDAMDICT, *PQDAMDICT;
 
 static BTREEHEADRECORD header; // Static buffer for database header record
 
@@ -594,7 +583,7 @@ UCHAR chDefCollate[] = {
 /**********************************************************************/
 /* global struct containing struct. for open dicts ...                */
 /**********************************************************************/
-QDAMDICT QDAMDict[MAX_NUM_DICTS];
+//QDAMDICT QDAMDict[MAX_NUM_DICTS];
 
 /**********************************************************************/
 /* Table for punctuation detection                                    */
@@ -927,24 +916,8 @@ SHORT NTMKeyCompare
   HeadRecord.usNextFreeRecord = usNextFreeRecord;
   HeadRecord.Flags.f16kRec  = TRUE;
   
-  ;
-    // check if disk is full
-  if ( fb.Write((PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), FILE_BEGIN) != sizeof(BTREEHEADRECORD)  )
-  {
-    sRc = BTREE_DISK_FULL;
-  }
-
-  if ( sRc == NO_ERROR )
-  {
-    fUpdated = TRUE;
-  } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMWRITEHEADER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-  DEBUGEVENT2( QDAMWRITEHEADER_LOC, FUNCEXIT_EVENT, 0, DB_GROUP, "" );
+  // check if disk is full
+  sRc = fb.Write((PVOID) &HeadRecord, sizeof(BTREEHEADRECORD), FILE_BEGIN);
 
   return sRc;
 }
@@ -1022,37 +995,27 @@ SHORT BTREE::QDAMWRecordToDisk_V3
 
 //QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
 
-  if ( ! sRc )
-  {
-    //sRc = FilesystemHelper::WriteToFileBuff(pBT->fb.file, (PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, iBytesWritten, lOffset);
-    sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) != BTREE_REC_SIZE_V3;
+  //if ( ! sRc ){
+    sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) ;
     // check if disk is full
-    if ( ! sRc )
-    {
+    //if ( ! sRc )
+    //{
        //if ( iBytesWritten == BTREE_REC_SIZE_V3 )
        //{
-          pBuffer->fNeedToWrite = FALSE;
+       //  pBuffer->fNeedToWrite = FALSE;
        //}
        //else
        //{
        //   sRc = BTREE_DISK_FULL;
        //   fCorrupted = TRUE;                     // indicate corruption
        //} /* endif */
-    }
-    else
-    {
-       sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-       fCorrupted = TRUE;                     // indicate corruption
-    } /* endif */
-  }
-  else
-  {
-    sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-    fCorrupted = TRUE;                        // indicate corruption
-  } /* endif */
+    //}
+  //}
 
   if ( sRc )
   {
+    sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
+    fCorrupted = TRUE;                     // indicate corruption
     ERREVENT2( QDAMRECORDTODISK_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
   return sRc;
@@ -1082,58 +1045,6 @@ SHORT BTREE::QDAMWRecordToDisk_V3
 //------------------------------------------------------------------------------
 // Function flow:     read update counter from dummy file
 //------------------------------------------------------------------------------
- SHORT QDAMGetUpdCounter
-(
-   PBTREE     pBTIda,                   // pointer to btree structure
-   PLONG      plUpdCount,               // ptr to buffer for update counter
-   SHORT      sIndex,                   // index of requested update counter
-   SHORT      sNumCounters              // number of counters requested
-)
-{
-  SHORT  sRc=0;
-  
-  USHORT usNumBytes;                   // number of bytes written or read
-  ULONG  ulNewOffset;                  // new offset in file
-  PBTREEGLOB  pBT = pBTIda;
-  SHORT      sRetries;                 // number of retries
-
-  sRetries = 0; // MAX_RETRY_COUNT;
-  do
-  {
-     // Position to requested update counter
-    sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
-                         FILE_BEGIN, &ulNewOffset, FALSE);
-    sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-    // Read requested update counter(s)
-    if ( !sRc )
-    {
-      memset( plUpdCount, 0, sizeof(LONG)*sNumCounters );
-
-      sRc = UtlRead( pBT->fpDummy, (PVOID)plUpdCount,
-                     (USHORT)(sizeof(LONG) * sNumCounters),
-                     &usNumBytes, FALSE);
-      sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-     if ( sRc == BTREE_IN_USE )
-     {
-  //   UtlWait( MAX_WAIT_TIME );
-       sRetries--;
-     } /* endif */
-
-  // if ( sRetries != MAX_RETRY_COUNT )
-  // {
-  //   DEBUGEVENT2( QDAMGETUPDCOUNTER_LOC, WAIT_EVENT, (MAX_RETRY_COUNT - sRetries), DB_GROUP, "" );
-  // } /* endif */
-  } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMGETUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-  return sRc;
-}
 
 
 //------------------------------------------------------------------------------
@@ -1242,27 +1153,7 @@ SHORT BTREE::QDAMReadRecordFromDisk_V3
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
 
       DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, READ_EVENT, usNumber, DB_GROUP, "" );
-      //resRead = FilesystemHelper::ReadFile(fb.file, (PVOID)&pBuffer->contents,
-      //               BTREE_REC_SIZE_V3, iNumBytesRead,  (int)lOffset);
       resRead = fb.Read((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3, lOffset);
-      //if(!resRead) iNumBytesRead = BTREE_REC_SIZE_V3;
-      
-      //if (sRc ) 
-      //  sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, usOpenFlags );
-
-      /****************************************************************/
-      /* The following check added by XQG                             */
-      /* (Sometimes UtlRead terminates with sRc = 0 and usNumBytes = 0*/
-      /*  if the database is locked and although we are NOT at the    */
-      /*  end of the file!)                                           */
-      /****************************************************************/
-     // if ( !sRc && !iNumBytesRead )
-     // {
-     //   if ( usNumber < usNextFreeRecord )
-     //   {
-     //     sRc = BTREE_READ_ERROR;
-     //   } /* endif */
-     // } /* endif */
     } /* endif */
 
     if ( !sRc )
@@ -1535,7 +1426,7 @@ SHORT  BTREE::QDAMReadRecord_V3
              && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
         {
             /* write buffer and free allocated space */
-            if ( (pLEntry->pBuffer)->fNeedToWrite )
+            //if ( (pLEntry->pBuffer)->fNeedToWrite )
             {
               sRc = QDAMWRecordToDisk_V3( pLEntry->pBuffer);
             } /* endif */
@@ -1614,6 +1505,8 @@ QDAMAddDict
 {
   USHORT usI = 1;
   SHORT  sRc = 0;
+  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
+  #ifdef TEMPORARY_COMMENTED
   PQDAMDICT  pQDict;
 
   while ( QDAMDict[usI].usOpenCount > 0)
@@ -1639,6 +1532,8 @@ QDAMAddDict
   } /* endif */
 
   return sRc;
+  #endif 
+  return 0;
 } /* end of function QDAMAddDict */
 
 
@@ -1678,7 +1573,8 @@ BTREE::QDAMDictLockDictLocal
 )
 {
   SHORT  sRc = 0;
-
+  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
+  #ifdef TEMPORARY_COMMENTED
   /********************************************************************/
   /* check if open count > 1, then no exclusive use possible any more */
   /********************************************************************/
@@ -1697,6 +1593,7 @@ BTREE::QDAMDictLockDictLocal
   {
     QDAMDict[ usDictNum ].fDictLock = fLock;
   } /* endif */
+  #endif
 
   return sRc;
 } /* end of function QDAMDictLockDictLocal */
@@ -1740,6 +1637,8 @@ QDAMRemoveDict
   PBTREE pBTIda                        // pointer to ida
 )
 {
+  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
+  #ifdef TEMPORARY_COMMENTED
   USHORT usI;
   PPBTREE  ppBTSrc;
   PPBTREE  ppBTTgt;
@@ -1780,6 +1679,8 @@ QDAMRemoveDict
   } /* endif */
 
   return( pQDict->usOpenCount );
+  #endif 
+  return 0;
 } /* end of function QDAMRemoveDict */
 
 
@@ -1841,7 +1742,7 @@ SHORT QDAMDictFlushLocal
       PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
       for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
       {
-        if ( pLEntry->pBuffer &&  (pLEntry->pBuffer)->fNeedToWrite )
+        if ( pLEntry->pBuffer /*&&  (pLEntry->pBuffer)->fNeedToWrite*/ )
         {
           sRc = pBTIda->QDAMWRecordToDisk_V3( pLEntry->pBuffer);
           fRecordWritten = TRUE;
@@ -2472,14 +2373,15 @@ SHORT BTREE::QDAMDictCreateLocal
     /* in order to initialize the area of the first record we       */
     /* write an empty record buffer to the file before writing the  */
     /* header                                                       */
-    /****************************************************************/             
-    int iBytesWritten = 0;         
+    /****************************************************************/                  
     BTREEBUFFER_V3 pbuffer;
     memset((PVOID) &pbuffer, 0, BTREE_REC_SIZE_V3);
-    iBytesWritten = fb.Write((PVOID)&pbuffer,BTREE_REC_SIZE_V3, 0);
-    sRc = QDAMWriteHeader();
+    sRc = fb.Write((PVOID)&pbuffer,BTREE_REC_SIZE_V3, 0);
   }
-      
+
+  if(! sRc ){
+    sRc = QDAMWriteHeader();
+  }    
 
   if (! sRc )
   {
@@ -2592,7 +2494,7 @@ SHORT BTREE::QDAMDictCreateLocal
 
 USHORT TmtXClose
 (
-  PTMX_CLB pTmClb,             //ptr to control block
+  EqfMemory* pTmClb,             //ptr to control block
   PTMX_CLOSE_IN pTmCloseIn,    //ptr to input struct
   PTMX_CLOSE_OUT pTmCloseOut   //ptr to output struct
 )
@@ -2612,12 +2514,12 @@ USHORT TmtXClose
   } /* endif */
 
   //close index file regardless of errors
-  usRc1 = EQFNTMClose( &pTmClb->InBtree );
+  usRc1 = pTmClb->InBtree.QDAMDictClose();
   if ( !usRc )
     usRc = usRc1;
 
   //close data file
-  usRc1 = EQFNTMClose( &pTmClb->TmBtree );
+  usRc1 = pTmClb->TmBtree.QDAMDictClose();
   if ( !usRc )
     usRc = usRc1;
 
@@ -2706,7 +2608,8 @@ BTREE::QDAMDictLockStatus
   /******************************************************************/
   /* check the subject entry is not locked somewhere else...        */
   /******************************************************************/
-
+  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
+  #ifdef TEMPORARY_COMMENTED
   PPBTREE  ppBTemp;
   PQDAMDICT pQDict;
   pQDict = &(QDAMDict[usDictNum]);
@@ -2733,7 +2636,7 @@ BTREE::QDAMDictLockStatus
       ppBTemp++;
     } /* endif */
   } /* endwhile */
-
+  #endif
   return( fLock );
 } /* end of function QDAMDictLockStatus */
 
@@ -2892,6 +2795,8 @@ SHORT QDAMPhysLock
 //------------------------------------------------------------------------------
 VOID BTREE::QDAMDictUpdStatus()
 {
+  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
+  #ifdef TEMPORARY_COMMENTED
   PPBTREE  ppBTemp;
   PQDAMDICT pQDict;
   /********************************************************************/
@@ -2906,6 +2811,7 @@ VOID BTREE::QDAMDictUpdStatus()
     (*ppBTemp)->usCurrentRecord = 0;
     ppBTemp++;
   } /* endwhile */
+  #endif
 } /* end of function QDAMDictUpdStatus */
 
 PWCHAR QDAMGetszKey_V3
@@ -3304,16 +3210,13 @@ BOOL QDAMTerseData
 //                    endif
 //                    reset info in *ppRecord
 //------------------------------------------------------------------------------
-SHORT QDAMNewRecord_V3
+SHORT BTREE::QDAMNewRecord_V3
 (
-   PBTREE          pBTIda,
    PBTREEBUFFER_V3  * ppRecord,
    RECTYPE         recType          // data or key record
 )
 {
   SHORT   sRc = 0;                         // return code
-  PBTREEGLOB  pBT = pBTIda;
-
   //
   // Try and use a record within the file if there are any.  This saves
   // on disk usage
@@ -3321,40 +3224,40 @@ SHORT QDAMNewRecord_V3
   *ppRecord = NULL;                       // in case of error
   if ( recType == DATAREC )
   {
-     if ( pBT->usFreeDataBuffer )
+     if ( usFreeDataBuffer )
      {
-       sRc = pBTIda->QDAMReadRecord_V3( pBT->usFreeDataBuffer, ppRecord, FALSE );
+       sRc = QDAMReadRecord_V3( usFreeDataBuffer, ppRecord, FALSE );
        if ( ! sRc )
        {
-         pBT->usFreeDataBuffer = NEXT( *ppRecord );
+         usFreeDataBuffer = NEXT( *ppRecord );
        } /* endif */
      }
      else
      {
-       if ( pBT->usNextFreeRecord == 0xFFFF ) // end reached ???
+       if ( usNextFreeRecord == 0xFFFF ) // end reached ???
        {
          sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
        }
        else
        {
-         pBT->usNextFreeRecord++;
-         sRc = pBTIda->QDAMReadRecord_V3( pBT->usNextFreeRecord, ppRecord, TRUE );
+         usNextFreeRecord++;
+         sRc = QDAMReadRecord_V3( usNextFreeRecord, ppRecord, TRUE );
        }
      }
   }
   else
   {
-     if ( !pBT->usFreeKeyBuffer)
+     if ( !usFreeKeyBuffer)
      {
-       sRc = pBTIda->QDAMAllocKeyRecords( 5 );
+       sRc = QDAMAllocKeyRecords( 5 );
      } /* endif */
 
      if ( !sRc )
      {
-       sRc = pBTIda->QDAMReadRecord_V3( pBT->usFreeKeyBuffer, ppRecord, FALSE  );
+       sRc = QDAMReadRecord_V3( usFreeKeyBuffer, ppRecord, FALSE  );
        if ( ! sRc )
        {
-         pBT->usFreeKeyBuffer = NEXT( *ppRecord );
+         usFreeKeyBuffer = NEXT( *ppRecord );
        } /* endif */
      } /* endif */
   } /* endif */
@@ -3621,7 +3524,7 @@ SHORT  BTREE::QDAMAddToBuffer_V3
       // get record and store start position
       memset( pRecTemp, 0 , sizeof(RECPARAM));
 
-      sRc = QDAMNewRecord_V3( this, &pRecord, DATAREC );
+      sRc = QDAMNewRecord_V3( &pRecord, DATAREC );
       // fill it up to length or record size
       if ( ! sRc )
       {
@@ -3635,7 +3538,7 @@ SHORT  BTREE::QDAMAddToBuffer_V3
            /* get a new record, anchor it and fill data from end      */
            /* new record will be predecessor of already allocated rec.*/
            /***********************************************************/
-           sRc = QDAMNewRecord_V3( this, &pTempRecord, DATAREC );
+           sRc = QDAMNewRecord_V3( &pTempRecord, DATAREC );
            if ( !sRc )
            {
              TYPE( pTempRecord ) = chNodeType;   // data node
@@ -3998,15 +3901,6 @@ SHORT  QDAMFirstEntry_V3
 
 
 
-
-SHORT QDAMInsertKey_V3
-(
-   PBTREE       pBTIda,
-   PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
-   PWCHAR     pKey,
-   RECPARAM   recKey,                  // position/offset for key
-   RECPARAM   recData                  // position/offset for data
-);
 
 
 //------------------------------------------------------------------------------
@@ -4416,7 +4310,7 @@ SHORT QDAMSplitNode_V3
   // if root needs to be split do it first
   if (IS_ROOT(*record))
   {
-    sRc = QDAMNewRecord_V3( pBTIda, &newRecord, KEYREC );
+    sRc = pBTIda->QDAMNewRecord_V3( &newRecord, KEYREC );
     if ( newRecord )
     {
       BTREELOCKRECORD( newRecord );
@@ -4436,7 +4330,7 @@ SHORT QDAMSplitNode_V3
       {
          // store key temporarily, because record with key data is
          // not locked.
-         sRc = QDAMInsertKey_V3(pBTIda, newRecord, pParentKey, recKey, recData);
+         sRc = pBTIda->QDAMInsertKey_V3( newRecord, pParentKey, recKey, recData);
          // might be freed during insert
          BTREELOCKRECORD( pRecTemp );
       }
@@ -4461,7 +4355,7 @@ SHORT QDAMSplitNode_V3
   if ( !sRc )
   {
      // allocate space for the new record
-    sRc = QDAMNewRecord_V3( pBTIda, &newRecord, KEYREC );
+    sRc = pBTIda->QDAMNewRecord_V3( &newRecord, KEYREC );
     if ( newRecord )
     {
       BTREELOCKRECORD(newRecord);
@@ -4564,7 +4458,7 @@ SHORT QDAMSplitNode_V3
           pParentKey = QDAMGetszKey_V3( newRecord,0, pBT->usVersion );
           if ( pParentKey )
           {
-             sRc = QDAMInsertKey_V3(pBTIda, parent, pParentKey, recKey, recData);
+             sRc = pBTIda->QDAMInsertKey_V3( parent, pParentKey, recKey, recData);
           }
           else
           {
@@ -5210,7 +5104,7 @@ SHORT QDAMChangeKey_V3
        {
           recKey.usOffset = i;
           recKey.ulLen = 0;            // init length
-          sRc = QDAMInsertKey_V3( pBTIda, pRecord, pNewKey, recKey, recKey);
+          sRc = pBTIda->QDAMInsertKey_V3( pRecord, pNewKey, recKey, recKey);
        } /* endif */
     } /* endif */
     if ( !sRc )
@@ -5294,9 +5188,8 @@ SHORT QDAMChangeKey_V3
 //                    unlock record
 //
 //------------------------------------------------------------------------------
-SHORT QDAMInsertKey_V3
+SHORT BTREE::QDAMInsertKey_V3
 (
-   PBTREE       pBTIda,
    PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
    PWCHAR     pKey,
    RECPARAM   recKey,                  // position/offset for key
@@ -5318,14 +5211,13 @@ SHORT QDAMInsertKey_V3
   USHORT usDataRec = 0;                // length of key record
   PBYTE  pData;
   PUSHORT  pusOffset = NULL;
-  USHORT usCurrentRecord;              // current record
-  SHORT  sCurrentIndex;                // current index
-  PBTREEGLOB    pBT = pBTIda;
-   BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
+  USHORT _usCurrentRecord;              // current record
+  SHORT  _sCurrentIndex;                // current index
+  BOOL         fRecLocked = FALSE;    // TRUE if BTREELOCKRECORD has been done
 
   recKey;                              // get rid of compiler warnings
   //  check if key is already there -- duplicates will not be supported
-  sRc = QDAMLocateKey_V3( pBTIda, pRecord, pKey, &sKeyFound, FEXACT, &sNearKey);
+  sRc = QDAMLocateKey_V3( this, pRecord, pKey, &sKeyFound, FEXACT, &sNearKey);
   BTREELOCKRECORD( pRecord );
   fRecLocked = TRUE;
   if ( !sRc )
@@ -5346,7 +5238,7 @@ SHORT QDAMInsertKey_V3
        {
          BTREEUNLOCKRECORD( pRecord );
          fRecLocked = FALSE;
-         sRc = QDAMSplitNode_V3( pBTIda, &pRecord, pKey );
+         sRc = QDAMSplitNode_V3( this, &pRecord, pKey );
          if ( !sRc )
          {
            // SplitNode may have passed a new record back
@@ -5357,12 +5249,12 @@ SHORT QDAMInsertKey_V3
            /* inserting must be changed                               */
            if ( !IS_LEAF( pRecord ) )
            {
-             sRc = pBTIda->QDAMReadRecord_V3( recData.usNum, &pTempRec, FALSE );
+             sRc = QDAMReadRecord_V3( recData.usNum, &pTempRec, FALSE );
              if ( ! sRc )
              {
                PARENT( pTempRec ) = RECORDNUM( pRecord );
 //             pTempRec->ulCheckSum = QDAMComputeCheckSum( pTempRec );
-               sRc = pBTIda->QDAMWriteRecord_V3( pTempRec );
+               sRc = QDAMWriteRecord_V3( pTempRec );
              } /* endif */
            } /* endif */
          } /* endif */
@@ -5378,10 +5270,10 @@ SHORT QDAMInsertKey_V3
     pusOffset = (PUSHORT) pRecord->contents.uchData;
     while ( i > 0 && !fFound )
     {
-       pCompKey = QDAMGetszKey_V3( pRecord, (SHORT)(i-1), pBT->usVersion );
+       pCompKey = QDAMGetszKey_V3( pRecord, (SHORT)(i-1), usVersion );
        if ( pCompKey )
        {
-          if ( (*(pBT->compare))(pBTIda, pKey, pCompKey)  < 0 )
+          if ( (*(compare))(this, pKey, pCompKey)  < 0 )
           {
              *(pusOffset+i) = *(pusOffset+i-1);
              i--;
@@ -5399,8 +5291,8 @@ SHORT QDAMInsertKey_V3
     } /* endwhile */
 
     // set new current position
-    pBTIda->sCurrentIndex = i;
-    pBTIda->usCurrentRecord = RECORDNUM( pRecord );
+    sCurrentIndex = i;
+    usCurrentRecord = RECORDNUM( pRecord );
   } /* endif */
 
   if ( !sRc )
@@ -5418,7 +5310,7 @@ SHORT QDAMInsertKey_V3
         memcpy(pTarget, (PBYTE) pKey, usKeyLen );
       }
       // set data information      
-        memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recData, sizeof(RECPARAM));
+      memcpy((PRECPARAM) (pData+sizeof(USHORT)), &recData, sizeof(RECPARAM));
       
 
       // set address of key data at offset i
@@ -5429,7 +5321,7 @@ SHORT QDAMInsertKey_V3
       pRecord->contents.header.usFilled += usDataRec + sizeof(USHORT);
 //    pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
 
-      sRc = pBTIda->QDAMWriteRecord_V3(pRecord);
+      sRc = QDAMWriteRecord_V3(pRecord);
   } /* endif */
 
   // If this is the first key in the record, we must adjust pointers above
@@ -5437,8 +5329,8 @@ SHORT QDAMInsertKey_V3
   {
     if ((i == 0) && (!IS_ROOT(pRecord)))
     {
-       pOldKey = QDAMGetszKey_V3( pRecord, 1, pBT->usVersion );
-       pNewKey = QDAMGetszKey_V3( pRecord, 0, pBT->usVersion );
+       pOldKey = QDAMGetszKey_V3( pRecord, 1, usVersion );
+       pNewKey = QDAMGetszKey_V3( pRecord, 0, usVersion );
        if ( pOldKey && pNewKey )
        {
          if ( pCompKey && PARENT(pRecord) )
@@ -5447,11 +5339,11 @@ SHORT QDAMInsertKey_V3
             /* save old current record since ChangeKey will update it */
             /* (implicit call to QDAMInsertKey) and restore it ...   */
             /**********************************************************/
-            usCurrentRecord = pBTIda->usCurrentRecord;
-            sCurrentIndex   = pBTIda->sCurrentIndex;
-            sRc = QDAMChangeKey_V3( pBTIda, PARENT(pRecord), pOldKey, pNewKey);
-            pBTIda->usCurrentRecord = usCurrentRecord;
-            pBTIda->sCurrentIndex   = sCurrentIndex;
+            _usCurrentRecord = usCurrentRecord;
+            _sCurrentIndex   = sCurrentIndex;
+            sRc = QDAMChangeKey_V3( this, PARENT(pRecord), pOldKey, pNewKey);
+            usCurrentRecord = _usCurrentRecord;
+            sCurrentIndex   = _sCurrentIndex;
 
          } /* endif */
        }
@@ -6115,7 +6007,7 @@ SHORT BTREE::QDAMDictInsertLocal
           T5LOG(T5ERROR) <<  ":: tried to set bigget ulLen than rec size, ulLen = " << ulLen;
         }
         recData.ulLen = ulLen;
-        sRc = QDAMInsertKey_V3 (this, pNode, pKey, recKey, recData);
+        sRc = QDAMInsertKey_V3 ( pNode, pKey, recKey, recData);
       } /* endif */
 
       BTREEUNLOCKRECORD( pNode );
@@ -6197,17 +6089,12 @@ SHORT BTREE::QDAMDictUpdSignLocal
   if ( fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
-  //} else if ( !fOpen )
-  //{
-  //  sRc = BTREE_READONLY;
   }
   else
   {
      // let 2K at beginning as space
      writingPosition = (LONG) USERDATA_START;
-     sRc = fb.SetOffset( writingPosition, FILE_BEGIN);
-     //sRc = UtlChgFilePtr( fb.file, writingPosition, FILE_BEGIN,
-     //                      &ulNewOffset, FALSE);     
+     sRc = fb.SetOffset( writingPosition, FILE_BEGIN); 
   } 
 
   ulDataLen = BTREE_REC_SIZE_V3 - USERDATA_START - sizeof(USHORT);
@@ -6233,49 +6120,27 @@ SHORT BTREE::QDAMDictUpdSignLocal
        /*************************************************************/
        /*  write length of userdata                                 */
        /*************************************************************/
-       {
+       if ( ! sRc ) {
          USHORT usDataLen = (USHORT)ulDataLen;
-         fb.Write((PVOID) &usDataLen, sizeof(USHORT), writingPosition);
-         //FilesystemHelper::WriteToFileBuff(fb.file, (PVOID) &usDataLen, sizeof(USHORT), iBytesWritten, writingPosition);
-
-         //sRc = UtlWrite( pBT->fb.file, &usDataLen, sizeof(USHORT), &usBytesWritten, FALSE );
+         sRc = fb.Write((PVOID) &usDataLen, sizeof(USHORT), writingPosition);         
+         // check if disk is full
+        if ( ! sRc )
+        {
          ulDataLen = usDataLen;
          writingPosition += sizeof(USHORT);
+        }
        }
-
-       // check if disk is full
-       if ( ! sRc )
-       {
-          //if (  iBytesWritten != sizeof(USHORT) )
-          //{
-          //   sRc = BTREE_DISK_FULL;
-          //} /* endif */
-       }
-       else
-       {
-          sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-       } /* endif */
+       
        if ( ! sRc)
        {
          /***********************************************************/
          /* write user data itselft                                 */
          /***********************************************************/
-         fb.Write((PVOID) pSign, ulDataLen, writingPosition);
-         //FilesystemHelper::WriteToFileBuff(fb.file, (PCHAR)pSign, ulDataLen, iBytesWritten, writingPosition);
-          
+        sRc = fb.Write((PVOID) pSign, ulDataLen, writingPosition);
+        if ( ! sRc )
+        {
           writingPosition += ulDataLen;
-          // check if disk is full
-          if ( ! sRc )
-          {
-             //if (  iBytesWritten != ulDataLen )
-             //{
-             //   sRc = BTREE_DISK_FULL;
-             //} /* endif */
-          }
-          else
-          {
-             sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
-          } /* endif */
+        }
        } /* endif */
     } /* endif */
     if ( ! sRc )
@@ -6285,9 +6150,12 @@ SHORT BTREE::QDAMDictUpdSignLocal
       int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
       char* buff = new char[leftToFill];
       memset(buff, 0, leftToFill);
-      fb.Write((PVOID)buff, leftToFill, writingPosition);
-      //FilesystemHelper::WriteToFileBuff(fb.file, buff, leftToFill, iBytesWritten, writingPosition);
-      writingPosition += leftToFill;
+
+      sRc = fb.Write((PVOID)buff, leftToFill, writingPosition);
+      if(!sRc)
+      {
+        writingPosition += leftToFill;
+      }
       delete[] buff;
 
       if ( BTREE_REC_SIZE_V3 != writingPosition )
@@ -6453,6 +6321,7 @@ BTREE::QDAMCheckDict
 {
   USHORT  usI = 1;
   SHORT   sRc = 0;
+  #ifdef TEMPORARY_COMMENTED
   PQDAMDICT pQDict;
 
   /*******************************************************************/
@@ -6494,7 +6363,7 @@ BTREE::QDAMCheckDict
     T5LOG(T5FATAL) << ":: can't open more than " << MAX_NUM_DICTS << " dictionary files at the same time";
     sRc = BTREE_MAX_DICTS;
   } /* endif */
-
+  #endif
   return ( sRc );
 } /* end of function QDAMCheckDict */
 

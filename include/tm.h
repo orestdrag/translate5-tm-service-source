@@ -2347,7 +2347,6 @@ public:
 //private:
 
   HTM htm;                                       // old fashioned memory handle for this memory
-  //PTMX_CLB pTmClb;                               // ptr to ctl block struct
   TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
   TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
   TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure

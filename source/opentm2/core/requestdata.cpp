@@ -296,172 +296,120 @@ int RequestData::run(){
 }
 
 int CreateMemRequestData::createNewEmptyMemory(){
-    // create memory database
-    std::shared_ptr<EqfMemory> NewMem;
-    if (fValid){
-      T5LOG( T5DEBUG) << ":: create the memory" ;    
-      NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
-      ULONG ulKey;
-      bool fOK = true;
+  // create memory database
+  ULONG ulKey;
+  std::shared_ptr<EqfMemory> NewMem;
+  _rc_ = fValid? 0 : 1;
 
-      _rc_ = NewMem.get()->NTMCreateLongNameTable();
-      
-      fOK = (_rc_ == NO_ERROR );
-      if ( !fOK )
-      {
-        _rc_ = ERROR_NOT_ENOUGH_MEMORY;
-      }
-      else
-      {
-        //build name and extension of tm data file
+  if ( _rc_ == NO_ERROR )
+  {
+    T5LOG( T5DEBUG) << ":: create the memory" ;    
+    NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
+    _rc_ = NewMem.get()->NTMCreateLongNameTable();
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    //build name and extension of tm data file
 
-        //fill signature record structure
-        strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->TmBtree.fb.fileName.c_str() );
-        UtlTime( &(NewMem.get()->stTmSign.lTime) );
-        strcpy( NewMem.get()->stTmSign.szSourceLanguage,
-                strSrcLang.c_str() );
+    //fill signature record structure
+    strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->TmBtree.fb.fileName.c_str() );
+    UtlTime( &(NewMem.get()->stTmSign.lTime) );
+    strcpy( NewMem.get()->stTmSign.szSourceLanguage,
+            strSrcLang.c_str() );
 
-        //TODO - replace version with current t5memory version
-        NewMem.get()->stTmSign.bGlobVersion = T5GLOBVERSION;
-        NewMem.get()->stTmSign.bMajorVersion = T5MAJVERSION;
-        NewMem.get()->stTmSign.bMinorVersion = T5MINVERSION;
-        strcpy( NewMem.get()->stTmSign.szDescription,
-                strMemDescription.c_str() );
+    //TODO - replace version with current t5memory version
+    NewMem.get()->stTmSign.bGlobVersion = T5GLOBVERSION;
+    NewMem.get()->stTmSign.bMajorVersion = T5MAJVERSION;
+    NewMem.get()->stTmSign.bMinorVersion = T5MINVERSION;
+    strcpy( NewMem.get()->stTmSign.szDescription,
+            strMemDescription.c_str() );
 
-        //call create function for data file
-        NewMem.get()->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
-        
-        _rc_ = NewMem.get()->TmBtree.QDAMDictCreateLocal( &(NewMem.get()->stTmSign),FIRST_KEY );
-      
-        if ( _rc_ == NO_ERROR )
-        {
-          //insert initialized record to tm data file
-          ulKey = AUTHOR_KEY;
-          _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)&NewMem.get()->Authors, TMX_TABLE_SIZE );
-
-          if ( _rc_ == NO_ERROR )
-          {
-            ulKey = FILE_KEY;
-            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)&NewMem.get()->FileNames, TMX_TABLE_SIZE );     
-          } /* endif */
-
-          if ( _rc_ == NO_ERROR )
-          {
-            ulKey = TAGTABLE_KEY;
-            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)&NewMem.get()->TagTables, TMX_TABLE_SIZE );
-          } /* endif */
-
-          if ( _rc_ == NO_ERROR )
-          {
-            ulKey = LANG_KEY;
-            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)&NewMem.get()->Languages, TMX_TABLE_SIZE );
-          } /* endif */
-
-          if ( _rc_ == NO_ERROR )
-          {
-            int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
-            size = MAX_COMPACT_SIZE-1 ;
-            //initialize and insert compact area record
-            memset( NewMem.get()->bCompact, 0, size );
-
-            ulKey = COMPACT_KEY;
-            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                                NewMem.get()->bCompact, size);  
-
-          } /* endif */
-
-          // add long document table record
-          if ( _rc_ == NO_ERROR )
-          {
-            ulKey = LONGNAME_KEY;
-            // write long document name buffer area to the database
-            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                                (PBYTE)NewMem.get()->pLongNames->pszBuffer,
-                                NewMem.get()->pLongNames->ulBufUsed );        
-      
-          } /* endif */
-
-          // create language group table
-          if ( _rc_ == NO_ERROR )
-          {
-            _rc_ = NTMCreateLangGroupTable( NewMem.get() );
-            
-          } /* endif */
-
-          if ( _rc_ == NO_ERROR )
-          {
-            //fill signature record structure
-            strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->InBtree.fb.fileName.c_str() );
-
-            _rc_ = NewMem.get()->InBtree.QDAMDictCreateLocal(&NewMem.get()->stTmSign, START_KEY );
-                                
-          } /* endif */
-
-          if(_rc_ == NO_ERROR){   
-            NewMem.get()->TmBtree.fb.Flush();
-            NewMem.get()->InBtree.fb.Flush();     
-            //filesystem_flush_buffers(pFullName);  
-            //filesystem_flush_buffers(CreateIn.stTmCreate.szIndexName);
-          }/* endif */
-
-        } /* endif */
-
-        if ( _rc_ )
-        {
-          //something went wrong during create or insert so delete data file
-          UtlDelete( (PSZ)NewMem.get()->InBtree.fb.fileName.c_str(), 0L, FALSE );
-        } /* endif */
-      } /* endif */
-
-      if ( _rc_ )
-      {
-        //free allocated memory
-        NTMDestroyLongNameTable( NewMem.get() );
-        //UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
-      } /* endif */
-
-      //set return values
-        // setup memory properties
-        //this->createMemoryProperties( (PSZ)strMemName.c_str(), strMemPath, (PSZ)strMemDescription.c_str(), (PSZ)strSrcLang.c_str() );
-        
-        // create memory object if create function completed successfully
-        //NewMem.get()ory = new EqfMemory( this, htm, (PSZ)strMemName.c_str() );
-        // add memory info to our internal memory list
-        //if ( NewMem.get()ory != nullptr ) this->addToList( strMemPath );
-        
-      }//createMemory code
-      //return( (EqfMemory *)NewMem.get()ory );
-      
-
-      // check mem
-//      if ( NewMem.get()ory == NULL ){
-//        _rc_ = getLastError( strLastError );
-//        T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  _rc_;
-//      }
-//      else{
-        T5LOG( T5INFO) << "::Create successful ";
-        // get memory object name
-//        char szObjName[MAX_LONGFILESPEC];
-//        _rc_ = TMManager::GetInstance()->getObjectName( NewMem.get()ory, szObjName, sizeof(szObjName) );
-//      }
+    //call create function for data file
+    NewMem.get()->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
     
-      //--- Tm is created. Close it. 
-//      if ( NewMem.get()ory != NULL )
-//      {
-//        T5LOG( T5INFO ) << "::Tm is created. Close it";
-//        TMManager::GetInstance()->closeMemory( NewMem.get()ory );
-//        NewMem.get()ory = NULL;
-//      }
+    _rc_ = NewMem.get()->TmBtree.QDAMDictCreateLocal( &(NewMem.get()->stTmSign),FIRST_KEY );
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    //insert initialized record to tm data file
+    ulKey = AUTHOR_KEY;
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+              (PBYTE)&NewMem.get()->Authors, TMX_TABLE_SIZE );
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = FILE_KEY;
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                (PBYTE)&NewMem.get()->FileNames, TMX_TABLE_SIZE );     
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = TAGTABLE_KEY;
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                (PBYTE)&NewMem.get()->TagTables, TMX_TABLE_SIZE );
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = LANG_KEY;
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+            (PBYTE)&NewMem.get()->Languages, TMX_TABLE_SIZE );
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
+    size = MAX_COMPACT_SIZE-1 ;
+    //initialize and insert compact area record
+    memset( NewMem.get()->bCompact, 0, size );
+
+    ulKey = COMPACT_KEY;
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                        NewMem.get()->bCompact, size);  
+
+  } /* endif */
+
+  // add long document table record
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = LONGNAME_KEY;
+    // write long document name buffer area to the database
+    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                        (PBYTE)NewMem.get()->pLongNames->pszBuffer,
+                        NewMem.get()->pLongNames->ulBufUsed );        
+
+  } /* endif */
+
+  // create language group table
+  if ( _rc_ == NO_ERROR )
+  {
+    _rc_ =  NewMem.get()->NTMCreateLangGroupTable();
+    
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    //fill signature record structure
+    strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->InBtree.fb.fileName.c_str() );
+
+    _rc_ = NewMem.get()->InBtree.QDAMDictCreateLocal(&NewMem.get()->stTmSign, START_KEY );
+                        
+  } /* endif */
+
+  if(_rc_ == NO_ERROR){   
+    NewMem.get()->TmBtree.fb.Flush();
+    NewMem.get()->InBtree.fb.Flush();     
+  }else {
+    //something went wrong during create or insert so delete data file
+    //UtlDelete( (PSZ)NewMem.get()->InBtree.fb.fileName.c_str(), 0L, FALSE );
+    UtlDelete((PSZ) NewMem.get()->TmBtree.fb.fileName.c_str(), 0L, FALSE);
+    //free allocated memory
+    NewMem.get()->NTMDestroyLongNameTable();
+  } /* endif */       
 
   T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
   TMManager::GetInstance()->AddMem(NewMem);
-  //_rc_ = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
-  //Data.fComplete = TRUE;   // one-shot function are always complete   
-
 }
 
 int CreateMemRequestData::importInInternalFomat(){
@@ -691,7 +639,7 @@ int ExportRequestData::checkData(){
       return( _rest_rc_ =  NOT_FOUND );
     }
   }
-   fValid = true;
+  fValid = true;
 }
 
 int ExportRequestData::execute(){
