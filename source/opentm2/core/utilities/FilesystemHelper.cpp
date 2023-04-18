@@ -343,7 +343,43 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
 size_t FileBuffer::ReadFromFile(){return -1;}
 size_t FileBuffer::WriteToFile(){return -1;}
 
-size_t FileBuffer::WriteToFilebuffer(const void* buff, size_t buffSize, size_t startingPosition){
+int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
+    if(fileAnchor != FILE_BEGIN){
+        T5LOG(T5FATAL) <<"fileAnchor != FILE_BEGIN, is not implemented!";
+        throw;
+    }
+    if(newOffset>= data.size()){
+        T5LOG(T5ERROR) << "tried to set offset to " << newOffset <<" , but its bigger than data size =" <<data.size();
+        return -1;
+    }
+    if(newOffset < 0 ){
+        T5LOG(T5ERROR) << "newOffset is negative "<<newOffset;
+        return -2;
+    }
+    offset = newOffset;
+    return 0;
+}
+
+size_t FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
+    if(startingPos < 0){
+        startingPos = offset;
+    }
+
+    if(data.size()< startingPos + buffSize){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+            T5LOG(T5ERROR) << "ReadBuffer:: Trying to read not existing bytes from buffer, fName = " << fileName;
+        }
+        return FilesystemHelper::FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
+    }    
+    if(VLOG_IS_ON(1) && T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+        T5LOG( T5DEVELOP) << ":: fName = " << fileName << "; buff size = " << buffSize << "; data.size = " << data.size() << "; offset = " << startingPos << ";";
+    }
+    
+    memcpy(buff, &(data[startingPos]), buffSize);
+}
+
+
+size_t FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition){
     status |= MODIFIED;
     if(startingPosition + buffSize > data.size()){
         if(VLOG_IS_ON(1)){
@@ -378,7 +414,7 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
     if(getFileBufferInstance()->find(fName)!= getFileBufferInstance()->end()){
         FileBuffer* pFb = &(*getFileBufferInstance())[fName];    
 
-        pFb->WriteToFilebuffer(buff, buffSize, startingPosition);
+        pFb->Write(buff, buffSize, startingPosition);
     }else{
         T5LOG(T5ERROR) << "FilesystemHelper::WriteToBuffer:: can't find buffer for file " << fName;
         return -1;
@@ -401,24 +437,7 @@ int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int
         return FILEHELPER_WARNING_BUFFER_FOR_FILE_NOT_OPENED;
     }
     pFb = &(*getFileBufferInstance())[fName];
-    if(startingPos < 0){
-        offset = pFb->offset;
-    }
-
-    if(pFb->data.size()< offset + buffSize){
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-            T5LOG(T5ERROR) << "ReadBuffer:: Trying to read not existing bytes from buffer, fName = " << fName;
-        }
-        return FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
-    }
-    PUCHAR p = &(pFb->data[offset]);
-    //
-    if(VLOG_IS_ON(1) && T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-        T5LOG( T5DEVELOP) << ":: fName = " << fName << "; buff size = " << buffSize << "; data.size = " << pFb->data.size() << "; offset = " << offset << ";";
-        //LOG_DEVELOP_MSG << msg;
-    }
-    //
-    memcpy(buff, p, buffSize);
+    pFb->Read(buff, buffSize, startingPos);
     bytesRead = buffSize;
     if(VLOG_IS_ON(1)){
         T5LOG( T5DEBUG) <<  "ReadBuffer::" << buffSize <<" bytes read from buffer to " << fName << " starting from " << offset;

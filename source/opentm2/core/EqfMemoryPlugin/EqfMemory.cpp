@@ -160,7 +160,7 @@ void EqfMemory::setDescription
      // re-write signature record
      if ( fOK )
      {
-       usRc = TmBtree.EQFNTMUpdSign((PCHAR)pTmSign, sizeof(TMX_SIGN) );
+       usRc = TmBtree.QDAMDictUpdSignLocal(pTmSign);
        fOK = (usRc == NO_ERROR);
       } /* endif */
 

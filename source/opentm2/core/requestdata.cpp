@@ -97,11 +97,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //call create function for data file
         pNewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
         
-        NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
-        NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = FIRST_KEY;
-        _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( 20, (PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
-                                  NULL, NULL,
-                                  &NtmVitalInfo );
+        _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( &(pNewMem->stTmSign),FIRST_KEY );
       
         if ( _rc_ == NO_ERROR )
         {
@@ -167,12 +163,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
             //fill signature record structure
             strcpy( pNewMem->stTmSign.szName, pNewMem->InBtree.fb.fileName.c_str() );
 
-            //HERE .TMI file is created
-            NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
-            NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = START_KEY;
-            _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( 20, (PCHAR) &(pNewMem->stTmSign), sizeof(TMX_SIGN),
-                                      NULL, NULL,
-                                      &NtmVitalInfo );
+            _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal(&pNewMem->stTmSign, START_KEY );
                                 
           } /* endif */
 

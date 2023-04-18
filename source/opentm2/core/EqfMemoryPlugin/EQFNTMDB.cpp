@@ -230,11 +230,8 @@ BTREE::EQFNTMCreate
    ULONG  ulStartKey                  // first key to start automatic insert...
 )
 {
-   NTMVITALINFO NtmVitalInfo;          // structure to contain vital info for TM
-   NtmVitalInfo.ulStartKey = NtmVitalInfo.ulNextKey = ulStartKey;
-  return QDAMDictCreateLocal( 20, pUserData, usLen,
-                              NULL, NULL,
-                              &NtmVitalInfo );
+
+  return QDAMDictCreateLocal( (PTMX_SIGN)pUserData,ulStartKey );
 } /* end of function EQFNTMCreate */
 
 SHORT
@@ -463,14 +460,7 @@ SHORT EQFNTMClose
 //|Function flow:     call QDAMDictUpdSignLocal ...                            |
 // ----------------------------------------------------------------------------+
 
-SHORT BTREE::EQFNTMUpdSign
-(
-   PCHAR  pUserData,                   // pointer to user data
-   USHORT usLen                        // length of user data
-)
-{
-  return( QDAMDictUpdSignLocal( this, pUserData, usLen ) );
-}
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -616,7 +606,7 @@ BTREE::EQFNTMInsert
         /**************************************************************/
         if ( (ulKey & 0x020) )
         {
-          sRc = QDAMWriteHeader( this );
+          sRc = QDAMWriteHeader();
           fUpdated = TRUE;
         } /* endif */
       } /* endif */
@@ -930,7 +920,7 @@ SHORT BTREE::QDAMFreeRecord_V3
      pHeader->usFilled = sizeof(BTREEHEADER );
      pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //   pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
-     sRc = QDAMWriteRecord_V3( this, pRecord);
+     sRc = QDAMWriteRecord_V3( pRecord);
   }
   else
   {
@@ -1244,7 +1234,7 @@ SHORT BTREE::QDAMDeleteDataFromBuffer_V3
         if ( !sRc )
         {
 //         pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
-           sRc = QDAMWriteRecord_V3( this, pRecord );
+           sRc = QDAMWriteRecord_V3( pRecord );
         } /* endif */
       } /* endif */
 
@@ -1508,7 +1498,7 @@ SHORT BTREE::QDAMDictUpdateLocal
                     }
                     recData.ulLen = ulLen;
                     QDAMSetrecData_V3( pRecord, i, recData, usVersion );
-                    sRc = QDAMWriteRecord_V3( this, pRecord );
+                    sRc = QDAMWriteRecord_V3( pRecord );
                   } /* endif */
                 /****************************************************************/
                 /* change time to indicate modifications on dictionary...       */
