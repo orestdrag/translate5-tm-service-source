@@ -383,7 +383,7 @@ int UTF16strlenCHAR( PSZ_W pszString )
 }
 
 
-int UTF16strlenBYTE( PTMWCHAR pszString )
+int UTF16strlenBYTE( PWCHAR pszString )
 {
   int iLen = wcslen(pszString) * sizeof(TMWCHAR);  
   return( iLen );
@@ -497,7 +497,7 @@ ULONG Unicode2ASCIIBufEx( PSZ_W pszUni, PSZ pszASCII, ULONG ulLen, LONG lBufLen,
 ///  ASCII2Unicode convert ASCII string to Unicode                          ///
 ///////////////////////////////////////////////////////////////////////////////
 
-PTMWCHAR ASCII2Unicode( PSZ pszASCII, PTMWCHAR pszUni, ULONG  ulCP )
+PWCHAR ASCII2Unicode( PSZ pszASCII, PWCHAR pszUni, ULONG  ulCP )
 {
   mbstowcs(pszUni, pszASCII, MAX_SEGMENT_SIZE);
   return( pszUni );
@@ -566,7 +566,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 75 ulOutPut = MultiByt
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16strncpy   copy up to ulLen wide characters                        ///
 ///////////////////////////////////////////////////////////////////////////////
-PTMWCHAR UTF16strncpy(PTMWCHAR pusTarget, PTMWCHAR pusSource, LONG lLen)
+PWCHAR UTF16strncpy(PWCHAR pusTarget, PWCHAR pusSource, LONG lLen)
 {
   // usLen is number of CHAR_W's!!
   PSZ_W pszTarget = pusTarget;
@@ -587,7 +587,7 @@ PTMWCHAR UTF16strncpy(PTMWCHAR pusTarget, PTMWCHAR pusSource, LONG lLen)
 ///  UTF16stricmp   copy up to usLen wide characters                        ///
 ///////////////////////////////////////////////////////////////////////////////
 
-int UTF16stricmp(PTMWCHAR pusTarget, PTMWCHAR pusSource)
+int UTF16stricmp(PWCHAR pusTarget, PWCHAR pusSource)
 {
   //T5LOG(T5FATAL) << "UTF16stricmp is not implemented";
   //return -1;
@@ -598,14 +598,14 @@ int UTF16stricmp(PTMWCHAR pusTarget, PTMWCHAR pusSource)
 ///////////////////////////////////////////////////////////////////////////////
 ///  UTF16memset   initializes ulLen wide characters with c                 ///
 ///////////////////////////////////////////////////////////////////////////////
-PTMWCHAR UTF16memset( PTMWCHAR pusString, TMWCHAR c, USHORT usNum )
+PWCHAR UTF16memset( PWCHAR pusString, TMWCHAR c, USHORT usNum )
 {
   PSZ_W p = pusString;
   while ( usNum -- )
     *pusString++ = c;
   return p;
 }
-PTMWCHAR UTF16memsetL( PTMWCHAR pusString, TMWCHAR c, ULONG ulNum )
+PWCHAR UTF16memsetL( PWCHAR pusString, TMWCHAR c, ULONG ulNum )
 {
   PSZ_W p = pusString;
   while ( ulNum -- )

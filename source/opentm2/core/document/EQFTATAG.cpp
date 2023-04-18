@@ -609,7 +609,7 @@ BOOL  TATagsToUnicode
     USHORT     i,j = 0;
 
     PSZ     pCurName;
-    PTMWCHAR   pTmpW;
+    PWCHAR   pTmpW;
     PBYTE   pByte;
     PTAG    pTag;
     PSZ     pTagNames;

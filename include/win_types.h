@@ -42,7 +42,7 @@ typedef TM_CHAR * PTM_CHAR;
 
 //typedef unsigned short TMWCHAR;
 typedef wchar_t TMWCHAR;
-typedef TMWCHAR * PTMWCHAR;
+typedef TMWCHAR * PWCHAR;
 typedef TMWCHAR WCHAR;
 
 
@@ -608,17 +608,17 @@ typedef struct _OSVERSIONINFOEX {
 
 
 
-int _wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2);
+int _wcsicmp(const PWCHAR p1, const PWCHAR p2);
 
 int _stricmp(const char* p1, const char* p2);
 
-int wcsicmp(const PTMWCHAR p1, const PTMWCHAR p2);
+int wcsicmp(const PWCHAR p1, const PWCHAR p2);
 
 int stricmp(const char* p1, const char* p2);
 
-int _wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz);
+int _wcsnicmp(const PWCHAR p1, const PWCHAR p2, const int sz);
 
-int wcsnicmp(const PTMWCHAR p1, const PTMWCHAR p2, const int sz);
+int wcsnicmp(const PWCHAR p1, const PWCHAR p2, const int sz);
 
 int _strnicmp(const char* p1, const char* p2, const int sz);
 

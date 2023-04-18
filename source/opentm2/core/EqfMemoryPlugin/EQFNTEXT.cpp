@@ -156,19 +156,19 @@ USHORT TmtXExtract
         switch ( pTmExtIn->usConvert )
         {
           case MEM_OUTPUT_TAGTABLES :
-            pTable = pTmClb->pTagTables;
+            pTable = &pTmClb->TagTables;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_AUTHORS   :
-            pTable = pTmClb->pAuthors;
+            pTable = &pTmClb->Authors;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_DOCUMENTS :
-            pTable = pTmClb->pFileNames;
+            pTable = &pTmClb->FileNames;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_LANGUAGES :
-            pTable = pTmClb->pLanguages;
+            pTable = &pTmClb->Languages;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_LONGNAMES :
@@ -177,7 +177,7 @@ USHORT TmtXExtract
             break;
           case MEM_OUTPUT_ALLDOCS :
             // different handling for long names, no setting of pTable
-            pTable = pTmClb->pFileNames;
+            pTable = &pTmClb->FileNames;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           default :

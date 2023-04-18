@@ -165,18 +165,11 @@ USHORT TmtXOpen
           //call to obtain exact length of record
           ulLen = 0;
           USHORT usTempRc = NTMLoadNameTable( pTmClb, LANG_KEY,
-                                       (PBYTE *)&pTmClb->pLanguages, &ulLen );
+                                       (PBYTE *)&pTmClb->Languages, &ulLen );
 
           if ( usTempRc == BTREE_READ_ERROR ) 
               usTempRc = BTREE_CORRUPTED;
-          if ( pTmClb->pLanguages == NULL )
-          {
-            usTempRc = TM_FILE_SCREWED_UP; // cannot continue if no languages
-          }
-          else
-          {
-            usTempRc = NTMCreateLangGroupTable( pTmClb );
-          } /* endif */
+          usTempRc = NTMCreateLangGroupTable( pTmClb );
 
           if ( usTempRc != NO_ERROR )
           {
@@ -190,22 +183,14 @@ USHORT TmtXOpen
              (usRc == VERSION_MISMATCH) )
         {
           USHORT usTempRc = NTMLoadNameTable( pTmClb, FILE_KEY,
-                                       (PBYTE *)&pTmClb->pFileNames,
+                                       (PBYTE *)&pTmClb->FileNames,
                                        &ulLen );
 
           // in organize mode allow continue if file name area is corrupted
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {
-            if( UtlAlloc( (PVOID *)&(pTmClb->pFileNames),
-                          0L, (LONG)(TMX_TABLE_SIZE), NOMSG ) )
-            {
-              pTmClb->pFileNames->ulAllocSize = TMX_TABLE_SIZE;
-            }
-            else
-            {
-              usTempRc = ERROR_NOT_ENOUGH_MEMORY;
-            } /* endif */
+            pTmClb->FileNames.ulAllocSize = TMX_TABLE_SIZE;
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -220,21 +205,13 @@ USHORT TmtXOpen
              (usRc == VERSION_MISMATCH) )
         {
           USHORT usTempRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY,
-                                       (PBYTE *)&pTmClb->pAuthors, &ulLen );
+                                       (PBYTE *)&pTmClb->Authors, &ulLen );
 
           // in organize mode allow continue if author name area is corrupted
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
-          {
-            if( UtlAlloc( (PVOID *)&(pTmClb->pAuthors),
-                          0L, (LONG)(TMX_TABLE_SIZE), NOMSG ) )
-            {
-              pTmClb->pAuthors->ulAllocSize = TMX_TABLE_SIZE;
-            }
-            else
-            {
-              usTempRc = ERROR_NOT_ENOUGH_MEMORY;
-            } /* endif */
+          {          
+            pTmClb->Authors.ulAllocSize = TMX_TABLE_SIZE;            
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -249,7 +226,7 @@ USHORT TmtXOpen
              (usRc == VERSION_MISMATCH) )
         {
           USHORT usTempRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY,
-                                       (PBYTE *)&pTmClb->pTagTables, &ulLen );
+                                       (PBYTE *)&pTmClb->TagTables, &ulLen );
 
 
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
@@ -308,7 +285,7 @@ USHORT TmtXOpen
           // just for debugging purposes: check if short and long name table have the same numbe rof entries
           if ( usTempRc == NO_ERROR )
           {
-            if ( pTmClb->pLongNames->ulEntries != pTmClb->pFileNames->ulMaxEntries )
+            if ( pTmClb->pLongNames->ulEntries != pTmClb->FileNames.ulMaxEntries )
             {
               // this is strange...
               int iSetBreakPointHere = 1;
@@ -368,10 +345,10 @@ USHORT TmtXOpen
        (usRc == BTREE_CORRUPTED) ||
        (usRc == VERSION_MISMATCH) )
   {
-    if ( (pTmClb->pLanguages == NULL) ||
-         (pTmClb->pAuthors   == NULL) ||
-         (pTmClb->pTagTables == NULL) ||
-         (pTmClb->pFileNames == NULL) //||
+    if ( false //(pTmClb->pLanguages == NULL) ||
+         //(pTmClb->pAuthors   == NULL) ||
+         //(pTmClb->pTagTables == NULL) ||
+         //(pTmClb->pFileNames == NULL) //||
          //(pTmClb.TmBtree == NULL) ||
          //(pTmClb.InBtree == NULL) 
          )
@@ -384,16 +361,8 @@ USHORT TmtXOpen
        (usRc != BTREE_CORRUPTED) &&
        (usRc != VERSION_MISMATCH) )
   {
-    //release allocated memory
-    UtlAlloc( (PVOID *) &(pTmClb->pLanguages), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pAuthors), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pTagTables), 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &(pTmClb->pFileNames), 0L, 0L, NOMSG );
-
-    //if ( pTmClb.TmBtree != NULL ) 
-        EQFNTMClose( &pTmClb->TmBtree );
-    //if ( pTmClb.InBtree != NULL ) 
-        EQFNTMClose( &pTmClb->InBtree );
+    EQFNTMClose( &pTmClb->TmBtree );
+    EQFNTMClose( &pTmClb->InBtree );
 
     NTMDestroyLongNameTable( pTmClb );
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );

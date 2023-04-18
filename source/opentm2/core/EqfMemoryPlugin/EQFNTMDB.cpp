@@ -1152,7 +1152,7 @@ SHORT BTREE::QDAMDeleteDataFromBuffer_V3
 
    // read in record
    recParam.usNum = recParam.usNum + usFirstDataBuffer;      // adjust for offset
-   sRc = QDAMReadRecord_V3( this, recParam.usNum, &pRecord, FALSE  );
+   sRc = QDAMReadRecord_V3( recParam.usNum, &pRecord, FALSE  );
    if ( ! sRc )
    {
       BTREELOCKRECORD( pRecord );              // lock eecord.
@@ -1173,7 +1173,7 @@ SHORT BTREE::QDAMDeleteDataFromBuffer_V3
         usNum = NEXT( pRecord );
         while ( !sRc && usNum )
         {
-          sRc = QDAMReadRecord_V3( this, usNum, &pNew, FALSE  );
+          sRc = QDAMReadRecord_V3( usNum, &pNew, FALSE  );
           if ( !sRc )
           {
             if ( TYPE(pNew) != DATA_NEXTNODE )
@@ -1459,7 +1459,7 @@ SHORT BTREE::QDAMDictUpdateLocal
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
-   if ( !sRc && QDAMDictLockStatus( this, pKey ) )
+   if ( !sRc && QDAMDictLockStatus( pKey ) )
    {
      sRc = BTREE_ENTRY_LOCKED;
    } /* endif */
@@ -1476,8 +1476,8 @@ SHORT BTREE::QDAMDictUpdateLocal
         {         
           memcpy( chHeadTerm, pKey, sizeof(ULONG));   // save data
           
-          QDAMDictUpdStatus( this );
-          sRc = QDAMFindRecord_V3( this, pKey, &pRecord );
+          QDAMDictUpdStatus();
+          sRc = QDAMFindRecord_V3( pKey, &pRecord );
         } /* endif */
       } /* endif */
 
@@ -1500,7 +1500,7 @@ SHORT BTREE::QDAMDictUpdateLocal
               //  set new data value
               if ( recOldKey.usNum && recOldData.usNum )
               {
-                  sRc = QDAMAddToBuffer_V3( this, pUserData, ulLen, &recData );
+                  sRc = QDAMAddToBuffer_V3( pUserData, ulLen, &recData );
                   if ( !sRc )
                   {
                     if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
@@ -1680,7 +1680,7 @@ BTREE::EQFNTMUpdate
 
 SHORT BTREE::QDAMDictExactLocal
 (
-   PTMWCHAR pKey,                       // key to be searched for
+   PWCHAR pKey,                       // key to be searched for
    PBYTE  pchBuffer,                   // space for user data
    PULONG pulLength,                   // in/out length of returned user data
    USHORT usSearchSubType              // special hyphenation lookup flag
@@ -1707,7 +1707,7 @@ SHORT BTREE::QDAMDictExactLocal
           if ( !sRc )
           {
              /* Locate the Leaf node that contains the appropriate key */
-             sRc = QDAMFindRecord_V3( this, pKey, &pRecord );
+             sRc = QDAMFindRecord_V3( pKey, &pRecord );
           } /* endif */
 
           if ( !sRc )
@@ -1816,7 +1816,7 @@ BTREE::EQFNTMGet
       fCorrupted = FALSE;
       ulLength = *pulLength;
 
-      sRc = QDAMDictExactLocal( (PTMWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      sRc = QDAMDictExactLocal( (PWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
 
       fCorrupted = _fCorrupted;
 
