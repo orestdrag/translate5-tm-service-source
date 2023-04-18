@@ -2104,33 +2104,14 @@ SHORT BTREE::QDAMWriteRecord_V3
    /********************************************************************/
    /* write header with corruption flag -- if not yet done             */
    /********************************************************************/
-   //if ( fWriteHeaderPending )
-   {
-     sRc = QDAMWriteHeader();
-   //  fWriteHeaderPending = FALSE;
-   } /* endif */
+   sRc = QDAMWriteHeader();
 
    //  if guard flag is on write it to disk
    //  else set only the flag
    if ( !sRc )
    {
-    // T5LOG( T5WARNING) <<"TEMPORARY HARDCODED if(true) in QDAMWriteRecord_V3");
-     //if ( !fGuard && false)
-     //{
-     //   pBuffer->fNeedToWrite = TRUE;
-     //}
-     //else
-     //{
-        sRc = QDAMWRecordToDisk_V3( pBuffer);
-     //} /* endif */
-   } /* endif */
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMWRITERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-   DEBUGEVENT2( QDAMWRITERECORD_LOC, FUNCEXIT_EVENT, sRc, DB_GROUP, "" );
-      
+     sRc = QDAMWRecordToDisk_V3( pBuffer);
+   } /* endif */      
    return sRc;
 }
 
@@ -5696,37 +5677,21 @@ SHORT  BTREE::QDAMDictOpenLocal
    USHORT  usNumBytesRead=0;           // number of bytes read
    //PBTREE  pBTIda = this;            // set work pointer to passed pointer
    //PBTREEGLOB pBT;                     // set work pointer to passed pointer
-   BOOL    fWrite = usOpenFlags & (ASD_GUARDED | ASD_LOCKED);
    SHORT   sRc1;
    /*******************************************************************/
    /* allocate global area first ...                                  */
    /*******************************************************************/
-   //if ( ! UtlAlloc( (PVOID *)&pBT, 0L, (LONG) sizeof(BTREEGLOB ), NOMSG ) )
-   {
-   //   sRc = BTREE_NO_ROOM;
-   }
-   //else
-   {
-      //pBTIda = pBT;
 
-      if ( fWrite )
-      {
-         usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE;
-      }
-      else
-      {
-         usFlags = OPEN_ACCESS_READONLY | OPEN_SHARE_DENYREADWRITE;
-      } /* endif */
+    usFlags = OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE;
 
-      /****************************************************************/
-      /* check if immeadiate write of any changed necessary           */
-      /****************************************************************/
-      fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
-      usOpenFlags = usOpenFlags;
+    /****************************************************************/
+    /* check if immeadiate write of any changed necessary           */
+    /****************************************************************/
+    fGuard = ( usOpenFlags & ASD_FORCE_WRITE );
+    usOpenFlags = usOpenFlags;
 
-      // open the file
-      fb.ReadFromFile();
-   } /* endif */
+    // open the file
+    fb.ReadFromFile();
 
 
    if ( !sRc )
@@ -5739,19 +5704,10 @@ SHORT  BTREE::QDAMDictOpenLocal
      {
         memcpy( chEQF, header.chEQF, sizeof(chEQF));
         bVersion = header.Flags.bVersion;
-        //if ( header.Flags.f16kRec )
-        //{
-    //      pBT->bRecSizeVersion = BTREE_V3;
-        //}
-        //else
-        //{
-        //  pBT->bRecSizeVersion = BTREE_V2;
-        //} /* endif */
 
         /**************************************************************/
         /* support either old or new format or TM...                  */
         /**************************************************************/
-
         if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3,
                       sizeof(BTREE_HEADER_VALUE_TM3) ) == 0 )
         {
@@ -5760,24 +5716,12 @@ SHORT  BTREE::QDAMDictOpenLocal
           /* (Check only first 3 characters of BTREE identifier to    */
           /*  ignore the version number)                              */
           /************************************************************/
-          if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3, 3 ) == 0 )
-          {
-            usVersion = (USHORT) header.chEQF[3];
-            compare =  NTMKeyCompare;
-          }
-          else
-          {
-            compare =  QDAMKeyCompare;
-            /************************************************************/
-            /* determine version                                        */
-            /* for UNICODE dicts: usVersion is BTREE_VERSION2, which is */
-            /* the same as NTM_VERSION2 ( has also length field         */
-            /* ULONG at begin to support data recs > 32 k      )        */
-            /************************************************************/
-            //if ( header.chEQF[3] == BTREE_VERSION3 )
-            usVersion = BTREE_VERSION3;
-            
-          } /* endif */
+          //if ( strncmp( header.chEQF, BTREE_HEADER_VALUE_TM3, 3 ) == 0 )
+          //{
+          usVersion = (USHORT) header.chEQF[3];
+          compare =  NTMKeyCompare;
+          //}
+
           UtlTime( &(lTime) );                             // set open time
           sCurrentIndex = 0;
           usFirstNode = header.usFirstNode;
@@ -5786,8 +5730,7 @@ SHORT  BTREE::QDAMDictOpenLocal
           usFreeKeyBuffer = header.usFreeKeyBuffer;
           usFreeDataBuffer = header.usFreeDataBuffer;
           usFirstDataBuffer = header.usFirstDataBuffer;  //  data buffer
-          fpDummy = NULLHANDLE;
-          
+          fpDummy = NULLHANDLE;          
 
           // load usNextFreeRecord either from header record of from file info
           {
@@ -5866,7 +5809,6 @@ SHORT  BTREE::QDAMDictOpenLocal
      if ( !sRc && /*fWrite &&*/ !header.fOpen)
      {
         fOpen = TRUE;                       // set open flag
-        fWriteHeaderPending = TRUE;         // postpone write until change
      } /* endif */
 
     #ifdef TEMPORARY_COMMENTED
