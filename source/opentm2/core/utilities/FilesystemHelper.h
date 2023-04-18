@@ -29,6 +29,7 @@ struct FileBuffer{
 
     size_t ReadFromFile();
     size_t WriteToFile(); 
+    size_t Flush();
     int    SetOffset(size_t newOffset, int fileAnchor);
 
     size_t Write(const void* buff, size_t buffSize, size_t startingPosition = -1);
