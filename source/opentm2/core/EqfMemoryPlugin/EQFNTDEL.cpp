@@ -28,11 +28,11 @@
 //|Description:       Deletes target translation in tm record if untranslate   |
 //|                   segment is initiated in translation environment          |
 //+----------------------------------------------------------------------------+
-//|Function call:  TmtXDelSegm( PTMX_CLB pTmClb,    //ptr to ctl block struct  |
+//|Function call:  TmtXDelSegm( EqfMemory* pTmClb,    //ptr to ctl block struct  |
 //|                            PTMX_PUT_IN pTmDelIn,  //ptr to input struct    |
 //|                            PTMX_PUT_OUT pTmDelOut ) //ptr to output struct |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   PTMX_CLB  pTmClb         control block                   |
+//|Input parameter:   EqfMemory*  pTmClb         control block                   |
 //|                   PTMX_PUT_IN pTmDelIn     input structure                 |
 //+----------------------------------------------------------------------------+
 //|Output parameter:  PTMX_PUT_OUT pTmDelOut   output structure                |
@@ -53,7 +53,7 @@
 // ----------------------------------------------------------------------------+
 USHORT TmtXDelSegm
 (
-  PTMX_CLB pTmClb,         //ptr to ctl block struct
+  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_PUT_IN_W pTmDelIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 )
@@ -231,13 +231,13 @@ USHORT TmtXDelSegm
 //|                   translation environment when untranslate segment is      |
 //|                   done                                                     |
 //+----------------------------------------------------------------------------+
-//|Function call:  FindTargetAnddelete( PTMX_CLB pTmClb, //ptr to ctl block    |
+//|Function call:  FindTargetAnddelete( EqfMemory* pTmClb, //ptr to ctl block    |
 //|                            PTMX_RECORD pTmRecord, //ptr to tm record       |
 //|                            PTMX_PUT_IN pTmDelIn->stTmPut, //input structure|
 //|                            PTMX_SENTENCE pSentence, //ptr to sent structure|
 //|                            PULONG pulKey ) //tm key                        |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   PTMX_CLB  pTmClb         control block                   |
+//|Input parameter:   EqfMemory*  pTmClb         control block                   |
 //|                   PTMX_RECORD pTmRecord    tm record                       |
 //|                   PTMX_PUT_IN pTmDelIn     input structure                 |
 //|                   PTMX_SENTENCE pSentence  sentence structure              |
@@ -277,7 +277,7 @@ USHORT TmtXDelSegm
 //|    else                                                                    |
 //|      get next sentence key                                                 |
 // ----------------------------------------------------------------------------+
-USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
+USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
                             PTMX_RECORD pTmRecord,
                             PTMX_PUT_W  pTmDel,
                             PTMX_SENTENCE pSentence,

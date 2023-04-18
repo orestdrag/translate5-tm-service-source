@@ -36,10 +36,10 @@ EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
   this->htm = htmIn;
   this->pMemoryPlugin = pPlugin;
   strcpy( this->szName, pszName );
-  //pTmClb = (PTMX_CLB)this;
+  //pTmClb = (EqfMemory*)this;
   if ( this->htm != 0 )
   {
-    //pTmClb = (PTMX_CLB)this->htm;
+    //pTmClb = (EqfMemory*)this->htm;
   }
   else
   {
@@ -578,7 +578,7 @@ int EqfMemory::deleteProposal
   
 
 	if ( !iRC ) 
-    iRC = TmtXDelSegm ( (PTMX_CLB)htm, &TmPutIn, &TmPutOut );
+    iRC = TmtXDelSegm ( (EqfMemory*)htm, &TmPutIn, &TmPutOut );
 
   if ( iRC != 0  
       && iRC != 6020) // seg not found 

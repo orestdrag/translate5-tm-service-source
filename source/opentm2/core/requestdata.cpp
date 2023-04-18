@@ -304,7 +304,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
       ULONG ulKey;
       bool fOK = true;
 
-      _rc_ = NTMCreateLongNameTable( NewMem.get() );
+      _rc_ = NewMem.get()->NTMCreateLongNameTable();
       
       fOK = (_rc_ == NO_ERROR );
       if ( !fOK )

@@ -929,66 +929,10 @@ SHORT QDAMDictSignLocal
 #define NTMSTARTKEY( pBT ) pBT->chCollate.ulStartKey
 
 
-//TM control block structure
-struct TMX_CLB
-{
-  BTREE TmBtree;
-  BTREE InBtree;
-  TMX_TABLE Languages;
-  TMX_TABLE FileNames;
-  TMX_TABLE Authors;
-  TMX_TABLE TagTables;
-  USHORT usAccessMode;
-  USHORT usThreshold;
-  TMX_SIGN stTmSign;
-  BYTE     bCompact[MAX_COMPACT_SIZE-1];
-  BYTE     bCompactChanged;
-  LONG     alUpdCounter[MAX_UPD_COUNTERS];
-  PTMX_LONGNAME_TABLE pLongNames = nullptr;
-  TMX_TABLE LangGroups;              //  table containing language group names
-  PSHORT     psLangIdToGroupTable;     // language ID to group ID table
-  LONG       lLangIdToGroupTableSize; // size of table (alloc size)
-  LONG       lLangIdToGroupTableUsed; // size of table (bytes in use)
-  PVOID      pTagTable;               // tag table loaded for segment markup (TBLOADEDTABLE)
-
-  // copy of long name table sorted ignoring the case of the file names
-  // Note: only the stTableEntry array is filled in this area, for all other
-  //       information use the entries in the pLongNames structure
-  PTMX_LONGNAME_TABLE pLongNamesCaseIgnore;
-
-  // fields for work area pointers of various subfunctions which are allocated
-  // only once for performance reasons
-  PVOID      pvTempMatchList;        // matchlist of FillMatchEntry function
-  PVOID      pvIndexRecord;          // index record area of FillMatchEntry function
-  PVOID      pvTmRecord;             // buffer for memory record used by GetFuzzy and GetExact
-  ULONG      ulRecBufSize;           // current size of pvTMRecord;
-
-  // fields for time measurements and logging
-  BOOL       fTimeLogging;           // TRUE = Time logging is active
-  LONG64     lAllocTime;             // time for memory allocation
-  LONG64     lTokenizeTime;          // time for tokenization
-  LONG64     lGetExactTime;          // time for GetExact
-  LONG64     lOtherTime;             // time for other activities
-  LONG64     lGetFuzzyTime;          // time for GetFuzzy
-  LONG64     lFuzzyOtherTime;        // other time spent in GetFuzzy
-  LONG64     lFuzzyTestTime;         // FuzzyTest time spent in GetFuzzy
-  LONG64     lFuzzyGetTime;          // NTMGet time spent in GetFuzzy
-  LONG64     lFuzzyFillMatchEntry;   // FillMatchEntry time spent in GetFuzzy
-  LONG64     lFillMatchAllocTime;    // FillMatchEntry: allocation time
-  LONG64     lFillMatchOtherTime;    // FillMatchEntry: other times
-  LONG64     lFillMatchReadTime;     // FillMatchEntry: read index DB time
-  LONG64     lFillMatchFillTime;     // FillMatchEntry: fill match list time
-  LONG64     lFillMatchCleanupTime;  // FillMatchEntry: cleanup match list time
-  LONG64     lFillMatchFill1Time;     // FillMatchEntry: fill match list time
-  LONG64     lFillMatchFill2Time;     // FillMatchEntry: fill match list time
-  LONG64     lFillMatchFill3Time;     // FillMatchEntry: fill match list time
-  LONG64     lFillMatchFill4Time;     // FillMatchEntry: fill match list time
-};
 
 
 
-
-typedef TMX_CLB* PTMX_CLB;
+//typedef TMX_CLB* PTMX_CLB;
 //prefix for each output structures
 typedef struct _TMX_PREFIX_OUT
 {
@@ -999,14 +943,14 @@ typedef struct _TMX_PREFIX_OUT
 typedef struct _TMX_CREATE_OUT
 {
   TMX_PREFIX_OUT  stPrefixOut;
-  PTMX_CLB pstTmClb;
+  EqfMemory* pstTmClb;
 } TMX_CREATE_OUT, * PTMX_CREATE_OUT;
 
 
 typedef struct _TMX_OPEN_OUT
 {
   TMX_PREFIX_OUT stPrefixOut;
-  PTMX_CLB pstTmClb;
+  EqfMemory* pstTmClb;
 } TMX_OPEN_OUT, * PTMX_OPEN_OUT;
 
 

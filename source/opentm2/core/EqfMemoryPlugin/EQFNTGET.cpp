@@ -76,7 +76,7 @@ void NTMLogSegData( PSZ_W pszForm, PSZ_W pszSegData );
 
 
 
-USHORT FillMatchTable( PTMX_CLB, PSZ_W, PLONG, PTMX_TARGET_RECORD,
+USHORT FillMatchTable( EqfMemory*, PSZ_W, PLONG, PTMX_TARGET_RECORD,
                 PTMX_TARGET_CLB,
                 PTMX_MATCH_TABLE_W, PUSHORT, BOOL, PUSHORT, PUSHORT, PUSHORT,
                 ULONG, USHORT, PTMX_GET_W, PTMX_TAGTABLE_RECORD, USHORT, USHORT, int, int, USHORT);
@@ -184,7 +184,7 @@ NTMSplitAndAddTokens ( PTMX_SUBSTPROP,
 
 USHORT NTMCompareContext
 (
-  PTMX_CLB pTmClb,                     // ptr to ctl block struct
+  EqfMemory* pTmClb,                     // ptr to ctl block struct
   PSZ         pszMarkup,               // ptr to name markup used for segment
   PSZ_W       pszContext1,             // context of first segment
   PSZ_W       pszContext2              // context of second segment
@@ -193,7 +193,7 @@ USHORT NTMCompareContext
 
 //USHORT FillMatchEntryEx
 //( 
-//  PTMX_CLB pTmClb,
+//  EqfMemory* pTmClb,
 //  PTMX_SENTENCE pSentence,
 //  PTMX_MATCHENTRY pMatchEntry,
 //  PUSHORT pusMatchThreshold,
@@ -272,11 +272,11 @@ static BOOL NTMCheckAndDeleteTagPairs
 //+----------------------------------------------------------------------------+
 //|Description:       Gets data from tm data file - exact matches and fuzzies  |
 //+----------------------------------------------------------------------------+
-//|Function call:  TmtXGet( PTMX_CLB pTmClb,        //ptr to ctl block struct  |
+//|Function call:  TmtXGet( EqfMemory* pTmClb,        //ptr to ctl block struct  |
 //|                         PTMX_GET_IN pTmGetIn,   //ptr to input struct      |
 //|                         PTMX_GET_OUT pTmGetOut ) //ptr to output struct    |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   PTMX_CLB  pTmClb         control block                   |
+//|Input parameter:   EqfMemory*  pTmClb         control block                   |
 //|                   PTMX_GET_IN pTmGetIn     input structure                 |
 //+----------------------------------------------------------------------------+
 //|Output parameter:  PTMX_GET_OUT pTmGetOut   output structure                |
@@ -635,7 +635,7 @@ USHORT TmtXGet
 //+----------------------------------------------------------------------------+
 //|Description:       determines the degree of exactness of a match            |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb                                          |
+//|Parameters:        EqfMemory* pTmClb                                          |
 //|                   PTMX_SENTENCE pSentence                                  |
 //|                   PTMX_GET pGetIn                                          |
 //|                   PTMX_MATCH_TABLE pstMatchTable                           |
@@ -655,7 +655,7 @@ USHORT TmtXGet
 
 USHORT GetExactMatch
 (
-  PTMX_CLB pTmClb,                     //ptr to ctl block struct
+  EqfMemory* pTmClb,                     //ptr to ctl block struct
   PTMX_SENTENCE pSentence,             //ptr to sentence structure
   PTMX_GET_W pGetIn,                   //ptr to data in get in structure
   PTMX_MATCH_TABLE_W pstMatchTable,    //get out output structure
@@ -951,7 +951,7 @@ GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
 //|Description:       Fills the match table structure as required by the       |
 //|                   getout structure                                         |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb                                          |
+//|Parameters:        EqfMemory* pTmClb                                          |
 //|                   PTMX_RECORD pTmRecord                                    |
 //|                   PTMX_GET pGetIn                                          |
 //|                   PTMX_SENTENCE pSentence                                  |
@@ -978,7 +978,7 @@ GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
 // ----------------------------------------------------------------------------+
 USHORT ExactTest
 (
-  PTMX_CLB pTmClb,                  //ptr to ctl block struct
+  EqfMemory* pTmClb,                  //ptr to ctl block struct
   PTMX_RECORD pTmRecord,            //pointer to tm record data
   PTMX_GET_W pGetIn,                //pointer to get in data
   PTMX_SENTENCE pSentence,          //pointer to sentence structure
@@ -1795,7 +1795,7 @@ BOOL DITASpecialProcessingRequired
 //|Description:       Fills the match table structure as required by the       |
 //|                   getout structure                                         |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb                                          |
+//|Parameters:        EqfMemory* pTmClb                                          |
 //|                   PSZ pSourceString                                        |
 //|                   PUSHORT pusSourceLen                                     |
 //|                   PTMX_TARGET_RECORD pTMXTargetRecord                      |
@@ -1817,7 +1817,7 @@ BOOL DITASpecialProcessingRequired
 //|               output number of entries in match table                      |
 // ----------------------------------------------------------------------------+
 
-USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
+USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
                    PSZ_W pSourceString,         //pointer to normalized source string
                    PLONG plSourceLen,        //length of source string
                    PTMX_TARGET_RECORD pTMXTargetRecord, //pointer to tm target
@@ -2511,7 +2511,7 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
 
 USHORT GetFuzzyMatch
 (
-  PTMX_CLB pTmClb,                     //ptr to ctl block struct
+  EqfMemory* pTmClb,                     //ptr to ctl block struct
   PTMX_SENTENCE pSentence,             //ptr to sentence structure
   PTMX_GET_W pGetIn,                   //ptr to data in get in structure
   PTMX_MATCH_TABLE_W pstMatchTable,    //get out output structure
@@ -2699,7 +2699,7 @@ std::wstring removeTagsFromString(std::wstring input){
 //|Description:       The fuzzy match algorithm to determine the degree of     |
 //|                   fuzziness.                                               |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb                                          |
+//|Parameters:        EqfMemory* pTmClb                                          |
 //|                   PTMX_RECORD pTmRecord                                    |
 //|                   PTMX_GET pGetIn                                          |
 //|                   PTMX_MATCH_TABLE pstMatchTable                           |
@@ -2721,7 +2721,7 @@ std::wstring removeTagsFromString(std::wstring input){
 //|                     try next target record                                 |
 // ----------------------------------------------------------------------------+
 
-USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
+USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                    PTMX_RECORD pTmRecord,     //ptr to tm record
                    PTMX_GET_W pGetIn,         //ptr to data in get in structure
                    PTMX_MATCH_TABLE_W pstMatchTable, //get out output structure
@@ -3193,7 +3193,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 //|Description:       Determine the sentence keys for all triple hashes        |
 //|                   and their frequencies and add to match table.            |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb                                          |
+//|Parameters:        EqfMemory* pTmClb                                          |
 //|                   PTMX_SENTENCE pSentence                                  |
 //|                   PTMX_MATCHENTRY pMatchEntry                              |
 //|                   PUSHORT pusMatchThreshold                                |
@@ -3211,7 +3211,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 // ----------------------------------------------------------------------------+
 USHORT FillMatchEntry
 ( 
-  PTMX_CLB pTmClb,
+  EqfMemory* pTmClb,
   PTMX_SENTENCE pSentence,
   PTMX_MATCHENTRY pMatchEntry,
   PUSHORT pusMatchThreshold
@@ -3733,7 +3733,7 @@ CompCountVotes
 // function to compare the context strings of two segments
 USHORT NTMCompareContext
 (
-  PTMX_CLB pTmClb,                     // ptr to ctl block struct
+  EqfMemory* pTmClb,                     // ptr to ctl block struct
   PSZ         pszMarkup,               // ptr to name markup used for segment
   PSZ_W       pszContext1,             // context of first segment
   PSZ_W       pszContext2              // context of second segment

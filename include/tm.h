@@ -1945,13 +1945,65 @@ class EqfMemoryPlugin;
 class Dummy{};
 
 
-class EqfMemory : public TMX_CLB
+class EqfMemory //: public TMX_CLB
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
 */
 
 {
   
 public:
+  BTREE TmBtree;
+  BTREE InBtree;
+  TMX_TABLE Languages;
+  TMX_TABLE FileNames;
+  TMX_TABLE Authors;
+  TMX_TABLE TagTables;
+  USHORT usAccessMode;
+  USHORT usThreshold;
+  TMX_SIGN stTmSign;
+  BYTE     bCompact[MAX_COMPACT_SIZE-1];
+  BYTE     bCompactChanged;
+  LONG     alUpdCounter[MAX_UPD_COUNTERS];
+  PTMX_LONGNAME_TABLE pLongNames = nullptr;
+  TMX_TABLE LangGroups;              //  table containing language group names
+  PSHORT     psLangIdToGroupTable;     // language ID to group ID table
+  LONG       lLangIdToGroupTableSize; // size of table (alloc size)
+  LONG       lLangIdToGroupTableUsed; // size of table (bytes in use)
+  PVOID      pTagTable;               // tag table loaded for segment markup (TBLOADEDTABLE)
+
+  // copy of long name table sorted ignoring the case of the file names
+  // Note: only the stTableEntry array is filled in this area, for all other
+  //       information use the entries in the pLongNames structure
+  PTMX_LONGNAME_TABLE pLongNamesCaseIgnore;
+
+  // fields for work area pointers of various subfunctions which are allocated
+  // only once for performance reasons
+  PVOID      pvTempMatchList;        // matchlist of FillMatchEntry function
+  PVOID      pvIndexRecord;          // index record area of FillMatchEntry function
+  PVOID      pvTmRecord;             // buffer for memory record used by GetFuzzy and GetExact
+  ULONG      ulRecBufSize;           // current size of pvTMRecord;
+
+  // fields for time measurements and logging
+  BOOL       fTimeLogging;           // TRUE = Time logging is active
+  LONG64     lAllocTime;             // time for memory allocation
+  LONG64     lTokenizeTime;          // time for tokenization
+  LONG64     lGetExactTime;          // time for GetExact
+  LONG64     lOtherTime;             // time for other activities
+  LONG64     lGetFuzzyTime;          // time for GetFuzzy
+  LONG64     lFuzzyOtherTime;        // other time spent in GetFuzzy
+  LONG64     lFuzzyTestTime;         // FuzzyTest time spent in GetFuzzy
+  LONG64     lFuzzyGetTime;          // NTMGet time spent in GetFuzzy
+  LONG64     lFuzzyFillMatchEntry;   // FillMatchEntry time spent in GetFuzzy
+  LONG64     lFillMatchAllocTime;    // FillMatchEntry: allocation time
+  LONG64     lFillMatchOtherTime;    // FillMatchEntry: other times
+  LONG64     lFillMatchReadTime;     // FillMatchEntry: read index DB time
+  LONG64     lFillMatchFillTime;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchCleanupTime;  // FillMatchEntry: cleanup match list time
+  LONG64     lFillMatchFill1Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill2Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill3Time;     // FillMatchEntry: fill match list time
+  LONG64     lFillMatchFill4Time;     // FillMatchEntry: fill match list time
+
   //std::shared_ptr<EqfMemory> readOnlyPtr;
   //std::shared_ptr<EqfMemory> writePtr;
   std::shared_ptr<int> readOnlyCnt;
@@ -2322,6 +2374,16 @@ public:
   char szDescrMemoryType[256];                 // descriptive name of the memory type
   unsigned long ulSize;                        // size of the memory  
   BOOL fEnabled;                               // memory-is-enabled flag  
+
+
+  // functions dealing with long document tables
+  USHORT NTMCreateLongNameTable();
+  USHORT NTMReadLongNameTable();
+  USHORT NTMWriteLongNameTable();
+  USHORT NTMDestroyLongNameTable();
+  USHORT NTMCreateLangGroupTable();
+  USHORT NTMAddLangGroup( PSZ pszLang, USHORT sLangID );
+  USHORT NTMOrganizeIndexFile();
 private:
 /*! \brief Fill OtmProposal from TMX_GET_OUT_W structure
     \param ulKey key of record containing the proposal
@@ -2690,19 +2752,7 @@ NTMOpenProperties( HPROP *,
                    BOOL );
 
 
-// functions dealing with long document tables
-USHORT NTMCreateLongNameTable( PTMX_CLB pTmClb );
-//USHORT NTMCreateLongNameTable( EqfMemory* pTmClb );
-USHORT NTMReadLongNameTable( PTMX_CLB pTmClb );
-USHORT NTMWriteLongNameTable( PTMX_CLB pTmClb );
-USHORT NTMDestroyLongNameTable( PTMX_CLB pTmClb );
-USHORT NTMCreateLangGroupTable( PTMX_CLB pTmClb );
-USHORT NTMAddLangGroup( PTMX_CLB pTmClb, PSZ pszLang, USHORT sLangID );
 
-USHORT NTMOrganizeIndexFile
-(
-  PTMX_CLB pTmClb               // ptr to control block,
-);
 
 // Update specific parts of segment
 
@@ -2831,7 +2881,7 @@ BOOL TMFuzzynessEx
   PUSHORT     pusDiffs                 // number of diffs in segment
 );
 
-USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ );
+USHORT TokenizeSource( EqfMemory*, PTMX_SENTENCE, PSZ, PSZ );
 
 USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT);
 
@@ -3759,7 +3809,7 @@ USHORT
 /**********************************************************************/
 /* TmtXInfo                                                          */
 /**********************************************************************/
-USHORT TmtXInfo( PTMX_CLB,
+USHORT TmtXInfo( EqfMemory*,
                  PTMX_INFO_OUT );
 
 
@@ -3949,7 +3999,7 @@ MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 
 USHORT NTMGetIDFromNameEx
 (
-  PTMX_CLB    pTmClb,                  // input, memory control block pointer
+  EqfMemory*    pTmClb,                  // input, memory control block pointer
   PSZ         pszName,                 // input, name being looked up
   PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
@@ -3958,19 +4008,19 @@ USHORT NTMGetIDFromNameEx
   PUSHORT     pusAlternativeID         // output, alternative ID
 );
 
-PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
+PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType );
 
 
 
-USHORT NTMGetIDFromName( PTMX_CLB, PSZ, PSZ, USHORT, PUSHORT );
-USHORT NTMGetNameFromID( PTMX_CLB, PUSHORT, USHORT, PSZ, PSZ );
-USHORT TmtXReplace( PTMX_CLB, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
+USHORT NTMGetIDFromName( EqfMemory*, PSZ, PSZ, USHORT, PUSHORT );
+USHORT NTMGetNameFromID( EqfMemory*, PUSHORT, USHORT, PSZ, PSZ );
+USHORT TmtXReplace( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
 USHORT TmtXCreate( PTMX_CREATE_IN, PTMX_CREATE_OUT );
 USHORT TmtXOpen( PTMX_OPEN_IN, PTMX_OPEN_OUT );
-USHORT TmtXClose( PTMX_CLB, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
+USHORT TmtXClose( EqfMemory*, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 
 //tm put prototypes
@@ -3983,45 +4033,45 @@ static VOID BuildVotes( PTMX_SENTENCE );
 static VOID Vote( PTMX_TERM_TOKEN, PTMX_SENTENCE, USHORT );
 static VOID BuildVotesV5( PTMX_SENTENCE_V5 );
 static VOID VoteV5( PTMX_TERM_TOKEN, PTMX_SENTENCE_V5, USHORT );
-USHORT CheckCompactArea( PTMX_SENTENCE, PTMX_CLB );
-USHORT CheckCompactAreaV5( PTMX_SENTENCE_V5, PTMX_CLB );
+USHORT CheckCompactArea( PTMX_SENTENCE, EqfMemory* );
+USHORT CheckCompactAreaV5( PTMX_SENTENCE_V5, EqfMemory* );
 
-USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, PTMX_CLB );
-USHORT TokenizeTargetV5( PSZ, PSZ, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, PTMX_CLB );
+USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
+USHORT TokenizeTargetV5( PSZ, PSZ, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
 
-USHORT AddToTm( PTMX_SENTENCE, PTMX_CLB, PTMX_PUT_W, PULONG );
-USHORT AddToTmV5( PTMX_SENTENCE_V5, PTMX_CLB, PTMX_PUT, PULONG );
+USHORT AddToTm( PTMX_SENTENCE, EqfMemory*, PTMX_PUT_W, PULONG );
+USHORT AddToTmV5( PTMX_SENTENCE_V5, EqfMemory*, PTMX_PUT, PULONG );
 VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 VOID FillTmRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD, PSZ, USHORT,
                    PTMX_RECORD, PTMX_OLD_TARGET_CLB );
 
-USHORT FillClb( PTMX_TARGET_CLB *, PTMX_CLB, PTMX_PUT_W );
-USHORT FillClbV5( PTMX_OLD_TARGET_CLB *, PTMX_CLB, PTMX_PUT );
-USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG, PTMX_CLB );
-USHORT UpdateTmIndexV5( PTMX_SENTENCE_V5, ULONG, PTMX_CLB );
-USHORT DetermineTmRecord( PTMX_CLB, PTMX_SENTENCE, PULONG );
-USHORT DetermineTmRecordV5( PTMX_CLB, PTMX_SENTENCE_V5, PULONG );
-USHORT UpdateTmRecord( PTMX_CLB, PTMX_PUT_W, PTMX_SENTENCE );
-USHORT UpdateTmRecordV5( PTMX_CLB, PTMX_PUT, PTMX_SENTENCE_V5 );
-USHORT AddTmTarget( PTMX_CLB, PTMX_PUT_W, PTMX_SENTENCE, PTMX_RECORD *, PULONG, PULONG );
-USHORT AddTmTargetV5( PTMX_CLB, PTMX_PUT, PTMX_SENTENCE_V5, PTMX_RECORD *, PULONG, PULONG );
-USHORT ComparePutData( PTMX_CLB, PTMX_RECORD *, PULONG, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
-USHORT ComparePutDataV5( PTMX_CLB, PTMX_RECORD *, PULONG, PTMX_PUT, PTMX_SENTENCE_V5, PULONG );
+USHORT FillClb( PTMX_TARGET_CLB *, EqfMemory*, PTMX_PUT_W );
+USHORT FillClbV5( PTMX_OLD_TARGET_CLB *, EqfMemory*, PTMX_PUT );
+USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG, EqfMemory* );
+USHORT UpdateTmIndexV5( PTMX_SENTENCE_V5, ULONG, EqfMemory* );
+USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );
+USHORT DetermineTmRecordV5( EqfMemory*, PTMX_SENTENCE_V5, PULONG );
+USHORT UpdateTmRecord( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE );
+USHORT UpdateTmRecordV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5 );
+USHORT AddTmTarget( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE, PTMX_RECORD *, PULONG, PULONG );
+USHORT AddTmTargetV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5, PTMX_RECORD *, PULONG, PULONG );
+USHORT ComparePutData( EqfMemory*, PTMX_RECORD *, PULONG, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
+USHORT ComparePutDataV5( EqfMemory*, PTMX_RECORD *, PULONG, PTMX_PUT, PTMX_SENTENCE_V5, PULONG );
 
 VOID FillTargetRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD,
                        PSZ_W, USHORT, PTMX_TARGET_RECORD *, PTMX_TARGET_CLB );
 VOID FillTargetRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD,
                        PSZ, USHORT, PTMX_TARGET_RECORD *, PTMX_OLD_TARGET_CLB );
 
-USHORT ReplaceTmTarget( PTMX_SENTENCE, PTMX_CLB, PTMX_PUT, PBYTE,
+USHORT ReplaceTmTarget( PTMX_SENTENCE, EqfMemory*, PTMX_PUT, PBYTE,
                         PTMX_RECORD, PULONG );
 VOID DeleteOldestRecord( PTMX_RECORD, PULONG );
 
 //tm get prototypes
-USHORT GetExactMatch( PTMX_CLB, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W,
+USHORT GetExactMatch( EqfMemory*, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W,
                       PUSHORT, PTMX_GET_OUT_W );
-USHORT ExactTest( PTMX_CLB, PTMX_RECORD, PTMX_GET_W, PTMX_SENTENCE,
+USHORT ExactTest( EqfMemory*, PTMX_RECORD, PTMX_GET_W, PTMX_SENTENCE,
                   PTMX_MATCH_TABLE_W, PUSHORT, ULONG );
 
 BOOL AddTagsToString( PSZ, PULONG, PTMX_TAGTABLE_RECORD, PSZ );
@@ -4030,21 +4080,21 @@ BOOL AddTagsToStringW( PSZ_W, PLONG, PTMX_TAGTABLE_RECORD, PSZ_W );
 INT CompCount( const void *, const void * );
 INT CompCountVotes( const void *, const void * );
 VOID CleanupTempMatch( PTMX_MATCHENTRY, PTMX_MATCHENTRY *, PUSHORT, PUSHORT );
-USHORT FillMatchEntry( PTMX_CLB, PTMX_SENTENCE, PTMX_MATCHENTRY, PUSHORT );
-USHORT FuzzyTest( PTMX_CLB, PTMX_RECORD, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT,
+USHORT FillMatchEntry( EqfMemory*, PTMX_SENTENCE, PTMX_MATCHENTRY, PUSHORT );
+USHORT FuzzyTest( EqfMemory*, PTMX_RECORD, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT,
                   PUSHORT, PUSHORT, PUSHORT, PTMX_SENTENCE, ULONG );
-USHORT GetFuzzyMatch( PTMX_CLB, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT );
+USHORT GetFuzzyMatch( EqfMemory*, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT );
 
 //tm extract prototypes
-USHORT TmtXExtract( PTMX_CLB, PTMX_EXT_IN_W, PTMX_EXT_OUT_W );
-USHORT FillExtStructure( PTMX_CLB, PTMX_TARGET_RECORD,
+USHORT TmtXExtract( EqfMemory*, PTMX_EXT_IN_W, PTMX_EXT_OUT_W );
+USHORT FillExtStructure( EqfMemory*, PTMX_TARGET_RECORD,
                          PTMX_TARGET_CLB,
                          PSZ_W, PLONG, PTMX_EXT_W );
 
 // TM segment update prototypes
 USHORT TmtXUpdSeg
 (
-  PTMX_CLB    pTmClb,      // ptr to ctl block struct
+  EqfMemory*    pTmClb,      // ptr to ctl block struct
   PTMX_PUT_IN pTmPutIn,    // ptr to put input data
   ULONG       ulUpdKey,    // SID of record being updated
   USHORT      usUpdTarget, // number of target being updated
@@ -4052,10 +4102,10 @@ USHORT TmtXUpdSeg
 );
 
 //tm delete segment prototypes
-USHORT TmtXDelSegm( PTMX_CLB, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
-USHORT FindTargetAndDelete( PTMX_CLB, PTMX_RECORD, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
-USHORT NTMCheckForUpdates( PTMX_CLB );
-USHORT NTMLockTM( PTMX_CLB, BOOL, PBOOL );
+USHORT TmtXDelSegm( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
+USHORT FindTargetAndDelete( EqfMemory*, PTMX_RECORD, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
+USHORT NTMCheckForUpdates( EqfMemory* );
+USHORT NTMLockTM( EqfMemory*, BOOL, PBOOL );
 USHORT MemBatchTMCreate( HWND hwnd, PDDEMEMCRT pMemCrt );
 USHORT MemBatchTMExport( HWND hwnd, PDDEMEMEXP pMemExp );
 USHORT MemBatchTMImport( HWND hwnd, PDDEMEMIMP pMemImp );
@@ -4083,7 +4133,7 @@ typedef struct _TERSEHEADER
 
 USHORT NTMSaveNameTable
 (
-  PTMX_CLB    pTmClb,                  // ptr to TM control block
+  EqfMemory*    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
   PBYTE       pTMTable,                // ptr to table data
   ULONG       ulSize                   // size of table data
@@ -4091,7 +4141,7 @@ USHORT NTMSaveNameTable
 
 USHORT NTMLoadNameTable
 (
-  PTMX_CLB    pTmClb,                  // ptr to TM control block
+  EqfMemory*    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
   PTMX_TABLE  pTMTable,              // ptr to table data pointer
   PULONG      pulSize                  // ptr to buffer for size of table data

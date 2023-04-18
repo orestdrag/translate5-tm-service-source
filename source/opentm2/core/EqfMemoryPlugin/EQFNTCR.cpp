@@ -224,7 +224,7 @@ USHORT TmtXCreate
 )
 {
   BOOL       fOK;                      //success indicator
-  PTMX_CLB   pTmClb = NULL;            //pointer to control block
+  EqfMemory*   pTmClb = NULL;            //pointer to control block
   PSZ        pszName;                  //pointer to string
   ULONG      ulKey;                    //qdam data file keys
   USHORT     usRc = NO_ERROR;          //return value
@@ -234,7 +234,7 @@ USHORT TmtXCreate
 
   if ( fOK )
   {
-    usRc = NTMCreateLongNameTable( pTmClb );
+    usRc = pTmClb->NTMCreateLongNameTable();
     
     fOK = (usRc == NO_ERROR );
   } /* endif */

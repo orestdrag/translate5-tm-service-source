@@ -379,7 +379,7 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
       /****************************************************************/
       /* call U code to pass TM command to server or handle it local  */
       /****************************************************************/
-      usRc = TmtXClose ( (PTMX_CLB)htm, pstCloseIn, pstCloseOut );
+      usRc = TmtXClose ( (EqfMemory*)htm, pstCloseIn, pstCloseOut );
 
       /****************************************************************/
       /* if an error occured call MemRcHandling in dependency of      */
@@ -524,9 +524,9 @@ C_TmInfoHwnd( HTM           htm,            //(in)  TM handle
   /********************************************************************/
   /* call U code to pass TM command to server or handle it local      */
   /********************************************************************/
-  T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );";
+  T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 44 usRc = TmtXInfo( (EqfMemory*)htm, pstInfoOut );";
 #ifdef TEMPORARY_COMMENTED
-  usRc = TmtXInfo( (PTMX_CLB)htm, pstInfoOut );
+  usRc = TmtXInfo( (EqfMemory*)htm, pstInfoOut );
   #endif
 //usRc = U( htm,
 //          (PXIN)pstInfoIn,               // Pointer to input structure
