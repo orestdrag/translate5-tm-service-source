@@ -113,17 +113,17 @@ BOOL TwbGetCheckProfileData( PSZ pEqfSystemMsgFile, PSZ pEqfSystemPropPath,
 
     // Get system drive and system path
     Properties::GetInstance()->get_value(KEY_OTM_DIR, szOTMPath, MAX_EQF_PATH);
-    Properties::GetInstance()->get_value_or_default( KEY_Drive, szDrive, sizeof( szDrive  ), szOTMPath );
-    Properties::GetInstance()->get_value_or_default( KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), szOTMPath );
-    Properties::GetInstance()->get_value_or_default( KEY_Path, szSysPath, sizeof( szSysPath), szOTMPath );
+    //Properties::GetInstance()->get_value_or_default( KEY_Drive, szDrive, sizeof( szDrive  ), szOTMPath );
+    //Properties::GetInstance()->get_value_or_default( KEY_LanDrive, szLanDrive, sizeof( szLanDrive  ), szOTMPath );
+    //Properties::GetInstance()->get_value_or_default( KEY_Path, szSysPath, sizeof( szSysPath), szOTMPath );
     sprintf( EqfSystemPath, "%s",  szSysPath );
 
     // Get name of system property file
 
-    Properties::GetInstance()->get_value_or_default( KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), szOTMPath );
+    //Properties::GetInstance()->get_value_or_default( KEY_SysProp, EqfSystemPropPath, sizeof( EqfSystemPropPath ), szOTMPath );
 
     // Get name of current language
-    Properties::GetInstance()->get_value_or_default( KEY_SYSLANGUAGE, szEqfSysLanguage, sizeof( szEqfSysLanguage ), DEFAULT_SYSTEM_LANGUAGE );
+    //Properties::GetInstance()->get_value_or_default( KEY_SYSLANGUAGE, szEqfSysLanguage, sizeof( szEqfSysLanguage ), DEFAULT_SYSTEM_LANGUAGE );
 
     // Set name of resource, help file and message file for selected language
     fOK = UtlQuerySysLangFile( szEqfSysLanguage, szEqfResFile,

@@ -111,7 +111,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
-        pRequest = new ExportRequestData(memName, requestAcceptHeader);
+        pRequest = new ExportRequestData(requestAcceptHeader,memName);
         pRequest->strUrl = reqUrl;
         pRequest->run();
         strResponseBody = pRequest->outputMessage;

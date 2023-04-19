@@ -93,10 +93,7 @@ static USHORT           ReadAndPrepareConfigSys ( VOID );
 int SetupMAT();
          USHORT SetupMAT( HAB hab, CHAR chPrimaryDrive, PSZ  pszSecondaryDrives, CHAR chLanDrive );
 static   USHORT CreateEditProperties( CHAR );
-static   USHORT CreateFolderListProperties( CHAR );
 static   USHORT CreateImexProperties( CHAR );
-
-static   USHORT CreateSystemProperties( const char* );
 
 static   USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive ); /* $KIT0890 A */
 static   USHORT CreateDictProperties( CHAR chPrimaryDrive );
