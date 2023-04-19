@@ -345,7 +345,7 @@ SHORT  BTREE::EQFNTMOpen
                //{
                //   sRc = BTREE_NO_ROOM;
                //} /* endif */
-               sRc = 1;
+               //sRc = 1;
              } /* endif */
            } /* endif */
          } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
@@ -357,8 +357,6 @@ SHORT  BTREE::EQFNTMOpen
        } /* endif */
      } /* endif */
    } /* endif */
-
-   //*ppBTIda = pBTIda;                               // set base pointer
 
    if ( sRc != NO_ERROR )
    {

@@ -8,6 +8,7 @@
 #include "EQFMORPH.H"
 #include "FilesystemHelper.h"
 #include "OSWrapper.h"
+#include "LanguageFactory.H"
 JSONFactory RequestData::json_factory;
 
 
@@ -236,7 +237,7 @@ int RequestData::requestTM(){
   if(mem.get()== nullptr)
   {
   //  buildErrorReturn( _rc_, Data.szError );
-    return -1;//( httpRC );
+    return !isServiceRequest();//( httpRC );
   } /* endif */
   fValid = true;
   return 0;
@@ -822,7 +823,7 @@ int UpdateEntryRequestData::checkData(){
 }
 
 
-
+void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal );
 
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
@@ -867,7 +868,42 @@ int UpdateEntryRequestData::execute(){
   wcscpy( Prop.szAddInfo,Data.szAddInfo );
 
   // update the memory
-  _rc_ = EqfUpdateMem( OtmMemoryServiceWorker::getInstance()->hSession, mem.get(), &Prop, 0 );
+  OtmProposal OtmProposal;
+  strcpy(Prop.szDocShortName , Prop.szDocName);
+  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
+  //USHORT usRC = (USHORT)mem.get()->putProposal( *pOtmProposal );
+  
+  TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
+  TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
+  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
+
+  OtmProposalToPutIn( OtmProposal, &TmPutIn );
+
+  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
+    std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
+    T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
+  }
+  /********************************************************************/
+  /* fill the TMX_PUT_IN prefix structure                             */
+  /* the TMX_PUT_IN structure must not be filled it is provided       */
+  /* by the caller                                                    */
+  /********************************************************************/
+  _rc_ = TmtXReplace ( mem.get(), &TmPutIn, &TmPutOut );
+
+  if ( _rc_ != 0 ){
+      T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << _rc_;   
+      //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+  }else{
+    mem.get()->TmBtree.fb.Flush();
+    mem.get()->InBtree.fb.Flush();
+  }
+
+  if ( ( _rc_ == 0 ) &&
+       ( TmPutIn.stTmPut.fMarkupChanged ) ) {
+     _rc_ = SEG_RESET_BAD_MARKUP ;
+  }
+  
   if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;
@@ -1127,13 +1163,10 @@ int FuzzySearchRequestData::execute(){
   PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[Data.iNumOfProposals] );
   memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
   // do the lookup and handle the results
-  int ProposalSpacesLeft = Data.iNumOfProposals;
-  int iNumOfProposals = 0; 
-
   // call the memory factory to process the request
   if ( _rc_ == NO_ERROR )
   {
-    _rc_ =  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, &iNumOfProposals, pFoundProposals, GET_EXACT );
+    _rc_ =  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, & Data.iNumOfProposals, pFoundProposals, GET_EXACT );
   } /* endif */
 
   if(_rc_ != 0){
@@ -1146,11 +1179,11 @@ int FuzzySearchRequestData::execute(){
     json_factory.startJSONW( strOutputParmsW );
     json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ );
     json_factory.addParmToJSONW( strOutputParmsW, L"ErrorMsg", L"" );
-    json_factory.addParmToJSONW( strOutputParmsW, L"NumOfFoundProposals", iNumOfProposals );
-    if ( iNumOfProposals > 0 )
+    json_factory.addParmToJSONW( strOutputParmsW, L"NumOfFoundProposals",  Data.iNumOfProposals );
+    if (  Data.iNumOfProposals > 0 )
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );
-      addProposalsToJSONString( strOutputParmsW, pFoundProposals, iNumOfProposals, (void *)&Data );
+      addProposalsToJSONString( strOutputParmsW, pFoundProposals,  Data.iNumOfProposals, (void *)&Data );
     } /* endif */
 
     json_factory.terminateJSONW( strOutputParmsW );
@@ -1171,142 +1204,294 @@ int FuzzySearchRequestData::execute(){
 }
 
 int ConcordanceSearchRequestData::parseJSON(){
-  #ifdef TEMPORARY_COMMENTED
-  int iRC = verifyAPISession();
-  if ( iRC != 0 )
+  _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if ( _rc_ != 0 )
   {
-    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    buildErrorReturn( _rc_, "can't verifyAPISession" );
     return( BAD_REQUEST );
   } /* endif */
 
   //EncodingHelper::convertUTF8ToASCII( strMemory );
-  if ( strMemory.empty() )
+  if ( strMemName.empty() )
   {
-    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Missing name of memory";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::Missing name of memory" );
     return( BAD_REQUEST );
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
-  PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
-  memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  
+  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSearchString ), sizeof( pData->szSearchString ) / sizeof( pData->szSearchString[0] ) },
-  { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchMode ), sizeof( pData->szSearchMode ) },
-  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchPos ), sizeof( pData->szSearchPos ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },
-  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
-  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
-  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( pData->iSearchTime ), 0 },
+  { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) },
+  { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchMode ), sizeof( Data.szSearchMode ) },
+  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
-  iRC = json_factory.parseJSON( strInputParmsW, parseControl );
-  #endif
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  if(_rc_){
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::json parsing failed" );
+    return( BAD_REQUEST );
+  }
+  return 0;
 }
 
 int ConcordanceSearchRequestData::checkData(){
-  #ifdef TEMPORARY_COMMENTED
-  if ( iRC != 0 )
+  if ( _rc_ != 0 )
   {
-    iRC = ERROR_INTERNALFUNCTION_FAILED;
-    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Parsing of input parameters failed";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
-    delete pData;
+    _rc_ = ERROR_INTERNALFUNCTION_FAILED;
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::Error: Parsing of input parameters failed" );
     return( BAD_REQUEST );
   } /* end */
 
-  if ( pData->szSearchString[0] == 0 )
+  if ( Data.szSearchString[0] == 0 )
   {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Missing search string";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
-    delete pData;
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::Error: Missing search string" );
     return( BAD_REQUEST );
   } /* end */
 
-  if ( pData->iNumOfProposals > 20 )
+  if ( Data.iNumOfProposals > 20 )
   {
-    iRC = ERROR_INPUT_PARMS_INVALID;
-    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Too many proposals requested, the maximum value is 20";
-    buildErrorReturn( iRC, errMsg, strOutputParms );
-    delete pData;
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::Error: Too many proposals requested, the maximum value is 20" );
     return( BAD_REQUEST );
   } /* end */
-  if ( pData->iNumOfProposals == 0 )
+  if ( Data.iNumOfProposals == 0 )
   {
-    pData->iNumOfProposals = 5;
+    Data.iNumOfProposals = 5;
   }
 
   if(loggingThreshold >= 0){
     T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
-    // get the handle of the memory 
-  long lHandle = 0;
-  int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
-  if ( httpRC != OK )
-  {
-    std::wstring wstr = L"OtmMemoryServiceWorker::concordanceSearch::";
-    wstr += pData->szError;
-    buildErrorReturn( iRC, (wchar_t*)wstr.c_str(), strOutputParms );
-    delete pData;
-    return( httpRC );
-  } /* endif */
 
   // do the search and handle the results
-  LONG lOptions = 0;
-  if ( strcasecmp( pData->szSearchMode, "Source" ) == 0 )
+  if ( strcasecmp( Data.szSearchMode, "Source" ) == 0 )
   {
     lOptions |= SEARCH_IN_SOURCE_OPT;
   }
-  else if ( strcasecmp( pData->szSearchMode, "Target" ) == 0 )
+  else if ( strcasecmp( Data.szSearchMode, "Target" ) == 0 )
   {
     lOptions |= SEARCH_IN_TARGET_OPT;
   }
-  else if ( strcasecmp( pData->szSearchMode, "SourceAndTarget" ) == 0 )
+  else if ( strcasecmp( Data.szSearchMode, "SourceAndTarget" ) == 0 )
   {
     lOptions |= SEARCH_IN_SOURCE_OPT | SEARCH_IN_TARGET_OPT;
   } /* endif */
   lOptions |= SEARCH_CASEINSENSITIVE_OPT;
-  #endif
+
+  bool fOk = false;
+  if( strlen( Data.szIsoSourceLang) ){
+    LanguageFactory::LANGUAGEINFO srcLangInfo;
+    fOk = LanguageFactory::getInstance()->getLanguageInfo( Data.szIsoSourceLang, &srcLangInfo );
+    if(fOk){
+      if(srcLangInfo.fisPreferred){
+        lOptions |= SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT;
+      }else{
+        lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
+      }
+    }else{
+      std::string msg = "::concordanceSearch::Error: :: src lang could not be found: " ;
+      msg += Data.szIsoSourceLang;
+      buildErrorReturn( _rc_, (PSZ)msg.c_str() );
+      return( BAD_REQUEST );
+    }
+  }
+  if( strlen( Data.szIsoTargetLang) ){
+    LanguageFactory::LANGUAGEINFO trgLangInfo;
+    fOk = LanguageFactory::getInstance()->getLanguageInfo( Data.szIsoTargetLang, &trgLangInfo );
+    if(fOk){
+      if(trgLangInfo.fisPreferred){
+        lOptions |= SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT;
+      }else{
+        lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
+      }
+    }else{
+      std::string msg = "::concordanceSearch::Error: :: target lang could not be found: ";
+      msg += Data.szIsoTargetLang;
+      buildErrorReturn( _rc_, (PSZ)msg.c_str() );
+      return( BAD_REQUEST );
+    }
+  }
+  fValid = fOk;
+  return 0;
 
 }
 
+ULONG GetTickCount();
+wchar_t* wcsupr(wchar_t *str);
+
 int ConcordanceSearchRequestData::execute(){
-  #ifdef TEMPORARY_COMMENTED
-  bool fOk = false;
-    if( strlen( pData->szIsoSourceLang) ){
-      LanguageFactory::LANGUAGEINFO srcLangInfo;
-      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoSourceLang, &srcLangInfo );
-      if(fOk){
-        if(srcLangInfo.fisPreferred){
-          lOptions |= SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT;
-        }else{
-          lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
-        }
-      }else{
-        T5LOG( T5WARNING) << ":: src lang could not be found: " << pData->szIsoSourceLang;
+  std::wstring strProposals;
+
+  // loop until end reached or enough proposals have been found
+  int iFoundProposals = 0;
+  int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
+  do
+  {
+    memset( &Proposal, 0, sizeof( Proposal ) );
+    //_rc_ = EqfSearchMem( this->hSession, mem.get(), Data.szSearchString, Data.szSearchPos, &Proposal, iActualSearchTime, lOptions );
+    {
+      BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
+      OtmProposal *pOtmProposal = new (OtmProposal);
+      EqfMemory* pMem = mem.get();
+
+      if ((* Data.szSearchString  == EOS)  )
+      {
+        char* pszParm = "Error in TMManager::APISearchMem::Search string is null";
+        T5LOG(T5ERROR) <<  " DDE_MANDPARAMISSING"<< pszParm;
+        return DDE_MANDPARAMISSING;
+      } /* endif */
+
+      DWORD dwSearchStartTime = 0;
+      if ( iActualSearchTime != 0 ) dwSearchStartTime = GetTickCount();
+
+      // get first or next proposal
+      if ( *Data.szSearchPos == EOS )
+      {
+        _rc_ = pMem->getFirstProposal( *pOtmProposal );
       }
-    }
-    if( strlen( pData->szIsoTargetLang) ){
-      LanguageFactory::LANGUAGEINFO trgLangInfo;
-      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoTargetLang, &trgLangInfo );
-      if(fOk){
-        if(trgLangInfo.fisPreferred){
-          lOptions |= SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT;
-        }else{
-          lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
+      else
+      {
+        pMem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        _rc_ = pMem->getNextProposal( *pOtmProposal );
+      } /* endif */
+
+      // prepare searchstring
+      if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( Data.szSearchString );
+      if ( lOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( Data.szSearchString );
+
+      bool fOneOrMoreIsFound = false; 
+      while ( !fFound && ( _rc_ == 0 ) )
+      {
+        fFound = searchInProposal( pOtmProposal, Data.szSearchString, lOptions );
+        //check langs
+        if( fFound ) 
+        { // filter by src lang
+          if (lOptions & SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT)
+          {
+            char lang[50];
+            pOtmProposal->getSourceLanguage(lang, 50);
+            fFound = strcasecmp(lang, Data.szIsoSourceLang ) == 0;
+          }else if(lOptions & SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT){
+            char lang[50];
+            pOtmProposal->getSourceLanguage(lang, 50);
+            fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoSourceLang);
+          }
         }
-      }else{
-        T5LOG( T5WARNING) << ":: target lang could not be found: " << pData->szIsoTargetLang;
+        if ( fFound )
+        {
+          if (lOptions & SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT)
+          {
+            char lang[50];
+            pOtmProposal->getTargetLanguage(lang, 50);
+            fFound = strcasecmp(lang, Data.szIsoTargetLang ) == 0;
+          }else if(lOptions & SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT){
+            char lang[50];
+            pOtmProposal->getTargetLanguage(lang, 50);
+            fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoTargetLang);
+          }
+        }
+        if ( fFound )
+        {
+          fOneOrMoreIsFound = true;
+          copyOtmProposalToMemProposal( pOtmProposal , &Proposal );
+        }
+        else
+        { 
+          //add check if we have at least one result before stop because of timeout 
+          if ( iActualSearchTime != 0 )
+          {
+            LONG lElapsedMillis = 0;
+            DWORD dwCurTime = GetTickCount();
+            if ( dwCurTime < dwSearchStartTime )
+            {
+              // an overflow occured
+              lElapsedMillis = (LONG)(dwCurTime + (ULONG_MAX - dwSearchStartTime));
+            }
+            else
+            {
+              lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
+            } /* endif */
+            if ( lElapsedMillis > iActualSearchTime  && fOneOrMoreIsFound )
+            {
+              _rc_ = TIMEOUT_RC;
+            }
+          }
+          if ( _rc_ == 0 )
+          {
+            _rc_ = pMem->getNextProposal( *pOtmProposal );
+          }
+        }
+      } /* endwhile */
+
+      // search given string in proposal
+      if ( fFound || (_rc_ == TIMEOUT_RC) )
+      {
+        pMem->getSequentialAccessKey( Data.szSearchPos, 20 );
+      } /* endif */
+      else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
+      {
+        _rc_ = ENDREACHED_RC;
       }
+      else{}
     }
-  #endif
+    
+    iActualSearchTime = Data.iSearchTime;
+    if ( _rc_ == 0 )
+    {
+      addProposalToJSONString( strProposals, &Proposal, (void *)&Data );
+      iFoundProposals++;
+    }
+  } while ( ( _rc_ == 0 ) && ( iFoundProposals < Data.iNumOfProposals ) );
+
+  if ( iFoundProposals || (_rc_ == ENDREACHED_RC) || (_rc_ == TIMEOUT_RC) )
+  {
+    std::wstring strOutputParmsW;
+    json_factory.startJSONW( strOutputParmsW );
+//    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ );
+    if ( _rc_ == ENDREACHED_RC )
+    {
+      json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );
+    }
+    else
+    {
+      json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition", Data.szSearchPos );
+    }
+    if ( iFoundProposals > 0 )
+    {
+      json_factory.addNameToJSONW( strOutputParmsW, L"results" );
+      json_factory.addArrayStartToJSONW( strOutputParmsW );
+      strOutputParmsW.append( strProposals );
+      json_factory.addArrayEndToJSONW( strOutputParmsW );
+    } /* endif */
+
+    json_factory.terminateJSONW( strOutputParmsW );
+    outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW );
+    _rest_rc_ = 200;
+    return 0;
+  }
+  else
+  {
+    //unsigned short usRC = 0;
+    //EqfGetLastErrorW( this->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
+    buildErrorReturn( _rc_, Data.szError );
+    _rest_rc_ = INTERNAL_SERVER_ERROR;
+  } /* endif */
+
+  //if ( pFoundProposals ) delete pFoundProposals;
+
+  return( _rc_ );
 }
 
 

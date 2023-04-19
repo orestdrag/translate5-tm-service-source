@@ -1252,7 +1252,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->Authors ) UtlAlloc( (PVOID *) &pTmClb->pAuthors, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY, &pTmClb->Authors, &ulLen );
+     usRc = pTmClb->NTMLoadNameTable( AUTHOR_KEY, &pTmClb->Authors, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1268,7 +1268,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pLanguages ) UtlAlloc( (PVOID *) &pTmClb->pLanguages, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, LANG_KEY, &pTmClb->Languages, &ulLen );
+     usRc = pTmClb->NTMLoadNameTable( LANG_KEY, &pTmClb->Languages, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1284,7 +1284,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pTagTables ) UtlAlloc( (PVOID *) &pTmClb->pTagTables, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY, &pTmClb->TagTables, &ulLen );
+     usRc = pTmClb->NTMLoadNameTable( TAGTABLE_KEY, &pTmClb->TagTables, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1300,7 +1300,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pFileNames ) UtlAlloc( (PVOID *) &pTmClb->pFileNames, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, FILE_KEY, &pTmClb->FileNames, &ulLen );
+     usRc = pTmClb->NTMLoadNameTable( FILE_KEY, &pTmClb->FileNames, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1913,9 +1913,8 @@ USHORT NTMSaveNameTable
 //|Description:       This function loads a TM name table from the database.   |
 //|                   If the table is tersed it is uncompressed.               |
 // ----------------------------------------------------------------------------+
-USHORT NTMLoadNameTable
+USHORT EqfMemory::NTMLoadNameTable
 (
-  EqfMemory*    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
   PTMX_TABLE  pTMTable,                // ptr to table data pointer
   PULONG      pulSize                  // ptr to buffer for size of table data
@@ -1925,7 +1924,7 @@ USHORT NTMLoadNameTable
 
   // call to obtain exact length of record
   *pulSize = 0;
-  usRc =  pTmClb->TmBtree.EQFNTMGet( ulTableKey, 0, pulSize );
+  usRc =  TmBtree.EQFNTMGet( ulTableKey, 0, pulSize );
 
   // allocate table data area
   if ( usRc == NO_ERROR )
@@ -1983,7 +1982,7 @@ USHORT NTMLoadNameTable
   if ( usRc == NO_ERROR )
   {
     ULONG ulLen = *pulSize;
-    usRc =  pTmClb->TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pTMTable), &ulLen );
+    usRc =  TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pTMTable), &ulLen );
   } /* endif */
 
   // handle tersed name tables

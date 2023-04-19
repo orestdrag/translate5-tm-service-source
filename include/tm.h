@@ -2162,7 +2162,12 @@ public:
     OtmProposal &Proposal
   ); 
 
-
+USHORT NTMLoadNameTable
+(
+  ULONG       ulTableKey,              // key of table record
+  PTMX_TABLE  pTMTable,              // ptr to table data pointer
+  PULONG      pulSize                  // ptr to buffer for size of table data
+);
 
 /*! \brief Get a list of memory proposals matching the given search key
 
@@ -2446,16 +2451,6 @@ int MatchToOtmProposal
   OtmProposal *pProposal
 );
 
-/*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
-    \param Proposal reference to the OtmProposal containing the data
-    \param pPutIn pointer to the TMX_PUT_IN_W structure
-  	\returns 0 or error code in case of errors
-*/
-int OtmProposalToPutIn
-(
-  OtmProposal &Proposal,
-  PTMX_PUT_IN_W pPutIn
-);
 
 /*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
@@ -2488,6 +2483,18 @@ public:
 
 private:   
 };
+
+
+/*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
+    \param Proposal reference to the OtmProposal containing the data
+    \param pPutIn pointer to the TMX_PUT_IN_W structure
+  	\returns 0 or error code in case of errors
+*/
+int OtmProposalToPutIn
+(
+  OtmProposal &Proposal,
+  PTMX_PUT_IN_W pPutIn
+);
 
 USHORT  TmGetServerDrives( PDRIVES_IN  pDrivesIn,      // Pointer to DRIVES_IN struct
                            PDRIVES_OUT pDrivesOut,     // Pointer to DRIVES_OUT struct
@@ -3474,6 +3481,52 @@ typedef struct _MEM_LOAD_IDA
 }MEM_LOAD_IDA, * PMEM_LOAD_IDA;
 
 
+/*! \brief search a string in a proposal
+  \param pProposal pointer to the proposal 
+  \param pszSearch pointer to the search string (when fIngoreCase is being used, this strign has to be in uppercase)
+  \param lSearchOptions combination of search options
+  \returns TRUE if the proposal contains the searched string otherwise FALSE is returned
+*/
+BOOL searchInProposal
+( 
+  OtmProposal *pProposal,
+  PSZ_W pszSearch,
+  LONG lSearchOptions
+);
+
+
+/*! \brief normalize white space within a string by replacing single or multiple white space occurences to a single blank
+  \param pszString pointer to the string being normalized
+  \returns 0 in any case
+*/
+SHORT normalizeWhiteSpace
+(
+  PSZ_W   pszData
+);
+
+
+/*! \brief check if search string matches current data
+  \param pData pointer to current position in data area
+  \param pSearch pointer to search string
+  \returns 0 if search string matches data
+*/
+SHORT compareString
+(
+  PSZ_W   pData,
+  PSZ_W   pSearch
+);
+
+/*! \brief find the given string in the provided data
+  \param pszData pointer to the data being searched
+  \param pszSearch pointer to the search string
+  \returns TRUE if the data contains the searched string otherwise FALSE is returned
+*/
+BOOL findString
+( 
+  PSZ_W pszData,
+  PSZ_W pszSearch
+);
+
 typedef struct _MEM_MERGE_IDA
 {
  CHAR          szPathMergeMem[MAX_LONGPATH];  // Full path and name of TM to be merged
@@ -4136,14 +4189,6 @@ USHORT NTMSaveNameTable
   ULONG       ulTableKey,              // key of table record
   PBYTE       pTMTable,                // ptr to table data
   ULONG       ulSize                   // size of table data
-);
-
-USHORT NTMLoadNameTable
-(
-  EqfMemory*    pTmClb,                  // ptr to TM control block
-  ULONG       ulTableKey,              // key of table record
-  PTMX_TABLE  pTMTable,              // ptr to table data pointer
-  PULONG      pulSize                  // ptr to buffer for size of table data
 );
 
 
@@ -5291,64 +5336,6 @@ EqfMemory *handleToMemoryObject
 #define SEARCH_CASEINSENSITIVE 4
 #define SEARCH_WHITESPACETOLERANT 8
 
-/*! \brief search a string in a proposal
-  \param pProposal pointer to the proposal 
-  \param pszSearch pointer to the search string (when fIngoreCase is being used, this strign has to be in uppercase)
-  \param lSearchOptions combination of search options
-  \returns TRUE if the proposal contains the searched string otherwise FALSE is returned
-*/
-BOOL searchInProposal
-( 
-  OtmProposal *pProposal,
-  PSZ_W pszSearch,
-  LONG lSearchOptions
-);
-
-/*! \brief find the given string in the provided data
-  \param pszData pointer to the data being searched
-  \param pszSearch pointer to the search string
-  \returns TRUE if the data contains the searched string otherwise FALSE is returned
-*/
-BOOL findString
-( 
-  PSZ_W pszData,
-  PSZ_W pszSearch
-);
-
-/*! \brief check if search string matches current data
-  \param pData pointer to current position in data area
-  \param pSearch pointer to search string
-  \returns 0 if search string matches data
-*/
-SHORT compareString
-(
-  PSZ_W   pData,
-  PSZ_W   pSearch
-);
-
-/*! \brief normalize white space within a string by replacing single or multiple white space occurences to a single blank
-  \param pszString pointer to the string being normalized
-  \returns 0 in any case
-*/
-SHORT normalizeWhiteSpace
-(
-  PSZ_W   pszData
-);
-
-/*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
-  \param pMemProposal pointer to MEMPROPOSAL structure 
-  \param pOtmProposal pointer to OtmProposal object
-  \returns 0 in any case
-*/
-void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProposal  );
-
-/*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
-  \param pMemProposal pointer to MEMPROPOSAL structure 
-  \param pOtmProposal pointer to OtmProposal object
-  \returns 0 in any case
-*/
-void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal );
-
 
 /*! \brief Pointer to the list of installed memory plugins
 */
@@ -5391,7 +5378,19 @@ std::vector<EqfMemory *> *pHandleToMemoryList;
 };
 
 
+/*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
+  \param pMemProposal pointer to MEMPROPOSAL structure 
+  \param pOtmProposal pointer to OtmProposal object
+  \returns 0 in any case
+*/
+void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProposal  );
 
+/*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
+  \param pMemProposal pointer to MEMPROPOSAL structure 
+  \param pOtmProposal pointer to OtmProposal object
+  \returns 0 in any case
+*/
+void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal );
 
 ////OTMFUNC region
 /**
