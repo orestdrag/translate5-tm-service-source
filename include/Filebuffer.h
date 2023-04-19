@@ -14,7 +14,7 @@ struct FileBuffer{
     int status ;//FILEBUFFERSTATUS
     std::vector<unsigned char> data;
     size_t offset = 0;
-    FILE* file = NULL;
+    FILE* file = nullptr;
     std::string fileName;   
     long long originalFileSize = 0;
 

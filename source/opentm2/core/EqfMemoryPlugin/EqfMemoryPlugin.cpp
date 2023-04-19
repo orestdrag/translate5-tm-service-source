@@ -254,24 +254,13 @@ EqfMemory* EqfMemoryPlugin::openMemoryNew(
   EqfMemory* pMemory = new EqfMemory(memName);
   if(pMemory){
     usRC = pMemory->OpenX();
-  }
-  HTM htm = NULL;                      // memory handle 
-  //usRC = TmOpen(  (char*)path.c_str(), &htm,  EXCLUSIVE, 0, 0,  nullptr );
-  
+  }  
   // create memory object if create function completed successfully
-  //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) //*
-  //&& (usAccessMode == FOR_ORGANIZE)
-  //*/ 
-  //))
-  {
-  //  pMemory = new EqfMemory( this, htm, (PSZ)memName.c_str() );
-  }
-  //else
-  if(!pMemory || usRC){
+  if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){
     T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< memName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
         this->iLastError;
-    if ( htm != 0 ) 
-      TmClose( htm, NULL,  FALSE,  NULL );
+    //if ( pMemory != 0 ) 
+    //  TmClose( pMemory, NULL,  FALSE,  NULL );
   } /* end */       
   return pMemory;
 } /* end */     
