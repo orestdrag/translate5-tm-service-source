@@ -5,13 +5,10 @@
 #include <memory>
 #include "tm.h"
 
-/*! \brief Error return codes
-  */
-#define ERROR_INTERNALFUNCTION_FAILED  14001
-#define ERROR_INPUT_PARMS_INVALID      14002
-#define ERROR_TOO_MANY_OPEN_MEMORIES   14003
-#define ERROR_MEMORY_NOT_FOUND         14004
+#include "lowlevelotmdatastructs.h"
 
+
+class EqfMemory;
 class JSONFactory;
 
 class RequestData{
@@ -53,12 +50,7 @@ protected:
     virtual int execute() = 0;
 };
 
-USHORT
-NTMFillCreateInStruct( const char*,
-                       const char*,
-                       const char*,
-                       PTMX_CREATE_IN
-                       );
+
 
 class CreateMemRequestData: public RequestData{
     protected:
@@ -126,6 +118,11 @@ class ExportRequestData: public RequestData{
     
     std::string requestFormat;//application/xml or application/binary
     FCTDATA fctdata;
+    MEM_EXPORT_IDA IDA;         // Pointer to the export IDA
+    PROCESSCOMMAREA CommArea;   // ptr to commmunication area
+
+    USHORT PrepExport();
+    USHORT ExportProc();
     std::string strTempFile;
     public:
     ExportRequestData(const std::string& format, const std::string& memName): RequestData("", memName),  requestFormat(format){};

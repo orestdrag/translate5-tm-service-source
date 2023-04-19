@@ -68,63 +68,8 @@
 // activate this define to enable the export of context and addinfo data
 #define EXPORT_CONTEXT_AND_ADDINFO
 
-#include "IDA.H"
-typedef struct _MEM_EXPORT_IDA
-{
- CHAR         szMemName[MAX_LONGFILESPEC];// Memory database name without extension
- CHAR         szMemPath[2048];            // Full memory database name + path
- HTM          hMem;                       // Handle of memory database
- HFILE        hFile;                      // Handle of file the export should go to
- PMEM_IDA     pIDA;                       // Address to the memory database IDA
- HPROP        hPropMem;                   // Memory database property handle
- PPROP_NTM    pPropMem;                   // pointer to TM properties
- HPROP        hPropLast;                  // Last used property handle
- PMEM_LAST_USED pPropLast;                // Pointer to the last used properties
- BOOL         fAscii;                     // TRUE = ASCII else EQF internal format
- CHAR         szDummy[_MAX_DIR];          // string buffer
- USHORT       usEntryInDirToStop;         // The key where the export should stop
- ULONG        ulTotalBytesWritten;              // Total bytes written to extract file
- CHAR_W       szWorkArea[MEM_EXPORT_WORK_AREA]; // Work area for extract
- TMX_EXT_IN_W  stExtIn;                         // TMX_EXT_IN
- TMX_EXT_OUT_W stExtOut;                        // TMX_EXT_OUT
- ULONG        ulSegmentCounter;                 // Segment counter of progress window
- BOOL         fEOF;                             // Indicates end of file
- BOOL         fFirstExtract;                    // First extract call flag
- HWND         hProgressWindow;                  // Handle of progress indicator window
- ULONG        ulProgressPos;                        // position of progress indicator
- CHAR         acWriteBuffer[MEM_EXPORT_OUT_BUFFER]; // Export output buffer
- ULONG        ulBytesInBuffer;                      // No of bytes already in buffer
- CONTROLSIDA  ControlsIda;                      //ida of control utility
- BOOL         fBatch;                     // TRUE = we are in batch mode
- HWND         hwndErrMsg;                 // parent handle for error messages
- PDDEMEMEXP   pDDEMemExp;                 // ptr to batch memory export data
- USHORT       NextTask;                   // next task for non-DDE batch TM export
- USHORT       usRC;                       // error code in non-DDE batch mode
- USHORT       usExpMode;                  // mode for export
- CHAR         szConvArea[MEM_EXPORT_WORK_AREA]; // Work area for extract
- PSZ           pszNameList;            // pointer to list of TMs being organized
- PSZ           pszActiveName;          // points to current name in pszNameList
- USHORT        usYesToAllMode;         // yes-to-all mode for replace existing files
- ULONG         ulOemCP;                // ASCII cp of system preferences language
- ULONG         ulAnsiCP;
- // fields for external memory export methods
- LONG          lExternalExportHandle;  // handle of external memory export functions
- //HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
- PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
- PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
+#include "lowlevelotmdatastructs.h"
 
-
-
- BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
- CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
- EqfMemory    *pMem;                      // pointer to memory being exported
- OtmProposal  *pProposal;                   // buffer for proposal data
- CHAR_W       szSegmentBuffer[MAX_SEGMENT_SIZE]; // Buffer for segment data
- CHAR_W       szSegmentBuffer2[MAX_SEGMENT_SIZE]; // Buffer for preprocessed segment data
- int          iComplete;                  // completion rate
- CHAR         szPlugin[MAX_LONGFILESPEC]; // name of memory plugin handling the current memory database
-}
-MEM_EXPORT_IDA, * PMEM_EXPORT_IDA;
 
 
 
@@ -1695,6 +1640,17 @@ USHORT MemFuncExportMem
   //*/
   return( usRC );
 } /* end of function MemFuncExportMem */
+
+// prepare the function I/F TM import
+//USHORT FCTDATA::PrepExport
+//(
+//  const std::string& strMemName,              // name of Translation Memory
+//  const std::string& strOutFile,              // fully qualified name of output file
+//  LONG        lOptions                 // options for Translation Memory export
+//){
+//  return 0;
+//}
+
 
 // prepare the function I/F TM import
 USHORT FCTDATA::MemFuncPrepExport
