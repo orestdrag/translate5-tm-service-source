@@ -37,6 +37,7 @@ class JSONFactory;
 
 class RequestData{
 protected:
+    int loggingThreshold = -1;
     std::shared_ptr<EqfMemory> mem;
     int requestType = 0;
     static JSONFactory json_factory;
@@ -69,13 +70,21 @@ public:
     int buildErrorReturn(int iRC,char *pszErrorMsg);
 
 
-  COMMAND command = UNKNOWN_COMMAND;
+    COMMAND command = UNKNOWN_COMMAND;
     
     int run();
 protected:
     virtual int parseJSON() = 0;
     virtual int checkData() = 0;
     virtual int execute() = 0;
+    int convertUTCTimeToLong( char *pszDateTime, PLONG plTime );
+    int convertTimeToUTC( LONG lTime, char *pszDateTime );
+    bool getValue( char *pszString, int iLen, int *piResult );
+    int requestTM();
+
+    bool isWriteRequest();
+    bool isReadOnlyRequest();
+    bool isServiceRequest();
 };
 
 
@@ -255,15 +264,19 @@ protected:
 
 class UpdateEntryRequestData: public RequestData{
     private:
-  
+    
     public:
     UpdateEntryRequestData(const std::string& json, const std::string& memName): RequestData(UPDATE_ENTRY, json, memName) {};
     UpdateEntryRequestData(): RequestData(UPDATE_ENTRY){};
 protected:
-    int parseJSON() override {return -1;};
-    int checkData() override {return -1;};
-    int execute() override   {return -1;};
-};
+    int parseJSON() override;
+    int checkData() override;
+    int execute  () override;
+    
+    LOOKUPINMEMORYDATA Data;
+    MEMPROPOSAL Prop;
+    EqfMemory* lHandle = 0;
+  };
 
 class ExportRequestData: public RequestData{
     private:

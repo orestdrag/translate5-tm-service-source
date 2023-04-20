@@ -100,32 +100,6 @@ typedef struct _CLOSEMEMORYDATA
 } CLOSEMEMORYDATA, *PCLOSEMEMORYDATA;
 
 
-/*! \brief Data area for the processing of the lookupInMemory function (also used by searchMemory and updateMemory)
-*/
-typedef struct _LOOKUPINMEMORYDATA
-{
-  char szMemory[260];
-  wchar_t szSource[2050];
-  wchar_t szTarget[2050];
-  char szIsoSourceLang[40];
-  char szIsoTargetLang[40];
-  char szOtmSourceLang[40];
-  char szOtmTargetLang[40];
-  int lSegmentNum;
-  char szDocName[260];
-  char szMarkup[128];
-  wchar_t szContext[2050];
-  wchar_t szAddInfo[2050];
-  wchar_t szError[512];
-  char szType[256];
-  char szAuthor[80];
-  char szDateTime[40];
-  char szSearchMode[40];
-  char szSearchPos[80];
-  int iNumOfProposals;
-  int iSearchTime;
-  wchar_t szSearchString[2050];
-} LOOKUPINMEMORYDATA, *PLOOKUPINMEMORYDATA;
 
 
 
@@ -1677,6 +1651,7 @@ int OtmMemoryServiceWorker::updateEntry
   std::string &strOutputParms
 )
 {
+  #ifdef TO_BE_REMOVED
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -1864,6 +1839,8 @@ int OtmMemoryServiceWorker::updateEntry
   delete pData;
 
   return( iRC );
+  #endif// TO_BE REMOVED
+  return 0;
 }
 
 /*! \brief Delete an entry of the memory
@@ -2518,4 +2495,6 @@ void importMemoryProcess( void* pvData )
 
   return;
 }
+
+
 

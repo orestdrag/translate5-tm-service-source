@@ -1741,4 +1741,132 @@ typedef struct _PROPMEMORY
 typedef EQF_BOOL (*PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
 
 
+
+
+/*! \brief Data area for the processing of the lookupInMemory function (also used by searchMemory and updateMemory)
+*/
+typedef struct _LOOKUPINMEMORYDATA
+{
+  char szMemory[260];
+  wchar_t szSource[2050];
+  wchar_t szTarget[2050];
+  char szIsoSourceLang[40];
+  char szIsoTargetLang[40];
+  char szOtmSourceLang[40];
+  char szOtmTargetLang[40];
+  int lSegmentNum;
+  char szDocName[260];
+  char szMarkup[128];
+  wchar_t szContext[2050];
+  wchar_t szAddInfo[2050];
+  wchar_t szError[512];
+  char szType[256];
+  char szAuthor[80];
+  char szDateTime[40];
+  char szSearchMode[40];
+  char szSearchPos[80];
+  int iNumOfProposals;
+  int iSearchTime;
+  wchar_t szSearchString[2050];
+} LOOKUPINMEMORYDATA, *PLOOKUPINMEMORYDATA;
+
+
+
+/*! \brief memory proposal types */
+	enum MemProposalType
+	{
+		UNDEFINED_PROPTYPE,			/*!< proposal type has not been set or is not available */
+		MANUAL_PROPTYPE,	  		/*!< proposal was produced by manual translation */
+		MACHINE_PROPTYPE,	    	/*!< proposal was produced by automatic (machine) translation */
+		GLOBMEMORY_PROPTYPE, 	  /*!< proposal is from global memory  */
+    GLOBMEMORYSTAR_PROPTYPE /*!< proposal is from global memory, to be marked with an asterisk  */
+	};
+
+/*! \brief match type of memory proposals */
+	enum MemProposalMatchType
+	{
+		UNDEFINED_MATCHTYPE,			/*!< match type has not been set or is not available */
+		EXACT_MATCHTYPE,	    		/*!< proposal is an exact match */
+		EXACTEXACT_MATCHTYPE,		/*!< proposal is an exact match, document name and segment number are exact also */
+		EXACTSAMEDOC_MATCHTYPE,	/*!< proposal is an exact match from the same document */
+		FUZZY_MATCHTYPE,	    		/*!< proposal is a fuzzy match */
+		REPLACE_MATCHTYPE 	    	/*!< proposal is a replace match */
+	};
+
+/*! \brief maximum size of segment data */
+#define MEMPROPOSAL_MAXSEGLEN 2048
+
+/*! \brief maximum size of names */
+#define MEMPROPOSAL_MAXNAMELEN 256
+
+
+/*! \brief Structure for sending or receiving memory proposal data
+*/
+typedef struct _MEMPROPOSAL
+{
+  /*! \brief ID of this proposal */
+	char szId[MEMPROPOSAL_MAXNAMELEN];
+
+  /*! \brief Source string of memory proposal  (UTF-16) */
+  wchar_t szSource[MEMPROPOSAL_MAXSEGLEN+1];
+	//std::wstring strSource;
+
+	/*! \brief Target string of memory proposal (UTF-16). */
+  wchar_t szTarget[MEMPROPOSAL_MAXSEGLEN+1];
+
+	/*! \brief Name of document from which the proposal comes from. */
+	char szDocName[MEMPROPOSAL_MAXNAMELEN];
+
+	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
+	//std::string strDocShortName;
+	char szDocShortName[MEMPROPOSAL_MAXNAMELEN];
+
+	/*! \brief Segment number within the document from which the proposal comes from. */
+  long lSegmentNum;                  
+
+	/*! \brief source language. */
+	char szSourceLanguage[MEMPROPOSAL_MAXNAMELEN];
+
+	/*! \brief target language. */
+  char szTargetLanguage[MEMPROPOSAL_MAXNAMELEN];
+
+	/*! \brief origin or type of the proposal. */
+  MemProposalType eType;
+
+	/*! \brief match type of the proposal. */
+  MemProposalMatchType eMatch;
+
+	/*! \brief Author of the proposal. */
+  char szTargetAuthor[MEMPROPOSAL_MAXNAMELEN];
+
+	/*! \brief Update time stamp of the proposal. */
+  long    lTargetTime;
+
+	/*! \brief Fuzziness of the proposal. */
+  int iFuzziness;    
+
+  /*! \brief Words parsed in fuzzy calculations of the proposal. */
+  int iWords = -1;
+
+  /*! \brief Diffs in fuzzy calculations of the proposal. */
+  int iDiffs = -1;                 
+
+	/*! \brief Markup table (format) of the proposal. */
+  char szMarkup[MEMPROPOSAL_MAXNAMELEN];
+
+  /*! \brief Context information of the proposal */
+  //std::wstring strContext;  
+  wchar_t szContext[MEMPROPOSAL_MAXSEGLEN+1];
+
+  /*! \brief Additional information of the proposal */
+  //std::wstring strAddInfo; 
+  wchar_t szAddInfo[MEMPROPOSAL_MAXSEGLEN+1];
+  
+  /*! \brief is source lang is marked as prefered in languages.xml */
+  bool fIsoSourceLangIsPrefered = false;
+  /*! \brief is target lang is marked as prefered in languages.xml */
+  bool fIsoTargetLangIsPrefered = false;
+
+} MEMPROPOSAL, *PMEMPROPOSAL;
+
 #endif //_LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_

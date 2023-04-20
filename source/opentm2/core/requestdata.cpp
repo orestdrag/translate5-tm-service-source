@@ -10,6 +10,48 @@
 
 JSONFactory RequestData::json_factory;
 
+
+
+std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
+  std::vector<std::wstring> response;
+  *rc = 0;
+  try {        
+        *rc = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+        if(*rc == 0){
+          response = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::move(src_data), std::move(trg_data), std::move(req_data) );
+        }
+    }
+    //catch (const XMLException& toCatch) {
+      catch(...){
+        *rc = 400;
+        //return( ERROR_NOT_READY );
+    }
+  return response;
+}
+
+
+MemProposalType getMemProposalType( char *pszType )
+{
+  if ( strcasecmp( pszType, "GlobalMemory" ) == 0 )
+  {
+    return( GLOBMEMORY_PROPTYPE );
+  }
+  else if ( strcasecmp( pszType, "GlobalMemoryStar" ) == 0 )
+  {
+    return( GLOBMEMORYSTAR_PROPTYPE );
+  }
+  else if ( strcasecmp( pszType, "MachineTranslation" ) == 0 )
+  {
+    return( MACHINE_PROPTYPE );
+  }
+  else if ( strcasecmp( pszType, "Manual" ) == 0 )
+  {
+    return( MANUAL_PROPTYPE );
+  } /* endif */
+  return( UNDEFINED_PROPTYPE );
+}
+
+
 /*! \brief build return JSON string in case of errors
   \param iRC error return code
   \param pszErrorMessage error message text
@@ -47,6 +89,55 @@ int RequestData::buildErrorReturn
   
   T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << _rc_;
   return( 0 );
+}
+
+
+int RequestData::requestTM(){
+  if(isReadOnlyRequest())
+  {
+
+  }else if(isWriteRequest())
+  {
+
+  }else{
+    
+  }
+
+}
+
+bool RequestData::isWriteRequest(){
+  return command == COMMAND::CLONE_TM_LOCALY
+      || command == COMMAND::DELETE_MEM
+      || command == COMMAND::DELETE_ENTRY
+      || command == COMMAND::UPDATE_ENTRY
+      //|| command == COMMAND::CREATE_MEM// should be handled as service command
+      || command == COMMAND::IMPORT_MEM
+      || command == COMMAND::REORGANIZE_MEM
+      ;
+}
+
+
+bool RequestData::isReadOnlyRequest(){
+  return command == COMMAND::FUZZY
+      || command == COMMAND::CONCORDANCE
+      || command == COMMAND::EXPORT_MEM
+      || command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT
+     ;
+}
+
+
+bool RequestData::isServiceRequest(){
+  return !isWriteRequest() && !isReadOnlyRequest();
+  
+  //return
+         COMMAND::LIST_OF_MEMORIES
+      || COMMAND::SAVE_ALL_TM_ON_DISK 
+      || COMMAND::TAGREPLACEMENTTEST
+      || COMMAND::STATUS_MEM
+      || COMMAND::SHUTDOWN
+      || COMMAND::RESOURCE_INFO
+      || COMMAND::CREATE_MEM
+  ;   
 }
 
 int RequestData::run(){
@@ -225,7 +316,7 @@ int CreateMemRequestData::createNewEmptyMemory(){
       T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
 
       //_rc_ = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
-      //pData->fComplete = TRUE;   // one-shot function are always complete   
+      //Data.fComplete = TRUE;   // one-shot function are always complete   
 
 }
 
@@ -433,7 +524,7 @@ int CreateMemRequestData::execute(){
 
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestFormat;
-  //int _rc_ = verifyAPISession();
+  _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
   {
     T5LOG( T5INFO) <<"::getMem::Error: no valid API session" ;
@@ -528,7 +619,7 @@ int ExportRequestData::ExportTmx(){
   // call TM export
   if ( _rc_ == NO_ERROR )
   {
-    //if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
+    //if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) Data.sLastFunction = FCT_EQFEXPORTMEM;
     //_rc_ = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );    
     memset( &fctdata, 0, sizeof( FCTDATA ) );
     fctdata.fComplete = TRUE;
@@ -550,3 +641,316 @@ int ExportRequestData::ExportTmx(){
   }
   return 0;
 }
+
+int UpdateEntryRequestData::parseJSON(){
+  _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if ( _rc_ != 0 )
+  {
+    buildErrorReturn( _rc_, "can't verifyAPISession" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    buildErrorReturn( _rc_, "Missing name of memory");
+    return( BAD_REQUEST );
+  } /* endif */
+
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
+
+  // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  // parse input parameters
+  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
+      
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+  { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
+
+  { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+  { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szType ), sizeof( Data.szType ) },
+  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szAuthor ), sizeof( Data.szAuthor ) },
+  { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+  { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
+  { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
+  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  return 0;
+}
+
+int UpdateEntryRequestData::checkData(){
+  if ( _rc_ != 0 )
+  {
+    _rc_ = ERROR_INTERNALFUNCTION_FAILED;
+    buildErrorReturn( _rc_, "Error: Parsing of input parameters failed" );
+    return( BAD_REQUEST );
+  } /* end */
+
+  if ( Data.szSource[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing source text" );
+    return( BAD_REQUEST );
+  } /* end */
+  if ( Data.szTarget[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing target text" );
+    return( BAD_REQUEST );
+  } /* end */
+  if ( Data.szIsoSourceLang[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_,  "Error: Missing source language");
+    return( BAD_REQUEST );
+  } /* end */
+  if ( Data.szIsoTargetLang[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing target language" );
+    return( BAD_REQUEST );
+  } /* end */
+  if ( Data.szMarkup[0] == 0 )
+  {
+    strcpy( Data.szMarkup, "OTMXUXLF");
+  } /* end */
+
+  if(loggingThreshold >=0){
+    T5LOG( T5WARNING) <<"updateEntry::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
+  }
+
+  // get the handle of the memory 
+  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
+  lHandle = EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName);
+  //if ( httpRC != OK )
+  if(!lHandle)
+  {
+    buildErrorReturn( _rc_, Data.szError );
+    return -1;//( httpRC );
+  } /* endif */
+  return 0;
+}
+
+
+
+
+int UpdateEntryRequestData::execute(){
+  // prepare the proposal data
+  memset( &Prop, 0, sizeof( Prop ) );
+  int rc = 0;
+  auto replacedInput = replaceString( Data.szSource , Data.szTarget, L"", &rc );
+  //wcscpy( Prop.szSource, Data.szSource );
+  //wcscpy( Prop.szTarget, Data.szTarget );
+  if(!rc){
+    wcscpy( Prop.szSource, replacedInput[0].c_str());
+    wcscpy( Prop.szTarget, replacedInput[1].c_str());
+  }else{
+    outputMessage = "Error in xml in source or target!";
+    return rc;
+    //wcscpy( Prop.szSource, Data.szSource);
+    //wcscpy( Prop.szTarget, Data.szTarget);
+  }
+  Prop.lSegmentNum = Data.lSegmentNum;
+  strcpy( Prop.szDocName, Data.szDocName );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Prop.szSourceLanguage );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Prop.szTargetLanguage );
+  Prop.eType = getMemProposalType(Data.szType );
+  strcpy( Prop.szTargetAuthor,Data.szAuthor ); 
+  strcpy( Prop.szMarkup,Data.szMarkup );  
+  wcscpy( Prop.szContext,Data.szContext );
+  LONG lTime = 0;
+  if (Data.szDateTime[0] != 0 )
+  {
+  // use provided time stamp
+    convertUTCTimeToLong(Data.szDateTime, &(Prop.lTargetTime) );
+  }
+  else
+  {
+    // a lTime value of zero automatically sets the update time
+    // so refresh the time stamp (using OpenTM2 very special time logic...)
+    // and convert the time to a date time string
+    LONG            lTimeStamp;             // buffer for current time
+    time( (time_t*)&lTimeStamp );
+    lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+    convertTimeToUTC( lTimeStamp,Data.szDateTime );
+  }
+  wcscpy( Prop.szAddInfo,Data.szAddInfo );
+
+  // update the memory
+  _rc_ = EqfUpdateMem( OtmMemoryServiceWorker::getInstance()->hSession, lHandle, &Prop, 0 );
+  if ( _rc_ != 0 )
+  {
+    unsigned short usRC = 0;
+    EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC,Data.szError, sizeof(Data.szError ) / sizeof(Data.szError[0] ) );
+    buildErrorReturn( _rc_,Data.szError );
+    return( INTERNAL_SERVER_ERROR );
+  } /* endif */
+
+  // return the entry data
+  //std::string outputMessage;
+  std::string str_src = EncodingHelper::convertToUTF8(Data.szSource );
+  std::string str_trg = EncodingHelper::convertToUTF8(Data.szTarget );
+
+  std::wstring outputMessageW;
+  json_factory.startJSON( outputMessage );
+  json_factory.addParmToJSON( outputMessage, "sourceLang",Data.szIsoSourceLang );
+  json_factory.addParmToJSON( outputMessage, "targetLang",Data.szIsoTargetLang );
+
+  json_factory.addParmToJSONW( outputMessageW, L"source",Data.szSource );
+  json_factory.addParmToJSONW( outputMessageW, L"target",Data.szTarget );
+  outputMessage += ",\n" + EncodingHelper::convertToUTF8(outputMessageW.c_str());// +", ";
+
+
+  json_factory.addParmToJSON( outputMessage, "documentName", Data.szDocName );
+  json_factory.addParmToJSON( outputMessage, "segmentNumber", Data.lSegmentNum );
+  json_factory.addParmToJSON( outputMessage, "markupTable", Data.szMarkup );
+  json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
+  json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
+  json_factory.terminateJSON( outputMessage );
+  //outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
+
+  _rc_ = OK;
+
+  return( _rc_ );
+}
+
+
+
+/*! \brief convert a UTC time value to a OpenTM2 long time value 
+    \param pszDateTime buffer containing the UTC date and time
+    \param plTime pointer to a long buffer receiving the converted time 
+  \returns 0 
+*/
+int RequestData::convertUTCTimeToLong( char *pszDateTime, PLONG plTime )
+{
+  *plTime = 0;
+
+  // we currently support only dates in the form UTC format YYYYMMDDThhmmssZ
+  if ( (pszDateTime != NULL) && (strlen(pszDateTime) == 16) )
+  {
+    int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0;
+
+    // split string into date/time parts
+    BOOL fOK = getValue( pszDateTime, 4, &iYear );
+    if ( fOK ) fOK = getValue( pszDateTime + 4, 2, &iMonth );
+    if ( fOK ) fOK = getValue( pszDateTime + 6, 2, &iDay );
+    if ( fOK ) fOK = getValue( pszDateTime + 9, 2, &iHour );
+    if ( fOK ) fOK = getValue( pszDateTime + 11, 2, &iMin );
+    if ( fOK ) fOK = getValue( pszDateTime + 13, 2, &iSec );
+
+    if ( fOK )
+    {
+      struct tm timeStruct;
+      memset( &timeStruct, 0, sizeof(timeStruct) );
+      timeStruct.tm_hour = iHour;
+      timeStruct.tm_min = iMin;
+      timeStruct.tm_sec = iSec;
+      timeStruct.tm_mday = iDay;
+      timeStruct.tm_mon = iMonth - 1;
+      timeStruct.tm_year = iYear - 1900;
+
+      *plTime = mktime( &timeStruct );
+
+      // as mktime is always using the local time zone, we have to adjust the time to UTC time
+      time_t lLocalTime = 0;
+      time_t lGMTime = 0;
+      time( &lGMTime );
+      lLocalTime = mktime( localtime( &lGMTime ) );
+      lGMTime = mktime( gmtime( &lGMTime ) );
+      LONG lDiff = lLocalTime - lGMTime;
+      *plTime += lDiff;
+
+      *plTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+
+    } /* endif */
+  } /* endif */
+  return( 0 );
+}
+
+
+
+/*! \brief convert a long time value into the UTC date/time format
+    \param lTime long time value
+    \param pszDateTime buffer receiving the converted date and time
+  \returns 0 
+*/
+int RequestData::convertTimeToUTC( LONG lTime, char *pszDateTime )
+{
+  struct tm   *pTimeDate;            // time/date structure
+
+  if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
+
+  pTimeDate = gmtime( (time_t *)&lTime );
+  if ( pTimeDate->tm_isdst == 1 )
+  {
+    // correct summertime offset
+    lTime -= 3600; 
+    pTimeDate = gmtime( (time_t *)&lTime );
+    
+  }
+  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
+  {
+    sprintf( pszDateTime, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
+             pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,
+             pTimeDate->tm_hour, pTimeDate->tm_min, pTimeDate->tm_sec );
+  }
+  else
+  {
+    *pszDateTime = 0;
+  } /* endif */
+
+  return( 0 );
+}
+
+/*
+
+/*! \brief extract a numeric value from a string
+    \param pszString string containing the numeric value
+    \param iLen number of digits to be processed
+    \param piResult pointer to a int value receiving the extracted value
+  \returns TRUE if successful and FALSE in case of errors
+*/
+bool RequestData::getValue( char *pszString, int iLen, int *piResult )
+{
+  bool fOK = true;
+  char szNumber[10];
+  char *pszNumber = szNumber;
+
+  *piResult = 0;
+
+  while ( iLen && fOK )
+  {
+    if ( isdigit(*pszString) )
+    {
+      *pszNumber++ = *pszString++;
+      iLen--;
+    }
+    else
+    {
+      fOK = false;
+    } /* endif */
+  } /*endwhile */
+
+  if ( fOK )
+  {
+    *pszNumber = '\0';
+    *piResult = atoi( szNumber );
+  } /* endif */
+
+  return( fOK );
+} 
+
+
+
+
+
+
+
