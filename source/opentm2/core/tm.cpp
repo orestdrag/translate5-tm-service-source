@@ -2370,3 +2370,82 @@ int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotEx
   return res;
 }
 
+
+bool TMManager::IsMemoryLoaded(const std::string& strMemName){
+  return tms.count(strMemName);
+}
+
+int TMManager::OpenTM(const std::string& strMemName){
+  if(IsMemoryLoaded(strMemName)){
+    return 0;
+  }
+  std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName));
+  if(!pMem){
+    T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";
+    return 1;
+  }
+  tms[strMemName] = pMem; 
+}
+
+int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
+  if(NewMem.get() == nullptr || NewMem.get()->szName == "\0"){
+    return -1;
+  }
+  if(IsMemoryLoaded(NewMem.get()->szName)){
+    return -2;
+  }
+  tms[NewMem.get()->szName] = NewMem;
+  return 0;
+
+}
+
+int TMManager::CloseTM(const std::string& strMemName){
+
+}
+
+std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
+  int rc = 0;
+  if(!IsMemoryLoaded(strMemName)){
+    rc = OpenTM(strMemName);
+  }
+  auto mem = tms[strMemName];
+  if(rc){
+    //return;
+  }else{
+    //check if there are any Write pointers
+    rc = mem.get()->writeCnt.use_count()>1;
+  }
+  //
+  if(rc){
+    //return nullptr;
+  }
+  refBack = mem.get()->readOnlyCnt;
+  return mem;
+}
+
+std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
+  int rc = 0;
+  if(!IsMemoryLoaded(strMemName)){
+    rc = OpenTM(strMemName);
+  }
+
+  auto mem = tms[strMemName];
+  if(rc){ //Memory failed to open
+    //return;
+  }else{
+    //check if there are any Write pointers
+    //rc = mem.get()->writeCnt.use_count() > 1;
+  }
+  //
+  if(rc){ // we have some Write process;
+    //return nullptr;
+  }else{
+    //rc = mem.get()->readOnlyCnt.use_count() > 1;
+  }
+
+  if(rc){ // we have some Read process
+
+  }
+  //refBack = mem.get()->readOnlyCnt;
+  return mem;
+}

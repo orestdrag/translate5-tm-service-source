@@ -368,7 +368,7 @@ int EqfMemoryPlugin::closeMemory(
     T5LOG(T5ERROR) <<  "EqfMemoryPlugin::closeMemory pMemInfo == NULL";
   }
 
-  delete( pMemory );  
+  //delete( pMemory );  
 
   return( iRC );
 }

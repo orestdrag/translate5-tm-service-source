@@ -5863,7 +5863,7 @@ SHORT  BTREE::QDAMDictOpenLocal
      } /* endif */
      ASDLOG();
 
-     if ( !sRc && fWrite && !header.fOpen)
+     if ( !sRc && /*fWrite &&*/ !header.fOpen)
      {
         fOpen = TRUE;                       // set open flag
         fWriteHeaderPending = TRUE;         // postpone write until change
@@ -5925,7 +5925,7 @@ SHORT  BTREE::QDAMDictOpenLocal
     T5LOG(T5ERROR) << ":: sRc" << sRc;
     ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
-
+  fOpen = true;
    return ( sRc );
 }
 

@@ -93,16 +93,30 @@ int RequestData::buildErrorReturn
 
 
 int RequestData::requestTM(){
+  //check if memory is loaded to tmmanager
   if(isReadOnlyRequest())
   {
-
+    mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef);
   }else if(isWriteRequest())
   {
-
+    mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef);
   }else{
-    
+    fValid = true;
+    return 0;
   }
 
+  // get the handle of the memory 
+  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
+  //lHandle = EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName);
+  //if ( httpRC != OK )
+  //if(!lHandle)
+  if(mem.get()== nullptr)
+  {
+  //  buildErrorReturn( _rc_, Data.szError );
+    return -1;//( httpRC );
+  } /* endif */
+  fValid = true;
+  return 0;
 }
 
 bool RequestData::isWriteRequest(){
@@ -144,7 +158,12 @@ int RequestData::run(){
     int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
     if(!res) res = parseJSON();
     if(!res) res = checkData();
-    if(!res && fValid) res = execute();
+
+    if(!res) res = requestTM();
+    
+    
+    if(!res && fValid) 
+      res = execute();
     if ( res != 0 )
     {
         buildErrorReturn( res, ""/*szLastError*/ );
@@ -155,13 +174,14 @@ int RequestData::run(){
 
 int CreateMemRequestData::createNewEmptyMemory(){
     // create memory database
+    std::shared_ptr<EqfMemory> NewMem;
     if (fValid){
       T5LOG( T5DEBUG) << ":: create the memory" ;    
-      EqfMemory* pNewMem = new EqfMemory(strMemName);
+      NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
       ULONG ulKey;
       bool fOK = true;
 
-      _rc_ = NTMCreateLongNameTable( pNewMem );
+      _rc_ = NTMCreateLongNameTable( NewMem.get() );
       
       fOK = (_rc_ == NO_ERROR );
       if ( !fOK )
@@ -173,49 +193,49 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //build name and extension of tm data file
 
         //fill signature record structure
-        strcpy( pNewMem->stTmSign.szName, pNewMem->TmBtree.fb.fileName.c_str() );
-        UtlTime( &(pNewMem->stTmSign.lTime) );
-        strcpy( pNewMem->stTmSign.szSourceLanguage,
+        strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->TmBtree.fb.fileName.c_str() );
+        UtlTime( &(NewMem.get()->stTmSign.lTime) );
+        strcpy( NewMem.get()->stTmSign.szSourceLanguage,
                 strSrcLang.c_str() );
 
         //TODO - replace version with current t5memory version
-        pNewMem->stTmSign.bGlobVersion = T5GLOBVERSION;
-        pNewMem->stTmSign.bMajorVersion = T5MAJVERSION;
-        pNewMem->stTmSign.bMinorVersion = T5MINVERSION;
-        strcpy( pNewMem->stTmSign.szDescription,
+        NewMem.get()->stTmSign.bGlobVersion = T5GLOBVERSION;
+        NewMem.get()->stTmSign.bMajorVersion = T5MAJVERSION;
+        NewMem.get()->stTmSign.bMinorVersion = T5MINVERSION;
+        strcpy( NewMem.get()->stTmSign.szDescription,
                 strMemDescription.c_str() );
 
         //call create function for data file
-        pNewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
+        NewMem.get()->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
         
-        _rc_ = pNewMem->TmBtree.QDAMDictCreateLocal( &(pNewMem->stTmSign),FIRST_KEY );
+        _rc_ = NewMem.get()->TmBtree.QDAMDictCreateLocal( &(NewMem.get()->stTmSign),FIRST_KEY );
       
         if ( _rc_ == NO_ERROR )
         {
           //insert initialized record to tm data file
           ulKey = AUTHOR_KEY;
-          _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)&pNewMem->Authors, TMX_TABLE_SIZE );
+          _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                    (PBYTE)&NewMem.get()->Authors, TMX_TABLE_SIZE );
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = FILE_KEY;
-            _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)&pNewMem->FileNames, TMX_TABLE_SIZE );     
+            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                        (PBYTE)&NewMem.get()->FileNames, TMX_TABLE_SIZE );     
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = TAGTABLE_KEY;
-            _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)&pNewMem->TagTables, TMX_TABLE_SIZE );
+            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                        (PBYTE)&NewMem.get()->TagTables, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             ulKey = LANG_KEY;
-            _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                    (PBYTE)&pNewMem->Languages, TMX_TABLE_SIZE );
+            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                    (PBYTE)&NewMem.get()->Languages, TMX_TABLE_SIZE );
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
@@ -223,11 +243,11 @@ int CreateMemRequestData::createNewEmptyMemory(){
             int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
             size = MAX_COMPACT_SIZE-1 ;
             //initialize and insert compact area record
-            memset( pNewMem->bCompact, 0, size );
+            memset( NewMem.get()->bCompact, 0, size );
 
             ulKey = COMPACT_KEY;
-            _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                                pNewMem->bCompact, size);  
+            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                                NewMem.get()->bCompact, size);  
 
           } /* endif */
 
@@ -236,31 +256,31 @@ int CreateMemRequestData::createNewEmptyMemory(){
           {
             ulKey = LONGNAME_KEY;
             // write long document name buffer area to the database
-            _rc_ = pNewMem->TmBtree.EQFNTMInsert(&ulKey,
-                                (PBYTE)pNewMem->pLongNames->pszBuffer,
-                                pNewMem->pLongNames->ulBufUsed );        
+            _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
+                                (PBYTE)NewMem.get()->pLongNames->pszBuffer,
+                                NewMem.get()->pLongNames->ulBufUsed );        
       
           } /* endif */
 
           // create language group table
           if ( _rc_ == NO_ERROR )
           {
-            _rc_ = NTMCreateLangGroupTable( pNewMem );
+            _rc_ = NTMCreateLangGroupTable( NewMem.get() );
             
           } /* endif */
 
           if ( _rc_ == NO_ERROR )
           {
             //fill signature record structure
-            strcpy( pNewMem->stTmSign.szName, pNewMem->InBtree.fb.fileName.c_str() );
+            strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->InBtree.fb.fileName.c_str() );
 
-            _rc_ = pNewMem->InBtree.QDAMDictCreateLocal(&pNewMem->stTmSign, START_KEY );
+            _rc_ = NewMem.get()->InBtree.QDAMDictCreateLocal(&NewMem.get()->stTmSign, START_KEY );
                                 
           } /* endif */
 
           if(_rc_ == NO_ERROR){   
-            pNewMem->TmBtree.fb.Flush();
-            pNewMem->InBtree.fb.Flush();     
+            NewMem.get()->TmBtree.fb.Flush();
+            NewMem.get()->InBtree.fb.Flush();     
             //filesystem_flush_buffers(pFullName);  
             //filesystem_flush_buffers(CreateIn.stTmCreate.szIndexName);
           }/* endif */
@@ -270,14 +290,14 @@ int CreateMemRequestData::createNewEmptyMemory(){
         if ( _rc_ )
         {
           //something went wrong during create or insert so delete data file
-          UtlDelete( (PSZ)pNewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
+          UtlDelete( (PSZ)NewMem.get()->InBtree.fb.fileName.c_str(), 0L, FALSE );
         } /* endif */
       } /* endif */
 
       if ( _rc_ )
       {
         //free allocated memory
-        NTMDestroyLongNameTable( pNewMem );
+        NTMDestroyLongNameTable( NewMem.get() );
         //UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
       } /* endif */
 
@@ -286,16 +306,16 @@ int CreateMemRequestData::createNewEmptyMemory(){
         //this->createMemoryProperties( (PSZ)strMemName.c_str(), strMemPath, (PSZ)strMemDescription.c_str(), (PSZ)strSrcLang.c_str() );
         
         // create memory object if create function completed successfully
-        //pNewMemory = new EqfMemory( this, htm, (PSZ)strMemName.c_str() );
+        //NewMem.get()ory = new EqfMemory( this, htm, (PSZ)strMemName.c_str() );
         // add memory info to our internal memory list
-        //if ( pNewMemory != nullptr ) this->addToList( strMemPath );
+        //if ( NewMem.get()ory != nullptr ) this->addToList( strMemPath );
         
       }//createMemory code
-      //return( (EqfMemory *)pNewMemory );
+      //return( (EqfMemory *)NewMem.get()ory );
       
 
       // check mem
-//      if ( pNewMemory == NULL ){
+//      if ( NewMem.get()ory == NULL ){
 //        _rc_ = getLastError( strLastError );
 //        T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  _rc_;
 //      }
@@ -303,20 +323,21 @@ int CreateMemRequestData::createNewEmptyMemory(){
         T5LOG( T5INFO) << "::Create successful ";
         // get memory object name
 //        char szObjName[MAX_LONGFILESPEC];
-//        _rc_ = TMManager::GetInstance()->getObjectName( pNewMemory, szObjName, sizeof(szObjName) );
+//        _rc_ = TMManager::GetInstance()->getObjectName( NewMem.get()ory, szObjName, sizeof(szObjName) );
 //      }
     
       //--- Tm is created. Close it. 
-//      if ( pNewMemory != NULL )
+//      if ( NewMem.get()ory != NULL )
 //      {
 //        T5LOG( T5INFO ) << "::Tm is created. Close it";
-//        TMManager::GetInstance()->closeMemory( pNewMemory );
-//        pNewMemory = NULL;
+//        TMManager::GetInstance()->closeMemory( NewMem.get()ory );
+//        NewMem.get()ory = NULL;
 //      }
-      T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
 
-      //_rc_ = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
-      //Data.fComplete = TRUE;   // one-shot function are always complete   
+  T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
+  TMManager::GetInstance()->AddMem(NewMem);
+  //_rc_ = MemFuncCreateMem( strName.c_str(), "", szOtmSourceLang, 0);
+  //Data.fComplete = TRUE;   // one-shot function are always complete   
 
 }
 
@@ -523,7 +544,7 @@ int CreateMemRequestData::execute(){
 
 
 int ExportRequestData::checkData(){
-  T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestFormat;
+  T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
   {
@@ -559,7 +580,7 @@ int ExportRequestData::execute(){
     return( _rest_rc_ = INTERNAL_SERVER_ERROR );
   }
   // export the memory in internal format
-  if ( requestFormat.compare( "application/xml" ) == 0 )
+  if ( requestAcceptHeader.compare( "application/xml" ) == 0 )
   {
     T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
     //_rc_ = EqfExportMem( this->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
@@ -572,7 +593,7 @@ int ExportRequestData::execute(){
       return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
-  //else if ( requestFormat.compare( "application/zip" ) == 0 )
+  //else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
   //{
     //T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
     //_rc_ = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), (PSZ)strTempFile.c_str(), 0 );
@@ -586,7 +607,7 @@ int ExportRequestData::execute(){
   //}
   else
   {
-    T5LOG(T5ERROR) <<"::getMem:: Error: the type " << requestFormat << " is not supported" ;
+    T5LOG(T5ERROR) <<"::getMem:: Error: the type " << requestAcceptHeader << " is not supported" ;
     return( NOT_ACCEPTABLE );
   }
 
@@ -624,7 +645,7 @@ int ExportRequestData::ExportTmx(){
     memset( &fctdata, 0, sizeof( FCTDATA ) );
     fctdata.fComplete = TRUE;
     fctdata.usExportProgress = 0;
-    _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
+    _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT, mem );
   } 
 
   if ( _rc_ == 0 )
@@ -726,16 +747,6 @@ int UpdateEntryRequestData::checkData(){
     T5LOG( T5WARNING) <<"updateEntry::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
   }
-
-  // get the handle of the memory 
-  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
-  lHandle = EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName);
-  //if ( httpRC != OK )
-  if(!lHandle)
-  {
-    buildErrorReturn( _rc_, Data.szError );
-    return -1;//( httpRC );
-  } /* endif */
   return 0;
 }
 
@@ -785,7 +796,7 @@ int UpdateEntryRequestData::execute(){
   wcscpy( Prop.szAddInfo,Data.szAddInfo );
 
   // update the memory
-  _rc_ = EqfUpdateMem( OtmMemoryServiceWorker::getInstance()->hSession, lHandle, &Prop, 0 );
+  _rc_ = EqfUpdateMem( OtmMemoryServiceWorker::getInstance()->hSession, mem.get(), &Prop, 0 );
   if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;

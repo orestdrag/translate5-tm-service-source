@@ -450,8 +450,8 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   if ( pExportIDA->pMem != NULL)
   {
     TMManager *pFactory = TMManager::GetInstance();
-    pFactory->closeMemory( pExportIDA->pMem );
-    pExportIDA->pMem = NULL;
+    //pFactory->closeMemory( pExportIDA->pMem );
+    //pExportIDA->pMem = NULL;
   } /* endif */
   if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
 
@@ -1650,7 +1650,8 @@ USHORT FCTDATA::MemFuncPrepExport
   //PFCTDATA    pData,                   // function I/F session data
   PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszOutFile,              // fully qualified name of output file
-  LONG        lOptions                 // options for Translation Memory export
+  LONG        lOptions,                 // options for Translation Memory export
+  std::shared_ptr<EqfMemory> _mem
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1706,8 +1707,9 @@ USHORT FCTDATA::MemFuncPrepExport
   {
      int iRC = 0;
      TMManager *pFactory = TMManager::GetInstance();
-     pIDA->pMem = EqfMemoryPlugin::GetInstance()->openMemoryNew(pszMemName);
+     //pIDA->pMem = TMManager::GetInstance()->requestReadOnlyTMPointer(std::string(pszMemName)).get();// = EqfMemoryPlugin::GetInstance()->openMemoryNew(pszMemName);
      //pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
+     pIDA->pMem = _mem.get();
      if ( pIDA->pMem == NULL )
      {
        T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,

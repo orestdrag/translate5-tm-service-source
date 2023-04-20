@@ -139,7 +139,7 @@ USHORT TmtXDelSegm
   {
     //set pNormString to beginning of string
     pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence, pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    HashSentence( pSentence );
   } /* endif */
 
 

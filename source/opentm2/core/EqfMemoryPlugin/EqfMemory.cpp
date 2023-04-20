@@ -268,7 +268,7 @@ int EqfMemory::putProposal
   TmPutIn.stPrefixIn.usTmCommand   = TMC_REPLACE;
 
   //iRC = (int)TmReplace( this->htm,  NULL,  TmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
-  iRC = TmtXReplace ( (PTMX_CLB)htm, &TmPutIn, &TmPutOut );
+  iRC = TmtXReplace ( this, &TmPutIn, &TmPutOut );
 
   if ( iRC != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
@@ -979,9 +979,11 @@ int EqfMemory::setGlobalMemoryOptions
 
 
 // NewTM region
-EqfMemory::EqfMemory(const std::string& tmName){
+EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
   TmBtree.fb.fileName = NewTMManager::GetTmdPath(tmName);
   InBtree.fb.fileName = NewTMManager::GetTmiPath(tmName);
+
+ strcpy(szName, tmName.c_str());
 }
 
 int EqfMemory::LoadInRAM(){

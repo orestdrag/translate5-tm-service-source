@@ -599,6 +599,7 @@ int FilesystemHelper::WriteBuffToFile(std::string fName){
 
 std::vector<UCHAR>* FilesystemHelper::GetFilebufferData(std::string name){
     auto pfb = getFileBufferInstance();
+    name = FixPath(name);
     if(pfb->find(name) == pfb->end())
         return nullptr;
 
