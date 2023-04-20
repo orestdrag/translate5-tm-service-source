@@ -251,6 +251,38 @@ EqfMemory* EqfMemoryPlugin::createMemory(
   return( (EqfMemory *)pNewMemory );
 }
 
+EqfMemory* EqfMemoryPlugin::openMemoryNew(
+  const std::string& memName			 
+  //,unsigned short usAccessMode
+){
+  USHORT usRC = 0;
+  // use old memory open code
+  //std::string path = FilesystemHelper::GetMemDir() + memName + EXT_OF_TMDATA;
+  EqfMemory* pMemory = new EqfMemory(memName);
+  if(pMemory){
+    usRC = pMemory->OpenX();
+  }
+  HTM htm = NULL;                      // memory handle 
+  //usRC = TmOpen(  (char*)path.c_str(), &htm,  EXCLUSIVE, 0, 0,  nullptr );
+  
+  // create memory object if create function completed successfully
+  //if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) //*
+  //&& (usAccessMode == FOR_ORGANIZE)
+  //*/ 
+  //))
+  {
+  //  pMemory = new EqfMemory( this, htm, (PSZ)memName.c_str() );
+  }
+  //else
+  if(!pMemory || usRC){
+    T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< memName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
+        this->iLastError;
+    if ( htm != 0 ) 
+      TmClose( htm, NULL,  FALSE,  NULL );
+  } /* end */       
+  return pMemory;
+} /* end */     
+
 /*! \brief Open an existing translation memory
   \param pszName name of the existing memory
 	\param bMsgHandling true/false: display errors or not

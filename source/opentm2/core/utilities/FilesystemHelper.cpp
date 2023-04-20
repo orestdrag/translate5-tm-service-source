@@ -303,6 +303,10 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
         int fno = fileno(ptr);
         sprintf(proclnk, "/proc/self/fd/%d", fno);
         int r = readlink(proclnk, filename, MAXSIZE-1);
+        if(r == -1){
+            T5LOG(T5ERROR) << "can't process file \'"<<proclnk <<"\'"; 
+            return "";
+        }
         filename[r] = '\0';
 
         return filename;
@@ -384,8 +388,38 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     }
 }
 
-size_t FileBuffer::ReadFromFile(){return -1;}
-size_t FileBuffer::WriteToFile(){return -1;}
+size_t FileBuffer::ReadFromFile(){           
+    originalFileSize = FilesystemHelper::GetFileSize(fileName);
+    int readed = 0;
+    if( originalFileSize > 0 ){
+        data.resize(originalFileSize);
+        
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer resized to filesize(" << originalFileSize << "), fname = " << fileName;
+        }
+        file = fopen(fileName.c_str(), "rb");
+        if(file == nullptr){
+            T5LOG(T5ERROR) << "Can't open the file under the path=" << fileName;
+        }else
+        {
+            readed = fread(&data[0], originalFileSize, 1, file);
+            fclose(file);
+        } 
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = " << originalFileSize <<
+                    "), fname = " << fileName << "; readed = " << readed;
+        }
+    }else{
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = " << fileName ;
+        }
+        data.resize(16384);
+    }
+
+}
+size_t FileBuffer::WriteToFile(){
+
+}
 
 int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     if(fileAnchor != FILE_BEGIN){
@@ -444,22 +478,25 @@ size_t FileBuffer::Flush(){
 
 }
 
-size_t FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
-    if(startingPos < 0){
-        startingPos = offset;
-    }
-
-    if(data.size()< startingPos + buffSize){
+size_t FileBuffer::Read(void* buff, size_t buffSize){
+    if(data.size()< offset + buffSize){
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
             T5LOG(T5ERROR) << "ReadBuffer:: Trying to read not existing bytes from buffer, fName = " << fileName;
         }
         return FilesystemHelper::FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED;
     }    
     if(VLOG_IS_ON(1) && T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-        T5LOG( T5DEVELOP) << ":: fName = " << fileName << "; buff size = " << buffSize << "; data.size = " << data.size() << "; offset = " << startingPos << ";";
+        T5LOG( T5DEVELOP) << ":: fName = " << fileName << "; buff size = " << buffSize << "; data.size = " << data.size() << "; offset = " << offset << ";";
     }
     
-    memcpy(buff, &(data[startingPos]), buffSize);
+    memcpy(buff, &(data[offset]), buffSize);
+    offset+=buffSize;
+    return 0;
+}
+
+size_t FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
+    offset = startingPos;
+    return Read(buff, buffSize);
 }
 
 

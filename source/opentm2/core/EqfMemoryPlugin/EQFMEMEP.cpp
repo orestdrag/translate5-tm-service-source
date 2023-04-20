@@ -282,7 +282,6 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        //--- "No segments have been exported to %1." otherwise
        //--- issue a message "Memory Database Export successfully completed."
        CloseFile( &(pExportIDA->hFile) );
-       LOG_TEMPORARY_COMMENTED_W_INFO ( "OEMTOANSI"); //OEMTOANSI ( pExportIDA->szMemName );
        pReplString[0] = pExportIDA->ControlsIda.szPathContent;
        pReplString[1] = pExportIDA->szMemName;
 
@@ -301,7 +300,6 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
        } /* endif */
-       LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM");  //ANSITOOEM ( pExportIDA->szMemName );
 
        //--- Issue message WM_EQF_MEMEXPORT_END
        if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
@@ -317,13 +315,11 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      //--- Close the exported file
      //--- Issue a message "Memory Database Export abnormally terminated."
      T5LOG(T5ERROR) "Error in EQFMemExportProcess::switch MemExportProcess rc = " << usRC << "; ERROR_MEM_EXPORT_TERMINATED";
-     LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
      CloseFile( &(pExportIDA->hFile) );
      UtlDelete( pExportIDA->ControlsIda.szPathContent, 0L, FALSE );
      T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_TERMINATED::" << pReplString[0];
-     LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM"); //ANSITOOEM ( pExportIDA->szMemName );
      fOk=FALSE;
 
      //--- Issue message WM_EQF_MEMEXPORT_END
@@ -437,7 +433,6 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
      //--- Close the exported file
      //--- Issue a message:Export of memory database %1 to file %2 was
      //---                 forced before completion.
-     LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI");  //OEMTOANSI ( pExportIDA->szMemName );
      pReplString[0] = pExportIDA->ControlsIda.szPathContent;
      pReplString[1] = pExportIDA->szMemName;
      if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
@@ -449,7 +444,6 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
      {
        UtlError( ERROR_MEM_EXPORT_TERM_FORCED, MB_CANCEL, 2, &(pReplString[0]), EQF_WARNING );
      } /* endif */
-     LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM");  //ANSITOOEM ( pExportIDA->szMemName );
   } /* endif */
 
   //--- Close MemoryDb and input file. Return codes are for testing purposes only
@@ -792,7 +786,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
      if ( !usRc )
      {
        // close output file (if open) as external export process will open the file itself...
-       if ( pExportIDA->hFile ) 
+       if (false && pExportIDA->hFile ) 
        {
          UtlClose( pExportIDA->hFile, FALSE );
          pExportIDA->hFile = NULL; 
@@ -845,11 +839,9 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       {
         //--- Issue the error message :"Initialization of export from
         //--- translation memory %1 into file %2 failed."
-        LOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI");  //OEMTOANSI ( pExportIDA->szMemName );
         pReplAddr[0] = pExportIDA->szMemName;
         pReplAddr[1] = pExportIDA->ControlsIda.szPathContent;
         T5LOG(T5ERROR) <<  "::ERROR_MEM_EXPORT_INITFAILED::" << pReplAddr[0] ;
-        LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM");  //ANSITOOEM ( pExportIDA->szMemName );
       } /* endif */
     } /* endif */
    } /* endif */
@@ -1714,7 +1706,8 @@ USHORT FCTDATA::MemFuncPrepExport
   {
      int iRC = 0;
      TMManager *pFactory = TMManager::GetInstance();
-     pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
+     pIDA->pMem = EqfMemoryPlugin::GetInstance()->openMemoryNew(pszMemName);
+     //pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      if ( pIDA->pMem == NULL )
      {
        T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,
