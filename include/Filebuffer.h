@@ -16,7 +16,7 @@ struct FileBuffer{
     size_t offset = 0;
     FILE* file = NULL;
     std::string fileName;   
-    size_t originalFileSize = 0;
+    long long originalFileSize = 0;
 
     size_t ReadFromFile();
     size_t WriteToFile(); 

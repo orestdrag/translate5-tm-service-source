@@ -237,8 +237,7 @@ USHORT TmtXExtract
               }
               else
               {
-                pEntry = &pTable->stTmTableEntry;
-                pEntry += pTmExtIn->usNextTarget;
+                pEntry = &pTable->stTmTableEntry[pTmExtIn->usNextTarget];
                 pszName = pEntry->szName;
                 // check if there is a long name for the current document
                 if ( pTmExtIn->usConvert == MEM_OUTPUT_ALLDOCS )

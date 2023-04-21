@@ -339,13 +339,24 @@ typedef struct _TMX_TABLE_ENTRY
   USHORT usId = 0;
 } TMX_TABLE_ENTRY, * PTMX_TABLE_ENTRY;
 // name table structure (TM version 5 and up)
-typedef struct _TMX_TABLE
-{
-  ULONG  ulAllocSize = 0;
-  ULONG  ulMaxEntries = 0;
-  TMX_TABLE_ENTRY stTmTableEntry;
-} TMX_TABLE, * PTMX_TABLE;
+const int NUM_OF_TMX_TABLE_ENTRIES = (BTREE_REC_SIZE_V3 - sizeof(ULONG)) / sizeof(TMX_TABLE_ENTRY);
 
+typedef struct TMX_TABLE
+{
+  //ULONG  ulAllocSize = 0;
+  ULONG  ulMaxEntries = 0;
+  //std::vector<TMX_TABLE_ENTRY> stTmTableEntry;//[NUM_OF_TMX_TABLE_ENTRIES];
+  TMX_TABLE_ENTRY stTmTableEntry[NUM_OF_TMX_TABLE_ENTRIES];
+  TMX_TABLE(){
+    ulMaxEntries = 0;
+    for(int i=0;i<NUM_OF_TMX_TABLE_ENTRIES;i++){
+      stTmTableEntry[i].szName[0] = '\0';
+      stTmTableEntry[i].usId = 0;
+    }
+  }
+};
+
+typedef TMX_TABLE * PTMX_TABLE;
 //signature structure
 
 

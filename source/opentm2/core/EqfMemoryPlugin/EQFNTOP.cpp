@@ -189,7 +189,7 @@ USHORT TmtXOpen
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {
-            pTmClb->FileNames.ulAllocSize = TMX_TABLE_SIZE;
+            //pTmClb->FileNames.ulAllocSize = TMX_TABLE_SIZE;
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -210,7 +210,7 @@ USHORT TmtXOpen
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {          
-            pTmClb->Authors.ulAllocSize = TMX_TABLE_SIZE;            
+            //pTmClb->Authors.ulAllocSize = TMX_TABLE_SIZE;            
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -485,7 +485,7 @@ USHORT EqfMemory::OpenX()
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {
-            FileNames.ulAllocSize = TMX_TABLE_SIZE;
+            //FileNames.ulAllocSize = TMX_TABLE_SIZE;
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -506,7 +506,7 @@ USHORT EqfMemory::OpenX()
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {          
-            Authors.ulAllocSize = TMX_TABLE_SIZE;            
+            //Authors.ulAllocSize = TMX_TABLE_SIZE;            
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
@@ -527,7 +527,7 @@ USHORT EqfMemory::OpenX()
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
           if ( usTempRc == BTREE_CORRUPTED )
           {
-            usTempRc = TM_FILE_SCREWED_UP; // cannot continue if no tag tables
+            //usTempRc = TM_FILE_SCREWED_UP; // cannot continue if no tag tables
           } /* endif */
 
           if ( usTempRc != NO_ERROR )
