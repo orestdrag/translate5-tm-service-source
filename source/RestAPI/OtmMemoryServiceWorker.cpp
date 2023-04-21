@@ -766,7 +766,7 @@ int OtmMemoryServiceWorker::import
 
   // decode TMX data and write it to temp file
   std::string strError;
-  iRC = decodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
+  iRC = FilesystemHelper::DecodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
   if ( iRC != 0 )
   {
     strError = "OtmMemoryServiceWorker::import::" + strError;
@@ -2009,7 +2009,7 @@ it is up to the caller to free this area using free()
 \param strError string receiving any error message text
 \returns 0 is sucessfull or a return code
 */
-int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringData, std::string &strError )
+int FilesystemHelper::EncodeFileInBase64( char *pszFile, char **ppStringData, std::string &strError )
 {
   int iRC = 0;
 
@@ -2049,7 +2049,7 @@ int OtmMemoryServiceWorker::encodeFileInBase64( char *pszFile, char **ppStringDa
 \param strError string receiving any error message text
 \returns 0 is sucessfull or a return code
 */
-int OtmMemoryServiceWorker::decodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError )
+int FilesystemHelper::DecodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError )
 {
   int iRC = 0;
 

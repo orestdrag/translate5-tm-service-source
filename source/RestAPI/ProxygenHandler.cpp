@@ -207,6 +207,7 @@ void ProxygenHandler::onEOM() noexcept {
       case COMMAND::CREATE_MEM:
       case COMMAND::CONCORDANCE:
       case COMMAND::FUZZY:
+      case COMMAND::IMPORT_MEM:
       {
         if(fWriteRequestsAllowed == false){
           pRequest->_rest_rc_ = 423;
@@ -215,15 +216,15 @@ void ProxygenHandler::onEOM() noexcept {
         pRequest->run();
         break;
       }
-      case COMMAND::IMPORT_MEM:
-      {
-        if(fWriteRequestsAllowed == false){
-          pRequest->_rest_rc_ = 423;
-          break;
-        }
-        pRequest->_rest_rc_ = pMemService->import( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-        break; 
-      }
+      //case COMMAND::IMPORT_MEM:
+      //{
+      //  if(fWriteRequestsAllowed == false){
+      //    pRequest->_rest_rc_ = 423;
+      //    break;
+      //  }
+      //  pRequest->_rest_rc_ = pMemService->import( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
+      //  break; 
+      //}
       //case COMMAND::FUZZY:
       //{
         //pRequest->_rest_rc_ = pMemService->search( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );

@@ -82,6 +82,22 @@ public:
     static bool FilebufferExists(const std::string& path);
     static int ReadFileToFileBufferAndKeepInRam(const std::string& path);
 
+      /*! \brief read a binary file and encode it using BASE64 encoding
+    \param pszFile fully qualified name of file being encoded
+    \param ppStringData adress of a pointer which will receive the (per malloc allocated) pointer to the area for the encoded string
+    \param strError string receiving any error message text
+    \returns 0 is sucessfull or a return code
+    */
+    static int EncodeFileInBase64( char *pszFile, char **ppStringData, std::string &strError );
+
+    /*! \brief convert a BASE64 encoded string to a binary file
+    \param pStringData pointer to the BASE64 data
+    \param pszFile fully qualified name of file being written
+    \param strError string receiving any error message text
+    \returns 0 is sucessfull or a return code
+    */
+    static int DecodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError );
+
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
 #endif
