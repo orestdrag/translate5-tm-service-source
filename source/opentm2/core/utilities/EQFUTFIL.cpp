@@ -222,7 +222,7 @@ BOOL UtlLoadFileHwnd
 )
 {
     BOOL             fOK = TRUE;           // Procssing status flag
-    USHORT           usDosRc = TRUE;       // Return code from Dos operations
+    USHORT           usDosRc = 0;       // Return code from Dos operations
     HFILE            hInputfile = NULLHANDLE; // File handle for input file
     USHORT           usAction;             // input file action
     USHORT           usMsgButton;          // buttons to be set on msgbox
@@ -241,6 +241,8 @@ BOOL UtlLoadFileHwnd
       fMsg = FALSE;
     } /* endif */
 
+    hInputfile = fopen(pszFilename, "rb");
+    /*
     usDosRc = UtlOpen(pszFilename, &hInputfile , &usAction,
                       0L,                            // Create file size
                       FILE_NORMAL,                   // Normal attribute
@@ -248,6 +250,7 @@ BOOL UtlLoadFileHwnd
                       OPEN_SHARE_DENYWRITE,          // Deny Write access
                       0L,                            // Reserved
                       FALSE );                       // no error handling
+    //*/
 
     fOK = ( usDosRc == 0 );
 
@@ -256,7 +259,7 @@ BOOL UtlLoadFileHwnd
     if ( fOK )
     {
       // Get file size
-      usDosRc = UtlGetFileSize( hInputfile, &ulSize, FALSE );
+      ulSize = FilesystemHelper::GetFileSize( hInputfile );
 
       // If previous call OK allocate storage if required
       if ( !usDosRc && (ulSize > 0L) )
@@ -281,13 +284,14 @@ BOOL UtlLoadFileHwnd
     // If fOK. Load the input data in storage and close it if load was OK
     if (fOK)
     {
-      usDosRc = UtlReadL( hInputfile , *ppLoadedFile,
-                         ulSize, pulBytesRead, FALSE );
+      *pulBytesRead = fread(*ppLoadedFile, ulSize, 1, hInputfile);
+      //usDosRc = UtlReadL( hInputfile , *ppLoadedFile,
+      //                   ulSize, pulBytesRead, FALSE );
 
       fOK = (usDosRc == 0 );
 
       // Check if the entire file was read
-      if ( ulSize != *pulBytesRead )
+      if ( /*ulSize !=*/ *pulBytesRead<=0 )
       {
         fOK = FALSE;
       } /* endif */
@@ -295,7 +299,9 @@ BOOL UtlLoadFileHwnd
 
     if ( hInputfile )
     {
-      UtlCloseHwnd( hInputfile, fMsg, hwnd );          // Close Input file if needed
+      fclose(hInputfile);
+      hInputfile = nullptr;
+      //UtlCloseHwnd( hInputfile, fMsg, hwnd );          // Close Input file if needed
     } /* endif */
 
     // Free storage allocation if allocated and something went wrong

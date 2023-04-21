@@ -744,7 +744,7 @@ USHORT UtlCloseHwnd
    /*******************************************************************/
    /* close only if file has been opened                              */
    /*******************************************************************/
-   if ( hf != (HFILE)NULL )
+   if ( hf != NULL )
    {
      // remove handle from our handle/drive array
      int i = 0;

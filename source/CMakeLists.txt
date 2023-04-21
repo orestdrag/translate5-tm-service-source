@@ -1,17 +1,22 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.36")
+SET(APP_VERSION  "0.4.37")
 project(T5MEMORY VERSION ${APP_VERSION})
 
-#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread")
-#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -g")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -g")
+set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+
+
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 
 
 set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE RelWithDebInfo)
+#set(CMAKE_BUILD_TYPE Release)
 
 include(GNUInstallDirs)
 
@@ -175,7 +180,7 @@ find_package(OpenSSL REQUIRED)
 find_package(proxygen REQUIRED)
 #find_package(glog REQUIRED)
 
-target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
+#target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)
