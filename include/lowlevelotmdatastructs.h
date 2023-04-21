@@ -945,7 +945,7 @@ struct TMX_CLB
   BYTE     bCompact[MAX_COMPACT_SIZE-1];
   BYTE     bCompactChanged;
   LONG     alUpdCounter[MAX_UPD_COUNTERS];
-  PTMX_LONGNAME_TABLE pLongNames;
+  PTMX_LONGNAME_TABLE pLongNames = nullptr;
   TMX_TABLE LangGroups;              //  table containing language group names
   PSHORT     psLangIdToGroupTable;     // language ID to group ID table
   LONG       lLangIdToGroupTableSize; // size of table (alloc size)

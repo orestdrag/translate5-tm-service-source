@@ -7,8 +7,131 @@
 #include "EncodingHelper.h"
 #include "EQFMORPH.H"
 #include "FilesystemHelper.h"
-
+#include "OSWrapper.h"
 JSONFactory RequestData::json_factory;
+
+
+/*! \brief convert a long time value into the UTC date/time format
+    \param lTime long time value
+    \param pszDateTime buffer receiving the converted date and time
+  \returns 0 
+*/
+int convertTimeToUTC( LONG lTime, char *pszDateTime )
+{
+  struct tm   *pTimeDate;            // time/date structure
+
+  if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
+
+  pTimeDate = gmtime( (time_t *)&lTime );
+  if ( pTimeDate->tm_isdst == 1 )
+  {
+    // correct summertime offset
+    lTime -= 3600; 
+    pTimeDate = gmtime( (time_t *)&lTime );
+    
+  }
+  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
+  {
+    sprintf( pszDateTime, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
+             pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,
+             pTimeDate->tm_hour, pTimeDate->tm_min, pTimeDate->tm_sec );
+  }
+  else
+  {
+    *pszDateTime = 0;
+  } /* endif */
+
+  return( 0 );
+}
+
+
+
+/*! \brief extract a numeric value from a string
+    \param pszString string containing the numeric value
+    \param iLen number of digits to be processed
+    \param piResult pointer to a int value receiving the extracted value
+  \returns TRUE if successful and FALSE in case of errors
+*/
+bool getValue( char *pszString, int iLen, int *piResult )
+{
+  bool fOK = true;
+  char szNumber[10];
+  char *pszNumber = szNumber;
+
+  *piResult = 0;
+
+  while ( iLen && fOK )
+  {
+    if ( isdigit(*pszString) )
+    {
+      *pszNumber++ = *pszString++;
+      iLen--;
+    }
+    else
+    {
+      fOK = false;
+    } /* endif */
+  } /*endwhile */
+
+  if ( fOK )
+  {
+    *pszNumber = '\0';
+    *piResult = atoi( szNumber );
+  } /* endif */
+
+  return( fOK );
+} 
+
+/*! \brief convert a UTC time value to a OpenTM2 long time value 
+    \param pszDateTime buffer containing the UTC date and time
+    \param plTime pointer to a long buffer receiving the converted time 
+  \returns 0 
+*/
+int convertUTCTimeToLong( char *pszDateTime, PLONG plTime )
+{
+  *plTime = 0;
+
+  // we currently support only dates in the form UTC format YYYYMMDDThhmmssZ
+  if ( (pszDateTime != NULL) && (strlen(pszDateTime) == 16) )
+  {
+    int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0;
+
+    // split string into date/time parts
+    BOOL fOK = getValue( pszDateTime, 4, &iYear );
+    if ( fOK ) fOK = getValue( pszDateTime + 4, 2, &iMonth );
+    if ( fOK ) fOK = getValue( pszDateTime + 6, 2, &iDay );
+    if ( fOK ) fOK = getValue( pszDateTime + 9, 2, &iHour );
+    if ( fOK ) fOK = getValue( pszDateTime + 11, 2, &iMin );
+    if ( fOK ) fOK = getValue( pszDateTime + 13, 2, &iSec );
+
+    if ( fOK )
+    {
+      struct tm timeStruct;
+      memset( &timeStruct, 0, sizeof(timeStruct) );
+      timeStruct.tm_hour = iHour;
+      timeStruct.tm_min = iMin;
+      timeStruct.tm_sec = iSec;
+      timeStruct.tm_mday = iDay;
+      timeStruct.tm_mon = iMonth - 1;
+      timeStruct.tm_year = iYear - 1900;
+
+      *plTime = mktime( &timeStruct );
+
+      // as mktime is always using the local time zone, we have to adjust the time to UTC time
+      time_t lLocalTime = 0;
+      time_t lGMTime = 0;
+      time( &lGMTime );
+      lLocalTime = mktime( localtime( &lGMTime ) );
+      lGMTime = mktime( gmtime( &lGMTime ) );
+      LONG lDiff = lLocalTime - lGMTime;
+      *plTime += lDiff;
+
+      *plTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+
+    } /* endif */
+  } /* endif */
+  return( 0 );
+}
 
 
 
@@ -835,133 +958,423 @@ int UpdateEntryRequestData::execute(){
 
 
 
-/*! \brief convert a UTC time value to a OpenTM2 long time value 
-    \param pszDateTime buffer containing the UTC date and time
-    \param plTime pointer to a long buffer receiving the converted time 
-  \returns 0 
-*/
-int RequestData::convertUTCTimeToLong( char *pszDateTime, PLONG plTime )
-{
-  *plTime = 0;
 
-  // we currently support only dates in the form UTC format YYYYMMDDThhmmssZ
-  if ( (pszDateTime != NULL) && (strlen(pszDateTime) == 16) )
+int FuzzySearchRequestData::parseJSON(){
+  _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if ( _rc_ != 0 )
   {
-    int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0;
-
-    // split string into date/time parts
-    BOOL fOK = getValue( pszDateTime, 4, &iYear );
-    if ( fOK ) fOK = getValue( pszDateTime + 4, 2, &iMonth );
-    if ( fOK ) fOK = getValue( pszDateTime + 6, 2, &iDay );
-    if ( fOK ) fOK = getValue( pszDateTime + 9, 2, &iHour );
-    if ( fOK ) fOK = getValue( pszDateTime + 11, 2, &iMin );
-    if ( fOK ) fOK = getValue( pszDateTime + 13, 2, &iSec );
-
-    if ( fOK )
-    {
-      struct tm timeStruct;
-      memset( &timeStruct, 0, sizeof(timeStruct) );
-      timeStruct.tm_hour = iHour;
-      timeStruct.tm_min = iMin;
-      timeStruct.tm_sec = iSec;
-      timeStruct.tm_mday = iDay;
-      timeStruct.tm_mon = iMonth - 1;
-      timeStruct.tm_year = iYear - 1900;
-
-      *plTime = mktime( &timeStruct );
-
-      // as mktime is always using the local time zone, we have to adjust the time to UTC time
-      time_t lLocalTime = 0;
-      time_t lGMTime = 0;
-      time( &lGMTime );
-      lLocalTime = mktime( localtime( &lGMTime ) );
-      lGMTime = mktime( gmtime( &lGMTime ) );
-      LONG lDiff = lLocalTime - lGMTime;
-      *plTime += lDiff;
-
-      *plTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-
-    } /* endif */
+    buildErrorReturn( _rc_, "can't verifyAPISession" );
+    return( BAD_REQUEST );
   } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    buildErrorReturn( _rc_, "Missing name of memory" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+    // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  
+  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  int loggingThreshold = -1;
+  JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+                                                   { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+                                                   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+                                                   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+                                                   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+                                                   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+                                                   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+                                                   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+                                                   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+                                                   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  return _rc_;
+}
+
+int FuzzySearchRequestData::checkData(){
+  if ( _rc_ != 0 )
+  {
+    _rc_ = ERROR_INTERNALFUNCTION_FAILED;
+    buildErrorReturn( _rc_, "Error: Parsing of input parameters failed" );
+    return( _rest_rc_ = BAD_REQUEST );
+  } /* end */
+
+  if ( Data.szSource[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing source text input parameter" );
+    return(  _rest_rc_ = BAD_REQUEST );
+  } /* end */
+
+  if ( Data.szIsoSourceLang[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing source language input parameter" );
+    return(  _rest_rc_ = BAD_REQUEST );
+  } /* end */
+  
+  if ( Data.szIsoTargetLang[0] == 0 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Missing target language input parameter" );
+    return(  _rest_rc_ = BAD_REQUEST );
+  } /* end */
+  
+  if ( Data.szMarkup[0] == 0 )
+  {
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::search::No markup requested -> using OTMXUXLF";
+    // use default markup table if none given
+    strcpy( Data.szMarkup, "OTMXUXLF" );
+  } /* end */
+  
+  if ( Data.iNumOfProposals > 20 )
+  {
+    _rc_ = ERROR_INPUT_PARMS_INVALID;
+    buildErrorReturn( _rc_, "Error: Too many proposals requested, the maximum value is 20" );
+    return(  _rest_rc_ = BAD_REQUEST );
+  } /* end */
+
+  
+  if(loggingThreshold >= 0){
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::search::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
+  }
+
+  // get the handle of the memory 
+  //long lHandle = 0;
+  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
+  //if ( httpRC != OK )
+  //{
+  //  buildErrorReturn( _rc_, Data.szError );
+  //  return(  _rest_rc_ = httpRC );
+  //} /* endif */
+  return _rc_;
+}
+
+
+/* write a single proposal to a JSON string
+\param strJSON JSON stirng receiving the proposal data
+\param pProp pointer to a MEMPROPOSAL containing the proposal
+\param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
+\returns 0 is successful
+*/
+int addProposalToJSONString
+(
+  std::wstring &strJSON,
+  PMEMPROPOSAL pProp,
+  void *pvData
+)
+{
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  PLOOKUPINMEMORYDATA pData = (PLOOKUPINMEMORYDATA)pvData;
+
+  pJsonFactory->addElementStartToJSONW( strJSON );
+
+  pJsonFactory->addParmToJSONW( strJSON, L"source", pProp->szSource );
+  pJsonFactory->addParmToJSONW( strJSON, L"target", pProp->szTarget );
+  pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", pProp->lSegmentNum );
+  pJsonFactory->addParmToJSONW( strJSON, L"id", EncodingHelper::convertToUTF16(pProp->szId).c_str());
+  pJsonFactory->addParmToJSONW( strJSON, L"documentName", EncodingHelper::convertToUTF16(pProp->szDocName).c_str() );
+  pJsonFactory->addParmToJSONW( strJSON, L"documentShortName", EncodingHelper::convertToUTF16(pProp->szDocShortName).c_str() );
+  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, pProp->szSourceLanguage, pData->szIsoSourceLang );
+  pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
+  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, pProp->szTargetLanguage, pData->szIsoSourceLang );
+  pJsonFactory->addParmToJSONW( strJSON, L"targetLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
+
+  switch ( pProp->eType )
+  {
+    case GLOBMEMORY_PROPTYPE: wcscpy( pData->szSource, L"GlobalMemory" ); break;
+    case GLOBMEMORYSTAR_PROPTYPE: wcscpy( pData->szSource, L"GlobalMemoryStar" ); break;
+    case MACHINE_PROPTYPE: wcscpy( pData->szSource, L"MachineTranslation" ); break;
+    case MANUAL_PROPTYPE: wcscpy( pData->szSource, L"Manual" ); break;
+    default: wcscpy( pData->szSource, L"undefined" ); break;
+  }
+  pJsonFactory->addParmToJSONW( strJSON, L"type", pData->szSource );
+
+  switch ( pProp->eMatch )
+  {
+    case EXACT_MATCHTYPE: wcscpy( pData->szSource, L"Exact" ); break;
+    case EXACTEXACT_MATCHTYPE: wcscpy( pData->szSource, L"ExactExact" ); break;
+    case EXACTSAMEDOC_MATCHTYPE: wcscpy( pData->szSource, L"ExactSameDoc" ); break;
+    case FUZZY_MATCHTYPE: wcscpy( pData->szSource, L"Fuzzy" ); break;
+    case REPLACE_MATCHTYPE: wcscpy( pData->szSource, L"Replace" ); break;
+    default: wcscpy( pData->szSource, L"undefined" ); break;
+  }
+  pJsonFactory->addParmToJSONW( strJSON, L"matchType", pData->szSource );
+
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szTargetAuthor, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  pJsonFactory->addParmToJSONW( strJSON, L"author", pData->szSource );
+
+  convertTimeToUTC( pProp->lTargetTime, pData->szDateTime );
+  MultiByteToWideChar( CP_OEMCP, 0, pData->szDateTime, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  pJsonFactory->addParmToJSONW( strJSON, L"timestamp", pData->szSource );
+
+  pJsonFactory->addParmToJSONW( strJSON, L"matchRate", pProp->iFuzziness );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyWords", pProp->iWords );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyDiffs", pProp->iDiffs );
+
+  MultiByteToWideChar( CP_OEMCP, 0, pProp->szMarkup, -1, pData->szSource, sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) );
+  pJsonFactory->addParmToJSONW( strJSON, L"markupTable", pData->szSource );
+
+  pJsonFactory->addParmToJSONW( strJSON, L"context", pProp->szContext );
+
+  pJsonFactory->addParmToJSONW( strJSON, L"additionalInfo", pProp->szAddInfo );
+
+  pJsonFactory->addElementEndToJSONW( strJSON );
+
   return( 0 );
 }
 
 
-
-/*! \brief convert a long time value into the UTC date/time format
-    \param lTime long time value
-    \param pszDateTime buffer receiving the converted date and time
-  \returns 0 
+/* write proposals to a JSON string 
+\param strJSON JSON stirng receiving the proposal data
+\param pProposals pointer to a MEMPROPOSAL array containing the proposals
+\param iNumOfProposals number of proposals to write to JSON string
+\param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
+\returns 0 is successful
 */
-int RequestData::convertTimeToUTC( LONG lTime, char *pszDateTime )
+int addProposalsToJSONString
+(
+  std::wstring &strJSON,
+  PMEMPROPOSAL pProposals,
+  int iNumOfProposals,
+  void *pvData
+)
 {
-  struct tm   *pTimeDate;            // time/date structure
-
-  if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
-
-  pTimeDate = gmtime( (time_t *)&lTime );
-  if ( pTimeDate->tm_isdst == 1 )
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  PLOOKUPINMEMORYDATA pData = (PLOOKUPINMEMORYDATA)pvData;
+  
+  pJsonFactory->addArrayStartToJSONW( strJSON );
+  for ( int i = 0; i < iNumOfProposals; i++ )
   {
-    // correct summertime offset
-    lTime -= 3600; 
-    pTimeDate = gmtime( (time_t *)&lTime );
-    
+    PMEMPROPOSAL pProp = pProposals + i;
+    addProposalToJSONString( strJSON, pProp, pvData );
+  } /* endfor */
+  pJsonFactory->addArrayEndToJSONW( strJSON  );
+  
+  return( 0 );
+}
+
+
+int FuzzySearchRequestData::execute(){
+ // prepare the memory lookup
+  PMEMPROPOSAL pSearchKey = new (MEMPROPOSAL);
+  memset( pSearchKey, 0, sizeof( *pSearchKey ) );
+  wcscpy( pSearchKey->szSource, Data.szSource );
+  strcpy( pSearchKey->szDocName, Data.szDocName );
+  pSearchKey->lSegmentNum = Data.lSegmentNum;
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, pSearchKey->szSourceLanguage, &pSearchKey->fIsoSourceLangIsPrefered );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, pSearchKey->szTargetLanguage, &pSearchKey->fIsoTargetLangIsPrefered );
+  strcpy( pSearchKey->szMarkup, Data.szMarkup );
+  wcscpy( pSearchKey->szContext, Data.szContext );
+
+  std::vector<std::string> sourceLangs;
+  //if(pSearchKey->fIsoSourceLangIsPrefered){
+  //  sourceLangs = GetListOfLanguagesFromFamily(Data.szIsoSourceLang);
+  //}
+  
+  //if(sourceLangs.empty()){
+    sourceLangs.push_back(pSearchKey->szSourceLanguage);
+  //}
+
+  if ( Data.iNumOfProposals == 0 )
+  {
+    //Data.iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
+    Data.iNumOfProposals = 5;
   }
-  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
+
+  PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[Data.iNumOfProposals] );
+  memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
+  // do the lookup and handle the results
+  int ProposalSpacesLeft = Data.iNumOfProposals;
+  int iNumOfProposals;
+  int i = 0;
+  //for(int i = 0; i < sourceLangs.size() && _rc_ == 0; i++){
+    iNumOfProposals = ProposalSpacesLeft;
+    strcpy(pSearchKey->szSourceLanguage, sourceLangs[i].c_str());
+    int j = Data.iNumOfProposals - ProposalSpacesLeft;
+    _rc_ = EqfQueryMem( OtmMemoryServiceWorker::getInstance()->hSession, mem.get(), pSearchKey, &iNumOfProposals, &pFoundProposals[j], GET_EXACT );
+    ProposalSpacesLeft -= iNumOfProposals;
+    if(ProposalSpacesLeft <= 0 ){
+      T5LOG( T5WARNING) <<  ":: not all list of lang was checked before allocated proposals space reached end, allocated " << Data.iNumOfProposals << 
+        ", proposal spaces, checked " << i << " of " << sourceLangs.size() << " languages ";
+      //break;
+    }
+    if(_rc_ != 0){
+      T5LOG( T5WARNING) << ":: fuzzy search of mem returned error, rc = " << _rc_ << "; sourceLange = "<< sourceLangs[i] ;
+    }
+  //}
+  iNumOfProposals = Data.iNumOfProposals - ProposalSpacesLeft;
+  
+  if ( _rc_ == 0 )
   {
-    sprintf( pszDateTime, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
-             pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,
-             pTimeDate->tm_hour, pTimeDate->tm_min, pTimeDate->tm_sec );
+    std::wstring strOutputParmsW;
+    json_factory.startJSONW( strOutputParmsW );
+    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ );
+    json_factory.addParmToJSONW( strOutputParmsW, L"ErrorMsg", L"" );
+    json_factory.addParmToJSONW( strOutputParmsW, L"NumOfFoundProposals", iNumOfProposals );
+    if ( iNumOfProposals > 0 )
+    {
+      json_factory.addNameToJSONW( strOutputParmsW, L"results" );
+      addProposalsToJSONString( strOutputParmsW, pFoundProposals, iNumOfProposals, (void *)&Data );
+    } /* endif */
+
+    json_factory.terminateJSONW( strOutputParmsW );
+    outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW );
+    _rc_ = OK;
   }
   else
   {
-    *pszDateTime = 0;
+    unsigned short usRC = 0;
+    EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
+    buildErrorReturn( usRC, Data.szError );
+    _rc_ = INTERNAL_SERVER_ERROR;
   } /* endif */
 
-  return( 0 );
+  if ( pSearchKey ) delete pSearchKey;
+  if ( pFoundProposals ) delete[] pFoundProposals;
+  return( _rc_ );
 }
 
-/*
-
-/*! \brief extract a numeric value from a string
-    \param pszString string containing the numeric value
-    \param iLen number of digits to be processed
-    \param piResult pointer to a int value receiving the extracted value
-  \returns TRUE if successful and FALSE in case of errors
-*/
-bool RequestData::getValue( char *pszString, int iLen, int *piResult )
-{
-  bool fOK = true;
-  char szNumber[10];
-  char *pszNumber = szNumber;
-
-  *piResult = 0;
-
-  while ( iLen && fOK )
+int ConcordanceSearchRequestData::parseJSON(){
+  #ifdef TEMPORARY_COMMENTED
+  int iRC = verifyAPISession();
+  if ( iRC != 0 )
   {
-    if ( isdigit(*pszString) )
-    {
-      *pszNumber++ = *pszString++;
-      iLen--;
-    }
-    else
-    {
-      fOK = false;
-    } /* endif */
-  } /*endwhile */
-
-  if ( fOK )
-  {
-    *pszNumber = '\0';
-    *piResult = atoi( szNumber );
+    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    return( BAD_REQUEST );
   } /* endif */
 
-  return( fOK );
-} 
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  if ( strMemory.empty() )
+  {
+    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
 
+  // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strInputParms.c_str() );
+  PLOOKUPINMEMORYDATA pData = new( LOOKUPINMEMORYDATA );
+  memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  JSONFactory *factory = JSONFactory::getInstance();
+  int loggingThreshold = -1;
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSearchString ), sizeof( pData->szSearchString ) / sizeof( pData->szSearchString[0] ) },
+  { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchMode ), sizeof( pData->szSearchMode ) },
+  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szSearchPos ), sizeof( pData->szSearchPos ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoSourceLang ), sizeof( pData->szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szIsoTargetLang ), sizeof( pData->szIsoTargetLang ) },
+  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
+  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( pData->iNumOfProposals ), 0 },
+  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( pData->iSearchTime ), 0 },
+  { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
+  iRC = json_factory.parseJSON( strInputParmsW, parseControl );
+  #endif
+}
 
+int ConcordanceSearchRequestData::checkData(){
+  #ifdef TEMPORARY_COMMENTED
+  if ( iRC != 0 )
+  {
+    iRC = ERROR_INTERNALFUNCTION_FAILED;
+    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Parsing of input parameters failed";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( BAD_REQUEST );
+  } /* end */
 
+  if ( pData->szSearchString[0] == 0 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Missing search string";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( BAD_REQUEST );
+  } /* end */
 
+  if ( pData->iNumOfProposals > 20 )
+  {
+    iRC = ERROR_INPUT_PARMS_INVALID;
+    wchar_t errMsg[] = L"OtmMemoryServiceWorker::concordanceSearch::Error: Too many proposals requested, the maximum value is 20";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    delete pData;
+    return( BAD_REQUEST );
+  } /* end */
+  if ( pData->iNumOfProposals == 0 )
+  {
+    pData->iNumOfProposals = 5;
+  }
+
+  if(loggingThreshold >= 0){
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::concordanceSearch::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
+  }
+    // get the handle of the memory 
+  long lHandle = 0;
+  int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, pData->szError, sizeof( pData->szError ) / sizeof( pData->szError[0] ), &iRC );
+  if ( httpRC != OK )
+  {
+    std::wstring wstr = L"OtmMemoryServiceWorker::concordanceSearch::";
+    wstr += pData->szError;
+    buildErrorReturn( iRC, (wchar_t*)wstr.c_str(), strOutputParms );
+    delete pData;
+    return( httpRC );
+  } /* endif */
+
+  // do the search and handle the results
+  LONG lOptions = 0;
+  if ( strcasecmp( pData->szSearchMode, "Source" ) == 0 )
+  {
+    lOptions |= SEARCH_IN_SOURCE_OPT;
+  }
+  else if ( strcasecmp( pData->szSearchMode, "Target" ) == 0 )
+  {
+    lOptions |= SEARCH_IN_TARGET_OPT;
+  }
+  else if ( strcasecmp( pData->szSearchMode, "SourceAndTarget" ) == 0 )
+  {
+    lOptions |= SEARCH_IN_SOURCE_OPT | SEARCH_IN_TARGET_OPT;
+  } /* endif */
+  lOptions |= SEARCH_CASEINSENSITIVE_OPT;
+  #endif
+
+}
+
+int ConcordanceSearchRequestData::execute(){
+  #ifdef TEMPORARY_COMMENTED
+  bool fOk = false;
+    if( strlen( pData->szIsoSourceLang) ){
+      LanguageFactory::LANGUAGEINFO srcLangInfo;
+      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoSourceLang, &srcLangInfo );
+      if(fOk){
+        if(srcLangInfo.fisPreferred){
+          lOptions |= SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT;
+        }else{
+          lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
+        }
+      }else{
+        T5LOG( T5WARNING) << ":: src lang could not be found: " << pData->szIsoSourceLang;
+      }
+    }
+    if( strlen( pData->szIsoTargetLang) ){
+      LanguageFactory::LANGUAGEINFO trgLangInfo;
+      fOk = LanguageFactory::getInstance()->getLanguageInfo( pData->szIsoTargetLang, &trgLangInfo );
+      if(fOk){
+        if(trgLangInfo.fisPreferred){
+          lOptions |= SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT;
+        }else{
+          lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
+        }
+      }else{
+        T5LOG( T5WARNING) << ":: target lang could not be found: " << pData->szIsoTargetLang;
+      }
+    }
+  #endif
+}
 
 

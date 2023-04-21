@@ -843,7 +843,7 @@ USHORT EqfCloseMem
 USHORT EqfQueryMem
 (
   HSESSION    hSession,    
-  LONG        lHandle,          
+  EqfMemory*        pMem,          
   PMEMPROPOSAL pSearchKey, 
   int         *piNumOfProposals,
   PMEMPROPOSAL pProposals, 
@@ -854,17 +854,10 @@ USHORT EqfQueryMem
   // validate session handle
   USHORT usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    T5LOG( T5INFO) << "EqfQueryMem:: handle = " << lHandle << "; options = " << lOptions;
-  }else{
-    T5LOG(T5ERROR) << "ERROR in EqfQueryMem:: pData is null" ;
-  } /* endif */
-
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
-    usRC =  TMManager::GetInstance()->APIQueryMem( lHandle, pSearchKey, piNumOfProposals, pProposals, lOptions );
+    usRC =  TMManager::GetInstance()->APIQueryMem( pMem, pSearchKey, piNumOfProposals, pProposals, lOptions );
   } /* endif */
 
   if(usRC)  T5LOG(T5ERROR) << "End of EqfQueryMem, RC = " <<usRC ;

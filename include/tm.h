@@ -1979,6 +1979,11 @@ public:
     //writePtr(std::make_shared<EqfMemory>(*this));
     readOnlyCnt = std::make_shared<int>(0);
     writeCnt = std::make_shared<int>(0);
+    Languages.ulMaxEntries = 0;
+    FileNames.ulMaxEntries = 0;
+    Authors.ulMaxEntries = 0;
+    TagTables.ulMaxEntries = 0;
+    LangGroups.ulMaxEntries = 0;
   };
 
 	EqfMemory( EqfMemoryPlugin *pMemoryPlugin, HTM htm, char *pszName );
@@ -4117,7 +4122,7 @@ USHORT NTMLoadNameTable
 (
   PTMX_CLB    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
-  PBYTE       *ppTMTable,              // ptr to table data pointer
+  PTMX_TABLE  pTMTable,              // ptr to table data pointer
   PULONG      pulSize                  // ptr to buffer for size of table data
 );
 
@@ -5107,7 +5112,7 @@ int removeMemoryFromList(const char* pszName);
   */
   USHORT APIQueryMem
   (
-    LONG        lHandle,          
+    EqfMemory*        pMem,          
     PMEMPROPOSAL pSearchKey, 
     int         *piNumOfProsals,
     PMEMPROPOSAL pProposals, 
@@ -7914,7 +7919,7 @@ USHORT EqfCloseMem
 USHORT EqfQueryMem
 (
   HSESSION    hSession,    
-  LONG        lHandle,          
+  EqfMemory*        lHandle,          
   PMEMPROPOSAL pSearchKey, 
   int         *piNumOfProposals,
   PMEMPROPOSAL pProposals, 

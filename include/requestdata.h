@@ -78,8 +78,6 @@ protected:
     virtual int parseJSON() = 0;
     virtual int checkData() = 0;
     virtual int execute() = 0;
-    int convertUTCTimeToLong( char *pszDateTime, PLONG plTime );
-    int convertTimeToUTC( LONG lTime, char *pszDateTime );
     bool getValue( char *pszString, int iLen, int *piResult );
     int requestTM();
 
@@ -233,9 +231,9 @@ class ConcordanceSearchRequestData: public RequestData{
     ConcordanceSearchRequestData(const std::string& json, const std::string& memName): RequestData(CONCORDANCE, json, memName){};
     ConcordanceSearchRequestData(): RequestData(CONCORDANCE){};
 protected:
-    int parseJSON() override {return -1;};
-    int checkData() override {return -1;};
-    int execute()   override {return -1;};
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute()   override ;
 };
 
 
@@ -245,9 +243,10 @@ class FuzzySearchRequestData: public RequestData{
     FuzzySearchRequestData(): RequestData(FUZZY){};
 
 protected:
-    int parseJSON() override {return -1;};
-    int checkData() override {return -1;};
-    int execute()   override {return -1;};
+    LOOKUPINMEMORYDATA Data ;
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute()   override ;
 };
 
 class DeleteEntryRequestData: public RequestData{

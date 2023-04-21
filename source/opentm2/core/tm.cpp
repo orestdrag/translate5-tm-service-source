@@ -1654,7 +1654,7 @@ USHORT TMManager::APICloseMem
 */
 USHORT TMManager::APIQueryMem
 (
-  LONG        lHandle,          
+  EqfMemory*        pMem,          
   PMEMPROPOSAL pSearchKey, 
   int         *piNumOfProposals,
   PMEMPROPOSAL pProposals, 
@@ -1679,7 +1679,7 @@ USHORT TMManager::APIQueryMem
     return DDE_MANDPARAMISSING;
   } /* endif */
 
-  EqfMemory *pMem = handleToMemoryObject( lHandle );
+  //EqfMemory *pMem = handleToMemoryObject( lHandle );
 
   if ( pMem == NULL )
   {

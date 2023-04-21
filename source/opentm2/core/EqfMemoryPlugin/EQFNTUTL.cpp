@@ -1252,7 +1252,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->Authors ) UtlAlloc( (PVOID *) &pTmClb->pAuthors, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY, (PBYTE *)&pTmClb->Authors, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY, &pTmClb->Authors, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1268,7 +1268,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pLanguages ) UtlAlloc( (PVOID *) &pTmClb->pLanguages, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, LANG_KEY, (PBYTE *)&pTmClb->Languages, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, LANG_KEY, &pTmClb->Languages, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1284,7 +1284,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pTagTables ) UtlAlloc( (PVOID *) &pTmClb->pTagTables, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY, (PBYTE *)&pTmClb->TagTables, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY, &pTmClb->TagTables, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1300,7 +1300,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      //if ( pTmClb->pFileNames ) UtlAlloc( (PVOID *) &pTmClb->pFileNames, 0L, 0L, NOMSG );
 
      // Get new table
-     usRc = NTMLoadNameTable( pTmClb, FILE_KEY, (PBYTE *)&pTmClb->FileNames, &ulLen );
+     usRc = NTMLoadNameTable( pTmClb, FILE_KEY, &pTmClb->FileNames, &ulLen );
    } /* endif */
  } /* endif */
 
@@ -1927,7 +1927,7 @@ USHORT NTMLoadNameTable
 (
   PTMX_CLB    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
-  PBYTE       *ppTMTable,              // ptr to table data pointer
+  PTMX_TABLE  pTMTable,                // ptr to table data pointer
   PULONG      pulSize                  // ptr to buffer for size of table data
 )
 {
@@ -1940,23 +1940,66 @@ USHORT NTMLoadNameTable
   // allocate table data area
   if ( usRc == NO_ERROR )
   {
-    if ( !UtlAlloc( (PVOID *)ppTMTable, 0L, *pulSize, NOMSG ))
-    {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
-    } /* endif */
+    /*
+    switch(ulTableKey){
+      case LANG_KEY:
+      {
+        *ppTMTable = pTmClb->Languages;
+        break;
+      }
+      case  FILE_KEY:
+      {
+        break;
+      }
+      case AUTHOR_KEY:
+      {
+        break;
+      }
+      case TAGTABLE_KEY:
+      {
+        break;
+      }
+      case LONGNAME_KEY:
+      {
+        break;
+      }
+      case COMPACT_KEY:
+      {
+        break;
+
+      }
+      case FIRST_KEY:
+      {
+        break;
+      }           
+// Note: the following key is NOT used as the key of a QDAM record
+//       it is only a symbolic value used in the Name-to-ID functions
+      case LANGGROUP_KEY: 
+      {
+        break;
+      }
+      default:
+      {
+        break;
+      }       
+    }
+    //if ( !UtlAlloc( (PVOID *)ppTMTable, 0L, *pulSize, NOMSG ))
+    //{
+    //  usRc = ERROR_NOT_ENOUGH_MEMORY;
+    //} /* endif */
   } /* endif */
 
   // read table data
   if ( usRc == NO_ERROR )
   {
     ULONG ulLen = *pulSize;
-    usRc =  pTmClb->TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(*ppTMTable), &ulLen );
+    usRc =  pTmClb->TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pTMTable), &ulLen );
   } /* endif */
 
   // handle tersed name tables
   if ( usRc == NO_ERROR )
   {
-    PTERSEHEADER pTerseHeader = (PTERSEHEADER)*ppTMTable;
+    PTERSEHEADER pTerseHeader = (PTERSEHEADER)pTMTable;
     PBYTE     pNewArea = NULL;         // ptr to unterse data area
 
     if ( pTerseHeader->ulMagicWord == TERSEMAGICWORD )
@@ -1975,7 +2018,7 @@ USHORT NTMLoadNameTable
       {
         ULONG ulNewLen = 0;
 
-        memcpy( pNewArea, *ppTMTable + sizeof(TERSEHEADER),
+        memcpy( pNewArea, (PBYTE)pTMTable + sizeof(TERSEHEADER),
                 *pulSize - sizeof(TERSEHEADER) );
        
         T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 51 in NTMLoadNameTable";
@@ -1996,10 +2039,10 @@ USHORT NTMLoadNameTable
         *pulSize = pTerseHeader->usDataSize;
 
         // free tersed data area
-        UtlAlloc( (PVOID *)ppTMTable, 0L, 0L, NOMSG );
+        //UtlAlloc( (PVOID *)pTMTable, 0L, 0L, NOMSG );
 
         // anchor untersed data area
-        *ppTMTable = pNewArea;
+        //*pTMTable = pNewArea;
 
         // avoid free of untersed data area
         pNewArea = NULL;
@@ -2014,7 +2057,7 @@ USHORT NTMLoadNameTable
   if ( (usRc == NO_ERROR) && (ulTableKey == LANG_KEY) )
   {
     LONG lRest = *pulSize;
-    PBYTE pbTemp = *ppTMTable;
+    PBYTE pbTemp = (PBYTE)pTMTable;
     while ( lRest )
     {
       if ( *pbTemp == 0xA0 )
@@ -2108,6 +2151,7 @@ USHORT NTMCreateLangGroupTable
   // allocate language-ID-to-group-ID-table
  
   LONG lSize = pTmClb->Languages.ulMaxEntries > 100L ?  pTmClb->Languages.ulMaxEntries : 100L;
+  if(lSize <=0) lSize = 1;
   lSize *= sizeof(SHORT);
   if( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
                 0L, lSize, NOMSG ) )
