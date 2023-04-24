@@ -2605,7 +2605,7 @@ TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT, HWND );
 /* TmGet                                                              */
 /**********************************************************************/
 USHORT
-TmGetW(HTM,               //(in)  TM handle
+TmGetW(EqfMemory*,               //(in)  TM handle
        PSZ,               //(in)  full TM name x:\eqf\mem\mem.tmd
        PTMX_GET_IN_W,     //(in)  pointer to get input structure
        PTMX_GET_OUT_W,    //(out) pointer to get output structure
@@ -3996,7 +3996,7 @@ PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
 USHORT NTMGetIDFromName( PTMX_CLB, PSZ, PSZ, USHORT, PUSHORT );
 USHORT NTMGetNameFromID( PTMX_CLB, PUSHORT, USHORT, PSZ, PSZ );
 USHORT TmtXReplace( PTMX_CLB, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
-USHORT TmtXGet( PTMX_CLB, PTMX_GET_IN_W, PTMX_GET_OUT_W );
+USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
 USHORT TmtXCreate( PTMX_CREATE_IN, PTMX_CREATE_OUT );
 USHORT TmtXOpen( PTMX_OPEN_IN, PTMX_OPEN_OUT );
 USHORT TmtXClose( PTMX_CLB, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );

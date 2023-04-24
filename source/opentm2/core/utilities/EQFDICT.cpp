@@ -6131,7 +6131,7 @@ SHORT BTREE::QDAMDictInsertLocal
       sRc = BTREE_CORRUPTED;
    } else if(!fOpen )
    {
-     sRc = BTREE_READONLY;
+   //  sRc = BTREE_READONLY;
    } /* endif */
 
    /*******************************************************************/
@@ -6257,7 +6257,7 @@ SHORT BTREE::QDAMDictUpdSignLocal
      sRc = BTREE_CORRUPTED;
   } else if ( !fOpen )
   {
-    sRc = BTREE_READONLY;
+  //  sRc = BTREE_READONLY;
   }
   else
   {

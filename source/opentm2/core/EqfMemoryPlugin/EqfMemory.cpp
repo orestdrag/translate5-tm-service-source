@@ -515,7 +515,7 @@ int EqfMemory::searchProposal
     auto str = EncodingHelper::convertToUTF8(TmGetIn.stTmGet.szSource);
     T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::*** method: searchProposal, looking for " <<  str;
   } 
-  iRC = (int)TmGetW ( this->htm,  NULL,  &TmGetIn,  &TmGetOut, FALSE );
+  iRC = (int)TmGetW ( this,  NULL,  &TmGetIn,  &TmGetOut, FALSE );
 
   if ( iRC == 0 )
   {
