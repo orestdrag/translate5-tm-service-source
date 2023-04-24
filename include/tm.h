@@ -1657,7 +1657,6 @@ typedef struct _TMX_CREATE
 
 typedef struct _TMX_CREATE_IN
 {
-  TMX_PREFIX_IN  stPrefixIn;
   TMX_CREATE stTmCreate;
 } TMX_CREATE_IN, * PTMX_CREATE_IN;
 
@@ -1676,7 +1675,6 @@ typedef struct _TMX_OPEN
 
 typedef struct _TMX_OPEN_IN
 {
-  TMX_PREFIX_IN stPrefixIn;
   TMX_OPEN stTmOpen;
 } TMX_OPEN_IN, * PTMX_OPEN_IN;
 
@@ -1684,7 +1682,6 @@ typedef struct _TMX_OPEN_IN
 //=======================================================================
 typedef struct _TMX_CLOSE_IN
 {
-  TMX_PREFIX_IN stPrefixIn;
 } TMX_CLOSE_IN, * PTMX_CLOSE_IN;
 
 typedef struct _TMX_CLOSE_OUT
@@ -1730,13 +1727,11 @@ typedef struct _TMX_PUT_W
 
 typedef struct _TMX_PUT_IN
 {
-  TMX_PREFIX_IN  stPrefixIn;           //input prefix
   TMX_PUT        stTmPut;             //pointer to put input structure
 } TMX_PUT_IN, * PTMX_PUT_IN;
 
 typedef struct _TMX_PUT_IN_W
 {
-  TMX_PREFIX_IN  stPrefixIn;           //input prefix
   TMX_PUT_W      stTmPut;             //pointer to put input structure
 } TMX_PUT_IN_W, * PTMX_PUT_IN_W;
 
@@ -1797,13 +1792,11 @@ typedef struct _TMX_GET_W
 
 typedef struct _TMX_GET_IN
 {
-  TMX_PREFIX_IN  stPrefixIn;           //prefix of each command
   TMX_GET        stTmGet;             //pointer in structure
 } TMX_GET_IN, * PTMX_GET_IN;
 
 typedef struct _TMX_GET_IN_W
 {
-  TMX_PREFIX_IN  stPrefixIn;           //prefix of each command
   TMX_GET_W        stTmGet;             //pointer in structure
 } TMX_GET_IN_W, * PTMX_GET_IN_W;
 
@@ -1894,7 +1887,6 @@ typedef struct _TMX_GET_OUT_W
 //structure TMX_EXT_IN
 typedef struct _TMX_EXT_IN
 {
-  TMX_PREFIX_IN stPrefixIn;      //prefix of input buffer
   ULONG ulTmKey;                 //tm get to get
   USHORT usConvert;              //how the output is to appear
   USHORT usNextTarget;           //which target record to address next
@@ -1924,7 +1916,6 @@ typedef TMX_EXT_IN TMX_EXT_IN_W, *PTMX_EXT_IN_W;
 /**********************************************************************/
 typedef struct  _TMX_INFO_IN
 {
-  TMX_PREFIX_IN stPrefixIn;
   USHORT        usInfoLevel;
 } TMX_INFO_IN, * PTMX_INFO_IN;
 
@@ -1940,7 +1931,6 @@ typedef struct _TMX_INFO_OUT
 /**********************************************************************/
 typedef struct _TMX_DELTM_IN
 {
-  TMX_PREFIX_IN stPrefixIn;
   CHAR         szFullTmName[MAX_EQF_PATH];
   CHAR         szFullIndexName[MAX_EQF_PATH];
   CHAR         szFullPropName[MAX_EQF_PATH];
@@ -2797,24 +2787,6 @@ BOOL MTTMMergeStart
 BOOL MemCreatePath( PSZ pszString );
 
 
-// Unicode additions
-VOID TMX_GET_IN_Unicode2ASCII( PTMX_GET_IN_W pstGetInW, PTMX_GET_IN pstGetIn, ULONG ulCP );
-VOID TMX_GET_OUT_Unicode2ASCII( PTMX_GET_OUT_W pstGetOutW, PTMX_GET_OUT pstGetOut, ULONG ulCP );
-VOID TMX_GET_IN_ASCII2Unicode( PTMX_GET_IN pstGetIn, PTMX_GET_IN_W pstGetInW, ULONG  ulCP );
-VOID TMX_GET_OUT_ASCII2Unicode( PTMX_GET_OUT pstGetOut, PTMX_GET_OUT_W pstGetOutW, ULONG ulCP );
-
-VOID  TMX_PUT_IN_Unicode2ASCII( PTMX_PUT_IN_W pstPutInW, PTMX_PUT_IN pstPutIn, ULONG ulCP );
-VOID  TMX_PUT_OUT_ASCII2Unicode( PTMX_PUT_OUT pstPutOut, PTMX_PUT_OUT_W pstPutOutW );
-VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstPutIn, PTMX_PUT_IN_W pstPutInW , ULONG ulCP);
-VOID  TMX_PUT_OUT_Unicode2ASCII( PTMX_PUT_OUT_W pstPutOutW, PTMX_PUT_OUT pstPutOut );
-VOID  TMX_EXT_IN_Unicode2ASCII( PTMX_EXT_IN_W pstExtInW, PTMX_EXT_IN pstExtIn );
-VOID  TMX_EXT_OUT_ASCII2Unicode( PTMX_EXT_OUT pstExtOut, PTMX_EXT_OUT_W pstExtOutW, ULONG ulCP );
-VOID  TMX_EXT_IN_ASCII2Unicode( PTMX_EXT_IN pstExtIn, PTMX_EXT_IN_W pstExtInW );
-VOID  TMX_EXT_OUT_Unicode2ASCII( PTMX_EXT_OUT_W pstExtOutW, PTMX_EXT_OUT pstExtOut, ULONG ulCP );
-
-VOID  TMX_PUT_IN_ASCII2Unicode( PTMX_PUT_IN pstDelIn, PTMX_PUT_IN_W pstDelInW, ULONG ulCP );
-VOID  TMX_PUT_OUT_Unicode2ASCII( PTMX_PUT_OUT_W pstDelOutW, PTMX_PUT_OUT pstDelOut );
-
 // return codes of function MemConvertMem
 
 // memory converted successfully
@@ -3561,7 +3533,6 @@ typedef struct _MEMORY_HANDLER_DATA
 /**********************************************************************/
 typedef struct _TMX_ENDORG_IN
 {
-  TMX_PREFIX_IN  stPrefixIn;
   CHAR           szOrgTM[MAX_EQF_PATH];           //full name of original TM
   CHAR           szTmpTM[MAX_EQF_PATH];           //full name of temporary TM
   CHAR           szOrgIndex[MAX_EQF_PATH];        //full name of original index file

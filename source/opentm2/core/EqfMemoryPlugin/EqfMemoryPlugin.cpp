@@ -141,14 +141,7 @@ NTMFillCreateInStruct( const char*     pszPathMem,
                        PTMX_CREATE_IN  pstCreateIn)
 {
   USHORT        usRc=NO_ERROR;
-
-  /********************************************************************/
-  /* fill prefix of the TMX_CREATE_IN                                 */
-  /* prefin.usLenIn     - length of the structure (TMX_CREATE_IN)     */
-  /* prefin.usCommand   - the Tm command, here TMC_CREATE             */
-  /********************************************************************/
-  pstCreateIn->stPrefixIn.usLengthInput = sizeof( TMX_CREATE_IN );
-  pstCreateIn->stPrefixIn.usTmCommand  = TMC_CREATE;
+  
   /******************************************************************/
   /* no model handle get data for TMX_CREATE_IN stucture from input */
   /******************************************************************/

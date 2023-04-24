@@ -6255,8 +6255,8 @@ SHORT BTREE::QDAMDictUpdSignLocal
   if ( fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
-  } else if ( !fOpen )
-  {
+  //} else if ( !fOpen )
+  //{
   //  sRc = BTREE_READONLY;
   }
   else
