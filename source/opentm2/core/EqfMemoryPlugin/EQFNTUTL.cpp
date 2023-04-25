@@ -477,7 +477,7 @@ USHORT NTMGetIDFromNameEx
                if ( (usRc == NO_ERROR) &&
                     (usTableType == LANG_KEY) )
                {
-                 usRc = NTMAddLangGroup( pTmClb, pszName, *pusID );
+                 usRc = pTmClb->NTMAddLangGroup( pszName, *pusID );
                } /* endif */
              } /* endif */
            } /* endif */
@@ -1312,7 +1312,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
                       pTmClb->alUpdCounter[LONGNAMES_UPD_COUNTER] )
    {
      // Free any existing table
-     NTMDestroyLongNameTable( pTmClb );
+     pTmClb->NTMDestroyLongNameTable();
 
      // create a new and empty long name table
      usRc = pTmClb->NTMCreateLongNameTable();
@@ -1415,7 +1415,7 @@ USHORT EqfMemory::NTMCreateLongNameTable()
 //+----------------------------------------------------------------------------+
 //|Function name:     NTMDestroyLongNameTable                                  |
 //+----------------------------------------------------------------------------+
-//|Function call:     usRC = NTMDestroyLongnameTable( pTmClb );                |
+//|Function call:     usRC = NTMDestroyLongnameTable();                |
 //+----------------------------------------------------------------------------+
 //|Description:       Destroys a long name table and frees the memory occupied |
 //|                   by it.                                                   |
@@ -1424,32 +1424,29 @@ USHORT EqfMemory::NTMCreateLongNameTable()
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
 // ----------------------------------------------------------------------------+
-USHORT NTMDestroyLongNameTable
-(
-  EqfMemory*    pTmClb                   // pointer to control block
-)
+USHORT EqfMemory::NTMDestroyLongNameTable()
 {
   USHORT      usRC = NO_ERROR;         // function return code
 
   // if there is a long name table ...
-  if ( pTmClb->pLongNames != NULL )
+  if ( pLongNames != NULL )
   {
     // free any buffer area
-    if ( pTmClb->pLongNames->pszBuffer != NULL )
+    if ( pLongNames->pszBuffer != NULL )
     {
-      UtlAlloc( (PVOID *)&(pTmClb->pLongNames->pszBuffer), 0L, 0L, NOMSG );
+      UtlAlloc( (PVOID *)&(pLongNames->pszBuffer), 0L, 0L, NOMSG );
     } /* endif */
 
     // free table
-    UtlAlloc( (PVOID *)&(pTmClb->pLongNames), 0L, 0L, NOMSG );
-    pTmClb->pLongNames = NULL;
+    UtlAlloc( (PVOID *)&(pLongNames), 0L, 0L, NOMSG );
+    pLongNames = NULL;
   } /* endif */
 
-  if ( pTmClb->pLongNamesCaseIgnore != NULL )
+  if ( pLongNamesCaseIgnore != NULL )
   {
     // free table
-    UtlAlloc( (PVOID *)&(pTmClb->pLongNamesCaseIgnore), 0L, 0L, NOMSG );
-    pTmClb->pLongNamesCaseIgnore = NULL;
+    UtlAlloc( (PVOID *)&(pLongNamesCaseIgnore), 0L, 0L, NOMSG );
+    pLongNamesCaseIgnore = NULL;
   } /* endif */
 
   // return to caller
@@ -1469,27 +1466,23 @@ USHORT NTMDestroyLongNameTable
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
 // ----------------------------------------------------------------------------+
-USHORT NTMReadLongNameTable
-(
-  EqfMemory*    pTmClb                   // pointer to control block
-)
-{
+USHORT EqfMemory::NTMReadLongNameTable(){
   USHORT      usRC = NO_ERROR;         // function return code
   ULONG       ulLen = 0;               // record length
 
   // call to obtain exact length of record
   ulLen = 0;
-  usRC =  pTmClb->TmBtree.EQFNTMGet( LONGNAME_KEY, 0, &ulLen );
+  usRC =  TmBtree.EQFNTMGet( LONGNAME_KEY, 0, &ulLen );
 
   if ( usRC == NO_ERROR )
   {
     // allocate buffer area if it is too small
-    if ( pTmClb->pLongNames->ulBufSize < ulLen )
+    if ( pLongNames->ulBufSize < ulLen )
     {
-      if ( UtlAlloc( (PVOID *)&pTmClb->pLongNames->pszBuffer, 0L,
+      if ( UtlAlloc( (PVOID *)&pLongNames->pszBuffer, 0L,
                      ulLen, NOMSG ))
       {
-        pTmClb->pLongNames->ulBufSize = ulLen;
+        pLongNames->ulBufSize = ulLen;
       }
       else
       {
@@ -1500,15 +1493,15 @@ USHORT NTMReadLongNameTable
     // read long name table from database
     if ( usRC == NO_ERROR )
     {
-      usRC =  pTmClb->TmBtree.EQFNTMGet( LONGNAME_KEY,
-                        (PCHAR)pTmClb->pLongNames->pszBuffer, &ulLen );
+      usRC = TmBtree.EQFNTMGet( LONGNAME_KEY,
+                        (PCHAR)pLongNames->pszBuffer, &ulLen );
     } /* endif */
 
 
     // unterse data if table data is tersed
     if ( usRC == NO_ERROR )
     {
-      PTERSEHEADER pTerseHeader = (PTERSEHEADER)pTmClb->pLongNames->pszBuffer;
+      PTERSEHEADER pTerseHeader = (PTERSEHEADER)pLongNames->pszBuffer;
       PBYTE     pNewArea = NULL;         // ptr to unterse data area
 
       if ( pTerseHeader->ulMagicWord == TERSEMAGICWORD )
@@ -1528,7 +1521,7 @@ USHORT NTMReadLongNameTable
           ULONG  ulNewLen = 0;
 
           memcpy( pNewArea,
-                  (PBYTE)pTmClb->pLongNames->pszBuffer + sizeof(TERSEHEADER),
+                  (PBYTE)pLongNames->pszBuffer + sizeof(TERSEHEADER),
                   ulLen - sizeof(TERSEHEADER) );
           T5LOG(T5ERROR) << "::TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand";
 #ifdef TEMPORARY_COMMENTED
@@ -1545,13 +1538,13 @@ USHORT NTMReadLongNameTable
         if ( usRC == NO_ERROR )
         {
           // set size of buffer area
-          pTmClb->pLongNames->ulBufSize = (ULONG)pTerseHeader->usDataSize;
+          pLongNames->ulBufSize = (ULONG)pTerseHeader->usDataSize;
 
           // free tersed data area
-          UtlAlloc( (PVOID *)&pTmClb->pLongNames->pszBuffer, 0L, 0L, NOMSG );
+          UtlAlloc( (PVOID *)&pLongNames->pszBuffer, 0L, 0L, NOMSG );
 
           // anchor untersed data area
-          pTmClb->pLongNames->pszBuffer = (PSZ)pNewArea;
+          pLongNames->pszBuffer = (PSZ)pNewArea;
 
           // avoid free of untersed data area
           pNewArea = NULL;
@@ -1567,10 +1560,10 @@ USHORT NTMReadLongNameTable
       PSZ    pszTemp;                  // ptr for buffer processing
 
       // remember used space in buffer area
-      pTmClb->pLongNames->ulBufUsed = ulLen;
+      pLongNames->ulBufUsed = ulLen;
 
       // count number of entries in long name buffer
-      pszTemp = pTmClb->pLongNames->pszBuffer;
+      pszTemp = pLongNames->pszBuffer;
       while ( *((PUSHORT)pszTemp) != 0 )
       {
         ulEntries++;
@@ -1579,17 +1572,17 @@ USHORT NTMReadLongNameTable
       } /* endwhile */
 
       // enlarge pointer array if necessary
-      if ( pTmClb->pLongNames->ulTableSize < ulEntries )
+      if ( pLongNames->ulTableSize < ulEntries )
       {
         ULONG ulOldSize = sizeof(TMX_LONGNAMETABLE) +
                            (sizeof(TMX_LONGNAME_TABLE_ENTRY) *
-                           pTmClb->pLongNames->ulTableSize);
+                           pLongNames->ulTableSize);
         ULONG ulNewSize = sizeof(TMX_LONGNAMETABLE) +
                            (sizeof(TMX_LONGNAME_TABLE_ENTRY) * ulEntries);
-        if ( UtlAlloc( (PVOID *)&pTmClb->pLongNames,
+        if ( UtlAlloc( (PVOID *)&pLongNames,
                        ulOldSize, ulNewSize, NOMSG ) )
         {
-          pTmClb->pLongNames->ulTableSize = ulEntries;
+          pLongNames->ulTableSize = ulEntries;
         }
         else
         {
@@ -1599,10 +1592,10 @@ USHORT NTMReadLongNameTable
         // enlarge pointer array for case ignore search as well
         if ( usRC == NO_ERROR )
         {
-          if ( UtlAlloc( (PVOID *)&pTmClb->pLongNamesCaseIgnore,
+          if ( UtlAlloc( (PVOID *)&pLongNamesCaseIgnore,
                          ulOldSize, ulNewSize, NOMSG ) )
           {
-            pTmClb->pLongNamesCaseIgnore->ulTableSize = ulEntries;
+            pLongNamesCaseIgnore->ulTableSize = ulEntries;
           }
           else
           {
@@ -1614,9 +1607,9 @@ USHORT NTMReadLongNameTable
       // fill pointer array
       if ( usRC == NO_ERROR )
       {
-        PTMX_LONGNAME_TABLE_ENTRY pEntry = pTmClb->pLongNames->stTableEntry;
-        pTmClb->pLongNames->ulEntries = 0;
-        pszTemp = pTmClb->pLongNames->pszBuffer;
+        PTMX_LONGNAME_TABLE_ENTRY pEntry = pLongNames->stTableEntry;
+        pLongNames->ulEntries = 0;
+        pszTemp = pLongNames->pszBuffer;
         while ( *((PUSHORT)pszTemp) != 0 )
         {
 
@@ -1629,7 +1622,7 @@ USHORT NTMReadLongNameTable
 
           // continue with next entry
           pEntry++;
-          pTmClb->pLongNames->ulEntries++;
+          pLongNames->ulEntries++;
           pszTemp += strlen(pszTemp)+1;// skip long name
         } /* endwhile */
       } /* endif */
@@ -1637,8 +1630,8 @@ USHORT NTMReadLongNameTable
       // sort long name array
       if ( usRC == NO_ERROR )
       {
-        qsort( pTmClb->pLongNames->stTableEntry,
-               pTmClb->pLongNames->ulEntries,
+        qsort( pLongNames->stTableEntry,
+               pLongNames->ulEntries,
                sizeof(TMX_LONGNAME_TABLE_ENTRY),
                NTMLongNameTableComp );
       } /* endif */
@@ -1646,13 +1639,13 @@ USHORT NTMReadLongNameTable
       // make copy of long name array for case ignore search
       if ( usRC == NO_ERROR )
       {
-        memcpy( pTmClb->pLongNamesCaseIgnore->stTableEntry,
-                pTmClb->pLongNames->stTableEntry,
-                pTmClb->pLongNames->ulEntries *
+        memcpy( pLongNamesCaseIgnore->stTableEntry,
+                pLongNames->stTableEntry,
+                pLongNames->ulEntries *
                 sizeof(TMX_LONGNAME_TABLE_ENTRY) );
 
-        qsort( pTmClb->pLongNamesCaseIgnore->stTableEntry,
-               pTmClb->pLongNames->ulEntries,
+        qsort( pLongNamesCaseIgnore->stTableEntry,
+               pLongNames->ulEntries,
                sizeof(TMX_LONGNAME_TABLE_ENTRY),
                NTMLongNameTableCompCaseIgnore );
       } /* endif */
@@ -2071,9 +2064,8 @@ USHORT NTMLoadNameTable
 } /* end of function NTMLoadNameTable */
 
 
-USHORT NTMAddLangGroup
+USHORT EqfMemory::NTMAddLangGroup
 (
-  EqfMemory*    pTmClb,                  // ptr to TM control block
   PSZ         pszLang,                 // ptr to language name
   USHORT      sLangID                  // ID of language in our tables
 )
@@ -2104,22 +2096,22 @@ USHORT NTMAddLangGroup
   // get ID of group name
   if ( (usRC == NO_ERROR) && (sGroupID == 0) )
   {
-    usRC = NTMGetIDFromName( pTmClb, szLangGroup, NULL, LANGGROUP_KEY, (PUSHORT)&sGroupID );
+    usRC = NTMGetIDFromName( this, szLangGroup, NULL, LANGGROUP_KEY, (PUSHORT)&sGroupID );
   } /* endif */
 
   // enlarge language-ID-to-group-ID table if necessary
   if ( usRC == NO_ERROR )
   {
     LONG lRequiredSize = (sLangID + 1) * sizeof(SHORT);
-    if ( pTmClb->lLangIdToGroupTableSize < lRequiredSize )
+    if ( lLangIdToGroupTableSize < lRequiredSize )
     {
       lRequiredSize += (10 * sizeof(SHORT));
-      if ( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
-                      pTmClb->lLangIdToGroupTableSize,
+      if ( UtlAlloc( (PVOID *)&(psLangIdToGroupTable),
+                      lLangIdToGroupTableSize,
                       lRequiredSize, NOMSG ) )
       {
-        pTmClb->lLangIdToGroupTableSize = lRequiredSize;
-        pTmClb->lLangIdToGroupTableUsed = lRequiredSize;
+        lLangIdToGroupTableSize = lRequiredSize;
+        lLangIdToGroupTableUsed = lRequiredSize;
       }
       else
       {
@@ -2131,30 +2123,27 @@ USHORT NTMAddLangGroup
   // update language ID to group ID table
   if ( usRC == NO_ERROR )
   {
-    pTmClb->psLangIdToGroupTable[sLangID] = sGroupID;
+    psLangIdToGroupTable[sLangID] = sGroupID;
   } /* endif */
 
   return( usRC );
 } /* end of function NTMAddLangGroup */
 
-USHORT NTMCreateLangGroupTable
-(
-  EqfMemory*    pTmClb                   // ptr to TM control block
-)
+USHORT EqfMemory::NTMCreateLangGroupTable()
 {
   USHORT usRC = NO_ERROR;
   //pTmClb->LangGroups.ulAllocSize = TMX_TABLE_SIZE;
 
   // allocate language-ID-to-group-ID-table
  
-  LONG lSize = pTmClb->Languages.ulMaxEntries > 100L ?  pTmClb->Languages.ulMaxEntries : 100L;
+  LONG lSize = Languages.ulMaxEntries > 100L ?  Languages.ulMaxEntries : 100L;
   if(lSize <=0) lSize = 1;
   lSize *= sizeof(SHORT);
-  if( UtlAlloc( (PVOID *)&(pTmClb->psLangIdToGroupTable),
+  if( UtlAlloc( (PVOID *)&(psLangIdToGroupTable),
                 0L, lSize, NOMSG ) )
   {
-    pTmClb->lLangIdToGroupTableSize = lSize;
-    pTmClb->lLangIdToGroupTableUsed = 0L;
+    lLangIdToGroupTableSize = lSize;
+    lLangIdToGroupTableUsed = 0L;
   }
   else
   {
@@ -2166,11 +2155,10 @@ USHORT NTMCreateLangGroupTable
   {
     int i = 0;
     while ( (usRC == NO_ERROR) &&
-            (i < (int)pTmClb->Languages.ulMaxEntries) )
+            (i < (int)Languages.ulMaxEntries) )
     {
-      PTMX_TABLE_ENTRY pstEntry = pTmClb->Languages.stTmTableEntry;
-      usRC = NTMAddLangGroup( pTmClb,
-                              pstEntry[i].szName,
+      PTMX_TABLE_ENTRY pstEntry = Languages.stTmTableEntry;
+      usRC = NTMAddLangGroup( pstEntry[i].szName,
                               pstEntry[i].usId );
       i++;
     } /* endwhile */
@@ -2185,13 +2173,10 @@ USHORT NTMCreateLangGroupTable
 //
 // compact/organize the index part of a memory
 //
-USHORT NTMOrganizeIndexFile
-(
-  EqfMemory* pTmClb               // ptr to control block,
-)
+USHORT EqfMemory::NTMOrganizeIndexFile()
 {
   USHORT usRC = NO_ERROR;
-  usRC = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
+  usRC = EQFNTMOrganizeIndex( &(InBtree), usAccessMode, START_KEY );
 
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */

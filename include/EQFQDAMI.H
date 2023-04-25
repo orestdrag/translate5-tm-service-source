@@ -1292,14 +1292,6 @@ SHORT QDAMIncrUpdCounter
 );
 
 
-SHORT QDAMGetUpdCounter
-(
-   PBTREE     pBTIda,                  // pointer to btree structure
-   PLONG      plUpdCounter,            // buffer for update counter value
-   SHORT      sIndex,                  // index of requested update counter
-   SHORT      sNumCounters             // number of requested update counters
-);
-
 
 SHORT QDAMUpdateLockRec
 (

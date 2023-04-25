@@ -393,38 +393,6 @@ SHORT  BTREE::EQFNTMOpen
 //|Function flow:     call QDAMDictCloseLocal routine ...                      |
 // ----------------------------------------------------------------------------+
 
-SHORT EQFNTMClose
-(
-  BTREE * ppBTIda
-)
-{
-  SHORT sRc;
-
-  DEBUGEVENT( EQFNTMCLOSE_LOC, FUNCENTRY_EVENT, 0 );
-
-  if ( ppBTIda )
-  {
-    sRc = ppBTIda->QDAMDictClose( );
-  }
-  else
-  {
-    sRc = BTREE_INVALID;
-  } /* endif */
-
-  if ( !sRc )
-  {
-    //UtlAlloc( (PVOID*) ppBTIda, 0L, 0L, NOMSG );
-  } /* endif */
-
-  if ( sRc != NO_ERROR )
-  {
-    ERREVENT( EQFNTMCLOSE_LOC, ERROR_EVENT, sRc );
-  } /* endif */
-
-  DEBUGEVENT( EQFNTMCLOSE_LOC, FUNCEXIT_EVENT, 0 );
-
-  return sRc;
-}
 
 
 //+----------------------------------------------------------------------------+
@@ -566,16 +534,14 @@ BTREE::EQFNTMInsert
 )
 {
    SHORT         sRc = 0;   // return code
-   DEBUGEVENT( EQFNTMINSERT_LOC, FUNCENTRY_EVENT, 0 );
-
   /********************************************************************/
   /* do initial security checking...                                  */
   /********************************************************************/
-   if ( !sRc && fCorrupted )
+   if (fCorrupted )
    {
       sRc = BTREE_CORRUPTED;
-   } /* endif */
-   if ( !sRc && !fOpen )
+   }else  /* endif */
+   if ( !fOpen )
    {
    //  sRc = BTREE_READONLY;
    } /* endif */
@@ -605,7 +571,6 @@ BTREE::EQFNTMInsert
         if ( (ulKey & 0x020) )
         {
           sRc = QDAMWriteHeader();
-          fUpdated = TRUE;
         } /* endif */
       } /* endif */
     }

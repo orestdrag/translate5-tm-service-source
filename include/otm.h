@@ -9,30 +9,6 @@
 #include "FilesystemHelper.h"
 #include "win_types.h"
 #include "lowlevelotmdatastructs.h"
-
-//+----------------------------------------------------------------------------+
-// Internal function
-//+----------------------------------------------------------------------------+
-// Function name:     EQFNTMClose  close the TM file
-//+----------------------------------------------------------------------------+
-// Function call:     EQFNTMClose( PPBTREE );
-//+----------------------------------------------------------------------------+
-// Description:       Close the file
-//+----------------------------------------------------------------------------+
-// Parameters:        PPBTREE                pointer to btree structure
-//+----------------------------------------------------------------------------+
-// Returncode type:   SHORT
-//+----------------------------------------------------------------------------+
-// Returncodes:       0                 no error happened
-//                    BTREE_INVALID     incorrect pointer
-//                    BTREE_DISK_FULL   disk full condition encountered
-//                    BTREE_WRITE_ERROR write error to disk
-//                    BTREE_CORRUPTED   dictionary is corrupted
-//                    BTREE_CLOSE_ERROR error closing dictionary
-//+----------------------------------------------------------------------------+
-
-SHORT EQFNTMClose(PBTREE);
-
   
 /**********************************************************************/
 /* NTM prototypes                                                     */

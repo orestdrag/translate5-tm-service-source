@@ -68,7 +68,7 @@ USHORT TmtXOpen
   DEBUGEVENT( TMTXOPEN_LOC, FUNCENTRY_EVENT, 0 );
 
   //allocate control block
-  fOK = UtlAlloc( (PVOID *) &(pTmClb), 0L, (LONG)sizeof( TMX_CLB ), NOMSG );
+  fOK = UtlAlloc( (PVOID *) &(pTmClb), 0L, (LONG)sizeof( EqfMemory ), NOMSG );
 
   if ( !fOK )
   {
@@ -168,7 +168,7 @@ USHORT TmtXOpen
 
           if ( usTempRc == BTREE_READ_ERROR ) 
               usTempRc = BTREE_CORRUPTED;
-          usTempRc = NTMCreateLangGroupTable( pTmClb );
+          usTempRc = pTmClb->NTMCreateLangGroupTable();
 
           if ( usTempRc != NO_ERROR )
           {
@@ -265,10 +265,10 @@ USHORT TmtXOpen
                 // O.K. no problems at all
                 break;
               case BTREE_NOT_FOUND :
-              T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable( pTmClb );";
+              T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable();";
 #ifdef TEMPORARY_COMMENTED
                 // no long name tabel yet,create one ...
-                usTempRc = NTMWriteLongNameTable( pTmClb );
+                usTempRc = pTmClb->NTMWriteLongNameTable();
                 #endif
                 break;
               default:
@@ -359,10 +359,10 @@ USHORT TmtXOpen
        (usRc != BTREE_CORRUPTED) &&
        (usRc != VERSION_MISMATCH) )
   {
-    EQFNTMClose( &pTmClb->TmBtree );
-    EQFNTMClose( &pTmClb->InBtree );
+    pTmClb->TmBtree.QDAMDictClose( );
+    pTmClb->InBtree.QDAMDictClose( );
 
-    NTMDestroyLongNameTable( pTmClb );
+    pTmClb->NTMDestroyLongNameTable();
     UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
   } /* endif */
 
@@ -464,7 +464,7 @@ USHORT EqfMemory::OpenX()
 
           if ( usTempRc == BTREE_READ_ERROR ) 
               usTempRc = BTREE_CORRUPTED;
-          usTempRc = NTMCreateLangGroupTable( this );
+          usTempRc = NTMCreateLangGroupTable();
 
           if ( usTempRc != NO_ERROR )
           {
@@ -542,7 +542,7 @@ USHORT EqfMemory::OpenX()
              (usRc == VERSION_MISMATCH) )
         {
           // error in memory allocations will force end of open!
-          USHORT usTempRc = NTMCreateLongNameTable( this );
+          USHORT usTempRc = NTMCreateLongNameTable();
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
 
           // now read any long name table from database, if there is
@@ -550,7 +550,7 @@ USHORT EqfMemory::OpenX()
           // Translation Memory
           if ( usTempRc == NO_ERROR )
           {
-            usTempRc = NTMReadLongNameTable( this );
+            usTempRc = NTMReadLongNameTable();
 
             switch ( usTempRc)
             {
@@ -561,10 +561,10 @@ USHORT EqfMemory::OpenX()
                 // O.K. no problems at all
                 break;
               case BTREE_NOT_FOUND :
-              T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable( this );";
+              T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 48 usTempRc = NTMWriteLongNameTable();";
 #ifdef TEMPORARY_COMMENTED
                 // no long name tabel yet,create one ...
-                usTempRc = NTMWriteLongNameTable( this );
+                usTempRc = NTMWriteLongNameTable();
                 #endif
                 break;
               default:
@@ -655,10 +655,10 @@ USHORT EqfMemory::OpenX()
        (usRc != BTREE_CORRUPTED) &&
        (usRc != VERSION_MISMATCH) )
   {
-    EQFNTMClose( &TmBtree );
-    EQFNTMClose( &InBtree );
+    TmBtree.QDAMDictClose();
+    InBtree.QDAMDictClose();
 
-    NTMDestroyLongNameTable( this );
+    NTMDestroyLongNameTable( );
     //UtlAlloc( (PVOID *) &this, 0L, 0L, NOMSG );
   } /* endif */
 
