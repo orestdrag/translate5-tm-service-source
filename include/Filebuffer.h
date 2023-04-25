@@ -18,15 +18,15 @@ struct FileBuffer{
     std::string fileName;   
     long long originalFileSize = 0;
 
-    size_t ReadFromFile();
-    size_t WriteToFile(); 
-    size_t Flush();
-    int    SetOffset(size_t newOffset, int fileAnchor);
+    int ReadFromFile();
+    //int WriteToFile(); 
+    int Flush();
+    int SetOffset(size_t newOffset, int fileAnchor);
 
-    size_t Write(const void* buff, size_t buffSize, size_t startingPosition);
-    size_t Write(const void* buff, size_t buffSize);
-    size_t Read(void* buff, size_t buffSize, size_t startingPosition);
-    size_t Read(void* buff, size_t buffSize);
+    int Write(const void* buff, size_t buffSize, size_t startingPosition);
+    int Write(const void* buff, size_t buffSize);
+    int Read(void* buff, size_t buffSize, size_t startingPosition);
+    int Read(void* buff, size_t buffSize);
 
 
 } ;

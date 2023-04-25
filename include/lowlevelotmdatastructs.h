@@ -418,7 +418,6 @@ typedef struct _BTREEIDA
     USHORT       usFreeDataBuffer=0;               // first data buffer chain
     USHORT       usFirstDataBuffer=0;              // first data buffer
     BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
-    BOOL         fWriteHeaderPending=0;            // write of header pending
     LONG         lTime=0;                          // time of last update/open
     USHORT       usVersion=0;                      // version identification...
     CHAR         chEQF[7];                         // The type of file

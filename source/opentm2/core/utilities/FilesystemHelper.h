@@ -50,7 +50,7 @@ public:
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead);
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 
-    static bool FileExists(std::string&& fName);
+    static bool FileExists(const std::string& fName);
     static int DeleteFile(const std::string& path);
     static int RemoveDirWithFiles(const std::string& path);
     static size_t GetFileSize(const std::string& path);
@@ -100,8 +100,10 @@ public:
         FILEHELPER_ERROR_FILE_NOT_READ,
         FILEHELPER_ERROR_READING_OUT_OF_RANGE,
         FILEHELPER_FILE_IS_NOT_MODIFIED,
+        FILEHELPER_ERROR_DATA_SIZE_BIGGER_THAN_RECORD_SIZE,
         
         FILEHELPER_ERROR_NO_FILES_FOUND,
+        FILEHELPER_ERROR_WRONG_FILENAME,
 
         FILEHELPER_ERROR_CANT_OPEN_DIR,
 

@@ -911,7 +911,7 @@ int EqfMemory::OtmProposalToGetIn
   
   //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
   int threshold = TM_DEFAULT_THRESHOLD;
-  Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
+  //Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
   pGetIn->stTmGet.usMatchThreshold = threshold;
   pGetIn->stTmGet.ulSegmentId = Proposal.getSegmentNum();
   pGetIn->stTmGet.pvReplacementList = (PVOID)Proposal.getReplacementList();
@@ -1007,9 +1007,10 @@ int EqfMemory::UnloadFromRAM(){
     //file is in mem
     return -1;
   }
-  TmBtree.fb.WriteToFile();
-  InBtree.fb.WriteToFile();
-  
+  //TmBtree.fb.WriteToFile();
+  //InBtree.fb.WriteToFile();
+  TmBtree.fb.Flush();
+  InBtree.fb.Flush();
   return 0;
 }
 
