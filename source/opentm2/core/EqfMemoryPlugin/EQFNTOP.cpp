@@ -60,7 +60,7 @@ USHORT TmtXOpen
 )
 {
   BOOL fOK;                      //success indicator
-  PTMX_CLB pTmClb = NULL;        //pointer to control block
+  EqfMemory* pTmClb = NULL;        //pointer to control block
   USHORT usRc = NO_ERROR;        //return value
   USHORT usRc1 = NO_ERROR;       //return value
   ULONG  ulLen;                  //length indicator
@@ -246,7 +246,7 @@ USHORT TmtXOpen
              (usRc == VERSION_MISMATCH) )
         {
           // error in memory allocations will force end of open!
-          USHORT usTempRc = NTMCreateLongNameTable( pTmClb );
+          USHORT usTempRc = pTmClb->NTMCreateLongNameTable();
           if ( usTempRc == BTREE_READ_ERROR ) usTempRc = BTREE_CORRUPTED;
 
           // now read any long name table from database, if there is
@@ -254,7 +254,7 @@ USHORT TmtXOpen
           // Translation Memory
           if ( usTempRc == NO_ERROR )
           {
-            usTempRc = NTMReadLongNameTable( pTmClb );
+            usTempRc = pTmClb->NTMReadLongNameTable();
 
             switch ( usTempRc)
             {

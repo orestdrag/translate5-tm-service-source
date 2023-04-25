@@ -58,10 +58,10 @@
 /* prototypes for internal functions                                  */
 /**********************************************************************/
 int NTMCompNames( const void *, const void * );
-USHORT NTMGetPointersToTable( PTMX_CLB, USHORT, PTMX_TABLE *,
+USHORT NTMGetPointersToTable( EqfMemory*, USHORT, PTMX_TABLE *,
                               PTMX_TABLE_ENTRY * );
 USHORT NTMCheckPropFile( PSZ, PVOID *);
-USHORT NTMAddNameToTable( PTMX_CLB, PSZ, USHORT, PUSHORT );
+USHORT NTMAddNameToTable( EqfMemory*, PSZ, USHORT, PUSHORT );
 int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 
@@ -72,7 +72,7 @@ int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 //+----------------------------------------------------------------------------+
 //|Function name:     NTMGetIDFromName                                         |
 //+----------------------------------------------------------------------------+
-//|Function call:     NTMGetIDFromName( PTMX_CLB pTmClb,    //input            |
+//|Function call:     NTMGetIDFromName( EqfMemory* pTmClb,    //input            |
 //|                                     PSZ      pszName,     //input          |
 //|                                     USHORT   usTableType, //input          |
 //|                                     PUSHORT  pusID   )    //output         |
@@ -172,7 +172,7 @@ int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 //| return usRc;                                                               |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetIDFromName( PTMX_CLB pTmClb,   // input
+NTMGetIDFromName( EqfMemory* pTmClb,   // input
                   PSZ      pszName,    // input
                   PSZ      pszLongName, // input, long name (only for FILE_KEY)
                   USHORT   usTableType,   //input
@@ -193,7 +193,7 @@ NTMGetIDFromName( PTMX_CLB pTmClb,   // input
 // the short name table as well
 USHORT NTMGetIDFromNameEx
 ( 
-  PTMX_CLB    pTmClb,                  // input, memory control block pointer 
+  EqfMemory*    pTmClb,                  // input, memory control block pointer 
   PSZ         pszName,                 // input, name being looked up
   PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
@@ -542,7 +542,7 @@ USHORT NTMGetIDFromNameEx
 //+----------------------------------------------------------------------------+
 //|Function name:     NTMGetNameFromID                                         |
 //+----------------------------------------------------------------------------+
-//|Function call:     NTMGetNameFromID( PTMX_CLB pTmClb,     //input           |
+//|Function call:     NTMGetNameFromID( EqfMemory* pTmClb,     //input           |
 //|                                     PUSHORT pusID,         //intput        |
 //|                                     USHORT  usTableType,   //input         |
 //|                                     PSZ     pszName )      //output        |
@@ -607,7 +607,7 @@ USHORT NTMGetIDFromNameEx
 //|   return usRc;                                                             |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetNameFromID( PTMX_CLB pTmClb,      //input
+NTMGetNameFromID( EqfMemory* pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType,   //input
                   PSZ      pszName,       //output
@@ -699,7 +699,7 @@ NTMGetNameFromID( PTMX_CLB pTmClb,      //input
 } /* end of function NTMGetNameFromID */
 
 
-PSZ NTMFindNameForID( PTMX_CLB pTmClb,      //input
+PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType )  // input
 
@@ -839,7 +839,7 @@ NTMCompNames( const void * pstTMTableEntry1,  //input
 //|Function name:     NTMGetPointersToTable                                    |
 //+----------------------------------------------------------------------------+
 //|Function call:                                                              |
-//| NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input      |
+//| NTMGetPointersToTable( EqfMemory*         pTmClb,             //input      |
 //|                        USHORT           usTableType,          //input      |
 //|                        PTMX_TABLE       *ppstTMTable,         //output     |
 //|                        PTMX_TABLE_ENTRY *ppstTMTableEntries ) //output     |
@@ -878,7 +878,7 @@ NTMCompNames( const void * pstTMTableEntry1,  //input
 //| return usRc                                                                |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetPointersToTable( PTMX_CLB         pTmClb,             //input
+NTMGetPointersToTable( EqfMemory*         pTmClb,             //input
                        USHORT           usTableType,          //input
                        PTMX_TABLE       *ppstTMTable,         //output
                        PTMX_TABLE_ENTRY *ppstTMTableEntries ) //output
@@ -1126,7 +1126,7 @@ NTMCheckPropFile( PSZ    pszPropName,
 //|Description:       Physically lock or unlock the data and the index file    |
 //|                   of the given TM                                          |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb,            pointer to control block     |
+//|Parameters:        EqfMemory* pTmClb,            pointer to control block     |
 //|                   BOOL    fLock               TRUE = Lock, FALSE = Unlock  |
 //|                   PBOOL   pfLocked            set to TRUE if TM has been   |
 //|                                               locked                       |
@@ -1135,7 +1135,7 @@ NTMCheckPropFile( PSZ    pszPropName,
 // ----------------------------------------------------------------------------+
 USHORT NTMLockTM
 (
-  PTMX_CLB    pTmClb,                  // pointer to control block
+  EqfMemory*    pTmClb,                  // pointer to control block
   BOOL        fLock,                   // TRUE = Lock, FALSE = Unlock
   PBOOL       pfLocked                 // set to TRUE if TM has been locked
 )
@@ -1209,13 +1209,13 @@ USHORT NTMLockTM
 //|Description:       Check if the in-memory tables of the TM have been        |
 //|                   modified in the database and reload modified tables.     |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB pTmClb,            pointer to control block     |
+//|Parameters:        EqfMemory* pTmClb,            pointer to control block     |
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT                                                   |
 // ----------------------------------------------------------------------------+
 USHORT NTMCheckForUpdates
 (
-  PTMX_CLB    pTmClb                   // pointer to control block
+  EqfMemory*    pTmClb                   // pointer to control block
 )
 {
  USHORT usRc = 0;                      // function return code
@@ -1315,7 +1315,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
      NTMDestroyLongNameTable( pTmClb );
 
      // create a new and empty long name table
-     usRc = NTMCreateLongNameTable( pTmClb );
+     usRc = pTmClb->NTMCreateLongNameTable();
 
      // Get new table
      if ( !usRc )
@@ -1348,25 +1348,22 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 49 usRc = EQFNTMGetUpdCoun
 //+----------------------------------------------------------------------------+
 //|Description:       Creates an empty table for long document names.          |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB   pTmClb           pointer to control block     |
+//|Parameters:        EqfMemory*   pTmClb           pointer to control block     |
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
 // ----------------------------------------------------------------------------+
-USHORT NTMCreateLongNameTable
-(
-  PTMX_CLB    pTmClb                   // pointer to control block
-)
+USHORT EqfMemory::NTMCreateLongNameTable()
 {
   USHORT      usRC = NO_ERROR;         // function return code
 
   // allocate initial long name pointer array
-  if ( UtlAlloc( (PVOID *)&(pTmClb->pLongNames), 0L, (ULONG)
+  if ( UtlAlloc( (PVOID *)&(pLongNames), 0L, (ULONG)
                  (sizeof(TMX_LONGNAMETABLE) +
                   sizeof(TMX_LONGNAME_TABLE_ENTRY) * LONGNAMETABLE_ENTRIES),
                  NOMSG ) )
   {
-    pTmClb->pLongNames->ulTableSize = LONGNAMETABLE_ENTRIES;
-    pTmClb->pLongNames->ulEntries   = 0;
+    pLongNames->ulTableSize = LONGNAMETABLE_ENTRIES;
+    pLongNames->ulEntries   = 0;
   }
   else
   {
@@ -1374,13 +1371,13 @@ USHORT NTMCreateLongNameTable
   } /* endif */
 
   // allocate initial long name pointer array for case ignore search
-  if ( UtlAlloc( (PVOID *)&(pTmClb->pLongNamesCaseIgnore), 0L, (ULONG)
+  if ( UtlAlloc( (PVOID *)&(pLongNamesCaseIgnore), 0L, (ULONG)
                  (sizeof(TMX_LONGNAMETABLE) +
                   sizeof(TMX_LONGNAME_TABLE_ENTRY) * LONGNAMETABLE_ENTRIES),
                  NOMSG ) )
   {
-    pTmClb->pLongNamesCaseIgnore->ulTableSize = LONGNAMETABLE_ENTRIES;
-    pTmClb->pLongNamesCaseIgnore->ulEntries   = 0;
+    pLongNamesCaseIgnore->ulTableSize = LONGNAMETABLE_ENTRIES;
+    pLongNamesCaseIgnore->ulEntries   = 0;
   }
   else
   {
@@ -1390,11 +1387,11 @@ USHORT NTMCreateLongNameTable
   // allocate initial long name buffer area
   if ( usRC == NO_ERROR )
   {
-    if ( UtlAlloc( (PVOID *)&(pTmClb->pLongNames->pszBuffer), 0L,
+    if ( UtlAlloc( (PVOID *)&(pLongNames->pszBuffer), 0L,
                    (ULONG) LONGNAMEBUFFER_SIZE, NOMSG ) )
     {
-      pTmClb->pLongNames->ulBufSize = (ULONG)LONGNAMEBUFFER_SIZE;
-      pTmClb->pLongNames->ulBufUsed = (ULONG)sizeof(USHORT); // end-of-table delimiter
+      pLongNames->ulBufSize = (ULONG)LONGNAMEBUFFER_SIZE;
+      pLongNames->ulBufUsed = (ULONG)sizeof(USHORT); // end-of-table delimiter
     }
     else
     {
@@ -1405,7 +1402,7 @@ USHORT NTMCreateLongNameTable
   // cleanup in case of errors
   if ( usRC != NO_ERROR )
   {
-    NTMDestroyLongNameTable( pTmClb );
+    NTMDestroyLongNameTable( );
   } /* endif */
 
   // return to caller
@@ -1423,13 +1420,13 @@ USHORT NTMCreateLongNameTable
 //|Description:       Destroys a long name table and frees the memory occupied |
 //|                   by it.                                                   |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB   pTmClb           pointer to control block     |
+//|Parameters:        EqfMemory*   pTmClb           pointer to control block     |
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
 // ----------------------------------------------------------------------------+
 USHORT NTMDestroyLongNameTable
 (
-  PTMX_CLB    pTmClb                   // pointer to control block
+  EqfMemory*    pTmClb                   // pointer to control block
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1468,13 +1465,13 @@ USHORT NTMDestroyLongNameTable
 //+----------------------------------------------------------------------------+
 //|Description:       Reads the data of a long name table from the database.   |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PTMX_CLB   pTmClb           pointer to control block     |
+//|Parameters:        EqfMemory*   pTmClb           pointer to control block     |
 //+----------------------------------------------------------------------------+
 //|Returncode type:   USHORT     error return code or NO_ERROR if O.K.         |
 // ----------------------------------------------------------------------------+
 USHORT NTMReadLongNameTable
 (
-  PTMX_CLB    pTmClb                   // pointer to control block
+  EqfMemory*    pTmClb                   // pointer to control block
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1673,7 +1670,7 @@ USHORT NTMReadLongNameTable
 //+----------------------------------------------------------------------------+
 //|Function name:     NTMAddNameToTable                                        |
 //+----------------------------------------------------------------------------+
-//|Function call:     NTMAddNameToTable( PTMX_CLB pTmClb,    //input           |
+//|Function call:     NTMAddNameToTable( EqfMemory* pTmClb,    //input           |
 //|                                      PSZ      pszName,     //input         |
 //|                                      USHORT   usTableType, //input         |
 //|                                      PUSHORT  pusID   )    //output        |
@@ -1705,7 +1702,7 @@ USHORT NTMReadLongNameTable
 // ----------------------------------------------------------------------------+
 USHORT NTMAddNameToTable
 (
-  PTMX_CLB pTmClb,                   // input
+  EqfMemory* pTmClb,                   // input
   PSZ      pszName,                    // input
   USHORT   usTableType,                //input
   PUSHORT  pusID                       //output
@@ -1899,7 +1896,7 @@ int NTMLongNameTableCompCaseIgnore
 // ----------------------------------------------------------------------------+
 USHORT NTMSaveNameTable
 (
-  PTMX_CLB    pTmClb,                  // ptr to TM control block
+  EqfMemory*    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
   PBYTE       pTMTable,                // ptr to table data
   ULONG       ulSize                   // size of table data
@@ -1925,7 +1922,7 @@ USHORT NTMSaveNameTable
 // ----------------------------------------------------------------------------+
 USHORT NTMLoadNameTable
 (
-  PTMX_CLB    pTmClb,                  // ptr to TM control block
+  EqfMemory*    pTmClb,                  // ptr to TM control block
   ULONG       ulTableKey,              // key of table record
   PTMX_TABLE  pTMTable,                // ptr to table data pointer
   PULONG      pulSize                  // ptr to buffer for size of table data
@@ -2076,7 +2073,7 @@ USHORT NTMLoadNameTable
 
 USHORT NTMAddLangGroup
 (
-  PTMX_CLB    pTmClb,                  // ptr to TM control block
+  EqfMemory*    pTmClb,                  // ptr to TM control block
   PSZ         pszLang,                 // ptr to language name
   USHORT      sLangID                  // ID of language in our tables
 )
@@ -2142,7 +2139,7 @@ USHORT NTMAddLangGroup
 
 USHORT NTMCreateLangGroupTable
 (
-  PTMX_CLB    pTmClb                   // ptr to TM control block
+  EqfMemory*    pTmClb                   // ptr to TM control block
 )
 {
   USHORT usRC = NO_ERROR;
@@ -2190,7 +2187,7 @@ USHORT NTMCreateLangGroupTable
 //
 USHORT NTMOrganizeIndexFile
 (
-  PTMX_CLB pTmClb               // ptr to control block,
+  EqfMemory* pTmClb               // ptr to control block,
 )
 {
   USHORT usRC = NO_ERROR;

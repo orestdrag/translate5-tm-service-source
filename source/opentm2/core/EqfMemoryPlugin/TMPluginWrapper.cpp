@@ -382,11 +382,11 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 // Description:       Tokenizes a string and stores all tags and terms found.   
 //------------------------------------------------------------------------------
-// Function call:     TokenizeSource( PTMX_CLB pClb,  //ptr to ctl block        
+// Function call:     TokenizeSource( EqfMemory* pClb,  //ptr to ctl block        
 //                                PTMX_SENTENCE pSentence, //ptr sent struct    
 //                                PSZ pTagTableName )  //name of tag table      
 //------------------------------------------------------------------------------
-// Input parameter:   PTMX_CLB  pClb           control block                    
+// Input parameter:   EqfMemory*  pClb           control block                    
 //                    PTMX_SENTENCE pSentence  sentence structure               
 //                    PSZ      pTagTableName  name of tag table                 
 //                    USHORT usVersion       version of TM                      
@@ -419,7 +419,7 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 USHORT TokenizeSource
 (
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
+   EqfMemory* pClb,                       // pointer to control block (Null if called outside of Tm functions)
    PTMX_SENTENCE pSentence,             // pointer to sentence structure
    PSZ pTagTableName,                   // name of tag table
    PSZ pSourceLang                      // source language

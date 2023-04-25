@@ -22,7 +22,7 @@
 
 static USHORT ExtractRecordV5
 (
-  PTMX_CLB        pTmClb,         //ptr to ctl block struct
+  EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
   PTMX_EXT_OUT_W  pTmExtOut,
@@ -32,7 +32,7 @@ static USHORT ExtractRecordV5
 static
 USHORT FillExtStructureV5
 (
-  PTMX_CLB    pTmClb,                  //ptr to control block
+  EqfMemory*    pTmClb,                  //ptr to control block
   PTMX_TARGET_RECORD pTMXTargetRecord, //ptr to tm target
   PTMX_OLD_TARGET_CLB    pTargetClb,   // ptr to current target CLB
   PSZ         pSourceString,           //ptr to source string
@@ -44,7 +44,7 @@ USHORT FillExtStructureV5
 
 static USHORT ExtractRecordV6
 (
-  PTMX_CLB        pTmClb,         //ptr to ctl block struct
+  EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
   PTMX_EXT_OUT_W  pTmExtOut
@@ -58,11 +58,11 @@ static USHORT ExtractRecordV6
 //+----------------------------------------------------------------------------+
 //|Description:       Gets source and targets in sequential order              |
 //+----------------------------------------------------------------------------+
-//|Function call:  TmtXGet( PTMX_CLB pTmClb,        //ptr to ctl block struct  |
+//|Function call:  TmtXGet( EqfMemory* pTmClb,        //ptr to ctl block struct  |
 //|                         PTMX_EXT_IN pTmExtIn,   //ptr to input struct      |
 //|                         PTMX_EXT_OUT pTmExtOut ) //ptr to output struct    |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   PTMX_CLB  pTmClb         control block                   |
+//|Input parameter:   EqfMemory*  pTmClb         control block                   |
 //|                   PTMX_EXT_IN pTmExtIn     input structure                 |
 //+----------------------------------------------------------------------------+
 //|Output parameter:  PTMX_EXT_OUT pTmExtOut   output structure                |
@@ -89,7 +89,7 @@ static USHORT ExtractRecordV6
 
 USHORT TmtXExtract
 (
-  PTMX_CLB pTmClb,         //ptr to ctl block struct
+  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_EXT_IN_W  pTmExtIn, //ptr to input struct
   PTMX_EXT_OUT_W pTmExtOut //ptr to output struct
 )
@@ -382,7 +382,7 @@ USHORT TmtXExtract
 static
 USHORT ExtractRecordV6
 (
-  PTMX_CLB        pTmClb,         //ptr to ctl block struct
+  EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
   PTMX_EXT_OUT_W  pTmExtOut
@@ -617,14 +617,14 @@ USHORT ExtractRecordV6
 //+----------------------------------------------------------------------------+
 //|Description:       Fills the ext structure in sequential order              |
 //+----------------------------------------------------------------------------+
-//|Function call:  FillExtStructure( PTMX_CLB pTmClb, //ptr to control block   |
+//|Function call:  FillExtStructure( EqfMemory* pTmClb, //ptr to control block   |
 //|                         PTMX_TARGET_RECORD pTMXTargetRecord,               |
 //|                                             //ptr to target record         |
 //|                         PSZ pSourceString,  //ptr to source string         |
 //|                         PUSHORT pulSourceLen, //source string length       |
 //|                         PTMX_EXT pstExt ) //ptr to extract structure       |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   PTMX_CLB pTmClb                                          |
+//|Input parameter:   EqfMemory* pTmClb                                          |
 //|                   PTMX_TARGET_RECORD pTMXTargetRecord                      |
 //|                   PSZ pSourceString                                        |
 //|                   PUSHORT pulSourceLen                                     |
@@ -642,7 +642,7 @@ USHORT ExtractRecordV6
 
 USHORT FillExtStructure
 (
-  PTMX_CLB    pTmClb,                  //ptr to control block
+  EqfMemory*    pTmClb,                  //ptr to control block
   PTMX_TARGET_RECORD pTMXTargetRecord, //ptr to tm target
   PTMX_TARGET_CLB    pTargetClb,       // ptr to current target CLB
   PSZ_W pSourceString,                 //ptr to source string

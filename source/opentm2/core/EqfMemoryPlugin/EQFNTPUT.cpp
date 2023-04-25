@@ -142,11 +142,11 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 // Description:       Adds new data to database or modifies existing data       
 //------------------------------------------------------------------------------
-// Function call:  TmtXReplace( PTMX_CLB pTmClb,    //ptr to ctl block struct   
+// Function call:  TmtXReplace( EqfMemory* pTmClb,    //ptr to ctl block struct   
 //                             PTMX_PUT_IN pTmPutIn,  //ptr to input struct     
 //                             PTMX_PUT_OUT pTmPutOut ) //ptr to output struct  
 //------------------------------------------------------------------------------
-// Input parameter:   PTMX_CLB  pTmClb         control block                    
+// Input parameter:   EqfMemory*  pTmClb         control block                    
 //                    PTMX_PUT_IN pTmPutIn     input structure                  
 //------------------------------------------------------------------------------
 // Output parameter:  PTMX_PUT_OUT pTmPutOut   output structure                 
@@ -185,7 +185,7 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 USHORT TmtXReplace
 (
-  PTMX_CLB pTmClb,         //ptr to ctl block struct
+  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_PUT_IN_W pTmPutIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
@@ -672,7 +672,7 @@ Vote
 // Description:       calculate what percentage of triples already in tm        
 //------------------------------------------------------------------------------
 // Parameters:    PTMX_SENTENCE pstSentence pointer to sentence control struct  
-//                PTMX_CLB pTmClb         pointer to tm control block           
+//                EqfMemory* pTmClb         pointer to tm control block           
 //------------------------------------------------------------------------------
 // Returncode type:   USHORT  number of bits in compact area on                 
 //------------------------------------------------------------------------------
@@ -682,7 +682,7 @@ Vote
 USHORT CheckCompactArea
 (
   PTMX_SENTENCE pSentence,             // pointer to sentence structure
-  PTMX_CLB  pTmClb                     // pointer to tm control block
+  EqfMemory*  pTmClb                     // pointer to tm control block
 )
 {                        
   PULONG pulVotes = pSentence->pulVotes; // pointer to begin of votes                           
@@ -755,7 +755,7 @@ USHORT TokenizeTarget
    PLONG pulTagAlloc,                  // size of allocated area for tag record
    PSZ pTagTableName,                  // name of tag table
    PUSHORT pusNormLen,                 // length of normalized string
-   PTMX_CLB pClb                       // pointer to control block
+   EqfMemory* pClb                       // pointer to control block
 )
 {
   PVOID     pTokenList = NULL;         // ptr to token table
@@ -970,7 +970,7 @@ USHORT TokenizeTarget
 //------------------------------------------------------------------------------
 // Input parameter:   PTMX_RECORD pTmRecord                                     
 //                    PTMX_SENTENCE pSentence                                   
-//                    PTMX_CLB pTmClb                                           
+//                    EqfMemory* pTmClb                                           
 //                    PTMX_PUT pTmPut                                           
 //                    PULONG pulNewKey                                          
 //------------------------------------------------------------------------------
@@ -1000,7 +1000,7 @@ USHORT TokenizeTarget
 USHORT AddToTm
 (
   PTMX_SENTENCE pSentence,            // ptr to sentence structure
-  PTMX_CLB pTmClb,                    // ptr to control block
+  EqfMemory* pTmClb,                    // ptr to control block
   PTMX_PUT_W pTmPut,                  // ptr to put input structure
   PULONG pulNewKey                    // sid of newly added tm record
 )
@@ -1225,11 +1225,11 @@ VOID FillTmRecord
 // Description:       Fill target control block                                 
 //------------------------------------------------------------------------------
 // Function call:     FillClb( PTMX_TARGET_CLB * ppTargetClb,//ptr to ctl block 
-//                             PTMX_CLB pTmClb,  // ptr to tm ctl block         
+//                             EqfMemory* pTmClb,  // ptr to tm ctl block         
 //                             PTMX_PUT pTmPut ) // ptr to put input struct     
 //------------------------------------------------------------------------------
 // Input parameter:   PTMX_PUT pTmPut         put input structure               
-//                    PTMX_CLB pTmClb         tm control block                  
+//                    EqfMemory* pTmClb         tm control block                  
 //------------------------------------------------------------------------------
 // Output parameter:  PTM_TARGET_CLB * ppClb  //ptr to target control block     
 //------------------------------------------------------------------------------
@@ -1250,7 +1250,7 @@ VOID FillTmRecord
 USHORT FillClb
 (
   PTMX_TARGET_CLB * ppTargetClb,    // ptr to target control block
-  PTMX_CLB pTmClb,                  // ptr to tm control block
+  EqfMemory* pTmClb,                  // ptr to tm control block
   PTMX_PUT_W pTmPut                 // ptr to put input structure
 )
 {
@@ -1330,11 +1330,11 @@ USHORT FillClb
 //+---------------------------------------------------------------------------- 
 // Function call:     UpdateTmIndex( PTMX_SENTENCE  pSentence,//sent struct     
 //                                   ULONG  ulSidKey,     //tm record key       
-//                                   PTMX_CLB pTmClb) //ptr to tm ctl block     
+//                                   EqfMemory* pTmClb) //ptr to tm ctl block     
 //------------------------------------------------------------------------------
 // Input parameter: PTMX_SENTENCE pSentence                                     
 //                  ULONG  ulSidKey                                             
-//                  PTMX_CLB pTmClb                                             
+//                  EqfMemory* pTmClb                                             
 //------------------------------------------------------------------------------
 // Returncode type: USHORT                                                      
 //------------------------------------------------------------------------------
@@ -1362,7 +1362,7 @@ USHORT UpdateTmIndex
 (
   PTMX_SENTENCE  pSentence,            //pointer to sentence structure
   ULONG  ulSidKey,                     //tm record key
-  PTMX_CLB pTmClb                      //ptr to tm control block
+  EqfMemory* pTmClb                      //ptr to tm control block
 )
 {
   USHORT   usRc = 0;                   // return code
@@ -1567,11 +1567,11 @@ USHORT UpdateTmIndex
 // Description:       This function returns a list of all legitimate sentence   
 //                    keys                                                      
 //+---------------------------------------------------------------------------- 
-// Function call:  DetermineTmRecord( PTMX_CLB pTmClb,                          
+// Function call:  DetermineTmRecord( EqfMemory* pTmClb,                          
 //                                    PTMX_SENTENCE pSentence,                  
 //                                    PULONG pulSids )                          
 //------------------------------------------------------------------------------
-// Input parameter: PTMX_CLB pTmClb                                             
+// Input parameter: EqfMemory* pTmClb                                             
 //                  PTMX_SENTENCE pSentence                                     
 //------------------------------------------------------------------------------
 // Output parameter:  PULONG pulSids                                            
@@ -1594,7 +1594,7 @@ USHORT UpdateTmIndex
 
 USHORT DetermineTmRecord
 (
-  PTMX_CLB pTmClb,                   // ptr to tm control block
+  EqfMemory* pTmClb,                   // ptr to tm control block
   PTMX_SENTENCE pSentence,           // ptr to sentence structure
   PULONG pulSids                     // ptr to tm record
 )
@@ -1782,11 +1782,11 @@ USHORT DetermineTmRecord
 //                    multiple flag to true or replaces an existing target      
 //                    record                                                    
 //+---------------------------------------------------------------------------- 
-// Function call:     UpdateTmRecord( PTMX_CLB pTmClb,                          
+// Function call:     UpdateTmRecord( EqfMemory* pTmClb,                          
 //                                    PTMX_PUT pTmPut,                          
 //                                    PTMX_SENTENCE pSentence                   
 //------------------------------------------------------------------------------
-// Input parameter: PTMX_CLB                                                    
+// Input parameter: EqfMemory*                                                    
 //                  PTMX_PUT                                                    
 //                  PTMX_SENTENCE                                               
 //------------------------------------------------------------------------------
@@ -1808,7 +1808,7 @@ USHORT DetermineTmRecord
 
 USHORT UpdateTmRecord
 (
-  PTMX_CLB      pTmClb,                //ptr to tm control block
+  EqfMemory*      pTmClb,                //ptr to tm control block
   PTMX_PUT_W    pTmPut,                //pointer to get in data
   PTMX_SENTENCE pSentence              //ptr to sentence structure
 )
@@ -1928,13 +1928,13 @@ USHORT UpdateTmRecord
 //                    multiple flag to true or replaces an existing target      
 //                    record                                                    
 //+---------------------------------------------------------------------------- 
-// Function call:     ComparePutData( PTMX_CLB pTmClb,                          
+// Function call:     ComparePutData( EqfMemory* pTmClb,                          
 //                                    PTMX_RECORD pTmRecord,                    
 //                                    PTMX_PUT pTmPut,                          
 //                                    PTMX_SENTENCE pSentence,                  
 //                                    PULONG pulKey                             
 //------------------------------------------------------------------------------
-// Input parameter: PTMX_CLB pTmClb                                             
+// Input parameter: EqfMemory* pTmClb                                             
 //                  PTMX_RECORD pTmRecord                                       
 //                  PTMX_PUT pTmPut                                             
 //                  PTMX_SENTENCE pSentence                                     
@@ -1970,7 +1970,7 @@ USHORT UpdateTmRecord
 //------------------------------------------------------------------------------
 USHORT ComparePutData
 (
-  PTMX_CLB    pTmClb,                  // ptr to ctl block struct
+  EqfMemory*    pTmClb,                  // ptr to ctl block struct
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
   PULONG      pulRecBufSize,           // current size of record buffer
   PTMX_PUT_W  pTmPut,                  // pointer to get in data
@@ -2306,13 +2306,13 @@ USHORT ComparePutData
 //------------------------------------------------------------------------------
 // Description:       Adds a new target to tm record                            
 //+---------------------------------------------------------------------------- 
-// Function call:     AddTmTarget( PTMX_CLB pTmClb,                             
+// Function call:     AddTmTarget( EqfMemory* pTmClb,                             
 //                                 PTMX_PUT pTmPut,                             
 //                                 PTMX_SENTENCE pSentence,                     
 //                                 PTMX_RECORD pTmRecord,                       
 //                                 PULONG pulKey )                              
 //------------------------------------------------------------------------------
-// Input parameter: PTMX_CLB pTmClb                                             
+// Input parameter: EqfMemory* pTmClb                                             
 //                  PTMX_PUT pTmPut                                             
 //                  PTMX_SENTENCE pSentence                                     
 //                  PTMX_RECORD pTmRecord                                       
@@ -2330,7 +2330,7 @@ USHORT ComparePutData
 //   insert tm record in tm data fill                                           
 //------------------------------------------------------------------------------
 USHORT AddTmTarget(
-  PTMX_CLB pTmClb,                  //ptr to ctl block struct
+  EqfMemory* pTmClb,                  //ptr to ctl block struct
   PTMX_PUT_W pTmPut,                //pointer to get in data
   PTMX_SENTENCE pSentence,          //pointer to sentence structure
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
@@ -2569,7 +2569,7 @@ VOID FillTargetRecord
 //------------------------------------------------------------------------------
 // Function call:  TmtXUpdSeg( pTmClb, pTmPutIn, ulUpdKey, usUpdTarget, usFlags 
 //------------------------------------------------------------------------------
-// Input parameter:   PTMX_CLB  pTmClb         control block                    
+// Input parameter:   EqfMemory*  pTmClb         control block                    
 //                    PTMX_PUT_IN pTmPutIn     input structure                  
 //                    ULONG       ulUpdKey     SID of record being updated      
 //                    USHORT      usUpdTarget  number of target being updated   
@@ -2577,7 +2577,7 @@ VOID FillTargetRecord
 //------------------------------------------------------------------------------
 USHORT TmtXUpdSeg
 (
-  PTMX_CLB    pTmClb,      // ptr to ctl block struct
+  EqfMemory*    pTmClb,      // ptr to ctl block struct
   PTMX_PUT_IN pTmPutIn,    // ptr to put input data
   ULONG       ulUpdKey,    // SID of record being updated
   USHORT      usUpdTarget, // number of target being updated
