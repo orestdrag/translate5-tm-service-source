@@ -24,6 +24,7 @@ public:
     static bool checkFileName(const std::string& path);
     static std::string parseFilename(const std::string path);
     static std::string parseDirectory(const std::string path);
+    static std::string RemovePathAndExtention(const std::string path);
     static PFileBufferMap getFileBufferInstance();
     static std::string FixPath(std::string& path);
 

@@ -991,8 +991,8 @@ int EqfMemory::setGlobalMemoryOptions
 
 // NewTM region
 EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
-  TmBtree.fb.fileName = NewTMManager::GetTmdPath(tmName);
-  InBtree.fb.fileName = NewTMManager::GetTmiPath(tmName);
+  TmBtree.fb.fileName = TMManager::GetTmdPath(tmName);
+  InBtree.fb.fileName = TMManager::GetTmiPath(tmName);
 
  strcpy(szName, tmName.c_str());
 }

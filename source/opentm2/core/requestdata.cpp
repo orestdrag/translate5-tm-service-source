@@ -11,6 +11,7 @@
 #include "FilesystemHelper.h"
 #include "OSWrapper.h"
 #include "LanguageFactory.H"
+#include <set>
 JSONFactory RequestData::json_factory;
 
 
@@ -491,8 +492,8 @@ int CreateMemRequestData::checkData(){
     // check if TM exists already
     if ( _rc_ == NO_ERROR )
     {
-      int res = NewTMManager::GetInstance()->TMExistsOnDisk(strMemName, false );
-      if ( res != NewTMManager::TMM_TM_NOT_FOUND )
+      int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName, false );
+      if ( res != TMManager::TMM_TM_NOT_FOUND )
       {
         T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName << "; res = "<< res;
         _rc_ = ERROR_MEM_NAME_EXISTS;
@@ -638,7 +639,7 @@ int ImportRequestData::parseJSON(){
 
   // check if memory exists
   //if ( EqfMemoryExists( this->OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str() ) != 0 )
-  if(NewTMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  if(TMManager::GetInstance()->TMExistsOnDisk(strMemName))
   {
     return( NOT_FOUND );
   }
@@ -683,6 +684,84 @@ int ImportRequestData::parseJSON(){
   return 0; 
 }
 
+int ListTMRequestData::execute(){
+  auto buildError = [&] (int errCode, bool getErrorFromEqf = false) mutable -> int{
+    unsigned short usRC = 0;
+    if(getErrorFromEqf)
+      1;//EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    else
+      usRC = _rc_;
+    //buildErrorReturn( usRC, outputMessage );
+    return errCode;
+  };
+
+  if ( _rc_ != 0 )
+    buildError(BAD_REQUEST);
+  
+  // get buffer size required for the list of TMs
+  LONG lBufferSize = 0;
+  //_rc_ = EqfListMem( this->hSession, NULL, &lBufferSize );
+
+  if ( _rc_ != 0 )
+    return buildError(INTERNAL_SERVER_ERROR, true);
+
+  // get the list of TMs
+  //PSZ pszBuffer = new char[lBufferSize];
+  //pszBuffer[0] = 0;//terminated to avoid garbage output
+
+  //_rc_ = EqfListMem( this->hSession, pszBuffer, &lBufferSize );
+  if ( _rc_ != 0 )
+  {
+    //delete pszBuffer;
+    return buildError(INTERNAL_SERVER_ERROR, true);
+  } /* endif */
+
+  // add all TMs to reponse area
+  std::stringstream jsonSS;
+  std::istringstream buffer;//(pszBuffer);
+  std::string strName;
+
+  jsonSS << "{\n\t\"Open\":[";
+  int elementCount = 0;
+  std::set<std::string> printedTMNames;
+  //while (std::getline(buffer, strName, ','))
+  for(auto& tmem: TMManager::GetInstance()->tms)
+  {
+    if(elementCount)//skip delim for first elem
+      jsonSS << ',';
+    
+    // add name to response area
+    jsonSS << "{ " << "\"name\": \"" << tmem.first << "\" }";
+    printedTMNames.emplace(tmem.first);
+    elementCount++;
+  } /* endwhile */
+
+  jsonSS << "],\n\t\"Available on disk\": [";
+
+  // get list of files
+  std::string memPath = FilesystemHelper::GetMemDir() + '*';
+  auto Files = FilesystemHelper::FindFiles(memPath);
+  elementCount = 0;
+  for(auto& file: Files){
+    std::string memName = FilesystemHelper::RemovePathAndExtention(file);
+    if(!TMManager::GetInstance()->TMExistsOnDisk(memName)){
+      if(!printedTMNames.count(memName)){
+        if(elementCount)//skip delim for first elem
+          jsonSS << ',';
+        
+        // add name to response area
+        jsonSS << "{ " << "\"name\": \"" << memName << "\" }";
+        printedTMNames.emplace(memName);
+        elementCount++;
+      }
+    }
+  }
+  jsonSS <<"]\n}";
+  outputMessage = jsonSS.str();
+  T5LOG( T5INFO) << "OtmMemoryServiceWorker::list()::strOutputParams = " << outputMessage << "; _rc_ = OK";
+  _rc_ = OK;
+  return _rc_;
+}
 
 int ImportRequestData::checkData(){
   if ( strTmxData.empty() )
@@ -803,7 +882,7 @@ int StatusMemRequestData::checkData() {
 
   // check if memory exists
   //if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
-  if(int res = NewTMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  if(int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
   {
     factory->startJSON( outputMessage );
     factory->addParmToJSON( outputMessage, "status", "not found" );
@@ -839,8 +918,8 @@ int ExportRequestData::checkData(){
 
   if(!_rc_)
   {
-    int res =  NewTMManager::GetInstance()->TMExistsOnDisk(strMemName, true );
-    if ( res != NewTMManager::TMM_NO_ERROR )
+    int res =  TMManager::GetInstance()->TMExistsOnDisk(strMemName, true );
+    if ( res != TMManager::TMM_NO_ERROR )
     {
       T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName<< "; res= " << res;
       return( _rest_rc_ =  NOT_FOUND );

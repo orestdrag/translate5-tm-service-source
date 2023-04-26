@@ -48,6 +48,13 @@ std::string FilesystemHelper::parseFilename(const std::string path){
     return path;
 }
 
+std::string FilesystemHelper::RemovePathAndExtention(const std::string path){
+    std::string filename = parseFilename(path);
+    std::size_t found = filename.rfind('.');
+    if (found!=std::string::npos)
+        return filename.substr(0,found);
+    return filename;
+}
 
 
 /*! \brief read a binary file into a Byte vector

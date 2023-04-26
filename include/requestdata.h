@@ -94,9 +94,9 @@ class ListTMRequestData:public RequestData{
 public:
     ListTMRequestData(): RequestData(COMMAND::LIST_OF_MEMORIES) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override { return 0;};
+    int checkData() override { return 0;};
+    int execute() override  ;
 };
 
 /*! \brief Data area for the processing of the importMemory function

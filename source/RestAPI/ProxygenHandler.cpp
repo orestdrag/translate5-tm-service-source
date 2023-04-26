@@ -92,18 +92,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   if(pRequest->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
 
     switch(pRequest->command){
-      //case COMMAND::STATUS_MEM:
-      //{
-      //  pRequest->_rest_rc_ = pMemService->getStatus( pRequest->strMemName, pRequest->outputMessage );
-      //  break;
-      //}
         
-      case COMMAND::LIST_OF_MEMORIES:
-      {
-        int ret = pMemService->list( pRequest->outputMessage );
-        pRequest->_rest_rc_ = 200;
-        break;
-      }
       case COMMAND::TAGREPLACEMENTTEST:
       {
         pRequest->_rest_rc_ = 200;
@@ -113,6 +102,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       case COMMAND::STATUS_MEM:
+      case COMMAND::LIST_OF_MEMORIES:
       {
         pRequest->run();
         break;

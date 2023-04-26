@@ -2406,15 +2406,15 @@ void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProp
 }
 
 
-std::string NewTMManager::GetTmdPath(const std::string& memName){
+std::string TMManager::GetTmdPath(const std::string& memName){
   return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMDATA;
 }
 
-std::string NewTMManager::GetTmiPath(const std::string& memName){
+std::string TMManager::GetTmiPath(const std::string& memName){
   return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMINDEX;
 }
 
-int NewTMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){  
+int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){  
   
   int logLevel= 0;
   if(!logErrorIfNotExists) logLevel = T5Logger::GetInstance()->suppressLogging();
@@ -2443,8 +2443,8 @@ int TMManager::OpenTM(const std::string& strMemName){
   }
   size_t requiredMemory = 0;
     {
-      requiredMemory += FilesystemHelper::GetFileSize( NewTMManager::GetTmdPath(strMemName));
-      requiredMemory += FilesystemHelper::GetFileSize( NewTMManager::GetTmiPath(strMemName));
+      requiredMemory += FilesystemHelper::GetFileSize( GetTmdPath(strMemName));
+      requiredMemory += FilesystemHelper::GetFileSize( GetTmiPath(strMemName));
       requiredMemory *= 1.2;
       //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
       //requiredMemory += strBody.size() * 2;
