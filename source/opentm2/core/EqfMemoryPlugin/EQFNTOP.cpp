@@ -163,7 +163,7 @@ USHORT TmtXOpen
 
           //call to obtain exact length of record
           ulLen = 0;
-          USHORT usTempRc = NTMLoadNameTable( pTmClb, LANG_KEY,
+          USHORT usTempRc = pTmClb->NTMLoadNameTable( LANG_KEY,
                                        &pTmClb->Languages, &ulLen );
 
           if ( usTempRc == BTREE_READ_ERROR ) 
@@ -181,7 +181,7 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( pTmClb, FILE_KEY,
+          USHORT usTempRc = pTmClb->NTMLoadNameTable( FILE_KEY,
                                        &pTmClb->FileNames,
                                        &ulLen );
 
@@ -203,7 +203,7 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( pTmClb, AUTHOR_KEY,
+          USHORT usTempRc = pTmClb->NTMLoadNameTable( AUTHOR_KEY,
                                        &pTmClb->Authors, &ulLen );
 
           // in organize mode allow continue if author name area is corrupted
@@ -224,7 +224,7 @@ USHORT TmtXOpen
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( pTmClb, TAGTABLE_KEY,
+          USHORT usTempRc = pTmClb->NTMLoadNameTable( TAGTABLE_KEY,
                                        &pTmClb->TagTables, &ulLen );
 
 
@@ -390,9 +390,7 @@ USHORT EqfMemory::OpenX()
   USHORT usRc = NO_ERROR;        //return value
   USHORT usRc1 = NO_ERROR;       //return value
   ULONG  ulLen;                  //length indicator
-
   {
-
     //TmBtree.fb.fileName = pTmOpenIn->stTmOpen.szDataName;
     //InBtree.fb.fileName = pTmOpenIn->stTmOpen.szIndexName;
     //call open function for data file
@@ -459,7 +457,7 @@ USHORT EqfMemory::OpenX()
 
           //call to obtain exact length of record
           ulLen = 0;
-          USHORT usTempRc = NTMLoadNameTable( this, LANG_KEY,
+          USHORT usTempRc = NTMLoadNameTable( LANG_KEY,
                                       &Languages, &ulLen );
 
           if ( usTempRc == BTREE_READ_ERROR ) 
@@ -477,7 +475,7 @@ USHORT EqfMemory::OpenX()
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( this, FILE_KEY,
+          USHORT usTempRc = NTMLoadNameTable( FILE_KEY,
                                        &FileNames,
                                        &ulLen );
 
@@ -499,7 +497,7 @@ USHORT EqfMemory::OpenX()
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( this, AUTHOR_KEY,
+          USHORT usTempRc = NTMLoadNameTable( AUTHOR_KEY,
                                        &Authors, &ulLen );
 
           // in organize mode allow continue if author name area is corrupted
@@ -520,7 +518,7 @@ USHORT EqfMemory::OpenX()
              (usRc == BTREE_CORRUPTED) ||
              (usRc == VERSION_MISMATCH) )
         {
-          USHORT usTempRc = NTMLoadNameTable( this, TAGTABLE_KEY,
+          USHORT usTempRc = NTMLoadNameTable( TAGTABLE_KEY,
                                        &TagTables, &ulLen );
 
 

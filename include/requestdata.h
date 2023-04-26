@@ -234,6 +234,11 @@ protected:
     int parseJSON() override ;
     int checkData() override ;
     int execute()   override ;
+
+
+    LONG lOptions = 0;
+    LOOKUPINMEMORYDATA Data;
+    MEMPROPOSAL Proposal;
 };
 
 

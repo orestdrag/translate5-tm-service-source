@@ -1699,7 +1699,7 @@ USHORT TMManager::APIQueryMem
   return( usRC );
 }
 
-static wchar_t* wcsupr(wchar_t *str)
+wchar_t* wcsupr(wchar_t *str)
 {       
     int len = wcslen(str);
     for(int i=0; i<len; i++) {
@@ -2121,7 +2121,7 @@ LONG TMManager::createHandle
   \param lSearchOptions combination of search options
   \returns TRUE if the proposal contains the searched string otherwise FALSE is returned
 */
-BOOL TMManager::searchInProposal
+BOOL searchInProposal
 ( 
   OtmProposal *pProposal,
   PSZ_W pszSearch,
@@ -2130,20 +2130,22 @@ BOOL TMManager::searchInProposal
 {
   BOOL   fFound = FALSE;
 
+  wchar_t szSegmentText[MAX_SEGMENT_SIZE +1];
+
   if ( !fFound && (lSearchOptions & SEARCH_IN_SOURCE_OPT) )
   {
-    pProposal->getSource( m_szSegmentText, sizeof(m_szSegmentText)/sizeof(CHAR_W) );
-    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSegmentText );
-    if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSegmentText );
-    fFound = findString( m_szSegmentText, pszSearch );
+    pProposal->getSource( szSegmentText, MAX_SEGMENT_SIZE );
+    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( szSegmentText );
+    if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( szSegmentText );
+    fFound = findString( szSegmentText, pszSearch );
   }
 
   if ( !fFound && (lSearchOptions & SEARCH_IN_TARGET_OPT)  )
   {
-    pProposal->getTarget( m_szSegmentText, sizeof(m_szSegmentText)/sizeof(CHAR_W) );
-    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( m_szSegmentText );
-    if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( m_szSegmentText );
-    fFound = findString( m_szSegmentText, pszSearch );
+    pProposal->getTarget( szSegmentText, MAX_SEGMENT_SIZE );
+    if ( lSearchOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( szSegmentText );
+    if ( lSearchOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( szSegmentText );
+    fFound = findString( szSegmentText, pszSearch );
   }
 
   return( fFound );
@@ -2154,7 +2156,7 @@ BOOL TMManager::searchInProposal
   \param pszSearch pointer to the search string
   \returns TRUE if the data contains the searched string otherwise FALSE is returned
 */
-BOOL TMManager::findString
+BOOL findString
 ( 
   PSZ_W pszData,
   PSZ_W pszSearch
@@ -2196,7 +2198,7 @@ BOOL TMManager::findString
   \param pSearch pointer to search string
   \returns 0 if search string matches data
 */
-SHORT TMManager::compareString
+SHORT compareString
 (
   PSZ_W   pData,
   PSZ_W   pSearch
@@ -2227,7 +2229,7 @@ SHORT TMManager::compareString
   \param pszString pointer to the string being normalized
   \returns 0 in any case
 */
-SHORT TMManager::normalizeWhiteSpace
+SHORT normalizeWhiteSpace
 (
   PSZ_W   pszData
 )
@@ -2259,7 +2261,7 @@ SHORT TMManager::normalizeWhiteSpace
   \param pOtmProposal pointer to OtmProposal object
   \returns 0 in any case
 */
-void TMManager::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal )
+void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal )
 {
   if ( (pProposal == NULL) || (pOtmProposal == NULL) ) return;
 
@@ -2303,7 +2305,7 @@ void TMManager::copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposa
   \param pOtmProposal pointer to OtmProposal object
   \returns 0 in any case
 */
-void TMManager::copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProposal  )
+void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProposal  )
 {
   if ( (pProposal == NULL) || (pOtmProposal == NULL) ) return;
 

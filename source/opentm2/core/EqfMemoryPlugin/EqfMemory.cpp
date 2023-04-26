@@ -251,7 +251,7 @@ int EqfMemory::putProposal
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  this->OtmProposalToPutIn( Proposal, &TmPutIn );
+  OtmProposalToPutIn( Proposal, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
     std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
@@ -574,7 +574,7 @@ int EqfMemory::deleteProposal
 {
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-  int iRC = this->OtmProposalToPutIn( Proposal, &TmPutIn );
+  int iRC = OtmProposalToPutIn( Proposal, &TmPutIn );
   
 
 	if ( !iRC ) 
@@ -853,7 +853,7 @@ int EqfMemory::MatchToOtmProposal
     \param pPutIn pointer to the TMX_PUT_IN_W structure
   	\returns 0 or error code in case of errors
 */
-int EqfMemory::OtmProposalToPutIn
+int OtmProposalToPutIn
 (
   OtmProposal &Proposal,
   PTMX_PUT_IN_W pPutIn
