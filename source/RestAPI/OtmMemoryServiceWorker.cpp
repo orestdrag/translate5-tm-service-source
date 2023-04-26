@@ -191,38 +191,6 @@ int OtmMemoryServiceWorker::buildErrorReturn
 
 
 
-/*! \brief convert a long time value into the UTC date/time format
-    \param lTime long time value
-    \param pszDateTime buffer receiving the converted date and time
-  \returns 0 
-*/
-int OtmMemoryServiceWorker::convertTimeToUTC( LONG lTime, char *pszDateTime )
-{
-  struct tm   *pTimeDate;            // time/date structure
-
-  if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
-
-  pTimeDate = gmtime( (time_t *)&lTime );
-  if ( pTimeDate->tm_isdst == 1 )
-  {
-    // correct summertime offset
-    lTime -= 3600; 
-    pTimeDate = gmtime( (time_t *)&lTime );
-    
-  }
-  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
-  {
-    sprintf( pszDateTime, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
-             pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,
-             pTimeDate->tm_hour, pTimeDate->tm_min, pTimeDate->tm_sec );
-  }
-  else
-  {
-    *pszDateTime = 0;
-  } /* endif */
-
-  return( 0 );
-}
 
 /*! \brief convert a long time value to a date time string in the form YYYY-MM-DD HH:MM:SS
 \param lTime long time value
@@ -1391,7 +1359,7 @@ int OtmMemoryServiceWorker::updateEntry
     LONG            lTimeStamp;             // buffer for current time
     time( (time_t*)&lTimeStamp );
     lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    this->convertTimeToUTC( lTimeStamp, pData->szDateTime );
+    convertTimeToUTC( lTimeStamp, pData->szDateTime );
   }
   wcscpy( pProp->szAddInfo, pData->szAddInfo );
 
@@ -1582,7 +1550,7 @@ int OtmMemoryServiceWorker::deleteEntry
     LONG            lTimeStamp;             // buffer for current time
     time( (time_t*)&lTimeStamp );
     lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    this->convertTimeToUTC( lTimeStamp, pData->szDateTime );
+    convertTimeToUTC( lTimeStamp, pData->szDateTime );
   }
   wcscpy( pProp->szAddInfo, pData->szAddInfo );
 
@@ -1863,11 +1831,11 @@ int OtmMemoryServiceWorker::getMem
 }
 
 
-std::string OtmMemoryServiceWorker::printTime(time_t time){
+std::string printTime(time_t time){
   char buff[255];
   LONG lTimeStamp = (LONG) time;
   lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-  this->convertTimeToUTC( lTimeStamp, buff );
+  convertTimeToUTC( lTimeStamp, buff );
   //std::string res =  asctime(gmtime(&time));
   return buff;
 }

@@ -756,6 +756,71 @@ int ImportRequestData::execute(){
   return( CREATED );
 }
 
+
+std::string printTime(time_t time);
+int StatusMemRequestData::checkData() {
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  if ( strMemName.empty() )
+  {
+    buildErrorReturn( _rc_, "Missing name of memory" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  JSONFactory *factory = JSONFactory::getInstance();
+
+  // check if memory is contained in our list
+  if (  TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
+  {
+    auto pMem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
+    // set status value
+    std::string pszStatus = "";
+    switch ( pMem->eImportStatus )
+    {
+      case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
+      case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
+      default: pszStatus = "available"; break;
+    }
+    // return the status of the memory
+    factory->startJSON( outputMessage );
+    factory->addParmToJSON( outputMessage, "status", "open" );
+    factory->addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
+    if(pMem->importDetails != nullptr){
+      factory->addParmToJSON( outputMessage, "importProgress", pMem->importDetails->usProgress );
+      factory->addParmToJSON( outputMessage, "importTime", pMem->importDetails->importTimestamp );
+      factory->addParmToJSON( outputMessage, "segmentsImported", pMem->importDetails->segmentsImported );
+      factory->addParmToJSON( outputMessage, "invalidSegments", pMem->importDetails->invalidSegments );
+      factory->addParmToJSON( outputMessage, "invalidSymbolErrors", pMem->importDetails->invalidSymbolErrors );
+      factory->addParmToJSON( outputMessage, "importErrorMsg", pMem->importDetails->importMsg.str() );
+    }
+    factory->addParmToJSON( outputMessage, "lastAccessTime", printTime(pMem->tLastAccessTime) );
+    if ( ( pMem->eImportStatus == IMPORT_FAILED_STATUS ) && ( pMem->pszError != NULL ) )
+    {
+      factory->addParmToJSON( outputMessage, "ErrorMsg", pMem->pszError );
+    }
+    factory->terminateJSON( outputMessage );
+    return( OK );
+  } /* endif */
+
+  // check if memory exists
+  //if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
+  if(int res = NewTMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  {
+    factory->startJSON( outputMessage );
+    factory->addParmToJSON( outputMessage, "status", "not found" );
+    factory->terminateJSON( outputMessage );
+    return( NOT_FOUND );
+  }
+
+  factory->startJSON( outputMessage );
+  factory->addParmToJSON( outputMessage, "status", "available" );
+  factory->terminateJSON( outputMessage );
+  return( OK );
+  return 0; 
+};
+int StatusMemRequestData::execute() {
+  return 0; 
+};
+
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();

@@ -4650,6 +4650,7 @@ class TMManager{
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);
+  std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command);
   std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
   std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
 

@@ -2492,6 +2492,16 @@ int TMManager::CloseTM(const std::string& strMemName){
 
 }
 
+
+std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
+  std::shared_ptr<EqfMemory> mem;
+  if(IsMemoryLoaded(strMemName)){
+    if(command == STATUS_MEM){
+      return tms[strMemName];
+    }
+  }
+  return nullptr;
+}
 std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
   if(!IsMemoryLoaded(strMemName)){

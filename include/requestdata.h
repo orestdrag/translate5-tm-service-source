@@ -8,29 +8,7 @@
 #include "lowlevelotmdatastructs.h"
 
     
-     enum COMMAND {
-        UNKNOWN_COMMAND,
-        LIST_OF_MEMORIES,
-        SAVE_ALL_TM_ON_DISK,
-        SHUTDOWN,    
-        DELETE_MEM,
-        EXPORT_MEM,
-        EXPORT_MEM_INTERNAL_FORMAT,
-        REORGANIZE_MEM,
-        STATUS_MEM,
-        RESOURCE_INFO,
-
-        START_COMMANDS_WITH_BODY,
-        CREATE_MEM = START_COMMANDS_WITH_BODY, 
-        FUZZY,
-        CONCORDANCE,
-        DELETE_ENTRY,
-        UPDATE_ENTRY,
-        TAGREPLACEMENTTEST,
-        IMPORT_MEM,
-        CLONE_TM_LOCALY,
-        //IMPORT_MEM_INTERNAL_FORMAT
-    };
+   
 
 class EqfMemory;
 class JSONFactory;
@@ -202,15 +180,6 @@ protected:
     int execute() override   { return -1;};
 };
 
-class StatusRequestData:public RequestData{
-public:
-    StatusRequestData(): RequestData(COMMAND::STATUS_MEM) {};
-protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
-};
-
 class ReorganizeRequestData:public RequestData{
 public:
     ReorganizeRequestData(): RequestData(COMMAND::REORGANIZE_MEM) {};
@@ -236,8 +205,8 @@ class StatusMemRequestData: public RequestData{
     StatusMemRequestData(const std::string& memName): RequestData(STATUS_MEM, "", memName) {};
     StatusMemRequestData(): RequestData(STATUS_MEM){};
     int parseJSON() override {return 0;};
-    int checkData() override {return -1;};
-    int execute()   override {return -1;};
+    int checkData() override ;
+    int execute()   override ;
 };
 
 class DeleteMemRequestData: public RequestData{
