@@ -1749,8 +1749,6 @@ typedef struct _LOOKUPINMEMORYDATA
   wchar_t szTarget[2050];
   char szIsoSourceLang[40];
   char szIsoTargetLang[40];
-  char szOtmSourceLang[40];
-  char szOtmTargetLang[40];
   int lSegmentNum;
   char szDocName[260];
   char szMarkup[128];

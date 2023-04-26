@@ -80,6 +80,7 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
   if ( !fread(  &vFileData[0],dwFileSize,1, hFile ) )
   {
     fclose( hFile );
+    hFile = nullptr;
     iRC = GetLastError();
     T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< strFile <<" failed with rc=" << iRC << "\n";
     return( iRC );
@@ -87,6 +88,7 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
 
   // close file
   fclose( hFile );
+  hFile = nullptr;
 
   return( iRC );
 }
@@ -364,6 +366,8 @@ int FilesystemHelper::ReadFileToFileBufferAndKeepInRam(const std::string& path){
      return FILEHELPER_ERROR_NO_FILES_FOUND;
    }
    fclose(file);
+   
+   file = nullptr;
    return FILEHELPER_NO_ERROR;
 }
 
@@ -409,6 +413,7 @@ int FileBuffer::ReadFromFile(){
         {
             readed = fread(&data[0], originalFileSize, 1, file);
             fclose(file);
+            file = nullptr;
         } 
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer reading to buffer, size = " << originalFileSize <<
@@ -450,6 +455,8 @@ int FileBuffer::Flush(){
         }
         PUCHAR bufStart = &data[0];
         int size = data.size();
+        
+        //if(fileWasOpened && file) fclose(file);
         if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
         if(file==nullptr){
             T5LOG(T5ERROR) <<"Cant open the file " << fileName;
@@ -472,7 +479,11 @@ int FileBuffer::Flush(){
                 FilesystemHelper::GetFileSize(file) << ", oldSize = " << oldSize;
         }
 
-        if(!fileWasOpened) fclose(file);
+        if(!fileWasOpened) 
+        {
+            fclose(file);
+            file = nullptr;
+        }
     }else{
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) <<"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = " << fileName;
@@ -645,6 +656,7 @@ int FilesystemHelper::CloseFile(FILE*& ptr){
             T5LOG( T5DEBUG) << "FilesystemHelper::CloseFile(" << (long int) ptr << "), fName = " << fName;
         }
         fclose(ptr);
+        ptr = nullptr;
         FlushBufferIntoFile(fName);
         CloseFileBuffer(fName);
     }
