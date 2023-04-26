@@ -1203,49 +1203,7 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
   return( 0 );
 }
 
-/*
-VOID CloseFile
-(
-  HFILE * hFile                   // Pointer to the file handle
-)
-  // Close the file if the file handle is not NULL
-{
-  USHORT       usDosRc;           // Dos function return code
 
-  // Return code for test purposes only
-  if (*hFile)
-  {
-    usDosRc = UtlClose( *hFile, FALSE );
-    *hFile  = NULLHANDLE;
-  } 
-} 
-//* end of function CloseFile */
-
-
-/*! \brief extract all files contained in a ZIP package to a directory
-  \param pszPackage fully qualified name of the ZIP package
-  \param pszDestPath fully qualified name of the destination directory
-  \returns 0 in any case
-*/
-
-int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath )
-{
-  LOG_UNIMPLEMENTED_FUNCTION;
-  return( 0 );
-}
-
-/*! \brief add all files of a directoy to a ZIP package
-  The current version of this function does not recurse into subdirectories
-  \param pszSourcePath fully qualified name of the directory contaiing the files to be added to the package
-  \param pszPackage fully qualified name of the ZIP package being created
-  \returns 0 in any case
-*/
-
-int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage  )
-{
-  LOG_UNIMPLEMENTED_FUNCTION;
-  return( 0 );
-}
 
 /*! \brief add a list of files to a ZIP package
   \param pszFileList list of comma separated, fully qualified file names to be added to the package
@@ -1275,11 +1233,4 @@ int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
   return( 0 );
 }
 
-/*! \brief delete all files and directories located in a specific directory
-  \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
-*/
 
-void UtlDeleteAllFiles( const char *pszDirectory )
-{
-  LOG_UNIMPLEMENTED_FUNCTION;
-}

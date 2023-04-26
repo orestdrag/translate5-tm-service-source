@@ -192,61 +192,6 @@ BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BO
   return( fMatchIDAdded );
 }
 
-// prepare the match segment ID prefix using the provided TM_ID and StoreID
-BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID )
-{
-  BOOL fMatchIDPrepared = FALSE;
-  if ( (pszTM_ID != NULL) && (*pszTM_ID != EOS) )
-  {
-    fMatchIDPrepared = TRUE;
-
-    while( *pszTM_ID != EOS )
-    {
-      if ( *pszTM_ID == '_' )
-      { 
-        *pszMatchID++ = '+';
-      }
-      else if ( (*pszTM_ID == '<') || (*pszTM_ID == '>') )
-      { 
-        *pszMatchID++ = '-';
-      }
-      else
-      {
-        *pszMatchID++ = *pszTM_ID;
-      } /* endif */
-      pszTM_ID++;
-    } /* endwhile */
-    *pszMatchID++ = '_';
-  } /* endif */
-
-  if ( (pszStoreID != NULL) && (*pszStoreID != EOS) )
-  {
-    fMatchIDPrepared = TRUE;
-
-    while( *pszStoreID != EOS )
-    {
-      if ( *pszStoreID == '_' )
-      { 
-        *pszMatchID++ = '+';
-      }
-      else if ( (*pszStoreID == '<') || (*pszStoreID == '>') )
-      { 
-        *pszMatchID++ = '-';
-      }
-      else
-      {
-        *pszMatchID++ = *pszStoreID;
-      } /* endif */
-      pszStoreID++;
-    } /* endwhile */
-    *pszMatchID++ = '_';
-  } /* endif */
-
-  *pszMatchID = EOS;
-
-  return( fMatchIDPrepared );
-} /* end of MADPrepareMatchSegIDPrefix */
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

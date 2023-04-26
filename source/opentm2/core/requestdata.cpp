@@ -419,7 +419,7 @@ int CreateMemRequestData::importInInternalFomat(){
     T5LOG( T5INFO) << "createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
   
-    std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+    strTempFile =  FilesystemHelper::BuildTempFileName();
     if (strTempFile.empty()  )
     {
         wchar_t errMsg[] = L"Could not create file name for temporary data";
@@ -616,19 +616,6 @@ int CreateMemRequestData::execute(){
 
 
 
-/*! \brief Data area for the processing of the importMemory function
-*/
-typedef struct _IMPORTMEMORYDATA
-{
-  HSESSION hSession;
-  OtmMemoryServiceWorker *pMemoryServiceWorker;
-  char szMemory[260];
-  char szInFile[260];
-  char szError[512];
-  //ushort * pusImportPersent = nullptr;
-  ImportStatusDetails* importDetails = nullptr;
-  //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
-} IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
 // import memory process
@@ -658,9 +645,7 @@ int ImportRequestData::parseJSON(){
 
   // find the memory to our memory list
   //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  
   // extract TMX data
-  std::string strTmxData;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
   
   JSONFactory *factory = JSONFactory::getInstance();
@@ -668,11 +653,6 @@ int ImportRequestData::parseJSON(){
   if ( parseHandle == NULL )
   {
     buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Missing or incorrect JSON data in request body" );
-        
-    pMem->lHandle = lHandle;
-    pMem->eStatus = lastStatus;
-    pMem->eImportStatus = lastImportStatus;
-
     return( BAD_REQUEST );
   } /* end */
 
@@ -700,28 +680,22 @@ int ImportRequestData::parseJSON(){
     }
   } /* endwhile */
   factory->parseJSONStop( parseHandle );
+  return 0; 
+}
+
+
+int ImportRequestData::checkData(){
   if ( strTmxData.empty() )
   {
     buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Missing TMX data" );
-  
-    //restore status
-    pMem->lHandle = lHandle;
-    pMem->eStatus = lastStatus;
-    pMem->eImportStatus = lastImportStatus;
-
     return( BAD_REQUEST );
   } /* endif */
 
   // setup temp file name for TMX file 
-  std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+  strTempFile =  FilesystemHelper::BuildTempFileName();
   if (strTempFile.empty()  )
   {
     buildErrorReturn( -1, "OtmMemoryServiceWorker::import::Could not create file name for temporary data" );
-    
-    //restore status
-    pMem->lHandle = lHandle;
-    pMem->eStatus = lastStatus;
-    pMem->eImportStatus = lastImportStatus;
     return( INTERNAL_SERVER_ERROR );
   }
 
@@ -734,71 +708,52 @@ int ImportRequestData::parseJSON(){
   {
     strError = "OtmMemoryServiceWorker::import::" + strError;
     buildErrorReturn( _rc_, (char *)strError.c_str() );
-    
     //restore status
-    pMem->lHandle = lHandle;
-    pMem->eStatus = lastStatus;
-    pMem->eImportStatus = lastImportStatus;
     return( INTERNAL_SERVER_ERROR );
   }
+  return 0;
   
+}
+
+int ImportRequestData::execute(){
   //success in parsing request data-> close mem if needed
   //if(lHandle && fClose){
   //      EqfCloseMem( OtmMemoryServiceWorker::getInstance()->hSession, lHandle, 0 );
   //}
+  if ( mem == nullptr )
+  {
+    return 404;
+  }
+    // close the memory - when open
+  if ( mem->eStatus != OPEN_STATUS )
+  {
+    return 500;
+  }
+  lastStatus =       mem->eStatus;
+  lastImportStatus = mem->eImportStatus;
 
+  mem->eStatus = AVAILABLE_STATUS;
+  mem->eImportStatus = IMPORT_RUNNING_STATUS;
+  //mem->dImportProcess = 0;
+
+  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
   // start the import background process
-  PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
+  pData = new( IMPORTMEMORYDATA );
   strcpy( pData->szInFile, strTempFile.c_str() );
   strcpy( pData->szMemory, strMemName.c_str() );
 
-  if(pMem->importDetails == nullptr){
-    pMem->importDetails = new ImportStatusDetails;
+  if(mem->importDetails == nullptr){
+    mem->importDetails = new ImportStatusDetails;
   }
   
-  pData->importDetails = pMem->importDetails;
-  pData->importDetails->reset();
-  pData->hSession = OtmMemoryServiceWorker::getInstance()->hSession;
-  pData->pMemoryServiceWorker = nullptr;//this;
+  mem->importDetails->reset();
+  pData->mem = mem;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
   worker_thread.detach();
 
   return( CREATED );
-}
-
-
-int ImportRequestData::checkData(){
-  EqfMemory* pMem = mem.get();
-  if ( pMem != nullptr )
-  {
-    // close the memory - when open
-    if ( pMem->eStatus == OPEN_STATUS )
-    {
-      fClose = true;
-      lastStatus =       pMem->eStatus;
-      lastImportStatus = pMem->eImportStatus;
-
-      pMem->eStatus = AVAILABLE_STATUS;
-      pMem->eImportStatus = IMPORT_RUNNING_STATUS;
-      //pMem->dImportProcess = 0;
-    }
-  }
-  else
-  {
-    
-
-    pMem->eStatus = AVAILABLE_STATUS;
-    pMem->eImportStatus = IMPORT_RUNNING_STATUS;
-    //pMem->dImportProcess = 0;
-    strcpy( pMem->szName, strMemName.c_str() );
-  }
-  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
-}
-
-int ImportRequestData::execute(){
-
 }
 
 int ExportRequestData::checkData(){

@@ -1030,8 +1030,9 @@ USHORT  EXTMEMIMPORTEND
 )
 {
   USHORT           usRC = 0;           // function return code
-
+  
   CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
+  if(pTMXExport == nullptr) return 0;
   usRC = pTMXExport->EndImport(); 
   delete pTMXExport;
 

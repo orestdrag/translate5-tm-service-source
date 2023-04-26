@@ -127,26 +127,16 @@ USHORT MemFuncAddMatchSegID
 USHORT MemFuncImportMem
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemname,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
-  PSZ         pszTM_ID,                // translation memory ID or NULL if not used
-  PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
-  PSZ         pszUnused1,              // not in use, for future enhancements
-  PSZ         pszUnused2,              // not in use, for future enhancements
-  LONG        lOptions,                 // options for Translation Memory import
-  ImportStatusDetails*     pImportData
+  std::shared_ptr<EqfMemory> mem,             
+  LONG        lOptions                 // options for Translation Memory import
 );
 
 
 USHORT MemFuncPrepImport
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemname,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
-  PSZ         pszTM_ID,                // translation memory ID or NULL if not used
-  PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
-  PSZ         pszUnused1,              // not in use, for future enhancements
-  PSZ         pszUnused2,              // not in use, for future enhancements
   LONG        lOptions                 // options for Translation Memory import
 );
 
