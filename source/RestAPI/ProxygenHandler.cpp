@@ -97,6 +97,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       case COMMAND::STATUS_MEM:
       case COMMAND::LIST_OF_MEMORIES:
       case COMMAND::RESOURCE_INFO:
+      case COMMAND::SAVE_ALL_TM_ON_DISK:
       {
         pRequest->run();
         break;
