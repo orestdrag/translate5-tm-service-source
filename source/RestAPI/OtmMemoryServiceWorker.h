@@ -90,7 +90,7 @@ public:
     std::string &strOutputParms
   );
 
-  int resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats);
+  int resourcesInfo(std::string& strOutput, ProxygenStats& stats);
 
   std::string tagReplacement(std::string strInData, int& rc);
 

@@ -215,7 +215,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           if(urlCommand ==  "shutdown"){
             requestHandler->pRequest = new ShutdownRequestData();
           }else if(urlCommand == "resources"){
-            requestHandler->pRequest = new ResourceInfoRequestData();
+            auto request = new ResourceInfoRequestData();
+            request->pStats = stats_.get();
+            requestHandler->pRequest = request;
           }
         }else if( methodStr == "POST"){
           if(urlCommand == "tagreplacement"){

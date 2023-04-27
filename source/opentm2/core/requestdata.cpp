@@ -9,9 +9,12 @@
 #include "EncodingHelper.h"
 #include "EQFMORPH.H"
 #include "FilesystemHelper.h"
+#include "Property.h"
 #include "OSWrapper.h"
 #include "LanguageFactory.H"
 #include <set>
+#include "../../cmake/git_version.h"
+
 JSONFactory RequestData::json_factory;
 
 
@@ -297,6 +300,26 @@ int RequestData::run(){
         return( res );
     } /* endif */
     return res;
+}
+
+
+
+template<typename T>
+void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparator){
+  ss << "\"" << key << "\" : ";
+
+  //if (std::is_same<T, int>::value)
+  if(std::is_arithmetic<T>::value) // if it's number - skip quotes
+  {
+    ss << value;
+  }else{
+    ss << "\"" << value << "\"";
+  }
+  
+  if(fAddSeparator)
+    ss << ",";
+
+  ss << "\n";
 }
 
 int CreateMemRequestData::createNewEmptyMemory(){
@@ -836,6 +859,61 @@ int ImportRequestData::execute(){
 }
 
 
+int TagRemplacementRequestData::execute(){
+  _rc_ = 0;
+  std::string strSrcData, strTrgData, strReqData;
+ 
+  strSrcData.reserve( strBody.size() + 1 );
+  strTrgData.reserve( strBody.size() + 1 );
+  strReqData.reserve( strBody.size() + 1 );   
+  std::wstring wstr;
+
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
+    wstr = errMsg;
+    //buildErrorReturn( iRC, errMsg, strOutputParms );
+    return _rest_rc_ = BAD_REQUEST;
+  }else{ 
+    std::string name;
+    std::string value;
+    while ( _rc_ == 0 )
+    {
+      _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+      if ( _rc_ == 0 )
+      {      
+        T5LOG( T5DEBUG) << "::JSON parsed src = " << name << "; size = " << strSrcData.size();
+        if ( strcasecmp( name.c_str(), "src" ) == 0 )
+        {
+          strSrcData = value;
+        }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
+          strTrgData = value;
+        }else if( strcasecmp (name.c_str(), "req") == 0 ){
+          strReqData = value;          
+        }else{
+          T5LOG( T5WARNING) <<  "::JSON parsed unused data: name = " <<  name << "; value = " << value;
+        }
+      }
+    } /* endwhile */
+    json_factory.parseJSONStop( parseHandle );
+  }
+  
+  auto result =  replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
+                                              EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
+                                              EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &_rc_);
+
+  
+  wstr = L"{\n ";
+  std::wstring segmentLocations[] = {L"source", L"target", L"request"};
+  for(int index = 0; index < result.size(); index++){
+    wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
+  }
+  wstr += L"\n}";
+  outputMessage =  EncodingHelper::convertToUTF8(wstr);
+  return _rest_rc_ = 200;
+}
+
 std::string printTime(time_t time);
 int StatusMemRequestData::checkData() {
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -894,11 +972,134 @@ int StatusMemRequestData::checkData() {
   factory->addParmToJSON( outputMessage, "status", "available" );
   factory->terminateJSON( outputMessage );
   return( OK );
-  return 0; 
 };
 int StatusMemRequestData::execute() {
   return 0; 
 };
+
+
+int ResourceInfoRequestData::execute(){
+  std::stringstream ssOutput;
+
+  //open json
+  ssOutput << "{\n";
+
+  //the list of currently opened TMs (those loaded into the memory)
+  //for every loaded TM: The memory it allocates
+  { 
+
+    auto fbs = FilesystemHelper::getFileBufferInstance();
+    size_t total = 0, fSize;
+    std::string fName;
+
+    ssOutput << "\"filebuffers\": [\n";
+    for (auto it = fbs->cbegin(); it != fbs->cend(); )
+    {
+        //fSize = it->second.data.size();
+        fSize = it->second.data.capacity();
+        fName = it->first;
+        //fName = FilesystemHelper::parseFilename(it->first);
+        
+        ssOutput << "{ ";
+        AddToJson(ssOutput, "name", fName, true );
+        AddToJson(ssOutput, "size", fSize, false );
+        ssOutput << " }";
+
+        total += fSize;
+        it++;
+        if( it != fbs->cend()){
+            ssOutput << ",\n";
+        }
+    }   
+
+    ssOutput << "\n ],\n"; 
+    AddToJson(ssOutput, "totalOccupiedByFilebuffersRAM", total, true );
+  }
+  {
+   
+    size_t total = 0, fSize = 0, count = 0;
+    std::string fName;
+    ssOutput << "\"tms\": [\n";
+    for ( auto tm : TMManager::GetInstance()->tms)
+    {
+      if(count){
+        ssOutput << ",";
+      }
+      fSize = tm.second->GetRAMSize();
+      fName = tm.first;
+
+      ssOutput << "\n{ ";
+      AddToJson(ssOutput, "name", tm.first, true );
+      AddToJson(ssOutput, "size", fSize, false );
+      ssOutput << " }";
+
+      total += fSize;
+      count++;
+    }   
+
+    ssOutput << "\n ],\n"; 
+    AddToJson(ssOutput, "totalOccupiedByTMsInRAM", total, true );
+  }
+  //in addition the memory that is used by the service by other means
+  // it's better to use system calls
+
+  //the currently configured max usable memory
+  int availableRam = 0, threshold = 0, workerThreads = 0, timeout = 0;
+  char buff[255];
+  //Properties::GetInstance()->get_value(KEY_OTM_DIR, szOtmDirPath);
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
+  Properties::GetInstance()->get_value(KEY_TRIPLES_THRESHOLD, threshold);
+  Properties::GetInstance()->get_value(KEY_NUM_OF_THREADS, workerThreads);
+  Properties::GetInstance()->get_value(KEY_TIMEOUT_SETTINGS, timeout);
+  Properties::GetInstance()->get_value(KEY_RUN_DATE, buff,254);
+  double vm_usage, resident_set;
+  mem_usage(vm_usage, resident_set); 
+
+  AddToJson(ssOutput, "Run date", buff, true );
+  AddToJson(ssOutput, "Build date", buildDate, true );
+  AddToJson(ssOutput, "Git commit info", gitHash, true );
+  AddToJson(ssOutput, "Version", appVersion, true );
+  AddToJson(ssOutput, "Worker threads", workerThreads, true );
+  AddToJson(ssOutput, "Timeout(ms)", timeout, true );
+  
+  AddToJson(ssOutput, "Resident set", resident_set, true );
+  AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
+  if(pStats != nullptr){
+    ssOutput << "\"Requests\": {\n";
+    AddToJson(ssOutput, "RequestCount", pStats->getRequestCount(), true );
+    AddToJson(ssOutput, "CreateMemRequestCount", pStats->getCreateMemRequestCount(), true );
+    AddToJson(ssOutput, "DeleteMemRequestCount", pStats->getDeleteMemRequestCount(), true );
+    AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportMemRequestCount(), true );
+    AddToJson(ssOutput, "ExportMemRequestCount", pStats->getExportMemRequestCount(), true );
+    AddToJson(ssOutput, "CloneTmLocalyRequestCount", pStats->getCloneLocalyCount(), true);
+    AddToJson(ssOutput, "ReorganizeRequestCount", pStats->getReorganizeRequestCount(), true);
+    AddToJson(ssOutput, "StatusMemRequestCount", pStats->getStatusMemRequestCount(), true );
+    AddToJson(ssOutput, "FuzzyRequestCount", pStats->getFuzzyRequestCount(), true );
+    AddToJson(ssOutput, "ConcordanceRequestCount", pStats->getConcordanceRequestCount(), true );
+    AddToJson(ssOutput, "UpdateEntryRequestCount", pStats->getUpdateEntryRequestCount(), true );
+    AddToJson(ssOutput, "DeleteEntryRequestCount", pStats->getDeleteEntryRequestCount(), true );
+    AddToJson(ssOutput, "SaveAllTmsRequestCount", pStats->getSaveAllTmsRequestCount(), true );
+    AddToJson(ssOutput, "ListOfMemoriesRequestCount", pStats->getListOfMemoriesRequestCount(), true );
+    AddToJson(ssOutput, "ResourcesRequestCount", pStats->getResourcesRequestCount(), true);
+    AddToJson(ssOutput, "OtherRequestCount", pStats->getOtherRequestCount(), true );
+    AddToJson(ssOutput, "UnrecognizedRequestsCount", pStats->getUnrecognizedRequestCount(), false);
+    ssOutput << "\n },\n"; 
+  }
+
+  
+  //AddToJson(ssOutput, "Log level(internal)", GetLogLevel(), true );
+  //AddToJson(ssOutput, "CPU used by process", getCurrentCPUUsageByProcess(), true);
+  //AddToJson(ssOutput, "VirtualMem used by process(in KB)", getVirtualMemUsageKBValue(), true);
+  
+  AddToJson(ssOutput, "RAM limit(MB)", availableRam, false );
+
+  //close json
+  ssOutput << "\n}";
+
+  outputMessage = ssOutput.str();
+  _rest_rc_ = 200;
+  return _rest_rc_;
+}
 
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;

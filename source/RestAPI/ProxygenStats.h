@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace ProxygenService {
+//namespace ProxygenService {
 
 /**
  * Just some dummy class containing request count. Since we keep
@@ -105,4 +105,4 @@ class ProxygenStats {
 
 };
 
-} // namespace ProxygenService
+//} // namespace ProxygenService
