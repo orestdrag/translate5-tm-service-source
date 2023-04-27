@@ -195,8 +195,14 @@ int main(int argc, char* argv[]) {
    T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION;   
    std::thread worker(proxygen_server_init);
    worker.join();
-   OtmMemoryServiceWorker::getInstance()->shutdownService(SHUTDOWN_CALLED_FROM_MAIN);
-   while(OtmMemoryServiceWorker::getInstance()->fServiceIsRunning == true);
+   //TODO::REFACTOR HERE
+   //OtmMemoryServiceWorker::getInstance()->shutdownService(SHUTDOWN_CALLED_FROM_MAIN);
+   ShutdownRequestData srd;
+   SaveAllTMsToDiskRequestData saveTms;
+   saveTms.run();
+   srd.sig = SHUTDOWN_CALLED_FROM_MAIN;
+   srd.run();
+   while( TMManager::GetInstance()->fServiceIsRunning == true);
    T5LOG(T5TRANSACTION) << "Worker thread finished";    
 }
 

@@ -152,10 +152,11 @@ protected:
 class ShutdownRequestData:public RequestData{
 public:
     ShutdownRequestData(): RequestData(COMMAND::SHUTDOWN) {};
+    int sig = 0;
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override { return 0;};
+    int checkData() override { return 0;};
+    int execute()   override   ;
 };
 
 

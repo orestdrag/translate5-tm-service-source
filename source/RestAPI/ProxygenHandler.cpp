@@ -119,25 +119,22 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         pRequest->_rest_rc_ = pMemService->deleteMem( pRequest->strMemName, pRequest->outputMessage );
         break;
       }
-      case COMMAND::SAVE_ALL_TM_ON_DISK:
-      {
-        pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
-        pRequest->_rest_rc_ = 200;
-        break;
-      }
       case COMMAND::SHUTDOWN:
       { 
           fWriteRequestsAllowed = false;
-          pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
+          //pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
+          auto saveTmRD = SaveAllTMsToDiskRequestData();
+          saveTmRD.run();
           //check tms is in import status
           //close log file
-          if(pRequest->_rest_rc_ == 200){
-            pMemService->closeAll();
+          if(saveTmRD._rest_rc_ == 200){
+            //pMemService->closeAll();
             T5Logger::GetInstance()->LogStop();          
-            pRequest->_rest_rc_ = pMemService->shutdownService();
+            pRequest->run();
           }else{
             fWriteRequestsAllowed = true;
           }
+          
           //builder->status(400, "WRONG REQUEST");
         break;
       }
