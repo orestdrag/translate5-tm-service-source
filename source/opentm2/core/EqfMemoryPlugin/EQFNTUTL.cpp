@@ -440,7 +440,7 @@ USHORT NTMGetIDFromNameEx
             {
               DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 2, TM_GROUP, pszLongName );
 
-              usRc = pTmClb->InBtree.EQFNTMUpdate( LONGNAME_KEY,
+              usRc = pTmClb->TmBtree.EQFNTMUpdate( LONGNAME_KEY,
                                    (PBYTE)pTmClb->pLongNames->pszBuffer,
                                    pTmClb->pLongNames->ulBufUsed );
             } /* endif */
