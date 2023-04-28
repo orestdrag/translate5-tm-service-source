@@ -200,6 +200,40 @@ size_t TMManager::cleanupMemoryList(size_t memoryRequested)
   return( AllowedMemory - memoryNeed );
 }
 
+
+/*! \brief close any memories which haven't been used for a long time
+  \returns 0
+*/
+size_t TMManager::CleanupMemoryList(size_t memoryRequested)
+{  
+  int AllowedMBMemory = 500;
+  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
+  size_t AllowedMemory = AllowedMBMemory * 1000000;    
+  size_t memoryNeed = memoryRequested + CalculateOccupiedRAM();
+
+  if(memoryNeed < AllowedMemory){
+    return( AllowedMemory - memoryNeed );
+  }
+
+  time_t curTime;
+  time( &curTime );
+  std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
+  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
+    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
+    {
+      openedMemoriesSortedByLastAccess.insert({EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->tLastAccessTime, i});
+    }
+  }
+
+  for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
+    T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
+    RemoveFromMemoryList(it->second);
+    memoryNeed = memoryRequested + CalculateOccupiedRAM();
+  }
+
+  return( AllowedMemory - memoryNeed );
+}
+
 /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
 \param pszMemory name of the memory
 \param plHandle buffer for the memory handle
@@ -2381,6 +2415,32 @@ int TMManager::OpenTM(const std::string& strMemName){
   if(IsMemoryLoaded(strMemName)){
     return 0;
   }
+  size_t requiredMemory = 0;
+    {
+      requiredMemory += FilesystemHelper::GetFileSize( NewTMManager::GetTmdPath(strMemName));
+      requiredMemory += FilesystemHelper::GetFileSize( NewTMManager::GetTmiPath(strMemName));
+      requiredMemory *= 1.2;
+      //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
+      //requiredMemory += strBody.size() * 2;
+    }
+    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+
+    // cleanup the memory list (close memories not used for a longer time)
+    size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory);
+    if(VLOG_IS_ON(1)){
+      T5LOG( T5INFO) << ":: memory: " << strMemName << "; required RAM:" 
+          << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
+    }
+    //requiredMemory = 0;
+    // find a free slot in the memory list
+    //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->GetFreeSlotPointer(requiredMemory);
+
+    // handle "too many open memories" condition
+    //if ( pMem == nullptr )
+    {
+      //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
+      return( INTERNAL_SERVER_ERROR );
+    } /* endif */
   std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName));
   if(!pMem){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";

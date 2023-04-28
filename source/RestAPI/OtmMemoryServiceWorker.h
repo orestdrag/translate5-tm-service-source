@@ -314,22 +314,6 @@ public:
   */
   MemProposalType getMemProposalType( char *pszType );
 
-  /*! \brief read a binary file and encode it using BASE64 encoding
-  \param pszFile fully qualified name of file being encoded
-  \param ppStringData adress of a pointer which will receive the (per malloc allocated) pointer to the area for the encoded string
-  \param strError string receiving any error message text
-  \returns 0 is sucessfull or a return code
-  */
-  int encodeFileInBase64( char *pszFile, char **ppStringData, std::string &strError );
-
-  /*! \brief convert a BASE64 encoded string to a binary file
-  \param pStringData pointer to the BASE64 data
-  \param pszFile fully qualified name of file being written
-  \param strError string receiving any error message text
-  \returns 0 is sucessfull or a return code
-  */
-  int decodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError );
-
 
 /*! \brief OpenTM2 API session handle
 */

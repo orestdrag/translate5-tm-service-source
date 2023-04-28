@@ -4664,6 +4664,11 @@ class TMManager{
       \returns 0 
     */
     int removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem );
+    /*! \brief close a memory and remove it from the open list
+      \param pMem - pointer to mem
+      \returns 0 
+    */
+    int RemoveFromMemoryList( std::shared_ptr<EqfMemory>  pMem );
 
     /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
         \param pszMemory name of the memory
@@ -4691,11 +4696,13 @@ class TMManager{
         \returns 0
     */
     size_t cleanupMemoryList(size_t memoryRequested);
+    size_t CleanupMemoryList(size_t memoryRequested);
 
     /*! \brief calcuate total amount of RAM occupied by opened memory files
         \returns 0
     */
     size_t calculateOccupiedRAM();
+    size_t CalculateOccupiedRAM();
 
     std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 

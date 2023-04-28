@@ -1,3 +1,5 @@
+
+#include <thread>
 #include "requestdata.h"
 #include "tm.h"
 #include "otm.h"
@@ -177,14 +179,14 @@ MemProposalType getMemProposalType( char *pszType )
 
 
 /*! \brief build return JSON string in case of errors
-  \param iRC error return code
+  \param _rc_ error return code
   \param pszErrorMessage error message text
   \param strError JSON string receiving the error information
   \returns 0 if successful or an error code in case of failures
 */
 int RequestData::buildErrorReturn
 (
-  int iRC,
+  int _rc_,
   wchar_t *pszErrorMsg
 )
 {
@@ -429,7 +431,7 @@ int CreateMemRequestData::importInInternalFomat(){
 
     // decode binary data and write it to temp file
     std::string strError;
-    _rc_ = OtmMemoryServiceWorker::getInstance()->decodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
+    _rc_ = FilesystemHelper::DecodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
     if ( _rc_ != 0 )
     {
         buildErrorReturn( _rc_, (char *)strError.c_str() );
@@ -578,7 +580,7 @@ int CreateMemRequestData::execute(){
     
     char szError[PATH_MAX];
     unsigned short usRC = 0;
-    EqfGetLastError( NULL /*this->hSession*/, &usRC, szError, sizeof( szError ) );
+    EqfGetLastError( NULL /*OtmMemoryServiceWorker::getInstance()->hSession*/, &usRC, szError, sizeof( szError ) );
     //buildErrorReturn( _rc_, szError, outputMessage );
 
     outputMessage = "{\"" + strMemName + "\": \"" ;
@@ -614,6 +616,190 @@ int CreateMemRequestData::execute(){
 
 
 
+/*! \brief Data area for the processing of the importMemory function
+*/
+typedef struct _IMPORTMEMORYDATA
+{
+  HSESSION hSession;
+  OtmMemoryServiceWorker *pMemoryServiceWorker;
+  char szMemory[260];
+  char szInFile[260];
+  char szError[512];
+  //ushort * pusImportPersent = nullptr;
+  ImportStatusDetails* importDetails = nullptr;
+  //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
+} IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
+
+
+// import memory process
+void importMemoryProcess( void *pvData );
+
+int ImportRequestData::parseJSON(){
+  T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
+  if ( _rc_ != 0 )
+  {
+    //buildErrorReturn( _rc_, this->szLastError, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    wchar_t errMsg[] = L"OtmMemoryServiceWorker::import::Missing name of memory";
+    buildErrorReturn( _rc_, errMsg );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // check if memory exists
+  //if ( EqfMemoryExists( this->OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str() ) != 0 )
+  if(NewTMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  {
+    return( NOT_FOUND );
+  }
+
+  // find the memory to our memory list
+  //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
+  
+  // extract TMX data
+  std::string strTmxData;
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  JSONFactory *factory = JSONFactory::getInstance();
+  void *parseHandle = factory->parseJSONStart( strBody, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Missing or incorrect JSON data in request body" );
+        
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
+
+    return( BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  while ( _rc_ == 0 )
+  {
+    _rc_ = factory->parseJSONGetNext( parseHandle, name, value );
+    if ( _rc_ == 0 )
+    {
+      //T5LOG( T5INFO) << "parsed json name = ", name.c_str(), "; value = ", value.c_str());
+      if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
+      {
+        strTmxData = value;
+        //break;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else{
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }
+    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+        T5LOG(T5ERROR) << "failed to parse JSON \"" << strBody <<"\", _rc_ = " << _rc_;
+    }
+  } /* endwhile */
+  factory->parseJSONStop( parseHandle );
+  if ( strTmxData.empty() )
+  {
+    buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Missing TMX data" );
+  
+    //restore status
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
+
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // setup temp file name for TMX file 
+  std::string strTempFile =  FilesystemHelper::BuildTempFileName();
+  if (strTempFile.empty()  )
+  {
+    buildErrorReturn( -1, "OtmMemoryServiceWorker::import::Could not create file name for temporary data" );
+    
+    //restore status
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
+    return( INTERNAL_SERVER_ERROR );
+  }
+
+  T5LOG( T5INFO) << "OtmMemoryServiceWorker::import::+   Temp TMX File is " << strTempFile;
+
+  // decode TMX data and write it to temp file
+  std::string strError;
+  _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
+  if ( _rc_ != 0 )
+  {
+    strError = "OtmMemoryServiceWorker::import::" + strError;
+    buildErrorReturn( _rc_, (char *)strError.c_str() );
+    
+    //restore status
+    pMem->lHandle = lHandle;
+    pMem->eStatus = lastStatus;
+    pMem->eImportStatus = lastImportStatus;
+    return( INTERNAL_SERVER_ERROR );
+  }
+  
+  //success in parsing request data-> close mem if needed
+  //if(lHandle && fClose){
+  //      EqfCloseMem( OtmMemoryServiceWorker::getInstance()->hSession, lHandle, 0 );
+  //}
+
+  // start the import background process
+  PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
+  strcpy( pData->szInFile, strTempFile.c_str() );
+  strcpy( pData->szMemory, strMemName.c_str() );
+
+  if(pMem->importDetails == nullptr){
+    pMem->importDetails = new ImportStatusDetails;
+  }
+  
+  pData->importDetails = pMem->importDetails;
+  pData->importDetails->reset();
+  pData->hSession = OtmMemoryServiceWorker::getInstance()->hSession;
+  pData->pMemoryServiceWorker = nullptr;//this;
+
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
+
+  return( CREATED );
+}
+
+
+int ImportRequestData::checkData(){
+  EqfMemory* pMem = mem.get();
+  if ( pMem != nullptr )
+  {
+    // close the memory - when open
+    if ( pMem->eStatus == OPEN_STATUS )
+    {
+      fClose = true;
+      lastStatus =       pMem->eStatus;
+      lastImportStatus = pMem->eImportStatus;
+
+      pMem->eStatus = AVAILABLE_STATUS;
+      pMem->eImportStatus = IMPORT_RUNNING_STATUS;
+      //pMem->dImportProcess = 0;
+    }
+  }
+  else
+  {
+    
+
+    pMem->eStatus = AVAILABLE_STATUS;
+    pMem->eImportStatus = IMPORT_RUNNING_STATUS;
+    //pMem->dImportProcess = 0;
+    strcpy( pMem->szName, strMemName.c_str() );
+  }
+  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
+}
+
+int ImportRequestData::execute(){
+
+}
 
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;
@@ -655,24 +841,24 @@ int ExportRequestData::execute(){
   if ( requestAcceptHeader.compare( "application/xml" ) == 0 )
   {
     T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
-    //_rc_ = EqfExportMem( this->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
+    //_rc_ = EqfExportMem( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT );
     ExportTmx();
     if ( _rc_ != 0 )
     {
       //unsigned short usRC = 0;
-      //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMem failed with rc=" << _rc_ << ", error message is " <<  EncodingHelper::convertToUTF8( this->szLastError);
       return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
   //else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
   //{
-    //T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemory << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
-    //_rc_ = EqfExportMemInInternalFormat( this->hSession, (PSZ)strMemory.c_str(), (PSZ)strTempFile.c_str(), 0 );
+    //T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
+    //_rc_ = EqfExportMemInInternalFormat( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), 0 );
     //if ( _rc_ != 0 )
     //{
     //  unsigned short usRC = 0;
-    //  EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    //  EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     //  T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<_rc_ << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
     //  return( INTERNAL_SERVER_ERROR );
     //}
@@ -749,7 +935,7 @@ int UpdateEntryRequestData::parseJSON(){
     return( BAD_REQUEST );
   } /* endif */
 
-  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemName );
 
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
@@ -893,7 +1079,7 @@ int UpdateEntryRequestData::execute(){
 
   if ( _rc_ != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << _rc_;   
-      //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+      //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else{
     mem.get()->TmBtree.fb.Flush();
     mem.get()->InBtree.fb.Flush();
@@ -1028,7 +1214,7 @@ int FuzzySearchRequestData::checkData(){
 
   // get the handle of the memory 
   //long lHandle = 0;
-  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemory, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
+  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
   //if ( httpRC != OK )
   //{
   //  buildErrorReturn( _rc_, Data.szError );
@@ -1211,7 +1397,7 @@ int ConcordanceSearchRequestData::parseJSON(){
     return( BAD_REQUEST );
   } /* endif */
 
-  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemName );
   if ( strMemName.empty() )
   {
     buildErrorReturn( _rc_, "OtmMemoryServiceWorker::concordanceSearch::Missing name of memory" );
@@ -1340,7 +1526,7 @@ int ConcordanceSearchRequestData::execute(){
   do
   {
     memset( &Proposal, 0, sizeof( Proposal ) );
-    //_rc_ = EqfSearchMem( this->hSession, mem.get(), Data.szSearchString, Data.szSearchPos, &Proposal, iActualSearchTime, lOptions );
+    //_rc_ = EqfSearchMem( OtmMemoryServiceWorker::getInstance()->hSession, mem.get(), Data.szSearchString, Data.szSearchPos, &Proposal, iActualSearchTime, lOptions );
     {
       BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
       OtmProposal *pOtmProposal = new (OtmProposal);
@@ -1484,7 +1670,7 @@ int ConcordanceSearchRequestData::execute(){
   else
   {
     //unsigned short usRC = 0;
-    //EqfGetLastErrorW( this->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
+    //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
     buildErrorReturn( _rc_, Data.szError );
     _rest_rc_ = INTERNAL_SERVER_ERROR;
   } /* endif */

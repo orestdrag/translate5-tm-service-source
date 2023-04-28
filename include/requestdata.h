@@ -121,9 +121,13 @@ class ImportRequestData:public RequestData{
 public:
     ImportRequestData(): RequestData(COMMAND::IMPORT_MEM) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute() override   ;
+
+    BOOL fClose = false;
+    MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+    MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
 };
 
 class DeleteTMRequestData:public RequestData{
