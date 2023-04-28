@@ -1745,6 +1745,7 @@ USHORT MemoryFactory::APIUpdateMem
   OtmMemory *pMem = handleToMemoryObject( lHandle );
   if ( pMem == NULL )
   {
+    T5LOG(T5ERROR) <<  ":: INVALIDFILEHANDLE_RC:: pointer to mem is null";
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
   

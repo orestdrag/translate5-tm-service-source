@@ -833,11 +833,6 @@ C_TmReplaceHwndW( HTM       htm,            //(in)  TM handle
     } /* endif */
   } /* endif */
 
-  if ( usRc != NO_ERROR )
-  {
-    ERREVENT( TMREPLACE_LOC, ERROR_EVENT, usRc );
-  } /* endif */
-
   return usRc;
 } /* End of function TmReplace */
 

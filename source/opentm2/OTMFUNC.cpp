@@ -1105,8 +1105,6 @@ USHORT EqfUpdateMem
     usRC =  MemoryFactory::getInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
   } /* endif */
 
-  if(usRC)  T5LOG(T5ERROR) ":: RC = " << usRC;
-
   return( usRC );
 }
 

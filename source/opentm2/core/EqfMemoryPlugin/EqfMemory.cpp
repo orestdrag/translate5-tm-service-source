@@ -299,7 +299,7 @@ int EqfMemory::putProposal
 
   iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
 
-  if ( iRC != 0 ){
+  if ( iRC != 0 && (iRC != 5019 ||  T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
       //handleError( iRC, this->szName, this->pTmPutIn->stTmPut.szTagTable );
   }

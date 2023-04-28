@@ -231,6 +231,9 @@ int OtmMemoryServiceWorker::buildErrorReturn
 )
 {
 	std::wstring strUTF16;
+  if(iRC == 5019 && !T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    return 0;
+  }
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
   strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
