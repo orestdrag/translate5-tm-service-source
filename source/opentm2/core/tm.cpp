@@ -1976,42 +1976,7 @@ USHORT TMManager::APIUpdateMem
     \param lOptions processing options 
     \returns 0 if successful or an error code in case of failures
   */
-USHORT TMManager::APIUpdateDeleteMem
-(
-  LONG        lHandle,
-  PMEMPROPOSAL pProposalToDelete,
-  LONG        lOptions, 
-  char*       errorStr
-)
-{
-  if ( ( pProposalToDelete == NULL ) )
-  {
-    char* pszParm = "pointer to proposal is null";
-    T5LOG(T5ERROR) <<  ":: DDE_MANDPARAMISSING::" << pszParm;
-    return DDE_MANDPARAMISSING;
-  } /* endif */
 
-  EqfMemory *pMem = handleToMemoryObject( lHandle );
-
-  if ( pMem == NULL )
-  {
-    return( INVALIDFILEHANDLE_RC );
-  } /* endif */
-  
-  OtmProposal *pOtmProposal = new ( OtmProposal );
-  strcpy(pProposalToDelete->szDocShortName , pProposalToDelete->szDocName);
-  copyMemProposalToOtmProposal( pProposalToDelete, pOtmProposal );
-
-  USHORT usRC = (USHORT)pMem->deleteProposal( *pOtmProposal );
-  //strcpy( errorStr, pOtmProposal->errorStr);
-  if(usRC == 6020){
-    //seg not found
-    strcpy(errorStr, "Segment not found");
-  }
-
-  delete( pOtmProposal );
-  return( usRC );
-}
 
 // data structure for the APIListMem function and the insert memory callback function
 typedef struct _APILISTMEMDATA
@@ -2492,6 +2457,35 @@ int TMManager::CloseTM(const std::string& strMemName){
 
 }
 
+
+int TMManager::DeleteTM(const std::string& strMemName, std::string& outputMsg){
+  /*
+  if ( (pMemInfo.get() != NULL) && (pMemInfo.get()->szFullPath[0] != EOS) )
+  {
+    // delete the property file
+    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete property file: " << pMemInfo.get()->szFullPath ;
+
+    UtlDelete( pMemInfo.get()->szFullPath, 0L, FALSE );
+
+    char szPath[MAX_LONGFILESPEC];
+    strcpy( szPath, pMemInfo.get()->szFullPath );
+    strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
+    // delete index file
+    T5LOG( T5DEBUG) <<"EqfMemoryPlugin::deleteMemory:: try to delete index file: "<< szPath ;
+    UtlDelete( szPath, 0L, FALSE );
+    
+    // delete data file
+    strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
+    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete data file: "<< szPath ;    
+    UtlDelete( szPath, 0L, FALSE );
+
+    // remove memory infor from our memory info vector
+    m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
+  }
+  //*/
+  return 0;
+
+}
 
 std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
   std::shared_ptr<EqfMemory> mem;

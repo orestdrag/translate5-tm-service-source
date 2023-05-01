@@ -14,6 +14,7 @@
 #include "LanguageFactory.H"
 #include <set>
 #include "../../cmake/git_version.h"
+#include "Stopwatch.hpp"
 
 JSONFactory RequestData::json_factory;
 
@@ -649,7 +650,7 @@ int ImportRequestData::parseJSON(){
   T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
   if ( _rc_ != 0 )
   {
-    //buildErrorReturn( _rc_, this->szLastError, strOutputParms );
+    //buildErrorReturn( _rc_, this->szLastError, outputMessage );
     return( BAD_REQUEST );
   } /* endif */
 
@@ -673,7 +674,7 @@ int ImportRequestData::parseJSON(){
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
   
   JSONFactory *factory = JSONFactory::getInstance();
-  void *parseHandle = factory->parseJSONStart( strBody, &_rc_ );
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
   if ( parseHandle == NULL )
   {
     buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Missing or incorrect JSON data in request body" );
@@ -684,7 +685,7 @@ int ImportRequestData::parseJSON(){
   std::string value;
   while ( _rc_ == 0 )
   {
-    _rc_ = factory->parseJSONGetNext( parseHandle, name, value );
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
     if ( _rc_ == 0 )
     {
       //T5LOG( T5INFO) << "parsed json name = ", name.c_str(), "; value = ", value.c_str());
@@ -703,7 +704,7 @@ int ImportRequestData::parseJSON(){
         T5LOG(T5ERROR) << "failed to parse JSON \"" << strBody <<"\", _rc_ = " << _rc_;
     }
   } /* endwhile */
-  factory->parseJSONStop( parseHandle );
+  json_factory.parseJSONStop( parseHandle );
   return 0; 
 }
 
@@ -881,6 +882,105 @@ int ImportRequestData::execute(){
 
   return( CREATED );
 }
+int ReorganizeRequestData::execute(){
+  if ( strMemName.empty() )
+  {
+    T5LOG(T5ERROR) <<" error:: _rc_ = "<< _rc_ << "; strOutputParams = "<<
+      outputMessage << "; szLastError = "<< "Missing name of memory";
+    buildErrorReturn( _rc_, "Missing name of memory");
+    return( BAD_REQUEST );
+  } 
+
+  // close memory if it is open
+  std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
+  if ( pMem != nullptr )
+  {
+    // close the memory and remove it from our list
+    TMManager::GetInstance()->removeFromMemoryList( pMem );
+  } 
+
+  // reorganize the memory
+  if ( !_rc_ )
+  {
+    do
+    {
+      _rc_ = EqfOrganizeMem( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str()  );
+    } while ( _rc_ == CONTINUE_RC );
+  } 
+  
+  if ( _rc_ == ERROR_MEMORY_NOTFOUND )
+  {
+    outputMessage = "{\"" + strMemName + "\": \"not found\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+  else if ( _rc_ != 0 )
+  {
+    unsigned short usRC = 0;
+
+    wchar_t szLastError[4000];
+    EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, szLastError, sizeof( szLastError ) / sizeof( szLastError[0] ) );
+    
+    T5LOG(T5ERROR) << "fails:: _rc_ = " << _rc_ << "; strOutputParams = " << outputMessage << "; szLastError = " <<
+         EncodingHelper::convertToUTF8(szLastError);
+
+    buildErrorReturn( _rc_, szLastError );
+    return( INTERNAL_SERVER_ERROR );
+  }else{
+    outputMessage = "{\"" + strMemName + "\": \"reorganized\" }";
+  }
+
+  T5LOG(T5INFO) << "::success, memName = " << strMemName;
+  _rc_ = OK;
+
+  return( _rc_ );
+
+}
+
+
+int DeleteMemRequestData::execute(){
+  if ( strMemName.empty() )
+  {
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem error:: _rc_ = " << _rc_ << "; strOutputParams = " << 
+      outputMessage << "; szLastError = ", "Missing name of memory";
+    buildErrorReturn( _rc_, "Missing name of memory" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // close memory if it is open
+  if ( mem != nullptr )
+  {
+    // close the memory and remove it from our list
+    TMManager::GetInstance()->removeFromMemoryList( mem );
+  } /* endif */
+
+  // delete the memory
+  //_rc_ = EqfDeleteMem( this->hSession, (PSZ)strMemName.c_str() );
+  _rc_ = TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
+  
+  if ( _rc_ == ERROR_MEMORY_NOTFOUND )
+  {
+    outputMessage = "{\"" + strMemName + "\": \"not found\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+  else if ( _rc_ != 0 )
+  {
+    unsigned short usRC = 0;
+    //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+    
+    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: _rc_ = " << _rc_ << "; strOutputParams = " << 
+      outputMessage <<  "; szLastError = ";// << EncodingHelper::convertToUTF8(this->szLastError) ;
+
+    //buildErrorReturn( _rc_, this->szLastError, outputMessage );
+    return( INTERNAL_SERVER_ERROR );
+  }else{
+    outputMessage = "{\"" + strMemName + "\": \"deleted\" }";
+  }
+
+  T5LOG( T5INFO) <<"OtmMemoryServiceWorker::deleteMem::success, memName = " << strMemName;
+  _rc_ = OK;
+
+  return( _rc_ );
+}
 
 
 int TagRemplacementRequestData::execute(){
@@ -897,7 +997,7 @@ int TagRemplacementRequestData::execute(){
   {
     wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
     wstr = errMsg;
-    //buildErrorReturn( iRC, errMsg, strOutputParms );
+    //buildErrorReturn( _rc_, errMsg, outputMessage );
     return _rest_rc_ = BAD_REQUEST;
   }else{ 
     std::string name;
@@ -938,9 +1038,201 @@ int TagRemplacementRequestData::execute(){
   return _rest_rc_ = 200;
 }
 
+int CloneTMRequestData::execute(){
+  START_WATCH
+  
+  // parse json data
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
+  std::string newName, name, value;
+  while ( _rc_ == 0 )
+  {
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+    if ( _rc_ == 0 ){
+      if( strcasecmp (name.c_str(), "newName") == 0 ){
+         newName = value;          
+      }else{
+          T5LOG(T5WARNING) << "::JSON parsed unused data: name = " << name << "; value = " << value;
+      }
+    }
+  }
+  if(_rc_ == 2002){
+    _rc_ = 0;
+  }
+  if(!_rc_ && newName.empty()){
+    outputMessage = "\'newName\' parameter was not provided or was empty";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }
+
+  std::string srcTmdPath, srcTmiPath, dstTmdPath, dstTmiPath;
+  char memDir[255];
+  if(!_rc_){
+    _rc_ = Properties::GetInstance()->get_value(KEY_MEM_DIR, memDir, 254);
+    if(_rc_){
+      outputMessage = "can't read MEM_DIR path from properties";
+      T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+      _rc_ = 500;
+    }
+  }
+  if(!_rc_){
+    srcTmdPath = memDir + strMemName + ".TMD";
+    srcTmiPath = memDir + strMemName + ".TMI";
+    dstTmdPath = memDir + newName + ".TMD";
+    dstTmiPath = memDir + newName + ".TMI";
+  }
+
+  // check mem if exists
+  /*if(!_rc_ && FilesystemHelper::FileExists(srcMemPath.c_str()) == false){
+    outputMessage = "\'srcMemPath\' = " + srcMemPath + " not found";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }//*/
+  if(!_rc_ && FilesystemHelper::FileExists(srcTmdPath.c_str()) == false){
+    outputMessage = "\'srcTmdPath\' = " +  srcTmdPath + " not found";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }
+  if(!_rc_ && FilesystemHelper::FileExists(srcTmiPath.c_str()) == false){
+    outputMessage = "\'srcTmiPath\' = " +  srcTmiPath + " not found";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }
+
+  // check mem if is not in import state
+  std::shared_ptr<EqfMemory>  pMem; 
+  
+  //LONG lHandle = 0;
+  //BOOL fClose = false;
+  //MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+  //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+
+  if(!_rc_){
+    pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
+  
+    
+    if(pMem == nullptr){
+    // tm is probably not opened, buf files presence was checked before, so it should be "AVAILABLE" status
+    //  outputMessage = "\'newName\' " + strMemName +" was not found in memory list";
+    //  T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    //  _rc_ = 500;
+    }else{
+      // close the memory - if open
+      if(pMem->eImportStatus == IMPORT_RUNNING_STATUS){
+           outputMessage = "src tm \'" + strMemName +"\' is in import status. Repeat request later.";
+          T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+         _rc_ = 500;
+      }else if ( pMem->eStatus == OPEN_STATUS )
+      {
+        if(pMem->lHandle){
+          //EqfCloseMem( this->hSession, pMem->lHandle, 0 );
+          //pMem->lHandle = 0;
+        }
+      }else if(pMem->eStatus != AVAILABLE_STATUS ){
+         outputMessage = "src tm \'" + strMemName +"\' is not available nor opened";
+         T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+         _rc_ = 500;
+      }
+    }
+  }
+  
+  // check if new name is available(is not occupied)
+  /*if(!_rc_ && FilesystemHelper::FileExists(dstMemPath.c_str()) == true){
+    outputMessage = "\'dstMemPath\' = " +  dstMemPath + " already exists";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }//*/
+  if(!_rc_ && FilesystemHelper::FileExists(dstTmdPath.c_str()) == true){
+    outputMessage = "\'dstTmdPath\' = " +  dstTmdPath + " already exists";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }
+  if(!_rc_ && FilesystemHelper::FileExists(dstTmiPath.c_str()) == true){
+    outputMessage = "\'dstTmiPath\' = " +  dstTmiPath + " already exists";
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }
+
+  //flush filebuffers before clonning
+  if(FilesystemHelper::FilebufferExists(srcTmdPath)){
+    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmdPath))){
+      outputMessage = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmdPath\' = " + srcTmdPath;
+      T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+      _rc_ = 500;
+    }
+  }
+  if(FilesystemHelper::FilebufferExists(srcTmiPath)){
+    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmiPath))){
+      outputMessage = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmiPath\' = " + srcTmiPath;
+      T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+      _rc_ = 500;
+    }
+  }
+  /*
+  if(!_rc_ && (_rc_ = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcMemPath))){
+    outputMessage = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcMemPath\' = " + srcMemPath;
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 500;
+  }//*/
+
+  // clone .mem .tmi and .tmd files 
+  
+  /*if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcMemPath, dstMemPath))){
+    outputMessage = "Can't clone file, _rc_ = " + toStr(_rc_)  + "; \'srcMemPath\' = " + srcMemPath + "; \'dstMemPath\' = " +  dstMemPath;
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 501;
+  }//*/
+  if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcTmdPath, dstTmdPath))){
+    outputMessage = "Can't clone file, _rc_ = " + toStr(_rc_)  + "; \'srcTmdPath\' = " + srcTmdPath + "; \'dstTmdPath\' = " +  dstTmdPath;
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 501;
+  }
+  if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcTmiPath, dstTmiPath))){
+    outputMessage = "Can't clone file, _rc_ = " + toStr(_rc_)  + "; \'srcTmiPath\' = " + srcTmiPath + "; \'dstTmiPath\' = " +  dstTmiPath;
+    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
+    _rc_ = 501;
+  }
+
+  //if there was error- delete files
+  if(_rc_ == 501){
+    if(FilesystemHelper::FileExists(dstTmiPath.c_str())) FilesystemHelper::DeleteFile(dstTmiPath.c_str());
+    if(FilesystemHelper::FileExists(dstTmdPath.c_str())) FilesystemHelper::DeleteFile(dstTmdPath.c_str());
+    //if(FilesystemHelper::FileExists(dstMemPath.c_str())) FilesystemHelper::DeleteFile(dstMemPath.c_str());
+    _rc_ = 500;
+  }
+  if(!_rc_){
+    EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
+  }
+  if( pMem != nullptr )
+  {
+    //fClose = true;
+    //lHandle =          pMem->lHandle; 
+    //lastStatus =       pMem->eStatus;
+    //lastImportStatus = pMem->eImportStatus;
+
+    //pMem->lHandle = 0;
+    //pMem->eStatus = AVAILABLE_STATUS;
+    //pMem->eImportStatus = AVAILABLE_STATUS; //IMPORT_RUNNING_STATUS;
+    //pMem->dImportProcess = 0;
+  }
+
+  if(_rc_ == 0 ){
+    outputMessage = newName + " was cloned successfully";
+    _rc_ = 200;
+  }
+
+  outputMessage = "{\n\t\"msg\": \"" + outputMessage + "\",\n\t\"time\": \"" + watch.print()+ "\n}"; 
+
+
+  STOP_WATCH
+  //PRINT_WATCH
+
+  return _rc_;
+}
+
+
 std::string printTime(time_t time);
 int StatusMemRequestData::checkData() {
-  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  //EncodingHelper::convertUTF8ToASCII( strMemName );
   if ( strMemName.empty() )
   {
     buildErrorReturn( _rc_, "Missing name of memory" );
@@ -962,39 +1254,39 @@ int StatusMemRequestData::checkData() {
       default: pszStatus = "available"; break;
     }
     // return the status of the memory
-    factory->startJSON( outputMessage );
-    factory->addParmToJSON( outputMessage, "status", "open" );
-    factory->addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
+    json_factory.startJSON( outputMessage );
+    json_factory.addParmToJSON( outputMessage, "status", "open" );
+    json_factory.addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
     if(pMem->importDetails != nullptr){
-      factory->addParmToJSON( outputMessage, "importProgress", pMem->importDetails->usProgress );
-      factory->addParmToJSON( outputMessage, "importTime", pMem->importDetails->importTimestamp );
-      factory->addParmToJSON( outputMessage, "segmentsImported", pMem->importDetails->segmentsImported );
-      factory->addParmToJSON( outputMessage, "invalidSegments", pMem->importDetails->invalidSegments );
-      factory->addParmToJSON( outputMessage, "invalidSymbolErrors", pMem->importDetails->invalidSymbolErrors );
-      factory->addParmToJSON( outputMessage, "importErrorMsg", pMem->importDetails->importMsg.str() );
+      json_factory.addParmToJSON( outputMessage, "importProgress", pMem->importDetails->usProgress );
+      json_factory.addParmToJSON( outputMessage, "importTime", pMem->importDetails->importTimestamp );
+      json_factory.addParmToJSON( outputMessage, "segmentsImported", pMem->importDetails->segmentsImported );
+      json_factory.addParmToJSON( outputMessage, "invalidSegments", pMem->importDetails->invalidSegments );
+      json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", pMem->importDetails->invalidSymbolErrors );
+      json_factory.addParmToJSON( outputMessage, "importErrorMsg", pMem->importDetails->importMsg.str() );
     }
-    factory->addParmToJSON( outputMessage, "lastAccessTime", printTime(pMem->tLastAccessTime) );
+    json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(pMem->tLastAccessTime) );
     if ( ( pMem->eImportStatus == IMPORT_FAILED_STATUS ) && ( pMem->pszError != NULL ) )
     {
-      factory->addParmToJSON( outputMessage, "ErrorMsg", pMem->pszError );
+      json_factory.addParmToJSON( outputMessage, "ErrorMsg", pMem->pszError );
     }
-    factory->terminateJSON( outputMessage );
+    json_factory.terminateJSON( outputMessage );
     return( OK );
   } /* endif */
 
   // check if memory exists
-  //if ( EqfMemoryExists( this->hSession, (char *)strMemory.c_str() ) != 0 )
+  //if ( EqfMemoryExists( this->hSession, (char *)strMemName.c_str() ) != 0 )
   if(int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
   {
-    factory->startJSON( outputMessage );
-    factory->addParmToJSON( outputMessage, "status", "not found" );
-    factory->terminateJSON( outputMessage );
+    json_factory.startJSON( outputMessage );
+    json_factory.addParmToJSON( outputMessage, "status", "not found" );
+    json_factory.terminateJSON( outputMessage );
     return( NOT_FOUND );
   }
 
-  factory->startJSON( outputMessage );
-  factory->addParmToJSON( outputMessage, "status", "available" );
-  factory->terminateJSON( outputMessage );
+  json_factory.startJSON( outputMessage );
+  json_factory.addParmToJSON( outputMessage, "status", "available" );
+  json_factory.terminateJSON( outputMessage );
   return( OK );
 };
 
@@ -1470,7 +1762,7 @@ int UpdateEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
   json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
   json_factory.terminateJSON( outputMessage );
-  //outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW.c_str() );
+  //outputMessage = EncodingHelper::convertToUTF8( outputMessageW.c_str() );
 
   _rc_ = OK;
 
@@ -1479,18 +1771,14 @@ int UpdateEntryRequestData::execute(){
 
 
 int DeleteEntryRequestData::parseJSON(){
-  auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
   if ( strMemName.empty() )
   {
     buildErrorReturn( _rc_, "Missing name of memory" );
     return( BAD_REQUEST );
   } /* endif */
-
-
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  LOOKUPINMEMORYDATA Data;
   memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
 
   auto loggingThreshold = -1;
@@ -1511,7 +1799,11 @@ int DeleteEntryRequestData::parseJSON(){
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
+  return( _rc_ );
+}
+
+int DeleteEntryRequestData::checkData(){
 
   if ( _rc_ != 0 )
   {
@@ -1547,17 +1839,13 @@ int DeleteEntryRequestData::parseJSON(){
   if(loggingThreshold >=0){
     T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::updateEntry::set new threshold for logging" <<loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
-  }
+  }  
+  return 0;
+}
 
-    // get the handle of the memory 
-  long lHandle = 0;
-  int httpRC =  TMManager::GetInstance()->getMemoryHandle( strMemName,  &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
-  if ( httpRC != OK )
-  {
-    buildErrorReturn( _rc_, Data.szError );
-    return( httpRC );
-  } /* endif */
+int DeleteEntryRequestData::execute(){
 
+  auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
   // prepare the proposal data
   MEMPROPOSAL Prop ;
   memset( &Prop, 0, sizeof( Prop ) );
@@ -1592,8 +1880,22 @@ int DeleteEntryRequestData::parseJSON(){
   std::string errorStr;
   errorStr.reserve(1000);
   // update the memory delete entry
-  TMManager::GetInstance()->APIUpdateDeleteMem( lHandle, &Prop, 0 , &errorStr[0]);
-  //_rc_ = EqfUpdateDeleteMem( this->hSession, lHandle, pProp, 0,  &errorStr[0]);
+
+  if ( mem == NULL )
+  {
+    return( INVALIDFILEHANDLE_RC );
+  } /* endif */
+  
+  OtmProposal OtmProposal;
+  strcpy(Prop.szDocShortName , Prop.szDocName);
+  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
+
+  _rc_ = mem->deleteProposal( OtmProposal );
+  if(_rc_ == 6020){
+    //seg not found
+    errorStr = "Segment not found";
+  }
+
   if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;
@@ -1621,18 +1923,7 @@ int DeleteEntryRequestData::parseJSON(){
   json_factory.terminateJSON( outputMessage );
 
   _rc_ = OK;
-
-  return( _rc_ );
-}
-
-int DeleteEntryRequestData::checkData(){
-
-  return 0;
-}
-
-int DeleteEntryRequestData::execute(){
-
-  return 0;
+  return _rc_;
 }
 
 int FuzzySearchRequestData::parseJSON(){

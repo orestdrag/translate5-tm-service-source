@@ -4656,6 +4656,7 @@ class TMManager{
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);
+  int DeleteTM(const std::string& strMemName, std::string& outputMsg);
   std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command);
   std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
   std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
@@ -5237,20 +5238,6 @@ int removeMemoryFromList(const char* pszName);
     EqfMemory*        lHandle, 
     PMEMPROPOSAL pNewProposal,
     LONG        lOptions
-  );
-
-    /*! \brief process the API call: EqfUpdateDeleteMem and deletes a segment in the memory
-    \param lHandle handle of a previously opened memory
-    \param pProposalToDelete pointer to an MemProposal structure containing the segment data
-    \param lOptions processing options 
-    \returns 0 if successful or an error code in case of failures
-  */
-  USHORT APIUpdateDeleteMem
-  (
-    LONG        lHandle, 
-    PMEMPROPOSAL pProposalToDelete,
-    LONG        lOptions,
-    char*       errorStr
   );
 
   /*! \brief List the name of all memories

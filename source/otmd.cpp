@@ -131,7 +131,7 @@ void signal_handler(int signal)
 {
   gSignalStatus = signal;
   T5LOG(T5TRANSACTION) << " Received signal "<< signal<< "; Shutting down :";
-  OtmMemoryServiceWorker::getInstance()->shutdownService(signal);
+  //OtmMemoryServiceWorker::getInstance()->shutdownService(signal);
 }
 
 /*
