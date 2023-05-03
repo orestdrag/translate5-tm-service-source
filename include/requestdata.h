@@ -178,8 +178,11 @@ class CloneTMRequestData:public RequestData{
 public:
     CloneTMRequestData(): RequestData(COMMAND::CLONE_TM_LOCALY) {};
 protected:
-    int parseJSON() override { return 0;};
-    int checkData() override { return 0;};
+    
+    std::string newName, srcTmdPath, srcTmiPath, dstTmdPath, dstTmiPath;
+    
+    int parseJSON() override;
+    int checkData() override;
     int execute  () override;
 };
 
@@ -187,8 +190,8 @@ class ReorganizeRequestData:public RequestData{
 public:
     ReorganizeRequestData(): RequestData(COMMAND::REORGANIZE_MEM) {};
 protected:
-    int parseJSON() override { return 0;};
-    int checkData() override { return 0;};
+    int parseJSON() override;
+    int checkData() override;
     int execute  () override;
 };
 

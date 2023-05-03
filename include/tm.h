@@ -4629,6 +4629,7 @@ int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
 class TMManager{
 
   public:
+  
   std::atomic_bool fServiceIsRunning{0};
     /*! \brief Pointer to the list of opened memories
     */
@@ -6441,7 +6442,7 @@ USHORT EqfExportMem
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
-  PSZ         pszMemname               // mand: name of Translation Memory
+  std::shared_ptr<EqfMemory>  pMem     // mand: name of Translation Memory
 );
 
 /*! \brief Create a new Translation Memory

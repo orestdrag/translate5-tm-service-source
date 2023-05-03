@@ -3876,16 +3876,6 @@ USHORT UtlMakeFileName
   PSZ         pszBuffer                // buffer for created file name
 );
 
-
-
-/*! \brief add a list of files to a ZIP package
-  \param pszFileList list of comma separated, fully qualified file names to be added to the package
-  \param pszPackage fully qualified name of the ZIP package being created
-  \returns 0 in any case
-*/
-int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
-
-
 // Mode defines for function UtlHandleConversionStrings
 // CONVLOAD_MODE loads the names of the conversion into a listbox or combo-box
 #define CONVLOAD_MODE     1

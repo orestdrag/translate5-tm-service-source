@@ -229,7 +229,9 @@ USHORT EQFMemOrganizeStart
     } /* endif */
   }
 #endif
-
+    
+    T5LOG(T5ERROR) << "Reorganize is not implemented yet for new codebase!";
+    usRc = 11111;
     // --------------------------------------------------------------------
     // Create the Output translation memory
     if ( usRc )
@@ -635,7 +637,7 @@ VOID EQFMemOrganizeEnd
 USHORT MemFuncPrepOrganize
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName               // Translation Memory being deleted
+  EqfMemory*  pMem               // Translation Memory being reorganized
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -644,93 +646,48 @@ USHORT MemFuncPrepOrganize
   BOOL        fOK = TRUE;              // internal O.K. flag
   PSZ         pszParm;                 // error parameter pointer
   CHAR        szMemPath[MAX_EQF_PATH];
-  EqfMemory *pMem = NULL;       // TM handle
-  SHORT       sRC;                     // value used for symbol checking..
-  TMManager *pFactory = TMManager::GetInstance();
 
-   // check if a TM has been specified
-   if ( fOK )
-   {
-     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-     {
-       fOK = FALSE;
-       UtlErrorHwnd( TMT_MANDCMDLINE, MB_CANCEL, 0, NULL,
-                     EQF_ERROR, HWND_FUNCIF );
-     } /* endif */
-   } /* endif */
+  // prepare TM organize process
+  // allocate storage for the organize process communication area
+  fOK = UtlAllocHwnd( (PVOID *)&pCommArea, 0L,
+                      (LONG)sizeof(PROCESSCOMMAREA),
+                      ERROR_STORAGE, HWND_FUNCIF );
 
-   // check if there is a TM with the given name
-   if ( fOK )
-   {
-     int iRC = 0;
+  // allocate storage for the MEM_ORGANIZE_IDA.
+  if ( fOK )
+  {
+    fOK = UtlAllocHwnd( (PVOID *)&pRIDA, 0L,
+                        (LONG)sizeof(MEM_ORGANIZE_IDA),
+                        ERROR_STORAGE, HWND_FUNCIF );
+  } /* endif */
 
-     pMem = pFactory->openMemory( NULL, pszMemName, FOR_ORGANIZE, &iRC );
-     if ( iRC != 0)
-     {
-       pszParm = pszMemName;
-       UtlErrorHwnd( ERROR_MEMORY_NOTFOUND, MB_CANCEL, 1,
-                     &pszParm, EQF_ERROR, HWND_FUNCIF );
-     } /* endif */
-   } /* endif */
+  if ( fOK )
+  {
+    // Fill  IDA with necessary values
+    pCommArea->pUserIDA = pRIDA;
+    pRIDA->pMem = pMem;
+    pRIDA->usRC = NO_ERROR;
+    strcpy( pRIDA->szMemName, pMem->szName );
+    pRIDA->fBatch = TRUE;
+    pRIDA->hwndErrMsg = HWND_FUNCIF;
+    pRIDA->NextTask = MEM_START_ORGANIZE;
+  } /* endif */
 
-   if ( fOK )
-   {
-     // prepare TM organize process
-     if ( fOK )
-     {
-       // allocate storage for the organize process communication area
-       fOK = UtlAllocHwnd( (PVOID *)&pCommArea, 0L,
-                           (LONG)sizeof(PROCESSCOMMAREA),
-                           ERROR_STORAGE, HWND_FUNCIF );
+  // enable organize process if OK
+  if ( fOK )
+  {
+    pData->fComplete = FALSE;
+    pData->sLastFunction = FCT_EQFORGANIZEMEM;
+    pData->pvMemOrganizeCommArea = pCommArea;
+    pCommArea->pUserIDA = pRIDA;
+  } /* endif */
 
-       // allocate storage for the MEM_ORGANIZE_IDA.
-       if ( fOK )
-       {
-         fOK = UtlAllocHwnd( (PVOID *)&pRIDA, 0L,
-                             (LONG)sizeof(MEM_ORGANIZE_IDA),
-                             ERROR_STORAGE, HWND_FUNCIF );
-       } /* endif */
-
-       if ( fOK )
-       {
-         // Fill  IDA with necessary values
-         pCommArea->pUserIDA = pRIDA;
-         pRIDA->pMem = pMem;
-         pRIDA->usRC = NO_ERROR;
-         strcpy( pRIDA->szMemName, pszMemName );
-         pRIDA->fBatch = TRUE;
-         pRIDA->hwndErrMsg = HWND_FUNCIF;
-         pRIDA->NextTask = MEM_START_ORGANIZE;
-
-         if ( !fOK )
-         {
-           // free IDA, otherwise it will be freed in organize process
-           UtlAlloc( (PVOID *)&pRIDA, 0L, 0L, NOMSG );
-         } /* endif */
-       } /* endif */
-     } /* endif */
-   } /* endif */
-
-   // enable organize process if OK
-   if ( fOK )
-   {
-     pData->fComplete = FALSE;
-     pData->sLastFunction = FCT_EQFORGANIZEMEM;
-     pData->pvMemOrganizeCommArea = pCommArea;
-     pCommArea->pUserIDA = pRIDA;
-    } /* endif */
-
-   // cleanup in case of errors
-   if ( !fOK )
-   {
-     usRC = UtlGetDDEErrorCode( HWND_FUNCIF );
-     if ( pMem != NULL )
-     {
-       pFactory->closeMemory( pMem );
-     } /* endif */
-     pData->fComplete = TRUE;
-   } /* endif */
-
+  // cleanup in case of errors
+  if ( !fOK )
+  {
+    usRC = UtlGetDDEErrorCode( HWND_FUNCIF );
+    pData->fComplete = TRUE;
+  } /* endif */
   return( usRC );
 } /* end of function MemFuncPrepOrganize */
 
