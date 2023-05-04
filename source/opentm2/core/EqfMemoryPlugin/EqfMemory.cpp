@@ -50,9 +50,10 @@ EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
 
 }
 
-
 EqfMemory::~EqfMemory()
 {
+  T5LOG(T5DEBUG) << "Closing memory" << szName;
+  UnloadFromRAM();
   //if ( this->pTmExtIn != NULL )  delete  this->pTmExtIn ;
   //if ( &TmExtOut != NULL ) delete  &TmExtOut ;
   //if ( TmPutIn != NULL )  delete  TmPutIn ;
@@ -991,8 +992,8 @@ int EqfMemory::setGlobalMemoryOptions
 
 // NewTM region
 EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
-  TmBtree.fb.fileName = TMManager::GetTmdPath(tmName);
-  InBtree.fb.fileName = TMManager::GetTmiPath(tmName);
+  TmBtree.fb.fileName = FilesystemHelper::GetTmdPath(tmName);
+  InBtree.fb.fileName = FilesystemHelper::GetTmiPath(tmName);
 
  strcpy(szName, tmName.c_str());
 }

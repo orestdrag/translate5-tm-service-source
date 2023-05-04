@@ -4650,10 +4650,6 @@ class TMManager{
   bool IsMemoryLoaded(const std::string& strMemName);
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
 
-  //helper functions 
-  static std::string GetTmdPath(const std::string& memName);
-  static std::string GetTmiPath(const std::string& memName);
-
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);

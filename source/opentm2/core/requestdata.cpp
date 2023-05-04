@@ -1011,23 +1011,30 @@ int DeleteMemRequestData::execute(){
     buildErrorReturn( _rc_, "Missing name of memory" );
     return( BAD_REQUEST );
   } /* endif */
-
-  // close memory if it is open
-  if ( mem != nullptr )
+  
+  
+  if (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) )
   {
-    // close the memory and remove it from our list
-    TMManager::GetInstance()->removeFromMemoryList( mem );
-  } /* endif */
+    outputMessage = "{\"" + strMemName + "\": \"not found(error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+
+  _rc_ = TMManager::GetInstance()->CloseTM(strMemName);
 
   // delete the memory
   //_rc_ = EqfDeleteMem( this->hSession, (PSZ)strMemName.c_str() );
-  _rc_ = TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
-  
-  if ( _rc_ == ERROR_MEMORY_NOTFOUND )
-  {
-    outputMessage = "{\"" + strMemName + "\": \"not found\" }";
-    return( _rc_ = NOT_FOUND );
+  if( !_rc_){
+    //_rc_ = TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(strMemName))){
+      return 1;
+    }
+
+    //check tmi file
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(strMemName))){
+      return 2;
+    }    
   }
+
   else if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;
@@ -1585,8 +1592,8 @@ int ExportRequestData::ExportZip(){
 
   // add the files to the package
   ZIP* pZip = FilesystemHelper::ZipOpen( strTempFile , 'w' );
-  FilesystemHelper::ZipAdd( pZip, TMManager::GetTmdPath(strMemName) );
-  FilesystemHelper::ZipAdd( pZip, TMManager::GetTmiPath(strMemName) );  
+  FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmdPath(strMemName) );
+  FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmiPath(strMemName) );  
   FilesystemHelper::ZipClose( pZip );
 
   return _rc_;

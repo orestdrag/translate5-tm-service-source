@@ -151,8 +151,11 @@ public:
     static int  ZipAdd    ( ZIP * pZip, const std::string& fName );
     static ZIP* ZipOpen   ( const std::string&  fName , char mode );
     static int  ZipClose  ( ZIP* pZip );
-    static int  ZipExtract( const std::string&  zipPath, const std::string&  destPath );    
-
+    static int  ZipExtract( const std::string&  zipPath, const std::string&  destPath );  
+      
+    //helper functions 
+    static std::string GetTmdPath(const std::string& memName);
+    static std::string GetTmiPath(const std::string& memName);
 
 private:
     static std::string _memDir;
