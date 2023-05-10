@@ -2442,13 +2442,6 @@ SHORT BTREE::QDAMDictCreateLocal
     // filename is not set
     QDAMDestroy( this );
   } /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMDICTCREATELOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-
   return( sRc );
 }
 

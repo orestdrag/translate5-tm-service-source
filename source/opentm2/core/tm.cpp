@@ -2323,7 +2323,7 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
 }
 
 int TMManager::CloseTM(const std::string& strMemName){
-  if(IsMemoryLoaded(strMemName)){
+  if(!IsMemoryLoaded(strMemName)){
     return 404;
   }
   tms.erase(strMemName);
