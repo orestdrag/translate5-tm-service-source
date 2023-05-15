@@ -211,16 +211,7 @@ USHORT EqfExportMem
 } /* end of function EqfExportMem */
 
 
-// Prepare the organize of a TM in function call mode
-USHORT MemFuncPrepOrganize
-(
-  PFCTDATA    pData,                   // function I/F session data
-  EqfMemory*  pMem               // Translation Memory being reorganized
-);
-USHORT MemFuncOrganizeProcess
-(
-  PFCTDATA    pData                    // function I/F session data
-);
+
 
 
 // organize a Translation Memory
@@ -231,40 +222,6 @@ USHORT EqfOrganizeMem
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-  do{
-  // check sequence of calls
-    if ( usRC == NO_ERROR )
-    {
-      if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
-      {
-        T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
-        usRC = LASTTASK_INCOMPLETE_RC;
-      } /* endif */
-    } /* endif */
-
-    // call TM organize
-    if ( usRC == NO_ERROR )
-    {
-      pData->sLastFunction = FCT_EQFORGANIZEMEM;
-      if ( pData->fComplete )              // has last run been completed
-      {
-        // prepare a new analysis run
-        usRC = MemFuncPrepOrganize( pData, mem.get() );
-       
-      }
-      else
-      {        
-        // continue current organize process
-        usRC = MemFuncOrganizeProcess( pData );
-      } /* endif */
-      //usRC = MemFuncOrganizeMem( pData, pszMemName );
-    } /* endif */
-  }while((usRC == NO_ERROR) && !pData->fComplete  );
-
   return( usRC );
 } /* end of function EqfOrganizeMem */
 
@@ -277,31 +234,7 @@ USHORT EqfDeleteMem
   PSZ         pszMemName               // Translation Memory being deleted
 )
 {
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  T5LOG( T5DEBUG) <<  "==EQFDeleteMem==::memName = " <<  pszMemName;
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  // call TM delete function
-  if ( usRC == NO_ERROR )
-  {
-    usRC = MemFuncDeleteMem( pszMemName );
-    pData->fComplete = TRUE;   // one-shot function are always complete
-  }else{
-    T5LOG(T5ERROR) << "Error in EQFDeleteMem::FctValidateSession:: MemName = " << pszMemName << "; RC = " << usRC;
-  } /* endif */
-
-  if ( !usRC )
-  {
-    SetSharingFlag( EQF_REFR_MEMLIST );
-  }
-
-  T5LOG( T5INFO) << "End of EQFDeleteMem:: MemName = " << pszMemName <<  "; RC = " << usRC;
-
-  return( usRC );
+  return( 0 );
 } /* end of function EqfDeleteMem */
 
  USHORT CreateSystemProperties( );
@@ -854,33 +787,6 @@ USHORT EqfUpdateMem
 }
 
 
-// OtmMemoryService
-/*! \brief List the name of all memories
-\param hSession the session handle returned by the EqfStartSession call
-\param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
-\param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
-\returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfListMem
-(
-  HSESSION    hSession,
-  PSZ         pszBuffer,
-  PLONG       plLength
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-                                       // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  // call the memory factory to process the request
-  if ( usRC == NO_ERROR )
-  {
-    usRC =  TMManager::GetInstance()->APIListMem( pszBuffer, plLength );
-  } /* endif */
-  return( usRC );
-}
 
 std::vector<std::string> GetListOfLanguagesFromFamily(PSZ pszIsoLang){
   return LanguageFactory::getInstance()->getListOfLanguagesFromTheSameFamily( pszIsoLang );

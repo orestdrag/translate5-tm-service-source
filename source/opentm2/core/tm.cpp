@@ -25,7 +25,7 @@ int TMManager::findMemoryInList( const std::string& memName )
   // 
   for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if ( strcasecmp( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName, memName.c_str() ) == 0 )
+    if ( strcasecmp( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName, memName.c_str() ) == 0 )
     {
       return( i );
     } /* endif */
@@ -39,9 +39,9 @@ int TMManager::findMemoryInList( const std::string& memName )
 int TMManager::GetMemImportInProcess(){
   for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->eImportStatus == IMPORT_RUNNING_STATUS)
+    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->eImportStatus == IMPORT_RUNNING_STATUS)
     {
-      T5LOG( T5INFO) << ":: memory in import process, name = " << EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName ;
+      T5LOG( T5INFO) << ":: memory in import process, name = " << EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName ;
       return i;
     }
   } /* endfor */
@@ -83,7 +83,7 @@ int TMManager::getFreeSlot(size_t memoryRequested)
     // first look for a free slot in the existing list
     for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
     {
-      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] == 0 )
+      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] == 0 )
       {
         return( i );
       } /* endif */
@@ -129,7 +129,7 @@ std::shared_ptr<EqfMemory>  TMManager::getFreeSlotPointer(size_t memoryRequested
     // first look for a free slot in the existing list
     for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
     {
-      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] == 0 )
+      if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] == 0 )
       {
         return( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i] );
       } /* endif */
@@ -185,7 +185,7 @@ size_t TMManager::CalculateOccupiedRAM(){
   }
   #else
   for(const auto& mem: tms){
-    UsedMemory += mem.second.get()->GetRAMSize();
+    UsedMemory += mem.second->GetRAMSize();
   }
   //UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
   UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
@@ -213,15 +213,15 @@ size_t TMManager::cleanupMemoryList(size_t memoryRequested)
   time( &curTime );
   std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
   for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
-    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
+    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] != 0 )
     {
-      openedMemoriesSortedByLastAccess.insert({EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->tLastAccessTime, i});
+      openedMemoriesSortedByLastAccess.insert({EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->tLastAccessTime, i});
     }
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
-    removeFromMemoryList(it->second);
+    T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->tLastAccessTime) <<  " seconds" ;
+    //removeFromMemoryList(it->second);
     memoryNeed = memoryRequested + calculateOccupiedRAM();
   }
 
@@ -248,16 +248,16 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   std::multimap <time_t, std::string>  openedMemoriesSortedByLastAccess;
   for(const auto& tm: tms){
   //for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
-  //  if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
+  //  if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] != 0 )
     {
-      openedMemoriesSortedByLastAccess.insert({tm.second.get()->tLastAccessTime, tm.first});
+      openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.first});
     }
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    //T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
+    //T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->tLastAccessTime) <<  " seconds" ;
     //RemoveFromMemoryList(it->second);
-    tms[it->second].get()->UnloadFromRAM();
+    tms[it->second]->UnloadFromRAM();
     memoryNeed = memoryRequested + CalculateOccupiedRAM();
   }
 
@@ -406,9 +406,9 @@ int TMManager::closeAll()
 {
   for ( int i = 0; i < ( int )EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
-    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
+    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] != 0 )
     {
-      removeFromMemoryList( i );
+      //removeFromMemoryList( i );
     }
   } /* endfor */
   return( 0 );
@@ -420,44 +420,10 @@ int TMManager::closeAll()
 /*! \brief close a memory and remove it from the open list
     \param iIndex index of memory in the open list
   \returns 0 
-*/
+*//*
 int TMManager::removeFromMemoryList( int iIndex )
 {
   std::shared_ptr<EqfMemory>  pMem = EqfMemoryPlugin::GetInstance()->m_MemInfoVector[iIndex];
-  LONG lHandle = pMem->lHandle;
-  int i=0;
-  while(pMem->eStatus == IMPORT_RUNNING_STATUS || pMem->eImportStatus == IMPORT_RUNNING_STATUS ){
-    sleep(1);
-    if(i++ % 10 == 0){
-      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem->szName << "\', for " << i << " seconds";
-    }
-  }
-  // remove the memory from the list
-  pMem.get()->lHandle = 0;
-  pMem.get()->tLastAccessTime = 0;
-  pMem.get()->szName[0] = 0;
-  if ( pMem->pszError ) delete[]  pMem->pszError ;
-  if( pMem.get()->importDetails != nullptr){
-    delete pMem.get()->importDetails;
-    pMem.get()->importDetails = nullptr;
-  }
-  pMem.get()->pszError = NULL;
-
-  // close the memory
-  EqfCloseMem( this->hSession, lHandle, 0 );
-
-  return( 0 );
-} 
-
-
-
-
-/*! \brief close a memory and remove it from the open list
-    \param iIndex index of memory in the open list
-  \returns 0 
-*/
-int TMManager::removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem )
-{
   LONG lHandle = pMem->lHandle;
   int i=0;
   while(pMem->eStatus == IMPORT_RUNNING_STATUS || pMem->eImportStatus == IMPORT_RUNNING_STATUS ){
@@ -482,6 +448,40 @@ int TMManager::removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem )
 
   return( 0 );
 } 
+//*/
+
+
+
+/*! \brief close a memory and remove it from the open list
+    \param iIndex index of memory in the open list
+  \returns 0 
+*/
+/*int TMManager::removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem )
+{
+  LONG lHandle = pMem->lHandle;
+  int i=0;
+  while(pMem->eStatus == IMPORT_RUNNING_STATUS || pMem->eImportStatus == IMPORT_RUNNING_STATUS ){
+    sleep(1);
+    if(i++ % 10 == 0){
+      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem->szName << "\', for " << i << " seconds";
+    }
+  }
+  // remove the memory from the list
+  pMem->lHandle = 0;
+  pMem->tLastAccessTime = 0;
+  pMem->szName[0] = 0;
+  if ( pMem->pszError ) delete[]  pMem->pszError ;
+  if( pMem->importDetails != nullptr){
+    delete pMem->importDetails;
+    pMem->importDetails = nullptr;
+  }
+  pMem->pszError = NULL;
+
+  // close the memory
+  EqfCloseMem( this->hSession, lHandle, 0 );
+
+  return( 0 );
+} //*/
 
 
 
@@ -536,6 +536,118 @@ Copyright Notice:
 TMManager* TMManager::GetInstance(){
     static TMManager tmm;
     return &tmm;
+}
+
+std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, const std::string& strMemDescription, int& _rc_){
+  std::shared_ptr<EqfMemory> NewMem;
+  ULONG ulKey = 0;
+  if ( _rc_ == NO_ERROR )
+  {
+    T5LOG( T5DEBUG) << ":: create the memory" ;    
+    NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
+    _rc_ = NewMem->NTMCreateLongNameTable();
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    //build name and extension of tm data file
+
+    //fill signature record structure
+    strcpy( NewMem->stTmSign.szName, NewMem->TmBtree.fb.fileName.c_str() );
+    UtlTime( &(NewMem->stTmSign.lTime) );
+    strcpy( NewMem->stTmSign.szSourceLanguage,
+            strSrcLang.c_str() );
+
+    //TODO - replace version with current t5memory version
+    NewMem->stTmSign.bGlobVersion = T5GLOBVERSION;
+    NewMem->stTmSign.bMajorVersion = T5MAJVERSION;
+    NewMem->stTmSign.bMinorVersion = T5MINVERSION;
+    strcpy( NewMem->stTmSign.szDescription,
+            strMemDescription.c_str() );
+
+    //call create function for data file
+    NewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
+    
+    _rc_ = NewMem->TmBtree.QDAMDictCreateLocal( &(NewMem->stTmSign),FIRST_KEY );
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    //insert initialized record to tm data file
+    ulKey = AUTHOR_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+              (PBYTE)&NewMem->Authors, TMX_TABLE_SIZE );
+  }
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = FILE_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+                (PBYTE)&NewMem->FileNames, TMX_TABLE_SIZE );     
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = TAGTABLE_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+                (PBYTE)&NewMem->TagTables, TMX_TABLE_SIZE );
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = LANG_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+            (PBYTE)&NewMem->Languages, TMX_TABLE_SIZE );
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    int size = MAX_COMPACT_SIZE-1 ;
+    //initialize and insert compact area record
+    memset( NewMem->bCompact, 0, size );
+
+    ulKey = COMPACT_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+                        NewMem->bCompact, size);  
+
+  } /* endif */
+
+  // add long document table record
+  if ( _rc_ == NO_ERROR )
+  {
+    ulKey = LONGNAME_KEY;
+    // write long document name buffer area to the database
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+                        (PBYTE)NewMem->pLongNames->pszBuffer,
+                        NewMem->pLongNames->ulBufUsed );        
+
+  } /* endif */
+
+  // create language group table
+  if ( _rc_ == NO_ERROR )
+  {
+    _rc_ =  NewMem->NTMCreateLangGroupTable();
+    
+  } /* endif */
+
+  if ( _rc_ == NO_ERROR )
+  {
+    //fill signature record structure
+    strcpy( NewMem->stTmSign.szName, NewMem->InBtree.fb.fileName.c_str() );
+
+    _rc_ = NewMem->InBtree.QDAMDictCreateLocal(&NewMem->stTmSign, START_KEY );
+                        
+  } /* endif */
+
+  if(_rc_ == NO_ERROR){   
+    NewMem->TmBtree.fb.Flush();
+    NewMem->InBtree.fb.Flush();     
+  }else {
+    //something went wrong during create or insert so delete data file
+    //UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
+    UtlDelete((PSZ) NewMem->TmBtree.fb.fileName.c_str(), 0L, FALSE);
+    //free allocated memory
+    NewMem->NTMDestroyLongNameTable();
+  } /* endif */    
+  return NewMem;
+
 }
 
 /* \brief Open an existing memory
@@ -722,24 +834,6 @@ EqfMemory *TMManager::createMemory
   return( pMemory );
 }
 
-/* \brief List memories from all memory plugins
-   \param pfnCallBack callback function to be called for each memory
-	 \param pvData caller's data pointetr, is passed to callback function
-	 \param fWithDetails TRUE = supply memory details, when this flag is set, 
-   the pInfo parameter of the callback function is set otherwise it is NULL
- 	 \returns number of provided memories
-*/
-int TMManager::listMemories
-(
-	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
-	void *pvData,
-	BOOL fWithDetails
-)
-{
-  int iMemories = 0;
-  iMemories += EqfMemoryPlugin::GetInstance()->listMemories( pfnCallBack, pvData, fWithDetails );     
-  return( iMemories );
-}
 
 /* \brief Closed a previously opened memory
    \param pMemory pointer to memory object beign closed
@@ -1881,36 +1975,6 @@ int AddMemToList( void *pvData, char *pszName,std::shared_ptr<EqfMemory>  pInfo 
   return( 0 );
 }
 
-/*! \brief List the name of all memories
-\param hSession the session handle returned by the EqfStartSession call
-\param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
-\param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
-\returns 0 if successful or an error code in case of failures
-*/
-USHORT TMManager::APIListMem
-(
-  const char*         pszBuffer,
-  LONG        *plLength
-)
-{
-  APILISTMEMDATA Data;
-
-  Data.pszBuffer = pszBuffer;
-  Data.lBufSize = *plLength;
-  Data.plLength = plLength;
-  *plLength = 0;
-
-  for ( std::size_t i = 0; i < pluginList->size(); i++ )
-  {
-    EqfMemoryPlugin *pluginCurrent = ( *pluginList )[i];
-
-    //pluginCurrent->listMemories( AddMemToList, (void *)&Data, FALSE );
-    
-    //pluginCurrent->listMemories( AddMemToList, (void *)&Data, TRUE );
-  } /* endfor */
-
-  return( 0 );
-}
 
 /*! \brief get the index into the memory object table from a memory handle
   \param lHandle handle of a previously opened memory
@@ -2311,13 +2375,13 @@ int TMManager::OpenTM(const std::string& strMemName){
 }
 
 int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
-  if(NewMem.get() == nullptr || NewMem.get()->szName == "\0"){
+  if(NewMem == nullptr || NewMem->szName == "\0"){
     return -1;
   }
-  if(IsMemoryLoaded(NewMem.get()->szName)){
+  if(IsMemoryLoaded(NewMem->szName)){
     return -2;
   }
-  tms[NewMem.get()->szName] = NewMem;
+  tms[NewMem->szName] = NewMem;
   return 0;
 
 }
@@ -2350,13 +2414,13 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
     //return;
   }else{
     //check if there are any Write pointers
-    rc = mem.get()->writeCnt.use_count()>1;
+    rc = mem->writeCnt.use_count()>1;
   }
   //
   if(rc){
     //return nullptr;
   }
-  refBack = mem.get()->readOnlyCnt;
+  refBack = mem->readOnlyCnt;
   return mem;
 }
 
@@ -2371,18 +2435,18 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
     //return;
   }else{
     //check if there are any Write pointers
-    //rc = mem.get()->writeCnt.use_count() > 1;
+    //rc = mem->writeCnt.use_count() > 1;
   }
   //
   if(rc){ // we have some Write process;
     //return nullptr;
   }else{
-    //rc = mem.get()->readOnlyCnt.use_count() > 1;
+    //rc = mem->readOnlyCnt.use_count() > 1;
   }
 
   if(rc){ // we have some Read process
 
   }
-  //refBack = mem.get()->readOnlyCnt;
+  //refBack = mem->readOnlyCnt;
   return mem;
 }

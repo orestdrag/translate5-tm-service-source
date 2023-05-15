@@ -31,10 +31,9 @@ Copyright Notice:
 static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
-EqfMemory::EqfMemory( EqfMemoryPlugin *pPlugin, HTM htmIn, char *pszName )
+EqfMemory::EqfMemory( HTM htmIn, char *pszName )
 {
   this->htm = htmIn;
-  this->pMemoryPlugin = pPlugin;
   strcpy( this->szName, pszName );
   //pTmClb = (EqfMemory*)this;
   if ( this->htm != 0 )
@@ -625,7 +624,7 @@ int EqfMemory::rebuildIndex
 */
 void *EqfMemory::getPlugin()
 {
-  return( (void *)this->pMemoryPlugin );
+  return(EqfMemoryPlugin::GetInstance());
 }
 
 /*! \brief Provide the internal memory handle
@@ -994,8 +993,7 @@ int EqfMemory::setGlobalMemoryOptions
 EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
   TmBtree.fb.fileName = FilesystemHelper::GetTmdPath(tmName);
   InBtree.fb.fileName = FilesystemHelper::GetTmiPath(tmName);
-
- strcpy(szName, tmName.c_str());
+  strcpy(szName, tmName.c_str());
 }
 
 int EqfMemory::LoadInRAM(){

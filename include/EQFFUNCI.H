@@ -342,11 +342,6 @@ USHORT MemFuncCreateMem
                                                // LOCAL_TM_OPT is the default
 );
 
-// delete a Translation Memory
-USHORT MemFuncDeleteMem
-(
-  PSZ         pszMemName               // Translation Memory being deleted
-);
 
 USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory );
 

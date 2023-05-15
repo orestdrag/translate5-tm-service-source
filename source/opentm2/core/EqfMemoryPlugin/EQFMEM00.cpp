@@ -55,95 +55,6 @@ BOOL MemCreatePath( PSZ pszString )
   return (usRc==0);
 } /* end of function MemCreatePath */
 
-//------------------------------------------------------------------------------
-//Internal function
-//------------------------------------------------------------------------------
-//Function name:     MemFuncDeleteMem
-//------------------------------------------------------------------------------
-//Description:       Deletes a Translation Memory in function I/F mode
-//------------------------------------------------------------------------------
-//Input parameter:  PSZ pszMemName  ptr to name of memory
-//------------------------------------------------------------------------------
-//Returncode type:   USHORT              error code or 0 if success
-//------------------------------------------------------------------------------
-
-USHORT MemFuncDeleteMem( PSZ pszMemName )
-{
-  BOOL            fOK = TRUE;         // return value
-  USHORT          usRC = NO_ERROR;    // function return code
-
-  // check if a TM has been specified
-  if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-  {
-    usRC = ERROR_MEMORY_NOTFOUND;
-    T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::(pszMemName == NULL) || (*pszMemName == EOS) ";
-  } /* endif */
-
-  std::shared_ptr<EqfMemory> Info;
-  TMManager *pFactory = TMManager::GetInstance();
-  // check if there is a TM with the given name
-  if ( usRC == NO_ERROR )
-  {
-      // check if memory existed
-      usRC = (USHORT)pFactory->getMemoryInfo( NULL, pszMemName, Info );
-      if (usRC != 0)
-      {
-        usRC = ERROR_MEMORY_NOTFOUND;              
-        T5LOG( T5DEBUG) << "Error in MemFuncDeleteMem::check if memory existed error:: memName =  " << pszMemName << " not found; usRC = " << usRC;
-      }
-  }
-
-  // Delete the TM
-  if ( usRC == NO_ERROR )
-  {
-    usRC = pFactory->deleteMemory( NULL,pszMemName);
-  }
-
-  return( usRC );
-} /* end of function MemFuncDeleteMem  */
-
-/*
-USHORT MemFuncPrepOrganize
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName               // Translation Memory being deleted
-);
-// Prepare the organize of a TM in function call mode
-USHORT MemFuncOrganizeProcess
-(
-  PFCTDATA    pData                    // function I/F session data
-);
-
-
-// Organize a TM in function call mode
-USHORT MemFuncOrganizeMem
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName               // Translation Memory being deleted
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-
-  // prepare a new organize run or continue current one
-  // call TM organize
-  if ( usRC == NO_ERROR )
-  {
-    pData->sLastFunction = FCT_EQFORGANIZEMEM;
-    if ( pData->fComplete )              // has last run been completed
-    {
-      // prepare a new analysis run
-      usRC = MemFuncPrepOrganize( pData, pszMemName );
-    }
-    else
-    {
-      // continue current organize process
-      usRC = MemFuncOrganizeProcess( pData );
-    } 
-  }
-  return( usRC );
-} /* end of function MemFuncOrganizeMem */
-
-
 
 #define MEM_START_ORGANIZE  USER_TASK + 1
 #define MEM_ORGANIZE_TASK   USER_TASK + 2
@@ -166,14 +77,14 @@ USHORT MemFuncOrganizeMem
    if ( pRIDA->pMem != NULL )
    {
      // Close the translation memory to be organized
-     usTmRc1 = (USHORT)pFactory->closeMemory( pRIDA->pMem );
+     usTmRc1 = (USHORT)pFactory->closeMemory( pRIDA->pMem.get() );
      pRIDA->pMem = NULL;
    } /* endif */
 
    if ( pRIDA->pMemTemp != NULL )
    {
      // Close the temporary translation memory
-     usTmRc2 = (USHORT)pFactory->closeMemory( pRIDA->pMemTemp );
+     usTmRc2 = (USHORT)pFactory->closeMemory( pRIDA->pMemTemp.get() );
      pRIDA->pMemTemp = NULL;
    } /* endif */
 
@@ -254,16 +165,7 @@ USHORT EQFMemOrganizeStart
         pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
         T5Logger::GetInstance()->desuppressLogging(ll);
       }
-      if ( MemInfo.get()->szFullPath[0] != '\0' )
-      {
-        pRIDA->pMemTemp = pFactory->createMemory( pRIDA->szPluginName,
-             pRIDA->szTempMemName,  pRIDA->szBuffer,  pRIDA->szSourceLanguage, MemInfo.get()->szFullPath[0], NULL, true, &iRC );
-      }
-      else
-      {
-        pRIDA->pMemTemp = pFactory->createMemory( pRIDA->szPluginName, pRIDA->szTempMemName, pRIDA->szBuffer, 
-                  pRIDA->szSourceLanguage, '\0', NULL, true, &iRC );
-      }
+      pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC);
 
       if ( (iRC != 0) || (pRIDA->pMemTemp == NULL ) )
       {
@@ -284,7 +186,7 @@ USHORT EQFMemOrganizeStart
         // Close the Translation memory which should be organized.
         if ( pRIDA->pMemTemp != NULL ) 
         {
-          pFactory->closeMemory( pRIDA->pMemTemp );
+          pFactory->closeMemory( pRIDA->pMemTemp.get() );
           pRIDA->pMemTemp = NULL;
           pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
         } /* endif */
@@ -339,14 +241,12 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
   USHORT  usURc = NO_ERROR ;   //function returncode
   TMManager *pFactory = TMManager::GetInstance();
 
-  usMsgHandling;
-
   /* close the original TM                                          */
   if ( pRIDA->pMem != NULL )
   {
     int iRC = 0;
 
-    pFactory->closeMemory( pRIDA->pMem );
+    pFactory->closeMemory( pRIDA->pMem.get() );
     pRIDA->pMem = NULL;
 
     // replace original memory with the organized one
@@ -443,7 +343,7 @@ VOID EQFMemOrganizeProcess
 
         pRIDA->pMemTemp->rebuildIndex();
 
-        pFactory->closeMemory( pRIDA->pMemTemp );
+        pFactory->closeMemory( pRIDA->pMemTemp.get() );
 
         pRIDA->pMemTemp = NULL;
 
@@ -530,8 +430,7 @@ VOID EQFMemOrganizeProcess
         CloseTmAndTempTm( pRIDA );
 
           // Delete the temporary translation memory
-        TMManager *pFactory = TMManager::GetInstance();
-        pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
+        TMManager::GetInstance()->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
 
         // Issue message WM_EQF_MEMORGANIZE_END
         if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
@@ -637,7 +536,7 @@ VOID EQFMemOrganizeEnd
 USHORT MemFuncPrepOrganize
 (
   PFCTDATA    pData,                   // function I/F session data
-  EqfMemory*  pMem               // Translation Memory being reorganized
+  std::shared_ptr<EqfMemory>  pMem               // Translation Memory being reorganized
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
