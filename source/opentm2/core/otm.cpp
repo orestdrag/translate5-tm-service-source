@@ -3,6 +3,6 @@
 #include "tm.h"
 
 NewTM::NewTM(const std::string& tmName){
-  TmBtree.fb.fileName = TMManager::GetTmdPath(tmName);
-  InBtree.fb.fileName = TMManager::GetTmiPath(tmName);
+  TmBtree.fb.fileName = FilesystemHelper::GetTmdPath(tmName);
+  InBtree.fb.fileName = FilesystemHelper::GetTmiPath(tmName);
 }

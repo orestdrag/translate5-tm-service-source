@@ -2240,11 +2240,11 @@ void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProp
 }
 
 
-std::string TMManager::GetTmdPath(const std::string& memName){
+std::string FilesystemHelper::GetTmdPath(const std::string& memName){
   return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMDATA;
 }
 
-std::string TMManager::GetTmiPath(const std::string& memName){
+std::string FilesystemHelper::GetTmiPath(const std::string& memName){
   return FilesystemHelper::GetMemDir() + memName  + EXT_OF_TMINDEX;
 }
 
@@ -2254,12 +2254,12 @@ int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExist
   if(!logErrorIfNotExists) logLevel = T5Logger::GetInstance()->suppressLogging();
   //check tmd file
   int res = TMM_NO_ERROR;
-  if(FilesystemHelper::FileExists(GetTmdPath(tmName)) == false){
+  if(FilesystemHelper::FileExists(FilesystemHelper::GetTmdPath(tmName)) == false){
     res |= TMM_TMD_NOT_FOUND;
   }
 
   //check tmi file
-  if(FilesystemHelper::FileExists(GetTmiPath(tmName)) == false){
+  if(FilesystemHelper::FileExists(FilesystemHelper::GetTmiPath(tmName)) == false){
     res |= TMM_TMI_NOT_FOUND;
   }
   if(!logErrorIfNotExists) T5Logger::GetInstance()->desuppressLogging(logLevel);
@@ -2277,8 +2277,8 @@ int TMManager::OpenTM(const std::string& strMemName){
   }
   size_t requiredMemory = 0;
     {
-      requiredMemory += FilesystemHelper::GetFileSize( GetTmdPath(strMemName));
-      requiredMemory += FilesystemHelper::GetFileSize( GetTmiPath(strMemName));
+      requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName));
+      requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmiPath(strMemName));
       requiredMemory *= 1.2;
       //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
       //requiredMemory += strBody.size() * 2;
@@ -2323,38 +2323,13 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
 }
 
 int TMManager::CloseTM(const std::string& strMemName){
-
-}
-
-
-int TMManager::DeleteTM(const std::string& strMemName, std::string& outputMsg){
-  /*
-  if ( (pMemInfo.get() != NULL) && (pMemInfo.get()->szFullPath[0] != EOS) )
-  {
-    // delete the property file
-    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete property file: " << pMemInfo.get()->szFullPath ;
-
-    UtlDelete( pMemInfo.get()->szFullPath, 0L, FALSE );
-
-    char szPath[MAX_LONGFILESPEC];
-    strcpy( szPath, pMemInfo.get()->szFullPath );
-    strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
-    // delete index file
-    T5LOG( T5DEBUG) <<"EqfMemoryPlugin::deleteMemory:: try to delete index file: "<< szPath ;
-    UtlDelete( szPath, 0L, FALSE );
-    
-    // delete data file
-    strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
-    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete data file: "<< szPath ;    
-    UtlDelete( szPath, 0L, FALSE );
-
-    // remove memory infor from our memory info vector
-    m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
+  if(IsMemoryLoaded(strMemName)){
+    return 404;
   }
-  //*/
+  tms.erase(strMemName);
   return 0;
-
 }
+
 
 std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
   std::shared_ptr<EqfMemory> mem;
