@@ -90,61 +90,23 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   }
 
   if(pRequest->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
-
-    switch(pRequest->command){
-      case COMMAND::EXPORT_MEM:
-      case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
-      case COMMAND::STATUS_MEM:
-      case COMMAND::LIST_OF_MEMORIES:
-      case COMMAND::RESOURCE_INFO:
-      case COMMAND::SAVE_ALL_TM_ON_DISK:
-      {
+    if(pRequest->command == COMMAND::SHUTDOWN){
+      fWriteRequestsAllowed = false;
+      //pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
+      auto saveTmRD = SaveAllTMsToDiskRequestData();
+      saveTmRD.run();
+      //check tms is in import status
+      //close log file
+      if(saveTmRD._rest_rc_ == 200){
+        //pMemService->closeAll();
+        T5Logger::GetInstance()->LogStop();          
         pRequest->run();
-        break;
+      }else{
+        fWriteRequestsAllowed = true;
       }
-      case COMMAND::REORGANIZE_MEM:
-      {
-        pRequest->_rest_rc_ = 500;
-        //pRequest->outputMessage = "{\n\t\"msg\": \"endpoint is not implemented\"\n}";
-        pRequest->_rest_rc_ = pMemService->reorganizeMem( pRequest->strMemName, pRequest->outputMessage);
-        break;
-      }
-      
-      case COMMAND::DELETE_MEM:
-      {
-        if(fWriteRequestsAllowed == false){
-          pRequest->_rest_rc_ = 423;
-          break;
-        }
-        pRequest->_rest_rc_ = pMemService->deleteMem( pRequest->strMemName, pRequest->outputMessage );
-        break;
-      }
-      case COMMAND::SHUTDOWN:
-      { 
-          fWriteRequestsAllowed = false;
-          //pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
-          auto saveTmRD = SaveAllTMsToDiskRequestData();
-          saveTmRD.run();
-          //check tms is in import status
-          //close log file
-          if(saveTmRD._rest_rc_ == 200){
-            //pMemService->closeAll();
-            T5Logger::GetInstance()->LogStop();          
-            pRequest->run();
-          }else{
-            fWriteRequestsAllowed = true;
-          }
-          
-          //builder->status(400, "WRONG REQUEST");
-        break;
-      }
-      default:
-      {
-        
-        break;
-      }
+    }else{
+      pRequest->run();
     }
-
     sendResponse();
   }
 }
@@ -164,7 +126,7 @@ void ProxygenHandler::onEOM() noexcept {
   if(!pRequest){
 
   }else{ 
-    if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
+    //if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
     {
       body_->coalesce();      
       pRequest->strBody = (char*) body_->data(); 
@@ -178,63 +140,33 @@ void ProxygenHandler::onEOM() noexcept {
       T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
     }
     
-
-    switch(pRequest->command){
-
-      case COMMAND::UPDATE_ENTRY:
-      case COMMAND::CREATE_MEM:
-      case COMMAND::CONCORDANCE:
-      case COMMAND::FUZZY:
-      case COMMAND::IMPORT_MEM:
-      {
-        if(fWriteRequestsAllowed == false){
-          pRequest->_rest_rc_ = 423;
-          break;
-        }
-        pRequest->run();
-        break;
-      }
-      //case COMMAND::IMPORT_MEM:
-      //{
-      //  if(fWriteRequestsAllowed == false){
-      //    pRequest->_rest_rc_ = 423;
-      //    break;
-      //  }
-      //  pRequest->_rest_rc_ = pMemService->import( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-      //  break; 
-      //}
-      //case COMMAND::FUZZY:
-      //{
-        //pRequest->_rest_rc_ = pMemService->search( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-      //  break;
-      //}
-      //{
-      //  pRequest->_rest_rc_ = pMemService->concordanceSearch( pRequest->strMemName, pRequest->strBody, pRequest->outputMessage );
-      //  break;
-      //}
-      case COMMAND::DELETE_ENTRY:
-      {
-        if(fWriteRequestsAllowed == false){
-          pRequest->_rest_rc_ = 423;
-          break;
-        }
-        pRequest->_rest_rc_ = pMemService->deleteEntry( pRequest->strMemName, pRequest->strBody,  pRequest->outputMessage );
-        break;
-      }
-      case COMMAND::CLONE_TM_LOCALY:{
-        if(fWriteRequestsAllowed == false){
-          pRequest->_rest_rc_ = 423;
-          break;
-        }
-        pRequest->_rest_rc_ = pMemService->cloneTMLocaly(pRequest->strMemName, pRequest->strBody, pRequest->outputMessage);
-        break;
-      }
-      default:
-      {
-        pRequest->_rest_rc_ = 400;
-        break;
-      }
-    }    
+    if(fWriteRequestsAllowed == false){
+      pRequest->_rest_rc_ = 423;  
+    }else{
+      pRequest->run();
+    }
+    //switch(pRequest->command){
+    //  case COMMAND::UPDATE_ENTRY:
+    //  case COMMAND::CREATE_MEM:
+    //  case COMMAND::CONCORDANCE:
+    //  case COMMAND::FUZZY:
+    //  case COMMAND::IMPORT_MEM:
+    //  case COMMAND::DELETE_ENTRY:
+    //  case COMMAND::CLONE_TM_LOCALY:
+    //  {
+    //    if(fWriteRequestsAllowed == false){
+    //      pRequest->_rest_rc_ = 423;
+    //      break;
+    //    }
+    //    pRequest->run();
+    //    break;
+    //  }
+    //  default:
+    //  {
+    //    pRequest->_rest_rc_ = 400;
+    //    break;
+    //  }
+    //}    
   }
   sendResponse();
   }
