@@ -5135,6 +5135,9 @@ SHORT QDAMChangeKey_V3
 }
 
 
+size_t BTREE::GetFileSize()const{
+  return FilesystemHelper::GetFileSize(fb.fileName);
+}
 
 
 //------------------------------------------------------------------------------

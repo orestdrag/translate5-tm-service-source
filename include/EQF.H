@@ -3591,7 +3591,6 @@ typedef ULONG HPRINT, *PHPRINT;
                      BOOL fMsg );
     USHORT  UtlWriteL( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                      BOOL fMsg );
-    USHORT  UtlDupHandle( HFILE hfOld, PHFILE phfNew, BOOL fMsg );
     USHORT  UtlChgFilePtr( HFILE hf, LONG lOffset, USHORT fsMethod,
                           PULONG pulNewOffset, BOOL fMsg );
 
@@ -3778,10 +3777,6 @@ USHORT  UtlReadHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesRead,
                      BOOL fMsg, HWND hwndParent );
 USHORT  UtlWriteHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf, PULONG pcbBytesWritten,
                       BOOL fMsg, HWND hwndParent  );
-USHORT  UtlWriteWoCheckHwnd( HFILE hf, PVOID pBuf, ULONG cbBuf,
-                             PULONG pcbBytesWritten, BOOL fMsg, HWND hwndParent  );
-USHORT  UtlDupHandleHwnd( HFILE hfOld, PHFILE phfNew, BOOL fMsg,
-                          HWND hwndParent );
 USHORT  UtlChgFilePtrHwnd( HFILE hf, LONG lOffset, USHORT fsMethod,
                            PULONG pulNewOffset, BOOL fMsg, HWND hwndParent );
 USHORT  UtlDeleteHwnd( PSZ pszFName, ULONG ulReserved, BOOL fMsg, HWND hwndParent );
@@ -3881,20 +3876,7 @@ USHORT UtlMakeFileName
   PSZ         pszBuffer                // buffer for created file name
 );
 
-/*! \brief extract all files contained in a ZIP package to a directory
-  \param pszPackage fully qualified name of the ZIP package
-  \param pszDestPath fully qualified name of the destination directory
-  \returns 0 in any case
-*/
-int UtlUnzipToDirectory( const char * pszPackage, const char *pszDestPath );
 
-/*! \brief add all files of a directoy to a ZIP package
-  The current version of this function does not recurse into subdirectories
-  \param pszSourcePath fully qualified name of the directory contaiing the files to be added to the package
-  \param pszPackage fully qualified name of the ZIP package being created
-  \returns 0 in any case
-*/
-int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
 
 /*! \brief add a list of files to a ZIP package
   \param pszFileList list of comma separated, fully qualified file names to be added to the package
@@ -3903,10 +3885,6 @@ int UtlZipDirectory( const char *pszSourcePath, const char * pszPackage );
 */
 int UtlZipFiles( const char *pszFileList, const char * pszPackage  );
 
-/*! \brief delete all files and directories located in a specific directory
-  \param pszDirectory fully qualified name of the directory contaiing the files to be added to the package
-*/
-void UtlDeleteAllFiles( const char *pszDirectory );
 
 // Mode defines for function UtlHandleConversionStrings
 // CONVLOAD_MODE loads the names of the conversion into a listbox or combo-box
@@ -6079,8 +6057,6 @@ BOOL MADDeleteKey( HADDDATAKEY pKey );
 // Add a match segment ID to the additional data section
 BOOL MADAddMatchSegID( PSZ_W pszAddData, PSZ_W pszMatchIDPrefix, ULONG ulNum, BOOL fForce );
 
-// prepare the match segment ID prefix using the provided TM_ID and StoreID
-BOOL MADPrepareMatchSegIDPrefix( PSZ pszTM_ID, PSZ pszStoreID, PSZ pszMatchID );
 
 
 //VOID CloseFile( HFILE * );

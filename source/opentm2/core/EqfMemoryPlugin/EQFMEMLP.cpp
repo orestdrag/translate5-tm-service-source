@@ -89,13 +89,9 @@
 //--- declaration of internal functions
 static USHORT  MemLoadStart( PVOID *ppIda, HWND, ImportStatusDetails*     pImportData);
 static USHORT  MemLoadProcess(  PMEM_LOAD_IDA pLIDA );
-static USHORT  MemLoadReadFile( PMEM_LOAD_IDA pLIDA );
-static VOID    MemReduceCRLF( PSZ_W pString );
-static BOOL    NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge );
 
 // Check if a specific tag is following
 BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID );
-BOOL MemLPExtractValue( PTOKENENTRY *ppTok, SHORT sStartID, SHORT sEndID, PSZ_W pszBuffer, int iBufSize, PBOOL pfSegmentTooLarge );
 
 USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 ( 
@@ -173,7 +169,7 @@ typedef struct _MEM_LOAD_DLG_IDA
  HWND         hwndToCombo;                // handle of "to memory" combo box
  BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
  BOOL         fImpModeSet;                // TRUE = imp mode has been set by the impot file check logic
- EqfMemory    *pMem;                      // pointer to memory being imported
+ std::shared_ptr<EqfMemory>    mem;                      // pointer to memory being imported
  OtmProposal  *pProposal;                 // buffer for proposal data
  BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
  BOOL          fCreateMatchID;            // create match segment IDs
@@ -288,7 +284,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
    // and names from the dialog IDA and store them in the MEM_LOAD_IDA.
    // Then open the tagtable and get its Size. If an error occurred
    // set fOK to FALSE and issue the appropriate message.
-   if(pDialogIDA->pMem == nullptr){
+   if(pDialogIDA->mem == nullptr){
     fOK = false;
    }
    
@@ -296,7 +292,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
    {
       // Move values from dialog IDA to load IDA
       pLIDA->hFile = pDialogIDA->hFile;
-      pLIDA->pMem  = pDialogIDA->pMem;
+      pLIDA->mem  = pDialogIDA->mem;
       strcpy( pLIDA->szMemName, pDialogIDA->szMemName );
       strcpy( pLIDA->szShortMemName, pDialogIDA->szShortMemName );
       pLIDA->fMerge = pDialogIDA->fMerge;
@@ -489,7 +485,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
        memset( pLIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
        strcpy( pLIDA->pstMemInfo->szName, pLIDA->szMemName );
-       pLIDA->pMem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
+       pLIDA->mem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
        if ( pLIDA->usImpMode == MEM_FORMAT_TMX_TRADOS ) 
        {
          pLIDA->pstMemInfo->fCleanRTF = TRUE;
@@ -497,7 +493,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        }
        
        fOK = (EqfPluginWrapper::MemImportStart( &(pLIDA->lExternalImportHandle) , pLIDA->szFilePath, pLIDA->pstMemInfo,  pImportData ) == 0);
-       pLIDA->pMem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
+       pLIDA->mem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 
        // check if memory source lanuage matchs source language of imported file
        if ( pLIDA->pstMemInfo->szSourceLang[0] && (strcmp( pLIDA->pstMemInfo->szSourceLang, szMemSourceLang ) != 0) )
@@ -512,7 +508,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        // update memory description with description of imported memory
        if ( fOK )
        {
-         pLIDA->pMem->setDescription( pLIDA->pstMemInfo->szDescription );
+         pLIDA->mem->setDescription( pLIDA->pstMemInfo->szDescription );
        } /* endif */
      } /* endif */
 
@@ -544,12 +540,12 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
        memset( pLIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
        strcpy( pLIDA->pstMemInfo->szName, pLIDA->szMemName );
-       pLIDA->pMem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
+       pLIDA->mem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
 
        //fOK = (pLIDA->pfnMemImpStart( &(pLIDA->lExternalImportHandle), pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
        fOK = (EqfPluginWrapper::MemImportStart(  &(pLIDA->lExternalImportHandle) , pLIDA->szFilePath, pLIDA->pstMemInfo, pImportData ) == 0);
        
-       pLIDA->pMem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
+       pLIDA->mem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 
        // check if memory source lanuage matchs source language of imported file
        if ( pLIDA->pstMemInfo->szSourceLang[0] && (strcmp( pLIDA->pstMemInfo->szSourceLang, szMemSourceLang ) != 0) )
@@ -569,7 +565,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        // update memory description with description of imported memory
        if ( fOK )
        {
-         pLIDA->pMem->setDescription( pLIDA->pstMemInfo->szDescription );
+         pLIDA->mem->setDescription( pLIDA->pstMemInfo->szDescription );
        } /* endif */
 
      } /* endif */
@@ -745,643 +741,34 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
    }
    return usRc;
 } /* end of function MemLoadProcess  */
-
-//+----------------------------------------------------------------------------+
-//|Internal function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     MemLoadReadFile                                          |
-//+----------------------------------------------------------------------------+
-//|Function call:     static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA )     |
-//+----------------------------------------------------------------------------+
-//|Description:       Read a block of data from the file to be loaded          |
-//|                   into the textbuffer and tokenize it.                     |
-//+----------------------------------------------------------------------------+
-//|Parameters:        pLIDA -pointer to import IDA                             |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT                                                   |
-//+----------------------------------------------------------------------------+
-//|Returncodes:                                                                |
-//|  MEM_PROCESS_OK      -no error                                             |
-//|  MEM_FILE_SYN_ERR    -if nothing can be read from the file because no      |
-//|                       no CONTROL token is available                        |
-//|  MEM_READ_ERR        -File read ERROR                                      |
-//|  MEM_PROCESS_END     -There is nothing in the file to process              |
-//+----------------------------------------------------------------------------+
-//|Function flow:                                                              |
-//|  if ( first read flag is FALSE )                                           |
-//|  {                                                                         |
-//|      initialize buffer size                                                |
-//|       call UtlRead and do error handling                                   |
-//|   }                                                                        |
-//|   else                                                                     |
-//|   {                                                                        |
-//|      if ( file have invalis syntax )                                       |
-//|         do error handling and set usRc                                     |
-//|      if ( usRc is OK )                                                     |
-//|         get data and do error handling                                     |
-//|      if ( usRc is OK )                                                     |
-//|      {                                                                     |
-//|          prepare data for function EQFTagTokenize                          |
-//|          call function EQFTagTokenize and set usRc                         |
-//|      }                                                                     |
-//|   }                                                                        |
-//|   return usRc                                                              |
-//+----------------------------------------------------------------------------+
-static USHORT MemLoadReadFile( PMEM_LOAD_IDA pLIDA ) // pointer to the load IDA
-{
-  USHORT    usRc = MEM_PROCESS_OK;     // Return code to calling function
-  USHORT    usDosRc;                   // Read return code
-  ULONG     ulBytesRead = 0;           // Number of Bytes read
-  ULONG     ulBufferSize;              // Buffersize
-  PSZ_W     pRest;                     // Pointer to end of tokenized input
-  USHORT    usLastColPos;              // last column position
-  ULONG     ulNotProcessed;            // Number of bytes not processed yet
-  PSZ       pReplAddr[2];              // Array of pointers to replacement strings
-//CHAR      szDosRc[5];                // Dos return code in character format
-
-   // If fFirstRead = FALSE then process the first read otherwise
-   // process a normal read with buffer shifting.
-   if ( pLIDA->fFirstRead == FALSE )
-   {
-     // Read a full MEM_TEXT_BUFFER-1 and set fFirstRead to TRUE if the read was OK
-     // otherwise set usRc to MEM_READ_ERR.
-     // MemLoadAndConvert expects number of CHAR_Ws to be read and also returns number
-     // of CHAR_Ws...
-     ulBufferSize = MEM_TEXT_BUFFER-1;
-
-     usDosRc = MemLoadAndConvert( pLIDA, pLIDA->szTextBuffer,
-                                  ulBufferSize, &ulBytesRead );
-
-     if (usDosRc)
-     {
-       // Issue error message "File %1 can not be found or read"
-       CloseFile( &(pLIDA->hFile) );
-       usRc = MEM_READ_ERR;
-     } /* endif */
-
-     // Set the flag to indicate that the first read has been performed
-     pLIDA->fFirstRead = TRUE;
-
-     // Initialize the number of bytes not processed yet
-     ulNotProcessed = 0;
-     pLIDA->ulFilled = ulBytesRead/sizeof(CHAR_W) + ulNotProcessed;
-   }
-   else                           /* process a normal read */
-   {
-     // If pTokenEntry still points to the beginning of the token list
-     // which means to pTokenList then the file has
-     // invalid syntax. Issue message "File has invalid syntax"
-     // set usRc to MEM_FILE_SYN_ERR
-     if (pLIDA->pTokenEntry == pLIDA->pTokenList)
-     {
-        // Close import file
-        // Issue the message "The file %1 contains data which can not be processed"
-        pReplAddr[0] = pLIDA->szFilePath;
-        pReplAddr[1] = pLIDA->szSegmentID;
-        CloseFile( &(pLIDA->hFile));
-        T5LOG(T5ERROR) <<  "::ERROR_MEM_INVALID_SGML::" <<  *pReplAddr;
-        usRc = MEM_FILE_SYN_ERR;
-     } /* endif */
-
-     // If usRc == MEM_PROCESS_OK then
-     //    -move the rest of the text buffer beginning with pDataString
-     //     of pTokenEntry  to the start of the text buffer.
-     //    -set pTokenEntry as well as pTokenEntryWork to pTokenList.
-     //    -calculate remaining space in buffer.
-     //    -fill remaining space of buffer by reading from file
-     if ( usRc == MEM_PROCESS_OK )
-     {
-       // Move rest of text buffer to the beginning of the text buffer
-       // ulBufferSize will contain the number of bytes to be shifted and read.
-       // and ulNotProcessed represents the number of bytes not processed yet.
-       ulBufferSize = pLIDA->pTokenEntry->pDataStringW - pLIDA->szTextBuffer;
-       ulNotProcessed = pLIDA->ulFilled - ulBufferSize;
-       memmove( (PBYTE)&pLIDA->szTextBuffer[0],
-                (PBYTE)&pLIDA->pTokenEntry->pDataStringW[0],
-                ulNotProcessed * sizeof(CHAR_W));
-
-       ulBufferSize = MEM_TEXT_BUFFER-1 - ulNotProcessed;
-
-       memset( (PBYTE)&pLIDA->szTextBuffer[ulNotProcessed], 0, ulBufferSize *sizeof(CHAR_W));
-       // Set pTokenEntry as well as pTokenEntryWork to pTokenList.
-       pLIDA->pTokenEntry = pLIDA->pTokenList;
-       pLIDA->pTokenEntryWork = pLIDA->pTokenList;
-
-       // Fill remaining space of buffer by reading from file
-
-       usDosRc = MemLoadAndConvert( pLIDA, &(pLIDA->szTextBuffer[ulNotProcessed]),
-                                    ulBufferSize, &ulBytesRead );
-       if (usDosRc)
-       {
-         // Issue error message "File %1 can not be found or read"
-         CloseFile( &(pLIDA->hFile) );
-         usRc = MEM_READ_ERR;
-       } /* endif */
-       pLIDA->ulFilled = ulBytesRead/sizeof(CHAR_W) + ulNotProcessed;
-     } /* endif */
-   } /* endif */
-
-   if ( usRc == MEM_PROCESS_OK )
-   {
-     // Increase the number of total bytes read -- if ASCII/ANSI, we have to take real
-     // file position
-     if ( pLIDA->usImpMode == SGMLFORMAT_ASCII || pLIDA->usImpMode == SGMLFORMAT_ANSI)
-     {
-        UtlChgFilePtr( pLIDA->hFile, 0L, FILE_CURRENT, &pLIDA->ulBytesRead, FALSE );
-     }
-     else
-     {
-        pLIDA->ulBytesRead += ulBytesRead;
-     }
-
-     // If total bytes read still 0 then end the load process
-     // by setting the appropriate return code
-     if ( !pLIDA->ulBytesRead )
-     {
-       usRc = MEM_PROCESS_END;
-     } /* endif */
-
-     // Invoke the tag tokenize process only if the text buffer is not zero length
-     // because EQFTagTokenize crashes if the buffer starts with '\0'
-     if ( pLIDA->szTextBuffer[0] != NULC )
-     {
-       // Call the tokenize process
-       TATagTokenizeW( pLIDA->szTextBuffer, pLIDA->pFormatTable, pLIDA->fEOF,
-                      &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-
-       if ( pLIDA->pTokenList->sTokenid == pLIDA->sMemMemoryDBTokenID )
-       {
-         INT_PTR   iDlgRc = 1;
-         HMODULE hResMod = (HMODULE) UtlQueryULong(QL_HRESMOD);
-
-         /*************************************************************/
-         /* This is an old TM format display listbox to get           */
-         /* source and target language                                */
-         /*************************************************************/
-
-         if ( iDlgRc )
-         {
-           usRc = MEM_PROCESS_END;
-         } /* endif */
-       } /* endif */
-     } /* endif */
-   } /* endif */
-   return usRc;
-} /* end of function MemLoadReadFile */
-
-static BOOL
-NTMLoadPrepSeg( PMEM_LOAD_IDA  pLIDA, PBOOL pfSegmentTooLarge ) //pointer to the load IDA  area
-{
-   BOOL          fOk = TRUE;
-   PSZ_W         pszWork = NULL;
-   PTOKENENTRY   pTEW;
-   USHORT        usWork;
-//   PSZ           pszString;
-   PSZ_W         pszStringW;
-   USHORT        usPos;
-   CHAR_W        szX15String[ 512 ];        // string array for 0x15 characters
-   CHAR_W        chParse = X15;             // character used to parse control record
-
-   /*******************************************************************/
-   /* get pointer to work token entry an TMX_PUT structure            */
-   /*******************************************************************/
-   pTEW   = pLIDA->pTokenEntryWork;
-
-   pLIDA->pProposal->clear();
-
-   /*******************************************************************/
-   /* check if next token is a text token                             */
-   /* if not stop further processing                                  */
-   /*******************************************************************/
-   pTEW++;
-   if (pTEW->sTokenid != TEXT_TOKEN )
-   {
-      fOk = FALSE;
-   } /* endif */
-
-   // If fOk. Check if the control information do have a prefix and a suffix
-   // of CR and LF and check also if the real control data do have a size of
-   // sizeof(SEG_CTRL_DATA). If not set fOk to FALSE.
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* check if the control data starts ands ends with CRLF          */
-     /* if not stop further processing                                */
-     /*****************************************************************/
-     if ( pTEW->usLength < sizeof( szX15String ))
-     {
-       memcpy( szX15String, pTEW->pDataStringW, pTEW->usLength * sizeof(CHAR_W));
-       szX15String[ pTEW->usLength ] = EOS;
-       /*****************************************************************/
-       /* get rid of CRLF at the end ...                                */
-       /*****************************************************************/
-       usPos = pTEW->usLength - 1;
-       while ( (usPos > 0) &&
-               ((szX15String[usPos] == CR) || (szX15String[usPos] == LF)) )
-       {
-         szX15String[usPos] = EOS;
-         usPos --;
-       } /* endwhile */
-     }
-     else
-     {
-       fOk = FALSE;
-     } /* endif */
-     pszWork = szX15String;
-
-     if ( fOk && ( memcmp( pszWork, CRLF_STRINGW, UTF16strlenBYTE(CRLF_STRINGW) ) != 0 ) &&
-          ( memcmp( pszWork+(pTEW->usLength-UTF16strlenCHAR(CRLF_STRINGW)), CRLF_STRINGW,
-                    UTF16strlenBYTE(CRLF_STRINGW) ) !=0 ) )
-     {
-       /***************************************************************/
-       /* control data "has NO" CRLF at beginning and end             */
-       /* stop further processing                                     */
-       /***************************************************************/
-       fOk = FALSE;
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     // skip the first CRLF of the source string
-     pszWork += 2;
-
-     // GQ: Check if control string uses X15 as seperator, due to a bug in the
-     // conversion to Ansi, there may be exported memory databases which uses a
-     // different character
-     if ( fOk )
-     {
-       PSZ_W pszX15 = wcschr( pszWork, X15 );
-       if ( pszX15 != NULL )
-       {
-         chParse = X15;
-       }
-       else
-       {
-          PSZ_W pszDelimiter = pszWork;
-          while ( iswdigit( *pszDelimiter ) )
-          {
-            pszDelimiter++;
-          } /* endwhile */
-
-          if ( *pszDelimiter == X15 )
-          {
-            // use X15 a delimiter
-            chParse = X15;
-          }
-          else if ( (*pszDelimiter != EOS) && (pszDelimiter != pszWork) )
-          {
-            // use given delimiter
-            // the code could be combined with the assignment above
-            // but it has been splitted to allow to set a breakpoint for
-            // this condition
-            chParse = *pszDelimiter;
-          }
-          else
-          {
-            fOk = FALSE;
-          }
-       } /* endif */
-     } /* endif */
-
-     // get the seg. Nr
-     pszStringW = UtlParseCharW( pszWork, NTM_SEGNR_ID, chParse );
-
-
-     /*****************************************************************/
-     /* check if the seg Nr. contains only digits                     */
-     /* if not stop further processing                                */
-     /*****************************************************************/
-     usWork = 0;
-     while ( usWork < SEG_NUMB && fOk == TRUE)
-     {
-        if ( !iswdigit( pszStringW[usWork] ) )
-        {
-          fOk = FALSE;
-        } /* endif */
-        usWork++;
-     } /* endwhile */
-
-
-     if (fOk)
-     {
-       /***************************************************************/
-       /* seg. Nr Ok. copy it to put structure                        */
-       /***************************************************************/
-       pLIDA->pProposal->setSegmentNum( wcstol(pszStringW, 0, 10));
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get the MT flag and copy it to put structure                  */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_MTFLAG_ID, chParse );
-
-
-     switch (*pszStringW)
-     {
-       case '0':
-         pLIDA->pProposal->setType( OtmProposal::eptManual );
-        break;
-       case '1':
-         pLIDA->pProposal->setType( OtmProposal::eptMachine );
-        break;
-       case '2':
-         pLIDA->pProposal->setType( OtmProposal::eptGlobalMemory );
-        break;
-       default:
-         fOk = FALSE;
-        break;
-     } /* endswitch */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get time stamp, check if it contains only digits              */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_TIME_ID, chParse );
-     usWork = 0;
-     while ( usWork < TIME_STAMP && fOk == TRUE)
-     {
-        if ( !isdigit( (UCHAR) pszStringW[usWork] ) )
-        {
-          fOk = FALSE;
-        } /* endif */
-        usWork++;
-     } /* endwhile */
-
-     if (fOk)
-     {
-       /***************************************************************/
-       /* time stamp Ok. copy it to put structure                     */
-       /***************************************************************/
-       pLIDA->pProposal->setUpdateTime( wcstol(pszStringW, 0, 10) );
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get source language and check for max allowed length and EOS  */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_SOURCELANG_ID, chParse );
-
-     if (  UTF16strlenCHAR( pszStringW ) > MAX_LANG_LENGTH || pszStringW[0] == EOS)
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szLang[MAX_LANG_LENGTH];
-       Unicode2ASCII( pszStringW, szLang, pLIDA->ulOemCP );
-       pLIDA->pProposal->setSourceLanguage( szLang );
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get target language and check for max allowed length          */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_TARGETLANG_ID, chParse );
-
-     if (  UTF16strlenCHAR( pszStringW) > MAX_LANG_LENGTH || pszStringW[0] == EOS)
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szLang[MAX_LANG_LENGTH];
-       Unicode2ASCII( pszStringW, szLang, pLIDA->ulOemCP );
-       pLIDA->pProposal->setTargetLanguage( szLang );
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get author name                                               */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_AUTHORNAME_ID, chParse );
-     if (  UTF16strlenCHAR( pszStringW) > MAX_USERID )
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szAuthor[MAX_USERID];
-       Unicode2ASCII( pszStringW, szAuthor, pLIDA->ulOemCP );
-       pLIDA->pProposal->setAuthor( szAuthor );
-     } /* endif */
-
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get tagtable name                                             */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_TAGTABLENAME_ID, chParse );
-
-     if (  UTF16strlenCHAR( pszStringW) > MAX_FNAME || pszStringW[0] == EOS)
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szString[MAX_FNAME];
-       Unicode2ASCII( pszStringW, szString, pLIDA->ulOemCP );
-       pLIDA->pProposal->setMarkup( szString );
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get file name and check for maximal length                    */
-     /* if to long stop further processing                            */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_FILENAME_ID, chParse );
-
-     if (  UTF16strlenCHAR( pszStringW) > MAX_FILESPEC || pszStringW[0] == EOS)
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szString[MAX_FILESPEC];
-       Unicode2ASCII( pszStringW, szString, pLIDA->ulOemCP );
-       pLIDA->pProposal->setDocShortName( szString );
-     } /* endif */
-   } /* endif */
-
-   if (fOk)
-   {
-     /*****************************************************************/
-     /* get long name and check for maximal length                    */
-     /* if to long stop further processing                            */
-     /*****************************************************************/
-     pszStringW = UtlParseCharW( pszWork, NTM_LONGNAME_ID, chParse );
-
-     if (  UTF16strlenCHAR( pszStringW) > MAX_LONGFILESPEC )
-     {
-       fOk = FALSE;
-     }
-     else
-     {
-       char szString[MAX_LONGFILESPEC];
-       Unicode2ASCII( pszStringW, szString, pLIDA->ulOemCP );
-       pLIDA->pProposal->setDocName( szString );
-     } /* endif */
-   } /* endif */
-
-   // Process any context information
-   if ( fOk )
-   {
-     if ( MemLPCheckForTag( pTEW, pLIDA->sContextTokenID ) )
-     {
-       fOk = MemLPExtractValue( &pTEW, pLIDA->sContextTokenID, pLIDA->sContextEndTokenID, pLIDA->szSegBuffer, MAX_SEGMENT_SIZE, pfSegmentTooLarge );
-       if ( fOk ) pLIDA->pProposal->setContext( pLIDA->szSegBuffer );
-     } /* endif */      
-   } /* endif */      
-
-   // Process any addinfo information
-   if ( fOk )
-   {
-     if ( MemLPCheckForTag( pTEW, pLIDA->sAddInfoTokenID ) )
-     {
-       fOk = MemLPExtractValue( &pTEW, pLIDA->sAddInfoTokenID, pLIDA->sAddInfoEndTokenID, pLIDA->szSegBuffer, MAX_SEGMENT_SIZE, pfSegmentTooLarge );
-
-       // do any match segment ID processing
-       if ( fOk && pLIDA->fCreateMatchID )
-       {
-         MADAddMatchSegID( pLIDA->szSegBuffer, pLIDA->szMatchIDPrefixW, pLIDA->ulSequenceNumber, pLIDA->fForceNewMatchID );
-       } /* endif */
-
-       if ( fOk ) pLIDA->pProposal->setAddInfo( pLIDA->szSegBuffer );
-     }
-     else if ( pLIDA->fCreateMatchID ) 
-     {
-       //swprintf( pLIDA->szSegBuffer, "<MatchSegID ID=\"%s%lu\"/>", pLIDA->szMatchIDPrefixW, pLIDA->ulSequenceNumber );
-       pLIDA->pProposal->setAddInfo( pLIDA->szSegBuffer );
-     } /* endif */      
-   } /* endif */      
-
-   // get segment source
-   if ( fOk )
-   {
-     fOk = MemLPExtractValue( &pTEW, pLIDA->sSourceTokenID, pLIDA->sSourceEndTokenID, pLIDA->szSegBuffer, MAX_SEGMENT_SIZE, pfSegmentTooLarge );
-     if ( fOk ) pLIDA->pProposal->setSource( pLIDA->szSegBuffer );
-   } /* endif */      
-
-   // get segment target
-   if ( fOk )
-   {
-     fOk = MemLPExtractValue( &pTEW, pLIDA->sTargetTokenID, pLIDA->sTargetEndTokenID, pLIDA->szSegBuffer, MAX_SEGMENT_SIZE, pfSegmentTooLarge );
-     if ( fOk ) pLIDA->pProposal->setTarget( pLIDA->szSegBuffer );
-   } /* endif */      
-
-   if( fOk)
-   {
-     if ( pLIDA->szSegBuffer [0] == EOS ) pLIDA->pProposal->setTarget( EMPTY_TAG );
-   } /* endif */
-
-   /*******************************************************************/
-   /* if we are at the end of a token list and not everything read in */
-   /* try to read in a new chunk and try operation again --> recursion*/
-   /*******************************************************************/
-   if ( !fOk && (pTEW->sTokenid == ENDOFLIST) && !(pLIDA->fEOF) )
-   {
-     // Read block of data and tokenize it
-     if ( MemLoadReadFile( pLIDA ) == MEM_PROCESS_OK )
-     {
-       fOk = NTMLoadPrepSeg( pLIDA, pfSegmentTooLarge );
-     } /* endif */
-   }
-   else
-   {
-     /*******************************************************************/
-     /* Set pTokenEntryWork to the actual value                         */
-     /*******************************************************************/
-     pLIDA->pTokenEntryWork = pTEW;
-   } /* endif */
-
-   return (fOk);
-} /* end of function NTMLoadPrepSeg */
-
-static VOID MemReduceCRLF
-(
-  PSZ_W      pString                  // string to be processed
-)
-{
-  PSZ_W   pszFrom, pszTo;
-
-  pszFrom = pszTo = pString;
-
-  while ( *pszFrom )
-  {
-    if ( *pszFrom == CR )
-    {
-      if ( pszFrom[1] != LF )
-      {
-        // add CR as LF
-        *pszTo++ = LF;
-        pszFrom++;
-      }
-      else
-      {
-        // ignore CR
-        pszFrom++;
-      } /* endif */
-    }
-    else
-    {
-      // copy as-is
-      *pszTo++ = *pszFrom++;
-    } /* endif */
-  } /* endwhile */
-  *pszTo = EOS;
-} /* end of function MemReduceCRLF */
-
 USHORT MemFuncImportMem
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
-  PSZ         pszTM_ID,                // translation memory ID or NULL if not used
-  PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
-  PSZ         pszUnused1,              // not in use, for future enhancements
-  PSZ         pszUnused2,              // not in use, for future enhancements
-  LONG        lOptions,                 // options for Translation Memory import
-  ImportStatusDetails*     pImportData
+  std::shared_ptr<EqfMemory> mem,             
+  LONG        lOptions                 // options for Translation Memory import
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
 
   // when running in COMPLETE_IN_ONE_CALL_OPT mode we use our own data area to be independent of other API calls running in parallel
-  if ( lOptions & COMPLETE_IN_ONE_CALL_OPT )
+  FCTDATA PrivateData;
+  memset( &PrivateData, 0, sizeof( FCTDATA ) );
+  PrivateData.fComplete = TRUE;
+  PrivateData.pImportData = mem.get()->importDetails;
+  PrivateData.mem = mem;
+  usRC = MemFuncPrepImport( &PrivateData, pszInFile, lOptions );
+  if ( usRC == 0 )
   {
-    PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
-    memset( pPrivateData, 0, sizeof( FCTDATA ) );
-    pPrivateData->fComplete = TRUE;
-    pPrivateData->pImportData = pImportData;
-    usRC = MemFuncPrepImport( pPrivateData, pszMemName, pszInFile, pszTM_ID, pszStoreID, pszUnused1, pszUnused2, lOptions );
-    if ( usRC == 0 )
+    while ( !PrivateData.fComplete )
     {
-      while ( !pPrivateData->fComplete )
-      {
-        usRC = MemFuncImportProcess( pPrivateData, pImportData );
-      }
-      usRC = pPrivateData->usMemLoadRC;
+      usRC = MemFuncImportProcess( &PrivateData, PrivateData.pImportData );
     }
-    
-    if(usRC){
-      strcpy(pData->szError, pPrivateData->szError);
-    }
-    free( pPrivateData );
+    usRC = PrivateData.usMemLoadRC;
+  }
+  
+  if(usRC){
+    strcpy(pData->szError, PrivateData.szError);
   }
   return( usRC );
 } /* end of function MemFuncImportMem */
@@ -1390,12 +777,7 @@ USHORT MemFuncImportMem
 USHORT MemFuncPrepImport
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName,              // name of Translation Memory
   PSZ         pszInFile,               // fully qualified name of input file
-  PSZ         pszTM_ID,                // translation memory ID or NULL if not used
-  PSZ         pszStoreID,              // ID for the origin of the translation memory or NULL if not used
-  PSZ         pszUnused1,              // not in use, for future enhancements
-  PSZ         pszUnused2,              // not in use, for future enhancements
   LONG        lOptions                 // options for Translation Memory import
 )
 {
@@ -1404,7 +786,6 @@ USHORT MemFuncPrepImport
   PSZ         pszParm;                 // error parameter pointer
   PMEM_LOAD_DLG_IDA pLoadIDA = NULL;   // Pointer to the load IDA
 
-  pszUnused1; pszUnused2;
   bool fOkFailHandled = false;
    /*******************************************************************/
    /* Allocate storage for the MEM_LOAD_DLG_IDA. The area will be free*/
@@ -1421,19 +802,6 @@ USHORT MemFuncPrepImport
       T5LOG(T5ERROR) << "MemFuncPrepImport:: memory allocation fails";
     }
 
-   // check if a TM has been specified
-   if ( fOK )
-   {
-     if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-     {
-       fOK = FALSE;
-       usRC = TMT_MANDCMDLINE;
-       T5LOG(T5ERROR) <<  "::TMT_MANDCMDLINE";
-     } /* endif */
-   }else if(!fOkFailHandled){ 
-      fOkFailHandled = true;
-      T5LOG(T5ERROR) << "MemFuncPrepImport:: check if a TM has been specified fails";
-   }/* endif */
    // set options for import
    if ( fOK )
    {
@@ -1485,16 +853,8 @@ USHORT MemFuncPrepImport
    } /* endif */
 
    // prepare segment match ID prefix
-   if ( fOK )
-   {
-     pLoadIDA->fCreateMatchID = MADPrepareMatchSegIDPrefix( pszTM_ID, pszStoreID, pLoadIDA->szMatchIDPrefix );
-
-     if ( pLoadIDA->fCreateMatchID  ) {
-        T5LOG( T5INFO) << "pLoadIDA->fCreateMatchID is true, but converting MultiByteToWideChar is not implemented";
-        //MultiByteToWideChar( CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
-        //EncodingHelper::MultiByteToWideChar(CP_ACP, 0, pLoadIDA->szMatchIDPrefix, -1, pLoadIDA->szMatchIDPrefixW, sizeof(pLoadIDA->szMatchIDPrefixW)/sizeof(CHAR_W) );
-     }
-
+   if ( fOK ){
+     pLoadIDA->szMatchIDPrefix[0] = '\0';
    }else if(!fOkFailHandled){
      fOkFailHandled = true;
      T5LOG(T5ERROR) << "MemFuncPrepImport::set options for import fails";
@@ -1505,16 +865,16 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( fOK )
    {
-     strcpy( pLoadIDA->szMemName, pszMemName );
-     TMManager *pFactory = TMManager::GetInstance();
-     if ( !pFactory->exists( NULL, pszMemName ) )
-     {
-       T5LOG(T5ERROR) << "Mem file not found:: " << pszMemName;
-	     fOK = FALSE;
-       pszParm = pszMemName;
-       usRC = ERROR_MEMORY_NOTFOUND;
-       T5LOG(T5ERROR) <<  "::ERROR_MEMORY_NOTFOUND::" << pszParm;
-     } /* endif */
+     strcpy( pLoadIDA->szMemName, pData->mem.get()->szName );
+     //TMManager *pFactory = TMManager::GetInstance();
+  //   if ( !pFactory->exists( NULL, pszMemName ) )
+  //   {
+  //     T5LOG(T5ERROR) << "Mem file not found:: " << pszMemName;
+	//     fOK = FALSE;
+  //     pszParm = pszMemName;
+  //     usRC = ERROR_MEMORY_NOTFOUND;
+  //     T5LOG(T5ERROR) <<  "::ERROR_MEMORY_NOTFOUND::" << pszParm;
+  //   } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
      T5LOG(T5ERROR) << "MemFuncPrepImport::prepare segment match ID prefix fails";
@@ -1523,20 +883,21 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    /* Open the TM                                                     */
    /*******************************************************************/
-   if ( fOK )
-   {
-     int iRC = 0;
-     TMManager *pFactory = TMManager::GetInstance();
-     pLoadIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
-     if ( iRC != 0 || pLoadIDA->pMem == nullptr )
-     {
-	     fOK = FALSE;
-       pFactory->showLastError( NULL, pszMemName, pLoadIDA->pMem, (HWND)HWND_FUNCIF );
-     } /* end */        
-  }else if(!fOkFailHandled){
-      fOkFailHandled = true;
-      T5LOG(T5ERROR) << "MemFuncPrepImport::Check if there is a TM with the given name fails";
-  } /* endif */
+   //
+   //if ( fOK )
+   //{
+   //  int iRC = 0;
+   //  TMManager *pFactory = TMManager::GetInstance();
+   //  pLoadIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
+   //  if ( iRC != 0 || pLoadIDA->pMem == nullptr )
+   //  {
+	 //    fOK = FALSE;
+   //    pFactory->showLastError( NULL, pszMemName, pLoadIDA->pMem, (HWND)HWND_FUNCIF );
+   //  } /* end */        
+  //}else if(!fOkFailHandled){
+  //    fOkFailHandled = true;
+  //    T5LOG(T5ERROR) << "MemFuncPrepImport::Check if there is a TM with the given name fails";
+  //} /* endif */
 
    /*******************************************************************/
    /* Check if input file exists                                      */
@@ -1610,12 +971,12 @@ USHORT MemFuncPrepImport
       T5LOG(T5ERROR) << "MemFuncPrepImport::fOk in false, making Cleanup";
       if ( pLoadIDA )
       {
-         if ( pLoadIDA->pMem )
-         {
-           TMManager *pFactory = TMManager::GetInstance();
-           pFactory->closeMemory( pLoadIDA->pMem );
-           pLoadIDA->pMem = NULL;
-         } /* endif */
+         //if ( pLoadIDA->pMem )
+         //{
+         //  TMManager *pFactory = TMManager::GetInstance();
+         //  pFactory->closeMemory( pLoadIDA->pMem );
+         //  pLoadIDA->pMem = NULL;
+         //} /* endif */
          if ( pLoadIDA->hFile )
          {
             UtlClose( pLoadIDA->hFile, FALSE );
@@ -1629,6 +990,7 @@ USHORT MemFuncPrepImport
      pData->fComplete = FALSE;
      pData->usMemLoadPhase = MEM_START_IMPORT;
      pData->usMemLoadRC    = NO_ERROR;
+     pLoadIDA->mem = pData->mem;
    }
    else if(!fOkFailHandled)
    {
@@ -1665,8 +1027,8 @@ USHORT MemFuncImportProcess
 
        if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF, pImportData ) )
        {
-         TMManager *pFactory = TMManager::GetInstance();
-         pFactory->closeMemory( pDialogIDA->pMem );
+         //TMManager *pFactory = TMManager::GetInstance();
+         //pFactory->closeMemory( pDialogIDA->mem );
          if ( pDialogIDA->hFile ) CloseFile( &(pDialogIDA->hFile));
          pData->usMemLoadRC = UtlQueryUShort( QS_LASTERRORMSGID );
          if ( pData->usMemLoadRC == 0 ) pData->usMemLoadRC = ERROR_MEMIMP_ERROR;
@@ -1698,14 +1060,14 @@ USHORT MemFuncImportProcess
              //pData->pImportData->usProgress = 100;
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
             if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
-            if ( pLoadData->pMem )
+            if ( pLoadData->mem )
             {
               // organize index file of imported memory
-              pLoadData->pMem->rebuildIndex();
+              pLoadData->mem->rebuildIndex();
 
-              TMManager *pFactory = TMManager::GetInstance();
-              pFactory->closeMemory( pLoadData->pMem);
-              pLoadData->pMem = NULL;
+              //TMManager *pFactory = TMManager::GetInstance();
+              //pFactory->closeMemory( pLoadData->mem);
+              //pLoadData->mem = NULL;
             } /* endif */
             usPhase = MEM_END_IMPORT;
             break;
@@ -1737,11 +1099,11 @@ USHORT MemFuncImportProcess
            if ( pLoadData->pstSegment)        UtlAlloc( (PVOID *)&pLoadData->pstSegment, 0L, 0L, NOMSG );
          } /* endif */
 
-         if ( pLoadData->pMem )
+         if ( pLoadData->mem )
          {
-           TMManager *pFactory = TMManager::GetInstance();
-           pFactory->closeMemory( pLoadData->pMem);
-           pLoadData->pMem = NULLHANDLE;
+           //TMManager *pFactory = TMManager::GetInstance();
+           //pFactory->closeMemory( pLoadData->mem);
+           //pLoadData->mem = NULLHANDLE;
          } /* endif */
          pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
          if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
@@ -2213,7 +1575,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
     // insert/replace segment in(to) memory
-    usRC = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
+    usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
 
     if ( !usRC )
     {
@@ -2257,68 +1619,4 @@ BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID )
     pTok++; i++;
   } /* endwhile */
   return( pTok->sTokenid == sID );
-}
-
-// extract value between start and end tag
-BOOL MemLPExtractValue
-( 
-  PTOKENENTRY *ppTok, 
-  SHORT sStartID, 
-  SHORT sEndID, 
-  PSZ_W pszBuffer, 
-  int iBufSize,                         // size of buffer in number of CHAR_W characters
-  PBOOL pfSegmentTooLarge               // set to TRUE if segment data is too large
-)
-{
-  BOOL fOK = TRUE;
-  PTOKENENTRY pTok = *ppTok; 
-
-  // Check next 3 tokens for start token, if no one found stop further processing
-  if ( fOK )
-  {
-     int i = 1;
-     while ( (i <= 3) && (pTok->sTokenid != sStartID) && (pTok->sTokenid != ENDOFLIST) )
-     {
-        pTok++;
-        i++;
-     } /* endwhile */
-
-     fOK = pTok->sTokenid == sStartID;
-  } /* endif */
-
-  // get value
-  if (fOK)
-  {
-    pTok++;
-    memset( pszBuffer, NULC, iBufSize );
-    while ( fOK && (pTok->sTokenid != sEndID) && (pTok->sTokenid != ENDOFLIST) )
-    {
-      int iCurLen = UTF16strlenCHAR( pszBuffer );
-      if ( (iCurLen + pTok->usLength) < iBufSize )
-      {
-        memcpy( pszBuffer + iCurLen, pTok->pDataStringW, pTok->usLength * sizeof(CHAR_W) );
-        pszBuffer[iCurLen + pTok->usLength] = EOS;
-        pTok++;
-      }
-      else
-      {
-        fOK = FALSE;
-        *pfSegmentTooLarge = TRUE;
-      } /* endif */
-    } /* endwhile */
-
-    // In order to keep CRLF as-is deactivate the following line
-    MemReduceCRLF( pszBuffer );
-  } /* endif */
-
-  // Check for end token
-  if (fOK)
-  {
-    fOK = pTok->sTokenid == sEndID;
-    if ( fOK ) pTok++;
-  } /* endif */
-
-  *ppTok = pTok; 
-
-  return( fOK );
 }

@@ -126,67 +126,18 @@
 // import a Translation Memory
 USHORT EqfImportMem
 (
-  HSESSION    hSession,                // Eqf session handle
-  PSZ         pszMemName,              // name of Translation Memory
+  std::shared_ptr<EqfMemory> mem,                // Eqf session handle
   PSZ         pszInFile,               // fully qualified name of input file
   LONG        lOptions,                 // options for Translation Memory import
-  PSZ         errorBuff,
-  ImportStatusDetails*     pImportData
+  PSZ         errorBuff
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-  
-  T5LOG( T5INFO) << "==EQFImportMem== Memory: " << pszMemName ;
-  
-  if(!pData){
-    T5LOG( T5WARNING) << "EqfImportMem::pData is NULL";
-  }
-
-  if ( pData && (pData->fComplete || (pData->sLastFunction != FCT_EQFIMPORTMEM)) )
-  {
-    T5LOG( T5INFO) <<"InFile = " <<  pszInFile << ", Options = " << lOptions;
-  } /* endif */
-
-
-  // check sequence of calls
-  if ( (usRC == NO_ERROR ) && !(lOptions & COMPLETE_IN_ONE_CALL_OPT) )
-  {
-    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFIMPORTMEM) )
-    {
-      usRC = LASTTASK_INCOMPLETE_RC;
-    } /* endif */
-  } /* endif */
+  FCTDATA    Data;// = NULL;            // ptr to function data area
 
   // call TM import
-  if ( usRC == NO_ERROR )
-  {
-    T5LOG( T5INFO) << "EqfImportMem:: call TM import";
-    if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) 
-      pData->sLastFunction = FCT_EQFIMPORTMEM;
-    usRC = MemFuncImportMem( pData, pszMemName, pszInFile, NULL, NULL, NULL, NULL, lOptions, pImportData );
-    strcpy(errorBuff, pData->szError);
-  } /* endif */
-
-  if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) )
-  {
-    if ( ( usRC == NO_ERROR ) && !pData->fComplete )
-    {
-      usRC = CONTINUE_RC;
-    } /* endif */
-  }
-
-  if ( !usRC )
-  {
-      SetSharingFlag( EQF_REFR_MEMLIST );
-  }
-
-  if ( pData && (pData->fComplete || (lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) ) 
-    T5LOG( T5INFO)<< "EqfImportMem:: RC=" <<usRC;
+  usRC = MemFuncImportMem( &Data, pszInFile, mem, lOptions );
+  strcpy(errorBuff, Data.szError);
 
   return( usRC );
 } /* end of function EqfImportMem */

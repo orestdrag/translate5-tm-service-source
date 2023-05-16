@@ -154,7 +154,7 @@ void EqfMemory::setDescription
        pTmSign->szDescription[sizeof(pTmSign->szDescription)-1] = EOS;
 
        //trigger plugin to set description
-       pMemoryPlugin->setDescription(szName,pTmSign->szDescription);
+       //pMemoryPlugin->setDescription(szName,pTmSign->szDescription);
      } /* endif */
 
      // re-write signature record
@@ -325,6 +325,20 @@ int EqfMemory::getNextProposal
  return( this->getNextProposal( Proposal, NULL ) );
 }
 
+
+size_t EqfMemory::GetRAMSize()const{
+  size_t size = sizeof(*this);
+  size += TmBtree.fb.data.capacity();
+  size += InBtree.fb.data.capacity();
+  return size;
+};
+
+size_t EqfMemory::GetExpectedRAMSize()const{
+  size_t size = sizeof(*this);
+  size += TmBtree.GetFileSize();
+  size += InBtree.GetFileSize();
+  return size;
+};
 
 /*! \brief Get the next proposal from the memory 
     \param lHandle the hande returned by GetFirstProposal
@@ -999,18 +1013,24 @@ int EqfMemory::LoadInRAM(){
 }
 
 int EqfMemory::UnloadFromRAM(){
-  if(TmBtree.fb.file == nullptr){
+  //if(TmBtree.fb.file == nullptr){
     //file is in mem
-    return -1;
-  }
-  if(InBtree.fb.file == nullptr){
+  //  return -1;
+  //}
+  //if(InBtree.fb.file == nullptr){
     //file is in mem
-    return -1;
-  }
+  //  return -1;
+  //}
   //TmBtree.fb.WriteToFile();
   //InBtree.fb.WriteToFile();
   TmBtree.fb.Flush();
+  TmBtree.fb.data.clear();
+  TmBtree.fb.data.shrink_to_fit();
+
   InBtree.fb.Flush();
+  InBtree.fb.data.clear();
+  InBtree.fb.data.shrink_to_fit();
+  fOpen = false;
   return 0;
 }
 

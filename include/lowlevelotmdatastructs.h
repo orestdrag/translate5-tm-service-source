@@ -32,6 +32,18 @@ typedef char* PSZ;
 #define TRANSL_SOURCE_GLOBMEMORY 2
 
 
+
+
+  /*! \brief States of a memory
+  */
+  typedef enum 
+  {
+    OPEN_STATUS,            // memory is available and open
+    AVAILABLE_STATUS,       // memory has been imported but is not open yet
+    IMPORT_RUNNING_STATUS,  // memory import is running
+    IMPORT_FAILED_STATUS    // memory import failed
+  } MEMORY_STATUS;
+
 /**********************************************************************/
 /* Equivalent to OS/2 SWP structure                                   */
 /* Note: bFiller1 and bFiller2 have been inserted to enlarge the      */
@@ -962,6 +974,8 @@ SHORT QDAMInsertKey_V3
    RECPARAM   recData                  // position/offset for data
 );   
 
+size_t GetFileSize()const;
+
  } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB , QDAMDICT, *PQDAMDICT;;
 
 
@@ -1678,6 +1692,7 @@ typedef struct _FCTDATA
   LONG        lOptions,                // options for Translation Memory export
   std::shared_ptr<EqfMemory> _mem
 );
+  std::shared_ptr<EqfMemory> mem;
 } FCTDATA, *PFCTDATA;
 
 

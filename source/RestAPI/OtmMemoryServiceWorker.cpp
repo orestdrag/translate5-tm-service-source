@@ -66,19 +66,6 @@ OtmMemoryServiceWorker::OtmMemoryServiceWorker()
 }
 
 
-/*! \brief Data area for the processing of the importMemory function
-*/
-typedef struct _IMPORTMEMORYDATA
-{
-  HSESSION hSession;
-  OtmMemoryServiceWorker *pMemoryServiceWorker;
-  char szMemory[260];
-  char szInFile[260];
-  char szError[512];
-  //ushort * pusImportPersent = nullptr;
-  ImportStatusDetails* importDetails = nullptr;
-  //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
-} IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
 
@@ -793,10 +780,10 @@ int OtmMemoryServiceWorker::import
     pMem->importDetails = new ImportStatusDetails;
   }
   
-  pData->importDetails = pMem->importDetails;
-  pData->importDetails->reset();
-  pData->hSession = hSession;
-  pData->pMemoryServiceWorker = this;
+  pMem->importDetails->reset();
+  //pData->mem = mem;
+  //pData->hSession = hSession;
+  //pData->pMemoryServiceWorker = this;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
@@ -2082,7 +2069,7 @@ void importMemoryProcess( void* pvData )
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
   // call the OpenTM2 API function
   pData->szError[0] = 0;
-  int iRC = (int)EqfImportMem( pData->hSession, pData->szMemory, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError, pData->importDetails);
+  int iRC =(int)EqfImportMem( pData->mem, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);
 
   // handle any error
   if ( iRC != 0 )
@@ -2094,7 +2081,7 @@ void importMemoryProcess( void* pvData )
 
   // update memory status
   //pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
-  TMManager::GetInstance()->importDone( std::string(pData->szMemory),iRC, pData->szError );
+  TMManager::GetInstance()->importDone( pData->mem,iRC, pData->szError );
  
   // cleanup
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs

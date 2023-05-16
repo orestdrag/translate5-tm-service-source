@@ -167,6 +167,34 @@ size_t TMManager::calculateOccupiedRAM(){
 }
 
 
+
+size_t TMManager::CalculateOccupiedRAM(){
+  char memFolder[260];
+  size_t UsedMemory = 0;
+  #ifdef CALCULATE_ONLY_MEM_FILES
+  Properties::GetInstance()->get_value(KEY_MEM_DIR, memFolder, 260);
+  std::string path;
+  for(int i = 0; i < EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ;i++){
+    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName != 0){
+      path = memFolder;
+      path += EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].szName;
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMI"));
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".TMD"));
+      UsedMemory += FilesystemHelper::GetFilebufferSize( std::string(path + ".MEM"));
+    }
+  }
+  #else
+  for(const auto& mem: tms){
+    UsedMemory += mem.second.get()->GetRAMSize();
+  }
+  //UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
+  UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
+  #endif
+
+  T5LOG( T5INFO) << ":: calculated occupied ram = " << UsedMemory/1000000 << " MB";
+  return UsedMemory;
+}
+
 /*! \brief close any memories which haven't been used for a long time
   \returns 0
 */
@@ -217,21 +245,23 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 
   time_t curTime;
   time( &curTime );
-  std::multimap <time_t, int>  openedMemoriesSortedByLastAccess;
-  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
-    if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
+  std::multimap <time_t, std::string>  openedMemoriesSortedByLastAccess;
+  for(const auto& tm: tms){
+  //for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
+  //  if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->szName[0] != 0 )
     {
-      openedMemoriesSortedByLastAccess.insert({EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i].get()->tLastAccessTime, i});
+      openedMemoriesSortedByLastAccess.insert({tm.second.get()->tLastAccessTime, tm.first});
     }
   }
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
-    RemoveFromMemoryList(it->second);
+    //T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second].get()->tLastAccessTime) <<  " seconds" ;
+    //RemoveFromMemoryList(it->second);
+    tms[it->second].get()->UnloadFromRAM();
     memoryNeed = memoryRequested + CalculateOccupiedRAM();
   }
 
-  return( AllowedMemory - memoryNeed );
+  return AllowedMemory > memoryNeed ? AllowedMemory - memoryNeed : 0;
 }
 
 /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
@@ -349,25 +379,21 @@ int TMManager::getMemoryHandle( const std::string& pszMemory, PLONG plHandle, wc
 
 
 // update memory status
-void TMManager::importDone(const std::string& memName, int iRC, char *pszError )
+void TMManager::importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszError )
 {
-  std::shared_ptr<EqfMemory>  pMem = this->findOpenedMemory( memName );
-  if ( pMem != nullptr )
+  if ( iRC == 0 )
   {
-    if ( iRC == 0 )
-    {
-      pMem->eImportStatus = AVAILABLE_STATUS;
-      T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << memName;
-    }
-    else
-    {
-      pMem->eImportStatus = IMPORT_FAILED_STATUS;
-      pMem->pszError = new char[strlen( pszError ) + 1];
-      strcpy( pMem->pszError, pszError );
-      T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << memName <<", import failed: " << pszError << " import details = " << pMem->importDetails->toString() ;
-    }
-  }else{
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << memName << " not found ";
+    mem->eImportStatus = OPEN_STATUS;
+    mem->TmBtree.fb.Flush();
+    mem->InBtree.fb.Flush();
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << mem->szName;
+  }
+  else
+  {
+    mem->eImportStatus = IMPORT_FAILED_STATUS;
+    mem->pszError = new char[strlen( pszError ) + 1];
+    strcpy( mem->pszError, pszError );
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << mem->szName <<", import failed: " << pszError << " import details = " << mem->importDetails->toString() ;
   }
 }
 
@@ -2437,7 +2463,8 @@ int TMManager::OpenTM(const std::string& strMemName){
 
     // handle "too many open memories" condition
     //if ( pMem == nullptr )
-    {
+    
+    if(memLeftAfterOpening <= 0){
       //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
       return( INTERNAL_SERVER_ERROR );
     } /* endif */

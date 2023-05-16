@@ -116,16 +116,6 @@ struct ImportStatusDetails{
 };
 
 
-  /*! \brief States of a memory
-  */
-  typedef enum 
-  {
-    OPEN_STATUS,            // memory is available and open
-    AVAILABLE_STATUS,       // memory has been imported but is not open yet
-    IMPORT_RUNNING_STATUS,  // memory import is running
-    IMPORT_FAILED_STATUS    // memory import failed
-  } MEMORY_STATUS;
-
 
 
 

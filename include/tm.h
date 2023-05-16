@@ -1952,6 +1952,7 @@ class EqfMemory //: public TMX_CLB
 {
   
 public:
+  bool fOpen;
   BTREE TmBtree;
   BTREE InBtree;
   TMX_TABLE Languages;
@@ -2150,6 +2151,8 @@ public:
     char *pszKey
   ); 
 
+  size_t GetRAMSize()const;
+  size_t GetExpectedRAMSize()const;
 
 /*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
     \param pszKey internal key of the proposal
@@ -3387,7 +3390,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR         szMemPath[2048];                // Full memory database name + path
  CHAR         szFilePath[2048];               // Full file name + path
  BOOL         fControlFound;                  // Indicator whether a CONTROL token was found
- EqfMemory    *pMem;                          // pointer to memory object
+ std::shared_ptr<EqfMemory> mem;                          // pointer to memory object
  OtmProposal  *pProposal;                     // buffer for memory proposal data
  CHAR_W       szSegBuffer[MAX_SEGMENT_SIZE+1];// buffer for segment data
  CHAR_W       szSource[MAX_SEGMENT_SIZE+1];   // buffer for segment source data
@@ -4707,7 +4710,7 @@ class TMManager{
     std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 
     int GetMemImportInProcess();
-    void importDone(const std::string& memName, int iRC, char *pszError );
+    void importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszError );
     
     /*! \brief Close all open memories
     \returns http return code0 if successful or an error code in case of failures
@@ -6353,16 +6356,14 @@ USHORT EqfExportDocVal
 /*@ADDTOSCRIPTER*/
 USHORT EqfImportMem
 (
-  HSESSION    hSession,                // mand: Eqf session handle
-  PSZ         pszMemName,              // mand: name of Translation Memory
+  std::shared_ptr<EqfMemory>    hSession,                // mand: Eqf session handle
   PSZ         pszInFile,               // mand: fully qualified name of input file
   LONG        lOptions,                 // opt: options for Translation Memory import
                                        // @Import Mode: TMX_OPT{CLEANRTF_OPT}, XLIFF_MT_OPT,UTF16_OPT,ANSI_OPT,ASCII_OPT(default)
                                        // @Markup Table Handling: CANCEL_UNKNOWN_MARKUP_OPT(default), SKIP_UNKNOWN_MARKUP_OPT, GENERIC_UNKNOWN_MARKUP_OPT
 									                     // @Other: {CLEANRTF_OPT,IGNORE_OPT}
                                        
-  PSZ         errorBuff,
-  ImportStatusDetails*     pImportData
+  PSZ         errorBuff
 );
 
 /*! \brief Import a Translation Memory (extended version)

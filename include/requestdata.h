@@ -98,6 +98,7 @@ class CreateMemRequestData: public RequestData{
     std::string strSrcLang;
     std::string strMemDescription;
     std::string strMemB64EncodedData; // for import in internal format
+    std::string strTempFile;
     
     CreateMemRequestData(const std::string& json): RequestData(COMMAND::CREATE_MEM,json, ""){}
     CreateMemRequestData(): RequestData(COMMAND::CREATE_MEM) {};
@@ -108,6 +109,9 @@ protected:
     int execute() override ;
 };
 
+
+
+
 class ListTMRequestData:public RequestData{
 public:
     ListTMRequestData(): RequestData(COMMAND::LIST_OF_MEMORIES) {};
@@ -116,6 +120,21 @@ protected:
     int checkData() override { return -1;};
     int execute() override   { return -1;};
 };
+
+/*! \brief Data area for the processing of the importMemory function
+*/
+typedef struct _IMPORTMEMORYDATA
+{
+  //HSESSION hSession;
+  //OtmMemoryServiceWorker *pMemoryServiceWorker;
+  char szMemory[260];
+  char szInFile[260];
+  char szError[512];
+  std::shared_ptr<EqfMemory> mem;
+  //ushort * pusImportPersent = nullptr;
+  //ImportStatusDetails* importDetails = nullptr;
+  //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
+} IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 class ImportRequestData:public RequestData{
 public:
@@ -128,6 +147,9 @@ protected:
     BOOL fClose = false;
     MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
     MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+    PIMPORTMEMORYDATA pData = nullptr;
+    std::string strTempFile;
+    std::string strTmxData;
 };
 
 class DeleteTMRequestData:public RequestData{
