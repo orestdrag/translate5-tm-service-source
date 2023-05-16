@@ -817,6 +817,30 @@ int ImportRequestData::checkData(){
   
 }
 
+int SaveAllTMsToDiskRequestData::execute(){
+  if(_rc_) {
+    outputMessage = "Error: Can't save tm files on disk";
+    return _rc_;
+  };
+  std::string files; 
+  
+  //FilesystemHelper::FlushAllBuffers(&files);
+  int count = 0;
+  for(auto tm: TMManager::GetInstance()->tms){
+    if(count)
+      files += ", ";
+    tm.second->TmBtree.fb.Flush();
+    files += tm.second->TmBtree.fb.fileName;
+    files += ", ";
+
+    tm.second->InBtree.fb.Flush();
+    files += tm.second->TmBtree.fb.fileName;
+    count += 2;
+  }
+  outputMessage = "{\n   \'saved " + std::to_string(count) +" files\': \'" + files + "\' \n}";
+  return OK;
+}
+
 int ImportRequestData::execute(){
   //success in parsing request data-> close mem if needed
   //if(lHandle && fClose){

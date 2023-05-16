@@ -140,6 +140,14 @@ protected:
 };
 
 
+class SaveAllTMsToDiskRequestData: public RequestData{
+public:
+    SaveAllTMsToDiskRequestData(): RequestData(COMMAND::SAVE_ALL_TM_ON_DISK){};
+protected: 
+    int parseJSON() override { return 0; };
+    int checkData() override { return 0; };
+    int execute() override;
+};
 
 class ShutdownRequestData:public RequestData{
 public:
