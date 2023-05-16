@@ -130,15 +130,6 @@ protected:
     std::string strTmxData;
 };
 
-class DeleteTMRequestData:public RequestData{
-public:
-    DeleteTMRequestData(): RequestData(COMMAND::DELETE_MEM) {};
-protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
-};
-
 
 class SaveAllTMsToDiskRequestData: public RequestData{
 public:
@@ -187,18 +178,18 @@ class CloneTMRequestData:public RequestData{
 public:
     CloneTMRequestData(): RequestData(COMMAND::CLONE_TM_LOCALY) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override { return 0;};
+    int checkData() override { return 0;};
+    int execute  () override;
 };
 
 class ReorganizeRequestData:public RequestData{
 public:
     ReorganizeRequestData(): RequestData(COMMAND::REORGANIZE_MEM) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override { return 0;};
+    int checkData() override { return 0;};
+    int execute  () override;
 };
 
 
@@ -228,8 +219,8 @@ class DeleteMemRequestData: public RequestData{
 
 protected:
     int parseJSON() override {return 0;}
-    int checkData() override {return -1;};
-    int execute() override   {return -1;};
+    int checkData() override {return 0;};
+    int execute  () override;
 };
 
 
@@ -269,9 +260,11 @@ class DeleteEntryRequestData: public RequestData{
     DeleteEntryRequestData(): RequestData(DELETE_ENTRY){}
 
 protected:
+
+    LOOKUPINMEMORYDATA Data;
     int parseJSON() override ;
     int checkData() override ;
-    int execute  () override   ;
+    int execute  () override ;
 };
 
 class UpdateEntryRequestData: public RequestData{

@@ -57,128 +57,13 @@ public:
 
   std::atomic_bool fServiceIsRunning{0};
 
-  /*! \brief Import a memory from a TMX file
-  \param strMemory name of memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int import
-  (
-    std::string  strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
 
-  int cloneTMLocaly
-  (
-    std::string  strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
-  /*! \brief Search for matching proposals 
-  \param strMemory name of memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int search
-  (
-    std::string  strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
-  int resourcesInfo(std::string& strOutput, ProxygenStats& stats);
-
-  std::string tagReplacement(std::string strInData, int& rc);
-
-  /*! \brief Do a concordance search for the given search string
-  \param strMemory name of memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int concordanceSearch
-  (
-    std::string  strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
-/*! \brief shutdown the service
-  \returns http return code
-  */
-  int shutdownService(int sig = 0);
-
-  /*! \brief Close all open memories
-  \returns http return code0 if successful or an error code in case of failures
-  */
-  int closeAll ( );
-
-  /*! \brief Checks if there is opened memory in import process
-  \returns index if import process for any memory is going on, -1 if no
-  */
   int GetMemImportInProcess();
 
   /*! \brief Saves all open and modified memories
   \returns http return code if successful or an error code in case of failures
   */
   int saveAllTmOnDisk( std::string &strOutputParms );
-
-  /*! \brief List all available TMs
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int list
-  (
-    std::string &strOutputParms
-  );
-
-  /*! \brief Update an entry of the memory
-  \param strMemory name of memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int updateEntry
-  (
-    std::string strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
-  /*! \brief Delete an entry of the memory
-  \param strMemory name of memory
-  \param strInputParms input parameters in JSON format
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int deleteEntry
-  (
-    std::string strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
-  );
-
-  /*! \brief delete a memory
-  \param strMemory name of memory
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int deleteMem
-  (
-    std::string strMemory,
-    std::string &strOutputParms
-  );
-
-
-  int reorganizeMem
-  (
-    std::string strMemory,
-    std::string &strOutputParms
-  );
 
   /*! \brief get the data of a memory in binary form or TMX form
   \param strMemory name of memory
@@ -193,17 +78,6 @@ public:
     std::vector<unsigned char> &vMemData
   );
 
-  /*! \brief get the status of a memory
-  \param strMemory name of memory
-  \param strOutParms on return filled with the output parameters in JSON format
-  \returns http return code
-  */
-  int getStatus
-  ( 
-    std::string strMemory, 
-    std::string &strOutputParms 
-  );
-
   /* change the status of a memory in our memory list at the end of an import
   \param pszMemory name of the memory
   \param
@@ -214,9 +88,7 @@ public:
   /*! \brief Verify OpenTM2 API session
       \returns 0 if successful or an error code in case of failures
     */
-  int verifyAPISession
-  (
-  );
+  int verifyAPISession();
 //private:
   
   
@@ -227,26 +99,11 @@ public:
     \param strError JSON string receiving the error information
     \returns 0 if successful or an error code in case of failures
   */
-  int buildErrorReturn
-  (
-    int iRC,
-    wchar_t *pszErrorMsg,
-    std::wstring &strErrorReturn
-  );
+  //int buildErrorReturn( int iRC, wchar_t *pszErrorMsg, std::wstring &strErrorReturn );
 
-  int buildErrorReturn
-  (
-    int iRC,
-    wchar_t *pszErrorMsg,
-    std::string &strErrorReturn
-  );
+  //int buildErrorReturn( int iRC, wchar_t *pszErrorMsg, std::string &strErrorReturn );
 
-  int buildErrorReturn
-  (
-    int iRC,
-    char *pszErrorMsg,
-    std::string &strErrorReturn
-  );
+  //int buildErrorReturn( int iRC, char *pszErrorMsg,  std::string &strErrorReturn );
 
 
   /*! \brief convert a UTC time value to a OpenTM2 long time value 
@@ -254,7 +111,7 @@ public:
       \param plTime pointer to a long buffer receiving the converted time 
     \returns 0 
   */
-  int convertUTCTimeToLong( char *pszDateTime, long *plTime );
+  //int convertUTCTimeToLong( char *pszDateTime, long *plTime );
 
   /*! \brief extract a numeric value from a string
       \param pszString string containing the numeric value
@@ -262,21 +119,21 @@ public:
       \param piResult pointer to a int value receiving the extracted value
     \returns TRUE if successful and FALSE in case of errors
   */
-  bool getValue( char *pszString, int iLen, int *piResult );
+  //bool getValue( char *pszString, int iLen, int *piResult );
 
   /*! \brief convert a long time value to a date time string in the form YYYY-MM-DD HH:MM:SS
   \param lTime long time value
   \param pszDateTime buffer receiving the convererd date and time
   \returns 0
   */
-  int convertTimeToDateTimeString( long lTime, char *pszDateTime );
+  //int convertTimeToDateTimeString( long lTime, char *pszDateTime );
 
   /*! \brief convert a date and time in the form YYYY-MM-DD HH:MM:SS to a OpenTM2 long time value
   \param pszDateTime buffer containing the TMX date and time
   \param plTime pointer to a long buffer receiving the converted time
   \returns 0
   */
-  int convertDateTimeStringToLong( char *pszDateTime, long *plTime );
+  //int convertDateTimeStringToLong( char *pszDateTime, long *plTime );
   
 
 
@@ -287,13 +144,7 @@ public:
   \param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
   \returns 0 is successful
   */
-  int addProposalsToJSONString
-  (
-    std::wstring &strJSON,
-    PMEMPROPOSAL pProposals,
-    int iNumOfProposals,
-    void *pvData
-  );
+  int addProposalsToJSONString( std::wstring &strJSON, PMEMPROPOSAL pProposals, int iNumOfProposals, void *pvData );
 
   /* write a single proposal to a JSON string
   \param strJSON JSON stirng receiving the proposal data
@@ -301,19 +152,7 @@ public:
   \param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
   \returns 0 is successful
   */
-  int addProposalToJSONString
-  (
-    std::wstring &strJSON,
-    PMEMPROPOSAL pProp,
-    void *pvData
-  );
-
-  /* convert string proposal type to proposal type enum value
-  \param pszType proposal type as string
-  \returns proposal type as enum value
-  */
-  MemProposalType getMemProposalType( char *pszType );
-
+  int addProposalToJSONString ( std::wstring &strJSON, PMEMPROPOSAL pProp, void *pvData );
 
 /*! \brief OpenTM2 API session handle
 */
