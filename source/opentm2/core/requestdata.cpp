@@ -997,9 +997,36 @@ int StatusMemRequestData::checkData() {
   factory->terminateJSON( outputMessage );
   return( OK );
 };
+
 int StatusMemRequestData::execute() {
   return 0; 
 };
+
+int ShutdownRequestData::execute(){
+    TMManager::GetInstance()->fServiceIsRunning = true;
+    
+    std::thread([this]() 
+        {
+           sleep(3);
+           int j= 3;
+           while(int i = TMManager::GetInstance()->GetMemImportInProcess() != -1){
+            if( ++j % 15 == 0){
+              T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
+            }
+            T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  i = "<< i; 
+            
+            sleep(1);
+           }
+
+           TMManager::GetInstance()->fServiceIsRunning = false;
+           if(sig != SHUTDOWN_CALLED_FROM_MAIN){
+            exit(sig);
+           }
+        }).detach();
+    return 200;
+  
+}
+
 
 
 int ResourceInfoRequestData::execute(){

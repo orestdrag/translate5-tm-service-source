@@ -4629,6 +4629,7 @@ int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
 class TMManager{
 
   public:
+  std::atomic_bool fServiceIsRunning{0};
     /*! \brief Pointer to the list of opened memories
     */
     //std::vector<EqfMemory> vMemoryList;
