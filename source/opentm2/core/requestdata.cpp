@@ -440,6 +440,15 @@ int CreateMemRequestData::createNewEmptyMemory(){
   TMManager::GetInstance()->AddMem(NewMem);
 }
 
+const char* GetFileExtention(std::string file){
+  auto lastDot = file.rfind('.');
+  if(lastDot>0){
+    return &file[lastDot];
+  }else{
+    return &file[0];
+  }
+}
+
 int CreateMemRequestData::importInInternalFomat(){
     T5LOG( T5INFO) << "createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
@@ -462,10 +471,56 @@ int CreateMemRequestData::importInInternalFomat(){
         buildErrorReturn( _rc_, (char *)strError.c_str() );
         return( INTERNAL_SERVER_ERROR );
     }
-    _rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), strTempFile.c_str(), 0 );
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-        FilesystemHelper::DeleteFile( strTempFile );
+    //_rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), strTempFile.c_str(), 0 );
+
+    // make temporary directory for the memory files of the package
+    std::string tempMemUnzipFolder = FilesystemHelper::GetTempDir();
+    FilesystemHelper::CreateDir( FilesystemHelper::GetTempDir() );
+    tempMemUnzipFolder += "MemImp/";
+    FilesystemHelper::CreateDir( tempMemUnzipFolder );
+    tempMemUnzipFolder += strMemName + '/';
+    FilesystemHelper::CreateDir( tempMemUnzipFolder );
+
+    // unpzip the package
+    FilesystemHelper::ZipExtract( strTempFile, tempMemUnzipFolder );
+    
+       
+    auto files = FilesystemHelper::GetFilesList(tempMemUnzipFolder.c_str());
+    std::string memDir = FilesystemHelper::GetMemDir();
+    for( auto file: files ){
+      if(file.size() <= 4){
+        continue;
+      }
+      std::string targetFName = memDir + strMemName + GetFileExtention(file);
+      if(FilesystemHelper::FileExists(targetFName.c_str())){
+        T5LOG(T5ERROR) << ":: file exists, fName = " << targetFName;
+        _rc_ = -1;
+        break;
+      }
     }
+
+    if( !_rc_ ){
+      for( auto file:files){
+        if(file.size() <= 4){
+          continue;
+        }
+        std::string targetFName = memDir + strMemName + GetFileExtention(file);
+        std::string oldFName = tempMemUnzipFolder + file;
+        FilesystemHelper::MoveFile(oldFName, targetFName);
+      }
+      
+      if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName)){
+        T5LOG( T5INFO) << ":: memory file not found after import in internal format, mem name = "<< strMemName << "; rc = " << _rc_;
+        _rc_ = -2;
+      }      
+    }
+
+    // delete any files left over and remove the directory
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+      FilesystemHelper::RemoveDirWithFiles( tempMemUnzipFolder );
+      FilesystemHelper::DeleteFile( strTempFile );
+    }
+    return _rc_;
 }
 
 int CreateMemRequestData::checkData(){
@@ -882,7 +937,12 @@ int ImportRequestData::execute(){
 
   return( CREATED );
 }
-int ReorganizeRequestData::execute(){
+
+int ReorganizeRequestData::parseJSON(){
+  return 0;
+}
+
+int ReorganizeRequestData::checkData(){
   if ( strMemName.empty() )
   {
     T5LOG(T5ERROR) <<" error:: _rc_ = "<< _rc_ << "; strOutputParams = "<<
@@ -890,21 +950,27 @@ int ReorganizeRequestData::execute(){
     buildErrorReturn( _rc_, "Missing name of memory");
     return( BAD_REQUEST );
   } 
+  return 0;
+}
+
+
+int ReorganizeRequestData::execute(){
+
 
   // close memory if it is open
-  std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  if ( pMem != nullptr )
-  {
-    // close the memory and remove it from our list
-    TMManager::GetInstance()->removeFromMemoryList( pMem );
-  } 
+  //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
+  //if ( pMem != nullptr )
+  //{
+  //  // close the memory and remove it from our list
+  //  TMManager::GetInstance()->removeFromMemoryList( pMem );
+  //} 
 
   // reorganize the memory
   if ( !_rc_ )
   {
     do
     {
-      _rc_ = EqfOrganizeMem( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str()  );
+      _rc_ = EqfOrganizeMem( OtmMemoryServiceWorker::getInstance()->hSession, mem );
     } while ( _rc_ == CONTINUE_RC );
   } 
   
@@ -1038,12 +1104,10 @@ int TagRemplacementRequestData::execute(){
   return _rest_rc_ = 200;
 }
 
-int CloneTMRequestData::execute(){
-  START_WATCH
-  
+int CloneTMRequestData::parseJSON(){
   // parse json data
   void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
-  std::string newName, name, value;
+  std::string name, value;
   while ( _rc_ == 0 )
   {
     _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
@@ -1058,13 +1122,15 @@ int CloneTMRequestData::execute(){
   if(_rc_ == 2002){
     _rc_ = 0;
   }
+  return _rc_;
+}
+
+int CloneTMRequestData::checkData(){
   if(!_rc_ && newName.empty()){
     outputMessage = "\'newName\' parameter was not provided or was empty";
     T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
     _rc_ = 500;
   }
-
-  std::string srcTmdPath, srcTmiPath, dstTmdPath, dstTmiPath;
   char memDir[255];
   if(!_rc_){
     _rc_ = Properties::GetInstance()->get_value(KEY_MEM_DIR, memDir, 254);
@@ -1082,11 +1148,6 @@ int CloneTMRequestData::execute(){
   }
 
   // check mem if exists
-  /*if(!_rc_ && FilesystemHelper::FileExists(srcMemPath.c_str()) == false){
-    outputMessage = "\'srcMemPath\' = " + srcMemPath + " not found";
-    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
-    _rc_ = 500;
-  }//*/
   if(!_rc_ && FilesystemHelper::FileExists(srcTmdPath.c_str()) == false){
     outputMessage = "\'srcTmdPath\' = " +  srcTmdPath + " not found";
     T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
@@ -1098,49 +1159,41 @@ int CloneTMRequestData::execute(){
     _rc_ = 500;
   }
 
-  // check mem if is not in import state
-  std::shared_ptr<EqfMemory>  pMem; 
+    // check mem if is not in import state
   
   //LONG lHandle = 0;
   //BOOL fClose = false;
   //MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
   //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
 
-  if(!_rc_){
-    pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  
+  if(!_rc_){  
     
-    if(pMem == nullptr){
+    if(mem == nullptr){
     // tm is probably not opened, buf files presence was checked before, so it should be "AVAILABLE" status
     //  outputMessage = "\'newName\' " + strMemName +" was not found in memory list";
     //  T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
     //  _rc_ = 500;
     }else{
       // close the memory - if open
-      if(pMem->eImportStatus == IMPORT_RUNNING_STATUS){
+      if(mem->eImportStatus == IMPORT_RUNNING_STATUS){
            outputMessage = "src tm \'" + strMemName +"\' is in import status. Repeat request later.";
           T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
          _rc_ = 500;
-      }else if ( pMem->eStatus == OPEN_STATUS )
+      }else if ( mem->eStatus == OPEN_STATUS )
       {
-        if(pMem->lHandle){
+        //if(mem->lHandle){
           //EqfCloseMem( this->hSession, pMem->lHandle, 0 );
           //pMem->lHandle = 0;
-        }
-      }else if(pMem->eStatus != AVAILABLE_STATUS ){
+        //}
+      }else if(mem->eStatus != AVAILABLE_STATUS ){
          outputMessage = "src tm \'" + strMemName +"\' is not available nor opened";
          T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
          _rc_ = 500;
       }
     }
   }
-  
-  // check if new name is available(is not occupied)
-  /*if(!_rc_ && FilesystemHelper::FileExists(dstMemPath.c_str()) == true){
-    outputMessage = "\'dstMemPath\' = " +  dstMemPath + " already exists";
-    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
-    _rc_ = 500;
-  }//*/
+
+   // check if new name is available(is not occupied)
   if(!_rc_ && FilesystemHelper::FileExists(dstTmdPath.c_str()) == true){
     outputMessage = "\'dstTmdPath\' = " +  dstTmdPath + " already exists";
     T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
@@ -1151,7 +1204,12 @@ int CloneTMRequestData::execute(){
     T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
     _rc_ = 500;
   }
+  return _rc_;
+}
 
+int CloneTMRequestData::execute(){
+  START_WATCH
+  
   //flush filebuffers before clonning
   if(FilesystemHelper::FilebufferExists(srcTmdPath)){
     if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmdPath))){
@@ -1167,20 +1225,9 @@ int CloneTMRequestData::execute(){
       _rc_ = 500;
     }
   }
-  /*
-  if(!_rc_ && (_rc_ = FilesystemHelper::FilesystemHelper::WriteBuffToFile(srcMemPath))){
-    outputMessage = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcMemPath\' = " + srcMemPath;
-    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
-    _rc_ = 500;
-  }//*/
-
-  // clone .mem .tmi and .tmd files 
   
-  /*if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcMemPath, dstMemPath))){
-    outputMessage = "Can't clone file, _rc_ = " + toStr(_rc_)  + "; \'srcMemPath\' = " + srcMemPath + "; \'dstMemPath\' = " +  dstMemPath;
-    T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
-    _rc_ = 501;
-  }//*/
+
+  // clone .tmi and .tmd files   
   if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcTmdPath, dstTmdPath))){
     outputMessage = "Can't clone file, _rc_ = " + toStr(_rc_)  + "; \'srcTmdPath\' = " + srcTmdPath + "; \'dstTmdPath\' = " +  dstTmdPath;
     T5LOG(T5ERROR) << outputMessage << "; for request for mem "<< strMemName <<"; with body = ", strBody ;
@@ -1196,13 +1243,13 @@ int CloneTMRequestData::execute(){
   if(_rc_ == 501){
     if(FilesystemHelper::FileExists(dstTmiPath.c_str())) FilesystemHelper::DeleteFile(dstTmiPath.c_str());
     if(FilesystemHelper::FileExists(dstTmdPath.c_str())) FilesystemHelper::DeleteFile(dstTmdPath.c_str());
-    //if(FilesystemHelper::FileExists(dstMemPath.c_str())) FilesystemHelper::DeleteFile(dstMemPath.c_str());
     _rc_ = 500;
   }
   if(!_rc_){
-    EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
+    
+    //EqfMemoryPlugin::GetInstance()->addMemoryToList(newName.c_str());
   }
-  if( pMem != nullptr )
+  if( mem != nullptr )
   {
     //fClose = true;
     //lHandle =          pMem->lHandle; 
@@ -1222,7 +1269,6 @@ int CloneTMRequestData::execute(){
 
   outputMessage = "{\n\t\"msg\": \"" + outputMessage + "\",\n\t\"time\": \"" + watch.print()+ "\n}"; 
 
-
   STOP_WATCH
   //PRINT_WATCH
 
@@ -1232,7 +1278,6 @@ int CloneTMRequestData::execute(){
 
 std::string printTime(time_t time);
 int StatusMemRequestData::checkData() {
-  //EncodingHelper::convertUTF8ToASCII( strMemName );
   if ( strMemName.empty() )
   {
     buildErrorReturn( _rc_, "Missing name of memory" );
@@ -1494,18 +1539,19 @@ int ExportRequestData::execute(){
       return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
-  //else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
-  //{
-    //T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip(NOT TESTED YET), tempFile = " << szTempFile;
+  else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
+  {
+    T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip(NOT TESTED YET), tempFile = " << strTempFile;
     //_rc_ = EqfExportMemInInternalFormat( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), 0 );
-    //if ( _rc_ != 0 )
-    //{
-    //  unsigned short usRC = 0;
-    //  EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-    //  T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<_rc_ << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
-    //  return( INTERNAL_SERVER_ERROR );
-    //}
-  //}
+    ExportZip();
+    if ( _rc_ != 0 )
+    {
+      //unsigned short usRC = 0;
+      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<_rc_ << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
+      return( INTERNAL_SERVER_ERROR );
+    }
+  }
   else
   {
     T5LOG(T5ERROR) <<"::getMem:: Error: the type " << requestAcceptHeader << " is not supported" ;
@@ -1532,7 +1578,18 @@ int ExportRequestData::execute(){
 }
 
 int ExportRequestData::ExportZip(){
-  return -1;
+  // check if memory exists
+  if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) != NO_ERROR){
+    return _rc_;
+  }
+
+  // add the files to the package
+  ZIP* pZip = FilesystemHelper::ZipOpen( strTempFile , 'w' );
+  FilesystemHelper::ZipAdd( pZip, TMManager::GetTmdPath(strMemName) );
+  FilesystemHelper::ZipAdd( pZip, TMManager::GetTmiPath(strMemName) );  
+  FilesystemHelper::ZipClose( pZip );
+
+  return _rc_;
 }
 
 int ExportRequestData::ExportTmx(){
@@ -1577,8 +1634,6 @@ int UpdateEntryRequestData::parseJSON(){
     buildErrorReturn( _rc_, "Missing name of memory");
     return( BAD_REQUEST );
   } /* endif */
-
-  //EncodingHelper::convertUTF8ToASCII( strMemName );
 
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
@@ -1905,6 +1960,8 @@ int DeleteEntryRequestData::execute(){
     buildErrorReturn( _rc_, Data.szError );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
+  mem->TmBtree.fb.Flush();
+  mem->InBtree.fb.Flush();
 
   // return the entry data
   std::string str_src = EncodingHelper::convertToUTF8(Data.szSource );

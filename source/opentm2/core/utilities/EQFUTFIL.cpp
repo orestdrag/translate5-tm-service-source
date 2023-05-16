@@ -26,7 +26,6 @@
 #include "tm.h"
 #include "FilesystemHelper.h"
 #include "LogWrapper.h"
-#include "ZipHelper.h"
 static USHORT usLastDosRc;             // buffer for last DOS return code
 
 //+----------------------------------------------------------------------------+
@@ -1204,33 +1203,5 @@ USHORT UtlLongToShortName( PSZ pszLongName, PSZ pszShortName )
 }
 
 
-
-/*! \brief add a list of files to a ZIP package
-  \param pszFileList list of comma separated, fully qualified file names to be added to the package
-  \param pszPackage fully qualified name of the ZIP package being created
-  \returns 0 in any case
-*/
-
-int UtlZipFiles( const char *pszFileList, const char * pszPackage  )
-{
-  char szCurFile[MAX_PATH];
-
-  ZIP* pZip = ZipHelper::ZipOpen( pszPackage , 'w' );
-
-  while( *pszFileList != EOS )
-  {
-    // get current file name
-    Utlstrccpy( szCurFile, (PSZ)pszFileList, ',' );
-    // add it to theZIP package
-    ZipHelper::ZipAdd( pZip, szCurFile );
-
-    // continue with next file
-    pszFileList += strlen(szCurFile);
-    if ( *pszFileList == ',' ) pszFileList++;
-  } /* endwhile */
-  
-  ZipHelper::ZipClose( pZip );
-  return( 0 );
-}
 
 

@@ -592,7 +592,7 @@ int EqfMemory::deleteProposal
   
 
 	if ( !iRC ) 
-    iRC = TmtXDelSegm ( (EqfMemory*)htm, &TmPutIn, &TmPutOut );
+    iRC = TmtXDelSegm ( this, &TmPutIn, &TmPutOut );
 
   if ( iRC != 0  
       && iRC != 6020) // seg not found 

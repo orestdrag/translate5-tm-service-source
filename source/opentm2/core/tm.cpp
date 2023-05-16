@@ -426,10 +426,10 @@ int TMManager::removeFromMemoryList( int iIndex )
   std::shared_ptr<EqfMemory>  pMem = EqfMemoryPlugin::GetInstance()->m_MemInfoVector[iIndex];
   LONG lHandle = pMem->lHandle;
   int i=0;
-  while(pMem.get()->eStatus == IMPORT_RUNNING_STATUS || pMem.get()->eImportStatus == IMPORT_RUNNING_STATUS ){
+  while(pMem->eStatus == IMPORT_RUNNING_STATUS || pMem->eImportStatus == IMPORT_RUNNING_STATUS ){
     sleep(1);
     if(i++ % 10 == 0){
-      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem.get()->szName << "\', for " << i << " seconds";
+      T5LOG( T5WARNING) << ":: waiting for closing memory with name = \'" << pMem->szName << "\', for " << i << " seconds";
     }
   }
   // remove the memory from the list
@@ -515,7 +515,6 @@ Copyright Notice:
 #include "LogWrapper.h"
 #include "FilesystemHelper.h"
 #include "Property.h"
-#include "ZipHelper.h"
 #include "LanguageFactory.H"
 
 #include "vector"
@@ -1414,14 +1413,7 @@ void TMManager::refreshPluginList()
   }
 }
 
-const char* GetFileExtention(std::string file){
-  auto lastDot = file.rfind('.');
-  if(lastDot>0){
-    return &file[lastDot];
-  }else{
-    return &file[0];
-  }
-}
+
 
 
 /*! \brief Replace a memory with the data from another memory
@@ -1487,77 +1479,7 @@ USHORT TMManager::APIImportMemInInternalFormat
   LONG        lOptions 
 )
 {
-  int iRC = 0;
-
-  if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS) )
-  {
-    T5LOG(T5ERROR) <<   "::TA_MANDTM::if ( (pszMemoryName == NULL) || (*pszMemoryName == EOS))";
-    return( TA_MANDTM );
-  } /* endif */
-
-  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
-  {
-    T5LOG(T5ERROR) <<   "::FUNC_MANDINFILE::  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )";
-    return( FUNC_MANDINFILE );
-  } /* endif */
-
-  // make temporary directory for the memory files of the package
-  char szTempDir[MAX_PATH];
-  Properties::GetInstance()->get_value( KEY_OTM_DIR, szTempDir, MAX_PATH);
-  std::string memDir = szTempDir;
-  memDir  +=  "/MEM/";
-  strcat( szTempDir, "/TEMP/" );
-  FilesystemHelper::CreateDir( szTempDir );
-  strcat( szTempDir, "/MemImp/" );
-  FilesystemHelper::CreateDir( szTempDir );
-  strcat( szTempDir, pszMemoryName );
-  strcat (szTempDir, "/");
-  FilesystemHelper::CreateDir( szTempDir );
-
-  // unpzip the package
-  ZipHelper::ZipExtract( pszMemoryPackage, szTempDir );
-  
-  {   
-    auto files = FilesystemHelper::GetFilesList(szTempDir);
-    for( auto file: files ){
-      if(file.size() <= 4){
-        continue;
-      }
-      std::string targetFName = memDir + pszMemoryName + GetFileExtention(file);
-      if(FilesystemHelper::FileExists(targetFName.c_str())){
-         T5LOG(T5ERROR) << ":: file exists, fName = " << targetFName;
-         iRC = -1;
-         break;
-      }
-    }
-
-    if( !iRC ){
-      for( auto file:files){
-        if(file.size() <= 4){
-          continue;
-        }
-        std::string targetFName = memDir + pszMemoryName + GetFileExtention(file);
-        std::string oldFName = szTempDir + file;
-        FilesystemHelper::MoveFile(oldFName, targetFName);
-      }
-      
-      std::string memFilePath = memDir + pszMemoryName + EXT_OF_MEM;
-      if(FilesystemHelper::FileExists(memFilePath.c_str())){
-        T5LOG( T5INFO) << ":: memory added to list, mem name = "<< pszMemoryName;
-        EqfMemoryPlugin::GetInstance()->addMemoryToList(pszMemoryName);
-      }else{
-        T5LOG(T5ERROR) << ":: memory not added to list, mem path = " << memFilePath;
-      }
-    }
-  }
-
-  
-  // delete any files left over and remove the directory
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){
-    FilesystemHelper::RemoveDirWithFiles( szTempDir );
-  }
-
-  return( (USHORT)iRC );
+ 
 }
 
 /*! \brief process the API call: EqfExportMemInInternalFormat and export a memory to a ZIP package
@@ -1572,60 +1494,7 @@ USHORT TMManager::APIExportMemInInternalFormat
   LONG        lOptions 
 )
 {
-  int iRC = 0;  
-  PSZ pszMemName = (PSZ) pszMemoryName;
-  if ( (pszMemName == NULL) || (*pszMemName == EOS) )
-  {
-    T5LOG(T5ERROR) <<   "::TA_MANDTM::";
-    return( TA_MANDTM );
-  } /* endif */
-
-  if ( (pszMemoryPackage == NULL) || (*pszMemoryPackage == EOS) )
-  {
-    T5LOG(T5ERROR) <<   "::FUNC_MANDINFILE::";
-    return( FUNC_MANDINFILE );
-  } /* endif */
-
-  // check if memory exists
-  if ( !this->exists( NULL, pszMemName ) )
-  {
-    T5LOG(T5ERROR) <<   "::ERROR_MEMORY_NOTFOUND::", (pszMemName);
-    return( ERROR_MEMORY_NOTFOUND );
-  } /* endif */
-
-  // get the memory plugin for the memory
-  OtmPlugin* pPlugin = findPlugin( NULL, pszMemName  );
-  if( pPlugin == NULL )
-  {
-    this->iLastError = ERROR_MEMORYOBJECTISNULL;
-    this->strLastError = "Internal error: No plugin found for memory";
-    return( (USHORT)this->iLastError );
-  } /* endif */     
-
-  // get the list of memory files
-  const int iFileListBufferSize = 8000;
-  char *pszFileList = new char[iFileListBufferSize];
-  if( pPlugin->getType() ==  OtmPlugin::eTranslationMemoryType )
-  {
-    iRC = ((EqfMemoryPlugin *)pPlugin)->getMemoryFiles( pszMemName, pszFileList, iFileListBufferSize );
-  }
-  else
-  {
-    iRC = ERROR_VERSION_NOT_SUPPORTED;
-  }
-  if( iRC != 0  )
-  {
-    this->iLastError = ERROR_BUFFERTOOSMALL;
-    this->strLastError = "Internal error: Failed to get list of memory files";
-    delete[] pszFileList;
-    return( (USHORT)this->iLastError );
-  } /* endif */     
-
-  // add the files to the package
-  UtlZipFiles( pszFileList, pszMemoryPackage );
-  delete[] pszFileList;
-
-  return( (USHORT)iRC );
+  return 0;
 }
 
 /*! \brief process the API call: EqfOpenMem and open the specified translation memory

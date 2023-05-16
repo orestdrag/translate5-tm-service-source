@@ -7,6 +7,10 @@
 #include <map>
 #include "Filebuffer.h"
 
+#include "zip/zip.h"
+
+typedef zip_t ZIP;
+
 #ifdef _USING_FILESYSTEM_
 #include <filesystem>
 //#include <experimental/filesystem>
@@ -143,7 +147,14 @@ public:
     static std::string BuildTempFileName();
     static int LoadFileIntoByteVector(const std::string& strFile, std::vector<unsigned char>  &vFileData );
 
-    private:
+
+    static int  ZipAdd    ( ZIP * pZip, const std::string& fName );
+    static ZIP* ZipOpen   ( const std::string&  fName , char mode );
+    static int  ZipClose  ( ZIP* pZip );
+    static int  ZipExtract( const std::string&  zipPath, const std::string&  destPath );    
+
+
+private:
     static std::string _memDir;
     static std::string _tableDir;
     static std::string _homeDir;

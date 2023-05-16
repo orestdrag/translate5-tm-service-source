@@ -204,7 +204,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }else if(methodStr == "GET"){
           requestHandler->pRequest = new ExportRequestData();
         }else if(methodStr == "DELETE"){
-          requestHandler->pRequest = new DeleteTMRequestData();
+          requestHandler->pRequest = new DeleteMemRequestData();
         }
       }
     }else{

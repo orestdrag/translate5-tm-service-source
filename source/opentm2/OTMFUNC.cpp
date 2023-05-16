@@ -215,7 +215,7 @@ USHORT EqfExportMem
 USHORT MemFuncPrepOrganize
 (
   PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName               // Translation Memory being deleted
+  EqfMemory*  pMem               // Translation Memory being reorganized
 );
 USHORT MemFuncOrganizeProcess
 (
@@ -227,13 +227,11 @@ USHORT MemFuncOrganizeProcess
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // Eqf session handle
-  PSZ         pszMemName               // name of Translation Memory
+  std::shared_ptr<EqfMemory> mem       // name of Translation Memory
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
-
-  LOGWRITE1( "==EQFOrganizeMem==\n" );
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
@@ -255,7 +253,8 @@ USHORT EqfOrganizeMem
       if ( pData->fComplete )              // has last run been completed
       {
         // prepare a new analysis run
-        usRC = MemFuncPrepOrganize( pData, pszMemName );
+        usRC = MemFuncPrepOrganize( pData, mem.get() );
+       
       }
       else
       {        
@@ -265,7 +264,6 @@ USHORT EqfOrganizeMem
       //usRC = MemFuncOrganizeMem( pData, pszMemName );
     } /* endif */
   }while((usRC == NO_ERROR) && !pData->fComplete  );
-  LOGWRITE2( "  RC=%u\n", usRC );
 
   return( usRC );
 } /* end of function EqfOrganizeMem */
@@ -677,24 +675,11 @@ USHORT EqfExportMemInInternalFormat
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    LOGWRITE1( "==EqfExportMemInInternalFormat==\n" );
-    LOGPARMSTRING( "Memory", pszMemoryName );
-    LOGPARMSTRING( "Package", pszMemoryPackage );
-    LOGPARMOPTION( "Options", lOptions );
-  } /* endif */
-
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
     usRC = TMManager::GetInstance()->APIExportMemInInternalFormat( pszMemoryName, pszMemoryPackage, lOptions );
   } /* endif */
-
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
 
   return( usRC );
 }
@@ -720,13 +705,6 @@ USHORT EqfOpenMem
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
-
-  if ( pData )
-  {
-    T5LOG( T5INFO) << "==EqfOpenMem==, Memory = " << pszMemoryName << "; lOptions = " << lOptions;
-  }else{
-    T5LOG(T5ERROR) << "Error in EqfOpenMem:: pData == NULL";
-  } /* endif */
 
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
@@ -755,30 +733,16 @@ USHORT EqfCloseMem
   LONG        lOptions 
 )
 {
-  USHORT      usRC = NO_ERROR;         // function return code
   PFCTDATA    pData = NULL;            // ptr to function data area
 
   // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  if ( pData )
-  {
-    LOGWRITE1( "==EqfCloseMem==\n" );
-    LOGPARMLONG( "Handle", lHandle );
-    LOGPARMOPTION( "Options", lOptions );
-  } /* endif */
+  USHORT usRC = FctValidateSession( hSession, &pData );
 
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
     usRC =  TMManager::GetInstance()->APICloseMem( lHandle, lOptions );
   } /* endif */
-
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
-
   return( usRC );
 }
 
@@ -801,12 +765,7 @@ USHORT EqfQueryMem
   LONG        lOptions     
 )
 {
-  USHORT usRC = 0;
-  if(usRC)  T5LOG(T5ERROR) << "End of EqfQueryMem, RC = " <<usRC ;
-  else      T5LOG(T5INFO) << "End of EqfQueryMem, RC = " <<usRC;
-  
-
-  return( usRC );
+  return( 0 );
 }
 
 // OtmMemoryService
@@ -840,13 +799,6 @@ USHORT EqfSearchMem
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
-
-  if ( pData )
-  {
-    T5LOG( T5INFO) << "EqfSearchMem::Handle" << lHandle << "; SearchString = " << EncodingHelper::convertToUTF8(pszSearchString) << "; StartPosition = "<< pszStartPosition <<"; Options = " << lOptions;
-  }else{
-    T5LOG(T5ERROR) << "Error in EqfSearchMem:: pData == NULL";
-  } /* endif */
 
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
@@ -890,13 +842,6 @@ USHORT EqfUpdateMem
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    T5LOG( T5DEBUG) << ":: Handle = " << lHandle << "; Options = " << lOptions;
-  }else{
-    T5LOG( T5ERROR) << "::pData is nullptr";
-  } /* endif */
-
   // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
@@ -929,24 +874,11 @@ USHORT EqfListMem
                                        // validate session handle
   usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    LOGWRITE1( "==EqfUpdateMem==\n" );
-    LOGPARMLONG( "Handle", lHandle );
-    LOGPARMOPTION( "Options", lOptions );
-  } /* endif */
-
-    // call the memory factory to process the request
+  // call the memory factory to process the request
   if ( usRC == NO_ERROR )
   {
     usRC =  TMManager::GetInstance()->APIListMem( pszBuffer, plLength );
   } /* endif */
-
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
-
   return( usRC );
 }
 
@@ -973,11 +905,6 @@ USHORT EqfGetOpenTM2Lang
                                        // validate session handle
   USHORT usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    T5LOG( T5INFO) << "==EqfGetOpenTM2Lang== :: " <<  "ISOLang = " << pszISOLang;
-  } /* endif */
-
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
   {
     char*  pszParm = "pointer to ISO language id";
@@ -992,18 +919,12 @@ USHORT EqfGetOpenTM2Lang
     T5LOG(T5ERROR) << "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL), pszParam = " << pszParm;
   } /* endif */
 
-
   // use the language factory to process the request
   if ( usRC == NO_ERROR )
   {
     LanguageFactory *pLangFactory = LanguageFactory::getInstance();
     pLangFactory->getOpenTM2NameFromISO( pszISOLang, pszOpenTM2Lang, pfPrefered );
   } /* endif */
-
-  if ( pData )
-  {
-    T5LOG( T5INFO) << "EqfGetOpenTM2Lang()::pData != NULL, RC=" << usRC << "; pszISOLang = " <<pszISOLang <<"; pszOpenTM2Lang = " << pszOpenTM2Lang;
-  }
 
   return( usRC );
 }
@@ -1028,12 +949,6 @@ USHORT EqfGetIsoLang
                                        // validate session handle
   usRC = FctValidateSession( hSession, &pData );
 
-  if ( pData )
-  {
-    LOGWRITE1( "==EqfGetIsoTM2Lang==\n" );
-    LOGPARMSTRING( "OpenTM2Lang", pszOpenTM2Language );
-  } /* endif */
-
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "pointer to OpenTM2 language name";
@@ -1048,18 +963,12 @@ USHORT EqfGetIsoLang
     usRC = DDE_MANDPARAMISSING;
   } /* endif */
 
-
   // use the language factory to process the request
   if ( usRC == NO_ERROR )
   {
     LanguageFactory *pLangFactory = LanguageFactory::getInstance();
     pLangFactory->getISOName( pszOpenTM2Lang, pszISOLang );
   } /* endif */
-
-  if ( pData )
-  {
-    LOGWRITE2( "  RC=%u\n", usRC );
-  }
 
   return( usRC );
 }
