@@ -150,13 +150,16 @@ protected:
     int execute() override   { return -1;};
 };
 
+
+class ProxygenStats;
 class ResourceInfoRequestData:public RequestData{
 public:
+    ProxygenStats* pStats = nullptr;
     ResourceInfoRequestData(): RequestData(COMMAND::RESOURCE_INFO) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override { return 0;};
+    int checkData() override { return 0;};
+    int execute() override ;
 };
 
 
@@ -165,9 +168,9 @@ class TagRemplacementRequestData:public RequestData{
 public:
     TagRemplacementRequestData(): RequestData(COMMAND::TAGREPLACEMENTTEST) {};
 protected:
-    int parseJSON() override { return -1;};
-    int checkData() override { return -1;};
-    int execute() override   { return -1;};
+    int parseJSON() override {return 0;};
+    int checkData() override { return 0;};
+    int execute() override ;
 };
 
 

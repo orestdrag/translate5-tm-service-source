@@ -1,7 +1,7 @@
 
 #include "ProxygenStats.h"
 #include "ProxygenHandler.h"
-namespace ProxygenService{
+//namespace ProxygenService{
 int ProxygenStats::recordRequest(int command) {
     
     switch(command){
@@ -87,4 +87,4 @@ int ProxygenStats::recordRequest(int command) {
     }
     return reqCount_++;
   }
-}
+//}

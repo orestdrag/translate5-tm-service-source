@@ -863,23 +863,6 @@ int OtmMemoryServiceWorker::addProposalsToJSONString
   return( 0 );
 }
 
-template<typename T>
-void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparator){
-  ss << "\"" << key << "\" : ";
-
-  //if (std::is_same<T, int>::value)
-  if(std::is_arithmetic<T>::value) // if it's number - skip quotes
-  {
-    ss << value;
-  }else{
-    ss << "\"" << value << "\"";
-  }
-  
-  if(fAddSeparator)
-    ss << ",";
-
-  ss << "\n";
-}
 
 
 template<typename T>
@@ -900,168 +883,13 @@ void AddObjToJson(std::stringstream& ss, const char* key, T value, bool fAddSepa
   ss << "\n";
 }
 
-int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats){
-  int iRC = verifyAPISession();
-  if ( iRC != 0 )
-  {
-    buildErrorReturn( iRC, this->szLastError, strOutput );
-    return( BAD_REQUEST );
-  } /* endif */
-  std::stringstream ssOutput;
-
-  //open json
-  ssOutput << "{\n";
-
-  //the list of currently opened TMs (those loaded into the memory)
-  //for every loaded TM: The memory it allocates
-  { 
-
-    auto fbs = FilesystemHelper::getFileBufferInstance();
-    size_t total = 0, fSize;
-    std::string fName;
-
-    ssOutput << "\"filebuffers\": [\n";
-    for (auto it = fbs->cbegin(); it != fbs->cend(); )
-    {
-        //fSize = it->second.data.size();
-        fSize = it->second.data.capacity();
-        fName = it->first;
-        //fName = FilesystemHelper::parseFilename(it->first);
-        
-        ssOutput << "{ ";
-        AddToJson(ssOutput, "name", fName, true );
-        AddToJson(ssOutput, "size", fSize, false );
-        ssOutput << " }";
-
-        total += fSize;
-        it++;
-        if( it != fbs->cend()){
-            ssOutput << ",\n";
-        }
-    }   
-
-    ssOutput << "\n ],\n"; 
-    AddToJson(ssOutput, "totalOccupiedByFilebuffersRAM", total, true );
-  }
-
-  //in addition the memory that is used by the service by other means
-  // it's better to use system calls
-
-  //the currently configured max usable memory
-  int availableRam = 0, threshold = 0, workerThreads = 0, timeout = 0;
-  char buff[255];
-  //Properties::GetInstance()->get_value(KEY_OTM_DIR, szOtmDirPath);
-  Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
-  Properties::GetInstance()->get_value(KEY_TRIPLES_THRESHOLD, threshold);
-  Properties::GetInstance()->get_value(KEY_NUM_OF_THREADS, workerThreads);
-  Properties::GetInstance()->get_value(KEY_TIMEOUT_SETTINGS, timeout);
-  Properties::GetInstance()->get_value(KEY_RUN_DATE, buff,254);
-  double vm_usage, resident_set;
-  mem_usage(vm_usage, resident_set); 
-
-  AddToJson(ssOutput, "Run date", buff, true );
-  AddToJson(ssOutput, "Build date", buildDate, true );
-  AddToJson(ssOutput, "Git commit info", gitHash, true );
-  AddToJson(ssOutput, "Version", appVersion, true );
-  AddToJson(ssOutput, "Worker threads", workerThreads, true );
-  AddToJson(ssOutput, "Timeout(ms)", timeout, true );
+int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenStats& stats){
   
-  AddToJson(ssOutput, "Resident set", resident_set, true );
-  AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
-  {
-    ssOutput << "\"Requests\": {\n";
-    AddToJson(ssOutput, "RequestCount", stats.getRequestCount(), true );
-    AddToJson(ssOutput, "CreateMemRequestCount", stats.getCreateMemRequestCount(), true );
-    AddToJson(ssOutput, "DeleteMemRequestCount", stats.getDeleteMemRequestCount(), true );
-    AddToJson(ssOutput, "ImportMemRequestCount", stats.getImportMemRequestCount(), true );
-    AddToJson(ssOutput, "ExportMemRequestCount", stats.getExportMemRequestCount(), true );
-    AddToJson(ssOutput, "CloneTmLocalyRequestCount", stats.getCloneLocalyCount(), true);
-    AddToJson(ssOutput, "ReorganizeRequestCount", stats.getReorganizeRequestCount(), true);
-    AddToJson(ssOutput, "StatusMemRequestCount", stats.getStatusMemRequestCount(), true );
-    AddToJson(ssOutput, "FuzzyRequestCount", stats.getFuzzyRequestCount(), true );
-    AddToJson(ssOutput, "ConcordanceRequestCount", stats.getConcordanceRequestCount(), true );
-    AddToJson(ssOutput, "UpdateEntryRequestCount", stats.getUpdateEntryRequestCount(), true );
-    AddToJson(ssOutput, "DeleteEntryRequestCount", stats.getDeleteEntryRequestCount(), true );
-    AddToJson(ssOutput, "SaveAllTmsRequestCount", stats.getSaveAllTmsRequestCount(), true );
-    AddToJson(ssOutput, "ListOfMemoriesRequestCount", stats.getListOfMemoriesRequestCount(), true );
-    AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
-    AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
-    AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
-    ssOutput << "\n },\n"; 
-  }
-
-  
-  //AddToJson(ssOutput, "Log level(internal)", GetLogLevel(), true );
-  //AddToJson(ssOutput, "CPU used by process", getCurrentCPUUsageByProcess(), true);
-  //AddToJson(ssOutput, "VirtualMem used by process(in KB)", getVirtualMemUsageKBValue(), true);
-  
-  AddToJson(ssOutput, "RAM limit(MB)", availableRam, false );
-
-  //close json
-  ssOutput << "\n}";
-
-  strOutput = ssOutput.str();
-  iRC = 200;
-  return iRC;
 }
 
 
 std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& rc){
-  rc = 0;
-  std::string strSrcData, strTrgData, strReqData;
- 
-  strSrcData.reserve( strInData.size() + 1 );
-  strTrgData.reserve( strInData.size() + 1 );
-  strReqData.reserve( strInData.size() + 1 );   
-  std::wstring wstr;
-
-  JSONFactory *factory = JSONFactory::getInstance();
-  void *parseHandle = factory->parseJSONStart( strInData, &rc );
-  if ( parseHandle == NULL )
-  {
-    wchar_t errMsg[] = L"Missing or incorrect JSON data in request body";
-    wstr = errMsg;
-    //buildErrorReturn( iRC, errMsg, strOutputParms );
-    rc = BAD_REQUEST;
-    return "";
-  }else{ 
-    std::string name;
-    std::string value;
-    while ( rc == 0 )
-    {
-      rc = factory->parseJSONGetNext( parseHandle, name, value );
-      if ( rc == 0 )
-      {      
-        T5LOG( T5DEBUG) << "::JSON parsed src = " << name << "; size = " << strSrcData.size();
-        if ( strcasecmp( name.c_str(), "src" ) == 0 )
-        {
-          strSrcData = value;
-        }else if( strcasecmp( name.c_str(), "trg" ) == 0 ){
-          strTrgData = value;
-        }else if( strcasecmp (name.c_str(), "req") == 0 ){
-          strReqData = value;          
-        }else{
-          T5LOG( T5WARNING) <<  "::JSON parsed unused data: name = " <<  name << "; value = " << value;
-        }
-      }
-    } /* endwhile */
-    factory->parseJSONStop( parseHandle );
-  }
-  
-  auto result =  replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
-                                              EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
-                                              EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &rc);
-
-  
-  wstr = L"{\n ";
-  std::wstring segmentLocations[] = {L"source", L"target", L"request"};
-  for(int index = 0; index < result.size(); index++){
-    wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
-  }
-  wstr += L"\n}";
-  std::string strResponseBody =  EncodingHelper::convertToUTF8(wstr);
-  
-  return strResponseBody;
+  return "";
 }
 
 /*! \brief Search for matching proposals
