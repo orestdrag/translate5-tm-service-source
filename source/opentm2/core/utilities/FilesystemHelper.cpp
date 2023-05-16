@@ -465,6 +465,7 @@ int FileBuffer::Flush(){
         
         //if(fileWasOpened && file) fclose(file);
         if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
+       
         if(file==nullptr){
             T5LOG(T5ERROR) <<"Cant open the file " << fileName;
             return FilesystemHelper::FILEHELPER_FILE_PTR_IS_NULL;
@@ -474,6 +475,8 @@ int FileBuffer::Flush(){
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
             oldSize = FilesystemHelper::GetFileSize(file);
         }
+        
+        fseek(file, 0, SEEK_SET);
         writenBytes = fwrite(bufStart, size, 1, file) * size;
         if ( writenBytes <=0 ){
             T5LOG(T5ERROR) <<"::WriteToFile():: ERROR_WRITE_FAULT";

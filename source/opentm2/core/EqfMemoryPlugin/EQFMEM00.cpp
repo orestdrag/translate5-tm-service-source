@@ -56,9 +56,6 @@ BOOL MemCreatePath( PSZ pszString )
 } /* end of function MemCreatePath */
 
 
-#define MEM_START_ORGANIZE  USER_TASK + 1
-#define MEM_ORGANIZE_TASK   USER_TASK + 2
-#define MEM_END_ORGANIZE    USER_TASK + 3
 
 
 // ================ Close the Tm to be organized and close the temporary Tm ============
@@ -112,125 +109,104 @@ time_t lOrganizeStartTime;
 
 USHORT EQFMemOrganizeStart
 (
-  PPROCESSCOMMAREA  pCommArea,
-  HWND              hWnd
+  PPROCESSCOMMAREA  pCommArea
 )
   // The function initializes the TM organize. It returns TRUE if
   // the initialization was OK else it returns FASLE.
 {
-    PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the dialog IDA
-    USHORT            usRc = TRUE;    // Return code
-    PSZ               pReplAddr[4];   // Pointer to an address list of replacement strings
-    TMManager *pFactory = TMManager::GetInstance();
+  PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the dialog IDA
+  PSZ               pReplAddr[4];   // Pointer to an address list of replacement strings
 
-    // Address the organize IDA
-    pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
-    pRIDA->fFirstGet = TRUE;
-    pRIDA->pProposal = new OtmProposal();
+  // Address the organize IDA
+  pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
+  pRIDA->fFirstGet = TRUE;
+  pRIDA->pProposal = new OtmProposal();
+  
+  // --------------------------------------------------------------------
+  // Create the Output translation memory
 
-#ifdef ORGANIZE_LOGGING
+  int iRC = 0;
+  pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );
+  pRIDA->pMem->getDescription( pRIDA->szBuffer, sizeof(pRIDA->szBuffer) );
+  
+  strcpy( pRIDA->szTempMemName, "$Org-" );
+  strcat( pRIDA->szTempMemName, pRIDA->szMemName );
+
+  // delete any memory left over from a previous organize call
+  std::string outputMsg;
+  if(!TMManager::GetInstance()->TMExistsOnDisk(pRIDA->szTempMemName)){
+    auto ll = T5Logger::GetInstance()->suppressLogging();
+    std::string strMemName(pRIDA->szTempMemName);
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(strMemName))){
+      iRC = 1;
+      //return 1;
+    }
+
+    //check tmi file
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(strMemName))){
+      iRC = 2;
+      //return 2;
+    }    
+    T5Logger::GetInstance()->desuppressLogging(ll);
+    iRC = 0;
+  }
+  pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC);
+  
+  if ( (iRC != 0) || (pRIDA->pMemTemp == NULL ) )
   {
-    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
+    //usRc = FALSE;
+    pRIDA->fMsg = FALSE;
+    TMManager::GetInstance()->showLastError( pRIDA->szPluginName, pRIDA->szTempMemName, NULL, pRIDA->hwndErrMsg );
+  } /* endif */
+
+  // --------------------------------------------------------------------
+  // The initialization of translation memory organize failed
+  // Close translation memories. Clean the storage allocations.
+  if ( iRC )
+  {
+    // Issue an error message.
+    if ( pRIDA != NULL )
     {
-      time( &lOrganizeStartTime );
-      T5LOG(T5INFO) <<  "************ Memory Organize Log *********************\n"  
-        <<  "\nMemory organize started at : " 
-        //<< asctime( localtime( &lOrganizeStartTime ) 
-        << "\nMemory name                :  "<< pRIDA->szMemName ;
+      // Close the Translation memory which should be organized.
+      if ( pRIDA->pMemTemp != NULL ) 
+      {
+        TMManager::GetInstance()->closeMemory( pRIDA->pMemTemp.get() );
+        pRIDA->pMemTemp = NULL;
+        
+        std::string strMsg;
+        TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
+      } /* endif */
+
+      // Issue the error message :"Initialization of organize for
+      // translation memory %1 failed". Issue the message only if
+      // no other significant message has been issued already.
+      /*
+      if ( !pRIDA->fMsg )
+      {
+        pReplAddr[0] = pRIDA->szMemName;
+        UtlErrorHwnd( ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
+                      &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
+      } /* endif */
+
+      if ( pRIDA->fBatch )
+      {
+        pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
+        if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
+        {
+          pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
+        } /* endif */
+      } /* endif */
+
     } /* endif */
   }
-#endif
-    
-    T5LOG(T5ERROR) << "Reorganize is not implemented yet for new codebase!";
-    usRc = 11111;
-    // --------------------------------------------------------------------
-    // Create the Output translation memory
-    if ( usRc )
-    {
-      int iRC = 0;
-      std::shared_ptr<EqfMemory> MemInfo = std::make_shared<EqfMemory>(EqfMemory());
-      OtmPlugin *pAnyPlugin = (OtmPlugin *)pRIDA->pMem->getPlugin();
-      EqfMemoryPlugin *pPlugin = (EqfMemoryPlugin *)pAnyPlugin;
-      pRIDA->pMem->getSourceLanguage( pRIDA->szSourceLanguage, sizeof(pRIDA->szSourceLanguage) );
-      pRIDA->pMem->getDescription( pRIDA->szBuffer, sizeof(pRIDA->szBuffer) );
-      pPlugin->getMemoryInfo( pRIDA->szMemName, MemInfo );
-      
-      strcpy( pRIDA->szPluginName, pAnyPlugin->getName() );
-      strcpy( pRIDA->szTempMemName, "$Org-" );
-      strcat( pRIDA->szTempMemName, pRIDA->szMemName );
-
-      // delete any memory left over from a previous organize call
-      {
-        auto ll = T5Logger::GetInstance()->suppressLogging();
-        pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
-        T5Logger::GetInstance()->desuppressLogging(ll);
-      }
-      pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC);
-
-      if ( (iRC != 0) || (pRIDA->pMemTemp == NULL ) )
-      {
-        usRc = FALSE;
-        pRIDA->fMsg = FALSE;
-        pFactory->showLastError( pRIDA->szPluginName, pRIDA->szTempMemName, NULL, pRIDA->hwndErrMsg );
-      } /* endif */
-    } /* endif */
-
-    // --------------------------------------------------------------------
-    // The initialization of translation memory organize failed
-    // Close translation memories. Clean the storage allocations.
-    if ( !usRc )
-    {
-      // Issue an error message.
-      if ( pRIDA != NULL )
-      {
-        // Close the Translation memory which should be organized.
-        if ( pRIDA->pMemTemp != NULL ) 
-        {
-          pFactory->closeMemory( pRIDA->pMemTemp.get() );
-          pRIDA->pMemTemp = NULL;
-          pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
-        } /* endif */
-
-        // Issue the error message :"Initialization of organize for
-        // translation memory %1 failed". Issue the message only if
-        // no other significant message has been issued already.
-        /*
-        if ( !pRIDA->fMsg )
-        {
-          pReplAddr[0] = pRIDA->szMemName;
-          UtlErrorHwnd( ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
-                        &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
-        } /* endif */
-
-        if ( pRIDA->fBatch )
-        {
-          pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
-          if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-          {
-            pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
-          } /* endif */
-        } /* endif */
-
-        // Dismiss the slider window if it had been created
-        /*if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-        {
-          EqfRemoveObject( TWBFORCE, hWnd );
-        } /* endif */
-      } /* endif */
-    }
-    // --------------------------------------------------------------------
-    // Move process-ID into mp1 and issue a message WM_EQF_MEMORGANIZE_PROCESS
-    else if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
-    {
-      pRIDA->NextTask = MEM_ORGANIZE_TASK;
-    }
-    else
-    {
-       T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK,
-      //            MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL);
-    } /* endif */
-    return usRc;
-  } /* end of function EQFMemOrganizeStart */
+  // --------------------------------------------------------------------
+  // Move process-ID into mp1 and issue a message WM_EQF_MEMORGANIZE_PROCESS
+  else
+  {
+    pRIDA->NextTask = MEM_ORGANIZE_TASK;
+  } 
+  return iRC;
+} /* end of function EQFMemOrganizeStart */
 
 
 
@@ -262,187 +238,180 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
 
 VOID EQFMemOrganizeProcess
 (
-  PPROCESSCOMMAREA  pCommArea,
-  HWND              hWnd
+  PPROCESSCOMMAREA  pCommArea
 )
 {
-    USHORT            usRc = TRUE;    // Return code to control a process
-    USHORT            usDosRc;        // Dos Returncode
-    PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the organize IDA
-    PSZ               pReplAddr[3];   // Arrey of pointers to replacement strings
+  USHORT            usRc = TRUE;    // Return code to control a process
+  USHORT            usDosRc;        // Dos Returncode
+  PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the organize IDA
+  PSZ               pReplAddr[3];   // Arrey of pointers to replacement strings
 
-    // Get the address of the process IDA by means of the process handle
-    pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
+  // Get the address of the process IDA by means of the process handle
+  pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
 
-    // If usRc. Call the memory database load function
-    // and handle return codes
-    if ( usRc )
+  // If usRc. Call the memory database load function
+  // and handle return codes
+
+  int iProgress = 0;
+  int iRC = 0;
+
+  if ( pRIDA->fFirstGet )
+  {
+    pRIDA->ulInvSegmentCounter = 0;
+    pRIDA->ulSegmentCounter = 0;
+    iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
+    pRIDA->fFirstGet = FALSE;
+  }
+  else
+  {
+    iRC = pRIDA->pMem->getNextProposal( *(pRIDA->pProposal), &iProgress );
+  } /* endif */         
+
+  if ( iRC == NO_ERROR )
+  {
+    pCommArea->usComplete = (USHORT)iProgress;
+
+    // do some consistency checking
+    pRIDA->pProposal->getMarkup( pRIDA->szTagTable, sizeof(pRIDA->szTagTable) );
+    pRIDA->pProposal->getTargetLanguage( pRIDA->szTargetLanguage, sizeof(pRIDA->szTargetLanguage) );
+    if ( (pRIDA->pProposal->getSourceLen() == 0) || (pRIDA->pProposal->getTargetLen() == 0) ||
+          (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
     {
-      int iProgress = 0;
-      int iRC = 0;
-
-      if ( pRIDA->fFirstGet )
+      // ignore invalid proposal
+      pRIDA->ulInvSegmentCounter++;
+    }
+    else
+    {
+      // write proposal to output memory
+      iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
+      if ( iRC != 0 )
       {
-        iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
-        pRIDA->fFirstGet = FALSE;
-      }
-      else
-      {
-        iRC = pRIDA->pMem->getNextProposal( *(pRIDA->pProposal), &iProgress );
-      } /* endif */         
-
-      if ( iRC == NO_ERROR )
-      {
-        pCommArea->usComplete = (USHORT)iProgress;
-
-        // do some consistency checking
-        pRIDA->pProposal->getMarkup( pRIDA->szTagTable, sizeof(pRIDA->szTagTable) );
-        pRIDA->pProposal->getTargetLanguage( pRIDA->szTargetLanguage, sizeof(pRIDA->szTargetLanguage) );
-        if ( (pRIDA->pProposal->getSourceLen() == 0) || (pRIDA->pProposal->getTargetLen() == 0) ||
-             (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
-        {
-          // ignore invalid proposal
-          pRIDA->ulInvSegmentCounter++;
-        }
-        else
-        {
-          // write proposal to output memory
-          iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
-          if ( iRC != 0 )
-          {
-            pRIDA->ulInvSegmentCounter++;
-          }
-          else
-          {
-            pRIDA->ulSegmentCounter++;
-          } /* endif */             
-        } /* endif */
-
-        // Post the next WM_EQF_MEMORGANIZE_PROCESS message but check
-        // first whether an other message is in the message queue
-        // and if it is dispatch it.
-        if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-        {
-          UtlDispatch();
-           T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
-        } /* endif */
-      }
-      else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
-      {
-        pCommArea->usComplete = (USHORT)iProgress;
         pRIDA->ulInvSegmentCounter++;
-        if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-        {
-          UtlDispatch();
-           T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
-        } /* endif */
       }
-      else if ( iRC == EqfMemory::INFO_ENDREACHED )
+      else
       {
-        TMManager *pFactory = TMManager::GetInstance();
+        pRIDA->ulSegmentCounter++;
+      } /* endif */             
+    } /* endif */
+  }
+  else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
+  {
+    pCommArea->usComplete = (USHORT)iProgress;
+    pRIDA->ulInvSegmentCounter++;
+    if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
+    {
+      UtlDispatch();
+        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
+    } /* endif */
+  }
+  else if ( iRC == EqfMemory::INFO_ENDREACHED )
+  {
+    TMManager *pFactory = TMManager::GetInstance();
 
-        pRIDA->pMemTemp->rebuildIndex();
+    pRIDA->pMemTemp->NTMOrganizeIndexFile();
+    T5LOG(T5WARNING) << "reorganize is done, segCount = " << pRIDA->ulSegmentCounter << "; invSegCount = " << pRIDA->ulInvSegmentCounter;
+    pRIDA->pMemTemp->TmBtree.fb.Flush();
+    pRIDA->pMemTemp->InBtree.fb.Flush();  
+    pFactory->closeMemory( pRIDA->pMemTemp.get() );
 
-        pFactory->closeMemory( pRIDA->pMemTemp.get() );
+    pRIDA->pMemTemp = NULL;
 
-        pRIDA->pMemTemp = NULL;
+    if (usRc)
+    {
+      //T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";
+      usDosRc = NTMCloseOrganize( pRIDA, FALSE );
 
-        if (usRc)
+      // set the progress indicator to 100 percent
+      if ( !pRIDA->fBatch )
+      {
+        pCommArea->usComplete = 100;
+        //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
+      } /* endif */
+
+      if ( usDosRc == NO_ERROR )
+      {
+        // everything in the termination process was ok
+        pRIDA->pMem = NULL;
+
+        // end message only in GUI single organize mode
+        if ( !pRIDA->fBatch && !pRIDA->pszNameList)
         {
-          //T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";
-          usDosRc = NTMCloseOrganize( pRIDA, FALSE );
+          CHAR szNumber1[10];    // buffer for character string
+          CHAR szNumber2[10];    // buffer for character string
 
-          // set the progress indicator to 100 percent
-          if ( !pRIDA->fBatch )
-          {
-            pCommArea->usComplete = 100;
-            //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
-          } /* endif */
-
-          if ( usDosRc == NO_ERROR )
-          {
-            // everything in the termination process was ok
-            pRIDA->pMem = NULL;
-
-            // end message only in GUI single organize mode
-            if ( !pRIDA->fBatch && !pRIDA->pszNameList)
-            {
-              CHAR szNumber1[10];    // buffer for character string
-              CHAR szNumber2[10];    // buffer for character string
-
-              pReplAddr[0] = pRIDA->szMemName;
-              //pReplAddr[1] = ltoa( pRIDA->ulSegmentCounter, szNumber1, 10 );
-              //pReplAddr[2] = ltoa( pRIDA->ulInvSegmentCounter, szNumber2, 10 );
-              UtlError( MESSAGE_MEM_ORGANIZE_COMPLETED, MB_OK, /*3*/1, &pReplAddr[0], EQF_INFO );
-            } /* endif */
-          }
-          else
-          {
-            usRc = FALSE;
-          } /* endif */
-        } /* endif */
-
-        if (!usRc)
-        {
-          // something in the termination process failed
           pReplAddr[0] = pRIDA->szMemName;
-          UtlErrorHwnd( ERROR_MEM_ORGANIZE_TERMFAILED, MB_CANCEL, 1, &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
-          if ( pRIDA->fBatch )
-          {
-            pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
-            if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-            {
-              pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
-            } /* endif */
-          } /* endif */
-        } /* endif */
-
-        // -----------------------------------------------------
-        // Issue message WM_EQF_MEMORGANIZE_END
-        if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
-        {
-          pRIDA->NextTask = MEM_END_ORGANIZE;
-        }
-        else
-        {
-           T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
+          //pReplAddr[1] = ltoa( pRIDA->ulSegmentCounter, szNumber1, 10 );
+          //pReplAddr[2] = ltoa( pRIDA->ulInvSegmentCounter, szNumber2, 10 );
+          UtlError( MESSAGE_MEM_ORGANIZE_COMPLETED, MB_OK, /*3*/1, &pReplAddr[0], EQF_INFO );
         } /* endif */
       }
       else
       {
-        // Issue a message "Translation memory organize abnormally terminated."
-        if ( !pRIDA->fBatch )
-        {
-          pReplAddr[0] = pRIDA->szMemName;
-          UtlError( ERROR_MEM_ORGANIZE_TERMINATED, MB_CANCEL, 1,
-                    &pReplAddr[0], EQF_ERROR );
-        }
-        else
-        {
-          pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
-          if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-          {
-            pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
-          } /* endif */
-        } /* endif */
+        usRc = FALSE;
+      } /* endif */
+    } /* endif */
 
-        // Close the input translation memory and temporary translation memory
-        CloseTmAndTempTm( pRIDA );
-
-          // Delete the temporary translation memory
-        TMManager::GetInstance()->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
-
-        // Issue message WM_EQF_MEMORGANIZE_END
-        if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
+    if (!usRc)
+    {
+      // something in the termination process failed
+      pReplAddr[0] = pRIDA->szMemName;
+      UtlErrorHwnd( ERROR_MEM_ORGANIZE_TERMFAILED, MB_CANCEL, 1, &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
+      if ( pRIDA->fBatch )
+      {
+        pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
+        if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
         {
-          pRIDA->NextTask = MEM_END_ORGANIZE;
-        }
-        else
-        {
-           T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
+          pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
         } /* endif */
       } /* endif */
     } /* endif */
+
+    // -----------------------------------------------------
+    // Issue message WM_EQF_MEMORGANIZE_END
+    if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
+    {
+      pRIDA->NextTask = MEM_END_ORGANIZE;
+    }
+    else
+    {
+        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
+    } /* endif */
+  }
+  else
+  {
+    // Issue a message "Translation memory organize abnormally terminated."
+    if ( !pRIDA->fBatch )
+    {
+      pReplAddr[0] = pRIDA->szMemName;
+      UtlError( ERROR_MEM_ORGANIZE_TERMINATED, MB_CANCEL, 1,
+                &pReplAddr[0], EQF_ERROR );
+    }
+    else
+    {
+      pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
+      if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
+      {
+        pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
+      } /* endif */
+    } /* endif */
+
+    // Close the input translation memory and temporary translation memory
+    CloseTmAndTempTm( pRIDA );
+
+    // Delete the temporary translation memory    
+    std::string strMsg;
+    TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
+
+    // Issue message WM_EQF_MEMORGANIZE_END
+    if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
+    {
+      pRIDA->NextTask = MEM_END_ORGANIZE;
+    }
+    else
+    {
+        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
+    } /* endif */
+  } /* endif */
 } /* end of function EQFMemOrganizeProcess */
 
 
@@ -450,179 +419,26 @@ VOID EQFMemOrganizeProcess
 
 VOID EQFMemOrganizeEnd
 (
-  PPROCESSCOMMAREA  pCommArea,
-  HWND              hWnd,
-  LPARAM            mp2,
-  BOOL              fTerminate
+  PPROCESSCOMMAREA  pCommArea
 )
 {
-    PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the data for the organize process
-    PSZ               pReplAddr[2];   // Arrey of pointers to replacement strings
+  PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the data for the organize process
+  PSZ               pReplAddr[2];   // Arrey of pointers to replacement strings
 
-    // Get the address of the process IDA by means of the process handle
-    pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
+  // Get the address of the process IDA by means of the process handle
+  pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
 
-    // Check if the termination was due to a
-    // CLOSE message. Mp2 is in that case not zero.
-    if (SHORT1FROMMP2(mp2) != 0 )
-    {
-      // -----------------------------------------------------
-      // Issue a message "Termination of memory database load"
-      // "was forced and is not completed"
-      if ( !pRIDA->fBatch )
-      {
-        pReplAddr[0] = pRIDA->szMemName;
-        UtlError( ERROR_MEM_ORGANIZE_TERM_FORCED, MB_CANCEL, 1,
-                &pReplAddr[0], EQF_WARNING );
-      } /* endif */
-      // -----------------------------------------------------
-      // Close the input translation memory and temporary translation memory
-      CloseTmAndTempTm( pRIDA );
+  // Check if the termination was due to a
+  // CLOSE message. Mp2 is in that case not zero.
+  
+  // Refresh the memory database list box
+  sprintf( pCommArea->szBuffer, "%s:%s", pRIDA->szPluginName, pRIDA->szMemName );
 
-      // Delete the temporary translation memory
-      TMManager *pFactory = TMManager::GetInstance();
-      pFactory->deleteMemory( pRIDA->szPluginName, pRIDA->szTempMemName );
-    }
-    else
-    {
-      // Refresh the memory database list box
-      sprintf( pCommArea->szBuffer, "%s:%s", pRIDA->szPluginName, pRIDA->szMemName );
-
-      if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
-      {
-        //T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION"; 
-        //ObjBroadcast( WM_EQFN_PROPERTIESCHANGED, PROP_CLASS_MEMORY, pCommArea->szBuffer );
-      }
-      else
-      {
-        EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pCommArea->szBuffer ));
-      } /* endif */
-    } /* endif */
-
-    if ( fTerminate )
-    {
-      if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-      {
-        EqfRemoveObject( TWBFORCE, hWnd );
-      } /* endif */
-    } /* endif */
-
-#ifdef ORGANIZE_LOGGING
+  if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
   {
-    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
-    {
-      LONG lCurTime = 0;  
-
-      time( &lCurTime );
-      T5LOG(T5INFO) << "Memory organize ended at   : " << asctime( localtime( &lCurTime ) ) ;
-      if ( lOrganizeStartTime )
-      {
-        LONG lDiff = lCurTime - lOrganizeStartTime;
-        T5LOG(T5INFO) << "Overall organize time is "<<lDiff / 3600<<":" 
-              << (lDiff - (lDiff / 3600 * 3600)) / 60 <<":" << (lDiff - (lDiff / 3600 * 3600)) % 60  <<"\n";         
-                
-      }
-    } /* endif */
-  }
-#endif
-
-
+    EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pCommArea->szBuffer ));
+    EqfRemoveObject( TWBFORCE, HWND_FUNCIF );
+  } /* endif */
 } /* end of function EQFMemOrganizeEnd */
 
 
-
-
-// Prepare the organize of a TM in function call mode
-USHORT MemFuncPrepOrganize
-(
-  PFCTDATA    pData,                   // function I/F session data
-  std::shared_ptr<EqfMemory>  pMem               // Translation Memory being reorganized
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PPROCESSCOMMAREA pCommArea = NULL;   // ptr to commmunication area
-  PMEM_ORGANIZE_IDA pRIDA = NULL;      // pointer to instance area
-  BOOL        fOK = TRUE;              // internal O.K. flag
-  PSZ         pszParm;                 // error parameter pointer
-  CHAR        szMemPath[MAX_EQF_PATH];
-
-  // prepare TM organize process
-  // allocate storage for the organize process communication area
-  fOK = UtlAllocHwnd( (PVOID *)&pCommArea, 0L,
-                      (LONG)sizeof(PROCESSCOMMAREA),
-                      ERROR_STORAGE, HWND_FUNCIF );
-
-  // allocate storage for the MEM_ORGANIZE_IDA.
-  if ( fOK )
-  {
-    fOK = UtlAllocHwnd( (PVOID *)&pRIDA, 0L,
-                        (LONG)sizeof(MEM_ORGANIZE_IDA),
-                        ERROR_STORAGE, HWND_FUNCIF );
-  } /* endif */
-
-  if ( fOK )
-  {
-    // Fill  IDA with necessary values
-    pCommArea->pUserIDA = pRIDA;
-    pRIDA->pMem = pMem;
-    pRIDA->usRC = NO_ERROR;
-    strcpy( pRIDA->szMemName, pMem->szName );
-    pRIDA->fBatch = TRUE;
-    pRIDA->hwndErrMsg = HWND_FUNCIF;
-    pRIDA->NextTask = MEM_START_ORGANIZE;
-  } /* endif */
-
-  // enable organize process if OK
-  if ( fOK )
-  {
-    pData->fComplete = FALSE;
-    pData->sLastFunction = FCT_EQFORGANIZEMEM;
-    pData->pvMemOrganizeCommArea = pCommArea;
-    pCommArea->pUserIDA = pRIDA;
-  } /* endif */
-
-  // cleanup in case of errors
-  if ( !fOK )
-  {
-    usRC = UtlGetDDEErrorCode( HWND_FUNCIF );
-    pData->fComplete = TRUE;
-  } /* endif */
-  return( usRC );
-} /* end of function MemFuncPrepOrganize */
-
-// Prepare the organize of a TM in function call mode
-USHORT MemFuncOrganizeProcess
-(
-  PFCTDATA    pData                    // function I/F session data
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-
-  PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)pData->pvMemOrganizeCommArea;          // ptr to commmunication area
-  PMEM_ORGANIZE_IDA pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;             // pointer to instance area
-
-  switch ( pRIDA->NextTask )
-  {
-    case MEM_START_ORGANIZE:
-      EQFMemOrganizeStart( pCommArea, HWND_FUNCIF );
-      usRC = pRIDA->usRC;
-      break;
-
-    case MEM_ORGANIZE_TASK:
-      EQFMemOrganizeProcess( pCommArea, HWND_FUNCIF );
-      usRC = pRIDA->usRC;
-      break;
-
-    case MEM_END_ORGANIZE:
-      pData->fComplete = TRUE;
-      EQFMemOrganizeEnd( pCommArea, HWND_FUNCIF, 0L, TRUE );
-      if ( pRIDA->pszNameList ) UtlAlloc( (PVOID *)&pRIDA->pszNameList, 0L, 0L, NOMSG );
-      //REMOVESYMBOL( pCommArea->szObjName );
-      usRC = pRIDA->usRC;
-      if ( pCommArea ) UtlAlloc( (PVOID *)&pCommArea, 0L, 0L, NOMSG );
-      if ( pRIDA )     UtlAlloc( (PVOID *)&pRIDA, 0L, 0L, NOMSG );
-      break;
-  } /* endswitch */
-
-  return( usRC );
-} /* end of function MemFuncOrganizeProcess */

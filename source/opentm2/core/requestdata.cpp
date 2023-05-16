@@ -855,11 +855,7 @@ int ReorganizeRequestData::checkData(){
 
 
 // Prepare the organize of a TM in function call mode
-USHORT MemFuncPrepOrganize
-(
-  PFCTDATA    pData,                   // function I/F session data
-  std::shared_ptr<EqfMemory>  pMem               // Translation Memory being reorganized
-);
+
 USHORT MemFuncOrganizeProcess
 (
   PFCTDATA    pData                    // function I/F session data
@@ -867,6 +863,8 @@ USHORT MemFuncOrganizeProcess
 
 int ReorganizeRequestData::execute(){
   PFCTDATA    pData = NULL;            // ptr to function data area
+  PROCESSCOMMAREA CommArea;   // ptr to commmunication area
+  MEM_ORGANIZE_IDA RIDA;      // pointer to instance area
 
   // validate session handle
   _rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
@@ -889,18 +887,45 @@ int ReorganizeRequestData::execute(){
       _rc_ = LASTTASK_INCOMPLETE_RC;
     } /* endif */
   } /* endif */
+  
   if ( !_rc_ )
-  {
-    
-    // prepare a new analysis run    
+  {    
+    // prepare TM organize process
+    // Fill  IDA with necessary values
+    CommArea.pUserIDA = &RIDA;
+    RIDA.pMem = mem;
+    RIDA.usRC = NO_ERROR;
+    strcpy( RIDA.szMemName, mem->szName );
+    RIDA.fBatch = TRUE;
+    RIDA.hwndErrMsg = HWND_FUNCIF;
+    RIDA.NextTask = MEM_START_ORGANIZE;
+
+    // enable organize process if OK
+    pData->fComplete = FALSE;
     pData->sLastFunction = FCT_EQFORGANIZEMEM;
-    _rc_ = MemFuncPrepOrganize( pData, mem );
+    pData->pvMemOrganizeCommArea = &CommArea;    
   } 
 
   while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )
   {      
     // continue current organize process
-    _rc_ = MemFuncOrganizeProcess( pData );
+    switch ( RIDA.NextTask )
+    {
+      case MEM_START_ORGANIZE:
+        EQFMemOrganizeStart( &CommArea );
+        break;
+
+      case MEM_ORGANIZE_TASK:
+        EQFMemOrganizeProcess( &CommArea );
+        break;
+
+      case MEM_END_ORGANIZE:
+        pData->fComplete = TRUE;
+        EQFMemOrganizeEnd( &CommArea);
+        if ( RIDA.pszNameList ) UtlAlloc( (PVOID *)&RIDA.pszNameList, 0L, 0L, NOMSG );
+        break;
+    } /* endswitch */
+    _rc_ = RIDA.usRC;
   };
   
   if ( _rc_ == ERROR_MEMORY_NOTFOUND )
@@ -941,35 +966,14 @@ int DeleteMemRequestData::execute(){
     return( BAD_REQUEST );
   } /* endif */
   
-  
-  if (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) )
-  {
-    outputMessage = "{\"" + strMemName + "\": \"not found(error " + std::to_string(_rc_) + ")\" }";
-    return( _rc_ = NOT_FOUND );
-  }
+  TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
 
-  _rc_ = TMManager::GetInstance()->CloseTM(strMemName);
-
-  // delete the memory
-  //_rc_ = EqfDeleteMem( this->hSession, (PSZ)strMemName.c_str() );
-  if( !_rc_){
-    //_rc_ = TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
-    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(strMemName))){
-      return 1;
-    }
-
-    //check tmi file
-    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(strMemName))){
-      return 2;
-    }    
-  }
-
-  else if ( _rc_ != 0 )
+  if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;
     //EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
     
-    T5LOG(T5ERROR) <<"OtmMemoryServiceWorker::deleteMem::EqfDeleteMem fails:: _rc_ = " << _rc_ << "; strOutputParams = " << 
+    T5LOG(T5ERROR) <<"DeleteMem fails:: _rc_ = " << _rc_ << "; strOutputParams = " << 
       outputMessage <<  "; szLastError = ";// << EncodingHelper::convertToUTF8(this->szLastError) ;
 
     //buildErrorReturn( _rc_, this->szLastError, outputMessage );

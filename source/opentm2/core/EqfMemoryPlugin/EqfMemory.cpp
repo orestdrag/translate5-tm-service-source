@@ -270,8 +270,8 @@ int EqfMemory::putProposal
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
       //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
   }else{
-    TmBtree.fb.Flush();
-    InBtree.fb.Flush();
+    //TmBtree.fb.Flush();
+    //InBtree.fb.Flush();
   }
 
   if ( ( iRC == 0 ) &&
@@ -598,23 +598,6 @@ int EqfMemory::deleteProposal
       && iRC != 6020) // seg not found 
     handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
   
-  return( iRC );
-}
-
-/*! \brief Rebuild internal index after mass updates
-  This method is called after mass updates (e.g. memory import) has beebn performed.
-  The memory can rebuild or optimize its internal index when necessary.
-
-  \returns 0 or error code in case of errors
-*/
-int EqfMemory::rebuildIndex
-(
-)
-{
-  int iRC = 0;
-
-  if ( !iRC ) iRC = NTMOrganizeIndexFile();
-
   return( iRC );
 }
 

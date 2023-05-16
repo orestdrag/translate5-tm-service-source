@@ -23,6 +23,13 @@
 #include "LogWrapper.h"
 
 #include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
+
+
+#define MEM_START_ORGANIZE  USER_TASK + 1
+#define MEM_ORGANIZE_TASK   USER_TASK + 2
+#define MEM_END_ORGANIZE    USER_TASK + 3
+
+
 /*! \brief Data class for the transport of memory proposals
  *
  * 
@@ -2206,15 +2213,7 @@ USHORT NTMLoadNameTable
     OtmProposal &Proposal
   ); 
 
-  /*! \brief Rebuild internal index after mass updates
-    This method is called after mass updates (e.g. memory import) has beebn performed.
-    The memory can rebuild or optimize its internal index when necessary.
 
-  	\returns 0 or error code in case of errors
-*/
-  int rebuildIndex
-  (
-  ); 
 
 
 /*! \brief Get number of markups used for the proposals in this memory
@@ -4010,9 +4009,9 @@ VOID    MemDestroyProcess( PMEM_IDA, USHORT * );
 USHORT  MemGetAddressOfProcessIDA( PMEM_IDA, WPARAM, USHORT *, PVOID * );
 VOID    MemRcHandlingErrorUndefined( USHORT, PSZ );
 VOID    MemRcHandlingErrorUndefinedHwnd( USHORT, PSZ, HWND );
-USHORT  EQFMemOrganizeStart( PPROCESSCOMMAREA, HWND );
-VOID    EQFMemOrganizeProcess( PPROCESSCOMMAREA, HWND );
-VOID    EQFMemOrganizeEnd( PPROCESSCOMMAREA, HWND, LPARAM, BOOL );
+USHORT  EQFMemOrganizeStart( PPROCESSCOMMAREA );
+VOID    EQFMemOrganizeProcess( PPROCESSCOMMAREA );
+VOID    EQFMemOrganizeEnd( PPROCESSCOMMAREA );
 VOID    EQFMemLoadStart( PPROCESSCOMMAREA, HWND );
 VOID    EQFMemLoadProcess( PPROCESSCOMMAREA, HWND );
 VOID    EQFMemLoadEnd( PPROCESSCOMMAREA, HWND, LPARAM );
@@ -4393,15 +4392,6 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
   int closeMemory(
 	  EqfMemory *pMemory			 
   );
-
-/*! \brief Physically delete a translation memory
-  \param pszName name of the memory being deleted
-	\returns 0 if successful or error return code
-*/
-	int deleteMemory(
-		const char* pszName			  
-	);
-
 
 /*! \brief Get information about a memory
   \param pszName name of the memory
@@ -4880,31 +4870,6 @@ int renameMemory(
   char *pszNewMemoryName
 );
 
-/*! \brief Physically delete a translation memory
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-  \param pszMemoryName name of the memory being deleted or
-  memory object name (pluginname + colon + memoryname)
-	\returns 0 if successful or error return code
-*/
-int deleteMemory(
-  char *pszPluginName,
-  char *pszMemoryName
-);
-
-
-/*! \brief Physically delete a translation memory
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-  \param pszMemoryName name of the memory being deleted or
-  memory object name (pluginname + colon + memoryname)
-  \param strError  return error message with it
-	\returns 0 if successful or error return code
-*/
-int deleteMemory(
-  char *pszPluginName,
-  char *pszMemoryName,
-  std::string &strError
-);
-
 
 /*! \brief Check if memory exists
   \param pszPlugin plugin-name or NULL if not available or memory object name is used
@@ -5184,18 +5149,7 @@ int removeMemoryFromList(const char* pszName);
     LONG        lOptions
   );
 
-  /*! \brief process the API call: EqfUpdateMem and update a segment in the memory
-    \param lHandle handle of a previously opened memory
-    \param pNewProposal pointer to an MemProposal structure containing the segment data
-    \param lOptions processing options 
-    \returns 0 if successful or an error code in case of failures
-  */
-  USHORT APIUpdateMem
-  (
-    EqfMemory*        lHandle, 
-    PMEMPROPOSAL pNewProposal,
-    LONG        lOptions
-  );
+
 
 
 private:
