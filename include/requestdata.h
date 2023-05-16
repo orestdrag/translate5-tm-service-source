@@ -269,9 +269,9 @@ class DeleteEntryRequestData: public RequestData{
     DeleteEntryRequestData(): RequestData(DELETE_ENTRY){}
 
 protected:
-    int parseJSON() override {return -1;};
-    int checkData() override {return -1;};
-    int execute() override   {return -1;};
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute  () override   ;
 };
 
 class UpdateEntryRequestData: public RequestData{
