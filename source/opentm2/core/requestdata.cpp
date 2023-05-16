@@ -15,6 +15,7 @@
 #include <set>
 #include "../../cmake/git_version.h"
 #include "Stopwatch.hpp"
+#include "EQFFUNCI.H"
 
 JSONFactory RequestData::json_factory;
 
@@ -236,15 +237,10 @@ int RequestData::requestTM(){
     return 0;
   }
 
-  // get the handle of the memory 
-  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
-  //lHandle = EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName);
-  //if ( httpRC != OK )
-  //if(!lHandle)
   if(mem.get()== nullptr)
   {
   //  buildErrorReturn( _rc_, Data.szError );
-    return !isServiceRequest();//( httpRC );
+    return !isServiceRequest();
   } /* endif */
   fValid = true;
   return 0;
@@ -286,6 +282,15 @@ bool RequestData::isServiceRequest(){
 }
 
 int RequestData::run(){
+    //fix garbage in json 
+    if(strBody.empty() == false){
+      size_t json_end = strBody.find("\n}") ;
+      if(json_end > 0 && json_end != std::string::npos){
+        strBody = strBody.substr(0, json_end + 2);
+      }
+      std::string truncatedInput = strBody.size() > 3000 ? strBody.substr(0, 3000) : strBody;
+      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+    }
     int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
     if(!res) res = parseJSON();
     if(!res) res = checkData();
@@ -327,117 +332,14 @@ int CreateMemRequestData::createNewEmptyMemory(){
   // create memory database
   ULONG ulKey;
   std::shared_ptr<EqfMemory> NewMem;
-  _rc_ = fValid? 0 : 1;
-
-  if ( _rc_ == NO_ERROR )
-  {
-    T5LOG( T5DEBUG) << ":: create the memory" ;    
-    NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
-    _rc_ = NewMem.get()->NTMCreateLongNameTable();
+  if(!_rc_){
+    NewMem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_);
   }
-  if ( _rc_ == NO_ERROR )
-  {
-    //build name and extension of tm data file
-
-    //fill signature record structure
-    strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->TmBtree.fb.fileName.c_str() );
-    UtlTime( &(NewMem.get()->stTmSign.lTime) );
-    strcpy( NewMem.get()->stTmSign.szSourceLanguage,
-            strSrcLang.c_str() );
-
-    //TODO - replace version with current t5memory version
-    NewMem.get()->stTmSign.bGlobVersion = T5GLOBVERSION;
-    NewMem.get()->stTmSign.bMajorVersion = T5MAJVERSION;
-    NewMem.get()->stTmSign.bMinorVersion = T5MINVERSION;
-    strcpy( NewMem.get()->stTmSign.szDescription,
-            strMemDescription.c_str() );
-
-    //call create function for data file
-    NewMem.get()->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
-    
-    _rc_ = NewMem.get()->TmBtree.QDAMDictCreateLocal( &(NewMem.get()->stTmSign),FIRST_KEY );
-  }
-  if ( _rc_ == NO_ERROR )
-  {
-    //insert initialized record to tm data file
-    ulKey = AUTHOR_KEY;
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-              (PBYTE)&NewMem.get()->Authors, TMX_TABLE_SIZE );
-  }
-  if ( _rc_ == NO_ERROR )
-  {
-    ulKey = FILE_KEY;
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                (PBYTE)&NewMem.get()->FileNames, TMX_TABLE_SIZE );     
-  } /* endif */
-
-  if ( _rc_ == NO_ERROR )
-  {
-    ulKey = TAGTABLE_KEY;
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                (PBYTE)&NewMem.get()->TagTables, TMX_TABLE_SIZE );
-  } /* endif */
-
-  if ( _rc_ == NO_ERROR )
-  {
-    ulKey = LANG_KEY;
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-            (PBYTE)&NewMem.get()->Languages, TMX_TABLE_SIZE );
-  } /* endif */
-
-  if ( _rc_ == NO_ERROR )
-  {
-    int size = sizeof( MAX_COMPACT_SIZE-1 );//OLD, probably bug
-    size = MAX_COMPACT_SIZE-1 ;
-    //initialize and insert compact area record
-    memset( NewMem.get()->bCompact, 0, size );
-
-    ulKey = COMPACT_KEY;
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                        NewMem.get()->bCompact, size);  
-
-  } /* endif */
-
-  // add long document table record
-  if ( _rc_ == NO_ERROR )
-  {
-    ulKey = LONGNAME_KEY;
-    // write long document name buffer area to the database
-    _rc_ = NewMem.get()->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)NewMem.get()->pLongNames->pszBuffer,
-                        NewMem.get()->pLongNames->ulBufUsed );        
-
-  } /* endif */
-
-  // create language group table
-  if ( _rc_ == NO_ERROR )
-  {
-    _rc_ =  NewMem.get()->NTMCreateLangGroupTable();
-    
-  } /* endif */
-
-  if ( _rc_ == NO_ERROR )
-  {
-    //fill signature record structure
-    strcpy( NewMem.get()->stTmSign.szName, NewMem.get()->InBtree.fb.fileName.c_str() );
-
-    _rc_ = NewMem.get()->InBtree.QDAMDictCreateLocal(&NewMem.get()->stTmSign, START_KEY );
-                        
-  } /* endif */
-
-  if(_rc_ == NO_ERROR){   
-    NewMem.get()->TmBtree.fb.Flush();
-    NewMem.get()->InBtree.fb.Flush();     
-  }else {
-    //something went wrong during create or insert so delete data file
-    //UtlDelete( (PSZ)NewMem.get()->InBtree.fb.fileName.c_str(), 0L, FALSE );
-    UtlDelete((PSZ) NewMem.get()->TmBtree.fb.fileName.c_str(), 0L, FALSE);
-    //free allocated memory
-    NewMem.get()->NTMDestroyLongNameTable();
-  } /* endif */       
-
   T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
-  TMManager::GetInstance()->AddMem(NewMem);
+  if(!_rc_){
+    TMManager::GetInstance()->AddMem(NewMem);
+  }
+  return 0;
 }
 
 const char* GetFileExtention(std::string file){
@@ -614,8 +516,8 @@ int CreateMemRequestData::parseJSON(){
         {      
             if ( strcasecmp( name.c_str(), "data" ) == 0 )
             {
-            strMemB64EncodedData = value;
-            T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; size = " << value.size();
+              strMemB64EncodedData = value;
+              T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; size = " << value.size();
             }
             else{
             T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; value = " << value;
@@ -779,7 +681,6 @@ int ListTMRequestData::execute(){
   
   // get buffer size required for the list of TMs
   LONG lBufferSize = 0;
-  //_rc_ = EqfListMem( this->hSession, NULL, &lBufferSize );
 
   if ( _rc_ != 0 )
     return buildError(INTERNAL_SERVER_ERROR, true);
@@ -788,7 +689,6 @@ int ListTMRequestData::execute(){
   //PSZ pszBuffer = new char[lBufferSize];
   //pszBuffer[0] = 0;//terminated to avoid garbage output
 
-  //_rc_ = EqfListMem( this->hSession, pszBuffer, &lBufferSize );
   if ( _rc_ != 0 )
   {
     //delete pszBuffer;
@@ -954,8 +854,22 @@ int ReorganizeRequestData::checkData(){
 }
 
 
-int ReorganizeRequestData::execute(){
+// Prepare the organize of a TM in function call mode
+USHORT MemFuncPrepOrganize
+(
+  PFCTDATA    pData,                   // function I/F session data
+  std::shared_ptr<EqfMemory>  pMem               // Translation Memory being reorganized
+);
+USHORT MemFuncOrganizeProcess
+(
+  PFCTDATA    pData                    // function I/F session data
+);
 
+int ReorganizeRequestData::execute(){
+  PFCTDATA    pData = NULL;            // ptr to function data area
+
+  // validate session handle
+  _rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
 
   // close memory if it is open
   //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
@@ -966,13 +880,28 @@ int ReorganizeRequestData::execute(){
   //} 
 
   // reorganize the memory
+  // check sequence of calls
+  if ( _rc_ == NO_ERROR )
+  {
+    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
+    {
+      T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
+      _rc_ = LASTTASK_INCOMPLETE_RC;
+    } /* endif */
+  } /* endif */
   if ( !_rc_ )
   {
-    do
-    {
-      _rc_ = EqfOrganizeMem( OtmMemoryServiceWorker::getInstance()->hSession, mem );
-    } while ( _rc_ == CONTINUE_RC );
+    
+    // prepare a new analysis run    
+    pData->sLastFunction = FCT_EQFORGANIZEMEM;
+    _rc_ = MemFuncPrepOrganize( pData, mem );
   } 
+
+  while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )
+  {      
+    // continue current organize process
+    _rc_ = MemFuncOrganizeProcess( pData );
+  };
   
   if ( _rc_ == ERROR_MEMORY_NOTFOUND )
   {

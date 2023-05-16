@@ -1461,11 +1461,6 @@ SHORT  BTREE::QDAMReadRecord_V3
     pACTEntry->ulAccessCounter += ACCESSBONUSPOINTS;
   } /* endif */
 
-  if ( sRc )
-  {
-    ERREVENT2( QDAMREADRECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
   return ( sRc );
 }
 
@@ -1503,36 +1498,6 @@ QDAMAddDict
   PBTREE  pBTIda
 )
 {
-  USHORT usI = 1;
-  SHORT  sRc = 0;
-  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
-  #ifdef TEMPORARY_COMMENTED
-  PQDAMDICT  pQDict;
-
-  while ( QDAMDict[usI].usOpenCount > 0)
-  {
-    usI++;
-  } /* endwhile */
-  /********************************************************************/
-  /* if still space is available fill it up                           */
-  /********************************************************************/
-  if ( usI < MAX_NUM_DICTS )
-  {
-    pQDict = &(QDAMDict[usI]);
-    pQDict->pBTree = pBTIda;
-    pQDict->usOpenCount = 1;
-    pQDict->pIdaList[pQDict->usOpenCount] = pBTIda;
-    strcpy(pQDict->chDictName, pName);
-    pBTIda->usDictNum = usI;
-  }
-  else
-  {
-    T5LOG(T5FATAL) << ":: can't open more than " << MAX_NUM_DICTS << " dictionary files at the same time";
-    sRc = BTREE_MAX_DICTS;
-  } /* endif */
-
-  return sRc;
-  #endif 
   return 0;
 } /* end of function QDAMAddDict */
 

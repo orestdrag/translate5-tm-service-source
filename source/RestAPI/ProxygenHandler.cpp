@@ -123,51 +123,15 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
-  if(!pRequest){
-
-  }else{ 
-    //if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
-    {
-      body_->coalesce();      
-      pRequest->strBody = (char*) body_->data(); 
-      //fix garbage in json 
-      size_t json_end = pRequest->strBody.find("\n}") ;
-      if(json_end > 0 && json_end != std::string::npos){
-        pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
-      }
-
-      std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
-      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-    }
+    body_->coalesce();      
+    pRequest->strBody = (char*) body_->data(); 
     
     if(fWriteRequestsAllowed == false){
       pRequest->_rest_rc_ = 423;  
     }else{
       pRequest->run();
     }
-    //switch(pRequest->command){
-    //  case COMMAND::UPDATE_ENTRY:
-    //  case COMMAND::CREATE_MEM:
-    //  case COMMAND::CONCORDANCE:
-    //  case COMMAND::FUZZY:
-    //  case COMMAND::IMPORT_MEM:
-    //  case COMMAND::DELETE_ENTRY:
-    //  case COMMAND::CLONE_TM_LOCALY:
-    //  {
-    //    if(fWriteRequestsAllowed == false){
-    //      pRequest->_rest_rc_ = 423;
-    //      break;
-    //    }
-    //    pRequest->run();
-    //    break;
-    //  }
-    //  default:
-    //  {
-    //    pRequest->_rest_rc_ = 400;
-    //    break;
-    //  }
-    //}    
-  }
+ 
   sendResponse();
   }
 }

@@ -2029,7 +2029,7 @@ public:
     LangGroups.ulMaxEntries = 0;
   };
 
-	EqfMemory( EqfMemoryPlugin *pMemoryPlugin, HTM htm, char *pszName );
+	EqfMemory( HTM htm, char *pszName );
 
 /*! \brief Destructor
 */
@@ -2363,7 +2363,6 @@ USHORT NTMLoadNameTable
   TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_PUT_OUT_W structure
   ULONG ulNextKey;                       // next TM key for GetFirstProposal/GetNextProposal
   USHORT usNextTarget;                   // next TM target for GetFirstProposal/GetNextProposal
-  EqfMemoryPlugin *pMemoryPlugin;                // memory plugin for this memory
   //char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;
 	int iLastError;
@@ -4229,8 +4228,8 @@ typedef struct _MEM_ORGANIZE_IDA
  CHAR          szPluginName[MAX_LONGFILESPEC]; // name of plugin used for the memory
  CHAR          szPathTempMem[2048];            // Full path of temporary transl. mem.
  OtmProposal   *pProposal;                     // buffer for memory proposal
- EqfMemory     *pMem;                           // Handle of transl. memory
- EqfMemory     *pMemTemp;                       // Handle of tmporary transl. memory
+ std::shared_ptr<EqfMemory>     pMem;                           // Handle of transl. memory
+ std::shared_ptr<EqfMemory>     pMemTemp;                       // Handle of tmporary transl. memory
  BOOL          fMsg;                           // A message has been issued already
  ULONG         ulSegmentCounter;               // Number of segments organized
  ULONG         ulInvSegmentCounter;            // Invalid Segment counter
@@ -4329,10 +4328,6 @@ public:
 	};
 
 
-/*! \brief type of callback function for ListMemories method */
-typedef int (*PFN_LISTMEMORY_CALLBACK )(PVOID pvData, char *pszName, EqfMemory *  pInfo  );
-
-
 // options for the importFromMemoryFiles method
 static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the import in one call, do not divide the processing into smaller steps
 
@@ -4390,18 +4385,7 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 
   EqfMemory* openMemoryNew(const std::string& memName);
 
-  /*! \brief Provide a list of all available memories
-  \param pfnCallBack callback function to be called for each memory
-	\param pvData caller's data pointetr, is passed to callback function
-	\param fWithDetails TRUE = supply memory details, when this flag is set, 
-  the pInfo parameter of the callback function is set otherwise it is NULL
-	\returns number of provided memories
-*/
-	int listMemories(
-		EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
-		void *pvData,
-		BOOL fWithDetails
-	);
+
 
 /*! \brief Close a memory
   \param pMemory pointer to memory object
@@ -4562,7 +4546,6 @@ static int handleError( int iRC, char *pszMemName, char *pszMarkup, char *pszMem
 private:
 
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
-  void refreshMemoryList();
  std::shared_ptr<EqfMemory>  findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);
 /*! \brief Create memory properties
@@ -4615,14 +4598,14 @@ int makePropName( std::string &strPathName, std::string &strPropName );
   \param pszIndexFileName pointer to a buffer for the memory index file name
 	\returns 0 when successful
 */
-int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile = false );
+int makeIndexFileName( char *pszMemPath, char *pszIndexFileName, bool fTmdFile = false ){return 0;};
 
 /*! \brief make Index filename from memory data file name
   \param strMemPath reference to a string containing the memory data file name
   \param strIndexFileName reference to a string receiving the memory index file name
 	\returns 0 when successful
 */
-int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName );
+int makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName ){return 0;};
 
 };
 
@@ -4658,6 +4641,7 @@ class TMManager{
   std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
   std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
 
+  std::shared_ptr<EqfMemory> CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, const std::string& strMemDescription, int& _rc_);
     /*! \brief OpenTM2 API session handle
     */
     LONG hSession = 0;
@@ -4665,18 +4649,7 @@ class TMManager{
       \param iIndex index of memory in the open list
       \returns 0 
     */
-    int removeFromMemoryList( int iIndex );
-
-    /*! \brief close a memory and remove it from the open list
-      \param pMem - pointer to mem
-      \returns 0 
-    */
-    int removeFromMemoryList( std::shared_ptr<EqfMemory>  pMem );
-    /*! \brief close a memory and remove it from the open list
-      \param pMem - pointer to mem
-      \returns 0 
-    */
-    int RemoveFromMemoryList( std::shared_ptr<EqfMemory>  pMem );
+    
 
     /*! \brief get the handle for a memory, if the memory is not opened yet it will be openend
         \param pszMemory name of the memory
@@ -4858,19 +4831,6 @@ EqfMemory* createMemory
   int *piErrorCode
 );
 
-/* \brief List all available memories from all installed memory plugins
-   \param pfnCallBack callback function to be called for each memory found
-	 \param pvData caller's data pointetr, is passed to callback function
-	 \param fWithDetails TRUE = supply memory details, when this flag is set, 
-   the pInfo parameter of the callback function is set otherwise it is NULL
- 	 \returns number of provided memories
-*/
-int listMemories
-(
-	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
-	void *pvData,
-	BOOL fWithDetails
-);
 
 /* \brief Get a list of the active memory plugins
    \param vPluginList reference to caller's vector receiving the list of memory plugins
@@ -5237,17 +5197,6 @@ int removeMemoryFromList(const char* pszName);
     LONG        lOptions
   );
 
-  /*! \brief List the name of all memories
-  \param hSession the session handle returned by the EqfStartSession call
-  \param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
-  \param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
-  \returns 0 if successful or an error code in case of failures
-  */
-  USHORT APIListMem
-  (
-    const char*         pszBuffer,
-    LONG        *plLength
-  );
 
 private:
   
@@ -7985,19 +7934,6 @@ USHORT EqfUpdateMem
 );
 
 
-/*! \brief List the name of all memories
-\param hSession the session handle returned by the EqfStartSession call
-\param pszBuffer pointer to a buffer reiceiving the comma separated list of memory names or NULL to get the required length for the list
-\param plLength pointer to a variable containing the size of the buffer area, on return the length of name list is stored in this variable
-\returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfListMem
-(
-  HSESSION    hSession,
-  PSZ         pszBuffer,
-  PLONG       plLength
-);
-
 /*! \brief Get the OpenTM2 language name for a ISO language identifier
 \param hSession the session handle returned by the EqfStartSession call
 \param pszISOLang pointer to ISO language name (e.g. en-US )
@@ -8078,56 +8014,11 @@ EqfMemory *OpenMemory
   int *piErrorCode
 );
 
-
-int ListMemories
-(
-	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
-	void *pvData,
-	BOOL fWithDetails
-);
-
-
 int CloseMemory
 (
   EqfMemory *pMemory
 );
 //end of MemoryUtil.H  
 
-
-class NewTMManager{
-  typedef std::map <std::string, NewTM> TMMap;
-  TMMap tms;
-
-  public:
-  
-
-  static NewTMManager* GetInstance(){
-    static NewTMManager instance;
-    return &instance;
-  }
-
-  //functions to work with tm from outside
-  int CreateEmptyTM(const std::string& tmName, const std::string& srcLang, const std::string& tmDescr);
-  int ImportTMInInternalFormat(const std::string& tmName);
-  int DeleteTM(const std::string& tmName);
-  int CloneTMLocaly(const std::string& srcTmName, const std::string& dstTmName);
-  int ReorganizeTM(const std::string& tmName);
-
-  //functions to work with loading and unloading tm
-  int OpenTM(const std::string& tmName);
-  bool TmIsOpened(const std::string& tmName);
-  std::shared_ptr<NewTM> GetOpenedTm(const std::string& tmName);
-  int CloseTM(const std::string& tmName);
-  int GetTMSizeOnDisk(const std::string& tmName);
-  int StatusTM(const std::string& tmName);  
-  std::vector<std::shared_ptr<NewTM>> ListOpenedTms()const;
-
-  //functions to set up tm service
-  int SetAvailableRam(const size_t availableRam);
-  size_t GetAvailableRam()const;
-  int FreeRamToFitNewMemory(const size_t expectedRamToOccupyByTm);
-
-
-};
 
 #endif //_tm_h_included_

@@ -41,8 +41,6 @@ EqfMemoryPlugin::EqfMemoryPlugin()
     pluginType  = OtmPlugin::eTranslationMemoryType;
     usableState = OtmPlugin::eUsable;
     UtlGetCheckedEqfDrives( szSupportedDrives );
-
-    this->refreshMemoryList();
 }
 
 EqfMemoryPlugin::~EqfMemoryPlugin()
@@ -226,7 +224,7 @@ EqfMemory* EqfMemoryPlugin::createMemory(
   this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
   
   // create memory object if create function completed successfully
-  pNewMemory = new EqfMemory( this, htm, (PSZ)pszName );
+  pNewMemory = new EqfMemory( htm, (PSZ)pszName );
 
 
   // add memory info to our internal memory list
@@ -300,7 +298,7 @@ EqfMemory* EqfMemoryPlugin::openMemory(
     //*/ 
     ))
     {
-      pMemory = new EqfMemory( this, htm, (PSZ)pszName );
+      pMemory = new EqfMemory( htm, (PSZ)pszName );
     }
     else
     {
@@ -353,31 +351,6 @@ int EqfMemoryPlugin::closeMemory(
   //delete( pMemory );  
 
   return( iRC );
-}
-
-
-/*! \brief Provide a list of all available memories
-  \param pfnCallBack callback function to be called for each memory
-	\param pvData caller's data pointetr, is passed to callback function
-	\param fWithDetails TRUE = supply memory details, when this flag is set, 
-  the pInfo parameter of the callback function is set otherwise it is NULL
-	\returns number of provided memories
-*/
-int EqfMemoryPlugin::listMemories(
-	EqfMemoryPlugin::PFN_LISTMEMORY_CALLBACK pfnCallBack,			  
-	void *pvData,
-	BOOL fWithDetails
-)
-{
-
-  for ( std::size_t i = 0; i < m_MemInfoVector.size(); i++ )
-  {
-    std::shared_ptr<EqfMemory>  pInfo = m_MemInfoVector[i];
-    //EqfMemory *  pInfo = (m_MemInfoVector[i]).get();
-    //pfnCallBack( pvData, pInfo.get()->szName, fWithDetails ? pInfo : std::make_shared<EqfMemory>(nullptr) );
-    pfnCallBack( pvData, pInfo.get()->szName, fWithDetails ? pInfo.get() : nullptr );
-  } /* end */     
-  return( m_MemInfoVector.size() );
 }
 
 /*! \brief Get information about a memory
@@ -698,57 +671,6 @@ int EqfMemoryPlugin::getLastError
   return( this->iLastError );
 }
 
-/* private methods */
-
-/*! \brief Refresh the internal list of translation memory dbs
-*/
-void EqfMemoryPlugin::refreshMemoryList()
-{
-  //if ( this->pMemList != NULL )
-  //{
-  //    // delete all the elements in vector
-  //    for (std::vector<std::shared_ptr<EqfMemory> >::iterator iter = this->pMemList->begin();
-  //        iter != this->pMemList->end();
-  //        iter++
-  //        )
-  //    {
-  //        delete *iter;
-  //    }
-  //   // then clear the vector, without above step, its' a memory leak
-  //   this->pMemList->clear();
-  //}
-  //else
-  //{
-  //    return;
-  //}
-  // clear the old vector
-  m_MemInfoVector.clear();
-
-  
-  char mem_dir[MAX_EQF_PATH];
-  {
-    //prepare path for searching
-    Properties::GetInstance()->get_value(KEY_MEM_DIR, mem_dir, MAX_EQF_PATH);
-    strncpy(this->szBuffer, mem_dir, MAX_EQF_PATH );
-    sprintf( this->szBuffer + strlen(szBuffer), "%s%s", DEFAULT_PATTERN_NAME, EXT_OF_MEM );
-  }
-
-  auto files = FilesystemHelper::FindFiles(this->szBuffer);
-  int errcode = 0;
-  if(FilesystemHelper::GetLastError() == FilesystemHelper::FILEHELPER_ERROR_CANT_OPEN_DIR){
-      errcode = FilesystemHelper::CreateDir(mem_dir);
-      if( FilesystemHelper::GetLastError() != FilesystemHelper::FILEHELPER_NO_ERROR ){
-        T5LOG(T5FATAL) << ":: error with filesystem helper, errcode = " << errcode;
-        throw;
-      }
-  }  
-
-  for(auto file: files){
-    addToList(file);
-  }
-
-  return;
-} /* end of method RefreshMemoryList */
 
 int tryStrCpy(char* dest, const char* src, const char* def){
   if(src && strlen(src)){
@@ -1055,34 +977,8 @@ int EqfMemoryPlugin::addToList( char *pszPropName )
   return( 0 );
 }
 
-/*! \brief make Index filename from memory data file name
-  \param pszMemPath pointer to memory data file name
-  \param pszIndexFileName pointer to a buffer for the memory index file name
-	\returns 0 when successful
-*/
-int EqfMemoryPlugin::makeIndexFileName( char *pszMemPath, char *pszIndexFileName , bool fTmdFile)
-{
-  char *pszExt = NULL;
-  strcpy( pszIndexFileName, pszMemPath );
-  pszExt = strrchr( pszIndexFileName, DOT );
-  if ( fTmdFile ) strcpy( pszExt, EXT_OF_TMDATA );
-  else  strcpy( pszExt, EXT_OF_TMINDEX );
-  
-  return( 0 );
-}
 
-/*! \brief make Index filename from memory data file name
-  \param strMemPath reference to a string containing the memory data file name
-  \param strIndexFileName reference to a string receiving the memory index file name
-	\returns 0 when successful
-*/
-int EqfMemoryPlugin::makeIndexFileName( std::string &strMemPath, std::string &strIndexFileName )
-{
-  size_t ExtPos = strMemPath.find_last_of( '.' );
-  strIndexFileName =strMemPath.substr( 0, ExtPos );
-  strIndexFileName.append( EXT_OF_TMINDEX );
-  return( 0 );
-}
+
 
 /*! \brief Private data area for the memory import from data files */
 typedef struct _MEMIMPORTFROMFILEDATA
