@@ -753,38 +753,6 @@ USHORT EqfSearchMem
   return( usRC );
 }
 
-// OtmMemoryService
-/*! \brief Update a segment in the memory
-  \param hSession the session handle returned by the EqfStartSession call
-  \param lHandle handle of a previously opened memory
-  \param pNewProposal pointer to an MemProposal structure containing the segment data
-  \param lOptions processing options 
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfUpdateMem
-(
-  HSESSION    hSession,
-  EqfMemory*        lHandle, 
-  PMEMPROPOSAL pNewProposal,
-  LONG        lOptions
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-
-  // call the memory factory to process the request
-  if ( usRC == NO_ERROR )
-  {
-    usRC =  TMManager::GetInstance()->APIUpdateMem( lHandle, pNewProposal, lOptions );
-  } /* endif */
-
-  if(usRC)  T5LOG(T5ERROR) ":: RC = " << usRC;
-
-  return( usRC );
-}
 
 
 

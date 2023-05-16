@@ -872,31 +872,6 @@ int TMManager::closeMemory
 }
 
 
-/*! \brief Physically delete a translation memory
-  \param pszPluginName name of the memory being deleted
-  \param pszMemoryName name of the memory being deleted or
-  memory object name (pluginname + colon + memoryname)
-	\returns 0 if successful or error return code
-*/
-int TMManager::deleteMemory(
-  char *pszPluginName,
-  char *pszMemoryName
-)
-{
-  if(pszPluginName == NULL){
-    if(VLOG_IS_ON(1))
-      T5LOG( T5INFO) <<"TMManager::deleteMemory::pszPluginName = NULL";
-  }else if(pszMemoryName == NULL){
-    T5LOG(T5ERROR) <<"TMManager::deleteMemory::pszPluginName = " << pszPluginName <<"; pszMemoryName = NULL";
-  }else{
-    T5LOG( T5INFO) <<"TMManager::deleteMemory::pszPluginName = " << pszPluginName <<"; pszMemoryName = "<< pszMemoryName;
-  }
-  std::string strError;
-  int iRC = deleteMemory(pszPluginName,pszMemoryName, strError);
-  if(iRC != EqfMemoryPlugin::eSuccess)
-    T5LOG(T5ERROR) <<"deleteMemory::strError = " << strError;
-  return iRC;
-}
 
 /*! \brief Physically delete a translation memory
   \param pszPluginName name of the memory being deleted
@@ -905,39 +880,35 @@ int TMManager::deleteMemory(
   \param strError return error message with it
 	returns 0 if successful or error return code
 */
-int TMManager::deleteMemory(
-  char *pszPluginName,
-  char *pszMemoryName,
+int TMManager::DeleteTM(
+  const std::string& memoryName,
   std::string &strError
 )
 {
-  int iRC = EqfMemoryPlugin::eSuccess;
-
-  OtmPlugin *plugin = this->findPlugin( pszPluginName, pszMemoryName );
-
-  if ( plugin != NULL )
+  int _rc_ = 0;
+  //close if open
+  //if files exists
+   if (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(memoryName) )
   {
-    std::string strMemoryName;
-    this->getMemoryName( pszMemoryName, strMemoryName );
-
-    // use the given plugin to delete local memory
-    iRC = EqfMemoryPlugin::GetInstance()->deleteMemory( (char *)strMemoryName.c_str());
-    if ( iRC != 0 ) EqfMemoryPlugin::GetInstance()->getLastError(strError);
-
-    // broadcast deleted memory name
-    if ( iRC == EqfMemoryPlugin::eSuccess )
-    {
-      strcpy( this->szMemObjName, plugin->getName() );
-      strcat( this->szMemObjName,  ":" ); 
-		  strcat( this->szMemObjName, pszMemoryName );
-	  }
+    strError = "{\"" + memoryName + "\": \"not found(error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
   }
-  else
-  {
-    strError = "Memory Not Found";
-    iRC = EqfMemoryPlugin::eMemoryNotFound;
-  } /* endif */
-  return( iRC );
+
+  //_rc_ = 
+  TMManager::GetInstance()->CloseTM(memoryName);
+
+  // delete the memory
+  if( !_rc_){
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(memoryName))){
+      _rc_ |= 16;
+    }
+
+    //check tmi file
+    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(memoryName))){
+      _rc_ |= 8;
+    }    
+  }
+  return _rc_;
 }
 
 
@@ -1527,22 +1498,23 @@ int TMManager::replaceMemory
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
+  std::string strReplace(pszReplace);
 
   OtmPlugin *plugin = this->findPlugin( pszPluginName, pszReplace );
 
   if ( plugin != NULL )
   {
     // use the given plugin to replace the memory, when not supported try the delete-and-rename approach
-    if ( plugin->getType() == EqfMemoryPlugin::eTranslationMemoryType )
-    {
-      iRC = ((EqfMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
-      if ( iRC == EqfMemoryPlugin::eNotSupported )
-      {
-        iRC = ((EqfMemoryPlugin *)plugin)->deleteMemory( pszReplace );
-        if ( iRC == 0 ) iRC = ((EqfMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
-      }
-      if ( iRC != 0 ) ((EqfMemoryPlugin *)plugin)->getLastError(this->strLastError);
+
+    iRC = ((EqfMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
+    if ( iRC == EqfMemoryPlugin::eNotSupported )
+    {  
+      std::string strMsg;
+      iRC = TMManager::GetInstance()->DeleteTM( strReplace, strMsg );
+      if ( iRC == 0 ) iRC = ((EqfMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
     }
+    if ( iRC != 0 ) ((EqfMemoryPlugin *)plugin)->getLastError(this->strLastError);
+
 
     // broadcast deleted memory name for replaceWith memory
     if ( iRC == EqfMemoryPlugin::eSuccess )
@@ -1890,44 +1862,6 @@ USHORT TMManager::APISearchMem
   }
 
   delete( pOtmProposal );
-  return( usRC );
-}
-
-
-/*! \brief process the API call: EqfUpdateMem and update a segment in the memory
-  \param lHandle handle of a previously opened memory
-    \param pNewProposal pointer to an MemProposal structure containing the segment data
-  \param lOptions processing options
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT TMManager::APIUpdateMem
-(
-  EqfMemory*        lHandle,
-  PMEMPROPOSAL pNewProposal,
-  LONG        lOptions
-)
-{
-  OtmProposal *pOtmProposal = new ( OtmProposal );
-
-  if ( ( pNewProposal == NULL ) )
-  {
-    T5LOG(T5ERROR) <<  ":: DDE_MANDPARAMISSING:: pointer to proposal is null";
-    return DDE_MANDPARAMISSING;
-  } /* endif */
-
- // EqfMemory *pMem = handleToMemoryObject( lHandle );
-  if ( lHandle == NULL )
-  {
-    return( INVALIDFILEHANDLE_RC );
-  } /* endif */
-  
-  strcpy(pNewProposal->szDocShortName , pNewProposal->szDocName);
-  copyMemProposalToOtmProposal( pNewProposal, pOtmProposal );
-
-  USHORT usRC = (USHORT)lHandle->putProposal( *pOtmProposal );
-
-  delete( pOtmProposal );
-
   return( usRC );
 }
 

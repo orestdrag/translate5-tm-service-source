@@ -1063,7 +1063,7 @@ USHORT MemFuncImportProcess
             if ( pLoadData->mem )
             {
               // organize index file of imported memory
-              pLoadData->mem->rebuildIndex();
+              pLoadData->mem->NTMOrganizeIndexFile();
 
               //TMManager *pFactory = TMManager::GetInstance();
               //pFactory->closeMemory( pLoadData->mem);

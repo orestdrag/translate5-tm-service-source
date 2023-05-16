@@ -570,52 +570,6 @@ int EqfMemoryPlugin::renameMemory(
   return( iRC );
 }
 
-/*! \brief Physically delete a translation memory
-  \param pszName name of the memory being deleted
-	\returns 0 if successful or error return code
-*/
-int EqfMemoryPlugin::deleteMemory(
-	const char* pszName			  
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<EqfMemory>  pMemInfo;
-
-  // get the memory info index int the vector and use it to get memory info
-  int idx = this->findMemoryIndex(pszName);
-  if( idx>=0 && idx<((int)m_MemInfoVector.size()) )
-      pMemInfo = m_MemInfoVector[idx];
-
-  if ( (pMemInfo.get() != NULL) && (pMemInfo.get()->szFullPath[0] != EOS) )
-  {
-    // delete the property file
-    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete property file: " << pMemInfo.get()->szFullPath ;
-
-    UtlDelete( pMemInfo.get()->szFullPath, 0L, FALSE );
-
-    char szPath[MAX_LONGFILESPEC];
-    strcpy( szPath, pMemInfo.get()->szFullPath );
-    strcpy( strrchr( szPath, DOT ), EXT_OF_TMINDEX );
-    // delete index file
-    T5LOG( T5DEBUG) <<"EqfMemoryPlugin::deleteMemory:: try to delete index file: "<< szPath ;
-    UtlDelete( szPath, 0L, FALSE );
-    
-    // delete data file
-    strcpy( strrchr( szPath, DOT ), EXT_OF_TMDATA );
-    T5LOG( T5DEBUG) << "EqfMemoryPlugin::deleteMemory:: try to delete data file: "<< szPath ;    
-    UtlDelete( szPath, 0L, FALSE );
-
-    // remove memory infor from our memory info vector
-    m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
-  }
-  else
-  {
-    T5LOG(T5ERROR) << "EqfMemoryPlugin::deleteMemory:: EqfMemoryPlugin::eMemoryNotFound name = "<< pszName ;
-    iRC = EqfMemoryPlugin::eMemoryNotFound;
-  } /* endif */
-  return( iRC );
-}
-
 /*! \brief close and delete a temporary memory
   \param pMemory pointer to memory objject
 */
@@ -1201,7 +1155,7 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
 int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszReplaceWith )
 {
  std::shared_ptr<EqfMemory>  pInfoReplace = this->findMemory( pszReplace );
-  
+  std::string strReplaceWith(pszReplaceWith);
   if ( pszReplace == NULL )
   {
     handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplace, NULL, NULL, this->strLastError, this->iLastError );
@@ -1236,7 +1190,8 @@ int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszRepla
 
   int loglevel = T5Logger::GetInstance()->suppressLogging();
   // delete all remaining files using the normal memory delete
-  deleteMemory( pszReplaceWith );
+  std::string strMsg;
+  TMManager::GetInstance()->DeleteTM( strReplaceWith, strMsg );
   T5Logger::GetInstance()->desuppressLogging(loglevel);
   return( 0 );
 }
