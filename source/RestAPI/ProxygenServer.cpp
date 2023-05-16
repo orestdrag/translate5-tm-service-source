@@ -240,7 +240,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           }
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 
-            requestHandler->pRequest = new StatusRequestData();
+            requestHandler->pRequest = new StatusMemRequestData();
 
           }else if(urlCommand == "reorganize"){
             requestHandler->pRequest = new ReorganizeRequestData();

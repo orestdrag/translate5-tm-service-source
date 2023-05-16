@@ -31,7 +31,29 @@ typedef char* PSZ;
 #define TRANSL_SOURCE_MANCHINE 1
 #define TRANSL_SOURCE_GLOBMEMORY 2
 
+  enum COMMAND {
+        UNKNOWN_COMMAND,
+        LIST_OF_MEMORIES,
+        SAVE_ALL_TM_ON_DISK,
+        SHUTDOWN,    
+        DELETE_MEM,
+        EXPORT_MEM,
+        EXPORT_MEM_INTERNAL_FORMAT,
+        REORGANIZE_MEM,
+        STATUS_MEM,
+        RESOURCE_INFO,
 
+        START_COMMANDS_WITH_BODY,
+        CREATE_MEM = START_COMMANDS_WITH_BODY, 
+        FUZZY,
+        CONCORDANCE,
+        DELETE_ENTRY,
+        UPDATE_ENTRY,
+        TAGREPLACEMENTTEST,
+        IMPORT_MEM,
+        CLONE_TM_LOCALY,
+        //IMPORT_MEM_INTERNAL_FORMAT
+    };
 
 
   /*! \brief States of a memory

@@ -21,6 +21,13 @@
 #include "requestdata.h"
 
 
+  /*! \brief convert a long time value into the UTC date/time format
+    \param lTime long time value
+    \param pszDateTime buffer receiving the converted date time
+    \returns 0 
+  */
+  int convertTimeToUTC( long lTime, char *pszDateTime );
+  
 /*! \brief constant defining the timeout for memories (in number of seconds)
   When a memory has not been used for the given time it is automatically closed
 */
@@ -32,7 +39,6 @@ class OtmMemoryServiceWorker
 */
 
 {
-  std::string printTime(time_t time);
 public:
 
   /*! \brief OtmMemoryServiceWorker constructor
@@ -242,12 +248,6 @@ public:
     std::string &strErrorReturn
   );
 
-  /*! \brief convert a long time value into the UTC date/time format
-    \param lTime long time value
-    \param pszDateTime buffer receiving the converted date time
-    \returns 0 
-  */
-  int convertTimeToUTC( long lTime, char *pszDateTime );
 
   /*! \brief convert a UTC time value to a OpenTM2 long time value 
       \param pszDateTime buffer containing the UTC date and time
