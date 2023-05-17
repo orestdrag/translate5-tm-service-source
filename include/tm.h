@@ -4351,22 +4351,7 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 */
 	const char* getDescriptiveMemType();
 
-/*! \brief Create a new translation memory
-  \param pszName name of the new memory
-	\param pszSourceLang source language
-	\param pszDescription description of the memory
-	\param bMsgHandling true/false: display errors or not
-	\param hwnd owner-window needed for modal error-message
-  \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
-	\returns Pointer to created translation memory or NULL in case of errors
-*/
-	EqfMemory* createMemory(
-		const char* pszName,			  
-		const char* pszSourceLang,
-		const char* pszDescription
-	);
-	
-  void createMemory(CreateMemRequestData& request);
+
 
 /*! \brief Open an existing translation memory
   \param pszName name of the existing memory
@@ -4538,15 +4523,6 @@ private:
   BOOL makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved = NULL );
  std::shared_ptr<EqfMemory>  findMemory( const char *pszName );
   int findMemoryIndex(const char *pszName);
-/*! \brief Create memory properties
-  \param pszName long name of the memory
-  \param strPathName memory path name
-	\param pszDescription memory description
-	\param pszSourceLanguage memory source language
-	\returns TRUE when successful, FALSE in case of errors
-*/
-BOOL createMemoryProperties( const char* pszName, std::string &strPathName, const char*  pszDescription, const char*  pszSourceLanguage );
-
 
 /*! \brief Make the fully qualified property file name for a memory
   \param strPathName reference to the memory path name
@@ -4627,6 +4603,8 @@ class TMManager{
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);
   int DeleteTM(const std::string& strMemName, std::string& outputMsg);
+
+  int RenameTM(const std::string& oldMemName, const std::string& newMemName, std::string& outputMsg);
   std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command);
   std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
   std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
@@ -4768,58 +4746,6 @@ int getMemoryFiles
 );
 
 
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param pszOwner owner of the newly created memory
-   \param bInvisible don't display memory in memory loist window when true, 
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-EqfMemory *createMemory
-(
-  const char *pszPluginName,
-  const char *pszMemoryName,
-  const char *pszDescription,
-  const char *pszSourceLanguage,
-  const char *pszOwner,
-  bool bInvisible,
-  int *piErrorCode
-);
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-EqfMemory *createMemory
-(
-  const char *pszPluginName,
-  const char *pszMemoryName,
-  const char *pszDescription,
-  const char *pszSourceLanguage,
-  int *piErrorCode
-);
-
-EqfMemory* createMemory
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  char *pszOwner,
-  bool bInvisible,
-  int *piErrorCode
-);
 
 
 /* \brief Get a list of the active memory plugins
@@ -5048,11 +4974,11 @@ int removeMemoryFromList(const char* pszName);
     \param pszReplaceWith name of the memory replacing the pszReplace memory
 	  returns 0 if successful or error return code
   */
-  int replaceMemory
+ int ReplaceMemory
   (
-    char *pszPluginName,
-    char *pszReplace,
-    char *pszReplaceWith
+    const std::string& strReplace,
+    const std::string& strReplaceWith, 
+    std::string& outputMsg
   );
 
 

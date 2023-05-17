@@ -456,9 +456,11 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
 int FileBuffer::Flush(){
     bool fileWasOpened = file != nullptr;
     size_t writenBytes = 0;
-    if(status & FileBufferStatus::MODIFIED){
+    if(!FilesystemHelper::FileExists(fileName)){
+        T5LOG(T5WARNING) << "File is not exists on disk so flushing would be skipped, fName = " << fileName;
+    }else if(status & FileBufferStatus::MODIFIED){
         if(VLOG_IS_ON(1)){
-            T5LOG( T5INFO) << "WriteBuffToFile:: writing files from buffer";
+            T5LOG( T5INFO) << "Flush:: writing files from buffer";
         }
         PUCHAR bufStart = &data[0];
         int size = data.size();
@@ -479,12 +481,12 @@ int FileBuffer::Flush(){
         fseek(file, 0, SEEK_SET);
         writenBytes = fwrite(bufStart, size, 1, file) * size;
         if ( writenBytes <=0 ){
-            T5LOG(T5ERROR) <<"::WriteToFile():: ERROR_WRITE_FAULT";
+            T5LOG(T5ERROR) <<"::Flush():: ERROR_WRITE_FAULT";
             return ERROR_WRITE_FAULT;
         }
     
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-            T5LOG( T5DEBUG) "::WriteToFile("  << (long int) file << ") buff = " << "void" <<
+            T5LOG( T5DEBUG) "::Flush("  << (long int) file << ") buff = " << "void" <<
                 ", buffsize = " << size << ", path = " << fileName << ", file size = " <<
                 FilesystemHelper::GetFileSize(file) << ", oldSize = " << oldSize;
         }
@@ -496,7 +498,7 @@ int FileBuffer::Flush(){
         }
     }else{
         if(VLOG_IS_ON(1)){
-            T5LOG( T5INFO) <<"WriteBuffToFile:: buffer not modified, so no need to overwrite file, fName = " << fileName;
+            T5LOG( T5INFO) <<"Flush:: buffer not modified, so no need to overwrite file, fName = " << fileName;
         }
     }
     return 0;

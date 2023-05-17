@@ -137,18 +137,9 @@ USHORT EQFMemOrganizeStart
   if(!TMManager::GetInstance()->TMExistsOnDisk(pRIDA->szTempMemName)){
     auto ll = T5Logger::GetInstance()->suppressLogging();
     std::string strMemName(pRIDA->szTempMemName);
-    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(strMemName))){
-      iRC = 1;
-      //return 1;
-    }
-
-    //check tmi file
-    if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(strMemName))){
-      iRC = 2;
-      //return 2;
-    }    
+    TMManager::GetInstance()->DeleteTM(strMemName, outputMsg);
+    outputMsg = "";
     T5Logger::GetInstance()->desuppressLogging(ll);
-    iRC = 0;
   }
   pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC);
   
@@ -215,18 +206,21 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
                    USHORT            usMsgHandling )  //message handling flag
 {
   USHORT  usURc = NO_ERROR ;   //function returncode
-  TMManager *pFactory = TMManager::GetInstance();
+  std::string outputMessage, strMemName(pRIDA->szMemName), strTempMemName(pRIDA->szTempMemName);
 
   /* close the original TM                                          */
   if ( pRIDA->pMem != NULL )
   {
-    int iRC = 0;
-
-    pFactory->closeMemory( pRIDA->pMem.get() );
-    pRIDA->pMem = NULL;
+    int use_count = pRIDA->pMem.use_count();
+    if(use_count != 3)//1)
+    {
+      T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 1, but " << use_count;
+    }
+    //TMManager::GetInstance()->CloseTM(strMemName);
+    pRIDA->pMem = nullptr;
 
     // replace original memory with the organized one
-    iRC = pFactory->replaceMemory( pRIDA->szPluginName, pRIDA->szMemName, pRIDA->szTempMemName );
+    usURc = TMManager::GetInstance()->ReplaceMemory( strTempMemName, strMemName, outputMessage );
 
  } /* endif */
 
@@ -298,23 +292,19 @@ VOID EQFMemOrganizeProcess
   {
     pCommArea->usComplete = (USHORT)iProgress;
     pRIDA->ulInvSegmentCounter++;
-    if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-    {
-      UtlDispatch();
-        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_ORGANIZE_TASK ), NULL );
-    } /* endif */
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )
   {
-    TMManager *pFactory = TMManager::GetInstance();
-
     pRIDA->pMemTemp->NTMOrganizeIndexFile();
     T5LOG(T5WARNING) << "reorganize is done, segCount = " << pRIDA->ulSegmentCounter << "; invSegCount = " << pRIDA->ulInvSegmentCounter;
-    pRIDA->pMemTemp->TmBtree.fb.Flush();
-    pRIDA->pMemTemp->InBtree.fb.Flush();  
-    pFactory->closeMemory( pRIDA->pMemTemp.get() );
-
-    pRIDA->pMemTemp = NULL;
+    int use_count = pRIDA->pMemTemp.use_count();
+    if(use_count != 1){
+      T5LOG(T5WARNING) << ":: use_count for temporary tm is not 1, but " << use_count;
+    }
+    //pRIDA->pMemTemp->TmBtree.fb.Flush();
+    //pRIDA->pMemTemp->InBtree.fb.Flush();  
+    pRIDA->pMemTemp = nullptr;
+    //TMManager::GetInstance()->closeMemory( pRIDA->pMemTemp.get() );
 
     if (usRc)
     {
@@ -359,23 +349,12 @@ VOID EQFMemOrganizeProcess
       if ( pRIDA->fBatch )
       {
         pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
-        if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-        {
-          pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
-        } /* endif */
       } /* endif */
     } /* endif */
 
     // -----------------------------------------------------
     // Issue message WM_EQF_MEMORGANIZE_END
-    if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
-    {
-      pRIDA->NextTask = MEM_END_ORGANIZE;
-    }
-    else
-    {
-        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
-    } /* endif */
+    pRIDA->NextTask = MEM_END_ORGANIZE;
   }
   else
   {
@@ -389,10 +368,6 @@ VOID EQFMemOrganizeProcess
     else
     {
       pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
-      if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-      {
-        pRIDA->pDDEMemOrg->DDEReturn.usRc = pRIDA->usRC;
-      } /* endif */
     } /* endif */
 
     // Close the input translation memory and temporary translation memory
@@ -403,14 +378,7 @@ VOID EQFMemOrganizeProcess
     TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
 
     // Issue message WM_EQF_MEMORGANIZE_END
-    if ( pRIDA->hwndErrMsg == HWND_FUNCIF )
-    {
-      pRIDA->NextTask = MEM_END_ORGANIZE;
-    }
-    else
-    {
-        T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";  //WinPostMsg( hWnd, WM_EQF_PROCESSTASK, MP1FROMSHORT( MEM_END_ORGANIZE ), NULL );
-    } /* endif */
+    pRIDA->NextTask = MEM_END_ORGANIZE;    
   } /* endif */
 } /* end of function EQFMemOrganizeProcess */
 

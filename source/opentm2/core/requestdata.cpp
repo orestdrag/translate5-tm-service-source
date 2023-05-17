@@ -352,7 +352,7 @@ const char* GetFileExtention(std::string file){
 }
 
 int CreateMemRequestData::importInInternalFomat(){
-    T5LOG( T5INFO) << "createMemory():: strData is not empty -> setup temp file name for ZIP package file ";
+    T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
     // setup temp file name for ZIP package file 
   
     strTempFile =  FilesystemHelper::BuildTempFileName();

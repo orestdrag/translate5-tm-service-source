@@ -51,7 +51,7 @@ EqfMemory::EqfMemory( HTM htmIn, char *pszName )
 
 EqfMemory::~EqfMemory()
 {
-  T5LOG(T5DEBUG) << "Closing memory" << szName;
+  T5LOG(T5DEBUG) << "Closing memory " << szName;
   UnloadFromRAM();
   //if ( this->pTmExtIn != NULL )  delete  this->pTmExtIn ;
   //if ( &TmExtOut != NULL ) delete  &TmExtOut ;

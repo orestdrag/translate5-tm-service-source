@@ -730,110 +730,6 @@ int TMManager::getMemoryInfo
 }
 
 
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param chDrive drive where new memory should be created, or 0 if memory should be created on primary drive
-   \param pszOwner owner of the newly created memory
-   \param bInvisible don't display memory in memory loist window when true, 
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-EqfMemory *TMManager::createMemory
-(
-  char *pszPluginName,
-  char *pszMemoryName,
-  char *pszDescription,
-  char *pszSourceLanguage,
-  char chDrive,
-  char *pszOwner,
-  bool bInvisible,
-  int *piErrorCode
-)
-{
-  EqfMemory *pMemory = NULL;
-  this->strLastError = "";
-  this->iLastError = 0;
-  T5LOG(T5DEBUG) << "Create memory " << pszMemoryName ;
-
-  if ( piErrorCode != NULL ) *piErrorCode = 0;   
-
-  // use the plugin to create the memory
-  std::string strMemoryName;
-  this->getMemoryName( pszMemoryName, strMemoryName );  
-  pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
-
-  if ( pMemory == NULL)
-  {
-    this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-    T5LOG(T5DEBUG) << "   Create failed, with message \""<< this->strLastError << "\"";
-    if ( piErrorCode != NULL ) *piErrorCode = this->iLastError;
-  }
-  else if ( !bInvisible )
-  {
-    // send created notifcation
-    PSZ pszObjName = NULL;
-    UtlAlloc( (PVOID *)&pszObjName, 0L, MAX_LONGFILESPEC + MAX_LONGFILESPEC + 2, NOMSG );
-    strcpy( pszObjName, EqfMemoryPlugin::GetInstance()->getName() );
-    strcat( pszObjName, ":" );
-    strcat( pszObjName, pszMemoryName );
-    EqfSend2Handler( MEMORYHANDLER, WM_EQFN_CREATED, MP1FROMSHORT(  clsMEMORYDB  ), MP2FROMP( pszObjName ));
-    if ( pszObjName != NULL ) UtlAlloc( (PVOID *)&pszObjName, 0L, 0L, NOMSG );
-    T5LOG(T5DEBUG) << "   Create successful" ;
-  } /* endif */     
-
-  return( pMemory );
-}
-
-/* \brief Create a memory 
-   \param pszPlugin plugin-name or NULL if not available or memory object name is used
-   \param pszMemoryName name of the memory being created or
-    memory object name (pluginname + colon + memory name)
-   \param pszDescription description of the memory
-   \param pszSourceLanguage source language of the memory
-   \param pszOwner owner of the newly created memory
-   \param bInvisible don't display memory in memory loist window when true, 
-   \param piErrorCode pointer to a int varaibel receiving any error code when function fails
-   \returns pointer to created memory object 
-*/
-EqfMemory *TMManager::createMemory
-(
-  const char *pszPluginName,
-  const char *pszMemoryName,
-  const char *pszDescription,
-  const char *pszSourceLanguage,
-  const char *pszOwner,
-  bool bInvisible,
-  int *piErrorCode
-)
-{  
-  T5LOG( T5INFO) << "::pszMemoryName = " << pszMemoryName <<  ", pszSourceLanguage = " << pszSourceLanguage <<
-      ", pszDescription = " << pszDescription ;
-  this->strLastError = "";
-  this->iLastError = 0;
-
-  if ( piErrorCode != nullptr ) 
-      *piErrorCode = 0;
-
-  std::string strMemoryName;
-  this->getMemoryName( pszMemoryName, strMemoryName );
-  EqfMemory * pMemory = EqfMemoryPlugin::GetInstance()->createMemory( (char *)strMemoryName.c_str(), pszSourceLanguage, pszDescription );
-  if ( pMemory == NULL ){
-     this->iLastError = EqfMemoryPlugin::GetInstance()->getLastError( this->strLastError );
-     T5LOG(T5ERROR) << "TMManager::createMemory()::EqfMemoryPlugin::GetInstance()->getType() == OtmPlugin::eTranslationMemoryType->::pMemory == NULL, strLastError = " <<  strLastError;
-     
-     if ( piErrorCode != NULL ) 
-        *piErrorCode = this->iLastError;
-  }
-  else{
-    T5LOG( T5INFO) << "::Create successful ";
-  }
-  return( pMemory );
-}
-
 
 /* \brief Closed a previously opened memory
    \param pMemory pointer to memory object beign closed
@@ -905,6 +801,45 @@ int TMManager::DeleteTM(
 
     //check tmi file
     if(FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(memoryName))){
+      _rc_ |= 8;
+    }    
+  }
+  return _rc_;
+}
+
+
+int TMManager::RenameTM(
+  const std::string& oldMemoryName,
+  const std::string& newMemoryName,
+  std::string &strError
+)
+{
+  int _rc_ = 0;
+  //close if open
+  //if files exists
+  if (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(oldMemoryName) )
+  {
+    strError = "{\"" + oldMemoryName + "\": \"not found(error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+
+  if ( (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(newMemoryName)) == 0 )
+  {
+    strError = "{\"" + newMemoryName + "\": \"already exists (error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+
+
+  TMManager::GetInstance()->CloseTM(oldMemoryName);
+
+  // move/rename the memory
+  if( !_rc_){
+    if(FilesystemHelper::MoveFile(FilesystemHelper::GetTmdPath(oldMemoryName), FilesystemHelper::GetTmdPath(newMemoryName))){
+      _rc_ |= 16;
+    }
+
+    //check tmi file
+    if(FilesystemHelper::MoveFile(FilesystemHelper::GetTmiPath(oldMemoryName),  FilesystemHelper::GetTmdPath(newMemoryName))){
       _rc_ |= 8;
     }    
   }
@@ -1490,45 +1425,34 @@ void TMManager::refreshPluginList()
   \param pszReplaceWith name of the memory replacing the pszReplace memory
 	returns 0 if successful or error return code
 */
-int TMManager::replaceMemory
+int TMManager::ReplaceMemory
 (
-  char *pszPluginName,
-  char *pszReplace,
-  char *pszReplaceWith
+  const std::string& strReplace,
+  const std::string& strReplaceWith,
+  std::string& outputMsg
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
-  std::string strReplace(pszReplace);
 
-  OtmPlugin *plugin = this->findPlugin( pszPluginName, pszReplace );
-
-  if ( plugin != NULL )
-  {
-    // use the given plugin to replace the memory, when not supported try the delete-and-rename approach
-
-    iRC = ((EqfMemoryPlugin *)plugin)->replaceMemory( pszReplace, pszReplaceWith );
-    if ( iRC == EqfMemoryPlugin::eNotSupported )
-    {  
-      std::string strMsg;
-      iRC = TMManager::GetInstance()->DeleteTM( strReplace, strMsg );
-      if ( iRC == 0 ) iRC = ((EqfMemoryPlugin *)plugin)->renameMemory( pszReplaceWith, pszReplace );
-    }
-    if ( iRC != 0 ) ((EqfMemoryPlugin *)plugin)->getLastError(this->strLastError);
-
-
-    // broadcast deleted memory name for replaceWith memory
-    if ( iRC == EqfMemoryPlugin::eSuccess )
-    {
-      strcpy( this->szMemObjName, plugin->getName() );
-      strcat( this->szMemObjName,  ":" ); 
-		  strcat( this->szMemObjName, pszReplaceWith );
-      //EqfSend2AllHandlers( WM_EQFN_DELETED, MP1FROMSHORT(clsMEMORYDB), MP2FROMP(this->szMemObjName) );
-	  }
-  }
-  else
-  {
+  if(TMExistsOnDisk(strReplace)){
     iRC = EqfMemoryPlugin::eMemoryNotFound;
+    return iRC;
   } /* endif */
+  if(TMExistsOnDisk(strReplaceWith)){
+    iRC = EqfMemoryPlugin::eMemoryNotFound;
+    return iRC;
+  } /* endif */
+
+  iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
+  if(!iRC){
+    iRC = TMManager::GetInstance()->RenameTM( strReplace, strReplaceWith, outputMsg );
+  }
+  
+  // broadcast deleted memory name for replaceWith memory
+  if ( iRC == EqfMemoryPlugin::eSuccess )
+  {
+    strcat( this->szMemObjName, strReplaceWith.c_str() );
+  }
   return( iRC );
 }
 

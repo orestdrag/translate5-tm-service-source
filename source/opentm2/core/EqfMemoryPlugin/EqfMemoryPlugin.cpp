@@ -185,63 +185,6 @@ NTMFillCreateInStruct( const char*     pszPathMem,
 
 
 
-
-
-/*! \brief Create a new translation memory
-  \param pszName name of the new memory
-	\param pszSourceLang source language
-	\param pszDescription description of the memory
-	\param bMsgHandling true/false: display errors or not
-	\param hwnd owner-window needed for modal error-message
-	\returns Pointer to created translation memory or NULL in case of errors
-*/
-EqfMemory* EqfMemoryPlugin::createMemory(
-	const char* pszName,			  
-	const char* pszSourceLang,
-	const char* pszDescription
-)
-{
-  EqfMemory *pNewMemory = NULL;        // new memory object
-  HTM htm = NULL;                      // memory handle 
-  std::string strMemPath;
-  BOOL fReserved = FALSE;
-  USHORT usRc = 0;
-  // build memory path and reserve a short name
-  this->makeMemoryPath( pszName, strMemPath, &fReserved );
-  
-  TMX_CREATE_IN   CreateIn;    //pointer to create input structure
-  TMX_CREATE_OUT  CreateOut;   //pointer to create output structure
-  // use old memory create code
-  usRc = NTMFillCreateInStruct( strMemPath.c_str(), //call function to fill TMC_CREATE_IN structure
-                                pszSourceLang,
-                                pszDescription,
-                                &CreateIn );
-  usRc = TmtXCreate( &CreateIn, &CreateOut ); //call U code to pass TM command to server or handle it local   
-                              
-  htm = (HTM)CreateOut.pstTmClb;//no error,  return pointer to TM CLB as handle  
-
-  // setup memory properties
-  this->createMemoryProperties( pszName, strMemPath, pszDescription, pszSourceLang );
-  
-  // create memory object if create function completed successfully
-  pNewMemory = new EqfMemory( htm, (PSZ)pszName );
-
-
-  // add memory info to our internal memory list
-  if ( pNewMemory != NULL ) this->addToList( strMemPath );
-  
-  // cleanup
-  if ( (pNewMemory == NULL) && fReserved )
-  {
-    std::string strPropName ;
-
-    this->makePropName( strMemPath, strPropName );
-    UtlDelete( (char *)strPropName.c_str(), 0, FALSE );
-  } /* endif */
-
-  return( (EqfMemory *)pNewMemory );
-}
-
 EqfMemory* EqfMemoryPlugin::openMemoryNew(
   const std::string& memName			 
   //,unsigned short usAccessMode
@@ -826,59 +769,6 @@ BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathN
   return( fOK );
 }
 
-/*! \brief Create memory properties
-  \param pszName long name of the memory
-  \param strPathName memory path name
-	\param pszDescription memory description
-	\param pszSourceLanguage memory source language
-	\returns TRUE when successful, FALSE in case of errors
-*/
-BOOL EqfMemoryPlugin::createMemoryProperties( const char* pszName, std::string &strPathName, const char* pszDescription, const char* pszSourceLanguage )
-{
-  BOOL fOK = TRUE;
-  PPROP_NTM pProp = NULL;
-  USHORT usPropSize = get_max( sizeof(PROP_NTM), MEM_PROP_SIZE );
-
-  fOK = UtlAlloc( (void **)&pProp, 0, usPropSize, NOMSG );
-
-  // init memory
-  memset((void*)pProp,0,usPropSize);
-  if ( fOK )
-  {
-    // fill properties file
-    pProp->stPropHead.usClass = PROP_CLASS_MEMORY;
-    pProp->stPropHead.chType = PROP_TYPE_NEW;
-
-    char * fname = UtlGetFnameFromPath(  strPathName.c_str() );
-    Utlstrccpy( pProp->stPropHead.szName, fname, DOT );
-    strcpy(pProp->stTMSignature.szName, pProp->stPropHead.szName);
-    strcat( pProp->stPropHead.szName, EXT_OF_MEM );
-
-    strncpy( pProp->stTMSignature.szDescription, 
-             pszDescription, 
-             sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1);
-    strncpy( pProp->stTMSignature.szSourceLanguage, pszSourceLanguage, 
-             sizeof(pProp->stTMSignature.szSourceLanguage)/sizeof(pProp->stTMSignature.szSourceLanguage[0])-1);
-
-    pProp->stTMSignature.bGlobVersion = T5GLOBVERSION;
-    pProp->stTMSignature.bMajorVersion = T5MAJVERSION;
-    pProp->stTMSignature.bMinorVersion = T5MINVERSION;
-    strcpy( pProp->szNTMMarker, NTM_MARKER );
-    UtlTime( &pProp->stTMSignature.lTime );
-    pProp->usThreshold = TM_DEFAULT_THRESHOLD;
-
-    // write properties to disk
-    std::string strPropName;
-    this->makePropName( strPathName, strPropName );
-
-    //WritePropFile(cstr, (PVOID)pProp, sizeof(PROPSYSTEM));
-    T5LOG( T5INFO) << "createMemoryProperties called for file " << strPropName << " with fsize = " << usPropSize;    
-    fOK = UtlWriteFile( (char *)strPropName.c_str() , usPropSize, (PVOID)pProp, FALSE );
-
-    UtlAlloc( (void **)&pProp, 0, 0, NOMSG );
-  } /* endif */     
-  return( fOK );
-}
 
 /*! \brief Make the fully qualified property file name for a memory
   \param strPathName reference to the memory path name
