@@ -791,7 +791,7 @@ int TMManager::DeleteTM(
   }
 
   //_rc_ = 
-  TMManager::GetInstance()->CloseTM(memoryName);
+  //TMManager::GetInstance()->CloseTM(memoryName);
 
   // delete the memory
   if( !_rc_){
@@ -827,6 +827,8 @@ int TMManager::RenameTM(
   {
     strError = "{\"" + newMemoryName + "\": \"already exists (error " + std::to_string(_rc_) + ")\" }";
     return( _rc_ = NOT_FOUND );
+  }else{
+    _rc_ = 0;
   }
 
 
@@ -839,7 +841,7 @@ int TMManager::RenameTM(
     }
 
     //check tmi file
-    if(FilesystemHelper::MoveFile(FilesystemHelper::GetTmiPath(oldMemoryName),  FilesystemHelper::GetTmdPath(newMemoryName))){
+    if(FilesystemHelper::MoveFile(FilesystemHelper::GetTmiPath(oldMemoryName),  FilesystemHelper::GetTmiPath(newMemoryName))){
       _rc_ |= 8;
     }    
   }
@@ -1445,7 +1447,13 @@ int TMManager::ReplaceMemory
 
   iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
   if(!iRC){
-    iRC = TMManager::GetInstance()->RenameTM( strReplace, strReplaceWith, outputMsg );
+    iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg );
+  }
+  if(!iRC){
+    iRC = !TMManager::GetInstance()->IsMemoryLoaded(strReplace);
+  }
+  if(!iRC){
+    iRC = TMManager::GetInstance()->tms[strReplace]->ReloadFromDisk();
   }
   
   // broadcast deleted memory name for replaceWith memory

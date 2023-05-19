@@ -904,6 +904,7 @@ int ReorganizeRequestData::execute(){
     pData->fComplete = FALSE;
     pData->sLastFunction = FCT_EQFORGANIZEMEM;
     pData->pvMemOrganizeCommArea = &CommArea;    
+    RIDA.pszNameList = 0;
   } 
 
   while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )

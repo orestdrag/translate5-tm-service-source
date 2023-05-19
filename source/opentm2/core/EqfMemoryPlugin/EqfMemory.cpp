@@ -979,19 +979,11 @@ EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
   strcpy(szName, tmName.c_str());
 }
 
-int EqfMemory::LoadInRAM(){
-  if(TmBtree.fb.file != nullptr){
-    //file is in mem
-    return -1;
-  }
-  if(InBtree.fb.file != nullptr){
-    //file is in mem
-    return -1;
-  }
-  TmBtree.fb.ReadFromFile();
-  InBtree.fb.ReadFromFile();
-  
-  return 0;
+int EqfMemory::ReloadFromDisk(){
+  int rc = 0;
+  rc = TmBtree.fb.ReadFromFile();
+  rc = InBtree.fb.ReadFromFile();
+  return rc;
 }
 
 int EqfMemory::UnloadFromRAM(){

@@ -2478,7 +2478,7 @@ int handleError( int iRC, char *pszMemName, char *pszMarkup );
 public: 
   EqfMemory(const std::string& tmName);
   bool IsLoadedInRAM();
-  int LoadInRAM();
+  int ReloadFromDisk();
   int UnloadFromRAM();
   int FlushFilebuffers();
 
