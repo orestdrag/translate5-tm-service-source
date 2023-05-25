@@ -85,6 +85,6 @@ int ProxygenStats::recordRequest(int command) {
         break;
       }
     }
-    return reqCount_++;
+    return ++reqCount_;
   }
 //}

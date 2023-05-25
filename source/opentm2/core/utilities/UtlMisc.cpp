@@ -513,9 +513,6 @@ BOOL UtlInitUtils( HAB hab )
 
    // set version info in registry
    char version[20];
-   Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
-   WriteStringToRegistry( "OpenTM2", "CurVersion", version );
-
    //--- get profile information --- 
    int retCode = Properties::GetInstance()->get_value_or_default("iDate", iTemp, MDY_DATE_FORMAT);
    UtiVar[usId].usDateFormat = iTemp;

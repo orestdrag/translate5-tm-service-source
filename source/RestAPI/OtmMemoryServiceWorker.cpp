@@ -55,7 +55,6 @@ OtmMemoryServiceWorker* OtmMemoryServiceWorker::getInstance()
 {
   static OtmMemoryServiceWorker _instance;
 
-  //instance->hSession = 0;
 	return &_instance;
 }
 

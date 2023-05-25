@@ -22,6 +22,7 @@ protected:
     static JSONFactory json_factory;
     //RequestData(); // json was parsed in sub class
 public:
+    int _id_ = 0;
     bool fValid = false;
     std::string strMemName;
 
@@ -33,9 +34,9 @@ public:
 
     //return fields
     std::string outputMessage;
-    std::string errorMsg;
-    int _rc_=0; 
-    int _rest_rc_=0;
+    //std::string errorMsg;
+    int _rc_ = 0; 
+    int _rest_rc_ = 0;
     //timestamp
 
 
@@ -44,10 +45,9 @@ public:
     virtual ~RequestData() = default;
     //std::weak_ptr <EqfMemory> memory;
 
-    int buildErrorReturn(int iRC, wchar_t *pszErrorMsg);
-
-    int buildErrorReturn(int iRC,char *pszErrorMsg);
-
+    int buildErrorReturn(int iRC, const wchar_t *pszErrorMsg);
+    int buildErrorReturn(int iRC, const char *pszErrorMsg);
+    int buildRet(int ret);
 
     COMMAND command = UNKNOWN_COMMAND;
     
@@ -70,7 +70,6 @@ class CreateMemRequestData: public RequestData{
     int importInInternalFomat();
     int createNewEmptyMemory();
 
-  
     public:
     
     std::string strSrcLang;

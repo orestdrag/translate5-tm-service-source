@@ -192,35 +192,29 @@ MemProposalType getMemProposalType( char *pszType )
 */
 int RequestData::buildErrorReturn
 (
-  int _rc_,
-  wchar_t *pszErrorMsg
+  int rc,
+  const wchar_t *pszErrorMsg
 )
 {
-  std::wstring w_msg;
-  json_factory.startJSONW( w_msg );
-  json_factory.addParmToJSONW( w_msg, L"ReturnValue", _rc_ );
-  json_factory.addParmToJSONW( w_msg, L"ErrorMsg", pszErrorMsg );
-  json_factory.terminateJSONW( w_msg );
-
-  errorMsg = EncodingHelper::convertToUTF8( w_msg );
-  
-  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << _rc_;
-  return( 0 );
+  std::wstring wMsg(pszErrorMsg);
+  std::string strMsg = EncodingHelper::convertToUTF8( wMsg );
+  return buildErrorReturn(rc, strMsg.c_str());
 }
 
 int RequestData::buildErrorReturn
 (
-  int _rc_,
-  char *pszErrorMsg
+  int rc,
+  const char *pszErrorMsg
 )
 {
-  json_factory.startJSON( errorMsg );
-  json_factory.addParmToJSON( errorMsg, "ReturnValue", _rc_ );
-  json_factory.addParmToJSON( errorMsg, "ErrorMsg", pszErrorMsg );
-  json_factory.terminateJSON( errorMsg );
-  
-  T5LOG(T5ERROR) << errorMsg << ", ErrorCode = " << _rc_;
-  return( 0 );
+  if(!_rc_) _rc_ = rc;
+  json_factory.startJSON( outputMessage );
+  json_factory.addParmToJSON( outputMessage, "ReturnValue", rc );
+  json_factory.addParmToJSON( outputMessage, "ErrorMsg", pszErrorMsg );
+  json_factory.terminateJSON( outputMessage );
+  if(_rest_rc_ == 0) _rest_rc_ = BAD_REQUEST;
+  T5LOG(T5ERROR) << outputMessage;
+  return( rc );
 }
 
 
@@ -232,18 +226,16 @@ int RequestData::requestTM(){
   }else if(isWriteRequest())
   {
     mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef);
-  }else{
-    fValid = true;
-    return 0;
   }
 
   if(mem.get()== nullptr)
   {
   //  buildErrorReturn( _rc_, Data.szError );
-    return !isServiceRequest();
-  } /* endif */
-  fValid = true;
-  return 0;
+    fValid = isServiceRequest();
+  }else{
+    fValid = true;
+  }
+  return fValid == 0;
 }
 
 bool RequestData::isWriteRequest(){
@@ -281,6 +273,24 @@ bool RequestData::isServiceRequest(){
   ;   
 }
 
+int RequestData::buildRet(int res){
+  if(!_rest_rc_){
+    if(_rc_ == 0){
+      _rest_rc_ = 200;
+    }else if(_rc_>= 100 && _rc_ <1000){
+      _rest_rc_ = _rc_;
+    }else{
+      _rc_ = 500;
+    }
+  }
+
+  if(outputMessage.empty()){
+    //TODO: change to json
+    outputMessage = "emptyMessage, rc = "  + std::to_string(_rc_) + ", rest_rc = " + std::to_string(_rest_rc_);
+  }
+  T5LOG(T5DEBUG) << outputMessage;
+}
+
 int RequestData::run(){
     //fix garbage in json 
     if(strBody.empty() == false){
@@ -297,14 +307,9 @@ int RequestData::run(){
 
     if(!res) res = requestTM();
     
-    
     if(!res && fValid) 
       res = execute();
-    if ( res != 0 )
-    {
-        buildErrorReturn( res, ""/*szLastError*/ );
-        return( res );
-    } /* endif */
+    buildRet(res);
     return res;
 }
 
@@ -358,9 +363,9 @@ int CreateMemRequestData::importInInternalFomat(){
     strTempFile =  FilesystemHelper::BuildTempFileName();
     if (strTempFile.empty()  )
     {
-        wchar_t errMsg[] = L"Could not create file name for temporary data";
-        buildErrorReturn( -1, errMsg );
-        return( INTERNAL_SERVER_ERROR );
+      wchar_t errMsg[] = L"Could not create file name for temporary data";
+      buildErrorReturn( -1, errMsg );
+      return( INTERNAL_SERVER_ERROR );
     }
 
     T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
@@ -426,36 +431,26 @@ int CreateMemRequestData::importInInternalFomat(){
 }
 
 int CreateMemRequestData::checkData(){
-    if ( !_rest_rc_ && strMemName.empty() )
+    if ( !_rc_ && strMemName.empty() )
     {
-        _rc_ = ERROR_INPUT_PARMS_INVALID;
-        buildErrorReturn( _rc_, "Error: Missing memory name input parameter" );
-        _rest_rc_ = BAD_REQUEST ;
-        return _rest_rc_;
+        return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing memory name input parameter" );
     } /* end */
-    if ( !_rest_rc_ && strSrcLang.empty() )
+    if ( !_rc_ && strSrcLang.empty() )
     {
-        _rc_ = ERROR_INPUT_PARMS_INVALID;
-        buildErrorReturn( _rc_, "Error: Missing source language input parameter" );
-        _rest_rc_= BAD_REQUEST ;
-        return _rest_rc_;
+        return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source language input parameter" );
     } /* end */
 
     // convert the ISO source language to a OpenTM2 source language name
     char szOtmSourceLang[40];
-    if(!_rest_rc_ ){
-        
+    if(!_rc_ ){        
         szOtmSourceLang[0] = 0;//terminate to avoid garbage
         bool fPrefered = false;
         EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strSrcLang.c_str(), szOtmSourceLang, &fPrefered );
         
         if ( szOtmSourceLang[0] == 0 )
         {
-            _rc_ = ERROR_INPUT_PARMS_INVALID;
             std::string err =  "Error: Could not convert language " + strSrcLang + "to OpenTM2 language name";
-            buildErrorReturn( _rc_, (PSZ)err.c_str() );
-            _rest_rc_ =  BAD_REQUEST ;
-            return _rest_rc_;
+            return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, (PSZ)err.c_str() );
         } /* end */
     }
 
@@ -465,8 +460,9 @@ int CreateMemRequestData::checkData(){
     { 
       if ( !FilesystemHelper::checkFileName( strMemName ))
       {
-        T5LOG(T5ERROR) <<   "::ERROR_INV_NAME::" << strMemName;
-        _rc_ = ERROR_MEM_NAME_INVALID;
+        std::string errMsg = "::ERROR_INV_NAME::" + strMemName ;
+        buildErrorReturn( ERROR_MEM_NAME_INVALID,  errMsg.c_str() );
+        return _rc_;
       } /* endif */
     } /* endif */
 
@@ -476,8 +472,9 @@ int CreateMemRequestData::checkData(){
       int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName, false );
       if ( res != TMManager::TMM_TM_NOT_FOUND )
       {
-        T5LOG(T5ERROR) <<  "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " << strMemName << "; res = "<< res;
-        _rc_ = ERROR_MEM_NAME_EXISTS;
+        std::string errMsg = "::ERROR_MEM_NAME_EXISTS:: TM with this name already exists: " +  strMemName + "; res = " + std::to_string(res) ;
+        buildErrorReturn( ERROR_MEM_NAME_EXISTS, errMsg.c_str());
+        return _rc_;
       }
     } /* endif */
 
@@ -488,8 +485,9 @@ int CreateMemRequestData::checkData(){
       SHORT sID = 0;    
       if ( MorphGetLanguageID( (PSZ)strSrcLang.c_str(), &sID ) != MORPH_OK )
       {
-        _rc_ = ERROR_PROPERTY_LANG_DATA;
-        T5LOG(T5ERROR) << "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA;";
+        std::string errMsg = "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA::" +  strSrcLang ;
+        buildErrorReturn( ERROR_PROPERTY_LANG_DATA, errMsg.c_str());
+        return _rc_;
       } /* endif */
     } /* endif */
     fValid = !_rest_rc_ && !_rc_;
@@ -497,16 +495,12 @@ int CreateMemRequestData::checkData(){
 }
 
 int CreateMemRequestData::parseJSON(){
-// parse input parameters
-  //std::string strData, strName, strSourceLang, strDescription;
+  // parse input parameters
   void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
   if ( parseHandle == NULL )
   {
-    buildErrorReturn( _rc_, "Missing or incorrect JSON data in request body" );
-    _rest_rc_ =  BAD_REQUEST ;
-    return _rest_rc_;
+    return buildErrorReturn( _rc_, "Missing or incorrect JSON data in request body" );
   } /* end */
-  //if(_rest_rc_){
     std::string name;
     std::string value;
     while ( _rc_ == 0 )
@@ -539,9 +533,8 @@ int CreateMemRequestData::parseJSON(){
         }
     } /* endwhile */
     json_factory.parseJSONStop( parseHandle );
-  //}
   if(_rc_ == 2002) _rc_=0;
-  return _rest_rc_;
+  return _rc_;
 }
 
 int CreateMemRequestData::execute(){
@@ -666,44 +659,17 @@ int ImportRequestData::parseJSON(){
 }
 
 int ListTMRequestData::execute(){
-  auto buildError = [&] (int errCode, bool getErrorFromEqf = false) mutable -> int{
-    unsigned short usRC = 0;
-    if(getErrorFromEqf)
-      1;//EqfGetLastErrorW( this->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-    else
-      usRC = _rc_;
-    //buildErrorReturn( usRC, outputMessage );
-    return errCode;
-  };
-
   if ( _rc_ != 0 )
-    buildError(BAD_REQUEST);
-  
-  // get buffer size required for the list of TMs
-  LONG lBufferSize = 0;
-
-  if ( _rc_ != 0 )
-    return buildError(INTERNAL_SERVER_ERROR, true);
-
-  // get the list of TMs
-  //PSZ pszBuffer = new char[lBufferSize];
-  //pszBuffer[0] = 0;//terminated to avoid garbage output
-
-  if ( _rc_ != 0 )
-  {
-    //delete pszBuffer;
-    return buildError(INTERNAL_SERVER_ERROR, true);
-  } /* endif */
+    return buildErrorReturn(_rc_, "Error code is not 0 before executing listtm main code");
 
   // add all TMs to reponse area
   std::stringstream jsonSS;
-  std::istringstream buffer;//(pszBuffer);
+  std::istringstream buffer;
   std::string strName;
 
   jsonSS << "{\n\t\"Open\":[";
   int elementCount = 0;
   std::set<std::string> printedTMNames;
-  //while (std::getline(buffer, strName, ','))
   for(auto& tmem: TMManager::GetInstance()->tms)
   {
     if(elementCount)//skip delim for first elem
@@ -737,8 +703,6 @@ int ListTMRequestData::execute(){
   }
   jsonSS <<"]\n}";
   outputMessage = jsonSS.str();
-  T5LOG( T5INFO) << "OtmMemoryServiceWorker::list()::strOutputParams = " << outputMessage << "; _rc_ = OK";
-  _rc_ = OK;
   return _rc_;
 }
 
@@ -943,8 +907,8 @@ int ReorganizeRequestData::execute(){
     
     T5LOG(T5ERROR) << "fails:: _rc_ = " << _rc_ << "; strOutputParams = " << outputMessage << "; szLastError = " <<
          EncodingHelper::convertToUTF8(szLastError);
-
-    buildErrorReturn( _rc_, szLastError );
+    std::string strLastError = EncodingHelper::convertToUTF8(szLastError);
+    buildErrorReturn( _rc_, strLastError.c_str() );
     return( INTERNAL_SERVER_ERROR );
   }else{
     outputMessage = "{\"" + strMemName + "\": \"reorganized\" }";

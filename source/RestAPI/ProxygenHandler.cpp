@@ -78,12 +78,13 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 
   pRequest->requestAcceptHeader = requestAcceptHeader;
 
-  int id = stats_->recordRequest(pRequest->command);
+  pRequest->_id_ = stats_->recordRequest(pRequest->command);
+  
   T5Logger::GetInstance()->SetLogInfo(pRequest->command);
   if(CommandToStringsMap.find(pRequest->command) == CommandToStringsMap.end()){
-    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + toStr(pRequest->command) + " request, id = " + toStr(id));
+    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + toStr(pRequest->command) + " request, id = " + toStr(pRequest->_id_));
   }else{
-    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(pRequest->command)->second + " request, id = " + toStr(id));
+    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(pRequest->command)->second + " request, id = " + toStr(pRequest->_id_));
   }
   if(pRequest->strMemName.empty() == false){
     T5Logger::GetInstance()->AddToLogBuffer(std::string(", for memory \"") + pRequest->strMemName + "\"");
@@ -132,7 +133,7 @@ void ProxygenHandler::onEOM() noexcept {
       pRequest->run();
     }
  
-  sendResponse();
+    sendResponse();
   }
 }
 
@@ -172,16 +173,15 @@ void ProxygenHandler::sendResponse()noexcept{
     builder->status(pRequest->_rest_rc_, responseText);
     if (FLAGS_request_number) {
       builder->header("Request-Number",
-                    folly::to<std::string>(stats_->getRequestCount()));
+                    folly::to<std::string>(pRequest->_id_));
     }
     
     //req->getHeaders().forEach([&](std::string& name, std::string& value) {
     //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
     //});
 
-    char version[20];
-    Properties::GetInstance()->get_value_or_default(KEY_APP_VERSION, version, 20, "");
-    builder->header("t5memory-version", version);  
+    std::string appVersion = std::to_string(T5GLOBVERSION) + ":" + std::to_string(T5MAJVERSION) + ":" + std::to_string(T5MINVERSION)  ;
+    builder->header("t5memory-version", appVersion);  
     if(pRequest->command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT){
       builder->header("Content-Type", "application/zip");
     } else{
