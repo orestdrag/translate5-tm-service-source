@@ -544,10 +544,13 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   if ( _rc_ == NO_ERROR )
   {
     T5LOG( T5DEBUG) << ":: create the memory" ;    
-    NewMem = std::make_shared<EqfMemory> (EqfMemory(strMemName));
-    _rc_ = NewMem->NTMCreateLongNameTable();
+    NewMem = std::make_shared<EqfMemory> (strMemName);
+    if ( NewMem == nullptr ){
+      _rc_ = ERROR_NOT_ENOUGH_MEMORY;
+    }
   }
-  if ( _rc_ == NO_ERROR )
+  
+  if(_rc_ == NO_ERROR)
   {
     //build name and extension of tm data file
 
@@ -557,10 +560,6 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     strcpy( NewMem->stTmSign.szSourceLanguage,
             strSrcLang.c_str() );
 
-    //TODO - replace version with current t5memory version
-    NewMem->stTmSign.bGlobVersion = T5GLOBVERSION;
-    NewMem->stTmSign.bMajorVersion = T5MAJVERSION;
-    NewMem->stTmSign.bMinorVersion = T5MINVERSION;
     strcpy( NewMem->stTmSign.szDescription,
             strMemDescription.c_str() );
 
@@ -643,8 +642,6 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     //something went wrong during create or insert so delete data file
     //UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
     UtlDelete((PSZ) NewMem->TmBtree.fb.fileName.c_str(), 0L, FALSE);
-    //free allocated memory
-    NewMem->NTMDestroyLongNameTable();
   } /* endif */    
   return NewMem;
 

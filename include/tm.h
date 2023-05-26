@@ -2034,6 +2034,12 @@ public:
     Authors.ulMaxEntries = 0;
     TagTables.ulMaxEntries = 0;
     LangGroups.ulMaxEntries = 0;
+
+    stTmSign.bGlobVersion = T5GLOBVERSION;
+    stTmSign.bMajorVersion = T5MAJVERSION;
+    stTmSign.bMinorVersion = T5MINVERSION;
+    int rc = NTMCreateLongNameTable();
+    if(rc) T5LOG(T5ERROR) << "NTMCreateLongNameTable returned non-zero, but " << rc; 
   };
 
 	EqfMemory( HTM htm, char *pszName );

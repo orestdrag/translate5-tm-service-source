@@ -336,13 +336,12 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 int CreateMemRequestData::createNewEmptyMemory(){
   // create memory database
   ULONG ulKey;
-  std::shared_ptr<EqfMemory> NewMem;
   if(!_rc_){
-    NewMem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_);
+    mem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_);
   }
   T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
   if(!_rc_){
-    TMManager::GetInstance()->AddMem(NewMem);
+    TMManager::GetInstance()->AddMem(mem);
   }
   return 0;
 }
@@ -357,77 +356,76 @@ const char* GetFileExtention(std::string file){
 }
 
 int CreateMemRequestData::importInInternalFomat(){
-    T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
-    // setup temp file name for ZIP package file 
-  
-    strTempFile =  FilesystemHelper::BuildTempFileName();
-    if (strTempFile.empty()  )
-    {
-      wchar_t errMsg[] = L"Could not create file name for temporary data";
-      buildErrorReturn( -1, errMsg );
+  T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
+  // setup temp file name for ZIP package file 
+
+  strTempFile =  FilesystemHelper::BuildTempFileName();
+  if (strTempFile.empty()  )
+  {
+    buildErrorReturn( -1, "Could not create file name for temporary data" );
+    return( INTERNAL_SERVER_ERROR );
+  }
+
+  T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
+
+  // decode binary data and write it to temp file
+  std::string strError;
+  _rc_ = FilesystemHelper::DecodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
+  if ( _rc_ != 0 )
+  {
+      buildErrorReturn( _rc_, (char *)strError.c_str() );
       return( INTERNAL_SERVER_ERROR );
+  }
+  //_rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), strTempFile.c_str(), 0 );
+
+  // make temporary directory for the memory files of the package
+  std::string tempMemUnzipFolder = FilesystemHelper::GetTempDir();
+  FilesystemHelper::CreateDir( FilesystemHelper::GetTempDir() );
+  tempMemUnzipFolder += "MemImp/";
+  FilesystemHelper::CreateDir( tempMemUnzipFolder );
+  tempMemUnzipFolder += strMemName + '/';
+  FilesystemHelper::CreateDir( tempMemUnzipFolder );
+
+  // unpzip the package
+  FilesystemHelper::ZipExtract( strTempFile, tempMemUnzipFolder );
+  
+      
+  auto files = FilesystemHelper::GetFilesList(tempMemUnzipFolder.c_str());
+  std::string memDir = FilesystemHelper::GetMemDir();
+  for( auto file: files ){
+    if(file.size() <= 4){
+      continue;
     }
-
-    T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
-
-    // decode binary data and write it to temp file
-    std::string strError;
-    _rc_ = FilesystemHelper::DecodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
-    if ( _rc_ != 0 )
-    {
-        buildErrorReturn( _rc_, (char *)strError.c_str() );
-        return( INTERNAL_SERVER_ERROR );
+    std::string targetFName = memDir + strMemName + GetFileExtention(file);
+    if(FilesystemHelper::FileExists(targetFName.c_str())){
+      T5LOG(T5ERROR) << ":: file exists, fName = " << targetFName;
+      _rc_ = -1;
+      break;
     }
-    //_rc_ = TMManager::GetInstance()->APIImportMemInInternalFormat( strMemName.c_str(), strTempFile.c_str(), 0 );
+  }
 
-    // make temporary directory for the memory files of the package
-    std::string tempMemUnzipFolder = FilesystemHelper::GetTempDir();
-    FilesystemHelper::CreateDir( FilesystemHelper::GetTempDir() );
-    tempMemUnzipFolder += "MemImp/";
-    FilesystemHelper::CreateDir( tempMemUnzipFolder );
-    tempMemUnzipFolder += strMemName + '/';
-    FilesystemHelper::CreateDir( tempMemUnzipFolder );
-
-    // unpzip the package
-    FilesystemHelper::ZipExtract( strTempFile, tempMemUnzipFolder );
-    
-       
-    auto files = FilesystemHelper::GetFilesList(tempMemUnzipFolder.c_str());
-    std::string memDir = FilesystemHelper::GetMemDir();
-    for( auto file: files ){
+  if( !_rc_ ){
+    for( auto file:files){
       if(file.size() <= 4){
         continue;
       }
       std::string targetFName = memDir + strMemName + GetFileExtention(file);
-      if(FilesystemHelper::FileExists(targetFName.c_str())){
-        T5LOG(T5ERROR) << ":: file exists, fName = " << targetFName;
-        _rc_ = -1;
-        break;
-      }
+      std::string oldFName = tempMemUnzipFolder + file;
+      FilesystemHelper::MoveFile(oldFName, targetFName);
     }
+    
+    if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName)){
+      T5LOG( T5INFO) << ":: memory file not found after import in internal format, mem name = "<< strMemName << "; rc = " << _rc_;
+      _rc_ = -2;
+    }      
+  }
 
-    if( !_rc_ ){
-      for( auto file:files){
-        if(file.size() <= 4){
-          continue;
-        }
-        std::string targetFName = memDir + strMemName + GetFileExtention(file);
-        std::string oldFName = tempMemUnzipFolder + file;
-        FilesystemHelper::MoveFile(oldFName, targetFName);
-      }
-      
-      if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName)){
-        T5LOG( T5INFO) << ":: memory file not found after import in internal format, mem name = "<< strMemName << "; rc = " << _rc_;
-        _rc_ = -2;
-      }      
-    }
-
-    // delete any files left over and remove the directory
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-      FilesystemHelper::RemoveDirWithFiles( tempMemUnzipFolder );
-      FilesystemHelper::DeleteFile( strTempFile );
-    }
-    return _rc_;
+  // delete any files left over and remove the directory
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+    FilesystemHelper::RemoveDirWithFiles( tempMemUnzipFolder );
+    FilesystemHelper::DeleteFile( strTempFile );
+  }
+  return _rc_;
 }
 
 int CreateMemRequestData::checkData(){
@@ -435,14 +433,15 @@ int CreateMemRequestData::checkData(){
     {
         return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing memory name input parameter" );
     } /* end */
-    if ( !_rc_ && strSrcLang.empty() )
+    
+    if ( !_rc_ && strSrcLang.empty() && strMemB64EncodedData.empty())// it's import in internal format
     {
         return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source language input parameter" );
     } /* end */
 
     // convert the ISO source language to a OpenTM2 source language name
     char szOtmSourceLang[40];
-    if(!_rc_ ){        
+    if(!_rc_ && strSrcLang.empty() == false ){        
         szOtmSourceLang[0] = 0;//terminate to avoid garbage
         bool fPrefered = false;
         EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strSrcLang.c_str(), szOtmSourceLang, &fPrefered );
@@ -534,6 +533,7 @@ int CreateMemRequestData::parseJSON(){
     } /* endwhile */
     json_factory.parseJSONStop( parseHandle );
   if(_rc_ == 2002) _rc_=0;
+  if (_rc_) buildErrorReturn (_rc_, "Error during parsing json");
   return _rc_;
 }
 
