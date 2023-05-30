@@ -1399,14 +1399,12 @@ int ExportRequestData::checkData(){
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
   {
-    T5LOG( T5INFO) <<"::getMem::Error: no valid API session" ;
-    return(_rest_rc_ =  BAD_REQUEST );
+    return buildErrorReturn(_rc_ , "::getMem::Error: no valid API session" );
   } /* endif */
 
   if ( strMemName.empty() )
   {
-    T5LOG(T5ERROR) <<"::getMem::Error: no memory name specified" ;
-    return( _rest_rc_ = BAD_REQUEST );
+    return buildErrorReturn(_rc_ , "::getMem::Error: no memory name specified" );
   } /* endif */
 
 
@@ -1415,11 +1413,13 @@ int ExportRequestData::checkData(){
     int res =  TMManager::GetInstance()->TMExistsOnDisk(strMemName, true );
     if ( res != TMManager::TMM_NO_ERROR )
     {
-      T5LOG(T5ERROR) <<"::getMem::Error: memory does not exist, memName = " << strMemName<< "; res= " << res;
+      std::string errMsg = ":getMem::Error: memory does not exist, memName = " + strMemName + "; res= " + std::to_string(res);
+      buildErrorReturn(res, errMsg.c_str()); 
       return( _rest_rc_ =  NOT_FOUND );
     }
+    //fValid = true;
   }
-  fValid = true;
+  return _rc_;
 }
 
 int ExportRequestData::execute(){
@@ -1427,7 +1427,7 @@ int ExportRequestData::execute(){
   strTempFile = FilesystemHelper::BuildTempFileName();
   if ( _rc_ != 0 )
   {
-    T5LOG(T5ERROR) <<"::getMem:: Error: creation of temporary file for memory data failed" ;
+    buildErrorReturn(_rc_, "::getMem:: Error: creation of temporary file for memory data failed");
     return( _rest_rc_ = INTERNAL_SERVER_ERROR );
   }
   // export the memory in internal format
@@ -1440,27 +1440,29 @@ int ExportRequestData::execute(){
     {
       //unsigned short usRC = 0;
       //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMem failed with rc=" << _rc_ << ", error message is " <<  EncodingHelper::convertToUTF8( this->szLastError);
+      std::string strErrMsg = "::getMem:: Error: EqfExportMem failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
+      buildErrorReturn(_rc_, strErrMsg.c_str());
       return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
   else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
   {
     T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip(NOT TESTED YET), tempFile = " << strTempFile;
-    //_rc_ = EqfExportMemInInternalFormat( OtmMemoryServiceWorker::getInstance()->hSession, (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), 0 );
     ExportZip();
     if ( _rc_ != 0 )
     {
       //unsigned short usRC = 0;
       //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
-      //T5LOG(T5ERROR) <<"::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" <<_rc_ << ", error message is " << EncodingHelper::convertToUTF8( this->szLastError);
-      return( INTERNAL_SERVER_ERROR );
+      std::string strErrMsg = "::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
+      buildErrorReturn(_rc_, strErrMsg.c_str());
+      return( _rest_rc_ = INTERNAL_SERVER_ERROR );
     }
   }
   else
   {
-    T5LOG(T5ERROR) <<"::getMem:: Error: the type " << requestAcceptHeader << " is not supported" ;
-    return( NOT_ACCEPTABLE );
+    std::string strErrMsg = "::getMem:: Error: the type " + requestAcceptHeader + " is not supported" ;
+    buildErrorReturn(_rc_, strErrMsg.c_str());
+    return( _rest_rc_ = NOT_ACCEPTABLE );
   }
 
   // fill the vMemData vector with the content of zTempFile
@@ -1474,8 +1476,9 @@ int ExportRequestData::execute(){
   
   if ( _rc_ != 0 )
   {
-    T5LOG(T5ERROR) << "::getMem::  Error: failed to load the temporary file, fName = " <<  strTempFile ;
-    return( INTERNAL_SERVER_ERROR );
+    std::string strErrMsg = "::getMem::  Error: failed to load the temporary file, fName = " +  strTempFile ;
+    buildErrorReturn(_rc_, strErrMsg.c_str());
+    return( _rest_rc_ = INTERNAL_SERVER_ERROR );
   }
 
   return( OK );
@@ -1530,14 +1533,12 @@ int UpdateEntryRequestData::parseJSON(){
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
   {
-    buildErrorReturn( _rc_, "can't verifyAPISession" );
-    return( BAD_REQUEST );
+    return buildErrorReturn( BAD_REQUEST, "can't verifyAPISession" );
   } /* endif */
 
   if ( strMemName.empty() )
   {
-    buildErrorReturn( _rc_, "Missing name of memory");
-    return( BAD_REQUEST );
+    return buildErrorReturn( BAD_REQUEST, "Missing name of memory");
   } /* endif */
 
   // parse input parameters
@@ -1570,34 +1571,29 @@ int UpdateEntryRequestData::parseJSON(){
 int UpdateEntryRequestData::checkData(){
   if ( _rc_ != 0 )
   {
-    _rc_ = ERROR_INTERNALFUNCTION_FAILED;
-    buildErrorReturn( _rc_, "Error: Parsing of input parameters failed" );
-    return( BAD_REQUEST );
+    buildErrorReturn( ERROR_INTERNALFUNCTION_FAILED, "Error: Parsing of input parameters failed" );
+    return( _rest_rc_ = BAD_REQUEST );
   } /* end */
 
   if ( Data.szSource[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing source text" );
-    return( BAD_REQUEST );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source text" );
+    return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
   if ( Data.szTarget[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing target text" );
-    return( BAD_REQUEST );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing target text" );
+    return( _rest_rc_ =  BAD_REQUEST );
   } /* end */
   if ( Data.szIsoSourceLang[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_,  "Error: Missing source language");
-    return( BAD_REQUEST );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID,  "Error: Missing source language");
+    return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
   if ( Data.szIsoTargetLang[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing target language" );
-    return( BAD_REQUEST );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing target language" );
+    return( _rest_rc_ = BAD_REQUEST );
   } /* end */
   if ( Data.szMarkup[0] == 0 )
   {
@@ -1617,18 +1613,13 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
   memset( &Prop, 0, sizeof( Prop ) );
-  int rc = 0;
-  auto replacedInput = replaceString( Data.szSource , Data.szTarget, L"", &rc );
-  //wcscpy( Prop.szSource, Data.szSource );
-  //wcscpy( Prop.szTarget, Data.szTarget );
-  if(!rc){
+  auto replacedInput = replaceString( Data.szSource , Data.szTarget, L"", &_rc_ );
+  if(!_rc_){
     wcscpy( Prop.szSource, replacedInput[0].c_str());
     wcscpy( Prop.szTarget, replacedInput[1].c_str());
   }else{
-    outputMessage = "Error in xml in source or target!";
-    return rc;
-    //wcscpy( Prop.szSource, Data.szSource);
-    //wcscpy( Prop.szTarget, Data.szTarget);
+    buildErrorReturn(_rc_, "Error in xml in source or target!");
+    return _rc_;
   }
   Prop.lSegmentNum = Data.lSegmentNum;
   strcpy( Prop.szDocName, Data.szDocName );
@@ -1641,7 +1632,7 @@ int UpdateEntryRequestData::execute(){
   LONG lTime = 0;
   if (Data.szDateTime[0] != 0 )
   {
-  // use provided time stamp
+    // use provided time stamp
     convertUTCTimeToLong(Data.szDateTime, &(Prop.lTargetTime) );
   }
   else
@@ -1658,15 +1649,13 @@ int UpdateEntryRequestData::execute(){
 
   // update the memory
   OtmProposal OtmProposal;
-  strcpy(Prop.szDocShortName , Prop.szDocName);
-  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
-  //USHORT usRC = (USHORT)mem.get()->putProposal( *pOtmProposal );
-  
   TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
   TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
+  strcpy(Prop.szDocShortName , Prop.szDocName);
+  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
   OtmProposalToPutIn( OtmProposal, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
@@ -1681,7 +1670,7 @@ int UpdateEntryRequestData::execute(){
   _rc_ = TmtXReplace ( mem.get(), &TmPutIn, &TmPutOut );
 
   if ( _rc_ != 0 ){
-      T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << _rc_;   
+      return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else{
     mem.get()->TmBtree.fb.Flush();
@@ -1690,7 +1679,7 @@ int UpdateEntryRequestData::execute(){
 
   if ( ( _rc_ == 0 ) &&
        ( TmPutIn.stTmPut.fMarkupChanged ) ) {
-     _rc_ = SEG_RESET_BAD_MARKUP ;
+     return buildErrorReturn(SEG_RESET_BAD_MARKUP, "SEG_RESET_BAD_MARKUP") ;
   }
   
   if ( _rc_ != 0 )
@@ -1698,7 +1687,7 @@ int UpdateEntryRequestData::execute(){
     unsigned short usRC = 0;
     EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC,Data.szError, sizeof(Data.szError ) / sizeof(Data.szError[0] ) );
     buildErrorReturn( _rc_,Data.szError );
-    return( INTERNAL_SERVER_ERROR );
+    return( _rest_rc_ = INTERNAL_SERVER_ERROR );
   } /* endif */
 
   // return the entry data
@@ -1722,10 +1711,6 @@ int UpdateEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
   json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
   json_factory.terminateJSON( outputMessage );
-  //outputMessage = EncodingHelper::convertToUTF8( outputMessageW.c_str() );
-
-  _rc_ = OK;
-
   return( _rc_ );
 }
 
@@ -1734,7 +1719,7 @@ int DeleteEntryRequestData::parseJSON(){
   if ( strMemName.empty() )
   {
     buildErrorReturn( _rc_, "Missing name of memory" );
-    return( BAD_REQUEST );
+    return(  _rest_rc_ = BAD_REQUEST );
   } /* endif */
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
@@ -1858,11 +1843,11 @@ int DeleteEntryRequestData::execute(){
 
   if ( _rc_ != 0 )
   {
-    unsigned short usRC = 0;
-    auto w_error_str = EncodingHelper::convertToUTF16(errorStr.c_str());
-    EqfGetLastErrorW( hSession, &usRC, (wchar_t*)w_error_str.c_str(), w_error_str.size());
+    //unsigned short usRC = 0;
+    //auto w_error_str = EncodingHelper::convertToUTF16(errorStr.c_str());
+    //EqfGetLastErrorW( hSession, &usRC, (wchar_t*)w_error_str.c_str(), w_error_str.size());
     // Data.szError , sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
-    buildErrorReturn( _rc_, Data.szError );
+    buildErrorReturn( _rc_, errorStr.c_str() );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
   mem->TmBtree.fb.Flush();
@@ -1925,29 +1910,25 @@ int FuzzySearchRequestData::parseJSON(){
 int FuzzySearchRequestData::checkData(){
   if ( _rc_ != 0 )
   {
-    _rc_ = ERROR_INTERNALFUNCTION_FAILED;
-    buildErrorReturn( _rc_, "Error: Parsing of input parameters failed" );
+    buildErrorReturn( ERROR_INTERNALFUNCTION_FAILED, "Error: Parsing of input parameters failed" );
     return( _rest_rc_ = BAD_REQUEST );
   } /* end */
 
   if ( Data.szSource[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing source text input parameter" );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source text input parameter" );
     return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
 
   if ( Data.szIsoSourceLang[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing source language input parameter" );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source language input parameter" );
     return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
   
   if ( Data.szIsoTargetLang[0] == 0 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Missing target language input parameter" );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing target language input parameter" );
     return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
   
@@ -1960,8 +1941,7 @@ int FuzzySearchRequestData::checkData(){
   
   if ( Data.iNumOfProposals > 20 )
   {
-    _rc_ = ERROR_INPUT_PARMS_INVALID;
-    buildErrorReturn( _rc_, "Error: Too many proposals requested, the maximum value is 20" );
+    buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Too many proposals requested, the maximum value is 20" );
     return(  _rest_rc_ = BAD_REQUEST );
   } /* end */
 
@@ -1971,14 +1951,6 @@ int FuzzySearchRequestData::checkData(){
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
 
-  // get the handle of the memory 
-  //long lHandle = 0;
-  //int httpRC = TMManager::GetInstance()->getMemoryHandle(strMemName, &lHandle, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ), &_rc_ );
-  //if ( httpRC != OK )
-  //{
-  //  buildErrorReturn( _rc_, Data.szError );
-  //  return(  _rest_rc_ = httpRC );
-  //} /* endif */
   return _rc_;
 }
 
