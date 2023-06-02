@@ -1280,7 +1280,6 @@ VOID QDAMSetrecData_V3
 //   pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
    } /* endif */
 
-   return ;
 }
 
 
