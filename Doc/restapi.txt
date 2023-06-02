@@ -1,0 +1,199 @@
+
+all requests are executed in the same structure, but for some steps could be skipped
+1. determine command using url and request type(POST, GET, DELETE)
+2. created instance of class to handle that specific 
+3. call run which would do in this order
+	-a-  check service init
+	-b-  parse json (skip if there is no body)
+	-c-  check parsed data(just if all needed fields was proviced)
+	-d-  request tm handler (smart pointer)(
+			read only handler if it's read only request and if there is no write requests
+			write handler, if it's write request
+			for statusRequest request read handler ignoring check for write data(
+					should be available to access even with import of reorganize request )
+			nothing if it's service request 
+	-e-  execute command 
+	-f-  buildReturn codes and decorate error msg into JSON (here we should make outputing json message
+		 with responce or error, handle and correct 
+		 rest_rc(200, 404 etc.), rest_msg("OK/NOT FOUND etc") and rc(just high level t5memory rc
+			that caused error)
+
+
+in step -d-(execution) there could multiple paths(for createTM it's createEmpty and importTM) 
+	and different runtime issue, too many to list it here
+
+
+commands by requested tm handler{
+	we have different commands and all of them has one of this 3 approaches to 
+		request tm handle(only status is a bit different, it's closer to readonly, but since 
+		to have readonly there should be no active write tm handlers, and we need to access
+		to tm's that are in reorganize or import, it's like special case
+
+	write{ CLONE_MEM(should be moved to service requests), DELETE_MEM(should be mover to service), 
+		DELETE_ENTRY, UPDATE_ETRY, IMPORT_MEM(tmx), REORGANIZE_MEM} - to access
+		write tm handler there should be no other active tm handlers(from other requests) and no readonly
+		requests 
+	readonly{FUZZY, CONCORDANCE, EXPORT_MEM, EXPORT_IN_INTERNAL_FORMAT} to access readonly handler, 
+		there should be no active write handlers
+	service(all other: LIST_MEM, SAVE_ALL_TM_ON_DISK, STATUS_MEM, SHUTDOWN, RESOURCE_INFO, CREATE_MEM, (CLONE_MEM), (DELETE_MEM}
+	
+	some service calls is also seems like write(create_mem\unzip_tm, DELETE_MEM, CLONE_MEM ), but for them it's not necessary 
+		to LOAD mem or keep it in RAM, execution of that commands is more connected to files on disk. 
+			But usually we need to do some checks in t5memory.Like to make sure that we flush last version of files to 
+			disk and there are no write requests going on.
+	
+	
+}
+
+Available end points{
+	List of TMs{
+		- service call(don't need any pointer to tm)
+		- returns list of all files loaded in RAM + list of not listed yet memories in MEM folder(that have both tmd and tmi files)
+		results
+			- success - 2 lists of tms(if there is no tm, just 2 empty json arrays
+			- service init fail
+	}
+	
+	ResourceInfo{
+		- gives available info about running instance of t5memory
+		- should be refactored to use new filebuffer\tm system
+			
+	}
+	
+	
+	Create/Import TM in internal format{
+		- service call 
+		- creates new TM(tmd and tmi files) and add it to openMems list or unzip base-encoded tm provided
+			in json(operation depends if there is data field provided in json)
+		results:
+			-success-  created mem and loaded in RAM
+			-b- parsing name, sourceLang, data, loggingThreshold
+			-b- json error(corrupted, empty etc.)
+			-c-  if new tm - check if all next fields is provided: name, sourceLang
+			-c-  if importInInternal - check if all following fields is provided: name, data(b64 encoded binary)
+			-c- check if provided sourceLang could be parsed in t5memory
+			-c- check if name is valid filename
+			-c- check if there is no files with name on the disk
+				(could be different return if there is only one of two files)
+			
+	}
+	
+	
+	Export TM/TMX{
+		- readonly call
+		- export TMX from tm or binary(tm)
+		- export format depends on requests header application/xml or application/zip
+		results: 
+			-success- tm/tmx file of whole tm in responce body
+			-b- its get request so parsing json is skipped
+			-c- checks if tm name is proved(from URL)
+			-c- checks if tm exists on disk 
+	}
+	
+	Fuzzy search{
+		- readonly call
+		
+		- if no markupTable was provided use OTMUXLF
+		- if there were no numOfProposals provided, set it to 5
+		-b- parsing: source, segmentNumber, documentName, sourceLang, 
+			targetLang, markupTable, context, numOfProposal, loggingThreshold
+			
+		results: 
+			-success- returns fuzzy matches for provided segment 
+			-c- check is memName was provided(in URL)
+			-c- check if all following fields is provided:  source, sourceLang, targetLang
+			-c- if num of proposals is bigger than 20 
+	}
+	
+	Concordance search{
+		- readonly call
+		-b- parsing: searchString, searchType, searchPosition, sourceLang, 
+			targetLang, numResults, numOfProposal, msSearchAfterNumResults, loggingThreshold
+		-b- searchType could be equal(non case sensetive) to one of following: "Source", "Target", "SourceAndTarget"
+		results:
+			-success- returns fuzzy matches for provided data
+			-c- check if all following fields is provided:  searchString
+			-c- if sourceLang is provided, check if t5memory can parse it
+			-c- if targetLang is provided, check if t5memory can parse it  
+	}
+	Update entry{
+		- write call
+		-b- parsing: source, target, segmentNumber, documentName, sourceLang, 
+			targetLang, type, author, markupTable, context, timeStamp, addInfo, loggingThreshold
+		- if no markupTable was provided or it was equal to "translate5", use OTMUXLF
+		results:
+			-success- returns provided segment as proof that update was successful
+			-b- corrupted JSON
+			-c- check if all following fields is provided:  source, target, sourceLang, targetLang	
+			
+	}	
+	
+	Delete entry{
+		- write call
+		-b- parsing: source, target, segmentNumber, documentName, sourceLang, 
+			targetLang, type, author, markupTable, context, timeStamp, addInfo, loggingThreshold
+		- if no markupTable was provided or it was equal to "translate5", use OTMUXLF
+		results:
+			-success- returns provided segment as proof that delete was successful
+			-b- corrupted JSON
+			-c- check if all following fields is provided:  source, target, sourceLang, targetLang			
+	}
+	
+	Clone TM localy{
+		service call
+		clones tm 
+		
+		-b- parsing: newName
+		results: 
+			-succes- 
+			-b- if newName is empty
+			-b- if we can't find MEM directory path from t5memory runtime properties
+			-b- if we don't have tmd or tmi files with oldname on disk
+			-b- if we already have tmd or tmi files with newname 
+			-b- if memory is loaded into RAM and there is import process going on
+	}
+	
+	Delete TM{
+		service call
+	}
+	Import provided base64 encoded TMX file into TM{
+		write call
+	}
+	Reorganize TM{
+		- write call
+		- creates temporary tm and reupdating all segments from src tmd file 
+			and then deleting old tmd and tmi and replacing with new files
+		- GET requests(without body)
+		results:
+			-succes- json message that memory was reorganized
+			- checks if we have memname(from URL)
+			
+		
+	}
+	
+	Get the status of TM{
+		- special read call(without block in case if there is write handlers active)
+		- GET request(no body)
+		results:
+			-success- -data about memory, if mem is loaded into RAM, if there are any import processes etc.
+			-tm not found-
+			
+	}
+	
+	
+	Save all TMs{
+		service call 
+	}
+	
+	Shutdown service{
+		- service call
+		- block all new write requests
+		- check if there is no write requests going on
+			- if there is - wait 3 sec and repeat previous step - should be refactored to use new filebuffer
+	}
+	
+	Test tag replacement call{
+		- service call
+		- optional, not used in translate5
+	}
+}
