@@ -71,8 +71,6 @@
 #include "lowlevelotmdatastructs.h"
 
 
-
-
 int MemExpSaveAsDlg( HWND hwndParent, MEM_EXPORT_IDA *pExportIDA );
 
 USHORT  MemExportStart(     PPROCESSCOMMAREA, HWND );
@@ -80,8 +78,6 @@ USHORT  MemExportProcess(   PMEM_EXPORT_IDA pExportIDA );
 USHORT  MemExportWriteFile( PMEM_EXPORT_IDA pExportIDA );
 USHORT  MemExportWrite(     PMEM_EXPORT_IDA pExportIDA, PSZ_W  pszToWrite );
 USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn, PSZ_W pszSegmentOut );
-
-
 
 
 //+----------------------------------------------------------------------------+
@@ -125,30 +121,20 @@ USHORT  MemExportPrepareSegment( PMEM_EXPORT_IDA pExportIDA, PSZ_W pszSegmentIn,
 USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
                         HWND             hWnd )
 {
-  PMEM_EXPORT_IDA   pExportIDA;          // Pointer to the export IDA
-  USHORT            usRc;                // Return code to control the process
-  USHORT            usRC = NO_ERROR;          // function return code
-
   //--- Initialize the load process. If it failed close
   //--- the MemoryDb and the input file.
   //--- call function to  Initialize the load
-  usRc = MemExportStart( pCommArea, hWnd );
-  pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
+  USHORT usRc = MemExportStart( pCommArea, hWnd );
+  PMEM_EXPORT_IDA pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
 
   //--- if error starting export
   if ( !usRc )
   {
-    HWND hwndErrMsg;
-
-    //--- Get pointer to export IDA
-    hwndErrMsg = pExportIDA->hwndErrMsg;
-
     //--- Close MemoryDb and output file.
     //--- Return codes are for testing purposes only
     if ( pExportIDA->pMem != NULL)
     {
-      TMManager *pFactory = TMManager::GetInstance();
-      pFactory->closeMemory( pExportIDA->pMem );
+      TMManager::GetInstance()->closeMemory( pExportIDA->pMem );
       pExportIDA->pMem = NULL;
     } /* endif */
     CloseFile( &(pExportIDA->hFile));
@@ -160,24 +146,12 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
     if ( pExportIDA->pProposal != NULL ) free(pExportIDA->pProposal); 
     UtlAlloc( (PVOID *) &pExportIDA, 0L, 0L, NOMSG );
     pCommArea->pUserIDA = NULL;
-
-    // Dismiss the slider window if it had been created
-    if ( hwndErrMsg != HWND_FUNCIF )
-    {
-
-    } /* endif */
-  }
-  else if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
-  {
-    pExportIDA->NextTask = MEM_EXPORT_TASK;
   }
   else
   {
-    // Move process-ID which is stored in usRc into the
-    // mp1 and issue a message WM_EQF_MEMEXPORT_PROCESS
-
-  } /* endif */
-  return( usRC );
+    pExportIDA->NextTask = MEM_EXPORT_TASK;
+  } 
+  return( usRc );
 } /* end of function EQFMemExportStart */
 
 //+----------------------------------------------------------------------------+
@@ -287,10 +261,6 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
 
        //--- set the progress indicator to 100 percent
        pCommArea->usComplete = 100;
-       if ( pExportIDA->hwndErrMsg != HWND_FUNCIF )
-       {
-
-       } /* endif */
 
        if ( !pExportIDA->pszNameList )
        {
@@ -302,13 +272,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        } /* endif */
 
        //--- Issue message WM_EQF_MEMEXPORT_END
-       if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
-       {
-         pExportIDA->NextTask = MEM_END_EXPORT;
-       }
-       else
-       {
-       } /* endif */
+       pExportIDA->NextTask = MEM_END_EXPORT;      
        break;
     //--------------------------------------------------------------------
     default:
@@ -323,14 +287,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
      fOk=FALSE;
 
      //--- Issue message WM_EQF_MEMEXPORT_END
-     if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )
-     {
-       pExportIDA->NextTask = MEM_END_EXPORT;
-     }
-     else
-     {
-
-     } /* endif */
+     pExportIDA->NextTask = MEM_END_EXPORT;     
      break;
   } /* end switch */
 
@@ -451,7 +408,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   {
     TMManager *pFactory = TMManager::GetInstance();
     //pFactory->closeMemory( pExportIDA->pMem );
-    //pExportIDA->pMem = NULL;
+    pExportIDA->pMem = NULL;
   } /* endif */
   if ( pExportIDA->hFile ) CloseFile( &(pExportIDA->hFile) );
 
@@ -617,7 +574,10 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
     pExportIDA->hFile = NULLHANDLE;
 
     TMManager *pFactory = TMManager::GetInstance();
+    T5LOG(T5FATAL) << "TEMPORARY_COMMENTED CODE pExportIDA->pMem = pFactory->openMemory( pExportIDA->szPlugin, pExportIDA->szMemName, EXCLUSIVE, &iRC );";
+    #ifdef TEMPORARY_COMMENTED
     pExportIDA->pMem = pFactory->openMemory( pExportIDA->szPlugin, pExportIDA->szMemName, EXCLUSIVE, &iRC );
+    #endif
     if ( pExportIDA->pMem == NULL )
     {
       pFactory->showLastError( pExportIDA->szPlugin, pExportIDA->szMemName, pExportIDA->pMem, pExportIDA->hwndErrMsg );
@@ -638,9 +598,8 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
         pExportIDA->hFile = NULLHANDLE;
         fOK = FALSE;
         if ( pExportIDA->pMem != NULL)
-        {
-          TMManager *pFactory = TMManager::GetInstance();
-          pFactory->closeMemory( pExportIDA->pMem );
+        {          
+          TMManager::GetInstance()->closeMemory( pExportIDA->pMem );
           pExportIDA->pMem = NULL;
         } /* endif */
       } /* endif */
@@ -1707,8 +1666,6 @@ USHORT FCTDATA::MemFuncPrepExport
   {
      int iRC = 0;
      TMManager *pFactory = TMManager::GetInstance();
-     //pIDA->pMem = TMManager::GetInstance()->requestReadOnlyTMPointer(std::string(pszMemName)).get();// = EqfMemoryPlugin::GetInstance()->openMemoryNew(pszMemName);
-     //pIDA->pMem = pFactory->openMemory( NULL, pszMemName, EXCLUSIVE, &iRC );
      pIDA->pMem = _mem.get();
      if ( pIDA->pMem == NULL )
      {

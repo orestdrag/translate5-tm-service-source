@@ -294,15 +294,7 @@ int RequestData::buildRet(int res){
 }
 
 int RequestData::run(){
-    //fix garbage in json 
-    if(strBody.empty() == false){
-      size_t json_end = strBody.find("\n}") ;
-      if(json_end > 0 && json_end != std::string::npos){
-        strBody = strBody.substr(0, json_end + 2);
-      }
-      std::string truncatedInput = strBody.size() > 3000 ? strBody.substr(0, 3000) : strBody;
-      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-    }
+   
     int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
     if(!res) res = parseJSON();
     if(!res) res = checkData();
@@ -344,7 +336,6 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 
 int CreateMemRequestData::createNewEmptyMemory(){
   // create memory database
-  ULONG ulKey;
   if(!_rc_){
     mem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_);
   }
@@ -497,7 +488,7 @@ int CreateMemRequestData::checkData(){
       return _rc_;
     } /* endif */
   } /* endif */
-  fValid = !_rest_rc_ && !_rc_;
+  //fValid = !_rest_rc_ && !_rc_;
   return _rest_rc_;
 }
 
@@ -2248,7 +2239,7 @@ int ConcordanceSearchRequestData::execute(){
 
       if ((* Data.szSearchString  == EOS)  )
       {
-        char* pszParm = "Error in TMManager::APISearchMem::Search string is null";
+        char* pszParm = "Error in TMManager::Search string is null";
         T5LOG(T5ERROR) <<  " DDE_MANDPARAMISSING"<< pszParm;
         return DDE_MANDPARAMISSING;
       } /* endif */

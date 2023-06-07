@@ -2150,26 +2150,20 @@ BOOL NTMAlignTags
   BOOL         fOK = TRUE;                       // function return code
 
   // count number of tags in source of proposal
-  if ( fOK )
+  while ( pTokSource->ulHash )
   {
-    while ( pTokSource->ulHash )
+    if ( pTokSource->sType == TAG_TOKEN )
     {
-      if ( pTokSource->sType == TAG_TOKEN )
-      {
-        iSourceTags++;
-      } /* endif */
-      pTokSource++; 
-    } /*endwhile */
-  } /* endif */
+      iSourceTags++;
+    } /* endif */
+    pTokSource++; 
+  } /*endwhile */
 
   // allocate replacement list
-  if ( fOK )
-  {
-    int iSize =  MAX_REPL > iSourceTags?  MAX_REPL : iSourceTags;
-    iSize++;
-    fOK = UtlAlloc( (PVOID *)ppReplaceList, 0L, iSize * sizeof(REPLLIST), ERROR_STORAGE );
-    pReplaceList = *ppReplaceList;
-  } /* endif */
+  int iSize =  MAX_REPL > iSourceTags?  MAX_REPL : iSourceTags;
+  iSize++;
+  fOK = UtlAlloc( (PVOID *)ppReplaceList, 0L, iSize * sizeof(REPLLIST), ERROR_STORAGE );
+  pReplaceList = *ppReplaceList;
 
   // look for source tags in proposal target
   if ( fOK )

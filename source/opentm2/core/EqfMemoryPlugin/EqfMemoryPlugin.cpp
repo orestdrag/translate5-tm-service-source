@@ -77,24 +77,6 @@ const char* EqfMemoryPlugin::getSupplier()
 	return supplier.c_str();
 }
 
-const char* EqfMemoryPlugin::getDescriptiveMemType()
-{
-	return descrType.c_str();
-}
-
-/*! \brief Returns list of supported drive letters. 
-	The list of drives is used to allow the selection of a drive letter in the memory create indow
-	The drive letters are retunred as a null-terminated string containing the letters of the 
-  supported drives. When no drive selection should be possible, an empty string should be returned.\n
-	\param pszDriveListBuffer points to the callers buffer for the list of drive letter characters
-	\returns 0 if successful or error return code */
-int EqfMemoryPlugin::getListOfSupportedDrives( char *pszDriveListBuffer )
-{
-  strcpy( pszDriveListBuffer, szSupportedDrives );
-  return( 0 );
-};
-
-
 /**********************************************************************/
 /**********************************************************************/
 /* Internal functions                                                 */
@@ -195,7 +177,9 @@ EqfMemory* EqfMemoryPlugin::openMemoryNew(
   EqfMemory* pMemory = new EqfMemory(memName);
   if(pMemory){
     usRC = pMemory->OpenX();
-  }  
+  }else{
+    usRC = ERROR_NOT_ENOUGH_MEMORY;
+  } 
   // create memory object if create function completed successfully
   if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){
     T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< memName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
@@ -206,60 +190,6 @@ EqfMemory* EqfMemoryPlugin::openMemoryNew(
   return pMemory;
 } /* end */     
 
-/*! \brief Open an existing translation memory
-  \param pszName name of the existing memory
-	\param bMsgHandling true/false: display errors or not
-	\param hwnd owner-window needed for modal error-message
-  \param usAccessMode, special access mode for memory: FOR_ORGANIZE, EXCLUSIVE, READONLY
-	\returns Pointer to translation memory or NULL in case of errors
-*/
-EqfMemory* EqfMemoryPlugin::openMemory(
-	const char* pszName,			 
-	BOOL bMsgHandling,
-	HWND hwnd,
-  unsigned short usAccessMode
-)
-{
-  EqfMemory *pMemory = NULL;
-  HTM htm = NULL;                      // memory handle 
-  std::string strMemPath;
-
-  // find memory in our list
- std::shared_ptr<EqfMemory>  pInfo = this->findMemory( (PSZ)pszName );
-  if ( pInfo != NULL )
-  {
-    // use old memory open code
-    USHORT usMsgHandling = (USHORT)bMsgHandling;
-    
-    std::string path = pInfo->szFullPath;
-
-    USHORT usRC = TmOpen(  (char*)path.c_str(), &htm,  usAccessMode, 0, usMsgHandling,  hwnd );
-
-    // create memory object if create function completed successfully
-    if ( (usRC == 0) || ((usRC == BTREE_CORRUPTED) //*
-    && (usAccessMode == FOR_ORGANIZE)
-    //*/ 
-    ))
-    {
-      pMemory = new EqfMemory( htm, (PSZ)pszName );
-    }
-    else
-    {
-      T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< pInfo->szFullPath<< "; error = "<< this->strLastError<<"; iLastError = "<< 
-          this->iLastError;
-      //handleError( (int)usRC, (PSZ)pszName, NULL, (PSZ)pInfo->szFullPath, this->strLastError, this->iLastError );
-      if ( htm != 0 ) 
-        TmClose( htm, NULL,  FALSE,  NULL );
-    } /* end */       
-  } /* end */     
-  else
-  {
-    // no memory found
-    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszName, NULL, pInfo->szFullPath, this->strLastError, this->iLastError );
-  }
-
-  return( pMemory );
-}
 
 /*! \brief Close a memory
   \param pMemory pointer to memory object
@@ -268,57 +198,10 @@ int EqfMemoryPlugin::closeMemory(
 	EqfMemory *pMemory			 
 )
 {
-  if ( pMemory == NULL ) return( -1 );
-
-  EqfMemory *pMem = (EqfMemory *)pMemory;
-  HTM htm = pMem->getHTM();
-  
-	int iRC = TmClose( htm, NULL,  FALSE,  NULL );
-
-  // refresh memory info
-  std::string strMemName;
-  pMem->getName( strMemName );
- std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (char *)strMemName.c_str() );
-  if ( pMemInfo.get() != NULL )
-  {
-    std::string strPropName;
-    std::string pathName = pMemInfo.get()->szFullPath;
-    this->makePropName( pathName, strPropName );
-    const char* pszName = strrchr( (char*)strPropName.c_str(), '/' );
-    pszName = (pszName == NULL) ? (char*)strPropName.c_str() : pszName + 1;
-    this->fillInfoStructure( (PSZ)pszName, pMemInfo );  
-  }else{
-    T5LOG(T5ERROR) <<  "EqfMemoryPlugin::closeMemory pMemInfo == NULL";
-  }
-
-  //delete( pMemory );  
-
-  return( iRC );
+  T5LOG(T5ERROR) <<  "unimplemented funtion";
+  return( 0 );
 }
 
-/*! \brief Get information about a memory
-  \param pszName name of the memory
-  \param pInfo pointer to buffer for memory information
-	\returns 0 if successful or error return code
-*/
-int EqfMemoryPlugin::getMemoryInfo(
-	const char* pszName,
- std::shared_ptr<EqfMemory>  pInfo
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
-  if ( pMemInfo.get() != NULL )
-  {
-    memcpy( pInfo.get(), pMemInfo.get(), sizeof(EqfMemory) );
-  }
-  else
-  {
-    iRC = EqfMemoryPlugin::eMemoryNotFound;
-    memset( pInfo.get(), 0, sizeof(EqfMemory) );
-  } /* endif */
-  return( iRC );
-}
 
 ///*! \brief set description of a memory
 //  \param pszName name of the memory
@@ -372,172 +255,6 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     return res;
 }
 
-/*! \brief provides a list of the memory data files
-
-     This method returns a list of the files which together form the specific memory.
-     If there are no real physical files also a dummy name can be and
-     the contents of this dummy file can be generated dynamically when the getMemoryPart
-     method is applied on this memory.
-
-     The file names are passed to the getMemoryPart method to extract the memory data in
-     binary form.
-
-    \param pszName name of the memory
-    \param pFileListBuffer  pointer to a buffer receiving the file names as a comma separated list
-    \param iBufferSize      size of buffer in number of bytes
-
-  	\returns 0 or error code in case of errors
-*/
-int EqfMemoryPlugin::getMemoryFiles
-(
-  const char* pszName,
-  char *pFileListBuffer,
-  int  iBufferSize
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
-  *pFileListBuffer = '\0';
-
- std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
-
-  if ( pMemInfo.get() != NULL )
-  {
-    // get memory property file name
-    std::string strPropName = pMemInfo.get()->szFullPath;
-    std::string strMemName = strPropName.substr(0, strPropName.size()-4); 
-    std::string strMemDataFile = strMemName + EXT_OF_TMDATA ;
-    std::string strMemIndexFile = strMemName + EXT_OF_TMINDEX ;
-    std::string res = strPropName + ',' + strMemDataFile + ',' + strMemIndexFile;
-
-    if ( res.size() <= iBufferSize )
-    {
-      strcpy( pFileListBuffer, res.c_str() ); 
-    }
-    else
-    {
-      iRC = EqfMemoryPlugin::eBufferTooSmall;
-    } /* endif */
-  }
-  else
-  {
-    iRC = EqfMemoryPlugin::eMemoryNotFound;
-  } /* endif */
-  return( iRC );
-}
-
-/*! \brief Physically rename a translation memory
-  \param pszOldName name of the memory being rename
-  \param pszNewName new name for the memory
-	\returns 0 if successful or error return code
-*/
-int EqfMemoryPlugin::renameMemory(
-	const char* pszOldName,
-  const char* pszNewName
-)
-{
-  int iRC = EqfMemoryPlugin::eSuccess;
- std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszOldName );
-  if ( pMemInfo.get() != NULL )
-  {
-    // get new short name for memory
-    BOOL fIsNew = FALSE;
-    char szShortName[MAX_FILESPEC];
-    
-    T5LOG(T5ERROR) <<  ":: TEMPORARY_COMMENTED temcom_id = 16 ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew )";
-#ifdef TEMPORARY_COMMENTED
-    ObjLongToShortName( pszNewName, szShortName, TM_OBJECT, &fIsNew );
-    #endif
-
-    if ( !fIsNew ) return( EqfMemory::ERROR_MEMORYEXISTS );
-
-    // get memory property file name
-    std::string strPropName;
-    std::string strMemPath = pMemInfo.get()->szFullPath;
-    this->makePropName( strMemPath, strPropName ); 
-
-    // rename index file
-    char szIndexPath[MAX_LONGFILESPEC];
-    char szNewPath[MAX_LONGFILESPEC];
-    strcpy( szIndexPath, pMemInfo.get()->szFullPath );
-    char *pszExt = strrchr( szIndexPath, DOT );
-    strcpy( szNewPath, pMemInfo.get()->szFullPath );
-    UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
-    strcpy( strrchr( szIndexPath, DOT ), EXT_OF_TMINDEX );
-    strcat( szNewPath, EXT_OF_TMINDEX );
-    
-    rename( szIndexPath, szNewPath ) ;
-
-    // rename data file
-    strcpy( szNewPath, pMemInfo.get()->szFullPath );
-    UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
-    strcat( szNewPath, EXT_OF_TMDATA );
-    rename( pMemInfo.get()->szFullPath, szNewPath ) ;
-
-    // adjust data file name in memory info area
-    strcpy( pMemInfo.get()->szFullPath, szNewPath ) ;
-
-    // rename the property file
-    strcpy( szNewPath, strPropName.c_str() ); 
-    UtlSplitFnameFromPath( szNewPath );
-    strcat( szNewPath, "\\" );
-    strcat( szNewPath, szShortName );
-    strcat( szNewPath, EXT_OF_MEM  );
-    rename( strPropName.c_str(), szNewPath ) ;
-
-    // update property file
-    PPROP_NTM pstMemProp = NULL;
-    ULONG ulRead = 0;
-    if ( UtlLoadFileL( szNewPath, (PVOID *)&pstMemProp, &ulRead, FALSE, FALSE ) )
-    {      
-      // update name in signature structure
-      strcpy( pstMemProp->stTMSignature.szName, szShortName );
-
-      // re-write property file
-      UtlWriteFileL( szNewPath, ulRead, pstMemProp, FALSE );
-
-      // free property area
-      UtlAlloc( (PVOID *)&pstMemProp, 0, 0, NOMSG );
-    } /* endif */     
-
-    // update memory name in info data
-    strcpy( pMemInfo.get()->szName, pszNewName );
-  }
-  else
-  {
-    iRC = EqfMemoryPlugin::eMemoryNotFound;
-  } /* endif */
-  return( iRC );
-}
-
-/*! \brief close and delete a temporary memory
-  \param pMemory pointer to memory objject
-*/
-void EqfMemoryPlugin::closeTempMemory(
-	EqfMemory *pMemory
-)
-{
-  std::string strName;
-
-  // get the memory name
-  pMemory->getName( strName );
-
-  // close the memory
-  this->closeMemory( pMemory );
-
-T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 19 // use old temporary memory delete code  TMDeleteTempMem( (PSZ)strName.c_str() );";
-#ifdef TEMPORARY_COMMENTED
-  // use old temporary memory delete code
-  TMDeleteTempMem( (PSZ)strName.c_str() );
-#endif //TEMPORARY_COMMENTED
-  
-  return;
-}
-
-
 /*! \brief Get the error message for the last error occured
 
     \param strError reference to a string receiving the error mesage text
@@ -579,92 +296,6 @@ int tryStrCpy(char* dest, const char* src, const char* def){
     return 2;
   }
   
-}
-
-/*! \brief Fill memory info structure from memory properties
-  \param pszPropName name of the memory property file (w/o path) 
-	\param pInfo pointer to memory info structure
-	\returns TRUE when successful, FALSE in case of errors
-*/
-BOOL EqfMemoryPlugin::fillInfoStructure
-(
-   char *pszPropName,
-   std::shared_ptr<EqfMemory>  pInfo
-)
-{
-  if(pInfo==0 || pszPropName==0){
-    T5LOG(T5ERROR) <<  "EqfMemoryPlugin::fillInfoStructure():: pInfo==0 || pszPropName==0";
-    return false;
-  }
-
-  PROP_NTM prop;
-
-  memset( pInfo.get(), 0, sizeof(EqfMemory) );
-
-  // init it, if not meet some condition ,it will be set to false
-  pInfo->fEnabled = TRUE;
-
-  std::string mem_path;
-  int errCode = 0;
-  {
-    char path[MAX_EQF_PATH];
-    errCode = Properties::GetInstance()->get_value(KEY_MEM_DIR, path, MAX_EQF_PATH);
-    if(errCode){
-      T5LOG(T5ERROR) << "EqfMemoryPlugin::fillInfoStructure():: errCode = " << errCode;
-      return errCode;
-    }
-    if(strlen(path) && path[strlen(path)-1] != '/')
-      strcat(path, "/");
-    strcat(path, pszPropName);
-    mem_path = path;
-    mem_path = FilesystemHelper::FixPath(mem_path);
-  }
-  
-  std::string nameWithoutExtention = pszPropName;
-  auto dot = nameWithoutExtention.rfind('.');
-  if(dot != std::string::npos){
-    nameWithoutExtention = nameWithoutExtention.substr(0, dot);
-  }
-  dot = mem_path.rfind('.');
-  std::string dataFilePath;
-  std::string indexFilePath;
-  if(dot != std::string::npos){
-    mem_path = mem_path.substr(0, dot);
-    dataFilePath = mem_path + EXT_OF_TMDATA;
-    indexFilePath = mem_path + EXT_OF_TMINDEX;
-    mem_path = mem_path + EXT_OF_MEM;
-  }
-  //strcpy( pInfo->szFullPath, prop.szFullMemName);
-  //strcpy( pInfo->szName, prop.stPropHead.szName);
-  strcpy( pInfo->szFullPath, mem_path.c_str());
-  strcpy( pInfo->szName, nameWithoutExtention.c_str());
-  strcpy( pInfo->szFullDataFilePath, dataFilePath.c_str());
-  strcpy(pInfo->szFullIndexFilePath, indexFilePath.c_str());
-
-  auto memFile = FilesystemHelper::OpenFile(mem_path,"rb", true );
-  auto pData = FilesystemHelper::GetFilebufferData(mem_path);
-  
-  if(pData == NULL || pData->size()<sizeof(PROP_NTM)){
-    T5LOG(T5ERROR) << ":: pData == NULL || pData->size()<sizeof(PROP_NTM) for " << mem_path;
-    return -1;
-  }
-
-  PPROP_NTM pProp = (PPROP_NTM) (&((*pData)[0]));
-  
-  strcpy(pInfo->szDescription, pProp->stTMSignature.szDescription );
-  strcpy( pInfo->szSourceLanguage, pProp->stTMSignature.szSourceLanguage );
-  
-  strcpy( pInfo->szPlugin, this->name.c_str());
-  strcpy( pInfo->szDescrMemoryType, this->descrType.c_str());
-  //strcpy( pInfo->szOwner, "");
-
-  pInfo->ulSize = FilesystemHelper::GetFileSize(mem_path);
-  pInfo->ulSize += FilesystemHelper::GetFileSize(dataFilePath);
-  pInfo->ulSize += FilesystemHelper::GetFileSize(indexFilePath);
-  FilesystemHelper::CloseFile(memFile);
-
-  return( errCode == 0 );
-
 }
 
 /*! \brief Find memory in our memory list and return pointer to memory info 
@@ -736,94 +367,6 @@ USHORT registerPlugins()
   return usRC;
 }
 
-//#endif
-
-/*! \brief Build the path name for a memory
-  \param pszName (long) name of the new memory
-	\param string receiving the memory path name
-	\returns TRUE when successful 
-*/
-BOOL EqfMemoryPlugin::makeMemoryPath( const char* pszName, std::string &strPathName, PBOOL pfReserved )
-{
-  BOOL fOK = FALSE;
-  OBJLONGTOSHORTSTATE ObjState;
-
-  CreateMemFile( (PSZ)pszName , &ObjState);
-
-  if ( pfReserved != NULL ) 
-      *pfReserved = ObjState == OBJ_IS_NEW;
-
-  if ( ObjState == OBJ_IS_NEW ){
-      char buff[255];
-      Properties::GetInstance()->get_value(KEY_MEM_DIR, buff, 255);
-      strPathName = buff;      
-      strPathName += "/" + std::string(pszName) + EXT_OF_TMDATA;
-      fOK = true;
-  }else{
-    strPathName = pszName;
-    fOK = MemCreatePath( (char*) strPathName.c_str() );
-  }
-  
-  strPathName = FilesystemHelper::FixPath(strPathName);
-
-  return( fOK );
-}
-
-
-/*! \brief Make the fully qualified property file name for a memory
-  \param strPathName reference to the memory path name
-  \param strPropName reference to the string receiving the property file name
-	\returns 0 when successful
-*/
-int EqfMemoryPlugin::makePropName( std::string &strPathName, std::string &strPropName )
-{
-  char szFullPropName[MAX_LONGFILESPEC];
-
-  UtlMakeEQFPath( szFullPropName, NULC, PROPERTY_PATH, NULL );
-  Properties::GetInstance()->get_value(KEY_MEM_DIR, szFullPropName, MAX_LONGFILESPEC-1);
-  strcat( szFullPropName, BACKSLASH_STR );
-  Utlstrccpy( szFullPropName + strlen(szFullPropName), UtlGetFnameFromPath( (char *)strPathName.c_str() ), DOT );
-  strcat( szFullPropName, EXT_OF_MEM );
-  strPropName = szFullPropName;
-  return( 0 );
-}
- 
-/*! \brief Add memory to our internal memory lisst
-  \param strPathName reference to the memory path name
-	\returns 0 when successful
-*/
-int EqfMemoryPlugin::addToList( std::string &strPathName )
-{
-  return( this->addToList( (PSZ)strPathName.c_str() ) );
-}
-
-/*! \brief Add memory to our internal memory lisst
-  \param pszPropname pointer to property file name
-	\returns 0 when successful
-*/
-int EqfMemoryPlugin::addToList( char *pszPropName )
-{
- std::shared_ptr<EqfMemory> pInfo =  std::make_shared<EqfMemory>( EqfMemory() );
-  if(pInfo.get() != 0)
-  {
-    // find the property name when pszPropName is fully qualified
-    const char* pszName = strrchr( pszPropName, '/' );
-    pszName = (pszName == NULL) ? pszPropName : pszName + 1;
-    if ( this->fillInfoStructure( (PSZ)pszName, pInfo ) )
-    {
-      m_MemInfoVector.push_back( pInfo);
-    }
-    else
-    {
-    //  delete( pInfo );
-    }
-  }
-  return( 0 );
-}
-
-
-
-
 /*! \brief Private data area for the memory import from data files */
 typedef struct _MEMIMPORTFROMFILEDATA
 {
@@ -836,46 +379,6 @@ typedef struct _MEMIMPORTFROMFILEDATA
   char  szBuffer[1014];                // general purpose buffer
 
 } MEMIMPORTFROMFILEDATA, *PMEMIMPORTFROMFILEDATA;
-
-
-/* \brief add a new memory information to memory list
-   \param pszName memory name
-   \param chToDrive drive letter
-   \returns 0 if success
-*/
-int EqfMemoryPlugin::addMemoryToList(const char* pszName)
-{
-    if( pszName && findMemory(pszName) == NULL){
-        // only could be added when its property exists
-        std::string pathName = pszName;
-        pathName += EXT_OF_TMDATA;
-        addToList( pathName );
-        return 0;
-    }
-    
-    // already exist, just return
-    return -1;
-}
-
-
-/* \brief remove a memory information from memory list
-   \param  pszName memory name
-   \returns 0 if success
-*/
-int EqfMemoryPlugin::removeMemoryFromList(const char* pszName)
-{
-    if(pszName==NULL)
-        return -1;
-
-    int idx = findMemoryIndex(pszName);
-    if(idx == -1)
-        return -1;
-    
-    m_MemInfoVector.erase(m_MemInfoVector.begin( )+idx);
-
-    return 0;
-}
-
 
 
 /*! \brief Handle a return code from the memory functions and create the approbriate error message text for it
@@ -1036,56 +539,6 @@ int EqfMemoryPlugin::handleError( int iRC, char *pszMemName, char *pszMarkup, ch
 
  return( iRC );
 }
-
-/* \brief Replace the data of one memory with the data of another memory and delete the remains of the second memory
-    \param pszReplace name of the memory whose data is being replaced
-    \param pszReplaceWith name of the memory whose data will be used to replace the data of the other memory
-   \returns 0 if success
-*/
-int EqfMemoryPlugin::replaceMemory( const char* pszReplace, const char* pszReplaceWith )
-{
- std::shared_ptr<EqfMemory>  pInfoReplace = this->findMemory( pszReplace );
-  std::string strReplaceWith(pszReplaceWith);
-  if ( pszReplace == NULL )
-  {
-    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplace, NULL, NULL, this->strLastError, this->iLastError );
-    return( ERROR_MEMORY_NOTFOUND );
-  }
-
- std::shared_ptr<EqfMemory>  pInfoReplaceWith = this->findMemory( pszReplaceWith );
-  if ( pszReplaceWith == NULL )
-  {
-    handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszReplaceWith, NULL, NULL, this->strLastError, this->iLastError );
-    return( ERROR_MEMORY_NOTFOUND );
-  }
-
-  // delete and move data file
-  UtlDelete( pInfoReplace->szFullPath, 0L, FALSE );
-  UtlMove( pInfoReplaceWith->szFullPath, pInfoReplace->szFullPath, 0L, FALSE );
-
-  char szSource[MAX_LONGFILESPEC];
-  char szTarget[MAX_LONGFILESPEC];
-
-  // delete and move index file
-  this->makeIndexFileName( pInfoReplaceWith->szFullPath, szSource );
-  this->makeIndexFileName( pInfoReplace->szFullPath, szTarget );
-  UtlDelete( szTarget, 0L, FALSE );
-  UtlMove( szSource, szTarget, 0L, FALSE );
-
-   // delete and move index file
-  this->makeIndexFileName( pInfoReplaceWith->szFullPath, szSource, true );
-  this->makeIndexFileName( pInfoReplace->szFullPath, szTarget, true );
-  UtlDelete( szTarget, 0L, FALSE );
-  UtlMove( szSource, szTarget, 0L, FALSE );
-
-  int loglevel = T5Logger::GetInstance()->suppressLogging();
-  // delete all remaining files using the normal memory delete
-  std::string strMsg;
-  TMManager::GetInstance()->DeleteTM( strReplaceWith, strMsg );
-  T5Logger::GetInstance()->desuppressLogging(loglevel);
-  return( 0 );
-}
-
 
 unsigned short getPluginInfo( POTMPLUGININFO pPluginInfo )
 {

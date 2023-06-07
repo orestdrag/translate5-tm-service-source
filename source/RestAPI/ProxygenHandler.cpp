@@ -125,11 +125,19 @@ void ProxygenHandler::onEOM() noexcept {
   if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     body_->coalesce();      
-    pRequest->strBody = (char*) body_->data(); 
-    
-    if(fWriteRequestsAllowed == false){
+    pRequest->strBody = (char*) body_->data();
+     //fix garbage in json 
+    if(pRequest->strBody.empty()){
+      pRequest->_rest_rc_ = 404;
+    }else if(fWriteRequestsAllowed == false){
       pRequest->_rest_rc_ = 423;  
     }else{
+      size_t json_end = pRequest->strBody.find("\n}") ;
+      if(json_end > 0 && json_end != std::string::npos){
+        pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
+      }
+      std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
+      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
       pRequest->run();
     }
  

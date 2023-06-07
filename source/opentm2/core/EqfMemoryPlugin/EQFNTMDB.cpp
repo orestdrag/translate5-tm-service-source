@@ -1644,7 +1644,7 @@ SHORT BTREE::QDAMDictExactLocal
   if ( fCorrupted )
   {
     T5LOG(T5FATAL) << ":: BTREE_CORRUPTED";
-     sRc = BTREE_CORRUPTED;
+    sRc = BTREE_CORRUPTED;
   }else {    
        PBTREEBUFFER_V3 pRecord = NULL;
        SHORT sRetries = MAX_RETRY_COUNT;
