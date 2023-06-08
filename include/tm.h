@@ -2035,9 +2035,7 @@ public:
     TagTables.ulMaxEntries = 0;
     LangGroups.ulMaxEntries = 0;
 
-    stTmSign.bGlobVersion = T5GLOBVERSION;
-    stTmSign.bMajorVersion = T5MAJVERSION;
-    stTmSign.bMinorVersion = T5MINVERSION;
+    pvGlobalMemoryOptions = NULL;
     int rc = NTMCreateLongNameTable();
     if(rc) T5LOG(T5ERROR) << "NTMCreateLongNameTable returned non-zero, but " << rc; 
   };

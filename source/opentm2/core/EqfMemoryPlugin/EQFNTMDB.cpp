@@ -531,18 +531,14 @@ BTREE::EQFNTMInsert
   ULONG   ulLen             // length of user data
 )
 {
-   SHORT         sRc = 0;   // return code
+  SHORT         sRc = 0;   // return code
   /********************************************************************/
   /* do initial security checking...                                  */
   /********************************************************************/
-   if (fCorrupted )
-   {
-      sRc = BTREE_CORRUPTED;
-   }else  /* endif */
-   if ( !fOpen )
-   {
-   //  sRc = BTREE_READONLY;
-   } /* endif */
+  if (fCorrupted )
+  {
+    sRc = BTREE_CORRUPTED;
+  }
   /********************************************************************/
   /* if user wants that we find an appropriate key, we have to do so..*/
   /********************************************************************/

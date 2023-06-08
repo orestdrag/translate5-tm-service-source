@@ -216,11 +216,15 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   
   if(_rc_ == NO_ERROR)
   {
+    NewMem->stTmSign.bGlobVersion = T5GLOBVERSION;
+    NewMem->stTmSign.bMajorVersion = T5MAJVERSION;
+    NewMem->stTmSign.bMinorVersion = T5MINVERSION;
     //build name and extension of tm data file
 
     //fill signature record structure
     strcpy( NewMem->stTmSign.szName, NewMem->TmBtree.fb.fileName.c_str() );
     UtlTime( &(NewMem->stTmSign.lTime) );
+    UtlTime( &(NewMem->stTmSign.creationTime) );
     strcpy( NewMem->stTmSign.szSourceLanguage,
             strSrcLang.c_str() );
 

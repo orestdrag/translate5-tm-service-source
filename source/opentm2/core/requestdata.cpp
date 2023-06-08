@@ -342,6 +342,9 @@ int CreateMemRequestData::createNewEmptyMemory(){
   if(!_rc_){
     TMManager::GetInstance()->AddMem(mem);
   }
+  if(mem != nullptr){
+    mem.reset();
+  }
   return 0;
 }
 

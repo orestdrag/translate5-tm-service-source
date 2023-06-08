@@ -6033,23 +6033,7 @@ SHORT BTREE::QDAMDictUpdSignLocal
     } /* endif */
     if ( ! sRc )
     {
-      T5LOG( T5DEVELOP) << "QDAMDictUpdSignLocal :: filled first " << writingPosition << " bytes in file ";
-      // fill rest up with zeros
-      int leftToFill = BTREE_REC_SIZE_V3 - writingPosition;
-      char* buff = new char[leftToFill];
-      memset(buff, 0, leftToFill);
-
-      sRc = fb.Write((PVOID)buff, leftToFill, writingPosition);
-      if(!sRc)
-      {
-        writingPosition += leftToFill;
-      }
-      delete[] buff;
-
-      if ( BTREE_REC_SIZE_V3 != writingPosition )
-      {
-        sRc = BTREE_DISK_FULL;
-      }
+      fb.SetOffset(BTREE_REC_SIZE_V3, FILE_BEGIN);
     } /* endif */
   } 
 

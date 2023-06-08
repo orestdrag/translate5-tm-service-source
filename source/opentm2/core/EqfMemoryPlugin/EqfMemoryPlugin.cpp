@@ -183,7 +183,7 @@ EqfMemory* EqfMemoryPlugin::openMemoryNew(
   // create memory object if create function completed successfully
   if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){
     T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< memName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
-        this->iLastError;
+        this->iLastError << "; rc = " << usRC;
     //if ( pMemory != 0 ) 
     //  TmClose( pMemory, NULL,  FALSE,  NULL );
   } /* end */       

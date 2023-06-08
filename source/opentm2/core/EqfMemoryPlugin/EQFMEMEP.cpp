@@ -128,7 +128,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
   PMEM_EXPORT_IDA pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
 
   //--- if error starting export
-  if ( !usRc )
+  if ( usRc )
   {
     //--- Close MemoryDb and output file.
     //--- Return codes are for testing purposes only

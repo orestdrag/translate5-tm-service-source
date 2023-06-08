@@ -210,6 +210,7 @@ typedef struct _TMVITALINFO
 typedef struct _TMX_SIGN
 {
   TIME_L lTime=0;
+  TIME_L creationTime=0;
   BYTE bGlobVersion=0;  
   BYTE bMajorVersion=0;
   BYTE bMinorVersion=0;
