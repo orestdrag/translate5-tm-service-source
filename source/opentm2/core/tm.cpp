@@ -286,17 +286,14 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   // create language group table
   if ( _rc_ == NO_ERROR )
   {
-    _rc_ =  NewMem->NTMCreateLangGroupTable();
-    
+    _rc_ =  NewMem->NTMCreateLangGroupTable();    
   } /* endif */
 
   if ( _rc_ == NO_ERROR )
   {
     //fill signature record structure
     strcpy( NewMem->stTmSign.szName, NewMem->InBtree.fb.fileName.c_str() );
-
-    _rc_ = NewMem->InBtree.QDAMDictCreateLocal(&NewMem->stTmSign, START_KEY );
-                        
+    _rc_ = NewMem->InBtree.QDAMDictCreateLocal(&NewMem->stTmSign, START_KEY );                        
   } /* endif */
 
   if(_rc_ == NO_ERROR){   
@@ -304,11 +301,10 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     NewMem->InBtree.fb.Flush();     
   }else {
     //something went wrong during create or insert so delete data file
-    //UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
+    UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
     UtlDelete((PSZ) NewMem->TmBtree.fb.fileName.c_str(), 0L, FALSE);
   } /* endif */    
   return NewMem;
-
 }
 
 
@@ -1240,32 +1236,32 @@ int TMManager::OpenTM(const std::string& strMemName){
     return 0;
   }
   size_t requiredMemory = 0;
-    {
-      requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName));
-      requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmiPath(strMemName));
-      requiredMemory *= 1.2;
-      //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
-      //requiredMemory += strBody.size() * 2;
-    }
-    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+  {
+    requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName));
+    requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmiPath(strMemName));
+    requiredMemory *= 1.2;
+    //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
+    //requiredMemory += strBody.size() * 2;
+  }
+  //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
 
-    // cleanup the memory list (close memories not used for a longer time)
-    size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory);
-    if(VLOG_IS_ON(1)){
-      T5LOG( T5INFO) << ":: memory: " << strMemName << "; required RAM:" 
-          << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
-    }
-    //requiredMemory = 0;
-    // find a free slot in the memory list
-    //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->GetFreeSlotPointer(requiredMemory);
+  // cleanup the memory list (close memories not used for a longer time)
+  size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory);
+  if(VLOG_IS_ON(1)){
+    T5LOG( T5INFO) << ":: memory: " << strMemName << "; required RAM:" 
+        << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
+  }
+  //requiredMemory = 0;
+  // find a free slot in the memory list
+  //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->GetFreeSlotPointer(requiredMemory);
 
-    // handle "too many open memories" condition
-    //if ( pMem == nullptr )
+  // handle "too many open memories" condition
+  //if ( pMem == nullptr )
     
-    if(memLeftAfterOpening <= 0){
-      //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
-      return( INTERNAL_SERVER_ERROR );
-    } /* endif */
+  if(memLeftAfterOpening <= 0){
+    //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
+    return( INTERNAL_SERVER_ERROR );
+  } /* endif */
   std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName));
   if(!pMem){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";

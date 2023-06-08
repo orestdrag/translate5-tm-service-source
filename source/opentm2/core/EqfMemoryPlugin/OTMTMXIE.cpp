@@ -1105,7 +1105,6 @@ USHORT CTMXExportImport::WriteHeader
   m_xw.WriteAttributeString( "segtype", "sentence" ); 
   m_xw.WriteAttributeString( "adminlang", "en-us" ); 
 
-
   {
     // get TMX language name
     CHAR szTMXLang[20];                  // buffer for TMX language

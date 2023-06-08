@@ -31,24 +31,6 @@ Copyright Notice:
 static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
-EqfMemory::EqfMemory( HTM htmIn, char *pszName )
-{
-  this->htm = htmIn;
-  strcpy( this->szName, pszName );
-  //pTmClb = (EqfMemory*)this;
-  if ( this->htm != 0 )
-  {
-    //pTmClb = (EqfMemory*)this->htm;
-  }
-  else
-  {
-    //pTmClb = NULL;
-  } /* end */     
-
-  this->pvGlobalMemoryOptions = NULL;
-
-}
-
 EqfMemory::~EqfMemory()
 {
   T5LOG(T5DEBUG) << "Closing memory " << szName;

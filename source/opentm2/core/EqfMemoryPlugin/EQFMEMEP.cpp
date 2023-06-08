@@ -698,88 +698,62 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 12 WinPostMsg( pExport
 USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
                         HWND              hWnd )
 {
-   USHORT           usRc = 0;          // Process control switch
-   PMEM_EXPORT_IDA  pExportIDA;           // Pointer to the export IDA
-   PSZ              pReplAddr[2];         // Pointer to an address list of
+  USHORT           usRc = 0;          // Process control switch
+  PMEM_EXPORT_IDA  pExportIDA;           // Pointer to the export IDA
+  PSZ              pReplAddr[2];         // Pointer to an address list of
                                           // replacement strings
+  //--- Get pointer to export IDA
+  pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
 
+  // set first extract flag                                          
+  pExportIDA->fFirstExtract = TRUE;
 
-   //--- Get pointer to export IDA
-   pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
+  if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
+       (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
+  {
+    // allocate memory and segment data area
+    if ( !UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE ) )
+    {
+      usRc = ERROR_NOT_ENOUGH_MEMORY;
+    }
+    else if ( !UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE ) )
+    {
+      usRc = ERROR_NOT_ENOUGH_MEMORY;
+    } /* endif */
 
-   // set first extract flag                                          
-   pExportIDA->fFirstExtract = TRUE;
+    // load external memory export module
+    EqfPluginWrapper::init();
 
-   if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
-        (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
-   {
-     // allocate memory and segment data area
-     if ( !UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE ) )
-     {
-       usRc = ERROR_NOT_ENOUGH_MEMORY;
-     }
-     else if ( !UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE ) )
-     {
-       usRc = ERROR_NOT_ENOUGH_MEMORY;
-     } /* endif */
+    // call start entry point
+    if ( !usRc )
+    {
+      // close output file (if open) as external export process will open the file itself...
+      if (false && pExportIDA->hFile ) 
+      {
+        UtlClose( pExportIDA->hFile, FALSE );
+        pExportIDA->hFile = NULL; 
+      } /* endif */
 
-     // load external memory export module
-     EqfPluginWrapper::init();
-     
-     #ifdef TO_REPLACE
-     // load entry points
-     if ( !usRc )
-     {
-       usRc = DosGetProcAddr( pExportIDA->hmodMemExtExport, "EXTMEMEXPORTSTART", 
-                             (PFN*)(&(pExportIDA->pfnMemExpStart)));
-       if ( !usRc ) usRc = DosGetProcAddr( pExportIDA->hmodMemExtExport, "EXTMEMEXPORTPROCESS", 
-                                           (PFN*)(&(pExportIDA->pfnMemExpProcess)));
-       if ( !usRc ) usRc = DosGetProcAddr( pExportIDA->hmodMemExtExport, "EXTMEMEXPORTEND", 
-                                           (PFN*)(&(pExportIDA->pfnMemExpEnd)));
-     }else{
-       T5LOG(T5ERROR) << "MemExportStart:: can't load module " << libPath;
-     } /* endif */
-     #endif
+      memset( pExportIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
 
-     // call start entry point
-     if ( !usRc )
-     {
-       // close output file (if open) as external export process will open the file itself...
-       if (false && pExportIDA->hFile ) 
-       {
-         UtlClose( pExportIDA->hFile, FALSE );
-         pExportIDA->hFile = NULL; 
-       } /* endif */
+      // get name of first markup table
+      if ( pExportIDA->pMem->getNumOfMarkupNames() >= 1 )
+      {
+        pExportIDA->pMem->getMarkupName( 0, pExportIDA->pstMemInfo->szFormat, sizeof(pExportIDA->pstMemInfo->szFormat) );
+      } /* end */            
 
-       memset( pExportIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
-
-       // get name of first markup table
-       if ( pExportIDA->pMem->getNumOfMarkupNames() >= 1 )
-       {
-         pExportIDA->pMem->getMarkupName( 0, pExportIDA->pstMemInfo->szFormat, sizeof(pExportIDA->pstMemInfo->szFormat) );
-       } /* end */            
-
-       strcpy( pExportIDA->pstMemInfo->szName, pExportIDA->szMemName );
-       pExportIDA->pMem->getDescription( pExportIDA->pstMemInfo->szDescription, sizeof(pExportIDA->pstMemInfo->szDescription) );
-       pExportIDA->pMem->getSourceLanguage( pExportIDA->pstMemInfo->szSourceLang, sizeof(pExportIDA->pstMemInfo->szSourceLang) );
-       pExportIDA->pstMemInfo->fUTF16 = (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) ;
-       pExportIDA->pstMemInfo->fNoCRLF = (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF);
+      strcpy( pExportIDA->pstMemInfo->szName, pExportIDA->szMemName );
+      pExportIDA->pMem->getDescription( pExportIDA->pstMemInfo->szDescription, sizeof(pExportIDA->pstMemInfo->szDescription) );
+      pExportIDA->pMem->getSourceLanguage( pExportIDA->pstMemInfo->szSourceLang, sizeof(pExportIDA->pstMemInfo->szSourceLang) );
+      pExportIDA->pstMemInfo->fUTF16 = (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) ;
+      pExportIDA->pstMemInfo->fNoCRLF = (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF);
        
        
-       T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
-            "; markup = " << pExportIDA->pstMemInfo->szFormat;
+      T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
+           "; markup = " << pExportIDA->pstMemInfo->szFormat;
 
-       #ifdef TO_REPLACE
-       usRc = pExportIDA->pfnMemExpStart( &(pExportIDA->lExternalExportHandle),  
-                                           pExportIDA->ControlsIda.szPathContent,
-                                           pExportIDA->pstMemInfo );
-       #endif
-       usRc = EqfPluginWrapper::MemExportStart(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
-     } /* endif */
-     
-
-     // memory export uses usRc as an OK flag , so we have to remap our return code...
-     usRc = ( !usRc ) ? TRUE : FALSE;
+      usRc = EqfPluginWrapper::MemExportStart(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
+    } /* endif */
    }
    else
    {
@@ -1813,7 +1787,7 @@ USHORT FCTDATA::MemFuncExportProcess()
   PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)this->pvMemExportCommArea;  // ptr to commmunication area
   PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
-   switch ( pIDA->NextTask )
+  switch ( pIDA->NextTask )
   {
     case MEM_START_EXPORT:
       usRC = EQFMemExportStart( pCommArea, HWND_FUNCIF );

@@ -657,7 +657,6 @@ USHORT EqfMemory::OpenX()
     InBtree.QDAMDictClose();
 
     NTMDestroyLongNameTable( );
-    //UtlAlloc( (PVOID *) &this, 0L, 0L, NOMSG );
   } /* endif */
 
   //set out values
@@ -665,12 +664,6 @@ USHORT EqfMemory::OpenX()
   //pTmOpenOut->stPrefixOut.usLengthOutput = sizeof( TMX_OPEN_OUT );
   //pTmOpenOut->stPrefixOut.usTmtXRc = usRc;
 
-  if ( usRc != NO_ERROR )
-  {
-    ERREVENT( TMTXOPEN_LOC, ERROR_EVENT, usRc );
-  } /* endif */
-
-  DEBUGEVENT( TMTXOPEN_LOC, FUNCEXIT_EVENT, 0 );
   return( usRc );
 }
 

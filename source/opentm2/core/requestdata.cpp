@@ -293,25 +293,24 @@ int RequestData::buildRet(int res){
   T5LOG(T5DEBUG) << outputMessage;
 }
 
-int RequestData::run(){
-   
-    int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
-    if(!res) res = parseJSON();
-    if(!res) res = checkData();
+int RequestData::run(){   
+  int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if(!res) res = parseJSON();
+  if(!res) res = checkData();
 
-    if(!res) res = requestTM();
-    
-    if(!res && fValid) 
-      res = execute();
-    buildRet(res);
-    //reset pointers
-    if(mem != nullptr){
-      mem = nullptr;
-    }
-    if(memRef != nullptr){
-      memRef = nullptr;
-    }
-    return res;
+  if(!res) res = requestTM();
+  
+  if(!res && fValid) 
+    res = execute();
+  buildRet(res);
+  //reset pointers
+  if(mem != nullptr){
+    mem.reset();
+  }
+  if(memRef != nullptr){
+    memRef.reset();
+  }
+  return res;
 }
 
 
