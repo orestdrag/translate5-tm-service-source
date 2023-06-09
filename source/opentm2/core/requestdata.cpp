@@ -287,8 +287,12 @@ int RequestData::buildRet(int res){
   }
 
   if(outputMessage.empty()){
-    //TODO: change to json
-    outputMessage = "emptyMessage, rc = "  + std::to_string(_rc_) + ", rest_rc = " + std::to_string(_rest_rc_);
+    if(_rest_rc_ >=200 && _rest_rc_ <300){
+      outputMessage = "{\n\t\"msg\": \"success\"\n}";
+    }else{
+      //TODO: change to json
+      outputMessage = "{\n\t\"msg\": \"emptyMessage, rc = "  + std::to_string(_rc_) + ", rest_rc = " + std::to_string(_rest_rc_) + "\"\n}";
+    }
   }
   T5LOG(T5DEBUG) << outputMessage;
 }
@@ -1206,6 +1210,11 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
+    json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );
+    std::string creationT5MVersion = std::to_string(mem->stTmSign.bGlobVersion) 
+                              + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
+                              + ":" + std::to_string(mem->stTmSign.bMinorVersion);
+    json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
     if ( ( mem->eImportStatus == IMPORT_FAILED_STATUS ) && ( mem->pszError != NULL ) )
     {
       json_factory.addParmToJSON( outputMessage, "ErrorMsg", mem->pszError );
@@ -1231,6 +1240,9 @@ int StatusMemRequestData::execute() {
 };
 
 int ShutdownRequestData::execute(){
+    if(pfWriteRequestsAllowed) *pfWriteRequestsAllowed = false;
+    //pMemService->closeAll();
+    T5Logger::GetInstance()->LogStop();  
     TMManager::GetInstance()->fServiceIsRunning = true;
     
     std::thread([this]() 
@@ -1242,11 +1254,18 @@ int ShutdownRequestData::execute(){
           T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
         }
         T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  i = "<< i; 
-        
+      
         sleep(1);
       }
 
       TMManager::GetInstance()->fServiceIsRunning = false;
+      auto saveTmRD = SaveAllTMsToDiskRequestData();
+      saveTmRD.run();
+      //check tms is in import status
+      //close log file
+      if(saveTmRD._rest_rc_ == 200){
+        T5Logger::GetInstance()->LogStop();
+      }
       if(sig != SHUTDOWN_CALLED_FROM_MAIN){
         exit(sig);
       }
@@ -2237,7 +2256,6 @@ int ConcordanceSearchRequestData::execute(){
     {
       BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
       OtmProposal *pOtmProposal = new (OtmProposal);
-      EqfMemory* pMem = mem.get();
 
       if ((* Data.szSearchString  == EOS)  )
       {
@@ -2252,12 +2270,12 @@ int ConcordanceSearchRequestData::execute(){
       // get first or next proposal
       if ( *Data.szSearchPos == EOS )
       {
-        _rc_ = pMem->getFirstProposal( *pOtmProposal );
+        _rc_ = mem->getFirstProposal( *pOtmProposal );
       }
       else
       {
-        pMem->setSequentialAccessKey((PSZ) Data.szSearchPos );
-        _rc_ = pMem->getNextProposal( *pOtmProposal );
+        mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        _rc_ = mem->getNextProposal( *pOtmProposal );
       } /* endif */
 
       // prepare searchstring
@@ -2323,7 +2341,7 @@ int ConcordanceSearchRequestData::execute(){
           }
           if ( _rc_ == 0 )
           {
-            _rc_ = pMem->getNextProposal( *pOtmProposal );
+            _rc_ = mem->getNextProposal( *pOtmProposal );
           }
         }
       } /* endwhile */
@@ -2331,7 +2349,7 @@ int ConcordanceSearchRequestData::execute(){
       // search given string in proposal
       if ( fFound || (_rc_ == TIMEOUT_RC) )
       {
-        pMem->getSequentialAccessKey( Data.szSearchPos, 20 );
+        mem->getSequentialAccessKey( Data.szSearchPos, 20 );
       } /* endif */
       else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
       {

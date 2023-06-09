@@ -1397,11 +1397,6 @@ SHORT BTREE::QDAMDictUpdateLocal
       sRc = BTREE_CORRUPTED;
    } /* endif */
 
-   if ( !sRc && !fOpen )
-   {
-   //  sRc = BTREE_READONLY;
-   } /* endif */
-
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/

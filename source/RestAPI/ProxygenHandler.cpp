@@ -74,6 +74,8 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       errorStr = "export format not specified in Accept header";
       pRequest->command = COMMAND::UNKNOWN_COMMAND;
     }
+  }else if( pRequest->command == COMMAND::SHUTDOWN){
+    ((ShutdownRequestData*)pRequest)->pfWriteRequestsAllowed = & fWriteRequestsAllowed;
   }
 
   pRequest->requestAcceptHeader = requestAcceptHeader;
@@ -91,23 +93,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   }
 
   if(pRequest->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
-    if(pRequest->command == COMMAND::SHUTDOWN){
-      fWriteRequestsAllowed = false;
-      //pRequest->_rest_rc_ = pMemService->saveAllTmOnDisk( pRequest->outputMessage );
-      auto saveTmRD = SaveAllTMsToDiskRequestData();
-      saveTmRD.run();
-      //check tms is in import status
-      //close log file
-      if(saveTmRD._rest_rc_ == 200){
-        //pMemService->closeAll();
-        T5Logger::GetInstance()->LogStop();          
-        pRequest->run();
-      }else{
-        fWriteRequestsAllowed = true;
-      }
-    }else{
-      pRequest->run();
-    }
+    pRequest->run();
     sendResponse();
   }
 }

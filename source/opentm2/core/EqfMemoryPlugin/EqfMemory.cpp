@@ -103,14 +103,7 @@ int EqfMemory::getDescription
   int iSize
 )
 {
-  //if ( this->pTmClb != NULL )
-  {
-    return( CopyToBuffer(stTmSign.szDescription, pszBuffer, iSize ) );
-  }
-  //else
-  {
-    return( 0 );
-  } /* endif */     
+  return( CopyToBuffer(stTmSign.szDescription, pszBuffer, iSize ) );   
 }
 
 /*! \brief Set the description of the memory
@@ -169,14 +162,7 @@ int EqfMemory::getName
   int iSize
 )
 {
-  //if ( this->pTmClb != NULL )
-  {
-    return( CopyToBuffer( this->szName, pszBuffer, iSize ) );
-  }
-  //else
-  {
-    return( 0 );
-  } /* endif */     
+  return( CopyToBuffer( this->szName, pszBuffer, iSize ) );    
 }
 
 /*! \brief Get the name of the memory
@@ -187,16 +173,8 @@ int EqfMemory::getName
   std::string &strName
 )
 {
-  //if ( this->pTmClb != NULL )
-  {
-    strName = this->szName;
-    return( 0 );
-  }
-  //else
-  {
-    strName = "";
-    return( -1 );
-  } /* endif */     
+  strName = this->szName;
+  return( 0 );     
 }
 
 
@@ -440,14 +418,12 @@ int EqfMemory::getProposal
 )
 {
   int iRC = 0;
-
   memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
-
   Proposal.clear();
 
   iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &( TmExtIn.ulTmKey), &( TmExtIn.usNextTarget) );
-   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
+  TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
   if ( iRC == 0 )
   {
@@ -457,18 +433,15 @@ int EqfMemory::getProposal
   if ( iRC == 0 )
   {
     this->ExtOutToOtmProposal( &TmExtOut, Proposal );
-
     // set current proposal internal key ,which is used in updateProposal
     this->SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget, &Proposal );
-
     this->ulNextKey = TmExtOut.ulTmKey;
     this->usNextTarget = TmExtOut.usNextTarget;
-  } /* endif */       
+  } /* endif */      
 
   if ( iRC != 0 ) handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
 
   return( iRC );
-
 }
 
 
@@ -536,15 +509,12 @@ int EqfMemory::searchProposal
         wcscpy(TmGetOut.stMatchTable[i].szSource, result[0].c_str());
         wcscpy(TmGetOut.stMatchTable[i].szTarget, result[1].c_str());
 
-        
         if( TmGetOut.stMatchTable[i].usMatchLevel >= 100){
           //correct match rate for exact match based on whitespace difference
           int wsDiff = 0;
           UtlCompIgnWhiteSpaceW(szRequestedString, TmGetOut.stMatchTable[i].szSource, 0, &wsDiff);
-          TmGetOut.stMatchTable[i].usMatchLevel -= wsDiff;
-          
+          TmGetOut.stMatchTable[i].usMatchLevel -= wsDiff; 
         }
-
         this->MatchToOtmProposal( TmGetOut.stMatchTable + i, FoundProposals[i] );
       } /* end */         
     } /* end */       
@@ -574,7 +544,6 @@ int EqfMemory::deleteProposal
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
   int iRC = OtmProposalToPutIn( Proposal, &TmPutIn );
   
-
 	if ( !iRC ) 
     iRC = TmtXDelSegm ( this, &TmPutIn, &TmPutOut );
 

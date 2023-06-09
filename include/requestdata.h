@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <atomic>
 #include "tm.h"
 
 #include "lowlevelotmdatastructs.h"
@@ -143,6 +144,7 @@ class ShutdownRequestData:public RequestData{
 public:
     ShutdownRequestData(): RequestData(COMMAND::SHUTDOWN) {};
     int sig = 0;
+    std::atomic_bool* pfWriteRequestsAllowed = nullptr;
 protected:
     int parseJSON() override { return 0;};
     int checkData() override { return 0;};

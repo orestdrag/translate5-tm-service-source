@@ -1213,7 +1213,6 @@ std::string FilesystemHelper::GetTmiPath(const std::string& memName){
 }
 
 int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists){  
-  
   int logLevel= 0;
   if(!logErrorIfNotExists) logLevel = T5Logger::GetInstance()->suppressLogging();
   //check tmd file
@@ -1240,7 +1239,10 @@ int TMManager::OpenTM(const std::string& strMemName){
     return 0;
   }
   size_t requiredMemory = 0;
-  {
+  if(int res = TMExistsOnDisk(strMemName)){
+    T5LOG(T5ERROR) << "TM is not found, name = " << strMemName <<"; res = " << res;
+    return 404;
+  }else{
     requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName));
     requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmiPath(strMemName));
     requiredMemory *= 1.2;
@@ -1321,11 +1323,12 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
     rc = mem->writeCnt.use_count()>1;
 
     T5LOG(T5DEBUG) <<"writeCnt = " << mem->writeCnt.use_count();
+    if(rc){
+      mem.reset();
+    }
   }
   //
-  if(rc){
-    //return nullptr;
-  }
+  
   if(mem){
     refBack = mem->readOnlyCnt;
     T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
