@@ -1831,7 +1831,19 @@ int DeleteEntryRequestData::execute(){
   strcpy(Prop.szDocShortName , Prop.szDocName);
   copyMemProposalToOtmProposal( &Prop, &OtmProposal );
 
-  _rc_ = mem->deleteProposal( OtmProposal );
+
+  TMX_PUT_IN_W TmPutIn;
+  TMX_PUT_OUT_W TmPutOut;
+  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
+  _rc_ = OtmProposalToPutIn( OtmProposal, &TmPutIn );
+  if ( _rc_ ) 
+    _rc_ = TmtXDelSegm ( mem.get(), &TmPutIn, &TmPutOut );
+
+  //if ( _rc_ != 0  
+  //    && _rc_ != 6020) // seg not found 
+  //  handleError( iRC, mem->szName, TmPutIn.stTmPut.szTagTable );
+
   if(_rc_ == 6020){
     //seg not found
     errorStr = "Segment not found";

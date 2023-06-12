@@ -2206,20 +2206,6 @@ USHORT NTMLoadNameTable
 
   ); 
 
-/*! \brief Delete a specific proposal from the memory
-
-    \param Proposal reference to a OtmProposal object
-
-  	\returns 0 or error code in case of errors
-*/
-  int deleteProposal
-  (
-    OtmProposal &Proposal
-  ); 
-
-
-
-
 /*! \brief Get number of markups used for the proposals in this memory
   	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
 */

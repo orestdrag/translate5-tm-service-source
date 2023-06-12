@@ -529,30 +529,7 @@ int EqfMemory::searchProposal
   return( iRC );
 }
 
-/*! \brief Delete a specific proposal from the memory
 
-    \param Proposal reference to a OtmProposal object
-
-  	\returns 0 or error code in case of errors
-*/
-int EqfMemory::deleteProposal
-(
-  OtmProposal &Proposal
-)  
-{
-  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-  int iRC = OtmProposalToPutIn( Proposal, &TmPutIn );
-  
-	if ( !iRC ) 
-    iRC = TmtXDelSegm ( this, &TmPutIn, &TmPutOut );
-
-  if ( iRC != 0  
-      && iRC != 6020) // seg not found 
-    handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
-  
-  return( iRC );
-}
 
 
 /*! \brief Get plugin responsible for this memory
