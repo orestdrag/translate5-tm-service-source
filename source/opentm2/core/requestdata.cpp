@@ -1837,7 +1837,7 @@ int DeleteEntryRequestData::execute(){
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
   _rc_ = OtmProposalToPutIn( OtmProposal, &TmPutIn );
-  if ( _rc_ ) 
+  if ( !_rc_ ) 
     _rc_ = TmtXDelSegm ( mem.get(), &TmPutIn, &TmPutOut );
 
   //if ( _rc_ != 0  

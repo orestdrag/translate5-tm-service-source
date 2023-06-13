@@ -1262,10 +1262,6 @@ USHORT FillClb
 
   pTargetClb = *ppTargetClb;
 
-  // replace any 0xA0 in language name to 0xFF
-  // (0xA0 is 0xFF after processing by OemToAnsi)
-  REPLACE_A0_BY_FF( pTmPut->szTargetLanguage );
-
   //get id of target language, call
   usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTrgLang );
 
@@ -2026,10 +2022,6 @@ USHORT ComparePutData
     USHORT  usPutLang;                 // language id of target language
     USHORT  usPutFile;                 // file id of new entry
 
-    // replace any 0xA0 in language name to 0xFF
-    // (0xA0 is 0xFF after processing by OemToAnsi)
-    REPLACE_A0_BY_FF( pTmPut->szTargetLanguage );
-
     //get id of target language in the put structure
     if (NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage,
                           NULL, (USHORT)LANG_KEY, &usPutLang ))
@@ -2745,10 +2737,6 @@ USHORT TmtXUpdSeg
               if ( (usRc == NO_ERROR) &&
                    (usFlags & TMUPDSEG_TARGLANG) )
               {
-                // replace any 0xA0 in language name to 0xFF
-                // (0xA0 is 0xFF after processing by OemToAnsi)
-                REPLACE_A0_BY_FF( pTmPutIn->stTmPut.szTargetLanguage );
-
                 // set target language
                 usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTargetLanguage,
                                          NULL,

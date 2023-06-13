@@ -3079,20 +3079,6 @@ void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp );
     strcat( ind, EXT_OF_TMINDEX ); \
   }
 
-  // replace any 0xA0 in language name to 0xFF
-  // (0xA0 is 0xFF after processing by OemToAnsi)
-  #define REPLACE_A0_BY_FF( p ) \
-  {                          \
-    PBYTE pbTemp = (PBYTE)p; \
-    while ( *pbTemp )        \
-    {                        \
-      if ( *pbTemp == 0xA0 ) \
-      {                      \
-        *pbTemp = 0xFF;      \
-      }                      \
-      pbTemp++;              \
-    }                        \
-  }
 
 #include "EQFTAG.H"
 /*---------------------------------------------------------------------*\

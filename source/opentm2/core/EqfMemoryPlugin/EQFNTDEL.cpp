@@ -373,10 +373,6 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
         pByte += pTMXTargetRecord->usClb;
         pClb = (PTMX_TARGET_CLB)pByte;
 
-        // replace any 0xA0 in language name to 0xFF
-        // (0xA0 is 0xFF after processing by OemToAnsi)
-        REPLACE_A0_BY_FF( pTmDel->szTargetLanguage );
-
         //get id of target language in the put structure
         usRc = NTMGetIDFromName( pTmClb, pTmDel->szTargetLanguage,
                                  NULL,

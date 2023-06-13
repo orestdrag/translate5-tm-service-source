@@ -1063,9 +1063,6 @@ USHORT ExactTest
 
       USHORT  usOldMatches = *pusMatchEntries;
 
-      // replace any 0xA0 in language name to 0xFF
-      // (0xA0 is 0xFF after processing by OemToAnsi)
-      REPLACE_A0_BY_FF( pGetIn->szTargetLanguage );
 
       //get id of target language in the getin structure
       if (NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage,
@@ -1930,9 +1927,6 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
                             (USHORT)TAGTABLE_KEY,
                             pSubstProp->szPropTagTable, NULL );
           ulTgtOemCP = 1;
-          // replace any 0xA0 in language name to 0xFF
-          // (0xA0 is 0xFF after processing by OemToAnsi)
-          REPLACE_A0_BY_FF( pSubstProp->szTargetLanguage );
 
           //fill in the target language
           NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId,
@@ -2847,11 +2841,6 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
       {
         usTagId = 1;   // set default...
       } /* endif */
-
-      // replace any 0xA0 in language name to 0xFF
-      // (0xA0 is 0xFF after processing by OemToAnsi)
-      REPLACE_A0_BY_FF( pGetIn->szTargetLanguage );
-
         //get id of target language in the get structure
 
       // we have to update the memory language table to keep the language group table up-to-date...
