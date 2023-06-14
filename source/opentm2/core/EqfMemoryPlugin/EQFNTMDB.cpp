@@ -1444,7 +1444,7 @@ SHORT BTREE::QDAMDictUpdateLocal
                   sRc = QDAMAddToBuffer_V3( pUserData, ulLen, &recData );
                   if ( !sRc )
                   {
-                    if(ulLen > TMX_REC_SIZE && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+                    if( (ulLen > TMX_REC_SIZE)  && (T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))){
                       T5LOG(T5ERROR) << ":: tried to set bigget ulLen than rec size, ulLen = " << ulLen;
                     }
                     recData.ulLen = ulLen;

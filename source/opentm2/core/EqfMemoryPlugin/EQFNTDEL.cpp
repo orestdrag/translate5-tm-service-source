@@ -478,7 +478,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
                           /*  by a new translation, we will not remove  */
                           /* the key (only get rid of any target data)  */
                           /**********************************************/
-                          usRc = pTmClb->InBtree.EQFNTMUpdate(
+                          usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                                *pulKey,
                                                (PBYTE)pTmRecord,
                                                RECLEN(pTmRecord) );
