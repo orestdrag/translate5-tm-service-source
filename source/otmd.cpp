@@ -175,14 +175,14 @@ int main(int argc, char* argv[]) {
    //     FilesystemHelper::CreateDir(FLAGS_log_dir, 0700);
    //}
    FLAGS_colorlogtostderr = true;
-   FLAGS_logtostderr = true;
+   //FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
-   FLAGS_v=2;
+   //FLAGS_v=2;
    //#endif
    //#ifdef GFLAGS_ENABLED
    FLAGS_alsologtostderr = true;
-   FLAGS_t5loglevel = T5DEVELOP;
+  // FLAGS_t5loglevel = T5DEVELOP;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
