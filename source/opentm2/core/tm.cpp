@@ -132,23 +132,6 @@ void TMManager::importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszErr
 }
 
 
-// update memory status
-void EqfMemory::reorganizeDone(int iRC, char *pszError )
-{
-  if ( iRC == 0 )
-  {
-    eImportStatus = OPEN_STATUS;
-    TmBtree.fb.Flush();
-    InBtree.fb.Flush();
-    T5LOG( T5INFO) <<":: success, memName = " << szName;
-  }
-  else
-  {
-    eImportStatus = REORGANIZE_FAILED_STATUS;
-    strError =  pszError;
-    T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
-  }
-}
 
 /*! \brief Close all open memories
 \returns http return code0 if successful or an error code in case of failures
