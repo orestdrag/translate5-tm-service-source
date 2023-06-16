@@ -37,6 +37,7 @@ int TMManager::findMemoryInList( const std::string& memName )
   \returns index if import process for any memory is going on, -1 if no
   */
 int TMManager::GetMemImportInProcess(){
+  T5LOG(T5FATAL) << "fix this function after refactoring!";
   for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
   {
     if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->eImportStatus == IMPORT_RUNNING_STATUS)
@@ -131,6 +132,23 @@ void TMManager::importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszErr
 }
 
 
+// update memory status
+void EqfMemory::reorganizeDone(int iRC, char *pszError )
+{
+  if ( iRC == 0 )
+  {
+    eImportStatus = OPEN_STATUS;
+    TmBtree.fb.Flush();
+    InBtree.fb.Flush();
+    T5LOG( T5INFO) <<":: success, memName = " << szName;
+  }
+  else
+  {
+    eImportStatus = REORGANIZE_FAILED_STATUS;
+    strError =  pszError;
+    T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
+  }
+}
 
 /*! \brief Close all open memories
 \returns http return code0 if successful or an error code in case of failures
@@ -916,11 +934,11 @@ USHORT TMManager::APIQueryMem
 
 wchar_t* wcsupr(wchar_t *str)
 {       
-    int len = wcslen(str);
-    for(int i=0; i<len; i++) {
-        str[i] = toupper(str[i]);
-    }
-    return str;
+  int len = wcslen(str);
+  for(int i=0; i<len; i++) {
+    str[i] = toupper(str[i]);
+  }
+  return str;
 }
 
 ULONG GetTickCount(){

@@ -58,6 +58,9 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   builder = new ResponseBuilder(downstream_);
   auto methodStr = req->getMethodString ();
   auto method = req->getMethod ();
+  if(!pRequest){
+    pRequest = new UnknownRequestData();
+  }
   pRequest->strUrl = req->getURL () ;
   auto path = req->getPath () ;
   auto queryString   = req->getQueryString () ;
@@ -108,7 +111,7 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
 }
 
 void ProxygenHandler::onEOM() noexcept {  
-  if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
+  if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     body_->coalesce();      
     pRequest->strBody = (char*) body_->data();
@@ -137,6 +140,10 @@ void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
 
 void ProxygenHandler::requestComplete() noexcept {
   //ResetLogBuffer();
+  if(pRequest){
+    delete pRequest;
+    pRequest = nullptr;
+  }
   delete this;
 }
 
@@ -187,7 +194,8 @@ void ProxygenHandler::sendResponse()noexcept{
     if(pRequest->outputMessage.size())
       builder->body(pRequest->outputMessage);
     //builder->send();
-
+    //delete pRequest;
+    //pRequest = nullptr;
 
     T5Logger::GetInstance()->ResetLogBuffer();
     builder->sendWithEOM();

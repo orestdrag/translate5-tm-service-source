@@ -202,9 +202,13 @@ class UnknownRequestData: public RequestData{
     UnknownRequestData(): RequestData(UNKNOWN_COMMAND){};
 
     protected:
-    int parseJSON() override {return -1;};
-    int checkData() override {return -1;};
-    int execute()   override {return -1;};
+    int parseJSON() override {return 0;};
+    int checkData() override {return 0;};
+    int execute()   override {
+        _rest_rc_ = 404;
+        std::string msg = "Url " + strUrl + " was not parsed correctly";
+        return buildErrorReturn(404, msg.c_str());
+    };
 };
 
 class StatusMemRequestData: public RequestData{
