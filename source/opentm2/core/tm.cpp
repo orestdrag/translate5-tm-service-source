@@ -134,7 +134,7 @@ void EqfMemory::importDone(int iRC, char *pszError )
 // update memory status
 void EqfMemory::reorganizeDone(int iRC, char *pszError )
 {
-  sleep(10);
+  //sleep(10);
   eStatus = OPEN_STATUS;
   if ( iRC == 0 )
   {
