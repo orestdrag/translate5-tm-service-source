@@ -2059,7 +2059,7 @@ public:
   //std::atomic<double> dImportProcess; 
   //ushort * pusImportPersent = nullptr;
   ImportStatusDetails* importDetails = nullptr;
-  char *pszError = nullptr;           // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
+  std::string strError;           // pointer to an error message (only when eStatus is IMPORT_FAILED_STATUS)
  
   PPROP_NTM memoryProperties;
     /*! \brief structure for memory information */
@@ -2152,6 +2152,9 @@ public:
     int  iKeyBufferSize
   ); 
 
+
+  void importDone(int iRC, char *pszError );
+  void reorganizeDone(int iRC, char *pszError );
     
   /*! \brief Set the current sequential access key to resume the sequential access at the given position
     \param pszKey a sequential access key previously returned by getSequentialAccessKey
@@ -4185,6 +4188,8 @@ typedef struct _MEM_ORGANIZE_IDA
 {
  TMX_ENDORG_IN stEndOrgIn;                     // organize end input structure
  TMX_ENDORG_OUT stEndOrgOut;                   // organize end output structure
+
+ std::shared_ptr<int> memRef;
  TMX_PUT_IN_W  stPutIn;                        // input for TmReplace
  TMX_PUT_OUT_W stPutOut;                       // The REPLACE_OUT structure
  TMX_EXT_IN_W  stExtIn;                        // input for TmExtract
@@ -4459,7 +4464,6 @@ class TMManager{
     std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 
     int GetMemImportInProcess();
-    void importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszError );
     
     /*! \brief Close all open memories
     \returns http return code0 if successful or an error code in case of failures

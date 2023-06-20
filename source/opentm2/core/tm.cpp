@@ -113,25 +113,43 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 
 
 // update memory status
-void TMManager::importDone(std::shared_ptr<EqfMemory> mem, int iRC, char *pszError )
+void EqfMemory::importDone(int iRC, char *pszError )
 {
   if ( iRC == 0 )
   {
-    mem->eImportStatus = OPEN_STATUS;
-    mem->TmBtree.fb.Flush();
-    mem->InBtree.fb.Flush();
-    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << mem->szName;
+    eImportStatus = OPEN_STATUS;
+    TmBtree.fb.Flush();
+    InBtree.fb.Flush();
+    T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << szName;
   }
   else
   {
-    mem->eImportStatus = IMPORT_FAILED_STATUS;
-    mem->pszError = new char[strlen( pszError ) + 1];
-    strcpy( mem->pszError, pszError );
-    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << mem->szName <<", import failed: " << pszError << " import details = " << mem->importDetails->toString() ;
+    eImportStatus = IMPORT_FAILED_STATUS; 
+    strError =  pszError;
+    T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << szName <<", import failed: " << strError << " import details = " << importDetails->toString() ;
   }
 }
 
 
+// update memory status
+void EqfMemory::reorganizeDone(int iRC, char *pszError )
+{
+  sleep(10);
+  eStatus = OPEN_STATUS;
+  if ( iRC == 0 )
+  {
+    eImportStatus = AVAILABLE_STATUS;
+    TmBtree.fb.Flush();
+    InBtree.fb.Flush();
+    T5LOG( T5TRANSACTION) <<":: success, memName = " << szName;
+  }
+  else
+  {
+    eImportStatus = REORGANIZE_FAILED_STATUS;
+    strError =  pszError;
+    T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
+  }
+}
 
 /*! \brief Close all open memories
 \returns http return code0 if successful or an error code in case of failures

@@ -626,60 +626,60 @@ BOOL  TATagsToUnicode
 
     if ( UtlAlloc( (PVOID *)&pTmpW, 0L, usSize * sizeof(TMWCHAR), ERROR_STORAGE ) )
     {
-        pTable->pTagTableW = pTmpW;
-        for ( i = 0; i < usTagCount; i++ )
+      pTable->pTagTableW = pTmpW;
+      for ( i = 0; i < usTagCount; i++ )
+      {
+        pCurName = pTag[i].uTagnameOffs + pTagNames;
+        if (pCurName)
         {
-          pCurName = pTag[i].uTagnameOffs + pTagNames;
-          if (pCurName)
-          {
-            ASCII2Unicode( pCurName, pTmpW + pTag[i].uTagnameOffs, ulCP );
-          }
-        } /* endfor */
-        for ( i= 0; i < usTagCount; i++ )
+          ASCII2Unicode( pCurName, pTmpW + pTag[i].uTagnameOffs, ulCP );
+        }
+      } /* endfor */
+      for ( i= 0; i < usTagCount; i++ )
+      {
+        pCurName = pTag[i].uEndDelimOffs + pTagNames;
+        if (pCurName)
         {
-          pCurName = pTag[i].uEndDelimOffs + pTagNames;
-          if (pCurName)
-          {
-            ASCII2Unicode( pCurName, pTmpW + pTag[i].uEndDelimOffs, ulCP );
-          }
-        } /* endfor */
+          ASCII2Unicode( pCurName, pTmpW + pTag[i].uEndDelimOffs, ulCP );
+        }
+      } /* endfor */
 
-         for ( i = 0; i < usAttrCount; i++ )
-         {
-           pCurName = pTagNames + pAttr[i].uStringOffs;
-           if (pCurName)
-           {
-              ASCII2Unicode(pCurName, pTmpW + pAttr[i].uStringOffs, ulCP );
-           }
-         } /* endfor */
-         for ( i= 0; i < usAttrCount; i++ )
-         {
-             pCurName = pAttr[i].uEndDelimOffs + pTagNames;
-             if (pCurName)
-             {
-                ASCII2Unicode( pCurName, pTmpW + pAttr[i].uEndDelimOffs, ulCP );
-             }
-         } /* endfor */
-         for ( i = 0; i < 27; i++ )
-         {
-            pAttr = (PATTRIBUTE) ( pByte + pTagTable->stAttributeIndex[i].uOffset);
-            for ( j = 0; j < pTagTable->stAttributeIndex[i].uNumber; j++ )
+      for ( i = 0; i < usAttrCount; i++ )
+      {
+        pCurName = pTagNames + pAttr[i].uStringOffs;
+        if (pCurName)
+        {
+          ASCII2Unicode(pCurName, pTmpW + pAttr[i].uStringOffs, ulCP );
+        }
+      } /* endfor */
+      for ( i= 0; i < usAttrCount; i++ )
+      {
+          pCurName = pAttr[i].uEndDelimOffs + pTagNames;
+          if (pCurName)
+          {
+            ASCII2Unicode( pCurName, pTmpW + pAttr[i].uEndDelimOffs, ulCP );
+          }
+      } /* endfor */
+      for ( i = 0; i < 27; i++ )
+      {
+        pAttr = (PATTRIBUTE) ( pByte + pTagTable->stAttributeIndex[i].uOffset);
+        for ( j = 0; j < pTagTable->stAttributeIndex[i].uNumber; j++ )
+        {
+            pCurName = pTagNames + pAttr->uStringOffs;
+            if ( pCurName)
             {
-               pCurName = pTagNames + pAttr->uStringOffs;
-               if ( pCurName)
-               {
-                 ASCII2Unicode( pCurName, pTmpW + pAttr->uStringOffs, ulCP);
-               }
-               pCurName = pTagNames + pAttr->uEndDelimOffs;
-               if ( pCurName)
-               {
-                   ASCII2Unicode( pCurName, pTmpW + pAttr->uEndDelimOffs, ulCP);
-               }
+              ASCII2Unicode( pCurName, pTmpW + pAttr->uStringOffs, ulCP);
+            }
+            pCurName = pTagNames + pAttr->uEndDelimOffs;
+            if ( pCurName)
+            {
+                ASCII2Unicode( pCurName, pTmpW + pAttr->uEndDelimOffs, ulCP);
+            }
 
-               pAttr++;
-            } /* endfor */
-         } /* endfor */
-         pTable->pTagNamesW = pTmpW;
+            pAttr++;
+        } /* endfor */
+      } /* endfor */
+      pTable->pTagNamesW = pTmpW;
     }
     else
     {

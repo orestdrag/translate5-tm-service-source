@@ -184,10 +184,10 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
     int use_count = pRIDA->pMem.use_count();
     if(use_count != 3)//1)
     {
-      T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 1, but " << use_count;
+      T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 3, but " << use_count;
     }
     //TMManager::GetInstance()->CloseTM(strMemName);
-    pRIDA->pMem = nullptr;
+    //pRIDA->pMem = nullptr;
 
     // replace original memory with the organized one
     usURc = TMManager::GetInstance()->ReplaceMemory( strMemName, strTempMemName, outputMessage );
@@ -291,7 +291,7 @@ VOID EQFMemOrganizeProcess
       if ( usDosRc == NO_ERROR )
       {
         // everything in the termination process was ok
-        pRIDA->pMem = NULL;
+        //pRIDA->pMem = NULL;
 
         // end message only in GUI single organize mode
         if ( !pRIDA->fBatch && !pRIDA->pszNameList)

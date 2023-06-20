@@ -596,6 +596,9 @@ int CreateMemRequestData::execute(){
 // import memory process
 void importMemoryProcess( void *pvData );
 
+// reorganize memory process
+void reorganizeMemoryProcess( void *pvData );
+
 int ImportRequestData::parseJSON(){
   T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
   if ( _rc_ != 0 )
@@ -820,12 +823,25 @@ USHORT MemFuncOrganizeProcess
 );
 
 int ReorganizeRequestData::execute(){
-  PFCTDATA    pData = NULL;            // ptr to function data area
-  PROCESSCOMMAREA CommArea;   // ptr to commmunication area
-  MEM_ORGANIZE_IDA RIDA;      // pointer to instance area
+  if ( mem == nullptr )
+  {
+    return 404;
+  }
+    // close the memory - when open
+  if ( mem->eStatus != OPEN_STATUS )
+  {
+    return 500;
+  }
+
+  mem->eStatus = AVAILABLE_STATUS;
+  mem->eImportStatus = REORGANIZE_RUNNING_STATUS;
+  
+  PFCTDATA    pData = new FCTDATA;            // ptr to function data area
+  PPROCESSCOMMAREA pCommArea = new PROCESSCOMMAREA;   // ptr to commmunication area
+  PMEM_ORGANIZE_IDA pRIDA = new MEM_ORGANIZE_IDA;      // pointer to instance area
 
   // validate session handle
-  _rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
+  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
 
   // close memory if it is open
   //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
@@ -850,48 +866,42 @@ int ReorganizeRequestData::execute(){
   {    
     // prepare TM organize process
     // Fill  IDA with necessary values
-    CommArea.pUserIDA = &RIDA;
-    RIDA.pMem = mem;
-    RIDA.usRC = NO_ERROR;
-    strcpy( RIDA.szMemName, mem->szName );
-    RIDA.fBatch = TRUE;
-    RIDA.hwndErrMsg = HWND_FUNCIF;
-    RIDA.NextTask = MEM_START_ORGANIZE;
+    pCommArea->pUserIDA = pRIDA;
+    pRIDA->pMem = mem;
+    pRIDA->memRef = memRef;
+    pRIDA->usRC = NO_ERROR;
+    strcpy( pRIDA->szMemName, mem->szName );
+    pRIDA->fBatch = TRUE;
+    pRIDA->hwndErrMsg = HWND_FUNCIF;
+    pRIDA->NextTask = MEM_START_ORGANIZE;
 
     // enable organize process if OK
     pData->fComplete = FALSE;
     pData->sLastFunction = FCT_EQFORGANIZEMEM;
-    pData->pvMemOrganizeCommArea = &CommArea;    
-    RIDA.pszNameList = 0;
+    pData->pvMemOrganizeCommArea = pCommArea;    
+    pRIDA->pszNameList = 0;
+
+    mem.reset();
+    memRef.reset();
   } 
 
-  while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )
-  {      
-    // continue current organize process
-    switch ( RIDA.NextTask )
-    {
-      case MEM_START_ORGANIZE:
-        EQFMemOrganizeStart( &CommArea );
-        break;
-
-      case MEM_ORGANIZE_TASK:
-        EQFMemOrganizeProcess( &CommArea );
-        break;
-
-      case MEM_END_ORGANIZE:
-        pData->fComplete = TRUE;
-        EQFMemOrganizeEnd( &CommArea);
-        if ( RIDA.pszNameList ) UtlAlloc( (PVOID *)&RIDA.pszNameList, 0L, 0L, NOMSG );
-        break;
-    } /* endswitch */
-    _rc_ = RIDA.usRC;
-  };
+  //worker thread 
+  if(!_rc_){
+    //reorganizeMemoryProcess(pData);//to do in same thread
+    std::thread worker_thread(reorganizeMemoryProcess, pData);
+    worker_thread.detach();
+  }else{
+    delete pData;
+    delete pCommArea;
+    delete pCommArea;
+  }
   
   if ( _rc_ == ERROR_MEMORY_NOTFOUND )
   {
     outputMessage = "{\"" + strMemName + "\": \"not found\" }";
     return( _rc_ = NOT_FOUND );
   }
+  /*
   else if ( _rc_ != 0 )
   {
     unsigned short usRC = 0;
@@ -903,10 +913,15 @@ int ReorganizeRequestData::execute(){
          EncodingHelper::convertToUTF8(szLastError);
     std::string strLastError = EncodingHelper::convertToUTF8(szLastError);
     buildErrorReturn( _rc_, strLastError.c_str() );
+    mem->eStatus = OPEN_STATUS;
+    mem->eImportStatus = REORGANIZE_FAILED_STATUS;
+    mem->strError = strLastError;
     return( INTERNAL_SERVER_ERROR );
   }else{
+    mem->eStatus = OPEN_STATUS;
+    mem->eImportStatus = AVAILABLE_STATUS;
     outputMessage = "{\"" + strMemName + "\": \"reorganized\" }";
-  }
+  } //*/
 
   T5LOG(T5INFO) << "::success, memName = " << strMemName;
   _rc_ = OK;
@@ -1194,7 +1209,9 @@ int StatusMemRequestData::execute() {
     switch ( mem->eImportStatus )
     {
       case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
-      case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
+      case REORGANIZE_RUNNING_STATUS: pszStatus = "reorganize"; break;
+      case IMPORT_FAILED_STATUS: pszStatus = "import failed"; break;
+      case REORGANIZE_FAILED_STATUS: pszStatus = "reorganize failed"; break;
       default: pszStatus = "available"; break;
     }
     // return the status of the memory
@@ -1215,9 +1232,10 @@ int StatusMemRequestData::execute() {
                               + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
                               + ":" + std::to_string(mem->stTmSign.bMinorVersion);
     json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
-    if ( ( mem->eImportStatus == IMPORT_FAILED_STATUS ) && ( mem->pszError != NULL ) )
+    if ( ( (mem->eImportStatus == IMPORT_FAILED_STATUS) 
+        || (mem->eImportStatus == REORGANIZE_FAILED_STATUS)) && ( !mem->strError.empty() ) )
     {
-      json_factory.addParmToJSON( outputMessage, "ErrorMsg", mem->pszError );
+      json_factory.addParmToJSON( outputMessage, "ErrorMsg", mem->strError.c_str() );
     }
     json_factory.terminateJSON( outputMessage );
     return( OK );

@@ -575,7 +575,7 @@ int EqfMemory::getLastError
   int iBufSize
 )
 {
-  strncpy( pszError, this->strLastError.c_str(), iBufSize );
+  strError = strLastError.c_str();
   return( this->iLastError );
 }
 

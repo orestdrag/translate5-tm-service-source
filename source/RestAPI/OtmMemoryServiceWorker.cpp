@@ -58,17 +58,6 @@ OtmMemoryServiceWorker* OtmMemoryServiceWorker::getInstance()
 	return &_instance;
 }
 
-/*! \brief OtmMemoryServiceWorker constructor
-*/
-OtmMemoryServiceWorker::OtmMemoryServiceWorker()
-{
-}
-
-
-
-
-
-
 /*! \brief Data area for the processing of the openMemory function
 */
 typedef struct _OPENMEMORYDATA
@@ -296,21 +285,7 @@ int OtmMemoryServiceWorker::closeAll(){
 
 
 
-/*! \brief get the data of a memory in binary form or TMX form
-\param strMemory name of memory
-\param strType type of the requested memory data
-\param vMemData vector<Byte> receiving the memory data
-\returns http return code
-*/
-int OtmMemoryServiceWorker::getMem
-(
-  std::string strMemory,
-  std::string strType,
-  std::vector<unsigned char> &vMemData
-)
-{
-  return( OK );
-}
+
 
 
 std::string printTime(time_t time){
@@ -368,13 +343,13 @@ int FilesystemHelper::EncodeFileInBase64( char *pszFile, char **ppStringData, st
     }else{    
       std::string encodedData;
       EncodingHelper::Base64Encode(pData, fSize, encodedData);
-        if(encodedData.empty())
-        {
-          iRC = GetLastError();
-          strError = "encoding of BASE64 data failed";
-          T5LOG(T5ERROR) << "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = " << iRC;
-          return( iRC );
-        }
+      if(encodedData.empty())
+      {
+        iRC = GetLastError();
+        strError = "encoding of BASE64 data failed";
+        T5LOG(T5ERROR) << "encodeBase64ToFile()::ecnoding of BASE64 data failed, iRC = " << iRC;
+        return( iRC );
+      }
     }
 
     // cleanup
@@ -433,8 +408,7 @@ void importMemoryProcess( void* pvData )
   }
 
   // update memory status
-  //pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
-  TMManager::GetInstance()->importDone( pData->mem,iRC, pData->szError );
+  pData->mem->importDone( iRC, pData->szError );
  
   // cleanup
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
@@ -447,3 +421,58 @@ void importMemoryProcess( void* pvData )
 
 
 
+
+void reorganizeMemoryProcess( void* pvData )
+{
+  PFCTDATA    pData = (PFCTDATA)pvData;                      // ptr to function data area
+  PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)pData->pvMemOrganizeCommArea; // ptr to commmunication area
+  PMEM_ORGANIZE_IDA pRIDA =  (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;            // pointer to instance area
+  // call the OpenTM2 API function
+  pData->szError[0] = 0;
+
+  int _rc_ = 0;
+  while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )
+  {      
+    // continue current organize process
+    switch ( pRIDA->NextTask )
+    {
+      case MEM_START_ORGANIZE:
+        EQFMemOrganizeStart( pCommArea );
+        break;
+
+      case MEM_ORGANIZE_TASK:
+        EQFMemOrganizeProcess( pCommArea );
+        break;
+
+      case MEM_END_ORGANIZE:
+        pData->fComplete = TRUE;
+        EQFMemOrganizeEnd( pCommArea);
+        if ( pRIDA->pszNameList ) UtlAlloc( (PVOID *)pRIDA->pszNameList, 0L, 0L, NOMSG );
+        break;
+    } /* endswitch */
+    _rc_ = pRIDA->usRC;
+  };
+
+  // handle any error
+  if ( _rc_ != 0 )
+  {
+    unsigned short usRC = 0;
+    //EqfGetLastError( pData->hSession, &usRC, pData->szError, sizeof( pData->szError ) );
+    T5LOG(T5ERROR) <<"reorganizeMemoryProcess:: error = " << pData->szError << "; _rc_ = " << std::to_string(_rc_);
+  }
+  // update memory status
+  if(pRIDA && pRIDA->pMem){
+    pRIDA->pMem->reorganizeDone(_rc_, pData->szError );
+    pRIDA->pMem.reset();
+    pRIDA->memRef.reset();
+  }
+  // cleanup
+  //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+  //  DeleteFile( pData->szInFile );
+  //}
+  if(pCommArea) delete( pCommArea );
+  if(pRIDA) delete( pRIDA );
+  if(pData) delete( pData );
+
+  return;
+}
