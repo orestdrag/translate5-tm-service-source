@@ -4204,8 +4204,8 @@ typedef struct _MEM_ORGANIZE_IDA
  std::shared_ptr<EqfMemory>     pMem;                           // Handle of transl. memory
  std::shared_ptr<EqfMemory>     pMemTemp;                       // Handle of tmporary transl. memory
  BOOL          fMsg;                           // A message has been issued already
- ULONG         ulSegmentCounter;               // Number of segments organized
- ULONG         ulInvSegmentCounter;            // Invalid Segment counter
+ //ULONG         ulSegmentCounter;               // Number of segments organized
+ //ULONG         ulInvSegmentCounter;            // Invalid Segment counter
  TIME_L        tStamp;                         // Time stamp of organize start time
  HWND          hProgressWindow;                // Handle of progress indicator window
  ULONG         ulProgressPos;                  // position of progress indicator

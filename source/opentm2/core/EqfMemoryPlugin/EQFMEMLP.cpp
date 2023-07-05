@@ -117,7 +117,7 @@ USHORT MemHandleCodePageValue
 
 
 // import logging 
-  static LONG lImportStartTime = 0;
+  //static LONG lImportStartTime = 0;
   static LONG64 lMemAccessTime = 0;
   static LONG64 lFileReadTime = 0;
   static LONG64 lOtherTime = 0;
@@ -614,9 +614,9 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
    }else{
-    time( &lImportStartTime );
+    time( &pLIDA->mem->importDetails->lReorganizeStartTime );
     T5LOG(T5DEBUG)  << "************ Memory Import Log *********************\n Memory import started at   : "<<
-          asctime( localtime( &lImportStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
+          asctime( localtime( &pLIDA->mem->importDetails->lReorganizeStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
    } /* endif */   
 
    return ((USHORT)fOK);
@@ -1117,9 +1117,9 @@ USHORT MemFuncImportProcess
           LONG lCurTime = 0;  
           time( &lCurTime );
                   
-          if ( lImportStartTime )
+          if ( pData->pImportData->lReorganizeStartTime )
           {
-            LONG lDiff = lCurTime - lImportStartTime;
+            LONG lDiff = lCurTime - pData->pImportData->lReorganizeStartTime;
             char buff[256];
             sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                     (lDiff - (lDiff / 3600 * 3600)) / 60,

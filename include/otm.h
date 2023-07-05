@@ -98,7 +98,9 @@ struct ImportStatusDetails{
   std::atomic_int invalidSegments{-1};
   std::atomic_int invalidSymbolErrors{-1};
   std::string importTimestamp;
+  long lReorganizeStartTime;
   std::stringstream importMsg;
+  bool fReorganize{0}; // true for reorganize call, false for import
   
   void reset(){
     importMsg.str("");
@@ -106,11 +108,18 @@ struct ImportStatusDetails{
     segmentsImported = -1;
     invalidSegments = -1;
     invalidSymbolErrors = -1;
+    fReorganize = 0;
+    lReorganizeStartTime = 0;
     importTimestamp = "not finished";    
   }
   std::string toString(){
-    std::string res;
-    res = "progress = " + std::to_string(usProgress) + "; segmentsImported = " + std::to_string(segmentsImported) + "; invalidSegments = " + std::to_string(invalidSegments) + "; time = " + importTimestamp;
+    std::string res = "progress = " + std::to_string(usProgress);
+    if(fReorganize){
+      res += "; segmentsReorganized = ";
+    }else{
+      res +=  "; segmentsImported = " ;
+    }
+    res += std::to_string(segmentsImported) + "; invalidSegments = " + std::to_string(invalidSegments) + "; time = " + importTimestamp;
     return res;
   }
 };

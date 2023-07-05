@@ -134,7 +134,6 @@ void EqfMemory::importDone(int iRC, char *pszError )
 // update memory status
 void EqfMemory::reorganizeDone(int iRC, char *pszError )
 {
-  //sleep(10);
   eStatus = OPEN_STATUS;
   if ( iRC == 0 )
   {
@@ -1305,7 +1304,6 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
   }
   tms[NewMem->szName] = NewMem;
   return 0;
-
 }
 
 int TMManager::CloseTM(const std::string& strMemName){
@@ -1316,7 +1314,6 @@ int TMManager::CloseTM(const std::string& strMemName){
   return 0;
 }
 
-
 std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
   std::shared_ptr<EqfMemory> mem;
   if(IsMemoryLoaded(strMemName)){
@@ -1326,6 +1323,7 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
   }
   return nullptr;
 }
+
 std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
   if(!IsMemoryLoaded(strMemName)){

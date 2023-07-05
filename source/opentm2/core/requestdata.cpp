@@ -880,6 +880,16 @@ int ReorganizeRequestData::execute(){
     pData->sLastFunction = FCT_EQFORGANIZEMEM;
     pData->pvMemOrganizeCommArea = pCommArea;    
     pRIDA->pszNameList = 0;
+    if(mem->importDetails == nullptr){
+      mem->importDetails = new ImportStatusDetails;
+    }
+    
+    mem->importDetails->reset();
+    LONG lCurTime = 0;  
+    time( &lCurTime );
+                  
+    pRIDA->pMem->importDetails->lReorganizeStartTime = lCurTime;
+    mem->importDetails->fReorganize = true;
 
     mem.reset();
     memRef.reset();
@@ -1217,14 +1227,25 @@ int StatusMemRequestData::execute() {
     // return the status of the memory
     json_factory.startJSON( outputMessage );
     json_factory.addParmToJSON( outputMessage, "status", "open" );
-    json_factory.addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
     if(mem->importDetails != nullptr){
-      json_factory.addParmToJSON( outputMessage, "importProgress", mem->importDetails->usProgress );
-      json_factory.addParmToJSON( outputMessage, "importTime", mem->importDetails->importTimestamp );
-      json_factory.addParmToJSON( outputMessage, "segmentsImported", mem->importDetails->segmentsImported );
-      json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-      json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-      json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
+      if(mem->importDetails->fReorganize){
+        json_factory.addParmToJSON( outputMessage, "reorganizeStatus", pszStatus );
+        json_factory.addParmToJSON( outputMessage, "reorganizeProgress", mem->importDetails->usProgress );
+        json_factory.addParmToJSON( outputMessage, "reorganizeTime", mem->importDetails->importTimestamp );
+        json_factory.addParmToJSON( outputMessage, "segmentsReorganized", mem->importDetails->segmentsImported );
+        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+        //json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
+        json_factory.addParmToJSON( outputMessage, "reorganizeErrorMsg", mem->importDetails->importMsg.str() );
+      }else{
+        json_factory.addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
+        json_factory.addParmToJSON( outputMessage, "importProgress", mem->importDetails->usProgress );
+        json_factory.addParmToJSON( outputMessage, "importTime", mem->importDetails->importTimestamp );
+        json_factory.addParmToJSON( outputMessage, "segmentsImported", mem->importDetails->segmentsImported );
+        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+        json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
+        json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
+      }
+     
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );

@@ -221,8 +221,8 @@ VOID EQFMemOrganizeProcess
 
   if ( pRIDA->fFirstGet )
   {
-    pRIDA->ulInvSegmentCounter = 0;
-    pRIDA->ulSegmentCounter = 0;
+    pRIDA->pMem->importDetails->invalidSegments = 0;
+    pRIDA->pMem->importDetails->segmentsImported = 0;
     iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
     pRIDA->fFirstGet = FALSE;
   }
@@ -242,7 +242,7 @@ VOID EQFMemOrganizeProcess
           (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
     {
       // ignore invalid proposal
-      pRIDA->ulInvSegmentCounter++;
+      pRIDA->pMem->importDetails->invalidSegments++;
     }
     else
     {
@@ -250,23 +250,23 @@ VOID EQFMemOrganizeProcess
       iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
       if ( iRC != 0 )
       {
-        pRIDA->ulInvSegmentCounter++;
+        pRIDA->pMem->importDetails->invalidSegments++;
       }
       else
       {
-        pRIDA->ulSegmentCounter++;
+        pRIDA->pMem->importDetails->segmentsImported++;
       } /* endif */             
     } /* endif */
   }
   else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
   {
     pCommArea->usComplete = (USHORT)iProgress;
-    pRIDA->ulInvSegmentCounter++;
+    pRIDA->pMem->importDetails->invalidSegments++;
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )
   {
     pRIDA->pMemTemp->NTMOrganizeIndexFile();
-    T5LOG(T5WARNING) << "reorganize is done, segCount = " << pRIDA->ulSegmentCounter << "; invSegCount = " << pRIDA->ulInvSegmentCounter;
+    T5LOG(T5WARNING) << "reorganize is done, segCount = " << pRIDA->pMem->importDetails->segmentsImported << "; invSegCount = " << pRIDA->pMem->importDetails->invalidSegments;
     int use_count = pRIDA->pMemTemp.use_count();
     if(use_count != 1){
       T5LOG(T5WARNING) << ":: use_count for temporary tm is not 1, but " << use_count;
@@ -321,7 +321,8 @@ VOID EQFMemOrganizeProcess
         pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
       } /* endif */
     } /* endif */
-
+    
+    pRIDA->pMem->importDetails->usProgress = pCommArea->usComplete;
     // -----------------------------------------------------
     // Issue message WM_EQF_MEMORGANIZE_END
     pRIDA->NextTask = MEM_END_ORGANIZE;
@@ -377,6 +378,21 @@ VOID EQFMemOrganizeEnd
     EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pCommArea->szBuffer ));
     EqfRemoveObject( TWBFORCE, HWND_FUNCIF );
   } /* endif */
+
+  LONG lCurTime = 0;  
+  time( &lCurTime );
+                
+  if ( pRIDA->pMem->importDetails->lReorganizeStartTime )
+  {
+    LONG lDiff = lCurTime - pRIDA->pMem->importDetails->lReorganizeStartTime;
+    char buff[256];
+    sprintf( buff, "Overall reorganize time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
+            (lDiff - (lDiff / 3600 * 3600)) / 60,
+            (lDiff - (lDiff / 3600 * 3600)) % 60 );
+            
+    pRIDA->pMem->importDetails->importTimestamp = buff;
+  }
+  pRIDA->pMem->importDetails->usProgress = 100;
 } /* end of function EQFMemOrganizeEnd */
 
 

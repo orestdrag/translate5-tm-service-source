@@ -894,8 +894,6 @@ COLORREF UtlGetColorref( LONG lColor );
 #define EXLST_EXIT      3
 #define DosExitList( a, b )
 
-// Substitute for DosSleep
-#define DosSleep( a ) Sleep( a )
 
 // ignore DosEnterCritSec
 #define DosEnterCritSec()
