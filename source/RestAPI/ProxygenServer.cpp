@@ -218,6 +218,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             auto request = new ResourceInfoRequestData();
             request->pStats = stats_.get();
             requestHandler->pRequest = request;
+          }else if(urlCommand == "savetms"){
+            requestHandler->pRequest = new SaveAllTMsToDiskRequestData();
           }
         }else if( methodStr == "POST"){
           if(urlCommand == "tagreplacement"){

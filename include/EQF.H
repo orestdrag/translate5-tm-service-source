@@ -4828,8 +4828,6 @@ typedef struct _PROPFOLDER
    char   szSavedDlgIanaInMdb[NUM_OF_FOLDER_MDB+1][MAX_FNAME+MAX_FEXT];
                                             // input memory databases
    CHAR   szDummy1[MAX_FNAME+MAX_FEXT];     // ** variablee has been removed **
-   EQF_BOOL   fSavedDlgIanaChkMdb;          // state of out mdb checkb
-   EQF_BOOL   fSavedDlgIanaChkAddSeg;       // state of add segm. checkb
    //----------------- Analysis(2) - last used values ------------------------
    EQF_BOOL   fAddTermsToDicCb;             // state of add terms to dict. CB
    EQF_BOOL   fExTermsInListCb;             //state of excl. terms in list CB
@@ -4867,7 +4865,6 @@ typedef struct _PROPFOLDER
    CHAR         szCreateNewTermsDd[MAX_FILESPEC];// create new terms CB
    CHAR         szCreateFndTermsDd[MAX_FILESPEC];          // create found terms CB
 
-   EQF_BOOL  fSavedDlgIanaChkNoMatch;          // state of out new matches checkb
 
    CHAR      szSourceLang[MAX_LANG_LENGTH]; // FOLDER SOURCE LANGUAGE
    CHAR      szTargetLang[MAX_LANG_LENGTH]; // FOLDER TARGET LANGUAGE
@@ -4881,7 +4878,6 @@ typedef struct _PROPFOLDER
    CHAR      szOldRptOutputFile[MAX_PATH144];  // filename for output file
    char MemTbl[ NUM_OF_READONLY_MDB*MAX_FILESPEC];  // folder's list of mems
    EQF_BOOL  fExactContextTMMatch;          // support for Exact Context TM..
-   EQF_BOOL  fSavedDlgIanaTMMatch;          // state of TMMatch checkbox
    //----------------new Count dialog last used value ------------------------
    EQF_BOOL    fReplMatch;                  // status of replace match flag
     //---Summary counting report -----
@@ -5043,24 +5039,10 @@ typedef struct _PROPFOLDER
    // fields for document export in validation format
    char      szSavedDlgFExpoValPath[MAX_LONGPATH]; // last used valdiation format path export files dlg
    SHORT     sSavedDlgFExpoValFormat;              // selected export format
-   EQF_BOOL  fSavedDlgFExpoValWithProtSegs;        // TRUE = export with protected segments
-   EQF_BOOL  fSavedDlgFExpoValCombine;             // TRUE = combine into  a single output file
 
    // analysis "load balancer list flag"
    EQF_BOOL  fSavedDlgIanaBalanceList;
 
-   // more fields for document export in validation format
-   EQF_BOOL  fSavedDlgFExpoValValFormat;
-   EQF_BOOL  fSavedDlgFExpoValProofFormat;
-   EQF_BOOL  fSavedDlgFExpoValAllMatch;
-   EQF_BOOL  fSavedDlgFExpoValNewMatch;
-   EQF_BOOL  fSavedDlgFExpoValProtMatch;
-   EQF_BOOL  fSavedDlgFExpoValAutoMatch;
-   EQF_BOOL  fSavedDlgFExpoValNotTransl;
-   EQF_BOOL  fSavedDlgFExpoValFuzzyMatch;
-   EQF_BOOL  fSavedDlgFExpoValExactMatch;
-   EQF_BOOL  fSavedDlgFExpoValMachMatch;
-   EQF_BOOL  fSavedDlgFExpoValReplMatch;
 
    // analysis option fields for replacement list handling
    EQF_BOOL  fAnalUseReplacementList;
@@ -5068,10 +5050,6 @@ typedef struct _PROPFOLDER
 
    // more fields for document export in validation format
    USHORT    usSavedDlgFExpoValRemoveTagging; // remove tagging; 0 = not set, 1 = remove tagging, 2 = leave tagging
-   EQF_BOOL  fSavedDlgFExpoValInclCount;
-   EQF_BOOL  fSavedDlgFExpoValInclExisting;
-   EQF_BOOL  fSavedDlgFExpoValMismatchOnly;
-   EQF_BOOL  fSavedDlgFExpoValModExactMatch;
 
    // more fields for word count LUs
    EQF_BOOL  fInclMemMatch;            // include memory match info in duplicae word count
@@ -5083,9 +5061,6 @@ typedef struct _PROPFOLDER
    // last used values for aalysis profiles
    BOOL      fSavedDlgIanaProfile;         // profile checkbox
    CHAR      szSavedDlgIanaProfile[MAX_LONGFILESPEC]; // profile name
-
-   // more fields for document export in validation format
-   BOOL      fSavedDlgFExpoValLinksImages;
 
    // old analysis flag 'protect xmp/screen section'
    EQF_BOOL  fSavedDlgIanaProtXmpScreen;
@@ -5102,7 +5077,6 @@ typedef struct _PROPFOLDER
    CHAR      szGlobalMemOptFile[MAX_LONGFILESPEC]; // name of Global Memory Option file
    EQF_BOOL  fGlobalMemOptCheckRequired;           // FALSE = global memory options for this folder have been checked by user
 
-   EQF_BOOL  fSavedDlgFExpoValGlobMemMatch;
 
    // last used values for export segments function
    CHAR      szLastOutputFile[MAX_LONGFILESPEC]; // name of last output file
@@ -5110,9 +5084,6 @@ typedef struct _PROPFOLDER
 
    // flag: disabled because of user exit refresh failed (needs restart of workbench)
    EQF_BOOL fDisabled_UserExitRefresh;
-
-   // another validation document export option
-   EQF_BOOL  fSavedDlgFExpoValModAutoMatch;
 
    // new individual section protection flags
    EQF_BOOL  fSavedDlgIanaProtXmp;
@@ -5328,32 +5299,10 @@ struct imex_prop {
    // fields for document export in validation format
    char      szSavedDlgFExpoValPath[MAX_LONGPATH]; // last used valdiation format path export files dlg
    SHORT     sSavedDlgFExpoValFormat;              // selected export format
-   EQF_BOOL  fSavedDlgFExpoValWithProtSegs;        // TRUE = export with protected segments
-   EQF_BOOL  fSavedDlgFExpoValCombine;             // TRUE = combine all documents into a single output file
 
    // more fields for document export in validation format
-   EQF_BOOL  fSavedDlgFExpoValValFormat;
-   EQF_BOOL  fSavedDlgFExpoValProofFormat;
-   EQF_BOOL  fSavedDlgFExpoValAllMatch;
-   EQF_BOOL  fSavedDlgFExpoValNewMatch;
-   EQF_BOOL  fSavedDlgFExpoValProtMatch;
-   EQF_BOOL  fSavedDlgFExpoValAutoMatch;
-   EQF_BOOL  fSavedDlgFExpoValNotTransl;
-   EQF_BOOL  fSavedDlgFExpoValFuzzyMatch;
-   EQF_BOOL  fSavedDlgFExpoValExactMatch;
-   EQF_BOOL  fSavedDlgFExpoValMachMatch;
-   EQF_BOOL  fSavedDlgFExpoValReplMatch;
    USHORT    usSavedDlgFExpoValRemoveTagging; // remove tagging; 0 = not set, 1 = remove tagging, 2 = leave tagging
 
-   EQF_BOOL  fSavedDlgFExpoValInclCount;
-   EQF_BOOL  fSavedDlgFExpoValInclExisting;
-   EQF_BOOL  fSavedDlgFExpoValMismatchOnly;
-   EQF_BOOL  fSavedDlgFExpoValModExactMatch;
-   EQF_BOOL  fSavedDlgFExpoValLinksImages;
-   EQF_BOOL  fSavedDlgFExpoValGlobMemMatch;
-   EQF_BOOL  fSavedDlgFExpoValModAutoMatch;
-   EQF_BOOL  fSavedDlgFExpoValExactFromManual;      // check for exact matches coming from manual translation switch
-   EQF_BOOL  fSavedDlgFExpoValTransOnly;            // check for export trans text in simple format switch
    EQF_BOOL  fSavedDlgFExpoWithTrackID;             // selection of with TVT tracking ID button
 
    CHAR chReserve[1708];        // reserve space/filler (fills props to 4K )

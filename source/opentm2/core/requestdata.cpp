@@ -757,7 +757,7 @@ int SaveAllTMsToDiskRequestData::execute(){
     files += ", ";
 
     tm.second->InBtree.fb.Flush();
-    files += tm.second->TmBtree.fb.fileName;
+    files += tm.second->InBtree.fb.fileName;
     count += 2;
   }
   outputMessage = "{\n   \'saved " + std::to_string(count) +" files\': \'" + files + "\' \n}";
