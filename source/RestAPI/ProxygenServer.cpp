@@ -222,6 +222,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->command = ProxygenHandler::COMMAND::SHUTDOWN;
           }else if(urlCommand == "resources"){
             requestHandler->command = ProxygenHandler::COMMAND::RESOURCE_INFO;
+          }else if(urlCommand == "savetms"){
+            requestHandler->command = ProxygenHandler::COMMAND::SAVE_ALL_TM_ON_DISK;
           }
         }else if( methodStr == "POST"){
           if(urlCommand == "tagreplacement"){
