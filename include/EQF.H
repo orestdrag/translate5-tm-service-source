@@ -3722,7 +3722,6 @@ SHORT UtlDriveType( CHAR chDrive );
 VOID UtlSetHorzScrollingForLB(HWND hLB);
 
 VOID   UtlSaveWindowPos( HWND hFrame, EQF_PSWP pSwp);
-BOOL   UtlAlloc ( PVOID *, LONG, LONG, USHORT );
 BOOL   UtlAllocHwnd ( PVOID *, LONG, LONG, USHORT, HWND );
 BOOL   UtlInitUtils( HAB );
 BOOL   UtlRegisterEqfHelp( HAB );

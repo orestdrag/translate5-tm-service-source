@@ -777,7 +777,7 @@ int ImportRequestData::execute(){
   lastStatus =       mem->eStatus;
   lastImportStatus = mem->eImportStatus;
 
-  mem->eStatus = AVAILABLE_STATUS;
+  mem->eStatus = IMPORT_RUNNING_STATUS;
   mem->eImportStatus = IMPORT_RUNNING_STATUS;
   //mem->dImportProcess = 0;
 
@@ -833,7 +833,7 @@ int ReorganizeRequestData::execute(){
     return 500;
   }
 
-  mem->eStatus = AVAILABLE_STATUS;
+  mem->eStatus = REORGANIZE_RUNNING_STATUS;
   mem->eImportStatus = REORGANIZE_RUNNING_STATUS;
   
   PFCTDATA    pData = new FCTDATA;            // ptr to function data area
@@ -1242,6 +1242,20 @@ int StatusMemRequestData::execute() {
         json_factory.addParmToJSON( outputMessage, "importTime", mem->importDetails->importTimestamp );
         json_factory.addParmToJSON( outputMessage, "segmentsImported", mem->importDetails->segmentsImported );
         json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+        std::string invalidSegmRCs;
+        for(auto& isrc: mem->importDetails->invalidSegmentsRCs){
+          invalidSegmRCs += std::to_string(isrc.first) + ":" + std::to_string(isrc.second) +"; ";
+        }
+
+
+        std::string firstInvalidSegments;
+        int i=0;
+        for(auto& isn: mem->importDetails->firstInvalidSegmentsSegNums){
+          firstInvalidSegments += std::to_string(++i) + ":" +std::to_string(isn) + "; ";
+        }
+
+        json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
+        json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
         json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
         json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
       }

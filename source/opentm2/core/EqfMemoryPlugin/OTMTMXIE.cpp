@@ -1581,6 +1581,7 @@ USHORT CTMXExportImport::ImportNext
 
         //m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
         m_pMemInfo->fError = TRUE;
+        pImportData->importMsg << buff <<";;; ";
       } /* endif */
 
       if ( errorCount || !fContinue )

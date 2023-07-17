@@ -188,9 +188,9 @@ USHORT EqfExportMem
   if ( usRC == NO_ERROR )
   {
     if ( !( lOptions & COMPLETE_IN_ONE_CALL_OPT ) ) pData->sLastFunction = FCT_EQFEXPORTMEM;
-    if(pData->pImportData == nullptr){
-      pData->pImportData  = new ImportStatusDetails;
-      pData->pImportData->reset();
+    if(pData->mem->importDetails == nullptr){
+      pData->mem->importDetails  = new ImportStatusDetails;
+      pData->mem->importDetails->reset();
     }
     usRC = MemFuncExportMem( pData, pszMemName, pszOutFile, lOptions );
   } /* endif */

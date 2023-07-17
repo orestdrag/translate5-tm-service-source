@@ -2418,9 +2418,8 @@ USHORT AddTmTarget(
           //update overall length of tm record
           RECLEN(pTmRecord) += RECLEN(pTargetRecord);
 
-
           //add updated tm record to database
-          usRc = pTmClb->InBtree.EQFNTMUpdate(
+          usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                *pulKey,
                                (PBYTE)pTmRecord,
                                RECLEN(pTmRecord) );
@@ -2762,20 +2761,20 @@ USHORT TmtXUpdSeg
             else
             {
               // target not found
-              usRc = BTREE_NOT_FOUND;
+              SET_AND_LOG(usRc, BTREE_NOT_FOUND);
             } /* endif */
           }
           else
           {
             // record not found
-            usRc = BTREE_NOT_FOUND;
+            SET_AND_LOG(usRc, BTREE_NOT_FOUND);
           } /* endif */
         } /* endif */
       }
       else
       {
         // record is empty and should not be updated
-        usRc = BTREE_NOT_FOUND;
+        SET_AND_LOG(usRc, BTREE_NOT_FOUND);
       } /* endif */
     } /* endif */
   } /* endif */

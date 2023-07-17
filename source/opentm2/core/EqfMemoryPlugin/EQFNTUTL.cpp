@@ -1813,11 +1813,13 @@ USHORT NTMAddNameToTable
         {
           if ( usTableType != LANGGROUP_KEY )
           {
+            int occupSize = (pstTMTable->ulMaxEntries+1) * sizeof(TMX_TABLE_ENTRY);
             usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                 (ULONG)usTableType,
                                 (PBYTE)pstTMTable,
                                 //pstTMTable->ulAllocSize 
-                                BTREE_REC_SIZE_V3
+                                //BTREE_REC_SIZE_V3
+                                occupSize
                                 );
           } /* endif */
         } /* endif */

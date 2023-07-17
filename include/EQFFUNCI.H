@@ -143,9 +143,7 @@ USHORT MemFuncPrepImport
 
 USHORT MemFuncImportProcess
 (
-  PFCTDATA    pData,                    // function I/F session data
-  ImportStatusDetails*     pImportData
-
+  PFCTDATA    pData                    // function I/F session data
 );
 
 USHORT FolFuncCreateFolder

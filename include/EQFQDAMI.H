@@ -71,13 +71,7 @@ typedef enum _DICTCMD
 } DICTCMD;
 
 
-typedef enum _SEARCHTYPE
-{
-  FEXACT,                  // exact match requested
-  FSUBSTR,                 // only substring match
-  FEQUIV,                  // equivalent match
-  FEXACT_EQUIV             // editor: exact match then equivalent
-} SEARCHTYPE;
+
 
 typedef struct _STENCODEBITS
 {
@@ -909,7 +903,6 @@ typedef struct _DICTTIME
  SHORT QDAMFindParent_V3(PBTREE, PBTREEBUFFER_V3, PUSHORT );
 
  SHORT QDAMFindChild_V3 ( PBTREE, PWCHAR, USHORT, PBTREEBUFFER_V3 * );
- SHORT QDAMLocateKey_V3(PBTREE, PBTREEBUFFER_V3, PWCHAR, PSHORT, SEARCHTYPE, PSHORT);
 
  SHORT QDAMChangeKey_V3(PBTREE, USHORT, PWCHAR, PWCHAR );
  SHORT QDAMNewRecord_V3( PBTREE, PBTREEBUFFER_V3 *, RECTYPE );
@@ -932,7 +925,6 @@ typedef struct _DICTTIME
  SHORT QDAMHeaderNext ( PBTREE, PRECPARAM,  PRECPARAM,PRECPARAM );
  VOID  QDAMTerseInit ( PBTREE, PUCHAR );
  SHORT QDAMUnTerseData ( PBTREE, PUCHAR, ULONG, PULONG );
- BOOL  QDAMTerseData ( PBTREE, PUCHAR, PULONG, PUCHAR );
  SHORT QDAMValidateIndex_V3( PBTREE,  PBTREEBUFFER_V3 * );
 
  PSZ_W     QDAMGetszKey_V3 ( PBTREEBUFFER_V3,  USHORT, USHORT );

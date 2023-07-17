@@ -1426,7 +1426,7 @@ SHORT BTREE::QDAMDictUpdateLocal
       if ( !sRc )
       {
         //  find the key
-        sRc = QDAMLocateKey_V3( this, pRecord, pKey, &i, FEXACT, &sNearKey ) ;
+        sRc = QDAMLocateKey_V3( pRecord, pKey, &i, FEXACT, &sNearKey ) ;
         if ( !sRc )
         {
             if ( i != -1)
@@ -1653,7 +1653,7 @@ SHORT BTREE::QDAMDictExactLocal
 
           if ( !sRc )
           {
-            sRc = QDAMLocateKey_V3(this, pRecord, pKey, &i, FEXACT, &sNearKey);
+            sRc = QDAMLocateKey_V3(pRecord, pKey, &i, FEXACT, &sNearKey);
             if ( !sRc )
             {
                if ( i != -1 )

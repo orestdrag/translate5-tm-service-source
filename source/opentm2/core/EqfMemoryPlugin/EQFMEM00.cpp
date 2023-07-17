@@ -251,6 +251,7 @@ VOID EQFMemOrganizeProcess
       if ( iRC != 0 )
       {
         pRIDA->pMem->importDetails->invalidSegments++;
+        pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
       }
       else
       {

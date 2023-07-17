@@ -115,6 +115,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 // update memory status
 void EqfMemory::importDone(int iRC, char *pszError )
 {
+  eStatus = OPEN_STATUS;
   if ( iRC == 0 )
   {
     eImportStatus = OPEN_STATUS;

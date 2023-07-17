@@ -2025,6 +2025,8 @@ public:
 /*! \brief Constructors
 */
 	EqfMemory()  {
+    TmBtree.AllocateMem();
+    InBtree.AllocateMem();
     //readOnlyPtr = std::make_shared<EqfMemory>(*this);
     //writePtr(std::make_shared<EqfMemory>(*this));
     readOnlyCnt = std::make_shared<int>(0);
@@ -3381,10 +3383,11 @@ typedef struct _MEM_LOAD_IDA
  BOOL         fEOF;                           // Indicates end of file
  PTOKENENTRY  pTokenEntry;                    // A pointer to token entries
  PTOKENENTRY  pTokenEntryWork;                // A work pointer to token entries
- ULONG        ulSegmentCounter;               // Segment counter of progress window
- ULONG        ulInvSegmentCounter;            // Invalid Segment counter
- ULONG        ulProgress;
- ULONG        ulInvSymbolsErrors;
+ //ImportStatusDetails* pImportDetails = nullptr;
+ //ULONG        ulSegmentCounter;               // Segment counter of progress window
+ //ULONG        ulInvSegmentCounter;            // Invalid Segment counter
+ //ULONG        ulProgress;
+ //ULONG        ulInvSymbolsErrors;
  ULONG        ulResetSegmentCounter;          // Segments using generic markup when not valid
  CHAR         szSegmentID[SEGMENT_CLUSTER_LENGTH +
                           SEGMENT_NUMBER_LENGTH + 2]; // Segment identification

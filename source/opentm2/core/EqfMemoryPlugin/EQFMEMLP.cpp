@@ -755,14 +755,13 @@ USHORT MemFuncImportMem
   FCTDATA PrivateData;
   memset( &PrivateData, 0, sizeof( FCTDATA ) );
   PrivateData.fComplete = TRUE;
-  PrivateData.pImportData = mem.get()->importDetails;
   PrivateData.mem = mem;
   usRC = MemFuncPrepImport( &PrivateData, pszInFile, lOptions );
   if ( usRC == 0 )
   {
     while ( !PrivateData.fComplete )
     {
-      usRC = MemFuncImportProcess( &PrivateData, PrivateData.pImportData );
+      usRC = MemFuncImportProcess( &PrivateData );
     }
     usRC = PrivateData.usMemLoadRC;
   }
@@ -1005,8 +1004,7 @@ USHORT MemFuncPrepImport
 // function call interface TM import
 USHORT MemFuncImportProcess
 (
-  PFCTDATA    pData,                    // function I/F session data
-  ImportStatusDetails*     pImportData
+  PFCTDATA    pData                    // function I/F session data
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -1015,6 +1013,7 @@ USHORT MemFuncImportProcess
   USHORT            usPhase;           // current processing phase
 
   pLoadData = (PMEM_LOAD_IDA)pData->pvMemLoadIda;
+  
   UtlSetUShort( QS_LASTERRORMSGID, 0 );
   usPhase = pData->usMemLoadPhase;
 
@@ -1022,10 +1021,10 @@ USHORT MemFuncImportProcess
   {
     case MEM_START_IMPORT:
        T5LOG( T5INFO) << "::MEM_START_IMPORT";
-       pData->pImportData->usProgress = 0;
+       pData->mem->importDetails->usProgress = 0;
        pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
 
-       if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF, pImportData ) )
+       if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF, pData->mem->importDetails ) )
        {
          //TMManager *pFactory = TMManager::GetInstance();
          //pFactory->closeMemory( pDialogIDA->mem );
@@ -1044,16 +1043,11 @@ USHORT MemFuncImportProcess
     case MEM_IMPORT_TASK:
       {
         
-        T5LOG( T5INFO) << "::MEM_IMPORT_TASK, progress = " <<  pData->pImportData->usProgress;
-        USHORT usRc = MemLoadProcess( pLoadData, pImportData );
+        T5LOG( T5INFO) << "::MEM_IMPORT_TASK, progress = " << pData->mem->importDetails->usProgress;
+        USHORT usRc = MemLoadProcess( pLoadData, pData->mem->importDetails );
         switch ( usRc )
         {
-          case MEM_PROCESS_OK:
-            {
-              pData->pImportData->usProgress   = pLoadData->lProgress;
-              pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
-              pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
-            }
+          case MEM_PROCESS_OK:            
             usPhase = MEM_IMPORT_TASK;
             break;
           case MEM_PROCESS_END:
@@ -1117,24 +1111,22 @@ USHORT MemFuncImportProcess
           LONG lCurTime = 0;  
           time( &lCurTime );
                   
-          if ( pData->pImportData->lReorganizeStartTime )
+          if ( pData->mem->importDetails->lReorganizeStartTime )
           {
-            LONG lDiff = lCurTime - pData->pImportData->lReorganizeStartTime;
+            LONG lDiff = lCurTime - pData->mem->importDetails->lReorganizeStartTime;
             char buff[256];
             sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                     (lDiff - (lDiff / 3600 * 3600)) / 60,
                     (lDiff - (lDiff / 3600 * 3600)) % 60 );
                     
-            pData->pImportData->importTimestamp = buff;
+            pData->mem->importDetails->importTimestamp = buff;
           }
           
-          pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
-          pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
           if(VLOG_IS_ON(1)){
             std::string logMsg = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
-                                  "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
-                                "\n\tNumber of invalid segments  : " + toStr(pLoadData->ulInvSegmentCounter)+ 
-                                "\n\tNumber of OTMUTF8 segments  : " + toStr(pLoadData->ulResetSegmentCounter) + "\n\t" + pData->pImportData->importTimestamp;
+                                  "\tNumber of segments imported : " + toStr(pData->mem->importDetails->segmentsImported)+
+                                "\n\tNumber of invalid segments  : " + toStr(pData->mem->importDetails->invalidSegments)+ 
+                                "\n\tNumber of OTMUTF8 segments  : " + toStr(pData->mem->importDetails->resSegments) + "\n\t" + pData->mem->importDetails->importTimestamp;
             T5LOG( T5TRANSACTION) << logMsg;
           }
         }
@@ -1144,7 +1136,7 @@ USHORT MemFuncImportProcess
          UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
-       pData->pImportData->usProgress = 100;
+       pData->mem->importDetails->usProgress = 100;
        break;
  } /* endswitch */
 
@@ -1546,7 +1538,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 
   PMEM_LOAD_IDA pLIDA = (PMEM_LOAD_IDA)lMemHandle;
 
-  pLIDA->ulSequenceNumber++;           // Increase segment sequence number in any case
+  pLIDA->mem->importDetails->segmentsCount++;           // Increase segment sequence number in any case
 
   // prepare segment data
   if ( pSegment->fValid )
@@ -1579,16 +1571,23 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 
     if ( !usRC )
     {
-      pLIDA->ulSegmentCounter++;         // Increase the segment counter
+      pLIDA->mem->importDetails->segmentsImported++;         // Increase the segment counter
     }
     else
     {
-      pLIDA->ulInvSegmentCounter++;      // increase invalid segment counter 
+      pLIDA->mem->importDetails->invalidSegmentsRCs[usRC] ++;
+      pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
+      if( pLIDA->mem->importDetails->invalidSegments < 100){
+         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(pSegment->lSegNum);
+      }
     } /* endif */
   }
   else
   {
-    pLIDA->ulInvSegmentCounter++;      // increase invalid segment counter 
+    pLIDA->mem->importDetails->invalidSegmentsRCs[-1]++;
+    pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
+    
+    //pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
     #ifdef IMPORT_LOGGING
     // write segment to log file
     if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )

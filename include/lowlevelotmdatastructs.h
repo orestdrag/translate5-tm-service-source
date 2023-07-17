@@ -421,12 +421,40 @@ typedef struct _TMX_LONGNAME_TABLE
 } TMX_LONGNAMETABLE, * PTMX_LONGNAME_TABLE;
 
 
-#include "Filebuffer.h"
+BOOL   UtlAlloc ( void **, long, long, unsigned short );
+BOOL   UtlAllocHwnd ( void**, long, long, unsigned short, void * );
 
-typedef struct _BTREEIDA
+#include "Filebuffer.h"
+#include <cstring>
+
+typedef enum _SEARCHTYPE
+{
+  FEXACT,                  // exact match requested
+  FSUBSTR,                 // only substring match
+  FEQUIV,                  // equivalent match
+  FEXACT_EQUIV             // editor: exact match then equivalent
+} SEARCHTYPE;
+
+
+struct BTREE
 {   
+  BTREE(){
+    AllocateMem();
+    memset(&DataRecList[0], 0, sizeof(DataRecList));
+  }
+  int AllocateMem(){
+    int rc = 0;
+    TempRecord = std::vector<BYTE>(MAXDATASIZE, 0);
+    //ulTempRecSize = MAXDATASIZE;
+    //if(!pTempRecord) rc = UtlAlloc( (PVOID*)&pTempRecord, 0L, ulTempRecSize, -1); 
+    return rc;
+  }
+
+  ~BTREE(){
+    //if(pTempRecord) UtlAlloc( (PVOID*)&pTempRecord, ulTempRecSize, 0L, -1); 
+  }
     FileBuffer fb;
-    //{From BTREEGLOB
+    //{From BTREE
 
     USHORT       usFirstNode=0;                    // file pointer of record
     USHORT       usFirstLeaf=0;                    // file pointer of record
@@ -441,8 +469,8 @@ typedef struct _BTREEIDA
     BOOL         fOpen=0;                          // open flag
     BOOL         fCorrupted=0;                     // mark as corrupted
     WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
-    BYTE         TempRecord[MAXDATASIZE];          // pointer to temp record
-    ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
+    std::vector<BYTE>         TempRecord;          // pointer to temp record
+    //ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
     BOOL         fTerse=0;                         // tersing requested
     BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
     BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
@@ -1001,7 +1029,21 @@ SHORT QDAMInsertKey_V3
 
 size_t GetFileSize()const;
 
- } BTREE, * PBTREE, ** PPBTREE, BTREEGLOB, * PBTREEGLOB, ** PPBTREEGLOB , QDAMDICT, *PQDAMDICT;;
+
+BOOL QDAMTerseData
+(
+   PUCHAR  pData,                   // pointer to data
+   PULONG  pulLen                  // length of the string
+);
+
+
+ SHORT QDAMLocateKey_V3(
+   PBTREEBUFFER_V3, PWCHAR, PSHORT, SEARCHTYPE, PSHORT);
+
+};//BTREE
+
+typedef  BTREE * PBTREE;
+typedef BTREE ** PPBTREE;
 
 
 
@@ -1706,7 +1748,7 @@ typedef struct _FCTDATA
   //USHORT      usProgress;
   USHORT      usExportProgress;
 
-  ImportStatusDetails*     pImportData;
+  //ImportStatusDetails*     pImportData;
 
 
   USHORT MemFuncExportProcess();

@@ -4,9 +4,9 @@
 
 #ifndef EVENTLOG
   #ifndef _DEBUG
-    //#define NO_DEBUGEVENTS
-    //#define NO_ERREVENTS
-    //#define NO_INFOEVENTS
+    #define NO_DEBUGEVENTS
+    #define NO_ERREVENTS
+    #define NO_INFOEVENTS
   #endif
 #endif
 

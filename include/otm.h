@@ -94,23 +94,32 @@ class JSONFactory;
 
 struct ImportStatusDetails{
   std::atomic_short usProgress{0};
+  std::atomic_int segmentsCount{-1};
   std::atomic_int segmentsImported{-1};
   std::atomic_int invalidSegments{-1};
   std::atomic_int invalidSymbolErrors{-1};
+  std::atomic_int resSegments {-1};
+  std::map<int, int> invalidSegmentsRCs;
   std::string importTimestamp;
+  std::vector<int> firstInvalidSegmentsSegNums;
   long lReorganizeStartTime;
   std::stringstream importMsg;
   bool fReorganize{0}; // true for reorganize call, false for import
   
   void reset(){
+    firstInvalidSegmentsSegNums.clear();
+    firstInvalidSegmentsSegNums.reserve(100);
     importMsg.str("");
     usProgress = 0;
+    segmentsCount = -1;
     segmentsImported = -1;
     invalidSegments = -1;
     invalidSymbolErrors = -1;
+    resSegments = -1;
     fReorganize = 0;
     lReorganizeStartTime = 0;
     importTimestamp = "not finished";    
+    invalidSegmentsRCs.clear();
   }
   std::string toString(){
     std::string res = "progress = " + std::to_string(usProgress);

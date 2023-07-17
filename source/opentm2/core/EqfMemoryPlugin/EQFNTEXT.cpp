@@ -490,7 +490,7 @@ USHORT ExtractRecordV6
           {
             // database is corrupted
             lLeftClbLen = 0;
-            usRc = BTREE_NOT_FOUND;
+            SET_AND_LOG(usRc, BTREE_NOT_FOUND);
           } /* endif */ 
 
           // loop over all target CLBs
@@ -529,7 +529,7 @@ USHORT ExtractRecordV6
             {
               // database is corrupted
               lLeftClbLen = 0;
-              usRc = BTREE_NOT_FOUND;
+              SET_AND_LOG(usRc, BTREE_NOT_FOUND);
             } /* endif */ 
             usTarget++;
           } /* endif */
@@ -584,20 +584,20 @@ USHORT ExtractRecordV6
           else
           {
             //no more target so get next tm record and initialize target count
-            usRc = BTREE_NOT_FOUND;
+            SET_AND_LOG(usRc, BTREE_NOT_FOUND);
           } /* endif */
         }
         else
         {
           //no more target so get next tm record and initialize target count
-          usRc = BTREE_NOT_FOUND;
+          SET_AND_LOG(usRc, BTREE_NOT_FOUND);
         } /* endif */
       } /* endif */
     }
     else
     {
       //if record is empty, get next tm record and initialize target count
-      usRc = BTREE_NOT_FOUND;
+      SET_AND_LOG(usRc, BTREE_NOT_FOUND);
     } /* endif */
 
   }
