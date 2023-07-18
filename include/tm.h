@@ -4055,7 +4055,6 @@ USHORT TmtXOpen( PTMX_OPEN_IN, PTMX_OPEN_OUT );
 USHORT TmtXClose( EqfMemory*, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 //tm put prototypes
-BOOL AllocTable( PTMX_TABLE* );
 VOID HashSentence( PTMX_SENTENCE );
 VOID HashSentenceV5( PTMX_SENTENCE_V5, USHORT );
 USHORT HashTupel( PBYTE, USHORT, USHORT );

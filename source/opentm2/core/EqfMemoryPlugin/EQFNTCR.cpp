@@ -365,16 +365,3 @@ USHORT TmtXCreate
 
   return( usRc );
 }
-
-BOOL AllocTable( PTMX_TABLE *ppTable )
-{
-  BOOL       fOK;    //success indicator
-
-  //fOK = UtlAlloc( (PVOID *) ppTable, 0L, (LONG)( TMX_TABLE_SIZE ), NOMSG );
-  //if ( fOK )
-  //{
-  //  (*ppTable)->ulAllocSize = TMX_TABLE_SIZE;
-  //} /* endif */
-  //return( fOK );
-}
-

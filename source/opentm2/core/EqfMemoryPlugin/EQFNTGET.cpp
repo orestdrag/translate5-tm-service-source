@@ -22,7 +22,6 @@
 #include <EQFTPI.H>               // Private header file of Standard Editor
 #include <EQFMORPI.H>
 #include <EQFEVENT.H>             // event logging
-#include <EQFTADIT.H>             // IBMIDDOC->IBMDITA special processing functions
 #include <OTMGLOBMEM.H>         // Global Memory defines
 #include "OtmMarkup.h"
 #include "MarkupPluginMapper.H"
@@ -1770,18 +1769,6 @@ BOOL TMFuzzynessEx
   return fOK;
 } /* end of function TMFuzzyness */
 
-
-BOOL DITASpecialProcessingRequired
-(
-  PSZ         pszDocMarkup,                      // markup of document
-  PSZ         pszMemMarkup,                      // markup of memory proposal
-  DITAPROCESSINGMODES mode                       // type of special processing
-)
-{
-  BOOL fDitaProcessing = ( (stricmp( pszMemMarkup , "IBMIDDOC" ) == 0) &&
-                           (stricmp( pszDocMarkup, "IBMDITA" ) == 0) );
-  return( fDitaProcessing );
-} /* end of DITASpecialProcessingRequired */
 
 
 //+----------------------------------------------------------------------------+
