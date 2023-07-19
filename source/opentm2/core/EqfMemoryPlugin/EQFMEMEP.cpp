@@ -131,6 +131,7 @@ typedef struct _MEM_EXPORT_IDA
  CHAR_W       szSegmentBuffer2[MAX_SEGMENT_SIZE]; // Buffer for preprocessed segment data
  int          iComplete;                  // completion rate
  CHAR         szPlugin[MAX_LONGFILESPEC]; // name of memory plugin handling the current memory database
+int invalidXmlSegments=0;
 }
 MEM_EXPORT_IDA, * PMEM_EXPORT_IDA;
 
@@ -223,6 +224,7 @@ USHORT EQFMemExportStart( PPROCESSCOMMAREA pCommArea,
       pFactory->closeMemory( pExportIDA->pMem );
       pExportIDA->pMem = NULL;
     } /* endif */
+    pExportIDA->invalidXmlSegments = 0;
     CloseFile( &(pExportIDA->hFile));
 
     //--- delete file to which the TM should be exported
@@ -495,6 +497,9 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
       pExportIDA->pfnMemExpEnd( pExportIDA->lExternalExportHandle );
     } /* endif */
     #endif 
+    if(pExportIDA->invalidXmlSegments){
+      T5LOG(T5ERROR) << pExportIDA->invalidXmlSegments <<" segments was not exported because of invalid xml";
+    }
     EqfPluginWrapper::MemExportEnd(pExportIDA->lExternalExportHandle );
 
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
@@ -936,6 +941,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
    return usRc;
 } /* end of function MemExportStart */
 
+bool IsValidXml(std::wstring&& sentence);
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1029,6 +1035,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
      {
        //--- Increase the segment counter by one
        pExportIDA->ulSegmentCounter++;
+       
 
        //--- Prepare the segment and write it to the export file
        if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
@@ -1058,11 +1065,27 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
+        
+        auto ll = T5Logger::GetInstance()->suppressLogging(); 
+        bool fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource);
 
-
-         //usRc = pExportIDA->pfnMemExpProcess( pExportIDA->lExternalExportHandle, pExportIDA->pstSegment );
-         usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
-
+        if(fValidXml){
+          fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget);        
+          T5Logger::GetInstance()->desuppressLogging(ll);
+          if(fValidXml){
+            usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+          }else{
+            T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< pExportIDA->pstSegment->lSegNum;
+          } 
+        }else{
+          T5Logger::GetInstance()->desuppressLogging(ll);
+          T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< pExportIDA->pstSegment->lSegNum;
+        } 
+                
+        if(!fValidXml){
+          usRc = 0;
+          pExportIDA->invalidXmlSegments ++;
+        }
          // map return code to the ones used by memory export...
          switch ( usRc )
          {

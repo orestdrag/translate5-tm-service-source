@@ -73,7 +73,11 @@ struct ImportStatusDetails{
   }
 };
 
+/*! \brief maximum size of segment data */
+#define OTMPROPOSAL_MAXSEGLEN 2048
 
+/*! \brief maximum size of names */
+#define OTMPROPOSAL_MAXNAMELEN 256
 /**********************************************************************/
 /* add support for MFC compiling via predefined                       */
 /**********************************************************************/
