@@ -1864,6 +1864,40 @@ TMXParseHandler::~TMXParseHandler()
   if ( pTuvArray ) free( pTuvArray );
 }
 
+bool IsValidXml(std::wstring&& sentence){
+  USHORT usRc = 0; 
+  std::vector<std::wstring> res;
+  
+  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(sentence) + std::string("</TMXSentence>");
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler *handler = new TMXParseHandler();
+  handler->fReplaceWithTagsWithoutAttributes = true;
+  handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(handler);
+  parser->setErrorHandler( handler );
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( true );
+  xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
+                                      "src_buff (in memory)");
+
+  parser->parse(src_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler->GetErrorText(buff, sizeof(buff));
+    T5LOG(T5ERROR) << ":: error during parsing src : " << buff;
+    return false;
+  }
+  return true;
+}
+
+
 std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes)
 {
   USHORT usRc = 0; 

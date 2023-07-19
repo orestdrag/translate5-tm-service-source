@@ -9,17 +9,14 @@
 #include "LogWrapper.h"
 #include "tm.h"
 #include <cstring>
+#include "EQF.H"
 
 /*! \brief Data class for the transport of memory proposals
  *
  * 
  */
 
-/*! \brief maximum size of segment data */
-#define OTMPROPOSAL_MAXSEGLEN 2048
 
-/*! \brief maximum size of names */
-#define OTMPROPOSAL_MAXNAMELEN 256
 
 /*! \brief private proposal data area */
 typedef struct _OTMPROPOSALDATA

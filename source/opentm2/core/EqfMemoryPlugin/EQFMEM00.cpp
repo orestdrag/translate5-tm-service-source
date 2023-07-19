@@ -200,6 +200,7 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
 
 // ================ Handle the message WM_EQF_MEMORGANIZE_PROCESS =====================
 
+bool IsValidXml(std::wstring&& sentence);
 VOID EQFMemOrganizeProcess
 (
   PPROCESSCOMMAREA  pCommArea
@@ -238,8 +239,26 @@ VOID EQFMemOrganizeProcess
     // do some consistency checking
     pRIDA->pProposal->getMarkup( pRIDA->szTagTable, sizeof(pRIDA->szTagTable) );
     pRIDA->pProposal->getTargetLanguage( pRIDA->szTargetLanguage, sizeof(pRIDA->szTargetLanguage) );
-    if ( (pRIDA->pProposal->getSourceLen() == 0) || (pRIDA->pProposal->getTargetLen() == 0) ||
-          (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
+    auto ll = T5Logger::GetInstance()->suppressLogging(); 
+    wchar_t seg_buff[OTMPROPOSAL_MAXSEGLEN+1];
+    pRIDA->pProposal->getSource(seg_buff, OTMPROPOSAL_MAXSEGLEN);
+
+    bool fValidXml =  IsValidXml( seg_buff);
+
+    if(fValidXml){
+      pRIDA->pProposal->getTarget(seg_buff, OTMPROPOSAL_MAXSEGLEN);
+      fValidXml =  IsValidXml( seg_buff);        
+      T5Logger::GetInstance()->desuppressLogging(ll);
+      if(!fValidXml){
+        T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< pRIDA->pProposal->getSegmentNum();
+      } 
+    }else{
+      T5Logger::GetInstance()->desuppressLogging(ll);
+      T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< pRIDA->pProposal->getSegmentNum();
+    }
+            
+    if (!fValidXml || (pRIDA->pProposal->getSourceLen() == 0) || (pRIDA->pProposal->getTargetLen() == 0) ||
+      (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
     {
       // ignore invalid proposal
       pRIDA->pMem->importDetails->invalidSegments++;

@@ -80,10 +80,10 @@ class ProxygenStats {
   }
 
   virtual uint64_t getOpenedTMCount(){
-    return openedTM_;
+    return openedTm_;
   }
   virtual uint64_t getClosedTMCount(){
-    return closedTM_;
+    return closedTm_;
   }
 
  private:
