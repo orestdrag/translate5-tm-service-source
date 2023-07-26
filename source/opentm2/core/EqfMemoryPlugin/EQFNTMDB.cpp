@@ -1471,7 +1471,7 @@ SHORT BTREE::QDAMDictUpdateLocal
             }
             else
             {
-              sRc = BTREE_NOT_FOUND;
+              SET_AND_LOG( sRc, BTREE_NOT_FOUND);
               // set new current position
               sCurrentIndex = sNearKey;
               usCurrentRecord = RECORDNUM( pRecord );
