@@ -347,8 +347,8 @@ USHORT TmtXExtract
               pTmExtIn->usNextTarget = 1;
               pTmExtOut->ulTmKey = pTmExtIn->ulTmKey;
               pTmExtOut->usNextTarget = pTmExtIn->usNextTarget;
-              //usRc = BTREE_NOT_FOUND;     // reset error condition
-              } /* endif */
+              usRc = BTREE_NOT_FOUND;     // reset error condition
+            } /* endif */
           } /* endif */
         } /* endwhile */
 

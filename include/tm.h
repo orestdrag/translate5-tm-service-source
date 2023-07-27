@@ -4161,14 +4161,6 @@ typedef struct _TERSEHEADER
                                        // (values as defined in EQFCMPR.H)
 } TERSEHEADER, *PTERSEHEADER;
 
-USHORT NTMSaveNameTable
-(
-  EqfMemory*    pTmClb,                  // ptr to TM control block
-  ULONG       ulTableKey,              // key of table record
-  PBYTE       pTMTable,                // ptr to table data
-  ULONG       ulSize                   // size of table data
-);
-
 BOOL TMDelTargetClb
 (
   PTMX_RECORD        pTmRecord,        // ptr to TM record

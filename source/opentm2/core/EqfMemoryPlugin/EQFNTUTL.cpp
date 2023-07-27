@@ -1172,7 +1172,7 @@ USHORT NTMLockTM
    // Rewrite compact area if compact area has been changed
    if ( pTmClb->bCompactChanged )
    {
-     usRc = pTmClb->InBtree.EQFNTMUpdate( COMPACT_KEY,
+     usRc = pTmClb->TmBtree.EQFNTMUpdate( COMPACT_KEY,
                           pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
      if ( !usRc )
      {
@@ -1881,30 +1881,7 @@ int NTMLongNameTableCompCaseIgnore
 } /* end of function NTMCompNames */
 
 //+----------------------------------------------------------------------------+
-//|Internal function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     NTMSaveNameTable                                         |
-//+----------------------------------------------------------------------------+
-//|Description:       This function saves a TM name table to the database.     |
-//|                   If the size of the table exceeds 32k the table is        |
-//|                   tersed.                                                  |
-// ----------------------------------------------------------------------------+
-USHORT NTMSaveNameTable
-(
-  EqfMemory*    pTmClb,                  // ptr to TM control block
-  ULONG       ulTableKey,              // key of table record
-  PBYTE       pTMTable,                // ptr to table data
-  ULONG       ulSize                   // size of table data
-)
-{
-  USHORT      usRc = NO_ERROR;         // function return code
 
-  // check which method is to be used for table
-  usRc = pTmClb->InBtree.EQFNTMUpdate( ulTableKey, pTMTable, ulSize );
-
-  // return to caller
-  return( usRc );
-} /* end of function NTMSaveNameTable */
 
 
 //+----------------------------------------------------------------------------+

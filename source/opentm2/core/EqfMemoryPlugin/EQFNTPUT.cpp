@@ -2255,7 +2255,7 @@ USHORT ComparePutData
         // update TM record if required
         if ( fUpdate )
         {
-          usRc = pTmClb->TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );//pTmClb->InBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+          usRc = pTmClb->TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
         if ( !fStop )
@@ -2754,7 +2754,7 @@ USHORT TmtXUpdSeg
               // rewrite TM record
               if ( usRc == NO_ERROR )
               {
-                usRc = pTmClb->InBtree.EQFNTMUpdate( ulUpdKey,
+                usRc = pTmClb->TmBtree.EQFNTMUpdate( ulUpdKey,
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
             }
