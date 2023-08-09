@@ -1,3 +1,6 @@
+
+#include <chrono>
+#include <thread>
 #include "tm.h"
 #include "LogWrapper.h"
 #include "Property.h"
@@ -85,26 +88,43 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
   size_t AllowedMemory = AllowedMBMemory * 1000000;    
   size_t memoryNeed = memoryRequested + CalculateOccupiedRAM();
-
+  T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
+  
   if(memoryNeed < AllowedMemory){
     return( AllowedMemory - memoryNeed );
+  }else{
+    T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory more than available, mem need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   }
 
   time_t curTime;
   time( &curTime );
-  std::multimap <time_t, std::string>  openedMemoriesSortedByLastAccess;
+  std::multimap <time_t, std::weak_ptr<EqfMemory>>  openedMemoriesSortedByLastAccess;
   for(const auto& tm: tms){
-  //for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size() ; i++ ){
-  //  if ( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName[0] != 0 )
-    {
-      openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.first});
-    }
+    openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.second});
   }
 
+  T5LOG(T5DEBUG) << "there are  "<< openedMemoriesSortedByLastAccess.size()<<" open in RAM";
+
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
-    //T5LOG( T5INFO) << ":: removing memory  \'"<< EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->szName << "\' that wasns\'t used for " << (curTime - EqfMemoryPlugin::GetInstance()->m_MemInfoVector[it->second]->tLastAccessTime) <<  " seconds" ;
-    //RemoveFromMemoryList(it->second);
-    tms[it->second]->UnloadFromRAM();
+    std::string tmName;
+    {
+      auto tm = it->second.lock();
+      tm->UnloadFromRAM();
+      tmName = tm->szName;
+      tms.erase(tmName);
+      T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
+    }
+    for(int i = 0; i<5; i++){
+      if(it->second.expired()){
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    if(it->second.expired() == false){
+      T5LOG(T5INFO) << "TM with name \'" << tmName << " was stil not unloaded from RAM after 500 miliseconds after deleting it from TMManager!";
+    }
+
     memoryNeed = memoryRequested + CalculateOccupiedRAM();
   }
 

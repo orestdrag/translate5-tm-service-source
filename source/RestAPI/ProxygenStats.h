@@ -79,6 +79,13 @@ class ProxygenStats {
     return cloneLocalyCount_;
   }
 
+  virtual uint64_t getOpenedTMCount(){
+    return openedTM_;
+  }
+  virtual uint64_t getClosedTMCount(){
+    return closedTM_;
+  }
+
  private:
   atomic_uint64_t reqCount_{0};
 
@@ -103,6 +110,8 @@ class ProxygenStats {
   atomic_uint64_t otherRequestCount_{0};
   atomic_uint64_t unrecognizedRequestCount_{0};
 
+  atomic_uint64_t openedTm_{0};
+  atomic_uint64_t closedTm_{0};
 };
 
 //} // namespace ProxygenService

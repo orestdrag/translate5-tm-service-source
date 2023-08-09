@@ -441,8 +441,10 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
         T5LOG(T5FATAL) <<"fileAnchor != FILE_BEGIN, is not implemented!";
         throw;
     }
-    if(newOffset>= data.size()){
-        T5LOG(T5ERROR) << "tried to set offset to " << newOffset <<" , but its bigger than data size =" <<data.size();
+    if(newOffset > data.size()){
+        //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            T5LOG(T5ERROR) << "tried to set offset to " << newOffset <<" , but its bigger than data size =" <<data.size();
+        //}
         return -1;
     }
     if(newOffset < 0 ){

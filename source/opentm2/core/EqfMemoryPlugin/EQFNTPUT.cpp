@@ -1006,6 +1006,9 @@ USHORT AddToTm
 )
 {
   PTMX_RECORD pTmRecord = NULL;           // ptr to tm record
+  //TMX_RECORD TmRecord[2];
+  //unsigned char pUsTmRecord [TMX_REC_SIZE];
+  //memset(pUsTmRecord, 0 ,TMX_REC_SIZE);
   PTMX_TARGET_CLB pTargetClb = NULL;      // ptr to target ctl block
   PSZ_W pNormString = NULL;               // ptr to normalized string
   PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
@@ -1066,10 +1069,11 @@ USHORT AddToTm
         
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
+        
         usRc = pTmClb->TmBtree.EQFNTMInsert(//ptr to tm structure
                              pulNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
-                             RECLEN(pTmRecord) );     //length
+                             pTmRecord->lRecordLen);     //length
       } /* endif */
     } /* endif */
   } /* endif */
