@@ -313,7 +313,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       uiLogLevel = FLAGS_t5loglevel;
     }
 
-    uiAllowedRAM = 50;
     Properties::GetInstance()->set_anyway(KEY_SERVICE_URL, szServiceName);
     Properties::GetInstance()->set_anyway(KEY_OTM_DIR, FilesystemHelper::GetOtmDir().c_str());
     Properties::GetInstance()->set_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow

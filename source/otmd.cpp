@@ -77,7 +77,7 @@ static bool ValidateRAM(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(allowedram, 2048, "Sets amought RAM(in MB) allowed for service to use");
+DEFINE_int32(allowedram, 4096, "Sets amought RAM(in MB) allowed for service to use");
 DEFINE_validator(allowedram, &ValidateRAM);
 
 static bool ValidateLOGlevel(const char* flagname, int32_t value) {

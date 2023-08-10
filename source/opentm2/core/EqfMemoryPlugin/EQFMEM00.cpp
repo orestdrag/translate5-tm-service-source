@@ -256,8 +256,10 @@ VOID EQFMemOrganizeProcess
       T5Logger::GetInstance()->desuppressLogging(ll);
       T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< pRIDA->pProposal->getSegmentNum();
     }
-            
-    if (!fValidXml || (pRIDA->pProposal->getSourceLen() == 0) || (pRIDA->pProposal->getTargetLen() == 0) ||
+    int sourceLen = pRIDA->pProposal->getSourceLen(),
+      targetLen = pRIDA->pProposal->getTargetLen();
+
+    if (!fValidXml || (sourceLen == 0) || (sourceLen >= OTMPROPOSAL_MAXSEGLEN) || (targetLen == 0) || (targetLen>=OTMPROPOSAL_MAXSEGLEN) ||
       (pRIDA->szTargetLanguage[0] == EOS) || (pRIDA->szTagTable[0] == EOS) )
     {
       // ignore invalid proposal
