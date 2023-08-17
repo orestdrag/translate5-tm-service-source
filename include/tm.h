@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
 #include "win_types.h"
 #include "requestdata.h"
 #include "otm.h"
@@ -4406,6 +4407,8 @@ class TMManager{
     //std::vector<EqfMemory> vMemoryList;
   typedef std::map <std::string, std::shared_ptr<EqfMemory>> TMMap;
   TMMap tms;
+
+  std::mutex mutex_requestTM;
 
   enum TMManagerCodes{
     TMM_NO_ERROR = 0,

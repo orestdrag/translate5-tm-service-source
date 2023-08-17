@@ -1336,6 +1336,7 @@ int TMManager::CloseTM(const std::string& strMemName){
 }
 
 std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
+  std::lock_guard<std::mutex> l{mutex_requestTM};
   std::shared_ptr<EqfMemory> mem;
   if(IsMemoryLoaded(strMemName)){
     if(command == STATUS_MEM){
@@ -1347,6 +1348,7 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
 
 std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
+  std::lock_guard<std::mutex> l{mutex_requestTM};
   if(!IsMemoryLoaded(strMemName)){
     rc = OpenTM(strMemName);
   }
@@ -1376,6 +1378,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
 
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
+  std::lock_guard<std::mutex> l{mutex_requestTM};
   if(!IsMemoryLoaded(strMemName)){
     rc = OpenTM(strMemName);
   }

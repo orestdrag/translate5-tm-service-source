@@ -16,6 +16,7 @@
 #include "ProxygenStats.h"
 #include "OtmMemoryServiceWorker.h"
 #include <atomic>
+#include "LogWrapper.h"
 
 std::atomic_bool fWriteRequestsAllowed;
 
@@ -66,6 +67,8 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   auto queryString   = req->getQueryString () ;
   auto headers = req->getHeaders();
   pMemService = OtmMemoryServiceWorker::getInstance();
+
+  T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << CommandToStringsMap.find(pRequest->command)->second ;  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
   if(pRequest->command == COMMAND::EXPORT_MEM){
