@@ -5464,13 +5464,7 @@ SHORT ObjQuerySymbol( PSZ pszSymbol );
 SHORT ObjSetSymbol( PSZ pszSymbol );
 SHORT ObjRemoveSymbol( PSZ pszSymbol );
 
-USHORT MemFuncCreateMem
-(
-  const char*         pszMemName,              // name of new Translation Memory
-  const char*         pszDescription,          // description for new Translation Memory or NULL
-  const char*         pszSourceLanguage,       // Translation Memory source language
-  LONG                lOptions                 // type of new Translation Memory
-);
+
 USHORT MarkupFuncCreateMarkup
 (
   PSZ         pszInFile,               // Input TBX file

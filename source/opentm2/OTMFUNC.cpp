@@ -20,7 +20,7 @@
 #define INCL_EQFMEM_DLGIDAS            // include dialog IDA definitions
 #include "EQFSETUP.H"                  // directory names
 //#include "EQFRPT.H"
-#include "EQFSERNO.H"
+//#include "EQFSERNO.H"
 
 #include "core/document/InitPlugins.h"
 #include "core/pluginmanager/PluginManager.h"    // Add for P403138

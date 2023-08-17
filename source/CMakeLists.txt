@@ -1,17 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 5)
-SET(APP_VERSION_MINOR 11)
+SET(APP_VERSION_MINOR 12)
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 project(T5MEMORY VERSION ${APP_VERSION})
 
+#no sanitizer
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread")
 #set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
+
+#asan
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 
+#tsan
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -119,7 +126,7 @@ set(T5MEMORY_Source_Files
 #EqfMemoryPlugin
     "${CORE_DIR}/EqfMemoryPlugin/EQFFUZZ.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEM00.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
+    #"${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMEP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemory.cpp"

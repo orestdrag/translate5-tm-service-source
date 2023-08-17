@@ -58,7 +58,7 @@
 #define INCL_EQF_DAM
 #include <EQF.H>                  // General Translation Manager include file
 #include "EQFSETUP.H"                   // MAT setup functions
-#include <EQFSERNO.H>                   // Serial number
+//#include <EQFSERNO.H>                   // Serial number
 #ifdef __linux__
     #include <linux/limits.h>
 #endif // __linux__

@@ -330,15 +330,6 @@ USHORT MemFuncExportMem
   LONG        lOptions                 // options for Translation Memory export
 );
 
-// create a new Translation Memory
-USHORT MemFuncCreateMem
-(
-  const char*         pszMemname,              // name of new Translation Memory
-  const char*         pszDescription,          // description for new Translation Memory or NULL
-  const char*         pszSourceLanguage,       // Translation Memory source language
-  LONG                lOptions                 // type of new Translation Memory
-                                               // LOCAL_TM_OPT is the default
-);
 
 
 USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory );

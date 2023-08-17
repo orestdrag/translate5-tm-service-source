@@ -70,7 +70,7 @@ XERCES_CPP_NAMESPACE_USE
 #define INCL_EQF_MORPH            // morphologic functions
 #include "EQF.H"                  // General .H for EQF
 #include "EQFMEMIE.H"
-#include "EQFSERNO.H"
+//#include "EQFSERNO.H"
 #include "TMXNames.h"
 
 //#pragma pack( pop, TM2StructPacking )

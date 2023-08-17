@@ -15,7 +15,7 @@
 
 #define INCL_EQF_MORPH            // morphologic functions
 #include "EQF.H"
-#include "EQFSERNO.H"
+//#include "EQFSERNO.H"
 
 using namespace icu;
 /*! \brief class for morphology objects */

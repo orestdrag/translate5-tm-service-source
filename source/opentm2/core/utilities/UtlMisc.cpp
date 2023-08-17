@@ -10,7 +10,7 @@
 #define INCL_EQF_TM               // general Transl. Memory functions
 #include "EQF.H"
 #include "OTMAPI.H"
-#include "EQFSERNO.H"
+//#include "EQFSERNO.H"
 #include "EQFEVENT.H"
 #include "EQFSETUP.H"
 #include "Utility.h"
