@@ -379,7 +379,7 @@ public:
       \param Proposals reference to a vector containing the proposals
   */
   int static getNumOfProposals(
-    std::vector<OtmProposal *> &Proposals
+    std::vector<OtmProposal> &Proposals
   );
 
 
@@ -2207,7 +2207,7 @@ USHORT NTMLoadNameTable
   int searchProposal
   (
     OtmProposal &SearchKey,
-    std::vector<OtmProposal *> &FoundProposals,
+    std::vector<OtmProposal> &FoundProposals,
     unsigned long ulOptions
 
   ); 

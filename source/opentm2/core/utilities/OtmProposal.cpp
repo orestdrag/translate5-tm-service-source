@@ -773,13 +773,13 @@ void OtmProposal::clearAllProposals(
   \param Proposals reference to a vector containing the proposals
 */
 int OtmProposal::getNumOfProposals(
-  std::vector<OtmProposal *> &Proposals
+  std::vector<OtmProposal> &Proposals
 )
 {
   int iFilled = 0;
   for ( int i = 0; i < (int)Proposals.size(); i++ )
   {
-    if ( !Proposals[i]->isEmpty() ) iFilled++;
+    if ( !Proposals[i].isEmpty() ) iFilled++;
   } /* endfor */  
   return( iFilled );
 }

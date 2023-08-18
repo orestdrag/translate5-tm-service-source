@@ -463,59 +463,61 @@ int EqfMemory::getProposal
 int EqfMemory::searchProposal
 (
   OtmProposal &SearchKey,
-  std::vector<OtmProposal *> &FoundProposals,
+  std::vector<OtmProposal> &FoundProposals,
   unsigned long ulOptions
 )
 {
   int iRC = 0;
+  TMX_GET_IN_W GetIn;
+  TMX_GET_OUT_W GetOut;
+  //THREADING WARNING: GetIn GetOut could be unsafe for multithreading
+  memset( &GetIn, 0, sizeof(TMX_GET_IN_W) );
+  memset( &GetOut, 0, sizeof(TMX_GET_OUT_W) );
 
-  memset( &TmGetIn, 0, sizeof(TMX_GET_IN_W) );
-  memset( &TmGetOut, 0, sizeof(TMX_GET_OUT_W) );
-
-  this->OtmProposalToGetIn( SearchKey, &TmGetIn );
-  TmGetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
-  TmGetIn.stTmGet.usRequestedMatches = (USHORT)FoundProposals.size();
-  TmGetIn.stTmGet.ulParm = ulOptions;
-  TmGetIn.stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
+  this->OtmProposalToGetIn( SearchKey, &GetIn );
+  GetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
+  GetIn.stTmGet.usRequestedMatches = (USHORT)FoundProposals.size();
+  GetIn.stTmGet.ulParm = ulOptions;
+  GetIn.stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    auto str = EncodingHelper::convertToUTF8(TmGetIn.stTmGet.szSource);
+    auto str = EncodingHelper::convertToUTF8(GetIn.stTmGet.szSource);
     T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::*** method: searchProposal, looking for " <<  str;
   } 
-  iRC = (int)TmGetW ( this,  NULL,  &TmGetIn,  &TmGetOut, FALSE );
+  iRC = (int)TmGetW ( this,  NULL,  &GetIn,  &GetOut, FALSE );
 
   if ( iRC == 0 )
   {
-    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << TmGetOut.usNumMatchesFound << " proposals"   ;
+    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << GetOut.usNumMatchesFound << " proposals"   ;
     wchar_t szRequestedString[2049];
     SearchKey.getSource( szRequestedString, sizeof(szRequestedString) );
 
     for ( int i = 0; i < (int)FoundProposals.size(); i++ )
     {
-      if ( i >= TmGetOut.usNumMatchesFound )
+      if ( i >= GetOut.usNumMatchesFound )
       {
-        FoundProposals[i]->clear();
+        FoundProposals[i].clear();
       }
       else
       {
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-          auto strSource = EncodingHelper::convertToUTF8(TmGetOut.stMatchTable[i].szSource );
-          T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << TmGetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
+          auto strSource = EncodingHelper::convertToUTF8(GetOut.stMatchTable[i].szSource );
+          T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << GetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
         }
         //replace tags for proposal
-        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(TmGetOut.stMatchTable[i].szSource, 
-                                                                                     TmGetOut.stMatchTable[i].szTarget, 
+        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(GetOut.stMatchTable[i].szSource, 
+                                                                                     GetOut.stMatchTable[i].szTarget, 
                                                                                      szRequestedString); 
-        wcscpy(TmGetOut.stMatchTable[i].szSource, result[0].c_str());
-        wcscpy(TmGetOut.stMatchTable[i].szTarget, result[1].c_str());
+        wcscpy(GetOut.stMatchTable[i].szSource, result[0].c_str());
+        wcscpy(GetOut.stMatchTable[i].szTarget, result[1].c_str());
 
-        if( TmGetOut.stMatchTable[i].usMatchLevel >= 100){
+        if( GetOut.stMatchTable[i].usMatchLevel >= 100){
           //correct match rate for exact match based on whitespace difference
           int wsDiff = 0;
-          UtlCompIgnWhiteSpaceW(szRequestedString, TmGetOut.stMatchTable[i].szSource, 0, &wsDiff);
-          TmGetOut.stMatchTable[i].usMatchLevel -= wsDiff; 
+          UtlCompIgnWhiteSpaceW(szRequestedString, GetOut.stMatchTable[i].szSource, 0, &wsDiff);
+          GetOut.stMatchTable[i].usMatchLevel -= wsDiff; 
         }
-        this->MatchToOtmProposal( TmGetOut.stMatchTable + i, FoundProposals[i] );
+        this->MatchToOtmProposal( GetOut.stMatchTable + i, &FoundProposals[i] );
       } /* end */         
     } /* end */       
   }
@@ -524,7 +526,7 @@ int EqfMemory::searchProposal
     T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::  lookup failed, rc=" << iRC;
   } /* end */     
 
-  if ( iRC != 0 ) handleError( iRC, this->szName, TmGetIn.stTmGet.szTagTable );
+  if ( iRC != 0 ) handleError( iRC, this->szName, GetIn.stTmGet.szTagTable );
 
   return( iRC );
 }

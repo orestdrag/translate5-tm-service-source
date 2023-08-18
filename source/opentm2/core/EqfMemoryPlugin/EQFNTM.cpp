@@ -49,12 +49,6 @@
 /**********************************************************************/
 /* prototypes for internal functions                                  */
 /**********************************************************************/
-USHORT
-TmGetW(EqfMemory*     htm,             //(in)  TM handle
-       PSZ            szMemPath,       //(in)  full TM name x:\eqf\mem\mem.tmd
-       PTMX_GET_IN_W  pstGetIn,        //(in)  pointer to get input structure
-       PTMX_GET_OUT_W pstGetOut,       //(out) pointer to get output structure
-       USHORT         usMsgHandling );  //(in)  message handling parameter
 
 USHORT C_TmInfoHwnd( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT, HWND );
 

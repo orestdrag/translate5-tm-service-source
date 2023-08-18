@@ -918,37 +918,7 @@ USHORT TMManager::APIQueryMem
 )
 {
   USHORT usRC = 0;
-  std::vector<OtmProposal *> vProposals;
-  for ( int i = 0; i < *piNumOfProposals; i++ ) vProposals.push_back( new(OtmProposal) );
 
-  if ( pSearchKey == NULL )
-  {
-    char* pszParm = "pointer to search key";
-    T5LOG(T5ERROR) <<  ":: DDE_MANDPARAMISSING::" << pszParm;
-    return DDE_MANDPARAMISSING;
-  } /* endif */
-
-  if ( pProposals == NULL )
-  {
-    char* pszParm = "pointer to proposal array";
-    T5LOG(T5ERROR) <<  ":: DDE_MANDPARAMISSING::" << pszParm;
-    return DDE_MANDPARAMISSING;
-  } /* endif */
-
-  if ( pMem == NULL )
-  {
-    T5LOG(T5ERROR) <<   "::FUNC_INVALID_MEMORY_HANDLE";
-    return( FUNC_INVALID_MEMORY_HANDLE );
-  } /* endif */
-
-  OtmProposal SearchKey;
-  copyMemProposalToOtmProposal( pSearchKey, &SearchKey );
-  usRC = (USHORT)pMem->searchProposal( SearchKey, vProposals, lOptions );
-  *piNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
-
-  for( int i = 0; i < *piNumOfProposals; i++ ) copyOtmProposalToMemProposal( vProposals[i], pProposals + i );
-
-  for ( size_t i=0; i < vProposals.size(); i++ ) delete( vProposals[i] );
 
   return( usRC );
 }

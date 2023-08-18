@@ -2122,15 +2122,15 @@ int addProposalsToJSONString
 
 int FuzzySearchRequestData::execute(){
  // prepare the memory lookup
-  PMEMPROPOSAL pSearchKey = new (MEMPROPOSAL);
-  memset( pSearchKey, 0, sizeof( *pSearchKey ) );
-  wcscpy( pSearchKey->szSource, Data.szSource );
-  strcpy( pSearchKey->szDocName, Data.szDocName );
-  pSearchKey->lSegmentNum = Data.lSegmentNum;
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, pSearchKey->szSourceLanguage, &pSearchKey->fIsoSourceLangIsPrefered );
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, pSearchKey->szTargetLanguage, &pSearchKey->fIsoTargetLangIsPrefered );
-  strcpy( pSearchKey->szMarkup, Data.szMarkup );
-  wcscpy( pSearchKey->szContext, Data.szContext );
+  MEMPROPOSAL SearchKey;
+  memset( &SearchKey, 0, sizeof( SearchKey ) );
+  wcscpy( SearchKey.szSource, Data.szSource );
+  strcpy( SearchKey.szDocName, Data.szDocName );
+  SearchKey.lSegmentNum = Data.lSegmentNum;
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, SearchKey.szSourceLanguage, &SearchKey.fIsoSourceLangIsPrefered );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, SearchKey.szTargetLanguage, &SearchKey.fIsoTargetLangIsPrefered );
+  strcpy( SearchKey.szMarkup, Data.szMarkup );
+  wcscpy( SearchKey.szContext, Data.szContext );
 
   if ( Data.iNumOfProposals == 0 )
   {
@@ -2138,13 +2138,26 @@ int FuzzySearchRequestData::execute(){
     Data.iNumOfProposals = 5;
   }
 
-  PMEMPROPOSAL pFoundProposals = new( MEMPROPOSAL[Data.iNumOfProposals] );
-  memset( pFoundProposals, 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
+  std::vector<MEMPROPOSAL> vFoundProposals(Data.iNumOfProposals);
+  memset( &vFoundProposals[0], 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
   // do the lookup and handle the results
   // call the memory factory to process the request
   if ( _rc_ == NO_ERROR )
   {
-    _rc_ =  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, & Data.iNumOfProposals, pFoundProposals, GET_EXACT );
+//  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, & Data.iNumOfProposals, pFoundProposals, GET_EXACT );
+    std::vector<OtmProposal> vProposals(Data.iNumOfProposals);
+    //if ( pFoundProposals == NULL )
+    //{
+    //  return _rc_ = buildErrorReturn(DDE_MANDPARAMISSING,  ":: DDE_MANDPARAMISSING::pointer to proposal array");
+    //} /* endif */
+
+    OtmProposal otmSearchKey;
+    copyMemProposalToOtmProposal( &SearchKey, &otmSearchKey );
+
+    _rc_ = mem->searchProposal( otmSearchKey, vProposals, GET_EXACT );
+
+    Data.iNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
+    for( int i = 0; i < Data.iNumOfProposals; i++ ) copyOtmProposalToMemProposal( &vProposals[i], &vFoundProposals[i] );
   } /* endif */
 
   if(_rc_ != 0){
@@ -2161,7 +2174,7 @@ int FuzzySearchRequestData::execute(){
     if (  Data.iNumOfProposals > 0 )
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );
-      addProposalsToJSONString( strOutputParmsW, pFoundProposals,  Data.iNumOfProposals, (void *)&Data );
+      addProposalsToJSONString( strOutputParmsW, &vFoundProposals[0],  Data.iNumOfProposals, (void *)&Data );
     } /* endif */
 
     json_factory.terminateJSONW( strOutputParmsW );
@@ -2176,8 +2189,6 @@ int FuzzySearchRequestData::execute(){
     _rc_ = INTERNAL_SERVER_ERROR;
   } /* endif */
 
-  if ( pSearchKey ) delete pSearchKey;
-  if ( pFoundProposals ) delete[] pFoundProposals;
   return( _rc_ );
 }
 
