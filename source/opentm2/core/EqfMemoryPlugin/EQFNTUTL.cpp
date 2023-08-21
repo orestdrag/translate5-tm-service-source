@@ -1789,7 +1789,7 @@ USHORT NTMAddNameToTable
       } /* endif */
       #endif
       if( (pstTMTable->ulMaxEntries+1) * sizeof(pstTMTableEntries[0]) + sizeof(ULONG) > BTREE_REC_SIZE_V3){
-        T5LOG(T5ERROR) << ":: cannot increase table size, it reached it's limit ;"<< pstTMTable->ulMaxEntries;
+        T5LOG(T5ERROR) << ":: cannot increase table size, it reached it's limit ; maxEntries="<< pstTMTable->ulMaxEntries << "; tagTableType=" << usTableType;
         usRc = ERROR_NOT_ENOUGH_MEMORY;
       }
 
