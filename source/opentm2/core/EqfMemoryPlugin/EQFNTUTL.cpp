@@ -1788,9 +1788,19 @@ USHORT NTMAddNameToTable
         
       } /* endif */
       #endif
-      if( (pstTMTable->ulMaxEntries+1) * sizeof(pstTMTableEntries[0]) + sizeof(ULONG) > BTREE_REC_SIZE_V3){
-        T5LOG(T5ERROR) << ":: cannot increase table size, it reached it's limit ; maxEntries="<< pstTMTable->ulMaxEntries << "; tagTableType=" << usTableType;
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+      //if( (pstTMTable->ulMaxEntries+1) * sizeof(pstTMTableEntries[0]) + sizeof(ULONG) > TMX_REC_SIZE){
+      //  T5LOG(T5ERROR) << ":: cannot increase table size, it reached it's limit ; maxEntries="<< pstTMTable->ulMaxEntries << "; tagTableType=" << usTableType;
+        //usRc = ERROR_NOT_ENOUGH_MEMORY;
+      //}
+      const size_t currentCap = pstTMTable->stTmTableEntry.size();
+      if(pstTMTable->ulMaxEntries >= currentCap){
+        size_t newCap = currentCap + 10;
+        if(newCap >= pstTMTable->stTmTableEntry.max_size()){
+          T5LOG(T5FATAL) << "tried to set too big capacity for table " <<  usTableType <<"; newCap = " << newCap;
+        }
+        //T5LOG(T5ERROR)<<"remove this log later: tableType = " << usTableType <<" changing capacity to "<< newCap; 
+        pstTMTable->stTmTableEntry.resize(newCap);
+        pstTMTableEntries = &pstTMTable->stTmTableEntry[0];
       }
 
       if ( usRc == NO_ERROR )
@@ -1814,6 +1824,13 @@ USHORT NTMAddNameToTable
           if ( usTableType != LANGGROUP_KEY )
           {
             int occupSize = (pstTMTable->ulMaxEntries+1) * sizeof(TMX_TABLE_ENTRY);
+            PBYTE pOldTable = new BYTE[occupSize];
+            TMX_TABLE_OLD* table = (TMX_TABLE_OLD*) pOldTable;
+            table->ulMaxEntries = pstTMTable->ulMaxEntries;
+            if(table->ulMaxEntries){
+              memcpy( &table->stTmTableEntry, 
+                &pstTMTable->stTmTableEntry[0], sizeof(TMX_TABLE_ENTRY) * table->ulMaxEntries);
+            }
             usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                 (ULONG)usTableType,
                                 (PBYTE)pstTMTable,
@@ -1821,6 +1838,7 @@ USHORT NTMAddNameToTable
                                 //BTREE_REC_SIZE_V3
                                 occupSize
                                 );
+            delete[] pOldTable;
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1956,18 +1974,20 @@ USHORT EqfMemory::NTMLoadNameTable
     //  usRc = ERROR_NOT_ENOUGH_MEMORY;
     //} /* endif */
   } /* endif */
-
+  
+  PBYTE pOldTable = nullptr; 
   // read table data
   if ( usRc == NO_ERROR )
   {
     ULONG ulLen = *pulSize;
-    usRc =  TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pTMTable), &ulLen );
+    pOldTable = new BYTE[ulLen + 1];
+    usRc =  TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pOldTable), &ulLen );
   } /* endif */
 
   // handle tersed name tables
   if ( usRc == NO_ERROR )
   {
-    PTERSEHEADER pTerseHeader = (PTERSEHEADER)pTMTable;
+    PTERSEHEADER pTerseHeader = (PTERSEHEADER)pOldTable;
     PBYTE     pNewArea = NULL;         // ptr to unterse data area
 
     if ( pTerseHeader->ulMagicWord == TERSEMAGICWORD )
@@ -1986,7 +2006,7 @@ USHORT EqfMemory::NTMLoadNameTable
       {
         ULONG ulNewLen = 0;
 
-        memcpy( pNewArea, (PBYTE)pTMTable + sizeof(TERSEHEADER),
+        memcpy( pNewArea, (PBYTE)pOldTable + sizeof(TERSEHEADER),
                 *pulSize - sizeof(TERSEHEADER) );
        
         T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 51 in NTMLoadNameTable";
@@ -2025,7 +2045,7 @@ USHORT EqfMemory::NTMLoadNameTable
   if ( (usRc == NO_ERROR) && (ulTableKey == LANG_KEY) )
   {
     LONG lRest = *pulSize;
-    PBYTE pbTemp = (PBYTE)pTMTable;
+    PBYTE pbTemp = (PBYTE)pOldTable;
     while ( lRest )
     {
       if ( *pbTemp == 0xA0 )
@@ -2037,6 +2057,19 @@ USHORT EqfMemory::NTMLoadNameTable
     } /* endwhile */
   } /* endif */
 
+  if(usRc == NO_ERROR){
+    pTMTable->ulMaxEntries  = ((PTMX_TABLE_OLD)pOldTable)->ulMaxEntries;
+    pTMTable->stTmTableEntry.clear();
+    pTMTable->stTmTableEntry.resize(pTMTable->ulMaxEntries+1);
+    if(pTMTable->ulMaxEntries){
+      memcpy(&pTMTable->stTmTableEntry[0], &((PTMX_TABLE_OLD)pOldTable)->stTmTableEntry, pTMTable->ulMaxEntries * sizeof(TMX_TABLE_ENTRY));
+    }
+  }
+
+  if(pOldTable){
+     delete[] pOldTable;
+     pOldTable = nullptr;
+  }
   // return to caller
   return( usRc );
 } /* end of function NTMLoadNameTable */
@@ -2135,9 +2168,8 @@ USHORT EqfMemory::NTMCreateLangGroupTable()
     while ( (usRC == NO_ERROR) &&
             (i < (int)Languages.ulMaxEntries) )
     {
-      PTMX_TABLE_ENTRY pstEntry = Languages.stTmTableEntry;
-      usRC = NTMAddLangGroup( pstEntry[i].szName,
-                              pstEntry[i].usId );
+      usRC = NTMAddLangGroup( Languages.stTmTableEntry[i].szName,
+                              Languages.stTmTableEntry[i].usId );
       i++;
     } /* endwhile */
   } /* endif */

@@ -2032,11 +2032,18 @@ public:
     //writePtr(std::make_shared<EqfMemory>(*this));
     readOnlyCnt = std::make_shared<int>(0);
     writeCnt = std::make_shared<int>(0);
+    /*
     Languages.ulMaxEntries = 0;
+    Languages.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
     FileNames.ulMaxEntries = 0;
+    FileNames.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
     Authors.ulMaxEntries = 0;
+    Authors.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
     TagTables.ulMaxEntries = 0;
+    TagTables.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
     LangGroups.ulMaxEntries = 0;
+    LangGroups.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
+    //*/
 
     pvGlobalMemoryOptions = NULL;
     int rc = NTMCreateLongNameTable();

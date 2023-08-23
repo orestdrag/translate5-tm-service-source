@@ -68,9 +68,7 @@ int EqfMemory::getMarkupName
 {
   if ( (iPos >= 0) && (iPos < (int)(TagTables.ulMaxEntries)) )
   {
-    PTMX_TABLE_ENTRY pEntry = TagTables.stTmTableEntry;
-    pEntry += iPos;
-    return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
+    return( CopyToBuffer( TagTables.stTmTableEntry[iPos].szName, pszBuffer, iSize ) );
   }
   else
   {
@@ -596,9 +594,7 @@ int EqfMemory::getLanguage
 {
   if ( (iPos >= 0) && (iPos < (int)(Languages.ulMaxEntries)) )
   {
-    PTMX_TABLE_ENTRY pEntry = Languages.stTmTableEntry;
-    pEntry += iPos;
-    return( CopyToBuffer( pEntry->szName, pszBuffer, iSize ) );
+    return( CopyToBuffer( Languages.stTmTableEntry[iPos].szName, pszBuffer, iSize ) );
   }
   else
   {

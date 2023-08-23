@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <memory>
+#include <vector>
 #include "win_types.h"
 
 
@@ -376,16 +377,22 @@ typedef struct _TMX_TABLE_ENTRY
   USHORT usId = 0;
 } TMX_TABLE_ENTRY, * PTMX_TABLE_ENTRY;
 // name table structure (TM version 5 and up)
-const int NUM_OF_TMX_TABLE_ENTRIES = (BTREE_REC_SIZE_V3 - sizeof(ULONG)) / sizeof(TMX_TABLE_ENTRY);
+constexpr int NUM_OF_TMX_TABLE_ENTRIES = (BTREE_REC_SIZE_V3 - sizeof(ULONG)) / sizeof(TMX_TABLE_ENTRY);
+
+typedef struct TMX_TABLE_OLD{
+  ULONG  ulMaxEntries = 0;
+  TMX_TABLE_ENTRY stTmTableEntry[NUM_OF_TMX_TABLE_ENTRIES];
+};
+typedef TMX_TABLE_OLD * PTMX_TABLE_OLD;
 
 typedef struct TMX_TABLE
 {
   //ULONG  ulAllocSize = 0;
   ULONG  ulMaxEntries = 0;
   //std::vector<TMX_TABLE_ENTRY> stTmTableEntry;//[NUM_OF_TMX_TABLE_ENTRIES];
-  TMX_TABLE_ENTRY stTmTableEntry[NUM_OF_TMX_TABLE_ENTRIES];
+  std::vector<TMX_TABLE_ENTRY> stTmTableEntry;
   TMX_TABLE(){
-    ulMaxEntries = 0;
+    stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
     for(int i=0;i<NUM_OF_TMX_TABLE_ENTRIES;i++){
       stTmTableEntry[i].szName[0] = '\0';
       stTmTableEntry[i].usId = 0;
