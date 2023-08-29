@@ -838,8 +838,8 @@ VOID  BTREE::QDAMFreeFromList_V3
 //------------------------------------------------------------------------------
 SHORT BTREE::QDAMFreeRecord_V3
 (
-   BTREEBUFFER_V3& Record,
-   RECTYPE      recType                // data or key record
+  PBTREEBUFFER_V3 pRecord,
+  RECTYPE      recType                // data or key record
 )
 {
   SHORT  sRc;                          // return code

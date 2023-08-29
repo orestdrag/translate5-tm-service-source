@@ -968,14 +968,14 @@ SHORT QDAMDosRC2BtreeRC
 
 SHORT BTREE::QDAMWRecordToDisk_V3
 (
-   const BTREEBUFFER_V3&  Buffer               // pointer to buffer to write
+  PBTREEBUFFER_V3  pBuffer               // pointer to buffer to write
 )
 {
-  LONG  lOffset = RECORDNUM(Buffer) * (long)BTREE_REC_SIZE_V3; // offset in file
+  LONG  lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3; // offset in file
   INC_REAL_WRITE_COUNT;
 
 //QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
-  SHORT sRc = fb.Write((PVOID) &Buffer.contents, BTREE_REC_SIZE_V3,lOffset) ;
+  SHORT sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) ;
 
   if ( sRc )
   {
@@ -1188,12 +1188,12 @@ SHORT  BTREE::QDAMReadRecord_V3
     if ( !sRc )
     {
       lOffset = ((LONG) usNumber) * BTREE_REC_SIZE_V3;
-      resRead = fb.Read((PVOID) &ReadBuffer.contents, BTREE_REC_SIZE_V3, lOffset);
+      resRead = fb.Read((PVOID) &(*ppReadBuffer)->contents, BTREE_REC_SIZE_V3, lOffset);
     } /* endif */
 
     if ( !sRc )
     {
-      ReadBuffer.usRecordNumber = usNumber;
+      (*ppReadBuffer)->usRecordNumber = usNumber;
 //    pBuffer->ulCheckSum = QDAMComputeCheckSum( pBuffer );
       if ( resRead == FilesystemHelper::FILEHELPER_WARNING_FILE_IS_SMALLER_THAN_REQUESTED)
       {
@@ -1202,16 +1202,16 @@ SHORT  BTREE::QDAMReadRecord_V3
         /*************************************************************/
         if ( fNewRec )                // new record mode ???
         {
-          memset (&ReadBuffer.contents, 0, sizeof(BTREERECORD_V3));
+          memset (&(*ppReadBuffer)->contents, 0, sizeof(BTREERECORD_V3));
           // init this record
-          pHeader = &(ReadBuffer.contents.header);
+          pHeader = &((*ppReadBuffer)->contents.header);
           pHeader->usOccupied = 0;
           pHeader->usNum = usNumber;
           pHeader->usFilled = sizeof(BTREEHEADER );
           pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //        pBuffer->ulCheckSum = QDAMComputeCheckSum( ReadBuffer );
            
-          sRc = QDAMWRecordToDisk_V3( ReadBuffer);
+          sRc = QDAMWRecordToDisk_V3(*ppReadBuffer);
 
           if (! sRc )
           {
@@ -1812,7 +1812,7 @@ SHORT BTREE::QDAMAllocKeyRecords
   while ( usNum-- && !sRc )
   {
     usNextFreeRecord++;
-    sRc = QDAMReadRecord_V3( usNextFreeRecord, pRecord, TRUE  );
+    sRc = QDAMReadRecord_V3( usNextFreeRecord, &pRecord, TRUE  );
 
     if ( !sRc )
     {
@@ -1957,6 +1957,7 @@ SHORT BTREE::QDAMDictCreateLocal
   SHORT sRc = 0;                       // return code
   USHORT  usAction;                    // used in open of file
   BTREEBUFFER_V3 Record;
+  PBTREEBUFFER_V3 pRecord = &Record;
     
     // Try to create the index file
   fb.file = fopen(fb.fileName.c_str(), "w+b");
@@ -2025,11 +2026,11 @@ SHORT BTREE::QDAMDictCreateLocal
     /*******************************************************************/
     /* Write out an empty root node                                    */
     /*******************************************************************/
-    sRc = QDAMReadRecord_V3( usFirstNode, Record, TRUE );
+    sRc = QDAMReadRecord_V3( usFirstNode, &pRecord, TRUE );
     if ( !sRc )
     {
-      TYPE(Record) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
-      sRc = QDAMWriteRecord_V3(Record);
+      TYPE(&Record) = ROOT_NODE | LEAF_NODE | DATA_KEYNODE;            
+      sRc = QDAMWriteRecord_V3(&Record);
     } /* endif */
     if ( !sRc )
     {
@@ -2505,7 +2506,7 @@ RECPARAM  QDAMGetrecData_V3
 SHORT BTREE::QDAMFindRecord_V3
 (
   PWCHAR  pKey,
-  BTREEBUFFER_V3 ** pRecord
+  BTREEBUFFER_V3 ** ppRecord
 )
 {
   SHORT         sResult;
@@ -3438,7 +3439,7 @@ SHORT  QDAMFirstEntry_V3
     } /* endwhile */
     if ( !sRc )
     {
-      pBT->usCurrentRecord = RECORDNUM(Record);
+      pBT->usCurrentRecord = RECORDNUM(*ppRecord);
       pBT->usFirstLeaf = pBT->usCurrentRecord;    // determine first leaf
       pBT->sCurrentIndex = 0;
     } /* endif */
@@ -3843,9 +3844,6 @@ SHORT QDAMSplitNode_V3
 
   SHORT sRc = 0;                       // success indicator
 
-
-  //T5LOG(T5FATAL) << "called commented out function QDAMSplitNode_V3";
-  //#ifdef TEMPORARY_COMMENTED
   memset( &recKey, 0, sizeof( recKey ) );
   memset( &recData,  0, sizeof( recData ) );
 
@@ -3906,7 +3904,7 @@ SHORT QDAMSplitNode_V3
       BTREELOCKRECORD(newRecord);
       if ( NEXT(*record) )
       {
-        sRc = pBTIda->QDAMReadRecord_V3( NEXT(*record), &child, FALSE );
+        sRc = pBT->QDAMReadRecord_V3( NEXT(*record), &child, FALSE );
         if ( !sRc )
         {
           PREV(child) = RECORDNUM(newRecord);
@@ -4041,13 +4039,6 @@ SHORT QDAMSplitNode_V3
     } /* endif */
   } /* endif */
   BTREEUNLOCKRECORD( pRecTemp );
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMSPLITNODE_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-  
-  //#endif
 
   return ( sRc );
 }
@@ -4641,17 +4632,17 @@ SHORT QDAMChangeKey_V3
     {
        // get the key description and insert the new key
        recKey.usNum = pNewRecord->contents.header.usNum;
-       sRc = pBTIda->QDAMLocateKey_V3( pNewRecord, pNewKey, &i, FEXACT, &sNearKey);
+       sRc = pBT->QDAMLocateKey_V3( pNewRecord, pNewKey, &i, FEXACT, &sNearKey);
        if ( !sRc && i != -1 )
        {
           recKey.usOffset = i;
           recKey.ulLen = 0;            // init length
-          sRc = pBTIda->QDAMInsertKey_V3( pRecord, pNewKey, recKey, recKey);
+          sRc = pBT->QDAMInsertKey_V3( pRecord, pNewKey, recKey, recKey);
        } /* endif */
     } /* endif */
     if ( !sRc )
     {
-       sRc = pBTIda->QDAMLocateKey_V3( pRecord, pOldKey, &i, FEXACT, &sNearKey);
+       sRc = pBT->QDAMLocateKey_V3( pRecord, pOldKey, &i, FEXACT, &sNearKey);
     } /* endif */
 
     if (!sRc && i!= -1)
@@ -4662,7 +4653,7 @@ SHORT QDAMChangeKey_V3
        OCCUPIED(pRecord) --;
        // record should be rearranged - it will be written during the insert
        // of the new key
-       QDAMReArrangeKRec_V3( pBTIda, pRecord );
+       QDAMReArrangeKRec_V3( pBT, pRecord );
 
     }
     BTREEUNLOCKRECORD(pRecord);
@@ -5916,47 +5907,47 @@ BTREE::QDAMCheckDict
 //------------------------------------------------------------------------------
 SHORT QDAMValidateIndex_V3
 (
-   PBTREE         pBTIda,
+   PBTREE         pBT,
    PBTREEBUFFER_V3 * ppRecord
 )
 {
    SHORT    sRc = 0;                   // set return code
    USHORT   usRecord;
 
-   if ( pBTIda->sCurrentIndex < 0 ||
-           pBTIda->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
+   if ( pBT->sCurrentIndex < 0 ||
+           pBT->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
    {
-      if ( pBTIda->sCurrentIndex < 0 )
+      if ( pBT->sCurrentIndex < 0 )
       {
          if ( PREV( *ppRecord ))
          {
             usRecord = PREV(*ppRecord);
-            sRc = pBTIda->QDAMReadRecord_V3( usRecord, ppRecord, FALSE  );
+            sRc = pBT->QDAMReadRecord_V3( usRecord, ppRecord, FALSE  );
             if (!sRc )
             {
-               pBTIda->usCurrentRecord = usRecord;
-               pBTIda->sCurrentIndex = (SHORT) (OCCUPIED(*ppRecord) - 1);
+               pBT->usCurrentRecord = usRecord;
+               pBT->sCurrentIndex = (SHORT) (OCCUPIED(*ppRecord) - 1);
             } /* endif */
          }
          else
          {
-            pBTIda->usCurrentRecord = 0;
-            pBTIda->sCurrentIndex =  0;
+            pBT->usCurrentRecord = 0;
+            pBT->sCurrentIndex =  0;
             sRc = BTREE_EOF_REACHED;
          } /* endif */
       }
-      else if ( pBTIda->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
+      else if ( pBT->sCurrentIndex >= (SHORT) OCCUPIED(*ppRecord))
       {
          if ( NEXT(*ppRecord) )
          {
-            pBTIda->usCurrentRecord = NEXT(*ppRecord);
-            sRc = pBTIda->QDAMReadRecord_V3( pBTIda->usCurrentRecord, ppRecord, FALSE  );
-            pBTIda->sCurrentIndex = 0;
+            pBT->usCurrentRecord = NEXT(*ppRecord);
+            sRc = pBT->QDAMReadRecord_V3( pBT->usCurrentRecord, ppRecord, FALSE  );
+            pBT->sCurrentIndex = 0;
          }
          else
          {
-            pBTIda->usCurrentRecord = 0;
-            pBTIda->sCurrentIndex =  0;
+            pBT->usCurrentRecord = 0;
+            pBT->sCurrentIndex =  0;
             sRc = BTREE_EOF_REACHED;
          } /* endif */
       } /* endif */
@@ -6117,14 +6108,14 @@ SHORT QDAMNext_V3
 //------------------------------------------------------------------------------
 SHORT QDAMGetszKeyParam_V3
 (
-   PBTREE  pBTIda,               // pointer to btree structure
+   PBTREE  pBT,               // pointer to btree structure
    RECPARAM  recKey,             // active record
    PCHAR_W   pKeyData,             // pointer to data
    PULONG  pulLen                // length of data
 )
 {
    PCHAR   pData = NULL;
-   PBTREEBUFFER_V3  pRecord;              // active record
+   PBTREEBUFFER_V3  pRecord = nullptr;              // active record
    SHORT   sRc = 0;                    // return code
    USHORT  usLen;
 
