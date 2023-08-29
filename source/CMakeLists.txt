@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 5)
-SET(APP_VERSION_MINOR 14)
+SET(APP_VERSION_MINOR 15)
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 project(T5MEMORY VERSION ${APP_VERSION})
 
@@ -65,7 +65,6 @@ set(T5MEMORY_Source_Files
     "${T5MEMORY_SOURCE_ROOT}/otmd.cpp"
     "${T5MEMORY_SOURCE_ROOT}/config.cpp"
     "${CORE_DIR}/tm.cpp"
-    "${CORE_DIR}/otm.cpp"
     "${CORE_DIR}/requestdata.cpp"
 #RestAPI
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"
@@ -126,7 +125,6 @@ set(T5MEMORY_Source_Files
 #EqfMemoryPlugin
     "${CORE_DIR}/EqfMemoryPlugin/EQFFUZZ.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEM00.cpp"
-    #"${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMEP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemory.cpp"

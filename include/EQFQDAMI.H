@@ -525,7 +525,7 @@ typedef struct _DICTLOCK
 //+----------------------------------------------------------------------------+
 // Description:       Locks/Unlocks the specified dictionary entry
 //+----------------------------------------------------------------------------+
-// Parameters:        PBTREE pBTIda          pointer to btree structure
+// Parameters:        PBTREE pBT          pointer to btree structure
 //                    PSZ    pEntry          dictionary entry
 //                    BOOL   fLock           lock/unlock dictionary entry
 //+----------------------------------------------------------------------------+
@@ -536,7 +536,7 @@ typedef struct _DICTLOCK
 //+----------------------------------------------------------------------------+
 SHORT QDAMDictLockEntry
 (
-   PBTREE pBTIda,
+   PBTREE pBT,
    PSZ_W    pEntry,
    BOOL   fLock
 );
@@ -807,7 +807,7 @@ typedef struct _DICTORG
 //+----------------------------------------------------------------------------+
 // Description:       gets the update time
 //+----------------------------------------------------------------------------+
-// Parameters:        PBTREE    pBTIda   pointer to control block
+// Parameters:        PBTREE    pBT   pointer to control block
 //                    PLONG     plTime   time of last open
 //+----------------------------------------------------------------------------+
 // Returncode type:   SHORT
@@ -827,7 +827,7 @@ typedef struct _DICTORG
 //+----------------------------------------------------------------------------+
 // Description:       gets the update time
 //+----------------------------------------------------------------------------+
-// Parameters:        PBTREE    pBTIda   pointer to control block
+// Parameters:        PBTREE    pBT   pointer to control block
 //                    PLONG     plTime   time of last open
 //+----------------------------------------------------------------------------+
 // Returncode type:   SHORT
@@ -941,11 +941,7 @@ typedef struct _DICTTIME
 
 
  SHORT  QDAMAllocKeyRecords ( PBTREE, USHORT );
- SHORT  QDAMLocSubstr_V3( PBTREE, PBTREEBUFFER_V3, PWCHAR, PBYTE, PULONG, PBYTE, PULONG );
 
-
-
- SHORT  QDAMAddDict( PUSHORT, PBTREE );
  USHORT QDAMRemoveDict( PBTREE );
  SHORT  QDAMDictLockEntryLocal( PBTREE, PUSHORT, BOOL );
  USHORT QDAMMoveProperties ( PPROPDICTIONARY , PUSHORT );
@@ -1250,7 +1246,7 @@ void DAMLINK
 
 SHORT NTMKeyCompare
 (
-    PVOID  pBTIda,                     // pointer to tree structure
+    PVOID  pBT,                     // pointer to tree structure
     PVOID  pulKey1,                    // pointer to first key
     PVOID  pulKey2                     // pointer to second key
 );
@@ -1270,7 +1266,7 @@ SHORT NTMKeyCompare
 
 SHORT QDAMPhysLock
 (
-   PBTREE         pBTIda,
+   PBTREE         pBT,
    BOOL           fLock,
    PBOOL          pfLocked
 );
@@ -1278,7 +1274,7 @@ SHORT QDAMPhysLock
 
 SHORT QDAMIncrUpdCounter
 (
-   PBTREE     pBTIda,                  // pointer to btree structure
+   PBTREE     pBT,                  // pointer to btree structure
    SHORT      sIndex,                  // index of requested update counter
    PLONG      plNewValue               // ptr to buffer for new counte value
 );
@@ -1287,7 +1283,7 @@ SHORT QDAMIncrUpdCounter
 
 SHORT QDAMUpdateLockRec
 (
-   PBTREE     pBTIda,                  // pointer to btree structure
+   PBTREE     pBT,                  // pointer to btree structure
    PSZ_W      pszTerm,                 // term being added or removed
    BOOL       fAdd                     // TRUE = Add term to lock record
                                        // FALSE = remove term from lock record
@@ -1315,7 +1311,7 @@ USHORT QDamWildCardList
 
 SHORT QDAMDictNextWildLocal
 (
-   PBTREE     pBTIda,
+   PBTREE     pBT,
    PSZ_W      pPattern,                // search pattern or compound
    BOOL       fCompound,               // compound search flag
    PBYTE      pKeyData,                // pointer to space for key data

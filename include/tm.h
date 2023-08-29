@@ -2507,11 +2507,7 @@ USHORT  TmGetServerDrivesHwnd( PDRIVES_IN, PDRIVES_OUT, USHORT, HWND );
 USHORT  TmGetServerTMs( PFILE_LIST_IN  pTmListIn,      // Pointer to FILE_LIST_IN struct !!! CHM
                         PFILE_LIST_OUT pTmListOut,     // Pointer to FILE_LIST_OUT struct !!! CHM
                         USHORT       usMsgHandling );  // Message handling parameter
-USHORT  TmGetTMPart( HTM          htm,                 // Memory database handle
-                     PSZ          pszMemPat,           // Full translation memory path
-                     PGETPART_IN  pGetPartIn,          // Pointer to GETPART_IN struct
-                     PGETPART_OUT pGetPartOut,         // Pointer to GETPART_OUT struct
-                     USHORT       usMsgHandling );     // Message handling parameter
+
 USHORT  TmSendTMProp( SERVERNAME szServer,             // Servername
                       PSZ        pszMemName,           // Translation memory name
                       USHORT     usMsgHandling );      // Message handling parameter
@@ -2531,8 +2527,7 @@ USHORT TmGetServerFileInfo( SERVERNAME   szServer,        //Servername
                             USHORT       usMsgHandling ); // Message handling parameter
 USHORT TmGetServerFileInfoHwnd( SERVERNAME, PSZ, PFILEFINDBUF, USHORT, HWND );
 USHORT TmCompareLocalRemoteProperties( SERVERNAME, PSZ, USHORT );
-USHORT MemRcHandling( USHORT,  PSZ, HTM *, PSZ );
-USHORT MemRcHandlingHwnd( USHORT,  PSZ, HTM *, PSZ, HWND );
+
 
 /**********************************************************************/
 /* MemReadWriteSegment                                                */
@@ -2615,27 +2610,6 @@ BOOL fMemIsAvail( PSZ, PSZ, PSZ );      // memory is available and accessible
 USHORT MemFillCBNames( HWND, PSZ, PSZ );
 USHORT MemFillTableLB( HWND   hListBox, USHORT usBoxType, PSZ    pszLastUsed );
 
-/**********************************************************************/
-/* TmOpen                                                             */
-/**********************************************************************/
-USHORT TmOpen( PSZ, HTM *, USHORT, USHORT,    //(in)  location:    TM_LOCAL
-                   //                   TM_REMOTE
-                   //                   TM_LOCAL_REMOTE
-        USHORT,    //(in)  message handling parameter
-                   //      TRUE:  display error message
-                   //      FALSE: display no error message
-        HWND   );  //(in)  window handle for error messages
-
-/**********************************************************************/
-/* TmClose                                                            */
-/**********************************************************************/
-USHORT
-TmClose( HTM,        //(in) TM handle returned from open
-         PSZ,        //(in) full TM name x:\eqf\mem\mem.mem
-         USHORT,     //(in) message handling parameter
-                     //     TRUE:  display error message
-                     //     FALSE: display no error message
-         HWND );     //(in) window handle for error messages
 /**********************************************************************/
 /* TmReplace                                                          */
 /**********************************************************************/
@@ -2748,21 +2722,6 @@ NTMConvertCRLF( PSZ,
                 PSZ,
                 USHORT );
 VOID NTMConvertCRLFW( PSZ_W, PSZ_W, USHORT );
-
-
-/**********************************************************************/
-/* NTMOpenProperties                                                  */
-/**********************************************************************/
-USHORT
-NTMOpenProperties( HPROP *,
-                   PVOID *,
-                   PSZ,
-                   PSZ,
-                   USHORT,
-                   BOOL );
-
-
-
 
 // Update specific parts of segment
 
@@ -3996,8 +3955,7 @@ INT_PTR /*CALLBACK*/ SERVWAITDLG( HWND, WINMSG, WPARAM, LPARAM );
 USHORT  MemCreateProcess( PMEM_IDA, PSZ, USHORT );
 VOID    MemDestroyProcess( PMEM_IDA, USHORT * );
 USHORT  MemGetAddressOfProcessIDA( PMEM_IDA, WPARAM, USHORT *, PVOID * );
-VOID    MemRcHandlingErrorUndefined( USHORT, PSZ );
-VOID    MemRcHandlingErrorUndefinedHwnd( USHORT, PSZ, HWND );
+
 USHORT  EQFMemOrganizeStart( PPROCESSCOMMAREA );
 VOID    EQFMemOrganizeProcess( PPROCESSCOMMAREA );
 VOID    EQFMemOrganizeEnd( PPROCESSCOMMAREA );
@@ -4058,7 +4016,6 @@ USHORT NTMGetIDFromName( EqfMemory*, PSZ, PSZ, USHORT, PUSHORT );
 USHORT NTMGetNameFromID( EqfMemory*, PUSHORT, USHORT, PSZ, PSZ );
 USHORT TmtXReplace( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
-USHORT TmtXCreate( PTMX_CREATE_IN, PTMX_CREATE_OUT );
 USHORT TmtXOpen( PTMX_OPEN_IN, PTMX_OPEN_OUT );
 USHORT TmtXClose( EqfMemory*, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
@@ -4236,7 +4193,6 @@ typedef struct _MEM_ORGANIZE_IDA
  BOOL          fFirstGet;              // TRUE = this is the first get access
 }MEM_ORGANIZE_IDA, * PMEM_ORGANIZE_IDA;
 
-USHORT  TmCloseOrganize( PMEM_ORGANIZE_IDA, USHORT );
 
 USHORT NTMCloseOrganize ( PMEM_ORGANIZE_IDA, USHORT            );
 

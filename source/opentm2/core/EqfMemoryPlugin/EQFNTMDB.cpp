@@ -208,7 +208,7 @@ UCHAR  ucbEncodeTbl[30]
 //|                   PCHAR  pUserData,     user data                          |
 //|                   USHORT usLen,         length of user data                |
 //|                   ULONG  ulStartKey,    first key to start automatic insert|
-//|                   PBTREE * ppBTIda      pointer to structure               |
+//|                   PBTREE * ppBT      pointer to structure               |
 //+----------------------------------------------------------------------------+
 //|Returncode type:   SHORT                                                    |
 //+----------------------------------------------------------------------------+
@@ -238,7 +238,7 @@ SHORT
 QDAMCheckDict
 (
   PSZ    pName,                        // name of dictionary
-  PBTREE pBTIda                        // pointer to ida
+  PBTREE pBT                        // pointer to ida
 );
 
 
@@ -302,13 +302,13 @@ SHORT  BTREE::EQFNTMOpen
   USHORT usOpenFlags                 // Read Only or Read/Write
 )
 {
-   //PBTREE    pBTIda;                   // pointer to BTRee structure
+   //PBTREE    pBT;                   // pointer to BTRee structure
    SHORT     sRc = 0;                  // return code
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
   
 
-   //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
+   //if ( ! UtlAlloc( (PVOID *)&pBT, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
    {
    //   sRc = BTREE_NO_ROOM;
    }
@@ -341,7 +341,7 @@ SHORT  BTREE::EQFNTMOpen
                /* re-allocate PBTIDA (has been de-allocated within    */
                /* QDAMDictOpenLocal due to error code)                */
                /*******************************************************/
-               //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
+               //if ( ! UtlAlloc( (PVOID *)&pBT, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
                //{
                //   sRc = BTREE_NO_ROOM;
                //} /* endif */
@@ -496,11 +496,11 @@ SHORT BTREE::EQFNTMSign
 //+----------------------------------------------------------------------------+
 //|Function name:     EQFNTMInsert                                             |
 //+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMInsert( pBTIda, &ulKey, pData, usLen );      |
+//|Function call:     sRc = EQFNTMInsert( pBT, &ulKey, pData, usLen );      |
 //+----------------------------------------------------------------------------+
 //|Description:       insert a new key (ULONG) with data                       |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE  pBTIda,      pointer to binary tree struct       |
+//|Parameters:        PBTREE  pBT,      pointer to binary tree struct       |
 //|                   PULONG  pulKey,      pointer to key                      |
 //|                   PBYTE   pData,       pointer to user data                |
 //|                   USHORT  usLen        length of user data                 |
@@ -838,7 +838,7 @@ VOID  BTREE::QDAMFreeFromList_V3
 //------------------------------------------------------------------------------
 SHORT BTREE::QDAMFreeRecord_V3
 (
-   PBTREEBUFFER_V3 pRecord,
+   BTREEBUFFER_V3& Record,
    RECTYPE      recType                // data or key record
 )
 {
@@ -877,18 +877,8 @@ SHORT BTREE::QDAMFreeRecord_V3
      pHeader->usFilled = sizeof(BTREEHEADER );
      pHeader->usLastFilled = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER );
 //   pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
-     sRc = QDAMWriteRecord_V3( pRecord);
+    sRc = QDAMWriteRecord_V3(pRecord);
   }
-  else
-  {
-    sRc = BTREE_INVALID;
-  }  /* endif */
-
-   if ( sRc )
-   {
-     ERREVENT2( QDAMFREERECORD_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-   } /* endif */
-
   return sRc;
 }
 
@@ -1384,19 +1374,6 @@ SHORT BTREE::QDAMDictUpdateLocal
    RECPARAM      recOldKey;             // pointer to old key value
    BOOL          fLocked = FALSE;       // file-has-been-locked flag
 
-   DEBUGEVENT2( QDAMDICTUPDATELOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
-
-   /*******************************************************************/
-   /* validate passed pointer ...                                     */
-   /*******************************************************************/
-   CHECKPBTREE( this, sRc );
-
-
-   if ( !sRc && fCorrupted )
-   {
-      sRc = BTREE_CORRUPTED;
-   } /* endif */
-
    /*******************************************************************/
    /* check if entry is locked ....                                   */
    /*******************************************************************/
@@ -1506,11 +1483,11 @@ SHORT BTREE::QDAMDictUpdateLocal
 //+----------------------------------------------------------------------------+
 //|Function name:     EQFNTMUpdate                                             |
 //+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMUpdate( pBTIda,  ulKey, pData, usLen );      |
+//|Function call:     sRc = EQFNTMUpdate( pBT,  ulKey, pData, usLen );      |
 //+----------------------------------------------------------------------------+
 //|Description:       update the data of an already inserted key               |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE  pBTIda,      pointer to binary tree struct       |
+//|Parameters:        PBTREE  pBT,      pointer to binary tree struct       |
 //|                   ULONG   ulKey,      key value                            |
 //|                   PBYTE   pData,       pointer to user data                |
 //|                   USHORT  usLen        length of user data                 |
@@ -1716,11 +1693,11 @@ SHORT BTREE::QDAMDictExactLocal
 //+----------------------------------------------------------------------------+
 //|Function name:     EQFNTMGet                                                |
 //+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMGet( pBTIda, ulKey, chData, &usLen );        |
+//|Function call:     sRc = EQFNTMGet( pBT, ulKey, chData, &usLen );        |
 //+----------------------------------------------------------------------------+
 //|Description:       get the data string for the passed key                   |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE pBTIda,       pointer to btree struct             |
+//|Parameters:        PBTREE pBT,       pointer to btree struct             |
 //|                   ULONG  ulKey,        key to be searched for              |
 //|                   PCHAR  pchBuffer,    space for user data                 |
 //|                   PUSHORT pusLength    in/out length of returned user data |
@@ -1785,11 +1762,11 @@ BTREE::EQFNTMGet
 //+----------------------------------------------------------------------------+
 //|Function name:     EQFNTMGetMaxNumber                                       |
 //+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMGetNextNumber( pBTIda, &ulKey, &ulNextFree );|
+//|Function call:     sRc = EQFNTMGetNextNumber( pBT, &ulKey, &ulNextFree );|
 //+----------------------------------------------------------------------------+
 //|Description:       get the start key and the next free key ...              |
 //+----------------------------------------------------------------------------+
-//|Parameters:        PBTREE pBTIda,       pointer to btree struct             |
+//|Parameters:        PBTREE pBT,       pointer to btree struct             |
 //|                   PULONG pulStartKey   first key                           |
 //|                   PULONG pulNextKey    next key to be assigned             |
 //+----------------------------------------------------------------------------+
@@ -1817,7 +1794,7 @@ BTREE::EQFNTMGetNextNumber
 //+----------------------------------------------------------------------------+
 //|Function name:     EQFNTMPhysLock                                           |
 //+----------------------------------------------------------------------------+
-//|Function call:     sRc = EQFNTMPhysLock( pBTIda );                          |
+//|Function call:     sRc = EQFNTMPhysLock( pBT );                          |
 //+----------------------------------------------------------------------------+
 //|Description:       Physicall lock or unlock database.                       |
 //+----------------------------------------------------------------------------+

@@ -340,10 +340,6 @@ typedef struct _LOOKUPENTRY_V3
 
 
 
-typedef struct _ACCESSCOUNTERTABLEENTRY
-{
-  ULONG ulAccessCounter;
-} ACCESSCTRTABLEENTRY, * PACCESSCTRTABLEENTRY;
 
 
 typedef LHANDLE HTM;
@@ -497,11 +493,7 @@ struct BTREE
     USHORT       usOpenFlags=0;                    // settings used for open
     LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
     HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
-    USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
-    USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
     ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
-    PLOOKUPENTRY_V3 LookupTable_V3=nullptr;        // Pointer to lookup-table
-    PACCESSCTRTABLEENTRY AccessCtrTable=nullptr;   // Pointer to access-counter-table
     BYTE         bRecSizeVersion=0;                  // record size version flag
     //} //end of PBTREEGLOB
 
@@ -615,11 +607,11 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Function name:     EQFNTMInsert
     //+----------------------------------------------------------------------------+
-    // Function call:     sRc = EQFNTMInsert( pBTIda, &ulKey, pData, usLen );
+    // Function call:     sRc = EQFNTMInsert( pBT, &ulKey, pData, usLen );
     //+----------------------------------------------------------------------------+
     // Description:       insert a new key (ULONG) with data
     //+----------------------------------------------------------------------------+
-    // Parameters:        PBTREE  pBTIda,      pointer to binary tree struct
+    // Parameters:        PBTREE  pBT,      pointer to binary tree struct
     //                    PULONG  pulKey,      pointer to key
     //                    PBYTE   pData,       pointer to user data
     //                    ULONG   ulLen        length of user data
@@ -645,11 +637,11 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Function name:     EQFNTMUpdate
     //+----------------------------------------------------------------------------+
-    // Function call:     sRc = EQFNTMUpdate( pBTIda,  ulKey, pData, usLen );
+    // Function call:     sRc = EQFNTMUpdate( pBT,  ulKey, pData, usLen );
     //+----------------------------------------------------------------------------+
     // Description:       update the data of an already inserted key
     //+----------------------------------------------------------------------------+
-    // Parameters:        PBTREE  pBTIda,      pointer to binary tree struct
+    // Parameters:        PBTREE  pBT,      pointer to binary tree struct
     //                    ULONG   ulKey,      key value
     //                    PBYTE   pData,       pointer to user data
     //                    ULONG   ulLen        length of user data
@@ -675,11 +667,11 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Function name:     EQFNTMGet
     //+----------------------------------------------------------------------------+
-    // Function call:     sRc = EQFNTMGet( pBTIda, ulKey, chData, &usLen );
+    // Function call:     sRc = EQFNTMGet( pBT, ulKey, chData, &usLen );
     //+----------------------------------------------------------------------------+
     // Description:       get the data string for the passed key
     //+----------------------------------------------------------------------------+
-    // Parameters:        PBTREE pBTIda,       pointer to btree struct
+    // Parameters:        PBTREE pBT,       pointer to btree struct
     //                    ULONG  ulKey,        key to be searched for
     //                    PCHAR  pchBuffer,    space for user data
     //                    PULONG  pulLength    in/out length of returned user data
@@ -703,11 +695,11 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Function name:     EQFNTMGetMaxNumber
     //+----------------------------------------------------------------------------+
-    // Function call:     sRc = EQFNTMGetNextNumber( pBTIda, &ulKey, &ulNextFree );
+    // Function call:     sRc = EQFNTMGetNextNumber( pBT, &ulKey, &ulNextFree );
     //+----------------------------------------------------------------------------+
     // Description:       get the start key and the next free key ...
     //+----------------------------------------------------------------------------+
-    // Parameters:        PBTREE pBTIda,       pointer to btree struct
+    // Parameters:        PBTREE pBT,       pointer to btree struct
     //                    PULONG pulStartKey   first key
     //                    PULONG pulNextKey    next key to be assigned
     //+----------------------------------------------------------------------------+
@@ -730,7 +722,7 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Function name:     EQFNTMPhysLock
     //+----------------------------------------------------------------------------+
-    // Function call:     sRc = EQFNTMPhysLock( pBTIda );
+    // Function call:     sRc = EQFNTMPhysLock( pBT );
     //+----------------------------------------------------------------------------+
     // Description:       Physicall lock or unlock database.
     //+----------------------------------------------------------------------------+

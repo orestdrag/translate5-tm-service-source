@@ -28,7 +28,7 @@
 //                    PCHAR  pUserData,     user data
 //                    USHORT usLen,         length of user data
 //                    ULONG  ulStartKey,    first key to start automatic insert
-//                    PBTREE * ppBTIda      pointer to structure
+//                    PBTREE * ppBT      pointer to structure
 //+----------------------------------------------------------------------------+
 // Returncode type:   SHORT
 //+----------------------------------------------------------------------------+
@@ -47,7 +47,7 @@ EQFNTMCreate
    PCHAR  pUserData,                   // user data
    USHORT usLen,                       // length of user data
    ULONG  ulStartKey,                  // first key to start automatic insert...
-   PBTREE  * ppBTIda                    // pointer to structure
+   PBTREE  * ppBT                    // pointer to structure
 );
 
 
