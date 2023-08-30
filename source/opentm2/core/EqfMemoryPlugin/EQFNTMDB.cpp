@@ -632,10 +632,10 @@ EQFNTMInsert
    {
       sRc = BTREE_CORRUPTED;
    } /* endif */
-   if ( !sRc && !pBT->fOpen )
-   {
-     sRc = BTREE_READONLY;
-   } /* endif */
+   //if ( !sRc && !pBT->fOpen )
+   //{
+   //  sRc = BTREE_READONLY;
+   //} /* endif */
   /********************************************************************/
   /* if user wants that we find an appropriate key, we have to do so..*/
   /********************************************************************/
@@ -1511,10 +1511,10 @@ SHORT QDAMDictUpdateLocal
       sRc = BTREE_CORRUPTED;
    } /* endif */
 
-   if ( !sRc && !pBT->fOpen )
-   {
-     sRc = BTREE_READONLY;
-   } /* endif */
+   //if ( !sRc && !pBT->fOpen )
+   //{
+   //  sRc = BTREE_READONLY;
+   //} /* endif */
 
    /*******************************************************************/
    /* check if entry is locked ....                                   */

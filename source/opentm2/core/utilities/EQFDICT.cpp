@@ -2073,7 +2073,7 @@ SHORT QDAMDictCloseLocal
 
      //  reset open flag in header and force a write to disk
      // open flag will only be set if opened for r/w
-     if ( !sRc && pBT->fOpen && ! pBT->fCorrupted )
+     if ( !sRc /*&& pBT->fOpen*/ && ! pBT->fCorrupted )
      {
         pBT->fOpen = FALSE;
 
@@ -6860,7 +6860,7 @@ SHORT  QDAMDictOpenLocal
      } /* endif */
      ASDLOG();
 
-     if ( !sRc && fWrite && !header.fOpen)
+     if ( !sRc && fWrite /*&& !header.fOpen*/)
      {
         pBT->fOpen = TRUE;                       // set open flag
         pBT->fWriteHeaderPending = TRUE;         // postpone write until change
@@ -7129,10 +7129,10 @@ SHORT QDAMDictInsertLocal
    if ( pBT->fCorrupted )
    {
       sRc = BTREE_CORRUPTED;
-   } else if(!pBT->fOpen )
-   {
-     sRc = BTREE_READONLY;
-   } /* endif */
+   } //else if(!pBT->fOpen )
+   //{
+   //  sRc = BTREE_READONLY;
+   //} /* endif */
 
    /*******************************************************************/
    /* check if entry is locked ....                                   */
@@ -7263,10 +7263,10 @@ SHORT QDAMDictUpdSignLocal
   if ( pBT->fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
-  } else if ( !pBT->fOpen )
-  {
-    sRc = BTREE_READONLY;
-  }
+  }//else if ( !pBT->fOpen )
+  //{
+  //  sRc = BTREE_READONLY;
+  //}
   else
   {
      // let 2K at beginning as space
