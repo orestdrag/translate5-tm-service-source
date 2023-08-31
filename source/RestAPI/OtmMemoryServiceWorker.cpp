@@ -2560,6 +2560,8 @@ int OtmMemoryServiceWorker::reorganizeMem
   std::string &strOutputParms
 )
 {
+  time_t curTime, startTime;
+  time(&startTime);
   int iRC = verifyAPISession();
   if ( iRC != 0 )
   {
@@ -2613,7 +2615,9 @@ int OtmMemoryServiceWorker::reorganizeMem
     buildErrorReturn( iRC, this->szLastError, strOutputParms );
     return( INTERNAL_SERVER_ERROR );
   }else{
-    strOutputParms = "{\"" + strMemory + "\": \"reorganized\" }";
+    time(&curTime);
+    strOutputParms = "{\"" + strMemory + "\": \"reorganized\", \"time\": \"";
+    strOutputParms += std::to_string(curTime-startTime) + " sec\" }";
   }
 
   T5LOG(T5INFO) << "::success, memName = " << strMemory;
