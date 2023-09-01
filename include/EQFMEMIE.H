@@ -65,7 +65,7 @@ typedef struct _MEMEXPIMPINFO
   BYTE    fUnused[20];                     // room for enhancements
 } MEMEXPIMPINFO, *PMEMEXPIMPINFO;
 
-#define SEGDATABUFLEN 8096
+#define SEGDATABUFLEN 4096
 
 // translation source values for usTranslationFlag in MEMEXPIMPSEG sgtructure
 #define TRANSL_SOURCE_MANUAL 0
