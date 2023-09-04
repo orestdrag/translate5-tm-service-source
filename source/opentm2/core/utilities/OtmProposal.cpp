@@ -196,8 +196,8 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   size_t len = wcslen(pszBuffer);
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and therefore truncated at the length of 2048 bytes and inserted like this to the database. Origina len = " << len;
-    len = OTMPROPOSAL_MAXSEGLEN; 
+    T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and would be skipped. Origina len =  " << len;
+    len = 1; 
     pszBuffer[len] = L'\0';
   }
   wcsncpy( pData->szSource, pszBuffer, len );
@@ -237,8 +237,8 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
   size_t len = wcslen(pszBuffer);
 
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and therefore truncated at the length of 2048 bytes and inserted like this to the database. Origina len = " << len;
-    len = OTMPROPOSAL_MAXSEGLEN; 
+    T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and would be skipped. Origina len = " << len;
+    len = 1; 
     pszBuffer[len] = L'\0';
   }
   wcsncpy( pData->szTarget, pszBuffer, len );

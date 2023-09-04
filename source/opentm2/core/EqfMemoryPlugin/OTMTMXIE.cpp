@@ -1864,47 +1864,38 @@ TMXParseHandler::~TMXParseHandler()
   if ( pTuvArray ) free( pTuvArray );
 }
 
-TMXParseHandler* getIsValidXmlXercesParseHandler(){
-  static TMXParseHandler handler;
-  return &handler;
-}
 
-SAXParser* getIsValidXmlXercesParser(){
-  static SAXParser parser;
-  TMXParseHandler* handler = getIsValidXmlXercesParseHandler();
-  if(!handler->fInitialized){
-    // create an instance of our handler
-    handler->fReplaceWithTagsWithoutAttributes = true;
-    handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
-    XMLPScanToken saxToken;
 
-    //  install our SAX handler as the document and error handler.
-    parser.setDocumentHandler(handler);
-    parser.setErrorHandler( handler );
-    parser.setValidationSchemaFullChecking( false );
-    parser.setDoSchema( false );
-    parser.setLoadExternalDTD( false );
-    parser.setValidationScheme( SAXParser::Val_Never );
-    parser.setExitOnFirstFatalError( true );
-    handler->fInitialized = true;  
-  }
-  return &parser;
-}
 
 bool IsValidXml(std::wstring&& sentence){
   USHORT usRc = 0; 
   std::vector<std::wstring> res;
   
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(sentence) + std::string("</TMXSentence>");
+  SAXParser parser;
+  TMXParseHandler handler;
+  // create an instance of our handler
+  handler.fReplaceWithTagsWithoutAttributes = true;
+  handler.tagReplacer.activeSegment = SOURCE_SEGMENT;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser.setDocumentHandler(&handler);
+  parser.setErrorHandler(&handler);
+  parser.setValidationSchemaFullChecking( false );
+  parser.setDoSchema( false );
+  parser.setLoadExternalDTD( false );
+  parser.setValidationScheme( SAXParser::Val_Never );
+  parser.setExitOnFirstFatalError( true );
+  handler.fInitialized = true;  
   
-  SAXParser* parser = getIsValidXmlXercesParser();
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
 
-  parser->parse(src_buff);
-  if(parser->getErrorCount()){
+  parser.parse(src_buff);
+  if(parser.getErrorCount()){
     char buff[512];
-    getIsValidXmlXercesParseHandler()->GetErrorText(buff, sizeof(buff));
+    handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing src : " << buff;
     return false;
   }

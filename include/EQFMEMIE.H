@@ -21,9 +21,6 @@
 class ImportStatusDetails;
 
 
-//#pragma pack( push, segmentpacking, 1 )
-//#pragma pack( pop, segmentpacking )
-
 // callback function which is used by ExtMemImportprocess to insert segments into the memory
 typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
 

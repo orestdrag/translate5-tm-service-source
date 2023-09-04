@@ -24,7 +24,7 @@ typedef char* PSZ;
 #define MAX_TGT_LANG     10            // max number of target languages
 #define MAX_PROF_ENTRIES 100           // max number of profile entries
 
-#define SEGDATABUFLEN 8096
+#define SEGDATABUFLEN 4096
 
 #define MEM_IMPORT_COMPLETE  7001                // the import is complete
 // translation source values for usTranslationFlag in MEMEXPIMPSEG sgtructure
