@@ -125,11 +125,13 @@ public:
     static std::string GetOtmDir();
     static std::string GetHomeDir();
 
+
+    static int FlushBufferIntoFile(const std::string& fName);
+
     private:
 
     //buffers
     static int WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition);
-    static int FlushBufferIntoFile(const std::string& fName);
     static int ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 };
 

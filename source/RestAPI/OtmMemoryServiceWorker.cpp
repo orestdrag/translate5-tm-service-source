@@ -837,9 +837,9 @@ int OtmMemoryServiceWorker::cloneTMLocaly
       }else if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
       {
         int ll = T5Logger::GetInstance()->suppressLogging();
-        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcMemPath);
-        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcTmdPath);
-        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcTmiPath);
+        FilesystemHelper::FlushBufferIntoFile(srcMemPath);
+        FilesystemHelper::FlushBufferIntoFile(srcTmdPath);
+        FilesystemHelper::FlushBufferIntoFile(srcTmiPath);
         T5Logger::GetInstance()->desuppressLogging(ll);
         if(this->vMemoryList[iIndex].lHandle){
           //EqfCloseMem( this->hSession, this->vMemoryList[iIndex].lHandle, 0 );
