@@ -836,9 +836,14 @@ int OtmMemoryServiceWorker::cloneTMLocaly
          iRC = 500;
       }else if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
       {
+        int ll = T5Logger::GetInstance()->suppressLogging();
+        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcMemPath);
+        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcTmdPath);
+        FilesystemHelper::getFileBufferInstance()->FlushBufferIntoFile(srcTmiPath);
+        T5Logger::GetInstance()->desuppressLogging(ll);
         if(this->vMemoryList[iIndex].lHandle){
           //EqfCloseMem( this->hSession, this->vMemoryList[iIndex].lHandle, 0 );
-          //this->vMemoryList[iIndex].lHandle = 0;
+          //this->vMemoryList[iIndex].lHandle = 0;         
         }
       }else if(this->vMemoryList[iIndex].eStatus != AVAILABLE_STATUS ){
          strOutputParms = "src tm \'" + strMemory +"\' is not available nor opened";
