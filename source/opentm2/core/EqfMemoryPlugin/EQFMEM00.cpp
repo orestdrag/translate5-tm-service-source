@@ -402,7 +402,7 @@ VOID EQFMemOrganizeProcess
       if ( iRC == NO_ERROR )
       {
         pCommArea->usComplete = (USHORT)iProgress;
-
+        //T5LOG(T5TRANSACTION) << "reorganizing, proposal : " << *(pRIDA->pProposal);
         // do some consistency checking
         pRIDA->pProposal->getMarkup( pRIDA->szTagTable, sizeof(pRIDA->szTagTable) );
         pRIDA->pProposal->getTargetLanguage( pRIDA->szTargetLanguage, sizeof(pRIDA->szTargetLanguage) );
@@ -430,6 +430,7 @@ VOID EQFMemOrganizeProcess
         {
           // ignore invalid proposal
           pRIDA->ulInvSegmentCounter++;
+          T5LOG(T5ERROR) << "Skipping proposal because some required fields(src, trg, srcLang, trgLang, tagTable) are empty or it have invalid xml in the source or target; proposal :\n" << *pRIDA->pProposal;
         }
         else
         {
@@ -438,6 +439,7 @@ VOID EQFMemOrganizeProcess
           if ( iRC != 0 )
           {
             pRIDA->ulInvSegmentCounter++;
+            T5LOG(T5ERROR) << "Skipping proposal becase putProposal returned : " << iRC <<" code; proposal:\n" << *pRIDA->pProposal ; 
           }
           else
           {
@@ -794,6 +796,11 @@ USHORT MemFuncOrganizeProcess
       pData->fComplete = TRUE;
       EQFMemOrganizeEnd( pCommArea, HWND_FUNCIF, 0L, TRUE );
       if ( pRIDA->pszNameList ) UtlAlloc( (PVOID *)&pRIDA->pszNameList, 0L, 0L, NOMSG );
+      if(!pData->pImportData) pData->pImportData = new ImportStatusDetails;
+
+      pData->pImportData->invalidSegments = pRIDA->ulInvSegmentCounter;
+      pData->pImportData->segmentsImported = pRIDA->ulSegmentCounter;
+      
       //REMOVESYMBOL( pCommArea->szObjName );
       usRC = pRIDA->usRC;
       if ( pCommArea ) UtlAlloc( (PVOID *)&pCommArea, 0L, 0L, NOMSG );

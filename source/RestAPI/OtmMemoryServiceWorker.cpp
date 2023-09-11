@@ -2590,12 +2590,13 @@ int OtmMemoryServiceWorker::reorganizeMem
     removeFromMemoryList( iIndex );
   } /* endif */
 
+  long invSeg = 0, reorgSeg = 0;
   // reorganize the memory
   if ( !iRC )
   {
     do
     {
-      iRC = EqfOrganizeMem( this->hSession, (PSZ)strMemory.c_str()  );
+      iRC = EqfOrganizeMem( this->hSession, (PSZ)strMemory.c_str() , reorgSeg, invSeg  );
     } while ( iRC == CONTINUE_RC );
   } /* endif */
   
@@ -2617,7 +2618,9 @@ int OtmMemoryServiceWorker::reorganizeMem
   }else{
     time(&curTime);
     strOutputParms = "{\"" + strMemory + "\": \"reorganized\", \"time\": \"";
-    strOutputParms += std::to_string(curTime-startTime) + " sec\" }";
+    strOutputParms += std::to_string(curTime-startTime) + " sec\", \"reorganizedSegmentCount\": \"";
+    strOutputParms += std::to_string(reorgSeg) + "\", \"invalidSegmentCount\": \"";
+    strOutputParms +=  std::to_string(invSeg) + "\" }";
   }
 
   T5LOG(T5INFO) << "::success, memName = " << strMemory;

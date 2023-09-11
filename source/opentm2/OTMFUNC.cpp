@@ -279,7 +279,9 @@ USHORT MemFuncOrganizeProcess
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // Eqf session handle
-  PSZ         pszMemName               // name of Translation Memory
+  PSZ         pszMemName,               // name of Translation Memory
+  long& reorgSegCount, 
+  long& invSegCount
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
@@ -289,6 +291,16 @@ USHORT EqfOrganizeMem
 
   // validate session handle
   usRC = FctValidateSession( hSession, &pData );
+
+  if(pData) {
+    if(!pData->pImportData){
+      pData->pImportData = new ImportStatusDetails;
+    }
+    pData->pImportData->invalidSegments = 0;
+    pData->pImportData->segmentsImported = 0;
+  }
+
+  
   do{
   // check sequence of calls
     if ( usRC == NO_ERROR )
@@ -317,8 +329,18 @@ USHORT EqfOrganizeMem
       //usRC = MemFuncOrganizeMem( pData, pszMemName );
     } /* endif */
   }while((usRC == NO_ERROR) && !pData->fComplete  );
-  LOGWRITE2( "  RC=%u\n", usRC );
 
+  if(pData && pData->pImportData){
+    invSegCount = pData->pImportData->invalidSegments;
+    reorgSegCount = pData->pImportData->segmentsImported;
+    delete pData->pImportData;
+    pData->pImportData = nullptr;
+
+    T5LOG(T5TRANSACTION) << "Mem reorganization was finished, memName = " << pszMemName <<";\n\t rc = " 
+                << usRC << ";\n\t invalidSegCount = " 
+                << invSegCount <<";\n\t reimportedSegCount = " << reorgSegCount;
+  }
+  
   return( usRC );
 } /* end of function EqfOrganizeMem */
 

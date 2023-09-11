@@ -1041,7 +1041,9 @@ USHORT EqfExportMem
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
-  PSZ         pszMemname               // mand: name of Translation Memory
+  PSZ         pszMemname,               // mand: name of Translation Memory
+  long& reorgSegCount, 
+  long& invSegCount
 );
 
 /*! \brief Create a new Translation Memory

@@ -369,6 +369,7 @@ public:
    */
   OtmProposal &operator=( const OtmProposal &copyme );
 
+  friend std::ostream & operator<<( std::ostream & o, OtmProposal & proposal );
 
 private:
 
