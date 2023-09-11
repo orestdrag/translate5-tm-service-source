@@ -1786,11 +1786,6 @@ int OtmMemoryServiceWorker::search
     int j = pData->iNumOfProposals - ProposalSpacesLeft;
     iRC = EqfQueryMem( this->hSession, lHandle, pSearchKey, &iNumOfProposals, &pFoundProposals[j], GET_EXACT );
     ProposalSpacesLeft -= iNumOfProposals;
-    if(ProposalSpacesLeft <= 0 ){
-      T5LOG( T5WARNING) <<  ":: not all list of lang was checked before allocated proposals space reached end, allocated " << pData->iNumOfProposals << 
-        ", proposal spaces, checked " << i << " of " << sourceLangs.size() << " languages ";
-      //break;
-    }
     if(iRC != 0){
       T5LOG( T5WARNING) << ":: fuzzy search of mem returned error, rc = " << iRC << "; sourceLange = "<< sourceLangs[i] ;
     }
