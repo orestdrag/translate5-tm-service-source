@@ -388,6 +388,8 @@ public:
      \param copyme reference to OtmProposal being copied
    */
   OtmProposal &operator=( const OtmProposal &copyme );
+  
+  friend std::ostream & operator<<( std::ostream & o, OtmProposal & proposal );
 
 
 private:
