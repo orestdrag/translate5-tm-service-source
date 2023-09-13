@@ -1228,38 +1228,27 @@ int StatusMemRequestData::execute() {
     json_factory.startJSON( outputMessage );
     json_factory.addParmToJSON( outputMessage, "status", "open" );
     if(mem->importDetails != nullptr){
-      if(mem->importDetails->fReorganize){
-        json_factory.addParmToJSON( outputMessage, "reorganizeStatus", pszStatus );
-        json_factory.addParmToJSON( outputMessage, "reorganizeProgress", mem->importDetails->usProgress );
-        json_factory.addParmToJSON( outputMessage, "reorganizeTime", mem->importDetails->importTimestamp );
-        json_factory.addParmToJSON( outputMessage, "segmentsReorganized", mem->importDetails->segmentsImported );
-        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-        //json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-        json_factory.addParmToJSON( outputMessage, "reorganizeErrorMsg", mem->importDetails->importMsg.str() );
-      }else{
-        json_factory.addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
-        json_factory.addParmToJSON( outputMessage, "importProgress", mem->importDetails->usProgress );
-        json_factory.addParmToJSON( outputMessage, "importTime", mem->importDetails->importTimestamp );
-        json_factory.addParmToJSON( outputMessage, "segmentsImported", mem->importDetails->segmentsImported );
-        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-        std::string invalidSegmRCs;
-        for(auto& isrc: mem->importDetails->invalidSegmentsRCs){
-          invalidSegmRCs += std::to_string(isrc.first) + ":" + std::to_string(isrc.second) +"; ";
-        }
-
-
-        std::string firstInvalidSegments;
-        int i=0;
-        for(auto& isn: mem->importDetails->firstInvalidSegmentsSegNums){
-          firstInvalidSegments += std::to_string(++i) + ":" +std::to_string(isn) + "; ";
-        }
-
-        json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
-        json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
-        json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-        json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
+      
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importProgress", mem->importDetails->usProgress );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
+      json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+      std::string invalidSegmRCs;
+      for(auto& isrc: mem->importDetails->invalidSegmentsRCs){
+        invalidSegmRCs += std::to_string(isrc.first) + ":" + std::to_string(isrc.second) +"; ";
       }
-     
+
+
+      std::string firstInvalidSegments;
+      int i=0;
+      for(auto& isn: mem->importDetails->firstInvalidSegmentsSegNums){
+        firstInvalidSegments += std::to_string(++i) + ":" +std::to_string(isn) + "; ";
+      }
+      json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
+      json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
+      json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeErrorMsg":"importErrorMsg", mem->importDetails->importMsg.str() );
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );

@@ -121,6 +121,7 @@ struct ImportStatusDetails{
     importTimestamp = "not finished";    
     invalidSegmentsRCs.clear();
   }
+  
   std::string toString(){
     std::string res = "progress = " + std::to_string(usProgress);
     if(fReorganize){
