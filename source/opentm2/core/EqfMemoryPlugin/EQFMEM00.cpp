@@ -266,7 +266,7 @@ VOID EQFMemOrganizeProcess
     {
       // ignore invalid proposal
       pRIDA->pMem->importDetails->invalidSegments++;
-      pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(pRIDA->pProposal->getSegmentNum());
+      pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), -8));
     }
     else
     {
@@ -276,7 +276,7 @@ VOID EQFMemOrganizeProcess
       {
         T5LOG(T5ERROR) << "segment in reorganize was skipped! segment: "<< *pRIDA->pProposal;
         pRIDA->pMem->importDetails->invalidSegments++;
-        pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(pRIDA->pProposal->getSegmentNum());
+        pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), iRC));
         pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
       }
       else
@@ -289,7 +289,7 @@ VOID EQFMemOrganizeProcess
   {
     pCommArea->usComplete = (USHORT)iProgress;
     pRIDA->pMem->importDetails->invalidSegments++;    
-    pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(pRIDA->pProposal->getSegmentNum());    
+    pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), -9));    
     T5LOG(T5ERROR) << "Skipping proposal iRC == EqfMemory::ERROR_ENTRYISCORRUPTED ; proposal :\n" << *pRIDA->pProposal;
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )

@@ -1235,15 +1235,15 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
       std::string invalidSegmRCs;
-      for(auto& isrc: mem->importDetails->invalidSegmentsRCs){
-        invalidSegmRCs += std::to_string(isrc.first) + ":" + std::to_string(isrc.second) +"; ";
+      for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
+        invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
       }
 
 
       std::string firstInvalidSegments;
       int i=0;
-      for(auto& isn: mem->importDetails->firstInvalidSegmentsSegNums){
-        firstInvalidSegments += std::to_string(++i) + ":" +std::to_string(isn) + "; ";
+      for(auto [segNum, invSegErrCode] : mem->importDetails->firstInvalidSegmentsSegNums){
+        firstInvalidSegments += std::to_string(++i) + ":" + std::to_string(segNum) + ":" + std::to_string(invSegErrCode) + "; ";
       }
       json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
       json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);

@@ -1578,7 +1578,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
       pLIDA->mem->importDetails->invalidSegmentsRCs[usRC] ++;
       pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
       //if( pLIDA->mem->importDetails->invalidSegments < 100){
-         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(pSegment->lSegNum);
+         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pSegment->lSegNum, usRC) );
       //}
     } /* endif */
   }
