@@ -914,6 +914,13 @@ int EqfMemory::ReloadFromDisk(){
   return rc;
 }
 
+int EqfMemory::FlushFilebuffers(){
+  TmBtree.fb.Flush();
+  InBtree.fb.Flush();
+  return 0;
+}
+
+
 int EqfMemory::UnloadFromRAM(){
   //if(TmBtree.fb.file == nullptr){
     //file is in mem

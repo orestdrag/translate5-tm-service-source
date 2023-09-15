@@ -213,7 +213,7 @@ int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
     if(pszName==NULL || pszDesc==NULL)
         return 0;
 
-   std::shared_ptr<EqfMemory>  pMemInfo = this->findMemory( (PSZ)pszName );
+   std::shared_ptr<EqfMemory>  pMemInfo ;//= this->findMemory( (PSZ)pszName );
     if ( pMemInfo.get() == NULL )
     {
       // no memory found
@@ -298,40 +298,9 @@ int tryStrCpy(char* dest, const char* src, const char* def){
   
 }
 
-/*! \brief Find memory in our memory list and return pointer to memory info 
-  \param pszName name of the memory  
-	\returns std::shared_ptr<EqfMemory>  pInfo pointer to memory info or NULL in case of errors
-*/
-std::shared_ptr<EqfMemory>  EqfMemoryPlugin::findMemory
-(
-   const char *pszName
-)
-{
-  int idx = findMemoryIndex(pszName);
-  if( idx>=0 && idx<((int)m_MemInfoVector.size()) )
-  {
-      return m_MemInfoVector[idx];
-  }
-  return nullptr;
-}
 
-// return the memory index of the specified memory name
-int EqfMemoryPlugin::findMemoryIndex
-(
-   const char *pszName
-)
-{
-    for ( int i = 0; i < (int)m_MemInfoVector.size(); i++ )
-    {
-        EqfMemory *  pInfo = (m_MemInfoVector[i]).get();
-        if ( strcasecmp( pszName, pInfo->szName) == 0 )
-        {
-            return i;
-        }
-    }
-  
-    return (-1);
-}
+
+
 
 
 bool EqfMemoryPlugin::stopPlugin( bool fForce  )

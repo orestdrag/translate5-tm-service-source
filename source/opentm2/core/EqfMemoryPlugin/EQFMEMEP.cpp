@@ -1623,6 +1623,7 @@ USHORT FCTDATA::MemFuncPrepExport
      int iRC = 0;
      TMManager *pFactory = TMManager::GetInstance();
      pIDA->pMem = _mem.get();
+     //_mem->FlushFilebuffers();
      if ( pIDA->pMem == NULL )
      {
        T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,

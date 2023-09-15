@@ -9,32 +9,7 @@
 #include "FilesystemHelper.h"
 #include "tm.h"
 
-std::shared_ptr<EqfMemory>  TMManager::findOpenedMemory(const std::string& memName){
-    int index = findMemoryInList(memName);
-    if(index != -1)
-        return EqfMemoryPlugin::GetInstance()->m_MemInfoVector[index];
-    return nullptr;
-}
 
-/*! \brief find a memory in our list of active memories
-  \param pszMemory name of the memory
-  \returns index in the memory table if successful, -1 if memory is not contained in the list
-*/
-int TMManager::findMemoryInList( const std::string& memName )
-{
-  if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size()==0){
-    T5LOG( T5WARNING) <<"findMemoryInList:: EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size == 0";
-  }
-  // 
-  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
-  {
-    if ( strcasecmp( EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName, memName.c_str() ) == 0 )
-    {
-      return( i );
-    } /* endif */
-  } /* endfor */
-  return( -1 );
-}
 
 /*! \brief Checks if there is opened memory in import process
   \returns index if import process for any memory is going on, -1 if no

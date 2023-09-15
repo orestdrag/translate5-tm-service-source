@@ -234,7 +234,16 @@ int RequestData::requestTM(){
     fValid = isServiceRequest();
   }else{
     fValid = true;
-  }
+    
+    if(  command == EXPORT_MEM 
+      || command == EXPORT_MEM_INTERNAL_FORMAT
+      || command == CLONE_TM_LOCALY
+      )
+    {
+      mem->FlushFilebuffers();
+    }
+  }  
+
   return fValid == 0;
 }
 
@@ -746,21 +755,16 @@ int SaveAllTMsToDiskRequestData::execute(){
     outputMessage = "Error: Can't save tm files on disk";
     return _rc_;
   };
-  std::string files; 
+  std::string tms; 
   
   int count = 0;
-  for(auto tm: TMManager::GetInstance()->tms){
-    if(count)
-      files += ", ";
-    tm.second->TmBtree.fb.Flush();
-    files += tm.second->TmBtree.fb.fileName;
-    files += ", ";
-
-    tm.second->InBtree.fb.Flush();
-    files += tm.second->InBtree.fb.fileName;
-    count += 2;
+  for(const auto& tm: TMManager::GetInstance()->tms){
+    if(count++)
+      tms += ", ";
+    tm.second->FlushFilebuffers();
+    tms += tm.first;
   }
-  outputMessage = "{\n   \'saved " + std::to_string(count) +" files\': \'" + files + "\' \n}";
+  outputMessage = "{\n   \'saved " + std::to_string(count) +" tms\': \'" + tms + "\' \n}";
   return OK;
 }
 
@@ -841,15 +845,7 @@ int ReorganizeRequestData::execute(){
   PMEM_ORGANIZE_IDA pRIDA = new MEM_ORGANIZE_IDA;      // pointer to instance area
 
   // validate session handle
-  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
-
-  // close memory if it is open
-  //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  //if ( pMem != nullptr )
-  //{
-  //  // close the memory and remove it from our list
-  //  TMManager::GetInstance()->removeFromMemoryList( pMem );
-  //} 
+  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData ); 
 
   // reorganize the memory
   // check sequence of calls
@@ -1131,22 +1127,7 @@ int CloneTMRequestData::checkData(){
 
 int CloneTMRequestData::execute(){
   START_WATCH
-   std::string msg;
-  //flush filebuffers before clonning
-  if(FilesystemHelper::FilebufferExists(srcTmdPath)){
-    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmdPath))){
-        msg = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmdPath\' = " + srcTmdPath 
-         + "; for request for mem " + strMemName + "; with body = " + strBody ;
-      _rc_ = 500;
-    }
-  }
-  if(FilesystemHelper::FilebufferExists(srcTmiPath)){
-    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmiPath))){
-      msg = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmiPath\' = " + srcTmiPath;
-        + "; for request for mem " + strMemName + "; with body = " + strBody ;
-      _rc_ = 500;
-    }
-  }
+  std::string msg;
   
   // clone .tmi and .tmd files   
   if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcTmdPath, dstTmdPath))){
@@ -1532,7 +1513,6 @@ int ExportRequestData::ExportZip(){
   if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) != NO_ERROR){
     return _rc_;
   }
-
   // add the files to the package
   ZIP* pZip = FilesystemHelper::ZipOpen( strTempFile , 'w' );
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmdPath(strMemName) );
@@ -1713,8 +1693,8 @@ int UpdateEntryRequestData::execute(){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else{
-    mem.get()->TmBtree.fb.Flush();
-    mem.get()->InBtree.fb.Flush();
+    //mem.get()->TmBtree.fb.Flush();
+    //mem.get()->InBtree.fb.Flush();
   }
 
   if ( ( _rc_ == 0 ) &&
@@ -1900,8 +1880,8 @@ int DeleteEntryRequestData::execute(){
     buildErrorReturn( _rc_, errorStr.c_str() );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
-  mem->TmBtree.fb.Flush();
-  mem->InBtree.fb.Flush();
+  //mem->TmBtree.fb.Flush();
+  //mem->InBtree.fb.Flush();
 
   // return the entry data
   std::string str_src = EncodingHelper::convertToUTF8(Data.szSource );
