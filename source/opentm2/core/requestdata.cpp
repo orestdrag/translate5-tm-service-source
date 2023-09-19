@@ -238,6 +238,7 @@ int RequestData::requestTM(){
     if(  command == EXPORT_MEM 
       || command == EXPORT_MEM_INTERNAL_FORMAT
       || command == CLONE_TM_LOCALY
+      || command == REORGANIZE_MEM
       )
     {
       mem->FlushFilebuffers();
@@ -848,16 +849,6 @@ int ReorganizeRequestData::execute(){
   //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData ); 
 
   // reorganize the memory
-  // check sequence of calls
-  if ( _rc_ == NO_ERROR )
-  {
-    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
-    {
-      T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
-      _rc_ = LASTTASK_INCOMPLETE_RC;
-    } /* endif */
-  } /* endif */
-  
   if ( !_rc_ )
   {    
     // prepare TM organize process

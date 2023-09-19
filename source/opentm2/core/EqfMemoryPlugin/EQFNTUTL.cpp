@@ -1808,11 +1808,11 @@ USHORT NTMAddNameToTable
         /*************************************************************/
         /* insert name and id to table and sort table                */
         /*************************************************************/
-        *pusID = (USHORT)pstTMTable->ulMaxEntries + 1;
-        strncpy( pstTMTableEntries[pstTMTable->ulMaxEntries].szName,
+        int pos = pstTMTable->ulMaxEntries;
+        *pusID = ++pstTMTable->ulMaxEntries;
+        strncpy( pstTMTableEntries[pos].szName,
                 pszName, MAX_LANG_LENGTH-1 );
-        pstTMTableEntries[pstTMTable->ulMaxEntries].usId = *pusID;
-        pstTMTable->ulMaxEntries++;
+        pstTMTableEntries[pos].usId = *pusID;
         qsort( pstTMTableEntries,
                pstTMTable->ulMaxEntries,
                sizeof(TMX_TABLE_ENTRY),
@@ -1833,7 +1833,8 @@ USHORT NTMAddNameToTable
             }
             usRc = pTmClb->TmBtree.EQFNTMUpdate(
                                 (ULONG)usTableType,
-                                (PBYTE)pstTMTable,
+                                //(PBYTE)pstTMTable,
+                                (PBYTE)table,
                                 //pstTMTable->ulAllocSize 
                                 //BTREE_REC_SIZE_V3
                                 occupSize
@@ -1922,58 +1923,6 @@ USHORT EqfMemory::NTMLoadNameTable
   // call to obtain exact length of record
   *pulSize = 0;
   usRc =  TmBtree.EQFNTMGet( ulTableKey, 0, pulSize );
-
-  // allocate table data area
-  if ( usRc == NO_ERROR )
-  {
-    /*
-    switch(ulTableKey){
-      case LANG_KEY:
-      {
-        *ppTMTable = pTmClb->Languages;
-        break;
-      }
-      case  FILE_KEY:
-      {
-        break;
-      }
-      case AUTHOR_KEY:
-      {
-        break;
-      }
-      case TAGTABLE_KEY:
-      {
-        break;
-      }
-      case LONGNAME_KEY:
-      {
-        break;
-      }
-      case COMPACT_KEY:
-      {
-        break;
-
-      }
-      case FIRST_KEY:
-      {
-        break;
-      }           
-// Note: the following key is NOT used as the key of a QDAM record
-//       it is only a symbolic value used in the Name-to-ID functions
-      case LANGGROUP_KEY: 
-      {
-        break;
-      }
-      default:
-      {
-        break;
-      }       
-    }
-    //if ( !UtlAlloc( (PVOID *)ppTMTable, 0L, *pulSize, NOMSG ))
-    //{
-    //  usRc = ERROR_NOT_ENOUGH_MEMORY;
-    //} /* endif */
-  } /* endif */
   
   PBYTE pOldTable = nullptr; 
   // read table data
