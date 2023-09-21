@@ -6,6 +6,7 @@
 #include <string>
 #include <time.h>
 #include <sstream>
+#include <tuple>
 #include "FilesystemHelper.h"
 #include "win_types.h"
 #include "lowlevelotmdatastructs.h"
@@ -101,7 +102,7 @@ struct ImportStatusDetails{
   std::atomic_int resSegments {-1};
   std::map<int, int> invalidSegmentsRCs;
   std::string importTimestamp;
-  std::vector<int> firstInvalidSegmentsSegNums;
+  std::vector<std::tuple<int,int>> firstInvalidSegmentsSegNums;
   long lReorganizeStartTime;
   std::stringstream importMsg;
   bool fReorganize{0}; // true for reorganize call, false for import
@@ -121,6 +122,7 @@ struct ImportStatusDetails{
     importTimestamp = "not finished";    
     invalidSegmentsRCs.clear();
   }
+  
   std::string toString(){
     std::string res = "progress = " + std::to_string(usProgress);
     if(fReorganize){

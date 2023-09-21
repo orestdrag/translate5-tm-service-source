@@ -196,8 +196,8 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   size_t len = wcslen(pszBuffer);
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and therefore truncated at the length of 2048 bytes and inserted like this to the database. Origina len = " << len;
-    len = OTMPROPOSAL_MAXSEGLEN; 
+    T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and would be skipped. Origina len =  " << len;
+    len = 1; 
     pszBuffer[len] = L'\0';
   }
   wcsncpy( pData->szSource, pszBuffer, len );
@@ -237,8 +237,8 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
   size_t len = wcslen(pszBuffer);
 
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and therefore truncated at the length of 2048 bytes and inserted like this to the database. Origina len = " << len;
-    len = OTMPROPOSAL_MAXSEGLEN; 
+    T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and would be skipped. Origina len = " << len;
+    len = 1; 
     pszBuffer[len] = L'\0';
   }
   wcsncpy( pData->szTarget, pszBuffer, len );
@@ -575,6 +575,112 @@ void OtmProposal::setMarkup( char *pszBuffer )
   POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   strncpy( pData->szMarkup, pszBuffer, sizeof(pData->szMarkup)-1 );
   pData->fFilled = 1;
+}
+
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include "EncodingHelper.h"
+
+#define ALIGN std::setfill(' ') << std::setw(20) <<
+std::ostream & operator<<( std::ostream & o, OtmProposal & proposal ){
+  
+  o << "|-----------------------------------------------------------------------------|\n";
+  wchar_t wbuff [OTMPROPOSAL_MAXSEGLEN];
+  char buff [OTMPROPOSAL_MAXSEGLEN];
+  wbuff[0] = L'\0';
+  buff[0] = '\0';  
+
+  proposal.getSource(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  std::string src = EncodingHelper::convertToUTF8(wbuff);
+  o << ALIGN "src: \"" << src << "\"\n";
+  wbuff[0] = L'\0';
+  
+  proposal.getSourceLanguage(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "srcLang: \"" << buff << "\"\n";
+  buff[0] = '\0';
+  
+  proposal.getTarget(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  std::string trg = EncodingHelper::convertToUTF8(wbuff);
+  o <<ALIGN "trg: \"" << trg << "\"\n";
+  wbuff[0] = L'\0';
+  
+  proposal.getTargetLanguage(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "trgLang: \"" << buff << "\"\n";
+  buff[0] = '\0';
+  
+  proposal.getMarkup(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "markup: \"" << buff << "\"\n";
+  buff[0] = '\0';
+  
+  proposal.getAuthor(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "author: \"" << buff << "\"\n";
+  buff[0] = '\0';
+  
+  proposal.getAddInfo(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  std::string addInfo = EncodingHelper::convertToUTF8(wbuff);
+  o <<ALIGN "add info: \"" << addInfo << "\"\n";
+  wbuff[0] = L'\0';
+
+  proposal.getContext(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  std::string contex = EncodingHelper::convertToUTF8(wbuff);
+  o <<ALIGN "context: \"" << contex << "\"\n";
+  wbuff[0] = L'\0';
+
+  proposal.getDocName(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "doc name: \"" << buff << "\"\n";
+  buff[0] = L'\0';
+
+  proposal.getDocShortName(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "short doc name: \"" << buff << "\"\n";
+  buff[0] = L'\0';
+
+  proposal.getID(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "id: \"" << buff << "\"\n";
+  buff[0] = L'\0';
+
+
+  proposal.getInternalKey(buff, OTMPROPOSAL_MAXSEGLEN);
+  o <<ALIGN "internal key: \"" << buff << "\"\n";
+  buff[0] = L'\0';
+
+  long segNum = proposal.getSegmentNum();
+  o <<ALIGN "segment num: \"" << segNum << "\"\n";
+
+  long memoryIndex = proposal.getMemoryIndex();
+  o <<ALIGN "memory index: \"" << memoryIndex << "\"\n";
+  buff[0] = L'\0';
+
+  long updateTime = proposal.getUpdateTime();
+  o <<ALIGN "update time: \"" << updateTime << "\"\n";
+  buff[0] = L'\0';
+
+  o << "|-----------------------------------------------------------------------------|\n\n";
+  //proposal.getWords(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "words: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  //proposal.getType(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "type: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  //proposal.getMatchType(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "match type: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  //proposal.getFuzziness(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "fuzziness: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  //proposal.getContextRanking(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "context ranking: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  //proposal.getDiffs(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "diffs: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
+
+  return o;
 }
 
 /* \brief get length of proposal context 

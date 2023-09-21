@@ -234,7 +234,17 @@ int RequestData::requestTM(){
     fValid = isServiceRequest();
   }else{
     fValid = true;
-  }
+    
+    if(  command == EXPORT_MEM 
+      || command == EXPORT_MEM_INTERNAL_FORMAT
+      || command == CLONE_TM_LOCALY
+      || command == REORGANIZE_MEM
+      )
+    {
+      mem->FlushFilebuffers();
+    }
+  }  
+
   return fValid == 0;
 }
 
@@ -246,6 +256,7 @@ bool RequestData::isWriteRequest(){
       //|| command == COMMAND::CREATE_MEM// should be handled as service command
       || command == COMMAND::IMPORT_MEM
       || command == COMMAND::REORGANIZE_MEM
+      || command == COMMAND::IMPORT_LOCAL_MEM
       ;
 }
 
@@ -746,21 +757,16 @@ int SaveAllTMsToDiskRequestData::execute(){
     outputMessage = "Error: Can't save tm files on disk";
     return _rc_;
   };
-  std::string files; 
+  std::string tms; 
   
   int count = 0;
-  for(auto tm: TMManager::GetInstance()->tms){
-    if(count)
-      files += ", ";
-    tm.second->TmBtree.fb.Flush();
-    files += tm.second->TmBtree.fb.fileName;
-    files += ", ";
-
-    tm.second->InBtree.fb.Flush();
-    files += tm.second->InBtree.fb.fileName;
-    count += 2;
+  for(const auto& tm: TMManager::GetInstance()->tms){
+    if(count++)
+      tms += ", ";
+    tm.second->FlushFilebuffers();
+    tms += tm.first;
   }
-  outputMessage = "{\n   \'saved " + std::to_string(count) +" files\': \'" + files + "\' \n}";
+  outputMessage = "{\n   \'saved " + std::to_string(count) +" tms\': \'" + tms + "\' \n}";
   return OK;
 }
 
@@ -784,7 +790,122 @@ int ImportRequestData::execute(){
   T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
   // start the import background process
   pData = new( IMPORTMEMORYDATA );
+  pData->fDeleteTmx = true;
   strcpy( pData->szInFile, strTempFile.c_str() );
+  strcpy( pData->szMemory, strMemName.c_str() );
+
+  if(mem->importDetails == nullptr){
+    mem->importDetails = new ImportStatusDetails;
+  }
+  
+  mem->importDetails->reset();
+  pData->mem = mem;
+
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
+
+  return( CREATED );
+}
+
+int ImportLocalRequestData::parseJSON(){
+  T5LOG( T5INFO) << "+POST " << strMemName << "/importLocal\n";
+  if ( _rc_ != 0 )
+  {
+    buildErrorReturn( _rc_, "ImportRequestData::parseJSON, rc is not 0 at the start of function" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    buildErrorReturn( _rc_, "import::Missing name of memory" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // check if memory exists
+  if(int existscode = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  {
+    std::string msg = "import::Missing tm files on disk, code=";
+    msg += std::to_string(existscode);
+    buildErrorReturn( 404, msg.c_str());
+    return( _rest_rc_ = NOT_FOUND );
+  }
+
+  // find the memory to our memory list
+  // extract TMX data
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    buildErrorReturn( _rc_, "import::Missing or incorrect JSON data in request body" );
+    return( BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  while ( _rc_ == 0 )
+  {
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+    if ( _rc_ == 0 )
+    {
+      if ( strcasecmp( name.c_str(), "localPath" ) == 0 )
+      {
+        strInputFile = value;
+        //break;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else{
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }
+    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+      std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
+      return buildErrorReturn(_rc_, msg.c_str());
+    }
+  } /* endwhile */
+  json_factory.parseJSONStop( parseHandle );
+  if(_rc_ == 2002) _rc_ == 0;
+  return 0; 
+}
+
+int ImportLocalRequestData::checkData(){
+  if (strInputFile.empty()  )
+  {
+    buildErrorReturn( -1, "importLocal::Filename of inputfile is empty" );
+    return( _rest_rc_ = INTERNAL_SERVER_ERROR );
+  }
+
+  T5LOG( T5INFO) << "importLocal::+  TMX File is " << strInputFile;
+  if(!FilesystemHelper::FileExists(strInputFile)){
+    return  buildErrorReturn( 404, "importLocal::InputFile not found" );
+  }
+  return 0;
+  
+}
+
+int ImportLocalRequestData::execute(){
+  if ( mem == nullptr )
+  {
+    return 404;
+  }
+    // close the memory - when open
+  if ( mem->eStatus != OPEN_STATUS )
+  {
+    return 500;
+  }
+  lastStatus =       mem->eStatus;
+  lastImportStatus = mem->eImportStatus;
+
+  mem->eStatus = IMPORT_RUNNING_STATUS;
+  mem->eImportStatus = IMPORT_RUNNING_STATUS;
+  //mem->dImportProcess = 0;
+
+  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
+  // start the import background process
+  pData = new( IMPORTMEMORYDATA );
+  strcpy( pData->szInFile, strInputFile.c_str() );
   strcpy( pData->szMemory, strMemName.c_str() );
 
   if(mem->importDetails == nullptr){
@@ -841,27 +962,9 @@ int ReorganizeRequestData::execute(){
   PMEM_ORGANIZE_IDA pRIDA = new MEM_ORGANIZE_IDA;      // pointer to instance area
 
   // validate session handle
-  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData );
-
-  // close memory if it is open
-  //std::shared_ptr<EqfMemory>  pMem = TMManager::GetInstance()->findOpenedMemory( strMemName);
-  //if ( pMem != nullptr )
-  //{
-  //  // close the memory and remove it from our list
-  //  TMManager::GetInstance()->removeFromMemoryList( pMem );
-  //} 
+  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData ); 
 
   // reorganize the memory
-  // check sequence of calls
-  if ( _rc_ == NO_ERROR )
-  {
-    if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
-    {
-      T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
-      _rc_ = LASTTASK_INCOMPLETE_RC;
-    } /* endif */
-  } /* endif */
-  
   if ( !_rc_ )
   {    
     // prepare TM organize process
@@ -1131,22 +1234,7 @@ int CloneTMRequestData::checkData(){
 
 int CloneTMRequestData::execute(){
   START_WATCH
-   std::string msg;
-  //flush filebuffers before clonning
-  if(FilesystemHelper::FilebufferExists(srcTmdPath)){
-    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmdPath))){
-        msg = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmdPath\' = " + srcTmdPath 
-         + "; for request for mem " + strMemName + "; with body = " + strBody ;
-      _rc_ = 500;
-    }
-  }
-  if(FilesystemHelper::FilebufferExists(srcTmiPath)){
-    if(!_rc_ && (_rc_ = FilesystemHelper::WriteBuffToFile(srcTmiPath))){
-      msg = "Can't flush src filebuffer, _rc_ = " + toStr(_rc_)  + "; \'srcTmiPath\' = " + srcTmiPath;
-        + "; for request for mem " + strMemName + "; with body = " + strBody ;
-      _rc_ = 500;
-    }
-  }
+  std::string msg;
   
   // clone .tmi and .tmd files   
   if(!_rc_ && (_rc_ = FilesystemHelper::CloneFile(srcTmdPath, dstTmdPath))){
@@ -1228,38 +1316,27 @@ int StatusMemRequestData::execute() {
     json_factory.startJSON( outputMessage );
     json_factory.addParmToJSON( outputMessage, "status", "open" );
     if(mem->importDetails != nullptr){
-      if(mem->importDetails->fReorganize){
-        json_factory.addParmToJSON( outputMessage, "reorganizeStatus", pszStatus );
-        json_factory.addParmToJSON( outputMessage, "reorganizeProgress", mem->importDetails->usProgress );
-        json_factory.addParmToJSON( outputMessage, "reorganizeTime", mem->importDetails->importTimestamp );
-        json_factory.addParmToJSON( outputMessage, "segmentsReorganized", mem->importDetails->segmentsImported );
-        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-        //json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-        json_factory.addParmToJSON( outputMessage, "reorganizeErrorMsg", mem->importDetails->importMsg.str() );
-      }else{
-        json_factory.addParmToJSON( outputMessage, "tmxImportStatus", pszStatus );
-        json_factory.addParmToJSON( outputMessage, "importProgress", mem->importDetails->usProgress );
-        json_factory.addParmToJSON( outputMessage, "importTime", mem->importDetails->importTimestamp );
-        json_factory.addParmToJSON( outputMessage, "segmentsImported", mem->importDetails->segmentsImported );
-        json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-        std::string invalidSegmRCs;
-        for(auto& isrc: mem->importDetails->invalidSegmentsRCs){
-          invalidSegmRCs += std::to_string(isrc.first) + ":" + std::to_string(isrc.second) +"; ";
-        }
-
-
-        std::string firstInvalidSegments;
-        int i=0;
-        for(auto& isn: mem->importDetails->firstInvalidSegmentsSegNums){
-          firstInvalidSegments += std::to_string(++i) + ":" +std::to_string(isn) + "; ";
-        }
-
-        json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
-        json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
-        json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-        json_factory.addParmToJSON( outputMessage, "importErrorMsg", mem->importDetails->importMsg.str() );
+      
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importProgress", mem->importDetails->usProgress );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
+      json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+      std::string invalidSegmRCs;
+      for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
+        invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
       }
-     
+
+
+      std::string firstInvalidSegments;
+      int i=0;
+      for(auto [segNum, invSegErrCode] : mem->importDetails->firstInvalidSegmentsSegNums){
+        firstInvalidSegments += std::to_string(++i) + ":" + std::to_string(segNum) + ":" + std::to_string(invSegErrCode) + "; ";
+      }
+      json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
+      json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
+      json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeErrorMsg":"importErrorMsg", mem->importDetails->importMsg.str() );
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );
@@ -1418,6 +1495,8 @@ int ResourceInfoRequestData::execute(){
     AddToJson(ssOutput, "CreateMemRequestCount", pStats->getCreateMemRequestCount(), true );
     AddToJson(ssOutput, "DeleteMemRequestCount", pStats->getDeleteMemRequestCount(), true );
     AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportMemRequestCount(), true );
+    AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportLocalMemRequestCount(), true );
+    
     AddToJson(ssOutput, "ExportMemRequestCount", pStats->getExportMemRequestCount(), true );
     AddToJson(ssOutput, "CloneTmLocalyRequestCount", pStats->getCloneLocalyCount(), true);
     AddToJson(ssOutput, "ReorganizeRequestCount", pStats->getReorganizeRequestCount(), true);
@@ -1543,7 +1622,6 @@ int ExportRequestData::ExportZip(){
   if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) != NO_ERROR){
     return _rc_;
   }
-
   // add the files to the package
   ZIP* pZip = FilesystemHelper::ZipOpen( strTempFile , 'w' );
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmdPath(strMemName) );
@@ -1724,8 +1802,8 @@ int UpdateEntryRequestData::execute(){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else{
-    mem.get()->TmBtree.fb.Flush();
-    mem.get()->InBtree.fb.Flush();
+    //mem.get()->TmBtree.fb.Flush();
+    //mem.get()->InBtree.fb.Flush();
   }
 
   if ( ( _rc_ == 0 ) &&
@@ -1911,8 +1989,8 @@ int DeleteEntryRequestData::execute(){
     buildErrorReturn( _rc_, errorStr.c_str() );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
-  mem->TmBtree.fb.Flush();
-  mem->InBtree.fb.Flush();
+  //mem->TmBtree.fb.Flush();
+  //mem->InBtree.fb.Flush();
 
   // return the entry data
   std::string str_src = EncodingHelper::convertToUTF8(Data.szSource );

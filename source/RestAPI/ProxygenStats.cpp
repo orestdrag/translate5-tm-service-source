@@ -26,6 +26,11 @@ int ProxygenStats::recordRequest(int command) {
         importMemReqCount_++;
         break;
       }
+      case COMMAND::IMPORT_LOCAL_MEM:
+      {
+        importLocalReqCount_++;
+        break;
+      }
       case COMMAND::STATUS_MEM: 
       {        
         statusMemReqCount_++;

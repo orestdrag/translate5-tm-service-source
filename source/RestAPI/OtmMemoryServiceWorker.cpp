@@ -411,7 +411,7 @@ void importMemoryProcess( void* pvData )
   pData->mem->importDone( iRC, pData->szError );
  
   // cleanup
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+  if(pData->fDeleteTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
     DeleteFile( pData->szInFile );
   }
   delete( pData );

@@ -12,8 +12,6 @@
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 
-/** Initialize the static instance variable */
-JSONFactory* JSONFactory::instance = 0;
 
 
 /*! \brief This static method returns a pointer to the JSONFactory object.
@@ -21,11 +19,8 @@ JSONFactory* JSONFactory::instance = 0;
 */
 JSONFactory* JSONFactory::getInstance()
 {
-	if (instance == 0)
-	{
-		instance = new JSONFactory();
-	}
-	return instance;
+	static JSONFactory instance;
+	return &instance;
 }
 
 /*! \brief Starts a JSON string

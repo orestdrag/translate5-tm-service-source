@@ -90,8 +90,6 @@
 static USHORT  MemLoadStart( PVOID *ppIda, HWND, ImportStatusDetails*     pImportData);
 static USHORT  MemLoadProcess(  PMEM_LOAD_IDA pLIDA );
 
-// Check if a specific tag is following
-BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID );
 
 USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 ( 
@@ -741,6 +739,8 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
    }
    return usRc;
 } /* end of function MemLoadProcess  */
+
+
 USHORT MemFuncImportMem
 (
   PFCTDATA    pData,                   // function I/F session data
@@ -1577,9 +1577,9 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     {
       pLIDA->mem->importDetails->invalidSegmentsRCs[usRC] ++;
       pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
-      if( pLIDA->mem->importDetails->invalidSegments < 100){
-         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(pSegment->lSegNum);
-      }
+      //if( pLIDA->mem->importDetails->invalidSegments < 100){
+         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pSegment->lSegNum, usRC) );
+      //}
     } /* endif */
   }
   else
@@ -1609,13 +1609,3 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
   return( usRC );
 } /* end of function MEMINSERTSEGMENT */
 
-// Check if a specific tag is following
-BOOL MemLPCheckForTag( PTOKENENTRY pTok, SHORT sID )
-{
-  int i = 1;
-  while ( (i <= 3) && (pTok->sTokenid != sID) && (pTok->sTokenid != ENDOFLIST) )
-  {
-    pTok++; i++;
-  } /* endwhile */
-  return( pTok->sTokenid == sID );
-}

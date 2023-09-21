@@ -41,6 +41,11 @@ class ProxygenStats {
   virtual uint64_t getImportMemRequestCount() {
     return importMemReqCount_;
   }
+
+  virtual uint64_t getImportLocalMemRequestCount(){
+    return importLocalReqCount_;
+  }
+
   virtual uint64_t getExportMemRequestCount() {
     return exportMemReqCount_;
   }
@@ -94,6 +99,7 @@ class ProxygenStats {
   atomic_uint64_t deleteMemReqCount_{0};
   atomic_uint64_t exportMemReqCount_{0};
   atomic_uint64_t importMemReqCount_{0};
+  atomic_uint64_t importLocalReqCount_{0};
   atomic_uint64_t statusMemReqCount_{0};
   
   atomic_uint64_t fuzzyReqCount_{0};

@@ -165,6 +165,11 @@ USHORT EQFMemOrganizeStart
   else
   {
     pRIDA->NextTask = MEM_ORGANIZE_TASK;
+    //if(pRIDA->pMem->importDetails == nullptr){
+    //  pRIDA->pMem->importDetails = new ImportStatusDetails;
+    //}
+    //pRIDA->pMem->importDetails->reset();
+    //pRIDA->pMem->importDetails->fReorganize = true;
   } 
   return iRC;
 } /* end of function EQFMemOrganizeStart */
@@ -222,8 +227,6 @@ VOID EQFMemOrganizeProcess
 
   if ( pRIDA->fFirstGet )
   {
-    pRIDA->pMem->importDetails->invalidSegments = 0;
-    pRIDA->pMem->importDetails->segmentsImported = 0;
     iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
     pRIDA->fFirstGet = FALSE;
   }
@@ -250,11 +253,11 @@ VOID EQFMemOrganizeProcess
       fValidXml =  IsValidXml( seg_buff);        
       T5Logger::GetInstance()->desuppressLogging(ll);
       if(!fValidXml){
-        T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< pRIDA->pProposal->getSegmentNum();
+        T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pRIDA->pProposal;
       } 
     }else{
       T5Logger::GetInstance()->desuppressLogging(ll);
-      T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< pRIDA->pProposal->getSegmentNum();
+      T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pRIDA->pProposal;
     }
     int sourceLen = pRIDA->pProposal->getSourceLen(),
       targetLen = pRIDA->pProposal->getTargetLen();
@@ -264,6 +267,7 @@ VOID EQFMemOrganizeProcess
     {
       // ignore invalid proposal
       pRIDA->pMem->importDetails->invalidSegments++;
+      pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), -8));
     }
     else
     {
@@ -271,7 +275,9 @@ VOID EQFMemOrganizeProcess
       iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
       if ( iRC != 0 )
       {
+        T5LOG(T5ERROR) << "segment in reorganize was skipped! segment: "<< *pRIDA->pProposal;
         pRIDA->pMem->importDetails->invalidSegments++;
+        pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), iRC));
         pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
       }
       else
@@ -283,7 +289,9 @@ VOID EQFMemOrganizeProcess
   else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
   {
     pCommArea->usComplete = (USHORT)iProgress;
-    pRIDA->pMem->importDetails->invalidSegments++;
+    pRIDA->pMem->importDetails->invalidSegments++;    
+    pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), -9));    
+    T5LOG(T5ERROR) << "Skipping proposal iRC == EqfMemory::ERROR_ENTRYISCORRUPTED ; proposal :\n" << *pRIDA->pProposal;
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )
   {
@@ -307,7 +315,6 @@ VOID EQFMemOrganizeProcess
       if ( !pRIDA->fBatch )
       {
         pCommArea->usComplete = 100;
-        //WinSendMsg( hWnd, WM_EQF_UPDATESLIDER, MP1FROMSHORT( 100 ), NULL );
       } /* endif */
 
       if ( usDosRc == NO_ERROR )
@@ -352,6 +359,7 @@ VOID EQFMemOrganizeProcess
   else
   {
     // Issue a message "Translation memory organize abnormally terminated."
+    T5LOG(T5ERROR) << "Issue a message \"Translation memory organize abnormally terminated.\" for " << pRIDA->pMem->szName ;
     if ( !pRIDA->fBatch )
     {
       pReplAddr[0] = pRIDA->szMemName;

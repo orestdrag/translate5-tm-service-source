@@ -920,11 +920,11 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
           if(fValidXml){
             usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
           }else{
-            T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< pExportIDA->pstSegment->lSegNum;
+            T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
           } 
         }else{
           T5Logger::GetInstance()->desuppressLogging(ll);
-          T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< pExportIDA->pstSegment->lSegNum;
+          T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pExportIDA->pProposal;
         } 
                 
         if(!fValidXml){
@@ -1559,46 +1559,6 @@ USHORT MemExportWrite
 } /* end of function MemExportWrite  */
 
 
-USHORT MemFuncExportMem
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemName,              // name of Translation Memory
-  PSZ         pszOutFile,              // fully qualified name of output file
-  LONG        lOptions                 // options for Translation Memory export
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  /*
-  PFCTDATA pPrivateData = (PFCTDATA)malloc( sizeof( FCTDATA ) );
-  memset( pPrivateData, 0, sizeof( FCTDATA ) );
-  pPrivateData->fComplete = TRUE;
-  pPrivateData->usExportProgress = 0;
-
-  usRC = MemFuncPrepExport( pPrivateData, pszMemName, pszOutFile, lOptions );
-  if ( usRC == 0 )
-  {
-    while ( !pPrivateData->fComplete )
-    {
-      usRC = MemFuncExportProcess( pPrivateData );
-    }
-  }
-  T5LOG( T5INFO) <<"MemFuncExportMem finished, RC = " << usRC;
-  free( pPrivateData );
-  //*/
-  return( usRC );
-} /* end of function MemFuncExportMem */
-
-// prepare the function I/F TM import
-//USHORT FCTDATA::PrepExport
-//(
-//  const std::string& strMemName,              // name of Translation Memory
-//  const std::string& strOutFile,              // fully qualified name of output file
-//  LONG        lOptions                 // options for Translation Memory export
-//){
-//  return 0;
-//}
-
-
 // prepare the function I/F TM import
 USHORT FCTDATA::MemFuncPrepExport
 (
@@ -1663,6 +1623,7 @@ USHORT FCTDATA::MemFuncPrepExport
      int iRC = 0;
      TMManager *pFactory = TMManager::GetInstance();
      pIDA->pMem = _mem.get();
+     //_mem->FlushFilebuffers();
      if ( pIDA->pMem == NULL )
      {
        T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,

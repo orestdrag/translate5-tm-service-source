@@ -322,15 +322,6 @@ USHORT DocFuncExportDocVal
   PSZ         pszPM
 );
 
-USHORT MemFuncExportMem
-(
-  PFCTDATA    pData,                   // function I/F session data
-  PSZ         pszMemname,              // name of Translation Memory
-  PSZ         pszOutFile,              // fully qualified name of output file
-  LONG        lOptions                 // options for Translation Memory export
-);
-
-
 
 USHORT MemFuncClearMTFlag( PSZ pszInMemory, PSZ pszOutMemory );
 

@@ -389,6 +389,8 @@ public:
    */
   OtmProposal &operator=( const OtmProposal &copyme );
 
+  friend std::ostream & operator<<( std::ostream & o, OtmProposal & proposal );
+
 
 private:
 
@@ -5148,34 +5150,6 @@ USHORT EqfImportMem
   PSZ         errorBuff
 );
 
-/*! \brief Export a Translation Memory
-  \param hSession the session handle returned by the EqfStartSession call
-  \param pszMemame name of the Translation Memory
-  \param pszOutFile fully qualified name of the output file
-  \param lOptions options for Translation Memory export
-         - OVERWRITE_OPT to overwrite existing files
-         .
-         and one of the format options 
-         - TMX_OPT import in TMX format
-         - XLIFF_MT_OPT import in XLIFF format
-         - UTF16_OPT export in the EXP format (Unicode UTF-16 encoded)
-         - ANSI_OPT export in the EXP format (ANSI encoded)
-         - ASCII_OPT export in the EXP format (ASCII encoded)
-         .
-         for the TMX_UTF8_OPT and TMX_UTF16_OPT also the following option can be specified
-         - TMX_NOCRLF_OPT to remove line breaks within the segment data
-\returns 0 if successful or an error code in case of failures
-*/
-/*@ADDTOSCRIPTER*/
-USHORT EqfExportMem
-(
-  HSESSION    hSession,                // mand: Eqf session handle
-  PSZ         pszMemname,              // mand: name of Translation Memory
-  PSZ         pszOutFile,              // mand: fully qualified name of output file
-  LONG        lOptions                 // opt: options for Translation Memory export
-                                       // @Export Mode: UTF16_OPT,ANSI_OPT,TMX_UTF8_OPT{TMX_NOCRLF_OPT},TMX_UTF16_OPT{TMX_NOCRLF_OPT},ASCII_OPT(default)
-									   // @Other: OVERWRITE_OPT
-);
 
 /*! \brief Organize a Translation Memory
   \param hSession the session handle returned by the EqfStartSession call
