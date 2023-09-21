@@ -165,10 +165,11 @@ USHORT EQFMemOrganizeStart
   else
   {
     pRIDA->NextTask = MEM_ORGANIZE_TASK;
-    if(pRIDA->pMem->importDetails == nullptr){
-      pRIDA->pMem->importDetails = new ImportStatusDetails;
-    }
-    pRIDA->pMem->importDetails->reset();
+    //if(pRIDA->pMem->importDetails == nullptr){
+    //  pRIDA->pMem->importDetails = new ImportStatusDetails;
+    //}
+    //pRIDA->pMem->importDetails->reset();
+    //pRIDA->pMem->importDetails->fReorganize = true;
   } 
   return iRC;
 } /* end of function EQFMemOrganizeStart */
