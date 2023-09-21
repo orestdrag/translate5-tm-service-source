@@ -256,6 +256,7 @@ bool RequestData::isWriteRequest(){
       //|| command == COMMAND::CREATE_MEM// should be handled as service command
       || command == COMMAND::IMPORT_MEM
       || command == COMMAND::REORGANIZE_MEM
+      || command == COMMAND::IMPORT_LOCAL_MEM
       ;
 }
 
@@ -789,7 +790,122 @@ int ImportRequestData::execute(){
   T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
   // start the import background process
   pData = new( IMPORTMEMORYDATA );
+  pData->fDeleteTmx = true;
   strcpy( pData->szInFile, strTempFile.c_str() );
+  strcpy( pData->szMemory, strMemName.c_str() );
+
+  if(mem->importDetails == nullptr){
+    mem->importDetails = new ImportStatusDetails;
+  }
+  
+  mem->importDetails->reset();
+  pData->mem = mem;
+
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
+
+  return( CREATED );
+}
+
+int ImportLocalRequestData::parseJSON(){
+  T5LOG( T5INFO) << "+POST " << strMemName << "/importLocal\n";
+  if ( _rc_ != 0 )
+  {
+    buildErrorReturn( _rc_, "ImportRequestData::parseJSON, rc is not 0 at the start of function" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    buildErrorReturn( _rc_, "import::Missing name of memory" );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // check if memory exists
+  if(int existscode = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  {
+    std::string msg = "import::Missing tm files on disk, code=";
+    msg += std::to_string(existscode);
+    buildErrorReturn( 404, msg.c_str());
+    return( _rest_rc_ = NOT_FOUND );
+  }
+
+  // find the memory to our memory list
+  // extract TMX data
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    buildErrorReturn( _rc_, "import::Missing or incorrect JSON data in request body" );
+    return( BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  while ( _rc_ == 0 )
+  {
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+    if ( _rc_ == 0 )
+    {
+      if ( strcasecmp( name.c_str(), "localPath" ) == 0 )
+      {
+        strInputFile = value;
+        //break;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else{
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }
+    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+      std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
+      return buildErrorReturn(_rc_, msg.c_str());
+    }
+  } /* endwhile */
+  json_factory.parseJSONStop( parseHandle );
+  if(_rc_ == 2002) _rc_ == 0;
+  return 0; 
+}
+
+int ImportLocalRequestData::checkData(){
+  if (strInputFile.empty()  )
+  {
+    buildErrorReturn( -1, "importLocal::Filename of inputfile is empty" );
+    return( _rest_rc_ = INTERNAL_SERVER_ERROR );
+  }
+
+  T5LOG( T5INFO) << "importLocal::+  TMX File is " << strInputFile;
+  if(!FilesystemHelper::FileExists(strInputFile)){
+    return  buildErrorReturn( 404, "importLocal::InputFile not found" );
+  }
+  return 0;
+  
+}
+
+int ImportLocalRequestData::execute(){
+  if ( mem == nullptr )
+  {
+    return 404;
+  }
+    // close the memory - when open
+  if ( mem->eStatus != OPEN_STATUS )
+  {
+    return 500;
+  }
+  lastStatus =       mem->eStatus;
+  lastImportStatus = mem->eImportStatus;
+
+  mem->eStatus = IMPORT_RUNNING_STATUS;
+  mem->eImportStatus = IMPORT_RUNNING_STATUS;
+  //mem->dImportProcess = 0;
+
+  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
+  // start the import background process
+  pData = new( IMPORTMEMORYDATA );
+  strcpy( pData->szInFile, strInputFile.c_str() );
   strcpy( pData->szMemory, strMemName.c_str() );
 
   if(mem->importDetails == nullptr){
@@ -1379,6 +1495,8 @@ int ResourceInfoRequestData::execute(){
     AddToJson(ssOutput, "CreateMemRequestCount", pStats->getCreateMemRequestCount(), true );
     AddToJson(ssOutput, "DeleteMemRequestCount", pStats->getDeleteMemRequestCount(), true );
     AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportMemRequestCount(), true );
+    AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportLocalMemRequestCount(), true );
+    
     AddToJson(ssOutput, "ExportMemRequestCount", pStats->getExportMemRequestCount(), true );
     AddToJson(ssOutput, "CloneTmLocalyRequestCount", pStats->getCloneLocalyCount(), true);
     AddToJson(ssOutput, "ReorganizeRequestCount", pStats->getReorganizeRequestCount(), true);

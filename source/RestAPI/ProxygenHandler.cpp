@@ -50,6 +50,7 @@ const std::map<const COMMAND,const char*> CommandToStringsMap {
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { IMPORT_MEM, "IMPORT_MEM" },
+        { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
         { REORGANIZE_MEM, "REORGANIZE_MEM" },
         { CLONE_TM_LOCALY, "CLONE_MEM"}
     };

@@ -52,6 +52,7 @@ typedef char* PSZ;
         UPDATE_ENTRY,
         TAGREPLACEMENTTEST,
         IMPORT_MEM,
+        IMPORT_LOCAL_MEM,
         CLONE_TM_LOCALY,
         //IMPORT_MEM_INTERNAL_FORMAT
     };

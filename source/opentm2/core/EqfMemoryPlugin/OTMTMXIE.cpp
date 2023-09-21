@@ -396,7 +396,7 @@ class TagReplacer{
   TagInfo GenerateReplacingTag(ELEMENTID tagType, AttributeList* attributes, bool saveTagToTagList = true);
   std::wstring PrintTag(TagInfo& tag);
   void reset();
-  void static LogTag(TagInfo& tag);
+  std::string static LogTag(TagInfo& tag);
 
   TagReplacer(){
     sourceTagList.reserve(50);
@@ -512,7 +512,7 @@ bool is_number(std::u16string s)
 }
 
 
-void TagReplacer::LogTag(TagInfo & tag){
+std::string TagReplacer::LogTag(TagInfo & tag){
   bool isClosingTag = tag.generated_tagType == EPT_ELEMENT && tag.original_tagType != EPT_ELEMENT && tag.original_tagType != BX_ELEMENT;
   std::string logMsg = "LogTag::\n original tag = <";
   if(isClosingTag)
@@ -524,7 +524,8 @@ void TagReplacer::LogTag(TagInfo & tag){
           " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
           "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
           "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
-  T5LOG( T5DEVELOP)<< logMsg;
+  return logMsg;
+  //T5LOG( T5DEVELOP)<< logMsg;
   //LOG_DEVELOP_MSG << logMsg;
   
   //T5LOG( T5INFO) << "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
@@ -670,7 +671,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   {//generate new attributes or find matching 
     //try to find matching tag in source
     if(sourceTagList.empty() && VLOG_IS_ON(1)){
-      T5LOG(T5ERROR) << ":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml";
+      T5LOG(T5ERROR) << ":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml; tag: " << LogTag(tag);
     }
     std::vector<TagInfo>::iterator matchingSourceTag = std::find_if(sourceTagList.begin(), sourceTagList.end(),
                                   [&tag](TagInfo& i) { return i.fTagAlreadyUsedInTarget == false 
@@ -749,8 +750,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   }
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    T5LOG(T5DEBUG) << "Generated tag logging:";
-    LogTag(tag);
+    T5LOG(T5DEBUG) << "Generated tag logging:" << LogTag(tag);
   }
   return tag;
 }
@@ -1970,11 +1970,11 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
     T5LOG( T5DEVELOP) <<  ":: source tags: ";
     for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
-      TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
     }
     T5LOG( T5DEVELOP) << ":: target tags: ";
     for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
-      TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
     }
 
   }
@@ -2067,15 +2067,15 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     T5LOG( T5DEBUG) <<  ":: request tags: ";
     for(int i = 0; i < handler->tagReplacer.requestTagList.size(); i++){
-      TagReplacer::LogTag(handler->tagReplacer.requestTagList[i]);
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.requestTagList[i]);
     }
     T5LOG( T5DEBUG) <<  ":: source tags: ";
     for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
-      TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
     }
     T5LOG( T5DEBUG) <<  ":: target tags: ";
     for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
-      TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
     }
 
   }
@@ -2644,15 +2644,15 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){              
           T5LOG( T5DEBUG) <<  "::parsed end of TU_ELEMENT::request tags: ";
           for(int i = 0; i < tagReplacer.requestTagList.size(); i++){
-            TagReplacer::LogTag(tagReplacer.requestTagList[i]);
+            T5LOG(T5DEVELOP) << TagReplacer::LogTag(tagReplacer.requestTagList[i]);
           }
           T5LOG( T5DEBUG) <<  "::parsed end of TU_ELEMENT:::: source tags: ";
           for(int i = 0; i < tagReplacer.sourceTagList.size(); i++){
-            TagReplacer::LogTag(tagReplacer.sourceTagList[i]);
+            T5LOG(T5DEVELOP) << TagReplacer::LogTag(tagReplacer.sourceTagList[i]);
           }
           T5LOG( T5DEBUG) <<  "::parsed end of TU_ELEMENT:::: target tags: ";
           for(int i = 0; i < tagReplacer.targetTagList.size(); i++){
-            TagReplacer::LogTag(tagReplacer.targetTagList[i]);
+            T5LOG(T5DEVELOP) << TagReplacer::LogTag(tagReplacer.targetTagList[i]);
           }
         }
 

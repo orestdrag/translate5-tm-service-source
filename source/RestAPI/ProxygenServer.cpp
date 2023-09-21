@@ -199,7 +199,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }else{// mem name is not empty, but command is empty 
         if(methodStr == "POST"){
-          requestHandler->pRequest = new ImportRequestData();
+          //requestHandler->pRequest = new ImportRequestData();
           //check if it's in internal format;            
         }else if(methodStr == "GET"){
           requestHandler->pRequest = new ExportRequestData();
@@ -241,6 +241,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new ImportRequestData();
           }else if(urlCommand == "clone"){
             requestHandler->pRequest = new CloneTMRequestData();
+          }else if(urlCommand == "importlocal"){
+            requestHandler->pRequest = new ImportLocalRequestData();
           }
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 

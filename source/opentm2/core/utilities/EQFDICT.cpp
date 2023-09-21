@@ -4638,8 +4638,8 @@ SHORT QDAMGetszData_V3
          }
          else
          {           
-             ulLen = *((PULONG)pTempData);
-             if ( ulLen & QDAM_TERSE_FLAGL )
+           ulLen = *((PULONG)pTempData);
+           if ( ulLen & QDAM_TERSE_FLAGL )
            {
             fTerse = TRUE;
             ulLen &= ~QDAM_TERSE_FLAGL;

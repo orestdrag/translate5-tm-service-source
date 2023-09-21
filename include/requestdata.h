@@ -109,6 +109,7 @@ typedef struct _IMPORTMEMORYDATA
   char szInFile[260];
   char szError[512];
   std::shared_ptr<EqfMemory> mem;
+  BOOL fDeleteTmx = false;
   //ushort * pusImportPersent = nullptr;
   //ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
@@ -130,6 +131,21 @@ protected:
     std::string strTmxData;
 };
 
+
+class ImportLocalRequestData:public RequestData{
+public:
+    ImportLocalRequestData(): RequestData(COMMAND::IMPORT_LOCAL_MEM) {};
+protected:
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute() override   ;
+
+    BOOL fClose = false;
+    MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+    MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+    PIMPORTMEMORYDATA pData = nullptr;
+    std::string strInputFile;
+};
 
 class SaveAllTMsToDiskRequestData: public RequestData{
 public:
