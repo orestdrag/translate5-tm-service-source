@@ -1690,6 +1690,7 @@ int UpdateEntryRequestData::parseJSON(){
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
@@ -1801,9 +1802,8 @@ int UpdateEntryRequestData::execute(){
   if ( _rc_ != 0 ){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
-  }else{
-    //mem.get()->TmBtree.fb.Flush();
-    //mem.get()->InBtree.fb.Flush();
+  }else if(fSave2Disk){
+    mem->FlushFilebuffers();
   }
 
   if ( ( _rc_ == 0 ) &&
@@ -1871,6 +1871,7 @@ int DeleteEntryRequestData::parseJSON(){
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
@@ -1988,9 +1989,10 @@ int DeleteEntryRequestData::execute(){
     // Data.szError , sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
     buildErrorReturn( _rc_, errorStr.c_str() );
     return( INTERNAL_SERVER_ERROR );
-  } /* endif */
-  //mem->TmBtree.fb.Flush();
-  //mem->InBtree.fb.Flush();
+  } else if(fSave2Disk){
+    mem->FlushFilebuffers();
+  }
+
 
   // return the entry data
   std::string str_src = EncodingHelper::convertToUTF8(Data.szSource );

@@ -283,8 +283,8 @@ class DeleteEntryRequestData: public RequestData{
     DeleteEntryRequestData(const std::string& json, const std::string& memName): RequestData(DELETE_ENTRY, json, memName) {};
     DeleteEntryRequestData(): RequestData(DELETE_ENTRY){}
 
+    BOOL fSave2Disk = 1;
 protected:
-
     LOOKUPINMEMORYDATA Data;
     int parseJSON() override ;
     int checkData() override ;
@@ -292,11 +292,11 @@ protected:
 };
 
 class UpdateEntryRequestData: public RequestData{
-    private:
-    
     public:
     UpdateEntryRequestData(const std::string& json, const std::string& memName): RequestData(UPDATE_ENTRY, json, memName) {};
     UpdateEntryRequestData(): RequestData(UPDATE_ENTRY){};
+
+    BOOL fSave2Disk = 1;
 protected:
     int parseJSON() override;
     int checkData() override;
@@ -304,7 +304,7 @@ protected:
     
     LOOKUPINMEMORYDATA Data;
     MEMPROPOSAL Prop;
-    //EqfMemory* lHandle = 0;
+
   };
 
 class ExportRequestData: public RequestData{
