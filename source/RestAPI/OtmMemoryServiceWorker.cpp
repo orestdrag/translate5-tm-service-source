@@ -2204,6 +2204,7 @@ int OtmMemoryServiceWorker::updateEntry
   auto loggingThreshold = -1;
        
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  BOOL fSave2Disk = 1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
   { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szTarget ), sizeof( pData->szTarget ) / sizeof( pData->szTarget[0] ) },
@@ -2219,6 +2220,7 @@ int OtmMemoryServiceWorker::updateEntry
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDateTime ), sizeof( pData->szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szAddInfo ), sizeof( pData->szAddInfo ) / sizeof( pData->szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = pJsonFactory->parseJSON( strInputParmsW, parseControl );
@@ -2338,6 +2340,24 @@ int OtmMemoryServiceWorker::updateEntry
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
 
+  if(fSave2Disk){
+    std::string TmdPath, TmiPath, dstMemPath;
+    char memDir[255];
+    if(!iRC){
+      iRC = properties_get_str(KEY_MEM_DIR, memDir, 254);
+      if(iRC){
+        strOutputParms = "can't read MEM_DIR path from properties";
+        T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+        iRC = 500;
+      }
+    }
+    if(!iRC){
+      TmdPath = memDir + strMemory + ".TMD";
+      TmiPath = memDir + strMemory + ".TMI";
+      FilesystemHelper::FlushBufferIntoFile(TmdPath);
+      FilesystemHelper::FlushBufferIntoFile(TmiPath);
+    }
+  }
   // return the entry data
   //std::string strOutputParms;
   std::string str_src = EncodingHelper::convertToUTF8(pData->szSource );
@@ -2403,7 +2423,8 @@ int OtmMemoryServiceWorker::deleteEntry
   memset( pData, 0, sizeof( LOOKUPINMEMORYDATA ) );
 
   auto loggingThreshold = -1;
-       
+  
+  BOOL fSave2Disk = 1;
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szSource ), sizeof( pData->szSource ) / sizeof( pData->szSource[0] ) },
@@ -2419,6 +2440,7 @@ int OtmMemoryServiceWorker::deleteEntry
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( pData->szDateTime ), sizeof( pData->szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( pData->szAddInfo ), sizeof( pData->szAddInfo ) / sizeof( pData->szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },  
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   iRC = pJsonFactory->parseJSON( strInputParmsW, parseControl );
@@ -2530,6 +2552,26 @@ int OtmMemoryServiceWorker::deleteEntry
     delete pData;
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
+
+
+  if(fSave2Disk){
+    std::string TmdPath, TmiPath, dstMemPath;
+    char memDir[255];
+    if(!iRC){
+      iRC = properties_get_str(KEY_MEM_DIR, memDir, 254);
+      if(iRC){
+        strOutputParms = "can't read MEM_DIR path from properties";
+        T5LOG(T5ERROR) << strOutputParms << "; for request for mem "<< strMemory <<"; with body = ", strInputParms ;
+        iRC = 500;
+      }
+    }
+    if(!iRC){
+      TmdPath = memDir + strMemory + ".TMD";
+      TmiPath = memDir + strMemory + ".TMI";
+      FilesystemHelper::FlushBufferIntoFile(TmdPath);
+      FilesystemHelper::FlushBufferIntoFile(TmiPath);
+    }
+  }
 
   // return the entry data
   std::string str_src = EncodingHelper::convertToUTF8(pData->szSource );
