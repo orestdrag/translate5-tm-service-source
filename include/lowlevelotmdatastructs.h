@@ -717,7 +717,8 @@ struct BTREE
     PULONG pulNextKey                   // return next key data
     );
 
-
+    
+   SHORT QDAMSplitNode_V3( PBTREEBUFFER_V3 *, PWCHAR );
     //+----------------------------------------------------------------------------+
     // External function
     //+----------------------------------------------------------------------------+
@@ -774,6 +775,8 @@ struct BTREE
     PLONG                         plNewValue                                               // ptr to buffer for new counte value
     );
 
+    
+    SHORT QDAMChangeKey_V3(USHORT, PWCHAR, PWCHAR );
     //+----------------------------------------------------------------------------+
     // Internal function
     //+----------------------------------------------------------------------------+
@@ -1040,6 +1043,11 @@ BOOL QDAMTerseData
  SHORT QDAMLocateKey_V3(
    PBTREEBUFFER_V3, PWCHAR, PSHORT, SEARCHTYPE, PSHORT);
 
+  
+ SHORT QDAMFirstEntry_V3(  PBTREEBUFFER_V3 * );
+ 
+ SHORT QDAMFindChild_V3 ( PWCHAR, USHORT, PBTREEBUFFER_V3 * );
+ 
 };//BTREE
 
 typedef  BTREE * PBTREE;

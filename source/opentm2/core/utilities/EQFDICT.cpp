@@ -3419,9 +3419,8 @@ SHORT BTREE::QDAMLocateKey_V3
 //                    return Rc
 //
 //------------------------------------------------------------------------------
-SHORT  QDAMFirstEntry_V3
+SHORT  BTREE::QDAMFirstEntry_V3
 (
-   PBTREE  pBT,
    PBTREEBUFFER_V3* ppRecord               // pointer to pointer of record
 )
 {
@@ -3429,19 +3428,19 @@ SHORT  QDAMFirstEntry_V3
   RECPARAM     recData;
 
   // read in root record
-  sRc = pBT->QDAMReadRecord_V3( pBT->usFirstNode, ppRecord, FALSE );
+  sRc = QDAMReadRecord_V3( usFirstNode, ppRecord, FALSE );
   if ( !sRc )
   {
     while (!sRc && !IS_LEAF(*ppRecord))
     {
-      recData = QDAMGetrecData_V3( *ppRecord, 0, pBT->usVersion);
-      sRc = pBT->QDAMReadRecord_V3( recData.usNum, ppRecord , FALSE );
+      recData = QDAMGetrecData_V3( *ppRecord, 0, usVersion);
+      sRc = QDAMReadRecord_V3( recData.usNum, ppRecord , FALSE );
     } /* endwhile */
     if ( !sRc )
     {
-      pBT->usCurrentRecord = RECORDNUM(*ppRecord);
-      pBT->usFirstLeaf = pBT->usCurrentRecord;    // determine first leaf
-      pBT->sCurrentIndex = 0;
+      usCurrentRecord = RECORDNUM(*ppRecord);
+      usFirstLeaf = usCurrentRecord;    // determine first leaf
+      sCurrentIndex = 0;
     } /* endif */
   } /* endif */
 
@@ -3822,9 +3821,8 @@ VOID QDAMReArrangeKRec_V3
 //                    endif
 //                    unlock temp record
 //------------------------------------------------------------------------------
-SHORT QDAMSplitNode_V3
+SHORT BTREE::QDAMSplitNode_V3
 (
-   PBTREE pBT,                // pointer to generic structure
    PBTREEBUFFER_V3 *record,      // pointer to pointer to node
    PWCHAR pKey                 // new key
 )
@@ -3853,13 +3851,13 @@ SHORT QDAMSplitNode_V3
   // if root needs to be split do it first
   if (IS_ROOT(*record))
   {
-    sRc = pBT->QDAMNewRecord_V3( &newRecord, KEYREC );
+    sRc = QDAMNewRecord_V3( &newRecord, KEYREC );
     if ( newRecord )
     {
       BTREELOCKRECORD( newRecord );
       /* We can't simply split a root node, since only one is allowed */
       /* so a new root is created to hold the records                 */
-      pBT->usFirstNode = PARENT(*record) = RECORDNUM(newRecord);
+      usFirstNode = PARENT(*record) = RECORDNUM(newRecord);
       TYPE(newRecord) = ROOT_NODE | INNER_NODE | DATA_KEYNODE;
       PARENT(newRecord) = PREV(newRecord) = NEXT(newRecord) = 0L;
       TYPE(*record) &= ~ROOT_NODE;
@@ -3867,13 +3865,13 @@ SHORT QDAMSplitNode_V3
       recData.usOffset = 0;
       
       //pParentKey = QDAMGetszKey_V3( *record, 0, pBT->usVersion );
-      pParentKey = QDAMGetszKey_V3( *record, 0, pBT->usVersion );
+      pParentKey = QDAMGetszKey_V3( *record, 0, usVersion );
       
       if ( pParentKey )
       {
          // store key temporarily, because record with key data is
          // not locked.
-         sRc = pBT->QDAMInsertKey_V3( newRecord, pParentKey, recKey, recData);
+         sRc = QDAMInsertKey_V3( newRecord, pParentKey, recKey, recData);
          // might be freed during insert
          BTREELOCKRECORD( pRecTemp );
       }
@@ -3886,11 +3884,11 @@ SHORT QDAMSplitNode_V3
       // update usFirstLeaf information
       if ( !sRc )
       {
-         sRc = QDAMFirstEntry_V3( pBT, &newRecord );
+         sRc = QDAMFirstEntry_V3(&newRecord );
       } /* endif */
       if ( !sRc )
       {
-         sRc = pBT->QDAMWriteHeader();
+         sRc = QDAMWriteHeader();
       } /* endif */
     } /* endif */
   } /* endif */
@@ -3898,17 +3896,17 @@ SHORT QDAMSplitNode_V3
   if ( !sRc )
   {
      // allocate space for the new record
-    sRc = pBT->QDAMNewRecord_V3( &newRecord, KEYREC );
+    sRc = QDAMNewRecord_V3( &newRecord, KEYREC );
     if ( newRecord )
     {
       BTREELOCKRECORD(newRecord);
       if ( NEXT(*record) )
       {
-        sRc = pBT->QDAMReadRecord_V3( NEXT(*record), &child, FALSE );
+        sRc = QDAMReadRecord_V3( NEXT(*record), &child, FALSE );
         if ( !sRc )
         {
           PREV(child) = RECORDNUM(newRecord);
-          sRc = pBT->QDAMWriteRecord_V3(child);
+          sRc = QDAMWriteRecord_V3(child);
         }
       }
 
@@ -3923,18 +3921,18 @@ SHORT QDAMSplitNode_V3
 
         // Decide where to split the record
         //pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), pBT->usVersion );
-        pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), pBT->usVersion );
+        pParentKey = QDAMGetszKey_V3( *record, (SHORT)(OCCUPIED(*record)/2), usVersion );
         
         if ( pParentKey )
         {
-           fCompare = ((*(pBT->compare))(pBT, pParentKey, pKey) <= 0 ) ;
+           fCompare = ((*(compare))(this, pParentKey, pKey) <= 0 ) ;
            /***********************************************************/
            /* check in which part we will lay                         */
            /***********************************************************/
            if ( fCompare )
            {
-              pParentKey = QDAMGetszKey_V3(*record, (SHORT)(OCCUPIED(*record)-MINFREEKEYS), pBT->usVersion);
-              fCompare = ((*(pBT->compare))(pBT, pParentKey, pKey) <= 0 ) ;
+              pParentKey = QDAMGetszKey_V3(*record, (SHORT)(OCCUPIED(*record)-MINFREEKEYS), usVersion);
+              fCompare = ((*(compare))(this, pParentKey, pKey) <= 0 ) ;
               if ( fCompare )
               {
                 usFreeKeys = MINFREEKEYS;
@@ -3946,8 +3944,8 @@ SHORT QDAMSplitNode_V3
            }
            else
            {
-              pParentKey = QDAMGetszKey_V3( *record,MINFREEKEYS, pBT->usVersion);
-              fCompare = ((*(pBT->compare))(pBT, pParentKey, pKey) <= 0 ) ;
+              pParentKey = QDAMGetszKey_V3( *record,MINFREEKEYS, usVersion);
+              fCompare = ((*(compare))(this, pParentKey, pKey) <= 0 ) ;
               if ( fCompare )
               {
                 usFreeKeys = OCCUPIED( *record )/2;
@@ -3976,7 +3974,7 @@ SHORT QDAMSplitNode_V3
            pusOffset = (PUSHORT) (*record)->contents.uchData;
            while ( i < (SHORT) OCCUPIED( *record ))
            {
-             QDAMCopyKeyTo_V3( *record, i, newRecord, j, pBT->usVersion );
+             QDAMCopyKeyTo_V3( *record, i, newRecord, j, usVersion );
              *(pusOffset+i) = 0 ;    // mark it as deleted
              j++;
              i++;
@@ -3984,13 +3982,13 @@ SHORT QDAMSplitNode_V3
            /* Adjust count of keys */
            OCCUPIED(*record) = OCCUPIED(*record) - usFreeKeys;
            OCCUPIED(newRecord) =  usFreeKeys;
-           QDAMReArrangeKRec_V3( pBT, *record );
+           QDAMReArrangeKRec_V3( this, *record );
         /* Insert pointer to new record into the parent node */
         /* due to the construction parent MUST be the same   */
-           sRc = QDAMFindParent_V3( pBT, *record, &usParent );
+           sRc = QDAMFindParent_V3( this, *record, &usParent );
            if ( !sRc && usParent )
            {
-             sRc = pBT->QDAMReadRecord_V3( usParent, &parent, FALSE );
+             sRc = QDAMReadRecord_V3( usParent, &parent, FALSE );
            } /* endif */
         } /* endif */
 
@@ -3998,10 +3996,10 @@ SHORT QDAMSplitNode_V3
         {
           recData.usNum = RECORDNUM( newRecord );
           recData.usOffset = 0;
-          pParentKey = QDAMGetszKey_V3( newRecord,0, pBT->usVersion );
+          pParentKey = QDAMGetszKey_V3( newRecord,0, usVersion );
           if ( pParentKey )
           {
-             sRc = pBT->QDAMInsertKey_V3( parent, pParentKey, recKey, recData);
+             sRc = QDAMInsertKey_V3( parent, pParentKey, recKey, recData);
           }
           else
           {
@@ -4016,17 +4014,17 @@ SHORT QDAMSplitNode_V3
       {
 //       newRecord->ulCheckSum = QDAMComputeCheckSum( newRecord );
 //       (*record)->ulCheckSum = QDAMComputeCheckSum( *record );
-         pParentKey = QDAMGetszKey_V3( newRecord, 0, pBT->usVersion );
+         pParentKey = QDAMGetszKey_V3( newRecord, 0, usVersion );
          if ( pParentKey )
          {
-           if ( (*(pBT->compare))(pBT, pParentKey, pKey) <= 0)
+           if ( (*(compare))(this, pParentKey, pKey) <= 0)
            {
-             sRc = pBT->QDAMWriteRecord_V3( *record);
+             sRc = QDAMWriteRecord_V3( *record);
              *record = newRecord;                     // add to new record
            }
            else
            {
-             sRc = pBT->QDAMWriteRecord_V3( newRecord );
+             sRc = QDAMWriteRecord_V3( newRecord );
            } /* endif */
          }
          else
@@ -4529,9 +4527,8 @@ SHORT QDAMGetszData_V3
 //                        read record
 //                    endif
 //------------------------------------------------------------------------------
-SHORT QDAMFindChild_V3
+SHORT BTREE::QDAMFindChild_V3
 (
-    PBTREE pBT,
     PCHAR_W  pKey,
     USHORT   usNode,
     PBTREEBUFFER_V3 * ppRecord
@@ -4546,7 +4543,7 @@ SHORT QDAMFindChild_V3
   SHORT         sRc;                               // return code
 
   memset(&recData, 0, sizeof(recData));
-  sRc = pBT->QDAMReadRecord_V3( usNode, ppRecord, FALSE  );
+  sRc = QDAMReadRecord_V3( usNode, ppRecord, FALSE  );
   if ( !sRc && !IS_LEAF( *ppRecord ))
   {
     BTREELOCKRECORD( *ppRecord );
@@ -4558,14 +4555,14 @@ SHORT QDAMFindChild_V3
     while ( !sRc && (sLow <= sHigh) )
     {
       sMid = (sLow + sHigh)/2;
-      pKey2 = QDAMGetszKey_V3( *ppRecord, sMid, pBT->usVersion );
+      pKey2 = QDAMGetszKey_V3( *ppRecord, sMid, usVersion );
       if ( pKey2 == NULL )
       {
         sRc = BTREE_CORRUPTED;
       }
       else
       {
-        sResult = (*pBT->compare)(pBT, pKey, pKey2);
+        sResult = (*compare)(this, pKey, pKey2);
         if ( sResult < 0 )
         {
           sHigh = sMid - 1;                        // Go left
@@ -4588,23 +4585,22 @@ SHORT QDAMFindChild_V3
       {
         sHigh = 0;
       } /* endif */
-      recData = QDAMGetrecData_V3( *ppRecord, sHigh, pBT->usVersion );
+      recData = QDAMGetrecData_V3( *ppRecord, sHigh, usVersion );
     } /* endif */
 
     BTREEUNLOCKRECORD( *ppRecord );    // unlock previous record.
 
     if ( !sRc )
     {
-      sRc = pBT->QDAMReadRecord_V3( recData.usNum, ppRecord, FALSE  );
+      sRc = QDAMReadRecord_V3( recData.usNum, ppRecord, FALSE  );
     } /* endif */
   } /* endif */
   return( sRc );
 }
 
 
-SHORT QDAMChangeKey_V3
+SHORT BTREE::QDAMChangeKey_V3
 (
-   PBTREE   pBT,                                 // ptr to tree structure
    USHORT   usNode,                                 // start node
    PWCHAR pOldKey,                                // find old key
    PWCHAR pNewKey                                 // find new key
@@ -4619,30 +4615,30 @@ SHORT QDAMChangeKey_V3
   RECPARAM recKey;                                 // record parameter descrip.
 
 
-  sRc = pBT->QDAMReadRecord_V3( usNode, &pRecord, FALSE  );
+  sRc = QDAMReadRecord_V3( usNode, &pRecord, FALSE  );
   if ( !sRc )
   {
     BTREELOCKRECORD(pRecord);
     if ( !sRc )
     {
        /* Locate the Leaf node that contains the appropriate key */
-       sRc = QDAMFindChild_V3( pBT, pNewKey, usNode, &pNewRecord );
+       sRc = QDAMFindChild_V3( pNewKey, usNode, &pNewRecord );
     } /* endif */
     if ( !sRc )
     {
        // get the key description and insert the new key
        recKey.usNum = pNewRecord->contents.header.usNum;
-       sRc = pBT->QDAMLocateKey_V3( pNewRecord, pNewKey, &i, FEXACT, &sNearKey);
+       sRc = QDAMLocateKey_V3( pNewRecord, pNewKey, &i, FEXACT, &sNearKey);
        if ( !sRc && i != -1 )
        {
           recKey.usOffset = i;
           recKey.ulLen = 0;            // init length
-          sRc = pBT->QDAMInsertKey_V3( pRecord, pNewKey, recKey, recKey);
+          sRc = QDAMInsertKey_V3( pRecord, pNewKey, recKey, recKey);
        } /* endif */
     } /* endif */
     if ( !sRc )
     {
-       sRc = pBT->QDAMLocateKey_V3( pRecord, pOldKey, &i, FEXACT, &sNearKey);
+       sRc = QDAMLocateKey_V3( pRecord, pOldKey, &i, FEXACT, &sNearKey);
     } /* endif */
 
     if (!sRc && i!= -1)
@@ -4653,7 +4649,7 @@ SHORT QDAMChangeKey_V3
        OCCUPIED(pRecord) --;
        // record should be rearranged - it will be written during the insert
        // of the new key
-       QDAMReArrangeKRec_V3( pBT, pRecord );
+       QDAMReArrangeKRec_V3( this, pRecord );
 
     }
     BTREEUNLOCKRECORD(pRecord);
@@ -4774,7 +4770,7 @@ SHORT BTREE::QDAMInsertKey_V3
       {
         BTREEUNLOCKRECORD( pRecord );
         fRecLocked = FALSE;
-        sRc = QDAMSplitNode_V3( this, &pRecord, pKey );
+        sRc = QDAMSplitNode_V3( &pRecord, pKey );
         if ( !sRc )
         {
           // SplitNode may have passed a new record back
@@ -4876,7 +4872,7 @@ SHORT BTREE::QDAMInsertKey_V3
           /**********************************************************/
           _usCurrentRecord = usCurrentRecord;
           _sCurrentIndex   = sCurrentIndex;
-          sRc = QDAMChangeKey_V3( this, PARENT(pRecord), pOldKey, pNewKey);
+          sRc = QDAMChangeKey_V3( PARENT(pRecord), pOldKey, pNewKey);
           usCurrentRecord = _usCurrentRecord;
           sCurrentIndex   = _sCurrentIndex;
 
@@ -6036,7 +6032,7 @@ SHORT QDAMNext_V3
       // if usCurrentRecord = 0 we are at EOF
       if ( !pBT->usCurrentRecord )
       {
-         sRc = QDAMFirstEntry_V3( pBT,&pRecord );
+         sRc = pBT->QDAMFirstEntry_V3(&pRecord );
       }
       else
       {
