@@ -2022,7 +2022,7 @@ USHORT EqfMemory::NTMCreateLangGroupTable()
 USHORT EqfMemory::NTMOrganizeIndexFile()
 {
   USHORT usRC = NO_ERROR;
-  usRC = EQFNTMOrganizeIndex( &(InBtree), usAccessMode, START_KEY );
+  usRC = InBtree.EQFNTMOrganizeIndex( usAccessMode, START_KEY );
 
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */

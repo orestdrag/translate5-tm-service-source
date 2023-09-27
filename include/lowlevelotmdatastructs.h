@@ -4,6 +4,7 @@
 #include <atomic>
 #include <memory>
 #include <vector>
+//#include "Filebuffer.h"
 #include "win_types.h"
 
 
@@ -226,24 +227,6 @@ typedef struct _TMX_SIGN
 
 
 
-/*****************************************************************************/
-/* Used to determine amount of padding required for the Btree record so      */
-/* that the header + keys fix in to a single disk record                     */
-/*****************************************************************************/
-typedef struct _BTREEHEADER
-{
-  CHAR    chType;                                 // record type
-  USHORT  usNum;                                  // record number
-  USHORT  usPrevious;                             // previous leaf node
-  USHORT  usNext;                                 // next leaf node
-  USHORT  usParent;                               // parent node
-  USHORT  usOccupied;                             // # of keys in record
-  USHORT  usFilled;                               // number of bytes filled
-  USHORT  usLastFilled;                           // ptr. to next free byte
-  USHORT  usWasteSize;                            // waste size?
-} BTREEHEADER , * PBTREEHEADER;
-
-
 
 /*****************************************************************************/
 /* BTREEHEADRECORD is the record at the start of a B-tree file.  It is used  */
@@ -286,67 +269,12 @@ typedef enum _RECTYPE
   ROOTREC                  // record contains root key data
 } RECTYPE;
 
-/*****************************************************************************/
-/* BTREERECORD  is the format of each of the blocks on the disk.             */
-/*  This structure should be BTREE_REC_SIZE long                             */
-/*****************************************************************************/
 
-#define BTREE_REC_SIZE_V3 (16384)          // record size V3
-#define BTREE_BUFFER_V3   (BTREE_REC_SIZE_V3 + 10*sizeof(USHORT)) // buffer size
-
-#define FREE_SIZE_V3  (BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER))
-typedef struct _BTREERECORD_V3
-{
-  BTREEHEADER  header;                             // 16 bytes header
-  UCHAR        uchData[ FREE_SIZE_V3 ] ;              // free size to be used
-} BTREERECORD_V3, *PBTREERECORD_V3, **PPBTREERECORD_V3;
-
-/*****************************************************************************/
-/* BTREEBUFFER  is the format of the buffers when read in to the buffer      */
-/* cache.  It maps a record number and its properties to its contents        */
-/*****************************************************************************/
-typedef struct _BTREEBUFFER_V3
-{
-  USHORT usRecordNumber;                           // index of rec in buffer
-  BOOL   fLocked;                                  // Is the record locked ?
-  //BOOL   fNeedToWrite;                             // Commit before reuse
-  SHORT  sUsed;                                    // buffer used count
-  ULONG  ulCheckSum;                               // CheckSum of contents data
-  BTREERECORD_V3 contents;                            // data from disk
-} BTREEBUFFER_V3, *PBTREEBUFFER_V3;
-
-typedef struct _BTREEINDEX_V3
-{
-  struct _BTREEINDEX_V3 * pNext;                    // point to next index buffer
-  BTREEBUFFER_V3  btreeBuffer;                       // data from disk
-} BTREEINDEX_V3, * PBTREEINDEX_V3;
 
 
 #define HEADTERM_SIZE     256          // size of the head term
 
-
-/*****************************************************************************/
-/* BTree is the memory resident structure describing the current state of    */
-/* the B tree.  It contains the house keeping information for all of the     */
-/* functions                                                                 */
-/*****************************************************************************/
-
-typedef SHORT _PFN_QDAMCOMPARE( PVOID, PVOID, PVOID );
-typedef _PFN_QDAMCOMPARE *PFN_QDAMCOMPARE;
-
-typedef struct _LOOKUPENTRY_V3
-{
-  PBTREEBUFFER_V3 pBuffer; // Pointer to BTREEBUFFER
-} LOOKUPENTRY_V3, *PLOOKUPENTRY_V3;
-
-
-
-
-
 typedef LHANDLE HTM;
-
-
-
 
 #define MAX_SERVER_NAME         15     // max. length of a server name
 #define MAX_USERID              15     // max. length of LAN user ID
@@ -373,6 +301,56 @@ typedef struct _TMX_TABLE_ENTRY
   CHAR   szName[MAX_LANG_LENGTH];
   USHORT usId = 0;
 } TMX_TABLE_ENTRY, * PTMX_TABLE_ENTRY;
+
+
+
+/*****************************************************************************/
+/* Used to determine amount of padding required for the Btree record so      */
+/* that the header + keys fix in to a single disk record                     */
+/*****************************************************************************/
+typedef struct _BTREEHEADER
+{
+  char    chType;                                 // record type
+  ushort  usNum;                                  // record number
+  ushort  usPrevious;                             // previous leaf node
+  ushort  usNext;                                 // next leaf node
+  ushort  usParent;                               // parent node
+  ushort  usOccupied;                             // # of keys in record
+  ushort  usFilled;                               // number of bytes filled
+  ushort  usLastFilled;                           // ptr. to next free byte
+  ushort  usWasteSize;                            // waste size?
+} BTREEHEADER , * PBTREEHEADER;
+
+/*****************************************************************************/
+/* BTREERECORD  is the format of each of the blocks on the disk.             */
+/*  This structure should be BTREE_REC_SIZE long                             */
+/*****************************************************************************/
+
+#define BTREE_REC_SIZE_V3 (16384)          // record size V3
+#define BTREE_BUFFER_V3   (BTREE_REC_SIZE_V3 + 10*sizeof(ushort)) // buffer size
+
+#define FREE_SIZE_V3  (BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER))
+typedef struct _BTREERECORD_V3
+{
+  BTREEHEADER  header;                             // 16 bytes header
+  UCHAR        uchData[ FREE_SIZE_V3 ] ;              // free size to be used
+} BTREERECORD_V3, *PBTREERECORD_V3, **PPBTREERECORD_V3;
+/*****************************************************************************/
+/* BTREEBUFFER  is the format of the buffers when read in to the buffer      */
+/* cache.  It maps a record number and its properties to its contents        */
+/*****************************************************************************/
+typedef struct _BTREEBUFFER_V3
+{
+  short usRecordNumber;                           // index of rec in buffer
+  bool   fLocked;                                  // Is the record locked ?
+  bool   fNeedToWrite;                             // Commit before reuse
+  short  sUsed;                                    // buffer used count
+  long  ulCheckSum;                               // CheckSum of contents data
+  BTREERECORD_V3 contents;                            // data from disk
+} BTREEBUFFER_V3, *PBTREEBUFFER_V3;
+
+using BTREE_NODE = std::shared_ptr<BTREEBUFFER_V3> ;
+using BTREE_KEY  = size_t;
 // name table structure (TM version 5 and up)
 constexpr int NUM_OF_TMX_TABLE_ENTRIES = (BTREE_REC_SIZE_V3 - sizeof(ULONG)) / sizeof(TMX_TABLE_ENTRY);
 
@@ -440,6 +418,18 @@ typedef enum _SEARCHTYPE
 } SEARCHTYPE;
 
 
+struct BtreeFileBuffer: public FileBuffer{
+    std::map<BTREE_KEY, BTREE_NODE> btree;
+
+    int ParseData();// should parse binary vector to btree nodes
+    int WriteRecord(BTREE_NODE node);
+    BTREE_NODE GetRecord(BTREE_KEY);
+    BTREE_NODE GetNewRecord(BTREE_KEY);
+
+    int Flush()override;
+    int FlushBtree();
+};
+
 struct BTREE
 {   
   BTREE(){
@@ -457,15 +447,13 @@ struct BTREE
   ~BTREE(){
     //if(pTempRecord) UtlAlloc( (PVOID*)&pTempRecord, ulTempRecSize, 0L, -1); 
   }
-    FileBuffer fb;
+    BtreeFileBuffer fb;
     //{From BTREE
 
     USHORT       usFirstNode=0;                    // file pointer of record
     USHORT       usFirstLeaf=0;                    // file pointer of record
 
-    PBTREEINDEX_V3  pIndexBuffer_V3 = nullptr;     // Pointer to index records
-    USHORT       usIndexBuffer=0;                  // number of index buffers
-    PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
+    //PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
     USHORT       usNextFreeRecord;                 // Next record to expand to
     //CHAR         chFileName[144];                // Name of B-tree file
     RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
@@ -718,7 +706,7 @@ struct BTREE
     );
 
     
-   SHORT QDAMSplitNode_V3( PBTREEBUFFER_V3 *, PWCHAR );
+   SHORT QDAMSplitNode_V3( BTREEBUFFER_V3&, PWCHAR );
     //+----------------------------------------------------------------------------+
     // External function
     //+----------------------------------------------------------------------------+
@@ -802,12 +790,12 @@ struct BTREE
     );
 
     
-    VOID  QDAMUpdateList_V3( PBTREEBUFFER_V3 );
+    VOID  QDAMUpdateList_V3( BTREEBUFFER_V3& );
     
-    VOID  QDAMFreeFromList_V3(PRECPARAM ,PBTREEBUFFER_V3 );
-    SHORT QDAMFreeRecord_V3( PBTREEBUFFER_V3 pRecord, RECTYPE  recType/* data or key record*/);
+    VOID  QDAMFreeFromList_V3(PRECPARAM ,BTREEBUFFER_V3& );
+    SHORT QDAMFreeRecord_V3( BTREEBUFFER_V3& Record, RECTYPE  recType/* data or key record*/);
 
-    ULONG QDAMGetrecDataLen_V3 ( PBTREEBUFFER_V3, SHORT );
+    ULONG QDAMGetrecDataLen_V3 ( BTREEBUFFER_V3&, SHORT );
     SHORT QDAMDeleteDataFromBuffer_V3( RECPARAM recParam);
     SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, ULONG );
     
@@ -825,7 +813,7 @@ struct BTREE
     SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
     BOOL   QDAMDictLockStatus ( PWCHAR );
     VOID   QDAMDictUpdStatus ();
-    SHORT QDAMFindRecord_V3( PWCHAR, PBTREEBUFFER_V3 * );
+    SHORT QDAMFindRecord_V3( PWCHAR, BTREEBUFFER_V3& );
 
 
     //------------------------------------------------------------------------------
@@ -934,7 +922,7 @@ struct BTREE
     SHORT  QDAMReadRecord_V3
     (
     USHORT  usNumber,
-    PBTREEBUFFER_V3 * ppReadBuffer,
+    BTREEBUFFER_V3& ReadBuffer,
     BOOL    fNewRec
     );
 
@@ -949,8 +937,8 @@ struct BTREE
 
     SHORT QDAMReadRecordFromDisk_V3( USHORT, PBTREEBUFFER_V3 *, BOOL );
     
-    SHORT QDAMWRecordToDisk_V3( PBTREEBUFFER_V3 );
-    SHORT QDAMWriteRecord_V3( PBTREEBUFFER_V3  pBuffer);
+    SHORT QDAMWRecordToDisk_V3( BTREEBUFFER_V3& );
+    SHORT QDAMWriteRecord_V3( BTREEBUFFER_V3&  Buffer);
     SHORT QDAMAllocKeyRecords(   USHORT usNum);
     SHORT QDAMDictOpenLocal(
         SHORT sNumberOfBuffers,             // number of buffers
@@ -1018,13 +1006,13 @@ SHORT EQFNTMClose();
 
 SHORT QDAMNewRecord_V3
 (
-   PBTREEBUFFER_V3  * ppRecord,
+   BTREEBUFFER_V3& Record,
    RECTYPE         recType          // data or key record
 );
 
 SHORT QDAMInsertKey_V3
 (
-   PBTREEBUFFER_V3 pRecord,               // record where key is to be inserted
+   BTREEBUFFER_V3& Record,               // record where key is to be inserted
    PWCHAR     pKey,
    RECPARAM   recKey,                  // position/offset for key
    RECPARAM   recData                  // position/offset for data
@@ -1041,13 +1029,40 @@ BOOL QDAMTerseData
 
 
  SHORT QDAMLocateKey_V3(
-   PBTREEBUFFER_V3, PWCHAR, PSHORT, SEARCHTYPE, PSHORT);
+   BTREEBUFFER_V3&, PWCHAR, PSHORT, SEARCHTYPE, PSHORT);
 
   
- SHORT QDAMFirstEntry_V3(  PBTREEBUFFER_V3 * );
+ SHORT QDAMFirstEntry_V3(  BTREEBUFFER_V3&  );
  
- SHORT QDAMFindChild_V3 ( PWCHAR, USHORT, PBTREEBUFFER_V3 * );
+ SHORT QDAMFindChild_V3 ( PWCHAR, USHORT, BTREEBUFFER_V3& );
  
+ SHORT QDAMFindParent_V3(BTREEBUFFER_V3&, PUSHORT );
+
+ // function to organize index file
+ USHORT EQFNTMOrganizeIndex
+  (
+    USHORT         usOpenFlags,         // open flags to be used for index file
+    ULONG          ulStartKey           // first key to start automatic insert...
+  );
+
+ SHORT QDAMDictFirstLocal ( PWCHAR, PULONG, PBYTE, PULONG );
+
+ SHORT QDAMGetszData_V3 ( RECPARAM,  PBYTE, PULONG, CHAR );
+ 
+ SHORT QDAMFirst_V3
+  (
+    PRECPARAM  precBTree,
+    PRECPARAM  precKey,
+    PRECPARAM  precData
+  );
+  
+ SHORT QDAMUnTerseData ( PUCHAR, ULONG, PULONG );
+ 
+ SHORT QDAMValidateIndex_V3(  BTREEBUFFER_V3&);
+
+ VOID  QDAMReArrangeKRec_V3 ( BTREEBUFFER_V3& );
+ VOID  QDAMCopyKeyTo_V3( BTREEBUFFER_V3&, SHORT, BTREEBUFFER_V3&, SHORT, USHORT );
+
 };//BTREE
 
 typedef  BTREE * PBTREE;

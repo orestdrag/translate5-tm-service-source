@@ -129,7 +129,6 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemory.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemoryPlugin.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMUT.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTCR.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTDEL.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTEXT.cpp"

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include <map>
 
 enum  FileBufferStatus{
         CLOSED = 1,
@@ -18,17 +20,18 @@ struct FileBuffer{
     std::string fileName;   
     long long originalFileSize = 0;
 
-    int ReadFromFile();
+    virtual int ReadFromFile();
     //int WriteToFile(); 
-    int Flush();
+    virtual int Flush();
     int SetOffset(size_t newOffset, int fileAnchor);
 
     int Write(const void* buff, size_t buffSize, size_t startingPosition);
     int Write(const void* buff, size_t buffSize);
     int Read(void* buff, size_t buffSize, size_t startingPosition);
     int Read(void* buff, size_t buffSize);
-
+    virtual ~FileBuffer()=default;
 
 } ;
+
 
 #endif//_FILEBUFFER_INCLUDED_

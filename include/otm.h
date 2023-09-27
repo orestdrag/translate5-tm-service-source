@@ -82,13 +82,7 @@ EQFNTMCreate
 //  USHORT usOpenFlags,                 // Read Only or Read/Write
 //);
 
-// function to organize index file
-USHORT EQFNTMOrganizeIndex
-(
-   PBTREE,
-   USHORT         usOpenFlags,         // open flags to be used for index file
-   ULONG          ulStartKey           // first key to start automatic insert...
-);
+
 
 
 class JSONFactory;

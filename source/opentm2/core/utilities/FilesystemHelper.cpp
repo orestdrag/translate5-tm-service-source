@@ -1245,3 +1245,104 @@ bool FilesystemHelper::DirExists(const std::string& path){
     }
     return bExists;
 }
+
+int BtreeFileBuffer::ParseData(){
+    int rc = 0;
+    size_t nodeCount = 0;
+
+    const size_t recSize = sizeof(BTREERECORD_V3);
+
+    if(size_t dataSize = data.size()){
+        btree.clear();
+        nodeCount = dataSize/recSize;
+        
+        for(size_t i = 0; i<nodeCount; i++){
+            BTREEBUFFER_V3 buf; 
+            memcpy(&buf.contents, &data[i*recSize], recSize); 
+            btree[i] = std::make_shared<BTREEBUFFER_V3>(buf);
+        }
+        data.clear();
+    }
+ 
+}
+
+int BtreeFileBuffer::WriteRecord(BTREE_NODE node){
+
+}
+
+
+BTREE_NODE BtreeFileBuffer::GetRecord(BTREE_KEY key){
+    if(btree.find(key) != btree.end())
+        return btree[key];
+    return nullptr;
+}
+
+
+BTREE_NODE BtreeFileBuffer::GetNewRecord(BTREE_KEY key){
+    if(btree.find(key) == btree.end())
+        return btree[key];//emplace new key
+    return nullptr;
+}
+
+int BtreeFileBuffer::Flush(){
+    return btree.empty()? FileBuffer::Flush() : FlushBtree();
+}
+
+int BtreeFileBuffer::FlushBtree(){  
+    const size_t recSize = sizeof(BTREERECORD_V3);
+    bool fileWasOpened = file != nullptr;
+    size_t writenNodes = 0;
+
+    if(!FilesystemHelper::FileExists(fileName)){
+        T5LOG(T5WARNING) << "File is not exists on disk so flushing would be skipped, fName = " << fileName;
+    }else if(status & FileBufferStatus::MODIFIED){
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "Flush:: writing files from buffer";
+        }
+        int size = data.size();
+        
+        //if(fileWasOpened && file) fclose(file);
+        if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
+       
+        if(file==nullptr){
+            T5LOG(T5ERROR) <<"Cant open the file " << fileName;
+            return FilesystemHelper::FILEHELPER_FILE_PTR_IS_NULL;
+        }
+
+        int oldSize = 0;
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            oldSize = FilesystemHelper::GetFileSize(file);
+        }
+        
+        fseek(file, 0, SEEK_SET);
+        //writenNodes = fwrite(bufStart, size, 1, file) * size;
+        for(const auto& node: btree){
+            writenNodes += fwrite(&(node.second->contents), recSize, 1, file);
+        }
+
+        if ( writenNodes <=0 ){
+            T5LOG(T5ERROR) <<"::Flush():: ERROR_WRITE_FAULT";
+            return ERROR_WRITE_FAULT;
+        }
+    
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            T5LOG( T5DEBUG) "::Flush("  << (long int) file << ") buff = " << "void" <<
+                ", buffsize = " << size << ", path = " << fileName << ", file size = " <<
+                FilesystemHelper::GetFileSize(file) << ", oldSize = " << oldSize;
+        }
+
+        if(!fileWasOpened) 
+        {
+            fclose(file);
+            file = nullptr;
+        }
+        status &= ~MODIFIED;
+    }else{
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) <<"Flush:: buffer not modified, so no need to overwrite file, fName = " << fileName;
+        }
+    }
+    
+    return 0;
+}
+

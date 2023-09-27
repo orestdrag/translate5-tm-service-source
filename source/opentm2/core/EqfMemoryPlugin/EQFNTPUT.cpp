@@ -1434,7 +1434,7 @@ USHORT UpdateTmIndex
           // if index DB is full and memory is in exclusive access we try to compact the index file
           if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
           {
-             usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
+             usRc = pTmClb->InBtree.EQFNTMOrganizeIndex( pTmClb->usAccessMode, START_KEY );
 
              if ( usRc == NO_ERROR )
              {
@@ -1514,7 +1514,7 @@ USHORT UpdateTmIndex
                 // if index DB is full and memory is in exclusive access we try to compact the index file
                 if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
                 {
-                  usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
+                  usRc = pTmClb->InBtree.EQFNTMOrganizeIndex( pTmClb->usAccessMode, START_KEY );
 
                   if ( usRc == NO_ERROR )
                   {
