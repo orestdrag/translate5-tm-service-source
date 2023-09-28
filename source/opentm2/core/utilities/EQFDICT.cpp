@@ -5808,6 +5808,10 @@ SHORT BTREE::QDAMDictInsertLocal
   {
     sRc = BTREE_CORRUPTED;
   }
+  else if ( ulLen == 0)
+  {
+    sRc = BTREE_DATA_RANGE;
+  }
 
   /*******************************************************************/
   /* check if entry is locked ....                                   */
@@ -5821,20 +5825,10 @@ SHORT BTREE::QDAMDictInsertLocal
   if ( !sRc )
   {
     usKeyLen = (USHORT) sizeof(ULONG);
-
-    if ( (usKeyLen == 0) ||
-          ((usKeyLen >= HEADTERM_SIZE * sizeof(PUSHORT))) ||
-          (ulLen == 0) )
-    {
-      sRc = BTREE_DATA_RANGE;
-    }
-    else
-    {
-      memcpy( (PBYTE)chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
+    memcpy( (PBYTE)chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
       
-      QDAMDictUpdStatus ();
-      sRc = QDAMFindRecord_V3( pKey, &pNode );
-    } /* endif */
+    QDAMDictUpdStatus ();
+    sRc = QDAMFindRecord_V3( pKey, &pNode );
   } /* endif */
 
   if ( !sRc )

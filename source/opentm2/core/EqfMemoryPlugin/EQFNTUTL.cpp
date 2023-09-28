@@ -2294,7 +2294,8 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     pszNewData[usNewLength] = 0;
     //wcscpy( (PSZ_W)pusData, pszNewData);
     memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
-    pusData += usNewLength * 2;
+    pusData += usNewLength * sizeof(wchar_t);
+    //pusData += usNewLength * 2;
     *pusData = ADDDATA_ENDOFDATA_ID;
     pCLB->usAddDataLen = (usNewLength + 3) * sizeof(wchar_t);
   } /* endif */     

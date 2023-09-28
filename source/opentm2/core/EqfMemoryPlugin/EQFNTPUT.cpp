@@ -3159,11 +3159,6 @@ USHORT TMLoopAndDelTargetClb
   PBOOL               pfNewerTargetExists
 )
 {
-
-  static int call_n = 0;
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    T5LOG( T5INFO) << ":: call n = " << (++call_n) << "; Sentence = " << EncodingHelper::convertToUTF8(pSentence->pInputString);
-  }
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block
   PTMX_TAGTABLE_RECORD 	pTMXSrcTTable = NULL; //ptr to source tag info
