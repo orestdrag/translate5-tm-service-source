@@ -153,8 +153,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto requestHandler = new ProxygenHandler(stats_.get());
 
     requestHandler->command = ProxygenHandler::COMMAND::UNKNOWN_COMMAND;
-
-    url = url.substr(urlSeparator + 1);
+    
+    url = url.size() > urlSeparator ? url.substr(urlSeparator + 1) : "";
     
     std::string urlMemName;
     std::string urlCommand;
@@ -174,7 +174,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           urlMemName = url;
         }else{
           urlMemName = url.substr(0, urlSeparator);
-          url = url.substr(urlSeparator + 1);
+  
+          url = url.size() > urlSeparator ? url.substr(urlSeparator + 1) : "";
 
           if(url.size()){
             urlSeparator = url.find("/");
@@ -187,7 +188,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }
-
+ 
     restoreBlanks(urlMemName);
     requestHandler->memName = urlMemName; 
 
@@ -405,6 +406,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       "\n  Run date: " << runDate <<
       "\n  Git commit info: " << gitHash <<
       "\n  Version: " << appVersion <<
+      "\n  Asan:" << asanIsOn <<
       "\n  Workdir: " << szOtmDirPath <<
       "\n  Worker threads: " << iWorkerThreads <<
       "\n  Timeout: " << uiTimeOut <<

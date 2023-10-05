@@ -221,7 +221,8 @@ typedef enum
   X_ELEMENT             = 21,
   IT_ELEMENT            = 22,
   UT_ELEMENT            = 23,
-  END_STANDALONE_TAGS   = 24,
+  T5_N_ELEMENT          = 24,
+  END_STANDALONE_TAGS   = 25,
 
   END_INLINE_TAGS       = 29,
 
@@ -258,6 +259,7 @@ TMXNAMETOID TmxNameToID[] = {
      { "x",       X_ELEMENT },
      { "it",      IT_ELEMENT },
      { "ut",      UT_ELEMENT },
+     { "t5:n",      T5_N_ELEMENT },
 
      {"TMXSentence", TMX_SENTENCE_ELEMENT},
      {"invchar",     INVCHAR_ELEMENT},
@@ -288,6 +290,7 @@ std::map<ELEMENTID, const std::string> TmxIDToName = {
      { X_ELEMENT,    "x"       },
      { IT_ELEMENT,   "it"      },
      { UT_ELEMENT,   "ut"      },
+     { T5_N_ELEMENT, "t5:n"    },
 
      { TMX_SENTENCE_ELEMENT, "TMXSentence"},
      { INVCHAR_ELEMENT,      "invchar"    },
@@ -342,7 +345,10 @@ size_t str16len(const char16_t* source)
     //if sourceTag -> matching tag from target tags
     //TagInfo* matchingTag;
     //int matchingTagIndex = -1;
-   
+    
+    //t5n
+    std::string t5n_key;
+    std::string t5n_value;
   };
 
 // PROP types
@@ -384,6 +390,7 @@ class TagReplacer{
   int      iHighestPTId = 500;             // increments with pair tag
   int      iHighestPHId = 100;             // increments with ph tag
   bool fFuzzyRequest = false;              // if re are dealing with import or fuzzy request
+  bool fReplaceNumberProtectionTagsWithHashes = false;//
 
   //to track id and i attributes in request and then generate new values for tags in srt and trg that is not matching
   int iHighestRequestsOriginalI  = 0;
@@ -417,13 +424,37 @@ void TagReplacer::reset(){
   requestTagList.clear();
 }
 
+
+
 std::wstring TagReplacer::PrintTag(TagInfo& tag){
   std::string res = "<" ;
   bool fClosingTag = false; // for </g> and similar tags
   bool fClosedTag = true; // for <ph/> and similar tags
   
   ELEMENTID tagType = tag.generated_tagType;
-  
+  if(fReplaceNumberProtectionTagsWithHashes){
+    if(tagType == T5_N_ELEMENT){
+      return EncodingHelper::convertToUTF16(tag.t5n_key);
+    }
+    /*else{// skip other tags
+      std::string outStr = "<" + TmxIDToName[tag.original_tagType];
+      if(tag.original_x>0){
+        outStr += " x=\"" + tag.original_x + "\"";
+      }
+      if(tag.original_i>0){
+        outStr += " i=\"" + tag.original_i + "\"";
+      }
+      return EncodingHelper::convertToUTF16(outStr);
+      return L"";
+    }//*/
+  }
+
+  if(tagType == T5_N_ELEMENT){
+    std::string outputStr = "<" + TmxIDToName[T5_N_ELEMENT] + " id=\"" + std::to_string(tag.original_x) + "\" r=\"" + tag.t5n_key + "\" n=\"" + tag.t5n_value + "\"/>";
+    return EncodingHelper::convertToUTF16(outputStr);
+  }
+
+
   if(fFuzzyRequest){
 
     int x = 0,// tag.original_x, 
@@ -495,7 +526,8 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
                 tagType ==  PH_ELEMENT ||
                 tagType ==  BX_ELEMENT ||
                 tagType ==  EX_ELEMENT ||
-                tagType ==   X_ELEMENT ;
+                tagType ==   X_ELEMENT ||
+                tagType ==T5_N_ELEMENT;
 
   if(!fClosingTag && fClosedTag)
     res += '/';
@@ -539,6 +571,27 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   TagInfo tag;  
   tag.original_tagType = tagType;
   tag.tagLocation = activeSegment;
+
+  if(tagType == T5_N_ELEMENT){
+    tag.fPairedTagClosed = true;
+    tag.fTagAlreadyUsedInTarget = true;
+    tag.generated_tagType = T5_N_ELEMENT;
+    // id value could be stored in id attribute or x attribute
+    if( char16_t* _r = (char16_t*) attributes->getValue("r") ){
+      tag.t5n_key = EncodingHelper::toChar(_r);
+    }
+    if(char16_t* _n = (char16_t*) attributes->getValue("n") ){
+      tag.t5n_value = EncodingHelper::toChar(_n);      
+    }    
+    if( char16_t* _id = (char16_t*) attributes->getValue("id") ){
+      if( is_number(_id) ){
+        tag.original_x = std::stoi( EncodingHelper::toChar(_id) );
+      }
+    }
+
+    LogTag(tag);
+    return tag;
+  }
   
   if( tagType >= BEGIN_PAIR_TAGS && tagType <= END_PAIR_TAGS){
     if(attributes && tagType != EPT_ELEMENT && tagType != EX_ELEMENT){
@@ -1908,7 +1961,8 @@ bool IsValidXml(std::wstring&& sentence){
   if(parser.getErrorCount()){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing src : " << buff;
+    std::string errMsg(buff);
+    T5LOG(T5ERROR) << ":: error during parsing src : " << errMsg;
     return false;
   }
   return true;
@@ -1996,6 +2050,42 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
   return res;
 }
 
+
+std::wstring GenerateNormalizeString(std::wstring&& w_str){
+
+  // parse and save request
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler handler;
+  
+  handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
+  handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(&handler);
+  parser->setErrorHandler(&handler);
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+
+  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
+  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
+  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+                                      "req_buff (in memory)");
+
+  parser->parse(req_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler.GetErrorText(buff, sizeof(buff));
+    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+  }
+  delete parser;
+  return handler.GetParsedData();
+}
 
 std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg){ 
   USHORT usRc = 0; 
@@ -2421,7 +2511,11 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         fCatchData = TRUE;    
         break;
-
+      case T5_N_ELEMENT:
+      {
+      //  T5LOG(T5ERROR) <<"found T5N_element, handling is not implemented yet";
+      //  break;
+      }
       case PH_ELEMENT:
       case X_ELEMENT:
       case UT_ELEMENT:
@@ -2488,6 +2582,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         }
         break;
       }
+      
       case HI_ELEMENT:
       case SUB_ELEMENT:
       case G_ELEMENT:
@@ -2506,6 +2601,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         }
         break;
       }
+      
       case INVCHAR_ELEMENT:
         // segment contains invalid data
         this->fInvalidChars = TRUE;
@@ -2974,7 +3070,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       
       break;  
     }
-
+    case T5_N_ELEMENT:
+    {
+    //  T5LOG(T5ERROR) <<"found T5N_element, handling is not implemented yet";
+    //  break;
+    }
     case PH_ELEMENT:
     case X_ELEMENT:
     case UT_ELEMENT:
@@ -2989,8 +3089,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       CurElement.fInsideTagging = false;
       CurElement.fInlineTagging = true;
       break;
-    }
-
+    } 
     case HI_ELEMENT:
     case SUB_ELEMENT:
     case G_ELEMENT: 
@@ -3007,6 +3106,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         }  
       break;
     }
+   
     case INVCHAR_ELEMENT:
       break;
     case UNKNOWN_ELEMENT:

@@ -2040,7 +2040,7 @@ SHORT EQFNTMPhysLock
 //+----------------------------------------------------------------------------+
 //|Parameters:        PBTREE                 pointer to btree structure        |
 //|                   SHORT                  index of counter field            |
-//|                                                                      PLONG                                                                  ptr to buffer for new counte value|
+//|                   PLONG                  ptr to buffer for new counte value|
 //+----------------------------------------------------------------------------+
 //|Returncode type:   SHORT                                                    |
 //+----------------------------------------------------------------------------+

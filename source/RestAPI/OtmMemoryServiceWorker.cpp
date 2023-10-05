@@ -216,7 +216,11 @@ int OtmMemoryServiceWorker::buildErrorReturn
   i = strErrorReturn.size();
   factory->addParmToJSONW( strErrorReturn, L"ReturnValue", iRC );
   i = strErrorReturn.size();
-  factory->addParmToJSONW( strErrorReturn, L"ErrorMsg", pszErrorMsg );
+  std::wstring strErrMsg = pszErrorMsg;
+  if(iRC == 133){
+    strErrMsg += L"; ERROR_MEMORY_NOTFOUND";
+  }
+  factory->addParmToJSONW( strErrorReturn, L"ErrorMsg", strErrMsg.c_str() );
   i = strErrorReturn.size();
   factory->terminateJSONW( strErrorReturn );
   i = strErrorReturn.size();
@@ -1533,6 +1537,7 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
   AddToJson(ssOutput, "Build date", buildDate, true );
   AddToJson(ssOutput, "Git commit info", gitHash, true );
   AddToJson(ssOutput, "Version", appVersion, true );
+  AddToJson(ssOutput, "Asan", asanIsOn, true );
   AddToJson(ssOutput, "Worker threads", workerThreads, true );
   AddToJson(ssOutput, "Timeout(ms)", timeout, true );
   
@@ -1593,7 +1598,7 @@ std::string OtmMemoryServiceWorker::tagReplacement(std::string strInData, int& r
     wstr = errMsg;
     //buildErrorReturn( iRC, errMsg, strOutputParms );
     rc = BAD_REQUEST;
-    return "";
+    return EncodingHelper::convertToUTF8(wstr.c_str());
   }else{ 
     std::string name;
     std::string value;

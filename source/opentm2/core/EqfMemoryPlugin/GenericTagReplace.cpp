@@ -2071,6 +2071,8 @@ USHORT NTMAllocSentenceStructure
 
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
+  
+  //if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pNormStringWithNPTagHashes), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   //if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWNormalizedTags), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
@@ -2107,6 +2109,7 @@ VOID NTMFreeSentenceStructure
     UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
     //UtlAlloc( (PVOID *) &pSentence->pInputStringWNormalizedTags, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
+    //UtlAlloc( (PVOID *) &pSentence->pNormStringWithNPTagHashes, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG ); 

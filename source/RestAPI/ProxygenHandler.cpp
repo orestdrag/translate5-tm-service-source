@@ -102,12 +102,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
         iRC = 200;
         break;
       }
-      case COMMAND::TAGREPLACEMENTTEST:
-      {
-        iRC = 200;
-        pMemService->tagReplacement(strResponseBody, iRC);
-        break;
-      }
       case COMMAND::EXPORT_MEM:
       case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
       {
@@ -195,7 +189,13 @@ void ProxygenHandler::onEOM() noexcept {
     if(json_end > 0 && json_end != std::string::npos){
       //strInData[json_end + 1] = '\0';
       strInData = strInData.substr(0, json_end + 2);
+    }else{
+      strResponseBody = "{\n\"msg\": \"please, use pretty json format\"\n}";
+      iRC = 424;
+      sendResponse();
+      return;
     }
+
 
     std::string truncatedInput = strInData.size() > 3000 ? strInData.substr(0, 3000) : strInData;
     T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
@@ -252,6 +252,12 @@ void ProxygenHandler::onEOM() noexcept {
           break;
         }
         iRC = pMemService->cloneTMLocaly(memName, strInData, strResponseBody);
+        break;
+      }
+      case COMMAND::TAGREPLACEMENTTEST:
+      {
+        iRC = 200;
+        strResponseBody = pMemService->tagReplacement(strInData, iRC);
         break;
       }
       default:

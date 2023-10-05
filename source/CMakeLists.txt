@@ -1,17 +1,26 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.49")
+SET(APP_VERSION  "0.4.50")
 project(T5MEMORY VERSION ${APP_VERSION})
+
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -g")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -g")
 set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
+#use cmake .. -DASAN_IS_ON=True to build with asan
+message("ASAN_IS_ON=${ASAN_IS_ON}")
+SET(STR_ASAN_IS_ON "Asan is off")
 
-#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+if( ASAN_IS_ON  ) 
+    message("ASAN_IS_ON evaluates to True")
+    SET(STR_ASAN_IS_ON "Asan is ON")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+endif()
+
 
 
 set(CMAKE_BUILD_TYPE Debug)

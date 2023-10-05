@@ -268,6 +268,8 @@ static BOOL NTMCheckAndDeleteTagPairs
   BOOL      fRespectLFs
 );
 
+std::wstring GenerateNormalizeString(std::wstring&& w_str);
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -360,15 +362,19 @@ USHORT TmtXGet
 
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
-
-    auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetIn->stTmGet.szSource);
+    
+    //auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetIn->stTmGet.szSource);
+    auto inputStringWithReplacedTags = GenerateNormalizeString(pTmGetIn->stTmGet.szSource);
+    
     //wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
-    wcscpy( pSentence->pInputString, inputStringWithReplacedTags[0].c_str());
+    wcsncpy( pSentence->pInputString, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE);
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
     ULONG ulSrcCP = 1;
     usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
+    //std::wstring NPTagsReplacedWithTheirKeys = GenerateNormalizeString(pSentence->pInputString);
+    //wcpncpy(pSentence->pNormStringWithNPTagHashes, NPTagsReplacedWithTheirKeys.c_str(), MAX_SEGMENT_SIZE);
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -2706,6 +2712,9 @@ std::wstring removeTagsFromString(std::wstring input){
 }
 
 
+
+std::wstring GenerateNormalizeString(std::wstring&& w_str);
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2755,6 +2764,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_CLB pTMXTargetClb = NULL;       //ptr to target control block
   PSZ_W pString = NULL;                //ptr to normalized source string
+  //PSZ_W pStringWithNP = NULL;                //ptr to normalized source string
   BOOL fOK = TRUE;                     //success indicator
   ULONG ulSourceLen = 0;              //length of normalized source string
   USHORT usRc = NO_ERROR;              //return code
@@ -2775,6 +2785,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
+  //fOK = fOK && UtlAlloc( (PVOID *) &(pStringWithNP), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
   if ( !fOK )
   {
@@ -2810,6 +2821,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
       auto str = EncodingHelper::convertToUTF8(pString);
       T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\r\n" << str << "\r\n</SOURCE>\r\n" ;
     }
+    //std::wstring w_str = 
+
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
 	    fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pString, pSentence->pNormString, 0 )== 0L);
@@ -3036,12 +3049,15 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */              
             } /* endif */
 
-            auto propNormString = removeTagsFromString(pSentence->pPropString);
+            std::wstring NPNormString = GenerateNormalizeString(pSentence->pPropString);
+
+            //TODO: remove punctuation here
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
                                         //pSentence->pNormString,
                                         pSentence->pInputString,
 //                                        pString,
-                                        pSentence->pPropString,
+                                        (PSZ_W)NPNormString.c_str(),
+                                        //pSentence->pPropString,
                                         //(wchar_t*)propNormString.c_str(),
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP, &usWords, &usDiffs);
@@ -3190,6 +3206,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
+  //UtlAlloc( (PVOID *) &pStringWithNP, 0L, 0L, NOMSG );
 
   if ( usRc )
   {
