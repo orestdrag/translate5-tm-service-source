@@ -615,6 +615,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
  CHAR_W        szMatchSegIdInfo[512];     // buffer for the complete match segment ID entry
  ULONG         ulSequenceNumber;          // segment sequence number within current external memory file
+ ULONG         ulActiveSegment;
 }MEM_LOAD_IDA, * PMEM_LOAD_IDA;
 
 typedef struct _MEM_MERGE_IDA

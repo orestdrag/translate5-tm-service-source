@@ -808,6 +808,11 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   return tag;
 }
 
+USHORT  MEMINSERTSEGMENT
+( 
+  LONG lMemHandle, 
+  PMEMEXPIMPSEG pSegment 
+);
 
 
 //
@@ -854,12 +859,19 @@ public:
   void warning(const SAXParseException& exc);
   void error(const SAXParseException& exc );
   void fatalError(const SAXParseException& exc);
+  void fatalInternalError(const SAXException& exc);
   //void resetErrors();
 
   
   TagReplacer tagReplacer;
   BOOL fInitialized = false;
+
+  USHORT insertSegUsRC{0};
+
+  void setDocumentLocator(const Locator* const locator) override;
+
 private:
+  const Locator* m_locator = nullptr;
   ImportStatusDetails* pImportDetails = nullptr;
   ELEMENTID GetElementID( PSZ pszName );
   void Push( PTMXELEMENT pElement );
@@ -1075,7 +1087,7 @@ USHORT  EXTMEMIMPORTPROCESS
 )
 {
   CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  USHORT usRC = pTMXExport->ImportNext( pfnInsertSegment, pMemHandle,    pImportData ); 
+  USHORT usRC = pTMXExport->ImportNext( MEMINSERTSEGMENT, pMemHandle,    pImportData ); 
   return( usRC );
 } /* end of function EXTMEMIMPORTPROCESS */
 
@@ -1613,7 +1625,7 @@ USHORT CTMXExportImport::ImportNext
   BOOL fContinue  = TRUE;
   int errorCode = 0;
   int errorCount = 0;
-  m_handler->SetMemInterface( pfnInsertSegment, MemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
+  m_handler->SetMemInterface( MEMINSERTSEGMENT, MemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
       while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration )
@@ -2730,7 +2742,8 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   T5LOG( T5DEBUG) << "endElement: " << pszName;
   ELEMENTID CurrentID = CurElement.ID;
   PROPID    CurrentProp = CurElement.PropID;
-
+  
+  try{
   switch ( CurrentID )
   {
     case TMX_ELEMENT:
@@ -2805,7 +2818,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           fillSegmentInfo( pTuvArray, NULL, &(pBuf->SegmentData) );
           pBuf->SegmentData.fValid = FALSE;
           strcpy( pBuf->SegmentData.szReason, "No unit matching the memory source language" );
-          pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+          MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
         }
         else
         {
@@ -2884,14 +2897,14 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 T5LOG( T5INFO) << ":: invalid segment, reason = " << pBuf->SegmentData.szReason;
               }
               // add segment to memory (if fValid set) or count as skipped segment
-              if ( pfnInsertSegment != NULL )
+              //if ( MEMINSERTSEGMENT != NULL )
               {
                 if ( pBuf->SegmentData.fValid )
                 {
                   if ( pBuf->SegmentData.szFormat[0] != EOS ) 
                   {
                     // markup table information is already available
-                    pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                   }
                   else if ( m_pMemInfo->pszMarkupList != NULL )
                   {
@@ -2902,7 +2915,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                       while ( *pszCurrentMarkup )
                       {
                         strcpy( pBuf->SegmentData.szFormat, pszCurrentMarkup );
-                        pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                        insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                         pszCurrentMarkup += strlen(pszCurrentMarkup) + 1;
                       } /* endwhile */                       
                     }
@@ -2910,28 +2923,28 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                     {
                       // segment contains no inline tagging so add it only once using the first markup of the list
                       strcpy( pBuf->SegmentData.szFormat, m_pMemInfo->pszMarkupList );
-                      pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                      insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                     } /* endif */                       
                   }
                   else if ( m_pMemInfo->szFormat[0] != EOS )
                   {
                     // use supplied markup table for the segment
                     strcpy( pBuf->SegmentData.szFormat, m_pMemInfo->szFormat );
-                    pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                   }
                   else
                   {
                     // use default markup table for the segment
                     strcpy( pBuf->SegmentData.szFormat, "OTMANSI" );
 
-                    pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                   } /* endif */                     
                 }
                 else
                 {
                    if ( pBuf->SegmentData.szFormat[0] == EOS ) strcpy( pBuf->SegmentData.szFormat, "OTMANSI" );
 
-                  pfnInsertSegment( lMemHandle, &(pBuf->SegmentData) );
+                  insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
                 } /* endif */
               } /* endif */
             } /* endif */
@@ -3113,7 +3126,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     default:
       break;
   } /*endswitch */
-
+  }catch(const xercesc::SAXException& exc){
+    fatalInternalError(exc);
+  }
   Pop( &CurElement );
 
   // for prop elements we have to set the data in the parent element (i.e. after the element has been removed from the stack)
@@ -3333,6 +3348,39 @@ void TMXParseHandler::fatalError(const SAXParseException& exception)
     
     XMLString::release( &message );
 }
+
+
+void TMXParseHandler::setDocumentLocator(const Locator* const locator){
+  m_locator = locator ;
+}
+
+#include <xercesc/sax/Locator.hpp>
+void TMXParseHandler::fatalInternalError(const SAXException& exception)
+{
+  char* message = XMLString::transcode(exception.getMessage());
+  std::string msg = message; 
+  XMLString::release( &message );
+  //if(m_locator){
+  //  fatalError(xercesc::SAXParseException(msg.c_str(), m_locator));
+  //}else
+  {
+    long line = 0;//(long)exception.getLineNumber();
+    long col = 0; //(long)exception.getColumnNumber();
+    if(m_locator){
+      line = m_locator->getLineNumber();
+      col = m_locator->getColumnNumber();
+    }
+    this->fError = TRUE;
+    sprintf( this->pBuf->szErrorMessage, " Fatal internal Error at column %ld in line %ld, import stopped at progress = %i%, errorMsg: %s ", 
+            col, line, (int)pImportDetails->usProgress, msg.c_str() );
+    msg =  std::string(pBuf->szErrorMessage);
+    if(pImportDetails){
+      pImportDetails->importMsg << msg;
+    }
+    
+  }
+}
+
 
 void TMXParseHandler::error(const SAXParseException& exception)
 {

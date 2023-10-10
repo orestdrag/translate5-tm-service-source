@@ -76,6 +76,10 @@ int ProxygenStats::recordRequest(int command) {
         cloneLocalyCount_++;
         break;
       }
+      case ProxygenHandler::COMMAND::IMPORT_TMX_LOCALY:
+      {
+        break;
+      }
       case ProxygenHandler::COMMAND::UNKNOWN_COMMAND:{
         unrecognizedRequestCount_++;
         break;

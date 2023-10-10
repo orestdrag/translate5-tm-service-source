@@ -667,7 +667,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
         (pLIDA->usImpMode == MEM_FORMAT_TMX_TRADOS) ||
         (pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT) )
    {
-     pLIDA->lProgress = 0;
+     //pLIDA->lProgress = 0;
      
      usRc = EqfPluginWrapper::MemImportProcess( pLIDA->lExternalImportHandle , MEMINSERTSEGMENT, (LONG)pLIDA, pImportData);
 
@@ -1262,7 +1262,7 @@ USHORT MemFuncImportProcess
         {
           case MEM_PROCESS_OK:
             {
-              pData->pImportData->usProgress   = pLoadData->lProgress;
+              //pData->pImportData->usProgress   = pLoadData->lProgress;
               pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
               pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
             }
@@ -1743,6 +1743,8 @@ USHORT MemHandleCodePageValue
   return(usRc);
 } /* end of function MemHandleCodePageValue */
 
+
+#include <xercesc/sax/SAXParseException.hpp>
 //
 // MEMINSERTSEGMENT  
 //
@@ -1786,6 +1788,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
+    pLIDA->ulActiveSegment = pSegment->lSegNum;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
 
@@ -1796,6 +1799,19 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     else
     {
       pLIDA->ulInvSegmentCounter++;      // increase invalid segment counter 
+      if(usRC == BTREE_LOOKUPTABLE_CORRUPTED || usRC == BTREE_LOOKUPTABLE_TOO_SMALL)
+      {    
+        std::string msg = "TM is reached it's size limit, please create another one and import segments there, rc = " 
+          + toStr(usRC) + "; aciveSegment = " + toStr(pSegment->lSegNum) + "\n\nSegment " + toStr(pSegment->lSegNum) + " not imported\r\n" 
+          +"\nReason         = " +  pSegment->szReason 
+          +"\nDocument       = " +  pSegment->szDocument 
+          +"\nSourceLanguage = " +  pSegment->szSourceLang 
+          +"\nTargetLanguage = " +  pSegment->szTargetLang 
+          +"\nMarkup         = " +  pSegment->szFormat 
+          +"\nSource         = " +  EncodingHelper::convertToUTF8(pSegment->szSource) 
+          +"\nTarget         = " +  EncodingHelper::convertToUTF8(pSegment->szTarget) ;
+        throw xercesc::SAXException(msg.c_str());        
+      }
     } /* endif */
   }
   else

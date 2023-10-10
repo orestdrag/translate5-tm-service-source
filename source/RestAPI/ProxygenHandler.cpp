@@ -50,7 +50,8 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
         { ProxygenHandler::COMMAND::TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { ProxygenHandler::COMMAND::IMPORT_MEM, "IMPORT_MEM" },
         { ProxygenHandler::COMMAND::REORGANIZE_MEM, "REORGANIZE_MEM" },
-        { ProxygenHandler::COMMAND::CLONE_TM_LOCALY, "CLONE_MEM"}
+        { ProxygenHandler::COMMAND::CLONE_TM_LOCALY, "CLONE_MEM"},
+        { ProxygenHandler::COMMAND::IMPORT_TMX_LOCALY, "IMPORT_TMX_LOCALY"}
     };
 
 
@@ -252,6 +253,14 @@ void ProxygenHandler::onEOM() noexcept {
           break;
         }
         iRC = pMemService->cloneTMLocaly(memName, strInData, strResponseBody);
+        break;
+      }
+      case COMMAND::IMPORT_TMX_LOCALY:{
+        if(fWriteRequestsAllowed == false){
+          iRC =423;
+          break;
+        }
+        iRC = pMemService->importLocal(memName, strInData, strResponseBody);
         break;
       }
       case COMMAND::TAGREPLACEMENTTEST:

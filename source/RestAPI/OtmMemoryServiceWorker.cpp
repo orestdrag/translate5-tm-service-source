@@ -111,6 +111,7 @@ typedef struct _IMPORTMEMORYDATA
   //ushort * pusImportPersent = nullptr;
   ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::POPENEDMEMORY pMem = nullptr;
+  bool fDeleteSourceTmx{0};
 } IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
@@ -1144,6 +1145,7 @@ int OtmMemoryServiceWorker::import
   // start the import background process
   PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
   strcpy( pData->szInFile, szTempFile );
+  pData->fDeleteSourceTmx = true;
   strcpy( pData->szMemory, strMemory.c_str() );
 
   if(this->vMemoryList[iIndex].importDetails == nullptr){
@@ -1161,6 +1163,219 @@ int OtmMemoryServiceWorker::import
 
   return( CREATED );
 }
+
+
+
+/*! \brief Import a memory from a TMX file
+\param strMemory name of memory
+\param strInputParms input parameters in JSON format
+\param strOutParms on return filled with the output parameters in JSON format
+\returns 0 if successful or an error code in case of failures
+*/
+int OtmMemoryServiceWorker::importLocal
+(
+  std::string  strMemory,
+  std::string strInputParms,
+  std::string &strOutputParms
+)
+{
+  //EncodingHelper::convertUTF8ToASCII( strMemory );
+  T5LOG( T5INFO) << "+POST " << strMemory << "/importlocal\n";
+  int iRC = verifyAPISession();
+  std::string strTempFile;
+  if ( iRC != 0 )
+  {
+    buildErrorReturn( iRC, this->szLastError, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  if ( strMemory.empty() )
+  {
+    wchar_t errMsg[] = L"::Missing name of memory";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+    return( BAD_REQUEST );
+  } /* endif */
+
+  // check if memory exists
+  if ( EqfMemoryExists( this->hSession, (PSZ)strMemory.c_str() ) != 0 )
+  {
+    return( NOT_FOUND );
+  }
+
+  // find the memory to our memory list
+  int iIndex = this->findMemoryInList( strMemory.c_str() );
+  LONG lHandle = 0;
+  BOOL fClose = false;
+  MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+  MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+  if ( iIndex != -1 )
+  {
+    // close the memory - when open
+    if ( this->vMemoryList[iIndex].eStatus == OPEN_STATUS )
+    {
+      fClose = true;
+      lHandle =          this->vMemoryList[iIndex].lHandle; //
+      lastStatus =       this->vMemoryList[iIndex].eStatus;
+      lastImportStatus = this->vMemoryList[iIndex].eImportStatus;
+
+      this->vMemoryList[iIndex].lHandle = 0;
+      this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+      this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+      //this->vMemoryList[iIndex].dImportProcess = 0;
+    }
+  }
+  else
+  {
+    size_t requiredMemory = 0;
+    {
+      char memFolder[260];
+      properties_get_str(KEY_MEM_DIR, memFolder, 260);
+      std::string path;
+
+      path = memFolder + strMemory;
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMI"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".TMD"));
+      requiredMemory += FilesystemHelper::GetFileSize( std::string(path + ".MEM"));
+
+      //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
+      requiredMemory += strInputParms.size() * 2;
+    }
+    //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+
+    // cleanup the memory list (close memories not used for a longer time)
+    size_t memLeftAfterOpening = cleanupMemoryList(requiredMemory);
+    if(VLOG_IS_ON(1)){
+      T5LOG( T5INFO) << ":: memory: " << strMemory << "; required RAM:" 
+          << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
+    }
+    //requiredMemory = 0;
+    // find a free slot in the memory list
+    iIndex = getFreeSlot(requiredMemory);
+
+    // handle "too many open memories" condition
+    if ( iIndex == -1 )
+    {
+      wchar_t errMsg[] = L"::Error: too many open translation memory databases";
+      buildErrorReturn( iRC, errMsg, strOutputParms );
+      return( INTERNAL_SERVER_ERROR );
+    } /* endif */
+
+    this->vMemoryList[iIndex].lHandle = 0;
+    this->vMemoryList[iIndex].eStatus = AVAILABLE_STATUS;
+    this->vMemoryList[iIndex].eImportStatus = IMPORT_RUNNING_STATUS;
+    //this->vMemoryList[iIndex].dImportProcess = 0;
+    strcpy( this->vMemoryList[iIndex].szName, strMemory.c_str() );
+  }
+  T5LOG( T5DEBUG) <<  "status for " << strMemory << " was changed to import";
+  // extract TMX data
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  JSONFactory *factory = JSONFactory::getInstance();
+  void *parseHandle = factory->parseJSONStart( strInputParms, &iRC );
+  if ( parseHandle == NULL )
+  {
+    wchar_t errMsg[] = L"::Missing or incorrect JSON data in request body";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+        
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+
+    return( BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  while ( iRC == 0 )
+  {
+    iRC = factory->parseJSONGetNext( parseHandle, name, value );
+    if ( iRC == 0 )
+    {
+      //T5LOG( T5INFO) << "parsed json name = ", name.c_str(), "; value = ", value.c_str());
+      if ( strcasecmp( name.c_str(), "localPath" ) == 0 )
+      {
+        strTempFile = value;
+        //break;
+      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        T5LOG( T5WARNING) <<"::set new threshold for logging" << loggingThreshold;
+        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else{
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }
+    }else if(iRC != 2002){// iRC != INFO_ENDOFPARAMETERLISTREACHED
+        T5LOG(T5ERROR) << "failed to parse JSON \"" << strInputParms <<"\", iRC = " << iRC;
+    }
+  } /* endwhile */
+  factory->parseJSONStop( parseHandle );
+  iRC = iRC == 2002? 0: iRC;
+
+  if ( strTempFile.empty())
+  {
+    wchar_t errMsg[] = L"::Missing TMX filepath";
+    buildErrorReturn( iRC, errMsg, strOutputParms );
+  
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+
+    return( BAD_REQUEST );
+  } /* endif */ 
+
+  T5LOG( T5INFO) << "+   Temp TMX File is " << strTempFile;
+
+  // decode TMX data and write it to temp file
+  if(!FilesystemHelper::FileExists(strTempFile.c_str())){
+    std::wstring errMsg = L"::TMX filepath not found, filepath: " + EncodingHelper::convertToUTF32(strTempFile);
+    buildErrorReturn( iRC, (PSZ_W)errMsg.c_str(), strOutputParms );
+  
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    return (BAD_REQUEST);
+  }
+  if ( iRC != 0 )
+  {
+    std::string strError = "error::iRC = " + to_string(iRC);
+    buildErrorReturn( iRC, (char *)strError.c_str(), strOutputParms );
+    
+    //restore status
+    this->vMemoryList[iIndex].lHandle = lHandle;
+    this->vMemoryList[iIndex].eStatus = lastStatus;
+    this->vMemoryList[iIndex].eImportStatus = lastImportStatus;
+    return( INTERNAL_SERVER_ERROR );
+  }
+  
+  //success in parsing request data-> close mem if needed
+  if(lHandle && fClose){
+        EqfCloseMem( this->hSession, lHandle, 0 );
+  }
+
+  // start the import background process
+  PIMPORTMEMORYDATA pData = new( IMPORTMEMORYDATA );
+  strcpy( pData->szInFile, strTempFile.c_str() );
+  strcpy( pData->szMemory, strMemory.c_str() );
+  pData->fDeleteSourceTmx = false;
+
+  if(this->vMemoryList[iIndex].importDetails == nullptr){
+    this->vMemoryList[iIndex].importDetails = new ImportStatusDetails;
+  }
+  
+  pData->importDetails = this->vMemoryList[iIndex].importDetails;
+  pData->importDetails->reset();
+  pData->hSession = hSession;
+  pData->pMemoryServiceWorker = this;
+
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
+
+  return( CREATED );
+}
+
+
 
 /*! \brief Create a new memory
 \param strInputParms input parameters in JSON format
@@ -3178,7 +3393,7 @@ void importMemoryProcess( void *pvData )
   pData->pMemoryServiceWorker->importDone( pData->szMemory, iRC, pData->szError );
 
   // cleanup
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+  if(pData->fDeleteSourceTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
     DeleteFile( pData->szInFile );
   }
   delete( pData );

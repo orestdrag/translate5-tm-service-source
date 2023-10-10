@@ -74,6 +74,13 @@ public:
     std::string &strOutputParms
   );
 
+  int importLocal
+  (
+    std::string  strMemory,
+    std::string strInputParms,
+    std::string &strOutputParms
+  );
+
   int cloneTMLocaly
   (
     std::string  strMemory,
