@@ -1310,7 +1310,7 @@ typedef struct _TMX_SENTENCE
 {
   PSZ_W pInputString;
   PSZ_W pNormString;
-  //PSZ_W pNormStringWithNPTagHashes;
+  PSZ_W pInputStringWithNPTagHashes;
   //PSZ_W pInputStringWNormalizedTags;
   PSZ_W pNormStringStart;
   USHORT  usNormLen;
@@ -2233,18 +2233,8 @@ BOOL TMFuzzynessEx
   PUSHORT     pusDiffs                 // number of diffs in segment
 );
 
-USHORT TokenizeSource( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT );
-USHORT TokenizeSourceEx( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG );
 USHORT TokenizeSourceEx2( PTMX_CLB, PTMX_SENTENCE, PSZ, PSZ, USHORT, ULONG, int );
-USHORT TokenizeSourceEx2Ref(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   TMX_SENTENCE& rSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP,                      // OEM CP of source language     
-   int iMode                            // mode to be passed to create protect table function
-);
+
 
 USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT, USHORT);
 

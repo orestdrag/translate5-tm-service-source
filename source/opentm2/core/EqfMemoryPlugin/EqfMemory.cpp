@@ -270,6 +270,7 @@ unsigned long EqfMemory::getFileSize()
 }
 
 
+USHORT TmtXReplace( PTMX_CLB, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 
 /*! \brief Store the supplied proposal in the memory
     When the proposal aready exists it will be overwritten with the supplied data
@@ -297,7 +298,20 @@ int EqfMemory::putProposal
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
 
-  iRC = (int)TmReplaceW( this->htm,  NULL,  this->pTmPutIn, this->pTmPutOut, FALSE );
+  /********************************************************************/
+  /* fill the TMX_PUT_IN prefix structure                             */
+  /* stPrefixIn.usLengthInput                                         */
+  /* stPrefixIn.usTmCommand                                           */
+  /* the TMX_PUT_IN structure must not be filled it is provided       */
+  /* by the caller                                                    */
+  /********************************************************************/
+  pTmPutIn->stPrefixIn.usLengthInput = sizeof( TMX_PUT_IN_W );
+  pTmPutIn->stPrefixIn.usTmCommand   = TMC_REPLACE;
+
+  /********************************************************************/
+  /* call TmtXReplace                                                 */
+  /********************************************************************/
+  iRC = TmtXReplace ( (PTMX_CLB)htm, pTmPutIn, pTmPutOut );
 
   if ( iRC != 0 && (iRC != 5019 ||  T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   

@@ -356,7 +356,6 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        //--- "No segments have been exported to %1." otherwise
        //--- issue a message "Memory Database Export successfully completed."
        CloseFile( &(pExportIDA->hFile) );
-       LOG_TEMPORARY_COMMENTED_W_INFO ( "OEMTOANSI"); //OEMTOANSI ( pExportIDA->szMemName );
        pReplString[0] = pExportIDA->ControlsIda.szPathContent;
        pReplString[1] = pExportIDA->szMemName;
 
@@ -375,7 +374,6 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
          //          &(pReplString[0]), EQF_INFO,
          //          pExportIDA->hwndErrMsg );
        } /* endif */
-       LOG_TEMPORARY_COMMENTED_W_INFO ("ANSITOOEM");  //ANSITOOEM ( pExportIDA->szMemName );
 
        //--- Issue message WM_EQF_MEMEXPORT_END
        if ( pExportIDA->hwndErrMsg == HWND_FUNCIF )

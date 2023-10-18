@@ -80,6 +80,9 @@ USHORT TmtXDelSegm
    fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
+   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
+                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
+  if ( fOK )
    fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
@@ -124,11 +127,17 @@ USHORT TmtXDelSegm
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    UTF16strcpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource );
+    wcsncpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1 );
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEG_SIZE-1);
+    auto normalizedStringWithNPHashes = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pInputString);
+
+
     //tokenize source segment, resuting in normalized string and tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString,
+    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
                            pTmDelIn->stTmPut.szSourceLanguage,
-                           pTmClb->stTmSign.bMajorVersion );
+                           pTmClb->stTmSign.bMajorVersion, 1, 0  );
+    wcsncpy(pSentence->pNormString, normalizedStringWithNPHashes.c_str(), MAX_SEG_SIZE-1);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     pSentence->pTagRecord->usTagTableId = 0;
@@ -212,6 +221,7 @@ USHORT TmtXDelSegm
   UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pNormString, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );

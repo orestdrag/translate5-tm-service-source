@@ -220,6 +220,9 @@ USHORT TmtXReplace
    fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
+   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
+                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
+  if ( fOK )
    fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
@@ -258,12 +261,14 @@ USHORT TmtXReplace
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    UTF16strcpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource );
+    wcsncpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1);
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy( pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE-1);
 
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString,
+    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage,
-                           (USHORT)pTmClb->stTmSign.bMajorVersion );
+                           (USHORT)pTmClb->stTmSign.bMajorVersion, 1, 0  );
     
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );
@@ -329,6 +334,7 @@ USHORT TmtXReplace
   //release allocated memory
   UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
@@ -431,10 +437,10 @@ VOID HashSentence
 
   while ( pTermTokens->usLength )
   {
-    pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+    pNormOffset = pSentence->pInputStringWithNPTagHashes + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      auto str = EncodingHelper::convertToUTF8(pNormOffset);
+      auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
       T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
     }
     //max nr of hashes built
@@ -1124,8 +1130,10 @@ USHORT AddToTm
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
-                       pNormString,  // ptr to target normalized string
-                       usNormLen,    // length of target normalized string
+                       pTmPut->szTarget,
+                       //pNormString,  // ptr to target normalized string
+                       //usNormLen,    // length of target normalized string
+                       wcslen(pTmPut->szTarget),
                        pTmRecord,    // filled tm record returned
                        pTargetClb, usSrcLang );
         
@@ -1207,7 +1215,8 @@ VOID FillTmRecord
   pTMXSourceRecord->usSource = sizeof( TMX_SOURCE_RECORD );
 //  memcpy( pTMXSourceRecord+1, pSentence->pNormString, pSentence->usNormLen *sizeof(CHAR_W));
 //@@@
-  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
+  //ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
+  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pInputString, wcslen(pSentence->pInputString) );
   pTMXSourceRecord->usLangId = usSrcLangId;
   //size of source record
   RECLEN(pTMXSourceRecord) = sizeof( TMX_SOURCE_RECORD ) + ulSrcNormLen;
@@ -1445,28 +1454,6 @@ USHORT UpdateTmIndex
 
   //allocate 32K for tm index record
   fOK = UtlAlloc( (PVOID *) &(pIndexRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-
-#ifdef NTMTEST
-{
-  FILE *fOut;                          // test output
-  PULONG pulTVotes = pSentence->pulVotes;
-  USHORT  i;
-  ULONG   ulKey;
-
-  fOut      = fopen ( "\\NTMTEST.DBG", "a" );
-  fprintf (fOut, "%20s %d\n", __FILE__, __LINE__);
-  fprintf (fOut, "Input String: %s\n",pSentence->pInputString );
-  fprintf (fOut, "\nCompact Bits: \n");
-
-  for ( i = 0; i < pSentence->usActVote; i++, pulTVotes++ )
-  {
-      //add the match(tuple) to compact area
-      ulKey = *pulTVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-      fprintf (fOut, "%4d %4d\n",(ulKey >> 3), (1 << (USHORT)(ulKey & 0x07)));
-   } /* endfor */
-   fclose( fOut      );
-}
-#endif
 
   if ( !fOK )
   {

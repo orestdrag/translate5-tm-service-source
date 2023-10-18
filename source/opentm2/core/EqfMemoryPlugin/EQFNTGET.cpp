@@ -268,8 +268,6 @@ static BOOL NTMCheckAndDeleteTagPairs
   BOOL      fRespectLFs
 );
 
-std::wstring GenerateNormalizeString(std::wstring&& w_str);
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -363,18 +361,15 @@ USHORT TmtXGet
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
     
-    //auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetIn->stTmGet.szSource);
-    auto inputStringWithReplacedTags = GenerateNormalizeString(pTmGetIn->stTmGet.szSource);
-    
-    //wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
-    wcsncpy( pSentence->pInputString, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE);
+    wcsncpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource, MAX_SEGMENT_SIZE-1);
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, 
+            inputStringWithReplacedTags.c_str(), std::min(inputStringWithReplacedTags.length(), (size_t) MAX_SEG_SIZE-1));
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    ULONG ulSrcCP = 1;
-    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, ulSrcCP, 0 );
-    //std::wstring NPTagsReplacedWithTheirKeys = GenerateNormalizeString(pSentence->pInputString);
-    //wcpncpy(pSentence->pNormStringWithNPTagHashes, NPTagsReplacedWithTheirKeys.c_str(), MAX_SEGMENT_SIZE);
+    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage, (USHORT)pTmClb->stTmSign.bMajorVersion, 1, 0 );
+
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -1909,10 +1904,12 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
       MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
       pSubstProp->pTagsPropSource = (PTMX_TAGTABLE_RECORD)pByte;
-      usRc = (AddTagsToStringW( pSourceString,
-                              plSourceLen,      // in # of w's
-                             (PTMX_TAGTABLE_RECORD)pByte,
-                             pSubstProp->szPropSource )) ? usRc : BTREE_CORRUPTED;
+      //usRc = (AddTagsToStringW( pSourceString,
+      //                        plSourceLen,      // in # of w's
+      //                       (PTMX_TAGTABLE_RECORD)pByte,
+      //                       pSubstProp->szPropSource )) ? usRc : BTREE_CORRUPTED;
+        //instead of lines above we now save not normalize string to btree
+        wcsncpy(pSubstProp->szPropSource, pSourceString, *plSourceLen);
       if ( usRc == NO_ERROR )
       {
         PSZ_W  pTarget;
@@ -1932,10 +1929,13 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           pByte += pTMXTargetRecord->usTargetTagTable;
 
           pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
-          usRc = (AddTagsToStringW( pTarget,
-                                    &lTargetLen,     // in # of w's
-                                    (PTMX_TAGTABLE_RECORD)pByte,
-                                    pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;
+
+          //usRc = (AddTagsToStringW( pTarget,
+          //                          &lTargetLen,     // in # of w's
+          //                          (PTMX_TAGTABLE_RECORD)pByte,
+          //                          pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;      
+         //instead of lines above we now save not normalize string to btree
+            wcsncpy(pSubstProp->szPropTarget, pTarget, lTargetLen);
           UtlAlloc( (PVOID *) &pTarget, 0L, 0L, NOMSG );
         }
         else
@@ -2100,7 +2100,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
         }
         else
         {
-          if ( fTag )
+          if (false // segments after 0.4.52 would be saved as is 
+              && fTag 
+          )
           {
             /************************************************************/
             /* add tags to source string                                */
@@ -2192,7 +2194,9 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
           }
           else
           {
-            if ( fTag )
+            if ( false && // segments after 0.4.52 would be saved as is 
+             fTag 
+            )
             {
               //add tags to target string if flag set to true
               fOK = AddTagsToStringW( pString, &lTargetLen,
@@ -2713,7 +2717,6 @@ std::wstring removeTagsFromString(std::wstring input){
 
 
 
-std::wstring GenerateNormalizeString(std::wstring&& w_str);
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -2764,6 +2767,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_CLB pTMXTargetClb = NULL;       //ptr to target control block
   PSZ_W pString = NULL;                //ptr to normalized source string
+  PSZ_W pNormalizedString = NULL;
   //PSZ_W pStringWithNP = NULL;                //ptr to normalized source string
   BOOL fOK = TRUE;                     //success indicator
   ULONG ulSourceLen = 0;              //length of normalized source string
@@ -2772,6 +2776,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   BOOL   fStringEqual;                 // strings are equal ???
   BOOL   fNormStringEqual;             // normalized strings are equal ???
   BOOL   fRespectCRLFStringEqual = 0L;
+  std::wstring NormalizedPString;
 
   SHORT sLangID = MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
@@ -2785,6 +2790,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
+  if( fOK ) fOK = UtlAlloc( (PVOID *) &(pNormalizedString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   //fOK = fOK && UtlAlloc( (PVOID *) &(pStringWithNP), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
   if ( !fOK )
@@ -2816,12 +2822,13 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
+    NormalizedPString = ReplaceNPTagsWithHashesAndNormalizeString(pString);
+    wcsncpy(pNormalizedString, NormalizedPString.c_str(), NormalizedPString.length());
 
-    if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
       T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\r\n" << str << "\r\n</SOURCE>\r\n" ;
     }
-    //std::wstring w_str = 
 
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
@@ -2835,9 +2842,9 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = ( //UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L 
-                        UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L 
-                      ||UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L ) ;
+       fStringEqual = (// UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWithNPTagHashes,0) == 0L 
+                         UtlCompIgnWhiteSpaceW(pNormalizedString, pSentence->pNormString, 0 ) == 0L 
+                      || UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L  ) ;
     } /* endif*/
 
     T5LOG( T5INFO) << "FuzzyTest: After String compare, fStringEqual = " <<fStringEqual;
@@ -3042,19 +3049,21 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
               pByte += pTMXTargetRecord->usSourceTagTable;
               pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-              fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+              //fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+                //instead of lines above we now save not normalize string to btree        
+                wcsncpy(pSentence->pPropString, pString, lLenTmp);
               if ( !fOK )
               {
                 LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */              
             } /* endif */
 
-            std::wstring NPNormString = GenerateNormalizeString(pSentence->pPropString);
+            std::wstring NPNormString = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pPropString);
 
             //TODO: remove punctuation here
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
-                                        //pSentence->pNormString,
-                                        pSentence->pInputString,
+                                        pSentence->pNormString,
+                                        //pSentence->pInputStringWithNPTagHashes,
 //                                        pString,
                                         (PSZ_W)NPNormString.c_str(),
                                         //pSentence->pPropString,
@@ -3100,9 +3109,10 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
                 {
                   //calculate length of source string
                   LONG  lLenTmp = ulSourceLen;
-                  fOK = AddTagsToStringW( pString,
-                                          &lLenTmp,      // in # of w's
-                                         pTMXSourceTagTable, pSentence->pPropString );
+                  //fOK = AddTagsToStringW( pString,
+                  //                        &lLenTmp,      // in # of w's
+                  //                       pTMXSourceTagTable, pSentence->pPropString );
+                  
                   if ( !fOK )
                   {
                     LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
@@ -3206,6 +3216,7 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pNormalizedString, 0L, 0L, NOMSG );
   //UtlAlloc( (PVOID *) &pStringWithNP, 0L, 0L, NOMSG );
 
   if ( usRc )

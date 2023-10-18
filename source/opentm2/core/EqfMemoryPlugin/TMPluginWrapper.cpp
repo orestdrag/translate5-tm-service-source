@@ -514,31 +514,6 @@ BOOL CheckForAlloc
 //       add term info to structure                                             
 //                                                                              
 //------------------------------------------------------------------------------
-USHORT TokenizeSource
-(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   PTMX_SENTENCE pSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion                     // version of TM
-)
-{
-  ULONG ulSrcCP = 1;
-  return( TokenizeSourceEx( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP ) );
-}
-
-USHORT TokenizeSourceEx
-(
-   PTMX_CLB pClb,                       // pointer to control block (Null if called outside of Tm functions)
-   PTMX_SENTENCE pSentence,             // pointer to sentence structure
-   PSZ pTagTableName,                   // name of tag table
-   PSZ pSourceLang,                     // source language
-   USHORT usVersion,                    // version of TM
-   ULONG  ulSrcCP                       // OEM CP of source language     
-)
-{
-    return( TokenizeSourceEx2( pClb, pSentence, pTagTableName, pSourceLang, usVersion, ulSrcCP, 0 ) );
-}
 
 USHORT TokenizeSourceEx2
 (
@@ -572,16 +547,9 @@ USHORT TokenizeSourceEx2
   /* normalize \r\n combinations in input string ..                   */
   /********************************************************************/
   {
-    PSZ_W  pSrc = pSentence->pInputString;
-    PSZ_W  pTgt = pSentence->pInputString;
+    PSZ_W  pSrc = pSentence->pInputStringWithNPTagHashes;
+    PSZ_W  pTgt = pSentence->pInputStringWithNPTagHashes;
     CHAR_W c;
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string src = EncodingHelper::convertToUTF8(pSrc);
-      T5LOG( T5DEBUG) <<  ":: src = " << src;
-      
-      std::string trg = EncodingHelper::convertToUTF8(pTgt);
-      T5LOG( T5DEBUG) << "\n:: trg = " << trg;
-    }
 
     while ( (c = *pSrc++) != NULC )
     {
@@ -669,7 +637,7 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+       usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
                                    (PTOKENENTRY)pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
@@ -694,7 +662,7 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
-           usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+           usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
                                       (PTOKENENTRY)pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
@@ -723,15 +691,15 @@ USHORT TokenizeSourceEx2
               ULONG     ulListSize = 0;    
               USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
 
-              CHAR_W chTemp = pSentence->pInputString[pEntry->usStop+1]; // buffer for character values
-              pSentence->pInputString[pEntry->usStop+1] = EOS;
+              CHAR_W chTemp = pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1]; // buffer for character values
+              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = EOS;
 
               usRc = NTMMorphTokenizeW( usLangId,
-                                       pSentence->pInputString + pEntry->usStart,
+                                       pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
                                        &ulListSize, (PVOID *)&pTermList,
                                        MORPH_FLAG_OFFSLIST, usVersion );
 
-              pSentence->pInputString[pEntry->usStop+1] = chTemp;
+              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = chTemp;
 
               if ( usRc == MORPH_OK )
               {
@@ -766,7 +734,7 @@ USHORT TokenizeSourceEx2
                         pTerm++;
                       } /* endwhile */
                   } /* endif */
-                  memcpy( pszNormStringPos, pSentence->pInputString + pEntry->usStart, usTokLen * sizeof(CHAR_W));
+                  memcpy( pszNormStringPos, pSentence->pInputStringWithNPTagHashes + pEntry->usStart, usTokLen * sizeof(CHAR_W));
                   pSentence->usNormLen =  pSentence->usNormLen + usTokLen;
                   pszNormStringPos += usTokLen;
                 } /* endif */
@@ -820,7 +788,7 @@ USHORT TokenizeSourceEx2
                   ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
                     (pEntry->usStop - pEntry->usStart + 1);
                   memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
-                          pSentence->pInputString + pEntry->usStart,
+                          pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
                           ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
                   pTagEntry += usTagEntryLen;
                 } /* endif */
@@ -839,7 +807,7 @@ USHORT TokenizeSourceEx2
       if ( pTermTokens == pSentence->pTermTokens )
       {
         pTermTokens->usOffset = 0;
-        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputString );
+        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputStringWithNPTagHashes );
         pTermTokens->usHash = 0;
         pTermTokens++;
       } /* endif */

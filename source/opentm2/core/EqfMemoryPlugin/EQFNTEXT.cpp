@@ -689,12 +689,13 @@ USHORT FillExtStructure
     pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
     //add tags to source string if there are any
-    if ( RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD) )
-    {
-      fOK = AddTagsToStringW( pSourceString, plSourceLen,
-                             (PTMX_TAGTABLE_RECORD)pByte, pstExt->szSource );
-    }
-    else if(*plSourceLen > 0)
+    //if ( RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD) )
+    //{
+      //fOK = AddTagsToStringW( pSourceString, plSourceLen,
+      //                       (PTMX_TAGTABLE_RECORD)pByte, pstExt->szSource );
+    //}
+    //else 
+    if(*plSourceLen > 0)
     {
       //else copy string
       memcpy( pstExt->szSource, pSourceString, *plSourceLen * sizeof(CHAR_W) );
@@ -745,12 +746,12 @@ USHORT FillExtStructure
                         pstExt->szTagTable, NULL );
 
       //add tags to target string if flag set to true
-      if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
-      {
-        AddTagsToStringW( pTargetString, &lTargetLen,
-                         (PTMX_TAGTABLE_RECORD)pByte, pstExt->szTarget );
-      }
-      else
+      //if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
+      //{
+        //AddTagsToStringW( pTargetString, &lTargetLen,
+        //                 (PTMX_TAGTABLE_RECORD)pByte, pstExt->szTarget );
+      //}
+      //else
       {
         //else copy string
         if(lTargetLen >= 0){

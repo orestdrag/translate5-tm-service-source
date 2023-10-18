@@ -6743,3 +6743,8 @@ typedef struct _CALCREPORTBINDATA
 #define FUZZY_THRESHOLD_1                  0.7 // Theshold for different fuzzy classes
 #define FUZZY_THRESHOLD_2                  0.9 // Theshold for different fuzzy classes
 
+
+
+#include<string>
+std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str);
+std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str);

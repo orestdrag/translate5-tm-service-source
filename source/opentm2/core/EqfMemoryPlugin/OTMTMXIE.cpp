@@ -391,6 +391,7 @@ class TagReplacer{
   int      iHighestPHId = 100;             // increments with ph tag
   bool fFuzzyRequest = false;              // if re are dealing with import or fuzzy request
   bool fReplaceNumberProtectionTagsWithHashes = false;//
+  bool fSkipTags = false;
 
   //to track id and i attributes in request and then generate new values for tags in srt and trg that is not matching
   int iHighestRequestsOriginalI  = 0;
@@ -434,17 +435,19 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
   ELEMENTID tagType = tag.generated_tagType;
   if(fReplaceNumberProtectionTagsWithHashes){
     if(tagType == T5_N_ELEMENT){
-      return EncodingHelper::convertToUTF16(tag.t5n_key);
+      std::wstring rAttrValue = EncodingHelper::convertToUTF16(tag.t5n_key);
+      std::replace(rAttrValue.begin(), rAttrValue.end(), '=', '_');
+      return rAttrValue;
     }
-    /*else{// skip other tags
-      std::string outStr = "<" + TmxIDToName[tag.original_tagType];
-      if(tag.original_x>0){
-        outStr += " x=\"" + tag.original_x + "\"";
-      }
-      if(tag.original_i>0){
-        outStr += " i=\"" + tag.original_i + "\"";
-      }
-      return EncodingHelper::convertToUTF16(outStr);
+    else if(fSkipTags){// skip other tags
+      //std::string outStr = "<" + TmxIDToName[tag.original_tagType];
+      //if(tag.original_x>0){
+      //  outStr += " x=\"" + tag.original_x + "\"";
+      //}
+      //if(tag.original_i>0){
+      //  outStr += " i=\"" + tag.original_i + "\"";
+      //}
+      //return EncodingHelper::convertToUTF16(outStr);
       return L"";
     }//*/
   }
@@ -2063,7 +2066,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
 }
 
 
-std::wstring GenerateNormalizeString(std::wstring&& w_str){
+std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str){
 
   // parse and save request
   SAXParser *parser = new SAXParser();
@@ -2073,6 +2076,43 @@ std::wstring GenerateNormalizeString(std::wstring&& w_str){
   handler.tagReplacer.fFuzzyRequest = true;
   handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
   handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(&handler);
+  parser->setErrorHandler(&handler);
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+
+  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
+  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
+  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+                                      "req_buff (in memory)");
+
+  parser->parse(req_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler.GetErrorText(buff, sizeof(buff));
+    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+  }
+  delete parser;
+  return handler.GetParsedData();
+}
+
+std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str){
+
+  // parse and save request
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler handler;
+  
+  handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
+  handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
+  handler.tagReplacer.fSkipTags = true;
   XMLPScanToken saxToken;
 
   //  install our SAX handler as the document and error handler.
