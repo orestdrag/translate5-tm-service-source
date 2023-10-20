@@ -1,6 +1,9 @@
 /*! EQFEVENT.H
 	Copyright (c) 1990-2012, International Business Machines Corporation and others. All rights reserved.
 */
+#ifndef _EQF_EVENT_H_INCLUDED_
+#define _EQF_EVENT_H_INCLUDED_
+
 
 #ifndef EVENTLOG
   #ifndef _DEBUG
@@ -239,16 +242,6 @@ extern TEVENTGROUP EVENTGROUP;
 /**********************************************************************/
 #ifndef STRING_EVENT_IDS
 
-// record type identifier
-typedef struct _EVENTENTRY
-{
-  LONG        lTime;                   // date and time of event
-  SHORT       sType;                   // type of event
-  SHORT       sEventId;                // ID of event
-  SHORT       sClass;                  // class or type of event
-  SHORT       sRC;                     // event return code
-} EVENTENTRY, *PEVENTENTRY;
-
 /**********************************************************************/
 /* New event structure                                                */
 /* For events of a record type of EVENTRECEXTENDED the subsequent     */
@@ -276,17 +269,7 @@ typedef struct _EVENTENTRY2
 /* Format of event table                                              */
 /**********************************************************************/
 #define EVENTMAGICWORD "EVN"           // event table identifier
-#define EVENTTABLEVERSION  1           // current event table version
 
-typedef struct _EVENTTABLE
-{
-  CHAR   szMagicWord[4];               // identifier for this type of event table
-  SHORT  sVersion;                     // version of event table
-  SHORT  sFirstEvent;                  // number of first event in list
-  SHORT  sLastEvent;                   // number of last event in list
-  SHORT  sListSize;                    // total size of list in number of events
-  EVENTENTRY2 Event[MAX_EVENT2_ENTRIES]; // table with event entries
-} EVENTTABLE, *PEVENTTABLE;
 
 // Macros to access the elements of the first entry in the list
 #define LASTEVENTINLIST( plist ) plist[0].sClass
@@ -309,6 +292,94 @@ typedef enum
 /**********************************************************************/
 /* Event macros                                                       */
 /**********************************************************************/
+
+
+/**********************************************************************/
+/* Event macros                                                       */
+/**********************************************************************/
+BOOL UtlEvent2
+(
+  SHORT sEventType,                    // type of the event
+  SHORT sEventID,                      // the event identifier
+  SHORT sEventClass,                   // the event class
+  SHORT sEventRC,                      // the event return code or error code
+  SHORT sGroup,                        // the event group
+  PSZ   pszAddData                     // additional data for event (string)
+);
+
+BOOL UtlEvent
+(
+  SHORT sEventType,                    // type of the event
+  SHORT sEventID,                      // the event identifier
+  SHORT sEventClass,                   // the event class
+  SHORT sEventRC                       // the event return code or error code
+);
+
+
+
+#ifndef STRING_EVENT_IDS
+  #ifndef NO_ERREVENTS
+    #define ERREVENT( id, class, rc ) \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
+      T5LOG( T5ERROR) << ":: id = " << id << "(" << GET_NAME(id) << "); class = " <<  class << "(" << GET_NAME(class) \
+          <<"); rc = " <<  rc ;
+  #else
+    #define ERREVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_ERREVENTS
+    #define ERREVENT2( id, class, rc, gr, str ) \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
+      T5LOG( T5ERROR) << ":: id = " << id << "(" << GET_NAME(id) << "); class = " <<  class << "(" << GET_NAME(class) \
+          <<"); rc = " <<  rc <<" (" <<GET_NAME(rc) << "); str = " << str << "; gr = " << gr << "(" << GET_NAME(gr) << ")"; 
+      //UtlEvent2( ERROR_EVENT, id, class, rc, gr, str )
+  #else
+    #define ERREVENT2( id, class, rc, gr, str )
+  #endif
+
+  #ifndef NO_INFOEVENTS
+    #define INFOEVENT( id, class, rc ) \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+    T5LOG( T5INFO) << ":: id = " << id << "; class = " <<  class << "; rc = " <<  rc ;
+      //UtlEvent( INFO_EVENT, id, class, rc )
+  #else
+    #define INFOEVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_INFOEVENTS
+    #define INFOEVENT2( id, class, rc, gr, str ) \
+      if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)) \
+      T5LOG( T5INFO) << ":: id = " << id << "(" << GET_NAME(id) << "); class = " <<  class << "(" << GET_NAME(class) \
+          <<"); rc = " <<  rc <<" (" <<GET_NAME(rc) << "); str = " << str << "; gr = " << gr << "(" << GET_NAME(gr) << ")"; 
+      //UtlEvent2( INFO_EVENT, id, class, rc, gr, str )
+  #else
+    #define INFOEVENT2( id, class, rc, gr, str )
+  #endif
+
+  #ifndef _DEBUG
+    //#define NO_DEBUGEVENTS
+  #endif
+
+  #ifndef NO_DEBUGEVENTS
+    #define DEBUGEVENT( id, class, rc ) \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+    T5LOG( T5DEVELOP)<< ":: id = " << (id) << "; class = " << class << "; rc = " <<rc;\
+      //UtlEvent( EQFDEBUG_EVENT, id, class, rc )
+  #else
+    #define DEBUGEVENT( id, class, rc )
+  #endif
+
+  #ifndef NO_DEBUGEVENTS
+    #define DEBUGEVENT2( id, class, rc, gr, str ) \
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)) \
+      T5LOG( T5DEVELOP) <<  ":: id = "<< id <<  "; class = " << class << \
+      "; rc = "<<rc<< "; str = "<< str<< "; gr = "<<gr;\
+      //UtlEvent2( EQFDEBUG_EVENT, id, class, rc, gr, str )
+  #else
+    #define DEBUGEVENT2( id, class, rc, gr, str )
+  #endif
+#endif
+/*
 #ifndef STRING_EVENT_IDS
   #ifndef NO_ERREVENTS
     #define ERREVENT( id, class, rc ) \
@@ -355,4 +426,10 @@ typedef enum
   #else
     #define DEBUGEVENT2( id, class, rc, gr, str )
   #endif
+
+
 #endif
+
+//*/
+
+#endif //_EQF_EVENT_H_INCLUDED_

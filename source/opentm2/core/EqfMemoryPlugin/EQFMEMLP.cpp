@@ -705,7 +705,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
         (pLIDA->usImpMode == MEM_FORMAT_TMX_TRADOS) ||
         (pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT) )
    {
-     pLIDA->lProgress = 0;
+     //pLIDA->lProgress = 0;
      
      usRc = EqfPluginWrapper::MemImportProcess( pLIDA->lExternalImportHandle , MEMINSERTSEGMENT, (LONG)pLIDA, pImportData);
 
@@ -714,23 +714,23 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
      {
        PSZ pszMsg = pLIDA->pstMemInfo->szError;
        T5LOG(T5ERROR) <<  "::ERROR_MEMIMP_ERROR::MEM_SEG_SYN_ERR::" <<  pszMsg ;
-       usRc = MEM_SEG_SYN_ERR;
+       LOG_AND_SET_RC(usRc, T5INFO, MEM_SEG_SYN_ERR);
      } /* endif */
 
      // map return code to the ones used by memory export...
      switch ( usRc )
      {
        case 0 :
-         usRc = MEM_PROCESS_OK;
+         LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_OK);
          break;
        case MEM_IMPORT_COMPLETE: 
-         usRc = MEM_PROCESS_END;
+         LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
          break;
        case MEM_SEG_SYN_ERR:
          // leave as-is
          break;
        default:
-         usRc = MEM_DB_ERROR;
+         LOG_AND_SET_RC(usRc, T5INFO, MEM_DB_ERROR);
          break;
      } /*endswitch */
    }
@@ -1410,7 +1410,7 @@ USHORT MemHandleCodePageValue
 		    {
 			    if ( pLIDA->usImpMode == SGMLFORMAT_UNICODE )
 		      {
-				    usRc = NO_VALID_ASCIIANSIFORMAT;
+				    LOG_AND_SET_RC(usRc, T5INFO, NO_VALID_ASCIIANSIFORMAT);
 		        pMsgError[0] = L"SGML ANSI";
             T5LOG(T5ERROR) << "::NO_VALID_ASCIIANSIFORMAT::" << EncodingHelper::convertToUTF8(pMsgError[0]);
 		      }
@@ -1418,20 +1418,20 @@ USHORT MemHandleCodePageValue
 		      { 
             if ( (pLIDA->hwndErrMsg == HWND_FUNCIF) || pLIDA->fBatch  )
 			      {
-			        usRc = MBID_OK;
+			        LOG_AND_SET_RC(usRc, T5INFO, MBID_OK);
 			      }
 			      else
             {
 		          pMsgError[1] = L"SGML ASCII";
 				      pMsgError[0] = pszCodePage;
               T5LOG(T5ERROR) << ":: WARNING_DIMP_FORMAT_SGML ASCII::"<<    EncodingHelper::convertToUTF8(pMsgError[0]);
-              usRc = WARNING_DIMP_FORMAT;
+              LOG_AND_SET_RC(usRc, T5INFO, WARNING_DIMP_FORMAT);
 			      } /* endif */
 
 			      if ( usRc == MBID_OK )
 			      {
 				      *pfRestartImport = TRUE;
-				      usRc = NO_ERROR;
+				      LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
 			      } /* endif */
   		    } /* endif */
 		    } /* endif */
@@ -1440,7 +1440,7 @@ USHORT MemHandleCodePageValue
 		    {
           if ( !UtlIsValidCP( ulCP ) )
           {
-			       usRc = NO_VALID_ASCIIANSICP;
+			       LOG_AND_SET_RC(usRc, T5INFO, NO_VALID_ASCIIANSICP);
              pMsgError[0] = pszCodePage + 5;
              T5LOG(T5ERROR) << "::rc = " << usRc << ":: " << EncodingHelper::convertToUTF8(pMsgError[0]);
 		      } /* endif */
@@ -1461,7 +1461,7 @@ USHORT MemHandleCodePageValue
 		   {
 		     if ( pLIDA->usImpMode == SGMLFORMAT_UNICODE )
 		     {
-				  usRc = NO_VALID_ASCIIANSIFORMAT;
+				  LOG_AND_SET_RC(usRc, T5INFO, NO_VALID_ASCIIANSIFORMAT);
 				  pMsgError[0] = L"SGML ASCII";
           T5LOG(T5ERROR) << "::NO_VALID_ASCIIANSIFORMAT::SGML ASCII";
 		    }
@@ -1469,7 +1469,7 @@ USHORT MemHandleCodePageValue
 		    {
           if ( ( pLIDA->hwndErrMsg == HWND_FUNCIF) || pLIDA->fBatch )
 			    {
-  				  usRc = MBID_OK;
+  				  LOG_AND_SET_RC(usRc, T5INFO, MBID_OK);
 			    }
 			    else
 			    {
@@ -1482,7 +1482,7 @@ USHORT MemHandleCodePageValue
 			    if (usRc == MBID_OK)
 			    {
   		      *pfRestartImport = TRUE;
-			      usRc = NO_ERROR;
+			      LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
 			    } /* endif */
 		    } /* endif */
 	     } /* endif */
@@ -1491,7 +1491,7 @@ USHORT MemHandleCodePageValue
 		   {
          if ( !UtlIsValidCP( ulCP ) )
          {
-			     usRc = NO_VALID_ASCIIANSICP;
+			     LOG_AND_SET_RC(usRc, T5INFO, NO_VALID_ASCIIANSICP);
            pMsgError[0] = pszCodePage + 6;
            T5LOG(T5ERROR) <<  ":: " << usRc << "::" << EncodingHelper::convertToUTF8(pMsgError[0]);
 		     } /* endif */
@@ -1509,13 +1509,13 @@ USHORT MemHandleCodePageValue
 
 		   if ( usImpMode != pLIDA->usImpMode )
 		   {
-		     usRc = ERROR_DIMP_UTF16WRONG;
+		     LOG_AND_SET_RC(usRc, T5INFO, ERROR_DIMP_UTF16WRONG);
 		     T5LOG(T5ERROR) << "::rc = ERROR_DIMP_UTF16WRONG = " << usRc;
 		   } /* endif */
 	   }
 	   else
 	   {  // error - this should not occur...
-		   usRc = ERROR_MEM_INVALID_SGML;
+		   LOG_AND_SET_RC(usRc, T5INFO, ERROR_MEM_INVALID_SGML);
 		   T5LOG(T5ERROR) <<  "::rc =  ERROR_MEM_INVALID_SGML" ;
 	   } /* endif */
   } /* endif */
@@ -1523,6 +1523,8 @@ USHORT MemHandleCodePageValue
   return(usRc);
 } /* end of function MemHandleCodePageValue */
 
+
+#include <xercesc/sax/SAXParseException.hpp>
 //
 // MEMINSERTSEGMENT  
 //
@@ -1566,6 +1568,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
+    pLIDA->ulActiveSegment = pSegment->lSegNum;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
 

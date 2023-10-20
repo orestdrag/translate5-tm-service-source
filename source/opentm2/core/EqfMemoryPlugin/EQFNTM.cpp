@@ -143,7 +143,7 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
   /********************************************************************/
   /* initialize function return code                                  */
   /********************************************************************/
-  usRc = ERROR_NOT_ENOUGH_MEMORY;
+  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 
   /********************************************************************/
   /* initialize TM handle                                             */
@@ -162,7 +162,7 @@ TmOpen( PSZ        szMemFullPath,      //(in)  full TM name x:\eqf\mem\mem.tmd
     /******************************************************************/
     /* set usRc to NO_ERROR                                           */
     /******************************************************************/
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
 
     /******************************************************************/
     /* assign memory to pointer pstOpenOut                           */
@@ -349,7 +349,7 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
   /********************************************************************/
   /* initialze function return code                                   */
   /********************************************************************/
-  usRc = ERROR_NOT_ENOUGH_MEMORY;
+  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 
   /********************************************************************/
   /* do processing only when a valid TM handle is passed              */
@@ -394,7 +394,7 @@ TmClose( HTM        htm,               //(in) TM handle returned from open
     /* no valid TM handle was passed (handle is NULL)                 */
     /* handle this as no error                                        */
     /******************************************************************/
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
   } /* endif */
 
   if ( usRc != NO_ERROR )
@@ -480,7 +480,7 @@ TmGetW(EqfMemory*            htm,             //(in)  TM handle
       }
       else
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
   } /* endif */

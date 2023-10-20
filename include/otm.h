@@ -106,6 +106,7 @@ struct ImportStatusDetails{
   long lReorganizeStartTime;
   std::stringstream importMsg;
   bool fReorganize{0}; // true for reorganize call, false for import
+  size_t activeSegment{0};
   
   void reset(){
     firstInvalidSegmentsSegNums.clear();
@@ -121,6 +122,7 @@ struct ImportStatusDetails{
     lReorganizeStartTime = 0;
     importTimestamp = "not finished";    
     invalidSegmentsRCs.clear();
+    activeSegment = 0;
   }
   
   std::string toString(){

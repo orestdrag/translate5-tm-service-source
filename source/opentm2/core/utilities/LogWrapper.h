@@ -153,4 +153,5 @@ int getBuffIdForLog(int severity);
 //    #define SET_AND_LOG(rc, error) rc = error;
 //#endif
 
+#define LOG_AND_SET_RC(rcVar, logLevel, rc)  T5LOG(logLevel) << "rc was set to " <<#rc << "(" << rc <<"), prev state = " <<rcVar; rcVar = rc;
 #endif //_LOG_WRAPPER_H_

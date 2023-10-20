@@ -264,6 +264,7 @@ static BOOL NTMCheckAndDeleteTagPairs
   BOOL      fRespectLFs
 );
 
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -356,15 +357,15 @@ USHORT TmtXGet
 
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
-
-    auto inputStringWithReplacedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(pTmGetIn->stTmGet.szSource);
-    //wcscpy(pSentence->pInputStringWNormalizedTags, inputStringWithReplacedTags[0].c_str());
-    wcscpy( pSentence->pInputString, inputStringWithReplacedTags[0].c_str());
+    
+    wcsncpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource, MAX_SEGMENT_SIZE-1);
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, 
+            inputStringWithReplacedTags.c_str(), std::min(inputStringWithReplacedTags.length(), (size_t) MAX_SEG_SIZE-1));
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    ULONG ulSrcCP = 1;
-    usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage/*, (USHORT)pTmClb->stTmSign.bMajorVersion*/);
+    usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
@@ -697,7 +698,7 @@ USHORT GetExactMatch
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -727,7 +728,7 @@ USHORT GetExactMatch
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
         if ( usRc == NO_ERROR )
@@ -1017,7 +1018,7 @@ USHORT ExactTest
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1194,7 +1195,7 @@ USHORT ExactTest
                                      pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               }
               else
               {
@@ -1853,7 +1854,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
 
     if ( !fOK )
     {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
     }
     else
     {
@@ -1872,10 +1873,12 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
       MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
       pSubstProp->pTagsPropSource = (PTMX_TAGTABLE_RECORD)pByte;
-      usRc = (AddTagsToStringW( pSourceString,
-                              plSourceLen,      // in # of w's
-                             (PTMX_TAGTABLE_RECORD)pByte,
-                             pSubstProp->szPropSource )) ? usRc : BTREE_CORRUPTED;
+      //usRc = (AddTagsToStringW( pSourceString,
+      //                        plSourceLen,      // in # of w's
+      //                       (PTMX_TAGTABLE_RECORD)pByte,
+      //                       pSubstProp->szPropSource )) ? usRc : BTREE_CORRUPTED;
+        //instead of lines above we now save not normalize string to btree
+        wcsncpy(pSubstProp->szPropSource, pSourceString, *plSourceLen);
       if ( usRc == NO_ERROR )
       {
         PSZ_W  pTarget;
@@ -1895,15 +1898,18 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           pByte += pTMXTargetRecord->usTargetTagTable;
 
           pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
-          usRc = (AddTagsToStringW( pTarget,
-                                    &lTargetLen,     // in # of w's
-                                    (PTMX_TAGTABLE_RECORD)pByte,
-                                    pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;
+
+          //usRc = (AddTagsToStringW( pTarget,
+          //                          &lTargetLen,     // in # of w's
+          //                          (PTMX_TAGTABLE_RECORD)pByte,
+          //                          pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;      
+         //instead of lines above we now save not normalize string to btree
+            wcsncpy(pSubstProp->szPropTarget, pTarget, lTargetLen);
           UtlAlloc( (PVOID *) &pTarget, 0L, 0L, NOMSG );
         }
         else
         {
-          usRc = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
         }
         if ( usRc == NO_ERROR )
         {
@@ -2041,7 +2047,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
 
       if ( !fOK )
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       }
       else
       {
@@ -2060,7 +2066,9 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
         }
         else
         {
-          if ( fTag )
+          if (false // segments after 0.4.52 would be saved as is 
+              && fTag 
+          )
           {
             /************************************************************/
             /* add tags to source string                                */
@@ -2070,7 +2078,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
                                    pstMatchTable->szSource );
             if ( !fOK )
             {
-              usRc = BTREE_CORRUPTED;
+              LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
             } /* endif */
           }
           else
@@ -2152,7 +2160,9 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           }
           else
           {
-            if ( fTag )
+            if ( false && // segments after 0.4.52 would be saved as is 
+             fTag 
+            )
             {
               //add tags to target string if flag set to true
               fOK = AddTagsToStringW( pString, &lTargetLen,
@@ -2160,7 +2170,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
                                      pstMatchTable->szTarget );
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */
             }
             else
@@ -2532,7 +2542,7 @@ USHORT GetFuzzyMatch
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2573,7 +2583,7 @@ USHORT GetFuzzyMatch
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 #ifdef MEASURETIME
@@ -2672,6 +2682,8 @@ std::wstring removeTagsFromString(std::wstring input){
 }
 
 
+
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -2721,6 +2733,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_CLB pTMXTargetClb = NULL;       //ptr to target control block
   PSZ_W pString = NULL;                //ptr to normalized source string
+  PSZ_W pNormalizedString = NULL;
+  //PSZ_W pStringWithNP = NULL;                //ptr to normalized source string
   BOOL fOK = TRUE;                     //success indicator
   ULONG ulSourceLen = 0;              //length of normalized source string
   USHORT usRc = NO_ERROR;              //return code
@@ -2728,6 +2742,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   BOOL   fStringEqual;                 // strings are equal ???
   BOOL   fNormStringEqual;             // normalized strings are equal ???
   BOOL   fRespectCRLFStringEqual = 0L;
+  std::wstring NormalizedPString;
 
   SHORT sLangID = MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
@@ -2741,10 +2756,12 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
+  if( fOK ) fOK = UtlAlloc( (PVOID *) &(pNormalizedString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
+  //fOK = fOK && UtlAlloc( (PVOID *) &(pStringWithNP), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2771,11 +2788,14 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
+    NormalizedPString = ReplaceNPTagsWithHashesAndNormalizeString(pString);
+    wcsncpy(pNormalizedString, NormalizedPString.c_str(), NormalizedPString.length());
 
-    if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
       T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\r\n" << str << "\r\n</SOURCE>\r\n" ;
     }
+
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
 	    fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pString, pSentence->pNormString, 0 )== 0L);
@@ -2788,9 +2808,9 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = ( //UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags,0) == 0L 
-                        UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L 
-                      ||UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L ) ;
+       fStringEqual = (// UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWithNPTagHashes,0) == 0L 
+                         UtlCompIgnWhiteSpaceW(pNormalizedString, pSentence->pNormString, 0 ) == 0L 
+                      || UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L  ) ;
     } /* endif*/
 
     T5LOG( T5INFO) << "FuzzyTest: After String compare, fStringEqual = " <<fStringEqual;
@@ -2990,19 +3010,24 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
               pByte += pTMXTargetRecord->usSourceTagTable;
               pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-              fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+              //fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
+                //instead of lines above we now save not normalize string to btree        
+                wcsncpy(pSentence->pPropString, pString, lLenTmp);
               if ( !fOK )
               {
-                usRc = BTREE_CORRUPTED;
+                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */              
             } /* endif */
 
-            auto propNormString = removeTagsFromString(pSentence->pPropString);
+            std::wstring NPNormString = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pPropString);
+
+            //TODO: remove punctuation here
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
-                                        //pSentence->pNormString,
-                                        pSentence->pInputString,
+                                        pSentence->pNormString,
+                                        //pSentence->pInputStringWithNPTagHashes,
 //                                        pString,
-                                        pSentence->pPropString,
+                                        (PSZ_W)NPNormString.c_str(),
+                                        //pSentence->pPropString,
                                         //(wchar_t*)propNormString.c_str(),
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP, &usWords, &usDiffs);
@@ -3045,12 +3070,13 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                 {
                   //calculate length of source string
                   LONG  lLenTmp = ulSourceLen;
-                  fOK = AddTagsToStringW( pString,
-                                          &lLenTmp,      // in # of w's
-                                         pTMXSourceTagTable, pSentence->pPropString );
+                  //fOK = AddTagsToStringW( pString,
+                  //                        &lLenTmp,      // in # of w's
+                  //                       pTMXSourceTagTable, pSentence->pPropString );
+                  
                   if ( !fOK )
                   {
-                    usRc = BTREE_CORRUPTED;
+                    LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
                   }
                   else
                   {
@@ -3151,6 +3177,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pNormalizedString, 0L, 0L, NOMSG );
+  //UtlAlloc( (PVOID *) &pStringWithNP, 0L, 0L, NOMSG );
 
   if ( usRc )
   {
@@ -3246,7 +3274,7 @@ USHORT FillMatchEntry
   }
   else
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 #ifdef MEASURETIME
@@ -3430,7 +3458,7 @@ USHORT FillMatchEntry
   //an error
   if ( usRc == BTREE_NOT_FOUND )
   {
-    usRc = NO_ERROR;
+    LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
   } /* endif */
 
 #ifdef MEASURETIME

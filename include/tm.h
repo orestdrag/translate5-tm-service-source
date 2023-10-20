@@ -1577,7 +1577,7 @@ typedef struct _TMX_SENTENCE
 {
   PSZ_W pInputString;
   PSZ_W pNormString;
-  //PSZ_W pInputStringWNormalizedTags;
+  PSZ_W pInputStringWithNPTagHashes;
   PSZ_W pNormStringStart;
   USHORT  usNormLen;
   PTMX_TERM_TOKEN pTermTokens;
@@ -3470,6 +3470,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
  CHAR_W        szMatchSegIdInfo[512];     // buffer for the complete match segment ID entry
  ULONG         ulSequenceNumber;          // segment sequence number within current external memory file
+ ULONG         ulActiveSegment;
 }MEM_LOAD_IDA, * PMEM_LOAD_IDA;
 
 
@@ -5203,7 +5204,9 @@ USHORT EqfImportMem
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // mand: Eqf session handle
-  std::shared_ptr<EqfMemory>  pMem     // mand: name of Translation Memory
+  std::shared_ptr<EqfMemory>  pMem,     // mand: name of Translation Memory
+  long& reorgSegCount, 
+  long& invSegCount
 );
 
 /*! \brief Start a OpenTM2 API call session

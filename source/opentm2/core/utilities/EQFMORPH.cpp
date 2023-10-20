@@ -204,7 +204,7 @@ USHORT MorphInit
 	/********************************************************************/
 	if ( !UtlAlloc( (PVOID *)&pLangCB, 0L, (LONG)sizeof(LANGCB), NOMSG ) )
 	{
-		usRC = MORPH_NO_MEMORY;
+		LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
 	} /* endif */
 
 	if ( usRC == MORPH_OK )
@@ -222,13 +222,13 @@ USHORT MorphInit
 		MorphFactory* tMorphFactoryInstance = MorphFactory::getInstance();
 		if (NULL == tMorphFactoryInstance)
 		{
-			usRC = MORPH_NO_MEMORY;
+			LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
 		}
 		pLangCB->m_MorphInstance = tMorphFactoryInstance->getMorph( pszLanguage, pszMorphPlugin );
 		if (NULL == pLangCB->m_MorphInstance)
 		{
       T5LOG( T5WARNING) << ":: pLangCB->m_MorphInstance == NULL";
-			usRC = MORPH_NO_MEMORY;
+			LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
 		}
 
 		if (MORPH_OK != usRC)
@@ -686,7 +686,7 @@ USHORT MorphTokenizeW
        (ppTermList == NULL)    ||
        ((*ppTermList == NULL) && (*pusBufferSize != 0) ) )
   {
-    usRC = MORPH_INV_PARMS;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_PARMS);
   } /* endif */
 
   /********************************************************************/
@@ -873,7 +873,7 @@ USHORT MorphGetLanguageID
   {
     if ( !UtlAlloc( (PVOID *)&ppIdToLCB, 0L, (LONG) (sizeof(PLCB) * 256), NOMSG ) )
     {
-      usRC = MORPH_NO_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
 	}
 	else
 	{
@@ -905,7 +905,7 @@ USHORT MorphGetLanguageID
   {
     if ( !UtlAlloc( (PVOID *)&pLCB, 0L, (LONG)sizeof(LCB), NOMSG ) )
     {
-      usRC = MORPH_NO_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -929,14 +929,14 @@ USHORT MorphGetLanguageID
     MorphFactory* tMorphFactoryInstance =  MorphFactory::getInstance();
     if (NULL == tMorphFactoryInstance)
     {
-      usRC = MORPH_NO_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
     }
     if (MORPH_OK == usRC && tMorphFactoryInstance->isSupported(pszLanguage))
     {
     }
     else
     {
-      usRC = MORPH_OK; // GQ: disabled temporarely the result of isSupported, correct code is: usRC = MORPH_NO_LANG_PROPS;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK); // GQ: disabled temporarely the result of isSupported, correct code is: usRC = MORPH_NO_LANG_PROPS;
     } /* endif */
   } /* endif */
 
@@ -978,7 +978,7 @@ USHORT MorphGetLanguageID
 
     if ( (pLCB->HashCache == NULL) || (pLCB->HashNoLookup == NULL) )
     {
-      usRC = MORPH_NO_MEMORY;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -998,7 +998,7 @@ USHORT MorphGetLanguageID
     }
     else
     {
-      usRC = MORPH_TOO_MUCH_LANGUAGES;
+      LOG_AND_SET_RC(usRC, T5INFO, MORPH_TOO_MUCH_LANGUAGES);
     } /* endif */
   } /* endif */
 
@@ -1090,12 +1090,12 @@ USHORT MorphGetLCB
        (sLanguageID <= 255)    &&
        (*ppLCBTemp != 0) )
   {
-    usRC = MORPH_OK;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_OK);
     *ppLCB = *ppLCBTemp;
   }
   else
   {
-    usRC = MORPH_INV_LANG_ID;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_LANG_ID);
   } /* endif */
 
   return( usRC );
@@ -1245,7 +1245,7 @@ USHORT MorphAddTermToList2W
       }
       else
       {
-         usRC = MORPH_NO_MEMORY;
+         LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
 
          // free the term list in case of erros
          if ( usListType == MORPH_LARGE_ZTERMLIST )

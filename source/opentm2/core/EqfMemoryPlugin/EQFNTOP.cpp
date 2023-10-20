@@ -72,7 +72,7 @@ USHORT TmtXOpen
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -124,7 +124,7 @@ USHORT TmtXOpen
       else if ( pTmClb->usAccessMode & ASD_ORGANIZE )
       {
         // allow to continue even if signature record is corrupted
-        usRc = NO_ERROR;
+        LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
       } /* endif */
 
       if ( (usRc == NO_ERROR) || (usRc == VERSION_MISMATCH) )
@@ -351,7 +351,7 @@ USHORT TmtXOpen
          //(pTmClb.InBtree == NULL) 
          )
     {
-      usRc = TM_FILE_SCREWED_UP;
+      LOG_AND_SET_RC(usRc, T5INFO, TM_FILE_SCREWED_UP);
     } /* endif */
   } /* endif */
 

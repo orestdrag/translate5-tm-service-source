@@ -879,7 +879,7 @@ USHORT UtlBufOpenHwnd
                  ERROR_STORAGE, hwnd );
   if ( !pBufCB )
   {
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   /********************************************************************/
@@ -1006,7 +1006,7 @@ USHORT UtlBufCloseHwnd
                      fMsg, hwnd );
     if ( !usRC && (pBufCB->ulUsed != ulBytesWritten) )
     {
-      usRC = ERROR_DISK_FULL;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_DISK_FULL);
       if ( fMsg )
       {
         pszErrParm = pBufCB->szFileName,
@@ -1128,7 +1128,7 @@ USHORT UtlBufReadHwnd
                          fMsg, hwnd );
          if ( !usRC && (ulBytesToRead != ulBytesRead) )
          {
-           usRC = ERROR_READ_FAULT;
+           LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_FAULT);
          } /* endif */
          if ( usRC == NO_ERROR )
          {
@@ -1141,7 +1141,7 @@ USHORT UtlBufReadHwnd
    }
    else
    {
-     usRC = ERROR_INVALID_ACCESS;
+     LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_ACCESS);
    } /* endif */
 
    /*******************************************************************/

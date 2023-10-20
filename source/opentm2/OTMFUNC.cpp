@@ -150,10 +150,59 @@ USHORT EqfImportMem
 USHORT EqfOrganizeMem
 (
   HSESSION    hSession,                // Eqf session handle
-  std::shared_ptr<EqfMemory> mem       // name of Translation Memory
+  PSZ         pszMemName,               // name of Translation Memory
+  long& reorgSegCount, 
+  long& invSegCount
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
+  PFCTDATA    pData = NULL;            // ptr to function data area
+  /*
+  LOGWRITE1( "==EQFOrganizeMem==\n" );
+
+  // validate session handle
+  usRC = FctValidateSession( hSession, &pData );
+  do{
+  // check sequence of calls
+    if ( usRC == NO_ERROR )
+    {
+      if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
+      {
+        T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
+        usRC = LASTTASK_INCOMPLETE_RC;
+      } 
+    } 
+
+    // call TM organize
+    if ( usRC == NO_ERROR )
+    {
+      pData->sLastFunction = FCT_EQFORGANIZEMEM;
+      if ( pData->fComplete )              // has last run been completed
+      {
+        // prepare a new analysis run
+        usRC = MemFuncPrepOrganize( pData, pszMemName );
+      }
+      else
+      {        
+        // continue current organize process
+        usRC = MemFuncOrganizeProcess( pData );
+      }
+      //usRC = MemFuncOrganizeMem( pData, pszMemName );
+    } 
+  }while((usRC == NO_ERROR) && !pData->fComplete  );
+  LOGWRITE2( "  RC=%u\n", usRC );
+   if(pData && pData->pImportData){
+    invSegCount = pData->pImportData->invalidSegments;
+    reorgSegCount = pData->pImportData->segmentsImported;
+    delete pData->pImportData;
+    pData->pImportData = nullptr;
+
+    T5LOG(T5TRANSACTION) << "Mem reorganization was finished, memName = " << pszMemName <<";\n\t rc = " 
+                << usRC << ";\n\t invalidSegCount = " 
+                << invSegCount <<";\n\t reimportedSegCount = " << reorgSegCount;
+  }
+  //*/
+  
   return( usRC );
 } /* end of function EqfOrganizeMem */
 
@@ -183,7 +232,7 @@ USHORT EqfStartSession
   {
     T5LOG(T5ERROR) << "EqfStartSession():: Not enought memory for pData";
 
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // initialize utilities
@@ -194,7 +243,7 @@ USHORT EqfStartSession
 
     if ( !UtlInitUtils( NULLHANDLE ) )
     {
-      usRC = ERROR_READ_SYSTEMPROPERTIES;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_SYSTEMPROPERTIES);
     } /* endif */
   } /* endif */
 
@@ -325,7 +374,7 @@ USHORT EqfStartSession
     {
       T5LOG(T5ERROR) << "EqfStartSession()::ERROR_READ_SYSTEMPROPERTIES";
       // access to system properties failed
-      usRC = ERROR_READ_SYSTEMPROPERTIES;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_READ_SYSTEMPROPERTIES);
     } /* endif */
   } /* endif */
 
@@ -445,12 +494,12 @@ USHORT FctValidateSession
   if ( pData == NULL )
   {
     T5LOG(T5ERROR) << "FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData == NULL";
-    usRC = ERROR_INVALID_SESSION_HANDLE;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SESSION_HANDLE);
   }
   else if ( pData->lMagicWord != FCTDATA_IDENTIFIER )
   {
     T5LOG(T5ERROR) << "FctValidateSession()::ERROR_INVALID_SESSION_HANDLE, pData->lMagicWord != FCTDATA_IDENTIFIER ";
-    usRC = ERROR_INVALID_SESSION_HANDLE;
+    LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_SESSION_HANDLE);
   }
   
   if ( usRC == NO_ERROR )
@@ -511,14 +560,14 @@ USHORT EqfGetOpenTM2Lang
   if ( (usRC == NO_ERROR ) && (pszISOLang == NULL) ) 
   {
     char*  pszParm = "pointer to ISO language id";
-    usRC = DDE_MANDPARAMISSING;
+    LOG_AND_SET_RC(usRC, T5INFO, DDE_MANDPARAMISSING);
     T5LOG(T5ERROR) <<"EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszISOLang == NULL), pszParam =" << pszParm;
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     char* pszParm = "buffer for OpenTM2 language name";
-    usRC = DDE_MANDPARAMISSING;
+    LOG_AND_SET_RC(usRC, T5INFO, DDE_MANDPARAMISSING);
     T5LOG(T5ERROR) << "EqfGetOpenTM2Lang()::DDE_MANDPARAMISSING, (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL), pszParam = " << pszParm;
   } /* endif */
 
@@ -556,14 +605,14 @@ USHORT EqfGetIsoLang
   {
     PSZ pszParm = "pointer to OpenTM2 language name";
     T5LOG(T5ERROR) <<  ":: DDE_MANDPARAMISSING ::" << pszParm;
-    usRC = DDE_MANDPARAMISSING;
+    LOG_AND_SET_RC(usRC, T5INFO, DDE_MANDPARAMISSING);
   } /* endif */
 
   if ( (usRC == NO_ERROR ) && (pszOpenTM2Lang == NULL) ) 
   {
     PSZ pszParm = "buffer for ISO language id";
     T5LOG(T5ERROR) << ":: DDE_MANDPARAMISSING :: " << pszParm;
-    usRC = DDE_MANDPARAMISSING;
+    LOG_AND_SET_RC(usRC, T5INFO, DDE_MANDPARAMISSING);
   } /* endif */
 
   // use the language factory to process the request

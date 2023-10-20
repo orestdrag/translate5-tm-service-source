@@ -4,4 +4,5 @@ const char *gitHash = "@GIT_HASH@";
 //const char *gitHashFull = "@GIT_HASH_FULL@";
 const char *buildDate="@BUILD_DATE@";
 const char *appVersion="@APP_VERSION@";
+const char *asanIsOn="@STR_ASAN_IS_ON@";
 

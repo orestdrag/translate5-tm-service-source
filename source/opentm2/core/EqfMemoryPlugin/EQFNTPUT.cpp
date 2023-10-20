@@ -209,6 +209,9 @@ USHORT TmtXReplace
    fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
+   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
+                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
+  if ( fOK )
    fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
@@ -233,7 +236,7 @@ USHORT TmtXReplace
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -247,7 +250,9 @@ USHORT TmtXReplace
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    UTF16strcpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource );
+    wcsncpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1);
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy( pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE-1);
 
     //tokenize source segment, resulting in norm. string and tag table record
     usRc = TokenizeSource( pTmClb, pSentence, szString,
@@ -317,6 +322,7 @@ USHORT TmtXReplace
   //release allocated memory
   UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
@@ -417,10 +423,10 @@ VOID HashSentence
 
   while ( pTermTokens->usLength )
   {
-    pNormOffset = pSentence->pInputString + pTermTokens->usOffset;
+    pNormOffset = pSentence->pInputStringWithNPTagHashes + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      auto str = EncodingHelper::convertToUTF8(pNormOffset);
+      auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
       T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
     }
     //max nr of hashes built
@@ -779,7 +785,7 @@ USHORT TokenizeTarget
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -805,7 +811,7 @@ USHORT TokenizeTarget
                                    FALSE, NULLHANDLE );
       if ( usRc )
       {
-        usRc = ERROR_TA_ACC_TAGTABLE;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
       } /* endif */
     } /* endif */
 
@@ -913,7 +919,7 @@ USHORT TokenizeTarget
                 if ( !fOK )
                 {
                   
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -1045,7 +1051,7 @@ USHORT AddToTm
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1062,8 +1068,10 @@ USHORT AddToTm
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
-                       pNormString,  // ptr to target normalized string
-                       usNormLen,    // length of target normalized string
+                       pTmPut->szTarget,
+                       //pNormString,  // ptr to target normalized string
+                       //usNormLen,    // length of target normalized string
+                       wcslen(pTmPut->szTarget),
                        pTmRecord,    // filled tm record returned
                        pTargetClb, usSrcLang );
         
@@ -1146,7 +1154,8 @@ VOID FillTmRecord
   pTMXSourceRecord->usSource = sizeof( TMX_SOURCE_RECORD );
 //  memcpy( pTMXSourceRecord+1, pSentence->pNormString, pSentence->usNormLen *sizeof(CHAR_W));
 //@@@
-  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
+  //ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
+  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pInputString, wcslen(pSentence->pInputString) );
   pTMXSourceRecord->usLangId = usSrcLangId;
   //size of source record
   RECLEN(pTMXSourceRecord) = sizeof( TMX_SOURCE_RECORD ) + ulSrcNormLen;
@@ -1381,31 +1390,9 @@ USHORT UpdateTmIndex
   //allocate 32K for tm index record
   fOK = UtlAlloc( (PVOID *) &(pIndexRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
 
-#ifdef NTMTEST
-{
-  FILE *fOut;                          // test output
-  PULONG pulTVotes = pSentence->pulVotes;
-  USHORT  i;
-  ULONG   ulKey;
-
-  fOut      = fopen ( "\\NTMTEST.DBG", "a" );
-  fprintf (fOut, "%20s %d\n", __FILE__, __LINE__);
-  fprintf (fOut, "Input String: %s\n",pSentence->pInputString );
-  fprintf (fOut, "\nCompact Bits: \n");
-
-  for ( i = 0; i < pSentence->usActVote; i++, pulTVotes++ )
-  {
-      //add the match(tuple) to compact area
-      ulKey = *pulTVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-      fprintf (fOut, "%4d %4d\n",(ulKey >> 3), (1 << (USHORT)(ulKey & 0x07)));
-   } /* endfor */
-   fclose( fOut      );
-}
-#endif
-
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1622,7 +1609,7 @@ USHORT DetermineTmRecord
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1733,7 +1720,7 @@ USHORT DetermineTmRecord
               //set return code to 0
               if ( usRc == BTREE_NOT_FOUND )
               {
-                usRc = NO_ERROR;
+                LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
               } /* endif */
             } /* endif */
           } /* endif */
@@ -1746,7 +1733,7 @@ USHORT DetermineTmRecord
       //code to 0
       if ( usRc == BTREE_NOT_FOUND )
       {
-        usRc = NO_ERROR;
+        LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1840,7 +1827,7 @@ USHORT UpdateTmRecord
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1873,7 +1860,7 @@ USHORT UpdateTmRecord
           }
           else
           {
-            usRc = ERROR_NOT_ENOUGH_MEMORY;
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 
@@ -1887,7 +1874,7 @@ USHORT UpdateTmRecord
           {
             //get next tm record
             pulSids++;
-            usRc = NO_ERROR;
+            LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
           }
           else if ( usRc == NO_ERROR )
           {
@@ -1902,7 +1889,7 @@ USHORT UpdateTmRecord
       {
         //issue message that tm needs to be organized if pulsid is empty and
         //no get was successful
-        usRc = ERROR_ADD_TO_TM;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_ADD_TO_TM);
       } /* endif */
     }  /* endif */
   } /* endif */
@@ -2018,7 +2005,7 @@ USHORT ComparePutData
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2198,7 +2185,7 @@ USHORT ComparePutData
                     }
                     else
                     {
-                      usRc = ERROR_NOT_ENOUGH_MEMORY;
+                      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                     } /* endif */
                   } /* endif */
 
@@ -2274,7 +2261,7 @@ USHORT ComparePutData
       {
         //source strings are not equal so try another sid or if all have been
         //tries add new tm record
-        usRc = SOURCE_STRING_ERROR;
+        LOG_AND_SET_RC(usRc, T5INFO, SOURCE_STRING_ERROR);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -2371,7 +2358,7 @@ USHORT AddTmTarget(
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2405,7 +2392,7 @@ USHORT AddTmTarget(
             }
             else
             {
-              usRc = ERROR_NOT_ENOUGH_MEMORY;
+              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
         }
@@ -2595,7 +2582,7 @@ USHORT TmtXUpdSeg
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2605,7 +2592,7 @@ USHORT TmtXUpdSeg
   // get TM record being modified and update the record
   if ( !usRc )
   {
-    usRc = BTREE_NOT_FOUND;
+    LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
 
     ulLen = TMX_REC_SIZE;
     usRc =  pTmClb->TmBtree.EQFNTMGet( ulUpdKey, (PCHAR)pTmRecord,
@@ -2626,7 +2613,7 @@ USHORT TmtXUpdSeg
       }
       else
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
 
@@ -2765,20 +2752,20 @@ USHORT TmtXUpdSeg
             else
             {
               // target not found
-              SET_AND_LOG(usRc, BTREE_NOT_FOUND);
+              LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
             } /* endif */
           }
           else
           {
             // record not found
-            SET_AND_LOG(usRc, BTREE_NOT_FOUND);
+            LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
           } /* endif */
         } /* endif */
       }
       else
       {
         // record is empty and should not be updated
-        SET_AND_LOG(usRc, BTREE_NOT_FOUND);
+        LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -3066,7 +3053,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 	    }
 	    else
 	    {
-		    usRc = ERROR_NOT_ENOUGH_MEMORY;
+		    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
 	    } /* endif */
 	  } /* endif */
 

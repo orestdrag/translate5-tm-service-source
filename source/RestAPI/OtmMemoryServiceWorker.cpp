@@ -131,7 +131,11 @@ int buildErrorReturn
   i = strErrorReturn.size();
   factory->addParmToJSONW( strErrorReturn, L"ReturnValue", iRC );
   i = strErrorReturn.size();
-  factory->addParmToJSONW( strErrorReturn, L"ErrorMsg", pszErrorMsg );
+  std::wstring strErrMsg = pszErrorMsg;
+  if(iRC == 133){
+    strErrMsg += L"; ERROR_MEMORY_NOTFOUND";
+  }
+  factory->addParmToJSONW( strErrorReturn, L"ErrorMsg", strErrMsg.c_str() );
   i = strErrorReturn.size();
   factory->terminateJSONW( strErrorReturn );
   i = strErrorReturn.size();
@@ -146,6 +150,9 @@ int buildErrorReturn
 )
 {
 	std::wstring strUTF16;
+  if(iRC == 5019 && !T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    return 0;
+  }
 	buildErrorReturn( iRC, pszErrorMsg, strUTF16 );
   strErrorReturn = EncodingHelper::convertToUTF8( strUTF16 );
   //strUTF16 += L" [utf16]";
@@ -280,11 +287,6 @@ int OtmMemoryServiceWorker::closeAll(){
   int rc = TMManager::GetInstance()->closeAll();
   return rc;
 }//*/
-
-
-
-
-
 
 
 
@@ -466,10 +468,12 @@ void reorganizeMemoryProcess( void* pvData )
     pRIDA->pMem.reset();
     pRIDA->memRef.reset();
   }
+
   // cleanup
-  //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+  //if(pData->fDeleteSourceTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
   //  DeleteFile( pData->szInFile );
   //}
+  
   if(pCommArea) delete( pCommArea );
   if(pRIDA) delete( pRIDA );
   if(pData) delete( pData );

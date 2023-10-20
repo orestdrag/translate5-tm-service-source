@@ -28,6 +28,7 @@
     #define WC_SCROLLBAR      "SCROLLBAR"
 #endif
 
+#include "lowlevelotmdatastructs.h"
 /**********************************************************************/
 /* The following defines are copied from BSEERR.H to ensure common    */
 /* return codes among platforms                                       */

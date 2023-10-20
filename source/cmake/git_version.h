@@ -5,5 +5,6 @@ extern const char *gitHash;
 //extern const char *gitHashFull;
 extern const char *buildDate;
 extern const char *appVersion;
+extern const char *asanIsOn; 
 
 #endif // GIT_VERSION_H

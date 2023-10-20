@@ -362,6 +362,7 @@ BOOL CheckForAlloc
 //       add term info to structure                                             
 //                                                                              
 //------------------------------------------------------------------------------
+
 USHORT TokenizeSource
 (
    EqfMemory* pClb,                       // pointer to control block (Null if called outside of Tm functions)
@@ -391,16 +392,9 @@ USHORT TokenizeSource
   /* normalize \r\n combinations in input string ..                   */
   /********************************************************************/
   {
-    PSZ_W  pSrc = pSentence->pInputString;
-    PSZ_W  pTgt = pSentence->pInputString;
+    PSZ_W  pSrc = pSentence->pInputStringWithNPTagHashes;
+    PSZ_W  pTgt = pSentence->pInputStringWithNPTagHashes;
     CHAR_W c;
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string src = EncodingHelper::convertToUTF8(pSrc);
-      T5LOG( T5DEBUG) <<  ":: src = " << src;
-      
-      std::string trg = EncodingHelper::convertToUTF8(pTgt);
-      T5LOG( T5DEBUG) << "\n:: trg = " << trg;
-    }
 
     while ( (c = *pSrc++) != NULC )
     {
@@ -433,7 +427,7 @@ USHORT TokenizeSource
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -463,7 +457,7 @@ USHORT TokenizeSource
       if ( usRc )
       {
         USHORT usAction = UtlQueryUShort( QS_MEMIMPMRKUPACTION);
-        usRc = ERROR_TA_ACC_TAGTABLE;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
         if ( usAction == MEMIMP_MRKUP_ACTION_RESET ) {
            CHAR  *ptrMarkup ;
            ptrMarkup = strstr( pTagTableName, szString ) ;
@@ -475,11 +469,11 @@ USHORT TokenizeSource
                                            TALOADCOMPCONTEXTFUNC,
                                            FALSE, NULLHANDLE );
               if ( usRc )
-                 usRc = ERROR_TA_ACC_TAGTABLE;
+                 LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
            } 
         } else
         if ( usAction == MEMIMP_MRKUP_ACTION_SKIP ) {
-           usRc = SEG_SKIPPED_BAD_MARKUP ;
+           LOG_AND_SET_RC(usRc, T5INFO, SEG_SKIPPED_BAD_MARKUP);
         }
       } /* endif */
 
@@ -488,7 +482,7 @@ USHORT TokenizeSource
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+       usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
                                    (PTOKENENTRY)pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
@@ -513,7 +507,7 @@ USHORT TokenizeSource
         // retry tokenization
         if (iIterations < 10 )
         {
-           usRc = TACreateProtectTableWEx( pSentence->pInputString, pTable, 0,
+           usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
                                       (PTOKENENTRY)pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
@@ -542,15 +536,15 @@ USHORT TokenizeSource
               ULONG     ulListSize = 0;    
               USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
 
-              CHAR_W chTemp = pSentence->pInputString[pEntry->usStop+1]; // buffer for character values
-              pSentence->pInputString[pEntry->usStop+1] = EOS;
+              CHAR_W chTemp = pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1]; // buffer for character values
+              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = EOS;
 
               usRc = NTMMorphTokenizeW( usLangId,
-                                       pSentence->pInputString + pEntry->usStart,
+                                       pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
                                        &ulListSize, (PVOID *)&pTermList,
                                        MORPH_FLAG_OFFSLIST );
 
-              pSentence->pInputString[pEntry->usStop+1] = chTemp;
+              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = chTemp;
 
               if ( usRc == MORPH_OK )
               {
@@ -558,7 +552,7 @@ USHORT TokenizeSource
                 fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                 if ( !fOK )
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -572,7 +566,7 @@ USHORT TokenizeSource
                           fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                           if ( !fOK )
                           {
-                            usRc = ERROR_NOT_ENOUGH_MEMORY;
+                            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                           }
                           else
                           {
@@ -585,7 +579,7 @@ USHORT TokenizeSource
                         pTerm++;
                       } /* endwhile */
                   } /* endif */
-                  memcpy( pszNormStringPos, pSentence->pInputString + pEntry->usStart, usTokLen * sizeof(CHAR_W));
+                  memcpy( pszNormStringPos, pSentence->pInputStringWithNPTagHashes + pEntry->usStart, usTokLen * sizeof(CHAR_W));
                   pSentence->usNormLen =  pSentence->usNormLen + usTokLen;
                   pszNormStringPos += usTokLen;
                 } /* endif */
@@ -631,7 +625,7 @@ USHORT TokenizeSource
 
                 if ( !fOK )
                 {
-                  usRc = ERROR_NOT_ENOUGH_MEMORY;
+                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -639,7 +633,7 @@ USHORT TokenizeSource
                   ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
                     (pEntry->usStop - pEntry->usStart + 1);
                   memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
-                          pSentence->pInputString + pEntry->usStart,
+                          pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
                           ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
                   pTagEntry += usTagEntryLen;
                 } /* endif */
@@ -658,7 +652,7 @@ USHORT TokenizeSource
       if ( pTermTokens == pSentence->pTermTokens )
       {
         pTermTokens->usOffset = 0;
-        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputString );
+        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputStringWithNPTagHashes );
         pTermTokens->usHash = 0;
         pTermTokens++;
       } /* endif */
@@ -666,7 +660,7 @@ USHORT TokenizeSource
       fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
       if ( !fOK )
       {
-        usRc = ERROR_NOT_ENOUGH_MEMORY;
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       }
 
       //set total tag record length
@@ -721,7 +715,7 @@ USHORT NTMMorphTokenizeW
        (ppTermList == NULL)    ||
        ((*ppTermList == NULL) && (*pulBufferSize != 0) ) )
   {
-    usRC = MORPH_INV_PARMS;
+    LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_PARMS);
   } /* endif */
 
 ///********************************************************************/

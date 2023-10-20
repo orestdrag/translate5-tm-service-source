@@ -882,7 +882,7 @@ T5LOG( T5DEBUG) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 78 if ( (GetOEMCP() =
           case 850  : pTable = chAnsiToPC850; break;
           default   :
              pTable = chAnsiToPC850;
-             usRC = ERROR_NOT_READY;
+             LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_READY);
              break;
 
         } /* endswitch */
@@ -949,7 +949,7 @@ T5LOG( T5DEBUG) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79 if ( (GetOEMCP() =
           default   :
              pTable = chAnsiToPC850;
              pInvTable = chPC850ToAnsi;
-             usRC = ERROR_NOT_READY;
+             LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_READY);
              break;
         } /* endswitch */
 
@@ -973,7 +973,7 @@ T5LOG( T5DEBUG) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 79 if ( (GetOEMCP() =
       break;
 
     default :
-      usRC = ERROR_INVALID_DATA;
+      LOG_AND_SET_RC(usRC, T5INFO, ERROR_INVALID_DATA);
       break;
   } /* endswitch */
 

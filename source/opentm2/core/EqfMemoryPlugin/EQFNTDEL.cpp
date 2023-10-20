@@ -20,6 +20,8 @@
 #include "./LogWrapper.h"
 #include "./Property.h"
 #include "./EncodingHelper.h"
+
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -80,6 +82,9 @@ USHORT TmtXDelSegm
    fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
+   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
+                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
+  if ( fOK )
    fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
                    (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
   if ( fOK )
@@ -110,7 +115,7 @@ USHORT TmtXDelSegm
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -124,10 +129,16 @@ USHORT TmtXDelSegm
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    UTF16strcpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource );
+    wcsncpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1 );
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEG_SIZE-1);
+    auto normalizedStringWithNPHashes = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pInputString);
+
+
     //tokenize source segment, resuting in normalized string and tag table record
     usRc = TokenizeSource( pTmClb, pSentence, szString,
                            pTmDelIn->stTmPut.szSourceLanguage);
+    wcsncpy(pSentence->pNormString, normalizedStringWithNPHashes.c_str(), MAX_SEG_SIZE-1);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     pSentence->pTagRecord->usTagTableId = 0;
@@ -175,7 +186,7 @@ USHORT TmtXDelSegm
             }
             else
             {
-              usRc = ERROR_NOT_ENOUGH_MEMORY;
+              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
 
@@ -202,7 +213,7 @@ USHORT TmtXDelSegm
     }
     else
     {
-      usRc = SEG_NOT_FOUND;
+      LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
     } /* endif */
   } /* endif */
 
@@ -211,6 +222,7 @@ USHORT TmtXDelSegm
   UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pNormString, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
@@ -320,7 +332,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
 
   if ( !fOK )
   {
-    usRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -514,7 +526,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
 
     if ( !fStop )
     {
-      usRc = SEG_NOT_FOUND;
+      LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
     } /* endif */
   } /* endif */
 

@@ -1012,7 +1012,7 @@ VOID QDAMCopyDataTo_V3
         T5LOG(T5FATAL) << "QDAMCopyDataTo_V3::DEBUG 2 Assetrion fails : usLastPos >= usLen, usLastPos = " << usLastPos 
               << ", usLen = " << usLen;
       }
-      //assert( (usLastPos >= usLen) );
+      assert( (usLastPos >= usLen) );
 
       usLastPos = usLastPos - usLen;
       memcpy( pNew->contents.uchData+usLastPos, pOldData, usLen );
@@ -1863,7 +1863,7 @@ SHORT BTREE::EQFNTMPhysLock
 //+----------------------------------------------------------------------------+
 //|Parameters:        PBTREE                 pointer to btree structure        |
 //|                   SHORT                  index of counter field            |
-//|                                                                      PLONG                                                                  ptr to buffer for new counte value|
+//|                   PLONG                  ptr to buffer for new counte value|
 //+----------------------------------------------------------------------------+
 //|Returncode type:   SHORT                                                    |
 //+----------------------------------------------------------------------------+

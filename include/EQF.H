@@ -56,6 +56,7 @@
 #define OTMPROPOSAL_MAXSEGLEN 2048
 /*! \brief maximum size of names */
 #define OTMPROPOSAL_MAXNAMELEN 256
+
 /**********************************************************************/
 /* add support for MFC compiling via predefined                       */
 /**********************************************************************/
@@ -4571,22 +4572,6 @@ MRESULT ListHandlerCallBack( PHANDLERCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #define ErrProp_InvalidParms   (Err_Prop+22) // invalid parm specified
 #define ErrProp_InvalidHandle  (Err_Prop+23) // invalid handle to properties
 
-#define ErrNfol_NoName         (Err_Nfol+ 1) // missing folder name
-#define ErrNfol_NoDescription  (Err_Nfol+ 2) // missing folder description
-#define ErrNfol_NoFormat       (Err_Nfol+ 3) // missing documents format
-#define ErrNfol_InvalidFormat  (Err_Nfol+ 4) // format specified is wrong
-#define ErrNfol_NoMemory       (Err_Nfol+ 5) // no memory db specified
-#define ErrNfol_NoExlist       (Err_Nfol+ 6) // no excusion list specified
-#define ErrNfol_NameExists     (Err_Nfol+ 7) // folder name already exists
-#define ErrNfol_DicsTooMany    (Err_Nfol+ 8) // too many dics selected
-#define ErrNfol_DicsTooLess    (Err_Nfol+ 9) // too less dics selected
-#define ErrNfol_SubsTooMany    (Err_Nfol+10) // too many dics selected
-#define ErrNfol_SubsTooLess    (Err_Nfol+11) // too less dics selected
-#define ErrNfol_NoSLang        (Err_Nfol+12) // no source language specified
-#define ErrNfol_NoTLang        (Err_Nfol+13) // no target language specified
-#define ErrNfol_NoSCodp        (Err_Nfol+14) // no source code page specified
-#define ErrNfol_NoTCodp        (Err_Nfol+15) // no target code page specified
-
 
 #define BTREE_BASE          ERR_BTREE_BASE        //
 #define BTREE_NO_ROOM       BTREE_BASE+1          // Insufficent memory
@@ -6104,3 +6089,8 @@ typedef struct _CALCREPORTBINDATA
 #define FUZZY_THRESHOLD_1                  0.7 // Theshold for different fuzzy classes
 #define FUZZY_THRESHOLD_2                  0.9 // Theshold for different fuzzy classes
 
+
+
+#include<string>
+std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str);
+std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str);
