@@ -56,6 +56,11 @@ const std::map<const ProxygenHandler::COMMAND,const char*> CommandToStringsMap {
 
 
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
+#ifdef TIME_MEASURES 
+  start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  //time(&startingTime);
+#endif
+
   builder = new ResponseBuilder(downstream_);
   auto methodStr = req->getMethodString ();
   auto method = req->getMethod ();
@@ -77,7 +82,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     }
   }
 
-  int id = stats_->recordRequest(this->command);
+  id = stats_->recordRequest(this->command);
   T5Logger::GetInstance()->SetLogInfo(this->command);
   if(CommandToStringsMap.find(this->command) == CommandToStringsMap.end()){
     T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + toStr(this->command) + " request, id = " + toStr(id));
@@ -116,7 +121,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       {
         iRC = 500;
         //strResponseBody = "{\n\t\"msg\": \"endpoint is not implemented\"\n}";
-        iRC = pMemService->reorganizeMem( memName, strResponseBody);
+        iRC = pMemService->reorganizeMem( memName, strResponseBody, stats_);
         break;
       }
       
@@ -217,7 +222,7 @@ void ProxygenHandler::onEOM() noexcept {
           iRC = 423;
           break;
         }
-        iRC = pMemService->import( memName, strInData, strResponseBody );
+        iRC = pMemService->import( memName, strInData, strResponseBody, stats_ );
         break; 
       }
       case COMMAND::FUZZY:
@@ -260,7 +265,7 @@ void ProxygenHandler::onEOM() noexcept {
           iRC =423;
           break;
         }
-        iRC = pMemService->importLocal(memName, strInData, strResponseBody);
+        iRC = pMemService->importLocal(memName, strInData, strResponseBody, stats_);
         break;
       }
       case COMMAND::TAGREPLACEMENTTEST:
@@ -294,6 +299,17 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
 }
 
 void ProxygenHandler::sendResponse()noexcept{
+
+    #ifdef TIME_MEASURES
+    //time(&endingTime);
+    //time_t time = endingTime - startingTime;
+    
+    end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+    milliseconds time = end_ms-start_ms;   
+    T5LOG(T5TRANSACTION) <<"id = " << id << "; exection time = " <<  std::chrono::duration<double>(time).count();
+    stats_->addRequestTime(command, time);
+    #endif
+
     switch(iRC){
       case 200:
       case 201:
@@ -319,6 +335,11 @@ void ProxygenHandler::sendResponse()noexcept{
                     folly::to<std::string>(stats_->getRequestCount()));
     }
     
+    #ifdef TIME_MEASURES
+    builder->header("Execution-time",
+                    folly::to<std::string>( std::chrono::duration<double>(time).count()));
+
+    #endif
     //req->getHeaders().forEach([&](std::string& name, std::string& value) {
     //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
     //});

@@ -70,15 +70,17 @@ public:
   int import
   (
     std::string  strMemory,
-    std::string strInputParms,
-    std::string &strOutputParms
+    std::string &strInputParms,
+    std::string &strOutputParms,
+    ProxygenService::ProxygenStats* stats
   );
 
   int importLocal
   (
     std::string  strMemory,
     std::string strInputParms,
-    std::string &strOutputParms
+    std::string &strOutputParms,
+    ProxygenService::ProxygenStats* stats
   );
 
   int cloneTMLocaly
@@ -201,7 +203,8 @@ public:
   int reorganizeMem
   (
     std::string strMemory,
-    std::string &strOutputParms
+    std::string &strOutputParms,
+    ProxygenService::ProxygenStats* stats
   );
 
   /*! \brief get the data of a memory in binary form or TMX form
