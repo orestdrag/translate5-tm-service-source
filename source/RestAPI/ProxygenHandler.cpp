@@ -298,6 +298,8 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
   delete this;
 }
 
+#define LOG_SEND_RESPONSE 1
+
 void ProxygenHandler::sendResponse()noexcept{
 
     #ifdef TIME_MEASURES
@@ -306,7 +308,11 @@ void ProxygenHandler::sendResponse()noexcept{
     
     end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
     milliseconds time = end_ms-start_ms;   
-    T5LOG(T5TRANSACTION) <<"id = " << id << "; exection time = " <<  std::chrono::duration<double>(time).count();
+    
+    #ifdef LOG_SEND_RESPONSE
+     T5LOG(T5TRANSACTION) <<"id = " << id << "; exection time = " <<  std::chrono::duration<double>(time).count();
+    #endif
+
     stats_->addRequestTime(command, time);
     #endif
 

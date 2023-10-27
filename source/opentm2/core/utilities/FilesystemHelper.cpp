@@ -22,6 +22,7 @@
 #include <folly/portability/GFlags.h>
 
 int __last_error_code = 0;
+//#define LOG_FILE_WRITE 1
 
 PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     static FileBufferMap map;
@@ -326,6 +327,9 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
 
 int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
     std::string fName = GetFileName(ptr);
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called read file " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
     int offset = startingPos;
     FileBuffer* pFb = NULL;
 
@@ -379,6 +383,9 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 }
 
 int FilesystemHelper::WriteBuffToFile(std::string fName){
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called save file " << fileName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
     FileBuffer* pFb = NULL;
     auto pFBs = getFileBufferInstance();
     if(pFBs->find(fName)!= pFBs->end()){
