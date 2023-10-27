@@ -152,18 +152,12 @@ DWORD SetFilePointer(HFILE fp,LONG LoPart,LONG *HiPart,DWORD OffSet);
 
 void CopyFilePathReplaceExt(char* dest, const char* src, const char* new_ext);
 
-BOOL FlushFileBuffers(
-    HANDLE hFile
-);
-
 int GetFileId(HFILE ptr);
 
 int SkipBytesFromBeginningInFile(HFILE ptr, int numOfBytes);
 
 int TruncateFileForBytes(HFILE ptr, int numOfBytes);
 
-int filesystem_flush_buffers(const char* fname);
-int filesystem_flush_buffers_ptr(HFILE file);
 
 BOOL MoveFile(
     LPCTSTR lpExistingFileName, 

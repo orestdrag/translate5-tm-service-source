@@ -3933,9 +3933,7 @@ USHORT  UtlFillTableLB( HWND, USHORT );     // get languages
 USHORT SetSystemLanguage( PSZ pLanguage );
 PSZ    GetSystemLanguage( );
 USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg );
-USHORT UtlBufReset( HFILE hf, BOOL fMsg );
 USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd );
-USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd );
 BOOL   UtlAllocTrace ( PVOID *, LONG, LONG, USHORT, PSZ, USHORT );
 BOOL   UtlAllocTraceHwnd ( PVOID *, LONG, LONG, USHORT, HWND, PSZ, USHORT );
 #ifdef UTLFFST

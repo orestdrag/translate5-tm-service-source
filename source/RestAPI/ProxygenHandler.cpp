@@ -57,6 +57,11 @@ const std::map<const COMMAND,const char*> CommandToStringsMap {
 
 
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
+#ifdef TIME_MEASURES 
+  start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  //time(&startingTime);
+#endif
+
   builder = new ResponseBuilder(downstream_);
   auto methodStr = req->getMethodString ();
   auto method = req->getMethod ();
@@ -156,6 +161,17 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
 }
 
 void ProxygenHandler::sendResponse()noexcept{
+
+    #ifdef TIME_MEASURES
+    //time(&endingTime);
+    //time_t time = endingTime - startingTime;
+    
+    end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+    milliseconds time = end_ms-start_ms;   
+    //T5LOG(T5TRANSACTION) <<"id = " << pRequest->_id_ << "; exection time = " <<  std::chrono::duration<double>(time).count();
+    stats_->addRequestTime(pRequest->command, time);
+    #endif
+
     switch(pRequest->_rest_rc_){
       case 200:
       case 201:
@@ -181,6 +197,11 @@ void ProxygenHandler::sendResponse()noexcept{
                     folly::to<std::string>(pRequest->_id_));
     }
     
+    #ifdef TIME_MEASURES
+    builder->header("Execution-time",
+                    folly::to<std::string>( std::chrono::duration<double>(time).count()));
+
+    #endif
     //req->getHeaders().forEach([&](std::string& name, std::string& value) {
     //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
     //});

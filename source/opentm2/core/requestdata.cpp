@@ -1297,6 +1297,22 @@ int StatusMemRequestData::checkData() {
   return 0;
 };
 
+
+
+void AddRequestDataToJson(std::stringstream& ss, std::string reqType, milliseconds sumTime, size_t requestCount)
+{
+  ss << "\n[\n";
+  std::string paramName = reqType + "ReqCount";
+  AddToJson(ss, paramName.c_str(), requestCount, true);
+  paramName = reqType + "SumTime(sec)";
+  double sec = std::chrono::duration<double>(sumTime).count();
+  AddToJson(ss, paramName.c_str(), sec, true);
+  paramName = reqType + "AvrgReqTime";
+  AddToJson(ss, paramName.c_str(), requestCount? sec/requestCount : 0, false);
+  ss << "\n]";
+}
+
+
 int StatusMemRequestData::execute() {
   // check if memory is contained in our list
   if (  TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
@@ -1489,28 +1505,104 @@ int ResourceInfoRequestData::execute(){
   
   AddToJson(ssOutput, "Resident set", resident_set, true );
   AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
+
   if(pStats != nullptr){
-    ssOutput << "\"Requests\": {\n";
-    AddToJson(ssOutput, "RequestCount", pStats->getRequestCount(), true );
-    AddToJson(ssOutput, "CreateMemRequestCount", pStats->getCreateMemRequestCount(), true );
-    AddToJson(ssOutput, "DeleteMemRequestCount", pStats->getDeleteMemRequestCount(), true );
-    AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportMemRequestCount(), true );
-    AddToJson(ssOutput, "ImportMemRequestCount", pStats->getImportLocalMemRequestCount(), true );
-    
-    AddToJson(ssOutput, "ExportMemRequestCount", pStats->getExportMemRequestCount(), true );
-    AddToJson(ssOutput, "CloneTmLocalyRequestCount", pStats->getCloneLocalyCount(), true);
-    AddToJson(ssOutput, "ReorganizeRequestCount", pStats->getReorganizeRequestCount(), true);
-    AddToJson(ssOutput, "StatusMemRequestCount", pStats->getStatusMemRequestCount(), true );
-    AddToJson(ssOutput, "FuzzyRequestCount", pStats->getFuzzyRequestCount(), true );
-    AddToJson(ssOutput, "ConcordanceRequestCount", pStats->getConcordanceRequestCount(), true );
-    AddToJson(ssOutput, "UpdateEntryRequestCount", pStats->getUpdateEntryRequestCount(), true );
-    AddToJson(ssOutput, "DeleteEntryRequestCount", pStats->getDeleteEntryRequestCount(), true );
-    AddToJson(ssOutput, "SaveAllTmsRequestCount", pStats->getSaveAllTmsRequestCount(), true );
-    AddToJson(ssOutput, "ListOfMemoriesRequestCount", pStats->getListOfMemoriesRequestCount(), true );
-    AddToJson(ssOutput, "ResourcesRequestCount", pStats->getResourcesRequestCount(), true);
-    AddToJson(ssOutput, "OtherRequestCount", pStats->getOtherRequestCount(), true );
-    AddToJson(ssOutput, "UnrecognizedRequestsCount", pStats->getUnrecognizedRequestCount(), false);
-    ssOutput << "\n },\n"; 
+    milliseconds sumTime;
+    size_t requestCount;
+
+    {
+      ssOutput << "\"Requests\": {\n";
+      AddToJson(ssOutput, "RequestCount", pStats->getRequestCount(), true );
+
+      double sec = std::chrono::duration<double>(pStats->getExecutionTime()).count();
+      AddToJson(ssOutput, "RequestExecutionSumTime(sec)", sec, true);
+
+      requestCount = pStats->getCreateMemRequestCount();
+      sumTime = pStats->getCreateMemSumTime();
+      AddRequestDataToJson(ssOutput, "CreateMem", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getDeleteEntryRequestCount();
+      sumTime = pStats->getDeleteEntrySumTime();
+      AddRequestDataToJson(ssOutput, "DeleteMem", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getImportMemRequestCount();
+      sumTime = pStats->getImportMemSumTime();
+      AddRequestDataToJson(ssOutput, "ImportMem", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getExportMemRequestCount();
+      sumTime = pStats->getExportMemSumTime();
+      AddRequestDataToJson(ssOutput, "ExportMem", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getCloneLocalyCount();
+      sumTime = pStats->getCloneLocalySumTime();
+      AddRequestDataToJson(ssOutput, "CloneTmLocaly", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getReorganizeRequestCount();
+      sumTime = pStats->getReorganizeExecutionTime();
+      AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getStatusMemRequestCount();
+      sumTime = pStats->getStatusMemSumTime();
+      AddRequestDataToJson(ssOutput, "StatusMem", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getFuzzyRequestCount();
+      sumTime = pStats->getFuzzySumTime();
+      AddRequestDataToJson(ssOutput, "Fuzzy", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getConcordanceRequestCount();
+      sumTime = pStats->getConcordanceSumTime();
+      AddRequestDataToJson(ssOutput, "Concordance", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getUpdateEntryRequestCount();
+      sumTime = pStats->getUpdateEntrySumTime();
+      AddRequestDataToJson(ssOutput, "UpdateEntry", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getDeleteEntryRequestCount();
+      sumTime = pStats->getDeleteEntrySumTime();
+      AddRequestDataToJson(ssOutput, "DeleteEntry", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getReorganizeRequestCount();
+      sumTime = pStats->getReorganizeExecutionTime();
+      AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getSaveAllTmsRequestCount();
+      sumTime = pStats->getSaveAllTmsSumTime();
+      AddRequestDataToJson(ssOutput, "SaveAllTms", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getListOfMemoriesRequestCount();
+      sumTime = pStats->getListOfMemoriesSumTime();
+      AddRequestDataToJson(ssOutput, "ListOfMemories", sumTime, requestCount);
+      ssOutput <<",";
+      
+      requestCount = pStats->getResourcesRequestCount();
+      sumTime = pStats->getResourcesSumTime();
+      AddRequestDataToJson(ssOutput, "Resources", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getOtherRequestCount();
+      sumTime = pStats->getOtherSumTime();
+      AddRequestDataToJson(ssOutput, "Other", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getUnrecognizedRequestCount();
+      sumTime = pStats->getUnrecognizedSumTime();
+      AddRequestDataToJson(ssOutput, "Unrecognized", sumTime, requestCount);
+      ssOutput << "\n },\n"; 
+    }
+  
   }
 
   

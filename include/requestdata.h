@@ -7,7 +7,7 @@
 #include "tm.h"
 
 #include "lowlevelotmdatastructs.h"
-
+#include "RestAPI/ProxygenStats.h"
     
    
 
@@ -23,6 +23,7 @@ protected:
     static JSONFactory json_factory;
     //RequestData(); // json was parsed in sub class
 public:
+    ProxygenStats* stats = nullptr;
     int _id_ = 0;
     bool fValid = false;
     std::string strMemName;
@@ -99,6 +100,9 @@ protected:
     int execute() override  ;
 };
 
+#include "../source/RestAPI/ProxygenStats.h"
+//namespace ProxygenService;
+//class ProxygenService::ProxygenStats;
 /*! \brief Data area for the processing of the importMemory function
 */
 typedef struct _IMPORTMEMORYDATA
@@ -110,6 +114,7 @@ typedef struct _IMPORTMEMORYDATA
   char szError[512];
   std::shared_ptr<EqfMemory> mem;
   BOOL fDeleteTmx = false;
+  ProxygenStats* stats_ = nullptr;
   //ushort * pusImportPersent = nullptr;
   //ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
@@ -168,7 +173,7 @@ protected:
 };
 
 
-class ProxygenStats;
+//class ProxygenStats;
 class ResourceInfoRequestData:public RequestData{
 public:
     ProxygenStats* pStats = nullptr;

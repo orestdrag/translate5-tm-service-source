@@ -1971,54 +1971,6 @@ USHORT UtlSetFileModeHwnd
    return( usRetCode );
 }
 
-//+----------------------------------------------------------------------------+
-//|External function                                                           |
-//+----------------------------------------------------------------------------+
-//|Function name:     UtlBufReset/...Hwnd DosBufReset: flush buffer contents   |
-//+----------------------------------------------------------------------------+
-//|Function call:     UtlBufReset( HFILE hf, BOOL fMsg );                      |
-//+----------------------------------------------------------------------------+
-//|Description:       Interface function to DosBufReset                        |
-//+----------------------------------------------------------------------------+
-//|Input parameter:   HFILE    hf             handle of an openend file        |
-//|                   BOOL     fMsg           if TRUE handle errors in utility |
-//|                 ( HWND     hwnd )                                          |
-//+----------------------------------------------------------------------------+
-//|Returncode type:   USHORT                                                   |
-//+----------------------------------------------------------------------------+
-//|Returncodes:       return code of DosBufReset                               |
-//+----------------------------------------------------------------------------+
-//|Function flow:     call DosBufReset                                         |
-//+----------------------------------------------------------------------------+
-USHORT UtlBufReset( HFILE hf, BOOL fMsg )
-{
-  return UtlBufResetHwnd( hf, fMsg, (HWND)NULL );
-}
-
-USHORT UtlBufResetHwnd( HFILE hf, BOOL fMsg, HWND hwnd )
-{
-   USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-
-   do {
-      DosError(0);
-
-      if ( FlushFileBuffers( hf ) == 0 )
-      {
-        //usRetCode = (USHORT)GetLastError();
-      } /* endif */
-
-      DosError(1);
-      if ( fMsg && usRetCode )
-      {
-         usMBCode = MB_CANCEL;
-         T5LOG(T5ERROR) << ":: rc = " << usRetCode;
-      } /* endif */
-   } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
-
-   return( usRetCode );
-}
-
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

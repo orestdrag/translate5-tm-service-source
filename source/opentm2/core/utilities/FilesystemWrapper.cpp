@@ -69,9 +69,7 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
         return pFile;
     }
 
-    BOOL FlushFileBuffers( HANDLE hFile){
-        return true;
-    }
+   
 
     BOOL ReadFile(      HFILE        hFile,
                         LPVOID       lpBuffer,
@@ -272,12 +270,3 @@ BOOL SetFilePointerEx(
         }
 //}
 
-
-int filesystem_flush_buffers(const char* fname){
-    return FilesystemHelper::WriteBuffToFile(fname);
-}
-
-int filesystem_flush_buffers_ptr(HFILE file){
-    std::string fName = FilesystemHelper::GetFileName(file);
-    return FilesystemHelper::WriteBuffToFile(fName.c_str());
-}

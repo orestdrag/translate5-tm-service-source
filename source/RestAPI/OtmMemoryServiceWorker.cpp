@@ -397,6 +397,9 @@ int FilesystemHelper::DecodeBase64ToFile( const char *pStringData, const char *p
 void importMemoryProcess( void* pvData )
 {
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
+  #ifdef TIME_MEASURES
+  milliseconds start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  #endif 
   // call the OpenTM2 API function
   pData->szError[0] = 0;
   int iRC =(int)EqfImportMem( pData->mem, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);
@@ -416,6 +419,14 @@ void importMemoryProcess( void* pvData )
   if(pData->fDeleteTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
     DeleteFile( pData->szInFile );
   }
+
+  #ifdef TIME_MEASURES
+  milliseconds end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  milliseconds time = end_ms-start_ms;   
+  T5LOG(T5TRANSACTION) /*<<"id = " << id*/ << "; exection time = " <<  std::chrono::duration<double>(time).count();
+  pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
+  #endif
+
   delete( pData );
 
   return;
@@ -429,6 +440,9 @@ void reorganizeMemoryProcess( void* pvData )
   PFCTDATA    pData = (PFCTDATA)pvData;                      // ptr to function data area
   PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)pData->pvMemOrganizeCommArea; // ptr to commmunication area
   PMEM_ORGANIZE_IDA pRIDA =  (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;            // pointer to instance area
+  #ifdef TIME_MEASURES
+  milliseconds start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  #endif 
   // call the OpenTM2 API function
   pData->szError[0] = 0;
 
@@ -473,6 +487,12 @@ void reorganizeMemoryProcess( void* pvData )
   //if(pData->fDeleteSourceTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
   //  DeleteFile( pData->szInFile );
   //}
+  #ifdef TIME_MEASURES
+  milliseconds end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  milliseconds time = end_ms-start_ms;   
+  T5LOG(T5TRANSACTION) /*<<"id = " << id*/ << "; exection time = " <<  std::chrono::duration<double>(time).count();
+  pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
+  #endif
   
   if(pCommArea) delete( pCommArea );
   if(pRIDA) delete( pRIDA );

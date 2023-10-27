@@ -398,7 +398,8 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
     }
 }
 
-int FileBuffer::ReadFromFile(){           
+int FileBuffer::ReadFromFile(){        
+    T5LOG(T5TRANSACTION) <<"reading file " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;   
     if(fileName.empty()){
         return FilesystemHelper::FILEHELPER_ERROR_WRONG_FILENAME;
     }
@@ -456,7 +457,9 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
 }
 
 int FileBuffer::Flush(){
+    T5LOG(T5TRANSACTION) <<"saving file " << fileName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
     bool fileWasOpened = file != nullptr;
+
     size_t writenBytes = 0;
     if(!FilesystemHelper::FileExists(fileName)){
         T5LOG(T5WARNING) << "File is not exists on disk so flushing would be skipped, fName = " << fileName;
