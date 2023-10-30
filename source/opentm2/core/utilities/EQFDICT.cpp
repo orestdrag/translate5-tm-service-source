@@ -1744,7 +1744,6 @@ SHORT BTREE::QDAMDictClose()
           sRc = QDAMWriteHeader();
      } /* endif */
      
-     filesystem_flush_buffers_ptr(fb.file);
      if ( UtlClose(fb.file, FALSE) && !sRc )
      {
         sRc = BTREE_CLOSE_ERROR;

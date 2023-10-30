@@ -20,6 +20,7 @@
 
 #include <filesystem>
 #include <folly/portability/GFlags.h>
+//#define LOG_FILE_WRITE 1
 
 int __last_error_code = 0;
 
@@ -399,7 +400,10 @@ int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
 }
 
 int FileBuffer::ReadFromFile(){        
-    T5LOG(T5TRANSACTION) <<"reading file " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;   
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called read file " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
+
     if(fileName.empty()){
         return FilesystemHelper::FILEHELPER_ERROR_WRONG_FILENAME;
     }
@@ -457,7 +461,10 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
 }
 
 int FileBuffer::Flush(){
-    T5LOG(T5TRANSACTION) <<"saving file " << fileName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called flush  filebuffer " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
+    
     bool fileWasOpened = file != nullptr;
 
     size_t writenBytes = 0;

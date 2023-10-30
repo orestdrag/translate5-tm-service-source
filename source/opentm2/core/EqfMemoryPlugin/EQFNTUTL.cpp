@@ -2153,13 +2153,13 @@ USHORT NTMComputeAddDataSize( PSZ_W pszContext, PSZ_W pszAddInfo )
   if ( (pszContext != NULL) && (*pszContext != 0) )
   {
     // length = characters in context + end delimiter + size field + IF field
-    usLength = usLength + (USHORT)((wcslen( pszContext) + 3) * sizeof(CHAR_W));
+    usLength = usLength + (USHORT)((wcslen( pszContext) + 4) * sizeof(CHAR_W));
   } /* endif */     
 
   if ( (pszAddInfo != NULL) && (*pszAddInfo != 0) )
   {
     // length = characters in add.info + end delimiter + size field + IF field
-    usLength = usLength + (USHORT)((wcslen( pszAddInfo) + 3) * sizeof(CHAR_W));
+    usLength = usLength + (USHORT)((wcslen( pszAddInfo) + 4) * sizeof(CHAR_W));
   } /* endif */     
 
   if ( usLength != 0 )
@@ -2264,26 +2264,26 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     {
       PSZ_W pEndOfData = (PSZ_W)(((PBYTE)pOldData ) + pCLB->usAddDataLen - 2);
       USHORT usOldLen = (USHORT) pOldData [1];
-      PSZ_W pusSource = pOldData + usOldLen + 2;
-      PSZ_W pusTarget = pOldData ;
+      PSZ_W pSource = pOldData + usOldLen + 2;
+      PSZ_W pTarget = pOldData ;
 
-      while ( pusSource <= pEndOfData )
+      while ( pSource <= pEndOfData )
       {
-        *pusTarget++ = *pusSource++;
+        *pTarget++ = *pSource++;
       } /* endwhile */         
 
-      pCLB->usAddDataLen = pCLB->usAddDataLen - ((usOldLen + 2)*sizeof(USHORT));
+      pCLB->usAddDataLen = pCLB->usAddDataLen - ((usOldLen + 2)*sizeof(PSZ_W));
     } /* endif */       
 
     // add new data to end of data area
     if ( usNewLength != 0 )
     {
-      PUSHORT pusTarget = (PUSHORT)(((PBYTE)pData) + pCLB->usAddDataLen - 2);
-      *pusTarget++ = usDataID;
-      *pusTarget++ = usNewLength;
-      while ( *pszNewData != 0 ) *pusTarget++ = *pszNewData++;
-      *pusTarget++ = 0;
-      *pusTarget++ = ADDDATA_ENDOFDATA_ID;
+      PSZ_W pTarget = (PSZ_W)(((PBYTE)pData) + pCLB->usAddDataLen - 2);
+      *pTarget++ = usDataID;
+      *pTarget++ = usNewLength;
+      while ( *pszNewData != 0 ) *pTarget++ = *pszNewData++;
+      *pTarget++ = 0;
+      *pTarget++ = ADDDATA_ENDOFDATA_ID;
       pCLB->usAddDataLen += ((usNewLength + 2 ) * sizeof(USHORT));
     } /* endif */       
   }
@@ -2294,7 +2294,7 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     *pData++ = usNewLength;
     //pData += 2;
     pszNewData[usNewLength] = 0;
-    wcscpy( pData, pszNewData);
+    wcsncpy( pData, pszNewData, usNewLength);
     //memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
     pData += usNewLength;// * sizeof(wchar_t);
     //pusData += usNewLength * 2;
