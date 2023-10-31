@@ -20,7 +20,7 @@
 
 #include <filesystem>
 #include <folly/portability/GFlags.h>
-//#define LOG_FILE_WRITE 1
+#define LOG_FILE_WRITE 1
 
 int __last_error_code = 0;
 

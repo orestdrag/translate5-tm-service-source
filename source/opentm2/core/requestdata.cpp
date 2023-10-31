@@ -1889,7 +1889,7 @@ int UpdateEntryRequestData::execute(){
   /* the TMX_PUT_IN structure must not be filled it is provided       */
   /* by the caller                                                    */
   /********************************************************************/
-  _rc_ = TmtXReplace ( mem.get(), &TmPutIn, &TmPutOut );
+  _rc_ = mem->TmtXReplace ( &TmPutIn, &TmPutOut );
 
   if ( _rc_ != 0 ){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   

@@ -183,9 +183,8 @@ BOOL CheckForAlloc
 //        AddToTM( pszTmPut, pstTagTable, pstTmClb )                            
 //        UpdateTmIndex( pstTmClb, ulHashList )                                 
 //------------------------------------------------------------------------------
-USHORT TmtXReplace
+USHORT EqfMemory::TmtXReplace
 (
-  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_PUT_IN_W pTmPutIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
@@ -200,7 +199,6 @@ USHORT TmtXReplace
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
 
-  DEBUGEVENT2( TMTXREPLACE_LOC, FUNCENTRY_EVENT, 0, TM_GROUP, "" );
 
   //allocate pSentence
   fOK = UtlAlloc( (PVOID *) &(pSentence), 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
@@ -255,7 +253,7 @@ USHORT TmtXReplace
     wcsncpy( pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE-1);
 
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString,
+    usRc = TokenizeSource( this, pSentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage);
     
     if ( strstr( szString, "OTMUTF8" ) ) {
@@ -269,32 +267,31 @@ USHORT TmtXReplace
     pSentence->pNormString = pSentence->pNormStringStart;
     HashSentence( pSentence );
     pSentence->pTagRecord->usTagTableId = 0;
-    if ( pTmClb )  /* 4-13-15 */
-    {
-      usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
-      if(usRc){
-        T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
-      }
+        
+    usRc = NTMGetIDFromName( this, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+    if(usRc){
+      T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
     }
+    
     
   } /* endif */
 
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( pSentence, pTmClb );
+    usMatchesFound = CheckCompactArea( pSentence, this );
     if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
     {
       //update entry in tm database
-      usRc = UpdateTmRecord(pTmClb, &pTmPutIn->stTmPut, pSentence );
+      usRc = UpdateTmRecord(&pTmPutIn->stTmPut, pSentence );
 
       //if no tm record fitted for update assume new and add to tm
       if ( usRc == ERROR_ADD_TO_TM )
       {
-        usRc = AddToTm( pSentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
+        usRc = AddToTm( pSentence, &pTmPutIn->stTmPut, &ulNewKey );
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+          usRc = UpdateTmIndex( pSentence, ulNewKey );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
       } /* endif */
@@ -302,12 +299,12 @@ USHORT TmtXReplace
     else
     {
       //add new tm record to tm database
-      usRc = AddToTm( pSentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
+      usRc = AddToTm( pSentence, &pTmPutIn->stTmPut, &ulNewKey );
 
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+        usRc = UpdateTmIndex( pSentence, ulNewKey );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
     } /* endif */
@@ -316,7 +313,7 @@ USHORT TmtXReplace
   // unlock TM database if database has been locked
   if ( fLocked )
   {
-    NTMLockTM( pTmClb, FALSE, &fLocked );
+    NTMLockTM( this, FALSE, &fLocked );
   } /* endif */
 
   //release allocated memory
@@ -360,16 +357,12 @@ USHORT TmtXReplace
       strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-      TmtXDelSegm( pTmClb, pstDelIn, pstDelOut );
+      TmtXDelSegm( this, pstDelIn, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
     } /* endif */
   } /* endif */
 
-  if ( usRc )
-  {
-    ERREVENT2( TMTXREPLACE_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
   return( usRc );
 }
 
@@ -954,11 +947,6 @@ USHORT TokenizeTarget
 
   *ppTagRecord = pTagRecord;
 
-  if ( usRc )
-  {
-    ERREVENT2( TOKENIZETARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
-
   return( usRc );
 }
 
@@ -1003,10 +991,9 @@ USHORT TokenizeTarget
 //                                                                              
 //      add tm record to tm data file                                           
 //------------------------------------------------------------------------------
-USHORT AddToTm
+USHORT EqfMemory::AddToTm
 (
   PTMX_SENTENCE pSentence,            // ptr to sentence structure
-  EqfMemory* pTmClb,                    // ptr to control block
   PTMX_PUT_W pTmPut,                  // ptr to put input structure
   PULONG pulNewKey                    // sid of newly added tm record
 )
@@ -1056,15 +1043,15 @@ USHORT AddToTm
   else
   {
     usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
-                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
+                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, this );
     
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
+      usRc = FillClb( &pTargetClb, this, pTmPut );
       if ( usRc == NO_ERROR )
       {
         USHORT usSrcLang = 0; 
-        usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+        usRc = NTMGetIDFromName( this, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
         //fill tm record to add to database
         FillTmRecord ( pSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
@@ -1078,7 +1065,7 @@ USHORT AddToTm
         //add new tm record to database
         *pulNewKey = NTMREQUESTNEWKEY;
         
-        usRc = pTmClb->TmBtree.EQFNTMInsert(//ptr to tm structure
+        usRc = TmBtree.EQFNTMInsert(//ptr to tm structure
                              pulNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
                              pTmRecord->lRecordLen);     //length
@@ -1091,11 +1078,6 @@ USHORT AddToTm
   UtlAlloc( (PVOID *) &(pTargetClb), 0L, 0L, NOMSG);
   UtlAlloc( (PVOID *) &(pNormString), 0L, 0L, NOMSG);
   UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
-
-  if ( usRc )
-  {
-    ERREVENT2( ADDTOTM_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
 
   return( usRc );
 }
@@ -1367,11 +1349,10 @@ USHORT FillClb
 //      call AddToTm                                                            
 //------------------------------------------------------------------------------
 
-USHORT UpdateTmIndex
+USHORT EqfMemory::UpdateTmIndex
 (
   PTMX_SENTENCE  pSentence,            //pointer to sentence structure
-  ULONG  ulSidKey,                     //tm record key
-  EqfMemory* pTmClb                      //ptr to tm control block
+  ULONG  ulSidKey                      //tm record key
 )
 {
   USHORT   usRc = 0;                   // return code
@@ -1403,7 +1384,7 @@ USHORT UpdateTmIndex
         ulKey = (*pulVotes) & START_KEY;
         ulLen = TMX_REC_SIZE;
         memset( pIndexRecord, 0, TMX_REC_SIZE );
-        usRc = pTmClb->InBtree.EQFNTMGet( ulKey,  //index key
+        usRc = InBtree.EQFNTMGet( ulKey,  //index key
                           (PCHAR)pIndexRecord,   //pointer to index record
                           &ulLen );  //length
 
@@ -1414,18 +1395,18 @@ USHORT UpdateTmIndex
 
           pIndexRecord->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
 
-          usRc = pTmClb->InBtree.EQFNTMInsert( &ulKey,
+          usRc = InBtree.EQFNTMInsert( &ulKey,
                                (PBYTE)pIndexRecord,  //pointer to index
                                pIndexRecord->usRecordLen );  //length
 
           // if index DB is full and memory is in exclusive access we try to compact the index file
-          if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
+          if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (usAccessMode & ASD_LOCKED) )
           {
-             usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
+             usRc = EQFNTMOrganizeIndex( &(InBtree), usAccessMode, START_KEY );
 
              if ( usRc == NO_ERROR )
              {
-               usRc = pTmClb->InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+               usRc = InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
              } /* endif */
           } /* endif */
 
@@ -1433,10 +1414,10 @@ USHORT UpdateTmIndex
           {
             //add the match(tuple) to compact area
             ulKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-            *((PBYTE)pTmClb->bCompact + (ulKey >> 3)) |=
+            *((PBYTE)bCompact + (ulKey >> 3)) |=
                                   1 << ((BYTE)ulKey & 0x07);
 //                                  1 << (USHORT)(ulKey & 0x07);       @01M
-            pTmClb->bCompactChanged = TRUE;
+            bCompactChanged = TRUE;
           } /* endif */
         }
         else
@@ -1494,27 +1475,27 @@ USHORT UpdateTmIndex
                 //update index record size
                 pIndexRecord->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
 
-                usRc = pTmClb->InBtree.EQFNTMUpdate( 
+                usRc = InBtree.EQFNTMUpdate( 
                                     ulKey,
                                     (PBYTE)pIndexRecord,  //pointer to index
                                     pIndexRecord->usRecordLen );  //length
                 // if index DB is full and memory is in exclusive access we try to compact the index file
-                if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (pTmClb->usAccessMode & ASD_LOCKED) )
+                if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (usAccessMode & ASD_LOCKED) )
                 {
-                  usRc = EQFNTMOrganizeIndex( &(pTmClb->InBtree), pTmClb->usAccessMode, START_KEY );
+                  usRc = EQFNTMOrganizeIndex( &(InBtree), usAccessMode, START_KEY );
 
                   if ( usRc == NO_ERROR )
                   {
-                    usRc = pTmClb->InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
+                    usRc = InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
                   } /* endif */
                 } /* endif */
                 if ( !usRc )
                 {
                   //add the match(tuple) to compact area
                   ulKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-                  *((PBYTE)pTmClb->bCompact + (ulKey >> 3)) |=
+                  *((PBYTE)bCompact + (ulKey >> 3)) |=
                                         1 << ((BYTE)ulKey & 0x07);
-                  pTmClb->bCompactChanged = TRUE;
+                  bCompactChanged = TRUE;
                 } /* endif */
               }
               else
@@ -1537,11 +1518,6 @@ USHORT UpdateTmIndex
 
   //release allocated memory
   UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG);
-
-  if ( usRc )
-  {
-    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
 
   return( usRc );
 }
@@ -1793,9 +1769,8 @@ USHORT DetermineTmRecord
 //       else try next sentence key                                             
 //------------------------------------------------------------------------------
 
-USHORT UpdateTmRecord
+USHORT EqfMemory::UpdateTmRecord
 (
-  EqfMemory*      pTmClb,                //ptr to tm control block
   PTMX_PUT_W    pTmPut,                //pointer to get in data
   PTMX_SENTENCE pSentence              //ptr to sentence structure
 )
@@ -1832,7 +1807,7 @@ USHORT UpdateTmRecord
   else
   {
     pulSidStart = pulSids;
-    usRc = DetermineTmRecord( pTmClb, pSentence, pulSids );
+    usRc = DetermineTmRecord( this, pSentence, pulSids );
     if ( usRc == NO_ERROR )
     {
       //get tm record(s)
@@ -1841,7 +1816,7 @@ USHORT UpdateTmRecord
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
         memset( pTmRecord, 0, ulLen );
-        usRc =  pTmClb->TmBtree.EQFNTMGet(
+        usRc =  TmBtree.EQFNTMGet(
                           ulKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
@@ -1853,7 +1828,7 @@ USHORT UpdateTmRecord
             ulRecBufSize = ulLen;
             memset( pTmRecord, 0, ulLen );
 
-            usRc =  pTmClb->TmBtree.EQFNTMGet(
+            usRc =  TmBtree.EQFNTMGet(
                               ulKey,  //tm record key
                               (PCHAR)pTmRecord,   //pointer to tm record data
                               &ulLen );    //length
@@ -1867,7 +1842,7 @@ USHORT UpdateTmRecord
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( pTmClb, &pTmRecord, &ulRecBufSize,
+          usRc = ComparePutData( this, &pTmRecord, &ulRecBufSize,
                                  pTmPut, pSentence, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
@@ -1897,11 +1872,6 @@ USHORT UpdateTmRecord
   //release memory
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
-
-  if ( usRc )
-  {
-    ERREVENT2( UPDATETMRECORD_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
 
   return( usRc );
 }

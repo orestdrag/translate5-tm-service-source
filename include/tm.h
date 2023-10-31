@@ -24,7 +24,7 @@
 #include "LogWrapper.h"
 
 #include "../source/opentm2/core/pluginmanager/OtmPlugin.h"
-
+#include "../source/opentm2/core/utilities/Stopwatch.hpp"
 
 #define MEM_START_ORGANIZE  USER_TASK + 1
 #define MEM_ORGANIZE_TASK   USER_TASK + 2
@@ -2165,6 +2165,9 @@ public:
   ); 
 
 
+  USHORT AddToTm( PTMX_SENTENCE, PTMX_PUT_W, PULONG );
+  USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG );
+
   void importDone(int iRC, char *pszError );
   void reorganizeDone(int iRC, char *pszError );
     
@@ -2190,6 +2193,13 @@ public:
     char *pszKey,
     OtmProposal &Proposal
   ); 
+
+
+  USHORT TmtXReplace
+  (
+    PTMX_PUT_IN_W pTmPutIn,  //ptr to input struct
+    PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
+  );
 
 USHORT NTMLoadNameTable
 (
@@ -2221,9 +2231,8 @@ USHORT NTMLoadNameTable
 
   ); 
 
-/*! \brief Get number of markups used for the proposals in this memory
-  	\returns number of markups used by the memory proposals or 0 if no markup information can be provided
-*/
+  USHORT UpdateTmRecord( PTMX_PUT_W, PTMX_SENTENCE );
+  
   int getNumOfMarkupNames();
 
 /*! \brief Get markup name at position n [n = 0.. GetNumOfMarkupNames()-1]
@@ -4079,8 +4088,6 @@ USHORT CheckCompactAreaV5( PTMX_SENTENCE_V5, EqfMemory* );
 USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
 USHORT TokenizeTargetV5( PSZ, PSZ, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
 
-USHORT AddToTm( PTMX_SENTENCE, EqfMemory*, PTMX_PUT_W, PULONG );
-USHORT AddToTmV5( PTMX_SENTENCE_V5, EqfMemory*, PTMX_PUT, PULONG );
 VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 VOID FillTmRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD, PSZ, USHORT,
@@ -4088,11 +4095,8 @@ VOID FillTmRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD, PSZ, USHORT,
 
 USHORT FillClb( PTMX_TARGET_CLB *, EqfMemory*, PTMX_PUT_W );
 USHORT FillClbV5( PTMX_OLD_TARGET_CLB *, EqfMemory*, PTMX_PUT );
-USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG, EqfMemory* );
-USHORT UpdateTmIndexV5( PTMX_SENTENCE_V5, ULONG, EqfMemory* );
 USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );
 USHORT DetermineTmRecordV5( EqfMemory*, PTMX_SENTENCE_V5, PULONG );
-USHORT UpdateTmRecord( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE );
 USHORT UpdateTmRecordV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5 );
 USHORT AddTmTarget( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE, PTMX_RECORD *, PULONG, PULONG );
 USHORT AddTmTargetV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5, PTMX_RECORD *, PULONG, PULONG );

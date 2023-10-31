@@ -224,7 +224,7 @@ int EqfMemory::putProposal
   /********************************************************************/
 
   //iRC = (int)TmReplace( this->htm,  NULL,  TmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
-  iRC = TmtXReplace ( this, &TmPutIn, &TmPutOut );
+  iRC = TmtXReplace ( &TmPutIn, &TmPutOut );
 
   if ( iRC != 0 ){
       T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
