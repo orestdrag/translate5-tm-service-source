@@ -33,17 +33,38 @@ namespace stopwatch{
             start_time = std::chrono::high_resolution_clock::now();
         }
 
-        std::uint64_t elapsed(){
-            const auto duration = std::chrono::high_resolution_clock::now() - start_time;
-            const std::uint64_t ns_count = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
-            std::uint64_t up = ((ns_count/100000)%10 >= 5) ? 1 : 0;
-            const auto ms_count = (ns_count /1000000) + up;
+        void reset(){
+          start_time = std::chrono::high_resolution_clock::now();
         }
-        std::string print(){
-            return /*"{" + */ std::to_string(elapsed()) + /*"}*/" ms\"";
+        std::uint64_t elapsedMs(){
+          const auto duration = std::chrono::high_resolution_clock::now() - start_time;
+          const std::uint64_t ns_count = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+          std::uint64_t up = ((ns_count/100000)%10 >= 5) ? 1 : 0;
+          const auto ms_count = (ns_count /1000000) + up;
+          return ms_count;
         }
+
+        std::uint64_t elapsedNs(){
+          const auto duration = std::chrono::high_resolution_clock::now() - start_time;
+          const std::uint64_t ns_count = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+          std::uint64_t up = ((ns_count/100000)%10 >= 5) ? 1 : 0;
+          const auto ms_count = (ns_count /1000000) + up;
+        }
+
+        std::string getString(){
+          return /*"{" + */ std::to_string(elapsedMs()) + /*"}*/" ms\"";
+        }
+
+        std::string getStringNs(){
+          return /*"{" + */ std::to_string(elapsedNs()) + /*"}*/" ns\"";
+        }
+
+        void print(){
+          T5LOG(T5TRANSACTION) << getString();
+        }
+
         ~Stopwatch(){
-            T5LOG(T5INFO) << "stopwatch, method  = " << methodName << "; time = " << print();
+          T5LOG(T5INFO) << "stopwatch, method  = " << methodName << "; time = " << getStringNs();
         }
     
     };

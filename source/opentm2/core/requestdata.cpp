@@ -306,6 +306,7 @@ int RequestData::buildRet(int res){
     }
   }
   T5LOG(T5DEBUG) << outputMessage;
+  return 0;
 }
 
 int RequestData::run(){   
@@ -1278,7 +1279,7 @@ int CloneTMRequestData::execute(){
     _rest_rc_ = 200;
   }
 
-  outputMessage = "{\n\t\"msg\": \"" + outputMessage + "\",\n\t\"time\": \"" + watch.print()+ "\n}"; 
+  outputMessage = "{\n\t\"msg\": \"" + outputMessage + "\",\n\t\"time\": \"" + watch.getString()+ "\n}"; 
 
   STOP_WATCH
   //PRINT_WATCH

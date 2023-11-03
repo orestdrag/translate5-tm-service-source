@@ -30,38 +30,3 @@ BOOL IsDBCS_CP( ULONG ulCP )
   return(fIsDBCS);
 }
 
-// check if the codepage for the given language is supported by the operating system
-BOOL UtlIsLanguageSupported
-(
-  PSZ    pszLanguage,
-  BOOL   fMsg,
-  HWND   hwndErrMsg
-)
-{
-  T5LOG( T5WARNING) <<  ":: called function that probably should be refactored";
-  CHAR_W szUnicode[10];
-  int    iRC = 0;
-  BOOL   fOK = TRUE;
-
-  // get OEM codepage for given language
-  ULONG ulCP = 1;
-
-  // convert our test string to UTF16
-  iRC = MultiByteToWideChar( ulCP, 0, "ABC", -1, szUnicode, 10 );
-
-  if ( iRC == 0 )
-  {
-    //iRC = GetLastError();
-    //fOK = (iRC != ERROR_INVALID_PARAMETER);
-    fOK = false;
-  } /* endif */
-
-  // error handling moved to caller functions
-//  // do any error handling
-//  if ( !fOK && fMsg )
-//  {
-//    UtlErrorHwnd( ERROR_LANG_NOTSUPPORTED, MB_CANCEL, 1, &pszLanguage, EQF_ERROR, hwndErrMsg );
-//  } /* endif */
-
-  return( fOK );
-} /* end of function UtlIsLanguageSupported */

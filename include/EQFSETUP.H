@@ -78,8 +78,6 @@ typedef enum _UPDPROPTYPE
 }  UPDPROPTYPE;
 
 
-static USHORT DeletePropFile( CHAR chDrive, PSZ pszName );
-static USHORT SetupCreateDir( CHAR chDrive, PSZ pFolder, USHORT usPathID );
        VOID   BuildPath( PSZ pszBuffer, CHAR chEqfDrive, PSZ pszFolder, USHORT usPathID );
 static VOID             DeleteFiles( PSZ, USHORT );
 static USHORT           ErrorMessage( USHORT, PSZ, USHORT );
@@ -92,10 +90,7 @@ static USHORT           ReadAndPrepareConfigSys ( VOID );
 
 int SetupMAT();
          USHORT SetupMAT( HAB hab, CHAR chPrimaryDrive, PSZ  pszSecondaryDrives, CHAR chLanDrive );
-static   USHORT CreateEditProperties( CHAR );
-static   USHORT CreateImexProperties( CHAR );
 
-static   USHORT UpdateSystemProperties ( CHAR chPrimaryDrive, CHAR chLanDrive ); /* $KIT0890 A */
 static   USHORT CreateDictProperties( CHAR chPrimaryDrive );
          USHORT SetupTmCom (CHAR chPrimaryDrive, PSZ pszSecondaryDrives);
          USHORT SetupDemo  (HAB hab, CHAR chPrimaryDrive, PSZ pszSecondaryDrives, CHAR chLanDrive);

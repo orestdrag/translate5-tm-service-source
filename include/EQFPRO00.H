@@ -189,11 +189,8 @@ PPROPHND  FindPropHnd( PPROPHND ptop, PPROPHND hprop);
 PPROPCNTL LoadPropFile( PPROP_IDA pIda, PSZ pName, PSZ pPath, USHORT Acc);
 PPROPCNTL CreatePropFile( PPROP_IDA pIda, PSZ pName, PSZ pPath, USHORT Class, BOOL fOverwriteExisting );
 VOID      DropPropFile( PPROP_IDA pIda, PPROPCNTL pcntl);
-SHORT     DeletePropFile( PPROP_IDA pIda, PSZ pszName, PSZ pszPath);
 PPROPCNTL FindPropCntl( PPROPCNTL ptop, PSZ pszName, PSZ pszPath);
 USHORT    GetSysProp( PPROP_IDA pIda);
 USHORT    PutItAway( PPROPCNTL pcntl);
-SHORT     LoadPropMsg( PPROPMSGPARM mp, PPROPHND hprop, PSZ name, PSZ path, \
-                       USHORT flg, PEQFINFO pErrorInfo, BYTE *buffer);
 
 #endif

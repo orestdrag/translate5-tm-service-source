@@ -98,22 +98,11 @@
 #define MAX_ATTR_TOKENS 512
 
 //--- Function prototypes for internal C functions                                */
-static BOOL Tagsearch (PSZ, ULONG, USHORT, BOOL, PTAG, CHAR *, TAGTABLE *, SHORT *);
-static BOOL Attributesearch(PSZ, ULONG, PATTRIBUTE, CHAR * ,TAGTABLE *, SHORT *);
-static BOOL Skipwhitespace(PSZ *, USHORT *);
-static BOOL WildCardSearch (PSZ, PSZ );
-static PSZ SkipToTextEnd( PSZ  );
-static PSZ SkipTextString ( PSZ, USHORT * );
 #define MAX_CHINPUTW 40000
 static CHAR_W chInputW[ MAX_CHINPUTW ];
 
 #define TAG_END_CHAR       "."        // tag end character
 #define TAG_END_CHARW      L"."
-PNODE  TAFastCreateNodeTree( PTBTAGENTRY pTags, ULONG ulNoOfTags );
-PNODE  TAFastCreateTagTree( PLOADEDTABLE pLoadedTable, PTAGTABLE pTagTable );
-PNODE  TAFastCreateAttrTree( PLOADEDTABLE pLoadedTable, PTAGTABLE pTagTable );
-BOOL   TAFastAddNode ( PNODE *, PNODE, PULONG, PULONG );
-int    TATastTagCompare( const void *, const void * );
 
 VOID TASetStartStopType(PSTARTSTOP pCurrent, USHORT usStart, USHORT usStop, USHORT usType );
 USHORT TAFindQuote ( PTOKENENTRY pTok, USHORT usStartSearch, PCHAR_W pchQuote );
