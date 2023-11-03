@@ -14,8 +14,12 @@
 #include <proxygen/httpserver/ResponseBuilder.h>
 #include <map>
 #include <string>
+#include <time.h>
 #include "OtmMemoryServiceWorker.h"
 #include "ProxygenStats.h"
+
+
+using namespace std::chrono;
 
 namespace proxygen {
 class ResponseHandler;
@@ -24,6 +28,7 @@ class ResponseHandler;
 namespace ProxygenService {
 
 
+#define TIME_MEASURES
 class ProxygenHandler : public proxygen::RequestHandler {
  public:
  
@@ -72,6 +77,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
 
   std::string memName;
   std::string errorStr;
+  int id{0};
 
   std::string strResponseBody;
   std::vector<unsigned char> vMemData;
@@ -83,6 +89,12 @@ class ProxygenHandler : public proxygen::RequestHandler {
   ProxygenStats* const stats_{nullptr};
 
   std::unique_ptr<folly::IOBuf> body_;
+
+#ifdef TIME_MEASURES
+  //time_t startingTime;
+  //time_t endingTime;
+  std::chrono::milliseconds start_ms, end_ms;
+#endif
 
   void sendResponse()noexcept;
 };

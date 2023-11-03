@@ -22,6 +22,7 @@
 #include <folly/portability/GFlags.h>
 
 int __last_error_code = 0;
+#define LOG_FILE_WRITE 1
 
 PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     static FileBufferMap map;
@@ -255,7 +256,9 @@ int FilesystemHelper::ReadFileToFileBufferAndKeepInRam(const std::string& path){
    if(FilebufferExists(path)){
         return FILEHELPER_WARNING_FILEBUFFER_EXISTS;
    }
-
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called ReadFileToFileBufferAndKeepInRam " << path <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
    auto file = OpenFile(path, "r", true);
    if(file == nullptr){
      return FILEHELPER_ERROR_NO_FILES_FOUND;
@@ -326,6 +329,9 @@ int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buf
 
 int FilesystemHelper::ReadBuffer(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos){
     std::string fName = GetFileName(ptr);
+    #ifdef  LOG_FILE_WRITE
+    // T5LOG(T5TRANSACTION) <<"called read file " << fName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
     int offset = startingPos;
     FileBuffer* pFb = NULL;
 
@@ -379,6 +385,9 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
 }
 
 int FilesystemHelper::WriteBuffToFile(std::string fName){
+    //#ifdef  LOG_FILE_WRITE
+    // T5LOG(T5TRANSACTION) <<"called save file " << fName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    //#endif
     FileBuffer* pFb = NULL;
     auto pFBs = getFileBufferInstance();
     if(pFBs->find(fName)!= pFBs->end()){
@@ -726,6 +735,9 @@ int FilesystemHelper::WriteToFile(FILE*& ptr, const void* buff, const int buffsi
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         oldSize = GetFileSize(ptr);
     }
+    #ifdef  LOG_FILE_WRITE
+     T5LOG(T5TRANSACTION) <<"called save file " << (long int) ptr <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+    #endif
     if(ptr == NULL){
         T5LOG(T5ERROR) <<"FilesystemHelper::WriteToFile():: FILEHELPER_FILE_PTR_IS_NULL";
         __last_error_code = errCode = FILEHELPER_FILE_PTR_IS_NULL;

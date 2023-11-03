@@ -42,7 +42,8 @@
 #include "EqfMemoryPlugin.h"
 
 #include "opentm2/core/utilities/Stopwatch.hpp"
-
+//#include "RestAPI/ProxygenHandler.h"
+//#include "RestAPI/ProxygenStats.h"
 
 enum statusCodes {
   OK = 200, 
@@ -98,7 +99,7 @@ typedef struct _CREATEMEMORYDATA
   wchar_t szError[512];
 } CREATEMEMORYDATA, *PCREATEMEMORYDATA;
 
-
+//class ProxygenService::ProxygenStats;
 /*! \brief Data area for the processing of the importMemory function
 */
 typedef struct _IMPORTMEMORYDATA
@@ -112,6 +113,7 @@ typedef struct _IMPORTMEMORYDATA
   ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::POPENEDMEMORY pMem = nullptr;
   bool fDeleteSourceTmx{0};
+  ProxygenService::ProxygenStats* stats_ = nullptr;
 } IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
 
 
@@ -950,6 +952,7 @@ int OtmMemoryServiceWorker::cloneTMLocaly
 
   return iRC;
 }
+
 /*! \brief Import a memory from a TMX file
 \param strMemory name of memory
 \param strInputParms input parameters in JSON format
@@ -959,8 +962,9 @@ int OtmMemoryServiceWorker::cloneTMLocaly
 int OtmMemoryServiceWorker::import
 (
   std::string  strMemory,
-  std::string strInputParms,
-  std::string &strOutputParms
+  std::string &strInputParms,
+  std::string &strOutputParms,
+  ProxygenService::ProxygenStats* stats
 )
 {
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1156,6 +1160,7 @@ int OtmMemoryServiceWorker::import
   pData->importDetails->reset();
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
+  pData->stats_ = stats;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
@@ -1176,7 +1181,8 @@ int OtmMemoryServiceWorker::importLocal
 (
   std::string  strMemory,
   std::string strInputParms,
-  std::string &strOutputParms
+  std::string &strOutputParms,
+  ProxygenService::ProxygenStats* stats
 )
 {
   //EncodingHelper::convertUTF8ToASCII( strMemory );
@@ -1367,6 +1373,7 @@ int OtmMemoryServiceWorker::importLocal
   pData->importDetails->reset();
   pData->hSession = hSession;
   pData->pMemoryServiceWorker = this;
+  pData->stats_ = stats;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
@@ -1671,6 +1678,20 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 }
 
 
+void AddRequestDataToJson(std::stringstream& ss, std::string reqType, milliseconds sumTime, size_t requestCount)
+{
+  ss << "\n[\n";
+  std::string paramName = reqType + "ReqCount";
+  AddToJson(ss, paramName.c_str(), requestCount, true);
+  paramName = reqType + "SumTime(sec)";
+  double sec = std::chrono::duration<double>(sumTime).count();
+  AddToJson(ss, paramName.c_str(), sec, true);
+  paramName = reqType + "AvrgReqTime";
+  AddToJson(ss, paramName.c_str(), requestCount? sec/requestCount : 0, false);
+  ss << "\n]";
+}
+
+
 template<typename T>
 void AddObjToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparator){
   ss << "{ \"" << key << "\" : ";
@@ -1688,6 +1709,8 @@ void AddObjToJson(std::stringstream& ss, const char* key, T value, bool fAddSepa
 
   ss << "\n";
 }
+
+
 
 int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenService::ProxygenStats& stats){
   int iRC = verifyAPISession();
@@ -1758,25 +1781,99 @@ int OtmMemoryServiceWorker::resourcesInfo(std::string& strOutput, ProxygenServic
   
   AddToJson(ssOutput, "Resident set", resident_set, true );
   AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
+  milliseconds sumTime;
+  size_t requestCount;
+
   {
     ssOutput << "\"Requests\": {\n";
     AddToJson(ssOutput, "RequestCount", stats.getRequestCount(), true );
-    AddToJson(ssOutput, "CreateMemRequestCount", stats.getCreateMemRequestCount(), true );
-    AddToJson(ssOutput, "DeleteMemRequestCount", stats.getDeleteMemRequestCount(), true );
-    AddToJson(ssOutput, "ImportMemRequestCount", stats.getImportMemRequestCount(), true );
-    AddToJson(ssOutput, "ExportMemRequestCount", stats.getExportMemRequestCount(), true );
-    AddToJson(ssOutput, "CloneTmLocalyRequestCount", stats.getCloneLocalyCount(), true);
-    AddToJson(ssOutput, "ReorganizeRequestCount", stats.getReorganizeRequestCount(), true);
-    AddToJson(ssOutput, "StatusMemRequestCount", stats.getStatusMemRequestCount(), true );
-    AddToJson(ssOutput, "FuzzyRequestCount", stats.getFuzzyRequestCount(), true );
-    AddToJson(ssOutput, "ConcordanceRequestCount", stats.getConcordanceRequestCount(), true );
-    AddToJson(ssOutput, "UpdateEntryRequestCount", stats.getUpdateEntryRequestCount(), true );
-    AddToJson(ssOutput, "DeleteEntryRequestCount", stats.getDeleteEntryRequestCount(), true );
-    AddToJson(ssOutput, "SaveAllTmsRequestCount", stats.getSaveAllTmsRequestCount(), true );
-    AddToJson(ssOutput, "ListOfMemoriesRequestCount", stats.getListOfMemoriesRequestCount(), true );
-    AddToJson(ssOutput, "ResourcesRequestCount", stats.getResourcesRequestCount(), true);
-    AddToJson(ssOutput, "OtherRequestCount", stats.getOtherRequestCount(), true );
-    AddToJson(ssOutput, "UnrecognizedRequestsCount", stats.getUnrecognizedRequestCount(), false);
+
+    double sec = std::chrono::duration<double>(stats.getExecutionTime()).count();
+    AddToJson(ssOutput, "RequestExecutionSumTime(sec)", sec, true);
+
+    requestCount = stats.getCreateMemRequestCount();
+    sumTime = stats.getCreateMemSumTime();
+    AddRequestDataToJson(ssOutput, "CreateMem", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getDeleteEntryRequestCount();
+    sumTime = stats.getDeleteEntrySumTime();
+    AddRequestDataToJson(ssOutput, "DeleteMem", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getImportMemRequestCount();
+    sumTime = stats.getImportMemSumTime();
+    AddRequestDataToJson(ssOutput, "ImportMem", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getExportMemRequestCount();
+    sumTime = stats.getExportMemSumTime();
+    AddRequestDataToJson(ssOutput, "ExportMem", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getCloneLocalyCount();
+    sumTime = stats.getCloneLocalySumTime();
+    AddRequestDataToJson(ssOutput, "CloneTmLocaly", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getReorganizeRequestCount();
+    sumTime = stats.getReorganizeExecutionTime();
+    AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getStatusMemRequestCount();
+    sumTime = stats.getStatusMemSumTime();
+    AddRequestDataToJson(ssOutput, "StatusMem", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getFuzzyRequestCount();
+    sumTime = stats.getFuzzySumTime();
+    AddRequestDataToJson(ssOutput, "Fuzzy", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getConcordanceRequestCount();
+    sumTime = stats.getConcordanceSumTime();
+    AddRequestDataToJson(ssOutput, "Concordance", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getUpdateEntryRequestCount();
+    sumTime = stats.getUpdateEntrySumTime();
+    AddRequestDataToJson(ssOutput, "UpdateEntry", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getDeleteEntryRequestCount();
+    sumTime = stats.getDeleteEntrySumTime();
+    AddRequestDataToJson(ssOutput, "DeleteEntry", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getReorganizeRequestCount();
+    sumTime = stats.getReorganizeExecutionTime();
+    AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getSaveAllTmsRequestCount();
+    sumTime = stats.getSaveAllTmsSumTime();
+    AddRequestDataToJson(ssOutput, "SaveAllTms", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getListOfMemoriesRequestCount();
+    sumTime = stats.getListOfMemoriesSumTime();
+    AddRequestDataToJson(ssOutput, "ListOfMemories", sumTime, requestCount);
+    ssOutput <<",";
+    
+    requestCount = stats.getResourcesRequestCount();
+    sumTime = stats.getResourcesSumTime();
+    AddRequestDataToJson(ssOutput, "Resources", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getOtherRequestCount();
+    sumTime = stats.getOtherSumTime();
+    AddRequestDataToJson(ssOutput, "Other", sumTime, requestCount);
+    ssOutput <<",";
+
+    requestCount = stats.getUnrecognizedRequestCount();
+    sumTime = stats.getUnrecognizedSumTime();
+    AddRequestDataToJson(ssOutput, "Unrecognized", sumTime, requestCount);
     ssOutput << "\n },\n"; 
   }
 
@@ -2819,7 +2916,8 @@ int OtmMemoryServiceWorker::deleteEntry
 int OtmMemoryServiceWorker::reorganizeMem
 (
   std::string strMemory,
-  std::string &strOutputParms
+  std::string &strOutputParms,
+  ProxygenService::ProxygenStats* stats
 )
 {
   time_t curTime, startTime;
@@ -3376,6 +3474,9 @@ int OtmMemoryServiceWorker::loadFileIntoByteVector( char *pszFile, std::vector<u
 
 void importMemoryProcess( void *pvData )
 {
+  #ifdef TIME_MEASURES
+  milliseconds start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  #endif 
   PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
   // call the OpenTM2 API function
   pData->szError[0] = 0;
@@ -3396,6 +3497,15 @@ void importMemoryProcess( void *pvData )
   if(pData->fDeleteSourceTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
     DeleteFile( pData->szInFile );
   }
+
+  #ifdef TIME_MEASURES
+  milliseconds end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  milliseconds time = end_ms-start_ms;   
+  T5LOG(T5TRANSACTION) /*<<"id = " << id*/ << "; exection time = " <<  std::chrono::duration<double>(time).count();
+  pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
+  #endif
+
+
   delete( pData );
 
   return;
