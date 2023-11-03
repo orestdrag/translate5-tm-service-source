@@ -298,7 +298,7 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
   delete this;
 }
 
-#define LOG_SEND_RESPONSE 1
+//#define LOG_SEND_RESPONSE 1
 
 void ProxygenHandler::sendResponse()noexcept{
 
