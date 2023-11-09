@@ -306,9 +306,8 @@ static BOOL NTMCheckAndDeleteTagPairs
 //|         assume fuzzy match so apply fuzzy match test                       |
 //|                                                                            |
 // ----------------------------------------------------------------------------+
-USHORT TmtXGet
+USHORT EqfMemory::TmtXGet
 (
-  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_GET_IN_W pTmGetIn,    //ptr to input struct
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
@@ -324,27 +323,27 @@ USHORT TmtXGet
 
 #ifdef MEASURETIME
   LONG64 lDummy = 0;
-  pTmClb->fTimeLogging = TRUE;
+  fTimeLogging = TRUE;
   GetElapsedTime( &lDummy );
 #endif
 
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){    
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
-      T5LOG(T5DEBUG) << "== Lookup in memory  ==" << pTmClb->stTmSign.szName <<" ==\nLookupSource = >>>" <<str_source << "<<<" ;
+      T5LOG(T5DEBUG) << "== Lookup in memory  ==" << stTmSign.szName <<" ==\nLookupSource = >>>" <<str_source << "<<<" ;
       auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
       T5LOG(T5INFO) << "-------------- Looking up:\n" <<  str << "\n" ;
   }
 
 #ifdef MEASURETIME
-  GetElapsedTime( &(pTmClb->lOtherTime) );
+  GetElapsedTime( &(lOtherTime) );
 #endif
 
   //allocate pSentence
   usRc = NTMAllocSentenceStructure( &pSentence ); 
 
 #ifdef MEASURETIME
-  GetElapsedTime( &(pTmClb->lAllocTime) );
+  GetElapsedTime( &(lAllocTime) );
 #endif
 
   if ( !usRc )
@@ -365,23 +364,23 @@ USHORT TmtXGet
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
+    usRc = TokenizeSource( this, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
-      if ( pTmClb )
+      //if ( pTmClb )
       {
-        usRc = NTMGetIDFromName( pTmClb, pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+        usRc = NTMGetIDFromName( this, pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
       }
-      else
+      //else
       {
-        pSentence->pTagRecord->usTagTableId = 0;
+      //  pSentence->pTagRecord->usTagTableId = 0;
       } /* endif */
     }
   } /* endif */
 
 #ifdef MEASURETIME
-  GetElapsedTime( &(pTmClb->lTokenizeTime) );
+  GetElapsedTime( &(lTokenizeTime) );
 #endif
 
   if ( !usRc )
@@ -396,48 +395,48 @@ USHORT TmtXGet
           HashSentence( pSentence );
 
 #ifdef MEASURETIME
-  GetElapsedTime( &(pTmClb->lOtherTime) );
+  GetElapsedTime( &(lOtherTime) );
 #endif
 
-          usOverlaps = CheckCompactArea( pSentence, pTmClb );
+          usOverlaps = CheckCompactArea( pSentence, this );
           T5LOG( T5INFO) << "TmtXGet: Checked compact area, usOverlaps=" << usOverlaps;
           if ( usOverlaps == pSentence->usActVote ) //all hash triples found
           {
 #ifdef MEASURETIME
-            GetElapsedTime( &(pTmClb->lOtherTime) );
+            GetElapsedTime( &(lOtherTime) );
 #endif
             if ( ulStrippedParm & GET_EXACT ) 
             {
               T5LOG( T5INFO) << "TmtXGet: Calling GetExactMatch" ;
               //get exact matches only
-              usRc = GetExactMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
+              usRc = GetExactMatch( this, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound, pTmGetOut );
 
 #ifdef MEASURETIME
-              GetElapsedTime( &(pTmClb->lGetExactTime) );
+              GetElapsedTime( &(lGetExactTime) );
 #endif
               //if usNumMatchesFound is zero then try for fuzzies
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
               {                
                 T5LOG( T5INFO) << "TmtXGet: No exact matches found, trying GetFuzzyMatch" ;
-                usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
+                usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound << " matches" ;
               } /* endif */
 #ifdef MEASURETIME
-              GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
+              GetElapsedTime( &(lGetFuzzyTime) );
 #endif
             }
             else
             {
                 T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
                 
-                usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet,
+                usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) <<  "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound  << " matches" ;
 
 #ifdef MEASURETIME
-                GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
+                GetElapsedTime( &(lGetFuzzyTime) );
 #endif
             } /* endif */
           }
@@ -477,15 +476,15 @@ USHORT TmtXGet
 
               //not all triples on in compact area so fuzzy match
 #ifdef MEASURETIME
-            GetElapsedTime( &(pTmClb->lOtherTime) );
+            GetElapsedTime( &(lOtherTime) );
 #endif
               T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
               
-              usRc = GetFuzzyMatch( pTmClb, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
+              usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
               T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned "<<pTmGetOut->usNumMatchesFound<<" matches" ;
               
 #ifdef MEASURETIME
-              GetElapsedTime( &(pTmClb->lGetFuzzyTime) );
+              GetElapsedTime( &(lGetFuzzyTime) );
 #endif
             } /* endif */
           } /* endif */
@@ -592,14 +591,14 @@ USHORT TmtXGet
 
   // release access to any tag table loaded for segment markup
   // (may have been loaded for context handling)
-  if ( pTmClb->pTagTable )
+  if ( pTagTable )
   {
-    TAFreeTagTable( (PLOADEDTABLE)(pTmClb->pTagTable) );
-    pTmClb->pTagTable = NULL;
+    TAFreeTagTable( (PLOADEDTABLE)(pTagTable) );
+    pTagTable = NULL;
   } /* endif */
 
 #ifdef MEASURETIME
-            GetElapsedTime( &(pTmClb->lOtherTime) );
+            GetElapsedTime( &(lOtherTime) );
 #endif
 
 

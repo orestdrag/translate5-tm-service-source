@@ -336,7 +336,7 @@ int EqfMemory::getNextProposal
     this->ExtOutToOtmProposal( &TmExtOut, Proposal );
 
     // set current proposal internal key ,which is used in updateProposal
-    this->SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget, &Proposal );
+    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
   } /* endif */       
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
@@ -432,7 +432,7 @@ int EqfMemory::getProposal
   {
     this->ExtOutToOtmProposal( &TmExtOut, Proposal );
     // set current proposal internal key ,which is used in updateProposal
-    this->SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget, &Proposal );
+    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
     this->ulNextKey = TmExtOut.ulTmKey;
     this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */      
@@ -465,68 +465,9 @@ int EqfMemory::searchProposal
   unsigned long ulOptions
 )
 {
-  int iRC = 0;
-  TMX_GET_IN_W GetIn;
-  TMX_GET_OUT_W GetOut;
-  //THREADING WARNING: GetIn GetOut could be unsafe for multithreading
-  memset( &GetIn, 0, sizeof(TMX_GET_IN_W) );
-  memset( &GetOut, 0, sizeof(TMX_GET_OUT_W) );
+  
 
-  this->OtmProposalToGetIn( SearchKey, &GetIn );
-  GetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
-  GetIn.stTmGet.usRequestedMatches = (USHORT)FoundProposals.size();
-  GetIn.stTmGet.ulParm = ulOptions;
-  GetIn.stTmGet.pvGMOptList = this->pvGlobalMemoryOptions;
-
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    auto str = EncodingHelper::convertToUTF8(GetIn.stTmGet.szSource);
-    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::*** method: searchProposal, looking for " <<  str;
-  } 
-  iRC = (int)TmGetW ( this,  NULL,  &GetIn,  &GetOut, FALSE );
-
-  if ( iRC == 0 )
-  {
-    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << GetOut.usNumMatchesFound << " proposals"   ;
-    wchar_t szRequestedString[2049];
-    SearchKey.getSource( szRequestedString, sizeof(szRequestedString) );
-
-    for ( int i = 0; i < (int)FoundProposals.size(); i++ )
-    {
-      if ( i >= GetOut.usNumMatchesFound )
-      {
-        FoundProposals[i].clear();
-      }
-      else
-      {
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-          auto strSource = EncodingHelper::convertToUTF8(GetOut.stMatchTable[i].szSource );
-          T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << GetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
-        }
-        //replace tags for proposal
-        auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(GetOut.stMatchTable[i].szSource, 
-                                                                                     GetOut.stMatchTable[i].szTarget, 
-                                                                                     szRequestedString); 
-        wcscpy(GetOut.stMatchTable[i].szSource, result[0].c_str());
-        wcscpy(GetOut.stMatchTable[i].szTarget, result[1].c_str());
-
-        if( GetOut.stMatchTable[i].usMatchLevel >= 100){
-          //correct match rate for exact match based on whitespace difference
-          int wsDiff = 0;
-          UtlCompIgnWhiteSpaceW(szRequestedString, GetOut.stMatchTable[i].szSource, 0, &wsDiff);
-          GetOut.stMatchTable[i].usMatchLevel -= wsDiff; 
-        }
-        this->MatchToOtmProposal( GetOut.stMatchTable + i, &FoundProposals[i] );
-      } /* end */         
-    } /* end */       
-  }
-  else
-  {
-    T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::  lookup failed, rc=" << iRC;
-  } /* end */     
-
-  if ( iRC != 0 ) handleError( iRC, this->szName, GetIn.stTmGet.szTagTable );
-
-  return( iRC );
+  return( 0 );
 }
 
 
@@ -612,20 +553,14 @@ int EqfMemory::getLanguage
     \param Proposal reference to the OtmProposal 
   	\returns 0 or error code in case of errors
 */
-int EqfMemory::SetProposalKey
+int OtmProposal::SetProposalKey
 (
   ULONG   ulKey,
-  USHORT  usTargetNum,
-  OtmProposal *pProposal
+  USHORT  usTargetNum
 )
 {
-  int iRC = 0;
-  char szKey[20];
-
-  sprintf( szKey, "%lu:%u", ulKey, usTargetNum );
-  pProposal->setInternalKey( szKey );
-
-  return( iRC );
+  sprintf( szInternalKey, "%lu:%u", ulKey, usTargetNum );
+  return( 0 );
 }
 
 /*! \brief Split an internal key into record number and target number
@@ -739,12 +674,15 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setSegmentNum( pMatch->ulSegmentId );
   pProposal->setType( FlagToProposalType( pMatch->usTranslationFlag ) );
   pProposal->setUpdateTime( pMatch->lTargetTime );
-  this->SetProposalKey( pMatch->ulKey, pMatch->usTargetNum, pProposal );
+  pProposal->SetProposalKey( pMatch->ulKey, pMatch->usTargetNum );
   pProposal->setContextRanking( (int)pMatch->usContextRanking );
   pProposal->setMemoryIndex( pMatch->usDBIndex );
   pProposal->setWords( pMatch->iWords );
   pProposal->setDiffs( pMatch->iDiffs );
   pProposal->setOriginalSourceLanguage( pMatch->szOriginalSrcLanguage );
+  pProposal->SetProposalKey(pMatch->ulKey, pMatch->usTargetNum);
+  //pProposal->setKey(pMatch->ulKey);
+  //pProposal->setTargetNum(pMatch->usTargetNum);
   
   switch ( pMatch->usMatchLevel )
   {

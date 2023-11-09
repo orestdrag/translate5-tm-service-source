@@ -16,89 +16,6 @@
  * 
  */
 
-
-
-/*! \brief private proposal data area */
-typedef struct _OTMPROPOSALDATA
-{
-  /*! \brief internal key of this proposal */
-	char szInternalKey[OTMPROPOSAL_MAXNAMELEN];
-
-  /*! \brief ID of this proposal */
-	char szId[OTMPROPOSAL_MAXNAMELEN];
-
-  /*! \brief Source string of memory proposal  (UTF-16) */
-  wchar_t szSource[OTMPROPOSAL_MAXSEGLEN+1];
-	//std::wstring strSource;
-
-	/*! \brief Target string of memory proposal (UTF-16). */
-	//std::wstring strTarget;
-  wchar_t szTarget[OTMPROPOSAL_MAXSEGLEN+1];
-
-	/*! \brief Name of document from which the proposal comes from. */
-	//std::string strDocName;
-	char szDocName[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
-	//std::string strDocShortName;
-	char szDocShortName[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Segment number within the document from which the proposal comes from. */
-  long lSegmentNum;                  
-
-	/*! \brief source language. */
-  //std::string strSourceLanguage;
-	char szSourceLanguage[OTMPROPOSAL_MAXNAMELEN];
-  char szOriginalSourceLanguage[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief target language. */
-  //std::string strTargetLanguage;
-  char szTargetLanguage[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief origin or type of the proposal. */
-  OtmProposal::eProposalType eType;
-
-	/*! \brief match type of the proposal. */
-  OtmProposal::eMatchType eMatch;
-
-	/*! \brief Author of the proposal. */
-  // std::string strTargetAuthor;   
-  char szTargetAuthor[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Update time stamp of the proposal. */
-  long    lTargetTime;
-
-	/*! \brief Fuzziness of the proposal. */
-  int iFuzziness;                 
-  int iDiffs, iWords;
-	/*! \brief Markup table (format) of the proposal. */
-  //std::string strMarkup;
-  char szMarkup[OTMPROPOSAL_MAXNAMELEN];
-
-  /*! \brief Context information of the proposal */
-  //std::wstring strContext;  
-  wchar_t szContext[OTMPROPOSAL_MAXSEGLEN+1];
-
-  /*! \brief Additional information of the proposal */
-  //std::wstring strAddInfo; 
-  wchar_t szAddInfo[OTMPROPOSAL_MAXSEGLEN+1];
-
-  /*! \brief Proposal data has been filled flag */
-  bool fFilled; 
-
-  /*! \brief Index of memory when looking up in a list of memories */
-  int iMemoryIndex; 
-
-  /*! \brief ranking of the context information (0..100) */
-  int iContextRanking; 
-
-  /*! \brief list of replacement values */
-  long pvReplacementList;
-
-  bool fSourceLangIsPrefered;
-
-} OTMPROPOSALDATA, *POTMPROPOSALDATA;
-
 /*! \brief Prototypes of helper functions */
 //int CopyToBufferW( const std::wstring &strSource, wchar_t *pszBuffer, int iBufSize );
 //int CopyToBuffer( const std::string &strSource, char *pszBuffer, int iBufSize );
@@ -108,34 +25,29 @@ int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 /*! \brief Constructors */
 OtmProposal::OtmProposal() 
 {
-  POTMPROPOSALDATA pData = new OTMPROPOSALDATA;
-  this->pvProposalData = (void *)pData;
   this->clear();
-  pData->fFilled = 0;
+  fFilled = 0;
 };
 
 /*! \brief Destructor */
 OtmProposal::~OtmProposal() 
-{
-  if ( this->pvProposalData != NULL )
-  {
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    delete pData;  
-  } /* end */     
+{   
 };
 
 /* operations */
 
 void OtmProposal::clear()
-{
-  if ( this->pvProposalData != NULL )
-  {
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    memset( pData, 0, sizeof(OTMPROPOSALDATA) );
-    pData->eType = OtmProposal::eptUndefined;
-    pData->eMatch = OtmProposal::emtUndefined;
-  } /* end */     
+{ 
+  memset( this, 0, sizeof(OtmProposal) );
+  eType = OtmProposal::eptUndefined;
+  eMatch = OtmProposal::emtUndefined;
+}
 
+
+void SearchProposal::clearSearchProposal(){
+  memset( this, 0, sizeof(SearchProposal) );
+  eType = OtmProposal::eptUndefined;
+  eMatch = OtmProposal::emtUndefined;
 }
 
 /* setters and getters */
@@ -148,9 +60,7 @@ void OtmProposal::clear()
 */
 int OtmProposal::getInternalKey( char *pszBuffer, int iBufSize )
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szInternalKey, pszBuffer, iBufSize ) );
+  return( CopyToBuffer( szInternalKey, pszBuffer, iBufSize ) );
 }
 
   	
@@ -159,20 +69,21 @@ int OtmProposal::getInternalKey( char *pszBuffer, int iBufSize )
    */
 void OtmProposal::setInternalKey( char *pszBuffer )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strcpy( pData->szInternalKey, pszBuffer );
-  pData->fFilled = 1;
+  strcpy( szInternalKey, pszBuffer );
+  fFilled = 1;
+}
+
+
+std::string OtmProposal::getProposalKey(){
+  return szInternalKey;
 }
 
 /* \brief get length of proposal source text 
   	\returns Number of characters in proposal source text
   */
 int OtmProposal::getSourceLen()
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( wcslen( pData->szSource ) );
+{  
+  return( wcslen( szSource ) );
 }
 
 /* \brief get proposal source text 
@@ -181,10 +92,8 @@ int OtmProposal::getSourceLen()
   	\returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getSource( wchar_t *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBufferW( pData->szSource, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBufferW( szSource, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal source text
@@ -192,26 +101,22 @@ int OtmProposal::getSource( wchar_t *pszBuffer, int iBufSize )
   */
 void OtmProposal::setSource( wchar_t *pszBuffer )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
   size_t len = wcslen(pszBuffer);
   if(len > OTMPROPOSAL_MAXSEGLEN){
     T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and would be skipped. Origina len =  " << len;
     len = 1; 
     pszBuffer[len] = L'\0';
   }
-  wcsncpy( pData->szSource, pszBuffer, len );
-  pData->fFilled = 1;
+  wcsncpy( szSource, pszBuffer, len );
+  fFilled = 1;
 }
   	
 /* \brief get length of proposal target text 
   	\returns Number of characters in proposal target text
   */
 int OtmProposal::getTargetLen()
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( wcslen( pData->szTarget ) );
+{  
+  return( wcslen( szTarget ) );
 }
 
 /* \brief get proposal target text   
@@ -220,20 +125,15 @@ int OtmProposal::getTargetLen()
   	\returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getTarget( wchar_t *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBufferW( pData->szTarget, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBufferW( szTarget, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal target text
     \param pszBuffer Pointer to buffer containing the proposal target text
   */
 void OtmProposal::setTarget( wchar_t *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  
+{ 
   size_t len = wcslen(pszBuffer);
 
   if(len > OTMPROPOSAL_MAXSEGLEN){
@@ -241,8 +141,8 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
     len = 1; 
     pszBuffer[len] = L'\0';
   }
-  wcsncpy( pData->szTarget, pszBuffer, len );
-  pData->fFilled = 1;
+  wcsncpy( szTarget, pszBuffer, len );
+  fFilled = 1;
 }
   	
 /* \brief get proposal ID
@@ -251,21 +151,17 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
     \returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getID( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szId, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szId, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal ID 
     \param pszBuffer Pointer to buffer containing the proposal ID
   */
 void OtmProposal::setID( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szId, pszBuffer, sizeof(pData->szId)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szId, pszBuffer, sizeof(szId)-1 );
+  fFilled = 1;
 }
   	
 
@@ -276,21 +172,17 @@ void OtmProposal::setID( char *pszBuffer )
   \returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getDocName( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szDocName, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szDocName, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal document short name
     \param pszBuffer Pointer to buffer containing the document name
   */
 void OtmProposal::setDocName( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szDocName, pszBuffer, sizeof(pData->szDocName)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szDocName, pszBuffer, sizeof(szDocName)-1 );
+  fFilled = 1;
 }
   	
 /* \brief get proposal document short name
@@ -299,10 +191,8 @@ void OtmProposal::setDocName( char *pszBuffer )
   	\returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getDocShortName( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szDocShortName, pszBuffer, iBufSize ) );
+{ 
+ return( CopyToBuffer( szDocName, pszBuffer, iBufSize ) );
 }
 
   	
@@ -310,11 +200,9 @@ int OtmProposal::getDocShortName( char *pszBuffer, int iBufSize )
     \param pszBuffer Pointer to buffer containing the document short short name
   */
 void OtmProposal::setDocShortName( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szDocShortName, pszBuffer, sizeof(pData->szDocShortName)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szDocName, pszBuffer, sizeof(szDocName)-1 );
+  fFilled = 1;
 }
 
 
@@ -322,21 +210,17 @@ void OtmProposal::setDocShortName( char *pszBuffer )
   \returns proposal segment number
   */
 long OtmProposal::getSegmentNum()
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->lSegmentNum );
+{  
+  return( lSegmentNum );
 }
   	
 /* \brief set the proposal segment number
     \param lSegmentNum new segment number of proposal
   */
 void OtmProposal::setSegmentNum( long lSegmentNumIn )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->lSegmentNum = lSegmentNumIn;
-  pData->fFilled = 1;
+{  
+  lSegmentNum = lSegmentNumIn;
+  fFilled = 1;
 }
 
   	
@@ -347,36 +231,53 @@ void OtmProposal::setSegmentNum( long lSegmentNumIn )
   */
 int OtmProposal::getSourceLanguage( char *pszBuffer, int iBufSize )
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szSourceLanguage, pszBuffer, iBufSize ) );
+  return( CopyToBuffer( szSourceLanguage, pszBuffer, iBufSize ) );
 }
 
 int OtmProposal::getOriginalSourceLanguage( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szOriginalSourceLanguage, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szOriginalSourceLanguage, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal source language
     \param pszBuffer Pointer to buffer containing the proposal source language
   */
 void OtmProposal::setSourceLanguage( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szSourceLanguage, pszBuffer, sizeof(pData->szSourceLanguage)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szSourceLanguage, pszBuffer, sizeof(szSourceLanguage)-1 );
+  fFilled = 1;
 }
   
 void OtmProposal::setOriginalSourceLanguage( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szOriginalSourceLanguage, pszBuffer, sizeof(pData->szOriginalSourceLanguage)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szOriginalSourceLanguage, pszBuffer, sizeof(szOriginalSourceLanguage)-1 );
+  fFilled = 1;
 }
+
+/*
+void OtmProposal::setKey(ULONG ulKey)
+{
+   
+  ulKey = ulKey;
+}
+
+void OtmProposal::setTargetNum(USHORT usTargetNum)
+{
+   
+  usTargetNum = usTargetNum;
+}
+
+ULONG OtmProposal::getKey()
+{
+  if ( this->pvProposalData == NULL ) return 0 ; 
+  return ulKey ;
+}
+
+USHORT OtmProposal::getTargetNum()
+{
+  if ( this->pvProposalData == NULL ) return 0 ; 
+  return usTargetNum ;
+}//*/
 
 
 /* \brief get proposal target language
@@ -385,21 +286,17 @@ void OtmProposal::setOriginalSourceLanguage( char *pszBuffer )
   	\returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getTargetLanguage( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szTargetLanguage, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szTargetLanguage, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal target language
     \param pszBuffer Pointer to buffer containing the proposal target language
   */
 void OtmProposal::setTargetLanguage( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szTargetLanguage, pszBuffer, sizeof(pData->szTargetLanguage)-1 );
-  pData->fFilled = 1;
+{   
+  strncpy( szTargetLanguage, pszBuffer, sizeof(szTargetLanguage)-1 );
+  fFilled = 1;
 }
 
 
@@ -408,9 +305,7 @@ void OtmProposal::setTargetLanguage( char *pszBuffer )
   */
 OtmProposal::eProposalType OtmProposal::getType()
 {
-  if ( this->pvProposalData == NULL ) return( OtmProposal::eptUndefined );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->eType );
+  return( eType );
 }
   	
 /* \brief set the proposal type
@@ -418,10 +313,8 @@ OtmProposal::eProposalType OtmProposal::getType()
   */
 void OtmProposal::setType( eProposalType eTypeIn )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->eType = eTypeIn;
-  pData->fFilled = 1;
+  eType = eTypeIn;
+  fFilled = 1;
 }
 
 /* \brief get match type
@@ -429,20 +322,16 @@ void OtmProposal::setType( eProposalType eTypeIn )
   */
 OtmProposal::eMatchType OtmProposal::getMatchType()
 {
-  if ( this->pvProposalData == NULL ) return( OtmProposal::emtUndefined );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->eMatch );
+  return( eMatch );
 }
   	
 /* \brief set the match type
     \param eType new type of the proposal
   */
 void OtmProposal::setMatchType( OtmProposal::eMatchType eMatchTypeIn )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->eMatch = eMatchTypeIn;
-  pData->fFilled = 1;
+{  
+  eMatch = eMatchTypeIn;
+  fFilled = 1;
 }
 
 
@@ -452,21 +341,17 @@ void OtmProposal::setMatchType( OtmProposal::eMatchType eMatchTypeIn )
     \returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getAuthor( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szTargetAuthor, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szTargetAuthor, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the name of the proposal author
     \param pszBuffer Pointer to buffer containing the name of the proposal author
   */
 void OtmProposal::setAuthor( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szTargetAuthor, pszBuffer, sizeof(pData->szTargetAuthor)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szTargetAuthor, pszBuffer, sizeof(szTargetAuthor)-1 );
+  fFilled = 1;
 }
 
 
@@ -474,31 +359,25 @@ void OtmProposal::setAuthor( char *pszBuffer )
     \returns proposal segment number
   */
 long OtmProposal::getUpdateTime()
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->lTargetTime );
+{  
+  return( lTargetTime );
 }
   	
 /* \brief set the proposal time stamp
     \param lTime new time stamp of proposal
   */
 void OtmProposal::setUpdateTime( long lTime )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->lTargetTime = lTime;
-  pData->fFilled = 1;
+{  
+  lTargetTime = lTime;
+  fFilled = 1;
 }
 
 /* \brief get proposal fuzziness
     \returns proposal fuzziness
   */
 int OtmProposal::getFuzziness()
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->iFuzziness );
+{  
+  return( iFuzziness );
 }
 
   	
@@ -507,10 +386,8 @@ int OtmProposal::getFuzziness()
   */
 void OtmProposal::setFuzziness( long iFuzzinessIn )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->iFuzziness = iFuzzinessIn;
-  pData->fFilled = 1;
+  iFuzziness = iFuzzinessIn;
+  fFilled = 1;
 }
 
 
@@ -518,40 +395,28 @@ void OtmProposal::setFuzziness( long iFuzzinessIn )
      \returns proposal diffs count from fuzzy calculations
    */
   int OtmProposal::getDiffs(){
-    if ( this->pvProposalData == NULL ) return( 0 );
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    return( pData->iDiffs );
-
+    return( iDiffs );
   }
 
   /* \brief set the proposal diffs count from fuzzy calculations
      \param iDiffs new diffs count from fuzzy calculations of proposal
    */
   void OtmProposal::setDiffs( long iDiffs ){
-    if ( this->pvProposalData == NULL ) return;
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    pData->iDiffs = iDiffs;
-
+    iDiffs = iDiffs;
   }
 
     /* \brief get proposal words count during fuzzy calculations
      \returns proposal fuzziness
    */
   int OtmProposal::getWords(){
-    if ( this->pvProposalData == NULL ) return( 0 );
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    return( pData->iWords );
-
+    return( iWords );
   }
 
   /* \brief set the proposal words count during fuzzy calculations
      \param iWords new words count during fuzzy calculations of proposal
    */
-  void OtmProposal::setWords( long iWords ){
-    if ( this->pvProposalData == NULL ) return;
-    POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-    pData->iWords = iWords;
-
+  void OtmProposal::setWords( long iWords ){      
+    iWords = iWords;
   }
 
 /* \brief get markup table name (format)
@@ -560,21 +425,17 @@ void OtmProposal::setFuzziness( long iFuzzinessIn )
     \returns Number of characters copied to pszBuffer including the terminating null character
   */
 int OtmProposal::getMarkup( char *pszBuffer, int iBufSize )
-{
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBuffer( pData->szMarkup, pszBuffer, iBufSize ) );
+{  
+  return( CopyToBuffer( szMarkup, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set markup table name (format)
     \param pszBuffer Pointer to buffer containing the markup table name
   */
 void OtmProposal::setMarkup( char *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  strncpy( pData->szMarkup, pszBuffer, sizeof(pData->szMarkup)-1 );
-  pData->fFilled = 1;
+{  
+  strncpy( szMarkup, pszBuffer, sizeof(szMarkup)-1 );
+  fFilled = 1;
 }
 
 #include <iostream>
@@ -688,9 +549,7 @@ std::ostream & operator<<( std::ostream & o, OtmProposal & proposal ){
   */
 int OtmProposal::getContextLen()
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( wcslen( pData->szContext ) );
+  return( wcslen( szContext ) );
 }
 
 /* \brief get proposal Context 
@@ -700,9 +559,7 @@ int OtmProposal::getContextLen()
   */
 int OtmProposal::getContext( wchar_t *pszBuffer, int iBufSize )
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBufferW( pData->szContext, pszBuffer, iBufSize ) );
+  return( CopyToBufferW( szContext, pszBuffer, iBufSize ) );
 }
   	
 /* \brief set the proposal context
@@ -710,10 +567,8 @@ int OtmProposal::getContext( wchar_t *pszBuffer, int iBufSize )
   */
 void OtmProposal::setContext( wchar_t *pszBuffer )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  wcsncpy( pData->szContext, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
-  pData->fFilled = 1;
+  wcsncpy( szContext, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
+  fFilled = 1;
 }
 
 /* \brief get proposal context ranking
@@ -721,9 +576,7 @@ void OtmProposal::setContext( wchar_t *pszBuffer )
   */
 int OtmProposal::getContextRanking()
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->iContextRanking );
+  return( iContextRanking );
 }
   	
 /* \brief set the proposal context ranking
@@ -731,10 +584,8 @@ int OtmProposal::getContextRanking()
   */
 void OtmProposal::setContextRanking( int iContextRankingIn )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->iContextRanking = iContextRankingIn;
-  pData->fFilled = 1;
+  iContextRanking = iContextRankingIn;
+  fFilled = 1;
 }
 
 /* \brief get length of proposal AddInfo text 
@@ -742,9 +593,7 @@ void OtmProposal::setContextRanking( int iContextRankingIn )
   */
 int OtmProposal::getAddInfoLen()
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( wcslen( pData->szAddInfo ) );
+  return( wcslen( szAddInfo ) );
 }
 
 /* \brief get additional info
@@ -754,9 +603,7 @@ int OtmProposal::getAddInfoLen()
   */
 int OtmProposal::getAddInfo( wchar_t *pszBuffer, int iBufSize )
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( CopyToBufferW( pData->szAddInfo, pszBuffer, iBufSize ) );
+  return( CopyToBufferW( szAddInfo, pszBuffer, iBufSize ) );
 }
 
 
@@ -764,11 +611,9 @@ int OtmProposal::getAddInfo( wchar_t *pszBuffer, int iBufSize )
     \param pszBuffer Pointer to buffer containing the additional info
   */
 void OtmProposal::setAddInfo( wchar_t *pszBuffer )
-{
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  wcsncpy( pData->szAddInfo, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
-  pData->fFilled = 1;
+{ 
+  wcsncpy( szAddInfo, pszBuffer, OTMPROPOSAL_MAXSEGLEN );
+  fFilled = 1;
 }
 
 
@@ -777,9 +622,7 @@ void OtmProposal::setAddInfo( wchar_t *pszBuffer )
   */
 void OtmProposal::setMemoryIndex( int iIndex )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->iMemoryIndex = iIndex;
+  iMemoryIndex = iIndex;
 }
 
 /* \brief get memory index
@@ -787,9 +630,7 @@ void OtmProposal::setMemoryIndex( int iIndex )
   */
 int OtmProposal::getMemoryIndex()
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->iMemoryIndex );
+  return( iMemoryIndex );
 }
 
 
@@ -798,9 +639,7 @@ int OtmProposal::getMemoryIndex()
   */
 void OtmProposal::setReplacementList( long pList )
 {
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->pvReplacementList = pList;
+  pvReplacementList = pList;
 }
 
 /* \brief get replacement list
@@ -808,9 +647,7 @@ void OtmProposal::setReplacementList( long pList )
   */
 long OtmProposal::getReplacementList()
 {
-  if ( this->pvProposalData == NULL ) return( 0 );
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( (long)pData->pvReplacementList );
+  return( (long)pvReplacementList );
 }
 
 
@@ -818,38 +655,31 @@ long OtmProposal::getReplacementList()
   */
 bool OtmProposal::isExactMatch()
 {
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( (pData->eType == eptManual) && ((pData->eMatch == emtExact) || (pData->eMatch == emtExactSameDoc) || (pData->eMatch == emtExactExact)) );
+  return( (eType == eptManual) && ((eMatch == emtExact) || (eMatch == emtExactSameDoc) || (eMatch == emtExactExact)) );
 }
 
 /* \brief check if proposal is empty (i.e. has not been used)
   */
 bool OtmProposal::isEmpty()
 {
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( !pData->fFilled );
+  return( !fFilled );
 }
 
 
 bool OtmProposal::isSourceLangIsPrefered(){
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( pData->fSourceLangIsPrefered );
+  return( fSourceLangIsPrefered );
 }
 
 void OtmProposal::setIsSourceLangIsPrefered(bool fPref){
-  if ( this->pvProposalData == NULL ) return;
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  pData->fSourceLangIsPrefered = fPref;
-
+  fSourceLangIsPrefered = fPref;
 }
 
 
 /* \brief check if source and target of proposal is equal
   */
 bool OtmProposal::isSourceAndTargetEqual()
-{
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  return( wcscmp( pData->szSource, pData->szTarget ) == 0 );
+{ 
+  return( wcscmp( szSource, szTarget ) == 0 );
 }
 
 /* \brief check if target strings of two proposals are identical
@@ -857,9 +687,7 @@ bool OtmProposal::isSourceAndTargetEqual()
   */
 bool OtmProposal::isSameTarget( OtmProposal *otherProposal )
 {
-  POTMPROPOSALDATA pData = (POTMPROPOSALDATA)this->pvProposalData;
-  POTMPROPOSALDATA pOtherData = (POTMPROPOSALDATA)otherProposal->pvProposalData;
-  return( wcscmp( pData->szTarget, pOtherData->szTarget ) == 0 );
+  return( wcscmp( szTarget, otherProposal->szTarget ) == 0 );
 }
 
 /*! \brief Clear the data of proposals stored in a vector
@@ -901,12 +729,12 @@ OtmProposal &OtmProposal::operator=( const OtmProposal &copyme )
 {
   if (this != &copyme ) 
   {
-    POTMPROPOSALDATA pSource = (POTMPROPOSALDATA)copyme.pvProposalData;
-    POTMPROPOSALDATA pTarget = (POTMPROPOSALDATA)this->pvProposalData;
+    OtmProposal* pSource = (OtmProposal*)&copyme;
+    OtmProposal* pTarget = (OtmProposal*)this;
 
     if ( (pSource != NULL) && (pTarget != NULL) && (pSource != pTarget) )
     {
-      memcpy( pTarget, pSource, sizeof(OTMPROPOSALDATA) );
+      memcpy( pTarget, pSource, sizeof(OtmProposal) );
     }
   }
   return *this; 

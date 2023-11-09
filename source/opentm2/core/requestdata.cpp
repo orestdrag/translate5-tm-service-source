@@ -1766,7 +1766,7 @@ int UpdateEntryRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  Data.clearSearchProposal();
       
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
@@ -1929,6 +1929,7 @@ int UpdateEntryRequestData::execute(){
 
   json_factory.addParmToJSON( outputMessage, "documentName", Data.szDocName );
   json_factory.addParmToJSON( outputMessage, "segmentNumber", Data.lSegmentNum );
+  json_factory.addParmToJSON( outputMessage, "internalKey", Data.szInternalKey);
   json_factory.addParmToJSON( outputMessage, "markupTable", Data.szMarkup );
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
   json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
@@ -1946,7 +1947,7 @@ int DeleteEntryRequestData::parseJSON(){
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  Data.clearSearchProposal();
 
   auto loggingThreshold = -1;
        
@@ -2124,7 +2125,7 @@ int FuzzySearchRequestData::parseJSON(){
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   
-  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
+  Data.clearSearchProposal();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
                                                    { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
@@ -2199,11 +2200,10 @@ int addProposalToJSONString
 (
   std::wstring &strJSON,
   PMEMPROPOSAL pProp,
-  void *pvData
+  SearchProposal *pData
 )
 {
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
-  PLOOKUPINMEMORYDATA pData = (PLOOKUPINMEMORYDATA)pvData;
 
   pJsonFactory->addElementStartToJSONW( strJSON );
 
@@ -2263,6 +2263,104 @@ int addProposalToJSONString
 }
 
 
+
+/* write a single proposal to a JSON string
+\param strJSON JSON stirng receiving the proposal data
+\param pProp pointer to a MEMPROPOSAL containing the proposal
+\param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
+\returns 0 is successful
+*/
+int addProposalToJSONString
+(
+  std::wstring &strJSON,
+  OtmProposal& Prop,
+  SearchProposal* pData
+)
+{
+  //*
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+
+  pJsonFactory->addElementStartToJSONW( strJSON );
+  char buff[OTMPROPOSAL_MAXSEGLEN+1];
+  wchar_t wbuff [OTMPROPOSAL_MAXSEGLEN+1];
+  
+  Prop.getSource(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"source", wbuff );
+
+  Prop.getTarget(wbuff, OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"target", wbuff );
+  
+  pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", Prop.getSegmentNum() );
+  Prop.getID(buff, OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"id", EncodingHelper::convertToUTF16(buff).c_str());
+
+  Prop.getDocName(buff, OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"documentName", EncodingHelper::convertToUTF16(buff).c_str() );
+
+  buff[0] = '\0';
+  Prop.getSourceLanguage(buff, OTMPROPOSAL_MAXSEGLEN);
+  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, buff, pData->szIsoSourceLang);
+  pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", EncodingHelper::convertToUTF16( pData->szIsoSourceLang ).c_str() );
+
+
+  buff[0] = '\0';
+  Prop.getTargetLanguage(buff, OTMPROPOSAL_MAXSEGLEN);
+  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, buff, pData->szIsoTargetLang );
+  pJsonFactory->addParmToJSONW( strJSON, L"targetLang", EncodingHelper::convertToUTF16( pData->szIsoTargetLang ).c_str() );
+
+
+  switch ( Prop.getType() )
+  {
+    case OtmProposal::eptGlobalMemory: wcscpy( pData->szSource, L"GlobalMemory" ); break;
+    case OtmProposal::eptGlobalMemoryStar: wcscpy( pData->szSource, L"GlobalMemoryStar" ); break;
+    case OtmProposal::eptMachine: wcscpy( pData->szSource, L"MachineTranslation" ); break;
+    case OtmProposal::eptManual: wcscpy( pData->szSource, L"Manual" ); break;
+    default: wcscpy( pData->szSource, L"undefined" ); break;
+  }
+
+  pJsonFactory->addParmToJSONW( strJSON, L"type", pData->szSource );
+
+  switch ( Prop.getMatchType() )
+  {
+    case OtmProposal::emtExact: wcscpy( pData->szSource, L"Exact" ); break;
+    case OtmProposal::emtExactExact: wcscpy( pData->szSource, L"ExactExact" ); break;
+    case OtmProposal::emtExactSameDoc: wcscpy( pData->szSource, L"ExactSameDoc" ); break;
+    case OtmProposal::emtFuzzy: wcscpy( pData->szSource, L"Fuzzy" ); break;
+    case OtmProposal::emtReplace: wcscpy( pData->szSource, L"Replace" ); break;
+    default: wcscpy( pData->szSource, L"undefined" ); break;
+  }
+
+  pJsonFactory->addParmToJSONW( strJSON, L"matchType", pData->szSource );
+
+  Prop.getAuthor(buff,OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"author", EncodingHelper::convertToUTF16(buff).c_str() );
+
+  convertTimeToUTC( Prop.getUpdateTime(), pData->szDateTime );
+  pJsonFactory->addParmToJSONW( strJSON, L"timestamp", EncodingHelper::convertToUTF16(pData->szDateTime).c_str() );
+
+  pJsonFactory->addParmToJSONW( strJSON, L"matchRate", Prop.getFuzziness() );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyWords", Prop.getWords() );
+  pJsonFactory->addParmToJSONW( strJSON, L"fuzzyDiffs", Prop.getDiffs() );
+
+  Prop.getMarkup(buff,OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"markupTable", EncodingHelper::convertToUTF16(buff).c_str() );
+
+  Prop.getContext(wbuff,OTMPROPOSAL_MAXSEGLEN );
+  pJsonFactory->addParmToJSONW( strJSON, L"context", wbuff );
+
+  Prop.getAddInfo(wbuff,OTMPROPOSAL_MAXSEGLEN );
+  pJsonFactory->addParmToJSONW( strJSON, L"additionalInfo", wbuff );
+
+  Prop.getInternalKey(buff, OTMPROPOSAL_MAXSEGLEN);
+  pJsonFactory->addParmToJSONW( strJSON, L"internalKey", EncodingHelper::convertToUTF16(buff).c_str() );
+
+
+  pJsonFactory->addElementEndToJSONW( strJSON );
+
+  return( 0 );
+}
+
+
 /* write proposals to a JSON string 
 \param strJSON JSON stirng receiving the proposal data
 \param pProposals pointer to a MEMPROPOSAL array containing the proposals
@@ -2275,17 +2373,36 @@ int addProposalsToJSONString
   std::wstring &strJSON,
   PMEMPROPOSAL pProposals,
   int iNumOfProposals,
-  void *pvData
+  SearchProposal *pData
 )
 {
   JSONFactory *pJsonFactory = JSONFactory::getInstance();
-  PLOOKUPINMEMORYDATA pData = (PLOOKUPINMEMORYDATA)pvData;
   
   pJsonFactory->addArrayStartToJSONW( strJSON );
   for ( int i = 0; i < iNumOfProposals; i++ )
   {
     PMEMPROPOSAL pProp = pProposals + i;
-    addProposalToJSONString( strJSON, pProp, pvData );
+    addProposalToJSONString( strJSON, pProp, pData );
+  } /* endfor */
+  pJsonFactory->addArrayEndToJSONW( strJSON  );
+  
+  return( 0 );
+}
+
+int addProposalsToJSONString
+(
+  std::wstring &strJSON,
+  std::vector<OtmProposal>& vProposals,
+  int iNumOfProposals,
+  SearchProposal* pData
+)
+{
+  JSONFactory *pJsonFactory = JSONFactory::getInstance();
+  
+  pJsonFactory->addArrayStartToJSONW( strJSON );
+  for ( int i = 0; i < iNumOfProposals; i++ )
+  {
+    addProposalToJSONString( strJSON, vProposals[i], pData );
   } /* endfor */
   pJsonFactory->addArrayEndToJSONW( strJSON  );
   
@@ -2295,15 +2412,8 @@ int addProposalsToJSONString
 
 int FuzzySearchRequestData::execute(){
  // prepare the memory lookup
-  MEMPROPOSAL SearchKey;
-  memset( &SearchKey, 0, sizeof( SearchKey ) );
-  wcscpy( SearchKey.szSource, Data.szSource );
-  strcpy( SearchKey.szDocName, Data.szDocName );
-  SearchKey.lSegmentNum = Data.lSegmentNum;
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, SearchKey.szSourceLanguage, &SearchKey.fIsoSourceLangIsPrefered );
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, SearchKey.szTargetLanguage, &SearchKey.fIsoTargetLangIsPrefered );
-  strcpy( SearchKey.szMarkup, Data.szMarkup );
-  wcscpy( SearchKey.szContext, Data.szContext );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Data.szSourceLanguage, &Data.fIsoSourceLangIsPrefered );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Data.szTargetLanguage, &Data.fIsoTargetLangIsPrefered );
 
   if ( Data.iNumOfProposals == 0 )
   {
@@ -2311,26 +2421,80 @@ int FuzzySearchRequestData::execute(){
     Data.iNumOfProposals = 5;
   }
 
-  std::vector<MEMPROPOSAL> vFoundProposals(Data.iNumOfProposals);
-  memset( &vFoundProposals[0], 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
+  //std::vector<MEMPROPOSAL> vFoundProposals(Data.iNumOfProposals);
+  //memset( &vFoundProposals[0], 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
   // do the lookup and handle the results
   // call the memory factory to process the request
+
+  std::vector<OtmProposal> vProposals(Data.iNumOfProposals);
   if ( _rc_ == NO_ERROR )
   {
-//  TMManager::GetInstance()->APIQueryMem( mem.get(), pSearchKey, & Data.iNumOfProposals, pFoundProposals, GET_EXACT );
-    std::vector<OtmProposal> vProposals(Data.iNumOfProposals);
-    //if ( pFoundProposals == NULL )
-    //{
-    //  return _rc_ = buildErrorReturn(DDE_MANDPARAMISSING,  ":: DDE_MANDPARAMISSING::pointer to proposal array");
-    //} /* endif */
+    //copyMemProposalToOtmProposal( &SearchKey, &otmSearchKey );
+    //
+    TMX_GET_IN_W GetIn;
+    TMX_GET_OUT_W GetOut;
+    memset( &GetIn, 0, sizeof(TMX_GET_IN_W) );
+    memset( &GetOut, 0, sizeof(TMX_GET_OUT_W) );
 
-    OtmProposal otmSearchKey;
-    copyMemProposalToOtmProposal( &SearchKey, &otmSearchKey );
+    mem->OtmProposalToGetIn( Data, &GetIn );
+    GetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
+    GetIn.stTmGet.usRequestedMatches = (USHORT)vProposals.size();
+    GetIn.stTmGet.ulParm = GET_EXACT;
+    GetIn.stTmGet.pvGMOptList = mem->pvGlobalMemoryOptions;
 
-    _rc_ = mem->searchProposal( otmSearchKey, vProposals, GET_EXACT );
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      auto str = EncodingHelper::convertToUTF8(GetIn.stTmGet.szSource);
+      T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::*** method: searchProposal, looking for " <<  str;
+    } 
+    //_rc_ = mem->searchProposal( otmSearchKey, vProposals, GET_EXACT );
+    //////////////////
+    _rc_ = mem->TmtXGet ( &GetIn, &GetOut);
+    ///
+    if ( _rc_ == 0 )
+    {
+      T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   lookup complete, found " << GetOut.usNumMatchesFound << " proposals"   ;
+      wchar_t szRequestedString[2049];
+      Data.getSource( szRequestedString, sizeof(szRequestedString) );
 
+      for ( int i = 0; i < (int)vProposals.size(); i++ )
+      {
+        if ( i >= GetOut.usNumMatchesFound )
+        {
+          vProposals[i].clear();
+        }
+        else
+        {
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            auto strSource = EncodingHelper::convertToUTF8(GetOut.stMatchTable[i].szSource );
+            T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << GetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
+          }
+          //replace tags for proposal
+          auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(GetOut.stMatchTable[i].szSource, 
+                                                                                      GetOut.stMatchTable[i].szTarget, 
+                                                                                      szRequestedString); 
+          wcscpy(GetOut.stMatchTable[i].szSource, result[0].c_str());
+          wcscpy(GetOut.stMatchTable[i].szTarget, result[1].c_str());
+
+          if( GetOut.stMatchTable[i].usMatchLevel >= 100){
+            //correct match rate for exact match based on whitespace difference
+            int wsDiff = 0;
+            UtlCompIgnWhiteSpaceW(szRequestedString, GetOut.stMatchTable[i].szSource, 0, &wsDiff);
+            GetOut.stMatchTable[i].usMatchLevel -= wsDiff; 
+          }
+          mem->MatchToOtmProposal( GetOut.stMatchTable + i, &vProposals[i] );
+        } /* end */         
+      } /* end */       
+    }
+    else
+    {
+      T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::  lookup failed, rc=" << _rc_;
+    } /* end */     
+
+    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.stTmGet.szTagTable );
+
+    //
     Data.iNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
-    for( int i = 0; i < Data.iNumOfProposals; i++ ) copyOtmProposalToMemProposal( &vProposals[i], &vFoundProposals[i] );
+    //for( int i = 0; i < Data.iNumOfProposals; i++ ) copyOtmProposalToMemProposal( &vProposals[i], &vFoundProposals[i] );
   } /* endif */
 
   if(_rc_ != 0){
@@ -2347,7 +2511,8 @@ int FuzzySearchRequestData::execute(){
     if (  Data.iNumOfProposals > 0 )
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );
-      addProposalsToJSONString( strOutputParmsW, &vFoundProposals[0],  Data.iNumOfProposals, (void *)&Data );
+      //addProposalsToJSONString( strOutputParmsW, &vFoundProposals[0],  Data.iNumOfProposals, (void *)&Data );
+      addProposalsToJSONString( strOutputParmsW, vProposals,  Data.iNumOfProposals, &Data );
     } /* endif */
 
     json_factory.terminateJSONW( strOutputParmsW );
@@ -2382,7 +2547,6 @@ int ConcordanceSearchRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   
-  memset( &Data, 0, sizeof( LOOKUPINMEMORYDATA ) );
   JSONFactory *factory = JSONFactory::getInstance();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
@@ -2610,7 +2774,7 @@ int ConcordanceSearchRequestData::execute(){
     iActualSearchTime = Data.iSearchTime;
     if ( _rc_ == 0 )
     {
-      addProposalToJSONString( strProposals, &Proposal, (void *)&Data );
+      addProposalToJSONString( strProposals, &Proposal, &Data );
       iFoundProposals++;
     }
   } while ( ( _rc_ == 0 ) && ( iFoundProposals < Data.iNumOfProposals ) );

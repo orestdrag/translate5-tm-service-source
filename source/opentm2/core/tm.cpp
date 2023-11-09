@@ -875,28 +875,6 @@ int TMManager::ReplaceMemory
 
 
 
-/*! \brief process the API call: EqfQueryMem and lookup a segment in the memory
-  \param lHandle handle of a previously opened memory
-  \param pSearchKey pointer to a MemProposal structure containing the searched criteria
-  \param *piNumOfProposals pointer to the number of requested memory proposals, will be changed on return to the number of proposals found
-  \param pProposals pointer to a array of MemProposal structures receiving the search results
-  \param lOptions processing options 
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT TMManager::APIQueryMem
-(
-  EqfMemory*        pMem,          
-  PMEMPROPOSAL pSearchKey, 
-  int         *piNumOfProposals,
-  PMEMPROPOSAL pProposals, 
-  LONG        lOptions     
-)
-{
-  USHORT usRC = 0;
-
-
-  return( usRC );
-}
 
 wchar_t* wcsupr(wchar_t *str)
 {       

@@ -252,6 +252,7 @@ protected:
     int execute  () override;
 };
 
+#include "Proposal.h"
 
 class ConcordanceSearchRequestData: public RequestData{
     public:
@@ -264,7 +265,7 @@ protected:
 
 
     LONG lOptions = 0;
-    LOOKUPINMEMORYDATA Data;
+    SearchProposal Data;
     MEMPROPOSAL Proposal;
 };
 
@@ -275,7 +276,7 @@ class FuzzySearchRequestData: public RequestData{
     FuzzySearchRequestData(): RequestData(FUZZY){};
 
 protected:
-    LOOKUPINMEMORYDATA Data ;
+    SearchProposal Data ;
     int parseJSON() override ;
     int checkData() override ;
     int execute()   override ;
@@ -290,7 +291,7 @@ class DeleteEntryRequestData: public RequestData{
 
     BOOL fSave2Disk = 1;
 protected:
-    LOOKUPINMEMORYDATA Data;
+    SearchProposal Data;
     int parseJSON() override ;
     int checkData() override ;
     int execute  () override ;
@@ -307,7 +308,7 @@ protected:
     int checkData() override;
     int execute  () override;
     
-    LOOKUPINMEMORYDATA Data;
+    SearchProposal Data;
     MEMPROPOSAL Prop;
 
   };

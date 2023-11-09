@@ -143,70 +143,6 @@ USHORT EqfImportMem
 } /* end of function EqfImportMem */
 
 
-
-
-
-// organize a Translation Memory
-USHORT EqfOrganizeMem
-(
-  HSESSION    hSession,                // Eqf session handle
-  PSZ         pszMemName,               // name of Translation Memory
-  long& reorgSegCount, 
-  long& invSegCount
-)
-{
-  USHORT      usRC = NO_ERROR;         // function return code
-  PFCTDATA    pData = NULL;            // ptr to function data area
-  /*
-  LOGWRITE1( "==EQFOrganizeMem==\n" );
-
-  // validate session handle
-  usRC = FctValidateSession( hSession, &pData );
-  do{
-  // check sequence of calls
-    if ( usRC == NO_ERROR )
-    {
-      if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )
-      {
-        T5LOG(T5WARNING) << "CHECK IF THIS CODE EVER WOULD BE EXECUTED :: if ( !pData->fComplete && (pData->sLastFunction != FCT_EQFORGANIZEMEM) )" ;
-        usRC = LASTTASK_INCOMPLETE_RC;
-      } 
-    } 
-
-    // call TM organize
-    if ( usRC == NO_ERROR )
-    {
-      pData->sLastFunction = FCT_EQFORGANIZEMEM;
-      if ( pData->fComplete )              // has last run been completed
-      {
-        // prepare a new analysis run
-        usRC = MemFuncPrepOrganize( pData, pszMemName );
-      }
-      else
-      {        
-        // continue current organize process
-        usRC = MemFuncOrganizeProcess( pData );
-      }
-      //usRC = MemFuncOrganizeMem( pData, pszMemName );
-    } 
-  }while((usRC == NO_ERROR) && !pData->fComplete  );
-  LOGWRITE2( "  RC=%u\n", usRC );
-   if(pData && pData->pImportData){
-    invSegCount = pData->pImportData->invalidSegments;
-    reorgSegCount = pData->pImportData->segmentsImported;
-    delete pData->pImportData;
-    pData->pImportData = nullptr;
-
-    T5LOG(T5TRANSACTION) << "Mem reorganization was finished, memName = " << pszMemName <<";\n\t rc = " 
-                << usRC << ";\n\t invalidSegCount = " 
-                << invSegCount <<";\n\t reimportedSegCount = " << reorgSegCount;
-  }
-  //*/
-  
-  return( usRC );
-} /* end of function EqfOrganizeMem */
-
-
  USHORT CreateSystemProperties( );
 
 // OtmMemoryService
@@ -510,33 +446,9 @@ USHORT FctValidateSession
   return( usRC );
 } /* end of function FctValidateSession */
 
-void SetSharingFlag(ULONG ulRefreshFlag)
-{
-
-}
 
 
-/*! \brief Lookup a segment in the memory
-  \param hSession the session handle returned by the EqfStartSession call
-  \param lHandle handle of a previously opened memory
-  \param pSearchKey pointer to a MemProposal structure containing the searched criteria
-  \param *piNumOfProposals pointer to the number of requested memory proposals, will be changed on return to the number of proposals found
-  \param pProposals pointer to a array of MemProposal structures receiving the search results
-  \param lOptions processing options 
-  \returns 0 if successful or an error code in case of failures
-*/
-USHORT EqfQueryMem
-(
-  HSESSION    hSession,    
-  EqfMemory*        pMem,          
-  PMEMPROPOSAL pSearchKey, 
-  int         *piNumOfProposals,
-  PMEMPROPOSAL pProposals, 
-  LONG        lOptions     
-)
-{
-  return( 0 );
-}
+
 
 // OtmMemoryService
 /*! \brief Get the OpenTM2 language name for a ISO language identifier

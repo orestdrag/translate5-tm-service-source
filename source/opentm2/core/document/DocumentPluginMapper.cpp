@@ -16,22 +16,6 @@ static OtmDocumentPlugin* thePlugin = 0;
 static OtmDocument* theDocument = 0;
 
 
-__declspec(dllexport)
-void InitDocumentPluginMapper()
-{
-	PluginManager* thePluginManager = PluginManager::getInstance();
-	thePlugin = (OtmDocumentPlugin*) thePluginManager->getPlugin(OtmPlugin::eDocumentType);
-  if ( thePlugin != NULL )
-  {
- 	  theDocument = thePlugin->createDocument();
-  }
-#ifdef _DEBUG
-  else
-  {
-    MessageBox( NULL, "No document plugin available, could not initialize document plugin mapper","Debug message",  MB_OK );
-  }
-#endif
-}
 
 USHORT EQFBCharType(PTBDOCUMENT pDoc, PTBSEGMENT pSeg, USHORT usOffs)
 {
