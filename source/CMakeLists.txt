@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(APP_VERSION  "0.4.1055")
+SET(APP_VERSION  "0.4.1056")
 project(T5MEMORY VERSION ${APP_VERSION})
 
 

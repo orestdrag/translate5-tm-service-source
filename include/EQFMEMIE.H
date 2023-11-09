@@ -191,41 +191,6 @@ typedef USHORT (/**/ *PFN_EXTMEMIMPORTSTART)( PLONG plHandle, PSZ pszInFile, PME
 typedef USHORT (/**/ *PFN_EXTMEMIMPORTPROCESS)( LONG lHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLONG lProgress );
 typedef USHORT (/**/ *PFN_EXTMEMIMPORTEND)(LONG lHandle );
 
-USHORT TMXTOEXP
-( 
-  PSZ              pszInMem,            // fully qualified name of input (TMX) memory
-  PSZ              pszOutMem,           // fully qualified name of output (EXP) memory
-  LONG             lOutMode,            // output mode ANSI/ASCII/UTF16
-  LONG             lOptions,            // other processing options
-  PSZ              pszMarkup,           // markup to use for segments
-  PLONG            plValidSegs,         // number of segments written to EXP file
-  PLONG            plSkippedSegs,       // number of skipped segments
-  PSZ              pszErrorMsgBuffer,   // buffer for error message texts,
-  int              iErrorMsgBufferSize  // size of buffer for error message texts
-);
-
-USHORT EXPTOTMX
-( 
-  PSZ              pszInMem,            // fully qualified name of input (EXP) memory
-  PSZ              pszOutMem,           // fully qualified name of output (TMX) memory
-  PSZ              pszInMode,           // input mode "ANSI"/"ASCII"/"UTF16" or a codepage number
-  LONG             lOutMode,            // output mode UTF16/UTF8
-  PLONG            plSegs,              // number of written (=valid) segments
-  PSZ              pszMsgBuffer,        // buffer for error messages
-  PLONG            plInvalidSegs       // number of skipped segments
-);
-
-
-USHORT XLFTOEXP
-( 
-  PSZ              pszInMem,            // fully qualified name of input (XLIFF) memory
-  PSZ              pszOutMem,           // fully qualified name of output (EXP) memory
-  LONG             lOutMode,            // output mode ANSI/ASCII/UTF16
-  LONG             lOptions,            // other processing options
-  PLONG            plValidSegs,         // number of segments written to EXP file
-  PLONG            plSkippedSegs        // number of skipped segments
-);
-
 
 
 #endif

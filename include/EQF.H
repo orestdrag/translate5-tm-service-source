@@ -52,20 +52,22 @@
 #include <atomic>
 struct ImportStatusDetails{
   std::atomic_short usProgress{0};
-  std::atomic_int segmentsImported{-1};
-  std::atomic_int invalidSegments{-1};
-  std::atomic_int invalidSymbolErrors{-1};
+  std::atomic_long segmentsImported{0};
+  std::atomic_long invalidSegments{0};
+  std::atomic_long invalidSymbolErrors{0};
+  std::atomic_long segmentCount{0};
+  std::atomic_long  activeSegment{0};
   std::string importTimestamp;
   std::stringstream importMsg;
-  int activeSegment{0};
   
   void reset(){
     importMsg.str("");
     usProgress = 0;
     activeSegment = 0;
-    segmentsImported = -1;
-    invalidSegments = -1;
-    invalidSymbolErrors = -1;
+    segmentsImported = 0;
+    invalidSegments = 0;
+    invalidSymbolErrors = 0;
+    segmentCount = 0;
     importTimestamp = "not finished";    
   }
   std::string toString(){
