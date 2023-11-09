@@ -1342,6 +1342,7 @@ USHORT MemFuncImportProcess
           
           pData->pImportData->segmentsImported = pLoadData->ulSegmentCounter;
           pData->pImportData->invalidSegments  = pLoadData->ulInvSegmentCounter;
+          pData->pImportData->segmentCount = pLoadData->ulActiveSegment;
           if(VLOG_IS_ON(1)){
             std::string logMsg = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
                                   "\tNumber of segments imported : " + toStr(pLoadData->ulSegmentCounter)+
@@ -1788,7 +1789,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
-    pLIDA->ulActiveSegment = pSegment->lSegNum;
+    pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->pMem->putProposal( *(pLIDA->pProposal) );
 
@@ -1802,7 +1803,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
       if(usRC == BTREE_LOOKUPTABLE_CORRUPTED || usRC == BTREE_LOOKUPTABLE_TOO_SMALL)
       {    
         std::string msg = "TM is reached it's size limit, please create another one and import segments there, rc = " 
-          + toStr(usRC) + "; aciveSegment = " + toStr(pSegment->lSegNum) + "\n\nSegment " + toStr(pSegment->lSegNum) + " not imported\r\n" 
+          + toStr(usRC) + "; segment #" + toStr(pLIDA->ulActiveSegment) + " wasn't imported and all were following segments skipped\r\n" 
           +"\nReason         = " +  pSegment->szReason 
           +"\nDocument       = " +  pSegment->szDocument 
           +"\nSourceLanguage = " +  pSegment->szSourceLang 
