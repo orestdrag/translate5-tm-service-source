@@ -266,7 +266,6 @@ protected:
 
     LONG lOptions = 0;
     SearchProposal Data;
-    MEMPROPOSAL Proposal;
 };
 
 

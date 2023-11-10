@@ -2659,16 +2659,17 @@ wchar_t* wcsupr(wchar_t *str);
 
 int ConcordanceSearchRequestData::execute(){
   std::wstring strProposals;
-
+  
+  OtmProposal OProposal;
   // loop until end reached or enough proposals have been found
   int iFoundProposals = 0;
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
   do
   {
-    memset( &Proposal, 0, sizeof( Proposal ) );
+    //memset( &Proposal, 0, sizeof( Proposal ) );
     {
       BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
-      OtmProposal *pOtmProposal = new (OtmProposal);
+      
 
       if ((* Data.szSearchString  == EOS)  )
       {
@@ -2683,12 +2684,12 @@ int ConcordanceSearchRequestData::execute(){
       // get first or next proposal
       if ( *Data.szSearchPos == EOS )
       {
-        _rc_ = mem->getFirstProposal( *pOtmProposal );
+        _rc_ = mem->getFirstProposal( OProposal );
       }
       else
       {
         mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
-        _rc_ = mem->getNextProposal( *pOtmProposal );
+        _rc_ = mem->getNextProposal( OProposal );
       } /* endif */
 
       // prepare searchstring
@@ -2698,18 +2699,18 @@ int ConcordanceSearchRequestData::execute(){
       bool fOneOrMoreIsFound = false; 
       while ( !fFound && ( _rc_ == 0 ) )
       {
-        fFound = searchInProposal( pOtmProposal, Data.szSearchString, lOptions );
+        fFound = searchInProposal( &OProposal, Data.szSearchString, lOptions );
         //check langs
         if( fFound ) 
         { // filter by src lang
           if (lOptions & SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT)
           {
             char lang[50];
-            pOtmProposal->getSourceLanguage(lang, 50);
+            OProposal.getSourceLanguage(lang, 50);
             fFound = strcasecmp(lang, Data.szIsoSourceLang ) == 0;
           }else if(lOptions & SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT){
             char lang[50];
-            pOtmProposal->getSourceLanguage(lang, 50);
+            OProposal.getSourceLanguage(lang, 50);
             fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoSourceLang);
           }
         }
@@ -2718,18 +2719,18 @@ int ConcordanceSearchRequestData::execute(){
           if (lOptions & SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT)
           {
             char lang[50];
-            pOtmProposal->getTargetLanguage(lang, 50);
+            OProposal.getTargetLanguage(lang, 50);
             fFound = strcasecmp(lang, Data.szIsoTargetLang ) == 0;
           }else if(lOptions & SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT){
             char lang[50];
-            pOtmProposal->getTargetLanguage(lang, 50);
+            OProposal.getTargetLanguage(lang, 50);
             fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoTargetLang);
           }
         }
         if ( fFound )
         {
           fOneOrMoreIsFound = true;
-          copyOtmProposalToMemProposal( pOtmProposal , &Proposal );
+          //copyOtmProposalToMemProposal( pOtmProposal , &Proposal );
         }
         else
         { 
@@ -2754,7 +2755,7 @@ int ConcordanceSearchRequestData::execute(){
           }
           if ( _rc_ == 0 )
           {
-            _rc_ = mem->getNextProposal( *pOtmProposal );
+            _rc_ = mem->getNextProposal( OProposal );
           }
         }
       } /* endwhile */
@@ -2774,7 +2775,7 @@ int ConcordanceSearchRequestData::execute(){
     iActualSearchTime = Data.iSearchTime;
     if ( _rc_ == 0 )
     {
-      addProposalToJSONString( strProposals, &Proposal, &Data );
+      addProposalToJSONString( strProposals, OProposal, &Data );
       iFoundProposals++;
     }
   } while ( ( _rc_ == 0 ) && ( iFoundProposals < Data.iNumOfProposals ) );
@@ -2783,7 +2784,7 @@ int ConcordanceSearchRequestData::execute(){
   {
     std::wstring strOutputParmsW;
     json_factory.startJSONW( strOutputParmsW );
-//    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ );
+    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ == ENDREACHED_RC? L"ENDREACHED_RC" : _rc_==TIMEOUT_RC? L"TIMEOUT_RC": L"FOUND");
     if ( _rc_ == ENDREACHED_RC )
     {
       json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );

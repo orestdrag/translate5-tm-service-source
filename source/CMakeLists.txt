@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 5)
-SET(APP_VERSION_MINOR 29)
+SET(APP_VERSION_MINOR 30)
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
@@ -103,7 +103,6 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/utilities/EQFMORPH.cpp"
     "${CORE_DIR}/utilities/EQFMORPW.cpp"
     "${CORE_DIR}/utilities/EQFOBJ00.cpp"
-    "${CORE_DIR}/utilities/EQFOSWIN.cpp"
     "${CORE_DIR}/utilities/EqfPluginWrapper.cpp"
     "${CORE_DIR}/utilities/EQFPRO00.cpp"
     "${CORE_DIR}/utilities/EQFSETUP.cpp"
@@ -139,17 +138,13 @@ set(T5MEMORY_Source_Files
 #EqfMemoryPlugin
     "${CORE_DIR}/EqfMemoryPlugin/EQFFUZZ.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEM00.cpp"
-    #"${CORE_DIR}/EqfMemoryPlugin/EQFMEMCD.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMEP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFMEMLP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemory.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EqfMemoryPlugin.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/EQFMEMUT.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/EQFNTCR.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTDEL.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTEXT.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTGET.cpp"
-    "${CORE_DIR}/EqfMemoryPlugin/EQFNTM.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTMDB.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTOP.cpp"
     "${CORE_DIR}/EqfMemoryPlugin/EQFNTPUT.cpp"
