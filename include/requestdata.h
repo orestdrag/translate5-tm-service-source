@@ -308,7 +308,6 @@ protected:
     int execute  () override;
     
     SearchProposal Data;
-    MEMPROPOSAL Prop;
 
   };
 

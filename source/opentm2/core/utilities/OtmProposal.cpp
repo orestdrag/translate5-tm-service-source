@@ -50,6 +50,27 @@ void SearchProposal::clearSearchProposal(){
   eMatch = OtmProposal::emtUndefined;
 }
 
+OtmProposal::eProposalType getMemProposalType( char *pszType )
+{
+  if ( strcasecmp( pszType, "GlobalMemory" ) == 0 )
+  {
+    return( OtmProposal::eptGlobalMemory );
+  }
+  else if ( strcasecmp( pszType, "GlobalMemoryStar" ) == 0 )
+  {
+    return( OtmProposal::eptGlobalMemoryStar );
+  }
+  else if ( strcasecmp( pszType, "MachineTranslation" ) == 0 )
+  {
+    return( OtmProposal::eptMachine );
+  }
+  else if ( strcasecmp( pszType, "Manual" ) == 0 )
+  {
+    return( OtmProposal::eptManual );
+  } /* endif */
+  return( OtmProposal::eptUndefined );
+}
+
 /* setters and getters */
 
 /* \brief get the internal key of the proposal

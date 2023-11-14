@@ -464,6 +464,9 @@ public:
   //char errorStr[1000];
 };
 
+
+OtmProposal::eProposalType getMemProposalType( char *pszType );
+
 class SearchProposal: public OtmProposal
 {
 public:
@@ -482,6 +485,9 @@ public:
   int iNumOfProposals;
   int iSearchTime;
   wchar_t szSearchString[2050];
+  ulong recordKey{0};
+  ushort targetKey{0};
+
     
   /*! \brief is source lang is marked as prefered in languages.xml */
   bool fIsoSourceLangIsPrefered = false;

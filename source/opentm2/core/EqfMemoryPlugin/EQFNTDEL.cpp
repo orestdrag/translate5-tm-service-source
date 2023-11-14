@@ -53,9 +53,8 @@
 //|        get tm record                                                       |
 //|        find and delete target record readjusting tm record length          |
 // ----------------------------------------------------------------------------+
-USHORT TmtXDelSegm
+USHORT EqfMemory::TmtXDelSegm
 (
-  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_PUT_IN_W pTmDelIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 )
@@ -136,7 +135,7 @@ USHORT TmtXDelSegm
 
 
     //tokenize source segment, resuting in normalized string and tag table record
-    usRc = TokenizeSource( pTmClb, pSentence, szString,
+    usRc = TokenizeSource( this, pSentence, szString,
                            pTmDelIn->stTmPut.szSourceLanguage);
     wcsncpy(pSentence->pNormString, normalizedStringWithNPHashes.c_str(), MAX_SEG_SIZE-1);
 
@@ -157,17 +156,17 @@ USHORT TmtXDelSegm
   // update TM databse
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( pSentence, pTmClb );
+    usMatchesFound = CheckCompactArea( pSentence, this );
     if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
     {
-      usRc = DetermineTmRecord( pTmClb, pSentence, pulSids );
+      usRc = DetermineTmRecord( this, pSentence, pulSids );
       if ( !usRc )
       {
         while ( *pulSids )
         {
           ulKey = *pulSids;
           ulLen = TMX_REC_SIZE;
-          usRc =  pTmClb->TmBtree.EQFNTMGet(
+          usRc =  TmBtree.EQFNTMGet(
                             ulKey,  //tm record key
                             (PCHAR)pTmRecord,   //pointer to tm record data
                             &ulLen );  //length
@@ -179,7 +178,7 @@ USHORT TmtXDelSegm
             {
               ulRecBufSize = ulLen;
 
-              usRc =  pTmClb->TmBtree.EQFNTMGet(
+              usRc =  TmBtree.EQFNTMGet(
                                 ulKey,
                                 (PCHAR)pTmRecord,
                                 &ulLen );
@@ -194,7 +193,7 @@ USHORT TmtXDelSegm
           {
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
-            usRc = FindTargetAndDelete( pTmClb, pTmRecord,
+            usRc = FindTargetAndDelete( pTmRecord,
                                 &pTmDelIn->stTmPut, pSentence, &ulKey );
             if ( usRc == SEG_NOT_FOUND )
             {
@@ -233,6 +232,152 @@ USHORT TmtXDelSegm
   return( usRc );
 }
 
+
+USHORT EqfMemory::TmtXDelSegmByKey
+(
+  SearchProposal& TmDelIn,  //ptr to input struct
+  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+)
+{
+  PTMX_SENTENCE pSentence = NULL;    // ptr to sentence structure
+  ULONG ulKey;                         // tm record key
+  BOOL fOK;                            // success indicator
+  USHORT usRc = NO_ERROR;              // return code
+  USHORT usMatchesFound = 0;           // compact area hits
+  ULONG  ulLen = 0;                    // length indication
+  PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
+  CHAR szString[MAX_EQF_PATH];         // character string
+  //PULONG pulSids = NULL;               // ptr to sentence ids
+  //PULONG pulSidStart = NULL;           // ptr to sentence ids
+  ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
+
+  //allocate pSentence
+
+  if ( fOK )
+   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
+  if(fOK) fOK = NTMAllocSentenceStructure(&pSentence);
+
+  if ( fOK )
+  {
+  //  fOK = UtlAlloc( (PVOID *) &(pulSids), 0L, (LONG)(MAX_INDEX_LEN * sizeof(ULONG)),
+  //                  NOMSG );
+  //  if ( fOK )
+  //    pulSidStart = pulSids;
+  } /* endif */
+
+  if ( !fOK )
+  {
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+  } /* endif */
+
+  if ( !usRc )
+  {
+    //build tag table path
+    Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, MAX_EQF_PATH);
+    strcat (szString, "/TABLE/");
+    strcat( szString, TmDelIn.szMarkup );
+    strcat( szString, EXT_OF_FORMAT );
+
+    //remember start of norm string
+    pSentence->pNormStringStart = pSentence->pNormString;
+
+    wcsncpy( pSentence->pInputString, TmDelIn.szSource, MAX_SEGMENT_SIZE-1 );
+    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEG_SIZE-1);
+    auto normalizedStringWithNPHashes = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pInputString);
+
+
+    //tokenize source segment, resuting in normalized string and tag table record
+    usRc = TokenizeSource( this, pSentence, szString,
+                           TmDelIn.szSourceLanguage);
+    wcsncpy(pSentence->pNormString, normalizedStringWithNPHashes.c_str(), MAX_SEG_SIZE-1);
+
+    // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
+    pSentence->pTagRecord->usTagTableId = 0;
+  }
+
+
+  // update TM databse
+  if ( !usRc )
+  {
+    //set pNormString to beginning of string
+    pSentence->pNormString = pSentence->pNormStringStart;
+    HashSentence( pSentence );
+  } /* endif */
+
+
+  // update TM databse
+  if ( !usRc )
+  {
+    //usMatchesFound = CheckCompactArea( pSentence, this );
+    //if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
+    {
+      //usRc = DetermineTmRecord( this, pSentence, pulSids );
+      if ( !usRc )
+      {
+      //  while ( *pulSids )
+        {
+      //    ulKey = *pulSids;
+          ulLen = TMX_REC_SIZE;
+          usRc =  TmBtree.EQFNTMGet(
+                            ulKey,  //tm record key
+                            (PCHAR)pTmRecord,   //pointer to tm record data
+                            &ulLen );  //length
+          // re-alloc buffer and try again if buffer overflow occured
+          if ( usRc == BTREE_BUFFER_SMALL )
+          {
+            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
+            if ( fOK )
+            {
+              ulRecBufSize = ulLen;
+
+              usRc =  TmBtree.EQFNTMGet(
+                                ulKey,
+                                (PCHAR)pTmRecord,
+                                &ulLen );
+            }
+            else
+            {
+              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            } /* endif */
+          } /* endif */
+
+          if ( usRc == NO_ERROR )
+          {
+            //find target record and delete, if the target record was the
+            //only target in the tm record, delete the entire record
+            usRc = FindTargetByKeyAndDelete( pTmRecord,
+                                TmDelIn, pSentence, &ulKey );
+            if ( usRc == SEG_NOT_FOUND )
+            {
+              //get next tm record
+        //      pulSids++;
+            }
+            else
+            {
+              //target record was found and deleted or an error occured
+              //so don't try other sids
+        //      *pulSids = 0;
+            } /* endif */
+          } /* endif */
+        } /* endwhile */
+      } /* endif */
+    }
+    //else
+    {
+    //  LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
+    } /* endif */
+  } /* endif */
+
+  //release memory
+  
+  NTMFreeSentenceStructure(pSentence);
+  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
+
+  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
+  pTmDelOut->stPrefixOut.usTmtXRc = usRc;
+  return( usRc );
+}
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -289,7 +434,7 @@ USHORT TmtXDelSegm
 //|    else                                                                    |
 //|      get next sentence key                                                 |
 // ----------------------------------------------------------------------------+
-USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
+USHORT EqfMemory::FindTargetAndDelete(
                             PTMX_RECORD pTmRecord,
                             PTMX_PUT_W  pTmDel,
                             PTMX_SENTENCE pSentence,
@@ -386,7 +531,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
         pClb = (PTMX_TARGET_CLB)pByte;
 
         //get id of target language in the put structure
-        usRc = NTMGetIDFromName( pTmClb, pTmDel->szTargetLanguage,
+        usRc = NTMGetIDFromName( this, pTmDel->szTargetLanguage,
                                  NULL,
                                  (USHORT)LANG_KEY, &usId );
         //compare target language ids
@@ -424,7 +569,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
             ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
             //tokenize target string in del structure
-            usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, pTmClb );
+            usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, this );
 
             if ( !usRc )
             {
@@ -456,7 +601,7 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
                   pClb = (PTMX_TARGET_CLB)pByte;
 
                   //get id of filename in the put structure
-                  usRc = NTMGetIDFromName( pTmClb, pTmDel->szFileName,
+                  usRc = NTMGetIDFromName( this, pTmDel->szFileName,
                                            pTmDel->szLongName,
                                            (USHORT)FILE_KEY, &usId );
                   if ( !usRc )
@@ -490,7 +635,256 @@ USHORT FindTargetAndDelete( EqfMemory*    pTmClb,
                           /*  by a new translation, we will not remove  */
                           /* the key (only get rid of any target data)  */
                           /**********************************************/
-                          usRc = pTmClb->TmBtree.EQFNTMUpdate(
+                          usRc = TmBtree.EQFNTMUpdate(
+                                               *pulKey,
+                                               (PBYTE)pTmRecord,
+                                               RECLEN(pTmRecord) );
+                        } /* endif */
+
+                        //leave while loop
+                        fStop = TRUE;
+                      }
+                      else
+                      {
+                        // try next target CLB
+                        ulLeftClbLen -= TARGETCLBLEN(pClb);
+                        pClb = NEXTTARGETCLB(pClb);
+                      } /* endif */
+                    } /* endwhile */
+                  } /* endif */
+                } /* endif */
+              } /* endif */
+            } /* endif */
+          } /* endif */
+        } /* endif */
+
+        //position at next target
+        pByte = pStartTarget;
+        pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+        //move pointer to end of target
+        pByte += RECLEN(pTMXTargetRecord);
+        //remember the end/beginning of record
+        pStartTarget = pByte;
+        pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+      } /* endwhile */
+    } /* endif */
+
+    if ( !fStop )
+    {
+      LOG_AND_SET_RC(usRc, T5INFO, SEG_NOT_FOUND);
+    } /* endif */
+  } /* endif */
+
+  //release memory
+  UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &(pNormString), 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG );
+
+  return( usRc );
+}
+
+USHORT EqfMemory::FindTargetByKeyAndDelete(
+                            PTMX_RECORD pTmRecord,
+                            SearchProposal&  TmDel,
+                            PTMX_SENTENCE pSentence,
+                            PULONG pulKey )
+{
+  BOOL fOK = FALSE;                    //success indicator
+  BOOL fStop = FALSE;                  //indicates whether to leave loop or not
+  PBYTE pByte;                         //position ptr
+  PBYTE pStartTarget;                  //position ptr
+  PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
+  PTMX_TARGET_RECORD pTMXTargetRecord = NULL; //ptr to target record
+  PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
+  PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
+  PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
+  PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
+  LONG lTagAlloc;                      //allocate length
+  ULONG ulLen = 0;                    //length indicator
+  USHORT usNormLen = 0;                //length of normalized string
+  PSZ_W  pString = NULL;               //pointer to character string
+  PSZ_W  pNormString = NULL;           //pointer to character string
+  USHORT usId = 0;                     //returned id from function
+  USHORT usRc = NO_ERROR;              //returned value from function
+
+  //allocate pString
+  fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
+
+  //allocate normalized string
+  if ( fOK )
+  {
+    fOK = UtlAlloc( (PVOID *) &(pNormString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
+  } /* endif */
+
+  //allocate 4k for pTagRecord
+  if ( fOK )
+  {
+    fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
+    if ( fOK )
+     lTagAlloc = (LONG)TOK_SIZE;
+  }
+
+  if ( !fOK )
+  {
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+  }
+  else
+  {
+    //position at beginning of source structure in tm record
+    pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
+
+    //move pointer to source string
+    pByte = (PBYTE)(pTmRecord+1);
+    pByte += pTMXSourceRecord->usSource;
+
+    //calculate length of source string
+    ulLen = (RECLEN(pTMXSourceRecord) - sizeof( TMX_SOURCE_RECORD ));
+
+    //clear pString for later use
+    memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W) );
+
+    //copy source string for later compare function
+//    memcpy( pString, pByte, ulLen );
+    ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
+
+    //compare source strings
+    //if ( !UTF16strcmp( pString, pSentence->pNormString ) )
+    if ( !UTF16strcmp( pString, pSentence->pInputString ) )
+    {
+      ULONG   ulLeftTgtLen;            // remaining target length
+      /****************************************************************/
+      /* get length of target block to work with                      */
+      /****************************************************************/
+      assert( RECLEN(pTmRecord) >= pTmRecord->usFirstTargetRecord );
+      ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+
+      //source strings equal
+      //position at first target record
+      pByte = (PBYTE)(pTmRecord+1);
+      pByte += RECLEN(pTMXSourceRecord);
+      pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+      pStartTarget = (PBYTE)pTMXTargetRecord;
+
+      //source strings are identical so loop through target records
+      while ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) && !fStop )
+      {
+        /**************************************************************/
+        /* update left target length                                  */
+        /**************************************************************/
+        assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
+        ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+
+        //next check the target language
+        //position at target control block
+        pByte += pTMXTargetRecord->usClb;
+        pClb = (PTMX_TARGET_CLB)pByte;
+
+        //get id of target language in the put structure
+        usRc = NTMGetIDFromName( this, TmDel.szTargetLanguage,
+                                 NULL,
+                                 (USHORT)LANG_KEY, &usId );
+        //compare target language ids
+        //if ( (pClb->usLangId == usId) && !usRc )
+        {
+          //compare source tag table records
+          //position at source tag table record
+          pByte = pStartTarget;
+          pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+
+          //position at source tag table
+          pByte += pTMXTargetRecord->usSourceTagTable;
+          pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+
+          //compare tag table records
+          //if ( !memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
+          //             RECLEN(pTMXSourceTagTable) ) )
+          //std::wstring pStringWNormalizedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring(pSentence->pInputString));
+          if(//UtlCompIgnWhiteSpaceW(pSentence->pInputString, (wchar_t*)pStringWNormalizedTags.c_str(), pStringWNormalizedTags.size() ) == 0
+          true) // we use the same tag tables in t5?
+          {
+            //source tag tables are identical
+            pByte = pStartTarget;
+            pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+            pByte += pTMXTargetRecord->usTarget;
+
+            //calculate length of target string
+            ulLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
+
+            //clear pString for later use
+            memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
+
+            //copy target string for later compare function
+//            memcpy( pString, pByte, ulLen );
+            ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
+
+            //tokenize target string in del structure
+            usRc = TokenizeTarget( TmDel.szTarget, pNormString, &pTagRecord, &lTagAlloc, TmDel.szMarkup, &usNormLen, this );
+
+            if ( !usRc )
+            {
+              //compare target strings
+              //if ( !UTF16strcmp( pString, pNormString ) )
+              if ( !UTF16strcmp( pString, TmDel.szTarget ) )
+              {
+                //target strings are equal so compare target tag records
+                //position at target tag table record
+                pByte = pStartTarget;
+                pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+                pByte += pTMXTargetRecord->usTargetTagTable;
+                pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+
+                //compare tag table records
+                if (true 
+                //||   //we use the same tag tables
+                //     !memcmp( pTMXTargetTagTable, pTagRecord,
+                //              RECLEN(pTMXTargetTagTable) ) 
+                )
+                {
+                  //identical target tag table as in del structure so
+                  //check segment id and file name in control block
+                  pByte = pStartTarget;
+                  pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+
+                  //position at target control block
+                  pByte += pTMXTargetRecord->usClb;
+                  pClb = (PTMX_TARGET_CLB)pByte;
+
+                  //get id of filename in the put structure
+                  usRc = NTMGetIDFromName( this, TmDel.szDocName,
+                                           TmDel.szDocName,
+                                           (USHORT)FILE_KEY, &usId );
+                  if ( !usRc )
+                  {
+                    ULONG ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+                                         pTMXTargetRecord->usClb;
+                    while ( ulLeftClbLen && !fStop )
+                    {
+                      if ( 
+                           //(pClb->usFileId == usId) &&
+                           //(pClb->ulSegmId == pTmDel->ulSourceSegmentId) &&
+                           //(pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag)
+                           //||
+                           true 
+                           )
+                      {
+                        //if segment id and filename are equal then delete
+                        //target CLB and any empty target record
+
+                        //check that multiple flag isn't on
+                        //if on leave while loop as though delete was carried out
+                        if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime  || true)
+                        {
+                          TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
+
+                          //add updated tm record to database
+                          /**********************************************/
+                          /* we usually should delete the record here   */
+                          /* (if no translation is available for it)    */
+                          /* BUT: since usually an untranslate is follow*/
+                          /*  by a new translation, we will not remove  */
+                          /* the key (only get rid of any target data)  */
+                          /**********************************************/
+                          usRc = TmBtree.EQFNTMUpdate(
                                                *pulKey,
                                                (PBYTE)pTmRecord,
                                                RECLEN(pTmRecord) );

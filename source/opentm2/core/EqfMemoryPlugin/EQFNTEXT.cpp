@@ -20,28 +20,6 @@
 #include <EQFMORPI.H>
 #include "LogWrapper.h"
 
-static USHORT ExtractRecordV5
-(
-  EqfMemory*        pTmClb,         //ptr to ctl block struct
-  PTMX_RECORD     pTmRecord,
-  PTMX_EXT_IN_W   pTmExtIn,
-  PTMX_EXT_OUT_W  pTmExtOut,
-  ULONG           ulOemCP
-);
-
-static
-USHORT FillExtStructureV5
-(
-  EqfMemory*    pTmClb,                  //ptr to control block
-  PTMX_TARGET_RECORD pTMXTargetRecord, //ptr to tm target
-  PTMX_OLD_TARGET_CLB    pTargetClb,   // ptr to current target CLB
-  PSZ         pSourceString,           //ptr to source string
-  PULONG      pulSourceLen,            //length of source string
-  PTMX_EXT_W  pstExt,                   //extout ext struct
-  ULONG       ulOemCP
-);
-
-
 static USHORT ExtractRecordV6
 (
   EqfMemory*        pTmClb,         //ptr to ctl block struct

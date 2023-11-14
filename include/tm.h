@@ -1732,6 +1732,29 @@ public:
   static const int UPDATE_TARGLANG = 0x04;           // update target language
   static const int UPDATE_DATE     = 0x08;           // update proposal update time
 
+  ushort TmtXDelSegm
+(
+  PTMX_PUT_IN_W pTmDelIn,  //ptr to input struct
+  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+);
+
+USHORT TmtXDelSegmByKey
+(
+  SearchProposal& TmDelIn,  //ptr to input struct
+  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+);
+
+USHORT FindTargetAndDelete(
+                            PTMX_RECORD pTmRecord,
+                            PTMX_PUT_W  pTmDel,
+                            PTMX_SENTENCE pSentence,
+                            PULONG pulKey );
+
+USHORT FindTargetByKeyAndDelete(
+                            PTMX_RECORD pTmRecord,
+                            SearchProposal&  pTmDel,
+                            PTMX_SENTENCE pSentence,
+                            PULONG pulKey );
 
 /*! \brief Store the supplied proposal in the memory
     When the proposal aready exists it will be overwritten with the supplied data
@@ -1869,10 +1892,15 @@ USHORT NTMLoadNameTable
     OtmProposal &SearchKey,
     std::vector<OtmProposal> &FoundProposals,
     unsigned long ulOptions
-
   ); 
 
   USHORT UpdateTmRecord( PTMX_PUT_W, PTMX_SENTENCE );
+  
+  USHORT UpdateTmRecordByInternalKey
+  (
+    PTMX_PUT_W    pTmPut,                //pointer to get in data
+    PTMX_SENTENCE pSentence              //ptr to sentence structure
+  );
   
   int getNumOfMarkupNames();
 
@@ -2119,6 +2147,12 @@ int OtmProposalToGetIn
   PTMX_GET_IN_W pGetIn
 );
 
+int OtmProposalToPutIn
+(
+  OtmProposal &Proposal,
+  PTMX_PUT_IN_W pPutIn
+);
+
 /*! \brief Handle a return code from the memory functions and create 
     the approbriate error message text for it
     \param iRC return code from memory function
@@ -2140,17 +2174,6 @@ public:
 private:   
 };
 
-
-/*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
-    \param Proposal reference to the OtmProposal containing the data
-    \param pPutIn pointer to the TMX_PUT_IN_W structure
-  	\returns 0 or error code in case of errors
-*/
-int OtmProposalToPutIn
-(
-  OtmProposal &Proposal,
-  PTMX_PUT_IN_W pPutIn
-);
 
 USHORT  TmGetServerDrives( PDRIVES_IN  pDrivesIn,      // Pointer to DRIVES_IN struct
                            PDRIVES_OUT pDrivesOut,     // Pointer to DRIVES_OUT struct

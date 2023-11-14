@@ -162,26 +162,6 @@ std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& 
 }
 
 
-MemProposalType getMemProposalType( char *pszType )
-{
-  if ( strcasecmp( pszType, "GlobalMemory" ) == 0 )
-  {
-    return( GLOBMEMORY_PROPTYPE );
-  }
-  else if ( strcasecmp( pszType, "GlobalMemoryStar" ) == 0 )
-  {
-    return( GLOBMEMORYSTAR_PROPTYPE );
-  }
-  else if ( strcasecmp( pszType, "MachineTranslation" ) == 0 )
-  {
-    return( MACHINE_PROPTYPE );
-  }
-  else if ( strcasecmp( pszType, "Manual" ) == 0 )
-  {
-    return( MANUAL_PROPTYPE );
-  } /* endif */
-  return( UNDEFINED_PROPTYPE );
-}
 
 
 /*! \brief build return JSON string in case of errors
@@ -1766,8 +1746,7 @@ int UpdateEntryRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  Data.clearSearchProposal();
-      
+  Data.clearSearchProposal();    
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
   { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
@@ -1784,6 +1763,8 @@ int UpdateEntryRequestData::parseJSON(){
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
+  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
+  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
@@ -1835,28 +1816,25 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
-  memset( &Prop, 0, sizeof( Prop ) );
   auto replacedInput = replaceString( Data.szSource , Data.szTarget, L"", &_rc_ );
   if(!_rc_){
-    wcscpy( Prop.szSource, replacedInput[0].c_str());
-    wcscpy( Prop.szTarget, replacedInput[1].c_str());
+    wcscpy( Data.szSource, replacedInput[0].c_str());
+    wcscpy( Data.szTarget, replacedInput[1].c_str());
   }else{
     buildErrorReturn(_rc_, "Error in xml in source or target!");
     return _rc_;
   }
-  Prop.lSegmentNum = Data.lSegmentNum;
-  strcpy( Prop.szDocName, Data.szDocName );
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Prop.szSourceLanguage );
-  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Prop.szTargetLanguage );
-  Prop.eType = getMemProposalType(Data.szType );
-  strcpy( Prop.szTargetAuthor,Data.szAuthor ); 
-  strcpy( Prop.szMarkup,Data.szMarkup );  
-  wcscpy( Prop.szContext,Data.szContext );
+
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
+  EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
+  Data.eType = getMemProposalType(Data.szType );
+  strcpy( Data.szTargetAuthor,Data.szAuthor ); 
+
   LONG lTime = 0;
   if (Data.szDateTime[0] != 0 )
   {
     // use provided time stamp
-    convertUTCTimeToLong(Data.szDateTime, &(Prop.lTargetTime) );
+    convertUTCTimeToLong(Data.szDateTime, &(Data.lTargetTime) );
   }
   else
   {
@@ -1868,18 +1846,16 @@ int UpdateEntryRequestData::execute(){
     lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
     convertTimeToUTC( lTimeStamp,Data.szDateTime );
   }
-  wcscpy( Prop.szAddInfo,Data.szAddInfo );
 
   // update the memory
-  OtmProposal OtmProposal;
+  //OtmProposal OtmProposal;
   TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
   TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  strcpy(Prop.szDocShortName , Prop.szDocName);
-  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
-  OtmProposalToPutIn( OtmProposal, &TmPutIn );
+  //copyMemProposalToOtmProposal( &Prop, &OtmProposal );
+  mem->OtmProposalToPutIn( Data, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
     std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
@@ -2014,23 +1990,15 @@ int DeleteEntryRequestData::execute(){
 
   auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
   // prepare the proposal data
-  MEMPROPOSAL Prop ;
-  memset( &Prop, 0, sizeof( Prop ) );
-  wcscpy( Prop.szSource, Data.szSource );
-  wcscpy( Prop.szTarget, Data.szTarget );
-  Prop.lSegmentNum = Data.lSegmentNum;
-  strcpy( Prop.szDocName, Data.szDocName );
-  EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Prop.szSourceLanguage );
-  EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Prop.szTargetLanguage );
-  Prop.eType = getMemProposalType( Data.szType );
-  strcpy( Prop.szTargetAuthor, Data.szAuthor );
-  strcpy( Prop.szMarkup, Data.szMarkup );  
-  wcscpy( Prop.szContext, Data.szContext );
+  EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
+  EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
+  Data.eType = getMemProposalType( Data.szType );
+  strcpy( Data.szTargetAuthor, Data.szAuthor );
   LONG lTime = 0;
   if ( Data.szDateTime[0] != 0 )
   {
     // use provided time stamp
-    convertUTCTimeToLong( Data.szDateTime, &(Prop.lTargetTime) );
+    convertUTCTimeToLong( Data.szDateTime, &(Data.lTargetTime) );
   }
   else
   {
@@ -2042,7 +2010,6 @@ int DeleteEntryRequestData::execute(){
     lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
     convertTimeToUTC( lTimeStamp, Data.szDateTime );
   }
-  wcscpy( Prop.szAddInfo, Data.szAddInfo );
 
   std::string errorStr;
   errorStr.reserve(1000);
@@ -2052,23 +2019,19 @@ int DeleteEntryRequestData::execute(){
   {
     return( INVALIDFILEHANDLE_RC );
   } /* endif */
-  
-  OtmProposal OtmProposal;
-  strcpy(Prop.szDocShortName , Prop.szDocName);
-  copyMemProposalToOtmProposal( &Prop, &OtmProposal );
 
-
-  TMX_PUT_IN_W TmPutIn;
   TMX_PUT_OUT_W TmPutOut;
-  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-  _rc_ = OtmProposalToPutIn( OtmProposal, &TmPutIn );
-  if ( !_rc_ ) 
-    _rc_ = TmtXDelSegm ( mem.get(), &TmPutIn, &TmPutOut );
-
-  //if ( _rc_ != 0  
-  //    && _rc_ != 6020) // seg not found 
-  //  handleError( iRC, mem->szName, TmPutIn.stTmPut.szTagTable );
+  if(Data.recordKey && Data.targetKey){
+    _rc_ = mem->TmtXDelSegmByKey(Data, &TmPutOut);
+  }else{
+    TMX_PUT_IN_W TmPutIn;
+    memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+    _rc_ = mem->OtmProposalToPutIn( Data, &TmPutIn );
+    if ( !_rc_ ){ 
+      _rc_ = mem->TmtXDelSegm ( &TmPutIn, &TmPutOut );
+    }
+  }
 
   if(_rc_ == 6020){
     //seg not found
@@ -2077,10 +2040,6 @@ int DeleteEntryRequestData::execute(){
 
   if ( _rc_ != 0 )
   {
-    //unsigned short usRC = 0;
-    //auto w_error_str = EncodingHelper::convertToUTF16(errorStr.c_str());
-    //EqfGetLastErrorW( hSession, &usRC, (wchar_t*)w_error_str.c_str(), w_error_str.size());
-    // Data.szError , sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
     buildErrorReturn( _rc_, errorStr.c_str() );
     return( INTERNAL_SERVER_ERROR );
   } else if(fSave2Disk){

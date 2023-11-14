@@ -223,15 +223,11 @@ int EqfMemory::putProposal
   /* by the caller                                                    */
   /********************************************************************/
 
-  //iRC = (int)TmReplace( this->htm,  NULL,  TmPutIn, this->pTmPutOut, FALSE, NULLHANDLE );
   iRC = TmtXReplace ( &TmPutIn, &TmPutOut );
 
   if ( iRC != 0 ){
-      T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
-      //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
-  }else{
-    //TmBtree.fb.Flush();
-    //InBtree.fb.Flush();
+    T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
+    //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
   }
 
   if ( ( iRC == 0 ) &&
@@ -716,7 +712,7 @@ int EqfMemory::MatchToOtmProposal
     \param pPutIn pointer to the TMX_PUT_IN_W structure
   	\returns 0 or error code in case of errors
 */
-int OtmProposalToPutIn
+int EqfMemory::OtmProposalToPutIn
 (
   OtmProposal &Proposal,
   PTMX_PUT_IN_W pPutIn

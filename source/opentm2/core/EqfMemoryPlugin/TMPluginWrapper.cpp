@@ -61,25 +61,7 @@ void InitTMPluginWrapper()
            } /* endwhile */                     \
          }
 
-USHORT TmUpdSegW
-(
-  HTM         htm,                       //(in)  TM handle
-  PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN_W pstPutIn,                  //(in)  pointer to put input structure
-  ULONG       ulUpdKey,                  //(in)  key of record being updated
-  USHORT      usUpdTarget,               //(in)  number of target being updated
-  USHORT      usFlags,                   //(in)  flags controlling the updated fields
-  USHORT      usMsgHandling              //(in)  message handling parameter
-                                         //      TRUE:  display error message
-                                         //      FALSE: display no error message
-)
-{
-  htm; szMemPath; pstPutIn; ulUpdKey; usUpdTarget; usFlags; usMsgHandling;
 
-//	return theMemory->CPP_TmUpdSegW(  htm,  szMemPath,  pstPutIn,  ulUpdKey,  usUpdTarget,  usFlags,  usMsgHandling);
-    return( 1 );
-
-}
 
 
 

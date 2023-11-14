@@ -337,29 +337,15 @@ USHORT EqfMemory::TmtXReplace
     // try to delete the segment from the memory
 
     PTMX_PUT_OUT_W pstDelOut = NULL;
-    PTMX_PUT_IN_W  pstDelIn = NULL;
-    int iLen = sizeof (TMX_PUT_IN_W) + sizeof (TMX_PUT_OUT_W);
-    if ( UtlAlloc( (PVOID *)&pstDelIn, 0L, (LONG)iLen, NOMSG ) )
-    {
-      pstDelOut = (PTMX_PUT_OUT_W)(pstDelIn+1);
-    } /* endif */
+    UtlAlloc( (PVOID *)&pstDelOut, 0L, sizeof (TMX_PUT_OUT_W), NOMSG );
 
-    if ( pstDelIn )
+    if ( pstDelOut )
     {
-      UTF16strcpy( pstDelIn->stTmPut.szSource, pTmPutIn->stTmPut.szSource );
-      UTF16strcpy(pstDelIn->stTmPut.szTarget, pTmPutIn->stTmPut.szTarget );
-      strcpy(pstDelIn->stTmPut.szSourceLanguage, pTmPutIn->stTmPut.szSourceLanguage );
-      strcpy(pstDelIn->stTmPut.szTargetLanguage, pTmPutIn->stTmPut.szTargetLanguage );
-      pstDelIn->stTmPut.usTranslationFlag = pTmPutIn->stTmPut.usTranslationFlag;
-      strcpy(pstDelIn->stTmPut.szFileName, pTmPutIn->stTmPut.szFileName );
-      strcpy(pstDelIn->stTmPut.szLongName, pTmPutIn->stTmPut.szLongName );
-      pstDelIn->stTmPut.ulSourceSegmentId = pTmPutIn->stTmPut.ulSourceSegmentId;
-      strcpy(pstDelIn->stTmPut.szTagTable, pTmPutIn->stTmPut.szTagTable );
 //       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
 
-      TmtXDelSegm( this, pstDelIn, pstDelOut );
+      TmtXDelSegm( pTmPutIn, pstDelOut );
 
-      UtlAlloc( (PVOID *)&pstDelIn, 0L, 0L, NOMSG );
+      UtlAlloc( (PVOID *)&pstDelOut, 0L, 0L, NOMSG );
     } /* endif */
   } /* endif */
 
@@ -1770,6 +1756,146 @@ USHORT DetermineTmRecord
 //------------------------------------------------------------------------------
 
 USHORT EqfMemory::UpdateTmRecord
+(
+  PTMX_PUT_W    pTmPut,                //pointer to get in data
+  PTMX_SENTENCE pSentence              //ptr to sentence structure
+)
+{
+  BOOL   fOK;                          //success indicator
+  BOOL   fStop = FALSE;                //indication to leave while loop
+  PULONG pulSids = NULL;               //ptr to sentence ids
+  PULONG pulSidStart = NULL;           //ptr to sentence ids
+  USHORT usRc = NO_ERROR;              //return code
+  ULONG  ulLen;                        //length indicator
+  ULONG ulKey;                         //tm record key
+  PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
+  ULONG       ulRecBufSize = 0L;       // current size of record buffer
+
+  //allocate 32K for tm record
+  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
+  if ( fOK )
+  {
+    ulRecBufSize = TMX_REC_SIZE;
+  } /* endif */
+
+  //allocate for sentence ids
+  if ( fOK )
+  {
+    fOK = UtlAlloc( (PVOID *) &(pulSids), 0L,
+                    (LONG)((MAX_INDEX_LEN + 5) * sizeof(ULONG)),
+                    NOMSG );
+  } /* endif */
+
+  if ( !fOK )
+  {
+    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+  }
+  else
+  {
+    pulSidStart = pulSids;
+    usRc = DetermineTmRecord( this, pSentence, pulSids );
+    if ( usRc == NO_ERROR )
+    {
+      //get tm record(s)
+      while ( (*pulSids) && (usRc == NO_ERROR) && !fStop )
+      {
+        ulKey = *pulSids;
+        ulLen = TMX_REC_SIZE;
+        memset( pTmRecord, 0, ulLen );
+        usRc =  TmBtree.EQFNTMGet(
+                          ulKey,  //tm record key
+                          (PCHAR)pTmRecord,   //pointer to tm record data
+                          &ulLen );    //length
+        if ( usRc == BTREE_BUFFER_SMALL)
+        {
+          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+          if ( fOK )
+          {
+            ulRecBufSize = ulLen;
+            memset( pTmRecord, 0, ulLen );
+
+            usRc =  TmBtree.EQFNTMGet(
+                              ulKey,  //tm record key
+                              (PCHAR)pTmRecord,   //pointer to tm record data
+                              &ulLen );    //length
+          }
+          else
+          {
+            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          } /* endif */
+        } /* endif */
+
+        if ( usRc == NO_ERROR )
+        {
+          //compare tm record data with data passed in the get in structure
+          usRc = ComparePutData( this, &pTmRecord, &ulRecBufSize,
+                                 pTmPut, pSentence, &ulKey );
+
+          if ( usRc == SOURCE_STRING_ERROR )
+          {
+            //get next tm record
+            pulSids++;
+            LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
+          }
+          else if ( usRc == NO_ERROR )
+          {
+            //new target record was added or an existing one was successfully
+            //replaced so don't try other sids
+            fStop = TRUE;
+          } /* endif */
+        } /* endif */
+      } /* endwhile */
+
+      if ( !(*pulSids) && !fStop )
+      {
+        //issue message that tm needs to be organized if pulsid is empty and
+        //no get was successful
+        LOG_AND_SET_RC(usRc, T5INFO, ERROR_ADD_TO_TM);
+      } /* endif */
+    }  /* endif */
+  } /* endif */
+
+  //release memory
+  UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
+  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
+
+  return( usRc );
+}
+
+//------------------------------------------------------------------------------
+// External function                                                            
+//------------------------------------------------------------------------------
+// Function name:     UpdateTmRecord                                            
+//------------------------------------------------------------------------------
+// Description:       This function either adds a new target, sets the          
+//                    multiple flag to true or replaces an existing target      
+//                    record                                                    
+//+---------------------------------------------------------------------------- 
+// Function call:     UpdateTmRecord( EqfMemory* pTmClb,                          
+//                                    PTMX_PUT pTmPut,                          
+//                                    PTMX_SENTENCE pSentence                   
+//------------------------------------------------------------------------------
+// Input parameter: EqfMemory*                                                    
+//                  PTMX_PUT                                                    
+//                  PTMX_SENTENCE                                               
+//------------------------------------------------------------------------------
+// Output parameter:                                                            
+//------------------------------------------------------------------------------
+// Returncode type: USHORT                                                      
+//------------------------------------------------------------------------------
+// Returncodes:                                                                 
+//                                                                              
+//------------------------------------------------------------------------------
+// Function flow:                                                               
+//   determine all valid sentence keys for source string                        
+//     for all returned sentence keys                                           
+//       get tm record                                                          
+//       call function with put criteria                                        
+//       if record putted stop processing                                       
+//       else try next sentence key                                             
+//------------------------------------------------------------------------------
+
+USHORT EqfMemory::UpdateTmRecordByInternalKey
 (
   PTMX_PUT_W    pTmPut,                //pointer to get in data
   PTMX_SENTENCE pSentence              //ptr to sentence structure
