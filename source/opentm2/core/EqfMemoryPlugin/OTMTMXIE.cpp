@@ -1263,6 +1263,12 @@ USHORT CTMXExportImport::WriteSegment
   m_xw.WriteInt( pSegment->lSegNum );
   m_xw.WriteEndElement(); // prop
 
+  // add segment number as property
+  m_xw.WriteStartElement( "prop" );
+  m_xw.WriteAttributeString( "type", "t5:InternalKey" );
+  m_xw.WriteString( pSegment->szInternalKey );
+  m_xw.WriteEndElement(); // prop
+
   // add original tmgr markup as property
   m_xw.WriteStartElement( "prop" );
   m_xw.WriteAttributeString( "type", MARKUP_PROP );

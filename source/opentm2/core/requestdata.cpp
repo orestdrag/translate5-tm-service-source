@@ -1941,6 +1941,8 @@ int DeleteEntryRequestData::parseJSON(){
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
+  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
@@ -1954,6 +1956,9 @@ int DeleteEntryRequestData::parseJSON(){
 }
 
 int DeleteEntryRequestData::checkData(){
+  if(Data.recordKey && Data.targetKey){
+    return 0;
+  }
   if ( Data.szSource[0] == 0 )
   {
     buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source text" );
@@ -1987,14 +1992,8 @@ int DeleteEntryRequestData::checkData(){
 }
 
 int DeleteEntryRequestData::execute(){
-
   auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
   // prepare the proposal data
-  EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
-  EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
-  Data.eType = getMemProposalType( Data.szType );
-  strcpy( Data.szTargetAuthor, Data.szAuthor );
-  LONG lTime = 0;
   if ( Data.szDateTime[0] != 0 )
   {
     // use provided time stamp
@@ -2012,19 +2011,18 @@ int DeleteEntryRequestData::execute(){
   }
 
   std::string errorStr;
-  errorStr.reserve(1000);
+  //errorStr.reserve(1000);
   // update the memory delete entry
-
-  if ( mem == NULL )
-  {
-    return( INVALIDFILEHANDLE_RC );
-  } /* endif */
-
+  
   TMX_PUT_OUT_W TmPutOut;
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
   if(Data.recordKey && Data.targetKey){
     _rc_ = mem->TmtXDelSegmByKey(Data, &TmPutOut);
   }else{
+    EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
+    EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
+    Data.eType = getMemProposalType( Data.szType );
+    strcpy( Data.szTargetAuthor, Data.szAuthor );
     TMX_PUT_IN_W TmPutIn;
     memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
     _rc_ = mem->OtmProposalToPutIn( Data, &TmPutIn );

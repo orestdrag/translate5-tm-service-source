@@ -1319,6 +1319,8 @@ typedef struct _MEMEXPIMPSEG
   CHAR             szReason[200];                // reason for invalid segment
   WCHAR            szContext[SEGDATABUFLEN+1];    // buffer for segment context
   WCHAR            szAddInfo[SEGDATABUFLEN+1];    // buffer for additional information of segment 
+
+ char szInternalKey[SEGDATABUFLEN];
 } MEMEXPIMPSEG, *PMEMEXPIMPSEG;
 
 
@@ -1374,6 +1376,7 @@ typedef struct _MEM_EXPORT_IDA
  CHAR_W       szSegmentBuffer2[MAX_SEGMENT_SIZE]; // Buffer for preprocessed segment data
  int          iComplete;                  // completion rate
  CHAR         szPlugin[MAX_LONGFILESPEC]; // name of memory plugin handling the current memory database
+
  int invalidXmlSegments=0;
 }
 MEM_EXPORT_IDA, * PMEM_EXPORT_IDA;
