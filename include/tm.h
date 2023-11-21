@@ -1795,6 +1795,15 @@ USHORT FindTargetByKeyAndDelete(
     PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
   );
 
+  // TM segment update prototypes
+  USHORT TmtXUpdSeg
+  (
+    SearchProposal* pTmPutIn,    // ptr to put input data
+    PTMX_PUT_OUT_W pTmPutOut,   //ptr to output struct
+    USHORT      usFlags      // flags controlling the updated fields
+  );
+
+
 /*! \brief Get the next proposal from the memory 
     \param lHandle the hande returned by GetFirstProposal
     \param Proposal reference to a OtmProposal object which will be filled with the proposal data
@@ -3799,15 +3808,6 @@ USHORT FillExtStructure( EqfMemory*, PTMX_TARGET_RECORD,
                          PTMX_TARGET_CLB,
                          PSZ_W, PLONG, PTMX_EXT_W );
 
-// TM segment update prototypes
-USHORT TmtXUpdSeg
-(
-  EqfMemory*    pTmClb,      // ptr to ctl block struct
-  PTMX_PUT_IN pTmPutIn,    // ptr to put input data
-  ULONG       ulUpdKey,    // SID of record being updated
-  USHORT      usUpdTarget, // number of target being updated
-  USHORT      usFlags      // flags controlling the updated fields
-);
 
 //tm delete segment prototypes
 USHORT TmtXDelSegm( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );

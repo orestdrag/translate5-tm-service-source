@@ -2653,12 +2653,10 @@ VOID FillTargetRecord
 //                    USHORT      usUpdTarget  number of target being updated   
 //                    USHORT      usFlags      flags controlling the update     
 //------------------------------------------------------------------------------
-USHORT TmtXUpdSeg
+USHORT EqfMemory::TmtXUpdSeg
 (
-  EqfMemory*    pTmClb,      // ptr to ctl block struct
-  PTMX_PUT_IN pTmPutIn,    // ptr to put input data
-  ULONG       ulUpdKey,    // SID of record being updated
-  USHORT      usUpdTarget, // number of target being updated
+  SearchProposal* pTmPutIn,    // ptr to put input data
+  PTMX_PUT_OUT_W pTmPutOut,   //ptr to output struct
   USHORT      usFlags      // flags controlling the updated fields
 )
 {
@@ -2691,7 +2689,7 @@ USHORT TmtXUpdSeg
     LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
 
     ulLen = TMX_REC_SIZE;
-    usRc =  pTmClb->TmBtree.EQFNTMGet( ulUpdKey, (PCHAR)pTmRecord,
+    usRc =  TmBtree.EQFNTMGet( pTmPutIn->recordKey, (PCHAR)pTmRecord,
                       &ulLen );
 
     if ( usRc == BTREE_BUFFER_SMALL)
@@ -2702,8 +2700,8 @@ USHORT TmtXUpdSeg
         ulRecBufSize = ulLen;
         memset( pTmRecord, 0, ulLen );
 
-        usRc =  pTmClb->TmBtree.EQFNTMGet(
-                          ulUpdKey,  //tm record key
+        usRc =  TmBtree.EQFNTMGet(
+                          pTmPutIn->recordKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
       }
@@ -2736,7 +2734,7 @@ USHORT TmtXUpdSeg
           usTarget = 1;           //initialize counter
 
           //loop until correct target is found
-          while ( (usTarget < usUpdTarget) && ulLeftTgtLen )
+          while ( (usTarget < pTmPutIn->targetKey) && ulLeftTgtLen )
           {
             // position to first target CLB
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2746,7 +2744,7 @@ USHORT TmtXUpdSeg
             ulLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
 
             // loop over all target CLBs
-            while ( (usTarget < usUpdTarget) && ulLeftClbLen )
+            while ( (usTarget < pTmPutIn->targetKey) && ulLeftClbLen )
             {
               usTarget++;
               pTargetClb = NEXTTARGETCLB(pTargetClb);
@@ -2754,7 +2752,7 @@ USHORT TmtXUpdSeg
             } /* endwhile */
 
             // continue with next target if no match yet
-            if ( usTarget < usUpdTarget )
+            if ( usTarget < pTmPutIn->targetKey )
             {
               // position at next target
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2774,7 +2772,7 @@ USHORT TmtXUpdSeg
             } /* endif */
           } /* endwhile */
 
-          if ( usTarget == usUpdTarget )
+          if ( usTarget == pTmPutIn->targetKey )
           {
             //position at start of target record
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2785,15 +2783,15 @@ USHORT TmtXUpdSeg
               // update requested fields
 
               // change markup/tag table if requested
-              if ( (usFlags & TMUPDSEG_MARKUP) &&
-                   (pTmPutIn->stTmPut.szTagTable[0] != EOS) )
+              if ( //(usFlags & TMUPDSEG_MARKUP) &&
+                   (pTmPutIn->szMarkup[0] != EOS) )
               {
                 PTMX_TAGTABLE_RECORD pTMXTagTableRecord;
                 USHORT usNewId;
                 PBYTE pByte;
 
                 // get ID for new tag table
-                usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable,
+                usRc = NTMGetIDFromName( this, pTmPutIn->szMarkup,
                                          NULL,
                                          (USHORT)TAGTABLE_KEY,
                                          &usNewId );
@@ -2812,36 +2810,39 @@ USHORT TmtXUpdSeg
               } /* endif */
 
               // update MT flag if requested
-              if ( (usRc == NO_ERROR) &&
-                   (usFlags & TMUPDSEG_MTFLAG) )
+              if ( (usRc == NO_ERROR) 
+                // && (usFlags & TMUPDSEG_MTFLAG) 
+                )
               {
                 // set type of translation flag
-                pTargetClb->bTranslationFlag = (BYTE)pTmPutIn->stTmPut.usTranslationFlag;
+                pTargetClb->bTranslationFlag = (BYTE)pTmPutIn->eType;
               } /* endif */
 
               // update target language if requested
-              if ( (usRc == NO_ERROR) &&
-                   (usFlags & TMUPDSEG_TARGLANG) )
+              if ( (usRc == NO_ERROR) 
+                  // && (usFlags & TMUPDSEG_TARGLANG) 
+                )
               {
                 // set target language
-                usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTargetLanguage,
+                usRc = NTMGetIDFromName( this, pTmPutIn->szTargetLanguage,
                                          NULL,
                                          (USHORT)LANG_KEY,
                                          &pTargetClb->usLangId );
               } /* endif */
 
               // update segment date if requested
-              if ( (usRc == NO_ERROR) &&
-                   (usFlags & TMUPDSEG_DATE) )
+              if ( (usRc == NO_ERROR) 
+                  // && (usFlags & TMUPDSEG_DATE) 
+                )
               {
-                pTargetClb->lTime = pTmPutIn->stTmPut.lTime;
+                pTargetClb->lTime = pTmPutIn->lTargetTime;
               } /* endif */
 
 
               // rewrite TM record
               if ( usRc == NO_ERROR )
               {
-                usRc = pTmClb->TmBtree.EQFNTMUpdate( ulUpdKey,
+                usRc = TmBtree.EQFNTMUpdate( pTmPutIn->recordKey,
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
             }
@@ -2869,7 +2870,7 @@ USHORT TmtXUpdSeg
   // unlock TM database if database has been locked
   if ( fLocked )
   {
-    NTMLockTM( pTmClb, FALSE, &fLocked );
+    NTMLockTM( this, FALSE, &fLocked );
   } /* endif */
 
   //release allocated memory

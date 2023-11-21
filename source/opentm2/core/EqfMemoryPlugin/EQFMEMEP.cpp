@@ -910,6 +910,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
+         pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W)); 
         
         auto ll = T5Logger::GetInstance()->suppressLogging(); 
         bool fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource);
