@@ -1050,24 +1050,9 @@ USHORT ExactTest
 
     //copy source string for later compare function
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
-
+    std::wstring normalizedTmStr = ReplaceNPTagsWithHashesAndNormalizeString(pString);
     //compare source strings
-    {    
-      if ( pGetIn->ulParm & GET_RESPECTCRLF )
-      {  // if LF different, strings are NOT EQUAL in this case!!
-        //fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
-        fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputString, 0) == 0L;
-        if(!fStringEqual)
-          fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
-      }
-      else
-      {
-        //fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
-        fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString, 0) == 0L;
-        if(!fStringEqual)
-          fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
-      } /* endif */
-    }
+    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr.c_str(), pSentence->pNormString, 0) == 0L;
 
     if ( fStringEqual )
     {
@@ -1209,9 +1194,9 @@ USHORT ExactTest
 //              usLenTmp = (USHORT)(RECLEN(pTMXSourceRecord) -
 //                                  sizeof(TMX_SOURCE_RECORD));
               LONG lLenTmp = ulLen;       // len of pString in # of w's
-              fOK = AddTagsToStringW( pString,
-                                      &lLenTmp,     // in # of w's
-                                     pTMXSourceTagTable, pSentence->pPropString );
+              //fOK = AddTagsToStringW( pString,
+              //                        &lLenTmp,     // in # of w's
+              //                       pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
                 LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
@@ -1219,10 +1204,15 @@ USHORT ExactTest
               else
               {
                 fStringEqual = FALSE;
+                std::wstring genericTagsInput = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+                std::wstring genericTagsTmSeg = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pString);
                 fStringEqual = (UtlCompIgnWhiteSpaceW(
-                                              pSentence->pPropString,
+                                              (PSZ_W)genericTagsTmSeg.c_str(), 
+                                              //pString,
+                                              //pSentence->pPropString,
                                               //pSentence->pInputStringWNormalizedTags,
-                                              pSentence->pInputString,
+                                              (PSZ_W)genericTagsInput.c_str(),
+                                              //pSentence->pInputString,
                                               0 ) == 0 );
               } /* endif */
             } /* endif */
@@ -1607,14 +1597,6 @@ USHORT ExactTest
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
   if ( pContextBuffer ) UtlAlloc( (PVOID *)&pContextBuffer, 0L, 0L, NOMSG );
-
-
-
-  if ( usRc )
-  {
-    ERREVENT2( EXACTTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
-
 
   return( usRc );
 }
