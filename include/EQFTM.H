@@ -1308,9 +1308,9 @@ typedef struct _TMX_MATCHENTRY
 
 typedef struct _TMX_SENTENCE
 {
-  PSZ_W pInputString;
-  PSZ_W pNormString;
-  PSZ_W pInputStringWithNPTagHashes;
+  PSZ_W pInputString; // original string with generic(generated) tags
+  PSZ_W pNormString; // string without tags
+  PSZ_W pInputStringWithNPTagHashes; // string with 
   //PSZ_W pInputStringWNormalizedTags;
   PSZ_W pNormStringStart;
   USHORT  usNormLen;

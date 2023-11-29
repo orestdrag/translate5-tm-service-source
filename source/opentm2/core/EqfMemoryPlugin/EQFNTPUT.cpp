@@ -261,14 +261,17 @@ USHORT TmtXReplace
     //remember start of norm string
     pSentence->pNormStringStart = pSentence->pNormString;
 
-    wcsncpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1);
-    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
-    wcsncpy( pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE-1);
+    
+    auto generatedStrings = StringTagVariants(pTmPutIn->stTmPut.szSource);
+    wcsncpy( pSentence->pInputString, generatedStrings.getGenericTagsString().c_str(), MAX_SEGMENT_SIZE-1);
+    wcsncpy( pSentence->pInputStringWithNPTagHashes, generatedStrings.getNpReplacedStr().c_str(), MAX_SEGMENT_SIZE-1);
+    wcsncpy( pSentence->pNormString, generatedStrings.getNormStr().c_str(), MAX_SEGMENT_SIZE -1);
 
     //tokenize source segment, resulting in norm. string and tag table record
     usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage,
                            (USHORT)pTmClb->stTmSign.bMajorVersion, 1, 0  );
+                           
     
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );

@@ -405,6 +405,7 @@ class TagReplacer{
   std::wstring PrintTag(TagInfo& tag);
   void reset();
   void static LogTag(TagInfo& tag);
+  std::wstring PrintReplaceTagWithKey(TagInfo& tag);
 
   TagReplacer(){
     sourceTagList.reserve(50);
@@ -425,7 +426,11 @@ void TagReplacer::reset(){
   requestTagList.clear();
 }
 
-
+std::wstring TagReplacer::PrintReplaceTagWithKey(TagInfo& tag){  
+  std::wstring rAttrValue = EncodingHelper::convertToUTF16(tag.t5n_key);
+  std::replace(rAttrValue.begin(), rAttrValue.end(), '=', '_');
+  return rAttrValue;
+}
 
 std::wstring TagReplacer::PrintTag(TagInfo& tag){
   std::string res = "<" ;
@@ -435,25 +440,15 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
   ELEMENTID tagType = tag.generated_tagType;
   if(fReplaceNumberProtectionTagsWithHashes){
     if(tagType == T5_N_ELEMENT){
-      std::wstring rAttrValue = EncodingHelper::convertToUTF16(tag.t5n_key);
-      std::replace(rAttrValue.begin(), rAttrValue.end(), '=', '_');
-      return rAttrValue;
+      return PrintReplaceTagWithKey(tag);
     }
     else if(fSkipTags){// skip other tags
-      //std::string outStr = "<" + TmxIDToName[tag.original_tagType];
-      //if(tag.original_x>0){
-      //  outStr += " x=\"" + tag.original_x + "\"";
-      //}
-      //if(tag.original_i>0){
-      //  outStr += " i=\"" + tag.original_i + "\"";
-      //}
-      //return EncodingHelper::convertToUTF16(outStr);
       return L"";
-    }//*/
+      }
   }
 
   if(tagType == T5_N_ELEMENT){
-    std::string outputStr = "<" + TmxIDToName[T5_N_ELEMENT] + " id=\"" + std::to_string(tag.original_x) + "\" r=\"" + tag.t5n_key + "\" n=\"" + tag.t5n_value + "\"/>";
+    std::string outputStr = "<" + TmxIDToName[tag.original_tagType] + " id=\"" + std::to_string(tag.original_x) + "\" r=\"" + tag.t5n_key + "\" n=\"" + tag.t5n_value + "\"/>";
     return EncodingHelper::convertToUTF16(outputStr);
   }
 
@@ -843,6 +838,9 @@ public:
   BOOL ErrorOccured( void );
   void GetErrorText( char *pszTextBuffer, int iBufSize );
   std::wstring GetParsedData() const;
+  std::wstring GetParsedDataWithReplacedNpTags()const;
+  std::wstring GetParsedNormalizedData()const;
+
   bool fReplaceWithTagsWithoutAttributes;
   size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }
 
@@ -868,6 +866,7 @@ public:
   
   TagReplacer tagReplacer;
   BOOL fInitialized = false;
+  BOOL fCreateNormalizedStr = false;
 
   USHORT insertSegUsRC{0};
 
@@ -916,6 +915,8 @@ private:
   typedef struct _BUFFERAREAS
   {
     CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
+    CHAR_W   szReplacedNpData[DATABUFFERSIZE];
+    CHAR_W   szNormalizedData[DATABUFFERSIZE];
     CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
@@ -2066,6 +2067,91 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
 }
 
 
+StringTagVariants::StringTagVariants(std::wstring&& w_str){
+   // parse and save request
+  SAXParser parser;
+  original = w_str;
+  // create an instance of our handler
+  TMXParseHandler handler;
+  
+  handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
+  //handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
+  handler.fCreateNormalizedStr = true;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser.setDocumentHandler(&handler);
+  parser.setErrorHandler(&handler);
+  parser.setValidationSchemaFullChecking( false );
+  parser.setDoSchema( false );
+  parser.setLoadExternalDTD( false );
+  parser.setValidationScheme( SAXParser::Val_Never );
+  parser.setExitOnFirstFatalError( false );
+
+  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
+  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
+  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+                                      "req_buff (in memory)");
+  parser.parse(req_buff);
+  if(parser.getErrorCount()){
+    char buff[512];
+    handler.GetErrorText(buff, sizeof(buff));
+    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+  }else{
+    fSuccess = true;
+    genericTags = handler.GetParsedData();
+    norm = handler.GetParsedNormalizedData();
+    npReplaced = handler.GetParsedDataWithReplacedNpTags();
+  }  
+}
+
+/*
+std::vector<std::wstring> GenerateGenericAndNormalizedStrings(std::wstring&& w_str){
+
+  // parse and save request
+  SAXParser *parser = new SAXParser();
+  // create an instance of our handler
+  TMXParseHandler handler;
+  
+  handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
+  //handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
+  handler.fCreateNormalizedStr = true;
+  XMLPScanToken saxToken;
+
+  //  install our SAX handler as the document and error handler.
+  parser->setDocumentHandler(&handler);
+  parser->setErrorHandler(&handler);
+  parser->setValidationSchemaFullChecking( false );
+  parser->setDoSchema( false );
+  parser->setLoadExternalDTD( false );
+  parser->setValidationScheme( SAXParser::Val_Never );
+  parser->setExitOnFirstFatalError( false );
+
+  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
+  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
+  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+                                      "req_buff (in memory)");
+  std::wstring norm, npRepl, generic;
+  parser->parse(req_buff);
+  if(parser->getErrorCount()){
+    char buff[512];
+    handler.GetErrorText(buff, sizeof(buff));
+    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+  }else{
+    generic = handler.GetParsedData();
+    norm = handler.GetParsedNormalizedData();
+    npRepl = handler.GetParsedDataWithReplacedNpTags();
+  }
+  std::vector<std::wstring> output;
+  output.push_back(generic);
+  output.push_back(npRepl);
+  output.push_back(norm);
+  delete parser;
+  return output;
+}
+
 std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str){
 
   // parse and save request
@@ -2091,16 +2177,18 @@ std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str)
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
   xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
                                       "req_buff (in memory)");
-
+  std::wstring norm, npRepl;
   parser->parse(req_buff);
   if(parser->getErrorCount()){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
   }
+
   delete parser;
   return handler.GetParsedData();
 }
+
 
 std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str){
 
@@ -2138,6 +2226,7 @@ std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str){
   delete parser;
   return handler.GetParsedData();
 }
+//*/
 
 std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg){ 
   USHORT usRc = 0; 
@@ -2239,6 +2328,7 @@ std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstrin
 
   return res;
 }
+
 std::wstring TMXParseHandler::GetParsedData() const
 {
   if (pBuf == nullptr || pBuf->szData == nullptr)
@@ -2246,6 +2336,26 @@ std::wstring TMXParseHandler::GetParsedData() const
     return L"";
   }
   return pBuf->szData;
+}
+
+
+std::wstring TMXParseHandler::GetParsedNormalizedData() const
+{
+  if (pBuf == nullptr || pBuf->szNormalizedData == nullptr)
+  {
+    return L"";
+  }
+  return pBuf->szNormalizedData;
+}
+
+
+std::wstring TMXParseHandler::GetParsedDataWithReplacedNpTags()const
+{
+  if (pBuf == nullptr || pBuf->szReplacedNpData == nullptr)
+  {
+    return L"";
+  }
+  return pBuf->szReplacedNpData;
 }
 
 void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attributes)
@@ -2557,6 +2667,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         CurElement.fInlineTagging = FALSE;
         CurElement.fInsideTagging = FALSE;
         pBuf->szData[0] = 0; // reset data buffer
+        pBuf->szNormalizedData[0] = 0;
+        pBuf->szReplacedNpData[0] = 0;
 
         //reset enclosing tags flags
         pBuf->fSegmentStartsWithBPTTag = 0;
@@ -2584,6 +2696,13 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         }else{      
           auto tag = tagReplacer.GenerateReplacingTag(CurElement.ID , &attributes); 
           std::wstring replacingTag = tagReplacer.PrintTag(tag);
+          
+          if(fCreateNormalizedStr && tag.original_tagType == T5_N_ELEMENT){
+            std::wstring NpTagFiller = tagReplacer.PrintReplaceTagWithKey(tag);
+            wcscat(pBuf->szReplacedNpData, NpTagFiller.c_str());
+            wcscat(pBuf->szNormalizedData, NpTagFiller.c_str());
+          }
+
           if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
             if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
               T5LOG( T5DEBUG) << ":: parsed standalone tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
@@ -2611,6 +2730,9 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             T5LOG( T5DEBUG) << ":: parsed bpt tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
           }
           wcscat(pBuf->szData, replacingTag.c_str());
+          if(fCreateNormalizedStr){
+            wcscat(pBuf->szReplacedNpData, replacingTag.c_str());
+          }
         }
         break;
       }
@@ -2628,7 +2750,11 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){           
             T5LOG( T5DEBUG) << ":: parsed \'" << pszName << "\' tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacedTag);
           }
-          wcscat(pBuf->szData, replacedTag.c_str());            
+          wcscat(pBuf->szData, replacedTag.c_str());  
+          if(fCreateNormalizedStr){
+            wcscat(pBuf->szReplacedNpData, replacedTag.c_str());
+          }    
+
         }else{
           T5LOG( T5WARNING) << ":: buffer size overflow for " << EncodingHelper::convertToUTF8(replacedTag);
         }
@@ -2648,6 +2774,9 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             T5LOG( T5DEBUG) << ":: parsed pair tag \'<" << sName  << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
           }
           wcscat(pBuf->szData, replacingTag.c_str());
+          if(fCreateNormalizedStr){
+            wcscat(pBuf->szReplacedNpData, replacingTag.c_str());
+          }
         }else{
           T5LOG( T5WARNING) << ":: buffer size overflow for " << EncodingHelper::convertToUTF8(replacingTag);
         }
@@ -3147,13 +3276,15 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     case SUB_ELEMENT:
     case G_ELEMENT: 
     {        
-      auto tag = tagReplacer.GenerateReplacingTag(CurElement.ID, nullptr);
-      auto replactingTagStr = tagReplacer.PrintTag(tag);      
-
+      auto tag = tagReplacer.GenerateReplacingTag(CurElement.ID, nullptr);  
+      auto replacingTagStr = tagReplacer.PrintTag(tag); 
       int iCurLen = wcslen(pBuf->szData);
-      if((iCurLen + replactingTagStr.size()) < DATABUFFERSIZE){            
+      if((iCurLen + replacingTagStr.size()) < DATABUFFERSIZE){            
           T5LOG( T5DEBUG) << ":: parsed end pair tag \'</" << sName << ">\' , replaced with <ept i=\'" << "calculate i";
-          wcscat(pBuf->szData, replactingTagStr.c_str());    
+          wcscat(pBuf->szData, replacingTagStr.c_str());   
+          if(fCreateNormalizedStr){
+            wcscat(pBuf->szReplacedNpData, replacingTagStr.c_str());
+          } 
         }else{
           T5LOG(T5ERROR) << ":: parsed end of pair tag \'" << sName << "\' replacing failed because no space left in buffer";         
         }  
@@ -3356,7 +3487,11 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
     if ( (iCurLen + length + 1) < DATABUFFERSIZE)
     {
       // escape any special characters in inline tags
-      EscapeXMLChars( w_chars, pBuf->szData + iCurLen );      
+      EscapeXMLChars( w_chars, pBuf->szData + iCurLen );  
+      if(fCreateNormalizedStr){
+        wcscat(pBuf->szReplacedNpData, pBuf->szData + iCurLen);
+        wcscat(pBuf->szNormalizedData, pBuf->szData + iCurLen);
+      }    
     } /* endif */
     if ( CurElement.fInlineTagging ) 
         this->fInlineTags = TRUE;

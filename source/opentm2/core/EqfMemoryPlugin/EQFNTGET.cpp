@@ -362,9 +362,9 @@ USHORT TmtXGet
     pSentence->pNormStringStart = pSentence->pNormString;
     
     wcsncpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource, MAX_SEGMENT_SIZE-1);
-    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
+    auto inputStringWithReplacedTags = StringTagVariants(pSentence->pInputString);
     wcsncpy(pSentence->pInputStringWithNPTagHashes, 
-            inputStringWithReplacedTags.c_str(), std::min(inputStringWithReplacedTags.length(), (size_t) MAX_SEG_SIZE-1));
+            inputStringWithReplacedTags.getGenericTagsString().c_str(), std::min(inputStringWithReplacedTags.getGenericTagsString().length(), (size_t) MAX_SEG_SIZE-1));
     
     //tokenize source segment, resuting in normalized string and
     //tag table record
@@ -1050,9 +1050,9 @@ USHORT ExactTest
 
     //copy source string for later compare function
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
-    std::wstring normalizedTmStr = ReplaceNPTagsWithHashesAndNormalizeString(pString);
+    auto normalizedTmStr = StringTagVariants(pString);
     //compare source strings
-    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr.c_str(), pSentence->pNormString, 0) == 0L;
+    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr.getNormStr().c_str(), pSentence->pNormString, 0) == 0L;
 
     if ( fStringEqual )
     {
@@ -1204,14 +1204,14 @@ USHORT ExactTest
               else
               {
                 fStringEqual = FALSE;
-                std::wstring genericTagsInput = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
-                std::wstring genericTagsTmSeg = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pString);
+                auto genericTagsInput = StringTagVariants(pSentence->pInputString);
+                auto genericTagsTmSeg = StringTagVariants(pString);
                 fStringEqual = (UtlCompIgnWhiteSpaceW(
-                                              (PSZ_W)genericTagsTmSeg.c_str(), 
+                                              (PSZ_W)genericTagsTmSeg.getNpReplacedStr().c_str(), 
                                               //pString,
                                               //pSentence->pPropString,
                                               //pSentence->pInputStringWNormalizedTags,
-                                              (PSZ_W)genericTagsInput.c_str(),
+                                              (PSZ_W)genericTagsInput.getNpReplacedStr().c_str(),
                                               //pSentence->pInputString,
                                               0 ) == 0 );
               } /* endif */
@@ -1620,7 +1620,7 @@ USHORT ExactTest
       {
         *pszTarget++ = *pszSource;
       } /* endif */
-      pszSource++;
+      pszSource++;       
     } /*endwhile */
     *pszTarget = 0;
   }
@@ -2294,7 +2294,6 @@ USHORT FillMatchTable( PTMX_CLB pTmClb,         //ptr to ctl block struct
               }
             }
 
-
             //update match entry structure counter
             if ( *pusMatchEntries < MAX_MATCHES )
             {
@@ -2364,8 +2363,6 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
   //position at beginning of target record
   pByte = (PBYTE)pTMXTagTable;
   pByte += pTMXTagTable->usFirstTagEntry;
-
-
 
   fOK = (*plInStringLen < MAX_SEGMENT_SIZE );
 
@@ -2758,7 +2755,6 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
   BOOL   fStringEqual;                 // strings are equal ???
   BOOL   fNormStringEqual;             // normalized strings are equal ???
   BOOL   fRespectCRLFStringEqual = 0L;
-  std::wstring NormalizedPString;
 
   SHORT sLangID = MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
@@ -2804,8 +2800,8 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
-    NormalizedPString = ReplaceNPTagsWithHashesAndNormalizeString(pString);
-    wcsncpy(pNormalizedString, NormalizedPString.c_str(), NormalizedPString.length());
+    auto NormalizedPString = StringTagVariants(pString);
+    wcsncpy(pNormalizedString, NormalizedPString.getNormStr().c_str(), NormalizedPString.getNormStr().length());
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
@@ -3040,14 +3036,14 @@ USHORT FuzzyTest ( PTMX_CLB pTmClb,           //ptr to control block
               } /* endif */              
             } /* endif */
 
-            std::wstring NPNormString = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pPropString);
+            auto NPNormString = StringTagVariants(pSentence->pPropString);
 
             //TODO: remove punctuation here
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
                                         pSentence->pNormString,
                                         //pSentence->pInputStringWithNPTagHashes,
 //                                        pString,
-                                        (PSZ_W)NPNormString.c_str(),
+                                        (PSZ_W)NPNormString.getNormStr().c_str(),
                                         //pSentence->pPropString,
                                         //(wchar_t*)propNormString.c_str(),
                                         sLangID, &usFuzzy,

@@ -128,16 +128,15 @@ USHORT TmtXDelSegm
     pSentence->pNormStringStart = pSentence->pNormString;
 
     wcsncpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1 );
-    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
-    wcsncpy(pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEG_SIZE-1);
-    auto normalizedStringWithNPHashes = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pInputString);
+    auto generatedStrings = StringTagVariants(pSentence->pInputString);
+    wcsncpy(pSentence->pInputStringWithNPTagHashes, generatedStrings.getNpReplacedStr().c_str(), MAX_SEG_SIZE-1);
 
 
     //tokenize source segment, resuting in normalized string and tag table record
     usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
                            pTmDelIn->stTmPut.szSourceLanguage,
                            pTmClb->stTmSign.bMajorVersion, 1, 0  );
-    wcsncpy(pSentence->pNormString, normalizedStringWithNPHashes.c_str(), MAX_SEG_SIZE-1);
+    wcsncpy(pSentence->pNormString, generatedStrings.getNormStr().c_str(), MAX_SEG_SIZE-1);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     pSentence->pTagRecord->usTagTableId = 0;
