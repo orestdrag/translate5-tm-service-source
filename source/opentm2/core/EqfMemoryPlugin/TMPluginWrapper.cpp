@@ -541,7 +541,7 @@ USHORT TokenizeSourceEx2
   PSTARTSTOP pStartStop = NULL;        // ptr to start/stop table
   int        iIterations = 0;
   USHORT     usAddEntries = 0;
-  PSZ_W pStringToTokenize = pSentence->pStrings->getNpReplStrC();//getNormStrC();//getNpReplStrC()
+  PSZ_W pStringToTokenize = pSentence->pStrings->getNormStrC();//getNormStrC();//getNpReplStrC()
   /********************************************************************/
   /* normalize \r\n combinations in input string ..                   */
   /********************************************************************/
