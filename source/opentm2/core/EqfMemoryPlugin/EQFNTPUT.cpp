@@ -201,7 +201,7 @@ USHORT TmtXReplace
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  PTMX_SENTENCE  pSentence = NULL;     // ptr to sentence structure
+  TMX_SENTENCE  Sentence(pTmPutIn->stTmPut.szSource);     // ptr to sentence structure
   ULONG      ulNewKey = 0;             // sid of newly added tm record
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
@@ -210,40 +210,6 @@ USHORT TmtXReplace
   szString[0] = 0;
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
-
-  DEBUGEVENT2( TMTXREPLACE_LOC, FUNCENTRY_EVENT, 0, TM_GROUP, "" );
-
-  //allocate pSentence
-  fOK = UtlAlloc( (PVOID *) &(pSentence), 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
-
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L,
-                   (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
-
-  //allocate 4k for pTagRecord
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, (LONG)(TOK_SIZE*2), NOMSG);
-    if ( fOK )
-      pSentence->lTagAlloc = (LONG)(TOK_SIZE*2);
-  } /* endif */
-
-  //allocate 4k for pTermTokens
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, (LONG)TOK_SIZE, NOMSG );
-    if ( fOK )
-      pSentence->lTermAlloc = (LONG)TOK_SIZE;
-  } /* endif */
 
   if ( !fOK )
   {
@@ -259,16 +225,10 @@ USHORT TmtXReplace
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
-    pSentence->pNormStringStart = pSentence->pNormString;
-
-    
-    auto generatedStrings = StringTagVariants(pTmPutIn->stTmPut.szSource);
-    wcsncpy( pSentence->pInputString, generatedStrings.getGenericTagsString().c_str(), MAX_SEGMENT_SIZE-1);
-    wcsncpy( pSentence->pInputStringWithNPTagHashes, generatedStrings.getNpReplacedStr().c_str(), MAX_SEGMENT_SIZE-1);
-    wcsncpy( pSentence->pNormString, generatedStrings.getNormStr().c_str(), MAX_SEGMENT_SIZE -1);
+    //Sentence.pNormStringStart = Sentence.pStrings->getNormStrC();
 
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
+    usRc = TokenizeSourceEx2( pTmClb, &Sentence, szString,
                            pTmPutIn->stTmPut.szSourceLanguage,
                            (USHORT)pTmClb->stTmSign.bMajorVersion, 1, 0  );
                            
@@ -281,12 +241,12 @@ USHORT TmtXReplace
 
   if ( !usRc )
   {
-    pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
-    pSentence->pTagRecord->usTagTableId = 0;
+    //Sentence->pNormString = pSentence->pNormStringStart;
+    HashSentence( &Sentence, (USHORT)pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    Sentence.pTagRecord->usTagTableId = 0;
     if ( pTmClb )  /* 4-13-15 */
     {
-      usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+      usRc = NTMGetIDFromName( pTmClb, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
       if(usRc){
         T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
       }
@@ -296,20 +256,20 @@ USHORT TmtXReplace
 
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( pSentence, pTmClb );
-    if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
+    usMatchesFound = CheckCompactArea( &Sentence, pTmClb );
+    if ( usMatchesFound == Sentence.usActVote ) //all hash triples found
     {
       //update entry in tm database
-      usRc = UpdateTmRecord(pTmClb, &pTmPutIn->stTmPut, pSentence );
+      usRc = UpdateTmRecord(pTmClb, &pTmPutIn->stTmPut, &Sentence );
 
       //if no tm record fitted for update assume new and add to tm
       if ( usRc == ERROR_ADD_TO_TM )
       {
-        usRc = AddToTm( pSentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
+        usRc = AddToTm( &Sentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+          usRc = UpdateTmIndex( &Sentence, ulNewKey, pTmClb );
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
       } /* endif */
@@ -317,12 +277,12 @@ USHORT TmtXReplace
     else
     {
       //add new tm record to tm database
-      usRc = AddToTm( pSentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
+      usRc = AddToTm( &Sentence, pTmClb, &pTmPutIn->stTmPut, &ulNewKey );
 
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( pSentence, ulNewKey, pTmClb );
+        usRc = UpdateTmIndex( &Sentence, ulNewKey, pTmClb );
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
     } /* endif */
@@ -333,15 +293,6 @@ USHORT TmtXReplace
   {
     NTMLockTM( pTmClb, FALSE, &fLocked );
   } /* endif */
-
-  //release allocated memory
-  UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
 
   pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
   pTmPutOut->stPrefixOut.usTmtXRc = usRc;
@@ -440,7 +391,7 @@ VOID HashSentence
 
   while ( pTermTokens->usLength )
   {
-    pNormOffset = pSentence->pInputStringWithNPTagHashes + pTermTokens->usOffset;
+    pNormOffset = pSentence->pStrings->getNormStrC() + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength, usMajVersion, usMinVersion );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
@@ -467,7 +418,7 @@ VOID HashSentence
   } /* endif */
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
+    auto str = EncodingHelper::convertToUTF8(pSentence->pStrings->getOriginalStrC());
     T5LOG( T5DEBUG) <<"HashSentence:: inputString =\"" << str << "\"; count = " << usCount;
   }
   
@@ -1219,7 +1170,7 @@ VOID FillTmRecord
 //  memcpy( pTMXSourceRecord+1, pSentence->pNormString, pSentence->usNormLen *sizeof(CHAR_W));
 //@@@
   //ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
-  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pInputString, wcslen(pSentence->pInputString) );
+  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pStrings->getGenericTagStrC(), pSentence->pStrings->getGenericTagsString().length() );
   pTMXSourceRecord->usLangId = usSrcLangId;
   //size of source record
   RECLEN(pTMXSourceRecord) = sizeof( TMX_SOURCE_RECORD ) + ulSrcNormLen;
@@ -2110,7 +2061,7 @@ USHORT ComparePutData
       //copy and compare source string
       memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
       lLen = EQFCompress2Unicode( pString, pByte, lLen );
-      fStringEqual = ! UTF16strcmp( pString, pSentence->pNormString );
+      fStringEqual = ! UTF16strcmp( pString, pSentence->pStrings->getNormStrC() );
 
       if ( fStringEqual )
       {
@@ -3251,7 +3202,7 @@ USHORT TMLoopAndDelTargetClb
 
   static int call_n = 0;
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    T5LOG( T5INFO) << ":: call n = " << (++call_n) << "; Sentence = " << EncodingHelper::convertToUTF8(pSentence->pInputString);
+    T5LOG( T5INFO) << ":: call n = " << (++call_n) << "; Sentence = " << EncodingHelper::convertToUTF8(pSentence->pStrings->getOriginalStrC());
   }
   USHORT 				usRc = NO_ERROR;
   PTMX_TARGET_CLB    	pClb = NULL;    //ptr to target control block

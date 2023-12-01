@@ -58,7 +58,7 @@ USHORT TmtXDelSegm
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 )
 {
-  PTMX_SENTENCE pSentence = NULL;    // ptr to sentence structure
+  TMX_SENTENCE Sentence(pTmDelIn->stTmPut.szSource);    // ptr to sentence structure
   ULONG ulKey;                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
@@ -71,37 +71,7 @@ USHORT TmtXDelSegm
   ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
 
   //allocate pSentence
-  fOK = UtlAlloc( (PVOID *) &(pSentence), 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
-
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L,
-                   (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, (LONG)TOK_SIZE, NOMSG);
-    if ( fOK )
-      pSentence->lTagAlloc = (LONG)TOK_SIZE;
-  } /* endif */
-
-  //allocate 4k for pTermTokens
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, (LONG)TOK_SIZE, NOMSG );
-    if ( fOK )
-      pSentence->lTermAlloc = (LONG)TOK_SIZE;
-  } /* endif */
+  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
 
   if ( fOK )
   {
@@ -124,22 +94,17 @@ USHORT TmtXDelSegm
     strcat( szString, pTmDelIn->stTmPut.szTagTable );
     strcat( szString, EXT_OF_FORMAT );
 
-    //remember start of norm string
-    pSentence->pNormStringStart = pSentence->pNormString;
-
-    wcsncpy( pSentence->pInputString, pTmDelIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1 );
-    auto generatedStrings = StringTagVariants(pSentence->pInputString);
-    wcsncpy(pSentence->pInputStringWithNPTagHashes, generatedStrings.getNpReplacedStr().c_str(), MAX_SEG_SIZE-1);
+    //remember start of norm string - why?
+    //Sentence.pNormStringStart = Sentence.pStrings->getNormStrC();
 
 
     //tokenize source segment, resuting in normalized string and tag table record
-    usRc = TokenizeSourceEx2( pTmClb, pSentence, szString,
+    usRc = TokenizeSourceEx2( pTmClb, &Sentence, szString,
                            pTmDelIn->stTmPut.szSourceLanguage,
                            pTmClb->stTmSign.bMajorVersion, 1, 0  );
-    wcsncpy(pSentence->pNormString, generatedStrings.getNormStr().c_str(), MAX_SEG_SIZE-1);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
-    pSentence->pTagRecord->usTagTableId = 0;
+    Sentence.pTagRecord->usTagTableId = 0;
   }
 
 
@@ -147,18 +112,18 @@ USHORT TmtXDelSegm
   if ( !usRc )
   {
     //set pNormString to beginning of string
-    pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence, pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
+    //Sentence.pNormString = Sentence.pStrings->getNormStrC();
+    HashSentence( &Sentence, pTmClb->stTmSign.bMajorVersion, pTmClb->stTmSign.bMinorVersion );
   } /* endif */
 
 
   // update TM databse
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( pSentence, pTmClb );
-    if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
+    usMatchesFound = CheckCompactArea( &Sentence, pTmClb );
+    if ( usMatchesFound == Sentence.usActVote ) //all hash triples found
     {
-      usRc = DetermineTmRecord( pTmClb, pSentence, pulSids );
+      usRc = DetermineTmRecord( pTmClb, &Sentence, pulSids );
       if ( !usRc )
       {
         while ( *pulSids )
@@ -193,7 +158,7 @@ USHORT TmtXDelSegm
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
             usRc = FindTargetAndDelete( pTmClb, pTmRecord,
-                                &pTmDelIn->stTmPut, pSentence, &ulKey );
+                                &pTmDelIn->stTmPut, &Sentence, &ulKey );
             if ( usRc == SEG_NOT_FOUND )
             {
               //get next tm record
@@ -216,13 +181,6 @@ USHORT TmtXDelSegm
   } /* endif */
 
   //release memory
-  UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pNormString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
 
@@ -353,7 +311,7 @@ USHORT FindTargetAndDelete( PTMX_CLB    pTmClb,
 
     //compare source strings
     //if ( !UTF16strcmp( pString, pSentence->pNormString ) )
-    if ( !UTF16strcmp( pString, pSentence->pInputString ) )
+    if ( !UTF16strcmp( pString, pSentence->pStrings->getGenericTagStrC() ) )
     {
       ULONG   ulLeftTgtLen;            // remaining target length
       /****************************************************************/

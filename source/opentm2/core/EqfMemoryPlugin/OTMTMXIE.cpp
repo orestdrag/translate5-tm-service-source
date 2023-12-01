@@ -2069,6 +2069,11 @@ std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &
 
 StringTagVariants::StringTagVariants(std::wstring&& w_str){
    // parse and save request
+  norm.reserve(MAX_SEGMENT_SIZE);
+  original.reserve(MAX_SEGMENT_SIZE);
+  genericTags.reserve(MAX_SEGMENT_SIZE);
+  npReplaced.reserve(MAX_SEGMENT_SIZE);
+  
   SAXParser parser;
   original = w_str;
   // create an instance of our handler

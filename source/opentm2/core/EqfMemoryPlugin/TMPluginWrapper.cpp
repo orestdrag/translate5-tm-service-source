@@ -541,14 +541,13 @@ USHORT TokenizeSourceEx2
   PSTARTSTOP pStartStop = NULL;        // ptr to start/stop table
   int        iIterations = 0;
   USHORT     usAddEntries = 0;
-  PSZ_W  pszNormStringPos = pSentence->pNormString; // current pNpormString output pointer
-
+  PSZ_W pStringToTokenize = pSentence->pStrings->getNpReplStrC();//getNormStrC();//getNpReplStrC()
   /********************************************************************/
   /* normalize \r\n combinations in input string ..                   */
   /********************************************************************/
   {
-    PSZ_W  pSrc = pSentence->pInputStringWithNPTagHashes;
-    PSZ_W  pTgt = pSentence->pInputStringWithNPTagHashes;
+    PSZ_W  pSrc = pStringToTokenize;
+    PSZ_W  pTgt = pStringToTokenize;
     CHAR_W c;
 
     while ( (c = *pSrc++) != NULC )
@@ -637,7 +636,8 @@ USHORT TokenizeSourceEx2
     if ( !usRc )
     {
       // build protect start/stop table for tag recognition
-       usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
+       usRc = TACreateProtectTableWEx( pStringToTokenize,
+                                   pTable, 0,
                                    (PTOKENENTRY)pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
@@ -662,7 +662,8 @@ USHORT TokenizeSourceEx2
         // retry tokenization
         if (iIterations < 10 )
         {
-           usRc = TACreateProtectTableWEx( pSentence->pInputStringWithNPTagHashes, pTable, 0,
+           usRc = TACreateProtectTableWEx( pStringToTokenize,
+                                      pTable, 0,
                                       (PTOKENENTRY)pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
@@ -691,15 +692,15 @@ USHORT TokenizeSourceEx2
               ULONG     ulListSize = 0;    
               USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
 
-              CHAR_W chTemp = pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1]; // buffer for character values
-              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = EOS;
+              CHAR_W chTemp = pStringToTokenize[pEntry->usStop+1]; // buffer for character values
+              pStringToTokenize[pEntry->usStop+1] = EOS;
 
               usRc = NTMMorphTokenizeW( usLangId,
-                                       pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
+                                       pStringToTokenize + pEntry->usStart,
                                        &ulListSize, (PVOID *)&pTermList,
                                        MORPH_FLAG_OFFSLIST, usVersion );
 
-              pSentence->pInputStringWithNPTagHashes[pEntry->usStop+1] = chTemp;
+              pStringToTokenize[pEntry->usStop+1] = chTemp;
 
               if ( usRc == MORPH_OK )
               {
@@ -734,9 +735,6 @@ USHORT TokenizeSourceEx2
                         pTerm++;
                       } /* endwhile */
                   } /* endif */
-                  memcpy( pszNormStringPos, pSentence->pInputStringWithNPTagHashes + pEntry->usStart, usTokLen * sizeof(CHAR_W));
-                  pSentence->usNormLen =  pSentence->usNormLen + usTokLen;
-                  pszNormStringPos += usTokLen;
                 } /* endif */
               } /* endif */
               UtlAlloc( (PVOID *) &pTermList, 0L, 0L, NOMSG );
@@ -788,7 +786,7 @@ USHORT TokenizeSourceEx2
                   ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
                     (pEntry->usStop - pEntry->usStart + 1);
                   memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
-                          pSentence->pInputStringWithNPTagHashes + pEntry->usStart,
+                          pStringToTokenize + pEntry->usStart,
                           ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
                   pTagEntry += usTagEntryLen;
                 } /* endif */
@@ -807,7 +805,7 @@ USHORT TokenizeSourceEx2
       if ( pTermTokens == pSentence->pTermTokens )
       {
         pTermTokens->usOffset = 0;
-        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pSentence->pInputStringWithNPTagHashes );
+        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pStringToTokenize );
         pTermTokens->usHash = 0;
         pTermTokens++;
       } /* endif */

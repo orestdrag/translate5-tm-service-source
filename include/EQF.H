@@ -6747,27 +6747,7 @@ typedef struct _CALCREPORTBINDATA
 
 
 
-#include<string>
 
-class StringTagVariants{
-  std::wstring original; // full original str
-  std::wstring norm; // without any tags
-  std::wstring npReplaced; // with generic(generated) tags but np tags is replaced with their keys(r attr)
-  std::wstring genericTags; // generated tags so there could be only ph or bpt/ept with id and r attributes that would map input str to common tag format
-  bool fSuccess = false;
-public:
-  StringTagVariants(std::wstring&& wstr);
 
-  bool isParsed(){ return fSuccess; }
-  std::wstring& getNormStr(){ return norm; }
-  std::wstring& getNpReplacedStr(){ return npReplaced; }
-  std::wstring& getGenericTagsString() { return genericTags; }
-  std::wstring& getOriginalString(){ return original; }
-
-};
-
-//std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str);
-//std::vector<std::wstring> GenerateGenericAndNormalizedStrings(std::wstring&& w_str);
-//std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str);
 
 #endif // _EQF_H_INCLUDED_
