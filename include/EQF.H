@@ -6062,7 +6062,7 @@ typedef struct _CALCREPORTBINDATA
   char          szUnUsed[256];
 } CALCREPORTBINDATA, *PCALCREPORTBINDATA;
 
-#endif
+
 
 
 // These values are used to define the action to take when 
@@ -6085,6 +6085,7 @@ typedef struct _CALCREPORTBINDATA
 
 
 
-#include<string>
-std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str);
-std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str);
+
+
+
+#endif // _EQF_H_INCLUDED_

@@ -2054,68 +2054,8 @@ static ULONG ulLastSrcOemCP = 0;
 static ULONG ulLastTgtOemCP = 0;               
 
 
-// utility to allocate pSentence and associated memory areas
-USHORT NTMAllocSentenceStructure
-(
-  PTMX_SENTENCE  *ppSentence
-)
-{
-  USHORT usRc = 0;
-  BOOL fOK = TRUE;
-  PTMX_SENTENCE pSentence;
 
-  //allocate pSentence
-  //fOK = UtlAlloc( (PVOID *)ppSentence, 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
-  //pSentence = *ppSentence;
-  fOK = UtlAlloc( (PVOID*)&pSentence, 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
 
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  //if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWNormalizedTags), 0L, (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
-  if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pSentence->pTermTokens), 0L, (LONG)TOK_SIZE, NOMSG );
-
-  if ( fOK )
-  {
-    pSentence->lTermAlloc = (LONG)TOK_SIZE;
-    pSentence->lTagAlloc = (LONG)(2*TOK_SIZE);
-    pSentence->pNormStringStart = pSentence->pNormString;
-  } /* endif */
-
-  if ( !fOK )
-  {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
-  }else{
-      *ppSentence = pSentence;
-    }/* endif */
-
-  return( usRc );
-} /* end of funcion NTMAllocSentenceStructure */
-
-// utility to free pSentence and associated memory areas
-VOID NTMFreeSentenceStructure
-(
-  PTMX_SENTENCE  pSentence
-)
-{
-  //release memory
-  if ( pSentence )
-  {
-    UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
-    //UtlAlloc( (PVOID *) &pSentence->pNormStringWithNPTagHashes, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, 0L, NOMSG );
-    UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG ); 
-    UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
-  } /* endif */
-} /* end of funcion NTMFreeSentenceStructure */
 
 // free tag substitution data area
 void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp )

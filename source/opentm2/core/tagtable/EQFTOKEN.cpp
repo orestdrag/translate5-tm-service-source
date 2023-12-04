@@ -98,11 +98,22 @@
 #define MAX_ATTR_TOKENS 512
 
 //--- Function prototypes for internal C functions                                */
+//static BOOL Tagsearch (PSZ, ULONG, USHORT, BOOL, PTAG, CHAR *, TAGTABLE *, SHORT *);
+//static BOOL Attributesearch(PSZ, ULONG, PATTRIBUTE, CHAR * ,TAGTABLE *, SHORT *);
+//static BOOL Skipwhitespace(PSZ *, USHORT *);
+//static BOOL WildCardSearch (PSZ, PSZ );
+//static PSZ SkipToTextEnd( PSZ  );
+//static PSZ SkipTextString ( PSZ, USHORT * );
 #define MAX_CHINPUTW 40000
 static CHAR_W chInputW[ MAX_CHINPUTW ];
 
 #define TAG_END_CHAR       "."        // tag end character
 #define TAG_END_CHARW      L"."
+//PNODE  TAFastCreateNodeTree( PTBTAGENTRY pTags, ULONG ulNoOfTags );
+//PNODE  TAFastCreateTagTree( PLOADEDTABLE pLoadedTable, PTAGTABLE pTagTable );
+//PNODE  TAFastCreateAttrTree( PLOADEDTABLE pLoadedTable, PTAGTABLE pTagTable );
+//BOOL   TAFastAddNode ( PNODE *, PNODE, PULONG, PULONG );
+//int    TATastTagCompare( const void *, const void * );
 
 VOID TASetStartStopType(PSTARTSTOP pCurrent, USHORT usStart, USHORT usStop, USHORT usType );
 USHORT TAFindQuote ( PTOKENENTRY pTok, USHORT usStartSearch, PCHAR_W pchQuote );
@@ -2269,7 +2280,7 @@ USHORT TACreateProtectTableWEx
         LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     }
-    else  if ( false && pvUserExit )
+    else  if ( pvUserExit )
     {
       /****************************************************************/
       /* Let user exit create the start/stop table                    */
@@ -2283,7 +2294,7 @@ USHORT TACreateProtectTableWEx
     }
     else
     {
-      T5LOG( T5DEBUG) << "TEMPORARY_HARDCODED in TACreateProtectTableWEx if ( false &sa& pvUserExit )";
+      
       /******************************************************************/
       /* Create start/stop table using tokenizer                        */
       /******************************************************************/

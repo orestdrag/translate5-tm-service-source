@@ -1568,7 +1568,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
-    pLIDA->ulActiveSegment = pSegment->lSegNum;
+    pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
 

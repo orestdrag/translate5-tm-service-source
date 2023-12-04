@@ -189,7 +189,7 @@ USHORT EqfMemory::TmtXReplace
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  PTMX_SENTENCE  pSentence = NULL;     // ptr to sentence structure
+  TMX_SENTENCE  Sentence(pTmPutIn->stTmPut.szSource);     // ptr to sentence structure
   ULONG      ulNewKey = 0;             // sid of newly added tm record
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
@@ -198,39 +198,6 @@ USHORT EqfMemory::TmtXReplace
   szString[0] = 0;
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
-
-
-  //allocate pSentence
-  fOK = UtlAlloc( (PVOID *) &(pSentence), 0L, (LONG)sizeof( TMX_SENTENCE ), NOMSG );
-
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pInputStringWithNPTagHashes), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pNormString), 0L,
-                   (LONG)( MAX_SEGMENT_SIZE * sizeof(CHAR_W)), NOMSG );
-  if ( fOK )
-   fOK = UtlAlloc( (PVOID *) &(pSentence->pulVotes), 0L,
-                   (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
-
-  //allocate 4k for pTagRecord
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, (LONG)(TOK_SIZE*2), NOMSG);
-    if ( fOK )
-      pSentence->lTagAlloc = (LONG)(TOK_SIZE*2);
-  } /* endif */
-
-  //allocate 4k for pTermTokens
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, (LONG)TOK_SIZE, NOMSG );
-    if ( fOK )
-      pSentence->lTermAlloc = (LONG)TOK_SIZE;
-  } /* endif */
 
   if ( !fOK )
   {
@@ -246,15 +213,11 @@ USHORT EqfMemory::TmtXReplace
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
-    pSentence->pNormStringStart = pSentence->pNormString;
-
-    wcsncpy( pSentence->pInputString, pTmPutIn->stTmPut.szSource, MAX_SEGMENT_SIZE-1);
-    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
-    wcsncpy( pSentence->pInputStringWithNPTagHashes, inputStringWithReplacedTags.c_str(), MAX_SEGMENT_SIZE-1);
+    //Sentence.pNormStringStart = Sentence.pStrings->getNormStrC();
 
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSource( this, pSentence, szString,
-                           pTmPutIn->stTmPut.szSourceLanguage);
+    usRc = TokenizeSource( this, &Sentence, szString,
+                           pTmPutIn->stTmPut.szSourceLanguage);             
     
     if ( strstr( szString, "OTMUTF8" ) ) {
        strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );
@@ -264,11 +227,11 @@ USHORT EqfMemory::TmtXReplace
 
   if ( !usRc )
   {
-    pSentence->pNormString = pSentence->pNormStringStart;
-    HashSentence( pSentence );
-    pSentence->pTagRecord->usTagTableId = 0;
+    //Sentence.pNormString = Sentence.pNormStringStart;
+    HashSentence( &Sentence );
+    Sentence.pTagRecord->usTagTableId = 0;
         
-    usRc = NTMGetIDFromName( this, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
+    usRc = NTMGetIDFromName( this, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
     if(usRc){
       T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
     }
@@ -278,20 +241,22 @@ USHORT EqfMemory::TmtXReplace
 
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( pSentence, this );
-    if ( usMatchesFound == pSentence->usActVote ) //all hash triples found
+    usMatchesFound = CheckCompactArea( &Sentence, this );
+    if ( usMatchesFound == Sentence.usActVote ) //all hash triples found
     {
       //update entry in tm database
-      usRc = UpdateTmRecord(&pTmPutIn->stTmPut, pSentence );
+      usRc = UpdateTmRecord(&pTmPutIn->stTmPut, &Sentence );
+
 
       //if no tm record fitted for update assume new and add to tm
       if ( usRc == ERROR_ADD_TO_TM )
       {
-        usRc = AddToTm( pSentence, &pTmPutIn->stTmPut, &ulNewKey );
+        usRc = AddToTm( &Sentence, &pTmPutIn->stTmPut, &ulNewKey );
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( pSentence, ulNewKey );
+          usRc = UpdateTmIndex( &Sentence, ulNewKey );
+
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
       } /* endif */
@@ -299,12 +264,13 @@ USHORT EqfMemory::TmtXReplace
     else
     {
       //add new tm record to tm database
-      usRc = AddToTm( pSentence, &pTmPutIn->stTmPut, &ulNewKey );
+      usRc = AddToTm( &Sentence, &pTmPutIn->stTmPut, &ulNewKey );
 
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( pSentence, ulNewKey );
+        usRc = UpdateTmIndex( &Sentence, ulNewKey );
+
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
     } /* endif */
@@ -315,15 +281,6 @@ USHORT EqfMemory::TmtXReplace
   {
     NTMLockTM( this, FALSE, &fLocked );
   } /* endif */
-
-  //release allocated memory
-  UtlAlloc( (PVOID *) &pSentence->pNormStringStart, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pInputStringWithNPTagHashes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pulVotes, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pTagRecord, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence->pTermTokens, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pSentence, 0L, 0L, NOMSG );
 
   pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
   pTmPutOut->stPrefixOut.usTmtXRc = usRc;
@@ -402,7 +359,7 @@ VOID HashSentence
 
   while ( pTermTokens->usLength )
   {
-    pNormOffset = pSentence->pInputStringWithNPTagHashes + pTermTokens->usOffset;
+    pNormOffset = pSentence->pStrings->getNormStrC() + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
@@ -429,7 +386,7 @@ VOID HashSentence
   } /* endif */
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    auto str = EncodingHelper::convertToUTF8(pSentence->pInputString);
+    auto str = EncodingHelper::convertToUTF8(pSentence->pStrings->getOriginalStrC());
     T5LOG( T5DEBUG) <<"HashSentence:: inputString =\"" << str << "\"; count = " << usCount;
   }
   
@@ -1123,7 +1080,7 @@ VOID FillTmRecord
 //  memcpy( pTMXSourceRecord+1, pSentence->pNormString, pSentence->usNormLen *sizeof(CHAR_W));
 //@@@
   //ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pNormString, ulSrcNormLen );
-  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pInputString, wcslen(pSentence->pInputString) );
+  ulSrcNormLen = EQFUnicode2Compress( (PBYTE)(pTMXSourceRecord+1), pSentence->pStrings->getGenericTagStrC(), pSentence->pStrings->getGenericTagsString().length() );
   pTMXSourceRecord->usLangId = usSrcLangId;
   //size of source record
   RECLEN(pTMXSourceRecord) = sizeof( TMX_SOURCE_RECORD ) + ulSrcNormLen;
@@ -2132,7 +2089,7 @@ USHORT ComparePutData
       //copy and compare source string
       memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
       lLen = EQFCompress2Unicode( pString, pByte, lLen );
-      fStringEqual = ! UTF16strcmp( pString, pSentence->pNormString );
+      fStringEqual = ! UTF16strcmp( pString, pSentence->pStrings->getNormStrC() );
 
       if ( fStringEqual )
       {

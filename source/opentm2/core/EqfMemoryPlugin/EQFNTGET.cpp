@@ -245,12 +245,6 @@ static OtmProposal::eProposalType GetProposalTypeFromFlag( USHORT usTranslationF
 }
 
 
-// utility to allocate pSentence and associated memory areas
-USHORT NTMAllocSentenceStructure( PTMX_SENTENCE  *ppSentence );
-
-// utility to free pSentence and associated memory areas
-VOID NTMFreeSentenceStructure( PTMX_SENTENCE  pSentence );
-
 void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp );
 void NTMMakeTagTablename( PSZ pszMarkup, PSZ pszTagTableName );
 
@@ -312,7 +306,7 @@ USHORT EqfMemory::TmtXGet
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
-  PTMX_SENTENCE pSentence = NULL;      // ptr to sentence structure
+  TMX_SENTENCE Sentence(pTmGetIn->stTmGet.szSource);      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string
@@ -339,8 +333,6 @@ USHORT EqfMemory::TmtXGet
   GetElapsedTime( &(lOtherTime) );
 #endif
 
-  //allocate pSentence
-  usRc = NTMAllocSentenceStructure( &pSentence ); 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(lAllocTime) );
@@ -355,27 +347,17 @@ USHORT EqfMemory::TmtXGet
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
-    pSentence->pNormStringStart = pSentence->pNormString;
+    //pSentence->pNormStringStart = pSentence->pNormString;
     
-    wcsncpy( pSentence->pInputString, pTmGetIn->stTmGet.szSource, MAX_SEGMENT_SIZE-1);
-    auto inputStringWithReplacedTags = ReplaceNPTagsWithHashesAndTagsWithGenericTags(pSentence->pInputString);
-    wcsncpy(pSentence->pInputStringWithNPTagHashes, 
-            inputStringWithReplacedTags.c_str(), std::min(inputStringWithReplacedTags.length(), (size_t) MAX_SEG_SIZE-1));
-    
+   
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    usRc = TokenizeSource( this, pSentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
+    usRc = TokenizeSource( this, &Sentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
+
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
-      //if ( pTmClb )
-      {
-        usRc = NTMGetIDFromName( this, pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &pSentence->pTagRecord->usTagTableId );
-      }
-      //else
-      {
-      //  pSentence->pTagRecord->usTagTableId = 0;
-      } /* endif */
+      usRc = NTMGetIDFromName( this, pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
     }
   } /* endif */
 
@@ -391,16 +373,16 @@ USHORT EqfMemory::TmtXGet
 
       if ( !usRc )
       {
-          pSentence->pNormString = pSentence->pNormStringStart;
-          HashSentence( pSentence );
+          //Sentence.pNormString = Sentence.pNormStringStart;
+          HashSentence( &Sentence );
 
 #ifdef MEASURETIME
   GetElapsedTime( &(lOtherTime) );
 #endif
 
-          usOverlaps = CheckCompactArea( pSentence, this );
+          usOverlaps = CheckCompactArea( &Sentence, this );
           T5LOG( T5INFO) << "TmtXGet: Checked compact area, usOverlaps=" << usOverlaps;
-          if ( usOverlaps == pSentence->usActVote ) //all hash triples found
+          if ( usOverlaps == Sentence.usActVote ) //all hash triples found
           {
 #ifdef MEASURETIME
             GetElapsedTime( &(lOtherTime) );
@@ -409,7 +391,7 @@ USHORT EqfMemory::TmtXGet
             {
               T5LOG( T5INFO) << "TmtXGet: Calling GetExactMatch" ;
               //get exact matches only
-              usRc = GetExactMatch( this, pSentence, &pTmGetIn->stTmGet,
+              usRc = GetExactMatch( this, &Sentence, &pTmGetIn->stTmGet,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound, pTmGetOut );
 
 #ifdef MEASURETIME
@@ -419,7 +401,8 @@ USHORT EqfMemory::TmtXGet
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
               {                
                 T5LOG( T5INFO) << "TmtXGet: No exact matches found, trying GetFuzzyMatch" ;
-                usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet,
+                usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet,
+
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound << " matches" ;
               } /* endif */
@@ -431,7 +414,8 @@ USHORT EqfMemory::TmtXGet
             {
                 T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
                 
-                usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet,
+                usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet,
+
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) <<  "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound  << " matches" ;
 
@@ -456,7 +440,7 @@ USHORT EqfMemory::TmtXGet
             //  if (( usOverlaps * 100 >= pSentence->usActVote * pTmGetIn->stTmGet.usMatchThreshold ) || (pSentence->usActVote <= 8))
 
             // GQ 2016/05/12: disabled new approach as it causes a 12% decrease in the overall analysis performance 
-            if ( pSentence->usActVote <= 8 )
+            if ( Sentence.usActVote <= 8 )
             {
               fCheckForFuzzyMatches = TRUE;
             }
@@ -466,21 +450,21 @@ USHORT EqfMemory::TmtXGet
             //}
             else 
             {
-              fCheckForFuzzyMatches = (usOverlaps * 100) >= (pSentence->usActVote * pTmGetIn->stTmGet.usMatchThreshold);
+              fCheckForFuzzyMatches = (usOverlaps * 100) >= (Sentence.usActVote * pTmGetIn->stTmGet.usMatchThreshold);
             } /* endif */
 
             if ( fCheckForFuzzyMatches )
             {
               T5LOG(T5INFO) << "TmtXGet: usOverlaps= "<<usOverlaps<<
-                  " ,usActVote=" << pSentence->usActVote << ", usMatchThreshold=" << pTmGetIn->stTmGet.usMatchThreshold;
+                  " ,usActVote=" << Sentence.usActVote << ", usMatchThreshold=" << pTmGetIn->stTmGet.usMatchThreshold;
 
               //not all triples on in compact area so fuzzy match
 #ifdef MEASURETIME
             GetElapsedTime( &(lOtherTime) );
 #endif
               T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
-              
-              usRc = GetFuzzyMatch( this, pSentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
+              usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
+
               T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned "<<pTmGetOut->usNumMatchesFound<<" matches" ;
               
 #ifdef MEASURETIME
@@ -575,10 +559,6 @@ USHORT EqfMemory::TmtXGet
   /********************************************************************/  
   pTmGetOut->usNumMatchesFound =  pTmGetOut->usNumMatchesFound < pTmGetIn->stTmGet.usRequestedMatches ?
                pTmGetOut->usNumMatchesFound : pTmGetIn->stTmGet.usRequestedMatches;
-
-
-  //release memory
-  NTMFreeSentenceStructure( pSentence );
 
   { 
     int iTemp = sizeof( TMX_GET_OUT_W);
@@ -1033,24 +1013,9 @@ USHORT ExactTest
 
     //copy source string for later compare function
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
-
+    auto normalizedTmStr = StringTagVariants(pString);
     //compare source strings
-    {    
-      if ( pGetIn->ulParm & GET_RESPECTCRLF )
-      {  // if LF different, strings are NOT EQUAL in this case!!
-        //fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
-        fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pInputString, 0) == 0L;
-        if(!fStringEqual)
-          fStringEqual = UtlCompIgnSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
-      }
-      else
-      {
-        //fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWNormalizedTags, 0) == 0L;
-        fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString, 0) == 0L;
-        if(!fStringEqual)
-          fStringEqual = UtlCompIgnWhiteSpaceW(pString, pSentence->pNormString, 0 ) == 0L ; 
-      } /* endif */
-    }
+    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr.getNormStr().c_str(), pSentence->pStrings->getNormStrC(), 0) == 0L;
 
     if ( fStringEqual )
     {
@@ -1176,22 +1141,10 @@ USHORT ExactTest
             /* i.e. we will create a fully qualified string and try   */
             /* another compare...                                     */
             /**********************************************************/
-            //allocate pString
-            if ( !pSentence->pPropString )
-            {
-              fOK = UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-            } /* endif */
 
             if ( fOK )
             {
-              //calculate length of source string
-//              USHORT  ulLenTmp;
-//              usLenTmp = (USHORT)(RECLEN(pTMXSourceRecord) -
-//                                  sizeof(TMX_SOURCE_RECORD));
               LONG lLenTmp = ulLen;       // len of pString in # of w's
-              fOK = AddTagsToStringW( pString,
-                                      &lLenTmp,     // in # of w's
-                                     pTMXSourceTagTable, pSentence->pPropString );
               if ( !fOK )
               {
                 LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
@@ -1199,10 +1152,10 @@ USHORT ExactTest
               else
               {
                 fStringEqual = FALSE;
+                auto genericTagsTmSeg = StringTagVariants(pString);
                 fStringEqual = (UtlCompIgnWhiteSpaceW(
-                                              pSentence->pPropString,
-                                              //pSentence->pInputStringWNormalizedTags,
-                                              pSentence->pInputString,
+                                              pSentence->pStrings->getNpReplStrC(), 
+                                              genericTagsTmSeg.getNpReplStrC(),
                                               0 ) == 0 );
               } /* endif */
             } /* endif */
@@ -1587,14 +1540,6 @@ USHORT ExactTest
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
   if ( pContextBuffer ) UtlAlloc( (PVOID *)&pContextBuffer, 0L, 0L, NOMSG );
-
-
-
-  if ( usRc )
-  {
-    ERREVENT2( EXACTTEST_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
-
 
   return( usRc );
 }
@@ -2277,7 +2222,6 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
               }
             }
 
-
             //update match entry structure counter
             if ( *pusMatchEntries < MAX_MATCHES )
             {
@@ -2347,8 +2291,6 @@ BOOL AddTagsToStringW( PSZ_W pInString,            //character string
   //position at beginning of target record
   pByte = (PBYTE)pTMXTagTable;
   pByte += pTMXTagTable->usFirstTagEntry;
-
-
 
   fOK = (*plInStringLen < MAX_SEGMENT_SIZE );
 
@@ -2731,9 +2673,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to target tag record
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_CLB pTMXTargetClb = NULL;       //ptr to target control block
-  PSZ_W pString = NULL;                //ptr to normalized source string
-  PSZ_W pNormalizedString = NULL;
-  //PSZ_W pStringWithNP = NULL;                //ptr to normalized source string
+  PSZ_W pString = NULL;                //ptr to source string
   BOOL fOK = TRUE;                     //success indicator
   ULONG ulSourceLen = 0;              //length of normalized source string
   USHORT usRc = NO_ERROR;              //return code
@@ -2741,7 +2681,6 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   BOOL   fStringEqual;                 // strings are equal ???
   BOOL   fNormStringEqual;             // normalized strings are equal ???
   BOOL   fRespectCRLFStringEqual = 0L;
-  std::wstring NormalizedPString;
 
   SHORT sLangID = MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
@@ -2754,9 +2693,6 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-  
-  if( fOK ) fOK = UtlAlloc( (PVOID *) &(pNormalizedString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-  //fOK = fOK && UtlAlloc( (PVOID *) &(pStringWithNP), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
   
   if ( !fOK )
   {
@@ -2787,8 +2723,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
-    NormalizedPString = ReplaceNPTagsWithHashesAndNormalizeString(pString);
-    wcsncpy(pNormalizedString, NormalizedPString.c_str(), NormalizedPString.length());
+    pSentence->pPropString = std::make_unique<StringTagVariants>(StringTagVariants(pString));
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
@@ -2797,9 +2732,9 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
     {
-	    fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pString, pSentence->pNormString, 0 )== 0L);
+	    fRespectCRLFStringEqual = (UtlCompIgnSpaceW( pSentence->pPropString->getNormStrC(), pSentence->pStrings->getNormStrC(), 0 )== 0L);
 
-	    fStringEqual = (UtlCompIgnWhiteSpaceW( pString, pSentence->pNormString, 0 ) == 0L);
+	    fStringEqual = (UtlCompIgnWhiteSpaceW( pSentence->pPropString->getNormStrC(), pSentence->pStrings->getNormStrC(), 0 ) == 0L);
 	    if (fStringEqual && !fRespectCRLFStringEqual)
 	    {  // there is a LF difference!
             fStringEqual = fRespectCRLFStringEqual;
@@ -2807,9 +2742,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
     }
     else
     {  //compare source strings
-       fStringEqual = (// UtlCompIgnWhiteSpaceW(pString, pSentence->pInputStringWithNPTagHashes,0) == 0L 
-                         UtlCompIgnWhiteSpaceW(pNormalizedString, pSentence->pNormString, 0 ) == 0L 
-                      || UtlCompIgnWhiteSpaceW(pString, pSentence->pInputString,0) == 0L  ) ;
+       fStringEqual = (  UtlCompIgnWhiteSpaceW(pSentence->pPropString->getNormStrC(), pSentence->pStrings->getNormStrC(), 0 ) == 0L 
+                      || UtlCompIgnWhiteSpaceW(pSentence->pPropString->getGenericTagStrC(), pSentence->pStrings->getGenericTagStrC(),0) == 0L  ) ;
     } /* endif*/
 
     T5LOG( T5INFO) << "FuzzyTest: After String compare, fStringEqual = " <<fStringEqual;
@@ -2922,11 +2856,11 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
         if ( fTestCLB && (pTMXTargetClb->bTranslationFlag == TRANSLFLAG_GLOBMEM) && (pGetIn->pvGMOptList != NULL) && pTMXTargetClb->usAddDataLen  )
         {
           USHORT usAddDataLen = 0;
-          if ( !pSentence->pPropString ) UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-          usAddDataLen = NtmGetAddData( pTMXTargetClb, ADDDATA_ADDINFO_ID, pSentence->pPropString, MAX_SEGMENT_SIZE );   
+          if ( !pSentence->pAddString ) UtlAlloc( (PVOID *) &pSentence->pAddString, 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
+          usAddDataLen = NtmGetAddData( pTMXTargetClb, ADDDATA_ADDINFO_ID, pSentence->pAddString, MAX_SEGMENT_SIZE );   
           if ( usAddDataLen )
           {
-            GMMEMOPT GobMemOpt = GlobMemGetFlagForProposal( pGetIn->pvGMOptList, pSentence->pPropString );
+            GMMEMOPT GobMemOpt = GlobMemGetFlagForProposal( pGetIn->pvGMOptList, pSentence->pAddString );
             switch ( GobMemOpt )
             {
               case GM_SUBSTITUTE_OPT: usModifiedTranslationFlag  = TRANSLFLAG_NORMAL; break;
@@ -2994,11 +2928,6 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
             // if the tag tables are different this is omitted as the
             // inline tags are suppressed in the proposal in such a case
 
-            //allocate pString
-            if ( !pSentence->pPropString )
-            {
-              fOK = UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-            } /* endif */
 
             if ( fOK )
             {
@@ -3009,25 +2938,16 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
               pByte += pTMXTargetRecord->usSourceTagTable;
               pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-              //fOK = AddTagsToStringW( pString, &lLenTmp,  pTMXSourceTagTable, pSentence->pPropString );
-                //instead of lines above we now save not normalize string to btree        
-                wcsncpy(pSentence->pPropString, pString, lLenTmp);
               if ( !fOK )
               {
                 LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
               } /* endif */              
             } /* endif */
 
-            std::wstring NPNormString = ReplaceNPTagsWithHashesAndNormalizeString(pSentence->pPropString);
-
             //TODO: remove punctuation here
             fFuzzynessOK = TMFuzzynessEx( pGetIn->szTagTable,
-                                        pSentence->pNormString,
-                                        //pSentence->pInputStringWithNPTagHashes,
-//                                        pString,
-                                        (PSZ_W)NPNormString.c_str(),
-                                        //pSentence->pPropString,
-                                        //(wchar_t*)propNormString.c_str(),
+                                        pSentence->pStrings->getNormStrC(),
+                                        pSentence->pPropString->getNormStrC(),
                                         sLangID, &usFuzzy,
                                         pGetIn->ulSrcOemCP, &usWords, &usDiffs);
 
@@ -3060,18 +2980,11 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                 /* another compare...                                     */
                 /**********************************************************/
                 //allocate pString
-                if ( !pSentence->pPropString )
-                {
-                  fOK = UtlAlloc( (PVOID *) &pSentence->pPropString, 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-                } /* endif */
 
                 if ( fOK )
                 {
                   //calculate length of source string
                   LONG  lLenTmp = ulSourceLen;
-                  //fOK = AddTagsToStringW( pString,
-                  //                        &lLenTmp,      // in # of w's
-                  //                       pTMXSourceTagTable, pSentence->pPropString );
                   
                   if ( !fOK )
                   {
@@ -3081,9 +2994,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                   {
                     fStringEqual = FALSE;
                     
-                    fStringEqual = (UtlCompIgnWhiteSpaceW(pSentence->pPropString,
-                                                  pSentence->pInputString,
-                                                  //pSentence->pInputStringWNormalizedTags,
+                    fStringEqual = (UtlCompIgnWhiteSpaceW(pSentence->pPropString->getGenericTagStrC(),
+                                                  pSentence->pStrings->getGenericTagStrC(),
                                                   0 ) == 0 );
                     if (!fStringEqual && (usFuzzy >= 100) )
                     {
@@ -3093,9 +3005,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                       BOOL fTempStringEqual = FALSE;
                       BOOL fOK = FALSE;
                       fOK = NTMCompareBetweenTokens(
-                            pSentence->pPropString,
-                            //pSentence->pInputStringWNormalizedTags,
-                            pSentence->pInputString,
+                            pSentence->pPropString->getGenericTagStrC(),
+                            pSentence->pStrings->getGenericTagStrC(),
                             pGetIn->szTagTable,
                             sLangID,
                             pGetIn->ulSrcOemCP, &fTempStringEqual);
@@ -3176,8 +3087,6 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pNormalizedString, 0L, 0L, NOMSG );
-  //UtlAlloc( (PVOID *) &pStringWithNP, 0L, 0L, NOMSG );
 
   if ( usRc )
   {

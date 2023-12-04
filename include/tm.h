@@ -1207,23 +1207,78 @@ typedef struct _TMX_MATCHENTRY
 //#pragma pack(push, 8)
 //#pragma pack(8)
 
-typedef struct _TMX_SENTENCE
+#include<string>
+
+class StringTagVariants{
+  std::wstring original; // full original str
+  std::wstring norm; // without any tags
+  std::wstring npReplaced; // with generic(generated) tags but np tags is replaced with their keys(r attr)
+  std::wstring genericTags; // generated tags so there could be only ph or bpt/ept with id and r attributes that would map input str to common tag format
+  bool fSuccess = false;
+public:
+  StringTagVariants(std::wstring&& wstr);
+
+  bool isParsed(){ return fSuccess; }
+  std::wstring& getNormStr(){ return norm; }
+  std::wstring& getNpReplacedStr(){ return npReplaced; }
+  std::wstring& getGenericTagsString() { return genericTags; }
+  std::wstring& getOriginalString(){ return original; }
+  
+  wchar_t* getNormStrC(){return &norm[0];}
+  wchar_t* getNpReplStrC(){return &npReplaced[0];}
+  wchar_t* getGenericTagStrC() { return &genericTags[0]; }
+  wchar_t* getOriginalStrC() { return &original[0]; }
+};
+
+struct TMX_SENTENCE
 {
-  PSZ_W pInputString;
-  PSZ_W pNormString;
-  PSZ_W pInputStringWithNPTagHashes;
-  PSZ_W pNormStringStart;
-  USHORT  usNormLen;
-  PTMX_TERM_TOKEN pTermTokens;
-  LONG lTermAlloc;
-  PTMX_TAGTABLE_RECORD pTagRecord;
-  LONG lTagAlloc;
-  PTMX_TAGENTRY pTagEntryList;
-  USHORT  usActVote;
-  PULONG  pulVotes;
-  PSZ_W pPropString;                   // proposal string (with tagging)
-  PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
-} TMX_SENTENCE, * PTMX_SENTENCE;
+  std::unique_ptr<StringTagVariants>  pStrings = nullptr;
+
+  PSZ_W pAddString = nullptr;
+  USHORT  usNormLen = 0;
+  PTMX_TERM_TOKEN pTermTokens = nullptr;
+  LONG lTermAlloc = 0;
+  PTMX_TAGTABLE_RECORD pTagRecord = nullptr;
+  LONG lTagAlloc = 0;
+  PTMX_TAGENTRY pTagEntryList = nullptr;
+  USHORT  usActVote = 0;
+  PULONG  pulVotes = nullptr;
+  std::unique_ptr<StringTagVariants>  pPropString = nullptr;
+  PTMX_TERM_TOKEN pPropTermTokens = nullptr;     // buffer for Termtokens
+
+  TMX_SENTENCE(PSZ_W inputStr){
+    bool fOK = true;
+    if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
+    if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
+    if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pTermTokens), 0L, (LONG)TOK_SIZE, NOMSG );
+
+    if ( fOK )
+    {
+      lTermAlloc = (LONG)TOK_SIZE;
+      lTagAlloc = (LONG)(2*TOK_SIZE);
+    } /* endif */
+    if(fOK){
+      pStrings = std::make_unique<StringTagVariants> (StringTagVariants(inputStr));
+      usNormLen = pStrings->getNormStr().length();
+    }
+    if(!fOK){
+      throw ;//new Exception();
+    }
+  }
+
+  ~TMX_SENTENCE(){
+    UtlAlloc( (PVOID *) &pTermTokens, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID *) &pTagRecord, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID *) &pulVotes, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID *) &pAddString, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID *) &pTermTokens, 0L, 0L, NOMSG ); 
+  }
+};
+using PTMX_SENTENCE = TMX_SENTENCE *;
+
+
+//#pragma pack(pop)
+//#pragma pack()
 
 
 //#pragma pack(pop)
@@ -2587,11 +2642,6 @@ BOOL NTMTagSubst                     // generic inline tagging for TM
 
 BOOL NTMDocMatch( PSZ pszShort1, PSZ pszLong1, PSZ pszShort2, PSZ pszLong2 );
 
-// utility to allocate pSentence and associated memory areas
-USHORT NTMAllocSentenceStructure( PTMX_SENTENCE  *ppSentence );
-
-// utility to free pSentence and associated memory areas
-VOID NTMFreeSentenceStructure( PTMX_SENTENCE  pSentence );
 
 void NTMFreeSubstProp( PTMX_SUBSTPROP pSubstProp );
 
