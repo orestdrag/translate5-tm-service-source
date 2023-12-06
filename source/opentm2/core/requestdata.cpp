@@ -143,9 +143,11 @@ int convertUTCTimeToLong( char *pszDateTime, PLONG plTime )
 }
 
 
+#include <tm.h>
 
-std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
-  std::vector<std::wstring> response;
+/*
+std::unique_ptr<RequestTagReplacer> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
+  std::unique_ptr<RequestTagReplacer> response;
   *rc = 0;
   try {        
         *rc = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
@@ -158,8 +160,8 @@ std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& 
         *rc = 400;
         //return( ERROR_NOT_READY );
     }
-  return response;
-}
+  return std::move(response);
+}//*/
 
 
 
@@ -1096,17 +1098,21 @@ int TagRemplacementRequestData::execute(){
     } /* endwhile */
     json_factory.parseJSONStop( parseHandle );
   }
-  
-  auto result =  replaceString(  EncodingHelper::convertToUTF16(strSrcData.c_str()).c_str(), 
-                                              EncodingHelper::convertToUTF16(strTrgData.c_str()).c_str(),
-                                              EncodingHelper::convertToUTF16(strReqData.c_str()).c_str(), &_rc_);
+
+  auto result = std::make_unique<RequestTagReplacer>(std::move(EncodingHelper::convertToUTF16(strSrcData.c_str())), 
+                                                     std::move(EncodingHelper::convertToUTF16(strTrgData.c_str())),
+                                                     std::move(EncodingHelper::convertToUTF16(strReqData.c_str())));
+                            
+  //auto  =  replaceString( &_rc_);
 
   
   wstr = L"{\n ";
   std::wstring segmentLocations[] = {L"source", L"target", L"request"};
-  for(int index = 0; index < result.size(); index++){
-    wstr += L"\'" + segmentLocations[index] + L"\' :\'" + result[index] + L"\',\n ";
-  }
+
+  wstr += L"\'source\' :\'" + result->getSrcWithTagsFromRequest() + L"\',\n ";
+  wstr += L"\'target\' :\'" + result->getTrgWithTagsFromRequest() + L"\',\n ";
+  wstr += L"\'request\' :\'" + result->getReqGenericTagStr() + L"\',\n ";
+
   wstr += L"\n}";
   outputMessage =  EncodingHelper::convertToUTF8(wstr);
   return _rest_rc_ = 200;
@@ -1816,10 +1822,12 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
-  auto replacedInput = replaceString( Data.szSource , Data.szTarget, L"", &_rc_ );
-  if(!_rc_){
-    wcscpy( Data.szSource, replacedInput[0].c_str());
-    wcscpy( Data.szTarget, replacedInput[1].c_str());
+  if(Data.szSource && Data.szTarget){
+    Data.pInputSentence  = new TMX_SENTENCE(std::make_shared<TMX_SENTENCE>( Data.szSource , Data.szTarget ));
+  }
+  if(!_rc_ && inputSentence->isParsed()){
+    wcscpy( Data.szSource, replacedInput->getGenericTagStrC());
+    wcscpy( Data.szTarget, replacedInput->getGenericTargetStrC());
   }else{
     buildErrorReturn(_rc_, "Error in xml in source or target!");
     return _rc_;
@@ -1854,7 +1862,6 @@ int UpdateEntryRequestData::execute(){
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  //copyMemProposalToOtmProposal( &Prop, &OtmProposal );
   mem->OtmProposalToPutIn( Data, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
@@ -1913,6 +1920,7 @@ int UpdateEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
   json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
   json_factory.terminateJSON( outputMessage );
+  if(!inputSentence) delete inputSentence;
   return( _rc_ );
 }
 
@@ -2429,11 +2437,10 @@ int FuzzySearchRequestData::execute(){
             T5LOG( T5DEBUG) <<"EqfMemory::searchProposal::   proposal " << i << ": match=" << GetOut.stMatchTable[i].usMatchLevel << ", source=", strSource;
           }
           //replace tags for proposal
-          auto result = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(GetOut.stMatchTable[i].szSource, 
-                                                                                      GetOut.stMatchTable[i].szTarget, 
+          auto result = std::make_unique<RequestTagReplacer>(GetOut.stMatchTable[i].szSource, GetOut.stMatchTable[i].szTarget, 
                                                                                       szRequestedString); 
-          wcscpy(GetOut.stMatchTable[i].szSource, result[0].c_str());
-          wcscpy(GetOut.stMatchTable[i].szTarget, result[1].c_str());
+          wcscpy(GetOut.stMatchTable[i].szSource, result->getSrcWithTagsFromRequestC());
+          wcscpy(GetOut.stMatchTable[i].szTarget, result->getTrgWithTagsFromRequestC());
 
           if( GetOut.stMatchTable[i].usMatchLevel >= 100){
             //correct match rate for exact match based on whitespace difference

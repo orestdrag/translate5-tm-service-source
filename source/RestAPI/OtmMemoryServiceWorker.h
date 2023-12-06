@@ -55,7 +55,7 @@ public:
   */
   void importDone( char *pszMemory, int iRC, char *pszError );
 
-  std::vector<std::wstring> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc);
+ //std::unique_ptr<StringTagVariants> replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc);
   /*! \brief Verify OpenTM2 API session
       \returns 0 if successful or an error code in case of failures
     */

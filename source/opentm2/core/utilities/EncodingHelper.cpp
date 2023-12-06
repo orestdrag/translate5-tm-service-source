@@ -32,18 +32,6 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
 }
 
 
-std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg);
-std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes = false);
-std::vector<std::wstring> EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg, std::wstring &&w_req)
-{
-  if(w_req.empty()){
-    return ReplaceOriginalTagsWithPlaceholdersFunc(std::move(w_src), std::move(w_trg));
-  }
-  return ReplaceOriginalTagsWithTagsFromRequestFunc(std::move(w_req),std::move(w_src), std::move(w_trg));
-}
-
-
-
 std::string to_utf8(const std::u16string &s)
 {
     std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> conv;

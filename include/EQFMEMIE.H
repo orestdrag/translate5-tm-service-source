@@ -18,11 +18,6 @@
 
 #include "lowlevelotmdatastructs.h"
 
-class ImportStatusDetails;
-
-
-// callback function which is used by ExtMemImportprocess to insert segments into the memory
-typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
 
 //+----------------------------------------------------------------------------+
 //|                                                                            |
@@ -72,6 +67,7 @@ USHORT /**/ EXTMEMIMPORTSTART
   ImportStatusDetails*     pImportData = nullptr
 );
 
+#include "tm.h"
 //
 // EXTMEMIMPORTPROCESS
 //

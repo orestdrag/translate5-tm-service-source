@@ -430,9 +430,6 @@ USHORT EqfMemory::FindTargetAndDelete(
           pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           //compare tag table records
-          //if ( !memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
-          //             RECLEN(pTMXSourceTagTable) ) )
-          //std::wstring pStringWNormalizedTags = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::wstring(pSentence->pInputString));
           if(//UtlCompIgnWhiteSpaceW(pSentence->pInputString, (wchar_t*)pStringWNormalizedTags.c_str(), pStringWNormalizedTags.size() ) == 0
           true) // we use the same tag tables in t5?
           {

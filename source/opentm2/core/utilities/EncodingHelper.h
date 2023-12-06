@@ -5,6 +5,8 @@
 #include <vector>
 
 
+#include <tm.h>
+
 class EncodingHelper{
     public:
     /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
@@ -47,8 +49,6 @@ class EncodingHelper{
     void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
 
     static std::wstring EscapeXML( std::wstring input );
-    static std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholders(std::wstring &&w_src, std::wstring &&w_trg = L"", std::wstring &&w_req = L"");
-
 };
 
 #endif

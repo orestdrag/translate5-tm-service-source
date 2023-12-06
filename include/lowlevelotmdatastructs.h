@@ -1070,11 +1070,6 @@ typedef struct _TMX_PREFIX_OUT
   USHORT usTmtXRc;                     //function returncode
 } TMX_PREFIX_OUT, * PTMX_PREFIX_OUT, XOUT, * PXOUT;
 
-typedef struct _TMX_CREATE_OUT
-{
-  TMX_PREFIX_OUT  stPrefixOut;
-  EqfMemory* pstTmClb;
-} TMX_CREATE_OUT, * PTMX_CREATE_OUT;
 
 
 typedef struct _TMX_OPEN_OUT

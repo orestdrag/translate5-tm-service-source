@@ -920,7 +920,7 @@ GMMEMOPT GlobMemGetFlagForProposal( PVOID pCTIDList, PSZ_W pszAddData )
   return( optReturn );
 }
 
-
+#include <tm.h>
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -1013,9 +1013,9 @@ USHORT ExactTest
 
     //copy source string for later compare function
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
-    auto normalizedTmStr = StringTagVariants(pString);
+    auto normalizedTmStr = std::make_unique<StringTagVariants>(pString);
     //compare source strings
-    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr.getNormStr().c_str(), pSentence->pStrings->getNormStrC(), 0) == 0L;
+    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr->getNormStr().c_str(), pSentence->pStrings->getNormStrC(), 0) == 0L;
 
     if ( fStringEqual )
     {
@@ -1152,10 +1152,10 @@ USHORT ExactTest
               else
               {
                 fStringEqual = FALSE;
-                auto genericTagsTmSeg = StringTagVariants(pString);
+                auto genericTagsTmSeg = std::make_unique<StringTagVariants>(pString);
                 fStringEqual = (UtlCompIgnWhiteSpaceW(
                                               pSentence->pStrings->getNpReplStrC(), 
-                                              genericTagsTmSeg.getNpReplStrC(),
+                                              genericTagsTmSeg->getNpReplStrC(),
                                               0 ) == 0 );
               } /* endif */
             } /* endif */
@@ -2723,7 +2723,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
-    pSentence->pPropString = std::make_unique<StringTagVariants>(StringTagVariants(pString));
+    pSentence->pPropString = std::make_unique<StringTagVariants>(pString);
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);

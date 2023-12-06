@@ -300,23 +300,7 @@ std::string printTime(time_t time){
 }
 
 
-std::vector<std::wstring> OtmMemoryServiceWorker::replaceString(std::wstring&& src_data, std::wstring&& trg_data, std::wstring&& req_data,  int* rc){ 
-  std::vector<std::wstring> response;
-  *rc = 0;
-  try {        
-        *rc = verifyAPISession();
-        if(*rc == 0){
-          response = EncodingHelper::ReplaceOriginalTagsWithPlaceholders(std::move(src_data), std::move(trg_data), std::move(req_data) );
-        }
-    }
-    //catch (const XMLException& toCatch) {
-      catch(...){
-        *rc = 400;
-        //return( ERROR_NOT_READY );
-    }
-  return response;
-}
-
+#include <tm.h>
 
 
 /*! \brief read a binary file and encode it using BASE64 encoding

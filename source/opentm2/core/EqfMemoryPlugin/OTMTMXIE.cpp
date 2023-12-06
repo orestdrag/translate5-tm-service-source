@@ -190,45 +190,7 @@ XERCES_CPP_NAMESPACE_USE
 
 #define ERROR_BAD_FORMAT 136464
 
-// IDs of TMX elelements
-typedef enum
-{
-  UNKNOWN_ELEMENT =-1,
-  TMX_ELEMENT     = 1,
-  PROP_ELEMENT    = 2,
-  HEADER_ELEMENT  = 3,
-  TU_ELEMENT      = 4,
-  TUV_ELEMENT     = 5,
-  BODY_ELEMENT    = 6,
-  SEG_ELEMENT     = 7,
-  SEGMENT_TAGS    = 8,
 
-  BEGIN_INLINE_TAGS = 10,
-  //pair tags
-  BEGIN_PAIR_TAGS = 10,
-  BPT_ELEMENT     = 10, 
-  EPT_ELEMENT     = 11,
-  G_ELEMENT       = 12,
-  HI_ELEMENT      = 13,
-  SUB_ELEMENT     = 14,
-  BX_ELEMENT      = 15,
-  EX_ELEMENT      = 16,
-  END_PAIR_TAGS   = 16,
-
-  //standalone tags
-  BEGIN_STANDALONE_TAGS = 20,
-  PH_ELEMENT            = 20, 
-  X_ELEMENT             = 21,
-  IT_ELEMENT            = 22,
-  UT_ELEMENT            = 23,
-  T5_N_ELEMENT          = 24,
-  END_STANDALONE_TAGS   = 25,
-
-  END_INLINE_TAGS       = 29,
-
-  TMX_SENTENCE_ELEMENT  = 30,
-  INVCHAR_ELEMENT       = 31
-} ELEMENTID;
 typedef struct _TMXNAMETOID
 {
   //CHAR_W   szName[30];                 // name of element
@@ -297,14 +259,6 @@ std::map<ELEMENTID, const std::string> TmxIDToName = {
      { UNKNOWN_ELEMENT,       ""          }
 };
 
-enum ACTIVE_SEGMENT{
-  SOURCE_SEGMENT  = 0,
-  TARGET_SEGMENT  = 1, 
-  REQUEST_SEGMENT = 2 //from fuzzy search request
-};
-
-
-typedef ACTIVE_SEGMENT TagLocation;
 
 std::map<ACTIVE_SEGMENT, const std::string> TagLocIDToStr = {
      { SOURCE_SEGMENT,   "SOURCE_SEGMENT"  },
@@ -326,49 +280,8 @@ size_t str16len(const char16_t* source)
     while((*temp++ = *source++) != 0) ;
     return temp-source;
 }	 
-  
-  struct TagInfo
-  {
-    TagLocation tagLocation = SOURCE_SEGMENT;
-    //bool fPairedTag;                    // is tag is paired tag (bpt, ept, )
-    bool fPairedTagClosed = false;        // false for bpt/ept tag - waiting for matching ept/bpt tag 
-    bool fTagAlreadyUsedInTarget = false; // we save tags only from source segment and then try to match\bind them in target
 
-    int generated_i = 0;                 // for pair tags - generated identifier to find matching tag. the same as in original_i if it's not binded to other tag in segment
-    int generated_x = 0;                 // id of tag. should match original_x, if it's not occupied by other tags
-    ELEMENTID generated_tagType = UNKNOWN_ELEMENT;           // replaced tagType, could be PH_ELEMENT, BPT_ELEMENT, EPT_ELEMENT  
 
-    int original_i = 0;        // original paired tags i
-    int original_x = 0;        // original id of tag
-    ELEMENTID original_tagType;  // original tagType
-    //if targetTag -> matching tag from source tags
-    //if sourceTag -> matching tag from target tags
-    //TagInfo* matchingTag;
-    //int matchingTagIndex = -1;
-    
-    //t5n
-    std::string t5n_key;
-    std::string t5n_value;
-  };
-
-// PROP types
-typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
-  TRANSLATIONFLAG_PROP, TMTMMATCHTYPE_PROP, TMMTSERVICE_PROP, TMMTMETRICNAME_PROP, TMMTMETRICVALUE_PROP, TMPEEDITDISTANCECHARS_PROP, TMPEEDITDISTANCEWORDS_PROP,  
-  TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID, PROPID;
-
-// stack elements
-typedef struct _TMXELEMENT
-{
-  ELEMENTID ID;                        // ID of element 
-  BOOL      fInlineTagging;            // TRUE = we are processing inline tagging
-  BOOL      fInsideTagging;            // TRUE = we are currently inside inline tagging
-  TMXPROPID PropID;                    // ID of prop element (only used for props)
-  CHAR      szDataType[50];            // data type of current element
-  CHAR      szTMXLanguage[50];         // TMX language of element
-  CHAR      szTMLanguage[50];          // TM language of element
-  CHAR      szTMMarkup[50];            // TM markup of element
-  LONG      lSegNum;                   // TM segment number
-} TMXELEMENT, *PTMXELEMENT;
 
 // helper function for the access to the name mapping tables
 BOOL FindName( PNAMETABLE pTable, const char *pszName, char *pszValue, int iBufSize );
@@ -378,43 +291,6 @@ BOOL CheckEntityW( PSZ_W pszText, int *piValue, int *piLen );
 BOOL CheckEntity( PSZ pszText, int *piValue, int *piLen );
 void CopyTextAndProcessMaskedEntitites( PSZ_W pszTarget, PSZ_W pszSource );
 
-
-class TagReplacer{
-  public:
-  
-  std::vector<TagInfo> sourceTagList;
-  std::vector<TagInfo> targetTagList;
-  std::vector<TagInfo> requestTagList;
-  ACTIVE_SEGMENT activeSegment = SOURCE_SEGMENT;
-  int      iHighestPTI  = 0;               // increments with each opening pair tags
-  int      iHighestPTId = 500;             // increments with pair tag
-  int      iHighestPHId = 100;             // increments with ph tag
-  bool fFuzzyRequest = false;              // if re are dealing with import or fuzzy request
-  bool fReplaceNumberProtectionTagsWithHashes = false;//
-  bool fSkipTags = false;
-
-  //to track id and i attributes in request and then generate new values for tags in srt and trg that is not matching
-  int iHighestRequestsOriginalI  = 0;
-  int iHighestRequestsOriginalId = 0;
-
-
-  //idAttr==0 -> look for id in attributes
-  //iAttr==0 ->i attribute not used 
-  //tag should be only "ph", "bpt", or "ept"
-  TagInfo GenerateReplacingTag(ELEMENTID tagType, AttributeList* attributes, bool saveTagToTagList = true);
-  std::wstring PrintTag(TagInfo& tag);
-  void reset();
-  std::string static LogTag(TagInfo& tag);
-  std::wstring PrintReplaceTagWithKey(TagInfo& tag);
-
-  TagReplacer(){
-    sourceTagList.reserve(50);
-    targetTagList.reserve(50);
-    requestTagList.reserve(50);
-    reset();  
-  }
-  
-};
 
 void TagReplacer::reset(){
   fFuzzyRequest = false;
@@ -813,166 +689,6 @@ USHORT  MEMINSERTSEGMENT
 );
 
 
-//
-// class for our SAX handler
-//
-class TMXParseHandler : public HandlerBase
-{
-public:
-  // -----------------------------------------------------------------------
-  //  Constructors and Destructor
-  // -----------------------------------------------------------------------
-  TMXParseHandler(); 
-  virtual ~TMXParseHandler();
-
-  // setter functions for import info
-  void SetMemInfo( PMEMEXPIMPINFO m_pMemInfo ); 
-  void SetImportData(ImportStatusDetails * _pImportDetails) { pImportDetails = _pImportDetails;}
-  void SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, PLOADEDTABLE pTable, PTOKENENTRY pTokBuf, int iTokBufSize ); 
-  void SetSourceLanguage( char *pszSourceLang );
-
-  // getter functions 
-  void GetDescription( char *pszDescription, int iBufSize );
-  void GetSourceLanguage( char *pszSourceLang, int iBufSize );
-  BOOL IsHeaderDone( void );
-  BOOL ErrorOccured( void );
-  void GetErrorText( char *pszTextBuffer, int iBufSize );
-  std::wstring GetParsedData() const;
-  std::wstring GetParsedDataWithReplacedNpTags()const;
-  std::wstring GetParsedNormalizedData()const;
-
-  bool fReplaceWithTagsWithoutAttributes;
-  size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }
-
-  // -----------------------------------------------------------------------
-  //  Handlers for the SAX DocumentHandler interface
-  // -----------------------------------------------------------------------
-  void startElement(const XMLCh* const name, AttributeList& attributes);
-  void endElement(const XMLCh* const name );
-  void characters(const XMLCh* const chars, const XMLSize_t length);
-  //void ignorableWhitespace(const XMLCh* const chars, const unsigned int length);
-  //void resetDocument();
-
-
-  // -----------------------------------------------------------------------
-  //  Handlers for the SAX ErrorHandler interface
-  // -----------------------------------------------------------------------
-  void warning(const SAXParseException& exc);
-  void error(const SAXParseException& exc );
-  void fatalError(const SAXParseException& exc);
-  void fatalInternalError(const SAXException& exc);
-  //void resetErrors();
-
-  
-  TagReplacer tagReplacer;
-  BOOL fInitialized = false;
-  BOOL fCreateNormalizedStr = false;
-
-  USHORT insertSegUsRC{0};
-
-  void setDocumentLocator(const Locator* const locator) override;
-
-private:
-  const Locator* m_locator = nullptr;
-  ImportStatusDetails* pImportDetails = nullptr;
-  ELEMENTID GetElementID( PSZ pszName );
-  void Push( PTMXELEMENT pElement );
-  void Pop( PTMXELEMENT pElement );
-  BOOL GetValue( PSZ pszString, int iLen, int *piResult );
-  BOOL TMXLanguage2TMLanguage( PSZ pszTMLanguage, PSZ pszTMXLanguage, PSZ pszResultingLanguage );
-  USHORT RemoveRTFTags( PSZ_W pszString, BOOL fTagsInCurlyBracesOnly );
-
-  // date conversion help functions
-  BOOL IsLeapYear( const int iYear );
-  int GetDaysOfMonth( const int iMonth, const int iYear );
-  int GetDaysOfYear( const int iYear );
-  int GetYearDay( const int iDay, const int iMonth, const int iYear );
-
-  // mem import interface data
-  PMEMEXPIMPINFO m_pMemInfo;
-  PFN_MEMINSERTSEGMENT pfnInsertSegment;
-  LONG  lMemHandle;
-
-  // processing flags
-  BOOL fSource;                        // TRUE = source data collected  
-  BOOL fTarget;                        // TRUE = target data collected
-  BOOL fCatchData;                     // TRUE = catch data
-  BOOL fWithTagging;                   // TRUE = add tagging to data
-  BOOL fWithTMXTags;                   // TRUE = segment contains TMX tags
-  BOOL fTMXTagStarted;                 // TRUE = TMX inline tag started
-  BOOL fHeaderDone;                    // TRUE = header has been processed
-  BOOL fError;                         // TRUE = parsing ended with error
-  
-  // segment data
-  ULONG ulSegNo;                       // segmet number
-  LONG  lTime;                         // segment date/time
-  USHORT usTranslationFlag;            // type of translation flag
-  int   iNumOfTu;
-  size_t _invalidCharacterErrorCount{0};
-  // buffers
-  #define DATABUFFERSIZE 4098
-
-  typedef struct _BUFFERAREAS
-  {
-    CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
-    CHAR_W   szReplacedNpData[DATABUFFERSIZE];
-    CHAR_W   szNormalizedData[DATABUFFERSIZE];
-    CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
-    CHAR     szLang[50];              // buffer for language
-    CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
-    MEMEXPIMPSEG SegmentData;         // buffer for segment data
-    CHAR     szDescription[1024];     // buffer for memory descripion
-    CHAR     szMemSourceLang[50];     // buffer for memory source language
-    CHAR     szMemSourceIsoLang[50];
-    CHAR     szErrorMessage[1024];    // buffer for error message text
-    CHAR_W   szNote[MAX_SEGMENT_SIZE];// buffer for note text
-    CHAR_W   szNoteStyle[100];        // buffer for note style
-    CHAR_W   szMTMetrics[MAX_SEGMENT_SIZE]; // buffer for MT metrics data
-    ULONG    ulWords;                       // number of words in the segment text
-    CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
-    
-    //for enclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> enclosing tags skipping should be ignored
-    bool        fSegmentStartsWithBPTTag;
-
-    bool        fUseMajorLanguage;
-  } BUFFERAREAS, *PBUFFERAREAS;
-
-  PBUFFERAREAS pBuf; 
-
-  // TUV data area
-  typedef struct _TMXTUV
-  {
-    CHAR_W   szText[DATABUFFERSIZE];  // buffer for TUV text
-    CHAR     szLang[50];              // buffer for TUV language (converted to Tmgr language name) or original language in case of fInvalidLang
-    CHAR     szIsoLang[10];
-    BOOL     fInvalidChars;           // TRUE = contains invalid characters 
-    BOOL     fInlineTags;             // TRUE = contains inline tagging
-    BOOL     fInvalidLang;            // TRUE = the language of the TUV is invalid
-  } TMXTUV, *PTMXTUV;
-
-  PTMXTUV pTuvArray;
-  int iCurTuv;                        // current TUV index
-  int iTuvArraySize;                  // current size of TUV array
-
-  // element stack
-  int iStackSize;
-  int iCurElement;
-  TMXELEMENT CurElement;
-  PTMXELEMENT pStack;
-
-  bool            fSawErrors;
-  BOOL      fInvalidChars;             // TRUE = current TUV contains invalid characters 
-  BOOL      fInlineTags;               // TRUE = current TUV contains inline tagging
-
-  // data for remove tag function
-  PLOADEDTABLE pRTFTable;
-  PTOKENENTRY pTokBuf;
-  int iTokBufSize;
-  //ULONG ulCP;
-
-  void fillSegmentInfo( PTMXTUV pSource, PTMXTUV pTarget, PMEMEXPIMPSEG pSegment );
-
-};
 
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
@@ -1622,7 +1338,8 @@ USHORT CTMXExportImport::ImportNext
   BOOL fContinue  = TRUE;
   int errorCode = 0;
   int errorCount = 0;
-  m_handler->SetMemInterface( MEMINSERTSEGMENT, MemHandle, m_pLoadedRTFTable, this->m_pTokBuf, TMXTOKBUFSIZE ); 
+  m_handler->SetMemInterface( MEMINSERTSEGMENT, MemHandle, //m_pLoadedRTFTable, 
+    this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
       while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration )
@@ -1979,105 +1696,18 @@ bool IsValidXml(std::wstring&& sentence){
 }
 
 
-std::vector<std::wstring> ReplaceOriginalTagsWithPlaceholdersFunc(std::wstring &&w_src, std::wstring &&w_trg, bool fSkipAttributes)
-{
-  USHORT usRc = 0; 
-  std::vector<std::wstring> res;
-  
-  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
-  SAXParser *parser = new SAXParser();
-  // create an instance of our handler
-  TMXParseHandler *handler = new TMXParseHandler();
-  handler->fReplaceWithTagsWithoutAttributes = fSkipAttributes;
-  handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
-  XMLPScanToken saxToken;
-
-  //  install our SAX handler as the document and error handler.
-  parser->setDocumentHandler(handler);
-  parser->setErrorHandler( handler );
-  parser->setValidationSchemaFullChecking( false );
-  parser->setDoSchema( false );
-  parser->setLoadExternalDTD( false );
-  parser->setValidationScheme( SAXParser::Val_Never );
-  parser->setExitOnFirstFatalError( false );
-  T5LOG( T5DEBUG) << ":: parsing str = \'" << src << "\'";
-  xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
-                                      "src_buff (in memory)");
-
-  parser->parse(src_buff);
-  if(parser->getErrorCount()){
-    char buff[512];
-    handler->GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing src : " << buff;
-  }
-  std::wstring src_res = handler->GetParsedData();  
-  res.push_back(src_res);
-
-  std::string trg;
-  if(w_trg.empty() ){
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
-      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
-            res_src_s <<"\'\n";
-    }
-  }else{    
-    handler->tagReplacer.activeSegment = TARGET_SEGMENT;
-    trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_trg) + std::string("</TMXSentence>");
-    xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
-                                        "trg_buff (in memory)");
-    parser->parse(trg_buff);
-    if(parser->getErrorCount()){
-      char buff[512];
-      handler->GetErrorText(buff, sizeof(buff));
-      T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
-    }
-
-    std::wstring trg_res = handler->GetParsedData();    
-
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
-      std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
-      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
-              res_src_s << "\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
-    }
-    res.push_back(trg_res);
-  }
-  
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-    T5LOG( T5DEVELOP) <<  ":: source tags: ";
-    for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
-      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
-    }
-    T5LOG( T5DEVELOP) << ":: target tags: ";
-    for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
-      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
-    }
-
-  }
-  delete parser;
-  delete handler;
-
-  return res;
-}
-
-
-StringTagVariants::StringTagVariants(std::wstring&& w_str){
+void StringTagVariants::initParser(){
    // parse and save request
   norm.reserve(MAX_SEGMENT_SIZE);
   original.reserve(MAX_SEGMENT_SIZE);
   genericTags.reserve(MAX_SEGMENT_SIZE);
   npReplaced.reserve(MAX_SEGMENT_SIZE);
   
-  SAXParser parser;
-  original = w_str;
   // create an instance of our handler
-  TMXParseHandler handler;
   
   handler.tagReplacer.fFuzzyRequest = true;
   handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
-  //handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
   handler.fCreateNormalizedStr = true;
-  XMLPScanToken saxToken;
 
   //  install our SAX handler as the document and error handler.
   parser.setDocumentHandler(&handler);
@@ -2087,10 +1717,12 @@ StringTagVariants::StringTagVariants(std::wstring&& w_str){
   parser.setLoadExternalDTD( false );
   parser.setValidationScheme( SAXParser::Val_Never );
   parser.setExitOnFirstFatalError( false );
+}
 
-  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
-  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
-  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
+void StringTagVariants::parseSrc(){
+  src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(original) + std::string("</TMXSentence>");
+  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  src << "\'";
+  xercesc::MemBufInputSource req_buff((const XMLByte *)src.c_str(), src.size(),
                                       "req_buff (in memory)");
   parser.parse(req_buff);
   if(parser.getErrorCount()){
@@ -2105,228 +1737,136 @@ StringTagVariants::StringTagVariants(std::wstring&& w_str){
   }  
 }
 
-/*
-std::vector<std::wstring> GenerateGenericAndNormalizedStrings(std::wstring&& w_str){
+void StringTagVariants::parseTrg(){
+  if(originalTarget.empty() ){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
+      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
+            res_src_s <<"\'\n";
+    }
+  }else{    
+    handler.tagReplacer.activeSegment = TARGET_SEGMENT;
+    handler.fCreateNormalizedStr = false;//not needed for target
+    trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
+    xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
+                                        "trg_buff (in memory)");
+    parser.parse(trg_buff);
+    if(parser.getErrorCount()){
+      char buff[512];
+      handler.GetErrorText(buff, sizeof(buff));
+      T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
+    }
 
-  // parse and save request
-  SAXParser *parser = new SAXParser();
-  // create an instance of our handler
-  TMXParseHandler handler;
-  
-  handler.tagReplacer.fFuzzyRequest = true;
-  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
-  //handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
-  handler.fCreateNormalizedStr = true;
-  XMLPScanToken saxToken;
-
-  //  install our SAX handler as the document and error handler.
-  parser->setDocumentHandler(&handler);
-  parser->setErrorHandler(&handler);
-  parser->setValidationSchemaFullChecking( false );
-  parser->setDoSchema( false );
-  parser->setLoadExternalDTD( false );
-  parser->setValidationScheme( SAXParser::Val_Never );
-  parser->setExitOnFirstFatalError( false );
-
-  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
-  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
-  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
-                                      "req_buff (in memory)");
-  std::wstring norm, npRepl, generic;
-  parser->parse(req_buff);
-  if(parser->getErrorCount()){
-    char buff[512];
-    handler.GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
-  }else{
-    generic = handler.GetParsedData();
-    norm = handler.GetParsedNormalizedData();
-    npRepl = handler.GetParsedDataWithReplacedNpTags();
+    genericTarget = handler.GetParsedData();    
   }
-  std::vector<std::wstring> output;
-  output.push_back(generic);
-  output.push_back(npRepl);
-  output.push_back(norm);
-  delete parser;
-  return output;
+
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+    T5LOG( T5DEVELOP) <<  ":: source tags: ";
+    for(int i = 0; i < handler.tagReplacer.sourceTagList.size(); i++){
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.sourceTagList[i]);
+    }
+    T5LOG( T5DEVELOP) << ":: target tags: ";
+    for(int i = 0; i < handler.tagReplacer.targetTagList.size(); i++){
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.targetTagList[i]);
+    }
+  }
+
 }
 
-std::wstring ReplaceNPTagsWithHashesAndTagsWithGenericTags(std::wstring&& w_str){
-
-  // parse and save request
-  SAXParser *parser = new SAXParser();
-  std::wstring  res;
-  // create an instance of our handler
-  {
-  TMXParseHandler handler;
-  
-  handler.tagReplacer.fFuzzyRequest = true;
-  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
-  handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
-  XMLPScanToken saxToken;
-
-  //  install our SAX handler as the document and error handler.
-  parser->setDocumentHandler(&handler);
-  parser->setErrorHandler(&handler);
-  parser->setValidationSchemaFullChecking( false );
-  parser->setDoSchema( false );
-  parser->setLoadExternalDTD( false );
-  parser->setValidationScheme( SAXParser::Val_Never );
-  parser->setExitOnFirstFatalError( false );
-
-  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
-  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
-  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
-                                      "req_buff (in memory)");
-  std::wstring norm, npRepl;
-  parser->parse(req_buff);
-  if(parser->getErrorCount()){
-    char buff[512];
-    handler.GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+void StringTagVariants::logResults(){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
+      std::string res_trg_s = EncodingHelper::convertToUTF8(genericTarget);
+      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
+              res_src_s << "\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
   }
-  delete parser;
-  return res;
 }
 
-
-std::wstring ReplaceNPTagsWithHashesAndNormalizeString(std::wstring&& w_str){
-
-  // parse and save request
-  SAXParser *parser = new SAXParser();
-  // create an instance of our handler
-  TMXParseHandler handler;
-  
-  handler.tagReplacer.fFuzzyRequest = true;
-  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
-  handler.tagReplacer.fReplaceNumberProtectionTagsWithHashes = true;
-  handler.tagReplacer.fSkipTags = true;
-  XMLPScanToken saxToken;
-
-  //  install our SAX handler as the document and error handler.
-  parser->setDocumentHandler(&handler);
-  parser->setErrorHandler(&handler);
-  parser->setValidationSchemaFullChecking( false );
-  parser->setDoSchema( false );
-  parser->setLoadExternalDTD( false );
-  parser->setValidationScheme( SAXParser::Val_Never );
-  parser->setExitOnFirstFatalError( false );
-
-  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_str) + std::string("</TMXSentence>");
-  T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
-  xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
-                                      "req_buff (in memory)");
-
-  parser->parse(req_buff);
-  if(parser->getErrorCount()){
-    char buff[512];
-    handler.GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
-  }
-  delete parser;
-  return handler.GetParsedData();
-}
-//*/
-
-std::vector<std::wstring> ReplaceOriginalTagsWithTagsFromRequestFunc(std::wstring&& w_request, std::wstring &&w_src, std::wstring &&w_trg){ 
+void RequestTagReplacer::parseAndReplaceTags(){ 
   USHORT usRc = 0; 
-  std::vector<std::wstring> res;
-
-  // parse and save request
-  SAXParser *parser = new SAXParser();
-  // create an instance of our handler
-  TMXParseHandler *handler = new TMXParseHandler();
+  std::string req, src, trg;
   
-  handler->tagReplacer.fFuzzyRequest = true;
-  handler->tagReplacer.activeSegment = REQUEST_SEGMENT;
-  XMLPScanToken saxToken;
+  handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
 
   //  install our SAX handler as the document and error handler.
-  parser->setDocumentHandler(handler);
-  parser->setErrorHandler( handler );
-  parser->setValidationSchemaFullChecking( false );
-  parser->setDoSchema( false );
-  parser->setLoadExternalDTD( false );
-  parser->setValidationScheme( SAXParser::Val_Never );
-  parser->setExitOnFirstFatalError( false );
+  parser.setDocumentHandler(&handler);
+  parser.setErrorHandler(&handler );
+  parser.setValidationSchemaFullChecking( false );
+  parser.setDoSchema( false );
+  parser.setLoadExternalDTD( false );
+  parser.setValidationScheme( SAXParser::Val_Never );
+  parser.setExitOnFirstFatalError( false );
 
-  std::string req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_request) + std::string("</TMXSentence>");
+  req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalReq) + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
   xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
                                       "req_buff (in memory)");
 
-  parser->parse(req_buff);
-  if(parser->getErrorCount()){
+  parser.parse(req_buff);
+  if(parser.getErrorCount()){
     char buff[512];
-    handler->GetErrorText(buff, sizeof(buff));
+    handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
   }
 
-  std::wstring req_res = handler->GetParsedData();
+  genericTagsReq = handler.GetParsedData();
   
   // do tag replacement for source and target 
-  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_src) + std::string("</TMXSentence>");
+  src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(original) + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing str = \'" << src << "\'";
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
-  handler->tagReplacer.activeSegment = SOURCE_SEGMENT;
-  handler->tagReplacer.iHighestPTId = 500;
-  handler->tagReplacer.iHighestPHId = 100;
-  handler->tagReplacer.iHighestPTI = 0;
+  handler.tagReplacer.activeSegment = SOURCE_SEGMENT;
+  handler.tagReplacer.iHighestPTId = 500;
+  handler.tagReplacer.iHighestPHId = 100;
+  handler.tagReplacer.iHighestPTI = 0;
 
-  parser->parse(src_buff);
-  if(parser->getErrorCount()){
+  parser.parse(src_buff);
+  if(parser.getErrorCount()){
     char buff[512];
-    handler->GetErrorText(buff, sizeof(buff));
+    handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing src : ", buff;
   }
-  std::wstring src_res = handler->GetParsedData();
+  replacedTagsSrc = handler.GetParsedData();
   
-  std::string trg;
-  handler->tagReplacer.activeSegment = TARGET_SEGMENT;
-  trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(w_trg) + std::string("</TMXSentence>");
+  handler.tagReplacer.activeSegment = TARGET_SEGMENT;
+  trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
   xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                       "trg_buff (in memory)");
-  parser->parse(trg_buff);
-  if(parser->getErrorCount()){
+  parser.parse(trg_buff);
+  if(parser.getErrorCount()){
     char buff[512];
-    handler->GetErrorText(buff, sizeof(buff));
+    handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
+  }else{
+    fSuccess = true;
   }
 
-  std::wstring trg_res = handler->GetParsedData();    
+  replacedTagsTrg = handler.GetParsedData();    
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    std::string res_src_s = EncodingHelper::convertToUTF8(src_res);
-    std::string res_trg_s = EncodingHelper::convertToUTF8(trg_res);
+    std::string res_src_s = EncodingHelper::convertToUTF8(replacedTagsSrc);
+    std::string res_trg_s = EncodingHelper::convertToUTF8(replacedTagsTrg);
     T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
             res_src_s <<"\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
   }
   
-  res.push_back(src_res);
-  res.push_back(trg_res);
-  res.push_back(req_res);
   
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     T5LOG( T5DEBUG) <<  ":: request tags: ";
-    for(int i = 0; i < handler->tagReplacer.requestTagList.size(); i++){
-      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.requestTagList[i]);
+    for(int i = 0; i < handler.tagReplacer.requestTagList.size(); i++){
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.requestTagList[i]);
     }
     T5LOG( T5DEBUG) <<  ":: source tags: ";
-    for(int i = 0; i < handler->tagReplacer.sourceTagList.size(); i++){
-      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.sourceTagList[i]);
+    for(int i = 0; i < handler.tagReplacer.sourceTagList.size(); i++){
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.sourceTagList[i]);
     }
     T5LOG( T5DEBUG) <<  ":: target tags: ";
-    for(int i = 0; i < handler->tagReplacer.targetTagList.size(); i++){
-      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler->tagReplacer.targetTagList[i]);
+    for(int i = 0; i < handler.tagReplacer.targetTagList.size(); i++){
+      T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.targetTagList[i]);
     }
-
   }
-
-  delete parser;
-  delete handler;
-
-  return res;
 }
 
 std::wstring TMXParseHandler::GetParsedData() const
@@ -2677,7 +2217,6 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         break;
       case T5_N_ELEMENT:
       {
-      //  T5LOG(T5ERROR) <<"found T5N_element, handling is not implemented yet";
       //  break;
       }
       case PH_ELEMENT:
@@ -3692,11 +3231,12 @@ BOOL TMXParseHandler::TMXLanguage2TMLanguage( PSZ pszTMLanguage, PSZ pszTMXLangu
   return( fOK );
 } /* end of method TMXParseHandler::GeValue */
 
-void TMXParseHandler::SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsert, LONG lHandle, PLOADEDTABLE pTable, PTOKENENTRY pBuf, int iSize )
+void TMXParseHandler::SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsert, LONG lHandle, //PLOADEDTABLE pTable, 
+    PTOKENENTRY pBuf, int iSize )
 {
   pfnInsertSegment = pfnInsert;
   lMemHandle = lHandle;
-  pRTFTable = pTable;
+  //pRTFTable = pTable;
   pTokBuf = pTokBuf;
   iTokBufSize = iSize;
 } /* end of method TMXParseHandler::SetMemInterface */

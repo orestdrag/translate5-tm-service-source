@@ -1209,30 +1209,398 @@ typedef struct _TMX_MATCHENTRY
 
 #include<string>
 
-class StringTagVariants{
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/framework/XMLPScanToken.hpp>
+#include <xercesc/parsers/SAXParser.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+
+
+class ImportStatusDetails;
+
+
+// callback function which is used by ExtMemImportprocess to insert segments into the memory
+typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
+// IDs of TMX elelements
+typedef enum
+{
+  UNKNOWN_ELEMENT =-1,
+  TMX_ELEMENT     = 1,
+  PROP_ELEMENT    = 2,
+  HEADER_ELEMENT  = 3,
+  TU_ELEMENT      = 4,
+  TUV_ELEMENT     = 5,
+  BODY_ELEMENT    = 6,
+  SEG_ELEMENT     = 7,
+  SEGMENT_TAGS    = 8,
+
+  BEGIN_INLINE_TAGS = 10,
+  //pair tags
+  BEGIN_PAIR_TAGS = 10,
+  BPT_ELEMENT     = 10, 
+  EPT_ELEMENT     = 11,
+  G_ELEMENT       = 12,
+  HI_ELEMENT      = 13,
+  SUB_ELEMENT     = 14,
+  BX_ELEMENT      = 15,
+  EX_ELEMENT      = 16,
+  END_PAIR_TAGS   = 16,
+
+  //standalone tags
+  BEGIN_STANDALONE_TAGS = 20,
+  PH_ELEMENT            = 20, 
+  X_ELEMENT             = 21,
+  IT_ELEMENT            = 22,
+  UT_ELEMENT            = 23,
+  T5_N_ELEMENT          = 24,
+  END_STANDALONE_TAGS   = 25,
+
+  END_INLINE_TAGS       = 29,
+
+  TMX_SENTENCE_ELEMENT  = 30,
+  INVCHAR_ELEMENT       = 31
+} ELEMENTID;
+
+  
+enum ACTIVE_SEGMENT{
+  SOURCE_SEGMENT  = 0,
+  TARGET_SEGMENT  = 1, 
+  REQUEST_SEGMENT = 2 //from fuzzy search request
+};
+
+
+typedef ACTIVE_SEGMENT TagLocation;
+
+struct TagInfo
+{
+  TagLocation tagLocation = SOURCE_SEGMENT;
+  //bool fPairedTag;                    // is tag is paired tag (bpt, ept, )
+  bool fPairedTagClosed = false;        // false for bpt/ept tag - waiting for matching ept/bpt tag 
+  bool fTagAlreadyUsedInTarget = false; // we save tags only from source segment and then try to match\bind them in target
+
+  int generated_i = 0;                 // for pair tags - generated identifier to find matching tag. the same as in original_i if it's not binded to other tag in segment
+  int generated_x = 0;                 // id of tag. should match original_x, if it's not occupied by other tags
+  ELEMENTID generated_tagType = UNKNOWN_ELEMENT;           // replaced tagType, could be PH_ELEMENT, BPT_ELEMENT, EPT_ELEMENT  
+
+  int original_i = 0;        // original paired tags i
+  int original_x = 0;        // original id of tag
+  ELEMENTID original_tagType;  // original tagType
+  //if targetTag -> matching tag from source tags
+  //if sourceTag -> matching tag from target tags
+  //TagInfo* matchingTag;
+  //int matchingTagIndex = -1;
+  
+  //t5n
+  std::string t5n_key;
+  std::string t5n_value;
+};
+
+
+class TagReplacer{
+  public:
+  
+  std::vector<TagInfo> sourceTagList;
+  std::vector<TagInfo> targetTagList;
+  std::vector<TagInfo> requestTagList;
+  ACTIVE_SEGMENT activeSegment = SOURCE_SEGMENT;
+  int      iHighestPTI  = 0;               // increments with each opening pair tags
+  int      iHighestPTId = 500;             // increments with pair tag
+  int      iHighestPHId = 100;             // increments with ph tag
+  bool fFuzzyRequest = false;              // if re are dealing with import or fuzzy request
+  bool fReplaceNumberProtectionTagsWithHashes = false;//
+  bool fSkipTags = false;
+
+  //to track id and i attributes in request and then generate new values for tags in srt and trg that is not matching
+  int iHighestRequestsOriginalI  = 0;
+  int iHighestRequestsOriginalId = 0;
+
+
+  //idAttr==0 -> look for id in attributes
+  //iAttr==0 ->i attribute not used 
+  //tag should be only "ph", "bpt", or "ept"
+  TagInfo GenerateReplacingTag(ELEMENTID tagType, xercesc::AttributeList* attributes, bool saveTagToTagList = true);
+  std::wstring PrintTag(TagInfo& tag);
+  void reset();
+  std::string static LogTag(TagInfo& tag);
+  std::wstring PrintReplaceTagWithKey(TagInfo& tag);
+
+  TagReplacer(){
+    sourceTagList.reserve(50);
+    targetTagList.reserve(50);
+    requestTagList.reserve(50);
+    reset();  
+  }  
+};
+
+// PROP types
+typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
+  TRANSLATIONFLAG_PROP, TMTMMATCHTYPE_PROP, TMMTSERVICE_PROP, TMMTMETRICNAME_PROP, TMMTMETRICVALUE_PROP, TMPEEDITDISTANCECHARS_PROP, TMPEEDITDISTANCEWORDS_PROP,  
+  TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID, PROPID;
+
+// stack elements
+typedef struct _TMXELEMENT
+{
+  ELEMENTID ID;                        // ID of element 
+  BOOL      fInlineTagging;            // TRUE = we are processing inline tagging
+  BOOL      fInsideTagging;            // TRUE = we are currently inside inline tagging
+  TMXPROPID PropID;                    // ID of prop element (only used for props)
+  CHAR      szDataType[50];            // data type of current element
+  CHAR      szTMXLanguage[50];         // TMX language of element
+  CHAR      szTMLanguage[50];          // TM language of element
+  CHAR      szTMMarkup[50];            // TM markup of element
+  LONG      lSegNum;                   // TM segment number
+} TMXELEMENT, *PTMXELEMENT;
+
+
+//
+// class for our SAX handler
+//
+class TMXParseHandler : public xercesc::HandlerBase
+{
+public:
+  // -----------------------------------------------------------------------
+  //  Constructors and Destructor
+  // -----------------------------------------------------------------------
+  TMXParseHandler(); 
+  virtual ~TMXParseHandler();
+
+  // setter functions for import info
+  void SetMemInfo( PMEMEXPIMPINFO m_pMemInfo ); 
+  void SetImportData(ImportStatusDetails * _pImportDetails) { pImportDetails = _pImportDetails;}
+  void SetMemInterface( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, //LOADEDTABLE* pTable,
+     PTOKENENTRY pTokBuf, int iTokBufSize ); 
+  void SetSourceLanguage( char *pszSourceLang );
+
+  // getter functions 
+  void GetDescription( char *pszDescription, int iBufSize );
+  void GetSourceLanguage( char *pszSourceLang, int iBufSize );
+  BOOL IsHeaderDone( void );
+  BOOL ErrorOccured( void );
+  void GetErrorText( char *pszTextBuffer, int iBufSize );
+  std::wstring GetParsedData() const;
+  std::wstring GetParsedDataWithReplacedNpTags()const;
+  std::wstring GetParsedNormalizedData()const;
+
+  bool fReplaceWithTagsWithoutAttributes;
+  size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }
+
+  // -----------------------------------------------------------------------
+  //  Handlers for the SAX DocumentHandler interface
+  // -----------------------------------------------------------------------
+  void startElement(const XMLCh* const name, xercesc::AttributeList& attributes);
+  void endElement(const XMLCh* const name );
+  void characters(const XMLCh* const chars, const XMLSize_t length);
+  //void ignorableWhitespace(const XMLCh* const chars, const unsigned int length);
+  //void resetDocument();
+
+
+  // -----------------------------------------------------------------------
+  //  Handlers for the SAX ErrorHandler interface
+  // -----------------------------------------------------------------------
+  void warning(const xercesc::SAXParseException& exc);
+  void error(const xercesc::SAXParseException& exc );
+  void fatalError(const xercesc::SAXParseException& exc);
+  void fatalInternalError(const xercesc::SAXException& exc);
+  //void resetErrors();
+
+  
+  TagReplacer tagReplacer;
+  BOOL fInitialized = false;
+  BOOL fCreateNormalizedStr = false;
+
+  USHORT insertSegUsRC{0};
+
+  void setDocumentLocator(const xercesc::Locator* const locator) override;
+
+private:
+  const  xercesc::Locator* m_locator = nullptr;
+  ImportStatusDetails* pImportDetails = nullptr;
+  ELEMENTID GetElementID( PSZ pszName );
+  void Push( PTMXELEMENT pElement );
+  void Pop( PTMXELEMENT pElement );
+  BOOL GetValue( PSZ pszString, int iLen, int *piResult );
+  BOOL TMXLanguage2TMLanguage( PSZ pszTMLanguage, PSZ pszTMXLanguage, PSZ pszResultingLanguage );
+  USHORT RemoveRTFTags( PSZ_W pszString, BOOL fTagsInCurlyBracesOnly );
+
+  // date conversion help functions
+  BOOL IsLeapYear( const int iYear );
+  int GetDaysOfMonth( const int iMonth, const int iYear );
+  int GetDaysOfYear( const int iYear );
+  int GetYearDay( const int iDay, const int iMonth, const int iYear );
+
+  // mem import interface data
+  PMEMEXPIMPINFO m_pMemInfo;
+  PFN_MEMINSERTSEGMENT pfnInsertSegment;
+  LONG  lMemHandle;
+
+  // processing flags
+  BOOL fSource;                        // TRUE = source data collected  
+  BOOL fTarget;                        // TRUE = target data collected
+  BOOL fCatchData;                     // TRUE = catch data
+  BOOL fWithTagging;                   // TRUE = add tagging to data
+  BOOL fWithTMXTags;                   // TRUE = segment contains TMX tags
+  BOOL fTMXTagStarted;                 // TRUE = TMX inline tag started
+  BOOL fHeaderDone;                    // TRUE = header has been processed
+  BOOL fError;                         // TRUE = parsing ended with error
+  
+  // segment data
+  ULONG ulSegNo;                       // segmet number
+  LONG  lTime;                         // segment date/time
+  USHORT usTranslationFlag;            // type of translation flag
+  int   iNumOfTu;
+  size_t _invalidCharacterErrorCount{0};
+  // buffers
+  #define DATABUFFERSIZE 4098
+
+  typedef struct _BUFFERAREAS
+  {
+    CHAR_W   szData[DATABUFFERSIZE];  // buffer for collected data
+    CHAR_W   szReplacedNpData[DATABUFFERSIZE];
+    CHAR_W   szNormalizedData[DATABUFFERSIZE];
+    CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
+    CHAR     szLang[50];              // buffer for language
+    CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
+    MEMEXPIMPSEG SegmentData;         // buffer for segment data
+    CHAR     szDescription[1024];     // buffer for memory descripion
+    CHAR     szMemSourceLang[50];     // buffer for memory source language
+    CHAR     szMemSourceIsoLang[50];
+    CHAR     szErrorMessage[1024];    // buffer for error message text
+    CHAR_W   szNote[MAX_SEGMENT_SIZE];// buffer for note text
+    CHAR_W   szNoteStyle[100];        // buffer for note style
+    CHAR_W   szMTMetrics[MAX_SEGMENT_SIZE]; // buffer for MT metrics data
+    ULONG    ulWords;                       // number of words in the segment text
+    CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
+    
+    //for enclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> enclosing tags skipping should be ignored
+    bool        fSegmentStartsWithBPTTag;
+
+    bool        fUseMajorLanguage;
+  } BUFFERAREAS, *PBUFFERAREAS;
+
+  PBUFFERAREAS pBuf; 
+
+  // TUV data area
+  typedef struct _TMXTUV
+  {
+    CHAR_W   szText[DATABUFFERSIZE];  // buffer for TUV text
+    CHAR     szLang[50];              // buffer for TUV language (converted to Tmgr language name) or original language in case of fInvalidLang
+    CHAR     szIsoLang[10];
+    BOOL     fInvalidChars;           // TRUE = contains invalid characters 
+    BOOL     fInlineTags;             // TRUE = contains inline tagging
+    BOOL     fInvalidLang;            // TRUE = the language of the TUV is invalid
+  } TMXTUV, *PTMXTUV;
+
+  PTMXTUV pTuvArray;
+  int iCurTuv;                        // current TUV index
+  int iTuvArraySize;                  // current size of TUV array
+
+  // element stack
+  int iStackSize;
+  int iCurElement;
+  TMXELEMENT CurElement;
+  PTMXELEMENT pStack;
+
+  bool            fSawErrors;
+  BOOL      fInvalidChars;             // TRUE = current TUV contains invalid characters 
+  BOOL      fInlineTags;               // TRUE = current TUV contains inline tagging
+
+  // data for remove tag function
+  PTOKENENTRY pTokBuf;
+  int iTokBufSize;
+  //ULONG ulCP;
+
+  void fillSegmentInfo( PTMXTUV pSource, PTMXTUV pTarget, PMEMEXPIMPSEG pSegment );
+
+};
+
+
+class StringVariants{
+protected:
   std::wstring original; // full original str
+  std::wstring originalTarget;
+  bool fSuccess = false; 
+
+  
+  xercesc::SAXParser parser;
+  TMXParseHandler handler;
+  xercesc::XMLPScanToken saxToken;
+public:
+  StringVariants(std::wstring&& w_src, std::wstring&& w_trg){
+    original = std::move(w_src);
+    originalTarget = std::move(w_trg);
+  }
+  bool isParsed() const{ return fSuccess; }
+  std::wstring& getOriginalSrcStr(){ return original; }
+  std::wstring& getOriginalTrgStr(){ return original; }
+  wchar_t* getOriginalStrC() { return &original[0]; }
+  wchar_t* getOriginalTrgStrC() {return &originalTarget[0];}
+};
+
+class StringTagVariants: public StringVariants{
+protected:
   std::wstring norm; // without any tags
   std::wstring npReplaced; // with generic(generated) tags but np tags is replaced with their keys(r attr)
   std::wstring genericTags; // generated tags so there could be only ph or bpt/ept with id and r attributes that would map input str to common tag format
-  bool fSuccess = false;
-public:
-  StringTagVariants(std::wstring&& wstr);
 
-  bool isParsed(){ return fSuccess; }
+  std::wstring genericTarget; 
+
+  void initParser();
+  void parseSrc();
+  void parseTrg();
+  void logResults();
+  std::string src;
+  std::string trg;
+
+public:
+  StringTagVariants(std::wstring&& w_src): StringTagVariants(std::move(w_src), L""){}
+  StringTagVariants(std::wstring&& w_src, std::wstring&& w_trg): StringVariants(std::move(w_src), std::move(w_trg)){
+    initParser();
+    parseSrc();
+    if(fSuccess){
+      parseTrg();
+      logResults();
+    }
+  }
+
+  bool hasTarget() const { return !genericTarget.empty(); }
+  bool replaceTags(std::wstring&& w_request_input);
+
   std::wstring& getNormStr(){ return norm; }
   std::wstring& getNpReplacedStr(){ return npReplaced; }
   std::wstring& getGenericTagsString() { return genericTags; }
-  std::wstring& getOriginalString(){ return original; }
   
   wchar_t* getNormStrC(){return &norm[0];}
   wchar_t* getNpReplStrC(){return &npReplaced[0];}
   wchar_t* getGenericTagStrC() { return &genericTags[0]; }
-  wchar_t* getOriginalStrC() { return &original[0]; }
+  wchar_t* getGenericTargetStrC() {return &genericTarget[0];}
+};
+
+class RequestTagReplacer: public StringVariants{
+  std::wstring replacedTagsSrc, replacedTagsTrg, genericTagsReq, originalReq;
+  void parseAndReplaceTags();
+  public:
+
+  RequestTagReplacer(std::wstring&& w_src, std::wstring&& w_trg, std::wstring&& w_req): StringVariants(std::move(w_src), std::move(w_trg)){
+      originalReq = std::move(w_req);
+      parseAndReplaceTags();
+  };
+
+  wchar_t* getSrcWithTagsFromRequestC(){ return &replacedTagsSrc[0];}
+  wchar_t* getTrgWithTagsFromRequestC(){ return &replacedTagsTrg[0];}
+  wchar_t* getReqGenericTagStrC(){return &genericTagsReq[0]; }
+  wchar_t* getOrigReqC(){return &originalReq[0];}
+
+  std::wstring& getSrcWithTagsFromRequest(){ return replacedTagsSrc;}
+  std::wstring& getTrgWithTagsFromRequest(){ return replacedTagsTrg;}
+  std::wstring& getReqGenericTagStr(){return genericTagsReq; }
+  std::wstring& getOrigReq(){return originalReq;}
 };
 
 struct TMX_SENTENCE
 {
-  std::unique_ptr<StringTagVariants>  pStrings = nullptr;
+  std::shared_ptr<StringTagVariants>  pStrings = nullptr;
 
   PSZ_W pAddString = nullptr;
   USHORT  usNormLen = 0;
@@ -1246,7 +1614,22 @@ struct TMX_SENTENCE
   std::unique_ptr<StringTagVariants>  pPropString = nullptr;
   PTMX_TERM_TOKEN pPropTermTokens = nullptr;     // buffer for Termtokens
 
-  TMX_SENTENCE(PSZ_W inputStr){
+  //ADDINFO
+  CHAR      szSourceLanguage[MAX_LANG_LENGTH]; //language name of source
+  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
+  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
+  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
+  LONG_FN   szLongName;                        // name of source file (long name or EOS)
+  ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
+  CHAR      szTagTable[MAX_FNAME];             //tag table name
+  TIME_L    lTime;                             //time stamp
+  CHAR_W    szContext[MAX_SEGMENT_SIZE];       //segment context
+  CHAR_W    szAddInfo[MAX_SEGMENT_SIZE];       // additional segment information
+  BOOL      fMarkupChanged;                    // Markup does not exist, changed to OTMUTF8 during import
+  //end ADDINFO
+
+  TMX_SENTENCE(std::shared_ptr<StringTagVariants> input){
     bool fOK = true;
     if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
     if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
@@ -1257,13 +1640,11 @@ struct TMX_SENTENCE
       lTermAlloc = (LONG)TOK_SIZE;
       lTagAlloc = (LONG)(2*TOK_SIZE);
     } /* endif */
-    if(fOK){
-      pStrings = std::make_unique<StringTagVariants> (StringTagVariants(inputStr));
-      usNormLen = pStrings->getNormStr().length();
-    }
     if(!fOK){
       throw ;//new Exception();
     }
+    pStrings = input;
+    usNormLen = pStrings->getNormStr().length();    
   }
 
   ~TMX_SENTENCE(){
@@ -1273,6 +1654,7 @@ struct TMX_SENTENCE
     UtlAlloc( (PVOID *) &pAddString, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pTermTokens, 0L, 0L, NOMSG ); 
   }
+
 };
 using PTMX_SENTENCE = TMX_SENTENCE *;
 
@@ -1283,24 +1665,6 @@ using PTMX_SENTENCE = TMX_SENTENCE *;
 
 //#pragma pack(pop)
 //#pragma pack()
-
-typedef struct _TMX_SENTENCE_V5
-{
-  PSZ pInputString;
-  PSZ pNormString;
-  PSZ pNormStringStart;
-  USHORT  usNormLen;
-  PTMX_TERM_TOKEN pTermTokens;
-  LONG lTermAlloc;
-  PTMX_TAGTABLE_RECORD pTagRecord;
-  LONG lTagAlloc;
-  PTMX_TAGENTRY pTagEntryList;
-  USHORT  usActVote;
-  PULONG  pulVotes;
-  PSZ_W pPropString;                   // proposal string (with tagging)
-  PTMX_TERM_TOKEN pPropTermTokens;     // buffer for Termtokens
-} TMX_SENTENCE_V5, * PTMX_SENTENCE_V5           ;
-
 
 typedef struct _TMX_REPLTAGPAIR
 {
@@ -1344,23 +1708,6 @@ typedef struct _TMX_PREFIX_IN
 
 
 
-//======================================================
-typedef struct _TMX_CREATE
-{
-  USHORT usThreshold;
-  CHAR szDataName[MAX_EQF_PATH];
-  CHAR szIndexName[MAX_EQF_PATH];
-  CHAR szSourceLanguage[MAX_LANG_LENGTH];
-  CHAR szDescription[MAX_DESCRIPTION];
-} TMX_CREATE, * PTMX_CREATE;
-
-typedef struct _TMX_CREATE_IN
-{
-  TMX_CREATE stTmCreate;
-} TMX_CREATE_IN, * PTMX_CREATE_IN;
-
-
-
 //=======================================================================
 typedef struct _TMX_OPEN
 {
@@ -1378,15 +1725,6 @@ typedef struct _TMX_OPEN_IN
 } TMX_OPEN_IN, * PTMX_OPEN_IN;
 
 
-//=======================================================================
-typedef struct _TMX_CLOSE_IN
-{
-} TMX_CLOSE_IN, * PTMX_CLOSE_IN;
-
-typedef struct _TMX_CLOSE_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;
-} TMX_CLOSE_OUT, * PTMX_CLOSE_OUT;
 
 //=======================================================================
 typedef struct _TMX_PUT
@@ -2276,40 +2614,6 @@ USHORT MemRcHandlingHwnd( USHORT,  PSZ, HTM *, PSZ, HWND );
 /**********************************************************************/
 /* MemReadWriteSegment                                                */
 /**********************************************************************/
-USHORT
-MemReadWriteSegment( HTM,
-                     PSZ,
-                     HTM,
-                     PSZ,
-                     PEXT_IN,
-                     PEXT_OUT,
-                     PTMX_PUT_IN,
-                     PTMX_PUT_OUT,
-                     ULONG *,
-                     ULONG *,
-                     TIME_L,
-                     PSZ,
-                     PSZ,
-                     PSZ,
-                     BOOL );
-USHORT
-MemReadWriteSegmentHwnd( HTM,
-                     PSZ,
-                     HTM,
-                     PSZ,
-                     PEXT_IN,
-                     PEXT_OUT,
-                     PTMX_PUT_IN,
-                     PTMX_PUT_OUT,
-                     ULONG *,
-                     ULONG *,
-                     TIME_L,
-                     PSZ,
-                     PSZ,
-                     PSZ,
-                     BOOL,
-                     HWND );
-
 
 /**********************************************************************/
 /* NTMReadWriteSegment                                                */
@@ -2378,16 +2682,6 @@ TmClose( HTM,        //(in) TM handle returned from open
 /**********************************************************************/
 /* TmReplace                                                          */
 /**********************************************************************/
-USHORT
-TmReplace( HTM,           //(in)  TM handle
-           PSZ,           //(in)  full TM name x:\eqf\mem\mem.mem
-           PTMX_PUT_IN,   //(in)  pointer to put input structure
-           PTMX_PUT_OUT,  //(out) pointer to put output structure
-           USHORT );      //(in)  message handling parameter
-                          //      TRUE:  display error message
-                          //      FALSE: display no error message
-USHORT
-TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
 
 USHORT
 TmReplace( HTM,           //(in)  TM handle
@@ -2467,12 +2761,6 @@ USHORT TmDeleteTM( PSZ, USHORT, HWND, PUSHORT );
 /**********************************************************************/
 /* TmDeleteSegment                                                    */
 /**********************************************************************/
-USHORT
-TmDeleteSegment( HTM,
-                 PSZ,
-                 PTMX_PUT_IN,
-                 PTMX_PUT_OUT,
-                 USHORT );
 
 USHORT
 TmDeleteSegmentW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
@@ -3798,23 +4086,16 @@ USHORT TmtXClose( EqfMemory*, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 //tm put prototypes
 VOID HashSentence( PTMX_SENTENCE );
-VOID HashSentenceV5( PTMX_SENTENCE_V5, USHORT );
 USHORT HashTupel( PBYTE, USHORT, USHORT );
 USHORT HashTupelW( PSZ_W, USHORT );
 static VOID BuildVotes( PTMX_SENTENCE );
 static VOID Vote( PTMX_TERM_TOKEN, PTMX_SENTENCE, USHORT );
-static VOID BuildVotesV5( PTMX_SENTENCE_V5 );
-static VOID VoteV5( PTMX_TERM_TOKEN, PTMX_SENTENCE_V5, USHORT );
 USHORT CheckCompactArea( PTMX_SENTENCE, EqfMemory* );
-USHORT CheckCompactAreaV5( PTMX_SENTENCE_V5, EqfMemory* );
 
 USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
-USHORT TokenizeTargetV5( PSZ, PSZ, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
 
 VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
-VOID FillTmRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD, PSZ, USHORT,
-                   PTMX_RECORD, PTMX_OLD_TARGET_CLB );
 
 USHORT FillClb( PTMX_TARGET_CLB *, EqfMemory*, PTMX_PUT_W );
 USHORT FillClbV5( PTMX_OLD_TARGET_CLB *, EqfMemory*, PTMX_PUT );

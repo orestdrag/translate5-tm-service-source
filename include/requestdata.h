@@ -303,6 +303,8 @@ class UpdateEntryRequestData: public RequestData{
 
     BOOL fSave2Disk = 1;
 protected:
+    //TMX_SENTENCE *inputSentence = nullptr;
+    
     int parseJSON() override;
     int checkData() override;
     int execute  () override;

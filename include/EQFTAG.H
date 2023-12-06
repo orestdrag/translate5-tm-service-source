@@ -295,7 +295,7 @@ typedef struct _NODEAREA
 } NODEAREA, *PNODEAREA;
 
 // structure for loaded tag tables
-typedef struct _LOADEDTABLE
+using LOADEDTABLE = struct _LOADEDTABLE
 {
    CHAR        szName[MAX_FNAME];      // tag table name (w/o path and ext.)
    SHORT       sUseCount;              // number of active table users
@@ -336,7 +336,8 @@ typedef struct _LOADEDTABLE
    ULONG       ulTRNote2Len;			// lenght of TRNotesText2
    // timestamp when tag table was loaded the last time
    ULONG       ulTimeStamp;
-} LOADEDTABLE, *PLOADEDTABLE;
+};
+using PLOADEDTABLE = LOADEDTABLE *;
 
 /**********************************************************************/
 /* Error codes returned by EQFB... functions                          */

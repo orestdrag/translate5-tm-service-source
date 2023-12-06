@@ -2403,7 +2403,7 @@ USHORT TmtXClose
 (
   EqfMemory* pTmClb,             //ptr to control block
   PTMX_CLOSE_IN pTmCloseIn,    //ptr to input struct
-  PTMX_CLOSE_OUT pTmCloseOut   //ptr to output struct
+  PTMX_PUT_OUT_W pTmCloseOut   //ptr to output struct
 )
 {
   USHORT     usRc = NO_ERROR;          //return value
@@ -2478,7 +2478,7 @@ USHORT TmtXClose
   //release control block memory
   UtlAlloc( (PVOID *) &pTmClb, 0L, 0L, NOMSG );
 
-  pTmCloseOut->stPrefixOut.usLengthOutput = sizeof( TMX_CLOSE_OUT );
+  pTmCloseOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
   pTmCloseOut->stPrefixOut.usTmtXRc = usRc;
   return( usRc );
 }
