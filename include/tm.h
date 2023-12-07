@@ -1706,43 +1706,6 @@ typedef struct _TMX_PREFIX_IN
   USHORT usTmCommand;                  //TM command id
 } TMX_PREFIX_IN, * PTMX_PREFIX_IN, XIN, * PXIN;
 
-
-
-//=======================================================================
-typedef struct _TMX_OPEN
-{
-  CHAR szDataName[MAX_EQF_PATH];
-  CHAR szIndexName[MAX_EQF_PATH];
-  CHAR szServer[MAX_SERVER_NAME];
-  CHAR szUserid[MAX_USERID];
-  USHORT usAccess;
-  USHORT usThreshold;
-} TMX_OPEN, * PTMX_OPEN;
-
-typedef struct _TMX_OPEN_IN
-{
-  TMX_OPEN stTmOpen;
-} TMX_OPEN_IN, * PTMX_OPEN_IN;
-
-
-
-//=======================================================================
-typedef struct _TMX_PUT
-{
-  CHAR      szSource[MAX_SEGMENT_SIZE];        //source sentence
-  CHAR      szTarget[MAX_SEGMENT_SIZE];        //target sentence
-  CHAR      szSourceLanguage[MAX_LANG_LENGTH]; //language name of source
-  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
-  USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
-  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
-  USHORT    usSourceSegmentId;                 //seg. num. of source sentence from analysis
-  CHAR      szTagTable[MAX_FNAME];             //tag table name
-  TIME_L    lTime;                             //time stamp
-} TMX_PUT, * PTMX_PUT;
-
-
 typedef struct _TMX_PUT_W
 {
   CHAR_W    szSource[MAX_SEGMENT_SIZE];        //source sentence
@@ -1762,46 +1725,16 @@ typedef struct _TMX_PUT_W
 } TMX_PUT_W, * PTMX_PUT_W;
 
 
-typedef struct _TMX_PUT_IN
-{
-  TMX_PUT        stTmPut;             //pointer to put input structure
-} TMX_PUT_IN, * PTMX_PUT_IN;
-
 typedef struct _TMX_PUT_IN_W
 {
   TMX_PUT_W      stTmPut;             //pointer to put input structure
 } TMX_PUT_IN_W, * PTMX_PUT_IN_W;
-
-
-//structure TMX_PUT_OUT
-typedef struct _TMX_PUT_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;           //output structure
-} TMX_PUT_OUT, * PTMX_PUT_OUT;
 
 typedef struct _TMX_PUT_OUT_W
 {
   TMX_PREFIX_OUT stPrefixOut;           //output structure
 } TMX_PUT_OUT_W, * PTMX_PUT_OUT_W;
 
-
-//=======================================================================
-//structure TMX_GET_IN and _TMX_GET
-typedef struct _TMX_GET
-{
-  CHAR        szSource[MAX_SEGMENT_SIZE];        //source sentence
-  CHAR        szTagTable[MAX_FNAME];             //tag table name of source
-  CHAR        szSourceLanguage[MAX_LANG_LENGTH]; //language of source
-  CHAR        szFileName[MAX_FILESPEC];          //file name the source comes from
-  LONG_FN     szLongName;                        // name of source file (long name or EOS)
-  USHORT      usSegmentId;                       //segment number from analysis
-  CHAR        szAuthorName[MAX_USERID];          //author name
-  CHAR        szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
-  USHORT      usRequestedMatches;                //number of requested matches
-  USHORT      usMatchThreshold;                  //threshold for match level
-  USHORT      usConvert;                //how the output should be converted
-  USHORT      usParm;                   //for future use, xmp. GET_ONLY_MT_MATCHES, GET_ONLY_EXACT_MATCHES...)
-} TMX_GET, * PTMX_GET;
 
 typedef struct _TMX_GET_W
 {
@@ -1827,10 +1760,6 @@ typedef struct _TMX_GET_W
   bool fTargetLangIsPrefered;
 } TMX_GET_W, * PTMX_GET_W;
 
-typedef struct _TMX_GET_IN
-{
-  TMX_GET        stTmGet;             //pointer in structure
-} TMX_GET_IN, * PTMX_GET_IN;
 
 typedef struct _TMX_GET_IN_W
 {
@@ -1840,24 +1769,6 @@ typedef struct _TMX_GET_IN_W
 
 //=======================================================================
 // structure TMX_GET_OUT
-typedef struct _TMX_MATCH_TABLE
-{
-  CHAR   szSource[MAX_SEGMENT_SIZE];   //source sentence with tags
-  CHAR   szFileName[MAX_FILESPEC];     //file name where the source comes from.
-  LONG_FN szLongName;                  // name of source file (long name or EOS)
-  USHORT usSegmentId;                  //segment number from analysis
-  CHAR   szTarget[MAX_SEGMENT_SIZE];   //target sentence with tags
-  CHAR   szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
-  USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
-  CHAR   szTargetAuthor[MAX_USERID];   //author name of target
-  TIME_L lTargetTime;                  //time stamp of target
-  USHORT usMatchLevel;                 //similarity of the source
-  USHORT usOverlaps;                   //temp field - nr of overlapping triples
-  CHAR   szTagTable[MAX_FNAME];        //tag table name of source
-  ULONG  ulKey;                        // key of match
-  USHORT usTargetNum;                  // number of target
-  USHORT usDBIndex;                    // number of memory in current hierarchy
-} TMX_MATCH_TABLE, * PTMX_MATCH_TABLE;
 
 typedef struct _TMX_MATCH_TABLE_W
 {
@@ -1884,14 +1795,6 @@ typedef struct _TMX_MATCH_TABLE_W
   USHORT  usContextRanking;             // context ranking from user exit context processing
   USHORT  usMatchInfo;                  // for future use: special info for match
 } TMX_MATCH_TABLE_W, * PTMX_MATCH_TABLE_W;
-
-typedef struct _TMX_GET_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;         //prefix of Output buffer
-  USHORT usNumMatchesFound;           //number of matches found
-  TMX_MATCH_TABLE stMatchTable[MAX_MATCHES];     //match structure
-  USHORT fsAvailFlags;                // additional flags (more exact/fuzzy matches avail)
-} TMX_GET_OUT, * PTMX_GET_OUT;
 
 typedef struct _TMX_GET_OUT_W
 {
@@ -2682,17 +2585,6 @@ TmClose( HTM,        //(in) TM handle returned from open
 /**********************************************************************/
 /* TmReplace                                                          */
 /**********************************************************************/
-
-USHORT
-TmReplace( HTM,           //(in)  TM handle
-           PSZ,           //(in)  full TM name x:\eqf\mem\mem.mem
-           PTMX_PUT_IN,   //(in)  pointer to put input structure
-           PTMX_PUT_OUT,  //(out) pointer to put output structure
-           USHORT,        //(in)  message handling parameter
-                          //      TRUE:  display error message
-                          //      FALSE: display no error message
-           HWND );                     //(in) handle for error messages
-
 USHORT
 TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT, HWND );
 
@@ -2708,35 +2600,11 @@ TmGetW(EqfMemory*,               //(in)  TM handle
                           //      TRUE:  display error message
                           //      FALSE: display no error message
 
-USHORT
-TmGet( HTM,               //(in)  TM handle
-       PSZ,               //(in)  full TM name x:\eqf\mem\mem.tmd
-       PTMX_GET_IN,       //(in)  pointer to get input structure
-       PTMX_GET_OUT,      //(out) pointer to get output structure
-       USHORT );          //(in)  message handling parameter
-                          //      TRUE:  display error message
-                          //      FALSE: display no error message
 /**********************************************************************/
 /* TmExtract                                                          */
 /**********************************************************************/
 USHORT
-TmExtract( HTM,
-           PSZ,
-           PTMX_EXT_IN,
-           PTMX_EXT_OUT,
-           USHORT );
-
-USHORT
 TmExtractW( HTM, PSZ, PTMX_EXT_IN_W, PTMX_EXT_OUT_W, USHORT );
-
-
-USHORT
-TmExtractHwnd( HTM,
-           PSZ,
-           PTMX_EXT_IN,
-           PTMX_EXT_OUT,
-           USHORT,
-           HWND );                     //(in) handle for error messages
 
 USHORT
 TmExtractHwndW( HTM, PSZ, PTMX_EXT_IN_W, PTMX_EXT_OUT_W, USHORT, HWND );
@@ -2799,32 +2667,6 @@ NTMOpenProperties( HPROP *,
 #define  TMUPDSEG_TARGLANG     0x04    // update target language
 #define  TMUPDSEG_DATE         0x08    // update segment time
 
-USHORT TmUpdSeg
-(
-  HTM         htm,                       //(in)  TM handle
-  PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN pstPutIn,                  //(in)  pointer to put input structure
-  ULONG       ulUpdKey,                  //(in)  key of record being updated
-  USHORT      usUpdTarget,               //(in)  number of target being updated
-  USHORT      usFlags,                   //(in)  flags controlling the updated fields
-  USHORT      usMsgHandling              //(in)  message handling parameter
-                                         //      TRUE:  display error message
-                                         //      FALSE: display no error message
-);
-
-USHORT TmUpdSegHwnd
-(
-  HTM         htm,                       //(in)  TM handle
-  PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN pstPutIn,                  //(in)  pointer to put input structure
-  ULONG       ulUpdKey,                  //(in)  key of record being updated
-  USHORT      usUpdTarget,               //(in)  number of target being updated
-  USHORT      usFlags,                   //(in)  flags controlling the updated fields
-  USHORT      usMsgHandling,             //(in)  message handling parameter
-                                         //      TRUE:  display error message
-                                         //      FALSE: display no error message
-  HWND        hwnd                       //(in)  handle for error messages
-);
 
 USHORT TmUpdSegW
 (
@@ -4081,8 +3923,6 @@ USHORT NTMGetIDFromName( EqfMemory*, PSZ, PSZ, USHORT, PUSHORT );
 USHORT NTMGetNameFromID( EqfMemory*, PUSHORT, USHORT, PSZ, PSZ );
 USHORT TmtXReplace( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
-USHORT TmtXOpen( PTMX_OPEN_IN, PTMX_OPEN_OUT );
-USHORT TmtXClose( EqfMemory*, PTMX_CLOSE_IN, PTMX_CLOSE_OUT );
 
 //tm put prototypes
 VOID HashSentence( PTMX_SENTENCE );
@@ -4098,22 +3938,13 @@ VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 
 USHORT FillClb( PTMX_TARGET_CLB *, EqfMemory*, PTMX_PUT_W );
-USHORT FillClbV5( PTMX_OLD_TARGET_CLB *, EqfMemory*, PTMX_PUT );
 USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );
-USHORT DetermineTmRecordV5( EqfMemory*, PTMX_SENTENCE_V5, PULONG );
-USHORT UpdateTmRecordV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5 );
 USHORT AddTmTarget( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE, PTMX_RECORD *, PULONG, PULONG );
-USHORT AddTmTargetV5( EqfMemory*, PTMX_PUT, PTMX_SENTENCE_V5, PTMX_RECORD *, PULONG, PULONG );
 USHORT ComparePutData( EqfMemory*, PTMX_RECORD *, PULONG, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
-USHORT ComparePutDataV5( EqfMemory*, PTMX_RECORD *, PULONG, PTMX_PUT, PTMX_SENTENCE_V5, PULONG );
 
 VOID FillTargetRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD,
                        PSZ_W, USHORT, PTMX_TARGET_RECORD *, PTMX_TARGET_CLB );
-VOID FillTargetRecordV5( PTMX_SENTENCE_V5, PTMX_TAGTABLE_RECORD,
-                       PSZ, USHORT, PTMX_TARGET_RECORD *, PTMX_OLD_TARGET_CLB );
 
-USHORT ReplaceTmTarget( PTMX_SENTENCE, EqfMemory*, PTMX_PUT, PBYTE,
-                        PTMX_RECORD, PULONG );
 VOID DeleteOldestRecord( PTMX_RECORD, PULONG );
 
 //tm get prototypes

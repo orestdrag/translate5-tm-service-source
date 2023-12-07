@@ -1822,12 +1822,13 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
+  PTMX_SENTENCE inputSentence = nullptr;
   if(Data.szSource && Data.szTarget){
-    Data.pInputSentence  = new TMX_SENTENCE(std::make_shared<TMX_SENTENCE>( Data.szSource , Data.szTarget ));
+    inputSentence  = new TMX_SENTENCE(std::make_unique<StringTagVariants> (Data.szSource , Data.szTarget));
   }
-  if(!_rc_ && inputSentence->isParsed()){
-    wcscpy( Data.szSource, replacedInput->getGenericTagStrC());
-    wcscpy( Data.szTarget, replacedInput->getGenericTargetStrC());
+  if(!_rc_ && inputSentence->pStrings->isParsed()){
+    wcscpy( Data.szSource, inputSentence->pStrings->getGenericTagStrC());
+    wcscpy( Data.szTarget, inputSentence->pStrings->getGenericTargetStrC());
   }else{
     buildErrorReturn(_rc_, "Error in xml in source or target!");
     return _rc_;
@@ -1920,7 +1921,7 @@ int UpdateEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
   json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
   json_factory.terminateJSON( outputMessage );
-  if(!inputSentence) delete inputSentence;
+  //if(!inputSentence) delete inputSentence;
   return( _rc_ );
 }
 

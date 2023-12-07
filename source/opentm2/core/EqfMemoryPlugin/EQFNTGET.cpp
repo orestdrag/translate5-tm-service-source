@@ -306,7 +306,7 @@ USHORT EqfMemory::TmtXGet
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
-  TMX_SENTENCE Sentence(pTmGetIn->stTmGet.szSource);      // ptr to sentence structure
+  TMX_SENTENCE Sentence(std::make_shared<StringTagVariants>(pTmGetIn->stTmGet.szSource));      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string

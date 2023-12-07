@@ -189,7 +189,7 @@ USHORT EqfMemory::TmtXReplace
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  TMX_SENTENCE  Sentence(pTmPutIn->stTmPut.szSource);     // ptr to sentence structure
+  TMX_SENTENCE  Sentence(std::make_shared<StringTagVariants>(pTmPutIn->stTmPut.szSource));     // ptr to sentence structure
   ULONG      ulNewKey = 0;             // sid of newly added tm record
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
@@ -282,7 +282,7 @@ USHORT EqfMemory::TmtXReplace
     NTMLockTM( this, FALSE, &fLocked );
   } /* endif */
 
-  pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
+  pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
   pTmPutOut->stPrefixOut.usTmtXRc = usRc;
 
   // special handling if update of index failed with BTREE_LOOKUPTABLE_TOO_SMALL:

@@ -59,7 +59,7 @@ USHORT EqfMemory::TmtXDelSegm
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 )
 {
-  TMX_SENTENCE Sentence(pTmDelIn->stTmPut.szSource);    // ptr to sentence structure
+  TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->stTmPut.szSource));    // ptr to sentence structure
   ULONG ulKey;                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
@@ -184,7 +184,7 @@ USHORT EqfMemory::TmtXDelSegm
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
 
-  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
+  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
   pTmDelOut->stPrefixOut.usTmtXRc = usRc;
   return( usRc );
 }
@@ -257,7 +257,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
   
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
-  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT );
+  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
   pTmDelOut->stPrefixOut.usTmtXRc = usRc;
   return( usRc );
 }
