@@ -345,9 +345,8 @@ BOOL CheckForAlloc
 //                                                                              
 //------------------------------------------------------------------------------
 
-USHORT TokenizeSource
+USHORT EqfMemory::TokenizeSource
 (
-   EqfMemory* pClb,                       // pointer to control block (Null if called outside of Tm functions)
    PTMX_SENTENCE pSentence,             // pointer to sentence structure
    PSZ pTagTableName,                   // name of tag table
    PSZ pSourceLang                      // source language

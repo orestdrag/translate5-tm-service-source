@@ -55,11 +55,11 @@
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::TmtXDelSegm
 (
-  PTMX_PUT_IN_W pTmDelIn,  //ptr to input struct
+  SearchProposal& TmDelIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 )
 {
-  TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->stTmPut.szSource));    // ptr to sentence structure
+  //TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->stTmPut.szSource));    // ptr to sentence structure
   ULONG ulKey;                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
@@ -92,7 +92,7 @@ USHORT EqfMemory::TmtXDelSegm
     //build tag table path
     Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, MAX_EQF_PATH);
     strcat (szString, "/TABLE/");
-    strcat( szString, pTmDelIn->stTmPut.szTagTable );
+    strcat( szString, TmDelIn.szMarkup );
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string - why?
@@ -100,11 +100,11 @@ USHORT EqfMemory::TmtXDelSegm
 
 
     //tokenize source segment, resuting in normalized string and tag table record
-    usRc = TokenizeSource( this, &Sentence, szString,
-                           pTmDelIn->stTmPut.szSourceLanguage);
+    usRc = TokenizeSource( TmDelIn.pInputSentence, szString,
+                           TmDelIn.szIsoSourceLang);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
-    Sentence.pTagRecord->usTagTableId = 0;
+    TmDelIn.pInputSentence->pTagRecord->usTagTableId = 0;
   }
 
 
@@ -113,17 +113,17 @@ USHORT EqfMemory::TmtXDelSegm
   {
     //set pNormString to beginning of string
     //Sentence.pNormString = Sentence.pStrings->getNormStrC();
-    HashSentence( &Sentence );
+    HashSentence( TmDelIn.pInputSentence );
   } /* endif */
 
 
   // update TM databse
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( &Sentence, this );
-    if ( usMatchesFound == Sentence.usActVote ) //all hash triples found
+    usMatchesFound = CheckCompactArea( TmDelIn.pInputSentence, this );
+    if ( usMatchesFound == TmDelIn.pInputSentence->usActVote ) //all hash triples found
     {
-      usRc = DetermineTmRecord( this, &Sentence, pulSids );
+      usRc = DetermineTmRecord( this, TmDelIn.pInputSentence, pulSids );
       if ( !usRc )
       {
         while ( *pulSids )
@@ -157,8 +157,7 @@ USHORT EqfMemory::TmtXDelSegm
           {
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
-            usRc = FindTargetAndDelete( pTmRecord,
-                                &pTmDelIn->stTmPut, &Sentence, &ulKey );
+            usRc = FindTargetAndDelete( pTmRecord, TmDelIn, &ulKey );
             if ( usRc == SEG_NOT_FOUND )
             {
               //get next tm record
@@ -319,8 +318,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::FindTargetAndDelete(
                             PTMX_RECORD pTmRecord,
-                            PTMX_PUT_W  pTmDel,
-                            PTMX_SENTENCE pSentence,
+                            SearchProposal&  TmDel,
                             PULONG pulKey )
 {
   BOOL fOK = FALSE;                    //success indicator
@@ -335,20 +333,12 @@ USHORT EqfMemory::FindTargetAndDelete(
   PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lTagAlloc;                      //allocate length
   ULONG ulLen = 0;                    //length indicator
-  USHORT usNormLen = 0;                //length of normalized string
   PSZ_W  pString = NULL;               //pointer to character string
-  PSZ_W  pNormString = NULL;           //pointer to character string
   USHORT usId = 0;                     //returned id from function
   USHORT usRc = NO_ERROR;              //returned value from function
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-
-  //allocate normalized string
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &(pNormString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-  } /* endif */
 
   //allocate 4k for pTagRecord
   if ( fOK )
@@ -383,7 +373,7 @@ USHORT EqfMemory::FindTargetAndDelete(
 
     //compare source strings
     //if ( !UTF16strcmp( pString, pSentence->pNormString ) )
-    if ( !UTF16strcmp( pString, pSentence->pStrings->getGenericTagStrC() ) )
+    if ( !UTF16strcmp( pString, TmDel.pInputSentence->pStrings->getGenericTagStrC() ) )
     {
       ULONG   ulLeftTgtLen;            // remaining target length
       /****************************************************************/
@@ -414,7 +404,7 @@ USHORT EqfMemory::FindTargetAndDelete(
         pClb = (PTMX_TARGET_CLB)pByte;
 
         //get id of target language in the put structure
-        usRc = NTMGetIDFromName( this, pTmDel->szTargetLanguage,
+        usRc = NTMGetIDFromName( TmDel.szIsoTargetLang,
                                  NULL,
                                  (USHORT)LANG_KEY, &usId );
         //compare target language ids
@@ -449,13 +439,13 @@ USHORT EqfMemory::FindTargetAndDelete(
             ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
 
             //tokenize target string in del structure
-            usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, this );
+            //usRc = TokenizeTarget( pTmDel->szTarget, pNormString, &pTagRecord, &lTagAlloc, pTmDel->szTagTable, &usNormLen, this );
 
             if ( !usRc )
             {
               //compare target strings
               //if ( !UTF16strcmp( pString, pNormString ) )
-              if ( !UTF16strcmp( pString, pTmDel->szTarget ) )
+              if ( !UTF16strcmp( pString, TmDel.pInputSentence->pStrings->getGenericTargetStrC() ) )
               {
                 //target strings are equal so compare target tag records
                 //position at target tag table record
@@ -481,8 +471,8 @@ USHORT EqfMemory::FindTargetAndDelete(
                   pClb = (PTMX_TARGET_CLB)pByte;
 
                   //get id of filename in the put structure
-                  usRc = NTMGetIDFromName( this, pTmDel->szFileName,
-                                           pTmDel->szLongName,
+                  usRc = NTMGetIDFromName( TmDel.szDocName,
+                                           TmDel.szDocName,
                                            (USHORT)FILE_KEY, &usId );
                   if ( !usRc )
                   {
@@ -503,7 +493,7 @@ USHORT EqfMemory::FindTargetAndDelete(
 
                         //check that multiple flag isn't on
                         //if on leave while loop as though delete was carried out
-                        if ( !pClb->bMultiple || (BOOL)pTmDel->lTime  || true)
+                        if ( !pClb->bMultiple || (BOOL)TmDel.lTime  || true)
                         {
                           TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
 
@@ -557,7 +547,6 @@ USHORT EqfMemory::FindTargetAndDelete(
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &(pNormString), 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG );
 
   return( usRc );
@@ -732,7 +721,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
             //                         pTargetClb,
             //                         pSourceString, &lSourceLen,
             //                         &pTmExtOut->stTmExt );
-            //NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+            //pTmClb->NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
             //            pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
             //if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime )
             {

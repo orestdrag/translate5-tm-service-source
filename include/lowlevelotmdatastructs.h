@@ -210,7 +210,7 @@ typedef struct _TMVITALINFO
 
 #define MAX_COMPACT_SIZE    3217   // 256
 
-#define MAX_LANG_LENGTH         20     // length of the name of a language
+#define MAX_LANG_LENGTH         40     // length of the name of a language
 typedef struct _TMX_SIGN
 {
   TIME_L lTime=0;

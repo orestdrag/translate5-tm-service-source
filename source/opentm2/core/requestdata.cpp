@@ -1762,7 +1762,7 @@ int UpdateEntryRequestData::parseJSON(){
   { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
   { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szType ), sizeof( Data.szType ) },
-  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szAuthor ), sizeof( Data.szAuthor ) },
+  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
@@ -1822,13 +1822,12 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
-  PTMX_SENTENCE inputSentence = nullptr;
   if(Data.szSource && Data.szTarget){
-    inputSentence  = new TMX_SENTENCE(std::make_unique<StringTagVariants> (Data.szSource , Data.szTarget));
+    Data.pInputSentence  = new TMX_SENTENCE(std::make_unique<StringTagVariants> (Data.szSource , Data.szTarget));
   }
-  if(!_rc_ && inputSentence->pStrings->isParsed()){
-    wcscpy( Data.szSource, inputSentence->pStrings->getGenericTagStrC());
-    wcscpy( Data.szTarget, inputSentence->pStrings->getGenericTargetStrC());
+  if(!_rc_ && Data.pInputSentence->pStrings->isParsed()){
+    //wcscpy( Data.szSource, inputSentence->pStrings->getGenericTagStrC());
+    //wcscpy( Data.szTarget, inputSentence->pStrings->getGenericTargetStrC());
   }else{
     buildErrorReturn(_rc_, "Error in xml in source or target!");
     return _rc_;
@@ -1837,7 +1836,6 @@ int UpdateEntryRequestData::execute(){
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
   Data.eType = getMemProposalType(Data.szType );
-  strcpy( Data.szTargetAuthor,Data.szAuthor ); 
 
   LONG lTime = 0;
   if (Data.szDateTime[0] != 0 )
@@ -1858,15 +1856,13 @@ int UpdateEntryRequestData::execute(){
 
   // update the memory
   //OtmProposal OtmProposal;
-  TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
   TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
-  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  mem->OtmProposalToPutIn( Data, &TmPutIn );
+  //mem->OtmProposalToPutIn( Data, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
-    std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
+    std::string source = EncodingHelper::convertToUTF8(Data.szSource);
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
   /********************************************************************/
@@ -1877,7 +1873,7 @@ int UpdateEntryRequestData::execute(){
   if(Data.recordKey && Data.targetKey){
     _rc_ = mem->TmtXUpdSeg(  &Data, &TmPutOut, 0 );
   }else{
-    _rc_ = mem->TmtXReplace ( &TmPutIn, &TmPutOut );
+    _rc_ = mem->TmtXReplace ( Data, &TmPutOut );
   }
   if ( _rc_ != 0 ){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ");   
@@ -1887,7 +1883,7 @@ int UpdateEntryRequestData::execute(){
   }
 
   if ( ( _rc_ == 0 ) &&
-       ( TmPutIn.stTmPut.fMarkupChanged ) ) {
+       ( Data.fMarkupChanged ) ) {
     return buildErrorReturn(SEG_RESET_BAD_MARKUP, "SEG_RESET_BAD_MARKUP") ;
   }
   
@@ -1919,7 +1915,7 @@ int UpdateEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "internalKey", Data.szInternalKey);
   json_factory.addParmToJSON( outputMessage, "markupTable", Data.szMarkup );
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
-  json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
+  json_factory.addParmToJSON( outputMessage, "author", Data.szTargetAuthor );
   json_factory.terminateJSON( outputMessage );
   //if(!inputSentence) delete inputSentence;
   return( _rc_ );
@@ -1947,7 +1943,7 @@ int DeleteEntryRequestData::parseJSON(){
   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
   { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szType ), sizeof( Data.szType ) },
-  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szAuthor ), sizeof( Data.szAuthor ) },
+  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
@@ -2034,12 +2030,11 @@ int DeleteEntryRequestData::execute(){
     EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
     EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
     Data.eType = getMemProposalType( Data.szType );
-    strcpy( Data.szTargetAuthor, Data.szAuthor );
-    TMX_PUT_IN_W TmPutIn;
-    memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-    _rc_ = mem->OtmProposalToPutIn( Data, &TmPutIn );
+    //TMX_PUT_IN_W TmPutIn;
+    //memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
+    //_rc_ = mem->OtmProposalToPutIn( Data, &TmPutIn );
     if ( !_rc_ ){ 
-      _rc_ = mem->TmtXDelSegm ( &TmPutIn, &TmPutOut );
+      _rc_ = mem->TmtXDelSegm ( Data, &TmPutOut );
     }
   }
 
@@ -2070,7 +2065,7 @@ int DeleteEntryRequestData::execute(){
   json_factory.addParmToJSON( outputMessage, "segmentNumber", Data.lSegmentNum );
   json_factory.addParmToJSON( outputMessage, "markupTable", Data.szMarkup );
   json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
-  json_factory.addParmToJSON( outputMessage, "author", Data.szAuthor );
+  json_factory.addParmToJSON( outputMessage, "author", Data.szTargetAuthor );
   json_factory.terminateJSON( outputMessage );
 
   _rc_ = OK;

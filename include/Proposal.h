@@ -467,18 +467,21 @@ public:
 
 OtmProposal::eProposalType getMemProposalType( char *pszType );
 
+class TMX_SENTENCE;
+
 class SearchProposal: public OtmProposal
 {
 public:
+  TMX_SENTENCE* pInputSentence = nullptr;
 
   char szMemory[260];
-  char szIsoSourceLang[40];
-  char szIsoTargetLang[40];
+  char szIsoSourceLang[MAX_LANG_LENGTH];
+  char szIsoTargetLang[MAX_LANG_LENGTH];
   int lSegmentNum;
   char szDocName[260];
   wchar_t szError[512];
   char szType[256];
-  char szAuthor[80];
+  //char szAuthor[MAX_USERID];
   char szDateTime[40];
   char szSearchMode[40];
   char szSearchPos[80];
@@ -488,6 +491,13 @@ public:
   ulong recordKey{0};
   ushort targetKey{0};
 
+//otm_put
+  //USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
+  //ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
+  TIME_L    lTime;                             //time stamp
+  BOOL      fMarkupChanged;                    // Markup does not exist, changed to OTMUTF8 during import
+//otm_put end
+
     
   /*! \brief is source lang is marked as prefered in languages.xml */
   bool fIsoSourceLangIsPrefered = false;
@@ -495,6 +505,7 @@ public:
   bool fIsoTargetLangIsPrefered = false;
 
   void clearSearchProposal();
+  ~SearchProposal() { if(pInputSentence) delete pInputSentence;}
 };
 
 #endif //_PROPOSAL_H_INCLUDED_

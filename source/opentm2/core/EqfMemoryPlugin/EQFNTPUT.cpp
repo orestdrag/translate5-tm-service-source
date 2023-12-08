@@ -47,7 +47,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 	(
 		PTMX_RECORD		   *ppTmRecordStart,
 		PULONG     		   pulRecBufSize,
-	    PTMX_PUT_W 		   pTmPut,
+	  SearchProposal& 		   TmProposal,
 		PTMX_TARGET_CLB    *ppClb,
 		PTMX_RECORD        *ppCurTmRecord,
 		PTMX_TARGET_RECORD	 *ppTMXTargetRecord,
@@ -57,8 +57,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 USHORT TMLoopAndDelTargetClb
 	(
 		PTMX_RECORD         pTmRecord,
-		PTMX_PUT_W 			    pTmPut,
-    PTMX_SENTENCE       pSentence,
+		SearchProposal& 	  TmProposal,
     USHORT              usPutLang,
     USHORT              usPutFile,
     PBOOL               fNewerTargetExists
@@ -185,11 +184,11 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 USHORT EqfMemory::TmtXReplace
 (
-  PTMX_PUT_IN_W pTmPutIn,  //ptr to input struct
+  SearchProposal& TmProposal,  //ptr to input struct
   PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  TMX_SENTENCE  Sentence(std::make_shared<StringTagVariants>(pTmPutIn->stTmPut.szSource));     // ptr to sentence structure
+  //TMX_SENTENCE  Sentence(std::make_shared<StringTagVariants>(pTmPutIn->stTmPut.szSource));     // ptr to sentence structure
   ULONG      ulNewKey = 0;             // sid of newly added tm record
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
@@ -209,29 +208,26 @@ USHORT EqfMemory::TmtXReplace
     //build tag table path
     Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, sizeof(szString));
     strcat( szString, "/TABLE/");
-    strcat( szString, pTmPutIn->stTmPut.szTagTable );
+    strcat( szString, TmProposal.szMarkup );
     strcat( szString, EXT_OF_FORMAT );
 
-    //remember start of norm string
-    //Sentence.pNormStringStart = Sentence.pStrings->getNormStrC();
-
     //tokenize source segment, resulting in norm. string and tag table record
-    usRc = TokenizeSource( this, &Sentence, szString,
-                           pTmPutIn->stTmPut.szSourceLanguage);             
+    usRc = TokenizeSource( TmProposal.pInputSentence, szString,
+                           TmProposal.szIsoSourceLang);             
     
     if ( strstr( szString, "OTMUTF8" ) ) {
-       strcpy( pTmPutIn->stTmPut.szTagTable, "OTMUTF8" );
-       pTmPutIn->stTmPut.fMarkupChanged = TRUE ;
+       strcpy( TmProposal.szMarkup, "OTMUTF8" );
+       TmProposal.fMarkupChanged = TRUE ;
     }
   } /* endif */
 
   if ( !usRc )
   {
-    //Sentence.pNormString = Sentence.pNormStringStart;
-    HashSentence( &Sentence );
-    Sentence.pTagRecord->usTagTableId = 0;
+    HashSentence( TmProposal.pInputSentence );
+    TmProposal.pInputSentence->pTagRecord->usTagTableId = 0;
         
-    usRc = NTMGetIDFromName( this, pTmPutIn->stTmPut.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
+    usRc = NTMGetIDFromName( TmProposal.szMarkup, NULL, (USHORT)TAGTABLE_KEY, 
+                          &TmProposal.pInputSentence->pTagRecord->usTagTableId );
     if(usRc){
       T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
     }
@@ -241,21 +237,21 @@ USHORT EqfMemory::TmtXReplace
 
   if ( !usRc )
   {
-    usMatchesFound = CheckCompactArea( &Sentence, this );
-    if ( usMatchesFound == Sentence.usActVote ) //all hash triples found
+    usMatchesFound = CheckCompactArea( TmProposal.pInputSentence, this );
+    if ( usMatchesFound == TmProposal.pInputSentence->usActVote ) //all hash triples found
     {
       //update entry in tm database
-      usRc = UpdateTmRecord(&pTmPutIn->stTmPut, &Sentence );
+      usRc = UpdateTmRecord(TmProposal);
 
 
       //if no tm record fitted for update assume new and add to tm
       if ( usRc == ERROR_ADD_TO_TM )
       {
-        usRc = AddToTm( &Sentence, &pTmPutIn->stTmPut, &ulNewKey );
+        usRc = AddToTm(TmProposal, &ulNewKey );
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( &Sentence, ulNewKey );
+          usRc = UpdateTmIndex( TmProposal.pInputSentence, ulNewKey );
 
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
@@ -264,12 +260,12 @@ USHORT EqfMemory::TmtXReplace
     else
     {
       //add new tm record to tm database
-      usRc = AddToTm( &Sentence, &pTmPutIn->stTmPut, &ulNewKey );
+      usRc = AddToTm(TmProposal, &ulNewKey );
 
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( &Sentence, ulNewKey );
+        usRc = UpdateTmIndex( TmProposal.pInputSentence, ulNewKey );
 
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
@@ -298,9 +294,7 @@ USHORT EqfMemory::TmtXReplace
 
     if ( pstDelOut )
     {
-//       pstDelIn->stTmPut.lTime = pTmPutIn->stTmPut.lTargetTime;
-
-      TmtXDelSegm( pTmPutIn, pstDelOut );
+      TmtXDelSegm( TmProposal, pstDelOut );
 
       UtlAlloc( (PVOID *)&pstDelOut, 0L, 0L, NOMSG );
     } /* endif */
@@ -731,7 +725,7 @@ USHORT TokenizeTarget
     pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
 
     //get id of tag table, call
-    usRc = NTMGetIDFromName( pClb, pTagTableName,
+    usRc = pClb->NTMGetIDFromName( pTagTableName,
                              NULL,
                              (USHORT)TAGTABLE_KEY,
                              &pTagRecord->usTagTableId  );
@@ -936,8 +930,7 @@ USHORT TokenizeTarget
 //------------------------------------------------------------------------------
 USHORT EqfMemory::AddToTm
 (
-  PTMX_SENTENCE pSentence,            // ptr to sentence structure
-  PTMX_PUT_W pTmPut,                  // ptr to put input structure
+  SearchProposal& TmProposal,         // ptr to sentence structure
   PULONG pulNewKey                    // sid of newly added tm record
 )
 {
@@ -960,7 +953,7 @@ USHORT EqfMemory::AddToTm
   //allocate target control block record
   if ( fOK )
   {
-    usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+    usAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
 
     fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+usAddDataLen), NOMSG );
   } /* endif */
@@ -985,23 +978,21 @@ USHORT EqfMemory::AddToTm
   }
   else
   {
-    usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
-                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, this );
+    usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings->getGenericTargetStrC(), pNormString, &pTagRecord,
+                           &lTagAlloc, TmProposal.szMarkup, &usNormLen, this );
     
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, this, pTmPut );
+      usRc = FillClb( &pTargetClb, TmProposal );
       if ( usRc == NO_ERROR )
       {
         USHORT usSrcLang = 0; 
-        usRc = NTMGetIDFromName( this, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+        usRc = NTMGetIDFromName( TmProposal.szIsoSourceLang, NULL, (USHORT)LANG_KEY, &usSrcLang );
         //fill tm record to add to database
-        FillTmRecord ( pSentence,    // ptr to sentence struct for source info
+        FillTmRecord ( TmProposal.pInputSentence,    // ptr to sentence struct for source info
                        pTagRecord,   // ptr to target string tag table
-                       pTmPut->szTarget,
-                       //pNormString,  // ptr to target normalized string
-                       //usNormLen,    // length of target normalized string
-                       wcslen(pTmPut->szTarget),
+                       TmProposal.pInputSentence->pStrings->getGenericTargetStrC(),
+                       wcslen(TmProposal.pInputSentence->pStrings->getGenericTargetStrC()),
                        pTmRecord,    // filled tm record returned
                        pTargetClb, usSrcLang );
         
@@ -1185,11 +1176,10 @@ VOID FillTmRecord
 //      fill target control block structure with data from TM_PUT               
 //      return ulKey                                                            
 //------------------------------------------------------------------------------
-USHORT FillClb
+USHORT EqfMemory::FillClb
 (
   PTMX_TARGET_CLB * ppTargetClb,    // ptr to target control block
-  EqfMemory* pTmClb,                  // ptr to tm control block
-  PTMX_PUT_W pTmPut                 // ptr to put input structure
+  SearchProposal& TmProposal                 // ptr to put input structure
 )
 {
   USHORT  usTrgLang,usSrcLang;
@@ -1201,47 +1191,47 @@ USHORT FillClb
   pTargetClb = *ppTargetClb;
 
   //get id of target language, call
-  usRc = NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTrgLang );
+  usRc = NTMGetIDFromName( TmProposal.szIsoTargetLang, NULL, (USHORT)LANG_KEY, &usTrgLang );
 
   //if ( !usRc )
   //{
-  //  usRc = NTMGetIDFromName( pTmClb, pTmPut->szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
+  //  usRc = NTMGetIDFromName( pTmClb, TmProposal.szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
   //} /* endif */
 
   //get id of file name, call
   if ( !usRc )
   {
-    usRc = NTMGetIDFromName( pTmClb, pTmPut->szFileName, pTmPut->szLongName, (USHORT)FILE_KEY, &usFile );
+    usRc = NTMGetIDFromName( TmProposal.szDocName, TmProposal.szDocName, (USHORT)FILE_KEY, &usFile );
   } /* endif */
 
   //get id of target author
   if ( !usRc )
   {
-    usRc = NTMGetIDFromName( pTmClb, pTmPut->szAuthorName, NULL, (USHORT)AUTHOR_KEY, &usAuthor );
+    usRc = NTMGetIDFromName( TmProposal.szTargetAuthor, NULL, (USHORT)AUTHOR_KEY, &usAuthor );
   } /* endif */
 
   if ( !usRc )
   {
     pTargetClb->usLangId = usTrgLang;
     //pTargetClb->usSrcLangId = usSrcLang;
-    pTargetClb->bTranslationFlag = (BYTE)pTmPut->usTranslationFlag;
+    pTargetClb->bTranslationFlag = ProposalTypeToFlag(TmProposal.eType);
     //if a time is given take it else use current time
-    if ( pTmPut->lTime )
+    if ( TmProposal.lTime )
     {
-      pTargetClb->lTime = pTmPut->lTime;
+      pTargetClb->lTime = TmProposal.lTime;
     }
     else
     {
       UtlTime( &(pTargetClb->lTime) );
     } /* endif */
     pTargetClb->usFileId = usFile;
-    pTargetClb->ulSegmId = pTmPut->ulSourceSegmentId;
+    pTargetClb->ulSegmId = TmProposal.getSegmentNum();
     pTargetClb->usAuthorId = usAuthor;
     pTargetClb->usAddDataLen = 0;
-    if ( pTmPut->szContext[0] ) 
-      NtmStoreAddData( pTargetClb, ADDDATA_CONTEXT_ID, pTmPut->szContext );
-    if ( pTmPut->szAddInfo[0] ) 
-      NtmStoreAddData( pTargetClb, ADDDATA_ADDINFO_ID, pTmPut->szAddInfo );
+    if ( TmProposal.szContext[0] ) 
+      NtmStoreAddData( pTargetClb, ADDDATA_CONTEXT_ID, TmProposal.szContext );
+    if ( TmProposal.szAddInfo[0] ) 
+      NtmStoreAddData( pTargetClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
     *ppTargetClb = pTargetClb;
   } /* endif */
 
@@ -1714,8 +1704,7 @@ USHORT DetermineTmRecord
 
 USHORT EqfMemory::UpdateTmRecord
 (
-  PTMX_PUT_W    pTmPut,                //pointer to get in data
-  PTMX_SENTENCE pSentence              //ptr to sentence structure
+  SearchProposal&    TmProposal                //pointer to get in data
 )
 {
   BOOL   fOK;                          //success indicator
@@ -1750,7 +1739,7 @@ USHORT EqfMemory::UpdateTmRecord
   else
   {
     pulSidStart = pulSids;
-    usRc = DetermineTmRecord( this, pSentence, pulSids );
+    usRc = DetermineTmRecord( this, TmProposal.pInputSentence, pulSids );
     if ( usRc == NO_ERROR )
     {
       //get tm record(s)
@@ -1785,8 +1774,8 @@ USHORT EqfMemory::UpdateTmRecord
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( this, &pTmRecord, &ulRecBufSize,
-                                 pTmPut, pSentence, &ulKey );
+          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
+                                 TmProposal, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -1854,8 +1843,7 @@ USHORT EqfMemory::UpdateTmRecord
 
 USHORT EqfMemory::UpdateTmRecordByInternalKey
 (
-  PTMX_PUT_W    pTmPut,                //pointer to get in data
-  PTMX_SENTENCE pSentence              //ptr to sentence structure
+  SearchProposal& TmProposal
 )
 {
   BOOL   fOK;                          //success indicator
@@ -1890,7 +1878,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
   else
   {
     pulSidStart = pulSids;
-    usRc = DetermineTmRecord( this, pSentence, pulSids );
+    usRc = DetermineTmRecord( this, TmProposal.pInputSentence, pulSids );
     if ( usRc == NO_ERROR )
     {
       //get tm record(s)
@@ -1925,8 +1913,8 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( this, &pTmRecord, &ulRecBufSize,
-                                 pTmPut, pSentence, &ulKey );
+          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
+                                 TmProposal, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -2008,13 +1996,11 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
 //   else                                                                       
 //       source_string_error                                                    
 //------------------------------------------------------------------------------
-USHORT ComparePutData
+USHORT EqfMemory::ComparePutData
 (
-  EqfMemory*    pTmClb,                  // ptr to ctl block struct
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
   PULONG      pulRecBufSize,           // current size of record buffer
-  PTMX_PUT_W  pTmPut,                  // pointer to get in data
-  PTMX_SENTENCE pSentence,             // pointer to sentence structure
+  SearchProposal&  TmProposal,                  // pointer to get in data
   PULONG      pulKey                   // tm key
 )
 {
@@ -2067,17 +2053,17 @@ USHORT ComparePutData
     USHORT  usPutFile;                 // file id of new entry
 
     //get id of target language in the put structure
-    if (NTMGetIDFromName( pTmClb, pTmPut->szTargetLanguage,
+    if (NTMGetIDFromName( TmProposal.szIsoTargetLang,
                           NULL, (USHORT)LANG_KEY, &usPutLang ))
     {
       usPutLang = 1;
     } /* endif */
 
-    NTMGetIDFromName( pTmClb, pTmPut->szAuthorName, 			// get author ID
+    NTMGetIDFromName( TmProposal.szTargetAuthor, 			// get author ID
                       NULL, (USHORT)AUTHOR_KEY, &usAuthorId );
 
-    usRc = NTMGetIDFromName( pTmClb, pTmPut->szFileName,		 // get file id
-                             pTmPut->szLongName, (USHORT)FILE_KEY, &usPutFile );
+    usRc = NTMGetIDFromName( TmProposal.szDocName,		 // get file id
+                             TmProposal.szDocName, (USHORT)FILE_KEY, &usPutFile );
     if ( !usRc )
     {
       //position at beginning of source structure in tm record
@@ -2089,7 +2075,7 @@ USHORT ComparePutData
       //copy and compare source string
       memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
       lLen = EQFCompress2Unicode( pString, pByte, lLen );
-      fStringEqual = ! UTF16strcmp( pString, pSentence->pStrings->getNormStrC() );
+      fStringEqual = ! UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getNormStrC() );
 
       if ( fStringEqual )
       {
@@ -2105,15 +2091,15 @@ USHORT ComparePutData
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
         //tokenize target string in put structure
-        usRc = TokenizeTarget( pTmPut->szTarget, pNormString,
-                            &pTagRecord, &lTagAlloc, pTmPut->szTagTable,
-                            &usNormLen, pTmClb );
+        usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings->getGenericTargetStrC(), pNormString,
+                            &pTagRecord, &lTagAlloc, TmProposal.szMarkup,
+                            &usNormLen, this );
 
         fStop = (usRc != 0);
         //RJ: 04/01/22: P018830:
         // loop through all target records
         // delete entry if current segment has already been translated
-        TMLoopAndDelTargetClb(pTmRecord, pTmPut, pSentence, usPutLang, usPutFile, &fNewerTargetExists );
+        TMLoopAndDelTargetClb(pTmRecord, TmProposal, usPutLang, usPutFile, &fNewerTargetExists );
 
         // recalc since record may have changed during delete above!
         lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
@@ -2144,7 +2130,7 @@ USHORT ComparePutData
 
             // compare target language IDs and source tag record
             if ( (pClb->usLangId == usPutLang) &&
-                (memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
+                (memcmp( pTMXSourceTagTable, TmProposal.pInputSentence->pTagRecord,
                           RECLEN(pTMXSourceTagTable)) == 0) )
             {
               // check if target string and target tag record are identical
@@ -2168,7 +2154,7 @@ USHORT ComparePutData
                 lLeftClbLen = RECLEN(pTMXTargetRecord) - pTMXTargetRecord->usClb;
                 while ( lLeftClbLen > 0 && !fStop )
                 {
-                  if ( ((pClb->ulSegmId == pTmPut->ulSourceSegmentId) &&
+                  if ( ((pClb->ulSegmId == TmProposal.getSegmentNum()) &&
                         (pClb->usFileId == usPutFile)) ||
                         pClb->bMultiple )
                   {
@@ -2182,34 +2168,34 @@ USHORT ComparePutData
                     if ( pClb->bMultiple )
                     {
                       pClb->bMultiple = FALSE;
-                      pClb->lTime     = pTmPut->lTime;
-                      pClb->ulSegmId  = pTmPut->ulSourceSegmentId;
+                      pClb->lTime     = TmProposal.lTime;
+                      pClb->ulSegmId  = TmProposal.getSegmentNum();
                       pClb->usFileId  = usPutFile;
-                      pClb->bTranslationFlag       = (BYTE)pTmPut->usTranslationFlag;
+                      pClb->bTranslationFlag       = ProposalTypeToFlag(TmProposal.eType);
                       pClb->usAuthorId = usAuthorId;
                       fUpdate         = TRUE;
                       fStop           = TRUE;
                     }
                     else
                     {
-                      if ( (pClb->lTime < pTmPut->lTime) || !pTmPut->lTime )
+                      if ( (pClb->lTime < TmProposal.lTime) || !TmProposal.lTime )
                       {
-                        if ( pTmPut->lTime )
+                        if ( TmProposal.lTime )
                         {
-                          pClb->lTime = pTmPut->lTime;
+                          pClb->lTime = TmProposal.lTime;
                         }
                         else
                         {
                           UtlTime( &(pClb->lTime) );
                         } /* endif */
-                        pClb->bTranslationFlag       = (BYTE)pTmPut->usTranslationFlag;
+                        pClb->bTranslationFlag       = ProposalTypeToFlag(TmProposal.eType);
                         fUpdate         = TRUE;
                       } /* endif */
                       fStop           = TRUE;
                     } /* endif */
 
                     // adjust context part of target control block if necessary
-                    NTMAdjustAddDataInTgtCLB( ppTmRecord, pulRecBufSize, pTmPut, &pClb, &pTmRecord, &pTMXTargetRecord, &lLeftClbLen, &fUpdate );
+                    NTMAdjustAddDataInTgtCLB( ppTmRecord, pulRecBufSize, TmProposal, &pClb, &pTmRecord, &pTMXTargetRecord, &lLeftClbLen, &fUpdate );
                   } /* endif */
 
                   // continue with next target CLB
@@ -2224,7 +2210,7 @@ USHORT ComparePutData
                 if ( !fStop )
                 {
                   // re-alloc record buffer if too small
-                  USHORT usAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+                  USHORT usAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
                   ULONG ulNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_CLB) + usAddDataLen;
                   if ( ulNewSize > *pulRecBufSize)
                   {
@@ -2263,22 +2249,22 @@ USHORT ComparePutData
                   if ( fOK )
                   {
                     pClb->bMultiple = FALSE;
-                    if ( pTmPut->lTime )
+                    if ( TmProposal.lTime )
                     {
-                      pClb->lTime = pTmPut->lTime;
+                      pClb->lTime = TmProposal.lTime;
                     }
                     else
                     {
                       UtlTime( &(pClb->lTime) );
                     } /* endif */
-                    pClb->ulSegmId   = pTmPut->ulSourceSegmentId;
+                    pClb->ulSegmId   = TmProposal.getSegmentNum();
                     pClb->usFileId   = usPutFile;
-                    pClb->bTranslationFlag = (BYTE)pTmPut->usTranslationFlag;
+                    pClb->bTranslationFlag = ProposalTypeToFlag(TmProposal.eType);
                     pClb->usAuthorId = usAuthorId;
                     pClb->usLangId   = usPutLang;
                     pClb->usAddDataLen = 0;
-                    NtmStoreAddData( pClb, ADDDATA_CONTEXT_ID, pTmPut->szContext );
-                    NtmStoreAddData( pClb, ADDDATA_ADDINFO_ID, pTmPut->szAddInfo );
+                    NtmStoreAddData( pClb, ADDDATA_CONTEXT_ID, TmProposal.szContext );
+                    NtmStoreAddData( pClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
                   } /* endif */
 
                   fStop = TRUE;        // avoid add of a new target record at end of outer loop
@@ -2299,14 +2285,14 @@ USHORT ComparePutData
         // update TM record if required
         if ( fUpdate )
         {
-          usRc = pTmClb->TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+          usRc = TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
         if ( !fStop )
         {
           //all target records have been checked but nothing overlapped
           //so add new target record to end of tm record
-          usRc = AddTmTarget( pTmClb, pTmPut, pSentence, ppTmRecord, pulRecBufSize, pulKey );
+          usRc = AddTmTarget( TmProposal, ppTmRecord, pulRecBufSize, pulKey );
           pTmRecord = *ppTmRecord;
         } /* endif */
       }
@@ -2365,10 +2351,8 @@ USHORT ComparePutData
 //   fill target tm record structure add end of tm record                       
 //   insert tm record in tm data fill                                           
 //------------------------------------------------------------------------------
-USHORT AddTmTarget(
-  EqfMemory* pTmClb,                  //ptr to ctl block struct
-  PTMX_PUT_W pTmPut,                //pointer to get in data
-  PTMX_SENTENCE pSentence,          //pointer to sentence structure
+USHORT EqfMemory::AddTmTarget(
+  SearchProposal& TmProposal,       //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
   PULONG pulRecBufSize,             //ptr to current size of TM record buffer
   PULONG pulKey )                   //tm key
@@ -2386,7 +2370,7 @@ USHORT AddTmTarget(
   ULONG       ulAddDataLen = 0;
 
   //allocate target control block record
-  ulAddDataLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+  ulAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
   fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+ulAddDataLen), NOMSG );
 
   //allocate normalized string
@@ -2415,15 +2399,15 @@ USHORT AddTmTarget(
   }
   else
   {
-    usRc = TokenizeTarget( pTmPut->szTarget, pNormString, &pTagRecord,
-                           &lTagAlloc, pTmPut->szTagTable, &usNormLen, pTmClb );
+    usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings->getGenericTargetStrC(), pNormString, &pTagRecord,
+                           &lTagAlloc, TmProposal.szMarkup, &usNormLen, this );
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, pTmClb, pTmPut );
+      usRc = FillClb( &pTargetClb, TmProposal );
       if ( usRc == NO_ERROR )
       {
         //fill target record
-        FillTargetRecord( pSentence,  //ptr to sentence structure
+        FillTargetRecord( TmProposal.pInputSentence,  //ptr to sentence structure
                           pTagRecord, //ptr to target string tag table
                           pNormString,//ptr to target normalized string
                           usNormLen,  //length of target normalized string
@@ -2463,7 +2447,7 @@ USHORT AddTmTarget(
           RECLEN(pTmRecord) += RECLEN(pTargetRecord);
 
           //add updated tm record to database
-          usRc = pTmClb->TmBtree.EQFNTMUpdate(
+          usRc = TmBtree.EQFNTMUpdate(
                                *pulKey,
                                (PBYTE)pTmRecord,
                                RECLEN(pTmRecord) );
@@ -2748,7 +2732,7 @@ USHORT EqfMemory::TmtXUpdSeg
                 PBYTE pByte;
 
                 // get ID for new tag table
-                usRc = NTMGetIDFromName( this, pTmPutIn->szMarkup,
+                usRc = NTMGetIDFromName( pTmPutIn->szMarkup,
                                          NULL,
                                          (USHORT)TAGTABLE_KEY,
                                          &usNewId );
@@ -2781,7 +2765,7 @@ USHORT EqfMemory::TmtXUpdSeg
                 )
               {
                 // set target language
-                usRc = NTMGetIDFromName( this, pTmPutIn->szTargetLanguage,
+                usRc = NTMGetIDFromName( pTmPutIn->szTargetLanguage,
                                          NULL,
                                          (USHORT)LANG_KEY,
                                          &pTargetClb->usLangId );
@@ -3045,7 +3029,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 (
 	PTMX_RECORD	      *ppTmRecordStart,
 	PULONG     		   pulRecBufSize,
-	PTMX_PUT_W 		   pTmPut,
+	SearchProposal& 		   TmProposal,
 	PTMX_TARGET_CLB    *ppClb,
 	PTMX_RECORD        *ppCurTmRecord,
 	PTMX_TARGET_RECORD *ppTMXTargetRecord,
@@ -3066,9 +3050,9 @@ USHORT NTMAdjustAddDataInTgtCLB
   pCurClb          = *ppClb;
   usOldLen         = pCurClb->usAddDataLen;
 
-  if ( pTmPut->szContext[0] )
+  if ( TmProposal.szContext[0] )
   {
-	  ulNewLen = NTMComputeAddDataSize( pTmPut->szContext, pTmPut->szAddInfo );
+	  ulNewLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
   } /* endif */
 
   if ( usOldLen == ulNewLen )
@@ -3126,8 +3110,8 @@ USHORT NTMAdjustAddDataInTgtCLB
 
   // update additional data
   pCurClb->usAddDataLen = 0;
-  NtmStoreAddData( pCurClb, ADDDATA_CONTEXT_ID, pTmPut->szContext );
-  NtmStoreAddData( pCurClb, ADDDATA_ADDINFO_ID, pTmPut->szAddInfo );
+  NtmStoreAddData( pCurClb, ADDDATA_CONTEXT_ID, TmProposal.szContext );
+  NtmStoreAddData( pCurClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
 
   // reduce size of CLB when the new content is smaller
   if ( usOldLen > ulNewLen )
@@ -3193,8 +3177,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 USHORT TMLoopAndDelTargetClb
 (
 	PTMX_RECORD         pTmRecord,
-	PTMX_PUT_W 			pTmPut,
-	PTMX_SENTENCE       pSentence,
+	SearchProposal& 		TmProposal,
 	USHORT              usPutLang,
   USHORT              usPutFile,
   PBOOL               pfNewerTargetExists
@@ -3227,7 +3210,7 @@ USHORT TMLoopAndDelTargetClb
 	pTMXSrcTTable = (PTMX_TAGTABLE_RECORD)NTRecPos((PBYTE)pTMXTgtRec,
 												   REC_SRCTAGTABLE);
 	// compare source tag record
-	if ( (memcmp( pTMXSrcTTable, pSentence->pTagRecord,
+	if ( (memcmp( pTMXSrcTTable, TmProposal.pInputSentence->pTagRecord,
 		  RECLEN(pTMXSrcTTable)) == 0) )
 	{
 		pClb = (PTMX_TARGET_CLB)NTRecPos((PBYTE)pTMXTgtRec, REC_CLB);
@@ -3236,11 +3219,11 @@ USHORT TMLoopAndDelTargetClb
 		while ( ( lLeftClbLen > 0 ) && !fDel )
 		{
 			if ( (pClb->usLangId == usPutLang) &&
-			     (pClb->ulSegmId == pTmPut->ulSourceSegmentId) &&
+			     (pClb->ulSegmId == TmProposal.getSegmentNum()) &&
 			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
-				if ( (pClb->lTime < pTmPut->lTime) || !pTmPut->lTime )
+				if ( (pClb->lTime < TmProposal.lTime) || !TmProposal.lTime )
 				{
 				  lLeftClbLen -= TARGETCLBLEN(pClb);
 				  // loop over all CLBs of this target record and remove

@@ -1885,6 +1885,7 @@ class EqfMemoryPlugin;
 class Dummy{};
 
 
+
 class EqfMemory //: public TMX_CLB
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
 */
@@ -2030,7 +2031,7 @@ public:
 
   ushort TmtXDelSegm
 (
-  PTMX_PUT_IN_W pTmDelIn,  //ptr to input struct
+  SearchProposal& pTmDelIn,  //ptr to input struct
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 );
 
@@ -2040,10 +2041,8 @@ USHORT TmtXDelSegmByKey
   PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
 );
 
-USHORT FindTargetAndDelete(
-                            PTMX_RECORD pTmRecord,
-                            PTMX_PUT_W  pTmDel,
-                            PTMX_SENTENCE pSentence,
+USHORT FindTargetAndDelete( PTMX_RECORD pTmRecord,
+                            SearchProposal&  TmDel,
                             PULONG pulKey );
 
 USHORT FindTargetByKeyAndDelete(
@@ -2051,6 +2050,41 @@ USHORT FindTargetByKeyAndDelete(
                             SearchProposal&  pTmDel,
                             PTMX_SENTENCE pSentence,
                             PULONG pulKey );
+
+
+USHORT TokenizeSource( PTMX_SENTENCE, PSZ, PSZ );
+
+USHORT NTMGetIDFromName( PSZ, PSZ, USHORT, PUSHORT );
+USHORT NTMGetIDFromNameEx
+(
+  PSZ         pszName,                 // input, name being looked up
+  PSZ         pszLongName,             // input, long name (only for FILE_KEY)
+  USHORT      usTableType,             // input, type of table to use
+  PUSHORT     pusID,                   // output, ID for name being looked up
+  LONG        lOptions,                // input, additional options
+  PUSHORT     pusAlternativeID         // output, alternative ID
+);
+USHORT NTMGetNameFromID( PUSHORT, USHORT, PSZ, PSZ );
+USHORT NTMGetPointersToTable(  USHORT, PTMX_TABLE *,
+                              PTMX_TABLE_ENTRY * );
+USHORT NTMAddNameToTable(  PSZ, USHORT, PUSHORT );
+PSZ NTMFindNameForID( 
+                  PUSHORT  pusID,         //intput
+                  USHORT   usTableType );
+
+USHORT FillClb( PTMX_TARGET_CLB *, SearchProposal& );
+USHORT ComparePutData
+(
+  PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
+  PULONG      pulRecBufSize,           // current size of record buffer
+  SearchProposal&  TmProposal,                  // pointer to get in data
+  PULONG      pulKey                   // tm key
+);
+USHORT AddTmTarget(
+  SearchProposal& TmProposal,       //pointer to get in data
+  PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
+  PULONG pulRecBufSize,             //ptr to current size of TM record buffer
+  PULONG pulKey );                  //tm key
 
 /*! \brief Store the supplied proposal in the memory
     When the proposal aready exists it will be overwritten with the supplied data
@@ -2061,7 +2095,7 @@ USHORT FindTargetByKeyAndDelete(
 */
   int putProposal
   (
-    OtmProposal &Proposal
+    SearchProposal &Proposal
   ); 
 
   /*! \brief Get the the first proposal from the memory and prepare sequential access
@@ -2134,7 +2168,7 @@ USHORT FindTargetByKeyAndDelete(
   ); 
 
 
-  USHORT AddToTm( PTMX_SENTENCE, PTMX_PUT_W, PULONG );
+  USHORT AddToTm( SearchProposal&, PULONG );
   USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG );
 
   void importDone(int iRC, char *pszError );
@@ -2166,7 +2200,7 @@ USHORT FindTargetByKeyAndDelete(
 
   USHORT TmtXReplace
   (
-    PTMX_PUT_IN_W pTmPutIn,  //ptr to input struct
+    SearchProposal& TmProposal,  //ptr to input struct
     PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
   );
 
@@ -2199,12 +2233,11 @@ USHORT NTMLoadNameTable
     unsigned long ulOptions
   ); 
 
-  USHORT UpdateTmRecord( PTMX_PUT_W, PTMX_SENTENCE );
+  USHORT UpdateTmRecord( SearchProposal& );
   
   USHORT UpdateTmRecordByInternalKey
   (
-    PTMX_PUT_W    pTmPut,                //pointer to get in data
-    PTMX_SENTENCE pSentence              //ptr to sentence structure
+    SearchProposal&
   );
   
   int getNumOfMarkupNames();
@@ -2479,6 +2512,9 @@ public:
 private:   
 };
 
+
+OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
+BYTE ProposalTypeToFlag(OtmProposal::eProposalType t);
 
 USHORT  TmGetServerDrives( PDRIVES_IN  pDrivesIn,      // Pointer to DRIVES_IN struct
                            PDRIVES_OUT pDrivesOut,     // Pointer to DRIVES_OUT struct
@@ -2759,7 +2795,6 @@ BOOL TMFuzzynessEx
   PUSHORT     pusDiffs                 // number of diffs in segment
 );
 
-USHORT TokenizeSource( EqfMemory*, PTMX_SENTENCE, PSZ, PSZ );
 
 USHORT NTMMorphTokenizeW( SHORT, PSZ_W, PULONG, PVOID*, USHORT);
 
@@ -3241,7 +3276,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR         szFilePath[2048];               // Full file name + path
  BOOL         fControlFound;                  // Indicator whether a CONTROL token was found
  std::shared_ptr<EqfMemory> mem;                          // pointer to memory object
- OtmProposal  *pProposal;                     // buffer for memory proposal data
+ SearchProposal  *pProposal;                     // buffer for memory proposal data
  CHAR_W       szSegBuffer[MAX_SEGMENT_SIZE+1];// buffer for segment data
  CHAR_W       szSource[MAX_SEGMENT_SIZE+1];   // buffer for segment source data
  HFILE        hFile;                          // Handle of file to be loaded
@@ -3904,24 +3939,7 @@ MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 // returned ID if a name is not found in the table
 #define NTMGETID_NOTFOUND_ID 0xFFFF
 
-USHORT NTMGetIDFromNameEx
-(
-  EqfMemory*    pTmClb,                  // input, memory control block pointer
-  PSZ         pszName,                 // input, name being looked up
-  PSZ         pszLongName,             // input, long name (only for FILE_KEY)
-  USHORT      usTableType,             // input, type of table to use
-  PUSHORT     pusID,                   // output, ID for name being looked up
-  LONG        lOptions,                // input, additional options
-  PUSHORT     pusAlternativeID         // output, alternative ID
-);
 
-PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
-                  PUSHORT  pusID,         //intput
-                  USHORT   usTableType );
-
-USHORT NTMGetIDFromName( EqfMemory*, PSZ, PSZ, USHORT, PUSHORT );
-USHORT NTMGetNameFromID( EqfMemory*, PUSHORT, USHORT, PSZ, PSZ );
-USHORT TmtXReplace( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
 USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
 
 //tm put prototypes
@@ -3937,10 +3955,7 @@ USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT,
 VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 
-USHORT FillClb( PTMX_TARGET_CLB *, EqfMemory*, PTMX_PUT_W );
 USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );
-USHORT AddTmTarget( EqfMemory*, PTMX_PUT_W, PTMX_SENTENCE, PTMX_RECORD *, PULONG, PULONG );
-USHORT ComparePutData( EqfMemory*, PTMX_RECORD *, PULONG, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
 
 VOID FillTargetRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD,
                        PSZ_W, USHORT, PTMX_TARGET_RECORD *, PTMX_TARGET_CLB );
@@ -3972,8 +3987,6 @@ USHORT FillExtStructure( EqfMemory*, PTMX_TARGET_RECORD,
 
 
 //tm delete segment prototypes
-USHORT TmtXDelSegm( EqfMemory*, PTMX_PUT_IN_W, PTMX_PUT_OUT_W );
-USHORT FindTargetAndDelete( EqfMemory*, PTMX_RECORD, PTMX_PUT_W, PTMX_SENTENCE, PULONG );
 USHORT NTMCheckForUpdates( EqfMemory* );
 USHORT NTMLockTM( EqfMemory*, BOOL, PBOOL );
 USHORT MemBatchTMCreate( HWND hwnd, PDDEMEMCRT pMemCrt );
@@ -4034,7 +4047,7 @@ typedef struct _MEM_ORGANIZE_IDA
  CHAR          szTempMemName[MAX_LONGFILESPEC];// name of temporary translation memory 
  CHAR          szPluginName[MAX_LONGFILESPEC]; // name of plugin used for the memory
  CHAR          szPathTempMem[2048];            // Full path of temporary transl. mem.
- OtmProposal   *pProposal;                     // buffer for memory proposal
+ SearchProposal   *pProposal;                     // buffer for memory proposal
  std::shared_ptr<EqfMemory>     pMem;                           // Handle of transl. memory
  std::shared_ptr<EqfMemory>     pMemTemp;                       // Handle of tmporary transl. memory
  BOOL          fMsg;                           // A message has been issued already

@@ -58,9 +58,6 @@
 /* prototypes for internal functions                                  */
 /**********************************************************************/
 int NTMCompNames( const void *, const void * );
-USHORT NTMGetPointersToTable( EqfMemory*, USHORT, PTMX_TABLE *,
-                              PTMX_TABLE_ENTRY * );
-USHORT NTMAddNameToTable( EqfMemory*, PSZ, USHORT, PUSHORT );
 int NTMLongNameTableComp( const void *,  const void * );
 int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 
@@ -171,13 +168,13 @@ int NTMLongNameTableCompCaseIgnore( const void *,  const void * );
 //| return usRc;                                                               |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetIDFromName( EqfMemory* pTmClb,   // input
+EqfMemory::NTMGetIDFromName(
                   PSZ      pszName,    // input
                   PSZ      pszLongName, // input, long name (only for FILE_KEY)
                   USHORT   usTableType,   //input
                   PUSHORT  pusID       )  //output
 {
-  return( NTMGetIDFromNameEx( pTmClb, pszName, pszLongName, usTableType,
+  return( NTMGetIDFromNameEx( pszName, pszLongName, usTableType,
                               pusID, 0L, NULL ) );
 
 } /* end of function NTMGetIDFromName */
@@ -190,9 +187,8 @@ NTMGetIDFromName( EqfMemory* pTmClb,   // input
 // the pusAlternativeID is filled with the ID of the name in the long name
 // table if no pszLongName has been specified and the pszName is found in 
 // the short name table as well
-USHORT NTMGetIDFromNameEx
+USHORT EqfMemory::NTMGetIDFromNameEx
 ( 
-  EqfMemory*    pTmClb,                  // input, memory control block pointer 
   PSZ         pszName,                 // input, name being looked up
   PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
@@ -221,7 +217,7 @@ USHORT NTMGetIDFromNameEx
   if ( pszName[0] != EOS)
   {
     //--- if input parameters OK
-    if ( pTmClb && pszName[0] != EOS )
+    if ( pszName[0] != EOS )
     {
       //--- capitalize input string
       strupr( pszName );
@@ -230,8 +226,7 @@ USHORT NTMGetIDFromNameEx
       /* get pointer to table and table entries in dependency of the    */
       /* table type                                                     */
       /******************************************************************/
-      usRc = NTMGetPointersToTable( pTmClb,
-                                    usTableType,
+      usRc = NTMGetPointersToTable( usTableType,
                                     &pstTMTable,
                                     &pstTMTableEntries );
       /****************************************************************/
@@ -263,8 +258,8 @@ USHORT NTMGetIDFromNameEx
 
         // do the actual search
         pEntry = (PTMX_LONGNAME_TABLE_ENTRY)bsearch( &SearchEntry,
-                                                     pTmClb->pLongNames->stTableEntry,
-                                                     pTmClb->pLongNames->ulEntries,
+                                                     pLongNames->stTableEntry,
+                                                     pLongNames->ulEntries,
                                                      sizeof(TMX_LONGNAME_TABLE_ENTRY),
                                                      NTMLongNameTableComp );
 
@@ -273,8 +268,8 @@ USHORT NTMGetIDFromNameEx
         if ( pEntry == NULL )
         {
           pEntry = (PTMX_LONGNAME_TABLE_ENTRY)bsearch( &SearchEntry,
-                                                       pTmClb->pLongNamesCaseIgnore->stTableEntry,
-                                                       pTmClb->pLongNames->ulEntries,
+                                                       pLongNamesCaseIgnore->stTableEntry,
+                                                       pLongNames->ulEntries,
                                                        sizeof(TMX_LONGNAME_TABLE_ENTRY),
                                                        NTMLongNameTableCompCaseIgnore );
         } /* endif */
@@ -301,27 +296,26 @@ USHORT NTMGetIDFromNameEx
             do
             {
               DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 1, TM_GROUP, pszName );
-              usRc = NTMAddNameToTable( pTmClb, pszName, usTableType, pusID );
-            } while ( (usRc == NO_ERROR) && (*pusID < pTmClb->pLongNames->ulEntries) ); /* enddo */                 
+              usRc = NTMAddNameToTable( pszName, usTableType, pusID );
+            } while ( (usRc == NO_ERROR) && (*pusID < pLongNames->ulEntries) ); /* enddo */                 
           } /* endif */
 
           // add a new entry to the long name table
           if ( usRc == NO_ERROR )
           {
             // enlarge array if necessary
-            if ( pTmClb->pLongNames->ulEntries >=
-                                                pTmClb->pLongNames->ulTableSize)
+            if ( pLongNames->ulEntries >= pLongNames->ulTableSize)
             {
               ULONG ulOldSize = (ULONG)sizeof(TMX_LONGNAMETABLE) +
                                 (ULONG)(sizeof(TMX_LONGNAME_TABLE_ENTRY) *
-                                     pTmClb->pLongNames->ulTableSize);
+                                     pLongNames->ulTableSize);
               ULONG ulNewSize = ulOldSize + (ULONG)
                 (sizeof(TMX_LONGNAME_TABLE_ENTRY) * LONGNAMETABLE_ENTRIES);
 
-              if ( UtlAlloc( (PVOID *)&pTmClb->pLongNames,
+              if ( UtlAlloc( (PVOID *)&pLongNames,
                              ulOldSize, ulNewSize, NOMSG ) )
               {
-                pTmClb->pLongNames->ulTableSize += LONGNAMETABLE_ENTRIES;
+                pLongNames->ulTableSize += LONGNAMETABLE_ENTRIES;
               }
               else
               {
@@ -331,7 +325,7 @@ USHORT NTMGetIDFromNameEx
               // enlarge case ignore table as well
               if ( usRc == NO_ERROR )
               {
-                if ( !UtlAlloc( (PVOID *)&pTmClb->pLongNamesCaseIgnore,
+                if ( !UtlAlloc( (PVOID *)&pLongNamesCaseIgnore,
                                 ulOldSize, ulNewSize, NOMSG ) )
                 {
                   LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
@@ -342,31 +336,31 @@ USHORT NTMGetIDFromNameEx
             // enlarge buffer if necessary
             if ( usRc == NO_ERROR )
             {
-              if ( (pTmClb->pLongNames->ulBufUsed + ulAddLen ) >=
-                    pTmClb->pLongNames->ulBufSize)
+              if ( (pLongNames->ulBufUsed + ulAddLen ) >=
+                    pLongNames->ulBufSize)
               {
                 PSZ pszOldBuffer;      // ptr to old buffer area
 
-                ULONG ulNewLen = pTmClb->pLongNames->ulBufUsed +
+                ULONG ulNewLen = pLongNames->ulBufUsed +
                                  ulAddLen + 256;
-                pszOldBuffer = pTmClb->pLongNames->pszBuffer;
-                if ( UtlAlloc( (PVOID *)&(pTmClb->pLongNames->pszBuffer),
-                               pTmClb->pLongNames->ulBufSize,
+                pszOldBuffer = pLongNames->pszBuffer;
+                if ( UtlAlloc( (PVOID *)&(pLongNames->pszBuffer),
+                               pLongNames->ulBufSize,
                                ulNewLen, NOMSG ) )
                 {
                   // remember new buffer size
-                  pTmClb->pLongNames->ulBufSize = ulNewLen;
+                  pLongNames->ulBufSize = ulNewLen;
 
                   // adjust pointers in our table
                   {
                     ULONG ulI;
                     PTMX_LONGNAME_TABLE_ENTRY pEntry;       // ptr to table entry
 
-                    pEntry = pTmClb->pLongNames->stTableEntry;
+                    pEntry = pLongNames->stTableEntry;
 
-                    for ( ulI = 0; ulI < pTmClb->pLongNames->ulEntries; ulI++ )
+                    for ( ulI = 0; ulI < pLongNames->ulEntries; ulI++ )
                     {
-                      pEntry->pszLongName = pTmClb->pLongNames->pszBuffer +
+                      pEntry->pszLongName = pLongNames->pszBuffer +
                                             (pEntry->pszLongName - pszOldBuffer);
                       pEntry++;
                     } /* endfor */
@@ -386,12 +380,12 @@ USHORT NTMGetIDFromNameEx
               PSZ pszTarget;                     // ptr into buffer
 
               // position to table entry
-              pEntry = pTmClb->pLongNames->stTableEntry +
-                       pTmClb->pLongNames->ulEntries;
+              pEntry = pLongNames->stTableEntry +
+                       pLongNames->ulEntries;
 
               // position to free area in buffer (overwrite end delimiter!)
-              pszTarget = pTmClb->pLongNames->pszBuffer +
-                          (pTmClb->pLongNames->ulBufUsed - sizeof(USHORT));
+              pszTarget = pLongNames->pszBuffer +
+                          (pLongNames->ulBufUsed - sizeof(USHORT));
 
               // add ID to buffer and table
               *((PUSHORT)pszTarget) = *pusID;
@@ -407,15 +401,15 @@ USHORT NTMGetIDFromNameEx
               *((PUSHORT)pszTarget) = 0;                   // end delimiter
 
               // adjust entry count and buffer used size
-              pTmClb->pLongNames->ulEntries++;
-              pTmClb->pLongNames->ulBufUsed += ulAddLen;
+              pLongNames->ulEntries++;
+              pLongNames->ulBufUsed += ulAddLen;
             } /* endif */
 
             // sort long name array
             if ( usRc == NO_ERROR )
             {
-              qsort( pTmClb->pLongNames->stTableEntry,
-                     pTmClb->pLongNames->ulEntries,
+              qsort( pLongNames->stTableEntry,
+                     pLongNames->ulEntries,
                      sizeof(TMX_LONGNAME_TABLE_ENTRY),
                      NTMLongNameTableComp );
             } /* endif */
@@ -423,13 +417,13 @@ USHORT NTMGetIDFromNameEx
             // copy to case ignore table and sort it
             if ( usRc == NO_ERROR )
             {
-              memcpy( pTmClb->pLongNamesCaseIgnore->stTableEntry,
-                      pTmClb->pLongNames->stTableEntry,
-                      pTmClb->pLongNames->ulEntries *
+              memcpy( pLongNamesCaseIgnore->stTableEntry,
+                      pLongNames->stTableEntry,
+                      pLongNames->ulEntries *
                       sizeof(TMX_LONGNAME_TABLE_ENTRY) );
 
-              qsort( pTmClb->pLongNamesCaseIgnore->stTableEntry,
-                     pTmClb->pLongNames->ulEntries,
+              qsort( pLongNamesCaseIgnore->stTableEntry,
+                     pLongNames->ulEntries,
                      sizeof(TMX_LONGNAME_TABLE_ENTRY),
                      NTMLongNameTableCompCaseIgnore );
             } /* endif */
@@ -439,9 +433,9 @@ USHORT NTMGetIDFromNameEx
             {
               DEBUGEVENT2( NTMGETIDFROMNAME_LOC, INFO_EVENT, 2, TM_GROUP, pszLongName );
 
-              usRc = pTmClb->TmBtree.EQFNTMUpdate( LONGNAME_KEY,
-                                   (PBYTE)pTmClb->pLongNames->pszBuffer,
-                                   pTmClb->pLongNames->ulBufUsed );
+              usRc = TmBtree.EQFNTMUpdate( LONGNAME_KEY,
+                                   (PBYTE)pLongNames->pszBuffer,
+                                   pLongNames->ulBufUsed );
             } /* endif */
           } /* endif */
         } /* endif */
@@ -469,14 +463,14 @@ USHORT NTMGetIDFromNameEx
              // name is not contained in name table
              if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
              {
-               usRc = NTMAddNameToTable( pTmClb, pszName, usTableType,
+               usRc = NTMAddNameToTable( pszName, usTableType,
                                          pusID );
 
                // for new languages update our language group table
                if ( (usRc == NO_ERROR) &&
                     (usTableType == LANG_KEY) )
                {
-                 usRc = pTmClb->NTMAddLangGroup( pszName, *pusID );
+                 usRc = NTMAddLangGroup( pszName, *pusID );
                } /* endif */
              } /* endif */
            } /* endif */
@@ -497,16 +491,16 @@ USHORT NTMGetIDFromNameEx
 
         // do the actual search
         pEntry = (PTMX_LONGNAME_TABLE_ENTRY)bsearch( &SearchEntry,
-                                                     pTmClb->pLongNames->stTableEntry,
-                                                     pTmClb->pLongNames->ulEntries,
+                                                     pLongNames->stTableEntry,
+                                                     pLongNames->ulEntries,
                                                      sizeof(TMX_LONGNAME_TABLE_ENTRY),
                                                      NTMLongNameTableComp );
 
         if ( pEntry != NULL )
         {
           pEntry = (PTMX_LONGNAME_TABLE_ENTRY)bsearch( &SearchEntry,
-                                                       pTmClb->pLongNamesCaseIgnore->stTableEntry,
-                                                       pTmClb->pLongNames->ulEntries,
+                                                       pLongNamesCaseIgnore->stTableEntry,
+                                                       pLongNames->ulEntries,
                                                        sizeof(TMX_LONGNAME_TABLE_ENTRY),
                                                        NTMLongNameTableCompCaseIgnore );
         } /* endif */
@@ -577,7 +571,7 @@ USHORT NTMGetIDFromNameEx
 //|                   initialized and is saved to QDAM, therefor the record    |
 //|                   will be reserved in QDAM TM file.                        |
 //+----------------------------------------------------------------------------+
-//|Samples:           usRc = NTMGetNameFromID( pTmClb,                         |
+//|Samples:           usRc = pTmClb->NTMGetNameFromID(                         |
 //|                                            &usID,                          |
 //|                                            LANG_KEY,                       |
 //|                                            pszName    )                    |
@@ -606,8 +600,7 @@ USHORT NTMGetIDFromNameEx
 //|   return usRc;                                                             |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetNameFromID( EqfMemory* pTmClb,      //input
-                  PUSHORT  pusID,         //intput
+EqfMemory::NTMGetNameFromID(  PUSHORT  pusID,         //intput
                   USHORT   usTableType,   //input
                   PSZ      pszName,       //output
                   PSZ      pszLongName )  //output, long name (only for FILE_KEY)
@@ -625,14 +618,13 @@ NTMGetNameFromID( EqfMemory* pTmClb,      //input
   } /* endif */
 
   //--- if input parameters OK
-  if ( pTmClb )
+  //if ( pTmClb )
   {
     /******************************************************************/
     /* get pointer to table and table entries in dependency of the    */
     /* table type                                                     */
     /******************************************************************/
-    usRc = NTMGetPointersToTable( pTmClb,
-                                  usTableType,
+    usRc = NTMGetPointersToTable( usTableType,
                                   &pstTMTable,
                                   &pstTMTableEntries );
     /****************************************************************/
@@ -663,14 +655,14 @@ NTMGetNameFromID( EqfMemory* pTmClb,      //input
         {
           BOOL fLongFound = FALSE;
           for ( ulI = 0;
-                ulI < pTmClb->pLongNames->ulEntries && !fLongFound;
+                ulI < pLongNames->ulEntries && !fLongFound;
                 ulI++ )
           {
-            if ( *pusID == pTmClb->pLongNames->stTableEntry[ulI].usId )
+            if ( *pusID == pLongNames->stTableEntry[ulI].usId )
             {
               fLongFound = TRUE;
               strcpy( pszLongName,
-                      pTmClb->pLongNames->stTableEntry[ulI].pszLongName );
+                      pLongNames->stTableEntry[ulI].pszLongName );
             } /* endif */
           } /* endfor */
         } /* endif */
@@ -688,17 +680,11 @@ NTMGetNameFromID( EqfMemory* pTmClb,      //input
       } /* endif */
     } /* endif */
   }
-  else  //--- pTmClb is NULL pointer
-  {
-    //--- wrong function paramters
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
-  } /* endif */
-
   return usRc;
 } /* end of function NTMGetNameFromID */
 
 
-PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
+PSZ EqfMemory::NTMFindNameForID(
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType )  // input
 
@@ -710,14 +696,13 @@ PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
   PSZ pszFoundName = NULL;
 
   //--- if input parameters OK
-  if ( pTmClb )
+  //if ( pTmClb )
   {
     /******************************************************************/
     /* get pointer to table and table entries in dependency of the    */
     /* table type                                                     */
     /******************************************************************/
-    usRc = NTMGetPointersToTable( pTmClb,
-                                  usTableType,
+    usRc = NTMGetPointersToTable( usTableType,
                                   &pstTMTable,
                                   &pstTMTableEntries );
     /****************************************************************/
@@ -748,13 +733,13 @@ PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
         {
           BOOL fLongFound = FALSE;
           for ( ulI = 0;
-                ulI < pTmClb->pLongNames->ulEntries && !fLongFound;
+                ulI < pLongNames->ulEntries && !fLongFound;
                 ulI++ )
           {
-            if ( *pusID == pTmClb->pLongNames->stTableEntry[ulI].usId )
+            if ( *pusID == pLongNames->stTableEntry[ulI].usId )
             {
               fLongFound = TRUE;
-              pszFoundName = pTmClb->pLongNames->stTableEntry[ulI].pszLongName;
+              pszFoundName = pLongNames->stTableEntry[ulI].pszLongName;
             } /* endif */
           } /* endfor */
         } /* endif */
@@ -772,11 +757,6 @@ PSZ NTMFindNameForID( EqfMemory* pTmClb,      //input
       } /* endif */
     } /* endif */
   }
-  else  //--- pTmClb is NULL pointer
-  {
-    //--- wrong function paramters
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_INTERNAL);
-  } /* endif */
 
   return( pszFoundName );
 } /* end of function NTMFindNameForID */
@@ -877,7 +857,7 @@ NTMCompNames( const void * pstTMTableEntry1,  //input
 //| return usRc                                                                |
 // ----------------------------------------------------------------------------+
 USHORT
-NTMGetPointersToTable( EqfMemory*         pTmClb,             //input
+EqfMemory::NTMGetPointersToTable( 
                        USHORT           usTableType,          //input
                        PTMX_TABLE       *ppstTMTable,         //output
                        PTMX_TABLE_ENTRY *ppstTMTableEntries ) //output
@@ -891,23 +871,23 @@ NTMGetPointersToTable( EqfMemory*         pTmClb,             //input
   {
     //-----------------------------------------------------------------------
     case LANG_KEY :
-      *ppstTMTable = (PTMX_TABLE)&pTmClb->Languages;
+      *ppstTMTable = (PTMX_TABLE)&Languages;
       break;
     //-----------------------------------------------------------------------
     case FILE_KEY :
-      *ppstTMTable = (PTMX_TABLE)&pTmClb->FileNames;
+      *ppstTMTable = (PTMX_TABLE)&FileNames;
       break;
     //-----------------------------------------------------------------------
     case AUTHOR_KEY :
-      *ppstTMTable = (PTMX_TABLE)&pTmClb->Authors;
+      *ppstTMTable = (PTMX_TABLE)&Authors;
       break;
     //-----------------------------------------------------------------------
     case TAGTABLE_KEY :
-      *ppstTMTable = (PTMX_TABLE)&pTmClb->TagTables;
+      *ppstTMTable = (PTMX_TABLE)&TagTables;
       break;
     //-----------------------------------------------------------------------
     case LANGGROUP_KEY :
-      *ppstTMTable = (PTMX_TABLE)&pTmClb->LangGroups;
+      *ppstTMTable = (PTMX_TABLE)&LangGroups;
       break;
     //-----------------------------------------------------------------------
     default :
@@ -1367,9 +1347,8 @@ USHORT EqfMemory::NTMReadLongNameTable(){
 //|             ERROR_NOT_ENOUGH_MEMORY  - reallocation of table failed        |
 //|             others                   - return codes from QDAM              |
 // ----------------------------------------------------------------------------+
-USHORT NTMAddNameToTable
+USHORT EqfMemory::NTMAddNameToTable
 (
-  EqfMemory* pTmClb,                   // input
   PSZ      pszName,                    // input
   USHORT   usTableType,                //input
   PUSHORT  pusID                       //output
@@ -1387,14 +1366,13 @@ USHORT NTMAddNameToTable
   *pusID = 0;
 
   //--- if input parameters OK
-  if ( pTmClb && pszName[0] != EOS )
+  if ( pszName[0] != EOS )
   {
     /******************************************************************/
     /* get pointer to table and table entries in dependency of the    */
     /* table type                                                     */
     /******************************************************************/
-    usRc = NTMGetPointersToTable( pTmClb,
-                                  usTableType,
+    usRc = NTMGetPointersToTable( usTableType,
                                   &pstTMTable,
                                   &pstTMTableEntries );
 
@@ -1493,7 +1471,7 @@ USHORT NTMAddNameToTable
                NTMCompNames );
 
         // update table record in TM QDAM file (if not in read-only mode)
-        if ( !(pTmClb->usAccessMode & ASD_READONLY) )
+        if ( !(usAccessMode & ASD_READONLY) )
         {
           if ( usTableType != LANGGROUP_KEY )
           {
@@ -1505,7 +1483,7 @@ USHORT NTMAddNameToTable
               memcpy( &table->stTmTableEntry, 
                 &pstTMTable->stTmTableEntry[0], sizeof(TMX_TABLE_ENTRY) * table->ulMaxEntries);
             }
-            usRc = pTmClb->TmBtree.EQFNTMUpdate(
+            usRc = TmBtree.EQFNTMUpdate(
                                 (ULONG)usTableType,
                                 //(PBYTE)pstTMTable,
                                 (PBYTE)table,
@@ -1730,7 +1708,7 @@ USHORT EqfMemory::NTMAddLangGroup
   // get ID of group name
   if ( (usRC == NO_ERROR) && (sGroupID == 0) )
   {
-    usRC = NTMGetIDFromName( this, szLangGroup, NULL, LANGGROUP_KEY, (PUSHORT)&sGroupID );
+    usRC = NTMGetIDFromName( szLangGroup, NULL, LANGGROUP_KEY, (PUSHORT)&sGroupID );
   } /* endif */
 
   // enlarge language-ID-to-group-ID table if necessary

@@ -526,7 +526,7 @@ USHORT ExtractRecordV6
                                      pTargetClb,
                                      pSourceString, &lSourceLen,
                                      &pTmExtOut->stTmExt );
-            NTMGetNameFromID( pTmClb, &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+            pTmClb->NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
                         pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
             if ( ! usRc )
             {
@@ -702,7 +702,7 @@ USHORT FillExtStructure
       pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
       //fill in the tag table name
-      NTMGetNameFromID( pTmClb, &pTMXTagTableRecord->usTagTableId,
+      pTmClb->NTMGetNameFromID( &pTMXTagTableRecord->usTagTableId,
                         (USHORT)TAGTABLE_KEY,
                         pstExt->szTagTable, NULL );
 
@@ -734,7 +734,7 @@ USHORT FillExtStructure
       } /* endif */
 
       //fill in the target file name
-      NTMGetNameFromID( pTmClb, &pTMXTargetClb->usFileId, (USHORT)FILE_KEY,
+      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usFileId, (USHORT)FILE_KEY,
                         pstExt->szFileName, pstExt->szLongName );
       //use overflow name if no document name available
       if ( pstExt->szFileName[0] == EOS )
@@ -743,11 +743,11 @@ USHORT FillExtStructure
       } /* endif */
 
       //fill in the target author
-      NTMGetNameFromID( pTmClb, &pTMXTargetClb->usAuthorId, (USHORT)AUTHOR_KEY,
+      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usAuthorId, (USHORT)AUTHOR_KEY,
                         pstExt->szAuthorName, NULL );
 
       //fill in the target language
-      NTMGetNameFromID( pTmClb, &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
+      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
                         pstExt->szTargetLanguage, NULL );
       
 

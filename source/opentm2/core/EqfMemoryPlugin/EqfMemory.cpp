@@ -29,7 +29,6 @@ Copyright Notice:
 // activate the folllowing define to activate logging
 /*! \brief Prototypes of helper functions */
 static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
-OtmProposal::eProposalType FlagToProposalType( USHORT usTranslationFlag );
 
 EqfMemory::~EqfMemory()
 {
@@ -204,14 +203,14 @@ unsigned long EqfMemory::getFileSize()
 */
 int EqfMemory::putProposal
 (
-  OtmProposal &Proposal
+  SearchProposal &Proposal
 )
 {
   int iRC = 0;
   memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
 
-  OtmProposalToPutIn( Proposal, &TmPutIn );
+  //OtmProposalToPutIn( Proposal, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
     std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
@@ -222,12 +221,10 @@ int EqfMemory::putProposal
   /* the TMX_PUT_IN structure must not be filled it is provided       */
   /* by the caller                                                    */
   /********************************************************************/
-
-  iRC = TmtXReplace ( &TmPutIn, &TmPutOut );
+  iRC = TmtXReplace ( Proposal, &TmPutOut );
 
   if ( iRC != 0 ){
-    T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC;   
-    //handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+    T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
   }
 
   if ( ( iRC == 0 ) &&
@@ -707,11 +704,23 @@ int EqfMemory::MatchToOtmProposal
   return( iRC );
 }
 
+BYTE ProposalTypeToFlag(OtmProposal::eProposalType t){
+  switch ( t )
+  {
+    case OtmProposal::eptManual: return TRANSLFLAG_NORMAL; break;
+    case OtmProposal::eptMachine: return TRANSLFLAG_MACHINE; break;
+    case OtmProposal::eptGlobalMemory: return TRANSLFLAG_GLOBMEM; break;
+    case OtmProposal::eptGlobalMemoryStar: return TRANSLFLAG_GLOBMEMSTAR; break;
+    default: return TRANSLFLAG_NORMAL; break;
+  } 
+}
+
 /*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
     \param pPutIn pointer to the TMX_PUT_IN_W structure
   	\returns 0 or error code in case of errors
 */
+/*
 int EqfMemory::OtmProposalToPutIn
 (
   OtmProposal &Proposal,
@@ -731,18 +740,11 @@ int EqfMemory::OtmProposalToPutIn
   Proposal.getDocName( pPutIn->stTmPut.szLongName, sizeof(pPutIn->stTmPut.szLongName)  );
   Proposal.getDocShortName( pPutIn->stTmPut.szFileName, sizeof(pPutIn->stTmPut.szFileName)  );
   pPutIn->stTmPut.ulSourceSegmentId = Proposal.getSegmentNum();
-  switch ( Proposal.getType() )
-  {
-    case OtmProposal::eptManual: pPutIn->stTmPut.usTranslationFlag = TRANSLFLAG_NORMAL; break;
-    case OtmProposal::eptMachine: pPutIn->stTmPut.usTranslationFlag = TRANSLFLAG_MACHINE; break;
-    case OtmProposal::eptGlobalMemory: pPutIn->stTmPut.usTranslationFlag = TRANSLFLAG_GLOBMEM; break;
-    case OtmProposal::eptGlobalMemoryStar: pPutIn->stTmPut.usTranslationFlag = TRANSLFLAG_GLOBMEMSTAR; break;
-    default: pPutIn->stTmPut.usTranslationFlag = TRANSLFLAG_NORMAL; break;
-  } /* endswitch */     
+     
   pPutIn->stTmPut.lTime = Proposal.getUpdateTime();
 
   return( iRC );
-}
+}//*/
 
 /*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
