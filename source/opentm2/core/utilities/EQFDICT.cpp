@@ -973,35 +973,13 @@ SHORT BTREE::QDAMWRecordToDisk_V3
 (
    PBTREEBUFFER_V3  pBuffer               // pointer to buffer to write
 )
-{
-  SHORT sRc = 0;                          // return code
-  
+{  
   LONG  lOffset = RECORDNUM(pBuffer) * (long)BTREE_REC_SIZE_V3; // offset in file
   ULONG ulNewOffset;                      // new file pointer position
-  //int iBytesWritten;                  // number of bytes written
 
   INC_REAL_WRITE_COUNT;
 
-  DEBUGEVENT2( QDAMRECORDTODISK_LOC, FUNCENTRY_EVENT, RECORDNUM(pBuffer), DB_GROUP, "" );
-
-//QDAMCheckCheckSum( pBuffer, QDAMRECORDTODISK_LOC );
-
-  //if ( ! sRc ){
-    sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) ;
-    // check if disk is full
-    //if ( ! sRc )
-    //{
-       //if ( iBytesWritten == BTREE_REC_SIZE_V3 )
-       //{
-       //  pBuffer->fNeedToWrite = FALSE;
-       //}
-       //else
-       //{
-       //   sRc = BTREE_DISK_FULL;
-       //   fCorrupted = TRUE;                     // indicate corruption
-       //} /* endif */
-    //}
-  //}
+ SHORT sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) ;
 
   if ( sRc )
   {
@@ -3131,6 +3109,7 @@ SHORT  BTREE::QDAMAddToBuffer_V3
    USHORT   usLenFieldSize;            // size of length field
 
    memset(&recStart, 0, sizeof(recStart));
+   memset(&TempRecord[0], 0, sizeof(TempRecord));
    /*******************************************************************/
    /* Enlarge pTempRecord area if it is not large enough to contain   */
    /* the data for this record                                        */

@@ -1746,7 +1746,7 @@ void StringTagVariants::parseTrg(){
     }
   }else{    
     handler.tagReplacer.activeSegment = TARGET_SEGMENT;
-    handler.fCreateNormalizedStr = false;//not needed for target
+    //handler.fCreateNormalizedStr = false;//not needed for target
     trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
     xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                         "trg_buff (in memory)");
@@ -1758,6 +1758,7 @@ void StringTagVariants::parseTrg(){
     }
 
     genericTarget = handler.GetParsedData();    
+    normTarget = handler.GetParsedNormalizedData();
   }
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){

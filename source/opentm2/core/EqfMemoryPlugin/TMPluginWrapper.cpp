@@ -411,7 +411,6 @@ USHORT EqfMemory::TokenizeSource
   }
   else
   {
-    //LOG_DEVELOP_MSG << "TokenizeSourceEx2";
     pTagRecord = pSentence->pTagRecord;
     pTermTokens = pSentence->pTermTokens;
     pTagEntry = (PBYTE)pTagRecord;
@@ -423,7 +422,7 @@ USHORT EqfMemory::TokenizeSource
     //get id of tag table, call
     Utlstrccpy( szString, UtlGetFnameFromPath( pTagTableName ), DOT );
 
-    pTagRecord->usTagTableId = 0;
+    pTagRecord->usTagTableId = 1;
 
     //get lang id of source lang for morphtokenize call
     usLangId = 0;

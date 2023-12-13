@@ -1835,6 +1835,16 @@ int UpdateEntryRequestData::execute(){
 
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
+
+  if(Data.szSourceLanguage[0] == '\0' ){
+    buildErrorReturn(404, "Error in input - srcLang is not supported!");
+    return _rc_ = 404;
+  }
+  if(Data.szTargetLanguage[0] == '\0' ){
+    buildErrorReturn(404, "Error in input - trgLang is not supported!");
+    return _rc_ = 404;
+  }
+  
   Data.eType = getMemProposalType(Data.szType );
 
   LONG lTime = 0;
@@ -1855,11 +1865,8 @@ int UpdateEntryRequestData::execute(){
   }
 
   // update the memory
-  //OtmProposal OtmProposal;
   TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
   memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
-
-  //mem->OtmProposalToPutIn( Data, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
     std::string source = EncodingHelper::convertToUTF8(Data.szSource);
@@ -1902,8 +1909,8 @@ int UpdateEntryRequestData::execute(){
 
   std::wstring outputMessageW;
   json_factory.startJSON( outputMessage );
-  json_factory.addParmToJSON( outputMessage, "sourceLang",Data.szIsoSourceLang );
-  json_factory.addParmToJSON( outputMessage, "targetLang",Data.szIsoTargetLang );
+  json_factory.addParmToJSON( outputMessage, "sourceLang",Data.szSourceLanguage );
+  json_factory.addParmToJSON( outputMessage, "targetLang",Data.szTargetLanguage );
 
   json_factory.addParmToJSONW( outputMessageW, L"source",Data.szSource );
   json_factory.addParmToJSONW( outputMessageW, L"target",Data.szTarget );

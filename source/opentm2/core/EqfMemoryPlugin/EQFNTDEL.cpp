@@ -104,7 +104,7 @@ USHORT EqfMemory::TmtXDelSegm
                            TmDelIn.szIsoSourceLang);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
-    TmDelIn.pInputSentence->pTagRecord->usTagTableId = 0;
+    TmDelIn.pInputSentence->pTagRecord->usTagTableId = 1;
   }
 
 

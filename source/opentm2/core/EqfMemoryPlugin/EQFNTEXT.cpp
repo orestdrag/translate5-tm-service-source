@@ -544,8 +544,9 @@ USHORT ExtractRecordV6
 
               //if target exists
               if ( ((RECLEN(pTMXTargetRecord) > 0) && (lLeftTgtLen > 0 ) )
-                          ||
-                    (lLeftClbLen > 0) )
+                   //       ||
+                   // (lLeftClbLen > 0) 
+                  )
               {
                 //increase target count and leave tm record key number as before
                 pTmExtOut->ulTmKey = pTmExtIn->ulTmKey;
@@ -702,9 +703,11 @@ USHORT FillExtStructure
       pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
       //fill in the tag table name
-      pTmClb->NTMGetNameFromID( &pTMXTagTableRecord->usTagTableId,
-                        (USHORT)TAGTABLE_KEY,
-                        pstExt->szTagTable, NULL );
+      //pTmClb->NTMGetNameFromID( &pTMXTagTableRecord->usTagTableId,
+      //                  (USHORT)TAGTABLE_KEY,
+      //                  pstExt->szTagTable, NULL );
+      //pTMXTagTableRecord->usTagTableId = 1;
+      strcpy(pstExt->szTagTable, "OTMXUXLF");
 
       //add tags to target string if flag set to true
       //if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )

@@ -1545,6 +1545,7 @@ protected:
   std::wstring genericTags; // generated tags so there could be only ph or bpt/ept with id and r attributes that would map input str to common tag format
 
   std::wstring genericTarget; 
+  std::wstring normTarget;
 
   void initParser();
   void parseSrc();
@@ -1570,11 +1571,13 @@ public:
   std::wstring& getNormStr(){ return norm; }
   std::wstring& getNpReplacedStr(){ return npReplaced; }
   std::wstring& getGenericTagsString() { return genericTags; }
+  std::wstring& getNormTargetStr(){return normTarget; }
   
   wchar_t* getNormStrC(){return &norm[0];}
   wchar_t* getNpReplStrC(){return &npReplaced[0];}
   wchar_t* getGenericTagStrC() { return &genericTags[0]; }
   wchar_t* getGenericTargetStrC() {return &genericTarget[0];}
+  wchar_t* getNormalizedTargetStrC() { return &normTarget[0]; }
 };
 
 class RequestTagReplacer: public StringVariants{
@@ -1603,7 +1606,7 @@ struct TMX_SENTENCE
   std::shared_ptr<StringTagVariants>  pStrings = nullptr;
 
   PSZ_W pAddString = nullptr;
-  USHORT  usNormLen = 0;
+  //USHORT  usNormLen = 0;
   PTMX_TERM_TOKEN pTermTokens = nullptr;
   LONG lTermAlloc = 0;
   PTMX_TAGTABLE_RECORD pTagRecord = nullptr;
@@ -1644,7 +1647,7 @@ struct TMX_SENTENCE
       throw ;//new Exception();
     }
     pStrings = input;
-    usNormLen = pStrings->getNormStr().length();    
+    //usNormLen = pStrings->getNormStr().length();    
   }
 
   ~TMX_SENTENCE(){
@@ -3950,9 +3953,9 @@ static VOID BuildVotes( PTMX_SENTENCE );
 static VOID Vote( PTMX_TERM_TOKEN, PTMX_SENTENCE, USHORT );
 USHORT CheckCompactArea( PTMX_SENTENCE, EqfMemory* );
 
-USHORT TokenizeTarget( PSZ_W, PSZ_W, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, PUSHORT, EqfMemory* );
+USHORT TokenizeTarget( StringTagVariants*, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, EqfMemory* );
 
-VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, PSZ_W, USHORT,
+VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, //PSZ_W, USHORT,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 
 USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );

@@ -357,7 +357,8 @@ USHORT EqfMemory::TmtXGet
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
-      usRc = NTMGetIDFromName( pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
+      //usRc = NTMGetIDFromName( pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
+      Sentence.pTagRecord->usTagTableId = 1;
     }
   } /* endif */
 
@@ -1858,10 +1859,12 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
         {
           //fill in the markup table
           PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
-          pTmClb->NTMGetNameFromID(
-                            &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
-                            (USHORT)TAGTABLE_KEY,
-                            pSubstProp->szPropTagTable, NULL );
+          //pTmClb->NTMGetNameFromID(
+          //                  &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
+          //                  (USHORT)TAGTABLE_KEY,
+          //                  pSubstProp->szPropTagTable, NULL );      
+          strcpy(pSubstProp->szPropTagTable, "OTMXUXLF");
+
           ulTgtOemCP = 1;
 
           //fill in the target language
@@ -2144,10 +2147,11 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
             //fill in the markup table
             {
               PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
-              pTmClb->NTMGetNameFromID(
-                                &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
-                                (USHORT)TAGTABLE_KEY,
-                                pstMatchTable->szTagTable, NULL );
+              //pTmClb->NTMGetNameFromID(
+              //                  &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
+              //                  (USHORT)TAGTABLE_KEY,
+              //                  pstMatchTable->szTagTable, NULL );
+              strcpy(pstMatchTable->szTagTable, "OTMXUXLF");
             }
 
             //fill in the target and original src language
@@ -2773,10 +2777,10 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
       LONG    lTempSrcLen;            // temp. source length
 
       //get id of target tag table in the get structure
-      if ( pTmClb->NTMGetIDFromNameEx( pGetIn->szTagTable,
-                             NULL,
-                             (USHORT)TAGTABLE_KEY, &usTagId,
-                             NTMGETID_NOUPDATE_OPT, NULL ))
+     // if ( pTmClb->NTMGetIDFromNameEx( pGetIn->szTagTable,
+     //                        NULL,
+     //                        (USHORT)TAGTABLE_KEY, &usTagId,
+     //                        NTMGETID_NOUPDATE_OPT, NULL ))
       {
         usTagId = 1;   // set default...
       } /* endif */
@@ -2887,7 +2891,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
           // GQ: only compare tag tables if segment and proposal have inline tagging
           if ( (RECLEN(pTMXTargetTagTable) > sizeof(TMX_TAGTABLE_RECORD)) ||  (RECLEN(pSentence->pTagRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
           {
-            fTagTableEqual =(pTMXTargetTagTable->usTagTableId == usTagId);
+            fTagTableEqual =true;//(pTMXTargetTagTable->usTagTableId == usTagId);
             // For R012645 begin
             if(!fTagTableEqual)
             {
@@ -2898,8 +2902,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                 // get markup name firstly, also with cache
                 char szMarkup[MAX_FNAME];
                 memset(szMarkup,0,sizeof(szMarkup));
-                pTmClb->NTMGetNameFromID( &(pTMXTargetTagTable->usTagTableId), (USHORT)TAGTABLE_KEY,szMarkup, NULL );
-                  
+                //pTmClb->NTMGetNameFromID( &(pTMXTargetTagTable->usTagTableId), (USHORT)TAGTABLE_KEY,szMarkup, NULL );      
+                strcpy(szMarkup, "OTMXUXLF");
                 std::string familyNameTgt = GetAndCacheFamilyName(szMarkup);
                 if( !familyNameTgt.empty() && familyNameIn==familyNameTgt)
                   fTagTableEqual = TRUE;
