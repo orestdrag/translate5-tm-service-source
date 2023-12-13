@@ -2042,7 +2042,7 @@ USHORT EqfMemory::ComparePutData
     USHORT  usPutFile;                 // file id of new entry
 
     //get id of target language in the put structure
-    if (NTMGetIDFromName( TmProposal.szIsoTargetLang,
+    if (NTMGetIDFromName( TmProposal.szTargetLanguage,
                           NULL, (USHORT)LANG_KEY, &usPutLang ))
     {
       usPutLang = 1;
@@ -2225,15 +2225,16 @@ USHORT EqfMemory::ComparePutData
                   {
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
                     LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord); 
-                    //if( size> 0 ){
+                    if( size> 0 ){
                       memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
                       RECLEN(pTmRecord) += lNewClbLen;
                       RECLEN(pTMXTargetRecord) += lNewClbLen;
-                    //}else{
-                    //  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-                    //    T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen;
-                    //  }
-                    //}
+                    }else{
+                      //if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+                        T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen << "; segment was not saved";
+                      //}
+                      //fOK = false;
+                    }
                   } /* endif */
 
                   // fill-in new target CLB
@@ -2257,9 +2258,12 @@ USHORT EqfMemory::ComparePutData
                     NtmStoreAddData( pClb, ADDDATA_CONTEXT_ID, TmProposal.szContext );
                     NtmStoreAddData( pClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
                   } /* endif */
-
-                  fStop = TRUE;        // avoid add of a new target record at end of outer loop
-                  fUpdate = TRUE;
+                  //if(fOK){
+                    fStop = TRUE;        // avoid add of a new target record at end of outer loop
+                    fUpdate = TRUE;
+                  //}else{
+                  //  fOK = true;
+                  //}
                 } /* endif */
               } /* endif */
             } /* endif */
