@@ -275,7 +275,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
       //--- will be displayed                                          /*@47A*/
       pLIDA->fDisplayNotReplacedMessage = TRUE;                        /*@47A*/
 
-      pLIDA->pProposal = new(SearchProposal);
+      pLIDA->pProposal = new(OtmProposal);
    } /* endif */
 
    // If fOK. Get file and memory database handle as well as their path

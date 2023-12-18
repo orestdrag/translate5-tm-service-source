@@ -1072,13 +1072,6 @@ typedef struct _TMX_PREFIX_OUT
 
 
 
-typedef struct _TMX_OPEN_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;
-  EqfMemory* pstTmClb;
-} TMX_OPEN_OUT, * PTMX_OPEN_OUT;
-
-
 #define  MEM_EXPORT_OUT_BUFFER      8200  // Output buffer for export
 
 #define  MAX_HANDLER_NAME        40

@@ -258,7 +258,6 @@ int convertDateTimeStringToLong( char *pszDateTime, PLONG plTime )
 }
 
 
-int addProposalToJSONString ( std::wstring &strJSON, PMEMPROPOSAL pProp, void *pvData );
 
 
 

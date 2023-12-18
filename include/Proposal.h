@@ -11,6 +11,8 @@
 #define OTMPROPOSAL_MAXNAMELEN 256
 
 
+class TMX_SENTENCE;
+
 /*! \brief Data class for the transport of memory proposals
  *
  * 
@@ -78,6 +80,8 @@ public:
      \param pszBuffer Pointer to buffer containing the proposal key
    */
   void setInternalKey( char *pszBuffer );
+  
+  std::string getInternalKey()const;
   	
 
   /* \brief get length of proposal source text 
@@ -358,7 +362,7 @@ public:
       \param Proposals reference to a vector containing the proposals
   */
   void static clearAllProposals(
-    std::vector<OtmProposal *> &Proposals
+    std::vector<OtmProposal> &Proposals
   );
 
   /*! \brief Get the number of filled proposals in a proposal list
@@ -377,16 +381,9 @@ public:
 
   friend std::ostream & operator<<( std::ostream & o, OtmProposal & proposal );
 
-
-  //void setKey(ULONG ulKey);
-  //void setTargetNum(USHORT usTargetNum);
-  //ULONG getKey()
-  //USHORT getTargetNum();
   std::string getProposalKey();
 
 //protected:
-  /*! \brief internal key of this proposal */
-	char szInternalKey[OTMPROPOSAL_MAXNAMELEN];
 
   /*! \brief ID of this proposal */
 	char szId[OTMPROPOSAL_MAXNAMELEN];
@@ -402,10 +399,6 @@ public:
 	/*! \brief Name of document from which the proposal comes from. */
 	//std::string strDocName;
 	char szDocName[OTMPROPOSAL_MAXNAMELEN];
-
-	/*! \brief Short (8.3) name of the document from which the proposal comes from. */
-	//std::string strDocShortName;
-	//char szDocShortName[OTMPROPOSAL_MAXNAMELEN];
 
 	/*! \brief Segment number within the document from which the proposal comes from. */
   long lSegmentNum;                  
@@ -461,24 +454,15 @@ public:
 
   bool fSourceLangIsPrefered;
 
-  //char errorStr[1000];
-};
-
-
-OtmProposal::eProposalType getMemProposalType( char *pszType );
-
-class TMX_SENTENCE;
-
-class SearchProposal: public OtmProposal
-{
-public:
+  
+  //searchproposal
   TMX_SENTENCE* pInputSentence = nullptr;
 
   char szMemory[260];
   char szIsoSourceLang[MAX_LANG_LENGTH];
   char szIsoTargetLang[MAX_LANG_LENGTH];
-  int lSegmentNum;
-  char szDocName[260];
+  //int lSegmentNum;
+  //char szDocName[260];
   wchar_t szError[512];
   char szType[256];
   //char szAuthor[MAX_USERID];
@@ -504,8 +488,15 @@ public:
   /*! \brief is target lang is marked as prefered in languages.xml */
   bool fIsoTargetLangIsPrefered = false;
 
-  void clearSearchProposal();
-  ~SearchProposal() { if(pInputSentence) delete pInputSentence;}
+  void clearProposal();
+  //searchproposal
+
+  //char errorStr[1000];
 };
+
+
+
+
+OtmProposal::eProposalType getMemProposalType( char *pszType );
 
 #endif //_PROPOSAL_H_INCLUDED_

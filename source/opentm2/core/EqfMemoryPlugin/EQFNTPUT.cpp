@@ -47,7 +47,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 	(
 		PTMX_RECORD		   *ppTmRecordStart,
 		PULONG     		   pulRecBufSize,
-	  SearchProposal& 		   TmProposal,
+	  OtmProposal& 		   TmProposal,
 		PTMX_TARGET_CLB    *ppClb,
 		PTMX_RECORD        *ppCurTmRecord,
 		PTMX_TARGET_RECORD	 *ppTMXTargetRecord,
@@ -57,7 +57,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 USHORT TMLoopAndDelTargetClb
 	(
 		PTMX_RECORD         pTmRecord,
-		SearchProposal& 	  TmProposal,
+		OtmProposal& 	  TmProposal,
     USHORT              usPutLang,
     USHORT              usPutFile,
     PBOOL               fNewerTargetExists
@@ -184,8 +184,8 @@ BOOL CheckForAlloc
 //------------------------------------------------------------------------------
 USHORT EqfMemory::TmtXReplace
 (
-  SearchProposal& TmProposal,  //ptr to input struct
-  PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
+  OtmProposal& TmProposal,  //ptr to input struct
+  PTMX_EXT_OUT_W pTmPutOut //ptr to output struct
 )
 {
   //TMX_SENTENCE  Sentence(std::make_shared<StringTagVariants>(pTmPutIn->stTmPut.szSource));     // ptr to sentence structure
@@ -279,7 +279,7 @@ USHORT EqfMemory::TmtXReplace
     NTMLockTM( this, FALSE, &fLocked );
   } /* endif */
 
-  pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
+  pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmPutOut->stPrefixOut.usTmtXRc = usRc;
 
   // special handling if update of index failed with BTREE_LOOKUPTABLE_TOO_SMALL:
@@ -290,8 +290,8 @@ USHORT EqfMemory::TmtXReplace
   {
     // try to delete the segment from the memory
 
-    PTMX_PUT_OUT_W pstDelOut = NULL;
-    UtlAlloc( (PVOID *)&pstDelOut, 0L, sizeof (TMX_PUT_OUT_W), NOMSG );
+    PTMX_EXT_OUT_W pstDelOut = NULL;
+    UtlAlloc( (PVOID *)&pstDelOut, 0L, sizeof (TMX_EXT_OUT_W), NOMSG );
 
     if ( pstDelOut )
     {
@@ -932,7 +932,7 @@ USHORT TokenizeTarget
 //------------------------------------------------------------------------------
 USHORT EqfMemory::AddToTm
 (
-  SearchProposal& TmProposal,         // ptr to sentence structure
+  OtmProposal& TmProposal,         // ptr to sentence structure
   PULONG pulNewKey                    // sid of newly added tm record
 )
 {
@@ -1174,7 +1174,7 @@ VOID FillTmRecord
 USHORT EqfMemory::FillClb
 (
   PTMX_TARGET_CLB * ppTargetClb,    // ptr to target control block
-  SearchProposal& TmProposal                 // ptr to put input structure
+  OtmProposal& TmProposal                 // ptr to put input structure
 )
 {
   USHORT  usTrgLang,usSrcLang;
@@ -1699,7 +1699,7 @@ USHORT DetermineTmRecord
 
 USHORT EqfMemory::UpdateTmRecord
 (
-  SearchProposal&    TmProposal                //pointer to get in data
+  OtmProposal&    TmProposal                //pointer to get in data
 )
 {
   BOOL   fOK;                          //success indicator
@@ -1838,7 +1838,7 @@ USHORT EqfMemory::UpdateTmRecord
 
 USHORT EqfMemory::UpdateTmRecordByInternalKey
 (
-  SearchProposal& TmProposal
+  OtmProposal& TmProposal
 )
 {
   BOOL   fOK;                          //success indicator
@@ -1995,7 +1995,7 @@ USHORT EqfMemory::ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
   PULONG      pulRecBufSize,           // current size of record buffer
-  SearchProposal&  TmProposal,                  // pointer to get in data
+  OtmProposal&  TmProposal,                  // pointer to get in data
   PULONG      pulKey                   // tm key
 )
 {
@@ -2346,7 +2346,7 @@ USHORT EqfMemory::ComparePutData
 //   insert tm record in tm data fill                                           
 //------------------------------------------------------------------------------
 USHORT EqfMemory::AddTmTarget(
-  SearchProposal& TmProposal,       //pointer to get in data
+  OtmProposal& TmProposal,       //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
   PULONG pulRecBufSize,             //ptr to current size of TM record buffer
   PULONG pulKey )                   //tm key
@@ -2583,8 +2583,8 @@ VOID FillTargetRecord
 //------------------------------------------------------------------------------
 USHORT EqfMemory::TmtXUpdSeg
 (
-  SearchProposal* pTmPutIn,    // ptr to put input data
-  PTMX_PUT_OUT_W pTmPutOut,   //ptr to output struct
+  OtmProposal* pTmPutIn,    // ptr to put input data
+  PTMX_EXT_OUT_W pTmPutOut,   //ptr to output struct
   USHORT      usFlags      // flags controlling the updated fields
 )
 {
@@ -3017,7 +3017,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 (
 	PTMX_RECORD	      *ppTmRecordStart,
 	PULONG     		   pulRecBufSize,
-	SearchProposal& 		   TmProposal,
+	OtmProposal& 		   TmProposal,
 	PTMX_TARGET_CLB    *ppClb,
 	PTMX_RECORD        *ppCurTmRecord,
 	PTMX_TARGET_RECORD *ppTMXTargetRecord,
@@ -3165,7 +3165,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 USHORT TMLoopAndDelTargetClb
 (
 	PTMX_RECORD         pTmRecord,
-	SearchProposal& 		TmProposal,
+	OtmProposal& 		TmProposal,
 	USHORT              usPutLang,
   USHORT              usPutFile,
   PBOOL               pfNewerTargetExists

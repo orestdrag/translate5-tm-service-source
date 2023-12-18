@@ -61,8 +61,13 @@ typedef UCHAR BUFFEROUT  [DATA_OUT_SIZE],
 typedef CHAR  LANG_LINE  [MAX_LINE_LENGTH + 1];
 typedef CHAR  LONG_FN    [MAX_LONGFILESPEC];
 
-typedef struct _TMX_EXT_W
+
+
+
+struct TMX_EXT_OUT_W
 {
+  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
+
   CHAR_W    szSource[MAX_SEGMENT_SIZE];        //source sentence
   CHAR_W    szTarget[MAX_SEGMENT_SIZE];        //target sentence
   CHAR      szOriginalSourceLanguage[MAX_LANG_LENGTH]; //language name of the source
@@ -76,42 +81,14 @@ typedef struct _TMX_EXT_W
   TIME_L    lTargetTime;                       //time stamp of target
   CHAR_W    szContext[MAX_SEGMENT_SIZE];       //segment context
   CHAR_W    szAddInfo[MAX_SEGMENT_SIZE];       // additional segment information
-} TMX_EXT_W, * PTMX_EXT_W;
+  ULONG ulRecKey;
+  USHORT usTargetKey;  
 
-typedef struct _TMX_EXT
-{
-  CHAR      szSource[MAX_SEGMENT_SIZE];        //source sentence
-  CHAR      szTarget[MAX_SEGMENT_SIZE];        //target sentence
-  CHAR      szTagTable[MAX_FNAME];             //tag table name
-  CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
-  USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
-  CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
-  LONG_FN   szLongName;                        // name of source file (long name or EOS)
-  USHORT    usSourceSegmentId;                 //seg. num. of source sentence from analysis
-  TIME_L    lTargetTime;                       //time stamp of target
-} TMX_EXT, * PTMX_EXT;
-
-
-typedef struct _TMX_EXT_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
-  TMX_EXT stTmExt;                 //pointer to put structure
-  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
   ULONG ulTmKey;                   //tm record key
   USHORT usNextTarget;             //which target record to address next
   ULONG ulMaxEntries;              //number of entries in tm data file
-} TMX_EXT_OUT, * PTMX_EXT_OUT;
-
-typedef struct _TMX_EXT_OUT_W
-{
-  TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer
-  TMX_EXT_W      stTmExt;          //pointer to put structure
-  CHAR szServer[MAX_SERVER_NAME];  //server name filled by u-code function
-  ULONG ulTmKey;                   //tm record key
-  USHORT usNextTarget;             //which target record to address next
-  ULONG ulMaxEntries;              //number of entries in tm data file
-} TMX_EXT_OUT_W, *PTMX_EXT_OUT_W;
+};
+using PTMX_EXT_OUT_W = TMX_EXT_OUT_W *;
 
 
 
@@ -1733,10 +1710,6 @@ typedef struct _TMX_PUT_IN_W
   TMX_PUT_W      stTmPut;             //pointer to put input structure
 } TMX_PUT_IN_W, * PTMX_PUT_IN_W;
 
-typedef struct _TMX_PUT_OUT_W
-{
-  TMX_PREFIX_OUT stPrefixOut;           //output structure
-} TMX_PUT_OUT_W, * PTMX_PUT_OUT_W;
 
 
 typedef struct _TMX_GET_W
@@ -1799,13 +1772,14 @@ typedef struct _TMX_MATCH_TABLE_W
   USHORT  usMatchInfo;                  // for future use: special info for match
 } TMX_MATCH_TABLE_W, * PTMX_MATCH_TABLE_W;
 
-typedef struct _TMX_GET_OUT_W
+using TMX_GET_OUT_W = struct _TMX_GET_OUT_W : public TMX_EXT_OUT_W
 {
-  TMX_PREFIX_OUT    stPrefixOut;               //prefix of Output buffer
+  //TMX_PREFIX_OUT    stPrefixOut;               //prefix of Output buffer
   USHORT            usNumMatchesFound;         //number of matches found
   TMX_MATCH_TABLE_W stMatchTable[MAX_MATCHES]; //match structure
   USHORT fsAvailFlags;                         // additional flags (more exact/fuzzy matches avail)
-} TMX_GET_OUT_W, * PTMX_GET_OUT_W;
+};
+using PTMX_GET_OUT_W = TMX_GET_OUT_W *;
 
 
 
@@ -1835,6 +1809,7 @@ typedef struct _TMX_EXT_IN
   USHORT usNextTarget;           //which target record to address next
 } TMX_EXT_IN, * PTMX_EXT_IN;
 typedef TMX_EXT_IN TMX_EXT_IN_W, *PTMX_EXT_IN_W;
+
 //=======================================================================
 /**********************************************************************/
 /* Attention: for special names mode of TMExtract, the TMX_EXT_OUT    */
@@ -1848,41 +1823,6 @@ typedef TMX_EXT_IN TMX_EXT_IN_W, *PTMX_EXT_IN_W;
 /*            The remaining fields are unused.                        */
 /**********************************************************************/
 // structure TMX_EXT_OUT
-
-
-
-
-//=======================================================================
-
-/**********************************************************************/
-/* TMX_INFO_IN, TMX_INFO_OUT used by TmInfo                           */
-/**********************************************************************/
-typedef struct  _TMX_INFO_IN
-{
-  USHORT        usInfoLevel;
-} TMX_INFO_IN, * PTMX_INFO_IN;
-
-typedef struct _TMX_INFO_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;
-  TMX_SIGN       stTmSign;
-  USHORT         usThreshold;
-} TMX_INFO_OUT , * PTMX_INFO_OUT;
-
-/**********************************************************************/
-/* _TMX_DELTM_IN and _TMX_DELTM_IN  used bt TmDeleteTM                */
-/**********************************************************************/
-typedef struct _TMX_DELTM_IN
-{
-  CHAR         szFullTmName[MAX_EQF_PATH];
-  CHAR         szFullIndexName[MAX_EQF_PATH];
-  CHAR         szFullPropName[MAX_EQF_PATH];
-} TMX_DELTM_IN, * PTMX_DELTM_IN;
-
-typedef struct _TMXDELTM_OUT
-{
-  TMX_PREFIX_OUT stPrefixOut;
-} TMX_DELTM_OUT, * PTMX_DELTM_OUT;
 
 class EqfMemoryPlugin;
 class Dummy{};
@@ -2034,24 +1974,26 @@ public:
 
   ushort TmtXDelSegm
 (
-  SearchProposal& pTmDelIn,  //ptr to input struct
-  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+  OtmProposal& pTmDelIn,  //ptr to input struct
+  TMX_EXT_OUT_W* pTmDelOut //ptr to output struct
 );
 
 USHORT TmtXDelSegmByKey
 (
-  SearchProposal& TmDelIn,  //ptr to input struct
-  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+  OtmProposal& TmDelIn,  //ptr to input struct
+  TMX_EXT_OUT_W* pTmDelOut //ptr to output struct
 );
 
 USHORT FindTargetAndDelete( PTMX_RECORD pTmRecord,
-                            SearchProposal&  TmDel,
+                            OtmProposal&  TmDel,
+                            TMX_EXT_OUT_W * pTmExtOut,
                             PULONG pulKey );
 
 USHORT FindTargetByKeyAndDelete(
                             PTMX_RECORD pTmRecord,
-                            SearchProposal&  pTmDel,
+                            OtmProposal&  pTmDel,
                             PTMX_SENTENCE pSentence,
+                            TMX_EXT_OUT_W * pTmExtOut,
                             PULONG pulKey );
 
 
@@ -2075,16 +2017,16 @@ PSZ NTMFindNameForID(
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType );
 
-USHORT FillClb( PTMX_TARGET_CLB *, SearchProposal& );
+USHORT FillClb( PTMX_TARGET_CLB *, OtmProposal& );
 USHORT ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
   PULONG      pulRecBufSize,           // current size of record buffer
-  SearchProposal&  TmProposal,                  // pointer to get in data
+  OtmProposal&  TmProposal,                  // pointer to get in data
   PULONG      pulKey                   // tm key
 );
 USHORT AddTmTarget(
-  SearchProposal& TmProposal,       //pointer to get in data
+  OtmProposal& TmProposal,       //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
   PULONG pulRecBufSize,             //ptr to current size of TM record buffer
   PULONG pulKey );                  //tm key
@@ -2098,7 +2040,7 @@ USHORT AddTmTarget(
 */
   int putProposal
   (
-    SearchProposal &Proposal
+    OtmProposal &Proposal
   ); 
 
   /*! \brief Get the the first proposal from the memory and prepare sequential access
@@ -2131,8 +2073,8 @@ USHORT AddTmTarget(
   // TM segment update prototypes
   USHORT TmtXUpdSeg
   (
-    SearchProposal* pTmPutIn,    // ptr to put input data
-    PTMX_PUT_OUT_W pTmPutOut,   //ptr to output struct
+    OtmProposal* pTmPutIn,    // ptr to put input data
+    PTMX_EXT_OUT_W pTmPutOut,   //ptr to output struct
     USHORT      usFlags      // flags controlling the updated fields
   );
 
@@ -2171,7 +2113,7 @@ USHORT AddTmTarget(
   ); 
 
 
-  USHORT AddToTm( SearchProposal&, PULONG );
+  USHORT AddToTm( OtmProposal&, PULONG );
   USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG );
 
   void importDone(int iRC, char *pszError );
@@ -2203,8 +2145,8 @@ USHORT AddTmTarget(
 
   USHORT TmtXReplace
   (
-    SearchProposal& TmProposal,  //ptr to input struct
-    PTMX_PUT_OUT_W pTmPutOut //ptr to output struct
+    OtmProposal& TmProposal,  //ptr to input struct
+    PTMX_EXT_OUT_W pTmPutOut //ptr to output struct
   );
 
 USHORT NTMLoadNameTable
@@ -2229,18 +2171,18 @@ USHORT NTMLoadNameTable
 
   	\returns 0 or error code in case of errors
 */
-  int searchProposal
+  int SearchProposal
   (
     OtmProposal &SearchKey,
     std::vector<OtmProposal> &FoundProposals,
     unsigned long ulOptions
   ); 
 
-  USHORT UpdateTmRecord( SearchProposal& );
+  USHORT UpdateTmRecord( OtmProposal& );
   
   USHORT UpdateTmRecordByInternalKey
   (
-    SearchProposal&
+    OtmProposal&
   );
   
   int getNumOfMarkupNames();
@@ -2329,10 +2271,6 @@ USHORT NTMLoadNameTable
 */
   void *getPlugin();
 
-/*! \brief Provide the internal memory handle
-  	\returns memory handle
-*/
-  HTM getHTM();
   
 /*! \brief Get overall file size of this memory
   	\returns size of memory in number of bytes
@@ -2377,13 +2315,13 @@ USHORT NTMLoadNameTable
 
 //private:
 
-  HTM htm;                                       // old fashioned memory handle for this memory
-  TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
-  TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
-  TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
-  TMX_PUT_OUT_W TmPutOut;                      // ptr to TMX_PUT_OUT_W structure
-  TMX_GET_IN_W  TmGetIn;                       // ptr to TMX_PUT_IN_W structure
-  TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_PUT_OUT_W structure
+  //HTM htm;                                       // old fashioned memory handle for this memory
+  //TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
+  //TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
+  //TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
+  //TMX_EXT_OUT_W TmPutOut;                      // ptr to TMX_EXT_OUT_W structure
+  //TMX_GET_IN_W  TmGetIn;                       // ptr to TMX_PUT_IN_W structure
+  //TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_EXT_OUT_W structure
   ULONG ulNextKey = 0;                       // next TM key for GetFirstProposal/GetNextProposal
   USHORT usNextTarget = 0;                   // next TM target for GetFirstProposal/GetNextProposal
   //char szName[MAX_LONGFILESPEC];                 // memory name
@@ -2461,7 +2399,7 @@ int SplitProposalKeyIntoRecordAndTarget
 */
 int ExtOutToOtmProposal
 (
-  PTMX_EXT_OUT_W pExtOut,
+  TMX_EXT_OUT_W* pExtOut,
   OtmProposal &Proposal
 );
 
@@ -2501,7 +2439,7 @@ int OtmProposalToPutIn
     \param pszMarkup markup table name
   	\returns original or modified error return code
 */
-int handleError( int iRC, char *pszMemName, char *pszMarkup );
+int handleError( int iRC, char *pszMemName, char *pszMarkup = "OTMXUXLF" );
 
 
 /// newTM code 
@@ -2573,9 +2511,9 @@ USHORT NTMReadWriteSegmentW( HTM,          //Handle of Input TM
                              HTM,          //Handle of Output TM
                              PSZ,          //Full path to Output TM
                              PTMX_EXT_IN_W,//Pointer to the EXTRACT_IN structure
-                             PTMX_EXT_OUT_W, //Pointer to the EXTRACT_OUT structure
+                             TMX_EXT_OUT_W *, //Pointer to the EXTRACT_OUT structure
                              PTMX_PUT_IN_W,  //Pointer to the REPLACE_OUT structure
-                             PTMX_PUT_OUT_W, //Pointer to the REPLACE_OUT structure
+                             PTMX_EXT_OUT_W, //Pointer to the REPLACE_OUT structure
                              ULONG *,      //Pointer to a segment counter
                              ULONG *,      //Pointer to the invalid segment counter
                              PSZ,          //pointer to TM source language
@@ -2585,9 +2523,9 @@ USHORT NTMReadWriteSegmentHwndW( HTM,      //Handle of Input TM
                              HTM,          //Handle of Output TM
                              PSZ,          //Full path to Output TM
                              PTMX_EXT_IN_W,  //Pointer to the EXTRACT_IN structure
-                             PTMX_EXT_OUT_W, //Pointer to the EXTRACT_OUT structure
+                             TMX_EXT_OUT_W *, //Pointer to the EXTRACT_OUT structure
                              PTMX_PUT_IN_W,  //Pointer to the REPLACE_OUT structure
-                             PTMX_PUT_OUT_W, //Pointer to the REPLACE_OUT structure
+                             PTMX_EXT_OUT_W, //Pointer to the REPLACE_OUT structure
                              ULONG *,      //Pointer to a segment counter
                              ULONG *,      //Pointer to the invalid segment counter
                              PSZ,          //pointer to TM source language
@@ -2625,7 +2563,7 @@ TmClose( HTM,        //(in) TM handle returned from open
 /* TmReplace                                                          */
 /**********************************************************************/
 USHORT
-TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT, HWND );
+TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_EXT_OUT_W, USHORT, HWND );
 
 /**********************************************************************/
 /* TmGet                                                              */
@@ -2643,22 +2581,16 @@ TmGetW(EqfMemory*,               //(in)  TM handle
 /* TmExtract                                                          */
 /**********************************************************************/
 USHORT
-TmExtractW( HTM, PSZ, PTMX_EXT_IN_W, PTMX_EXT_OUT_W, USHORT );
+TmExtractW( HTM, PSZ, PTMX_EXT_IN_W, TMX_EXT_OUT_W *, USHORT );
 
 USHORT
-TmExtractHwndW( HTM, PSZ, PTMX_EXT_IN_W, PTMX_EXT_OUT_W, USHORT, HWND );
+TmExtractHwndW( HTM, PSZ, PTMX_EXT_IN_W, TMX_EXT_OUT_W *, USHORT, HWND );
 
 /**********************************************************************/
 /* information levels for TmInfo function call                        */
 /* TM_INFO_SIGNATURE - returns the signature record of a TM           */
 /**********************************************************************/
 #define TMINFO_SIGNATURE 0
-
-/**********************************************************************/
-/* TmInfo                                                             */
-/**********************************************************************/
-USHORT TmInfo( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT );
-USHORT TmInfoHwnd( HTM, PSZ, USHORT, PTMX_INFO_IN, PTMX_INFO_OUT, USHORT, HWND );
 
 /**********************************************************************/
 /* TmDeleteTM                                                         */
@@ -2670,7 +2602,7 @@ USHORT TmDeleteTM( PSZ, USHORT, HWND, PUSHORT );
 /**********************************************************************/
 
 USHORT
-TmDeleteSegmentW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_PUT_OUT_W, USHORT );
+TmDeleteSegmentW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_EXT_OUT_W, USHORT );
 
 
 
@@ -3279,7 +3211,7 @@ typedef struct _MEM_LOAD_IDA
  CHAR         szFilePath[2048];               // Full file name + path
  BOOL         fControlFound;                  // Indicator whether a CONTROL token was found
  std::shared_ptr<EqfMemory> mem;                          // pointer to memory object
- SearchProposal  *pProposal;                     // buffer for memory proposal data
+ OtmProposal  *pProposal;                     // buffer for memory proposal data
  CHAR_W       szSegBuffer[MAX_SEGMENT_SIZE+1];// buffer for segment data
  CHAR_W       szSource[MAX_SEGMENT_SIZE+1];   // buffer for segment source data
  HFILE        hFile;                          // Handle of file to be loaded
@@ -3452,7 +3384,7 @@ typedef struct _MEM_MERGE_IDA
  TMX_EXT_IN_W  stExtIn;                       // TMX_EXTRACT_IN structure
  TMX_EXT_OUT_W stExtOut;                      // TMX_EXTRACT_OUT structure
  TMX_PUT_IN_W  stPutIn;                       // TMX_PUT_IN structure
- TMX_PUT_OUT_W stPutOut;                      // TMX_PUT_OUT structure
+ TMX_EXT_OUT_W stPutOut;                      // TMX_PUT_OUT structure
  TIME_L        tStamp;                        // Time stamp of merge start time
  HWND          hwndMemLb;                     // Handle to the TM listbox
  HWND          hProgressWindow;               // Handle of progress indicator window
@@ -3526,21 +3458,8 @@ typedef struct _MEMORY_HANDLER_DATA
 /* renaming of the original and temporary TM file and index.          */
 /* The temporary file has to be closed previously.                    */
 /**********************************************************************/
-typedef struct _TMX_ENDORG_IN
-{
-  CHAR           szOrgTM[MAX_EQF_PATH];           //full name of original TM
-  CHAR           szTmpTM[MAX_EQF_PATH];           //full name of temporary TM
-  CHAR           szOrgIndex[MAX_EQF_PATH];        //full name of original index file
-  CHAR           szTmpIndex[MAX_EQF_PATH];        //full name of temporary index file
-  CHAR           szOrgProp[MAX_EQF_PATH];         //full name of original property file
-  CHAR           szTmpProp[MAX_EQF_PATH];         //full name of temporary property file
-  USHORT         usOrgType;                       //type ORGANIZE, CONVERT
-} TMX_ENDORG_IN, * PTMX_ENDORG_IN;
 
-typedef struct _TMX_ENDORG_OUT
-{
-  TMX_PREFIX_OUT  stPrefixOut;
-} TMX_ENDORG_OUT, * PTMX_ENDORG_OUT;
+
 
 /**********************************************************************/
 /* The following structures for dialog IDAs are defined only          */
@@ -3751,11 +3670,6 @@ USHORT
 
   TmtInfo     (PTMT_GLOBALS     ptmtg,         /* pointer to Tmt globals....*/
                PINFO_OUT        pInfoOut);     /* pointer to output buffer..*/
-/**********************************************************************/
-/* TmtXInfo                                                          */
-/**********************************************************************/
-USHORT TmtXInfo( EqfMemory*,
-                 PTMX_INFO_OUT );
 
 
 LONG
@@ -3841,24 +3755,12 @@ BOOL
 USHORT TmtDeleteTM( HTM        hMem,                 // TM handle
                     PDELTM_IN  pDelTmIn,             // Input structure
                     PDELTM_OUT pDelTmOut );          // Output structure
-/**********************************************************************/
-/* TmXtDeleteTM                                                       */
-/**********************************************************************/
-USHORT
-TmtXDeleteTM( HTM,
-              PTMX_DELTM_IN,
-              PTMX_DELTM_OUT );
+
 
 USHORT TmtCloseOrganize( HTM         hMem,           // TM handle
                          PENDORG_IN  pEndOrgIn,      // Input structure
                          PENDORG_OUT pEndOrgOut );   // Output structure
-/**********************************************************************/
-/* TmtXCloseOrganize                                                  */
-/**********************************************************************/
-USHORT
-TmtXCloseOrganize( HTM,
-                   PTMX_ENDORG_IN,
-                   PTMX_ENDORG_OUT );
+
 
 
 VOID   TmtDeleteFile( PDELFILE_IN  pDelFileIn,          // Input structure
@@ -3983,10 +3885,10 @@ USHORT FuzzyTest( EqfMemory*, PTMX_RECORD, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHO
 USHORT GetFuzzyMatch( EqfMemory*, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT );
 
 //tm extract prototypes
-USHORT TmtXExtract( EqfMemory*, PTMX_EXT_IN_W, PTMX_EXT_OUT_W );
+USHORT TmtXExtract( EqfMemory*, PTMX_EXT_IN_W, TMX_EXT_OUT_W * );
 USHORT FillExtStructure( EqfMemory*, PTMX_TARGET_RECORD,
                          PTMX_TARGET_CLB,
-                         PSZ_W, PLONG, PTMX_EXT_W );
+                         PSZ_W, PLONG, PTMX_EXT_OUT_W );
 
 
 //tm delete segment prototypes
@@ -4036,12 +3938,9 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG usLenComp );
 
 typedef struct _MEM_ORGANIZE_IDA
 {
- TMX_ENDORG_IN stEndOrgIn;                     // organize end input structure
- TMX_ENDORG_OUT stEndOrgOut;                   // organize end output structure
-
  std::shared_ptr<int> memRef;
  TMX_PUT_IN_W  stPutIn;                        // input for TmReplace
- TMX_PUT_OUT_W stPutOut;                       // The REPLACE_OUT structure
+ TMX_EXT_OUT_W stPutOut;                       // The REPLACE_OUT structure
  TMX_EXT_IN_W  stExtIn;                        // input for TmExtract
  TMX_EXT_OUT_W stExtOut;                       // output for TmExtract
  CHAR          szPathOrganizeMem[2048];        // Full path and name of TM to be organized
@@ -4050,7 +3949,7 @@ typedef struct _MEM_ORGANIZE_IDA
  CHAR          szTempMemName[MAX_LONGFILESPEC];// name of temporary translation memory 
  CHAR          szPluginName[MAX_LONGFILESPEC]; // name of plugin used for the memory
  CHAR          szPathTempMem[2048];            // Full path of temporary transl. mem.
- SearchProposal   *pProposal;                     // buffer for memory proposal
+ OtmProposal   *pProposal;                     // buffer for memory proposal
  std::shared_ptr<EqfMemory>     pMem;                           // Handle of transl. memory
  std::shared_ptr<EqfMemory>     pMemTemp;                       // Handle of tmporary transl. memory
  BOOL          fMsg;                           // A message has been issued already

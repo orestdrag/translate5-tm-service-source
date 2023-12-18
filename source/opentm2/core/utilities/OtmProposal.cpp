@@ -19,8 +19,8 @@
 /*! \brief Prototypes of helper functions */
 //int CopyToBufferW( const std::wstring &strSource, wchar_t *pszBuffer, int iBufSize );
 //int CopyToBuffer( const std::string &strSource, char *pszBuffer, int iBufSize );
-int CopyToBufferW( wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize );
-int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
+int CopyToBufferW(const wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize );
+int CopyToBuffer(const char *pszSource, char *pszBuffer, int iBufSize );
 
 /*! \brief Constructors */
 OtmProposal::OtmProposal() 
@@ -32,6 +32,7 @@ OtmProposal::OtmProposal()
 /*! \brief Destructor */
 OtmProposal::~OtmProposal() 
 {   
+if(pInputSentence) delete pInputSentence;
 };
 
 /* operations */
@@ -44,8 +45,8 @@ void OtmProposal::clear()
 }
 
 
-void SearchProposal::clearSearchProposal(){
-  memset( this, 0, sizeof(SearchProposal) );
+void OtmProposal::clearProposal(){
+  memset( this, 0, sizeof(OtmProposal) );
   eType = OtmProposal::eptUndefined;
   eMatch = OtmProposal::emtUndefined;
 }
@@ -81,23 +82,9 @@ OtmProposal::eProposalType getMemProposalType( char *pszType )
 */
 int OtmProposal::getInternalKey( char *pszBuffer, int iBufSize )
 {
-  return( CopyToBuffer( szInternalKey, pszBuffer, iBufSize ) );
+  return( CopyToBuffer( getInternalKey().c_str(), pszBuffer, iBufSize ) );
 }
 
-  	
-  /* \brief set the internal proposal key
-     \param pszBuffer Pointer to buffer containing the proposal key
-   */
-void OtmProposal::setInternalKey( char *pszBuffer )
-{
-  strcpy( szInternalKey, pszBuffer );
-  fFilled = 1;
-}
-
-
-std::string OtmProposal::getProposalKey(){
-  return szInternalKey;
-}
 
 /* \brief get length of proposal source text 
   	\returns Number of characters in proposal source text
@@ -715,12 +702,12 @@ bool OtmProposal::isSameTarget( OtmProposal *otherProposal )
   \param Proposals reference to a vector containing the proposals
 */
 void OtmProposal::clearAllProposals(
-  std::vector<OtmProposal *> &Proposals
+  std::vector<OtmProposal> &Proposals
 )
 {
   for ( int i = 0; i < (int)Proposals.size(); i++ )
   {
-    Proposals[i]->clear();
+    Proposals[i].clear();
   } /* endfor */     
 }
 
@@ -762,7 +749,7 @@ OtmProposal &OtmProposal::operator=( const OtmProposal &copyme )
 }
 
 /*! \brief Copies a string to the user supplied buffer area*/
-int CopyToBufferW( wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize )
+int CopyToBufferW(const wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize )
 {
   int iCopied = wcslen( pszSource );
   if ( iCopied >= iBufSize ) iCopied = iBufSize - 1;
@@ -772,7 +759,7 @@ int CopyToBufferW( wchar_t *pszSource, wchar_t *pszBuffer, int iBufSize )
   return( iCopied );
 }
 
-int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize )
+int CopyToBuffer(const char *pszSource, char *pszBuffer, int iBufSize )
 {
   int iCopied = strlen( pszSource );
   if ( iCopied >= iBufSize ) iCopied = iBufSize - 1;

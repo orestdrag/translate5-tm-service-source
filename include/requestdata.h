@@ -265,7 +265,7 @@ protected:
 
 
     LONG lOptions = 0;
-    SearchProposal Data;
+    OtmProposal Data;
 };
 
 
@@ -275,7 +275,7 @@ class FuzzySearchRequestData: public RequestData{
     FuzzySearchRequestData(): RequestData(FUZZY){};
 
 protected:
-    SearchProposal Data ;
+    OtmProposal Data ;
     int parseJSON() override ;
     int checkData() override ;
     int execute()   override ;
@@ -290,7 +290,7 @@ class DeleteEntryRequestData: public RequestData{
 
     BOOL fSave2Disk = 1;
 protected:
-    SearchProposal Data;
+    OtmProposal Data;
     int parseJSON() override ;
     int checkData() override ;
     int execute  () override ;
@@ -303,13 +303,12 @@ class UpdateEntryRequestData: public RequestData{
 
     BOOL fSave2Disk = 1;
 protected:
-    //TMX_SENTENCE *inputSentence = nullptr;
     
     int parseJSON() override;
     int checkData() override;
     int execute  () override;
     
-    SearchProposal Data;
+    OtmProposal Data;
 
   };
 

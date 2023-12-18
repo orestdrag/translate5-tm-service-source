@@ -203,17 +203,17 @@ unsigned long EqfMemory::getFileSize()
 */
 int EqfMemory::putProposal
 (
-  SearchProposal &Proposal
+  OtmProposal &Proposal
 )
 {
   int iRC = 0;
-  memset( &TmPutIn, 0, sizeof(TMX_PUT_IN_W) );
-  memset( &TmPutOut, 0, sizeof(TMX_PUT_OUT_W) );
+  TMX_EXT_OUT_W TmPutOut;
+  memset( &TmPutOut, 0, sizeof(TMX_EXT_OUT_W) );
 
   //OtmProposalToPutIn( Proposal, &TmPutIn );
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
-    std::string source = EncodingHelper::convertToUTF8(TmPutIn.stTmPut.szSource);
+    std::string source = EncodingHelper::convertToUTF8(Proposal.pInputSentence->pStrings->getOriginalStrC());
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
   /********************************************************************/
@@ -227,10 +227,10 @@ int EqfMemory::putProposal
     T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
   }
 
-  if ( ( iRC == 0 ) &&
-       ( TmPutIn.stTmPut.fMarkupChanged ) ) {
-     iRC = SEG_RESET_BAD_MARKUP ;
-  }
+  //if ( ( iRC == 0 ) &&
+       //( TmPutIn.stTmPut.fMarkupChanged ) ) {
+  //   iRC = SEG_RESET_BAD_MARKUP ;
+  //}
 
   return( iRC );
 }
@@ -306,6 +306,9 @@ int EqfMemory::getNextProposal
 )
 {
   int iRC = 0;
+  TMX_EXT_IN_W TmExtIn;
+  TMX_EXT_OUT_W TmExtOut;
+
   memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
 
@@ -326,7 +329,7 @@ int EqfMemory::getNextProposal
 
   if ( iRC == 0 )
   {
-    this->ExtOutToOtmProposal( &TmExtOut, Proposal );
+    ExtOutToOtmProposal( &TmExtOut, Proposal );
 
     // set current proposal internal key ,which is used in updateProposal
     Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
@@ -348,7 +351,7 @@ int EqfMemory::getNextProposal
   }
   else
   {
-    handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+    handleError( iRC, this->szName);
     if ( iRC == BTREE_CORRUPTED ) iRC = ERROR_ENTRYISCORRUPTED;
   }
 
@@ -409,6 +412,8 @@ int EqfMemory::getProposal
 )
 {
   int iRC = 0;
+  TMX_EXT_IN_W TmExtIn;
+  TMX_EXT_OUT_W TmExtOut;
   memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
   Proposal.clear();
@@ -423,14 +428,14 @@ int EqfMemory::getProposal
 
   if ( iRC == 0 )
   {
-    this->ExtOutToOtmProposal( &TmExtOut, Proposal );
+    ExtOutToOtmProposal( &TmExtOut, Proposal );
     // set current proposal internal key ,which is used in updateProposal
     Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
     this->ulNextKey = TmExtOut.ulTmKey;
     this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */      
 
-  if ( iRC != 0 ) handleError( iRC, this->szName, TmPutIn.stTmPut.szTagTable );
+  if ( iRC != 0 ) handleError( iRC, this->szName );
 
   return( iRC );
 }
@@ -451,7 +456,7 @@ int EqfMemory::getProposal
 
   	\returns 0 or error code in case of errors
 */
-int EqfMemory::searchProposal
+int EqfMemory::SearchProposal
 (
   OtmProposal &SearchKey,
   std::vector<OtmProposal> &FoundProposals,
@@ -474,13 +479,6 @@ void *EqfMemory::getPlugin()
   return(EqfMemoryPlugin::GetInstance());
 }
 
-/*! \brief Provide the internal memory handle
-  	\returns memory handle
-*/
-HTM EqfMemory::getHTM()
-{
-  return( this->htm );
-}
 
 
 /*! \brief Get the error message for the last error occured
@@ -551,9 +549,14 @@ int OtmProposal::SetProposalKey
   ULONG   ulKey,
   USHORT  usTargetNum
 )
-{
-  sprintf( szInternalKey, "%lu:%u", ulKey, usTargetNum );
+{  
+  recordKey = ulKey;
+  targetKey = usTargetNum;
   return( 0 );
+}
+
+std::string OtmProposal::getInternalKey()const{
+  return std::to_string( recordKey) + ":" + std::to_string(targetKey);
 }
 
 /*! \brief Split an internal key into record number and target number
@@ -614,28 +617,30 @@ int EqfMemory::SplitProposalKeyIntoRecordAndTarget
 */
 int EqfMemory::ExtOutToOtmProposal
 (
-  PTMX_EXT_OUT_W pExtOut,
+  TMX_EXT_OUT_W * pExtOut,
   OtmProposal &Proposal
 )
 {
   int iRC = 0;
 
   Proposal.clear();
-  Proposal.setSource( pExtOut->stTmExt.szSource );
-  Proposal.setTarget( pExtOut->stTmExt.szTarget );
-  Proposal.setAuthor( pExtOut->stTmExt.szAuthorName );
-  Proposal.setMarkup( pExtOut->stTmExt.szTagTable );
-  Proposal.setTargetLanguage( pExtOut->stTmExt.szTargetLanguage );
+  Proposal.setSource( pExtOut->szSource );
+  Proposal.setTarget( pExtOut->szTarget );
+  Proposal.setAuthor( pExtOut->szAuthorName );
+  Proposal.setMarkup( pExtOut->szTagTable );
+  Proposal.setTargetLanguage( pExtOut->szTargetLanguage );
   Proposal.setSourceLanguage( stTmSign.szSourceLanguage);
-  Proposal.setAddInfo( pExtOut->stTmExt.szAddInfo );
-  Proposal.setContext( pExtOut->stTmExt.szContext );
-  Proposal.setDocName( pExtOut->stTmExt.szLongName );
-  Proposal.setDocShortName( pExtOut->stTmExt.szFileName );
-  Proposal.setSegmentNum( pExtOut->stTmExt.ulSourceSegmentId );
-  Proposal.setType( FlagToProposalType( pExtOut->stTmExt.usTranslationFlag ) );
-  Proposal.setUpdateTime( pExtOut->stTmExt.lTargetTime );
+  Proposal.setAddInfo( pExtOut->szAddInfo );
+  Proposal.setContext( pExtOut->szContext );
+  Proposal.setDocName( pExtOut->szLongName );
+  Proposal.setDocShortName( pExtOut->szFileName );
+  Proposal.setSegmentNum( pExtOut->ulSourceSegmentId );
+  Proposal.setType( FlagToProposalType( pExtOut->usTranslationFlag ) );
+  Proposal.setUpdateTime( pExtOut->lTargetTime );
   Proposal.setContextRanking( 0 );
-  Proposal.setOriginalSourceLanguage( pExtOut->stTmExt.szOriginalSourceLanguage );
+  Proposal.setOriginalSourceLanguage( pExtOut->szOriginalSourceLanguage );
+  Proposal.recordKey = pExtOut->ulRecKey;
+  Proposal.targetKey = pExtOut->usTargetKey;
 
   return( iRC );
 }
@@ -674,8 +679,6 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setDiffs( pMatch->iDiffs );
   pProposal->setOriginalSourceLanguage( pMatch->szOriginalSrcLanguage );
   pProposal->SetProposalKey(pMatch->ulKey, pMatch->usTargetNum);
-  //pProposal->setKey(pMatch->ulKey);
-  //pProposal->setTargetNum(pMatch->usTargetNum);
   
   switch ( pMatch->usMatchLevel )
   {

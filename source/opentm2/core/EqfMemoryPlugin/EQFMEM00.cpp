@@ -90,7 +90,7 @@ USHORT EQFMemOrganizeStart
   // Address the organize IDA
   pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
   pRIDA->fFirstGet = TRUE;
-  pRIDA->pProposal = new SearchProposal();
+  pRIDA->pProposal = new OtmProposal();
   
   // --------------------------------------------------------------------
   // Create the Output translation memory

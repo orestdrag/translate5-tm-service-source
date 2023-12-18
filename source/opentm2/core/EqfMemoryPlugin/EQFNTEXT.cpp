@@ -25,7 +25,7 @@ static USHORT ExtractRecordV6
   EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
-  PTMX_EXT_OUT_W  pTmExtOut
+  TMX_EXT_OUT_W *  pTmExtOut
 );
 
 //+----------------------------------------------------------------------------+
@@ -69,7 +69,7 @@ USHORT TmtXExtract
 (
   EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_EXT_IN_W  pTmExtIn, //ptr to input struct
-  PTMX_EXT_OUT_W pTmExtOut //ptr to output struct
+  TMX_EXT_OUT_W * pTmExtOut //ptr to output struct
 )
 {
   USHORT usRc = NO_ERROR;              //return code
@@ -178,10 +178,10 @@ USHORT TmtXExtract
           /****************************************************************/
           /* Initialize our output buffers                                */
           /****************************************************************/
-          memset( pTmExtOut->stTmExt.szSource, NULC,
-                  sizeof(pTmExtOut->stTmExt.szSource) );
-          memset( pTmExtOut->stTmExt.szTarget, NULC,
-                  sizeof(pTmExtOut->stTmExt.szTarget) );
+          memset( pTmExtOut->szSource, NULC,
+                  sizeof(pTmExtOut->szSource) );
+          memset( pTmExtOut->szTarget, NULC,
+                  sizeof(pTmExtOut->szTarget) );
 
           /****************************************************************/
           /* Loop two times: first time to fill szSource, the second      */
@@ -194,16 +194,16 @@ USHORT TmtXExtract
             if ( iteration == 0 )
             {
               // use szSource buffer
-              pszBuffer = pTmExtOut->stTmExt.szSource;
+              pszBuffer = pTmExtOut->szSource;
               // leave room for NULC and ASCII expansion
-              lRoomLeft = (sizeof(pTmExtOut->stTmExt.szSource)/sizeof(CHAR_W))/2 - 1;
+              lRoomLeft = (sizeof(pTmExtOut->szSource)/sizeof(CHAR_W))/2 - 1;
             }
             else
             {
               // use szTarget buffer
-              pszBuffer = pTmExtOut->stTmExt.szTarget;
+              pszBuffer = pTmExtOut->szTarget;
               // leave room for NULC and ASCII expansion
-              lRoomLeft = (sizeof(pTmExtOut->stTmExt.szTarget)/sizeof(CHAR_W))/2 - 1;
+              lRoomLeft = (sizeof(pTmExtOut->szTarget)/sizeof(CHAR_W))/2 - 1;
             } /* endif */
 
             while ( lRoomLeft && (pTmExtIn->usNextTarget < ulMaxEntries) )
@@ -260,13 +260,13 @@ USHORT TmtXExtract
           {
             // more names available for extract
             pTmExtOut->usNextTarget = pTmExtIn->usNextTarget;
-            pTmExtOut->stTmExt.usTranslationFlag = TRANSLFLAG_MACHINE;
+            pTmExtOut->usTranslationFlag = TRANSLFLAG_MACHINE;
           }
           else
           {
             // all names have been extracted
             pTmExtOut->usNextTarget = 0;
-            pTmExtOut->stTmExt.usTranslationFlag = TRANSLFLAG_NORMAL;
+            pTmExtOut->usTranslationFlag = TRANSLFLAG_NORMAL;
           } /* endif */
         } /* endif */
       } /* endif */
@@ -342,7 +342,7 @@ USHORT TmtXExtract
     }
   } /* endif */
 
-  pTmExtOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT );
+  pTmExtOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmExtOut->stPrefixOut.usTmtXRc = usRc;
 
   //release memory
@@ -363,7 +363,7 @@ USHORT ExtractRecordV6
   EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
-  PTMX_EXT_OUT_W  pTmExtOut
+  TMX_EXT_OUT_W *  pTmExtOut
 )
 {
   USHORT usRc = 0;
@@ -525,9 +525,9 @@ USHORT ExtractRecordV6
             usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
                                      pTargetClb,
                                      pSourceString, &lSourceLen,
-                                     &pTmExtOut->stTmExt );
+                                     pTmExtOut );
             pTmClb->NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
-                        pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
+                        pTmExtOut->szOriginalSourceLanguage, NULL );
             if ( ! usRc )
             {
               //check for another target
@@ -626,7 +626,7 @@ USHORT FillExtStructure
   PTMX_TARGET_CLB    pTargetClb,       // ptr to current target CLB
   PSZ_W pSourceString,                 //ptr to source string
   PLONG plSourceLen,                   //length of source string
-  PTMX_EXT_W pstExt                    //extout ext struct
+  PTMX_EXT_OUT_W pstExt                    //extout ext struct
 )
 {
   PTMX_TARGET_CLB pTMXTargetClb = NULL;      //ptr to target control block
@@ -650,13 +650,6 @@ USHORT FillExtStructure
     pByte += pTMXTargetRecord->usSourceTagTable;
     pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
-    //add tags to source string if there are any
-    //if ( RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD) )
-    //{
-      //fOK = AddTagsToStringW( pSourceString, plSourceLen,
-      //                       (PTMX_TAGTABLE_RECORD)pByte, pstExt->szSource );
-    //}
-    //else 
     if(*plSourceLen > 0)
     {
       //else copy string
@@ -703,26 +696,14 @@ USHORT FillExtStructure
       pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
       //fill in the tag table name
-      //pTmClb->NTMGetNameFromID( &pTMXTagTableRecord->usTagTableId,
-      //                  (USHORT)TAGTABLE_KEY,
-      //                  pstExt->szTagTable, NULL );
-      //pTMXTagTableRecord->usTagTableId = 1;
       strcpy(pstExt->szTagTable, "OTMXUXLF");
 
-      //add tags to target string if flag set to true
-      //if ( (RECLEN(pTMXTagTableRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
-      //{
-        //AddTagsToStringW( pTargetString, &lTargetLen,
-        //                 (PTMX_TAGTABLE_RECORD)pByte, pstExt->szTarget );
-      //}
-      //else
-      {
-        //else copy string
-        if(lTargetLen >= 0){
-          memcpy( pstExt->szTarget, pTargetString, lTargetLen * sizeof(CHAR_W));
-          pstExt->szTarget[lTargetLen] = EOS;
-        }
-      } /* endif */
+      
+      if(lTargetLen >= 0){
+        memcpy( pstExt->szTarget, pTargetString, lTargetLen * sizeof(CHAR_W));
+        pstExt->szTarget[lTargetLen] = EOS;
+      }
+      /* endif */
 
       //position at target control block
       pTMXTargetClb = pTargetClb;

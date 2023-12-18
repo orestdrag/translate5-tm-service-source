@@ -55,8 +55,8 @@
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::TmtXDelSegm
 (
-  SearchProposal& TmDelIn,  //ptr to input struct
-  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+  OtmProposal& TmDelIn,  //ptr to input struct
+  TMX_EXT_OUT_W* pTmDelOut //ptr to output struct
 )
 {
   //TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->stTmPut.szSource));    // ptr to sentence structure
@@ -101,7 +101,7 @@ USHORT EqfMemory::TmtXDelSegm
 
     //tokenize source segment, resuting in normalized string and tag table record
     usRc = TokenizeSource( TmDelIn.pInputSentence, szString,
-                           TmDelIn.szIsoSourceLang);
+                           TmDelIn.szSourceLanguage);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     TmDelIn.pInputSentence->pTagRecord->usTagTableId = 1;
@@ -157,7 +157,7 @@ USHORT EqfMemory::TmtXDelSegm
           {
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
-            usRc = FindTargetAndDelete( pTmRecord, TmDelIn, &ulKey );
+            usRc = FindTargetAndDelete( pTmRecord, TmDelIn, pTmDelOut, &ulKey );
             if ( usRc == SEG_NOT_FOUND )
             {
               //get next tm record
@@ -183,7 +183,7 @@ USHORT EqfMemory::TmtXDelSegm
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
 
-  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
+  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmDelOut->stPrefixOut.usTmtXRc = usRc;
   return( usRc );
 }
@@ -191,8 +191,8 @@ USHORT EqfMemory::TmtXDelSegm
 
 USHORT EqfMemory::TmtXDelSegmByKey
 (
-  SearchProposal& TmDelIn,  //ptr to input struct
-  PTMX_PUT_OUT_W pTmDelOut //ptr to output struct
+  OtmProposal& TmDelIn,  //ptr to input struct
+  TMX_EXT_OUT_W * pTmDelOut //ptr to output struct
 )
 {
   PTMX_SENTENCE pSentence = NULL;    // ptr to sentence structure
@@ -248,7 +248,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
       //find target record and delete, if the target record was the
       //only target in the tm record, delete the entire record
       usRc = FindTargetByKeyAndDelete( pTmRecord,
-                          TmDelIn, pSentence, &ulKey );
+                          TmDelIn, pSentence, pTmDelOut, &ulKey );
     } /* endif */
   } /* endif */
 
@@ -256,7 +256,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
   
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
-  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_PUT_OUT_W );
+  pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmDelOut->stPrefixOut.usTmtXRc = usRc;
   return( usRc );
 }
@@ -318,7 +318,8 @@ USHORT EqfMemory::TmtXDelSegmByKey
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::FindTargetAndDelete(
                             PTMX_RECORD pTmRecord,
-                            SearchProposal&  TmDel,
+                            OtmProposal&  TmDel,
+                            TMX_EXT_OUT_W * pTmExtOut,
                             PULONG pulKey )
 {
   BOOL fOK = FALSE;                    //success indicator
@@ -333,9 +334,11 @@ USHORT EqfMemory::FindTargetAndDelete(
   PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lTagAlloc;                      //allocate length
   ULONG ulLen = 0;                    //length indicator
+  LONG lSrcLen = 0;
   PSZ_W  pString = NULL;               //pointer to character string
   USHORT usId = 0;                     //returned id from function
   USHORT usRc = NO_ERROR;              //returned value from function
+  USHORT usTarget = 0;           //initialize counter
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
@@ -370,6 +373,7 @@ USHORT EqfMemory::FindTargetAndDelete(
     //copy source string for later compare function
 //    memcpy( pString, pByte, ulLen );
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
+    lSrcLen = ulLen;
 
     //compare source strings
     //if ( !UTF16strcmp( pString, pSentence->pNormString ) )
@@ -392,6 +396,7 @@ USHORT EqfMemory::FindTargetAndDelete(
       //source strings are identical so loop through target records
       while ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) && !fStop )
       {
+        usTarget++;
         /**************************************************************/
         /* update left target length                                  */
         /**************************************************************/
@@ -404,11 +409,11 @@ USHORT EqfMemory::FindTargetAndDelete(
         pClb = (PTMX_TARGET_CLB)pByte;
 
         //get id of target language in the put structure
-        usRc = NTMGetIDFromName( TmDel.szIsoTargetLang,
+        usRc = NTMGetIDFromName( TmDel.szTargetLanguage,
                                  NULL,
                                  (USHORT)LANG_KEY, &usId );
         //compare target language ids
-        //if ( (pClb->usLangId == usId) && !usRc )
+        if ( (pClb->usLangId == usId) && !usRc )
         {
           //compare source tag table records
           //position at source tag table record
@@ -495,8 +500,18 @@ USHORT EqfMemory::FindTargetAndDelete(
                         //if on leave while loop as though delete was carried out
                         if ( !pClb->bMultiple || (BOOL)TmDel.lTime  || true)
                         {
-                          TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
+                          //fill out the put structure as output of the extract function
+                          usRc = FillExtStructure( this, pTMXTargetRecord,
+                                                  pClb,
+                                                  TmDel.pInputSentence->pStrings->getGenericTargetStrC(), &lSrcLen,
+                                                  pTmExtOut );
+                          NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+                                      pTmExtOut->szOriginalSourceLanguage, NULL );
+                          pTmExtOut->ulRecKey = TmDel.recordKey = *pulKey;
+                          pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
 
+                          TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
+                          
                           //add updated tm record to database
                           /**********************************************/
                           /* we usually should delete the record here   */
@@ -554,8 +569,9 @@ USHORT EqfMemory::FindTargetAndDelete(
 
 USHORT EqfMemory::FindTargetByKeyAndDelete(
                             PTMX_RECORD pTmRecord,
-                            SearchProposal&  TmDel,
+                            OtmProposal&  TmDel,
                             PTMX_SENTENCE pSentence,
+                            TMX_EXT_OUT_W * pTmExtOut,
                             PULONG pulKey )
 {
   USHORT usRc = 0;
@@ -564,8 +580,8 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
   PTMX_TARGET_CLB    pTargetClb;       //ptr to target CLB
   LONG       lLeftClbLen = 0;        // remaining length of CLB area
   PBYTE pByte;                         //position ptr
-  LONG lSourceLen = 0;              //length of source string
-  USHORT usTarget;                     //nr of target records in tm record
+  LONG lSourceLen = 0;                 //length of source string
+  USHORT usTarget = 0;                 //nr of target records in tm record
   PSZ_W pSourceString = NULL;          //pointer to source string
   PBYTE pSource;                       //position ptr
 
@@ -717,12 +733,15 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
             //if on leave while loop as though delete was carried out
             
             //fill out the put structure as output of the extract function
-            //usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
-            //                         pTargetClb,
-            //                         pSourceString, &lSourceLen,
-            //                         &pTmExtOut->stTmExt );
-            //pTmClb->NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
-            //            pTmExtOut->stTmExt.szOriginalSourceLanguage, NULL );
+            usRc = FillExtStructure( this, pTMXTargetRecord,
+                                     pTargetClb,
+                                     pSourceString, &lSourceLen,
+                                     pTmExtOut );
+            NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+                        pTmExtOut->szOriginalSourceLanguage, NULL );
+            pTmExtOut->ulRecKey = TmDel.recordKey = *pulKey;
+            pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
+            
             //if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime )
             {
               TMDelTargetClb( pTmRecord, pTMXTargetRecord, pTargetClb );

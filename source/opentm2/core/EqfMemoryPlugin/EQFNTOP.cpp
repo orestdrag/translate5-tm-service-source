@@ -329,11 +329,6 @@ USHORT EqfMemory::OpenX()
     NTMDestroyLongNameTable( );
   } /* endif */
 
-  //set out values
-  //pTmOpenOut->pstTmClb = pTmClb;
-  //pTmOpenOut->stPrefixOut.usLengthOutput = sizeof( TMX_OPEN_OUT );
-  //pTmOpenOut->stPrefixOut.usTmtXRc = usRc;
-
   return( usRc );
 }
 
