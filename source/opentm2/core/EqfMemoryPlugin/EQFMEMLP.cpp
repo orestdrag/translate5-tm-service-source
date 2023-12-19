@@ -1568,6 +1568,8 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
+    pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(pSegment->szSource, pSegment->szTarget));
+
     pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );

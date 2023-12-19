@@ -488,7 +488,6 @@ public:
   /*! \brief is target lang is marked as prefered in languages.xml */
   bool fIsoTargetLangIsPrefered = false;
 
-  void clearProposal();
   //searchproposal
 
   //char errorStr[1000];

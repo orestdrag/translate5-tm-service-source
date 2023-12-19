@@ -1904,7 +1904,7 @@ int UpdateEntryRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  Data.clearProposal();    
+  Data.clear();    
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
   { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
@@ -2087,7 +2087,7 @@ int DeleteEntryRequestData::parseJSON(){
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   // parse input parameters
-  Data.clearProposal();
+  Data.clear();
 
   auto loggingThreshold = -1;
        
@@ -2253,7 +2253,7 @@ int FuzzySearchRequestData::parseJSON(){
     // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
   
-  Data.clearProposal();
+  Data.clear();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
                                                    { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },

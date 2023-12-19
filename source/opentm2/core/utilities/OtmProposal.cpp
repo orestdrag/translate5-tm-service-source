@@ -39,13 +39,7 @@ if(pInputSentence) delete pInputSentence;
 
 void OtmProposal::clear()
 { 
-  memset( this, 0, sizeof(OtmProposal) );
-  eType = OtmProposal::eptUndefined;
-  eMatch = OtmProposal::emtUndefined;
-}
-
-
-void OtmProposal::clearProposal(){
+  if(this->pInputSentence) delete pInputSentence;
   memset( this, 0, sizeof(OtmProposal) );
   eType = OtmProposal::eptUndefined;
   eMatch = OtmProposal::emtUndefined;
