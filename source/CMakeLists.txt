@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 5)
-SET(APP_VERSION_MINOR 40)
+SET(APP_VERSION_MINOR 41)
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
@@ -80,6 +80,8 @@ set(T5MEMORY_Source_Files
     "${CORE_DIR}/tm.cpp"
     "${CORE_DIR}/otm.cpp"
     "${CORE_DIR}/requestdata.cpp"
+    "${CORE_DIR}/ProposalFilter.cpp"
+
 #RestAPI
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OtmMemoryServiceWorker.cpp"
     "${T5MEMORY_SOURCE_ROOT}/RestAPI/OTMMSJSONFactory.cpp"

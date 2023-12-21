@@ -3936,6 +3936,97 @@ BOOL TMDelTargetClbV5
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG usLenChar );
 ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG usLenComp );
 
+#include "EncodingHelper.h"
+
+std::wstring convertStrToWstr(std::string& str);
+
+/*
+class FilterParam{
+
+public:
+
+   FilterParam(std::string& search, FilterField field, FilterType type): m_field(field), m_type(type), 
+        m_searchString(search), m_searchStringW(convertStrToWstr(search)){};
+  
+  FilterParam(long t1, long t2, FilterField field = TIMESTAMP): m_timestamp1(t1), m_timestamp2(t2), m_field{field}{}
+
+private:
+  FilterField m_field;
+  FilterType m_type;
+
+  long m_timestamp1=0, m_timestamp2=0;
+};//*/
+
+
+class ProposalFilter{
+//public:  
+//  FilterParam m_param;  
+
+
+public:
+
+enum FilterField{    
+    UNKNOWN_FIELD,
+    TIMESTAMP,
+    //SEG_ID,
+
+    CHAR_FIELDS_START,
+    SRC_LANG = CHAR_FIELDS_START,
+    TRG_LANG,
+    AUTHOR,
+    DOC, 
+    //MARKUP,
+
+    WIDE_CHAR_FIELDS_START, 
+    SOURCE = WIDE_CHAR_FIELDS_START,
+    TARGET,
+    CONTEXT,
+    ADDINFO
+  };
+
+  enum FilterType{
+    UNKNOWN, EXACT, CONTAINS, RANGE
+  };
+
+  static FilterType StrToFilterType(char* str){
+    if(!str) return FilterType::UNKNOWN;
+    if(strcasecmp(str, "EXACT")) return FilterType::EXACT;
+    if(strcasecmp(str, "CONTAINS")) return FilterType::CONTAINS;
+    //if(strcasecmp(str, "RANGE")) return FilterType::RANGE;
+    T5LOG(T5WARNING) << " cant parse " << str << " filtertype!";
+    return FilterType::UNKNOWN;
+  }
+
+
+private:
+  FilterField m_field;
+  FilterType m_type;
+  long m_timestamp1=0, m_timestamp2=0;
+  std::string m_searchString;
+  std::wstring m_searchStringW;
+
+public:
+
+  ProposalFilter(std::string& search, FilterField field, FilterType type): m_field(field), m_type(type), 
+        m_searchString(search), m_searchStringW(convertStrToWstr(search)){};
+  
+  ProposalFilter(long t1, long t2, FilterField field = TIMESTAMP): m_timestamp1(t1), m_timestamp2(t2), m_field{field}{}
+
+  //ProposalFilter(FilterParam&& param) m_param(param){}
+
+  bool check(OtmProposal& prop);
+};
+
+
+/*
+class StringFilterParam{
+  std::string m_searchString;
+  std::wstring m_searchStringW;
+
+public:
+  StringFilterParam(std::string& search, ProposalFilter::FilterType type): FilterParam(type, field), {}
+}//*/
+
 typedef struct _MEM_ORGANIZE_IDA
 {
  std::shared_ptr<int> memRef;
@@ -3981,6 +4072,7 @@ typedef struct _MEM_ORGANIZE_IDA
  PSZ           pszActiveName;          // points to current name in pszNameList
  CHAR          szBuffer[2048];         // general purpose buffer
  BOOL          fFirstGet;              // TRUE = this is the first get access
+ std::vector<ProposalFilter> m_reorganizeFilters;
 }MEM_ORGANIZE_IDA, * PMEM_ORGANIZE_IDA;
 
 USHORT  TmCloseOrganize( PMEM_ORGANIZE_IDA, USHORT );

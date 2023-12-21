@@ -1089,7 +1089,6 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
   pOtmProposal->setSource( pProposal->szSource );
   pOtmProposal->setTarget( pProposal->szTarget );
   pOtmProposal->setDocName( pProposal->szDocName );
-  pOtmProposal->setDocShortName( pProposal->szDocShortName );
   pOtmProposal->setSegmentNum( pProposal->lSegmentNum );
   pOtmProposal->setSourceLanguage( pProposal->szSourceLanguage );
   pOtmProposal->setIsSourceLangIsPrefered( pProposal->fIsoSourceLangIsPrefered);
@@ -1133,7 +1132,6 @@ void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProp
   pOtmProposal->getSource( pProposal->szSource, sizeof(pProposal->szSource)/sizeof(CHAR_W) );
   pOtmProposal->getTarget( pProposal->szTarget, sizeof(pProposal->szTarget)/sizeof(CHAR_W) );
   pOtmProposal->getDocName( pProposal->szDocName, sizeof(pProposal->szDocName) );
-  pOtmProposal->getDocShortName( pProposal->szDocShortName, sizeof(pProposal->szDocShortName) );
   pProposal->lSegmentNum = pOtmProposal->getSegmentNum();
 
   pOtmProposal->getOriginalSourceLanguage( pProposal->szSourceLanguage, sizeof(pProposal->szSourceLanguage) );

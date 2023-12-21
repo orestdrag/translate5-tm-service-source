@@ -498,7 +498,7 @@ USHORT EqfMemory::FindTargetAndDelete(
 
                         //check that multiple flag isn't on
                         //if on leave while loop as though delete was carried out
-                        if ( !pClb->bMultiple || (BOOL)TmDel.lTime  || true)
+                        if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime  || true)
                         {
                           //fill out the put structure as output of the extract function
                           usRc = FillExtStructure( this, pTMXTargetRecord,

@@ -633,7 +633,6 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setAddInfo( pExtOut->szAddInfo );
   Proposal.setContext( pExtOut->szContext );
   Proposal.setDocName( pExtOut->szLongName );
-  Proposal.setDocShortName( pExtOut->szFileName );
   Proposal.setSegmentNum( pExtOut->ulSourceSegmentId );
   Proposal.setType( FlagToProposalType( pExtOut->usTranslationFlag ) );
   Proposal.setUpdateTime( pExtOut->lTargetTime );
@@ -668,7 +667,6 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setAddInfo( pMatch->szAddInfo );
   pProposal->setContext( pMatch->szContext );
   pProposal->setDocName( pMatch->szLongName );
-  pProposal->setDocShortName( pMatch->szFileName );
   pProposal->setSegmentNum( pMatch->ulSegmentId );
   pProposal->setType( FlagToProposalType( pMatch->usTranslationFlag ) );
   pProposal->setUpdateTime( pMatch->lTargetTime );
@@ -718,36 +716,6 @@ BYTE ProposalTypeToFlag(OtmProposal::eProposalType t){
   } 
 }
 
-/*! \brief Fill TMX_PUT_IN_W structure with OtmProposal data
-    \param Proposal reference to the OtmProposal containing the data
-    \param pPutIn pointer to the TMX_PUT_IN_W structure
-  	\returns 0 or error code in case of errors
-*/
-/*
-int EqfMemory::OtmProposalToPutIn
-(
-  OtmProposal &Proposal,
-  PTMX_PUT_IN_W pPutIn
-)
-{
-  int iRC = 0;
-
-  Proposal.getSource( pPutIn->stTmPut.szSource, sizeof(pPutIn->stTmPut.szSource) );
-  Proposal.getTarget( pPutIn->stTmPut.szTarget, sizeof(pPutIn->stTmPut.szTarget) );
-  Proposal.getAuthor( pPutIn->stTmPut.szAuthorName, sizeof(pPutIn->stTmPut.szAuthorName) );
-  Proposal.getMarkup( pPutIn->stTmPut.szTagTable, sizeof(pPutIn->stTmPut.szTagTable)  );
-  Proposal.getSourceLanguage( pPutIn->stTmPut.szSourceLanguage, sizeof(pPutIn->stTmPut.szSourceLanguage)  );
-  Proposal.getTargetLanguage( pPutIn->stTmPut.szTargetLanguage, sizeof(pPutIn->stTmPut.szTargetLanguage)  );
-  Proposal.getAddInfo( pPutIn->stTmPut.szAddInfo, sizeof(pPutIn->stTmPut.szAddInfo)  );
-  Proposal.getContext( pPutIn->stTmPut.szContext, sizeof(pPutIn->stTmPut.szContext)  );
-  Proposal.getDocName( pPutIn->stTmPut.szLongName, sizeof(pPutIn->stTmPut.szLongName)  );
-  Proposal.getDocShortName( pPutIn->stTmPut.szFileName, sizeof(pPutIn->stTmPut.szFileName)  );
-  pPutIn->stTmPut.ulSourceSegmentId = Proposal.getSegmentNum();
-     
-  pPutIn->stTmPut.lTime = Proposal.getUpdateTime();
-
-  return( iRC );
-}//*/
 
 /*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
@@ -771,7 +739,7 @@ int EqfMemory::OtmProposalToGetIn
   Proposal.getAddInfo( pGetIn->stTmGet.szAddInfo, sizeof(pGetIn->stTmGet.szAddInfo)  );
   Proposal.getContext( pGetIn->stTmGet.szContext, sizeof(pGetIn->stTmGet.szContext)  );
   Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
-  Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
+  //Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
   
   //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
   int threshold = TM_DEFAULT_THRESHOLD;

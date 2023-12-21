@@ -49,6 +49,7 @@ typedef char* PSZ;
         FUZZY,
         CONCORDANCE,
         DELETE_ENTRY,
+        DELETE_ENTRIES_REORGANIZE,
         UPDATE_ENTRY,
         TAGREPLACEMENTTEST,
         IMPORT_MEM,

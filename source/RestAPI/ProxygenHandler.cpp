@@ -47,6 +47,7 @@ const std::map<const COMMAND,const char*> CommandToStringsMap {
         { FUZZY, "FUZZY" },
         { CONCORDANCE, "CONCORDANCE" },
         { DELETE_ENTRY, "DELETE_ENTRY" },
+        { DELETE_ENTRIES_REORGANIZE, "DELETE_ENTRIES_REORGANIZE" },
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { IMPORT_MEM, "IMPORT_MEM" },

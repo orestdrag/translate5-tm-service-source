@@ -95,11 +95,12 @@ class JSONFactory;
 
 struct ImportStatusDetails{
   std::atomic_short usProgress{0};
-  std::atomic_int segmentsCount{-1};
-  std::atomic_int segmentsImported{-1};
-  std::atomic_int invalidSegments{-1};
-  std::atomic_int invalidSymbolErrors{-1};
-  std::atomic_int resSegments {-1};
+  std::atomic_int segmentsCount{0};
+  std::atomic_int segmentsImported{0};
+  std::atomic_int invalidSegments{0};
+  std::atomic_int invalidSymbolErrors{0};
+  std::atomic_int resSegments {0};
+  long filteredSegments{0};
   std::map<int, int> invalidSegmentsRCs;
   std::string importTimestamp;
   std::vector<std::tuple<int,int>> firstInvalidSegmentsSegNums;

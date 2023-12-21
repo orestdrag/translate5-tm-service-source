@@ -60,7 +60,8 @@ USHORT TMLoopAndDelTargetClb
 		OtmProposal& 	  TmProposal,
     USHORT              usPutLang,
     USHORT              usPutFile,
-    PBOOL               fNewerTargetExists
+    PBOOL               fNewerTargetExists,
+    PINT                pTargetKey
 	);
 /**********************************************************************/
 /* activate this define to get a faster memory                        */
@@ -273,6 +274,11 @@ USHORT EqfMemory::TmtXReplace
     } /* endif */
   } /* endif */
 
+  if(!usRc){
+    pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
+    pTmPutOut->usTargetKey = TmProposal.targetKey;
+  }
+
   // unlock TM database if database has been locked
   if ( fLocked )
   {
@@ -303,7 +309,6 @@ USHORT EqfMemory::TmtXReplace
 
   return( usRc );
 }
-
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -999,6 +1004,10 @@ USHORT EqfMemory::AddToTm
                              pulNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
                              pTmRecord->lRecordLen);     //length
+        if(!usRc){
+          TmProposal.recordKey = *pulNewKey;
+          TmProposal.targetKey = 1;
+        }
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1211,9 +1220,9 @@ USHORT EqfMemory::FillClb
     //pTargetClb->usSrcLangId = usSrcLang;
     pTargetClb->bTranslationFlag = ProposalTypeToFlag(TmProposal.eType);
     //if a time is given take it else use current time
-    if ( TmProposal.lTime )
+    if ( TmProposal.lTargetTime )
     {
-      pTargetClb->lTime = TmProposal.lTime;
+      pTargetClb->lTime = TmProposal.lTargetTime;
     }
     else
     {
@@ -1780,6 +1789,7 @@ USHORT EqfMemory::UpdateTmRecord
           }
           else if ( usRc == NO_ERROR )
           {
+            TmProposal.recordKey = ulKey;
             //new target record was added or an existing one was successfully
             //replaced so don't try other sids
             fStop = TRUE;
@@ -2019,6 +2029,7 @@ USHORT EqfMemory::ComparePutData
   PTMX_RECORD pTmRecord = *ppTmRecord; // pointer to tm record data
   USHORT      usAuthorId;              // ID for author string
   LONG lLeftClbLen;
+  int delTargetKey = 0, targetKey = 0;
 
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
@@ -2088,7 +2099,7 @@ USHORT EqfMemory::ComparePutData
         //RJ: 04/01/22: P018830:
         // loop through all target records
         // delete entry if current segment has already been translated
-        TMLoopAndDelTargetClb(pTmRecord, TmProposal, usPutLang, usPutFile, &fNewerTargetExists );
+        TMLoopAndDelTargetClb(pTmRecord, TmProposal, usPutLang, usPutFile, &fNewerTargetExists, &delTargetKey );
 
         // recalc since record may have changed during delete above!
         lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
@@ -2145,6 +2156,7 @@ USHORT EqfMemory::ComparePutData
                 lLeftClbLen = RECLEN(pTMXTargetRecord) - pTMXTargetRecord->usClb;
                 while ( lLeftClbLen > 0 && !fStop )
                 {
+                  targetKey++;
                   if ( ((pClb->ulSegmId == TmProposal.getSegmentNum()) &&
                         (pClb->usFileId == usPutFile)) ||
                         pClb->bMultiple )
@@ -2159,7 +2171,7 @@ USHORT EqfMemory::ComparePutData
                     if ( pClb->bMultiple )
                     {
                       pClb->bMultiple = FALSE;
-                      pClb->lTime     = TmProposal.lTime;
+                      pClb->lTime     = TmProposal.lTargetTime;
                       pClb->ulSegmId  = TmProposal.getSegmentNum();
                       pClb->usFileId  = usPutFile;
                       pClb->bTranslationFlag       = ProposalTypeToFlag(TmProposal.eType);
@@ -2169,11 +2181,11 @@ USHORT EqfMemory::ComparePutData
                     }
                     else
                     {
-                      if ( (pClb->lTime < TmProposal.lTime) || !TmProposal.lTime )
+                      if ( (pClb->lTime < TmProposal.lTargetTime) || !TmProposal.lTargetTime )
                       {
-                        if ( TmProposal.lTime )
+                        if ( TmProposal.lTargetTime )
                         {
-                          pClb->lTime = TmProposal.lTime;
+                          pClb->lTime = TmProposal.lTargetTime;
                         }
                         else
                         {
@@ -2234,6 +2246,7 @@ USHORT EqfMemory::ComparePutData
                         T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen << "; segment was not saved";
                       //}
                       //fOK = false;
+                      usRc = ERROR_ADD_TO_TM;
                     }
                   } /* endif */
 
@@ -2241,9 +2254,9 @@ USHORT EqfMemory::ComparePutData
                   if ( fOK )
                   {
                     pClb->bMultiple = FALSE;
-                    if ( TmProposal.lTime )
+                    if ( TmProposal.lTargetTime )
                     {
-                      pClb->lTime = TmProposal.lTime;
+                      pClb->lTime = TmProposal.lTargetTime;
                     }
                     else
                     {
@@ -3168,7 +3181,8 @@ USHORT TMLoopAndDelTargetClb
 	OtmProposal& 		TmProposal,
 	USHORT              usPutLang,
   USHORT              usPutFile,
-  PBOOL               pfNewerTargetExists
+  PBOOL               pfNewerTargetExists,
+  PINT                pTargetKey
 )
 {
   USHORT 				usRc = NO_ERROR;
@@ -3188,6 +3202,7 @@ USHORT TMLoopAndDelTargetClb
 
   //source strings equal, position at first target record
   pTMXTgtRec = (PTMX_TARGET_RECORD)NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
+  if(pTargetKey) *pTargetKey = 0;
 
   while ( ( lLeftTgtLen <= RECLEN(pTMXTgtRec) )  && (RECLEN(pTMXTgtRec) != 0) && !fDel )
   {
@@ -3206,12 +3221,13 @@ USHORT TMLoopAndDelTargetClb
 
 		while ( ( lLeftClbLen > 0 ) && !fDel )
 		{
+      *pTargetKey++;
 			if ( (pClb->usLangId == usPutLang) &&
 			     (pClb->ulSegmId == TmProposal.getSegmentNum()) &&
 			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
-				if ( (pClb->lTime < TmProposal.lTime) || !TmProposal.lTime )
+				if ( (pClb->lTime < TmProposal.lTargetTime) || !TmProposal.lTargetTime )
 				{
 				  lLeftClbLen -= TARGETCLBLEN(pClb);
 				  // loop over all CLBs of this target record and remove

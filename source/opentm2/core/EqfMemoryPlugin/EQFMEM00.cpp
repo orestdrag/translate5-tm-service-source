@@ -272,20 +272,30 @@ VOID EQFMemOrganizeProcess
     else
     {
       // write proposal to output memory
-      
-      pRIDA->pProposal->pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(pRIDA->pProposal->szSource, pRIDA->pProposal->szTarget));
-      iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
-      if ( iRC != 0 )
-      {
-        T5LOG(T5ERROR) << "segment in reorganize was skipped! segment: "<< *pRIDA->pProposal;
-        pRIDA->pMem->importDetails->invalidSegments++;
-        pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), iRC));
-        pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
+      bool fFilterPassed = true;
+      for(auto& filter: pRIDA->m_reorganizeFilters){
+        if(filter.check(*pRIDA->pProposal)){
+          fFilterPassed = false;
+          break;
+        }
       }
-      else
-      {
-        pRIDA->pMem->importDetails->segmentsImported++;
-      } /* endif */             
+      if(fFilterPassed == false){
+        pRIDA->pMem->importDetails->filteredSegments++;
+      }else{
+        pRIDA->pProposal->pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(pRIDA->pProposal->szSource, pRIDA->pProposal->szTarget));
+        iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
+        if ( iRC != 0 )
+        {
+          T5LOG(T5ERROR) << "segment in reorganize was skipped! segment: "<< *pRIDA->pProposal;
+          pRIDA->pMem->importDetails->invalidSegments++;
+          pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentNum(), iRC));
+          pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
+        }
+        else
+        {
+          pRIDA->pMem->importDetails->segmentsImported++;
+        } /* endif */             
+      }
     } /* endif */
   }
   else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )

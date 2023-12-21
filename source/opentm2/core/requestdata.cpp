@@ -19,6 +19,32 @@
 
 JSONFactory RequestData::json_factory;
 
+std::string OtmProposal::GetUpdateTimeStr(){
+  struct tm   *pTimeDate;            // time/date structure
+  char buff[100];
+  long lTime = lTargetTime;
+  if ( lTime != 0L ) lTime += 10800L;// correction: + 3 hours
+
+  pTimeDate = gmtime( (time_t *)&lTime );
+  if ( pTimeDate->tm_isdst == 1 )
+  {
+    // correct summertime offset
+    lTime -= 3600; 
+    pTimeDate = gmtime( (time_t *)&lTime );
+    
+  }
+  if ( (lTime != 0L) && pTimeDate )   // if gmtime was successful ...
+  {
+    sprintf( buff, "%4.4d%2.2d%2.2dT%2.2d%2.2d%2.2dZ", 
+             pTimeDate->tm_year + 1900, pTimeDate->tm_mon + 1, pTimeDate->tm_mday,
+             pTimeDate->tm_hour, pTimeDate->tm_min, pTimeDate->tm_sec );
+  }
+  else
+  {
+    buff[0] = '\0';
+  } /* endif */
+  return buff;
+}
 
 /*! \brief convert a long time value into the UTC date/time format
     \param lTime long time value
@@ -234,6 +260,7 @@ bool RequestData::isWriteRequest(){
   return //command == COMMAND::CLONE_TM_LOCALY ||
       //|| command == COMMAND::DELETE_MEM
        command == COMMAND::DELETE_ENTRY
+      || command == COMMAND::DELETE_ENTRIES_REORGANIZE
       || command == COMMAND::UPDATE_ENTRY
       //|| command == COMMAND::CREATE_MEM// should be handled as service command
       || command == COMMAND::IMPORT_MEM
@@ -997,33 +1024,149 @@ int ReorganizeRequestData::execute(){
     outputMessage = "{\"" + strMemName + "\": \"not found\" }";
     return( _rc_ = NOT_FOUND );
   }
-  /*
-  else if ( _rc_ != 0 )
-  {
-    unsigned short usRC = 0;
-
-    wchar_t szLastError[4000];
-    EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, szLastError, sizeof( szLastError ) / sizeof( szLastError[0] ) );
-    
-    T5LOG(T5ERROR) << "fails:: _rc_ = " << _rc_ << "; strOutputParams = " << outputMessage << "; szLastError = " <<
-         EncodingHelper::convertToUTF8(szLastError);
-    std::string strLastError = EncodingHelper::convertToUTF8(szLastError);
-    buildErrorReturn( _rc_, strLastError.c_str() );
-    mem->eStatus = OPEN_STATUS;
-    mem->eImportStatus = REORGANIZE_FAILED_STATUS;
-    mem->strError = strLastError;
-    return( INTERNAL_SERVER_ERROR );
-  }else{
-    mem->eStatus = OPEN_STATUS;
-    mem->eImportStatus = AVAILABLE_STATUS;
-    outputMessage = "{\"" + strMemName + "\": \"reorganized\" }";
-  } //*/
 
   T5LOG(T5INFO) << "::success, memName = " << strMemName;
   _rc_ = OK;
 
   return( _rc_ );
+}
 
+    char author[OTMPROPOSAL_MAXNAMELEN];
+    char document[OTMPROPOSAL_MAXNAMELEN];
+    char addInfo[OTMPROPOSAL_MAXNAMELEN];
+    char context[OTMPROPOSAL_MAXNAMELEN];
+    
+    char srcLangSearchType[50];
+    char trgLangSearchType[50];
+    char timespanSearchType[50];
+    char authorSearchType[50];
+    char docSearchType[50];
+    char addInfoSearchType[50];
+    char contextSearchType[50];
+
+int DeleteEntriesReorganizeRequestData::parseJSON(){
+   JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"source",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcStr ), sizeof( Data.srcStr ) / sizeof( Data.srcStr[0] ) },
+  { L"sourceSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.sourceSearchType ), sizeof( Data.sourceSearchType ) / sizeof( Data.sourceSearchType[0] ) },
+  { L"target",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgStr ), sizeof( Data.trgStr ) / sizeof( Data.trgStr[0] ) },
+  { L"targetSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.targetSearchType ), sizeof( Data.targetSearchType ) / sizeof( Data.targetSearchType[0] ) },
+  { L"sourceLang",       JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcLang ), sizeof( Data.srcLang ) },
+  { L"targetLang",       JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgLang ), sizeof( Data.trgLang ) },   
+  { L"sourceLangSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcLangSearchType ), sizeof( Data.srcLangSearchType ) },
+  { L"targetLangSearchType",JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgLangSearchType ), sizeof( Data.trgLangSearchType ) },  
+
+  { L"document",          JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.document ), sizeof( Data.document ) },
+  { L"documentSearchType",JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.docSearchType ), sizeof( Data.docSearchType ) },
+  { L"author",            JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.author ), sizeof( Data.author ) },
+  { L"authorSearchType",  JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.authorSearchType ), sizeof( Data.authorSearchType ) },
+  { L"context",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.context ), sizeof( Data.context ) / sizeof( Data.context[0] ) },
+  { L"contextSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.contextSearchType ), sizeof( Data.contextSearchType ) / sizeof( Data.contextSearchType[0] ) },
+  { L"timeStamp2",        JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTime1 ), sizeof( Data.szTime1 ) },
+  { L"timeStamp2",        JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTime2 ), sizeof( Data.szTime2 ) },
+
+  { L"addInfo",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.addInfo ), sizeof( Data.addInfo ) / sizeof( Data.addInfo[0] ) },
+  { L"addInfoSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.addInfoSearchType ), sizeof( Data.addInfoSearchType ) / sizeof( Data.addInfoSearchType[0] ) },
+  
+  { L"loggingThreshold",  JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"save2disk",         JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
+  { L"",                  JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  
+  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
+
+  return _rc_;
+}
+
+int DeleteEntriesReorganizeRequestData::checkData(){
+  if ( strMemName.empty() )
+  {
+    T5LOG(T5ERROR) <<" error:: _rc_ = "<< _rc_ << "; strOutputParams = "<<
+      outputMessage << "; szLastError = "<< "Missing name of memory";
+    buildErrorReturn( _rc_, "Missing name of memory");
+    return( BAD_REQUEST );
+  } 
+  return 0;
+}
+
+int DeleteEntriesReorganizeRequestData::execute(){
+  if ( mem == nullptr )
+  {
+    return 404;
+  }
+    // close the memory - when open
+  if ( mem->eStatus != OPEN_STATUS )
+  {
+    return 500;
+  }
+
+  mem->eStatus = REORGANIZE_RUNNING_STATUS;
+  mem->eImportStatus = REORGANIZE_RUNNING_STATUS;
+  
+  PFCTDATA    pData = new FCTDATA;            // ptr to function data area
+  PPROCESSCOMMAREA pCommArea = new PROCESSCOMMAREA;   // ptr to commmunication area
+  PMEM_ORGANIZE_IDA pRIDA = new MEM_ORGANIZE_IDA;      // pointer to instance area
+
+  // validate session handle
+  //_rc_ = FctValidateSession( OtmMemoryServiceWorker::getInstance()->hSession, &pData ); 
+
+  // reorganize the memory
+  if ( !_rc_ )
+  {    
+    // prepare TM organize process
+    // Fill  IDA with necessary values
+    pCommArea->pUserIDA = pRIDA;
+    pRIDA->pMem = mem;
+    pRIDA->memRef = memRef;
+    pRIDA->usRC = NO_ERROR;
+    strcpy( pRIDA->szMemName, mem->szName );
+    pRIDA->fBatch = TRUE;
+    pRIDA->hwndErrMsg = HWND_FUNCIF;
+    pRIDA->NextTask = MEM_START_ORGANIZE;
+
+    // enable organize process if OK
+    pData->fComplete = FALSE;
+    pData->sLastFunction = FCT_EQFORGANIZEMEM;
+    pData->pvMemOrganizeCommArea = pCommArea;    
+    pRIDA->pszNameList = 0;
+    if(mem->importDetails == nullptr){
+      mem->importDetails = new ImportStatusDetails;
+    }
+    
+    mem->importDetails->reset();
+    LONG lCurTime = 0;  
+    time( &lCurTime );
+                  
+    pRIDA->pMem->importDetails->lReorganizeStartTime = lCurTime;
+    mem->importDetails->fReorganize = true;
+
+    mem.reset();
+    memRef.reset();
+  } 
+
+  //worker thread 
+  if(!_rc_){
+    //reorganizeMemoryProcess(pData);//to do in same thread
+    std::thread worker_thread(reorganizeMemoryProcess, pData);
+    worker_thread.detach();
+  }else{
+    delete pData;
+    delete pCommArea;
+    delete pCommArea;
+  }
+  
+  if ( _rc_ == ERROR_MEMORY_NOTFOUND )
+  {
+    outputMessage = "{\"" + strMemName + "\": \"not found\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+
+  T5LOG(T5INFO) << "::success, memName = " << strMemName;
+  _rc_ = OK;
+
+  return( _rc_ );
 }
 
 
@@ -1407,89 +1550,6 @@ int ShutdownRequestData::execute(){
   
 }
 
-/* write a single proposal to a JSON string
-\param strJSON JSON stirng receiving the proposal data
-\param pProp pointer to a MEMPROPOSAL containing the proposal
-\param pData pointer to LOOKUPINMEMORYDATA area (used as buffer for the proposal data)
-\returns 0 is successful
-*/
-/*
-int addProposalToJSONString
-(
-  std::wstring &strJSON,
-  OtmProposal& Data,
-  bool fAddFuzzyInfo = false
-)
-{
-  JSONFactory *pJsonFactory = JSONFactory::getInstance();
-  wchar_t wbuff [OTMPROPOSAL_MAXSEGLEN+1];
-
-  pJsonFactory->addElementStartToJSONW( strJSON );
-
-  pJsonFactory->addParmToJSONW( strJSON, L"source", Data.szSource );
-  pJsonFactory->addParmToJSONW( strJSON, L"target", Data.szTarget );
-  pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", Data.lSegmentNum );
-  pJsonFactory->addParmToJSONW( strJSON, L"id", EncodingHelper::convertToUTF16(Data.szId).c_str());
-  pJsonFactory->addParmToJSONW( strJSON, L"documentName", EncodingHelper::convertToUTF16(Data.szDocName).c_str() );
-  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szSourceLanguage, Data.szIsoSourceLang );
-  pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", EncodingHelper::convertToUTF16( Data.szIsoSourceLang ).c_str() );
-  EqfGetIsoLang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szTargetLanguage, Data.szIsoTargetLang );
-  pJsonFactory->addParmToJSONW( strJSON, L"targetLang", EncodingHelper::convertToUTF16( Data.szIsoTargetLang ).c_str() );
-
-  wbuff[0] = '\0';
-  switch ( Data.eType )
-  {
-    case GLOBMEMORY_PROPTYPE: wcscpy( wbuff , L"GlobalMemory" ); break;
-    case GLOBMEMORYSTAR_PROPTYPE: wcscpy( wbuff , L"GlobalMemoryStar" ); break;
-    case MACHINE_PROPTYPE: wcscpy( wbuff , L"MachineTranslation" ); break;
-    case MANUAL_PROPTYPE: wcscpy( wbuff , L"Manual" ); break;
-    default: wcscpy( wbuff , L"undefined" ); break;
-  }
-  pJsonFactory->addParmToJSONW( strJSON, L"type", wbuff  );
-  
-  if(fAddFuzzyInfo){
-    wbuff[0] = '\0';
-    switch ( Data.eMatch )
-    {
-      case EXACT_MATCHTYPE: wcscpy( wbuff , L"Exact" ); break;
-      case EXACTEXACT_MATCHTYPE: wcscpy( wbuff , L"ExactExact" ); break;
-      case EXACTSAMEDOC_MATCHTYPE: wcscpy( wbuff , L"ExactSameDoc" ); break;
-      case FUZZY_MATCHTYPE: wcscpy( wbuff , L"Fuzzy" ); break;
-      case REPLACE_MATCHTYPE: wcscpy( wbuff , L"Replace" ); break;
-      default: wcscpy( wbuff , L"undefined" ); break;
-    }
-    pJsonFactory->addParmToJSONW( strJSON, L"matchType", wbuff  );
-  }
-  MultiByteToWideChar( CP_OEMCP, 0, Data.szTargetAuthor, -1, wbuff , sizeof( wbuff  ) / sizeof( wbuff [0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"author", wbuff  );
-
-  convertTimeToUTC( Data.lTargetTime, Data.szDateTime );
-  MultiByteToWideChar( CP_OEMCP, 0, Data.szDateTime, -1, wbuff , sizeof( wbuff  ) / sizeof( wbuff [0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"timestamp", wbuff  );
-  
-  if(fAddFuzzyInfo){
-    pJsonFactory->addParmToJSONW( strJSON, L"matchRate", Data.iFuzziness );
-    pJsonFactory->addParmToJSONW( strJSON, L"fuzzyWords", Data.iWords );
-    pJsonFactory->addParmToJSONW( strJSON, L"fuzzyDiffs", Data.iDiffs );
-  }
-
-  MultiByteToWideChar( CP_OEMCP, 0, Data.szMarkup, -1, wbuff , sizeof( wbuff  ) / sizeof( wbuff [0] ) );
-  pJsonFactory->addParmToJSONW( strJSON, L"markupTable", wbuff  );
-
-  pJsonFactory->addParmToJSONW( strJSON, L"context", Data.szContext );
-
-  pJsonFactory->addParmToJSONW( strJSON, L"additionalInfo", Data.szAddInfo );
-
-  Data.getInternalKey(buff, OTMPROPOSAL_MAXSEGLEN);
-  pJsonFactory->addParmToJSONW( strJSON, L"internalKey", EncodingHelper::convertToUTF16(buff).c_str() );
-
-  pJsonFactory->addElementEndToJSONW( strJSON );
-
-  return( 0 );
-}
-//*/
-
-
 int addProposalToJSONString
 (
   std::wstring &strJSON,
@@ -1529,7 +1589,7 @@ int addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"type", wbuff  );
 
   pJsonFactory->addParmToJSONW( strJSON, L"author", Data.szTargetAuthor);
-  pJsonFactory->addParmToJSONW( strJSON, L"timestamp", Data.szDateTime);
+  pJsonFactory->addParmToJSONW( strJSON, L"timestamp", Data.GetUpdateTimeStr().c_str());
   pJsonFactory->addParmToJSONW( strJSON, L"markupTable", Data.szMarkup);
   pJsonFactory->addParmToJSONW( strJSON, L"context", Data.szContext);
   pJsonFactory->addParmToJSONW( strJSON, L"additionalInfo", Data.szAddInfo );
@@ -1913,11 +1973,11 @@ int UpdateEntryRequestData::parseJSON(){
 
   { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
-  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szType ), sizeof( Data.szType ) },
+  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
   { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
+  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
@@ -1932,6 +1992,8 @@ int UpdateEntryRequestData::parseJSON(){
     buildErrorReturn( ERROR_INTERNALFUNCTION_FAILED, "Error: Parsing of input parameters failed" );
     return( _rest_rc_ = BAD_REQUEST );
   } /* end */
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
 
   return 0;
 }
@@ -1995,19 +2057,19 @@ int UpdateEntryRequestData::execute(){
     return _rc_ = 404;
   }
   
-  Data.eType = getMemProposalType(Data.szType );
+  Data.eType = getMemProposalType( szType );
 
-  if (Data.szDateTime[0] == 0 )
+  if (szDateTime[0] == 0 )
   {
     // a lTime value of zero automatically sets the update time
     // so refresh the time stamp (using OpenTM2 very special time logic...)
     // and convert the time to a date time string
     time( (time_t*)&Data.lTargetTime );
     Data.lTargetTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    convertTimeToUTC(Data.lTargetTime, Data.szDateTime);
+    convertTimeToUTC(Data.lTargetTime, szDateTime);
   }else{
     // use provided time stamp
-    convertUTCTimeToLong(Data.szDateTime, &(Data.lTargetTime) );
+    convertUTCTimeToLong(szDateTime, &(Data.lTargetTime) );
   }
   // update the memory
   TMX_EXT_OUT_W TmPutOut;                      // ptr to TMX_EXT_OUT_W structure
@@ -2034,10 +2096,10 @@ int UpdateEntryRequestData::execute(){
     mem->FlushFilebuffers();
   }
 
-  if ( ( _rc_ == 0 ) &&
-       ( Data.fMarkupChanged ) ) {
-    return buildErrorReturn(SEG_RESET_BAD_MARKUP, "SEG_RESET_BAD_MARKUP") ;
-  }
+  //if ( ( _rc_ == 0 ) &&
+  //     ( Data.fMarkupChanged ) ) {
+  //  return buildErrorReturn(SEG_RESET_BAD_MARKUP, "SEG_RESET_BAD_MARKUP") ;
+  //}
   
   if ( _rc_ != 0 )
   {
@@ -2050,22 +2112,7 @@ int UpdateEntryRequestData::execute(){
   // return the entry data
   std::wstring outputMessageW;
   json_factory.startJSONW( outputMessageW );
-  
-  //json_factory.addParmToJSON( outputMessage, "sourceLang",Data.szSourceLanguage );
-  //json_factory.addParmToJSON( outputMessage, "targetLang",Data.szTargetLanguage );
 
-  //json_factory.addParmToJSONW( outputMessageW, L"source",Data.szSource );
-  //json_factory.addParmToJSONW( outputMessageW, L"target",Data.szTarget );
-  //outputMessage += ",\n" + EncodingHelper::convertToUTF8(outputMessageW.c_str());// +", ";
-
-  /*
-  json_factory.addParmToJSON( outputMessage, "documentName", Data.szDocName );
-  json_factory.addParmToJSON( outputMessage, "segmentNumber", Data.lSegmentNum );
-  json_factory.addParmToJSON( outputMessage, "internalKey", Data.szInternalKey);
-  json_factory.addParmToJSON( outputMessage, "markupTable", Data.szMarkup );
-  json_factory.addParmToJSON( outputMessage, "timeStamp", Data.szDateTime );
-  json_factory.addParmToJSON( outputMessage, "author", Data.szTargetAuthor );
-  //*/
   addProposalToJSONString(outputMessageW, Data);
   json_factory.terminateJSONW( outputMessageW );
   outputMessage = EncodingHelper::convertToUTF8(outputMessageW.c_str());
@@ -2098,11 +2145,11 @@ int DeleteEntryRequestData::parseJSON(){
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szType ), sizeof( Data.szType ) },
+  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
   { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDateTime ), sizeof( Data.szDateTime ) },
+  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
@@ -2111,6 +2158,9 @@ int DeleteEntryRequestData::parseJSON(){
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
+
   if ( _rc_ )
   {
     buildErrorReturn( _rc_, "Error during parsing json: Parsing of input parameters failed" );
@@ -2164,10 +2214,10 @@ int DeleteEntryRequestData::checkData(){
 int DeleteEntryRequestData::execute(){
   auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
   // prepare the proposal data
-  if ( Data.szDateTime[0] != 0 )
+  if ( szDateTime[0] != 0 )
   {
     // use provided time stamp
-    convertUTCTimeToLong( Data.szDateTime, &(Data.lTargetTime) );
+    convertUTCTimeToLong( szDateTime, &(Data.lTargetTime) );
   }
   else
   {
@@ -2177,7 +2227,7 @@ int DeleteEntryRequestData::execute(){
     LONG            lTimeStamp;             // buffer for current time
     time( (time_t*)&lTimeStamp );
     lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    convertTimeToUTC( lTimeStamp, Data.szDateTime );
+    convertTimeToUTC( lTimeStamp, szDateTime );
   }
 
   std::string errorStr;
@@ -2195,7 +2245,7 @@ int DeleteEntryRequestData::execute(){
   }else{
     EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
     EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
-    Data.eType = getMemProposalType( Data.szType );
+    Data.eType = getMemProposalType( szType );
     if ( !_rc_ ){ 
       Data.pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(Data.szSource, Data.szTarget));
       _rc_ = mem->TmtXDelSegm ( Data, &TmPutOut );
@@ -2225,7 +2275,7 @@ int DeleteEntryRequestData::execute(){
     mem->ExtOutToOtmProposal(&TmPutOut, output);
     time( (time_t*)&output.lTargetTime );
     output.lTargetTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    convertTimeToUTC(output.lTargetTime, output.szDateTime);
+    //convertTimeToUTC(output.lTargetTime, output.szDateTime);
     addProposalToJSONString( strOutputParmsW, output );
   }
 
@@ -2267,6 +2317,9 @@ int FuzzySearchRequestData::parseJSON(){
                                                    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
+
   return _rc_;
 }
 
@@ -2483,6 +2536,8 @@ int ConcordanceSearchRequestData::parseJSON(){
   { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
   if(_rc_){

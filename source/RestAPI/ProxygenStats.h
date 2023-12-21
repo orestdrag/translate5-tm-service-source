@@ -107,6 +107,13 @@ class ProxygenStats {
     return deleteEntrySumTime_;
   }
 
+  virtual uint64_t getDeleteEntriesReorganizeCount() {
+    return deleteEntryReorganizeReqCount_;
+  }
+  virtual milliseconds getDeleteEntriesReorganizeSumTime(){
+    return deleteEntryReorganizeSumTime_;
+  }
+
   virtual uint64_t getSaveAllTmsRequestCount() {
     return saveAllTmsReqCount_;
   }
@@ -162,6 +169,7 @@ class ProxygenStats {
 
   atomic_uint64_t createMemReqCount_{0};
   atomic_uint64_t deleteMemReqCount_{0};
+  atomic_uint64_t deleteEntryReorganizeReqCount_{0};
   atomic_uint64_t exportMemReqCount_{0};
   atomic_uint64_t importMemReqCount_{0};
   atomic_uint64_t importLocalReqCount_{0};
@@ -192,6 +200,7 @@ class ProxygenStats {
   milliseconds concordanceSumTime_{0};
   milliseconds updateEntrySumTime_{0};
   milliseconds deleteEntrySumTime_{0};
+  milliseconds deleteEntryReorganizeSumTime_{0};
 
   milliseconds saveAllTmsSumTime_{0};
   milliseconds getListOfMemoriesSumTime_{0};

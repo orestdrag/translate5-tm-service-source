@@ -187,25 +187,7 @@ void OtmProposal::setDocName( char *pszBuffer )
   fFilled = 1;
 }
   	
-/* \brief get proposal document short name
-    \param pszBuffer Pointer to buffer receiving the document short name
-    \param iBufSize Size of the buffer in number of characters
-  	\returns Number of characters copied to pszBuffer including the terminating null character
-  */
-int OtmProposal::getDocShortName( char *pszBuffer, int iBufSize )
-{ 
- return( CopyToBuffer( szDocName, pszBuffer, iBufSize ) );
-}
 
-  	
-/* \brief set the proposal document short name
-    \param pszBuffer Pointer to buffer containing the document short short name
-  */
-void OtmProposal::setDocShortName( char *pszBuffer )
-{  
-  strncpy( szDocName, pszBuffer, sizeof(szDocName)-1 );
-  fFilled = 1;
-}
 
 
 /* \brief get proposal segment number
@@ -494,9 +476,9 @@ std::ostream & operator<<( std::ostream & o, OtmProposal & proposal ){
   o <<ALIGN "doc name: \"" << buff << "\"\n";
   buff[0] = L'\0';
 
-  proposal.getDocShortName(buff, OTMPROPOSAL_MAXSEGLEN);
-  o <<ALIGN "short doc name: \"" << buff << "\"\n";
-  buff[0] = L'\0';
+  //proposal.getDocShortName(buff, OTMPROPOSAL_MAXSEGLEN);
+  //o <<ALIGN "short doc name: \"" << buff << "\"\n";
+  //buff[0] = L'\0';
 
   proposal.getID(buff, OTMPROPOSAL_MAXSEGLEN);
   o <<ALIGN "id: \"" << buff << "\"\n";

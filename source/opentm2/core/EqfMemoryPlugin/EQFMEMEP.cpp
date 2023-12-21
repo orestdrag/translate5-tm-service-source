@@ -1187,7 +1187,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
      pExportIDA->pProposal->getSourceLanguage( szSourceLanguage, sizeof(szSourceLanguage) );
      pExportIDA->pProposal->getTargetLanguage( szTargetLanguage, sizeof(szTargetLanguage) );
      pExportIDA->pProposal->getAuthor( szAuthorName, sizeof(szAuthorName) );
-     pExportIDA->pProposal->getDocShortName( szFileName, sizeof(szFileName) );
+     //pExportIDA->pProposal->getDocShortName( szFileName, sizeof(szFileName) );
      pExportIDA->pProposal->getDocName( szLongName, sizeof(szLongName) );
      pExportIDA->pProposal->getMarkup( szTagTable, sizeof(szTagTable) );
      sprintf( pExportIDA->szConvArea,

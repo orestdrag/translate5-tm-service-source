@@ -89,6 +89,8 @@ public:
    */
   int getSourceLen();
 
+  std::string GetUpdateTimeStr();
+
   /* \brief get proposal source text 
      \param pszBuffer Pointer to buffer receiving the proposal source text
      \param iBufSize Size of the buffer in number of characters
@@ -144,17 +146,6 @@ public:
    */
   void setDocName( char *pszBuffer );
   	
-  /* \brief get proposal document short name
-     \param pszBuffer Pointer to buffer receiving the document short name
-     \param iBufSize Size of the buffer in number of characters
-  	 \returns Number of characters copied to pszBuffer including the terminating null character
-   */
-  int getDocShortName( char *pszBuffer, int iBufSize );
-  	
-  /* \brief set the proposal document short name
-     \param pszBuffer Pointer to buffer containing the document short short name
-   */
-  void setDocShortName( char *pszBuffer );
 
   /* \brief get proposal segment number
    	\returns proposal segment number
@@ -426,10 +417,9 @@ public:
   long    lTargetTime;
 
 	/*! \brief Fuzziness of the proposal. */
-  int iFuzziness;                 
-  int iDiffs, iWords;
+  int iFuzziness, iDiffs, iWords;
+
 	/*! \brief Markup table (format) of the proposal. */
-  //std::string strMarkup;
   char szMarkup[OTMPROPOSAL_MAXNAMELEN];
 
   /*! \brief Context information of the proposal */
@@ -461,12 +451,9 @@ public:
   char szMemory[260];
   char szIsoSourceLang[MAX_LANG_LENGTH];
   char szIsoTargetLang[MAX_LANG_LENGTH];
-  //int lSegmentNum;
-  //char szDocName[260];
   wchar_t szError[512];
-  char szType[256];
-  //char szAuthor[MAX_USERID];
-  char szDateTime[40];
+  //char szType[256];
+  //char szDateTime[40];
   char szSearchMode[40];
   char szSearchPos[80];
   int iNumOfProposals;
@@ -478,7 +465,7 @@ public:
 //otm_put
   //USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   //ULONG     ulSourceSegmentId;                 //seg. num. of source sentence from analysis
-  TIME_L    lTime;                             //time stamp
+  //TIME_L    lTime;                             //time stamp
   BOOL      fMarkupChanged;                    // Markup does not exist, changed to OTMUTF8 during import
 //otm_put end
 
@@ -493,6 +480,12 @@ public:
   //char errorStr[1000];
 };
 
+#include "tm.h"
+
+class SearchParams: public OtmProposal{
+  public:
+//  ProposalFiter::
+};
 
 
 

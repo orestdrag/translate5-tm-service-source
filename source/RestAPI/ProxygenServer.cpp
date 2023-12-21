@@ -238,6 +238,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new UpdateEntryRequestData();
           }else if(urlCommand ==  "entrydelete"){  
             requestHandler->pRequest = new DeleteEntryRequestData();
+          }else if(urlCommand == "entriesdelete"){
+            requestHandler->pRequest = new DeleteEntriesReorganizeRequestData();
           }else if(urlCommand ==  "import"){ // update 
             requestHandler->pRequest = new ImportRequestData();
           }else if(urlCommand == "clone"){
@@ -261,6 +263,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       requestHandler->pRequest = new UnknownRequestData;
     }
     requestHandler->pRequest->strMemName = urlMemName;
+    restoreBlanks(requestHandler->pRequest->strMemName);
     return requestHandler;
   }
 
