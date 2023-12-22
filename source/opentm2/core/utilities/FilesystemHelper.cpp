@@ -465,7 +465,7 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
 
 int FileBuffer::Flush(){
     #ifdef  LOG_FILE_WRITE
-     T5LOG(T5TRANSACTION) <<"called flush  filebuffer " << fileName <<" from disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
+     T5LOG(T5TRANSACTION) <<"called flush  filebuffer " << fileName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
     #endif
     
     bool fileWasOpened = file != nullptr;

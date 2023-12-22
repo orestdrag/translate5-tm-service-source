@@ -247,6 +247,7 @@ int RequestData::requestTM(){
       || command == EXPORT_MEM_INTERNAL_FORMAT
       || command == CLONE_TM_LOCALY
       || command == REORGANIZE_MEM
+      || command == DELETE_ENTRIES_REORGANIZE
       )
     {
       mem->FlushFilebuffers();

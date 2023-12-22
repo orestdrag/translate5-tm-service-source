@@ -220,7 +220,10 @@ USHORT EqfMemory::NTMGetIDFromNameEx
     if ( pszName[0] != EOS )
     {
       //--- capitalize input string
-      strupr( pszName );
+      if(usTableType != FILE_KEY)
+      {
+        strupr( pszName );
+      }
 
       /******************************************************************/
       /* get pointer to table and table entries in dependency of the    */
@@ -242,8 +245,9 @@ USHORT EqfMemory::NTMGetIDFromNameEx
 
       fLongName = (usTableType == FILE_KEY) &&
                    (pszLongName != NULL) &&
-                   (pszLongName[0] != EOS) &&
-                   (strcmp( pszLongName, pszName ) != 0);
+                   (pszLongName[0] != EOS) 
+                   //&& (strcmp( pszLongName, pszName ) != 0)
+                   ;
 
       if ( (usRc == NO_ERROR) && fLongName )
       {
@@ -665,6 +669,10 @@ EqfMemory::NTMGetNameFromID(  PUSHORT  pusID,         //intput
                       pLongNames->stTableEntry[ulI].pszLongName );
             } /* endif */
           } /* endfor */
+
+          if(!fLongFound){
+            strcpy(pszLongName, pszName);
+          }
         } /* endif */
 
 
@@ -936,7 +944,7 @@ USHORT NTMLockTM
 {
  USHORT usRc = 0;                      // function return code
  BOOL   fLockedData = FALSE;           // data-file-has-been-locked flag
- BOOL   fLockedIndex = FALSE;          // index-file-has-been-locked flag
+ BOOL   fLockedIndex = FALSE;          // index-file-has-been-locked flagf
 
  DEBUGEVENT( NTMLOCKTM_LOC, FUNCENTRY_EVENT, usRc );
 
@@ -1996,8 +2004,8 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
         usLength = (USHORT)(wcslen(pData) + 1);
         if ( usLength < usBufSize )
         {
-          //memcpy( pszBuffer, pusData, (usLength)*sizeof(wchar_t) );
-          wcscpy( pszBuffer, pData );
+          memcpy( pszBuffer, pData, (usLength)*sizeof(wchar_t) );
+          //wcscpy( pszBuffer, pData );
         }
         else
         {
