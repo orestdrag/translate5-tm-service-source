@@ -95,7 +95,7 @@ EqfMemory* EqfMemoryPlugin::openMemoryNew(
   if(pMemory){
     usRC = pMemory->OpenX();
   }else{
-    usRC = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } 
   // create memory object if create function completed successfully
   if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){

@@ -131,6 +131,12 @@ XERCES_CPP_NAMESPACE_USE
 #define TRANSLFLAG_PROP        "tmgr:translFlag"
 #define TRANSLFLAG_PROP_W      L"tmgr:translFlag"
 
+
+#define ADDINFO_PROP        "tmgr:addinfo"
+#define ADDINFO_PROP_W      L"tmgr:addinfo"
+#define CONTEXT_PROP        "tmgr:context"
+#define CONTEXT_PROP_W      L"tmgr:context"
+
 #define SEGNUM_PROP_OLD      "tmgr-segNum"
 #define SEGNUM_PROP_W_OLD    L"tmgr-segNum"
 #define SEGNUM_PROP          "tmgr:segNum"
@@ -1017,6 +1023,7 @@ USHORT CTMXExportImport::WriteSegment
   // add segment note as property
   if ( pSegment->szAddInfo[0] != 0 )
   {
+    bool addInfoWasParsed = false;
     static CHAR_W szBuffer[MAX_SEGMENT_SIZE];
     HADDDATAKEY hKey = MADSearchKey( pSegment->szAddInfo, L"Note" );
     if ( hKey != NULL )
@@ -1094,7 +1101,22 @@ USHORT CTMXExportImport::WriteSegment
         } /* endif */           
       } /* endwhile */         
     } /* endif */
+    
+    if(!addInfoWasParsed){
+      m_xw.WriteStartElement( "prop" );
+      m_xw.WriteAttributeString( "type", ADDINFO_PROP );
+      m_xw.WriteString( pSegment->szAddInfo ); 
+      m_xw.WriteEndElement(); // prop
+    }
   } /* endif */
+
+  if ( pSegment->szContext[0] != 0 )
+  {
+    m_xw.WriteStartElement( "prop" );
+    m_xw.WriteAttributeString( "type", CONTEXT_PROP );
+    m_xw.WriteString( pSegment->szContext ); 
+    m_xw.WriteEndElement(); // prop
+  }
 
 
   // write source tuv
@@ -1307,7 +1329,7 @@ USHORT CTMXExportImport::StartImport
     catch (const OutOfMemoryException& )
     {
 //        XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+      LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     }
     catch (const XMLException& toCatch)
     {
@@ -1705,8 +1727,8 @@ void StringTagVariants::initParser(){
   
   // create an instance of our handler
   
-  handler.tagReplacer.fFuzzyRequest = true;
-  handler.tagReplacer.activeSegment = REQUEST_SEGMENT;
+  //handler.tagReplacer.fFuzzyRequest = true;
+  handler.tagReplacer.activeSegment = SOURCE_SEGMENT;//REQUEST_SEGMENT;
   handler.fCreateNormalizedStr = true;
 
   //  install our SAX handler as the document and error handler.

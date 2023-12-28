@@ -282,7 +282,7 @@ VOID EQFMemOrganizeProcess
       if(fFilterPassed == false){
         pRIDA->pMem->importDetails->filteredSegments++;
       }else{
-        pRIDA->pProposal->pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(pRIDA->pProposal->szSource, pRIDA->pProposal->szTarget));
+        pRIDA->pProposal->pInputSentence = new TMX_SENTENCE(pRIDA->pProposal->szSource, pRIDA->pProposal->szTarget);
         iRC = pRIDA->pMemTemp->putProposal( *(pRIDA->pProposal) );
         if ( iRC != 0 )
         {

@@ -1223,7 +1223,7 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
         }
         else
         {
-          usDosRc = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usDosRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
       }
       break;
@@ -1358,7 +1358,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x if ( IsDBCSLeadByteE
         }
         else
         {
-          usDosRc = ERROR_NOT_ENOUGH_MEMORY;
+          LOG_AND_SET_RC(usDosRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
       }
       break;
@@ -1565,7 +1565,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
     pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
 
-    pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(pSegment->szSource, pSegment->szTarget));
+    pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(pSegment->szSource, pSegment->szTarget);
 
     pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory

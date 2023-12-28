@@ -407,7 +407,7 @@ USHORT EqfMemory::TokenizeSource
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -533,7 +533,7 @@ USHORT EqfMemory::TokenizeSource
                 fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                 if ( !fOK )
                 {
-                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -547,7 +547,7 @@ USHORT EqfMemory::TokenizeSource
                           fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
                           if ( !fOK )
                           {
-                            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                           }
                           else
                           {
@@ -603,7 +603,7 @@ USHORT EqfMemory::TokenizeSource
 
                 if ( !fOK )
                 {
-                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -638,7 +638,7 @@ USHORT EqfMemory::TokenizeSource
       fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
       if ( !fOK )
       {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       }
 
       //set total tag record length

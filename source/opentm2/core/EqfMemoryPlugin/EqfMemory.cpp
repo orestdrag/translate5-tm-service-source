@@ -317,7 +317,7 @@ int EqfMemory::getNextProposal
   TmExtIn.usNextTarget = this->usNextTarget;
   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
-  iRC = (int)TmtXExtract(  this,  &TmExtIn,  &TmExtOut);
+  iRC = (int)TmtXExtract( &TmExtIn,  &TmExtOut);
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
   {
@@ -423,7 +423,7 @@ int EqfMemory::getProposal
 
   if ( iRC == 0 )
   {
-    iRC = (int)TmtXExtract(  this,  &TmExtIn,  &TmExtOut);
+    iRC = (int)TmtXExtract(  &TmExtIn,  &TmExtOut);
   } /* endif */     
 
   if ( iRC == 0 )

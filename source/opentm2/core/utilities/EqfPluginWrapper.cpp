@@ -10,17 +10,7 @@ void EqfPluginWrapper::deinit(){
 
 }
 
-USHORT EqfPluginWrapper::MemExportStart     (PLONG plHandle, char*  pszOutFile, PMEMEXPIMPINFO pMemInfo ){
-    return EXTMEMEXPORTSTART(plHandle, pszOutFile, pMemInfo);   
-}
 
-USHORT EqfPluginWrapper::MemExportProcess   (LONG plHandle, PMEMEXPIMPSEG pSeg){
-    return EXTMEMEXPORTPROCESS(plHandle, pSeg);
-}
-
-USHORT EqfPluginWrapper::MemExportEnd       (LONG plHandle  ){
-    return EXTMEMEXPORTEND(plHandle);
-}
 
 USHORT EqfPluginWrapper::MemImportStart     (PLONG plHandle,  PSZ pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails*     pImportData  ){
     return EXTMEMIMPORTSTART(plHandle, pszInFile, pMemInfo, pImportData);

@@ -168,7 +168,7 @@ USHORT EqfStartSession
   {
     T5LOG(T5ERROR) << "EqfStartSession():: Not enought memory for pData";
 
-    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // initialize utilities

@@ -380,7 +380,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     if(pExportIDA->invalidXmlSegments){
       T5LOG(T5ERROR) << pExportIDA->invalidXmlSegments <<" segments was not exported because of invalid xml";
     }
-    EqfPluginWrapper::MemExportEnd(pExportIDA->lExternalExportHandle );
+    EXTMEMEXPORTEND(pExportIDA->lExternalExportHandle );
 
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
@@ -718,11 +718,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
     // allocate memory and segment data area
     if ( !UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, sizeof(MEMEXPIMPINFO), ERROR_STORAGE ) )
     {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRc, T5WARNING,ERROR_NOT_ENOUGH_MEMORY);
     }
     else if ( !UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, sizeof(MEMEXPIMPSEG), ERROR_STORAGE ) )
     {
-      usRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
     // load external memory export module
@@ -756,7 +756,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
            "; markup = " << pExportIDA->pstMemInfo->szFormat;
 
-      usRc = EqfPluginWrapper::MemExportStart(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
+      usRc = EXTMEMEXPORTSTART(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
     } /* endif */
    }
    else
@@ -919,7 +919,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
           fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget);        
           T5Logger::GetInstance()->desuppressLogging(ll);
           if(fValidXml){
-            usRc = EqfPluginWrapper::MemExportProcess( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+            usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
           }else{
             T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
           } 

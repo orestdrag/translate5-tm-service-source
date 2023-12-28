@@ -2038,7 +2038,7 @@ void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProp
 int UpdateEntryRequestData::execute(){
   // prepare the proposal data
   if(Data.szSource && Data.szTarget){
-    Data.pInputSentence  = new TMX_SENTENCE(std::make_unique<StringTagVariants> (Data.szSource , Data.szTarget));
+    Data.pInputSentence  = new TMX_SENTENCE(Data.szSource , Data.szTarget);
   }
   if(!_rc_ && Data.pInputSentence->pStrings->isParsed()){
   }else{
@@ -2113,8 +2113,19 @@ int UpdateEntryRequestData::execute(){
   // return the entry data
   std::wstring outputMessageW;
   json_factory.startJSONW( outputMessageW );
-
-  addProposalToJSONString(outputMessageW, Data);
+  {
+    //OtmProposal output;
+    //mem->ExtOutToOtmProposal(&TmPutOut, output);
+    //time( (time_t*)&output.lTargetTime );
+    //output.lTargetTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+    //convertTimeToUTC(output.lTargetTime, output.szDateTime);
+    //addProposalToJSONString( outputMessageW, output );
+    addProposalToJSONString(outputMessageW, Data);
+    //if(Data.pInputSentence){
+      //delete Data.pInputSentence;
+      //Data.pInputSentence = nullptr;
+    //}
+  }
   json_factory.terminateJSONW( outputMessageW );
   outputMessage = EncodingHelper::convertToUTF8(outputMessageW.c_str());
 
@@ -2248,7 +2259,7 @@ int DeleteEntryRequestData::execute(){
     EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
     Data.eType = getMemProposalType( szType );
     if ( !_rc_ ){ 
-      Data.pInputSentence = new TMX_SENTENCE(std::make_shared<StringTagVariants>(Data.szSource, Data.szTarget));
+      Data.pInputSentence = new TMX_SENTENCE(Data.szSource, Data.szTarget);
       _rc_ = mem->TmtXDelSegm ( Data, &TmPutOut );
     }
   }

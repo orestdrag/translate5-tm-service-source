@@ -2097,7 +2097,7 @@ USHORT TASoSiProtectTable
     LONG size = (usCountSOSI * sizeof(STARTSTOP)) > MIN_ALLOC ? (usCountSOSI * sizeof(STARTSTOP)) : MIN_ALLOC;
     if ( !UtlAlloc( (PVOID *)&pCurrent, 0L, size,  NOMSG ))
     {
-      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+      LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
 
 
@@ -2277,7 +2277,7 @@ USHORT TACreateProtectTableWEx
       pfnUserExitW = (PFNSTARTSTOPEXITW) pvUserExitW;
       if ( !pfnUserExitW( pszSegment, &pStartStop ) )
       {
-        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     }
     else  if ( pvUserExit )
@@ -2289,7 +2289,7 @@ USHORT TACreateProtectTableWEx
       Unicode2ASCII( pszSegment, &chAsciiSeg[0], ulCP);
       if ( !pfnUserExit( &chAsciiSeg[0], &pStartStop ) )
       {
-        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     }
     else
@@ -2383,7 +2383,7 @@ USHORT TACreateProtectTableWEx
                        (LONG) (ulTableAlloc * sizeof(STARTSTOP)),
                        NOMSG ))
         {
-          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
         ulTableUsed = 0;
       } /* endif */
@@ -2431,7 +2431,7 @@ USHORT TACreateProtectTableWEx
 				lAttrSize = MAX_ATTR_TOKENS * sizeof(TOKENENTRY);
 				if (!UtlAlloc((PVOID *) &pAttrTokBuffer, 0L, lAttrSize, NOMSG) )
 				{
-				   LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+				   LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
 				} /* endif */
 			  } /* endif */
 			  if ( usRC == NO_ERROR)
@@ -2810,7 +2810,7 @@ USHORT TAGotoNextStartStopEntry
         if ( !UtlAlloc( (PVOID *)&pNewStartStop, lOldLen,
                                   lNewLen, NOMSG ))
         {
-          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
         else
         {

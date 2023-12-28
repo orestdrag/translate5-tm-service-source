@@ -1038,44 +1038,43 @@ typedef struct _TMX_RECORD
   USHORT  usFirstTargetRecord;
 } TMX_RECORD, * PTMX_RECORD;
 
-typedef struct _TMX_OLD_RECORD
-{
-  USHORT  usRecordLen;
-  USHORT  usSourceRecord;
-  USHORT  usFirstTargetRecord;
-} TMX_OLD_RECORD, * PTMX_OLD_RECORD;
-
 //structure of the source segment
 typedef struct _TMX_SOURCE_RECORD
 {
   LONG   lRecordLen;
   USHORT  usSource;
   USHORT usLangId;
+  void reset(){
+    memset(this, 0, sizeof(*this));
+  }
 } TMX_SOURCE_RECORD, * PTMX_SOURCE_RECORD;
 
 //structure of the target segment
 typedef struct _TMX_TARGET_RECORD
 {
-  LONG   lRecordLen;
-  USHORT  usSourceTagTable;
-  USHORT  usTargetTagTable;
-  USHORT  usTarget;
-  USHORT  usClb;
+  LONG   lRecordLen = 0;
+  //USHORT  usSourceTagTable;
+  //USHORT  usTargetTagTable;
+  USHORT  usTarget = 0;
+  USHORT  usClb = 0;
+  void reset(){
+    memset(this, 0, sizeof(*this));
+  }
 } TMX_TARGET_RECORD, * PTMX_TARGET_RECORD;
 
 
 //control block structure in target record
 typedef struct _TMX_TARGET_CLB
-{
-  BYTE    bMultiple;
-  USHORT  usSrcLangId;
-  USHORT  usLangId;
-  BYTE    bTranslationFlag;
+{ 
   TIME_L  lTime;
+  TIME_L  lUpdateTime;
+  ULONG   ulSegmId;
+  USHORT  usLangId;
   USHORT  usFileId;
-  ULONG   ulSegmId;   // changed from USHORT
   USHORT  usAuthorId;
   USHORT  usAddDataLen;  // new for Major_version6: Length of following context and additional info data
+  BYTE    bMultiple;
+  BYTE    bTranslationFlag;
 } TMX_TARGET_CLB, * PTMX_TARGET_CLB;
 
 // helper macros for working with TMX_TARGET_CLBs
@@ -1113,18 +1112,6 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
 
 // find a string in a specific data area
 BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch );
-
-typedef struct _TMX_OLD_TARGET_CLB
-{
-  BYTE    bMultiple;
-  USHORT  usLangId;
-  BYTE    bMT;
-  TIME_L  lTime;
-  USHORT  usFileId;
-  USHORT  usSegmId;
-  USHORT  usAuthorId;
-} TMX_OLD_TARGET_CLB, * PTMX_OLD_TARGET_CLB;
-
 
 //tag table structure for both source and target
 typedef struct _TMX_TAGTABLE_RECORD
@@ -1580,7 +1567,8 @@ class RequestTagReplacer: public StringVariants{
 
 struct TMX_SENTENCE
 {
-  std::shared_ptr<StringTagVariants>  pStrings = nullptr;
+  //std::unique_ptr<StringTagVariants>  pStrings = nullptr;
+  StringTagVariants* pStrings = nullptr;
 
   PSZ_W pAddString = nullptr;
   //USHORT  usNormLen = 0;
@@ -1591,7 +1579,9 @@ struct TMX_SENTENCE
   PTMX_TAGENTRY pTagEntryList = nullptr;
   USHORT  usActVote = 0;
   PULONG  pulVotes = nullptr;
-  std::unique_ptr<StringTagVariants>  pPropString = nullptr;
+  //std::unique_ptr<StringTagVariants>  pPropString = nullptr;
+  StringTagVariants * pPropString = nullptr;
+
   PTMX_TERM_TOKEN pPropTermTokens = nullptr;     // buffer for Termtokens
 
   //ADDINFO
@@ -1609,7 +1599,13 @@ struct TMX_SENTENCE
   BOOL      fMarkupChanged;                    // Markup does not exist, changed to OTMUTF8 during import
   //end ADDINFO
 
-  TMX_SENTENCE(std::shared_ptr<StringTagVariants> input){
+
+  TMX_SENTENCE(std::wstring&& w_src, std::wstring &&w_trg){
+    if(w_trg.empty()){
+      pStrings = new StringTagVariants(std::move(w_src)); //;std::make_unique<StringTagVariants> (std::move(w_src));
+    }else{
+      pStrings =  new StringTagVariants(std::move(w_src), std::move(w_trg)); // std::make_unique<StringTagVariants> (std::move(w_src), std::move(w_trg));
+    }
     bool fOK = true;
     if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pulVotes), 0L, (LONG)(ABS_VOTES * sizeof(ULONG)), NOMSG );
     if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG)(2*TOK_SIZE), NOMSG);
@@ -1623,11 +1619,23 @@ struct TMX_SENTENCE
     if(!fOK){
       throw ;//new Exception();
     }
-    pStrings = input;
+    //pStrings = input;
     //usNormLen = pStrings->getNormStr().length();    
   }
 
+  TMX_SENTENCE(wchar_t* w_src): TMX_SENTENCE(std::move(w_src), L""){}
+
   ~TMX_SENTENCE(){
+    if(pStrings){
+      delete pStrings;
+      pStrings = nullptr;
+    }
+    if(pPropString){
+      delete pPropString;
+      pPropString = nullptr;
+    }
+    //if(pPropString) pPropString.reset();
+    //if(pStrings) pStrings.reset();
     UtlAlloc( (PVOID *) &pTermTokens, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pTagRecord, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pulVotes, 0L, 0L, NOMSG );
@@ -1665,9 +1673,9 @@ typedef struct _TMX_SUBSTPROP
   PBYTE                pTokSource;       // token buffer for source tokens
   PBYTE                pTokPropSource;   // token buffer for proposal tokens
   PBYTE                pTokPropTarget;   // token buffer for proposal target ..
-  PTMX_TAGTABLE_RECORD pTagsSource;      // tag table record for source  ..
-  PTMX_TAGTABLE_RECORD pTagsPropSource;  // tag table record for prop source
-  PTMX_TAGTABLE_RECORD pTagsPropTarget;  // tag table record for prop target
+  //PTMX_TAGTABLE_RECORD pTagsSource;      // tag table record for source  ..
+  //PTMX_TAGTABLE_RECORD pTagsPropSource;  // tag table record for prop source
+  //PTMX_TAGTABLE_RECORD pTagsPropTarget;  // tag table record for prop target
   CHAR_W chBuffer[ MAX_SEGMENT_SIZE * 2 ]; // generic token buffer
   USHORT usTokenSource;                  // number of source tokens
   USHORT usTokenPropSource;              // number of prop source tokens
@@ -2017,7 +2025,7 @@ PSZ NTMFindNameForID(
                   PUSHORT  pusID,         //intput
                   USHORT   usTableType );
 
-USHORT FillClb( PTMX_TARGET_CLB *, OtmProposal& );
+USHORT FillClb( PTMX_TARGET_CLB, OtmProposal& );
 USHORT ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
@@ -2078,7 +2086,16 @@ USHORT AddTmTarget(
     USHORT      usFlags      // flags controlling the updated fields
   );
 
+  USHORT TmtXExtract
+  (
+    PTMX_EXT_IN_W  pTmExtIn, //ptr to input struct
+    TMX_EXT_OUT_W * pTmExtOut //ptr to output struct
+  );
 
+  //tm extract prototypes
+  USHORT FillExtStructure( PTMX_TARGET_RECORD,
+                         PTMX_TARGET_CLB,
+                         PSZ_W, PLONG, PTMX_EXT_OUT_W );
 /*! \brief Get the next proposal from the memory 
     \param lHandle the hande returned by GetFirstProposal
     \param Proposal reference to a OtmProposal object which will be filled with the proposal data
@@ -2130,6 +2147,13 @@ USHORT AddTmTarget(
 
   size_t GetRAMSize()const;
   size_t GetExpectedRAMSize()const;
+
+  USHORT ExtractRecordV6
+  (
+    PTMX_RECORD     pTmRecord,
+    PTMX_EXT_IN_W   pTmExtIn,
+    TMX_EXT_OUT_W *  pTmExtOut
+  );
 
 /*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
     \param pszKey internal key of the proposal
@@ -3857,12 +3881,12 @@ USHORT CheckCompactArea( PTMX_SENTENCE, EqfMemory* );
 
 USHORT TokenizeTarget( StringTagVariants*, PTMX_TAGTABLE_RECORD*, PLONG, PSZ, EqfMemory* );
 
-VOID FillTmRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD, //PSZ_W, USHORT,
+VOID FillTmRecord( PTMX_SENTENCE,
                    PTMX_RECORD, PTMX_TARGET_CLB, USHORT );
 
 USHORT DetermineTmRecord( EqfMemory*, PTMX_SENTENCE, PULONG );
 
-VOID FillTargetRecord( PTMX_SENTENCE, PTMX_TAGTABLE_RECORD,
+VOID FillTargetRecord( PTMX_SENTENCE, //PTMX_TAGTABLE_RECORD,
                        PSZ_W, USHORT, PTMX_TARGET_RECORD *, PTMX_TARGET_CLB );
 
 VOID DeleteOldestRecord( PTMX_RECORD, PULONG );
@@ -3883,12 +3907,6 @@ USHORT FillMatchEntry( EqfMemory*, PTMX_SENTENCE, PTMX_MATCHENTRY, PUSHORT );
 USHORT FuzzyTest( EqfMemory*, PTMX_RECORD, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT,
                   PUSHORT, PUSHORT, PUSHORT, PTMX_SENTENCE, ULONG );
 USHORT GetFuzzyMatch( EqfMemory*, PTMX_SENTENCE, PTMX_GET_W, PTMX_MATCH_TABLE_W, PUSHORT );
-
-//tm extract prototypes
-USHORT TmtXExtract( EqfMemory*, PTMX_EXT_IN_W, TMX_EXT_OUT_W * );
-USHORT FillExtStructure( EqfMemory*, PTMX_TARGET_RECORD,
-                         PTMX_TARGET_CLB,
-                         PSZ_W, PLONG, PTMX_EXT_OUT_W );
 
 
 //tm delete segment prototypes
@@ -3924,13 +3942,6 @@ BOOL TMDelTargetClb
   PTMX_RECORD        pTmRecord,        // ptr to TM record
   PTMX_TARGET_RECORD pTargetRecord,    // ptr to target record within TM record
   PTMX_TARGET_CLB    pTargetClb        // ptr to target control record
-);
-
-BOOL TMDelTargetClbV5
-(
-  PTMX_RECORD         pTmRecord,        // ptr to TM record
-  PTMX_TARGET_RECORD  pTargetRecord,    // ptr to target record within TM record
-  PTMX_OLD_TARGET_CLB pTargetClb        // ptr to target control record
 );
 
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG usLenChar );

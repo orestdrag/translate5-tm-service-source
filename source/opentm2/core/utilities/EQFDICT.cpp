@@ -6748,7 +6748,7 @@ USHORT EQFNTMOrganizeIndex
   ulKeyBufSize = 256;
   if ( !UtlAlloc( (PVOID *)&pchKeyBuffer, 0, ulKeyBufSize*sizeof(CHAR_W) , ERROR_STORAGE ) ) 
   {
-    sRc = ERROR_NOT_ENOUGH_MEMORY;
+    LOG_AND_SET_RC(sRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !sRc )
@@ -6756,7 +6756,7 @@ USHORT EQFNTMOrganizeIndex
     ulDataBufSize = MAX_INDEX_LEN * sizeof(LONG) * 4;    
     if ( !UtlAlloc( (PVOID *)&pbData, 0, ulDataBufSize, ERROR_STORAGE ) ) 
     {
-      sRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(sRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -6764,7 +6764,7 @@ USHORT EQFNTMOrganizeIndex
   {
     if ( !UtlAlloc( (PVOID *)&pBtreeOut, 0, sizeof(BTREE), ERROR_STORAGE ) ) 
     {
-      sRc = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(sRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 

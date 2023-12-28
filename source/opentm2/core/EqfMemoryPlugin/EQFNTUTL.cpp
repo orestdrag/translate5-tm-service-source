@@ -323,7 +323,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
               }
               else
               {
-                LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
               } /* endif */
 
               // enlarge case ignore table as well
@@ -332,7 +332,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
                 if ( !UtlAlloc( (PVOID *)&pLongNamesCaseIgnore,
                                 ulOldSize, ulNewSize, NOMSG ) )
                 {
-                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                 } /* endif */
               } /* endif */
             } /* endif */
@@ -372,7 +372,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
                 }
                 else
                 {
-                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                 } /* endif */
               } /* endif */
             } /* endif */
@@ -1029,7 +1029,7 @@ USHORT EqfMemory::NTMCreateLongNameTable()
   }
   else
   {
-    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // allocate initial long name pointer array for case ignore search
@@ -1043,7 +1043,7 @@ USHORT EqfMemory::NTMCreateLongNameTable()
   }
   else
   {
-    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // allocate initial long name buffer area
@@ -1057,7 +1057,7 @@ USHORT EqfMemory::NTMCreateLongNameTable()
     }
     else
     {
-      LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+      LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     } /* endif */
   } /* endif */
 
@@ -1148,7 +1148,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
       }
       else
       {
-        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
 
@@ -1174,7 +1174,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
         if ( !UtlAlloc( (PVOID *)&pNewArea, 0L,
                         (LONG)pTerseHeader->usDataSize, NOMSG ) )
         {
-          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
 
         // unterse data
@@ -1190,7 +1190,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                                 &ulNewLen ) )
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
                                             // memory shortage
           } /* endif */
           #endif
@@ -1248,7 +1248,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
         }
         else
         {
-          LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         } /* endif */
 
         // enlarge pointer array for case ignore search as well
@@ -1261,7 +1261,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
           }
           else
           {
-            LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
       } /* endif */
@@ -1442,7 +1442,7 @@ USHORT EqfMemory::NTMAddNameToTable
           }
           else
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
         
@@ -1607,7 +1607,7 @@ USHORT EqfMemory::NTMLoadNameTable
       if ( !UtlAlloc( (PVOID *)&pNewArea, 0L,
                       (LONG)pTerseHeader->usDataSize, NOMSG ) )
       {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
 
       // unterse data
@@ -1623,7 +1623,7 @@ USHORT EqfMemory::NTMLoadNameTable
         if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
                               &ulNewLen ) )
         {
-          LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
+          LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY); // expand failed most likely to
                                           // memory shortage
         } /* endif */
         #endif
@@ -1735,7 +1735,7 @@ USHORT EqfMemory::NTMAddLangGroup
       }
       else
       {
-        LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
   } /* endif */
@@ -1767,7 +1767,7 @@ USHORT EqfMemory::NTMCreateLangGroupTable()
   }
   else
   {
-    LOG_AND_SET_RC(usRC, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // get group IDs for all languages and fill map table
@@ -1800,7 +1800,6 @@ USHORT EqfMemory::NTMOrganizeIndexFile()
   return( usRC );
 } /* end of function NTMOrganizeIndexFile */
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///   functions for working with the additional data area following the target CLB          ///
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1813,13 +1812,13 @@ USHORT NTMComputeAddDataSize( PSZ_W pszContext, PSZ_W pszAddInfo )
   if ( (pszContext != NULL) && (*pszContext != 0) )
   {
     // length = characters in context + end delimiter + size field + IF field
-    usLength = usLength + (USHORT)((wcslen( pszContext) + 4) * sizeof(CHAR_W));
+    usLength = usLength + (USHORT)((wcslen( pszContext) + 2) * sizeof(CHAR_W));
   } /* endif */     
 
   if ( (pszAddInfo != NULL) && (*pszAddInfo != 0) )
   {
     // length = characters in add.info + end delimiter + size field + IF field
-    usLength = usLength + (USHORT)((wcslen( pszAddInfo) + 4) * sizeof(CHAR_W));
+    usLength = usLength + (USHORT)((wcslen( pszAddInfo) + 2) * sizeof(CHAR_W));
   } /* endif */     
 
   if ( usLength != 0 )
@@ -1836,8 +1835,8 @@ USHORT NTMComputeAddDataSize( PSZ_W pszContext, PSZ_W pszAddInfo )
 BOOL NTMIsAddData( PSZ_W pData )
 {
   BOOL fAddData = FALSE;
-
-  if ( (*pData == ADDDATA_ADDINFO_ID) || (*pData == ADDDATA_CONTEXT_ID) || (*pData == ADDDATA_ENDOFDATA_ID) )
+  PUSHORT pDataShort = (PUSHORT) pData;
+  if ( (*pDataShort == ADDDATA_ADDINFO_ID) || (*pDataShort == ADDDATA_CONTEXT_ID) || (*pDataShort == ADDDATA_ENDOFDATA_ID) )
   {
     fAddData = TRUE;
   } /* endif */     
@@ -1847,13 +1846,15 @@ BOOL NTMIsAddData( PSZ_W pData )
 // find specified data area in additional data, returns ptr to start of area or NULL
 PSZ_W NTMFindData( PSZ_W pData, USHORT usDataID )
 {
-  while ( (*pData != 0) && (*pData != ADDDATA_ENDOFDATA_ID)  && (*pData != usDataID) )
+  PUSHORT pDataShort = (PUSHORT) pData;
+  while ( (*pDataShort != 0) && (*pDataShort != ADDDATA_ENDOFDATA_ID)  && (*pDataShort != usDataID) )
   {
-    USHORT usLen = pData[1];
-    pData += usLen + 2;
+    USHORT usLen = pDataShort[1];
+    pData += (usLen + 1);
+    pDataShort = (PUSHORT) pData;
   } /* endwhile */     
 
-  return( (*pData == usDataID) ? pData : NULL );
+  return( (*pDataShort == usDataID) ? pData : NULL );
 } /* end of function NTMFindData */ 
 
 // get length of specific data in the combined data area, returns length of data area in number of CHAR_Ws
@@ -1871,17 +1872,10 @@ USHORT NtmGetAddDataLen( PTMX_TARGET_CLB pCLB, USHORT usDataID )
 
       if ( pData != NULL )
       {
-        usLength = pData[1];
+        PUSHORT pDataPShort = (PUSHORT) pData;
+        usLength = pDataPShort[1];
       } /* endif */         
-    }
-    else
-    {
-      // only old format context data is available
-      if ( usDataID == ADDDATA_CONTEXT_ID )
-      {
-        usLength = (USHORT)(wcslen(pData) + 1);
-      } /* endif */         
-    } /* endif */       
+    }  
   } /* endif */     
 
   return( usLength );
@@ -1892,29 +1886,11 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
 {
   PSZ_W pData = (PSZ_W)(((PBYTE)pCLB) + sizeof(TMX_TARGET_CLB));
   PSZ_W pDataStart = pData;
+  //PSZ_W pNewDataStr = nullptr;
+  PUSHORT pDataShort = (PUSHORT)pData;
   USHORT usNewLength = (USHORT)(wcslen( pszNewData ));
-  if ( usNewLength != 0 ) usNewLength += 1;
 
-
-  // convert any old style comment
-  /*
-  if ( (pCLB->usAddDataLen != 0) && !NTMIsAddData( pData ) )
-  {
-    USHORT usWords = pCLB->usAddDataLen / sizeof(USHORT);
-
-    // make room for ID and length field
-    memmove( pData + 2, pData, pCLB->usAddDataLen );
-
-    // insert ID and length 
-    *pData = ADDDATA_CONTEXT_ID;
-    pData[1] = pCLB->usAddDataLen;
-
-    // add data area end identifier
-    pData[usWords+2] = ADDDATA_ENDOFDATA_ID;
-
-    // correct usAddDataLen
-    pCLB->usAddDataLen += (3 * sizeof(USHORT));
-  } /* endif */     
+  if ( usNewLength != 0 ) usNewLength += 1;   
 
   if ( pCLB->usAddDataLen != 0 )       
   {
@@ -1922,8 +1898,9 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     PSZ_W pOldData = NTMFindData( pData, usDataID );
     if ( pOldData  != NULL )
     {
+      PUSHORT pOldDataPShort = (PUSHORT) pOldData;
       PSZ_W pEndOfData = (PSZ_W)(((PBYTE)pOldData ) + pCLB->usAddDataLen - 2);
-      USHORT usOldLen = (USHORT) pOldData [1];
+      USHORT usOldLen =  pOldDataPShort [1];
       PSZ_W pSource = pOldData + usOldLen + 2;
       PSZ_W pTarget = pOldData ;
 
@@ -1938,29 +1915,37 @@ USHORT NtmStoreAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszNewData 
     // add new data to end of data area
     if ( usNewLength != 0 )
     {
-      PSZ_W pTarget = (PSZ_W)(((PBYTE)pData) + pCLB->usAddDataLen - 2);
-      *pTarget++ = usDataID;
-      *pTarget++ = usNewLength;
-      while ( *pszNewData != 0 ) *pTarget++ = *pszNewData++;
-      *pTarget++ = 0;
-      *pTarget++ = ADDDATA_ENDOFDATA_ID;
-      pCLB->usAddDataLen += ((usNewLength + 2 ) * sizeof(USHORT));
+      PSZ_W pTarget = (PSZ_W)(((PBYTE)pData) + pCLB->usAddDataLen - 1 );
+      PUSHORT pTargetPShort = (PUSHORT)pTarget;
+      *pTargetPShort++ = usDataID;
+      *pTargetPShort++ = usNewLength;
+      pTarget++;
+      //pNewDataStr = pTarget;
+      pszNewData[usNewLength] = 0;
+      //wcsncpy( pTarget, pszNewData, usNewLength);
+      memcpy( pTarget, pszNewData, sizeof(pData[0])*(usNewLength) );
+      pTarget += usNewLength;
+      pTargetPShort = (PUSHORT) pTarget;
+      *pTargetPShort++ = ADDDATA_ENDOFDATA_ID;
+      *pTargetPShort = 0;
+      pCLB->usAddDataLen += ((usNewLength + 1 ) * sizeof(pData[0]));
     } /* endif */       
   }
   else if ( usNewLength != 0 )
   {
     // no additional data yet, copy new data
-    *pData++ = usDataID;
-    *pData++ = usNewLength;
-    //pData += 2;
+    *pDataShort++ = usDataID;
+    *pDataShort = usNewLength;
+    pData++;
     pszNewData[usNewLength] = 0;
-    wcsncpy( pData, pszNewData, usNewLength);
-    //memcpy( pusData, pszNewData, sizeof(wchar_t)*(usNewLength) );
-    pData += usNewLength;// * sizeof(wchar_t);
-    //pusData += usNewLength * 2;
-    auto diff = pData-pDataStart;
-    *pData = ADDDATA_ENDOFDATA_ID;
-    pCLB->usAddDataLen = (usNewLength + 4) * sizeof(pData[0]);
+    //wcsncpy( pData, pszNewData, usNewLength);
+    memcpy( pData, pszNewData, sizeof(pData[0])*(usNewLength) );
+    //pNewDataStr = pData;
+    pData += usNewLength;
+    pDataShort = (PUSHORT) pData;
+    *pDataShort++ = ADDDATA_ENDOFDATA_ID;
+    *pDataShort = 0;
+    pCLB->usAddDataLen = (usNewLength + 2) * sizeof(pData[0]);// addinfo_metadana(len+type - 1 wchar) + (usNewLength = strlen + endDelim(1 wchar)) + endAddinfoDelim(1wchar)
   } /* endif */     
 
   return( pCLB->usAddDataLen );
@@ -1981,13 +1966,15 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
 
       if ( pData != NULL )
       {
-        usLength = pData[1];
-        pData += 2;
+        PUSHORT pDataPUShort = (PUSHORT)pData;
+        usLength = pDataPUShort[1];
+        pData++;
         if ( usLength < usBufSize )
         {
           pszBuffer[0] = 0;
-          wcsncpy(pszBuffer, pData, usLength );
-          pszBuffer[usLength] = 0;
+          //wcsncpy(pszBuffer, pData, usLength+1 );
+          memcpy(pszBuffer, pData, usLength*sizeof(pData[0]));
+          pszBuffer[usLength+1] = 0;
           //wcscpy( pszBuffer, (wchar_t *) pusData );
         }
         else
@@ -1998,20 +1985,7 @@ USHORT NtmGetAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszBuffer, US
     }
     else
     {
-      // only old format context data is available
-      if ( usDataID == ADDDATA_CONTEXT_ID )
-      {
-        usLength = (USHORT)(wcslen(pData) + 1);
-        if ( usLength < usBufSize )
-        {
-          memcpy( pszBuffer, pData, (usLength)*sizeof(wchar_t) );
-          //wcscpy( pszBuffer, pData );
-        }
-        else
-        {
-          usLength = 0;
-        } /* endif */           
-      } /* endif */         
+      T5LOG(T5WARNING) <<"Add info was not saved properly";      
     } /* endif */       
   } /* endif */     
 
@@ -2035,10 +2009,11 @@ BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch )
 
       if ( pData != NULL )
       {
-        usLength = pData[1];
+        PUSHORT pDataUShort = (PUSHORT) pData;
+        usLength = pDataUShort[1];
         if ( usLength > 0 )
         {
-          if ( wcsstr( (pData + 2), pszSearch ) != NULL )
+          if ( wcsstr( (pData + 1), pszSearch ) != NULL )
           {
             fFound = TRUE;
           } /* endif */             
@@ -2047,18 +2022,7 @@ BOOL NtmFindInAddData( PTMX_TARGET_CLB pCLB, USHORT usDataID, PSZ_W pszSearch )
     }
     else
     {
-      // only old format context data is available
-      if ( usDataID == ADDDATA_CONTEXT_ID )
-      {
-        usLength = (USHORT)(wcslen(pData) + 1);
-        if ( usLength != 0 )
-        {
-          if ( wcsstr(pData, pszSearch ) != NULL )
-          {
-            fFound = TRUE;
-          } /* endif */             
-        } /* endif */           
-      } /* endif */         
+       T5LOG(T5WARNING) <<"Add info was not saved properly";
     } /* endif */       
   } /* endif */     
 

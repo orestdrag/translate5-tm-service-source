@@ -189,7 +189,6 @@ USHORT EqfMemory::TmtXReplace
   PTMX_EXT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  //TMX_SENTENCE  Sentence(std::make_shared<StringTagVariants>(pTmPutIn->stTmPut.szSource));     // ptr to sentence structure
   ULONG      ulNewKey = 0;             // sid of newly added tm record
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
@@ -201,7 +200,7 @@ USHORT EqfMemory::TmtXReplace
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -722,7 +721,7 @@ USHORT TokenizeTarget
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -856,7 +855,7 @@ USHORT TokenizeTarget
 
                 if ( !fOK )
                 {                  
-                  LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                 }
                 else
                 {
@@ -946,10 +945,10 @@ USHORT EqfMemory::AddToTm
   //unsigned char pUsTmRecord [TMX_REC_SIZE];
   //memset(pUsTmRecord, 0 ,TMX_REC_SIZE);
   PTMX_TARGET_CLB pTargetClb = NULL;      // ptr to target ctl block
-  PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
+  //PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
   USHORT usRc = NO_ERROR;                 // return code
   BOOL fOK;                               // success indicator
-  LONG lTagAlloc;                         // alloc size
+  //LONG lTagAlloc;                         // alloc size
   USHORT usAddDataLen = 0;
 
   //allocate 32K for tm record
@@ -964,34 +963,34 @@ USHORT EqfMemory::AddToTm
   } /* endif */
 
   //allocate 4k for pTagRecord
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
-    if ( fOK )
-     lTagAlloc = (LONG)TOK_SIZE;
-  }
+  //if ( fOK )
+  //{
+  //  fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
+  //  if ( fOK )
+  //   lTagAlloc = (LONG)TOK_SIZE;
+  //}
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
-    usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(), 
-                           &pTagRecord,
-                           &lTagAlloc, TmProposal.szMarkup, 
-                          this );
+    //usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(), 
+    //                       &pTagRecord,
+    //                       &lTagAlloc, TmProposal.szMarkup, 
+    //                      this );
     
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, TmProposal );
+      usRc = FillClb( pTargetClb, TmProposal );
       if ( usRc == NO_ERROR )
       {
         USHORT usSrcLang = 0; 
         usRc = NTMGetIDFromName( TmProposal.szSourceLanguage, NULL, (USHORT)LANG_KEY, &usSrcLang );
         //fill tm record to add to database
         FillTmRecord ( TmProposal.pInputSentence,    // ptr to sentence struct for source info
-                       pTagRecord,   // ptr to target string tag table
+                       //pTagRecord,   // ptr to target string tag table
                        //TmProposal.pInputSentence->pStrings->getGenericTargetStrC(),
                        //wcslen(TmProposal.pInputSentence->pStrings->getGenericTargetStrC()),
                        pTmRecord,    // filled tm record returned
@@ -1015,7 +1014,7 @@ USHORT EqfMemory::AddToTm
   //release memory
   UtlAlloc( (PVOID *) &(pTmRecord), 0L, 0L, NOMSG);
   UtlAlloc( (PVOID *) &(pTargetClb), 0L, 0L, NOMSG);
-  UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
+  //UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
 
   return( usRc );
 }
@@ -1052,7 +1051,7 @@ USHORT EqfMemory::AddToTm
 VOID FillTmRecord
 (
   PTMX_SENTENCE  pSentence,          // ptr to sentence struct for source info
-  PTMX_TAGTABLE_RECORD pTagRecord,   // ptr to target string tag table
+  //PTMX_TAGTABLE_RECORD pTagRecord,   // ptr to target string tag table
   //PSZ_W pNormString,                 // ptr to target normalized string
   //USHORT usNormLen,                  // length of target normalized string
   PTMX_RECORD pTmRecord,             // filled tm record returned
@@ -1068,6 +1067,7 @@ VOID FillTmRecord
 
   //position source structure in tm record
   pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
+  pTMXSourceRecord->reset();
   //source structure offset in tm record
   pTmRecord->usSourceRecord = (USHORT)((PBYTE)pTMXSourceRecord - (PBYTE)pTmRecord);
 
@@ -1083,37 +1083,41 @@ VOID FillTmRecord
 
   //position target structure in tm record
   pTarget = (PBYTE)(pTmRecord+1);
-  pTarget = pTarget + RECLEN(pTMXSourceRecord);
+  pTarget += RECLEN(pTMXSourceRecord);
 
   //first target offset in tm record
   pTmRecord->usFirstTargetRecord = (USHORT)(pTarget - (PBYTE)pTmRecord);
 
   //position to start of target structure
   pTMXTargetRecord = ((PTMX_TARGET_RECORD)pTarget);
+  pTMXTargetRecord->reset();
+  pTMXTargetRecord->usTarget = sizeof(*pTMXTargetRecord);
+  pTarget += pTMXTargetRecord->usTarget;
+
 
   //set source tag table offset
-  pTMXTargetRecord->usSourceTagTable = sizeof(TMX_TARGET_RECORD);
+  //pTMXTargetRecord->usSourceTagTable = sizeof(TMX_TARGET_RECORD);
 
   //position pointer for source tag table
-  pTarget += pTMXTargetRecord->usSourceTagTable;
+  //pTarget += pTMXTargetRecord->usSourceTagTable;
 
   //copy source tag table record to correct position
-  memcpy( pTarget, pSentence->pTagRecord, RECLEN(pSentence->pTagRecord) );
+  //memcpy( pTarget, pSentence->pTagRecord, RECLEN(pSentence->pTagRecord) );
 
   //set target tag table start offset
-  pTMXTargetRecord->usTargetTagTable = (USHORT)(pTMXTargetRecord->usSourceTagTable +
-                               RECLEN(pSentence->pTagRecord));
+  //pTMXTargetRecord->usTargetTagTable = (USHORT)(pTMXTargetRecord->usSourceTagTable +
+  //                             RECLEN(pSentence->pTagRecord));
   //adjust target pointer for target tag table
-  pTarget += RECLEN(pSentence->pTagRecord);
+  //pTarget += RECLEN(pSentence->pTagRecord);
 
   //copy target tag table record to correct position
-  memcpy( pTarget, pTagRecord, RECLEN(pTagRecord) );
+  //memcpy( pTarget, pTagRecord, RECLEN(pTagRecord) );
 
   //set target string start offset
-  pTMXTargetRecord->usTarget = (USHORT)(pTMXTargetRecord->usTargetTagTable +
-                               RECLEN(pTagRecord));
+  //pTMXTargetRecord->usTarget = //(USHORT)(pTMXTargetRecord->usTargetTagTable +
+                               //RECLEN(pTagRecord);
   //adjust target pointer for target string
-  pTarget += RECLEN(pTagRecord);
+  //pTarget += RECLEN(pTagRecord);
 
   //copy target string to correct position
 //@@  memcpy( pTarget, pNormString, usNormLen );
@@ -1122,7 +1126,8 @@ VOID FillTmRecord
   }
 
   //set target string control block start offset
-  pTMXTargetRecord->usClb = pTMXTargetRecord->usTarget + ulTrgLen;
+  pTMXTargetRecord->usClb = pTMXTargetRecord->usTarget + 
+                              ulTrgLen;
 
   //adjust target pointer for control block
   pTarget += ulTrgLen;
@@ -1132,9 +1137,10 @@ VOID FillTmRecord
 
   //size of target record
   RECLEN(pTMXTargetRecord) = sizeof(TMX_TARGET_RECORD) +
-                                  RECLEN(pSentence->pTagRecord) +
-                                  RECLEN(pTagRecord) +
-                                  ulSrcLen +
+                                  //RECLEN(pSentence->pTagRecord) +
+                                  //RECLEN(pTagRecord) +
+                                  ulTrgLen +
+                                  //ulSrcLen +
                                   TARGETCLBLEN(pTargetClb);
   //size of entire tm record
   RECLEN(pTmRecord) = sizeof( TMX_RECORD ) +
@@ -1182,7 +1188,7 @@ VOID FillTmRecord
 //------------------------------------------------------------------------------
 USHORT EqfMemory::FillClb
 (
-  PTMX_TARGET_CLB * ppTargetClb,    // ptr to target control block
+  PTMX_TARGET_CLB  pTargetClb,    // ptr to target control block
   OtmProposal& TmProposal                 // ptr to put input structure
 )
 {
@@ -1190,9 +1196,6 @@ USHORT EqfMemory::FillClb
   USHORT  usFile = 0;
   USHORT  usAuthor = 0;                 // ids
   USHORT  usRc = NO_ERROR;             // returned value
-  PTMX_TARGET_CLB pTargetClb = NULL;   // ptr to target control block
-
-  pTargetClb = *ppTargetClb;
 
   //get id of target language, call
   usRc = NTMGetIDFromName( TmProposal.szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTrgLang );
@@ -1236,13 +1239,8 @@ USHORT EqfMemory::FillClb
       NtmStoreAddData( pTargetClb, ADDDATA_CONTEXT_ID, TmProposal.szContext );
     if ( TmProposal.szAddInfo[0] ) 
       NtmStoreAddData( pTargetClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
-    *ppTargetClb = pTargetClb;
   } /* endif */
 
-  if ( usRc )
-  {
-    ERREVENT2( FILLCLB_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
-  } /* endif */
 
   return (usRc);
 }
@@ -1310,7 +1308,7 @@ USHORT EqfMemory::UpdateTmIndex
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1522,7 +1520,7 @@ USHORT DetermineTmRecord
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1738,7 +1736,7 @@ USHORT EqfMemory::UpdateTmRecord
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1771,7 +1769,7 @@ USHORT EqfMemory::UpdateTmRecord
           }
           else
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 
@@ -1878,7 +1876,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1911,7 +1909,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
           }
           else
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 
@@ -2016,15 +2014,15 @@ USHORT EqfMemory::ComparePutData
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord = NULL; //ptr to target record
   PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
-  PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
-  PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
-  PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
+  //PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
+  //PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
+  //PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lLen = 0;                        //length indicator
   USHORT usNormLen = 0;                    //length of normalized string
   PSZ_W pString = NULL;                  //pointer to character string
   //PSZ_W pNormString = NULL;              //pointer to character string
   USHORT usRc = NO_ERROR;              //returned value from function
-  LONG lTagAlloc;                      //alloc size
+  //LONG lTagAlloc;                      //alloc size
   BOOL        fUpdate = FALSE;         // TRUE = record has been updated
   PTMX_RECORD pTmRecord = *ppTmRecord; // pointer to tm record data
   USHORT      usAuthorId;              // ID for author string
@@ -2035,16 +2033,16 @@ USHORT EqfMemory::ComparePutData
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
 
   //allocate 4k for pTagRecord
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
-    if ( fOK )
-     lTagAlloc = (LONG)TOK_SIZE;
-  }
+  //if ( fOK )
+  //{
+  //  fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
+  //  if ( fOK )
+  //   lTagAlloc = (LONG)TOK_SIZE;
+  //}
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2091,9 +2089,9 @@ USHORT EqfMemory::ComparePutData
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
         //tokenize target string in put structure
-        usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(),
-                            &pTagRecord, &lTagAlloc, TmProposal.szMarkup,
-                            this );
+        //usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(),
+        //                    &pTagRecord, &lTagAlloc, TmProposal.szMarkup,
+        //                    this );
 
         fStop = (usRc != 0);
         //RJ: 04/01/22: P018830:
@@ -2126,7 +2124,7 @@ USHORT EqfMemory::ComparePutData
             // next check the target language and target tag info
             // position at first target control block and to source tag info
             pClb = (PTMX_TARGET_CLB)NTRecPos((PBYTE)pTMXTargetRecord, REC_CLB);
-            pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_SRCTAGTABLE);
+            //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_SRCTAGTABLE);
 
             // compare target language IDs and source tag record
             if ( (pClb->usLangId == usPutLang) //&&
@@ -2140,7 +2138,7 @@ USHORT EqfMemory::ComparePutData
               lLen = EQFCompress2Unicode( pString, pByte, lLen );
               pString[lLen] = EOS;
 
-              pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_TGTTAGTABLE);
+              //pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_TGTTAGTABLE);
 
               //compare target strings and target tag record
               if ( (UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getGenericTargetStrC()) == 0)// &&
@@ -2227,7 +2225,7 @@ USHORT EqfMemory::ComparePutData
                     }
                     else
                     {
-                      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+                      LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
                     } /* endif */
                   } /* endif */
 
@@ -2238,7 +2236,7 @@ USHORT EqfMemory::ComparePutData
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
                     LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord); 
                     //try
-                    if(size>0)
+                    if(size>=0)
                     {
                       memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
                       RECLEN(pTmRecord) += lNewClbLen;
@@ -2246,8 +2244,7 @@ USHORT EqfMemory::ComparePutData
                     }
                     else
                     //catch(...)
-                    {
-                    
+                    {                    
                       T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen << "; segment was not saved";//; memmove crash";
                       usRc = ERROR_ADD_TO_TM;
                       fOK = false;
@@ -2300,8 +2297,11 @@ USHORT EqfMemory::ComparePutData
           usRc = TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
-        if ( !fStop )
+        if ( fStop )
         {
+          TmProposal.recordKey = *pulKey;
+          TmProposal.targetKey = targetKey;          
+        }else{
           //all target records have been checked but nothing overlapped
           //so add new target record to end of tm record
           usRc = AddTmTarget( TmProposal, ppTmRecord, pulRecBufSize, pulKey );
@@ -2319,7 +2319,7 @@ USHORT EqfMemory::ComparePutData
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pTagRecord, 0L, 0L, NOMSG );
+  //UtlAlloc( (PVOID *) &pTagRecord, 0L, 0L, NOMSG );
 
   if ( usRc )
   {
@@ -2370,10 +2370,10 @@ USHORT EqfMemory::AddTmTarget(
 {
   PTMX_TARGET_CLB pTargetClb ;              // ptr to target ctl block
   PTMX_TARGET_RECORD pTargetRecord = NULL;  // ptr to target record
-  PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
+  //PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
   USHORT       usRc = NO_ERROR;           // return code
   BOOL         fOK;                       // success indicator
-  LONG         lTagAlloc;                 // alloc size
+  //LONG         lTagAlloc;                 // alloc size
   PBYTE        pByte;                     // position pointer
   PTMX_RECORD pTmRecord = *ppTmRecord;    //pointer to tm record data
   ULONG       ulAddDataLen = 0;
@@ -2389,29 +2389,29 @@ USHORT EqfMemory::AddTmTarget(
   }
 
   //allocate 4k for pTagRecord
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
-    if ( fOK )
-      lTagAlloc = (LONG)TOK_SIZE;
-  }
+  //if ( fOK )
+  //{
+    //fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
+    //if ( fOK )
+    //  lTagAlloc = (LONG)TOK_SIZE;
+  //}
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
-    usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(), &pTagRecord,
-                           &lTagAlloc, TmProposal.szMarkup, this );
+    //usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(), &pTagRecord,
+    //                       &lTagAlloc, TmProposal.szMarkup, this );
     if ( usRc == NO_ERROR )
     {
-      usRc = FillClb( &pTargetClb, TmProposal );
+      usRc = FillClb( pTargetClb, TmProposal );
       if ( usRc == NO_ERROR )
       {
         //fill target record
         FillTargetRecord( TmProposal.pInputSentence,  //ptr to sentence structure
-                          pTagRecord, //ptr to target string tag table
+        //                  pTagRecord, //ptr to target string tag table
                           TmProposal.pInputSentence->pStrings->getGenericTargetStrC(),
                           wcslen(TmProposal.pInputSentence->pStrings->getGenericTargetStrC()),
                           //pNormString,//ptr to target normalized string
@@ -2434,7 +2434,7 @@ USHORT EqfMemory::AddTmTarget(
             }
             else
             {
-              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+              LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
         }
@@ -2464,7 +2464,7 @@ USHORT EqfMemory::AddTmTarget(
   //release memory
   UtlAlloc( (PVOID *) &(pTargetClb), 0L, 0L, NOMSG);
   UtlAlloc( (PVOID *) &(pTargetRecord), 0L, 0L, NOMSG);
-  UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
+  //UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
 
   if ( usRc )
   {
@@ -2512,7 +2512,7 @@ USHORT EqfMemory::AddTmTarget(
 VOID FillTargetRecord
 (
   PTMX_SENTENCE pSentence,           //ptr to sentence structure
-  PTMX_TAGTABLE_RECORD pTagRecord,   //ptr to target string tag table
+//  PTMX_TAGTABLE_RECORD pTagRecord,   //ptr to target string tag table
   PSZ_W pNormString,                 //ptr to target normalized string
   USHORT usNormLen,                  //length of target normalized string
   PTMX_TARGET_RECORD *ppTMXTargetRecord,  //ptr to target record
@@ -2528,28 +2528,30 @@ VOID FillTargetRecord
   pTarget = (PBYTE)pTMXTargetRecord;
 
   //set source tag table offset
-  pTMXTargetRecord->usSourceTagTable = sizeof(TMX_TARGET_RECORD);
+  //pTMXTargetRecord->usSourceTagTable = sizeof(TMX_TARGET_RECORD);
 
   //position pointer for source tag table
-  pTarget += pTMXTargetRecord->usSourceTagTable;
+  //pTarget += pTMXTargetRecord->usSourceTagTable;
 
   //copy source tag table record to correct position
-  memcpy( pTarget, pSentence->pTagRecord, RECLEN(pSentence->pTagRecord) );
+  //memcpy( pTarget, pSentence->pTagRecord, RECLEN(pSentence->pTagRecord) );
 
   //set target tag table start offset
-  pTMXTargetRecord->usTargetTagTable = (USHORT)(pTMXTargetRecord->usSourceTagTable +
-                                       RECLEN(pSentence->pTagRecord));
+  //pTMXTargetRecord->usTargetTagTable = (USHORT)(pTMXTargetRecord->usSourceTagTable +
+  //                                     RECLEN(pSentence->pTagRecord));
+  
   //adjust target pointer for target tag table
-  pTarget += RECLEN(pSentence->pTagRecord);
+  //pTarget += RECLEN(pSentence->pTagRecord);
 
   //copy target tag table record to correct position
-  memcpy( pTarget, pTagRecord, RECLEN(pTagRecord) );
+  //memcpy( pTarget, pTagRecord, RECLEN(pTagRecord) );
 
   //set target string start offset
-  pTMXTargetRecord->usTarget = (USHORT)(pTMXTargetRecord->usTargetTagTable +
-                                       RECLEN(pTagRecord));
+  pTMXTargetRecord->usTarget = sizeof(*pTMXTargetRecord);
+  pTarget += pTMXTargetRecord->usTarget;
+  //(USHORT)(pTMXTargetRecord->usTargetTagTable + RECLEN(pTagRecord);
   //adjust target pointer for target string
-  pTarget += RECLEN(pTagRecord);
+  //pTarget += RECLEN(pTagRecord);
 
   //copy target string to correct position
   { ULONG ulTempLen = usNormLen;
@@ -2569,8 +2571,8 @@ VOID FillTargetRecord
 
   //size of target record
   RECLEN(pTMXTargetRecord) = sizeof(TMX_TARGET_RECORD) +
-                                  RECLEN(pSentence->pTagRecord) +
-                                  RECLEN(pTagRecord) +
+                                  //RECLEN(pSentence->pTagRecord) +
+                                  //RECLEN(pTagRecord) +
                                   usNormLen +
                                   TARGETCLBLEN(pTargetClb);
   *ppTMXTargetRecord = pTMXTargetRecord;
@@ -2621,7 +2623,7 @@ USHORT EqfMemory::TmtXUpdSeg
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2652,7 +2654,7 @@ USHORT EqfMemory::TmtXUpdSeg
       }
       else
       {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
 
@@ -2743,16 +2745,16 @@ USHORT EqfMemory::TmtXUpdSeg
                 usNewId = 1;
 
                 // update source tag table record
-                pByte = (PBYTE)pTMXTargetRecord;
-                pByte += pTMXTargetRecord->usSourceTagTable;
-                pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
-                pTMXTagTableRecord->usTagTableId = 1;//usNewId;
+                //pByte = (PBYTE)pTMXTargetRecord;
+                //pByte += pTMXTargetRecord->usSourceTagTable;
+                //pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
+                //pTMXTagTableRecord->usTagTableId = 1;//usNewId;
 
                 // update target tag table record
-                pByte = (PBYTE)pTMXTargetRecord;
-                pByte += pTMXTargetRecord->usTargetTagTable;
-                pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
-                pTMXTagTableRecord->usTagTableId = 1;//usNewId;
+                //pByte = (PBYTE)pTMXTargetRecord;
+                //pByte += pTMXTargetRecord->usTargetTagTable;
+                //pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
+                //pTMXTagTableRecord->usTagTableId = 1;//usNewId;
               } /* endif */
 
               // update MT flag if requested
@@ -3096,7 +3098,7 @@ USHORT NTMAdjustAddDataInTgtCLB
 	    }
 	    else
 	    {
-		    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+		    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
 	    } /* endif */
 	  } /* endif */
 
@@ -3227,7 +3229,7 @@ USHORT TMLoopAndDelTargetClb
 		{
       *pTargetKey++;
 			if ( (pClb->usLangId == usPutLang) &&
-			     (pClb->ulSegmId == TmProposal.getSegmentNum()) &&
+			     (pClb->ulSegmId == TmProposal.lSegmentNum) &&
 			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
@@ -3312,11 +3314,11 @@ NTRecPos
 	 	break;
 	 	case REC_SRCTAGTABLE:
 	 	    pTmpTgtRecord = (PTMX_TARGET_RECORD)pStart;
-	 		pNewPosition  = pStart + pTmpTgtRecord->usSourceTagTable;
+	 		pNewPosition  = pStart;// + pTmpTgtRecord->usSourceTagTable;
 	 	break;
 	 	case REC_TGTTAGTABLE:
 	 	    pTmpTgtRecord = (PTMX_TARGET_RECORD)pStart;
-	 		pNewPosition  = pStart + pTmpTgtRecord->usTargetTagTable;
+	 		pNewPosition  = pStart;// + pTmpTgtRecord->usTargetTagTable;
 	 	break;
 	 	case REC_NEXTTARGET:
 	 	    pTmpTgtRecord = (PTMX_TARGET_RECORD)pStart;

@@ -224,7 +224,7 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     T5LOG( T5DEBUG) << ":: create the memory" ;    
     NewMem = std::make_shared<EqfMemory> (strMemName);
     if ( NewMem == nullptr ){
-      _rc_ = ERROR_NOT_ENOUGH_MEMORY;
+      LOG_AND_SET_RC(_rc_, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     }
   }
   

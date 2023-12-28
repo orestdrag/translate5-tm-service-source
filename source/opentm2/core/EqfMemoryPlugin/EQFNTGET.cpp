@@ -306,7 +306,7 @@ USHORT EqfMemory::TmtXGet
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
-  TMX_SENTENCE Sentence(std::make_shared<StringTagVariants>(pTmGetIn->stTmGet.szSource));      // ptr to sentence structure
+  TMX_SENTENCE Sentence(pTmGetIn->stTmGet.szSource);      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string
@@ -677,7 +677,7 @@ USHORT GetExactMatch
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -707,7 +707,7 @@ USHORT GetExactMatch
           }
           else
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
         if ( usRc == NO_ERROR )
@@ -997,7 +997,7 @@ USHORT ExactTest
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -1126,8 +1126,8 @@ USHORT ExactTest
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
           //position at source tag table
-          pByte += pTMXTargetRecord->usSourceTagTable;
-          pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+          //pByte += pTMXTargetRecord->usSourceTagTable;
+          //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           //compare tag table records
           fStringEqual = true; // tag table should be always equal in t5memory
@@ -1798,7 +1798,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
 
     if ( !fOK )
     {
-      LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+      LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
     }
     else
     {
@@ -1810,13 +1810,13 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
       strcpy( pSubstProp->szSourceLanguage, pGetIn->szSourceLanguage);
       strcpy( pSubstProp->szTargetLanguage, pGetIn->szTargetLanguage );
       UTF16strcpy( pSubstProp->szSource, pGetIn->szSource );
-      pSubstProp->pTagsSource = pTagRecord;
+      //pSubstProp->pTagsSource = pTagRecord;
       pByte = (PBYTE)pTMXTargetRecord;
-      pByte += pTMXTargetRecord->usSourceTagTable;
+      //pByte += pTMXTargetRecord->usSourceTagTable;
 
       MorphGetLanguageID( pGetIn->szSourceLanguage, &sLangID );
 
-      pSubstProp->pTagsPropSource = (PTMX_TAGTABLE_RECORD)pByte;
+      //pSubstProp->pTagsPropSource = (PTMX_TAGTABLE_RECORD)pByte;
       //usRc = (AddTagsToStringW( pSourceString,
       //                        plSourceLen,      // in # of w's
       //                       (PTMX_TAGTABLE_RECORD)pByte,
@@ -1839,9 +1839,9 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           lTargetLen = EQFCompress2Unicode(pTarget, pByte, lTargetLen);
           //position at target tag record
           pByte = (PBYTE)pTMXTargetRecord;
-          pByte += pTMXTargetRecord->usTargetTagTable;
+          //pByte += pTMXTargetRecord->usTargetTagTable;
 
-          pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
+          //pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
 
           //usRc = (AddTagsToStringW( pTarget,
           //                          &lTargetLen,     // in # of w's
@@ -1853,12 +1853,12 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
         }
         else
         {
-          LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+          LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         }
         if ( usRc == NO_ERROR )
         {
           //fill in the markup table
-          PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
+          //PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
           //pTmClb->NTMGetNameFromID(
           //                  &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
           //                  (USHORT)TAGTABLE_KEY,
@@ -1993,12 +1993,12 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
 
       if ( !fOK )
       {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       }
       else
       {
         pByte = (PBYTE)pTMXTargetRecord;
-        pByte += pTMXTargetRecord->usSourceTagTable;
+        //pByte += pTMXTargetRecord->usSourceTagTable;
         if (fSubstAll )
         {
           /**************************************************************/
@@ -2011,29 +2011,11 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           }
         }
         else
-        {
-          if (false // segments after 0.4.52 would be saved as is 
-              && fTag 
-          )
-          {
-            /************************************************************/
-            /* add tags to source string                                */
-            /************************************************************/
-            fOK = AddTagsToStringW( pSourceString, plSourceLen,
-                                   (PTMX_TAGTABLE_RECORD)pByte,
-                                   pstMatchTable->szSource );
-            if ( !fOK )
-            {
-              LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
-            } /* endif */
-          }
-          else
-          {
-            //else copy normalized propsource string
-            if(*plSourceLen > 0 ){
-              memcpy( pstMatchTable->szSource, pSourceString, *plSourceLen * sizeof(CHAR_W));
-            }
-          } /* endif */
+        {          
+          // copy normalized propsource string
+          if(*plSourceLen > 0 ){
+            memcpy( pstMatchTable->szSource, pSourceString, *plSourceLen * sizeof(CHAR_W));
+          }          
         } /* endif */
 
         if ( usRc == NO_ERROR )
@@ -2050,7 +2032,7 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           // now ulTargetLen is # of w's
           //position at target tag record
           pByte = (PBYTE)pTMXTargetRecord;
-          pByte += pTMXTargetRecord->usTargetTagTable;
+          //pByte += pTMXTargetRecord->usTargetTagTable;
 
           if (fSubstAll )
           {
@@ -2105,25 +2087,8 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
             }
           }
           else
-          {
-            if ( false && // segments after 0.4.52 would be saved as is 
-             fTag 
-            )
-            {
-              //add tags to target string if flag set to true
-              fOK = AddTagsToStringW( pString, &lTargetLen,
-                                     (PTMX_TAGTABLE_RECORD)pByte,
-                                     pstMatchTable->szTarget );
-              if ( !fOK )
-              {
-                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
-              } /* endif */
-            }
-            else
-            {
-              //else copy normalized target string
-              memcpy( pstMatchTable->szTarget, pString, lTargetLen * sizeof(CHAR_W));
-            } /* endif */
+          {            
+            memcpy( pstMatchTable->szTarget, pString, lTargetLen * sizeof(CHAR_W));
           } /* endif */
 
           if ( usRc == NO_ERROR )
@@ -2146,7 +2111,6 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
 
             //fill in the markup table
             {
-              PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
               //pTmClb->NTMGetNameFromID(
               //                  &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
               //                  (USHORT)TAGTABLE_KEY,
@@ -2486,7 +2450,7 @@ USHORT GetFuzzyMatch
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2527,7 +2491,7 @@ USHORT GetFuzzyMatch
           }
           else
           {
-            LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
           } /* endif */
         } /* endif */
 #ifdef MEASURETIME
@@ -2699,7 +2663,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
   
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -2726,7 +2690,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     //copy source string for fill matchtable
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
-    pSentence->pPropString = std::make_unique<StringTagVariants>(pString);
+    if(pSentence->pPropString) delete pSentence->pPropString;
+    pSentence->pPropString = new StringTagVariants(pString);//std::make_unique<StringTagVariants>(pString);
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
@@ -2885,10 +2850,11 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
           //position at target tag table
-          pByte += pTMXTargetRecord->usTargetTagTable;
-          pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+          //pByte += pTMXTargetRecord->usTargetTagTable;
+          //pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           // GQ: only compare tag tables if segment and proposal have inline tagging
+          /*
           if ( (RECLEN(pTMXTargetTagTable) > sizeof(TMX_TAGTABLE_RECORD)) ||  (RECLEN(pSentence->pTagRecord) > sizeof(TMX_TAGTABLE_RECORD)) )
           {
             fTagTableEqual =true;//(pTMXTargetTagTable->usTagTableId == usTagId);
@@ -2912,6 +2878,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
             // For R012645 end
           }
           else
+          //*/
           {
             fTagTableEqual = TRUE;
           } /* endif */
@@ -2935,12 +2902,12 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
             if ( fOK )
             {
               LONG  lLenTmp = ulSourceLen;
-              PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
+              //PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
               //position at source tag table record
               pByte = pStartTarget;
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
-              pByte += pTMXTargetRecord->usSourceTagTable;
-              pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+              //pByte += pTMXTargetRecord->usSourceTagTable;
+              //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
               if ( !fOK )
               {
                 LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
@@ -2960,7 +2927,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 //            if ( usFuzzy >= 100 )
             if ( fNormStringEqual )
             {
-              PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
+              //PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
               BOOL fStringEqual = FALSE;
               //compare source tag table records
               //position at source tag table record
@@ -2968,8 +2935,8 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
               //position at source tag table
-              pByte += pTMXTargetRecord->usSourceTagTable;
-              pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+              //pByte += pTMXTargetRecord->usSourceTagTable;
+              //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
               //compare tag table records
               //fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
@@ -3185,7 +3152,7 @@ USHORT FillMatchEntry
   }
   else
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 #ifdef MEASURETIME

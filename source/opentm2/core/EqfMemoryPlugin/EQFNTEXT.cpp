@@ -20,13 +20,6 @@
 #include <EQFMORPI.H>
 #include "LogWrapper.h"
 
-static USHORT ExtractRecordV6
-(
-  EqfMemory*        pTmClb,         //ptr to ctl block struct
-  PTMX_RECORD     pTmRecord,
-  PTMX_EXT_IN_W   pTmExtIn,
-  TMX_EXT_OUT_W *  pTmExtOut
-);
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -65,9 +58,8 @@ static USHORT ExtractRecordV6
 //|                                                                            |
 // ----------------------------------------------------------------------------+
 
-USHORT TmtXExtract
+USHORT EqfMemory::TmtXExtract
 (
-  EqfMemory* pTmClb,         //ptr to ctl block struct
   PTMX_EXT_IN_W  pTmExtIn, //ptr to input struct
   TMX_EXT_OUT_W * pTmExtOut //ptr to output struct
 )
@@ -91,7 +83,7 @@ USHORT TmtXExtract
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -134,28 +126,28 @@ USHORT TmtXExtract
         switch ( pTmExtIn->usConvert )
         {
           case MEM_OUTPUT_TAGTABLES :
-            pTable = &pTmClb->TagTables;
+            pTable = &TagTables;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_AUTHORS   :
-            pTable = &pTmClb->Authors;
+            pTable = &Authors;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_DOCUMENTS :
-            pTable = &pTmClb->FileNames;
+            pTable = &FileNames;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_LANGUAGES :
-            pTable = &pTmClb->Languages;
+            pTable = &Languages;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           case MEM_OUTPUT_LONGNAMES :
             // different handling for long names, no setting of pTable
-            ulMaxEntries = pTmClb->pLongNames->ulEntries;
+            ulMaxEntries = pLongNames->ulEntries;
             break;
           case MEM_OUTPUT_ALLDOCS :
             // different handling for long names, no setting of pTable
-            pTable = &pTmClb->FileNames;
+            pTable = &FileNames;
             ulMaxEntries = pTable->ulMaxEntries;
             break;
           default :
@@ -210,7 +202,7 @@ USHORT TmtXExtract
             {
               if ( pTmExtIn->usConvert == MEM_OUTPUT_LONGNAMES )
               {
-                pszName = pTmClb->pLongNames->
+                pszName = pLongNames->
                             stTableEntry[pTmExtIn->usNextTarget].pszLongName;
               }
               else
@@ -221,15 +213,15 @@ USHORT TmtXExtract
                 if ( pTmExtIn->usConvert == MEM_OUTPUT_ALLDOCS )
                 {
                   ULONG ulEntry = 0;
-                  while ( (ulEntry < pTmClb->pLongNames->ulEntries) &&
-                          (pEntry->usId != pTmClb->pLongNames->
+                  while ( (ulEntry < pLongNames->ulEntries) &&
+                          (pEntry->usId != pLongNames->
                                            stTableEntry[ulEntry].usId ) )
                   {
                     ulEntry++;
                   } /* endwhile */
-                  if ( ulEntry < pTmClb->pLongNames->ulEntries )
+                  if ( ulEntry < pLongNames->ulEntries )
                   {
-                    pszName = pTmClb->pLongNames->stTableEntry[ulEntry].pszLongName;
+                    pszName = pLongNames->stTableEntry[ulEntry].pszLongName;
                   } /* endif */
                 } /* endif */
               } /* endif */
@@ -276,7 +268,7 @@ USHORT TmtXExtract
       /********************************************************************/
       if ( !usRc && !fSpecialMode )
       {
-        pTmClb->TmBtree.EQFNTMGetNextNumber(  &ulStartKey, &ulNextKey);
+        TmBtree.EQFNTMGetNextNumber(  &ulStartKey, &ulNextKey);
         pTmExtOut->ulMaxEntries = (ulNextKey - ulStartKey);
         /******************************************************************/
         /* return one matching entry (if any available)                   */
@@ -285,7 +277,7 @@ USHORT TmtXExtract
         while ( (pTmExtIn->ulTmKey < ulNextKey) && (usRc == BTREE_NOT_FOUND) )
         {
           ulLen = ulRecBufSize;
-          usRc =  pTmClb->TmBtree.EQFNTMGet(
+          usRc =  TmBtree.EQFNTMGet(
                             pTmExtIn->ulTmKey,
                             (PCHAR)pTmRecord,
                             &ulLen );
@@ -298,20 +290,20 @@ USHORT TmtXExtract
             {
               ulRecBufSize = ulLen;
 
-              usRc =  pTmClb->TmBtree.EQFNTMGet(
+              usRc =  TmBtree.EQFNTMGet(
                                 pTmExtIn->ulTmKey,
                                 (PCHAR)pTmRecord,
                                 &ulLen );
             }
             else
             {
-              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+              LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
 
           if ( usRc == NO_ERROR )
           {
-            usRc = ExtractRecordV6( pTmClb, pTmRecord, pTmExtIn, pTmExtOut );            
+            usRc = ExtractRecordV6( pTmRecord, pTmExtIn, pTmExtOut );            
           }
           /****************************************************************/
           /* setup new starting point (do this even in the case we are    */
@@ -319,7 +311,7 @@ USHORT TmtXExtract
           /****************************************************************/
           if ( usRc != NO_ERROR )
           {
-            if ( (usRc == BTREE_NOT_FOUND) || ( usRc == BTREE_CORRUPTED ) || ((pTmClb->usAccessMode & ASD_ORGANIZE) != 0) )
+            if ( (usRc == BTREE_NOT_FOUND) || ( usRc == BTREE_CORRUPTED ) || ((usAccessMode & ASD_ORGANIZE) != 0) )
             {
               pTmExtIn->ulTmKey ++;
               pTmExtIn->usNextTarget = 1;
@@ -349,7 +341,7 @@ USHORT TmtXExtract
   UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
   // in organize mode only: change any error code (except BTREE_EOF_REACHED) to BTREE_CORRUPTED
-  if ( (usRc != NO_ERROR ) && (usRc != BTREE_EOF_REACHED) && ((pTmClb->usAccessMode & ASD_ORGANIZE) != 0) )
+  if ( (usRc != NO_ERROR ) && (usRc != BTREE_EOF_REACHED) && ((usAccessMode & ASD_ORGANIZE) != 0) )
   {
     LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
   } /* endif */
@@ -357,10 +349,8 @@ USHORT TmtXExtract
   return( usRc );
 }
 
-static
-USHORT ExtractRecordV6
+USHORT EqfMemory::ExtractRecordV6
 (
-  EqfMemory*        pTmClb,         //ptr to ctl block struct
   PTMX_RECORD     pTmRecord,
   PTMX_EXT_IN_W   pTmExtIn,
   TMX_EXT_OUT_W *  pTmExtOut
@@ -382,7 +372,7 @@ USHORT ExtractRecordV6
 
   if ( !pSourceString )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 
@@ -522,11 +512,11 @@ USHORT ExtractRecordV6
           if ( ( lLeftTgtLen > 0) && ( RECLEN(pTMXTargetRecord) != 0) )
           {
             //fill out the put structure as output of the extract function
-            usRc = FillExtStructure( pTmClb, pTMXTargetRecord,
+            usRc = FillExtStructure( pTMXTargetRecord,
                                      pTargetClb,
                                      pSourceString, &lSourceLen,
                                      pTmExtOut );
-            pTmClb->NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
+            NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
                         pTmExtOut->szOriginalSourceLanguage, NULL );
             if ( ! usRc )
             {
@@ -619,9 +609,8 @@ USHORT ExtractRecordV6
 // ----------------------------------------------------------------------------+
 
 
-USHORT FillExtStructure
+USHORT EqfMemory::FillExtStructure
 (
-  EqfMemory*    pTmClb,                  //ptr to control block
   PTMX_TARGET_RECORD pTMXTargetRecord, //ptr to tm target
   PTMX_TARGET_CLB    pTargetClb,       // ptr to current target CLB
   PSZ_W pSourceString,                 //ptr to source string
@@ -642,13 +631,13 @@ USHORT FillExtStructure
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
     pByte = (PBYTE)pTMXTargetRecord;
-    pByte += pTMXTargetRecord->usSourceTagTable;
-    pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
+    //pByte += pTMXTargetRecord->usSourceTagTable;
+    //pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
     if(*plSourceLen > 0)
     {
@@ -692,8 +681,8 @@ USHORT FillExtStructure
 
       //position at target tag record
       pByte = (PBYTE)pTMXTargetRecord;
-      pByte += pTMXTargetRecord->usTargetTagTable;
-      pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
+      //pByte += pTMXTargetRecord->usTargetTagTable;
+      //pTMXTagTableRecord = (PTMX_TAGTABLE_RECORD)pByte;
 
       //fill in the tag table name
       strcpy(pstExt->szTagTable, "OTMXUXLF");
@@ -710,7 +699,7 @@ USHORT FillExtStructure
 
       // in organize mode preset author and file name field with default
       // values as here the corresponding tables may be corrupted
-      if ( pTmClb->usAccessMode & ASD_ORGANIZE )
+      if ( usAccessMode & ASD_ORGANIZE )
       {
         strcpy( pstExt->szFileName, OVERFLOW_NAME );
         pstExt->szLongName[0] = EOS;
@@ -718,7 +707,7 @@ USHORT FillExtStructure
       } /* endif */
 
       //fill in the target file name
-      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usFileId, (USHORT)FILE_KEY,
+      NTMGetNameFromID( &pTMXTargetClb->usFileId, (USHORT)FILE_KEY,
                         pstExt->szFileName, pstExt->szLongName );
       //use overflow name if no document name available
       if ( pstExt->szFileName[0] == EOS )
@@ -727,11 +716,11 @@ USHORT FillExtStructure
       } /* endif */
 
       //fill in the target author
-      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usAuthorId, (USHORT)AUTHOR_KEY,
+      NTMGetNameFromID( &pTMXTargetClb->usAuthorId, (USHORT)AUTHOR_KEY,
                         pstExt->szAuthorName, NULL );
 
       //fill in the target language
-      pTmClb->NTMGetNameFromID( &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
+      NTMGetNameFromID( &pTMXTargetClb->usLangId, (USHORT)LANG_KEY,
                         pstExt->szTargetLanguage, NULL );
       
 
@@ -760,7 +749,6 @@ USHORT FillExtStructure
       LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
     }else{
       LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
-
     }
   } /* endif */
 

@@ -260,7 +260,8 @@ BOOL     NTMTagSubst
     fOK = NTMPrepareTokens( pSubstProp, pSubstProp->szSource,
                             (PFUZZYTOK *)&pSubstProp->pTokSource,
                             &pSubstProp->usTokenSource,
-                            pSubstProp->pTagsSource, sSrcLangID, ulSrcOemCP );
+                            nullptr, //pSubstProp->pTagsSource, 
+                            sSrcLangID, ulSrcOemCP );
   #ifdef INLINE_TAG_REPL_LOGGING
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
     if ( fOK ) NTMListTokens(  "Source", (PFUZZYTOK)pSubstProp->pTokSource );
@@ -273,7 +274,8 @@ BOOL     NTMTagSubst
     fOK = NTMPrepareTokens( pSubstProp, pSubstProp->szPropSource,
                             (PFUZZYTOK *)&pSubstProp->pTokPropSource,
                             &pSubstProp->usTokenPropSource,
-                            pSubstProp->pTagsPropSource, sSrcLangID, ulSrcOemCP );
+                            nullptr, //pSubstProp->pTagsPropSource, 
+                            sSrcLangID, ulSrcOemCP );
 #ifdef INLINE_TAG_REPL_LOGGING
     if ( fOK ) NTMListTokens( "PropSource", (PFUZZYTOK)pSubstProp->pTokPropSource );
 #endif
@@ -284,7 +286,8 @@ BOOL     NTMTagSubst
     fOK = NTMPrepareTokens( pSubstProp, pSubstProp->szPropTarget,
                             (PFUZZYTOK *)&pSubstProp->pTokPropTarget,
                             &pSubstProp->usTokenPropTarget,
-                            pSubstProp->pTagsPropTarget, sTgtLangID, ulTgtOemCP );
+                            nullptr,//pSubstProp->pTagsPropTarget, 
+                            sTgtLangID, ulTgtOemCP );
 #ifdef INLINE_TAG_REPL_LOGGING
     if ( fOK ) NTMListTokens( "PropTarget", (PFUZZYTOK)pSubstProp->pTokPropTarget );
 #endif

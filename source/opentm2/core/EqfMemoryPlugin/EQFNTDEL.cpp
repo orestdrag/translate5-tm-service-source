@@ -84,7 +84,7 @@ USHORT EqfMemory::TmtXDelSegm
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   if ( !usRc )
@@ -149,7 +149,7 @@ USHORT EqfMemory::TmtXDelSegm
             }
             else
             {
-              LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+              LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
             } /* endif */
           } /* endif */
 
@@ -212,7 +212,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
   // update TM databse
@@ -238,7 +238,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
       }
       else
       {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
       } /* endif */
     } /* endif */
 
@@ -329,9 +329,9 @@ USHORT EqfMemory::FindTargetAndDelete(
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord = NULL; //ptr to target record
   PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
-  PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
-  PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
-  PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
+  //PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
+  //PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
+  //PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lTagAlloc;                      //allocate length
   ULONG ulLen = 0;                    //length indicator
   LONG lSrcLen = 0;
@@ -346,14 +346,14 @@ USHORT EqfMemory::FindTargetAndDelete(
   //allocate 4k for pTagRecord
   if ( fOK )
   {
-    fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
+    //fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
     if ( fOK )
      lTagAlloc = (LONG)TOK_SIZE;
   }
 
   if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }
   else
   {
@@ -421,8 +421,8 @@ USHORT EqfMemory::FindTargetAndDelete(
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
           //position at source tag table
-          pByte += pTMXTargetRecord->usSourceTagTable;
-          pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+          //pByte += pTMXTargetRecord->usSourceTagTable;
+          //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
           //compare tag table records
           if(//UtlCompIgnWhiteSpaceW(pSentence->pInputString, (wchar_t*)pStringWNormalizedTags.c_str(), pStringWNormalizedTags.size() ) == 0
@@ -456,8 +456,8 @@ USHORT EqfMemory::FindTargetAndDelete(
                 //position at target tag table record
                 pByte = pStartTarget;
                 pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
-                pByte += pTMXTargetRecord->usTargetTagTable;
-                pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
+                //pByte += pTMXTargetRecord->usTargetTagTable;
+                //pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)pByte;
 
                 //compare tag table records
                 if (true 
@@ -501,7 +501,7 @@ USHORT EqfMemory::FindTargetAndDelete(
                         if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime  || true)
                         {
                           //fill out the put structure as output of the extract function
-                          usRc = FillExtStructure( this, pTMXTargetRecord,
+                          usRc = FillExtStructure( pTMXTargetRecord,
                                                   pClb,
                                                   TmDel.pInputSentence->pStrings->getGenericTargetStrC(), &lSrcLen,
                                                   pTmExtOut );
@@ -562,7 +562,7 @@ USHORT EqfMemory::FindTargetAndDelete(
 
   //release memory
   UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG );
+  //UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG );
 
   return( usRc );
 }
@@ -590,7 +590,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
 
   if ( !pSourceString )
   {
-    LOG_AND_SET_RC(usRc, T5INFO, ERROR_NOT_ENOUGH_MEMORY);
+    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   } /* endif */
 
 
@@ -733,7 +733,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
             //if on leave while loop as though delete was carried out
             
             //fill out the put structure as output of the extract function
-            usRc = FillExtStructure( this, pTMXTargetRecord,
+            usRc = FillExtStructure( pTMXTargetRecord,
                                      pTargetClb,
                                      pSourceString, &lSourceLen,
                                      pTmExtOut );
