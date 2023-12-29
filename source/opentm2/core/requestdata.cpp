@@ -2112,7 +2112,7 @@ int UpdateEntryRequestData::execute(){
 
   // return the entry data
   std::wstring outputMessageW;
-  json_factory.startJSONW( outputMessageW );
+  //json_factory.startJSONW( outputMessageW );
   {
     //OtmProposal output;
     //mem->ExtOutToOtmProposal(&TmPutOut, output);
@@ -2126,7 +2126,7 @@ int UpdateEntryRequestData::execute(){
       //Data.pInputSentence = nullptr;
     //}
   }
-  json_factory.terminateJSONW( outputMessageW );
+  //json_factory.terminateJSONW( outputMessageW );
   outputMessage = EncodingHelper::convertToUTF8(outputMessageW.c_str());
 
   //if(!inputSentence) delete inputSentence;
@@ -2280,6 +2280,8 @@ int DeleteEntryRequestData::execute(){
       mem->FlushFilebuffers();
     }
     // return the entry data
+
+    json_factory.startJSONW( strOutputParmsW );
     json_factory.addParmToJSONW( strOutputParmsW, L"fileFlushed", fSave2Disk );
     json_factory.addNameToJSONW( strOutputParmsW, L"results" );
 
@@ -2289,6 +2291,8 @@ int DeleteEntryRequestData::execute(){
     output.lTargetTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
     //convertTimeToUTC(output.lTargetTime, output.szDateTime);
     addProposalToJSONString( strOutputParmsW, output );
+
+    json_factory.terminateJSONW( strOutputParmsW );
   }
 
 
