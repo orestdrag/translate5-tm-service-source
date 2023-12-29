@@ -190,18 +190,13 @@ USHORT EqfMemory::TmtXReplace
 )
 {
   ULONG      ulNewKey = 0;             // sid of newly added tm record
-  BOOL       fOK;                      // success indicator
+  BOOL       fOK = TRUE;               // success indicator
   USHORT     usRc = NO_ERROR;          // return code
   USHORT     usMatchesFound;           // compact area hits
   CHAR       szString[MAX_EQF_PATH];   // character string
   szString[0] = 0;
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
-
-  if ( !fOK )
-  {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  } /* endif */
 
   if ( !usRc )
   {
