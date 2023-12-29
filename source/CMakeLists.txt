@@ -1,29 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 5)
-SET(APP_VERSION_MINOR 43)
+SET(APP_VERSION_MINOR 44)
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
 
 
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -g")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -g")
-set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -g")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -g")
+#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 #use cmake .. -DASAN_IS_ON=True to build with asan
 message("ASAN_IS_ON=${ASAN_IS_ON}")
 SET(STR_ASAN_IS_ON "Asan is off")
 
-if( ASAN_IS_ON  ) 
+#if( ASAN_IS_ON  ) 
     message("ASAN_IS_ON evaluates to True")
     SET(STR_ASAN_IS_ON "Asan is ON")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
     set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-endif()
+#endif()
 
 
 #tsan
@@ -31,8 +31,8 @@ endif()
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
 #set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE RelWithDebInfo)
 #set(CMAKE_BUILD_TYPE Release)
 
 include(GNUInstallDirs)
