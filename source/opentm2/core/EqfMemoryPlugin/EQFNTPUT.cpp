@@ -239,9 +239,12 @@ USHORT EqfMemory::TmtXReplace
       //update entry in tm database
       usRc = UpdateTmRecord(TmProposal);
 
-
+      if(usRc == NO_ERROR)
+      {
+        ulNewKey = TmProposal.recordKey;
+      }
       //if no tm record fitted for update assume new and add to tm
-      if ( usRc == ERROR_ADD_TO_TM )
+      else if ( usRc == ERROR_ADD_TO_TM )
       {
         usRc = AddToTm(TmProposal, &ulNewKey );
         //update index
@@ -271,6 +274,7 @@ USHORT EqfMemory::TmtXReplace
   if(!usRc){
     pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
     pTmPutOut->usTargetKey = TmProposal.targetKey;
+    RewriteCompactTable();
   }
 
   // unlock TM database if database has been locked
@@ -2009,15 +2013,10 @@ USHORT EqfMemory::ComparePutData
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord = NULL; //ptr to target record
   PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
-  //PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
-  //PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
-  //PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lLen = 0;                        //length indicator
   USHORT usNormLen = 0;                    //length of normalized string
   PSZ_W pString = NULL;                  //pointer to character string
-  //PSZ_W pNormString = NULL;              //pointer to character string
   USHORT usRc = NO_ERROR;              //returned value from function
-  //LONG lTagAlloc;                      //alloc size
   BOOL        fUpdate = FALSE;         // TRUE = record has been updated
   PTMX_RECORD pTmRecord = *ppTmRecord; // pointer to tm record data
   USHORT      usAuthorId;              // ID for author string
@@ -2027,13 +2026,6 @@ USHORT EqfMemory::ComparePutData
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
 
-  //allocate 4k for pTagRecord
-  //if ( fOK )
-  //{
-  //  fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
-  //  if ( fOK )
-  //   lTagAlloc = (LONG)TOK_SIZE;
-  //}
 
   if ( !fOK )
   {
@@ -2083,11 +2075,6 @@ USHORT EqfMemory::ComparePutData
         pStartTarget = NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
-        //tokenize target string in put structure
-        //usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(),
-        //                    &pTagRecord, &lTagAlloc, TmProposal.szMarkup,
-        //                    this );
-
         fStop = (usRc != 0);
         //RJ: 04/01/22: P018830:
         // loop through all target records
@@ -2119,13 +2106,9 @@ USHORT EqfMemory::ComparePutData
             // next check the target language and target tag info
             // position at first target control block and to source tag info
             pClb = (PTMX_TARGET_CLB)NTRecPos((PBYTE)pTMXTargetRecord, REC_CLB);
-            //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_SRCTAGTABLE);
 
             // compare target language IDs and source tag record
-            if ( (pClb->usLangId == usPutLang) //&&
-                //(memcmp( pTMXSourceTagTable, TmProposal.pInputSentence->pTagRecord,
-                //          RECLEN(pTMXSourceTagTable)) == 0) 
-                )
+            if (pClb->usLangId == usPutLang)
             {
               // check if target string and target tag record are identical
               pByte = NTRecPos(pStartTarget, REC_TGTSTRING);
@@ -2133,13 +2116,8 @@ USHORT EqfMemory::ComparePutData
               lLen = EQFCompress2Unicode( pString, pByte, lLen );
               pString[lLen] = EOS;
 
-              //pTMXTargetTagTable = (PTMX_TAGTABLE_RECORD)NTRecPos(pStartTarget, REC_TGTTAGTABLE);
-
               //compare target strings and target tag record
-              if ( (UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getGenericTargetStrC()) == 0)// &&
-                  //(memcmp( pTMXTargetTagTable, pTagRecord,
-                  //          RECLEN(pTMXTargetTagTable) ) == 0) 
-                  )
+              if ( !UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getGenericTargetStrC()))
               {  //target strings and target tag record are equal
                 //position at first control block
                 pClb = (PTMX_TARGET_CLB)NTRecPos(pStartTarget, REC_CLB);
@@ -2150,7 +2128,7 @@ USHORT EqfMemory::ComparePutData
                 while ( lLeftClbLen > 0 && !fStop )
                 {
                   targetKey++;
-                  if ( ((pClb->ulSegmId == TmProposal.getSegmentNum()) &&
+                  if ( ((pClb->ulSegmId == TmProposal.lSegmentNum) &&
                         (pClb->usFileId == usPutFile)) ||
                         pClb->bMultiple )
                   {
@@ -2205,6 +2183,7 @@ USHORT EqfMemory::ComparePutData
                 // add new CLB if no matching CLB has been found
                 if ( !fStop )
                 {
+                  targetKey++;
                   // re-alloc record buffer if too small
                   USHORT usAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
                   ULONG ulNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_CLB) + usAddDataLen;
@@ -2229,7 +2208,8 @@ USHORT EqfMemory::ComparePutData
                   if ( fOK )
                   {
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
-                    LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord); 
+                    //LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord);
+                    LONG size = TARGETCLBLEN(pClb); 
                     //try
                     if(size>=0)
                     {
@@ -2788,6 +2768,11 @@ USHORT EqfMemory::TmtXUpdSeg
                 usRc = TmBtree.EQFNTMUpdate( pTmPutIn->recordKey,
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
+
+              if(usRc == NO_ERROR)
+              {
+                usRc = RewriteCompactTable();
+              }
             }
             else
             {

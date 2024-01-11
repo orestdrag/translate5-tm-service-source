@@ -534,8 +534,8 @@ USHORT EqfMemory::ExtractRecordV6
 
               //if target exists
               if ( ((RECLEN(pTMXTargetRecord) > 0) && (lLeftTgtLen > 0 ) )
-                   //       ||
-                   // (lLeftClbLen > 0) 
+                          ||
+                    (lLeftClbLen > 0) 
                   )
               {
                 //increase target count and leave tm record key number as before
@@ -593,7 +593,7 @@ USHORT EqfMemory::ExtractRecordV6
 //|                         PUSHORT pulSourceLen, //source string length       |
 //|                         PTMX_EXT pstExt ) //ptr to extract structure       |
 //+----------------------------------------------------------------------------+
-//|Input parameter:   EqfMemory* pTmClb                                          |
+//|Input parameter:   EqfMemory* pTmClb                                        |
 //|                   PTMX_TARGET_RECORD pTMXTargetRecord                      |
 //|                   PSZ pSourceString                                        |
 //|                   PUSHORT pulSourceLen                                     |

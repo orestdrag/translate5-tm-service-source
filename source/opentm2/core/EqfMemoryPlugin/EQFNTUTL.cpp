@@ -957,7 +957,7 @@ USHORT NTMLockTM
    // Lock Index file of TM
    if ( !usRc )
    {
-         usRc = pTmClb->InBtree.EQFNTMPhysLock( TRUE, &fLockedIndex  );
+      usRc = pTmClb->InBtree.EQFNTMPhysLock( TRUE, &fLockedIndex  );
    } /* endif */
 
    // Set caller's lock flag
@@ -972,18 +972,7 @@ USHORT NTMLockTM
  else
  {
    // Rewrite compact area if compact area has been changed
-   if ( pTmClb->bCompactChanged )
-   {
-     usRc = pTmClb->TmBtree.EQFNTMUpdate( COMPACT_KEY,
-                          pTmClb->bCompact, MAX_COMPACT_SIZE-1 );
-     if ( !usRc )
-     {
-       pTmClb->bCompactChanged = FALSE;
-
-       usRc = pTmClb->TmBtree.EQFNTMIncrUpdCounter( COMPACTAREA_UPD_COUNTER,
-                             &(pTmClb->alUpdCounter[COMPACTAREA_UPD_COUNTER]) );
-     } /* endif */
-   } /* endif */
+   pTmClb->RewriteCompactTable();
 
    // Unlock index file of TM
    usRc = pTmClb->InBtree.EQFNTMPhysLock( FALSE, &fLockedIndex );

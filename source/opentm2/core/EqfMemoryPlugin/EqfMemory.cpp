@@ -279,6 +279,25 @@ int EqfMemory::getNextProposal
 }
 
 
+int EqfMemory::RewriteCompactTable(){
+  USHORT usRc = 0;
+  if ( bCompactChanged )
+   {
+     usRc = TmBtree.EQFNTMUpdate( COMPACT_KEY,
+                          bCompact, MAX_COMPACT_SIZE-1 );
+     if ( !usRc )
+     {
+       bCompactChanged = FALSE;
+
+       //usRc = TmBtree.EQFNTMIncrUpdCounter( COMPACTAREA_UPD_COUNTER,
+       //                      &(alUpdCounter[COMPACTAREA_UPD_COUNTER]) );
+     } /* endif */
+   } /* endif */
+
+   return usRc;
+}
+
+
 size_t EqfMemory::GetRAMSize()const{
   size_t size = sizeof(*this);
   size += TmBtree.fb.data.capacity();
@@ -463,8 +482,6 @@ int EqfMemory::SearchProposal
   unsigned long ulOptions
 )
 {
-  
-
   return( 0 );
 }
 

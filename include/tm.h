@@ -2106,6 +2106,8 @@ USHORT AddTmTarget(
     OtmProposal &Proposal
   ); 
 
+  int RewriteCompactTable();
+  
 /*! \brief Get the next proposal from the memory (with progress info) 
     \param lHandle the hande returned by GetFirstProposal
     \param Proposal reference to a OtmProposal object which will be filled with the proposal data

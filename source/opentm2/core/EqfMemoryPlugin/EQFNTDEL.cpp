@@ -486,11 +486,9 @@ USHORT EqfMemory::FindTargetAndDelete(
                     while ( ulLeftClbLen && !fStop )
                     {
                       if ( 
-                           //(pClb->usFileId == usId) &&
-                           //(pClb->ulSegmId == pTmDel->ulSourceSegmentId) &&
-                           //(pClb->bTranslationFlag == (BYTE)pTmDel->usTranslationFlag)
-                           //||
-                           true 
+                           (pClb->usFileId == usId) &&
+                           (pClb->ulSegmId == TmDel.lSegmentNum) &&
+                           (pClb->bTranslationFlag == (BYTE)ProposalTypeToFlag(TmDel.eType))
                            )
                       {
                         //if segment id and filename are equal then delete
@@ -498,7 +496,8 @@ USHORT EqfMemory::FindTargetAndDelete(
 
                         //check that multiple flag isn't on
                         //if on leave while loop as though delete was carried out
-                        if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime  || true)
+                        if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime  //|| true
+                            )
                         {
                           //fill out the put structure as output of the extract function
                           usRc = FillExtStructure( pTMXTargetRecord,
@@ -531,6 +530,7 @@ USHORT EqfMemory::FindTargetAndDelete(
                       }
                       else
                       {
+                        usTarget++;
                         // try next target CLB
                         ulLeftClbLen -= TARGETCLBLEN(pClb);
                         pClb = NEXTTARGETCLB(pClb);
