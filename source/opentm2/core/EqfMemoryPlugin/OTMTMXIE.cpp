@@ -3580,9 +3580,9 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
     } /* endif */
     pData->lSegCounter++;
      T5LOG( T5WARNING) << "TEMPORARY_COMMENTED";
-    //swprintf( pData->szBufferW, L"<Segment>%10.10ld\r\n", pData->lSegCounter );
+    //swprintf( pData->szBufferW, L"<Segment>%10.10ld\n", pData->lSegCounter );
     WriteStringToMemory( pData, pData->szBufferW );
-    WriteStringToMemory( pData, L"<Control>\r\n" );
+    WriteStringToMemory( pData, L"<Control>\n" );
     
      T5LOG(T5ERROR) << "TEMPORARY_COMMENTED WRITEEXPSEGMENT";
     /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
@@ -3591,16 +3591,16 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
       (pData->MemInfo.fSourceSource) ? pSegment->szSourceLang : pSegment->szTargetLang, X15_STRW,
       pSegment->szAuthor, X15_STRW, pSegment->szFormat, X15_STRW, L"na", X15_STRW, pSegment->szDocument );//*/
     WriteStringToMemory( pData, pData->szBufferW );
-    WriteStringToMemory( pData, L"\r\n</Control>\r\n" );
+    WriteStringToMemory( pData, L"\n</Control>\n" );
     if ( pSegment->szAddInfo[0] != 0 )
     {
       WriteStringToMemory( pData, L"<AddData>" );
       WriteStringToMemory( pData, pSegment->szAddInfo );
-      WriteStringToMemory( pData, L"</AddData>\r\n" );
+      WriteStringToMemory( pData, L"</AddData>\n" );
     } /* endif */       
     WriteStringToMemory( pData, L"<Source>" );
     WriteStringToMemory( pData, pSegment->szSource );
-    WriteStringToMemory( pData, L"</Source>\r\n" );
+    WriteStringToMemory( pData, L"</Source>\n" );
     WriteStringToMemory( pData, L"<Target>" );
     if ( pData->MemInfo.fSourceSource )
     {
@@ -3610,8 +3610,8 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
     {
       WriteStringToMemory( pData, pSegment->szTarget );
     } /* endif */
-    WriteStringToMemory( pData, L"</Target>\r\n" );
-    WriteStringToMemory( pData, L"</Segment>\r\n" );
+    WriteStringToMemory( pData, L"</Target>\n" );
+    WriteStringToMemory( pData, L"</Segment>\n" );
   }
   else
   {
@@ -3660,11 +3660,11 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
 {
   if ( !pData->fHeaderWritten )
   {
-    WriteStringToMemory( pData, L"<NTMMemoryDb>\r\n" );
-    WriteStringToMemory( pData, L"<Description>\r\n" );
+    WriteStringToMemory( pData, L"<NTMMemoryDb>\n" );
+    WriteStringToMemory( pData, L"<Description>\n" );
     MultiByteToWideChar( CP_ACP, 0, pData->MemInfo.szDescription, -1, pData->szBufferW, sizeof(pData->szBufferW)/sizeof(CHAR_W) );
     WriteStringToMemory( pData, pData->szBufferW );
-    WriteStringToMemory( pData, L"\r\n</Description>\r\n" );
+    WriteStringToMemory( pData, L"\n</Description>\n" );
     WriteStringToMemory( pData, L"<Codepage>" );
     if ( pData->MemInfo.lOutMode & ANSI_OPT )
     {
@@ -3678,7 +3678,7 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
     {
       WriteStringToMemory( pData, L"UTF16" );
     } /* endif */
-    WriteStringToMemory( pData, L"</Codepage>\r\n" );
+    WriteStringToMemory( pData, L"</Codepage>\n" );
     pData->fHeaderWritten = TRUE;
   } /* endif */
   return( 0 );
@@ -3686,7 +3686,7 @@ USHORT WriteMemHeader( PCONVERTERDATA pData )
 
 USHORT WriteMemFooter( PCONVERTERDATA pData )
 {
-  WriteStringToMemory( pData, L"</NTMMemoryDb>\r\n" );
+  WriteStringToMemory( pData, L"</NTMMemoryDb>\n" );
   return( 0 );
 } /* end of function WriteMemHeader */
 
@@ -3946,13 +3946,13 @@ void AddLineToSegBuffer( PCONVERTERDATA pData )
       pData->iSegBufferUsed += iAddLen;
       pData->iSegBufferFree -= iAddLen;
 
-      wcscpy( pData->szSegBuffer + pData->iSegBufferUsed, L"\r\n" );
+      wcscpy( pData->szSegBuffer + pData->iSegBufferUsed, L"\n" );
       pData->iSegBufferUsed += 2;
       pData->iSegBufferFree -= 2;
     }
     else
     {
-      wcscpy( pData->szSegBuffer + pData->iSegBufferUsed, L"...\r\n" );
+      wcscpy( pData->szSegBuffer + pData->iSegBufferUsed, L"...\n" );
       pData->iSegBufferUsed += 5;
       pData->fSegBufferFull = TRUE;
       pData->iSegBufferFree = 0;
@@ -4164,7 +4164,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
 
         while ( !usRC && !fEnd && !fEOF )
         {
-          usRC = ConcatenateSegData( pData->Segment.szAddInfo, L"\r\n", MAX_SEGMENT_SIZE );
+          usRC = ConcatenateSegData( pData->Segment.szAddInfo, L"\n", MAX_SEGMENT_SIZE );
           if ( usRC )
           {
             pszError = "Segment additional data text too long";
@@ -4803,7 +4803,7 @@ void EscapeXMLChars( PSZ_W pszText, PSZ_W pszBuffer)
   {
     if ( *pszText == L'\n' )
     {
-      wcscpy( pszBuffer, L"\r\n" );
+      wcscpy( pszBuffer, L"\n" );
       pszBuffer += wcslen( pszBuffer );
     }
     else if ( *pszText == L'\r' )

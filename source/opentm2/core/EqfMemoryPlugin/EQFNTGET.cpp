@@ -1015,7 +1015,7 @@ USHORT ExactTest
     ulLen = EQFCompress2Unicode( pString, pByte, ulLen );
     auto normalizedTmStr = std::make_unique<StringTagVariants>(pString);
     //compare source strings
-    fStringEqual = UtlCompIgnWhiteSpaceW((PSZ_W)normalizedTmStr->getNormStr().c_str(), pSentence->pStrings->getNormStrC(), 0) == 0L;
+    fStringEqual = UtlCompIgnWhiteSpaceW(normalizedTmStr->getNormStrC(), pSentence->pStrings->getNormStrC(), 0) == 0L;
 
     if ( fStringEqual )
     {
@@ -2695,7 +2695,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
-      T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\r\n" << str << "\r\n</SOURCE>\r\n" ;
+      T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\n" << str << "\n</SOURCE>\n" ;
     }
 
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279

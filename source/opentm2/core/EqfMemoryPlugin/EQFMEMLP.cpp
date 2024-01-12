@@ -1594,16 +1594,16 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     // write segment to log file
     if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
-      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNum <<" not imported\r\n";
-      T5LOG(T5DEBUG) <<"Reason         = \r\n",  pSegment->szReason ;
-      T5LOG(T5DEBUG) <<"Document       = \r\n",  pSegment->szDocument ;
-      T5LOG(T5DEBUG) <<"SourceLanguage = \r\n",  pSegment->szSourceLang ;
-      T5LOG(T5DEBUG) <<"TargetLanguage = \r\n",  pSegment->szTargetLang ;
-      T5LOG(T5DEBUG) <<"Markup         = \r\n",  pSegment->szFormat ;
-      T5LOG(T5DEBUG) <<"Source         = \r\n";
-      T5LOG(T5DEBUG) <<"\r\n", pSegment->szSource ;
-      T5LOG(T5DEBUG) <<"Target         = \r\n";
-      T5LOG(T5DEBUG) <<"\r\n\r\n", pSegment->szTarget ;
+      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNum <<" not imported\n";
+      T5LOG(T5DEBUG) <<"Reason         = \n" <<  pSegment->szReason ;
+      T5LOG(T5DEBUG) <<"Document       = \n" <<  pSegment->szDocument ;
+      T5LOG(T5DEBUG) <<"SourceLanguage = \n" <<  pSegment->szSourceLang ;
+      T5LOG(T5DEBUG) <<"TargetLanguage = \n" <<  pSegment->szTargetLang ;
+      T5LOG(T5DEBUG) <<"Markup         = \n" <<  pSegment->szFormat ;
+      T5LOG(T5DEBUG) <<"Source         = \n";
+      T5LOG(T5DEBUG) <<"\n" << pSegment->szSource ;
+      T5LOG(T5DEBUG) <<"Target         = \n";
+      T5LOG(T5DEBUG) <<"\n" << pSegment->szTarget ;
     } /* endif */
     #endif
   } /* endif */

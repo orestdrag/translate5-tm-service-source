@@ -131,6 +131,11 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     //std::transform(url.begin(), url.end(), url.begin(),
     //[](unsigned char c){ return std::tolower(c); });
 
+    std::string urlMemName;
+    std::string urlCommand;
+    ProxygenHandler* requestHandler = nullptr;
+
+    try{
     if(url[0] == '/'){
       url = url.substr(1, url.size() - 1);
     }
@@ -152,14 +157,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       return rh;
     }
 
-    auto requestHandler = new ProxygenHandler(stats_.get());
+    requestHandler = new ProxygenHandler(stats_.get());
 
     requestHandler->pRequest =  nullptr;
     
     url = url.size() > urlSeparator ? url.substr(urlSeparator + 1) : "";
     
-    std::string urlMemName;
-    std::string urlCommand;
     if( urlService == additionalServiceName ){
       if( url.size() ){
         urlSeparator = url.find("/");
@@ -258,9 +261,15 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
     }
+    }
+    catch(...){
+      T5LOG(T5ERROR) << "url wasn't parsed correctly, url: " << url;
+    }
 
     if(!requestHandler->pRequest){
       requestHandler->pRequest = new UnknownRequestData;
+      requestHandler->pRequest->strUrl = url;
+      
     }
     requestHandler->pRequest->strMemName = urlMemName;
     restoreBlanks(requestHandler->pRequest->strMemName);

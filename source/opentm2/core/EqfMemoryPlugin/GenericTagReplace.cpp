@@ -153,7 +153,7 @@ void NTMListTokens
 )
 {
   int i = 1;
-  T5LOG(T5INFO) << "\r\n"<<pszName <<" token list\r\n"; 
+  T5LOG(T5INFO) << "\n"<<pszName <<" token list\n"; 
   while ( pToken->ulHash )
   {
     std::string tokenName = "Token " + i;

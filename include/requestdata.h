@@ -227,7 +227,7 @@ class UnknownRequestData: public RequestData{
     int checkData() override {return 0;};
     int execute()   override {
         _rest_rc_ = 404;
-        std::string msg = "Url " + strUrl + " was not parsed correctly";
+        std::string msg = "Url \"" + strUrl + "\" was not parsed correctly";
         return buildErrorReturn(404, msg.c_str());
     };
 };

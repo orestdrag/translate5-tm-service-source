@@ -1133,7 +1133,7 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceD
     wspaceDiff = abs(ws1-ws2);
   }  /* endif */
 
-  while ( ulI++ < ulLen )
+  while ( ulI++ < ulLen && *pD1 && *pD2 )
   {
     c = *pD1; d = *pD2;
     if ( UtlIsWhiteSpaceW(c) && UtlIsWhiteSpaceW(d) )
