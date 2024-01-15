@@ -1465,7 +1465,7 @@ int StatusMemRequestData::execute() {
     if(mem->importDetails != nullptr){
       
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importProgress", mem->importDetails->usProgress );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeProgress":"importProgress", mem->importDetails->usProgress );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );

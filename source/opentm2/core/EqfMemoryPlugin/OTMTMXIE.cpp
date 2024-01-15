@@ -1718,6 +1718,12 @@ bool IsValidXml(std::wstring&& sentence){
 }
 
 
+void TweakNormString(std::wstring& str){  
+  std::replace( str.begin(), str.end(), '\t', ' ');
+  std::replace( str.begin(), str.end(), '\n', ' ');
+}
+
+
 void StringTagVariants::initParser(){
    // parse and save request
   norm.reserve(MAX_SEGMENT_SIZE);
@@ -1756,6 +1762,7 @@ void StringTagVariants::parseSrc(){
     genericTags = handler.GetParsedData();
     norm = handler.GetParsedNormalizedData();
     npReplaced = handler.GetParsedDataWithReplacedNpTags();
+    TweakNormString(norm);
   }  
 }
 
@@ -1781,6 +1788,7 @@ void StringTagVariants::parseTrg(){
 
     genericTarget = handler.GetParsedData();    
     normTarget = handler.GetParsedNormalizedData();
+    TweakNormString(normTarget);     
   }
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
@@ -4829,7 +4837,8 @@ void EscapeXMLChars( PSZ_W pszText, PSZ_W pszBuffer)
       wcscpy( pszBuffer, L"&quot;" );
       pszBuffer += wcslen( pszBuffer );
     }
-    else if ( (*pszText == L'\x1F') || (*pszText == L'\t') )
+    else if ( (*pszText == L'\x1F')// || (*pszText == L'\t') 
+    )
     {
       // suppress some special characters
       *pszBuffer++ = L' ';
