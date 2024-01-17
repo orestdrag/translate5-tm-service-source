@@ -1299,7 +1299,7 @@ class TagReplacer{
 };
 
 // PROP types
-typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
+typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, TMAUTHOR_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
   TRANSLATIONFLAG_PROP, TMTMMATCHTYPE_PROP, TMMTSERVICE_PROP, TMMTMETRICNAME_PROP, TMMTMETRICVALUE_PROP, TMPEEDITDISTANCECHARS_PROP, TMPEEDITDISTANCEWORDS_PROP,  
   TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID, PROPID;
 
@@ -1431,6 +1431,7 @@ private:
     CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
+    CHAR     szAuthor[EQF_DOCNAMELEN];// buffer for document name
     MEMEXPIMPSEG SegmentData;         // buffer for segment data
     CHAR     szDescription[1024];     // buffer for memory descripion
     CHAR     szMemSourceLang[50];     // buffer for memory source language

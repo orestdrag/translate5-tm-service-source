@@ -1988,6 +1988,10 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               {
                 CurElement.PropID = TMDOCNAME_PROP;
               }
+              else if ( strcasecmp( pszAttVal, AUTHOR_PROP ) == 0  )
+              {
+                CurElement.PropID = TMAUTHOR_PROP;
+              }
               else if ( (strcasecmp( pszAttVal, MACHFLAG_PROP ) == 0) || (strcasecmp( pszAttVal, MACHFLAG_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = MACHINEFLAG_PROP;
@@ -2427,6 +2431,16 @@ void TMXParseHandler::fillSegmentInfo
   {
     strcpy( pSegment->szDocument, "none" );
   } /* endif */
+
+  if( pBuf->szAuthor[0] )
+  {
+    strcpy( pSegment->szAuthor, pBuf->szAuthor );
+  }
+  else
+  {
+    pSegment->szAuthor[0] = '\0';
+  }
+  
   pSegment->usTranslationFlag = usTranslationFlag;
   if ( lTime )
   {
@@ -2916,6 +2930,15 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       unsigned char s;
       memcpy( pBuf->szDocument, buff.c_str(), size);
       //strncpy( pBuf->szDocument, buff.c_str(), size );
+    }
+    else if ( CurrentProp == TMAUTHOR_PROP )
+    {
+      std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
+      int size = std::min(buff.size(), sizeof(pBuf->szAuthor) - 1);
+      memset( pBuf->szAuthor, 0, size+1 );
+      unsigned char s;
+      memcpy( pBuf->szAuthor, buff.c_str(), size);
+      //strncpy( pBuf->szAuthor, buff.c_str(), size );
     }
     else if ( CurrentProp == TMDESCRIPTION_PROP )
     {
