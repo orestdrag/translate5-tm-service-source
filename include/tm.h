@@ -1318,6 +1318,11 @@ typedef struct _TMXELEMENT
 } TMXELEMENT, *PTMXELEMENT;
 
 
+enum InclosingTagsBehaviour{
+  saveAll = 0, skipAll, skipPaired
+};
+
+
 //
 // class for our SAX handler
 //
@@ -1437,9 +1442,11 @@ private:
     ULONG    ulWords;                       // number of words in the segment text
     CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
     
-    //for enclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> enclosing tags skipping should be ignored
+    //for inclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> inclosing tags skipping should be ignored
     bool        fSegmentStartsWithBPTTag;
-
+    
+    InclosingTagsBehaviour inclosingTagsBehaviour = saveAll;
+    
     bool        fUseMajorLanguage;
   } BUFFERAREAS, *PBUFFERAREAS;
 

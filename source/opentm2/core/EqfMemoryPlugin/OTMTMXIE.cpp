@@ -121,6 +121,9 @@ XERCES_CPP_NAMESPACE_USE
 #define DOCNAME_PROP        "tmgr:docname"
 #define DOCNAME_PROP_W      L"tmgr:docname"
 
+#define AUTHOR_PROP        "tmgr:author"
+#define AUTHOR_PROP_W      L"tmgr:author"
+
 #define MACHFLAG_PROP_OLD    "tmgr-MTflag"
 #define MACHFLAG_PROP_W_OLD  L"tmgr-MTflag"
 #define MACHFLAG_PROP        "tmgr:MTflag"
@@ -1002,6 +1005,12 @@ USHORT CTMXExportImport::WriteSegment
   m_xw.WriteStartElement( "prop" );
   m_xw.WriteAttributeString( "type", DOCNAME_PROP );
   m_xw.WriteString( pSegment->szDocument ); 
+  m_xw.WriteEndElement(); // prop
+
+  // add document name property
+  m_xw.WriteStartElement( "prop" );
+  m_xw.WriteAttributeString( "type", AUTHOR_PROP );
+  m_xw.WriteString( pSegment->szAuthor ); 
   m_xw.WriteEndElement(); // prop
 
   // add translation flag as property
@@ -2241,7 +2250,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szNormalizedData[0] = 0;
         pBuf->szReplacedNpData[0] = 0;
 
-        //reset enclosing tags flags
+        //reset inclosing tags flags
         pBuf->fSegmentStartsWithBPTTag = 0;
 
         fCatchData = TRUE;    
@@ -2774,13 +2783,22 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       fCatchData = FALSE;    
       std::string result = "pBuf is null"; 
       
-      //check if we have enclosing tags and skip them if that's true
+      //check if we have inclosing tags and skip them if that's true
       if(pBuf && pBuf->szData)
       {
+        
         bool inclosingTagsSkipped = false;
         std::wstring begPairTag, endPairTag;
-        begPairTag = endPairTag = L"tag wasn't generated because not enought conditions are true for enclosing tags";
-        {//filter out tag as start and end if it's in 
+        if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::saveAll)
+        {
+          //do nothing
+        }else if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::skipAll){
+          //todo: implement exctraction of 
+        }else if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::skipPaired){
+          //todo: implement multiple pair skip
+          begPairTag = endPairTag = L"tag wasn't generated because not enought conditions are true for inclosing tags";
+        
+          {//filter out tag as start and end if it's in 
           //<bpt i='1'/>Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence<ept i='1'/> 
           //to
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
@@ -2810,6 +2828,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 }
               }
             }
+          }
           }  
         }
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){      
