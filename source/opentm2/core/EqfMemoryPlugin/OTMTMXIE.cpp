@@ -121,6 +121,9 @@ XERCES_CPP_NAMESPACE_USE
 #define DOCNAME_PROP        "tmgr:docname"
 #define DOCNAME_PROP_W      L"tmgr:docname"
 
+#define AUTHOR_PROP        "tmgr:author"
+#define AUTHOR_PROP_W      L"tmgr:author"
+
 #define MACHFLAG_PROP_OLD    "tmgr-MTflag"
 #define MACHFLAG_PROP_W_OLD  L"tmgr-MTflag"
 #define MACHFLAG_PROP        "tmgr:MTflag"
@@ -1218,6 +1221,12 @@ USHORT CTMXExportImport::WriteSegment
   m_xw.WriteStartElement( "prop" );
   m_xw.WriteAttributeString( "type", DOCNAME_PROP );
   m_xw.WriteString( pSegment->szDocument ); 
+  m_xw.WriteEndElement(); // prop
+
+  // add document name property
+  m_xw.WriteStartElement( "prop" );
+  m_xw.WriteAttributeString( "type", AUTHOR_PROP );
+  m_xw.WriteString( pSegment->szAuthor ); 
   m_xw.WriteEndElement(); // prop
 
   // add translation flag as property
@@ -2416,7 +2425,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         CurElement.fInsideTagging = FALSE;
         pBuf->szData[0] = 0; // reset data buffer
 
-        //reset enclosing tags flags
+        //reset inclosing tags flags
         pBuf->fSegmentStartsWithBPTTag = 0;
 
         fCatchData = TRUE;    
