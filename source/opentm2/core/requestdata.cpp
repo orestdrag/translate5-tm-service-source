@@ -1180,7 +1180,12 @@ int DeleteMemRequestData::execute(){
     return( BAD_REQUEST );
   } /* endif */
   
-  TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
+  if(_rc_ = TMManager::GetInstance()->CloseTM(strMemName)){
+    outputMessage = "failed to closeTm, memName = " + strMemName;
+    return _rc_;
+  }else{
+    _rc_ = TMManager::GetInstance()->DeleteTM(strMemName, outputMessage);
+  }
 
   if ( _rc_ != 0 )
   {
