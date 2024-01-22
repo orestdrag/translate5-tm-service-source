@@ -20,10 +20,9 @@
 
 #include <filesystem>
 #include <folly/portability/GFlags.h>
-#define LOG_FILE_WRITE 1
+//#define LOG_FILE_WRITE 1
 
 int __last_error_code = 0;
-#define LOG_FILE_WRITE 1
 
 std::string FilesystemHelper::_memDir;
 std::string FilesystemHelper::_tableDir;
@@ -261,9 +260,9 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
         }
 
         if(getFileBufferInstance()->find(fixedPath) != getFileBufferInstance()->end()){
-            //if(VLOG_IS_ON(1)){
+            if(VLOG_IS_ON(1)){
                 T5LOG( T5WARNING) << "OpenFile::Filebuffer wasn't created, it's already exists for " << fixedPath ;
-            //}
+            }
             pFb = &(*getFileBufferInstance())[fixedPath];
             pFb->offset = 0;
         }else{

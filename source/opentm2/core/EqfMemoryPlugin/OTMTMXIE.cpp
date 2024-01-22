@@ -698,7 +698,6 @@ USHORT  MEMINSERTSEGMENT
 );
 
 
-
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
 //+----------------------------------------------------------------------------+
@@ -2293,6 +2292,10 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             wcscat(pBuf->szData, replacingTag.c_str());
             fCatchData = false;
             CurElement.fInsideTagging = true;
+            
+            if(fCreateNormalizedStr && tag.original_tagType != T5_N_ELEMENT){
+              wcscat(pBuf->szReplacedNpData, replacingTag.c_str());
+            }
           }
         }
         break;

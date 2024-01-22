@@ -63,7 +63,6 @@ typedef CHAR  LONG_FN    [MAX_LONGFILESPEC];
 
 
 
-
 struct TMX_EXT_OUT_W
 {
   TMX_PREFIX_OUT stPrefixOut;      //prefix of output buffer

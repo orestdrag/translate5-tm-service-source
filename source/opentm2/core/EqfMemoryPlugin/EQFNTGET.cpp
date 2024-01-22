@@ -690,7 +690,7 @@ USHORT GetExactMatch
       {
         ulKey = *pulSids;
         ulLen = TMX_REC_SIZE;
-        T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record" <<ulKey;
+        T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record #" <<ulKey;
         usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
 
         if ( usRc == BTREE_BUFFER_SMALL)
