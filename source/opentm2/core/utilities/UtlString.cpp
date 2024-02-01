@@ -1170,6 +1170,25 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceD
     {
       pD1++; pD2++;
     }
+    else if(UtlIsWhiteSpaceW(*pD1))
+    {
+      while ( UtlIsWhiteSpaceW( *pD1 ) && (ulI < ulLen) )
+      {
+        ws1++;
+        pD1++;
+        ulI++;
+        wspaceDiff++;
+      } /* endwhile */
+    }
+    else if(UtlIsWhiteSpaceW(*pD2))
+    {
+      while ( UtlIsWhiteSpaceW( *pD2 ) )
+      {
+        ws2++;
+        pD2++;
+        wspaceDiff++;
+      } /* endwhile */
+    }
     else
     {
       ulI = ulLen;   // stop loop;
@@ -1186,7 +1205,11 @@ LONG UtlCompIgnWhiteSpaceW( PSZ_W pD1, PSZ_W pD2, ULONG ulLen , PINT whitespaceD
     while ( *pD2 && UtlIsWhiteSpaceW( *pD2 ) ) { pD2++; ws2++; }
     
     wspaceDiff += abs(ws1 - ws2);
-    if ( *pD1 )
+    if(*pD1 && *pD2 && *pD1 == *pD2)
+    {
+      lRc = 0;
+    }
+    else if ( *pD1 )
     {
       lRc = 1;
     }

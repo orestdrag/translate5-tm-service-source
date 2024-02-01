@@ -101,34 +101,6 @@ int WideCharToMultiByte(
         
     }
 
-void GetSystemTime(LPSYSTEMTIME lpSystemTime){
-    LOG_UNIMPLEMENTED_FUNCTION;
-}
-
-BOOL SystemTimeToFileTime(
-    const SYSTEMTIME *lpSystemTime,
-    LPFILETIME       lpFileTime
-){
-    LOG_UNIMPLEMENTED_FUNCTION;
-}
-
-BOOL FileTimeToSystemTime(
-        const FILETIME *lpFileTime,
-        LPSYSTEMTIME   lpSystemTime
-    ){
-        LOG_UNIMPLEMENTED_FUNCTION;
-    }
-
-
-HANDLE OpenMutex(
-  DWORD dwDesiredAccess,  // access flag
-  BOOL bInheritHandle,    // inherit flag
-  LPCTSTR lpName          // pointer to mutex-object name
-){
-    LOG_UNIMPLEMENTED_FUNCTION;
-    return NULL;
-}
-
 
 DWORD WaitForSingleObject(
   HANDLE hHandle,

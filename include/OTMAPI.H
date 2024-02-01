@@ -1126,17 +1126,6 @@ EQF_BOOL  EQFPRESEG (
                 PEQF_BOOL   pfNoSegment);
 
 
-EQF_BOOL  EQFPRESEG2 (
-                PSZ pTagTable,
-                PSZ   pEdit,
-                PSZ   pProgPath,
-                PSZ   pSource,
-                PSZ   pTempSource,
-                PEQF_BOOL   pfNoSegment,
-                HWND hSlider,
-                PEQF_BOOL   pfKill );
-
-
 EQF_BOOL  EQFPRESEGEX (
                 PSZ pTagTable,
                 PSZ   pEdit,

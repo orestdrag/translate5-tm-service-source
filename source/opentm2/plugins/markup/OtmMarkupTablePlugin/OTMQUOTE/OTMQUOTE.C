@@ -117,41 +117,6 @@ static MRIPARSMARKUPINFO MarkupInfo[20] = { { "", { 0, 0, 0 }  } };
 //|  None.                                                                     |
 //+----------------------------------------------------------------------------+
 
-EQF_BOOL  /*APIENTRY*/ EQFPRESEG2
-(
-   PSZ pTagTable,
-   PSZ pEdit,                    // name of editor dll
-   PSZ pProgPath,                // pointer to program path
-   PSZ pSource,                  // pointer to source file name
-   PSZ pTempSource,              // pointer to source path
-   PEQF_BOOL pfNoSegment,        // no further segmenting ??
-   HWND  hwndSlider,             // handle of analysis slider control
-   PEQF_BOOL pfKill              // pointer to kill flag              /* @50A */
-)
-{
-   PSZ           pName;                    // pointer to file name
-   USHORT        usRC = NO_ERROR;
-
-   pEdit;
-   pProgPath;
-
-   *pfNoSegment = TRUE;          // no further segmentation requested
-
-   // setup temp name for output file
-   strcpy( pTempSource, pSource );
-   pName = UtlGetFnameFromPath( pTempSource );
-   while ( *pName && *pName != '.') pName ++;
-   if ( !*pName ) *pName = '.';
-   strcpy( pName+1, "$$$" );
-
-   if (!usRC)
-   {
-		 usRC = ParseQuotedFile( pSource, pTempSource, hwndSlider, pfKill, pTagTable );
-   } /* endif */
-
-   return( !usRC );
-}
-
 
 //+----------------------------------------------------------------------------+
 //| EQFPOSTSEG      - postsegment parser                                       |

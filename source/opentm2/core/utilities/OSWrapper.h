@@ -162,25 +162,6 @@ unsigned long int _ttol(const char* source);
 int strupr(char * str);
 int _strcmp(const char* a, const char* b);
 int _strcmpi(const char* a, const char* b);
-//int _stricmp(const char* a, const char* b);
-
-void GetSystemTime(LPSYSTEMTIME lpSystemTime);
-
-BOOL SystemTimeToFileTime(
-    const SYSTEMTIME *lpSystemTime,
-    LPFILETIME       lpFileTime
-);
-
-BOOL FileTimeToSystemTime(
-    const FILETIME *lpFileTime,
-    LPSYSTEMTIME   lpSystemTime
-);
-
-HANDLE OpenMutex(
-    DWORD dwDesiredAccess,  // access flag
-    BOOL bInheritHandle,    // inherit flag
-    LPCTSTR lpName          // pointer to mutex-object name
-);
 
 DWORD WaitForSingleObject(
     HANDLE hHandle,

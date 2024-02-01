@@ -225,11 +225,9 @@ typedef struct                               // Structure to define spreadsheet 
 
 // Routines defined in OTMMSOFC.C       ----------------------------------------------
 
-    BOOL       ConvertWordToXml(char*, char*, char*, char*, USHORT* );
     BOOL       ConvertXmlToWord(char*, char*, char*, USHORT );
     BOOL       GetWordProcessList( ULONG * ); 
     BOOL       AutomationWrapper(int,VARIANT*,IDispatch*,char*,char*,int ...);
-    BOOL       ExtractXmlFromZip(char*, char*, char*, char* );
     BOOL       ReplaceXmlInZip( char*, char*, char* );
     BOOL       ExecuteCommand( char*, char*, char* );
     BOOL       ConcatFiles( char*, char*, char* );

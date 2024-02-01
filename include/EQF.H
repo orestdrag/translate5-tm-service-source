@@ -5911,20 +5911,6 @@ BOOL TACheckAndAdaptLFChanges
 // name of mutex semaphore for property access
 #define PROP_ACCESS_MUTEX "EQFPRO00-PropAccess"
 
-// keep other process from doing property related stuff..
-// GETMUTEX to create a mutex
-#ifdef TEMPORARY_COMMENTED
-#define GETMUTEX(hMutexSem) \
-{ hMutexSem = OpenMutex( MUTEX_ALL_ACCESS, TRUE, PROP_ACCESS_MUTEX );                \
-  if ( hMutexSem == NULL) hMutexSem = CreateMutex( NULL, FALSE, PROP_ACCESS_MUTEX ); \
-  if ( hMutexSem ) WaitForSingleObject( hMutexSem, INFINITE );                       \
-}
-
-#define RELEASEMUTEX(hMutexSem)   \
-{ if ( hMutexSem )                                           \
-  {  ReleaseMutex( hMutexSem ); CloseHandle( hMutexSem ); }  \
-}
-#endif
 
 MRESULT UtlInvokeHelp();
 BOOL    UtlIsHighContrast();
