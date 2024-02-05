@@ -2782,7 +2782,8 @@ int ConcordanceSearchRequestData::execute(){
   {
     std::wstring strOutputParmsW;
     json_factory.startJSONW( strOutputParmsW );
-    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ == ENDREACHED_RC? L"ENDREACHED_RC" : _rc_==TIMEOUT_RC? L"TIMEOUT_RC": L"FOUND");
+    json_factory.addParmToJSONW(strOutputParmsW, L"ReturnValue",  _rc_);
+    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnMessage", _rc_ == ENDREACHED_RC? L"ENDREACHED_RC" : _rc_==TIMEOUT_RC? L"TIMEOUT_RC": L"FOUND");
     if ( _rc_ == ENDREACHED_RC )
     {
       json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );
