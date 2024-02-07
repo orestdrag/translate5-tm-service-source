@@ -90,8 +90,9 @@ USHORT EQFNTMOrganizeIndex
    ULONG          ulStartKey           // first key to start automatic insert...
 );
 
-
 class JSONFactory;
+
+#include "lowlevelotmdatastructs.h"
 
 struct ImportStatusDetails{
   std::atomic_short usProgress{0};
@@ -108,7 +109,8 @@ struct ImportStatusDetails{
   std::stringstream importMsg;
   bool fReorganize{0}; // true for reorganize call, false for import
   size_t activeSegment{0};
-  
+  InclosingTagsBehaviour inclosingTagsBehaviour{InclosingTagsBehaviour::saveAll};
+
   void reset(){
     firstInvalidSegmentsSegNums.clear();
     firstInvalidSegmentsSegNums.reserve(100);

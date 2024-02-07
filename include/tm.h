@@ -1254,6 +1254,8 @@ struct TagInfo
   //if sourceTag -> matching tag from target tags
   //TagInfo* matchingTag;
   //int matchingTagIndex = -1;
+
+  bool fDeleted = false;
   
   //t5n
   std::string t5n_key;
@@ -1316,12 +1318,6 @@ typedef struct _TMXELEMENT
   LONG      lSegNum;                   // TM segment number
 } TMXELEMENT, *PTMXELEMENT;
 
-
-enum InclosingTagsBehaviour{
-  saveAll = 0, skipAll, skipPaired
-};
-
-
 //
 // class for our SAX handler
 //
@@ -1331,7 +1327,7 @@ public:
   // -----------------------------------------------------------------------
   //  Constructors and Destructor
   // -----------------------------------------------------------------------
-  TMXParseHandler(); 
+  TMXParseHandler(InclosingTagsBehaviour InclosingTagsBehaviour = InclosingTagsBehaviour::saveAll); 
   virtual ~TMXParseHandler();
 
   // setter functions for import info
@@ -1443,7 +1439,8 @@ private:
     CHAR_W   szMatchSegID[MAX_SEGMENT_SIZE];// buffer for match segment ID
     
     //for inclosing tags skipping. If pFirstBptTag is nullptr->segments don't start from bpt tag-> inclosing tags skipping should be ignored
-    bool        fSegmentStartsWithBPTTag;
+    int        inclosingTagsAtTheStartOfSegment = 0;
+    int        inclosingTagsAtTheEndOfSegment   = 0;
     
     InclosingTagsBehaviour inclosingTagsBehaviour = saveAll;
     
@@ -4998,6 +4995,8 @@ typedef struct _EXTFOLPROP
 #define VAL_VALIDATION_OPT            0x01000000L
 #define VAL_PROOFREAD_OPT             0x02000000L
 
+
+class IMPORTMEMORYDATA;
 /*! \brief Import a Translation Memory
   \param hSession the session handle returned by the EqfStartSession call
   \param pszMemName name of the Translation Memory
@@ -5023,14 +5022,14 @@ typedef struct _EXTFOLPROP
 /*@ADDTOSCRIPTER*/
 USHORT EqfImportMem
 (
-  std::shared_ptr<EqfMemory>    hSession,                // mand: Eqf session handle
-  PSZ         pszInFile,               // mand: fully qualified name of input file
-  LONG        lOptions,                 // opt: options for Translation Memory import
+  IMPORTMEMORYDATA* pData,
+  //std::shared_ptr<EqfMemory>    hSession,                // mand: Eqf session handle
+  //PSZ         pszInFile,               // mand: fully qualified name of input file
+  LONG        lOptions                 // opt: options for Translation Memory import
                                        // @Import Mode: TMX_OPT{CLEANRTF_OPT}, XLIFF_MT_OPT,UTF16_OPT,ANSI_OPT,ASCII_OPT(default)
                                        // @Markup Table Handling: CANCEL_UNKNOWN_MARKUP_OPT(default), SKIP_UNKNOWN_MARKUP_OPT, GENERIC_UNKNOWN_MARKUP_OPT
 									                     // @Other: {CLEANRTF_OPT,IGNORE_OPT}
                                        
-  PSZ         errorBuff
 );
 
 

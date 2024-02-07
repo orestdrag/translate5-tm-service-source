@@ -318,6 +318,10 @@ std::wstring TagReplacer::PrintReplaceTagWithKey(TagInfo& tag){
 }
 
 std::wstring TagReplacer::PrintTag(TagInfo& tag){
+  if(tag.fDeleted){
+    return L"";
+  }
+
   std::string res = "<" ;
   bool fClosingTag = false; // for </g> and similar tags
   bool fClosedTag = true; // for <ph/> and similar tags
@@ -618,7 +622,8 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
       // mark binded tag as already used in target
       matchingSourceTag->fTagAlreadyUsedInTarget = true;
       tag.fTagAlreadyUsedInTarget = true;
-      
+
+      tag.fDeleted = matchingSourceTag->fDeleted;
       tag.generated_x = matchingSourceTag->generated_x;
       tag.generated_i = matchingSourceTag->generated_i;
       //tag.generated_tagType = matchingSourceTag->generated_tagType;
@@ -668,6 +673,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
           // mark matching tag as which have completed pair
           matchingTargetTag->fPairedTagClosed = true;
           tag.fPairedTagClosed = true;
+          tag.fDeleted = matchingTargetTag->fDeleted;
           tag.generated_i =  matchingTargetTag->generated_i;
           tag.generated_x = -matchingTargetTag->generated_x;
         }else{        
@@ -1267,7 +1273,7 @@ USHORT CTMXExportImport::StartImport
       m_parser = new SAXParser();      // Create a SAX parser object
 
       // create an instance of our handler
-      m_handler = new TMXParseHandler();
+      m_handler = new TMXParseHandler(pImportDetails->inclosingTagsBehaviour);
       m_handler->SetImportData(pImportDetails);
 
       // pass memory info to handler
@@ -1646,11 +1652,12 @@ BOOL FindName( PNAMETABLE pTable, const char *pszName, char *pszValue, int iBufS
 //
 // Implementation of TMX SAX parser
 //
-TMXParseHandler::TMXParseHandler()
+TMXParseHandler::TMXParseHandler(InclosingTagsBehaviour inclosingTagsBehaviour)// = InclosingTagsBehaviour::saveAll)
 {
    // allocate buffer areas
   pBuf = (PBUFFERAREAS)malloc( sizeof(BUFFERAREAS) );
   if ( pBuf ) memset( pBuf, 0, sizeof(BUFFERAREAS) );
+  pBuf->inclosingTagsBehaviour = inclosingTagsBehaviour;
   fError = FALSE;
 
   // initialize element stack
@@ -1695,7 +1702,7 @@ bool IsValidXml(std::wstring&& sentence){
   
   std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(sentence) + std::string("</TMXSentence>");
   SAXParser parser;
-  TMXParseHandler handler;
+  TMXParseHandler handler(InclosingTagsBehaviour::saveAll);
   // create an instance of our handler
   handler.fReplaceWithTagsWithoutAttributes = true;
   handler.tagReplacer.activeSegment = SOURCE_SEGMENT;
@@ -2254,7 +2261,8 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szReplacedNpData[0] = 0;
 
         //reset inclosing tags flags
-        pBuf->fSegmentStartsWithBPTTag = 0;
+        pBuf->inclosingTagsAtTheStartOfSegment = 0;
+        pBuf->inclosingTagsAtTheEndOfSegment = 0;
 
         fCatchData = TRUE;    
         break;
@@ -2803,27 +2811,100 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       //check if we have inclosing tags and skip them if that's true
       if(pBuf && pBuf->szData)
       {
-        
         bool inclosingTagsSkipped = false;
         std::wstring begPairTag, endPairTag;
         if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::saveAll)
         {
           //do nothing
         }else if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::skipAll){
-          //todo: implement exctraction of 
+          //todo: implement exctraction of
+                    //todo: implement multiple pair skip
+          begPairTag = endPairTag = L"tag wasn't generated because not enought conditions are true for inclosing tags";
+        
+          //filter out tag as start and end if it's in 
+          //<bpt i='1'/>Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence<ept i='1'/> 
+          //to
+          //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence           
+          size_t unhandledTagCounter = tagReplacer.sourceTagList.size();
+          size_t firstTagPos = 0;
+          size_t lastTagPos = tagReplacer.sourceTagList.size()-1;
+          bool fTagDeleted = true;
+
+          while(firstTagPos <= lastTagPos && fTagDeleted){
+            TagInfo& tag = tagReplacer.sourceTagList[firstTagPos];
+            fTagDeleted = false;
+            std::wstring tagStr = tagReplacer.PrintTag(tag) ;         
+
+            int len = wcslen(pBuf->szData);
+            wchar_t* pStartText = pBuf->szData;
+            while(UtlIsWhiteSpaceW(*pStartText))pStartText++;
+            int startTextOffset = pStartText-pBuf->szData;
+
+            if( len >= startTextOffset + tagStr.length() ){
+              if(  wcsncmp(pStartText, tagStr.c_str(), tagStr.length()) == 0 ){
+                  
+                  T5LOG(T5INFO) << "found inclosing tag at the start \"" << EncodingHelper::convertToUTF8(tagStr.c_str()) << "\" \""  
+                        <<"\" - > erasing it and  " << (startTextOffset) << " whitespaces"; 
+                  //skip begin and end tags                  
+                  int newLen = len- tagStr.length() - startTextOffset;
+                  wcsncpy(pBuf->szData, &(pStartText[tagStr.length()]), newLen);
+                  pBuf->szData[newLen] = 0;
+                  tag.fDeleted = true;
+                  fTagDeleted = true;
+                  firstTagPos++;
+              }
+            }            
+          }  
+
+          fTagDeleted = true;
+          while(firstTagPos <= lastTagPos && fTagDeleted){
+            TagInfo& tag = tagReplacer.sourceTagList[lastTagPos];
+            fTagDeleted = false;
+            std::wstring tagStr = tagReplacer.PrintTag(tag) ;         
+
+            int len = wcslen(pBuf->szData);
+            if(len == 0) break;
+            wchar_t* pEndText = &pBuf->szData[len];
+            while( (pEndText - pBuf->szData > 0 ) && UtlIsWhiteSpaceW(*(pEndText-1)))
+            {
+              pEndText--;
+            }
+            int whistespacesAtTheEnd = len - (pEndText - pBuf->szData );
+
+            if( len >= whistespacesAtTheEnd + tagStr.length() ){
+              //wchar_t* segEnd = &(pBuf->szData[len-tagStr.size()]);
+              wchar_t* segEnd = pEndText-tagStr.size();
+              
+              if(  wcsncmp(segEnd, tagStr.c_str(), tagStr.length()) == 0 ){
+                  T5LOG(T5INFO) << "found inclosing tag at the end \"" << EncodingHelper::convertToUTF8(tagStr.c_str())  << "\" \""  
+                        <<"\" - > erasing it and  " << (whistespacesAtTheEnd) << " whitespaces"; 
+                  //skip end tags
+                  segEnd[0] = 0;
+                  tag.fDeleted = true;
+                  fTagDeleted = true;
+                  lastTagPos--;
+              }
+            }            
+          } 
+
         }else if(pBuf->inclosingTagsBehaviour == InclosingTagsBehaviour::skipPaired){
           //todo: implement multiple pair skip
           begPairTag = endPairTag = L"tag wasn't generated because not enought conditions are true for inclosing tags";
         
-          {//filter out tag as start and end if it's in 
+          //filter out tag as start and end if it's in 
           //<bpt i='1'/>Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence<ept i='1'/> 
           //to
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
           int len = wcslen(pBuf->szData);
+          
+          size_t firstTagPos = 0;
+          size_t lastTagPos = tagReplacer.sourceTagList.size()-1;
+          bool fInclosingTags = true;
 
-          if(tagReplacer.sourceTagList.size()>=2){
-            auto&& firstTag = tagReplacer.sourceTagList[0];
-            auto&& lastTag  = tagReplacer.sourceTagList[tagReplacer.sourceTagList.size()-1];
+          while(firstTagPos<lastTagPos && fInclosingTags){
+            TagInfo& firstTag = tagReplacer.sourceTagList[firstTagPos];
+            TagInfo& lastTag  = tagReplacer.sourceTagList[lastTagPos];
+            fInclosingTags = false;
 
             if(firstTag.generated_tagType == BPT_ELEMENT 
                 && lastTag.generated_tagType == EPT_ELEMENT
@@ -2833,21 +2914,46 @@ void TMXParseHandler::endElement(const XMLCh* const name )
               endPairTag = tagReplacer.PrintTag(lastTag);            
 
               const size_t inclosingTagsLenSum = begPairTag.size() + endPairTag.size();
+              
+              int len = wcslen(pBuf->szData);
+              
+              wchar_t* pStartText = pBuf->szData;
+              while(UtlIsWhiteSpaceW(*pStartText))pStartText++;
+              int whitespacesAtTheStart = pStartText - pBuf->szData;
 
-              if( len >= inclosingTagsLenSum ){
-                wchar_t* segEnd = &(pBuf->szData[len-endPairTag.size()]);
-                if(  wcsncmp(pBuf->szData, begPairTag.c_str(), begPairTag.size()) == 0 
-                  && wcsncmp (segEnd,      endPairTag.c_str(), endPairTag.size()) == 0){
+              wchar_t* pEndText = &pBuf->szData[len];
+              while( (pEndText - pBuf->szData > 0 ) && UtlIsWhiteSpaceW(*(pEndText-1)))
+              {
+                pEndText--;
+              }
+
+              int whistespacesAtTheEnd = len - (pEndText - pBuf->szData);
+
+              if( len >= inclosingTagsLenSum + whistespacesAtTheEnd + whitespacesAtTheStart ){
+                //wchar_t* segEnd = &(pBuf->szData[len-endPairTag.size()]);              
+                wchar_t* segEnd = pEndText-endPairTag.size();
+
+                if(  wcsncmp(pStartText, begPairTag.c_str(), begPairTag.size()) == 0 
+                  && wcsncmp (segEnd,      endPairTag.c_str(), endPairTag.size()) == 0 ){
+                    T5LOG(T5INFO) << "found paired inclosing tags \""
+                         << EncodingHelper::convertToUTF8(begPairTag.c_str())  << "\": \"" 
+                         << EncodingHelper::convertToUTF8(endPairTag.c_str())  
+                         <<"\" - > erasing them and whitespaces: " << (whitespacesAtTheStart + whistespacesAtTheEnd); 
+                    int newLen = len - inclosingTagsLenSum - whitespacesAtTheStart - whistespacesAtTheEnd;
                     //skip begin and end tags
-                    wcsncpy(pBuf->szData, &(pBuf->szData[begPairTag.size()]), len-(inclosingTagsLenSum));
-                    pBuf->szData[len-(inclosingTagsLenSum)] = 0;
-                     inclosingTagsSkipped = true;
+                    wcsncpy(pBuf->szData, pStartText + begPairTag.size(), newLen);
+                    pBuf->szData[newLen] = 0;
+                    inclosingTagsSkipped = true;
+                    fInclosingTags = true;
+                    firstTag.fDeleted = lastTag.fDeleted = true;
+                    firstTagPos++;
+                    lastTagPos--;
                 }
               }
             }
-          }
           }  
-        }
+        }//endif
+        
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){      
           result = EncodingHelper::convertToUTF8(pBuf->szData);
           T5LOG( T5DEBUG) << ":: parsed end of TMX sentence, result = \'" << result << 
@@ -4113,7 +4219,6 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
 
           WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szFormat, sizeof(pData->Segment.szFormat), NULL, NULL );
           wcscpy( pData->szBufferW, ParseX15W( pData->szControl, 8 ) );
-;
           WideCharToMultiByte( CP_OEMCP, 0, pData->szBufferW, -1, pData->Segment.szDocument, sizeof(pData->Segment.szDocument), NULL, NULL );
 
           // get contol string end tag and check it

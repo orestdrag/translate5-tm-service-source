@@ -670,6 +670,15 @@ int ImportRequestData::parseJSON(){
         loggingThreshold = std::stoi(value);
         T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
         T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else if(strcasecmp(name.c_str(), "framingTags") == 0){
+        std::string strInclosingTagsBehaviour = value;
+        if(strcasecmp(value.c_str(), "saveAll") == 0){
+          inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
+        }else if(strcasecmp(value.c_str(), "skipAll") == 0){
+          inclosingTagsBehaviour = InclosingTagsBehaviour::skipAll;
+        }else if(strcasecmp(value.c_str(), "skipPaired") == 0){
+          inclosingTagsBehaviour = InclosingTagsBehaviour::skipPaired;
+        }
       }else{
         T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
       }
@@ -786,7 +795,7 @@ int ImportRequestData::execute(){
   {
     return 404;
   }
-    // close the memory - when open
+  // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
     return 500;
@@ -802,6 +811,7 @@ int ImportRequestData::execute(){
   // start the import background process
   pData = new( IMPORTMEMORYDATA );
   pData->fDeleteTmx = true;
+  pData->inclosingTagsBehaviour = inclosingTagsBehaviour;
   strcpy( pData->szInFile, strTempFile.c_str() );
   strcpy( pData->szMemory, strMemName.c_str() );
 

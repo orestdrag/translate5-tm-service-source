@@ -379,13 +379,18 @@ int FilesystemHelper::DecodeBase64ToFile( const char *pStringData, const char *p
 
 void importMemoryProcess( void* pvData )
 {
-  PIMPORTMEMORYDATA pData = (PIMPORTMEMORYDATA)pvData;
+  IMPORTMEMORYDATA* pData = (IMPORTMEMORYDATA*)pvData;
   #ifdef TIME_MEASURES
   milliseconds start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   #endif 
   // call the OpenTM2 API function
   pData->szError[0] = 0;
-  int iRC =(int)EqfImportMem( pData->mem, pData->szInFile, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT, pData->szError);
+  if(!pData->mem->importDetails){
+    pData->mem->importDetails = new ImportStatusDetails;
+  }
+  pData->mem->importDetails->inclosingTagsBehaviour = pData->inclosingTagsBehaviour;
+  
+  int iRC =(int)EqfImportMem( pData, TMX_OPT | COMPLETE_IN_ONE_CALL_OPT);
 
   // handle any error
   if ( iRC != 0 )

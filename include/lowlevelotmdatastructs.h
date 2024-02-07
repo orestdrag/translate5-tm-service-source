@@ -58,6 +58,9 @@ typedef char* PSZ;
         //IMPORT_MEM_INTERNAL_FORMAT
     };
 
+enum InclosingTagsBehaviour{
+  saveAll = 0, skipAll, skipPaired
+};
 
   /*! \brief States of a memory
   */
@@ -1267,6 +1270,9 @@ typedef struct _DDEMEMEXP
   HWND hwndErrMsg;                         // HWND to be used for error messages
 } DDEMEMEXP, *PDDEMEMEXP;
 
+
+
+
 // structure to pass/receive general memory information
 typedef struct _MEMEXPIMPINFO
 {
@@ -1284,6 +1290,7 @@ typedef struct _MEMEXPIMPINFO
   BOOL    fNoCRLF;                        // remove CRLFs in segment text
   PSZ     pszMarkupList;                   // pointer to a list of markup tables (zero terminated C strigns followed by another zero)
   BYTE    fUnused[20];                     // room for enhancements
+  //InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
 } MEMEXPIMPINFO, *PMEMEXPIMPINFO;
 
 
@@ -1746,9 +1753,7 @@ typedef struct _FCTDATA
   // current progress of some nonDDE functions
   //USHORT      usProgress;
   USHORT      usExportProgress;
-
-  //ImportStatusDetails*     pImportData;
-
+  
 
   USHORT MemFuncExportProcess();
   USHORT MemFuncPrepExport

@@ -126,18 +126,17 @@
 // import a Translation Memory
 USHORT EqfImportMem
 (
-  std::shared_ptr<EqfMemory> mem,                // Eqf session handle
-  PSZ         pszInFile,               // fully qualified name of input file
-  LONG        lOptions,                 // options for Translation Memory import
-  PSZ         errorBuff
+  IMPORTMEMORYDATA* pData,
+  //std::shared_ptr<EqfMemory> mem,                // Eqf session handle
+  LONG        lOptions                 // options for Translation Memory import
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
   FCTDATA    Data;// = NULL;            // ptr to function data area
 
   // call TM import
-  usRC = MemFuncImportMem( &Data, pszInFile, mem, lOptions );
-  strcpy(errorBuff, Data.szError);
+  usRC = MemFuncImportMem( &Data, pData->szInFile, pData->mem, lOptions );
+  strcpy(pData->szError, Data.szError);
 
   return( usRC );
 } /* end of function EqfImportMem */

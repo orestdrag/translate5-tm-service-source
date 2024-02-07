@@ -105,8 +105,9 @@ protected:
 //class ProxygenService::ProxygenStats;
 /*! \brief Data area for the processing of the importMemory function
 */
-typedef struct _IMPORTMEMORYDATA
+class IMPORTMEMORYDATA
 {
+public:
   //HSESSION hSession;
   //OtmMemoryServiceWorker *pMemoryServiceWorker;
   char szMemory[260];
@@ -115,10 +116,11 @@ typedef struct _IMPORTMEMORYDATA
   std::shared_ptr<EqfMemory> mem;
   BOOL fDeleteTmx = false;
   ProxygenStats* stats_ = nullptr;
+  InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
   //ushort * pusImportPersent = nullptr;
   //ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
-} IMPORTMEMORYDATA, *PIMPORTMEMORYDATA;
+};
 
 class ImportRequestData:public RequestData{
 public:
@@ -131,7 +133,8 @@ protected:
     BOOL fClose = false;
     MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
     MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
-    PIMPORTMEMORYDATA pData = nullptr;
+    InclosingTagsBehaviour inclosingTagsBehaviour;
+    IMPORTMEMORYDATA* pData = nullptr;
     std::string strTempFile;
     std::string strTmxData;
 };
@@ -148,7 +151,7 @@ protected:
     BOOL fClose = false;
     MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
     MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
-    PIMPORTMEMORYDATA pData = nullptr;
+    IMPORTMEMORYDATA* pData = nullptr;
     std::string strInputFile;
 };
 
