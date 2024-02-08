@@ -1449,15 +1449,18 @@ int StatusMemRequestData::checkData() {
 
 void AddRequestDataToJson(std::stringstream& ss, std::string reqType, milliseconds sumTime, size_t requestCount)
 {
-  ss << "\n[\n";
-  std::string paramName = reqType + "ReqCount";
+  ss << "\n\"" << reqType << "\" :{\n";
+  std::string paramName = //reqType + 
+    "ReqCount";
   AddToJson(ss, paramName.c_str(), requestCount, true);
-  paramName = reqType + "SumTime(sec)";
+  paramName = //reqType + 
+    "SumTime(sec)";
   double sec = std::chrono::duration<double>(sumTime).count();
   AddToJson(ss, paramName.c_str(), sec, true);
-  paramName = reqType + "AvrgReqTime";
+  paramName = //reqType + 
+    "AvrgReqTime";
   AddToJson(ss, paramName.c_str(), requestCount? sec/requestCount : 0, false);
-  ss << "\n]";
+  ss << "\n}";
 }
 
 
@@ -1789,10 +1792,10 @@ int ResourceInfoRequestData::execute(){
       AddRequestDataToJson(ssOutput, "DeleteEntry", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getReorganizeRequestCount();
-      sumTime = pStats->getReorganizeExecutionTime();
-      AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
-      ssOutput <<",";
+      //requestCount = pStats->getReorganizeRequestCount();
+      //sumTime = pStats->getReorganizeExecutionTime();
+      //AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
+      //ssOutput <<",";
 
       requestCount = pStats->getSaveAllTmsRequestCount();
       sumTime = pStats->getSaveAllTmsSumTime();
