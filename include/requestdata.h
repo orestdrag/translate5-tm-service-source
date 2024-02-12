@@ -318,7 +318,7 @@ timestampSpanEnd: STAMP
 context: We still need to decide, when we know, what is really saved in here. Therefore we omit context for now in the implementation of this issue.
 */
 
-struct ConcordanceSearchParams{
+struct ConcordanceSearchParams {
     char srcStr[OTMPROPOSAL_MAXSEGLEN];
     char trgStr[OTMPROPOSAL_MAXSEGLEN];
     char srcLang[OTMPROPOSAL_MAXNAMELEN];
@@ -340,7 +340,7 @@ struct ConcordanceSearchParams{
     char addInfoSearchType[50];
     char contextSearchType[50];
 
-    ConcordanceSearchParams(){memset(this, 0, sizeof(*this));
+    ConcordanceSearchParams(){memset(this, 0, sizeof(*this));}
 };//*/
 
 class DeleteEntriesReorganizeRequestData: public RequestData{
@@ -355,7 +355,7 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
 protected:
     ConcordanceSearchParams concordanceSearchParams;
 
-    int parseJSON() override { return concordanceSearchParams.parseJSON(strBody);}
+    int parseJSON() override ;
     int checkData() override ;
     int execute  () override ;
 };

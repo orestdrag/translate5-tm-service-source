@@ -1037,22 +1037,11 @@ int ReorganizeRequestData::execute(){
   return( _rc_ );
 }
 
-    char author[OTMPROPOSAL_MAXNAMELEN];
-    char document[OTMPROPOSAL_MAXNAMELEN];
-    char addInfo[OTMPROPOSAL_MAXNAMELEN];
-    char context[OTMPROPOSAL_MAXNAMELEN];
-    
-    char srcLangSearchType[50];
-    char trgLangSearchType[50];
-    char timespanSearchType[50];
-    char authorSearchType[50];
-    char docSearchType[50];
-    char addInfoSearchType[50];
-    char contextSearchType[50];
 
 int DeleteEntriesReorganizeRequestData::parseJSON(){
-   JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"source",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcStr ), sizeof( Data.srcStr ) / sizeof( Data.srcStr[0] ) },
+
+/*   JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"source",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data ), sizeof( Data.srcStr ) / sizeof( Data.srcStr[0] ) },
   { L"sourceSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.sourceSearchType ), sizeof( Data.sourceSearchType ) / sizeof( Data.sourceSearchType[0] ) },
   { L"target",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgStr ), sizeof( Data.trgStr ) / sizeof( Data.trgStr[0] ) },
   { L"targetSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.targetSearchType ), sizeof( Data.targetSearchType ) / sizeof( Data.targetSearchType[0] ) },
@@ -1082,7 +1071,7 @@ int DeleteEntriesReorganizeRequestData::parseJSON(){
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
-
+//*/
   return _rc_;
 }
 
