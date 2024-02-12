@@ -482,11 +482,6 @@ public:
 
 #include "tm.h"
 
-class SearchParams: public OtmProposal{
-  public:
-//  ProposalFiter::
-};
-
 
 
 OtmProposal::eProposalType getMemProposalType( char *pszType );

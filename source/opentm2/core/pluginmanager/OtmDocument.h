@@ -64,49 +64,6 @@ public:
 	\returns true = success, false = failed to update the segment. */
 	virtual bool updateSegment(OtmSegment* pSegment) = 0;
 
-/*! \cond */
-	virtual USHORT CPP_EQFBCharType(PTBDOCUMENT pDoc, PTBSEGMENT pSeg, USHORT usOffs) = 0;
-	virtual PTBSEGMENT CPP_EQFBGetSegW(PTBDOCUMENT pDoc, ULONG ulSeg) = 0;
-	virtual BOOL CPP_EQFBFileExists(PSZ pszFile) = 0;
-	virtual BOOL CPP_EQFBDiffTag(PTBDOCUMENT pDoc, ULONG ulSeg, USHORT usOffs) = 0;
-	virtual BOOL CPP_EQFBIsLFProtected(PTBSEGMENT pSeg, SHORT sOffs) = 0;
-	virtual BOOL CPP_EQFBDiffProtectTag(PTBDOCUMENT pDoc, ULONG ulSeg, USHORT usOffs) = 0;
-	virtual VOID CPP_EQFBReparse(PTBDOCUMENT pDoc, PTBSEGMENT pSeg, USHORT usOffs, SHORT sDiff) = 0;
-	virtual SHORT CPP_EQFBLineUp(PTBDOCUMENT pDoc) = 0;
-	virtual SHORT CPP_EQFBLineDown(PTBDOCUMENT pDoc) = 0;
-	virtual SHORT CPP_EQFBDocLoad(PLOADSTRUCT pLoad) = 0;
-	virtual PTBDOCUMENT CPP_EQFBDocDelete(PTBDOCUMENT pDoc) = 0;
-	virtual SHORT CPP_EQFBDocSave(PTBDOCUMENT pDoc, PSZ pszFileName, BOOL fAskForSave) = 0;
-	virtual VOID CPP_EQFBFuncOpenTRNote(PTBDOCUMENT pDoc) = 0;
-	virtual VOID CPP_EQFBDocPrint(PTBDOCUMENT pDoc) = 0;
-	virtual SHORT CPP_EQFBWordCntPerSeg(PVOID pVoidTable, PTOKENENTRY pTokBuf, PSZ_W pData, SHORT sLanguageId, PULONG pulResult, PULONG pulMarkUp, ULONG ulOemCP) = 0;
-	virtual PTBDOCUMENT CPP_EQFBRemoveDoc(PTBDOCUMENT pDoc) = 0;
-	virtual BOOL CPP_EQFBCheckNoneTag(PTBDOCUMENT pDoc, PSZ_W pString) = 0;
-	virtual VOID CPP_EQFBNormSeg(PTBDOCUMENT pDoc, PSZ_W pData, PSZ_W pOutData) = 0;
-	virtual USHORT CPP_EQFBPrepareFileWrite( PTBDOCUMENT pDoc, PVOID  *ppvFileWriteData, PSZ pszFileName, SHORT sLogTaskID, USHORT  usCPConversion, EQF_BOOL fAutoSave ) = 0;
-	virtual USHORT CPP_EQFBTerminateFileWrite( PTBDOCUMENT pDoc, PVOID pvFileWriteData, USHORT usRCIn ) = 0;
-	virtual USHORT CPP_EQFBWriteNextSegment(PTBDOCUMENT pDoc, PVOID pvFileWriteData, USHORT usCPConversion, ULONG ulCP, PBOOL pfDone) = 0;
-	virtual BOOL CPP_EQFBOnTRNote(PTBDOCUMENT pDoc) = 0;
-	virtual USHORT CPP_EQFBWriteHistLog(PSZ pszFolObjName, PSZ pszDocName, SHORT TaskId, USHORT usAddInfoLength, PVOID pvAddInfo, BOOL fMsg, HWND hwndErrMsg) = 0;
-	virtual USHORT CPP_EQFBWriteHistLog2(PSZ pszFolObjName, PSZ pszDocName, SHORT TaskId, USHORT usAddInfoLength, PVOID pvAddInfo, BOOL fMsg, HWND hwndErrMsg, PSZ pszLongDocName) = 0;
-	virtual void CPP_HistLogCorrectRecSizes(PHISTLOGRECORD pRecord) = 0;
-	virtual SHORT CPP_EQFBHistDocSave(PSZ pszFileName, PTBDOCUMENT pDoc, SHORT sLogTaskID) = 0;
-	virtual SHORT CPP_EQFBHistDocSaveEx(PSZ pszFileName, PTBDOCUMENT pDoc, SHORT sLogTaskID ) = 0;
-	virtual USHORT CPP_EQFBFileRead(PSZ pszFileName, PTBDOCUMENT pDoc) = 0;
-	virtual USHORT CPP_EQFBFileReadExW(PSZ pszFileName, PTBDOCUMENT pDoc, LONG lFlags) = 0;
-	virtual void CPP_EQFBFreeDoc(PTBDOCUMENT *ppDoc, ULONG ulOptions) = 0;
-	virtual USHORT CPP_EQFBFileWrite(PSZ pszFileName, PTBDOCUMENT pDoc) = 0;
-	virtual USHORT CPP_EQFBFileWriteEx(PSZ pszFileName, PTBDOCUMENT pDoc, SHORT sLogTaskID, USHORT usCPConversion) = 0;
-	virtual PTBSEGMENT CPP_EQFBGetSeg(PTBDOCUMENT pDoc, ULONG ulSeg) = 0;
-	virtual PTBSEGMENT CPP_EQFBGetFromBothTables(PTBDOCUMENT pDoc, PULONG pulStandardIndex, PULONG pulAdditionalIndex, PULONG pulLastTable) = 0;
-	virtual VOID CPP_EQFBBufRemoveTRNote(PSZ_W pData, PVOID pDocTagTable, PFN pfnUserExit, PFN pfnUserExitW, ULONG ulOemCP) = 0;
-	virtual SHORT CPP_EQFBAddSeg(PTBDOCUMENT pDoc, PTBSEGMENT pNewSeg) = 0;
-	virtual SHORT CPP_EQFBAddSegW(PTBDOCUMENT pDoc, PTBSEGMENT pNewSeg) = 0;
-	virtual USHORT CPP_EQFBBuildCountCheckSum(USHORT usCountFlags, USHORT usSrcWords, USHORT usTgtWords, USHORT usModWords) = 0;
-	virtual VOID CPP_EQFBFillWriteAttr(PVOID pQFTagTable, PSZ pszMarkAttr, PSZ pszNoCountAttr, PSZ pszCurrentAttr, PSZ pszJoinAttr, PSZ pszNAttr, PSZ pszStatusAttr, PSZ pszCountAttr) = 0;
-	virtual VOID CPP_EQFBFillWriteAttrW(PVOID pQFTagTable, PSZ_W pszMarkAttr, PSZ_W pszNoCountAttr, PSZ_W pszCurrentAttr, PSZ_W pszJoinAttr, PSZ_W pszNAttr, PSZ_W pszStatusAttr, PSZ_W pszCountAttr) = 0;
-	virtual BOOL CPP_EQFBGetHexNumberW(PSZ_W pszNumber, PUSHORT pusValue) = 0;
-/*! \endcond */
 
 private:
 

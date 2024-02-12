@@ -47,8 +47,8 @@ public:
     virtual ~RequestData() = default;
     //std::weak_ptr <EqfMemory> memory;
 
-    int buildErrorReturn(int iRC, const wchar_t *pszErrorMsg);
-    int buildErrorReturn(int iRC, const char *pszErrorMsg);
+    int buildErrorReturn(int iRC, const wchar_t *pszErrorMsg, int rest_rc = INTERNAL_SERVER_ERROR);
+    int buildErrorReturn(int iRC, const char *pszErrorMsg, int rest_rc = INTERNAL_SERVER_ERROR);
     int buildRet(int ret);
 
     COMMAND command = UNKNOWN_COMMAND;
@@ -231,7 +231,7 @@ class UnknownRequestData: public RequestData{
     int execute()   override {
         _rest_rc_ = 404;
         std::string msg = "Url \"" + strUrl + "\" was not parsed correctly";
-        return buildErrorReturn(404, msg.c_str());
+        return buildErrorReturn(404, msg.c_str(), 404);
     };
 };
 
@@ -340,9 +340,8 @@ struct ConcordanceSearchParams{
     char addInfoSearchType[50];
     char contextSearchType[50];
 
-    ConcordanceSearchParams(){memset(this, 0, sizeof(*this));}
-    
-};
+    ConcordanceSearchParams(){memset(this, 0, sizeof(*this));
+};//*/
 
 class DeleteEntriesReorganizeRequestData: public RequestData{
     private:
@@ -354,10 +353,9 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
 
     BOOL fSave2Disk = 1;
 protected:
-    ConcordanceSearchParams Data;
+    ConcordanceSearchParams concordanceSearchParams;
 
-
-    int parseJSON() override ;
+    int parseJSON() override { return concordanceSearchParams.parseJSON(strBody);}
     int checkData() override ;
     int execute  () override ;
 };

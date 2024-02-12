@@ -200,110 +200,7 @@ using PTMX_EXT_OUT_W = TMX_EXT_OUT_W *;
 #define GET_MORE_EXACTS_AVAIL      0x8000
 #define GET_ADDITIONAL_FUZZY_AVAIL 0x4000
 
-/**********************************************************************/
-/* Return Codes                                                       */
-/**********************************************************************/
-#define TMERR_BASE ERR_MEM_BASE            /* Base for errors          */
 
-#define TMERR_EOF     TMERR_BASE + 12
-
-#define DISK_FULL     TMERR_BASE + 13   // for Add /Replace / Create
-#define DB_FULL       TMERR_BASE + 14   // when number of blocks exceeds 2**16 - 1
-
-#define SEG_NOT_FOUND TMERR_BASE + 20   /* for Delete command          */
-#define CLUSTER_EMPTY TMERR_BASE + 21   /* Internally only             */
-
-#define TM_FILE_NOT_FOUND                  TMERR_BASE + 30 // for Open
-#define FILE_ALREADY_OPEN                  TMERR_BASE + 31 // for Open
-#define CORRUPTION_FLAG_ON                 TMERR_BASE + 32 // for Open
-#define FILE_MIGHT_BE_CORRUPTED            TMERR_BASE + 33 // for Open
-#define VERSION_MISMATCH                   TMERR_BASE + 34 // for Open
-#define CORRUPT_VERSION_MISMATCH           TMERR_BASE + 35 // for Open
-#define TM_FILE_SCREWED_UP                 TMERR_BASE + 36 // for Open
-#define NOT_A_MEMORY_DATABASE              TMERR_BASE + 37 // for Open
-// the following error code is returned if open fails because a TM was
-// corrupted and (on confirmation via a message) was then
-// successfully organized
-#define TM_WAS_CORRUPTED_IS_ORGANIZED      TMERR_BASE + 38 // for Open,
-#define TM_PROPERTIES_DIFFERENT            TMERR_BASE + 39 // for Open,
-#define SERVER_DRIVE_REMOVED               TMERR_BASE + 40 // for Open, /*@89A*/
-#define SERVER_DRIVE_ACTIVE                TMERR_BASE + 41 // for Open, /*@89A*/
-#define TM_PROPERTIES_EQUAL                TMERR_BASE + 42 // for Open,/*@1170A*/
-#define TM_PROPERTIES_NOT_OPENED           TMERR_BASE + 43 // for Open,/*@1170A*/
-
-#define BLOCK_SIZE_TOO_SMALL     TMERR_BASE + 48 /* for Create         */
-#define FILE_ALREADY_EXISTS      TMERR_BASE + 49 /* for Create         */
-
-#define NO_SEG_FOUND             TMERR_BASE + 50 /* for Extract        */
-
-#define ILLEGAL_TM_COMMAND       TMERR_BASE + 60 /* for TMT            */
-
-#define NOT_REPLACED_OLD_SEGMENT TMERR_BASE + 70 /* for Replace        */
-#define SEGMENT_BUFFER_FULL      TMERR_BASE + 71 /* for Replace   */ /*@1108A*/
-                                         /*rc from AddSegToCluster*/ /*@1108A*/
-#define SEG_SKIPPED_BAD_MARKUP   TMERR_BASE + 72 /* for Import         */
-#define SEG_RESET_BAD_MARKUP     TMERR_BASE + 73 /* for Import         */
-
-#define TM_FUNCTION_FAILED       TMERR_BASE + 80 /* Undefinable Error  */
-
-// Currently not used
-//#define TMERR_TM_HANDLER_ALREADY_ACTIVE     TMERR_BASE + 90  // Comm code
-
-#define TMERR_TOO_MANY_OPEN_DATABASES       TMERR_BASE + 91  // Comm code
-#define TMERR_TOO_MANY_USERS_CONNECTED      TMERR_BASE + 92  // Comm code
-#define TMERR_THREAD_NOT_SPAWNED            TMERR_BASE + 93  // Comm code
-#define TMERR_TM_OPENED_EXCLUSIVELY         TMERR_BASE + 94  // Comm code
-#define TMERR_TM_OPENED_SHARED              TMERR_BASE + 95  // Comm code
-
-// Currently not used
-//#define TMERR_PIPE_EXISTS                   TMERR_BASE + 96  // Comm code
-
-#define TMERR_NO_MORE_MEMORY_AVAILABLE      TMERR_BASE + 97  // Comm code
-#define TMERR_THREAD_INIT_FAILED            TMERR_BASE + 98  // Comm code
-#define TMERR_TOO_MANY_QUERIES              TMERR_BASE + 99  // Comm code
-#define TMERR_PROP_EXIST                    TMERR_BASE + 100 // Comm code
-#define TMERR_PROP_WRITE_ERROR              TMERR_BASE + 101 // Comm code
-#define TMERR_PROP_NOT_FOUND                TMERR_BASE + 102 // Comm code
-#define TMERR_PROP_READ_ERROR               TMERR_BASE + 103 // Comm code
-#define TMERR_TOO_MANY_TMS                  TMERR_BASE + 104 // Comm code
-#define TMERR_SERVER_NOT_STARTED            TMERR_BASE + 105 // Comm code
-#define TMERR_SERVERCODE_NOT_STARTED        TMERR_BASE + 106 // Comm code
-#define TMERR_COMMUNICATION_FAILURE         TMERR_BASE + 107 // Comm code
-
-// This error code is sent when somebody stops the server code and open connections
-// are still there (it's not guaranteed that this error code makes it to the requester
-// since the pipe is closed immediately; if this error code doesn't make it to the
-// requester, TMERR_COMMUNICATION_FAILURE will be returned)
-#define TMERR_SERVER_ABOUT_TO_EXIT          TMERR_BASE + 108 // Comm code
-#define TMERR_TOO_MANY_USERS_ON_SERVER      TMERR_BASE + 109 // Comm code
-
-#define SOURCE_STRING_ERROR                 TMERR_BASE + 150
-#define ERROR_ADD_TO_TM                     TMERR_BASE + 151
-
-#define LANG_FILE_NOT_FOUND                 TMERR_BASE + 200 // for Create
-#define LANGUAGE_NOT_FOUND                  TMERR_BASE + 201 // for Create
-#define LANG_FILE_LINE_TOO_LONG             TMERR_BASE + 202 // for Create
-#define LANG_CHAR_APPEARS_TWICE             TMERR_BASE + 203 // for Create
-#define LANG_GROUP_NUM_TOO_LARGE            TMERR_BASE + 204 // for Create
-#define TAG_FILE_NOT_FOUND                  TMERR_BASE + 205 // for Create
-#define WORD_FILE_NOT_FOUND                 TMERR_BASE + 206 // for Create
-#define TAG_FILE_TOO_LARGE                  TMERR_BASE + 207 // for Create /*@ZDA*/
-#define ERROR_OLD_PROPERTY_FILE             TMERR_BASE + 208
-#define ERROR_REMOTE_TM_NOT_SUPPORTED       TMERR_BASE + 209
-#define ERROR_VERSION_NOT_SUPPORTED         TMERR_BASE + 210
-
-#define  MEM_PROCESS_OK        6900              // Return code of load is OK
-#define  MEM_READ_ERR          MEM_PROCESS_OK+1  // Dos read error
-#define  MEM_WRITE_ERR         MEM_PROCESS_OK+2  // Dos write error
-#define  MEM_SEG_SYN_ERR       MEM_PROCESS_OK+3  // Segment syntax error
-#define  MEM_FILE_SYN_ERR      MEM_PROCESS_OK+4  // File syntax error
-#define  MEM_LOAD_OK           MEM_PROCESS_OK+5  // Return code of load dialog is OK
-#define  MEM_PROCESS_END       MEM_PROCESS_OK+6  // ID which indicates that a proc is terminated
-#define  MEM_DB_ERROR          MEM_PROCESS_OK+7  // Unpredictable memory db error
-#define  MEM_DB_CANCEL         MEM_PROCESS_OK+8  // load process was canceled /*@47*/
-#define  MEM_DB_CANCEL         MEM_PROCESS_OK+8  // load process was canceled /*@47*/
-#define  MEM_DB_EXTRACT_ERROR  MEM_PROCESS_OK+9  // retuned from function MemReadWriteSegment when TmExtract fails /*@47*/
-#define  MEM_DB_REPLACE_ERROR  MEM_PROCESS_OK+10 // retuned from function MemReadWriteSegment when TmReplace fails /*@47*/
 
 /* The segment marker */
 #define  SEGMARKER       "###"
@@ -4105,18 +4002,6 @@ USHORT NTMConvertProperties( PPROPTRANSLMEM, PMEM_ORGANIZE_IDA );
 //5MB reserved for service
 #define MEMORY_RESERVED_FOR_SERVICE 5000000
 
-
-enum statusCodes {
-  OK = 200, 
-  INTERNAL_SERVER_ERROR = 500, 
-  PROCESSING = 102, 
-  NOT_FOUND = 404,
-  BAD_REQUEST = 400,
-  CONFLICT = 409,
-  CREATED = 201,
-  NOT_ACCEPTABLE = 406
-
-};
 
 class CreateMemRequestData;
 class EqfMemoryPlugin : public OtmPlugin

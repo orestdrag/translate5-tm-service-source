@@ -187,13 +187,23 @@ void ProxygenHandler::sendResponse()noexcept{
       }
       case 423:
       {
-        responseText = "WRITE REQUESTS ARE NOT ALLOWED";
+        //responseText 
+        pRequest->outputMessage = "{\n\"msg\": \"WRITE REQUESTS ARE NOT ALLOWED\",\n\"rc\" = 423\n}\n" ;
+        responseText = "Locked";
         break;
       }
-      //case 400:
+      case 400:
+      {
+        responseText = "Bad Request";
+      }
+      //case 500:
+      //{
+      //}
+      case 500:
       default:
       {
-        responseText = "WRONG REQUEST";
+        pRequest->_rest_rc_ = 500;
+        responseText = "Internal Server Error";
         break;
       }
     }

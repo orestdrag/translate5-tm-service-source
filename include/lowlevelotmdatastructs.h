@@ -1411,6 +1411,238 @@ typedef enum _PROCWINSTYLE
 /**********************************************************************/
 #define HPOINTER    HICON
 
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* Error Base IDs                                                     */
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+#define  Err_NoError          0        // no error occured
+
+/* Error Base Values */
+#define  Err_Eqfstart      1000
+#define  Err_Prop          2000        // property handler rc
+#define  Err_ObjM          2100        // object manager rc
+#define  Err_Nfol          2200        // new folder messages
+#define  ERR_BTREE_BASE    5000
+#define  ERR_BTREE_END     5999
+#define  ERR_MEM_BASE      6000
+#define  ERR_MEM_END       6999
+#define  ERR_MORPH_BASE    7000
+#define  ERR_MORPH_END     7999
+#define  ERR_DICT_BASE     8000
+#define  ERR_DICT_END      8999
+#define  ERR_PRINT_BASE    9000
+#define  ERR_PRINT_END     9999
+#define  ERR_COUNT_BASE   10000
+#define  ERR_COUNT_END    10100
+#define  QLDB_ERR_BASE    10500
+#define  QLDB_ERR_END     11000
+
+/* General error message IDs */
+
+#define Err_NoDiskSpace        (Err_Eqfstart+01) // too less disk space
+#define Err_NoStorage          (Err_Eqfstart+02) // no more storage
+#define Err_System             (Err_Eqfstart+03) // unexpected error
+#define Err_OpenFile           (Err_Eqfstart+04) // error opening file
+#define Err_ReadFile           (Err_Eqfstart+05) // error reading file
+#define Err_DeleteFile         (Err_Eqfstart+06) // cannot delete file
+#define Err_WriteFile          (Err_Eqfstart+07) // error writing to file
+#define Err_HandlerExists      (Err_Eqfstart+08) // handler already installed
+
+
+/* Object manager error message IDs */
+
+#define ErrObjM_AlreadyReg     (Err_ObjM+ 1) // already registered
+#define ErrObjM_CreateEntry    (Err_ObjM+ 2) // cannot create tbl entry (nostor?)
+#define ErrObjM_NoHandler      (Err_ObjM+ 3) // no anchor found for class
+
+/* Properties handler error message IDs */
+
+#define ErrProp_AccessDenied   (Err_Prop+ 1) // wrong access to properties
+#define ErrProp_AlreadyDefined (Err_Prop+ 2) // symbolic name already defined
+#define ErrProp_AlreadyExists  (Err_Prop+ 3) // properties already exist
+#define ErrProp_InvalidClass   (Err_Prop+ 4) // invalid properties class
+#define ErrProp_InvalidData    (Err_Prop+ 5) // invalid properties data
+#define ErrProp_InvalidEntry   (Err_Prop+ 6) // invalid entry index
+#define ErrProp_InvalidFile    (Err_Prop+ 7) // invalid file detected
+//
+#define ErrProp_InvalidName    (Err_Prop+ 9) // symbolic name invalid
+#define ErrProp_InvalidObjectName (Err_Prop+10) // object name invalid
+#define ErrProp_InvalidType    (Err_Prop+11) // properties type invalid
+#define ErrProp_NoEnvironment  (Err_Prop+12) // properties environment not active
+#define ErrProp_NoName         (Err_Prop+13) // invalid handles
+#define ErrProp_NoSystem       (Err_Prop+14) // system properties not located
+#define ErrProp_NotAuthorized  (Err_Prop+15) // properties of class not created
+#define ErrProp_NotFound       (Err_Prop+16) // property name not located
+#define ErrProp_ObjectBusy     (Err_Prop+17) // objects busy
+#define ErrProp_SystemInvalid  (Err_Prop+18) // system properties invalid
+#define ErrProp_InvalidAccess  (Err_Prop+19) // access flg invalid
+#define ErrProp_MissingBuffer  (Err_Prop+20) // buffer addr missing
+#define ErrProp_NotLoaded      (Err_Prop+21) // prop load error
+#define ErrProp_InvalidParms   (Err_Prop+22) // invalid parm specified
+#define ErrProp_InvalidHandle  (Err_Prop+23) // invalid handle to properties
+
+
+#define BTREE_BASE          ERR_BTREE_BASE        //
+#define BTREE_NO_ROOM       BTREE_BASE+1          // Insufficent memory
+#define BTREE_ILLEGAL_FILE  BTREE_BASE+2          // Not an index file
+#define BTREE_DUPLICATE_KEY BTREE_BASE+3          // Key is not unique
+#define BTREE_NO_BUFFER     BTREE_BASE+4          // No buffer available
+#define BTREE_NOT_FOUND     BTREE_BASE+5          // Key not found
+#define BTREE_INVALID       BTREE_BASE+6          // Btree pointer invalid
+#define BTREE_READ_ERROR    BTREE_BASE+7          // read error on file
+#define BTREE_CORRUPTED     BTREE_BASE+8          // binary tree is corrupted
+#define BTREE_BUFFER_SMALL  BTREE_BASE+9          // buffer to small for data
+#define BTREE_DISK_FULL     BTREE_BASE+10         // disk is full
+#define BTREE_USERDATA      BTREE_BASE+11         // user data too large
+#define BTREE_EOF_REACHED   BTREE_BASE+12         // eof or start reached
+#define BTREE_EMPTY         BTREE_BASE+13         // no entries in dictionary
+#define BTREE_WRITE_ERROR   BTREE_BASE+14         // error during write
+#define BTREE_OPEN_ERROR    BTREE_BASE+15         // error during open
+#define BTREE_CLOSE_ERROR   BTREE_BASE+16         // error during close
+#define BTREE_NUMBER_RANGE  BTREE_BASE+17         // number out of range
+#define BTREE_INV_SERVER    BTREE_BASE+18         // invalid server name
+#define BTREE_READONLY      BTREE_BASE+19         // opened for read/only
+#define BTREE_DATA_RANGE    BTREE_BASE+20         // data length out of range
+#define BTREE_DICT_LOCKED   BTREE_BASE+21         // dictionary is locked
+#define BTREE_ENTRY_LOCKED  BTREE_BASE+22         // entry is locked
+#define BTREE_MAX_DICTS     BTREE_BASE+23         // max. number of dicts reached
+#define BTREE_NO_EXCLUSIVE  BTREE_BASE+24         // no excl. use possible
+#define BTREE_FILE_NOTFOUND BTREE_BASE+25         // file not found
+#define BTREE_ACCESS_ERROR  BTREE_BASE+26         // access error
+#define BTREE_INVALID_DRIVE           BTREE_BASE+27
+#define BTREE_OPEN_FAILED             BTREE_BASE+28
+#define BTREE_NETWORK_ACCESS_DENIED   BTREE_BASE+29
+#define BTREE_LOCK_ERROR              BTREE_BASE+30  // locking failed
+#define BTREE_IN_USE                  BTREE_BASE+31  // data is locked/modified
+#define BTREE_INVALIDATED             BTREE_BASE+32  // data has been invalidated
+#define BTREE_LOOKUPTABLE_NULL        BTREE_BASE+33  // pointer to lookup table is null
+#define BTREE_LOOKUPTABLE_CORRUPTED   BTREE_BASE+34  // lookup table is corrupted
+#define BTREE_LOOKUPTABLE_TOO_SMALL   BTREE_BASE+35  // lookup table is too small, file is too big
+#define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
+
+
+#define MAX_NUM_DICTS      1900        // max. number of dict concurrently open
+
+/**********************************************************************/
+/* Return Codes                                                       */
+/**********************************************************************/
+#define TMERR_BASE ERR_MEM_BASE            /* Base for errors          */
+
+#define TMERR_EOF     TMERR_BASE + 12
+
+#define DISK_FULL     TMERR_BASE + 13   // for Add /Replace / Create
+#define DB_FULL       TMERR_BASE + 14   // when number of blocks exceeds 2**16 - 1
+
+#define SEG_NOT_FOUND TMERR_BASE + 20   /* for Delete command          */
+#define CLUSTER_EMPTY TMERR_BASE + 21   /* Internally only             */
+
+#define TM_FILE_NOT_FOUND                  TMERR_BASE + 30 // for Open
+#define FILE_ALREADY_OPEN                  TMERR_BASE + 31 // for Open
+#define CORRUPTION_FLAG_ON                 TMERR_BASE + 32 // for Open
+#define FILE_MIGHT_BE_CORRUPTED            TMERR_BASE + 33 // for Open
+#define VERSION_MISMATCH                   TMERR_BASE + 34 // for Open
+#define CORRUPT_VERSION_MISMATCH           TMERR_BASE + 35 // for Open
+#define TM_FILE_SCREWED_UP                 TMERR_BASE + 36 // for Open
+#define NOT_A_MEMORY_DATABASE              TMERR_BASE + 37 // for Open
+// the following error code is returned if open fails because a TM was
+// corrupted and (on confirmation via a message) was then
+// successfully organized
+#define TM_WAS_CORRUPTED_IS_ORGANIZED      TMERR_BASE + 38 // for Open,
+#define TM_PROPERTIES_DIFFERENT            TMERR_BASE + 39 // for Open,
+#define SERVER_DRIVE_REMOVED               TMERR_BASE + 40 // for Open, /*@89A*/
+#define SERVER_DRIVE_ACTIVE                TMERR_BASE + 41 // for Open, /*@89A*/
+#define TM_PROPERTIES_EQUAL                TMERR_BASE + 42 // for Open,/*@1170A*/
+#define TM_PROPERTIES_NOT_OPENED           TMERR_BASE + 43 // for Open,/*@1170A*/
+
+#define BLOCK_SIZE_TOO_SMALL     TMERR_BASE + 48 /* for Create         */
+#define FILE_ALREADY_EXISTS      TMERR_BASE + 49 /* for Create         */
+
+#define NO_SEG_FOUND             TMERR_BASE + 50 /* for Extract        */
+
+#define ILLEGAL_TM_COMMAND       TMERR_BASE + 60 /* for TMT            */
+
+#define NOT_REPLACED_OLD_SEGMENT TMERR_BASE + 70 /* for Replace        */
+#define SEGMENT_BUFFER_FULL      TMERR_BASE + 71 /* for Replace   */ /*@1108A*/
+                                         /*rc from AddSegToCluster*/ /*@1108A*/
+#define SEG_SKIPPED_BAD_MARKUP   TMERR_BASE + 72 /* for Import         */
+#define SEG_RESET_BAD_MARKUP     TMERR_BASE + 73 /* for Import         */
+
+#define TM_FUNCTION_FAILED       TMERR_BASE + 80 /* Undefinable Error  */
+
+// Currently not used
+//#define TMERR_TM_HANDLER_ALREADY_ACTIVE     TMERR_BASE + 90  // Comm code
+
+#define TMERR_TOO_MANY_OPEN_DATABASES       TMERR_BASE + 91  // Comm code
+#define TMERR_TOO_MANY_USERS_CONNECTED      TMERR_BASE + 92  // Comm code
+#define TMERR_THREAD_NOT_SPAWNED            TMERR_BASE + 93  // Comm code
+#define TMERR_TM_OPENED_EXCLUSIVELY         TMERR_BASE + 94  // Comm code
+#define TMERR_TM_OPENED_SHARED              TMERR_BASE + 95  // Comm code
+
+// Currently not used
+//#define TMERR_PIPE_EXISTS                   TMERR_BASE + 96  // Comm code
+
+#define TMERR_NO_MORE_MEMORY_AVAILABLE      TMERR_BASE + 97  // Comm code
+#define TMERR_THREAD_INIT_FAILED            TMERR_BASE + 98  // Comm code
+#define TMERR_TOO_MANY_QUERIES              TMERR_BASE + 99  // Comm code
+#define TMERR_PROP_EXIST                    TMERR_BASE + 100 // Comm code
+#define TMERR_PROP_WRITE_ERROR              TMERR_BASE + 101 // Comm code
+#define TMERR_PROP_NOT_FOUND                TMERR_BASE + 102 // Comm code
+#define TMERR_PROP_READ_ERROR               TMERR_BASE + 103 // Comm code
+#define TMERR_TOO_MANY_TMS                  TMERR_BASE + 104 // Comm code
+#define TMERR_SERVER_NOT_STARTED            TMERR_BASE + 105 // Comm code
+#define TMERR_SERVERCODE_NOT_STARTED        TMERR_BASE + 106 // Comm code
+#define TMERR_COMMUNICATION_FAILURE         TMERR_BASE + 107 // Comm code
+
+// This error code is sent when somebody stops the server code and open connections
+// are still there (it's not guaranteed that this error code makes it to the requester
+// since the pipe is closed immediately; if this error code doesn't make it to the
+// requester, TMERR_COMMUNICATION_FAILURE will be returned)
+#define TMERR_SERVER_ABOUT_TO_EXIT          TMERR_BASE + 108 // Comm code
+#define TMERR_TOO_MANY_USERS_ON_SERVER      TMERR_BASE + 109 // Comm code
+
+#define SOURCE_STRING_ERROR                 TMERR_BASE + 150
+#define ERROR_ADD_TO_TM                     TMERR_BASE + 151
+
+#define LANG_FILE_NOT_FOUND                 TMERR_BASE + 200 // for Create
+#define LANGUAGE_NOT_FOUND                  TMERR_BASE + 201 // for Create
+#define LANG_FILE_LINE_TOO_LONG             TMERR_BASE + 202 // for Create
+#define LANG_CHAR_APPEARS_TWICE             TMERR_BASE + 203 // for Create
+#define LANG_GROUP_NUM_TOO_LARGE            TMERR_BASE + 204 // for Create
+#define TAG_FILE_NOT_FOUND                  TMERR_BASE + 205 // for Create
+#define WORD_FILE_NOT_FOUND                 TMERR_BASE + 206 // for Create
+#define TAG_FILE_TOO_LARGE                  TMERR_BASE + 207 // for Create /*@ZDA*/
+#define ERROR_OLD_PROPERTY_FILE             TMERR_BASE + 208
+#define ERROR_REMOTE_TM_NOT_SUPPORTED       TMERR_BASE + 209
+#define ERROR_VERSION_NOT_SUPPORTED         TMERR_BASE + 210
+
+#define  MEM_PROCESS_OK        6900              // Return code of load is OK
+#define  MEM_READ_ERR          MEM_PROCESS_OK+1  // Dos read error
+#define  MEM_WRITE_ERR         MEM_PROCESS_OK+2  // Dos write error
+#define  MEM_SEG_SYN_ERR       MEM_PROCESS_OK+3  // Segment syntax error
+#define  MEM_FILE_SYN_ERR      MEM_PROCESS_OK+4  // File syntax error
+#define  MEM_LOAD_OK           MEM_PROCESS_OK+5  // Return code of load dialog is OK
+#define  MEM_PROCESS_END       MEM_PROCESS_OK+6  // ID which indicates that a proc is terminated
+#define  MEM_DB_ERROR          MEM_PROCESS_OK+7  // Unpredictable memory db error
+#define  MEM_DB_CANCEL         MEM_PROCESS_OK+8  // load process was canceled /*@47*/
+#define  MEM_DB_CANCEL         MEM_PROCESS_OK+8  // load process was canceled /*@47*/
+#define  MEM_DB_EXTRACT_ERROR  MEM_PROCESS_OK+9  // retuned from function MemReadWriteSegment when TmExtract fails /*@47*/
+#define  MEM_DB_REPLACE_ERROR  MEM_PROCESS_OK+10 // retuned from function MemReadWriteSegment when TmReplace fails /*@47*/
+
+
+enum statusCodes {
+  OK = 200, 
+  INTERNAL_SERVER_ERROR = 500, 
+  PROCESSING = 102, 
+  NOT_FOUND = 404,
+  BAD_REQUEST = 400,
+  CONFLICT = 409,
+  CREATED = 201,
+  NOT_ACCEPTABLE = 406
+
+};
 
 
 /**********************************************************************/

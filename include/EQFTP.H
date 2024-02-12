@@ -1015,39 +1015,6 @@ int BiDitransform
 #define BDTERR_DIFFERENT_CODEPAGES 3
 #define BDTERR_NOMEM 4
 
- SHORT EQFBWordCntPerSeg (PVOID, PTOKENENTRY, PSZ_W, SHORT, PULONG,PULONG, ULONG);
- SHORT EQFBCntAllSrcWords( PTBDOCUMENT pSourceDoc, PTBDOCUMENT pTargetDoc, SHORT sSourceLang, ULONG ulOemCP );
- SHORT EQFBHistDocSave(PSZ, PTBDOCUMENT, SHORT );
- SHORT EQFBHistDocSaveEx( PSZ, PTBDOCUMENT, SHORT );
-   VOID  EQFBShowFindChangeDlg( BOOL );   // show or hide
-   HWND  EQFBFindChangeDlgHwnd( VOID );   // return handle of FindChange Dlg
- VOID  EQFBBufRemoveTRNote( PSZ_W, PVOID, PFN, PFN, ULONG );
- BOOL  EQFBInit ( VOID );                                 // init editor wnd class
- VOID  EQFBGotoSeg( PTBDOCUMENT,ULONG,USHORT);  // position file at segment
- VOID EQFBSetNewCellSize ( PTBDOCUMENT, ULONG, ULONG );// set new cell size
- VOID  EQFBGetUserSettings ( PTBDOCUMENT );
-   VOID  EQFBGenProcessing( HWND, PTBDOCUMENT, USHORT );
- void  EQFBFuncTopDoc(PTBDOCUMENT);
-  MRESULT HandleEEAWMChar ( HWND, WINMSG, WPARAM, LPARAM, PTBDOCUMENT );
-
- VOID EQFBSoftLFInsert ( PTBDOCUMENT );
- VOID EQFBSoftLFRemove ( PTBDOCUMENT );
-  BOOL EQFBBufAddSoftLF ( PTBDOCUMENT    pDoc,
-                          PTBSEGMENT     pSeg,
-                          PSZ_W          pData,
-                          LONG           lSegStartCol,
-                          PLONG          plSegEndCol,
-                          PUSHORT        pusSegOffOld );
- USHORT EQFBAdjustCountInfo( PTBDOCUMENT pDoc, PSZ pszDocObjName );
-
-
-
-
-VOID EQFBBufRemoveSoftLF(HWND, PCHAR_W, PUSHORT, PUSHORT);
-
-
-BOOL   EQFBEnableToolbarItem( HWND  hwnd, USHORT usID );
-
 
 
 typedef struct _FUZZYTOK
