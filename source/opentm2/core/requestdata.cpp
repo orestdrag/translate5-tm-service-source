@@ -693,7 +693,7 @@ int ImportRequestData::parseJSON(){
     }
   } /* endwhile */
   json_factory.parseJSONStop( parseHandle );
-  if(_rc_ == 2002) _rc_ == 0;
+  if(_rc_ == 2002) _rc_ = 0;
   return 0; 
 }
 
@@ -884,7 +884,7 @@ int ImportLocalRequestData::parseJSON(){
     }
   } /* endwhile */
   json_factory.parseJSONStop( parseHandle );
-  if(_rc_ == 2002) _rc_ == 0;
+  if(_rc_ == 2002) _rc_ = 0;
   return 0; 
 }
 
