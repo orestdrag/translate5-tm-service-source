@@ -1456,7 +1456,7 @@ int StatusMemRequestData::execute() {
     {
       case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
       case REORGANIZE_RUNNING_STATUS: pszStatus = "reorganize"; break;
-      case IMPORT_FAILED_STATUS: pszStatus = "import failed"; break;
+      case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
       case REORGANIZE_FAILED_STATUS: pszStatus = "reorganize failed"; break;
       default: pszStatus = "available"; break;
     }
