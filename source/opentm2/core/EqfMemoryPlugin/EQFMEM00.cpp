@@ -187,10 +187,10 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
   if ( pRIDA->pMem != NULL )
   {
     int use_count = pRIDA->pMem.use_count();
-    if(use_count != 3)//1)
-    {
-      T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 3, but " << use_count;
-    }
+    //if(use_count != 3)//1)
+    //{
+    //  T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 3, but " << use_count;
+    //}
     //TMManager::GetInstance()->CloseTM(strMemName);
     //pRIDA->pMem = nullptr;
 
@@ -272,14 +272,22 @@ VOID EQFMemOrganizeProcess
     else
     {
       // write proposal to output memory
-      bool fFilterPassed = true;
+      //bool fFilterPassed = true;
+      bool fSkipSegment = !pRIDA->m_reorganizeFilters.empty(); // if there are no filters - no need to filter out segment
+
+      //if no filters - import segment
+      //else check all filters if all true - skip segment
       for(auto& filter: pRIDA->m_reorganizeFilters){
-        if(filter.check(*pRIDA->pProposal)){
-          fFilterPassed = false;
+        bool result = filter.check(*pRIDA->pProposal);
+        if(!result){
+          fSkipSegment = false;
+          //fFilterPassed = false;
           break;
         }
       }
-      if(fFilterPassed == false){
+
+      //if(fFilterPassed == false){
+      if( fSkipSegment ){
         pRIDA->pMem->importDetails->filteredSegments++;
       }else{
         pRIDA->pProposal->pInputSentence = new TMX_SENTENCE(pRIDA->pProposal->szSource, pRIDA->pProposal->szTarget);

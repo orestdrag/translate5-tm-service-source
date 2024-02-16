@@ -833,6 +833,8 @@ EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
 
 int EqfMemory::ReloadFromDisk(){
   int rc = 0;
+  TmBtree.resetLookupTable();
+  InBtree.resetLookupTable();
   rc = TmBtree.fb.ReadFromFile();
   rc = InBtree.fb.ReadFromFile();
   return rc;

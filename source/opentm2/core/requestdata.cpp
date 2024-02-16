@@ -939,9 +939,6 @@ int ImportLocalRequestData::execute(){
   return( CREATED );
 }
 
-int ReorganizeRequestData::parseJSON(){
-  return 0;
-}
 
 int ReorganizeRequestData::checkData(){
   if ( strMemName.empty() )
@@ -951,6 +948,121 @@ int ReorganizeRequestData::checkData(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } 
   return 0;
+}
+
+/*
+int ParseSearchType(std::string& inputStr, SearchType& param){
+  if(!strcasecmp(inputStr.c_str(),"concordance"))
+  {
+    param = SearchType::CONCORDANCE;
+  }else if(!strcasecmp(inputStr.c_str(),"EXACT")){
+    param = SearchType::EXACT;
+  }else{
+    T5LOG(T5ERROR) << "";
+    return -1;
+  }
+  return 0;
+}//*/
+
+int ProposalFilter::StrToFilterType(const char* str, FilterType &filterType){
+    filterType = FilterType::UNKNOWN;
+    if(!str){ 
+      return -1;
+    }
+    if(!strcasecmp(str, "EXACT")){ 
+      filterType =  FilterType::EXACT;
+      return 0;
+    }
+    if(!strcasecmp(str, "CONTAINS")){
+      filterType = FilterType::CONTAINS;
+      return 0;
+    }
+    if(!strcasecmp(str, "concordance")){
+      filterType = FilterType::CONTAINS;
+      return 0;
+    }
+    //if(strcasecmp(str, "RANGE")) return FilterType::RANGE;
+    T5LOG(T5WARNING) << " cant parse " << str << " filtertype!";
+    return -1;
+  }
+
+int ConcordanceSearchParams::parseJSON(std::string& str){
+  int _rc_ = 0;
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  static JSONFactory json_factory;
+
+  void *parseHandle = json_factory.parseJSONStart( str, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    T5LOG(T5ERROR) <<  "ConcordanceSearchParams::Missing or incorrect JSON data in request body" ;
+    return( BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  while ( _rc_ == 0 )
+  {
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+    if ( _rc_ == 0 )
+    {
+      if ( strcasecmp( name.c_str(), "addInfo" ) == 0 )
+      {
+        addInfo = value;
+      }
+      else if(strcasecmp(name.c_str(), "addInfoSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), addInfoSearchMode);
+      }
+      else if ( strcasecmp( name.c_str(), "context" ) == 0 )
+      {
+        context = value;
+      }
+      else if(strcasecmp(name.c_str(), "contextSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), contextSearchMode);
+      }
+      else if(strcasecmp(name.c_str(), "author") == 0)
+      {
+        author = value;
+      }
+      else if(strcasecmp(name.c_str(), "authorSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), authorSearchMode);
+      }
+      else if(strcasecmp(name.c_str(), "document") == 0)
+      {
+        document = value;
+      }
+      else if(strcasecmp(name.c_str(), "documentSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), documentSearchMode);
+      }
+      else if(strcasecmp(name.c_str(), "timestampSpanStart") == 0)
+      {
+        convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanStart);
+      }
+      else if(strcasecmp(name.c_str(), "timestampSpanEnd") == 0)
+      {
+        convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanEnd);
+      }
+      else      
+      if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+        loggingThreshold = std::stoi(value);
+        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+      }else {
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }
+    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+      std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
+      T5LOG(T5ERROR) << msg;
+      return _rc_;
+    }
+  } /* endwhile */
+  json_factory.parseJSONStop( parseHandle );
+  if(_rc_ == 2002) _rc_ = 0;
+  return _rc_;
 }
 
 // Prepare the organize of a TM in function call mode
@@ -1037,6 +1149,20 @@ int ReorganizeRequestData::execute(){
   return( _rc_ );
 }
 
+/*
+    char author[OTMPROPOSAL_MAXNAMELEN];
+    char document[OTMPROPOSAL_MAXNAMELEN];
+    char addInfo[OTMPROPOSAL_MAXNAMELEN];
+    char context[OTMPROPOSAL_MAXNAMELEN];
+    
+    char srcLangSearchType[50];
+    char trgLangSearchType[50];
+    char timespanSearchType[50];
+    char authorSearchType[50];
+    char docSearchType[50];
+    char addInfoSearchType[50];
+    char contextSearchType[50];
+>>>>>>> Stashed changes
 
 int DeleteEntriesReorganizeRequestData::parseJSON(){
 
@@ -1067,13 +1193,13 @@ int DeleteEntriesReorganizeRequestData::parseJSON(){
   { L"",                  JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
-//*/
   return _rc_;
 }
+//*/
 
 int DeleteEntriesReorganizeRequestData::checkData(){
   if ( strMemName.empty() )
@@ -1138,6 +1264,40 @@ int DeleteEntriesReorganizeRequestData::execute(){
 
     mem.reset();
     memRef.reset();
+
+    if(concordanceSearchParams.addInfoSearchMode != ProposalFilter::NONE && concordanceSearchParams.addInfoSearchMode != ProposalFilter::UNKNOWN)
+    {
+      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.addInfo, 
+          ProposalFilter::ADDINFO, concordanceSearchParams.addInfoSearchMode));
+    }
+    if(concordanceSearchParams.contextSearchMode != ProposalFilter::NONE && concordanceSearchParams.contextSearchMode != ProposalFilter::UNKNOWN)
+    {
+      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.context, 
+          ProposalFilter::CONTEXT, concordanceSearchParams.contextSearchMode));
+    }
+    if(concordanceSearchParams.authorSearchMode != ProposalFilter::NONE && concordanceSearchParams.authorSearchMode != ProposalFilter::UNKNOWN)
+    {
+      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.author, 
+          ProposalFilter::AUTHOR, concordanceSearchParams.authorSearchMode));
+    }
+    if(concordanceSearchParams.documentSearchMode != ProposalFilter::NONE && concordanceSearchParams.documentSearchMode != ProposalFilter::UNKNOWN)
+    {
+      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.document, 
+          ProposalFilter::DOC, concordanceSearchParams.documentSearchMode));
+    }
+    if(concordanceSearchParams.timestampSpanStart || concordanceSearchParams.timestampSpanEnd)
+    {
+      if(concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd)
+      {
+        pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.timestampSpanStart, concordanceSearchParams.timestampSpanEnd,
+          ProposalFilter::TIMESTAMP));
+      }else{
+        std::string msg = "for timespan you should provide 2 values, provided values: timestampSpanStart=" + std::to_string(concordanceSearchParams.timestampSpanStart) 
+            + "; timestampSpanEnd=" + std::to_string(concordanceSearchParams.timestampSpanStart); 
+        buildErrorReturn(_rc_, msg.c_str(), 400);
+      }
+
+    }
   } 
 
   //worker thread 
@@ -1242,9 +1402,9 @@ int TagRemplacementRequestData::execute(){
     json_factory.parseJSONStop( parseHandle );
   }
 
-  auto result = std::make_unique<RequestTagReplacer>(std::move(EncodingHelper::convertToUTF16(strSrcData.c_str())), 
-                                                     std::move(EncodingHelper::convertToUTF16(strTrgData.c_str())),
-                                                     std::move(EncodingHelper::convertToUTF16(strReqData.c_str())));
+  auto result = std::make_unique<RequestTagReplacer>(std::move(EncodingHelper::convertToWChar(strSrcData.c_str())), 
+                                                     std::move(EncodingHelper::convertToWChar(strTrgData.c_str())),
+                                                     std::move(EncodingHelper::convertToWChar(strReqData.c_str())));
                             
   //auto  =  replaceString( &_rc_);
 
@@ -1469,6 +1629,7 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeProgress":"importProgress", mem->importDetails->usProgress );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
+      if(mem->importDetails->fReorganize) json_factory.addParmToJSON( outputMessage, "segmentsFilteredOut", mem->importDetails->filteredSegments );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
       std::string invalidSegmRCs;
       for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
@@ -1596,7 +1757,7 @@ int addProposalToJSONString
   pJsonFactory->addParmToJSONW( strJSON, L"context", Data.szContext);
   pJsonFactory->addParmToJSONW( strJSON, L"additionalInfo", Data.szAddInfo );
   Data.getInternalKey(buff, OTMPROPOSAL_MAXSEGLEN);
-  pJsonFactory->addParmToJSONW( strJSON, L"internalKey", EncodingHelper::convertToUTF16(buff).c_str() );
+  pJsonFactory->addParmToJSONW( strJSON, L"internalKey", EncodingHelper::convertToWChar(buff).c_str() );
   
   if(fAddFuzzyInfo){
     wbuff[0] = '\0';
@@ -1958,7 +2119,7 @@ int UpdateEntryRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   // parse input parameters
   Data.clear();    
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
@@ -2129,7 +2290,7 @@ int DeleteEntryRequestData::parseJSON(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } /* endif */
     // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   // parse input parameters
   Data.clear();
 
@@ -2292,7 +2453,7 @@ int FuzzySearchRequestData::parseJSON(){
   } /* endif */
 
     // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
   Data.clear();
   int loggingThreshold = -1;
@@ -2503,7 +2664,7 @@ int ConcordanceSearchRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
   JSONFactory *factory = JSONFactory::getInstance();
   int loggingThreshold = -1;

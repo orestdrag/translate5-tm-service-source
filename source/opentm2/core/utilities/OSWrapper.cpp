@@ -71,7 +71,7 @@ int MultiByteToWideChar(
     lpWideCharStr[cbMultiByte] = 0;
 
     return mbsnrtowcs(lpWideCharStr, (const char**)&lpMultiByteStr, cbMultiByte, cchWideChar, &state );
-    //EncodingHelper::convertToUTF16(lpMultiByteStr);
+    //EncodingHelper::convertToWChar(lpMultiByteStr);
     //return mbtowc(lpWideCharStr, lpMultiByteStr, cchWideChar);
 }
 

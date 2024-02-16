@@ -675,6 +675,9 @@ struct BTREE
     ULONG   ulLen             // length of user data
     );
 
+
+    int resetLookupTable();
+    
     //+----------------------------------------------------------------------------+
     // External function
     //+----------------------------------------------------------------------------+
@@ -2154,5 +2157,61 @@ typedef struct _MEMPROPOSAL
   bool fIsoTargetLangIsPrefered = false;
 
 } MEMPROPOSAL, *PMEMPROPOSAL;
+
+
+std::wstring convertStrToWstr(std::string& str);
+
+class ProposalFilter{
+//public:  
+//  FilterParam m_param;  
+
+
+public:
+
+enum FilterField{    
+    UNKNOWN_FIELD,
+    TIMESTAMP,
+    //SEG_ID,
+
+    CHAR_FIELDS_START,
+    SRC_LANG = CHAR_FIELDS_START,
+    TRG_LANG,
+    AUTHOR,
+    DOC, 
+    //MARKUP,
+
+    WIDE_CHAR_FIELDS_START, 
+    SOURCE = WIDE_CHAR_FIELDS_START,
+    TARGET,
+    CONTEXT,
+    ADDINFO
+  };
+
+  enum FilterType{
+    NONE = 0, UNKNOWN, EXACT, CONTAINS, RANGE
+  };
+
+  static int StrToFilterType(const char* str, FilterType &filterType);
+
+
+private:
+  FilterField m_field;
+  FilterType m_type;
+  long m_timestamp1=0, m_timestamp2=0;
+  std::string m_searchString;
+  std::wstring m_searchStringW;
+
+public:
+
+  ProposalFilter(std::string& search, FilterField field, FilterType type): m_field(field), m_type(type), m_searchStringW(convertStrToWstr(search)),
+        m_searchString(search){};
+  
+  ProposalFilter(long t1, long t2, FilterField field = TIMESTAMP): m_timestamp1(t1), m_timestamp2(t2), m_field{field}{}
+
+  //ProposalFilter(FilterParam&& param) m_param(param){}
+
+  bool check(OtmProposal& prop);
+};
+
 
 #endif //_LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_

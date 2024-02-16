@@ -312,7 +312,7 @@ void TagReplacer::reset(){
 }
 
 std::wstring TagReplacer::PrintReplaceTagWithKey(TagInfo& tag){  
-  std::wstring rAttrValue = EncodingHelper::convertToUTF16(tag.t5n_key);
+  std::wstring rAttrValue = EncodingHelper::convertToWChar(tag.t5n_key);
   std::replace(rAttrValue.begin(), rAttrValue.end(), '=', '_');
   return rAttrValue;
 }
@@ -338,7 +338,7 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
 
   if(tagType == T5_N_ELEMENT){
     std::string outputStr = "<" + TmxIDToName[tag.original_tagType] + " id=\"" + std::to_string(tag.original_x) + "\" r=\"" + tag.t5n_key + "\" n=\"" + tag.t5n_value + "\"/>";
-    return EncodingHelper::convertToUTF16(outputStr);
+    return EncodingHelper::convertToWChar(outputStr);
   }
 
 
@@ -420,7 +420,7 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
     res += '/';
   res += ">";
   T5LOG( T5DEBUG) <<  ":: generated tag = " <<  res;
-  return EncodingHelper::convertToUTF16(res.c_str());
+  return EncodingHelper::convertToWChar(res.c_str());
 }
 
 bool is_number(std::u16string s)
@@ -3155,7 +3155,7 @@ void TMXParseHandler::characters(const XMLCh* const chars, const XMLSize_t lengt
 {
   char16_t* pzChars = (char16_t*)chars;
   std::string sChars = EncodingHelper::convertToUTF8(pzChars);
-  std::wstring wChars = EncodingHelper::convertToUTF16(sChars.c_str());
+  std::wstring wChars = EncodingHelper::convertToWChar(sChars.c_str());
   char* c_chars = (char*) sChars.c_str();
   wchar_t* w_chars = (wchar_t*) wChars.c_str();
   int iLength = length;

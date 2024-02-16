@@ -42,7 +42,7 @@ std::wstring convertStrToWstr(std::string& str)
  //   m_searchStringW = EncodingHelper::convertToUTF32(search);
 //}
 //    m_searchString = search;
-    return EncodingHelper::convertToUTF32(str);
+    return EncodingHelper::convertToWChar(str);
 }
 
 /*
@@ -73,7 +73,7 @@ bool ProposalFilter::check(OtmProposal& prop){
 //*/
 
 bool ProposalFilter::check(OtmProposal& prop){
-    if(m_type == ProposalFilter::TIMESTAMP){
+    if(m_field == ProposalFilter::TIMESTAMP){
         return prop.lTargetTime >= m_timestamp1 && prop.lTargetTime <= m_timestamp2;
     }
 

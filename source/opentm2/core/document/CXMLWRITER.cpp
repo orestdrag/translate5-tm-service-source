@@ -820,7 +820,7 @@ BOOL CXmlWriter::GetContentFlag( void )
 void CXmlWriter::AnsiToUnicode( const char *pAnsiText, WCHAR **ppUnicodeText )
 {  
   std::string str(pAnsiText);  
-  std::wstring wstr = EncodingHelper::convertToUTF16(str);
+  std::wstring wstr = EncodingHelper::convertToWChar(str);
   size_t iUnicodeLen = wstr.size()+1;
   WCHAR *pBuffer = (WCHAR *)malloc( iUnicodeLen* sizeof(WCHAR) );
   memset(pBuffer, 0, sizeof(WCHAR) * iUnicodeLen);

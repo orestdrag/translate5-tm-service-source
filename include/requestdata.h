@@ -211,11 +211,50 @@ protected:
     int execute  () override;
 };
 
+
+enum struct SearchType{
+    NONE = 0,
+    EXACT = 1,
+    CONCORDANCE = 2
+};
+
+#include "tm.h"
+
+struct ConcordanceSearchParams{
+
+  //author: SEARCHED_STRING
+  //authorSearchMode: concordance|exact
+  //additionalInfo: SEARCHED_STRING
+  //additionalInfoSearchMode: concordance|exact
+  //documentName: SEARCHED_STRING
+  //documentNameSearchMode: concordance|exact
+  //timestampSpanStart: STAMP
+  //timestampSpanEnd: STAMP
+  //context: We still need to decide, when we know, what is really saved in here. Therefore we omit context for now in the implementation of this issue.
+
+  std::string author;
+  ProposalFilter::FilterType authorSearchMode = ProposalFilter::FilterType::NONE;
+
+  std::string document;
+  ProposalFilter::FilterType documentSearchMode = ProposalFilter::FilterType::NONE;
+
+  std::string addInfo;
+  ProposalFilter::FilterType addInfoSearchMode = ProposalFilter::FilterType::NONE;
+
+  std::string context;
+  ProposalFilter::FilterType contextSearchMode = ProposalFilter::FilterType::NONE;
+
+  TIME_L timestampSpanStart = 0;
+  TIME_L timestampSpanEnd = 0;
+
+  int parseJSON(std::string& w_str);
+};
+
 class ReorganizeRequestData:public RequestData{
 public:
     ReorganizeRequestData(): RequestData(COMMAND::REORGANIZE_MEM) {};
 protected:
-    int parseJSON() override;
+    int parseJSON() override {return 0;};
     int checkData() override;
     int execute  () override;
 };
@@ -317,8 +356,8 @@ timestampSpanStart: STAMP
 timestampSpanEnd: STAMP
 context: We still need to decide, when we know, what is really saved in here. Therefore we omit context for now in the implementation of this issue.
 */
-
-struct ConcordanceSearchParams {
+/*
+struct ConcordanceSearchParams{
     char srcStr[OTMPROPOSAL_MAXSEGLEN];
     char trgStr[OTMPROPOSAL_MAXSEGLEN];
     char srcLang[OTMPROPOSAL_MAXNAMELEN];
@@ -355,7 +394,7 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
 protected:
     ConcordanceSearchParams concordanceSearchParams;
 
-    int parseJSON() override ;
+    int parseJSON() override { return concordanceSearchParams.parseJSON(strBody); };
     int checkData() override ;
     int execute  () override ;
 };

@@ -13,7 +13,7 @@ class EncodingHelper{
     \param strUTF8String string in UTF8 encoding
     \returns string converted to UTF16
     */
-    std::wstring static convertToUTF16(std::string strUTF8String);
+    std::wstring static convertToWChar(std::string strUTF8String);
     std::u16string static toUtf16(std::wstring wstr);
     std::wstring static toWChar(std::u16string u16str);
     std::string static toChar(std::u16string u16str);
@@ -24,14 +24,14 @@ class EncodingHelper{
     \param strUTF8String string in UTF8 encoding
     \returns string converted to UTF16
     */
-    std::string static convertToUTF8( const std::wstring& strUTF16String );
+    std::string static convertToUTF8( const std::wstring& strUTF32String );
 
     /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
     \param strUTF8String string in UTF8 encoding
     \returns string converted to UTF16
     */
     std::string static convertToUTF8( const std::u16string& strUTF16String );
-    std::string static convertToUTF8( const wchar_t* UTF16String);
+    std::string static convertToUTF8( const wchar_t* UTF32String);
 
     /*! \brief convert a UTF8 std::string to a ASCII std::string (on spot conversion)
     \param strText on input string in UTF8 encoding, on output string in ASCII encoding

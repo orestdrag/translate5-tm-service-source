@@ -1501,6 +1501,34 @@ SHORT BTREE::QDAMDictUpdateLocal
    return sRc;
 }
 
+
+int BTREE::resetLookupTable(){
+  int rc = 0;
+  for (int i=0; !rc && (i < usNumberOfLookupEntries); i++ )
+  {
+    auto pLEntry = LookupTable_V3 + i;
+    auto pACTEntry = AccessCtrTable + i;
+    //if ( pLEntry->pBuffer //&& !((pLEntry->pBuffer)->fLocked) && (i!=usNumber)
+    //    && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
+    //{
+    //    /* write buffer and free allocated space */
+    //    //rc = QDAMWRecordToDisk_V3( pLEntry->pBuffer);
+    //    if ( !rc )
+    //    {
+    //      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L , NOMSG );
+    //      usNumberOfAllocatedBuffers--;
+    //    } /* endif */
+    //} /* endif */
+    if ( (pLEntry != NULL) && (pLEntry->pBuffer != NULL) )
+    {
+      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+      (usNumberOfAllocatedBuffers)--;
+    } /* endif */
+  }
+  //UtlAlloc( (PVOID *)&LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+  memset(LookupTable_V3, 0, usNumberOfLookupEntries*sizeof(_LOOKUPENTRY_V3));
+  return rc;
+}
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+

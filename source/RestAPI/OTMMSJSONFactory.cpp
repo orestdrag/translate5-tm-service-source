@@ -129,9 +129,9 @@ JSONFactory* JSONFactory::getInstance()
   \param strUTF8String string in UTF8 encoding
   \returns string converted to UTF16
   */
-  std::wstring convertToUTF16( const std::string& strASCII )
+  std::wstring convertToWChar( const std::string& strASCII )
   {  
-    std::wstring strUTF16 = EncodingHelper::convertToUTF16(strASCII.c_str());
+    std::wstring strUTF16 = EncodingHelper::convertToWChar(strASCII.c_str());
     return strUTF16;
   }
 
@@ -143,7 +143,7 @@ JSONFactory* JSONFactory::getInstance()
     const std::string &value
   )
   {
-    std::wstring strValueW = convertToUTF16( value );
+    std::wstring strValueW = convertToWChar( value );
     int iRC = addParmToJSONW( JSONString, name, strValueW );
     return( iRC );
   }
