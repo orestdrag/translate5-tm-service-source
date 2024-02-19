@@ -677,7 +677,10 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
     }
     std::vector<TagInfo>::iterator matchingSourceTag = std::find_if(sourceTagList.begin(), sourceTagList.end(),
                                   [&tag](TagInfo& i) { return i.fTagAlreadyUsedInTarget == false 
-                                                          &&  i.original_x       == tag.original_x
+                                                          && (tag.original_tagType == EPT_ELEMENT? 
+                                                                  i.original_i       == tag.original_i
+                                                                : i.original_x       == tag.original_x
+                                                             )
                                                           &&  i.original_tagType == tag.original_tagType;
                                   });
     if ( matchingSourceTag != sourceTagList.end()){
