@@ -17,6 +17,9 @@
 #include "Stopwatch.hpp"
 #include "EQFFUNCI.H"
 
+DECLARE_bool(log_every_request_end);
+
+
 enum InternalErrorRC
 {
   CANT_CREATE_FILE = 1771,
@@ -349,6 +352,19 @@ int RequestData::run(){
   }
   if(memRef != nullptr){
     memRef.reset();
+  }
+
+  if(FLAGS_log_every_request_end){
+    std::string msg = "SERVER FINISHED REQUEST:";
+    msg += "\n\t URL: " + strUrl;
+    msg += "\n\t id: " + std::to_string(_id_);
+    msg += "\n\t command: "; 
+    msg +=  CommandToStringsMap.find(command)->second;
+    msg += "\n\t rc: " + std::to_string(_rc_);
+    msg += "\n\t rest_rc: " + std::to_string(_rest_rc_);
+   
+
+    T5LOG(T5TRANSACTION)  << msg;
   }
   return res;
 }

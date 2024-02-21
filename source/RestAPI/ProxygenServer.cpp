@@ -42,6 +42,8 @@ DECLARE_int32(timeout);
 DECLARE_int32(servicethreads);
 DECLARE_int32(allowedram);
 DECLARE_int32(t5loglevel);
+DECLARE_bool(log_every_request_start);
+DECLARE_bool(log_every_request_end);
 
 using namespace ProxygenService;
 using namespace proxygen;
@@ -114,15 +116,21 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto method = message->getMethod ();
     auto url = message->getURL () ;
     auto path = message->getPath () ;
-    auto queryString   = message->getQueryString () ;
+    //auto queryString   = message->getQueryString () ;
     auto headers = message->getHeaders();
-    auto queryParams = message->getQueryParams();
+    //auto queryParams = message->getQueryParams();
 
-    if(0 || VLOG_IS_ON(1)){
+    //if(0 || VLOG_IS_ON(1)){
+    if(FLAGS_log_every_request_start){
       std::string msg = "SERVER RECEIVED REQUEST:";
       msg += "\n\t URL: " + url;
+      msg += "\n\t method: " + methodStr;
+      
+      if(stats_){
+        msg += "\n\t reqCount: " + std::to_string(stats_->getRequestCount());
+      }
 
-      T5LOG(T5INFO)  << msg;
+      T5LOG(T5TRANSACTION)  << msg;
     }
     if(url.size() <= 1){
       return  new ProxygenHandler(stats_.get());;
