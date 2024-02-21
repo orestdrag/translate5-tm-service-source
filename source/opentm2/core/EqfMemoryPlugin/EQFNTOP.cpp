@@ -74,12 +74,23 @@ USHORT EqfMemory::OpenX()
 
       if ( usRc == NO_ERROR )
       {
-        if ( stTmSign.bGlobVersion > T5GLOBVERSION  || stTmSign.bMajorVersion > T5MAJVERSION )
+        int T5MAJVERSION_MIN_SUPPORTED = 5;
+        int T5MAJVERSION_MAX_SUPPORTED = T5MAJVERSION;
+        int T5MINVERSION_MIN_SUPPORTED = 60;
+        int T5MINVERSION_MAX_SUPPORTED = T5MINVERSION;
+
+        if ( stTmSign.bGlobVersion > T5GLOBVERSION  
+            || stTmSign.bMajorVersion > T5MAJVERSION_MAX_SUPPORTED 
+            //|| (stTmSign.bMajorVersion == T5MAJVERSION_MAX_SUPPORTED && stTmSign.bMinorVersion > T5MINVERSION_MAX_SUPPORTED )
+            )
         {
-          T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v0."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
+          T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v" 
+                  << stTmSign.bGlobVersion << "." << stTmSign.bMajorVersion << "." << stTmSign.bMinorVersion;
           usRc = ERROR_VERSION_NOT_SUPPORTED;
         }
-        else if (stTmSign.bGlobVersion < T5GLOBVERSION  || stTmSign.bMajorVersion < T5MAJVERSION )
+        else if (stTmSign.bGlobVersion < T5GLOBVERSION  
+            || stTmSign.bMajorVersion < T5MAJVERSION_MIN_SUPPORTED 
+            || (stTmSign.bMajorVersion == T5MAJVERSION_MIN_SUPPORTED && stTmSign.bMinorVersion < T5MINVERSION_MAX_SUPPORTED ) )
         {
           T5LOG(T5ERROR) << "TM was created in older vertions of t5memory, v"<<stTmSign.bGlobVersion<<"."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
           usRc = VERSION_MISMATCH;

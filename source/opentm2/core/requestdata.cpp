@@ -1025,6 +1025,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       if ( strcasecmp( name.c_str(), "addInfo" ) == 0 )
       {
         addInfo = value;
+        if(addInfoSearchMode == ProposalFilter::NONE) addInfoSearchMode = ProposalFilter::UNKNOWN;
       }
       else if(strcasecmp(name.c_str(), "addInfoSearchMode") == 0)
       {
@@ -1033,6 +1034,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       else if ( strcasecmp( name.c_str(), "context" ) == 0 )
       {
         context = value;
+        if(contextSearchMode == ProposalFilter::NONE) contextSearchMode = ProposalFilter::UNKNOWN;
       }
       else if(strcasecmp(name.c_str(), "contextSearchMode") == 0)
       {
@@ -1041,6 +1043,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       else if(strcasecmp(name.c_str(), "author") == 0)
       {
         author = value;
+        if(authorSearchMode == ProposalFilter::NONE) authorSearchMode = ProposalFilter::UNKNOWN;
       }
       else if(strcasecmp(name.c_str(), "authorSearchMode") == 0)
       {
@@ -1049,6 +1052,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       else if(strcasecmp(name.c_str(), "document") == 0)
       {
         document = value;
+        if(documentSearchMode == ProposalFilter::NONE) documentSearchMode = ProposalFilter::UNKNOWN;
       }
       else if(strcasecmp(name.c_str(), "documentSearchMode") == 0)
       {
@@ -1057,10 +1061,19 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       else if(strcasecmp(name.c_str(), "timestampSpanStart") == 0)
       {
         convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanStart);
+        
+        if(!timestampSpanStart){
+          T5LOG(T5ERROR) << "Can't parse start timestamp " << value;
+          _rc_ = 1001;
+        }
       }
       else if(strcasecmp(name.c_str(), "timestampSpanEnd") == 0)
       {
         convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanEnd);
+        if(!timestampSpanEnd){
+          T5LOG(T5ERROR) << "Can't parse end timestamp " << value;
+          _rc_ = 1002;
+        }
       }
       else      
       if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
@@ -1068,7 +1081,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
         T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
         T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
       }else {
-        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
       }
     }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
       std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
@@ -1224,6 +1237,28 @@ int DeleteEntriesReorganizeRequestData::checkData(){
       outputMessage << "; szLastError = "<< "Missing name of memory";
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } 
+
+  if(concordanceSearchParams.addInfoSearchMode == ProposalFilter::UNKNOWN ){
+    std::string msg = "addInfoSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);      
+  }else if(concordanceSearchParams.contextSearchMode == ProposalFilter::UNKNOWN){
+    std::string msg = "contextSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);      
+  }else if(concordanceSearchParams.authorSearchMode == ProposalFilter::UNKNOWN){
+    std::string msg = "authorSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);  
+  }else if(concordanceSearchParams.documentSearchMode == ProposalFilter::UNKNOWN){
+    std::string msg = "documentSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
+  }else if(concordanceSearchParams.timestampSpanStart || concordanceSearchParams.timestampSpanEnd){
+    if(! (concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd) ) {
+      std::string msg = "for timespan you should provide 2 values, provided values: timestampSpanStart=" + std::to_string(concordanceSearchParams.timestampSpanStart) 
+          + "; timestampSpanEnd=" + std::to_string(concordanceSearchParams.timestampSpanStart); 
+      buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
+    }
+
+  }
+
   return 0;
 }
 
@@ -1281,38 +1316,31 @@ int DeleteEntriesReorganizeRequestData::execute(){
     mem.reset();
     memRef.reset();
 
-    if(concordanceSearchParams.addInfoSearchMode != ProposalFilter::NONE && concordanceSearchParams.addInfoSearchMode != ProposalFilter::UNKNOWN)
+
+    if(concordanceSearchParams.addInfoSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.addInfoSearchMode != ProposalFilter::UNKNOWN)
     {
       pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.addInfo, 
           ProposalFilter::ADDINFO, concordanceSearchParams.addInfoSearchMode));
     }
-    if(concordanceSearchParams.contextSearchMode != ProposalFilter::NONE && concordanceSearchParams.contextSearchMode != ProposalFilter::UNKNOWN)
+    if(concordanceSearchParams.contextSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.contextSearchMode != ProposalFilter::UNKNOWN)
     {
       pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.context, 
           ProposalFilter::CONTEXT, concordanceSearchParams.contextSearchMode));
     }
-    if(concordanceSearchParams.authorSearchMode != ProposalFilter::NONE && concordanceSearchParams.authorSearchMode != ProposalFilter::UNKNOWN)
+    if(concordanceSearchParams.authorSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.authorSearchMode != ProposalFilter::UNKNOWN)
     {
       pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.author, 
           ProposalFilter::AUTHOR, concordanceSearchParams.authorSearchMode));
     }
-    if(concordanceSearchParams.documentSearchMode != ProposalFilter::NONE && concordanceSearchParams.documentSearchMode != ProposalFilter::UNKNOWN)
+    if(concordanceSearchParams.documentSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.documentSearchMode != ProposalFilter::UNKNOWN)
     {
       pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.document, 
           ProposalFilter::DOC, concordanceSearchParams.documentSearchMode));
     }
-    if(concordanceSearchParams.timestampSpanStart || concordanceSearchParams.timestampSpanEnd)
+    if(concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd)
     {
-      if(concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd)
-      {
-        pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.timestampSpanStart, concordanceSearchParams.timestampSpanEnd,
-          ProposalFilter::TIMESTAMP));
-      }else{
-        std::string msg = "for timespan you should provide 2 values, provided values: timestampSpanStart=" + std::to_string(concordanceSearchParams.timestampSpanStart) 
-            + "; timestampSpanEnd=" + std::to_string(concordanceSearchParams.timestampSpanStart); 
-        buildErrorReturn(_rc_, msg.c_str(), 400);
-      }
-
+      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.timestampSpanStart, concordanceSearchParams.timestampSpanEnd,
+        ProposalFilter::TIMESTAMP));
     }
   } 
 

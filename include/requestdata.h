@@ -394,7 +394,12 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
 protected:
     ConcordanceSearchParams concordanceSearchParams;
 
-    int parseJSON() override { return concordanceSearchParams.parseJSON(strBody); };
+    int parseJSON() override { 
+        _rc_ = concordanceSearchParams.parseJSON(strBody); 
+        if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
+        else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
+        return _rc_;
+        };
     int checkData() override ;
     int execute  () override ;
 };
