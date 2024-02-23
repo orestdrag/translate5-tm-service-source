@@ -858,13 +858,14 @@ int EqfMemory::UnloadFromRAM(){
   //}
   //TmBtree.fb.WriteToFile();
   //InBtree.fb.WriteToFile();
-  FlushFilebuffers();
-  TmBtree.fb.data.clear();
-  TmBtree.fb.data.shrink_to_fit();
+  
+  //FlushFilebuffers();
+  //TmBtree.fb.data.clear();
+  //TmBtree.fb.data.shrink_to_fit();
 
-  InBtree.fb.data.clear();
-  InBtree.fb.data.shrink_to_fit();
-  fOpen = false;
+  //InBtree.fb.data.clear();
+  //InBtree.fb.data.shrink_to_fit();
+  //fOpen = false;
   return 0;
 }
 

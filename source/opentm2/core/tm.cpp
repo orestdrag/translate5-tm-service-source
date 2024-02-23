@@ -65,7 +65,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   
   if(memoryNeed < AllowedMemory){
-    return( AllowedMemory - memoryNeed );
+    return ( AllowedMemory - memoryNeed );
   }else{
     T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory more than available, mem need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   }
@@ -81,18 +81,24 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 
   for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
     std::string tmName;
-    {
+    if(!it->second.expired()){
       auto tm = it->second.lock();
-      tm->UnloadFromRAM();
+      //tm->UnloadFromRAM();
       tmName = tm->szName;
-      tms.erase(tmName);
-      T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
+      if(tm.use_count() > 2){
+        T5LOG(T5WARNING) <<" need to close tm, but \"" << tmName <<"\" is still in use "; 
+      }else{
+        tms.erase(tmName);
+        T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
+        //memoryNeed = memoryRequested + CalculateOccupiedRAM();
+      }
     }
     for(int i = 0; i<5; i++){
       if(it->second.expired()){
         break;
+      }else{
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     if(it->second.expired() == false){
