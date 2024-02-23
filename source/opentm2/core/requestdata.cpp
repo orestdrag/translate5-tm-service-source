@@ -255,6 +255,7 @@ int RequestData::requestTM(){
     fValid = isServiceRequest();
   }else{
     fValid = true;
+    mem->tLastAccessTime = time(0);
     
     if(  command == EXPORT_MEM 
       || command == EXPORT_MEM_INTERNAL_FORMAT
