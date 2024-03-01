@@ -29,27 +29,7 @@ unsigned long int _ttol(const char* source){
     return atoi(source);
 }
 
-/*
- int _strcmp(const char* a, const char* b){
-    return strcmp(a,b);
- }
- 
- int _strcmpi(const char* a, const char* b){
-     return strcmp(a,b);
- }
- 
- int _stricmp(const char* a, const char* b){
-    return strcmp(a,b);
- }//*/ 
 
-
-int strupr(char * str){
-    int len = strlen(str);
-    for(int i=0; i<len; i++){
-        str[i] = toupper(str[i]);
-    }
-    return 0;
-}
 
 int MultiByteToWideChar(
   UINT                              CodePage,

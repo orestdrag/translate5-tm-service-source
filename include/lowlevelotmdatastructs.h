@@ -2186,6 +2186,36 @@ typedef struct _MEMPROPOSAL
 
 
 std::wstring convertStrToWstr(std::string& str);
+std::string convertWstrToStr(std::wstring& wstr);
+wchar_t* wcsupr(wchar_t *str);
+char* strupr(char *str);
+
+/*! \brief normalize white space within a string by replacing single or multiple white space occurences to a single blank
+  \param pszString pointer to the string being normalized
+  \returns 0 in any case
+*/
+SHORT normalizeWhiteSpace
+(
+  PSZ_W   pszData
+);
+
+
+// concordance search modes
+#define SEARCH_IN_SOURCE_OPT  0x00020000L
+#define SEARCH_IN_TARGET_OPT  0x00040000L
+#define SEARCH_CASEINSENSITIVE_OPT 0x00080000L
+#define SEARCH_WHITESPACETOLERANT_OPT 0x00100000L
+
+
+#define SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT 0x00200000L
+#define SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT 0x00400000L
+#define SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT 0x00800000L
+#define SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT 0x01000000L
+
+#define SEARCH_FILTERS_LOGICAL_OR 0x02000000L
+#define SEARCH_FILTERS_NOT 0x04000000L
+
+typedef long FilterOptions;
 
 class ProposalFilter{
 //public:  
@@ -2217,7 +2247,7 @@ enum FilterField{
     NONE = 0, UNKNOWN, EXACT, CONTAINS, RANGE
   };
 
-  static int StrToFilterType(const char* str, FilterType &filterType);
+  static int StrToFilterType(const char* str, FilterType &filterType, FilterOptions& options);
 
 
 private:
@@ -2226,18 +2256,40 @@ private:
   long m_timestamp1=0, m_timestamp2=0;
   std::string m_searchString;
   std::wstring m_searchStringW;
+  FilterOptions m_searchOptions = 0;
 
 public:
 
-  ProposalFilter(std::string& search, FilterField field, FilterType type): m_field(field), m_type(type), m_searchStringW(convertStrToWstr(search)),
-        m_searchString(search){};
+  ProposalFilter(std::string& search, FilterField field, FilterType type, FilterOptions searchOptions): m_searchOptions(searchOptions), 
+        m_field(field), m_type(type), m_searchStringW(convertStrToWstr(search)),
+        m_searchString(search){ 
+          if ( searchOptions & SEARCH_CASEINSENSITIVE_OPT )
+          { 
+            wcsupr(&m_searchStringW[0]);
+            m_searchString = convertWstrToStr(m_searchStringW);
+          }
+          if ( searchOptions & SEARCH_WHITESPACETOLERANT_OPT )
+          { 
+            normalizeWhiteSpace( &m_searchStringW[0] );
+            m_searchString = convertWstrToStr(m_searchStringW);
+          }
+        };
   
-  ProposalFilter(long t1, long t2, FilterField field = TIMESTAMP): m_timestamp1(t1), m_timestamp2(t2), m_field{field}{}
+  ProposalFilter(long t1, long t2, FilterField field = TIMESTAMP): m_timestamp1(t1), m_timestamp2(t2), m_field{field}, m_type(FilterType::RANGE){}
 
   //ProposalFilter(FilterParam&& param) m_param(param){}
+
+  std::string toString()const;
 
   bool check(OtmProposal& prop);
 };
 
+
+  /*! \brief convert a long time value into the UTC date/time format
+    \param lTime long time value
+    \param pszDateTime buffer receiving the converted date time
+    \returns 0 
+  */
+  int convertTimeToUTC( long lTime, char *pszDateTime );
 
 #endif //_LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_

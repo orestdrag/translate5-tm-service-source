@@ -245,6 +245,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new FuzzySearchRequestData();
           }else if(urlCommand == "concordancesearch"){
             requestHandler->pRequest = new ConcordanceSearchRequestData();
+          }else if(urlCommand == "search"){
+            requestHandler->pRequest = new ConcordanceExtendedSearchRequestData();
           }else if(urlCommand ==  "entry"){ // update 
             requestHandler->pRequest = new UpdateEntryRequestData();
           }else if(urlCommand ==  "entrydelete"){  

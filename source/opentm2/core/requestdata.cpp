@@ -981,29 +981,45 @@ int ParseSearchType(std::string& inputStr, SearchType& param){
   return 0;
 }//*/
 
-int ProposalFilter::StrToFilterType(const char* str, FilterType &filterType){
+int ProposalFilter::StrToFilterType(const char* str, FilterType &filterType, FilterOptions& options){
     filterType = FilterType::UNKNOWN;
     if(!str){ 
       return -1;
     }
-    if(!strcasecmp(str, "EXACT")){ 
+    if(strcasestr(str, "EXACT")){ 
       filterType =  FilterType::EXACT;
-      return 0;
+      //return 0;
     }
-    if(!strcasecmp(str, "CONTAINS")){
+    if(strcasestr(str, "CONTAINS")){
       filterType = FilterType::CONTAINS;
-      return 0;
+      //return 0;
     }
-    if(!strcasecmp(str, "concordance")){
+    if(strcasestr(str, "CONCORDANCE")){
       filterType = FilterType::CONTAINS;
-      return 0;
+      //return 0;
     }
+    if(strcasestr(str, "CASEINSENSETIVE")){
+      options |= SEARCH_CASEINSENSITIVE_OPT;
+      //return 0;
+    }
+    if(strcasestr(str, "WHITESPACETOLERANT")){
+      options |= SEARCH_WHITESPACETOLERANT_OPT;
+      //return 0;
+    }
+    if(strcasestr(str, "INVERTED")){
+      options |= SEARCH_FILTERS_NOT;
+      //return 0;
+    }
+
     //if(strcasecmp(str, "RANGE")) return FilterType::RANGE;
-    T5LOG(T5WARNING) << " cant parse " << str << " filtertype!";
-    return -1;
+    if(FilterType::UNKNOWN == filterType){
+      T5LOG(T5WARNING) << " cant parse " << str << " filtertype!";
+      return -1;
+    }
+    return 0;
   }
 
-int ConcordanceSearchParams::parseJSON(std::string& str){
+int SearchFilterFactory::parseJSON(std::string& str){
   int _rc_ = 0;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
   
@@ -1012,7 +1028,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
   void *parseHandle = json_factory.parseJSONStart( str, &_rc_ );
   if ( parseHandle == NULL )
   {
-    T5LOG(T5ERROR) <<  "ConcordanceSearchParams::Missing or incorrect JSON data in request body" ;
+    T5LOG(T5ERROR) <<  "SearchFilterFactory::Missing or incorrect JSON data in request body" ;
     return( BAD_REQUEST );
   } /* end */
 
@@ -1023,14 +1039,32 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
     _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
     if ( _rc_ == 0 )
     {
-      if ( strcasecmp( name.c_str(), "addInfo" ) == 0 )
+      if ( strcasecmp( name.c_str(), "source" ) == 0 )
+      {
+        source = value;
+        if(sourceSearchMode == ProposalFilter::NONE) sourceSearchMode = ProposalFilter::UNKNOWN;
+      }
+      else if(strcasecmp(name.c_str(), "sourceSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), sourceSearchMode, sourceSearchOptions);
+      }
+      else if ( strcasecmp( name.c_str(), "target" ) == 0 )
+      {
+        target = value;
+        if(targetSearchMode == ProposalFilter::NONE) targetSearchMode = ProposalFilter::UNKNOWN;
+      }
+      else if(strcasecmp(name.c_str(), "targetSearchMode") == 0)
+      {
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), targetSearchMode, targetSearchOptions);
+      }
+      else if ( strcasecmp( name.c_str(), "addInfo" ) == 0 )
       {
         addInfo = value;
         if(addInfoSearchMode == ProposalFilter::NONE) addInfoSearchMode = ProposalFilter::UNKNOWN;
       }
       else if(strcasecmp(name.c_str(), "addInfoSearchMode") == 0)
       {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), addInfoSearchMode);
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), addInfoSearchMode, addInfoSearchOptions);
       }
       else if ( strcasecmp( name.c_str(), "context" ) == 0 )
       {
@@ -1039,7 +1073,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       }
       else if(strcasecmp(name.c_str(), "contextSearchMode") == 0)
       {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), contextSearchMode);
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), contextSearchMode, contextSearchOptions);
       }
       else if(strcasecmp(name.c_str(), "author") == 0)
       {
@@ -1048,7 +1082,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       }
       else if(strcasecmp(name.c_str(), "authorSearchMode") == 0)
       {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), authorSearchMode);
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), authorSearchMode, authorSearchOptions);
       }
       else if(strcasecmp(name.c_str(), "document") == 0)
       {
@@ -1057,7 +1091,7 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
       }
       else if(strcasecmp(name.c_str(), "documentSearchMode") == 0)
       {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), documentSearchMode);
+        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), documentSearchMode, documentSearchOptions);
       }
       else if(strcasecmp(name.c_str(), "timestampSpanStart") == 0)
       {
@@ -1081,8 +1115,11 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
         loggingThreshold = std::stoi(value);
         T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
         T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
-      }else {
-        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
+      }else 
+      {
+        bool FLAGS_log_every_json_unexpected_name = false;
+        if(FLAGS_log_every_json_unexpected_name)
+          T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
       }
     }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
       std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
@@ -1093,6 +1130,75 @@ int ConcordanceSearchParams::parseJSON(std::string& str){
   json_factory.parseJSONStop( parseHandle );
   if(_rc_ == 2002) _rc_ = 0;
   return _rc_;
+}
+
+std::string SearchFilterFactory::checkParsedModes(){
+  std::string msg;
+  if(sourceSearchMode == ProposalFilter::UNKNOWN ){
+    msg = "sourceSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    
+  }else if(targetSearchMode == ProposalFilter::UNKNOWN ){
+    msg = "targetSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    
+  }else if(addInfoSearchMode == ProposalFilter::UNKNOWN ){
+    msg = "addInfoSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+    
+  }else if(contextSearchMode == ProposalFilter::UNKNOWN){
+    msg = "contextSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+
+  }else if(authorSearchMode == ProposalFilter::UNKNOWN){
+    msg = "authorSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+
+  }else if(documentSearchMode == ProposalFilter::UNKNOWN){
+    msg = "documentSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
+
+  }else if(timestampSpanStart || timestampSpanEnd){
+    if(! (timestampSpanStart && timestampSpanEnd) ) {
+      msg = "for timespan you should provide 2 values, provided values: timestampSpanStart=" + std::to_string(timestampSpanStart) 
+          + "; timestampSpanEnd=" + std::to_string(timestampSpanStart); 
+    }
+  }
+  return msg;
+}
+
+std::vector<ProposalFilter> SearchFilterFactory::getListOfFilters(){
+  std::vector<ProposalFilter> filters;
+  if(sourceSearchMode != ProposalFilter::NONE)// && addInfoSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(source, 
+        ProposalFilter::SOURCE, sourceSearchMode, sourceSearchOptions));
+  }
+  if(targetSearchMode != ProposalFilter::NONE)// && contextSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(target, 
+        ProposalFilter::TARGET, targetSearchMode, targetSearchOptions));
+  }
+  if(addInfoSearchMode != ProposalFilter::NONE)// && addInfoSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(addInfo, 
+        ProposalFilter::ADDINFO, addInfoSearchMode, addInfoSearchOptions));
+  }
+  if(contextSearchMode != ProposalFilter::NONE)// && contextSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(context, 
+        ProposalFilter::CONTEXT, contextSearchMode, contextSearchOptions));
+  }
+  if(authorSearchMode != ProposalFilter::NONE)// && authorSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(author, 
+        ProposalFilter::AUTHOR, authorSearchMode, authorSearchOptions));
+  }
+  if(documentSearchMode != ProposalFilter::NONE)// && documentSearchMode != ProposalFilter::UNKNOWN)
+  {
+    filters.push_back(ProposalFilter(document, 
+        ProposalFilter::DOC, documentSearchMode, documentSearchOptions));
+  }
+  if(timestampSpanStart && timestampSpanEnd)
+  {
+    filters.push_back(ProposalFilter(timestampSpanStart, timestampSpanEnd,
+      ProposalFilter::TIMESTAMP));
+  }
+  return filters;
 }
 
 // Prepare the organize of a TM in function call mode
@@ -1179,57 +1285,6 @@ int ReorganizeRequestData::execute(){
   return( _rc_ );
 }
 
-/*
-    char author[OTMPROPOSAL_MAXNAMELEN];
-    char document[OTMPROPOSAL_MAXNAMELEN];
-    char addInfo[OTMPROPOSAL_MAXNAMELEN];
-    char context[OTMPROPOSAL_MAXNAMELEN];
-    
-    char srcLangSearchType[50];
-    char trgLangSearchType[50];
-    char timespanSearchType[50];
-    char authorSearchType[50];
-    char docSearchType[50];
-    char addInfoSearchType[50];
-    char contextSearchType[50];
->>>>>>> Stashed changes
-
-int DeleteEntriesReorganizeRequestData::parseJSON(){
-
-/*   JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"source",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data ), sizeof( Data.srcStr ) / sizeof( Data.srcStr[0] ) },
-  { L"sourceSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.sourceSearchType ), sizeof( Data.sourceSearchType ) / sizeof( Data.sourceSearchType[0] ) },
-  { L"target",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgStr ), sizeof( Data.trgStr ) / sizeof( Data.trgStr[0] ) },
-  { L"targetSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.targetSearchType ), sizeof( Data.targetSearchType ) / sizeof( Data.targetSearchType[0] ) },
-  { L"sourceLang",       JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcLang ), sizeof( Data.srcLang ) },
-  { L"targetLang",       JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgLang ), sizeof( Data.trgLang ) },   
-  { L"sourceLangSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.srcLangSearchType ), sizeof( Data.srcLangSearchType ) },
-  { L"targetLangSearchType",JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.trgLangSearchType ), sizeof( Data.trgLangSearchType ) },  
-
-  { L"document",          JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.document ), sizeof( Data.document ) },
-  { L"documentSearchType",JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.docSearchType ), sizeof( Data.docSearchType ) },
-  { L"author",            JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.author ), sizeof( Data.author ) },
-  { L"authorSearchType",  JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.authorSearchType ), sizeof( Data.authorSearchType ) },
-  { L"context",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.context ), sizeof( Data.context ) / sizeof( Data.context[0] ) },
-  { L"contextSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.contextSearchType ), sizeof( Data.contextSearchType ) / sizeof( Data.contextSearchType[0] ) },
-  { L"timeStamp2",        JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTime1 ), sizeof( Data.szTime1 ) },
-  { L"timeStamp2",        JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTime2 ), sizeof( Data.szTime2 ) },
-
-  { L"addInfo",           JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.addInfo ), sizeof( Data.addInfo ) / sizeof( Data.addInfo[0] ) },
-  { L"addInfoSearchType", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.addInfoSearchType ), sizeof( Data.addInfoSearchType ) / sizeof( Data.addInfoSearchType[0] ) },
-  
-  { L"loggingThreshold",  JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"save2disk",         JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
-  { L"",                  JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
-
-  
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
-
-  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
-  return _rc_;
-}
-//*/
 
 int DeleteEntriesReorganizeRequestData::checkData(){
   if ( strMemName.empty() )
@@ -1239,25 +1294,10 @@ int DeleteEntriesReorganizeRequestData::checkData(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } 
 
-  if(concordanceSearchParams.addInfoSearchMode == ProposalFilter::UNKNOWN ){
-    std::string msg = "addInfoSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
-    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);      
-  }else if(concordanceSearchParams.contextSearchMode == ProposalFilter::UNKNOWN){
-    std::string msg = "contextSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
-    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);      
-  }else if(concordanceSearchParams.authorSearchMode == ProposalFilter::UNKNOWN){
-    std::string msg = "authorSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
-    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);  
-  }else if(concordanceSearchParams.documentSearchMode == ProposalFilter::UNKNOWN){
-    std::string msg = "documentSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
-    return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
-  }else if(concordanceSearchParams.timestampSpanStart || concordanceSearchParams.timestampSpanEnd){
-    if(! (concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd) ) {
-      std::string msg = "for timespan you should provide 2 values, provided values: timestampSpanStart=" + std::to_string(concordanceSearchParams.timestampSpanStart) 
-          + "; timestampSpanEnd=" + std::to_string(concordanceSearchParams.timestampSpanStart); 
-      buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
-    }
+  std::string errMsg = searchFilterFactory.checkParsedModes();
 
+  if(!errMsg.empty()){
+    buildErrorReturn(400, errMsg.c_str(), 400);
   }
 
   return 0;
@@ -1317,32 +1357,8 @@ int DeleteEntriesReorganizeRequestData::execute(){
     mem.reset();
     memRef.reset();
 
-
-    if(concordanceSearchParams.addInfoSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.addInfoSearchMode != ProposalFilter::UNKNOWN)
-    {
-      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.addInfo, 
-          ProposalFilter::ADDINFO, concordanceSearchParams.addInfoSearchMode));
-    }
-    if(concordanceSearchParams.contextSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.contextSearchMode != ProposalFilter::UNKNOWN)
-    {
-      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.context, 
-          ProposalFilter::CONTEXT, concordanceSearchParams.contextSearchMode));
-    }
-    if(concordanceSearchParams.authorSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.authorSearchMode != ProposalFilter::UNKNOWN)
-    {
-      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.author, 
-          ProposalFilter::AUTHOR, concordanceSearchParams.authorSearchMode));
-    }
-    if(concordanceSearchParams.documentSearchMode != ProposalFilter::NONE)// && concordanceSearchParams.documentSearchMode != ProposalFilter::UNKNOWN)
-    {
-      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.document, 
-          ProposalFilter::DOC, concordanceSearchParams.documentSearchMode));
-    }
-    if(concordanceSearchParams.timestampSpanStart && concordanceSearchParams.timestampSpanEnd)
-    {
-      pRIDA->m_reorganizeFilters.push_back(ProposalFilter(concordanceSearchParams.timestampSpanStart, concordanceSearchParams.timestampSpanEnd,
-        ProposalFilter::TIMESTAMP));
-    }
+    pRIDA->m_reorganizeFilters = searchFilterFactory.getListOfFilters();
+    
   } 
 
   //worker thread 
@@ -2696,6 +2712,330 @@ int FuzzySearchRequestData::execute(){
   return( _rc_ );
 }
 
+int ConcordanceExtendedSearchRequestData::parseJSON(){
+   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if ( _rc_ != 0 )
+  {
+    return buildErrorReturn( _rc_, "can't verifyAPISession", INTERNAL_SERVER_ERROR);
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    return buildErrorReturn( _rc_, "::Missing name of memory", BAD_REQUEST);
+  } /* endif */
+
+  // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+  
+  int loggingThreshold = -1;
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"filtersCombinedAs",   JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) }, // reuse fields
+  //{ L"searchOptions",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchMode ), sizeof( Data.szSearchMode ) }, // reuse fields - refactor later, when old concordance would be deleted
+  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
+  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
+  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+
+  if(!_rc_){
+    _rc_ = searchFilterFactory.parseJSON(strBody); 
+    if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
+    else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
+    //return _rc_;
+  }
+
+  if(_rc_){
+    return buildErrorReturn( _rc_, "::json parsing failed", BAD_REQUEST);
+  }
+  return 0;
+}
+
+
+int ConcordanceExtendedSearchRequestData::checkData()
+{
+  if ( _rc_ != 0 )
+  {
+    return buildErrorReturn( _rc_, 
+      "::concordanceSearch::Error: Parsing of input parameters failed:: ERROR_INTERNALFUNCTION_FAILED", INTERNAL_SERVER_ERROR );
+  } /* end */
+
+  //if ( Data.szSearchString[0] == 0 )
+  //{
+  //  return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "::concordanceSearch::Error: Missing search string", BAD_REQUEST );
+  //} /* end */
+  if ( wcscasecmp( Data.szSearchString, L"OR" ) == 0 )
+  {
+    lOptions |= SEARCH_FILTERS_LOGICAL_OR;
+  }
+
+  if ( Data.iNumOfProposals > 200 )
+  {
+    return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
+        "::concordanceSearch::Error: Too many proposals requested, the maximum value is 200", BAD_REQUEST );
+  } /* end */
+  if ( Data.iNumOfProposals == 0 )
+  {
+    Data.iNumOfProposals = 5;
+  }
+
+  if(loggingThreshold >= 0){
+    T5LOG( T5WARNING) <<"::concordanceSearch::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
+  }
+
+  // do the search and handle the results
+   // do the search and handle the results
+  //if ( strcasecmp( Data.szSearchMode, "CASEINSENSETIVE" ) == 0 )
+  //{
+  //  lOptions |= SEARCH_CASEINSENSITIVE_OPT;
+  //}
+  //else if(strcasecmp( Data.szSearchMode, "WHITESPACETOLERANT" ) == 0 )
+  //{
+  //  lOptions |= SEARCH_CASEINSENSITIVE_OPT;
+  //}
+
+  //lOptions |= SEARCH_CASEINSENSITIVE_OPT;
+
+  bool fOk = false;
+  if( strlen( Data.szIsoSourceLang) ){
+    LanguageFactory::LANGUAGEINFO srcLangInfo;
+    fOk = LanguageFactory::getInstance()->getLanguageInfo( Data.szIsoSourceLang, &srcLangInfo );
+    if(fOk){
+      if(srcLangInfo.fisPreferred){
+        lOptions |= SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT;
+      }else{
+        lOptions |= SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT;
+      }
+    }else{
+      std::string msg = "::concordanceSearch::Error: :: src lang could not be found: " ;
+      msg += Data.szIsoSourceLang;
+      return buildErrorReturn( _rc_, (PSZ)msg.c_str(), BAD_REQUEST);
+    }
+  }
+  if( strlen( Data.szIsoTargetLang) ){
+    LanguageFactory::LANGUAGEINFO trgLangInfo;
+    fOk = LanguageFactory::getInstance()->getLanguageInfo( Data.szIsoTargetLang, &trgLangInfo );
+    if(fOk){
+      if(trgLangInfo.fisPreferred){
+        lOptions |= SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT;
+      }else{
+        lOptions |= SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT;
+      }
+    }else{
+      std::string msg = "::concordanceSearch::Error: :: target lang could not be found: ";
+      msg += Data.szIsoTargetLang;
+      return buildErrorReturn( _rc_, (PSZ)msg.c_str(), BAD_REQUEST);
+    }
+  }else{
+    fOk = true;
+    //buildErrorReturn( _rc_, "::concordanceSearch::Error: ::  "  );
+  }
+  return 0;
+}
+
+
+ULONG GetTickCount();
+
+int ConcordanceExtendedSearchRequestData::execute()
+{
+  std::wstring strProposals;
+  
+  OtmProposal OProposal;
+  // loop until end reached or enough proposals have been found
+  int iFoundProposals = 0;
+  int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
+
+  auto filters = searchFilterFactory.getListOfFilters();
+
+  do
+  {
+    {
+      BOOL fFound = FALSE;                 // found-a-matching-memory-proposal flag
+
+      DWORD dwSearchStartTime = 0;
+      if ( iActualSearchTime != 0 ) dwSearchStartTime = GetTickCount();
+
+      // get first or next proposal
+      if ( *Data.szSearchPos == EOS )
+      {
+        _rc_ = mem->getFirstProposal( OProposal );
+      }
+      else
+      {
+        mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        _rc_ = mem->getNextProposal( OProposal );
+      } /* endif */
+
+      // prepare searchstring
+      //if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( Data.szSearchString );
+      //if ( lOptions & SEARCH_WHITESPACETOLERANT_OPT ) normalizeWhiteSpace( Data.szSearchString );
+
+      bool fOneOrMoreIsFound = false; 
+      while ( !fFound && ( _rc_ == 0 ) )
+      {
+        fFound = searchExtendedInProposal( &OProposal, filters, lOptions );
+        //check langs
+        if( fFound ) 
+        { // filter by src lang
+          if (lOptions & SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT)
+          {
+            char lang[50];
+            OProposal.getSourceLanguage(lang, 50);
+            fFound = strcasecmp(lang, Data.szIsoSourceLang ) == 0;
+          }else if(lOptions & SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT){
+            char lang[50];
+            OProposal.getSourceLanguage(lang, 50);
+            fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoSourceLang);
+          }
+        }
+        if ( fFound )
+        {
+          if (lOptions & SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT)
+          {
+            char lang[50];
+            OProposal.getTargetLanguage(lang, 50);
+            fFound = strcasecmp(lang, Data.szIsoTargetLang ) == 0;
+          }else if(lOptions & SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT){
+            char lang[50];
+            OProposal.getTargetLanguage(lang, 50);
+            fFound = LanguageFactory::getInstance()->isTheSameLangGroup(lang, Data.szIsoTargetLang);
+          }
+        }
+        if ( fFound )
+        {
+          fOneOrMoreIsFound = true;
+        }
+        else
+        { 
+          //add check if we have at least one result before stop because of timeout 
+          if ( iActualSearchTime != 0 ) //&& false)
+          {
+            LONG lElapsedMillis = 0;
+            DWORD dwCurTime = GetTickCount();
+            if ( dwCurTime < dwSearchStartTime )
+            {
+              // an overflow occured
+              lElapsedMillis = (LONG)(dwCurTime + (ULONG_MAX - dwSearchStartTime));
+            }
+            else
+            {
+              lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
+            } /* endif */
+            if ( lElapsedMillis > iActualSearchTime  && fOneOrMoreIsFound )
+            {
+              _rc_ = TIMEOUT_RC;
+            }
+          }
+          if ( _rc_ == 0 )
+          {
+            _rc_ = mem->getNextProposal( OProposal );
+          }
+        }
+      } /* endwhile */
+
+      // search given string in proposal
+      if ( fFound || (_rc_ == TIMEOUT_RC) )
+      {
+        mem->getSequentialAccessKey( Data.szSearchPos, 20 );
+      } /* endif */
+      else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
+      {
+        _rc_ = ENDREACHED_RC;
+      }
+      else{}
+    }
+    
+    iActualSearchTime = Data.iSearchTime;
+    if ( _rc_ == 0 )
+    {
+      addProposalToJSONString( strProposals, OProposal );
+      iFoundProposals++;
+    }
+  } while ( ( _rc_ == 0 ) && ( iFoundProposals < Data.iNumOfProposals ) );
+
+
+  std::string filtersStr, globalOptionsStr;
+  for(auto& filter:filters)
+  {
+    filtersStr += filter.toString() + ";\n";
+  }
+
+  if (lOptions & SEARCH_FILTERS_LOGICAL_OR)
+  {
+    globalOptionsStr +="SEARCH_FILTERS_LOGICAL_OR";
+  }else
+  {
+    globalOptionsStr +="SEARCH_FILTERS_LOGICAL_AND";
+  }
+
+  if (lOptions & SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT)
+  {
+    globalOptionsStr += "|SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT, lang = " +  std::string(Data.szIsoSourceLang) ;
+  }
+  if (lOptions & SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT)
+  {
+    globalOptionsStr += "|SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT, lang = " +  std::string(Data.szIsoSourceLang) ;
+  }
+  if (lOptions & SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT)
+  {
+    globalOptionsStr += "|SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT, lang = " +  std::string(Data.szIsoTargetLang) ;
+  }
+  if (lOptions & SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT)
+  {
+    globalOptionsStr += "|SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT, lang = " +  std::string(Data.szIsoTargetLang) ;
+  }
+
+  std::wstring filtersStrW = EncodingHelper::convertToWChar(filtersStr);
+  std::wstring globalOptionsStrW = EncodingHelper::convertToWChar(globalOptionsStr);
+
+
+
+  if ( iFoundProposals || (_rc_ == ENDREACHED_RC) || (_rc_ == TIMEOUT_RC) )
+  {
+    std::wstring strOutputParmsW;
+    json_factory.startJSONW( strOutputParmsW );
+    json_factory.addParmToJSONW( strOutputParmsW, L"Filters", filtersStrW);
+    json_factory.addParmToJSONW( strOutputParmsW, L"GlobalSearchOptions", globalOptionsStrW);
+    json_factory.addParmToJSONW(strOutputParmsW, L"ReturnValue",  _rc_);
+    json_factory.addParmToJSONW( strOutputParmsW, L"ReturnMessage", _rc_ == ENDREACHED_RC? L"ENDREACHED_RC" : _rc_==TIMEOUT_RC? L"TIMEOUT_RC": L"FOUND");
+    if ( _rc_ == ENDREACHED_RC )
+    {
+      json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition" );
+    }
+    else
+    {
+      json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition", Data.szSearchPos );
+    }
+    if ( iFoundProposals > 0 )
+    {
+      json_factory.addNameToJSONW( strOutputParmsW, L"results" );
+      json_factory.addArrayStartToJSONW( strOutputParmsW );
+      strOutputParmsW.append( strProposals );
+      json_factory.addArrayEndToJSONW( strOutputParmsW );
+    } /* endif */
+
+    json_factory.terminateJSONW( strOutputParmsW );
+    outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW );
+    _rest_rc_ = 200;
+    return 0;
+  }
+  else
+  {
+    //unsigned short usRC = 0;
+    //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
+    return buildErrorReturn( _rc_, Data.szError, INTERNAL_SERVER_ERROR);
+  } /* endif */
+
+  return( _rc_ );
+}
+
+
 int ConcordanceSearchRequestData::parseJSON(){
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
@@ -2711,7 +3051,6 @@ int ConcordanceSearchRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
-  JSONFactory *factory = JSONFactory::getInstance();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) },
@@ -2813,8 +3152,6 @@ int ConcordanceSearchRequestData::checkData(){
   return 0;
 }
 
-ULONG GetTickCount();
-wchar_t* wcsupr(wchar_t *str);
 
 int ConcordanceSearchRequestData::execute(){
   std::wstring strProposals;

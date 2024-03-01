@@ -3113,6 +3113,8 @@ typedef enum
 #define EXT_OF_TEMP_TMINDEX    ".TTI"
 #define EXT_OF_TMPROP          EXT_OF_MEM
 
+#include <vector>
+class ProposalFilter;
 
 // ************ Type definitions ****************************************
 
@@ -3247,14 +3249,20 @@ BOOL searchInProposal
 );
 
 
-/*! \brief normalize white space within a string by replacing single or multiple white space occurences to a single blank
-  \param pszString pointer to the string being normalized
-  \returns 0 in any case
+/*! \brief search a string in a proposal
+  \param pProposal pointer to the proposal 
+  \param pszSearch pointer to the search string (when fIngoreCase is being used, this strign has to be in uppercase)
+  \param lSearchOptions combination of search options
+  \returns TRUE if the proposal contains the searched string otherwise FALSE is returned
 */
-SHORT normalizeWhiteSpace
-(
-  PSZ_W   pszData
+BOOL searchExtendedInProposal
+( 
+  OtmProposal *pProposal,
+  std::vector<ProposalFilter>& filters,
+  LONG lSearchOptions
 );
+
+
 
 
 /*! \brief check if search string matches current data
@@ -4740,17 +4748,6 @@ typedef struct _EXTFOLPROP
 #define SELECTEDCLASSANDHIGHER_MODE 1
 #define ONLYSELECTEDCLASS_MODE 2
 
-// concordance search modes
-#define SEARCH_IN_SOURCE_OPT  0x00020000L
-#define SEARCH_IN_TARGET_OPT  0x00040000L
-#define SEARCH_CASEINSENSITIVE_OPT 0x00080000L
-#define SEARCH_WHITESPACETOLERANT_OPT 0x00100000L
-
-
-#define SEARCH_EXACT_MATCH_OF_SRC_LANG_OPT 0x00200000L
-#define SEARCH_GROUP_MATCH_OF_SRC_LANG_OPT 0x00400000L
-#define SEARCH_EXACT_MATCH_OF_TRG_LANG_OPT 0x00800000L
-#define SEARCH_GROUP_MATCH_OF_TRG_LANG_OPT 0x01000000L
 
 // return when all activitiy has been completed (instead of iterative processing)
 #define COMPLETE_IN_ONE_CALL_OPT 0x01000000

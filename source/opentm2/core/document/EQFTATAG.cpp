@@ -51,15 +51,6 @@ USHORT TALoadTagTableHwnd
                                 0L, fMsg, NULLHANDLE ) );
 }
 
-static char* strupr(char *str) 
-{ 
-    char *tmp = str; 
-    while (*tmp) { 
-        *tmp = toupper((unsigned char)*tmp); 
-        ++tmp; 
-    } 
-    return str; 
-}
 
 USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 (

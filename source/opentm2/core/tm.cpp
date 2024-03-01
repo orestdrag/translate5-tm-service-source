@@ -878,9 +878,6 @@ int TMManager::ReplaceMemory
 }
 
 
-
-
-
 wchar_t* wcsupr(wchar_t *str)
 {       
   int len = wcslen(str);
@@ -889,6 +886,7 @@ wchar_t* wcsupr(wchar_t *str)
   }
   return str;
 }
+
 
 ULONG GetTickCount(){
   struct timespec t; 
@@ -939,6 +937,51 @@ int AddMemToList( void *pvData, char *pszName,std::shared_ptr<EqfMemory>  pInfo 
   return( 0 );
 }
 
+
+
+/*! \brief search a string in a proposal
+  \param pProposal pointer to the proposal 
+  \param pszSearch pointer to the search string (when fIngoreCase is being used, this strign has to be in uppercase)
+  \param lSearchOptions combination of search options
+  \returns TRUE if the proposal contains the searched string otherwise FALSE is returned
+*/
+BOOL searchExtendedInProposal
+( 
+  OtmProposal *pProposal,
+  std::vector<ProposalFilter>& filters,
+  LONG lSearchOptions
+)
+{
+  //if no filters - return true?
+
+  //else check all filters if all true - skip segment
+  if(lSearchOptions & SEARCH_FILTERS_LOGICAL_OR)
+  { // any filter passed - return true
+    for(auto& filter: filters)
+    {
+      bool result = filter.check(*pProposal);
+      if(result)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+  else
+  {
+    for(auto& filter: filters)
+    {
+      bool result = filter.check(*pProposal);
+      if(!result)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return( false );
+}
 
 /*! \brief search a string in a proposal
   \param pProposal pointer to the proposal 

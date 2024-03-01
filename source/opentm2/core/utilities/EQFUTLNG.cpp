@@ -297,15 +297,7 @@ static char szChachedLang2[MAX_LANG_LENGTH] = "";
 static ULONG ulCachedCP1 = 0;
 static ULONG ulCachedCP2 = 0;
 
-static char* strupr(char *str)
-{
-    char *tmp = str;
-    while(*tmp) {
-        *tmp = toupper((unsigned char)*tmp);
-        ++tmp;
-    }
-    return str;
-}
+
 
 
 

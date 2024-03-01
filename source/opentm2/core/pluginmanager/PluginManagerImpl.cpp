@@ -300,7 +300,7 @@ bool PluginManagerImpl::NotifyListeners( PluginListener::eNotifcationType eNotif
 	return (m_vPluginListener.size() > 0);
 }
 
-static char* strupr(char *str) 
+char* strupr(char *str) 
 { 
     char *tmp = str; 
     while (*tmp) { 

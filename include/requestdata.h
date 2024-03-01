@@ -220,7 +220,7 @@ enum struct SearchType{
 
 #include "tm.h"
 
-struct ConcordanceSearchParams{
+struct SearchFilterFactory{
 
   //author: SEARCHED_STRING
   //authorSearchMode: concordance|exact
@@ -232,22 +232,43 @@ struct ConcordanceSearchParams{
   //timestampSpanEnd: STAMP
   //context: We still need to decide, when we know, what is really saved in here. Therefore we omit context for now in the implementation of this issue.
 
+  //int caseInsensetive = 0, whitespaceTolerant = 0;
+  
+  //FilterOptions getSearchOptions(){
+  //  long res = 0;
+  //  return res;
+  //}
+
+  std::string source;
+  ProposalFilter::FilterType sourceSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions sourceSearchOptions = 0;
+
+  std::string target;
+  ProposalFilter::FilterType targetSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions targetSearchOptions = 0;
+
   std::string author;
   ProposalFilter::FilterType authorSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions authorSearchOptions = 0;
 
   std::string document;
   ProposalFilter::FilterType documentSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions documentSearchOptions = 0;
 
   std::string addInfo;
   ProposalFilter::FilterType addInfoSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions addInfoSearchOptions = 0;
 
   std::string context;
   ProposalFilter::FilterType contextSearchMode = ProposalFilter::FilterType::NONE;
+  FilterOptions contextSearchOptions = 0;
 
   TIME_L timestampSpanStart = 0;
   TIME_L timestampSpanEnd = 0;
 
   int parseJSON(std::string& w_str);
+  std::string checkParsedModes();
+  std::vector<ProposalFilter> getListOfFilters();
 };
 
 class ReorganizeRequestData:public RequestData{
@@ -310,6 +331,21 @@ protected:
     OtmProposal Data;
 };
 
+
+class ConcordanceExtendedSearchRequestData: public RequestData{
+    public:
+    ConcordanceExtendedSearchRequestData(const std::string& json, const std::string& memName): RequestData(CONCORDANCE, json, memName){};
+    ConcordanceExtendedSearchRequestData(): RequestData(CONCORDANCE){};
+protected:
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute()   override ;
+
+
+    SearchFilterFactory searchFilterFactory;
+    OtmProposal Data;
+    LONG lOptions = 0;
+};
 
 class FuzzySearchRequestData: public RequestData{    
     public:
@@ -390,12 +426,11 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
     DeleteEntriesReorganizeRequestData(const std::string& json, const std::string& memName): RequestData(DELETE_ENTRIES_REORGANIZE, json, memName) {};
     DeleteEntriesReorganizeRequestData(): RequestData(DELETE_ENTRIES_REORGANIZE){}
 
-    BOOL fSave2Disk = 1;
 protected:
-    ConcordanceSearchParams concordanceSearchParams;
+    SearchFilterFactory searchFilterFactory;
 
     int parseJSON() override { 
-        _rc_ = concordanceSearchParams.parseJSON(strBody); 
+        _rc_ = searchFilterFactory.parseJSON(strBody); 
         if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
         else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
         return _rc_;

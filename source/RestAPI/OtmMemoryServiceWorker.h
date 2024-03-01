@@ -21,12 +21,6 @@
 #include "requestdata.h"
 
 
-  /*! \brief convert a long time value into the UTC date/time format
-    \param lTime long time value
-    \param pszDateTime buffer receiving the converted date time
-    \returns 0 
-  */
-  int convertTimeToUTC( long lTime, char *pszDateTime );
   
 /*! \brief constant defining the timeout for memories (in number
 . of seconds)
