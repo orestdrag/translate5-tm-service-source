@@ -2128,8 +2128,10 @@ USHORT EqfMemory::ComparePutData
                 while ( lLeftClbLen > 0 && !fStop )
                 {
                   targetKey++;
-                  if ( ((pClb->ulSegmId == TmProposal.lSegmentNum) &&
-                        (pClb->usFileId == usPutFile)) ||
+                  if ( (//
+                        (pClb->ulSegmId == TmProposal.lSegmentNum) &&
+                        (pClb->usFileId == usPutFile)
+                        ) ||
                         pClb->bMultiple )
                   {
                     // either an identical segment already in record (update
@@ -2210,7 +2212,7 @@ USHORT EqfMemory::ComparePutData
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
                     //LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord);
                     LONG size = TARGETCLBLEN(pClb); 
-                    //try
+                    //try{                    
                     if(size>=0)
                     {
                       memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
@@ -2218,7 +2220,7 @@ USHORT EqfMemory::ComparePutData
                       RECLEN(pTMXTargetRecord) += lNewClbLen;
                     }
                     else
-                    //catch(...)
+                    //}catch(...)
                     {                    
                       T5LOG(T5ERROR) << "::memmove size is less or equal to 0, size = " << size << "; lNewClbLen = " << lNewClbLen << "; segment was not saved";//; memmove crash";
                       usRc = ERROR_ADD_TO_TM;

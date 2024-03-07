@@ -1966,6 +1966,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       case TMX_ELEMENT:
         // reset element info
         memset( &CurElement, 0, sizeof(CurElement) );
+        CurElement.lSegNum = -1;
         this->iNumOfTu = 0;
         break;
       case PROP_ELEMENT:
@@ -2410,7 +2411,7 @@ void TMXParseHandler::fillSegmentInfo
 {
   // fill-in header data
   memset( pSegment, 0, sizeof(MEMEXPIMPSEG) );
-  if ( CurElement.lSegNum != 0 )
+  if ( CurElement.lSegNum != -1 )
   {
     pSegment->lSegNum = CurElement.lSegNum; 
   }
