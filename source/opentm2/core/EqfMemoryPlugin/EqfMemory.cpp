@@ -756,6 +756,7 @@ int EqfMemory::OtmProposalToGetIn
   Proposal.getAddInfo( pGetIn->stTmGet.szAddInfo, sizeof(pGetIn->stTmGet.szAddInfo)  );
   Proposal.getContext( pGetIn->stTmGet.szContext, sizeof(pGetIn->stTmGet.szContext)  );
   Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
+  Proposal.getDocName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
   //Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
   
   //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
