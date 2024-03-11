@@ -2729,14 +2729,14 @@ int ConcordanceExtendedSearchRequestData::parseJSON(){
   
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"filtersCombinedAs",   JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) }, // reuse fields
-  //{ L"searchOptions",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchMode ), sizeof( Data.szSearchMode ) }, // reuse fields - refactor later, when old concordance would be deleted
   { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
   { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
   { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
+  { L"onlyCountSegments",       JSONFactory::INT_PARM_TYPE, &(fCountInsteadOfReturnSegments ), 0 },
+  { L"logicalOr",       JSONFactory::INT_PARM_TYPE, &(fCombineAsLogicalOr ), 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
@@ -2765,42 +2765,30 @@ int ConcordanceExtendedSearchRequestData::checkData()
       "::concordanceSearch::Error: Parsing of input parameters failed:: ERROR_INTERNALFUNCTION_FAILED", INTERNAL_SERVER_ERROR );
   } /* end */
 
-  //if ( Data.szSearchString[0] == 0 )
-  //{
-  //  return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "::concordanceSearch::Error: Missing search string", BAD_REQUEST );
-  //} /* end */
-  if ( wcscasecmp( Data.szSearchString, L"OR" ) == 0 )
+  if(fCombineAsLogicalOr)
   {
     lOptions |= SEARCH_FILTERS_LOGICAL_OR;
   }
 
-  if ( Data.iNumOfProposals > 200 )
+  if(fCountInsteadOfReturnSegments)
   {
-    return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
-        "::concordanceSearch::Error: Too many proposals requested, the maximum value is 200", BAD_REQUEST );
-  } /* end */
-  if ( Data.iNumOfProposals == 0 )
-  {
-    Data.iNumOfProposals = 5;
+    Data.iNumOfProposals = 1;
+  }else{
+    if ( Data.iNumOfProposals > 200 )
+    {
+      return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
+          "::concordanceSearch::Error: Too many proposals requested, the maximum value is 200", BAD_REQUEST );
+    } /* end */
+    if ( Data.iNumOfProposals == 0)
+    {
+      Data.iNumOfProposals = 5;
+    }
   }
 
   if(loggingThreshold >= 0){
     T5LOG( T5WARNING) <<"::concordanceSearch::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
-
-  // do the search and handle the results
-   // do the search and handle the results
-  //if ( strcasecmp( Data.szSearchMode, "CASEINSENSETIVE" ) == 0 )
-  //{
-  //  lOptions |= SEARCH_CASEINSENSITIVE_OPT;
-  //}
-  //else if(strcasecmp( Data.szSearchMode, "WHITESPACETOLERANT" ) == 0 )
-  //{
-  //  lOptions |= SEARCH_CASEINSENSITIVE_OPT;
-  //}
-
-  //lOptions |= SEARCH_CASEINSENSITIVE_OPT;
 
   bool fOk = false;
   if( strlen( Data.szIsoSourceLang) ){
@@ -2927,7 +2915,7 @@ int ConcordanceExtendedSearchRequestData::execute()
             {
               lElapsedMillis = (LONG)(dwCurTime - dwSearchStartTime);
             } /* endif */
-            if ( lElapsedMillis > iActualSearchTime  && fOneOrMoreIsFound )
+            if ( lElapsedMillis > iActualSearchTime  && fOneOrMoreIsFound && !fCountInsteadOfReturnSegments)
             {
               _rc_ = TIMEOUT_RC;
             }
@@ -2954,10 +2942,13 @@ int ConcordanceExtendedSearchRequestData::execute()
     iActualSearchTime = Data.iSearchTime;
     if ( _rc_ == 0 )
     {
-      addProposalToJSONString( strProposals, OProposal );
+      if(!fCountInsteadOfReturnSegments)
+      {
+        addProposalToJSONString( strProposals, OProposal );
+      }
       iFoundProposals++;
     }
-  } while ( ( _rc_ == 0 ) && ( iFoundProposals < Data.iNumOfProposals ) );
+  } while ( ( _rc_ == 0 ) && ( fCountInsteadOfReturnSegments || iFoundProposals < Data.iNumOfProposals ) );
 
 
   std::string filtersStr, globalOptionsStr;
@@ -3012,13 +3003,16 @@ int ConcordanceExtendedSearchRequestData::execute()
     {
       json_factory.addParmToJSONW( strOutputParmsW, L"NewSearchPosition", Data.szSearchPos );
     }
-    if ( iFoundProposals > 0 )
+    
+    json_factory.addParmToJSONW(strOutputParmsW, L"NumOfFoundSegments",  iFoundProposals);  
+    if ( iFoundProposals > 0 && !fCountInsteadOfReturnSegments)
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );
       json_factory.addArrayStartToJSONW( strOutputParmsW );
       strOutputParmsW.append( strProposals );
       json_factory.addArrayEndToJSONW( strOutputParmsW );
     } /* endif */
+  
 
     json_factory.terminateJSONW( strOutputParmsW );
     outputMessage = EncodingHelper::convertToUTF8( strOutputParmsW );

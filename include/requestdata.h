@@ -345,6 +345,8 @@ protected:
     SearchFilterFactory searchFilterFactory;
     OtmProposal Data;
     LONG lOptions = 0;
+    BOOL fCountInsteadOfReturnSegments = false;
+    BOOL fCombineAsLogicalOr = false;
 };
 
 class FuzzySearchRequestData: public RequestData{    
@@ -379,44 +381,6 @@ protected:
     int checkData() override ;
     int execute  () override ;
 };
-
-
-/*
-author: SEARCHED_STRING
-authorSearchMode: concordance|exact
-additionalInfo: SEARCHED_STRING
-additionalInfoSearchMode: concordance|exact
-documentName: SEARCHED_STRING
-documentNameSearchMode: concordance|exact
-timestampSpanStart: STAMP
-timestampSpanEnd: STAMP
-context: We still need to decide, when we know, what is really saved in here. Therefore we omit context for now in the implementation of this issue.
-*/
-/*
-struct ConcordanceSearchParams{
-    char srcStr[OTMPROPOSAL_MAXSEGLEN];
-    char trgStr[OTMPROPOSAL_MAXSEGLEN];
-    char srcLang[OTMPROPOSAL_MAXNAMELEN];
-    char trgLang[OTMPROPOSAL_MAXNAMELEN];
-    char author[OTMPROPOSAL_MAXNAMELEN];
-    char document[OTMPROPOSAL_MAXNAMELEN];
-    char addInfo[OTMPROPOSAL_MAXNAMELEN];
-    char context[OTMPROPOSAL_MAXNAMELEN];
-    char szTime1[100];
-    char szTime2[100];
-    
-    char sourceSearchType[50];
-    char targetSearchType[50];
-    char srcLangSearchType[50];
-    char trgLangSearchType[50];
-    char timespanSearchType[50];
-    char authorSearchType[50];
-    char docSearchType[50];
-    char addInfoSearchType[50];
-    char contextSearchType[50];
-
-    ConcordanceSearchParams(){memset(this, 0, sizeof(*this));}
-};//*/
 
 class DeleteEntriesReorganizeRequestData: public RequestData{
     private:
