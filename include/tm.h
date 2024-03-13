@@ -72,7 +72,7 @@ struct TMX_EXT_OUT_W
   CHAR      szOriginalSourceLanguage[MAX_LANG_LENGTH]; //language name of the source
   CHAR      szTagTable[MAX_FNAME];             //tag table name
   CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  CHAR      szAuthorName[MAX_FILESPEC];          //author name of target
   USHORT  usTranslationFlag; /* type of translation, 0 = human, 1 = machine, 2 = Global Memory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
   LONG_FN   szLongName;                        // name of source file (long name or EOS)
@@ -1488,7 +1488,7 @@ struct TMX_SENTENCE
   //ADDINFO
   CHAR      szSourceLanguage[MAX_LANG_LENGTH]; //language name of source
   CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  CHAR      szAuthorName[MAX_FILESPEC];          //author name of target
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
   LONG_FN   szLongName;                        // name of source file (long name or EOS)
@@ -1601,7 +1601,7 @@ typedef struct _TMX_PUT_W
   CHAR_W    szTarget[MAX_SEGMENT_SIZE];        //target sentence
   CHAR      szSourceLanguage[MAX_LANG_LENGTH]; //language name of source
   CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-  CHAR      szAuthorName[MAX_USERID];          //author name of target
+  CHAR      szAuthorName[MAX_LANG_LENGTH];          //author name of target
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
   CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
   LONG_FN   szLongName;                        // name of source file (long name or EOS)
@@ -1614,12 +1614,6 @@ typedef struct _TMX_PUT_W
 } TMX_PUT_W, * PTMX_PUT_W;
 
 
-typedef struct _TMX_PUT_IN_W
-{
-  TMX_PUT_W      stTmPut;             //pointer to put input structure
-} TMX_PUT_IN_W, * PTMX_PUT_IN_W;
-
-
 
 typedef struct _TMX_GET_W
 {
@@ -1629,7 +1623,7 @@ typedef struct _TMX_GET_W
   CHAR        szFileName[MAX_FILESPEC];          //file name the source comes from
   LONG_FN     szLongName;                        // name of source file (long name or EOS)
   ULONG       ulSegmentId;                       //segment number from analysis
-  CHAR        szAuthorName[MAX_USERID];          //author name
+  CHAR        szAuthorName[MAX_LANG_LENGTH];          //author name
   CHAR        szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
   USHORT      usRequestedMatches;                //number of requested matches
   USHORT      usMatchThreshold;                  //threshold for match level
@@ -1646,12 +1640,6 @@ typedef struct _TMX_GET_W
 } TMX_GET_W, * PTMX_GET_W;
 
 
-typedef struct _TMX_GET_IN_W
-{
-  TMX_GET_W        stTmGet;             //pointer in structure
-} TMX_GET_IN_W, * PTMX_GET_IN_W;
-
-
 //=======================================================================
 // structure TMX_GET_OUT
 
@@ -1665,7 +1653,7 @@ typedef struct _TMX_MATCH_TABLE_W
   CHAR    szTargetLanguage[MAX_LANG_LENGTH]; //language of translation
   CHAR    szOriginalSrcLanguage[MAX_LANG_LENGTH]; //language of src of translation
   USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */
-  CHAR    szTargetAuthor[MAX_USERID];   //author name of target
+  CHAR    szTargetAuthor[OTMPROPOSAL_MAXNAMELEN];   //author name of target
   TIME_L  lTargetTime;                  //time stamp of target
   USHORT  usMatchLevel;                 //similarity of the source
   int iWords;
@@ -1975,7 +1963,7 @@ USHORT AddTmTarget(
   //fuzzy search
   USHORT TmtXGet
   (
-    PTMX_GET_IN_W pTmGetIn,    //ptr to input struct
+    PTMX_GET_W pTmGetIn,    //ptr to input struct
     PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
   );
 
@@ -2245,9 +2233,9 @@ USHORT NTMLoadNameTable
   //HTM htm;                                       // old fashioned memory handle for this memory
   //TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
   //TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
-  //TMX_PUT_IN_W  TmPutIn;                       // ptr to TMX_PUT_IN_W structure
+  //TMX_PUT_W  TmPutIn;                       // ptr to TMX_PUT_W structure
   //TMX_EXT_OUT_W TmPutOut;                      // ptr to TMX_EXT_OUT_W structure
-  //TMX_GET_IN_W  TmGetIn;                       // ptr to TMX_PUT_IN_W structure
+  //TMX_GET_W  TmGetIn;                       // ptr to TMX_PUT_W structure
   //TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_EXT_OUT_W structure
   ULONG ulNextKey = 0;                       // next TM key for GetFirstProposal/GetNextProposal
   USHORT usNextTarget = 0;                   // next TM target for GetFirstProposal/GetNextProposal
@@ -2342,21 +2330,21 @@ int MatchToOtmProposal
 );
 
 
-/*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
+/*! \brief Fill TMX_GET_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
-    \param pGetIn pointer to the TMX_GET_IN_W structure
+    \param pGetIn pointer to the TMX_GET_W structure
   	\returns 0 or error code in case of errors
 */
 int OtmProposalToGetIn
 (
   OtmProposal &Proposal,
-  PTMX_GET_IN_W pGetIn
+  PTMX_GET_W pGetIn
 );
 
 int OtmProposalToPutIn
 (
   OtmProposal &Proposal,
-  PTMX_PUT_IN_W pPutIn
+  PTMX_PUT_W pPutIn
 );
 
 /*! \brief Handle a return code from the memory functions and create 
@@ -2439,7 +2427,7 @@ USHORT NTMReadWriteSegmentW( HTM,          //Handle of Input TM
                              PSZ,          //Full path to Output TM
                              PTMX_EXT_IN_W,//Pointer to the EXTRACT_IN structure
                              TMX_EXT_OUT_W *, //Pointer to the EXTRACT_OUT structure
-                             PTMX_PUT_IN_W,  //Pointer to the REPLACE_OUT structure
+                             PTMX_PUT_W,  //Pointer to the REPLACE_OUT structure
                              PTMX_EXT_OUT_W, //Pointer to the REPLACE_OUT structure
                              ULONG *,      //Pointer to a segment counter
                              ULONG *,      //Pointer to the invalid segment counter
@@ -2451,7 +2439,7 @@ USHORT NTMReadWriteSegmentHwndW( HTM,      //Handle of Input TM
                              PSZ,          //Full path to Output TM
                              PTMX_EXT_IN_W,  //Pointer to the EXTRACT_IN structure
                              TMX_EXT_OUT_W *, //Pointer to the EXTRACT_OUT structure
-                             PTMX_PUT_IN_W,  //Pointer to the REPLACE_OUT structure
+                             PTMX_PUT_W,  //Pointer to the REPLACE_OUT structure
                              PTMX_EXT_OUT_W, //Pointer to the REPLACE_OUT structure
                              ULONG *,      //Pointer to a segment counter
                              ULONG *,      //Pointer to the invalid segment counter
@@ -2490,7 +2478,7 @@ TmClose( HTM,        //(in) TM handle returned from open
 /* TmReplace                                                          */
 /**********************************************************************/
 USHORT
-TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_EXT_OUT_W, USHORT, HWND );
+TmReplace( HTM, PSZ, PTMX_PUT_W, PTMX_EXT_OUT_W, USHORT, HWND );
 
 /**********************************************************************/
 /* TmGet                                                              */
@@ -2498,7 +2486,7 @@ TmReplace( HTM, PSZ, PTMX_PUT_IN_W, PTMX_EXT_OUT_W, USHORT, HWND );
 USHORT
 TmGetW(EqfMemory*,               //(in)  TM handle
        PSZ,               //(in)  full TM name x:\eqf\mem\mem.tmd
-       PTMX_GET_IN_W,     //(in)  pointer to get input structure
+       PTMX_GET_W,     //(in)  pointer to get input structure
        PTMX_GET_OUT_W,    //(out) pointer to get output structure
        USHORT );          //(in)  message handling parameter
                           //      TRUE:  display error message
@@ -2529,7 +2517,7 @@ USHORT TmDeleteTM( PSZ, USHORT, HWND, PUSHORT );
 /**********************************************************************/
 
 USHORT
-TmDeleteSegmentW( HTM, PSZ, PTMX_PUT_IN_W, PTMX_EXT_OUT_W, USHORT );
+TmDeleteSegmentW( HTM, PSZ, PTMX_PUT_W, PTMX_EXT_OUT_W, USHORT );
 
 
 
@@ -2570,7 +2558,7 @@ USHORT TmUpdSegW
 (
   HTM         htm,                       //(in)  TM handle
   PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN_W pstPutIn,                  //(in)  pointer to put input structure
+  PTMX_PUT_W pstPutIn,                  //(in)  pointer to put input structure
   ULONG       ulUpdKey,                  //(in)  key of record being updated
   USHORT      usUpdTarget,               //(in)  number of target being updated
   USHORT      usFlags,                   //(in)  flags controlling the updated fields
@@ -2583,7 +2571,7 @@ USHORT TmUpdSegHwndW
 (
   HTM         htm,                       //(in)  TM handle
   PSZ         szMemPath,                 //(in)  full TM name x:\eqf\mem\mem
-  PTMX_PUT_IN_W pstPutIn,                  //(in)  pointer to put input structure
+  PTMX_PUT_W pstPutIn,                  //(in)  pointer to put input structure
   ULONG       ulUpdKey,                  //(in)  key of record being updated
   USHORT      usUpdTarget,               //(in)  number of target being updated
   USHORT      usFlags,                   //(in)  flags controlling the updated fields
@@ -3310,7 +3298,7 @@ typedef struct _MEM_MERGE_IDA
  EXT_OUT       stOldExtOut;                   // output for TmOldExtract
  TMX_EXT_IN_W  stExtIn;                       // TMX_EXTRACT_IN structure
  TMX_EXT_OUT_W stExtOut;                      // TMX_EXTRACT_OUT structure
- TMX_PUT_IN_W  stPutIn;                       // TMX_PUT_IN structure
+ TMX_PUT_W  stPutIn;                       // TMX_PUT_IN structure
  TMX_EXT_OUT_W stPutOut;                      // TMX_PUT_OUT structure
  TIME_L        tStamp;                        // Time stamp of merge start time
  HWND          hwndMemLb;                     // Handle to the TM listbox
@@ -3772,7 +3760,7 @@ MRESULT MemImportCallBack( PPROCESSCOMMAREA, HWND, WINMSG, WPARAM, LPARAM );
 #define NTMGETID_NOTFOUND_ID 0xFFFF
 
 
-USHORT TmtXGet( EqfMemory*, PTMX_GET_IN_W, PTMX_GET_OUT_W );
+USHORT TmtXGet( EqfMemory*, PTMX_GET_W, PTMX_GET_OUT_W );
 
 //tm put prototypes
 VOID HashSentence( PTMX_SENTENCE );
@@ -3944,7 +3932,7 @@ public:
 typedef struct _MEM_ORGANIZE_IDA
 {
  std::shared_ptr<int> memRef;
- TMX_PUT_IN_W  stPutIn;                        // input for TmReplace
+ TMX_PUT_W  stPutIn;                        // input for TmReplace
  TMX_EXT_OUT_W stPutOut;                       // The REPLACE_OUT structure
  TMX_EXT_IN_W  stExtIn;                        // input for TmExtract
  TMX_EXT_OUT_W stExtOut;                       // output for TmExtract

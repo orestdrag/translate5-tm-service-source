@@ -2399,19 +2399,19 @@ int FuzzySearchRequestData::execute(){
   std::vector<OtmProposal> vProposals(Data.iNumOfProposals);
   if ( _rc_ == NO_ERROR )
   {
-    TMX_GET_IN_W GetIn;
+    TMX_GET_W GetIn;
     TMX_GET_OUT_W GetOut;
-    memset( &GetIn, 0, sizeof(TMX_GET_IN_W) );
+    memset( &GetIn, 0, sizeof(TMX_GET_W) );
     memset( &GetOut, 0, sizeof(TMX_GET_OUT_W) );
 
     mem->OtmProposalToGetIn( Data, &GetIn );
-    GetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
-    GetIn.stTmGet.usRequestedMatches = (USHORT)vProposals.size();
-    GetIn.stTmGet.ulParm = GET_EXACT;
-    GetIn.stTmGet.pvGMOptList = mem->pvGlobalMemoryOptions;
+    GetIn.usConvert = MEM_OUTPUT_ASIS;
+    GetIn.usRequestedMatches = (USHORT)vProposals.size();
+    GetIn.ulParm = GET_EXACT;
+    GetIn.pvGMOptList = mem->pvGlobalMemoryOptions;
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      auto str = EncodingHelper::convertToUTF8(GetIn.stTmGet.szSource);
+      auto str = EncodingHelper::convertToUTF8(GetIn.szSource);
       T5LOG( T5DEBUG) <<"EqfMemory::OtmProposal::*** method: OtmProposal, looking for " <<  str;
     } 
 
@@ -2456,7 +2456,7 @@ int FuzzySearchRequestData::execute(){
       T5LOG( T5DEBUG) <<"EqfMemory::SearchProposal::  lookup failed, rc=" << _rc_;
     } /* end */     
 
-    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.stTmGet.szTagTable );
+    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.szTagTable );
 
     Data.iNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
   } /* endif */

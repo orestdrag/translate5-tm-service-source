@@ -59,7 +59,7 @@ USHORT EqfMemory::TmtXDelSegm
   TMX_EXT_OUT_W* pTmDelOut //ptr to output struct
 )
 {
-  //TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->stTmPut.szSource));    // ptr to sentence structure
+  //TMX_SENTENCE Sentence(std::make_unique<StringTagVariants>(pTmDelIn->szSource));    // ptr to sentence structure
   ULONG ulKey;                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
