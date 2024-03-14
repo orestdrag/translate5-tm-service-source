@@ -47,7 +47,7 @@ public:
 
   std::atomic_bool fServiceIsRunning{0};
 
-  int GetMemImportInProcess();
+  int GetMemImportInProcessCount();
 
   /* change the status of a memory in our memory list at the end of an import
   \param pszMemory name of the memory

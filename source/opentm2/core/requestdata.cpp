@@ -1523,16 +1523,16 @@ int ShutdownRequestData::execute(){
     //pMemService->closeAll();
     T5Logger::GetInstance()->LogStop();  
     TMManager::GetInstance()->fServiceIsRunning = true;
-    
-    std::thread([this]() 
+    int signal = sig;
+    std::thread([signal]
     {
       sleep(3);
       int j= 3;
-      while(int i = TMManager::GetInstance()->GetMemImportInProcess() != -1){
+      while(int i = TMManager::GetInstance()->GetMemImportInProcessCount()){
         if( ++j % 15 == 0){
           T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
         }
-        T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  i = "<< i; 
+        T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
       
         sleep(1);
       }
@@ -1544,9 +1544,11 @@ int ShutdownRequestData::execute(){
       //close log file
       if(saveTmRD._rest_rc_ == 200){
         T5Logger::GetInstance()->LogStop();
+      }else{
+        T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
       }
-      if(sig != SHUTDOWN_CALLED_FROM_MAIN){
-        exit(sig);
+      if(signal != SHUTDOWN_CALLED_FROM_MAIN){
+        exit(signal);
       }
     }).detach();
     return 200;

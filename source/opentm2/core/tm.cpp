@@ -13,17 +13,21 @@
 /*! \brief Checks if there is opened memory in import process
   \returns index if import process for any memory is going on, -1 if no
   */
-int TMManager::GetMemImportInProcess(){
-  T5LOG(T5FATAL) << "fix this function after refactoring!";
-  for( int i = 0; i < (int)EqfMemoryPlugin::GetInstance()->m_MemInfoVector.size(); i++ )
+int TMManager::GetMemImportInProcessCount(){
+  int count = 0;
+  for(auto& tm: tms)
   {
-    if(EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->eImportStatus == IMPORT_RUNNING_STATUS)
+    ImportStatusDetails* pImportDetails = tm.second->importDetails;
+    if( (tm.second->eImportStatus == IMPORT_RUNNING_STATUS) || 
+        (tm.second->eImportStatus == REORGANIZE_RUNNING_STATUS) 
+    )
     {
-      T5LOG( T5INFO) << ":: memory in import process, name = " << EqfMemoryPlugin::GetInstance()->m_MemInfoVector[i]->szName ;
-      return i;
+      T5LOG( T5INFO) << ":: memory in " <<  (tm.second->eImportStatus == IMPORT_RUNNING_STATUS? "import" : "reorganize" ) << " process, name = " << tm.first;
+      count++;
     }
-  } /* endfor */
-  return -1;
+  }
+
+  return count;
 }
 
 size_t TMManager::CalculateOccupiedRAM(){

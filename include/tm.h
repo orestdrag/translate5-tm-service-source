@@ -4196,7 +4196,7 @@ class TMManager{
 
     std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 
-    int GetMemImportInProcess();
+    int GetMemImportInProcessCount();
     
     /*! \brief Close all open memories
     \returns http return code0 if successful or an error code in case of failures
