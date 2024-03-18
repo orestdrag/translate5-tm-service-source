@@ -269,7 +269,7 @@ int LanguageFactory::getOpenTM2NameFromISO
   int i = this->findISO( pszISO, fPrefered);
   if ( i < 0 )
   {
-    T5LOG(T5ERROR) << "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = " << pszISO;
+    T5LOG(T5WARNING) << "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = " << pszISO;
     return( ERROR_LANGUAGENOTFOUND );
   }
 
@@ -542,7 +542,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
       std::qsort(&vLanguageList[0], vLanguageList.size(), sizeof(LANGUAGEINFO), compareLanguageInfo);    
       usRC = false == std::is_sorted(vLanguageList.begin(), vLanguageList.end(), 
           []( LANGUAGEINFO a, LANGUAGEINFO b) {//values should be unique
-            return  strcmp(a.szName, b.szName) < 0;
+            return  strcasecmp(a.szName, b.szName) < 0;
           } ) ;
     }
 

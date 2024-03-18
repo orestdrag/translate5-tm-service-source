@@ -1165,6 +1165,9 @@ USHORT CTMXExportImport::WriteTUV
 
   // start TUV
   m_xw.WriteStartElement( "tuv" );
+  if(!strcmp(szTMXLang, "??")){
+    strcpy(szTMXLang, pszLanguage);
+  }
   m_xw.WriteAttributeString( "xml:lang", szTMXLang ); 
 
   // add original Tmgr language as property
