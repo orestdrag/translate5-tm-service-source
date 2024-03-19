@@ -1518,41 +1518,42 @@ int StatusMemRequestData::execute() {
   return( OK );
 };
 
-int ShutdownRequestData::execute(){
-    if(pfWriteRequestsAllowed) *pfWriteRequestsAllowed = false;
-    //pMemService->closeAll();
-    T5Logger::GetInstance()->LogStop();  
-    TMManager::GetInstance()->fServiceIsRunning = true;
-    int signal = sig;
-    std::thread([signal]
-    {
-      sleep(3);
-      int j= 3;
-      while(int i = TMManager::GetInstance()->GetMemImportInProcessCount()){
-        if( ++j % 15 == 0){
-          T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
-        }
-        T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
-      
-        sleep(1);
-      }
-
-      TMManager::GetInstance()->fServiceIsRunning = false;
-      auto saveTmRD = SaveAllTMsToDiskRequestData();
-      saveTmRD.run();
-      //check tms is in import status
-      //close log file
-      if(saveTmRD._rest_rc_ == 200){
-        T5Logger::GetInstance()->LogStop();
-      }else{
-        T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
-      }
-      if(signal != SHUTDOWN_CALLED_FROM_MAIN){
-        exit(signal);
-      }
-    }).detach();
-    return 200;
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal)
+{
+  TMManager::GetInstance()->fWriteRequestsAllowed = false;
+  TMManager::GetInstance()->fServiceIsRunning = true;
+  //pMemService->closeAll();
+  T5Logger::GetInstance()->LogStop();  
+  int j= 3;
+  while(int i = TMManager::GetInstance()->GetMemImportInProcessCount()){
+    if( ++j % 15 == 0){
+      T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
+    }
+    T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
   
+    sleep(1);
+  }
+
+  auto saveTmRD = SaveAllTMsToDiskRequestData();
+  saveTmRD.run();
+  //check tms is in import status
+  //close log file
+  if(saveTmRD._rest_rc_ == 200){
+    T5Logger::GetInstance()->LogStop();
+  }else{
+    T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
+  }
+  if(signal != SHUTDOWN_CALLED_FROM_MAIN){
+    TMManager::GetInstance()->fServiceIsRunning = false;
+    sleep(1);
+    exit(signal);
+  }
+}
+
+int ShutdownRequestData::execute()
+{
+  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown, this->sig).detach();
+  return 200;
 }
 
 int addProposalToJSONString

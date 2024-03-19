@@ -168,7 +168,8 @@ class ShutdownRequestData:public RequestData{
 public:
     ShutdownRequestData(): RequestData(COMMAND::SHUTDOWN) {};
     int sig = 0;
-    std::atomic_bool* pfWriteRequestsAllowed = nullptr;
+
+    static void CheckImportFlushTmsAndShutdown(int signal);
 protected:
     int parseJSON() override { return 0;};
     int checkData() override { return 0;};

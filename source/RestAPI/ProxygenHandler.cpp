@@ -18,7 +18,6 @@
 #include <atomic>
 #include "LogWrapper.h"
 
-std::atomic_bool fWriteRequestsAllowed;
 
 using namespace proxygen;
 
@@ -30,7 +29,7 @@ DEFINE_bool(request_number,
 namespace ProxygenService {
 
 ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
-  fWriteRequestsAllowed = true;
+  TMManager::GetInstance()->fWriteRequestsAllowed = true;
 }
 
 const std::map<const COMMAND,const char*> CommandToStringsMap {
@@ -87,8 +86,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       errorStr = "export format not specified in Accept header";
       pRequest->command = COMMAND::UNKNOWN_COMMAND;
     }
-  }else if( pRequest->command == COMMAND::SHUTDOWN){
-    ((ShutdownRequestData*)pRequest)->pfWriteRequestsAllowed = & fWriteRequestsAllowed;
   }
 
   pRequest->requestAcceptHeader = requestAcceptHeader;
@@ -128,7 +125,7 @@ void ProxygenHandler::onEOM() noexcept {
      //fix garbage in json 
     if(pRequest->strBody.empty()){
       pRequest->_rest_rc_ = 404;
-    }else if(fWriteRequestsAllowed == false){
+    }else if(TMManager::GetInstance()->fWriteRequestsAllowed == false){
       pRequest->_rest_rc_ = 423;  
     }else{
       size_t json_end = pRequest->strBody.find("\n}") ;

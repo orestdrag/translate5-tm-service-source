@@ -4137,6 +4137,7 @@ class TMManager{
 
   public:
   
+  std::atomic_bool fWriteRequestsAllowed{0};
   std::atomic_bool fServiceIsRunning{0};
     /*! \brief Pointer to the list of opened memories
     */
