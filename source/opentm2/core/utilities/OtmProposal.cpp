@@ -651,11 +651,11 @@ bool OtmProposal::isEmpty()
 
 
 bool OtmProposal::isSourceLangIsPrefered(){
-  return( fSourceLangIsPrefered );
+  return( fIsoSourceLangIsPrefered );
 }
 
 void OtmProposal::setIsSourceLangIsPrefered(bool fPref){
-  fSourceLangIsPrefered = fPref;
+  fIsoSourceLangIsPrefered = fPref;
 }
 
 

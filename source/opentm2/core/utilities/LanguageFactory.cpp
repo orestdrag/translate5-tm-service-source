@@ -269,7 +269,7 @@ int LanguageFactory::getOpenTM2NameFromISO
   int i = this->findISO( pszISO, fPrefered);
   if ( i < 0 )
   {
-    T5LOG(T5WARNING) << "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = " << pszISO;
+    T5LOG(T5ERROR) << "LanguageFactory::getOpenTM2NameFromISO()::ERROR_LANGUAGENOTFOUND, pszISO = " << pszISO;
     return( ERROR_LANGUAGENOTFOUND );
   }
 

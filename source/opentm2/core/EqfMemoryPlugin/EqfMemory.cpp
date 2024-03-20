@@ -765,8 +765,9 @@ int EqfMemory::OtmProposalToGetIn
   pGetIn->usMatchThreshold = threshold;
   pGetIn->ulSegmentId = Proposal.getSegmentNum();
   pGetIn->pvReplacementList = (PVOID)Proposal.getReplacementList();
-  pGetIn->fSourceLangIsPrefered= Proposal.isSourceLangIsPrefered();
-  pGetIn->fTargetLangIsPrefered = LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szTargetLanguage ) >= 0;
+  //pGetIn->fSourceLangIsPrefered = Proposal.isSourceLangIsPrefered();
+  pGetIn->fSourceLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szSourceLanguage ) != -1);
+  pGetIn->fTargetLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szTargetLanguage ) != -1);
   return( iRC );
 }
 
