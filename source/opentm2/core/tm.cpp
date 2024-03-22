@@ -15,6 +15,8 @@
   */
 int TMManager::GetMemImportInProcessCount(){
   int count = 0;
+  // lock tms list
+  std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
   for(auto& tm: tms)
   {
     ImportStatusDetails* pImportDetails = tm.second->importDetails;
@@ -46,8 +48,11 @@ size_t TMManager::CalculateOccupiedRAM(){
     }
   }
   #else
-  for(const auto& mem: tms){
-    UsedMemory += mem.second->GetRAMSize();
+  {
+    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    for(const auto& mem: tms){
+      UsedMemory += mem.second->GetRAMSize();
+    }
   }
   //UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
   UsedMemory += MEMORY_RESERVED_FOR_SERVICE;
@@ -77,35 +82,48 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   time_t curTime;
   time( &curTime );
   std::multimap <time_t, std::weak_ptr<EqfMemory>>  openedMemoriesSortedByLastAccess;
-  for(const auto& tm: tms){
-    openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.second});
+  
+  {
+    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    for(const auto& tm: tms){
+      openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.second});
+    }
   }
 
   T5LOG(T5DEBUG) << "there are  "<< openedMemoriesSortedByLastAccess.size()<<" open in RAM";
 
-  for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++){
+  for(auto it = openedMemoriesSortedByLastAccess.begin(); memoryNeed >= AllowedMemory && it != openedMemoriesSortedByLastAccess.end(); it++)
+  {
     std::string tmName;
-    if(!it->second.expired()){
-      auto tm = it->second.lock();
-      //tm->UnloadFromRAM();
-      tmName = tm->szName;
-      if(tm.use_count() > 2){
-        T5LOG(T5WARNING) <<" need to close tm, but \"" << tmName <<"\" is still in use "; 
-      }else{
-        tms.erase(tmName);
-        T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
-        //memoryNeed = memoryRequested + CalculateOccupiedRAM();
+    {
+      std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+      if(!it->second.expired())
+      {
+        auto tm = it->second.lock();
+        //tm->UnloadFromRAM();
+        tmName = tm->szName;
+        if(tm.use_count() > 2)
+        {
+          T5LOG(T5WARNING) <<" need to close tm, but \"" << tmName <<"\" is still in use "; 
+        }else{
+          tms.erase(tmName);
+          T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
+          //memoryNeed = memoryRequested + CalculateOccupiedRAM();
+        }
       }
     }
-    for(int i = 0; i<5; i++){
-      if(it->second.expired()){
+    for(int i = 0; i<5; i++)
+    {
+      if(it->second.expired())
+      {
         break;
       }else{
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
 
-    if(it->second.expired() == false){
+    if(it->second.expired() == false)
+    {
       T5LOG(T5INFO) << "TM with name \'" << tmName << " was stil not unloaded from RAM after 500 miliseconds after deleting it from TMManager!";
     }
 
@@ -861,18 +879,19 @@ int TMManager::ReplaceMemory
     iRC = EqfMemoryPlugin::eMemoryNotFound;
     return iRC;
   } /* endif */
-
-  iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
-  if(!iRC){
-    iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg );
+  {
+    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
+    if(!iRC){
+      iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg );
+    }
+    if(!iRC){
+      iRC = !TMManager::GetInstance()->IsMemoryLoadedUnsafe(strReplace);
+    }
+    if(!iRC){
+      iRC = TMManager::GetInstance()->tms[strReplace]->ReloadFromDisk();
+    }
   }
-  if(!iRC){
-    iRC = !TMManager::GetInstance()->IsMemoryLoaded(strReplace);
-  }
-  if(!iRC){
-    iRC = TMManager::GetInstance()->tms[strReplace]->ReloadFromDisk();
-  }
-  
   // broadcast deleted memory name for replaceWith memory
   if ( iRC == EqfMemoryPlugin::eSuccess )
   {
@@ -1200,7 +1219,12 @@ int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExist
 
 
 bool TMManager::IsMemoryLoaded(const std::string& strMemName){
-  return tms.count(strMemName);
+  std::lock_guard<std::mutex> l{mutex_access_tms};
+  return IsMemoryLoadedUnsafe(strMemName);
+}
+
+bool TMManager::IsMemoryLoadedUnsafe(const std::string& strMemName){
+  return TMManager::GetInstance()->tms.find(strMemName) != TMManager::GetInstance()->tms.end();
 }
 
 int TMManager::OpenTM(const std::string& strMemName){
@@ -1242,18 +1266,25 @@ int TMManager::OpenTM(const std::string& strMemName){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";
     return 1;
   }
-  tms[strMemName] = pMem;
+  
+  {
+    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    tms[strMemName] = pMem;
+  }
   return 0; 
 }
 
 int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
+  std::lock_guard<std::mutex> l{mutex_access_tms};
   if(NewMem == nullptr || NewMem->szName == "\0"){
     return -1;
   }
-  if(IsMemoryLoaded(NewMem->szName)){
+  if(IsMemoryLoadedUnsafe(NewMem->szName)){
     return -2;
   }
-  tms[NewMem->szName] = NewMem;
+  {
+    tms[NewMem->szName] = NewMem;
+  }
   return 0;
 }
 
@@ -1261,7 +1292,10 @@ int TMManager::CloseTM(const std::string& strMemName){
   if(!IsMemoryLoaded(strMemName)){
     return 404;
   }
-  tms.erase(strMemName);
+  {
+    std::lock_guard<std::mutex> l{mutex_access_tms};
+    tms.erase(strMemName);
+  }
   return 0;
 }
 
@@ -1270,6 +1304,7 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
   std::shared_ptr<EqfMemory> mem;
   if(IsMemoryLoaded(strMemName)){
     if(command == STATUS_MEM){
+      std::lock_guard<std::mutex> l{mutex_access_tms};//lock tms list
       return tms[strMemName];
     }
   }
@@ -1283,11 +1318,14 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
     rc = OpenTM(strMemName);
   }
   std::shared_ptr<EqfMemory>  mem;
-  if(rc){
-    //return;
-  }else if(tms.count(strMemName)){
-    mem = tms[strMemName];
-  } 
+  
+  {//lock tms list
+    std::lock_guard<std::mutex> l{mutex_access_tms}; 
+    if(IsMemoryLoadedUnsafe(strMemName)){    
+      mem = tms[strMemName];
+    } 
+  }// unlock
+
   if(mem){
     //check if there are any Write pointers
     rc = mem->writeCnt.use_count()>1;
@@ -1314,17 +1352,23 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
   }
 
   std::shared_ptr<EqfMemory>  mem; 
-  if(rc){ //Memory failed to open
-    //return;
-  }else if(tms.count(strMemName)){
-    mem = tms[strMemName];
-    //check if there are any Write pointers
-    rc = mem->writeCnt.use_count() > 1;
-    refBack = mem->writeCnt;
-  }else{
-    rc = 2;
-  }
-  //
+  
+  {// lock tms list
+    std::lock_guard<std::mutex> l{mutex_access_tms};
+  
+    if(rc){ //Memory failed to open
+      //return;
+    }else if(IsMemoryLoadedUnsafe(strMemName)){
+      mem = tms[strMemName];
+      //check if there are any Write pointers
+      rc = mem->writeCnt.use_count() > 1;
+      refBack = mem->writeCnt;
+    }else{
+      rc = 2;
+    }
+  }// unlock tms
+  
+
   if(!rc){ // we have some Write process;
     //mem.reset();
     rc = mem->readOnlyCnt.use_count() > 1;

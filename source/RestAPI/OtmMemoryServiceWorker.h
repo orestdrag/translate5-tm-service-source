@@ -45,8 +45,6 @@ public:
 	
   int init();
 
-  std::atomic_bool fServiceIsRunning{0};
-
   int GetMemImportInProcessCount();
 
   /* change the status of a memory in our memory list at the end of an import

@@ -711,16 +711,19 @@ int ListTMRequestData::execute(){
   jsonSS << "{\n\t\"Open\":[";
   int elementCount = 0;
   std::set<std::string> printedTMNames;
-  for(auto& tmem: TMManager::GetInstance()->tms)
-  {
-    if(elementCount)//skip delim for first elem
-      jsonSS << ',';
-    
-    // add name to response area
-    jsonSS << "{ " << "\"name\": \"" << tmem.first << "\" }";
-    printedTMNames.emplace(tmem.first);
-    elementCount++;
-  } /* endwhile */
+  
+  {// lock tms
+    for (auto& tmem : TMManager::GetInstance()->tms)
+    {
+      if(elementCount)//skip delim for first elem
+        jsonSS << ',';
+      
+      // add name to response area
+      jsonSS << "{ " << "\"name\": \"" << tmem.first << "\" }";
+      printedTMNames.emplace(tmem.first);
+      elementCount++;
+    } /* endwhile */
+  }// unlock tms
 
   jsonSS << "],\n\t\"Available on disk\": [";
 
@@ -782,12 +785,18 @@ int SaveAllTMsToDiskRequestData::execute(){
   std::string tms; 
   
   int count = 0;
-  for(const auto& tm: TMManager::GetInstance()->tms){
-    if(count++)
-      tms += ", ";
-    tm.second->FlushFilebuffers();
-    tms += tm.first;
-  }
+  
+  //std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_requestTM};
+  {// lock tms
+    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    for(const auto& tm: TMManager::GetInstance()->tms){
+      if(count++)
+        tms += ", ";
+      tm.second->FlushFilebuffers();
+      tms += tm.first;
+    }
+  }// unlock tms
+
   outputMessage = "{\n   \'saved " + std::to_string(count) +" tms\': \'" + tms + "\' \n}";
   return OK;
 }
@@ -1666,22 +1675,25 @@ int ResourceInfoRequestData::execute(){
   size_t total = 0, fSize = 0, count = 0;
   std::string fName;
   ssOutput << "\"tms\": [\n";
-  for ( auto tm : TMManager::GetInstance()->tms)
-  {
-    if(count){
-      ssOutput << ",";
-    }
-    fSize = tm.second->GetRAMSize();
-    fName = tm.first;
+  {// lock tms
+    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    for ( auto& tm : TMManager::GetInstance()->tms)
+    {
+      if(count){
+        ssOutput << ",";
+      }
+      fSize = tm.second->GetRAMSize();
+      fName = tm.first;
 
-    ssOutput << "\n{ ";
-    AddToJson(ssOutput, "name", tm.first, true );
-    AddToJson(ssOutput, "size", fSize, false );
-    ssOutput << " }";
+      ssOutput << "\n{ ";
+      AddToJson(ssOutput, "name", tm.first, true );
+      AddToJson(ssOutput, "size", fSize, false );
+      ssOutput << " }";
 
-    total += fSize;
-    count++;
-  }   
+      total += fSize;
+      count++;
+    }   
+  }
 
   ssOutput << "\n ],\n"; 
   AddToJson(ssOutput, "totalOccupiedByTMsInRAM", total, true );

@@ -4138,7 +4138,7 @@ class TMManager{
   public:
   
   std::atomic_bool fWriteRequestsAllowed{0};
-  std::atomic_bool fServiceIsRunning{0};
+  std::atomic_bool fServiceIsRunning{1};
     /*! \brief Pointer to the list of opened memories
     */
     //std::vector<EqfMemory> vMemoryList;
@@ -4146,6 +4146,7 @@ class TMManager{
   TMMap tms;
 
   std::mutex mutex_requestTM;
+  std::mutex mutex_access_tms;
 
   enum TMManagerCodes{
     TMM_NO_ERROR = 0,
@@ -4158,6 +4159,7 @@ class TMManager{
   };
 
   bool IsMemoryLoaded(const std::string& strMemName);
+  bool IsMemoryLoadedUnsafe(const std::string& strMemName);
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
 
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
