@@ -2505,6 +2505,10 @@ USHORT GetFuzzyMatch
                             &usMatchEntries, &usOverlaps,
                             &pMatchEntry->usMaxVotes, &pSentence->usActVote,
                             pSentence, pMatchEntry->ulKey );
+          if(usRc == SOURCE_LANG_DIFFERENT)
+          {
+            usRc = NO_ERROR;
+          }
           if ( !usRc )
           {
             //nr of matches found
@@ -2512,7 +2516,7 @@ USHORT GetFuzzyMatch
 
             //get next tm record
             pMatchEntry++;
-          } /* endif */
+          }/* endif */
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFuzzyTestTime) );
 #endif
