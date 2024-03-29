@@ -96,6 +96,19 @@ DEFINE_bool(useconfigfile, false, "Set to use values from config file that shoul
 
 DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including temporary and tm)");
 
+const char* chec_segment_xml_msg = "If set to true, segments would be checked for valid xml, that includes check for tags, and also xml allowed symbols. Xml invalid symbols, including with non escaped unicode sequences, would be skipped";
+DEFINE_bool(check_segment_xml_in_export, false, chec_segment_xml_msg);
+DEFINE_bool(check_segment_xml_in_reorganize, false, chec_segment_xml_msg);
+DEFINE_bool(ignore_invalid_chars_in_string_variants_generation, false, "String variants are copies of the input segments, \
+with generic tags instead of original, with np tags replaces and also normalized strings. \
+This parameter would allow xml parser to skip INV_CHARS error inside of the segments, set it to true to allow t5memory work with segments with not xml-escaped symbols");
+
+DEFINE_bool(ignore_invalid_chars_in_export, false, "This flag is applied only if check_segment_xml_in_export is set to true, otherwise there are no xml check.\
+This allow to do xml check with skipping INV_CHARS errors");
+DEFINE_bool(ignore_invalid_chars_in_reorganize, false, "This flag is applied only if check_segment_xml_in_reorganize is set to true, otherwise there are no xml check.\
+This allow to do xml check with skipping INV_CHARS errors");
+
+
 void handle_interrupt_sig(int sig) {
     T5LOG( T5TRANSACTION) << "Received interrupt signal\n";
     //StopOtmMemoryService();

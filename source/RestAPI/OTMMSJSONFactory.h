@@ -175,6 +175,14 @@ public:
     int iBufferLen;          // size of the buffer in number of characters
   } JSONPARSECONTROL, *PJSONPARSECONTROL;
 
+   typedef struct _JSONPARSECONTROLUTF8
+  {
+    char szName[40];      // name of the parameter
+    PARMTYPE type;           // type of the parameter
+    void *pvValue;           // pointer to a variable receiving the value
+    int iBufferLen;          // size of the buffer in number of characters
+  } JSONPARSECONTROLUTF8, *PJSONPARSECONTROLUTF8;
+
 /*! \brief Parses a JSON string using the supplied control table
 
     This method parses a JSON string using the provided control table
@@ -190,6 +198,13 @@ public:
     std::wstring &JSONString,
     PJSONPARSECONTROL paParserControl
   ); 
+
+  int parseJSON
+  (
+    std::string &JSONString,
+    PJSONPARSECONTROLUTF8 paParserControl
+  ); 
+
 
 
 /*! \brief Start parsing of a JSON string

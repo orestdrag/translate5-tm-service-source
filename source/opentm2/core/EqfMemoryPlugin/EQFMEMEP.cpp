@@ -786,7 +786,10 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
    return usRc;
 } /* end of function MemExportStart */
 
-bool IsValidXml(std::wstring&& sentence);
+bool IsValidXml(std::wstring&& sentence, bool ignoreInvalidCharactersErrors);
+DECLARE_bool(check_segment_xml_in_export);
+DECLARE_bool(ignore_invalid_chars_in_export);
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -912,25 +915,30 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W)); 
         
-        auto ll = T5Logger::GetInstance()->suppressLogging(); 
-        bool fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource);
+        bool fValidXml = true; 
 
-        if(fValidXml){
-          fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget);        
-          T5Logger::GetInstance()->desuppressLogging(ll);
+        if(FLAGS_check_segment_xml_in_export){
+          auto ll = T5Logger::GetInstance()->suppressLogging(); 
+          fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource, FLAGS_ignore_invalid_chars_in_export);
           if(fValidXml){
-            usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+            if(FLAGS_check_segment_xml_in_export){
+              fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget, FLAGS_ignore_invalid_chars_in_export);        
+            }
+            T5Logger::GetInstance()->desuppressLogging(ll);
+            if(!fValidXml){
+              T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
+            } 
           }else{
-            T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
+            T5Logger::GetInstance()->desuppressLogging(ll);
+            T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pExportIDA->pProposal;
           } 
-        }else{
-          T5Logger::GetInstance()->desuppressLogging(ll);
-          T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pExportIDA->pProposal;
-        } 
+        }       
                 
         if(!fValidXml){
           usRc = 0;
           pExportIDA->invalidXmlSegments ++;
+        }else{
+          usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
         }
          // map return code to the ones used by memory export...
          switch ( usRc )

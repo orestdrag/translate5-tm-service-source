@@ -1974,30 +1974,33 @@ int UpdateEntryRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToUTF16( strBody.c_str() );
+
+  //std::string preprocessedInput = );
+  //std::wstring strInputParmsW = EncodingHelper::convertToUTF16(strBody.c_str());
+  //strInputParmsW = 
   // parse input parameters
   Data.clear();    
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
-  { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+  { "source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+  { "target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
+  { "sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { "targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
 
-  { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
-  { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
-  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
-  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
-  { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
-  { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
-  { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
-  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  { "segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+  { "documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+  { "type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
+  { "author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
+  { "markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+  { "context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+  { "timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
+  { "addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
+  { "loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { "save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
+  { "recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
+  { "targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
+  { "",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strBody, parseControl );
 
   if ( _rc_ != 0 )
   {

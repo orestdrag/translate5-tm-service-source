@@ -31,6 +31,141 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
   return buff;
 }
 
+#include <locale>
+#include <codecvt>
+// Convert std::wstring to std::string
+std::string EncodingHelper::wstringToString(const std::wstring& wstr) {
+    // Create a locale with UTF-8 encoding
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(wstr);
+}
+
+// Convert std::string to std::wstring
+std::wstring EncodingHelper::stringToWstring(const std::string& str) {
+  // Create a locale with UTF-8 encoding
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+  return converter.from_bytes(str);
+}
+
+#include <regex>
+/*
+std::string EncodingHelper::PreprocessUnicodeInput(const std::string& inputString) {
+    // Regular expression to match Unicode escape sequences
+    std::regex unicodeEscapePattern("\\\\u([0-9a-fA-F]{4})");
+
+    // Lambda function to replace Unicode escape sequences with their corresponding characters
+    auto replaceUnicodeEscape = [&](const std::smatch& match) {
+        // Extract the hexadecimal value from the match and convert it to an integer
+        int unicodeValue = std::stoi(match.str(1), nullptr, 16);
+        // Convert the integer to the corresponding Unicode character
+        return static_cast<char>(unicodeValue);
+    };
+
+    // Replace Unicode escape sequences with their corresponding characters
+    std::string preprocessedString = std::regex_replace(inputString, unicodeEscapePattern, replaceUnicodeEscape);
+
+    return preprocessedString;
+}//*/
+
+
+#include <sstream>
+
+
+std::string preprocessString(const std::string& inputString) {
+    std::ostringstream preprocessedStream;
+    std::istringstream inputStream(inputString);
+    char currentChar;
+    while (inputStream.get(currentChar)) {
+        if (currentChar == '\\') {
+            // Check if next character is 'u'
+            if (inputStream.get() == 'u') {
+                // Read the next four characters as hexadecimal Unicode value
+                std::string unicodeStr;
+                for (int i = 0; i < 4; ++i) {
+                    unicodeStr += inputStream.get();
+                }
+                // Convert hexadecimal Unicode value to integer
+                int unicodeValue = std::stoi(unicodeStr, nullptr, 16);
+                // Convert integer to character and append to preprocessed string
+                preprocessedStream << static_cast<char>(unicodeValue);
+            } else {
+                // If it's not 'u', just append the backslash and the next character
+                preprocessedStream << '\\' << currentChar;
+            }
+        } else {
+            // If it's not a backslash, just append the character
+            preprocessedStream << currentChar;
+        }
+    }
+    return preprocessedStream.str();
+}
+
+std::string preprocessStrVar2(const std::string& inputString){
+  // Regular expression to match Unicode escape sequences
+    std::regex unicodeEscapePattern("\\\\u([0-9a-fA-F]{4})");
+
+    // Replace Unicode escape sequences with their corresponding characters
+    std::ostringstream preprocessedStream;
+    auto it = std::sregex_iterator(inputString.begin(), inputString.end(), unicodeEscapePattern);
+    auto end = std::sregex_iterator();
+    size_t lastPos = 0;
+    while (it != end) {
+        // Append characters before the match
+        preprocessedStream << inputString.substr(lastPos, it->position() - lastPos);
+
+        // Extract the hexadecimal value from the match and convert it to an integer
+        int unicodeValue = std::stoi(it->str(1), nullptr, 16);
+        // Convert the integer to the corresponding Unicode character and append it
+        preprocessedStream << static_cast<char>(unicodeValue);
+
+        // Update last position
+        lastPos = it->position() + it->length();
+
+        // Move to the next match
+        ++it;
+    }
+    // Append the remaining characters after the last match
+    preprocessedStream << inputString.substr(lastPos);
+
+    return preprocessedStream.str();
+}
+
+std::string EncodingHelper::PreprocessUnicodeInput(const std::string& inputString) {
+  return preprocessString(inputString);    
+}
+
+std::wstring EncodingHelper::PreprocessUnicodeInput(const std::wstring& inputString) {
+  std::string inputStr = wstringToString(inputString);
+  std::string res = PreprocessUnicodeInput(inputStr);
+  return stringToWstring(res);
+}
+
+std::string EncodingHelper::PreprocessSymbolsForXML(const std::string& inputString)
+{
+  std::ostringstream oss;
+  for (char ch : inputString) {
+      switch (ch) {
+          case '\a': oss << "\\a"; break; // Bell (alert)
+          case '\b': oss << "\\b"; break; // Backspace
+          case '\f': oss << "\\f"; break; // Form feed
+          case '\n': oss << "\\n"; break; // Newline
+          case '\r': oss << "\\r"; break; // Carriage return
+          case '\t': oss << "\\t"; break; // Horizontal tab
+          case '\v': oss << "\\v"; break; // Vertical tab
+          case '\\': oss << "\\\\"; break; // Backslash
+          case '\'': oss << "\\'"; break; // Single quote
+          case '\"': oss << "\\\""; break; // Double quote
+          default: oss << ch; break;
+      }
+  }
+  return oss.str();
+}
+
+std::wstring EncodingHelper::PreprocessSymbolsForXML(const std::wstring& inputString){
+  std::string inputStr = wstringToString(inputString);
+  std::string res = PreprocessSymbolsForXML(inputStr);
+  return stringToWstring(res);
+}
 
 std::string to_utf8(const std::u16string &s)
 {

@@ -205,7 +205,10 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
 
 // ================ Handle the message WM_EQF_MEMORGANIZE_PROCESS =====================
 
-bool IsValidXml(std::wstring&& sentence);
+bool IsValidXml(std::wstring&& sentence, bool ignoreInvalidCharactersErrors);
+DECLARE_bool(check_segment_xml_in_reorganize);
+DECLARE_bool(ignore_invalid_chars_in_reorganize);
+
 VOID EQFMemOrganizeProcess
 (
   PPROCESSCOMMAREA  pCommArea
@@ -244,21 +247,24 @@ VOID EQFMemOrganizeProcess
     pRIDA->pProposal->getTargetLanguage( pRIDA->szTargetLanguage, sizeof(pRIDA->szTargetLanguage) );
     auto ll = T5Logger::GetInstance()->suppressLogging(); 
     wchar_t seg_buff[OTMPROPOSAL_MAXSEGLEN+1];
-    pRIDA->pProposal->getSource(seg_buff, OTMPROPOSAL_MAXSEGLEN);
+    bool fValidXml =  true;
 
-    bool fValidXml =  IsValidXml( seg_buff);
-
-    if(fValidXml){
-      pRIDA->pProposal->getTarget(seg_buff, OTMPROPOSAL_MAXSEGLEN);
-      fValidXml =  IsValidXml( seg_buff);        
-      T5Logger::GetInstance()->desuppressLogging(ll);
-      if(!fValidXml){
-        T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pRIDA->pProposal;
-      } 
-    }else{
-      T5Logger::GetInstance()->desuppressLogging(ll);
-      T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pRIDA->pProposal;
+    if(FLAGS_check_segment_xml_in_reorganize ){    
+      pRIDA->pProposal->getSource(seg_buff, OTMPROPOSAL_MAXSEGLEN);
+      fValidXml = IsValidXml( seg_buff, FLAGS_ignore_invalid_chars_in_reorganize);
+      if(fValidXml){
+        pRIDA->pProposal->getTarget(seg_buff, OTMPROPOSAL_MAXSEGLEN);
+        fValidXml =  IsValidXml( seg_buff, FLAGS_ignore_invalid_chars_in_reorganize);        
+        T5Logger::GetInstance()->desuppressLogging(ll);
+        if(!fValidXml){
+          T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pRIDA->pProposal;
+        } 
+      }else{
+        T5Logger::GetInstance()->desuppressLogging(ll);
+        T5LOG(T5ERROR) << "skipping tu with invalid source segment: "<< *pRIDA->pProposal;
+      }
     }
+    
     int sourceLen = pRIDA->pProposal->getSourceLen(),
       targetLen = pRIDA->pProposal->getTargetLen();
 

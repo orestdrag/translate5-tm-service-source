@@ -1702,7 +1702,7 @@ TMXParseHandler::~TMXParseHandler()
 
 
 
-bool IsValidXml(std::wstring&& sentence){
+bool IsValidXml(std::wstring&& sentence, bool ignoreInvalidCharactersErrors){
   USHORT usRc = 0; 
   std::vector<std::wstring> res;
   
@@ -1728,7 +1728,13 @@ bool IsValidXml(std::wstring&& sentence){
                                       "src_buff (in memory)");
 
   parser.parse(src_buff);
-  if(parser.getErrorCount()){
+  int errCount = parser.getErrorCount();
+  if(ignoreInvalidCharactersErrors)
+  {
+    errCount -= handler.getInvalidCharacterErrorCount();
+  }
+
+  if( errCount > 0 ){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     std::string errMsg(buff);
@@ -1768,13 +1774,27 @@ void StringTagVariants::initParser(){
   parser.setExitOnFirstFatalError( false );
 }
 
+DECLARE_bool(ignore_invalid_chars_in_string_variants_generation);
+
 void StringTagVariants::parseSrc(){
-  src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(original) + std::string("</TMXSentence>");
+  //std::wstring escapedXMLCharsSrc = EncodingHelper::EscapeXML(original);
+  //src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(escapedXMLCharsSrc) + std::string("</TMXSentence>");
+
+  std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(original));
+  src = std::string("<TMXSentence>") + preprocessedInput + std::string("</TMXSentence>");
+
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  src << "\'";
   xercesc::MemBufInputSource req_buff((const XMLByte *)src.c_str(), src.size(),
                                       "req_buff (in memory)");
   parser.parse(req_buff);
-  if(parser.getErrorCount()){
+
+  int errCount = parser.getErrorCount();
+  if(FLAGS_ignore_invalid_chars_in_string_variants_generation)
+  {
+    errCount -= handler.getInvalidCharacterErrorCount();
+  }
+
+  if(errCount > 0){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
@@ -1797,11 +1817,19 @@ void StringTagVariants::parseTrg(){
   }else{    
     handler.tagReplacer.activeSegment = TARGET_SEGMENT;
     //handler.fCreateNormalizedStr = false;//not needed for target
-    trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
+    std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalTarget));
+    trg = std::string("<TMXSentence>") + preprocessedInput + std::string("</TMXSentence>");
+    //trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
     xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                         "trg_buff (in memory)");
     parser.parse(trg_buff);
-    if(parser.getErrorCount()){
+    int errCount = parser.getErrorCount();
+    if(FLAGS_ignore_invalid_chars_in_string_variants_generation)
+    {
+      errCount -= handler.getInvalidCharacterErrorCount();
+    }
+
+    if(errCount > 0){
       char buff[512];
       handler.GetErrorText(buff, sizeof(buff));
       T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
@@ -1856,7 +1884,13 @@ void RequestTagReplacer::parseAndReplaceTags(){
                                       "req_buff (in memory)");
 
   parser.parse(req_buff);
-  if(parser.getErrorCount()){
+  int errCount = parser.getErrorCount();
+  if(FLAGS_ignore_invalid_chars_in_string_variants_generation)
+  {
+    errCount -= handler.getInvalidCharacterErrorCount();
+  }
+  
+  if(errCount > 0){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
@@ -1875,7 +1909,14 @@ void RequestTagReplacer::parseAndReplaceTags(){
   handler.tagReplacer.iHighestPTI = 0;
 
   parser.parse(src_buff);
-  if(parser.getErrorCount()){
+  
+  errCount = parser.getErrorCount();
+  if(FLAGS_ignore_invalid_chars_in_string_variants_generation)
+  {
+    errCount -= handler.getInvalidCharacterErrorCount();
+  }
+
+  if(errCount>0){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing src : ", buff;
@@ -1887,7 +1928,13 @@ void RequestTagReplacer::parseAndReplaceTags(){
   xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                       "trg_buff (in memory)");
   parser.parse(trg_buff);
-  if(parser.getErrorCount()){
+  errCount = parser.getErrorCount();
+  if(FLAGS_ignore_invalid_chars_in_string_variants_generation)
+  {
+    errCount -= handler.getInvalidCharacterErrorCount();
+  }
+
+  if(errCount>0){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
@@ -3231,9 +3278,9 @@ void TMXParseHandler::fatalError(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
+
     if(strncmp(message,"invalid character", std::min(strlen(message), strlen("invalid character")))){
       this->fError = TRUE;
-      
       T5LOG(T5ERROR) <<  "Fatal Error: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
       sprintf( this->pBuf->szErrorMessage, "Fatal Error: %s at column %ld in line %ld", message, col, line );
       if(pImportDetails){
@@ -3244,6 +3291,7 @@ void TMXParseHandler::fatalError(const SAXParseException& exception)
         pImportDetails->importMsg << "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"; \n";
       }
       
+      int tmxSentenceCol = col - 13;//len of <TMXSentence>
       T5LOG(T5WARNING) <<  "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
       resetErrors(); 
       _invalidCharacterErrorCount++;
@@ -3304,6 +3352,7 @@ void TMXParseHandler::warning(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
+    warningCount++;
     T5LOG(T5WARNING) << "Warning: "<< message << " at column "<< col << " in line " << line << "\n";
     if(pImportDetails){
         pImportDetails->importMsg <<  "Warning: "<< message << " at column "<< col << " in line " << line << "; \n";

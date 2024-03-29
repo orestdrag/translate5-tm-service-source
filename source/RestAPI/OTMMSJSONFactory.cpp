@@ -778,13 +778,11 @@ int JSONFactory::extractString
               }
 
               // convert to UTF8
-              int iUTF8Len;
-              iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, 0, 0, 0, 0 );
-              std::string strUTF8( iUTF8Len, '\0' );
-              WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
+        
+              std::string strUTF8 = EncodingHelper::wstringToString(strUTF16);
 
               // add UTF8 character to target string
-              for ( int i = 0; i < iUTF8Len; i++ ) string[iTargetPos++] = strUTF8[i];
+              for ( int i = 0; i < strUTF8.length(); i++ ) string[iTargetPos++] = strUTF8[i];
             }
             break;
           default:
@@ -977,24 +975,8 @@ int JSONFactory::extractStringW
   return( 0 );
 }
 
-/*! \brief Parameter types for the entries of a JSON parse control table
-*/
-  typedef enum 
-  {
-    ASCII_STRING_PARM_TYPE,
-    UTF8_STRING_PARM_TYPE,
-    UTF16_STRING_PARM_TYPE,
-    INT_PARM_TYPE
-  } PARMTYPE;
 
-/*! \brief Entry of a JSON parse control table
-*/
-  typedef struct _JSONPARSECONTROL
-  {
-    wchar_t szName[40];      // name of the parameter
-    PARMTYPE type;           // type of the parameter
-    void *pvValue;           // pointer to a variable receiving the value
-  } JSONPARSECONTROL, *PJSONPARSECONTROL;
+ 
 
 /*! \brief Parses a JSON string using the supplied control table
 
@@ -1014,6 +996,8 @@ int JSONFactory::parseJSON
 {
   int iRC = 0;
 
+  //std::wstring jsonString = EncodingHelper::PreprocessUnicodeInput(JSONString);
+  
   void *parseHandle = parseJSONStartW( JSONString, &iRC );
   if ( parseHandle == NULL )
   {
@@ -1080,6 +1064,93 @@ int JSONFactory::parseJSON
   } /* endwhile */    
 
   parseJSONStopW( parseHandle );
+
+  return( (iRC == INFO_ENDOFPARAMETERLISTREACHED) ? 0 : iRC );
+}
+
+/*! \brief Parses a JSON string using the supplied control table
+
+    This method parses a JSON string using the provided control table
+
+    \param JSONString reference to a JSON string 
+
+    \param pParserControl pointer to table containing the information on the parameters to be extracted
+
+  	\returns 0 when successful or an error code
+*/
+int JSONFactory::parseJSON
+(
+  std::string &JSONString,
+  PJSONPARSECONTROLUTF8 pParserControl
+)
+{
+  int iRC = 0;
+
+  //std::string jsonString = EncodingHelper::PreprocessUnicodeInput(JSONString);
+  void *parseHandle = parseJSONStart( JSONString, &iRC );
+  if ( parseHandle == NULL )
+  {
+    return( iRC );
+  } /* end */         
+
+  while ( iRC == 0 )
+  {
+    std::string name;
+    std::string value;
+    iRC = parseJSONGetNext( parseHandle, name, value );
+    if ( iRC == 0 )
+    {
+      PJSONPARSECONTROLUTF8 pParm = pParserControl;
+      bool fFound = false;
+
+      while( !fFound && (pParm->szName[0] != 0) )
+      {
+        if ( strcasecmp( name.c_str(), pParm->szName ) == 0 )
+        {
+          fFound = true;
+        }
+        else
+        {
+          pParm++;
+        } /* endif */
+      } /* endwhile */
+
+      if ( fFound )
+      {
+        switch ( pParm->type )
+        {
+          case JSONFactory::ASCII_STRING_PARM_TYPE:
+          case JSONFactory::UTF8_STRING_PARM_TYPE:
+          {
+            std::strncpy((char*)pParm->pvValue, value.c_str(), pParm->iBufferLen-1);
+            *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
+            break;
+          }
+          case JSONFactory::UTF16_STRING_PARM_TYPE:
+          {
+            std::wstring wstrValue = EncodingHelper::stringToWstring(value);
+            wcsncpy( (wchar_t *)pParm->pvValue, wstrValue.c_str(), pParm->iBufferLen - 1 );
+            *(((wchar_t *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
+            break;
+          }
+          case JSONFactory::INT_PARM_TYPE:
+          {
+            char * pEnd;
+            *((int *)pParm->pvValue) = strtol( value.c_str(), &pEnd, 10 );
+            break;
+          }
+        } /* endswitch */
+      } /* endif */
+    } /* endif */       
+
+    // reset iRC for specific codes
+    if ( iRC == INFO_BEGINOFELEMENTDETECTED )
+    {
+      iRC = 0;
+    } /* endif */
+  } /* endwhile */    
+
+  parseJSONStop( parseHandle );
 
   return( (iRC == INFO_ENDOFPARAMETERLISTREACHED) ? 0 : iRC );
 }

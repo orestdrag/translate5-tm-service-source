@@ -1247,6 +1247,7 @@ public:
   bool fReplaceWithTagsWithoutAttributes;
   size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }
 
+  size_t warningCount{0};
   // -----------------------------------------------------------------------
   //  Handlers for the SAX DocumentHandler interface
   // -----------------------------------------------------------------------

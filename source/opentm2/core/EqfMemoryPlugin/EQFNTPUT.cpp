@@ -2283,6 +2283,11 @@ USHORT EqfMemory::ComparePutData
           //so add new target record to end of tm record
           usRc = AddTmTarget( TmProposal, ppTmRecord, pulRecBufSize, pulKey );
           pTmRecord = *ppTmRecord;
+          if(!usRc)
+          {
+            TmProposal.recordKey = *pulKey;
+            TmProposal.targetKey = 1;
+          }
         } /* endif */
       }
       else
