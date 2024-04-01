@@ -52,9 +52,11 @@ class EncodingHelper{
     static std::string PreprocessSymbolsForXML(const std::string& inputString);
     static std::wstring PreprocessSymbolsForXML(const std::wstring& inputString);
 
-
-    static std::wstring PreprocessUnicodeInput(const std::wstring& input);
     static std::string  PreprocessUnicodeInput(const std::string& input);
+    static std::wstring PreprocessUnicodeInput(const std::wstring& input);
+
+    static std::string RestoreUnicodeInput(const std::string& preprocessedString);
+    static std::wstring RestoreUnicodeInput(const std::wstring& preprocessedString);
 
     static std::wstring stringToWstring(const std::string& str);
     static std::string wstringToString(const std::wstring& str);

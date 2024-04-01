@@ -140,6 +140,52 @@ std::wstring EncodingHelper::PreprocessUnicodeInput(const std::wstring& inputStr
   return stringToWstring(res);
 }
 
+std::string EncodingHelper::RestoreUnicodeInput(const std::string& preprocessedString){
+  std::string restoredString;
+  restoredString.reserve(preprocessedString.size()); // Reserve memory for efficiency
+
+  for (std::size_t i = 0; i < preprocessedString.size(); ++i) {
+      if (preprocessedString[i] == '\\') {
+          // Check if the next character indicates an escape sequence
+          if (i + 1 < preprocessedString.size()) {
+              switch (preprocessedString[i + 1]) {
+                  case 'a': restoredString += '\a'; break; // Bell (alert)
+                  case 'b': restoredString += '\b'; break; // Backspace
+                  case 'f': restoredString += '\f'; break; // Form feed
+                  case 'n': restoredString += '\n'; break; // Newline
+                  case 'r': restoredString += '\r'; break; // Carriage return
+                  case 't': restoredString += '\t'; break; // Horizontal tab
+                  case 'v': restoredString += '\v'; break; // Vertical tab
+                  case '\\': restoredString += '\\'; break; // Backslash
+                  case '\'': restoredString += '\''; break; // Single quote
+                  case '\"': restoredString += '\"'; break; // Double quote
+                  default:
+                      // If the next character is not part of a recognized escape sequence, append both characters
+                      restoredString += '\\';
+                      restoredString += preprocessedString[i + 1];
+                      break;
+              }
+              // Skip the next character since it's part of the escape sequence
+              ++i;
+          } else {
+              // If there's no next character, append backslash as is
+              restoredString += '\\';
+          }
+      } else {
+          // If the current character is not a backslash, append it as is
+          restoredString += preprocessedString[i];
+      }
+  }
+
+  return restoredString;
+}
+
+std::wstring EncodingHelper::RestoreUnicodeInput(const std::wstring& inputString) {
+  std::string inputStr = wstringToString(inputString);
+  std::string res = RestoreUnicodeInput(inputStr);
+  return stringToWstring(res);
+}
+
 std::string EncodingHelper::PreprocessSymbolsForXML(const std::string& inputString)
 {
   std::ostringstream oss;

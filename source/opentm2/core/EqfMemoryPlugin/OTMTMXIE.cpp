@@ -1800,9 +1800,9 @@ void StringTagVariants::parseSrc(){
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
   }else{
     fSuccess = true;
-    genericTags = handler.GetParsedData();
-    norm = handler.GetParsedNormalizedData();
-    npReplaced = handler.GetParsedDataWithReplacedNpTags();
+    genericTags = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());
+    norm =  EncodingHelper::RestoreUnicodeInput(handler.GetParsedNormalizedData());
+    npReplaced =  EncodingHelper::RestoreUnicodeInput(handler.GetParsedDataWithReplacedNpTags());
     TweakNormString(norm);
   }  
 }
@@ -1835,8 +1835,8 @@ void StringTagVariants::parseTrg(){
       T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
     }
 
-    genericTarget = handler.GetParsedData();    
-    normTarget = handler.GetParsedNormalizedData();
+    genericTarget = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());    
+    normTarget = EncodingHelper::RestoreUnicodeInput(handler.GetParsedNormalizedData());
     TweakNormString(normTarget);     
   }
 
@@ -1877,8 +1877,8 @@ void RequestTagReplacer::parseAndReplaceTags(){
   parser.setLoadExternalDTD( false );
   parser.setValidationScheme( SAXParser::Val_Never );
   parser.setExitOnFirstFatalError( false );
-
-  req = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalReq) + std::string("</TMXSentence>");
+  std::string preprocessedInputReq = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalReq));
+  req = std::string("<TMXSentence>") + preprocessedInputReq + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
   xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
                                       "req_buff (in memory)");
@@ -1896,10 +1896,11 @@ void RequestTagReplacer::parseAndReplaceTags(){
     T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
   }
 
-  genericTagsReq = handler.GetParsedData();
+  genericTagsReq = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());
   
   // do tag replacement for source and target 
-  src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(original) + std::string("</TMXSentence>");
+  std::string preprocessedInputSrc = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(original));
+  src = std::string("<TMXSentence>") +  preprocessedInputSrc + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing str = \'" << src << "\'";
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
                                       "src_buff (in memory)");
@@ -1921,10 +1922,12 @@ void RequestTagReplacer::parseAndReplaceTags(){
     handler.GetErrorText(buff, sizeof(buff));
     T5LOG(T5ERROR) << ":: error during parsing src : ", buff;
   }
-  replacedTagsSrc = handler.GetParsedData();
+  replacedTagsSrc = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());
   
   handler.tagReplacer.activeSegment = TARGET_SEGMENT;
-  trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
+  
+  std::string preprocessedInputTrg = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalTarget));
+  trg  = std::string("<TMXSentence>") + preprocessedInputTrg + std::string("</TMXSentence>");
   xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                       "trg_buff (in memory)");
   parser.parse(trg_buff);
@@ -1942,7 +1945,7 @@ void RequestTagReplacer::parseAndReplaceTags(){
     fSuccess = true;
   }
 
-  replacedTagsTrg = handler.GetParsedData();    
+  replacedTagsTrg = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());    
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     std::string res_src_s = EncodingHelper::convertToUTF8(replacedTagsSrc);
