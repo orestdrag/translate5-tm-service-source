@@ -186,26 +186,44 @@ std::wstring EncodingHelper::RestoreUnicodeInput(const std::wstring& inputString
   return stringToWstring(res);
 }
 
-std::string EncodingHelper::PreprocessSymbolsForXML(const std::string& inputString)
-{
-  std::ostringstream oss;
-  for (char ch : inputString) {
-      switch (ch) {
-          case '\a': oss << "\\a"; break; // Bell (alert)
-          case '\b': oss << "\\b"; break; // Backspace
-          case '\f': oss << "\\f"; break; // Form feed
-          case '\n': oss << "\\n"; break; // Newline
-          case '\r': oss << "\\r"; break; // Carriage return
-          case '\t': oss << "\\t"; break; // Horizontal tab
-          case '\v': oss << "\\v"; break; // Vertical tab
-          case '\\': oss << "\\\\"; break; // Backslash
-          case '\'': oss << "\\'"; break; // Single quote
-          case '\"': oss << "\\\""; break; // Double quote
-          default: oss << ch; break;
-      }
-  }
-  return oss.str();
+
+std::string EncodingHelper::PreprocessSymbolsForXML(const std::string& inputString) {
+    std::ostringstream oss;
+    bool insideTag = false; // Flag to track if we are inside an XML tag
+
+    for (char ch : inputString) {
+        if (ch == '<') {
+            // Entering an XML tag
+            insideTag = true;
+        } else if (ch == '>') {
+            // Exiting an XML tag
+            insideTag = false;
+        }
+
+        // Check if we are inside an XML tag
+        if (insideTag) {
+            oss << ch; // Append the character as is
+        } else {
+            // Escape special characters outside XML tags
+            switch (ch) {
+                case '\a': oss << "\\a"; break; // Bell (alert)
+                case '\b': oss << "\\b"; break; // Backspace
+                case '\f': oss << "\\f"; break; // Form feed
+                case '\n': oss << "\\n"; break; // Newline
+                case '\r': oss << "\\r"; break; // Carriage return
+                case '\t': oss << "\\t"; break; // Horizontal tab
+                case '\v': oss << "\\v"; break; // Vertical tab
+                case '\\': oss << "\\\\"; break; // Backslash
+                case '\'': oss << "\\'"; break; // Single quote
+                case '\"': oss << "\\\""; break; // Double quote
+                default: oss << ch; break;
+            }
+        }
+    }
+    return oss.str();
 }
+
+
 
 std::wstring EncodingHelper::PreprocessSymbolsForXML(const std::wstring& inputString){
   std::string inputStr = wstringToString(inputString);

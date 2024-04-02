@@ -1705,8 +1705,8 @@ TMXParseHandler::~TMXParseHandler()
 bool IsValidXml(std::wstring&& sentence, bool ignoreInvalidCharactersErrors){
   USHORT usRc = 0; 
   std::vector<std::wstring> res;
-  
-  std::string src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(sentence) + std::string("</TMXSentence>");
+  std::string protectedSentence = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(sentence)) ;
+  std::string src = std::string("<TMXSentence>") + protectedSentence + std::string("</TMXSentence>");
   SAXParser parser;
   TMXParseHandler handler(InclosingTagsBehaviour::saveAll);
   // create an instance of our handler
@@ -1778,9 +1778,9 @@ DECLARE_bool(ignore_invalid_chars_in_string_variants_generation);
 
 void StringTagVariants::parseSrc(){
   //std::wstring escapedXMLCharsSrc = EncodingHelper::EscapeXML(original);
-  //src = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(escapedXMLCharsSrc) + std::string("</TMXSentence>");
+  //src = std::string("<TMXSentence>") + EncodingHelper::wstringToString(escapedXMLCharsSrc) + std::string("</TMXSentence>");
 
-  std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(original));
+  std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(original));
   src = std::string("<TMXSentence>") + preprocessedInput + std::string("</TMXSentence>");
 
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  src << "\'";
@@ -1810,16 +1810,16 @@ void StringTagVariants::parseSrc(){
 void StringTagVariants::parseTrg(){
   if(originalTarget.empty() ){
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
+      std::string res_src_s = EncodingHelper::wstringToString(genericTags);
       T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
             res_src_s <<"\'\n";
     }
   }else{    
     handler.tagReplacer.activeSegment = TARGET_SEGMENT;
     //handler.fCreateNormalizedStr = false;//not needed for target
-    std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalTarget));
+    std::string preprocessedInput = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(originalTarget));
     trg = std::string("<TMXSentence>") + preprocessedInput + std::string("</TMXSentence>");
-    //trg  = std::string("<TMXSentence>") + EncodingHelper::convertToUTF8(originalTarget) + std::string("</TMXSentence>");
+    //trg  = std::string("<TMXSentence>") + EncodingHelper::wstringToString(originalTarget) + std::string("</TMXSentence>");
     xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                         "trg_buff (in memory)");
     parser.parse(trg_buff);
@@ -1855,8 +1855,8 @@ void StringTagVariants::parseTrg(){
 
 void StringTagVariants::logResults(){
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
-      std::string res_trg_s = EncodingHelper::convertToUTF8(genericTarget);
+      std::string res_src_s = EncodingHelper::wstringToString(genericTags);
+      std::string res_trg_s = EncodingHelper::wstringToString(genericTarget);
       T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
               res_src_s << "\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
   }
@@ -1877,7 +1877,7 @@ void RequestTagReplacer::parseAndReplaceTags(){
   parser.setLoadExternalDTD( false );
   parser.setValidationScheme( SAXParser::Val_Never );
   parser.setExitOnFirstFatalError( false );
-  std::string preprocessedInputReq = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalReq));
+  std::string preprocessedInputReq = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(originalReq));
   req = std::string("<TMXSentence>") + preprocessedInputReq + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing request str = \'" <<  req << "\'";
   xercesc::MemBufInputSource req_buff((const XMLByte *)req.c_str(), req.size(),
@@ -1899,7 +1899,7 @@ void RequestTagReplacer::parseAndReplaceTags(){
   genericTagsReq = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());
   
   // do tag replacement for source and target 
-  std::string preprocessedInputSrc = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(original));
+  std::string preprocessedInputSrc = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(original));
   src = std::string("<TMXSentence>") +  preprocessedInputSrc + std::string("</TMXSentence>");
   T5LOG( T5DEBUG) << ":: parsing str = \'" << src << "\'";
   xercesc::MemBufInputSource src_buff((const XMLByte *)src.c_str(), src.size(),
@@ -1926,7 +1926,7 @@ void RequestTagReplacer::parseAndReplaceTags(){
   
   handler.tagReplacer.activeSegment = TARGET_SEGMENT;
   
-  std::string preprocessedInputTrg = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::convertToUTF8(originalTarget));
+  std::string preprocessedInputTrg = EncodingHelper::PreprocessSymbolsForXML(EncodingHelper::wstringToString(originalTarget));
   trg  = std::string("<TMXSentence>") + preprocessedInputTrg + std::string("</TMXSentence>");
   xercesc::MemBufInputSource trg_buff((const XMLByte *)trg.c_str(), trg.size(),
                                       "trg_buff (in memory)");
@@ -1948,8 +1948,8 @@ void RequestTagReplacer::parseAndReplaceTags(){
   replacedTagsTrg = EncodingHelper::RestoreUnicodeInput(handler.GetParsedData());    
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    std::string res_src_s = EncodingHelper::convertToUTF8(replacedTagsSrc);
-    std::string res_trg_s = EncodingHelper::convertToUTF8(replacedTagsTrg);
+    std::string res_src_s = EncodingHelper::wstringToString(replacedTagsSrc);
+    std::string res_trg_s = EncodingHelper::wstringToString(replacedTagsTrg);
     T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
             res_src_s <<"\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
   }
