@@ -1853,23 +1853,23 @@ CompFuzzyTok
   USHORT  usToken2Len= 0;
   SHORT   sRc = 0;
 
-    if (fCompareAll )
+  if (fCompareAll )
+  {
+    usTokenLen = pFuzzy1->usStop - pFuzzy1->usStart + 1;
+    usToken2Len = pFuzzy2->usStop - pFuzzy2->usStart + 1;
+    if (usToken2Len > usTokenLen )
     {
-      usTokenLen = pFuzzy1->usStop - pFuzzy1->usStart + 1;
-      usToken2Len = pFuzzy2->usStop - pFuzzy2->usStart + 1;
-      if (usToken2Len > usTokenLen )
-      {
-        usTokenLen = usToken2Len;
-      } /* endif */
-      sRc = (SHORT)UTF16strncmp(pFuzzy1->pData,
-                         pFuzzy2->pData,
-                         usTokenLen);
-    }
-    else
-    {
-      sRc = TokStrCompare( pFuzzy1,pFuzzy2 );
+      usTokenLen = usToken2Len;
     } /* endif */
-    return(sRc);
+    sRc = (SHORT)UTF16strncmp(pFuzzy1->pData,
+                        pFuzzy2->pData,
+                        usTokenLen);
+  }
+  else
+  {
+    sRc = TokStrCompare( pFuzzy1,pFuzzy2 );
+  } /* endif */
+  return(sRc);
  } /* end of CompFuzzyTOk */
 
 
@@ -2107,6 +2107,9 @@ LCS
       while ( (sI <= MidSnake.sU) && (sJ <= MidSnake.sV)  )
       {
         if((LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
+          &&
+          ( CompFuzzyTok( &(LCSStringA.pTokenList[sI]), &(LCSStringB.pTokenList[sJ]), true /*fCompareAll*/) == 0)
+          //(wcscasecmp(LCSStringA.pTokenList[sI].pData, LCSStringB.pTokenList[sI].pData) == 0)
         ){
           LCSStringA.pTokenList[sI].sType = MARK_EQUAL;
           LCSStringB.pTokenList[sJ].sType = MARK_EQUAL;
