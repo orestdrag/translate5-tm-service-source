@@ -2108,8 +2108,8 @@ LCS
       {
         if((LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
           &&
-          ( CompFuzzyTok( &(LCSStringA.pTokenList[sI]), &(LCSStringB.pTokenList[sJ]), true /*fCompareAll*/) == 0)
-          //(wcscasecmp(LCSStringA.pTokenList[sI].pData, LCSStringB.pTokenList[sI].pData) == 0)
+          //( CompFuzzyTok( &(LCSStringA.pTokenList[sI]), &(LCSStringB.pTokenList[sJ]), true /*fCompareAll*/) == 0)
+          (wcscasecmp(LCSStringA.pTokenList[sI].pData, LCSStringB.pTokenList[sJ].pData) == 0)
         ){
           LCSStringA.pTokenList[sI].sType = MARK_EQUAL;
           LCSStringB.pTokenList[sJ].sType = MARK_EQUAL;
