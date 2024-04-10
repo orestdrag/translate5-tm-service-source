@@ -715,7 +715,7 @@ int JSONFactory::extractString
     if ( pData->JSONString[iCurPos] != '\"' ) return( ERROR_INVALIDJSONSYNTAX );
 
     // copy characters to target string and unescape escaped characters
-    string.resize( iTargetLen, ' ' );
+    string.resize( iTargetLen, '\0' );
     int iTargetPos = 0;
     while ( pData->iPos < iCurPos )
     {
