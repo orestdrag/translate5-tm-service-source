@@ -2106,7 +2106,9 @@ LCS
       //TODO - verify , because this is changed from original algorhythm 
       while ( (sI <= MidSnake.sU) && (sJ <= MidSnake.sV)  )
       {
-        if((LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
+        if( (LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
+          && 
+            (wcscasecmp(LCSStringA.pTokenList[sI].pData, LCSStringB.pTokenList[sJ].pData) == 0)
         ){
           LCSStringA.pTokenList[sI].sType = MARK_EQUAL;
           LCSStringB.pTokenList[sJ].sType = MARK_EQUAL;
