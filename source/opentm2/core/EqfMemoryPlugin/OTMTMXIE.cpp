@@ -991,6 +991,13 @@ USHORT CTMXExportImport::WriteSegment
     } /* endif */
   }
 
+  //author 
+  {
+    m_xw.WriteStartAttribute( "creationid" );
+    m_xw.WriteString(  pSegment->szAuthor );  
+    m_xw.WriteEndAttribute();
+  }
+
   // add segment number as property
   m_xw.WriteStartElement( "prop" );
   m_xw.WriteAttributeString( "type", SEGNUM_PROP );
@@ -1016,10 +1023,10 @@ USHORT CTMXExportImport::WriteSegment
   m_xw.WriteEndElement(); // prop
 
   // add document name property
-  m_xw.WriteStartElement( "prop" );
-  m_xw.WriteAttributeString( "type", AUTHOR_PROP );
-  m_xw.WriteString( pSegment->szAuthor ); 
-  m_xw.WriteEndElement(); // prop
+  //m_xw.WriteStartElement( "prop" );
+  //m_xw.WriteAttributeString( "type", AUTHOR_PROP );
+  //m_xw.WriteString( pSegment->szAuthor ); 
+  //m_xw.WriteEndElement(); // prop
 
   // add translation flag as property
   if ( pSegment->usTranslationFlag == TRANSLFLAG_MACHINE )
@@ -2140,6 +2147,11 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szNoteStyle[0] = 0;
         pBuf->szMTMetrics[0] = 0;
         pBuf->szMatchSegID[0] = 0;
+
+        pBuf->szAuthor[0] = 0;
+        pBuf->szChangeId[0] = 0;
+        pBuf->szCreationId[0] = 0;
+        
         pBuf->ulWords = 0;
         lTime = 0;
         
@@ -2167,6 +2179,16 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           {
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL ) strcpy( CurElement.szDataType, pszValue );
+            XMLString::release( &pszValue );
+          } if ( strcasecmp( pszName, "creationid" ) == 0 )
+          {
+            char *pszValue = XMLString::transcode(attributes.getValue( i ));
+            if ( pszValue != NULL ) strcpy( pBuf->szCreationId, pszValue );
+            XMLString::release( &pszValue );
+          } else if ( strcasecmp( pszName, "changeid" ) == 0 )
+          {
+            char *pszValue = XMLString::transcode(attributes.getValue( i ));
+            if ( pszValue != NULL ) strcpy( pBuf->szChangeId, pszValue );
             XMLString::release( &pszValue );
           } 
           else if ( strcasecmp( pszName, "creationdate" ) == 0 )
@@ -2450,7 +2472,15 @@ void TMXParseHandler::fillSegmentInfo
     strcpy( pSegment->szDocument, "none" );
   } /* endif */
 
-  if( pBuf->szAuthor[0] )
+  if(pBuf->szChangeId[0])
+  {
+    strcpy( pSegment->szAuthor, pBuf->szChangeId );
+  }
+  else if(pBuf->szCreationId[0])
+  {
+    strcpy( pSegment->szAuthor, pBuf->szCreationId );
+  }
+  else if( pBuf->szAuthor[0] )
   {
     strcpy( pSegment->szAuthor, pBuf->szAuthor );
   }

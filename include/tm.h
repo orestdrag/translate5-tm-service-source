@@ -1323,7 +1323,11 @@ private:
     CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
-    CHAR     szAuthor[EQF_DOCNAMELEN];// buffer for document name
+
+    CHAR     szAuthor[EQF_DOCNAMELEN];// buffer for author name
+    CHAR     szChangeId[EQF_DOCNAMELEN];// buffer for author/changeId name
+    CHAR     szCreationId[EQF_DOCNAMELEN];// buffer for author/creationId name
+
     MEMEXPIMPSEG SegmentData;         // buffer for segment data
     CHAR     szDescription[1024];     // buffer for memory descripion
     CHAR     szMemSourceLang[50];     // buffer for memory source language
