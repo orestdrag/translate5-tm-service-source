@@ -2472,7 +2472,11 @@ void TMXParseHandler::fillSegmentInfo
     strcpy( pSegment->szDocument, "none" );
   } /* endif */
 
-  if(pBuf->szChangeId[0])
+  if( pBuf->szAuthor[0] )
+  {
+    strcpy( pSegment->szAuthor, pBuf->szAuthor );
+  }
+  else if(pBuf->szChangeId[0])
   {
     strcpy( pSegment->szAuthor, pBuf->szChangeId );
   }
@@ -2480,11 +2484,7 @@ void TMXParseHandler::fillSegmentInfo
   {
     strcpy( pSegment->szAuthor, pBuf->szCreationId );
   }
-  else if( pBuf->szAuthor[0] )
-  {
-    strcpy( pSegment->szAuthor, pBuf->szAuthor );
-  }
-  else
+  else 
   {
     pSegment->szAuthor[0] = '\0';
   }
