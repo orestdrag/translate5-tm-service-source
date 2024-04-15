@@ -26,6 +26,7 @@ public:
     ProxygenStats* stats = nullptr;
     int _id_ = 0;
     bool fValid = false;
+    bool fRunning = true;
     std::string strMemName;
 
     //requests field
