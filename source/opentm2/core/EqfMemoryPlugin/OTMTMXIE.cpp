@@ -2191,11 +2191,13 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             if ( pszValue != NULL ) strcpy( pBuf->szChangeId, pszValue );
             XMLString::release( &pszValue );
           } 
-          else if ( strcasecmp( pszName, "creationdate" ) == 0 )
+          else if ( strcasecmp( pszName, "creationdate" ) == 0  
+                ||  strcasecmp( pszName, "changedate" ) == 0  )
           {
             char *pszDate = XMLString::transcode(attributes.getValue( i ));
+            bool fOverwritePriority = strcasecmp( pszName, "changedate" ) == 0;// if creationdate and changedate both exist, changedate should be used
             // we currently support only dates in the form YYYYMMDDThhmmssZ
-            if ( (pszDate != NULL) && (strlen(pszDate) == 16) )
+            if ( (pszDate != NULL) && (strlen(pszDate) == 16) && (fOverwritePriority || !lTime))
             {
               int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0, iDaysSince1970 = 0;
 
