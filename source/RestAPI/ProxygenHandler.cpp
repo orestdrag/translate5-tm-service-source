@@ -154,7 +154,7 @@ void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
 void ProxygenHandler::requestComplete() noexcept {
   //ResetLogBuffer();
   if(pRequest){
-    while(pRequest->fRunning){};
+    //while(pRequest->fRunning){};
     delete pRequest;
     pRequest = nullptr;
   }
