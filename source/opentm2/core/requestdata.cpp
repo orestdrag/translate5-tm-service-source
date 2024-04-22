@@ -346,6 +346,8 @@ int RequestData::run(){
 
   //reset pointers
   if(mem != nullptr){
+    mem->tmMutex.unlock();
+    T5LOG(T5TRANSACTION) << "Unclocking mem \'" << mem->szName << "\' returned ";
     mem.reset();
   }
   if(memRef != nullptr){

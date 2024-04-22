@@ -1323,12 +1323,15 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
     std::lock_guard<std::mutex> l{mutex_access_tms}; 
     if(IsMemoryLoadedUnsafe(strMemName)){    
       mem = tms[strMemName];
+      rc = mem->tmMutex.try_lock();
+      T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName <<"\' returned rc = " << rc;
+      //mem->tmMutex.lock();
     } 
   }// unlock
 
   if(mem){
     //check if there are any Write pointers
-    rc = mem->writeCnt.use_count()>1;
+    rc = rc || (mem->writeCnt.use_count()>1);
 
     T5LOG(T5DEBUG) <<"writeCnt = " << mem->writeCnt.use_count();
     if(rc){
@@ -1360,8 +1363,10 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
       //return;
     }else if(IsMemoryLoadedUnsafe(strMemName)){
       mem = tms[strMemName];
+      rc = mem->tmMutex.try_lock();
+      T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName <<"\' returned rc = " << rc;
       //check if there are any Write pointers
-      rc = mem->writeCnt.use_count() > 1;
+      rc = rc || (mem->writeCnt.use_count() > 1);
       refBack = mem->writeCnt;
     }else{
       rc = 2;
