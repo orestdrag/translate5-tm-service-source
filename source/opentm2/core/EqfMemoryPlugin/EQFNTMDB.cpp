@@ -528,7 +528,7 @@ BTREE::EQFNTMInsert
 (
   PULONG  pulKey,           // pointer to key
   PBYTE   pData,            // pointer to user data
-  ULONG   ulLen             // length of user data
+  LONG   lLen             // length of user data
 )
 {
   SHORT         sRc = 0;   // return code
@@ -589,7 +589,7 @@ BTREE::EQFNTMInsert
     RetryCount = MAX_RETRY_COUNT;
     do
     {
-      sRc = QDAMDictInsertLocal( (PWCHAR)pulKey, pData, ulLen );
+      sRc = QDAMDictInsertLocal( (PWCHAR)pulKey, pData, lLen );
       if ( sRc == BTREE_IN_USE )
       {
         RetryCount--;
@@ -1320,7 +1320,7 @@ RECPARAM  QDAMGetrecKey_V3
 
    recData.usNum  = pRecord->usRecordNumber;
    recData.usOffset  = *pusOffset;
-   recData.ulLen = *(PUSHORT) (pRecord->contents.uchData +*pusOffset);
+   recData.lLen = *(PUSHORT) (pRecord->contents.uchData +*pusOffset);
    return ( recData );
 }
 
@@ -1373,7 +1373,7 @@ SHORT BTREE::QDAMDictUpdateLocal
 (
   PCHAR_W pKey,                          //  key string
   PBYTE   pUserData,                     //  user data
-  ULONG   ulLen                          //  user data length
+  LONG    lLen                           //  user data length
 )
 {
    SHORT sRc = 0;                        // return code
@@ -1409,7 +1409,7 @@ SHORT BTREE::QDAMDictUpdateLocal
       PBTREEBUFFER_V3  pRecord = NULL;        // pointer to record
       if ( !sRc )
       {
-        if ( ulLen == 0 )
+        if ( lLen <= 0 )
         {
           sRc = BTREE_DATA_RANGE;
         }
@@ -1441,13 +1441,13 @@ SHORT BTREE::QDAMDictUpdateLocal
               //  set new data value
               if ( recOldKey.usNum && recOldData.usNum )
               {
-                  sRc = QDAMAddToBuffer_V3( pUserData, ulLen, &recData );
+                  sRc = QDAMAddToBuffer_V3( pUserData, lLen, &recData );
                   if ( !sRc )
                   {
-                    if( (ulLen > TMX_REC_SIZE)  && (T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))){
-                      T5LOG(T5ERROR) << ":: tried to set bigget ulLen than rec size, ulLen = " << ulLen;
+                    if( (lLen > TMX_REC_SIZE)  && (T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))){
+                      T5LOG(T5ERROR) << ":: tried to set bigget lLen than rec size, lLen = " << lLen;
                     }
-                    recData.ulLen = ulLen;
+                    recData.lLen = lLen;
                     QDAMSetrecData_V3( pRecord, i, recData, usVersion );
                     sRc = QDAMWriteRecord_V3( pRecord );
                   } /* endif */
@@ -1531,7 +1531,7 @@ BTREE::EQFNTMUpdate
 (
   ULONG   ulKey,            // key value
   PBYTE   pData,            // pointer to user data
-  ULONG   ulLen             // length of user data
+  LONG   lLen             // length of user data
 )
 {
   SHORT  sRc = 0;           // success indicator
@@ -1544,7 +1544,7 @@ BTREE::EQFNTMUpdate
     RetryCount = MAX_RETRY_COUNT;
     do
     {
-      sRc = QDAMDictUpdateLocal( (PSZ_W) &ulKey, pData, ulLen );
+      sRc = QDAMDictUpdateLocal( (PSZ_W) &ulKey, pData, lLen );
       if ( sRc == BTREE_IN_USE )
       {
         RetryCount--;
@@ -1621,9 +1621,9 @@ BTREE::EQFNTMUpdate
 
 SHORT BTREE::QDAMDictExactLocal
 (
-   PWCHAR pKey,                       // key to be searched for
+   PWCHAR pKey,                        // key to be searched for
    PBYTE  pchBuffer,                   // space for user data
-   PULONG pulLength,                   // in/out length of returned user data
+   PLONG  plLength,                    // in/out length of returned user data
    USHORT usSearchSubType              // special hyphenation lookup flag
 )
 {
@@ -1665,21 +1665,21 @@ SHORT BTREE::QDAMDictExactLocal
                  memcpy( chHeadTerm, pKey, sizeof(ULONG) );  // save data
                  
                  recData = QDAMGetrecData_V3( pRecord, i, usVersion );
-                 if ( *pulLength == 0 || ! pchBuffer )
+                 if ( *plLength == 0 || ! pchBuffer )
                  {
-                    *pulLength = recData.ulLen;
+                    *plLength = recData.lLen;
                  }
-                 else if ( *pulLength < recData.ulLen )
+                 else if ( *plLength < recData.lLen )
                  {
                     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-                      T5LOG(T5ERROR) << "::BTREE_BUFFER_SMALL, pulLength = " << *pulLength << "; recData.ulLen = " << recData.ulLen;
+                      T5LOG(T5ERROR) << "::BTREE_BUFFER_SMALL, pulLength = " << *plLength << "; recData.lLen = " << recData.lLen;
                     }
-                    *pulLength = recData.ulLen;
+                    *plLength = recData.lLen;
                     sRc = BTREE_BUFFER_SMALL;
                  }
                  else
                  {
-                    sRc = QDAMGetszData_V3( this, recData, pchBuffer, pulLength, DATA_NODE );
+                    sRc = QDAMGetszData_V3( this, recData, pchBuffer, plLength, DATA_NODE );
                  } /* endif */
                }
                else
@@ -1688,7 +1688,7 @@ SHORT BTREE::QDAMDictExactLocal
                   // set new current position
                  sCurrentIndex = sNearKey;
                  usCurrentRecord = RECORDNUM( pRecord );
-                 *pulLength = 0;            // init returned length
+                 *plLength = 0;            // init returned length
                } /* endif */
             } /* endif */
           } /* endif */
@@ -1736,7 +1736,7 @@ BTREE::EQFNTMGet
 (
    ULONG  ulKey,                       // key to be searched for
    PCHAR  pchBuffer,                   // space for user data
-   PULONG pulLength                    // in/out length of returned user data
+   PLONG plLength                    // in/out length of returned user data
 )
 {
   SHORT sRc;                           // return code
@@ -1746,7 +1746,7 @@ BTREE::EQFNTMGet
   if ( !sRc )
   {
     SHORT  RetryCount = MAX_RETRY_COUNT;                  // retry counter for in-use condition
-    ULONG ulLength;
+    LONG lLength;
     do
     {
       /******************************************************************/
@@ -1755,9 +1755,9 @@ BTREE::EQFNTMGet
       /******************************************************************/
       BOOL          _fCorrupted = fCorrupted;
       fCorrupted = FALSE;
-      ulLength = *pulLength;
+      lLength = *plLength;
 
-      sRc = QDAMDictExactLocal( (PWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
+      sRc = QDAMDictExactLocal( (PWCHAR) &ulKey, (PBYTE)pchBuffer, &lLength, FEXACT );
 
       fCorrupted = _fCorrupted;
 
@@ -1768,7 +1768,7 @@ BTREE::EQFNTMGet
       } /* endif */
     } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
               (RetryCount > 0) ); /* enddo */
-    *pulLength = ulLength;
+    *plLength = lLength;
   } /* endif */
 
   if ( sRc && (sRc != BTREE_NOT_FOUND) )

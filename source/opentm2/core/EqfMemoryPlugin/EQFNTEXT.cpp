@@ -67,8 +67,8 @@ USHORT EqfMemory::TmtXExtract
   USHORT usRc = NO_ERROR;              //return code
   BOOL fOK;                            //success indicator
   PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG  ulRecBufSize = 0;             // current size of record buffer
-  ULONG  ulLen = 0;                    //length indicator
+  LONG  lRecBufSize = 0;               // current size of record buffer
+  LONG  lLen = 0;                      //length indicator
   PTMX_SOURCE_RECORD pTMXSourceRecord; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord; //ptr to target record
   ULONG ulStartKey;                    //start tm key
@@ -276,24 +276,24 @@ USHORT EqfMemory::TmtXExtract
         LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
         while ( (pTmExtIn->ulTmKey < ulNextKey) && (usRc == BTREE_NOT_FOUND) )
         {
-          ulLen = ulRecBufSize;
+          lLen = lRecBufSize;
           usRc =  TmBtree.EQFNTMGet(
                             pTmExtIn->ulTmKey,
                             (PCHAR)pTmRecord,
-                            &ulLen );
+                            &lLen );
 
           // re-alloc buffer and try again if buffer overflow occured
           if ( usRc == BTREE_BUFFER_SMALL )
           {
-            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
+            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, lLen, NOMSG );
             if ( fOK )
             {
-              ulRecBufSize = ulLen;
+              lRecBufSize = lLen;
 
               usRc =  TmBtree.EQFNTMGet(
                                 pTmExtIn->ulTmKey,
                                 (PCHAR)pTmRecord,
-                                &ulLen );
+                                &lLen );
             }
             else
             {

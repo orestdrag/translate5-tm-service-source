@@ -1922,14 +1922,14 @@ USHORT FillClb( PTMX_TARGET_CLB, OtmProposal& );
 USHORT ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
-  PULONG      pulRecBufSize,           // current size of record buffer
-  OtmProposal&  TmProposal,                  // pointer to get in data
+  PLONG      plRecBufSize,             // current size of record buffer
+  OtmProposal&  TmProposal,            // pointer to get in data
   PULONG      pulKey                   // tm key
 );
 USHORT AddTmTarget(
   OtmProposal& TmProposal,       //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
-  PULONG pulRecBufSize,             //ptr to current size of TM record buffer
+  PLONG plRecBufSize,             //ptr to current size of TM record buffer
   PULONG pulKey );                  //tm key
 
 /*! \brief Store the supplied proposal in the memory
@@ -2071,8 +2071,8 @@ USHORT AddTmTarget(
 USHORT NTMLoadNameTable
 (
   ULONG       ulTableKey,              // key of table record
-  PTMX_TABLE  pTMTable,              // ptr to table data pointer
-  PULONG      pulSize                  // ptr to buffer for size of table data
+  PTMX_TABLE  pTMTable,                // ptr to table data pointer
+  PLONG       plSize                   // ptr to buffer for size of table data
 );
 
 /*! \brief Get a list of memory proposals matching the given search key

@@ -349,14 +349,14 @@ SHORT QDAMDictInsert
   PBTREE  pBT,               // pointer to binary tree struct
   PWCHAR   pKey,              // pointer to key data
   PBYTE   pData,             // pointer to user data
-  ULONG   ulLen              // length of user data
+  LONG    lLen              // length of user data
 );
 
 typedef struct _DICTINSERT
 {
   USHORT  usKey;             // pointer to key data
   USHORT  usData;            // pointer to user data
-  ULONG   ulLen;             // length of user data
+  LONG    lLen;             // length of user data
   BYTE    chVarData;         // data pointer
 } DICTINS, * PDICTINS;
 
@@ -394,7 +394,7 @@ SHORT QDAMDictExact
    PBTREE   pBT,                         // pointer to btree struct
    PWCHAR  pKey,                        // key to be searched for
    PBYTE    pchBuffer,                   // space for user data
-   PULONG   pulLength,                   // in/out length of returned user data
+   PLONG    plLength,                   // in/out length of returned user data
    USHORT   usSeachSubType  
 );
 
@@ -896,7 +896,7 @@ typedef struct _DICTTIME
  
  SHORT QDAMDictNumEntriesLocal ( PBTREE, PULONG );
 
- SHORT QDAMDictFirstLocal ( PBTREE, PWCHAR, PULONG, PBYTE, PULONG );
+ SHORT QDAMDictFirstLocal ( PBTREE, PWCHAR, PLONG, PBYTE, PLONG );
 
 
  SHORT QDAMInsertKey_V3( PBTREE, PBTREEBUFFER_V3, PWCHAR, RECPARAM, RECPARAM );
@@ -910,8 +910,8 @@ typedef struct _DICTTIME
  SHORT QDAMSplitNode_V3( PBTREE, PBTREEBUFFER_V3 *, PWCHAR );
 
 
- SHORT QDAMGetszKeyParam_V3( PBTREE, RECPARAM, PWCHAR, PULONG );
- SHORT QDAMGetszData_V3 ( PBTREE, RECPARAM,  PBYTE, PULONG, CHAR );
+ SHORT QDAMGetszKeyParam_V3( PBTREE, RECPARAM, PWCHAR, PLONG );
+ SHORT QDAMGetszData_V3 ( PBTREE, RECPARAM,  PBYTE, PLONG, CHAR );
 
  BOOL  QDAMDeleteKey_V3( PBTREE, PBTREEBUFFER_V3, PCHAR);
  SHORT QDAMDestroy ( PBTREE );
@@ -924,7 +924,7 @@ typedef struct _DICTTIME
  SHORT QDAMHeaderFirst ( PBTREE, PRECPARAM, PRECPARAM, PRECPARAM );
  SHORT QDAMHeaderNext ( PBTREE, PRECPARAM,  PRECPARAM,PRECPARAM );
  VOID  QDAMTerseInit ( PBTREE, PUCHAR );
- SHORT QDAMUnTerseData ( PBTREE, PUCHAR, ULONG, PULONG );
+ SHORT QDAMUnTerseData ( PBTREE, PUCHAR, LONG, PLONG );
  SHORT QDAMValidateIndex_V3( PBTREE,  PBTREEBUFFER_V3 * );
 
  PSZ_W     QDAMGetszKey_V3 ( PBTREEBUFFER_V3,  USHORT, USHORT );

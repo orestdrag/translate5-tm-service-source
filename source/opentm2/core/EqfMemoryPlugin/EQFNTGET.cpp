@@ -644,11 +644,11 @@ USHORT GetExactMatch
   PULONG pulSids = NULL;             //ptr to sentence ids
   PULONG pulSidStart = NULL;         //ptr to sentence ids
   USHORT usRc = NO_ERROR;            //return code
-  ULONG ulLen;                       //length indicator
+  LONG lLen;                         //length indicator
   ULONG ulKey;                       //tm record key
   PTMX_RECORD pTmRecord = NULL;      //pointer to tm record
   USHORT   usMatchEntries = 0;         //nr of found matches
-  ULONG  ulRecBufSize = 0;             // current size of record buffer
+  LONG  lRecBufSize = 0;               // current size of record buffer
 
   ULONG ulStrippedParm = pGetIn->ulParm &
     ~(GET_RESPECTCRLF | GET_IGNORE_PATH | GET_NO_GENERICREPLACE | GET_ALWAYS_WITH_TAGS | GET_IGNORE_COMMENT);
@@ -657,14 +657,14 @@ USHORT GetExactMatch
   if ( pTmClb->pvTmRecord )
   {
     pTmRecord = (PTMX_RECORD)pTmClb->pvTmRecord; 
-    ulRecBufSize = pTmClb->ulRecBufSize;
+    lRecBufSize = pTmClb->ulRecBufSize;
 //    memset( pTmRecord, 0, ulRecBufSize );
   }
   else
   {
     fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
     pTmClb->pvTmRecord = pTmRecord;
-    if ( fOK ) pTmClb->ulRecBufSize = ulRecBufSize = TMX_REC_SIZE;
+    if ( fOK ) pTmClb->ulRecBufSize = lRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
 
@@ -687,21 +687,21 @@ USHORT GetExactMatch
       while ( (*pulSids) && (usRc == NO_ERROR) )
       {
         ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
+        lLen = TMX_REC_SIZE;
         T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record #" <<ulKey;
-        usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
+        usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord, &lLen );
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+          fOK = UtlAlloc( (PVOID *)&pTmRecord, lRecBufSize, lLen, NOMSG );
           if ( fOK )
           {
-            pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
+            pTmClb->ulRecBufSize = lRecBufSize = lLen;
             pTmClb->pvTmRecord = pTmRecord;
-            memset( pTmRecord, 0, ulLen );
+            memset( pTmRecord, 0, lLen );
 
             usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord,
-                              &ulLen );
+                              &lLen );
           }
           else
           {
@@ -2417,14 +2417,14 @@ USHORT GetFuzzyMatch
 {
   BOOL fOK = TRUE;                     //success indicator
   USHORT usRc = NO_ERROR;              //return code
-  ULONG  ulLen;                        //length indicator
+  LONG  lLen;                          //length indicator
   PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
   PTMX_MATCHENTRY pMatchEntry = NULL;  //pointer to match entry structure
   PTMX_MATCHENTRY pMatchStart = NULL;  //pointer to match entry structure
   USHORT usMatchEntries = 0;           //nr of matches found
   USHORT usOverlaps = 0;               //nr of overlapping triples
-  ULONG  ulRecBufSize = 0L;            // current size of record buffer
-
+  LONG  lRecBufSize = 0L;              // current size of record buffer
+ 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
@@ -2433,14 +2433,14 @@ USHORT GetFuzzyMatch
   if ( pTmClb->pvTmRecord )
   {
     pTmRecord = (PTMX_RECORD)pTmClb->pvTmRecord; 
-    ulRecBufSize = pTmClb->ulRecBufSize;
+    lRecBufSize = pTmClb->ulRecBufSize;
 //    memset( pTmRecord, 0, ulRecBufSize );
   }
   else
   {
     fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
     pTmClb->pvTmRecord = pTmRecord;
-    pTmClb->ulRecBufSize = ulRecBufSize = TMX_REC_SIZE;
+    pTmClb->ulRecBufSize = lRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
   //allocate for match entry
@@ -2471,21 +2471,21 @@ USHORT GetFuzzyMatch
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFuzzyOtherTime) );
 #endif
-        ulLen = ulRecBufSize;
+        lLen = lRecBufSize;
 
         T5LOG( T5INFO) << "GetFuzzyMatch: EQFNTMGET of record " << pMatchEntry->ulKey;
 
-        usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
+        usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &lLen ); 
 
         if ( usRc == BTREE_BUFFER_SMALL)
         {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+          fOK = UtlAlloc( (PVOID *)&pTmRecord, lRecBufSize, lLen, NOMSG );
           if ( fOK )
           {
-            pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
+            pTmClb->ulRecBufSize = lRecBufSize = lLen;
             pTmClb->pvTmRecord = pTmRecord;
-            memset( pTmRecord, 0, ulLen );
-            usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
+            memset( pTmRecord, 0, lLen );
+            usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &lLen );
           }
           else
           {
@@ -3108,7 +3108,7 @@ USHORT FillMatchEntry
   USHORT usRc = NO_ERROR;                     //return code
   PTMX_INDEX_ENTRY pIndexEntry = NULL;        //pointer to index entry
   PULONG pulVotes;                   // pointer to votes
-  ULONG  ulLen;                      // length paramter
+  LONG  lLen;                        // length paramter
   USHORT i, j;                       // index in for loop
   USHORT usMaxEntries;               // nr of index entries in index record
   ULONG  lMatchEntries = 0;             // nr of entries in pTempMatch
@@ -3168,11 +3168,11 @@ USHORT FillMatchEntry
     for ( i = 0; i < pSentence->usActVote; i++, pulVotes++ )
     {
       ulKey = (*pulVotes) & START_KEY;
-      ulLen = TMX_REC_SIZE;
+      lLen = TMX_REC_SIZE;
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchOtherTime) );
 #endif
-      usRc = pTmClb->InBtree.EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
+      usRc = pTmClb->InBtree.EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &lLen ); 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchReadTime) );
@@ -3182,8 +3182,8 @@ USHORT FillMatchEntry
         //calculate number of index entries in index record
         T5LOG(T5INFO) <<"Processing index record "<<ulKey;
 
-        ulLen = pIndexRecord->usRecordLen;
-        usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+        lLen = pIndexRecord->usRecordLen;
+        usMaxEntries = (USHORT)((lLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
         pIndexEntry = &pIndexRecord->stIndexEntry;
         pTempMatch = pTempStart;
