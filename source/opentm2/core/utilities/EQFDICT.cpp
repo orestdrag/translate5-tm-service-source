@@ -3102,10 +3102,10 @@ SHORT  BTREE::QDAMAddToBuffer_V3
    CHAR     chNodeType;                // type of node
    BOOL     fTerse = FALSE;            // data are not tersed
    USHORT   usLastPos;
-   ULONG    ulFullDataLen;             // length of record
+   LONG     lFullDataLen;              // length of record
    PUSHORT  pusOffset;
    PCHAR    pRecData;                  // pointer to record data
-   ULONG    ulFitLen;                  // currently used length
+   LONG     lFitLen;                   // currently used length
    USHORT   usLenFieldSize;            // size of length field
 
    memset(&recStart, 0, sizeof(recStart));
@@ -3279,8 +3279,8 @@ SHORT  BTREE::QDAMAddToBuffer_V3
       TYPE( pRecord ) = chNodeType;     // indicate that it is a data node
       BTREELOCKRECORD( pRecord );
       pRecData = (PCHAR)(&TempRecord[0] + lDataLen);
-      ulFullDataLen = ulDataLen;         // store original data len
-      while ( !sRc && ulDataLen + pRecord->contents.header.usFilled  >= (BTREE_REC_SIZE_V3 - (usLenFieldSize + sizeof(SHORT))))
+      lFullDataLen = lDataLen;         // store original data len
+      while ( !sRc && lDataLen + pRecord->contents.header.usFilled  >= (BTREE_REC_SIZE_V3 - (usLenFieldSize + sizeof(SHORT))))
       {
         /***********************************************************/
         /* get a new record, anchor it and fill data from end      */
@@ -3307,16 +3307,16 @@ SHORT  BTREE::QDAMAddToBuffer_V3
             lFitLen =  lDataLen < lMax? lDataLen : lMax;
             lFitLen -= (LONG)(usLenFieldSize + sizeof(USHORT));
           }
-          usLastPos = usLastPos - (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+          usLastPos = usLastPos - (USHORT)(lFitLen + (ULONG)usLenFieldSize);
           pData = pRecord->contents.uchData + usLastPos;
-          pRecData -= ulFitLen;
-          ulDataLen -= ulFitLen;
+          pRecData -= lFitLen;
+          lDataLen -= lFitLen;
           /*********************************************************/
           /* store length and copy data of part contained in record*/
           /*********************************************************/
-          *(PULONG) pData = ulFitLen;
+          *(PULONG) pData = lFitLen;
           
-          memcpy( pData+usLenFieldSize, pRecData,  ulFitLen );
+          memcpy( pData+usLenFieldSize, pRecData,  lFitLen );
           // set address of key data at next free offset
           pusOffset = (PUSHORT) pRecord->contents.uchData;
           *(pusOffset + OCCUPIED( pRecord )) = usLastPos;
@@ -3324,7 +3324,7 @@ SHORT  BTREE::QDAMAddToBuffer_V3
           OCCUPIED(pRecord) += 1;
           pRecord->contents.header.usLastFilled = usLastPos;
           pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
-                                        (USHORT)(ulFitLen + (ULONG)usLenFieldSize);
+                                        (USHORT)(lFitLen + (ULONG)usLenFieldSize);
 //           pRecord->ulCheckSum = QDAMComputeCheckSum( pRecord );
 
           sRc = QDAMWriteRecord_V3(pRecord);
@@ -3354,14 +3354,14 @@ SHORT  BTREE::QDAMAddToBuffer_V3
         // fill in key data
         usLastPos = pRecord->contents.header.usLastFilled;
 
-        usLastPos = usLastPos - (USHORT)(ulDataLen + (ULONG)usLenFieldSize);
+        usLastPos = usLastPos - (USHORT)(lDataLen + (ULONG)usLenFieldSize);
         pData = pRecord->contents.uchData + usLastPos;
-        pRecData -= ulDataLen;
+        pRecData -= lDataLen;
 
         // insert reference           
-        *(PULONG) pData = ulFullDataLen;
+        *(PULONG) pData = lFullDataLen;
         
-        memcpy( pData+usLenFieldSize, pRecData, ulDataLen );
+        memcpy( pData+usLenFieldSize, pRecData, lDataLen );
 
         // set address of key data at next free offset
         pusOffset = (PUSHORT) pRecord->contents.uchData;
@@ -3370,7 +3370,7 @@ SHORT  BTREE::QDAMAddToBuffer_V3
         OCCUPIED(pRecord) += 1;
         pRecord->contents.header.usLastFilled = usLastPos;
         pRecord->contents.header.usFilled = pRecord->contents.header.usFilled +
-                                (USHORT)(ulDataLen+usLenFieldSize+sizeof(USHORT));
+                                (USHORT)(lDataLen+usLenFieldSize+sizeof(USHORT));
 
         // mark if tersed or not
         if ( fTerse )
