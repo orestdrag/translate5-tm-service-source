@@ -1495,6 +1495,7 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
       json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeErrorMsg":"importErrorMsg", mem->importDetails->importMsg.str() );
+      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeRc":"importRc", mem->importDetails->importRc);
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );

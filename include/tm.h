@@ -1243,6 +1243,7 @@ public:
   std::wstring GetParsedData() const;
   std::wstring GetParsedDataWithReplacedNpTags()const;
   std::wstring GetParsedNormalizedData()const;
+  int iStopImportWRc = 0;
 
   bool fReplaceWithTagsWithoutAttributes;
   size_t getInvalidCharacterErrorCount() const { return _invalidCharacterErrorCount; }

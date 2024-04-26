@@ -1391,7 +1391,7 @@ USHORT CTMXExportImport::ImportNext
     this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration )
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration && !m_handler->iStopImportWRc)
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
@@ -1423,6 +1423,11 @@ USHORT CTMXExportImport::ImportNext
         //m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
         m_pMemInfo->fError = TRUE;
         pImportData->importMsg << buff <<";;; ";
+      }else if(m_handler->iStopImportWRc){
+        std::string errormsg = "Error occured with rc = " + std::to_string(m_handler->iStopImportWRc);
+        m_pMemInfo->fError = TRUE;
+        pImportData->importRc = m_handler->iStopImportWRc;
+        pImportData->importMsg << errormsg;
       } /* endif */
 
       if ( errorCount || !fContinue )
@@ -2716,7 +2721,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                   if ( pBuf->SegmentData.szFormat[0] != EOS ) 
                   {
                     // markup table information is already available
-                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
+                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );                    
                   }
                   else if ( m_pMemInfo->pszMarkupList != NULL )
                   {
@@ -2760,6 +2765,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 } /* endif */
               } /* endif */
             } /* endif */
+
+            if(insertSegUsRC == BTREE_LOOKUPTABLE_CORRUPTED || insertSegUsRC == BTREE_LOOKUPTABLE_CORRUPTED)
+            {//stop import
+              this->iStopImportWRc = insertSegUsRC;
+            }
 
             // continue with next tuv
             pCurrentTuv++;

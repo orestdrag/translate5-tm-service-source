@@ -1051,8 +1051,10 @@ USHORT MemFuncImportProcess
             usPhase = MEM_IMPORT_TASK;
             break;
           case MEM_PROCESS_END:
-             //pData->pImportData->usProgress = 100;
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
+            if(!pData->mem->importDetails->importRc){
+              pData->mem->importDetails->usProgress = 100;
+            }
             if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
             if ( pLoadData->mem )
             {
@@ -1136,7 +1138,9 @@ USHORT MemFuncImportProcess
          UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
-       pData->mem->importDetails->usProgress = 100;
+       if(!pData->mem->importDetails->importRc){
+          pData->mem->importDetails->usProgress = 100;
+        }
        break;
  } /* endswitch */
 
