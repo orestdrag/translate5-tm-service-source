@@ -101,6 +101,7 @@ struct ImportStatusDetails{
   std::atomic_int invalidSegments{0};
   std::atomic_int invalidSymbolErrors{0};
   std::atomic_int resSegments {0};
+  std::atomic_long lActiveSegment{0};
   int importRc{0};
   long filteredSegments{0};
   std::map<int, int> invalidSegmentsRCs;
@@ -117,12 +118,13 @@ struct ImportStatusDetails{
     firstInvalidSegmentsSegNums.reserve(100);
     importMsg.str("");
     usProgress = 0;
+    lActiveSegment = 0;
     importRc = 0;
-    segmentsCount = -1;
-    segmentsImported = -1;
-    invalidSegments = -1;
-    invalidSymbolErrors = -1;
-    resSegments = -1;
+    segmentsCount = 0;
+    segmentsImported = 0;
+    invalidSegments = 0;
+    invalidSymbolErrors = 0;
+    resSegments = 0;
     fReorganize = 0;
     lReorganizeStartTime = 0;
     importTimestamp = "not finished";    

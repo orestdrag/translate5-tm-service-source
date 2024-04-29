@@ -1391,7 +1391,7 @@ USHORT CTMXExportImport::ImportNext
     this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration && !m_handler->iStopImportWRc)
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration)
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
@@ -1402,6 +1402,7 @@ USHORT CTMXExportImport::ImportNext
       if(pImportData != nullptr){
         pImportData->invalidSymbolErrors = m_handler->getInvalidCharacterErrorCount();
 
+        if(pImportData->importRc) errorCount++;        
         // compute current progress
         if ( !errorCount && fContinue )
         {
@@ -1423,11 +1424,10 @@ USHORT CTMXExportImport::ImportNext
         //m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
         m_pMemInfo->fError = TRUE;
         pImportData->importMsg << buff <<";;; ";
-      }else if(m_handler->iStopImportWRc){
-        std::string errormsg = "Error occured with rc = " + std::to_string(m_handler->iStopImportWRc);
+      }else if(pImportData->importRc){
+        //std::string errormsg = "Error occured with rc = " + std::to_string(m_handler->iStopImportWRc);
         m_pMemInfo->fError = TRUE;
-        pImportData->importRc = m_handler->iStopImportWRc;
-        pImportData->importMsg << errormsg;
+        //pImportData->importMsg << errormsg;
       } /* endif */
 
       if ( errorCount || !fContinue )
@@ -2443,6 +2443,7 @@ void TMXParseHandler::fillSegmentInfo
 {
   // fill-in header data
   memset( pSegment, 0, sizeof(MEMEXPIMPSEG) );
+  pSegment->lSegNo = (LONG) ulSegNo;
   if ( CurElement.lSegNum != -1 )
   {
     pSegment->lSegNum = CurElement.lSegNum; 

@@ -1480,6 +1480,7 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+      json_factory.addParmToJSON( outputMessage, "tmxSegmentCount", mem->importDetails->segmentsCount );
       std::string invalidSegmRCs;
       for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
         invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
@@ -1494,8 +1495,8 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
       json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
       json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeErrorMsg":"importErrorMsg", mem->importDetails->importMsg.str() );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeRc":"importRc", mem->importDetails->importRc);
+      json_factory.addParmToJSON( outputMessage, "errorMsg", mem->importDetails->importMsg.str() );
+      json_factory.addParmToJSON( outputMessage, "rc", mem->importDetails->importRc);
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );

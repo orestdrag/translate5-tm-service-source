@@ -1302,6 +1302,7 @@ typedef struct _MEMEXPIMPSEG
 {
   BOOL             fValid;                       // FALSE = segment data is invalid, count as invalid segment
   LONG             lSegNum;                      // segment number
+  LONG             lSegNo;
   CHAR             szFormat[EQF_FORMATLEN];      // format / markup table name
   CHAR             szSourceLang[EQF_LANGLEN];    // segment source language
   CHAR             szTargetLang[EQF_LANGLEN];    // segment target language
